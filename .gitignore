@@ -1,0 +1,21 @@
+# ── PRIVATE — never publish ─────────────────────────────────────────────────
+# Build reference only: personal portrait, conceptual map, mined-archive paths,
+# employer/partner identifiers, the idea atlas + gold index. This folder lives
+# here so the site can be built from it, but it MUST NOT reach the public repo.
+_reference/
+
+# ── local verification artifacts ────────────────────────────────────────────
+*.png
+*.gif
+_shot.html
+lbrshots/
+tools/out/
+
+# ── OS / editor junk ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/

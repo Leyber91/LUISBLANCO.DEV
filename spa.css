@@ -1,0 +1,218 @@
+/* =========================================================================
+   spa.css — consolidation layer on top of styles.css. Page-swap transitions,
+   focal/docked glyph docking, gold traversal pulse, first-visit assembly
+   overlay, master Tweaks panel. The substrate + foundation live in styles.css.
+   ========================================================================= */
+
+/* persistent chrome → fixed so it survives long-page scroll on every route */
+.coord-frame, .topnav, .dwgindex, .glyph, .traversal{ position:fixed; }
+
+/* nav: centered persistent cluster (corner reserved for glyph + index) */
+.topnav{ top:22px; left:50%; right:auto; transform:translateX(-50%);
+  background:rgba(6,8,13,0.42); border:1px solid var(--line-soft); border-radius:20px;
+  padding:7px 16px; backdrop-filter:blur(7px); z-index:30; }
+.topnav a{ text-transform:lowercase; }
+
+/* drawing index: upper-right, carries SHEET n/6 */
+.dwgindex{ top:78px; right:34px; z-index:24; }
+.dwgindex .di-title{ display:flex; align-items:baseline; justify-content:space-between; gap:18px; }
+.dwgindex .di-sheet{ color:var(--faint); letter-spacing:.16em; font-size:9px; }
+
+/* ── glyph docking ───────────────────────────────────────────────────── */
+.glyph{ z-index:26; pointer-events:auto; cursor:pointer;
+  transition:top .6s var(--ease), right .6s var(--ease), width .6s var(--ease),
+             height .6s var(--ease), transform .6s var(--ease); }
+.glyph-halo{ position:absolute; inset:-30% ; border-radius:50%; pointer-events:none; opacity:0;
+  background:radial-gradient(closest-side, rgba(212,162,76,0.16) 0%, rgba(212,162,76,0.05) 46%, rgba(6,8,13,0) 74%);
+  transition:opacity .6s var(--ease); }
+.glyph .cube-nest line{ stroke:var(--line-soft); stroke-width:1; opacity:.5; }
+.glyph-caption{ position:absolute; left:50%; bottom:-30px; transform:translateX(-50%);
+  white-space:nowrap; font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--faint); opacity:0; transition:opacity .5s var(--ease); pointer-events:none; }
+.glyph-caption .gc-lead{ color:var(--faint); }
+.glyph-caption .gc-term{ color:var(--gold); font-weight:500; transition:opacity .18s var(--ease); }
+
+/* docked (interior pages): small mark in the top-right corner */
+body.glyph-docked .glyph{ top:16px; right:32px; width:58px; height:58px; transform:none; opacity:.92; }
+body.glyph-docked .glyph-halo{ opacity:0; }
+body.glyph-docked .glyph-caption{ opacity:0; }
+
+/* focal (home): large, haloed, with the cycling concept caption */
+body.glyph-focal .glyph{ top:48%; right:9vw; width:204px; height:204px; transform:translateY(-50%); opacity:1; }
+body.glyph-focal .glyph-halo{ opacity:1; }
+body.glyph-focal .glyph-caption{ opacity:1; }
+body.glyph-focal .glyph:hover .glyph-halo{ opacity:1; }
+body.glyph-focal .glyph:hover .cube-inner{ filter:drop-shadow(0 0 9px var(--gold-glow)); }
+
+/* ── page swap container + transitions ───────────────────────────────── */
+#page{ position:relative; z-index:5; }
+#page.leaving{ opacity:0; transform:translateY(-8px);
+  transition:opacity .2s var(--ease), transform .2s var(--ease); }
+@keyframes pageEnter{ from{ opacity:0; transform:translateY(9px); } to{ opacity:1; transform:none; } }
+#page.entering{ animation:pageEnter .42s var(--ease) both; }
+
+/* ── THE POSTER — every section lives on one continuous plate ────────── */
+.plate-sec{ position:relative; }
+.plate-sec + .plate-sec{ border-top:1px dashed rgba(234,240,251,0.07); }
+#plateSpine{ position:absolute; top:0; left:0; width:100%; z-index:1;
+  pointer-events:none; overflow:visible; }
+#plateSpine .spine-path{ stroke:rgba(234,240,251,0.15); stroke-width:1; fill:none;
+  vector-effect:non-scaling-stroke; }
+@media (max-width:760px){ #plateSpine{ display:none; } }
+
+/* ── persistent traversal spine + gold pulse during a swap ───────────── */
+/* the continuous structural line that threads every region: faintly present
+   on every route (you are always somewhere along one vast object), and a gold
+   pulse runs the line on navigation. */
+.traversal{ inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:1; }
+.traversal path{ fill:none; vector-effect:non-scaling-stroke; }
+.traversal .spine{ stroke:var(--line-soft); stroke-width:1; opacity:.55; }
+.traversal .pulse-path{ stroke:var(--gold); stroke-width:1.4;
+  filter:drop-shadow(0 0 6px var(--gold-glow)); stroke-dasharray:0.22 0.86; stroke-dashoffset:1; opacity:0; }
+.traversal.pulse .pulse-path{ animation:travelFade .72s var(--ease); }
+@keyframes travelFade{
+  0%{ opacity:0; stroke-dashoffset:1; }
+  12%{ opacity:.95; }
+  100%{ opacity:0; stroke-dashoffset:-0.22; } }
+html.reduced-motion .traversal .pulse-path{ animation:none; }
+
+/* ── first-visit assembly overlay ────────────────────────────────────── */
+.intro{ position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
+  background:radial-gradient(120% 100% at 50% 46%, rgba(6,8,13,0) 0%, rgba(6,8,13,0.4) 70%, rgba(6,8,13,0.7) 100%); }
+.intro.on{ display:flex; }
+.intro.fade{ opacity:0; transition:opacity .6s var(--ease); }
+
+body.intro-playing .foreground{ opacity:0; pointer-events:none; }
+body.intro-playing .glyph{ opacity:0 !important; }
+/* reveal is transition-free so content is guaranteed visible the instant the
+   intro ends (the overlay's own fade carries the smoothness). */
+body.intro-done .foreground{ opacity:1; }
+
+.intro-focal{ position:relative; width:340px; height:250px; }
+.intro-halo{ position:absolute; left:50%; top:46%; width:560px; height:560px; transform:translate(-50%,-50%);
+  pointer-events:none; opacity:0; transition:opacity 1.1s var(--ease);
+  background:radial-gradient(closest-side, rgba(212,162,76,0.15) 0%, rgba(212,162,76,0.05) 44%, rgba(6,8,13,0) 74%); }
+.intro.glyph-in .intro-halo{ opacity:1; }
+.intro-orbits{ position:absolute; left:50%; top:46%; width:560px; height:560px; transform:translate(-50%,-50%);
+  overflow:visible; opacity:0; transition:opacity 1s var(--ease); }
+.intro.orbit-in .intro-orbits{ opacity:1; }
+.intro-orbits circle.ring{ fill:none; stroke:rgba(159,179,214,0.16); stroke-width:1; stroke-dasharray:2 6; }
+.intro-orbits circle.starlet{ fill:#cdd9f0; }
+.intro-orbits circle.starlet.gold{ fill:var(--gold); filter:drop-shadow(0 0 4px var(--gold-glow)); }
+
+.intro-mark{ position:absolute; left:0; top:0; width:340px; height:250px; display:block; overflow:visible; }
+.intro-mark .strut{ stroke:rgba(234,240,251,0.4); stroke-width:1; stroke-dasharray:var(--l,126); stroke-dashoffset:var(--l,126); }
+.intro.glyph-built .intro-mark .strut{ transition:stroke-dashoffset .7s var(--ease); stroke-dashoffset:0; }
+.intro-mark .code-circle{ fill:transparent; stroke:rgba(234,240,251,0.7); stroke-width:1.5; opacity:0; transform:scale(.5);
+  transform-box:fill-box; transform-origin:center;
+  transition:opacity .55s var(--ease), transform .55s var(--ease), fill .4s var(--ease), stroke .4s var(--ease), filter .4s var(--ease); }
+.intro.glyph-built .intro-mark .code-circle{ opacity:1; transform:scale(1); }
+.intro-mark .code-letter{ fill:rgba(234,240,251,0.85); font-size:14px; font-weight:600; text-anchor:middle; opacity:0;
+  transition:opacity .55s var(--ease), fill .4s var(--ease); }
+.intro.glyph-built .intro-mark .code-letter{ opacity:1; }
+.intro-mark .axis-name{ fill:rgba(234,240,251,0.4); font-size:8px; text-anchor:middle; letter-spacing:.02em; opacity:0; transition:opacity .6s var(--ease); }
+.intro-mark .level-label{ fill:rgba(234,240,251,0.3); font-size:8px; text-anchor:end; opacity:0; transition:opacity .5s var(--ease); }
+.intro.glyph-built .intro-mark .axis-name, .intro.glyph-built .intro-mark .level-label{ opacity:1; }
+.intro-mark .dot{ fill:#080b12; stroke:rgba(234,240,251,0.5); stroke-width:1; opacity:0; transform:scale(.3);
+  transform-box:fill-box; transform-origin:center;
+  transition:opacity .35s var(--ease), transform .35s var(--ease), fill .25s var(--ease), stroke .25s var(--ease), filter .25s var(--ease); }
+.intro-mark .dot.in{ opacity:1; transform:scale(1); }
+.intro-mark .seed-conn{ fill:none; stroke:rgba(234,240,251,0.18); stroke-width:1; opacity:0; transition:opacity .6s var(--ease); }
+.intro-mark .seed-line{ stroke:rgba(234,240,251,0.4); stroke-width:1; opacity:0; transition:opacity .6s var(--ease); }
+.intro-mark .seed-marker{ fill:rgba(234,240,251,0.55); opacity:0; transition:opacity .6s var(--ease), fill .4s var(--ease); }
+.intro-mark .annot{ fill:rgba(234,240,251,0.4); font-size:9px; text-anchor:middle; letter-spacing:.1em; opacity:0; transition:opacity .6s var(--ease); }
+.intro-mark .annot-c{ fill:rgba(234,240,251,0.34); font-size:8px; text-anchor:end; letter-spacing:.16em; opacity:0; transition:opacity .6s var(--ease); }
+.intro.glyph-built .intro-mark .seed-conn, .intro.glyph-built .intro-mark .seed-line,
+.intro.glyph-built .intro-mark .seed-marker, .intro.glyph-built .intro-mark .annot,
+.intro.glyph-built .intro-mark .annot-c{ opacity:1; }
+
+.intro.glyph-gold .intro-mark .code-circle{ fill:var(--gold); stroke:var(--gold); filter:drop-shadow(0 0 5px rgba(212,162,76,0.7)); }
+.intro.glyph-gold .intro-mark .code-letter{ fill:#06080d; }
+.intro.glyph-gold .intro-mark .dot{ fill:var(--gold); stroke:var(--gold); }
+.intro.glyph-gold .intro-mark .seed-marker{ fill:var(--gold); }
+
+.intro-status{ position:fixed; left:30px; bottom:26px; z-index:52; font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--faint); opacity:0; transition:opacity .4s var(--ease); pointer-events:none; }
+.intro-status.on{ opacity:.95; }
+.intro-status .blip{ color:var(--gold); }
+.intro-status.ready{ color:var(--gold); }
+.intro-skip{ position:fixed; right:28px; bottom:24px; z-index:52; appearance:none; border:none; background:transparent;
+  color:var(--faint); font-family:inherit; font-size:11px; letter-spacing:.18em; text-transform:uppercase; cursor:pointer;
+  padding:6px 4px; opacity:0; transition:color .25s var(--ease), opacity .4s var(--ease); }
+.intro-skip.on{ opacity:.7; }
+.intro-skip:hover{ color:var(--gold); opacity:1; }
+
+/* page content must clear the fixed top-right chrome (drawing index) — the
+   architecture headline was a floating top-right annotation that collided. */
+.plate-sec[data-sec="architecture"] .arch-head .headline{
+  position:static; text-align:left; margin-top:14px; }
+/* projects' 4th cluster column reaches the top-right; drop it clear of the index */
+@media (min-width:1081px){ .plate-sec[data-sec="projects"] .clusters{ margin-top:64px; } }
+
+/* ── master Tweaks panel ─────────────────────────────────────────────── */
+.lb-tweaks{ position:fixed; top:20px; left:20px; z-index:9999; width:286px;
+  background:rgba(8,11,18,0.96); border:1px solid var(--line-soft); border-radius:12px; padding:0;
+  color:var(--ink); display:none; box-shadow:0 18px 60px rgba(0,0,0,.6); backdrop-filter:blur(10px);
+  font-family:'IBM Plex Mono',monospace; max-height:calc(100vh - 40px); overflow:auto; }
+.lb-tweaks.open{ display:block; }
+.lb-tweaks .hd{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px;
+  border-bottom:1px solid var(--line-soft); cursor:move; position:sticky; top:0; background:rgba(8,11,18,0.98); }
+.lb-tweaks .hd b{ font-weight:500; letter-spacing:.2em; font-size:11px; text-transform:uppercase; color:var(--ink-dim); }
+.lb-tweaks .x{ cursor:pointer; color:var(--faint); font-size:15px; line-height:1; padding:2px 4px; }
+.lb-tweaks .x:hover{ color:var(--gold); }
+.lb-tweaks .bd{ padding:14px 15px 18px; }
+.lb-tweaks .grp{ font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--faint);
+  margin:4px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line-soft); }
+.lb-tweaks .grp:not(:first-child){ margin-top:20px; }
+.lb-tweaks .row{ margin-bottom:14px; }
+.lb-tweaks label{ display:flex; justify-content:space-between; font-size:11px; letter-spacing:.04em; color:var(--ink-dim); margin-bottom:9px; }
+.lb-tweaks label .v{ color:var(--gold); font-variant-numeric:tabular-nums; }
+.lb-tweaks input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:2px;
+  background:var(--line-soft); border-radius:2px; outline:none; cursor:pointer; }
+.lb-tweaks input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:13px; height:13px; border-radius:50%;
+  background:var(--gold); box-shadow:0 0 8px var(--gold-glow); cursor:pointer; }
+.lb-tweaks input[type=range]::-moz-range-thumb{ width:13px; height:13px; border:none; border-radius:50%;
+  background:var(--gold); box-shadow:0 0 8px var(--gold-glow); cursor:pointer; }
+.lb-tweaks .hint{ font-size:10px; color:var(--faint); letter-spacing:.02em; margin-top:7px; line-height:1.45; }
+.lb-tweaks .seg{ display:flex; gap:0; border:1px solid var(--line-soft); border-radius:8px; overflow:hidden; }
+.lb-tweaks .seg button{ flex:1; appearance:none; border:none; background:transparent; color:var(--ink-dim);
+  font-family:inherit; font-size:11px; letter-spacing:.06em; padding:7px 4px; cursor:pointer;
+  border-right:1px solid var(--line-soft); transition:background .2s var(--ease), color .2s var(--ease); }
+.lb-tweaks .seg button:last-child{ border-right:none; }
+.lb-tweaks .seg button:hover{ color:var(--ink); }
+.lb-tweaks .seg button.on{ background:rgba(212,162,76,0.16); color:var(--gold-hi); }
+.lb-tweaks .row.toggle{ display:flex; align-items:center; justify-content:space-between; }
+.lb-tweaks .row.toggle label{ margin:0; }
+.lb-tweaks .sw{ position:relative; width:38px; height:20px; flex:none; border-radius:20px;
+  background:var(--line-soft); border:1px solid var(--line-soft); cursor:pointer; transition:background .25s var(--ease), border-color .25s var(--ease); }
+.lb-tweaks .sw i{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%;
+  background:rgba(234,240,251,0.6); transition:transform .25s var(--ease), background .25s var(--ease); }
+.lb-tweaks .sw.on{ background:rgba(212,162,76,0.28); border-color:var(--gold-dim); }
+.lb-tweaks .sw.on i{ transform:translateX(18px); background:var(--gold); box-shadow:0 0 8px var(--gold-glow); }
+.lb-tweaks .pbtn{ width:100%; appearance:none; border:1px solid var(--line-soft); background:transparent;
+  color:var(--ink-dim); font-family:inherit; font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+  padding:10px; border-radius:6px; cursor:pointer; margin-top:8px; transition:color .25s var(--ease), border-color .25s var(--ease); }
+.lb-tweaks .pbtn.reset{ color:var(--faint); margin-top:18px; }
+.lb-tweaks .pbtn.reset:hover{ color:var(--ink); border-color:var(--line); }
+
+/* reduced-motion preview (master) — hold the static frame like the system pref */
+html.reduced-motion .gold-node{ animation:none; opacity:1; }
+html.reduced-motion .edge-flow{ animation:none; }
+html.reduced-motion .draw-line{ stroke-dashoffset:0 !important; }
+html.reduced-motion .drafting .pulse{ animation:none; }
+html.reduced-motion #page.entering{ animation:none; }
+html.reduced-motion .glyph{ transition:none; }
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+@media (max-width:760px){
+  .topnav{ top:0; left:0; right:0; transform:none; border-radius:0; justify-content:center; flex-wrap:wrap;
+    padding:9px 10px; background:rgba(6,8,13,0.92); border:none; border-bottom:1px solid var(--line-soft); }
+  .dwgindex{ top:44px; right:8px; background:rgba(8,11,18,0.9); border:1px solid var(--line-soft); border-radius:8px; padding:6px 9px; }
+  body.glyph-focal .glyph{ top:auto; bottom:16px; right:14px; width:80px; height:80px; transform:none; }
+  body.glyph-focal .glyph-caption{ display:none; }
+  body.glyph-docked .glyph{ top:auto; bottom:14px; right:14px; width:62px; height:62px; }
+  .intro-focal{ transform:scale(.74); }
+  .intro-status{ left:14px; bottom:18px; }
+  .intro-skip{ right:14px; }
+  .lb-tweaks{ left:10px; right:10px; width:auto; top:10px; }
+}

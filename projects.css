@@ -1,0 +1,101 @@
+/* projects.css — /projects: one woven field. Four cluster regions, isometric
+   module diagrams, a computed connective mesh, a shared principle baseline that
+   every module drops a line into, and a mechanics/ops rail wired to the right. */
+
+.proj-main{ padding:118px 56px 0; position:relative; z-index:5; }
+.proj-head{ max-width:1320px; margin:0 auto; }
+.proj-head .ttl{ font-size:15px; letter-spacing:.16em; color:var(--ink-dim); text-transform:lowercase; }
+.proj-head .intro{ font-size:15px; line-height:1.68; color:var(--ink); max-width:740px; margin:16px 0 0; text-wrap:pretty; }
+.proj-head .intro .em{ color:var(--gold-hi); }
+
+/* filter chips */
+.filters{ max-width:1320px; margin:22px auto 0; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.filters .flabel{ font-size:11px; letter-spacing:.1em; color:var(--faint); margin-right:4px; }
+.fchip{ font-size:11px; letter-spacing:.04em; color:var(--ink-dim); cursor:pointer; font-family:inherit;
+  border:1px solid var(--line-soft); border-radius:15px; padding:4px 12px; background:rgba(12,16,24,0.4);
+  transition:all .2s var(--ease); }
+.fchip:hover{ border-color:var(--gold-dim); color:var(--ink); }
+.fchip.active{ border-color:var(--gold); color:var(--gold-hi); background:rgba(212,162,76,0.08); box-shadow:0 0 10px rgba(212,162,76,0.12); }
+
+/* ── the woven field ─────────────────────────────────────────────── */
+.proj-field{ position:relative; max-width:1480px; margin:46px auto 0; padding-bottom:128px; }
+.proj-weave{ position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; overflow:visible; }
+.proj-weave .drop{ stroke:var(--line-soft); stroke-width:1; fill:none; stroke-dasharray:3 5; }
+.proj-weave .drop.lit{ stroke:var(--gold-dim); }
+.proj-weave .weave{ stroke:rgba(234,240,251,0.1); stroke-width:1; fill:none; stroke-dasharray:2 6; }
+.proj-weave .rail-link{ stroke:var(--line-soft); stroke-width:1; fill:none; stroke-dasharray:2 5; }
+.proj-weave .base-line{ stroke:var(--line); stroke-width:1; fill:none; }
+.proj-weave .base-node{ fill:var(--bg); stroke:var(--line); stroke-width:1; }
+.proj-weave .base-node.gold{ fill:var(--gold); stroke:none; filter:drop-shadow(0 0 5px var(--gold-glow)); }
+
+/* clusters laid out across the field + rail as the final column */
+.clusters{ display:grid; grid-template-columns:repeat(4,1fr) 128px; gap:20px;
+  position:relative; z-index:5; align-items:start; }
+.cluster{ position:relative; border:1px solid var(--line-soft); border-radius:24px;
+  padding:16px 14px 22px; background:rgba(9,12,19,0.28); }
+.cluster .cl-name{ font-size:12px; letter-spacing:.18em; color:var(--ink-dim); text-transform:uppercase;
+  text-align:center; margin-bottom:16px; }
+.cluster .cl-cards{ display:flex; flex-direction:column; gap:14px; }
+
+.pcard{ position:relative; border:1px solid var(--line-soft); border-radius:11px; padding:15px 15px 16px;
+  background:rgba(10,14,22,0.42);
+  transition:border-color .25s var(--ease), background .25s var(--ease), opacity .3s, transform .25s var(--ease); }
+.pcard:hover{ border-color:var(--gold-dim); background:rgba(16,20,30,0.6); transform:translateY(-2px); }
+
+/* isometric module diagram (injected by spa-projects.js) */
+.pcard .iso{ height:84px; margin-bottom:13px; display:flex; align-items:center; justify-content:center; }
+.pcard .iso svg{ width:100%; height:84px; overflow:visible; }
+.pcard .iso svg .ed{ stroke:var(--line); stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
+.pcard .iso svg .ed-soft{ stroke:var(--line-soft); stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
+.pcard .iso svg .face{ fill:rgba(234,240,251,0.04); }
+.pcard .iso svg .face-2{ fill:rgba(234,240,251,0.07); }
+.pcard .iso svg .face-top{ fill:rgba(234,240,251,0.02); }
+.pcard .iso svg .link{ stroke:var(--line-soft); stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
+.pcard .iso svg .link-d{ stroke:var(--line-soft); stroke-width:1; fill:none; stroke-dasharray:2 3; vector-effect:non-scaling-stroke; }
+.pcard .iso svg .nd{ fill:var(--line-soft); }
+.pcard .iso svg .gn{ fill:var(--gold); filter:drop-shadow(0 0 4px var(--gold-glow)); }
+.pcard .iso svg .gcube polygon{ stroke:var(--gold); stroke-width:1; fill:rgba(212,162,76,0.07);
+  vector-effect:non-scaling-stroke; filter:drop-shadow(0 0 3px var(--gold-glow)); }
+.pcard:hover .iso svg .ed{ stroke:var(--line-hi); }
+.pcard.ph-card .iso svg .ed{ stroke-dasharray:3 4; }
+
+.pcard .pname{ font-size:15px; color:var(--ink); letter-spacing:.01em; }
+.pcard:hover .pname{ color:var(--gold-hi); }
+.pcard .auth{ font-size:10px; letter-spacing:.08em; color:var(--faint); text-transform:uppercase; margin:5px 0 9px; }
+.pcard .ppat{ font-size:11.5px; line-height:1.5; color:var(--ink-dim); }
+.pcard .paxis{ font-size:10.5px; color:var(--faint); margin-top:9px; letter-spacing:.02em; }
+.pcard .paxis b{ color:var(--gold-dim); font-weight:400; }
+.pcard .vsrc{ display:inline-flex; align-items:center; gap:5px; font-size:11px; letter-spacing:.06em;
+  color:var(--gold); margin-top:11px; transition:gap .2s var(--ease); }
+.pcard .vsrc:hover{ gap:9px; }
+.pcard .internal{ font-size:10.5px; letter-spacing:.06em; color:var(--faint); margin-top:11px; }
+.pcard.ph-card{ border-style:dashed; }
+.pcard.dim{ opacity:.26; }
+
+/* mechanics + ops rail */
+.proj-rail{ position:relative; z-index:5; padding-top:30px; display:flex; flex-direction:column; gap:26px; }
+.rail-grp .rail-h{ font-size:11px; letter-spacing:.14em; color:var(--ink-dim); margin-bottom:12px; }
+.rail-item{ display:flex; align-items:center; gap:9px; font-size:11.5px; color:var(--faint);
+  letter-spacing:.03em; padding:5px 0; }
+.rail-item .ri-node{ width:9px; height:9px; border-radius:50%; border:1.3px solid var(--line);
+  background:var(--bg); flex:none; }
+.rail-item .ri-node.gold{ border-color:var(--gold); background:var(--gold); box-shadow:0 0 7px var(--gold-glow); }
+
+/* shared baseline carrying the three principles */
+.proj-baseline{ position:absolute; left:0; right:0; bottom:30px; z-index:5; text-align:center; }
+.proj-baseline .bl-text{ display:inline-flex; gap:14px; align-items:center; white-space:nowrap;
+  font-size:13px; letter-spacing:.05em; color:var(--ink-dim); background:var(--bg); padding:0 20px; }
+.proj-baseline .bl-text i{ color:var(--gold); font-style:normal; }
+
+@media (max-width:1180px){
+  .clusters{ grid-template-columns:repeat(2,1fr); }
+  .proj-rail{ grid-column:1 / -1; flex-direction:row; flex-wrap:wrap; gap:34px; padding-top:8px; }
+  .proj-weave{ display:none; }
+  .proj-field{ padding-bottom:60px; }
+  .proj-baseline{ position:static; margin-top:34px; }
+  .proj-baseline .bl-text{ padding:0; white-space:normal; flex-wrap:wrap; justify-content:center; }
+}
+@media (max-width:760px){
+  .proj-main{ padding:64px 18px 0; }
+  .clusters{ grid-template-columns:1fr; }
+}

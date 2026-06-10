@@ -1,0 +1,278 @@
+/* =========================================================================
+   luisblanco.dev — shared foundation
+   Locked palette + IBM Plex Mono. Dark only. Three-layer drift register.
+   NOTE (real build): self-host IBM Plex Mono WOFF2 (400/500/600) under
+   /assets/fonts and @font-face from there — Google Fonts here is prototype-only.
+   ========================================================================= */
+
+:root{
+  --bg:        #06080d;
+  --bg-2:      #080b12;
+  --ink:       #EAF0FB;   /* body */
+  --ink-dim:   #9FB3D6;   /* secondary */
+  --faint:     #565d72;   /* annotations */
+  --line:      rgba(234,240,251,0.42);   /* white linework, mid opacity */
+  --line-soft: rgba(234,240,251,0.16);
+  --line-hi:   rgba(234,240,251,0.92);
+  --gold:      #D4A24C;
+  --gold-hi:   #F0C674;
+  --gold-dim:  rgba(212,162,76,0.45);
+  --gold-glow: rgba(212,162,76,0.55);
+
+  --fz-annot: 11px;
+  --fz-label: 12px;
+  --fz-body:  15px;
+  --fz-sub:   18px;
+
+  --ease: cubic-bezier(.4,.1,.2,1);
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+
+html{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'IBM Plex Mono','SFMono-Regular',ui-monospace,monospace;
+  font-size:var(--fz-body);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(140% 120% at 78% 8%, rgba(20,28,46,0.55) 0%, rgba(6,8,13,0) 55%),
+    radial-gradient(120% 120% at 12% 92%, rgba(16,22,38,0.45) 0%, rgba(6,8,13,0) 50%),
+    var(--bg);
+  position:relative;
+  overflow-x:hidden;
+}
+
+a{ color:inherit; text-decoration:none; }
+::selection{ background:rgba(212,162,76,0.28); color:var(--ink); }
+
+/* ── layer scaffold ──────────────────────────────────────────────────── */
+.substrate{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+}
+.substrate canvas{ position:absolute; top:0; left:0; }
+
+/* mid-layer drifts as a coherent whole (set by drift.js transform) */
+.drift-mid{ will-change:transform; }
+
+/* foreground: anchored, never drifts */
+.foreground{ position:relative; z-index:5; }
+
+/* ── coordinate frame (faint celestial axis ticks) ───────────────────── */
+.coord-frame{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  color:var(--faint); font-size:10px; letter-spacing:.14em;
+}
+.coord-frame .dec{ position:absolute; left:10px; transform:translateY(-50%); }
+.coord-frame .ra{ position:absolute; bottom:8px; transform:translateX(-50%); }
+.coord-frame .axis-tag{ position:absolute; opacity:.7; }
+.coord-frame .axis-dec{ left:10px; top:10px; }
+.coord-frame .axis-ra{ left:10px; bottom:8px; }
+
+/* ── top nav ─────────────────────────────────────────────────────────── */
+.topnav{
+  position:absolute; top:26px; right:340px; z-index:6;
+  display:flex; gap:0; align-items:center;
+  font-size:var(--fz-label); letter-spacing:.04em;
+}
+.topnav a{
+  color:var(--faint); padding:2px 4px; transition:color .25s var(--ease);
+  position:relative;
+}
+.topnav a:hover{ color:var(--ink-dim); }
+.topnav a.current{ color:var(--ink); }
+.topnav .sep{ color:var(--faint); opacity:.5; padding:0 6px; }
+.topnav .arrow{ color:var(--gold); margin-left:2px; }
+
+/* ── drawing index (upper-right floating annotations) ────────────────── */
+.dwgindex{
+  position:absolute; top:88px; right:40px; z-index:6;
+  font-size:var(--fz-annot); letter-spacing:.06em; color:var(--faint);
+  text-align:left; min-width:150px;
+}
+.dwgindex .di-title{
+  color:var(--ink-dim); letter-spacing:.22em; font-size:10px; margin-bottom:10px;
+}
+.dwgindex ul{ list-style:none; margin:0; padding:0; }
+.dwgindex li{ display:flex; gap:8px; align-items:baseline; padding:2.5px 0; }
+.dwgindex li .bullet{ color:var(--faint); width:8px; opacity:.6; }
+.dwgindex li .num{ color:var(--faint); }
+.dwgindex a{ color:var(--faint); transition:color .25s var(--ease); }
+.dwgindex a:hover{ color:var(--ink-dim); }
+.dwgindex li.current .bullet{ color:var(--gold); opacity:1; }
+.dwgindex li.current .num{ color:var(--gold); }
+.dwgindex li.current a{ color:var(--ink); }
+
+/* sheet indicator */
+.sheet{
+  position:absolute; top:60px; right:200px; z-index:6;
+  font-size:10px; letter-spacing:.18em; color:var(--faint);
+}
+
+/* ── nested-cube glyph (upper-right corner) ──────────────────────────── */
+.glyph{
+  position:absolute; top:60px; right:200px; z-index:4;
+  width:150px; height:150px; pointer-events:none;
+}
+.glyph svg{ width:100%; height:100%; overflow:visible; }
+.glyph .cube-outer line{ stroke:var(--line-soft); stroke-width:1; }
+.glyph .cube-mid line{ stroke:rgba(234,240,251,0.28); stroke-width:1; }
+.glyph .cube-inner line{ stroke:var(--gold); stroke-width:1.3; }
+.glyph .cube-inner{ filter:drop-shadow(0 0 5px var(--gold-glow)); transform-origin:center; transform-box:fill-box; }
+.glyph .cube-node{ fill:var(--gold); filter:drop-shadow(0 0 4px var(--gold-glow)); }
+.glyph .cube-vert{ fill:var(--line-soft); }
+
+/* ── footer ──────────────────────────────────────────────────────────── */
+.site-footer{
+  position:relative; z-index:5;
+  margin-top:80px; padding:26px 40px 36px;
+  border-top:1px solid var(--line-soft);
+  display:flex; justify-content:space-between; align-items:flex-end;
+  flex-wrap:wrap; gap:18px;
+  font-size:var(--fz-annot); letter-spacing:.04em; color:var(--faint);
+}
+.site-footer .links{ display:flex; gap:22px; flex-wrap:wrap; }
+.site-footer a{ color:var(--ink-dim); transition:color .2s var(--ease); }
+.site-footer a:hover{ color:var(--gold); }
+.site-footer .ph{ color:var(--faint); }
+.site-footer .stamp{ color:var(--faint); letter-spacing:.14em; }
+
+/* ── shared type atoms ───────────────────────────────────────────────── */
+.eyebrow{
+  color:var(--gold); font-size:13px; font-weight:500;
+  letter-spacing:.34em; text-transform:uppercase;
+}
+.label-sc{
+  color:var(--ink-dim); font-size:13px; letter-spacing:.2em;
+  text-transform:lowercase;
+}
+.annot{ color:var(--faint); font-size:var(--fz-annot); letter-spacing:.05em; }
+.dim{ color:var(--ink-dim); }
+.sub{ color:var(--ink-dim); font-size:var(--fz-sub); line-height:1.6; }
+
+/* callout number in white circle */
+.callnum{
+  width:54px; height:54px; border-radius:50%;
+  border:1.4px solid var(--line); color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; letter-spacing:.04em; flex:none;
+}
+.callnum.gold{ border-color:var(--gold); color:var(--gold-hi);
+  box-shadow:0 0 14px var(--gold-glow), inset 0 0 8px rgba(212,162,76,0.12); }
+
+/* lettered component code circle (P M A R S) */
+.compcode{
+  width:42px; height:42px; border-radius:50%;
+  border:1.4px solid var(--line-hi); color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex:none;
+}
+
+/* status pill */
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  border:1px solid var(--line-soft); border-radius:20px;
+  padding:3px 11px; font-size:10px; letter-spacing:.08em; color:var(--ink-dim);
+  white-space:nowrap;
+}
+.pill .v{ color:var(--gold); }
+
+/* placeholder marker — must stay visible in rendered output */
+.ph{
+  color:var(--gold-dim); border-bottom:1px dotted var(--gold-dim);
+  letter-spacing:.02em;
+}
+
+/* small gold tick mark drawn on hover (cursor-proximity) */
+.tickbox{ position:relative; }
+.tickbox::after{
+  content:""; position:absolute; top:-3px; right:-3px;
+  width:7px; height:7px;
+  border-top:1.5px solid var(--gold); border-right:1.5px solid var(--gold);
+  opacity:0; transition:opacity .2s var(--ease);
+}
+.tickbox:hover::after{ opacity:1; }
+
+/* ── structured engineering motion ───────────────────────────────────── */
+@keyframes nodePulse{ 0%,100%{ opacity:.78; } 50%{ opacity:1; } }
+@keyframes edgeFlow{ to{ stroke-dashoffset:-140; } }
+
+.gold-node{
+  fill:var(--gold);
+  animation:nodePulse 3s var(--ease) infinite;
+  filter:drop-shadow(0 0 4px var(--gold-glow));
+}
+.edge-flow{
+  stroke:var(--gold-dim); stroke-width:1; fill:none;
+  stroke-dasharray:4 8; animation:edgeFlow 6s linear infinite;
+}
+
+/* line-draw on reveal — applied by drift.js (.draw-line + .drawn) */
+.draw-line{
+  stroke-dasharray:var(--len,1200);
+  stroke-dashoffset:var(--len,1200);
+}
+.draw-line.drawn{
+  transition:stroke-dashoffset 1.2s var(--ease);
+  stroke-dashoffset:0;
+}
+
+/* plate detail marks — registration crosshairs, sparkles, glyph leaders */
+.xhair{ stroke:var(--line-soft); fill:none; }
+.xhair.gold{ stroke:var(--gold-dim); }
+.sparkle{ stroke:rgba(234,240,251,0.22); }
+.sparkle.gold{ stroke:var(--gold-dim); }
+.mid-schematic .xhair line, .mid-schematic .xhair circle{ stroke:inherit; }
+.mid-schematic .sparkle line{ stroke:inherit; }
+@keyframes leaderFlow{ to{ stroke-dashoffset:-80; } }
+.glyph .cube-leader{ stroke:var(--line-soft); stroke-width:1; stroke-dasharray:3 7;
+  animation:leaderFlow 30s linear infinite; }
+@media (prefers-reduced-motion: reduce){ .glyph .cube-leader{ animation:none; } }
+html.reduced-motion .glyph .cube-leader{ animation:none; }
+@media (max-width:760px){ .glyph .cube-leader{ display:none; } }
+
+/* concept-locator lit states (gold only — palette locked) */
+.lvl-node{ transition:fill .3s var(--ease), filter .3s var(--ease); }
+.lvl-node.lit{ fill:var(--gold); filter:drop-shadow(0 0 6px var(--gold-glow)); }
+.axis-rail.lit{ stroke:var(--gold-dim); }
+
+/* ── reduced motion: hold the final static frame ─────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  .gold-node{ animation:none; opacity:1; }
+  .edge-flow{ animation:none; }
+  .draw-line{ stroke-dashoffset:0; }
+}
+html.reduced-motion .gold-node{ animation:none; opacity:1; }
+html.reduced-motion .edge-flow{ animation:none; }
+html.reduced-motion .draw-line{ stroke-dashoffset:0; }
+
+/* ── responsive base (mobile chrome) ─────────────────────────────────── */
+@media (max-width:760px){
+  :root{ --fz-body:14px; }
+  .topnav{
+    position:fixed; top:0; left:0; right:0; z-index:30;
+    justify-content:center; flex-wrap:wrap; gap:0;
+    padding:10px 12px; background:rgba(6,8,13,0.92);
+    border-bottom:1px solid var(--line-soft); backdrop-filter:blur(6px);
+  }
+  .topnav .sep{ padding:0 4px; }
+  .glyph{ width:74px; height:74px; top:auto; right:14px; bottom:14px; }
+  .sheet{ display:none; }
+  .dwgindex{
+    position:fixed; top:46px; right:8px; z-index:20;
+    min-width:0; background:rgba(8,11,18,0.9); border:1px solid var(--line-soft);
+    border-radius:8px; padding:6px 8px; transform:none;
+  }
+  .dwgindex.collapsed ul{ display:none; }
+  .dwgindex .di-title{ margin:0; cursor:pointer; }
+  .coord-frame .dec{ font-size:8px; left:3px; }
+  .coord-frame .ra{ font-size:8px; }
+  .site-footer{ flex-direction:column; align-items:flex-start; padding:24px 18px; }
+}

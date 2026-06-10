@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<!-- luisblanco.dev — CONSOLIDATED reference prototype (single navigable build).
+     Six routes, one continuous space: the celestial substrate, chrome, glyph and
+     intro overlay mount ONCE; only #page swaps between routes. Hash-routed and
+     deep-linkable (#/architecture?locate=RAG). Reference only — the real site is
+     hand-built vanilla; self-host IBM Plex Mono WOFF2 400/500/600 (no CDN). -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luis Blanco — Autonomous Entity Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="home.css">
+<link rel="stylesheet" href="architecture.css">
+<link rel="stylesheet" href="projects.css">
+<link rel="stylesheet" href="writing.css">
+<link rel="stylesheet" href="about.css">
+<link rel="stylesheet" href="contact.css">
+<link rel="stylesheet" href="work.css">
+<link rel="stylesheet" href="spa.css">
+</head>
+<body data-route="home">
+
+<!-- ══ PERSISTENT LAYERS — mounted once, never re-rendered on navigation ══ -->
+<!-- substrate auto-mounts into .substrate · coord-frame / nav / drawing-index /
+     glyph injected by spa-engine.js · #page is the only thing that swaps. -->
+
+<svg class="traversal" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+  <path class="spine" d="M2,8 C26,30 30,64 62,72 C82,77 90,86 98,94" pathLength="1"></path>
+  <path class="pulse-path" d="M2,8 C26,30 30,64 62,72 C82,77 90,86 98,94" pathLength="1"></path>
+</svg>
+
+<main class="foreground">
+  <div id="page"></div>
+  <footer class="site-footer" id="siteFooter" hidden></footer>
+</main>
+
+<!-- first-visit assembly overlay (plays once, gated by spa-router/spa-intro) -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-focal">
+    <div class="intro-halo"></div>
+    <svg class="intro-orbits" id="introOrbits" viewBox="0 0 560 560" aria-hidden="true"></svg>
+    <svg class="intro-mark" id="introMark" viewBox="0 0 340 250" aria-hidden="true"></svg>
+  </div>
+  <div class="intro-status" id="introStatus"><span class="blip">▸ </span><span id="introStatusText">initializing substrate</span></div>
+  <button class="intro-skip" id="introSkip" type="button">skip ▸</button>
+</div>
+
+<!-- ══════════════════════ ROUTE TEMPLATES ══════════════════════ -->
+
+<!-- ── / home ─────────────────────────────────────────────────── -->
+<template id="tpl-home">
+  <div class="home-stage" data-screen-label="home /">
+    <svg class="mid-schematic drift-mid" viewBox="0 0 1440 1700" aria-hidden="true">
+      <line class="dim" x1="64" y1="824" x2="1376" y2="824"></line>
+      <line class="dim" x1="64" y1="818" x2="64" y2="830"></line>
+      <line class="dim" x1="1376" y1="818" x2="1376" y2="830"></line>
+      <text x="700" y="816">entry · sheet 01</text>
+      <rect x="64" y="1240" width="1312" height="220" rx="10" fill="none" stroke="rgba(234,240,251,0.07)"></rect>
+      <circle class="gold-node" cx="360" cy="560" r="2.6" style="animation-delay:.4s"></circle>
+      <circle class="gold-node" cx="1180" cy="300" r="2.2" style="animation-delay:1.1s"></circle>
+      <circle class="gold-node" cx="700" cy="980" r="2.4" style="animation-delay:1.8s"></circle>
+      <g stroke="rgba(234,240,251,0.12)"><line x1="1190" y1="290" x2="1190" y2="310"></line><line x1="1180" y1="300" x2="1200" y2="300"></line></g>
+      <line class="dim" x1="0" y1="150" x2="1440" y2="540"></line>
+      <line class="dim" x1="160" y1="1700" x2="1440" y2="1090"></line>
+      <g class="xhair"><circle cx="128" cy="1168" r="8"></circle><line x1="116" y1="1168" x2="140" y2="1168"></line><line x1="128" y1="1156" x2="128" y2="1180"></line></g>
+      <g class="xhair gold"><circle cx="1322" cy="1012" r="6"></circle><line x1="1312" y1="1012" x2="1332" y2="1012"></line><line x1="1322" y1="1002" x2="1322" y2="1022"></line></g>
+      <g class="sparkle"><line x1="236" y1="408" x2="244" y2="408"></line><line x1="240" y1="404" x2="240" y2="412"></line></g>
+      <g class="sparkle"><line x1="1076" y1="688" x2="1084" y2="688"></line><line x1="1080" y1="684" x2="1080" y2="692"></line></g>
+      <g class="sparkle gold"><line x1="868" y1="1262" x2="876" y2="1262"></line><line x1="872" y1="1258" x2="872" y2="1266"></line></g>
+      <line class="dim" x1="64" y1="1186" x2="690" y2="1186"></line>
+      <line class="dim" x1="64" y1="1180" x2="64" y2="1192"></line>
+      <line class="dim" x1="690" y1="1180" x2="690" y2="1192"></line>
+      <text x="320" y="1178">the record · figs. i — iii</text>
+    </svg>
+    <svg class="traj-overlay" viewBox="0 0 1440 1700" aria-hidden="true">
+      <g class="traj-flex" data-phase="0">
+        <path class="scroll-draw" data-s="0.02" data-e="0.5" d="M118,300 C122,470 150,560 300,560 C560,560 620,690 922,694"></path>
+        <path class="traj-soft scroll-draw" data-s="0.42" data-e="0.96" d="M922,694 C1000,760 720,860 700,980 C690,1066 860,1120 936,1150"></path>
+        <g data-scroll-reveal="0.46" style="opacity:0">
+          <circle class="gold-node" cx="922" cy="694" r="4.2"></circle>
+          <circle cx="922" cy="694" r="9" fill="none" stroke="var(--gold-dim)" stroke-width="1"></circle>
+        </g>
+      </g>
+      <g class="traj-flex" data-phase="1.4">
+        <path class="traj-soft scroll-draw" data-s="0.5" data-e="0.97" d="M1336,830 C1180,1010 920,1064 700,1170 C520,1258 380,1372 318,1520"></path>
+        <g data-scroll-reveal="0.72" style="opacity:0">
+          <circle class="gold-node" cx="700" cy="1170" r="3.6"></circle>
+          <circle cx="700" cy="1170" r="8" fill="none" stroke="var(--gold-dim)" stroke-width="1"></circle>
+        </g>
+      </g>
+    </svg>
+
+    <section class="hero" data-screen-label="01 hero">
+      <div class="hero-grid">
+        <div class="num-col"><div class="callnum gold">01</div><div class="stem"></div></div>
+        <div class="body-col">
+          <div class="eyebrow">AI Systems Architect</div>
+          <h1>Luis Blanco<span class="dot">.</span></h1>
+          <p class="subline">I build the engineering that makes AI autonomous and reliable — from a proven framework to production at scale.</p>
+          <a class="commission tickbox" href="#/work"><span class="pulse-dot"></span>open for commissions — the operational AI diagnostic<span class="arr">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="inside" id="inside" data-screen-label="02 mission">
+      <div class="mission-row">
+        <div class="num-col"><div class="callnum">02</div><div class="stem"></div></div>
+        <div>
+          <h2>what's inside</h2>
+          <p>AI is everywhere and still misunderstood — pitched as magic or dismissed as autocomplete. The truth sits between, and it's more interesting than either: a probabilistic node you wire into a program, where the real work is the system you build around it. I take a system, refuse the convenient story, and find what's actually there — still astonishing once you see it clearly. Aimed at AI, that stance produced the <span class="em">Autonomous Entity Architecture (AEA)</span> — the framework I use to make the space legible. I share it openly so others can stress it, extend it, and build better.</p>
+        </div>
+        <div class="callout-col">
+          <div class="cl"><span class="ring"><i></i></span><span class="lead"></span>demystify</div>
+          <div class="cl"><span class="ring"><i></i></span><span class="lead"></span>don't dunk</div>
+          <div class="cl"><span class="ring"><i></i></span><span class="lead"></span>keep the wonder</div>
+        </div>
+      </div>
+
+      <!-- the record, kept legible: was · wasn't · can be -->
+      <div class="triptych" id="triptych">
+        <div class="trip-head">
+          <div class="trip-rule"></div>
+          <h2>what AI <span class="t-was">was</span> · what it <span class="t-wasnt">wasn't</span> · what it <span class="t-canbe">can be</span></h2>
+          <div class="annot">the record, kept legible — for whoever studies this later.</div>
+        </div>
+        <div class="trip-grid">
+          <article class="trip-panel">
+            <div class="fig">fig. I — what it was</div>
+            <svg class="trip-diag" viewBox="0 0 300 96" aria-hidden="true">
+              <line class="base" x1="14" y1="48" x2="286" y2="48"></line>
+              <circle class="tl-node" cx="30" cy="48" r="2.6"></circle>
+              <circle class="tl-node" cx="92" cy="48" r="2.6"></circle>
+              <circle class="tl-node" cx="154" cy="48" r="2.6"></circle>
+              <circle class="tl-node gold" cx="216" cy="48" r="3.2"></circle>
+              <circle class="tl-node gold" cx="278" cy="48" r="3.8"></circle>
+              <text class="yr" x="30" y="30" text-anchor="middle">1956</text>
+              <text class="yr" x="92" y="30" text-anchor="middle">1986</text>
+              <text class="yr" x="154" y="30" text-anchor="middle">2012</text>
+              <text class="yr" x="216" y="30" text-anchor="middle">2017</text>
+              <text class="yr" x="278" y="30" text-anchor="middle">now</text>
+              <text x="30" y="70" text-anchor="middle">symbols</text>
+              <text x="92" y="70" text-anchor="middle">backprop</text>
+              <text x="154" y="70" text-anchor="middle">depth</text>
+              <text x="216" y="70" text-anchor="middle">attention</text>
+              <text x="278" y="70" text-anchor="middle">scale</text>
+            </svg>
+            <p>Decades of hand-written rules the world refused to fit. Then the turn: stop writing rules — <b>learn them from data</b> — and at scale the learning compounds. What came out is knowable machinery: weights, attention, next-token probability over a compressed map of human text. No ghost in it. That it works anyway is the marvel.</p>
+          </article>
+          <article class="trip-panel">
+            <div class="fig">fig. II — what it wasn't</div>
+            <div class="myths" aria-label="claims that did not hold">
+              <span class="myth">magic</span>
+              <span class="myth">a mind in a box</span>
+              <span class="myth">just autocomplete</span>
+              <span class="myth">an agent on its own</span>
+              <span class="myth">the end of human work</span>
+            </div>
+            <p>Worship and dismissal were both ways of not looking. The model alone completes text — it doesn't remember, act, or hold a goal. <b>What looked like a mind was architecture</b> someone built around a model; strip the architecture and the agency goes with it.</p>
+          </article>
+          <article class="trip-panel">
+            <div class="fig">fig. III — what it can be</div>
+            <svg class="trip-diag" viewBox="0 0 300 96" aria-hidden="true">
+              <line class="t-edge" x1="150" y1="48" x2="52" y2="26"></line>
+              <line class="t-edge" x1="150" y1="48" x2="52" y2="70"></line>
+              <line class="t-edge" x1="150" y1="48" x2="150" y2="14"></line>
+              <line class="t-edge" x1="150" y1="48" x2="150" y2="82"></line>
+              <line class="t-edge" x1="150" y1="48" x2="248" y2="26"></line>
+              <line class="t-edge" x1="150" y1="48" x2="248" y2="70"></line>
+              <circle class="t-core gold-node" cx="150" cy="48" r="3.6"></circle>
+              <circle class="t-ring" cx="150" cy="48" r="9"></circle>
+              <circle class="t-sat" cx="52" cy="26" r="2.4"></circle>
+              <circle class="t-sat" cx="52" cy="70" r="2.4"></circle>
+              <circle class="t-sat" cx="150" cy="14" r="2.4"></circle>
+              <circle class="t-sat" cx="150" cy="82" r="2.4"></circle>
+              <circle class="t-sat" cx="248" cy="26" r="2.4"></circle>
+              <circle class="t-sat" cx="248" cy="70" r="2.4"></circle>
+              <text x="44" y="29" text-anchor="end">memory</text>
+              <text x="44" y="73" text-anchor="end">tools</text>
+              <text x="150" y="9" text-anchor="middle">observe</text>
+              <text x="150" y="94" text-anchor="middle">recover</text>
+              <text x="256" y="29" text-anchor="start">feedback</text>
+              <text x="256" y="73" text-anchor="start">time</text>
+            </svg>
+            <p>Wire that node into memory, tools, feedback, recovery — and behavior appears that <b>none of the parts have alone</b>. The live question isn't "does it think"; it's which structures let a system keep growing capability without collapsing. That question has an engineering shape.</p>
+            <a class="trip-link tickbox" href="#/architecture">the AEA — my answer in specification form →</a>
+          </article>
+        </div>
+      </div>
+
+      <div class="tiles">
+        <a class="ptile tickbox" href="#/architecture">
+          <div class="pt-head"><span class="pt-name">the architecture</span><span class="pt-arrow">→</span></div>
+          <div class="pt-desc">the AEA, navigable. five axes, ten seeds, three mechanics, open cracks.</div>
+        </a>
+        <a class="ptile tickbox" href="#/projects">
+          <div class="pt-head"><span class="pt-name">projects</span><span class="pt-arrow">→</span></div>
+          <div class="pt-desc">what runs: the open proofs, and the engineering shipped at scale.</div>
+        </a>
+        <a class="ptile tickbox" href="#/writing">
+          <div class="pt-head"><span class="pt-name">writing</span><span class="pt-arrow">→</span></div>
+          <div class="pt-desc">explaining what AI actually is, in the open — one axis at a time.</div>
+        </a>
+        <a class="ptile tickbox" href="#/about">
+          <div class="pt-head"><span class="pt-name">about</span><span class="pt-arrow">→</span></div>
+          <div class="pt-desc">astrophysics, sci-fi — the systems thinking the AI work flows from.</div>
+        </a>
+      </div>
+    </section>
+
+  </div>
+</template>
+
+<!-- ── /architecture ──────────────────────────────────────────── -->
+<template id="tpl-architecture">
+  <section class="arch-main" data-screen-label="03 architecture">
+    <div class="arch-head">
+      <div class="ttl">the architecture</div>
+      <div class="sub">autonomous entity architecture (AEA)</div>
+      <p class="intro">An engineering specification of the minimum viable shape an AI system must contain to become autonomous: to keep evolving its own capabilities without operator intervention, and without collapsing. Not a tool I use — a <span class="em">framework for understanding what AI actually is</span>, across axes, mechanics, and the seed of conditions that keep an entity coherent. Stress-test it, extend it, build with it.</p>
+      <div class="arch-status">
+        <span class="pill"><span class="v">v0.2</span></span>
+        <span class="pill">39 versions</span>
+        <span class="pill">spec unchanged</span>
+        <span class="pill">20+ hrs sustained</span>
+      </div>
+      <div class="headline">5 axes · 10 seeds · 3 mechanics<br>4 ops · 3 principles · one system</div>
+    </div>
+
+    <div class="locator">
+      <div class="loc-label">locate a concept on the architecture. <span class="hint">type to search, or pick a chip — relevant axis nodes light up.</span></div>
+      <div class="loc-autocomplete">
+        <div class="loc-field">
+          <span class="mag">⌖</span>
+          <input id="locInput" type="text" placeholder="e.g. RAG, MCP, multi-agent, self-refine…" aria-label="locate a concept">
+          <button class="loc-clear" id="locClear">clear</button>
+        </div>
+        <div class="loc-menu" id="locMenu"></div>
+      </div>
+      <div class="loc-suggest" id="locSuggest"></div>
+    </div>
+
+    <div class="diagram drift-mid">
+      <svg class="diagram-svg" id="diagramSvg" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="diagram-inner">
+        <div class="axis-grid" id="axisGrid"></div>
+        <div class="standing-layer" id="standingLayer"></div>
+      </div>
+      <div class="axis-stack" id="axisStack"></div>
+      <div class="seeds-head"><span class="arrow">seeds ⟶</span></div>
+      <div class="seed-row" id="seedRow"></div>
+      <p class="seeds-note">seeds connect to the axes they touch — 10 elements. Remove any one and autonomy breaks. Started at 13; empirical pressure consolidated to 10.</p>
+      <div class="mech-row" id="mechRow"></div>
+      <div class="ops-line"><b>L5 innovation outputs:</b>&nbsp; axis-extension · corpus-swap · new-skill · bifurcation</div>
+    </div>
+
+    <div class="principles">
+      <span>emergence over imposition</span><span class="sep">·</span>
+      <span>restorable coherence</span><span class="sep">·</span>
+      <span>operator-observable time</span>
+    </div>
+
+    <div class="loc-explanations" id="locExplain"></div>
+
+    <div class="cracks-head">open cracks</div>
+    <div class="cracks">
+      <div class="crack">
+        <div class="ckey">CR6 · identity <span class="cstate">(open)</span></div>
+        <div class="ctext">which divergence still counts as the same entity when an entity bifurcates.</div>
+      </div>
+      <div class="crack">
+        <div class="ckey">CR9 · meta-reflexivity <span class="cstate">(deferred)</span></div>
+        <div class="ctext">can the entity rewrite the framework that describes it.</div>
+      </div>
+      <div class="crack">
+        <div class="ckey">Layer 4 · trajectory <span class="cstate">(untested)</span></div>
+        <div class="ctext">which growth paths preserve viability over time.</div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<!-- ── /projects ──────────────────────────────────────────────── -->
+<template id="tpl-projects">
+  <section class="proj-main" data-screen-label="04 projects">
+    <div class="proj-head">
+      <div class="ttl">projects</div>
+      <p class="intro">The same lens, applied to real systems. Two kinds live here: the <span class="em">proofs</span> — open-source, where the framework actually runs — and the <span class="em">engineering</span>, shipped to production at scale (anonymized: the logic, never the client). Honest authorship throughout: forks are labelled as forks.</p>
+    </div>
+
+    <div class="filters" id="filters">
+      <span class="flabel">filter:</span>
+      <button class="fchip active" data-filter="all">all</button>
+      <button class="fchip axis" data-filter="P">P</button>
+      <button class="fchip axis" data-filter="M">M</button>
+      <button class="fchip axis" data-filter="A">A</button>
+      <button class="fchip axis" data-filter="R">R</button>
+      <button class="fchip axis" data-filter="S">S</button>
+      <button class="fchip" data-filter="ORCHESTRATION">ORCHESTRATION</button>
+      <button class="fchip" data-filter="MICROSERVICES">MICROSERVICES</button>
+      <button class="fchip" data-filter="FRAMEWORK">FRAMEWORK</button>
+      <button class="fchip" data-filter="VISUALIZATION">VISUALIZATION</button>
+    </div>
+
+    <!-- one woven field: clusters + computed connective mesh + shared baseline -->
+    <div class="proj-field" id="projField">
+      <svg class="proj-weave" id="projWeave" aria-hidden="true"></svg>
+
+      <div class="clusters" id="clusters">
+        <div class="cluster" data-cluster="ORCHESTRATION">
+          <div class="cl-name">orchestration</div>
+          <div class="cl-cards">
+            <div class="pcard tickbox" data-cluster="ORCHESTRATION" data-axis="M R">
+              <div class="iso" data-mod="agents"></div>
+              <div class="pname">groq_html</div>
+              <div class="auth">original</div>
+              <div class="ppat">mixture-of-agents with client-side semantic routing, token-bucket rate limiting, and a model fallback chain.</div>
+              <div class="paxis"><b>axis</b> · Multiplicity L3 + Prompting L4</div>
+              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
+            </div>
+            <div class="pcard tickbox" data-cluster="ORCHESTRATION" data-axis="A S">
+              <div class="iso" data-mod="loop"></div>
+              <div class="pname">Aether_AI</div>
+              <div class="auth">original</div>
+              <div class="ppat">MCP filesystem server behind a local + cloud chat app with an iterative self-refinement loop.</div>
+              <div class="paxis"><b>axis</b> · Abstraction L2–3 + Async L3</div>
+              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cluster" data-cluster="MICROSERVICES">
+          <div class="cl-name">microservices</div>
+          <div class="cl-cards">
+            <div class="pcard tickbox" data-cluster="MICROSERVICES" data-axis="A R">
+              <div class="iso" data-mod="layers"></div>
+              <div class="pname">Hybrid search service</div>
+              <div class="auth">production-internal</div>
+              <div class="ppat">semantic vector + BM25 keyword ranking with dynamic weights — enriching and searching technical-spec databases in production.</div>
+              <div class="paxis"><b>axis</b> · Abstraction L2 + Prompting L3</div>
+              <div class="internal">production-internal · no public source</div>
+            </div>
+            <div class="pcard tickbox" data-cluster="MICROSERVICES" data-axis="P S">
+              <div class="iso" data-mod="pipeline"></div>
+              <div class="pname">Resilient ingestion pipeline</div>
+              <div class="auth">production-internal</div>
+              <div class="ppat">retry + jitter, failure registry, atomic writes — months wedge-free.</div>
+              <div class="paxis"><b>axis</b> · Path L2 + Async L2</div>
+              <div class="internal">production-internal · no public source</div>
+            </div>
+            <div class="pcard tickbox" data-cluster="MICROSERVICES" data-axis="P M">
+              <div class="iso" data-mod="panel"></div>
+              <div class="pname">Real-time operational dashboard</div>
+              <div class="auth">production-internal</div>
+              <div class="ppat">a deterministic rule-engine recommendation with an LLM narrator anchored to the rules — the model speaks, the code decides. Live across 9 sites, refreshed every 15 min.</div>
+              <div class="paxis"><b>axis</b> · Path L3 + Multiplicity L3</div>
+              <div class="internal">production-internal · no public source</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cluster" data-cluster="FRAMEWORK">
+          <div class="cl-name">framework</div>
+          <div class="cl-cards">
+            <div class="pcard ph-card" data-cluster="FRAMEWORK" data-axis="">
+              <div class="iso" data-mod="cluster"></div>
+              <div class="pname">framework implementation</div>
+              <div class="auth">private workspace</div>
+              <div class="ppat"><span class="ph">[PLACEHOLDER: Luis to confirm what's public-facing here — likely the AEA implementation work; if private, no source link.]</span></div>
+              <div class="internal">private · no public source</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cluster" data-cluster="VISUALIZATION">
+          <div class="cl-name">visualization</div>
+          <div class="cl-cards">
+            <div class="pcard tickbox" data-cluster="VISUALIZATION" data-axis="">
+              <div class="iso" data-mod="nest"></div>
+              <div class="pname">WirthForge</div>
+              <div class="auth">declaration of intent</div>
+              <div class="ppat">truthful 60Hz observability for local AI — the self-model made visible.</div>
+              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
+            </div>
+            <div class="pcard tickbox" data-cluster="VISUALIZATION" data-axis="">
+              <div class="iso" data-mod="radial"></div>
+              <div class="pname">Prime Radiant</div>
+              <div class="auth">original</div>
+              <div class="ppat">the AEA's concept graph as a 3D force-directed visualization.</div>
+              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- mechanics + ops rail (wired into the field on the right) -->
+        <aside class="proj-rail" id="projRail">
+          <div class="rail-grp">
+            <div class="rail-h">mechanics</div>
+            <div class="rail-item" data-rail="compose"><span class="ri-node"></span>compose</div>
+            <div class="rail-item" data-rail="propagate"><span class="ri-node gold"></span>propagate</div>
+            <div class="rail-item" data-rail="observe"><span class="ri-node"></span>observe</div>
+          </div>
+          <div class="rail-grp">
+            <div class="rail-h">ops</div>
+            <div class="rail-item" data-rail="design"><span class="ri-node"></span>design</div>
+            <div class="rail-item" data-rail="time"><span class="ri-node gold"></span>time</div>
+            <div class="rail-item" data-rail="ship"><span class="ri-node"></span>ship</div>
+            <div class="rail-item" data-rail="learn"><span class="ri-node"></span>learn</div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- shared baseline — every module drops a line to this continuous structure -->
+      <div class="proj-baseline" id="projBaseline">
+        <div class="bl-text"><span>emergence over imposition</span><i>·</i><span>restorable coherence</span><i>·</i><span>operator-observable time</span></div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<!-- ── /writing ───────────────────────────────────────────────── -->
+<template id="tpl-writing">
+  <section class="wr-main" data-screen-label="05 what's new">
+    <div class="wr-head">
+      <div class="ttl">writing</div>
+      <p class="intro">The ongoing work of explaining what AI actually is — posts revealing the AEA one axis at a time, each backed by a <span class="em">receipt from the running system</span>. Cadence: Mon / Tue / Thu, 14:00 Europe/Madrid. The newsletter goes deeper on what doesn't fit in a post.</p>
+    </div>
+
+    <div class="wr-wrap">
+      <div class="filters" id="filters">
+        <span class="flabel">filter:</span>
+        <button class="fchip active" data-filter="all">all</button>
+        <button class="fchip" data-filter="P">P</button>
+        <button class="fchip" data-filter="M">M</button>
+        <button class="fchip" data-filter="A">A</button>
+        <button class="fchip" data-filter="R">R</button>
+        <button class="fchip" data-filter="S">S</button>
+      </div>
+
+      <div class="drafting"><span class="pulse"></span>currently drafting: <b><span class="ph">[PLACEHOLDER: e.g., P4 — the multiplicity axis]</span></b></div>
+
+      <div class="working">
+        <span class="wlabel">currently working on</span>
+        <span class="wo"><i class="rdot on"></i>AEA site build</span>
+        <span class="wo"><i class="rdot"></i>operator-observable time essay</span>
+        <span class="wo"><i class="rdot"></i>WirthForge diagram set</span>
+      </div>
+
+      <div class="section-label">shipped — recent first</div>
+      <div class="posts" id="posts">
+        <div class="post" data-axis="P" data-ago="2">
+          <span class="pdate"><span class="ph">[date]</span></span>
+          <span class="pnum">P1</span>
+          <span class="ptitle"><span class="newdot"></span><span class="ph">[PLACEHOLDER: title]</span><span class="paxis">· path</span></span>
+          <a class="pli">LinkedIn →</a>
+        </div>
+        <div class="post" data-axis="P" data-ago="9">
+          <span class="pdate"><span class="ph">[date]</span></span>
+          <span class="pnum">P2</span>
+          <span class="ptitle"><span class="newdot"></span><span class="ph">[PLACEHOLDER: title]</span><span class="paxis">· path</span></span>
+          <a class="pli">LinkedIn →</a>
+        </div>
+        <div class="post" data-axis="M" data-ago="20">
+          <span class="pdate"><span class="ph">[date]</span></span>
+          <span class="pnum">P3</span>
+          <span class="ptitle"><span class="newdot"></span><span class="ph">[PLACEHOLDER: title]</span><span class="paxis">· multiplicity</span></span>
+          <a class="pli">LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="section-label">up next</div>
+      <div class="upnext">
+        <span class="unext"><b>P4</b> · multiplicity <span class="q">· queued</span></span>
+        <span class="unext"><b>P5</b> · abstraction <span class="q">· queued</span></span>
+        <span class="unext"><b>P6</b> · prompting <span class="q">· queued</span></span>
+        <span class="unext"><b>P7</b> · async <span class="q">· queued</span></span>
+      </div>
+
+      <div class="section-label">eventually</div>
+      <div class="eventually">
+        <div class="evt"><span class="eglyph"><svg viewBox="0 0 24 18"><rect x="1" y="1" width="22" height="16" rx="4" fill="none" stroke="currentColor"/><path d="M10,6 L16,9 L10,12 Z" fill="currentColor" stroke="none"/></svg></span><b>video</b> · coming</div>
+        <div class="evt"><span class="eglyph"><svg viewBox="0 0 24 18"><path d="M3,15 L3,4 C3,3 4,3 5,3 L19,3 C20,3 21,4 21,5 L21,15 L18,13 L15,15 L12,13 L9,15 L6,13 Z" fill="none" stroke="currentColor"/></svg></span><b>newsletter long-form</b> · coming</div>
+      </div>
+
+      <div class="archive">
+        <button class="show-more" id="showMore">show more →</button>
+        <div class="archive-more" id="archiveMore">
+          <span class="ph">[PLACEHOLDER: the archive expands here as the pipeline runs — older posts, recent first.]</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<!-- ── /about ─────────────────────────────────────────────────── -->
+<template id="tpl-about">
+  <section class="ab-main" data-screen-label="06 personal">
+    <div class="ab-grid">
+      <div class="ab-head">
+        <span class="callnum gold">06</span>
+        <span class="ttl">about</span>
+      </div>
+      <div class="ab-body">
+        <div>
+          <p class="ab-para">The AI work isn't where the systems thinking starts — it's just where it's sharpest right now. <span class="em">Astrophysics</span> pulled me in first: large structures, hidden constraints, time, scale, and what emerges when parts interact. I read science fiction that thinks in civilizational terms — Asimov, Greg Egan, writers who treat ideas as environments. The same lens reads other systems too: I read a country less as politics than as a system — what makes it generate, work, and prosper, the way a strategy game asks you to keep a world alive. It's the point where technical work becomes worldview.</p>
+          <div class="triverse"><span class="tick"></span><span>also writing fiction. <b>TRIVERSE</b>: three humanities at civilizational scale. coming when it's ready.</span></div>
+        </div>
+        <div class="ab-side">
+          <div class="sig">L.B.</div>
+          <div class="ab-stamp">rev. v0.1 · 2026-06-01</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="orbital drift-mid">
+      <svg id="abField" viewBox="0 0 760 520" aria-hidden="true">
+        <g id="orbInner">
+          <g id="orbRings">
+            <ellipse class="orbit" cx="380" cy="260" rx="70" ry="26"/>
+            <ellipse class="orbit dashed" cx="380" cy="260" rx="130" ry="50"/>
+            <ellipse class="orbit" cx="380" cy="260" rx="195" ry="76"/>
+            <ellipse class="orbit dashed" cx="380" cy="260" rx="262" ry="103"/>
+            <ellipse class="orbit" cx="380" cy="260" rx="330" ry="131"/>
+            <ellipse class="orbit dashed" cx="380" cy="260" rx="392" ry="158"/>
+          </g>
+          <g id="orbDust"></g>
+          <circle class="sun-glow g2" cx="380" cy="260" r="16"/>
+          <circle class="sun-glow g1" cx="380" cy="260" r="8.5"/>
+          <circle class="sun" cx="380" cy="260" r="4.2"/>
+          <g id="orbPlanets"></g>
+          <g class="marker"><circle cx="190" cy="368" r="22"/><line x1="160" y1="368" x2="220" y2="368"/><line x1="190" y1="338" x2="190" y2="398"/></g>
+          <g class="marker"><circle cx="612" cy="176" r="9"/><line x1="600" y1="176" x2="624" y2="176"/></g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="sig-gesture">
+      <span class="tick"></span>scale: 1 light-year
+      <span class="sub">time: 10<sup>8</sup> years</span>
+    </div>
+  </section>
+</template>
+
+<!-- ── /work ──────────────────────────────────────────────────── -->
+<template id="tpl-work">
+  <section class="wk-main" data-screen-label="07 work with me">
+    <svg class="mid-schematic drift-mid" viewBox="0 0 1440 1200" aria-hidden="true">
+      <line class="dim" x1="64" y1="120" x2="1376" y2="120"></line>
+      <line class="dim" x1="64" y1="114" x2="64" y2="126"></line>
+      <line class="dim" x1="1376" y1="114" x2="1376" y2="126"></line>
+      <text x="650" y="112">commission · sheet 07</text>
+      <line class="dim" x1="0" y1="980" x2="1440" y2="640"></line>
+      <rect x="900" y="300" width="420" height="200" rx="10" fill="none" stroke="rgba(234,240,251,0.06)"></rect>
+      <circle class="gold-node" cx="1180" cy="240" r="2.2" style="animation-delay:.7s"></circle>
+      <circle class="gold-node" cx="320" cy="760" r="2.4" style="animation-delay:1.5s"></circle>
+      <g stroke="rgba(234,240,251,0.12)"><line x1="1190" y1="230" x2="1190" y2="250"></line><line x1="1180" y1="240" x2="1200" y2="240"></line></g>
+      <g class="xhair"><circle cx="180" cy="560" r="8"></circle><line x1="168" y1="560" x2="192" y2="560"></line><line x1="180" y1="548" x2="180" y2="572"></line></g>
+      <g class="xhair gold"><circle cx="1240" cy="860" r="6"></circle><line x1="1230" y1="860" x2="1250" y2="860"></line><line x1="1240" y1="850" x2="1240" y2="870"></line></g>
+      <g class="sparkle"><line x1="436" y1="208" x2="444" y2="208"></line><line x1="440" y1="204" x2="440" y2="212"></line></g>
+      <g class="sparkle gold"><line x1="1056" y1="1048" x2="1064" y2="1048"></line><line x1="1060" y1="1044" x2="1060" y2="1052"></line></g>
+      <path class="scroll-draw" data-s="0.06" data-e="0.92" d="M1380,180 C1280,420 1040,520 880,640 C720,760 560,860 470,1020"></path>
+      <g data-scroll-reveal="0.5" style="opacity:0">
+        <circle class="gold-node" cx="880" cy="640" r="3.4"></circle>
+        <circle cx="880" cy="640" r="8" fill="none" stroke="var(--gold-dim)" stroke-width="1"></circle>
+      </g>
+    </svg>
+
+    <div class="wk-head">
+      <div class="sub">open for commissions</div>
+      <div class="ttl">the operational AI diagnostic<span class="dot">.</span></div>
+      <p class="intro">Your operation is leaking margin in ways the reports don't show — plans that don't survive the floor, exceptions handled by heroics, data nobody fully trusts. In one week I find the leaks in your own data, <span class="em">prove the why behind each one</span>, and hand you the fix order. Fixed fee. No black box, no 90-slide deck.</p>
+      <div class="wk-status">
+        <span class="pill"><span class="v">EUR 1,500</span> · fixed</span>
+        <span class="pill">~1 week</span>
+        <span class="pill">remote</span>
+        <span class="pill">NDA standard</span>
+        <span class="pill">your data stays yours</span>
+      </div>
+    </div>
+
+    <div class="wk-grid">
+      <div class="wk-deliver">
+        <div class="wk-label">what you get</div>
+        <ul>
+          <li><b>the leak map</b> — where the money is going, ranked by size, from your own operational data.</li>
+          <li><b>the causal why</b> — every finding traced to the source rows that prove it. every number has a receipt.</li>
+          <li><b>the fix roadmap</b> — ranked by effort against payback. yours to execute with me or with anyone.</li>
+        </ul>
+      </div>
+      <div class="wk-steps">
+        <div class="wk-label">how it runs</div>
+        <div class="wk-step"><div class="callnum">01</div><div><div class="st-name">scope</div><div class="st-desc">a 20-minute call + a data sample under NDA. I confirm the leak is findable before you commit a euro.</div></div></div>
+        <div class="wk-step"><div class="callnum">02</div><div><div class="st-name">analysis</div><div class="st-desc">one week over your flows — pattern pass, then causal pass. plan vs. actual, where it diverges, and what the divergence costs.</div></div></div>
+        <div class="wk-step"><div class="callnum gold">03</div><div><div class="st-name">hand-off</div><div class="st-desc">the report, walked through together. want the fixes built? the diagnostic fee credits into that engagement.</div></div></div>
+      </div>
+    </div>
+
+    <div class="wk-proof">
+      <p><b>Why this is reliable enough to act on:</b> I run AI systems inside large-scale logistics operations for a living. The engine behind this diagnostic is the same kind running in production — deterministic rules decide, the AI explains, and every claim shows its work. <span class="num">the model speaks; the code decides.</span></p>
+      <div class="wk-metrics">
+        <div class="wk-metric"><span class="mv">9</span><span class="ml">sites live</span></div>
+        <div class="wk-metric"><span class="mv">15 min</span><span class="ml">refresh cycle</span></div>
+        <div class="wk-metric"><span class="mv">months</span><span class="ml">wedge-free</span></div>
+      </div>
+    </div>
+
+    <div class="wk-guarantee"><span class="tick"></span><span>If the diagnostic finds nothing worth fixing, you get that in writing — with the receipts. Either way, you stop guessing.</span></div>
+
+    <div class="wk-cta">
+      <a class="cta-btn tickbox" href="mailto:leyber.91.2@gmail.com?subject=Operational%20AI%20Diagnostic">book the 20-minute scoping call →</a>
+      <div class="cta-alt">or write directly — <a href="mailto:leyber.91.2@gmail.com">leyber.91.2@gmail.com</a> · linkedin · <span class="ph">[PLACEHOLDER]</span></div>
+      <div class="wk-foot-note">SMB logistics, warehousing, manufacturing, freight — if your operation moves things and the numbers feel off, that's the brief.</div>
+    </div>
+  </section>
+</template>
+
+<!-- ── /contact ───────────────────────────────────────────────── -->
+<template id="tpl-contact">
+  <section class="ct-main" data-screen-label="08 contact">
+    <div class="ct-wrap">
+      <div class="ct-radial">
+        <svg viewBox="0 0 240 240" aria-hidden="true">
+          <circle class="o" cx="120" cy="120" r="30"/>
+          <circle class="o" cx="120" cy="120" r="58"/>
+          <circle class="o" cx="120" cy="120" r="88"/>
+          <circle class="o" cx="120" cy="120" r="116"/>
+          <line class="spoke" x1="120" y1="4" x2="120" y2="236"/>
+          <line class="spoke" x1="4" y1="120" x2="236" y2="120"/>
+          <line class="spoke" x1="36" y1="36" x2="204" y2="204"/>
+          <line class="spoke" x1="204" y1="36" x2="36" y2="204"/>
+          <circle class="core" cx="120" cy="120" r="5"/>
+        </svg>
+      </div>
+
+      <h1 class="ct-title">let's build better systems<span class="dot">.</span></h1>
+      <p class="ct-pitch">I write deeper on the framework in the newsletter — what doesn't fit in a post. One email per week, no hype, calibrated by the same rules as the rest of the site.</p>
+
+      <div class="nl">
+        <div class="nl-field">
+          <input type="email" placeholder="your email" aria-label="email (newsletter deferred)" disabled>
+          <button type="button" disabled>subscribe →</button>
+        </div>
+        <div class="nl-note"><span class="ph">[PLACEHOLDER: Ghost URL — or newsletter deferred to v2]</span></div>
+      </div>
+
+      <div class="ct-links">
+        <a class="clink tickbox" role="link" tabindex="0">
+          <span class="ring"><svg viewBox="0 0 16 16"><rect x="1.5" y="3" width="13" height="10" rx="1.5" fill="none" stroke="currentColor"/><path d="M2,4 L8,9 L14,4" fill="none" stroke="currentColor"/></svg></span>
+          <span class="ctext"><span class="clabel">email</span><span class="cval ph">[PLACEHOLDER]</span></span>
+        </a>
+        <a class="clink tickbox" href="https://github.com/Leyber91" target="_blank" rel="noopener">
+          <span class="ring"><svg viewBox="0 0 16 16"><circle cx="4" cy="4" r="2" fill="none" stroke="currentColor"/><circle cx="4" cy="12" r="2" fill="none" stroke="currentColor"/><circle cx="12" cy="6" r="2" fill="none" stroke="currentColor"/><path d="M4,6 L4,10 M4,8 C4,8 12,8 12,8" fill="none" stroke="currentColor"/></svg></span>
+          <span class="ctext"><span class="clabel">github</span><span class="cval">github.com/Leyber91</span></span>
+        </a>
+        <a class="clink tickbox" role="link" tabindex="0">
+          <span class="ring"><svg viewBox="0 0 16 16"><rect x="2" y="6" width="3" height="8" fill="none" stroke="currentColor"/><circle cx="3.5" cy="2.6" r="1.6" fill="none" stroke="currentColor"/><path d="M7,14 L7,6 M7,9 C7,6 13,6 13,9.5 L13,14" fill="none" stroke="currentColor"/></svg></span>
+          <span class="ctext"><span class="clabel">linkedin</span><span class="cval ph">[PLACEHOLDER]</span></span>
+        </a>
+        <a class="clink tickbox" role="link" tabindex="0">
+          <span class="ring"><svg viewBox="0 0 16 16"><path d="M3,3 L13,13 M13,3 L3,13" fill="none" stroke="currentColor"/></svg></span>
+          <span class="ctext"><span class="clabel">X</span><span class="cval ph">[PLACEHOLDER]</span></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="ct-extend drift-mid">
+      <svg viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M40,20 C200,60 240,160 480,180 C740,202 800,90 1160,150"/>
+        <path d="M120,90 C360,140 520,200 760,220 C980,238 1080,200 1180,236"/>
+        <path d="M20,160 L1180,160" stroke="rgba(234,240,251,0.06)"/>
+        <circle class="node" cx="480" cy="180" r="3"/>
+        <circle class="node" cx="760" cy="220" r="3"/>
+      </svg>
+    </div>
+
+    <div class="ct-foot">luisblanco.dev / contact · v0.2</div>
+  </section>
+</template>
+
+<!-- ══════════════════════ ENGINE (load order matters) ══════════════════════ -->
+<script src="spa-engine.js"></script>
+<script src="spa-substrate.js"></script>
+<script src="lumen.js"></script>
+<script src="concepts.js"></script>
+<script src="spa-architecture.js"></script>
+<script src="spa-projects.js"></script>
+<script src="spa-intro.js"></script>
+<script src="spa-home.js"></script>
+<script src="spa-about.js"></script>
+<script src="spa-spine.js"></script>
+<script src="spa-router.js"></script>
+<script src="spa-tweaks.js"></script>
+</body>
+</html>

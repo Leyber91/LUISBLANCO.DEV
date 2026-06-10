@@ -1,0 +1,52 @@
+/* contact.css — /contact closure */
+
+.ct-main{ padding:140px 56px 0; position:relative; z-index:5; min-height:100vh; display:flex; flex-direction:column; }
+.ct-wrap{ max-width:1000px; margin:0 auto; width:100%; position:relative; }
+
+.ct-title{ font-size:clamp(34px,5vw,64px); font-weight:500; line-height:1.04; letter-spacing:-0.01em; color:var(--ink); margin:0; }
+.ct-title .dot{ color:var(--gold); }
+
+.ct-pitch{ font-size:16px; line-height:1.7; color:var(--ink-dim); max-width:600px; margin:26px 0 0; text-wrap:pretty; }
+.ct-pitch .ph{ font-size:13px; }
+
+/* newsletter (deferred) */
+.nl{ margin:28px 0 0; max-width:480px; }
+.nl-field{ display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); padding-bottom:8px; opacity:.7; }
+.nl-field input{ flex:1; background:transparent; border:none; color:var(--ink); font-family:inherit; font-size:15px; outline:none; }
+.nl-field input::placeholder{ color:var(--faint); }
+.nl-field button{ background:none; border:none; color:var(--gold); font-family:inherit; font-size:13px; letter-spacing:.06em; cursor:not-allowed; }
+.nl-note{ font-size:11px; color:var(--faint); margin-top:9px; letter-spacing:.02em; }
+
+/* contact links as floating annotations */
+.ct-links{ margin:44px 0 0; display:grid; grid-template-columns:repeat(2,minmax(0,260px)); gap:18px 56px; }
+.clink{ display:flex; align-items:center; gap:13px; }
+.clink .ring{ width:30px; height:30px; border-radius:50%; border:1.2px solid var(--line); display:flex;
+  align-items:center; justify-content:center; flex:none; color:var(--ink-dim); transition:all .25s var(--ease); }
+.clink .ring svg{ width:15px; height:15px; }
+.clink:hover .ring{ border-color:var(--gold); color:var(--gold-hi); box-shadow:0 0 10px var(--gold-glow); }
+.clink .ctext{ font-size:13px; }
+.clink .clabel{ color:var(--faint); letter-spacing:.1em; text-transform:lowercase; font-size:11px; display:block; }
+.clink .cval{ color:var(--ink); }
+.clink:hover .cval{ color:var(--gold-hi); }
+
+/* radial closure diagram */
+.ct-radial{ position:absolute; right:-10px; top:40px; width:240px; height:240px; z-index:2; pointer-events:none; }
+.ct-radial svg{ width:100%; height:100%; overflow:visible; }
+.ct-radial .o{ fill:none; stroke:var(--line-soft); stroke-width:1; }
+.ct-radial .spoke{ stroke:var(--line-soft); stroke-width:1; }
+.ct-radial .core{ fill:var(--gold); filter:drop-shadow(0 0 8px var(--gold-glow)); }
+
+/* faint structural lines extending off the bottom */
+.ct-extend{ position:relative; z-index:1; margin-top:auto; height:200px; pointer-events:none; }
+.ct-extend svg{ position:absolute; left:0; bottom:-40px; width:100%; height:240px; overflow:visible; }
+.ct-extend path{ fill:none; stroke:var(--line-soft); stroke-width:1; }
+.ct-extend .node{ fill:var(--gold-dim); }
+
+.ct-foot{ position:relative; z-index:5; text-align:center; font-size:11px; letter-spacing:.16em;
+  color:var(--faint); padding:30px 0 36px; }
+
+@media (max-width:760px){
+  .ct-main{ padding:80px 18px 0; }
+  .ct-radial{ display:none; }
+  .ct-links{ grid-template-columns:1fr; }
+}
