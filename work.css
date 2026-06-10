@@ -1,0 +1,78 @@
+/* work.css — #/work · the operational AI diagnostic (conversion route).
+   One sharp path: problem → offer → how it runs → proof → CTA.
+   Same locked language as the rest of the site; gold = active/fired only,
+   which is exactly what a CTA is. */
+
+.wk-main{ position:relative; z-index:5; max-width:1100px; margin:0 auto;
+  padding:150px 64px 60px; display:flex; flex-direction:column; gap:54px; }
+
+/* nav accent: the one commercial door is findable, not shouting */
+.topnav a[data-route="work"]{ color:var(--gold-dim); }
+.topnav a[data-route="work"]:hover{ color:var(--gold); }
+.topnav a[data-route="work"].current{ color:var(--gold-hi); }
+
+/* ── head ─────────────────────────────────────────────────────────── */
+.wk-head{ display:flex; flex-direction:column; gap:14px; max-width:780px; }
+.wk-head .sub{ color:var(--gold); font-size:12px; letter-spacing:.3em; text-transform:uppercase; }
+.wk-head .ttl{ font-size:clamp(28px,3.4vw,38px); font-weight:500; color:var(--ink); line-height:1.12; }
+.wk-head .ttl .dot{ color:var(--gold); }
+.wk-head .intro{ color:var(--ink-dim); font-size:16.5px; line-height:1.7; margin:6px 0 0; text-wrap:pretty; }
+.wk-head .intro .em{ color:var(--gold-hi); }
+.wk-status{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+
+/* ── deliverables + steps ─────────────────────────────────────────── */
+.wk-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:48px; align-items:start; }
+.wk-label{ font-size:10px; letter-spacing:.22em; color:var(--faint); text-transform:uppercase; margin-bottom:18px; }
+.wk-deliver ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:18px; }
+.wk-deliver li{ position:relative; padding-left:26px; font-size:14px; line-height:1.65; color:var(--ink-dim); }
+.wk-deliver li::before{ content:""; position:absolute; left:0; top:11px; width:13px; height:1px; background:var(--gold-dim); }
+.wk-deliver li b{ color:var(--ink); font-weight:500; }
+
+.wk-steps{ display:flex; flex-direction:column; }
+.wk-step{ display:grid; grid-template-columns:54px 1fr; gap:18px; padding:16px 0; align-items:start; }
+.wk-step + .wk-step{ border-top:1px dashed var(--line-soft); }
+.wk-step .callnum{ width:42px; height:42px; font-size:13px; }
+.wk-step .st-name{ font-size:14px; color:var(--ink); margin-bottom:5px; letter-spacing:.05em; }
+.wk-step .st-desc{ font-size:13px; line-height:1.62; color:var(--ink-dim); }
+
+/* ── proof strip ──────────────────────────────────────────────────── */
+.wk-proof{ border:1px dashed var(--line-soft); border-radius:10px; padding:26px 30px;
+  background:rgba(10,14,22,0.34);
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:34px; align-items:center; }
+.wk-proof p{ margin:0; font-size:14.5px; line-height:1.7; color:var(--ink-dim); max-width:620px; text-wrap:pretty; }
+.wk-proof p b{ color:var(--ink); font-weight:500; }
+.wk-proof .num{ color:var(--gold-hi); }
+.wk-metrics{ display:flex; flex-direction:column; gap:12px; }
+.wk-metric{ display:flex; align-items:baseline; gap:10px; white-space:nowrap; }
+.wk-metric .mv{ font-size:23px; color:var(--gold-hi); }
+.wk-metric .ml{ font-size:10.5px; letter-spacing:.14em; color:var(--faint); text-transform:uppercase; }
+
+/* ── guarantee ────────────────────────────────────────────────────── */
+.wk-guarantee{ display:flex; gap:14px; align-items:baseline; font-size:13.5px;
+  color:var(--ink-dim); max-width:720px; line-height:1.65; }
+.wk-guarantee .tick{ width:8px; height:8px; flex:none;
+  border-top:1.5px solid var(--gold); border-right:1.5px solid var(--gold);
+  transform:rotate(45deg) translateY(2px); }
+
+/* ── CTA ──────────────────────────────────────────────────────────── */
+.wk-cta{ display:flex; flex-direction:column; gap:16px; align-items:flex-start;
+  border-top:1px solid var(--line-soft); padding-top:40px; }
+.cta-btn{ display:inline-flex; align-items:center; gap:12px;
+  border:1.4px solid var(--gold); border-radius:8px; padding:14px 26px;
+  color:var(--gold-hi); font-size:15px; letter-spacing:.06em;
+  box-shadow:0 0 18px rgba(212,162,76,0.14), inset 0 0 10px rgba(212,162,76,0.06);
+  transition:background .25s var(--ease), color .25s var(--ease), box-shadow .25s var(--ease); }
+.cta-btn:hover{ background:rgba(212,162,76,0.1); color:#fff;
+  box-shadow:0 0 26px rgba(212,162,76,0.3), inset 0 0 12px rgba(212,162,76,0.1); }
+.cta-alt{ font-size:12.5px; color:var(--faint); }
+.cta-alt a{ color:var(--ink-dim); border-bottom:1px dotted var(--gold-dim); transition:color .2s var(--ease); }
+.cta-alt a:hover{ color:var(--gold); }
+.wk-foot-note{ font-size:11px; color:var(--faint); letter-spacing:.05em; }
+
+/* ── responsive ───────────────────────────────────────────────────── */
+@media (max-width:760px){
+  .wk-main{ padding:96px 22px 40px; gap:40px; }
+  .wk-grid{ grid-template-columns:1fr; gap:34px; }
+  .wk-proof{ grid-template-columns:1fr; gap:22px; }
+  .wk-metrics{ flex-direction:row; flex-wrap:wrap; gap:18px; }
+}

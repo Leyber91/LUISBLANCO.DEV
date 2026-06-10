@@ -1,0 +1,181 @@
+/* home.css — / immersive hero entry + what's inside */
+
+.home-stage{ position:relative; }
+
+/* curved trajectory overlay (layer 4 — its own breathing flex) */
+.traj-overlay{ position:absolute; top:0; left:0; width:1440px; height:100%;
+  z-index:2; pointer-events:none; max-width:none; }
+.traj-overlay path{ fill:none; stroke:var(--line); stroke-width:1.1; }
+.traj-overlay .traj-soft{ stroke:var(--line-soft); }
+
+/* decorative structural linework (mid-layer, drifts) */
+.mid-schematic{ position:absolute; top:0; left:0; width:1440px; height:100%;
+  z-index:1; pointer-events:none; max-width:none; }
+.mid-schematic line, .mid-schematic path{ stroke:var(--line-soft); fill:none; stroke-width:1; }
+.mid-schematic .dim{ stroke:rgba(234,240,251,0.1); }
+.mid-schematic text{ fill:var(--faint); font-size:10px; letter-spacing:.1em; }
+
+/* ── hero ─────────────────────────────────────────────────────────── */
+.hero{ min-height:100vh; display:flex; align-items:center;
+  padding:0 64px; position:relative; z-index:5; }
+.hero-grid{ display:grid; grid-template-columns:56px minmax(0,1fr); gap:34px;
+  align-items:start; max-width:1040px; }
+.num-col{ display:flex; flex-direction:column; align-items:center; }
+.num-col .stem{ width:1px; flex:1; min-height:90px;
+  background:linear-gradient(to bottom,var(--gold-dim),transparent); margin-top:8px; }
+.hero h1{ font-size:clamp(54px,6.6vw,96px); font-weight:500; letter-spacing:-0.01em; line-height:0.96;
+  margin:18px 0 26px; color:var(--ink); }
+.hero h1 .dot{ color:var(--gold); }
+.hero .subline{ font-size:21px; line-height:1.55; color:var(--ink-dim);
+  max-width:680px; font-weight:400; }
+
+/* ── what's inside ────────────────────────────────────────────────── */
+.inside{ min-height:100vh; padding:96px 64px 40px; position:relative; z-index:5;
+  display:flex; flex-direction:column; gap:64px; }
+.mission-row{ display:grid; grid-template-columns:56px minmax(0,600px) minmax(0,1fr);
+  gap:40px; align-items:start; }
+.mission-row h2{ font-size:14px; letter-spacing:.06em; color:var(--ink-dim);
+  font-weight:500; margin:14px 0 16px; }
+.mission-row p{ font-size:16.5px; line-height:1.7; color:var(--ink); margin:0; max-width:600px; text-wrap:pretty; }
+.mission-row p .em{ color:var(--gold-hi); }
+.callout-col{ display:flex; flex-direction:column; gap:24px; padding-top:48px; }
+.callout-col .cl{ display:flex; align-items:center; gap:14px; font-size:15px; color:var(--ink-dim); }
+.callout-col .cl .ring{ width:18px; height:18px; border-radius:50%;
+  border:1.4px solid var(--gold); display:flex; align-items:center; justify-content:center; flex:none; }
+.callout-col .cl .ring i{ width:5px; height:5px; border-radius:50%; background:var(--gold);
+  box-shadow:0 0 6px var(--gold-glow); }
+.callout-col .cl .lead{ width:34px; height:1px; background:var(--line-soft); flex:none; }
+
+/* preview tiles */
+.tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; max-width:1180px; }
+.ptile{ border:1px solid var(--line-soft); border-radius:10px; padding:20px 18px 22px;
+  background:rgba(10,14,22,0.34); transition:border-color .25s var(--ease), background .25s var(--ease);
+  display:flex; flex-direction:column; gap:11px; min-height:158px; }
+.ptile:hover{ border-color:var(--gold-dim); background:rgba(16,20,30,0.5); }
+.ptile .pt-head{ display:flex; align-items:center; justify-content:space-between; }
+.ptile .pt-name{ font-size:15px; color:var(--ink); letter-spacing:.02em; }
+.ptile:hover .pt-name{ color:var(--gold-hi); }
+.ptile .pt-arrow{ color:var(--gold); opacity:.7; transition:transform .25s var(--ease); }
+.ptile:hover .pt-arrow{ transform:translateX(3px); opacity:1; }
+.ptile .pt-desc{ font-size:12.5px; line-height:1.55; color:var(--ink-dim); }
+
+/* home footer (custom) */
+.home-footer{ position:relative; z-index:5; margin-top:30px; padding:30px 64px 46px;
+  border-top:1px solid var(--line-soft); display:flex; justify-content:space-between;
+  align-items:flex-end; flex-wrap:wrap; gap:22px; }
+.home-footer .links{ display:flex; gap:26px; flex-wrap:wrap; font-size:13px; }
+.home-footer .links a{ color:var(--ink-dim); transition:color .2s var(--ease); }
+.home-footer .links a:hover{ color:var(--gold); }
+.home-footer .stamp{ font-size:11px; letter-spacing:.14em; color:var(--faint); }
+
+@media (max-width:760px){
+  .traj-overlay, .mid-schematic{ display:none; }
+  .hero{ padding:96px 22px 40px; min-height:auto; }
+  .hero-grid{ grid-template-columns:42px 1fr; gap:18px; }
+  .hero h1{ font-size:52px; }
+  .hero .subline{ font-size:17px; }
+  .inside{ padding:40px 22px; gap:44px; }
+  .mission-row{ grid-template-columns:1fr; gap:22px; }
+  .callout-col{ flex-direction:row; flex-wrap:wrap; padding-top:0; gap:16px; }
+  .tiles{ grid-template-columns:1fr; }
+  .home-footer{ flex-direction:column; align-items:flex-start; padding:28px 22px; }
+}
+
+/* ── commission line (hero → #/work) ──────────────────────────────── */
+.commission{ display:inline-flex; align-items:center; gap:11px; margin-top:32px;
+  padding:9px 16px 9px 14px; border:1px dashed var(--gold-dim); border-radius:8px;
+  font-size:12.5px; letter-spacing:.07em; color:var(--ink-dim);
+  transition:color .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease); }
+.commission:hover{ color:var(--ink); border-color:var(--gold); background:rgba(212,162,76,0.07); }
+.commission .pulse-dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); flex:none;
+  box-shadow:0 0 8px var(--gold-glow); animation:nodePulse 2.6s var(--ease) infinite; }
+.commission .arr{ color:var(--gold); }
+
+/* ── triptych — what AI was · wasn't · can be ─────────────────────── */
+.triptych{ display:flex; flex-direction:column; gap:26px; max-width:1180px; }
+.trip-rule{ width:54px; height:1px; opacity:.6; margin-bottom:16px;
+  background:linear-gradient(to right,var(--gold),transparent); }
+.trip-head h2{ font-size:14px; letter-spacing:.06em; color:var(--ink-dim); font-weight:500; margin:0 0 8px; }
+.trip-head .t-was{ color:var(--ink); }
+.trip-head .t-wasnt{ color:var(--faint); text-decoration:line-through; text-decoration-color:var(--gold-dim); }
+.trip-head .t-canbe{ color:var(--gold-hi); }
+.trip-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.trip-panel{ border:1px dashed var(--line-soft); border-radius:10px; padding:22px 20px 24px;
+  background:rgba(10,14,22,0.34); display:flex; flex-direction:column; gap:16px; }
+.trip-panel .fig{ font-size:10px; letter-spacing:.22em; color:var(--faint); text-transform:uppercase; }
+.trip-panel p{ font-size:13.5px; line-height:1.68; color:var(--ink-dim); margin:0; text-wrap:pretty; }
+.trip-panel p b{ color:var(--ink); font-weight:500; }
+.trip-diag{ width:100%; height:96px; flex:none; }
+.trip-diag text{ fill:var(--faint); font-size:8.5px; letter-spacing:.08em; }
+.trip-diag .yr{ fill:var(--ink-dim); }
+
+/* fig I — timeline: nodes fade in left → right when lit */
+.trip-diag .base{ stroke:var(--line-soft); stroke-dasharray:3 6; }
+.trip-diag .tl-node{ fill:var(--line); opacity:0; transition:opacity .6s var(--ease); }
+.trip-diag .tl-node.gold{ fill:var(--gold); filter:drop-shadow(0 0 4px var(--gold-glow)); }
+.trip-panel.lit .tl-node{ opacity:1; }
+.trip-panel.lit .tl-node:nth-of-type(1){ transition-delay:.05s; }
+.trip-panel.lit .tl-node:nth-of-type(2){ transition-delay:.25s; }
+.trip-panel.lit .tl-node:nth-of-type(3){ transition-delay:.45s; }
+.trip-panel.lit .tl-node:nth-of-type(4){ transition-delay:.65s; }
+.trip-panel.lit .tl-node:nth-of-type(5){ transition-delay:.85s; }
+
+/* fig II — myths take the gold strike when lit */
+.myths{ display:flex; flex-wrap:wrap; gap:10px; }
+.myth{ position:relative; font-size:12.5px; color:var(--ink-dim); padding:4px 12px;
+  border:1px solid var(--line-soft); border-radius:6px; letter-spacing:.03em;
+  transition:color .7s var(--ease), border-color .7s var(--ease); }
+.myth::after{ content:""; position:absolute; left:7px; top:50%; height:1px; width:0;
+  background:var(--gold); box-shadow:0 0 5px var(--gold-glow); transition:width .6s var(--ease); }
+.trip-panel.lit .myth{ color:var(--faint); border-color:rgba(234,240,251,0.07); }
+.trip-panel.lit .myth::after{ width:calc(100% - 14px); }
+.trip-panel.lit .myth:nth-child(1), .trip-panel.lit .myth:nth-child(1)::after{ transition-delay:.15s; }
+.trip-panel.lit .myth:nth-child(2), .trip-panel.lit .myth:nth-child(2)::after{ transition-delay:.4s; }
+.trip-panel.lit .myth:nth-child(3), .trip-panel.lit .myth:nth-child(3)::after{ transition-delay:.65s; }
+.trip-panel.lit .myth:nth-child(4), .trip-panel.lit .myth:nth-child(4)::after{ transition-delay:.9s; }
+.trip-panel.lit .myth:nth-child(5), .trip-panel.lit .myth:nth-child(5)::after{ transition-delay:1.15s; }
+
+/* fig III — the lattice draws its edges, satellites ignite */
+.trip-diag .t-edge{ stroke:var(--gold-dim); stroke-width:1;
+  stroke-dasharray:120; stroke-dashoffset:120; transition:stroke-dashoffset .9s var(--ease); }
+.trip-panel.lit .t-edge{ stroke-dashoffset:0; }
+.trip-panel.lit .t-edge:nth-of-type(1){ transition-delay:.1s; }
+.trip-panel.lit .t-edge:nth-of-type(2){ transition-delay:.22s; }
+.trip-panel.lit .t-edge:nth-of-type(3){ transition-delay:.34s; }
+.trip-panel.lit .t-edge:nth-of-type(4){ transition-delay:.46s; }
+.trip-panel.lit .t-edge:nth-of-type(5){ transition-delay:.58s; }
+.trip-panel.lit .t-edge:nth-of-type(6){ transition-delay:.7s; }
+.trip-diag .t-ring{ fill:none; stroke:var(--gold-dim); stroke-width:1;
+  animation:nodePulse 3s var(--ease) infinite; }
+.trip-diag .t-sat{ fill:var(--line); opacity:0; transition:opacity .5s var(--ease); }
+.trip-panel.lit .t-sat{ opacity:1; }
+.trip-panel.lit .t-sat:nth-of-type(3){ transition-delay:.55s; }
+.trip-panel.lit .t-sat:nth-of-type(4){ transition-delay:.67s; }
+.trip-panel.lit .t-sat:nth-of-type(5){ transition-delay:.79s; }
+.trip-panel.lit .t-sat:nth-of-type(6){ transition-delay:.91s; }
+.trip-panel.lit .t-sat:nth-of-type(7){ transition-delay:1.03s; }
+.trip-panel.lit .t-sat:nth-of-type(8){ transition-delay:1.15s; }
+
+.trip-link{ align-self:flex-start; font-size:12.5px; letter-spacing:.07em; color:var(--gold);
+  border-bottom:1px solid var(--gold-dim); padding-bottom:2px; transition:color .2s var(--ease); }
+.trip-link:hover{ color:var(--gold-hi); }
+
+/* reduced motion: triptych holds the final frame */
+@media (prefers-reduced-motion: reduce){
+  .trip-diag .tl-node, .trip-diag .t-sat{ opacity:1; }
+  .trip-diag .t-edge{ stroke-dashoffset:0; }
+  .trip-panel .myth{ color:var(--faint); }
+  .trip-panel .myth::after{ width:calc(100% - 14px); }
+  .trip-diag .t-ring{ animation:none; }
+  .commission .pulse-dot{ animation:none; }
+}
+html.reduced-motion .trip-diag .tl-node, html.reduced-motion .trip-diag .t-sat{ opacity:1; }
+html.reduced-motion .trip-diag .t-edge{ stroke-dashoffset:0; }
+html.reduced-motion .trip-panel .myth::after{ width:calc(100% - 14px); }
+html.reduced-motion .trip-diag .t-ring{ animation:none; }
+html.reduced-motion .commission .pulse-dot{ animation:none; }
+
+@media (max-width:760px){
+  .trip-grid{ grid-template-columns:1fr; }
+  .commission{ margin-top:24px; }
+}
