@@ -12,15 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="home.css">
-<link rel="stylesheet" href="architecture.css">
-<link rel="stylesheet" href="projects.css">
-<link rel="stylesheet" href="writing.css">
-<link rel="stylesheet" href="about.css">
-<link rel="stylesheet" href="contact.css">
-<link rel="stylesheet" href="work.css">
-<link rel="stylesheet" href="spa.css">
+<link rel="stylesheet" href="styles/styles.css">
+<link rel="stylesheet" href="styles/home.css">
+<link rel="stylesheet" href="styles/architecture.css">
+<link rel="stylesheet" href="styles/projects.css">
+<link rel="stylesheet" href="styles/writing.css">
+<link rel="stylesheet" href="styles/about.css">
+<link rel="stylesheet" href="styles/contact.css">
+<link rel="stylesheet" href="styles/work.css">
+<link rel="stylesheet" href="styles/spa.css">
 </head>
 <body data-route="home">
 
@@ -681,17 +681,21 @@
 </template>
 
 <!-- ══════════════════════ ENGINE (load order matters) ══════════════════════ -->
-<script src="spa-engine.js"></script>
-<script src="spa-substrate.js"></script>
-<script src="lumen.js"></script>
-<script src="concepts.js"></script>
-<script src="spa-architecture.js"></script>
-<script src="spa-projects.js"></script>
-<script src="spa-intro.js"></script>
-<script src="spa-home.js"></script>
-<script src="spa-about.js"></script>
-<script src="spa-spine.js"></script>
-<script src="spa-router.js"></script>
-<script src="spa-tweaks.js"></script>
+<script src="src/core/spa-engine.js"></script>
+<script src="src/core/spa-substrate.js"></script>
+<!-- LUMEN — modular GPU particle substrate (load order: config → glsl → engine → orchestrator) -->
+<script src="src/lumen/lumen.config.js"></script>
+<script src="src/lumen/lumen.glsl.js"></script>
+<script src="src/lumen/lumen.engine.js"></script>
+<script src="src/lumen/lumen.orchestrator.js"></script>
+<script src="src/data/concepts.js"></script>
+<script src="src/routes/spa-architecture.js"></script>
+<script src="src/routes/spa-projects.js"></script>
+<script src="src/core/spa-intro.js"></script>
+<script src="src/routes/spa-home.js"></script>
+<script src="src/routes/spa-about.js"></script>
+<script src="src/core/spa-spine.js"></script>
+<script src="src/core/spa-router.js"></script>
+<script src="src/ui/spa-tweaks.js"></script>
 </body>
 </html>
