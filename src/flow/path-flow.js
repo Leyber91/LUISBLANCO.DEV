@@ -28,9 +28,9 @@
   // not a thin tube along the line. cloud:0 → tight defined dust (the orbits,
   // which already landed — leave them).
   const TARGETS = [
-    { sel:'.traversal .spine',       dens:3.2, band:34, warm:0.55, wander:0.95, minLen:80, cloud:1 }, // cloud current
-    { sel:'#plateSpine .spine-path', dens:3.4, band:38, warm:0.70, wander:0.95, minLen:80, cloud:1 }, // the spine that extends down the page
-    { sel:'.traj-flex path',         dens:3.0, band:32, warm:0.55, wander:0.95, minLen:120, cloud:1 }, // the trajectory currents
+    { sel:'.traversal .spine',       dens:3.6, band:64, warm:0.55, wander:0.95, minLen:80, cloud:1 }, // wide irregular cloud current
+    { sel:'#plateSpine .spine-path', dens:3.8, band:70, warm:0.70, wander:0.95, minLen:80, cloud:1 }, // the spine that extends down the page
+    { sel:'.traj-flex path',         dens:3.4, band:60, warm:0.55, wander:0.95, minLen:120, cloud:1 }, // the trajectory currents
     { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60, cloud:0 },  // solar system — defined dust rings
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
@@ -122,9 +122,10 @@
     const sf=(window.scrollY||document.documentElement.scrollTop||0)/maxsc;   // scroll progress 0..1
     for(const tr of tracks){
       let m; try{ m=tr.el.getScreenCTM(); }catch(e){ m=null; } if(!m) continue;
-      const reveal=tr.hasBand ? Math.max(0,Math.min(1,(sf-tr.ds)/Math.max(0.0001,tr.de-tr.ds))) : 1;
+      // 2x reveal lead: the flow runs DOUBLE the scroll journey so it's ahead, not behind.
+      const reveal=tr.hasBand ? Math.max(0,Math.min(1, 2.0*(sf-tr.ds)/Math.max(0.0001,tr.de-tr.ds))) : 1;
       const cloud=tr.cloud;
-      const bAmp=tr.band*2.2, bScale=7.0, wScale=4.3;   // lobe reach · lobes-along-path · width-variation freq
+      const bAmp=tr.band*2.7, bScale=5.4, wScale=3.2;   // lobe reach · lobes-along-path · width-variation freq (bigger, more irregular)
       for(const p of tr.parts){
         if(p.t > reveal) continue;                               // extend down the page as you scroll
         const ef=Math.min(1,(reveal-p.t)/0.08);                  // soft, feathered leading edge
@@ -138,7 +139,7 @@
           // coherent lobe — whole clusters swing off the path together, so the
           // current reads as a meandering CLOUD that forms a flow, not a tube.
           const billow=(vnoise(tt*bScale + tr.seed + now*0.00007)-0.5)*bAmp;
-          const widthMod=0.4+1.25*vnoise(tt*wScale + tr.seed + 11.0 + now*0.00003); // body fattens / pinches
+          const widthMod=0.22+1.95*vnoise(tt*wScale + tr.seed + 11.0 + now*0.00003); // body fattens / pinches (way more irregular)
           localOff=p.offBase*widthMod + Math.sin(p.wPhase+now*p.wFreq)*p.wAmp;       // seat in the lobe + wisp
           perpCss=billow + localOff;
         } else {
