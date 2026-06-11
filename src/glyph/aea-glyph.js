@@ -17,7 +17,7 @@
     R: 0.92,                 // outer radius as fraction of the half-box
     tilt: 0.80,              // X-tilt (radians) — pentagon reads frontally, still 3D
     spin: 0.00024,           // turntable speed (radians / ms)
-    perEdge: { spoke: 22, ring: 40, chord: 26 },   // rings dense (the pentagons read)
+    perEdge: { spoke: 32, ring: 58, chord: 36 },   // denser = more defined
     GOLD: [212,162,76], AMBER:[245,205,128], INK:[150,170,205],
     INTERNAL: 260,           // canvas internal resolution (CSS scales to box)
   };
@@ -64,7 +64,7 @@
           e, t: seed,
           spd: 0.10 + seed*0.16,                 // flow speed along the edge
           ja: seed*Math.PI*2, js: 0.6 + seed*1.4, // jitter phase / speed
-          amp: 0.006 + seed*0.012,                // perpendicular jitter amplitude
+          amp: 0.0035 + seed*0.008,               // tighter jitter — defined but still dusty
           warm: e.kind==='chord' ? 1.0 : (e.kind==='ring' ? 0.7 : 0.5),
           sz: 0.7 + seed*0.9,
         });
@@ -145,7 +145,7 @@
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = CFG.INTERNAL*dpr; H = CFG.INTERNAL*dpr;
     canvas.width = W; canvas.height = H;
-    cx = W/2; cy = H/2; scale = (W/2)*0.74;
+    cx = W/2; cy = H/2; scale = (W/2)*0.82;
   }
   function attach(){
     host = document.querySelector('.glyph'); if(!host) return false;
