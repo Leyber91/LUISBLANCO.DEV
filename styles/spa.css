@@ -19,9 +19,10 @@
 .dwgindex .di-sheet{ color:var(--faint); letter-spacing:.16em; font-size:9px; }
 
 /* ── glyph docking ───────────────────────────────────────────────────── */
-.glyph{ z-index:26; pointer-events:auto; cursor:pointer;
+.glyph{ z-index:26; pointer-events:auto; cursor:pointer; outline:none; -webkit-tap-highlight-color:transparent;
   transition:top .6s var(--ease), right .6s var(--ease), width .6s var(--ease),
              height .6s var(--ease), transform .6s var(--ease); }
+.glyph:focus, .glyph:focus-visible, .glyph:active{ outline:none; box-shadow:none; }
 .glyph-halo{ position:absolute; inset:-30% ; border-radius:50%; pointer-events:none; opacity:0;
   background:radial-gradient(closest-side, rgba(212,162,76,0.16) 0%, rgba(212,162,76,0.05) 46%, rgba(6,8,13,0) 74%);
   transition:opacity .6s var(--ease); }
