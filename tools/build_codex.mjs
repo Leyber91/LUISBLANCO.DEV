@@ -20,12 +20,12 @@ const ITER = 600_000;
 const SKIP = new Set(['README.md', 'STYLE_HANDOVER.md', 'ALGORITHM_REFERENCE.md', '_RESUME_STATE.md']);
 const group = (rel) => {
   const f = basename(rel);
-  if (f === 'DOCTRINE_VISIBLE_AI.md') return '01 · the doctrine';
-  if (f === 'LUIS_CONCEPTUAL_MAP.md') return '02 · the map';
-  if (f === 'LUIS_IDEA_ATLAS.md') return '03 · the atlas';
-  if (rel.includes('claude_vault_chunks')) return '06 · raw vault';
-  if (f.startsWith('_')) return '04 · synthesis';
-  return '05 · evidence';
+  if (f === 'DOCTRINE_VISIBLE_AI.md') return '04 · the doctrine';
+  if (f === 'LUIS_CONCEPTUAL_MAP.md') return '05 · the map';
+  if (f === 'LUIS_IDEA_ATLAS.md') return '06 · the atlas';
+  if (rel.includes('claude_vault_chunks')) return '09 · raw vault';
+  if (f.startsWith('_')) return '07 · synthesis';
+  return '08 · evidence';
 };
 const title = (file, md) => {
   const m = md.match(/^#\s+(.+)$/m);
@@ -43,16 +43,23 @@ function walk(dir, out = []) {
 
 // the authored book: _reference/BOOK/*.html fragments, ordered by filename,
 // shipped raw (inline SVG diagrams included) as group 00.
-const BOOK = join(REF, 'BOOK');
+const BOOKS = [
+  ['BOOK', '00 · the book of luis'],
+  ['BOOK_AEA', '01 · book of the aea'],
+  ['BOOK_ESSENCE', '02 · book of essence'],
+  ['BOOK_CONSTELLATION', '03 · book of constellation'],
+];
 let bookSections = [];
-try {
-  bookSections = readdirSync(BOOK).filter(f => f.endsWith('.html')).sort().map(f => {
-    const html = readFileSync(join(BOOK, f), 'utf8');
-    const m = html.match(/<h1[^>]*>(.*?)<\/h1>/s);
-    const t = m ? m[1].replace(/<[^>]+>/g, '').trim() : basename(f, '.html').replace(/^\d+_/, '').replace(/_/g, ' ');
-    return { group: '00 · the book of luis', title: t.slice(0, 80), file: f, md: html, raw: true };
-  });
-} catch { /* no BOOK yet — corpus-only build */ }
+for (const [dir, grp] of BOOKS) {
+  try {
+    for (const f of readdirSync(join(REF, dir)).filter(f => f.endsWith('.html')).sort()) {
+      const html = readFileSync(join(REF, dir, f), 'utf8');
+      const m = html.match(/<h1[^>]*>(.*?)<\/h1>/s);
+      const t = m ? m[1].replace(/<[^>]+>/g, '').trim() : basename(f, '.html').replace(/^\d+_/, '').replace(/_/g, ' ');
+      bookSections.push({ group: grp, title: t.slice(0, 80), file: f, md: html, raw: true });
+    }
+  } catch { /* folder not authored yet */ }
+}
 
 const files = walk(REF).filter(f => !f.includes('BOOK'));
 const sections = [...bookSections, ...files.map(f => {
