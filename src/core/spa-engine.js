@@ -27,7 +27,7 @@
   const NAVLBL = { work:'work with me' };
   const DI = [
     { n:'01', label:'hero',         route:'home' },
-    { n:'02', label:'mission',      route:'home', hash:'#/' },
+    { n:'02', label:'mission',      route:'home', hash:'#/', anchor:'#inside' },
     { n:'03', label:'architecture', route:'architecture' },
     { n:'04', label:'projects',     route:'projects' },
     { n:'05', label:"what's new",   route:'writing' },
@@ -95,9 +95,19 @@
   function drawingIndex(){
     diEl=document.createElement('aside'); diEl.className='dwgindex'; diEl.setAttribute('aria-label','drawing index');
     let h='<div class="di-title"><span>DRAWING INDEX</span><span class="di-sheet">SHEET 1 / 6</span></div><ul>';
-    DI.forEach(d=>{ h+=`<li data-route="${d.route}" data-n="${d.n}"><span class="bullet">·</span><span class="num">${d.n}</span><a href="${d.hash||HREF(d.route)}">${d.label}</a></li>`; });
+    DI.forEach(d=>{ h+=`<li data-route="${d.route}" data-n="${d.n}"${d.anchor?` data-anchor="${d.anchor}"`:''}><span class="bullet">·</span><span class="num">${d.n}</span><a href="${d.hash||HREF(d.route)}">${d.label}</a></li>`; });
     h+='</ul>';
     diEl.innerHTML=h;
+    // sub-anchor entries (e.g. 02 mission → #inside) scroll within the home plate
+    diEl.querySelector('ul').addEventListener('click',(e)=>{
+      const a=e.target.closest('a'); if(!a) return;
+      const anch=a.closest('li')?.getAttribute('data-anchor'); if(!anch) return;
+      const t=document.querySelector(anch); if(!t) return;
+      e.preventDefault();
+      const top=t.getBoundingClientRect().top+(window.scrollY||document.documentElement.scrollTop)-70;
+      const red=window.matchMedia('(prefers-reduced-motion: reduce)').matches||document.documentElement.classList.contains('reduced-motion');
+      try{ window.scrollTo({ top, behavior:red?'auto':'smooth' }); }catch(_){ window.scrollTo(0,top); }
+    });
     diEl.querySelector('.di-title').addEventListener('click',()=>diEl.classList.toggle('collapsed'));
     if(window.innerWidth<=760) diEl.classList.add('collapsed');
     return diEl;
