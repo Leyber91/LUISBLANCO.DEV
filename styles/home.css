@@ -100,9 +100,33 @@
 .trip-head .t-wasnt{ color:var(--faint); text-decoration:line-through; text-decoration-color:var(--gold-dim); }
 .trip-head .t-canbe{ color:var(--gold-hi); }
 .trip-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-.trip-panel{ border:1px dashed var(--line-soft); border-radius:10px; padding:22px 20px 24px;
-  background:rgba(10,14,22,0.34); display:flex; flex-direction:column; gap:16px; }
-.trip-panel .fig{ font-size:10px; letter-spacing:.22em; color:var(--faint); text-transform:uppercase; }
+.trip-panel{ position:relative; border:1px solid rgba(234,240,251,0.09); border-radius:13px;
+  padding:26px 22px 26px; overflow:hidden; display:flex; flex-direction:column; gap:16px;
+  background:linear-gradient(177deg, rgba(17,22,34,0.62) 0%, rgba(9,12,19,0.30) 64%);
+  box-shadow:inset 0 1px 0 rgba(234,240,251,0.05), 0 16px 40px -28px rgba(0,0,0,0.9);
+  transition:border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease); }
+.trip-panel:hover{ transform:translateY(-2px); border-color:rgba(234,240,251,0.16);
+  box-shadow:inset 0 1px 0 rgba(234,240,251,0.06), 0 22px 48px -26px rgba(0,0,0,0.95); }
+/* color-coded top accent — the was · wasn't · can-be narrative, made material */
+.trip-panel::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; }
+.trip-grid .trip-panel:nth-child(1)::before{ background:linear-gradient(90deg, var(--ink-dim), transparent 75%); opacity:.7; }
+.trip-grid .trip-panel:nth-child(2)::before{ background:linear-gradient(90deg, var(--gold-dim), transparent 75%); opacity:.45; }
+.trip-grid .trip-panel:nth-child(3)::before{ background:linear-gradient(90deg, var(--gold), transparent 78%);
+  box-shadow:0 0 10px var(--gold-glow); }
+/* gold corner tick — drafting grammar */
+.trip-panel::after{ content:""; position:absolute; top:11px; right:11px; width:9px; height:9px;
+  border-top:1px solid var(--gold-dim); border-right:1px solid var(--gold-dim); opacity:.45; transition:opacity .3s var(--ease); }
+.trip-grid .trip-panel:nth-child(3)::after{ border-color:var(--gold); opacity:.8; }
+.trip-panel:hover::after{ opacity:.9; }
+.trip-panel .fig{ font-size:10px; letter-spacing:.24em; color:var(--faint); text-transform:uppercase;
+  padding-left:14px; position:relative; }
+.trip-panel .fig::before{ content:""; position:absolute; left:0; top:50%; width:7px; height:7px; margin-top:-3.5px;
+  border-radius:50%; border:1px solid var(--gold-dim); }
+.trip-grid .trip-panel:nth-child(3) .fig::before{ background:var(--gold); border-color:var(--gold); box-shadow:0 0 5px var(--gold-glow); }
+/* diagram nodes glow — match the particle language */
+.trip-diag .gold, .trip-diag .gold-node{ filter:drop-shadow(0 0 5px var(--gold-glow)); }
+.trip-diag .t-sat{ filter:drop-shadow(0 0 3px rgba(212,162,76,0.45)); }
+.trip-diag .t-ring{ stroke:var(--gold-dim); }
 .trip-panel p{ font-size:13.5px; line-height:1.68; color:var(--ink-dim); margin:0; text-wrap:pretty; }
 .trip-panel p b{ color:var(--ink); font-weight:500; }
 .trip-diag{ width:100%; height:96px; flex:none; }
