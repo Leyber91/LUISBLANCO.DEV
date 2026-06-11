@@ -33,7 +33,8 @@
 .ct-radial{ position:absolute; right:-10px; top:40px; width:240px; height:240px; z-index:2; pointer-events:none; }
 .ct-radial svg{ width:100%; height:100%; overflow:visible; }
 .ct-radial .o{ fill:none; stroke:var(--line-soft); stroke-width:1; }
-.ct-radial .spoke{ stroke:var(--line-soft); stroke-width:1; }
+/* straight spokes read mechanical as ink — hidden; the concentric rings + core carry it */
+.ct-radial .spoke{ display:none; }
 .ct-radial .core{ fill:var(--gold); filter:drop-shadow(0 0 8px var(--gold-glow)); }
 
 /* faint structural lines extending off the bottom */
