@@ -108,62 +108,39 @@
     </section>
 
     <section class="inside" id="inside" data-screen-label="02 mission">
-      <div class="mission-row">
-        <div class="num-col"><div class="callnum">02</div><div class="stem"></div></div>
-        <div>
-          <h2>what's inside</h2>
-          <p>AI is everywhere and still misunderstood — pitched as magic or dismissed as autocomplete. The truth sits between, and it's more interesting than either: a probabilistic node you wire into a program, where the real work is the system you build around it. I take a system, refuse the convenient story, and find what's actually there — still astonishing once you see it clearly. Aimed at AI, that stance produced the <span class="em">Autonomous Entity Architecture (AEA)</span> — the framework I use to make the space legible. I share it openly so others can stress it, extend it, and build better.</p>
-        </div>
-        <div class="callout-col">
-          <div class="cl"><span class="ring"><i></i></span><span class="lead"></span>demystify</div>
-          <div class="cl"><span class="ring"><i></i></span><span class="lead"></span>don't dunk</div>
-          <div class="cl"><span class="ring"><i></i></span><span class="lead"></span>keep the wonder</div>
-        </div>
+      <div class="mission-lead">
+        <div class="ml-eyebrow"><span class="ml-num">02</span> · what's inside</div>
+        <h2 class="ml-thesis">AI is pitched as magic or dismissed as autocomplete. The truth sits between — a probabilistic node you wire into a program, where the real work is the <span class="em">system you build around it</span>.</h2>
+        <div class="ml-sig">demystify <span class="sep">·</span> don't dunk <span class="sep">·</span> keep the wonder</div>
       </div>
 
-      <!-- the record, kept legible: was · wasn't · can be -->
-      <div class="phase" id="phase">
-        <div class="trip-head">
-          <div class="trip-rule"></div>
-          <h2>what AI <span class="t-was">was</span> · what it <span class="t-wasnt">wasn't</span> · what it <span class="t-canbe">can be</span></h2>
-          <div class="annot">one node, three states — drawn in dust, for whoever studies this later.</div>
+      <!-- the record as ONE instrument: a node passing through three dust states -->
+      <div class="mission-console" id="phase">
+        <div class="mc-head">
+          <span class="mc-zone mc-was">was</span>
+          <span class="mc-arrow">→</span>
+          <span class="mc-zone mc-wasnt">wasn't</span>
+          <span class="mc-arrow">→</span>
+          <span class="mc-zone mc-canbe">can be</span>
         </div>
         <div class="phase-strip" id="phaseStrip" aria-hidden="true"></div>
-        <div class="trip-grid">
-          <article class="trip-panel">
-            <div class="fig">fig. I — what it was</div>
-            <p>Decades of hand-written rules the world refused to fit. Then the turn: stop writing rules — <b>learn them from data</b> — and at scale the learning compounds. What came out is knowable machinery: weights, attention, next-token probability over a compressed map of human text. No ghost in it. That it works anyway is the marvel.</p>
-          </article>
-          <article class="trip-panel">
-            <div class="fig">fig. II — what it wasn't</div>
-            <p>Worship and dismissal were both ways of not looking. The model alone completes text — it doesn't remember, act, or hold a goal. <b>What looked like a mind was architecture</b> someone built around a model; strip the architecture and the agency goes with it.</p>
-          </article>
-          <article class="trip-panel">
-            <div class="fig">fig. III — what it can be</div>
-            <p>Wire that node into memory, tools, feedback, recovery — and behavior appears that <b>none of the parts have alone</b>. The live question isn't "does it think"; it's which structures let a system keep growing capability without collapsing. That question has an engineering shape.</p>
-            <a class="trip-link tickbox" href="#/architecture">the AEA — my answer in specification form →</a>
-          </article>
+        <div class="mc-captions">
+          <figure class="mc-cap">
+            <figcaption>was</figcaption>
+            <p>Rules we wrote, then learned from data instead — knowable machinery: weights, attention, next-token probability over a compressed map of human text. No ghost in it. That it works anyway is the marvel.</p>
+          </figure>
+          <figure class="mc-cap">
+            <figcaption>wasn't</figcaption>
+            <p>Not a mind in a box. The model alone completes text — it doesn't remember, act, or hold a goal. What looked like agency was architecture built around it; strip that and the agency goes.</p>
+          </figure>
+          <figure class="mc-cap mc-cap-canbe">
+            <figcaption>can be</figcaption>
+            <p>Wire that node into memory, tools, feedback, recovery — and behavior appears that none of the parts have alone. The question isn't "does it think"; it's which structures let it grow without collapsing.</p>
+          </figure>
         </div>
       </div>
 
-      <div class="tiles">
-        <a class="ptile tickbox" href="#/architecture">
-          <div class="pt-head"><span class="pt-name">the architecture</span><span class="pt-arrow">→</span></div>
-          <div class="pt-desc">the AEA, navigable. five axes, ten seeds, three mechanics, open cracks.</div>
-        </a>
-        <a class="ptile tickbox" href="#/projects">
-          <div class="pt-head"><span class="pt-name">projects</span><span class="pt-arrow">→</span></div>
-          <div class="pt-desc">what runs: the open proofs, and the engineering shipped at scale.</div>
-        </a>
-        <a class="ptile tickbox" href="#/writing">
-          <div class="pt-head"><span class="pt-name">writing</span><span class="pt-arrow">→</span></div>
-          <div class="pt-desc">explaining what AI actually is, in the open — one axis at a time.</div>
-        </a>
-        <a class="ptile tickbox" href="#/about">
-          <div class="pt-head"><span class="pt-name">about</span><span class="pt-arrow">→</span></div>
-          <div class="pt-desc">astrophysics, sci-fi — the systems thinking the AI work flows from.</div>
-        </a>
-      </div>
+      <a class="mission-exit tickbox" href="#/architecture">the AEA — my answer in specification form <span class="arr">→</span></a>
     </section>
 
   </div>
