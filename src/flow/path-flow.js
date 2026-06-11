@@ -19,10 +19,12 @@
   const LB = (window.LB = window.LB || {});
   const sysReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // selector · density (particles / screen-px) · band half-width px · warmth · hide-extra strokes
+  // selector · density (particles/screen-px) · band half-width px · warmth · wander · minLen(screen px)
   const TARGETS = [
-    { sel:'.traversal .spine',       dens:2.6, band:26, warm:0.55 },
-    { sel:'#plateSpine .spine-path', dens:2.8, band:30, warm:0.70 },
+    { sel:'.traversal .spine',       dens:2.4, band:26, warm:0.55, wander:1.00, minLen:80 },
+    { sel:'#plateSpine .spine-path', dens:2.6, band:30, warm:0.70, wander:1.00, minLen:80 },
+    { sel:'.dim',                    dens:1.4, band:12, warm:0.40, wander:0.70, minLen:130 }, // dimension/structural lines
+    { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60 },  // solar system — defined dust rings
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
   const GOLD=[214,164,80], AMBER=[246,208,132];
@@ -55,7 +57,7 @@
     for(const p of pts){ const x=m.a*p.x+m.c*p.y+m.e, y=m.b*p.x+m.d*p.y+m.f;
       if(px!==null) s+=Math.hypot(x-px,y-py); px=x; py=y; } return s; }
 
-  function makeParts(n, band, warm){
+  function makeParts(n, band, warm, wander){
     const a=[];
     for(let i=0;i<n;i++){
       const r1=h(i), r2=h(i+11.3), r3=h(i+27.7), r4=h(i+53.1), r5=h(i+71.9);
@@ -63,8 +65,8 @@
       a.push({
         t:r1,                                     // irregular start along the path
         spd:0.004+r2*0.05,                        // varied flow speed (free, not uniform)
-        // perpendicular wander — individual amp / freq / phase
-        offBase, wAmp:3+r4*11, wFreq:0.0003+r1*0.0016, wPhase:r2*6.283,
+        // perpendicular wander — individual amp / freq / phase (scaled by target wander)
+        offBase, wAmp:(3+r4*11)*wander, wFreq:0.0003+r1*0.0016, wPhase:r2*6.283,
         // along-path micro-wander — individual amp / freq / phase
         aAmp:0.003+r3*0.012, aFreq:0.0005+r4*0.0017, aPhase:r5*6.283,
         sz:0.8+r1*1.6, amber:r4 < (warm-0.4)*0.8,
@@ -80,9 +82,10 @@
         const pts=samplePath(el); if(!pts) return;
         let m=null; try{ m=el.getScreenCTM(); }catch(e){}
         const slen=screenLen(pts,m)||600;
+        if(slen < (t.minLen||0)) return;               // skip ticks / tiny lines
         el.style.strokeOpacity='0';
-        const n=Math.max(240,Math.min(5200,Math.round(slen*t.dens)));
-        tracks.push({ el, pts, band:t.band, parts:makeParts(n,t.band,t.warm) });
+        const n=Math.max(120,Math.min(5200,Math.round(slen*t.dens)));
+        tracks.push({ el, pts, band:t.band, parts:makeParts(n,t.band,t.warm,t.wander||1) });
       });
     });
   }
