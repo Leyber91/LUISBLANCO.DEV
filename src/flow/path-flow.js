@@ -26,6 +26,7 @@
   const TARGETS = [
     { sel:'.traversal .spine',       dens:2.7, band:15, warm:0.55, wander:0.60, minLen:80 }, // defined-but-free current
     { sel:'#plateSpine .spine-path', dens:2.9, band:17, warm:0.70, wander:0.60, minLen:80 }, // (half point: not scattered, not a hard line)
+    { sel:'.traj-flex path',         dens:2.5, band:16, warm:0.55, wander:0.60, minLen:120 }, // the trajectory curves that follow the parallax
     { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60 },  // solar system — defined dust rings
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
