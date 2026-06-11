@@ -93,14 +93,16 @@
 .seed{ display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center; }
 .seed .snode{ width:24px; height:24px; border-radius:50%; border:1.2px solid var(--line);
   display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--ink-dim);
-  background:rgba(8,11,18,0.6); position:relative; z-index:3; transition:all .25s var(--ease); }
+  background:rgba(8,11,18,0.92); position:relative; z-index:3; transition:all .25s var(--ease); }
 .seed.lit .snode{ border-color:var(--gold); color:var(--gold-hi); box-shadow:0 0 9px var(--gold-glow); }
 .seed .sname{ font-size:9px; line-height:1.3; color:var(--faint); letter-spacing:.01em; }
 .seeds-note{ font-size:11px; color:var(--faint); max-width:560px; margin:16px 0 0; line-height:1.55; position:relative; z-index:2; }
 
 /* mechanics + ops + principles */
 .mech-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:42px 0 0; position:relative; z-index:2; }
-.mech{ border:1px solid var(--line-soft); border-radius:9px; padding:15px 15px 16px; background:rgba(10,14,22,0.3); }
+.mech{ border:1px solid var(--line-soft); border-radius:9px; padding:15px 15px 16px;
+  background:linear-gradient(180deg, rgba(15,19,29,0.95), rgba(9,12,18,0.97));
+  box-shadow:inset 0 1px 0 rgba(234,240,251,0.04), 0 16px 40px -30px rgba(0,0,0,0.9); }
 .mech .mname{ font-size:13px; color:var(--ink); letter-spacing:.02em; display:flex; align-items:center; gap:8px; }
 .mech .mname .dotg{ width:6px; height:6px; border-radius:50%; background:var(--gold); box-shadow:0 0 6px var(--gold-glow); }
 .mech.meta .mname .dotg{ background:transparent; border:1px solid var(--gold); box-shadow:none; }
