@@ -39,7 +39,7 @@ body.glyph-docked .glyph-halo{ opacity:0; }
 body.glyph-docked .glyph-caption{ opacity:0; }
 
 /* focal (home): large, haloed, with the cycling concept caption */
-body.glyph-focal .glyph{ top:48%; right:9vw; width:204px; height:204px; transform:translateY(-50%); opacity:1; }
+body.glyph-focal .glyph{ top:48%; right:8vw; width:256px; height:256px; transform:translateY(-50%); opacity:1; }
 body.glyph-focal .glyph-halo{ opacity:1; }
 body.glyph-focal .glyph-caption{ opacity:1; }
 body.glyph-focal .glyph:hover .glyph-halo{ opacity:1; }
