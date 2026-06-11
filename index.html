@@ -121,70 +121,24 @@
       </div>
 
       <!-- the record, kept legible: was · wasn't · can be -->
-      <div class="triptych" id="triptych">
+      <div class="phase" id="phase">
         <div class="trip-head">
           <div class="trip-rule"></div>
           <h2>what AI <span class="t-was">was</span> · what it <span class="t-wasnt">wasn't</span> · what it <span class="t-canbe">can be</span></h2>
-          <div class="annot">the record, kept legible — for whoever studies this later.</div>
+          <div class="annot">one node, three states — drawn in dust, for whoever studies this later.</div>
         </div>
+        <div class="phase-strip" id="phaseStrip" aria-hidden="true"></div>
         <div class="trip-grid">
           <article class="trip-panel">
             <div class="fig">fig. I — what it was</div>
-            <svg class="trip-diag" viewBox="0 0 300 96" aria-hidden="true">
-              <line class="base" x1="14" y1="48" x2="286" y2="48"></line>
-              <circle class="tl-node" cx="30" cy="48" r="2.6"></circle>
-              <circle class="tl-node" cx="92" cy="48" r="2.6"></circle>
-              <circle class="tl-node" cx="154" cy="48" r="2.6"></circle>
-              <circle class="tl-node gold" cx="216" cy="48" r="3.2"></circle>
-              <circle class="tl-node gold" cx="278" cy="48" r="3.8"></circle>
-              <text class="yr" x="30" y="30" text-anchor="middle">1956</text>
-              <text class="yr" x="92" y="30" text-anchor="middle">1986</text>
-              <text class="yr" x="154" y="30" text-anchor="middle">2012</text>
-              <text class="yr" x="216" y="30" text-anchor="middle">2017</text>
-              <text class="yr" x="278" y="30" text-anchor="middle">now</text>
-              <text x="30" y="70" text-anchor="middle">symbols</text>
-              <text x="92" y="70" text-anchor="middle">backprop</text>
-              <text x="154" y="70" text-anchor="middle">depth</text>
-              <text x="216" y="70" text-anchor="middle">attention</text>
-              <text x="278" y="70" text-anchor="middle">scale</text>
-            </svg>
             <p>Decades of hand-written rules the world refused to fit. Then the turn: stop writing rules — <b>learn them from data</b> — and at scale the learning compounds. What came out is knowable machinery: weights, attention, next-token probability over a compressed map of human text. No ghost in it. That it works anyway is the marvel.</p>
           </article>
           <article class="trip-panel">
             <div class="fig">fig. II — what it wasn't</div>
-            <div class="myths" aria-label="claims that did not hold">
-              <span class="myth">magic</span>
-              <span class="myth">a mind in a box</span>
-              <span class="myth">just autocomplete</span>
-              <span class="myth">an agent on its own</span>
-              <span class="myth">the end of human work</span>
-            </div>
             <p>Worship and dismissal were both ways of not looking. The model alone completes text — it doesn't remember, act, or hold a goal. <b>What looked like a mind was architecture</b> someone built around a model; strip the architecture and the agency goes with it.</p>
           </article>
           <article class="trip-panel">
             <div class="fig">fig. III — what it can be</div>
-            <svg class="trip-diag" viewBox="0 0 300 96" aria-hidden="true">
-              <line class="t-edge" x1="150" y1="48" x2="52" y2="26"></line>
-              <line class="t-edge" x1="150" y1="48" x2="52" y2="70"></line>
-              <line class="t-edge" x1="150" y1="48" x2="150" y2="14"></line>
-              <line class="t-edge" x1="150" y1="48" x2="150" y2="82"></line>
-              <line class="t-edge" x1="150" y1="48" x2="248" y2="26"></line>
-              <line class="t-edge" x1="150" y1="48" x2="248" y2="70"></line>
-              <circle class="t-core gold-node" cx="150" cy="48" r="3.6"></circle>
-              <circle class="t-ring" cx="150" cy="48" r="9"></circle>
-              <circle class="t-sat" cx="52" cy="26" r="2.4"></circle>
-              <circle class="t-sat" cx="52" cy="70" r="2.4"></circle>
-              <circle class="t-sat" cx="150" cy="14" r="2.4"></circle>
-              <circle class="t-sat" cx="150" cy="82" r="2.4"></circle>
-              <circle class="t-sat" cx="248" cy="26" r="2.4"></circle>
-              <circle class="t-sat" cx="248" cy="70" r="2.4"></circle>
-              <text x="44" y="29" text-anchor="end">memory</text>
-              <text x="44" y="73" text-anchor="end">tools</text>
-              <text x="150" y="9" text-anchor="middle">observe</text>
-              <text x="150" y="94" text-anchor="middle">recover</text>
-              <text x="256" y="29" text-anchor="start">feedback</text>
-              <text x="256" y="73" text-anchor="start">time</text>
-            </svg>
             <p>Wire that node into memory, tools, feedback, recovery — and behavior appears that <b>none of the parts have alone</b>. The live question isn't "does it think"; it's which structures let a system keep growing capability without collapsing. That question has an engineering shape.</p>
             <a class="trip-link tickbox" href="#/architecture">the AEA — my answer in specification form →</a>
           </article>
@@ -703,5 +657,7 @@
 <script src="src/flow/path-flow.js"></script>
 <!-- card borders become a linear swarm of dust -->
 <script src="src/flow/border-swarm.js"></script>
+<!-- section 02: one node, three dust states — converge · dissolve · emanate -->
+<script src="src/flow/phase-diagram.js"></script>
 </body>
 </html>
