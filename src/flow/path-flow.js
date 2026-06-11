@@ -34,6 +34,7 @@
     { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60, cloud:0 },  // solar system — defined dust rings
     { sel:'.ct-extend .ext-flow',    dens:3.6, band:46, warm:0.60, wander:0.95, minLen:120, cloud:1 }, // contact closing currents
     { sel:'.mid-schematic path',     dens:3.0, band:34, warm:0.55, wander:0.95, minLen:160, cloud:1, auto:1 }, // schematic sweeps → dust, straights hidden
+    { sel:'.proj-weave path',        dens:2.0, band:7,  warm:0.55, wander:0.40, minLen:90,  cloud:0, auto:1 }, // woven mesh: curves → tight dust, straight mesh hidden
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
   const GOLD=[214,164,80], AMBER=[246,208,132];
