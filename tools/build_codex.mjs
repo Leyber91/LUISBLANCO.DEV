@@ -41,11 +41,24 @@ function walk(dir, out = []) {
   return out;
 }
 
-const files = walk(REF);
-const sections = files.map(f => {
+// the authored book: _reference/BOOK/*.html fragments, ordered by filename,
+// shipped raw (inline SVG diagrams included) as group 00.
+const BOOK = join(REF, 'BOOK');
+let bookSections = [];
+try {
+  bookSections = readdirSync(BOOK).filter(f => f.endsWith('.html')).sort().map(f => {
+    const html = readFileSync(join(BOOK, f), 'utf8');
+    const m = html.match(/<h1[^>]*>(.*?)<\/h1>/s);
+    const t = m ? m[1].replace(/<[^>]+>/g, '').trim() : basename(f, '.html').replace(/^\d+_/, '').replace(/_/g, ' ');
+    return { group: '00 · the book of luis', title: t.slice(0, 80), file: f, md: html, raw: true };
+  });
+} catch { /* no BOOK yet — corpus-only build */ }
+
+const files = walk(REF).filter(f => !f.includes('BOOK'));
+const sections = [...bookSections, ...files.map(f => {
   const md = readFileSync(f, 'utf8');
   return { group: group(f), title: title(f, md), file: basename(f), md };
-}).sort((a, b) => a.group.localeCompare(b.group) || a.title.localeCompare(b.title));
+}).sort((a, b) => a.group.localeCompare(b.group) || a.title.localeCompare(b.title))];
 
 let pass = process.env.CODEX_PASS;
 if (!pass) {
