@@ -40,7 +40,9 @@
 /* faint structural lines extending off the bottom */
 .ct-extend{ position:relative; z-index:1; margin-top:auto; height:200px; pointer-events:none; }
 .ct-extend svg{ position:absolute; left:0; bottom:-40px; width:100%; height:240px; overflow:visible; }
-.ct-extend path{ fill:none; stroke:var(--line-soft); stroke-width:1; }
+/* the closing curves become dust currents (path-flow → .ext-flow); strokes hidden
+   as a backstop so no ink line shows, and the straight base goes with them. */
+.ct-extend path{ fill:none; stroke:var(--line-soft); stroke-width:1; stroke-opacity:0; }
 .ct-extend .node{ fill:var(--gold-dim); }
 
 .ct-foot{ position:relative; z-index:5; text-align:center; font-size:11px; letter-spacing:.16em;

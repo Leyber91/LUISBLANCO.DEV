@@ -32,6 +32,7 @@
     { sel:'#plateSpine .spine-path', dens:3.8, band:70, warm:0.70, wander:0.95, minLen:80, cloud:1 }, // the spine that extends down the page
     { sel:'.traj-flex path',         dens:3.4, band:60, warm:0.55, wander:0.95, minLen:120, cloud:1 }, // the trajectory currents
     { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60, cloud:0 },  // solar system — defined dust rings
+    { sel:'.ct-extend .ext-flow',    dens:3.2, band:40, warm:0.60, wander:0.95, minLen:120, cloud:1 }, // contact closing currents
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
   const GOLD=[214,164,80], AMBER=[246,208,132];
