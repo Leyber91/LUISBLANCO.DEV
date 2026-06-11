@@ -32,7 +32,8 @@
     { sel:'#plateSpine .spine-path', dens:3.8, band:70, warm:0.70, wander:0.95, minLen:80, cloud:1 }, // the spine that extends down the page
     { sel:'.traj-flex path',         dens:3.4, band:60, warm:0.55, wander:0.95, minLen:120, cloud:1 }, // the trajectory currents
     { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60, cloud:0 },  // solar system — defined dust rings
-    { sel:'.ct-extend .ext-flow',    dens:3.2, band:40, warm:0.60, wander:0.95, minLen:120, cloud:1 }, // contact closing currents
+    { sel:'.ct-extend .ext-flow',    dens:3.6, band:46, warm:0.60, wander:0.95, minLen:120, cloud:1 }, // contact closing currents
+    { sel:'.mid-schematic path',     dens:3.0, band:34, warm:0.55, wander:0.95, minLen:160, cloud:1, auto:1 }, // schematic sweeps → dust, straights hidden
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
   const GOLD=[214,164,80], AMBER=[246,208,132];
@@ -70,6 +71,18 @@
     for(const p of pts){ const x=m.a*p.x+m.c*p.y+m.e, y=m.b*p.x+m.d*p.y+m.f;
       if(px!==null) s+=Math.hypot(x-px,y-py); px=x; py=y; } return s; }
 
+  // curvature test (the generalization): max deviation from the straight chord,
+  // relative to chord length. Curved → becomes a dust current; straight reads
+  // mechanical as dust, so it's hidden instead. Used by `auto` targets.
+  function isCurve(pts){
+    const a=pts[0], b=pts[pts.length-1];
+    const cl=Math.hypot(b.x-a.x,b.y-a.y); if(cl<1e-3) return true;   // closed/degenerate → curve
+    let maxd=0; for(const p of pts){
+      const d=Math.abs((b.y-a.y)*p.x-(b.x-a.x)*p.y+b.x*a.y-b.y*a.x)/cl;
+      if(d>maxd) maxd=d; }
+    return (maxd/cl) > 0.045;
+  }
+
   function makeParts(n, band, warm, wander){
     const a=[];
     for(let i=0;i<n;i++){
@@ -98,6 +111,7 @@
         let m=null; try{ m=el.getScreenCTM(); }catch(e){}
         const slen=screenLen(pts,m)||600;
         if(slen < (t.minLen||0)) return;               // skip ticks / tiny lines
+        if(t.auto && !isCurve(pts)){ el.style.strokeOpacity='0'; return; }  // straight → hide, no dust
         el.style.strokeOpacity='0';
         const n=Math.max(120,Math.min(5200,Math.round(slen*t.dens)));
         // scroll-draw band: the dust reveals along the same s..e the stroke used,
