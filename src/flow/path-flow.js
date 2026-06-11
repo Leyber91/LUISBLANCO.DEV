@@ -23,11 +23,15 @@
   // dust belongs on CURVES that flow (spine, traversal, orbits) — not on rigid
   // straight dimension lines, which read mechanical as dust. .dim is left as its
   // original faint drafting SVG (subtle), not dusted.
+  // cloud:1 → the flowing currents become a turbulent CLOUD of dust forming a
+  // flow (coherent meandering lobes + width that fattens/pinches + wispy tails),
+  // not a thin tube along the line. cloud:0 → tight defined dust (the orbits,
+  // which already landed — leave them).
   const TARGETS = [
-    { sel:'.traversal .spine',       dens:2.7, band:15, warm:0.55, wander:0.60, minLen:80 }, // defined-but-free current
-    { sel:'#plateSpine .spine-path', dens:2.9, band:17, warm:0.70, wander:0.60, minLen:80 }, // (half point: not scattered, not a hard line)
-    { sel:'.traj-flex path',         dens:2.5, band:16, warm:0.55, wander:0.60, minLen:120 }, // the trajectory curves that follow the parallax
-    { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60 },  // solar system — defined dust rings
+    { sel:'.traversal .spine',       dens:3.2, band:34, warm:0.55, wander:0.95, minLen:80, cloud:1 }, // cloud current
+    { sel:'#plateSpine .spine-path', dens:3.4, band:38, warm:0.70, wander:0.95, minLen:80, cloud:1 }, // the spine that extends down the page
+    { sel:'.traj-flex path',         dens:3.0, band:32, warm:0.55, wander:0.95, minLen:120, cloud:1 }, // the trajectory currents
+    { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60, cloud:0 },  // solar system — defined dust rings
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)
   const GOLD=[214,164,80], AMBER=[246,208,132];
@@ -37,6 +41,11 @@
 
   const frac=(x)=>x-Math.floor(x);
   const h=(n)=>frac(Math.sin(n*12.9898)*43758.5453);   // irregular hash in [0,1)
+  // smooth 1D value noise in [0,1) — neighbours share it, so particles at a
+  // similar point on the path swing TOGETHER → coherent billowing lobes, not a
+  // straight tube. This is what turns the band into a cloud that forms a flow.
+  const vnoise=(x)=>{ const i=Math.floor(x), f=x-i, u=f*f*(3-2*f);
+    const a=h(i*1.17+3.1), b=h((i+1)*1.17+3.1); return a+(b-a)*u; };
 
   // soft round additive sprite (transparent corners → no squares)
   function sprite(col){
@@ -69,7 +78,8 @@
         t:r1,                                     // irregular start along the path
         spd:0.004+r2*0.05,                        // varied flow speed (free, not uniform)
         // perpendicular wander — individual amp / freq / phase (scaled by target wander)
-        offBase, wAmp:(3+r4*11)*wander, wFreq:0.0003+r1*0.0016, wPhase:r2*6.283,
+        // r4*r4 bias → most wander a little, a few fling far out = wispy tendrils
+        offBase, wAmp:(2+r4*r4*30)*wander, wFreq:0.0003+r1*0.0016, wPhase:r2*6.283,
         // along-path micro-wander — individual amp / freq / phase
         aAmp:0.003+r3*0.012, aFreq:0.0005+r4*0.0017, aPhase:r5*6.283,
         sz:0.8+r1*1.6, amber:r4 < (warm-0.4)*0.8,
@@ -80,6 +90,7 @@
   function scan(){
     tracks=[];
     HIDE_TOO.forEach(sel=> document.querySelectorAll(sel).forEach(el=> el.style.strokeOpacity='0'));
+    let seedN=0;
     TARGETS.forEach(t=>{
       document.querySelectorAll(t.sel).forEach(el=>{
         const pts=samplePath(el); if(!pts) return;
@@ -91,7 +102,8 @@
         // scroll-draw band: the dust reveals along the same s..e the stroke used,
         // so the current EXTENDS down the page as you scroll (not all at once).
         const hasBand = el.dataset.s !== undefined;
-        tracks.push({ el, pts, band:t.band, parts:makeParts(n,t.band,t.warm,t.wander||1),
+        tracks.push({ el, pts, band:t.band, cloud:t.cloud?1:0, seed:(seedN++)*4.7+1.3,
+          parts:makeParts(n,t.band,t.warm,t.wander||1),
           hasBand, ds: hasBand ? (parseFloat(el.dataset.s)||0) : 0,
                    de: hasBand ? (parseFloat(el.dataset.e)||1) : 1 });
       });
@@ -111,19 +123,33 @@
     for(const tr of tracks){
       let m; try{ m=tr.el.getScreenCTM(); }catch(e){ m=null; } if(!m) continue;
       const reveal=tr.hasBand ? Math.max(0,Math.min(1,(sf-tr.ds)/Math.max(0.0001,tr.de-tr.ds))) : 1;
+      const cloud=tr.cloud;
+      const bAmp=tr.band*2.2, bScale=7.0, wScale=4.3;   // lobe reach · lobes-along-path · width-variation freq
       for(const p of tr.parts){
         if(p.t > reveal) continue;                               // extend down the page as you scroll
-        const ef=Math.min(1,(reveal-p.t)/0.05);                  // soft leading edge
+        const ef=Math.min(1,(reveal-p.t)/0.08);                  // soft, feathered leading edge
         const tt=p.t + Math.sin(p.aPhase+now*p.aFreq)*p.aAmp;     // free along-path wander
         const u=ptAt(tr.pts,tt);
         const cxp=(m.a*u.x+m.c*u.y+m.e)*dpr, cyp=(m.b*u.x+m.d*u.y+m.f)*dpr;
         let tx=m.a*u.dx+m.c*u.dy, ty=m.b*u.dx+m.d*u.dy; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
         const nx=-ty, ny=tx;
-        const perp=(p.offBase + Math.sin(p.wPhase+now*p.wFreq)*p.wAmp)*dpr;  // free perpendicular wander
+        let localOff, perpCss;
+        if(cloud){
+          // coherent lobe — whole clusters swing off the path together, so the
+          // current reads as a meandering CLOUD that forms a flow, not a tube.
+          const billow=(vnoise(tt*bScale + tr.seed + now*0.00007)-0.5)*bAmp;
+          const widthMod=0.4+1.25*vnoise(tt*wScale + tr.seed + 11.0 + now*0.00003); // body fattens / pinches
+          localOff=p.offBase*widthMod + Math.sin(p.wPhase+now*p.wFreq)*p.wAmp;       // seat in the lobe + wisp
+          perpCss=billow + localOff;
+        } else {
+          localOff=p.offBase + Math.sin(p.wPhase+now*p.wFreq)*p.wAmp;  // tight defined dust (orbits)
+          perpCss=localOff;
+        }
+        const perp=perpCss*dpr;
         const x=cxp+nx*perp, y=cyp+ny*perp;
         if(x<-60||y<-60||x>W+60||y>H+60) continue;
         const r=(p.sz*1.3+0.8)*dpr;
-        const edge=1-Math.min(1,Math.abs(perp/dpr)/(tr.band+8));   // dense core → free fading edge
+        const edge=1-Math.min(1,Math.abs(localOff)/(tr.band+8));   // each lobe: dense core → wispy edge
         ctx.globalAlpha=(0.05+0.16*edge*edge)*ef;
         ctx.drawImage(p.amber?SP_AMBER:SP_GOLD, x-r, y-r, r*2, r*2);
       }
