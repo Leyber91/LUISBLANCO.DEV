@@ -159,10 +159,10 @@
     vSpeed = length(V.xy);
     vSeed  = V.w;
     vec2 dr = vec2(uTime*0.010, -uTime*0.007);
-    float env = smoothstep(0.32, 0.74, fbm(P.xy*0.55 + 11.0 + dr*0.4));
+    float env = smoothstep(0.50, 0.86, fbm(P.xy*0.55 + 11.0 + dr*0.4));
     float cloud = fbm(P.xy*0.95 + dr + 0.75*fbm(P.xy*0.6 + dr*0.5));
-    vCloud = smoothstep(0.50, 0.74, cloud) * env;             // tighter band = defined jets
-    vCloud = pow(vCloud, 1.35);                               // concentrate the cores
+    vCloud = smoothstep(0.63, 0.84, cloud) * env;             // way more void — the substrate is just faint notes
+    vCloud = pow(vCloud, 2.1);                                // concentrate to sparse cores
     float z = P.z, size;
     if(z < 0.55){ vBand = 0.0; size = 1.0; }                  // far 55% — fine sharp sand
     else if(z < 0.93){ vBand = 1.0; size = 1.7; }             // focus 38%
@@ -200,10 +200,10 @@
     float a;
     if(vBand > 1.5){                                    // near: small crisp bokeh
       float disc = smoothstep(0.5, 0.24, rr);
-      a = disc * 0.07;
+      a = disc * 0.045;
     } else {                                            // far/focus: tight bright sand
       float fall = exp(-dot(d,d) * 10.0);
-      float base = mix(0.04, 0.26, warm);
+      float base = mix(0.025, 0.15, warm);              // dimmer — faint notes, not a dense field
       if(vBand < 0.5) base *= 0.5;                      // far band dimmer (depth)
       a = fall * base;
     }
