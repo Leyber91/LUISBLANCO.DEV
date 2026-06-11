@@ -88,7 +88,12 @@
         if(slen < (t.minLen||0)) return;               // skip ticks / tiny lines
         el.style.strokeOpacity='0';
         const n=Math.max(120,Math.min(5200,Math.round(slen*t.dens)));
-        tracks.push({ el, pts, band:t.band, parts:makeParts(n,t.band,t.warm,t.wander||1) });
+        // scroll-draw band: the dust reveals along the same s..e the stroke used,
+        // so the current EXTENDS down the page as you scroll (not all at once).
+        const hasBand = el.dataset.s !== undefined;
+        tracks.push({ el, pts, band:t.band, parts:makeParts(n,t.band,t.warm,t.wander||1),
+          hasBand, ds: hasBand ? (parseFloat(el.dataset.s)||0) : 0,
+                   de: hasBand ? (parseFloat(el.dataset.e)||1) : 1 });
       });
     });
   }
@@ -101,9 +106,14 @@
   function render(now){
     ctx.clearRect(0,0,W,H);
     ctx.globalCompositeOperation='lighter';
+    const maxsc=Math.max(1,(document.documentElement.scrollHeight||0)-innerHeight);
+    const sf=(window.scrollY||document.documentElement.scrollTop||0)/maxsc;   // scroll progress 0..1
     for(const tr of tracks){
       let m; try{ m=tr.el.getScreenCTM(); }catch(e){ m=null; } if(!m) continue;
+      const reveal=tr.hasBand ? Math.max(0,Math.min(1,(sf-tr.ds)/Math.max(0.0001,tr.de-tr.ds))) : 1;
       for(const p of tr.parts){
+        if(p.t > reveal) continue;                               // extend down the page as you scroll
+        const ef=Math.min(1,(reveal-p.t)/0.05);                  // soft leading edge
         const tt=p.t + Math.sin(p.aPhase+now*p.aFreq)*p.aAmp;     // free along-path wander
         const u=ptAt(tr.pts,tt);
         const cxp=(m.a*u.x+m.c*u.y+m.e)*dpr, cyp=(m.b*u.x+m.d*u.y+m.f)*dpr;
@@ -114,7 +124,7 @@
         if(x<-60||y<-60||x>W+60||y>H+60) continue;
         const r=(p.sz*1.3+0.8)*dpr;
         const edge=1-Math.min(1,Math.abs(perp/dpr)/(tr.band+8));   // dense core → free fading edge
-        ctx.globalAlpha=0.05+0.16*edge*edge;
+        ctx.globalAlpha=(0.05+0.16*edge*edge)*ef;
         ctx.drawImage(p.amber?SP_AMBER:SP_GOLD, x-r, y-r, r*2, r*2);
       }
     }
