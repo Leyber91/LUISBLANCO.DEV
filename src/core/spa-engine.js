@@ -128,14 +128,26 @@
   }
 
   // ── route state ─────────────────────────────────────────────────────
-  function setActiveRoute(route){
-    if(navEl) navEl.querySelectorAll('a[data-route]').forEach(a=> a.classList.toggle('current', a.getAttribute('data-route')===route));
-    if(diEl){ const cur=DI_CUR[route];
-      diEl.querySelectorAll('li').forEach(li=>{ const on=li.getAttribute('data-n')===cur; li.classList.toggle('current',on);
-        li.querySelector('.bullet').textContent = on?'/':'·'; }); }
-    if(sheetEl) sheetEl.textContent = 'SHEET '+(SHEET[route]||'1 / 6');
-    const ds = diEl && diEl.querySelector('.di-sheet'); if(ds) ds.textContent = 'SHEET '+(SHEET[route]||'1 / 6');
+  // applyDI is the SOLE writer of the drawing-index `current` highlight, so the
+  // route spy and the home inner-section spy never fight. diOverride lets the
+  // home plate light 02 (mission) while its inner section holds the viewport.
+  let diOverride=null, curRoute='home';
+  function applyDI(n){
+    if(!diEl) return;
+    diEl.querySelectorAll('li').forEach(li=>{ const on=li.getAttribute('data-n')===n;
+      li.classList.toggle('current',on); li.querySelector('.bullet').textContent = on?'/':'·'; });
   }
+  function setActiveRoute(route){
+    curRoute=route; if(route!=='home') diOverride=null;
+    if(navEl) navEl.querySelectorAll('a[data-route]').forEach(a=> a.classList.toggle('current', a.getAttribute('data-route')===route));
+    applyDI(diOverride || DI_CUR[route]);
+    const sh = 'SHEET '+(SHEET[route]||'1 / 6');
+    if(sheetEl) sheetEl.textContent = sh;
+    const ds = diEl && diEl.querySelector('.di-sheet'); if(ds) ds.textContent = sh;
+  }
+  // called by the home inner-section observer (spa-home.js): '02' while the
+  // mission section dominates, '01' for the hero. Ignored off the home route.
+  function setDIOverride(n){ diOverride=(curRoute==='home')?n:null; applyDI(diOverride || DI_CUR[curRoute]); }
 
   // ── concept caption cycle (home only) ───────────────────────────────
   const CYCLE = ['RAG','MCP','multi-agent','self-refine','ReAct','tool generation'];
@@ -231,7 +243,7 @@
     requestAnimationFrame(frame);
   }
 
-  window.LB_ENGINE = { mount, setActiveRoute, setGlyphMode, refreshReveal, updateScroll,
+  window.LB_ENGINE = { mount, setActiveRoute, setDIOverride, setGlyphMode, refreshReveal, updateScroll,
     setConcept, startConceptCycle, stopConceptCycle, glyphEl:()=>glyphEl };
 
   if(document.readyState!=='loading') mount();

@@ -11,10 +11,10 @@
   const LB = (window.LB = window.LB || {});
   const sysReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const TARGETS = '.trip-panel, .ptile';   // cards whose border becomes a swarm
-  const RAD = 13;          // corner radius (match the card border-radius)
+  const TARGETS = '.mission-console';   // the section-02 console edge becomes a swarm
+  const RAD = 18;          // corner radius (match the console border-radius)
   const BAND = 9;          // swarm reach inward from the edge (px)
-  const DENS = 0.85;       // particles per perimeter pixel
+  const DENS = 0.45;       // particles per perimeter pixel (lower: large panel perimeter)
   const GOLD=[214,164,80], AMBER=[246,208,132];
 
   let canvas, ctx, W, H, dpr, SP_GOLD, SP_AMBER;
