@@ -54,6 +54,7 @@
   function buildAxes(){
     const grid = document.getElementById('axisGrid');
     const stack = document.getElementById('axisStack');
+    grid.innerHTML=''; stack.innerHTML='';        // idempotent — no duplicate on re-init
     AXES.forEach(ax=>{
       const col = el('div','axis-col');
       col.innerHTML = `
@@ -83,6 +84,7 @@
   // ── build seeds ─────────────────────────────────────────────────────
   function buildSeeds(){
     const row = document.getElementById('seedRow');
+    row.innerHTML='';
     SEEDS.forEach((s,i)=>{
       const seed = el('div','seed'); seed.setAttribute('data-seed',i);
       seed.innerHTML = `<span class="snode" data-seed="${i}">${i+1}</span><span class="sname">${s.n}</span>`;
@@ -109,6 +111,7 @@
   };
   function buildMechs(){
     const row = document.getElementById('mechRow');
+    row.innerHTML='';
     MECHS.forEach(m=>{
       const c = el('div','mech'+(m.meta?' meta':''));
       const glyph = MISO[m.name] ? MISO[m.name]() : '';
@@ -123,6 +126,7 @@
   // ── build standing annotations ──────────────────────────────────────
   function buildStanding(){
     const layer = document.getElementById('standingLayer');
+    layer.innerHTML='';
     STANDING.forEach((s,i)=>{
       const a = el('div','standing'); a.setAttribute('data-st',i);
       a.style.left = (s.x*100)+'%'; a.style.top = (s.y*100)+'%';
