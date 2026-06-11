@@ -20,10 +20,12 @@
   const sysReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // selector · density (particles/screen-px) · band half-width px · warmth · wander · minLen(screen px)
+  // dust belongs on CURVES that flow (spine, traversal, orbits) — not on rigid
+  // straight dimension lines, which read mechanical as dust. .dim is left as its
+  // original faint drafting SVG (subtle), not dusted.
   const TARGETS = [
-    { sel:'.traversal .spine',       dens:2.4, band:26, warm:0.55, wander:1.00, minLen:80 },
-    { sel:'#plateSpine .spine-path', dens:2.6, band:30, warm:0.70, wander:1.00, minLen:80 },
-    { sel:'.dim',                    dens:1.4, band:12, warm:0.40, wander:0.70, minLen:130 }, // dimension/structural lines
+    { sel:'.traversal .spine',       dens:2.7, band:15, warm:0.55, wander:0.60, minLen:80 }, // defined-but-free current
+    { sel:'#plateSpine .spine-path', dens:2.9, band:17, warm:0.70, wander:0.60, minLen:80 }, // (half point: not scattered, not a hard line)
     { sel:'.orbit',                  dens:1.4, band:5,  warm:0.62, wander:0.30, minLen:60 },  // solar system — defined dust rings
   ];
   const HIDE_TOO = ['.traversal .pulse-path'];   // strokes to silence (no stray line)

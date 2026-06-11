@@ -76,6 +76,9 @@ body.glyph-focal .glyph:hover .cube-inner{ filter:drop-shadow(0 0 9px var(--gold
   12%{ opacity:.95; }
   100%{ opacity:0; stroke-dashoffset:-0.22; } }
 html.reduced-motion .traversal .pulse-path{ animation:none; }
+/* the spine strokes are replaced by path-flow dust — keep the stroke hidden as a
+   backstop so a rebuilt spine never flashes a solid line (path-flow draws the dust). */
+.traversal .spine, .traversal .pulse-path, #plateSpine .spine-path{ stroke-opacity:0; }
 
 /* ── first-visit assembly overlay ────────────────────────────────────── */
 .intro{ position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
