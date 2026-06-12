@@ -90,7 +90,7 @@
 /* ── the reader ───────────────────────────────────────────────────── */
 .cx-body{ flex:1; display:grid; grid-template-columns:290px 1fr; min-height:0;
   animation:cxFadeIn .6s var(--ease) both; }
-.cx-body[hidden]{ display:none; }
+.cx-lock[hidden], .cx-body[hidden]{ display:none; }
 @keyframes cxFadeIn{ from{ opacity:0; } to{ opacity:1; } }
 .cx-nav{ overflow-y:auto; border-right:1px solid var(--line-soft); padding:12px 0 30px;
   scrollbar-width:thin; scrollbar-color:rgba(234,240,251,0.15) transparent; }
