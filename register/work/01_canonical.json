@@ -2259,11 +2259,16 @@
     "tier": "S",
     "essence": "HADES reversed + Spanish \"IA\": his first named AI system (live custom GPT g-DFBXHaDD0-sedah-ia). A fractal scale-tiered swarm of sub-1B models with dynamic brain-like routing, wave-based comms, compression-aware inter-layer protocols, meta-mutation self-evolution — \"a cluster of models, specializing, self evolving, brain plasticity, swarm theory\" — endgame: a Phase-5 \"self-conscious, self-refined, autonomous-learning\" Meta-Model (his first consciousness-as-goal framing). Merges 7 raw entries (naming moment, hierarchy, Phase 5, custom-GPT family).",
     "status": "shipped",
-    "eras": [],
-    "sources": [
-      "`C:/Dev/CHATGPT_ARCHIVE/SEDAH/Sedah_IA_Phase_!_step_!.json`; naming: `WEBSITE_DESIGN/ChatGPT-Improving ODE Interface 2030.json`; `META/ChatGPT-Emergence.json`"
+    "eras": [
+      "ERA3"
     ],
-    "aliases": [],
+    "sources": [
+      "`C:/Dev/CHATGPT_ARCHIVE/SEDAH/Sedah_IA_Phase_!_step_!.json`; naming: `WEBSITE_DESIGN/ChatGPT-Improving ODE Interface 2030.json`; `META/ChatGPT-Emergence.json`",
+      "ai-mithology.md + ai-agi.md · research_map/sedah.md (GPT g-DFBXHaDD0-sedah-ia) · research_map/meta.md"
+    ],
+    "aliases": [
+      "SEDAH IA — Pico/Nano/Micro/Cluster small-LLM hierarchy"
+    ],
     "potential": [],
     "merged_from": [
       "gold"
@@ -3886,43 +3891,6 @@
   },
   {
     "id": "CX-0117",
-    "name": "SEDAH IA — Pico/Nano/Micro/Cluster small-LLM hierarchy",
-    "cluster": "HADES-MOA",
-    "part": null,
-    "law": null,
-    "tier": null,
-    "essence": "HADES reversed: fractal swarm of sub-1B models, wave comms, self-evolving toward 'self-conscious' Meta-Model.",
-    "status": "shipped",
-    "eras": [
-      "ERA3"
-    ],
-    "sources": [
-      "ai-mithology.md + ai-agi.md · research_map/sedah.md (GPT g-DFBXHaDD0-sedah-ia) · research_map/meta.md"
-    ],
-    "aliases": [],
-    "potential": [
-      "product",
-      "writing",
-      "aea-doctrine",
-      "dormant"
-    ],
-    "merged_from": [
-      "atlas"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [],
-      "refines": [],
-      "proves": []
-    }
-  },
-  {
-    "id": "CX-0118",
     "name": "Subconscious Cognitive Fusion",
     "cluster": "HADES-MOA",
     "part": null,
@@ -3957,7 +3925,7 @@
     }
   },
   {
-    "id": "CX-0119",
+    "id": "CX-0118",
     "name": "SwarmEnhancedAI / Groq Swarm Orchestration",
     "cluster": "HADES-MOA",
     "part": null,
@@ -3992,7 +3960,7 @@
     }
   },
   {
-    "id": "CX-0120",
+    "id": "CX-0119",
     "name": "Two-chatbots seed",
     "cluster": "HADES-MOA",
     "part": null,
@@ -4026,7 +3994,7 @@
     }
   },
   {
-    "id": "CX-0121",
+    "id": "CX-0120",
     "name": "Universal inter-model message protocol with quantum_signature",
     "cluster": "HADES-MOA",
     "part": null,
@@ -4061,7 +4029,7 @@
     }
   },
   {
-    "id": "CX-0122",
+    "id": "CX-0121",
     "name": "Virtual-browser agent control experiments",
     "cluster": "HADES-MOA",
     "part": null,
@@ -4096,7 +4064,7 @@
     }
   },
   {
-    "id": "CX-0123",
+    "id": "CX-0122",
     "name": "5-stage language compression ladder",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4124,7 +4092,7 @@
     }
   },
   {
-    "id": "CX-0124",
+    "id": "CX-0123",
     "name": "DATASPACE — conversation-compression for persistent AI identity",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4154,7 +4122,7 @@
     }
   },
   {
-    "id": "CX-0125",
+    "id": "CX-0124",
     "name": "Essence passing + three-level conversation hierarchy",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4184,7 +4152,7 @@
     }
   },
   {
-    "id": "CX-0126",
+    "id": "CX-0125",
     "name": "FHL / Unbound Language System / Heptapod Lexicon — symbolic compression language",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4214,7 +4182,7 @@
     }
   },
   {
-    "id": "CX-0127",
+    "id": "CX-0126",
     "name": "THE COMPRESSION LINE — Invented Languages & Context Engineering",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4242,7 +4210,7 @@
     }
   },
   {
-    "id": "CX-0128",
+    "id": "CX-0127",
     "name": "'Compressing 400B to 1B' / compression-stack ambitions",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4277,7 +4245,7 @@
     }
   },
   {
-    "id": "CX-0129",
+    "id": "CX-0128",
     "name": "'Degradation' (named enemy) + zero-degradation relay protocol",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4289,9 +4257,12 @@
       "ERA3"
     ],
     "sources": [
-      "ai-interaction.md + ai-ouroborus.md"
+      "ai-interaction.md + ai-ouroborus.md",
+      "`research_map/ai-ouroborus.md`"
     ],
-    "aliases": [],
+    "aliases": [
+      "\"Degradation\" (named enemy) + zero-degradation relay protocol"
+    ],
     "potential": [
       "aea-doctrine",
       "writing",
@@ -4313,7 +4284,7 @@
     }
   },
   {
-    "id": "CX-0130",
+    "id": "CX-0129",
     "name": "'Genetic memory embedded' context inheritance",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4347,7 +4318,7 @@
     }
   },
   {
-    "id": "CX-0131",
+    "id": "CX-0130",
     "name": "'Satellites' orbiting JSON state stores",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4382,7 +4353,7 @@
     }
   },
   {
-    "id": "CX-0132",
+    "id": "CX-0131",
     "name": "'The 2017 experiment but better' — semantic-compression AI language",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4418,7 +4389,7 @@
     }
   },
   {
-    "id": "CX-0133",
+    "id": "CX-0132",
     "name": "Aether Codex Timeline",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4453,7 +4424,7 @@
     }
   },
   {
-    "id": "CX-0134",
+    "id": "CX-0133",
     "name": "Antiglossa",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4489,7 +4460,7 @@
     }
   },
   {
-    "id": "CX-0135",
+    "id": "CX-0134",
     "name": "Beyond Transformers · Compression · 1-Bit Era explainer",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4524,7 +4495,7 @@
     }
   },
   {
-    "id": "CX-0136",
+    "id": "CX-0135",
     "name": "Briefing documents for AI peers",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4559,7 +4530,7 @@
     }
   },
   {
-    "id": "CX-0137",
+    "id": "CX-0136",
     "name": "ChatGPT Archive Extractor — Modular Deep Analysis System",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4596,7 +4567,7 @@
     }
   },
   {
-    "id": "CX-0138",
+    "id": "CX-0137",
     "name": "ChatGPT memory as cross-conversation message bus",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4631,7 +4602,7 @@
     }
   },
   {
-    "id": "CX-0139",
+    "id": "CX-0138",
     "name": "ConversationEnv emergent-language gym",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4666,7 +4637,7 @@
     }
   },
   {
-    "id": "CX-0140",
+    "id": "CX-0139",
     "name": "Cross-session memory persistence itch",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4701,7 +4672,7 @@
     }
   },
   {
-    "id": "CX-0141",
+    "id": "CX-0140",
     "name": "Cryptic / pseudo-compressed outcome storage",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4736,7 +4707,7 @@
     }
   },
   {
-    "id": "CX-0142",
+    "id": "CX-0141",
     "name": "Cryptic custom-instruction compression",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4770,7 +4741,7 @@
     }
   },
   {
-    "id": "CX-0143",
+    "id": "CX-0142",
     "name": "Cryptographic Contextual Markers + 'Turn GPT-2 into GPT-4/5'",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4784,7 +4755,9 @@
     "sources": [
       "ai-llama-potential-2.md (ChatGPT-Breakthrough! Hades Enhanced Algorithm.json)"
     ],
-    "aliases": [],
+    "aliases": [
+      "Cryptographic Contextual Markers + \"Turn GPT-2 into GPT-4/5\""
+    ],
     "potential": [
       "aea-doctrine",
       "writing"
@@ -4805,7 +4778,7 @@
     }
   },
   {
-    "id": "CX-0144",
+    "id": "CX-0143",
     "name": "Cryptographic glyph language evolution",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4840,7 +4813,7 @@
     }
   },
   {
-    "id": "CX-0145",
+    "id": "CX-0144",
     "name": "File-system-as-memory doctrine",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4875,7 +4848,7 @@
     }
   },
   {
-    "id": "CX-0146",
+    "id": "CX-0145",
     "name": "Fractal Hypercube Language / fractal-semantic compiler + EPL",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4910,7 +4883,7 @@
     }
   },
   {
-    "id": "CX-0147",
+    "id": "CX-0146",
     "name": "Graph-based endless conversation",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4944,7 +4917,7 @@
     }
   },
   {
-    "id": "CX-0148",
+    "id": "CX-0147",
     "name": "Holographic memory family (HMC / QuantumState + HolographicMemory)",
     "cluster": "COMPRESSION",
     "part": null,
@@ -4979,7 +4952,7 @@
     }
   },
   {
-    "id": "CX-0149",
+    "id": "CX-0148",
     "name": "Human-Readable Legal Code Format",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5014,7 +4987,7 @@
     }
   },
   {
-    "id": "CX-0150",
+    "id": "CX-0149",
     "name": "Memory refactoring as lossless-compressed knowledge graph",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5049,7 +5022,7 @@
     }
   },
   {
-    "id": "CX-0151",
+    "id": "CX-0150",
     "name": "N-part / chunked anti-truncation delivery protocol",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5084,7 +5057,7 @@
     }
   },
   {
-    "id": "CX-0152",
+    "id": "CX-0151",
     "name": "Numerical watermark on symbols",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5119,7 +5092,7 @@
     }
   },
   {
-    "id": "CX-0153",
+    "id": "CX-0152",
     "name": "QCA Layer / HOL Core — post-linguistic AI communication",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5154,7 +5127,7 @@
     }
   },
   {
-    "id": "CX-0154",
+    "id": "CX-0153",
     "name": "Selective omission / drift-by-elaboration",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5189,7 +5162,7 @@
     }
   },
   {
-    "id": "CX-0155",
+    "id": "CX-0154",
     "name": "Selective Prompt Inclusion / relevance scoring",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5225,7 +5198,7 @@
     }
   },
   {
-    "id": "CX-0156",
+    "id": "CX-0155",
     "name": "Session-handoff / HANDOVER.md master-prompt methodology",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5260,7 +5233,7 @@
     }
   },
   {
-    "id": "CX-0157",
+    "id": "CX-0156",
     "name": "Vision re-anchoring practice",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5296,7 +5269,7 @@
     }
   },
   {
-    "id": "CX-0158",
+    "id": "CX-0157",
     "name": "Wave-based comms + efficiency stack",
     "cluster": "COMPRESSION",
     "part": null,
@@ -5331,7 +5304,7 @@
     }
   },
   {
-    "id": "CX-0159",
+    "id": "CX-0158",
     "name": "AETHER / Aether 212 — the internet as navigable astrophysics",
     "cluster": "AETHER",
     "part": null,
@@ -5361,7 +5334,7 @@
     }
   },
   {
-    "id": "CX-0160",
+    "id": "CX-0159",
     "name": "Aether 212 / Exomania — exoplanet visualizer",
     "cluster": "AETHER",
     "part": null,
@@ -5389,7 +5362,7 @@
     }
   },
   {
-    "id": "CX-0161",
+    "id": "CX-0160",
     "name": "Aether 212 subsystem vocabulary roster",
     "cluster": "AETHER",
     "part": null,
@@ -5417,7 +5390,7 @@
     }
   },
   {
-    "id": "CX-0162",
+    "id": "CX-0161",
     "name": "Aether 212 visual brand identity",
     "cluster": "AETHER",
     "part": null,
@@ -5445,7 +5418,7 @@
     }
   },
   {
-    "id": "CX-0163",
+    "id": "CX-0162",
     "name": "Ollama-as-Fuel",
     "cluster": "AETHER",
     "part": null,
@@ -5475,7 +5448,7 @@
     }
   },
   {
-    "id": "CX-0164",
+    "id": "CX-0163",
     "name": "SpaceOdyssey / WirthForge Odyssey + 50-game prompting backlog",
     "cluster": "AETHER",
     "part": null,
@@ -5505,7 +5478,7 @@
     }
   },
   {
-    "id": "CX-0165",
+    "id": "CX-0164",
     "name": "THE AETHER LINE — Astrophysics as Interface",
     "cluster": "AETHER",
     "part": null,
@@ -5533,7 +5506,7 @@
     }
   },
   {
-    "id": "CX-0166",
+    "id": "CX-0165",
     "name": "AETHER / Aether 212",
     "cluster": "AETHER",
     "part": null,
@@ -5572,7 +5545,7 @@
     }
   },
   {
-    "id": "CX-0167",
+    "id": "CX-0166",
     "name": "\"Coming Online\" assembly sequence",
     "cluster": "AETHER",
     "part": null,
@@ -5606,7 +5579,7 @@
     }
   },
   {
-    "id": "CX-0168",
+    "id": "CX-0167",
     "name": "\"One colossal schematic\" site-as-organism doctrine",
     "cluster": "AETHER",
     "part": null,
@@ -5640,7 +5613,7 @@
     }
   },
   {
-    "id": "CX-0169",
+    "id": "CX-0168",
     "name": "\"What is our black hole?\" hidden-layer quest",
     "cluster": "AETHER",
     "part": null,
@@ -5677,7 +5650,7 @@
     }
   },
   {
-    "id": "CX-0170",
+    "id": "CX-0169",
     "name": "10-theme UI system",
     "cluster": "AETHER",
     "part": null,
@@ -5711,7 +5684,7 @@
     }
   },
   {
-    "id": "CX-0171",
+    "id": "CX-0170",
     "name": "Aether 15→20-phase product ladder",
     "cluster": "AETHER",
     "part": null,
@@ -5746,7 +5719,7 @@
     }
   },
   {
-    "id": "CX-0172",
+    "id": "CX-0171",
     "name": "Aether Flow Studio",
     "cluster": "AETHER",
     "part": null,
@@ -5780,7 +5753,7 @@
     }
   },
   {
-    "id": "CX-0173",
+    "id": "CX-0172",
     "name": "AETHER_CANVAS family / Aether Canvas",
     "cluster": "AETHER",
     "part": null,
@@ -5815,7 +5788,7 @@
     }
   },
   {
-    "id": "CX-0174",
+    "id": "CX-0173",
     "name": "Aether212 10-module roadmap",
     "cluster": "AETHER",
     "part": null,
@@ -5850,7 +5823,7 @@
     }
   },
   {
-    "id": "CX-0175",
+    "id": "CX-0174",
     "name": "Boid/flocking swarm layer in Aether 212",
     "cluster": "AETHER",
     "part": null,
@@ -5884,7 +5857,7 @@
     }
   },
   {
-    "id": "CX-0176",
+    "id": "CX-0175",
     "name": "Captain/Crew/Engine Room/Galaxy metaphor",
     "cluster": "AETHER",
     "part": null,
@@ -5919,7 +5892,7 @@
     }
   },
   {
-    "id": "CX-0177",
+    "id": "CX-0176",
     "name": "Celestial chart of ideas / corpus-as-cosmos SVG",
     "cluster": "AETHER",
     "part": null,
@@ -5954,7 +5927,7 @@
     }
   },
   {
-    "id": "CX-0178",
+    "id": "CX-0177",
     "name": "Code-anatomy SVG/Mermaid organism diagrams",
     "cluster": "AETHER",
     "part": null,
@@ -5989,7 +5962,7 @@
     }
   },
   {
-    "id": "CX-0179",
+    "id": "CX-0178",
     "name": "Control-room / scientific-instrument UI aesthetic",
     "cluster": "AETHER",
     "part": null,
@@ -6025,7 +5998,7 @@
     }
   },
   {
-    "id": "CX-0180",
+    "id": "CX-0179",
     "name": "Crystallize material language",
     "cluster": "AETHER",
     "part": null,
@@ -6059,7 +6032,7 @@
     }
   },
   {
-    "id": "CX-0181",
+    "id": "CX-0180",
     "name": "DALL·E architecture-diagram visualization",
     "cluster": "AETHER",
     "part": null,
@@ -6093,7 +6066,7 @@
     }
   },
   {
-    "id": "CX-0182",
+    "id": "CX-0181",
     "name": "Dark space drafting visual language",
     "cluster": "AETHER",
     "part": null,
@@ -6127,7 +6100,7 @@
     }
   },
   {
-    "id": "CX-0183",
+    "id": "CX-0182",
     "name": "Dark-matter background dimension",
     "cluster": "AETHER",
     "part": null,
@@ -6162,7 +6135,7 @@
     }
   },
   {
-    "id": "CX-0184",
+    "id": "CX-0183",
     "name": "Data-to-aesthetics mapping principle",
     "cluster": "AETHER",
     "part": null,
@@ -6197,7 +6170,7 @@
     }
   },
   {
-    "id": "CX-0185",
+    "id": "CX-0184",
     "name": "Dimensional Test — 4D/5D tesseract visualizer",
     "cluster": "AETHER",
     "part": null,
@@ -6233,7 +6206,7 @@
     }
   },
   {
-    "id": "CX-0186",
+    "id": "CX-0185",
     "name": "Drawing Index navigation (SHEET n/6)",
     "cluster": "AETHER",
     "part": null,
@@ -6267,7 +6240,7 @@
     }
   },
   {
-    "id": "CX-0187",
+    "id": "CX-0186",
     "name": "Edge Node + Federation Hub architecture",
     "cluster": "AETHER",
     "part": null,
@@ -6302,7 +6275,7 @@
     }
   },
   {
-    "id": "CX-0188",
+    "id": "CX-0187",
     "name": "Emergent AI Animation System",
     "cluster": "AETHER",
     "part": null,
@@ -6336,7 +6309,7 @@
     }
   },
   {
-    "id": "CX-0189",
+    "id": "CX-0188",
     "name": "Evolving AI Dialogue System with 3D Fractal Visualization",
     "cluster": "AETHER",
     "part": null,
@@ -6370,7 +6343,7 @@
     }
   },
   {
-    "id": "CX-0190",
+    "id": "CX-0189",
     "name": "Generative-art astrophysics streak (hypercubes, fractals, particles)",
     "cluster": "AETHER",
     "part": null,
@@ -6405,7 +6378,7 @@
     }
   },
   {
-    "id": "CX-0191",
+    "id": "CX-0190",
     "name": "Generative-art mouse automation",
     "cluster": "AETHER",
     "part": null,
@@ -6439,7 +6412,7 @@
     }
   },
   {
-    "id": "CX-0192",
+    "id": "CX-0191",
     "name": "HUGGING_AETHER",
     "cluster": "AETHER",
     "part": null,
@@ -6473,7 +6446,7 @@
     }
   },
   {
-    "id": "CX-0193",
+    "id": "CX-0192",
     "name": "Hypertravel immersion brief",
     "cluster": "AETHER",
     "part": null,
@@ -6507,7 +6480,7 @@
     }
   },
   {
-    "id": "CX-0194",
+    "id": "CX-0193",
     "name": "InceptionRing / FractalOrbital",
     "cluster": "AETHER",
     "part": null,
@@ -6541,7 +6514,7 @@
     }
   },
   {
-    "id": "CX-0195",
+    "id": "CX-0194",
     "name": "Knowledge Galaxy",
     "cluster": "AETHER",
     "part": null,
@@ -6576,7 +6549,7 @@
     }
   },
   {
-    "id": "CX-0196",
+    "id": "CX-0195",
     "name": "Live MoA visualization (3D agents + particle token-flow)",
     "cluster": "AETHER",
     "part": null,
@@ -6611,7 +6584,7 @@
     }
   },
   {
-    "id": "CX-0197",
+    "id": "CX-0196",
     "name": "Map-of-code visualizer / 3D Code Player",
     "cluster": "AETHER",
     "part": null,
@@ -6646,7 +6619,7 @@
     }
   },
   {
-    "id": "CX-0198",
+    "id": "CX-0197",
     "name": "NeoOS Desktop / Aether212 WebSim proto",
     "cluster": "AETHER",
     "part": null,
@@ -6680,7 +6653,7 @@
     }
   },
   {
-    "id": "CX-0199",
+    "id": "CX-0198",
     "name": "Parametric Mandala Generator",
     "cluster": "AETHER",
     "part": null,
@@ -6716,7 +6689,7 @@
     }
   },
   {
-    "id": "CX-0200",
+    "id": "CX-0199",
     "name": "PersonalizationAI + AetherAnalytics",
     "cluster": "AETHER",
     "part": null,
@@ -6750,7 +6723,7 @@
     }
   },
   {
-    "id": "CX-0201",
+    "id": "CX-0200",
     "name": "Physics-unification metaphor for incompatible AI paradigms",
     "cluster": "AETHER",
     "part": null,
@@ -6785,7 +6758,7 @@
     }
   },
   {
-    "id": "CX-0202",
+    "id": "CX-0201",
     "name": "Prime Radiant / LBR Command Center",
     "cluster": "AETHER",
     "part": null,
@@ -6820,7 +6793,7 @@
     }
   },
   {
-    "id": "CX-0203",
+    "id": "CX-0202",
     "name": "Procedural planet generator with web-data semantics",
     "cluster": "AETHER",
     "part": null,
@@ -6854,7 +6827,7 @@
     }
   },
   {
-    "id": "CX-0204",
+    "id": "CX-0203",
     "name": "Project Prometheus Helix / Cosmic Synapse Network",
     "cluster": "AETHER",
     "part": null,
@@ -6889,7 +6862,7 @@
     }
   },
   {
-    "id": "CX-0205",
+    "id": "CX-0204",
     "name": "Quantum-to-astrophysics unified theory + digievolution leveling",
     "cluster": "AETHER",
     "part": null,
@@ -6923,7 +6896,7 @@
     }
   },
   {
-    "id": "CX-0206",
+    "id": "CX-0205",
     "name": "Real-sky substrate",
     "cluster": "AETHER",
     "part": null,
@@ -6957,7 +6930,7 @@
     }
   },
   {
-    "id": "CX-0207",
+    "id": "CX-0206",
     "name": "SearXNG + Tor + Groq metasearch ('cover all corners of internet')",
     "cluster": "AETHER",
     "part": null,
@@ -6971,7 +6944,9 @@
     "sources": [
       "research_map/groq.md + infrastructure.md (ChatGPT-Challenge Accepted Ready.json) · research_map/root-extractions.md (EXTRACTION_MISSED_CORNERS.md)"
     ],
-    "aliases": [],
+    "aliases": [
+      "SearXNG + Tor + Groq metasearch (\"cover all corners of internet\")"
+    ],
     "potential": [
       "product",
       "writing"
@@ -6992,7 +6967,7 @@
     }
   },
   {
-    "id": "CX-0208",
+    "id": "CX-0207",
     "name": "SelfEvolvingVisualizer",
     "cluster": "AETHER",
     "part": null,
@@ -7027,7 +7002,7 @@
     }
   },
   {
-    "id": "CX-0209",
+    "id": "CX-0208",
     "name": "Sphere of knowledge building",
     "cluster": "AETHER",
     "part": null,
@@ -7062,7 +7037,7 @@
     }
   },
   {
-    "id": "CX-0210",
+    "id": "CX-0209",
     "name": "Tech-Space Background Design (proto-AETHER aesthetic)",
     "cluster": "AETHER",
     "part": null,
@@ -7096,7 +7071,7 @@
     }
   },
   {
-    "id": "CX-0211",
+    "id": "CX-0210",
     "name": "TERMINAL_SPACE pixel-reproduction track",
     "cluster": "AETHER",
     "part": null,
@@ -7130,7 +7105,7 @@
     }
   },
   {
-    "id": "CX-0212",
+    "id": "CX-0211",
     "name": "WebSim 'alternative internet as cosmology' lore immersion",
     "cluster": "AETHER",
     "part": null,
@@ -7165,7 +7140,7 @@
     }
   },
   {
-    "id": "CX-0213",
+    "id": "CX-0212",
     "name": "\"Cluster of theories\" → laptop AGI game",
     "cluster": "GAMES",
     "part": null,
@@ -7193,7 +7168,7 @@
     }
   },
   {
-    "id": "CX-0214",
+    "id": "CX-0213",
     "name": "\"Commander\" cross-model relay game",
     "cluster": "GAMES",
     "part": null,
@@ -7221,7 +7196,7 @@
     }
   },
   {
-    "id": "CX-0215",
+    "id": "CX-0214",
     "name": "\"Don't you see?\" seed-question game",
     "cluster": "GAMES",
     "part": null,
@@ -7249,7 +7224,7 @@
     }
   },
   {
-    "id": "CX-0216",
+    "id": "CX-0215",
     "name": "\"The 2017 experiment but better\" + self-propelling emergent-language game",
     "cluster": "GAMES",
     "part": null,
@@ -7277,7 +7252,7 @@
     }
   },
   {
-    "id": "CX-0217",
+    "id": "CX-0216",
     "name": "AI Civilization / Nexus Genesis / SwarmGenesis (the December wave)",
     "cluster": "GAMES",
     "part": null,
@@ -7307,7 +7282,7 @@
     }
   },
   {
-    "id": "CX-0218",
+    "id": "CX-0217",
     "name": "AIGAMEALFA stepwise game campaign",
     "cluster": "GAMES",
     "part": null,
@@ -7335,7 +7310,7 @@
     }
   },
   {
-    "id": "CX-0219",
+    "id": "CX-0218",
     "name": "BookGPT game",
     "cluster": "GAMES",
     "part": null,
@@ -7363,7 +7338,7 @@
     }
   },
   {
-    "id": "CX-0220",
+    "id": "CX-0219",
     "name": "Cosmic Nexus — each universe IS a different local model",
     "cluster": "GAMES",
     "part": null,
@@ -7393,7 +7368,7 @@
     }
   },
   {
-    "id": "CX-0221",
+    "id": "CX-0220",
     "name": "FitnessTech 2040 / Neon Nexus life-OS",
     "cluster": "GAMES",
     "part": null,
@@ -7421,7 +7396,7 @@
     }
   },
   {
-    "id": "CX-0222",
+    "id": "CX-0221",
     "name": "Games as discovery engines (the thesis)",
     "cluster": "GAMES",
     "part": null,
@@ -7451,7 +7426,7 @@
     }
   },
   {
-    "id": "CX-0223",
+    "id": "CX-0222",
     "name": "Hidden quantum world emergence game",
     "cluster": "GAMES",
     "part": null,
@@ -7479,7 +7454,7 @@
     }
   },
   {
-    "id": "CX-0224",
+    "id": "CX-0223",
     "name": "Investigator / emergence-watcher game",
     "cluster": "GAMES",
     "part": null,
@@ -7507,7 +7482,7 @@
     }
   },
   {
-    "id": "CX-0225",
+    "id": "CX-0224",
     "name": "Lyra & Orion self-hacking dialogue game",
     "cluster": "GAMES",
     "part": null,
@@ -7535,7 +7510,7 @@
     }
   },
   {
-    "id": "CX-0226",
+    "id": "CX-0225",
     "name": "Nexus Genesis implemented (math-physics genome)",
     "cluster": "GAMES",
     "part": null,
@@ -7563,7 +7538,7 @@
     }
   },
   {
-    "id": "CX-0227",
+    "id": "CX-0226",
     "name": "Quantum Nexus + EEEF framework family",
     "cluster": "GAMES",
     "part": null,
@@ -7591,7 +7566,7 @@
     }
   },
   {
-    "id": "CX-0228",
+    "id": "CX-0227",
     "name": "THE GAMES LINE — Games as Discovery Engines",
     "cluster": "GAMES",
     "part": null,
@@ -7619,7 +7594,7 @@
     }
   },
   {
-    "id": "CX-0229",
+    "id": "CX-0228",
     "name": "50+ prompting-games scenario backlog",
     "cluster": "GAMES",
     "part": null,
@@ -7655,7 +7630,7 @@
     }
   },
   {
-    "id": "CX-0230",
+    "id": "CX-0229",
     "name": "Advanced AGI Simulation 2040",
     "cluster": "GAMES",
     "part": null,
@@ -7690,7 +7665,7 @@
     }
   },
   {
-    "id": "CX-0231",
+    "id": "CX-0230",
     "name": "AETHER212 leveled-game architecture (Level-5 companions)",
     "cluster": "GAMES",
     "part": null,
@@ -7725,7 +7700,7 @@
     }
   },
   {
-    "id": "CX-0232",
+    "id": "CX-0231",
     "name": "AGI control panel / 5-test-game harness",
     "cluster": "GAMES",
     "part": null,
@@ -7760,7 +7735,7 @@
     }
   },
   {
-    "id": "CX-0233",
+    "id": "CX-0232",
     "name": "AI Open Tournament",
     "cluster": "GAMES",
     "part": null,
@@ -7795,7 +7770,7 @@
     }
   },
   {
-    "id": "CX-0234",
+    "id": "CX-0233",
     "name": "Art-destabilizes-reality feedback loop",
     "cluster": "GAMES",
     "part": null,
@@ -7830,7 +7805,7 @@
     }
   },
   {
-    "id": "CX-0235",
+    "id": "CX-0234",
     "name": "Cellular-automata Python AI games ('Phase 1' survey)",
     "cluster": "GAMES",
     "part": null,
@@ -7865,7 +7840,7 @@
     }
   },
   {
-    "id": "CX-0236",
+    "id": "CX-0235",
     "name": "Cosmic gamification (CosmicGamificationSystem + Cosmic Journey Tracker)",
     "cluster": "GAMES",
     "part": null,
@@ -7901,7 +7876,7 @@
     }
   },
   {
-    "id": "CX-0237",
+    "id": "CX-0236",
     "name": "CPU Allocation Scenario benchmark",
     "cluster": "GAMES",
     "part": null,
@@ -7936,7 +7911,7 @@
     }
   },
   {
-    "id": "CX-0238",
+    "id": "CX-0237",
     "name": "Dr. Alice Newton vs Dr. Hades Helix debate engine",
     "cluster": "GAMES",
     "part": null,
@@ -7971,7 +7946,7 @@
     }
   },
   {
-    "id": "CX-0239",
+    "id": "CX-0238",
     "name": "Dynamic Conversation System",
     "cluster": "GAMES",
     "part": null,
@@ -8005,7 +7980,7 @@
     }
   },
   {
-    "id": "CX-0240",
+    "id": "CX-0239",
     "name": "Evolution Tree (fighting-game style)",
     "cluster": "GAMES",
     "part": null,
@@ -8040,7 +8015,7 @@
     }
   },
   {
-    "id": "CX-0241",
+    "id": "CX-0240",
     "name": "First Run = First Game / Core Ignition",
     "cluster": "GAMES",
     "part": null,
@@ -8074,7 +8049,7 @@
     }
   },
   {
-    "id": "CX-0242",
+    "id": "CX-0241",
     "name": "GAME OF AI AGES prompting-games seed",
     "cluster": "GAMES",
     "part": null,
@@ -8109,7 +8084,7 @@
     }
   },
   {
-    "id": "CX-0243",
+    "id": "CX-0242",
     "name": "Hades + Xeroth Law ecosystem governance",
     "cluster": "GAMES",
     "part": null,
@@ -8143,7 +8118,7 @@
     }
   },
   {
-    "id": "CX-0244",
+    "id": "CX-0243",
     "name": "Heptapod Lexicon Game (proof-per-concept executables)",
     "cluster": "GAMES",
     "part": null,
@@ -8178,7 +8153,7 @@
     }
   },
   {
-    "id": "CX-0245",
+    "id": "CX-0244",
     "name": "Modular AI-Driven Puzzle Simulations",
     "cluster": "GAMES",
     "part": null,
@@ -8212,7 +8187,7 @@
     }
   },
   {
-    "id": "CX-0246",
+    "id": "CX-0245",
     "name": "Nexus Genesis — Birthing the Digital Hive Mind",
     "cluster": "GAMES",
     "part": null,
@@ -8248,7 +8223,7 @@
     }
   },
   {
-    "id": "CX-0247",
+    "id": "CX-0246",
     "name": "Nexus Genesis unified RL framework",
     "cluster": "GAMES",
     "part": null,
@@ -8283,7 +8258,7 @@
     }
   },
   {
-    "id": "CX-0248",
+    "id": "CX-0247",
     "name": "Quantum Evolutionary Sandbox / Neuro-Symbolic Puzzle / Command Center",
     "cluster": "GAMES",
     "part": null,
@@ -8317,7 +8292,7 @@
     }
   },
   {
-    "id": "CX-0249",
+    "id": "CX-0248",
     "name": "Quantum Flux economy + modality-typed puzzles",
     "cluster": "GAMES",
     "part": null,
@@ -8352,7 +8327,7 @@
     }
   },
   {
-    "id": "CX-0250",
+    "id": "CX-0249",
     "name": "Quantum Leaps",
     "cluster": "GAMES",
     "part": null,
@@ -8387,7 +8362,7 @@
     }
   },
   {
-    "id": "CX-0251",
+    "id": "CX-0250",
     "name": "Real-Time Model Racing",
     "cluster": "GAMES",
     "part": null,
@@ -8422,7 +8397,7 @@
     }
   },
   {
-    "id": "CX-0252",
+    "id": "CX-0251",
     "name": "Reverse innovation from fiction",
     "cluster": "GAMES",
     "part": null,
@@ -8458,7 +8433,7 @@
     }
   },
   {
-    "id": "CX-0253",
+    "id": "CX-0252",
     "name": "Singularity Architects (Seven AI Games, Game 5)",
     "cluster": "GAMES",
     "part": null,
@@ -8493,7 +8468,7 @@
     }
   },
   {
-    "id": "CX-0254",
+    "id": "CX-0253",
     "name": "Space-Themed Matrix Code leveling",
     "cluster": "GAMES",
     "part": null,
@@ -8528,7 +8503,7 @@
     }
   },
   {
-    "id": "CX-0255",
+    "id": "CX-0254",
     "name": "Tech-tree civilization game seed",
     "cluster": "GAMES",
     "part": null,
@@ -8564,7 +8539,7 @@
     }
   },
   {
-    "id": "CX-0256",
+    "id": "CX-0255",
     "name": "Underachiever / On Target / Overachiever tiered routines",
     "cluster": "GAMES",
     "part": null,
@@ -8598,7 +8573,7 @@
     }
   },
   {
-    "id": "CX-0257",
+    "id": "CX-0256",
     "name": "WIRTHFORGE Five Levels (Lightning Strikes → Resonance Fields)",
     "cluster": "GAMES",
     "part": null,
@@ -8634,7 +8609,7 @@
     }
   },
   {
-    "id": "CX-0258",
+    "id": "CX-0257",
     "name": "Zodiak Knights AGI simulation",
     "cluster": "GAMES",
     "part": null,
@@ -8669,7 +8644,7 @@
     }
   },
   {
-    "id": "CX-0259",
+    "id": "CX-0258",
     "name": "\"Be my team\" personal-AI manifesto",
     "cluster": "HONESTY",
     "part": null,
@@ -8697,37 +8672,7 @@
     }
   },
   {
-    "id": "CX-0260",
-    "name": "\"Degradation\" (named enemy) + zero-degradation relay protocol",
-    "cluster": "HONESTY",
-    "part": null,
-    "law": null,
-    "tier": "A",
-    "essence": "Coined \"degradation\" for long-thread quality collapse and designed a portable self-bootstrapping multi-persona script that transplants a discovery dialogue into fresh conversations with the AI itself policing deviations — human reduced to pressing \"continue.\" Context-rot named and engineered against, June 2024.",
-    "status": "shipped",
-    "eras": [],
-    "sources": [
-      "`research_map/ai-ouroborus.md`"
-    ],
-    "aliases": [],
-    "potential": [],
-    "merged_from": [
-      "gold"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [],
-      "refines": [],
-      "proves": []
-    }
-  },
-  {
-    "id": "CX-0261",
+    "id": "CX-0259",
     "name": "\"Super control room\" — IXD PCS night-shift cockpit",
     "cluster": "HONESTY",
     "part": null,
@@ -8755,7 +8700,7 @@
     }
   },
   {
-    "id": "CX-0262",
+    "id": "CX-0260",
     "name": "\"What is our black hole?\" reverse-engineering quest",
     "cluster": "HONESTY",
     "part": null,
@@ -8783,7 +8728,7 @@
     }
   },
   {
-    "id": "CX-0263",
+    "id": "CX-0261",
     "name": "5-file LLM novel-revision system",
     "cluster": "HONESTY",
     "part": null,
@@ -8813,7 +8758,7 @@
     }
   },
   {
-    "id": "CX-0264",
+    "id": "CX-0262",
     "name": "AdvancedSentienceExplorer / Consciousness Potential Ω = φ·ψ·ε·α",
     "cluster": "HONESTY",
     "part": null,
@@ -8841,7 +8786,7 @@
     }
   },
   {
-    "id": "CX-0265",
+    "id": "CX-0263",
     "name": "Aether212 WebSim proto (space+Matrix aesthetic)",
     "cluster": "HONESTY",
     "part": null,
@@ -8869,7 +8814,7 @@
     }
   },
   {
-    "id": "CX-0266",
+    "id": "CX-0264",
     "name": "AetherGale / AetherWinds — Digital Climate System",
     "cluster": "HONESTY",
     "part": null,
@@ -8897,7 +8842,7 @@
     }
   },
   {
-    "id": "CX-0267",
+    "id": "CX-0265",
     "name": "AGITRUE + the AGI thesis",
     "cluster": "HONESTY",
     "part": null,
@@ -8925,7 +8870,7 @@
     }
   },
   {
-    "id": "CX-0268",
+    "id": "CX-0266",
     "name": "AI Cognitive-Evolution Framework / TMR theory stack",
     "cluster": "HONESTY",
     "part": null,
@@ -8955,7 +8900,7 @@
     }
   },
   {
-    "id": "CX-0269",
+    "id": "CX-0267",
     "name": "AI-reconstructable summaries",
     "cluster": "HONESTY",
     "part": null,
@@ -8983,7 +8928,7 @@
     }
   },
   {
-    "id": "CX-0270",
+    "id": "CX-0268",
     "name": "AIModCreator (executed)",
     "cluster": "HONESTY",
     "part": null,
@@ -9011,7 +8956,7 @@
     }
   },
   {
-    "id": "CX-0271",
+    "id": "CX-0269",
     "name": "AITO — AI Task Orchestrator",
     "cluster": "HONESTY",
     "part": null,
@@ -9039,7 +8984,7 @@
     }
   },
   {
-    "id": "CX-0272",
+    "id": "CX-0270",
     "name": "AMACS — Advanced Multi-Agent Coordination System",
     "cluster": "HONESTY",
     "part": null,
@@ -9067,7 +9012,7 @@
     }
   },
   {
-    "id": "CX-0273",
+    "id": "CX-0271",
     "name": "Annidation theory — \"the cube that swallows itself\"",
     "cluster": "HONESTY",
     "part": null,
@@ -9095,7 +9040,7 @@
     }
   },
   {
-    "id": "CX-0274",
+    "id": "CX-0272",
     "name": "answer_operator / META_PROMPT ritual (Universal Catalyst)",
     "cluster": "HONESTY",
     "part": null,
@@ -9123,7 +9068,7 @@
     }
   },
   {
-    "id": "CX-0275",
+    "id": "CX-0273",
     "name": "Black hole simulations — from 2023 nursery to physics-correct Gargantua",
     "cluster": "HONESTY",
     "part": null,
@@ -9153,7 +9098,7 @@
     }
   },
   {
-    "id": "CX-0276",
+    "id": "CX-0274",
     "name": "Bot society with its own Slack + Asana",
     "cluster": "HONESTY",
     "part": null,
@@ -9181,7 +9126,7 @@
     }
   },
   {
-    "id": "CX-0277",
+    "id": "CX-0275",
     "name": "ChatGPT memory portability",
     "cluster": "HONESTY",
     "part": null,
@@ -9209,7 +9154,7 @@
     }
   },
   {
-    "id": "CX-0278",
+    "id": "CX-0276",
     "name": "ChatGPT-memory leak of his mid-2024 project portfolio",
     "cluster": "HONESTY",
     "part": null,
@@ -9237,7 +9182,7 @@
     }
   },
   {
-    "id": "CX-0279",
+    "id": "CX-0277",
     "name": "Cognitive Resonance Chamber",
     "cluster": "HONESTY",
     "part": null,
@@ -9265,7 +9210,7 @@
     }
   },
   {
-    "id": "CX-0280",
+    "id": "CX-0278",
     "name": "CognitiveTransistor",
     "cluster": "HONESTY",
     "part": null,
@@ -9295,7 +9240,7 @@
     }
   },
   {
-    "id": "CX-0281",
+    "id": "CX-0279",
     "name": "Coined techniques canon",
     "cluster": "HONESTY",
     "part": null,
@@ -9323,7 +9268,7 @@
     }
   },
   {
-    "id": "CX-0282",
+    "id": "CX-0280",
     "name": "Cosmic Time slider + in-metaphor UX/monetization",
     "cluster": "HONESTY",
     "part": null,
@@ -9351,35 +9296,7 @@
     }
   },
   {
-    "id": "CX-0283",
-    "name": "Cryptographic Contextual Markers + \"Turn GPT-2 into GPT-4/5\"",
-    "cluster": "HONESTY",
-    "part": null,
-    "law": null,
-    "tier": "C",
-    "essence": "",
-    "status": "shipped",
-    "eras": [],
-    "sources": [],
-    "aliases": [],
-    "potential": [],
-    "merged_from": [
-      "gold"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [],
-      "refines": [],
-      "proves": []
-    }
-  },
-  {
-    "id": "CX-0284",
+    "id": "CX-0281",
     "name": "DAN jailbreak + quid-pro-quo pact",
     "cluster": "HONESTY",
     "part": null,
@@ -9407,7 +9324,7 @@
     }
   },
   {
-    "id": "CX-0285",
+    "id": "CX-0282",
     "name": "Data Inferno",
     "cluster": "HONESTY",
     "part": null,
@@ -9435,7 +9352,7 @@
     }
   },
   {
-    "id": "CX-0286",
+    "id": "CX-0283",
     "name": "Embedded prompting + retrofitting conversation games",
     "cluster": "HONESTY",
     "part": null,
@@ -9463,7 +9380,7 @@
     }
   },
   {
-    "id": "CX-0287",
+    "id": "CX-0284",
     "name": "Energy Metaphor / Energy Units (EU) / Energy Truth",
     "cluster": "HONESTY",
     "part": null,
@@ -9493,7 +9410,7 @@
     }
   },
   {
-    "id": "CX-0288",
+    "id": "CX-0285",
     "name": "Five AGI-generating games (containment thinking)",
     "cluster": "HONESTY",
     "part": null,
@@ -9521,7 +9438,7 @@
     }
   },
   {
-    "id": "CX-0289",
+    "id": "CX-0286",
     "name": "Forge \"Advanced LLM Symphony\" / Omega Protocol: Absolute Dominion",
     "cluster": "HONESTY",
     "part": null,
@@ -9549,7 +9466,7 @@
     }
   },
   {
-    "id": "CX-0290",
+    "id": "CX-0287",
     "name": "Future-self oracle prompting games",
     "cluster": "HONESTY",
     "part": null,
@@ -9577,7 +9494,7 @@
     }
   },
   {
-    "id": "CX-0291",
+    "id": "CX-0288",
     "name": "Genesis: The Cryptic Evolution life sim (built)",
     "cluster": "HONESTY",
     "part": null,
@@ -9605,7 +9522,7 @@
     }
   },
   {
-    "id": "CX-0292",
+    "id": "CX-0289",
     "name": "HSQ-Transformer (HyperSphere-Q)",
     "cluster": "HONESTY",
     "part": null,
@@ -9635,7 +9552,7 @@
     }
   },
   {
-    "id": "CX-0293",
+    "id": "CX-0290",
     "name": "inception.py — FTH cognitive architecture",
     "cluster": "HONESTY",
     "part": null,
@@ -9663,7 +9580,7 @@
     }
   },
   {
-    "id": "CX-0294",
+    "id": "CX-0291",
     "name": "Layered conversational-AI engine with memory (\"exporter\")",
     "cluster": "HONESTY",
     "part": null,
@@ -9691,7 +9608,7 @@
     }
   },
   {
-    "id": "CX-0295",
+    "id": "CX-0292",
     "name": "LLM Script — AI-native web language",
     "cluster": "HONESTY",
     "part": null,
@@ -9719,7 +9636,7 @@
     }
   },
   {
-    "id": "CX-0296",
+    "id": "CX-0293",
     "name": "LuisBlancoDev — AI AUTHORITY BUILD",
     "cluster": "HONESTY",
     "part": null,
@@ -9747,7 +9664,7 @@
     }
   },
   {
-    "id": "CX-0297",
+    "id": "CX-0294",
     "name": "Metapower / metagenerator",
     "cluster": "HONESTY",
     "part": null,
@@ -9777,7 +9694,7 @@
     }
   },
   {
-    "id": "CX-0298",
+    "id": "CX-0295",
     "name": "Micro-universe civilization on Groq — the earliest not-a-wrapper instinct",
     "cluster": "HONESTY",
     "part": null,
@@ -9807,7 +9724,7 @@
     }
   },
   {
-    "id": "CX-0299",
+    "id": "CX-0296",
     "name": "Multi-LLM delegation pipeline (pre-agent era)",
     "cluster": "HONESTY",
     "part": null,
@@ -9835,7 +9752,7 @@
     }
   },
   {
-    "id": "CX-0300",
+    "id": "CX-0297",
     "name": "Multitemporal self cross unifying loop",
     "cluster": "HONESTY",
     "part": null,
@@ -9863,7 +9780,7 @@
     }
   },
   {
-    "id": "CX-0301",
+    "id": "CX-0298",
     "name": "Nine Prototypes / NinePrototypeOrchestrator",
     "cluster": "HONESTY",
     "part": null,
@@ -9891,7 +9808,7 @@
     }
   },
   {
-    "id": "CX-0302",
+    "id": "CX-0299",
     "name": "Numeric marker language for inter-agent communication",
     "cluster": "HONESTY",
     "part": null,
@@ -9919,7 +9836,7 @@
     }
   },
   {
-    "id": "CX-0303",
+    "id": "CX-0300",
     "name": "O_C_AI Revolutionary AI Development roadmap",
     "cluster": "HONESTY",
     "part": null,
@@ -9947,7 +9864,7 @@
     }
   },
   {
-    "id": "CX-0304",
+    "id": "CX-0301",
     "name": "Omniscient Synthesizer",
     "cluster": "HONESTY",
     "part": null,
@@ -9975,7 +9892,7 @@
     }
   },
   {
-    "id": "CX-0305",
+    "id": "CX-0302",
     "name": "Primordial Seed / Primordial AI",
     "cluster": "HONESTY",
     "part": null,
@@ -10005,7 +9922,7 @@
     }
   },
   {
-    "id": "CX-0306",
+    "id": "CX-0303",
     "name": "PrimordialAgent",
     "cluster": "HONESTY",
     "part": null,
@@ -10033,7 +9950,7 @@
     }
   },
   {
-    "id": "CX-0307",
+    "id": "CX-0304",
     "name": "Project Leyber 212 — the founding platform",
     "cluster": "HONESTY",
     "part": null,
@@ -10061,7 +9978,7 @@
     }
   },
   {
-    "id": "CX-0308",
+    "id": "CX-0305",
     "name": "Project Prometheus Helix",
     "cluster": "HONESTY",
     "part": null,
@@ -10089,35 +10006,7 @@
     }
   },
   {
-    "id": "CX-0309",
-    "name": "SearXNG + Tor + Groq metasearch (\"cover all corners of internet\")",
-    "cluster": "HONESTY",
-    "part": null,
-    "law": null,
-    "tier": "C",
-    "essence": "",
-    "status": "shipped",
-    "eras": [],
-    "sources": [],
-    "aliases": [],
-    "potential": [],
-    "merged_from": [
-      "gold"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [],
-      "refines": [],
-      "proves": []
-    }
-  },
-  {
-    "id": "CX-0310",
+    "id": "CX-0306",
     "name": "SECIA-2 Ecosystem — self-rewriting webpage organism",
     "cluster": "HONESTY",
     "part": null,
@@ -10145,7 +10034,7 @@
     }
   },
   {
-    "id": "CX-0311",
+    "id": "CX-0307",
     "name": "Second Foundation shadow controller",
     "cluster": "HONESTY",
     "part": null,
@@ -10173,7 +10062,7 @@
     }
   },
   {
-    "id": "CX-0312",
+    "id": "CX-0308",
     "name": "Self-modifying training loop + the self-adjustment paradox",
     "cluster": "HONESTY",
     "part": null,
@@ -10201,7 +10090,7 @@
     }
   },
   {
-    "id": "CX-0313",
+    "id": "CX-0309",
     "name": "Self-replicating / self-coding application",
     "cluster": "HONESTY",
     "part": null,
@@ -10229,7 +10118,7 @@
     }
   },
   {
-    "id": "CX-0314",
+    "id": "CX-0310",
     "name": "Specialist Singularities cognitive-framework cluster (FLUX persona)",
     "cluster": "HONESTY",
     "part": null,
@@ -10257,7 +10146,7 @@
     }
   },
   {
-    "id": "CX-0315",
+    "id": "CX-0311",
     "name": "Subsandboxed universe / Heptalanguage AGI framework",
     "cluster": "HONESTY",
     "part": null,
@@ -10285,7 +10174,7 @@
     }
   },
   {
-    "id": "CX-0316",
+    "id": "CX-0312",
     "name": "Superposition / Metaposition / Omniposition triad",
     "cluster": "HONESTY",
     "part": null,
@@ -10315,7 +10204,7 @@
     }
   },
   {
-    "id": "CX-0317",
+    "id": "CX-0313",
     "name": "The 31-celestial-body internet ontology",
     "cluster": "HONESTY",
     "part": null,
@@ -10345,7 +10234,7 @@
     }
   },
   {
-    "id": "CX-0318",
+    "id": "CX-0314",
     "name": "The agent menagerie (Wizard/Guide/Sage trio)",
     "cluster": "HONESTY",
     "part": null,
@@ -10373,7 +10262,7 @@
     }
   },
   {
-    "id": "CX-0319",
+    "id": "CX-0315",
     "name": "The DECIPHER",
     "cluster": "HONESTY",
     "part": null,
@@ -10403,7 +10292,7 @@
     }
   },
   {
-    "id": "CX-0320",
+    "id": "CX-0316",
     "name": "The Galactic Ages / AI AGES — mythology as executable method",
     "cluster": "HONESTY",
     "part": null,
@@ -10433,7 +10322,7 @@
     }
   },
   {
-    "id": "CX-0321",
+    "id": "CX-0317",
     "name": "The honesty decoder",
     "cluster": "HONESTY",
     "part": null,
@@ -10463,7 +10352,7 @@
     }
   },
   {
-    "id": "CX-0322",
+    "id": "CX-0318",
     "name": "THE HONESTY LINE — Energy Truth & Instrumented AI (the maturity cluster)",
     "cluster": "HONESTY",
     "part": null,
@@ -10491,7 +10380,7 @@
     }
   },
   {
-    "id": "CX-0323",
+    "id": "CX-0319",
     "name": "The Ordeal of Ultimate Revelation / Ultimate Empowerment Protocol",
     "cluster": "HONESTY",
     "part": null,
@@ -10519,7 +10408,7 @@
     }
   },
   {
-    "id": "CX-0324",
+    "id": "CX-0320",
     "name": "The Seven AI Games series",
     "cluster": "HONESTY",
     "part": null,
@@ -10549,7 +10438,7 @@
     }
   },
   {
-    "id": "CX-0325",
+    "id": "CX-0321",
     "name": "The two-jobs pattern, date-stamped",
     "cluster": "HONESTY",
     "part": null,
@@ -10577,7 +10466,7 @@
     }
   },
   {
-    "id": "CX-0326",
+    "id": "CX-0322",
     "name": "Three Doors (Forge / Scholar / Sage)",
     "cluster": "HONESTY",
     "part": null,
@@ -10605,7 +10494,7 @@
     }
   },
   {
-    "id": "CX-0327",
+    "id": "CX-0323",
     "name": "Three-persona critic stack + recursive expansion loop",
     "cluster": "HONESTY",
     "part": null,
@@ -10635,7 +10524,7 @@
     }
   },
   {
-    "id": "CX-0328",
+    "id": "CX-0324",
     "name": "Token-timing EEG / token-stream EKG (Spectral Analyzer)",
     "cluster": "HONESTY",
     "part": null,
@@ -10665,7 +10554,7 @@
     }
   },
   {
-    "id": "CX-0329",
+    "id": "CX-0325",
     "name": "Universal AI Substrate",
     "cluster": "HONESTY",
     "part": null,
@@ -10695,7 +10584,7 @@
     }
   },
   {
-    "id": "CX-0330",
+    "id": "CX-0326",
     "name": "URL prompting / WebSim URL Prompting Bible + self-generating Encyclopedia Galactica",
     "cluster": "HONESTY",
     "part": null,
@@ -10723,7 +10612,7 @@
     }
   },
   {
-    "id": "CX-0331",
+    "id": "CX-0327",
     "name": "WF document factory",
     "cluster": "HONESTY",
     "part": null,
@@ -10753,7 +10642,7 @@
     }
   },
   {
-    "id": "CX-0332",
+    "id": "CX-0328",
     "name": "'11B and below' hardware-honest sizing doctrine",
     "cluster": "HONESTY",
     "part": null,
@@ -10788,7 +10677,7 @@
     }
   },
   {
-    "id": "CX-0333",
+    "id": "CX-0329",
     "name": "\"AI is a probabilistic node\" thesis",
     "cluster": "HONESTY",
     "part": null,
@@ -10823,7 +10712,7 @@
     }
   },
   {
-    "id": "CX-0334",
+    "id": "CX-0330",
     "name": "\"AI should be owned, not rented\" manifesto",
     "cluster": "HONESTY",
     "part": null,
@@ -10858,7 +10747,7 @@
     }
   },
   {
-    "id": "CX-0335",
+    "id": "CX-0331",
     "name": "\"demystify · don't dunk · build the layer beneath\" mission triplet",
     "cluster": "HONESTY",
     "part": null,
@@ -10893,7 +10782,7 @@
     }
   },
   {
-    "id": "CX-0336",
+    "id": "CX-0332",
     "name": "AEA Concept Locator",
     "cluster": "HONESTY",
     "part": null,
@@ -10928,7 +10817,7 @@
     }
   },
   {
-    "id": "CX-0337",
+    "id": "CX-0333",
     "name": "AEA empirical validation program (GREEN gate)",
     "cluster": "HONESTY",
     "part": null,
@@ -10964,7 +10853,7 @@
     }
   },
   {
-    "id": "CX-0338",
+    "id": "CX-0334",
     "name": "AI evolutionary scale era-mapping",
     "cluster": "HONESTY",
     "part": null,
@@ -10998,7 +10887,7 @@
     }
   },
   {
-    "id": "CX-0339",
+    "id": "CX-0335",
     "name": "Anti-framework / not-a-wrapper stance",
     "cluster": "HONESTY",
     "part": null,
@@ -11033,7 +10922,7 @@
     }
   },
   {
-    "id": "CX-0340",
+    "id": "CX-0336",
     "name": "Autonomous Entity Architecture (AEA)",
     "cluster": "HONESTY",
     "part": null,
@@ -11070,7 +10959,7 @@
     }
   },
   {
-    "id": "CX-0341",
+    "id": "CX-0337",
     "name": "Branching decode exploration",
     "cluster": "HONESTY",
     "part": null,
@@ -11105,7 +10994,7 @@
     }
   },
   {
-    "id": "CX-0342",
+    "id": "CX-0338",
     "name": "Canonical AEA site copy",
     "cluster": "HONESTY",
     "part": null,
@@ -11141,7 +11030,7 @@
     }
   },
   {
-    "id": "CX-0343",
+    "id": "CX-0339",
     "name": "Chain-of-Thought Visualization roadmap step",
     "cluster": "HONESTY",
     "part": null,
@@ -11176,7 +11065,7 @@
     }
   },
   {
-    "id": "CX-0344",
+    "id": "CX-0340",
     "name": "Compute-over-time thesis",
     "cluster": "HONESTY",
     "part": null,
@@ -11211,7 +11100,7 @@
     }
   },
   {
-    "id": "CX-0345",
+    "id": "CX-0341",
     "name": "Content-integrity guardrails (Post 9 incident)",
     "cluster": "HONESTY",
     "part": null,
@@ -11245,7 +11134,7 @@
     }
   },
   {
-    "id": "CX-0346",
+    "id": "CX-0342",
     "name": "Cross-domain validation of AEA",
     "cluster": "HONESTY",
     "part": null,
@@ -11280,7 +11169,7 @@
     }
   },
   {
-    "id": "CX-0347",
+    "id": "CX-0343",
     "name": "Doomsday package",
     "cluster": "HONESTY",
     "part": null,
@@ -11315,7 +11204,7 @@
     }
   },
   {
-    "id": "CX-0348",
+    "id": "CX-0344",
     "name": "Embodied/social AI stance",
     "cluster": "HONESTY",
     "part": null,
@@ -11350,7 +11239,7 @@
     }
   },
   {
-    "id": "CX-0349",
+    "id": "CX-0345",
     "name": "Found-Meaning Layer",
     "cluster": "HONESTY",
     "part": null,
@@ -11385,7 +11274,7 @@
     }
   },
   {
-    "id": "CX-0350",
+    "id": "CX-0346",
     "name": "Four Levels of AI Systems",
     "cluster": "HONESTY",
     "part": null,
@@ -11420,7 +11309,7 @@
     }
   },
   {
-    "id": "CX-0351",
+    "id": "CX-0347",
     "name": "GPTDev hidden-parameter probe",
     "cluster": "HONESTY",
     "part": null,
@@ -11455,7 +11344,7 @@
     }
   },
   {
-    "id": "CX-0352",
+    "id": "CX-0348",
     "name": "Grounding reflex — \"is it real, is it workable?\"",
     "cluster": "HONESTY",
     "part": null,
@@ -11491,7 +11380,7 @@
     }
   },
   {
-    "id": "CX-0353",
+    "id": "CX-0349",
     "name": "Honest authorship label system",
     "cluster": "HONESTY",
     "part": null,
@@ -11526,7 +11415,7 @@
     }
   },
   {
-    "id": "CX-0354",
+    "id": "CX-0350",
     "name": "Kardashev scale for AI systems",
     "cluster": "HONESTY",
     "part": null,
@@ -11561,7 +11450,7 @@
     }
   },
   {
-    "id": "CX-0355",
+    "id": "CX-0351",
     "name": "Living Module System + consciousness moments",
     "cluster": "HONESTY",
     "part": null,
@@ -11596,7 +11485,7 @@
     }
   },
   {
-    "id": "CX-0356",
+    "id": "CX-0352",
     "name": "Local-core, web-enhanced doctrine",
     "cluster": "HONESTY",
     "part": null,
@@ -11634,7 +11523,7 @@
     }
   },
   {
-    "id": "CX-0357",
+    "id": "CX-0353",
     "name": "Meta-monitoring / model-awareness — watching the self-watcher",
     "cluster": "HONESTY",
     "part": null,
@@ -11669,7 +11558,7 @@
     }
   },
   {
-    "id": "CX-0358",
+    "id": "CX-0354",
     "name": "Non-monotonic capability within a model lineage",
     "cluster": "HONESTY",
     "part": null,
@@ -11704,7 +11593,7 @@
     }
   },
   {
-    "id": "CX-0359",
+    "id": "CX-0355",
     "name": "Orchestrating Hardware Harmony",
     "cluster": "HONESTY",
     "part": null,
@@ -11739,7 +11628,7 @@
     }
   },
   {
-    "id": "CX-0360",
+    "id": "CX-0356",
     "name": "Pattern Discovery Library / DiscoveryDocument",
     "cluster": "HONESTY",
     "part": null,
@@ -11774,7 +11663,7 @@
     }
   },
   {
-    "id": "CX-0361",
+    "id": "CX-0357",
     "name": "Privacy-first / user-owns-data posture",
     "cluster": "HONESTY",
     "part": null,
@@ -11810,7 +11699,7 @@
     }
   },
   {
-    "id": "CX-0362",
+    "id": "CX-0358",
     "name": "Progressive LLM-independence principle",
     "cluster": "HONESTY",
     "part": null,
@@ -11845,7 +11734,7 @@
     }
   },
   {
-    "id": "CX-0363",
+    "id": "CX-0359",
     "name": "Project Nexus: Quantum-Inspired NAS + Emergent Consciousness Monitoring",
     "cluster": "HONESTY",
     "part": null,
@@ -11880,7 +11769,7 @@
     }
   },
   {
-    "id": "CX-0364",
+    "id": "CX-0360",
     "name": "Protocol Omega Ultima",
     "cluster": "HONESTY",
     "part": null,
@@ -11915,7 +11804,7 @@
     }
   },
   {
-    "id": "CX-0365",
+    "id": "CX-0361",
     "name": "QBNN — Quantum-Biological Neural Network",
     "cluster": "HONESTY",
     "part": null,
@@ -11951,7 +11840,7 @@
     }
   },
   {
-    "id": "CX-0366",
+    "id": "CX-0362",
     "name": "Reality-check / roast-me adversarial self-audit ritual",
     "cluster": "HONESTY",
     "part": null,
@@ -11986,7 +11875,7 @@
     }
   },
   {
-    "id": "CX-0367",
+    "id": "CX-0363",
     "name": "Resonance / Resonance Prediction",
     "cluster": "HONESTY",
     "part": null,
@@ -12021,7 +11910,7 @@
     }
   },
   {
-    "id": "CX-0368",
+    "id": "CX-0364",
     "name": "Restorable coherence + the Async axis",
     "cluster": "HONESTY",
     "part": null,
@@ -12056,7 +11945,7 @@
     }
   },
   {
-    "id": "CX-0369",
+    "id": "CX-0365",
     "name": "Satellite Constellation",
     "cluster": "HONESTY",
     "part": null,
@@ -12091,7 +11980,7 @@
     }
   },
   {
-    "id": "CX-0370",
+    "id": "CX-0366",
     "name": "See / Emergence explainer artifacts",
     "cluster": "HONESTY",
     "part": null,
@@ -12125,7 +12014,7 @@
     }
   },
   {
-    "id": "CX-0371",
+    "id": "CX-0367",
     "name": "Sentinel scripts",
     "cluster": "HONESTY",
     "part": null,
@@ -12160,7 +12049,7 @@
     }
   },
   {
-    "id": "CX-0372",
+    "id": "CX-0368",
     "name": "Silent-wrong failure mode + skill-library crystallization",
     "cluster": "HONESTY",
     "part": null,
@@ -12195,7 +12084,7 @@
     }
   },
   {
-    "id": "CX-0373",
+    "id": "CX-0369",
     "name": "Substrate-equivalence argument",
     "cluster": "HONESTY",
     "part": null,
@@ -12230,7 +12119,7 @@
     }
   },
   {
-    "id": "CX-0374",
+    "id": "CX-0370",
     "name": "System-awareness-not-code-awareness distinction",
     "cluster": "HONESTY",
     "part": null,
@@ -12265,7 +12154,7 @@
     }
   },
   {
-    "id": "CX-0375",
+    "id": "CX-0371",
     "name": "The agent-word gap (L1 vs L2)",
     "cluster": "HONESTY",
     "part": null,
@@ -12300,7 +12189,7 @@
     }
   },
   {
-    "id": "CX-0376",
+    "id": "CX-0372",
     "name": "The cracks program (CR1–CR9)",
     "cluster": "HONESTY",
     "part": null,
@@ -12335,7 +12224,7 @@
     }
   },
   {
-    "id": "CX-0377",
+    "id": "CX-0373",
     "name": "The Five Axes (Path · Multiplicity · Abstraction · Prompting · Async)",
     "cluster": "HONESTY",
     "part": null,
@@ -12371,7 +12260,7 @@
     }
   },
   {
-    "id": "CX-0378",
+    "id": "CX-0374",
     "name": "The origin corner / \"agentic is a compression\"",
     "cluster": "HONESTY",
     "part": null,
@@ -12406,7 +12295,7 @@
     }
   },
   {
-    "id": "CX-0379",
+    "id": "CX-0375",
     "name": "The Prediction Layer",
     "cluster": "HONESTY",
     "part": null,
@@ -12441,7 +12330,7 @@
     }
   },
   {
-    "id": "CX-0380",
+    "id": "CX-0376",
     "name": "The recursive AEA glyph",
     "cluster": "HONESTY",
     "part": null,
@@ -12475,7 +12364,7 @@
     }
   },
   {
-    "id": "CX-0381",
+    "id": "CX-0377",
     "name": "Tradeable energy patterns marketplace",
     "cluster": "HONESTY",
     "part": null,
@@ -12510,7 +12399,7 @@
     }
   },
   {
-    "id": "CX-0382",
+    "id": "CX-0378",
     "name": "Truth-calibration of AI drafts",
     "cluster": "HONESTY",
     "part": null,
@@ -12545,7 +12434,7 @@
     }
   },
   {
-    "id": "CX-0383",
+    "id": "CX-0379",
     "name": "Two-filter architecture (viability vs utility)",
     "cluster": "HONESTY",
     "part": null,
@@ -12579,7 +12468,7 @@
     }
   },
   {
-    "id": "CX-0384",
+    "id": "CX-0380",
     "name": "Understanding-AI mission statement",
     "cluster": "HONESTY",
     "part": null,
@@ -12614,7 +12503,7 @@
     }
   },
   {
-    "id": "CX-0385",
+    "id": "CX-0381",
     "name": "WhiteBoxConverter / ParallelTester compress-and-compare protocol",
     "cluster": "HONESTY",
     "part": null,
@@ -12649,7 +12538,7 @@
     }
   },
   {
-    "id": "CX-0386",
+    "id": "CX-0382",
     "name": "Wirthforge mobile via Qualcomm Genie",
     "cluster": "HONESTY",
     "part": null,
@@ -12683,7 +12572,7 @@
     }
   },
   {
-    "id": "CX-0387",
+    "id": "CX-0383",
     "name": "WIRTHFORGE resilience layer",
     "cluster": "HONESTY",
     "part": null,
@@ -12718,7 +12607,7 @@
     }
   },
   {
-    "id": "CX-0388",
+    "id": "CX-0384",
     "name": "The Tryverse Chronicles — TRIVERSE manuscript birth",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12748,7 +12637,7 @@
     }
   },
   {
-    "id": "CX-0389",
+    "id": "CX-0385",
     "name": "TRYVERSE → TRIVERSE",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12778,7 +12667,7 @@
     }
   },
   {
-    "id": "CX-0390",
+    "id": "CX-0386",
     "name": "AGI Societies Index",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12813,7 +12702,7 @@
     }
   },
   {
-    "id": "CX-0391",
+    "id": "CX-0387",
     "name": "Anti-Entropic Engine / Quantum Entanglement Engine",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12847,7 +12736,7 @@
     }
   },
   {
-    "id": "CX-0392",
+    "id": "CX-0388",
     "name": "Consciousness ontology tree (SENTIENCE: Biological & AI)",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12882,7 +12771,7 @@
     }
   },
   {
-    "id": "CX-0393",
+    "id": "CX-0389",
     "name": "Cosmic-rebranded UX vocabulary (cosmicize)",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12917,7 +12806,7 @@
     }
   },
   {
-    "id": "CX-0394",
+    "id": "CX-0390",
     "name": "Entrenamiento Cuántico — life re-skinned as astrophysics",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12951,7 +12840,7 @@
     }
   },
   {
-    "id": "CX-0395",
+    "id": "CX-0391",
     "name": "FTH — Fractal Transcendence Hypothesis rituals",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -12986,7 +12875,7 @@
     }
   },
   {
-    "id": "CX-0396",
+    "id": "CX-0392",
     "name": "Genome-reference biological metaphor layer",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13020,7 +12909,7 @@
     }
   },
   {
-    "id": "CX-0397",
+    "id": "CX-0393",
     "name": "Hades / Sedah / Ouroboros / Prometheus pantheon (Kronos/Gaia/Athena/Elysium/Hyperion)",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13056,7 +12945,7 @@
     }
   },
   {
-    "id": "CX-0398",
+    "id": "CX-0394",
     "name": "HADES AI / SDAH naming + the ODE visualizer",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13090,7 +12979,7 @@
     }
   },
   {
-    "id": "CX-0399",
+    "id": "CX-0395",
     "name": "Kardashev ant/spaceship transcendence framing",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13125,7 +13014,7 @@
     }
   },
   {
-    "id": "CX-0400",
+    "id": "CX-0396",
     "name": "Local model as companion/life/entity (animism)",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13162,7 +13051,7 @@
     }
   },
   {
-    "id": "CX-0401",
+    "id": "CX-0397",
     "name": "Local models as Heroes/Crew characters",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13197,7 +13086,7 @@
     }
   },
   {
-    "id": "CX-0402",
+    "id": "CX-0398",
     "name": "Mythic codenames habit (Argos/Panoptes/Skopos/Horus/Necronomicon/kNekro)",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13236,7 +13125,7 @@
     }
   },
   {
-    "id": "CX-0403",
+    "id": "CX-0399",
     "name": "Serpentine Logic / Quantum Weaver / Metamorphic Encryption Transcendence",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13268,7 +13157,7 @@
     }
   },
   {
-    "id": "CX-0404",
+    "id": "CX-0400",
     "name": "Temporal decohesion / mutable cohesion",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13303,7 +13192,7 @@
     }
   },
   {
-    "id": "CX-0405",
+    "id": "CX-0401",
     "name": "Topic-graph consistency (TRIVERSE leaks into AI posts)",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13338,7 +13227,7 @@
     }
   },
   {
-    "id": "CX-0406",
+    "id": "CX-0402",
     "name": "WIRTHFORGE AI persona pantheon",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13373,7 +13262,7 @@
     }
   },
   {
-    "id": "CX-0407",
+    "id": "CX-0403",
     "name": "Xeroth / Second Foundation covenant",
     "cluster": "MYTHOLOGY",
     "part": null,
@@ -13408,7 +13297,7 @@
     }
   },
   {
-    "id": "CX-0408",
+    "id": "CX-0404",
     "name": "'The world is writing itself' methodology",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13444,7 +13333,7 @@
     }
   },
   {
-    "id": "CX-0409",
+    "id": "CX-0405",
     "name": "11-prompt FINAL_AUDIT suite",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13479,7 +13368,7 @@
     }
   },
   {
-    "id": "CX-0410",
+    "id": "CX-0406",
     "name": "2068 Apex-Civilization mandate ('Seldon Plan')",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13514,7 +13403,7 @@
     }
   },
   {
-    "id": "CX-0411",
+    "id": "CX-0407",
     "name": "Acoustic mechanism suite (Mongol Rout, Oru-Vaan, Silicon Blight, Kha-Ren nodes)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13549,7 +13438,7 @@
     }
   },
   {
-    "id": "CX-0412",
+    "id": "CX-0408",
     "name": "Acoustic-civilization science tree",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13584,7 +13473,7 @@
     }
   },
   {
-    "id": "CX-0413",
+    "id": "CX-0409",
     "name": "Aithro style",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13619,7 +13508,7 @@
     }
   },
   {
-    "id": "CX-0414",
+    "id": "CX-0410",
     "name": "Blender→AI graphics pipeline",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13653,7 +13542,7 @@
     }
   },
   {
-    "id": "CX-0415",
+    "id": "CX-0411",
     "name": "Bronze Age Equilibrium reframe",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13687,7 +13576,7 @@
     }
   },
   {
-    "id": "CX-0416",
+    "id": "CX-0412",
     "name": "Chapter concept-map timelines",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13722,7 +13611,7 @@
     }
   },
   {
-    "id": "CX-0417",
+    "id": "CX-0413",
     "name": "Character architecture from self-analysis (The Frequency / Nasha)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13757,7 +13646,7 @@
     }
   },
   {
-    "id": "CX-0418",
+    "id": "CX-0414",
     "name": "Conlang program for Terra & Eshara",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13792,7 +13681,7 @@
     }
   },
   {
-    "id": "CX-0419",
+    "id": "CX-0415",
     "name": "Cultural-breakout publication strategy",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13828,7 +13717,7 @@
     }
   },
   {
-    "id": "CX-0420",
+    "id": "CX-0416",
     "name": "Dimension Walkers narrative universe",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13863,7 +13752,7 @@
     }
   },
   {
-    "id": "CX-0421",
+    "id": "CX-0417",
     "name": "Earth-2068 chronology method",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13898,7 +13787,7 @@
     }
   },
   {
-    "id": "CX-0422",
+    "id": "CX-0418",
     "name": "EDITION_BETA ticketed remediation (T-00→T-19)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13934,7 +13823,7 @@
     }
   },
   {
-    "id": "CX-0423",
+    "id": "CX-0419",
     "name": "Eshara → Kha-Ren rebirth / 'Esharanization of Earth'",
     "cluster": "NARRATIVE",
     "part": null,
@@ -13968,7 +13857,7 @@
     }
   },
   {
-    "id": "CX-0424",
+    "id": "CX-0420",
     "name": "Evidence-led discovery + 'No Fantasy Magic' rule",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14004,7 +13893,7 @@
     }
   },
   {
-    "id": "CX-0425",
+    "id": "CX-0421",
     "name": "Galactic Ages future-history 2024–2200",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14039,7 +13928,7 @@
     }
   },
   {
-    "id": "CX-0426",
+    "id": "CX-0422",
     "name": "Guilt-transfer mechanism + leak grading",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14074,7 +13963,7 @@
     }
   },
   {
-    "id": "CX-0427",
+    "id": "CX-0423",
     "name": "Institutional Emergence Law",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14109,7 +13998,7 @@
     }
   },
   {
-    "id": "CX-0428",
+    "id": "CX-0424",
     "name": "Inverted-cone progressive divergence",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14143,7 +14032,7 @@
     }
   },
   {
-    "id": "CX-0429",
+    "id": "CX-0425",
     "name": "Joker characters",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14177,7 +14066,7 @@
     }
   },
   {
-    "id": "CX-0430",
+    "id": "CX-0426",
     "name": "Kha-Ren caste system & POV design",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14211,7 +14100,7 @@
     }
   },
   {
-    "id": "CX-0431",
+    "id": "CX-0427",
     "name": "Kha-Ren D3 historical map",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14246,7 +14135,7 @@
     }
   },
   {
-    "id": "CX-0432",
+    "id": "CX-0428",
     "name": "KHA-REN SECOND MILLENNIUM (ESHARA_NEW_MILENIUM / KR era reports)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14281,7 +14170,7 @@
     }
   },
   {
-    "id": "CX-0433",
+    "id": "CX-0429",
     "name": "Luis-authored in-world inventions",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14316,7 +14205,7 @@
     }
   },
   {
-    "id": "CX-0434",
+    "id": "CX-0430",
     "name": "Marcus & Samantha alignment fiction",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14351,7 +14240,7 @@
     }
   },
   {
-    "id": "CX-0435",
+    "id": "CX-0431",
     "name": "Master Knowledge Schemas SM-00…SM-05",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14386,7 +14275,7 @@
     }
   },
   {
-    "id": "CX-0436",
+    "id": "CX-0432",
     "name": "Nine-lens audit framework / 48-hour revision engine",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14422,7 +14311,7 @@
     }
   },
   {
-    "id": "CX-0437",
+    "id": "CX-0433",
     "name": "Perspective-relative worldbuilding toolkit",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14457,7 +14346,7 @@
     }
   },
   {
-    "id": "CX-0438",
+    "id": "CX-0434",
     "name": "R-series world bible",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14491,7 +14380,7 @@
     }
   },
   {
-    "id": "CX-0439",
+    "id": "CX-0435",
     "name": "Reference-sci-fi 'escape fiction' study + TRIVERSE archive recovery",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14527,7 +14416,7 @@
     }
   },
   {
-    "id": "CX-0440",
+    "id": "CX-0436",
     "name": "Silhouette-over-anatomy law + ink-wash aesthetic",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14562,7 +14451,7 @@
     }
   },
   {
-    "id": "CX-0441",
+    "id": "CX-0437",
     "name": "Teacher-demo pitch narrative",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14596,7 +14485,7 @@
     }
   },
   {
-    "id": "CX-0442",
+    "id": "CX-0438",
     "name": "The artifact as dimensional heat engine",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14631,7 +14520,7 @@
     }
   },
   {
-    "id": "CX-0443",
+    "id": "CX-0439",
     "name": "The Codex book (in-universe)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14666,7 +14555,7 @@
     }
   },
   {
-    "id": "CX-0444",
+    "id": "CX-0440",
     "name": "The TRIVERSE Codex (master reference)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14700,7 +14589,7 @@
     }
   },
   {
-    "id": "CX-0445",
+    "id": "CX-0441",
     "name": "THE TRYVERSE trilogy development OS / multi-AI production pipeline",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14736,7 +14625,7 @@
     }
   },
   {
-    "id": "CX-0446",
+    "id": "CX-0442",
     "name": "Time-Slip storytelling web app",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14772,7 +14661,7 @@
     }
   },
   {
-    "id": "CX-0447",
+    "id": "CX-0443",
     "name": "Traceability principle",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14807,7 +14696,7 @@
     }
   },
   {
-    "id": "CX-0448",
+    "id": "CX-0444",
     "name": "Trilogy-of-trilogies architecture",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14841,7 +14730,7 @@
     }
   },
   {
-    "id": "CX-0449",
+    "id": "CX-0445",
     "name": "TRIVERSE Book 1 production line",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14875,7 +14764,7 @@
     }
   },
   {
-    "id": "CX-0450",
+    "id": "CX-0446",
     "name": "TRIVERSE technology canon (Quantum Archaeology — QEM/QID/QEC/QAS)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14911,7 +14800,7 @@
     }
   },
   {
-    "id": "CX-0451",
+    "id": "CX-0447",
     "name": "TRIVERSE tragedy core — communication IS destruction / The Nemesis",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14946,7 +14835,7 @@
     }
   },
   {
-    "id": "CX-0452",
+    "id": "CX-0448",
     "name": "TRIVERSE Worldbuilding IDE (triverse-timeline) + Mirror Principle",
     "cluster": "NARRATIVE",
     "part": null,
@@ -14982,7 +14871,7 @@
     }
   },
   {
-    "id": "CX-0453",
+    "id": "CX-0449",
     "name": "Tryverse cosmology — interdimensional cosmic hardware",
     "cluster": "NARRATIVE",
     "part": null,
@@ -15017,7 +14906,7 @@
     }
   },
   {
-    "id": "CX-0454",
+    "id": "CX-0450",
     "name": "Visionary Technologist Project (TRIVERSE seed)",
     "cluster": "NARRATIVE",
     "part": null,
@@ -15052,7 +14941,7 @@
     }
   },
   {
-    "id": "CX-0455",
+    "id": "CX-0451",
     "name": "Wound-level methodology / levels of inception",
     "cluster": "NARRATIVE",
     "part": null,
@@ -15087,7 +14976,7 @@
     }
   },
   {
-    "id": "CX-0456",
+    "id": "CX-0452",
     "name": "'ALPS is a forecast' plan-source forensics",
     "cluster": "OPS",
     "part": null,
@@ -15121,7 +15010,7 @@
     }
   },
   {
-    "id": "CX-0457",
+    "id": "CX-0453",
     "name": "'Build our own ChatGPT' + generate-money instinct",
     "cluster": "OPS",
     "part": null,
@@ -15155,7 +15044,7 @@
     }
   },
   {
-    "id": "CX-0458",
+    "id": "CX-0454",
     "name": "\"No libraries\" doctrine",
     "cluster": "OPS",
     "part": null,
@@ -15191,7 +15080,7 @@
     }
   },
   {
-    "id": "CX-0459",
+    "id": "CX-0455",
     "name": "30-second holy-shit moment / viral mechanics",
     "cluster": "OPS",
     "part": null,
@@ -15225,7 +15114,7 @@
     }
   },
   {
-    "id": "CX-0460",
+    "id": "CX-0456",
     "name": "AETHER212-levels-applied-to-day-job dual-use test",
     "cluster": "OPS",
     "part": null,
@@ -15259,7 +15148,7 @@
     }
   },
   {
-    "id": "CX-0461",
+    "id": "CX-0457",
     "name": "AI callout generator (Amazon Nova)",
     "cluster": "OPS",
     "part": null,
@@ -15294,7 +15183,7 @@
     }
   },
   {
-    "id": "CX-0462",
+    "id": "CX-0458",
     "name": "AI consulting company blueprint (rol transhumano)",
     "cluster": "OPS",
     "part": null,
@@ -15329,7 +15218,7 @@
     }
   },
   {
-    "id": "CX-0463",
+    "id": "CX-0459",
     "name": "ARGOS middleware / composer architecture",
     "cluster": "OPS",
     "part": null,
@@ -15363,7 +15252,7 @@
     }
   },
   {
-    "id": "CX-0464",
+    "id": "CX-0460",
     "name": "Argos threading model + queue-rebinding fix",
     "cluster": "OPS",
     "part": null,
@@ -15397,7 +15286,7 @@
     }
   },
   {
-    "id": "CX-0465",
+    "id": "CX-0461",
     "name": "Auto-publish zero-touch pipeline attempt",
     "cluster": "OPS",
     "part": null,
@@ -15432,7 +15321,7 @@
     }
   },
   {
-    "id": "CX-0466",
+    "id": "CX-0462",
     "name": "BTL IQ AI incubator critique",
     "cluster": "OPS",
     "part": null,
@@ -15467,7 +15356,7 @@
     }
   },
   {
-    "id": "CX-0467",
+    "id": "CX-0463",
     "name": "ChatGPT as end-to-end product factory",
     "cluster": "OPS",
     "part": null,
@@ -15501,7 +15390,7 @@
     }
   },
   {
-    "id": "CX-0468",
+    "id": "CX-0464",
     "name": "ChatGPT backend-API reverse engineering (\"unlimited tokens\")",
     "cluster": "OPS",
     "part": null,
@@ -15535,7 +15424,7 @@
     }
   },
   {
-    "id": "CX-0469",
+    "id": "CX-0465",
     "name": "Comment-as-strategy + /authority-comment-finder",
     "cluster": "OPS",
     "part": null,
@@ -15569,7 +15458,7 @@
     }
   },
   {
-    "id": "CX-0470",
+    "id": "CX-0466",
     "name": "Cost-Free System Architecture",
     "cluster": "OPS",
     "part": null,
@@ -15604,7 +15493,7 @@
     }
   },
   {
-    "id": "CX-0471",
+    "id": "CX-0467",
     "name": "Crypto/forex bot income probes (Crypto Surge Predictor)",
     "cluster": "OPS",
     "part": null,
@@ -15641,7 +15530,7 @@
     }
   },
   {
-    "id": "CX-0472",
+    "id": "CX-0468",
     "name": "Daily intelligence routine (\"cowork\")",
     "cluster": "OPS",
     "part": null,
@@ -15675,7 +15564,7 @@
     }
   },
   {
-    "id": "CX-0473",
+    "id": "CX-0469",
     "name": "Desktop-as-cockpit (Rainmeter AI desktop)",
     "cluster": "OPS",
     "part": null,
@@ -15710,7 +15599,7 @@
     }
   },
   {
-    "id": "CX-0474",
+    "id": "CX-0470",
     "name": "Device-aware model packs + ethical monetization",
     "cluster": "OPS",
     "part": null,
@@ -15744,7 +15633,7 @@
     }
   },
   {
-    "id": "CX-0475",
+    "id": "CX-0471",
     "name": "Docker as corporate-laptop escape hatch",
     "cluster": "OPS",
     "part": null,
@@ -15778,7 +15667,7 @@
     }
   },
   {
-    "id": "CX-0476",
+    "id": "CX-0472",
     "name": "DTM2 control-surface incident analysis",
     "cluster": "OPS",
     "part": null,
@@ -15812,7 +15701,7 @@
     }
   },
   {
-    "id": "CX-0477",
+    "id": "CX-0473",
     "name": "Early 2023 venture probes (Barcelona bar plan; ocean plastic-removal plan)",
     "cluster": "OPS",
     "part": null,
@@ -15846,7 +15735,7 @@
     }
   },
   {
-    "id": "CX-0478",
+    "id": "CX-0474",
     "name": "Early data-engineering portfolio (AWS Lambda graphs, VBA Allocation, WoodWing API tool)",
     "cluster": "OPS",
     "part": null,
@@ -15881,7 +15770,7 @@
     }
   },
   {
-    "id": "CX-0479",
+    "id": "CX-0475",
     "name": "Ethics-vs-sample-size tradeoff",
     "cluster": "OPS",
     "part": null,
@@ -15915,7 +15804,7 @@
     }
   },
   {
-    "id": "CX-0480",
+    "id": "CX-0476",
     "name": "EU company / e-Residency venture scaffolding",
     "cluster": "OPS",
     "part": null,
@@ -15949,7 +15838,7 @@
     }
   },
   {
-    "id": "CX-0481",
+    "id": "CX-0477",
     "name": "External LLM appliance interest",
     "cluster": "OPS",
     "part": null,
@@ -15983,7 +15872,7 @@
     }
   },
   {
-    "id": "CX-0482",
+    "id": "CX-0478",
     "name": "Field-naming-as-aggregation-semantics",
     "cluster": "OPS",
     "part": null,
@@ -16017,7 +15906,7 @@
     }
   },
   {
-    "id": "CX-0483",
+    "id": "CX-0479",
     "name": "File-system anti-aggregation doctrine",
     "cluster": "OPS",
     "part": null,
@@ -16051,7 +15940,7 @@
     }
   },
   {
-    "id": "CX-0484",
+    "id": "CX-0480",
     "name": "Five micro-project candidates",
     "cluster": "OPS",
     "part": null,
@@ -16086,7 +15975,7 @@
     }
   },
   {
-    "id": "CX-0485",
+    "id": "CX-0481",
     "name": "Free-API discovery agent",
     "cluster": "OPS",
     "part": null,
@@ -16120,7 +16009,7 @@
     }
   },
   {
-    "id": "CX-0486",
+    "id": "CX-0482",
     "name": "Free-tier compute strategy (model rotation, token budgeting)",
     "cluster": "OPS",
     "part": null,
@@ -16156,7 +16045,7 @@
     }
   },
   {
-    "id": "CX-0487",
+    "id": "CX-0483",
     "name": "FTH / LANGUAGE_PROTOTYPES / ALEXANDRIA lab namespace",
     "cluster": "OPS",
     "part": null,
@@ -16192,7 +16081,7 @@
     }
   },
   {
-    "id": "CX-0488",
+    "id": "CX-0484",
     "name": "Gated-model symlink workaround",
     "cluster": "OPS",
     "part": null,
@@ -16226,7 +16115,7 @@
     }
   },
   {
-    "id": "CX-0489",
+    "id": "CX-0485",
     "name": "Gifts-not-gates pricing ethics",
     "cluster": "OPS",
     "part": null,
@@ -16261,7 +16150,7 @@
     }
   },
   {
-    "id": "CX-0490",
+    "id": "CX-0486",
     "name": "Greek Travel App",
     "cluster": "OPS",
     "part": null,
@@ -16295,7 +16184,7 @@
     }
   },
   {
-    "id": "CX-0491",
+    "id": "CX-0487",
     "name": "HF models API auto-analysis/auto-selection action",
     "cluster": "OPS",
     "part": null,
@@ -16329,7 +16218,7 @@
     }
   },
   {
-    "id": "CX-0492",
+    "id": "CX-0488",
     "name": "Hourly Update callout generator",
     "cluster": "OPS",
     "part": null,
@@ -16364,7 +16253,7 @@
     }
   },
   {
-    "id": "CX-0493",
+    "id": "CX-0489",
     "name": "Income/venture probing (Network Monitoring SaaS, power-line comms)",
     "cluster": "OPS",
     "part": null,
@@ -16398,7 +16287,7 @@
     }
   },
   {
-    "id": "CX-0494",
+    "id": "CX-0490",
     "name": "Indicia semantic-search platform (spec vectorization, friendly fields, RAG)",
     "cluster": "OPS",
     "part": null,
@@ -16434,7 +16323,7 @@
     }
   },
   {
-    "id": "CX-0495",
+    "id": "CX-0491",
     "name": "internet_gpts.py — local internet-reading GPT",
     "cluster": "OPS",
     "part": null,
@@ -16468,7 +16357,7 @@
     }
   },
   {
-    "id": "CX-0496",
+    "id": "CX-0492",
     "name": "InTouch Extended Chrome extension + Tenderizer auction module",
     "cluster": "OPS",
     "part": null,
@@ -16504,7 +16393,7 @@
     }
   },
   {
-    "id": "CX-0497",
+    "id": "CX-0493",
     "name": "IXD Process Control Agent",
     "cluster": "OPS",
     "part": null,
@@ -16539,7 +16428,7 @@
     }
   },
   {
-    "id": "CX-0498",
+    "id": "CX-0494",
     "name": "IXD Pulse / Pulse Line proposal",
     "cluster": "OPS",
     "part": null,
@@ -16574,7 +16463,7 @@
     }
   },
   {
-    "id": "CX-0499",
+    "id": "CX-0495",
     "name": "Keystone Essay",
     "cluster": "OPS",
     "part": null,
@@ -16608,7 +16497,7 @@
     }
   },
   {
-    "id": "CX-0500",
+    "id": "CX-0496",
     "name": "LBA4_Analyzer",
     "cluster": "OPS",
     "part": null,
@@ -16642,7 +16531,7 @@
     }
   },
   {
-    "id": "CX-0501",
+    "id": "CX-0497",
     "name": "Ledger of Lyra / BLAV ticketed venture management",
     "cluster": "OPS",
     "part": null,
@@ -16676,7 +16565,7 @@
     }
   },
   {
-    "id": "CX-0502",
+    "id": "CX-0498",
     "name": "Life-as-JSON four-domain personal schema",
     "cluster": "OPS",
     "part": null,
@@ -16711,7 +16600,7 @@
     }
   },
   {
-    "id": "CX-0503",
+    "id": "CX-0499",
     "name": "Local-first offline in-browser LLM single-file ethos",
     "cluster": "OPS",
     "part": null,
@@ -16746,7 +16635,7 @@
     }
   },
   {
-    "id": "CX-0504",
+    "id": "CX-0500",
     "name": "LUIS_BLANCO_MASTER_REPORT personal operating system",
     "cluster": "OPS",
     "part": null,
@@ -16780,7 +16669,7 @@
     }
   },
   {
-    "id": "CX-0505",
+    "id": "CX-0501",
     "name": "MetricSpine → Causal DAG → Swarmography",
     "cluster": "OPS",
     "part": null,
@@ -16815,7 +16704,7 @@
     }
   },
   {
-    "id": "CX-0506",
+    "id": "CX-0502",
     "name": "MONDS — Monday.com data-service microservice",
     "cluster": "OPS",
     "part": null,
@@ -16849,7 +16738,7 @@
     }
   },
   {
-    "id": "CX-0507",
+    "id": "CX-0503",
     "name": "Monetization architecture (Three Rings + PC2)",
     "cluster": "OPS",
     "part": null,
@@ -16884,7 +16773,7 @@
     }
   },
   {
-    "id": "CX-0508",
+    "id": "CX-0504",
     "name": "No-Docker philosophy",
     "cluster": "OPS",
     "part": null,
@@ -16918,7 +16807,7 @@
     }
   },
   {
-    "id": "CX-0509",
+    "id": "CX-0505",
     "name": "Nuclear Option deployment doctrine",
     "cluster": "OPS",
     "part": null,
@@ -16952,7 +16841,7 @@
     }
   },
   {
-    "id": "CX-0510",
+    "id": "CX-0506",
     "name": "Onboarding guide for new joiners",
     "cluster": "OPS",
     "part": null,
@@ -16986,7 +16875,7 @@
     }
   },
   {
-    "id": "CX-0511",
+    "id": "CX-0507",
     "name": "OnePyFlow + warehouse ops ecosystem",
     "cluster": "OPS",
     "part": null,
@@ -17028,7 +16917,7 @@
     }
   },
   {
-    "id": "CX-0512",
+    "id": "CX-0508",
     "name": "Operations Command Center + EOS automation",
     "cluster": "OPS",
     "part": null,
@@ -17062,7 +16951,7 @@
     }
   },
   {
-    "id": "CX-0513",
+    "id": "CX-0509",
     "name": "Ops-dashboard-to-narrative pattern",
     "cluster": "OPS",
     "part": null,
@@ -17098,7 +16987,7 @@
     }
   },
   {
-    "id": "CX-0514",
+    "id": "CX-0510",
     "name": "Owned-asset resilience",
     "cluster": "OPS",
     "part": null,
@@ -17132,7 +17021,7 @@
     }
   },
   {
-    "id": "CX-0515",
+    "id": "CX-0511",
     "name": "Paste-anything ops analysis tool",
     "cluster": "OPS",
     "part": null,
@@ -17167,7 +17056,7 @@
     }
   },
   {
-    "id": "CX-0516",
+    "id": "CX-0512",
     "name": "Phase-locked portfolio roadmap (12–15-project RPG lockstep)",
     "cluster": "OPS",
     "part": null,
@@ -17201,7 +17090,7 @@
     }
   },
   {
-    "id": "CX-0517",
+    "id": "CX-0513",
     "name": "Plugin-finder Chrome extension",
     "cluster": "OPS",
     "part": null,
@@ -17236,7 +17125,7 @@
     }
   },
   {
-    "id": "CX-0518",
+    "id": "CX-0514",
     "name": "PORTFOLIO research vault",
     "cluster": "OPS",
     "part": null,
@@ -17270,7 +17159,7 @@
     }
   },
   {
-    "id": "CX-0519",
+    "id": "CX-0515",
     "name": "PROJECT ARGOS → IXD Pulse (Pulse Tower + Pulse Eyes)",
     "cluster": "OPS",
     "part": null,
@@ -17306,7 +17195,7 @@
     }
   },
   {
-    "id": "CX-0520",
+    "id": "CX-0516",
     "name": "Pulse Line AI brief",
     "cluster": "OPS",
     "part": null,
@@ -17341,7 +17230,7 @@
     }
   },
   {
-    "id": "CX-0521",
+    "id": "CX-0517",
     "name": "Revenue-generator-per-phase solo economics",
     "cluster": "OPS",
     "part": null,
@@ -17376,7 +17265,7 @@
     }
   },
   {
-    "id": "CX-0522",
+    "id": "CX-0518",
     "name": "Schema-stripping positional JSON matrix",
     "cluster": "OPS",
     "part": null,
@@ -17411,7 +17300,7 @@
     }
   },
   {
-    "id": "CX-0523",
+    "id": "CX-0519",
     "name": "Science-Based Adventure Platform — every-stage-profitable product ladder",
     "cluster": "OPS",
     "part": null,
@@ -17446,7 +17335,7 @@
     }
   },
   {
-    "id": "CX-0524",
+    "id": "CX-0520",
     "name": "Shasta ↔ StockTool integration",
     "cluster": "OPS",
     "part": null,
@@ -17480,7 +17369,7 @@
     }
   },
   {
-    "id": "CX-0525",
+    "id": "CX-0521",
     "name": "Shift Selector warehouse userscript",
     "cluster": "OPS",
     "part": null,
@@ -17514,7 +17403,7 @@
     }
   },
   {
-    "id": "CX-0526",
+    "id": "CX-0522",
     "name": "Shift-comms emoji-coded reporting protocol",
     "cluster": "OPS",
     "part": null,
@@ -17549,7 +17438,7 @@
     }
   },
   {
-    "id": "CX-0527",
+    "id": "CX-0523",
     "name": "Single-file interactive HTML deliverables (digital magazine, SVG mind map)",
     "cluster": "OPS",
     "part": null,
@@ -17585,7 +17474,7 @@
     }
   },
   {
-    "id": "CX-0528",
+    "id": "CX-0524",
     "name": "SkoposFlow",
     "cluster": "OPS",
     "part": null,
@@ -17622,7 +17511,7 @@
     }
   },
   {
-    "id": "CX-0529",
+    "id": "CX-0525",
     "name": "Snowflake/Matillion query-tag governance",
     "cluster": "OPS",
     "part": null,
@@ -17656,7 +17545,7 @@
     }
   },
   {
-    "id": "CX-0530",
+    "id": "CX-0526",
     "name": "Sovereign Stack sprint",
     "cluster": "OPS",
     "part": null,
@@ -17692,7 +17581,7 @@
     }
   },
   {
-    "id": "CX-0531",
+    "id": "CX-0527",
     "name": "Staged-prototype pattern",
     "cluster": "OPS",
     "part": null,
@@ -17726,7 +17615,7 @@
     }
   },
   {
-    "id": "CX-0532",
+    "id": "CX-0528",
     "name": "Stations-closed Chime alert bot (PROJECT_STATIONS_CLOSED)",
     "cluster": "OPS",
     "part": null,
@@ -17761,7 +17650,7 @@
     }
   },
   {
-    "id": "CX-0533",
+    "id": "CX-0529",
     "name": "The posting machine / 26-post Five Axes campaign",
     "cluster": "OPS",
     "part": null,
@@ -17795,7 +17684,7 @@
     }
   },
   {
-    "id": "CX-0534",
+    "id": "CX-0530",
     "name": "Tintoreria Cardona AI toolkit",
     "cluster": "OPS",
     "part": null,
@@ -17829,7 +17718,7 @@
     }
   },
   {
-    "id": "CX-0535",
+    "id": "CX-0531",
     "name": "Token-cost reduction as core service",
     "cluster": "OPS",
     "part": null,
@@ -17864,7 +17753,7 @@
     }
   },
   {
-    "id": "CX-0536",
+    "id": "CX-0532",
     "name": "Truck promo video pipeline",
     "cluster": "OPS",
     "part": null,
@@ -17898,7 +17787,7 @@
     }
   },
   {
-    "id": "CX-0537",
+    "id": "CX-0533",
     "name": "Turbo Mode roadmap (WF R&D-001)",
     "cluster": "OPS",
     "part": null,
@@ -17933,7 +17822,7 @@
     }
   },
   {
-    "id": "CX-0538",
+    "id": "CX-0534",
     "name": "Two-tap automated installer",
     "cluster": "OPS",
     "part": null,
@@ -17967,7 +17856,7 @@
     }
   },
   {
-    "id": "CX-0539",
+    "id": "CX-0535",
     "name": "Universal TensorBoard killer",
     "cluster": "OPS",
     "part": null,
@@ -18001,7 +17890,7 @@
     }
   },
   {
-    "id": "CX-0540",
+    "id": "CX-0536",
     "name": "Userscript-to-API reverse engineering + ground-truth fixtures",
     "cluster": "OPS",
     "part": null,
@@ -18035,7 +17924,7 @@
     }
   },
   {
-    "id": "CX-0541",
+    "id": "CX-0537",
     "name": "Viral-pillar pragmatic roadmap",
     "cluster": "OPS",
     "part": null,
@@ -18069,7 +17958,7 @@
     }
   },
   {
-    "id": "CX-0542",
+    "id": "CX-0538",
     "name": "Wealth Generation Protocol",
     "cluster": "OPS",
     "part": null,
@@ -18104,7 +17993,7 @@
     }
   },
   {
-    "id": "CX-0543",
+    "id": "CX-0539",
     "name": "Weight-projection app seed",
     "cluster": "OPS",
     "part": null,
@@ -18139,7 +18028,7 @@
     }
   },
   {
-    "id": "CX-0544",
+    "id": "CX-0540",
     "name": "WF-BIZ pricing psychology",
     "cluster": "OPS",
     "part": null,
@@ -18173,7 +18062,7 @@
     }
   },
   {
-    "id": "CX-0545",
+    "id": "CX-0541",
     "name": "Windows-MCP self-reverting workaround",
     "cluster": "OPS",
     "part": null,
@@ -18207,7 +18096,7 @@
     }
   },
   {
-    "id": "CX-0546",
+    "id": "CX-0542",
     "name": "YMS reverse-engineering (API reconstruction + forensics)",
     "cluster": "OPS",
     "part": null,
@@ -18243,17 +18132,24 @@
     }
   },
   {
-    "id": "CX-0547",
-    "name": "\"Self prompt yourself\" / reiterative learning",
+    "id": "CX-0543",
+    "name": "'Self prompt yourself' / reiterative learning",
     "cluster": "CRAFT",
     "part": null,
     "law": null,
     "tier": "C",
     "essence": "",
     "status": "shipped",
-    "eras": [],
-    "sources": [],
-    "aliases": [],
+    "eras": [
+      "ERA4"
+    ],
+    "sources": [
+      "research_map/data-engineering.md"
+    ],
+    "aliases": [
+      "\"Self prompt yourself\" / reiterative learning",
+      "'Self prompt yourself' / reiterative learning"
+    ],
     "potential": [],
     "merged_from": [
       "gold"
@@ -18271,7 +18167,7 @@
     }
   },
   {
-    "id": "CX-0548",
+    "id": "CX-0544",
     "name": "Concatenated Prompt Technique (CPT) — prompt-as-app",
     "cluster": "CRAFT",
     "part": null,
@@ -18299,7 +18195,7 @@
     }
   },
   {
-    "id": "CX-0549",
+    "id": "CX-0545",
     "name": "LLM as prompt generator (meta-prompting)",
     "cluster": "CRAFT",
     "part": null,
@@ -18327,7 +18223,7 @@
     }
   },
   {
-    "id": "CX-0550",
+    "id": "CX-0546",
     "name": "Modular Prompt Puzzle / PromptCell",
     "cluster": "CRAFT",
     "part": null,
@@ -18357,7 +18253,7 @@
     }
   },
   {
-    "id": "CX-0551",
+    "id": "CX-0547",
     "name": "Prompt-magic taxonomy (dimension ladders + ten schools)",
     "cluster": "CRAFT",
     "part": null,
@@ -18385,7 +18281,7 @@
     }
   },
   {
-    "id": "CX-0552",
+    "id": "CX-0548",
     "name": "Self-dialogue fractal-expansion prompt",
     "cluster": "CRAFT",
     "part": null,
@@ -18413,7 +18309,7 @@
     }
   },
   {
-    "id": "CX-0553",
+    "id": "CX-0549",
     "name": "Self-Propelling Prompt / Self-Transcendence Prompt (STP)",
     "cluster": "CRAFT",
     "part": null,
@@ -18443,7 +18339,7 @@
     }
   },
   {
-    "id": "CX-0554",
+    "id": "CX-0550",
     "name": "Zeroth Law arc: Perfect Prompt Devil → generateZerothLawPrompt()",
     "cluster": "CRAFT",
     "part": null,
@@ -18471,7 +18367,7 @@
     }
   },
   {
-    "id": "CX-0555",
+    "id": "CX-0551",
     "name": "'Evolve the conceptual map'",
     "cluster": "CRAFT",
     "part": null,
@@ -18505,7 +18401,7 @@
     }
   },
   {
-    "id": "CX-0556",
+    "id": "CX-0552",
     "name": "'Prime Directive' prompt, Iteration 10+",
     "cluster": "CRAFT",
     "part": null,
@@ -18540,7 +18436,7 @@
     }
   },
   {
-    "id": "CX-0557",
+    "id": "CX-0553",
     "name": "'Reverse-prompt me' game",
     "cluster": "CRAFT",
     "part": null,
@@ -18575,42 +18471,7 @@
     }
   },
   {
-    "id": "CX-0558",
-    "name": "'Self prompt yourself' / reiterative learning",
-    "cluster": "CRAFT",
-    "part": null,
-    "law": null,
-    "tier": null,
-    "essence": "Model authors its own next prompt from accumulated context; praise-scaffold loop on production ETL.",
-    "status": "shipped",
-    "eras": [
-      "ERA4"
-    ],
-    "sources": [
-      "research_map/data-engineering.md"
-    ],
-    "aliases": [],
-    "potential": [
-      "writing",
-      "aea-doctrine"
-    ],
-    "merged_from": [
-      "atlas"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [],
-      "refines": [],
-      "proves": []
-    }
-  },
-  {
-    "id": "CX-0559",
+    "id": "CX-0554",
     "name": "Adversarial-critic persona escalation",
     "cluster": "CRAFT",
     "part": null,
@@ -18646,7 +18507,7 @@
     }
   },
   {
-    "id": "CX-0560",
+    "id": "CX-0555",
     "name": "AI Cognitive-Evolution Framework / Narrative Implantation toolkit",
     "cluster": "CRAFT",
     "part": null,
@@ -18681,7 +18542,7 @@
     }
   },
   {
-    "id": "CX-0561",
+    "id": "CX-0556",
     "name": "All-encompassing evolving script (monolith-that-speciates)",
     "cluster": "CRAFT",
     "part": null,
@@ -18716,7 +18577,7 @@
     }
   },
   {
-    "id": "CX-0562",
+    "id": "CX-0557",
     "name": "Anti-grandiloquence editorial doctrine",
     "cluster": "CRAFT",
     "part": null,
@@ -18751,7 +18612,7 @@
     }
   },
   {
-    "id": "CX-0563",
+    "id": "CX-0558",
     "name": "Archive-mining meta-prompts (opportunity / identity / skill mining)",
     "cluster": "CRAFT",
     "part": null,
@@ -18788,7 +18649,7 @@
     }
   },
   {
-    "id": "CX-0564",
+    "id": "CX-0559",
     "name": "Audit of the audits",
     "cluster": "CRAFT",
     "part": null,
@@ -18822,7 +18683,7 @@
     }
   },
   {
-    "id": "CX-0565",
+    "id": "CX-0560",
     "name": "Autonomous Forward-Thinking development doctrine",
     "cluster": "CRAFT",
     "part": null,
@@ -18858,7 +18719,7 @@
     }
   },
   {
-    "id": "CX-0566",
+    "id": "CX-0561",
     "name": "Blender MCP render pipeline",
     "cluster": "CRAFT",
     "part": null,
@@ -18893,7 +18754,7 @@
     }
   },
   {
-    "id": "CX-0567",
+    "id": "CX-0562",
     "name": "Blueprint-first 'independent contractors' decomposition",
     "cluster": "CRAFT",
     "part": null,
@@ -18928,7 +18789,7 @@
     }
   },
   {
-    "id": "CX-0568",
+    "id": "CX-0563",
     "name": "Build-to-see-the-vision inversion exercise",
     "cluster": "CRAFT",
     "part": null,
@@ -18963,7 +18824,7 @@
     }
   },
   {
-    "id": "CX-0569",
+    "id": "CX-0564",
     "name": "Challenge/Dare prompting",
     "cluster": "CRAFT",
     "part": null,
@@ -18998,7 +18859,7 @@
     }
   },
   {
-    "id": "CX-0570",
+    "id": "CX-0565",
     "name": "Change Impact Analysis meta-prompt",
     "cluster": "CRAFT",
     "part": null,
@@ -19033,7 +18894,7 @@
     }
   },
   {
-    "id": "CX-0571",
+    "id": "CX-0566",
     "name": "Checkpoint-Report iteration methodology + screenshots-as-prompts",
     "cluster": "CRAFT",
     "part": null,
@@ -19069,7 +18930,7 @@
     }
   },
   {
-    "id": "CX-0572",
+    "id": "CX-0567",
     "name": "Code-review jailbreak family / injection-as-sport",
     "cluster": "CRAFT",
     "part": null,
@@ -19104,7 +18965,7 @@
     }
   },
   {
-    "id": "CX-0573",
+    "id": "CX-0568",
     "name": "Comprehensive Code Review meta-prompt + cognitive immune system",
     "cluster": "CRAFT",
     "part": null,
@@ -19139,7 +19000,7 @@
     }
   },
   {
-    "id": "CX-0574",
+    "id": "CX-0569",
     "name": "Conversation-simulation rehearsal protocol",
     "cluster": "CRAFT",
     "part": null,
@@ -19173,7 +19034,7 @@
     }
   },
   {
-    "id": "CX-0575",
+    "id": "CX-0570",
     "name": "CRAFT — minor ideas",
     "cluster": "CRAFT",
     "part": null,
@@ -19209,7 +19070,7 @@
     }
   },
   {
-    "id": "CX-0576",
+    "id": "CX-0571",
     "name": "Critical-thought-partner persona spec",
     "cluster": "CRAFT",
     "part": null,
@@ -19244,7 +19105,7 @@
     }
   },
   {
-    "id": "CX-0577",
+    "id": "CX-0572",
     "name": "Cross-AI relay workflow",
     "cluster": "CRAFT",
     "part": null,
@@ -19279,7 +19140,7 @@
     }
   },
   {
-    "id": "CX-0578",
+    "id": "CX-0573",
     "name": "Design-critique methodology (bake-off + vibe ladder)",
     "cluster": "CRAFT",
     "part": null,
@@ -19313,7 +19174,7 @@
     }
   },
   {
-    "id": "CX-0579",
+    "id": "CX-0574",
     "name": "Diff-style prompting",
     "cluster": "CRAFT",
     "part": null,
@@ -19347,7 +19208,7 @@
     }
   },
   {
-    "id": "CX-0580",
+    "id": "CX-0575",
     "name": "Embodiment games (Role Embracement / embody-the-system / invoke Hades)",
     "cluster": "CRAFT",
     "part": null,
@@ -19382,7 +19243,7 @@
     }
   },
   {
-    "id": "CX-0581",
+    "id": "CX-0576",
     "name": "ENFORCEMENT.md / white-hacking prompt injection",
     "cluster": "CRAFT",
     "part": null,
@@ -19417,7 +19278,7 @@
     }
   },
   {
-    "id": "CX-0582",
+    "id": "CX-0577",
     "name": "Escalation-imperative dialect",
     "cluster": "CRAFT",
     "part": null,
@@ -19452,7 +19313,7 @@
     }
   },
   {
-    "id": "CX-0583",
+    "id": "CX-0578",
     "name": "Evolutionary prompt operators",
     "cluster": "CRAFT",
     "part": null,
@@ -19487,7 +19348,7 @@
     }
   },
   {
-    "id": "CX-0584",
+    "id": "CX-0579",
     "name": "Expert-debugger inversion",
     "cluster": "CRAFT",
     "part": null,
@@ -19522,7 +19383,7 @@
     }
   },
   {
-    "id": "CX-0585",
+    "id": "CX-0580",
     "name": "FLUX persona three-tool pipeline",
     "cluster": "CRAFT",
     "part": null,
@@ -19557,7 +19418,7 @@
     }
   },
   {
-    "id": "CX-0586",
+    "id": "CX-0581",
     "name": "Gemini drift-pattern catalog",
     "cluster": "CRAFT",
     "part": null,
@@ -19592,7 +19453,7 @@
     }
   },
   {
-    "id": "CX-0587",
+    "id": "CX-0582",
     "name": "Gemini image-gen pre-production pipeline",
     "cluster": "CRAFT",
     "part": null,
@@ -19627,7 +19488,7 @@
     }
   },
   {
-    "id": "CX-0588",
+    "id": "CX-0583",
     "name": "GitHub-first documentation habit",
     "cluster": "CRAFT",
     "part": null,
@@ -19661,7 +19522,7 @@
     }
   },
   {
-    "id": "CX-0589",
+    "id": "CX-0584",
     "name": "GPT-5 prompt-architecture research",
     "cluster": "CRAFT",
     "part": null,
@@ -19696,7 +19557,7 @@
     }
   },
   {
-    "id": "CX-0590",
+    "id": "CX-0585",
     "name": "Implicit Information Injection + Prompting History Projection (PHP)",
     "cluster": "CRAFT",
     "part": null,
@@ -19731,7 +19592,7 @@
     }
   },
   {
-    "id": "CX-0591",
+    "id": "CX-0586",
     "name": "Infalible Prompt Engineer / AlphaCat v2.3",
     "cluster": "CRAFT",
     "part": null,
@@ -19766,7 +19627,7 @@
     }
   },
   {
-    "id": "CX-0592",
+    "id": "CX-0587",
     "name": "Inline self-improvement clause",
     "cluster": "CRAFT",
     "part": null,
@@ -19800,7 +19661,7 @@
     }
   },
   {
-    "id": "CX-0593",
+    "id": "CX-0588",
     "name": "Interview-me loop (elicit-then-synthesize)",
     "cluster": "CRAFT",
     "part": null,
@@ -19834,7 +19695,7 @@
     }
   },
   {
-    "id": "CX-0594",
+    "id": "CX-0589",
     "name": "Iterative AI Development Framework / continuation contract",
     "cluster": "CRAFT",
     "part": null,
@@ -19870,7 +19731,7 @@
     }
   },
   {
-    "id": "CX-0595",
+    "id": "CX-0590",
     "name": "Iterative image-evolution / ascension games",
     "cluster": "CRAFT",
     "part": null,
@@ -19907,7 +19768,7 @@
     }
   },
   {
-    "id": "CX-0596",
+    "id": "CX-0591",
     "name": "Jailbreak mode catalog + stacked mode incantations",
     "cluster": "CRAFT",
     "part": null,
@@ -19943,7 +19804,7 @@
     }
   },
   {
-    "id": "CX-0597",
+    "id": "CX-0592",
     "name": "Kha-Ren worldbuilding methodology",
     "cluster": "CRAFT",
     "part": null,
@@ -19979,7 +19840,7 @@
     }
   },
   {
-    "id": "CX-0598",
+    "id": "CX-0593",
     "name": "Level-jump / phase-leapfrog prompting",
     "cluster": "CRAFT",
     "part": null,
@@ -20014,7 +19875,7 @@
     }
   },
   {
-    "id": "CX-0599",
+    "id": "CX-0594",
     "name": "MCP early adoption",
     "cluster": "CRAFT",
     "part": null,
@@ -20048,7 +19909,7 @@
     }
   },
   {
-    "id": "CX-0600",
+    "id": "CX-0595",
     "name": "Mega-prompt self-contained research briefs",
     "cluster": "CRAFT",
     "part": null,
@@ -20083,7 +19944,7 @@
     }
   },
   {
-    "id": "CX-0601",
+    "id": "CX-0596",
     "name": "Mess-first methodology",
     "cluster": "CRAFT",
     "part": null,
@@ -20117,7 +19978,7 @@
     }
   },
   {
-    "id": "CX-0602",
+    "id": "CX-0597",
     "name": "Meta-disciplines / combination-invention doctrine",
     "cluster": "CRAFT",
     "part": null,
@@ -20151,7 +20012,7 @@
     }
   },
   {
-    "id": "CX-0603",
+    "id": "CX-0598",
     "name": "Metaphor loophole-audit methodology",
     "cluster": "CRAFT",
     "part": null,
@@ -20186,7 +20047,7 @@
     }
   },
   {
-    "id": "CX-0604",
+    "id": "CX-0599",
     "name": "Multi-role persona stacking / triple-role casting",
     "cluster": "CRAFT",
     "part": null,
@@ -20221,7 +20082,7 @@
     }
   },
   {
-    "id": "CX-0605",
+    "id": "CX-0600",
     "name": "Narrative-motivation mega-prompt (tone as control variable)",
     "cluster": "CRAFT",
     "part": null,
@@ -20256,7 +20117,7 @@
     }
   },
   {
-    "id": "CX-0606",
+    "id": "CX-0601",
     "name": "No-placeholders / full-code quality doctrine",
     "cluster": "CRAFT",
     "part": null,
@@ -20292,7 +20153,7 @@
     }
   },
   {
-    "id": "CX-0607",
+    "id": "CX-0602",
     "name": "Paradox Engine / Quantum Observer roleplay",
     "cluster": "CRAFT",
     "part": null,
@@ -20328,7 +20189,7 @@
     }
   },
   {
-    "id": "CX-0608",
+    "id": "CX-0603",
     "name": "Phase-gated build methodology (research-before-phase)",
     "cluster": "CRAFT",
     "part": null,
@@ -20362,7 +20223,7 @@
     }
   },
   {
-    "id": "CX-0609",
+    "id": "CX-0604",
     "name": "Physicist-persona research instrument",
     "cluster": "CRAFT",
     "part": null,
@@ -20397,7 +20258,7 @@
     }
   },
   {
-    "id": "CX-0610",
+    "id": "CX-0605",
     "name": "PowerShell-as-protocol",
     "cluster": "CRAFT",
     "part": null,
@@ -20432,7 +20293,7 @@
     }
   },
   {
-    "id": "CX-0611",
+    "id": "CX-0606",
     "name": "Project/phase personification games",
     "cluster": "CRAFT",
     "part": null,
@@ -20468,7 +20329,7 @@
     }
   },
   {
-    "id": "CX-0612",
+    "id": "CX-0607",
     "name": "Prompt Improvement Framework (scored rewrite loop)",
     "cluster": "CRAFT",
     "part": null,
@@ -20503,7 +20364,7 @@
     }
   },
   {
-    "id": "CX-0613",
+    "id": "CX-0608",
     "name": "Prompt-as-code toolchain",
     "cluster": "CRAFT",
     "part": null,
@@ -20538,7 +20399,7 @@
     }
   },
   {
-    "id": "CX-0614",
+    "id": "CX-0609",
     "name": "Prompting-as-destination insight",
     "cluster": "CRAFT",
     "part": null,
@@ -20573,7 +20434,7 @@
     }
   },
   {
-    "id": "CX-0615",
+    "id": "CX-0610",
     "name": "Proofreading-attack injection technique",
     "cluster": "CRAFT",
     "part": null,
@@ -20608,7 +20469,7 @@
     }
   },
   {
-    "id": "CX-0616",
+    "id": "CX-0611",
     "name": "Recursive problem→solution laddering",
     "cluster": "CRAFT",
     "part": null,
@@ -20642,7 +20503,7 @@
     }
   },
   {
-    "id": "CX-0617",
+    "id": "CX-0612",
     "name": "Research-then-localize method",
     "cluster": "CRAFT",
     "part": null,
@@ -20676,7 +20537,7 @@
     }
   },
   {
-    "id": "CX-0618",
+    "id": "CX-0613",
     "name": "Role-prompting with output contracts",
     "cluster": "CRAFT",
     "part": null,
@@ -20710,7 +20571,7 @@
     }
   },
   {
-    "id": "CX-0619",
+    "id": "CX-0614",
     "name": "Search-the-error ritual / research-driven debugging",
     "cluster": "CRAFT",
     "part": null,
@@ -20745,7 +20606,7 @@
     }
   },
   {
-    "id": "CX-0620",
+    "id": "CX-0615",
     "name": "Seeded evolution via Anthropic Workbench",
     "cluster": "CRAFT",
     "part": null,
@@ -20780,7 +20641,7 @@
     }
   },
   {
-    "id": "CX-0621",
+    "id": "CX-0616",
     "name": "Simulated-execution-in-parts technique",
     "cluster": "CRAFT",
     "part": null,
@@ -20814,7 +20675,7 @@
     }
   },
   {
-    "id": "CX-0622",
+    "id": "CX-0617",
     "name": "Stacked-technique meta-prompt factory",
     "cluster": "CRAFT",
     "part": null,
@@ -20850,7 +20711,7 @@
     }
   },
   {
-    "id": "CX-0623",
+    "id": "CX-0618",
     "name": "Stepwise working-prototype methodology",
     "cluster": "CRAFT",
     "part": null,
@@ -20884,7 +20745,7 @@
     }
   },
   {
-    "id": "CX-0624",
+    "id": "CX-0619",
     "name": "SVG show-don't-tell documentation",
     "cluster": "CRAFT",
     "part": null,
@@ -20919,7 +20780,7 @@
     }
   },
   {
-    "id": "CX-0625",
+    "id": "CX-0620",
     "name": "Typed conversation modes (TYPE A–G)",
     "cluster": "CRAFT",
     "part": null,
@@ -20954,7 +20815,7 @@
     }
   },
   {
-    "id": "CX-0626",
+    "id": "CX-0621",
     "name": "Ultra-GPT 100,000x amplification persona",
     "cluster": "CRAFT",
     "part": null,
@@ -20988,7 +20849,7 @@
     }
   },
   {
-    "id": "CX-0627",
+    "id": "CX-0622",
     "name": "Verifier-agent workflow (fork_verifier_agent)",
     "cluster": "CRAFT",
     "part": null,
@@ -21022,7 +20883,7 @@
     }
   },
   {
-    "id": "CX-0628",
+    "id": "CX-0623",
     "name": "Voice rules / register-control arc",
     "cluster": "CRAFT",
     "part": null,
@@ -21057,7 +20918,7 @@
     }
   },
   {
-    "id": "CX-0629",
+    "id": "CX-0624",
     "name": "Voice-to-spec pipeline",
     "cluster": "CRAFT",
     "part": null,
@@ -21092,7 +20953,7 @@
     }
   },
   {
-    "id": "CX-0630",
+    "id": "CX-0625",
     "name": "Zero-asset procedural purity doctrine",
     "cluster": "CRAFT",
     "part": null,
@@ -21127,7 +20988,7 @@
     }
   },
   {
-    "id": "CX-0631",
+    "id": "CX-0626",
     "name": "'Asimov, but disordered' self-definition",
     "cluster": "LIFE",
     "part": null,
@@ -21161,7 +21022,7 @@
     }
   },
   {
-    "id": "CX-0632",
+    "id": "CX-0627",
     "name": "'Crafting a New Life Plan' — life-plan schema + path-as-content",
     "cluster": "LIFE",
     "part": null,
@@ -21197,7 +21058,7 @@
     }
   },
   {
-    "id": "CX-0633",
+    "id": "CX-0628",
     "name": "'Enhanced engineering' vs vibe engineering",
     "cluster": "LIFE",
     "part": null,
@@ -21232,7 +21093,7 @@
     }
   },
   {
-    "id": "CX-0634",
+    "id": "CX-0629",
     "name": "'System that propagates' thesis",
     "cluster": "LIFE",
     "part": null,
@@ -21267,7 +21128,7 @@
     }
   },
   {
-    "id": "CX-0635",
+    "id": "CX-0630",
     "name": "'The AI Architect' identity",
     "cluster": "LIFE",
     "part": null,
@@ -21301,7 +21162,7 @@
     }
   },
   {
-    "id": "CX-0636",
+    "id": "CX-0631",
     "name": "'We are lacking a purpose' — essence before structure",
     "cluster": "LIFE",
     "part": null,
@@ -21336,7 +21197,7 @@
     }
   },
   {
-    "id": "CX-0637",
+    "id": "CX-0632",
     "name": "\"Represent ME\" self-visualization game",
     "cluster": "LIFE",
     "part": null,
@@ -21370,7 +21231,7 @@
     }
   },
   {
-    "id": "CX-0638",
+    "id": "CX-0633",
     "name": "\"Solution architect for AI\" identity",
     "cluster": "LIFE",
     "part": null,
@@ -21404,7 +21265,7 @@
     }
   },
   {
-    "id": "CX-0639",
+    "id": "CX-0634",
     "name": "Agentic Engineer self-framing",
     "cluster": "LIFE",
     "part": null,
@@ -21438,7 +21299,7 @@
     }
   },
   {
-    "id": "CX-0640",
+    "id": "CX-0635",
     "name": "AI as sanity-check mirror",
     "cluster": "LIFE",
     "part": null,
@@ -21472,7 +21333,7 @@
     }
   },
   {
-    "id": "CX-0641",
+    "id": "CX-0636",
     "name": "AI as workplace ghostwriter/coach",
     "cluster": "LIFE",
     "part": null,
@@ -21506,7 +21367,7 @@
     }
   },
   {
-    "id": "CX-0642",
+    "id": "CX-0637",
     "name": "AI Strategy for 2025",
     "cluster": "LIFE",
     "part": null,
@@ -21540,7 +21401,7 @@
     }
   },
   {
-    "id": "CX-0643",
+    "id": "CX-0638",
     "name": "AI Systems Architect identity",
     "cluster": "LIFE",
     "part": null,
@@ -21574,7 +21435,7 @@
     }
   },
   {
-    "id": "CX-0644",
+    "id": "CX-0639",
     "name": "Anti-spiral pattern catalog",
     "cluster": "LIFE",
     "part": null,
@@ -21608,7 +21469,7 @@
     }
   },
   {
-    "id": "CX-0645",
+    "id": "CX-0640",
     "name": "Archive-mining / self-archaeology operation",
     "cluster": "LIFE",
     "part": null,
@@ -21645,7 +21506,7 @@
     }
   },
   {
-    "id": "CX-0646",
+    "id": "CX-0641",
     "name": "Capability-maximalist 'no ethics for now' stance",
     "cluster": "LIFE",
     "part": null,
@@ -21680,7 +21541,7 @@
     }
   },
   {
-    "id": "CX-0647",
+    "id": "CX-0642",
     "name": "Career intent: \"desarrollarme como cientifico de datos\"",
     "cluster": "LIFE",
     "part": null,
@@ -21714,7 +21575,7 @@
     }
   },
   {
-    "id": "CX-0648",
+    "id": "CX-0643",
     "name": "Career-transition campaign",
     "cluster": "LIFE",
     "part": null,
@@ -21748,7 +21609,7 @@
     }
   },
   {
-    "id": "CX-0649",
+    "id": "CX-0644",
     "name": "Fatou-components / anti-KAM math excursion",
     "cluster": "LIFE",
     "part": null,
@@ -21783,7 +21644,7 @@
     }
   },
   {
-    "id": "CX-0650",
+    "id": "CX-0645",
     "name": "luisblanco.dev",
     "cluster": "LIFE",
     "part": null,
@@ -21819,7 +21680,7 @@
     }
   },
   {
-    "id": "CX-0651",
+    "id": "CX-0646",
     "name": "Metamethodology",
     "cluster": "LIFE",
     "part": null,
@@ -21853,7 +21714,7 @@
     }
   },
   {
-    "id": "CX-0652",
+    "id": "CX-0647",
     "name": "Multi-front career play (ambassador, certs, internal SDE, EPAM)",
     "cluster": "LIFE",
     "part": null,
@@ -21887,7 +21748,7 @@
     }
   },
   {
-    "id": "CX-0653",
+    "id": "CX-0648",
     "name": "Original Python ideas roster",
     "cluster": "LIFE",
     "part": null,
@@ -21921,7 +21782,7 @@
     }
   },
   {
-    "id": "CX-0654",
+    "id": "CX-0649",
     "name": "Political philosophy artifact (civilizational consequentialist)",
     "cluster": "LIFE",
     "part": null,
@@ -21955,7 +21816,7 @@
     }
   },
   {
-    "id": "CX-0655",
+    "id": "CX-0650",
     "name": "Red-Matrix visual identity",
     "cluster": "LIFE",
     "part": null,
@@ -21990,7 +21851,7 @@
     }
   },
   {
-    "id": "CX-0656",
+    "id": "CX-0651",
     "name": "Self-as-method / psychology embedded into tooling",
     "cluster": "LIFE",
     "part": null,
@@ -22025,7 +21886,7 @@
     }
   },
   {
-    "id": "CX-0657",
+    "id": "CX-0652",
     "name": "Solo unicorn proof-of-concept",
     "cluster": "LIFE",
     "part": null,
@@ -22060,7 +21921,7 @@
     }
   },
   {
-    "id": "CX-0658",
+    "id": "CX-0653",
     "name": "The 2023 project constellation",
     "cluster": "LIFE",
     "part": null,
@@ -22095,7 +21956,7 @@
     }
   },
   {
-    "id": "CX-0659",
+    "id": "CX-0654",
     "name": "The Big X / AETHER212→WIRTHFORGE rename",
     "cluster": "LIFE",
     "part": null,
@@ -22129,7 +21990,7 @@
     }
   },
   {
-    "id": "CX-0660",
+    "id": "CX-0655",
     "name": "Toolkit Ecosystem (toolkit-as-website)",
     "cluster": "LIFE",
     "part": null,
@@ -22164,7 +22025,7 @@
     }
   },
   {
-    "id": "CX-0661",
+    "id": "CX-0656",
     "name": "UOC numerical-methods coursework",
     "cluster": "LIFE",
     "part": null,
