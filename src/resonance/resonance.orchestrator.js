@@ -14,122 +14,111 @@
   const RESONANCE = (window.RESONANCE = window.RESONANCE || {});
   const CFG = RESONANCE.CONFIG;
 
-  let engine = null, renderer = null, canvas = null;
+  let engine = null, renderer = null, canvas = null, ctx = null;
   let raf = 0, last = 0, running = false, started = false;
-  let activeProfile = CFG.DEFAULT_PROFILE;
-  let io = null;   // IntersectionObserver
+  let activeProfile = CFG ? CFG.DEFAULT_PROFILE : 'council';
 
-  // ── canvas mount ─────────────────────────────────────────────────────────
-  function mountCanvas(container){
-    canvas = document.createElement('canvas');
-    canvas.className = 'rs-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    container.appendChild(canvas);
-    sizeCanvas(container);
+  function sizeCanvas(){
+    if(!canvas) return;
+    const wrap = canvas.parentElement;
+    if(!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    const W = Math.max(320, Math.floor(rect.width));
+    const H = Math.max(200, Math.floor(rect.height));
+    if(canvas.width !== W || canvas.height !== H){
+      canvas.width = W; canvas.height = H;
+      if(renderer) renderer.resize(W, H);
+    }
   }
 
-  function sizeCanvas(container){
-    if(!canvas) return;
-    const W = container.clientWidth  || 640;
-    const H = container.clientHeight || 340;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
-    canvas.width  = W;
-    canvas.height = H;
-    if(renderer) renderer.resize(W, H);
+  function bootFrame(){
+    if(!ctx || !canvas) return;
+    sizeCanvas();
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(8,10,18,0.25)'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(212,162,76,0.35)'; ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+    ctx.fillStyle = '#D4A24C';
+    ctx.font = '12px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('RESONANCE · ' + activeProfile, W / 2, H / 2);
+    ctx.fillStyle = 'rgba(212,162,76,0.06)';
+    for(let gy = 20; gy < H; gy += 20){
+      for(let gx = 20; gx < W; gx += 20){ ctx.fillRect(gx, gy, 1, 1); }
+    }
   }
 
   // ── rAF loop ─────────────────────────────────────────────────────────────
   function frame(ts){
     if(!running) return;
-    if(!last) last = ts;
-    const dt = Math.min(ts - last, 100);
-    last = ts;
-    if(engine)   engine.tick(dt);
-    if(renderer) renderer.render(engine.getSignature());
-    raf = requestAnimationFrame(frame);
+    try {
+      if(!last) last = ts;
+      const dt = Math.min(ts - last, 100);
+      last = ts;
+      if(engine) engine.tick(dt);
+      if(renderer && engine) renderer.render(engine.getSignature());
+      raf = requestAnimationFrame(frame);
+    } catch(err) {
+      console.error('[RESONANCE] frame error:', err);
+      running = false;
+    }
   }
 
-  function pause(){
-    running = false;
-    if(raf){ cancelAnimationFrame(raf); raf = 0; }
-  }
+  function pause(){ running = false; if(raf){ cancelAnimationFrame(raf); raf = 0; } }
+  function resume(){ if(!started || running) return; running = true; last = 0; raf = requestAnimationFrame(frame); }
 
-  function resume(){
-    if(!started || running) return;
-    running = true;
-    last = 0;
-    raf = requestAnimationFrame(frame);
-  }
-
-  // ── LUMEN bridge ─────────────────────────────────────────────────────────
-  // Applies the profile-specific delta on top of the base 'resonance' preset.
   function applyLumenDelta(profileKey){
-    const base  = (window.LUMEN && window.LUMEN.CONFIG.PRESETS['resonance']);
-    const delta = CFG.LUMEN_DELTA[profileKey];
+    const base = (window.LUMEN && window.LUMEN.CONFIG && window.LUMEN.CONFIG.PRESETS && window.LUMEN.CONFIG.PRESETS['resonance']);
+    const delta = CFG && CFG.LUMEN_DELTA && CFG.LUMEN_DELTA[profileKey];
     if(!base || !delta) return;
-    // Merge delta into the preset so next setPreset picks it up.
     Object.assign(base, delta);
     if(window.LB_LUMEN) window.LB_LUMEN.setPreset('resonance');
   }
 
-  // ── profile switch ───────────────────────────────────────────────────────
   function setProfile(key){
-    if(!CFG.PROFILES[key]) return;
+    if(!CFG || !CFG.PROFILES || !CFG.PROFILES[key]) return;
     activeProfile = key;
     if(engine) engine.setProfile(key);
     applyLumenDelta(key);
-    // update button states
     const btns = document.querySelectorAll('.rs-profile-btn');
     btns.forEach(b => b.classList.toggle('active', b.dataset.profile === key));
   }
 
-  // ── init (called once by spa-router.js after the plate is mounted) ───────
   function init(sectionEl){
-    if(started) return;
-    if(!sectionEl) return;
+    if(started){ console.info('[RESONANCE] already started'); return; }
+    if(!sectionEl){ console.warn('[RESONANCE] no sectionEl'); return; }
+    const wrap = sectionEl.querySelector('.rs-canvas-wrap');
+    if(!wrap){ console.warn('[RESONANCE] no wrap'); return; }
 
-    const container = sectionEl.querySelector('.rs-canvas-wrap');
-    if(!container) return;
+    canvas = wrap.querySelector('canvas.rs-canvas');
+    if(!canvas){ console.warn('[RESONANCE] no canvas in wrap'); return; }
+    ctx = canvas.getContext('2d');
+    if(!ctx){ console.warn('[RESONANCE] Canvas2D unavailable'); return; }
 
-    // Build engine + renderer
-    engine   = RESONANCE.Engine.create(activeProfile);
-    mountCanvas(container);
-    renderer = RESONANCE.Renderer.create(canvas);
-    if(!renderer){ console.info('[RESONANCE] Canvas2D unavailable — panel inactive.'); return; }
+    try {
+      engine = RESONANCE.Engine.create(activeProfile);
+      renderer = RESONANCE.Renderer.create(canvas);
+    } catch(err) {
+      console.error('[RESONANCE] engine/renderer error:', err);
+      bootFrame(); return;
+    }
 
-    // Wire profile buttons
     const btns = sectionEl.querySelectorAll('.rs-profile-btn');
     btns.forEach(b => {
       b.addEventListener('click', () => setProfile(b.dataset.profile));
       b.classList.toggle('active', b.dataset.profile === activeProfile);
     });
 
-    // Wire resize
-    window.addEventListener('resize', () => sizeCanvas(container));
+    window.addEventListener('resize', sizeCanvas);
 
     started = true;
-    sizeCanvas(container);
+    sizeCanvas();
+    bootFrame();
+    wrap.classList.add('active');
+    setTimeout(() => { applyLumenDelta(activeProfile); resume(); }, 120);
 
-    // Use IntersectionObserver to start/stop the loop as the section
-    // scrolls in/out of view (saves CPU when not visible).
-    let obsStarted = false;
-    if('IntersectionObserver' in window){
-      io = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-          if(e.isIntersecting && !obsStarted){ obsStarted = true; applyLumenDelta(activeProfile); resume(); }
-          else if(!e.isIntersecting && obsStarted){ pause(); }
-        });
-      }, { threshold: 0.01, rootMargin: '50px' });
-      io.observe(sectionEl);
-    }
-
-    // Fallback: force-start after 800ms if observer hasn't triggered
-    setTimeout(() => {
-      if(!running){ applyLumenDelta(activeProfile); resume(); }
-    }, 800);
-
-    console.info('[RESONANCE] online · profile: ' + activeProfile);
+    console.info('[RESONANCE] online · profile:', activeProfile);
   }
 
   window.LB_RESONANCE = { init, setProfile, pause, resume };

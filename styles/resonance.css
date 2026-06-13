@@ -1,6 +1,7 @@
 /* =========================================================================
-   resonance.css — AI Resonance section styles.
-   Matches the site's dark-space drafting visual language (styles.css).
+   resonance.css — AI Resonance instrument styles.
+   Gold/dust space-odyssey aesthetic. The instrument must be visible
+   immediately — border, glow, and frame show even before JS animates.
    ========================================================================= */
 
 /* ── section wrapper ────────────────────────────────────────────────────── */
@@ -71,27 +72,71 @@
 
 .rs-profile-btn.active {
   color: #D4A24C;
-  border-color: rgba(212,162,76,0.50);
-  background: rgba(212,162,76,0.06);
+  border-color: rgba(212,162,76,0.55);
+  background: rgba(212,162,76,0.08);
+  box-shadow: 0 0 12px rgba(212,162,76,0.15);
 }
 
-/* ── canvas wrap ────────────────────────────────────────────────────────── */
+/* ── canvas wrap — visible frame even before JS ─────────────────────────── */
 .rs-canvas-wrap {
   width: 100%;
-  height: 460px;
-  background: transparent;           /* LUMEN starfield shows through */
-  border: 1px solid rgba(212,162,76,0.18);
+  height: 480px;
+  background: rgba(8,10,18,0.55);
+  border: 1px solid rgba(212,162,76,0.35);
   position: relative;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(8,10,18,0.8) inset,
-    0 0 48px rgba(212,162,76,0.06) inset;
+    0 0 0 1px rgba(8,10,18,0.9) inset,
+    0 0 64px rgba(212,162,76,0.10) inset,
+    0 0 24px rgba(212,162,76,0.08);
+}
+
+/* Corner accents — visible frame markers */
+.rs-canvas-wrap::before,
+.rs-canvas-wrap::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(212,162,76,0.45);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 2;
+}
+.rs-canvas-wrap::before {
+  top: 6px; left: 6px;
+  border-width: 1px 0 0 1px;
+}
+.rs-canvas-wrap::after {
+  bottom: 6px; right: 6px;
+  border-width: 0 1px 1px 0;
 }
 
 .rs-canvas {
   display: block;
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fallback text — hidden once canvas is active */
+.rs-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(212,162,76,0.50);
+  z-index: 0;
+  pointer-events: none;
+}
+.rs-canvas-wrap.active .rs-fallback {
+  display: none;
 }
 
 /* ── legend ─────────────────────────────────────────────────────────────── */
@@ -146,17 +191,15 @@
   .rs-main {
     padding: 60px 24px 72px;
   }
-
   .rs-canvas-wrap {
-    height: 380px;
+    height: 400px;
   }
 }
 
 @media (max-width: 480px) {
   .rs-canvas-wrap {
-    height: 300px;
+    height: 320px;
   }
-
   .rs-legend {
     grid-template-columns: 1fr;
   }
