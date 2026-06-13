@@ -245,6 +245,33 @@
     return { update, get, reset };
   }
 
+  // ── TokenWordGenerator ────────────────────────────────────────────────
+  // Maps each token-fire event to a word drawn from the vocabulary,
+  // maintaining a rolling display buffer for the renderer.
+  function makeWordGen(rand){
+    const vocab = CFG.TOKEN_VOCAB;
+    const HIST  = CFG.TOKEN_STREAM.HISTORY;
+    const stream = [];   // [{word, isBurst, age}]  age increments each tick
+    let   vocabIdx = Math.floor(rand() * vocab.length);
+
+    function nextWord(){ vocabIdx = (vocabIdx + 1) % vocab.length; return vocab[vocabIdx]; }
+
+    function push(isBurst){
+      stream.push({ word: nextWord(), isBurst, age: 0 });
+      if(stream.length > HIST) stream.shift();
+    }
+
+    function tick(dtMs){
+      // age all existing tokens (visual fade is driven by position, not age,
+      // but we keep age for potential future use)
+      for(const t of stream) t.age += dtMs;
+    }
+
+    function get(){ return stream; }
+    function reset(){ stream.length = 0; vocabIdx = 0; }
+    return { push, tick, get, reset };
+  }
+
   // ── Engine factory ────────────────────────────────────────────────────
   function create(profileKey){
     const rand    = prng(Date.now() & 0xFFFF);
@@ -253,6 +280,7 @@
     const spectral= makeSpectral();
     const bursts  = makeBurstDetector(SP.HISTORY_LEN);
     const health  = makeHealth();
+    const words   = makeWordGen(rand);
 
     // Rolling interval history (for radar computation)
     const intervalHistory = [];
@@ -281,11 +309,15 @@
     function tick(dtMs){
       const dtVirtual = dtMs * CFG.SIM_SPEED;
       const fired = sim.advance(dtVirtual);
+      words.tick(dtMs);
       fired.forEach(iv => {
         spectral.push(iv);
         bursts.push(iv, profile.mean_ms);
         intervalHistory.push(iv);
         if(intervalHistory.length > HIST) intervalHistory.shift();
+        // word stream: classify as burst if interval < 45% of profile mean
+        const isBurst = iv < profile.mean_ms * 0.45;
+        words.push(isBurst);
       });
       if(spectral.getCount() < 4) return;
 
@@ -326,8 +358,10 @@
         energy_type:  profile.energy_type,
         color:        profile.color,
         dim_color:    profile.dim_color,
+        glow:         profile.glow,
         mag:          sp.mag,
         profile_label:profile.label,
+        token_stream: words.get().slice(),
       };
     }
 
@@ -337,12 +371,12 @@
       const p = CFG.PROFILES[key];
       if(!p) return;
       profile = p;
-      sim.reset();
+      sim.reset(); words.reset();
       signature = _emptySignature(p);
     }
 
     function reset(){
-      sim.reset(); spectral.reset(); bursts.reset(); health.reset();
+      sim.reset(); spectral.reset(); bursts.reset(); health.reset(); words.reset();
       intervalHistory.length = 0;
       signature = _emptySignature(profile);
     }
