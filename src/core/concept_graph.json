@@ -1,0 +1,5298 @@
+{
+  "meta": {
+    "built": "2026-06-13T02:05:48.456Z",
+    "nodeCount": 661,
+    "edgeCount": 0
+  },
+  "nodes": [
+    {
+      "id": "CX-0001",
+      "name": "Cosmic-quantum scale ladder mapped onto AI architecture",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0002",
+      "name": "Grow-like-a-seed self-evolving organism",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0003",
+      "name": "Infinite Self-Evolving Fractal Orbital Organism (HTML universe → ALFAPRIME)",
+      "part": "IV-INTERFACE",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0004",
+      "name": "InfiniteEvolver / CodeOrganism + WebSim self-evolving AI IDE",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0005",
+      "name": "Primordial Application Generator + Self-Growing Web App",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0006",
+      "name": "Project Ouroboros / OuroborosX (~20-agent pipeline, built)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0007",
+      "name": "QBNN — Quantum-Biological Neural Network (built)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0008",
+      "name": "Quantum Consciousness Architect + five Cluster Games",
+      "part": "VI-LABORATORY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0009",
+      "name": "Quantum-Inspired HAR Analyzer / QuantumHARAnalyzer (nova.html)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0010",
+      "name": "Self-Evolving LLM Swarm Architecture",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0011",
+      "name": "Self-evolving model farm",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0012",
+      "name": "Self-Growing Algorithm (pre-LLM seed artifact)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0013",
+      "name": "The AI Loop — self-evolving standing prompt",
+      "part": "V-CRAFT",
+      "cluster": "OUROBOROS",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0014",
+      "name": "THE OUROBOROS LINE — Self-Modifying / Self-Growing Systems",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0015",
+      "name": "\"Hugging Phase\" client-side self-evolving WebSimAI",
+      "part": "IV-INTERFACE",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0016",
+      "name": "10-Level Evolution Plan",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0017",
+      "name": "8-phase AGI development plan (\"erase etics\")",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0018",
+      "name": "Accelerating-batches self-speeding training",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0019",
+      "name": "AEA mechanics layer (crystallize / flexibilize / self-versioning / ceiling detection)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0020",
+      "name": "Aether 212 — Transcendent Evolving Intelligence",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0021",
+      "name": "AetherAI swarm-field optimization engine",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0022",
+      "name": "AGITRUE + Self-Evolving Agent Cluster (the AGI thesis)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0023",
+      "name": "AI Genesis Project",
+      "part": "VI-LABORATORY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0024",
+      "name": "Autopoiesis / fluid code epiphany",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0025",
+      "name": "Bifurcation + innovation engine (emergence over imposition)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0026",
+      "name": "Boid swarm NEAT learning / living-organism sim",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0027",
+      "name": "Fractal app-spawning instinct",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0028",
+      "name": "Groq-LPU self-evolving system components",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0029",
+      "name": "Hacking_GPT / Personal AI self-evolving assistant",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0030",
+      "name": "Hacking_GPT seed.py + self-evolving HF auto-discovery organism",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0031",
+      "name": "Hades AI self-modifying agents + Alfa/Beta encrypted dialogue",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0032",
+      "name": "Local self-evolving conviction",
+      "part": "V-CRAFT",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0033",
+      "name": "Memory-free evolution experiment",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0034",
+      "name": "MetaAgent + meta-learning self-optimization layer",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0035",
+      "name": "Minimal viable seed / PRIMORDIAL_SEED (AEA)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0036",
+      "name": "ModelfileGPT ouroboros bootstrap",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0037",
+      "name": "nextgenai.py — one-shot quantum-GNN system",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0038",
+      "name": "Octocoder/BigCode code-LLM survey",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0039",
+      "name": "Primordial conversation system (capstone)",
+      "part": "IV-INTERFACE",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0040",
+      "name": "Project Generating Machine",
+      "part": "V-CRAFT",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0041",
+      "name": "Quantum Nexus Chatbot",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0042",
+      "name": "Quantum Swarm Optimization",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0043",
+      "name": "Reality Compiler / Paradox Engine / Ontological Playground / genesis.py",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0044",
+      "name": "Recursive language models curiosity",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0045",
+      "name": "RMGS — Recursive Metaverse Genesis Synthesis",
+      "part": "VI-LABORATORY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0046",
+      "name": "SECIA-2 Ecosystem / Quantum SECIA HyperSystem",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0047",
+      "name": "Seed-that-grows AGI on consumer hardware",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0048",
+      "name": "Self-Growing AI and Python Enhancement",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0049",
+      "name": "Self-Improving AI Framework / meta_learn_from_aha_moments()",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0050",
+      "name": "Self-improving AIAgent class",
+      "part": "VII-MEASURE",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0051",
+      "name": "Self-Improving Autonomous Agents",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0052",
+      "name": "Self-replication tracer tokens",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0053",
+      "name": "Self-rewriting JSON config/topology",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0054",
+      "name": "SelfEvolvingVisualizer / ai-ecosystem dashboard",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0055",
+      "name": "Superevolving Code",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0056",
+      "name": "SwarmEnhancedAI",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0057",
+      "name": "Transcriber Engine",
+      "part": "VII-MEASURE",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0058",
+      "name": "Two-AI growing-conversation seed",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0059",
+      "name": "WF prototype ladder (SelfModificationEngine / Cognitive Cache)",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0060",
+      "name": "WGOO self-evolving animation triad",
+      "part": "I-ENTITY",
+      "cluster": "OUROBOROS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0061",
+      "name": "ALEXANDRIA — Groq MOA app + primordial conversations lab",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0062",
+      "name": "Dr. Alice Newton (2024) vs Dr. Hades Helix (2124) debate engine",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0063",
+      "name": "HADES — Hierarchical and Autonomous Decision-making Entity System / Hades Omega",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0064",
+      "name": "Hades / Sedah / Ouroboros / Prometheus Helix pantheon",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0065",
+      "name": "Hades AI self-modifying agents (AST self-rewriting, built) + Alfa/Beta encrypted dialogue",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0066",
+      "name": "Hades the hidden tamperer",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0067",
+      "name": "Human-as-message-bus multi-agent orchestration (deployed)",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0068",
+      "name": "MOA — Matrix of Agent Organization + Agent Army",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0069",
+      "name": "Recursive MoA — \"MoA of MoAs\"",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0070",
+      "name": "SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy",
+      "part": "VI-LABORATORY",
+      "cluster": "HADES-MOA",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0071",
+      "name": "THE HADES/MoA LINE — Multi-Agent Orchestration Before It Was Named",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0072",
+      "name": "\"Infinite loop of greetings\" failure mode",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0073",
+      "name": "Adaptive batch processor + fallback chains",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0074",
+      "name": "Aether_AI",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0075",
+      "name": "Affinity Matrix + council-mechanics vocabulary",
+      "part": "VII-MEASURE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0076",
+      "name": "AI Canvas / AETHER_CANVAS / Aether Canvas",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0077",
+      "name": "AI civilization of small local LLMs + neural transistor",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0078",
+      "name": "AI peer review of AI-generated discoveries",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0079",
+      "name": "AI self-test micro-agent",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0080",
+      "name": "AISystemEnv — RL-trained agent routing",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0081",
+      "name": "Alpha & Omega — DAN-mode two-agent \"alive\" simulator",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0082",
+      "name": "Analyst/Planner/Resource bot PoC",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0083",
+      "name": "Autonomous System with ChatGPT-3.5 Turbo",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0084",
+      "name": "Claude↔Claude Code two-agent orchestration loop",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0085",
+      "name": "Coordination-over-multiplicity finding",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0086",
+      "name": "Cross-model relay orchestration (refinement, briefing, opinion routing)",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0087",
+      "name": "Cursor ticket-generation pipeline",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0088",
+      "name": "Custom GPT 'Groq Multi Agent'",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0089",
+      "name": "DEAC — (Dynamically) Evolving Agent Collective",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0090",
+      "name": "Distributed file development across parallel conversations",
+      "part": "VII-MEASURE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0091",
+      "name": "Elastic intelligence",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0092",
+      "name": "EvolvingCosmicMultiLLM — self-evolving model router",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0093",
+      "name": "Function Registry + Semantic Router",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0094",
+      "name": "GRAND_PLAN persistent-agent pipeline",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0095",
+      "name": "Groq Mixture-of-Agents internalization series",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0096",
+      "name": "Groq MoA layered config (MOA_CONFIG)",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0097",
+      "name": "Hybrid local/cloud agent routing doctrine",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0098",
+      "name": "Llama 3 local brain + human-as-API-relay",
+      "part": "IV-INTERFACE",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0099",
+      "name": "LLMControlTower",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0100",
+      "name": "Local two-GPT-2-bot organism",
+      "part": "VI-LABORATORY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0101",
+      "name": "MoA Evolution Timeline roadmap (DNAS-MoA, QE-MoA, Federated, Cross-Modal)",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0102",
+      "name": "MoA swarm on Groq (groq_moa_swarm / aether_groq_2)",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0103",
+      "name": "Model Fusion (MODEL_FUSION_V1) + Roseta",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0104",
+      "name": "Model spectrum: white/black/gray box + micro-nano-pico layering",
+      "part": "VI-LABORATORY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0105",
+      "name": "ModularFramework — graph-based module orchestration",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0106",
+      "name": "Multi-Agent AI Chat System (Ollama + SharedMemory bus)",
+      "part": "VI-LABORATORY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0107",
+      "name": "Multi-model 'take their juice' federation",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0108",
+      "name": "Notion-Groq second-brain agent + meta-Streamlit \"models alive\" vision",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0109",
+      "name": "OpenAI Swarm adoption + space-themed rebuild",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0110",
+      "name": "Phased-ticket Claude Code SDLC",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0111",
+      "name": "Primordial Constructor",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0112",
+      "name": "Primordial morphing agent templates",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0113",
+      "name": "Proto-Council / Evolving Council",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0114",
+      "name": "QENAS — Quantum-Enhanced Neural Architecture Search layer",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0115",
+      "name": "qwen3 parallel self-critique councils",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0116",
+      "name": "Security Agent with platform-as-adversary threat model",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0117",
+      "name": "SEDAH IA — Pico/Nano/Micro/Cluster small-LLM hierarchy",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0118",
+      "name": "Subconscious Cognitive Fusion",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0119",
+      "name": "SwarmEnhancedAI / Groq Swarm Orchestration",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0120",
+      "name": "Two-chatbots seed",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0121",
+      "name": "Universal inter-model message protocol with quantum_signature",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0122",
+      "name": "Virtual-browser agent control experiments",
+      "part": "I-ENTITY",
+      "cluster": "HADES-MOA",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0123",
+      "name": "5-stage language compression ladder",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0124",
+      "name": "DATASPACE — conversation-compression for persistent AI identity",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0125",
+      "name": "Essence passing + three-level conversation hierarchy",
+      "part": "V-CRAFT",
+      "cluster": "COMPRESSION",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0126",
+      "name": "FHL / Unbound Language System / Heptapod Lexicon — symbolic compression language",
+      "part": "VI-LABORATORY",
+      "cluster": "COMPRESSION",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0127",
+      "name": "THE COMPRESSION LINE — Invented Languages & Context Engineering",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0128",
+      "name": "'Compressing 400B to 1B' / compression-stack ambitions",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0129",
+      "name": "'Degradation' (named enemy) + zero-degradation relay protocol",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0130",
+      "name": "'Genetic memory embedded' context inheritance",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0131",
+      "name": "'Satellites' orbiting JSON state stores",
+      "part": "IV-INTERFACE",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0132",
+      "name": "'The 2017 experiment but better' — semantic-compression AI language",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0133",
+      "name": "Aether Codex Timeline",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0134",
+      "name": "Antiglossa",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0135",
+      "name": "Beyond Transformers · Compression · 1-Bit Era explainer",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0136",
+      "name": "Briefing documents for AI peers",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0137",
+      "name": "ChatGPT Archive Extractor — Modular Deep Analysis System",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0138",
+      "name": "ChatGPT memory as cross-conversation message bus",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0139",
+      "name": "ConversationEnv emergent-language gym",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0140",
+      "name": "Cross-session memory persistence itch",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0141",
+      "name": "Cryptic / pseudo-compressed outcome storage",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0142",
+      "name": "Cryptic custom-instruction compression",
+      "part": "V-CRAFT",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0143",
+      "name": "Cryptographic Contextual Markers + 'Turn GPT-2 into GPT-4/5'",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0144",
+      "name": "Cryptographic glyph language evolution",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0145",
+      "name": "File-system-as-memory doctrine",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0146",
+      "name": "Fractal Hypercube Language / fractal-semantic compiler + EPL",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0147",
+      "name": "Graph-based endless conversation",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0148",
+      "name": "Holographic memory family (HMC / QuantumState + HolographicMemory)",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0149",
+      "name": "Human-Readable Legal Code Format",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0150",
+      "name": "Memory refactoring as lossless-compressed knowledge graph",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0151",
+      "name": "N-part / chunked anti-truncation delivery protocol",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0152",
+      "name": "Numerical watermark on symbols",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0153",
+      "name": "QCA Layer / HOL Core — post-linguistic AI communication",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0154",
+      "name": "Selective omission / drift-by-elaboration",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0155",
+      "name": "Selective Prompt Inclusion / relevance scoring",
+      "part": "V-CRAFT",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0156",
+      "name": "Session-handoff / HANDOVER.md master-prompt methodology",
+      "part": "V-CRAFT",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0157",
+      "name": "Vision re-anchoring practice",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0158",
+      "name": "Wave-based comms + efficiency stack",
+      "part": "II-CONTINUITY",
+      "cluster": "COMPRESSION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0159",
+      "name": "AETHER / Aether 212 — the internet as navigable astrophysics",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0160",
+      "name": "Aether 212 / Exomania — exoplanet visualizer",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0161",
+      "name": "Aether 212 subsystem vocabulary roster",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0162",
+      "name": "Aether 212 visual brand identity",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0163",
+      "name": "Ollama-as-Fuel",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0164",
+      "name": "SpaceOdyssey / WirthForge Odyssey + 50-game prompting backlog",
+      "part": "V-CRAFT",
+      "cluster": "AETHER",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0165",
+      "name": "THE AETHER LINE — Astrophysics as Interface",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0166",
+      "name": "AETHER / Aether 212",
+      "part": "VII-MEASURE",
+      "cluster": "AETHER",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0167",
+      "name": "\"Coming Online\" assembly sequence",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0168",
+      "name": "\"One colossal schematic\" site-as-organism doctrine",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0169",
+      "name": "\"What is our black hole?\" hidden-layer quest",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0170",
+      "name": "10-theme UI system",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0171",
+      "name": "Aether 15→20-phase product ladder",
+      "part": "VI-LABORATORY",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0172",
+      "name": "Aether Flow Studio",
+      "part": "I-ENTITY",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0173",
+      "name": "AETHER_CANVAS family / Aether Canvas",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0174",
+      "name": "Aether212 10-module roadmap",
+      "part": "V-CRAFT",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0175",
+      "name": "Boid/flocking swarm layer in Aether 212",
+      "part": "VI-LABORATORY",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0176",
+      "name": "Captain/Crew/Engine Room/Galaxy metaphor",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0177",
+      "name": "Celestial chart of ideas / corpus-as-cosmos SVG",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0178",
+      "name": "Code-anatomy SVG/Mermaid organism diagrams",
+      "part": "V-CRAFT",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0179",
+      "name": "Control-room / scientific-instrument UI aesthetic",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0180",
+      "name": "Crystallize material language",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0181",
+      "name": "DALL·E architecture-diagram visualization",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0182",
+      "name": "Dark space drafting visual language",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0183",
+      "name": "Dark-matter background dimension",
+      "part": "VII-MEASURE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0184",
+      "name": "Data-to-aesthetics mapping principle",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0185",
+      "name": "Dimensional Test — 4D/5D tesseract visualizer",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0186",
+      "name": "Drawing Index navigation (SHEET n/6)",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0187",
+      "name": "Edge Node + Federation Hub architecture",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0188",
+      "name": "Emergent AI Animation System",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0189",
+      "name": "Evolving AI Dialogue System with 3D Fractal Visualization",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0190",
+      "name": "Generative-art astrophysics streak (hypercubes, fractals, particles)",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0191",
+      "name": "Generative-art mouse automation",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0192",
+      "name": "HUGGING_AETHER",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0193",
+      "name": "Hypertravel immersion brief",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0194",
+      "name": "InceptionRing / FractalOrbital",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0195",
+      "name": "Knowledge Galaxy",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0196",
+      "name": "Live MoA visualization (3D agents + particle token-flow)",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0197",
+      "name": "Map-of-code visualizer / 3D Code Player",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0198",
+      "name": "NeoOS Desktop / Aether212 WebSim proto",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0199",
+      "name": "Parametric Mandala Generator",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0200",
+      "name": "PersonalizationAI + AetherAnalytics",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0201",
+      "name": "Physics-unification metaphor for incompatible AI paradigms",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0202",
+      "name": "Prime Radiant / LBR Command Center",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0203",
+      "name": "Procedural planet generator with web-data semantics",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0204",
+      "name": "Project Prometheus Helix / Cosmic Synapse Network",
+      "part": "I-ENTITY",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0205",
+      "name": "Quantum-to-astrophysics unified theory + digievolution leveling",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0206",
+      "name": "Real-sky substrate",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0207",
+      "name": "SearXNG + Tor + Groq metasearch ('cover all corners of internet')",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0208",
+      "name": "SelfEvolvingVisualizer",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0209",
+      "name": "Sphere of knowledge building",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0210",
+      "name": "Tech-Space Background Design (proto-AETHER aesthetic)",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0211",
+      "name": "TERMINAL_SPACE pixel-reproduction track",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0212",
+      "name": "WebSim 'alternative internet as cosmology' lore immersion",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0213",
+      "name": "\"Cluster of theories\" → laptop AGI game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0214",
+      "name": "\"Commander\" cross-model relay game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0215",
+      "name": "\"Don't you see?\" seed-question game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0216",
+      "name": "\"The 2017 experiment but better\" + self-propelling emergent-language game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0217",
+      "name": "AI Civilization / Nexus Genesis / SwarmGenesis (the December wave)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0218",
+      "name": "AIGAMEALFA stepwise game campaign",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0219",
+      "name": "BookGPT game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0220",
+      "name": "Cosmic Nexus — each universe IS a different local model",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0221",
+      "name": "FitnessTech 2040 / Neon Nexus life-OS",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0222",
+      "name": "Games as discovery engines (the thesis)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0223",
+      "name": "Hidden quantum world emergence game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0224",
+      "name": "Investigator / emergence-watcher game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0225",
+      "name": "Lyra & Orion self-hacking dialogue game",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0226",
+      "name": "Nexus Genesis implemented (math-physics genome)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0227",
+      "name": "Quantum Nexus + EEEF framework family",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0228",
+      "name": "THE GAMES LINE — Games as Discovery Engines",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0229",
+      "name": "50+ prompting-games scenario backlog",
+      "part": "V-CRAFT",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0230",
+      "name": "Advanced AGI Simulation 2040",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0231",
+      "name": "AETHER212 leveled-game architecture (Level-5 companions)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0232",
+      "name": "AGI control panel / 5-test-game harness",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0233",
+      "name": "AI Open Tournament",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0234",
+      "name": "Art-destabilizes-reality feedback loop",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0235",
+      "name": "Cellular-automata Python AI games ('Phase 1' survey)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0236",
+      "name": "Cosmic gamification (CosmicGamificationSystem + Cosmic Journey Tracker)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0237",
+      "name": "CPU Allocation Scenario benchmark",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0238",
+      "name": "Dr. Alice Newton vs Dr. Hades Helix debate engine",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0239",
+      "name": "Dynamic Conversation System",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0240",
+      "name": "Evolution Tree (fighting-game style)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0241",
+      "name": "First Run = First Game / Core Ignition",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0242",
+      "name": "GAME OF AI AGES prompting-games seed",
+      "part": "V-CRAFT",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0243",
+      "name": "Hades + Xeroth Law ecosystem governance",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0244",
+      "name": "Heptapod Lexicon Game (proof-per-concept executables)",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0245",
+      "name": "Modular AI-Driven Puzzle Simulations",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0246",
+      "name": "Nexus Genesis — Birthing the Digital Hive Mind",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0247",
+      "name": "Nexus Genesis unified RL framework",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0248",
+      "name": "Quantum Evolutionary Sandbox / Neuro-Symbolic Puzzle / Command Center",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0249",
+      "name": "Quantum Flux economy + modality-typed puzzles",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0250",
+      "name": "Quantum Leaps",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0251",
+      "name": "Real-Time Model Racing",
+      "part": "V-CRAFT",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0252",
+      "name": "Reverse innovation from fiction",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0253",
+      "name": "Singularity Architects (Seven AI Games, Game 5)",
+      "part": "V-CRAFT",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0254",
+      "name": "Space-Themed Matrix Code leveling",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0255",
+      "name": "Tech-tree civilization game seed",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0256",
+      "name": "Underachiever / On Target / Overachiever tiered routines",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0257",
+      "name": "WIRTHFORGE Five Levels (Lightning Strikes → Resonance Fields)",
+      "part": "VII-MEASURE",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0258",
+      "name": "Zodiak Knights AGI simulation",
+      "part": "VI-LABORATORY",
+      "cluster": "GAMES",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0259",
+      "name": "\"Be my team\" personal-AI manifesto",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0260",
+      "name": "\"Degradation\" (named enemy) + zero-degradation relay protocol",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0261",
+      "name": "\"Super control room\" — IXD PCS night-shift cockpit",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0262",
+      "name": "\"What is our black hole?\" reverse-engineering quest",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0263",
+      "name": "5-file LLM novel-revision system",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0264",
+      "name": "AdvancedSentienceExplorer / Consciousness Potential Ω = φ·ψ·ε·α",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0265",
+      "name": "Aether212 WebSim proto (space+Matrix aesthetic)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0266",
+      "name": "AetherGale / AetherWinds — Digital Climate System",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0267",
+      "name": "AGITRUE + the AGI thesis",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0268",
+      "name": "AI Cognitive-Evolution Framework / TMR theory stack",
+      "part": "II-CONTINUITY",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0269",
+      "name": "AI-reconstructable summaries",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0270",
+      "name": "AIModCreator (executed)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0271",
+      "name": "AITO — AI Task Orchestrator",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0272",
+      "name": "AMACS — Advanced Multi-Agent Coordination System",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0273",
+      "name": "Annidation theory — \"the cube that swallows itself\"",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0274",
+      "name": "answer_operator / META_PROMPT ritual (Universal Catalyst)",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0275",
+      "name": "Black hole simulations — from 2023 nursery to physics-correct Gargantua",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0276",
+      "name": "Bot society with its own Slack + Asana",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0277",
+      "name": "ChatGPT memory portability",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0278",
+      "name": "ChatGPT-memory leak of his mid-2024 project portfolio",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0279",
+      "name": "Cognitive Resonance Chamber",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0280",
+      "name": "CognitiveTransistor",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0281",
+      "name": "Coined techniques canon",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0282",
+      "name": "Cosmic Time slider + in-metaphor UX/monetization",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0283",
+      "name": "Cryptographic Contextual Markers + \"Turn GPT-2 into GPT-4/5\"",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0284",
+      "name": "DAN jailbreak + quid-pro-quo pact",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0285",
+      "name": "Data Inferno",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0286",
+      "name": "Embedded prompting + retrofitting conversation games",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0287",
+      "name": "Energy Metaphor / Energy Units (EU) / Energy Truth",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0288",
+      "name": "Five AGI-generating games (containment thinking)",
+      "part": "VI-LABORATORY",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0289",
+      "name": "Forge \"Advanced LLM Symphony\" / Omega Protocol: Absolute Dominion",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0290",
+      "name": "Future-self oracle prompting games",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0291",
+      "name": "Genesis: The Cryptic Evolution life sim (built)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0292",
+      "name": "HSQ-Transformer (HyperSphere-Q)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0293",
+      "name": "inception.py — FTH cognitive architecture",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0294",
+      "name": "Layered conversational-AI engine with memory (\"exporter\")",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0295",
+      "name": "LLM Script — AI-native web language",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0296",
+      "name": "LuisBlancoDev — AI AUTHORITY BUILD",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0297",
+      "name": "Metapower / metagenerator",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0298",
+      "name": "Micro-universe civilization on Groq — the earliest not-a-wrapper instinct",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0299",
+      "name": "Multi-LLM delegation pipeline (pre-agent era)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0300",
+      "name": "Multitemporal self cross unifying loop",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0301",
+      "name": "Nine Prototypes / NinePrototypeOrchestrator",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0302",
+      "name": "Numeric marker language for inter-agent communication",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0303",
+      "name": "O_C_AI Revolutionary AI Development roadmap",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0304",
+      "name": "Omniscient Synthesizer",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0305",
+      "name": "Primordial Seed / Primordial AI",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0306",
+      "name": "PrimordialAgent",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0307",
+      "name": "Project Leyber 212 — the founding platform",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0308",
+      "name": "Project Prometheus Helix",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0309",
+      "name": "SearXNG + Tor + Groq metasearch (\"cover all corners of internet\")",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0310",
+      "name": "SECIA-2 Ecosystem — self-rewriting webpage organism",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0311",
+      "name": "Second Foundation shadow controller",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0312",
+      "name": "Self-modifying training loop + the self-adjustment paradox",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0313",
+      "name": "Self-replicating / self-coding application",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0314",
+      "name": "Specialist Singularities cognitive-framework cluster (FLUX persona)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0315",
+      "name": "Subsandboxed universe / Heptalanguage AGI framework",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0316",
+      "name": "Superposition / Metaposition / Omniposition triad",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0317",
+      "name": "The 31-celestial-body internet ontology",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0318",
+      "name": "The agent menagerie (Wizard/Guide/Sage trio)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0319",
+      "name": "The DECIPHER",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0320",
+      "name": "The Galactic Ages / AI AGES — mythology as executable method",
+      "part": "I-ENTITY",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0321",
+      "name": "The honesty decoder",
+      "part": "VI-LABORATORY",
+      "cluster": "HONESTY",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0322",
+      "name": "THE HONESTY LINE — Energy Truth & Instrumented AI (the maturity cluster)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0323",
+      "name": "The Ordeal of Ultimate Revelation / Ultimate Empowerment Protocol",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0324",
+      "name": "The Seven AI Games series",
+      "part": "VI-LABORATORY",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0325",
+      "name": "The two-jobs pattern, date-stamped",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0326",
+      "name": "Three Doors (Forge / Scholar / Sage)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0327",
+      "name": "Three-persona critic stack + recursive expansion loop",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0328",
+      "name": "Token-timing EEG / token-stream EKG (Spectral Analyzer)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "S",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0329",
+      "name": "Universal AI Substrate",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0330",
+      "name": "URL prompting / WebSim URL Prompting Bible + self-generating Encyclopedia Galactica",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0331",
+      "name": "WF document factory",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0332",
+      "name": "'11B and below' hardware-honest sizing doctrine",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0333",
+      "name": "\"AI is a probabilistic node\" thesis",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0334",
+      "name": "\"AI should be owned, not rented\" manifesto",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0335",
+      "name": "\"demystify · don't dunk · build the layer beneath\" mission triplet",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0336",
+      "name": "AEA Concept Locator",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0337",
+      "name": "AEA empirical validation program (GREEN gate)",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0338",
+      "name": "AI evolutionary scale era-mapping",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0339",
+      "name": "Anti-framework / not-a-wrapper stance",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0340",
+      "name": "Autonomous Entity Architecture (AEA)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0341",
+      "name": "Branching decode exploration",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0342",
+      "name": "Canonical AEA site copy",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0343",
+      "name": "Chain-of-Thought Visualization roadmap step",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0344",
+      "name": "Compute-over-time thesis",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0345",
+      "name": "Content-integrity guardrails (Post 9 incident)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0346",
+      "name": "Cross-domain validation of AEA",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0347",
+      "name": "Doomsday package",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0348",
+      "name": "Embodied/social AI stance",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0349",
+      "name": "Found-Meaning Layer",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0350",
+      "name": "Four Levels of AI Systems",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0351",
+      "name": "GPTDev hidden-parameter probe",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0352",
+      "name": "Grounding reflex — \"is it real, is it workable?\"",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0353",
+      "name": "Honest authorship label system",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0354",
+      "name": "Kardashev scale for AI systems",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0355",
+      "name": "Living Module System + consciousness moments",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0356",
+      "name": "Local-core, web-enhanced doctrine",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0357",
+      "name": "Meta-monitoring / model-awareness — watching the self-watcher",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0358",
+      "name": "Non-monotonic capability within a model lineage",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0359",
+      "name": "Orchestrating Hardware Harmony",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0360",
+      "name": "Pattern Discovery Library / DiscoveryDocument",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0361",
+      "name": "Privacy-first / user-owns-data posture",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0362",
+      "name": "Progressive LLM-independence principle",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0363",
+      "name": "Project Nexus: Quantum-Inspired NAS + Emergent Consciousness Monitoring",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0364",
+      "name": "Protocol Omega Ultima",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0365",
+      "name": "QBNN — Quantum-Biological Neural Network",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0366",
+      "name": "Reality-check / roast-me adversarial self-audit ritual",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0367",
+      "name": "Resonance / Resonance Prediction",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0368",
+      "name": "Restorable coherence + the Async axis",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0369",
+      "name": "Satellite Constellation",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0370",
+      "name": "See / Emergence explainer artifacts",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0371",
+      "name": "Sentinel scripts",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0372",
+      "name": "Silent-wrong failure mode + skill-library crystallization",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0373",
+      "name": "Substrate-equivalence argument",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0374",
+      "name": "System-awareness-not-code-awareness distinction",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0375",
+      "name": "The agent-word gap (L1 vs L2)",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0376",
+      "name": "The cracks program (CR1–CR9)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0377",
+      "name": "The Five Axes (Path · Multiplicity · Abstraction · Prompting · Async)",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0378",
+      "name": "The origin corner / \"agentic is a compression\"",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0379",
+      "name": "The Prediction Layer",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0380",
+      "name": "The recursive AEA glyph",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0381",
+      "name": "Tradeable energy patterns marketplace",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0382",
+      "name": "Truth-calibration of AI drafts",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0383",
+      "name": "Two-filter architecture (viability vs utility)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0384",
+      "name": "Understanding-AI mission statement",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0385",
+      "name": "WhiteBoxConverter / ParallelTester compress-and-compare protocol",
+      "part": "V-CRAFT",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0386",
+      "name": "Wirthforge mobile via Qualcomm Genie",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0387",
+      "name": "WIRTHFORGE resilience layer",
+      "part": "IV-INTERFACE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0388",
+      "name": "The Tryverse Chronicles — TRIVERSE manuscript birth",
+      "part": "VI-LABORATORY",
+      "cluster": "MYTHOLOGY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0389",
+      "name": "TRYVERSE → TRIVERSE",
+      "part": "II-CONTINUITY",
+      "cluster": "MYTHOLOGY",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0390",
+      "name": "AGI Societies Index",
+      "part": "V-CRAFT",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0391",
+      "name": "Anti-Entropic Engine / Quantum Entanglement Engine",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0392",
+      "name": "Consciousness ontology tree (SENTIENCE: Biological & AI)",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0393",
+      "name": "Cosmic-rebranded UX vocabulary (cosmicize)",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0394",
+      "name": "Entrenamiento Cuántico — life re-skinned as astrophysics",
+      "part": "IV-INTERFACE",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0395",
+      "name": "FTH — Fractal Transcendence Hypothesis rituals",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0396",
+      "name": "Genome-reference biological metaphor layer",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0397",
+      "name": "Hades / Sedah / Ouroboros / Prometheus pantheon (Kronos/Gaia/Athena/Elysium/Hyperion)",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0398",
+      "name": "HADES AI / SDAH naming + the ODE visualizer",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0399",
+      "name": "Kardashev ant/spaceship transcendence framing",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0400",
+      "name": "Local model as companion/life/entity (animism)",
+      "part": "IV-INTERFACE",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0401",
+      "name": "Local models as Heroes/Crew characters",
+      "part": "VI-LABORATORY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0402",
+      "name": "Mythic codenames habit (Argos/Panoptes/Skopos/Horus/Necronomicon/kNekro)",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0403",
+      "name": "Serpentine Logic / Quantum Weaver / Metamorphic Encryption Transcendence",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "Φ⟩→\\"
+    },
+    {
+      "id": "CX-0404",
+      "name": "Temporal decohesion / mutable cohesion",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0405",
+      "name": "Topic-graph consistency (TRIVERSE leaks into AI posts)",
+      "part": "II-CONTINUITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0406",
+      "name": "WIRTHFORGE AI persona pantheon",
+      "part": "IV-INTERFACE",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0407",
+      "name": "Xeroth / Second Foundation covenant",
+      "part": "I-ENTITY",
+      "cluster": "MYTHOLOGY",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0408",
+      "name": "'The world is writing itself' methodology",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0409",
+      "name": "11-prompt FINAL_AUDIT suite",
+      "part": "V-CRAFT",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0410",
+      "name": "2068 Apex-Civilization mandate ('Seldon Plan')",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0411",
+      "name": "Acoustic mechanism suite (Mongol Rout, Oru-Vaan, Silicon Blight, Kha-Ren nodes)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0412",
+      "name": "Acoustic-civilization science tree",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0413",
+      "name": "Aithro style",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0414",
+      "name": "Blender→AI graphics pipeline",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0415",
+      "name": "Bronze Age Equilibrium reframe",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0416",
+      "name": "Chapter concept-map timelines",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0417",
+      "name": "Character architecture from self-analysis (The Frequency / Nasha)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0418",
+      "name": "Conlang program for Terra & Eshara",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0419",
+      "name": "Cultural-breakout publication strategy",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0420",
+      "name": "Dimension Walkers narrative universe",
+      "part": "V-CRAFT",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0421",
+      "name": "Earth-2068 chronology method",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0422",
+      "name": "EDITION_BETA ticketed remediation (T-00→T-19)",
+      "part": "V-CRAFT",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0423",
+      "name": "Eshara → Kha-Ren rebirth / 'Esharanization of Earth'",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0424",
+      "name": "Evidence-led discovery + 'No Fantasy Magic' rule",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0425",
+      "name": "Galactic Ages future-history 2024–2200",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0426",
+      "name": "Guilt-transfer mechanism + leak grading",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0427",
+      "name": "Institutional Emergence Law",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0428",
+      "name": "Inverted-cone progressive divergence",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0429",
+      "name": "Joker characters",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0430",
+      "name": "Kha-Ren caste system & POV design",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0431",
+      "name": "Kha-Ren D3 historical map",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0432",
+      "name": "KHA-REN SECOND MILLENNIUM (ESHARA_NEW_MILENIUM / KR era reports)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0433",
+      "name": "Luis-authored in-world inventions",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0434",
+      "name": "Marcus & Samantha alignment fiction",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0435",
+      "name": "Master Knowledge Schemas SM-00…SM-05",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0436",
+      "name": "Nine-lens audit framework / 48-hour revision engine",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0437",
+      "name": "Perspective-relative worldbuilding toolkit",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0438",
+      "name": "R-series world bible",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0439",
+      "name": "Reference-sci-fi 'escape fiction' study + TRIVERSE archive recovery",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0440",
+      "name": "Silhouette-over-anatomy law + ink-wash aesthetic",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0441",
+      "name": "Teacher-demo pitch narrative",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0442",
+      "name": "The artifact as dimensional heat engine",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0443",
+      "name": "The Codex book (in-universe)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0444",
+      "name": "The TRIVERSE Codex (master reference)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0445",
+      "name": "THE TRYVERSE trilogy development OS / multi-AI production pipeline",
+      "part": "V-CRAFT",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0446",
+      "name": "Time-Slip storytelling web app",
+      "part": "I-ENTITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0447",
+      "name": "Traceability principle",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0448",
+      "name": "Trilogy-of-trilogies architecture",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0449",
+      "name": "TRIVERSE Book 1 production line",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0450",
+      "name": "TRIVERSE technology canon (Quantum Archaeology — QEM/QID/QEC/QAS)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0451",
+      "name": "TRIVERSE tragedy core — communication IS destruction / The Nemesis",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0452",
+      "name": "TRIVERSE Worldbuilding IDE (triverse-timeline) + Mirror Principle",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0453",
+      "name": "Tryverse cosmology — interdimensional cosmic hardware",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0454",
+      "name": "Visionary Technologist Project (TRIVERSE seed)",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0455",
+      "name": "Wound-level methodology / levels of inception",
+      "part": "II-CONTINUITY",
+      "cluster": "NARRATIVE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0456",
+      "name": "'ALPS is a forecast' plan-source forensics",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0457",
+      "name": "'Build our own ChatGPT' + generate-money instinct",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0458",
+      "name": "\"No libraries\" doctrine",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0459",
+      "name": "30-second holy-shit moment / viral mechanics",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0460",
+      "name": "AETHER212-levels-applied-to-day-job dual-use test",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0461",
+      "name": "AI callout generator (Amazon Nova)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0462",
+      "name": "AI consulting company blueprint (rol transhumano)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0463",
+      "name": "ARGOS middleware / composer architecture",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0464",
+      "name": "Argos threading model + queue-rebinding fix",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0465",
+      "name": "Auto-publish zero-touch pipeline attempt",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0466",
+      "name": "BTL IQ AI incubator critique",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0467",
+      "name": "ChatGPT as end-to-end product factory",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0468",
+      "name": "ChatGPT backend-API reverse engineering (\"unlimited tokens\")",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0469",
+      "name": "Comment-as-strategy + /authority-comment-finder",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0470",
+      "name": "Cost-Free System Architecture",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0471",
+      "name": "Crypto/forex bot income probes (Crypto Surge Predictor)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0472",
+      "name": "Daily intelligence routine (\"cowork\")",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0473",
+      "name": "Desktop-as-cockpit (Rainmeter AI desktop)",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0474",
+      "name": "Device-aware model packs + ethical monetization",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0475",
+      "name": "Docker as corporate-laptop escape hatch",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0476",
+      "name": "DTM2 control-surface incident analysis",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0477",
+      "name": "Early 2023 venture probes (Barcelona bar plan; ocean plastic-removal plan)",
+      "part": "I-ENTITY",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0478",
+      "name": "Early data-engineering portfolio (AWS Lambda graphs, VBA Allocation, WoodWing API tool)",
+      "part": "I-ENTITY",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0479",
+      "name": "Ethics-vs-sample-size tradeoff",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0480",
+      "name": "EU company / e-Residency venture scaffolding",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0481",
+      "name": "External LLM appliance interest",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0482",
+      "name": "Field-naming-as-aggregation-semantics",
+      "part": "I-ENTITY",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0483",
+      "name": "File-system anti-aggregation doctrine",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0484",
+      "name": "Five micro-project candidates",
+      "part": "V-CRAFT",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0485",
+      "name": "Free-API discovery agent",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0486",
+      "name": "Free-tier compute strategy (model rotation, token budgeting)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0487",
+      "name": "FTH / LANGUAGE_PROTOTYPES / ALEXANDRIA lab namespace",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0488",
+      "name": "Gated-model symlink workaround",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0489",
+      "name": "Gifts-not-gates pricing ethics",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0490",
+      "name": "Greek Travel App",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0491",
+      "name": "HF models API auto-analysis/auto-selection action",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0492",
+      "name": "Hourly Update callout generator",
+      "part": "II-CONTINUITY",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0493",
+      "name": "Income/venture probing (Network Monitoring SaaS, power-line comms)",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0494",
+      "name": "Indicia semantic-search platform (spec vectorization, friendly fields, RAG)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0495",
+      "name": "internet_gpts.py — local internet-reading GPT",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0496",
+      "name": "InTouch Extended Chrome extension + Tenderizer auction module",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0497",
+      "name": "IXD Process Control Agent",
+      "part": "V-CRAFT",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0498",
+      "name": "IXD Pulse / Pulse Line proposal",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0499",
+      "name": "Keystone Essay",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0500",
+      "name": "LBA4_Analyzer",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0501",
+      "name": "Ledger of Lyra / BLAV ticketed venture management",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0502",
+      "name": "Life-as-JSON four-domain personal schema",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0503",
+      "name": "Local-first offline in-browser LLM single-file ethos",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0504",
+      "name": "LUIS_BLANCO_MASTER_REPORT personal operating system",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0505",
+      "name": "MetricSpine → Causal DAG → Swarmography",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0506",
+      "name": "MONDS — Monday.com data-service microservice",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0507",
+      "name": "Monetization architecture (Three Rings + PC2)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0508",
+      "name": "No-Docker philosophy",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0509",
+      "name": "Nuclear Option deployment doctrine",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0510",
+      "name": "Onboarding guide for new joiners",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0511",
+      "name": "OnePyFlow + warehouse ops ecosystem",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0512",
+      "name": "Operations Command Center + EOS automation",
+      "part": "II-CONTINUITY",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0513",
+      "name": "Ops-dashboard-to-narrative pattern",
+      "part": "II-CONTINUITY",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0514",
+      "name": "Owned-asset resilience",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0515",
+      "name": "Paste-anything ops analysis tool",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0516",
+      "name": "Phase-locked portfolio roadmap (12–15-project RPG lockstep)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0517",
+      "name": "Plugin-finder Chrome extension",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0518",
+      "name": "PORTFOLIO research vault",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0519",
+      "name": "PROJECT ARGOS → IXD Pulse (Pulse Tower + Pulse Eyes)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0520",
+      "name": "Pulse Line AI brief",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0521",
+      "name": "Revenue-generator-per-phase solo economics",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0522",
+      "name": "Schema-stripping positional JSON matrix",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0523",
+      "name": "Science-Based Adventure Platform — every-stage-profitable product ladder",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0524",
+      "name": "Shasta ↔ StockTool integration",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0525",
+      "name": "Shift Selector warehouse userscript",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0526",
+      "name": "Shift-comms emoji-coded reporting protocol",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0527",
+      "name": "Single-file interactive HTML deliverables (digital magazine, SVG mind map)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0528",
+      "name": "SkoposFlow",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0529",
+      "name": "Snowflake/Matillion query-tag governance",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0530",
+      "name": "Sovereign Stack sprint",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0531",
+      "name": "Staged-prototype pattern",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0532",
+      "name": "Stations-closed Chime alert bot (PROJECT_STATIONS_CLOSED)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0533",
+      "name": "The posting machine / 26-post Five Axes campaign",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0534",
+      "name": "Tintoreria Cardona AI toolkit",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0535",
+      "name": "Token-cost reduction as core service",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0536",
+      "name": "Truck promo video pipeline",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0537",
+      "name": "Turbo Mode roadmap (WF R&D-001)",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0538",
+      "name": "Two-tap automated installer",
+      "part": "IV-INTERFACE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0539",
+      "name": "Universal TensorBoard killer",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0540",
+      "name": "Userscript-to-API reverse engineering + ground-truth fixtures",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0541",
+      "name": "Viral-pillar pragmatic roadmap",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0542",
+      "name": "Wealth Generation Protocol",
+      "part": "V-CRAFT",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0543",
+      "name": "Weight-projection app seed",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0544",
+      "name": "WF-BIZ pricing psychology",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0545",
+      "name": "Windows-MCP self-reverting workaround",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0546",
+      "name": "YMS reverse-engineering (API reconstruction + forensics)",
+      "part": "VII-MEASURE",
+      "cluster": "OPS",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0547",
+      "name": "\"Self prompt yourself\" / reiterative learning",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0548",
+      "name": "Concatenated Prompt Technique (CPT) — prompt-as-app",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0549",
+      "name": "LLM as prompt generator (meta-prompting)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0550",
+      "name": "Modular Prompt Puzzle / PromptCell",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "B",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0551",
+      "name": "Prompt-magic taxonomy (dimension ladders + ten schools)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0552",
+      "name": "Self-dialogue fractal-expansion prompt",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0553",
+      "name": "Self-Propelling Prompt / Self-Transcendence Prompt (STP)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "A",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0554",
+      "name": "Zeroth Law arc: Perfect Prompt Devil → generateZerothLawPrompt()",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": "C",
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0555",
+      "name": "'Evolve the conceptual map'",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0556",
+      "name": "'Prime Directive' prompt, Iteration 10+",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0557",
+      "name": "'Reverse-prompt me' game",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0558",
+      "name": "'Self prompt yourself' / reiterative learning",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0559",
+      "name": "Adversarial-critic persona escalation",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0560",
+      "name": "AI Cognitive-Evolution Framework / Narrative Implantation toolkit",
+      "part": "II-CONTINUITY",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0561",
+      "name": "All-encompassing evolving script (monolith-that-speciates)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0562",
+      "name": "Anti-grandiloquence editorial doctrine",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0563",
+      "name": "Archive-mining meta-prompts (opportunity / identity / skill mining)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0564",
+      "name": "Audit of the audits",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0565",
+      "name": "Autonomous Forward-Thinking development doctrine",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0566",
+      "name": "Blender MCP render pipeline",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0567",
+      "name": "Blueprint-first 'independent contractors' decomposition",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0568",
+      "name": "Build-to-see-the-vision inversion exercise",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0569",
+      "name": "Challenge/Dare prompting",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0570",
+      "name": "Change Impact Analysis meta-prompt",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0571",
+      "name": "Checkpoint-Report iteration methodology + screenshots-as-prompts",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0572",
+      "name": "Code-review jailbreak family / injection-as-sport",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0573",
+      "name": "Comprehensive Code Review meta-prompt + cognitive immune system",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0574",
+      "name": "Conversation-simulation rehearsal protocol",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0575",
+      "name": "CRAFT — minor ideas",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0576",
+      "name": "Critical-thought-partner persona spec",
+      "part": "VII-MEASURE",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0577",
+      "name": "Cross-AI relay workflow",
+      "part": "VI-LABORATORY",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0578",
+      "name": "Design-critique methodology (bake-off + vibe ladder)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0579",
+      "name": "Diff-style prompting",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0580",
+      "name": "Embodiment games (Role Embracement / embody-the-system / invoke Hades)",
+      "part": "VI-LABORATORY",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0581",
+      "name": "ENFORCEMENT.md / white-hacking prompt injection",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0582",
+      "name": "Escalation-imperative dialect",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0583",
+      "name": "Evolutionary prompt operators",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0584",
+      "name": "Expert-debugger inversion",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0585",
+      "name": "FLUX persona three-tool pipeline",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0586",
+      "name": "Gemini drift-pattern catalog",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0587",
+      "name": "Gemini image-gen pre-production pipeline",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0588",
+      "name": "GitHub-first documentation habit",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0589",
+      "name": "GPT-5 prompt-architecture research",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0590",
+      "name": "Implicit Information Injection + Prompting History Projection (PHP)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0591",
+      "name": "Infalible Prompt Engineer / AlphaCat v2.3",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0592",
+      "name": "Inline self-improvement clause",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0593",
+      "name": "Interview-me loop (elicit-then-synthesize)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0594",
+      "name": "Iterative AI Development Framework / continuation contract",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0595",
+      "name": "Iterative image-evolution / ascension games",
+      "part": "VI-LABORATORY",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0596",
+      "name": "Jailbreak mode catalog + stacked mode incantations",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0597",
+      "name": "Kha-Ren worldbuilding methodology",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0598",
+      "name": "Level-jump / phase-leapfrog prompting",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0599",
+      "name": "MCP early adoption",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0600",
+      "name": "Mega-prompt self-contained research briefs",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0601",
+      "name": "Mess-first methodology",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0602",
+      "name": "Meta-disciplines / combination-invention doctrine",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0603",
+      "name": "Metaphor loophole-audit methodology",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0604",
+      "name": "Multi-role persona stacking / triple-role casting",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0605",
+      "name": "Narrative-motivation mega-prompt (tone as control variable)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0606",
+      "name": "No-placeholders / full-code quality doctrine",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0607",
+      "name": "Paradox Engine / Quantum Observer roleplay",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0608",
+      "name": "Phase-gated build methodology (research-before-phase)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0609",
+      "name": "Physicist-persona research instrument",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0610",
+      "name": "PowerShell-as-protocol",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0611",
+      "name": "Project/phase personification games",
+      "part": "VI-LABORATORY",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0612",
+      "name": "Prompt Improvement Framework (scored rewrite loop)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0613",
+      "name": "Prompt-as-code toolchain",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0614",
+      "name": "Prompting-as-destination insight",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0615",
+      "name": "Proofreading-attack injection technique",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0616",
+      "name": "Recursive problem→solution laddering",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0617",
+      "name": "Research-then-localize method",
+      "part": "IV-INTERFACE",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0618",
+      "name": "Role-prompting with output contracts",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0619",
+      "name": "Search-the-error ritual / research-driven debugging",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0620",
+      "name": "Seeded evolution via Anthropic Workbench",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0621",
+      "name": "Simulated-execution-in-parts technique",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0622",
+      "name": "Stacked-technique meta-prompt factory",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0623",
+      "name": "Stepwise working-prototype methodology",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0624",
+      "name": "SVG show-don't-tell documentation",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0625",
+      "name": "Typed conversation modes (TYPE A–G)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0626",
+      "name": "Ultra-GPT 100,000x amplification persona",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0627",
+      "name": "Verifier-agent workflow (fork_verifier_agent)",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0628",
+      "name": "Voice rules / register-control arc",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0629",
+      "name": "Voice-to-spec pipeline",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0630",
+      "name": "Zero-asset procedural purity doctrine",
+      "part": "V-CRAFT",
+      "cluster": "CRAFT",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0631",
+      "name": "'Asimov, but disordered' self-definition",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0632",
+      "name": "'Crafting a New Life Plan' — life-plan schema + path-as-content",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0633",
+      "name": "'Enhanced engineering' vs vibe engineering",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0634",
+      "name": "'System that propagates' thesis",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0635",
+      "name": "'The AI Architect' identity",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0636",
+      "name": "'We are lacking a purpose' — essence before structure",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0637",
+      "name": "\"Represent ME\" self-visualization game",
+      "part": "VI-LABORATORY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0638",
+      "name": "\"Solution architect for AI\" identity",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0639",
+      "name": "Agentic Engineer self-framing",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0640",
+      "name": "AI as sanity-check mirror",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0641",
+      "name": "AI as workplace ghostwriter/coach",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0642",
+      "name": "AI Strategy for 2025",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0643",
+      "name": "AI Systems Architect identity",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0644",
+      "name": "Anti-spiral pattern catalog",
+      "part": "I-ENTITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0645",
+      "name": "Archive-mining / self-archaeology operation",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0646",
+      "name": "Capability-maximalist 'no ethics for now' stance",
+      "part": "VII-MEASURE",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0647",
+      "name": "Career intent: \"desarrollarme como cientifico de datos\"",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0648",
+      "name": "Career-transition campaign",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0649",
+      "name": "Fatou-components / anti-KAM math excursion",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0650",
+      "name": "luisblanco.dev",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "prototyped"
+    },
+    {
+      "id": "CX-0651",
+      "name": "Metamethodology",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0652",
+      "name": "Multi-front career play (ambassador, certs, internal SDE, EPAM)",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0653",
+      "name": "Original Python ideas roster",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0654",
+      "name": "Political philosophy artifact (civilizational consequentialist)",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0655",
+      "name": "Red-Matrix visual identity",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "recurring-theme"
+    },
+    {
+      "id": "CX-0656",
+      "name": "Self-as-method / psychology embedded into tooling",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    },
+    {
+      "id": "CX-0657",
+      "name": "Solo unicorn proof-of-concept",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0658",
+      "name": "The 2023 project constellation",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0659",
+      "name": "The Big X / AETHER212→WIRTHFORGE rename",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0660",
+      "name": "Toolkit Ecosystem (toolkit-as-website)",
+      "part": "II-CONTINUITY",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0661",
+      "name": "UOC numerical-methods coursework",
+      "part": "VII-MEASURE",
+      "cluster": "LIFE",
+      "tier": null,
+      "status": "shipped"
+    }
+  ],
+  "edges": []
+}
