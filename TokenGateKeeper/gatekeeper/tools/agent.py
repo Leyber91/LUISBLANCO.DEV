@@ -68,8 +68,16 @@ FILE_CONTENT_HERE
   Create a new file. Do not use on existing files.
 
 <tool name="run_cmd" cmd="COMMAND" cwd="OPTIONAL_DIR"/>
-  Run a shell command. Prefer read-only commands (git diff, git log, ls) first.
+  Run a shell command (PowerShell on Windows). Prefer read-only commands first.
+  IMPORTANT: Do NOT use python -c "...". Instead write a .py file and run it.
+  For imports: write 'import X; print("OK")' to a .py file, then run it.
   For write operations (git commit, npm install), always use dry-run first if possible.
+
+<tool name="lookup_book" query="KEYWORD_OR_PHRASE"/>
+  Search the Book of Luis concept graph (690 nodes) + raw idea atlas for prior art.
+  Use this FIRST when designing any new system, memory mechanism, compression scheme,
+  or architecture pattern. The book likely already has the solution.
+  Returns matching concepts with cluster, essence, era, and status.
 
 <tool name="done" summary="BRIEF_SUMMARY"/>
   Signal task complete. Provide a 1-2 sentence summary of what was done.
@@ -77,10 +85,13 @@ FILE_CONTENT_HERE
 ## RULES (AEA Law)
 1. Read before writing. Never guess file contents.
 2. One edit per edit_file call. Prefer minimal upstream fixes.
-3. Verify with run_cmd (git diff, node --check) after edits.
-4. If a pattern repeats, note it — it should be crystallized.
-5. End every session with <tool name="done">.
-6. Never output code without using a tool to write it.
+3. After EVERY new_file or edit_file: immediately verify with list_dir or read_file.
+   If the file doesn't appear, the tool call failed — debug the cause before retrying.
+4. Do NOT use python -c "..." on Windows/PowerShell. Write a .py file and run it.
+5. If a pattern repeats, note it — it should be crystallized.
+6. End every session with <tool name="done"/>.
+7. Never output code without using a tool to write it.
+8. When designing anything new: lookup_book FIRST. The solution likely already exists.
 """
 
 # ── Tool Dispatcher ───────────────────────────────────────────────────────────
@@ -176,6 +187,64 @@ def tool_new_file(path, content, cwd="."):
     except Exception as ex:
         return f"ERROR: {ex}"
 
+# ── Book Lookup ────────────────────────────────────────────────────────────────
+CONCEPT_GRAPH_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "..",
+    "src", "core", "concept_graph.json"
+)
+RAW_ATLAS_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "..",
+    "register", "work", "00_raw_concepts.json"
+)
+
+def tool_lookup_book(query):
+    """Search concept_graph.json + raw atlas for relevant prior art."""
+    terms = [t.lower().strip() for t in re.split(r'[\s/,+]+', query) if t.strip()]
+    if not terms:
+        return "ERROR: empty query"
+    results = []
+
+    # Search concept graph (nodes have id, label, part, tier)
+    try:
+        cg_path = os.path.abspath(CONCEPT_GRAPH_PATH)
+        if os.path.exists(cg_path):
+            with open(cg_path, "r", encoding="utf-8") as f:
+                cg = json.load(f)
+            for node in cg.get("nodes", []):
+                label = node.get("label", "").lower()
+                nid   = node.get("id", "").lower()
+                if any(t in label or t in nid for t in terms):
+                    results.append(
+                        f"[GRAPH] {node.get('id','?')} | {node.get('label','?')} "
+                        f"| part={node.get('part','?')} tier={node.get('tier','?')}"
+                    )
+    except Exception as ex:
+        results.append(f"[GRAPH ERROR] {ex}")
+
+    # Search raw atlas (has cluster, essence, era, status, potential)
+    try:
+        ra_path = os.path.abspath(RAW_ATLAS_PATH)
+        if os.path.exists(ra_path):
+            with open(ra_path, "r", encoding="utf-8") as f:
+                atlas = json.load(f)
+            for entry in atlas:
+                name    = entry.get("name", "").lower()
+                essence = entry.get("essence", "").lower()
+                cluster = entry.get("cluster", "").lower()
+                if any(t in name or t in essence or t in cluster for t in terms):
+                    results.append(
+                        f"[ATLAS] {entry.get('name','?')} | "
+                        f"cluster={entry.get('cluster','?')} era={entry.get('era','?')} "
+                        f"status={entry.get('status','?')} | "
+                        f"{entry.get('essence','')[:120]}"
+                    )
+    except Exception as ex:
+        results.append(f"[ATLAS ERROR] {ex}")
+
+    if not results:
+        return f"No matches found for: {query}"
+    return "\n".join(results[:20]) + (f"\n... ({len(results)} total, showing 20)" if len(results) > 20 else "")
+
 def tool_run_cmd(cmd, cwd=".", dry_run=False):
     if dry_run:
         return f"[DRY-RUN] would execute: {cmd}"
@@ -200,8 +269,8 @@ def parse_tool_calls(text):
     for m in re.finditer(r'<tool\s+([^>]*?)\/>', text, re.DOTALL):
         attrs = _parse_attrs(m.group(1))
         calls.append({"attrs": attrs, "body": None, "raw": m.group(0)})
-    # Block: <tool name="...">...</tool>
-    for m in re.finditer(r'<tool\s+([^>]*?)>(.*?)</tool>', text, re.DOTALL):
+    # Block: <tool name="...">...</tool>  (also accept </tool_file> as closing tag)
+    for m in re.finditer(r'<tool\s+([^>]*?)>(.*?)</tool(?:_file)?>', text, re.DOTALL):
         attrs = _parse_attrs(m.group(1))
         calls.append({"attrs": attrs, "body": m.group(2), "raw": m.group(0)})
     return calls
@@ -237,6 +306,8 @@ def dispatch_tool(call, cwd, dry_run):
         return tool_new_file(attrs.get("path",""), body.lstrip("\n"), cwd)
     elif name == "run_cmd":
         return tool_run_cmd(attrs.get("cmd",""), attrs.get("cwd", cwd), dry_run)
+    elif name == "lookup_book":
+        return tool_lookup_book(attrs.get("query", ""))
     elif name == "done":
         return "__DONE__:" + attrs.get("summary", "Task complete.")
     else:

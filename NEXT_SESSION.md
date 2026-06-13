@@ -193,6 +193,16 @@ Source: `_reference/research_map/7-games.md` + `websim.md` + GAMES cluster in re
 - Income clock outranks shiny (E13 Track 1). Cite research_map for any claim.
 - Ship under working titles; bank to disk at session end — nothing lives only in conversation.
 - Register pipeline lives in `register/` — checkpoint files in `register/work/`.
+- **THE BOOK IS AN IDEA CHAMBER**: Before designing any new system, search `register/work/00_raw_concepts.json` (690 nodes) and `src/core/concept_graph.json`. The solution is probably already there, often years earlier. DATASPACE (Feb 2023) = agent memory. Pico→Cluster ladder (ERA3) = model tiering. 5-stage compression language = BRAID notation. The agent has `lookup_book` tool for this.
+
+## THE COMPRESSION / MEMORY ARCHITECTURE (from BOOK + CONSTELLATION framework)
+- **DATASPACE** (gold_rank=10, ERA1): encode a conversation into lines only the model can decode → cross-session memory.
+- **5-stage compression ladder**: Natural → Dense → Coded → DATASPACE notation → Vector embedding.
+- **Pico→Nano→Micro→Macro→Cluster**: each tier is a cognitive function, not just a model size. Pico/Nano embed+compress; Micro retrieve+rank; Macro reason; Cluster compose.
+- **BRAID**: threading identity across discontinuous sessions — each session is a strand, the braid is the compressed invariant.
+- **Was/Wasn't/Can Be**: 3-state memory per session (~40 tokens total).
+- **`memory.py` tool** — still to build: `memory write` (compress+embed), `memory load --task` (RAG retrieve), `memory crystallize` (promote patterns to COLD).
+- NIM models for memory: `nv-embedqa-mistral-7b` (embed) + `nemotron-nano-9b` (compress) + `nv-rerankqa-mistral-4b` (rank) — all free.
 
 ## OWED BY ME (remind, don't block)
 D-6 revoke old API keys · D-4 CTA email/booking · D-5 X handle/post titles/newsletter/years ·
