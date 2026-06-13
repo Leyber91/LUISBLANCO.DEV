@@ -49,7 +49,7 @@ def _emit(event_type, **data):
 # ── Nemotron API ──────────────────────────────────────────────────────────────
 NIM_URL   = "https://integrate.api.nvidia.com/v1/chat/completions"
 NIM_MODEL = "nvidia/nemotron-3-ultra-550b-a55b"
-MAX_TURNS = 24          # safety limit — prevent infinite loops
+MAX_TURNS = 40          # safety limit — override with --max-turns
 MAX_FILE_LINES = 300    # truncate files to this many lines per read
 RATE_LIMIT_RPM = 38     # stay under 40 RPM hard limit
 
@@ -69,7 +69,15 @@ Available tools:
   Keep reads focused — max 300 lines at a time.
 
 <tool name="list_dir" path="DIRPATH"/>
-  List directory contents.
+  List directory contents (one level).
+
+<tool name="tree" path="DIRPATH" depth="3"/>
+  Show full directory tree up to depth levels. Use first to explore unknown repos.
+  Skips .git, node_modules, __pycache__. Default depth=3.
+
+<tool name="find_files" path="DIRPATH" pattern="*.py" extensions="py,json" depth="5"/>
+  Find files by glob pattern and/or extension across subtree.
+  pattern: filename glob (e.g. "*.md"). extensions: comma list (e.g. "py,md,json").
 
 <tool name="search_code" path="DIRPATH" pattern="REGEX" filter="*.js"/>
   Search for a pattern in files. filter is a glob (optional).
@@ -150,6 +158,61 @@ def tool_list_dir(path, cwd="."):
         return "\n".join(entries) or "(empty)"
     except Exception as ex:
         return f"ERROR: {ex}"
+
+def tool_find_files(path, pattern="*", extensions="", depth=5, cwd="."):
+    """Find files by name pattern and/or extension, up to depth levels deep."""
+    full = os.path.join(cwd, path) if not os.path.isabs(path) else path
+    if not os.path.exists(full):
+        return f"ERROR: path not found: {full}"
+    exts = [e.strip().lstrip('.') for e in extensions.split(',') if e.strip()] if extensions else []
+    results = []
+    skip = {".git", "node_modules", "__pycache__", ".venv", "venv", ".mypy_cache"}
+    try:
+        for root, dirs, files in os.walk(full):
+            rel_root = os.path.relpath(root, full)
+            cur_depth = 0 if rel_root == '.' else rel_root.count(os.sep) + 1
+            dirs[:] = [d for d in sorted(dirs) if d not in skip and cur_depth < depth]
+            for fname in sorted(files):
+                if exts and not any(fname.endswith('.'+e) for e in exts):
+                    continue
+                if pattern != "*" and not fnmatch.fnmatch(fname, pattern):
+                    continue
+                fpath = os.path.join(root, fname)
+                rel   = os.path.relpath(fpath, cwd)
+                size  = os.path.getsize(fpath)
+                results.append(f"{rel}  ({size}b)")
+        return '\n'.join(results[:200]) + (f'\n... ({len(results)} total)' if len(results)>200 else '') or '(no matches)'
+    except Exception as ex:
+        return f"ERROR: {ex}"
+
+def tool_tree(path, depth=3, cwd="."):
+    """Show directory tree up to depth levels. Fast filesystem overview."""
+    full = os.path.join(cwd, path) if not os.path.isabs(path) else path
+    if not os.path.exists(full):
+        return f"ERROR: path not found: {full}"
+    skip = {".git", "node_modules", "__pycache__", ".venv", "venv"}
+    lines = [os.path.abspath(full)]
+    def _walk(d, prefix, cur_depth):
+        if cur_depth > depth:
+            return
+        try:
+            entries = sorted(os.scandir(d), key=lambda e: (e.is_file(), e.name))
+        except PermissionError:
+            return
+        for i, entry in enumerate(entries):
+            if entry.name in skip:
+                continue
+            last = i == len(entries) - 1
+            connector = '└── ' if last else '├── '
+            if entry.is_dir():
+                lines.append(f"{prefix}{connector}{entry.name}/")
+                ext = '    ' if last else '│   '
+                _walk(entry.path, prefix + ext, cur_depth + 1)
+            else:
+                size = entry.stat().st_size
+                lines.append(f"{prefix}{connector}{entry.name}  ({size}b)")
+    _walk(full, '', 1)
+    return '\n'.join(lines[:300]) + (f'\n... (truncated)' if len(lines)>300 else '')
 
 def tool_search_code(path, pattern, file_filter="*", cwd="."):
     full = os.path.join(cwd, path) if not os.path.isabs(path) else path
@@ -309,6 +372,11 @@ def dispatch_tool(call, cwd, dry_run):
         return tool_read_file(attrs.get("path",""), attrs.get("start"), attrs.get("end"), cwd)
     elif name == "list_dir":
         return tool_list_dir(attrs.get("path","."), cwd)
+    elif name == "find_files":
+        return tool_find_files(attrs.get("path","."), attrs.get("pattern","*"),
+                               attrs.get("extensions",""), int(attrs.get("depth",5)), cwd)
+    elif name == "tree":
+        return tool_tree(attrs.get("path","."), int(attrs.get("depth",3)), cwd)
     elif name == "search_code":
         return tool_search_code(attrs.get("path","."), attrs.get("pattern",""), attrs.get("filter","*"), cwd)
     elif name == "edit_file":
@@ -433,7 +501,8 @@ class AgentCommand(GatekeeperTool):
         parser.add_argument("--cwd",     default=".",    help="Working directory for file tools")
         parser.add_argument("--dry-run", action="store_true", help="Parse and plan but don't write files")
         parser.add_argument("--verbose", action="store_true", help="Print full Nemotron responses")
-        parser.add_argument("--context", nargs="*",      help="Paths to pre-read into context")
+        parser.add_argument("--context",   nargs="*",   help="Paths to pre-read into context")
+        parser.add_argument("--max-turns", type=int, default=MAX_TURNS, help="Max agent turns (default 40)")
 
     def execute(self, args, manifest):
         api_key = os.environ.get("NVIDIA_API_KEY", "")
@@ -447,6 +516,7 @@ class AgentCommand(GatekeeperTool):
         verbose  = args.verbose
         task     = args.task
         _current_session_id = f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:6]}"
+        max_turns = args.max_turns
 
         _emit("session_start", task=task, cwd=cwd, dry_run=dry_run)
         print(f"\n{'='*60}")
@@ -484,7 +554,7 @@ class AgentCommand(GatekeeperTool):
         last_summary = ""
         call_times = []
 
-        while turns < MAX_TURNS:
+        while turns < max_turns:
             # Rate limit: stay under RATE_LIMIT_RPM
             now = time.time()
             call_times = [t for t in call_times if now - t < 60]
