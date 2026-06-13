@@ -30,12 +30,13 @@
       projects:     { scale:2.8, speed:0.060, drift:0.06, damp:0.94, mode:2, cx:0.00, cy:0.0 },
       work:         { scale:1.6, speed:0.075, drift:0.05, damp:0.95, mode:3, cx:0.55, cy:0.0 },
       contact:      { scale:1.2, speed:0.045, drift:0.03, damp:0.96, mode:4, cx:0.00, cy:0.0 },
+      resonance:    { scale:2.0, speed:0.040, drift:0.06, damp:0.93, mode:4, cx:0.50, cy:0.4 },
     },
 
     // route spy: first matching section class wins (distinctive classes first).
     SECTION_PRESET: [
       ['.arch-main','architecture'], ['.proj-main','projects'], ['.wr-main','projects'],
-      ['.wk-main','work'], ['.ct-main','contact'], ['.ab-main','contact'],
+      ['.rs-main','resonance'], ['.wk-main','work'], ['.ct-main','contact'], ['.ab-main','contact'],
       ['.inside','hero'], ['.hero','hero'],
     ],
   };
