@@ -4,383 +4,550 @@
 <meta charset="UTF-8">
 <title>TokenGateKeeper — Observability Tower</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#080c10;--panel:#0d1117;--border:#1a2332;--gold:#d4a24c;--gold2:#f0c674;
-  --green:#76b900;--red:#ff4444;--blue:#4a9eff;--dim:#4a5568;--text:#e2e8f0;
-  --think:#8892a4;--mono:'IBM Plex Mono',monospace;
+  --bg:#060a0f;--panel:#0b1018;--panel2:#0e1420;--border:#1c2a3a;--border2:#243040;
+  --gold:#d4a24c;--gold2:#f0c674;--gold-dim:rgba(212,162,76,0.15);
+  --green:#76b900;--green-dim:rgba(118,185,0,0.12);
+  --red:#e05555;--red-dim:rgba(224,85,85,0.12);
+  --blue:#4a9eff;--blue-dim:rgba(74,158,255,0.12);
+  --purple:#9b6dff;--teal:#1abc9c;
+  --dim:#3a4a5e;--dim2:#5a6a7e;--text:#c8d8e8;--text2:#8898a8;
+  --mono:'IBM Plex Mono',monospace;
+  --radius:5px;
 }
+html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;
-  display:grid;grid-template-rows:48px 1fr 180px;grid-template-columns:1fr 340px;
-  height:100vh;gap:1px;background:var(--border);}
-/* Header */
-#header{grid-column:1/-1;background:var(--panel);display:flex;align-items:center;
-  padding:0 20px;gap:20px;border-bottom:1px solid var(--border);}
-#header h1{font-size:13px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
-#session-id{color:var(--dim);font-size:10px;}
-#status-dot{width:8px;height:8px;border-radius:50%;background:var(--dim);margin-left:auto;}
-#status-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);}
-#status-dot.done{background:var(--gold);}
-#token-counter{color:var(--dim);font-size:10px;margin-left:8px;}
-/* Main stream */
-#stream-panel{background:var(--panel);overflow-y:auto;padding:12px;}
-#stream{display:flex;flex-direction:column;gap:4px;}
-.ev{padding:6px 10px;border-radius:4px;border-left:3px solid transparent;line-height:1.5;}
-.ev-think{border-color:var(--dim);color:var(--think);font-size:11px;background:#0a0e14;}
-.ev-think .label{color:var(--dim);margin-right:6px;}
-.ev-tool_call{border-color:var(--blue);color:var(--blue);}
-.ev-tool_call .label{color:#4a9eff88;}
-.ev-tool_result.ok{border-color:var(--green);color:#a8d8a8;}
-.ev-tool_result.fail{border-color:var(--red);color:#ffaaaa;}
-.ev-turn_start{border-color:var(--gold);color:var(--gold);font-size:10px;background:#12100800;}
-.ev-session_start{border-color:var(--gold2);color:var(--gold2);}
-.ev-done{border-color:var(--green);color:var(--green);background:#0a1a0a;}
-.ev-session_end{border-color:var(--gold);color:var(--gold);}
-.ev-thinking .think-content{
-  display:block;max-height:80px;overflow:hidden;
-  transition:max-height 0.2s;cursor:pointer;}
-.ev-thinking.expanded .think-content{max-height:600px;}
-.ts{color:var(--dim);font-size:9px;margin-right:6px;}
-/* Right panel: tools + radar */
-#right-panel{background:var(--panel);display:flex;flex-direction:column;gap:1px;}
-#tool-log{flex:1;overflow-y:auto;padding:10px;}
-#tool-log h2{font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:8px;}
-.tool-row{display:flex;align-items:center;gap:6px;padding:4px 0;
-  border-bottom:1px solid #1a2332;font-size:11px;}
-.tool-icon{width:22px;height:22px;border-radius:3px;display:flex;align-items:center;
-  justify-content:center;font-size:10px;flex-shrink:0;}
-.tool-name{color:var(--blue);flex:1;}
-.tool-ok{color:var(--green);}
-.tool-fail{color:var(--red);}
-.tool-turn{color:var(--dim);font-size:9px;}
-/* Radar */
-#radar-panel{height:200px;background:#0a0e14;border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;padding:10px;gap:16px;}
-#radar-canvas{width:160px;height:160px;}
-#radar-legend{font-size:9px;color:var(--dim);display:flex;flex-direction:column;gap:4px;}
-.legend-item{display:flex;align-items:center;gap:5px;}
-.legend-dot{width:7px;height:7px;border-radius:50%;}
-/* Bottom: spectral bar */
-#spectral-panel{grid-column:1/-1;background:#0a0e14;border-top:1px solid var(--border);
-  padding:10px 16px;display:flex;align-items:center;gap:16px;}
-#spectral-panel h3{font-size:9px;color:var(--dim);letter-spacing:2px;white-space:nowrap;}
-#spectral-bars{flex:1;display:flex;align-items:flex-end;gap:3px;height:100px;}
-.sbar{flex:1;border-radius:2px 2px 0 0;transition:height 0.3s;min-height:2px;max-height:90px;}
-#spectral-labels{display:flex;gap:3px;font-size:8px;color:var(--dim);}
-#spectral-wrap{flex:1;display:flex;flex-direction:column;}
-#session-stats{font-size:9px;color:var(--dim);white-space:nowrap;text-align:right;
-  display:flex;flex-direction:column;gap:3px;min-width:120px;}
-#session-stats span{color:var(--text);}
+  display:grid;
+  grid-template-rows:52px 1fr 200px;
+  grid-template-columns:1fr 380px;
+  gap:1px;background:var(--border);}
+
+/* ── HEADER ── */
+#header{
+  grid-column:1/-1;background:var(--panel);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+  border-bottom:1px solid var(--border2);
+}
+#header .logo{font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;font-weight:600;}
+#header .logo span{color:var(--dim2);font-weight:300;}
+#session-id{
+  background:var(--panel2);border:1px solid var(--border2);
+  border-radius:3px;padding:2px 10px;font-size:10px;color:var(--dim2);
+  max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#live-task{flex:1;font-size:10px;color:var(--text2);padding-left:8px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dot-group{display:flex;align-items:center;gap:8px;margin-left:auto;}
+#status-dot{width:9px;height:9px;border-radius:50%;background:var(--dim);transition:all 0.3s;}
+#status-dot.live{background:var(--green);box-shadow:0 0 10px var(--green);}
+#status-dot.done{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+#token-badge{
+  background:var(--panel2);border:1px solid var(--border2);
+  border-radius:3px;padding:2px 8px;font-size:10px;color:var(--dim2);}
+
+/* ── STREAM ── */
+#stream-panel{
+  background:var(--panel);overflow-y:auto;padding:10px 14px;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent;
+}
+#stream{display:flex;flex-direction:column;gap:3px;}
+
+.ev{
+  padding:7px 12px;border-radius:var(--radius);
+  border-left:3px solid transparent;line-height:1.6;font-size:11.5px;
+  transition:background 0.2s;
+}
+.ev:hover{filter:brightness(1.1);}
+.ts{color:var(--dim2);font-size:9px;margin-right:8px;font-weight:300;}
+.label{font-size:9px;font-weight:600;letter-spacing:1px;margin-right:6px;padding:1px 5px;border-radius:2px;}
+
+/* Turn separator */
+.ev-turn_start{
+  border-color:transparent;color:var(--dim2);font-size:10px;
+  border-bottom:1px solid var(--border);margin:6px 0 2px;padding:4px 0;
+  display:flex;align-items:center;gap:8px;
+}
+.ev-turn_start .turn-num{
+  background:var(--gold-dim);border:1px solid rgba(212,162,76,0.3);
+  color:var(--gold);font-weight:600;font-size:10px;
+  padding:0 8px;border-radius:3px;white-space:nowrap;
+}
+.ev-turn_start .turn-line{flex:1;height:1px;background:var(--border);}
+
+/* Session start */
+.ev-session_start{
+  border-color:var(--gold);background:rgba(212,162,76,0.06);
+  color:var(--gold2);font-size:12px;
+}
+.ev-session_start .label{background:var(--gold-dim);color:var(--gold);}
+
+/* Thinking */
+.ev-thinking{
+  border-color:var(--dim);background:#090d12;color:var(--text2);font-size:11px;
+  cursor:pointer;
+}
+.ev-thinking .label{background:#1a2030;color:var(--dim2);}
+.think-content{
+  display:block;max-height:60px;overflow:hidden;
+  transition:max-height 0.25s ease;margin-top:4px;
+  color:var(--text2);font-size:11px;line-height:1.6;
+}
+.ev-thinking.expanded .think-content{max-height:500px;}
+.ev-thinking::after{
+  content:'▸ click to expand';display:block;
+  font-size:9px;color:var(--dim);margin-top:3px;
+}
+.ev-thinking.expanded::after{content:'▾ click to collapse';}
+
+/* Tool call */
+.ev-tool_call{border-color:var(--blue);background:var(--blue-dim);}
+.ev-tool_call .label{background:rgba(74,158,255,0.2);color:var(--blue);}
+.ev-tool_call .tool-n{color:var(--blue);font-weight:600;}
+.ev-tool_call .arg-k{color:var(--dim2);}
+.ev-tool_call .arg-v{color:var(--text);}
+
+/* Tool result */
+.ev-tool_result{font-size:11px;}
+.ev-tool_result.ok{border-color:var(--green);background:var(--green-dim);color:#a8e8a8;}
+.ev-tool_result.fail{border-color:var(--red);background:var(--red-dim);color:#ffaaaa;}
+.ev-tool_result .label{background:rgba(118,185,0,0.15);color:var(--green);}
+.ev-tool_result.fail .label{background:rgba(224,85,85,0.15);color:var(--red);}
+
+/* Done */
+.ev-done{
+  border-color:var(--green);background:var(--green-dim);
+  color:var(--green);font-size:12px;font-weight:500;
+}
+.ev-done .label{background:rgba(118,185,0,0.25);color:var(--green);}
+
+/* Session end */
+.ev-session_end{
+  border-color:var(--gold);background:var(--gold-dim);
+  color:var(--gold);font-size:11px;
+}
+
+/* Memory / BRAID */
+.ev-memory{border-color:var(--purple);background:rgba(155,109,255,0.08);color:#c0aaff;}
+.ev-memory .label{background:rgba(155,109,255,0.2);color:var(--purple);}
+
+/* ── RIGHT PANEL ── */
+#right-panel{background:var(--panel);display:flex;flex-direction:column;overflow:hidden;}
+
+#right-header{
+  display:flex;border-bottom:1px solid var(--border2);
+  font-size:10px;color:var(--dim2);letter-spacing:2px;
+}
+#right-header div{
+  flex:1;padding:8px 14px;text-align:center;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all 0.2s;
+}
+#right-header div.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+#tool-log{flex:1;overflow-y:auto;padding:8px 10px;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
+.tool-row{
+  display:flex;align-items:center;gap:8px;padding:5px 6px;
+  border-radius:4px;margin-bottom:2px;
+  border:1px solid var(--border);background:var(--panel2);
+  font-size:11px;transition:background 0.15s;
+}
+.tool-row:hover{background:var(--border);}
+.t-icon{
+  width:26px;height:26px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;flex-shrink:0;
+}
+.t-name{font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.t-turn{
+  font-size:9px;padding:1px 6px;border-radius:2px;
+  background:var(--panel);border:1px solid var(--border2);color:var(--dim2);
+}
+.t-ok{color:var(--green);}
+.t-fail{color:var(--red);}
+
+/* ── RADAR ── */
+#radar-wrap{
+  border-top:1px solid var(--border2);
+  background:#070b10;padding:14px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+#radar-title{font-size:9px;color:var(--dim2);letter-spacing:2px;align-self:flex-start;}
+#radar-row{display:flex;gap:14px;align-items:center;width:100%;}
+#radar-canvas{flex-shrink:0;}
+#radar-legend{
+  display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;
+  font-size:9px;align-self:center;
+}
+.leg{display:flex;align-items:center;gap:5px;color:var(--dim2);}
+.leg .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.leg .val{margin-left:auto;font-size:9px;}
+
+/* ── SPECTRAL (bottom) ── */
+#spectral-panel{
+  grid-column:1/-1;
+  background:#070b10;border-top:1px solid var(--border2);
+  display:grid;grid-template-columns:100px 1fr 160px;gap:16px;
+  padding:12px 18px;align-items:center;
+}
+#spec-title{
+  font-size:9px;color:var(--dim2);letter-spacing:2px;
+  display:flex;flex-direction:column;gap:4px;
+}
+#spec-title strong{color:var(--text2);font-size:11px;letter-spacing:0;}
+#spectral-chart{display:flex;flex-direction:column;gap:6px;}
+#spectral-bars{display:flex;align-items:flex-end;gap:4px;height:120px;}
+.sbar{
+  flex:1;border-radius:3px 3px 0 0;
+  transition:height 0.4s cubic-bezier(.4,0,.2,1);
+  min-height:3px;position:relative;
+}
+.sbar::after{
+  content:attr(data-v);position:absolute;top:-14px;left:50%;
+  transform:translateX(-50%);font-size:8px;color:var(--dim2);
+  white-space:nowrap;
+}
+#spectral-labels{
+  display:flex;gap:4px;margin-top:4px;
+}
+.slabel{flex:1;text-align:center;font-size:8px;font-weight:500;letter-spacing:.5px;}
+
+#session-stats{
+  font-size:10px;display:flex;flex-direction:column;gap:6px;
+  border-left:1px solid var(--border2);padding-left:16px;
+}
+.stat-row{display:flex;justify-content:space-between;gap:8px;}
+.stat-k{color:var(--dim2);}
+.stat-v{color:var(--text);font-weight:500;}
+#progress-bar-wrap{margin-top:4px;}
+#progress-bar{
+  height:3px;background:var(--border2);border-radius:2px;overflow:hidden;
+}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));
+  transition:width 0.5s;border-radius:2px;}
 </style>
 </head>
 <body>
 
 <div id="header">
-  <h1>⬡ Observability Tower</h1>
-  <div id="session-id">no session</div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-    <div id="token-counter">tokens: —</div>
-    <div id="status-dot" title="connection status"></div>
+  <div class="logo">⬡ Token<span>Gate</span>Keeper &nbsp;·&nbsp; Observability Tower</div>
+  <div id="session-id">waiting for session…</div>
+  <div id="live-task"></div>
+  <div class="dot-group">
+    <div id="token-badge">tokens: —</div>
+    <div id="status-dot"></div>
   </div>
 </div>
 
-<div id="stream-panel">
-  <div id="stream"></div>
-</div>
+<div id="stream-panel"><div id="stream"></div></div>
 
 <div id="right-panel">
-  <div id="tool-log">
-    <h2>TOOL CALLS</h2>
-    <div id="tool-list"></div>
+  <div id="right-header">
+    <div class="active">TOOL CALLS</div>
+    <div id="radar-tab-btn" onclick="document.getElementById('radar-tab-btn').classList.add('active');this.parentElement.children[0].classList.remove('active')">RADAR</div>
   </div>
-  <div id="radar-panel">
-    <canvas id="radar-canvas" width="160" height="160"></canvas>
-    <div id="radar-legend">
-      <div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:4px">COGNITIVE RADAR</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div>Memory</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#76b900"></div>Tools</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#d4a24c"></div>Feedback</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div>Recovery</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>Observe</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#1abc9c"></div>Time</div>
+  <div id="tool-log"><div id="tool-list"></div></div>
+  <div id="radar-wrap">
+    <div id="radar-title">COGNITIVE RADAR</div>
+    <div id="radar-row">
+      <canvas id="radar-canvas" width="200" height="200"></canvas>
+      <div id="radar-legend">
+        <div class="leg"><div class="dot" style="background:#4a9eff"></div>Memory<span class="val" id="rv0">0%</span></div>
+        <div class="leg"><div class="dot" style="background:#76b900"></div>Tools<span class="val" id="rv1">0%</span></div>
+        <div class="leg"><div class="dot" style="background:#d4a24c"></div>Feedback<span class="val" id="rv2">0%</span></div>
+        <div class="leg"><div class="dot" style="background:#9b6dff"></div>Recovery<span class="val" id="rv3">0%</span></div>
+        <div class="leg"><div class="dot" style="background:#e05555"></div>Observe<span class="val" id="rv4">0%</span></div>
+        <div class="leg"><div class="dot" style="background:#1abc9c"></div>Time<span class="val" id="rv5">0%</span></div>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="spectral-panel">
-  <h3>TOKEN SPECTRAL ANALYSIS</h3>
-  <div id="spectral-wrap">
+  <div id="spec-title">
+    TOKEN<br>SPECTRAL<br>ANALYSIS
+    <strong id="spec-total">0 tokens</strong>
+  </div>
+  <div id="spectral-chart">
     <div id="spectral-bars"></div>
     <div id="spectral-labels"></div>
   </div>
   <div id="session-stats">
-    <div>TURNS <span id="stat-turns">0</span></div>
-    <div>TOKENS IN <span id="stat-in">0</span></div>
-    <div>TOKENS OUT <span id="stat-out">0</span></div>
-    <div>TOOLS CALLED <span id="stat-tools">0</span></div>
-    <div>ERRORS <span id="stat-errors">0</span></div>
+    <div class="stat-row"><span class="stat-k">TURNS</span><span class="stat-v" id="stat-turns">0</span></div>
+    <div class="stat-row"><span class="stat-k">IN</span><span class="stat-v" id="stat-in">0</span></div>
+    <div class="stat-row"><span class="stat-k">OUT</span><span class="stat-v" id="stat-out">0</span></div>
+    <div class="stat-row"><span class="stat-k">TOOLS</span><span class="stat-v" id="stat-tools">0</span></div>
+    <div class="stat-row"><span class="stat-k">ERRORS</span><span class="stat-v" id="stat-errors">0</span></div>
+    <div id="progress-bar-wrap">
+      <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+    </div>
   </div>
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────
 const state = {
-  session: null, turns: 0, tokensIn: 0, tokensOut: 0,
-  toolCalls: 0, errors: 0,
-  // Cognitive radar axes: Memory, Tools, Feedback, Recovery, Observe, Time
-  radar: [0,0,0,0,0,0],
-  // Spectral categories
-  spectral: {},
-  connected: false,
+  session:null, turns:0, maxTurns:40,
+  tokensIn:0, tokensOut:0, toolCalls:0, errors:0,
+  radar:[0,0,0,0,0,0],
+  radarPeak:[0,0,0,0,0,0],
+  spectral:{},
 };
 
-// Tool → cognitive axis mapping
 const TOOL_AXIS = {
-  lookup_book:  0,  // Memory
-  new_file:     1,  // Tools
-  edit_file:    1,  // Tools
-  run_cmd:      2,  // Feedback
-  read_file:    4,  // Observe
-  list_dir:     4,  // Observe
-  search_code:  4,  // Observe
-  done:         5,  // Time
-  memory:       0,  // Memory
+  lookup_book:0, memory:0,
+  new_file:1, edit_file:1,
+  run_cmd:2,
+  read_file:4, list_dir:4, search_code:4, find_files:4, tree:4,
+  done:5,
 };
+const AXIS_COLORS=['#4a9eff','#76b900','#d4a24c','#9b6dff','#e05555','#1abc9c'];
+const AXIS_NAMES=['Memory','Tools','Feedback','Recovery','Observe','Time'];
 
-const AXIS_COLORS = ['#4a9eff','#76b900','#d4a24c','#9b59b6','#e74c3c','#1abc9c'];
-const AXIS_LABELS = ['Memory','Tools','Feedback','Recovery','Observe','Time'];
-
-// Spectral categories — word patterns
-const SPECTRAL_CATS = [
-  {label:'REASON',  color:'#4a9eff', words:['because','therefore','since','analyze','understand','root','cause']},
-  {label:'PLAN',    color:'#76b900', words:['need','should','will','plan','approach','step','first','then']},
-  {label:'WRITE',   color:'#d4a24c', words:['create','edit','write','add','insert','replace','implement','build']},
-  {label:'READ',    color:'#8892a4', words:['read','check','look','find','search','list','view','see']},
-  {label:'ERROR',   color:'#e74c3c', words:['error','fail','wrong','fix','bug','issue','problem','incorrect']},
-  {label:'DONE',    color:'#1abc9c', words:['done','complete','finish','success','created','verified','works']},
+const SPECTRAL=[
+  {l:'REASON',c:'#4a9eff',w:['because','therefore','since','analyze','understand','root','cause','why']},
+  {l:'PLAN',  c:'#76b900',w:['need','should','will','plan','approach','step','first','then','next']},
+  {l:'WRITE', c:'#d4a24c',w:['create','edit','write','add','insert','replace','implement','build']},
+  {l:'READ',  c:'#7a8898',w:['read','check','look','find','search','list','view','see','explore']},
+  {l:'ERROR', c:'#e05555',w:['error','fail','wrong','fix','bug','issue','problem','incorrect','missing']},
+  {l:'DONE',  c:'#1abc9c',w:['done','complete','finish','success','created','verified','works','ok']},
 ];
 
-// ── DOM helpers ────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const stream = $('stream');
+const $=id=>document.getElementById(id);
+const stream=$('stream');
 
-function ts(isoStr) {
-  try {
-    return isoStr.substr(11,8);
-  } catch { return ''; }
-}
+function fmtTs(iso){try{return iso.substr(11,8);}catch{return '';}}
 
-function addEvent(ev) {
-  const el = document.createElement('div');
-  const t = ts(ev.ts);
+function addEvent(ev){
+  const el=document.createElement('div');
+  const t=fmtTs(ev.ts);
 
-  if (ev.type === 'session_start') {
-    el.className = 'ev ev-session_start';
-    el.innerHTML = `<span class="ts">${t}</span><b>SESSION START</b> · ${ev.task||''}`;
-    state.session = ev.session;
-    $('session-id').textContent = ev.session || 'active';
-    $('status-dot').className = 'live';
-
-  } else if (ev.type === 'turn_start') {
-    el.className = 'ev ev-turn_start';
-    el.innerHTML = `<span class="ts">${t}</span>── Turn ${ev.turn} ──────────────────────────────────────`;
-    state.turns = ev.turn;
-    updateStats();
-
-  } else if (ev.type === 'thinking') {
-    el.className = 'ev ev-think ev-thinking';
-    el.innerHTML = `<span class="ts">${t}</span><span class="label">[THINK]</span>`
-      + `<span class="think-content">${escHtml(ev.content||'').replace(/\n/g,'<br>')}</span>`;
-    el.querySelector('.think-content').addEventListener('click', () => el.classList.toggle('expanded'));
-    analyzeSpectral(ev.content||'');
-
-  } else if (ev.type === 'tool_call') {
-    const axis = TOOL_AXIS[ev.tool] ?? 4;
-    state.radar[axis] = Math.min(1, state.radar[axis] + 0.15);
-    state.toolCalls++;
-    el.className = 'ev ev-tool_call';
-    const argsStr = Object.entries(ev.args||{}).map(([k,v])=>`${k}=<em>${escHtml(String(v).substr(0,40))}</em>`).join(' ');
-    el.innerHTML = `<span class="ts">${t}</span><span class="label">[TOOL]</span>`
-      + `<b>${ev.tool}</b>(${argsStr})`;
-    addToolRow(ev, t);
-    updateStats();
-    updateRadar();
-
-  } else if (ev.type === 'tool_result') {
-    if (!ev.ok) state.errors++;
-    el.className = `ev ev-tool_result ${ev.ok ? 'ok' : 'fail'}`;
-    el.innerHTML = `<span class="ts">${t}</span>`
-      + `<span style="color:${ev.ok?'var(--green)':'var(--red)'}">  → ${escHtml((ev.preview||'').substr(0,160))}</span>`;
-    updateStats();
-
-  } else if (ev.type === 'done') {
-    el.className = 'ev ev-done';
-    el.innerHTML = `<span class="ts">${t}</span><b>[DONE]</b> ${escHtml(ev.summary||'')}`;
-    $('status-dot').className = 'done';
-
-  } else if (ev.type === 'session_end') {
-    el.className = 'ev ev-session_end';
-    state.tokensIn  = ev.tokens_in  || state.tokensIn;
-    state.tokensOut = ev.tokens_out || state.tokensOut;
-    el.innerHTML = `<span class="ts">${t}</span><b>SESSION END</b> · `
-      + `turns=${ev.turns} in=${ev.tokens_in} out=${ev.tokens_out}`;
-    $('token-counter').textContent = `tokens: ${ev.tokens_in}in / ${ev.tokens_out}out`;
-    updateStats();
-    $('status-dot').className = 'done';
-
-  } else {
-    return; // skip unknown types silently
+  if(ev.type==='session_start'){
+    el.className='ev ev-session_start';
+    el.innerHTML=`<span class="ts">${t}</span><span class="label">SESSION</span><b>START</b> &nbsp;${esc(ev.task||'').substr(0,80)}`;
+    state.session=ev.session;
+    $('session-id').textContent=ev.session||'active';
+    $('live-task').textContent=ev.task||'';
+    $('status-dot').className='live';
   }
+  else if(ev.type==='turn_start'){
+    el.className='ev ev-turn_start';
+    state.turns=ev.turn; state.maxTurns=ev.max_turns||40;
+    el.innerHTML=`<span class="turn-num">Turn ${ev.turn}</span><span class="turn-line"></span>`;
+    updateStats();
+  }
+  else if(ev.type==='thinking'){
+    el.className='ev ev-thinking';
+    el.innerHTML=`<span class="ts">${t}</span><span class="label">THINK</span>`
+      +`<span class="think-content">${esc(ev.content||'').replace(/\n/g,'<br>')}</span>`;
+    el.addEventListener('click',()=>el.classList.toggle('expanded'));
+    analyzeSpectral(ev.content||'');
+  }
+  else if(ev.type==='tool_call'){
+    const ax=TOOL_AXIS[ev.tool]??4;
+    state.radar[ax]=Math.min(1,state.radar[ax]+0.25);
+    state.radarPeak[ax]=Math.max(state.radarPeak[ax],state.radar[ax]);
+    state.toolCalls++;
+    const argsStr=Object.entries(ev.args||{})
+      .map(([k,v])=>`<span class="arg-k">${k}=</span><span class="arg-v">${esc(String(v).substr(0,50))}</span>`)
+      .join(' &nbsp;');
+    el.className='ev ev-tool_call';
+    el.innerHTML=`<span class="ts">${t}</span><span class="label">TOOL</span><span class="tool-n">${ev.tool}</span>(`+argsStr+`)`;
+    addToolRow(ev);
+    updateStats(); updateRadarLegend();
+  }
+  else if(ev.type==='tool_result'){
+    if(!ev.ok)state.errors++;
+    el.className=`ev ev-tool_result ${ev.ok?'ok':'fail'}`;
+    el.innerHTML=`<span class="ts">${t}</span><span class="label">${ev.ok?'OK':'ERR'}</span>`
+      +esc((ev.preview||'').substr(0,180));
+    updateStats();
+  }
+  else if(ev.type==='done'){
+    el.className='ev ev-done';
+    el.innerHTML=`<span class="ts">${t}</span><span class="label">DONE</span>${esc(ev.summary||'')}`;
+    $('status-dot').className='done';
+  }
+  else if(ev.type==='session_end'){
+    el.className='ev ev-session_end';
+    state.tokensIn=ev.tokens_in||state.tokensIn;
+    state.tokensOut=ev.tokens_out||state.tokensOut;
+    el.innerHTML=`<span class="ts">${t}</span><span class="label">END</span>`
+      +`turns=${ev.turns} &nbsp;·&nbsp; in=${ev.tokens_in} &nbsp;·&nbsp; out=${ev.tokens_out}`;
+    $('token-badge').textContent=`${fmtN(ev.tokens_in)}in / ${fmtN(ev.tokens_out)}out`;
+    $('status-dot').className='done';
+    updateStats();
+  }
+  else{ return; }
 
   stream.appendChild(el);
-  stream.scrollTop = stream.scrollHeight;
+  stream.scrollTop=stream.scrollHeight;
 }
 
-function addToolRow(ev, t) {
-  const icons = {
-    read_file:'📄', list_dir:'📁', new_file:'✨', edit_file:'✏️',
-    run_cmd:'⚡', lookup_book:'📚', search_code:'🔍', memory:'🧠', done:'✅'
-  };
-  const row = document.createElement('div');
-  row.className = 'tool-row';
-  row.innerHTML = `<div class="tool-icon" style="background:${AXIS_COLORS[TOOL_AXIS[ev.tool]??4]}22;color:${AXIS_COLORS[TOOL_AXIS[ev.tool]??4]}">${icons[ev.tool]||'⚙'}</div>`
-    + `<div class="tool-name">${ev.tool}</div>`
-    + `<div class="tool-turn" style="color:var(--dim)">T${ev.turn||'?'}</div>`;
+function fmtN(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n||0);}
+
+function addToolRow(ev){
+  const icons={read_file:'📄',list_dir:'📁',tree:'🌲',find_files:'🔎',new_file:'✨',
+    edit_file:'✏️',run_cmd:'⚡',lookup_book:'📚',search_code:'🔍',memory:'🧠',done:'✅'};
+  const ax=TOOL_AXIS[ev.tool]??4;
+  const row=document.createElement('div');
+  row.className='tool-row';
+  row.innerHTML=`<div class="t-icon" style="background:${AXIS_COLORS[ax]}22;color:${AXIS_COLORS[ax]}">${icons[ev.tool]||'⚙'}</div>`
+    +`<div class="t-name" style="color:${AXIS_COLORS[ax]}">${ev.tool}</div>`
+    +`<div class="t-turn">T${ev.turn||'?'}</div>`;
   $('tool-list').appendChild(row);
-  $('tool-list').scrollTop = $('tool-list').scrollHeight;
+  $('tool-list').scrollTop=$('tool-list').scrollHeight;
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// ── Spectral Analysis ──────────────────────────────────────────────
-function analyzeSpectral(text) {
-  const words = text.toLowerCase().split(/\W+/);
-  SPECTRAL_CATS.forEach(cat => {
-    const hits = words.filter(w => cat.words.includes(w)).length;
-    state.spectral[cat.label] = (state.spectral[cat.label]||0) + hits;
+// Spectral
+function analyzeSpectral(text){
+  const words=text.toLowerCase().split(/\W+/);
+  SPECTRAL.forEach(cat=>{
+    const h=words.filter(w=>cat.w.includes(w)).length;
+    state.spectral[cat.l]=(state.spectral[cat.l]||0)+h;
   });
   renderSpectral();
 }
 
-function renderSpectral() {
-  const bars = $('spectral-bars');
-  const labels = $('spectral-labels');
-  bars.innerHTML = '';
-  labels.innerHTML = '';
-  const max = Math.max(1, ...Object.values(state.spectral));
-  SPECTRAL_CATS.forEach(cat => {
-    const v = state.spectral[cat.label]||0;
-    const h = Math.max(2, Math.round((v/max)*90));
-    const bar = document.createElement('div');
-    bar.className = 'sbar';
-    bar.style.cssText = `height:${h}px;background:${cat.color};opacity:0.8;`;
-    bar.title = `${cat.label}: ${v}`;
+function renderSpectral(){
+  const bars=$('spectral-bars'), labels=$('spectral-labels');
+  bars.innerHTML=''; labels.innerHTML='';
+  const total=Object.values(state.spectral).reduce((a,b)=>a+b,0);
+  const mx=Math.max(1,...Object.values(state.spectral));
+  $('spec-total').textContent=`${total} signals`;
+  SPECTRAL.forEach(cat=>{
+    const v=state.spectral[cat.l]||0;
+    const h=Math.max(3,Math.round((v/mx)*112));
+    const bar=document.createElement('div');
+    bar.className='sbar';
+    bar.setAttribute('data-v',v>0?v:'');
+    bar.style.cssText=`height:${h}px;background:${cat.c};opacity:${v>0?'0.85':'0.2'};`;
+    bar.title=`${cat.l}: ${v}`;
     bars.appendChild(bar);
-    const lbl = document.createElement('div');
-    lbl.style.cssText = `flex:1;text-align:center;font-size:7px;color:${cat.color};`;
-    lbl.textContent = cat.label;
+    const lbl=document.createElement('div');
+    lbl.className='slabel';
+    lbl.style.color=cat.c;
+    lbl.textContent=cat.l;
     labels.appendChild(lbl);
   });
 }
 
-// ── Cognitive Radar ────────────────────────────────────────────────
-function updateRadar() {
-  const canvas = $('radar-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = 160, H = 160, cx = W/2, cy = H/2, R = 62;
+// Radar
+function updateRadar(){
+  const canvas=$('radar-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=200,H=200,cx=W/2,cy=H/2,R=76;
   ctx.clearRect(0,0,W,H);
-  const N = 6;
-  // Grid rings
-  for (let r = 1; r <= 4; r++) {
+  const N=6;
+  // Background rings
+  for(let r=1;r<=4;r++){
     ctx.beginPath();
-    for (let i = 0; i < N; i++) {
-      const a = (i/N)*Math.PI*2 - Math.PI/2;
-      const x = cx + Math.cos(a)*R*(r/4);
-      const y = cy + Math.sin(a)*R*(r/4);
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    for(let i=0;i<N;i++){
+      const a=(i/N)*Math.PI*2-Math.PI/2;
+      const x=cx+Math.cos(a)*R*(r/4), y=cy+Math.sin(a)*R*(r/4);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
     }
     ctx.closePath();
-    ctx.strokeStyle = '#1a2332';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle=r===4?'#243040':'#141e2a';
+    ctx.lineWidth=r===4?1:0.5;
     ctx.stroke();
   }
-  // Axis lines + labels
-  for (let i = 0; i < N; i++) {
-    const a = (i/N)*Math.PI*2 - Math.PI/2;
+  // Axis spokes
+  for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2-Math.PI/2;
     ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(a)*R, cy + Math.sin(a)*R);
-    ctx.strokeStyle = '#1a2332';
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+    ctx.strokeStyle='#1c2a3a';
+    ctx.lineWidth=1;
     ctx.stroke();
-    // Label
-    const lx = cx + Math.cos(a)*(R+12);
-    const ly = cy + Math.sin(a)*(R+12);
-    ctx.fillStyle = AXIS_COLORS[i];
-    ctx.font = '7px IBM Plex Mono';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(AXIS_LABELS[i].substr(0,3), lx, ly);
+    // Labels
+    const lx=cx+Math.cos(a)*(R+16), ly=cy+Math.sin(a)*(R+16);
+    ctx.fillStyle=AXIS_COLORS[i];
+    ctx.font=`500 8px IBM Plex Mono`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(AXIS_NAMES[i].substr(0,3).toUpperCase(),lx,ly);
   }
-  // Decay radar values slightly each render
-  state.radar = state.radar.map(v => Math.max(0, v*0.95));
-  // Data polygon
+  // Decay
+  state.radar=state.radar.map(v=>Math.max(0,v*0.94));
+  // Peak ghost (faded)
   ctx.beginPath();
-  for (let i = 0; i < N; i++) {
-    const a = (i/N)*Math.PI*2 - Math.PI/2;
-    const v = Math.min(1, state.radar[i]);
-    const x = cx + Math.cos(a)*R*v;
-    const y = cy + Math.sin(a)*R*v;
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2-Math.PI/2;
+    const v=Math.min(1,state.radarPeak[i]);
+    const x=cx+Math.cos(a)*R*v, y=cy+Math.sin(a)*R*v;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(212,162,76,0.15)';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(212,162,76,0.8)';
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle='rgba(212,162,76,0.12)';
+  ctx.lineWidth=1;
+  ctx.setLineDash([3,4]);
   ctx.stroke();
-  // Dots
-  for (let i = 0; i < N; i++) {
-    const a = (i/N)*Math.PI*2 - Math.PI/2;
-    const v = Math.min(1, state.radar[i]);
-    const x = cx + Math.cos(a)*R*v;
-    const y = cy + Math.sin(a)*R*v;
+  ctx.setLineDash([]);
+  // Active fill
+  ctx.beginPath();
+  for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2-Math.PI/2;
+    const v=Math.min(1,state.radar[i]);
+    const x=cx+Math.cos(a)*R*v, y=cy+Math.sin(a)*R*v;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle='rgba(212,162,76,0.12)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(212,162,76,0.9)';
+  ctx.lineWidth=1.5;
+  ctx.stroke();
+  // Dots per axis
+  for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2-Math.PI/2;
+    const v=Math.min(1,state.radar[i]);
+    const x=cx+Math.cos(a)*R*v, y=cy+Math.sin(a)*R*v;
+    const grd=ctx.createRadialGradient(x,y,0,x,y,5);
+    grd.addColorStop(0,AXIS_COLORS[i]);
+    grd.addColorStop(1,'transparent');
     ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI*2);
-    ctx.fillStyle = AXIS_COLORS[i];
+    ctx.arc(x,y,v>0.05?4:2,0,Math.PI*2);
+    ctx.fillStyle=v>0.05?grd:AXIS_COLORS[i]+'44';
     ctx.fill();
   }
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(cx,cy,3,0,Math.PI*2);
+  ctx.fillStyle='#d4a24c66';
+  ctx.fill();
 }
 
-function updateStats() {
-  $('stat-turns').textContent  = state.turns;
-  $('stat-in').textContent     = state.tokensIn;
-  $('stat-out').textContent    = state.tokensOut;
-  $('stat-tools').textContent  = state.toolCalls;
-  $('stat-errors').textContent = state.errors;
+function updateRadarLegend(){
+  AXIS_NAMES.forEach((_,i)=>{
+    const el=$(`rv${i}`);
+    if(el) el.textContent=Math.round(state.radar[i]*100)+'%';
+  });
 }
 
-// ── Radar animation loop ───────────────────────────────────────────
-setInterval(updateRadar, 200);
+function updateStats(){
+  $('stat-turns').textContent=state.turns;
+  $('stat-in').textContent=fmtN(state.tokensIn);
+  $('stat-out').textContent=fmtN(state.tokensOut);
+  $('stat-tools').textContent=state.toolCalls;
+  $('stat-errors').textContent=state.errors;
+  const pct=Math.min(100,Math.round(state.turns/state.maxTurns*100));
+  $('progress-fill').style.width=pct+'%';
+}
+
+setInterval(()=>{updateRadar();updateRadarLegend();},150);
 renderSpectral();
 updateRadar();
 
-// ── SSE Connection ─────────────────────────────────────────────────
-function connect() {
-  const es = new EventSource('/events');
-  es.onopen = () => {
-    state.connected = true;
-    if (!state.session) $('status-dot').className = 'live';
-  };
-  es.onmessage = e => {
-    try { addEvent(JSON.parse(e.data)); } catch {}
-  };
-  es.onerror = () => {
-    state.connected = false;
-    $('status-dot').className = '';
-    setTimeout(connect, 3000);
-  };
+// SSE
+function connect(){
+  const es=new EventSource('/events');
+  es.onopen=()=>{ if(!state.session)$('status-dot').className='live'; };
+  es.onmessage=e=>{ try{addEvent(JSON.parse(e.data));}catch{} };
+  es.onerror=()=>{ $('status-dot').className=''; setTimeout(connect,3000); };
 }
 connect();
 </script>
