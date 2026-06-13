@@ -12,7 +12,7 @@ Your rules (global CLAUDE.md v3.1 + project CLAUDE.md) auto-load — honor layer
 ## THE CODEX
 Repo: github.com/Leyber91/LUISBLANCO.DEV · passphrase: `Aether91212*` · AES-256-GCM client-side.
 Source: `_reference/` (gitignored). Rebuild: `cd LUISBLANCO.DEV; $env:CODEX_PASS="Aether91212*"; node tools/build_codex.mjs` → commit + push `codex.enc.json`.
-Currently sealed: **141 sections · 1.29 MB**.
+Currently sealed: **148 sections · 1.31 MB**.
 
 ---
 
@@ -50,7 +50,16 @@ Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) ·
 
 ## WHAT WAS BUILT THIS SESSION (2026-06-13 cont.)
 
-- **inject-wirtforge.js** — 14 WirthForge LLM-measurement concepts injected: 6 × IV-INTERFACE (AI Resonance instrument, Spectral Analyzer, Cognitive Radar, Pattern Analysis, Load Meter, Observable-time doctrine) + 8 × VII-MEASURE (token-stream-as-signal, spectral fingerprint, stochasticity axis, token velocity Rₜ, asymptotic load pattern, pre-flight cost runway, cognitive load formula, health score). Source: AI Resonance dashboard screenshot (2025-09-12) + TokenGateKeeper/research_gemini.md.
+- **inject-wirtforge.js** — 14 WirthForge LLM-measurement concepts injected: 6 × IV-INTERFACE + 8 × VII-MEASURE.
+- **BOOK_PARADIGM/00_intro.html** — unified Paradigm Book intro: Visible AI doctrine (9 principles), 7-part dependency diagram (SVG), reading order, scope boundaries.
+- **BOOK_AETHER/** (Part IV — INTERFACE) — 6 files authored from scratch:
+  - 00_plate: overview + status table
+  - 01_the_laws: 9 laws of interface (Navigable Space, Celestial Correspondence, Observable Time, Data Made Physical, No-Label Legibility, Scientific Instrument, Spectral Fingerprint, Ordered Chaos, Local Rendering)
+  - 02_the_concepts: 86-node roster organized by tier/cluster
+  - 03_the_ontology: full 31-body celestial internet ontology + API supply map + product inventions + visual direction doctrine
+  - 04_lineage_and_failures: 5 forms (2023 mapping → 2023 visual sprint → 2024 AI Canvas → 2025 WIRTHFORGE → 2026 LUMEN), failure patterns, deposited invariant
+  - 05_practice: 7 practice sections mapping to laws + site feed documentation
+- **Codex re-sealed**: 148 sections, 1.31 MB (was 141 at session start).
 
 ## WHAT WAS BUILT THIS SESSION (2026-06-13)
 
@@ -79,7 +88,8 @@ Codex = **TWO books + an archive**:
 **One LINEAGE** spanning all 7 parts belongs at the back of the Paradigm Book.
 
 `_reference/` current book dirs: `BOOK/` · `BOOK_AEA/` · `BOOK_ESSENCE/` · `BOOK_CONSTELLATION/` · `REGISTER/` · `research_map/`.
-**Missing: `BOOK_AETHER/` · `BOOK_CRAFT/` · `BOOK_LABORATORY/` · `BOOK_MEASURE/`** (Parts IV-VII).
+**Missing: `BOOK_CRAFT/` · `BOOK_LABORATORY/` · `BOOK_MEASURE/`** (Parts V-VII).
+`BOOK_PARADIGM/` (intro) and `BOOK_AETHER/` (Part IV) are now authored and sealed.
 
 Each new book follows the existing 6-file structure: `00_plate.html` · `01_the_laws.html` · `02_the_concepts.html` · `03_[thematic].html` · `04_lineage_and_failures.html` · `05_practice.html`.
 
@@ -87,19 +97,16 @@ Each new book follows the existing 6-file structure: `00_plate.html` · `01_the_
 
 ## ORDER NEXT SESSION
 
-**0. Author the Paradigm Book unified intro** (do this BEFORE re-seating or writing new parts)
-- One page: Visible AI doctrine statement + a support/dependency diagram of the 7 parts.
-- Lives at `_reference/BOOK_PARADIGM/00_intro.html`. No new concepts — pure architecture.
+**0. Author the Paradigm Book unified intro** — ✅ DONE
+- `_reference/BOOK_PARADIGM/00_intro.html`: Visible AI doctrine (9 principles), 7-part table, SVG dependency diagram, reading order.
+- Sealed in codex.
 
-**1. Author BOOK_AETHER (Part IV — INTERFACE)** ← START HERE after intro
-- Theme: astrophysics as interface; the internet as navigable space; AETHER/WIRTHFORGE/AetherNet.
-- **Critical detail**: the **31-body ontology** (the 31 subsystems/entities of the Aether architecture) is the structural spine of this part. Name and define all 31.
-- **Critical link**: AETHER **feeds LUMEN and Transit** — the instrument vocabulary here is the live animation vocabulary on-site. Laws written here become LUMEN preset names and parameters.
-- **WirthForge source vocabulary now in register** (inject-wirtforge.js). Pull IV-INTERFACE cluster for instrument laws; pull VII-MEASURE WIRTHFORGE- entries for measurement laws.
-- Pull register's IV-INTERFACE concepts (86 entries) from `register/work/02_assigned.json` where `part=="IV-INTERFACE"` as the concept roster.
-- 6 files in `_reference/BOOK_AETHER/`. Model exactly on `_reference/BOOK_CONSTELLATION/` structure.
-- Laws to derive from the AETHER LINE in `PORTFOLIO/LUIS_CONCEPTUAL_MAP.md` (section: THE AETHER LINE).
-- After writing: add `BOOK_AETHER` to `tools/build_codex.mjs` BOOKS array, re-seal, push.
+**1. Author BOOK_AETHER (Part IV — INTERFACE)** — ✅ DONE
+- 6 files authored: 00_plate, 01_the_laws (9 laws), 02_the_concepts (86 nodes), 03_the_ontology (31-body table), 04_lineage_and_failures, 05_practice.
+- 9 Laws: Navigable Space, Celestial Correspondence, Observable Time, Data Made Physical, No-Label Legibility, Scientific Instrument, Spectral Fingerprint, Ordered Chaos, Local Rendering.
+- 31-body ontology fully documented with API supply map.
+- LUMEN/Transit feed explicit in practice chapter.
+- Sealed in codex (148 sections, 1.31 MB).
 
 **2. Re-seat Parts I–III** under the unified Paradigm Book law system (after intro is written).
 - BOOK_AEA → Part I-ENTITY, BOOK_ESSENCE → Part II-CONTINUITY, BOOK_CONSTELLATION → Part III-COMPOSITION.

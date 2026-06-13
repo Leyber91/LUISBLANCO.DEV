@@ -45,9 +45,11 @@ function walk(dir, out = []) {
 // shipped raw (inline SVG diagrams included) as group 00.
 const BOOKS = [
   ['BOOK', '00 · the book of luis'],
-  ['BOOK_AEA', '01 · book of the aea'],
-  ['BOOK_ESSENCE', '02 · book of essence'],
-  ['BOOK_CONSTELLATION', '03 · book of constellation'],
+  ['BOOK_PARADIGM', '00p · the paradigm book'],
+  ['BOOK_AEA', '01 · part i — entity'],
+  ['BOOK_ESSENCE', '02 · part ii — continuity'],
+  ['BOOK_CONSTELLATION', '03 · part iii — composition'],
+  ['BOOK_AETHER', '04 · part iv — interface'],
   ['REGISTER', '10 · the register'],
 ];
 let bookSections = [];
