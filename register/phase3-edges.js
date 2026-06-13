@@ -124,6 +124,40 @@ const SPINE = [
   ['Project Leyber 212 — the founding platform', 'TRYVERSE → TRIVERSE', 'enables', 0.9, 'era-1: tryverse section born inside leyber212'],
   ['Project Leyber 212 — the founding platform', 'Metapower / metagenerator', 'enables', 0.85, 'era-1: metapower section born inside leyber212'],
 
+  /* ── CONSTELLATION LAWS → their proof concepts ──────────────────────────── */
+  ['CONSTELLATION · LAW 1 · SCALE BY COMPOSITION, NOT SIZE', 'Recursive MoA — "MoA of MoAs"', 'derives_from', 0.95, 'law-1: recursive MoA IS the proof of law 1'],
+  ['CONSTELLATION · LAW 1 · SCALE BY COMPOSITION, NOT SIZE', 'HADES — Hierarchical and Autonomous Decision-making Entity System / Hades Omega', 'proves', 0.9, 'law-1: HADES is the lived evidence of composition over size'],
+  ['CONSTELLATION · LAW 2 · HETEROGENEITY BEATS CLONES', 'Cosmic Nexus — each universe IS a different local model', 'derives_from', 0.9, 'law-2: cosmic nexus IS law 2 built: each universe a different model'],
+  ['CONSTELLATION · LAW 2 · HETEROGENEITY BEATS CLONES', 'Affinity Matrix + council-mechanics vocabulary', 'implements', 0.85, 'law-2: affinity matrix scores heterogeneity systematically'],
+  ['CONSTELLATION · LAW 3 · EVERY AUTONOMOUS LAYER GETS A WATCHER — THE SEDAH LAW', 'SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy', 'derives_from', 0.95, 'law-3: SEDAH IS law 3 built'],
+  ['CONSTELLATION · LAW 3 · EVERY AUTONOMOUS LAYER GETS A WATCHER — THE SEDAH LAW', 'HADES — Hierarchical and Autonomous Decision-making Entity System / Hades Omega', 'watches', 0.9, 'law-3: law requires hades to be watched'],
+  ['CONSTELLATION · LAW 4 · FIT THE HARDWARE YOU OWN', 'Ollama-as-Fuel', 'implements', 0.9, 'law-4: ollama-as-fuel is running on owned silicon'],
+  ['CONSTELLATION · LAW 4 · FIT THE HARDWARE YOU OWN', 'SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy', 'derives_from', 0.85, 'law-4: pico/nano/micro ladder IS fitting the hardware ladder'],
+  ['CONSTELLATION · LAW 5 · ROUTING IS COGNITION', 'CognitiveTransistor', 'derives_from', 0.9, 'law-5: cognitive transistor IS routing-as-cognition built'],
+  ['CONSTELLATION · LAW 5 · ROUTING IS COGNITION', 'Recursive MoA — "MoA of MoAs"', 'implements', 0.85, 'law-5: moa routing IS the cognitive act'],
+  ['CONSTELLATION · LAW 6 · THE HUMAN IS A LEGITIMATE BUS', 'Human-as-message-bus multi-agent orchestration (deployed)', 'derives_from', 0.95, 'law-6: human-as-message-bus is the lived proof of law 6'],
+  ['CONSTELLATION · LAW 7 · OUTPUT IS FUEL', 'Ollama-as-Fuel', 'enables', 0.9, 'law-7: output-as-fuel IS ollama as fuel philosophy'],
+  ['CONSTELLATION · LAW 7 · OUTPUT IS FUEL', 'Energy Metaphor / Energy Units (EU) / Energy Truth', 'derives_from', 0.85, 'law-7: output=fuel IS the energy metaphor applied to model I/O'],
+  ['CONSTELLATION · LAW 8 · FAILURE MUST BE RECOVERABLE, NOT PREVENTED', 'SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy', 'implements', 0.8, 'law-8: sedah watches to enable recovery'],
+  ['CONSTELLATION · LAW 9 · THE TOPOLOGY IS VISIBLE OR IT IS BROKEN', 'WIRTHFORGE', 'implements', 0.9, 'law-9: wirthforge renders the topology visible — the law made into product'],
+
+  /* ── REVERSE: proof concepts → laws (gives laws incoming edges) ────────── */
+  ['Recursive MoA — "MoA of MoAs"',                             'CONSTELLATION · LAW 1 · SCALE BY COMPOSITION, NOT SIZE',             'proves', 0.95, 'law-1-reverse: recursive MoA is the receipt for law 1'],
+  ['Cosmic Nexus — each universe IS a different local model',   'CONSTELLATION · LAW 2 · HETEROGENEITY BEATS CLONES',                 'proves', 0.9,  'law-2-reverse: cosmic nexus is the receipt for law 2'],
+  ['SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy','CONSTELLATION · LAW 3 · EVERY AUTONOMOUS LAYER GETS A WATCHER — THE SEDAH LAW', 'proves', 0.95, 'law-3-reverse: SEDAH is the receipt for law 3'],
+  ['Ollama-as-Fuel',                                            'CONSTELLATION · LAW 4 · FIT THE HARDWARE YOU OWN',                   'proves', 0.9,  'law-4-reverse: ollama-as-fuel is the receipt for law 4'],
+  ['CognitiveTransistor',                                       'CONSTELLATION · LAW 5 · ROUTING IS COGNITION',                       'proves', 0.9,  'law-5-reverse: cognitivetransistor is the receipt for law 5'],
+  ['Human-as-message-bus multi-agent orchestration (deployed)', 'CONSTELLATION · LAW 6 · THE HUMAN IS A LEGITIMATE BUS',             'proves', 0.95, 'law-6-reverse: human-as-message-bus IS the receipt for law 6'],
+  ['Energy Metaphor / Energy Units (EU) / Energy Truth',        'CONSTELLATION · LAW 7 · OUTPUT IS FUEL',                            'proves', 0.9,  'law-7-reverse: energy metaphor proves law 7 — output IS fuel'],
+  ['WIRTHFORGE',                                                'CONSTELLATION · LAW 8 · FAILURE MUST BE RECOVERABLE, NOT PREVENTED', 'proves', 0.8,  'law-8-reverse: wf recovery mechanisms prove law 8'],
+  ['WIRTHFORGE',                                                'CONSTELLATION · LAW 9 · THE TOPOLOGY IS VISIBLE OR IT IS BROKEN',    'proves', 0.9,  'law-9-reverse: wf topology render IS law 9 built'],
+
+  /* ── CONSTELLATION ANTI-PATTERNS → what they watch ─────────────────────── */
+  ['CONSTELLATION · ANTI-PATTERN · I · CLONE SWARMS', 'Recursive MoA — "MoA of MoAs"', 'watches', 0.9, 'anti-pattern: clone swarms is what moa prevents'],
+  ['CONSTELLATION · ANTI-PATTERN · II · UNWATCHED AUTONOMY', 'SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy', 'watches', 0.9, 'anti-pattern: unwatched autonomy is what SEDAH prevents'],
+  ['CONSTELLATION · ANTI-PATTERN · III · TOPOLOGY SPAGHETTI', 'WIRTHFORGE', 'watches', 0.85, 'anti-pattern: topology spaghetti is what wirthforge visibility prevents'],
+  ['CONSTELLATION · ANTI-PATTERN · IV · FUEL WASTE', 'Ollama-as-Fuel', 'watches', 0.85, 'anti-pattern: fuel waste is what ollama-as-fuel grades prevent'],
+
   /* ── REVERSE EDGES FOR "LINE" META-SUMMARIES (make them reachable) ────── */
   ['Project Ouroboros / OuroborosX (~20-agent pipeline, built)', 'THE OUROBOROS LINE — Self-Modifying / Self-Growing Systems', 'proves',    0.9, 'ouroboros-line: ouroboros IS the proof-of-line'],
   ['Metapower / metagenerator',                                  'THE OUROBOROS LINE — Self-Modifying / Self-Growing Systems', 'implements', 0.8, 'ouroboros-line: metapower seeds the line'],
