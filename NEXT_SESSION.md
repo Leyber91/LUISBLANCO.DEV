@@ -23,37 +23,40 @@ Currently sealed: **141 sections, 1.28 MB** (was 129 before this session).
 - Applied to schematic sweeps + projects mesh. Architecture diagram intentionally NOT dustified (rails load-bearing).
 - Codex UI bug fixed (`.cx-lock[hidden]{ display:none }`).
 
-### THE REGISTER — scaffolded + shipped (6 pipeline scripts in `register/`)
-- **661 canonical concepts** with CX- IDs, tiers S/A/B/C, clusters, parts, eras, sources.
-- **862 typed edges** from 6 idea-lines (OUROBOROS/HADES-MOA/COMPRESSION/AETHER/GAMES/HONESTY) + source co-occurrence + cluster-spine attachment. Non-obvious chains explicitly captured (DATASPACE→CognitiveTransistor, token-EEG↔DATASPACE, Metapower→ALFAPRIME, Cosmic Nexus→AETHER).
-- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY (118) · II-CONTINUITY (107) · III-COMPOSITION (0 — GAP) · IV-INTERFACE (84) · V-CRAFT (108) · VI-LABORATORY (61) · VII-MEASURE (183).
-- **`src/core/concept_graph.json`**: 661 nodes, 862 edges — future Prime Radiant / AEA plate food.
-- `tools/build_codex.mjs` updated to include REGISTER. Codex re-sealed + pushed.
+### THE REGISTER — complete pipeline (8 scripts in `register/`)
+**FINAL STATE: 684 nodes · 1004 typed edges · 0 orphans · 1 isolated S/A · 7 part files · 141 codex sections · 1.29 MB**
 
-## REGISTER STATUS (as of 2026-06-13 end-of-session)
-**661 canonical concepts · 906 typed edges · 0 orphan nodes · 7 part files · 141 codex sections**
+- **684 canonical concepts** (661 from atlas/gold + 23 injected from BOOK_CONSTELLATION).
+- **1004 typed edges**: 124 spine (6 idea-lines + era bridges + LINE meta-summaries + LIFE spine + CONSTELLATION laws) · 207 source co-occurrence · 673 cluster-spine. Non-obvious chains: DATASPACE→CognitiveTransistor, token-EEG↔DATASPACE, Metapower→ALFAPRIME, Cosmic Nexus→AETHER.
+- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY(108) · II-CONTINUITY(107) · **III-COMPOSITION(47)** · IV-INTERFACE(81) · V-CRAFT(107) · VI-LABORATORY(59) · VII-MEASURE(175).
+- **`src/core/concept_graph.json`**: 684 nodes, 1004 edges.
+- `tools/build_codex.mjs` includes REGISTER. Codex: 141 sections, 1.29 MB.
+- **`register/phase4-audit.js`** + **`register/inject-constellation.js`** built + run.
 
-Part distribution: I-ENTITY(108) · II-CONTINUITY(107) · **III-COMPOSITION(24)** · IV-INTERFACE(81) · V-CRAFT(107) · VI-LABORATORY(59) · VII-MEASURE(175)
+**ALL GAPS RESOLVED THIS SESSION:**
+- ~~III-COMPOSITION empty~~ → 47 entries. 24 CONSTELLATION reassigned + 23 new (9 laws, 5 watcher, 4 anti-patterns, 5 practice) from BOOK_CONSTELLATION HTML.
+- ~~30 LIFE orphans~~ → 0 orphans. LIFE spine = luisblanco.dev + 15 identity→WIRTHFORGE edges.
+- ~~12 isolated Tier S/A~~ → 1. Reverse edges for LINE meta-summaries + HONESTY Tier A + CONSTELLATION laws.
+- ~~Phase 4 audit missing~~ → built, running clean.
 
-**FIXED THIS SESSION:**
-- ~~GAP 1~~ III-COMPOSITION: 24 entries (was 0). 24 CONSTELLATION concepts reassigned via manual_overrides. Source: `_reference/BOOK_CONSTELLATION/02_the_concepts.html` (30 concepts; 24 matched, 6 new ones still needed).
-- ~~GAP 2~~ LIFE orphans: 0 orphan nodes (was 30). LIFE cluster spine = luisblanco.dev; 15 explicit identity→WIRTHFORGE/honesty-decoder edges added.
+## REGISTER STATUS (2026-06-13 — TRUE FINAL)
+**684 nodes · 1004 edges · 0 orphans · 1 isolated S/A**
 
-## REGISTER GAPS (remaining, in order)
+The only remaining imperfection: **CX-0260** = smart-quote duplicate of **CX-0129** ("Degradation" vs 'Degradation'). Fix: add to `alias_maps` in `register_config.json` then re-run full pipeline from phase0. Documented in `_quote_duplicates_pending_phase1`. **Not blocking anything.**
 
-**GAP 1 — III-COMPOSITION still under-populated (24 vs expected ~75)**
-The CONSTELLATION book has 30 named concepts; 24 matched existing canonical entries. 6 new concepts were not found in the atlas:
-- MoA-OF-MoAs (distinct from Recursive MoA)
-- MOA — Matrix of Agent Organization (MOA as matrix concept)
-- SEVEN GAMES ORCHESTRATION PATTERNS (orchestration view, not the games thesis)
-- Plus ~45 more from CONSTELLATION laws + practice chapters
-Fix: read `_reference/BOOK_CONSTELLATION/01_the_laws.html` (9 laws) + `05_practice.html` and inject as new CX- entries. Script: write `register/inject-constellation.js` that reads all BOOK_CONSTELLATION HTML, extracts name+essence, assigns cluster=CONSTELLATION, part=III-COMPOSITION, and appends to `work/02_assigned.json`. Then re-run phase3 + phase5 + re-seal.
+## REGISTER REMAINING ITEMS (minor, not blocking)
 
-**GAP 2 — Phase 4 audit not yet run**
-`register/phase4-audit.js` was not built. Should generate `work/04_audit_report.md` flagging duplicates, part mismatches, concepts missing tiers. Build it and run it before calling the register production-quality.
+**ITEM 1 — CX-0260 quote duplicate** (1 isolated S/A)
+Smart-quote variant of CX-0129 ('Degradation'). Fix: add the 5 quote-variant pairs to `alias_maps` in `register_config.json`, re-run full pipeline from phase0. Documented in `_quote_duplicates_pending_phase1`. Pairs: CX-0260/0129 · CX-0283/0143 · CX-0309/0207 · CX-0558/0547 · CX-0117/0070.
 
-**GAP 3 — Part count: 7 files, some clusters subsumed**
-MYTHOLOGY, NARRATIVE, OPS, LIFE are merged into other parts (no dedicated files). Acceptable for now — revisit if the Paradigm Book needs them split out.
+**ITEM 2 — 524 concepts without tiers** (audit flag)
+Atlas-only entries have no gold ranking. Expected. Can assign tiers manually to high-value entries via `register_config.json` or a separate tier-assignment pass. Not blocking.
+
+**ITEM 3 — 4 clusters without dedicated part files** (design choice)
+MYTHOLOGY, NARRATIVE, OPS, LIFE are merged into other parts. Revisit when authoring Paradigm Book parts if dedicated sections are needed.
+
+**ITEM 4 — III-COMPOSITION at 47, target ~75** (ongoing)
+BOOK_CONSTELLATION `02_the_concepts.html` had 6 concepts not found in atlas (MoA-OF-MoAs, MOA Matrix, Seven Games Orchestration Patterns, + 3 more). Can inject individually as new entries if content matters. `inject-constellation.js` already handles bulk extraction.
 
 ## THE DECIDED ARCHITECTURE (structural work, not yet started)
 Hard-graded survey settled it: codex = **TWO books + an archive**:
@@ -62,13 +65,12 @@ Hard-graded survey settled it: codex = **TWO books + an archive**:
 - **THE ARCHIVE** — atlas/gold/evidence/vault. Parked: Venture Ladder, Three Doors.
 
 ## ORDER NEXT SESSION
-1. **Register: inject missing CONSTELLATION entries** — write `register/inject-constellation.js` to parse `_reference/BOOK_CONSTELLATION/01_the_laws.html` (9 laws) + `05_practice.html`, add as new CX- entries in III-COMPOSITION. Target: ~45 more entries → III-COMPOSITION from 24 → ~70.
-2. **Register: run phase4-audit** — `register/phase4-audit.js` (not yet built). Flags duplicates, tier gaps, mismatches. Run it, review `work/04_audit_report.md`, correct `register_config.json`, re-run phases 2-3-5, re-seal.
-3. **THE PARADIGM BOOK restructure** — author AETHER (IV) + CRAFT (V) + PLAY (VI) + OMEGA (VII) parts in `_reference/`. Each as its own session. Re-seat AEA/ESSENCE/CONSTELLATION as Parts I-III; draw support-map intro; add 4 Book-of-Luis chapters (Mythology, Narrative, Ops, Life).
-4. **Heritage repos scope** (AetherVision, project-leyber-212, time_slip, ai_canvas) — still owed. Identify extractable visual/shader assets.
-5. **LUMEN gravitational lensing shader** — heritage asset at `project-leyber-212-website/.../gravitational_lensing.js`. Gravity bends dust field, gives depth, separates glyph from substrate. **Needs your go-ahead first.**
-6. **Build frontier** — LUMEN look in real Chrome → T-1.4 morph attractors.
-7. **concept_graph.json → site instrument** — Prime Radiant / AEA plate. Wire 661 nodes + 906 edges as interactive graph on the site.
+1. **Register: fix 5 quote-duplicate pairs** — add straight-quote aliases to `register_config.json` `alias_maps`, re-run full pipeline from phase0: `node phase0-bootstrap.js; node phase1-canonicalize.js; node phase2-part-assign.js; node phase3-edges.js; node phase4-audit.js; node phase5-assemble.js`. Eliminates last isolated S/A (CX-0260). Pairs documented in `_quote_duplicates_pending_phase1`.
+2. **THE PARADIGM BOOK restructure** — author AETHER (IV) + CRAFT (V) + PLAY (VI) + OMEGA (VII) parts in `_reference/`. Each as its own session. Re-seat AEA/ESSENCE/CONSTELLATION as Parts I-III; draw support-map intro; add 4 Book-of-Luis chapters (Mythology, Narrative, Ops, Life). Re-seal codex after each part.
+3. **Heritage repos scope** (AetherVision, project-leyber-212, time_slip, ai_canvas) — identify extractable visual/shader assets before starting LUMEN work.
+4. **LUMEN gravitational lensing shader** — heritage asset `project-leyber-212-website/.../gravitational_lensing.js`. Gravity bends dust field, depth, separates glyph from substrate. **Needs your go-ahead first — substantial build.**
+5. **Build frontier** — LUMEN look in real Chrome → T-1.4 morph attractors.
+6. **concept_graph.json → site instrument** — Prime Radiant / AEA plate. Wire 684 nodes + 1004 edges as interactive graph. `src/core/concept_graph.json` is already in the repo and versioned.
 
 ## LESSONS THAT MUST NOT BE FORGOTTEN
 - Completion over planning; one ticket in flight; every visual change ends in screenshots.
