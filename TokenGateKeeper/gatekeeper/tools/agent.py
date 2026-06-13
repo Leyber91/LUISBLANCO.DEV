@@ -433,8 +433,19 @@ class AgentCommand(GatekeeperTool):
         print(f"  CWD:  {cwd}")
         print(f"{'='*60}\n")
 
+        # Auto-inject BRAID memory + graph-RAG context
+        try:
+            from gatekeeper.tools.memory import braid_context
+            mem_ctx = braid_context(task, last_n=6)
+            if mem_ctx.strip():
+                print(f"  [MEMORY] Graph-RAG context loaded ({len(mem_ctx)} chars)")
+        except Exception as _me:
+            mem_ctx = ""
+
         # Pre-load context files if provided
         user_content = f"Task: {task}"
+        if mem_ctx:
+            user_content += f"\n\n{mem_ctx}"
         if args.context:
             for p in args.context:
                 fc = tool_read_file(p, cwd=cwd)
