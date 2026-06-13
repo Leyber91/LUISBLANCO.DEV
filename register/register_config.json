@@ -90,5 +90,13 @@
     "Energy Metaphor": ["Energy Units", "EU", "Energy Truth"],
     "Cosmic Nexus": ["Nexus Core"]
   },
-  "edge_corrections": {}
+  "edge_corrections": {},
+  "_quote_duplicate_note": "These alias_maps fixes collapse smart-quote vs straight-quote duplicate pairs on next phase1 run. CX-IDs shown are the duplicates to eliminate.",
+  "_quote_duplicates_pending_phase1": {
+    "CX-0260_into_CX-0129": "'Degradation' (named enemy) + zero-degradation relay protocol aliases the smart-quote variant",
+    "CX-0283_into_CX-0143": "Cryptographic Contextual Markers quote variant",
+    "CX-0309_into_CX-0207": "SearXNG quote variant",
+    "CX-0558_into_CX-0547": "Self prompt yourself quote variant",
+    "CX-0117_into_CX-0070": "SEDAH IA name variant"
+  }
 }
