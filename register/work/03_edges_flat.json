@@ -1,6 +1,6 @@
 [
   {
-    "source": "CX-0294",
+    "source": "CX-0292",
     "target": "CX-0006",
     "type": "enables",
     "weight": 0.9,
@@ -15,27 +15,27 @@
   },
   {
     "source": "CX-0006",
-    "target": "CX-0302",
+    "target": "CX-0300",
     "type": "enables",
     "weight": 0.9,
     "reason": "ouroboros-line: ouroboros → seed as theory"
   },
   {
-    "source": "CX-0302",
-    "target": "CX-0165",
+    "source": "CX-0300",
+    "target": "CX-0074",
     "type": "derives_from",
     "weight": 0.8,
     "reason": "ouroboros-line: seed theory crystallises into WF"
   },
   {
-    "source": "CX-0308",
+    "source": "CX-0306",
     "target": "CX-0006",
     "type": "proves",
     "weight": 0.85,
     "reason": "ouroboros-line: paradox is learned inside ouroboros build"
   },
   {
-    "source": "CX-0294",
+    "source": "CX-0292",
     "target": "CX-0003",
     "type": "enables",
     "weight": 0.7,
@@ -64,14 +64,14 @@
   },
   {
     "source": "CX-0069",
-    "target": "CX-0165",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.8,
     "reason": "hades-line: recursive moa is the multi-model council in wf"
   },
   {
     "source": "CX-0070",
-    "target": "CX-0165",
+    "target": "CX-0074",
     "type": "derives_from",
     "weight": 0.85,
     "reason": "hades-line: WF inherits pico/nano/micro hierarchy"
@@ -106,21 +106,21 @@
   },
   {
     "source": "CX-0124",
-    "target": "CX-0165",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.75,
     "reason": "compression-line: essence passing lives in WF session handoffs"
   },
   {
     "source": "CX-0125",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "enables",
     "weight": 0.8,
     "reason": "compression-line: the invented language feeds the triverse universe linguistics"
   },
   {
     "source": "CX-0123",
-    "target": "CX-0278",
+    "target": "CX-0276",
     "type": "enables",
     "weight": 0.65,
     "reason": "non-obvious: dataspace compression instinct → bounded component model in cognitiVetransistor"
@@ -133,14 +133,14 @@
     "reason": "non-obvious: degradation problem confirms the need dataspace already solved — circular reinforcement"
   },
   {
-    "source": "CX-0273",
+    "source": "CX-0271",
     "target": "CX-0158",
     "type": "enables",
     "weight": 0.9,
     "reason": "aether-line: black hole visual is the nursery for aether metaphor"
   },
   {
-    "source": "CX-0313",
+    "source": "CX-0311",
     "target": "CX-0158",
     "type": "implements",
     "weight": 0.95,
@@ -148,90 +148,90 @@
   },
   {
     "source": "CX-0158",
-    "target": "CX-0165",
+    "target": "CX-0074",
     "type": "refines",
     "weight": 0.95,
     "reason": "aether-line: wirthforge is the mature aether"
   },
   {
-    "source": "CX-0284",
-    "target": "CX-0165",
+    "source": "CX-0282",
+    "target": "CX-0074",
     "type": "implements",
     "weight": 0.9,
     "reason": "aether-line: energy metaphor is wirthforge visualisation core"
   },
   {
-    "source": "CX-0273",
-    "target": "CX-0284",
+    "source": "CX-0271",
+    "target": "CX-0282",
     "type": "enables",
     "weight": 0.75,
     "reason": "aether-line: lensing + physics aesthetic → energy visual grammar"
   },
   {
     "source": "CX-0158",
-    "target": "CX-0315",
+    "target": "CX-0313",
     "type": "enables",
     "weight": 0.7,
     "reason": "non-obvious: aether render pipeline → decipher visualisation engine"
   },
   {
-    "source": "CX-0221",
-    "target": "CX-0320",
+    "source": "CX-0220",
+    "target": "CX-0318",
     "type": "implements",
     "weight": 0.9,
     "reason": "games-line: thesis → first concrete game series"
   },
   {
-    "source": "CX-0320",
-    "target": "CX-0219",
+    "source": "CX-0318",
+    "target": "CX-0218",
     "type": "enables",
     "weight": 0.9,
     "reason": "games-line: seven games → cosmic nexus as multi-model game"
   },
   {
-    "source": "CX-0219",
+    "source": "CX-0218",
     "target": "CX-0163",
     "type": "refines",
     "weight": 0.9,
     "reason": "games-line: cosmic nexus → spaceodyssey on phone"
   },
   {
-    "source": "CX-0546",
+    "source": "CX-0543",
     "target": "CX-0069",
     "type": "enables",
     "weight": 0.75,
     "reason": "games-line: prompt-as-cell architecture feeds recursive moa"
   },
   {
-    "source": "CX-0219",
+    "source": "CX-0218",
     "target": "CX-0158",
     "type": "implements",
     "weight": 0.7,
     "reason": "non-obvious: cosmic nexus materialises the aether metaphor — models AS celestial bodies"
   },
   {
-    "source": "CX-0317",
-    "target": "CX-0284",
+    "source": "CX-0315",
+    "target": "CX-0282",
     "type": "derives_from",
     "weight": 0.9,
     "reason": "honesty-line: honesty decoder names the fakery that energy-truth corrects"
   },
   {
-    "source": "CX-0284",
-    "target": "CX-0315",
+    "source": "CX-0282",
+    "target": "CX-0313",
     "type": "enables",
     "weight": 0.95,
     "reason": "honesty-line: energy metaphor IS the decipher pipeline"
   },
   {
-    "source": "CX-0324",
-    "target": "CX-0278",
+    "source": "CX-0322",
+    "target": "CX-0276",
     "type": "enables",
     "weight": 0.9,
     "reason": "honesty-line: measuring token timing → bounded component model"
   },
   {
-    "source": "CX-0278",
+    "source": "CX-0276",
     "target": "CX-0162",
     "type": "requires",
     "weight": 0.85,
@@ -239,27 +239,27 @@
   },
   {
     "source": "CX-0162",
-    "target": "CX-0165",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.9,
     "reason": "honesty-line: ollama-as-fuel is wirthforge energy philosophy"
   },
   {
-    "source": "CX-0324",
+    "source": "CX-0322",
     "target": "CX-0123",
     "type": "derives_from",
     "weight": 0.6,
     "reason": "non-obvious: both measure the AI process signal; token-eeg is the instrument, dataspace the compression — same instinct, different era"
   },
   {
-    "source": "CX-0385",
-    "target": "CX-0384",
+    "source": "CX-0382",
+    "target": "CX-0381",
     "type": "enables",
     "weight": 0.9,
     "reason": "mythology-method: triverse website → manuscript"
   },
   {
-    "source": "CX-0294",
+    "source": "CX-0292",
     "target": "CX-0158",
     "type": "derives_from",
     "weight": 0.7,
@@ -267,216 +267,216 @@
   },
   {
     "source": "CX-0123",
-    "target": "CX-0304",
+    "target": "CX-0302",
     "type": "enables",
     "weight": 0.8,
     "reason": "era-0-to-1: dataspace born while building leyber212"
   },
   {
-    "source": "CX-0304",
-    "target": "CX-0385",
+    "source": "CX-0302",
+    "target": "CX-0382",
     "type": "enables",
     "weight": 0.9,
     "reason": "era-1: tryverse section born inside leyber212"
   },
   {
-    "source": "CX-0304",
-    "target": "CX-0294",
+    "source": "CX-0302",
+    "target": "CX-0292",
     "type": "enables",
     "weight": 0.85,
     "reason": "era-1: metapower section born inside leyber212"
   },
   {
-    "source": "CX-0657",
+    "source": "CX-0654",
     "target": "CX-0069",
     "type": "derives_from",
     "weight": 0.95,
     "reason": "law-1: recursive MoA IS the proof of law 1"
   },
   {
-    "source": "CX-0657",
+    "source": "CX-0654",
     "target": "CX-0063",
     "type": "proves",
     "weight": 0.9,
     "reason": "law-1: HADES is the lived evidence of composition over size"
   },
   {
-    "source": "CX-0658",
-    "target": "CX-0219",
+    "source": "CX-0655",
+    "target": "CX-0218",
     "type": "derives_from",
     "weight": 0.9,
     "reason": "law-2: cosmic nexus IS law 2 built: each universe a different model"
   },
   {
-    "source": "CX-0658",
+    "source": "CX-0655",
     "target": "CX-0075",
     "type": "implements",
     "weight": 0.85,
     "reason": "law-2: affinity matrix scores heterogeneity systematically"
   },
   {
-    "source": "CX-0659",
+    "source": "CX-0656",
     "target": "CX-0070",
     "type": "derives_from",
     "weight": 0.95,
     "reason": "law-3: SEDAH IS law 3 built"
   },
   {
-    "source": "CX-0659",
+    "source": "CX-0656",
     "target": "CX-0063",
     "type": "watches",
     "weight": 0.9,
     "reason": "law-3: law requires hades to be watched"
   },
   {
-    "source": "CX-0660",
+    "source": "CX-0657",
     "target": "CX-0162",
     "type": "implements",
     "weight": 0.9,
     "reason": "law-4: ollama-as-fuel is running on owned silicon"
   },
   {
-    "source": "CX-0660",
+    "source": "CX-0657",
     "target": "CX-0070",
     "type": "derives_from",
     "weight": 0.85,
     "reason": "law-4: pico/nano/micro ladder IS fitting the hardware ladder"
   },
   {
-    "source": "CX-0661",
-    "target": "CX-0278",
+    "source": "CX-0658",
+    "target": "CX-0276",
     "type": "derives_from",
     "weight": 0.9,
     "reason": "law-5: cognitive transistor IS routing-as-cognition built"
   },
   {
-    "source": "CX-0661",
+    "source": "CX-0658",
     "target": "CX-0069",
     "type": "implements",
     "weight": 0.85,
     "reason": "law-5: moa routing IS the cognitive act"
   },
   {
-    "source": "CX-0662",
+    "source": "CX-0659",
     "target": "CX-0067",
     "type": "derives_from",
     "weight": 0.95,
     "reason": "law-6: human-as-message-bus is the lived proof of law 6"
   },
   {
-    "source": "CX-0663",
+    "source": "CX-0660",
     "target": "CX-0162",
     "type": "enables",
     "weight": 0.9,
     "reason": "law-7: output-as-fuel IS ollama as fuel philosophy"
   },
   {
-    "source": "CX-0663",
-    "target": "CX-0284",
+    "source": "CX-0660",
+    "target": "CX-0282",
     "type": "derives_from",
     "weight": 0.85,
     "reason": "law-7: output=fuel IS the energy metaphor applied to model I/O"
   },
   {
-    "source": "CX-0664",
+    "source": "CX-0661",
     "target": "CX-0070",
     "type": "implements",
     "weight": 0.8,
     "reason": "law-8: sedah watches to enable recovery"
   },
   {
-    "source": "CX-0665",
-    "target": "CX-0165",
+    "source": "CX-0662",
+    "target": "CX-0074",
     "type": "implements",
     "weight": 0.9,
     "reason": "law-9: wirthforge renders the topology visible — the law made into product"
   },
   {
     "source": "CX-0069",
-    "target": "CX-0657",
+    "target": "CX-0654",
     "type": "proves",
     "weight": 0.95,
     "reason": "law-1-reverse: recursive MoA is the receipt for law 1"
   },
   {
-    "source": "CX-0219",
-    "target": "CX-0658",
+    "source": "CX-0218",
+    "target": "CX-0655",
     "type": "proves",
     "weight": 0.9,
     "reason": "law-2-reverse: cosmic nexus is the receipt for law 2"
   },
   {
     "source": "CX-0070",
-    "target": "CX-0659",
+    "target": "CX-0656",
     "type": "proves",
     "weight": 0.95,
     "reason": "law-3-reverse: SEDAH is the receipt for law 3"
   },
   {
     "source": "CX-0162",
-    "target": "CX-0660",
+    "target": "CX-0657",
     "type": "proves",
     "weight": 0.9,
     "reason": "law-4-reverse: ollama-as-fuel is the receipt for law 4"
   },
   {
-    "source": "CX-0278",
-    "target": "CX-0661",
+    "source": "CX-0276",
+    "target": "CX-0658",
     "type": "proves",
     "weight": 0.9,
     "reason": "law-5-reverse: cognitivetransistor is the receipt for law 5"
   },
   {
     "source": "CX-0067",
-    "target": "CX-0662",
+    "target": "CX-0659",
     "type": "proves",
     "weight": 0.95,
     "reason": "law-6-reverse: human-as-message-bus IS the receipt for law 6"
   },
   {
-    "source": "CX-0284",
-    "target": "CX-0663",
+    "source": "CX-0282",
+    "target": "CX-0660",
     "type": "proves",
     "weight": 0.9,
     "reason": "law-7-reverse: energy metaphor proves law 7 — output IS fuel"
   },
   {
-    "source": "CX-0165",
-    "target": "CX-0664",
+    "source": "CX-0074",
+    "target": "CX-0661",
     "type": "proves",
     "weight": 0.8,
     "reason": "law-8-reverse: wf recovery mechanisms prove law 8"
   },
   {
-    "source": "CX-0165",
-    "target": "CX-0665",
+    "source": "CX-0074",
+    "target": "CX-0662",
     "type": "proves",
     "weight": 0.9,
     "reason": "law-9-reverse: wf topology render IS law 9 built"
   },
   {
-    "source": "CX-0671",
+    "source": "CX-0668",
     "target": "CX-0069",
     "type": "watches",
     "weight": 0.9,
     "reason": "anti-pattern: clone swarms is what moa prevents"
   },
   {
-    "source": "CX-0672",
+    "source": "CX-0669",
     "target": "CX-0070",
     "type": "watches",
     "weight": 0.9,
     "reason": "anti-pattern: unwatched autonomy is what SEDAH prevents"
   },
   {
-    "source": "CX-0673",
-    "target": "CX-0165",
+    "source": "CX-0670",
+    "target": "CX-0074",
     "type": "watches",
     "weight": 0.85,
     "reason": "anti-pattern: topology spaghetti is what wirthforge visibility prevents"
   },
   {
-    "source": "CX-0674",
+    "source": "CX-0671",
     "target": "CX-0162",
     "type": "watches",
     "weight": 0.85,
@@ -490,7 +490,7 @@
     "reason": "ouroboros-line: ouroboros IS the proof-of-line"
   },
   {
-    "source": "CX-0294",
+    "source": "CX-0292",
     "target": "CX-0014",
     "type": "implements",
     "weight": 0.8,
@@ -532,274 +532,274 @@
     "reason": "aether-line: AETHER IS the proof-of-line"
   },
   {
-    "source": "CX-0273",
+    "source": "CX-0271",
     "target": "CX-0164",
     "type": "implements",
     "weight": 0.85,
     "reason": "aether-line: visual nursery implements the line concept"
   },
   {
-    "source": "CX-0221",
-    "target": "CX-0227",
+    "source": "CX-0220",
+    "target": "CX-0226",
     "type": "proves",
     "weight": 0.95,
     "reason": "games-line: thesis IS the proof-of-line"
   },
   {
-    "source": "CX-0219",
-    "target": "CX-0227",
+    "source": "CX-0218",
+    "target": "CX-0226",
     "type": "proves",
     "weight": 0.85,
     "reason": "games-line: cosmic nexus is the built proof"
   },
   {
-    "source": "CX-0317",
-    "target": "CX-0318",
+    "source": "CX-0315",
+    "target": "CX-0316",
     "type": "proves",
     "weight": 0.9,
     "reason": "honesty-line: decoder IS the proof-of-line"
   },
   {
-    "source": "CX-0278",
-    "target": "CX-0318",
+    "source": "CX-0276",
+    "target": "CX-0316",
     "type": "proves",
     "weight": 0.9,
     "reason": "honesty-line: transistor is the built proof"
   },
   {
     "source": "CX-0063",
-    "target": "CX-0266",
+    "target": "CX-0264",
     "type": "enables",
     "weight": 0.8,
     "reason": "era-3: hades multi-agent system builds the context requiring TMR framework"
   },
   {
     "source": "CX-0006",
-    "target": "CX-0266",
+    "target": "CX-0264",
     "type": "enables",
     "weight": 0.8,
     "reason": "era-3: ouroboros build surfaced the need for cognitive-evolution framing"
   },
   {
-    "source": "CX-0304",
-    "target": "CX-0323",
+    "source": "CX-0302",
+    "target": "CX-0321",
     "type": "enables",
     "weight": 0.75,
     "reason": "era-0-to-1: leyber212 creative work established multi-persona prompting as method"
   },
   {
     "source": "CX-0123",
-    "target": "CX-0323",
+    "target": "CX-0321",
     "type": "enables",
     "weight": 0.7,
     "reason": "compression: critic stack is context-engineered multi-voice compression in practice"
   },
   {
     "source": "CX-0123",
-    "target": "CX-0261",
+    "target": "CX-0259",
     "type": "refines",
     "weight": 0.75,
     "reason": "compression: 5-file system is early DATASPACE-like external memory"
   },
   {
-    "source": "CX-0323",
+    "source": "CX-0321",
     "target": "CX-0069",
     "type": "derives_from",
     "weight": 0.8,
     "reason": "era-0: critic stack is the manual multi-agent debate ancestor"
   },
   {
-    "source": "CX-0266",
-    "target": "CX-0290",
+    "source": "CX-0264",
+    "target": "CX-0288",
     "type": "proves",
     "weight": 0.85,
     "reason": "era-3: inception.py proves the TMR theory ran as code"
   },
   {
-    "source": "CX-0165",
-    "target": "CX-0324",
+    "source": "CX-0074",
+    "target": "CX-0322",
     "type": "requires",
     "weight": 0.85,
     "reason": "honesty-line: WF requires token-EEG as its instrument layer"
   },
   {
-    "source": "CX-0165",
-    "target": "CX-0313",
+    "source": "CX-0074",
+    "target": "CX-0311",
     "type": "derives_from",
     "weight": 0.8,
     "reason": "aether-line: the ontology is the intellectual source WF builds from"
   },
   {
     "source": "CX-0158",
-    "target": "CX-0313",
+    "target": "CX-0311",
     "type": "requires",
     "weight": 0.95,
     "reason": "aether-line: AETHER requires the 31-body mapping — it IS the ontology"
   },
   {
-    "source": "CX-0633",
-    "target": "CX-0165",
+    "source": "CX-0630",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.85,
     "reason": "life-line: Dec 2024 self-definition → WF mission"
   },
   {
-    "source": "CX-0634",
-    "target": "CX-0165",
+    "source": "CX-0631",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.8,
     "reason": "life-line: agentic engineer framing feeds WF product persona"
   },
   {
-    "source": "CX-0638",
-    "target": "CX-0165",
+    "source": "CX-0635",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.8,
     "reason": "life-line: AI systems architect → WF architecture doctrine"
   },
   {
-    "source": "CX-0654",
-    "target": "CX-0165",
+    "source": "CX-0651",
+    "target": "CX-0074",
     "type": "implements",
     "weight": 0.95,
     "reason": "life-line: the rename IS the WIRTHFORGE birth moment"
   },
   {
-    "source": "CX-0654",
+    "source": "CX-0651",
     "target": "CX-0158",
     "type": "derives_from",
     "weight": 0.95,
     "reason": "life-line: rename traces back to aether origin"
   },
   {
-    "source": "CX-0645",
-    "target": "CX-0165",
+    "source": "CX-0642",
+    "target": "CX-0074",
     "type": "implements",
     "weight": 0.9,
     "reason": "life-line: site is the public face of the WF/AEA vision"
   },
   {
-    "source": "CX-0640",
-    "target": "CX-0317",
+    "source": "CX-0637",
+    "target": "CX-0315",
     "type": "proves",
     "weight": 0.85,
     "reason": "life-line: self-archaeology is what produces the honesty decoder insight"
   },
   {
-    "source": "CX-0646",
-    "target": "CX-0165",
+    "source": "CX-0643",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.75,
     "reason": "life-line: meta-methods → WF as the methodology platform"
   },
   {
-    "source": "CX-0651",
-    "target": "CX-0165",
+    "source": "CX-0648",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.8,
     "reason": "life-line: self-as-method → WF practitioner design"
   },
   {
-    "source": "CX-0639",
-    "target": "CX-0317",
+    "source": "CX-0636",
+    "target": "CX-0315",
     "type": "refines",
     "weight": 0.75,
     "reason": "life-line: pattern catalog names the anti-patterns the decoder exposes"
   },
   {
-    "source": "CX-0652",
-    "target": "CX-0165",
+    "source": "CX-0649",
+    "target": "CX-0074",
     "type": "derives_from",
     "weight": 0.75,
     "reason": "life-line: solo-unicorn thesis is the WF independence doctrine"
   },
   {
-    "source": "CX-0630",
-    "target": "CX-0165",
+    "source": "CX-0627",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.9,
     "reason": "life-line: named architect identity → WF persona"
   },
   {
-    "source": "CX-0629",
-    "target": "CX-0165",
+    "source": "CX-0626",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.8,
     "reason": "life-line: propagation thesis feeds WF self-evolution"
   },
   {
-    "source": "CX-0628",
-    "target": "CX-0317",
+    "source": "CX-0625",
+    "target": "CX-0315",
     "type": "derives_from",
     "weight": 0.8,
     "reason": "life-line: engineering vs vibes is the honesty decoder applied to practice"
   },
   {
-    "source": "CX-0266",
-    "target": "CX-0290",
+    "source": "CX-0264",
+    "target": "CX-0288",
     "type": "implements",
     "weight": 0.9,
     "reason": "era-3: TMR theory → implemented in inception.py"
   },
   {
-    "source": "CX-0290",
-    "target": "CX-0165",
+    "source": "CX-0288",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.7,
     "reason": "era-bridge: FTH framework becomes wf cognitive pipeline"
   },
   {
-    "source": "CX-0289",
-    "target": "CX-0165",
+    "source": "CX-0287",
+    "target": "CX-0074",
     "type": "enables",
     "weight": 0.7,
     "reason": "era-6-to-9: hsq architecture insights → wf model-efficiency layer"
   },
   {
-    "source": "CX-0549",
+    "source": "CX-0546",
     "target": "CX-0069",
     "type": "enables",
     "weight": 0.75,
     "reason": "era-bridge: self-propelling loop is the conceptual model for recursive moa"
   },
   {
-    "source": "CX-0312",
+    "source": "CX-0310",
     "target": "CX-0069",
     "type": "implements",
     "weight": 0.85,
     "reason": "era-5: super/meta/omni position triad IS recursive moa reasoning"
   },
   {
-    "source": "CX-0316",
-    "target": "CX-0221",
+    "source": "CX-0314",
+    "target": "CX-0220",
     "type": "refines",
     "weight": 0.8,
     "reason": "era-3: galactic ages methodology → games as discovery thesis"
   },
   {
-    "source": "CX-0325",
-    "target": "CX-0165",
+    "source": "CX-0323",
+    "target": "CX-0074",
     "type": "derives_from",
     "weight": 0.75,
     "reason": "era-3-to-9: universal substrate grand-unified vision → wf as the achievable version"
   },
   {
-    "source": "CX-0327",
-    "target": "CX-0165",
+    "source": "CX-0325",
+    "target": "CX-0074",
     "type": "implements",
     "weight": 0.9,
     "reason": "era-9: wf doc factory is an artifact of the wf project itself"
   },
   {
     "source": "CX-0163",
-    "target": "CX-0165",
+    "target": "CX-0074",
     "type": "implements",
     "weight": 0.9,
     "reason": "era-10: spaceodyssey is wirthforge shipped on mobile"
   },
   {
-    "source": "CX-0216",
-    "target": "CX-0165",
+    "source": "CX-0215",
+    "target": "CX-0074",
     "type": "derives_from",
     "weight": 0.75,
     "reason": "era-bridge: ai civilization → wf multi-agent council is harvesting-discoveries for real"
@@ -812,22 +812,22 @@
     "reason": "era-3-to-4: primordial app generator is ouroboros applied to web apps"
   },
   {
-    "source": "CX-0261",
+    "source": "CX-0259",
     "target": "CX-0123",
     "type": "derives_from",
     "weight": 0.8,
     "reason": "era-0-to-1: 5-file state management IS an early dataspace-like external memory"
   },
   {
-    "source": "CX-0323",
+    "source": "CX-0321",
     "target": "CX-0069",
     "type": "enables",
     "weight": 0.8,
     "reason": "era-0: three-persona critic stack is the first multi-agent debate pattern"
   },
   {
-    "source": "CX-0550",
-    "target": "CX-0549",
+    "source": "CX-0547",
+    "target": "CX-0546",
     "type": "refines",
     "weight": 0.75,
     "reason": "era-3: zeroth law → more structured self-propelling prompt"
@@ -854,14 +854,14 @@
     "reason": "era-3: qbnn architecture built inside hades context"
   },
   {
-    "source": "CX-0271",
+    "source": "CX-0269",
     "target": "CX-0158",
     "type": "enables",
     "weight": 0.7,
     "reason": "non-obvious: n-dimensional cube theory → astrophysics metaphor are same dimensional-thinking"
   },
   {
-    "source": "CX-0275",
+    "source": "CX-0273",
     "target": "CX-0123",
     "type": "refines",
     "weight": 0.8,
@@ -883,63 +883,63 @@
   },
   {
     "source": "CX-0038",
-    "target": "CX-0180",
+    "target": "CX-0179",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
     "source": "CX-0038",
-    "target": "CX-0204",
+    "target": "CX-0203",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
     "source": "CX-0038",
-    "target": "CX-0481",
+    "target": "CX-0478",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
     "source": "CX-0157",
-    "target": "CX-0180",
+    "target": "CX-0179",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
     "source": "CX-0157",
-    "target": "CX-0204",
+    "target": "CX-0203",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
     "source": "CX-0157",
-    "target": "CX-0481",
+    "target": "CX-0478",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0180",
-    "target": "CX-0204",
+    "source": "CX-0179",
+    "target": "CX-0203",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0180",
-    "target": "CX-0481",
+    "source": "CX-0179",
+    "target": "CX-0478",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0204",
-    "target": "CX-0481",
+    "source": "CX-0203",
+    "target": "CX-0478",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/sedah.md"
@@ -953,157 +953,178 @@
   },
   {
     "source": "CX-0044",
-    "target": "CX-0432",
+    "target": "CX-0429",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
     "source": "CX-0044",
-    "target": "CX-0452",
+    "target": "CX-0449",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
     "source": "CX-0044",
-    "target": "CX-0479",
+    "target": "CX-0476",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
     "source": "CX-0044",
-    "target": "CX-0536",
+    "target": "CX-0533",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
-    "source": "CX-0432",
-    "target": "CX-0452",
+    "source": "CX-0429",
+    "target": "CX-0449",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
-    "source": "CX-0432",
-    "target": "CX-0479",
+    "source": "CX-0429",
+    "target": "CX-0476",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
-    "source": "CX-0432",
-    "target": "CX-0536",
+    "source": "CX-0429",
+    "target": "CX-0533",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
-    "source": "CX-0452",
-    "target": "CX-0479",
+    "source": "CX-0449",
+    "target": "CX-0476",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
-    "source": "CX-0452",
-    "target": "CX-0536",
+    "source": "CX-0449",
+    "target": "CX-0533",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
-    "source": "CX-0479",
-    "target": "CX-0536",
+    "source": "CX-0476",
+    "target": "CX-0533",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md"
   },
   {
     "source": "CX-0057",
-    "target": "CX-0375",
+    "target": "CX-0372",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
   },
   {
     "source": "CX-0057",
-    "target": "CX-0377",
+    "target": "CX-0374",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
   },
   {
     "source": "CX-0057",
-    "target": "CX-0485",
+    "target": "CX-0482",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
   },
   {
-    "source": "CX-0375",
-    "target": "CX-0377",
+    "source": "CX-0372",
+    "target": "CX-0374",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
   },
   {
-    "source": "CX-0375",
-    "target": "CX-0485",
+    "source": "CX-0372",
+    "target": "CX-0482",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
   },
   {
-    "source": "CX-0377",
-    "target": "CX-0485",
+    "source": "CX-0374",
+    "target": "CX-0482",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
   },
   {
     "source": "CX-0060",
-    "target": "CX-0347",
+    "target": "CX-0345",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/tools.md"
   },
   {
     "source": "CX-0060",
-    "target": "CX-0348",
+    "target": "CX-0346",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/tools.md"
   },
   {
     "source": "CX-0060",
-    "target": "CX-0355",
+    "target": "CX-0353",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/tools.md"
   },
   {
-    "source": "CX-0347",
-    "target": "CX-0348",
+    "source": "CX-0345",
+    "target": "CX-0346",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/tools.md"
   },
   {
-    "source": "CX-0347",
-    "target": "CX-0355",
+    "source": "CX-0345",
+    "target": "CX-0353",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/tools.md"
   },
   {
-    "source": "CX-0348",
-    "target": "CX-0355",
+    "source": "CX-0346",
+    "target": "CX-0353",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0062",
+    "target": "CX-0128",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0062",
+    "target": "CX-0400",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0128",
+    "target": "CX-0400",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
   },
   {
     "source": "CX-0067",
@@ -1114,7 +1135,7 @@
   },
   {
     "source": "CX-0075",
-    "target": "CX-0249",
+    "target": "CX-0247",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md (PART_4_SCENARIO_BACKLOG.md)"
@@ -1128,273 +1149,273 @@
   },
   {
     "source": "CX-0078",
-    "target": "CX-0233",
+    "target": "CX-0232",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/ollama.md (ChatGPT-Ollama Models Python Integration.json)"
   },
   {
     "source": "CX-0120",
-    "target": "CX-0233",
+    "target": "CX-0232",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/ollama.md (ChatGPT-Ollama Models Python Integration.json)"
   },
   {
     "source": "CX-0084",
-    "target": "CX-0508",
+    "target": "CX-0505",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-001/002.md"
   },
   {
     "source": "CX-0087",
-    "target": "CX-0455",
+    "target": "CX-0452",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-projects-ideas.md backlog"
   },
   {
     "source": "CX-0092",
-    "target": "CX-0389",
+    "target": "CX-0386",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-loop-system.md"
   },
   {
     "source": "CX-0098",
-    "target": "CX-0552",
+    "target": "CX-0549",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-ouroborus.md"
   },
   {
     "source": "CX-0098",
-    "target": "CX-0648",
+    "target": "CX-0645",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-ouroborus.md"
   },
   {
-    "source": "CX-0552",
-    "target": "CX-0648",
+    "source": "CX-0549",
+    "target": "CX-0645",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-ouroborus.md"
   },
   {
     "source": "CX-0104",
-    "target": "CX-0334",
+    "target": "CX-0332",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 676b11d7)"
   },
   {
     "source": "CX-0104",
-    "target": "CX-0369",
+    "target": "CX-0366",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 676b11d7)"
   },
   {
-    "source": "CX-0334",
-    "target": "CX-0369",
+    "source": "CX-0332",
+    "target": "CX-0366",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 676b11d7)"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0254",
+    "target": "CX-0252",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0404",
+    "target": "CX-0401",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0429",
+    "target": "CX-0426",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0493",
+    "target": "CX-0490",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0494",
+    "target": "CX-0491",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0520",
+    "target": "CX-0517",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
     "source": "CX-0110",
-    "target": "CX-0610",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0254",
-    "target": "CX-0404",
+    "source": "CX-0252",
+    "target": "CX-0401",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0254",
-    "target": "CX-0429",
+    "source": "CX-0252",
+    "target": "CX-0426",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0254",
-    "target": "CX-0493",
+    "source": "CX-0252",
+    "target": "CX-0490",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0254",
-    "target": "CX-0494",
+    "source": "CX-0252",
+    "target": "CX-0491",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0254",
-    "target": "CX-0520",
+    "source": "CX-0252",
+    "target": "CX-0517",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0254",
-    "target": "CX-0610",
+    "source": "CX-0252",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0404",
-    "target": "CX-0429",
+    "source": "CX-0401",
+    "target": "CX-0426",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0404",
-    "target": "CX-0493",
+    "source": "CX-0401",
+    "target": "CX-0490",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0404",
-    "target": "CX-0494",
+    "source": "CX-0401",
+    "target": "CX-0491",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0404",
-    "target": "CX-0520",
+    "source": "CX-0401",
+    "target": "CX-0517",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0404",
-    "target": "CX-0610",
+    "source": "CX-0401",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0429",
-    "target": "CX-0493",
+    "source": "CX-0426",
+    "target": "CX-0490",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0429",
-    "target": "CX-0494",
+    "source": "CX-0426",
+    "target": "CX-0491",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0429",
-    "target": "CX-0520",
+    "source": "CX-0426",
+    "target": "CX-0517",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0429",
-    "target": "CX-0610",
+    "source": "CX-0426",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0493",
-    "target": "CX-0494",
+    "source": "CX-0490",
+    "target": "CX-0491",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0493",
-    "target": "CX-0520",
+    "source": "CX-0490",
+    "target": "CX-0517",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0493",
-    "target": "CX-0610",
+    "source": "CX-0490",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0494",
-    "target": "CX-0520",
+    "source": "CX-0491",
+    "target": "CX-0517",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0494",
-    "target": "CX-0610",
+    "source": "CX-0491",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
   },
   {
-    "source": "CX-0520",
-    "target": "CX-0610",
+    "source": "CX-0517",
+    "target": "CX-0607",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-005.md"
@@ -1415,14 +1436,14 @@
   },
   {
     "source": "CX-0116",
-    "target": "CX-0370",
+    "target": "CX-0367",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
   },
   {
     "source": "CX-0116",
-    "target": "CX-0578",
+    "target": "CX-0575",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
@@ -1436,59 +1457,38 @@
   },
   {
     "source": "CX-0129",
-    "target": "CX-0370",
+    "target": "CX-0367",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
   },
   {
     "source": "CX-0129",
-    "target": "CX-0578",
+    "target": "CX-0575",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
   },
   {
     "source": "CX-0130",
-    "target": "CX-0370",
+    "target": "CX-0367",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
   },
   {
     "source": "CX-0130",
-    "target": "CX-0578",
+    "target": "CX-0575",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
   },
   {
-    "source": "CX-0370",
-    "target": "CX-0578",
+    "source": "CX-0367",
+    "target": "CX-0575",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-interaction.md"
-  },
-  {
-    "source": "CX-0128",
-    "target": "CX-0237",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
-  },
-  {
-    "source": "CX-0128",
-    "target": "CX-0403",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
-  },
-  {
-    "source": "CX-0237",
-    "target": "CX-0403",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
   },
   {
     "source": "CX-0138",
@@ -1499,640 +1499,703 @@
   },
   {
     "source": "CX-0143",
-    "target": "CX-0391",
+    "target": "CX-0388",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/root-extractions.md (EXTRACTION_PROJECT_D_AGI_WEBSIM_GAMES.md)"
   },
   {
     "source": "CX-0148",
-    "target": "CX-0187",
+    "target": "CX-0186",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era D"
   },
   {
     "source": "CX-0156",
-    "target": "CX-0199",
+    "target": "CX-0198",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/website-design.md"
   },
   {
     "source": "CX-0156",
-    "target": "CX-0537",
+    "target": "CX-0534",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/website-design.md"
   },
   {
-    "source": "CX-0199",
-    "target": "CX-0537",
+    "source": "CX-0198",
+    "target": "CX-0534",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/website-design.md"
   },
   {
-    "source": "CX-0170",
-    "target": "CX-0517",
+    "source": "CX-0169",
+    "target": "CX-0514",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/astrophysics-metaphor.md (Aether212. Phase0. Global Aether Conceptualization.json)"
   },
   {
-    "source": "CX-0172",
-    "target": "CX-0354",
+    "source": "CX-0171",
+    "target": "CX-0352",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0363",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0365",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0376",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0589",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0363",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0365",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0376",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0589",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0363",
+    "target": "CX-0365",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0363",
+    "target": "CX-0376",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0363",
+    "target": "CX-0589",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0363",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0363",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0365",
+    "target": "CX-0376",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0365",
+    "target": "CX-0589",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0365",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0365",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0376",
+    "target": "CX-0589",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0376",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0376",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0589",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0589",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0593",
+    "target": "CX-0617",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
   },
   {
     "source": "CX-0172",
-    "target": "CX-0366",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0172",
-    "target": "CX-0368",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0172",
-    "target": "CX-0379",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0172",
-    "target": "CX-0592",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0172",
-    "target": "CX-0596",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0172",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0354",
-    "target": "CX-0366",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0354",
-    "target": "CX-0368",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0354",
-    "target": "CX-0379",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0354",
-    "target": "CX-0592",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0354",
-    "target": "CX-0596",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0354",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0366",
-    "target": "CX-0368",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0366",
-    "target": "CX-0379",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0366",
-    "target": "CX-0592",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0366",
-    "target": "CX-0596",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0366",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0368",
-    "target": "CX-0379",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0368",
-    "target": "CX-0592",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0368",
-    "target": "CX-0596",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0368",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0379",
-    "target": "CX-0592",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0379",
-    "target": "CX-0596",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0379",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0592",
-    "target": "CX-0596",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0592",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0596",
-    "target": "CX-0620",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
-  },
-  {
-    "source": "CX-0173",
-    "target": "CX-0253",
+    "target": "CX-0251",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/personal-analysis-6.md (raw/deep_project_details.json)"
   },
   {
-    "source": "CX-0194",
-    "target": "CX-0240",
+    "source": "CX-0193",
+    "target": "CX-0238",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md"
   },
   {
-    "source": "CX-0194",
-    "target": "CX-0470",
+    "source": "CX-0193",
+    "target": "CX-0467",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md"
   },
   {
-    "source": "CX-0194",
-    "target": "CX-0534",
+    "source": "CX-0193",
+    "target": "CX-0531",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md"
   },
   {
-    "source": "CX-0240",
-    "target": "CX-0470",
+    "source": "CX-0238",
+    "target": "CX-0467",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md"
   },
   {
-    "source": "CX-0240",
-    "target": "CX-0534",
+    "source": "CX-0238",
+    "target": "CX-0531",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md"
   },
   {
-    "source": "CX-0470",
-    "target": "CX-0534",
+    "source": "CX-0467",
+    "target": "CX-0531",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/spaceodyssey.md"
   },
   {
-    "source": "CX-0208",
-    "target": "CX-0633",
+    "source": "CX-0207",
+    "target": "CX-0630",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 6760228a)"
   },
   {
-    "source": "CX-0232",
-    "target": "CX-0247",
+    "source": "CX-0231",
+    "target": "CX-0245",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/websim.md (ChatGPT-Enhance WebSim AI Environment.json)"
   },
   {
-    "source": "CX-0356",
-    "target": "CX-0363",
+    "source": "CX-0354",
+    "target": "CX-0360",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/personal-analysis-2.md (chatgpt_archive_analysis/ WF-FND docs)"
   },
   {
-    "source": "CX-0364",
+    "source": "CX-0361",
+    "target": "CX-0368",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0361",
     "target": "CX-0371",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-008.md"
   },
   {
-    "source": "CX-0364",
-    "target": "CX-0374",
+    "source": "CX-0361",
+    "target": "CX-0536",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-008.md"
   },
   {
-    "source": "CX-0364",
-    "target": "CX-0539",
+    "source": "CX-0368",
+    "target": "CX-0371",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0368",
+    "target": "CX-0536",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-008.md"
   },
   {
     "source": "CX-0371",
-    "target": "CX-0374",
+    "target": "CX-0536",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-008.md"
   },
   {
-    "source": "CX-0371",
-    "target": "CX-0539",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
-  },
-  {
-    "source": "CX-0374",
-    "target": "CX-0539",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
-  },
-  {
-    "source": "CX-0373",
-    "target": "CX-0529",
+    "source": "CX-0370",
+    "target": "CX-0526",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-008.md"
   },
   {
-    "source": "CX-0387",
-    "target": "CX-0395",
+    "source": "CX-0384",
+    "target": "CX-0392",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-agi.md — ChatGPT-AGI Feasibility Analysis Clusters.json"
   },
   {
-    "source": "CX-0409",
-    "target": "CX-0412",
+    "source": "CX-0406",
+    "target": "CX-0409",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0406",
+    "target": "CX-0411",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0406",
+    "target": "CX-0436",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-000.md"
   },
   {
     "source": "CX-0409",
-    "target": "CX-0414",
+    "target": "CX-0411",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-000.md"
   },
   {
     "source": "CX-0409",
-    "target": "CX-0439",
+    "target": "CX-0436",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0411",
+    "target": "CX-0436",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-000.md"
   },
   {
     "source": "CX-0412",
-    "target": "CX-0414",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
-  },
-  {
-    "source": "CX-0412",
-    "target": "CX-0439",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
-  },
-  {
-    "source": "CX-0414",
-    "target": "CX-0439",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
-  },
-  {
-    "source": "CX-0415",
-    "target": "CX-0422",
+    "target": "CX-0419",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002/004.md"
   },
   {
-    "source": "CX-0421",
-    "target": "CX-0556",
+    "source": "CX-0418",
+    "target": "CX-0553",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-mithology.md"
   },
   {
-    "source": "CX-0421",
-    "target": "CX-0585",
+    "source": "CX-0418",
+    "target": "CX-0582",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-mithology.md"
   },
   {
-    "source": "CX-0421",
-    "target": "CX-0630",
+    "source": "CX-0418",
+    "target": "CX-0627",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-mithology.md"
   },
   {
-    "source": "CX-0556",
-    "target": "CX-0585",
+    "source": "CX-0553",
+    "target": "CX-0582",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-mithology.md"
   },
   {
-    "source": "CX-0556",
-    "target": "CX-0630",
+    "source": "CX-0553",
+    "target": "CX-0627",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-mithology.md"
   },
   {
-    "source": "CX-0585",
-    "target": "CX-0630",
+    "source": "CX-0582",
+    "target": "CX-0627",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-mithology.md"
   },
   {
-    "source": "CX-0456",
-    "target": "CX-0504",
+    "source": "CX-0453",
+    "target": "CX-0501",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-raw.md Era E"
   },
   {
-    "source": "CX-0461",
-    "target": "CX-0463",
+    "source": "CX-0458",
+    "target": "CX-0460",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/plugins.md (PLUGINS/ChatGPT-Google Programming Languages.json)"
   },
   {
-    "source": "CX-0499",
-    "target": "CX-0600",
+    "source": "CX-0496",
+    "target": "CX-0597",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-har.md"
   },
   {
-    "source": "CX-0499",
-    "target": "CX-0612",
+    "source": "CX-0496",
+    "target": "CX-0609",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-har.md"
   },
   {
-    "source": "CX-0499",
-    "target": "CX-0621",
+    "source": "CX-0496",
+    "target": "CX-0618",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-har.md"
   },
   {
-    "source": "CX-0600",
-    "target": "CX-0612",
+    "source": "CX-0597",
+    "target": "CX-0609",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-har.md"
   },
   {
-    "source": "CX-0600",
-    "target": "CX-0621",
+    "source": "CX-0597",
+    "target": "CX-0618",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-har.md"
   },
   {
-    "source": "CX-0612",
-    "target": "CX-0621",
+    "source": "CX-0609",
+    "target": "CX-0618",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-har.md"
   },
   {
-    "source": "CX-0506",
-    "target": "CX-0569",
+    "source": "CX-0503",
+    "target": "CX-0566",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
-    "source": "CX-0506",
-    "target": "CX-0588",
+    "source": "CX-0503",
+    "target": "CX-0585",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
-    "source": "CX-0506",
-    "target": "CX-0635",
+    "source": "CX-0503",
+    "target": "CX-0632",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
-    "source": "CX-0569",
-    "target": "CX-0588",
+    "source": "CX-0566",
+    "target": "CX-0585",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
-    "source": "CX-0569",
-    "target": "CX-0635",
+    "source": "CX-0566",
+    "target": "CX-0632",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
-    "source": "CX-0588",
-    "target": "CX-0635",
+    "source": "CX-0585",
+    "target": "CX-0632",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
-    "source": "CX-0516",
-    "target": "CX-0639",
+    "source": "CX-0513",
+    "target": "CX-0636",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-design.md (memories.json)"
   },
   {
-    "source": "CX-0516",
-    "target": "CX-0649",
+    "source": "CX-0513",
+    "target": "CX-0646",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-design.md (memories.json)"
   },
   {
-    "source": "CX-0639",
-    "target": "CX-0649",
+    "source": "CX-0636",
+    "target": "CX-0646",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-design.md (memories.json)"
   },
   {
-    "source": "CX-0543",
-    "target": "CX-0551",
+    "source": "CX-0540",
+    "target": "CX-0548",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/data-engineering.md"
   },
   {
-    "source": "CX-0553",
-    "target": "CX-0568",
+    "source": "CX-0550",
+    "target": "CX-0565",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: ai-o-c.md"
   },
   {
-    "source": "CX-0573",
-    "target": "CX-0581",
+    "source": "CX-0570",
+    "target": "CX-0578",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-design.md"
   },
   {
-    "source": "CX-0573",
-    "target": "CX-0622",
+    "source": "CX-0570",
+    "target": "CX-0619",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-design.md"
   },
   {
-    "source": "CX-0581",
-    "target": "CX-0622",
+    "source": "CX-0578",
+    "target": "CX-0619",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-design.md"
   },
   {
-    "source": "CX-0579",
-    "target": "CX-0605",
+    "source": "CX-0576",
+    "target": "CX-0602",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/ai-system.md"
   },
   {
-    "source": "CX-0582",
-    "target": "CX-0619",
+    "source": "CX-0579",
+    "target": "CX-0616",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/claude-vault-002.md · research_map/claude-vault-004.md"
   },
   {
-    "source": "CX-0583",
-    "target": "CX-0618",
+    "source": "CX-0580",
+    "target": "CX-0615",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/first-chatgptwebsite.md"
   },
   {
-    "source": "CX-0597",
-    "target": "CX-0598",
+    "source": "CX-0594",
+    "target": "CX-0595",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/astrophysics-metaphor.md"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0664",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0665",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0666",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0667",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0664",
+    "target": "CX-0665",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0664",
+    "target": "CX-0666",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0664",
+    "target": "CX-0667",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0665",
+    "target": "CX-0666",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0665",
+    "target": "CX-0667",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
   },
   {
     "source": "CX-0666",
@@ -2142,85 +2205,43 @@
     "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
   },
   {
-    "source": "CX-0666",
-    "target": "CX-0668",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
-  },
-  {
-    "source": "CX-0666",
-    "target": "CX-0669",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
-  },
-  {
-    "source": "CX-0666",
-    "target": "CX-0670",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
-  },
-  {
-    "source": "CX-0667",
-    "target": "CX-0668",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
-  },
-  {
-    "source": "CX-0667",
-    "target": "CX-0669",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
-  },
-  {
-    "source": "CX-0667",
-    "target": "CX-0670",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
-  },
-  {
     "source": "CX-0668",
     "target": "CX-0669",
     "type": "parallel",
     "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
   },
   {
     "source": "CX-0668",
     "target": "CX-0670",
     "type": "parallel",
     "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0668",
+    "target": "CX-0671",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
   },
   {
     "source": "CX-0669",
     "target": "CX-0670",
     "type": "parallel",
     "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
   },
   {
-    "source": "CX-0671",
-    "target": "CX-0672",
+    "source": "CX-0669",
+    "target": "CX-0671",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
   },
   {
-    "source": "CX-0671",
-    "target": "CX-0673",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
-  },
-  {
-    "source": "CX-0671",
-    "target": "CX-0674",
+    "source": "CX-0670",
+    "target": "CX-0671",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
@@ -2230,24 +2251,59 @@
     "target": "CX-0673",
     "type": "parallel",
     "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
   },
   {
     "source": "CX-0672",
     "target": "CX-0674",
     "type": "parallel",
     "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0672",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0672",
+    "target": "CX-0676",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
   },
   {
     "source": "CX-0673",
     "target": "CX-0674",
     "type": "parallel",
     "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
   },
   {
-    "source": "CX-0675",
+    "source": "CX-0673",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0673",
+    "target": "CX-0676",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0674",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0674",
     "target": "CX-0676",
     "type": "parallel",
     "weight": 0.4,
@@ -2255,63 +2311,7 @@
   },
   {
     "source": "CX-0675",
-    "target": "CX-0677",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0675",
-    "target": "CX-0678",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0675",
-    "target": "CX-0679",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0676",
-    "target": "CX-0677",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0676",
-    "target": "CX-0678",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0676",
-    "target": "CX-0679",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0677",
-    "target": "CX-0678",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0677",
-    "target": "CX-0679",
-    "type": "parallel",
-    "weight": 0.4,
-    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
-  },
-  {
-    "source": "CX-0678",
-    "target": "CX-0679",
+    "target": "CX-0676",
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
@@ -3753,1669 +3753,1669 @@
   },
   {
     "source": "CX-0211",
-    "target": "CX-0158",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: AETHER"
+    "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0212",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0213",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0214",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0215",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0216",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0217",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0218",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0219",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
-    "source": "CX-0220",
-    "target": "CX-0221",
+    "source": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0222",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0223",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0224",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0225",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0226",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0227",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0228",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0229",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0230",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0231",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0232",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0233",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0234",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0235",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0236",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0237",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0238",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0239",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0240",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0241",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0242",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0243",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0244",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0245",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0246",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0247",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0248",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0249",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0250",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0251",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0252",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0253",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0254",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0255",
-    "target": "CX-0221",
+    "target": "CX-0220",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: GAMES"
   },
   {
     "source": "CX-0256",
-    "target": "CX-0221",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: GAMES"
+    "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0257",
-    "target": "CX-0221",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: GAMES"
+    "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0258",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0259",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0260",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0261",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0262",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0263",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0264",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0265",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0266",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0267",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0268",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0269",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0270",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0271",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0272",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0273",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0274",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0275",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0276",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0277",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0278",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0279",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0280",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0281",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0282",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0283",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0284",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0285",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0286",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0287",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0288",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0289",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0290",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0291",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0292",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0293",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0294",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0295",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0296",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0297",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0298",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0299",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0300",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0301",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0302",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0303",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0304",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0305",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0306",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0307",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0308",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0309",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0310",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0311",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0312",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0313",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0314",
-    "target": "CX-0317",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: HONESTY"
-  },
-  {
-    "source": "CX-0315",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0316",
-    "target": "CX-0317",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0318",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0319",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0320",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0321",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0322",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0323",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0324",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0325",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0326",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0327",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0328",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0329",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0330",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0331",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0332",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0333",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0334",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0335",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0336",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0337",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0338",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0339",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0340",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0341",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0342",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0343",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0344",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0345",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0346",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0347",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0348",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0349",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0350",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0351",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0352",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0353",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0354",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0355",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0356",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0357",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0358",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0359",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0360",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0361",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0362",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0363",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0364",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0365",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0366",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0367",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0368",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0369",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0370",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0371",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0372",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0373",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0374",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0375",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0376",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0377",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0378",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0379",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0380",
-    "target": "CX-0317",
+    "target": "CX-0315",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: HONESTY"
   },
   {
     "source": "CX-0381",
-    "target": "CX-0317",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: HONESTY"
-  },
-  {
-    "source": "CX-0382",
-    "target": "CX-0317",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: HONESTY"
+    "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0383",
-    "target": "CX-0317",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: HONESTY"
+    "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0384",
-    "target": "CX-0385",
+    "target": "CX-0382",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0386",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0387",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0388",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0389",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0390",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0391",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0392",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0393",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0394",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0395",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0396",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0397",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0398",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0399",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0400",
-    "target": "CX-0385",
+    "target": "CX-0382",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: MYTHOLOGY"
   },
   {
     "source": "CX-0401",
-    "target": "CX-0385",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: MYTHOLOGY"
+    "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0402",
-    "target": "CX-0385",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: MYTHOLOGY"
+    "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0403",
-    "target": "CX-0385",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: MYTHOLOGY"
+    "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0404",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0405",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0406",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0407",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0408",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0409",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0410",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0411",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0412",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0413",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0414",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0415",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0416",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0417",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0418",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0419",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0420",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0421",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0422",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0423",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0424",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0425",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0426",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0427",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0428",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0429",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0430",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0431",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0432",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0433",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0434",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0435",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0436",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0437",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0438",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0439",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0440",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0441",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0442",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0443",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0444",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0445",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0446",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0447",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0448",
-    "target": "CX-0384",
+    "target": "CX-0381",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: NARRATIVE"
   },
   {
     "source": "CX-0449",
-    "target": "CX-0384",
+    "target": "CX-0124",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: NARRATIVE"
+    "reason": "cluster-spine: OPS"
   },
   {
     "source": "CX-0450",
-    "target": "CX-0384",
+    "target": "CX-0124",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: NARRATIVE"
+    "reason": "cluster-spine: OPS"
   },
   {
     "source": "CX-0451",
-    "target": "CX-0384",
+    "target": "CX-0124",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: NARRATIVE"
+    "reason": "cluster-spine: OPS"
   },
   {
     "source": "CX-0452",
@@ -6035,818 +6035,811 @@
   },
   {
     "source": "CX-0540",
-    "target": "CX-0124",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: OPS"
+    "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0541",
-    "target": "CX-0124",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: OPS"
+    "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0542",
-    "target": "CX-0124",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: OPS"
+    "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0543",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0544",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0545",
-    "target": "CX-0549",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: CRAFT"
-  },
-  {
-    "source": "CX-0546",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0547",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0548",
-    "target": "CX-0549",
+    "target": "CX-0546",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0550",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0551",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0552",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0553",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0554",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0555",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0556",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0557",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0558",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0559",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0560",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0561",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0562",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0563",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0564",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0565",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0566",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0567",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0568",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0569",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0570",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0571",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0572",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0573",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0574",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0575",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0576",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0577",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0578",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0579",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0580",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0581",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0582",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0583",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0584",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0585",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0586",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0587",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0588",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0589",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0590",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0591",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0592",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0593",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0594",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0595",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0596",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0597",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0598",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0599",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0600",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0601",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0602",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0603",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0604",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0605",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0606",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0607",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0608",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0609",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0610",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0611",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0612",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0613",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0614",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0615",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0616",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0617",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0618",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0619",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0620",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0621",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0622",
-    "target": "CX-0549",
+    "target": "CX-0546",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0623",
-    "target": "CX-0549",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: CRAFT"
+    "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0624",
-    "target": "CX-0549",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: CRAFT"
+    "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0625",
-    "target": "CX-0549",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
-    "reason": "cluster-spine: CRAFT"
+    "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0626",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0627",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0628",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0629",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0630",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0631",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0632",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0633",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0634",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0635",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0636",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0637",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0638",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0639",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0640",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0641",
-    "target": "CX-0645",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: LIFE"
-  },
-  {
-    "source": "CX-0642",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0643",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0644",
-    "target": "CX-0645",
+    "target": "CX-0642",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0646",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0647",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0648",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0649",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0650",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0651",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0652",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0653",
-    "target": "CX-0645",
+    "target": "CX-0642",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
   },
   {
     "source": "CX-0654",
-    "target": "CX-0645",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: LIFE"
-  },
-  {
-    "source": "CX-0655",
-    "target": "CX-0645",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: LIFE"
-  },
-  {
-    "source": "CX-0656",
-    "target": "CX-0645",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: LIFE"
-  },
-  {
-    "source": "CX-0657",
     "target": "CX-0069",
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CONSTELLATION"
   },
   {
-    "source": "CX-0658",
+    "source": "CX-0655",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0656",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0657",
     "target": "CX-0069",
     "type": "implements",
     "weight": 0.3,
@@ -6861,6 +6854,13 @@
   },
   {
     "source": "CX-0660",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0661",
     "target": "CX-0069",
     "type": "implements",
     "weight": 0.3,
@@ -6966,27 +6966,6 @@
   },
   {
     "source": "CX-0676",
-    "target": "CX-0069",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: CONSTELLATION"
-  },
-  {
-    "source": "CX-0677",
-    "target": "CX-0069",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: CONSTELLATION"
-  },
-  {
-    "source": "CX-0678",
-    "target": "CX-0069",
-    "type": "implements",
-    "weight": 0.3,
-    "reason": "cluster-spine: CONSTELLATION"
-  },
-  {
-    "source": "CX-0679",
     "target": "CX-0069",
     "type": "implements",
     "weight": 0.3,
