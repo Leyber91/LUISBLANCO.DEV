@@ -1,266 +1,6036 @@
 [
   {
-    "source": "CX-0007",
-    "target": "CX-0365",
+    "source": "CX-0297",
+    "target": "CX-0006",
     "type": "enables",
-    "weight": 0.5,
-    "source_name": "QBNN — Quantum-Biological Neural Network (built)",
-    "target_name": "qbnn — quantum-biological neural network"
+    "weight": 0.9,
+    "reason": "ouroboros-line: metapower seeds self-modifying agents"
   },
   {
-    "source": "CX-0054",
-    "target": "CX-0208",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "SelfEvolvingVisualizer / ai-ecosystem dashboard",
-    "target_name": "selfevolvingvisualizer"
+    "source": "CX-0006",
+    "target": "CX-0003",
+    "type": "refines",
+    "weight": 0.85,
+    "reason": "ouroboros-line: organism is the evolved form"
   },
   {
-    "source": "CX-0089",
-    "target": "CX-0166",
+    "source": "CX-0006",
+    "target": "CX-0305",
     "type": "enables",
-    "weight": 0.8,
-    "source_name": "DEAC — (Dynamically) Evolving Agent Collective",
-    "target_name": "wirthforge"
+    "weight": 0.9,
+    "reason": "ouroboros-line: ouroboros → seed as theory"
   },
   {
-    "source": "CX-0119",
-    "target": "CX-0056",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "SwarmEnhancedAI / Groq Swarm Orchestration",
-    "target_name": "swarmenhancedai"
-  },
-  {
-    "source": "CX-0159",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "AETHER / Aether 212 — the internet as navigable astrophysics",
-    "target_name": "aether / aether 212"
-  },
-  {
-    "source": "CX-0159",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "AETHER / Aether 212 — the internet as navigable astrophysics",
-    "target_name": "wirthforge"
-  },
-  {
-    "source": "CX-0159",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "AETHER / Aether 212 — the internet as navigable astrophysics",
-    "target_name": "aethernet"
-  },
-  {
-    "source": "CX-0164",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "SpaceOdyssey / WirthForge Odyssey + 50-game prompting backlog",
-    "target_name": "wirthforge"
-  },
-  {
-    "source": "CX-0164",
-    "target": "CX-0250",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "SpaceOdyssey / WirthForge Odyssey + 50-game prompting backlog",
-    "target_name": "quantum leaps"
-  },
-  {
-    "source": "CX-0172",
+    "source": "CX-0305",
     "target": "CX-0166",
     "type": "derives_from",
     "weight": 0.8,
-    "source_name": "Aether Flow Studio",
-    "target_name": "wirthforge"
+    "reason": "ouroboros-line: seed theory crystallises into WF"
   },
   {
-    "source": "CX-0176",
-    "target": "CX-0195",
+    "source": "CX-0312",
+    "target": "CX-0006",
+    "type": "proves",
+    "weight": 0.85,
+    "reason": "ouroboros-line: paradox is learned inside ouroboros build"
+  },
+  {
+    "source": "CX-0297",
+    "target": "CX-0003",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "non-obvious: metapower is the conceptual grandfather of alfaprime"
+  },
+  {
+    "source": "CX-0063",
+    "target": "CX-0070",
+    "type": "watches",
+    "weight": 0.95,
+    "reason": "invariant-3: SEDAH watches HADES (watcher-of-watchers)"
+  },
+  {
+    "source": "CX-0063",
+    "target": "CX-0067",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "hades-line: hades concept → manual fan-out execution"
+  },
+  {
+    "source": "CX-0067",
+    "target": "CX-0069",
+    "type": "refines",
+    "weight": 0.9,
+    "reason": "hades-line: manual fan-out → automated recursive moa"
+  },
+  {
+    "source": "CX-0069",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "hades-line: recursive moa is the multi-model council in wf"
+  },
+  {
+    "source": "CX-0070",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.85,
+    "reason": "hades-line: WF inherits pico/nano/micro hierarchy"
+  },
+  {
+    "source": "CX-0006",
+    "target": "CX-0063",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "non-obvious: ouroboros and hades built concurrently, ouroboros feeds hades memory model"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0129",
+    "type": "watches",
+    "weight": 0.9,
+    "reason": "compression-line: dataspace names the enemy it fights"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0126",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "compression-line: dataspace → symbolic language as next compression level"
+  },
+  {
+    "source": "CX-0129",
+    "target": "CX-0125",
+    "type": "derives_from",
+    "weight": 0.9,
+    "reason": "compression-line: fighting degradation invents essence passing"
+  },
+  {
+    "source": "CX-0125",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.75,
+    "reason": "compression-line: essence passing lives in WF session handoffs"
+  },
+  {
+    "source": "CX-0126",
+    "target": "CX-0389",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "compression-line: the invented language feeds the triverse universe linguistics"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0280",
+    "type": "enables",
+    "weight": 0.65,
+    "reason": "non-obvious: dataspace compression instinct → bounded component model in cognitiVetransistor"
+  },
+  {
+    "source": "CX-0129",
+    "target": "CX-0124",
     "type": "requires",
     "weight": 0.8,
-    "source_name": "Captain/Crew/Engine Room/Galaxy metaphor",
-    "target_name": "knowledge galaxy"
+    "reason": "non-obvious: degradation problem confirms the need dataspace already solved — circular reinforcement"
   },
   {
-    "source": "CX-0204",
-    "target": "CX-0308",
+    "source": "CX-0275",
+    "target": "CX-0159",
     "type": "enables",
-    "weight": 0.5,
-    "source_name": "Project Prometheus Helix / Cosmic Synapse Network",
-    "target_name": "project prometheus helix"
+    "weight": 0.9,
+    "reason": "aether-line: black hole visual is the nursery for aether metaphor"
   },
   {
-    "source": "CX-0257",
+    "source": "CX-0317",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.95,
+    "reason": "aether-line: 31 bodies IS the aether ontology built"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0166",
+    "type": "refines",
+    "weight": 0.95,
+    "reason": "aether-line: wirthforge is the mature aether"
+  },
+  {
+    "source": "CX-0287",
+    "target": "CX-0166",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "aether-line: energy metaphor is wirthforge visualisation core"
+  },
+  {
+    "source": "CX-0275",
+    "target": "CX-0287",
+    "type": "enables",
+    "weight": 0.75,
+    "reason": "aether-line: lensing + physics aesthetic → energy visual grammar"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0319",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "non-obvious: aether render pipeline → decipher visualisation engine"
+  },
+  {
+    "source": "CX-0222",
+    "target": "CX-0324",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "games-line: thesis → first concrete game series"
+  },
+  {
+    "source": "CX-0324",
+    "target": "CX-0220",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "games-line: seven games → cosmic nexus as multi-model game"
+  },
+  {
+    "source": "CX-0220",
+    "target": "CX-0164",
+    "type": "refines",
+    "weight": 0.9,
+    "reason": "games-line: cosmic nexus → spaceodyssey on phone"
+  },
+  {
+    "source": "CX-0550",
+    "target": "CX-0069",
+    "type": "enables",
+    "weight": 0.75,
+    "reason": "games-line: prompt-as-cell architecture feeds recursive moa"
+  },
+  {
+    "source": "CX-0220",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.7,
+    "reason": "non-obvious: cosmic nexus materialises the aether metaphor — models AS celestial bodies"
+  },
+  {
+    "source": "CX-0321",
+    "target": "CX-0287",
+    "type": "derives_from",
+    "weight": 0.9,
+    "reason": "honesty-line: honesty decoder names the fakery that energy-truth corrects"
+  },
+  {
+    "source": "CX-0287",
+    "target": "CX-0319",
+    "type": "enables",
+    "weight": 0.95,
+    "reason": "honesty-line: energy metaphor IS the decipher pipeline"
+  },
+  {
+    "source": "CX-0328",
+    "target": "CX-0280",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "honesty-line: measuring token timing → bounded component model"
+  },
+  {
+    "source": "CX-0280",
+    "target": "CX-0163",
+    "type": "requires",
+    "weight": 0.85,
+    "reason": "honesty-line: transistor model requires the fuel/substrate model"
+  },
+  {
+    "source": "CX-0163",
     "target": "CX-0166",
     "type": "enables",
-    "weight": 0.5,
-    "source_name": "WIRTHFORGE Five Levels (Lightning Strikes → Resonance Fields)",
-    "target_name": "wirthforge"
+    "weight": 0.9,
+    "reason": "honesty-line: ollama-as-fuel is wirthforge energy philosophy"
   },
   {
-    "source": "CX-0319",
+    "source": "CX-0328",
+    "target": "CX-0124",
+    "type": "derives_from",
+    "weight": 0.6,
+    "reason": "non-obvious: both measure the AI process signal; token-eeg is the instrument, dataspace the compression — same instinct, different era"
+  },
+  {
+    "source": "CX-0389",
+    "target": "CX-0388",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "mythology-method: triverse website → manuscript"
+  },
+  {
+    "source": "CX-0297",
+    "target": "CX-0159",
+    "type": "derives_from",
+    "weight": 0.7,
+    "reason": "mythology-method: metapower metaproject thinking → aether as meta-internet"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0307",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "era-0-to-1: dataspace born while building leyber212"
+  },
+  {
+    "source": "CX-0307",
+    "target": "CX-0389",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "era-1: tryverse section born inside leyber212"
+  },
+  {
+    "source": "CX-0307",
+    "target": "CX-0297",
+    "type": "enables",
+    "weight": 0.85,
+    "reason": "era-1: metapower section born inside leyber212"
+  },
+  {
+    "source": "CX-0268",
+    "target": "CX-0293",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "era-3: TMR theory → implemented in inception.py"
+  },
+  {
+    "source": "CX-0293",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "era-bridge: FTH framework becomes wf cognitive pipeline"
+  },
+  {
+    "source": "CX-0292",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "era-6-to-9: hsq architecture insights → wf model-efficiency layer"
+  },
+  {
+    "source": "CX-0553",
+    "target": "CX-0069",
+    "type": "enables",
+    "weight": 0.75,
+    "reason": "era-bridge: self-propelling loop is the conceptual model for recursive moa"
+  },
+  {
+    "source": "CX-0316",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.85,
+    "reason": "era-5: super/meta/omni position triad IS recursive moa reasoning"
+  },
+  {
+    "source": "CX-0320",
+    "target": "CX-0222",
+    "type": "refines",
+    "weight": 0.8,
+    "reason": "era-3: galactic ages methodology → games as discovery thesis"
+  },
+  {
+    "source": "CX-0329",
     "target": "CX-0166",
     "type": "derives_from",
-    "weight": 0.8,
-    "source_name": "The DECIPHER",
-    "target_name": "wirthforge"
+    "weight": 0.75,
+    "reason": "era-3-to-9: universal substrate grand-unified vision → wf as the achievable version"
   },
   {
     "source": "CX-0331",
     "target": "CX-0166",
-    "type": "derives_from",
-    "weight": 0.8,
-    "source_name": "WF document factory",
-    "target_name": "wirthforge"
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "era-9: wf doc factory is an artifact of the wf project itself"
   },
   {
-    "source": "CX-0334",
+    "source": "CX-0164",
+    "target": "CX-0166",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "era-10: spaceodyssey is wirthforge shipped on mobile"
+  },
+  {
+    "source": "CX-0217",
     "target": "CX-0166",
     "type": "derives_from",
-    "weight": 0.8,
-    "source_name": "\"AI should be owned, not rented\" manifesto",
-    "target_name": "wirthforge"
+    "weight": 0.75,
+    "reason": "era-bridge: ai civilization → wf multi-agent council is harvesting-discoveries for real"
   },
   {
-    "source": "CX-0347",
-    "target": "CX-0166",
+    "source": "CX-0005",
+    "target": "CX-0006",
+    "type": "refines",
+    "weight": 0.8,
+    "reason": "era-3-to-4: primordial app generator is ouroboros applied to web apps"
+  },
+  {
+    "source": "CX-0263",
+    "target": "CX-0124",
+    "type": "derives_from",
+    "weight": 0.8,
+    "reason": "era-0-to-1: 5-file state management IS an early dataspace-like external memory"
+  },
+  {
+    "source": "CX-0327",
+    "target": "CX-0069",
     "type": "enables",
     "weight": 0.8,
-    "source_name": "Doomsday package",
-    "target_name": "wirthforge"
+    "reason": "era-0: three-persona critic stack is the first multi-agent debate pattern"
   },
   {
-    "source": "CX-0361",
-    "target": "CX-0166",
-    "type": "requires",
+    "source": "CX-0554",
+    "target": "CX-0553",
+    "type": "refines",
+    "weight": 0.75,
+    "reason": "era-3: zeroth law → more structured self-propelling prompt"
+  },
+  {
+    "source": "CX-0009",
+    "target": "CX-0159",
+    "type": "implements",
     "weight": 0.8,
-    "source_name": "Privacy-first / user-owns-data posture",
-    "target_name": "wirthforge"
+    "reason": "era-4: har analyzer \"what is our black hole\" — aether crossover"
   },
   {
-    "source": "CX-0380",
-    "target": "CX-0166",
+    "source": "CX-0160",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.95,
+    "reason": "era-6: exomania IS aether visual prototype"
+  },
+  {
+    "source": "CX-0007",
+    "target": "CX-0063",
     "type": "enables",
+    "weight": 0.75,
+    "reason": "era-3: qbnn architecture built inside hades context"
+  },
+  {
+    "source": "CX-0273",
+    "target": "CX-0159",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "non-obvious: n-dimensional cube theory → astrophysics metaphor are same dimensional-thinking"
+  },
+  {
+    "source": "CX-0277",
+    "target": "CX-0124",
+    "type": "refines",
     "weight": 0.8,
-    "source_name": "The recursive AEA glyph",
-    "target_name": "wirthforge"
+    "reason": "non-obvious: memory portability IS the external form of dataspace compression"
   },
   {
-    "source": "CX-0384",
-    "target": "CX-0650",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "Understanding-AI mission statement",
-    "target_name": "luisblanco.dev"
+    "source": "CX-0035",
+    "target": "CX-0085",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-007.md · research_map/claude-vault-projects.md"
   },
   {
-    "source": "CX-0386",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "Wirthforge mobile via Qualcomm Genie",
-    "target_name": "wirthforge"
+    "source": "CX-0038",
+    "target": "CX-0158",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0387",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "WIRTHFORGE resilience layer",
-    "target_name": "wirthforge"
+    "source": "CX-0038",
+    "target": "CX-0181",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0388",
-    "target": "CX-0219",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "The Tryverse Chronicles — TRIVERSE manuscript birth",
-    "target_name": "bookgpt game"
+    "source": "CX-0038",
+    "target": "CX-0205",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0406",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "WIRTHFORGE AI persona pantheon",
-    "target_name": "wirthforge"
+    "source": "CX-0038",
+    "target": "CX-0485",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0441",
-    "target": "CX-0166",
-    "type": "proves",
-    "weight": 0.8,
-    "source_name": "Teacher-demo pitch narrative",
-    "target_name": "wirthforge"
+    "source": "CX-0158",
+    "target": "CX-0181",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
   },
   {
-    "source": "CX-0514",
-    "target": "CX-0650",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "Owned-asset resilience",
-    "target_name": "luisblanco.dev"
+    "source": "CX-0158",
+    "target": "CX-0205",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
+  },
+  {
+    "source": "CX-0158",
+    "target": "CX-0485",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
+  },
+  {
+    "source": "CX-0181",
+    "target": "CX-0205",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
+  },
+  {
+    "source": "CX-0181",
+    "target": "CX-0485",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
+  },
+  {
+    "source": "CX-0205",
+    "target": "CX-0485",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/sedah.md"
+  },
+  {
+    "source": "CX-0040",
+    "target": "CX-0053",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-llama-potential-2.md"
+  },
+  {
+    "source": "CX-0044",
+    "target": "CX-0436",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0044",
+    "target": "CX-0456",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0044",
+    "target": "CX-0483",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0044",
+    "target": "CX-0540",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0436",
+    "target": "CX-0456",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0436",
+    "target": "CX-0483",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0436",
+    "target": "CX-0540",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0456",
+    "target": "CX-0483",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0456",
+    "target": "CX-0540",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0483",
+    "target": "CX-0540",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md"
+  },
+  {
+    "source": "CX-0057",
+    "target": "CX-0379",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
+  },
+  {
+    "source": "CX-0057",
+    "target": "CX-0381",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
+  },
+  {
+    "source": "CX-0057",
+    "target": "CX-0489",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
+  },
+  {
+    "source": "CX-0379",
+    "target": "CX-0381",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
+  },
+  {
+    "source": "CX-0379",
+    "target": "CX-0489",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
+  },
+  {
+    "source": "CX-0381",
+    "target": "CX-0489",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era F"
+  },
+  {
+    "source": "CX-0060",
+    "target": "CX-0351",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0060",
+    "target": "CX-0352",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0060",
+    "target": "CX-0359",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0351",
+    "target": "CX-0352",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0351",
+    "target": "CX-0359",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0359",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/tools.md"
+  },
+  {
+    "source": "CX-0067",
+    "target": "CX-0125",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: `research_map/ai-interaction.md`"
+  },
+  {
+    "source": "CX-0075",
+    "target": "CX-0250",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md (PART_4_SCENARIO_BACKLOG.md)"
+  },
+  {
+    "source": "CX-0078",
+    "target": "CX-0121",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/ollama.md (ChatGPT-Ollama Models Python Integration.json)"
+  },
+  {
+    "source": "CX-0078",
+    "target": "CX-0234",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/ollama.md (ChatGPT-Ollama Models Python Integration.json)"
+  },
+  {
+    "source": "CX-0121",
+    "target": "CX-0234",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/ollama.md (ChatGPT-Ollama Models Python Integration.json)"
+  },
+  {
+    "source": "CX-0084",
+    "target": "CX-0512",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-001/002.md"
+  },
+  {
+    "source": "CX-0087",
+    "target": "CX-0459",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-projects-ideas.md backlog"
+  },
+  {
+    "source": "CX-0092",
+    "target": "CX-0393",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-loop-system.md"
+  },
+  {
+    "source": "CX-0098",
+    "target": "CX-0556",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0098",
+    "target": "CX-0653",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0556",
+    "target": "CX-0653",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0104",
+    "target": "CX-0338",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 676b11d7)"
+  },
+  {
+    "source": "CX-0104",
+    "target": "CX-0373",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 676b11d7)"
+  },
+  {
+    "source": "CX-0338",
+    "target": "CX-0373",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 676b11d7)"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0255",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0408",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0433",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0497",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0498",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0524",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0408",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0433",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0497",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0498",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0524",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0408",
+    "target": "CX-0433",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0408",
+    "target": "CX-0497",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0408",
+    "target": "CX-0498",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0408",
+    "target": "CX-0524",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0408",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0433",
+    "target": "CX-0497",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0433",
+    "target": "CX-0498",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0433",
+    "target": "CX-0524",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0433",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0497",
+    "target": "CX-0498",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0497",
+    "target": "CX-0524",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0497",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0498",
+    "target": "CX-0524",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0498",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0524",
+    "target": "CX-0615",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-005.md"
+  },
+  {
+    "source": "CX-0116",
+    "target": "CX-0130",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0116",
+    "target": "CX-0131",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0116",
+    "target": "CX-0374",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0116",
+    "target": "CX-0583",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0130",
+    "target": "CX-0131",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0130",
+    "target": "CX-0374",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0130",
+    "target": "CX-0583",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0131",
+    "target": "CX-0374",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0131",
+    "target": "CX-0583",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0374",
+    "target": "CX-0583",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md"
+  },
+  {
+    "source": "CX-0129",
+    "target": "CX-0238",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0129",
+    "target": "CX-0407",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0238",
+    "target": "CX-0407",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-interaction.md + ai-ouroborus.md"
+  },
+  {
+    "source": "CX-0139",
+    "target": "CX-0147",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/root-extractions.md (EXTRACTION_NEAT_RL_EVOLUTION.md)"
+  },
+  {
+    "source": "CX-0144",
+    "target": "CX-0395",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/root-extractions.md (EXTRACTION_PROJECT_D_AGI_WEBSIM_GAMES.md)"
+  },
+  {
+    "source": "CX-0149",
+    "target": "CX-0188",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era D"
+  },
+  {
+    "source": "CX-0157",
+    "target": "CX-0200",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/website-design.md"
+  },
+  {
+    "source": "CX-0157",
+    "target": "CX-0541",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/website-design.md"
+  },
+  {
+    "source": "CX-0200",
+    "target": "CX-0541",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/website-design.md"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0521",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/astrophysics-metaphor.md (Aether212. Phase0. Global Aether Conceptualization.json)"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0358",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0370",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0372",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0383",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0597",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0601",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0370",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0372",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0383",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0597",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0601",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0370",
+    "target": "CX-0372",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0370",
+    "target": "CX-0383",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0370",
+    "target": "CX-0597",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0370",
+    "target": "CX-0601",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0370",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0372",
+    "target": "CX-0383",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0372",
+    "target": "CX-0597",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0372",
+    "target": "CX-0601",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0372",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0383",
+    "target": "CX-0597",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0383",
+    "target": "CX-0601",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0383",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0597",
+    "target": "CX-0601",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0597",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0601",
+    "target": "CX-0625",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-projects.md"
+  },
+  {
+    "source": "CX-0174",
+    "target": "CX-0254",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/personal-analysis-6.md (raw/deep_project_details.json)"
+  },
+  {
+    "source": "CX-0195",
+    "target": "CX-0241",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md"
+  },
+  {
+    "source": "CX-0195",
+    "target": "CX-0474",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md"
+  },
+  {
+    "source": "CX-0195",
+    "target": "CX-0538",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md"
+  },
+  {
+    "source": "CX-0241",
+    "target": "CX-0474",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md"
+  },
+  {
+    "source": "CX-0241",
+    "target": "CX-0538",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md"
+  },
+  {
+    "source": "CX-0474",
+    "target": "CX-0538",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/spaceodyssey.md"
+  },
+  {
+    "source": "CX-0209",
+    "target": "CX-0638",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/personal-uuids-0.md (conv 6760228a)"
+  },
+  {
+    "source": "CX-0233",
+    "target": "CX-0248",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/websim.md (ChatGPT-Enhance WebSim AI Environment.json)"
+  },
+  {
+    "source": "CX-0360",
+    "target": "CX-0367",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/personal-analysis-2.md (chatgpt_archive_analysis/ WF-FND docs)"
+  },
+  {
+    "source": "CX-0368",
+    "target": "CX-0375",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0368",
+    "target": "CX-0378",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0368",
+    "target": "CX-0543",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0375",
+    "target": "CX-0378",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0375",
+    "target": "CX-0543",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0378",
+    "target": "CX-0543",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0377",
+    "target": "CX-0533",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-008.md"
+  },
+  {
+    "source": "CX-0391",
+    "target": "CX-0399",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-agi.md — ChatGPT-AGI Feasibility Analysis Clusters.json"
+  },
+  {
+    "source": "CX-0413",
+    "target": "CX-0416",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0413",
+    "target": "CX-0418",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0413",
+    "target": "CX-0443",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0416",
+    "target": "CX-0418",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0416",
+    "target": "CX-0443",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0418",
+    "target": "CX-0443",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-000.md"
+  },
+  {
+    "source": "CX-0419",
+    "target": "CX-0426",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002/004.md"
+  },
+  {
+    "source": "CX-0425",
+    "target": "CX-0561",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-mithology.md"
+  },
+  {
+    "source": "CX-0425",
+    "target": "CX-0590",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-mithology.md"
+  },
+  {
+    "source": "CX-0425",
+    "target": "CX-0635",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-mithology.md"
+  },
+  {
+    "source": "CX-0561",
+    "target": "CX-0590",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-mithology.md"
+  },
+  {
+    "source": "CX-0561",
+    "target": "CX-0635",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-mithology.md"
+  },
+  {
+    "source": "CX-0590",
+    "target": "CX-0635",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-mithology.md"
+  },
+  {
+    "source": "CX-0460",
+    "target": "CX-0508",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-raw.md Era E"
+  },
+  {
+    "source": "CX-0465",
+    "target": "CX-0467",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/plugins.md (PLUGINS/ChatGPT-Google Programming Languages.json)"
+  },
+  {
+    "source": "CX-0503",
+    "target": "CX-0605",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-har.md"
+  },
+  {
+    "source": "CX-0503",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-har.md"
+  },
+  {
+    "source": "CX-0503",
+    "target": "CX-0626",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-har.md"
+  },
+  {
+    "source": "CX-0605",
+    "target": "CX-0617",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-har.md"
+  },
+  {
+    "source": "CX-0605",
+    "target": "CX-0626",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-har.md"
+  },
+  {
+    "source": "CX-0617",
+    "target": "CX-0626",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-har.md"
+  },
+  {
+    "source": "CX-0510",
+    "target": "CX-0574",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/counselling.md"
+  },
+  {
+    "source": "CX-0510",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/counselling.md"
+  },
+  {
+    "source": "CX-0510",
+    "target": "CX-0640",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/counselling.md"
+  },
+  {
+    "source": "CX-0574",
+    "target": "CX-0593",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/counselling.md"
+  },
+  {
+    "source": "CX-0574",
+    "target": "CX-0640",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/counselling.md"
+  },
+  {
+    "source": "CX-0593",
+    "target": "CX-0640",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/counselling.md"
   },
   {
     "source": "CX-0520",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "Pulse Line AI brief",
-    "target_name": "wirthforge"
+    "target": "CX-0644",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-design.md (memories.json)"
+  },
+  {
+    "source": "CX-0520",
+    "target": "CX-0654",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-design.md (memories.json)"
+  },
+  {
+    "source": "CX-0644",
+    "target": "CX-0654",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-007.md; research_map/claude-vault-design.md (memories.json)"
+  },
+  {
+    "source": "CX-0555",
+    "target": "CX-0558",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/data-engineering.md"
+  },
+  {
+    "source": "CX-0557",
+    "target": "CX-0573",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: ai-o-c.md"
+  },
+  {
+    "source": "CX-0578",
+    "target": "CX-0586",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-design.md"
+  },
+  {
+    "source": "CX-0578",
+    "target": "CX-0627",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-design.md"
+  },
+  {
+    "source": "CX-0586",
+    "target": "CX-0627",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-design.md"
+  },
+  {
+    "source": "CX-0584",
+    "target": "CX-0610",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/ai-system.md"
+  },
+  {
+    "source": "CX-0587",
+    "target": "CX-0624",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/claude-vault-002.md · research_map/claude-vault-004.md"
+  },
+  {
+    "source": "CX-0588",
+    "target": "CX-0623",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/first-chatgptwebsite.md"
+  },
+  {
+    "source": "CX-0602",
+    "target": "CX-0603",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: research_map/astrophysics-metaphor.md"
+  },
+  {
+    "source": "CX-0001",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0002",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0003",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0004",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0005",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0007",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0008",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0009",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0010",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0011",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0012",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0013",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0014",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0015",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0016",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0017",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0018",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0019",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0020",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0021",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0022",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0023",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0024",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0025",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0026",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0027",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0028",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0029",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0030",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0031",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0032",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0033",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0034",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0035",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0036",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0037",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0038",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0039",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0040",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0041",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0042",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0043",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0044",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0045",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0046",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0047",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0048",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0049",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0050",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0051",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0052",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0053",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0054",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0055",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0056",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0057",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0058",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0059",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0060",
+    "target": "CX-0006",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OUROBOROS"
+  },
+  {
+    "source": "CX-0061",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0062",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0064",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0065",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0066",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0067",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0068",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0069",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0070",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0071",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0072",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0073",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0074",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0075",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0076",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0077",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0078",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0079",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0080",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0081",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0082",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0083",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0084",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0085",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0086",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0087",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0088",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0089",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0090",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0091",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0092",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0093",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0094",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0095",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0096",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0097",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0098",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0099",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0100",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0101",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0102",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0103",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0104",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0105",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0106",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0107",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0108",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0109",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0110",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0111",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0112",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0113",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0114",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0115",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0116",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0117",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0118",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0119",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0120",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0121",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0122",
+    "target": "CX-0063",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HADES-MOA"
+  },
+  {
+    "source": "CX-0123",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0125",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0126",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0127",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0128",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0129",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0130",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0131",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0132",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0133",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0134",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0135",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0136",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0137",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0138",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0139",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0140",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0141",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0142",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0143",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0144",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0145",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0146",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0147",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0148",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0149",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0150",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0151",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0152",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0153",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0154",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0155",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0156",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0157",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0158",
+    "target": "CX-0124",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: COMPRESSION"
+  },
+  {
+    "source": "CX-0161",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0162",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0163",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0164",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0165",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0166",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0167",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0168",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0169",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0170",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0171",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0172",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0173",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0174",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0175",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0176",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0177",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0178",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0179",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0180",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0181",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0182",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0183",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0184",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0185",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0186",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0187",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0188",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0189",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0190",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0191",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0192",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0193",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0194",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0195",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0196",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0197",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0198",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0199",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0200",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0201",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0202",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0203",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0204",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0205",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0206",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0207",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0208",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0209",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0210",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0211",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0212",
+    "target": "CX-0159",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0213",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0214",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0215",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0216",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0217",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0218",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0219",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0220",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0221",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0223",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0224",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0225",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0226",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0227",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0228",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0229",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0230",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0231",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0232",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0233",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0234",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0235",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0236",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0237",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0238",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0239",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0240",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0241",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0242",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0243",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0244",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0245",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0246",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0247",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0248",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0249",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0250",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0251",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0252",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0253",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0254",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0255",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0256",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0257",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0258",
+    "target": "CX-0222",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: GAMES"
+  },
+  {
+    "source": "CX-0259",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0260",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0261",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0262",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0263",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0264",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0265",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0266",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0267",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0268",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0269",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0270",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0271",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0272",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0273",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0274",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0275",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0276",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0277",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0278",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0279",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0280",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0281",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0282",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0283",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0284",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0285",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0286",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0287",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0288",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0289",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0290",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0291",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0292",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0293",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0294",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0295",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0296",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0297",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0298",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0299",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0300",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0301",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0302",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0303",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0304",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0305",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0306",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0307",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0308",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0309",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0310",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0311",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0312",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0313",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0314",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0315",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0316",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0317",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0318",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0319",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0320",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0322",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0323",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0324",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0325",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0326",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0327",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0328",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0329",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0330",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0331",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0332",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0333",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0334",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0335",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0336",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0337",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0338",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0339",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0340",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0341",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0342",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0343",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0344",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0345",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0346",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0347",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0348",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0349",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0350",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0351",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0352",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0353",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0354",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0355",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0356",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0357",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0358",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0359",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0360",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0361",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0362",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0363",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0364",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0365",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0366",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0367",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0368",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0369",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0370",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0371",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0372",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0373",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0374",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0375",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0376",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0377",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0378",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0379",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0380",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0381",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0382",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0383",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0384",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0385",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0386",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0387",
+    "target": "CX-0321",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0388",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0390",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0391",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0392",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0393",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0394",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0395",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0396",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0397",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0398",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0399",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0400",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0401",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0402",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0403",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0404",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0405",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0406",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0407",
+    "target": "CX-0389",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: MYTHOLOGY"
+  },
+  {
+    "source": "CX-0408",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0409",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0410",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0411",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0412",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0413",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0414",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0415",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0416",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0417",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0418",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0419",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0420",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0421",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0422",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0423",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0424",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0425",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0426",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0427",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0428",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0429",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0430",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0431",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0432",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0433",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0434",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0435",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0436",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0437",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0438",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0439",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0440",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0441",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0442",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0443",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0444",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0445",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0446",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0447",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0448",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0449",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0450",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0451",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0452",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0453",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0454",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0455",
+    "target": "CX-0388",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: NARRATIVE"
+  },
+  {
+    "source": "CX-0456",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0457",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0458",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0459",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0460",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0461",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0462",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0463",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0464",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0465",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0466",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0467",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0468",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0469",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0470",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0471",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0472",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0473",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0474",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0475",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0476",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0477",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0478",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0479",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0480",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0481",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0482",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0483",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0484",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0485",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0486",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0487",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0488",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0489",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0490",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0491",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0492",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0493",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0494",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0495",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0496",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0497",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0498",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0499",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0500",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0501",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0502",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0503",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0504",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0505",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0506",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0507",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0508",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0509",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0510",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0511",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0512",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0513",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0514",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0515",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0516",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0517",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0518",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0519",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0520",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0521",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0522",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0523",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0524",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0525",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0526",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0527",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0528",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0529",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
   },
   {
     "source": "CX-0530",
-    "target": "CX-0166",
-    "type": "derives_from",
-    "weight": 0.8,
-    "source_name": "Sovereign Stack sprint",
-    "target_name": "wirthforge"
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0531",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0532",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0533",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0534",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0535",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0536",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0537",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0538",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0539",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0540",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0541",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0542",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0543",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0544",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0545",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0546",
+    "target": "CX-0125",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: OPS"
+  },
+  {
+    "source": "CX-0547",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0548",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0549",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0550",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0551",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0552",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0554",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0555",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0556",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0557",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0558",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0559",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0560",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0561",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0562",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0563",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0564",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0565",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0566",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0567",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0568",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0569",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0570",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0571",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0572",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0573",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0574",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
   },
   {
     "source": "CX-0575",
-    "target": "CX-0304",
-    "type": "derives_from",
-    "weight": 0.8,
-    "source_name": "CRAFT — minor ideas",
-    "target_name": "omniscient synthesizer"
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
   },
   {
-    "source": "CX-0632",
-    "target": "CX-0650",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "'Crafting a New Life Plan' — life-plan schema + path-as-content",
-    "target_name": "luisblanco.dev"
+    "source": "CX-0576",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
   },
   {
-    "source": "CX-0659",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.5,
-    "source_name": "The Big X / AETHER212→WIRTHFORGE rename",
-    "target_name": "wirthforge"
+    "source": "CX-0577",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
   },
   {
-    "source": "CX-0660",
-    "target": "CX-0166",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "Toolkit Ecosystem (toolkit-as-website)",
-    "target_name": "aethernet"
+    "source": "CX-0578",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
   },
   {
-    "source": "CX-0660",
-    "target": "CX-0650",
-    "type": "enables",
-    "weight": 0.8,
-    "source_name": "Toolkit Ecosystem (toolkit-as-website)",
-    "target_name": "luisblanco.dev"
+    "source": "CX-0579",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0580",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0581",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0582",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0583",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0584",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0585",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0586",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0587",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0588",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0589",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0590",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0591",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0592",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0593",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0594",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0595",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0596",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0597",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0598",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0599",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0600",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0601",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0602",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0603",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0604",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0605",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0606",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0607",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0608",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0609",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0610",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0611",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0612",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0613",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0614",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0615",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0616",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0617",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0618",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0619",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0620",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0621",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0622",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0623",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0624",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0625",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0626",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0627",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0628",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0629",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0630",
+    "target": "CX-0553",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CRAFT"
   }
 ]
