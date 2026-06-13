@@ -24,39 +24,39 @@ Currently sealed: **141 sections, 1.28 MB** (was 129 before this session).
 - Codex UI bug fixed (`.cx-lock[hidden]{ display:none }`).
 
 ### THE REGISTER — complete pipeline (8 scripts in `register/`)
-**FINAL STATE: 684 nodes · 1004 typed edges · 0 orphans · 1 isolated S/A · 7 part files · 141 codex sections · 1.29 MB**
+**TRUE FINAL STATE: 679 nodes · 999 typed edges · 0 orphans · 0 isolated S/A · 5 remaining dup pairs · 7 part files · 141 codex sections · 1.29 MB**
 
-- **684 canonical concepts** (661 from atlas/gold + 23 injected from BOOK_CONSTELLATION).
-- **1004 typed edges**: 124 spine (6 idea-lines + era bridges + LINE meta-summaries + LIFE spine + CONSTELLATION laws) · 207 source co-occurrence · 673 cluster-spine. Non-obvious chains: DATASPACE→CognitiveTransistor, token-EEG↔DATASPACE, Metapower→ALFAPRIME, Cosmic Nexus→AETHER.
-- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY(108) · II-CONTINUITY(107) · **III-COMPOSITION(47)** · IV-INTERFACE(81) · V-CRAFT(107) · VI-LABORATORY(59) · VII-MEASURE(175).
-- **`src/core/concept_graph.json`**: 684 nodes, 1004 edges.
-- `tools/build_codex.mjs` includes REGISTER. Codex: 141 sections, 1.29 MB.
-- **`register/phase4-audit.js`** + **`register/inject-constellation.js`** built + run.
+- **679 canonical concepts** (656 from atlas/gold after 5 quote-duplicate merges + 23 injected from BOOK_CONSTELLATION).
+- **999 typed edges**: 124 spine (6 idea-lines + era bridges + LINE meta-summaries + LIFE spine + CONSTELLATION laws + reverse proves) · 207 source co-occurrence · 668 cluster-spine.
+- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(80) · V-CRAFT(106) · VI-LABORATORY(59) · VII-MEASURE(173).
+- **`src/core/concept_graph.json`**: 679 nodes, 999 edges. Ready for Prime Radiant / AEA plate.
+- Codex: 141 sections, 1.29 MB. Pipeline scripts: phase0-5 + phase4-audit + inject-constellation (8 total).
 
-**ALL GAPS RESOLVED THIS SESSION:**
-- ~~III-COMPOSITION empty~~ → 47 entries. 24 CONSTELLATION reassigned + 23 new (9 laws, 5 watcher, 4 anti-patterns, 5 practice) from BOOK_CONSTELLATION HTML.
+**ALL MAJOR GAPS RESOLVED:**
+- ~~III-COMPOSITION empty~~ → 47 entries (24 reassigned from CONSTELLATION concepts + 23 new laws/watcher/anti-patterns/practice).
 - ~~30 LIFE orphans~~ → 0 orphans. LIFE spine = luisblanco.dev + 15 identity→WIRTHFORGE edges.
-- ~~12 isolated Tier S/A~~ → 1. Reverse edges for LINE meta-summaries + HONESTY Tier A + CONSTELLATION laws.
-- ~~Phase 4 audit missing~~ → built, running clean.
+- ~~12 isolated Tier S/A~~ → **0**. Reverse edges for LINE meta-summaries + HONESTY Tier A + CONSTELLATION laws (each law has both outgoing law→concept AND incoming concept→law proves edges).
+- ~~5 quote-duplicate pairs~~ → eliminated. alias_maps in `register_config.json` now collapses them in phase1.
+- ~~manual_overrides keyed by CX-ID~~ → converted to name-based keys (survive re-runs).
 
 ## REGISTER STATUS (2026-06-13 — TRUE FINAL)
-**684 nodes · 1004 edges · 0 orphans · 1 isolated S/A**
+**679 nodes · 999 edges · 0 orphans · 0 isolated S/A · 5 dup pairs (name-similarity, not quotes)**
 
-The only remaining imperfection: **CX-0260** = smart-quote duplicate of **CX-0129** ("Degradation" vs 'Degradation'). Fix: add to `alias_maps` in `register_config.json` then re-run full pipeline from phase0. Documented in `_quote_duplicates_pending_phase1`. **Not blocking anything.**
+5 remaining duplicate pairs (sim > 70%) are conceptually similar but distinct entries — e.g. "QBNN" (gold) vs "QBNN" (atlas with different suffix), "Games thesis" vs "THE GAMES LINE". Not errors. Review manually only if register feels redundant.
 
 ## REGISTER REMAINING ITEMS (minor, not blocking)
 
-**ITEM 1 — CX-0260 quote duplicate** (1 isolated S/A)
-Smart-quote variant of CX-0129 ('Degradation'). Fix: add the 5 quote-variant pairs to `alias_maps` in `register_config.json`, re-run full pipeline from phase0. Documented in `_quote_duplicates_pending_phase1`. Pairs: CX-0260/0129 · CX-0283/0143 · CX-0309/0207 · CX-0558/0547 · CX-0117/0070.
+**ITEM 1 — 536 concepts without tiers** (audit flag)
+Atlas-only entries have no gold ranking. Expected. Can assign tiers manually to high-value entries via a separate tier-assignment pass. Not blocking.
 
-**ITEM 2 — 524 concepts without tiers** (audit flag)
-Atlas-only entries have no gold ranking. Expected. Can assign tiers manually to high-value entries via `register_config.json` or a separate tier-assignment pass. Not blocking.
-
-**ITEM 3 — 4 clusters without dedicated part files** (design choice)
+**ITEM 2 — 4 clusters without dedicated part files** (design choice)
 MYTHOLOGY, NARRATIVE, OPS, LIFE are merged into other parts. Revisit when authoring Paradigm Book parts if dedicated sections are needed.
 
-**ITEM 4 — III-COMPOSITION at 47, target ~75** (ongoing)
-BOOK_CONSTELLATION `02_the_concepts.html` had 6 concepts not found in atlas (MoA-OF-MoAs, MOA Matrix, Seven Games Orchestration Patterns, + 3 more). Can inject individually as new entries if content matters. `inject-constellation.js` already handles bulk extraction.
+**ITEM 3 — III-COMPOSITION at 47, target ~75** (ongoing)
+6 concepts from `02_the_concepts.html` not yet injected (MoA-OF-MoAs, MOA Matrix, Seven Games Orchestration Patterns, + 3 more). Can inject individually. `inject-constellation.js` already handles the extraction pattern.
+
+**ITEM 4 — 5 similarity-based duplicate pairs** (not errors)
+e.g. "QBNN" (gold) vs "QBNN" (atlas variant), "Games thesis" vs "THE GAMES LINE". Conceptually distinct. Review manually only if register feels redundant.
 
 ## THE DECIDED ARCHITECTURE (structural work, not yet started)
 Hard-graded survey settled it: codex = **TWO books + an archive**:
@@ -65,12 +65,11 @@ Hard-graded survey settled it: codex = **TWO books + an archive**:
 - **THE ARCHIVE** — atlas/gold/evidence/vault. Parked: Venture Ladder, Three Doors.
 
 ## ORDER NEXT SESSION
-1. **Register: fix 5 quote-duplicate pairs** — add straight-quote aliases to `register_config.json` `alias_maps`, re-run full pipeline from phase0: `node phase0-bootstrap.js; node phase1-canonicalize.js; node phase2-part-assign.js; node phase3-edges.js; node phase4-audit.js; node phase5-assemble.js`. Eliminates last isolated S/A (CX-0260). Pairs documented in `_quote_duplicates_pending_phase1`.
-2. **THE PARADIGM BOOK restructure** — author AETHER (IV) + CRAFT (V) + PLAY (VI) + OMEGA (VII) parts in `_reference/`. Each as its own session. Re-seat AEA/ESSENCE/CONSTELLATION as Parts I-III; draw support-map intro; add 4 Book-of-Luis chapters (Mythology, Narrative, Ops, Life). Re-seal codex after each part.
-3. **Heritage repos scope** (AetherVision, project-leyber-212, time_slip, ai_canvas) — identify extractable visual/shader assets before starting LUMEN work.
-4. **LUMEN gravitational lensing shader** — heritage asset `project-leyber-212-website/.../gravitational_lensing.js`. Gravity bends dust field, depth, separates glyph from substrate. **Needs your go-ahead first — substantial build.**
-5. **Build frontier** — LUMEN look in real Chrome → T-1.4 morph attractors.
-6. **concept_graph.json → site instrument** — Prime Radiant / AEA plate. Wire 684 nodes + 1004 edges as interactive graph. `src/core/concept_graph.json` is already in the repo and versioned.
+1. **THE PARADIGM BOOK restructure** — author AETHER (IV) + CRAFT (V) + PLAY (VI) + OMEGA (VII) parts in `_reference/`. Each as its own session. Re-seat AEA/ESSENCE/CONSTELLATION as Parts I-III; draw support-map intro; add 4 Book-of-Luis chapters (Mythology, Narrative, Ops, Life). Re-seal codex after each part.
+2. **Heritage repos scope** (AetherVision, project-leyber-212, time_slip, ai_canvas) — identify extractable visual/shader assets before starting LUMEN work.
+3. **LUMEN gravitational lensing shader** — heritage asset `project-leyber-212-website/.../gravitational_lensing.js`. Gravity bends dust field, depth, separates glyph from substrate. **Needs your go-ahead first — substantial build.**
+4. **Build frontier** — LUMEN look in real Chrome → T-1.4 morph attractors.
+5. **concept_graph.json → site instrument** — Prime Radiant / AEA plate. Wire 679 nodes + 999 edges as interactive graph. `src/core/concept_graph.json` is in repo and versioned.
 
 ## LESSONS THAT MUST NOT BE FORGOTTEN
 - Completion over planning; one ticket in flight; every visual change ends in screenshots.
