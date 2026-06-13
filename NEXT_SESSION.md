@@ -24,12 +24,12 @@ Currently sealed: **141 sections, 1.28 MB** (was 129 before this session).
 - Codex UI bug fixed (`.cx-lock[hidden]{ display:none }`).
 
 ### THE REGISTER — complete pipeline (8 scripts in `register/`)
-**TRUE FINAL STATE: 679 nodes · 999 typed edges · 0 orphans · 0 isolated S/A · 5 remaining dup pairs · 7 part files · 141 codex sections · 1.29 MB**
+**TRUE FINAL STATE: 676 nodes · 996 typed edges · 0 orphans · 0 isolated S/A · 2 dup pairs (irreducible) · 7 part files · 141 codex sections · 1.29 MB**
 
-- **679 canonical concepts** (656 from atlas/gold after 5 quote-duplicate merges + 23 injected from BOOK_CONSTELLATION).
-- **999 typed edges**: 124 spine (6 idea-lines + era bridges + LINE meta-summaries + LIFE spine + CONSTELLATION laws + reverse proves) · 207 source co-occurrence · 668 cluster-spine.
-- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(80) · V-CRAFT(106) · VI-LABORATORY(59) · VII-MEASURE(173).
-- **`src/core/concept_graph.json`**: 679 nodes, 999 edges. Ready for Prime Radiant / AEA plate.
+- **676 canonical concepts** (653 from atlas/gold after 10 merges + 23 injected from BOOK_CONSTELLATION).
+- **996 typed edges**: 124 spine (6 idea-lines + era bridges + LINE meta-summaries + LIFE spine + CONSTELLATION laws + reverse proves) · 207 source co-occurrence · 665 cluster-spine.
+- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(80) · V-CRAFT(106) · VI-LABORATORY(58) · VII-MEASURE(171).
+- **`src/core/concept_graph.json`**: 676 nodes, 996 edges. Ready for Prime Radiant / AEA plate.
 - Codex: 141 sections, 1.29 MB. Pipeline scripts: phase0-5 + phase4-audit + inject-constellation (8 total).
 
 **ALL MAJOR GAPS RESOLVED:**
@@ -40,9 +40,9 @@ Currently sealed: **141 sections, 1.28 MB** (was 129 before this session).
 - ~~manual_overrides keyed by CX-ID~~ → converted to name-based keys (survive re-runs).
 
 ## REGISTER STATUS (2026-06-13 — TRUE FINAL)
-**679 nodes · 999 edges · 0 orphans · 0 isolated S/A · 5 dup pairs (name-similarity, not quotes)**
+**676 nodes · 996 edges · 0 orphans · 0 isolated S/A · 2 dup pairs (irreducible)**
 
-5 remaining duplicate pairs (sim > 70%) are conceptually similar but distinct entries — e.g. "QBNN" (gold) vs "QBNN" (atlas with different suffix), "Games thesis" vs "THE GAMES LINE". Not errors. Review manually only if register feels redundant.
+2 remaining similarity pairs are conceptually distinct: (1) Hades AI AST self-rewriting vs Alfa/Beta encrypted dialogue — same project, different mechanisms; (2) "Games thesis" vs "THE GAMES LINE" — concept vs meta-summary line. Not merge candidates.
 
 ## REGISTER REMAINING ITEMS (minor, not blocking)
 
@@ -55,8 +55,8 @@ MYTHOLOGY, NARRATIVE, OPS, LIFE are merged into other parts. Revisit when author
 **ITEM 3 — III-COMPOSITION at 47, target ~75** (ongoing)
 6 concepts from `02_the_concepts.html` not yet injected (MoA-OF-MoAs, MOA Matrix, Seven Games Orchestration Patterns, + 3 more). Can inject individually. `inject-constellation.js` already handles the extraction pattern.
 
-**ITEM 4 — 5 similarity-based duplicate pairs** (not errors)
-e.g. "QBNN" (gold) vs "QBNN" (atlas variant), "Games thesis" vs "THE GAMES LINE". Conceptually distinct. Review manually only if register feels redundant.
+**ITEM 4 — 2 similarity-based dup pairs** (irreducible, not errors)
+Hades AI AST vs Alfa/Beta (same project, distinct mechanisms) + Games thesis vs THE GAMES LINE (concept vs meta-summary). Both verified distinct.
 
 ## THE DECIDED ARCHITECTURE (structural work, not yet started)
 Hard-graded survey settled it: codex = **TWO books + an archive**:
