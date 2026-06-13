@@ -22,10 +22,29 @@ import ssl
 import uuid
 import time
 import fnmatch
-from datetime import datetime
-from gatekeeper.base import GatekeeperTool, init_db, estimate_tokens, DB_PATH
+from datetime import datetime, timezone
+from gatekeeper.base import GatekeeperTool, init_db, estimate_tokens, DB_PATH, DB_DIR
 
 import sqlite3
+
+# ── Observability Event Emitter ───────────────────────────────────────────────
+EVENTS_FILE = os.path.join(DB_DIR, "events.jsonl")
+_current_session_id = None
+
+def _emit(event_type, **data):
+    """Write a structured event to events.jsonl for the Observability Tower."""
+    try:
+        os.makedirs(DB_DIR, exist_ok=True)
+        event = {
+            "ts":      datetime.now(timezone.utc).isoformat(),
+            "session": _current_session_id,
+            "type":    event_type,
+            **data
+        }
+        with open(EVENTS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception:
+        pass  # Never let observability break the agent
 
 # ── Nemotron API ──────────────────────────────────────────────────────────────
 NIM_URL   = "https://integrate.api.nvidia.com/v1/chat/completions"
@@ -422,11 +441,14 @@ class AgentCommand(GatekeeperTool):
             print("ERROR: NVIDIA_API_KEY not set.")
             return 1
 
+        global _current_session_id
         cwd      = os.path.abspath(args.cwd)
         dry_run  = args.dry_run
         verbose  = args.verbose
         task     = args.task
+        _current_session_id = f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:6]}"
 
+        _emit("session_start", task=task, cwd=cwd, dry_run=dry_run)
         print(f"\n{'='*60}")
         print(f"  NEMOTRON AGENT  {'[DRY-RUN] ' if dry_run else ''}— AEA tool protocol")
         print(f"  Task: {task}")
@@ -472,6 +494,7 @@ class AgentCommand(GatekeeperTool):
                 time.sleep(wait)
 
             print(f"  ── Turn {turns+1} ──────────────────────────────────")
+            _emit("turn_start", turn=turns+1)
             response, usage = call_nemotron(messages, api_key, verbose)
             call_times.append(time.time())
 
@@ -487,6 +510,7 @@ class AgentCommand(GatekeeperTool):
             think_m = re.search(r'<think>(.*?)</think>', response, re.DOTALL)
             if think_m:
                 thinking = think_m.group(1).strip()
+                _emit("thinking", turn=turns, content=thinking)
                 print(f"  [THINKING] {thinking[:200]}{'...' if len(thinking)>200 else ''}")
 
             if verbose:
@@ -506,11 +530,18 @@ class AgentCommand(GatekeeperTool):
             done = False
             for call in calls:
                 tname = call["attrs"].get("name", "?")
-                print(f"  [TOOL] {tname}({', '.join(f'{k}={v}' for k,v in call['attrs'].items() if k != 'name')})")
+                targs = {k:v for k,v in call["attrs"].items() if k != "name"}
+                print(f"  [TOOL] {tname}({', '.join(f'{k}={v}' for k,v in targs.items())})")
+                _emit("tool_call", turn=turns, tool=tname, args=targs)
                 result = dispatch_tool(call, cwd, dry_run)
+                ok = not result.startswith("ERROR")
+                _emit("tool_result", turn=turns, tool=tname, ok=ok,
+                      preview=result[:200].replace("\n","↵"))
                 if result.startswith("__DONE__:"):
                     last_summary = result[9:]
                     done = True
+                    _emit("done", summary=last_summary, turns=turns,
+                          tokens_in=total_in, tokens_out=total_out)
                     print(f"\n  [DONE] {last_summary}")
                 else:
                     preview = result[:120].replace("\n", "↵")
@@ -524,6 +555,8 @@ class AgentCommand(GatekeeperTool):
                 messages.append({"role": "user", "content": "\n".join(tool_results)})
 
         # Summary
+        _emit("session_end", turns=turns, tokens_in=total_in, tokens_out=total_out,
+              summary=last_summary)
         implied = log_transaction(task, total_in, total_out, turns)
         print(f"\n{'='*60}")
         print(f"  AGENT SESSION COMPLETE")
