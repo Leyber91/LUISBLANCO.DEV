@@ -74,19 +74,30 @@
     },
     DEFAULT_PROFILE: 'council',
 
-    // ── token vocabulary — drawn from AEA / site language ────────────────
-    // Short common tokens + concept words so the stream reads as real model output.
-    TOKEN_VOCAB: [
-      'the','a','of','in','to','and','is','it','as','for','by','on','with','not',
-      'this','that','when','each','but','so','if','we','I','its','be','at',
-      'entity','path','memory','tools','observe','feedback','context',
-      'token','weight','prompt','axis','autonomy','layer','model','signal',
-      'state','flow','seed','node','loop','step','window','span',
-      'drift','depth','scope','fork','trace','log','locate','measure',
-      'compress','persist','compose','navigate','coordinate','viability',
-      'operator','scaffold','ground','decode','coherence','emergence',
-      'recovery','attention','abstraction','multiplicity','async',
-      'RestorationOps','Spectral','Axis','L3','L4','L5','v0.2',
+    // ── token phrases — groups of tokens that read like actual LLM output ──
+    // The engine walks through each phrase word-by-word, then advances to the
+    // next. Burst tokens are flagged by timing (not content).
+    TOKEN_PHRASES: [
+      ['The','model','processes','each','input','token','in','sequence','.'],
+      ['Context','window','holds','the','full','conversation','state','.'],
+      ['Attention','weights','shift','toward','the','most','relevant','spans','.'],
+      ['Reasoning','emerges','from','repeated','forward','passes','through','the','layers','.'],
+      ['The','output','distribution','is','sampled','at','temperature','T','.'],
+      ['Each','layer','transforms','the','hidden','state','into','a','richer','representation','.'],
+      ['Coherent','text','flows','when','probability','mass','concentrates','on','likely','tokens','.'],
+      ['The','system','observes','its','own','token','stream','as','a','signal','.'],
+      ['Sparse','attention','reduces','the','quadratic','cost','of','long','contexts','.'],
+      ['The','prompt','seeds','the','generation','path','with','intent','.'],
+      ['Model','confidence','correlates','with','output','fluency','and','rhythm','.'],
+      ['Semantic','density','rises','in','knowledge-dense','passages','.'],
+      ['The','agent','composes','its','next','action','step','by','step','.'],
+      ['Depth','of','reasoning','trades','against','token','throughput','.'],
+      ['Drift','accumulates','when','context','exceeds','the','active','window','.'],
+      ['Forking','paths','are','scored','and','pruned','by','the','verifier','.'],
+      ['Memory','is','serialised','back','into','the','context','string','.'],
+      ['Navigation','through','latent','space','defines','the','final','output','.'],
+      ['Each','pause','is','a','deliberate','gap','—','the','model','is','thinking','.'],
+      ['A','burst','of','tokens','signals','high-confidence','decoding','in','progress','.'],
     ],
     TOKEN_STREAM: {
       HISTORY:    28,    // visible token slots in the strip
