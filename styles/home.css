@@ -54,7 +54,7 @@
     0 28px 70px -30px rgba(0,0,0,0.92),
     0 0 54px -16px rgba(212,162,76,0.13); }
 .mc-head{ display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:16px;
-  font-size:13px; letter-spacing:.12em; }
+  font-size:clamp(17px,1.8vw,22px); letter-spacing:.10em; font-weight:500; }
 .mc-arrow{ color:var(--faint); }
 .mc-zone{ text-transform:lowercase; }
 .mc-was{ color:var(--ink); }
@@ -68,10 +68,12 @@
   border-top:1px solid var(--line-soft); }
 .mc-cap{ margin:0; padding:16px 16px 4px; position:relative; }
 .mc-cap + .mc-cap{ border-left:1px solid rgba(234,240,251,0.07); }
-.mc-cap figcaption{ font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--faint); margin-bottom:8px; }
-.mc-cap p{ font-size:12.5px; line-height:1.6; color:var(--ink-dim); margin:0; text-wrap:pretty; }
-.mc-cap-canbe figcaption{ color:var(--gold); }
-.mc-cap-canbe p{ color:var(--ink); }
+.mc-cap figcaption{ font-size:12px; letter-spacing:.20em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px; }
+.mc-cap p{ font-size:clamp(14px,1.4vw,16px); line-height:1.65; color:rgba(234,240,251,0.60); margin:0; text-wrap:pretty; }
+.mc-captions .mc-cap:first-child p{ color:rgba(234,240,251,0.80); }
+.mc-captions .mc-cap:first-child figcaption{ color:var(--ink); }
+.mc-cap-canbe figcaption{ color:var(--gold); font-size:13px; }
+.mc-cap-canbe p{ color:var(--ink); font-size:clamp(14px,1.4vw,16px); font-weight:500; }
 .mc-cap-canbe::before{ content:""; position:absolute; left:0; top:14px; bottom:8px; width:2px;
   background:linear-gradient(180deg,var(--gold),transparent); box-shadow:0 0 8px var(--gold-glow); }
 .mission-exit{ align-self:center; font-size:13px; letter-spacing:.06em; color:var(--gold);
