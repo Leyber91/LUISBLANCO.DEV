@@ -99,6 +99,19 @@
       ['Each','pause','is','a','deliberate','gap','—','the','model','is','thinking','.'],
       ['A','burst','of','tokens','signals','high-confidence','decoding','in','progress','.'],
     ],
+    // ── flat fallback vocab (legacy compat for cached engine builds) ─────────
+    TOKEN_VOCAB: [
+      'The','model','processes','each','input','token','in','sequence',
+      'Context','window','holds','the','full','conversation','state',
+      'Attention','weights','shift','toward','the','most','relevant','spans',
+      'Reasoning','emerges','from','repeated','forward','passes',
+      'output','distribution','sampled','at','temperature','T',
+      'Each','layer','transforms','the','hidden','state',
+      'Coherent','text','flows','when','probability','mass','concentrates',
+      'system','observes','its','own','token','stream','as','a','signal',
+      'Sparse','attention','reduces','quadratic','cost','of','long','contexts',
+      'prompt','seeds','generation','path','with','intent',
+    ],
     TOKEN_STREAM: {
       HISTORY:    28,    // visible token slots in the strip
       FADE_STEPS: 12,    // how many slots fade out at the left edge

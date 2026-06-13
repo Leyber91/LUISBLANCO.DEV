@@ -246,29 +246,43 @@
   }
 
   // ── TokenWordGenerator ────────────────────────────────────────────────
-  // Maps each token-fire event to a word drawn from the vocabulary,
-  // maintaining a rolling display buffer for the renderer.
+  // Walks TOKEN_PHRASES word-by-word so the stream reads like real LLM output.
+  // Falls back to TOKEN_VOCAB if phrases are unavailable.
   function makeWordGen(rand){
-    const vocab = CFG.TOKEN_VOCAB;
-    const HIST  = CFG.TOKEN_STREAM.HISTORY;
-    const stream = [];   // [{word, isBurst, age}]  age increments each tick
-    let   vocabIdx = Math.floor(rand() * vocab.length);
+    const phrases = CFG.TOKEN_PHRASES || [];
+    const vocab   = CFG.TOKEN_VOCAB   || [];
+    const HIST    = (CFG.TOKEN_STREAM && CFG.TOKEN_STREAM.HISTORY) || 28;
+    const stream  = [];
+    let phraseIdx = Math.floor(rand() * Math.max(1, phrases.length));
+    let wordIdx   = 0;
+    let vocabIdx  = Math.floor(rand() * Math.max(1, vocab.length));
 
-    function nextWord(){ vocabIdx = (vocabIdx + 1) % vocab.length; return vocab[vocabIdx]; }
+    function nextWord(){
+      if(phrases.length > 0){
+        const phrase = phrases[phraseIdx % phrases.length];
+        const word   = phrase[wordIdx % phrase.length];
+        wordIdx++;
+        if(wordIdx >= phrase.length){ wordIdx = 0; phraseIdx = (phraseIdx + 1) % phrases.length; }
+        return word;
+      }
+      if(vocab.length > 0){ vocabIdx = (vocabIdx + 1) % vocab.length; return vocab[vocabIdx]; }
+      return '…';
+    }
 
     function push(isBurst){
       stream.push({ word: nextWord(), isBurst, age: 0 });
       if(stream.length > HIST) stream.shift();
     }
 
-    function tick(dtMs){
-      // age all existing tokens (visual fade is driven by position, not age,
-      // but we keep age for potential future use)
-      for(const t of stream) t.age += dtMs;
-    }
+    function tick(dtMs){ for(const t of stream) t.age += dtMs; }
 
     function get(){ return stream; }
-    function reset(){ stream.length = 0; vocabIdx = 0; }
+    function reset(){
+      stream.length = 0;
+      phraseIdx = Math.floor(rand() * Math.max(1, phrases.length));
+      wordIdx = 0;
+      vocabIdx = 0;
+    }
     return { push, tick, get, reset };
   }
 
