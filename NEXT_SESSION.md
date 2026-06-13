@@ -9,76 +9,105 @@ Continue from where we closed on 2026-06-13. Orient first:
 3. `PORTFOLIO/LUIS_CONCEPTUAL_MAP.md` + `LUIS_IDEA_ATLAS.md` (641 entries) — who I am / what I thought.
 Your rules (global CLAUDE.md v3.1 + project CLAUDE.md) auto-load — honor layer_11 field lessons.
 
-## THE CODEX (private, profile ring on luisblanco.dev)
-Repo: github.com/Leyber91/LUISBLANCO.DEV · passphrase: Aether91212* · AES-256-GCM client-side (D-10).
-Source: `_reference/` (gitignored). Rebuild: `cd LUISBLANCO.DEV; $env:CODEX_PASS="Aether91212*"; node tools/build_codex.mjs` → commit + push codex.enc.json.
-Currently sealed: **141 sections, 1.28 MB** (was 129 before this session).
+## THE CODEX
+Repo: github.com/Leyber91/LUISBLANCO.DEV · passphrase: `Aether91212*` · AES-256-GCM client-side.
+Source: `_reference/` (gitignored). Rebuild: `cd LUISBLANCO.DEV; $env:CODEX_PASS="Aether91212*"; node tools/build_codex.mjs` → commit + push `codex.enc.json`.
+Currently sealed: **141 sections · 1.29 MB**.
 
-## WHAT SHIPPED THIS SESSION (2026-06-13)
+---
 
-### Site visual work (all pushed — from previous sessions too, now complete)
-- Section 02 rebuilt as diagram-instrument (opaque console, phase-diagram, glyph-fade, drawing-index fix).
-- Sections 03–08: opaque lifted surfaces, decluttered straight lines.
-- Curvature-test in `path-flow.js` (isCurve + auto mode) — curved lines become dust, straights vanish.
-- Applied to schematic sweeps + projects mesh. Architecture diagram intentionally NOT dustified (rails load-bearing).
-- Codex UI bug fixed (`.cx-lock[hidden]{ display:none }`).
+## THE REGISTER — DONE (do not re-open unless a bug is found)
 
-### THE REGISTER — complete pipeline (8 scripts in `register/`)
-**TRUE FINAL STATE: 676 nodes · 996 typed edges · 0 orphans · 0 isolated S/A · 2 dup pairs (irreducible) · 7 part files · 141 codex sections · 1.29 MB**
+Pipeline: 8 scripts in `register/` (phase0-bootstrap → phase1-canonicalize → phase2-part-assign → inject-constellation → phase3-edges → phase4-audit → phase5-assemble).
 
-- **676 canonical concepts** (653 from atlas/gold after 10 merges + 23 injected from BOOK_CONSTELLATION).
-- **996 typed edges**: 124 spine (6 idea-lines + era bridges + LINE meta-summaries + LIFE spine + CONSTELLATION laws + reverse proves) · 207 source co-occurrence · 665 cluster-spine.
-- **7 part HTML files** in `_reference/REGISTER/`: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(80) · V-CRAFT(106) · VI-LABORATORY(58) · VII-MEASURE(171).
-- **`src/core/concept_graph.json`**: 676 nodes, 996 edges. Ready for Prime Radiant / AEA plate.
-- Codex: 141 sections, 1.29 MB. Pipeline scripts: phase0-5 + phase4-audit + inject-constellation (8 total).
+**FINAL STATE: 676 nodes · 996 typed edges · 0 orphans · 0 isolated S/A · 2 irreducible dup pairs**
 
-**ALL MAJOR GAPS RESOLVED:**
-- ~~III-COMPOSITION empty~~ → 47 entries (24 reassigned from CONSTELLATION concepts + 23 new laws/watcher/anti-patterns/practice).
-- ~~30 LIFE orphans~~ → 0 orphans. LIFE spine = luisblanco.dev + 15 identity→WIRTHFORGE edges.
-- ~~12 isolated Tier S/A~~ → **0**. Reverse edges for LINE meta-summaries + HONESTY Tier A + CONSTELLATION laws (each law has both outgoing law→concept AND incoming concept→law proves edges).
-- ~~5 quote-duplicate pairs~~ → eliminated. alias_maps in `register_config.json` now collapses them in phase1.
-- ~~manual_overrides keyed by CX-ID~~ → converted to name-based keys (survive re-runs).
+To re-run from scratch (only if source atlas changes):
+```
+cd register
+node phase0-bootstrap.js
+node phase1-canonicalize.js
+node phase2-part-assign.js
+node inject-constellation.js
+node phase3-edges.js
+node phase4-audit.js
+node phase5-assemble.js
+```
+Then re-seal: `$env:CODEX_PASS="Aether91212*"; node tools/build_codex.mjs`
 
-## REGISTER STATUS (2026-06-13 — TRUE FINAL)
-**676 nodes · 996 edges · 0 orphans · 0 isolated S/A · 2 dup pairs (irreducible)**
+Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(80) · V-CRAFT(106) · VI-LABORATORY(58) · VII-MEASURE(171).
 
-2 remaining similarity pairs are conceptually distinct: (1) Hades AI AST self-rewriting vs Alfa/Beta encrypted dialogue — same project, different mechanisms; (2) "Games thesis" vs "THE GAMES LINE" — concept vs meta-summary line. Not merge candidates.
+`src/core/concept_graph.json` — 676 nodes, 996 edges — is versioned and ready for the Prime Radiant graph instrument.
 
-## REGISTER REMAINING ITEMS (minor, not blocking)
+**Known minor items (not blocking):**
+- 536 atlas-only entries have no tier (expected — gold index only covers top ~130).
+- III-COMPOSITION target ~75, currently 47 (6 named CONSTELLATION concepts from `02_the_concepts.html` not yet injected: MoA-OF-MoAs, MOA Matrix, Seven Games Orchestration Patterns, +3).
+- 2 similarity dup pairs are verified distinct concepts — not merge candidates.
 
-**ITEM 1 — 536 concepts without tiers** (audit flag)
-Atlas-only entries have no gold ranking. Expected. Can assign tiers manually to high-value entries via a separate tier-assignment pass. Not blocking.
+---
 
-**ITEM 2 — 4 clusters without dedicated part files** (design choice)
-MYTHOLOGY, NARRATIVE, OPS, LIFE are merged into other parts. Revisit when authoring Paradigm Book parts if dedicated sections are needed.
+## WHAT WAS BUILT THIS SESSION (2026-06-13)
 
-**ITEM 3 — III-COMPOSITION at 47, target ~75** (ongoing)
-6 concepts from `02_the_concepts.html` not yet injected (MoA-OF-MoAs, MOA Matrix, Seven Games Orchestration Patterns, + 3 more). Can inject individually. `inject-constellation.js` already handles the extraction pattern.
+- **Register pipeline** (complete, clean, pushed).
+- **inject-constellation.js** — parses all 5 BOOK_CONSTELLATION HTML files, injects 23 new CX- entries into III-COMPOSITION (9 laws, 5 watcher sections, 4 anti-patterns, 5 practice sections).
+- **phase4-audit.js** — audits orphans, tiers, isolated S/A, dup pairs, thin parts → `work/04_audit_report.md`.
+- **register_config.json** — manual_overrides now name-based (survive phase1 re-runs); alias_maps has 13 collapse rules (5 quote-variant pairs + 3 true dups + existing).
+- **phase3-edges.js** — 124 spine edges including: CONSTELLATION law→concept (9 laws × 2 edges each) + reverse proves edges from proof concepts INTO each law.
+- **Codex** re-sealed to include REGISTER (141 sections, 1.29 MB).
+- Site visual work (from prior sessions): Section 02 diagram-instrument, sections 03-08 opaque lifted surfaces, curvature-dust in path-flow.js, codex lock fix. All complete.
 
-**ITEM 4 — 2 similarity-based dup pairs** (irreducible, not errors)
-Hades AI AST vs Alfa/Beta (same project, distinct mechanisms) + Games thesis vs THE GAMES LINE (concept vs meta-summary). Both verified distinct.
+---
 
-## THE DECIDED ARCHITECTURE (structural work, not yet started)
-Hard-graded survey settled it: codex = **TWO books + an archive**:
-- **THE PARADIGM BOOK** — 7 PARTS: I-ENTITY · II-CONTINUITY · III-COMPOSITION · IV-INTERFACE (AETHER, the big gap) · V-CRAFT · VI-LABORATORY · VII-MEASURE. Plus a unified REGISTER + LINEAGE. Parts I-III re-seat existing books (AEA/ESSENCE/CONSTELLATION); Parts IV-VII are NEW to author.
-- **THE BOOK OF LUIS** — separate genre (intellectual history). ADD 4 chapters: Mythology, Narrative, Ops, Life.
-- **THE ARCHIVE** — atlas/gold/evidence/vault. Parked: Venture Ladder, Three Doors.
+## THE DECIDED ARCHITECTURE
+
+Codex = **TWO books + an archive**:
+
+| Book | Parts | Status |
+|------|-------|--------|
+| **THE PARADIGM BOOK** | I-ENTITY · II-CONTINUITY · III-COMPOSITION · IV-INTERFACE · V-CRAFT · VI-LABORATORY · VII-MEASURE | Parts I-III = existing BOOK_AEA/ESSENCE/CONSTELLATION (done). Parts IV-VII = **NEW — not yet authored.** |
+| **THE BOOK OF LUIS** | Eras 00-12 + BRAID + 4 new chapters (Mythology, Narrative, Ops, Life) | Main BOOK/ complete. 4 new chapters not yet added. |
+| **THE ARCHIVE** | atlas/gold/evidence/vault | Parked. |
+
+`_reference/` current book dirs: `BOOK/` · `BOOK_AEA/` · `BOOK_ESSENCE/` · `BOOK_CONSTELLATION/` · `REGISTER/` · `research_map/`.
+**Missing: `BOOK_AETHER/` · `BOOK_CRAFT/` · `BOOK_LABORATORY/` · `BOOK_MEASURE/`** (Parts IV-VII).
+
+Each new book follows the existing 6-file structure: `00_plate.html` · `01_the_laws.html` · `02_the_concepts.html` · `03_[thematic].html` · `04_lineage_and_failures.html` · `05_practice.html`.
+
+---
 
 ## ORDER NEXT SESSION
-1. **THE PARADIGM BOOK restructure** — author AETHER (IV) + CRAFT (V) + PLAY (VI) + OMEGA (VII) parts in `_reference/`. Each as its own session. Re-seat AEA/ESSENCE/CONSTELLATION as Parts I-III; draw support-map intro; add 4 Book-of-Luis chapters (Mythology, Narrative, Ops, Life). Re-seal codex after each part.
-2. **Heritage repos scope** (AetherVision, project-leyber-212, time_slip, ai_canvas) — identify extractable visual/shader assets before starting LUMEN work.
-3. **LUMEN gravitational lensing shader** — heritage asset `project-leyber-212-website/.../gravitational_lensing.js`. Gravity bends dust field, depth, separates glyph from substrate. **Needs your go-ahead first — substantial build.**
-4. **Build frontier** — LUMEN look in real Chrome → T-1.4 morph attractors.
-5. **concept_graph.json → site instrument** — Prime Radiant / AEA plate. Wire 679 nodes + 999 edges as interactive graph. `src/core/concept_graph.json` is in repo and versioned.
+
+**1. Author BOOK_AETHER (Part IV — INTERFACE)** ← START HERE
+- Theme: astrophysics as interface; the internet as navigable space; AETHER/WIRTHFORGE/AetherNet.
+- Pull register's IV-INTERFACE concepts (80 entries) from `register/work/02_assigned.json` where `part=="IV-INTERFACE"` as the concept roster.
+- 6 files in `_reference/BOOK_AETHER/`. Model exactly on `_reference/BOOK_CONSTELLATION/` structure.
+- Laws to derive from the AETHER LINE in `PORTFOLIO/LUIS_CONCEPTUAL_MAP.md` (section: THE AETHER LINE).
+- After writing: add `BOOK_AETHER` to `tools/build_codex.mjs` BOOKS array, re-seal, push.
+
+**2. Author BOOK_CRAFT (Part V — CRAFT)** — prompting, context engineering, output grammar.
+Source: `_reference/research_map/prompting.md` + CRAFT cluster in register.
+
+**3. Author BOOK_LABORATORY (Part VI — LABORATORY)** — games as discovery engines, sim labs, prototyping.
+Source: `_reference/research_map/7-games.md` + `websim.md` + GAMES cluster in register.
+
+**4. Author BOOK_MEASURE (Part VII — MEASURE)** — honesty, audit, receipt culture, visible AI.
+Source: `_reference/DOCTRINE_VISIBLE_AI.md` + HONESTY cluster in register (171 entries, largest part).
+
+**5. Heritage repos scope** — list what exists in AetherVision, project-leyber-212, time_slip, ai_canvas; extract shader assets for LUMEN.
+
+**6. LUMEN gravitational lensing shader** — `project-leyber-212-website/.../gravitational_lensing.js`. Bends the dust field, adds depth layer under glyphs. **Needs explicit go-ahead — substantial JS build.**
+
+**7. concept_graph.json → Prime Radiant instrument** — force-directed graph page wiring 676 nodes + 996 edges from `src/core/concept_graph.json`. Already versioned, just needs a viewer.
+
+---
 
 ## LESSONS THAT MUST NOT BE FORGOTTEN
 - Completion over planning; one ticket in flight; every visual change ends in screenshots.
-- Dissatisfaction is structural until proven cosmetic; reference images are specs (study at crop).
+- Dissatisfaction is structural until proven cosmetic; reference images are specs.
 - Income clock outranks shiny (E13 Track 1). Cite research_map for any claim.
 - Ship under working titles; bank to disk at session end — nothing lives only in conversation.
-- The register pipeline lives in `register/` — resume by running phases in order from the last checkpoint in `register/work/`.
+- Register pipeline lives in `register/` — checkpoint files in `register/work/`.
 
 ## OWED BY ME (remind, don't block)
 D-6 revoke old API keys · D-4 CTA email/booking · D-5 X handle/post titles/newsletter/years ·
-D-8 doctrine name · GitHub Pages toggle (Settings→Pages→main, ring reachable from phone) ·
-Stronger codex passphrase (Aether91212* is guessable).
+D-8 doctrine name · GitHub Pages toggle (Settings→Pages→main) · Stronger codex passphrase.
