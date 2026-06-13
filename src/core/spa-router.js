@@ -10,10 +10,10 @@
    ========================================================================= */
 (function(){
   const LB = window.LB;
-  const ORDER  = ['home','architecture','projects','writing','about','work','contact'];
+  const ORDER  = ['home','architecture','projects','resonance','writing','about','work','contact'];
   const ROUTES = ORDER;
-  const AMP  = { home:1.0, about:0.7, architecture:0.55, projects:0.55, writing:0.55, work:0.55, contact:0.55 };
-  const ARCS = { home:4, about:6, architecture:2, projects:2, writing:2, work:2, contact:2 };
+  const AMP  = { home:1.0, about:0.7, architecture:0.55, projects:0.55, resonance:0.80, writing:0.55, work:0.55, contact:0.55 };
+  const ARCS = { home:4, about:6, architecture:2, projects:2, resonance:3, writing:2, work:2, contact:2 };
   const TOPPAD = 70;   // clearance under the fixed nav when scrolling to a section
 
   // visit bookkeeping — capture prior visit BEFORE we stamp this one
@@ -103,6 +103,7 @@
     if(sec('writing'))  wireWriting(sec('writing'));
     if(window.LB_HOME)  window.LB_HOME.init();
     if(window.LB_ABOUT) window.LB_ABOUT.init();
+    if(window.LB_RESONANCE) window.LB_RESONANCE.init(sec('resonance'));
   }
 
   // ── scroll spy — the section under the viewport drives the chrome ───

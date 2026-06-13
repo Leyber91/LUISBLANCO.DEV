@@ -22,6 +22,7 @@
 <link rel="stylesheet" href="styles/work.css">
 <link rel="stylesheet" href="styles/spa.css">
 <link rel="stylesheet" href="styles/codex.css">
+<link rel="stylesheet" href="styles/resonance.css">
 </head>
 <body data-route="home">
 
@@ -353,6 +354,39 @@
   </section>
 </template>
 
+<!-- ── /resonance ────────────────────────────────────────────── -->
+<template id="tpl-resonance">
+  <section class="rs-main" data-screen-label="04b resonance">
+    <div class="rs-head">
+      <div class="ttl">AI resonance</div>
+      <div class="sub">WirthForge · token stream as signal</div>
+      <p class="intro">Every model has a spectral fingerprint — a characteristic frequency profile visible in its token-emission timing, without access to weights. Select a profile to see what different LLM behaviours look like as physical phenomena.</p>
+    </div>
+
+    <div class="rs-controls">
+      <span class="rs-ctl-label">model profile</span>
+      <button class="rs-profile-btn" data-profile="lightning">LIGHTNING</button>
+      <button class="rs-profile-btn active" data-profile="council">COUNCIL</button>
+      <button class="rs-profile-btn" data-profile="architect">ARCHITECT</button>
+      <button class="rs-profile-btn" data-profile="deep">DEEP</button>
+    </div>
+
+    <div class="rs-canvas-wrap" aria-label="AI resonance instrument"></div>
+
+    <div class="rs-legend">
+      <div class="rs-leg-item"><span class="rs-leg-key">LIGHTNING</span><span class="rs-leg-desc">fast, low-variance — high-throughput completion models</span></div>
+      <div class="rs-leg-item"><span class="rs-leg-key">COUNCIL</span><span class="rs-leg-desc">balanced, moderate variance — conversational models at cruise</span></div>
+      <div class="rs-leg-item"><span class="rs-leg-key">ARCHITECT</span><span class="rs-leg-desc">deliberate, high-variance — reasoning models with thinking pauses</span></div>
+      <div class="rs-leg-item"><span class="rs-leg-key">DEEP</span><span class="rs-leg-desc">slow, high-variance — deep reasoning with long deliberation gaps</span></div>
+    </div>
+
+    <div class="rs-doctrine">
+      <span class="tick"></span>
+      <span>Token inter-arrival times are a real biosignal. Each model produces a characteristic frequency profile identifiable without weight access. — WirthForge Law VII</span>
+    </div>
+  </section>
+</template>
+
 <!-- ── /writing ───────────────────────────────────────────────── -->
 <template id="tpl-writing">
   <section class="wr-main" data-screen-label="05 what's new">
@@ -620,6 +654,11 @@
 <script src="src/lumen/lumen.glsl.js"></script>
 <script src="src/lumen/lumen.engine.js"></script>
 <script src="src/lumen/lumen.orchestrator.js"></script>
+<!-- RESONANCE — LLM output visualiser (load order: config → engine → renderer → orchestrator) -->
+<script src="src/resonance/resonance.config.js"></script>
+<script src="src/resonance/resonance.engine.js"></script>
+<script src="src/resonance/resonance.renderer.js"></script>
+<script src="src/resonance/resonance.orchestrator.js"></script>
 <script src="src/data/concepts.js"></script>
 <script src="src/routes/spa-architecture.js"></script>
 <script src="src/routes/spa-projects.js"></script>
