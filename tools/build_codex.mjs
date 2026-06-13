@@ -48,6 +48,7 @@ const BOOKS = [
   ['BOOK_AEA', '01 · book of the aea'],
   ['BOOK_ESSENCE', '02 · book of essence'],
   ['BOOK_CONSTELLATION', '03 · book of constellation'],
+  ['REGISTER', '10 · the register'],
 ];
 let bookSections = [];
 for (const [dir, grp] of BOOKS) {
