@@ -287,6 +287,202 @@
     "reason": "era-1: metapower section born inside leyber212"
   },
   {
+    "source": "CX-0662",
+    "target": "CX-0069",
+    "type": "derives_from",
+    "weight": 0.95,
+    "reason": "law-1: recursive MoA IS the proof of law 1"
+  },
+  {
+    "source": "CX-0662",
+    "target": "CX-0063",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "law-1: HADES is the lived evidence of composition over size"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0220",
+    "type": "derives_from",
+    "weight": 0.9,
+    "reason": "law-2: cosmic nexus IS law 2 built: each universe a different model"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0075",
+    "type": "implements",
+    "weight": 0.85,
+    "reason": "law-2: affinity matrix scores heterogeneity systematically"
+  },
+  {
+    "source": "CX-0664",
+    "target": "CX-0070",
+    "type": "derives_from",
+    "weight": 0.95,
+    "reason": "law-3: SEDAH IS law 3 built"
+  },
+  {
+    "source": "CX-0664",
+    "target": "CX-0063",
+    "type": "watches",
+    "weight": 0.9,
+    "reason": "law-3: law requires hades to be watched"
+  },
+  {
+    "source": "CX-0665",
+    "target": "CX-0163",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "law-4: ollama-as-fuel is running on owned silicon"
+  },
+  {
+    "source": "CX-0665",
+    "target": "CX-0070",
+    "type": "derives_from",
+    "weight": 0.85,
+    "reason": "law-4: pico/nano/micro ladder IS fitting the hardware ladder"
+  },
+  {
+    "source": "CX-0666",
+    "target": "CX-0280",
+    "type": "derives_from",
+    "weight": 0.9,
+    "reason": "law-5: cognitive transistor IS routing-as-cognition built"
+  },
+  {
+    "source": "CX-0666",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.85,
+    "reason": "law-5: moa routing IS the cognitive act"
+  },
+  {
+    "source": "CX-0667",
+    "target": "CX-0067",
+    "type": "derives_from",
+    "weight": 0.95,
+    "reason": "law-6: human-as-message-bus is the lived proof of law 6"
+  },
+  {
+    "source": "CX-0668",
+    "target": "CX-0163",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "law-7: output-as-fuel IS ollama as fuel philosophy"
+  },
+  {
+    "source": "CX-0668",
+    "target": "CX-0287",
+    "type": "derives_from",
+    "weight": 0.85,
+    "reason": "law-7: output=fuel IS the energy metaphor applied to model I/O"
+  },
+  {
+    "source": "CX-0669",
+    "target": "CX-0070",
+    "type": "implements",
+    "weight": 0.8,
+    "reason": "law-8: sedah watches to enable recovery"
+  },
+  {
+    "source": "CX-0670",
+    "target": "CX-0166",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "law-9: wirthforge renders the topology visible — the law made into product"
+  },
+  {
+    "source": "CX-0069",
+    "target": "CX-0662",
+    "type": "proves",
+    "weight": 0.95,
+    "reason": "law-1-reverse: recursive MoA is the receipt for law 1"
+  },
+  {
+    "source": "CX-0220",
+    "target": "CX-0663",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "law-2-reverse: cosmic nexus is the receipt for law 2"
+  },
+  {
+    "source": "CX-0070",
+    "target": "CX-0664",
+    "type": "proves",
+    "weight": 0.95,
+    "reason": "law-3-reverse: SEDAH is the receipt for law 3"
+  },
+  {
+    "source": "CX-0163",
+    "target": "CX-0665",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "law-4-reverse: ollama-as-fuel is the receipt for law 4"
+  },
+  {
+    "source": "CX-0280",
+    "target": "CX-0666",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "law-5-reverse: cognitivetransistor is the receipt for law 5"
+  },
+  {
+    "source": "CX-0067",
+    "target": "CX-0667",
+    "type": "proves",
+    "weight": 0.95,
+    "reason": "law-6-reverse: human-as-message-bus IS the receipt for law 6"
+  },
+  {
+    "source": "CX-0287",
+    "target": "CX-0668",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "law-7-reverse: energy metaphor proves law 7 — output IS fuel"
+  },
+  {
+    "source": "CX-0166",
+    "target": "CX-0669",
+    "type": "proves",
+    "weight": 0.8,
+    "reason": "law-8-reverse: wf recovery mechanisms prove law 8"
+  },
+  {
+    "source": "CX-0166",
+    "target": "CX-0670",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "law-9-reverse: wf topology render IS law 9 built"
+  },
+  {
+    "source": "CX-0676",
+    "target": "CX-0069",
+    "type": "watches",
+    "weight": 0.9,
+    "reason": "anti-pattern: clone swarms is what moa prevents"
+  },
+  {
+    "source": "CX-0677",
+    "target": "CX-0070",
+    "type": "watches",
+    "weight": 0.9,
+    "reason": "anti-pattern: unwatched autonomy is what SEDAH prevents"
+  },
+  {
+    "source": "CX-0678",
+    "target": "CX-0166",
+    "type": "watches",
+    "weight": 0.85,
+    "reason": "anti-pattern: topology spaghetti is what wirthforge visibility prevents"
+  },
+  {
+    "source": "CX-0679",
+    "target": "CX-0163",
+    "type": "watches",
+    "weight": 0.85,
+    "reason": "anti-pattern: fuel waste is what ollama-as-fuel grades prevent"
+  },
+  {
     "source": "CX-0006",
     "target": "CX-0014",
     "type": "proves",
@@ -1937,6 +2133,188 @@
     "type": "parallel",
     "weight": 0.4,
     "reason": "source-cooccurrence: research_map/astrophysics-metaphor.md"
+  },
+  {
+    "source": "CX-0671",
+    "target": "CX-0672",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0671",
+    "target": "CX-0673",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0671",
+    "target": "CX-0674",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0671",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0672",
+    "target": "CX-0673",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0672",
+    "target": "CX-0674",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0672",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0673",
+    "target": "CX-0674",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0673",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0674",
+    "target": "CX-0675",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/03_the_watcher.html"
+  },
+  {
+    "source": "CX-0676",
+    "target": "CX-0677",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0676",
+    "target": "CX-0678",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0676",
+    "target": "CX-0679",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0677",
+    "target": "CX-0678",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0677",
+    "target": "CX-0679",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0678",
+    "target": "CX-0679",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/04_lineage_and_failures.html"
+  },
+  {
+    "source": "CX-0680",
+    "target": "CX-0681",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0680",
+    "target": "CX-0682",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0680",
+    "target": "CX-0683",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0680",
+    "target": "CX-0684",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0681",
+    "target": "CX-0682",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0681",
+    "target": "CX-0683",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0681",
+    "target": "CX-0684",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0682",
+    "target": "CX-0683",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0682",
+    "target": "CX-0684",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
+  },
+  {
+    "source": "CX-0683",
+    "target": "CX-0684",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
   },
   {
     "source": "CX-0001",
@@ -6494,5 +6872,159 @@
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0662",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0663",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0664",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0665",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0667",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0668",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0669",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0670",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0671",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0672",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0673",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0674",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0675",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0676",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0677",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0678",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0679",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0680",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0681",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0682",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0683",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0684",
+    "target": "CX-0069",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: CONSTELLATION"
   }
 ]

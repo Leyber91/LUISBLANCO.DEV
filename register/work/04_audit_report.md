@@ -1,6 +1,6 @@
 # REGISTER AUDIT REPORT
-Generated: 2026-06-13 02:39
-Total concepts: 661 · Total edges: 928
+Generated: 2026-06-13 02:45
+Total concepts: 684 · Total edges: 1004
 
 ---
 
@@ -9,7 +9,7 @@ Total concepts: 661 · Total edges: 928
 | Check | Count | Status |
 |---|---|---|
 | Orphan nodes (0 outgoing edges) | 0 | ✅ CLEAN |
-| Missing tier (S/A/B/C) | 524 | ❌ HIGH |
+| Missing tier (S/A/B/C) | 538 | ❌ HIGH |
 | Thin parts (<20 entries) | 0 | ✅ OK |
 | Likely duplicates (>70% name similarity) | 10 | ⚠️ REVIEW |
 | Dense nodes (>15 outgoing edges) | 0 | ✅ OK |
@@ -20,7 +20,7 @@ Total concepts: 661 · Total edges: 928
 
 - **I-ENTITY**: 108 entries █████████████████████
 - **II-CONTINUITY**: 107 entries █████████████████████
-- **III-COMPOSITION**: 24 entries ████
+- **III-COMPOSITION**: 47 entries █████████
 - **IV-INTERFACE**: 81 entries ████████████████
 - **V-CRAFT**: 107 entries █████████████████████
 - **VI-LABORATORY**: 59 entries ███████████
@@ -29,21 +29,21 @@ Total concepts: 661 · Total edges: 928
 ## TIER DISTRIBUTION
 
 - **S**: 16 (spine concepts)
-- **A**: 15 (signature frameworks)
+- **A**: 24 (signature frameworks)
 - **B**: 15 (original architectures)
 - **C**: 91 (strong named systems)
-- **unranked**: 524 (atlas-only entries without gold ranking)
+- **unranked**: 538 (atlas-only entries without gold ranking)
 
 ## EDGE TYPE DISTRIBUTION
 
-- **implements**: 665
-- **parallel**: 181
-- **enables**: 39
-- **derives_from**: 14
-- **proves**: 13
+- **implements**: 692
+- **parallel**: 207
+- **enables**: 40
+- **proves**: 23
+- **derives_from**: 21
 - **refines**: 10
+- **watches**: 7
 - **requires**: 4
-- **watches**: 2
 
 ## ISOLATED SPINE NODES (Tier S/A with 0 INCOMING edges)
 
