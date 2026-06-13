@@ -287,6 +287,104 @@
     "reason": "era-1: metapower section born inside leyber212"
   },
   {
+    "source": "CX-0638",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.85,
+    "reason": "life-line: Dec 2024 self-definition → WF mission"
+  },
+  {
+    "source": "CX-0639",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "life-line: agentic engineer framing feeds WF product persona"
+  },
+  {
+    "source": "CX-0643",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "life-line: AI systems architect → WF architecture doctrine"
+  },
+  {
+    "source": "CX-0659",
+    "target": "CX-0166",
+    "type": "implements",
+    "weight": 0.95,
+    "reason": "life-line: the rename IS the WIRTHFORGE birth moment"
+  },
+  {
+    "source": "CX-0659",
+    "target": "CX-0159",
+    "type": "derives_from",
+    "weight": 0.95,
+    "reason": "life-line: rename traces back to aether origin"
+  },
+  {
+    "source": "CX-0650",
+    "target": "CX-0166",
+    "type": "implements",
+    "weight": 0.9,
+    "reason": "life-line: site is the public face of the WF/AEA vision"
+  },
+  {
+    "source": "CX-0645",
+    "target": "CX-0321",
+    "type": "proves",
+    "weight": 0.85,
+    "reason": "life-line: self-archaeology is what produces the honesty decoder insight"
+  },
+  {
+    "source": "CX-0651",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.75,
+    "reason": "life-line: meta-methods → WF as the methodology platform"
+  },
+  {
+    "source": "CX-0656",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "life-line: self-as-method → WF practitioner design"
+  },
+  {
+    "source": "CX-0644",
+    "target": "CX-0321",
+    "type": "refines",
+    "weight": 0.75,
+    "reason": "life-line: pattern catalog names the anti-patterns the decoder exposes"
+  },
+  {
+    "source": "CX-0657",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.75,
+    "reason": "life-line: solo-unicorn thesis is the WF independence doctrine"
+  },
+  {
+    "source": "CX-0635",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.9,
+    "reason": "life-line: named architect identity → WF persona"
+  },
+  {
+    "source": "CX-0634",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "life-line: propagation thesis feeds WF self-evolution"
+  },
+  {
+    "source": "CX-0633",
+    "target": "CX-0321",
+    "type": "derives_from",
+    "weight": 0.8,
+    "reason": "life-line: engineering vs vibes is the honesty decoder applied to practice"
+  },
+  {
     "source": "CX-0268",
     "target": "CX-0293",
     "type": "implements",
@@ -6032,5 +6130,215 @@
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CRAFT"
+  },
+  {
+    "source": "CX-0631",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0632",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0633",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0634",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0635",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0636",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0637",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0638",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0639",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0640",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0641",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0642",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0643",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0644",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0645",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0646",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0647",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0648",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0649",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0651",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0652",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0653",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0654",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0655",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0656",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0657",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0658",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0659",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0660",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
+  },
+  {
+    "source": "CX-0661",
+    "target": "CX-0650",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: LIFE"
   }
 ]
