@@ -75,6 +75,57 @@ Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) ·
 
 ---
 
+## RESONANCE VISUALIZATION — STATUS (2026-06-13)
+
+> **Goal:** WirthForge LLM output visualization — token stream, spectral analyzer, cognitive radar, health footer — rendered on a Canvas2D with a gold/dust aesthetic, semi-transparent over the LUMEN starfield.
+
+### Done this session
+- `resonance.orchestrator.js` — bulletproof rewrite: grabs `<canvas>` already in HTML (no dynamic creation), `bootFrame()` draws visible gold label immediately, `try-catch` on frame loop, defensive null-guards throughout, starts animation after 120ms with no IntersectionObserver gate.
+- `styles/resonance.css` — visible gold border, corner accent marks, 480px height, fallback text hidden once `.active` added to wrap.
+- `index.html` — `<canvas class="rs-canvas">` + `.rs-fallback` baked into template; wrap no longer needs JS to have something visible.
+- All committed + pushed → `c3582cd` on `main`.
+
+### Still missing / next session tasks
+
+**Priority 1 — Verify it actually renders in the browser**
+- Hard-refresh, scroll to resonance section.
+- Open DevTools console — look for `[RESONANCE] online` log.
+- If `[RESONANCE] frame error:` appears, note the message — most likely `resonance.renderer.js` is throwing on a property access.
+
+**Priority 2 — `resonance.renderer.js` needs the same robustness treatment**
+- File is 421 lines, OLD code — all `CFG.WAVE.BAR_COUNT`, `CFG.RADAR.RINGS`, `sig.timing_pattern.burst_patterns` accesses are unguarded.
+- Approach: replace the entire file in **3 focused edits** (header + helpers, three draw functions, factory) to stay under the 8192-token limit that broke the previous rewrite attempt.
+- Key changes needed:
+  - Guard every `sig.X` access with `|| fallback` so a cold/empty signature never throws.
+  - Use `hexA(hex, alpha)` helper instead of fragile string slicing (`sig.color + 'CC'` patterns).
+  - Panel backgrounds must be `rgba(8,10,18,0.40)` (40% opaque) — not fully opaque.
+  - Background clear must use `ctx.clearRect` then `rgba(8,10,18,0.20)` fill — NOT a solid fill.
+
+**Priority 3 — Token stream scroll direction**
+- Currently right-aligned, oldest at left. Confirm with Luis: should newest tokens appear at the RIGHT edge (current) or should the stream scroll LEFT like a ticker tape?
+- Ticker-tape variant: each new token appended to right, whole strip shifts left each frame.
+
+**Priority 4 — Profile button wiring**
+- Test all 4 buttons: LIGHTNING, COUNCIL, ARCHITECT, DEEP.
+- Each should swap `engine.setProfile()` + update glow color + (if LUMEN visible) trigger `applyLumenDelta`.
+
+**Priority 5 — Responsive sizing**
+- On < 600px wide, the side-by-side spectral + radar layout breaks.
+- Plan: stack them vertically on narrow viewports (spectral top, radar bottom).
+
+### File map for resonance
+```
+src/resonance/
+  resonance.config.js       — profiles, vocab, radar axes, LUMEN deltas  [stable]
+  resonance.engine.js       — tick loop, token gen, spectral FFT          [stable]
+  resonance.renderer.js     — Canvas2D drawing                            [NEEDS ROBUSTNESS PASS]
+  resonance.orchestrator.js — lifecycle, init, rAF loop                   [DONE - bulletproof]
+styles/resonance.css        — layout, gold border, fallback               [DONE]
+index.html (lines ~370-390) — template with canvas baked in              [DONE]
+```
+
+---
+
 ## THE DECIDED ARCHITECTURE
 
 Codex = **TWO books + an archive**:
