@@ -1,8 +1,8 @@
 {
   "meta": {
-    "built": "2026-06-13T03:01:56.239Z",
-    "nodeCount": 676,
-    "edgeCount": 996
+    "built": "2026-06-13T03:40:49.134Z",
+    "nodeCount": 690,
+    "edgeCount": 1013
   },
   "nodes": [
     {
@@ -5410,6 +5410,118 @@
       "name": "CONSTELLATION · PRACTICE · DOCTRINE PRINCIPLE SERVED",
       "part": "III-COMPOSITION",
       "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0677",
+      "name": "WIRTHFORGE — AI Resonance instrument",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0678",
+      "name": "WIRTHFORGE — Spectral Analyzer panel",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0679",
+      "name": "WIRTHFORGE — Cognitive Radar profile",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0680",
+      "name": "WIRTHFORGE — Pattern Analysis panel",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0681",
+      "name": "WIRTHFORGE — Load Meter (Scientific mode)",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0682",
+      "name": "WIRTHFORGE — Observable-time doctrine",
+      "part": "IV-INTERFACE",
+      "cluster": "AETHER",
+      "tier": "B",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0683",
+      "name": "WIRTHFORGE — Token stream as spectral signal",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0684",
+      "name": "WIRTHFORGE — LLM spectral fingerprint",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0685",
+      "name": "WIRTHFORGE — Stochasticity as measurable axis",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0686",
+      "name": "WIRTHFORGE — Token velocity Rₜ",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0687",
+      "name": "WIRTHFORGE — Asymptotic load pattern",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0688",
+      "name": "WIRTHFORGE — Pre-flight cost runway projection",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "B",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0689",
+      "name": "WIRTHFORGE — Cognitive load formula for AI-assisted dev",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0690",
+      "name": "WIRTHFORGE — Health score (composite LLM observable)",
+      "part": "VII-MEASURE",
+      "cluster": "HONESTY",
       "tier": null,
       "status": "paper-only"
     }
@@ -11388,6 +11500,108 @@
     {
       "source": "CX-0676",
       "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0677",
+      "target": "CX-0158",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0678",
+      "target": "CX-0158",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0679",
+      "target": "CX-0158",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0680",
+      "target": "CX-0158",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0681",
+      "target": "CX-0158",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0682",
+      "target": "CX-0158",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0683",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0684",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0685",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0686",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0686",
+      "target": "CX-0688",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0686",
+      "target": "CX-0689",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0687",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0688",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0688",
+      "target": "CX-0689",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0689",
+      "target": "CX-0315",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0690",
+      "target": "CX-0315",
       "type": "implements",
       "weight": 0.5
     }

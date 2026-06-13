@@ -1,6 +1,6 @@
 # REGISTER AUDIT REPORT
-Generated: 2026-06-13 03:01
-Total concepts: 676 · Total edges: 996
+Generated: 2026-06-13 03:40
+Total concepts: 690 · Total edges: 1013
 
 ---
 
@@ -9,11 +9,11 @@ Total concepts: 676 · Total edges: 996
 | Check | Count | Status |
 |---|---|---|
 | Orphan nodes (0 outgoing edges) | 0 | ✅ CLEAN |
-| Missing tier (S/A/B/C) | 534 | ❌ HIGH |
+| Missing tier (S/A/B/C) | 538 | ❌ HIGH |
 | Thin parts (<20 entries) | 0 | ✅ OK |
 | Likely duplicates (>70% name similarity) | 2 | ⚠️ REVIEW |
 | Dense nodes (>15 outgoing edges) | 0 | ✅ OK |
-| Tier S/A with 0 incoming edges | 0 | ✅ OK |
+| Tier S/A with 0 incoming edges | 5 | ⚠️ REVIEW |
 | Concepts with no source citation | 93 | ❌ HIGH |
 
 ## PART DISTRIBUTION
@@ -21,29 +21,39 @@ Total concepts: 676 · Total edges: 996
 - **I-ENTITY**: 107 entries █████████████████████
 - **II-CONTINUITY**: 107 entries █████████████████████
 - **III-COMPOSITION**: 47 entries █████████
-- **IV-INTERFACE**: 80 entries ████████████████
+- **IV-INTERFACE**: 86 entries █████████████████
 - **V-CRAFT**: 106 entries █████████████████████
 - **VI-LABORATORY**: 58 entries ███████████
-- **VII-MEASURE**: 171 entries ██████████████████████████████████
+- **VII-MEASURE**: 179 entries ███████████████████████████████████
 
 ## TIER DISTRIBUTION
 
 - **S**: 15 (spine concepts)
-- **A**: 23 (signature frameworks)
-- **B**: 15 (original architectures)
+- **A**: 29 (signature frameworks)
+- **B**: 19 (original architectures)
 - **C**: 89 (strong named systems)
-- **unranked**: 534 (atlas-only entries without gold ranking)
+- **unranked**: 538 (atlas-only entries without gold ranking)
 
 ## EDGE TYPE DISTRIBUTION
 
-- **implements**: 684
-- **parallel**: 207
+- **implements**: 698
+- **parallel**: 210
 - **enables**: 40
 - **proves**: 23
 - **derives_from**: 21
 - **refines**: 10
 - **watches**: 7
 - **requires**: 4
+
+## ISOLATED SPINE NODES (Tier S/A with 0 INCOMING edges)
+
+These concepts are important but nothing points to them — they appear unreachable in the graph. May indicate missing reverse edges.
+
+- `CX-0677` [A] — WIRTHFORGE — AI Resonance instrument
+- `CX-0678` [A] — WIRTHFORGE — Spectral Analyzer panel
+- `CX-0679` [A] — WIRTHFORGE — Cognitive Radar profile
+- `CX-0683` [A] — WIRTHFORGE — Token stream as spectral signal
+- `CX-0684` [A] — WIRTHFORGE — LLM spectral fingerprint
 
 ## LIKELY DUPLICATES (name similarity > 70%)
 
@@ -78,5 +88,6 @@ Review these pairs. If confirmed duplicate: merge in `register_config.json` alia
 ## ACTIONABLE FIXES (priority order)
 
 3. **2 duplicate pairs** — review and merge via alias_maps
+4. **5 isolated Tier S/A nodes** — add incoming edges from related concepts
 
 When fixes applied: re-run `node phase2-part-assign.js ; node phase3-edges.js ; node phase5-assemble.js`, re-seal codex, push.

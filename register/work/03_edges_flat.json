@@ -2317,6 +2317,27 @@
     "reason": "source-cooccurrence: BOOK_CONSTELLATION/05_practice.html"
   },
   {
+    "source": "CX-0686",
+    "target": "CX-0688",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: TokenGateKeeper/research_gemini.md"
+  },
+  {
+    "source": "CX-0686",
+    "target": "CX-0689",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: TokenGateKeeper/research_gemini.md"
+  },
+  {
+    "source": "CX-0688",
+    "target": "CX-0689",
+    "type": "parallel",
+    "weight": 0.4,
+    "reason": "source-cooccurrence: TokenGateKeeper/research_gemini.md"
+  },
+  {
     "source": "CX-0001",
     "target": "CX-0006",
     "type": "implements",
@@ -6970,5 +6991,103 @@
     "type": "implements",
     "weight": 0.3,
     "reason": "cluster-spine: CONSTELLATION"
+  },
+  {
+    "source": "CX-0677",
+    "target": "CX-0158",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0678",
+    "target": "CX-0158",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0679",
+    "target": "CX-0158",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0680",
+    "target": "CX-0158",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0681",
+    "target": "CX-0158",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0682",
+    "target": "CX-0158",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: AETHER"
+  },
+  {
+    "source": "CX-0683",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0684",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0685",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0686",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0687",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0688",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0689",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
+  },
+  {
+    "source": "CX-0690",
+    "target": "CX-0315",
+    "type": "implements",
+    "weight": 0.3,
+    "reason": "cluster-spine: HONESTY"
   }
 ]
