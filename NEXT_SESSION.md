@@ -87,19 +87,15 @@ Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) ·
 
 ### Still missing / next session tasks
 
-**Priority 1 — Verify it actually renders in the browser**
-- Hard-refresh, scroll to resonance section.
-- Open DevTools console — look for `[RESONANCE] online` log.
-- If `[RESONANCE] frame error:` appears, note the message — most likely `resonance.renderer.js` is throwing on a property access.
+**Priority 1 — Verify it actually renders in the browser** — ✅ DONE (2026-06-13)
+- All 4 panels live: token stream scrolling, spectral bars, radar polygon, health footer.
+- Confirmed visually in browser screenshot.
 
-**Priority 2 — `resonance.renderer.js` needs the same robustness treatment**
-- File is 421 lines, OLD code — all `CFG.WAVE.BAR_COUNT`, `CFG.RADAR.RINGS`, `sig.timing_pattern.burst_patterns` accesses are unguarded.
-- Approach: replace the entire file in **3 focused edits** (header + helpers, three draw functions, factory) to stay under the 8192-token limit that broke the previous rewrite attempt.
-- Key changes needed:
-  - Guard every `sig.X` access with `|| fallback` so a cold/empty signature never throws.
-  - Use `hexA(hex, alpha)` helper instead of fragile string slicing (`sig.color + 'CC'` patterns).
-  - Panel backgrounds must be `rgba(8,10,18,0.40)` (40% opaque) — not fully opaque.
-  - Background clear must use `ctx.clearRect` then `rgba(8,10,18,0.20)` fill — NOT a solid fill.
+**Priority 2 — `resonance.renderer.js` robustness pass** — ✅ DONE (2026-06-13)
+- `normSig(sig)` helper normalizes all signature fields upfront — no downstream null crashes.
+- `hexRGB(hex)` helper replaces all 4 `sig.color.slice()` instances.
+- `CFG.WAVE.BAR_COUNT`, `CFG.RADAR.RINGS`, `CFG.TOKEN_STREAM.FADE_STEPS` all guarded.
+- Committed `d25f766`.
 
 **Priority 3 — Token stream scroll direction**
 - Currently right-aligned, oldest at left. Confirm with Luis: should newest tokens appear at the RIGHT edge (current) or should the stream scroll LEFT like a ticker tape?
