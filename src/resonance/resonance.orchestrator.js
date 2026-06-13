@@ -109,22 +109,25 @@
     window.addEventListener('resize', () => sizeCanvas(container));
 
     started = true;
+    sizeCanvas(container);
 
     // Use IntersectionObserver to start/stop the loop as the section
     // scrolls in/out of view (saves CPU when not visible).
+    let obsStarted = false;
     if('IntersectionObserver' in window){
       io = new IntersectionObserver(entries => {
         entries.forEach(e => {
-          if(e.isIntersecting){ applyLumenDelta(activeProfile); resume(); }
-          else pause();
+          if(e.isIntersecting && !obsStarted){ obsStarted = true; applyLumenDelta(activeProfile); resume(); }
+          else if(!e.isIntersecting && obsStarted){ pause(); }
         });
-      }, { threshold: 0.05 });
+      }, { threshold: 0.01, rootMargin: '50px' });
       io.observe(sectionEl);
-    } else {
-      // Fallback: always run
-      applyLumenDelta(activeProfile);
-      resume();
     }
+
+    // Fallback: force-start after 800ms if observer hasn't triggered
+    setTimeout(() => {
+      if(!running){ applyLumenDelta(activeProfile); resume(); }
+    }, 800);
 
     console.info('[RESONANCE] online · profile: ' + activeProfile);
   }
