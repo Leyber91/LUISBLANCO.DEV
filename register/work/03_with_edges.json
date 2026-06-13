@@ -1023,7 +1023,7 @@
     "id": "CX-0031",
     "name": "Hades AI self-modifying agents + Alfa/Beta encrypted dialogue",
     "cluster": "OUROBOROS",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Agents grow Sym_0..9 language, Fernet-encrypt messages, AST-rewrite their own communicate().",
@@ -2152,7 +2152,7 @@
     "id": "CX-0061",
     "name": "ALEXANDRIA — Groq MOA app + primordial conversations lab",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "C",
     "essence": "",
@@ -2336,7 +2336,7 @@
     "id": "CX-0067",
     "name": "Human-as-message-bus multi-agent orchestration (deployed)",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "S",
     "essence": "Built and ran a planner/responder/improver/security/integration agent system using nothing but parallel free-tier ChatGPT browser tabs, manually copying \"essences\" between them — a complete fan-out/fan-in agentic loop in June 2024, before agentic AI was mainstream. Strongest single proof-of-priority artifact.",
@@ -2403,7 +2403,7 @@
     "id": "CX-0069",
     "name": "Recursive MoA — \"MoA of MoAs\"",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "A",
     "essence": "Mixture-of-Agents where each agent is itself a complete MoA (MoA_recursive = MoA(MoA_1..n)), tree-structured with runtime topology editing, a \"Metalayer\" that oversees and dynamically reroutes between agent layers, and live D3.js force-graph animation of agent activity. Merges 2 raw entries.",
@@ -2437,7 +2437,7 @@
     "id": "CX-0070",
     "name": "SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy",
     "cluster": "HADES-MOA",
-    "part": "VI-LABORATORY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "S",
     "essence": "HADES reversed + Spanish \"IA\": his first named AI system (live custom GPT g-DFBXHaDD0-sedah-ia). A fractal scale-tiered swarm of sub-1B models with dynamic brain-like routing, wave-based comms, compression-aware inter-layer protocols, meta-mutation self-evolution — \"a cluster of models, specializing, self evolving, brain plasticity, swarm theory\" — endgame: a Phase-5 \"self-conscious, self-refined, autonomous-learning\" Meta-Model (his first consciousness-as-goal framing). Merges 7 raw entries (naming moment, hierarchy, Phase 5, custom-GPT family).",
@@ -2610,7 +2610,7 @@
     "id": "CX-0075",
     "name": "Affinity Matrix + council-mechanics vocabulary",
     "cluster": "HADES-MOA",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Model synergy per task; council roles (judge/skeptic/explainer), combo meters, energy budgets, fallback ladders.",
@@ -2688,7 +2688,7 @@
     "id": "CX-0077",
     "name": "AI civilization of small local LLMs + neural transistor",
     "cluster": "HADES-MOA",
-    "part": "IV-INTERFACE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Society of qwen-scale models replacing function algorithms; small LLM as circuit element.",
@@ -2991,7 +2991,7 @@
     "id": "CX-0085",
     "name": "Coordination-over-multiplicity finding",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Uncoordinated role-differentiation regresses below one model; 'the protocol that connects them is the intelligence.'",
@@ -3253,7 +3253,7 @@
     "id": "CX-0092",
     "name": "EvolvingCosmicMultiLLM — self-evolving model router",
     "cluster": "HADES-MOA",
-    "part": "IV-INTERFACE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Eight client-side HF models; per-model EMAs, evolve() method, usage-evolved routing policy in localStorage.",
@@ -3294,7 +3294,7 @@
     "id": "CX-0093",
     "name": "Function Registry + Semantic Router",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Tool functions pre-embedded with MiniLM; queries routed by cosine similarity — semantic tool-routing before standard.",
@@ -3596,7 +3596,7 @@
     "id": "CX-0101",
     "name": "MoA Evolution Timeline roadmap (DNAS-MoA, QE-MoA, Federated, Cross-Modal)",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Self-authored future-paradigm roadmap for Mixture-of-Agents, rendered as FastHTML interactive timeline app.",
@@ -4126,7 +4126,7 @@
     "id": "CX-0115",
     "name": "qwen3 parallel self-critique councils",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Multiple qwen3 streams critiquing each other; '~10GB fits in 16GB RAM' — laptop-as-AI-datacenter realization.",
@@ -4163,7 +4163,7 @@
     "id": "CX-0116",
     "name": "Security Agent with platform-as-adversary threat model",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Agent protecting project progress against OpenAI itself — the platform as the threat model.",
@@ -4245,7 +4245,7 @@
     "id": "CX-0118",
     "name": "Subconscious Cognitive Fusion",
     "cluster": "HADES-MOA",
-    "part": "I-ENTITY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": null,
     "essence": "Dual-process cognition: conscious*0.7 + subconscious*0.3 weighted output, implemented as numpy in HadesOmega.",
@@ -4498,7 +4498,7 @@
     "id": "CX-0125",
     "name": "Essence passing + three-level conversation hierarchy",
     "cluster": "COMPRESSION",
-    "part": "V-CRAFT",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "A",
     "essence": "Overseer / cross / granular conversation tiers with rationed overseer responses (context-budget economics), a documentation pipeline topped by a \"Supreme Reporter,\" and \"essence passing\" — compressing a conversation's state into a transferable prompt. Context handoff / state serialization, self-invented.",
@@ -5906,7 +5906,7 @@
     "id": "CX-0163",
     "name": "Ollama-as-Fuel",
     "cluster": "AETHER",
-    "part": "IV-INTERFACE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "A",
     "essence": "The pivot thesis \"Ollama output isn't content to be consumed — it's fuel to power autonomous, self-evolving programs,\" industrialized into a refinery metaphor (fuel grades = quantization levels, octane = logprob consistency, contamination = hallucinations) and reframed as \"probability navigation through 50,000-dimensional token space\" with a 648-combination fuel-x-behavior framework.",
@@ -7976,7 +7976,7 @@
     "id": "CX-0220",
     "name": "Cosmic Nexus — each universe IS a different local model",
     "cluster": "GAMES",
-    "part": "VI-LABORATORY",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "A",
     "essence": "Multiverse game where Nexus Core = LLaMA 3.2 11B orchestrator and every universe is a distinct local Ollama model with its own puzzle modality (3B logic / 1B art / Hermes-8B emotion / PICO narrator), AI peer review of discoveries, \"quantum signature\" inter-model protocol, 3D WebGL starmap — multi-model orchestration as game design, all sized for a consumer GPU. Merges 3 raw entries.",
@@ -9750,7 +9750,7 @@
     "id": "CX-0271",
     "name": "AITO — AI Task Orchestrator",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "C",
     "essence": "",
@@ -9780,7 +9780,7 @@
     "id": "CX-0272",
     "name": "AMACS — Advanced Multi-Agent Coordination System",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "C",
     "essence": "",
@@ -9907,7 +9907,7 @@
     "id": "CX-0276",
     "name": "Bot society with its own Slack + Asana",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "C",
     "essence": "",
@@ -9999,7 +9999,7 @@
     "id": "CX-0279",
     "name": "Cognitive Resonance Chamber",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "C",
     "essence": "",
@@ -10029,7 +10029,7 @@
     "id": "CX-0280",
     "name": "CognitiveTransistor",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "A",
     "essence": "An LLM call modeled as a bounded electronic component — class with budget_ms, sense→decide→act→emit loop, schema-validated decisions, energy/telemetry emission — composed into probability-gated circuits with NEAT evolution, Cognitive Cache, Reflection Engine. Explicit rejection of \"LLMs as black-box answer generators.\" Merges 2 raw entries.",
@@ -10990,7 +10990,7 @@
     "id": "CX-0311",
     "name": "Second Foundation shadow controller",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "C",
     "essence": "",
@@ -11142,7 +11142,7 @@
     "id": "CX-0316",
     "name": "Superposition / Metaposition / Omniposition triad",
     "cluster": "HONESTY",
-    "part": "VII-MEASURE",
+    "part": "III-COMPOSITION",
     "law": null,
     "tier": "B",
     "essence": "His coined 3-tier extension of superposition (metaposition and omniposition are his words), formalized as a multi-LLM reasoning framework — run models in parallel (superposition), aggregate all states (omniposition), meta-decide strategy (metaposition) — and shipped as software primitives in the HAR analyzer. Merges 2 raw entries.",
@@ -22861,7 +22861,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -22897,7 +22899,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -22926,13 +22930,17 @@
       "atlas"
     ],
     "links": {
-      "derives_from": [],
+      "derives_from": [
+        "CX-0321"
+      ],
       "enables": [],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -22962,12 +22970,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -22996,12 +23008,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23036,7 +23052,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23070,7 +23088,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23099,12 +23119,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23133,12 +23157,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23172,7 +23200,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23206,7 +23236,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23240,7 +23272,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23269,12 +23303,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23308,8 +23346,12 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
-      "refines": [],
+      "implements": [
+        "CX-0650"
+      ],
+      "refines": [
+        "CX-0321"
+      ],
       "proves": [],
       "parallel": [
         "CX-0654"
@@ -23348,9 +23390,13 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0321"
+      ]
     }
   },
   {
@@ -23383,7 +23429,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23417,7 +23465,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23451,7 +23501,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23486,7 +23538,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23522,7 +23576,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0166"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23551,12 +23607,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23590,7 +23650,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23624,7 +23686,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23658,7 +23722,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23693,7 +23759,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23723,12 +23791,16 @@
     ],
     "links": {
       "derives_from": [],
-      "enables": [],
+      "enables": [
+        "CX-0166"
+      ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23757,13 +23829,17 @@
       "atlas"
     ],
     "links": {
-      "derives_from": [],
+      "derives_from": [
+        "CX-0166"
+      ],
       "enables": [],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23798,7 +23874,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23826,13 +23904,18 @@
       "atlas"
     ],
     "links": {
-      "derives_from": [],
+      "derives_from": [
+        "CX-0159"
+      ],
       "enables": [],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0166",
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23867,7 +23950,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
@@ -23901,7 +23986,9 @@
       "watches": [],
       "transports": [],
       "opposes": [],
-      "implements": [],
+      "implements": [
+        "CX-0650"
+      ],
       "refines": [],
       "proves": []
     }
