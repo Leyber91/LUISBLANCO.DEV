@@ -14,6 +14,7 @@ import argparse
 import threading
 import time
 from datetime import datetime, timezone
+from socketserver import ThreadingMixIn
 
 sys.path.insert(0, os.path.dirname(__file__))
 try:
@@ -25,8 +26,17 @@ except Exception:
 PORT = 7700
 DASHBOARD_HTML = os.path.join(os.path.dirname(__file__), "observer.html")
 
+class ThreadingHTTPServer(ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
+
 class ObserverHandler(http.server.BaseHTTPRequestHandler):
     def log_message(self, *a): pass  # silence default logs
+
+    def handle_error(self, request, client_address):
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+            return  # browser closed connection — not an error
+        super().handle_error(request, client_address)
 
     def do_GET(self):
         if self.path == "/" or self.path == "/observer.html":
@@ -53,28 +63,31 @@ class ObserverHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _serve_sse(self):
-        """Server-Sent Events: tail events.jsonl and stream new lines."""
+        """Server-Sent Events: replay existing events then tail for new ones."""
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         pos = 0
-        # Send all existing events first
+        # Replay all existing events
         if os.path.exists(EVENTS_FILE):
-            with open(EVENTS_FILE, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        try:
+            try:
+                with open(EVENTS_FILE, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
                             self.wfile.write(f"data: {line}\n\n".encode())
-                        except Exception:
-                            return
-            pos = os.path.getsize(EVENTS_FILE)
-        # Then tail for new events
+                self.wfile.flush()  # push replay to browser immediately
+                pos = os.path.getsize(EVENTS_FILE)
+            except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+                return
+        # Tail for new events + keepalive ping every 15 s
+        last_ping = time.monotonic()
         try:
             while True:
                 time.sleep(0.3)
+                now = time.monotonic()
                 if not os.path.exists(EVENTS_FILE):
                     continue
                 size = os.path.getsize(EVENTS_FILE)
@@ -87,7 +100,12 @@ class ObserverHandler(http.server.BaseHTTPRequestHandler):
                                 self.wfile.write(f"data: {line}\n\n".encode())
                     self.wfile.flush()
                     pos = size
-        except Exception:
+                    last_ping = now
+                elif now - last_ping > 15:
+                    self.wfile.write(b": keepalive\n\n")
+                    self.wfile.flush()
+                    last_ping = now
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError, OSError):
             return
 
     def _serve_events_json(self):
@@ -128,7 +146,7 @@ def main():
     parser = argparse.ArgumentParser(description="TokenGateKeeper Observability Tower")
     parser.add_argument("--port", type=int, default=PORT)
     args = parser.parse_args()
-    server = http.server.HTTPServer(("localhost", args.port), ObserverHandler)
+    server = ThreadingHTTPServer(("localhost", args.port), ObserverHandler)
     print(f"\n  OBSERVABILITY TOWER")
     print(f"  Dashboard : http://localhost:{args.port}/")
     print(f"  Events    : http://localhost:{args.port}/events  (SSE)")
