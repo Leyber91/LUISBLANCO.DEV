@@ -13,8 +13,8 @@
 (function(){
   "use strict";
   const RESONANCE = (window.RESONANCE = window.RESONANCE || {});
-  const CFG  = RESONANCE.CONFIG;
-  const AXES = CFG.RADAR_AXES;
+  const CFG    = RESONANCE.CONFIG || {};
+  const AXES   = CFG.RADAR_AXES  || [];
   const N_AXES = AXES.length;
 
   // ── colour palette ───────────────────────────────────────────────────────
@@ -55,6 +55,42 @@
   }
   function glow(ctx, color, blur){ ctx.shadowColor = color; ctx.shadowBlur = blur; }
   function noGlow(ctx){ ctx.shadowBlur = 0; }
+
+  function hexRGB(hex){
+    if(!hex || hex.length < 7) return [212, 162, 76];
+    return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+  }
+
+  function normSig(s){
+    if(!s) s = {};
+    const color = (typeof s.color === 'string' && s.color.length >= 7) ? s.color : '#D4A24C';
+    const [r,g,b] = hexRGB(color);
+    const tp = s.timing_pattern || {};
+    const rd = s.radar          || {};
+    return {
+      profile_label:       s.profile_label       || 'COUNCIL',
+      color,
+      glow:                s.glow                || 'rgba(212,162,76,0.6)',
+      dim_color:           s.dim_color           || `rgba(${r},${g},${b},0.08)`,
+      health:              s.health              != null ? s.health : 50,
+      resonance_potential: s.resonance_potential != null ? s.resonance_potential : 0.5,
+      token_stream:        Array.isArray(s.token_stream) ? s.token_stream : [],
+      mag:                 s.mag instanceof Float32Array ? s.mag : new Float32Array(32),
+      radar: {
+        processing:    rd.processing    != null ? rd.processing    : 0.5,
+        latency:       rd.latency       != null ? rd.latency       : 0.5,
+        throughput:    rd.throughput    != null ? rd.throughput    : 0.5,
+        coherence:     rd.coherence     != null ? rd.coherence     : 0.5,
+        efficiency:    rd.efficiency    != null ? rd.efficiency    : 0.5,
+        stochasticity: rd.stochasticity != null ? rd.stochasticity : 0.5,
+      },
+      timing_pattern: {
+        mean_interval:  tp.mean_interval  != null ? tp.mean_interval  : 0,
+        std_interval:   tp.std_interval   != null ? tp.std_interval   : 0,
+        burst_patterns: Array.isArray(tp.burst_patterns) ? tp.burst_patterns : [],
+      },
+    };
+  }
 
   // ── PANEL 1 — Token Stream ───────────────────────────────────────────────
   // Words scroll left to right, oldest at left. Burst words are brighter.
