@@ -287,6 +287,160 @@
     "reason": "era-1: metapower section born inside leyber212"
   },
   {
+    "source": "CX-0006",
+    "target": "CX-0014",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "ouroboros-line: ouroboros IS the proof-of-line"
+  },
+  {
+    "source": "CX-0297",
+    "target": "CX-0014",
+    "type": "implements",
+    "weight": 0.8,
+    "reason": "ouroboros-line: metapower seeds the line"
+  },
+  {
+    "source": "CX-0063",
+    "target": "CX-0071",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "hades-line: HADES IS the proof-of-line"
+  },
+  {
+    "source": "CX-0067",
+    "target": "CX-0071",
+    "type": "proves",
+    "weight": 0.95,
+    "reason": "hades-line: strongest proof-of-priority"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0127",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "compression-line: DATASPACE IS the compression line origin"
+  },
+  {
+    "source": "CX-0129",
+    "target": "CX-0127",
+    "type": "proves",
+    "weight": 0.85,
+    "reason": "compression-line: degradation problem proves the line"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0165",
+    "type": "proves",
+    "weight": 0.95,
+    "reason": "aether-line: AETHER IS the proof-of-line"
+  },
+  {
+    "source": "CX-0275",
+    "target": "CX-0165",
+    "type": "implements",
+    "weight": 0.85,
+    "reason": "aether-line: visual nursery implements the line concept"
+  },
+  {
+    "source": "CX-0222",
+    "target": "CX-0228",
+    "type": "proves",
+    "weight": 0.95,
+    "reason": "games-line: thesis IS the proof-of-line"
+  },
+  {
+    "source": "CX-0220",
+    "target": "CX-0228",
+    "type": "proves",
+    "weight": 0.85,
+    "reason": "games-line: cosmic nexus is the built proof"
+  },
+  {
+    "source": "CX-0321",
+    "target": "CX-0322",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "honesty-line: decoder IS the proof-of-line"
+  },
+  {
+    "source": "CX-0280",
+    "target": "CX-0322",
+    "type": "proves",
+    "weight": 0.9,
+    "reason": "honesty-line: transistor is the built proof"
+  },
+  {
+    "source": "CX-0063",
+    "target": "CX-0268",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "era-3: hades multi-agent system builds the context requiring TMR framework"
+  },
+  {
+    "source": "CX-0006",
+    "target": "CX-0268",
+    "type": "enables",
+    "weight": 0.8,
+    "reason": "era-3: ouroboros build surfaced the need for cognitive-evolution framing"
+  },
+  {
+    "source": "CX-0307",
+    "target": "CX-0327",
+    "type": "enables",
+    "weight": 0.75,
+    "reason": "era-0-to-1: leyber212 creative work established multi-persona prompting as method"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0327",
+    "type": "enables",
+    "weight": 0.7,
+    "reason": "compression: critic stack is context-engineered multi-voice compression in practice"
+  },
+  {
+    "source": "CX-0124",
+    "target": "CX-0263",
+    "type": "refines",
+    "weight": 0.75,
+    "reason": "compression: 5-file system is early DATASPACE-like external memory"
+  },
+  {
+    "source": "CX-0327",
+    "target": "CX-0069",
+    "type": "derives_from",
+    "weight": 0.8,
+    "reason": "era-0: critic stack is the manual multi-agent debate ancestor"
+  },
+  {
+    "source": "CX-0268",
+    "target": "CX-0293",
+    "type": "proves",
+    "weight": 0.85,
+    "reason": "era-3: inception.py proves the TMR theory ran as code"
+  },
+  {
+    "source": "CX-0166",
+    "target": "CX-0328",
+    "type": "requires",
+    "weight": 0.85,
+    "reason": "honesty-line: WF requires token-EEG as its instrument layer"
+  },
+  {
+    "source": "CX-0166",
+    "target": "CX-0317",
+    "type": "derives_from",
+    "weight": 0.8,
+    "reason": "aether-line: the ontology is the intellectual source WF builds from"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0317",
+    "type": "requires",
+    "weight": 0.95,
+    "reason": "aether-line: AETHER requires the 31-body mapping — it IS the ontology"
+  },
+  {
     "source": "CX-0638",
     "target": "CX-0166",
     "type": "enables",

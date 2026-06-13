@@ -173,7 +173,8 @@
       "derives_from": [],
       "enables": [
         "CX-0305",
-        "CX-0063"
+        "CX-0063",
+        "CX-0268"
       ],
       "requires": [],
       "watches": [],
@@ -183,7 +184,9 @@
       "refines": [
         "CX-0003"
       ],
-      "proves": []
+      "proves": [
+        "CX-0014"
+      ]
     }
   },
   {
@@ -2229,7 +2232,8 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0067"
+        "CX-0067",
+        "CX-0268"
       ],
       "requires": [],
       "watches": [
@@ -2239,7 +2243,9 @@
       "opposes": [],
       "implements": [],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0071"
+      ]
     }
   },
   {
@@ -2363,7 +2369,9 @@
       "refines": [
         "CX-0069"
       ],
-      "proves": [],
+      "proves": [
+        "CX-0071"
+      ],
       "parallel": [
         "CX-0125"
       ]
@@ -4481,7 +4489,8 @@
       "enables": [
         "CX-0126",
         "CX-0280",
-        "CX-0307"
+        "CX-0307",
+        "CX-0327"
       ],
       "requires": [],
       "watches": [
@@ -4490,8 +4499,12 @@
       "transports": [],
       "opposes": [],
       "implements": [],
-      "refines": [],
-      "proves": []
+      "refines": [
+        "CX-0263"
+      ],
+      "proves": [
+        "CX-0127"
+      ]
     }
   },
   {
@@ -4668,7 +4681,9 @@
         "CX-0124"
       ],
       "refines": [],
-      "proves": [],
+      "proves": [
+        "CX-0127"
+      ],
       "parallel": [
         "CX-0238",
         "CX-0407"
@@ -5801,7 +5816,9 @@
       "enables": [
         "CX-0319"
       ],
-      "requires": [],
+      "requires": [
+        "CX-0317"
+      ],
       "watches": [],
       "transports": [],
       "opposes": [],
@@ -5809,7 +5826,9 @@
       "refines": [
         "CX-0166"
       ],
-      "proves": []
+      "proves": [
+        "CX-0165"
+      ]
     }
   },
   {
@@ -6027,9 +6046,13 @@
       "gold+atlas"
     ],
     "links": {
-      "derives_from": [],
+      "derives_from": [
+        "CX-0317"
+      ],
       "enables": [],
-      "requires": [],
+      "requires": [
+        "CX-0328"
+      ],
       "watches": [],
       "transports": [],
       "opposes": [],
@@ -8004,7 +8027,9 @@
       "refines": [
         "CX-0164"
       ],
-      "proves": []
+      "proves": [
+        "CX-0228"
+      ]
     }
   },
   {
@@ -8066,7 +8091,9 @@
         "CX-0324"
       ],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0228"
+      ]
     }
   },
   {
@@ -9683,7 +9710,9 @@
         "CX-0321"
       ],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0293"
+      ]
     }
   },
   {
@@ -9897,6 +9926,7 @@
       "transports": [],
       "opposes": [],
       "implements": [
+        "CX-0165",
         "CX-0321"
       ],
       "refines": [],
@@ -10056,7 +10086,9 @@
         "CX-0321"
       ],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0322"
+      ]
     }
   },
   {
@@ -10581,6 +10613,7 @@
       "transports": [],
       "opposes": [],
       "implements": [
+        "CX-0014",
         "CX-0321"
       ],
       "refines": [],
@@ -10883,7 +10916,8 @@
       "derives_from": [],
       "enables": [
         "CX-0389",
-        "CX-0297"
+        "CX-0297",
+        "CX-0327"
       ],
       "requires": [],
       "watches": [],
@@ -11329,7 +11363,9 @@
       "opposes": [],
       "implements": [],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0322"
+      ]
     }
   },
   {
@@ -11505,7 +11541,9 @@
       "gold+atlas"
     ],
     "links": {
-      "derives_from": [],
+      "derives_from": [
+        "CX-0069"
+      ],
       "enables": [
         "CX-0069"
       ],
