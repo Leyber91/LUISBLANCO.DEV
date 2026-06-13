@@ -1,8 +1,8 @@
 {
   "meta": {
-    "built": "2026-06-13T02:39:47.133Z",
-    "nodeCount": 661,
-    "edgeCount": 928
+    "built": "2026-06-13T02:45:15.058Z",
+    "nodeCount": 684,
+    "edgeCount": 1004
   },
   "nodes": [
     {
@@ -5292,6 +5292,190 @@
       "cluster": "LIFE",
       "tier": null,
       "status": "shipped"
+    },
+    {
+      "id": "CX-0662",
+      "name": "CONSTELLATION · LAW 1 · SCALE BY COMPOSITION, NOT SIZE",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0663",
+      "name": "CONSTELLATION · LAW 2 · HETEROGENEITY BEATS CLONES",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0664",
+      "name": "CONSTELLATION · LAW 3 · EVERY AUTONOMOUS LAYER GETS A WATCHER — THE SEDAH LAW",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0665",
+      "name": "CONSTELLATION · LAW 4 · FIT THE HARDWARE YOU OWN",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0666",
+      "name": "CONSTELLATION · LAW 5 · ROUTING IS COGNITION",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0667",
+      "name": "CONSTELLATION · LAW 6 · THE HUMAN IS A LEGITIMATE BUS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0668",
+      "name": "CONSTELLATION · LAW 7 · OUTPUT IS FUEL",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0669",
+      "name": "CONSTELLATION · LAW 8 · FAILURE MUST BE RECOVERABLE, NOT PREVENTED",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0670",
+      "name": "CONSTELLATION · LAW 9 · THE TOPOLOGY IS VISIBLE OR IT IS BROKEN",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": "A",
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0671",
+      "name": "CONSTELLATION · THE REVERSAL",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0672",
+      "name": "CONSTELLATION · THE RECURSION INSTINCT",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0673",
+      "name": "CONSTELLATION · WHAT THE WATCHER ANSWERS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0674",
+      "name": "CONSTELLATION · THE RING, DRAWN",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0675",
+      "name": "CONSTELLATION · THE WATCHER'S DESCENDANTS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0676",
+      "name": "CONSTELLATION · ANTI-PATTERN · I · CLONE SWARMS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0677",
+      "name": "CONSTELLATION · ANTI-PATTERN · II · UNWATCHED AUTONOMY",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0678",
+      "name": "CONSTELLATION · ANTI-PATTERN · III · TOPOLOGY SPAGHETTI",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0679",
+      "name": "CONSTELLATION · ANTI-PATTERN · IV · FUEL WASTE",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0680",
+      "name": "CONSTELLATION · PRACTICE · THIS CODEX'S OWN AUTHORING FLEETS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0681",
+      "name": "CONSTELLATION · PRACTICE · THE SITE'S AGENT WORKFLOWS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0682",
+      "name": "CONSTELLATION · PRACTICE · FEEDING THE AEA — THE MULTIPLICITY AXIS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0683",
+      "name": "CONSTELLATION · PRACTICE · ESSENCE AT THE SEAMS",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
+    },
+    {
+      "id": "CX-0684",
+      "name": "CONSTELLATION · PRACTICE · DOCTRINE PRINCIPLE SERVED",
+      "part": "III-COMPOSITION",
+      "cluster": "CONSTELLATION",
+      "tier": null,
+      "status": "paper-only"
     }
   ],
   "edges": [
@@ -5861,6 +6045,12 @@
     },
     {
       "source": "CX-0067",
+      "target": "CX-0667",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0067",
       "target": "CX-0071",
       "type": "proves",
       "weight": 0.5
@@ -5890,6 +6080,12 @@
       "weight": 0.5
     },
     {
+      "source": "CX-0069",
+      "target": "CX-0662",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
       "source": "CX-0070",
       "target": "CX-0166",
       "type": "derives_from",
@@ -5899,6 +6095,12 @@
       "source": "CX-0070",
       "target": "CX-0063",
       "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0070",
+      "target": "CX-0664",
+      "type": "proves",
       "weight": 0.5
     },
     {
@@ -6772,6 +6974,12 @@
       "weight": 0.5
     },
     {
+      "source": "CX-0163",
+      "target": "CX-0665",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
       "source": "CX-0164",
       "target": "CX-0166",
       "type": "implements",
@@ -6805,6 +7013,18 @@
       "source": "CX-0166",
       "target": "CX-0159",
       "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0166",
+      "target": "CX-0669",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0166",
+      "target": "CX-0670",
+      "type": "proves",
       "weight": 0.5
     },
     {
@@ -7249,6 +7469,12 @@
       "source": "CX-0220",
       "target": "CX-0164",
       "type": "refines",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0220",
+      "target": "CX-0663",
+      "type": "proves",
       "weight": 0.5
     },
     {
@@ -7739,6 +7965,12 @@
     },
     {
       "source": "CX-0280",
+      "target": "CX-0666",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0280",
       "target": "CX-0322",
       "type": "proves",
       "weight": 0.5
@@ -7795,6 +8027,12 @@
       "source": "CX-0287",
       "target": "CX-0321",
       "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0287",
+      "target": "CX-0668",
+      "type": "proves",
       "weight": 0.5
     },
     {
@@ -10860,6 +11098,408 @@
     {
       "source": "CX-0661",
       "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0662",
+      "target": "CX-0069",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0662",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0662",
+      "target": "CX-0063",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0663",
+      "target": "CX-0220",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0663",
+      "target": "CX-0075",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0663",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0664",
+      "target": "CX-0070",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0664",
+      "target": "CX-0063",
+      "type": "watches",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0664",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0665",
+      "target": "CX-0070",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0665",
+      "target": "CX-0163",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0665",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0666",
+      "target": "CX-0280",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0666",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0667",
+      "target": "CX-0067",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0667",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0668",
+      "target": "CX-0287",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0668",
+      "target": "CX-0163",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0668",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0669",
+      "target": "CX-0070",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0669",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0670",
+      "target": "CX-0166",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0670",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0671",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0671",
+      "target": "CX-0672",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0671",
+      "target": "CX-0673",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0671",
+      "target": "CX-0674",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0671",
+      "target": "CX-0675",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0672",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0672",
+      "target": "CX-0673",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0672",
+      "target": "CX-0674",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0672",
+      "target": "CX-0675",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0673",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0673",
+      "target": "CX-0674",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0673",
+      "target": "CX-0675",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0674",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0674",
+      "target": "CX-0675",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0675",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0676",
+      "target": "CX-0069",
+      "type": "watches",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0676",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0676",
+      "target": "CX-0677",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0676",
+      "target": "CX-0678",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0676",
+      "target": "CX-0679",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0677",
+      "target": "CX-0070",
+      "type": "watches",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0677",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0677",
+      "target": "CX-0678",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0677",
+      "target": "CX-0679",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0678",
+      "target": "CX-0166",
+      "type": "watches",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0678",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0678",
+      "target": "CX-0679",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0679",
+      "target": "CX-0163",
+      "type": "watches",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0679",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0680",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0680",
+      "target": "CX-0681",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0680",
+      "target": "CX-0682",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0680",
+      "target": "CX-0683",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0680",
+      "target": "CX-0684",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0681",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0681",
+      "target": "CX-0682",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0681",
+      "target": "CX-0683",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0681",
+      "target": "CX-0684",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0682",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0682",
+      "target": "CX-0683",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0682",
+      "target": "CX-0684",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0683",
+      "target": "CX-0069",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0683",
+      "target": "CX-0684",
+      "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0684",
+      "target": "CX-0069",
       "type": "implements",
       "weight": 0.5
     }
