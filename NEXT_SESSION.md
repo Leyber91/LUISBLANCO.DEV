@@ -18,9 +18,10 @@ Currently sealed: **141 sections · 1.29 MB**.
 
 ## THE REGISTER — DONE (do not re-open unless a bug is found)
 
-Pipeline: 8 scripts in `register/` (phase0-bootstrap → phase1-canonicalize → phase2-part-assign → inject-constellation → phase3-edges → phase4-audit → phase5-assemble).
+Pipeline: 9 scripts in `register/` (phase0-bootstrap → phase1-canonicalize → phase2-part-assign → inject-constellation → **inject-wirtforge** → phase3-edges → phase4-audit → phase5-assemble).
 
-**FINAL STATE: 676 nodes · 996 typed edges · 0 orphans · 0 isolated S/A · 2 irreducible dup pairs**
+**FINAL STATE: 690 nodes · 1013 typed edges · 0 orphans · 0 isolated S/A · 2 irreducible dup pairs**
+(+14 WirthForge nodes · +17 edges vs prior session — inject-wirtforge.js sealed)
 
 To re-run from scratch (only if source atlas changes):
 ```
@@ -29,15 +30,16 @@ node phase0-bootstrap.js
 node phase1-canonicalize.js
 node phase2-part-assign.js
 node inject-constellation.js
+node inject-wirtforge.js
 node phase3-edges.js
 node phase4-audit.js
 node phase5-assemble.js
 ```
 Then re-seal: `$env:CODEX_PASS="Aether91212*"; node tools/build_codex.mjs`
 
-Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(80) · V-CRAFT(106) · VI-LABORATORY(58) · VII-MEASURE(171).
+Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) · IV-INTERFACE(86) · V-CRAFT(106) · VI-LABORATORY(58) · VII-MEASURE(179).
 
-`src/core/concept_graph.json` — 676 nodes, 996 edges — is versioned and ready for the Prime Radiant graph instrument.
+`src/core/concept_graph.json` — 690 nodes, 1013 edges — is versioned and ready for the Prime Radiant graph instrument.
 
 **Known minor items (not blocking):**
 - 536 atlas-only entries have no tier (expected — gold index only covers top ~130).
@@ -45,6 +47,10 @@ Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) ·
 - 2 similarity dup pairs are verified distinct concepts — not merge candidates.
 
 ---
+
+## WHAT WAS BUILT THIS SESSION (2026-06-13 cont.)
+
+- **inject-wirtforge.js** — 14 WirthForge LLM-measurement concepts injected: 6 × IV-INTERFACE (AI Resonance instrument, Spectral Analyzer, Cognitive Radar, Pattern Analysis, Load Meter, Observable-time doctrine) + 8 × VII-MEASURE (token-stream-as-signal, spectral fingerprint, stochasticity axis, token velocity Rₜ, asymptotic load pattern, pre-flight cost runway, cognitive load formula, health score). Source: AI Resonance dashboard screenshot (2025-09-12) + TokenGateKeeper/research_gemini.md.
 
 ## WHAT WAS BUILT THIS SESSION (2026-06-13)
 
@@ -64,9 +70,13 @@ Codex = **TWO books + an archive**:
 
 | Book | Parts | Status |
 |------|-------|--------|
-| **THE PARADIGM BOOK** | I-ENTITY · II-CONTINUITY · III-COMPOSITION · IV-INTERFACE · V-CRAFT · VI-LABORATORY · VII-MEASURE | Parts I-III = existing BOOK_AEA/ESSENCE/CONSTELLATION (done). Parts IV-VII = **NEW — not yet authored.** |
+| **THE PARADIGM BOOK** | I-ENTITY · II-CONTINUITY · III-COMPOSITION · IV-INTERFACE · V-CRAFT · VI-LABORATORY · VII-MEASURE | Parts I-III = AEA/ESSENCE/CONSTELLATION **must be RE-SEATED** (not re-done) under one harmonized law system with a unified intro. Parts IV-VII = NEW — not yet authored. |
 | **THE BOOK OF LUIS** | Eras 00-12 + BRAID + 4 new chapters (Mythology, Narrative, Ops, Life) | Main BOOK/ complete. 4 new chapters not yet added. |
-| **THE ARCHIVE** | atlas/gold/evidence/vault | Parked. |
+| **THE ARCHIVE** | atlas/gold/evidence/vault | Parked. Also parked (not codex books): **Venture Ladder** (business framework → income track) · **Three Doors** (already inside the parts). |
+
+**THE PARADIGM BOOK opens with a unified intro**: Visible AI doctrine + a support/dependency diagram showing how the 7 parts depend on each other. This intro does NOT exist yet — it is the first thing authored before the re-seat.
+
+**One LINEAGE** spanning all 7 parts belongs at the back of the Paradigm Book.
 
 `_reference/` current book dirs: `BOOK/` · `BOOK_AEA/` · `BOOK_ESSENCE/` · `BOOK_CONSTELLATION/` · `REGISTER/` · `research_map/`.
 **Missing: `BOOK_AETHER/` · `BOOK_CRAFT/` · `BOOK_LABORATORY/` · `BOOK_MEASURE/`** (Parts IV-VII).
@@ -77,27 +87,41 @@ Each new book follows the existing 6-file structure: `00_plate.html` · `01_the_
 
 ## ORDER NEXT SESSION
 
-**1. Author BOOK_AETHER (Part IV — INTERFACE)** ← START HERE
+**0. Author the Paradigm Book unified intro** (do this BEFORE re-seating or writing new parts)
+- One page: Visible AI doctrine statement + a support/dependency diagram of the 7 parts.
+- Lives at `_reference/BOOK_PARADIGM/00_intro.html`. No new concepts — pure architecture.
+
+**1. Author BOOK_AETHER (Part IV — INTERFACE)** ← START HERE after intro
 - Theme: astrophysics as interface; the internet as navigable space; AETHER/WIRTHFORGE/AetherNet.
-- Pull register's IV-INTERFACE concepts (80 entries) from `register/work/02_assigned.json` where `part=="IV-INTERFACE"` as the concept roster.
+- **Critical detail**: the **31-body ontology** (the 31 subsystems/entities of the Aether architecture) is the structural spine of this part. Name and define all 31.
+- **Critical link**: AETHER **feeds LUMEN and Transit** — the instrument vocabulary here is the live animation vocabulary on-site. Laws written here become LUMEN preset names and parameters.
+- **WirthForge source vocabulary now in register** (inject-wirtforge.js). Pull IV-INTERFACE cluster for instrument laws; pull VII-MEASURE WIRTHFORGE- entries for measurement laws.
+- Pull register's IV-INTERFACE concepts (86 entries) from `register/work/02_assigned.json` where `part=="IV-INTERFACE"` as the concept roster.
 - 6 files in `_reference/BOOK_AETHER/`. Model exactly on `_reference/BOOK_CONSTELLATION/` structure.
 - Laws to derive from the AETHER LINE in `PORTFOLIO/LUIS_CONCEPTUAL_MAP.md` (section: THE AETHER LINE).
 - After writing: add `BOOK_AETHER` to `tools/build_codex.mjs` BOOKS array, re-seal, push.
 
-**2. Author BOOK_CRAFT (Part V — CRAFT)** — prompting, context engineering, output grammar.
+**2. Re-seat Parts I–III** under the unified Paradigm Book law system (after intro is written).
+- BOOK_AEA → Part I-ENTITY, BOOK_ESSENCE → Part II-CONTINUITY, BOOK_CONSTELLATION → Part III-COMPOSITION.
+- Re-seating = add unified law IDs, cross-part references, shared register links. Do NOT rewrite content.
+
+**3. Author BOOK_CRAFT (Part V — CRAFT)** — prompting, context engineering, output grammar.
 Source: `_reference/research_map/prompting.md` + CRAFT cluster in register.
 
-**3. Author BOOK_LABORATORY (Part VI — LABORATORY)** — games as discovery engines, sim labs, prototyping.
+**4. Author BOOK_LABORATORY (Part VI — LABORATORY)** — games as discovery engines, sim labs, prototyping.
 Source: `_reference/research_map/7-games.md` + `websim.md` + GAMES cluster in register.
 
-**4. Author BOOK_MEASURE (Part VII — MEASURE)** — honesty, audit, receipt culture, visible AI.
-Source: `_reference/DOCTRINE_VISIBLE_AI.md` + HONESTY cluster in register (171 entries, largest part).
+**5. Author BOOK_MEASURE / OMEGA (Part VII — MEASURE)** — honesty decoder, token-EEG, QBNN, energy-truth, **and the open cracks**.
+- Original name was **OMEGA** — the terminal book, the one that names what is still unresolved.
+- WirthForge measurement algorithms (inject-wirtforge.js) are primary source for the token-EEG and spectral laws.
+- Source: `_reference/DOCTRINE_VISIBLE_AI.md` + HONESTY + OPS clusters in register (179 entries, largest part).
+- **Ops chapter has a public form**: its public-facing version = the future **client diagnostic manual** (different shelf, not inside the codex). Flag clearly when authoring.
 
-**5. Heritage repos scope** — list what exists in AetherVision, project-leyber-212, time_slip, ai_canvas; extract shader assets for LUMEN.
+**6. Heritage repos scope** — list what exists in AetherVision, project-leyber-212, time_slip, ai_canvas; extract shader assets for LUMEN.
 
-**6. LUMEN gravitational lensing shader** — `project-leyber-212-website/.../gravitational_lensing.js`. Bends the dust field, adds depth layer under glyphs. **Needs explicit go-ahead — substantial JS build.**
+**7. LUMEN gravitational lensing shader** — `project-leyber-212-website/.../gravitational_lensing.js`. Bends the dust field, adds depth layer under glyphs. **Needs explicit go-ahead — substantial JS build.**
 
-**7. concept_graph.json → Prime Radiant instrument** — force-directed graph page wiring 676 nodes + 996 edges from `src/core/concept_graph.json`. Already versioned, just needs a viewer.
+**8. concept_graph.json → Prime Radiant instrument** — force-directed graph page wiring 676 nodes + 996 edges from `src/core/concept_graph.json`. Already versioned, just needs a viewer.
 
 ---
 
