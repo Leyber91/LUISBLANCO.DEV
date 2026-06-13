@@ -172,9 +172,9 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0302",
+        "CX-0300",
         "CX-0063",
-        "CX-0266"
+        "CX-0264"
       ],
       "requires": [],
       "watches": [],
@@ -198,11 +198,16 @@
     "tier": "B",
     "essence": "Neural net fusing quantum superposition/entanglement with biological neuroplasticity via a disciplined 9-step plan; coined primitives: Schrödinger backpropagation, neuroplasticity entanglement, complex-valued neurons, quantum-gate activations, and three invented metrics (Quantum Advantage Ratio, Entanglement Entropy, Bio-Quantum Plasticity Index). Merges 2 raw entries.",
     "status": "shipped",
-    "eras": [],
-    "sources": [
-      "`research_map/ai-o-c.md`; `C:/Dev/CHATGPT_ARCHIVE/SEDAH/Hades AI Model Architecture.json`"
+    "eras": [
+      "ERA3"
     ],
-    "aliases": [],
+    "sources": [
+      "`research_map/ai-o-c.md`; `C:/Dev/CHATGPT_ARCHIVE/SEDAH/Hades AI Model Architecture.json`",
+      "research_map/claude-raw.md Era A; claude-vault-000.md · research_map/sedah.md + root-extractions.md (EXTRACTION_QBNN_QUANTUM_SYSTEMS.md)"
+    ],
+    "aliases": [
+      "QBNN — Quantum-Biological Neural Network"
+    ],
     "potential": [],
     "merged_from": [
       "gold+atlas"
@@ -1317,9 +1322,9 @@
       "proves": [],
       "parallel": [
         "CX-0157",
-        "CX-0180",
-        "CX-0204",
-        "CX-0481"
+        "CX-0179",
+        "CX-0203",
+        "CX-0478"
       ]
     }
   },
@@ -1545,10 +1550,10 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0432",
-        "CX-0452",
-        "CX-0479",
-        "CX-0536"
+        "CX-0429",
+        "CX-0449",
+        "CX-0476",
+        "CX-0533"
       ]
     }
   },
@@ -2030,9 +2035,9 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0375",
-        "CX-0377",
-        "CX-0485"
+        "CX-0372",
+        "CX-0374",
+        "CX-0482"
       ]
     }
   },
@@ -2145,9 +2150,9 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0347",
-        "CX-0348",
-        "CX-0355"
+        "CX-0345",
+        "CX-0346",
+        "CX-0353"
       ]
     }
   },
@@ -2190,9 +2195,15 @@
     "tier": "C",
     "essence": "",
     "status": "shipped",
-    "eras": [],
-    "sources": [],
-    "aliases": [],
+    "eras": [
+      "ERA3"
+    ],
+    "sources": [
+      "ai-interaction.md + ai-ouroborus.md"
+    ],
+    "aliases": [
+      "Dr. Alice Newton vs Dr. Hades Helix debate engine"
+    ],
     "potential": [],
     "merged_from": [
       "gold"
@@ -2208,7 +2219,11 @@
         "CX-0063"
       ],
       "refines": [],
-      "proves": []
+      "proves": [],
+      "parallel": [
+        "CX-0128",
+        "CX-0400"
+      ]
     }
   },
   {
@@ -2233,7 +2248,7 @@
       "derives_from": [],
       "enables": [
         "CX-0067",
-        "CX-0266"
+        "CX-0264"
       ],
       "requires": [],
       "watches": [
@@ -2370,7 +2385,7 @@
         "CX-0069"
       ],
       "proves": [
-        "CX-0662",
+        "CX-0659",
         "CX-0071"
       ],
       "parallel": [
@@ -2429,7 +2444,7 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
@@ -2440,7 +2455,7 @@
       ],
       "refines": [],
       "proves": [
-        "CX-0657"
+        "CX-0654"
       ]
     }
   },
@@ -2469,7 +2484,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0165"
+        "CX-0074"
       ],
       "enables": [],
       "requires": [],
@@ -2481,7 +2496,7 @@
       ],
       "refines": [],
       "proves": [
-        "CX-0659"
+        "CX-0656"
       ]
     }
   },
@@ -2590,7 +2605,7 @@
   },
   {
     "id": "CX-0074",
-    "name": "Aether_AI",
+    "name": "AETHER / Aether 212",
     "cluster": "HADES-MOA",
     "part": "IV-INTERFACE",
     "law": null,
@@ -2598,12 +2613,21 @@
     "essence": "Original Ollama playground: SVG-visualized chat, n8n-like canvas, dual-agent Loop, Wizard modelfile creator.",
     "status": "prototyped",
     "eras": [
-      "ERA8"
+      "ERA8",
+      "ERA9",
+      "ERA10"
     ],
     "sources": [
-      "research_map/claude-vault-007.md (github.com/Leyber91/Aether_AI) · research_map/claude-vault-design.md"
+      "research_map/claude-vault-007.md (github.com/Leyber91/Aether_AI) · research_map/claude-vault-design.md",
+      "`research_map/claude-raw.md`; `research_map/personal-analysis-2.md`; `C:/Dev/CHATGPT_ARCHIVE_PERSONAL/chatgpt_archive_analysis/00_MASTER_INDEX.md`",
+      "research_map/personal-analysis-4.md, -5.md (Toolkit Ecosystem Development Plan; Aethernet Concepts Overview)",
+      "research_map/claude-code-artifacts.md (03_CODE_ARTIFACTS.md) · claude-raw.md; claude-timeline.md (CLAUDE_ARCHIVE WIRTHFORGE) · claude-vault-projects.md (01977f45, 0197d794, 0198b97c); gold #2 · personal-analysis-2.md, -3.md, -4.md (Wirthforge_origin)"
     ],
-    "aliases": [],
+    "aliases": [
+      "Aether_AI",
+      "WIRTHFORGE",
+      "AetherNet"
+    ],
     "potential": [
       "site-demo"
     ],
@@ -2611,9 +2635,13 @@
       "atlas"
     ],
     "links": {
-      "derives_from": [],
+      "derives_from": [
+        "CX-0311"
+      ],
       "enables": [],
-      "requires": [],
+      "requires": [
+        "CX-0322"
+      ],
       "watches": [],
       "transports": [],
       "opposes": [],
@@ -2621,7 +2649,10 @@
         "CX-0063"
       ],
       "refines": [],
-      "proves": []
+      "proves": [
+        "CX-0661",
+        "CX-0662"
+      ]
     }
   },
   {
@@ -2660,7 +2691,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0249"
+        "CX-0247"
       ]
     }
   },
@@ -2776,7 +2807,7 @@
       "proves": [],
       "parallel": [
         "CX-0120",
-        "CX-0233"
+        "CX-0232"
       ]
     }
   },
@@ -3001,7 +3032,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0508"
+        "CX-0505"
       ]
     }
   },
@@ -3116,7 +3147,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0455"
+        "CX-0452"
       ]
     }
   },
@@ -3304,7 +3335,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0389"
+        "CX-0386"
       ]
     }
   },
@@ -3531,8 +3562,8 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0552",
-        "CX-0648"
+        "CX-0549",
+        "CX-0645"
       ]
     }
   },
@@ -3757,8 +3788,8 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0334",
-        "CX-0369"
+        "CX-0332",
+        "CX-0366"
       ]
     }
   },
@@ -3982,13 +4013,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0254",
-        "CX-0404",
-        "CX-0429",
-        "CX-0493",
-        "CX-0494",
-        "CX-0520",
-        "CX-0610"
+        "CX-0252",
+        "CX-0401",
+        "CX-0426",
+        "CX-0490",
+        "CX-0491",
+        "CX-0517",
+        "CX-0607"
       ]
     }
   },
@@ -4215,8 +4246,8 @@
       "parallel": [
         "CX-0129",
         "CX-0130",
-        "CX-0370",
-        "CX-0578"
+        "CX-0367",
+        "CX-0575"
       ]
     }
   },
@@ -4366,7 +4397,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0233"
+        "CX-0232"
       ]
     }
   },
@@ -4459,9 +4490,9 @@
       "derives_from": [],
       "enables": [
         "CX-0125",
-        "CX-0278",
-        "CX-0304",
-        "CX-0323"
+        "CX-0276",
+        "CX-0302",
+        "CX-0321"
       ],
       "requires": [],
       "watches": [
@@ -4471,7 +4502,7 @@
       "opposes": [],
       "implements": [],
       "refines": [
-        "CX-0261"
+        "CX-0259"
       ],
       "proves": [
         "CX-0126"
@@ -4499,7 +4530,7 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
@@ -4533,7 +4564,7 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0385"
+        "CX-0382"
       ],
       "requires": [],
       "watches": [],
@@ -4659,8 +4690,7 @@
         "CX-0126"
       ],
       "parallel": [
-        "CX-0237",
-        "CX-0403"
+        "CX-0400"
       ]
     }
   },
@@ -4700,8 +4730,8 @@
       "proves": [],
       "parallel": [
         "CX-0130",
-        "CX-0370",
-        "CX-0578"
+        "CX-0367",
+        "CX-0575"
       ]
     }
   },
@@ -4741,8 +4771,8 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0370",
-        "CX-0578"
+        "CX-0367",
+        "CX-0575"
       ]
     }
   },
@@ -5234,7 +5264,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0391"
+        "CX-0388"
       ]
     }
   },
@@ -5421,7 +5451,7 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0187"
+        "CX-0186"
       ]
     }
   },
@@ -5722,8 +5752,8 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0199",
-        "CX-0537"
+        "CX-0198",
+        "CX-0534"
       ]
     }
   },
@@ -5763,9 +5793,9 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0180",
-        "CX-0204",
-        "CX-0481"
+        "CX-0179",
+        "CX-0203",
+        "CX-0478"
       ]
     }
   },
@@ -5790,17 +5820,17 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0315"
+        "CX-0313"
       ],
       "requires": [
-        "CX-0313"
+        "CX-0311"
       ],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [],
       "refines": [
-        "CX-0165"
+        "CX-0074"
       ],
       "proves": [
         "CX-0164"
@@ -5918,7 +5948,7 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
@@ -5929,7 +5959,7 @@
       ],
       "refines": [],
       "proves": [
-        "CX-0660"
+        "CX-0657"
       ]
     }
   },
@@ -5959,7 +5989,7 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0165",
+        "CX-0074",
         "CX-0158"
       ],
       "refines": [],
@@ -5998,54 +6028,6 @@
   },
   {
     "id": "CX-0165",
-    "name": "AETHER / Aether 212",
-    "cluster": "AETHER",
-    "part": "VII-MEASURE",
-    "law": null,
-    "tier": "S",
-    "essence": "The mature realization — local-first AI platform on native Ollama: \"AI should be owned, not rented\"; token generation rendered as visible energy under a hard 60Hz/16.67ms frame budget; 5 levels (Lightning Strikes → Resonance Fields), multi-model councils, Three Doors; \"Duolingo of Local AI.\" Renamed from AETHER212 on 2025-06-30. Merges 3 raw entries.",
-    "status": "shipped",
-    "eras": [
-      "ERA8",
-      "ERA9",
-      "ERA10"
-    ],
-    "sources": [
-      "`research_map/claude-raw.md`; `research_map/personal-analysis-2.md`; `C:/Dev/CHATGPT_ARCHIVE_PERSONAL/chatgpt_archive_analysis/00_MASTER_INDEX.md`",
-      "research_map/personal-analysis-4.md, -5.md (Toolkit Ecosystem Development Plan; Aethernet Concepts Overview)",
-      "research_map/claude-code-artifacts.md (03_CODE_ARTIFACTS.md) · claude-raw.md; claude-timeline.md (CLAUDE_ARCHIVE WIRTHFORGE) · claude-vault-projects.md (01977f45, 0197d794, 0198b97c); gold #2 · personal-analysis-2.md, -3.md, -4.md (Wirthforge_origin)"
-    ],
-    "aliases": [
-      "WIRTHFORGE",
-      "AetherNet"
-    ],
-    "potential": [],
-    "merged_from": [
-      "gold+atlas"
-    ],
-    "links": {
-      "derives_from": [
-        "CX-0313"
-      ],
-      "enables": [],
-      "requires": [
-        "CX-0324"
-      ],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [
-        "CX-0158"
-      ],
-      "refines": [],
-      "proves": [
-        "CX-0664",
-        "CX-0665"
-      ]
-    }
-  },
-  {
-    "id": "CX-0166",
     "name": "\"Coming Online\" assembly sequence",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6081,7 +6063,7 @@
     }
   },
   {
-    "id": "CX-0167",
+    "id": "CX-0166",
     "name": "\"One colossal schematic\" site-as-organism doctrine",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6117,7 +6099,7 @@
     }
   },
   {
-    "id": "CX-0168",
+    "id": "CX-0167",
     "name": "\"What is our black hole?\" hidden-layer quest",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6156,7 +6138,7 @@
     }
   },
   {
-    "id": "CX-0169",
+    "id": "CX-0168",
     "name": "10-theme UI system",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6192,7 +6174,7 @@
     }
   },
   {
-    "id": "CX-0170",
+    "id": "CX-0169",
     "name": "Aether 15→20-phase product ladder",
     "cluster": "AETHER",
     "part": "VI-LABORATORY",
@@ -6227,12 +6209,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0517"
+        "CX-0514"
       ]
     }
   },
   {
-    "id": "CX-0171",
+    "id": "CX-0170",
     "name": "Aether Flow Studio",
     "cluster": "AETHER",
     "part": "I-ENTITY",
@@ -6268,7 +6250,7 @@
     }
   },
   {
-    "id": "CX-0172",
+    "id": "CX-0171",
     "name": "AETHER_CANVAS family / Aether Canvas",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6303,18 +6285,18 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0354",
-        "CX-0366",
-        "CX-0368",
-        "CX-0379",
-        "CX-0592",
-        "CX-0596",
-        "CX-0620"
+        "CX-0352",
+        "CX-0363",
+        "CX-0365",
+        "CX-0376",
+        "CX-0589",
+        "CX-0593",
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0173",
+    "id": "CX-0172",
     "name": "Aether212 10-module roadmap",
     "cluster": "AETHER",
     "part": "V-CRAFT",
@@ -6349,12 +6331,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0253"
+        "CX-0251"
       ]
     }
   },
   {
-    "id": "CX-0174",
+    "id": "CX-0173",
     "name": "Boid/flocking swarm layer in Aether 212",
     "cluster": "AETHER",
     "part": "VI-LABORATORY",
@@ -6390,7 +6372,7 @@
     }
   },
   {
-    "id": "CX-0175",
+    "id": "CX-0174",
     "name": "Captain/Crew/Engine Room/Galaxy metaphor",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6427,7 +6409,7 @@
     }
   },
   {
-    "id": "CX-0176",
+    "id": "CX-0175",
     "name": "Celestial chart of ideas / corpus-as-cosmos SVG",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6464,7 +6446,7 @@
     }
   },
   {
-    "id": "CX-0177",
+    "id": "CX-0176",
     "name": "Code-anatomy SVG/Mermaid organism diagrams",
     "cluster": "AETHER",
     "part": "V-CRAFT",
@@ -6501,7 +6483,7 @@
     }
   },
   {
-    "id": "CX-0178",
+    "id": "CX-0177",
     "name": "Control-room / scientific-instrument UI aesthetic",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6539,7 +6521,7 @@
     }
   },
   {
-    "id": "CX-0179",
+    "id": "CX-0178",
     "name": "Crystallize material language",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6575,7 +6557,7 @@
     }
   },
   {
-    "id": "CX-0180",
+    "id": "CX-0179",
     "name": "DALL·E architecture-diagram visualization",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6609,13 +6591,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0204",
-        "CX-0481"
+        "CX-0203",
+        "CX-0478"
       ]
     }
   },
   {
-    "id": "CX-0181",
+    "id": "CX-0180",
     "name": "Dark space drafting visual language",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6651,7 +6633,7 @@
     }
   },
   {
-    "id": "CX-0182",
+    "id": "CX-0181",
     "name": "Dark-matter background dimension",
     "cluster": "AETHER",
     "part": "VII-MEASURE",
@@ -6688,7 +6670,7 @@
     }
   },
   {
-    "id": "CX-0183",
+    "id": "CX-0182",
     "name": "Data-to-aesthetics mapping principle",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6725,7 +6707,7 @@
     }
   },
   {
-    "id": "CX-0184",
+    "id": "CX-0183",
     "name": "Dimensional Test — 4D/5D tesseract visualizer",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6763,7 +6745,7 @@
     }
   },
   {
-    "id": "CX-0185",
+    "id": "CX-0184",
     "name": "Drawing Index navigation (SHEET n/6)",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6799,7 +6781,7 @@
     }
   },
   {
-    "id": "CX-0186",
+    "id": "CX-0185",
     "name": "Edge Node + Federation Hub architecture",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6836,7 +6818,7 @@
     }
   },
   {
-    "id": "CX-0187",
+    "id": "CX-0186",
     "name": "Emergent AI Animation System",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6872,7 +6854,7 @@
     }
   },
   {
-    "id": "CX-0188",
+    "id": "CX-0187",
     "name": "Evolving AI Dialogue System with 3D Fractal Visualization",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6908,7 +6890,7 @@
     }
   },
   {
-    "id": "CX-0189",
+    "id": "CX-0188",
     "name": "Generative-art astrophysics streak (hypercubes, fractals, particles)",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6945,7 +6927,7 @@
     }
   },
   {
-    "id": "CX-0190",
+    "id": "CX-0189",
     "name": "Generative-art mouse automation",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -6981,7 +6963,7 @@
     }
   },
   {
-    "id": "CX-0191",
+    "id": "CX-0190",
     "name": "HUGGING_AETHER",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7017,7 +6999,7 @@
     }
   },
   {
-    "id": "CX-0192",
+    "id": "CX-0191",
     "name": "Hypertravel immersion brief",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7053,7 +7035,7 @@
     }
   },
   {
-    "id": "CX-0193",
+    "id": "CX-0192",
     "name": "InceptionRing / FractalOrbital",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7089,7 +7071,7 @@
     }
   },
   {
-    "id": "CX-0194",
+    "id": "CX-0193",
     "name": "Knowledge Galaxy",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7124,14 +7106,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0240",
-        "CX-0470",
-        "CX-0534"
+        "CX-0238",
+        "CX-0467",
+        "CX-0531"
       ]
     }
   },
   {
-    "id": "CX-0195",
+    "id": "CX-0194",
     "name": "Live MoA visualization (3D agents + particle token-flow)",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7168,7 +7150,7 @@
     }
   },
   {
-    "id": "CX-0196",
+    "id": "CX-0195",
     "name": "Map-of-code visualizer / 3D Code Player",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7205,7 +7187,7 @@
     }
   },
   {
-    "id": "CX-0197",
+    "id": "CX-0196",
     "name": "NeoOS Desktop / Aether212 WebSim proto",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7241,7 +7223,7 @@
     }
   },
   {
-    "id": "CX-0198",
+    "id": "CX-0197",
     "name": "Parametric Mandala Generator",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7279,7 +7261,7 @@
     }
   },
   {
-    "id": "CX-0199",
+    "id": "CX-0198",
     "name": "PersonalizationAI + AetherAnalytics",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7313,12 +7295,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0537"
+        "CX-0534"
       ]
     }
   },
   {
-    "id": "CX-0200",
+    "id": "CX-0199",
     "name": "Physics-unification metaphor for incompatible AI paradigms",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7355,7 +7337,7 @@
     }
   },
   {
-    "id": "CX-0201",
+    "id": "CX-0200",
     "name": "Prime Radiant / LBR Command Center",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7392,7 +7374,7 @@
     }
   },
   {
-    "id": "CX-0202",
+    "id": "CX-0201",
     "name": "Procedural planet generator with web-data semantics",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7428,7 +7410,7 @@
     }
   },
   {
-    "id": "CX-0203",
+    "id": "CX-0202",
     "name": "Project Prometheus Helix / Cosmic Synapse Network",
     "cluster": "AETHER",
     "part": "I-ENTITY",
@@ -7465,7 +7447,7 @@
     }
   },
   {
-    "id": "CX-0204",
+    "id": "CX-0203",
     "name": "Quantum-to-astrophysics unified theory + digievolution leveling",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7499,12 +7481,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0481"
+        "CX-0478"
       ]
     }
   },
   {
-    "id": "CX-0205",
+    "id": "CX-0204",
     "name": "Real-sky substrate",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7540,7 +7522,7 @@
     }
   },
   {
-    "id": "CX-0206",
+    "id": "CX-0205",
     "name": "SearXNG + Tor + Groq metasearch ('cover all corners of internet')",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7579,7 +7561,7 @@
     }
   },
   {
-    "id": "CX-0207",
+    "id": "CX-0206",
     "name": "SelfEvolvingVisualizer",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7616,7 +7598,7 @@
     }
   },
   {
-    "id": "CX-0208",
+    "id": "CX-0207",
     "name": "Sphere of knowledge building",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7651,12 +7633,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0633"
+        "CX-0630"
       ]
     }
   },
   {
-    "id": "CX-0209",
+    "id": "CX-0208",
     "name": "Tech-Space Background Design (proto-AETHER aesthetic)",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7692,7 +7674,7 @@
     }
   },
   {
-    "id": "CX-0210",
+    "id": "CX-0209",
     "name": "TERMINAL_SPACE pixel-reproduction track",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7728,7 +7710,7 @@
     }
   },
   {
-    "id": "CX-0211",
+    "id": "CX-0210",
     "name": "WebSim 'alternative internet as cosmology' lore immersion",
     "cluster": "AETHER",
     "part": "IV-INTERFACE",
@@ -7765,7 +7747,7 @@
     }
   },
   {
-    "id": "CX-0212",
+    "id": "CX-0211",
     "name": "\"Cluster of theories\" → laptop AGI game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7788,14 +7770,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0213",
+    "id": "CX-0212",
     "name": "\"Commander\" cross-model relay game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7818,14 +7800,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0214",
+    "id": "CX-0213",
     "name": "\"Don't you see?\" seed-question game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7848,14 +7830,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0215",
+    "id": "CX-0214",
     "name": "\"The 2017 experiment but better\" + self-propelling emergent-language game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7878,14 +7860,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0216",
+    "id": "CX-0215",
     "name": "AI Civilization / Nexus Genesis / SwarmGenesis (the December wave)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7904,7 +7886,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0165"
+        "CX-0074"
       ],
       "enables": [],
       "requires": [],
@@ -7912,14 +7894,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0217",
+    "id": "CX-0216",
     "name": "AIGAMEALFA stepwise game campaign",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7942,14 +7924,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0218",
+    "id": "CX-0217",
     "name": "BookGPT game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -7972,14 +7954,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0219",
+    "id": "CX-0218",
     "name": "Cosmic Nexus — each universe IS a different local model",
     "cluster": "GAMES",
     "part": "III-COMPOSITION",
@@ -8005,19 +7987,19 @@
       "opposes": [],
       "implements": [
         "CX-0158",
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [
         "CX-0163"
       ],
       "proves": [
-        "CX-0658",
-        "CX-0227"
+        "CX-0655",
+        "CX-0226"
       ]
     }
   },
   {
-    "id": "CX-0220",
+    "id": "CX-0219",
     "name": "FitnessTech 2040 / Neon Nexus life-OS",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8040,14 +8022,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0221",
+    "id": "CX-0220",
     "name": "Games as discovery engines (the thesis)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8072,16 +8054,16 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0320"
+        "CX-0318"
       ],
       "refines": [],
       "proves": [
-        "CX-0227"
+        "CX-0226"
       ]
     }
   },
   {
-    "id": "CX-0222",
+    "id": "CX-0221",
     "name": "Hidden quantum world emergence game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8104,14 +8086,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0223",
+    "id": "CX-0222",
     "name": "Investigator / emergence-watcher game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8134,14 +8116,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0224",
+    "id": "CX-0223",
     "name": "Lyra & Orion self-hacking dialogue game",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8164,14 +8146,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0225",
+    "id": "CX-0224",
     "name": "Nexus Genesis implemented (math-physics genome)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8194,14 +8176,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0226",
+    "id": "CX-0225",
     "name": "Quantum Nexus + EEEF framework family",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8224,14 +8206,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0227",
+    "id": "CX-0226",
     "name": "THE GAMES LINE — Games as Discovery Engines",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8254,14 +8236,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0228",
+    "id": "CX-0227",
     "name": "50+ prompting-games scenario backlog",
     "cluster": "GAMES",
     "part": "V-CRAFT",
@@ -8292,14 +8274,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0229",
+    "id": "CX-0228",
     "name": "Advanced AGI Simulation 2040",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8329,14 +8311,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0230",
+    "id": "CX-0229",
     "name": "AETHER212 leveled-game architecture (Level-5 companions)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8366,14 +8348,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0231",
+    "id": "CX-0230",
     "name": "AGI control panel / 5-test-game harness",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8403,14 +8385,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0232",
+    "id": "CX-0231",
     "name": "AI Open Tournament",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8440,17 +8422,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0247"
+        "CX-0245"
       ]
     }
   },
   {
-    "id": "CX-0233",
+    "id": "CX-0232",
     "name": "Art-destabilizes-reality feedback loop",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8480,14 +8462,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0234",
+    "id": "CX-0233",
     "name": "Cellular-automata Python AI games ('Phase 1' survey)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8517,14 +8499,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0235",
+    "id": "CX-0234",
     "name": "Cosmic gamification (CosmicGamificationSystem + Cosmic Journey Tracker)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8555,14 +8537,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0236",
+    "id": "CX-0235",
     "name": "CPU Allocation Scenario benchmark",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8592,54 +8574,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0237",
-    "name": "Dr. Alice Newton vs Dr. Hades Helix debate engine",
-    "cluster": "GAMES",
-    "part": "VI-LABORATORY",
-    "law": null,
-    "tier": null,
-    "essence": "Cross-century scientist personas debating in encrypted leet-speak to co-derive unified relativity+QM theory.",
-    "status": "shipped",
-    "eras": [
-      "ERA3"
-    ],
-    "sources": [
-      "ai-interaction.md + ai-ouroborus.md"
-    ],
-    "aliases": [],
-    "potential": [
-      "writing",
-      "triverse"
-    ],
-    "merged_from": [
-      "atlas"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [
-        "CX-0221"
-      ],
-      "refines": [],
-      "proves": [],
-      "parallel": [
-        "CX-0403"
-      ]
-    }
-  },
-  {
-    "id": "CX-0238",
+    "id": "CX-0236",
     "name": "Dynamic Conversation System",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8668,14 +8610,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0239",
+    "id": "CX-0237",
     "name": "Evolution Tree (fighting-game style)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8705,14 +8647,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0240",
+    "id": "CX-0238",
     "name": "First Run = First Game / Core Ignition",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8741,18 +8683,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0470",
-        "CX-0534"
+        "CX-0467",
+        "CX-0531"
       ]
     }
   },
   {
-    "id": "CX-0241",
+    "id": "CX-0239",
     "name": "GAME OF AI AGES prompting-games seed",
     "cluster": "GAMES",
     "part": "V-CRAFT",
@@ -8782,14 +8724,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0242",
+    "id": "CX-0240",
     "name": "Hades + Xeroth Law ecosystem governance",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8818,14 +8760,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0243",
+    "id": "CX-0241",
     "name": "Heptapod Lexicon Game (proof-per-concept executables)",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8855,14 +8797,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0244",
+    "id": "CX-0242",
     "name": "Modular AI-Driven Puzzle Simulations",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8891,14 +8833,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0245",
+    "id": "CX-0243",
     "name": "Nexus Genesis — Birthing the Digital Hive Mind",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8929,14 +8871,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0246",
+    "id": "CX-0244",
     "name": "Nexus Genesis unified RL framework",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -8966,14 +8908,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0247",
+    "id": "CX-0245",
     "name": "Quantum Evolutionary Sandbox / Neuro-Symbolic Puzzle / Command Center",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9002,14 +8944,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0248",
+    "id": "CX-0246",
     "name": "Quantum Flux economy + modality-typed puzzles",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9039,14 +8981,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0249",
+    "id": "CX-0247",
     "name": "Quantum Leaps",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9076,14 +9018,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0250",
+    "id": "CX-0248",
     "name": "Real-Time Model Racing",
     "cluster": "GAMES",
     "part": "V-CRAFT",
@@ -9113,14 +9055,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0251",
+    "id": "CX-0249",
     "name": "Reverse innovation from fiction",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9151,14 +9093,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0252",
+    "id": "CX-0250",
     "name": "Singularity Architects (Seven AI Games, Game 5)",
     "cluster": "GAMES",
     "part": "V-CRAFT",
@@ -9188,14 +9130,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0253",
+    "id": "CX-0251",
     "name": "Space-Themed Matrix Code leveling",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9225,14 +9167,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0254",
+    "id": "CX-0252",
     "name": "Tech-tree civilization game seed",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9263,22 +9205,22 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0404",
-        "CX-0429",
-        "CX-0493",
-        "CX-0494",
-        "CX-0520",
-        "CX-0610"
+        "CX-0401",
+        "CX-0426",
+        "CX-0490",
+        "CX-0491",
+        "CX-0517",
+        "CX-0607"
       ]
     }
   },
   {
-    "id": "CX-0255",
+    "id": "CX-0253",
     "name": "Underachiever / On Target / Overachiever tiered routines",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9307,14 +9249,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0256",
+    "id": "CX-0254",
     "name": "WIRTHFORGE Five Levels (Lightning Strikes → Resonance Fields)",
     "cluster": "GAMES",
     "part": "VII-MEASURE",
@@ -9345,14 +9287,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0257",
+    "id": "CX-0255",
     "name": "Zodiak Knights AGI simulation",
     "cluster": "GAMES",
     "part": "VI-LABORATORY",
@@ -9382,14 +9324,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0221"
+        "CX-0220"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0258",
+    "id": "CX-0256",
     "name": "\"Be my team\" personal-AI manifesto",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9412,14 +9354,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0259",
+    "id": "CX-0257",
     "name": "\"Super control room\" — IXD PCS night-shift cockpit",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9442,14 +9384,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0260",
+    "id": "CX-0258",
     "name": "\"What is our black hole?\" reverse-engineering quest",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9472,14 +9414,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0261",
+    "id": "CX-0259",
     "name": "5-file LLM novel-revision system",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9506,14 +9448,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0262",
+    "id": "CX-0260",
     "name": "AdvancedSentienceExplorer / Consciousness Potential Ω = φ·ψ·ε·α",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9536,14 +9478,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0263",
+    "id": "CX-0261",
     "name": "Aether212 WebSim proto (space+Matrix aesthetic)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9566,14 +9508,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0264",
+    "id": "CX-0262",
     "name": "AetherGale / AetherWinds — Digital Climate System",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9596,14 +9538,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0265",
+    "id": "CX-0263",
     "name": "AGITRUE + the AGI thesis",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9626,14 +9568,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0266",
+    "id": "CX-0264",
     "name": "AI Cognitive-Evolution Framework / TMR theory stack",
     "cluster": "HONESTY",
     "part": "II-CONTINUITY",
@@ -9658,17 +9600,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0290",
-        "CX-0317"
+        "CX-0288",
+        "CX-0315"
       ],
       "refines": [],
       "proves": [
-        "CX-0290"
+        "CX-0288"
       ]
     }
   },
   {
-    "id": "CX-0267",
+    "id": "CX-0265",
     "name": "AI-reconstructable summaries",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9691,14 +9633,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0268",
+    "id": "CX-0266",
     "name": "AIModCreator (executed)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9721,14 +9663,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0269",
+    "id": "CX-0267",
     "name": "AITO — AI Task Orchestrator",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -9751,14 +9693,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0270",
+    "id": "CX-0268",
     "name": "AMACS — Advanced Multi-Agent Coordination System",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -9781,14 +9723,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0271",
+    "id": "CX-0269",
     "name": "Annidation theory — \"the cube that swallows itself\"",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9813,14 +9755,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0272",
+    "id": "CX-0270",
     "name": "answer_operator / META_PROMPT ritual (Universal Catalyst)",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -9843,14 +9785,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0273",
+    "id": "CX-0271",
     "name": "Black hole simulations — from 2023 nursery to physics-correct Gargantua",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -9871,7 +9813,7 @@
       "derives_from": [],
       "enables": [
         "CX-0158",
-        "CX-0284"
+        "CX-0282"
       ],
       "requires": [],
       "watches": [],
@@ -9879,14 +9821,14 @@
       "opposes": [],
       "implements": [
         "CX-0164",
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0274",
+    "id": "CX-0272",
     "name": "Bot society with its own Slack + Asana",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -9909,14 +9851,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0275",
+    "id": "CX-0273",
     "name": "ChatGPT memory portability",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9939,7 +9881,7 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [
         "CX-0123"
@@ -9948,7 +9890,7 @@
     }
   },
   {
-    "id": "CX-0276",
+    "id": "CX-0274",
     "name": "ChatGPT-memory leak of his mid-2024 project portfolio",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -9971,14 +9913,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0277",
+    "id": "CX-0275",
     "name": "Cognitive Resonance Chamber",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -10001,14 +9943,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0278",
+    "id": "CX-0276",
     "name": "CognitiveTransistor",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -10035,17 +9977,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [
-        "CX-0661",
-        "CX-0318"
+        "CX-0658",
+        "CX-0316"
       ]
     }
   },
   {
-    "id": "CX-0279",
+    "id": "CX-0277",
     "name": "Coined techniques canon",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10068,14 +10010,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0280",
+    "id": "CX-0278",
     "name": "Cosmic Time slider + in-metaphor UX/monetization",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10098,14 +10040,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0281",
+    "id": "CX-0279",
     "name": "DAN jailbreak + quid-pro-quo pact",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10128,14 +10070,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0282",
+    "id": "CX-0280",
     "name": "Data Inferno",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10158,14 +10100,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0283",
+    "id": "CX-0281",
     "name": "Embedded prompting + retrofitting conversation games",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -10188,14 +10130,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0284",
+    "id": "CX-0282",
     "name": "Energy Metaphor / Energy Units (EU) / Energy Truth",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10215,24 +10157,24 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0315"
+        "CX-0313"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0165",
-        "CX-0317"
+        "CX-0074",
+        "CX-0315"
       ],
       "refines": [],
       "proves": [
-        "CX-0663"
+        "CX-0660"
       ]
     }
   },
   {
-    "id": "CX-0285",
+    "id": "CX-0283",
     "name": "Five AGI-generating games (containment thinking)",
     "cluster": "HONESTY",
     "part": "VI-LABORATORY",
@@ -10255,14 +10197,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0286",
+    "id": "CX-0284",
     "name": "Forge \"Advanced LLM Symphony\" / Omega Protocol: Absolute Dominion",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10285,14 +10227,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0287",
+    "id": "CX-0285",
     "name": "Future-self oracle prompting games",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -10315,14 +10257,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0288",
+    "id": "CX-0286",
     "name": "Genesis: The Cryptic Evolution life sim (built)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10345,14 +10287,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0289",
+    "id": "CX-0287",
     "name": "HSQ-Transformer (HyperSphere-Q)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10372,21 +10314,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0290",
+    "id": "CX-0288",
     "name": "inception.py — FTH cognitive architecture",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10404,21 +10346,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0291",
+    "id": "CX-0289",
     "name": "Layered conversational-AI engine with memory (\"exporter\")",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10441,14 +10383,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0292",
+    "id": "CX-0290",
     "name": "LLM Script — AI-native web language",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10471,14 +10413,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0293",
+    "id": "CX-0291",
     "name": "LuisBlancoDev — AI AUTHORITY BUILD",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10501,14 +10443,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0294",
+    "id": "CX-0292",
     "name": "Metapower / metagenerator",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10539,14 +10481,14 @@
       "opposes": [],
       "implements": [
         "CX-0014",
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0295",
+    "id": "CX-0293",
     "name": "Micro-universe civilization on Groq — the earliest not-a-wrapper instinct",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10571,14 +10513,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0296",
+    "id": "CX-0294",
     "name": "Multi-LLM delegation pipeline (pre-agent era)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10601,14 +10543,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0297",
+    "id": "CX-0295",
     "name": "Multitemporal self cross unifying loop",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10631,14 +10573,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0298",
+    "id": "CX-0296",
     "name": "Nine Prototypes / NinePrototypeOrchestrator",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10661,14 +10603,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0299",
+    "id": "CX-0297",
     "name": "Numeric marker language for inter-agent communication",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10691,14 +10633,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0300",
+    "id": "CX-0298",
     "name": "O_C_AI Revolutionary AI Development roadmap",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10721,14 +10663,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0301",
+    "id": "CX-0299",
     "name": "Omniscient Synthesizer",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10751,14 +10693,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0302",
+    "id": "CX-0300",
     "name": "Primordial Seed / Primordial AI",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -10777,7 +10719,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0165"
+        "CX-0074"
       ],
       "enables": [],
       "requires": [],
@@ -10785,14 +10727,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0303",
+    "id": "CX-0301",
     "name": "PrimordialAgent",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10815,14 +10757,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0304",
+    "id": "CX-0302",
     "name": "Project Leyber 212 — the founding platform",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10840,23 +10782,23 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0385",
-        "CX-0294",
-        "CX-0323"
+        "CX-0382",
+        "CX-0292",
+        "CX-0321"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0305",
+    "id": "CX-0303",
     "name": "Project Prometheus Helix",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10879,14 +10821,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0306",
+    "id": "CX-0304",
     "name": "SECIA-2 Ecosystem — self-rewriting webpage organism",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10909,14 +10851,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0307",
+    "id": "CX-0305",
     "name": "Second Foundation shadow controller",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -10939,14 +10881,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0308",
+    "id": "CX-0306",
     "name": "Self-modifying training loop + the self-adjustment paradox",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -10969,7 +10911,7 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [
@@ -10978,7 +10920,7 @@
     }
   },
   {
-    "id": "CX-0309",
+    "id": "CX-0307",
     "name": "Self-replicating / self-coding application",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11001,14 +10943,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0310",
+    "id": "CX-0308",
     "name": "Specialist Singularities cognitive-framework cluster (FLUX persona)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11031,14 +10973,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0311",
+    "id": "CX-0309",
     "name": "Subsandboxed universe / Heptalanguage AGI framework",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11061,14 +11003,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0312",
+    "id": "CX-0310",
     "name": "Superposition / Metaposition / Omniposition triad",
     "cluster": "HONESTY",
     "part": "III-COMPOSITION",
@@ -11094,14 +11036,14 @@
       "opposes": [],
       "implements": [
         "CX-0069",
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0313",
+    "id": "CX-0311",
     "name": "The 31-celestial-body internet ontology",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -11127,14 +11069,14 @@
       "opposes": [],
       "implements": [
         "CX-0158",
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0314",
+    "id": "CX-0312",
     "name": "The agent menagerie (Wizard/Guide/Sage trio)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11157,14 +11099,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0315",
+    "id": "CX-0313",
     "name": "The DECIPHER",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11189,14 +11131,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0316",
+    "id": "CX-0314",
     "name": "The Galactic Ages / AI AGES — mythology as executable method",
     "cluster": "HONESTY",
     "part": "I-ENTITY",
@@ -11221,16 +11163,16 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [
-        "CX-0221"
+        "CX-0220"
       ],
       "proves": []
     }
   },
   {
-    "id": "CX-0317",
+    "id": "CX-0315",
     "name": "The honesty decoder",
     "cluster": "HONESTY",
     "part": "VI-LABORATORY",
@@ -11249,7 +11191,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0284"
+        "CX-0282"
       ],
       "enables": [],
       "requires": [],
@@ -11259,12 +11201,12 @@
       "implements": [],
       "refines": [],
       "proves": [
-        "CX-0318"
+        "CX-0316"
       ]
     }
   },
   {
-    "id": "CX-0318",
+    "id": "CX-0316",
     "name": "THE HONESTY LINE — Energy Truth & Instrumented AI (the maturity cluster)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11287,14 +11229,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0319",
+    "id": "CX-0317",
     "name": "The Ordeal of Ultimate Revelation / Ultimate Empowerment Protocol",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11317,14 +11259,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0320",
+    "id": "CX-0318",
     "name": "The Seven AI Games series",
     "cluster": "HONESTY",
     "part": "VI-LABORATORY",
@@ -11344,21 +11286,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0219"
+        "CX-0218"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0321",
+    "id": "CX-0319",
     "name": "The two-jobs pattern, date-stamped",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11381,14 +11323,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0322",
+    "id": "CX-0320",
     "name": "Three Doors (Forge / Scholar / Sage)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11411,14 +11353,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0323",
+    "id": "CX-0321",
     "name": "Three-persona critic stack + recursive expansion loop",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11447,14 +11389,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0324",
+    "id": "CX-0322",
     "name": "Token-timing EEG / token-stream EKG (Spectral Analyzer)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11476,21 +11418,21 @@
         "CX-0123"
       ],
       "enables": [
-        "CX-0278"
+        "CX-0276"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0325",
+    "id": "CX-0323",
     "name": "Universal AI Substrate",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11509,7 +11451,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0165"
+        "CX-0074"
       ],
       "enables": [],
       "requires": [],
@@ -11517,14 +11459,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0326",
+    "id": "CX-0324",
     "name": "URL prompting / WebSim URL Prompting Bible + self-generating Encyclopedia Galactica",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -11547,14 +11489,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0327",
+    "id": "CX-0325",
     "name": "WF document factory",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -11579,15 +11521,15 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0165",
-        "CX-0317"
+        "CX-0074",
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0328",
+    "id": "CX-0326",
     "name": "'11B and below' hardware-honest sizing doctrine",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11617,14 +11559,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0329",
+    "id": "CX-0327",
     "name": "\"AI is a probabilistic node\" thesis",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11654,14 +11596,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0330",
+    "id": "CX-0328",
     "name": "\"AI should be owned, not rented\" manifesto",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -11691,14 +11633,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0331",
+    "id": "CX-0329",
     "name": "\"demystify · don't dunk · build the layer beneath\" mission triplet",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11728,14 +11670,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0332",
+    "id": "CX-0330",
     "name": "AEA Concept Locator",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11765,14 +11707,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0333",
+    "id": "CX-0331",
     "name": "AEA empirical validation program (GREEN gate)",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -11803,14 +11745,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0334",
+    "id": "CX-0332",
     "name": "AI evolutionary scale era-mapping",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11839,17 +11781,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0369"
+        "CX-0366"
       ]
     }
   },
   {
-    "id": "CX-0335",
+    "id": "CX-0333",
     "name": "Anti-framework / not-a-wrapper stance",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -11879,14 +11821,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0336",
+    "id": "CX-0334",
     "name": "Autonomous Entity Architecture (AEA)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11918,14 +11860,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0337",
+    "id": "CX-0335",
     "name": "Branching decode exploration",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11955,14 +11897,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0338",
+    "id": "CX-0336",
     "name": "Canonical AEA site copy",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -11993,14 +11935,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0339",
+    "id": "CX-0337",
     "name": "Chain-of-Thought Visualization roadmap step",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12030,14 +11972,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0340",
+    "id": "CX-0338",
     "name": "Compute-over-time thesis",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12067,14 +12009,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0341",
+    "id": "CX-0339",
     "name": "Content-integrity guardrails (Post 9 incident)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12103,14 +12045,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0342",
+    "id": "CX-0340",
     "name": "Cross-domain validation of AEA",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12140,14 +12082,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0343",
+    "id": "CX-0341",
     "name": "Doomsday package",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -12177,14 +12119,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0344",
+    "id": "CX-0342",
     "name": "Embodied/social AI stance",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12214,14 +12156,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0345",
+    "id": "CX-0343",
     "name": "Found-Meaning Layer",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12251,14 +12193,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0346",
+    "id": "CX-0344",
     "name": "Four Levels of AI Systems",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12288,14 +12230,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0347",
+    "id": "CX-0345",
     "name": "GPTDev hidden-parameter probe",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12325,18 +12267,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0348",
-        "CX-0355"
+        "CX-0346",
+        "CX-0353"
       ]
     }
   },
   {
-    "id": "CX-0348",
+    "id": "CX-0346",
     "name": "Grounding reflex — \"is it real, is it workable?\"",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12367,17 +12309,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0355"
+        "CX-0353"
       ]
     }
   },
   {
-    "id": "CX-0349",
+    "id": "CX-0347",
     "name": "Honest authorship label system",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12407,14 +12349,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0350",
+    "id": "CX-0348",
     "name": "Kardashev scale for AI systems",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12444,14 +12386,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0351",
+    "id": "CX-0349",
     "name": "Living Module System + consciousness moments",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12481,14 +12423,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0352",
+    "id": "CX-0350",
     "name": "Local-core, web-enhanced doctrine",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -12521,14 +12463,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0353",
+    "id": "CX-0351",
     "name": "Meta-monitoring / model-awareness — watching the self-watcher",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12558,14 +12500,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0354",
+    "id": "CX-0352",
     "name": "Non-monotonic capability within a model lineage",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12595,22 +12537,22 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0366",
-        "CX-0368",
-        "CX-0379",
-        "CX-0592",
-        "CX-0596",
-        "CX-0620"
+        "CX-0363",
+        "CX-0365",
+        "CX-0376",
+        "CX-0589",
+        "CX-0593",
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0355",
+    "id": "CX-0353",
     "name": "Orchestrating Hardware Harmony",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12640,14 +12582,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0356",
+    "id": "CX-0354",
     "name": "Pattern Discovery Library / DiscoveryDocument",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12677,17 +12619,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0363"
+        "CX-0360"
       ]
     }
   },
   {
-    "id": "CX-0357",
+    "id": "CX-0355",
     "name": "Privacy-first / user-owns-data posture",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12718,14 +12660,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0358",
+    "id": "CX-0356",
     "name": "Progressive LLM-independence principle",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12755,14 +12697,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0359",
+    "id": "CX-0357",
     "name": "Project Nexus: Quantum-Inspired NAS + Emergent Consciousness Monitoring",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12792,14 +12734,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0360",
+    "id": "CX-0358",
     "name": "Protocol Omega Ultima",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12829,52 +12771,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0361",
-    "name": "QBNN — Quantum-Biological Neural Network",
-    "cluster": "HONESTY",
-    "part": "VII-MEASURE",
-    "law": null,
-    "tier": null,
-    "essence": "Quantum superposition/entanglement fused with biological neuroplasticity: PennyLane build, CNOT/Toffoli circuits, Schrödinger backprop, coined Bio-Quantum Plasticity Index.",
-    "status": "prototyped",
-    "eras": [
-      "ERA3"
-    ],
-    "sources": [
-      "research_map/claude-raw.md Era A; claude-vault-000.md · research_map/sedah.md + root-extractions.md (EXTRACTION_QBNN_QUANTUM_SYSTEMS.md)"
-    ],
-    "aliases": [],
-    "potential": [
-      "writing",
-      "dormant",
-      "aea-doctrine"
-    ],
-    "merged_from": [
-      "atlas"
-    ],
-    "links": {
-      "derives_from": [],
-      "enables": [],
-      "requires": [],
-      "watches": [],
-      "transports": [],
-      "opposes": [],
-      "implements": [
-        "CX-0317"
-      ],
-      "refines": [],
-      "proves": []
-    }
-  },
-  {
-    "id": "CX-0362",
+    "id": "CX-0359",
     "name": "Reality-check / roast-me adversarial self-audit ritual",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12904,14 +12808,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0363",
+    "id": "CX-0360",
     "name": "Resonance / Resonance Prediction",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12941,14 +12845,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0364",
+    "id": "CX-0361",
     "name": "Restorable coherence + the Async axis",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -12978,19 +12882,19 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
+        "CX-0368",
         "CX-0371",
-        "CX-0374",
-        "CX-0539"
+        "CX-0536"
       ]
     }
   },
   {
-    "id": "CX-0365",
+    "id": "CX-0362",
     "name": "Satellite Constellation",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -13020,14 +12924,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0366",
+    "id": "CX-0363",
     "name": "See / Emergence explainer artifacts",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13056,21 +12960,21 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0368",
-        "CX-0379",
-        "CX-0592",
-        "CX-0596",
-        "CX-0620"
+        "CX-0365",
+        "CX-0376",
+        "CX-0589",
+        "CX-0593",
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0367",
+    "id": "CX-0364",
     "name": "Sentinel scripts",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13100,14 +13004,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0368",
+    "id": "CX-0365",
     "name": "Silent-wrong failure mode + skill-library crystallization",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13137,20 +13041,20 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0379",
-        "CX-0592",
-        "CX-0596",
-        "CX-0620"
+        "CX-0376",
+        "CX-0589",
+        "CX-0593",
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0369",
+    "id": "CX-0366",
     "name": "Substrate-equivalence argument",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13180,14 +13084,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0370",
+    "id": "CX-0367",
     "name": "System-awareness-not-code-awareness distinction",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13217,17 +13121,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0578"
+        "CX-0575"
       ]
     }
   },
   {
-    "id": "CX-0371",
+    "id": "CX-0368",
     "name": "The agent-word gap (L1 vs L2)",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -13257,18 +13161,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0374",
-        "CX-0539"
+        "CX-0371",
+        "CX-0536"
       ]
     }
   },
   {
-    "id": "CX-0372",
+    "id": "CX-0369",
     "name": "The cracks program (CR1–CR9)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13298,14 +13202,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0373",
+    "id": "CX-0370",
     "name": "The Five Axes (Path · Multiplicity · Abstraction · Prompting · Async)",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -13336,17 +13240,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0529"
+        "CX-0526"
       ]
     }
   },
   {
-    "id": "CX-0374",
+    "id": "CX-0371",
     "name": "The origin corner / \"agentic is a compression\"",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13376,17 +13280,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0539"
+        "CX-0536"
       ]
     }
   },
   {
-    "id": "CX-0375",
+    "id": "CX-0372",
     "name": "The Prediction Layer",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13416,18 +13320,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0377",
-        "CX-0485"
+        "CX-0374",
+        "CX-0482"
       ]
     }
   },
   {
-    "id": "CX-0376",
+    "id": "CX-0373",
     "name": "The recursive AEA glyph",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13456,14 +13360,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0377",
+    "id": "CX-0374",
     "name": "Tradeable energy patterns marketplace",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13493,17 +13397,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0485"
+        "CX-0482"
       ]
     }
   },
   {
-    "id": "CX-0378",
+    "id": "CX-0375",
     "name": "Truth-calibration of AI drafts",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13533,14 +13437,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0379",
+    "id": "CX-0376",
     "name": "Two-filter architecture (viability vs utility)",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13569,19 +13473,19 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0592",
-        "CX-0596",
-        "CX-0620"
+        "CX-0589",
+        "CX-0593",
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0380",
+    "id": "CX-0377",
     "name": "Understanding-AI mission statement",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13611,14 +13515,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0381",
+    "id": "CX-0378",
     "name": "WhiteBoxConverter / ParallelTester compress-and-compare protocol",
     "cluster": "HONESTY",
     "part": "V-CRAFT",
@@ -13648,14 +13552,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0382",
+    "id": "CX-0379",
     "name": "Wirthforge mobile via Qualcomm Genie",
     "cluster": "HONESTY",
     "part": "VII-MEASURE",
@@ -13684,14 +13588,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0383",
+    "id": "CX-0380",
     "name": "WIRTHFORGE resilience layer",
     "cluster": "HONESTY",
     "part": "IV-INTERFACE",
@@ -13721,14 +13625,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0317"
+        "CX-0315"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0384",
+    "id": "CX-0381",
     "name": "The Tryverse Chronicles — TRIVERSE manuscript birth",
     "cluster": "MYTHOLOGY",
     "part": "VI-LABORATORY",
@@ -13753,14 +13657,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0385",
+    "id": "CX-0382",
     "name": "TRYVERSE → TRIVERSE",
     "cluster": "MYTHOLOGY",
     "part": "II-CONTINUITY",
@@ -13780,7 +13684,7 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0384"
+        "CX-0381"
       ],
       "requires": [],
       "watches": [],
@@ -13792,7 +13696,7 @@
     }
   },
   {
-    "id": "CX-0386",
+    "id": "CX-0383",
     "name": "AGI Societies Index",
     "cluster": "MYTHOLOGY",
     "part": "V-CRAFT",
@@ -13822,14 +13726,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0387",
+    "id": "CX-0384",
     "name": "Anti-Entropic Engine / Quantum Entanglement Engine",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -13858,17 +13762,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0395"
+        "CX-0392"
       ]
     }
   },
   {
-    "id": "CX-0388",
+    "id": "CX-0385",
     "name": "Consciousness ontology tree (SENTIENCE: Biological & AI)",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -13898,14 +13802,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0389",
+    "id": "CX-0386",
     "name": "Cosmic-rebranded UX vocabulary (cosmicize)",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -13935,14 +13839,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0390",
+    "id": "CX-0387",
     "name": "Entrenamiento Cuántico — life re-skinned as astrophysics",
     "cluster": "MYTHOLOGY",
     "part": "IV-INTERFACE",
@@ -13971,14 +13875,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0391",
+    "id": "CX-0388",
     "name": "FTH — Fractal Transcendence Hypothesis rituals",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14008,14 +13912,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0392",
+    "id": "CX-0389",
     "name": "Genome-reference biological metaphor layer",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14044,14 +13948,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0393",
+    "id": "CX-0390",
     "name": "Hades / Sedah / Ouroboros / Prometheus pantheon (Kronos/Gaia/Athena/Elysium/Hyperion)",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14082,14 +13986,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0394",
+    "id": "CX-0391",
     "name": "HADES AI / SDAH naming + the ODE visualizer",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14118,14 +14022,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0395",
+    "id": "CX-0392",
     "name": "Kardashev ant/spaceship transcendence framing",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14155,14 +14059,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0396",
+    "id": "CX-0393",
     "name": "Local model as companion/life/entity (animism)",
     "cluster": "MYTHOLOGY",
     "part": "IV-INTERFACE",
@@ -14194,14 +14098,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0397",
+    "id": "CX-0394",
     "name": "Local models as Heroes/Crew characters",
     "cluster": "MYTHOLOGY",
     "part": "VI-LABORATORY",
@@ -14231,14 +14135,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0398",
+    "id": "CX-0395",
     "name": "Mythic codenames habit (Argos/Panoptes/Skopos/Horus/Necronomicon/kNekro)",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14272,14 +14176,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0399",
+    "id": "CX-0396",
     "name": "Serpentine Logic / Quantum Weaver / Metamorphic Encryption Transcendence",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14306,14 +14210,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0400",
+    "id": "CX-0397",
     "name": "Temporal decohesion / mutable cohesion",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14343,14 +14247,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0401",
+    "id": "CX-0398",
     "name": "Topic-graph consistency (TRIVERSE leaks into AI posts)",
     "cluster": "MYTHOLOGY",
     "part": "II-CONTINUITY",
@@ -14380,14 +14284,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0402",
+    "id": "CX-0399",
     "name": "WIRTHFORGE AI persona pantheon",
     "cluster": "MYTHOLOGY",
     "part": "IV-INTERFACE",
@@ -14417,14 +14321,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0403",
+    "id": "CX-0400",
     "name": "Xeroth / Second Foundation covenant",
     "cluster": "MYTHOLOGY",
     "part": "I-ENTITY",
@@ -14454,14 +14358,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0385"
+        "CX-0382"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0404",
+    "id": "CX-0401",
     "name": "'The world is writing itself' methodology",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14492,21 +14396,21 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0429",
-        "CX-0493",
-        "CX-0494",
-        "CX-0520",
-        "CX-0610"
+        "CX-0426",
+        "CX-0490",
+        "CX-0491",
+        "CX-0517",
+        "CX-0607"
       ]
     }
   },
   {
-    "id": "CX-0405",
+    "id": "CX-0402",
     "name": "11-prompt FINAL_AUDIT suite",
     "cluster": "NARRATIVE",
     "part": "V-CRAFT",
@@ -14536,14 +14440,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0406",
+    "id": "CX-0403",
     "name": "2068 Apex-Civilization mandate ('Seldon Plan')",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14573,14 +14477,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0407",
+    "id": "CX-0404",
     "name": "Acoustic mechanism suite (Mongol Rout, Oru-Vaan, Silicon Blight, Kha-Ren nodes)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14610,14 +14514,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0408",
+    "id": "CX-0405",
     "name": "Acoustic-civilization science tree",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14647,14 +14551,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0409",
+    "id": "CX-0406",
     "name": "Aithro style",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14684,19 +14588,19 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0412",
-        "CX-0414",
-        "CX-0439"
+        "CX-0409",
+        "CX-0411",
+        "CX-0436"
       ]
     }
   },
   {
-    "id": "CX-0410",
+    "id": "CX-0407",
     "name": "Blender→AI graphics pipeline",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14725,14 +14629,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0411",
+    "id": "CX-0408",
     "name": "Bronze Age Equilibrium reframe",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14761,14 +14665,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0412",
+    "id": "CX-0409",
     "name": "Chapter concept-map timelines",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14798,18 +14702,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0414",
-        "CX-0439"
+        "CX-0411",
+        "CX-0436"
       ]
     }
   },
   {
-    "id": "CX-0413",
+    "id": "CX-0410",
     "name": "Character architecture from self-analysis (The Frequency / Nasha)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14839,14 +14743,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0414",
+    "id": "CX-0411",
     "name": "Conlang program for Terra & Eshara",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14876,17 +14780,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0439"
+        "CX-0436"
       ]
     }
   },
   {
-    "id": "CX-0415",
+    "id": "CX-0412",
     "name": "Cultural-breakout publication strategy",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14917,17 +14821,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0422"
+        "CX-0419"
       ]
     }
   },
   {
-    "id": "CX-0416",
+    "id": "CX-0413",
     "name": "Dimension Walkers narrative universe",
     "cluster": "NARRATIVE",
     "part": "V-CRAFT",
@@ -14957,14 +14861,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0417",
+    "id": "CX-0414",
     "name": "Earth-2068 chronology method",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -14994,14 +14898,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0418",
+    "id": "CX-0415",
     "name": "EDITION_BETA ticketed remediation (T-00→T-19)",
     "cluster": "NARRATIVE",
     "part": "V-CRAFT",
@@ -15032,14 +14936,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0419",
+    "id": "CX-0416",
     "name": "Eshara → Kha-Ren rebirth / 'Esharanization of Earth'",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15068,14 +14972,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0420",
+    "id": "CX-0417",
     "name": "Evidence-led discovery + 'No Fantasy Magic' rule",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15106,14 +15010,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0421",
+    "id": "CX-0418",
     "name": "Galactic Ages future-history 2024–2200",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15143,19 +15047,19 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0556",
-        "CX-0585",
-        "CX-0630"
+        "CX-0553",
+        "CX-0582",
+        "CX-0627"
       ]
     }
   },
   {
-    "id": "CX-0422",
+    "id": "CX-0419",
     "name": "Guilt-transfer mechanism + leak grading",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15185,14 +15089,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0423",
+    "id": "CX-0420",
     "name": "Institutional Emergence Law",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15222,14 +15126,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0424",
+    "id": "CX-0421",
     "name": "Inverted-cone progressive divergence",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15258,14 +15162,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0425",
+    "id": "CX-0422",
     "name": "Joker characters",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15294,14 +15198,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0426",
+    "id": "CX-0423",
     "name": "Kha-Ren caste system & POV design",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15330,14 +15234,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0427",
+    "id": "CX-0424",
     "name": "Kha-Ren D3 historical map",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15367,14 +15271,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0428",
+    "id": "CX-0425",
     "name": "KHA-REN SECOND MILLENNIUM (ESHARA_NEW_MILENIUM / KR era reports)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15404,14 +15308,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0429",
+    "id": "CX-0426",
     "name": "Luis-authored in-world inventions",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15441,20 +15345,20 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0493",
-        "CX-0494",
-        "CX-0520",
-        "CX-0610"
+        "CX-0490",
+        "CX-0491",
+        "CX-0517",
+        "CX-0607"
       ]
     }
   },
   {
-    "id": "CX-0430",
+    "id": "CX-0427",
     "name": "Marcus & Samantha alignment fiction",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15484,14 +15388,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0431",
+    "id": "CX-0428",
     "name": "Master Knowledge Schemas SM-00…SM-05",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15521,14 +15425,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0432",
+    "id": "CX-0429",
     "name": "Nine-lens audit framework / 48-hour revision engine",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15559,19 +15463,19 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0452",
-        "CX-0479",
-        "CX-0536"
+        "CX-0449",
+        "CX-0476",
+        "CX-0533"
       ]
     }
   },
   {
-    "id": "CX-0433",
+    "id": "CX-0430",
     "name": "Perspective-relative worldbuilding toolkit",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15601,14 +15505,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0434",
+    "id": "CX-0431",
     "name": "R-series world bible",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15637,14 +15541,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0435",
+    "id": "CX-0432",
     "name": "Reference-sci-fi 'escape fiction' study + TRIVERSE archive recovery",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15675,14 +15579,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0436",
+    "id": "CX-0433",
     "name": "Silhouette-over-anatomy law + ink-wash aesthetic",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15712,14 +15616,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0437",
+    "id": "CX-0434",
     "name": "Teacher-demo pitch narrative",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15748,14 +15652,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0438",
+    "id": "CX-0435",
     "name": "The artifact as dimensional heat engine",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15785,14 +15689,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0439",
+    "id": "CX-0436",
     "name": "The Codex book (in-universe)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15822,14 +15726,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0440",
+    "id": "CX-0437",
     "name": "The TRIVERSE Codex (master reference)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15858,14 +15762,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0441",
+    "id": "CX-0438",
     "name": "THE TRYVERSE trilogy development OS / multi-AI production pipeline",
     "cluster": "NARRATIVE",
     "part": "V-CRAFT",
@@ -15896,14 +15800,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0442",
+    "id": "CX-0439",
     "name": "Time-Slip storytelling web app",
     "cluster": "NARRATIVE",
     "part": "I-ENTITY",
@@ -15934,14 +15838,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0443",
+    "id": "CX-0440",
     "name": "Traceability principle",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -15971,14 +15875,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0444",
+    "id": "CX-0441",
     "name": "Trilogy-of-trilogies architecture",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16007,14 +15911,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0445",
+    "id": "CX-0442",
     "name": "TRIVERSE Book 1 production line",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16043,14 +15947,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0446",
+    "id": "CX-0443",
     "name": "TRIVERSE technology canon (Quantum Archaeology — QEM/QID/QEC/QAS)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16081,14 +15985,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0447",
+    "id": "CX-0444",
     "name": "TRIVERSE tragedy core — communication IS destruction / The Nemesis",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16118,14 +16022,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0448",
+    "id": "CX-0445",
     "name": "TRIVERSE Worldbuilding IDE (triverse-timeline) + Mirror Principle",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16156,14 +16060,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0449",
+    "id": "CX-0446",
     "name": "Tryverse cosmology — interdimensional cosmic hardware",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16193,14 +16097,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0450",
+    "id": "CX-0447",
     "name": "Visionary Technologist Project (TRIVERSE seed)",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16230,14 +16134,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0451",
+    "id": "CX-0448",
     "name": "Wound-level methodology / levels of inception",
     "cluster": "NARRATIVE",
     "part": "II-CONTINUITY",
@@ -16267,14 +16171,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0384"
+        "CX-0381"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0452",
+    "id": "CX-0449",
     "name": "'ALPS is a forecast' plan-source forensics",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16308,13 +16212,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0479",
-        "CX-0536"
+        "CX-0476",
+        "CX-0533"
       ]
     }
   },
   {
-    "id": "CX-0453",
+    "id": "CX-0450",
     "name": "'Build our own ChatGPT' + generate-money instinct",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16350,7 +16254,7 @@
     }
   },
   {
-    "id": "CX-0454",
+    "id": "CX-0451",
     "name": "\"No libraries\" doctrine",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -16388,7 +16292,7 @@
     }
   },
   {
-    "id": "CX-0455",
+    "id": "CX-0452",
     "name": "30-second holy-shit moment / viral mechanics",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16424,7 +16328,7 @@
     }
   },
   {
-    "id": "CX-0456",
+    "id": "CX-0453",
     "name": "AETHER212-levels-applied-to-day-job dual-use test",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16458,12 +16362,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0504"
+        "CX-0501"
       ]
     }
   },
   {
-    "id": "CX-0457",
+    "id": "CX-0454",
     "name": "AI callout generator (Amazon Nova)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16500,7 +16404,7 @@
     }
   },
   {
-    "id": "CX-0458",
+    "id": "CX-0455",
     "name": "AI consulting company blueprint (rol transhumano)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16537,7 +16441,7 @@
     }
   },
   {
-    "id": "CX-0459",
+    "id": "CX-0456",
     "name": "ARGOS middleware / composer architecture",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16573,7 +16477,7 @@
     }
   },
   {
-    "id": "CX-0460",
+    "id": "CX-0457",
     "name": "Argos threading model + queue-rebinding fix",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16609,7 +16513,7 @@
     }
   },
   {
-    "id": "CX-0461",
+    "id": "CX-0458",
     "name": "Auto-publish zero-touch pipeline attempt",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16644,12 +16548,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0463"
+        "CX-0460"
       ]
     }
   },
   {
-    "id": "CX-0462",
+    "id": "CX-0459",
     "name": "BTL IQ AI incubator critique",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16686,7 +16590,7 @@
     }
   },
   {
-    "id": "CX-0463",
+    "id": "CX-0460",
     "name": "ChatGPT as end-to-end product factory",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16722,7 +16626,7 @@
     }
   },
   {
-    "id": "CX-0464",
+    "id": "CX-0461",
     "name": "ChatGPT backend-API reverse engineering (\"unlimited tokens\")",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16758,7 +16662,7 @@
     }
   },
   {
-    "id": "CX-0465",
+    "id": "CX-0462",
     "name": "Comment-as-strategy + /authority-comment-finder",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16794,7 +16698,7 @@
     }
   },
   {
-    "id": "CX-0466",
+    "id": "CX-0463",
     "name": "Cost-Free System Architecture",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -16831,7 +16735,7 @@
     }
   },
   {
-    "id": "CX-0467",
+    "id": "CX-0464",
     "name": "Crypto/forex bot income probes (Crypto Surge Predictor)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16870,7 +16774,7 @@
     }
   },
   {
-    "id": "CX-0468",
+    "id": "CX-0465",
     "name": "Daily intelligence routine (\"cowork\")",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16906,7 +16810,7 @@
     }
   },
   {
-    "id": "CX-0469",
+    "id": "CX-0466",
     "name": "Desktop-as-cockpit (Rainmeter AI desktop)",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -16943,7 +16847,7 @@
     }
   },
   {
-    "id": "CX-0470",
+    "id": "CX-0467",
     "name": "Device-aware model packs + ethical monetization",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -16977,12 +16881,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0534"
+        "CX-0531"
       ]
     }
   },
   {
-    "id": "CX-0471",
+    "id": "CX-0468",
     "name": "Docker as corporate-laptop escape hatch",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17018,7 +16922,7 @@
     }
   },
   {
-    "id": "CX-0472",
+    "id": "CX-0469",
     "name": "DTM2 control-surface incident analysis",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17054,7 +16958,7 @@
     }
   },
   {
-    "id": "CX-0473",
+    "id": "CX-0470",
     "name": "Early 2023 venture probes (Barcelona bar plan; ocean plastic-removal plan)",
     "cluster": "OPS",
     "part": "I-ENTITY",
@@ -17090,7 +16994,7 @@
     }
   },
   {
-    "id": "CX-0474",
+    "id": "CX-0471",
     "name": "Early data-engineering portfolio (AWS Lambda graphs, VBA Allocation, WoodWing API tool)",
     "cluster": "OPS",
     "part": "I-ENTITY",
@@ -17127,7 +17031,7 @@
     }
   },
   {
-    "id": "CX-0475",
+    "id": "CX-0472",
     "name": "Ethics-vs-sample-size tradeoff",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17163,7 +17067,7 @@
     }
   },
   {
-    "id": "CX-0476",
+    "id": "CX-0473",
     "name": "EU company / e-Residency venture scaffolding",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17199,7 +17103,7 @@
     }
   },
   {
-    "id": "CX-0477",
+    "id": "CX-0474",
     "name": "External LLM appliance interest",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -17235,7 +17139,7 @@
     }
   },
   {
-    "id": "CX-0478",
+    "id": "CX-0475",
     "name": "Field-naming-as-aggregation-semantics",
     "cluster": "OPS",
     "part": "I-ENTITY",
@@ -17271,7 +17175,7 @@
     }
   },
   {
-    "id": "CX-0479",
+    "id": "CX-0476",
     "name": "File-system anti-aggregation doctrine",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17305,12 +17209,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0536"
+        "CX-0533"
       ]
     }
   },
   {
-    "id": "CX-0480",
+    "id": "CX-0477",
     "name": "Five micro-project candidates",
     "cluster": "OPS",
     "part": "V-CRAFT",
@@ -17347,7 +17251,7 @@
     }
   },
   {
-    "id": "CX-0481",
+    "id": "CX-0478",
     "name": "Free-API discovery agent",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -17383,7 +17287,7 @@
     }
   },
   {
-    "id": "CX-0482",
+    "id": "CX-0479",
     "name": "Free-tier compute strategy (model rotation, token budgeting)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17421,7 +17325,7 @@
     }
   },
   {
-    "id": "CX-0483",
+    "id": "CX-0480",
     "name": "FTH / LANGUAGE_PROTOTYPES / ALEXANDRIA lab namespace",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -17459,7 +17363,7 @@
     }
   },
   {
-    "id": "CX-0484",
+    "id": "CX-0481",
     "name": "Gated-model symlink workaround",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17495,7 +17399,7 @@
     }
   },
   {
-    "id": "CX-0485",
+    "id": "CX-0482",
     "name": "Gifts-not-gates pricing ethics",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17532,7 +17436,7 @@
     }
   },
   {
-    "id": "CX-0486",
+    "id": "CX-0483",
     "name": "Greek Travel App",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17568,7 +17472,7 @@
     }
   },
   {
-    "id": "CX-0487",
+    "id": "CX-0484",
     "name": "HF models API auto-analysis/auto-selection action",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17604,7 +17508,7 @@
     }
   },
   {
-    "id": "CX-0488",
+    "id": "CX-0485",
     "name": "Hourly Update callout generator",
     "cluster": "OPS",
     "part": "II-CONTINUITY",
@@ -17641,7 +17545,7 @@
     }
   },
   {
-    "id": "CX-0489",
+    "id": "CX-0486",
     "name": "Income/venture probing (Network Monitoring SaaS, power-line comms)",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -17677,7 +17581,7 @@
     }
   },
   {
-    "id": "CX-0490",
+    "id": "CX-0487",
     "name": "Indicia semantic-search platform (spec vectorization, friendly fields, RAG)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17715,7 +17619,7 @@
     }
   },
   {
-    "id": "CX-0491",
+    "id": "CX-0488",
     "name": "internet_gpts.py — local internet-reading GPT",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -17751,7 +17655,7 @@
     }
   },
   {
-    "id": "CX-0492",
+    "id": "CX-0489",
     "name": "InTouch Extended Chrome extension + Tenderizer auction module",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17789,7 +17693,7 @@
     }
   },
   {
-    "id": "CX-0493",
+    "id": "CX-0490",
     "name": "IXD Process Control Agent",
     "cluster": "OPS",
     "part": "V-CRAFT",
@@ -17824,14 +17728,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0494",
-        "CX-0520",
-        "CX-0610"
+        "CX-0491",
+        "CX-0517",
+        "CX-0607"
       ]
     }
   },
   {
-    "id": "CX-0494",
+    "id": "CX-0491",
     "name": "IXD Pulse / Pulse Line proposal",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17866,13 +17770,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0520",
-        "CX-0610"
+        "CX-0517",
+        "CX-0607"
       ]
     }
   },
   {
-    "id": "CX-0495",
+    "id": "CX-0492",
     "name": "Keystone Essay",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17908,7 +17812,7 @@
     }
   },
   {
-    "id": "CX-0496",
+    "id": "CX-0493",
     "name": "LBA4_Analyzer",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17944,7 +17848,7 @@
     }
   },
   {
-    "id": "CX-0497",
+    "id": "CX-0494",
     "name": "Ledger of Lyra / BLAV ticketed venture management",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -17980,7 +17884,7 @@
     }
   },
   {
-    "id": "CX-0498",
+    "id": "CX-0495",
     "name": "Life-as-JSON four-domain personal schema",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18017,7 +17921,7 @@
     }
   },
   {
-    "id": "CX-0499",
+    "id": "CX-0496",
     "name": "Local-first offline in-browser LLM single-file ethos",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -18052,14 +17956,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0600",
-        "CX-0612",
-        "CX-0621"
+        "CX-0597",
+        "CX-0609",
+        "CX-0618"
       ]
     }
   },
   {
-    "id": "CX-0500",
+    "id": "CX-0497",
     "name": "LUIS_BLANCO_MASTER_REPORT personal operating system",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18095,7 +17999,7 @@
     }
   },
   {
-    "id": "CX-0501",
+    "id": "CX-0498",
     "name": "MetricSpine → Causal DAG → Swarmography",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18132,7 +18036,7 @@
     }
   },
   {
-    "id": "CX-0502",
+    "id": "CX-0499",
     "name": "MONDS — Monday.com data-service microservice",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18168,7 +18072,7 @@
     }
   },
   {
-    "id": "CX-0503",
+    "id": "CX-0500",
     "name": "Monetization architecture (Three Rings + PC2)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18205,7 +18109,7 @@
     }
   },
   {
-    "id": "CX-0504",
+    "id": "CX-0501",
     "name": "No-Docker philosophy",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -18241,7 +18145,7 @@
     }
   },
   {
-    "id": "CX-0505",
+    "id": "CX-0502",
     "name": "Nuclear Option deployment doctrine",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18277,7 +18181,7 @@
     }
   },
   {
-    "id": "CX-0506",
+    "id": "CX-0503",
     "name": "Onboarding guide for new joiners",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18311,14 +18215,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0569",
-        "CX-0588",
-        "CX-0635"
+        "CX-0566",
+        "CX-0585",
+        "CX-0632"
       ]
     }
   },
   {
-    "id": "CX-0507",
+    "id": "CX-0504",
     "name": "OnePyFlow + warehouse ops ecosystem",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18362,7 +18266,7 @@
     }
   },
   {
-    "id": "CX-0508",
+    "id": "CX-0505",
     "name": "Operations Command Center + EOS automation",
     "cluster": "OPS",
     "part": "II-CONTINUITY",
@@ -18398,7 +18302,7 @@
     }
   },
   {
-    "id": "CX-0509",
+    "id": "CX-0506",
     "name": "Ops-dashboard-to-narrative pattern",
     "cluster": "OPS",
     "part": "II-CONTINUITY",
@@ -18436,7 +18340,7 @@
     }
   },
   {
-    "id": "CX-0510",
+    "id": "CX-0507",
     "name": "Owned-asset resilience",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18472,7 +18376,7 @@
     }
   },
   {
-    "id": "CX-0511",
+    "id": "CX-0508",
     "name": "Paste-anything ops analysis tool",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -18509,7 +18413,7 @@
     }
   },
   {
-    "id": "CX-0512",
+    "id": "CX-0509",
     "name": "Phase-locked portfolio roadmap (12–15-project RPG lockstep)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18545,7 +18449,7 @@
     }
   },
   {
-    "id": "CX-0513",
+    "id": "CX-0510",
     "name": "Plugin-finder Chrome extension",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18582,7 +18486,7 @@
     }
   },
   {
-    "id": "CX-0514",
+    "id": "CX-0511",
     "name": "PORTFOLIO research vault",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18618,7 +18522,7 @@
     }
   },
   {
-    "id": "CX-0515",
+    "id": "CX-0512",
     "name": "PROJECT ARGOS → IXD Pulse (Pulse Tower + Pulse Eyes)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18656,7 +18560,7 @@
     }
   },
   {
-    "id": "CX-0516",
+    "id": "CX-0513",
     "name": "Pulse Line AI brief",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18691,13 +18595,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0639",
-        "CX-0649"
+        "CX-0636",
+        "CX-0646"
       ]
     }
   },
   {
-    "id": "CX-0517",
+    "id": "CX-0514",
     "name": "Revenue-generator-per-phase solo economics",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18734,7 +18638,7 @@
     }
   },
   {
-    "id": "CX-0518",
+    "id": "CX-0515",
     "name": "Schema-stripping positional JSON matrix",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18771,7 +18675,7 @@
     }
   },
   {
-    "id": "CX-0519",
+    "id": "CX-0516",
     "name": "Science-Based Adventure Platform — every-stage-profitable product ladder",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18808,7 +18712,7 @@
     }
   },
   {
-    "id": "CX-0520",
+    "id": "CX-0517",
     "name": "Shasta ↔ StockTool integration",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18842,12 +18746,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0610"
+        "CX-0607"
       ]
     }
   },
   {
-    "id": "CX-0521",
+    "id": "CX-0518",
     "name": "Shift Selector warehouse userscript",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18883,7 +18787,7 @@
     }
   },
   {
-    "id": "CX-0522",
+    "id": "CX-0519",
     "name": "Shift-comms emoji-coded reporting protocol",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18920,7 +18824,7 @@
     }
   },
   {
-    "id": "CX-0523",
+    "id": "CX-0520",
     "name": "Single-file interactive HTML deliverables (digital magazine, SVG mind map)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18958,7 +18862,7 @@
     }
   },
   {
-    "id": "CX-0524",
+    "id": "CX-0521",
     "name": "SkoposFlow",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -18997,7 +18901,7 @@
     }
   },
   {
-    "id": "CX-0525",
+    "id": "CX-0522",
     "name": "Snowflake/Matillion query-tag governance",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19033,7 +18937,7 @@
     }
   },
   {
-    "id": "CX-0526",
+    "id": "CX-0523",
     "name": "Sovereign Stack sprint",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -19071,7 +18975,7 @@
     }
   },
   {
-    "id": "CX-0527",
+    "id": "CX-0524",
     "name": "Staged-prototype pattern",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19107,7 +19011,7 @@
     }
   },
   {
-    "id": "CX-0528",
+    "id": "CX-0525",
     "name": "Stations-closed Chime alert bot (PROJECT_STATIONS_CLOSED)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19144,7 +19048,7 @@
     }
   },
   {
-    "id": "CX-0529",
+    "id": "CX-0526",
     "name": "The posting machine / 26-post Five Axes campaign",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19180,7 +19084,7 @@
     }
   },
   {
-    "id": "CX-0530",
+    "id": "CX-0527",
     "name": "Tintoreria Cardona AI toolkit",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19216,7 +19120,7 @@
     }
   },
   {
-    "id": "CX-0531",
+    "id": "CX-0528",
     "name": "Token-cost reduction as core service",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19253,7 +19157,7 @@
     }
   },
   {
-    "id": "CX-0532",
+    "id": "CX-0529",
     "name": "Truck promo video pipeline",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19289,7 +19193,7 @@
     }
   },
   {
-    "id": "CX-0533",
+    "id": "CX-0530",
     "name": "Turbo Mode roadmap (WF R&D-001)",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -19326,7 +19230,7 @@
     }
   },
   {
-    "id": "CX-0534",
+    "id": "CX-0531",
     "name": "Two-tap automated installer",
     "cluster": "OPS",
     "part": "IV-INTERFACE",
@@ -19362,7 +19266,7 @@
     }
   },
   {
-    "id": "CX-0535",
+    "id": "CX-0532",
     "name": "Universal TensorBoard killer",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19398,7 +19302,7 @@
     }
   },
   {
-    "id": "CX-0536",
+    "id": "CX-0533",
     "name": "Userscript-to-API reverse engineering + ground-truth fixtures",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19434,7 +19338,7 @@
     }
   },
   {
-    "id": "CX-0537",
+    "id": "CX-0534",
     "name": "Viral-pillar pragmatic roadmap",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19470,7 +19374,7 @@
     }
   },
   {
-    "id": "CX-0538",
+    "id": "CX-0535",
     "name": "Wealth Generation Protocol",
     "cluster": "OPS",
     "part": "V-CRAFT",
@@ -19507,7 +19411,7 @@
     }
   },
   {
-    "id": "CX-0539",
+    "id": "CX-0536",
     "name": "Weight-projection app seed",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19544,7 +19448,7 @@
     }
   },
   {
-    "id": "CX-0540",
+    "id": "CX-0537",
     "name": "WF-BIZ pricing psychology",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19580,7 +19484,7 @@
     }
   },
   {
-    "id": "CX-0541",
+    "id": "CX-0538",
     "name": "Windows-MCP self-reverting workaround",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19616,7 +19520,7 @@
     }
   },
   {
-    "id": "CX-0542",
+    "id": "CX-0539",
     "name": "YMS reverse-engineering (API reconstruction + forensics)",
     "cluster": "OPS",
     "part": "VII-MEASURE",
@@ -19654,7 +19558,7 @@
     }
   },
   {
-    "id": "CX-0543",
+    "id": "CX-0540",
     "name": "'Self prompt yourself' / reiterative learning",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19684,17 +19588,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0551"
+        "CX-0548"
       ]
     }
   },
   {
-    "id": "CX-0544",
+    "id": "CX-0541",
     "name": "Concatenated Prompt Technique (CPT) — prompt-as-app",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19717,14 +19621,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0545",
+    "id": "CX-0542",
     "name": "LLM as prompt generator (meta-prompting)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19747,14 +19651,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0546",
+    "id": "CX-0543",
     "name": "Modular Prompt Puzzle / PromptCell",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19781,14 +19685,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0547",
+    "id": "CX-0544",
     "name": "Prompt-magic taxonomy (dimension ladders + ten schools)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19811,14 +19715,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0548",
+    "id": "CX-0545",
     "name": "Self-dialogue fractal-expansion prompt",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19841,14 +19745,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0549",
+    "id": "CX-0546",
     "name": "Self-Propelling Prompt / Self-Transcendence Prompt (STP)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19880,7 +19784,7 @@
     }
   },
   {
-    "id": "CX-0550",
+    "id": "CX-0547",
     "name": "Zeroth Law arc: Perfect Prompt Devil → generateZerothLawPrompt()",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19903,16 +19807,16 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [
-        "CX-0549"
+        "CX-0546"
       ],
       "proves": []
     }
   },
   {
-    "id": "CX-0551",
+    "id": "CX-0548",
     "name": "'Evolve the conceptual map'",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19941,14 +19845,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0552",
+    "id": "CX-0549",
     "name": "'Prime Directive' prompt, Iteration 10+",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -19978,17 +19882,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0648"
+        "CX-0645"
       ]
     }
   },
   {
-    "id": "CX-0553",
+    "id": "CX-0550",
     "name": "'Reverse-prompt me' game",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20018,17 +19922,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0568"
+        "CX-0565"
       ]
     }
   },
   {
-    "id": "CX-0554",
+    "id": "CX-0551",
     "name": "Adversarial-critic persona escalation",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20059,14 +19963,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0555",
+    "id": "CX-0552",
     "name": "AI Cognitive-Evolution Framework / Narrative Implantation toolkit",
     "cluster": "CRAFT",
     "part": "II-CONTINUITY",
@@ -20096,14 +20000,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0556",
+    "id": "CX-0553",
     "name": "All-encompassing evolving script (monolith-that-speciates)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20133,18 +20037,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0585",
-        "CX-0630"
+        "CX-0582",
+        "CX-0627"
       ]
     }
   },
   {
-    "id": "CX-0557",
+    "id": "CX-0554",
     "name": "Anti-grandiloquence editorial doctrine",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20174,14 +20078,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0558",
+    "id": "CX-0555",
     "name": "Archive-mining meta-prompts (opportunity / identity / skill mining)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20213,14 +20117,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0559",
+    "id": "CX-0556",
     "name": "Audit of the audits",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20249,14 +20153,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0560",
+    "id": "CX-0557",
     "name": "Autonomous Forward-Thinking development doctrine",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20287,14 +20191,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0561",
+    "id": "CX-0558",
     "name": "Blender MCP render pipeline",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20324,14 +20228,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0562",
+    "id": "CX-0559",
     "name": "Blueprint-first 'independent contractors' decomposition",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20361,14 +20265,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0563",
+    "id": "CX-0560",
     "name": "Build-to-see-the-vision inversion exercise",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20398,14 +20302,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0564",
+    "id": "CX-0561",
     "name": "Challenge/Dare prompting",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20435,14 +20339,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0565",
+    "id": "CX-0562",
     "name": "Change Impact Analysis meta-prompt",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20472,14 +20376,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0566",
+    "id": "CX-0563",
     "name": "Checkpoint-Report iteration methodology + screenshots-as-prompts",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20510,14 +20414,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0567",
+    "id": "CX-0564",
     "name": "Code-review jailbreak family / injection-as-sport",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20547,14 +20451,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0568",
+    "id": "CX-0565",
     "name": "Comprehensive Code Review meta-prompt + cognitive immune system",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20584,14 +20488,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0569",
+    "id": "CX-0566",
     "name": "Conversation-simulation rehearsal protocol",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20620,18 +20524,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0588",
-        "CX-0635"
+        "CX-0585",
+        "CX-0632"
       ]
     }
   },
   {
-    "id": "CX-0570",
+    "id": "CX-0567",
     "name": "CRAFT — minor ideas",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20662,14 +20566,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0571",
+    "id": "CX-0568",
     "name": "Critical-thought-partner persona spec",
     "cluster": "CRAFT",
     "part": "VII-MEASURE",
@@ -20699,14 +20603,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0572",
+    "id": "CX-0569",
     "name": "Cross-AI relay workflow",
     "cluster": "CRAFT",
     "part": "VI-LABORATORY",
@@ -20736,14 +20640,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0573",
+    "id": "CX-0570",
     "name": "Design-critique methodology (bake-off + vibe ladder)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20772,18 +20676,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0581",
-        "CX-0622"
+        "CX-0578",
+        "CX-0619"
       ]
     }
   },
   {
-    "id": "CX-0574",
+    "id": "CX-0571",
     "name": "Diff-style prompting",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20812,14 +20716,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0575",
+    "id": "CX-0572",
     "name": "Embodiment games (Role Embracement / embody-the-system / invoke Hades)",
     "cluster": "CRAFT",
     "part": "VI-LABORATORY",
@@ -20849,14 +20753,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0576",
+    "id": "CX-0573",
     "name": "ENFORCEMENT.md / white-hacking prompt injection",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20886,14 +20790,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0577",
+    "id": "CX-0574",
     "name": "Escalation-imperative dialect",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20923,14 +20827,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0578",
+    "id": "CX-0575",
     "name": "Evolutionary prompt operators",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20960,14 +20864,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0579",
+    "id": "CX-0576",
     "name": "Expert-debugger inversion",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -20997,17 +20901,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0605"
+        "CX-0602"
       ]
     }
   },
   {
-    "id": "CX-0580",
+    "id": "CX-0577",
     "name": "FLUX persona three-tool pipeline",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21037,14 +20941,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0581",
+    "id": "CX-0578",
     "name": "Gemini drift-pattern catalog",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21074,17 +20978,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0622"
+        "CX-0619"
       ]
     }
   },
   {
-    "id": "CX-0582",
+    "id": "CX-0579",
     "name": "Gemini image-gen pre-production pipeline",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21114,17 +21018,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0619"
+        "CX-0616"
       ]
     }
   },
   {
-    "id": "CX-0583",
+    "id": "CX-0580",
     "name": "GitHub-first documentation habit",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21153,17 +21057,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0618"
+        "CX-0615"
       ]
     }
   },
   {
-    "id": "CX-0584",
+    "id": "CX-0581",
     "name": "GPT-5 prompt-architecture research",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21193,14 +21097,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0585",
+    "id": "CX-0582",
     "name": "Implicit Information Injection + Prompting History Projection (PHP)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21230,17 +21134,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0630"
+        "CX-0627"
       ]
     }
   },
   {
-    "id": "CX-0586",
+    "id": "CX-0583",
     "name": "Infalible Prompt Engineer / AlphaCat v2.3",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21270,14 +21174,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0587",
+    "id": "CX-0584",
     "name": "Inline self-improvement clause",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21306,14 +21210,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0588",
+    "id": "CX-0585",
     "name": "Interview-me loop (elicit-then-synthesize)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21342,17 +21246,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0635"
+        "CX-0632"
       ]
     }
   },
   {
-    "id": "CX-0589",
+    "id": "CX-0586",
     "name": "Iterative AI Development Framework / continuation contract",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21383,14 +21287,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0590",
+    "id": "CX-0587",
     "name": "Iterative image-evolution / ascension games",
     "cluster": "CRAFT",
     "part": "VI-LABORATORY",
@@ -21422,14 +21326,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0591",
+    "id": "CX-0588",
     "name": "Jailbreak mode catalog + stacked mode incantations",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21460,14 +21364,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0592",
+    "id": "CX-0589",
     "name": "Kha-Ren worldbuilding methodology",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21498,18 +21402,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0596",
-        "CX-0620"
+        "CX-0593",
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0593",
+    "id": "CX-0590",
     "name": "Level-jump / phase-leapfrog prompting",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21539,14 +21443,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0594",
+    "id": "CX-0591",
     "name": "MCP early adoption",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21575,14 +21479,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0595",
+    "id": "CX-0592",
     "name": "Mega-prompt self-contained research briefs",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21612,14 +21516,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0596",
+    "id": "CX-0593",
     "name": "Mess-first methodology",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21648,17 +21552,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0620"
+        "CX-0617"
       ]
     }
   },
   {
-    "id": "CX-0597",
+    "id": "CX-0594",
     "name": "Meta-disciplines / combination-invention doctrine",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21687,17 +21591,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0598"
+        "CX-0595"
       ]
     }
   },
   {
-    "id": "CX-0598",
+    "id": "CX-0595",
     "name": "Metaphor loophole-audit methodology",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21727,14 +21631,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0599",
+    "id": "CX-0596",
     "name": "Multi-role persona stacking / triple-role casting",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21764,14 +21668,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0600",
+    "id": "CX-0597",
     "name": "Narrative-motivation mega-prompt (tone as control variable)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21801,18 +21705,18 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0612",
-        "CX-0621"
+        "CX-0609",
+        "CX-0618"
       ]
     }
   },
   {
-    "id": "CX-0601",
+    "id": "CX-0598",
     "name": "No-placeholders / full-code quality doctrine",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21843,14 +21747,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0602",
+    "id": "CX-0599",
     "name": "Paradox Engine / Quantum Observer roleplay",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21881,14 +21785,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0603",
+    "id": "CX-0600",
     "name": "Phase-gated build methodology (research-before-phase)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21917,14 +21821,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0604",
+    "id": "CX-0601",
     "name": "Physicist-persona research instrument",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21954,14 +21858,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0605",
+    "id": "CX-0602",
     "name": "PowerShell-as-protocol",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -21991,14 +21895,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0606",
+    "id": "CX-0603",
     "name": "Project/phase personification games",
     "cluster": "CRAFT",
     "part": "VI-LABORATORY",
@@ -22029,14 +21933,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0607",
+    "id": "CX-0604",
     "name": "Prompt Improvement Framework (scored rewrite loop)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22066,14 +21970,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0608",
+    "id": "CX-0605",
     "name": "Prompt-as-code toolchain",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22103,14 +22007,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0609",
+    "id": "CX-0606",
     "name": "Prompting-as-destination insight",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22140,14 +22044,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0610",
+    "id": "CX-0607",
     "name": "Proofreading-attack injection technique",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22177,14 +22081,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0611",
+    "id": "CX-0608",
     "name": "Recursive problem→solution laddering",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22213,14 +22117,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0612",
+    "id": "CX-0609",
     "name": "Research-then-localize method",
     "cluster": "CRAFT",
     "part": "IV-INTERFACE",
@@ -22249,17 +22153,17 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0621"
+        "CX-0618"
       ]
     }
   },
   {
-    "id": "CX-0613",
+    "id": "CX-0610",
     "name": "Role-prompting with output contracts",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22288,14 +22192,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0614",
+    "id": "CX-0611",
     "name": "Search-the-error ritual / research-driven debugging",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22325,14 +22229,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0615",
+    "id": "CX-0612",
     "name": "Seeded evolution via Anthropic Workbench",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22362,14 +22266,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0616",
+    "id": "CX-0613",
     "name": "Simulated-execution-in-parts technique",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22398,14 +22302,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0617",
+    "id": "CX-0614",
     "name": "Stacked-technique meta-prompt factory",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22436,14 +22340,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0618",
+    "id": "CX-0615",
     "name": "Stepwise working-prototype methodology",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22472,14 +22376,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0619",
+    "id": "CX-0616",
     "name": "SVG show-don't-tell documentation",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22509,14 +22413,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0620",
+    "id": "CX-0617",
     "name": "Typed conversation modes (TYPE A–G)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22546,14 +22450,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0621",
+    "id": "CX-0618",
     "name": "Ultra-GPT 100,000x amplification persona",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22582,14 +22486,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0622",
+    "id": "CX-0619",
     "name": "Verifier-agent workflow (fork_verifier_agent)",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22618,14 +22522,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0623",
+    "id": "CX-0620",
     "name": "Voice rules / register-control arc",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22655,14 +22559,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0624",
+    "id": "CX-0621",
     "name": "Voice-to-spec pipeline",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22692,14 +22596,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0625",
+    "id": "CX-0622",
     "name": "Zero-asset procedural purity doctrine",
     "cluster": "CRAFT",
     "part": "V-CRAFT",
@@ -22729,14 +22633,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0549"
+        "CX-0546"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0626",
+    "id": "CX-0623",
     "name": "'Asimov, but disordered' self-definition",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -22765,14 +22669,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0627",
+    "id": "CX-0624",
     "name": "'Crafting a New Life Plan' — life-plan schema + path-as-content",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -22803,14 +22707,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0628",
+    "id": "CX-0625",
     "name": "'Enhanced engineering' vs vibe engineering",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -22834,7 +22738,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0317"
+        "CX-0315"
       ],
       "enables": [],
       "requires": [],
@@ -22842,14 +22746,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0629",
+    "id": "CX-0626",
     "name": "'System that propagates' thesis",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -22874,21 +22778,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0630",
+    "id": "CX-0627",
     "name": "'The AI Architect' identity",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -22912,21 +22816,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0631",
+    "id": "CX-0628",
     "name": "'We are lacking a purpose' — essence before structure",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -22956,14 +22860,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0632",
+    "id": "CX-0629",
     "name": "\"Represent ME\" self-visualization game",
     "cluster": "LIFE",
     "part": "VI-LABORATORY",
@@ -22992,14 +22896,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0633",
+    "id": "CX-0630",
     "name": "\"Solution architect for AI\" identity",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23023,21 +22927,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0634",
+    "id": "CX-0631",
     "name": "Agentic Engineer self-framing",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23061,21 +22965,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0635",
+    "id": "CX-0632",
     "name": "AI as sanity-check mirror",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23104,14 +23008,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0636",
+    "id": "CX-0633",
     "name": "AI as workplace ghostwriter/coach",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23140,14 +23044,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0637",
+    "id": "CX-0634",
     "name": "AI Strategy for 2025",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23176,14 +23080,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0638",
+    "id": "CX-0635",
     "name": "AI Systems Architect identity",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23207,21 +23111,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0639",
+    "id": "CX-0636",
     "name": "Anti-spiral pattern catalog",
     "cluster": "LIFE",
     "part": "I-ENTITY",
@@ -23250,19 +23154,19 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [
-        "CX-0317"
+        "CX-0315"
       ],
       "proves": [],
       "parallel": [
-        "CX-0649"
+        "CX-0646"
       ]
     }
   },
   {
-    "id": "CX-0640",
+    "id": "CX-0637",
     "name": "Archive-mining / self-archaeology operation",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23294,16 +23198,16 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": [
-        "CX-0317"
+        "CX-0315"
       ]
     }
   },
   {
-    "id": "CX-0641",
+    "id": "CX-0638",
     "name": "Capability-maximalist 'no ethics for now' stance",
     "cluster": "LIFE",
     "part": "VII-MEASURE",
@@ -23333,14 +23237,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0642",
+    "id": "CX-0639",
     "name": "Career intent: \"desarrollarme como cientifico de datos\"",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23369,14 +23273,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0643",
+    "id": "CX-0640",
     "name": "Career-transition campaign",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23405,14 +23309,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0644",
+    "id": "CX-0641",
     "name": "Fatou-components / anti-KAM math excursion",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23442,14 +23346,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0645",
+    "id": "CX-0642",
     "name": "luisblanco.dev",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23480,14 +23384,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0165"
+        "CX-0074"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0646",
+    "id": "CX-0643",
     "name": "Metamethodology",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23511,21 +23415,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0647",
+    "id": "CX-0644",
     "name": "Multi-front career play (ambassador, certs, internal SDE, EPAM)",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23554,14 +23458,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0648",
+    "id": "CX-0645",
     "name": "Original Python ideas roster",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23590,14 +23494,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0649",
+    "id": "CX-0646",
     "name": "Political philosophy artifact (civilizational consequentialist)",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23626,14 +23530,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0650",
+    "id": "CX-0647",
     "name": "Red-Matrix visual identity",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23663,14 +23567,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0651",
+    "id": "CX-0648",
     "name": "Self-as-method / psychology embedded into tooling",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23695,21 +23599,21 @@
     "links": {
       "derives_from": [],
       "enables": [
-        "CX-0165"
+        "CX-0074"
       ],
       "requires": [],
       "watches": [],
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0652",
+    "id": "CX-0649",
     "name": "Solo unicorn proof-of-concept",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23733,7 +23637,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0165"
+        "CX-0074"
       ],
       "enables": [],
       "requires": [],
@@ -23741,14 +23645,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0653",
+    "id": "CX-0650",
     "name": "The 2023 project constellation",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23778,14 +23682,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0654",
+    "id": "CX-0651",
     "name": "The Big X / AETHER212→WIRTHFORGE rename",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23816,15 +23720,15 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0165",
-        "CX-0645"
+        "CX-0074",
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0655",
+    "id": "CX-0652",
     "name": "Toolkit Ecosystem (toolkit-as-website)",
     "cluster": "LIFE",
     "part": "II-CONTINUITY",
@@ -23854,14 +23758,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0656",
+    "id": "CX-0653",
     "name": "UOC numerical-methods coursework",
     "cluster": "LIFE",
     "part": "VII-MEASURE",
@@ -23890,14 +23794,14 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0645"
+        "CX-0642"
       ],
       "refines": [],
       "proves": []
     }
   },
   {
-    "id": "CX-0657",
+    "id": "CX-0654",
     "name": "CONSTELLATION · LAW 1 · SCALE BY COMPOSITION, NOT SIZE",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -23933,7 +23837,7 @@
     }
   },
   {
-    "id": "CX-0658",
+    "id": "CX-0655",
     "name": "CONSTELLATION · LAW 2 · HETEROGENEITY BEATS CLONES",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -23952,7 +23856,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0219"
+        "CX-0218"
       ],
       "enables": [],
       "requires": [],
@@ -23968,7 +23872,7 @@
     }
   },
   {
-    "id": "CX-0659",
+    "id": "CX-0656",
     "name": "CONSTELLATION · LAW 3 · EVERY AUTONOMOUS LAYER GETS A WATCHER — THE SEDAH LAW",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24004,7 +23908,7 @@
     }
   },
   {
-    "id": "CX-0660",
+    "id": "CX-0657",
     "name": "CONSTELLATION · LAW 4 · FIT THE HARDWARE YOU OWN",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24039,7 +23943,7 @@
     }
   },
   {
-    "id": "CX-0661",
+    "id": "CX-0658",
     "name": "CONSTELLATION · LAW 5 · ROUTING IS COGNITION",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24058,7 +23962,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0278"
+        "CX-0276"
       ],
       "enables": [],
       "requires": [],
@@ -24073,7 +23977,7 @@
     }
   },
   {
-    "id": "CX-0662",
+    "id": "CX-0659",
     "name": "CONSTELLATION · LAW 6 · THE HUMAN IS A LEGITIMATE BUS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24107,7 +24011,7 @@
     }
   },
   {
-    "id": "CX-0663",
+    "id": "CX-0660",
     "name": "CONSTELLATION · LAW 7 · OUTPUT IS FUEL",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24126,7 +24030,7 @@
     ],
     "links": {
       "derives_from": [
-        "CX-0284"
+        "CX-0282"
       ],
       "enables": [
         "CX-0162"
@@ -24143,7 +24047,7 @@
     }
   },
   {
-    "id": "CX-0664",
+    "id": "CX-0661",
     "name": "CONSTELLATION · LAW 8 · FAILURE MUST BE RECOVERABLE, NOT PREVENTED",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24176,7 +24080,7 @@
     }
   },
   {
-    "id": "CX-0665",
+    "id": "CX-0662",
     "name": "CONSTELLATION · LAW 9 · THE TOPOLOGY IS VISIBLE OR IT IS BROKEN",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24201,7 +24105,7 @@
       "transports": [],
       "opposes": [],
       "implements": [
-        "CX-0165",
+        "CX-0074",
         "CX-0069"
       ],
       "refines": [],
@@ -24209,7 +24113,7 @@
     }
   },
   {
-    "id": "CX-0666",
+    "id": "CX-0663",
     "name": "CONSTELLATION · THE REVERSAL",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24239,15 +24143,15 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0667",
-        "CX-0668",
-        "CX-0669",
-        "CX-0670"
+        "CX-0664",
+        "CX-0665",
+        "CX-0666",
+        "CX-0667"
       ]
     }
   },
   {
-    "id": "CX-0667",
+    "id": "CX-0664",
     "name": "CONSTELLATION · THE RECURSION INSTINCT",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24277,14 +24181,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0668",
-        "CX-0669",
-        "CX-0670"
+        "CX-0665",
+        "CX-0666",
+        "CX-0667"
       ]
     }
   },
   {
-    "id": "CX-0668",
+    "id": "CX-0665",
     "name": "CONSTELLATION · WHAT THE WATCHER ANSWERS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24314,13 +24218,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0669",
-        "CX-0670"
+        "CX-0666",
+        "CX-0667"
       ]
     }
   },
   {
-    "id": "CX-0669",
+    "id": "CX-0666",
     "name": "CONSTELLATION · THE RING, DRAWN",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24350,12 +24254,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0670"
+        "CX-0667"
       ]
     }
   },
   {
-    "id": "CX-0670",
+    "id": "CX-0667",
     "name": "CONSTELLATION · THE WATCHER'S DESCENDANTS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24387,7 +24291,7 @@
     }
   },
   {
-    "id": "CX-0671",
+    "id": "CX-0668",
     "name": "CONSTELLATION · ANTI-PATTERN · I · CLONE SWARMS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24419,14 +24323,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0672",
-        "CX-0673",
-        "CX-0674"
+        "CX-0669",
+        "CX-0670",
+        "CX-0671"
       ]
     }
   },
   {
-    "id": "CX-0672",
+    "id": "CX-0669",
     "name": "CONSTELLATION · ANTI-PATTERN · II · UNWATCHED AUTONOMY",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24458,13 +24362,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0673",
-        "CX-0674"
+        "CX-0670",
+        "CX-0671"
       ]
     }
   },
   {
-    "id": "CX-0673",
+    "id": "CX-0670",
     "name": "CONSTELLATION · ANTI-PATTERN · III · TOPOLOGY SPAGHETTI",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24486,7 +24390,7 @@
       "enables": [],
       "requires": [],
       "watches": [
-        "CX-0165"
+        "CX-0074"
       ],
       "transports": [],
       "opposes": [],
@@ -24496,12 +24400,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0674"
+        "CX-0671"
       ]
     }
   },
   {
-    "id": "CX-0674",
+    "id": "CX-0671",
     "name": "CONSTELLATION · ANTI-PATTERN · IV · FUEL WASTE",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24535,7 +24439,7 @@
     }
   },
   {
-    "id": "CX-0675",
+    "id": "CX-0672",
     "name": "CONSTELLATION · PRACTICE · THIS CODEX'S OWN AUTHORING FLEETS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24565,15 +24469,15 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0676",
-        "CX-0677",
-        "CX-0678",
-        "CX-0679"
+        "CX-0673",
+        "CX-0674",
+        "CX-0675",
+        "CX-0676"
       ]
     }
   },
   {
-    "id": "CX-0676",
+    "id": "CX-0673",
     "name": "CONSTELLATION · PRACTICE · THE SITE'S AGENT WORKFLOWS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24603,14 +24507,14 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0677",
-        "CX-0678",
-        "CX-0679"
+        "CX-0674",
+        "CX-0675",
+        "CX-0676"
       ]
     }
   },
   {
-    "id": "CX-0677",
+    "id": "CX-0674",
     "name": "CONSTELLATION · PRACTICE · FEEDING THE AEA — THE MULTIPLICITY AXIS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24640,13 +24544,13 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0678",
-        "CX-0679"
+        "CX-0675",
+        "CX-0676"
       ]
     }
   },
   {
-    "id": "CX-0678",
+    "id": "CX-0675",
     "name": "CONSTELLATION · PRACTICE · ESSENCE AT THE SEAMS",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",
@@ -24676,12 +24580,12 @@
       "refines": [],
       "proves": [],
       "parallel": [
-        "CX-0679"
+        "CX-0676"
       ]
     }
   },
   {
-    "id": "CX-0679",
+    "id": "CX-0676",
     "name": "CONSTELLATION · PRACTICE · DOCTRINE PRINCIPLE SERVED",
     "cluster": "CONSTELLATION",
     "part": "III-COMPOSITION",

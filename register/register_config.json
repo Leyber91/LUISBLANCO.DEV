@@ -81,7 +81,7 @@
     "Coordination-over-multiplicity finding": "III-COMPOSITION"
   },
   "alias_maps": {
-    "AETHER / Aether 212": ["Aether 212", "AetherNet", "WIRTHFORGE", "Aether"],
+    "AETHER / Aether 212": ["Aether 212", "AetherNet", "WIRTHFORGE", "Aether", "Aether_AI"],
     "DATASPACE": ["DATASPACE"],
     "SEDAH IA": ["SEDAH", "Sedah_IA"],
     "HADES": ["Hades Omega", "Hades AI"],
@@ -94,7 +94,9 @@
     "Cryptographic Contextual Markers + 'Turn GPT-2 into GPT-4/5'": ["Cryptographic Contextual Markers + \"Turn GPT-2 into GPT-4/5\""],
     "SearXNG + Tor + Groq metasearch ('cover all corners of internet')": ["SearXNG + Tor + Groq metasearch (\"cover all corners of internet\")"],
     "'Self prompt yourself' / reiterative learning": ["\"Self prompt yourself\" / reiterative learning"],
-    "SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy": ["SEDAH IA — Pico/Nano/Micro/Cluster small-LLM hierarchy"]
+    "SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy": ["SEDAH IA — Pico/Nano/Micro/Cluster small-LLM hierarchy"],
+    "QBNN — Quantum-Biological Neural Network (built)": ["QBNN — Quantum-Biological Neural Network"],
+    "Dr. Alice Newton (2024) vs Dr. Hades Helix (2124) debate engine": ["Dr. Alice Newton vs Dr. Hades Helix debate engine"]
   },
   "edge_corrections": {},
   "_quote_duplicates_pending_phase1": "Alias pairs below collapse smart-quote vs straight-quote duplicates on next phase1 run"
