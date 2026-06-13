@@ -658,7 +658,11 @@ class AgentCommand(GatekeeperTool):
             if done:
                 break
             if tool_results:
-                messages.append({"role": "user", "content": "\n".join(tool_results)})
+                # Remind agent to check plan and write BRAID at end
+                reminder = ""
+                if turns == max_turns - 3:
+                    reminder = "\n\n[SYSTEM] 3 turns remaining. If task is complete: (1) call plan update if active, (2) call memory write with was/wasnt/canbe summary, (3) call done."
+                messages.append({"role": "user", "content": "\n".join(tool_results) + reminder})
 
         # Summary
         _emit("session_end", turns=turns, tokens_in=total_in, tokens_out=total_out,
