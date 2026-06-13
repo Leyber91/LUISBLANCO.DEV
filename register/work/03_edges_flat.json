@@ -1,0 +1,266 @@
+[
+  {
+    "source": "CX-0007",
+    "target": "CX-0365",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "QBNN — Quantum-Biological Neural Network (built)",
+    "target_name": "qbnn — quantum-biological neural network"
+  },
+  {
+    "source": "CX-0054",
+    "target": "CX-0208",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "SelfEvolvingVisualizer / ai-ecosystem dashboard",
+    "target_name": "selfevolvingvisualizer"
+  },
+  {
+    "source": "CX-0089",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "DEAC — (Dynamically) Evolving Agent Collective",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0119",
+    "target": "CX-0056",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "SwarmEnhancedAI / Groq Swarm Orchestration",
+    "target_name": "swarmenhancedai"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "AETHER / Aether 212 — the internet as navigable astrophysics",
+    "target_name": "aether / aether 212"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "AETHER / Aether 212 — the internet as navigable astrophysics",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0159",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "AETHER / Aether 212 — the internet as navigable astrophysics",
+    "target_name": "aethernet"
+  },
+  {
+    "source": "CX-0164",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "SpaceOdyssey / WirthForge Odyssey + 50-game prompting backlog",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0164",
+    "target": "CX-0250",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "SpaceOdyssey / WirthForge Odyssey + 50-game prompting backlog",
+    "target_name": "quantum leaps"
+  },
+  {
+    "source": "CX-0172",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.8,
+    "source_name": "Aether Flow Studio",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0176",
+    "target": "CX-0195",
+    "type": "requires",
+    "weight": 0.8,
+    "source_name": "Captain/Crew/Engine Room/Galaxy metaphor",
+    "target_name": "knowledge galaxy"
+  },
+  {
+    "source": "CX-0204",
+    "target": "CX-0308",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "Project Prometheus Helix / Cosmic Synapse Network",
+    "target_name": "project prometheus helix"
+  },
+  {
+    "source": "CX-0257",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "WIRTHFORGE Five Levels (Lightning Strikes → Resonance Fields)",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0319",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.8,
+    "source_name": "The DECIPHER",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0331",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.8,
+    "source_name": "WF document factory",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0334",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.8,
+    "source_name": "\"AI should be owned, not rented\" manifesto",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0347",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Doomsday package",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0361",
+    "target": "CX-0166",
+    "type": "requires",
+    "weight": 0.8,
+    "source_name": "Privacy-first / user-owns-data posture",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0380",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "The recursive AEA glyph",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0384",
+    "target": "CX-0650",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Understanding-AI mission statement",
+    "target_name": "luisblanco.dev"
+  },
+  {
+    "source": "CX-0386",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Wirthforge mobile via Qualcomm Genie",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0387",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "WIRTHFORGE resilience layer",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0388",
+    "target": "CX-0219",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "The Tryverse Chronicles — TRIVERSE manuscript birth",
+    "target_name": "bookgpt game"
+  },
+  {
+    "source": "CX-0406",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "WIRTHFORGE AI persona pantheon",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0441",
+    "target": "CX-0166",
+    "type": "proves",
+    "weight": 0.8,
+    "source_name": "Teacher-demo pitch narrative",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0514",
+    "target": "CX-0650",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Owned-asset resilience",
+    "target_name": "luisblanco.dev"
+  },
+  {
+    "source": "CX-0520",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Pulse Line AI brief",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0530",
+    "target": "CX-0166",
+    "type": "derives_from",
+    "weight": 0.8,
+    "source_name": "Sovereign Stack sprint",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0575",
+    "target": "CX-0304",
+    "type": "derives_from",
+    "weight": 0.8,
+    "source_name": "CRAFT — minor ideas",
+    "target_name": "omniscient synthesizer"
+  },
+  {
+    "source": "CX-0632",
+    "target": "CX-0650",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "'Crafting a New Life Plan' — life-plan schema + path-as-content",
+    "target_name": "luisblanco.dev"
+  },
+  {
+    "source": "CX-0659",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.5,
+    "source_name": "The Big X / AETHER212→WIRTHFORGE rename",
+    "target_name": "wirthforge"
+  },
+  {
+    "source": "CX-0660",
+    "target": "CX-0166",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Toolkit Ecosystem (toolkit-as-website)",
+    "target_name": "aethernet"
+  },
+  {
+    "source": "CX-0660",
+    "target": "CX-0650",
+    "type": "enables",
+    "weight": 0.8,
+    "source_name": "Toolkit Ecosystem (toolkit-as-website)",
+    "target_name": "luisblanco.dev"
+  }
+]
