@@ -28,8 +28,9 @@
         pause_prob:  0.02,
         pause_ms:    [60, 120],
         energy_type: 'lightning',
-        color:       '#00ffcc',
-        dim_color:   'rgba(0,255,204,0.25)',
+        color:       '#FFE566',
+        dim_color:   'rgba(255,229,102,0.18)',
+        glow:        'rgba(255,229,102,0.55)',
       },
       council: {
         label:       'COUNCIL',
@@ -40,8 +41,9 @@
         pause_prob:  0.06,
         pause_ms:    [140, 280],
         energy_type: 'council',
-        color:       '#4ecdc4',
-        dim_color:   'rgba(78,205,196,0.25)',
+        color:       '#D4A24C',
+        dim_color:   'rgba(212,162,76,0.18)',
+        glow:        'rgba(212,162,76,0.55)',
       },
       architect: {
         label:       'ARCHITECT',
@@ -52,8 +54,9 @@
         pause_prob:  0.14,
         pause_ms:    [220, 580],
         energy_type: 'architecture',
-        color:       '#ff8c42',
-        dim_color:   'rgba(255,140,66,0.25)',
+        color:       '#C07830',
+        dim_color:   'rgba(192,120,48,0.18)',
+        glow:        'rgba(192,120,48,0.55)',
       },
       deep: {
         label:       'DEEP',
@@ -64,11 +67,31 @@
         pause_prob:  0.22,
         pause_ms:    [420, 1100],
         energy_type: 'consciousness',
-        color:       '#9b59b6',
-        dim_color:   'rgba(155,89,182,0.25)',
+        color:       '#8B6D3A',
+        dim_color:   'rgba(139,109,58,0.18)',
+        glow:        'rgba(139,109,58,0.55)',
       },
     },
     DEFAULT_PROFILE: 'council',
+
+    // ── token vocabulary — drawn from AEA / site language ────────────────
+    // Short common tokens + concept words so the stream reads as real model output.
+    TOKEN_VOCAB: [
+      'the','a','of','in','to','and','is','it','as','for','by','on','with','not',
+      'this','that','when','each','but','so','if','we','I','its','be','at',
+      'entity','path','memory','tools','observe','feedback','context',
+      'token','weight','prompt','axis','autonomy','layer','model','signal',
+      'state','flow','seed','node','loop','step','window','span',
+      'drift','depth','scope','fork','trace','log','locate','measure',
+      'compress','persist','compose','navigate','coordinate','viability',
+      'operator','scaffold','ground','decode','coherence','emergence',
+      'recovery','attention','abstraction','multiplicity','async',
+      'RestorationOps','Spectral','Axis','L3','L4','L5','v0.2',
+    ],
+    TOKEN_STREAM: {
+      HISTORY:    28,    // visible token slots in the strip
+      FADE_STEPS: 12,    // how many slots fade out at the left edge
+    },
 
     // ── spectral analysis window ──────────────────────────────────────────
     // HISTORY_LEN: how many token intervals to keep in the rolling buffer

@@ -18,17 +18,18 @@
   const N_AXES = AXES.length;
 
   // ── colour palette ───────────────────────────────────────────────────────
+  // Semi-transparent so the LUMEN starfield substrate bleeds through
   const C = {
-    bg:         '#080A12',
-    panelBg:    'rgba(10,13,24,0.90)',
-    border:     'rgba(212,162,76,0.15)',
-    borderDim:  'rgba(212,162,76,0.07)',
-    text:       'rgba(234,240,251,0.40)',
-    textMid:    'rgba(234,240,251,0.60)',
-    textBright: 'rgba(234,240,251,0.82)',
+    bg:         'rgba(8,10,18,0.15)',        // 15% opaque — starfield visible
+    panelBg:    'rgba(8,10,18,0.42)',        // 42% opaque panels
+    border:     'rgba(212,162,76,0.22)',
+    borderDim:  'rgba(212,162,76,0.10)',
+    text:       'rgba(234,240,251,0.45)',
+    textMid:    'rgba(234,240,251,0.65)',
+    textBright: 'rgba(234,240,251,0.88)',
     gold:       '#D4A24C',
-    goldDim:    'rgba(212,162,76,0.22)',
-    scanline:   'rgba(212,162,76,0.03)',
+    goldDim:    'rgba(212,162,76,0.25)',
+    scanline:   'rgba(212,162,76,0.04)',
   };
 
   // ── tiny helpers ─────────────────────────────────────────────────────────
@@ -365,8 +366,18 @@
       if(!W || !H) return;
 
       // ── background ────────────────────────────────────────────────────
+      // Clear to transparent so LUMEN starfield substrate shows through
+      ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = C.bg;
       ctx.fillRect(0, 0, W, H);
+
+      // subtle dot grid for spatial reference (like the site substrate)
+      ctx.fillStyle = 'rgba(212,162,76,0.08)';
+      for(let gy = 20; gy < H; gy += 20){
+        for(let gx = 20; gx < W; gx += 20){
+          ctx.fillRect(gx, gy, 1, 1);
+        }
+      }
 
       // scanlines for depth (subtle horizontal bands)
       for(let sy = 0; sy < H; sy += 4){
