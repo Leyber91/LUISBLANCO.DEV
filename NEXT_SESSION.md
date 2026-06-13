@@ -12,7 +12,7 @@ Your rules (global CLAUDE.md v3.1 + project CLAUDE.md) auto-load — honor layer
 ## THE CODEX
 Repo: github.com/Leyber91/LUISBLANCO.DEV · passphrase: `Aether91212*` · AES-256-GCM client-side.
 Source: `_reference/` (gitignored). Rebuild: `cd LUISBLANCO.DEV; $env:CODEX_PASS="Aether91212*"; node tools/build_codex.mjs` → commit + push `codex.enc.json`.
-Currently sealed: **148 sections · 1.31 MB**.
+Currently sealed: **149 sections · 1.31 MB**.
 
 ---
 
@@ -60,6 +60,8 @@ Part distribution: I-ENTITY(107) · II-CONTINUITY(107) · III-COMPOSITION(47) ·
   - 04_lineage_and_failures: 5 forms (2023 mapping → 2023 visual sprint → 2024 AI Canvas → 2025 WIRTHFORGE → 2026 LUMEN), failure patterns, deposited invariant
   - 05_practice: 7 practice sections mapping to laws + site feed documentation
 - **Codex re-sealed**: 148 sections, 1.31 MB (was 141 at session start).
+- **Parts I–III re-seated**: cx-plate headers + cross-reference footers added to BOOK_AEA, BOOK_ESSENCE, BOOK_CONSTELLATION.
+- **Heritage scope**: `_reference/HERITAGE_SCOPE.md` written (149 sections now). Gravitational lensing shaders located. Three Doors implementation found in wirthforge. Energy backend found. Token tracking utilities found.
 
 ## WHAT WAS BUILT THIS SESSION (2026-06-13)
 
@@ -108,9 +110,9 @@ Each new book follows the existing 6-file structure: `00_plate.html` · `01_the_
 - LUMEN/Transit feed explicit in practice chapter.
 - Sealed in codex (148 sections, 1.31 MB).
 
-**2. Re-seat Parts I–III** under the unified Paradigm Book law system (after intro is written).
-- BOOK_AEA → Part I-ENTITY, BOOK_ESSENCE → Part II-CONTINUITY, BOOK_CONSTELLATION → Part III-COMPOSITION.
-- Re-seating = add unified law IDs, cross-part references, shared register links. Do NOT rewrite content.
+**2. Re-seat Parts I–III** — ✅ DONE
+- cx-plate headers updated (PART I / II / III), AEA position row updated, cross-reference footer appended to all three plates.
+- Feeds/depends-on tables embedded in each plate.
 
 **3. Author BOOK_CRAFT (Part V — CRAFT)** — prompting, context engineering, output grammar.
 Source: `_reference/research_map/prompting.md` + CRAFT cluster in register.
@@ -124,11 +126,17 @@ Source: `_reference/research_map/7-games.md` + `websim.md` + GAMES cluster in re
 - Source: `_reference/DOCTRINE_VISIBLE_AI.md` + HONESTY + OPS clusters in register (179 entries, largest part).
 - **Ops chapter has a public form**: its public-facing version = the future **client diagnostic manual** (different shelf, not inside the codex). Flag clearly when authoring.
 
-**6. Heritage repos scope** — list what exists in AetherVision, project-leyber-212, time_slip, ai_canvas; extract shader assets for LUMEN.
+**6. Heritage repos scope** — ✅ DONE
+- Full scope in `_reference/HERITAGE_SCOPE.md` (now sealed in codex, 149 sections).
+- **PRIMARY SHADER SOURCE**: `project-leyber-212-website/assets/js/black_hole/shaders/gravitational_lensing_fragment.glsl` + `_vertex.glsl` + `gravitational_lensing.js` (simplified canvas version = best port target, no THREE.js deps).
+- **THREE DOORS FOUND**: `wirthforge/frontend/src/pages/DoorSelection.tsx` + Level1/2/3. The wirthforge frontend IS the Three Doors implementation. Running receipt for Part VII/OMEGA.
+- **ENERGY BACKEND**: `wirthforge/backend/core/energy_calculator.py` + `energy_service.py` — energy-truth implementation for Part VII source.
+- **TOKEN TRACKING**: `Aether_AI/src/utils/tokenUsage/` — tracker, statistics, limits, constants. Feeds TokenGateKeeper.
+- Porting plan for gravitational lensing → LUMEN documented in HERITAGE_SCOPE.md.
 
-**7. LUMEN gravitational lensing shader** — `project-leyber-212-website/.../gravitational_lensing.js`. Bends the dust field, adds depth layer under glyphs. **Needs explicit go-ahead — substantial JS build.**
+**7. LUMEN gravitational lensing shader** — shader located, porting plan documented. **Still needs explicit go-ahead.** Source: `project-leyber-212-website/assets/js/main_page/gravitational_lensing.js` (simplified, no THREE.js — best port target). Port path: extract Schwarzschild math → replace skybox sample with LUMEN dust-field bend → LUMEN module pattern (lensing.config + lensing.glsl + lensing.engine + lensing.orchestrator). Should hold 60fps (one fullscreen quad per frame, ~1ms cost).
 
-**8. concept_graph.json → Prime Radiant instrument** — force-directed graph page wiring 676 nodes + 996 edges from `src/core/concept_graph.json`. Already versioned, just needs a viewer.
+**8. concept_graph.json → Prime Radiant instrument** — force-directed graph page wiring 690 nodes + 1013 edges from `src/core/concept_graph.json`. Already versioned, just needs a viewer. Reference layout: `ai_canvas/static/js/graph/GraphLayoutManager.js` (Cytoscape algorithms, adapt to vanilla D3/force without external dep).
 
 ---
 
