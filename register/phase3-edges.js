@@ -124,6 +124,36 @@ const SPINE = [
   ['Project Leyber 212 — the founding platform', 'TRYVERSE → TRIVERSE', 'enables', 0.9, 'era-1: tryverse section born inside leyber212'],
   ['Project Leyber 212 — the founding platform', 'Metapower / metagenerator', 'enables', 0.85, 'era-1: metapower section born inside leyber212'],
 
+  /* ── REVERSE EDGES FOR "LINE" META-SUMMARIES (make them reachable) ────── */
+  ['Project Ouroboros / OuroborosX (~20-agent pipeline, built)', 'THE OUROBOROS LINE — Self-Modifying / Self-Growing Systems', 'proves',    0.9, 'ouroboros-line: ouroboros IS the proof-of-line'],
+  ['Metapower / metagenerator',                                  'THE OUROBOROS LINE — Self-Modifying / Self-Growing Systems', 'implements', 0.8, 'ouroboros-line: metapower seeds the line'],
+  ['HADES — Hierarchical and Autonomous Decision-making Entity System / Hades Omega', 'THE HADES/MoA LINE — Multi-Agent Orchestration Before It Was Named', 'proves', 0.9, 'hades-line: HADES IS the proof-of-line'],
+  ['Human-as-message-bus multi-agent orchestration (deployed)',  'THE HADES/MoA LINE — Multi-Agent Orchestration Before It Was Named', 'proves', 0.95, 'hades-line: strongest proof-of-priority'],
+  ['DATASPACE — conversation-compression for persistent AI identity', 'THE COMPRESSION LINE — Invented Languages & Context Engineering', 'proves', 0.9, 'compression-line: DATASPACE IS the compression line origin'],
+  ["'Degradation' (named enemy) + zero-degradation relay protocol", 'THE COMPRESSION LINE — Invented Languages & Context Engineering', 'proves', 0.85, 'compression-line: degradation problem proves the line'],
+  ['AETHER / Aether 212 — the internet as navigable astrophysics', 'THE AETHER LINE — Astrophysics as Interface', 'proves',    0.95, 'aether-line: AETHER IS the proof-of-line'],
+  ['Black hole simulations — from 2023 nursery to physics-correct Gargantua', 'THE AETHER LINE — Astrophysics as Interface', 'implements', 0.85, 'aether-line: visual nursery implements the line concept'],
+  ['Games as discovery engines (the thesis)',                    'THE GAMES LINE — Games as Discovery Engines', 'proves',    0.95, 'games-line: thesis IS the proof-of-line'],
+  ['Cosmic Nexus — each universe IS a different local model',   'THE GAMES LINE — Games as Discovery Engines', 'proves',    0.85, 'games-line: cosmic nexus is the built proof'],
+  ['The honesty decoder',                                        'THE HONESTY LINE — Energy Truth & Instrumented AI (the maturity cluster)', 'proves', 0.9, 'honesty-line: decoder IS the proof-of-line'],
+  ['CognitiveTransistor',                                        'THE HONESTY LINE — Energy Truth & Instrumented AI (the maturity cluster)', 'proves', 0.9, 'honesty-line: transistor is the built proof'],
+
+  /* ── INCOMING EDGES FOR REMAINING ISOLATED TIER A NODES ─────────────── */
+  /* CX-0268 AI Cognitive-Evolution Framework / TMR theory stack */
+  ['HADES — Hierarchical and Autonomous Decision-making Entity System / Hades Omega', 'AI Cognitive-Evolution Framework / TMR theory stack', 'enables', 0.8, 'era-3: hades multi-agent system builds the context requiring TMR framework'],
+  ['Project Ouroboros / OuroborosX (~20-agent pipeline, built)', 'AI Cognitive-Evolution Framework / TMR theory stack', 'enables', 0.8, 'era-3: ouroboros build surfaced the need for cognitive-evolution framing'],
+  /* CX-0327 Three-persona critic stack + recursive expansion loop */
+  ['Project Leyber 212 — the founding platform', 'Three-persona critic stack + recursive expansion loop', 'enables', 0.75, 'era-0-to-1: leyber212 creative work established multi-persona prompting as method'],
+  ['DATASPACE — conversation-compression for persistent AI identity', 'Three-persona critic stack + recursive expansion loop', 'enables', 0.7, 'compression: critic stack is context-engineered multi-voice compression in practice'],
+
+  /* ── REVERSE EDGES FOR ISOLATED TIER S/A IN HONESTY CLUSTER ────────────── */
+  ['DATASPACE — conversation-compression for persistent AI identity', '5-file LLM novel-revision system', 'refines', 0.75, 'compression: 5-file system is early DATASPACE-like external memory'],
+  ['Three-persona critic stack + recursive expansion loop', 'Recursive MoA — "MoA of MoAs"', 'derives_from', 0.8, 'era-0: critic stack is the manual multi-agent debate ancestor'],
+  ['AI Cognitive-Evolution Framework / TMR theory stack',   'inception.py — FTH cognitive architecture', 'proves',  0.85, 'era-3: inception.py proves the TMR theory ran as code'],
+  ['WIRTHFORGE', 'Token-timing EEG / token-stream EKG (Spectral Analyzer)', 'requires', 0.85, 'honesty-line: WF requires token-EEG as its instrument layer'],
+  ['WIRTHFORGE', 'The 31-celestial-body internet ontology', 'derives_from', 0.8, 'aether-line: the ontology is the intellectual source WF builds from'],
+  ['AETHER / Aether 212 — the internet as navigable astrophysics', 'The 31-celestial-body internet ontology', 'requires', 0.95, 'aether-line: AETHER requires the 31-body mapping — it IS the ontology'],
+
   /* ── LIFE CLUSTER — identity crystallises into the work ───────────────── */
   ['"The AI Architect" identity',                  'WIRTHFORGE',                                         'enables',     0.9, 'life-line: naming-as-identity moment (2024-06-24) → WF persona'],
   ['"Solution architect for AI" identity',          'WIRTHFORGE',                                         'enables',     0.85,'life-line: Dec 2024 self-definition → WF mission'],
