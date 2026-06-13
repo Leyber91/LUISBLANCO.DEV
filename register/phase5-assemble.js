@@ -8,7 +8,8 @@ const fs = require('fs');
 const path = require('path');
 
 const WORK = path.join(__dirname, 'work');
-const IN_FILE = path.join(WORK, '02_assigned.json'); /* use assigned until edges fixed */
+const EDGES_FILE = path.join(WORK, '03_with_edges.json');
+const IN_FILE = fs.existsSync(EDGES_FILE) ? EDGES_FILE : path.join(WORK, '02_assigned.json');
 const OUT_DIR = path.join(__dirname, '..', '_reference', 'REGISTER');
 const GRAPH_FILE = path.join(__dirname, '..', 'src', 'core', 'concept_graph.json');
 
