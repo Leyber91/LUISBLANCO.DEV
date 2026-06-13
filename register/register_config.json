@@ -23,7 +23,8 @@
     "NARRATIVE": "II-CONTINUITY",
     "OPS": "VII-MEASURE",
     "CRAFT": "V-CRAFT",
-    "LIFE": "II-CONTINUITY"
+    "LIFE": "II-CONTINUITY",
+    "CONSTELLATION": "III-COMPOSITION"
   },
   "keyword_part_overrides": {
     "prompt": "V-CRAFT",
@@ -52,7 +53,32 @@
     "ops": "VII-MEASURE",
     "causal": "VII-MEASURE"
   },
-  "manual_overrides": {},
+  "manual_overrides": {
+    "CX-0067": "III-COMPOSITION",
+    "CX-0125": "III-COMPOSITION",
+    "CX-0031": "III-COMPOSITION",
+    "CX-0070": "III-COMPOSITION",
+    "CX-0311": "III-COMPOSITION",
+    "CX-0116": "III-COMPOSITION",
+    "CX-0118": "III-COMPOSITION",
+    "CX-0316": "III-COMPOSITION",
+    "CX-0272": "III-COMPOSITION",
+    "CX-0092": "III-COMPOSITION",
+    "CX-0069": "III-COMPOSITION",
+    "CX-0101": "III-COMPOSITION",
+    "CX-0279": "III-COMPOSITION",
+    "CX-0276": "III-COMPOSITION",
+    "CX-0093": "III-COMPOSITION",
+    "CX-0061": "III-COMPOSITION",
+    "CX-0271": "III-COMPOSITION",
+    "CX-0220": "III-COMPOSITION",
+    "CX-0077": "III-COMPOSITION",
+    "CX-0115": "III-COMPOSITION",
+    "CX-0163": "III-COMPOSITION",
+    "CX-0280": "III-COMPOSITION",
+    "CX-0075": "III-COMPOSITION",
+    "CX-0085": "III-COMPOSITION"
+  },
   "alias_maps": {
     "AETHER / Aether 212": ["Aether 212", "AetherNet", "WIRTHFORGE", "Aether"],
     "DATASPACE": ["DATASPACE"],

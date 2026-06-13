@@ -124,6 +124,23 @@ const SPINE = [
   ['Project Leyber 212 — the founding platform', 'TRYVERSE → TRIVERSE', 'enables', 0.9, 'era-1: tryverse section born inside leyber212'],
   ['Project Leyber 212 — the founding platform', 'Metapower / metagenerator', 'enables', 0.85, 'era-1: metapower section born inside leyber212'],
 
+  /* ── LIFE CLUSTER — identity crystallises into the work ───────────────── */
+  ['"The AI Architect" identity',                  'WIRTHFORGE',                                         'enables',     0.9, 'life-line: naming-as-identity moment (2024-06-24) → WF persona'],
+  ['"Solution architect for AI" identity',          'WIRTHFORGE',                                         'enables',     0.85,'life-line: Dec 2024 self-definition → WF mission'],
+  ['Agentic Engineer self-framing',                  'WIRTHFORGE',                                         'enables',     0.8, 'life-line: agentic engineer framing feeds WF product persona'],
+  ['AI Systems Architect identity',                  'WIRTHFORGE',                                         'enables',     0.8, 'life-line: AI systems architect → WF architecture doctrine'],
+  ['The Big X / AETHER212→WIRTHFORGE rename',        'WIRTHFORGE',                                         'implements',  0.95,'life-line: the rename IS the WIRTHFORGE birth moment'],
+  ['The Big X / AETHER212→WIRTHFORGE rename',        'AETHER / Aether 212 — the internet as navigable astrophysics', 'derives_from', 0.95, 'life-line: rename traces back to aether origin'],
+  ['luisblanco.dev',                                 'WIRTHFORGE',                                         'implements',  0.9, 'life-line: site is the public face of the WF/AEA vision'],
+  ['Archive-mining / self-archaeology operation',    'The honesty decoder',                                'proves',      0.85,'life-line: self-archaeology is what produces the honesty decoder insight'],
+  ['Metamethodology',                                'WIRTHFORGE',                                         'enables',     0.75,'life-line: meta-methods → WF as the methodology platform'],
+  ['Self-as-method / psychology embedded into tooling', 'WIRTHFORGE',                                     'enables',     0.8, 'life-line: self-as-method → WF practitioner design'],
+  ['Anti-spiral pattern catalog',                    'The honesty decoder',                                'refines',     0.75,'life-line: pattern catalog names the anti-patterns the decoder exposes'],
+  ['Solo unicorn proof-of-concept',                  'WIRTHFORGE',                                         'derives_from',0.75,'life-line: solo-unicorn thesis is the WF independence doctrine'],
+  ["'The AI Architect' identity",                   'WIRTHFORGE',                                         'enables',     0.9, 'life-line: named architect identity → WF persona'],
+  ["'System that propagates' thesis",               'WIRTHFORGE',                                         'enables',     0.8, 'life-line: propagation thesis feeds WF self-evolution'],
+  ["'Enhanced engineering' vs vibe engineering",    'The honesty decoder',                                'derives_from',0.8, 'life-line: engineering vs vibes is the honesty decoder applied to practice'],
+
   /* ── KEY ERA BRIDGES ────────────────────────────────────────────────── */
   ['AI Cognitive-Evolution Framework / TMR theory stack', 'inception.py — FTH cognitive architecture', 'implements', 0.9, 'era-3: TMR theory → implemented in inception.py'],
   ['inception.py — FTH cognitive architecture', 'WIRTHFORGE', 'enables', 0.7, 'era-bridge: FTH framework becomes wf cognitive pipeline'],
@@ -192,6 +209,8 @@ const CLUSTER_SPINE = {
   'CRAFT': 'Self-Propelling Prompt / Self-Transcendence Prompt (STP)',
   'OPS': 'Essence passing + three-level conversation hierarchy',
   'NARRATIVE': 'The Tryverse Chronicles — TRIVERSE manuscript birth',
+  'LIFE': 'luisblanco.dev',
+  'CONSTELLATION': 'Recursive MoA — "MoA of MoAs"',
 };
 
 for (const c of concepts) {

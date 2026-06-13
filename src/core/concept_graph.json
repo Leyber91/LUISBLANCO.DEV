@@ -1,8 +1,8 @@
 {
   "meta": {
-    "built": "2026-06-13T02:25:16.822Z",
+    "built": "2026-06-13T02:34:58.946Z",
     "nodeCount": 661,
-    "edgeCount": 862
+    "edgeCount": 906
   },
   "nodes": [
     {
@@ -248,7 +248,7 @@
     {
       "id": "CX-0031",
       "name": "Hades AI self-modifying agents + Alfa/Beta encrypted dialogue",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "OUROBOROS",
       "tier": null,
       "status": "shipped"
@@ -488,7 +488,7 @@
     {
       "id": "CX-0061",
       "name": "ALEXANDRIA — Groq MOA app + primordial conversations lab",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": "C",
       "status": "shipped"
@@ -536,7 +536,7 @@
     {
       "id": "CX-0067",
       "name": "Human-as-message-bus multi-agent orchestration (deployed)",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": "S",
       "status": "shipped"
@@ -552,7 +552,7 @@
     {
       "id": "CX-0069",
       "name": "Recursive MoA — \"MoA of MoAs\"",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": "A",
       "status": "shipped"
@@ -560,7 +560,7 @@
     {
       "id": "CX-0070",
       "name": "SEDAH IA — the Pico/Nano/Micro/Cluster small-LLM hierarchy",
-      "part": "VI-LABORATORY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": "S",
       "status": "shipped"
@@ -600,7 +600,7 @@
     {
       "id": "CX-0075",
       "name": "Affinity Matrix + council-mechanics vocabulary",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "paper-only"
@@ -616,7 +616,7 @@
     {
       "id": "CX-0077",
       "name": "AI civilization of small local LLMs + neural transistor",
-      "part": "IV-INTERFACE",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "paper-only"
@@ -680,7 +680,7 @@
     {
       "id": "CX-0085",
       "name": "Coordination-over-multiplicity finding",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "shipped"
@@ -736,7 +736,7 @@
     {
       "id": "CX-0092",
       "name": "EvolvingCosmicMultiLLM — self-evolving model router",
-      "part": "IV-INTERFACE",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "prototyped"
@@ -744,7 +744,7 @@
     {
       "id": "CX-0093",
       "name": "Function Registry + Semantic Router",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "prototyped"
@@ -808,7 +808,7 @@
     {
       "id": "CX-0101",
       "name": "MoA Evolution Timeline roadmap (DNAS-MoA, QE-MoA, Federated, Cross-Modal)",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "prototyped"
@@ -920,7 +920,7 @@
     {
       "id": "CX-0115",
       "name": "qwen3 parallel self-critique councils",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "prototyped"
@@ -928,7 +928,7 @@
     {
       "id": "CX-0116",
       "name": "Security Agent with platform-as-adversary threat model",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "shipped"
@@ -944,7 +944,7 @@
     {
       "id": "CX-0118",
       "name": "Subconscious Cognitive Fusion",
-      "part": "I-ENTITY",
+      "part": "III-COMPOSITION",
       "cluster": "HADES-MOA",
       "tier": null,
       "status": "prototyped"
@@ -1000,7 +1000,7 @@
     {
       "id": "CX-0125",
       "name": "Essence passing + three-level conversation hierarchy",
-      "part": "V-CRAFT",
+      "part": "III-COMPOSITION",
       "cluster": "COMPRESSION",
       "tier": "A",
       "status": "shipped"
@@ -1304,7 +1304,7 @@
     {
       "id": "CX-0163",
       "name": "Ollama-as-Fuel",
-      "part": "IV-INTERFACE",
+      "part": "III-COMPOSITION",
       "cluster": "AETHER",
       "tier": "A",
       "status": "shipped"
@@ -1760,7 +1760,7 @@
     {
       "id": "CX-0220",
       "name": "Cosmic Nexus — each universe IS a different local model",
-      "part": "VI-LABORATORY",
+      "part": "III-COMPOSITION",
       "cluster": "GAMES",
       "tier": "A",
       "status": "shipped"
@@ -2168,7 +2168,7 @@
     {
       "id": "CX-0271",
       "name": "AITO — AI Task Orchestrator",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "C",
       "status": "shipped"
@@ -2176,7 +2176,7 @@
     {
       "id": "CX-0272",
       "name": "AMACS — Advanced Multi-Agent Coordination System",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "C",
       "status": "shipped"
@@ -2208,7 +2208,7 @@
     {
       "id": "CX-0276",
       "name": "Bot society with its own Slack + Asana",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "C",
       "status": "shipped"
@@ -2232,7 +2232,7 @@
     {
       "id": "CX-0279",
       "name": "Cognitive Resonance Chamber",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "C",
       "status": "shipped"
@@ -2240,7 +2240,7 @@
     {
       "id": "CX-0280",
       "name": "CognitiveTransistor",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "A",
       "status": "shipped"
@@ -2488,7 +2488,7 @@
     {
       "id": "CX-0311",
       "name": "Second Foundation shadow controller",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "C",
       "status": "shipped"
@@ -2528,7 +2528,7 @@
     {
       "id": "CX-0316",
       "name": "Superposition / Metaposition / Omniposition triad",
-      "part": "VII-MEASURE",
+      "part": "III-COMPOSITION",
       "cluster": "HONESTY",
       "tier": "B",
       "status": "shipped"
@@ -10462,9 +10462,273 @@
       "weight": 0.5
     },
     {
+      "source": "CX-0631",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0632",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0633",
+      "target": "CX-0321",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0633",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0634",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0634",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0635",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0635",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0636",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0637",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0638",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0638",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0639",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0639",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0640",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0641",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0642",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0643",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0643",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0644",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0644",
+      "target": "CX-0321",
+      "type": "refines",
+      "weight": 0.5
+    },
+    {
       "source": "CX-0644",
       "target": "CX-0654",
       "type": "parallel",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0645",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0645",
+      "target": "CX-0321",
+      "type": "proves",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0646",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0647",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0648",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0649",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0650",
+      "target": "CX-0166",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0651",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0651",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0652",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0653",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0654",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0655",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0656",
+      "target": "CX-0166",
+      "type": "enables",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0656",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0657",
+      "target": "CX-0166",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0657",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0658",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0659",
+      "target": "CX-0159",
+      "type": "derives_from",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0659",
+      "target": "CX-0166",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0659",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0660",
+      "target": "CX-0650",
+      "type": "implements",
+      "weight": 0.5
+    },
+    {
+      "source": "CX-0661",
+      "target": "CX-0650",
+      "type": "implements",
       "weight": 0.5
     }
   ]
