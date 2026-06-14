@@ -20,12 +20,12 @@ const ITER = 600_000;
 const SKIP = new Set(['README.md', 'STYLE_HANDOVER.md', 'ALGORITHM_REFERENCE.md', '_RESUME_STATE.md']);
 const group = (rel) => {
   const f = basename(rel);
-  if (f === 'DOCTRINE_VISIBLE_AI.md') return '04 · the doctrine';
-  if (f === 'LUIS_CONCEPTUAL_MAP.md') return '05 · the map';
-  if (f === 'LUIS_IDEA_ATLAS.md') return '06 · the atlas';
-  if (rel.includes('claude_vault_chunks')) return '09 · raw vault';
-  if (f.startsWith('_')) return '07 · synthesis';
-  return '08 · evidence';
+  if (f === 'DOCTRINE_VISIBLE_AI.md') return '10 · the doctrine';
+  if (f === 'LUIS_CONCEPTUAL_MAP.md') return '11 · the map';
+  if (f === 'LUIS_IDEA_ATLAS.md') return '12 · the atlas';
+  if (rel.includes('claude_vault_chunks')) return '15 · raw vault';
+  if (f.startsWith('_')) return '13 · synthesis';
+  return '14 · evidence';
 };
 const title = (file, md) => {
   const m = md.match(/^#\s+(.+)$/m);
@@ -44,13 +44,16 @@ function walk(dir, out = []) {
 // the authored book: _reference/BOOK/*.html fragments, ordered by filename,
 // shipped raw (inline SVG diagrams included) as group 00.
 const BOOKS = [
-  ['BOOK', '00 · the book of luis'],
-  ['BOOK_PARADIGM', '00p · the paradigm book'],
+  ['BOOK_PARADIGM', '00 · the paradigm'],
   ['BOOK_AEA', '01 · part i — entity'],
   ['BOOK_ESSENCE', '02 · part ii — continuity'],
   ['BOOK_CONSTELLATION', '03 · part iii — composition'],
   ['BOOK_AETHER', '04 · part iv — interface'],
-  ['REGISTER', '10 · the register'],
+  ['BOOK_CRAFT', '05 · part v — craft'],
+  ['BOOK_PLAY', '06 · part vi — laboratory'],
+  ['BOOK_OMEGA', '07 · part vii — measure'],
+  ['REGISTER', '08 · the register'],
+  ['BOOK', '09 · the book of luis'],
 ];
 let bookSections = [];
 for (const [dir, grp] of BOOKS) {
