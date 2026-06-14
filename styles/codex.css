@@ -156,7 +156,9 @@
 .cx-read figure.cx-fig, .cx-read .cx-fig{ margin:22px 0; padding:18px;
   border:1px solid rgba(234,240,251,0.07); border-radius:10px;
   background:rgba(8,11,18,0.45); }
-.cx-read .cx-fig svg{ display:block; width:100%; height:auto; max-height:420px; }
+.cx-read .cx-fig svg{ display:block; width:100%; height:auto; max-height:520px; }
+.cx-read .cx-fig--plate{ padding:20px; }
+.cx-read .cx-fig--plate svg{ max-height:680px; }
 .cx-read .cx-fig figcaption{ margin-top:10px; font-size:10px; letter-spacing:.18em;
   color:var(--faint); text-transform:uppercase; text-align:center; }
 .cx-read .cx-src{ margin-top:24px; font-size:10px; color:var(--faint); letter-spacing:.1em;

@@ -17,7 +17,7 @@ const REF = join(ROOT, '_reference');
 const OUT = join(ROOT, 'codex.enc.json');
 const ITER = 600_000;
 
-const SKIP = new Set(['README.md', 'STYLE_HANDOVER.md', 'ALGORITHM_REFERENCE.md', '_RESUME_STATE.md']);
+const SKIP = new Set(['README.md', 'STYLE_HANDOVER.md', 'ALGORITHM_REFERENCE.md', '_RESUME_STATE.md', '_DIAGRAM_SYSTEM.md']);
 const group = (rel) => {
   const f = basename(rel);
   if (f === 'DOCTRINE_VISIBLE_AI.md') return '10 · the doctrine';
