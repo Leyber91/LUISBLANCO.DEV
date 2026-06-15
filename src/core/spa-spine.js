@@ -117,9 +117,6 @@
     remapSectionScrollHooks(H, vh);
     window.LB_ENGINE.refreshReveal();
     built=true;
-    // the spine is drawn as a dust CURRENT, not a stroke — tell path-flow to
-    // (re)dissolve this freshly-built spine immediately so no solid line shows.
-    if(window.LB_PATHFLOW) setTimeout(window.LB_PATHFLOW.scan, 40);
   }
 
   let rt=null;

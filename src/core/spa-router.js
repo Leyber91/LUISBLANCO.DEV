@@ -73,20 +73,6 @@
   function wireProjects(scope){
     if(window.LB_PROJ) window.LB_PROJ.init(scope);
   }
-  function wireWriting(scope){
-    const chips=[...scope.querySelectorAll('.fchip')], posts=[...scope.querySelectorAll('.post')];
-    chips.forEach(ch=>ch.addEventListener('click',()=>{
-      chips.forEach(c=>c.classList.remove('active')); ch.classList.add('active');
-      const f=ch.getAttribute('data-filter');
-      posts.forEach(p=> p.classList.toggle('hidden', !(f==='all'||p.getAttribute('data-axis')===f)));
-    }));
-    const sm=scope.querySelector('#showMore'), am=scope.querySelector('#archiveMore');
-    if(sm&&am) sm.addEventListener('click',()=>{ am.classList.toggle('open'); sm.textContent = am.classList.contains('open')?'show less ←':'show more →'; });
-    const DAY=86400000, now=Date.now();
-    let last = prevVisit || (now - 14*DAY);
-    posts.forEach(p=>{ const ago=parseInt(p.getAttribute('data-ago')||'0',10);
-      if(now - ago*DAY > last) p.classList.add('is-new'); });
-  }
   function initSections(){
     const sec = r => document.querySelector(`.plate-sec[data-sec="${r}"]`);
     const aeaMount = document.getElementById('aeaMount');
