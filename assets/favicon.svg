@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="luisblanco.dev">
+  <defs>
+    <radialGradient id="fHalo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F0C674" stop-opacity="0.42"/><stop offset="38%" stop-color="#D4A24C" stop-opacity="0.12"/>
+      <stop offset="72%" stop-color="#D4A24C" stop-opacity="0.02"/><stop offset="100%" stop-color="#D4A24C" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FCECC2" stop-opacity="1"/><stop offset="34%" stop-color="#F4CE7E" stop-opacity="0.85"/>
+      <stop offset="78%" stop-color="#D4A24C" stop-opacity="0.18"/><stop offset="100%" stop-color="#D4A24C" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#05070E"/>
+  <circle cx="50" cy="50" r="46" fill="url(#fHalo)"/>
+  <g stroke="#EBBB63" stroke-width="6.5" stroke-linecap="round">
+    <path d="M50,50 L50,16"/><path d="M50,50 L81.5,39.8"/><path d="M50,50 L69.4,77.6"/><path d="M50,50 L30.6,77.6"/><path d="M50,50 L18.5,39.8"/>
+  </g>
+  <circle cx="50" cy="50" r="22" fill="url(#fCore)"/>
+  <circle cx="50" cy="50" r="11" fill="#FFF4D6"/>
+</svg>
