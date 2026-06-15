@@ -15,19 +15,97 @@
 .mid-schematic .dim{ stroke:rgba(234,240,251,0.1); }
 .mid-schematic text{ fill:var(--faint); font-size:10px; letter-spacing:.1em; }
 
-/* ── hero ─────────────────────────────────────────────────────────── */
+/* ── hero — the blueprint plate ───────────────────────────────────── */
 .hero{ min-height:100vh; display:flex; align-items:center;
   padding:0 64px; position:relative; z-index:5; }
-.hero-grid{ display:grid; grid-template-columns:56px minmax(0,1fr); gap:34px;
-  align-items:start; max-width:1040px; }
-.num-col{ display:flex; flex-direction:column; align-items:center; }
-.num-col .stem{ width:1px; flex:1; min-height:90px;
-  background:linear-gradient(to bottom,var(--gold-dim),transparent); margin-top:8px; }
-.hero h1{ font-size:clamp(54px,6.6vw,96px); font-weight:500; letter-spacing:-0.01em; line-height:0.96;
-  margin:18px 0 26px; color:var(--ink); }
-.hero h1 .dot{ color:var(--gold); }
-.hero .subline{ font-size:21px; line-height:1.55; color:var(--ink-dim);
-  max-width:680px; font-weight:400; }
+.hero-plate{ display:grid; grid-template-columns:1.05fr 0.95fr; align-items:center;
+  gap:40px; width:100%; max-width:1300px; margin:0 auto; }
+.hero-left{ position:relative; min-width:0; }
+.hero-name{ font-family:var(--serif); font-weight:600; font-size:clamp(58px,8.4vw,140px);
+  line-height:0.9; letter-spacing:-0.01em; color:var(--ink); margin:14px 0 0;
+  text-shadow:0 0 42px rgba(180,206,255,0.12); }
+.hero-name .dot{ color:var(--gold); }
+.hero-name .reg{ display:inline-block; width:13px; height:13px; border:1.5px solid var(--gold);
+  margin-left:14px; vertical-align:0.22em; position:relative; }
+.hero-name .reg::after{ content:""; position:absolute; inset:3px; background:var(--gold); }
+.hero-tag{ margin-top:26px; display:inline-block; font-size:15px; letter-spacing:.03em;
+  color:var(--ink-dim); border:1px dashed var(--gold-dim); padding:11px 17px; }
+.hero-tag b{ color:var(--ink); font-weight:500; }
+.hero-census{ margin-top:28px; display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; }
+.hero-census .hc{ display:flex; flex-direction:column; gap:5px; }
+.hero-census .v{ font-size:32px; line-height:1; color:var(--gold-hi); font-variant-numeric:tabular-nums; }
+.hero-census .l{ font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); }
+.hero-census .hsep{ color:var(--faint); font-size:26px; align-self:center; }
+
+/* the living figure (hero-figure.js mounts canvas + labels in #heroFig) */
+.hero-figure{ position:relative; height:80%; min-height:440px; align-self:center; }
+.hero-figure::before{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(56% 50% at 52% 46%, rgba(212,162,76,0.10), rgba(150,185,255,0.05) 42%, rgba(0,0,0,0) 72%); }
+.hf-cap{ position:absolute; left:0; top:-4px; font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--faint); z-index:2; }
+.hf-cap b{ color:var(--gold); } .hf-cap a{ color:var(--ink-dim); border-bottom:1px solid var(--gold-dim); }
+.hf-mount{ position:absolute; inset:24px 0 24px 0; z-index:1; }
+.hf-mount .hf-canvas{ display:block; width:100%; height:100%; cursor:default; }
+.hf-mount .hf-labels{ position:absolute; inset:0; pointer-events:none; }
+.hf-lab{ position:absolute; transform:translate(-50%,-50%); font-size:12px; letter-spacing:.18em;
+  color:var(--gold-hi); font-family:var(--mono,"IBM Plex Mono",monospace); }
+.hf-dim{ position:absolute; right:-2px; top:12%; bottom:12%; width:1px; background:var(--frame); z-index:2; }
+.hf-dim::before,.hf-dim::after{ content:""; position:absolute; right:-5px; width:11px; height:1px; background:var(--frame); }
+.hf-dim::before{ top:0; } .hf-dim::after{ bottom:0; }
+.hf-dim span{ position:absolute; right:8px; top:50%; transform:translateY(-50%) rotate(90deg);
+  transform-origin:right center; white-space:nowrap; font-size:9px; letter-spacing:.2em; color:var(--faint); }
+
+@media (max-width:900px){
+  .hero-plate{ grid-template-columns:1fr; gap:24px; }
+  .hero-figure{ height:340px; min-height:340px; order:2; }
+}
+
+/* ══ hero: the living entity cover (supersedes the blueprint plate) ══ */
+.home-stage .mid-schematic, .home-stage .traj-overlay{ display:none; }  /* cinematic cover — drop the decorative linework */
+.hero{ position:relative; overflow:hidden; padding:0; }
+.hero-entity{ position:absolute; inset:0; width:100%; height:100%; z-index:0; display:block; }
+.hero-veil{ position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(90deg, rgba(4,14,28,0.94) 0%, rgba(4,14,28,0.58) 34%, rgba(4,14,28,0) 62%); }
+.hero-content{ position:relative; z-index:2; max-width:1300px; margin:0 auto; width:100%; padding:0 64px; }
+.hero-content .eyebrow{ display:inline-block; }
+.hero-head{ font-family:var(--serif); font-weight:600; font-size:clamp(40px,5.8vw,92px); line-height:0.98;
+  letter-spacing:-0.015em; color:var(--ink); margin:18px 0 0; max-width:16ch; text-shadow:0 2px 40px rgba(0,0,0,0.5); }
+.hero-head .em{ color:var(--gold-hi); font-style:italic; }
+.hero-sub{ font-size:clamp(14px,1.5vw,18px); line-height:1.6; color:var(--ink-dim); margin-top:22px; max-width:48ch; }
+.hero-sub b{ color:var(--ink); font-weight:500; }
+.hero-who{ margin-top:18px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+.hero-who b{ color:var(--ink); font-weight:500; }
+.hero-actions{ display:flex; gap:26px; align-items:center; margin-top:36px; flex-wrap:wrap; }
+/* CTAs in the node-panel / draughtsman language: line + light + gold dust, no solid fill */
+.hero-cta{ position:relative; display:inline-flex; align-items:center; gap:12px; isolation:isolate;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold-hi); padding:14px 22px; border:1px solid var(--gold-dim); background:transparent; overflow:hidden;
+  transition:color .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease); }
+.hero-cta::before{ content:""; position:absolute; inset:0; z-index:-1;
+  background:radial-gradient(130% 200% at 0% 50%, rgba(212,162,76,0.16), rgba(212,162,76,0) 62%);
+  opacity:.5; transition:opacity .35s var(--ease); }
+.hero-cta::after{ content:""; position:absolute; top:4px; right:4px; width:7px; height:7px;
+  border-top:1px solid var(--gold); border-right:1px solid var(--gold); opacity:.5; transition:opacity .3s var(--ease); }
+.hero-cta:hover{ color:#fff; border-color:var(--gold);
+  box-shadow:0 0 32px -8px var(--gold-glow), inset 0 0 28px -16px var(--gold-glow); }
+.hero-cta:hover::before{ opacity:1; } .hero-cta:hover::after{ opacity:1; }
+.hero-cta .arr{ color:var(--gold); transition:transform .25s var(--ease); }
+.hero-cta:hover .arr{ transform:translateX(5px); }
+.hero-ghost{ position:relative; font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--ink-dim); padding-bottom:4px; transition:color .3s var(--ease); }
+.hero-ghost::after{ content:""; position:absolute; left:0; bottom:0; width:100%; height:1px;
+  background:var(--gold-dim); transform:scaleX(.35); transform-origin:left;
+  transition:transform .4s var(--ease), background .3s var(--ease); }
+.hero-ghost:hover{ color:var(--gold-hi); }
+.hero-ghost:hover::after{ transform:scaleX(1); background:var(--gold); }
+.hero-cue{ position:absolute; left:64px; bottom:44px; z-index:2; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--faint); display:flex; align-items:center; gap:9px; pointer-events:none; }
+.hero-cue .cue-dot{ width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 10px var(--gold-glow);
+  animation:nodePulse 2s var(--ease) infinite; }
+@media (max-width:760px){
+  .hero-content{ padding:0 22px; } .hero-cue{ left:22px; bottom:28px; }
+  .hero-veil{ background:linear-gradient(180deg, rgba(4,14,28,0.3), rgba(4,14,28,0.85)); }
+}
 
 /* ── 02 · what's inside — the mission as a diagram-instrument ──────── */
 .inside{ min-height:100vh; padding:96px 64px 64px; position:relative; z-index:5;
@@ -42,39 +120,28 @@
 .ml-sig{ margin-top:18px; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-dim); }
 .ml-sig .sep{ color:var(--gold-dim); margin:0 5px; }
 
-/* the opaque glowing console — occludes the LUMEN field behind the transparent strip */
-.mission-console{ position:relative; width:100%; max-width:940px; border-radius:18px; padding:22px 26px 26px;
-  background:
-    radial-gradient(140% 120% at 50% 0%, rgba(24,30,46,0.6), rgba(10,13,20,0) 60%),
-    linear-gradient(180deg, rgba(12,16,24,0.97), rgba(8,11,17,0.98));
-  box-shadow:
-    inset 0 1px 0 rgba(234,240,251,0.06),
-    inset 0 0 70px -22px rgba(212,162,76,0.20),
-    0 0 0 1px rgba(212,162,76,0.16),
-    0 28px 70px -30px rgba(0,0,0,0.92),
-    0 0 54px -16px rgba(212,162,76,0.13); }
-.mc-head{ display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:16px;
-  font-size:clamp(17px,1.8vw,22px); letter-spacing:.10em; font-weight:500; }
-.mc-arrow{ color:var(--faint); }
-.mc-zone{ text-transform:lowercase; }
-.mc-was{ color:var(--ink); }
-.mc-wasnt{ color:var(--faint); text-decoration:line-through; text-decoration-color:var(--gold-dim); }
-.mc-canbe{ color:var(--gold-hi); }
-/* the strip is a transparent porthole — phase-diagram dust paints here over the opaque console */
-.phase-strip{ position:relative; width:100%; height:clamp(238px,27vw,308px); border-radius:12px;
-  overflow:hidden; background:transparent; box-shadow:inset 0 0 0 1px rgba(234,240,251,0.05); }
-/* de-boxed captions tied to the three zones */
-.mc-captions{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:20px;
+/* ── the node, made visible (the model instrument, relocated here) ──── */
+.mission-model{ width:100%; max-width:940px; display:flex; flex-direction:column; gap:14px; }
+.mm-head{ display:flex; flex-direction:column; gap:4px; }
+.mm-title{ font-size:clamp(16px,1.7vw,20px); letter-spacing:.04em; color:var(--ink); font-weight:500; }
+.mm-sub{ font-size:13px; letter-spacing:.02em; color:var(--ink-dim); }
+.mission-model .rs-canvas-wrap{ height:clamp(300px,34vw,420px); }
+.mm-legend{ display:flex; flex-wrap:wrap; gap:8px 22px; font-size:11px; color:var(--faint); letter-spacing:.02em; }
+.mm-legend b{ color:var(--ink-dim); font-weight:500; letter-spacing:.1em; font-size:9px; margin-right:5px; }
+
+/* ── was / wasn't / can be — legible, no dust ───────────────────────── */
+.mission-triptych{ width:100%; max-width:940px; display:grid; grid-template-columns:repeat(3,1fr);
   border-top:1px solid var(--line-soft); }
-.mc-cap{ margin:0; padding:16px 16px 4px; position:relative; }
-.mc-cap + .mc-cap{ border-left:1px solid rgba(234,240,251,0.07); }
-.mc-cap figcaption{ font-size:12px; letter-spacing:.20em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px; }
-.mc-cap p{ font-size:clamp(14px,1.4vw,16px); line-height:1.65; color:rgba(234,240,251,0.60); margin:0; text-wrap:pretty; }
-.mc-captions .mc-cap:first-child p{ color:rgba(234,240,251,0.80); }
-.mc-captions .mc-cap:first-child figcaption{ color:var(--ink); }
-.mc-cap-canbe figcaption{ color:var(--gold); font-size:13px; }
-.mc-cap-canbe p{ color:var(--ink); font-size:clamp(14px,1.4vw,16px); font-weight:500; }
-.mc-cap-canbe::before{ content:""; position:absolute; left:0; top:14px; bottom:8px; width:2px;
+.mt-cell{ margin:0; padding:18px 18px 6px; position:relative; }
+.mt-cell + .mt-cell{ border-left:1px solid rgba(234,240,251,0.08); }
+.mt-cell figcaption{ margin-bottom:11px; }
+.mt-zone{ font-size:12px; letter-spacing:.20em; text-transform:uppercase; }
+.mt-was{ color:var(--ink); }
+.mt-wasnt{ color:var(--faint); text-decoration:line-through; text-decoration-color:var(--gold-dim); }
+.mt-can{ color:var(--gold); }
+.mt-cell p{ font-size:clamp(14px,1.35vw,16px); line-height:1.65; color:rgba(234,240,251,0.82); margin:0; text-wrap:pretty; }
+.mt-canbe p{ color:var(--ink); font-weight:500; }
+.mt-canbe::before{ content:""; position:absolute; left:0; top:16px; bottom:8px; width:2px;
   background:linear-gradient(180deg,var(--gold),transparent); box-shadow:0 0 8px var(--gold-glow); }
 .mission-exit{ align-self:center; font-size:13px; letter-spacing:.06em; color:var(--gold);
   border-bottom:1px solid var(--gold-dim); padding-bottom:2px;
@@ -98,10 +165,9 @@
   .hero h1{ font-size:52px; }
   .hero .subline{ font-size:17px; }
   .inside{ padding:64px 22px 40px; gap:32px; }
-  .mission-console{ padding:16px 14px 18px; }
-  .mc-captions{ grid-template-columns:1fr; }
-  .mc-cap + .mc-cap{ border-left:none; border-top:1px solid rgba(234,240,251,0.07); }
-  .mc-cap-canbe::before{ display:none; }
+  .mission-triptych{ grid-template-columns:1fr; }
+  .mt-cell + .mt-cell{ border-left:none; border-top:1px solid rgba(234,240,251,0.08); }
+  .mt-canbe::before{ display:none; }
   .ml-thesis{ font-size:19px; }
   .home-footer{ flex-direction:column; align-items:flex-start; padding:28px 22px; }
 }

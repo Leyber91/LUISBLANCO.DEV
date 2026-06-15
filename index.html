@@ -11,7 +11,7 @@
 <title>Luis Blanco — Autonomous Entity Architecture</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/styles.css">
 <link rel="stylesheet" href="styles/home.css">
 <link rel="stylesheet" href="styles/architecture.css">
@@ -25,6 +25,12 @@
 <link rel="stylesheet" href="styles/resonance.css">
 </head>
 <body data-route="home">
+
+<!-- blueprint chrome: fine grid + plate frame + gold corner brackets (persistent) -->
+<div class="bp-grid" aria-hidden="true"></div>
+<div class="bp-frame" aria-hidden="true"></div>
+<div class="bp-corner tl" aria-hidden="true"></div><div class="bp-corner tr" aria-hidden="true"></div>
+<div class="bp-corner bl" aria-hidden="true"></div><div class="bp-corner br" aria-hidden="true"></div>
 
 <!-- ══ PERSISTENT LAYERS — mounted once, never re-rendered on navigation ══ -->
 <!-- substrate auto-mounts into .substrate · coord-frame / nav / drawing-index /
@@ -97,15 +103,19 @@
     </svg>
 
     <section class="hero" data-screen-label="01 hero">
-      <div class="hero-grid">
-        <div class="num-col"><div class="callnum gold">01</div><div class="stem"></div></div>
-        <div class="body-col">
-          <div class="eyebrow">AI Systems Architect</div>
-          <h1>Luis Blanco<span class="dot">.</span></h1>
-          <p class="subline">I build the engineering that makes AI autonomous and reliable — from a proven framework to production at scale.</p>
-          <a class="commission tickbox" href="#/work"><span class="pulse-dot"></span>open for commissions — the operational AI diagnostic<span class="arr">→</span></a>
+      <canvas class="hero-entity" id="heroEntity" aria-hidden="true"></canvas>
+      <div class="hero-veil"></div>
+      <div class="hero-content">
+        <div class="eyebrow">autonomous entity architecture</div>
+        <h1 class="hero-head">Intelligence isn't the&nbsp;model.<br>It's the <span class="em">system</span> around&nbsp;it.</h1>
+        <p class="hero-sub">A language model alone is just autocomplete. I engineer the architecture that makes it <b>remember, act, recover, and improve itself</b> autonomous and reliable, in production.</p>
+        <div class="hero-who"><b>Luis Blanco</b> · AI Systems Architect</div>
+        <div class="hero-actions">
+          <a class="hero-cta tickbox" href="#/architecture">see the architecture <span class="arr">→</span></a>
+          <a class="hero-ghost" href="#/work">open for commissions</a>
         </div>
       </div>
+      <div class="hero-cue"><span class="cue-dot"></span>this is one — move your cursor · it's attending to you</div>
     </section>
 
     <section class="inside" id="inside" data-screen-label="02 mission">
@@ -115,30 +125,45 @@
         <div class="ml-sig">demystify <span class="sep">·</span> don't dunk <span class="sep">·</span> keep the wonder</div>
       </div>
 
-      <!-- the record as ONE instrument: a node passing through three dust states -->
-      <div class="mission-console" id="phase">
-        <div class="mc-head">
-          <span class="mc-zone mc-was">was</span>
-          <span class="mc-arrow">→</span>
-          <span class="mc-zone mc-wasnt">wasn't</span>
-          <span class="mc-arrow">→</span>
-          <span class="mc-zone mc-canbe">can be</span>
+      <!-- the node itself, made visible: a model's raw output as a live signal -->
+      <div class="mission-model">
+        <div class="mm-head">
+          <span class="mm-title">the node, made visible</span>
+          <span class="mm-sub">a model's token stream as signal — everything else on this site is the program around it</span>
         </div>
-        <div class="phase-strip" id="phaseStrip" aria-hidden="true"></div>
-        <div class="mc-captions">
-          <figure class="mc-cap">
-            <figcaption>was</figcaption>
-            <p>Rules we wrote, then learned from data instead — knowable machinery: weights, attention, next-token probability over a compressed map of human text. No ghost in it. That it works anyway is the marvel.</p>
-          </figure>
-          <figure class="mc-cap">
-            <figcaption>wasn't</figcaption>
-            <p>Not a mind in a box. The model alone completes text — it doesn't remember, act, or hold a goal. What looked like agency was architecture built around it; strip that and the agency goes.</p>
-          </figure>
-          <figure class="mc-cap mc-cap-canbe">
-            <figcaption>can be</figcaption>
-            <p>Wire that node into memory, tools, feedback, recovery — and behavior appears that none of the parts have alone. The question isn't "does it think"; it's which structures let it grow without collapsing.</p>
-          </figure>
+        <div class="rs-controls">
+          <span class="rs-ctl-label">profile</span>
+          <button class="rs-profile-btn" data-profile="lightning">LIGHTNING</button>
+          <button class="rs-profile-btn active" data-profile="council">COUNCIL</button>
+          <button class="rs-profile-btn" data-profile="architect">ARCHITECT</button>
+          <button class="rs-profile-btn" data-profile="deep">DEEP</button>
         </div>
+        <div class="rs-canvas-wrap" aria-label="a model made visible">
+          <canvas class="rs-canvas"></canvas>
+          <div class="rs-fallback">RESONANCE · initializing instrument</div>
+        </div>
+        <div class="mm-legend">
+          <span><b>LIGHTNING</b> fast, low-variance</span>
+          <span><b>COUNCIL</b> balanced at cruise</span>
+          <span><b>ARCHITECT</b> reasoning, thinking pauses</span>
+          <span><b>DEEP</b> long deliberation gaps</span>
+        </div>
+      </div>
+
+      <!-- was / wasn't / can be — legible, no dust -->
+      <div class="mission-triptych">
+        <figure class="mt-cell">
+          <figcaption><span class="mt-zone mt-was">was</span></figcaption>
+          <p>Rules we wrote, then learned from data instead — knowable machinery: weights, attention, next-token probability over a compressed map of human text. No ghost in it. That it works anyway is the marvel.</p>
+        </figure>
+        <figure class="mt-cell">
+          <figcaption><span class="mt-zone mt-wasnt">wasn't</span></figcaption>
+          <p>Not a mind in a box. The model alone completes text — it doesn't remember, act, or hold a goal. What looked like agency was the architecture around it; strip that and the agency goes.</p>
+        </figure>
+        <figure class="mt-cell mt-canbe">
+          <figcaption><span class="mt-zone mt-can">can be</span></figcaption>
+          <p>Wire that node into memory, tools, feedback, recovery — and behaviour appears that none of the parts have alone. The question isn't "does it think"; it's which structures let it grow without collapsing.</p>
+        </figure>
       </div>
 
       <a class="mission-exit tickbox" href="#/architecture">the AEA — my answer in specification form <span class="arr">→</span></a>
@@ -150,67 +175,59 @@
 <!-- ── /architecture ──────────────────────────────────────────── -->
 <template id="tpl-architecture">
   <section class="arch-main" data-screen-label="03 architecture">
-    <div class="arch-head">
+    <div class="arch-head" data-reveal>
       <div class="ttl">the architecture</div>
       <div class="sub">autonomous entity architecture (AEA)</div>
-      <p class="intro">An engineering specification of the minimum viable shape an AI system must contain to become autonomous: to keep evolving its own capabilities without operator intervention, and without collapsing. Not a tool I use — a <span class="em">framework for understanding what AI actually is</span>, across axes, mechanics, and the seed of conditions that keep an entity coherent. Stress-test it, extend it, build with it.</p>
+      <p class="intro">The minimum viable shape an AI system must contain to run itself — to keep improving without an operator, and without falling apart. Not a tool I use: a <span class="em">framework for understanding what AI actually is</span>. Read it in plain words on the left; turn the structure on the right and switch on a layer to go deeper.</p>
       <div class="arch-status">
         <span class="pill"><span class="v">v0.2</span></span>
         <span class="pill">39 versions</span>
         <span class="pill">spec unchanged</span>
         <span class="pill">20+ hrs sustained</span>
       </div>
-      <div class="headline">5 axes · 10 seeds · 3 mechanics<br>4 ops · 3 principles · one system</div>
+      <div class="headline">5 axes · 10 seeds · 4 mechanics<br>4 ops · 3 rules · one system</div>
     </div>
 
-    <div class="locator">
-      <div class="loc-label">locate a concept on the architecture. <span class="hint">type to search, or pick a chip — relevant axis nodes light up.</span></div>
-      <div class="loc-autocomplete">
-        <div class="loc-field">
-          <span class="mag">⌖</span>
-          <input id="locInput" type="text" placeholder="e.g. RAG, MCP, multi-agent, self-refine…" aria-label="locate a concept">
-          <button class="loc-clear" id="locClear">clear</button>
-        </div>
-        <div class="loc-menu" id="locMenu"></div>
+    <!-- the AEA: plain-language text (left) + native-WebGL structure (right) -->
+    <div class="aea-panel" data-reveal>
+      <div class="aea-text">
+        <h1 class="at-h1">what makes AI run itself</h1>
+        <p class="at-lede">A model on its own is just <b>very good autocomplete</b> — it guesses the next word. No memory, no actions, no decisions. <span class="g">An "entity" is everything you wire around it</span> so it can remember, act, decide, and improve. This is the map of that wiring.</p>
+        <p class="at-law">THE ONE IDEA — watch what it does, freeze the parts that repeat into code, shrink the cost to almost nothing. Make the hidden parts visible, then drive the waste toward zero.</p>
+        <h2 class="at-h2">five questions that place any AI</h2>
+        <div class="at-row"><b>PATH</b> — <span class="d">who decides the next step — you, or it?</span></div>
+        <div class="at-row"><b>MULTIPLICITY</b> — <span class="d">one AI, or several working together?</span></div>
+        <div class="at-row"><b>ABSTRACTION</b> — <span class="d">what can it reach beyond its own words — memory? tools? writing its own tools?</span></div>
+        <div class="at-row"><b>pROMPTING</b> — <span class="d">how is it told what to do?</span></div>
+        <div class="at-row"><b>aSYNC</b> — <span class="d">does it wait in lockstep, or run on its own clock?</span></div>
+        <div class="at-mini">each question has levels, from "barely" to "fully on its own." The gold rung is the highest level actually proven — not just hoped for.</div>
+        <h2 class="at-h2">ten parts it can't live without</h2>
+        <div class="at-row"><span class="d">take any one away and the whole thing falls apart:</span></div>
+        <div class="at-row">somewhere to run · a clear goal · turning repeated work into code · falling back to the model when something's new · building its own next version · knowing what it's made of · sensing when it's stuck · a way past the wall · lines it must never cross · a path to roll back</div>
+        <h2 class="at-h2">what it's always doing</h2><div class="at-row"><b>build</b> the setup · <b>pass results along</b> · <b>watch itself</b> the whole time</div>
+        <h2 class="at-h2">the loop you run around it</h2><div class="at-row"><b>design</b> it · <b>run it on a clock you can watch</b> · <b>ship</b> it · <b>learn</b> from it</div>
+        <h2 class="at-h2">the three rules it lives by</h2><div class="at-row"><span class="d">let behaviour emerge, don't force it · always be able to roll back · always be able to see what it did</span></div>
+        <div class="at-mini">hover the structure on the right — every part explains itself in plain words.</div>
       </div>
-      <div class="loc-suggest" id="locSuggest"></div>
+      <div class="aea-stage" id="aeaMount"></div>
     </div>
 
-    <div class="diagram drift-mid">
-      <svg class="diagram-svg" id="diagramSvg" preserveAspectRatio="none" aria-hidden="true"></svg>
-      <div class="diagram-inner">
-        <div class="axis-grid" id="axisGrid"></div>
-        <div class="standing-layer" id="standingLayer"></div>
-      </div>
-      <div class="axis-stack" id="axisStack"></div>
-      <div class="seeds-head"><span class="arrow">seeds ⟶</span></div>
-      <div class="seed-row" id="seedRow"></div>
-      <p class="seeds-note">seeds connect to the axes they touch — 10 elements. Remove any one and autonomy breaks. Started at 13; empirical pressure consolidated to 10.</p>
-      <div class="mech-row" id="mechRow"></div>
-      <div class="ops-line"><b>L5 innovation outputs:</b>&nbsp; axis-extension · corpus-swap · new-skill · bifurcation</div>
-    </div>
-
-    <div class="principles">
-      <span>emergence over imposition</span><span class="sep">·</span>
-      <span>restorable coherence</span><span class="sep">·</span>
-      <span>operator-observable time</span>
-    </div>
-
-    <div class="loc-explanations" id="locExplain"></div>
-
-    <div class="cracks-head">open cracks</div>
-    <div class="cracks">
+    <div class="cracks-head" data-reveal>open cracks <span class="ch-note">— the honest edges, and the direction I'm taking on each</span></div>
+    <div class="cracks" data-reveal>
       <div class="crack">
-        <div class="ckey">CR6 · identity <span class="cstate">(open)</span></div>
-        <div class="ctext">which divergence still counts as the same entity when an entity bifurcates.</div>
+        <div class="ckey">identity <span class="cstate">(open)</span></div>
+        <div class="ctext">if an entity splits in two, which divergence still counts as the same entity?</div>
+        <div class="csol"><span class="cs-k">direction</span> identity = continuity of the rollback chain and the boundary set, not of the weights. A fork stays "the same entity" while it can still restore to a shared ancestor and honors the same lines.</div>
       </div>
       <div class="crack">
-        <div class="ckey">CR9 · meta-reflexivity <span class="cstate">(deferred)</span></div>
-        <div class="ctext">can the entity rewrite the framework that describes it.</div>
+        <div class="ckey">self-rewrite <span class="cstate">(deferred)</span></div>
+        <div class="ctext">can the entity safely rewrite the very framework that describes it?</div>
+        <div class="csol"><span class="cs-k">direction</span> only through the same freeze → falsify gate, against a frozen copy of the spec. It may propose a new framework, but the old one stays restorable until the new one survives.</div>
       </div>
       <div class="crack">
-        <div class="ckey">Layer 4 · trajectory <span class="cstate">(untested)</span></div>
-        <div class="ctext">which growth paths preserve viability over time.</div>
+        <div class="ckey">the long run <span class="cstate">(untested)</span></div>
+        <div class="ctext">which paths of growth stay viable over time?</div>
+        <div class="csol"><span class="cs-k">direction</span> treat each growth path as a hypothesis scored by the innovation layer; keep only the paths that pass the coherence and observability filters across a watched window.</div>
       </div>
     </div>
   </section>
@@ -221,135 +238,111 @@
   <section class="proj-main" data-screen-label="04 projects">
     <div class="proj-head">
       <div class="ttl">projects</div>
-      <p class="intro">The same lens, applied to real systems. Two kinds live here: the <span class="em">proofs</span> — open-source, where the framework actually runs — and the <span class="em">engineering</span>, shipped to production at scale (anonymized: the logic, never the client). Honest authorship throughout: forks are labelled as forks.</p>
+      <p class="intro">The same lens on real systems — and three I'm building toward income, each <span class="em">driving one number to zero</span>. Below them: the proofs (open-source, where the framework runs) and the engineering (shipped to production at scale — the logic, never the client). Forks are labelled as forks.</p>
     </div>
 
-    <div class="filters" id="filters">
-      <span class="flabel">filter:</span>
-      <button class="fchip active" data-filter="all">all</button>
-      <button class="fchip axis" data-filter="P">P</button>
-      <button class="fchip axis" data-filter="M">M</button>
-      <button class="fchip axis" data-filter="A">A</button>
-      <button class="fchip axis" data-filter="R">R</button>
-      <button class="fchip axis" data-filter="S">S</button>
-      <button class="fchip" data-filter="ORCHESTRATION">ORCHESTRATION</button>
-      <button class="fchip" data-filter="MICROSERVICES">MICROSERVICES</button>
-      <button class="fchip" data-filter="FRAMEWORK">FRAMEWORK</button>
-      <button class="fchip" data-filter="VISUALIZATION">VISUALIZATION</button>
+    <!-- A · what I'm building: the triad — one law across three substrates -->
+    <div class="triad-head" data-reveal>what I'm building<span class="th-note">— three substrates, one law: make the waste visible, then drive it toward zero</span></div>
+    <div class="triad" id="triad">
+      <article class="tri-card surface-line" data-reveal data-from="12480" data-to="0" data-dec="0" data-prefix="€ " data-suffix="">
+        <div class="tri-top"><span class="tri-tag">ground · logistics</span><span class="tri-zero">→ 0</span></div>
+        <div class="tri-name">The Leak Map</div>
+        <div class="tri-line">Surfaces the euros an operation is leaking — live, traced down to the source rows that prove each one — then drives the total toward zero.</div>
+        <div class="tri-meter"><div class="tm-bar fil-rail"><i class="fil-fill"></i></div><div class="tm-read"><span class="tm-val">€ 12,480</span><span class="tm-unit">/ wk leaked · illustrative, synthetic data</span></div></div>
+        <div class="tri-foot"><span class="tri-aea">AEA · observe → crystallize → reduce</span><span class="tri-state">the diagnostic offer</span></div>
+      </article>
+
+      <article class="tri-card surface-line" data-reveal data-from="1240000" data-to="0" data-dec="0" data-prefix="" data-suffix="">
+        <div class="tri-top"><span class="tri-tag">machine · the AI bill</span><span class="tri-zero">→ 0</span></div>
+        <div class="tri-name">TokenGateKeeper</div>
+        <div class="tri-line">Watches your model usage, picks the smallest model that still does the job, and freezes repeated calls into code — the token bill collapses.</div>
+        <div class="tri-meter"><div class="tm-bar fil-rail"><i class="fil-fill"></i></div><div class="tm-read"><span class="tm-val">1,240,000</span><span class="tm-unit">tokens / day wasted · illustrative</span></div></div>
+        <div class="tri-foot"><span class="tri-aea">AEA · the crystallize seed</span><span class="tri-state">freemium · in build</span></div>
+      </article>
+
+      <article class="tri-card surface-line" data-reveal data-from="0.068" data-to="0" data-dec="3" data-prefix="P " data-suffix="">
+        <div class="tri-top"><span class="tri-tag">sky · orbital</span><span class="tri-zero">→ 0.000</span></div>
+        <div class="tri-name">Conjunction Driver</div>
+        <div class="tri-line">Reads a live close-approach feed, freezes its screening heuristic into deterministic code, and drives a collision-probability counter to zero.</div>
+        <div class="tri-meter"><div class="tm-bar fil-rail"><i class="fil-fill"></i></div><div class="tm-read"><span class="tm-val">P 0.068</span><span class="tm-unit">collision probability · public catalog</span></div></div>
+        <div class="tri-foot"><span class="tri-aea">AEA · crystallize on physics</span><span class="tri-state">credibility crown · planned</span></div>
+      </article>
     </div>
 
-    <!-- one woven field: clusters + computed connective mesh + shared baseline -->
-    <div class="proj-field" id="projField">
-      <svg class="proj-weave" id="projWeave" aria-hidden="true"></svg>
+    <!-- B · the proofs & engineering: a draggable, parallaxed carousel -->
+    <div class="pc-head" data-reveal>proofs &amp; engineering<span class="pc-hnote">— where the lens already runs · drag to explore</span></div>
+    <div class="proj-carousel" id="projCarousel" aria-label="projects carousel — drag to explore">
+      <div class="pc-track" id="pcTrack">
 
-      <div class="clusters" id="clusters">
-        <div class="cluster" data-cluster="ORCHESTRATION">
-          <div class="cl-name">orchestration</div>
-          <div class="cl-cards">
-            <div class="pcard tickbox" data-cluster="ORCHESTRATION" data-axis="M R">
-              <div class="iso" data-mod="agents"></div>
-              <div class="pname">groq_html</div>
-              <div class="auth">original</div>
-              <div class="ppat">mixture-of-agents with client-side semantic routing, token-bucket rate limiting, and a model fallback chain.</div>
-              <div class="paxis"><b>axis</b> · Multiplicity L3 + Prompting L4</div>
-              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
-            </div>
-            <div class="pcard tickbox" data-cluster="ORCHESTRATION" data-axis="A S">
-              <div class="iso" data-mod="loop"></div>
-              <div class="pname">Aether_AI</div>
-              <div class="auth">original</div>
-              <div class="ppat">MCP filesystem server behind a local + cloud chat app with an iterative self-refinement loop.</div>
-              <div class="paxis"><b>axis</b> · Abstraction L2–3 + Async L3</div>
-              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
-            </div>
-          </div>
-        </div>
+        <article class="pc-card surface-line" data-axis="M R">
+          <div class="pc-bg" aria-hidden="true">01</div>
+          <div class="pc-kind">orchestration · original</div>
+          <div class="pc-name">groq_html</div>
+          <div class="pc-pat">Mixture-of-agents with client-side semantic routing, token-bucket rate limiting, and a model fallback chain.</div>
+          <div class="pc-axis">Multiplicity L3 · Prompting L4</div>
+          <a class="pc-src" href="https://github.com/Leyber91" target="_blank" rel="noopener">view source →</a>
+        </article>
 
-        <div class="cluster" data-cluster="MICROSERVICES">
-          <div class="cl-name">microservices</div>
-          <div class="cl-cards">
-            <div class="pcard tickbox" data-cluster="MICROSERVICES" data-axis="A R">
-              <div class="iso" data-mod="layers"></div>
-              <div class="pname">Hybrid search service</div>
-              <div class="auth">production-internal</div>
-              <div class="ppat">semantic vector + BM25 keyword ranking with dynamic weights — enriching and searching technical-spec databases in production.</div>
-              <div class="paxis"><b>axis</b> · Abstraction L2 + Prompting L3</div>
-              <div class="internal">production-internal · no public source</div>
-            </div>
-            <div class="pcard tickbox" data-cluster="MICROSERVICES" data-axis="P S">
-              <div class="iso" data-mod="pipeline"></div>
-              <div class="pname">Resilient ingestion pipeline</div>
-              <div class="auth">production-internal</div>
-              <div class="ppat">retry + jitter, failure registry, atomic writes — months wedge-free.</div>
-              <div class="paxis"><b>axis</b> · Path L2 + Async L2</div>
-              <div class="internal">production-internal · no public source</div>
-            </div>
-            <div class="pcard tickbox" data-cluster="MICROSERVICES" data-axis="P M">
-              <div class="iso" data-mod="panel"></div>
-              <div class="pname">Real-time operational dashboard</div>
-              <div class="auth">production-internal</div>
-              <div class="ppat">a deterministic rule-engine recommendation with an LLM narrator anchored to the rules — the model speaks, the code decides. Live across 9 sites, refreshed every 15 min.</div>
-              <div class="paxis"><b>axis</b> · Path L3 + Multiplicity L3</div>
-              <div class="internal">production-internal · no public source</div>
-            </div>
-          </div>
-        </div>
+        <article class="pc-card surface-line" data-axis="A S">
+          <div class="pc-bg" aria-hidden="true">02</div>
+          <div class="pc-kind">orchestration · original</div>
+          <div class="pc-name">Aether_AI</div>
+          <div class="pc-pat">An MCP filesystem server behind a local + cloud chat app, with an iterative self-refinement loop.</div>
+          <div class="pc-axis">Abstraction L2–3 · Async L3</div>
+          <a class="pc-src" href="https://github.com/Leyber91" target="_blank" rel="noopener">view source →</a>
+        </article>
 
-        <div class="cluster" data-cluster="FRAMEWORK">
-          <div class="cl-name">framework</div>
-          <div class="cl-cards">
-            <div class="pcard ph-card" data-cluster="FRAMEWORK" data-axis="">
-              <div class="iso" data-mod="cluster"></div>
-              <div class="pname">framework implementation</div>
-              <div class="auth">private workspace</div>
-              <div class="ppat"><span class="ph">[PLACEHOLDER: Luis to confirm what's public-facing here — likely the AEA implementation work; if private, no source link.]</span></div>
-              <div class="internal">private · no public source</div>
-            </div>
-          </div>
-        </div>
+        <article class="pc-card surface-line" data-axis="P M">
+          <div class="pc-bg" aria-hidden="true">03</div>
+          <div class="pc-kind">production · the logic, not the client</div>
+          <div class="pc-name">Real-time operational dashboard</div>
+          <div class="pc-pat">A deterministic rule-engine recommendation with an LLM narrator anchored to the rules — the model speaks, the code decides. Live across 9 sites, refreshed every 15 min.</div>
+          <div class="pc-axis">Path L3 · Multiplicity L3</div>
+          <div class="pc-internal">production-internal · no public source</div>
+        </article>
 
-        <div class="cluster" data-cluster="VISUALIZATION">
-          <div class="cl-name">visualization</div>
-          <div class="cl-cards">
-            <div class="pcard tickbox" data-cluster="VISUALIZATION" data-axis="">
-              <div class="iso" data-mod="nest"></div>
-              <div class="pname">WirthForge</div>
-              <div class="auth">declaration of intent</div>
-              <div class="ppat">truthful 60Hz observability for local AI — the self-model made visible.</div>
-              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
-            </div>
-            <div class="pcard tickbox" data-cluster="VISUALIZATION" data-axis="">
-              <div class="iso" data-mod="radial"></div>
-              <div class="pname">Prime Radiant</div>
-              <div class="auth">original</div>
-              <div class="ppat">the AEA's concept graph as a 3D force-directed visualization.</div>
-              <a class="vsrc" href="https://github.com/Leyber91" target="_blank" rel="noopener">VIEW SOURCE →</a>
-            </div>
-          </div>
-        </div>
+        <article class="pc-card surface-line" data-axis="A R">
+          <div class="pc-bg" aria-hidden="true">04</div>
+          <div class="pc-kind">production · the logic, not the client</div>
+          <div class="pc-name">Hybrid search service</div>
+          <div class="pc-pat">Semantic vector + BM25 keyword ranking with dynamic weights, enriching and searching technical-spec databases in production.</div>
+          <div class="pc-axis">Abstraction L2 · Prompting L3</div>
+          <div class="pc-internal">production-internal · no public source</div>
+        </article>
 
-        <!-- mechanics + ops rail (wired into the field on the right) -->
-        <aside class="proj-rail" id="projRail">
-          <div class="rail-grp">
-            <div class="rail-h">mechanics</div>
-            <div class="rail-item" data-rail="compose"><span class="ri-node"></span>compose</div>
-            <div class="rail-item" data-rail="propagate"><span class="ri-node gold"></span>propagate</div>
-            <div class="rail-item" data-rail="observe"><span class="ri-node"></span>observe</div>
-          </div>
-          <div class="rail-grp">
-            <div class="rail-h">ops</div>
-            <div class="rail-item" data-rail="design"><span class="ri-node"></span>design</div>
-            <div class="rail-item" data-rail="time"><span class="ri-node gold"></span>time</div>
-            <div class="rail-item" data-rail="ship"><span class="ri-node"></span>ship</div>
-            <div class="rail-item" data-rail="learn"><span class="ri-node"></span>learn</div>
-          </div>
-        </aside>
+        <article class="pc-card surface-line" data-axis="P S">
+          <div class="pc-bg" aria-hidden="true">05</div>
+          <div class="pc-kind">production · the logic, not the client</div>
+          <div class="pc-name">Resilient ingestion pipeline</div>
+          <div class="pc-pat">Retry + jitter, a failure registry, atomic writes — months wedge-free under real load.</div>
+          <div class="pc-axis">Path L2 · Async L2</div>
+          <div class="pc-internal">production-internal · no public source</div>
+        </article>
+
+        <article class="pc-card surface-line" data-axis="">
+          <div class="pc-bg" aria-hidden="true">06</div>
+          <div class="pc-kind">visualization · declaration of intent</div>
+          <div class="pc-name">WirthForge</div>
+          <div class="pc-pat">Truthful 60 Hz observability for local AI — the self-model made visible.</div>
+          <div class="pc-axis">the instrument layer</div>
+          <a class="pc-src" href="https://github.com/Leyber91" target="_blank" rel="noopener">view source →</a>
+        </article>
+
+        <article class="pc-card surface-line" data-axis="">
+          <div class="pc-bg" aria-hidden="true">07</div>
+          <div class="pc-kind">visualization · original</div>
+          <div class="pc-name">Prime Radiant</div>
+          <div class="pc-pat">The AEA's concept graph as a 3D force-directed visualization — the map you can turn.</div>
+          <div class="pc-axis">the map, made spatial</div>
+          <a class="pc-src" href="https://github.com/Leyber91" target="_blank" rel="noopener">view source →</a>
+        </article>
+
       </div>
-
-      <!-- shared baseline — every module drops a line to this continuous structure -->
-      <div class="proj-baseline" id="projBaseline">
-        <div class="bl-text"><span>emergence over imposition</span><i>·</i><span>restorable coherence</span><i>·</i><span>operator-observable time</span></div>
-      </div>
+    </div>
+    <div class="pc-nav">
+      <button class="pc-arrow" data-dir="-1" aria-label="previous">←</button>
+      <div class="pc-dots" id="pcDots"></div>
+      <button class="pc-arrow" data-dir="1" aria-label="next">→</button>
     </div>
   </section>
 </template>
@@ -392,73 +385,39 @@
 
 <!-- ── /writing ───────────────────────────────────────────────── -->
 <template id="tpl-writing">
-  <section class="wr-main" data-screen-label="05 what's new">
-    <div class="wr-head">
+  <section class="wr-main" data-screen-label="05 writing">
+    <div class="wr-head" data-reveal>
       <div class="ttl">writing</div>
-      <p class="intro">The ongoing work of explaining what AI actually is — posts revealing the AEA one axis at a time, each backed by a <span class="em">receipt from the running system</span>. Cadence: Mon / Tue / Thu, 14:00 Europe/Madrid. The newsletter goes deeper on what doesn't fit in a post.</p>
+      <p class="intro">One running series explaining what AI actually is — the AEA, one axis at a time, each post backed by a <span class="em">receipt from the running system</span>. Twenty-six pieces drawing a single map. Drag the timeline to travel it. <span class="wr-note">cadence: Mon / Tue / Thu · dates pending</span></p>
     </div>
 
-    <div class="wr-wrap">
-      <div class="filters" id="filters">
-        <span class="flabel">filter:</span>
+    <div class="wr-controls" data-reveal>
+      <div class="filters" id="wrFilters">
+        <span class="flabel">axis:</span>
         <button class="fchip active" data-filter="all">all</button>
-        <button class="fchip" data-filter="P">P</button>
-        <button class="fchip" data-filter="M">M</button>
-        <button class="fchip" data-filter="A">A</button>
-        <button class="fchip" data-filter="R">R</button>
-        <button class="fchip" data-filter="S">S</button>
+        <button class="fchip" data-filter="P">path</button>
+        <button class="fchip" data-filter="M">multiplicity</button>
+        <button class="fchip" data-filter="A">abstraction</button>
+        <button class="fchip" data-filter="R">prompting</button>
+        <button class="fchip" data-filter="S">async</button>
       </div>
-
-      <div class="drafting"><span class="pulse"></span>currently drafting: <b><span class="ph">[PLACEHOLDER: e.g., P4 — the multiplicity axis]</span></b></div>
-
-      <div class="working">
-        <span class="wlabel">currently working on</span>
-        <span class="wo"><i class="rdot on"></i>AEA site build</span>
-        <span class="wo"><i class="rdot"></i>operator-observable time essay</span>
-        <span class="wo"><i class="rdot"></i>WirthForge diagram set</span>
+      <div class="wr-legend">
+        <span class="wl"><i class="wl-dot shipped"></i>shipped</span>
+        <span class="wl"><i class="wl-dot queued"></i>upcoming</span>
+        <span class="wr-scrub">drag · scroll →</span>
       </div>
+    </div>
 
-      <div class="section-label">shipped — recent first</div>
-      <div class="posts" id="posts">
-        <div class="post" data-axis="P" data-ago="2">
-          <span class="pdate"><span class="ph">[date]</span></span>
-          <span class="pnum">P1</span>
-          <span class="ptitle"><span class="newdot"></span><span class="ph">[PLACEHOLDER: title]</span><span class="paxis">· path</span></span>
-          <a class="pli">LinkedIn →</a>
-        </div>
-        <div class="post" data-axis="P" data-ago="9">
-          <span class="pdate"><span class="ph">[date]</span></span>
-          <span class="pnum">P2</span>
-          <span class="ptitle"><span class="newdot"></span><span class="ph">[PLACEHOLDER: title]</span><span class="paxis">· path</span></span>
-          <a class="pli">LinkedIn →</a>
-        </div>
-        <div class="post" data-axis="M" data-ago="20">
-          <span class="pdate"><span class="ph">[date]</span></span>
-          <span class="pnum">P3</span>
-          <span class="ptitle"><span class="newdot"></span><span class="ph">[PLACEHOLDER: title]</span><span class="paxis">· multiplicity</span></span>
-          <a class="pli">LinkedIn →</a>
-        </div>
-      </div>
+    <!-- the series as a horizontal, scrubbable timeline; ends diffuminate as they leave frame -->
+    <div class="wr-timeline" id="wrTimeline" data-reveal aria-label="writing timeline — drag to explore">
+      <div class="wr-track" id="wrTrack"></div>
+    </div>
 
-      <div class="section-label">up next</div>
-      <div class="upnext">
-        <span class="unext"><b>P4</b> · multiplicity <span class="q">· queued</span></span>
-        <span class="unext"><b>P5</b> · abstraction <span class="q">· queued</span></span>
-        <span class="unext"><b>P6</b> · prompting <span class="q">· queued</span></span>
-        <span class="unext"><b>P7</b> · async <span class="q">· queued</span></span>
-      </div>
-
-      <div class="section-label">eventually</div>
-      <div class="eventually">
-        <div class="evt"><span class="eglyph"><svg viewBox="0 0 24 18"><rect x="1" y="1" width="22" height="16" rx="4" fill="none" stroke="currentColor"/><path d="M10,6 L16,9 L10,12 Z" fill="currentColor" stroke="none"/></svg></span><b>video</b> · coming</div>
-        <div class="evt"><span class="eglyph"><svg viewBox="0 0 24 18"><path d="M3,15 L3,4 C3,3 4,3 5,3 L19,3 C20,3 21,4 21,5 L21,15 L18,13 L15,15 L12,13 L9,15 L6,13 Z" fill="none" stroke="currentColor"/></svg></span><b>newsletter long-form</b> · coming</div>
-      </div>
-
-      <div class="archive">
-        <button class="show-more" id="showMore">show more →</button>
-        <div class="archive-more" id="archiveMore">
-          <span class="ph">[PLACEHOLDER: the archive expands here as the pipeline runs — older posts, recent first.]</span>
-        </div>
+    <div class="wr-foot" data-reveal>
+      <div class="wr-readout" id="wrReadout">hover or tap a post to read its hook</div>
+      <div class="wr-eventually">
+        <span class="evt"><b>newsletter long-form</b> · coming</span>
+        <span class="evt"><b>video</b> · coming</span>
       </div>
     </div>
   </section>
@@ -467,7 +426,7 @@
 <!-- ── /about ─────────────────────────────────────────────────── -->
 <template id="tpl-about">
   <section class="ab-main" data-screen-label="06 personal">
-    <div class="ab-grid">
+    <div class="ab-grid" data-reveal>
       <div class="ab-head">
         <span class="callnum gold">06</span>
         <span class="ttl">about</span>
@@ -484,7 +443,7 @@
       </div>
     </div>
 
-    <div class="orbital drift-mid">
+    <div class="orbital drift-mid" data-reveal>
       <svg id="abField" viewBox="0 0 760 520" aria-hidden="true">
         <g id="orbInner">
           <g id="orbRings">
@@ -506,7 +465,7 @@
       </svg>
     </div>
 
-    <div class="sig-gesture">
+    <div class="sig-gesture" data-reveal>
       <span class="tick"></span>scale: 1 light-year
       <span class="sub">time: 10<sup>8</sup> years</span>
     </div>
@@ -538,19 +497,27 @@
     </svg>
 
     <div class="wk-head">
-      <div class="sub">open for commissions</div>
-      <div class="ttl">the operational AI diagnostic<span class="dot">.</span></div>
-      <p class="intro">Your operation is leaking margin in ways the reports don't show — plans that don't survive the floor, exceptions handled by heroics, data nobody fully trusts. In one week I find the leaks in your own data, <span class="em">prove the why behind each one</span>, and hand you the fix order. Fixed fee. No black box, no 90-slide deck.</p>
-      <div class="wk-status">
-        <span class="pill"><span class="v">EUR 1,500</span> · fixed</span>
+      <div class="sub" data-reveal>open for commissions</div>
+      <div class="ttl" data-reveal style="--rd:.05s">the operational AI diagnostic<span class="dot">.</span></div>
+      <p class="intro" data-reveal style="--rd:.1s">Your operation is leaking margin in ways the reports don't show — plans that don't survive the floor, exceptions handled by heroics, data nobody fully trusts. In one week I find the leaks in your own data, <span class="em">prove the why behind each one</span>, and hand you the fix order. No black box, no 90-slide deck.</p>
+
+      <!-- the ONE living element: the offer's thesis made visible — spa-work.js drains it on scroll-in -->
+      <figure class="wk-leak" data-reveal style="--rd:.16s" aria-label="illustrative: weekly margin leak driven toward zero in week one">
+        <figcaption class="wk-leak-cap"><span class="wk-leak-k">find the leak</span><span class="wk-leak-arrow">→</span><span class="wk-leak-z">drive it to zero</span></figcaption>
+        <div class="wk-leak-rail fil-rail"><i class="wk-leak-fill fil-fill"></i></div>
+        <div class="wk-leak-read"><span class="wk-leak-val" data-from="12480" data-to="0">€ 12,480</span><span class="wk-leak-unit">/ wk · illustrative — your own data, week one</span></div>
+      </figure>
+
+      <div class="wk-status" data-reveal>
+        <span class="pill"><span class="v">free</span> · 20-min scope first</span>
         <span class="pill">~1 week</span>
-        <span class="pill">remote</span>
-        <span class="pill">NDA standard</span>
+        <span class="pill">remote · NDA</span>
         <span class="pill">your data stays yours</span>
       </div>
+      <p class="wk-why" data-reveal>The scoping call is free, and I only take the work if the leak is findable in your data. The aim is to surface far more than the work costs, with the receipts to prove it; if I find nothing worth fixing, you get that in writing.</p>
     </div>
 
-    <div class="wk-grid">
+    <div class="wk-grid" data-reveal>
       <div class="wk-deliver">
         <div class="wk-label">what you get</div>
         <ul>
@@ -563,11 +530,11 @@
         <div class="wk-label">how it runs</div>
         <div class="wk-step"><div class="callnum">01</div><div><div class="st-name">scope</div><div class="st-desc">a 20-minute call + a data sample under NDA. I confirm the leak is findable before you commit a euro.</div></div></div>
         <div class="wk-step"><div class="callnum">02</div><div><div class="st-name">analysis</div><div class="st-desc">one week over your flows — pattern pass, then causal pass. plan vs. actual, where it diverges, and what the divergence costs.</div></div></div>
-        <div class="wk-step"><div class="callnum gold">03</div><div><div class="st-name">hand-off</div><div class="st-desc">the report, walked through together. want the fixes built? the diagnostic fee credits into that engagement.</div></div></div>
+        <div class="wk-step"><div class="callnum gold">03</div><div><div class="st-name">hand-off</div><div class="st-desc">the report, walked through together. want the fixes built? the diagnostic rolls into that engagement.</div></div></div>
       </div>
     </div>
 
-    <div class="wk-proof">
+    <div class="wk-proof" data-reveal>
       <p><b>Why this is reliable enough to act on:</b> I run AI systems inside large-scale logistics operations for a living. The engine behind this diagnostic is the same kind running in production — deterministic rules decide, the AI explains, and every claim shows its work. <span class="num">the model speaks; the code decides.</span></p>
       <div class="wk-metrics">
         <div class="wk-metric"><span class="mv">9</span><span class="ml">sites live</span></div>
@@ -576,12 +543,19 @@
       </div>
     </div>
 
-    <div class="wk-guarantee"><span class="tick"></span><span>If the diagnostic finds nothing worth fixing, you get that in writing — with the receipts. Either way, you stop guessing.</span></div>
-
-    <div class="wk-cta">
-      <a class="cta-btn tickbox" href="mailto:leyber.91.2@gmail.com?subject=Operational%20AI%20Diagnostic">book the 20-minute scoping call →</a>
-      <div class="cta-alt">or write directly — <a href="mailto:leyber.91.2@gmail.com">leyber.91.2@gmail.com</a> · linkedin · <span class="ph">[PLACEHOLDER]</span></div>
-      <div class="wk-foot-note">SMB logistics, warehousing, manufacturing, freight — if your operation moves things and the numbers feel off, that's the brief.</div>
+    <!-- decision cluster: reassurance + action. Pricing is scoped privately on the call,
+         not advertised — fee block hidden 2026-06-15 (lead with the free scope instead). -->
+    <div class="wk-decide" data-reveal>
+      <div class="wk-offer">
+        <div class="wk-offer-lead">Start with a <span class="em">free 20-minute scope</span>.</div>
+        <div class="wk-offer-sub">No cost, no commitment — we confirm the leak is findable in your data before anything else. If it is, I scope the work with you from there.</div>
+      </div>
+      <div class="wk-guarantee"><span class="tick"></span><span>If the diagnostic finds nothing worth fixing, you get that in writing — with the receipts. Either way, you stop guessing.</span></div>
+      <div class="wk-cta">
+        <a class="cta-btn tickbox" href="mailto:leyber.91.2@gmail.com?subject=Operational%20AI%20Diagnostic">book the 20-minute scoping call →</a>
+        <div class="cta-alt">or write directly — <a href="mailto:leyber.91.2@gmail.com">leyber.91.2@gmail.com</a> · <a href="https://www.linkedin.com/in/luisblancorodriguez/" target="_blank" rel="noopener">linkedin</a></div>
+        <div class="wk-foot-note">SMB logistics, warehousing, manufacturing, freight — if your operation moves things and the numbers feel off, that's the brief.</div>
+      </div>
     </div>
   </section>
 </template>
@@ -590,7 +564,7 @@
 <template id="tpl-contact">
   <section class="ct-main" data-screen-label="08 contact">
     <div class="ct-wrap">
-      <div class="ct-radial">
+      <div class="ct-radial" data-reveal>
         <svg viewBox="0 0 240 240" aria-hidden="true">
           <circle class="o" cx="120" cy="120" r="30"/>
           <circle class="o" cx="120" cy="120" r="58"/>
@@ -604,44 +578,33 @@
         </svg>
       </div>
 
-      <h1 class="ct-title">let's build better systems<span class="dot">.</span></h1>
-      <p class="ct-pitch">I write deeper on the framework in the newsletter — what doesn't fit in a post. One email per week, no hype, calibrated by the same rules as the rest of the site.</p>
+      <h1 class="ct-title" data-reveal style="--rd:.05s">let's build better systems<span class="dot">.</span></h1>
+      <p class="ct-pitch" data-reveal style="--rd:.12s">The fastest way to reach me is email or LinkedIn. If you want the work commissioned, the operational AI diagnostic lives on <a class="ct-inline" href="#/work">work with me</a>.</p>
 
-      <div class="nl">
-        <div class="nl-field">
-          <input type="email" placeholder="your email" aria-label="email (newsletter deferred)" disabled>
-          <button type="button" disabled>subscribe →</button>
-        </div>
-        <div class="nl-note"><span class="ph">[PLACEHOLDER: Ghost URL — or newsletter deferred to v2]</span></div>
-      </div>
-
-      <div class="ct-links">
-        <a class="clink tickbox" role="link" tabindex="0">
+      <div class="ct-links" data-reveal style="--rd:.2s">
+        <a class="clink tickbox" href="mailto:leyber.91.2@gmail.com">
           <span class="ring"><svg viewBox="0 0 16 16"><rect x="1.5" y="3" width="13" height="10" rx="1.5" fill="none" stroke="currentColor"/><path d="M2,4 L8,9 L14,4" fill="none" stroke="currentColor"/></svg></span>
-          <span class="ctext"><span class="clabel">email</span><span class="cval ph">[PLACEHOLDER]</span></span>
+          <span class="ctext"><span class="clabel">email</span><span class="cval">leyber.91.2@gmail.com</span></span>
+        </a>
+        <a class="clink tickbox" href="https://www.linkedin.com/in/luisblancorodriguez/" target="_blank" rel="noopener">
+          <span class="ring"><svg viewBox="0 0 16 16"><rect x="2" y="6" width="3" height="8" fill="none" stroke="currentColor"/><circle cx="3.5" cy="2.6" r="1.6" fill="none" stroke="currentColor"/><path d="M7,14 L7,6 M7,9 C7,6 13,6 13,9.5 L13,14" fill="none" stroke="currentColor"/></svg></span>
+          <span class="ctext"><span class="clabel">linkedin</span><span class="cval">in/luisblancorodriguez</span></span>
         </a>
         <a class="clink tickbox" href="https://github.com/Leyber91" target="_blank" rel="noopener">
           <span class="ring"><svg viewBox="0 0 16 16"><circle cx="4" cy="4" r="2" fill="none" stroke="currentColor"/><circle cx="4" cy="12" r="2" fill="none" stroke="currentColor"/><circle cx="12" cy="6" r="2" fill="none" stroke="currentColor"/><path d="M4,6 L4,10 M4,8 C4,8 12,8 12,8" fill="none" stroke="currentColor"/></svg></span>
           <span class="ctext"><span class="clabel">github</span><span class="cval">github.com/Leyber91</span></span>
         </a>
-        <a class="clink tickbox" role="link" tabindex="0">
-          <span class="ring"><svg viewBox="0 0 16 16"><rect x="2" y="6" width="3" height="8" fill="none" stroke="currentColor"/><circle cx="3.5" cy="2.6" r="1.6" fill="none" stroke="currentColor"/><path d="M7,14 L7,6 M7,9 C7,6 13,6 13,9.5 L13,14" fill="none" stroke="currentColor"/></svg></span>
-          <span class="ctext"><span class="clabel">linkedin</span><span class="cval ph">[PLACEHOLDER]</span></span>
-        </a>
-        <a class="clink tickbox" role="link" tabindex="0">
-          <span class="ring"><svg viewBox="0 0 16 16"><path d="M3,3 L13,13 M13,3 L3,13" fill="none" stroke="currentColor"/></svg></span>
-          <span class="ctext"><span class="clabel">X</span><span class="cval ph">[PLACEHOLDER]</span></span>
-        </a>
       </div>
+      <div class="ct-newsletter">a deeper newsletter on the framework is coming with the next build.</div>
     </div>
 
     <div class="ct-extend drift-mid">
       <svg viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
-        <path class="ext-flow" d="M40,20 C200,60 240,160 480,180 C740,202 800,90 1160,150"/>
-        <path class="ext-flow" d="M120,90 C360,140 520,200 760,220 C980,238 1080,200 1180,236"/>
-        <path d="M20,160 L1180,160" stroke="rgba(234,240,251,0.06)"/>
-        <circle class="node" cx="480" cy="180" r="3"/>
-        <circle class="node" cx="760" cy="220" r="3"/>
+        <!-- the closing currents come to rest: they ease in from the left and flatten into
+             stillness toward the right, dissolving at the edges (the entity settling) -->
+        <path class="ext-flow" d="M0,44 C340,118 690,166 1200,171"/>
+        <path class="ext-flow soft" d="M0,96 C300,156 630,177 1200,180"/>
+        <circle class="rest" cx="1064" cy="172" r="2.4"/>
       </svg>
     </div>
 
@@ -663,22 +626,26 @@
 <script src="src/resonance/resonance.renderer.js"></script>
 <script src="src/resonance/resonance.orchestrator.js"></script>
 <script src="src/data/concepts.js"></script>
-<script src="src/routes/spa-architecture.js"></script>
 <script src="src/routes/spa-projects.js"></script>
+<script src="src/routes/spa-writing.js"></script>
 <script src="src/core/spa-intro.js"></script>
 <script src="src/routes/spa-home.js"></script>
 <script src="src/routes/spa-about.js"></script>
+<script src="src/routes/spa-work.js"></script>
+<!-- revealOnEnter: shared content-entrance atom (consumed by work now; others next) -->
+<script src="src/core/spa-reveal.js"></script>
 <script src="src/core/spa-spine.js"></script>
 <script src="src/core/spa-router.js"></script>
 <script src="src/ui/spa-tweaks.js"></script>
 <script src="src/ui/codex.js"></script>
 <!-- the AEA figure as a 3D dust-pentagon (replaces the cube glyph's visual) -->
 <script src="src/glyph/aea-glyph.js"></script>
-<!-- the lines become dust: flow particles along the structural paths, hide the strokes -->
-<script src="src/flow/path-flow.js"></script>
-<!-- card borders become a linear swarm of dust -->
-<script src="src/flow/border-swarm.js"></script>
-<!-- section 02: one node, three dust states — converge · dissolve · emanate -->
-<script src="src/flow/phase-diagram.js"></script>
+<!-- AEA section: native-WebGL structure (clean by default, layers on demand) -->
+<script src="src/aea3d/aea3d.js"></script>
+<!-- hero: the living entity that attends to the cursor (Canvas2D) -->
+<script src="src/aea3d/hero-entity.js"></script>
+<!-- dust currents removed (path-flow / border-swarm / phase-diagram): the spine and
+     structural lines stand as drawn drafting; the starfield substrate carries the motion. -->
+
 </body>
 </html>

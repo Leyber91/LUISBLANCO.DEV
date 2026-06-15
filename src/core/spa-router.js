@@ -10,10 +10,10 @@
    ========================================================================= */
 (function(){
   const LB = window.LB;
-  const ORDER  = ['home','architecture','projects','resonance','writing','about','work','contact'];
+  const ORDER  = ['home','architecture','projects','writing','about','work','contact'];
   const ROUTES = ORDER;
-  const AMP  = { home:1.0, about:0.7, architecture:0.55, projects:0.55, resonance:0.80, writing:0.55, work:0.55, contact:0.55 };
-  const ARCS = { home:4, about:6, architecture:2, projects:2, resonance:3, writing:2, work:2, contact:2 };
+  const AMP  = { home:1.0, about:0.7, architecture:0.55, projects:0.55, writing:0.55, work:0.55, contact:0.55 };
+  const ARCS = { home:4, about:6, architecture:2, projects:2, writing:2, work:2, contact:2 };
   const TOPPAD = 70;   // clearance under the fixed nav when scrolling to a section
 
   // visit bookkeeping — capture prior visit BEFORE we stamp this one
@@ -71,16 +71,7 @@
 
   // ── per-section wiring (runs once) ──────────────────────────────────
   function wireProjects(scope){
-    const chips=[...scope.querySelectorAll('.fchip')], cards=[...scope.querySelectorAll('.pcard')];
-    chips.forEach(ch=>ch.addEventListener('click',()=>{
-      chips.forEach(c=>c.classList.remove('active')); ch.classList.add('active');
-      const f=ch.getAttribute('data-filter');
-      cards.forEach(card=>{ const show = f==='all' || card.getAttribute('data-cluster')===f
-        || (card.getAttribute('data-axis')||'').split(' ').includes(f);
-        card.classList.toggle('hidden', !show); });
-      if(window.LB_PROJ) window.LB_PROJ.redraw();
-    }));
-    if(window.LB_PROJ) window.LB_PROJ.init();
+    if(window.LB_PROJ) window.LB_PROJ.init(scope);
   }
   function wireWriting(scope){
     const chips=[...scope.querySelectorAll('.fchip')], posts=[...scope.querySelectorAll('.post')];
@@ -98,12 +89,19 @@
   }
   function initSections(){
     const sec = r => document.querySelector(`.plate-sec[data-sec="${r}"]`);
-    if(window.LB_ARCH)  window.LB_ARCH.init({ locate:null });
+    const aeaMount = document.getElementById('aeaMount');
+    if(window.LB_AEA3D && aeaMount) window.LB_AEA3D.init(aeaMount);
+    const heroEntity = document.getElementById('heroEntity');
+    if(window.LB_HEROENT && heroEntity) window.LB_HEROENT.init(heroEntity);
     if(sec('projects')) wireProjects(sec('projects'));
-    if(sec('writing'))  wireWriting(sec('writing'));
+    if(window.LB_WRITING && sec('writing')) window.LB_WRITING.init(sec('writing'));
     if(window.LB_HOME)  window.LB_HOME.init();
     if(window.LB_ABOUT) window.LB_ABOUT.init();
-    if(window.LB_RESONANCE) window.LB_RESONANCE.init(sec('resonance'));
+    if(window.LB_WORK && sec('work')) window.LB_WORK.init(sec('work'));
+    // RESONANCE instrument now lives in the home mission beat ("the model, made visible")
+    if(window.LB_RESONANCE) window.LB_RESONANCE.init(sec('home'));
+    // revealOnEnter: arm every [data-reveal] across the mounted poster (once)
+    if(window.LB_REVEAL) window.LB_REVEAL.arm(document.getElementById('page'));
   }
 
   // ── scroll spy — the section under the viewport drives the chrome ───
@@ -153,6 +151,9 @@
       try{ window.LB_ARCH.teardown(); }catch(e){}
       window.LB_ARCH.init({ locate:list });
     }
+    if(params && params.locate && window.LB_AEA3D && window.LB_AEA3D.locate){
+      window.LB_AEA3D.locate(params.locate.split(',').map(s=>s.trim()).filter(Boolean));
+    }
     scrollToSection(route, opts.instant);
     if(!opts.instant) traversalPulse();
   }
@@ -178,6 +179,9 @@
         const list = params.locate.split(',').map(s=>s.trim()).filter(Boolean);
         try{ window.LB_ARCH.teardown(); }catch(e){}
         window.LB_ARCH.init({ locate:list });
+      }
+      if(params.locate && window.LB_AEA3D && window.LB_AEA3D.locate){
+        window.LB_AEA3D.locate(params.locate.split(',').map(s=>s.trim()).filter(Boolean));
       }
       if(window.LB_SPINE) window.LB_SPINE.build();   // also calls refreshReveal
       else window.LB_ENGINE.refreshReveal();

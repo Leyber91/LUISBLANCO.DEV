@@ -1,179 +1,109 @@
 /* =========================================================================
-   spa-projects.js — builds the /projects woven field:
-   • isometric module diagrams injected into each .pcard .iso[data-mod]
-   • a computed connective mesh: cluster-top weave, a shared baseline, and a
-     dropped line from every visible module down into that baseline
-   • rail links from the mechanics/ops aside into the visualization cluster
-   Router calls window.LB_PROJ.init() after /projects mounts; teardown() detaches.
+   spa-projects.js — /projects: the triad of build-toward-income demos (each
+   driving one number to zero) + a draggable, parallaxed carousel of the proofs
+   and the production engineering. Forks labelled as forks; clients never named;
+   triad meters are illustrative / synthetic only.
+
+   Router calls window.LB_PROJ.init(scope) after /projects mounts.
    ========================================================================= */
 (function(){
-  /* ---- isometric primitive: one cube, three shaded visible faces -------- */
-  const C=12, S=6.6, H=13.5;
-  function cube(ox,oy,w,d,h){
-    const p=(ix,iy,iz)=>`${((ix-iy)*C+ox).toFixed(1)},${((ix+iy)*S-iz*H+oy).toFixed(1)}`;
-    const top=`${p(0,0,h)} ${p(w,0,h)} ${p(w,d,h)} ${p(0,d,h)}`;
-    const left=`${p(0,d,h)} ${p(w,d,h)} ${p(w,d,0)} ${p(0,d,0)}`;
-    const right=`${p(w,0,h)} ${p(w,d,h)} ${p(w,d,0)} ${p(w,0,0)}`;
-    return `<polygon class="face-top ed" points="${top}"/>`
-         + `<polygon class="face ed" points="${left}"/>`
-         + `<polygon class="face-2 ed" points="${right}"/>`;
-  }
-  // top-centre of a cube in screen space (for linking)
-  function cubeTop(ox,oy,w,d,h){ const ix=w/2, iy=d/2; return [ (ix-iy)*C+ox, (ix+iy)*S-h*H+oy ]; }
-  function nd(x,y,gold){ return `<circle class="${gold?'gn':'nd'}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${gold?2.6:2}"/>`; }
-  function link(a,b,dash){ return `<line class="${dash?'link-d':'link'}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`; }
-  // an iso rhombus plane (flat tile) at height z
-  function plane(ox,oy,w,d,z){
-    const p=(ix,iy)=>`${((ix-iy)*C+ox).toFixed(1)},${((ix+iy)*S-z*H+oy).toFixed(1)}`;
-    return `<polygon class="face ed" points="${p(0,0)} ${p(w,0)} ${p(w,d)} ${p(0,d)}"/>`;
-  }
-  function svg(inner){ return `<svg viewBox="0 0 132 92" preserveAspectRatio="xMidYMid meet">${inner}</svg>`; }
+  "use strict";
+  const reduced = ()=> window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.classList.contains('reduced-motion')
+    || (window.LB && window.LB.reducedPreview);
 
-  const MOD = {
-    // multi-agent orchestration: three modules at different heights, wired
-    agents(){
-      const a=cube(30,52,2.4,2.4,2.4), b=cube(64,40,2.4,2.4,3.2), c=cube(92,58,2.2,2.2,2.2);
-      const ta=cubeTop(30,52,2.4,2.4,2.4), tb=cubeTop(64,40,2.4,2.4,3.2), tc=cubeTop(92,58,2.2,2.2,2.2);
-      return svg(link(ta,tb)+link(tb,tc)+link(ta,tc,true)+a+b+c+nd(tb[0],tb[1],true)+nd(ta[0],ta[1])+nd(tc[0],tc[1]));
-    },
-    // MCP server + self-refine loop
-    loop(){
-      const stack=cube(40,44,2.2,2.2,4.2);
-      const t=cubeTop(40,44,2.2,2.2,4.2);
-      const loop=`<path class="link" d="M${t[0]+4},${t[1]+2} C${t[0]+34},${t[1]-6} ${t[0]+40},${t[1]+30} ${t[0]+10},${t[1]+30}" marker-end=""/>`;
-      const arrow=`<path class="ed" d="M${t[0]+14},${t[1]+26} L${t[0]+8},${t[1]+30} L${t[0]+16},${t[1]+33}"/>`;
-      return svg(loop+arrow+stack+nd(t[0],t[1],true)+nd(t[0]+40,t[1]+14));
-    },
-    // hybrid search: two stacked retrieval planes merging into a result node
-    layers(){
-      const p1=plane(34,58,3.4,3.0,0), p2=plane(34,58,3.4,3.0,2.2);
-      const tp=cubeTop(34,58,3.4,3.0,2.2);
-      return svg(p1+`<line class="link-d" x1="${tp[0]-18}" y1="${tp[1]+13}" x2="${tp[0]-18}" y2="${tp[1]+1}"/>`+p2
-        + nd(tp[0]+22,tp[1]-6,true)+link([tp[0]+4,tp[1]-2],[tp[0]+22,tp[1]-6]));
-    },
-    // resilient ingestion pipeline: three stages in a row + retry arc
-    pipeline(){
-      const a=cube(20,54,1.8,1.8,1.8), b=cube(52,54,1.8,1.8,1.8), c=cube(84,54,1.8,1.8,1.8);
-      const ta=cubeTop(20,54,1.8,1.8,1.8), tb=cubeTop(52,54,1.8,1.8,1.8), tc=cubeTop(84,54,1.8,1.8,1.8);
-      const retry=`<path class="link-d" d="M${tc[0]},${tc[1]-3} C${tc[0]-6},${tc[1]-24} ${tb[0]+6},${tb[1]-24} ${tb[0]},${tb[1]-3}"/>`;
-      return svg(link(ta,tb)+link(tb,tc)+retry+a+b+c+nd(ta[0],ta[1])+nd(tb[0],tb[1])+nd(tc[0],tc[1],true));
-    },
-    // real-time dashboard: a flat iso panel carrying riser bars
-    panel(){
-      const base=plane(30,60,4.6,3.2,0.2);
-      const risers = [[46,42,1.4],[60,46,2.4],[74,40,1.7],[88,44,2.9]]
-        .map(([x,y,h])=>cube(x,y,0.6,0.6,h)).join('');
-      const tp=cubeTop(88,44,0.6,0.6,2.9);
-      return svg(base+risers+nd(tp[0],tp[1],true));
-    },
-    // framework (placeholder): central module, dashed links to satellites
-    cluster(){
-      const core=cube(54,48,2.4,2.4,2.6); const t=cubeTop(54,48,2.4,2.4,2.6);
-      const sats=[[24,40],[96,38],[28,70],[100,68]];
-      let l=''; sats.forEach(s=>{ l+=link(t,s,true)+nd(s[0],s[1]); });
-      return svg(l+core+nd(t[0],t[1],true));
-    },
-    // WirthForge: nested cube (self-model made visible) — gold inner
-    nest(){
-      const outer=cube(38,40,3.6,3.6,3.6);
-      const inner=cube(56,52,1.5,1.5,1.5);
-      const ti=cubeTop(56,52,1.5,1.5,1.5);
-      return svg(outer+`<g class="gcube">${inner}</g>`+nd(ti[0],ti[1],true));
-    },
-    // Prime Radiant: iso concentric rings + central radiant + orbiters
-    radial(){
-      const cx=66, cy=50;
-      let r='';
-      [ [40,16],[26,10],[13,5] ].forEach(([rx,ry])=>{ r+=`<ellipse class="ed-soft" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none"/>`; });
-      const orb=[[cx-40,cy],[cx+26,cy-9],[cx+13,cy+6],[cx-20,cy+9]].map(o=>nd(o[0],o[1])).join('');
-      return svg(r+orb+`<circle class="gn" cx="${cx}" cy="${cy}" r="3"/>`);
-    }
-  };
-
-  function buildIso(scope){
-    scope.querySelectorAll('.iso[data-mod]').forEach(el=>{
-      const m=el.getAttribute('data-mod'); if(MOD[m]) el.innerHTML=MOD[m]();
-    });
+  function fmt(v, dec, prefix, suffix){
+    const n = dec>0 ? v.toFixed(dec) : Math.round(v).toLocaleString('en-US');
+    return prefix + n + suffix;
   }
 
-  /* ---- connective mesh + shared baseline -------------------------------- */
-  function svgEl(tag,attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
-    for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+  // ── triad: animate each metric down toward zero when it scrolls into view ──
+  function wireTriad(scope){
+    const cards = [...scope.querySelectorAll('.tri-card')];
+    if(!cards.length) return;
+    const run = (card)=>{
+      if(card._ran) return; card._ran = true;
+      const from = parseFloat(card.dataset.from), to = parseFloat(card.dataset.to||'0');
+      const dec = parseInt(card.dataset.dec||'0',10), pre = card.dataset.prefix||'', suf = card.dataset.suffix||'';
+      const valEl = card.querySelector('.tm-val'), bar = card.querySelector('.tm-bar i');
+      const RESID = 0.06;   // a sliver remains — honest "toward zero", never a perfect 0 bar
+      if(reduced()){ if(valEl) valEl.textContent = fmt(to,dec,pre,suf); if(bar) bar.style.width = (RESID*100)+'%'; return; }
+      const dur = 1700; let t0 = null;
+      if(bar){ bar.style.width = '100%'; }
+      const ease = x => 1 - Math.pow(1-x, 3);
+      function step(ts){
+        if(t0===null) t0 = ts;
+        const k = Math.min(1, (ts - t0)/dur), e = ease(k);
+        const v = from + (to - from)*e;
+        if(valEl) valEl.textContent = fmt(v,dec,pre,suf);
+        if(bar) bar.style.width = (100 - (100-RESID*100)*e) + '%';
+        if(k<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    };
+    if(!('IntersectionObserver' in window)){ cards.forEach(run); return; }
+    const io = new IntersectionObserver(entries=>{
+      entries.forEach(en=>{ if(en.isIntersecting){ run(en.target); io.unobserve(en.target); } });
+    }, { threshold:0.4 });
+    cards.forEach(c=> io.observe(c));
+  }
 
-  let resizeHandler=null;
-  function rectIn(el, base){ const r=el.getBoundingClientRect(), b=base.getBoundingClientRect();
-    return { x:r.left-b.left, y:r.top-b.top, w:r.width, h:r.height, cx:r.left-b.left+r.width/2, cy:r.top-b.top+r.height/2,
-      bot:r.top-b.top+r.height, top:r.top-b.top }; }
+  // ── carousel: drag-scrub + arrows + dots + parallax background numerals ──
+  function wireCarousel(scope){
+    const car = scope.querySelector('#projCarousel');
+    const track = scope.querySelector('#pcTrack');
+    if(!car || !track) return;
+    const cards = [...track.children];
+    const dotsWrap = scope.querySelector('#pcDots');
 
-  function drawWeave(){
-    const field=document.getElementById('projField');
-    const svgn=document.getElementById('projWeave');
-    const base=document.getElementById('projBaseline');
-    if(!field||!svgn||!base) return;
-    if(window.innerWidth<=1180){ svgn.innerHTML=''; return; }
-    const W=field.clientWidth, Hh=field.clientHeight;
-    svgn.setAttribute('viewBox',`0 0 ${W} ${Hh}`);
-    svgn.innerHTML='';
-    const frag=document.createDocumentFragment();
-    const baseY = rectIn(base, field).cy;
+    // dots
+    if(dotsWrap){ dotsWrap.innerHTML = cards.map((_,i)=>'<button class="pc-dot" data-i="'+i+'" aria-label="card '+(i+1)+'"></button>').join(''); }
+    const dots = dotsWrap ? [...dotsWrap.children] : [];
 
-    // baseline spanning the field
-    frag.appendChild(svgEl('path',{class:'base-line draw-line', d:`M8,${baseY} L${W-8},${baseY}`}));
+    const cardW = ()=> cards[0] ? cards[0].getBoundingClientRect().width + 18 : 320;
+    const idx = ()=> Math.round(car.scrollLeft / cardW());
+    function syncDots(){ const i = idx(); dots.forEach((d,k)=> d.classList.toggle('on', k===i)); }
 
-    // every visible module drops a thin line into the baseline
-    const cards=[...field.querySelectorAll('.pcard')].filter(c=>!c.classList.contains('hidden'));
-    cards.forEach(card=>{
-      const r=rectIn(card, field);
-      const x=r.cx, y=r.bot;
-      const d=`M${x.toFixed(1)},${y.toFixed(1)} C${x.toFixed(1)},${(y+40).toFixed(1)} ${x.toFixed(1)},${(baseY-40).toFixed(1)} ${x.toFixed(1)},${baseY.toFixed(1)}`;
-      frag.appendChild(svgEl('path',{class:'drop', 'data-card':'1', d}));
-      frag.appendChild(svgEl('circle',{class:'base-node', cx:x, cy:baseY, r:3}));
-    });
-    // two gold anchor nodes on the baseline (the ends of the structural span)
-    [0.13,0.87].forEach(fr=>{ frag.appendChild(svgEl('circle',{class:'base-node gold', cx:(W*fr), cy:baseY, r:3.4})); });
-
-    // weave the cluster tops together with faint arcs
-    const clusters=[...field.querySelectorAll('.cluster')];
-    const tops=clusters.map(cl=>{ const r=rectIn(cl, field); return { x:r.cx, y:r.top }; });
-    for(let i=0;i<tops.length-1;i++){
-      const a=tops[i], b=tops[i+1];
-      const my=Math.min(a.y,b.y)-26;
-      frag.appendChild(svgEl('path',{class:'weave', d:`M${a.x},${a.y} C${a.x},${my} ${b.x},${my} ${b.x},${b.y}`}));
-    }
-
-    // rail links: connect each rail item to the nearest visualization card edge
-    const viz=field.querySelector('.cluster[data-cluster="VISUALIZATION"]');
-    const rail=document.getElementById('projRail');
-    if(viz&&rail){
-      const vr=rectIn(viz, field);
-      rail.querySelectorAll('.rail-item').forEach(it=>{
-        const ir=rectIn(it, field);
-        const sx=ir.x, sy=ir.cy, ex=vr.x+vr.w, ey=Math.max(vr.top+14, Math.min(sy, vr.bot-14));
-        frag.appendChild(svgEl('path',{class:'rail-link', d:`M${sx.toFixed(1)},${sy.toFixed(1)} C${(sx-18).toFixed(1)},${sy.toFixed(1)} ${(ex+18).toFixed(1)},${ey.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`}));
+    // parallax: shift each card's background numeral against its distance from centre
+    function parallax(){
+      const cc = car.getBoundingClientRect().left + car.clientWidth/2;
+      cards.forEach(c=>{
+        const r = c.getBoundingClientRect(); const center = r.left + r.width/2;
+        const d = (center - cc);
+        const bg = c.querySelector('.pc-bg'); if(bg) bg.style.transform = 'translateX('+(-d*0.07).toFixed(1)+'px)';
+        c.classList.toggle('focus', Math.abs(d) < r.width*0.55);
       });
     }
+    let ticking = false;
+    car.addEventListener('scroll', ()=>{ if(!ticking){ ticking = true; requestAnimationFrame(()=>{ parallax(); syncDots(); ticking=false; }); } });
 
-    svgn.appendChild(frag);
-    requestAnimationFrame(()=>{
-      svgn.querySelectorAll('.draw-line').forEach(p=>{
-        try{ p.style.setProperty('--len', Math.ceil(p.getTotalLength())); }catch(e){}
-        requestAnimationFrame(()=>p.classList.add('drawn'));
-      });
-    });
+    // drag-to-scrub
+    let down=false, sx=0, sl=0, moved=0;
+    car.addEventListener('pointerdown', e=>{ down=true; moved=0; sx=e.clientX; sl=car.scrollLeft; car.classList.add('dragging'); car.setPointerCapture(e.pointerId); });
+    car.addEventListener('pointermove', e=>{ if(!down) return; const dx=e.clientX-sx; moved+=Math.abs(dx); car.scrollLeft = sl - dx; });
+    const end = ()=>{ down=false; car.classList.remove('dragging'); };
+    car.addEventListener('pointerup', end); car.addEventListener('pointercancel', end);
+    car.addEventListener('click', e=>{ if(moved>6){ e.preventDefault(); e.stopPropagation(); } }, true);
+    car.addEventListener('wheel', e=>{ const d = Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY; if(d){ car.scrollLeft += d; e.preventDefault(); } }, {passive:false});
+
+    // arrows + dots
+    scope.querySelectorAll('.pc-arrow').forEach(b=> b.addEventListener('click', ()=>{
+      const dir = parseInt(b.dataset.dir,10);
+      car.scrollTo({ left: car.scrollLeft + dir*cardW(), behavior: reduced()?'auto':'smooth' });
+    }));
+    dots.forEach(d=> d.addEventListener('click', ()=>{
+      car.scrollTo({ left: parseInt(d.dataset.i,10)*cardW(), behavior: reduced()?'auto':'smooth' });
+    }));
+
+    requestAnimationFrame(()=>{ parallax(); syncDots(); });
+    window.addEventListener('resize', ()=>{ parallax(); syncDots(); });
   }
 
-  function init(){
-    const scope=document.getElementById('page');
-    if(!scope) return;
-    buildIso(scope);
-    drawWeave();
-    requestAnimationFrame(drawWeave);
-    setTimeout(drawWeave, 360);
-    if(resizeHandler) window.removeEventListener('resize', resizeHandler);
-    let rt; resizeHandler=()=>{ clearTimeout(rt); rt=setTimeout(drawWeave,160); };
-    window.addEventListener('resize', resizeHandler);
+  function init(scope){
+    scope = scope || document.querySelector('.plate-sec[data-sec="projects"]') || document;
+    wireTriad(scope);
+    wireCarousel(scope);
   }
-  function teardown(){ if(resizeHandler){ window.removeEventListener('resize', resizeHandler); resizeHandler=null; } }
 
-  window.LB_PROJ = { init, teardown, redraw:drawWeave };
+  window.LB_PROJ = { init, redraw(){}, teardown(){} };
 })();

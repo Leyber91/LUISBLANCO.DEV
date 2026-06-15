@@ -82,9 +82,10 @@ body.sec-mission .glyph-halo, body.sec-mission .glyph-caption{ opacity:0; }
   12%{ opacity:.95; }
   100%{ opacity:0; stroke-dashoffset:-0.22; } }
 html.reduced-motion .traversal .pulse-path{ animation:none; }
-/* the spine strokes are replaced by path-flow dust — keep the stroke hidden as a
-   backstop so a rebuilt spine never flashes a solid line (path-flow draws the dust). */
-.traversal .spine, .traversal .pulse-path, #plateSpine .spine-path{ stroke-opacity:0; }
+/* path-flow dust is retired, so the traversal STROKE now carries the "one continuous
+   object": the spine stays faintly present on every route, and the gold pulse rides it
+   on navigation. The per-section #plateSpine stays hidden (it was a dust scaffold). */
+#plateSpine .spine-path{ stroke-opacity:0; }
 /* dimension guide lines: gone (they read mechanical as dust and as ink). The dust
    currents + section seams carry the structure now. */
 .dim{ stroke-opacity:0 !important; }

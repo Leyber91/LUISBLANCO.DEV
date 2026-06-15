@@ -29,21 +29,33 @@
 .clink .cval{ color:var(--ink); }
 .clink:hover .cval{ color:var(--gold-hi); }
 
-/* radial closure diagram */
-.ct-radial{ position:absolute; right:-10px; top:40px; width:240px; height:240px; z-index:2; pointer-events:none; }
+.ct-pitch .ct-inline{ color:var(--gold); border-bottom:1px solid var(--gold-dim); transition:color .2s; }
+.ct-pitch .ct-inline:hover{ color:var(--gold-hi); border-color:var(--gold); }
+.ct-newsletter{ margin:30px 0 0; font-size:12px; letter-spacing:.02em; color:var(--faint); }
+
+/* radial closure diagram — the page's landing mark: the system converging to rest */
+.ct-radial{ position:absolute; right:-10px; top:22px; width:304px; height:304px; z-index:2; pointer-events:none; }
 .ct-radial svg{ width:100%; height:100%; overflow:visible; }
-.ct-radial .o{ fill:none; stroke:var(--line-soft); stroke-width:1; }
+.ct-radial .o{ fill:none; stroke:rgba(176,202,240,0.26); stroke-width:1; }
 /* straight spokes read mechanical as ink — hidden; the concentric rings + core carry it */
 .ct-radial .spoke{ display:none; }
-.ct-radial .core{ fill:var(--gold); filter:drop-shadow(0 0 8px var(--gold-glow)); }
+/* the core gently blooms — the entity coming to rest (gold = the point of rest; gated) */
+.ct-radial .core{ fill:var(--gold); filter:drop-shadow(0 0 8px var(--gold-glow));
+  transform-box:fill-box; transform-origin:center; animation:coreBloom 4.2s var(--ease) infinite; }
+@keyframes coreBloom{ 0%,100%{ filter:drop-shadow(0 0 7px var(--gold-glow)); }
+  50%{ filter:drop-shadow(0 0 17px var(--gold-glow)); } }
+@media (prefers-reduced-motion:reduce){ .ct-radial .core{ animation:none; } }
+html.reduced-motion .ct-radial .core{ animation:none; }
 
-/* faint structural lines extending off the bottom */
-.ct-extend{ position:relative; z-index:1; margin-top:auto; height:200px; pointer-events:none; }
+/* the closing currents — faint ink that eases in and comes to rest, dissolving at the edges */
+.ct-extend{ position:relative; z-index:1; margin-top:auto; height:200px; pointer-events:none;
+  -webkit-mask-image:linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+          mask-image:linear-gradient(to right, transparent, #000 14%, #000 86%, transparent); }
 .ct-extend svg{ position:absolute; left:0; bottom:-40px; width:100%; height:240px; overflow:visible; }
-/* the closing curves become dust currents (path-flow → .ext-flow); strokes hidden
-   as a backstop so no ink line shows, and the straight base goes with them. */
-.ct-extend path{ fill:none; stroke:var(--line-soft); stroke-width:1; stroke-opacity:0; }
-.ct-extend .node{ fill:var(--gold-dim); }
+.ct-extend path{ fill:none; stroke-width:1; }
+.ct-extend .ext-flow{ stroke:rgba(176,202,240,0.18); }
+.ct-extend .ext-flow.soft{ stroke:rgba(176,202,240,0.10); }
+.ct-extend .rest{ fill:var(--gold-dim); filter:drop-shadow(0 0 5px var(--gold-glow)); }
 
 .ct-foot{ position:relative; z-index:5; text-align:center; font-size:11px; letter-spacing:.16em;
   color:var(--faint); padding:30px 0 36px; }
