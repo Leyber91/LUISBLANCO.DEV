@@ -1,0 +1,190 @@
+<!doctype html>
+<!-- aea_panel_proto.html — AEA section. LEFT = the text of the AEA (every element).
+     RIGHT = the structure, CLEAN BY DEFAULT: five axes only. Toggle in placements /
+     seeds / mechanics / ops / links on demand. Native WebGL, no frameworks, file://. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEA · text + clean structure</title>
+<style>
+  :root{ --ink:#EAF0FB; --dim:#9FB3D6; --faint:#565d72; --gold:#D4A24C; --goldhi:#F0C674; }
+  *{ box-sizing:border-box; margin:0; } html,body{ height:100%; overflow:hidden;
+    background:radial-gradient(120% 100% at 50% 38%, rgba(10,14,24,.96) 0%, rgba(4,6,10,.99) 72%);
+    color:var(--ink); font-family:"IBM Plex Mono",ui-monospace,monospace; }
+  #stage{ display:flex; height:100vh; }
+  .panel{ position:relative; height:100%; min-width:0; }
+  #txt{ width:36%; border-right:1px solid rgba(234,240,251,.10); padding:30px 30px 30px 34px; overflow-y:auto;
+    scrollbar-width:thin; scrollbar-color:rgba(234,240,251,.15) transparent; }
+  #txt h1{ font-size:13px; letter-spacing:.34em; color:var(--gold); font-weight:500; }
+  #txt .lede{ font-size:11px; line-height:1.85; color:var(--dim); margin:14px 0 6px; } #txt .lede b{ color:var(--ink); } #txt .lede .g{ color:var(--goldhi); }
+  #txt .law{ font-size:11px; color:var(--gold); margin:12px 0 20px; padding:12px 0; border-top:1px dashed rgba(212,162,76,.3); border-bottom:1px dashed rgba(212,162,76,.3); }
+  #txt h2{ font-size:9px; letter-spacing:.28em; color:var(--gold); text-transform:uppercase; margin:20px 0 8px; display:flex; align-items:center; gap:9px; }
+  #txt h2::after{ content:""; flex:1; height:1px; background:linear-gradient(to right,rgba(234,240,251,.1),transparent); }
+  #txt .row{ font-size:10px; line-height:1.7; color:var(--dim); margin:3px 0; } #txt .row b{ color:var(--goldhi); } #txt .row .d{ color:var(--faint); }
+  #txt .mini{ font-size:9px; color:var(--faint); line-height:1.6; margin-top:4px; }
+  #txt .crack{ font-size:9.5px; color:var(--dim); margin:3px 0; } #txt .crack b{ color:var(--gold); }
+  #aeaPanel{ flex:1; }
+  #toolbar{ position:absolute; left:20px; top:20px; z-index:5; display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+  #toolbar .tt{ font-size:8px; letter-spacing:.26em; color:var(--faint); text-transform:uppercase; margin-right:4px; }
+  .tog{ font-family:inherit; font-size:8px; letter-spacing:.14em; text-transform:uppercase; color:rgba(234,240,251,.5);
+    background:rgba(234,240,251,.04); border:1px solid rgba(234,240,251,.12); padding:4px 11px; cursor:pointer;
+    transition:color .15s,border-color .15s,background .15s; }
+  .tog:hover{ color:rgba(234,240,251,.85); border-color:rgba(234,240,251,.3); }
+  .tog.on{ color:var(--gold); border-color:rgba(212,162,76,.55); background:rgba(212,162,76,.08); box-shadow:0 0 10px rgba(212,162,76,.12); }
+  #aeaCanvas{ display:block; width:100%; height:100%; cursor:grab; } #aeaCanvas:active{ cursor:grabbing; }
+  #aeaLabels{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+  .lab{ position:absolute; transform:translate(-50%,-50%); white-space:nowrap; letter-spacing:.12em; will-change:left,top,opacity; transition:opacity .12s; }
+  .lab.axis{ font-size:12px; color:var(--goldhi); text-transform:uppercase; letter-spacing:.2em; }
+  .lab.axsub{ font-size:7.5px; color:var(--faint); letter-spacing:.16em; }
+  .lab.lev{ font-size:7.5px; color:var(--dim); } .lab.levlit{ font-size:8px; color:var(--goldhi); }
+  .lab.ex{ font-size:7px; color:var(--gold); } .lab.seed{ font-size:7px; color:var(--faint); text-transform:uppercase; letter-spacing:.14em; }
+  .lab.seednum{ font-size:8px; color:var(--goldhi); } .lab.mech{ font-size:7px; color:var(--gold); text-transform:uppercase; letter-spacing:.16em; }
+  .lab.op{ font-size:7px; color:var(--gold); text-transform:uppercase; letter-spacing:.22em; }
+  #panel{ position:absolute; right:18px; top:18px; width:212px; border:1px solid rgba(234,240,251,.14); background:rgba(8,11,18,.84);
+    border-radius:9px; padding:12px 14px; opacity:0; transition:opacity .15s; z-index:4; pointer-events:none; }
+  #panel .pn{ font-size:10px; letter-spacing:.12em; color:var(--goldhi); } #panel .pl{ font-size:7.5px; letter-spacing:.16em; color:var(--gold); text-transform:uppercase; margin:3px 0 7px; }
+  #panel .pd{ font-size:9px; line-height:1.6; color:var(--dim); } #panel .px{ font-size:8px; color:var(--goldhi); margin-top:7px; }
+  #aeaHint{ position:absolute; right:18px; bottom:16px; font-size:7.5px; letter-spacing:.2em; color:var(--faint); text-transform:uppercase; z-index:3; }
+  #aeaCredo{ position:absolute; left:0; right:0; bottom:16px; text-align:center; font-size:8.5px; letter-spacing:.18em; color:var(--gold); z-index:3; }
+</style></head>
+<body>
+<div id="stage">
+  <section id="txt" class="panel">
+    <h1>WHAT MAKES AI RUN ITSELF</h1>
+    <p class="lede">An AI model on its own is just <b>very good autocomplete</b> — it guesses the next word. No memory, no actions, no decisions. <span class="g">An "entity" is everything you wire around it</span> so it can remember, act, decide, and improve. This is the map of that wiring.</p>
+    <p class="law">THE ONE IDEA &nbsp; watch what it does → freeze the parts that repeat into code → shrink the cost to almost nothing. Make the hidden parts visible, then drive the waste toward zero.</p>
+    <h2>five questions that place any AI</h2>
+    <div class="row"><b>PATH</b> — <span class="d">who decides the next step — you, or it?</span></div>
+    <div class="row"><b>MULTIPLICITY</b> — <span class="d">one AI, or several working together?</span></div>
+    <div class="row"><b>ABSTRACTION</b> — <span class="d">what can it reach beyond its own words — memory? tools? writing its own tools?</span></div>
+    <div class="row"><b>pROMPTING</b> — <span class="d">how is it told what to do?</span></div>
+    <div class="row"><b>aSYNC</b> — <span class="d">does it wait in lockstep, or run on its own clock?</span></div>
+    <div class="mini">each question has levels, from "barely" to "fully on its own." The gold dot is the highest level actually proven — not just hoped for.</div>
+    <h2>ten parts it can't live without</h2>
+    <div class="row"><span class="d">take any one away and the whole thing falls apart:</span></div>
+    <div class="row">somewhere to run · a clear goal · turning repeated work into code · falling back to the model when something's new · building its own next version · knowing what it's made of · sensing when it's stuck · a way past the wall · lines it must never cross · a path to roll back</div>
+    <h2>what it's always doing</h2><div class="row"><b>build</b> the setup · <b>pass results along</b> · <b>watch itself</b> the whole time</div>
+    <h2>the loop you run around it</h2><div class="row"><b>design</b> it · <b>run it on a clock you can watch</b> · <b>ship</b> it · <b>learn</b> from it</div>
+    <h2>the three rules it lives by</h2><div class="row"><span class="d">let behaviour emerge, don't force it · always be able to roll back · always be able to see what it did</span></div>
+    <h2>still-open questions</h2>
+    <div class="crack"><b>identity</b> — if it splits in two, which one is still "it"?</div>
+    <div class="crack"><b>self-rewrite</b> — can it safely rewrite the very rules that describe it?</div>
+    <div class="crack"><b>the long run</b> — which paths of growth stay healthy over time?</div>
+    <div class="mini">hover the structure on the right — every part explains itself in plain words.</div>
+  </section>
+  <div id="aeaPanel" class="panel">
+    <div id="toolbar"><span class="tt">layers</span>
+      <button class="tog" data-l="placements">placements</button>
+      <button class="tog" data-l="seeds">seeds</button>
+      <button class="tog" data-l="mechanics">mechanics</button>
+      <button class="tog" data-l="ops">ops</button>
+      <button class="tog" data-l="links">links</button>
+    </div>
+    <canvas id="aeaCanvas"></canvas>
+    <div id="aeaLabels"></div>
+    <div id="panel"><div class="pn" id="pn"></div><div class="pl" id="pl"></div><div class="pd" id="pd"></div><div class="px" id="px"></div></div>
+    <div id="aeaHint">drag · scroll · hover an axis</div>
+    <div id="aeaCredo">five axes — turn on a layer to go deeper</div>
+  </div>
+</div>
+<script>
+'use strict';
+const AX=[
+ {key:'path',c:'P',name:'PATH',sub:'who decides',levels:[{n:1,label:'one-shot'},{n:2,label:'multi-step',ex:'ingestion pipeline'},{n:3,label:'branching',ex:'ops dashboard',lit:1},{n:4,label:'entity-defines',ex:'1500-tick'},{n:5,label:'anticipates'}]},
+ {key:'multiplicity',c:'M',name:'MULTIPLICITY',sub:'how many',levels:[{n:1,label:'single',ex:'DATASPACE'},{n:2,label:'N-uncoord'},{n:3,label:'role-diff',ex:'HADES MoA'},{n:4,label:'coordinated',ex:'recursive MoA',lit:1},{n:5,label:'emergent'}]},
+ {key:'abstraction',c:'A',name:'ABSTRACTION',sub:'composes with',levels:[{n:0,label:'raw',ex:'GPT-2'},{n:1,label:'+memory',ex:'RAG',lit:1},{n:2,label:'+tools',ex:'MCP'},{n:3,label:'+tool-gen',ex:'skills · Voyager'},{n:4,label:'+integration'},{n:5,label:'self-extend'}]},
+ {key:'prompting',c:'R',name:'pROMPTING',sub:'input built',levels:[{n:1,label:'none'},{n:2,label:'preprompt'},{n:3,label:'context-dep',ex:'essence passing'},{n:4,label:'param+tools',ex:'Document DNA'},{n:5,label:'self-refine',ex:'Self-Propelling',lit:1},{n:6,label:'co-evolve'},{n:7,label:'absorption'}]},
+ {key:'async',c:'S',name:'aSYNC',sub:'time',levels:[{n:1,label:'sync'},{n:2,label:'pipeline',ex:'Ouroboros'},{n:3,label:'event-driven'},{n:4,label:'independent',ex:'1500-tick',lit:1},{n:5,label:'multi-version',ex:'backwards channel'}]},
+];
+const SEEDS=[
+ {num:1,name:'RUNS ON',pd:'Something to run on — the hardware and the model itself.',enables:[]},
+ {num:2,name:'THE GOAL',pd:'A clear goal it can measure its own work against.',enables:[]},
+ {num:3,name:'FREEZE TO CODE',pd:'Turns work it keeps repeating into plain code that runs for free.',enables:[]},
+ {num:4,name:'FALL BACK',pd:'When something new shows up, it drops back to the model instead of breaking.',enables:[]},
+ {num:5,name:'SELF-UPGRADE',pd:'Builds its own next version, safely, without losing the old one.',enables:[]},
+ {num:6,name:'SELF-KNOWLEDGE',pd:'A working picture of what it is made of and what each part is for.',enables:[['prompting',5],['path',4],['multiplicity',5]]},
+ {num:7,name:'KNOWS IT IS STUCK',pd:'Senses when the current approach has stopped working.',enables:[]},
+ {num:8,name:'THE LINES',pd:'Rules it must never cross — even with its own self-changes.',enables:[['async',4]]},
+ {num:9,name:'ROLLBACK LINE',pd:'A way back to the previous version that never closes.',enables:[['prompting',7]]},
+ {num:10,name:'PROGRESS CHECK',pd:'Notices when it must change shape, not just try harder.',enables:[['abstraction',5]]}];
+const MECH=[{name:'FREEZE TO CODE',seeds:[3],on:[['abstraction',2],['path',2]],detail:'Work it repeats becomes plain code that runs for almost nothing.'},{name:'FALL BACK',seeds:[4],on:[['abstraction',2],['path',4]],detail:'Hits something new? It returns to the model instead of failing.'},{name:'SELF-UPGRADE',seeds:[5,9],on:[['async',5],['abstraction',5],['multiplicity',5]],detail:'Builds its successor while the old version stays restorable.'},{name:'WHEN STUCK',seeds:[6,7],on:[],detail:'Decides what to do when it hits a wall.'}];
+const OPS=['DESIGN','TIME','SHIP','LEARN'];
+const PREREQ=[['multiplicity',5,'async',2,'locked'],['async',5,'multiplicity',2,'locked'],['path',5,'abstraction',1,'firm'],['abstraction',3,'path',2,'firm'],['abstraction',4,'prompting',4,'firm'],['abstraction',5,'prompting',5,'firm'],['prompting',6,'abstraction',3,'firm'],['path',3,'multiplicity',3,'soft'],['multiplicity',4,'prompting',3,'soft'],['prompting',4,'path',3,'soft'],['async',3,'abstraction',2,'soft']];
+const INK=[.918,.941,.984],DIM=[.624,.702,.839],FAINT=[.337,.365,.447],GOLD=[.831,.635,.298],GHI=[.941,.776,.455];
+const col=(c,a)=>[c[0],c[1],c[2],a];
+const RP=2.05,RS=3.45,RM=2.9,ROP=4.2,Y0=-2.0,DY=0.62;
+const axAng=AX.map((_,i)=>-Math.PI/2+i*2*Math.PI/5),colXZ=axAng.map(t=>[RP*Math.cos(t),RP*Math.sin(t)]);
+const Yof=n=>Y0+n*DY,axById={};AX.forEach((a,i)=>axById[a.key]=i);
+const nodePos=(k,n)=>{const i=axById[k],[x,z]=colXZ[i];return[x,Yof(n),z];};
+const seedXZ=SEEDS.map((_,j)=>{const t=-Math.PI/2+j*2*Math.PI/10;return[RS*Math.cos(t),RS*Math.sin(t)];});
+const seedPos=SEEDS.map((_,j)=>[seedXZ[j][0],Y0-0.85,seedXZ[j][1]]);
+const mechAng=[0.4,2.0,3.7,5.2],mechY=[Yof(2),Yof(2),Yof(4.4),Yof(5.6)];
+const mechPos=MECH.map((_,k)=>[RM*Math.cos(mechAng[k]),mechY[k],RM*Math.sin(mechAng[k])]);
+const opPos=OPS.map((_,k)=>{const t=k*2*Math.PI/4+Math.PI/4;return[ROP*Math.cos(t),Yof(7)+0.3,ROP*Math.sin(t)];});
+// ── geometry, split into layers ──
+function L(){return {line:[],point:[]};}
+const G={base:L(),seeds:L(),mechanics:L(),ops:L(),links:L()};
+const push=(g,k,p,c,s)=>{ if(k==='line')g.line.push(p[0],p[1],p[2],c[0],c[1],c[2],c[3],1); else g.point.push(p[0],p[1],p[2],c[0],c[1],c[2],c[3],s); };
+const seg=(g,a,b,c)=>{push(g,'line',a,c,1);push(g,'line',b,c,1);};
+function curve(g,a,b,lift,c,dash){const ct=[(a[0]+b[0])/2,(a[1]+b[1])/2+lift,(a[2]+b[2])/2],N=16;let pv=a;for(let k=1;k<=N;k++){const t=k/N,u=1-t,p=[u*u*a[0]+2*u*t*ct[0]+t*t*b[0],u*u*a[1]+2*u*t*ct[1]+t*t*b[1],u*u*a[2]+2*u*t*ct[2]+t*t*b[2]];if(!dash||k%2===0)seg(g,pv,p,c);pv=p;}}
+const NODES=[];
+// BASE: five axis columns + level dots + lit (always shown, clean)
+AX.forEach((a,i)=>{const[x,z]=colXZ[i],lo=Yof(a.levels[0].n),hi=Yof(a.levels[a.levels.length-1].n);seg(G.base,[x,lo,z],[x,hi,z],col(INK,.5));
+ a.levels.forEach(Lv=>{const p=[x,Yof(Lv.n),z];if(Lv.lit){push(G.base,'point',p,col(GOLD,.18),36);push(G.base,'point',p,col(GHI,1),16);}else push(G.base,'point',p,col(DIM,.85),8);NODES.push({pos:p,kind:'level',axis:a.key,data:{axis:a.name,n:Lv.n,label:Lv.label,ex:Lv.ex}});});});
+// SEEDS layer
+for(let j=0;j<10;j++)seg(G.seeds,[seedXZ[j][0],Y0-.85,seedXZ[j][1]],[seedXZ[(j+1)%10][0],Y0-.85,seedXZ[(j+1)%10][1]],col(INK,.14));
+SEEDS.forEach((s,j)=>{const p=seedPos[j];push(G.seeds,'point',p,col(GOLD,.12),18);push(G.seeds,'point',p,col(GOLD,.95),8);NODES.push({pos:p,kind:'seed',layer:'seeds',data:s});s.enables.forEach(([ax,n])=>curve(G.seeds,p,nodePos(ax,n),1.2,col(GHI,.5),true));});
+// MECHANICS layer
+MECH.forEach((m,k)=>{const p=mechPos[k];push(G.mechanics,'point',p,col(GOLD,.13),22);push(G.mechanics,'point',p,col(GHI,1),11);NODES.push({pos:p,kind:'mech',layer:'mechanics',data:m});m.on.forEach(([ax,n])=>curve(G.mechanics,p,nodePos(ax,n),.5,col(GOLD,.42),false));});
+// OPS layer
+for(let k=0;k<4;k++)curve(G.ops,opPos[k],opPos[(k+1)%4],.6,col(INK,.12),false);
+OPS.forEach((nm,k)=>{const p=opPos[k];push(G.ops,'point',p,col(GOLD,.1),15);push(G.ops,'point',p,col(GHI,.85),7);NODES.push({pos:p,kind:'op',layer:'ops',data:{name:nm}});});
+// LINKS layer (prereqs)
+PREREQ.forEach(([fa,fn,ta,tn,st])=>{const a=nodePos(fa,fn),b=nodePos(ta,tn),al=st==='locked'?.3:st==='firm'?.2:.13;curve(G.links,a,b,-.5,col(INK,al),st==='soft');});
+
+const cv=document.getElementById('aeaCanvas'),gl=cv.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false});
+const VS=`attribute vec3 a_pos;attribute vec4 a_col;attribute float a_size;uniform mat4 u_mvp;varying vec4 v;void main(){gl_Position=u_mvp*vec4(a_pos,1.);gl_PointSize=a_size;v=a_col;}`;
+const FS=`precision mediump float;varying vec4 v;uniform float u_round;void main(){if(u_round>.5){vec2 d=gl_PointCoord-.5;float r=dot(d,d);if(r>.25)discard;gl_FragColor=vec4(v.rgb,v.a*smoothstep(.25,.06,r));}else gl_FragColor=v;}`;
+function mksh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o;}
+const pr=gl.createProgram();gl.attachShader(pr,mksh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,mksh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+const Ap=gl.getAttribLocation(pr,'a_pos'),Ac=gl.getAttribLocation(pr,'a_col'),As=gl.getAttribLocation(pr,'a_size'),Um=gl.getUniformLocation(pr,'u_mvp'),Ur=gl.getUniformLocation(pr,'u_round');
+function mkbuf(a){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);return b;}
+const BUF={};for(const k in G)BUF[k]={line:mkbuf(G[k].line),lineN:G[k].line.length/8,point:mkbuf(G[k].point),pointN:G[k].point.length/8};
+const ST=32;
+function draw(buf,n,mode,round){if(!n)return;gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(Ap,3,gl.FLOAT,false,ST,0);gl.enableVertexAttribArray(Ap);gl.vertexAttribPointer(Ac,4,gl.FLOAT,false,ST,12);gl.enableVertexAttribArray(Ac);gl.vertexAttribPointer(As,1,gl.FLOAT,false,ST,28);gl.enableVertexAttribArray(As);gl.uniform1f(Ur,round);gl.drawArrays(mode,0,n);}
+gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+const Mx={mul:(a,b)=>{const o=new Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},persp:(f,as,n,fa)=>{const t=1/Math.tan(f/2);return[t/as,0,0,0,0,t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0];},look:(e,c,u)=>{const z=nm(sb(e,c)),x=nm(cr(u,z)),y=cr(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dt(x,e),-dt(y,e),-dt(z,e),1];}};
+const sb=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dt=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],nm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/l,a[1]/l,a[2]/l];};
+const state={placements:false,seeds:false,mechanics:false,ops:false,links:false};
+let hoverAxis=null;
+document.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{const l=b.dataset.l;state[l]=!state[l];b.classList.toggle('on',state[l]);updateLabels();}));
+let yaw=0.5,pitch=0.26,dist=12,drag=false,px=0,py=0,auto=!matchMedia('(prefers-reduced-motion: reduce)').matches,mx=-1,my=-1;
+cv.addEventListener('pointerdown',e=>{drag=true;auto=false;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top;if(!drag)return;yaw+=(e.clientX-px)*.008;pitch+=(e.clientY-py)*.006;pitch=Math.max(-.7,Math.min(1.2,pitch));px=e.clientX;py=e.clientY;});
+cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(8,Math.min(22,dist+e.deltaY*.01));},{passive:false});
+const LRoot=document.getElementById('aeaLabels'),labs=[];
+function mkLab(cls,txt,p,layer,axis){const el=document.createElement('div');el.className='lab '+cls;el.textContent=txt;LRoot.appendChild(el);const o={el,p,layer:layer||'base',axis:axis||null};labs.push(o);return o;}
+AX.forEach((a,i)=>{const[x,z]=colXZ[i];mkLab('axis',a.c+'·'+a.name,[x,Yof(a.levels[a.levels.length-1].n)+.55,z],'base');mkLab('axsub',a.sub,[x,Yof(a.levels[a.levels.length-1].n)+.25,z],'base');
+ a.levels.forEach(Lv=>{ mkLab(Lv.lit?'levlit':'lev',Lv.label,[x,Yof(Lv.n),z],'axisL',a.key); if(Lv.ex)mkLab('ex',Lv.ex,[x,Yof(Lv.n)-.12,z],'placements',a.key); });});
+SEEDS.forEach((s,j)=>{mkLab('seednum',String(s.num),[seedPos[j][0],seedPos[j][1]+.32,seedPos[j][2]],'seeds');mkLab('seed',s.name,[seedPos[j][0],seedPos[j][1]-.34,seedPos[j][2]],'seeds');});
+MECH.forEach((m,k)=>mkLab('mech',m.name,[mechPos[k][0],mechPos[k][1]+.32,mechPos[k][2]],'mechanics'));
+OPS.forEach((nm,k)=>mkLab('op',nm,[opPos[k][0],opPos[k][1]+.32,opPos[k][2]],'ops'));
+function labVisible(o){ if(o.layer==='base')return true; if(o.layer==='axisL')return hoverAxis===o.axis; if(o.layer==='placements')return state.placements||hoverAxis===o.axis; return state[o.layer]; }
+function updateLabels(){ for(const o of labs) o._want=labVisible(o); }
+updateLabels();
+const panel=document.getElementById('panel'),PN=document.getElementById('pn'),PL=document.getElementById('pl'),PD=document.getElementById('pd'),PX=document.getElementById('px');
+let W,H;function rsz(){const d=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;gl.viewport(0,0,cv.width,cv.height);}addEventListener('resize',rsz);rsz();
+function proj(m,p){const x=p[0],y=p[1],z=p[2],cx=m[0]*x+m[4]*y+m[8]*z+m[12],cy=m[1]*x+m[5]*y+m[9]*z+m[13],cw=m[3]*x+m[7]*y+m[11]*z+m[15];if(cw<=.001)return null;return[(cx/cw*.5+.5)*W,(1-(cy/cw*.5+.5))*H];}
+function showPanel(nd){panel.style.opacity='1';if(nd.kind==='level'){PN.textContent=nd.data.axis+' · L'+nd.data.n;PL.textContent=nd.data.label;PD.textContent='';PX.textContent=nd.data.ex?('example: '+nd.data.ex):'';}else if(nd.kind==='seed'){PN.textContent='part '+nd.data.num+' of 10';PL.textContent=nd.data.name;PD.textContent=nd.data.pd;PX.textContent=nd.data.enables.length?'':'take it away and the whole thing falls apart.';}else if(nd.kind==='op'){PN.textContent=nd.data.name;PL.textContent='operator op';PD.textContent='design → time → ship → learn';PX.textContent='';}else{PN.textContent=nd.data.name;PL.textContent='mechanic';PD.textContent=nd.data.detail;PX.textContent=nd.data.on.length?('acts on: '+nd.data.on.map(e=>e[0]+' L'+e[1]).join(' · ')):'meta';}}
+function frame(){if(auto)yaw+=.0022;const eye=[Math.cos(pitch)*Math.cos(yaw)*dist,Math.sin(pitch)*dist,Math.cos(pitch)*Math.sin(yaw)*dist];const mvp=Mx.mul(Mx.persp(.82,W/H||1,.1,100),Mx.look(eye,[0,-.1,0],[0,1,0]));
+ gl.clear(gl.COLOR_BUFFER_BIT);gl.uniformMatrix4fv(Um,false,new Float32Array(mvp));
+ const order=['links','base','seeds','mechanics','ops'];
+ for(const k of order){ if(k!=='base'&&!state[k])continue; draw(BUF[k].line,BUF[k].lineN,gl.LINES,0); draw(BUF[k].point,BUF[k].pointN,gl.POINTS,1); }
+ // hover: nearest base/active node
+ let best=null,bd=20*20;for(const nd of NODES){if(nd.layer&&nd.layer!=='base'&&!state[nd.layer])continue;const s=proj(mvp,nd.pos);if(!s)continue;const dx=s[0]-mx,dy=s[1]-my,d=dx*dx+dy*dy;if(d<bd){bd=d;best=nd;}}
+ const ha=best&&best.kind==='level'?best.axis:null; if(ha!==hoverAxis){hoverAxis=ha;updateLabels();}
+ if(best)showPanel(best);else panel.style.opacity='0';
+ for(const o of labs){ if(!o._want){o.el.style.opacity='0';continue;} const s=proj(mvp,o.p); if(s&&s[0]>-70&&s[0]<W+70&&s[1]>-30&&s[1]<H+30){o.el.style.left=s[0]+'px';o.el.style.top=s[1]+'px';o.el.style.opacity='1';}else o.el.style.opacity='0'; }
+ requestAnimationFrame(frame);}
+frame();
+</script>
+</body></html>

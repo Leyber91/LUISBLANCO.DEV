@@ -354,6 +354,7 @@
 
   let resizeHandler=null;
   function init(opts){
+    if(!document.getElementById('axisGrid')) return;   // legacy column DOM is gone — AEA now renders via LB_AEA3D; locate is handled there
     queue = [];
     buildAxes(); buildSeeds(); buildMechs(); buildStanding();
     buildChips(); wireInput();

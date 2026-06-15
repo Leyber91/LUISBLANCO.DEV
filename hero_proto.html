@@ -1,0 +1,177 @@
+<!doctype html>
+<!-- hero_proto.html — the WOW hero, faithful to SITE_CONCEPTS/FRONT PAGE.png:
+     blueprint-blue plate · fine grid · huge name · live AEA as the hero figure ·
+     full draughtsman framing (corner brackets, dimension lines, title block).
+     Ground color is ONE var (--plate) → flip blue↔black in one line.
+     Loads the real aea3d.js so the hero figure is the actual living structure. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luis Blanco — hero proto</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* the blueprint plate — flip --plate to #06080d for the near-black variant */
+  --plate:#04203F; --plate-2:#06294F;
+  --ink:#EAF2FF; --dim:#9DB6D8; --faint:#5C7299;
+  --grid:rgba(140,176,224,0.09); --grid-strong:rgba(140,176,224,0.16);
+  --gold:#D4A24C; --goldhi:#F0C674; --gold-dim:rgba(212,162,76,0.5);
+  --frame:rgba(157,182,216,0.28);
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{ font-family:var(--mono); color:var(--ink); overflow:hidden;
+  background:
+    radial-gradient(120% 90% at 78% 16%, var(--plate-2) 0%, var(--plate) 46%, #02152b 100%);
+  position:relative; }
+/* fine engineering grid */
+.grid{ position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    linear-gradient(var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-strong) 1px, transparent 1px);
+  background-size: 38px 38px, 38px 38px, 190px 190px, 190px 190px; }
+/* the plate frame inset from the edges */
+.plate{ position:relative; z-index:2; height:100vh; padding:34px 44px; display:flex; flex-direction:column; }
+.frame{ position:fixed; inset:22px; border:1px solid var(--frame); z-index:1; pointer-events:none; }
+.cnr{ position:fixed; width:16px; height:16px; z-index:3; border:1.5px solid var(--gold); pointer-events:none; }
+.cnr.tl{ left:22px; top:22px; border-right:none; border-bottom:none; }
+.cnr.tr{ right:22px; top:22px; border-left:none; border-bottom:none; }
+.cnr.bl{ left:22px; bottom:22px; border-right:none; border-top:none; }
+.cnr.br{ right:22px; bottom:22px; border-left:none; border-top:none; }
+
+/* top register line */
+.topbar{ display:flex; justify-content:space-between; align-items:center; font-size:10px;
+  letter-spacing:.28em; color:var(--faint); text-transform:uppercase; }
+.topbar nav{ display:flex; gap:0; }
+.topbar nav a{ color:var(--dim); text-decoration:none; padding:0 14px; border-right:1px solid var(--frame); }
+.topbar nav a:first-child{ padding-left:0; }
+.topbar nav a:last-child{ border-right:none; }
+.topbar nav a:hover{ color:var(--goldhi); }
+.topbar .sheet{ color:var(--faint); }
+
+/* main split */
+.main{ flex:1; display:grid; grid-template-columns:1.05fr 0.95fr; align-items:center; gap:30px; min-height:0; }
+.left{ position:relative; padding-right:10px; }
+.eyebrow{ font-size:12px; letter-spacing:.42em; color:var(--gold); text-transform:uppercase; }
+.eyebrow::before{ content:"▸ "; color:var(--gold-dim); }
+.name{ font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:clamp(64px,9.2vw,148px); line-height:0.92;
+  letter-spacing:-0.01em; color:var(--ink); margin:14px 0 0; text-shadow:0 0 38px rgba(180,206,255,0.12); }
+.name .dot{ color:var(--gold); }
+.name .reg{ display:inline-block; width:13px; height:13px; border:1.5px solid var(--gold); margin-left:14px;
+  vertical-align:0.18em; position:relative; }
+.name .reg::after{ content:""; position:absolute; inset:3px; background:var(--gold); }
+.tag{ margin-top:26px; display:inline-block; font-size:14px; letter-spacing:.04em; color:var(--dim);
+  border:1px dashed var(--gold-dim); padding:10px 16px; }
+.tag b{ color:var(--ink); font-weight:500; }
+/* the headline census */
+.census{ margin-top:30px; display:flex; gap:30px; }
+.cx{ display:flex; flex-direction:column; gap:5px; }
+.cx .v{ font-size:34px; line-height:1; color:var(--goldhi); font-weight:500; font-variant-numeric:tabular-nums; }
+.cx .l{ font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); }
+.cx .x{ color:var(--faint); font-size:34px; align-self:center; }
+.cta{ margin-top:34px; display:inline-flex; align-items:center; gap:11px; font-size:12.5px; letter-spacing:.06em;
+  color:var(--dim); border:1px solid var(--gold-dim); padding:10px 16px; text-decoration:none; transition:.25s; }
+.cta:hover{ color:var(--ink); border-color:var(--gold); background:rgba(212,162,76,0.07); }
+.cta .pd{ width:6px; height:6px; border-radius:50%; background:var(--gold); box-shadow:0 0 8px var(--gold); }
+.cta .ar{ color:var(--gold); }
+
+/* right — the live AEA figure, framed like a drawing */
+.figure{ position:relative; height:88%; align-self:center; }
+.figwrap{ position:absolute; inset:0; }
+.figlabel{ position:absolute; left:0; top:-22px; font-size:10px; letter-spacing:.22em; color:var(--faint); text-transform:uppercase; }
+.figlabel b{ color:var(--gold); font-weight:500; }
+/* dimension line down the right edge of the figure */
+.dimline{ position:absolute; right:-2px; top:0; bottom:0; width:1px; background:var(--frame); }
+.dimline::before,.dimline::after{ content:""; position:absolute; right:-5px; width:11px; height:1px; background:var(--frame); }
+.dimline::before{ top:0; } .dimline::after{ bottom:0; }
+.dimtxt{ position:absolute; right:8px; top:50%; transform:translateY(-50%) rotate(90deg); transform-origin:right center;
+  font-size:9px; letter-spacing:.2em; color:var(--faint); white-space:nowrap; }
+
+/* aea3d chrome: hero mode — hide controls, keep the structure + faint labels */
+#heroViz .aea-toolbar,#heroViz .aea-hint,#heroViz .aea-credo,#heroViz .aea-card,
+#heroViz .aea-systems,#heroViz .aea-legend{ display:none !important; }
+/* a soft luminous well behind the living figure */
+.figure::before{ content:""; position:absolute; inset:-6% -4% -6% -4%; z-index:-1; pointer-events:none;
+  background:radial-gradient(58% 52% at 52% 46%, rgba(212,162,76,0.10), rgba(150,185,255,0.05) 42%, rgba(0,0,0,0) 72%); }
+#heroViz .aea-canvas{ display:block; width:100%; height:100%; cursor:grab; }
+#heroViz .aea-labels{ position:absolute; inset:0; pointer-events:none; }
+.aea-lab{ position:absolute; transform:translate(-50%,-50%); white-space:nowrap; letter-spacing:.12em; font-family:var(--mono); transition:opacity .12s; }
+.aea-lab.axis{ font-size:11px; color:var(--goldhi); text-transform:uppercase; letter-spacing:.2em; }
+.aea-lab.axsub{ font-size:7.5px; color:var(--faint); }
+.aea-lab.lev,.aea-lab.levlit,.aea-lab.ex,.aea-lab.seed,.aea-lab.seednum,.aea-lab.mech,.aea-lab.op{ display:none; }
+
+/* bottom title block */
+.titleblock{ display:grid; grid-template-columns:repeat(5,1fr) 1.4fr; border:1px solid var(--frame); }
+.tb{ padding:9px 13px; border-right:1px solid var(--frame); }
+.tb:last-child{ border-right:none; }
+.tb .k{ font-size:8px; letter-spacing:.2em; color:var(--faint); text-transform:uppercase; }
+.tb .v{ font-size:12px; color:var(--dim); margin-top:3px; letter-spacing:.04em; }
+.tb .v.gold{ color:var(--goldhi); }
+.tb.brand .v{ color:var(--ink); font-size:13px; }
+
+/* scroll cue */
+.scrollcue{ position:absolute; left:50%; bottom:96px; transform:translateX(-50%); text-align:center; z-index:4; }
+.scrollcue .xh{ width:20px; height:20px; margin:0 auto 8px; position:relative; }
+.scrollcue .xh::before,.scrollcue .xh::after{ content:""; position:absolute; background:var(--gold-dim); }
+.scrollcue .xh::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%); }
+.scrollcue .xh::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-50%); }
+.scrollcue .xh i{ position:absolute; left:50%; top:50%; width:6px; height:6px; border:1px solid var(--gold); border-radius:50%; transform:translate(-50%,-50%); }
+.scrollcue .t{ font-size:9px; letter-spacing:.3em; color:var(--faint); text-transform:uppercase; }
+</style></head>
+<body>
+<div class="grid"></div>
+<div class="frame"></div>
+<div class="cnr tl"></div><div class="cnr tr"></div><div class="cnr bl"></div><div class="cnr br"></div>
+
+<div class="plate">
+  <div class="topbar">
+    <nav><a>the architecture</a><a>proofs</a><a>engineering</a><a>writing</a><a>contact</a></nav>
+    <div class="sheet">sheet 1 / 7</div>
+  </div>
+
+  <div class="main">
+    <div class="left">
+      <div class="eyebrow">autonomous entity architecture</div>
+      <h1 class="name">Luis Blanco<span class="dot">.</span><span class="reg"></span></h1>
+      <div class="tag">I translate <b>what AI is, what it isn't, and how to build with it</b>.</div>
+      <div class="census">
+        <div class="cx"><span class="v">5</span><span class="l">axes</span></div>
+        <div class="cx"><span class="x">·</span></div>
+        <div class="cx"><span class="v">10</span><span class="l">seeds</span></div>
+        <div class="cx"><span class="x">·</span></div>
+        <div class="cx"><span class="v">4</span><span class="l">mechanics</span></div>
+        <div class="cx"><span class="x">·</span></div>
+        <div class="cx"><span class="v">4</span><span class="l">ops</span></div>
+        <div class="cx"><span class="x">·</span></div>
+        <div class="cx"><span class="v">3</span><span class="l">rules</span></div>
+      </div>
+      <a class="cta" href="#"><span class="pd"></span>open for commissions — the operational AI diagnostic<span class="ar">→</span></a>
+    </div>
+
+    <div class="figure">
+      <div class="figlabel"><b>fig. 01</b> — the architecture, live · drag to turn</div>
+      <div class="figwrap" id="heroViz"></div>
+      <div class="dimline"></div>
+      <div class="dimtxt">5 axes · 1 system</div>
+    </div>
+  </div>
+
+  <div class="titleblock">
+    <div class="tb"><div class="k">plate nº</div><div class="v gold">AE-001</div></div>
+    <div class="tb"><div class="k">drawn by</div><div class="v">LB.SYSTEMS</div></div>
+    <div class="tb"><div class="k">rev</div><div class="v">v0.3 · 2026</div></div>
+    <div class="tb"><div class="k">scale</div><div class="v">1 : 1</div></div>
+    <div class="tb"><div class="k">status</div><div class="v gold">open</div></div>
+    <div class="tb brand"><div class="k">drawing</div><div class="v">luisblanco.dev — what AI actually is</div></div>
+  </div>
+
+  <div class="scrollcue"><div class="xh"><i></i></div><div class="t">scroll to explore</div></div>
+</div>
+
+<script src="src/aea3d/aea3d.js"></script>
+<script>
+  // mount the real living AEA as the hero figure (hero mode = chrome hidden via CSS)
+  if(window.LB_AEA3D) window.LB_AEA3D.init(document.getElementById('heroViz'));
+</script>
+</body></html>

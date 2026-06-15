@@ -34,14 +34,17 @@
 .orbital svg{ width:100%; height:100%; overflow:visible; }
 .orbital .orbit{ fill:none; stroke:var(--line-soft); stroke-width:1; }
 .orbital .orbit.dashed{ stroke-dasharray:3 7; stroke:rgba(234,240,251,0.12); }
-.orbital .sun{ fill:var(--gold-hi); filter:drop-shadow(0 0 10px var(--gold-glow)); }
-.orbital .sun-glow.g1{ fill:rgba(212,162,76,0.22); }
-.orbital .sun-glow.g2{ fill:rgba(212,162,76,0.09); }
-.orbital .oplanet{ fill:var(--ink-dim); }
-.orbital .oplanet.bright{ fill:var(--ink); }
+/* feathered light to share the hero's quality (soft bloom, not hard dots);
+   keep the orbit strokes as linework — feather lightly, don't over-inkify the human beat */
+.orbital .sun{ fill:var(--gold-hi);
+  filter:drop-shadow(0 0 12px var(--gold-glow)) drop-shadow(0 0 34px rgba(212,162,76,0.34)); }
+.orbital .sun-glow.g1{ fill:rgba(212,162,76,0.20); }
+.orbital .sun-glow.g2{ fill:rgba(212,162,76,0.07); }
+.orbital .oplanet{ fill:var(--ink-dim); filter:drop-shadow(0 0 3px rgba(166,190,223,0.5)); }
+.orbital .oplanet.bright{ fill:var(--ink); filter:drop-shadow(0 0 7px rgba(234,240,251,0.55)); }
 .orbital .oring{ fill:none; stroke:var(--line-soft); stroke-width:1; }
-.orbital .dust{ fill:#cdd9f0; }
-.orbital .dust.gold{ fill:var(--gold); }
+.orbital .dust{ fill:rgba(205,217,240,0.85); }
+.orbital .dust.gold{ fill:var(--gold-hi); filter:drop-shadow(0 0 3px var(--gold-glow)); }
 .orbital .marker{ fill:none; stroke:var(--line-soft); stroke-width:1; }
 
 @media (max-width:900px){

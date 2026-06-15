@@ -1,0 +1,187 @@
+<!doctype html>
+<!-- hero_alive.html — the CAPTIVATE hero. Not a blueprint: a living entity that
+     attends to your cursor and enacts the thesis — "the model is one node; the
+     intelligence is the system you build around it." A latent field of tokens
+     flows; a model node fires; the system organs (memory/tools/loop/recovery/
+     goal/self) light in sequence; tendrils reach toward you. Pure canvas, file://. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luis Blanco — living entity hero</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{ --bg:#050a14; --bg2:#0a1424; --ink:#EEF3FF; --dim:#9DB2D6; --faint:#5d6f93;
+  --gold:#E7B45A; --goldhi:#FAD68A; --mono:"IBM Plex Mono",monospace; --serif:"Fraunces",Georgia,serif; }
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--mono);}
+#stage{position:fixed;inset:0;}
+#field{position:absolute;inset:0;display:block;width:100%;height:100%;cursor:crosshair;}
+/* legibility veil so the type sits over the living field */
+.veil{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg, rgba(5,10,20,0.92) 0%, rgba(5,10,20,0.62) 34%, rgba(5,10,20,0) 60%);}
+.corner{position:fixed;width:16px;height:16px;border:1.5px solid rgba(231,180,90,0.6);pointer-events:none;z-index:5;}
+.corner.tl{left:20px;top:20px;border-right:none;border-bottom:none;}
+.corner.tr{right:20px;top:20px;border-left:none;border-bottom:none;}
+.corner.bl{left:20px;bottom:20px;border-right:none;border-top:none;}
+.corner.br{right:20px;bottom:20px;border-left:none;border-top:none;}
+
+.overlay{position:absolute;inset:0;z-index:4;pointer-events:none;
+  display:flex;flex-direction:column;justify-content:center;padding:0 7vw;}
+.eyebrow{font-size:12px;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;}
+.eyebrow::before{content:"▸ ";opacity:.7;}
+.headline{font-family:var(--serif);font-weight:600;font-size:clamp(40px,5.6vw,86px);line-height:0.98;
+  letter-spacing:-0.015em;color:var(--ink);margin:18px 0 0;max-width:15ch;text-shadow:0 2px 40px rgba(0,0,0,0.6);}
+.headline .em{color:var(--goldhi);font-style:italic;}
+.sub{font-size:clamp(14px,1.5vw,18px);line-height:1.55;color:var(--dim);margin-top:22px;max-width:46ch;}
+.sub b{color:var(--ink);font-weight:500;}
+.who{margin-top:18px;font-size:12px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;}
+.who b{color:var(--ink);font-weight:500;}
+.actions{display:flex;gap:14px;align-items:center;margin-top:30px;pointer-events:auto;flex-wrap:wrap;}
+.cta{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.05em;color:var(--bg);
+  background:linear-gradient(180deg,var(--goldhi),var(--gold));padding:12px 20px;border-radius:4px;text-decoration:none;
+  font-weight:500;box-shadow:0 8px 30px -8px rgba(231,180,90,0.5);transition:transform .2s,box-shadow .2s;}
+.cta:hover{transform:translateY(-2px);box-shadow:0 14px 38px -8px rgba(231,180,90,0.6);}
+.ghost{font-size:13px;letter-spacing:.05em;color:var(--dim);text-decoration:none;border-bottom:1px solid rgba(157,178,214,0.4);padding-bottom:2px;}
+.ghost:hover{color:var(--ink);border-color:var(--gold);}
+.hint{position:absolute;left:7vw;bottom:46px;z-index:4;font-size:11px;letter-spacing:.2em;color:var(--faint);
+  text-transform:uppercase;pointer-events:none;display:flex;align-items:center;gap:9px;}
+.hint .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);animation:bp 2s infinite;}
+@keyframes bp{0%,100%{opacity:.4;transform:scale(.8);}50%{opacity:1;transform:scale(1.3);}}
+.topbar{position:absolute;top:30px;left:7vw;right:7vw;z-index:5;display:flex;justify-content:space-between;
+  align-items:center;font-size:11px;letter-spacing:.24em;color:var(--faint);text-transform:uppercase;pointer-events:auto;}
+.topbar .name{color:var(--ink);letter-spacing:.1em;}
+.topbar nav a{color:var(--dim);text-decoration:none;margin-left:18px;}
+.topbar nav a:hover{color:var(--goldhi);}
+@media(max-width:760px){ .veil{background:linear-gradient(180deg,rgba(5,10,20,0.4),rgba(5,10,20,0.85));} .topbar nav{display:none;} }
+</style></head>
+<body>
+<div id="stage">
+  <canvas id="field"></canvas>
+  <div class="veil"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+
+  <div class="topbar">
+    <span class="name">LUIS BLANCO</span>
+    <nav><a href="#">architecture</a><a href="#">projects</a><a href="#">writing</a><a href="#">work with me</a></nav>
+  </div>
+
+  <div class="overlay">
+    <div class="eyebrow">autonomous entity architecture</div>
+    <h1 class="headline">Intelligence isn't the model. It's the <span class="em">system</span> around it.</h1>
+    <p class="sub">A language model alone is just autocomplete. I engineer the architecture that turns it into something that <b>remembers, acts, recovers, and improves itself</b> — autonomous and reliable, in production.</p>
+    <div class="who"><b>Luis Blanco</b> — AI Systems Architect</div>
+    <div class="actions">
+      <a class="cta" href="#">see the architecture →</a>
+      <a class="ghost" href="#">open for commissions</a>
+    </div>
+  </div>
+
+  <div class="hint"><span class="dot"></span>this is one — move your cursor · it's attending to you</div>
+</div>
+
+<script>
+'use strict';
+const cv=document.getElementById('field'), ctx=cv.getContext('2d');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,DPR,mx,my,mAct=0,mvT=0;
+function size(){ DPR=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener('resize',size); size();
+// model + system organs sit centre-right, away from the headline
+function anchor(){ return { cx:W*0.66, cy:H*0.5 }; }
+const ORGANS=[ {a:-Math.PI/2,l:'GOAL'},{a:-Math.PI/2+1.05,l:'MEMORY'},{a:-Math.PI/2+2.09,l:'TOOLS'},
+  {a:-Math.PI/2+3.14,l:'LOOP'},{a:-Math.PI/2+4.19,l:'RECOVERY'},{a:-Math.PI/2+5.24,l:'SELF-MODEL'} ];
+mx=W*0.66; my=H*0.5;
+addEventListener('pointermove',e=>{ mx=e.clientX; my=e.clientY; mAct=1; mvT=performance.now(); });
+addEventListener('pointerleave',()=>{ mAct=0; });
+
+// latent field — the "tokens": a drifting cloud that flows and reacts
+const N=reduced?160:340, P=[];
+function rnd(s){ return (Math.sin(s*127.1)*43758.5)%1; }
+for(let i=0;i<N;i++) P.push({ x:Math.random()*W, y:Math.random()*H, vx:0, vy:0, s:0.5+Math.random()*1.6, g:Math.random()<0.18 });
+function flow(x,y,t){ // cheap curl-ish field
+  return Math.sin(x*0.0016+t*0.00021)*1.6 + Math.cos(y*0.0019-t*0.00017)*1.6 + Math.sin((x+y)*0.0011+t*0.0003);
+}
+
+let t0=performance.now();
+function frame(now){
+  const t=now-t0;
+  const {cx,cy}=anchor();
+  // decay cursor activity
+  if(now-mvT>140) mAct*=0.94;
+  // motion-blur trail
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='rgba(5,10,20,'+(reduced?1:0.22)+')';
+  ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='lighter';
+
+  // ── latent field particles ──
+  for(const p of P){
+    const ang=flow(p.x,p.y,t);
+    p.vx += Math.cos(ang)*0.06; p.vy += Math.sin(ang)*0.06;
+    // gentle pull toward the model (the field condenses around the node)
+    let dx=cx-p.x, dy=cy-p.y, d=Math.hypot(dx,dy)||1;
+    p.vx += dx/d*0.05; p.vy += dy/d*0.05;
+    // attention: when the cursor is active, tokens stream toward it
+    if(mAct>0.02){ let ax=mx-p.x, ay=my-p.y, ad=Math.hypot(ax,ay)||1;
+      const pull=mAct*220/(ad+60); p.vx+=ax/ad*pull*0.05; p.vy+=ay/ad*pull*0.05; }
+    p.vx*=0.93; p.vy*=0.93;
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<-20)p.x=W+20; if(p.x>W+20)p.x=-20; if(p.y<-20)p.y=H+20; if(p.y>H+20)p.y=-20;
+    const near=1-Math.min(1,Math.hypot(p.x-cx,p.y-cy)/360);
+    const gold=p.g||near>0.7;
+    const r=p.s*(1+near*1.2);
+    ctx.beginPath();
+    ctx.fillStyle = gold ? 'rgba(231,180,90,'+(0.10+near*0.5)+')' : 'rgba(160,190,240,'+(0.06+near*0.32)+')';
+    ctx.arc(p.x,p.y,r,0,6.283); ctx.fill();
+  }
+
+  // ── thought tendrils toward the cursor ──
+  if(mAct>0.04){
+    ctx.strokeStyle='rgba(231,180,90,'+(0.10*mAct)+')'; ctx.lineWidth=1;
+    for(let k=0;k<5;k++){ const o=(k-2)*16;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.quadraticCurveTo((cx+mx)/2+o,(cy+my)/2-o, mx,my); ctx.stroke(); }
+  }
+
+  // ── system organs ring + sequential activation (the loop running) ──
+  const RR=Math.min(W,H)*0.20;
+  const phase=(t*0.0006)%(Math.PI*2);
+  ORGANS.forEach((o,i)=>{
+    const ox=cx+Math.cos(o.a)*RR, oy=cy+Math.sin(o.a)*RR;
+    // activation wave travels the ring; faster + brighter under attention
+    const lead=((o.a+Math.PI/2)+ (mAct>0.05? t*0.004 : t*0.0014))%(Math.PI*2);
+    const act=0.35+0.65*Math.pow(Math.max(0,Math.sin(phase - i*1.05)),6) + mAct*0.3;
+    // connection model<->organ
+    ctx.strokeStyle='rgba(160,190,240,'+(0.05+0.16*act)+')'; ctx.lineWidth=1+act*1.2;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ox,oy); ctx.stroke();
+    // a pulse traveling the wire
+    const pp=(t*0.0009+i*0.16)%1; const px=cx+(ox-cx)*pp, py=cy+(oy-cy)*pp;
+    ctx.beginPath(); ctx.fillStyle='rgba(250,214,138,'+(0.5*act)+')'; ctx.arc(px,py,1.8,0,6.283); ctx.fill();
+    // organ node
+    ctx.beginPath(); ctx.fillStyle='rgba(231,180,90,'+(0.18+act*0.5)+')'; ctx.arc(ox,oy,3+act*2.5,0,6.283); ctx.fill();
+    ctx.beginPath(); ctx.fillStyle='rgba(250,214,138,'+(0.4+act*0.5)+')'; ctx.arc(ox,oy,1.6,0,6.283); ctx.fill();
+    // label
+    ctx.font='9px "IBM Plex Mono",monospace'; ctx.fillStyle='rgba(157,178,214,'+(0.4+act*0.45)+')';
+    ctx.textAlign = ox<cx?'right':'left'; ctx.textBaseline='middle';
+    ctx.fillText(o.l, ox+(ox<cx?-9:9), oy);
+  });
+
+  // ── the model node (the "spark") ──
+  const pulse=0.5+0.5*Math.sin(t*0.003);
+  const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,70+pulse*22+mAct*30);
+  glow.addColorStop(0,'rgba(250,214,138,'+(0.5+mAct*0.2)+')');
+  glow.addColorStop(0.3,'rgba(231,180,90,0.18)');
+  glow.addColorStop(1,'rgba(231,180,90,0)');
+  ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(cx,cy,70+pulse*22+mAct*30,0,6.283); ctx.fill();
+  ctx.beginPath(); ctx.fillStyle='#FAD68A'; ctx.arc(cx,cy,5.5+pulse*1.5,0,6.283); ctx.fill();
+  // ring around the model
+  ctx.strokeStyle='rgba(231,180,90,0.3)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(cx,cy,RR,0,6.283); ctx.stroke();
+  // model caption
+  ctx.font='9px "IBM Plex Mono",monospace'; ctx.fillStyle='rgba(250,214,138,0.85)';
+  ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText('THE MODEL', cx, cy+12);
+
+  ctx.globalCompositeOperation='source-over';
+  if(!reduced) requestAnimationFrame(frame);
+}
+if(reduced){ ctx.fillStyle='#050a14'; ctx.fillRect(0,0,W,H); frame(performance.now()); }
+else requestAnimationFrame(frame);
+</script>
+</body></html>

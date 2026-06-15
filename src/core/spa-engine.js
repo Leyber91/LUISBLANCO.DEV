@@ -168,7 +168,9 @@
     if(forced==='focal') focal=true; else if(forced==='docked') focal=false;
     document.body.classList.toggle('glyph-focal', focal);
     document.body.classList.toggle('glyph-docked', !focal);
-    if(glyphEl){ if(focal) glyphEl.setAttribute('data-gimbal',''); else glyphEl.removeAttribute('data-gimbal'); }
+    // keep the inner cube breathing even when docked (interior routes) — gated by
+    // motionOn / reduced-motion in the drift loop; home hides the glyph so its spin is moot.
+    if(glyphEl){ glyphEl.setAttribute('data-gimbal',''); }
     if(focal) startConceptCycle(); else stopConceptCycle();
   }
 

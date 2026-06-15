@@ -1,0 +1,194 @@
+<!doctype html>
+<!-- aea3d_proto.html — native WebGL AEA, v2: every axis level populated with its real
+     example (RAG/MCP/skills/HADES/Ouroboros...), ALL interconnections (seed beams,
+     mechanic tethers, prereq/coupling arcs), hover-to-inspect. No frameworks, file://.
+     Canonical data ported from LBR_DEV/framework3d/f3d-data.js + BOOK_AEA receipts. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEA · 3D (v2)</title>
+<style>
+  :root{ --ink:#EAF0FB; --dim:#9FB3D6; --faint:#565d72; --gold:#D4A24C; --goldhi:#F0C674; }
+  *{ box-sizing:border-box; margin:0; } html,body{ height:100%; overflow:hidden;
+    background:radial-gradient(120% 100% at 50% 38%, rgba(10,14,24,.96) 0%, rgba(4,6,10,.99) 72%);
+    color:var(--ink); font-family:"IBM Plex Mono",ui-monospace,monospace; }
+  canvas{ display:block; width:100%; height:100%; cursor:grab; } canvas:active{ cursor:grabbing; }
+  .lab{ position:absolute; transform:translate(-50%,-50%); pointer-events:none; white-space:nowrap;
+    letter-spacing:.12em; will-change:left,top,opacity; }
+  .lab.axis{ font-size:11px; color:var(--goldhi); text-transform:uppercase; letter-spacing:.22em; }
+  .lab.ex{ font-size:7.5px; color:var(--dim); }
+  .lab.exgold{ font-size:8px; color:var(--goldhi); }
+  .lab.seed{ font-size:7.5px; color:var(--faint); text-transform:uppercase; letter-spacing:.16em; }
+  .lab.seednum{ font-size:8.5px; color:var(--goldhi); }
+  .lab.mech{ font-size:7.5px; color:var(--gold); text-transform:uppercase; letter-spacing:.18em; }
+  #hud{ position:fixed; left:26px; top:24px; pointer-events:none; }
+  #hud .t{ font-size:12px; letter-spacing:.34em; color:var(--gold); }
+  #hud .s{ font-size:8px; letter-spacing:.2em; color:var(--faint); margin-top:5px; line-height:1.7; }
+  #hud .k{ color:var(--goldhi); }
+  #panel{ position:fixed; right:24px; top:24px; width:236px; border:1px solid rgba(234,240,251,.14);
+    background:rgba(8,11,18,.78); border-radius:9px; padding:13px 15px; opacity:0; transition:opacity .15s;
+    pointer-events:none; }
+  #panel .pn{ font-size:11px; letter-spacing:.12em; color:var(--goldhi); }
+  #panel .pl{ font-size:8px; letter-spacing:.18em; color:var(--gold); text-transform:uppercase; margin:3px 0 8px; }
+  #panel .pd{ font-size:9.5px; line-height:1.65; color:var(--dim); }
+  #panel .px{ font-size:8.5px; color:var(--goldhi); margin-top:8px; }
+  #hint{ position:fixed; right:26px; bottom:20px; font-size:8px; letter-spacing:.2em; color:var(--faint); text-transform:uppercase; }
+  #credo{ position:fixed; left:0; right:0; bottom:20px; text-align:center; font-size:9px; letter-spacing:.2em; color:var(--gold); }
+  .corner{ position:fixed; width:14px;height:14px; } .corner::before,.corner::after{ content:"";position:absolute;background:rgba(212,162,76,.4); }
+  .corner.tl{left:14px;top:14px;}.corner.tr{right:14px;top:14px;}.corner.bl{left:14px;bottom:14px;}.corner.br{right:14px;bottom:14px;}
+  .corner::before{width:14px;height:1px;top:6px;}.corner::after{width:1px;height:14px;left:6px;}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><div class="t">THE AEA</div><div class="s">5 axes · their real placements · 10 seeds · 4 mechanics<br>
+  <span class="k">gold</span> = active relationship · <span class="k">beams</span> seeds enable levels · <span class="k">tethers</span> mechanics act on levels</div></div>
+<div id="panel"><div class="pn" id="pn"></div><div class="pl" id="pl"></div><div class="pd" id="pd"></div><div class="px" id="px"></div></div>
+<div id="hint">drag · scroll · hover a node</div>
+<div id="credo">observe · crystallize · reduce — the same law, made a structure</div>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div id="labels"></div>
+<script>
+'use strict';
+// ── canonical data (LBR_DEV f3d-data.js + BOOK_AEA receipts) ──────────
+const AX = [ // pentagon order P,M,A,R,S
+ { key:'path', c:'P', name:'PATH', levels:[
+   {n:1,label:'one-shot'},{n:2,label:'multi-step',ex:'ingestion pipeline'},
+   {n:3,label:'branching',ex:'ops dashboard · ReAct',lit:1},{n:4,label:'entity-defines',ex:'1500-tick runs'},{n:5,label:'anticipates'} ]},
+ { key:'multiplicity', c:'M', name:'MULTIPLICITY', levels:[
+   {n:1,label:'single',ex:'DATASPACE'},{n:2,label:'N-uncoord',ex:'anti-pattern'},
+   {n:3,label:'role-diff',ex:'HADES MoA · groq_html'},{n:4,label:'coordinated',ex:'recursive MoA',lit:1},{n:5,label:'emergent'} ]},
+ { key:'abstraction', c:'A', name:'ABSTRACTION', levels:[
+   {n:0,label:'raw model',ex:'GPT-2'},{n:1,label:'+memory',ex:'RAG · hybrid search',lit:1},
+   {n:2,label:'+tools',ex:'MCP · Aether_AI'},{n:3,label:'+tool-gen',ex:'skills · Voyager'},
+   {n:4,label:'+integration'},{n:5,label:'self-extend'} ]},
+ { key:'prompting', c:'R', name:'pROMPTING', levels:[
+   {n:1,label:'none'},{n:2,label:'preprompt',ex:'master-prompts'},{n:3,label:'context-dep',ex:'essence passing'},
+   {n:4,label:'param+tools',ex:'Document DNA'},{n:5,label:'self-refine',ex:'Self-Propelling',lit:1},{n:6,label:'co-evolve'},{n:7,label:'absorption'} ]},
+ { key:'async', c:'S', name:'aSYNC', levels:[
+   {n:1,label:'sync'},{n:2,label:'pipeline',ex:'Ouroboros'},{n:3,label:'event-driven',ex:'∞ greetings'},
+   {n:4,label:'independent',ex:'1500-tick',lit:1},{n:5,label:'multi-version',ex:'backwards channel'} ]},
+];
+const SEEDS = [
+ {num:1,name:'Substrate',enables:[]},{num:2,name:'Objective',enables:[]},
+ {num:3,name:'Crystallize',enables:[]},{num:4,name:'Flexibilize',enables:[]},{num:5,name:'Self-version',enables:[]},
+ {num:6,name:'Self-model',enables:[['prompting',5],['path',4],['multiplicity',5]]},
+ {num:7,name:'Ceiling',enables:[]},{num:8,name:'Boundary',enables:[['async',4]]},
+ {num:9,name:'Backchannel',enables:[['prompting',7]]},{num:10,name:'Progress-mon',enables:[['abstraction',5]]},
+];
+const MECH = [
+ {name:'CRYSTALLIZE',seeds:[3],on:[['abstraction',2],['path',2]],detail:'Convert repeated model behavior into deterministic code.'},
+ {name:'FLEXIBILIZE',seeds:[4],on:[['abstraction',2],['path',4]],detail:'Fall back to the model when the code meets novelty.'},
+ {name:'SELF-VERSION',seeds:[5,9],on:[['async',5],['abstraction',5],['multiplicity',5]],detail:'Build the successor, restorably (blue/green at entity level).'},
+ {name:'CEILING',seeds:[6,7],on:[],detail:'Choose which mechanic fires, or escalate to a new hypothesis.'},
+];
+const PREREQ = [
+ ['multiplicity',5,'async',2,'locked'],['async',5,'multiplicity',2,'locked'],
+ ['path',5,'abstraction',1,'firm'],['abstraction',3,'path',2,'firm'],['abstraction',4,'prompting',4,'firm'],
+ ['abstraction',5,'prompting',5,'firm'],['prompting',6,'abstraction',3,'firm'],
+ ['path',3,'multiplicity',3,'soft'],['multiplicity',4,'prompting',3,'soft'],['prompting',4,'path',3,'soft'],['async',3,'abstraction',2,'soft'],
+];
+const INK=[.918,.941,.984],DIM=[.624,.702,.839],FAINT=[.337,.365,.447],GOLD=[.831,.635,.298],GHI=[.941,.776,.455];
+const col=(c,a)=>[c[0],c[1],c[2],a];
+
+// ── geometry ─────────────────────────────────────────────────────────
+const RP=2.05, RS=3.5, RM=2.95, Y0=-2.25, DY=0.6;
+const axAng=AX.map((_,i)=>-Math.PI/2 + i*2*Math.PI/5);
+const colXZ=axAng.map(t=>[RP*Math.cos(t),RP*Math.sin(t)]);
+const Yof=n=>Y0+n*DY;
+const axById={}; AX.forEach((a,i)=>axById[a.key]=i);
+function nodePos(key,n){ const i=axById[key],[x,z]=colXZ[i]; return [x,Yof(n),z]; }
+const seedXZ=SEEDS.map((_,j)=>{const t=-Math.PI/2 + j*2*Math.PI/10; return [RS*Math.cos(t),RS*Math.sin(t)];});
+const seedPos=SEEDS.map((_,j)=>[seedXZ[j][0],Y0-0.9,seedXZ[j][1]]);
+const mechAng=[0.35,2.0,3.7,5.2]; const mechY=[Yof(2),Yof(2),Yof(4.4),Yof(5.6)];
+const mechPos=MECH.map((_,k)=>[RM*Math.cos(mechAng[k]),mechY[k],RM*Math.sin(mechAng[k])]);
+
+const lineV=[], pointV=[];
+const pL=(p,c)=>lineV.push(p[0],p[1],p[2],c[0],c[1],c[2],c[3],1);
+const pP=(p,c,s)=>pointV.push(p[0],p[1],p[2],c[0],c[1],c[2],c[3],s);
+function seg(a,b,c){ pL(a,c); pL(b,c); }
+function curve(a,b,lift,c,dash){ const ctrl=[(a[0]+b[0])/2,(a[1]+b[1])/2+lift,(a[2]+b[2])/2]; const N=18; let prev=a;
+  for(let k=1;k<=N;k++){ const t=k/N, u=1-t; const p=[u*u*a[0]+2*u*t*ctrl[0]+t*t*b[0], u*u*a[1]+2*u*t*ctrl[1]+t*t*b[1], u*u*a[2]+2*u*t*ctrl[2]+t*t*b[2]];
+    if(!dash||k%2===0) seg(prev,p,c); prev=p; } }
+
+// structure: columns + level nodes (+ example tags), spine, pentagon frames
+const NODES=[]; // {pos, kind, data, screen:[x,y], el?}
+AX.forEach((a,i)=>{ const [x,z]=colXZ[i]; const lo=Yof(a.levels[0].n), hi=Yof(a.levels[a.levels.length-1].n);
+  seg([x,lo,z],[x,hi,z],col(INK,.42));
+  a.levels.forEach(L=>{ const p=[x,Yof(L.n),z];
+    if(L.lit){ pP(p,col(GOLD,.18),34); pP(p,col(GHI,1),15); } else pP(p,col(DIM,.8),7.5);
+    NODES.push({pos:p,kind:'level',data:{axis:a.name,n:L.n,label:L.label,ex:L.ex}}); }); });
+pL([0,Yof(0),0],col(FAINT,.7)); pL([0,Yof(7),0],col(FAINT,.7));
+for(let i=0;i<5;i++){ const a=colXZ[i],b=colXZ[(i+1)%5];
+  seg([a[0],Yof(5.6),a[1]],[b[0],Yof(5.6),b[1]],col(INK,.16)); seg([a[0],Yof(0.3),a[1]],[b[0],Yof(0.3),b[1]],col(INK,.13)); }
+// seed ring + nodes + ENABLEMENT BEAMS (gold)
+for(let j=0;j<10;j++){ seg([seedXZ[j][0],Y0-0.9,seedXZ[j][1]],[seedXZ[(j+1)%10][0],Y0-0.9,seedXZ[(j+1)%10][1]],col(INK,.16)); }
+SEEDS.forEach((s,j)=>{ const p=seedPos[j]; pP(p,col(GOLD,.12),20); pP(p,col(GOLD,.95),8.5);
+  NODES.push({pos:p,kind:'seed',data:s});
+  s.enables.forEach(([ax,n])=>curve(p,nodePos(ax,n),1.3,col(GHI,.5),true)); });
+// mechanics + TETHERS (gold) to the levels they operate on
+MECH.forEach((m,k)=>{ const p=mechPos[k]; pP(p,col(GOLD,.14),24); pP(p,col(GHI,1),12);
+  NODES.push({pos:p,kind:'mech',data:m});
+  m.on.forEach(([ax,n])=>curve(p,nodePos(ax,n),0.5,col(GOLD,.42),false)); });
+// PREREQ / coupling arcs (ink; locked brightest, soft dashed)
+PREREQ.forEach(([fa,fn,ta,tn,st])=>{ const a=nodePos(fa,fn),b=nodePos(ta,tn);
+  const al=st==='locked'?.28:st==='firm'?.18:.12; curve(a,b,-0.5,col(INK,al),st==='soft'); });
+
+// ── WebGL ────────────────────────────────────────────────────────────
+const cv=document.getElementById('c'); const gl=cv.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false});
+const VS=`attribute vec3 a_pos;attribute vec4 a_col;attribute float a_size;uniform mat4 u_mvp;varying vec4 v;
+ void main(){gl_Position=u_mvp*vec4(a_pos,1.);gl_PointSize=a_size;v=a_col;}`;
+const FS=`precision mediump float;varying vec4 v;uniform float u_round;
+ void main(){ if(u_round>.5){vec2 d=gl_PointCoord-.5;float r=dot(d,d);if(r>.25)discard;
+   gl_FragColor=vec4(v.rgb,v.a*smoothstep(.25,.06,r));} else gl_FragColor=v; }`;
+function mksh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o;}
+const pr=gl.createProgram();gl.attachShader(pr,mksh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,mksh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+const Ap=gl.getAttribLocation(pr,'a_pos'),Ac=gl.getAttribLocation(pr,'a_col'),As=gl.getAttribLocation(pr,'a_size'),Um=gl.getUniformLocation(pr,'u_mvp'),Ur=gl.getUniformLocation(pr,'u_round');
+function mkbuf(a){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);return b;}
+const lb=mkbuf(lineV),pb=mkbuf(pointV),ST=32;
+function bind(){gl.vertexAttribPointer(Ap,3,gl.FLOAT,false,ST,0);gl.enableVertexAttribArray(Ap);
+ gl.vertexAttribPointer(Ac,4,gl.FLOAT,false,ST,12);gl.enableVertexAttribArray(Ac);
+ gl.vertexAttribPointer(As,1,gl.FLOAT,false,ST,28);gl.enableVertexAttribArray(As);}
+gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+const Mx={mul:(a,b)=>{const o=new Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ persp:(f,as,n,fa)=>{const t=1/Math.tan(f/2);return[t/as,0,0,0,0,t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0];},
+ look:(e,c,u)=>{const z=nm(sb(e,c)),x=nm(cr(u,z)),y=cr(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dt(x,e),-dt(y,e),-dt(z,e),1];}};
+const sb=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dt=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],nm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/l,a[1]/l,a[2]/l];};
+
+let yaw=0.5,pitch=0.32,dist=11.5,drag=false,px=0,py=0,auto=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+cv.addEventListener('pointerdown',e=>{drag=true;auto=false;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('pointermove',e=>{ mx=e.clientX;my=e.clientY; if(!drag)return; yaw+=(e.clientX-px)*.008;pitch+=(e.clientY-py)*.006;pitch=Math.max(-.9,Math.min(1.3,pitch));px=e.clientX;py=e.clientY;});
+cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(7,Math.min(20,dist+e.deltaY*.01));},{passive:false});
+let mx=-1,my=-1;
+
+// labels (axis names, example tags, seed numbers/names, mechanics)
+const LR=document.getElementById('labels'),labs=[];
+function mkLab(cls,txt,p){const el=document.createElement('div');el.className='lab '+cls;el.textContent=txt;LR.appendChild(el);labs.push({el,p});}
+AX.forEach((a,i)=>{const[x,z]=colXZ[i];mkLab('axis',a.c+'·'+a.name,[x,Yof(a.levels[a.levels.length-1].n)+0.5,z]);
+  a.levels.forEach(L=>{ if(L.ex) mkLab(L.lit?'exgold':'ex',L.ex,[x,Yof(L.n),z]); }); });
+SEEDS.forEach((s,j)=>{mkLab('seednum',String(s.num),[seedPos[j][0],seedPos[j][1]+0.34,seedPos[j][2]]);
+  mkLab('seed',s.name,[seedPos[j][0],seedPos[j][1]-0.36,seedPos[j][2]]);});
+MECH.forEach((m,k)=>mkLab('mech',m.name,[mechPos[k][0],mechPos[k][1]+0.34,mechPos[k][2]]));
+
+const panel=document.getElementById('panel'),PN=document.getElementById('pn'),PL=document.getElementById('pl'),PD=document.getElementById('pd'),PX=document.getElementById('px');
+let W,H;function rs(){const d=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;gl.viewport(0,0,cv.width,cv.height);}addEventListener('resize',rs);rs();
+function proj(m,p){const x=p[0],y=p[1],z=p[2],cx=m[0]*x+m[4]*y+m[8]*z+m[12],cy=m[1]*x+m[5]*y+m[9]*z+m[13],cw=m[3]*x+m[7]*y+m[11]*z+m[15];if(cw<=.001)return null;return[(cx/cw*.5+.5)*W,(1-(cy/cw*.5+.5))*H];}
+
+function showPanel(nd){ panel.style.opacity='1';
+  if(nd.kind==='level'){PN.textContent=nd.data.axis+' · L'+nd.data.n;PL.textContent=nd.data.label;PD.textContent='';PX.textContent=nd.data.ex?('example: '+nd.data.ex):''; }
+  else if(nd.kind==='seed'){PN.textContent='seed '+nd.data.num;PL.textContent=nd.data.name;PD.textContent=nd.data.enables.length?('enables: '+nd.data.enables.map(e=>e[0]+' L'+e[1]).join(' · ')):'floor organ — remove it and autonomy breaks';PX.textContent='';}
+  else {PN.textContent=nd.data.name;PL.textContent='mechanic · seeds '+nd.data.seeds.join(',');PD.textContent=nd.data.detail;PX.textContent=nd.data.on.length?('acts on: '+nd.data.on.map(e=>e[0]+' L'+e[1]).join(' · ')):'meta — selects the others';}
+}
+function frame(){ if(auto)yaw+=0.0022;
+  const eye=[Math.cos(pitch)*Math.cos(yaw)*dist,Math.sin(pitch)*dist-0.2,Math.cos(pitch)*Math.sin(yaw)*dist];
+  const mvp=Mx.mul(Mx.persp(0.84,W/H||1,0.1,100),Mx.look(eye,[0,-0.4,0],[0,1,0]));
+  gl.clear(gl.COLOR_BUFFER_BIT); gl.uniformMatrix4fv(Um,false,new Float32Array(mvp));
+  gl.bindBuffer(gl.ARRAY_BUFFER,lb);bind();gl.uniform1f(Ur,0);gl.drawArrays(gl.LINES,0,lineV.length/8);
+  gl.bindBuffer(gl.ARRAY_BUFFER,pb);bind();gl.uniform1f(Ur,1);gl.drawArrays(gl.POINTS,0,pointV.length/8);
+  for(const L of labs){const s=proj(mvp,L.p);if(s&&s[0]>-70&&s[0]<W+70&&s[1]>-30&&s[1]<H+30){L.el.style.left=s[0]+'px';L.el.style.top=s[1]+'px';L.el.style.opacity='1';}else L.el.style.opacity='0';}
+  // hover: nearest projected node within 16px
+  let best=null,bd=18*18; for(const nd of NODES){const s=proj(mvp,nd.pos);if(!s)continue;const dx=s[0]-mx,dy=s[1]-my,d=dx*dx+dy*dy;if(d<bd){bd=d;best=nd;}}
+  if(best)showPanel(best);else panel.style.opacity='0';
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body></html>
