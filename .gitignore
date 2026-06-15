@@ -7,6 +7,9 @@ _reference/
 # ── local verification artifacts ────────────────────────────────────────────
 *.png
 *.gif
+# ...but the brand icons ARE real published assets
+!assets/favicon-32.png
+!assets/favicon-180.png
 _shot.html
 lbrshots/
 tools/out/
