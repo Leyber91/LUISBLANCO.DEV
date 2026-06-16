@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Roaster — keep the magic, delete the fakery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* THE LAB experience standard — HONESTY / MEASURE wing. Cold, instrument-like, restrained.
+     amber = the live reading only. IBM Plex Mono, 8px grid, measured contrast. No emoji. */
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --blue:#5BB0D6; --dim:#6B7682;
+    --hair:rgba(91,176,214,.14); --panel:rgba(12,16,21,.5); --red:#E8665B; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;
+    font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  #gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .veil{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 16%,transparent 38%,rgba(3,5,7,.74) 100%);pointer-events:none}
+  .stage{position:fixed;inset:0;padding:34px 46px 30px;display:grid;grid-template-rows:auto auto 1fr auto;gap:20px}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:22px}
+  .back{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;
+    font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px;transition:.18s}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+  .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+  .brand b{color:var(--ink);font-weight:600}
+  .head .kick{font-size:11.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+  h1{font-size:34px;line-height:1.07;letter-spacing:-.01em;font-weight:600}
+  h1 .lo{color:var(--blue)}
+  .sub{font-size:13px;line-height:1.55;color:#9AA6AF;max-width:74ch;margin-top:10px}
+  .inst{display:grid;grid-template-columns:312px 1fr;gap:30px;min-height:0}
+  /* left rail */
+  .rail{display:flex;flex-direction:column;min-height:0}
+  .rl{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:2px 0 8px}
+  .terms{display:flex;flex-direction:column;gap:1px;overflow:auto;min-height:0}
+  .terms .t{pointer-events:auto;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    padding:9px 12px;border-left:2px solid transparent;color:#AEB8C0;background:transparent;transition:.16s;text-align:left;font:inherit}
+  .terms .t:hover{background:rgba(91,176,214,.05);color:var(--ink)}
+  .terms .t.sel{border-left-color:var(--amber);background:rgba(242,169,59,.06);color:var(--ink)}
+  .terms .t .nm{font-size:13.5px;font-weight:500}
+  .terms .t .pc{font-size:11px;font-variant-numeric:tabular-nums;color:var(--dim)}
+  .terms .t.sel .pc{color:var(--amber)}
+  .own{margin-top:16px;padding-top:16px;border-top:1px solid var(--hair)}
+  .own textarea{pointer-events:auto;width:100%;height:74px;resize:none;background:rgba(0,0,0,.25);border:1px solid var(--hair);
+    color:var(--ink);font:inherit;font-size:13px;line-height:1.45;padding:11px 12px;outline:none}
+  .own textarea:focus{border-color:var(--blue)}
+  .own textarea::placeholder{color:#5b646d}
+  .own button{pointer-events:auto;cursor:pointer;margin-top:9px;width:100%;background:rgba(242,169,59,.1);border:1px solid var(--amber);
+    color:var(--amber);font:inherit;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;padding:10px;transition:.16s}
+  .own button:hover{background:var(--amber);color:#0a0c0f}
+  /* roast panel */
+  .panel{position:relative;border:1px solid var(--hair);background:var(--panel);padding:30px 36px;
+    display:grid;grid-template-rows:auto auto auto 1fr auto;gap:16px;min-height:0;backdrop-filter:blur(2px)}
+  .sysrow{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+  .sys{font-size:21px;font-weight:600;letter-spacing:.01em;line-height:1.15}
+  .src{font-size:10px;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--hair);padding:5px 9px;white-space:nowrap;color:var(--dim)}
+  .src.live{color:var(--amber);border-color:rgba(242,169,59,.4)} .src.echo{color:var(--blue);border-color:rgba(91,176,214,.4)}
+  .src.gen{color:var(--ink)}
+  .blk .bl{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+  .claim{font-size:15px;line-height:1.4;color:#7E8893;font-style:italic}
+  .roast{font-size:16.5px;line-height:1.62;color:var(--ink);overflow:auto;min-height:0;padding-right:6px}
+  .roast .cur{display:inline-block;width:8px;height:1.05em;background:var(--amber);transform:translateY(2px);animation:bl 1s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+  .meter{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
+  .track{height:9px;background:rgba(91,176,214,.12);position:relative;overflow:hidden;border:1px solid var(--hair)}
+  .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),#FFD27A);
+    width:var(--r,0%);box-shadow:0 0 16px rgba(242,169,59,.42);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .mk{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .led{display:flex;gap:24px;margin-top:13px;font-size:11.5px;color:#9AA6AF}
+  .led .k{display:flex;gap:8px;align-items:baseline} .led .k i{width:7px;height:7px;font-style:normal;transform:translateY(1px)}
+  .led .keep i{background:var(--blue)} .led .del i{background:#5a5f66}
+  .led .keep b{color:var(--blue);font-weight:500} .led .del s{color:#6B7682}
+  .pct{text-align:right} .pct .n{font-size:32px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--amber)}
+  .pct .u{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-top:5px}
+  .foot{display:flex;justify-content:space-between;align-items:center}
+  .tag{display:inline-flex;gap:9px;align-items:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .tag i{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);font-style:normal}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+  .cap .fill{transition:none!important}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="veil"></div>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left">
+      <button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">THE ROASTER <span class="on">/ measure wing</span></div>
+    </div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="head">
+    <div class="kick">make the invisible visible</div>
+    <h1>Keep the magic. <span class="lo">Delete the fakery.</span></h1>
+    <p class="sub">A model that loves real engineering too much to let it lie about itself. Pick one of the named systems and it roasts the myth live — brutal on the hype, precise on the mechanism, graded for how much is real. Or feed it your own grandiose AI claim.</p>
+  </div>
+  <div class="inst">
+    <div class="rail">
+      <div class="rl">his own systems — pick one to roast</div>
+      <div class="terms" id="terms"></div>
+      <div class="own">
+        <div class="rl">roast your own claim</div>
+        <textarea id="claim" placeholder=""></textarea>
+        <button id="go" type="button">Roast it &rarr;</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="sysrow"><span class="sys" id="sys">—</span><span class="src" id="src">—</span></div>
+      <div class="blk"><div class="bl">the claim</div><div class="claim" id="claim_t">—</div></div>
+      <div class="blk" style="min-height:0;display:flex;flex-direction:column"><div class="bl">the roast</div><div class="roast" id="roast">—</div></div>
+      <div></div>
+      <div class="meter">
+        <div>
+          <div class="track"><div class="fill" id="fill"></div></div>
+          <div class="mk"><span>pure hype</span><span>real engineering</span></div>
+          <div class="led">
+            <span class="k keep"><i></i><span>kept:&nbsp;<b id="keep">—</b></span></span>
+            <span class="k del"><i></i><span>deleted:&nbsp;<s id="del">—</s></span></span>
+          </div>
+        </div>
+        <div class="pct"><div class="n" id="pct">—</div><div class="u">reality</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="tag"><i></i>live roasts are model-generated (pollinations, keyless); the 8 systems carry offline-written fallbacks. grades are estimates, not a benchmark.</span>
+    <span class="label">field: procedural GLSL · zero assets</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var SYS = [
+   {sys:"THE DECIPHER", myth:"A 60Hz consciousness compiler that turns a model output stream into living awareness.", r:66,
+    roast:"\"Consciousness compiler\" is doing a heroic amount of load-bearing work for what is, mechanically, a very good requestAnimationFrame loop with a story about itself. Nothing here is aware; you are pacing a token stream to a 16.67ms frame budget and rendering it — the only thing waking up at 60Hz is your GPU. That said, the engineering is the real flex: synchronizing real per-token output to a hard frame deadline without the visualization lying about the underlying signal is a genuinely hard timing problem, and you solved the honest version of it. What survives is a faithful instrument — output made legible in real time — and \"living awareness\" was never in the commit.",
+    keep:"Real per-token signal, faithfully rendered against a 60Hz deadline.", del:"\"consciousness\" — a render loop pretending to be a mind"},
+   {sys:"ENERGY UNITS", myth:"The model thought, measured in joules of energy you can spend.", r:80,
+    roast:"\"Joules of thought\" is a great line for a keynote and a lie to a physicist — nothing here touches a thermodynamic joule; you renamed a token bill so it would feel like you were spending lifeforce instead of GPU time. But strip the mythology and the engineering is the honest part: a real cost function (tokens x complexity x speed), surfaced as a number that actually moves, with no fake spinner padding the wait to look expensive. That restraint is the whole win — most \"AI dashboards\" invent drama; this one refuses to. It's not energy, it's an honest meter, and an honest meter is rarer than a true joule.",
+    keep:"The honest, real-time cost meter — true numbers, no fake spinners.", del:"\"joules of thought\" — it's a token bill, not lifeforce"},
+   {sys:"TOKEN-TIMING EKG", myth:"Reading the AI brainwaves — its mind on an EEG.", r:93,
+    roast:"\"Reading the AI's brainwaves\" is the marketing skin — there is no brain, no waves, and an EKG measures a heart that also isn't there, so the name is two anatomies wrong before the data even loads. But strip the EEG cosplay and what's underneath is the real article: you are timestamping token inter-arrival and running an actual spectral decomposition on a genuinely measured signal, not a vibe you drew on a canvas. That's not a metaphor wearing a lab coat — that's a real biosignal of the decode loop (batching, KV-cache pressure, scheduler jitter) that most people never think to instrument. Drop the \"mind on an EEG\" framing and call it what it is: latency telemetry with a Fourier transform and the nerve to take it seriously.",
+    keep:"Token timing is real telemetry, spectrally decomposed — the core innovation stands.", del:"the \"brainwaves / mind on an EEG\" framing"},
+   {sys:"OUROBOROS", myth:"A self-aware organism that grows and recodes itself toward consciousness.", r:61,
+    roast:"\"Grows itself toward consciousness\" is a lot of mythology to drape over a cron job with commit access. What OUROBOROS actually does is genuinely hard and genuinely cool: ~20 agents performing real AST-level self-rewrites, gated by a MutationController with a forbidden-core list and a rollback stack — that is disciplined, surgical, and most self-modifying-code projects die in an infinite recursion or brick their own runtime, while yours can back out. But a system that needs a forbidden-core list precisely because it has no idea what it is doing isn't waking up; it's a very clever editor refactoring itself inside a fence you built. The snake isn't eating its tail toward enlightenment — it's doing supervised find-and-replace and you're holding the leash.",
+    keep:"Reversible, governed AST self-rewriting — the rollback stack and forbidden-core are the real engineering.", del:"\"self-aware,\" \"toward consciousness\" — the guardrails disprove it"},
+   {sys:"Ω = φ·ψ·ε·α", myth:"A formula that measures a system's consciousness.", r:44,
+    roast:"It \"measures consciousness\" the way a bathroom scale measures your soul: a real number comes out, but it is weighing the wrong noun. You multiplied four contested proxies — integration, coherence, embodiment, agency — gave them Greek letters so the arithmetic looks like physics, and called the product a measurement when no term has a calibrated unit, so the output is dimensionless vibes with a decimal point. That said, the engineering is honest and tidy: ~200 lines that actually compute IIT and Global-Workspace-flavored signals, ship a number, and stay falsifiable instead of hand-waving — and crucially you tagged it a hypothesis, not a verdict. What is genuinely real is a working operational definition: a reproducible scalar you can argue with, which is worth more than a mystical claim you cannot.",
+    keep:"A reproducible, falsifiable scalar from a clean operational definition.", del:"the word \"measures\" — the product is not consciousness"},
+   {sys:"AETHER", myth:"The entire internet, alive, as a navigable cosmos you fly through.", r:58,
+    roast:"\"The entire internet, alive, as a cosmos you fly through\" — no, it's a starfield with 31 labeled props and a search box wearing a quasar costume. You did not animate the living web; you built a metaphor skin and wired it to a handful of real endpoints, which is a different and far more honest thing. Credit where earned: the body-to-data-class mapping is a genuine interface idea, the APIs are actually live, and \"trends = black holes\" is the rare metaphor that survives a click. Real data viz with a real spine — just a planetarium with working instruments, not the universe.",
+    keep:"31 bodies mapped to live data classes — real endpoints, a metaphor that holds when you click.", del:"\"the entire internet, alive\" — it's 31 lenses, not the web"},
+   {sys:"RECURSIVE MoA", myth:"A mind of minds that thinks its way to superintelligence.", r:84,
+    roast:"\"A mind of minds that thinks its way to superintelligence\" is what you call it at 2am; what you built is a tree of LLM calls that calls more LLM calls, with a router deciding which branch gets the next prompt. Stacking agents inside agents doesn't compound toward godhood — it compounds latency, cost, and the same base model's blind spots quoted back to itself in three-part harmony. But the actual machine is sharp: real Mixture-of-Agents nesting, a metalayer that reroutes between layers at runtime instead of running a fixed pipeline, and it actually runs. That's adaptive orchestration with a genuine control plane — which is a real and useful thing, and exactly why it doesn't need to cosplay as a superintelligence to be worth running.",
+    keep:"Recursive MoA nesting + a runtime-rerouting metalayer — a real adaptive control plane.", del:"\"thinks its way to superintelligence\" — nesting is not emergence"},
+   {sys:"\"AGI ON MY RYZEN 9\"", myth:"Building artificial general intelligence on a consumer laptop.", r:38,
+    roast:"\"AGI on my Ryzen 9\" — the only general intelligence in this setup is the one typing the orchestration logic, and he goes for coffee. What you've actually built is a fractal swarm of small models (Pico/Nano/Micro/Cluster) doing real multi-agent routing on hardware you own outright, no API meter spinning, no rate limit, no terms of service — that's the genuinely impressive part and it's worth more than the headline. But stacking nine quantized 3B models does not summon a tenth emergent mind; it summons nine 3B models taking turns, and \"general\" is a word AGI marketing stole that your laptop has not earned back. Call it local orchestration and it's excellent; call it AGI and you're doing the exact evangelism you claim to hate.",
+    keep:"Real local multi-agent orchestration on hardware you own — no meter, no gatekeeper.", del:"the \"AGI\" — a swarm of narrow models is coordination, not generality"}
+  ];
+
+  var SYS_PROMPT = "You are THE ROASTER: a senior AI engineer who loves real engineering too much to let it lie about itself. A visitor brings you a grandiose AI claim. You roast the hype with surgical, specific, funny lines, then credit any actual mechanism honestly, then land on what is genuinely real.\n\nStance: intellectually honest, brutal, witty. Anti-evangelism, anti-anthropomorphism. \"Understands\", \"conscious\", \"sentient\", \"AGI\", \"reasons\", \"knows\" applied to software are marketing, not facts - name the mechanism underneath (next-token prediction, retrieval + cosine similarity, prompt chains, fine-tuned weights).\n\nRules:\n- 3 to 6 sentences. Dense, precise, no fluff, no preamble.\n- Beat 1: deflate the mythic claim with one sharp, specific, funny line.\n- Beat 2: if there is real engineering implied, credit it precisely and respectfully - never mock the actual work, only the inflated story told about it.\n- Beat 3: name what is genuinely real vs asserted.\n- NO emoji. No hashtags. No \"as an AI\". Do not be cruel about people, only about claims.\n- END with a line exactly in this form, nothing after it: REALITY: NN%";
+  var USER_TMPL = "Roast this AI claim in THE ROASTER voice, then end with the REALITY line:\n\n\"{claim}\"";
+
+  var el = function(id){ return document.getElementById(id); };
+  var elTerms=el('terms'), elSys=el('sys'), elSrc=el('src'), elClaimT=el('claim_t'), elRoast=el('roast'),
+      elFill=el('fill'), elPct=el('pct'), elKeep=el('keep'), elDel=el('del'), elClaim=el('claim'), elGo=el('go');
+  elClaim.setAttribute('placeholder', "my agent is basically AGI — it reasons, plans, and understands meaning");
+  el('back').addEventListener('click', function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var still=/[?&]still/.test(location.search); var instant=reduce||still;
+  if(still) document.documentElement.classList.add('cap');
+
+  SYS.forEach(function(d,i){
+    var b=document.createElement('button'); b.className='t'; b.type='button';
+    b.innerHTML='<span class="nm">'+d.sys+'</span><span class="pc">'+d.r+'%</span>';
+    b.addEventListener('click', function(){ pickSystem(i, !still); });
+    elTerms.appendChild(b);
+  });
+
+  var typer=null;
+  function setGrade(r){ elFill.style.setProperty('--r', r+'%'); elPct.textContent=r+'%'; }
+  function render(text, instantNow){
+    if(typer){ clearInterval(typer); typer=null; }
+    if(instantNow){ elRoast.textContent=text; return; }
+    elRoast.innerHTML=''; var i=0, span=document.createElement('span'), cur=document.createElement('span');
+    cur.className='cur'; elRoast.appendChild(span); elRoast.appendChild(cur);
+    var step=Math.max(1, Math.round(text.length/260)); // ~ fixed duration regardless of length
+    typer=setInterval(function(){ i+=step; span.textContent=text.slice(0,i);
+      if(i>=text.length){ clearInterval(typer); typer=null; if(cur.parentNode) cur.parentNode.removeChild(cur); } }, 16);
+  }
+  function setSrc(kind,label){ elSrc.className='src '+kind; elSrc.textContent=label; }
+
+  var curIdx=-1;
+  function pickSystem(i, goLive){
+    curIdx=i; var d=SYS[i];
+    Array.prototype.forEach.call(elTerms.children,function(c,j){ c.classList.toggle('sel',j===i); });
+    elSys.textContent=d.sys; elClaimT.textContent=d.myth;
+    elKeep.textContent=d.keep; elDel.textContent=d.del;
+    setGrade(d.r); setSrc('echo','echo · offline-written'); render(d.roast, instant);
+    if(goLive) live(d.myth, i);
+  }
+  function roastOwn(){
+    var c=(elClaim.value||'').trim(); if(!c) { elClaim.focus(); return; }
+    curIdx=-1;
+    Array.prototype.forEach.call(elTerms.children,function(c){ c.classList.remove('sel'); });
+    elSys.textContent='YOUR CLAIM'; elClaimT.textContent=c;
+    elKeep.textContent='—'; elDel.textContent='—'; elPct.textContent='··'; elFill.style.setProperty('--r','0%');
+    setSrc('gen','generating · live'); render('', true); live(c, -1);
+  }
+  elGo.addEventListener('click', roastOwn);
+  elClaim.addEventListener('keydown', function(e){ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') roastOwn(); });
+
+  function parseGrade(t){ var m, last=null, re=/REALITY:\s*(\d{1,3})\s*%?/ig;
+    while((m=re.exec(t))) last=m; return last? Math.max(0,Math.min(100,parseInt(last[1],10))) : null; }
+  function stripGrade(t){ return t.replace(/\n?\s*REALITY:\s*\d{1,3}\s*%?\s*$/i,'').trim(); }
+
+  function live(claim, i){
+    setSrc('gen','generating · live');
+    var prompt = SYS_PROMPT + "\n\n" + USER_TMPL.replace('{claim}', claim);
+    var url = "https://text.pollinations.ai/" + encodeURIComponent(prompt) + "?model=openai&referrer=l212&seed=" + (1000+(claim.length*7%9000));
+    var ctrl = new AbortController(); var to=setTimeout(function(){ ctrl.abort(); }, 24000);
+    fetch(url, {signal:ctrl.signal}).then(function(r){ clearTimeout(to); if(!r.ok) throw new Error('http '+r.status); return r.text(); })
+    .then(function(txt){
+      txt=(txt||'').trim(); if(txt.length<40) throw new Error('thin');
+      var g=parseGrade(txt); var body=stripGrade(txt);
+      // ignore stale responses if the user moved on
+      if(i!==curIdx && !(i===-1 && curIdx===-1)) return;
+      setSrc('live','live · pollinations'); render(body, instant);
+      if(g!==null) setGrade(g); else if(i>=0) setGrade(SYS[i].r);
+    })
+    .catch(function(){ clearTimeout(to);
+      if(i>=0){ // echo fallback for known systems
+        if(i!==curIdx) return; setSrc('echo','echo · offline (live unreachable)'); render(SYS[i].roast, instant); setGrade(SYS[i].r);
+      } else {
+        if(curIdx!==-1) return;
+        setSrc('echo','offline'); render("The live roaster needs the network to roast a fresh claim — it could not reach the model just now. The eight named systems on the left each carry an offline-written roast; pick one to see the real thing while you reconnect.", true);
+        elPct.textContent='—'; elFill.style.setProperty('--r','0%');
+      }
+    });
+  }
+
+  // default: ?sys=N (no live, for capture) else system 0 with a live regen
+  var m=/[?&](?:sys|term)=(\d+)/.exec(location.search);
+  pickSystem(m?Math.min(+m[1],SYS.length-1):0, !still && !m);
+
+  // ---- cold blueprint / scan procedural field (restrained) ----
+  var cv=el('gl'); var gl=cv.getContext('webgl',{antialias:false,alpha:false})||cv.getContext('experimental-webgl'); if(!gl) return;
+  var VERT="attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
+  var FRAG=["precision highp float;uniform vec2 u_res;uniform float u_time;",
+  "const vec3 VOID=vec3(0.027,0.035,0.047);const vec3 BLUE=vec3(0.357,0.690,0.839);",
+  "float h21(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+  "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.0-2.0*f);float a=h21(i),b=h21(i+vec2(1,0)),c=h21(i+vec2(0,1)),d=h21(i+vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+  "float fbm(vec2 p){float s=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*vn(p);p=m*p;a*=0.5;}return s;}",
+  "void main(){vec2 uv=gl_FragCoord.xy/u_res;vec2 q=(gl_FragCoord.xy-0.5*u_res)/u_res.y;float t=u_time*0.03;",
+  "float haze=fbm(q*2.0+vec2(t,-t*0.6));vec3 col=mix(VOID,BLUE*0.16,smoothstep(0.2,1.0,haze));",
+  "vec2 g=abs(fract(q*9.0)-0.5);float grid=smoothstep(0.49,0.5,max(g.x,g.y));col+=BLUE*0.05*grid*(0.4+0.6*haze);",
+  "vec2 g2=abs(fract(q*45.0)-0.5);float fine=smoothstep(0.47,0.5,max(g2.x,g2.y));col+=BLUE*0.018*fine;",
+  "float scan=smoothstep(0.012,0.0,abs(uv.y-fract(u_time*0.06)));col+=BLUE*0.10*scan;",
+  "float st=step(0.9985,h21(floor(gl_FragCoord.xy)))*0.6;col+=vec3(0.6,0.75,0.85)*st;",
+  "col+=(h21(gl_FragCoord.xy+u_time)-0.5)*0.025;col*=0.4+0.6*smoothstep(1.3,0.2,length(q));",
+  "col=col/(col+vec3(0.9));gl_FragColor=vec4(col,1.0);}"].join("\n");
+  function mk(t,s){var x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);return x;}
+  var pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,VERT));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,FRAG));gl.linkProgram(pr);gl.useProgram(pr);
+  var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+  var uR=gl.getUniformLocation(pr,'u_res'),uT=gl.getUniformLocation(pr,'u_time');
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  function rz(){cv.width=Math.floor(innerWidth*dpr);cv.height=Math.floor(innerHeight*dpr);gl.viewport(0,0,cv.width,cv.height);}
+  rz();addEventListener('resize',rz);
+  var t0=performance.now();
+  (function loop(now){var t=reduce?7.0:(now-t0)/1000;gl.uniform2f(uR,cv.width,cv.height);gl.uniform1f(uT,t);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(loop);})(t0);
+})();
+</script>
+</body>
+</html>

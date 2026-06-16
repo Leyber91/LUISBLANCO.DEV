@@ -45,9 +45,9 @@
       href: 'labs/trending.html',
     },
     {
-      name: 'The Honesty Decoder', tag: 'instrumented AI · honesty',
-      blurb: 'Every system here was born with a mythic name. The decoder sets each myth beside the mechanism it actually is — DECIPHER, Energy Units, the token EKG, Ouroboros — and grades how much of the claim is real. Keep the magic, delete the fakery.',
-      href: 'labs/honesty-decoder.html',
+      name: 'The Roaster', tag: 'instrumented AI · roast',
+      blurb: 'A model that loves real engineering too much to let it lie about itself. Pick a named system — DECIPHER, the token EKG, Ouroboros, "AGI on my Ryzen 9" — and it roasts the myth live: brutal on the hype, precise on the mechanism, graded for how much is real. Or feed it your own claim.',
+      href: 'labs/roaster.html',
     },
   ];
 
