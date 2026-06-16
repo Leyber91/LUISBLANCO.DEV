@@ -171,18 +171,25 @@
     var url='https://text.pollinations.ai/'+encodeURIComponent(prompt)+'?model=openai&referrer=dataspace';
     var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},32000);
     return fetch(url,{signal:ctrl.signal}).then(function(r){ clearTimeout(to); if(!r.ok) throw new Error('http'); return r.text(); })
-      .then(function(t){ t=(t||'').trim(); if(t.length<20) throw new Error('thin'); return t; });
+      .then(function(t){ t=(t||'').trim(); if(t.length<10) throw new Error('thin'); return t; });
+  }
+  // strip an OpenAI-ish message wrapper / leaked reasoning so the capsule is plain text
+  function clean(t){ t=(t||'').trim();
+    if(t.charAt(0)==='{'){ try{ var j=JSON.parse(t); t=(j.content||(j.message&&j.message.content)||t); }
+      catch(e){ var m=t.match(/"content"\s*:\s*"([\s\S]*?)"(?:\s*[,}])/); if(m) t=m[1]; } }
+    return t.replace(/\\n/g,'\n').replace(/\\"/g,'"').replace(/^["'\s]+|["'\s]+$/g,'').trim();
   }
 
   // ---- state + measured numbers ----
-  var ST={ srcBits:0, capBits:0, floorBits:0, fid:0, deg:0, ratio:0, hist:new Uint8Array(64), phase:0, target:0, live:false, busy:false };
+  var ST={ srcBits:0, capBits:0, floorBits:0, fid:0, deg:0, ratio:0, avgBits:0.5, hist:new Uint8Array(64), phase:0, target:0, live:false, busy:false };
   function setHistFromTokens(tokens, per){
     // bin tokens by position -> average bits per shell -> 0..255
     var B=64, sum=new Float64Array(B), cnt=new Float64Array(B), i;
     for(i=0;i<tokens.length;i++){ var bi=Math.min(B-1, Math.floor(i/tokens.length*B)); sum[bi]+=per[i]; cnt[bi]++; }
     var mx=1; for(i=0;i<B;i++){ if(cnt[i]) sum[i]/=cnt[i]; mx=Math.max(mx,sum[i]); }
     for(i=0;i<B;i++) ST.hist[i]=Math.max(0,Math.min(255, Math.round(sum[i]/mx*255)));
-    uploadHist();
+    var mean=0,k; for(k=0;k<per.length;k++) mean+=per[k]; mean=per.length?mean/per.length:0;
+    ST.avgBits=Math.max(0,Math.min(1, mean/9.0));
   }
   function measureSource(text){
     var toks=tokenize(text); var ib=infoBits(toks); ST.srcBits=ib.total; setHistFromTokens(toks,ib.per);
@@ -238,13 +245,15 @@
 
   function collapse(){
     if(ST.busy) return; ST.busy=true; el('go').disabled=true; el('go').textContent='collapsing…';
-    var text=el('src').value;
+    var text=el('src').value.slice(0,1500); // keep the GET URL bounded
     var done=function(cap,rec,live){ applyResult(cap,rec,live); ST.busy=false; el('go').disabled=false; el('go').textContent='Collapse →'; };
-    var compressP='Re-encode the ENTIRE conversation below into the densest possible capsule (aim ~'+budgetWords()+' words) from which YOU could later reconstruct it faithfully. Keep names, numbers and load-bearing claims. Output ONLY the capsule, no preamble.\n\n'+text;
+    var fail=function(){ done(ECHO_CAP, ECHO_REC, false); };
+    var compressP='Compress the conversation below into the densest capsule (~'+budgetWords()+' words) from which you could reconstruct it. Keep names, numbers, load-bearing claims. Output ONLY the capsule as plain text — no JSON, no reasoning, no preamble.\n\n'+text;
     callModel(compressP).then(function(cap){
-      var recP='Reconstruct the original conversation as faithfully as possible from ONLY this capsule. Match the USER:/ASSISTANT: turn format. Output ONLY the reconstruction.\n\n'+cap;
-      return callModel(recP).then(function(rec){ done(cap,rec,true); });
-    }).catch(function(){ done(ECHO_CAP, ECHO_REC, false); }); // echo fallback
+      cap=clean(cap).slice(0,800); if(cap.length<20) throw new Error('thin'); // bound the reconstruct URL
+      var recP='Reconstruct the original conversation as faithfully as possible from ONLY this capsule. Use the USER:/ASSISTANT: turn format. Output ONLY the reconstruction as plain text.\n\n'+cap;
+      return callModel(recP).then(function(rec){ rec=clean(rec); if(rec.length<20) throw new Error('thin'); done(cap,rec,true); });
+    }).catch(fail); // any failure -> the recorded round-trip plays
   }
   el('go').addEventListener('click', collapse);
 
@@ -268,8 +277,7 @@
   "precision highp float;",
   "uniform vec2 uRes;uniform float uTime;uniform vec3 uCam;",
   "uniform float uHorizon,uPhotonR,uInner,uOuter,uExposure;",
-  "uniform float uPhase,uCapLum,uDeg,uFid,uFloorR;",
-  "uniform sampler2D uHist;",
+  "uniform float uPhase,uCapLum,uDeg,uFid,uFloorR,uAvgBits;",
   "#define STEPS 200",
   "float hash(vec3 p){p=fract(p*0.3183099+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}",
   "float vnoise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.0-2.0*f);",
@@ -291,7 +299,8 @@
   "vec4 diskShade(vec3 hit,vec3 vin){",
   " float r=length(hit.xz);",
   " float tt=clamp((r-uInner)/max(uOuter-uInner,0.001),0.0,1.0);",
-  " float bits=texture2D(uHist,vec2(tt,0.5)).r;",
+  " float bits=clamp((1.0-tt)*0.72+0.12+uAvgBits*0.24,0.0,1.0);", // inner=amber energy, outer=blue structure, warmth by avg bits
+
   " vec3 base=bitColor(bits);",
   " float omega=0.5/pow(r,1.5);float rot=omega*uTime*3.0;float cs=cos(rot),sn=sin(rot);",
   " vec2 q=mat2(cs,-sn,sn,cs)*hit.xz;float lr=log(r);",
@@ -345,14 +354,16 @@
   " color*=uExposure;color=color/(color+vec3(1.0));color=pow(color,vec3(0.4545));",
   " color+=dith(gl_FragCoord.xy)*(1.0/255.0);gl_FragColor=vec4(color,1.0);}"].join("\n");
 
+  var SHERR='';
   function mk(t,s){var x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);
-    if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))console.error('shader',gl.getShaderInfoLog(x));return x;}
+    if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)){var e=gl.getShaderInfoLog(x);console.error('shader',e);SHERR+=e+'\n';}return x;}
   var prog=gl.createProgram();gl.attachShader(prog,mk(gl.VERTEX_SHADER,VERT));gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,FRAG));
   gl.linkProgram(prog);gl.useProgram(prog);
-  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) console.error('link',gl.getProgramInfoLog(prog));
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){var le=gl.getProgramInfoLog(prog);console.error('link',le);SHERR+=le;
+    document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;left:40px;bottom:130px;max-width:66ch;color:#E8665B;font:11px ui-monospace,monospace;z-index:99;white-space:pre-wrap;pointer-events:none">WEBGL SHADER ERROR (please paste this back):\n'+SHERR.replace(/[<>]/g,'_').slice(0,900)+'</div>');}
   var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   var lp=gl.getAttribLocation(prog,'aPos');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
-  var U={}; ['uRes','uTime','uCam','uHorizon','uPhotonR','uInner','uOuter','uExposure','uPhase','uCapLum','uDeg','uFid','uFloorR','uHist']
+  var U={}; ['uRes','uTime','uCam','uHorizon','uPhotonR','uInner','uOuter','uExposure','uPhase','uCapLum','uDeg','uFid','uFloorR','uAvgBits']
     .forEach(function(n){U[n]=gl.getUniformLocation(prog,n);});
 
   // histogram data texture (64x1, R = bits)
@@ -390,7 +401,7 @@
     gl.uniform1f(U.uExposure,1.3); gl.uniform1f(U.uPhase,ph);
     gl.uniform1f(U.uCapLum, Math.min(1.0, (ST.capBits? ST.capBits/Math.max(ST.srcBits,1):0.0)+0.15));
     gl.uniform1f(U.uDeg,ST.deg); gl.uniform1f(U.uFid,ST.fid||1.0); gl.uniform1f(U.uFloorR, ST.srcBits? Math.min(9,ST.floorBits/ST.srcBits*12):0.0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,histTex); gl.uniform1i(U.uHist,0);
+    gl.uniform1f(U.uAvgBits, ST.avgBits!=null?ST.avgBits:0.5);
     gl.drawArrays(gl.TRIANGLES,0,3);
     requestAnimationFrame(draw);
   }
