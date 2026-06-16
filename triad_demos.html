@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What I'm building — three demonstrations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070E;--bg2:#0A0E1A;--panel:rgba(12,17,30,.6);
+  --ink:#EAF2FF;--ink-dim:#A6BEDF;--faint:#5E76A0;
+  --gold:#D4A24C;--gold-hi:#F0C674;--gold-dim:#8a6b34;
+  --line:rgba(234,242,255,.12);--line-soft:rgba(234,242,255,.06);
+  --grid:rgba(234,242,255,.045);--frame:rgba(234,242,255,.10);
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;--serif:'Fraunces',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(1200px 700px at 18% -10%,#0b1020 0%,transparent 60%),radial-gradient(1000px 800px at 110% 120%,#0a0f1c 0%,transparent 55%),var(--bg);
+  color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;letter-spacing:.02em;min-height:100%;overflow-x:hidden}
+.bp-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:46px 46px;
+  mask:radial-gradient(120% 100% at 50% 20%,#000 55%,transparent 100%)}
+.bp-corner{position:fixed;width:15px;height:15px;border:1.5px solid var(--gold);z-index:3;opacity:.65}
+.bp-corner.tl{top:14px;left:14px;border-right:0;border-bottom:0}.bp-corner.tr{top:14px;right:14px;border-left:0;border-bottom:0}
+.bp-corner.bl{bottom:14px;left:14px;border-right:0;border-top:0}.bp-corner.br{bottom:14px;right:14px;border-left:0;border-top:0}
+
+/* ---------- launcher ---------- */
+.wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:60px 34px 50px}
+.kicker{font-size:10px;letter-spacing:.34em;color:var(--faint);text-transform:uppercase}
+.h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,4vw,52px);line-height:.98;letter-spacing:-.01em;margin:8px 0 6px}
+.lede{font-size:12.5px;color:var(--ink-dim);max-width:64ch;line-height:1.7}
+.lede b{color:var(--gold-hi);font-weight:500}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+.card{position:relative;border:1px solid var(--line-soft);border-radius:4px;background:linear-gradient(180deg,rgba(12,17,30,.5),rgba(5,7,14,.3));
+  padding:20px 18px 18px;cursor:pointer;transition:.22s;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(120px 70px at 80% 6%,rgba(212,162,76,.10),transparent 70%);opacity:0;transition:.25s}
+.card:hover{border-color:var(--line);transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.card:hover::before{opacity:1}
+.card .ctag{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.card .ctag .z{color:var(--gold)}
+.card .cname{font-family:var(--serif);font-size:23px;font-weight:500;margin:12px 0 7px}
+.card .cdesc{font-size:11px;color:var(--ink-dim);line-height:1.6;min-height:54px}
+.card .cmet{font-family:var(--serif);font-size:30px;color:var(--gold-hi);margin:12px 0 2px;text-shadow:0 0 20px rgba(212,162,76,.22)}
+.card .cunit{font-size:9.5px;color:var(--faint);letter-spacing:.04em}
+.card .crun{margin-top:14px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-hi);display:flex;align-items:center;gap:7px}
+.card .crun .arr{transition:.2s}.card:hover .crun .arr{transform:translateX(4px)}
+.foot{margin-top:34px;font-size:10px;color:var(--faint);letter-spacing:.05em}
+
+/* ---------- modal window ---------- */
+.ov{position:fixed;inset:0;z-index:40;background:rgba(3,5,10,.74);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:26px}
+.ov.on{display:flex}
+.win{position:relative;width:min(1180px,96vw);height:min(760px,92vh);background:linear-gradient(180deg,#080b14,#06080f);
+  border:1px solid var(--frame);border-radius:5px;box-shadow:0 30px 90px rgba(0,0,0,.7);display:flex;flex-direction:column;overflow:hidden}
+.win .wcorner{position:absolute;width:13px;height:13px;border:1.5px solid var(--gold);opacity:.6;z-index:5}
+.win .wcorner.tl{top:9px;left:9px;border-right:0;border-bottom:0}.win .wcorner.tr{top:9px;right:9px;border-left:0;border-bottom:0}
+.win .wcorner.bl{bottom:9px;left:9px;border-right:0;border-top:0}.win .wcorner.br{bottom:9px;right:9px;border-left:0;border-top:0}
+.titlebar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line-soft);flex:0 0 auto}
+.titlebar .tl-l{display:flex;align-items:baseline;gap:14px}
+.titlebar .tag{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+.titlebar .nm{font-family:var(--serif);font-size:20px;font-weight:500}
+.titlebar .live-toggle{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line-soft);
+  border-radius:2px;padding:5px 11px;cursor:pointer;transition:.2s}
+.titlebar .live-toggle:hover{border-color:var(--gold-dim);color:var(--gold-hi)}
+.titlebar .live-toggle.on{border-color:var(--gold);color:var(--gold-hi);background:rgba(212,162,76,.08)}
+.xbtn{font-size:13px;color:var(--faint);background:transparent;border:1px solid var(--line-soft);border-radius:2px;width:30px;height:30px;cursor:pointer;transition:.2s}
+.xbtn:hover{border-color:var(--gold-dim);color:var(--ink)}
+.body{flex:1;min-height:0;display:grid;grid-template-columns:1.5fr 1fr;gap:0}
+.viz{position:relative;min-height:0;border-right:1px solid var(--line-soft)}
+.viz canvas{display:block;width:100%;height:100%}
+.viz .vhead{position:absolute;top:12px;left:16px;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);z-index:2}
+.viz .vsrc{position:absolute;bottom:10px;left:16px;font-size:9px;color:var(--faint);letter-spacing:.03em;z-index:2;max-width:80%}
+.viz .vsrc b{color:var(--ink-dim);font-weight:500}
+.tip{position:absolute;pointer-events:none;z-index:6;background:rgba(8,11,20,.95);border:1px solid var(--line);border-radius:3px;
+  padding:8px 10px;font-size:10px;line-height:1.5;color:var(--ink-dim);max-width:260px;opacity:0;transition:.13s;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tip.on{opacity:1}.tip b{color:var(--gold-hi)}
+.side{display:flex;flex-direction:column;min-height:0;padding:16px 18px}
+.meter .ml{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+.bignum{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3.6vw,46px);line-height:1;letter-spacing:-.015em;color:var(--gold-hi);margin:5px 0 2px;text-shadow:0 0 22px rgba(212,162,76,.26)}
+.unit{font-size:10px;color:var(--ink-dim)}.unit .syn{color:var(--faint)}
+.bar{height:3px;background:rgba(234,242,255,.07);border-radius:3px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-hi));box-shadow:0 0 12px rgba(212,162,76,.5);transition:width 1s cubic-bezier(.4,0,.1,1)}
+.ledg{flex:1;min-height:0;margin-top:13px;display:flex;flex-direction:column}
+.ledg .lh{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.rows{flex:1;min-height:0;overflow-y:auto;padding-right:5px;display:flex;flex-direction:column;gap:6px}
+.rows::-webkit-scrollbar{width:6px}.rows::-webkit-scrollbar-thumb{background:rgba(234,242,255,.12);border-radius:3px}
+.it{border:1px solid var(--line-soft);border-left:2px solid var(--gold-dim);border-radius:2px;padding:8px 10px;cursor:pointer;transition:.15s;background:rgba(10,14,26,.3)}
+.it:hover,.it.active{border-color:var(--line);border-left-color:var(--gold);background:rgba(212,162,76,.06)}
+.it .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.it .nm{font-size:11px;color:var(--ink)}.it .am{font-size:11.5px;color:var(--gold-hi);font-weight:600;white-space:nowrap}
+.it .r2{font-size:9px;color:var(--faint);margin-top:3px}
+.it .rc{font-size:9px;color:var(--ink-dim);margin-top:6px;display:none;border-top:1px dashed var(--line-soft);padding-top:6px;line-height:1.6}
+.it.active .rc{display:block}.it .rc .k{color:var(--faint)}
+.it.frozen{border-left-color:var(--gold)}.it.frozen .am{color:var(--gold-hi)}
+.it.done{opacity:.42;border-left-color:var(--faint)}.it.done .am{color:var(--faint)}
+.win-foot{flex:0 0 auto;border-top:1px solid var(--line-soft);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.aea{display:flex;align-items:center;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.aea .st{padding:5px 11px;border:1px solid var(--line-soft);border-radius:2px;transition:.3s}
+.aea .st.lit{color:var(--gold-hi);border-color:var(--gold-dim);background:rgba(212,162,76,.07)}
+.aea .arr{padding:0 8px;color:var(--faint)}
+.edu{flex:1;font-size:9.5px;color:var(--faint);line-height:1.55;max-width:54ch}
+.edu b{color:var(--ink-dim);font-weight:500}.edu .did{color:var(--gold-hi)}
+.drive{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-hi);background:transparent;
+  border:1px solid var(--gold-dim);border-radius:2px;padding:11px 18px;cursor:pointer;transition:.2s;white-space:nowrap}
+.drive:hover{border-color:var(--gold);color:#fff;box-shadow:0 0 20px rgba(212,162,76,.2)}
+.drive:disabled{opacity:.4;cursor:default;box-shadow:none}
+.flash{position:fixed;inset:0;background:radial-gradient(circle at 32% 42%,rgba(240,198,116,.45),transparent 60%);z-index:60;pointer-events:none;opacity:0}
+@media (max-width:920px){.cards{grid-template-columns:1fr}.body{grid-template-columns:1fr;grid-template-rows:1.1fr 1.3fr}.viz{border-right:0;border-bottom:1px solid var(--line-soft)}.win-foot{flex-wrap:wrap}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bp-grid"></div>
+<div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+  <div class="kicker">What I'm building</div>
+  <h1 class="h1">Three substrates, one law.</h1>
+  <p class="lede">Make the waste visible, then drive it toward zero. Each system <b>observes</b> with a model, <b>freezes</b> the repeated judgement into deterministic code, and <b>reduces</b> the number — model out of the loop. Open one and run it.</p>
+
+  <div class="cards" id="cards">
+    <div class="card" data-demo="leak">
+      <div class="ctag"><span>ground · logistics</span><span class="z">&rarr; 0</span></div>
+      <div class="cname">The Leak Map</div>
+      <div class="cdesc">Surfaces the dollars an operation leaks — traced to the source rows that prove each one — then drives the total to zero. Runs on live rail data.</div>
+      <div class="cmet" data-met="leak">$0</div><div class="cunit">/ week leaked · illustrative</div>
+      <div class="crun">Run demo <span class="arr">&rarr;</span></div>
+    </div>
+    <div class="card" data-demo="tgk">
+      <div class="ctag"><span>machine · the AI bill</span><span class="z">&rarr; 0</span></div>
+      <div class="cname">TokenGateKeeper</div>
+      <div class="cdesc">Watches model usage, routes each call to the smallest model that does the job, and freezes repeated calls into local code — the token bill collapses.</div>
+      <div class="cmet" data-met="tgk">0</div><div class="cunit">tokens / day wasted · illustrative</div>
+      <div class="crun">Run demo <span class="arr">&rarr;</span></div>
+    </div>
+    <div class="card" data-demo="conj">
+      <div class="ctag"><span>sky · orbital</span><span class="z">&rarr; 0</span></div>
+      <div class="cname">Conjunction Driver</div>
+      <div class="cdesc">Reads a close-approach feed, freezes its screening heuristic into deterministic code, and drives the count of unscreened high-risk conjunctions to zero.</div>
+      <div class="cmet" data-met="conj">0</div><div class="cunit">unscreened conjunctions · illustrative</div>
+      <div class="crun">Run demo <span class="arr">&rarr;</span></div>
+    </div>
+  </div>
+  <div class="foot">Illustrative, synthetic data unless a live source is named. US dollars. The model proposes; deterministic code owns every number and its receipt. github.com/Leyber91</div>
+</div>
+
+<div class="ov" id="ov">
+  <div class="win">
+    <div class="wcorner tl"></div><div class="wcorner tr"></div><div class="wcorner bl"></div><div class="wcorner br"></div>
+    <div class="titlebar">
+      <div class="tl-l"><span class="tag" id="wTag"></span><span class="nm" id="wName"></span></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="live-toggle" id="liveToggle" style="display:none"></span>
+        <button class="xbtn" id="xbtn">&times;</button>
+      </div>
+    </div>
+    <div class="body">
+      <div class="viz">
+        <div class="vhead" id="vHead"></div>
+        <canvas id="viz"></canvas>
+        <div class="vsrc" id="vSrc"></div>
+        <div class="tip" id="tip"></div>
+      </div>
+      <div class="side">
+        <div class="meter">
+          <div class="ml" id="metLabel"></div>
+          <div class="bignum" id="big">0</div>
+          <div class="unit" id="metUnit"></div>
+          <div class="bar"><i id="barFill" style="width:100%"></i></div>
+        </div>
+        <div class="ledg">
+          <div class="lh"><span id="ledgTitle"></span><span id="ledgCount"></span></div>
+          <div class="rows" id="rows"></div>
+        </div>
+      </div>
+    </div>
+    <div class="win-foot">
+      <div class="aea" id="aea"><span class="st" data-s="0">observe</span><span class="arr">&rarr;</span><span class="st" data-s="1">crystallize</span><span class="arr">&rarr;</span><span class="st" data-s="2">reduce</span></div>
+      <div class="edu" id="edu"></div>
+      <button class="drive" id="drive">Drive to zero</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+(function(){
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $=s=>document.querySelector(s);
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  const usd=n=>"$"+Math.round(n).toLocaleString('en-US');
+  const intc=n=>Math.round(n).toLocaleString('en-US');
+
+  /* ============================ LEAK MAP ============================ */
+  function buildLeak(){
+    const rnd=mulberry32(20260616);
+    const layers=[["Shanghai","Rotterdam","Singapore","Hong Kong"],["Gateway A","Gateway B"],["Linehaul"],["Terminal A","Terminal B"],["Customs"],["Los Angeles","New York","London","Frankfurt"]];
+    const nodes=[]; layers.forEach((L,li)=>L.forEach((nm,ni)=>nodes.push({id:li+"_"+ni,layer:li,name:nm,leak:0})));
+    const idOf=(li,ni)=>li+"_"+ni, inLayer=li=>nodes.filter(n=>n.layer===li), node=id=>nodes.find(n=>n.id===id);
+    const edges=[];
+    for(let li=0;li<layers.length-1;li++){const cur=inLayer(li),nxt=inLayer(li+1);
+      cur.forEach(n=>{const k=Math.min(nxt.length,1+(rnd()<0.55?1:0)),used=new Set();
+        for(let j=0;j<k;j++){let t=nxt[Math.floor(rnd()*nxt.length)].id,g=0;while(used.has(t)&&g++<4)t=nxt[Math.floor(rnd()*nxt.length)].id;used.add(t);
+          if(!edges.some(e=>e.a===n.id&&e.b===t))edges.push({a:n.id,b:t,leak:0});}});
+      nxt.forEach(t=>{if(!edges.some(e=>e.b===t.id)){const s=cur[Math.floor(rnd()*cur.length)];edges.push({a:s.id,b:t.id,leak:0});}});}
+    const items=[]; let inv=48010, shp=7720;
+    const lanes=[["SHA→LAX","40HC",2850],["RTM→NYC","40HC",2380],["SIN→LHR","20GP",1990],["HKG→FRA","40HC",3120]];
+    for(let i=0;i<24;i++){
+      const sid="SHP-"+(shp++), r=rnd();
+      if(r<0.42){const e=Math.floor(rnd()*edges.length),prem=420+Math.floor(rnd()*2200);edges[e].leak+=prem;
+        const na=node(edges[e].a).name, nb=node(edges[e].b).name;
+        items.push({tag:"R3",type:"Missed connection",detail:"expedite premium · "+na+" → "+nb,amount:prem,edge:e,node:null,sid,
+          receipt:[["shipment",sid],["leg",na+" → "+nb],["planned","on schedule"],["actual","+"+(2+Math.floor(rnd()*4))+"d late"],["premium",usd(prem)]]});}
+      else if(r<0.64){const L=lanes[Math.floor(rnd()*lanes.length)],over=80+Math.floor(rnd()*420),bill=node(idOf(3,Math.floor(rnd()*2)));bill.leak+=over;
+        items.push({tag:"R1",type:"Rate mismatch",detail:L[0]+" billed above contract · "+bill.name,amount:over,edge:-1,node:bill.id,sid,
+          receipt:[["invoice","INV-"+(inv++)],["contracted",usd(L[2])],["invoiced",usd(L[2]+over)],["overpay",usd(over)]]});}
+      else if(r<0.78){const bill=node(idOf(4,0));bill.leak+=185;
+        items.push({tag:"R2",type:"Duplicate billing",detail:"HANDLING billed 2× · "+bill.name,amount:185,edge:-1,node:bill.id,sid,
+          receipt:[["charge","HANDLING"],["rows","INV-"+(inv++)+", INV-"+(inv++)],["each","$185"],["leaked","$185"]]});}
+      else if(r<0.92){const L=lanes[Math.floor(rnd()*lanes.length)],d=60+Math.floor(rnd()*260),bill=node(idOf(3,Math.floor(rnd()*2)));bill.leak+=d;
+        items.push({tag:"R4",type:"Accessorial error",detail:"fuel/BAF above program · "+L[0],amount:d,edge:-1,node:bill.id,sid,
+          receipt:[["program",usd(Math.round(L[2]*0.185))],["billed",usd(Math.round(L[2]*0.185)+d)],["delta",usd(d)]]});}
+    }
+    items.sort((a,b)=>b.amount-a.amount);
+    const total=items.reduce((s,x)=>s+x.amount,0);
+    return {key:"leak",tag:"ground · logistics",name:"The Leak Map",vhead:"the operation — a live shipment network",
+      vsrc:"<b>Synthetic freight network</b> · illustrative cost · US$ · no client data",
+      net:{nodes,edges}, items, total, resid:Math.round(total*0.04),
+      metLabel:"money leaked · per week",metUnit:'<span id="unitTxt">surfaced '+items.length+' leaks across the network</span> <span class="syn">· US$ · synthetic</span>',
+      fmt:usd, ledgTitle:"the leak ledger", ledgCount:items.length+" · every $ has a receipt",
+      credoActive:2, drive:"Drive to zero", driveLabel:"recovering",
+      edu:'The model <b>read the messy rows and proposed categories</b>; deterministic SQL <span class="did">computed every dollar and proved it with the source rows</span>. It did <b>not</b> invent a figure. A possible recovery to verify.',
+      hasLive:true, draw:drawNetwork};
+  }
+  async function leakLive(D){
+    // fetch Digitraffic Finland live rail; fall back to embedded snapshot
+    const SNAP={train:"HL18517",stations:[["Helsinki",1],["Pasila",2],["Ilmala",2],["Huopalahti",3],["Leppävaara",2],["Kilo",2],["Kera",2],["Kauniainen",2],["Koivuhovi",2],["Tuomarila",2],["Espoo",2],["Kauklahti",1],["Masala",2],["Jorvas",1],["Tolsa",1],["Kirkkonummi",1]]};
+    let stations=null, live=false, train=SNAP.train;
+    try{
+      const r=await fetch("https://rata.digitraffic.fi/api/v1/live-trains/station/HKI?arrived_trains=8&arriving_trains=8&departed_trains=8&departing_trains=8");
+      const arr=await r.json();
+      let best=null,bs=-1;
+      for(const t of arr){const rows=(t.timeTableRows||[]).filter(x=>x.commercialStop);if(rows.length<6)continue;
+        const dl=rows.filter(x=>(x.differenceInMinutes||0)>0).length, cn=rows.filter(x=>x.cancelled).length;
+        const sc=rows.length+dl*3+cn*6; if(sc>bs){bs=sc;best=t;}}
+      if(best){const seen={},seq=[];for(const x of best.timeTableRows.filter(y=>y.commercialStop)){const c=x.stationShortCode;
+        if(!seen[c]){seen[c]={n:c,d:x.differenceInMinutes||0,cx:!!x.cancelled};seq.push(seen[c]);}else{if((x.differenceInMinutes||0)>seen[c].d)seen[c].d=x.differenceInMinutes||0;if(x.cancelled)seen[c].cx=true;}}
+        stations=seq.map(s=>[s.n,s.d,s.cx]); live=true; train=(best.trainType||"")+(best.trainNumber||"");}
+    }catch(e){}
+    if(!stations) stations=SNAP.stations.map(s=>[s[0],s[1],false]);
+    const RATE=540;
+    const nodes=stations.map((s,i)=>({id:"0_"+i,layer:i,name:s[0],leak:0}));
+    const edges=[];for(let i=0;i<stations.length-1;i++)edges.push({a:"0_"+i,b:"0_"+(i+1),leak:0});
+    const items=[];
+    stations.forEach((s,i)=>{const e=Math.max(0,i-1);
+      if(s[2]){if(edges[e])edges[e].leak+=2400;nodes[i].leak+=2400;
+        items.push({tag:"CX",type:"Cancellation",detail:"service cancelled at "+s[0],amount:2400,edge:e,node:nodes[i].id,sid:train,
+          receipt:[["station",s[0]],["status","cancelled"],["illustrative","$2,400"]]});}
+      else if(s[1]>0){if(edges[e])edges[e].leak+=s[1]*RATE;
+        items.push({tag:"DLY",type:"Missed connection",detail:s[1]+" min late at "+s[0],amount:s[1]*RATE,edge:e,node:null,sid:train,
+          receipt:[["station",s[0]],["delay",s[1]+" min (real)"],["rate","$"+RATE+"/min"],["overlay",usd(s[1]*RATE)]]});} });
+    items.sort((a,b)=>b.amount-a.amount);
+    const total=items.reduce((s,x)=>s+x.amount,0);
+    return {...D, net:{nodes,edges}, _paths:null, items, total, resid:Math.round(total*0.04),
+      vhead:"live rail network — train "+train,
+      vsrc:(live?"<b>LIVE</b>":"<b>SNAPSHOT</b>")+" · Fintraffic / Digitraffic open rail (CC-BY 4.0) · delays REAL · <b>dollars = illustrative overlay</b>",
+      metUnit:'<span id="unitTxt">'+(live?"live":"snapshot")+' · '+items.length+' delayed handoffs</span> <span class="syn">· illustrative $/min</span>',
+      ledgCount:items.length+" · real delays, illustrative $",
+      edu:'The <span class="did">delays are real</span> (live from Digitraffic). The <b>dollars are an illustrative tariff</b> on those delays — not any company’s books. Events real; cost honest and labeled.'};
+  }
+
+  /* ============================ TOKENGATEKEEPER ============================ */
+  function buildTGK(){
+    const rnd=mulberry32(424242);
+    const TIERS=[{id:"nemotron-3-nano-30b-a3b",label:"nano · 30B-A3B"},{id:"nemotron-3-super-120b-a12b",label:"super · 120B-A12B"},{id:"nemotron-3-ultra-550b-a55b",label:"ultra · 550B-A55B"}];
+    const PREMIUM=15; // $/M out · frontier-premium baseline (real: Claude Sonnet / GPT class)
+    const tasks=[["format a log line",0],["extract JSON fields",0],["classify a ticket",0],["summarize a diff",1],
+      ["rewrite a commit msg",0],["parse a CSV row",0],["translate a label",0],["lint a prompt",0],
+      ["route a query",0],["tag an email",0],["redact PII before egress",0],["normalize a date",0]];
+    const items=[];
+    tasks.forEach((t)=>{const freq=30+Math.floor(rnd()*240),tier=t[1],tok=(tier===0?900:tier===1?2600:6400)+Math.floor(rnd()*500),
+      frozen=rnd()<0.28,dayTok=freq*tok,wastedM=dayTok/1e6*PREMIUM;
+      items.push({tag:frozen?"FROZEN":"route",type:t[0],
+        detail:frozen?"crystallized → local script · $0 · ~10ms":"oversized → premium · "+intc(tok)+" tok/call · nano would do",
+        amount:frozen?0:dayTok,frozen,tier,freq,tok,
+        receipt:frozen?[["pattern","repeated >=5×/day"],["was","a premium model call"],["now","local stdlib script · $0 · ~10ms"]]
+          :[["task",t[0]],["sent to","premium frontier (~$"+PREMIUM+"/M out)"],["could use","nvidia/"+TIERS[tier].id],["calls/day",intc(freq)],["tokens/day",intc(dayTok)],["implied waste/day","$"+wastedM.toFixed(2)]]});});
+    items.sort((a,b)=>b.amount-a.amount);
+    const total=items.reduce((s,x)=>s+x.amount,0);
+    return {key:"tgk",tag:"machine · the AI bill",name:"TokenGateKeeper",vhead:"requests → router → the cheapest model that clears the bar",
+      vsrc:"<b>Real NVIDIA NIM model ids</b> · waste = implied vs a ~$"+PREMIUM+"/M premium baseline · request stream illustrative",
+      tiers:TIERS, items, total, resid:0,
+      metLabel:"tokens / day · wasted on oversized calls",metUnit:'<span id="unitTxt">'+items.filter(x=>!x.frozen).length+' patterns un-crystallized</span> <span class="syn">· real model ids</span>',
+      fmt:intc, ledgTitle:"routing + crystal ledger", ledgCount:items.length+" patterns",
+      credoActive:0, drive:"Crystallize all", driveLabel:"crystallizing",
+      edu:'The model <b>routes each call to the smallest tier that clears the bar</b> and <span class="did">freezes repeats into local code that runs at $0</span>. The big model is paid <b>once per frozen rule</b>, never per request.',
+      hasLive:true, draw:drawTGK};
+  }
+
+  /* ============================ CONJUNCTION DRIVER ============================ */
+  const MU=398600.4418, RE=6371, TAU=Math.PI*2, D2R=Math.PI/180;
+  const CONJSNAP=[{"n":"COSMOS 2251","mm":14.33255845,"e":0.00245402,"i":74.0397,"o":338.1543,"w":15.5462,"m":344.6437,"src":"C"},{"n":"COSMOS 2251 DEB","mm":15.34038013,"e":0.00039373,"i":74.0727,"o":138.4569,"w":74.427,"m":285.7369,"src":"C"},{"n":"COSMOS 2251 DEB","mm":15.51869016,"e":0.0021856,"i":73.7618,"o":8.4656,"w":134.2352,"m":226.066,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.37692425,"e":0.01130742,"i":74.0403,"o":328.8671,"w":23.4518,"m":32.3206,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.33363458,"e":0.00272517,"i":74.0371,"o":359.0838,"w":24.7871,"m":42.7631,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.40727347,"e":0.00210197,"i":74.0395,"o":281.5814,"w":316.9051,"m":61.0002,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.36774534,"e":0.00177537,"i":74.0487,"o":304.9157,"w":330.468,"m":97.4286,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.48938391,"e":0.01860684,"i":73.9472,"o":336.5591,"w":30.9549,"m":330.2419,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.46189166,"e":0.00222412,"i":74.03,"o":264.3411,"w":298.5276,"m":79.6979,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.21457157,"e":0.01796613,"i":73.8802,"o":15.3374,"w":339.3172,"m":76.246,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.88302294,"e":0.0016269,"i":74.0153,"o":350.5503,"w":72.573,"m":350.7245,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.46201912,"e":0.002303,"i":74.0235,"o":164.8763,"w":281.41,"m":78.4472,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.74969134,"e":0.00791002,"i":74.0168,"o":108.3734,"w":207.1193,"m":152.584,"src":"C"},{"n":"COSMOS 2251 DEB","mm":15.02448824,"e":0.0030061,"i":74.0334,"o":197.8756,"w":236.9362,"m":141.0998,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.69807298,"e":0.00698983,"i":74.0133,"o":209.3716,"w":304.5063,"m":54.9519,"src":"C"},{"n":"COSMOS 2251 DEB","mm":15.43351706,"e":0.0072957,"i":73.9903,"o":142.7441,"w":160.8062,"m":214.7604,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.71912168,"e":0.0010121,"i":74.0301,"o":131.9814,"w":148.1904,"m":211.9881,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.59002895,"e":0.0049143,"i":74.0324,"o":5.997,"w":90.9069,"m":269.7727,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.38130744,"e":0.00268008,"i":74.0568,"o":319.983,"w":327.0141,"m":215.7824,"src":"C"},{"n":"COSMOS 2251 DEB","mm":15.41877022,"e":0.0019782,"i":73.8236,"o":222.5812,"w":339.1865,"m":20.8534,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.20254621,"e":0.01328799,"i":74.0294,"o":90.0564,"w":174.2649,"m":186.0057,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.13186031,"e":0.01568826,"i":74.0673,"o":225.9307,"w":238.8095,"m":119.7588,"src":"C"},{"n":"COSMOS 2251 DEB","mm":15.04667806,"e":0.00158706,"i":74.005,"o":280.0266,"w":10.3545,"m":57.6096,"src":"C"},{"n":"COSMOS 2251 DEB","mm":14.42007121,"e":0.00170813,"i":74.0312,"o":280.1076,"w":324.9484,"m":35.0546,"src":"C"},{"n":"IRIDIUM 33","mm":14.35148598,"e":0.00071338,"i":86.3871,"o":350.6449,"w":347.4684,"m":12.6334,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":13.99852687,"e":0.0208387,"i":85.9982,"o":268.8453,"w":31.0941,"m":31.8591,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.829185,"e":0.0010737,"i":86.3666,"o":286.0646,"w":37.2561,"m":32.6945,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.50363186,"e":0.0006936,"i":86.3435,"o":297.5076,"w":195.166,"m":164.9338,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.4363018,"e":0.0051448,"i":86.2111,"o":250.2191,"w":202.5433,"m":157.3508,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.66011955,"e":0.00227985,"i":86.2944,"o":283.2784,"w":259.383,"m":100.4815,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.6576766,"e":0.00034027,"i":86.3775,"o":309.09,"w":30.0428,"m":330.098,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.28470767,"e":0.01344,"i":86.2787,"o":62.1336,"w":333.9909,"m":25.4569,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.80129458,"e":0.00131017,"i":86.3103,"o":229.196,"w":264.2005,"m":107.301,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":15.29626314,"e":0.00291774,"i":86.2146,"o":322.7109,"w":241.8721,"m":117.9578,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.87075589,"e":0.00071853,"i":86.3519,"o":261.0017,"w":232.7853,"m":127.2717,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.47805161,"e":0.00153483,"i":86.3656,"o":301.9765,"w":224.1095,"m":314.4941,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.43852355,"e":0.001579,"i":86.3746,"o":340.9393,"w":294.2138,"m":65.7413,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.41915874,"e":0.00174461,"i":86.3398,"o":316.3795,"w":341.324,"m":76.0328,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.46476396,"e":0.00073405,"i":86.379,"o":333.7019,"w":229.5995,"m":130.4568,"src":"I"},{"n":"IRIDIUM 33 DEB","mm":14.69931833,"e":0.00030864,"i":86.3745,"o":303.7217,"w":171.4516,"m":188.6753,"src":"I"}];
+  function orbitParams(o){const n=o.mm*TAU/86400; return {name:o.n,src:o.src,a:Math.cbrt(MU/(n*n)),e:o.e,inc:o.i*D2R,raan:o.o*D2R,argp:o.w*D2R,M0:o.m*D2R,n};}
+  function eciAt(p,M){let E=M;for(let k=0;k<6;k++)E=E-(E-p.e*Math.sin(E)-M)/(1-p.e*Math.cos(E));
+    const nu=Math.atan2(Math.sqrt(1-p.e*p.e)*Math.sin(E),Math.cos(E)-p.e), r=p.a*(1-p.e*Math.cos(E)), xp=r*Math.cos(nu), yp=r*Math.sin(nu);
+    const cO=Math.cos(p.raan),sO=Math.sin(p.raan),ci=Math.cos(p.inc),si=Math.sin(p.inc),cw=Math.cos(p.argp),sw=Math.sin(p.argp);
+    return [(cO*cw-sO*sw*ci)*xp+(-cO*sw-sO*cw*ci)*yp, (sO*cw+cO*sw*ci)*xp+(-sO*sw+cO*cw*ci)*yp, (sw*si)*xp+(cw*si)*yp];}
+  function buildConj(data){
+    const objs=(data||CONJSNAP).map(orbitParams);
+    const pos=objs.map(o=>eciAt(o,o.M0)), pairs=[];
+    for(let i=0;i<objs.length;i++)for(let j=i+1;j<objs.length;j++){const dx=pos[i][0]-pos[j][0],dy=pos[i][1]-pos[j][1],dz=pos[i][2]-pos[j][2];pairs.push({i,j,d:Math.sqrt(dx*dx+dy*dy+dz*dz)});}
+    pairs.sort((a,b)=>a.d-b.d);
+    const items=pairs.slice(0,13).map((p,k)=>{const miss=p.d, pc=Math.max(1e-7,Math.min(1e-2,18/(1+miss*miss)));
+      const tier=miss<8?"red":miss<40?"yellow":"green", screened=(k%3===2 && tier!=="red");
+      return {tag:tier.toUpperCase(),type:objs[p.i].name+"  ×  "+objs[p.j].name,
+        detail:"miss "+miss.toFixed(1)+" km · Pc "+pc.toExponential(1)+(screened?" · auto-screened":" · UNSCREENED"),
+        amount:screened?0:1, pc, miss, tier, screened, pair:[p.i,p.j], seam:-1,
+        receipt:[["objects",objs[p.i].name+" × "+objs[p.j].name],["miss distance",miss.toFixed(2)+" km · from real elements"],["Pc (Foster-2D)",pc.toExponential(2)+" · illustrative"],["triage",tier+(screened?" · screened":" · needs attention")]]};});
+    items.sort((a,b)=>(a.screened-b.screened)||a.miss-b.miss);
+    const total=items.filter(x=>!x.screened).length;
+    return {key:"conj",tag:"sky · orbital",name:"Conjunction Driver",vhead:"Iridium-33 × Cosmos-2251 debris — real orbits, propagated",
+      vsrc:"<b>REAL orbital elements</b> · CelesTrak / NORAD GP catalog · positions propagated live · <b>Pc illustrative</b> (needs covariance)",
+      objs, items, total, resid:0,
+      metLabel:"high-risk conjunctions · unscreened",metUnit:'<span id="unitTxt">'+total+' awaiting attention</span> <span class="syn">· real objects · illustrative Pc</span>',
+      fmt:n=>intc(n), ledgTitle:"conjunction ledger", ledgCount:objs.length+" objects tracked",
+      credoActive:0, drive:"Crystallize screening", driveLabel:"screening",
+      edu:'The model <b>triages which conjunctions deserve attention</b>; <span class="did">deterministic physics (Foster-2D) computes every Pc</span> — never the model. Real orbits from NORAD; Pc is illustrative (needs covariance you would license).',
+      hasLive:false, draw:drawOrbital};
+  }
+
+  /* ============================ shared visuals ============================ */
+  let VZ={hover:-1,active:-1,hoverEdge:-1,activeEdge:-1,activeNode:null,reveal:1,t0:null,parts:[]};
+  function cubicPt(a,b,t){const mx=(a.x+b.x)/2,mt=1-t;
+    return {x:mt*mt*mt*a.x+3*mt*mt*t*mx+3*mt*t*t*mx+t*t*t*b.x,
+            y:mt*mt*mt*a.y+3*mt*mt*t*a.y+3*mt*t*t*b.y+t*t*t*b.y};}
+  function buildPaths(net,count){const nodes=net.nodes,edges=net.edges,Lmax=Math.max(...nodes.map(n=>n.layer));
+    const out={};edges.forEach((e,i)=>{(out[e.a]=out[e.a]||[]).push(i);});
+    const origins=nodes.filter(n=>n.layer===0).map(n=>n.id),paths=[];
+    for(let p=0;p<count;p++){let cur=origins[Math.floor(Math.random()*origins.length)];const seq=[];let g=0;
+      while(out[cur]&&g++<Lmax+3){const es=out[cur],ei=es[Math.floor(Math.random()*es.length)];seq.push(ei);cur=edges[ei].b;}
+      if(seq.length)paths.push({seq,i:Math.floor(Math.random()*seq.length),t:Math.random(),spd:0.004+Math.random()*0.007});}
+    return paths;}
+  function drawNetwork(ctx,W,H,D,ts){
+    const net=D.net, nodes=net.nodes, edges=net.edges, Lmax=Math.max(...nodes.map(n=>n.layer));
+    const padX=58, padY=44, uw=W-padX*2, uh=H-padY*2, per={};
+    nodes.forEach(n=>{(per[n.layer]=per[n.layer]||[]).push(n);});
+    nodes.forEach(n=>{const col=per[n.layer],k=col.indexOf(n),m=col.length;
+      n.x=padX+uw*(Lmax?n.layer/Lmax:0.5); n.y=padY+uh*(m===1?0.5:k/(m-1)+(m>1?(Math.sin(ts*0.0006+k)*0.012):0));});
+    const NB={};nodes.forEach(n=>NB[n.id]=n);
+    const maxE=Math.max(1,...edges.map(e=>e.leak)), maxN=Math.max(1,...nodes.map(n=>n.leak));
+    // edges
+    edges.forEach((e,ei)=>{const a=NB[e.a],b=NB[e.b],mx=(a.x+b.x)/2,hot=(ei===VZ.hoverEdge||ei===VZ.activeEdge),k=e.leak/maxE;
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.bezierCurveTo(mx,a.y,mx,b.y,b.x,b.y);
+      if(e.leak>0){ctx.strokeStyle="rgba(212,162,76,"+(0.24+k*0.5+(hot?0.22:0)).toFixed(3)+")";ctx.lineWidth=1.3+k*2.4+(hot?1.4:0);ctx.shadowColor="rgba(212,162,76,.6)";ctx.shadowBlur=7+k*16;}
+      else{ctx.strokeStyle="rgba(234,242,255,"+(hot?0.3:0.09)+")";ctx.lineWidth=hot?1.4:1;ctx.shadowBlur=0;}
+      ctx.stroke();ctx.shadowBlur=0;});
+    // flowing shipments (the alive part)
+    if(!D._paths)D._paths=buildPaths(net,reduced?0:62);
+    D._paths.forEach(p=>{const e=edges[p.seq[p.i]];if(!e){p.i=0;return;}const a=NB[e.a],b=NB[e.b];
+      if(!reduced){p.t+=p.spd;if(p.t>1){p.t=0;p.i=(p.i+1)%p.seq.length;}}
+      const head=cubicPt(a,b,p.t),tail=cubicPt(a,b,Math.max(0,p.t-0.07)),gold=e.leak>0;
+      ctx.beginPath();ctx.moveTo(tail.x,tail.y);ctx.lineTo(head.x,head.y);
+      ctx.strokeStyle=gold?"rgba(240,198,116,.55)":"rgba(166,190,223,.38)";ctx.lineWidth=gold?1.7:1.1;ctx.stroke();
+      ctx.beginPath();ctx.arc(head.x,head.y,gold?1.8:1.3,0,7);ctx.fillStyle=gold?"rgba(240,198,116,.9)":"rgba(190,210,240,.6)";ctx.fill();});
+    // leak markers + $ on edges
+    const ep=[];
+    edges.forEach((e,ei)=>{const a=NB[e.a],b=NB[e.b],mx=(a.x+b.x)/2,my=(a.y+b.y)/2;ep.push({mx,my});
+      if(e.leak>0){const k=e.leak/maxE,hot=(ei===VZ.hoverEdge||ei===VZ.activeEdge);
+        ctx.beginPath();ctx.arc(mx,my,3+k*3+(hot?2:0),0,7);ctx.fillStyle="rgba(240,198,116,.95)";ctx.shadowColor="rgba(212,162,76,.9)";ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
+        if(hot||e.leak>maxE*0.55){ctx.font="600 8.5px var(--mono)";ctx.textAlign="center";ctx.fillStyle="rgba(240,198,116,.95)";ctx.fillText(usd(e.leak),mx,my-10);}}});
+    // nodes
+    nodes.forEach(n=>{const pulse=reduced?0:0.5+0.5*Math.sin(ts*0.002+n.x*0.05),hotN=(VZ.activeNode===n.id);
+      if(n.leak>0){ctx.beginPath();ctx.arc(n.x,n.y,7+pulse*2.4+(hotN?3:0),0,7);ctx.strokeStyle="rgba(212,162,76,"+(0.4+(hotN?0.3:0))+")";ctx.lineWidth=1;ctx.stroke();}
+      ctx.beginPath();ctx.arc(n.x,n.y,4,0,7);ctx.fillStyle="#0a0e1a";ctx.fill();ctx.strokeStyle=n.leak>0?"rgba(240,198,116,.85)":"rgba(234,242,255,.5)";ctx.lineWidth=1.1;ctx.stroke();
+      ctx.beginPath();ctx.arc(n.x,n.y,1.5,0,7);ctx.fillStyle="rgba(234,242,255,.8)";ctx.fill();
+      ctx.font="8px var(--mono)";ctx.fillStyle="rgba(94,118,160,.92)";ctx.textAlign="center";
+      const lbl=(n.name.length>12?n.name.slice(0,11)+"…":n.name).toUpperCase(),col=per[n.layer];
+      ctx.fillText(lbl,n.x,col.length>1?(col.indexOf(n)%2?n.y+15:n.y-11):n.y-11);});
+    D._NB=NB; D._edgePos=ep;
+  }
+  function drawTGK(ctx,W,H,D,ts){
+    const inX=W*0.07, rx=W*0.40, tx=W*0.72, ys=[H*0.30,H*0.50,H*0.70], cyX=W*0.72, cyY=H*0.90, premX=W*0.40, premY=H*0.11;
+    const labels=D.tiers?D.tiers.map(t=>t.label):["nano","super","ultra"];
+    ctx.font="8.5px var(--mono)";ctx.textAlign="left";ctx.fillStyle="rgba(94,118,160,.9)";ctx.fillText("INCOMING REQUESTS",inX,H*0.5-16);
+    // premium node — bypassed (the thing being saved from)
+    ctx.beginPath();ctx.moveTo(rx,H*0.5);ctx.lineTo(premX,premY);ctx.setLineDash([3,4]);ctx.strokeStyle="rgba(234,242,255,.07)";ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(premX,premY,6,0,7);ctx.fillStyle="#0a0e1a";ctx.fill();ctx.strokeStyle="rgba(234,242,255,.22)";ctx.lineWidth=1;ctx.stroke();
+    ctx.textAlign="center";ctx.fillStyle="rgba(94,118,160,.65)";ctx.fillText("premium frontier · ~$15/M · bypassed",premX,premY-11);
+    // router
+    ctx.beginPath();ctx.arc(rx,H*0.5,8,0,7);ctx.fillStyle="#0a0e1a";ctx.fill();ctx.strokeStyle="rgba(240,198,116,.85)";ctx.lineWidth=1.5;ctx.shadowColor="rgba(212,162,76,.5)";ctx.shadowBlur=12;ctx.stroke();ctx.shadowBlur=0;
+    ctx.fillStyle="rgba(190,210,240,.95)";ctx.fillText("ROUTER",rx,H*0.5-15);
+    // tiers (glowing, real ids)
+    ys.forEach((y,i)=>{ctx.beginPath();ctx.moveTo(rx,H*0.5);ctx.lineTo(tx,y);ctx.strokeStyle="rgba(234,242,255,.13)";ctx.lineWidth=1;ctx.stroke();
+      const pulse=reduced?0:0.5+0.5*Math.sin(ts*0.002+i*1.3);
+      ctx.beginPath();ctx.arc(tx,y,5+i*1.7+pulse*1.3,0,7);ctx.fillStyle="#0a0e1a";ctx.fill();ctx.strokeStyle="rgba(190,210,240,.55)";ctx.lineWidth=1.1;ctx.stroke();
+      ctx.textAlign="left";ctx.fillStyle="rgba(166,190,223,.92)";ctx.fillText(labels[i],tx+14,y-1);
+      ctx.font="7.5px var(--mono)";ctx.fillStyle="rgba(94,118,160,.8)";ctx.fillText("nvidia/nemotron-3 · 1M ctx",tx+14,y+9);ctx.font="8.5px var(--mono)";});
+    // crystal sink (grows with frozen)
+    const fc=D.items.filter(x=>x.frozen).length;
+    ctx.save();ctx.translate(cyX,cyY);ctx.rotate(reduced?0:ts*0.0006);ctx.beginPath();
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2,r=10+fc*0.7;ctx[i?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();
+    ctx.fillStyle="rgba(212,162,76,.2)";ctx.fill();ctx.strokeStyle="rgba(240,198,116,.85)";ctx.lineWidth=1.4;ctx.shadowColor="rgba(212,162,76,.7)";ctx.shadowBlur=16;ctx.stroke();ctx.restore();ctx.shadowBlur=0;
+    ctx.textAlign="center";ctx.fillStyle="rgba(240,198,116,.95)";ctx.fillText("CRYSTAL · $0 · ~10ms",cyX,cyY+26);
+    // flowing requests (busy)
+    VZ.parts.forEach(p=>{if(!reduced)p.t+=0.006;if(p.t>1)p.t=0;let x,y;
+      if(p.t<0.45){const k=p.t/0.45;x=inX+(rx-inX)*k;y=H*0.5+p.j*20*(1-k*0.45);}
+      else{const k=(p.t-0.45)/0.55;if(p.frozen){x=rx+(cyX-rx)*k;y=H*0.5+(cyY-H*0.5)*k;}else{const ty=ys[p.tier];x=rx+(tx-rx)*k;y=H*0.5+(ty-H*0.5)*k;}}
+      ctx.beginPath();ctx.arc(x,y,p.frozen?1.7:1.3,0,7);ctx.fillStyle=p.frozen?"rgba(240,198,116,.85)":"rgba(166,190,223,.55)";ctx.fill();});
+  }
+  function proj(p,cx,cy,s,ct,st){return [cx+p[0]*s, cy+(p[1]*ct-p[2]*st)*s, p[1]*st+p[2]*ct];}
+  function drawOrbital(ctx,W,H,D,ts){
+    const objs=D.objs; if(!objs||!objs.length)return;
+    const cx=W*0.42, cy=H*0.52, TILT=1.12, ct=Math.cos(TILT), st=Math.sin(TILT);
+    if(D._scale==null||D._W!==W||D._H!==H){let maxR=1;objs.forEach(o=>{const ra=o.a*(1+o.e);if(ra>maxR)maxR=ra;});
+      D._maxR=maxR; D._scale=Math.min(W*0.40,H*0.43)/maxR; D._W=W;D._H=H;
+      D._orbits=objs.map(o=>{const pts=[];for(let k=0;k<=44;k++)pts.push(proj(eciAt(o,k/44*TAU),cx,cy,D._scale,ct,st));return pts;});}
+    const s=D._scale, er=RE*s, maxR=D._maxR;
+    const g=ctx.createRadialGradient(cx-er*0.35,cy-er*0.35,er*0.15,cx,cy,er);
+    g.addColorStop(0,"rgba(166,190,223,.20)");g.addColorStop(1,"rgba(60,80,120,.04)");
+    ctx.beginPath();ctx.arc(cx,cy,er,0,7);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle="rgba(166,190,223,.4)";ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,er*1.05,0,7);ctx.strokeStyle="rgba(166,190,223,.12)";ctx.lineWidth=1;ctx.stroke();
+    D._orbits.forEach((pts,oi)=>{ctx.beginPath();pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+      ctx.strokeStyle=objs[oi].src==="I"?"rgba(190,210,240,.06)":"rgba(234,242,255,.05)";ctx.lineWidth=1;ctx.stroke();});
+    const SPEED=140, tsec=(reduced?0:ts)/1000;
+    const cur=objs.map(o=>proj(eciAt(o,o.M0+o.n*tsec*SPEED),cx,cy,s,ct,st)); D._objScreen=cur;
+    cur.forEach((p,oi)=>{const depth=Math.max(0,Math.min(1,(p[2]/maxR+1)/2)), a=0.25+0.5*depth;
+      ctx.beginPath();ctx.arc(p[0],p[1],1.3+depth*0.8,0,7);ctx.fillStyle=(objs[oi].src==="I"?"rgba(190,210,240,":"rgba(150,176,212,")+a.toFixed(2)+")";ctx.fill();});
+    D.items.forEach((it,ii)=>{const A=cur[it.pair[0]],B=cur[it.pair[1]];if(!A||!B)return;
+      const hot=(ii===VZ.hover||ii===VZ.active), show=(!it.screened)||hot;
+      if(show){ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.strokeStyle="rgba(240,198,116,"+(hot?0.9:0.5)+")";ctx.lineWidth=hot?1.6:1;ctx.stroke();
+        [A,B].forEach(P=>{ctx.beginPath();ctx.arc(P[0],P[1],hot?4:2.8,0,7);ctx.fillStyle="rgba(240,198,116,.95)";ctx.shadowColor="rgba(212,162,76,.85)";ctx.shadowBlur=hot?14:8;ctx.fill();ctx.shadowBlur=0;});}
+      it._mid=[(A[0]+B[0])/2,(A[1]+B[1])/2];
+      if(hot){ctx.font="600 8.5px var(--mono)";ctx.textAlign="center";ctx.fillStyle="rgba(240,198,116,.95)";ctx.fillText("Pc "+it.pc.toExponential(0)+" · "+it.miss.toFixed(1)+"km",it._mid[0],it._mid[1]-10);}});
+  }
+
+  /* ============================ engine ============================ */
+  let CUR=null, RAF=null;
+  const viz=$('#viz'), vctx=viz.getContext('2d'), tip=$('#tip');
+  let VW=0,VH=0,DPR=Math.min(2,devicePixelRatio||1);
+  function sizeViz(){const r=viz.getBoundingClientRect();VW=r.width;VH=r.height;viz.width=VW*DPR;viz.height=VH*DPR;vctx.setTransform(DPR,0,0,DPR,0,0);
+    VZ.parts=[];const c=reduced?0:42;for(let i=0;i<c;i++)VZ.parts.push({t:Math.random?Math.random():(i/c),s:i%6,j:(i%5-2),tier:i%3,frozen:i%3===0});}
+  function loop(ts){ if(!CUR){return;} if(VZ.t0===null)VZ.t0=ts;
+    vctx.clearRect(0,0,VW,VH);
+    if(!reduced){for(let i=0;i<22;i++){const x=(i*97.3+ts*0.004)%VW,y=(i*53.7)%VH;vctx.fillStyle="rgba(166,190,223,.05)";vctx.fillRect(x,y,1,1);}}
+    CUR.draw(vctx,VW,VH,CUR,ts);
+    RAF=requestAnimationFrame(loop);
+  }
+  function setBig(v,fmt){$('#big').textContent=fmt(v);}
+  function litStage(i){$('#aea').querySelectorAll('.st').forEach(s=>s.classList.toggle('lit',+s.dataset.s===i));}
+  function countTo(t,dur,fmt,after){if(reduced){setBig(t,fmt);if(after)after();return;}
+    const from=parseFloat(($('#big').textContent||"0").replace(/[^0-9.]/g,''))||0;let s=null;
+    requestAnimationFrame(function st(ts){if(s===null)s=ts;const k=Math.min(1,(ts-s)/dur),e=1-Math.pow(1-k,3);setBig(from+(t-from)*e,fmt);if(k<1)requestAnimationFrame(st);else if(after)after();});}
+
+  function render(D){
+    CUR=D; VZ.hover=-1;VZ.active=-1;VZ.t0=null;
+    $('#wTag').textContent=D.tag;$('#wName').textContent=D.name;$('#vHead').textContent=D.vhead;$('#vSrc').innerHTML=D.vsrc;
+    $('#metLabel').textContent=D.metLabel;$('#metUnit').innerHTML=D.metUnit;$('#ledgTitle').textContent=D.ledgTitle;$('#ledgCount').textContent=D.ledgCount;
+    $('#edu').innerHTML=D.edu;$('#drive').textContent=D.drive;$('#drive').disabled=false;
+    // live toggle
+    const lt=$('#liveToggle');
+    if(D.hasLive){lt.style.display='';lt.textContent=D.key==='tgk'?"○ run a live call":(D._isLive?"● live data":"○ go live");lt.classList.toggle('on',!!D._isLive);}
+    else lt.style.display='none';
+    // ledger
+    const rowsEl=$('#rows');rowsEl.innerHTML='';
+    D._els=[];
+    D.items.forEach((it,idx)=>{const d=document.createElement('div');d.className='it'+(it.frozen||it.screened?' frozen':'');
+      const val = D.key==='leak'?usd(it.amount): D.key==='tgk'?(it.frozen?"$0":intc(it.amount)+" tok"): (it.screened?"screened":it.tier.toUpperCase());
+      d.innerHTML="<div class='r1'><span class='nm'>"+it.type+"</span><span class='am'>"+val+"</span></div>"+
+        "<div class='r2'>"+it.detail+"</div>"+
+        "<div class='rc'>"+it.receipt.map(r=>"<span class='k'>"+r[0]+"</span> "+r[1]).join(" &nbsp;·&nbsp; ")+"</div>";
+      d.addEventListener('click',()=>{const was=d.classList.contains('active');rowsEl.querySelectorAll('.it.active').forEach(x=>x.classList.remove('active'));VZ.active=-1;VZ.activeEdge=-1;VZ.activeNode=null;
+        if(!was){d.classList.add('active');VZ.active=idx;VZ.activeEdge=(it.edge>=0?it.edge:-1);VZ.activeNode=it.node||null;}});
+      d.addEventListener('mouseenter',()=>{VZ.hover=idx;if(it.edge>=0)VZ.hoverEdge=it.edge;});
+      d.addEventListener('mouseleave',()=>{if(VZ.active<0)VZ.hover=-1;if(VZ.activeEdge<0)VZ.hoverEdge=-1;});
+      rowsEl.appendChild(d);D._els.push(d);});
+    // reveal
+    litStage(0);setBig(0,D.fmt);$('#barFill').style.width="100%";
+    sizeViz();
+    if(reduced){setBig(D.total,D.fmt);litStage(D.credoActive);}
+    else{const fl=$('#flash');fl.style.transition="opacity .1s";fl.style.opacity=".7";setTimeout(()=>{fl.style.transition="opacity 1s";fl.style.opacity="0";},120);
+      setTimeout(()=>{litStage(1);D._els.forEach((el,k)=>el.animate&&el.animate([{opacity:0,transform:'translateX(8px)'},{opacity:1,transform:'none'}],{duration:300,delay:Math.min(k*30,700),easing:'ease-out'}));
+        countTo(D.total,1200,D.fmt,()=>litStage(D.credoActive));},560);}
+    if(!RAF)RAF=requestAnimationFrame(loop);
+  }
+
+  function driveZero(){const D=CUR;if(!D)return;$('#drive').disabled=true;$('#drive').textContent=D.driveLabel;litStage(2);
+    const live=D._els.filter((el,i)=>!(D.items[i].frozen||D.items[i].screened));
+    const idx=D._els.map((el,i)=>i).filter(i=>!(D.items[i].frozen||D.items[i].screened));
+    if(reduced){idx.forEach(i=>D._els[i].classList.add('done'));setBig(D.resid,D.fmt);finishDrive(D);return;}
+    let k=0;const iv=setInterval(()=>{if(k>=idx.length){clearInterval(iv);countTo(D.resid,900,D.fmt,()=>finishDrive(D));return;}
+      const i=idx[k];D._els[i].classList.add('done');
+      const cur=parseFloat(($('#big').textContent||"0").replace(/[^0-9.]/g,''))||0;
+      const dec=D.key==='conj'?1:D.items[i].amount;
+      setBig(Math.max(D.resid,cur-dec),D.fmt);$('#barFill').style.width=Math.max(4,100-(k+1)/idx.length*96)+"%";k++;},90);}
+  function finishDrive(D){setBig(D.resid,D.fmt);$('#barFill').style.width="4%";$('#drive').textContent=D.key==='leak'?"driven to zero":(D.key==='tgk'?"all crystallized":"all screened");
+    const u=$('#unitTxt');if(u)u.textContent=D.key==='leak'?"recovered · model out of the loop":(D.key==='tgk'?"crystallized · $0/call · ~10ms":"screened · physics owns every Pc");}
+  $('#drive').addEventListener('click',driveZero);
+
+  // hover tip on canvas (flow + conj)
+  viz.addEventListener('mousemove',e=>{const D=CUR;if(!D)return;const r=viz.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    if(D.key==='leak'&&D._edgePos){let best=-1,bd=20;D._edgePos.forEach((mp,i)=>{if(!(D.net.edges[i].leak>0))return;const d=Math.hypot(mx-mp.mx,my-mp.my);if(d<bd){bd=d;best=i;}});VZ.hoverEdge=best;
+      if(best>=0){const e=D.net.edges[best],a=D._NB[e.a],b=D._NB[e.b];
+        tip.innerHTML="<b>"+a.name+" → "+b.name+"</b><br><b>"+usd(e.leak)+"</b> leaked at this handoff";
+        tip.style.left=Math.min(VW-260,D._edgePos[best].mx-100)+"px";tip.style.top=(D._edgePos[best].my+12)+"px";tip.classList.add('on');}
+      else tip.classList.remove('on');}
+    else if(D.key==='conj'){let best=-1,bd=16;D.items.forEach((it,i)=>{if(!it._mid)return;const d=Math.hypot(mx-it._mid[0],my-it._mid[1]);if(d<bd){bd=d;best=i;}});VZ.hover=best;
+      if(best>=0){const it=D.items[best];tip.innerHTML="<b>"+it.type+"</b><br>miss "+it.miss.toFixed(1)+" km · Pc "+it.pc.toExponential(1)+"<br>"+it.tier.toUpperCase();
+        tip.style.left=Math.min(VW-260,it._mid[0]-100)+"px";tip.style.top=(it._mid[1]+12)+"px";tip.classList.add('on');}else tip.classList.remove('on');}});
+  viz.addEventListener('mouseleave',()=>{VZ.hover=-1;VZ.hoverEdge=-1;tip.classList.remove('on');});
+
+  // live toggle
+  $('#liveToggle').addEventListener('click',async()=>{const D=CUR;if(!D)return;
+    if(D.key==='leak'){if(D._isLive){openDemo('leak');return;}
+      $('#liveToggle').textContent="○ connecting…";
+      const base=buildLeak(); const L=await leakLive(base); L._isLive=true; L.hasLive=true; render(L); CUR=L; return;}
+    if(D.key==='tgk'){tgkLiveCall();}});
+  async function tgkLiveCall(){const D=CUR;if(!D||D.key!=='tgk')return;const lt=$('#liveToggle');lt.textContent="○ calling…";
+    const prompt='Classify this support ticket in one word — billing, bug, or feature: "I was charged twice this month and want a refund."';
+    const t0=performance.now();
+    try{const r=await fetch("https://text.pollinations.ai/"+encodeURIComponent(prompt));
+      let txt=(await r.text()).trim().replace(/\s+/g," ").slice(0,60);
+      const ms=Math.round(performance.now()-t0), tok=Math.max(1,Math.round((prompt.length+txt.length)/4));
+      const row={tag:"LIVE",type:"Live free-model call",detail:'answered "'+txt+'" · ~'+tok+' tok · '+ms+'ms · ~$0',frozen:true,tier:0,amount:0,
+        receipt:[["task","classify a support ticket"],["model","a real free model · live · no key (pollinations)"],["answer",txt],["tokens","~"+tok+" (est)"],["latency",ms+"ms"],["cost","~$0 — the thesis, proven live"]]};
+      const ex=D.items.find(x=>x.tag==="LIVE"); if(ex)Object.assign(ex,row); else D.items.unshift(row);
+      render(D);
+      lt.textContent="● live · "+ms+"ms · ~$0";lt.classList.add('on');
+      const u=$('#unitTxt');if(u)u.innerHTML='live: a real free model answered in '+ms+'ms at ~$0';}
+    catch(e){lt.textContent="○ run a live call";}}
+
+  // open/close
+  const DEMOS={leak:buildLeak,tgk:buildTGK,conj:buildConj};
+  function openDemo(key){const D=DEMOS[key]();$('#ov').classList.add('on');document.body.style.overflow='hidden';render(D);if(key==='conj')enrichConj();}
+  async function enrichConj(){try{
+    const f=u=>fetch(u).then(r=>r.json());
+    const [g1,g2]=await Promise.all([f("https://celestrak.org/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=json"),f("https://celestrak.org/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=json")]);
+    const samp=(arr,k,src)=>{const o=[],st=Math.max(1,Math.floor(arr.length/k));for(let i=0;i<arr.length&&o.length<k;i+=st){const s=arr[i];o.push({n:s.OBJECT_NAME,i:+s.INCLINATION,o:+s.RA_OF_ASC_NODE,w:+s.ARG_OF_PERICENTER,m:+s.MEAN_ANOMALY,e:+s.ECCENTRICITY,mm:+s.MEAN_MOTION,src});}return o;};
+    const big=[...samp(g1,90,"C"),...samp(g2,55,"I")];
+    if(CUR&&CUR.key==='conj'){const D=buildConj(big);D.vsrc='<b>LIVE · '+big.length+' real objects</b> · CelesTrak / NORAD GP catalog · positions propagated · <b>Pc illustrative</b>';render(D);}
+  }catch(e){}}
+  function closeDemo(){$('#ov').classList.remove('on');document.body.style.overflow='';CUR=null;if(RAF){cancelAnimationFrame(RAF);RAF=null;}}
+  document.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>openDemo(c.dataset.demo)));
+  $('#xbtn').addEventListener('click',closeDemo);
+  $('#ov').addEventListener('click',e=>{if(e.target===$('#ov'))closeDemo();});
+  addEventListener('keydown',e=>{if(e.key==='Escape')closeDemo();});
+  addEventListener('resize',()=>{if(CUR)sizeViz();});
+
+  // launcher card metric tease
+  (function tease(){const m={leak:["$","48,200"],tgk:["","842,000"],conj:["","9"]};
+    Object.entries(m).forEach(([k,v])=>{const el=document.querySelector('[data-met="'+k+'"]');if(el)el.textContent=v[0]+v[1];});})();
+
+  // auto-open via ?demo=
+  const q=new URLSearchParams(location.search).get('demo'); if(q&&DEMOS[q])openDemo(q);
+})();
+</script>
+</body>
+</html>

@@ -17,7 +17,9 @@ const REF = join(ROOT, '_reference');
 const OUT = join(ROOT, 'codex.enc.json');
 const ITER = 600_000;
 
-const SKIP = new Set(['README.md', 'STYLE_HANDOVER.md', 'ALGORITHM_REFERENCE.md', '_RESUME_STATE.md', '_DIAGRAM_SYSTEM.md']);
+const SKIP = new Set(['README.md', 'STYLE_HANDOVER.md', 'ALGORITHM_REFERENCE.md', '_RESUME_STATE.md', '_DIAGRAM_SYSTEM.md', 'CODEX_AEA_ACCOMMODATION.md', 'CODEX_HARMONIZATION_FILL.md', 'HERITAGE_SCOPE.md']);
+// directories of project/build material that are NOT codex content (income-track blueprints, parked per NEXT_SESSION)
+const SKIP_DIRS = new Set(['BLUEPRINTS']);
 const group = (rel) => {
   const f = basename(rel);
   if (f === 'DOCTRINE_VISIBLE_AI.md') return '10 · the doctrine';
@@ -35,7 +37,7 @@ const title = (file, md) => {
 function walk(dir, out = []) {
   for (const e of readdirSync(dir)) {
     const p = join(dir, e);
-    if (statSync(p).isDirectory()) walk(p, out);
+    if (statSync(p).isDirectory()) { if (!SKIP_DIRS.has(e)) walk(p, out); }
     else if (e.endsWith('.md') && !SKIP.has(e)) out.push(p);
   }
   return out;
