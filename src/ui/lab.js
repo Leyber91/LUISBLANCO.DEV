@@ -62,6 +62,11 @@
       blurb: 'A model does not emit tokens evenly — it stalls on cache pressure, bursts when the batch clears, jitters with the scheduler. Token EKG timestamps each token as it streams and draws that hidden cadence as a live trace with a spectral read of its rhythm. Real telemetry of the serving pipeline — honestly not a brain.',
       href: 'labs/token-ekg.html',
     },
+    {
+      name: 'DATASPACE', tag: 'compression · information',
+      blurb: 'Your earliest idea (2023): compress a conversation into a capsule only the model can decode. Paste real text — it falls into a lensed horizon as its own measured bits, crushes to a capsule, a fresh model rebuilds it from the capsule alone, and every word that does not survive escapes as Hawking radiation. Degradation, measured against the lossless floor.',
+      href: 'labs/dataspace.html',
+    },
   ];
   EXPERIMENTS.forEach((e) => { e.slug = e.href.split('/').pop().replace(/\.html$/, ''); });
 

@@ -330,8 +330,10 @@
   " if(escaped)color+=background(v)*transmit;",
   " if(escaped){float ring=smoothstep(0.5,0.0,abs(minr-uPhotonR));color+=ring*ring*vec3(1.0,0.93,0.82)*1.6;}",
   // capsule glow: project — bright core scaled by phase + capLum
-  " float coreGlow=clamp(uPhase,0.0,1.5)*uCapLum;",
-  " float dcen=length(uv);color+=vec3(1.0,0.85,0.55)*coreGlow*exp(-dcen*dcen*55.0)*2.2;",
+  " float coreGlow=clamp(uPhase,0.0,1.0)*uCapLum;",
+  " float dcen=length(uv);",
+  " color+=vec3(1.0,0.86,0.6)*coreGlow*exp(-dcen*dcen*150.0)*0.85;",   // soft halo
+  " color+=vec3(1.0,0.95,0.82)*coreGlow*exp(-dcen*dcen*1100.0)*1.7;",  // tight capsule pinpoint",
   // Hawking radiation on reconstruction: faint blue motes off the photon ring, ∝ degradation
   " float emit=clamp(uPhase-1.0,0.0,1.0);",
   " if(emit>0.0){ float hr=abs(length(p.xz)*0.0+ (minr-uPhotonR));",
