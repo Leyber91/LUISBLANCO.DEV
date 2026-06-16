@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DATASPACE — the information singularity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --blue:#5BB0D6; --dim:#6B7682; --hair:rgba(91,176,214,.16); --panel:rgba(8,11,16,.62); --red:#E8665B; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;
+    font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased}
+  #gl{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab}
+  #gl:active{cursor:grabbing}
+  .stage{position:fixed;inset:0;padding:30px 40px 26px;display:grid;grid-template-rows:auto 1fr auto;gap:16px;pointer-events:none}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:20px}
+  .back{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .brand b{color:var(--ink);font-weight:600}
+  /* left: input + dial + collapse | right: plate + diff */
+  .cols{display:grid;grid-template-columns:330px 1fr 300px;gap:24px;min-height:0;align-items:end}
+  .panelL{pointer-events:auto;align-self:stretch;display:flex;flex-direction:column;gap:12px;justify-content:flex-end}
+  .kick{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:27px;line-height:1.08;letter-spacing:-.01em;font-weight:600;margin-top:4px} h1 .lo{color:var(--blue)}
+  .sub{font-size:12px;line-height:1.5;color:#97A2AB;max-width:42ch}
+  textarea{pointer-events:auto;width:100%;height:88px;resize:none;background:rgba(0,0,0,.32);border:1px solid var(--hair);color:var(--ink);font:inherit;font-size:12px;line-height:1.45;padding:10px 11px;outline:none}
+  textarea:focus{border-color:var(--blue)}
+  .dialrow{display:flex;align-items:center;gap:12px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  input[type=range]{pointer-events:auto;flex:1;-webkit-appearance:none;appearance:none;height:3px;background:var(--hair);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px rgba(242,169,59,.5);cursor:pointer}
+  .go{pointer-events:auto;cursor:pointer;background:rgba(242,169,59,.12);border:1px solid var(--amber);color:var(--amber);font:inherit;font-size:12px;letter-spacing:.22em;text-transform:uppercase;padding:12px;transition:.16s}
+  .go:hover{background:var(--amber);color:#0a0c0f} .go:disabled{opacity:.4;cursor:default}
+  /* center spacer (the singularity shows through) */
+  .mid{align-self:center;text-align:center}
+  .src{display:inline-flex;gap:9px;align-items:center;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);pointer-events:none}
+  .src i{width:6px;height:6px;border-radius:50%;background:var(--blue);font-style:normal} .src.live i{background:var(--amber);box-shadow:0 0 9px var(--amber)}
+  /* right: the measured plate + the diff */
+  .panelR{pointer-events:auto;display:flex;flex-direction:column;gap:14px}
+  .plate{border:1px solid var(--hair);background:var(--panel);backdrop-filter:blur(3px);padding:15px 17px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+  .mt{display:flex;flex-direction:column;gap:3px} .mt.full{grid-column:1/3}
+  .mt .k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .mt .v{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)} .mt .v.amber{color:var(--amber)} .mt .v.blue{color:var(--blue)} .mt .v.red{color:var(--red)}
+  .mt .u{font-size:9.5px;color:var(--dim)}
+  .barline{height:5px;background:rgba(91,176,214,.12);position:relative;margin-top:5px}
+  .barline i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),#FFD27A);width:0%;transition:width .5s}
+  .barline .floor{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--blue)}
+  .diff{border:1px solid var(--hair);background:var(--panel);backdrop-filter:blur(3px);padding:13px 15px;max-height:190px;overflow:auto}
+  .diff .dt{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:9px;display:flex;justify-content:space-between}
+  .toks{font-size:12px;line-height:1.7;word-break:break-word}
+  .toks .tk{padding:0 1px} .toks .keep{color:#C9D2DA} .toks .drop{color:var(--red);text-decoration:line-through;opacity:.8}
+  .toks .hal{color:var(--blue);border-bottom:1px dotted var(--blue)}
+  .leg{display:flex;gap:16px;margin-top:10px;font-size:9.5px;letter-spacing:.04em;color:var(--dim)}
+  .leg b{font-weight:500} .leg .k1 b{color:#C9D2DA} .leg .k2 b{color:var(--red)} .leg .k3 b{color:var(--blue)}
+  .foot{display:flex;justify-content:space-between;align-items:center}
+  .tag{display:inline-flex;gap:9px;align-items:center;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);max-width:80ch}
+  .tag i{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 9px var(--amber);font-style:normal}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left"><button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">DATASPACE <span class="on">/ compression line</span></div></div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="cols">
+    <div class="panelL">
+      <div><div class="kick">make the invisible visible</div>
+      <h1>Compress a conversation. <span class="lo">Watch what dies.</span></h1>
+      <p class="sub">Real text, real bits. It falls into a lensed horizon, crushes to a capsule, and a fresh model rebuilds it from the capsule alone. Every word that does not survive escapes as Hawking radiation — Degradation, measured.</p></div>
+      <textarea id="src" spellcheck="false"></textarea>
+      <div class="dialrow"><span>gentle</span><input id="dial" type="range" min="0" max="1" step="0.01" value="0.55"><span>brutal</span></div>
+      <button class="go" id="go" type="button">Collapse &rarr;</button>
+    </div>
+    <div class="mid"><span class="src" id="src_pill"><i></i><span id="src_t">recorded round-trip</span></span></div>
+    <div class="panelR">
+      <div class="plate">
+        <div class="mt"><span class="k">source</span><span class="v" id="m_src">—</span><span class="u">bits of information (H)</span></div>
+        <div class="mt"><span class="k">capsule</span><span class="v amber" id="m_cap">—</span><span class="u">bits after the squeeze</span></div>
+        <div class="mt full"><span class="k">compression — LLM vs the lossless floor</span>
+          <span class="v" id="m_ratio">—</span><span class="u" id="m_floor">deflate floor —</span>
+          <div class="barline"><i id="m_bar"></i><span class="floor" id="m_floormark"></span></div></div>
+        <div class="mt"><span class="k">fidelity</span><span class="v blue" id="m_fid">—</span><span class="u">lexical — surface, not meaning</span></div>
+        <div class="mt"><span class="k">degradation</span><span class="v red" id="m_deg">—</span><span class="u">what the squeeze killed</span></div>
+      </div>
+      <div class="diff">
+        <div class="dt"><span>the reconstruction, token by token</span><span id="d_counts">—</span></div>
+        <div class="toks" id="d_toks">paste a conversation and press collapse.</div>
+        <div class="leg"><span class="k1"><b>&#9632;</b> survived</span><span class="k2"><b>&#9632;</b> dropped</span><span class="k3"><b>&#9632;</b> hallucinated</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="tag"><i></i>[real] BPE-ish tokens · Shannon bits · DEFLATE lossless floor · live round-trip · LCS fidelity &nbsp;·&nbsp; [metaphor] horizon, lensing, Hawking = a picture of the numbers, not a physical claim</span>
+    <span class="label">single-pass WebGL1 · geodesic lensing</span>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATASPACE — the science (real, deterministic) + the ported
+   black-hole shader (geodesic lensing) as the singularity.
+   ============================================================ */
+(function(){
+  "use strict";
+  var el=function(id){return document.getElementById(id);};
+  el('back').addEventListener('click',function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if(window.self!==window.top){ var _b=el('back'); if(_b) _b.style.display='none'; }
+  var still=/[?&]still/.test(location.search);
+
+  // ---- bundled echo conversation + a fixed capsule + reconstruction (plays offline) ----
+  var SAMPLE =
+"USER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\n"+
+"ASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\n"+
+"USER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\n"+
+"ASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early.";
+  var ECHO_CAP =
+"CAPSULE// thread: Luis asks why he restarts one AI project under many names (DATASPACE/Ouroboros/AEA). Core: always one idea = make AI legible+owned (self-modifying, watchable, local, named); names change, spine constant. DATASPACE=first, Feb2023: compress a conversation to a few model-only-decodable lines -> cross-session self. Enemy=Degradation (long-thread quality collapse); engineering against context-rot 2yrs early.";
+  var ECHO_REC =
+"USER: Why do I keep restarting the same AI project under different names like DATASPACE, Ouroboros, and the AEA?\n"+
+"ASSISTANT: Because it was always one idea: make AI legible enough to be owned — self-modifying, watchable, local, and named. The names change but the spine stays the same.\n"+
+"USER: DATASPACE was first, in 2023 — compress a conversation into a few lines only the model can decode, so it keeps a self across sessions.\n"+
+"ASSISTANT: Identity through compression. The enemy was Degradation, the collapse of a long thread. You were working against context-rot very early.";
+
+  // ---- tokenizer (GPT-2-ish regex pre-tokenizer — approximate, tagged) ----
+  var TOKRE;
+  try { TOKRE = new RegExp("'s|'t|'re|'ve|'m|'ll|'d| ?[\\p{L}]+| ?[\\p{N}]+| ?[^\\s\\p{L}\\p{N}]+|\\s+","gu"); }
+  catch(e){ TOKRE = /[A-Za-z]+|[0-9]+|[^\sA-Za-z0-9]+|\s+/g; }
+  function tokenize(t){ return (t||'').match(TOKRE) || []; }
+  function infoBits(tokens){
+    var freq={}, n=tokens.length||1, i;
+    for(i=0;i<tokens.length;i++) freq[tokens[i]]=(freq[tokens[i]]||0)+1;
+    var per=[], total=0;
+    for(i=0;i<tokens.length;i++){ var b=-Math.log2(freq[tokens[i]]/n); per.push(b); total+=b; }
+    return { per:per, total:total };
+  }
+  function deflateBits(text){
+    if(typeof CompressionStream==='undefined') return Promise.resolve(null);
+    try{ var bytes=new TextEncoder().encode(text);
+      var cs=new CompressionStream('deflate-raw'); var w=cs.writable.getWriter(); w.write(bytes); w.close();
+      return new Response(cs.readable).arrayBuffer().then(function(ab){ return ab.byteLength*8; });
+    }catch(e){ return Promise.resolve(null); }
+  }
+  // LCS over tokens -> preserved / dropped / hallucinated + a render list
+  function fidelity(srcT, recT){
+    var n=srcT.length, m=recT.length;
+    var N=Math.min(n,1200), M=Math.min(m,1200); var A=srcT.slice(0,N), B=recT.slice(0,M);
+    var dp=[]; for(var i=0;i<=N;i++){ dp.push(new Uint16Array(M+1)); }
+    for(i=1;i<=N;i++) for(var j=1;j<=M;j++){ dp[i][j]= A[i-1]===B[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j],dp[i][j-1]); }
+    // backtrack -> render list over reconstruction (+ dropped source tokens marked inline)
+    var out=[], keep=0, hal=0; i=N; j=M; var rev=[];
+    while(i>0&&j>0){ if(A[i-1]===B[j-1]){ rev.push({t:B[j-1],c:'keep'}); keep++; i--; j--; }
+      else if(dp[i-1][j]>=dp[i][j-1]){ rev.push({t:A[i-1],c:'drop'}); i--; }
+      else { rev.push({t:B[j-1],c:'hal'}); hal++; j--; } }
+    while(i>0){ rev.push({t:A[i-1],c:'drop'}); i--; } while(j>0){ rev.push({t:B[j-1],c:'hal'}); hal++; j--; }
+    rev.reverse(); out=rev;
+    var drop=N-keep;
+    var fid = N>0 ? keep/N : 0;
+    return { list:out, keep:keep, drop:drop, hal:hal, fidelity:fid };
+  }
+  function callModel(prompt){
+    var url='https://text.pollinations.ai/'+encodeURIComponent(prompt)+'?model=openai&referrer=dataspace';
+    var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},32000);
+    return fetch(url,{signal:ctrl.signal}).then(function(r){ clearTimeout(to); if(!r.ok) throw new Error('http'); return r.text(); })
+      .then(function(t){ t=(t||'').trim(); if(t.length<20) throw new Error('thin'); return t; });
+  }
+
+  // ---- state + measured numbers ----
+  var ST={ srcBits:0, capBits:0, floorBits:0, fid:0, deg:0, ratio:0, hist:new Uint8Array(64), phase:0, target:0, live:false, busy:false };
+  function setHistFromTokens(tokens, per){
+    // bin tokens by position -> average bits per shell -> 0..255
+    var B=64, sum=new Float64Array(B), cnt=new Float64Array(B), i;
+    for(i=0;i<tokens.length;i++){ var bi=Math.min(B-1, Math.floor(i/tokens.length*B)); sum[bi]+=per[i]; cnt[bi]++; }
+    var mx=1; for(i=0;i<B;i++){ if(cnt[i]) sum[i]/=cnt[i]; mx=Math.max(mx,sum[i]); }
+    for(i=0;i<B;i++) ST.hist[i]=Math.max(0,Math.min(255, Math.round(sum[i]/mx*255)));
+    uploadHist();
+  }
+  function measureSource(text){
+    var toks=tokenize(text); var ib=infoBits(toks); ST.srcBits=ib.total; setHistFromTokens(toks,ib.per);
+    el('m_src').textContent=fmt(ST.srcBits);
+    deflateBits(text).then(function(fb){ if(fb!=null){ ST.floorBits=fb; el('m_floor').textContent='deflate floor '+fmt(fb)+' bits'; updateRatioBar(); } });
+    return toks;
+  }
+  function fmt(b){ if(b==null) return '—'; if(b>=1000) return (b/1000).toFixed(1)+'k'; return Math.round(b).toString(); }
+  function updateRatioBar(){
+    if(!ST.capBits||!ST.srcBits) return;
+    ST.ratio = ST.srcBits/ST.capBits;
+    el('m_ratio').textContent = ST.ratio.toFixed(1)+'x';
+    // bar: capsule position vs source (full) vs deflate floor mark
+    var capFrac = Math.min(1, ST.capBits/ST.srcBits);
+    el('m_bar').style.width = (capFrac*100).toFixed(0)+'%';
+    if(ST.floorBits){ el('m_floormark').style.left = (Math.min(1,ST.floorBits/ST.srcBits)*100).toFixed(0)+'%'; }
+  }
+
+  // ---- run the collapse ----
+  function setDeg(){ el('m_deg').textContent=Math.round(ST.deg*100)+'%'; el('m_fid').textContent=Math.round(ST.fid*100)+'%'; }
+  function renderDiff(res){
+    el('d_counts').textContent=res.keep+' kept · '+res.drop+' dropped · '+res.hal+' invented';
+    var h=''; for(var i=0;i<res.list.length;i++){ var o=res.list[i];
+      var cls=o.c==='keep'?'keep':o.c==='drop'?'drop':'hal';
+      h+='<span class="tk '+cls+'">'+esc(o.t)+'</span>'; }
+    el('d_toks').innerHTML=h;
+  }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function applyResult(capsule, reconstruction, live){
+    var srcToks=tokenize(el('src').value);
+    var capToks=tokenize(capsule); ST.capBits=infoBits(capToks).total;
+    var res=fidelity(srcToks, tokenize(reconstruction));
+    ST.fid=res.fidelity; ST.deg=1-res.fidelity;
+    el('m_cap').textContent=fmt(ST.capBits); updateRatioBar(); setDeg(); renderDiff(res);
+    setSrc(live);
+    animateCollapse();
+  }
+  function setSrc(live){ ST.live=live; var p=el('src_pill'); p.className='src'+(live?' live':''); el('src_t').textContent=live?'live · pollinations':'recorded round-trip'; }
+
+  var collapseT0=0, collapsing=false;
+  function animateCollapse(){ collapseT0=performance.now(); collapsing=true; }
+  function phaseNow(now){
+    if(!collapsing) return ST.phase;
+    var t=(now-collapseT0)/1000;
+    // 0->1 collapse over 1.4s, hold, 1->2 reconstruct over 1.8s
+    var p = t<1.4 ? (t/1.4) : t<2.0 ? 1.0 : Math.min(2.0, 1.0+(t-2.0)/1.8);
+    if(t>4.2){ collapsing=false; ST.phase=2.0; }
+    return p;
+  }
+  // dial -> aggressiveness affects the COMPRESS prompt budget (and the preview)
+  function budgetWords(){ var d=parseFloat(el('dial').value); return Math.round(140 - d*110); } // gentle 140 -> brutal 30
+
+  function collapse(){
+    if(ST.busy) return; ST.busy=true; el('go').disabled=true; el('go').textContent='collapsing…';
+    var text=el('src').value;
+    var done=function(cap,rec,live){ applyResult(cap,rec,live); ST.busy=false; el('go').disabled=false; el('go').textContent='Collapse →'; };
+    var compressP='Re-encode the ENTIRE conversation below into the densest possible capsule (aim ~'+budgetWords()+' words) from which YOU could later reconstruct it faithfully. Keep names, numbers and load-bearing claims. Output ONLY the capsule, no preamble.\n\n'+text;
+    callModel(compressP).then(function(cap){
+      var recP='Reconstruct the original conversation as faithfully as possible from ONLY this capsule. Match the USER:/ASSISTANT: turn format. Output ONLY the reconstruction.\n\n'+cap;
+      return callModel(recP).then(function(rec){ done(cap,rec,true); });
+    }).catch(function(){ done(ECHO_CAP, ECHO_REC, false); }); // echo fallback
+  }
+  el('go').addEventListener('click', collapse);
+
+  // ---- boot ----
+  el('src').value=SAMPLE;
+  var bootToks=measureSource(SAMPLE);
+  if(still){ // deterministic echo collapse, frozen mid-reconstruction for the shot
+    applyResult(ECHO_CAP, ECHO_REC, false); collapsing=false; ST.phase=1.55;
+  } else { el('src').addEventListener('input', function(){ measureSource(el('src').value); }); }
+
+  /* ============================================================
+     THE SINGULARITY — ported from blackhole.js (geodesic lensing),
+     the disk recoloured by the token bit-histogram, plus collapse,
+     capsule core and Hawking radiation driven by Degradation.
+     ============================================================ */
+  var cv=el('gl');
+  var gl=cv.getContext('webgl',{antialias:false,alpha:false})||cv.getContext('experimental-webgl');
+  if(!gl){ return; }
+  var VERT="attribute vec2 aPos;void main(){gl_Position=vec4(aPos,0.0,1.0);}";
+  var FRAG=[
+  "precision highp float;",
+  "uniform vec2 uRes;uniform float uTime;uniform vec3 uCam;",
+  "uniform float uHorizon,uPhotonR,uInner,uOuter,uExposure;",
+  "uniform float uPhase,uCapLum,uDeg,uFid,uFloorR;",
+  "uniform sampler2D uHist;",
+  "#define STEPS 200",
+  "float hash(vec3 p){p=fract(p*0.3183099+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}",
+  "float vnoise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.0-2.0*f);",
+  " float n=mix(mix(mix(hash(i+vec3(0,0,0)),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),",
+  "  mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);return n;}",
+  "float fbm(vec3 p){float a=0.5,s=0.0;for(int i=0;i<5;i++){s+=a*vnoise(p);p*=2.02;a*=0.5;}return s;}",
+  "float ign(vec2 px){return fract(52.9829189*fract(dot(px,vec2(0.06711056,0.00583715))));}",
+  "float dith(vec2 px){vec3 s=vec3(px,fract(uTime)*57.0);return (hash(s)+hash(s+17.13))-1.0;}",
+  // bits -> colour: low bits = cold blue structure, high bits = amber energy
+  "vec3 bitColor(float b){ vec3 lo=vec3(0.16,0.34,0.46); vec3 mid=vec3(0.55,0.62,0.66); vec3 hi=vec3(1.0,0.66,0.23);",
+  "  return b<0.5? mix(lo,mid,b/0.5) : mix(mid,hi,(b-0.5)/0.5); }",
+  "vec3 background(vec3 dir){vec3 d=normalize(dir);vec3 col=vec3(0.0);",
+  " for(int k=0;k<2;k++){float sc=240.0+float(k)*430.0;vec3 id=floor(d*sc);float h=hash(id);",
+  "  if(h>0.987){float b=(h-0.987)/0.013;vec3 cell=(id+0.5)/sc;float dd=1.0-clamp(length(normalize(cell)-d)*sc*0.9,0.0,1.0);",
+  "   col+=pow(dd,6.0)*b*mix(vec3(0.8,0.86,1.0),vec3(1.0,0.85,0.6),hash(id+7.0))*1.3;}}",
+  " float n=fbm(d*3.0+10.0);vec3 neb=vec3(0.012,0.02,0.04)+vec3(0.02,0.03,0.06)*pow(n,3.0);return col+neb*0.5;}",
+  "vec3 accel(vec3 p,vec3 v){vec3 h=cross(p,v);float h2=dot(h,h);float r2=dot(p,p);return -1.5*h2*p/pow(r2,2.5);}",
+  // disk shading: colour by bits sampled from the histogram at this radius, turbulence, collapse fade
+  "vec4 diskShade(vec3 hit,vec3 vin){",
+  " float r=length(hit.xz);",
+  " float tt=clamp((r-uInner)/max(uOuter-uInner,0.001),0.0,1.0);",
+  " float bits=texture2D(uHist,vec2(tt,0.5)).r;",
+  " vec3 base=bitColor(bits);",
+  " float omega=0.5/pow(r,1.5);float rot=omega*uTime*3.0;float cs=cos(rot),sn=sin(rot);",
+  " vec2 q=mat2(cs,-sn,sn,cs)*hit.xz;float lr=log(r);",
+  " float turb=fbm(vec3(q*0.55,lr*1.6+uTime*0.04));turb+=0.5*fbm(vec3(q*1.7,lr*3.0-uTime*0.07));turb=pow(clamp(turb,0.0,1.0),1.7);",
+  " float band=0.2+1.5*turb;",
+  " vec3 vdir=normalize(cross(vec3(0.0,1.0,0.0),hit));float beta=clamp(sqrt(0.5/max(r-0.5,0.18)),0.0,0.9);",
+  " float mu=dot(vdir,-normalize(vin));float dop=1.0/(1.0-mu*beta);float boost=pow(dop,2.6);",
+  " float gshift=sqrt(max(0.05,1.0-1.0/max(r,1.0001)));",
+  " vec3 col=base*band*boost*mix(0.5,1.0,gshift)*1.25;",
+  " col=mix(col,col*vec3(0.55,0.78,1.6),clamp((dop-1.0)*1.1,0.0,1.0));",
+  // collapse: the stream contracts toward the capsule; brightness concentrates
+  " float coll=clamp(uPhase,0.0,1.0);",
+  " float effOuter=mix(uOuter,uInner+0.4,coll);",
+  " float outerFall=smoothstep(effOuter,effOuter*0.6,r);float innerFall=smoothstep(0.0,0.6,r-uInner);",
+  // reconstruction (phase>1): only a uFid fraction of the stream re-forms; the rest is dark
+  " float emit=clamp(uPhase-1.0,0.0,1.0);",
+  " float survive=mix(1.0, step(tt, uFid), emit);",   // outer (later) tokens drop first when fidelity low
+  " float a=innerFall*outerFall*(0.4+0.6*turb)*survive;",
+  " col*=mix(1.0,1.0+1.6*coll,coll);",                // brighten as it crushes
+  " return vec4(col,clamp(a,0.0,1.0));}",
+  "void main(){vec2 uv=(gl_FragCoord.xy-0.5*uRes)/uRes.y;",
+  " vec3 ro=uCam;vec3 fwd=normalize(-ro);vec3 rgt=normalize(cross(fwd,vec3(0.0,1.0,0.0)));vec3 up=cross(rgt,fwd);",
+  " vec3 rd=normalize(uv.x*rgt+uv.y*up+1.5*fwd);",
+  " float jit=ign(gl_FragCoord.xy+fract(uTime)*17.0);float dt0=clamp(0.055*length(ro),0.01,0.7);",
+  " vec3 p=ro+rd*(jit*dt0);vec3 v=rd;vec3 color=vec3(0.0);float transmit=1.0;float minr=1e9;bool escaped=false;",
+  " for(int i=0;i<STEPS;i++){float r=length(p);",
+  "  if(r<uHorizon){transmit=0.0;break;}",
+  "  if(r>60.0&&dot(v,p)>0.0){escaped=true;break;}",
+  "  vec3 vin=v;float dt=clamp(0.055*r,0.01,0.7);vec3 a=accel(p,v);v=normalize(v+a*dt);vec3 pn=p+v*dt;",
+  "  vec3 seg=pn-p;float segl2=max(dot(seg,seg),1e-9);float tpr=clamp(-dot(p,seg)/segl2,0.0,1.0);minr=min(minr,min(r,length(p+seg*tpr)));",
+  "  if(p.y*pn.y<0.0){float k=p.y/(p.y-pn.y);vec3 hit=mix(p,pn,k);float rd2=length(hit.xz);",
+  "   if(rd2>uInner&&rd2<uOuter){vec4 dc=diskShade(hit,vin);color+=dc.rgb*dc.a*transmit;transmit*=(1.0-dc.a);}}",
+  "  p=pn;if(transmit<0.02)break;}",
+  // capsule core: a bright point at the centre, ignited on collapse, luminosity = capsule bits
+  " float capR=uInner*0.5;float cd=length(p)-0.0;", // placeholder; capsule drawn in screen space below
+  " if(escaped)color+=background(v)*transmit;",
+  " if(escaped){float ring=smoothstep(0.5,0.0,abs(minr-uPhotonR));color+=ring*ring*vec3(1.0,0.93,0.82)*1.6;}",
+  // capsule glow: project — bright core scaled by phase + capLum
+  " float coreGlow=clamp(uPhase,0.0,1.5)*uCapLum;",
+  " float dcen=length(uv);color+=vec3(1.0,0.85,0.55)*coreGlow*exp(-dcen*dcen*55.0)*2.2;",
+  // Hawking radiation on reconstruction: faint blue motes off the photon ring, ∝ degradation
+  " float emit=clamp(uPhase-1.0,0.0,1.0);",
+  " if(emit>0.0){ float hr=abs(length(p.xz)*0.0+ (minr-uPhotonR));",
+  "  float halo=smoothstep(2.4,0.0,abs(length(uv)*9.0-uPhotonR*1.4));",
+  "  float spark=fbm(vec3(uv*16.0, uTime*1.6));spark=pow(clamp(spark,0.0,1.0),3.0);",
+  "  color+=vec3(0.35,0.62,0.85)*halo*spark*emit*uDeg*3.2; }",
+  // deflate-floor ring marker (faint blue circle)
+  " float fr=smoothstep(0.012,0.0,abs(length(uv)-uFloorR*0.16));color+=vec3(0.2,0.45,0.6)*fr*0.5;",
+  " color*=uExposure;color=color/(color+vec3(1.0));color=pow(color,vec3(0.4545));",
+  " color+=dith(gl_FragCoord.xy)*(1.0/255.0);gl_FragColor=vec4(color,1.0);}"].join("\n");
+
+  function mk(t,s){var x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);
+    if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))console.error('shader',gl.getShaderInfoLog(x));return x;}
+  var prog=gl.createProgram();gl.attachShader(prog,mk(gl.VERTEX_SHADER,VERT));gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,FRAG));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) console.error('link',gl.getProgramInfoLog(prog));
+  var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(prog,'aPos');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+  var U={}; ['uRes','uTime','uCam','uHorizon','uPhotonR','uInner','uOuter','uExposure','uPhase','uCapLum','uDeg','uFid','uFloorR','uHist']
+    .forEach(function(n){U[n]=gl.getUniformLocation(prog,n);});
+
+  // histogram data texture (64x1, R = bits)
+  var histTex=gl.createTexture();
+  function uploadHist(){
+    if(!gl||!histTex) return; // boot's measureSource may call before WebGL init — no-op until ready
+    gl.bindTexture(gl.TEXTURE_2D,histTex);
+    var rgba=new Uint8Array(64*4); for(var i=0;i<64;i++){ rgba[i*4]=ST.hist[i]; rgba[i*4+1]=ST.hist[i]; rgba[i*4+2]=ST.hist[i]; rgba[i*4+3]=255; }
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,64,1,0,gl.RGBA,gl.UNSIGNED_BYTE,rgba);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  }
+  window.uploadHist=uploadHist; uploadHist();
+
+  // camera orbit
+  var yaw=0.7, pitch=0.32, dist=15.0, down=false, lx=0, ly=0;
+  cv.addEventListener('mousedown',function(e){down=true;lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('mousemove',function(e){ if(!down)return; yaw-=(e.clientX-lx)*0.006; pitch=Math.max(0.06,Math.min(1.3,pitch+(e.clientY-ly)*0.006)); lx=e.clientX;ly=e.clientY; });
+  window.addEventListener('mouseup',function(){down=false;});
+  cv.addEventListener('wheel',function(e){ e.preventDefault(); dist=Math.max(8,Math.min(28,dist+Math.sign(e.deltaY)*0.7)); },{passive:false});
+
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var dpr=Math.min(window.devicePixelRatio||1, still?1:1.5);
+  function rz(){ cv.width=Math.floor(innerWidth*dpr*(still?1:0.85)); cv.height=Math.floor(innerHeight*dpr*(still?1:0.85)); gl.viewport(0,0,cv.width,cv.height); }
+  rz(); addEventListener('resize',rz);
+  var t0=performance.now();
+  function draw(now){
+    var ph = still? ST.phase : phaseNow(now);
+    var cam=[dist*Math.cos(pitch)*Math.cos(yaw), dist*Math.sin(pitch), dist*Math.cos(pitch)*Math.sin(yaw)];
+    // horizon radius scales (gently) with source bits; inner/outer fixed-ish
+    var hor=0.5+Math.min(0.7, ST.srcBits/4000.0);
+    gl.uniform2f(U.uRes,cv.width,cv.height); gl.uniform1f(U.uTime,(now-t0)/1000);
+    gl.uniform3f(U.uCam,cam[0],cam[1],cam[2]);
+    gl.uniform1f(U.uHorizon,hor); gl.uniform1f(U.uPhotonR,1.5); gl.uniform1f(U.uInner,2.6); gl.uniform1f(U.uOuter,12.0);
+    gl.uniform1f(U.uExposure,1.3); gl.uniform1f(U.uPhase,ph);
+    gl.uniform1f(U.uCapLum, Math.min(1.0, (ST.capBits? ST.capBits/Math.max(ST.srcBits,1):0.0)+0.15));
+    gl.uniform1f(U.uDeg,ST.deg); gl.uniform1f(U.uFid,ST.fid||1.0); gl.uniform1f(U.uFloorR, ST.srcBits? Math.min(9,ST.floorBits/ST.srcBits*12):0.0);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,histTex); gl.uniform1i(U.uHist,0);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

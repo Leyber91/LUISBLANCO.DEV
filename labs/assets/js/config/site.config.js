@@ -10,13 +10,13 @@
    ============================================================ */
 
 export const SITE = {
-  name: 'Project Leyber 212',
-  short: 'L212',
-  tagline: 'A laboratory at the edge of the event horizon.',
+  name: 'luisblanco.dev — Labs',
+  short: 'Labs',
+  tagline: 'Interactive experiments at the edge of AI, space-science and systems.',
   blurb:
-    'Interactive experiments in space-science, AI and the systems that connect them. ' +
-    'Built in the open, one singularity at a time.',
-  domain: 'leyber212',
+    'Interactive experiments in AI, space-science and the systems that connect them. ' +
+    'Built in the open, playable in the browser.',
+  domain: 'luisblanco.dev',
   author: 'Leyber91',
 };
 
@@ -36,9 +36,9 @@ export const NAV = [
    'beta'    : playable but rough
    'planned' : conceived, not yet built (shown, honestly, as such) */
 export const STATUS = {
-  built:   { label: 'Live',     kind: 'built' },
-  beta:    { label: 'Beta',     kind: 'beta' },
-  planned: { label: 'Planned',  kind: 'planned' },
+  built:   { label: 'Live',     kind: 'built',   interactive: true },
+  beta:    { label: 'Beta',     kind: 'beta',    interactive: true },
+  planned: { label: 'Planned',  kind: 'planned', interactive: false },
 };
 
 export const CATEGORIES = [

@@ -1,25 +1,16 @@
 /* ============================================================
    cosmic-substrate.js — the living background behind the whole
-   hub. ONE fixed full-viewport canvas that draws, in depth order:
+   hub: drifting nebula, three parallax starfields, occasional
+   shooting stars. Rich but cheap. Honours reduced motion / ?still.
 
-     - drifting nebula clouds (warm + cold, theme-locked)
-     - three parallax starfields (far/mid/near), twinkling
-     - occasional shooting stars
-
-   This is the "atmosphere" layer — rich but cheap (a few hundred
-   points, soft-light nebula). Scroll moves the layers at
-   different rates (parallax). Honours reduced motion (still).
+   Palette + tuning come from hub/constants.js (PALETTE,
+   SUBSTRATE_CONFIG).
    ============================================================ */
+
+import { PALETTE, SUBSTRATE_CONFIG as S } from './constants.js';
 
 const TAU = Math.PI * 2;
 const rand = (() => { let s = 99991; return () => (s = (s * 48271) % 2147483647) / 2147483647; })();
-
-const NEBULAE = [
-  { x: 0.18, y: 0.22, r: 0.55, col: [43, 106, 135], a: 0.16, drift: 0.012 },  // cold
-  { x: 0.82, y: 0.30, r: 0.50, col: [151, 104, 31], a: 0.13, drift: -0.009 }, // warm
-  { x: 0.55, y: 0.85, r: 0.65, col: [60, 40, 90],  a: 0.12, drift: 0.007 },   // violet deep
-  { x: 0.30, y: 0.65, r: 0.40, col: [40, 70, 90],  a: 0.10, drift: -0.014 },
-];
 
 export class CosmicSubstrate {
   constructor(canvas) {
@@ -65,24 +56,17 @@ export class CosmicSubstrate {
   }
 
   _seed() {
-    // three layers: far (small/dim/slow) -> near (big/bright/fast parallax)
-    const layers = [
-      { n: this.w * this.h / 9000, size: [0.4, 1.0], alpha: [0.12, 0.4], par: 0.02 },
-      { n: this.w * this.h / 16000, size: [0.7, 1.6], alpha: [0.25, 0.6], par: 0.06 },
-      { n: this.w * this.h / 34000, size: [1.0, 2.4], alpha: [0.4, 0.9],  par: 0.12 },
-    ];
-    this.layers = layers.map((L) => {
+    this.layers = S.layers.map((L) => {
+      const count = Math.round((this.w * this.h) / L.divisor);
       const stars = [];
-      const count = Math.round(L.n);
       for (let i = 0; i < count; i++) {
-        const warm = rand() > 0.86;
         stars.push({
           x: rand() * this.w,
-          y: rand() * this.h * 1.3,        // taller than viewport for parallax headroom
+          y: rand() * this.h * 1.3,                 // taller than viewport for parallax headroom
           s: L.size[0] + rand() * (L.size[1] - L.size[0]),
           a: L.alpha[0] + rand() * (L.alpha[1] - L.alpha[0]),
           tw: rand() * TAU,
-          warm,
+          warm: rand() > S.warmStarChance,
         });
       }
       return { stars, par: L.par };
@@ -103,7 +87,6 @@ export class CosmicSubstrate {
 
     this._drawNebula(ctx, t);
 
-    // parallax starfields
     for (const L of this.layers) {
       const off = (this.scrollY * L.par) % (h * 1.3);
       for (const st of L.stars) {
@@ -111,7 +94,7 @@ export class CosmicSubstrate {
         if (y < -2) y += h * 1.3;
         const tw = this.reduced ? 1 : 0.65 + 0.35 * Math.sin(t * 1.6 + st.tw);
         ctx.globalAlpha = st.a * tw;
-        ctx.fillStyle = st.warm ? '#f6c271' : '#cdd6e4';
+        ctx.fillStyle = st.warm ? PALETTE.warmHex : PALETTE.starHex;
         ctx.beginPath(); ctx.arc(st.x, y, st.s, 0, TAU); ctx.fill();
       }
     }
@@ -123,11 +106,11 @@ export class CosmicSubstrate {
   _drawNebula(ctx, t) {
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    for (const n of NEBULAE) {
+    for (const n of S.nebulae) {
       const dx = this.reduced ? 0 : Math.sin(t * n.drift * 6) * this.w * 0.03;
       const dy = this.reduced ? 0 : Math.cos(t * n.drift * 5) * this.h * 0.03;
       const cx = n.x * this.w + dx;
-      const cy = n.y * this.h + dy - this.scrollY * 0.03;
+      const cy = n.y * this.h + dy - this.scrollY * S.nebulaParallax;
       const r = n.r * Math.max(this.w, this.h);
       const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
       g.addColorStop(0, `rgba(${n.col[0]},${n.col[1]},${n.col[2]},${n.a})`);
@@ -141,32 +124,34 @@ export class CosmicSubstrate {
 
   _drawShooters(ctx, t) {
     if (this.reduced) return;
+    const sh = S.shooter;
     const dt = 1 / 60;
     this.shootTimer -= dt;
     if (this.shootTimer <= 0) {
-      this.shootTimer = 3.5 + rand() * 5;
+      this.shootTimer = sh.minGap + rand() * sh.gapJitter;
       const edge = rand();
       this.shooters.push({
         x: rand() * this.w,
         y: -10 + rand() * this.h * 0.4,
-        vx: (edge > 0.5 ? -1 : 1) * (260 + rand() * 220),
-        vy: 120 + rand() * 160,
-        life: 0, max: 0.7 + rand() * 0.5,
-        len: 90 + rand() * 80,
+        vx: (edge > 0.5 ? -1 : 1) * (sh.speed[0] + rand() * sh.speed[1]),
+        vy: sh.vy[0] + rand() * sh.vy[1],
+        life: 0, max: sh.life[0] + rand() * sh.life[1],
+        len: sh.len[0] + rand() * sh.len[1],
       });
     }
     ctx.save();
     ctx.lineCap = 'round';
+    const [cr, cg, cb] = PALETTE.warmSoft;
     for (const s of this.shooters) {
       s.life += dt;
       s.x += s.vx * dt; s.y += s.vy * dt;
       const k = s.life / s.max;
-      const a = Math.sin(Math.min(1, k) * Math.PI);     // fade in/out
+      const a = Math.sin(Math.min(1, k) * Math.PI);
       const ang = Math.atan2(s.vy, s.vx);
       const tx = s.x - Math.cos(ang) * s.len, ty = s.y - Math.sin(ang) * s.len;
       const grad = ctx.createLinearGradient(s.x, s.y, tx, ty);
-      grad.addColorStop(0, `rgba(246,194,113,${0.9 * a})`);
-      grad.addColorStop(1, 'rgba(246,194,113,0)');
+      grad.addColorStop(0, `rgba(${cr},${cg},${cb},${0.9 * a})`);
+      grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
       ctx.strokeStyle = grad; ctx.lineWidth = 1.6;
       ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(tx, ty); ctx.stroke();
     }

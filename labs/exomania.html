@@ -15,7 +15,15 @@
   <link rel="stylesheet" href="assets/css/exoplanet.css" />
 </head>
 <body>
-  <div id="exo-loading">charting the catalogue…</div>
+  <div id="exo-loading" role="status" aria-live="polite">
+    <div class="load-core">
+      <div class="load-orbit" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="load-title">Kepler Deep-Field Array</div>
+      <div class="load-status" id="load-status">Establishing uplink</div>
+      <div class="load-track"><div class="load-fill" id="load-fill"></div></div>
+      <div class="load-meta"><span id="load-detail">standby</span><span id="load-pct"></span></div>
+    </div>
+  </div>
 
   <!-- the viewport: canvas behind glass, inside a window bezel -->
   <div id="exo-stage">

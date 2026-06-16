@@ -1,18 +1,18 @@
 /* ============================================================
-   PROJECT LEYBER 212 — design tokens
+   luisblanco.dev — Labs — design tokens
    The single source of truth for the visual language. Every
    colour, size, rhythm and motion value lives here; nothing
    downstream hard-codes a hex or a magic number.
 
-   Theme: "event horizon". A deep void, a WARM accretion accent
-   (energy, active, built) and a COLD horizon accent (structure,
-   links, the singularity itself). Duotone on purpose — discipline
-   over a rainbow of effects.
+   Aligned to the luisblanco.dev locked language (master §6):
+   near-black void, luminous-white linework, WARM GOLD as the only
+   accent. The "cold" role is played by cool ink-grays, never a
+   second hue. Monospace engineering schematic in deep space.
    ============================================================ */
 
 :root {
   /* ---- void / surfaces ---- */
-  --void:        #060709;   /* page base — deepest space                 */
+  --void:        #06080D;   /* page base — deepest space (luisblanco near-black) */
   --surface:     #0B0E13;   /* raised panels, cards at rest              */
   --surface-2:   #11161F;   /* nested / hover surfaces                   */
   --surface-3:   #18202B;   /* active wells, inputs                      */
@@ -25,19 +25,19 @@
   --text:        #C5CCD8;   /* body text (cool grey, never pure white)   */
   --text-dim:    #79828F;   /* secondary, metadata, captions             */
   --text-faint:  #424B57;   /* disabled, deep-background labels          */
-  --text-bright: #EDF1F7;   /* headings, emphasis                        */
+  --text-bright: #EAF0FB;   /* headings, emphasis (luminous white)       */
 
-  /* ---- accretion (WARM primary) — energy, active, "built" ---- */
-  --accretion:      #F2A93B;
-  --accretion-soft: #F6C271;
+  /* ---- gold (the ONLY accent) — energy, active, "built" ---- */
+  --accretion:      #D4A24C;
+  --accretion-soft: #F0C674;
   --accretion-dim:  #97681F;
-  --accretion-glow: rgba(242, 169, 59, .45);
+  --accretion-glow: rgba(212, 162, 76, .45);
 
-  /* ---- horizon (COLD secondary) — links, structure, the rift ---- */
-  --horizon:      #5BB0D6;
-  --horizon-soft: #93D0EB;
-  --horizon-dim:  #2B6A87;
-  --horizon-glow: rgba(91, 176, 214, .40);
+  /* ---- "cold" role — cool ink-grays, NOT a second hue (master §6) ---- */
+  --horizon:      #9FB3D6;
+  --horizon-soft: #C5CCD8;
+  --horizon-dim:  #565D72;
+  --horizon-glow: rgba(159, 179, 214, .30);
 
   /* ---- semantic ---- */
   --ok:    #6FCF8E;
@@ -48,9 +48,9 @@
   --status-built:   var(--accretion);
   --status-planned: var(--text-faint);
 
-  /* ---- type families ---- */
-  --font-display: 'Orbitron', system-ui, sans-serif;          /* logo / hero only */
-  --font-body:    'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* ---- type families — IBM Plex Mono everywhere (master §6) ---- */
+  --font-display: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --font-body:    'IBM Plex Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
   --font-mono:    'IBM Plex Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
 
   /* ---- type scale — 1.25 major third, 16px base ---- */

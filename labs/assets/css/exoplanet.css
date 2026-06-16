@@ -119,6 +119,23 @@ html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
 .nav-more { padding: .7em; text-align: center; font-family: var(--font-mono); font-size: var(--t-micro);
   color: var(--text-faint); letter-spacing: .04em; }
 
+/* header tools: catalogue count + refresh */
+.hud-head-tools { display: inline-flex; align-items: center; gap: .55em; }
+.nav-refresh { background: none; border: 0; color: var(--text-dim); cursor: pointer; padding: 2px 4px; line-height: 1;
+  font-size: var(--t-micro); transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); }
+.nav-refresh:hover { color: var(--accretion); }
+.nav-refresh:active { transform: rotate(180deg); }
+
+/* per-row save star + saved section + premium teaser */
+.nav-row { grid-template-columns: 10px 1fr auto auto; }
+.nav-sec-body .nav-row { grid-template-columns: 8px 1fr auto auto; }
+.nav-star { color: var(--text-faint); font-size: var(--t-micro); padding: 2px; opacity: .55; cursor: pointer;
+  transition: color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease); }
+.nav-row:hover .nav-star { opacity: 1; }
+.nav-star.on, .nav-star:hover { color: var(--accretion); opacity: 1; }
+.nav-premium { padding: .6em .7em; font-family: var(--font-mono); font-size: var(--t-micro); color: var(--text-faint);
+  letter-spacing: .03em; border-top: 1px dashed var(--line); margin-top: 2px; }
+
 /* category sections */
 .nav-sec { margin-bottom: var(--s-2); }
 .nav-sec-head { display: grid; grid-template-columns: 10px 1fr auto auto; align-items: center; gap: .6em;
@@ -132,7 +149,7 @@ html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
 .nav-sec-count { font-family: var(--font-mono); font-size: var(--t-micro); color: var(--text-faint); }
 .nav-sec-chev { width: 1.2em; text-align: center; color: var(--text-dim); font-family: var(--font-mono); }
 .nav-sec-body { padding: var(--s-1) 0 var(--s-2); }
-.nav-sec-body .nav-row { grid-template-columns: 8px 1fr auto; padding-left: .9em; }
+.nav-sec-body .nav-row { grid-template-columns: 8px 1fr auto auto; padding-left: .9em; }
 
 /* ---- telemetry ---- */
 .tel-body { padding: var(--s-3) var(--s-4) var(--s-4); display: flex; flex-direction: column; gap: .15em; }
@@ -189,11 +206,38 @@ html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
 
 @media (max-width: 1200px) { .hud-bottom { display: none; } }
 
-/* ---------- loading veil + no-webgl ---------- */
+/* ---------- loading veil ("contacting Kepler probe archive") + no-webgl ---------- */
 #exo-loading { position: fixed; inset: 0; z-index: var(--z-overlay); display: grid; place-items: center;
-  background: #000; color: var(--text-dim); font-size: var(--t-stamp); letter-spacing: .3em; text-transform: uppercase;
+  background: radial-gradient(130% 100% at 50% 50%, #05070b 0%, #000 72%);
+  color: var(--text-dim); font-family: 'IBM Plex Mono', ui-monospace, monospace;
   transition: opacity var(--t-slow) var(--ease); }
 #exo-loading.hidden { opacity: 0; pointer-events: none; }
+.load-core { width: min(420px, 78vw); text-align: center; }
+/* receiving-signal bars */
+.load-orbit { display: flex; gap: 5px; justify-content: center; align-items: flex-end; height: 24px; margin-bottom: 20px; }
+.load-orbit i { width: 3px; height: 7px; background: var(--accretion); opacity: .4; border-radius: 1px;
+  animation: load-sig 1.1s var(--ease) infinite; }
+.load-orbit i:nth-child(2) { animation-delay: .12s; }
+.load-orbit i:nth-child(3) { animation-delay: .24s; }
+.load-orbit i:nth-child(4) { animation-delay: .36s; }
+.load-orbit i:nth-child(5) { animation-delay: .48s; }
+@keyframes load-sig { 0%, 100% { height: 6px; opacity: .35; } 50% { height: 22px; opacity: 1; } }
+.load-title { color: var(--text-bright); letter-spacing: .34em; text-transform: uppercase; font-size: .72rem; }
+.load-status { margin-top: 12px; color: var(--text); letter-spacing: .1em; font-size: .82rem; min-height: 1.3em; }
+.load-status::after { content: '_'; margin-left: 1px; color: var(--accretion); animation: load-blink 1s steps(2, start) infinite; }
+@keyframes load-blink { 50% { opacity: 0; } }
+.load-track { position: relative; margin-top: 18px; height: 2px; background: var(--line); overflow: hidden; }
+.load-fill { height: 100%; width: 0%; background: var(--accretion); box-shadow: 0 0 12px -1px var(--accretion);
+  transition: width .25s var(--ease); }
+.load-track.indet .load-fill { width: 32%; box-shadow: 0 0 12px -1px var(--accretion);
+  animation: load-indet 1.3s var(--ease-out) infinite; transition: none; }
+@keyframes load-indet { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+.load-meta { margin-top: 11px; display: flex; justify-content: space-between; gap: 1em;
+  font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; color: var(--text-dim); }
+.load-pct { color: var(--accretion); }
+@media (prefers-reduced-motion: reduce) {
+  .load-orbit i, .load-status::after, .load-track.indet .load-fill { animation: none; }
+}
 .exo-nowebgl { position: fixed; inset: 0; display: grid; place-items: center; color: var(--text-dim); background: #000; }
 
 /* ---------- responsive ---------- */
