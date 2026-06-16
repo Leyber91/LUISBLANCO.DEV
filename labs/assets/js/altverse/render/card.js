@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    altverse/render/card.js — the shareable World Card (Phase 4).
    A downloadable PNG poster per world (canvas.toBlob): name, motto,
    the divergence, a mini-map, and the REAL consistency counts +
@@ -85,7 +85,7 @@ export function drawCard(canvas, world) {
   ctx.fillStyle = accent; ctx.fillRect(60, H - 70, 28, 28);
   ctx.fillStyle = voidc; ctx.strokeStyle = '#2c3744'; ctx.fillRect(92, H - 70, 28, 28); ctx.strokeRect(92, H - 70, 28, 28);
   ctx.fillStyle = '#79828F'; ctx.font = '12px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
-  ctx.fillText('PROJECT LEYBER 212 · ' + (world.tier === 'echo' ? 'OFFLINE SAMPLE' : world.tier.toUpperCase()), 132, H - 56);
+  ctx.fillText('luisblanco.dev / labs · ' + (world.tier === 'echo' ? 'OFFLINE SAMPLE' : world.tier.toUpperCase()), 132, H - 56);
 }
 
 async function toBlobDownload(world) {

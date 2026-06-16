@@ -36,9 +36,47 @@ function rng(seed) {
 const completeness = (r) => ['sy_dist','pl_orbper','pl_orbsmax','pl_rade','pl_masse','pl_eqt','st_teff']
   .reduce((n, k) => n + (num(r[k]) !== null ? 1 : 0), 0);
 
-export async function loadCatalogue() {
-  const res = await fetch('exoplanet_data.json');
-  const raw = await res.json();
+// Loads the ~8.5 MB NASA catalogue. Streams the download so the loading screen
+// can show real progress ("receiving telemetry…"), and accepts a force flag to
+// bypass the HTTP cache (the Refresh control -> pull the latest workflow-updated
+// JSON). onProgress({phase,received,total,count}) phases: download|parse|process|done.
+export async function loadCatalogue(onProgress, force = false) {
+  const report = (typeof onProgress === 'function') ? onProgress : () => {};
+  const url = 'exoplanet_data.json' + (force ? ('?t=' + Date.now()) : '');
+  const res = await fetch(url, force ? { cache: 'reload' } : {});
+  if (!res.ok) throw new Error('catalogue fetch failed: HTTP ' + res.status);
+
+  let raw;
+  const reader = res.body && res.body.getReader ? res.body.getReader() : null;
+  if (reader) {
+    // content-length is the COMPRESSED on-the-wire size when the host serves
+    // gzip/brotli (GitHub Pages does), but reader.read() yields DECOMPRESSED
+    // bytes — so only use it as the % denominator when the body is identity-
+    // encoded; otherwise go indeterminate ('X received') rather than lie at 100%.
+    const enc = (res.headers.get('content-encoding') || '').toLowerCase();
+    const total = (!enc || enc === 'identity') ? (+res.headers.get('content-length') || 0) : 0;
+    const chunks = []; let received = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value); received += value.length;
+      report({ phase: 'download', received, total });
+    }
+    report({ phase: 'parse' });
+    let buf = new Uint8Array(received); let pos = 0;
+    for (const c of chunks) { buf.set(c, pos); pos += c.length; }
+    chunks.length = 0;                                  // release the retained chunk views
+    const text = new TextDecoder('utf-8').decode(buf);
+    buf = null;                                         // release the byte buffer before parse
+    raw = JSON.parse(text);
+  } else {
+    // streaming unavailable (very old browser) — fall back to a plain read
+    report({ phase: 'download', received: 0, total: 0 });
+    raw = await res.json();
+    report({ phase: 'parse' });
+  }
+
+  report({ phase: 'process' });
   const best = new Map();
   for (const r of raw) {
     if (!r.pl_name || num(r.pl_rade) === null) continue;   // radius is the one mandatory field
@@ -47,6 +85,7 @@ export async function loadCatalogue() {
   }
   const list = [...best.values()].map(normalise);
   list.sort((a, b) => a.pl_name.localeCompare(b.pl_name, undefined, { numeric: true }));
+  report({ phase: 'done', count: list.length });
   return list;
 }
 
@@ -135,7 +174,10 @@ export function physics(p) {
   const gSI = 9.80665 * gRel;
   const Hm = kB * Teq / (mu * mH * gSI);                         // metres
   const Hr = Hm / (R * EARTH_R);                                 // in planet radii (tiny, e.g. Earth ~0.0013)
-  const atmR = 1.0 + clamp(50 * Hr * atmDensity, 0.022, 0.18);
+  // a giant IS its atmosphere — the banded disc is the cloud-top. Cap the shell THIN
+  // (a limb rim, not a thick wash on top) so it isn't a second atmosphere. Terrestrials
+  // keep a fuller visible shell. (Science spec: giants single-layer; atmR tracks H.)
+  const atmR = 1.0 + clamp(50 * Hr * atmDensity, 0.018, isGiant ? 0.045 : 0.16);
 
   // insolation -> exposure multiplier (compressive)
   const Lrel = Rstar * Rstar * Math.pow(Teff / 5772, 4);
@@ -255,7 +297,7 @@ export function toParams(p) {
   const c = classify(p);
   const seedInt = hashName(p.pl_name);
   const rand = rng(seedInt);
-  const { domClass, state, Teq, isGiant } = ph;
+  const { domClass, state, Teq, isGiant, atmDensity, Tsurf, gRel } = ph;
 
   const [colA, colB, colC] = classColors(ph, rand);
   const sky = blackbodySRGB(ph.Teff);
@@ -300,6 +342,26 @@ export function toParams(p) {
   const _z = rand() * 2 - 1, _a = rand() * 6.2831, _s = Math.sqrt(Math.max(0, 1 - _z * _z));
   const starSpin = [_s * Math.cos(_a), _z, _s * Math.sin(_a)];
 
+  // ---- procedural explorable surface (radially-displaced unit sphere) ----
+  const steam = (domClass === 1 && Teq > 420) ? 1 : 0;
+  // relief amplitude (planet radii): composition base, gravity-flattened in shader.
+  // Art-directed exaggeration (~4x physical Everest) so the surface reads as a
+  // dramatic landscape from the just-above-the-peak-line eye, not a flat haze.
+  const amp = (state === 'lava' || state === 'partial') ? 0.010
+            : state === 'ice' ? 0.006
+            : domClass === 1 ? 0.007 : 0.011;
+  // morphology (frame-constant int -> uniform branch, no per-pixel divergence)
+  const terrStyle = (state === 'lava' || state === 'partial') ? 3
+                  : state === 'ice' ? 2
+                  : atmDensity < 0.1 ? 4                          // cratered regolith (airless)
+                  : (Teq > 500 && atmDensity < 0.5) ? 1           // hot + dry dunes
+                  : 0;                                            // rocky / mountain
+  // liquid water can only STAND when temperate, not steaming, with enough air, in range
+  const hasSea = state === 'temperate' && steam === 0 && atmDensity > 0.15 && Teq >= 245 && Teq <= 370;
+  const seaY = hasSea ? clamp(0.30 + (wet - 0.5) * 0.6, 0.05, 0.85) : -1.0;  // SPECULATIVE waterline
+  // altitude snow-line driver: colder worlds carry more high snow
+  const tfreeze = clamp((273 - Tsurf) / 60 + 0.2, 0, 1);
+
   return {
     type: c.type, klass: domClass, isGasGiant: isGiant ? 1 : 0,
     seed: (seedInt % 997) + rand() * 3.0,
@@ -308,8 +370,10 @@ export function toParams(p) {
     seaLevel: wet, tempBias, iceCap,
     cloud: isGiant ? 0.0 : clamp(0.5 - Math.abs(Teq - 290) / 500, 0.1, 0.45),
     life: hab ? 0.55 + rand() * 0.3 : 0.0,
-    steam: (domClass === 1 && Teq > 420) ? 1 : 0,
+    steam,
     bump: isGiant ? 0.0 : 0.14,
+    // procedural explorable surface
+    amp, terrStyle, seaY, tfreeze, gRel,
     contFreq: 1.6 + rand() * 0.9, mtnFreq: 5.0 + rand() * 4.0,
     bandFreq: 10 + Math.floor(rand() * 16),
     colA, colB, colC,

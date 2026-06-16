@@ -84,6 +84,15 @@ uniform float uScatter;
 uniform int   uOctaves;
 uniform float uLastAmp;
 
+// procedural explorable surface (radially-displaced unit sphere)
+uniform float uAmp;          // relief amplitude (planet radii)
+uniform int   uTerrStyle;    // 0 rocky/mtn · 1 dune · 2 glacier · 3 lava · 4 cratered
+uniform float uSeaY;         // sea height in relief units (-1 = no sea)
+uniform float uTfreeze;      // snow-line driver
+uniform float uGRel;         // surface gravity (Earth=1) — high g flattens relief
+uniform int   uMarchSteps;
+uniform int   uShadowSteps;
+
 #define PI 3.14159265359
 
 // ---------- noise ----------
@@ -540,11 +549,208 @@ vec3 gasInterior(vec3 ro, vec3 rd){
   return col * uLightMul;
 }
 
+// ======================================================================
+// PROCEDURAL EXPLORABLE SURFACE — radially-displaced unit sphere.
+// The "ground" is length(p) == 1.0 + amp*H(normalize(p)), in the SAME
+// radius=1 space as the orbit ball, so raySph/atmosphere/background/
+// renderStar all reuse unchanged and the orbit world IS the surface world.
+// All loops are constant-bounded with break -> valid WebGL1 GLSL ES 1.00.
+// ======================================================================
+
+// per-planet world BASIS: seed -> fixed 3D rotation (NOT a translation, so
+// two worlds are genuinely different topologies, not shifted continents).
+mat3 seedBasis(){
+  float s = uSeed;
+  float a=fract(s*0.1031)*6.2831853, b=fract(s*0.1107+0.33)*6.2831853, c=fract(s*0.0973+0.71)*6.2831853;
+  float sa=sin(a),ca=cos(a),sb=sin(b),cb=cos(b),sc=sin(c),cc=cos(c);
+  mat3 Rx=mat3(1.,0.,0., 0.,ca,-sa, 0.,sa,ca);
+  mat3 Ry=mat3(cb,0.,sb, 0.,1.,0., -sb,0.,cb);
+  mat3 Rz=mat3(cc,-sc,0., sc,cc,0., 0.,0.,1.);
+  return Rz*Ry*Rx;
+}
+
+// LOD'd value-noise FBM: octave count is an ARGUMENT (falls with distance).
+float fbmN(vec3 p, int oct, float lastAmp){
+  float a=0.5, s=0.0;
+  for(int i=0;i<9;i++){ if(i>=oct) break;
+    float amp=(i==oct-1)?a*lastAmp:a; s+=amp*vnoise(p); p=p*2.03+1.1; a*=0.5; }
+  return s;
+}
+// LOD'd ridged: octave-capped so distance octave saving is not defeated.
+float ridgedN(vec3 p, int oct){
+  float a=0.5, s=0.0;
+  for(int i=0;i<6;i++){ if(i>=oct) break;
+    float n=1.0-abs(vnoise(p)*2.0-1.0); s+=a*n*n; p=p*2.07+0.7; a*=0.5; }
+  return s;
+}
+
+// science-driven height. d = unit direction on the sphere; dist = sample's
+// distance from the eye (drives LOD). Same signal at every scale => the
+// continent (oct3) IS the rock (oct9): seamless infinite-detail zoom.
+float planetH(vec3 d, float dist){
+  mat3 W = seedBasis();
+  vec3 wd = W*d;
+  // distance-driven octaves (dist = TRUE distance from the eye, see planetDE):
+  // near foreground gets oct~8-9, the horizon falls to ~5 -> detail where it reads.
+  float fo = clamp(9.0 - log2(max(dist,1e-5)*100.0), 2.0, 9.0);
+  int   oct = int(ceil(fo));
+  float lastAmp = clamp(fo - floor(fo), 0.0, 1.0); if(lastAmp==0.0) lastAmp=1.0;
+  // GLSL ES 1.00 has no int min/max overloads -> clamp octaves manually
+  int   wOct = oct-3; if(wOct<1) wOct=1;       // domain warp is itself LOD'd
+  int   mtOct = oct; if(mtOct>7) mtOct=7;      // mountain ridge cap
+  int   glOct = oct; if(glOct>4) glOct=4;      // glacier ridge cap
+  int   dtOct = oct; if(dtOct>5) dtOct=5;      // fine-detail cap
+
+  // regional elevation trend (gentle, sets highlands vs basins across the patch)
+  float tf = uContFreq*5.0;
+  vec3 p = wd*tf;
+  vec3 q = vec3(fbmN(p+1.7,wOct,1.0), fbmN(p+9.2,wOct,1.0), fbmN(p+4.3,wOct,1.0));
+  float trend = fbmN(p + 1.5*q, oct, lastAmp);
+  float uplift = smoothstep(0.18, 0.62, trend);
+  // primary mountains at VIEW scale: mf is high so the dominant (high-amplitude)
+  // low octaves are already mountain-WIDTH in the frame. ridged + squared ->
+  // sharp crests, deep valleys. This is what makes the relief read as 3D.
+  // Some ridges EVERYWHERE (no dead-flat landing site), more on the highlands.
+  float mf = uMtnFreq*7.0;
+  float rn = clamp(ridgedN(wd*mf, mtOct)/1.35, 0.0, 1.0);
+  float mtn = (0.40 + 0.60*uplift) * rn * rn;
+  // fine surface roughness (rocks/scree), centred so it adds and removes
+  float detail = fbmN(wd*mf*4.0, dtOct, 1.0) - 0.5;
+  float h = trend*0.30 + mtn*0.62 + detail*0.06;
+  // incised erosion channels on the slopes
+  float carve = ridgedN(wd*mf*1.8+5.0, dtOct);
+  h -= carve*carve*0.07*uplift;
+  // ---- per-style morphology (frame-constant uTerrStyle -> no divergence) ----
+  if(uTerrStyle==1){                     // DUNE: transverse ripple fields on flats
+    float wv = sin(dot(wd.xz, vec2(13.0,8.0))*8.0 + fbmN(wd*4.0,3,1.0)*8.0);
+    h += abs(wv)*0.06*(1.0-uplift);
+  } else if(uTerrStyle==2){              // GLACIER: ice sheet smooths the relief
+    h = mix(0.5, h, 0.5) + 0.04*ridgedN(wd*mf*0.7, glOct);
+  } else if(uTerrStyle==4){              // CRATERED: overlapping impact bowls
+    float b0 = ridgedN(wd*mf*0.5, 3);
+    float b1 = ridgedN(wd*mf*1.3+3.0, 3);
+    h -= 0.20*smoothstep(0.55,0.9,b0) + 0.12*smoothstep(0.6,0.92,b1);
+  }
+  return clamp(h, -0.25, 1.0);           // <=1 keeps peaks under the camera ceiling
+}
+
+// MATERIAL at the hit — science palette ONLY (no green default / no uLife).
+vec3 surfaceMaterial(vec3 P, vec3 N){
+  float H = clamp((length(P)-1.0)/max(uAmp,1e-5), -1.0, 1.0);
+  float e = clamp(H, 0.0, 1.0);
+  float slope = 1.0 - clamp(dot(N, normalize(P)), 0.0, 1.0);
+  vec3 rock = mix(uColB, uColA, slope*0.8);
+  vec3 reg  = uColA;
+  vec3 alb  = mix(reg, rock, smoothstep(0.4,0.62,slope));
+  float strata = fract(H*8.0 + fbm3(P*2.0)*0.3);
+  float band = smoothstep(0.0,0.04,strata)*smoothstep(0.08,0.04,strata);
+  alb = mix(alb, alb*0.55, band*smoothstep(0.45,0.7,slope));
+  float snow = smoothstep(uIceCap, uIceCap+0.12, e) * uTfreeze * smoothstep(0.6,0.3,slope);
+  alb = mix(alb, vec3(0.90,0.93,0.98), clamp(snow,0.0,1.0));
+  if(uTerrStyle==2) alb = mix(alb, vec3(0.80,0.87,0.96), 0.55);
+  if(uTerrStyle==3){
+    float lava = smoothstep(0.15, -0.15, H);     // molten crust pools in the lows
+    alb = mix(alb, vec3(0.05,0.035,0.03), lava); // dark cooled basalt around it
+  }
+  return alb * (0.45 + uSurfAlbedo*1.5);
+}
+
+// distance estimator: radial displacement of the unit sphere. Ocean clamps
+// flat (max(H,seaY)) so basins don't march a seabed under "water".
+float planetDE(vec3 p){
+  float r = length(p);
+  vec3 d = p / r;
+  float h = max(planetH(d, length(p-uCam)), uSeaY);  // LOD by true eye distance; flat sea
+  float amp = uAmp / sqrt(max(uGRel,0.3));     // high-g worlds flatter (isostasy)
+  return r - (1.0 + amp*h);
+}
+
+// analytic-bracketed under-relaxed sphere-trace. Returns t of hit, -1 on miss.
+float marchSurface(vec3 ro, vec3 rd, out vec3 hitP){
+  float amp = uAmp / sqrt(max(uGRel,0.3));
+  vec2 bo = raySph(ro, rd, 1.0 + amp);          // relief shell (free far-skip)
+  if(bo.x > bo.y) return -1.0;                  // misses planet entirely -> sky
+  float t = max(bo.x, 0.0), tFar = bo.y;
+  t += ign(gl_FragCoord.xy)*0.0008;             // start dither (banding -> noise)
+  for(int i=0;i<160;i++){                        // CONSTANT bound + break
+    if(i>=uMarchSteps || t>tFar) break;
+    vec3 p = ro + rd*t;
+    float d = planetDE(p);
+    if(d < 0.0008*t){ hitP = p; return t; }      // screen-space eps => constant cost
+    t += max(d*0.6, t*0.0025 + 0.0008);          // under-relax + growth floor
+  }
+  return -1.0;
+}
+
+// 4-tap tetrahedron normal of the FULL DE (must diff ridges, not plains).
+vec3 surfaceNormal(vec3 p, float t){
+  vec2 k = vec2(1.0,-1.0);
+  float e = max(0.0006*t, 0.00012);
+  return normalize( k.xyy*planetDE(p+k.xyy*e) + k.yyx*planetDE(p+k.yyx*e)
+                  + k.yxy*planetDE(p+k.yxy*e) + k.xxx*planetDE(p+k.xxx*e) );
+}
+
+// IQ soft shadow: short low-detail march toward the star.
+float surfaceShadow(vec3 P, vec3 L){
+  if(uShadowSteps<=0) return 1.0;
+  float res=1.0, t=0.004;
+  for(int j=0;j<24;j++){
+    if(j>=uShadowSteps) break;
+    float d = planetDE(P + L*t);
+    if(d < 0.0004) return 0.0;
+    res = min(res, 14.0*d/t);
+    t += max(d*0.7, 0.004);
+    if(t > 0.5) break;
+  }
+  return clamp(res,0.0,1.0);
+}
+
+// THE surface renderer. ro,rd in radius=1 space (eye just above the relief cap).
+vec3 surfaceView(vec3 ro, vec3 rd){
+  vec3 L = normalize(uLightDir);
+  vec3 P; float t = marchSurface(ro, rd, P);
+  if(t < 0.0){
+    // MISS -> over the horizon: reuse atmosphere()+background()(renderStar).
+    return atmosphere(ro, rd, background(rd), false, 0.0);
+  }
+  vec3 N   = surfaceNormal(P, t);
+  vec3 alb = surfaceMaterial(P, N);
+  float ndl = max(dot(N, L), 0.0);
+  float sh  = (ndl>0.0) ? surfaceShadow(P + N*0.0008, L) : 0.0;
+  vec3 amb = normalize(uBetaR+1e-3)*uSkyTint*uStarColor*0.16*uHasAtmo;
+  vec3 col = alb * (uStarColor*ndl*sh*1.2 + amb);
+  if(uTerrStyle==3 && uEmiss>0.001){           // dark basalt crust + bright molten fissures
+    float ampE=uAmp/sqrt(max(uGRel,0.3));
+    float H=(length(P)-1.0)/max(ampE,1e-5);
+    float crackn=fbm3(P*9.0+uTime*0.05);
+    float cracks=smoothstep(0.035,0.0,abs(crackn-0.5));  // thin glowing fissure lines only
+    float pools =smoothstep(-0.12,-0.30,H);              // molten only in the deepest pools
+    float lava=clamp(max(cracks, pools), 0.0, 1.0);
+    float pulse=0.6+0.4*fbm3(P*5.0+uTime*0.2);
+    col *= mix(1.0, 0.45, smoothstep(0.4,0.0,H));        // char/darken the low crust
+    col += uEmissColor*uEmiss*lava*pulse*2.6;
+  }
+  // aerial perspective: fade terrain toward the HORIZON-sky colour with distance.
+  // distance^2 keeps the near foreground crisp; the target is the actual sky in
+  // this azimuth so terrain joins the sky dome seamlessly at the horizon. Gated by
+  // uHasAtmo -> airless worlds stay perfectly crisp (no haze, hard terminator).
+  vec3 up = normalize(ro);
+  vec3 rh = rd - up*dot(rd, up);
+  rh = (length(rh) > 1e-4) ? normalize(rh) : rd;
+  vec3 airlight = atmosphere(ro, rh, background(rh), false, 0.0) * 0.8;
+  float haze = 1.0 - exp(-t*t*uScatter*0.35*uHasAtmo);
+  col = mix(col, airlight, clamp(haze, 0.0, 0.75));
+  return col;
+}
+
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5*uRes)/uRes.y;
   vec3 ro = uCam;
   vec3 fwd = normalize(uFwd);
-  vec3 wup = abs(fwd.y) > 0.99 ? vec3(0.0,0.0,1.0) : vec3(0.0,1.0,0.0);
+  // on the surface, level the horizon to the planet's radial up; in orbit use world Y
+  vec3 wup = (uSurfaceMode == 1) ? normalize(uCam)
+           : (abs(fwd.y) > 0.99 ? vec3(0.0,0.0,1.0) : vec3(0.0,1.0,0.0));
+  if(abs(dot(fwd, wup)) > 0.99) wup = abs(fwd.y) > 0.99 ? vec3(0.0,0.0,1.0) : vec3(0.0,1.0,0.0);
   vec3 rgt = normalize(cross(fwd, wup));
   vec3 upv = cross(rgt, fwd);
   vec3 rd  = normalize(uv.x*rgt + uv.y*upv + uFov*fwd);
@@ -554,6 +760,12 @@ void main(){
     vec3 gc = gasInterior(ro, rd);
     gc *= uExposure; gc = gc/(gc+vec3(1.0)); gc = pow(gc, vec3(0.4545));
     gl_FragColor = vec4(gc, 1.0); return;
+  }
+  // a rocky/ice/lava/airless world: sphere-trace the displaced-unit-sphere terrain
+  if(uSurfaceMode == 1 && uIsGasGiant == 0){
+    vec3 sc = surfaceView(ro, rd);
+    sc *= uExposure; sc = sc/(sc+vec3(1.0)); sc = pow(sc, vec3(0.4545));
+    gl_FragColor = vec4(sc, 1.0); return;
   }
 
   vec2 ps = raySph(ro, rd, 1.0);
@@ -599,6 +811,9 @@ const DEFAULTS = {
   atmR: 1.05, hr: 0.02, betaR: [0.175,0.408,1.0], betaM: 0.2, mieG: 0.76, haze: 0.0,
   skyTint: [0.9,0.95,1.0], hasAtmo: 0.9, scatter: 60.0,
   octaves: 6, lastAmp: 1.0,
+  // procedural explorable surface
+  amp: 0.0028, terrStyle: 0, seaY: -1.0, tfreeze: 0.2, gRel: 1.0,
+  marchSteps: 128, shadowSteps: 16,
 };
 
 const UNIFORMS = [
@@ -609,6 +824,7 @@ const UNIFORMS = [
   'uSurfAlbedo','uEmiss','uEmissColor',
   'uAtmR','uHr','uBetaR','uBetaM','uMieG','uHaze','uSkyTint','uHasAtmo','uScatter',
   'uOctaves','uLastAmp',
+  'uAmp','uTerrStyle','uSeaY','uTfreeze','uGRel','uMarchSteps','uShadowSteps',
 ];
 
 export class Exoplanet {
@@ -673,9 +889,15 @@ export class Exoplanet {
       t = vnorm(t);
       // stand so the star sits ~20 deg above the horizon (sin20 ~ 0.34)
       const up = vnorm(vadd(vscale(L, 0.34), vscale(t, 0.94)));
-      const ro = vscale(up, 1.03);
+      // float above the actual relief ceiling (amp/sqrt(g)) so the eye is never
+      // buried regardless of landing site; an oblique look-down reveals the
+      // procedural relief through shading + the curved horizon + star above it.
+      const cap = (cfg.amp || 0.011) / Math.sqrt(Math.max(cfg.gRel || 1, 0.3));
+      const ro = vscale(up, 1.0 + cap * 1.2 + 6e-6);
       const hd = vnorm(vsub(L, vscale(up, vdot(L, up))));   // star's horizontal bearing
-      const fwd = vnorm(vadd(vscale(hd, 0.97), vscale(up, 0.10)));  // just above the horizon
+      // oblique aerial: ~18 deg down -> terrain fills the lower ~60%, the
+      // horizon + star + sky sit in the upper ~40%
+      const fwd = vnorm(vadd(vscale(hd, 0.95), vscale(up, -0.31)));
       return { ro, fwd };
     }
     if (cfg.camMode === 'closeorbit') {
@@ -702,7 +924,13 @@ export class Exoplanet {
   // octave LOD from the planet's apparent radius in pixels
   _lod() {
     const cfg = this.cfg;
-    if (cfg.camMode === 'surface' || cfg.camMode === 'closeorbit') return { oct: 7, last: 1.0 };
+    if (cfg.camMode === 'surface' || cfg.camMode === 'closeorbit') {
+      // march/shadow budget scales with resScale (dGPU full / iGPU / mobile)
+      const rs = this.still ? 1.0 : cfg.resScale;
+      const marchSteps = rs >= 0.85 ? 128 : rs >= 0.7 ? 96 : 80;
+      const shadowSteps = rs >= 0.85 ? 16 : 0;
+      return { oct: 7, last: 1.0, marchSteps, shadowSteps };
+    }
     const halfFov = Math.atan(0.5 / cfg.fov);
     const angR = Math.asin(Math.min(1 / cfg.camDist, 1));
     const rpx = (angR / halfFov) * (this.canvas.height / 2);
@@ -785,6 +1013,15 @@ export class Exoplanet {
 
     gl.uniform1i(u.uOctaves, lod.oct | 0);
     gl.uniform1f(u.uLastAmp, lod.last);
+
+    // procedural explorable surface
+    gl.uniform1f(u.uAmp, cfg.amp);
+    gl.uniform1i(u.uTerrStyle, cfg.terrStyle | 0);
+    gl.uniform1f(u.uSeaY, cfg.seaY);
+    gl.uniform1f(u.uTfreeze, cfg.tfreeze);
+    gl.uniform1f(u.uGRel, cfg.gRel);
+    gl.uniform1i(u.uMarchSteps, (lod.marchSteps ?? cfg.marchSteps) | 0);
+    gl.uniform1i(u.uShadowSteps, (lod.shadowSteps ?? cfg.shadowSteps) | 0);
 
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
