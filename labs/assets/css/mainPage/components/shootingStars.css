@@ -1,0 +1,29 @@
+/* Shooting Stars Styles */
+.shooting-stars-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -4;
+}
+
+.shooting-star {
+    position: absolute;
+    width: 2px;
+    height: 80px;
+    background: linear-gradient(-45deg, #ffffff, rgba(255,255,255,0));
+    animation: shoot 1s forwards;
+}
+
+@keyframes shoot {
+    from {
+        transform: translateX(0) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100vw) translateY(100vh);
+        opacity: 0;
+    }
+}

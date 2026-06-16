@@ -1,0 +1,33 @@
+/* Aurora and Nebula Overlays with Enhanced Colors */
+.aurora-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(120deg, rgba(0, 153, 255, 0.5), rgba(255, 102, 0, 0.5));
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: -1;
+    animation: auroraFlow 15s linear infinite;
+    background-size: 200% 200%;
+}
+
+@keyframes auroraFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.nebula-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 25% 25%, rgba(255, 105, 180, 0.2), transparent),
+                radial-gradient(circle at 75% 75%, rgba(30, 144, 255, 0.2), transparent);
+    pointer-events: none;
+    z-index: -2;
+    backdrop-filter: blur(8px);
+}

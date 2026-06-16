@@ -1,0 +1,53 @@
+:root {
+    /* Sidebar Colors */
+    --sidebar-background: #0a0a0a;
+    --scrollbar-thumb: #3a3a3a;
+    --scrollbar-thumb-hover: #5a5a5a;
+    --scrollbar-track: #151515;
+
+    /* Link Colors */
+    --accent-color: #00ccff;
+    --hover-color: #ff33cc;
+    --hover-background-color: rgba(255, 255, 255, 0.1);
+
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+
+    /* Background Colors */
+    --background-primary: #050505;
+    --background-secondary: #101010;
+
+    /* Border Colors */
+    --border-color: #303030;
+
+    /* Transition Durations */
+    --transition-fast: 0.2s;
+    --transition-medium: 0.3s;
+    --transition-slow: 0.5s;
+
+    /* Spacing */
+    --spacing-small: 8px;
+    --spacing-medium: 16px;
+    --spacing-large: 24px;
+
+    /* Font Sizes */
+    --font-size-small: 14px;
+    --font-size-medium: 16px;
+    --font-size-large: 20px;
+
+    /* Box Shadows */
+    --box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --box-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+    /* Neon Colors */
+    --neon-blue: #00ccff;
+    --neon-pink: #ff33cc;
+    --neon-green: #33ff33;
+    --neon-yellow: #ffff33;
+
+    /* Gradient Colors */
+    --gradient-start: #000000;
+    --gradient-end: #1a1a1a;
+}

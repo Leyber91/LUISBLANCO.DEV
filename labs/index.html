@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Leyber 212 — a laboratory at the event horizon</title>
+  <meta name="description" content="Interactive experiments in space-science, AI and the systems that connect them. Black holes, exoplanets, n-dimensional space and more." />
+
+  <!-- fonts: Orbitron (display) · Space Grotesk (body) · IBM Plex Mono (mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- design tokens, then the hub stylesheet -->
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/hub.css" />
+</head>
+<body>
+  <!-- ===================== living background ===================== -->
+  <canvas id="cosmos-substrate" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ===================== header ===================== -->
+  <header class="site-header">
+    <a href="#home" class="brand">PROJECT&nbsp;LEYBER&nbsp;<b>212</b></a>
+    <nav class="site-nav" id="site-nav" aria-label="Primary"></nav>
+    <span class="ai-status" id="ai-status" data-mode="echo" title="AI backend (auto-detected)">
+      <span class="dot"></span><span id="ai-status-label">AI</span>
+    </span>
+    <button class="rail-toggle" id="rail-toggle" aria-label="Open project menu" aria-controls="rail">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- ===================== hero ===================== -->
+  <section class="hero" id="home">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <p class="hero-kicker">Space · AI · Systems</p>
+      <h1>Project Leyber <span class="x">212</span></h1>
+      <p class="hero-sub">A laboratory at the edge of the event horizon. Interactive experiments in space-science, AI and the systems that connect them.</p>
+      <div class="hero-stats" role="group" aria-label="Project counts">
+        <span class="stat"><span class="n warm" id="stat-built">0</span><span class="l">Live</span></span>
+        <span class="stat"><span class="n" id="stat-planned">0</span><span class="l">In pipeline</span></span>
+        <span class="stat"><span class="n" id="stat-cats">0</span><span class="l">Domains</span></span>
+      </div>
+    </div>
+    <a href="#projects" class="scroll-cue" aria-label="Scroll to projects">Explore</a>
+  </section>
+
+  <!-- ===================== projects ===================== -->
+  <section class="section" id="projects">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">The Lab</span>
+        <h2>Projects &amp; Experiments</h2>
+        <p>Everything Leyber 212 is building, across eight domains. Live ones are playable now; the rest are on the bench.</p>
+      </div>
+      <div class="filters" id="filters" role="group" aria-label="Filter by domain"></div>
+      <div class="grid" id="project-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== about ===================== -->
+  <section class="section" id="about">
+    <div class="wrap about-grid">
+      <div class="about" data-reveal>
+        <div class="section-head">
+          <span class="eyebrow">The Why</span>
+          <h2>An open laboratory</h2>
+        </div>
+        <p>Leyber 212 is a playground for hard ideas made interactive — gravitational lensing you can orbit, exoplanets fed by live NASA data, n-dimensional geometry you can rotate by hand.</p>
+        <p>Every experiment is built in the open and wired to a tiered AI backend: your local model when you have one, a hosted relay when you don't, and a graceful offline mode when there's neither. No keys ever ship to the browser.</p>
+        <div class="socials" id="socials" aria-label="Links"></div>
+      </div>
+      <aside class="ledger" data-reveal aria-label="Build status">
+        <div class="row"><span class="k">Live experiments</span><span class="v warm" id="ledger-built">0</span></div>
+        <div class="row"><span class="k">In beta</span><span class="v" id="ledger-beta">0</span></div>
+        <div class="row"><span class="k">Planned</span><span class="v" id="ledger-planned">0</span></div>
+        <div class="row"><span class="k">Domains</span><span class="v" id="ledger-cats">0</span></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== footer ===================== -->
+  <footer class="site-footer">
+    <div class="wrap" style="display:flex;flex-wrap:wrap;gap:var(--s-4);justify-content:space-between;align-items:center;width:100%">
+      <span>&copy; <span id="year">2024</span> Project Leyber 212 · built by <a href="https://github.com/Leyber91" target="_blank" rel="noopener">Leyber91</a></span>
+      <span>Made at the event horizon.</span>
+    </div>
+  </footer>
+
+  <!-- ===================== slide-in category rail ===================== -->
+  <aside class="rail" id="rail" aria-label="All projects"></aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- one module entry; it renders the page from site.config.js -->
+  <script type="module" src="assets/js/hub/main.js"></script>
+</body>
+</html>

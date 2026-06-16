@@ -12,22 +12,37 @@
     {
       name: 'Exomania', tag: 'exoplanet survey',
       blurb: 'A starship-window survey of real Kepler exoplanets — each world ray-traced from its own measured radius, temperature and host star, live in WebGL.',
-      href: 'labs/exomania/index.html',
+      href: 'labs/exomania.html',
     },
     {
       name: 'Black Hole', tag: 'general relativity',
-      blurb: 'A ray-marched Schwarzschild / Kerr black hole — gravitational lensing, a doppler-shifted accretion disk and the photon ring, rendered live in WebGL.',
-      href: 'labs/black-hole/index.html',
+      blurb: 'A ray-marched Schwarzschild / Kerr black hole — gravitational lensing, a doppler-shifted accretion disk and the photon ring, live in WebGL.',
+      href: 'labs/bh_animation_page.html',
     },
     {
       name: 'Dimensions', tag: 'higher-dimensional geometry',
-      blurb: 'WITNESS — turn an axis you cannot see by hand and watch an N-cube project and fold, while a live ledger names which hidden dimension is bending the shadow. 1D to 10D, real maths.',
-      href: 'labs/dimensions/index.html',
+      blurb: 'WITNESS — turn an axis you cannot see and watch an N-cube fold, while a live ledger names which hidden dimension is bending the shadow. 1D to 10D, real maths.',
+      href: 'labs/md_animation_page.html',
     },
     {
       name: 'Altverse', tag: 'generative cosmology',
-      blurb: 'A what-if engine: change one constant of reality and a deterministic pipeline weaves a complete, internally-consistent alternate world — premise, chronology, map and the causal record of how it differs from ours.',
-      href: 'labs/altverse/index.html',
+      blurb: 'A what-if engine: flip one constant of reality and a deterministic pipeline weaves a complete, internally-consistent alternate world — premise, chronology, map.',
+      href: 'labs/altverse.html',
+    },
+    {
+      name: 'AI Meme Lab', tag: 'reasoning · taste',
+      blurb: 'Watch a reasoning model argue with itself about what is funny — brainstorm angles, score a caption slate against a taste rubric, then commit. The meme is the receipt.',
+      href: 'labs/memes.html',
+    },
+    {
+      name: 'Personalized Plans', tag: 'reasoning · constraints',
+      blurb: 'A reasoning model that thinks through your real constraints out loud — the days, the kit, the bad knee — then builds a training block around them.',
+      href: 'labs/workout-plans.html',
+    },
+    {
+      name: 'Trending Topics', tag: 'agentic · live web',
+      blurb: 'A live agentic scan: it hits public keyless APIs, ranks what is actually rising right now, and a model explains why. No backend, no keys.',
+      href: 'labs/trending.html',
     },
   ];
 

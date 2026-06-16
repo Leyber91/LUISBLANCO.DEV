@@ -1,0 +1,387 @@
+/* Main Content Styles with Enhanced Readability */
+main {
+    padding: 80px 20px 20px 20px;
+    min-height: 100vh;
+    background: radial-gradient(circle at center, #1a1a1a, #121212);
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero Section */
+.hero {
+    position: relative;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero canvas#blackHole {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    color: var(--accent-color);
+    margin-top: 20px;
+    text-shadow: 0 0 8px var(--hover-color), 0 0 15px var(--hover-color);
+    transition: transform 0.5s ease;
+    cursor: pointer;
+}
+
+.hero h1:hover {
+    transform: scale(1.05);
+}
+
+/* Projects Section */
+.projects {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.projects h2 {
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: var(--accent-color);
+    position: relative;
+}
+
+.projects .project-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.project-card {
+    width: 300px;
+    height: 200px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: var(--card-background);
+    box-shadow: 0 4px 10px var(--shadow-color);
+    padding: 20px;
+    transition: transform 0.6s;
+}
+
+.card-front {
+    z-index: 2;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+}
+
+.project-card:hover .card-front {
+    transform: rotateY(180deg);
+}
+
+.project-card:hover .card-back {
+    transform: rotateY(0deg);
+}
+
+/* Glowing Borders for Project Cards */
+.project-card:hover {
+    box-shadow: 0 0 15px var(--hover-color);
+}
+
+.project-card h3, .project-card h4 {
+    color: var(--accent-color);
+}
+
+.project-card p, .project-card ul {
+    color: var(--text-color);
+    text-align: left;
+}
+
+.project-card ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+.project-card ul li {
+    margin-bottom: 5px;
+}
+
+/* Projects Section */
+.projects {
+    text-align: center;
+    padding: 50px 20px;
+    position: relative;
+}
+
+.projects::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(45deg, #ff00ff05, #00ffff05),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="0" y="0" width="100" height="100" fill="none" stroke="%23ffffff10" stroke-width="0.5"/></svg>') 0 0/50px 50px;
+    z-index: -1;
+    opacity: 0.1;
+    animation: gridShift 30s linear infinite;
+}
+
+@keyframes gridShift {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+}
+
+.projects h2 {
+    margin-bottom: 30px;
+    font-size: 3rem;
+    color: var(--accent-color);
+    position: relative;
+    display: inline-block;
+}
+
+.projects h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+}
+
+.projects .project-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.project-card {
+    width: 300px;
+    height: 200px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    background: var(--card-background);
+    box-shadow: 
+        0 4px 10px var(--shadow-color),
+        0 0 20px rgba(0, 255, 255, 0.1);
+    padding: 20px;
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-front {
+    z-index: 2;
+    background: linear-gradient(135deg, var(--card-background), rgba(0, 0, 0, 0.8));
+}
+
+.card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(45deg, var(--card-background), rgba(0, 0, 0, 0.9));
+}
+
+.project-card:hover .card-front {
+    transform: rotateY(180deg);
+}
+
+.project-card:hover .card-back {
+    transform: rotateY(0deg);
+}
+
+/* Glowing Borders for Project Cards */
+.project-card:hover {
+    box-shadow: 
+        0 0 15px var(--hover-color),
+        0 0 30px var(--hover-color),
+        0 0 45px var(--hover-color);
+}
+
+.project-card h3, .project-card h4 {
+    color: var(--accent-color);
+    text-shadow: 0 0 5px var(--hover-color);
+}
+
+.project-card p, .project-card ul {
+    color: var(--text-color);
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.project-card ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+.project-card ul li {
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.project-card ul li::before {
+    content: '▹';
+    position: absolute;
+    left: -15px;
+    color: var(--accent-color);
+}
+
+.projects-showcase {
+    padding: 50px 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 1em;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+    position: relative;
+}
+
+.project-carousel {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 1em;
+}
+
+.project-slide {
+    display: none;
+    animation: fadeEffect 1.5s;
+}
+
+.project-slide.active {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-radius: 1em;
+}
+
+.project-slide canvas {
+    width: 45%;
+    border-radius: 2em;
+    box-shadow: 
+        0 0 10px rgba(0, 255, 255, 0.3),
+        0 0 20px rgba(0, 255, 255, 0.2),
+        0 0 30px rgba(0, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    transform: scale(0.9);
+    filter: brightness(1.1) contrast(1.1);
+}
+
+.project-slide canvas:hover {
+    transform: scale(0.95);
+    filter: brightness(1.2) contrast(1.2);
+}
+
+.project-info {
+    width: 50%;
+    color: #fff;
+}
+
+.project-info h3 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: var(--accent-color);
+    text-shadow: 0 0 10px var(--hover-color);
+}
+
+.project-info p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: var(--accent-color);
+    color: #000;
+    text-decoration: none;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    transform: scale(0);
+    transition: transform 0.5s ease-out;
+}
+
+.btn:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-5px);
+    box-shadow: 
+        0 5px 15px rgba(0, 255, 255, 0.4),
+        0 10px 30px rgba(0, 255, 255, 0.2);
+}
+
+.btn:hover::before {
+    transform: scale(1);
+}
+
+.carousel-controls {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+}
+
+.carousel-controls button {
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    font-size: 3rem;
+    color: var(--accent-color);
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px var(--hover-color);
+}
+
+.carousel-controls button:hover {
+    color: var(--hover-color);
+    transform: scale(1.2);
+    text-shadow: 
+        0 0 20px var(--hover-color),
+        0 0 40px var(--hover-color);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}

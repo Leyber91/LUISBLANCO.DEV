@@ -1,0 +1,47 @@
+/* Header Styles */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Distributes space between logo and nav */
+    padding: 0 20px;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color var(--transition-duration);
+}
+
+.logo:hover {
+    color: var(--hover-color);
+}
+
+
+#toggle-sidebar:hover {
+    color: var(--hover-color);
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-nav a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color var(--transition-duration);
+}
+
+.header-nav a:hover {
+    color: var(--hover-color);
+}

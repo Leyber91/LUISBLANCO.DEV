@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Meme Lab — Project Leyber 212</title>
+  <meta name="description" content="Watch a reasoning model argue with itself about what is funny — brainstorm angles, draft a caption slate, score each against a taste rubric, then commit. Runs on a built-in reasoning engine, with a hosted Nemotron-3-Ultra relay when configured." />
+
+  <!-- fonts: Orbitron (display) · Space Grotesk (body) · IBM Plex Mono (mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- design tokens, then the page stylesheet -->
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/memes.css" />
+</head>
+<body>
+  <div class="void-bg" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ===================== header ===================== -->
+  <header class="page-header">
+    <a href="index.html" class="back" aria-label="Back to Project Leyber 212">
+      <i class="fa-solid fa-arrow-left-long"></i>
+      <span>PROJECT&nbsp;LEYBER&nbsp;<b>212</b></span>
+    </a>
+    <span class="ai-status" id="ai-status" data-mode="echo" title="AI backend (auto-detected)">
+      <span class="dot"></span><span id="ai-status-label">detecting…</span>
+    </span>
+  </header>
+
+  <span class="sr-only" id="reasoning-status" aria-live="polite"></span>
+
+  <main class="shell">
+    <!-- ===================== intro ===================== -->
+    <section class="intro">
+      <p class="eyebrow"><i class="fa-solid fa-fire"></i> Viral · made to be shared</p>
+      <h1>AI Meme <span class="x">Lab</span></h1>
+      <p class="lede">
+        A reasoning model doesn't just write a caption — it <em>argues with itself about what is
+        funny</em>. Watch it brainstorm angles, draft a slate, score every candidate against a
+        taste rubric out loud, then commit. The meme is the receipt; the reasoning is the show.
+      </p>
+      <p class="vision-note">
+        <i class="fa-solid fa-circle-info"></i>
+        Nemotron writes the words, not the pixels — it reasons about the joke; the picture is the
+        event-horizon canvas (or your own upload).
+      </p>
+    </section>
+
+    <!-- ===================== workbench ===================== -->
+    <section class="bench">
+      <!-- ---- inputs ---- -->
+      <form class="panel inputs" id="meme-form" autocomplete="off">
+        <h2 class="panel-title"><span class="idx">01</span> The brief</h2>
+
+        <label class="field">
+          <span class="lbl">Topic</span>
+          <input type="text" name="topic" id="topic" value="AGI timelines"
+                 placeholder="anything — or a pasted headline" />
+        </label>
+        <div class="chips" id="topic-chips" aria-label="Suggested topics">
+          <button type="button" class="chip" data-topic="RAG pipelines">RAG pipelines</button>
+          <button type="button" class="chip" data-topic="AGI timelines">AGI timelines</button>
+          <button type="button" class="chip" data-topic="prompt engineering as a job">prompt engineering</button>
+          <button type="button" class="chip" data-topic="vector databases">vector databases</button>
+          <button type="button" class="chip" data-topic="my code review">code review</button>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="lbl">Tone</span>
+            <select name="tone" id="tone">
+              <option value="deadpan">Deadpan</option>
+              <option value="absurdist">Absurdist</option>
+              <option value="wholesome">Wholesome engineer</option>
+              <option value="corporate">Corporate cringe</option>
+              <option value="doomer" selected>Doomer</option>
+            </select>
+          </label>
+          <label class="field seed-field">
+            <span class="lbl">Art seed</span>
+            <span class="seed-wrap">
+              <input type="number" name="seed" id="seed" value="1234" min="0" max="999999" />
+              <button type="button" class="dice" id="dice" aria-label="Random seed"><i class="fa-solid fa-dice"></i></button>
+            </span>
+          </label>
+        </div>
+
+        <div class="field">
+          <span class="lbl">Image source</span>
+          <div class="source-toggle" id="source-toggle" role="group" aria-label="Image source">
+            <button type="button" class="src" data-src="canvas" aria-pressed="true">Event-horizon art</button>
+            <button type="button" class="src" data-src="upload" aria-pressed="false">Upload</button>
+            <button type="button" class="src" data-src="pollinations" aria-pressed="false">Pollinations<span class="net">net</span></button>
+          </div>
+          <input type="file" id="upload" accept="image/*" hidden />
+          <p class="src-note" id="src-note" hidden></p>
+        </div>
+
+        <button type="submit" class="generate" id="generate">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Reason out a meme</span>
+        </button>
+        <button type="button" class="ghost" id="stop" hidden>
+          <i class="fa-solid fa-stop"></i> Stop
+        </button>
+
+        <p class="backend-note" id="backend-note"></p>
+      </form>
+
+      <!-- ---- output ---- -->
+      <div class="panel output" id="output">
+        <!-- resting / empty state -->
+        <div class="resting" id="resting">
+          <div class="resting-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p>Set a topic and a tone, and the model will reason its way to a joke.</p>
+          <p class="sub">Runs a built-in comedy engine here and now; a local model if you have one,
+            and a hosted Nemotron relay can be enabled. The meme is always downloadable.</p>
+        </div>
+
+        <!-- working / result -->
+        <div class="work" id="work" hidden>
+          <!-- reasoning stream — the visible star -->
+          <section class="reasoning" id="reasoning-wrap" data-active="false">
+            <button type="button" class="reasoning-head" id="reasoning-toggle" aria-expanded="true">
+              <span class="th-dot" aria-hidden="true"></span>
+              <span class="th-label" id="reasoning-label">Reasoning</span>
+              <i class="fa-solid fa-chevron-down chev"></i>
+            </button>
+            <pre class="reasoning-body" id="reasoning-body"></pre>
+          </section>
+
+          <div class="stage-grid">
+            <!-- the meme -->
+            <section class="stage">
+              <div class="canvas-frame">
+                <canvas id="meme" class="meme-canvas" width="1080" height="1080"
+                        role="img" aria-label="Generated meme"></canvas>
+                <div class="composing" id="composing" hidden>
+                  <span class="blip"></span><span>composing…</span>
+                </div>
+              </div>
+              <div class="caption-edit" id="caption-edit" hidden>
+                <input type="text" id="cap-top" class="cap-in" placeholder="TOP TEXT" aria-label="Top caption" />
+                <input type="text" id="cap-bottom" class="cap-in" placeholder="BOTTOM TEXT" aria-label="Bottom caption" />
+              </div>
+              <div class="export-bar" id="export-bar" hidden>
+                <div class="sizes" id="sizes" role="group" aria-label="Export size">
+                  <button type="button" class="size on" data-w="1080" data-h="1080">1:1</button>
+                  <button type="button" class="size" data-w="1920" data-h="1080">16:9</button>
+                  <button type="button" class="size" data-w="1080" data-h="1920">9:16</button>
+                </div>
+                <button type="button" class="ex-btn primary" id="download"><i class="fa-solid fa-download"></i> PNG</button>
+                <button type="button" class="ex-btn" id="copy"><i class="fa-solid fa-copy"></i> Copy</button>
+                <button type="button" class="ex-btn" id="reroll-art" title="New backdrop, same caption"><i class="fa-solid fa-dice"></i> Art</button>
+                <button type="button" class="ex-btn" id="remix" title="Re-run the model, keep the seed"><i class="fa-solid fa-rotate"></i> Remix</button>
+              </div>
+              <p class="export-note" id="export-note" hidden></p>
+            </section>
+
+            <!-- the taste filter, made visible -->
+            <section class="slate">
+              <div class="angle-chips" id="angle-chips" aria-label="Comedic angles"></div>
+              <div class="candidates" id="candidates" aria-label="Caption candidates, scored"></div>
+              <p class="fallback-note" id="fallback-note" hidden></p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <span>&copy; <span id="year">2026</span> Project Leyber 212 · built by
+      <a href="https://github.com/Leyber91" target="_blank" rel="noopener">Leyber91</a></span>
+    <span id="footer-tagline">Built-in comedy engine · a meme, not a manifesto.</span>
+  </footer>
+
+  <script type="module" src="assets/js/memes/main.js"></script>
+</body>
+</html>
