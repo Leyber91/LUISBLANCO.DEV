@@ -21,6 +21,17 @@
   function wireTriad(scope){
     const cards = [...scope.querySelectorAll('.tri-card')];
     if(!cards.length) return;
+    // each card opens its live demonstration (LB_DEMOS, ported from triad_demos)
+    cards.forEach(card=>{
+      const key = card.dataset.demo; if(!key) return;
+      card.classList.add('has-demo');
+      if(!card.querySelector('.tri-run')){
+        const r = document.createElement('button'); r.type = 'button'; r.className = 'tri-run';
+        r.innerHTML = 'run the demonstration <span class="arr">→</span>';
+        card.appendChild(r);
+      }
+      card.addEventListener('click', e=>{ e.preventDefault(); if(window.LB_DEMOS) window.LB_DEMOS.open(key); });
+    });
     const run = (card)=>{
       if(card._ran) return; card._ran = true;
       const from = parseFloat(card.dataset.from), to = parseFloat(card.dataset.to||'0');
