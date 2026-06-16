@@ -44,6 +44,11 @@
       blurb: 'A live agentic scan: it hits public keyless APIs, ranks what is actually rising right now, and a model explains why. No backend, no keys.',
       href: 'labs/trending.html',
     },
+    {
+      name: 'The Honesty Decoder', tag: 'instrumented AI · honesty',
+      blurb: 'Every system here was born with a mythic name. The decoder sets each myth beside the mechanism it actually is — DECIPHER, Energy Units, the token EKG, Ouroboros — and grades how much of the claim is real. Keep the magic, delete the fakery.',
+      href: 'labs/honesty-decoder.html',
+    },
   ];
 
   let root = null;
