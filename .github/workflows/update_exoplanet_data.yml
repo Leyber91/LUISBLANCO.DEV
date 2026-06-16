@@ -1,0 +1,47 @@
+name: Update Exoplanet Data
+
+# Refreshes labs/exoplanet_data.json (the catalogue the /labs exoplanet viewer
+# fetches at boot) from the NASA Exoplanet Archive. Ported from the original
+# project-leyber-212-website Action; repointed at labs/ and hardened.
+#
+# Differences from the original (each deliberate):
+#  - writes labs/exoplanet_data.json (was repo-root) — the site now serves from labs/
+#  - auth via the built-in GITHUB_TOKEN (permissions: contents: write) instead of an
+#    SSH DEPLOY_KEY secret — zero secrets to provision
+#  - curl --fail --retry + a payload sanity-check, so a NASA outage fails the run
+#    instead of silently overwriting 8.5 MB of good data with an HTML error page
+#  - weekly, not daily: the confirmed-planet catalogue changes slowly, and a daily
+#    8.5 MB commit would bloat git history by ~3 GB/year. Change the cron to
+#    '0 4 * * *' for daily if you want it.
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'   # weekly, Mondays 04:00 UTC
+  workflow_dispatch:        # run on demand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch latest catalogue from the NASA Exoplanet Archive (TAP)
+        run: |
+          curl -fsS --retry 3 --retry-delay 10 \
+            "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name,hostname,sy_dist,pl_orbper,pl_orbsmax,pl_rade,pl_masse,pl_eqt,st_teff+from+ps&format=json" \
+            -o labs/exoplanet_data.json
+          # guard: must be a non-trivial JSON array, else the step fails and the
+          # previous good file stays committed (no overwrite-with-garbage).
+          python3 -c "import json; d=json.load(open('labs/exoplanet_data.json')); assert isinstance(d, list) and len(d) > 1000, 'unexpected payload'; print(f'rows: {len(d)}')"
+
+      - name: Commit only if the catalogue changed
+        run: |
+          git config user.name  "Leyber91"
+          git config user.email "leyber.91.2@gmail.com"
+          git add labs/exoplanet_data.json
+          git diff --staged --quiet || git commit -m "data: refresh exoplanet catalogue (NASA Exoplanet Archive)"
+          git push
