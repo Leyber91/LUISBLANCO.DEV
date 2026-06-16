@@ -47,7 +47,7 @@
   const addEdge=(g,a,b,lift,c,dash,kind)=>{ curve(g,a,b,lift,c,dash); EDGES.push({a,b,lift,kind}); };
   const NODES=[];
   AX.forEach((a,i)=>{const[x,z]=colXZ[i],lo=Yof(a.levels[0].n),hi=Yof(a.levels[a.levels.length-1].n);seg(G.base,[x,lo,z],[x,hi,z],col(INK,.34));seg(G.base,[x,hi,z],[x,CROWN,z],col(INK,.08));
-   a.levels.forEach(Lv=>{const p=[x,Yof(Lv.n),z];if(Lv.lit){push(G.base,'point',p,col(GOLD,.2),50);push(G.base,'point',p,col(GOLD,.42),26);push(G.base,'point',p,col(GHI,1),15);}else push(G.base,'point',p,col(DIM,.85),8);NODES.push({pos:p,kind:'level',axis:a.key,data:{axis:a.name,n:Lv.n,label:Lv.label,ex:Lv.ex}});});});
+   a.levels.forEach(Lv=>{const p=[x,Yof(Lv.n),z];if(Lv.lit){push(G.base,'point',p,col(GOLD,.14),74);push(G.base,'point',p,col(GOLD,.30),46);push(G.base,'point',p,col(GHI,.88),24);push(G.base,'point',p,col(GHI,1),14);}else push(G.base,'point',p,col(DIM,.9),9);NODES.push({pos:p,kind:'level',axis:a.key,data:{axis:a.name,n:Lv.n,label:Lv.label,ex:Lv.ex}});});});
   // faint level rings — MARK the vertical distribution: each ring threads the same level across the axes,
   // so the volume reads as measured strata (you can see how tall, and which axes reached which level)
   for(let n=1;n<=5;n++){ const pts=AX.map((a,i)=> a.levels.some(L=>L.n===n)?[colXZ[i][0],Yof(n),colXZ[i][1]]:null).filter(Boolean);
@@ -130,8 +130,8 @@
     const Ap=gl.getAttribLocation(pr,'a_pos'),Ac=gl.getAttribLocation(pr,'a_col'),As=gl.getAttribLocation(pr,'a_size'),Um=gl.getUniformLocation(pr,'u_mvp'),Ur=gl.getUniformLocation(pr,'u_round');
     // mobile reads on a small canvas with less GPU punch: lift the faint structure's alpha + node sizes
     // so the pentagon is the hero (gold rungs stay clamped at 1, so they don't blow out). Desktop = 1.0.
-    gl.uniform1f(gl.getUniformLocation(pr,'u_boost'), MOB?1.55:1.0);
-    gl.uniform1f(gl.getUniformLocation(pr,'u_psz'), MOB?1.4:1.0);
+    gl.uniform1f(gl.getUniformLocation(pr,'u_boost'), MOB?1.55:1.3);
+    gl.uniform1f(gl.getUniformLocation(pr,'u_psz'), MOB?1.4:1.15);
     function mkbuf(a){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);return b;}
     const BUF={};for(const k in G)BUF[k]={line:mkbuf(G[k].line),lineN:G[k].line.length/8,point:mkbuf(G[k].point),pointN:G[k].point.length/8};
     const hlBuf=gl.createBuffer();   // dynamic: incident edges of the hovered/pinned node, in gold
