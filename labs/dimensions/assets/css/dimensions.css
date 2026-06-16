@@ -1,0 +1,244 @@
+/* ============================================================
+   dimensions.css — the Dimensions instrument page + its control
+   panel. Consumes tokens.css. Replaces md/animation_control.css.
+   Same chrome grammar as black_hole.css: a fixed canvas, top-left
+   Back, centred title, a glass control panel on the right, a live
+   readout. Duotone discipline — warm = active / in-hidden-space,
+   cold = structure.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: var(--font-body); color: var(--text); }
+
+/* reset native button chrome (this page loads only tokens.css + this file) */
+button {
+  font: inherit; color: inherit; cursor: pointer;
+  background: none; border: none; -webkit-appearance: none; appearance: none;
+}
+
+#dx-canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
+  cursor: grab; touch-action: none;
+}
+#dx-canvas:active { cursor: grabbing; }
+
+/* a faint vignette so the bloom reads against true black at the edges */
+.dx-vignette {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,.55) 100%);
+}
+
+/* ---- top chrome ---- */
+.dx-back {
+  position: fixed; top: var(--s-4); left: var(--s-4); z-index: var(--z-header);
+  display: inline-flex; align-items: center; gap: .5em;
+  padding: .5em 1em; border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--void) 60%, transparent); backdrop-filter: blur(10px);
+  color: var(--text-dim); font-size: var(--t-stamp); letter-spacing: .08em; text-transform: uppercase;
+  transition: all var(--t-fast) var(--ease); text-decoration: none;
+}
+.dx-back:hover { color: var(--text-bright); border-color: var(--line-bright); }
+
+.dx-title {
+  position: fixed; top: var(--s-4); left: 50%; transform: translateX(-50%); z-index: var(--z-header);
+  font-family: var(--font-display); font-size: var(--t-stamp); letter-spacing: .42em; text-transform: uppercase;
+  color: var(--text-dim); pointer-events: none; text-align: center; white-space: nowrap;
+}
+.dx-title b { color: var(--accretion); }
+.dx-hint {
+  position: fixed; bottom: var(--s-4); left: 50%; transform: translateX(-50%); z-index: var(--z-header);
+  font-size: var(--t-micro); letter-spacing: .2em; text-transform: uppercase; color: var(--text-faint);
+  pointer-events: none; text-align: center;
+}
+
+/* ---- control panel ---- */
+#dx-controls { position: fixed; top: var(--s-4); right: var(--s-4); z-index: var(--z-sidebar); width: min(310px, 86vw); }
+.dx-panel {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  backdrop-filter: blur(16px) saturate(140%); box-shadow: var(--shadow-2);
+  overflow: hidden; max-height: calc(100vh - 2 * var(--s-4)); display: flex; flex-direction: column;
+}
+.dx-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line);
+  font-family: var(--font-display); font-size: var(--t-stamp); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-bright); flex: none;
+}
+.dx-collapse { width: 26px; height: 26px; border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim); line-height: 1; }
+.dx-collapse:hover { color: var(--accretion); border-color: var(--accretion-dim); }
+.dx-panel-body { padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); overflow-y: auto; }
+
+/* section labels */
+.dx-section {
+  font-family: var(--font-display); font-size: var(--t-micro); letter-spacing: .22em;
+  text-transform: uppercase; color: var(--text-faint); margin-top: var(--s-2);
+}
+.dx-panel-body > .dx-section:first-child { margin-top: 0; }
+
+/* ---- dimension stepper ---- */
+.dx-stepper { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s-3); }
+.dx-step {
+  width: 38px; height: 38px; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: var(--r-md); color: var(--text-dim);
+  font-size: 1.3rem; line-height: 1; transition: all var(--t-fast) var(--ease);
+}
+.dx-step:hover:not(:disabled) { color: var(--accretion); border-color: var(--accretion-dim); }
+.dx-step:disabled { opacity: .3; cursor: default; }
+.dx-dim-readout { text-align: center; line-height: 1; }
+.dx-dim-n { font-family: var(--font-display); font-size: 2rem; color: var(--accretion); }
+.dx-dim-name { display: block; margin-top: .25em; font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); }
+
+.dx-dots { display: flex; justify-content: space-between; gap: 3px; margin-top: var(--s-1); }
+.dx-dot { flex: 1; height: 3px; border-radius: 2px; background: var(--line-bright); transition: background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease); }
+.dx-dot.on { background: var(--accretion); box-shadow: 0 0 8px var(--accretion-glow); }
+
+/* ---- live element ledger ---- */
+.dx-readout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .15em var(--s-4);
+  font-family: var(--font-mono); font-size: var(--t-micro); color: var(--text-dim);
+  padding: var(--s-3) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.dx-readout .r { display: flex; justify-content: space-between; gap: var(--s-2); }
+.dx-readout .r k { color: var(--text-faint); font-style: normal; }
+.dx-readout .r b { color: var(--accretion-soft); font-weight: 500; }
+.dx-chain {
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: .04em;
+  color: var(--horizon); text-align: center;
+}
+
+/* the one-line "what you're seeing" */
+.dx-gloss {
+  font-size: 0.66rem; line-height: 1.55; letter-spacing: .01em; color: var(--text-faint);
+  border-left: 2px solid var(--line-bright); padding-left: var(--s-2);
+}
+
+/* ---- presets (segmented) ---- */
+.dx-presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.dx-preset {
+  font-size: var(--t-micro); letter-spacing: .02em; padding: .5em .1em;
+  border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim);
+  transition: all var(--t-fast) var(--ease);
+}
+.dx-preset:hover { color: var(--text-bright); border-color: var(--line-bright); }
+.dx-preset.on { color: var(--void); background: var(--accretion); border-color: var(--accretion); box-shadow: 0 0 12px -2px var(--accretion-glow); }
+
+/* ---- fold-plane chips ---- */
+.dx-planes { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.dx-plane {
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: .02em;
+  padding: .4em .6em; border: 1px solid var(--line); border-radius: var(--r-sm);
+  color: var(--text-dim); transition: all var(--t-fast) var(--ease);
+  display: inline-flex; align-items: center; gap: .45em; white-space: nowrap;
+}
+.dx-plane-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex: none;
+  background: var(--text-faint); transition: all var(--t-fast) var(--ease);
+}
+.dx-plane:hover { color: var(--text-bright); border-color: var(--line-bright); }
+.dx-plane.on { color: var(--text-bright); border-color: var(--accretion-dim); }
+.dx-plane.on .dx-plane-dot { background: var(--accretion); box-shadow: 0 0 8px var(--accretion-glow); }
+.dx-planes-empty { font-size: var(--t-micro); color: var(--text-faint); font-style: italic; }
+
+/* ---- sliders ---- */
+.dx-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .3em .6em; }
+.dx-row-label { font-size: var(--t-micro); letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+.dx-row-val { font-family: var(--font-mono); font-size: var(--t-micro); color: var(--accretion); text-align: right; min-width: 3ch; }
+.dx-slider { grid-column: 1 / -1; -webkit-appearance: none; appearance: none; height: 3px; border-radius: 2px; background: var(--line-bright); outline: none; }
+.dx-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accretion); cursor: pointer; box-shadow: 0 0 8px var(--accretion-glow); }
+.dx-slider::-moz-range-thumb { width: 14px; height: 14px; border: none; border-radius: 50%; background: var(--accretion); cursor: pointer; }
+
+/* ---- toggle row (auto-tumble, vertices) ---- */
+.dx-toggles { display: flex; gap: var(--s-2); }
+.dx-toggle {
+  flex: 1; font-size: var(--t-micro); letter-spacing: .06em; text-transform: uppercase;
+  padding: .5em .2em; border: 1px solid var(--line); border-radius: var(--r-sm);
+  color: var(--text-dim); transition: all var(--t-fast) var(--ease);
+}
+.dx-toggle:hover { color: var(--text-bright); border-color: var(--line-bright); }
+.dx-toggle.on { color: var(--accretion); border-color: var(--accretion-dim); }
+.dx-toggle:disabled { opacity: .3; cursor: default; }
+.dx-toggle:disabled:hover { color: var(--text-dim); border-color: var(--line); }
+
+.dx-pause { margin-top: var(--s-1); padding: .6em; border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; font-size: var(--t-micro); transition: all var(--t-fast) var(--ease); }
+.dx-pause:hover { color: var(--text-bright); border-color: var(--line-bright); }
+
+/* ---- the Plane Dial: drive one hidden-axis rotation by hand ---- */
+.dx-dial-wrap { display: grid; grid-template-columns: auto 1fr; gap: var(--s-3); align-items: center; }
+.dx-dial {
+  --deg: 0deg;
+  position: relative; width: 64px; height: 64px; border-radius: 50%;
+  border: 1px solid var(--line-bright); background:
+    radial-gradient(circle at 50% 50%, var(--surface-3), var(--surface));
+  cursor: grab; touch-action: none; flex: none;
+}
+.dx-dial:active { cursor: grabbing; }
+.dx-dial::after { /* the tick that points at the current angle */
+  content: ""; position: absolute; left: 50%; top: 6px; width: 2px; height: 18px;
+  background: var(--accretion); border-radius: 1px; transform-origin: 50% 26px;
+  transform: translateX(-50%) rotate(var(--deg)); box-shadow: 0 0 6px var(--accretion-glow);
+}
+.dx-dial::before { /* hub */
+  content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px;
+  transform: translate(-50%, -50%); border-radius: 50%; background: var(--accretion-dim);
+}
+.dx-dial-meta { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.dx-dial-plane { font-family: var(--font-mono); font-size: var(--t-stamp); color: var(--text-bright); letter-spacing: .04em; }
+.dx-dial-plane b { color: var(--accretion); }
+.dx-dial-deg { font-family: var(--font-mono); font-size: var(--t-micro); color: var(--accretion-soft); font-variant-numeric: tabular-nums; }
+.dx-scrub { -webkit-appearance: none; appearance: none; width: 100%; height: 3px; border-radius: 2px; background: var(--line-bright); outline: none; }
+.dx-scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 2px; background: var(--accretion); cursor: pointer; }
+.dx-scrub::-moz-range-thumb { width: 12px; height: 12px; border: none; border-radius: 2px; background: var(--accretion); cursor: pointer; }
+
+/* ---- the Shadow Ledger: live w-divide distortion per hidden axis ---- */
+#dx-ledger {
+  position: fixed; bottom: var(--s-4); left: var(--s-4); z-index: var(--z-header);
+  width: min(260px, 50vw); padding: var(--s-3) var(--s-4);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  backdrop-filter: blur(12px); pointer-events: none;
+}
+#dx-ledger.empty { display: none; }
+.dx-ledger-head {
+  font-family: var(--font-display); font-size: var(--t-micro); letter-spacing: .22em;
+  text-transform: uppercase; color: var(--text-faint); margin-bottom: var(--s-2);
+}
+.dx-ledger-row { display: grid; grid-template-columns: 2.4ch 1fr; align-items: center; gap: var(--s-3); margin-top: .3em; }
+.dx-ledger-axis { font-family: var(--font-mono); font-size: var(--t-micro); color: var(--text-dim); }
+.dx-ledger-track { height: 4px; border-radius: 2px; background: var(--surface-3); overflow: hidden; }
+.dx-ledger-fill { height: 100%; width: 0%; border-radius: 2px; background: var(--horizon); transition: width 90ms linear; }
+.dx-ledger-row.hot .dx-ledger-axis { color: var(--accretion); }
+.dx-ledger-row.hot .dx-ledger-fill { background: var(--accretion); box-shadow: 0 0 8px var(--accretion-glow); }
+
+/* ---- diegetic caption: name the live action, in place ---- */
+.dx-caption {
+  position: fixed; bottom: calc(var(--s-4) + 1.6em); left: 50%; transform: translateX(-50%); z-index: var(--z-header);
+  font-family: var(--font-mono); font-size: var(--t-micro); letter-spacing: .12em;
+  color: var(--text-dim); pointer-events: none; text-align: center; white-space: nowrap;
+}
+.dx-caption b { color: var(--accretion-soft); font-weight: 500; }
+
+/* ---- loading veil + no-webgl ---- */
+#dx-loading {
+  position: fixed; inset: 0; z-index: var(--z-overlay); display: grid; place-items: center;
+  background: #000; color: var(--text-dim); font-size: var(--t-stamp); letter-spacing: .3em; text-transform: uppercase;
+  transition: opacity var(--t-slow) var(--ease);
+}
+#dx-loading.hidden { opacity: 0; pointer-events: none; }
+.dx-nowebgl { position: fixed; inset: 0; display: grid; place-items: center; padding: var(--s-6); text-align: center; color: var(--text-dim); background: #000; z-index: var(--z-overlay); }
+
+/* scrollbar inside the panel */
+.dx-panel-body::-webkit-scrollbar { width: 6px; }
+.dx-panel-body::-webkit-scrollbar-thumb { background: var(--line-bright); border-radius: 3px; }
+
+@media (max-width: 600px) {
+  .dx-title { display: none; }
+  #dx-controls { top: auto; bottom: var(--s-4); right: var(--s-4); left: var(--s-4); width: auto; }
+  .dx-panel { max-height: 60vh; }
+}
+
+/* still mode (?still — screenshots) + reduced motion */
+html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
