@@ -1,7 +1,15 @@
 /* =========================================================================
    lab.js — THE LAB: a ring beside the codex (top-right chrome) that opens an
-   overlay of the space-science experiments migrated into labs/. Each card
-   links to a self-contained experiment page. Mirrors the codex ring/overlay.
+   overlay of experiment cards. A card opens its experiment in a full-viewport
+   iframe layer HOSTED INSIDE the lab — never a page-jump — with persistent
+   chrome (back to the lab, close to the site). So a visitor is never stranded.
+
+   - card click            -> experiment opens in an iframe over the site
+   - "← the lab" / Esc      -> back to the card grid (where you were)
+   - "×"                    -> close everything, back to the site
+   - browser back           -> closes the experiment layer (history-aware)
+   - ?lab=<slug> on load    -> deep-links straight into an experiment
+   - ⌘/ctrl/middle-click    -> still opens the raw page in a new tab
 
    Experiments are declared once, here — add a line to ship a new one.
    ========================================================================= */
@@ -50,8 +58,10 @@
       href: 'labs/roaster.html',
     },
   ];
+  EXPERIMENTS.forEach((e) => { e.slug = e.href.split('/').pop().replace(/\.html$/, ''); });
 
-  let root = null;
+  let root = null;   // the card-grid overlay
+  let expEl = null;  // the experiment iframe layer
 
   function mountRing() {
     const a = document.createElement('button');
@@ -63,8 +73,8 @@
     document.body.appendChild(a);
   }
 
-  function card(e) {
-    return '<a class="lb-card" href="' + e.href + '">' +
+  function card(e, i) {
+    return '<a class="lb-card" data-i="' + i + '" href="' + e.href + '">' +
       '<span class="lb-tag">' + e.tag + '</span>' +
       '<span class="lb-name">' + e.name + '</span>' +
       '<span class="lb-blurb">' + e.blurb + '</span>' +
@@ -84,14 +94,61 @@
       '  <div class="lb-grid">' + EXPERIMENTS.map(card).join('') + '</div>' +
       '</div>';
     document.body.appendChild(root);
-    root.querySelector('.lb-close').addEventListener('click', () => { root.hidden = true; });
-    root.addEventListener('click', (e) => { if (e.target === root) root.hidden = true; });
+    root.querySelector('.lb-close').addEventListener('click', closeGrid);
+    root.addEventListener('click', (e) => { if (e.target === root) closeGrid(); });
+    root.querySelector('.lb-grid').addEventListener('click', (ev) => {
+      const a = ev.target.closest('.lb-card');
+      if (!a) return;
+      if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; // let it open in a new tab
+      ev.preventDefault();
+      openExp(EXPERIMENTS[+a.getAttribute('data-i')]);
+    });
   }
+  function closeGrid() { if (root) root.hidden = true; }
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && root && !root.hidden) root.hidden = true;
+  function buildLayer(e) {
+    expEl = document.createElement('div');
+    expEl.id = 'labExp';
+    expEl.innerHTML =
+      '<div class="le-bar">' +
+      '  <button class="le-back" type="button">&larr; the lab</button>' +
+      '  <span class="le-title">' + e.name + '<span class="le-tag">' + e.tag + '</span></span>' +
+      '  <button class="le-x" type="button" aria-label="close the lab">&times;</button>' +
+      '</div>' +
+      '<iframe class="le-frame" src="' + e.href + '" title="' + e.name + '" allow="autoplay; fullscreen"></iframe>';
+    document.body.appendChild(expEl);
+    expEl.querySelector('.le-back').addEventListener('click', backToGrid);
+    expEl.querySelector('.le-x').addEventListener('click', closeAll);
+  }
+  function teardown() { if (expEl) { expEl.remove(); expEl = null; } }
+
+  function openExp(e) {
+    if (!e) return;
+    if (root) root.hidden = false;             // the grid waits underneath
+    buildLayer(e);
+    try { history.pushState({ labExp: e.slug }, ''); } catch (_) {}
+  }
+  function consume() { try { if (history.state && history.state.labExp) history.back(); } catch (_) {} }
+  function backToGrid() { teardown(); if (root) root.hidden = false; consume(); }  // experiment -> grid
+  function closeAll() { teardown(); closeGrid(); consume(); }                       // experiment -> site
+
+  // browser back closes the experiment layer (lands you on the grid)
+  window.addEventListener('popstate', function () { if (expEl) { teardown(); if (root) root.hidden = false; } });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (expEl) backToGrid();
+    else if (root && !root.hidden) closeGrid();
   });
 
-  if (document.readyState !== 'loading') mountRing();
-  else document.addEventListener('DOMContentLoaded', mountRing);
+  function initDeepLink() {
+    const m = /[?&]lab=([\w-]+)/.exec(location.search);
+    if (!m) return;
+    const e = EXPERIMENTS.filter((x) => x.slug === m[1])[0];
+    if (e) { open(); openExp(e); }
+  }
+
+  function start() { mountRing(); initDeepLink(); }
+  if (document.readyState !== 'loading') start();
+  else document.addEventListener('DOMContentLoaded', start);
 })();
