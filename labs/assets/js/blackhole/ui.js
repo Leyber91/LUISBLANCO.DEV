@@ -202,11 +202,15 @@ export function buildPanel(host, bh, { onPause } = {}) {
   panel.appendChild(body);
   host.appendChild(panel);
 
-  collapse.addEventListener('click', () => {
-    const hidden = body.style.display === 'none';
-    body.style.display = hidden ? '' : 'none';
-    collapse.textContent = hidden ? '–' : '+';
-  });
+  // whole header toggles (big touch target on phones); the +/- button bubbles here too
+  const setCollapsed = (collapsed) => {
+    body.style.display = collapsed ? 'none' : '';
+    collapse.textContent = collapsed ? '+' : '–';
+    panel.classList.toggle('bh-collapsed', collapsed);
+  };
+  head.addEventListener('click', () => setCollapsed(body.style.display !== 'none'));
+  // on phones, start collapsed so the black hole is the hero; tap the bar to reveal controls
+  if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) setCollapsed(true);
 
   function applyType(ty) {
     Object.entries(ty.cfg).forEach(([k, v]) => { bh.cfg[k] = v; });

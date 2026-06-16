@@ -1028,6 +1028,12 @@ export class Exoplanet {
 
   _bindPointer() {
     const cv = this.canvas;
+    // wide multiplicative zoom range: close skim (1.15) out to a system view where
+    // the planet is a speck and the host star sits at its real angular size (60).
+    const ZMIN = 1.15, ZMAX = 60.0;
+    const redraw = () => { if (!this.running) this._draw(); };
+    const zoomBy = (factor) => { this.cfg.camDist = Math.max(ZMIN, Math.min(ZMAX, this.cfg.camDist * factor)); redraw(); };
+
     let down = false, lx = 0, ly = 0;
     const dn = (x, y) => { down = true; lx = x; ly = y; };
     const mv = (x, y) => {
@@ -1035,20 +1041,31 @@ export class Exoplanet {
       this.cfg.yaw   -= (x - lx) * 0.006;
       this.cfg.pitch = Math.max(-1.45, Math.min(1.45, this.cfg.pitch + (y - ly) * 0.006));
       lx = x; ly = y;
-      if (!this.running) this._draw();
+      redraw();
     };
     const up = () => { down = false; };
     cv.addEventListener('mousedown', (e) => dn(e.clientX, e.clientY));
     window.addEventListener('mousemove', (e) => mv(e.clientX, e.clientY));
     window.addEventListener('mouseup', up);
-    cv.addEventListener('touchstart', (e) => { const t = e.touches[0]; dn(t.clientX, t.clientY); }, { passive: true });
-    cv.addEventListener('touchmove', (e) => { const t = e.touches[0]; mv(t.clientX, t.clientY); }, { passive: true });
-    cv.addEventListener('touchend', up);
-    cv.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      this.cfg.camDist = Math.max(1.55, Math.min(9.0, this.cfg.camDist + Math.sign(e.deltaY) * 0.2));
-      if (!this.running) this._draw();
+
+    // touch: 1 finger orbits, 2 fingers pinch-zoom
+    let pinch = 0;
+    const pdist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    cv.addEventListener('touchstart', (e) => {
+      if (e.touches.length >= 2) { pinch = pdist(e.touches); down = false; }
+      else { const t = e.touches[0]; dn(t.clientX, t.clientY); }
+    }, { passive: true });
+    cv.addEventListener('touchmove', (e) => {
+      if (e.touches.length >= 2) {
+        e.preventDefault();
+        const d = pdist(e.touches);
+        if (pinch > 0 && d > 0) zoomBy(pinch / d);   // spread (d>pinch) -> factor<1 -> zoom in
+        pinch = d;
+      } else if (e.touches.length === 1) { const t = e.touches[0]; mv(t.clientX, t.clientY); }
     }, { passive: false });
+    cv.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = 0; if (e.touches.length === 0) up(); }, { passive: true });
+
+    cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); }, { passive: false });
   }
 
   _noWebGL() {
