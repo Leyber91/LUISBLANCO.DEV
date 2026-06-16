@@ -181,7 +181,12 @@ html.reduced-motion .cx-seal .so.dash2, html.reduced-motion .cx-seal .core{ anim
   #codexRing::after{ top:auto; bottom:calc(100% + 7px); right:auto; left:0; }
   .cx-frame{ inset:0; border-radius:0; }
   .cx-frame::before, .cx-frame::after{ display:none; }
-  .cx-body{ grid-template-columns:1fr; grid-template-rows:180px 1fr; }
+  /* lock: stack the field so the unseal button can't overflow the viewport */
+  .cx-field{ flex-direction:column; gap:11px; }
+  #cxPass{ min-width:0; }
+  #cxUnlock{ padding:13px 22px; width:100%; }
+  /* reader: taller nav (more of the 27 chapters visible) above the page */
+  .cx-body{ grid-template-columns:1fr; grid-template-rows:32vh 1fr; }
   .cx-nav{ border-right:none; border-bottom:1px solid var(--line-soft); }
   .cx-read{ padding:20px 18px 70px; }
   .cx-seal{ width:150px; height:150px; }
