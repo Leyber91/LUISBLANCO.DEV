@@ -42,7 +42,7 @@
       DPR=Math.min(2,devicePixelRatio||1); cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
       const cx=W*0.66, cy=H*0.5, RAD=Math.min(W,H)*0.27; CX=cx; CY=cy; RR0=RAD;
       // the ink — soft dye particles, denser toward the heart; gold biased inward (warm core)
-      const N=reduced()?150:320; dye=[];
+      const N=reduced()?160:440; dye=[];
       for(let i=0;i<N;i++){ const gold=Math.random()<0.15;
         const a=Math.random()*6.283, rr=Math.pow(Math.random(),0.7)*RAD*1.12;   // gold scattered, not pooled
         const hx=cx+Math.cos(a)*rr, hy=cy+Math.sin(a)*rr*0.95;
@@ -78,9 +78,13 @@
       if(ig<1 && !reduced()){
         const fr=eOut(Math.min(1,ig/0.6)), fa=(1-ig)*(1-ig);
         const frad=RR0*(0.15+fr*1.3), g=ctx.createRadialGradient(CX,CY,0,CX,CY,frad);
-        g.addColorStop(0,'rgba(250,222,150,'+(0.32*fa)+')'); g.addColorStop(0.4,'rgba(233,184,96,'+(0.1*fa)+')'); g.addColorStop(1,'rgba(233,184,96,0)');
+        g.addColorStop(0,'rgba(250,222,150,'+(0.42*fa)+')'); g.addColorStop(0.4,'rgba(233,184,96,'+(0.14*fa)+')'); g.addColorStop(1,'rgba(233,184,96,0)');
         ctx.fillStyle=g; ctx.beginPath(); ctx.arc(CX,CY,frad,0,6.283); ctx.fill();
       }
+      // the luminous heart — "the model" the system surrounds; a warm gold core that breathes
+      { const ca=appear*ie*(0.20+0.13*bloom), cr=RR0*(0.46+0.14*bloom), g=ctx.createRadialGradient(CX,CY,0,CX,CY,cr);
+        g.addColorStop(0,'rgba(252,231,172,'+ca+')'); g.addColorStop(0.34,'rgba(240,198,116,'+(ca*0.34)+')'); g.addColorStop(1,'rgba(233,184,96,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(CX,CY,cr,0,6.283); ctx.fill(); }
 
       // flow + paint the dye (the body of smoke-ink) — unfurls from the drop on ignite
       for(const p of dye){
@@ -96,7 +100,7 @@
         // depth shading + motion-stretch into the flow → soft wisps with dimension
         const spd=Math.hypot(p.vx,p.vy), ang=Math.atan2(p.vy,p.vx);
         const dep=0.7+0.4*p.z, sz=p.sz*(0.7+bloom*0.4)*dep, st=1+Math.min(4.6, spd*0.72);
-        ctx.globalAlpha=p.a*(0.12+0.05*bloom)*dep*appear;
+        ctx.globalAlpha=p.a*(0.19+0.07*bloom)*dep*appear;
         ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang);
         ctx.drawImage(p.gold?INKG:INKB, -sz*st, -sz, sz*2*st, sz*2); ctx.restore();
       }
@@ -104,8 +108,8 @@
 
       // the system's structure — soft gold ink-filaments from the model out to each organ.
       // source-over (not additive) so they don't pile brightness where they converge at the model.
-      ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.shadowBlur=6; ctx.shadowColor='rgba(233,184,96,0.45)';
-      ctx.strokeStyle='rgba(233,184,96,'+(0.16*ie*appear)+')'; ctx.lineWidth=1.1;
+      ctx.save(); ctx.globalCompositeOperation='source-over'; ctx.shadowBlur=10; ctx.shadowColor='rgba(233,184,96,0.5)';
+      ctx.strokeStyle='rgba(233,184,96,'+(0.30*ie*appear)+')'; ctx.lineWidth=1.4;
       for(let i=1;i<organs.length;i++){ ctx.beginPath(); ctx.moveTo(organs[0].x,organs[0].y); ctx.lineTo(organs[i].x,organs[i].y); ctx.stroke(); }
       ctx.restore();
 
@@ -114,15 +118,18 @@
         const c=curl(o.x*0.0032, o.y*0.0032, t*0.00016);
         o.vx += c[0]*FLOW*0.6 + (o.hx-o.x)*spring*1.5; o.vy += c[1]*FLOW*0.6 + (o.hy-o.y)*spring*1.5;
         o.vx*=0.9; o.vy*=0.9; o.x+=o.vx; o.y+=o.vy;
-        const sz=16+bloom*6; ctx.globalAlpha=0.3*appear; ctx.drawImage(INKG, o.x-sz, o.y-sz, sz*2, sz*2); ctx.globalAlpha=1;
-        ctx.beginPath(); ctx.fillStyle='rgba(250,222,150,'+(0.9*appear)+')'; ctx.arc(o.x,o.y,2,0,6.283); ctx.fill();
+        const main=o===organs[0], sz=(main?26:19)+bloom*7; ctx.globalAlpha=(main?0.6:0.44)*appear; ctx.drawImage(INKG, o.x-sz, o.y-sz, sz*2, sz*2); ctx.globalAlpha=1;
+        ctx.beginPath(); ctx.fillStyle='rgba(252,231,172,'+(0.95*appear)+')'; ctx.arc(o.x,o.y,main?3.4:2.5,0,6.283); ctx.fill();
       }
 
       // labels stay crisp + legible (fade in after the bloom)
       ctx.globalCompositeOperation='source-over';
-      ctx.font='8.5px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
-      const la=0.55*Math.max(0,(ie-0.5)/0.5);
-      for(const o of organs){ ctx.fillStyle='rgba(178,198,232,'+la+')'; ctx.fillText(o.label.toLowerCase(), o.x, o.y+8); }
+      ctx.font='9.5px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+      const la=0.72*Math.max(0,(ie-0.5)/0.5);
+      for(const o of organs){ const main=o===organs[0];
+        ctx.font=(main?'10.5px':'9.5px')+' "IBM Plex Mono",monospace';
+        ctx.fillStyle=main?'rgba(240,198,116,'+(la*1.15)+')':'rgba(190,208,238,'+la+')';
+        ctx.fillText(o.label.toLowerCase(), o.x, o.y+(main?11:9)); }
 
       if(!reduced()) requestAnimationFrame(frame);
     }
