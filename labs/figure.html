@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>THE FIGURE — a system that demonstrates a system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --blue:#5BB0D6; --dim:#6B7682; --hair:rgba(91,176,214,.16); --panel:rgba(8,11,16,.66); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased}
+  #bg,#net{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #net{cursor:default}
+  .stage{position:fixed;inset:0;padding:30px 40px 26px;display:grid;grid-template-rows:auto 1fr auto;gap:16px;pointer-events:none}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:20px}
+  .back{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .brand b{color:var(--ink);font-weight:600}
+  .cols{display:grid;grid-template-columns:330px 1fr 320px;gap:24px;min-height:0;align-items:end}
+  /* left: seed console */
+  .seed{pointer-events:auto;display:flex;flex-direction:column;gap:12px;justify-content:flex-end}
+  .kick{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber)}
+  h1{font-size:26px;line-height:1.1;letter-spacing:-.01em;font-weight:600;margin-top:4px} h1 .lo{color:var(--blue)}
+  .sub{font-size:12px;line-height:1.5;color:#97A2AB;max-width:42ch}
+  .q{font-size:12px;letter-spacing:.04em;color:var(--ink);border:1px solid var(--hair);background:rgba(0,0,0,.3);padding:11px 12px;line-height:1.45}
+  .q .ql{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+  .ctl{display:flex;gap:10px}
+  .go{pointer-events:auto;cursor:pointer;flex:1;background:rgba(242,169,59,.12);border:1px solid var(--amber);color:var(--amber);font:inherit;font-size:12px;letter-spacing:.2em;text-transform:uppercase;padding:12px;transition:.16s}
+  .go:hover{background:var(--amber);color:#0a0c0f} .go:disabled{opacity:.5;cursor:default}
+  .mid{align-self:stretch;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;padding:2px 0;pointer-events:none}
+  .mtop{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue)}
+  .mbot{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)} .mbot b{color:var(--amber)}
+  /* right: readout rail */
+  .rail{pointer-events:auto;display:flex;flex-direction:column;gap:12px;align-self:stretch;justify-content:flex-end}
+  .panel{border:1px solid var(--hair);background:var(--panel);backdrop-filter:blur(3px);padding:14px 16px}
+  .rt{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:9px;display:flex;justify-content:space-between;align-items:baseline}
+  .rt .who{color:var(--amber)}
+  .rout{font-size:12.5px;line-height:1.6;color:#C9D2DA;max-height:150px;overflow:auto}
+  .rout .cur{display:inline-block;width:7px;height:1.05em;background:var(--amber);transform:translateY(2px);animation:bl 1s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+  .ag{border-color:rgba(242,169,59,.4)} .ag .rt .who{color:#FFD27A}
+  .agt{font-size:13px;line-height:1.62;color:var(--ink)}
+  .foot{display:flex;justify-content:space-between;align-items:center}
+  .tag{display:inline-flex;gap:9px;align-items:center;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);max-width:84ch}
+  .tag i{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 9px var(--amber);font-style:normal}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+  @media (max-width:760px){
+    html,body{overflow-y:auto;overflow-x:hidden;height:auto;min-height:100%}
+    #bg,#net{position:fixed;height:100vh;opacity:.92}
+    .stage{position:relative;inset:auto;display:block;padding:16px 14px 40px}
+    .bp{display:none}
+    .cols{display:block}
+    .seed{margin-bottom:16px} .seed h1{font-size:20px} .seed .sub{max-width:none}
+    .mid{align-self:auto;display:block;margin:0 0 14px;padding:11px 13px;border:1px solid var(--hair);background:var(--panel)}
+    .mtop{margin-bottom:6px}
+    .rail{gap:12px} .rout{max-height:none}
+    .foot{display:block;margin-top:16px} .foot .tag{max-width:none;margin-bottom:6px;display:flex}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<canvas id="net"></canvas>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left"><button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">THE FIGURE <span class="on">/ hades · moa line</span></div></div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="cols">
+    <div class="seed">
+      <div><div class="kick">routing is cognition</div>
+      <h1>A system that <span class="lo">demonstrates a system.</span></h1>
+      <p class="sub">A recursive Mixture-of-Agents. Heterogeneous models fan out on one question; a metalayer reads where they agree and where they don't; an aggregator synthesizes. You watch orchestration think.</p></div>
+      <div class="q"><span class="ql">the question</span><span id="q_text">—</span></div>
+      <div class="ctl"><button class="go" id="go" type="button">Run the figure &rarr;</button></div>
+    </div>
+    <div class="mid">
+      <div class="mtop" id="m_top">3 proposers &middot; 1 aggregator</div>
+      <div class="mbot" id="m_bot">heterogeneous models &middot; <b>press run</b></div>
+    </div>
+    <div class="rail">
+      <div class="panel" id="prop_panel"><div class="rt"><span class="who" id="r_who">proposer</span><span id="r_model">—</span></div><div class="rout" id="r_out">each model answers in its own voice — watch them disagree.</div></div>
+      <div class="panel ag"><div class="rt"><span class="who">the aggregator</span><span id="a_route">routing —</span></div><div class="agt" id="a_out">— synthesises once the proposers have spoken —</div></div>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="tag"><i></i>[real] recursive MoA (Wang et al. 2406.04692) · heterogeneous models · agreement clustering &nbsp;·&nbsp; [recorded] this run is a captured trace — live agents are now key-gated, so echo is the demo</span>
+    <span class="label">stage 1 — the orchestration · the dive + the game next</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var el=function(id){return document.getElementById(id);};
+  el('back').addEventListener('click',function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if(window.self!==window.top){ var _b=el('back'); if(_b)_b.style.display='none'; }
+  var still=/[?&]still/.test(location.search);
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- a recorded Recursive-MoA trace (echo: live agents are key-gated) ----
+  var QUESTION="What makes a system intelligent?";
+  el('q_text').textContent='"'+QUESTION+'"';
+  var NODES=[
+    { id:'p0', layer:0, role:'proposer', model:'mistral', text:"Intelligence is goal-directed control: a system that models its world well enough to choose actions that reach an objective, and corrects course when the world pushes back." },
+    { id:'p1', layer:0, role:'proposer', model:'openai',  text:"A system is intelligent when it generalises — it transfers a solution to a problem it has never seen, instead of memorising the ones it has." },
+    { id:'p2', layer:0, role:'proposer', model:'claude',  text:"Intelligence is compression. The shorter the program that reproduces the data, the more of its structure the system has actually understood. Prediction is just compression run forward." },
+    { id:'a0', layer:1, role:'aggregator', model:'metalayer',
+      route:"p1 & p2 cluster (generalise / compress); p0 is the dissent (agency). escalate the dissent.",
+      text:"The proposers split into two camps. openai and claude converge — generalisation and compression are the same claim from two sides: understanding is finding the short, transferable rule. mistral dissents with agency: a model that cannot act on its compression is inert. The synthesis keeps both: an intelligent system compresses experience into transferable models AND acts on them toward goals — and the dissent, nearly pruned, is what completes it." }
+  ];
+  // edges: proposers -> aggregator
+  var EDGES=[ {a:'p0',b:'a0'}, {a:'p1',b:'a0'}, {a:'p2',b:'a0'} ];
+  var byId={}; NODES.forEach(function(n){ byId[n.id]=n; });
+  // agreement clusters (token-set Jaccard, computed live on the recorded answers)
+  function toks(s){ return (s.toLowerCase().match(/[a-z]+/g)||[]); }
+  function jac(a,b){ var A={},n=0,u=0,i; for(i=0;i<a.length;i++)A[a[i]]=1; var B={}; for(i=0;i<b.length;i++)B[b[i]]=1;
+    var keys={}; Object.keys(A).forEach(function(k){keys[k]=1;}); Object.keys(B).forEach(function(k){keys[k]=1;});
+    Object.keys(keys).forEach(function(k){ u++; if(A[k]&&B[k])n++; }); return u?n/u:0; }
+  var props=NODES.filter(function(n){return n.role==='proposer';});
+  // pairwise agreement -> who clusters
+  var pa=[]; for(var i=0;i<props.length;i++)for(var j=i+1;j<props.length;j++){ pa.push({i:props[i].id,j:props[j].id,s:jac(toks(props[i].text),toks(props[j].text))}); }
+  pa.sort(function(x,y){return y.s-x.s;});
+  // strongest pair = the cluster; the third = dissent
+  var cluster = pa.length? [pa[0].i,pa[0].j] : [];
+  var dissent = props.map(function(p){return p.id;}).filter(function(id){return cluster.indexOf(id)<0;})[0];
+
+  // ---- layout: proposers on an outer arc, aggregator at centre ----
+  var net=el('net'), ctx=net.getContext('2d'); var dpr=Math.min(window.devicePixelRatio||1, still?1:1.6);
+  var W=0,H=0,CX=0,CY=0,Rg=0;
+  function layout(){
+    W=net.width=Math.floor(innerWidth*dpr); H=net.height=Math.floor(innerHeight*dpr);
+    CX=W*0.5; CY=H*0.5; Rg=Math.min(W,H)*0.26;
+    var pr=NODES.filter(function(n){return n.layer===0;});
+    pr.forEach(function(n,k){ var ang=-Math.PI*0.5 + (k-(pr.length-1)/2)*0.62; n.x=CX+Math.cos(ang)*Rg; n.y=CY+Math.sin(ang)*Rg*0.9; });
+    byId['a0'].x=CX; byId['a0'].y=CY+Rg*0.18;
+  }
+  layout(); addEventListener('resize',function(){ layout(); });
+
+  // ---- playback state ----
+  var phase='idle'; // idle -> proposing -> routing -> aggregating -> done
+  var active=null, typed=0, pT0=0, seq=0;
+  function setRail(node){
+    el('r_who').textContent=node.role; el('r_model').textContent=node.model;
+    el('r_out').textContent='';
+  }
+  function run(){
+    if(phase!=='idle'&&phase!=='done') return;
+    phase='proposing'; seq=0; el('go').disabled=true; el('go').textContent='running…';
+    el('m_bot').innerHTML='<b>proposing</b> &middot; fan-out';
+    el('a_out').textContent='— waiting for the proposers —'; el('a_route').textContent='routing —';
+    nextProposer();
+  }
+  function nextProposer(){
+    if(seq>=props.length){ phase='routing'; route(); return; }
+    active=props[seq]; setRail(active); typed=0; pT0=performance.now(); el('m_bot').innerHTML='<b>'+active.model+'</b> &middot; proposing '+(seq+1)+'/'+props.length;
+  }
+  function route(){
+    el('m_bot').innerHTML='<b>routing</b> &middot; reading (dis)agreement';
+    el('a_route').textContent='agree: '+cluster.map(function(id){return byId[id].model;}).join(' + ')+' · dissent: '+byId[dissent].model;
+    setTimeout(function(){ phase='aggregating'; active=byId['a0']; typed=0; pT0=performance.now(); el('m_bot').innerHTML='<b>aggregator</b> &middot; synthesising'; el('a_out').textContent=''; }, still?0:900);
+  }
+  function finish(){ phase='done'; active=null; el('go').disabled=false; el('go').textContent='Run again →'; el('m_bot').innerHTML='<b>done</b> &middot; the dissent completed it'; }
+
+  // typewriter for the active node into the right rail
+  function tick(now){
+    if(active){
+      var full=active.text; var speed=reduce||still?full.length:Math.max(2,Math.round(full.length/ (active.role==='aggregator'?2600:1500) * 16));
+      typed=Math.min(full.length, typed+speed);
+      var tgt = active.role==='aggregator' ? el('a_out') : el('r_out');
+      tgt.innerHTML = full.slice(0,typed).replace(/[<>]/g,'') + (typed<full.length?'<span class="cur"></span>':'');
+      if(active.role!=='aggregator'){ el('r_who').textContent='proposer'; el('r_model').textContent=active.model; }
+      if(typed>=full.length){
+        if(active.role==='aggregator'){ finish(); }
+        else { seq++; setTimeout(nextProposer, still?0:260); active=null; }
+      }
+    }
+  }
+
+  // ---- render the constellation ----
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function draw(now){
+    ctx.clearRect(0,0,W,H);
+    // edges
+    EDGES.forEach(function(e){
+      var A=byId[e.a],B=byId[e.b];
+      var live = (phase==='proposing'||phase==='routing') && active && active.id===A.id || (phase==='aggregating');
+      ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y);
+      ctx.strokeStyle = live ? 'rgba(242,169,59,0.5)' : 'rgba(91,176,214,0.16)'; ctx.lineWidth=(live?2:1)*dpr; ctx.stroke();
+      // travelling packet when this proposer is active or during aggregation (output is fuel)
+      if(live && !reduce && !still){ var t=(now*0.0006)%1; var px=lerp(A.x,B.x,t), py=lerp(A.y,B.y,t);
+        ctx.beginPath(); ctx.arc(px,py,3*dpr,0,6.283); ctx.fillStyle='#FFD27A'; ctx.shadowColor='#F2A93B'; ctx.shadowBlur=10*dpr; ctx.fill(); ctx.shadowBlur=0; }
+    });
+    // nodes
+    NODES.forEach(function(n){
+      var isActive = active && active.id===n.id;
+      var spoke = (phase==='aggregating'||phase==='routing'||phase==='done') && n.role==='proposer' ? true : (phase==='done');
+      var isDissent = n.id===dissent;
+      var r=(n.role==='aggregator'?13:10)*dpr;
+      // glow
+      if(isActive){ ctx.beginPath(); ctx.arc(n.x,n.y,r*2.6,0,6.283); var g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*2.6); g.addColorStop(0,'rgba(242,169,59,0.5)'); g.addColorStop(1,'rgba(242,169,59,0)'); ctx.fillStyle=g; ctx.fill(); }
+      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,6.283);
+      ctx.fillStyle = isActive ? '#F2A93B' : (n.role==='aggregator'? 'rgba(91,176,214,0.18)' : 'rgba(10,14,20,0.9)');
+      ctx.fill();
+      ctx.lineWidth=1.4*dpr; ctx.strokeStyle = isActive ? '#FFD27A' : (isDissent && (phase==='routing'||phase==='aggregating'||phase==='done') ? 'rgba(232,102,91,0.7)' : 'rgba(91,176,214,0.5)'); ctx.stroke();
+      // label
+      ctx.font=(11*dpr)+'px "IBM Plex Mono", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle = isActive? '#FFE7BE' : 'rgba(201,210,218,0.85)';
+      var ly = n.y - r - 12*dpr;
+      ctx.fillText(n.model, n.x, ly);
+      ctx.font=(8.5*dpr)+'px "IBM Plex Mono", monospace'; ctx.fillStyle='rgba(107,118,130,0.9)';
+      ctx.fillText(n.role==='aggregator'?'AGGREGATOR':(isDissent?'PROPOSER · DISSENT':'PROPOSER'), n.x, ly+12*dpr);
+    });
+    tick(now);
+    requestAnimationFrame(draw);
+  }
+  el('go').addEventListener('click', run);
+
+  // still / boot
+  if(still){ phase='aggregating'; active=byId['a0']; typed=byId['a0'].text.length;
+    el('a_out').textContent=byId['a0'].text; el('a_route').textContent='agree: '+cluster.map(function(id){return byId[id].model;}).join(' + ')+' · dissent: '+byId[dissent].model;
+    el('r_who').textContent='proposer'; el('r_model').textContent=byId[dissent].model; el('r_out').textContent=byId[dissent].text;
+    el('m_bot').innerHTML='<b>synthesised</b> &middot; the dissent completed it'; active=null; }
+  requestAnimationFrame(draw);
+
+  // ---- cold nebula backdrop (reuse the measure-wing field, dimmer) ----
+  var bg=el('bg'); var gl=bg.getContext('webgl',{antialias:false,alpha:false})||bg.getContext('experimental-webgl');
+  if(gl){
+    var V="attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
+    var F=["precision highp float;uniform vec2 u_res;uniform float u_time;",
+    "const vec3 VOID=vec3(0.027,0.035,0.047);const vec3 BLUE=vec3(0.357,0.690,0.839);",
+    "float h(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+    "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.0-2.0*f);float a=h(i),b=h(i+vec2(1,0)),c=h(i+vec2(0,1)),d=h(i+vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+    "float fbm(vec2 p){float s=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*vn(p);p=m*p;a*=0.5;}return s;}",
+    "void main(){vec2 uv=gl_FragCoord.xy/u_res;vec2 q=(gl_FragCoord.xy-0.5*u_res)/u_res.y;float t=u_time*0.02;",
+    "float hz=fbm(q*1.7+vec2(t,-t*0.6));vec3 col=mix(VOID,BLUE*0.12,smoothstep(0.25,1.0,hz));",
+    "float st=step(0.9988,h(floor(gl_FragCoord.xy)))*0.5;col+=vec3(0.6,0.75,0.85)*st;",
+    "col+=(h(gl_FragCoord.xy+u_time)-0.5)*0.02;col*=0.5+0.5*smoothstep(1.4,0.2,length(q));",
+    "col=col/(col+vec3(0.95));gl_FragColor=vec4(col,1.0);}"].join("\n");
+    function mk(t,s){var x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);return x;}
+    var pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,V));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,F));gl.linkProgram(pr);gl.useProgram(pr);
+    var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    var lp=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    var uR=gl.getUniformLocation(pr,'u_res'),uT=gl.getUniformLocation(pr,'u_time');
+    function rzb(){bg.width=Math.floor(innerWidth*dpr);bg.height=Math.floor(innerHeight*dpr);gl.viewport(0,0,bg.width,bg.height);}
+    rzb();addEventListener('resize',rzb);var b0=performance.now();
+    (function bl(now){var tt=reduce||still?5.0:(now-b0)/1000;gl.uniform2f(uR,bg.width,bg.height);gl.uniform1f(uT,tt);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(bl);})(b0);
+  }
+})();
+</script>
+</body>
+</html>
