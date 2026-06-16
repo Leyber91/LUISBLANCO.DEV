@@ -188,22 +188,30 @@
   // live streaming from pollinations (keyless, OpenAI-compatible SSE)
   el('go').addEventListener('click', goLive);
   el('prompt').addEventListener('keydown', function(e){ if(e.key==='Enter') goLive(); });
+  function resetTrace(){ buf=new Float32Array(W); wp=0; qIdx=-1; dts=[]; lastTok=0; tps=8.0; count=0;
+    elTps.textContent='0.0'; elDt.textContent='—'; elJit.textContent='—'; elN.textContent='0'; }
   function goLive(){
-    var q=(el('prompt').value||'').trim() || 'Explain how a transformer predicts the next token, in two paragraphs.';
-    mode='live'; dts=[]; lastTok=0; count=0; elSrc.textContent='live · connecting'; elSrc.className='src live';
-    var body={ model:'openai', stream:true, messages:[{role:'user',content:q}] };
-    var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},30000);
-    fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctrl.signal})
-    .then(function(r){ if(!r.ok||!r.body) throw new Error('http '+r.status); elSrc.textContent='live · pollinations';
-      var reader=r.body.getReader(), dec=new TextDecoder(), buf2='';
+    var q=(el('prompt').value||'').trim() || 'Explain, in two short paragraphs, how a transformer predicts the next token.';
+    // visible reaction the instant you click: wipe the trace, reset the meters, switch to live
+    mode='live'; resetTrace(); elSrc.textContent='live · connecting'; elSrc.className='src live';
+    // GET + stream=true is the path that actually streams (POST /openai stalls); a GET is also a
+    // simple request, so no CORS preflight — which is what made the old POST read "unreachable".
+    var url='https://text.pollinations.ai/'+encodeURIComponent(q)+'?model=openai&stream=true&referrer=l212';
+    var ctrl=new AbortController(); var to=setTimeout(function(){ ctrl.abort(); }, 30000); var got=0;
+    fetch(url,{signal:ctrl.signal}).then(function(r){ if(!r.ok||!r.body) throw new Error('http '+r.status);
+      var reader=r.body.getReader(), dec=new TextDecoder(), acc='';
       function pump(){ return reader.read().then(function(res){
-        if(res.done){ clearTimeout(to); mode='echo'; nextSim=performance.now()+120; return; }
-        buf2+=dec.decode(res.value,{stream:true}); var lines=buf2.split('\n'); buf2=lines.pop();
-        for(var i=0;i<lines.length;i++){ var ln=lines[i].trim(); if(ln.indexOf('data:')!==0) continue; var p=ln.slice(5).trim(); if(p==='[DONE]') continue;
-          try{ var j=JSON.parse(p); var d=j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content; if(d) onToken(performance.now()); }catch(_){} }
+        if(res.done){ clearTimeout(to); elSrc.textContent=got?'live · complete':'echo · empty response';
+          if(!got) elSrc.className='src'; mode='echo'; nextSim=performance.now()+(got?700:150); return; }
+        acc+=dec.decode(res.value,{stream:true}); var lines=acc.split('\n'); acc=lines.pop();
+        for(var i=0;i<lines.length;i++){ var ln=lines[i].trim(); if(ln.indexOf('data:')!==0) continue;
+          var p=ln.slice(5).trim(); if(!p||p==='[DONE]') continue;
+          try{ var j=JSON.parse(p); var dl=j.choices&&j.choices[0]&&j.choices[0].delta;
+            var d=dl&&(dl.content||dl.reasoning);   // count reasoning + answer tokens — real cadence
+            if(d){ if(!got){ got=1; clearTimeout(to); elSrc.textContent='live · pollinations'; } onToken(performance.now()); } }catch(_){} }
         return pump(); }); }
       return pump(); })
-    .catch(function(){ clearTimeout(to); elSrc.textContent='echo · live unreachable'; elSrc.className='src'; mode='echo'; nextSim=performance.now()+100; });
+    .catch(function(){ clearTimeout(to); elSrc.textContent='echo · live unreachable'; elSrc.className='src'; mode='echo'; nextSim=performance.now()+150; });
   }
 
   // ---- cold blueprint field (shared measure-wing atmosphere) ----
