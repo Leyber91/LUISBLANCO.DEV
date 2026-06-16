@@ -81,3 +81,11 @@
   .pc-card{ width:280px; }
   .pc-track{ padding:8px 14vw 18px; }
 }
+
+/* triad card → live demonstration trigger (LB_DEMOS) */
+.tri-card.has-demo{ cursor:pointer; }
+.tri-run{ margin-top:14px; font-family:inherit; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--gold-hi); background:transparent; border:none; padding:0; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px; }
+.tri-run .arr{ transition:transform .2s var(--ease); }
+.tri-card.has-demo:hover .tri-run .arr{ transform:translateX(4px); }
