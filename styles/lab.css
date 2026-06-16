@@ -71,6 +71,23 @@
   color:var(--gold); opacity:.85; transition:opacity .25s var(--ease); }
 .lb-card:hover .lb-open{ opacity:1; }
 
+/* ── the experiment layer (iframe hosted inside the lab, never a page-jump) ── */
+#labExp{ position:fixed; inset:0; z-index:100; display:flex; flex-direction:column;
+  background:#05070b; animation:cxFadeIn .32s var(--ease) both; }
+.le-bar{ flex:0 0 48px; display:flex; align-items:center; gap:16px; padding:0 18px;
+  background:rgba(6,8,13,0.92); border-bottom:1px solid var(--line-soft); }
+.le-back{ appearance:none; background:rgba(8,11,18,0.6); border:1px solid var(--line-soft);
+  color:var(--ink-dim); font-family:inherit; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  padding:7px 13px; cursor:pointer; transition:border-color .25s var(--ease), color .25s var(--ease); }
+.le-back:hover{ border-color:var(--gold-dim); color:var(--gold-hi); }
+.le-title{ flex:1; display:flex; align-items:baseline; gap:12px;
+  font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); }
+.le-tag{ font-size:9px; letter-spacing:.22em; color:var(--gold-dim); }
+.le-x{ appearance:none; background:none; border:none; color:var(--faint); font-size:22px; line-height:1;
+  cursor:pointer; font-family:inherit; padding:0 4px; transition:color .25s var(--ease); }
+.le-x:hover{ color:var(--gold); }
+.le-frame{ flex:1; width:100%; border:0; display:block; background:#07090C; }
+
 /* ── reduced motion ───────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce){
   #labRing::before, #labRing .lb-dot{ animation:none; }
@@ -86,4 +103,6 @@ html.reduced-motion #labRing::before, html.reduced-motion #labRing .lb-dot{ anim
   .lb-frame{ inset:0; border-radius:0; }
   .lb-frame::before, .lb-frame::after{ display:none; }
   .lb-grid{ grid-template-columns:1fr; padding:18px; }
+  .le-bar{ flex-basis:44px; padding:0 12px; gap:12px; }
+  .le-title{ font-size:11px; }
 }

@@ -173,6 +173,7 @@
       elFill=el('fill'), elPct=el('pct'), elKeep=el('keep'), elDel=el('del'), elClaim=el('claim'), elGo=el('go');
   elClaim.setAttribute('placeholder', "my agent is basically AGI — it reasons, plans, and understands meaning");
   el('back').addEventListener('click', function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if (window.self !== window.top) { var _bk=el('back'); if(_bk) _bk.style.display='none'; } // shell provides the chrome
 
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var still=/[?&]still/.test(location.search); var instant=reduce||still;
