@@ -113,8 +113,8 @@
     const PAD_L   = x + 10;
 
     // Measure all tokens to pack them right-aligned (newest at right edge)
-    ctx.font = '10px "IBM Plex Mono", monospace';
-    const GAP_BASE = 10;
+    ctx.font = '12px "IBM Plex Mono", monospace';
+    const GAP_BASE = 11;
     const GAP_MAX  = 28;
     const measured = stream.map(t => {
       const tw = ctx.measureText(t.word).width;
@@ -158,13 +158,13 @@
       if(isBurst){
         glow(ctx, sig.glow, 8);
         ctx.fillStyle = sig.dim_color;
-        ctx.fillRect(cursor - 3, baseY - 12, t.tw + 6, 14);
+        ctx.fillRect(cursor - 3, baseY - 13, t.tw + 6, 16);
         noGlow(ctx);
       }
 
       if(isBurst) glow(ctx, sig.glow, 6); else noGlow(ctx);
       ctx.fillStyle = col;
-      ctx.font = isBurst ? 'bold 10px "IBM Plex Mono", monospace' : '10px "IBM Plex Mono", monospace';
+      ctx.font = isBurst ? 'bold 12px "IBM Plex Mono", monospace' : '12px "IBM Plex Mono", monospace';
       ctx.textAlign = 'left';
       ctx.fillText(t.word, cursor, baseY);
       noGlow(ctx);
@@ -427,7 +427,7 @@
       // Stream:  ~18% of height (min 56px)
       // Middle:  ~62% of height
       // Footer:  ~20% of height (min 28px)
-      const streamH = Math.max(56, Math.round(H * 0.18));
+      const streamH = Math.max(66, Math.round(H * 0.21));
       const footerH = Math.max(28, Math.round(H * 0.16));
       const midH    = H - PAD * 2 - GAP * 2 - streamH - footerH;
       const midW    = (W - PAD * 2 - GAP) / 2;
