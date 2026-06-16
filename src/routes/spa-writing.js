@@ -44,11 +44,15 @@
 
   function init(scope){
     if(!scope) return;
+    // mobile: the horizontal scrub timeline (drag + hover) becomes a vertical, tappable
+    // list with the hook inline — natural page scroll, no hover dependency. Desktop unchanged.
+    const MOB = window.matchMedia('(max-width:760px),(pointer:coarse)').matches;
     const track = scope.querySelector('#wrTrack');
     const tl    = scope.querySelector('#wrTimeline');
     const readout = scope.querySelector('#wrReadout');
     if(!track || !tl) return;
     track.innerHTML = '';
+    if(MOB) tl.classList.add('wr-mob');
 
     POSTS.forEach((p,i)=>{
       const shipped = p.n <= SHIPPED;
@@ -66,28 +70,31 @@
           '</div>'+
           '<div class="wr-title">'+p.t+'</div>'+
           '<div class="wr-ax">'+p.axn+'</div>'+
+          '<div class="wr-hook">'+p.hook+'</div>'+
         '</div>'+
-        '<span class="wr-stem"></span>'+
-        '<span class="wr-node"></span>';
-      // readout on hover/focus
-      const show = ()=>{ if(readout) readout.innerHTML = '<b>P'+p.n+'</b> · '+p.axn+' &nbsp;—&nbsp; '+p.hook; cell.classList.add('hot'); };
-      const hide = ()=>{ cell.classList.remove('hot'); };
-      cell.addEventListener('mouseenter', show);
-      cell.addEventListener('mouseleave', hide);
-      cell.addEventListener('focus', show);
+        (MOB ? '' : '<span class="wr-stem"></span><span class="wr-node"></span>');
+      if(!MOB){   // desktop: hook surfaces in the readout on hover/focus
+        const show = ()=>{ if(readout) readout.innerHTML = '<b>P'+p.n+'</b> · '+p.axn+' &nbsp;—&nbsp; '+p.hook; cell.classList.add('hot'); };
+        const hide = ()=>{ cell.classList.remove('hot'); };
+        cell.addEventListener('mouseenter', show);
+        cell.addEventListener('mouseleave', hide);
+        cell.addEventListener('focus', show);
+      }
       track.appendChild(cell);
     });
 
-    // ── drag-to-scrub + wheel → horizontal ──
-    let down=false, sx=0, sl=0, moved=0;
-    tl.addEventListener('pointerdown', e=>{ down=true; moved=0; sx=e.clientX; sl=tl.scrollLeft; tl.classList.add('dragging'); tl.setPointerCapture(e.pointerId); });
-    tl.addEventListener('pointermove', e=>{ if(!down) return; const dx=e.clientX-sx; moved+=Math.abs(dx); tl.scrollLeft = sl - dx; });
-    const end = ()=>{ down=false; tl.classList.remove('dragging'); };
-    tl.addEventListener('pointerup', end);
-    tl.addEventListener('pointercancel', end);
-    // a real drag suppresses the click-through to LinkedIn
-    tl.addEventListener('click', e=>{ if(moved>6){ e.preventDefault(); e.stopPropagation(); } }, true);
-    tl.addEventListener('wheel', e=>{ const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; if(d){ tl.scrollLeft += d; e.preventDefault(); } }, {passive:false});
+    // ── drag-to-scrub + wheel → horizontal (desktop only; mobile uses native vertical scroll) ──
+    if(!MOB){
+      let down=false, sx=0, sl=0, moved=0;
+      tl.addEventListener('pointerdown', e=>{ down=true; moved=0; sx=e.clientX; sl=tl.scrollLeft; tl.classList.add('dragging'); tl.setPointerCapture(e.pointerId); });
+      tl.addEventListener('pointermove', e=>{ if(!down) return; const dx=e.clientX-sx; moved+=Math.abs(dx); tl.scrollLeft = sl - dx; });
+      const end = ()=>{ down=false; tl.classList.remove('dragging'); };
+      tl.addEventListener('pointerup', end);
+      tl.addEventListener('pointercancel', end);
+      // a real drag suppresses the click-through to LinkedIn
+      tl.addEventListener('click', e=>{ if(moved>6){ e.preventDefault(); e.stopPropagation(); } }, true);
+      tl.addEventListener('wheel', e=>{ const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; if(d){ tl.scrollLeft += d; e.preventDefault(); } }, {passive:false});
+    }
 
     // ── axis filter ──
     const chips = [...scope.querySelectorAll('#wrFilters .fchip')];
