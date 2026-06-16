@@ -1,0 +1,30 @@
+/* Footer Styles */
+footer {
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+footer p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.footer-social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.footer-social-links a {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    transition: color var(--transition-duration);
+}
+
+.footer-social-links a:hover {
+    color: var(--hover-color);
+}

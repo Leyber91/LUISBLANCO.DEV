@@ -1,0 +1,38 @@
+/* Base Styles */
+body {
+    font-family: 'Orbitron', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    scroll-behavior: smooth; /* Enables smooth scrolling */
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color var(--transition-duration);
+}
+
+a:hover {
+    color: var(--hover-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--accent-color);
+    margin-bottom: 20px;
+}
+
+p {
+    margin-bottom: 15px;
+}
+
+ul, ol {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}

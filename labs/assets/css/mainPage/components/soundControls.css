@@ -1,0 +1,22 @@
+/* Sound Controls */
+.sound-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+}
+
+.sound-controls button {
+    background: rgba(0,0,0,0.7);
+    border: none;
+    color: var(--accent-color);
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background var(--transition-duration);
+}
+
+.sound-controls button:hover {
+    background: var(--hover-color);
+    color: #000;
+}

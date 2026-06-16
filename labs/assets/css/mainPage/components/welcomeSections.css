@@ -1,0 +1,146 @@
+/* Welcome Sections Styling */
+
+.welcome-section {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.bg-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(5px);
+    z-index: 1;
+}
+
+.bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.bg-text {
+    z-index: 10;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.bg-text h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+}
+
+.bg-text p {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Add Parallax Layers */
+.parallax-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.parallax-layer.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.parallax-layer.midground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Example midground */
+    z-index: 1;
+}
+
+/* Example for Content Above Parallax Layers */
+.bg-text {
+    position: relative;
+    z-index: 2;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Remove Blur if Using Parallax */
+.bg-blur {
+    display: none;
+}
+
+/* Twinkle Animation */
+@keyframes twinkle {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* Parallax Layer Styling */
+.parallax-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+}
+
+/* Example: Assign specific speeds using data attributes in HTML */
+
+/* Additional Styling for Better Readability */
+.parallax-layer.background,
+.parallax-layer.midground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.bg-text {
+    position: relative;
+    z-index: 2;
+    color: #ffffff; /* Set text color to white */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Enhance readability */
+}
+
+.bg-text h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #ffffff; /* Ensure h1 is white */
+}
+
+.bg-text p {
+    font-size: 1.2rem;
+    color: #ffffff; /* Ensure p is white */
+}

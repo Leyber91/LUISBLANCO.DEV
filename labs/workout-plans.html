@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personalized Plans — Project Leyber 212</title>
+  <meta name="description" content="A reasoning model that thinks through your constraints out loud, then builds a training block that adapts to the week you actually had. Powered by Nemotron-3-Ultra." />
+
+  <!-- fonts: Orbitron (display) · Space Grotesk (body) · IBM Plex Mono (mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- design tokens, then the page stylesheet -->
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/workout-plans.css" />
+</head>
+<body>
+  <div class="void-bg" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ===================== header ===================== -->
+  <header class="page-header">
+    <a href="index.html" class="back" aria-label="Back to Project Leyber 212">
+      <i class="fa-solid fa-arrow-left-long"></i>
+      <span>PROJECT&nbsp;LEYBER&nbsp;<b>212</b></span>
+    </a>
+    <span class="ai-status" id="ai-status" data-mode="echo" title="AI backend (auto-detected)">
+      <span class="dot"></span><span id="ai-status-label">detecting…</span>
+    </span>
+  </header>
+
+  <main class="shell">
+    <!-- ===================== intro ===================== -->
+    <section class="intro">
+      <p class="eyebrow"><i class="fa-solid fa-dumbbell"></i> Fitness · the body, in the loop</p>
+      <h1>Personalized <span class="x">Plans</span></h1>
+      <p class="lede">
+        Most plan generators fill a template. This one <em>reasons</em>. Tell it the week you
+        actually have — the days, the kit, the bad knee — and watch a reasoning model think
+        through the trade-offs out loud before it commits to a block built around your constraints.
+      </p>
+    </section>
+
+    <!-- ===================== workbench ===================== -->
+    <section class="bench">
+      <!-- ---- inputs ---- -->
+      <form class="panel inputs" id="plan-form" autocomplete="off">
+        <h2 class="panel-title"><span class="idx">01</span> Your constraints</h2>
+
+        <label class="field">
+          <span class="lbl">Primary goal</span>
+          <select name="goal" id="goal">
+            <option value="strength">Get stronger</option>
+            <option value="hypertrophy">Build muscle</option>
+            <option value="fatloss">Lose fat, keep muscle</option>
+            <option value="endurance">Conditioning &amp; endurance</option>
+            <option value="general">General health</option>
+          </select>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="lbl">Days / week</span>
+            <select name="days" id="days">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">Session length</span>
+            <select name="minutes" id="minutes">
+              <option value="30">30 min</option>
+              <option value="45" selected>45 min</option>
+              <option value="60">60 min</option>
+              <option value="90">90 min</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="lbl">Experience</span>
+            <select name="level" id="level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="lbl">Equipment</span>
+            <select name="equipment" id="equipment">
+              <option value="gym" selected>Full gym</option>
+              <option value="dumbbells">Dumbbells only</option>
+              <option value="bodyweight">Bodyweight only</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="lbl">Constraints / injuries <span class="hint">— the model works around these</span></span>
+          <input type="text" name="constraints" id="constraints"
+                 placeholder="e.g. dodgy left knee, desk job, no morning sessions" />
+        </label>
+
+        <button type="submit" class="generate" id="generate">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Reason out a plan</span>
+        </button>
+        <button type="button" class="ghost" id="stop" hidden>
+          <i class="fa-solid fa-stop"></i> Stop
+        </button>
+
+        <p class="backend-note" id="backend-note"></p>
+      </form>
+
+      <!-- ---- output ---- -->
+      <div class="panel output" id="output">
+        <!-- reasoning stream -->
+        <section class="reasoning" id="reasoning-wrap" hidden>
+          <button type="button" class="reasoning-head" id="reasoning-toggle" aria-expanded="true">
+            <span class="th-dot" aria-hidden="true"></span>
+            <span class="th-label" id="reasoning-label">Reasoning</span>
+            <i class="fa-solid fa-chevron-down chev"></i>
+          </button>
+          <pre class="reasoning-body" id="reasoning-body" aria-live="polite"></pre>
+        </section>
+
+        <!-- the plan -->
+        <section class="plan" id="plan" aria-live="polite"></section>
+
+        <!-- empty / resting state -->
+        <div class="resting" id="resting">
+          <div class="resting-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <p>Set your constraints and the model will think a block into existence.</p>
+          <p class="sub">Runs on your local model if you have one, a hosted Nemotron relay if you
+            don't, and a built-in coach offline. Nothing leaves until you press the button.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <span>&copy; <span id="year">2026</span> Project Leyber 212 · built by
+      <a href="https://github.com/Leyber91" target="_blank" rel="noopener">Leyber91</a></span>
+    <span>Reasoning by Nemotron-3-Ultra · plan is guidance, not medical advice.</span>
+  </footer>
+
+  <script type="module" src="assets/js/workout-plans/main.js"></script>
+</body>
+</html>

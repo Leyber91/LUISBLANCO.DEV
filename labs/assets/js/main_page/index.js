@@ -1,0 +1,35 @@
+import { addWelcomeSection } from './welcomeSection.js';
+import { addTryverseSection } from './tryverseSection.js';
+import { addParallaxEffectToTitle } from './parallaxEffect.js';
+import { initializeGSAPAnimations } from './gsapAnimations.js';
+import { addSidebarBlockHoverEffects } from './sidebarHoverEffects.js';
+import { addIntersectionObserver } from './intersectionObserver.js';
+import { addInteractiveSidebar } from './interactiveSidebar.js';
+import { addTouchSwipeFunctionality } from './touchSwipe.js';
+import { addRandomCrystalClipPath } from './randomCrystalClipPath.js';
+import { createBlackHoleEffect } from './blackHoleEffect.js';
+import { addStarfieldBackground } from './starfieldBackground.js';
+import { addGlitchEffect } from './glitchEffect.js';
+import { addShootingStars } from './shootingStars.js';
+import { addAuroraEffect } from './auroraEffect.js';
+import { initializeProjectCards } from './projectCards.js';
+import { addSoundControls } from './soundControls.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    addWelcomeSection();
+    addTryverseSection();
+    addParallaxEffectToTitle();
+    initializeGSAPAnimations();
+    addSidebarBlockHoverEffects();
+    addIntersectionObserver();
+    addInteractiveSidebar();
+    addTouchSwipeFunctionality();
+    addRandomCrystalClipPath();
+    createBlackHoleEffect();
+    addStarfieldBackground();
+    addGlitchEffect();
+    addShootingStars();
+    addAuroraEffect();
+    initializeProjectCards();
+    addSoundControls();
+});

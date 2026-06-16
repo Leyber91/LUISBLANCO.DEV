@@ -1,0 +1,170 @@
+/* Sidebar Styling */
+#sidebar {
+    position: fixed;
+    top: 60px; /* Same as header height */
+    left: -250px; /* Hidden by default */
+    width: 250px;
+    height: calc(100% - 60px); /* Full height minus header */
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+#sidebar.open {
+    left: 0;
+}
+
+/* Sidebar Link Styling */
+.sidebar-link a {
+    display: block;
+    color: #ccc; /* Light gray for links */
+    text-decoration: none;
+    padding: 8px 20px; /* Add padding for alignment */
+    transition: color 0.3s ease;
+}
+
+.sidebar-link a:hover {
+    color: #fff; /* Change to white on hover */
+}
+
+/* Adjust Toggle Button to Account for Header */
+#toggle-sidebar {
+    position: fixed; /* Fixed positioning */
+    left: 0.5em; /* Align to the left */
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1100; /* Above sidebar */
+}
+
+/* Header Styling */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px; /* Adjust as needed */
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1001; /* Above other elements except toggle */
+}
+
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    margin-left: 60px; /* Space for toggle button */
+}
+
+.header-nav {
+    margin-left: auto;
+}
+
+.header-nav a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.header-nav a:hover {
+    color: #ccc; /* Light gray on hover */
+}
+
+/* Adjust main content to account for fixed header */
+main {
+    margin-top: 60px; /* Same as header height */
+}
+
+.sidebar-block-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-large);
+}
+
+.sidebar-block {
+    margin-bottom: var(--spacing-medium);
+    transition: transform var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+    padding: var(--spacing-medium);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: var(--box-shadow-light);
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.sidebar-block:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: var(--box-shadow-medium);
+    transform: translateY(-2px);
+}
+
+.sidebar-block.active {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: var(--box-shadow-heavy);
+}
+
+.sidebar-block h3 {
+    margin-bottom: var(--spacing-small);
+    color: var(--text-primary);
+    font-size: var(--font-size-medium);
+    font-weight: bold;
+}
+
+.sidebar-block h3 i {
+    margin-right: var(--spacing-small);
+    color: var(--accent-color);
+}
+
+.sidebar-link {
+    display: block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin-bottom: var(--spacing-small);
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    padding-left: var(--spacing-medium);
+    position: relative;
+    font-size: var(--font-size-small);
+}
+
+.sidebar-link::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent-color);
+    transition: transform var(--transition-fast);
+}
+
+.sidebar-link:hover {
+    color: var(--text-primary);
+    transform: translateX(5px);
+}
+
+.sidebar-link:hover::before {
+    transform: scale(1.2);
+}
+
+/* Custom scrollbar for sidebar */
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 3px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+}
