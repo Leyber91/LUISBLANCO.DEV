@@ -57,6 +57,11 @@
       blurb: 'A model that loves real engineering too much to let it lie about itself. Pick a named system — DECIPHER, the token EKG, Ouroboros, "AGI on my Ryzen 9" — and it roasts the myth live: brutal on the hype, precise on the mechanism, graded for how much is real. Or feed it your own claim.',
       href: 'labs/roaster.html',
     },
+    {
+      name: 'Token EKG', tag: 'instrumented AI · biosignal',
+      blurb: 'A model does not emit tokens evenly — it stalls on cache pressure, bursts when the batch clears, jitters with the scheduler. Token EKG timestamps each token as it streams and draws that hidden cadence as a live trace with a spectral read of its rhythm. Real telemetry of the serving pipeline — honestly not a brain.',
+      href: 'labs/token-ekg.html',
+    },
   ];
   EXPERIMENTS.forEach((e) => { e.slug = e.href.split('/').pop().replace(/\.html$/, ''); });
 

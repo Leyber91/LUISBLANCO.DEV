@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Token EKG — the inference biosignal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* THE LAB experience standard — HONESTY / MEASURE wing. amber = the live signal only. */
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --blue:#5BB0D6; --dim:#6B7682; --hair:rgba(91,176,214,.14); --panel:rgba(12,16,21,.5); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;
+    font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  #gl,#trace{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #trace{pointer-events:none}
+  .veil{position:fixed;inset:0;background:radial-gradient(120% 95% at 50% 30%,transparent 42%,rgba(3,5,7,.7) 100%);pointer-events:none}
+  .stage{position:fixed;inset:0;padding:34px 46px 30px;display:grid;grid-template-rows:auto auto 1fr auto;gap:18px}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:22px}
+  .back{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px;transition:.18s}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .brand b{color:var(--ink);font-weight:600}
+  .head .kick{font-size:11.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+  h1{font-size:34px;line-height:1.07;letter-spacing:-.01em;font-weight:600} h1 .lo{color:var(--blue)}
+  .sub{font-size:13px;line-height:1.55;color:#9AA6AF;max-width:78ch;margin-top:9px}
+  /* main: readouts + spectral rail | the EKG occupies the canvas behind */
+  .grid{display:grid;grid-template-columns:1fr 300px;gap:30px;min-height:0;align-items:end}
+  .meters{display:flex;gap:38px;align-self:end;pointer-events:none}
+  .m{display:flex;flex-direction:column;gap:7px} .m .k{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+  .m .v{font-size:30px;line-height:1;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)} .m .v.amber{color:var(--amber)}
+  .m .u{font-size:11px;color:var(--dim)}
+  .spec{pointer-events:auto;border:1px solid var(--hair);background:var(--panel);padding:16px 18px;backdrop-filter:blur(2px)}
+  .spec .st{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+  .bands{display:flex;align-items:flex-end;gap:5px;height:90px}
+  .bd{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%}
+  .bd .bar{width:100%;background:linear-gradient(180deg,var(--amber),rgba(242,169,59,.25));height:2%;transition:height .12s linear;box-shadow:0 0 10px rgba(242,169,59,.25)}
+  .bd .bl{font-size:8.5px;letter-spacing:.06em;color:var(--dim)}
+  .ctl{display:flex;gap:10px;margin-top:14px}
+  .ctl input{pointer-events:auto;flex:1;background:rgba(0,0,0,.25);border:1px solid var(--hair);color:var(--ink);font:inherit;font-size:12px;padding:9px 10px;outline:none}
+  .ctl input:focus{border-color:var(--blue)}
+  .ctl button{pointer-events:auto;cursor:pointer;background:rgba(242,169,59,.1);border:1px solid var(--amber);color:var(--amber);font:inherit;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:9px 12px;transition:.16s;white-space:nowrap}
+  .ctl button:hover{background:var(--amber);color:#0a0c0f}
+  .foot{display:flex;justify-content:space-between;align-items:center}
+  .tag{display:inline-flex;gap:9px;align-items:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .tag i{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);font-style:normal}
+  .src{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)} .src.live{color:var(--amber)}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<canvas id="trace"></canvas>
+<div class="veil"></div>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left">
+      <button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">TOKEN EKG <span class="on">/ measure wing</span></div>
+    </div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="head">
+    <div class="kick">make the invisible visible</div>
+    <h1>The machine has a <span class="lo">pulse</span>. Read it.</h1>
+    <p class="sub">A model does not emit tokens evenly — it stalls on KV-cache pressure, bursts when the batch clears, jitters with the scheduler. Token EKG timestamps each token as it arrives and draws that hidden cadence as a live trace, with a spectral read of its rhythm. A real biosignal of the serving pipeline — not a mind.</p>
+  </div>
+  <div class="grid">
+    <div class="meters">
+      <div class="m"><span class="k">heart rate</span><span class="v amber" id="tps">0.0</span><span class="u">tokens / sec</span></div>
+      <div class="m"><span class="k">inter-arrival</span><span class="v" id="dt">—</span><span class="u">ms mean</span></div>
+      <div class="m"><span class="k">jitter</span><span class="v" id="jit">—</span><span class="u">ms std-dev</span></div>
+      <div class="m"><span class="k">tokens</span><span class="v" id="n">0</span><span class="u">counted</span></div>
+    </div>
+    <div class="spec">
+      <div class="st">cadence spectrum <span class="src" id="src">echo · simulated</span></div>
+      <div class="bands" id="bands"></div>
+      <div class="ctl">
+        <input id="prompt" type="text" placeholder="ask the model anything — watch it think" />
+        <button id="go" type="button">stream live</button>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="tag"><i></i>real telemetry of token inter-arrival (batching · KV-cache · scheduler jitter) — not brainwaves. live stream is keyless (pollinations); default is a simulated cadence.</span>
+    <span class="label">trace: canvas · field: GLSL</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var el=function(id){return document.getElementById(id);};
+  el('back').addEventListener('click',function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if(window.self!==window.top){ var _b=el('back'); if(_b) _b.style.display='none'; }
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var still=/[?&]still/.test(location.search);
+
+  // ---- timing model ----
+  var tps=8.0, dts=[], lastTok=0, count=0;
+  var elTps=el('tps'), elDt=el('dt'), elJit=el('jit'), elN=el('n'), elSrc=el('src');
+  function onToken(now){
+    if(lastTok){ var dt=now-lastTok; dts.push(dt); if(dts.length>64) dts.shift();
+      tps=tps*0.85 + (1000/Math.max(dt,1))*0.15;
+      var mean=dts.reduce(function(a,b){return a+b;},0)/dts.length;
+      var varc=dts.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/dts.length;
+      elDt.textContent=Math.round(mean); elJit.textContent=Math.round(Math.sqrt(varc));
+    }
+    lastTok=now; count++; elTps.textContent=tps.toFixed(1); elN.textContent=count.toLocaleString();
+    inject();
+  }
+
+  // ---- spectral panel (DFT of the recent inter-arrival series -> 9 bands) ----
+  var NB=9, bandEls=[];
+  (function(){ var labels=['δ','','θ','','α','','β','','γ']; var c=el('bands');
+    for(var i=0;i<NB;i++){ var d=document.createElement('div'); d.className='bd';
+      d.innerHTML='<div class="bar"></div><div class="bl">'+labels[i]+'</div>'; c.appendChild(d); bandEls.push(d.firstChild); } })();
+  function spectrum(){
+    var N=dts.length; if(N<6) return;
+    // normalize intervals to a zero-mean signal
+    var mean=dts.reduce(function(a,b){return a+b;},0)/N;
+    var sig=dts.map(function(v){return (v-mean);});
+    var mags=[];
+    for(var k=1;k<=NB;k++){ var re=0,im=0;
+      for(var t=0;t<N;t++){ var ph=-2*Math.PI*k*t/N; re+=sig[t]*Math.cos(ph); im+=sig[t]*Math.sin(ph); }
+      mags.push(Math.sqrt(re*re+im*im)/N); }
+    var mx=Math.max.apply(null,mags)||1;
+    for(var i=0;i<NB;i++){ var h=Math.max(2, Math.min(100, mags[i]/mx*100)); bandEls[i].style.height=h+'%'; }
+  }
+
+  // ---- EKG trace (canvas, scrolling) ----
+  var tc=el('trace'), ctx=tc.getContext('2d'); var dpr=Math.min(window.devicePixelRatio||1,2);
+  var W=0,H=0, buf=null, wp=0, qIdx=-1;
+  var QRS=[-0.05,-0.12,0.08,0.95,-0.42,0.12,-0.03,0.0];
+  function rzT(){ W=tc.width=Math.floor(innerWidth*dpr); H=tc.height=Math.floor(innerHeight*dpr); buf=new Float32Array(W); wp=0; }
+  rzT(); addEventListener('resize',rzT);
+  function inject(){ qIdx=0; }
+  var SPEED=3; // samples advanced per frame
+  function drawTrace(){
+    // advance
+    for(var s=0;s<SPEED;s++){
+      var y=(Math.random()-0.5)*0.03;
+      if(qIdx>=0 && qIdx<QRS.length){ y+=QRS[qIdx]; qIdx++; } else qIdx=-1;
+      buf[wp]=y; wp=(wp+1)%W;
+    }
+    ctx.clearRect(0,0,W,H);
+    var mid=H*0.52, amp=H*0.30;
+    // baseline grid tick
+    ctx.strokeStyle='rgba(91,176,214,0.10)'; ctx.lineWidth=1*dpr; ctx.beginPath();
+    ctx.moveTo(0,mid); ctx.lineTo(W,mid); ctx.stroke();
+    // trace: oldest at x=0 -> newest at x=W (wp is the write head = newest)
+    ctx.lineWidth=1.8*dpr; ctx.lineJoin='round';
+    ctx.beginPath();
+    for(var x=0;x<W;x++){ var idx=(wp+x)%W; var yy=mid-buf[idx]*amp; if(x===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy); }
+    ctx.strokeStyle='rgba(105,186,222,0.7)'; ctx.stroke(); // cool history trace
+    // hot leading sweep (the "now") in amber, glow
+    var lead=Math.floor(W*0.22);
+    ctx.beginPath();
+    for(var x2=W-lead;x2<W;x2++){ var idx2=(wp+x2)%W; var y2=mid-buf[idx2]*amp; if(x2===W-lead) ctx.moveTo(x2,y2); else ctx.lineTo(x2,y2); }
+    ctx.strokeStyle='rgba(242,169,59,0.95)'; ctx.shadowColor='rgba(242,169,59,0.6)'; ctx.shadowBlur=12*dpr; ctx.lineWidth=2*dpr; ctx.stroke(); ctx.shadowBlur=0;
+    // the "now" head dot
+    var hy=mid-buf[(wp-1+W)%W]*amp; ctx.fillStyle='#FFD27A'; ctx.beginPath(); ctx.arc(W-1,hy,2.4*dpr,0,6.283); ctx.fill();
+  }
+
+  // ---- drivers: echo (simulated) + live (pollinations stream) ----
+  var mode='echo', nextSim=0, specT=0;
+  function simStep(now){
+    if(now>=nextSim){ onToken(now);
+      var base=70+Math.random()*90; if(Math.random()<0.20) base=22+Math.random()*22; if(Math.random()<0.08) base=260+Math.random()*240;
+      nextSim=now+base; }
+  }
+  var start=performance.now();
+  function loop(now){
+    if(mode==='echo' && !still) simStep(now);
+    if(!still) drawTrace();
+    if(now-specT>120){ spectrum(); specT=now; }
+    requestAnimationFrame(loop);
+  }
+  // prime a still frame with some history so the screenshot isn't empty
+  if(still){ var t=performance.now(); for(var i=0;i<240;i++){ onToken(t+i*70 + (i%7===0? -40:0)); for(var s=0;s<3;s++){ var y=(Math.random()-0.5)*0.03; if(qIdx>=0&&qIdx<QRS.length){y+=QRS[qIdx];qIdx++;}else qIdx=-1; buf[wp]=y; wp=(wp+1)%W; } } drawTrace(); spectrum(); elSrc.textContent='echo · simulated'; }
+  requestAnimationFrame(loop);
+
+  // live streaming from pollinations (keyless, OpenAI-compatible SSE)
+  el('go').addEventListener('click', goLive);
+  el('prompt').addEventListener('keydown', function(e){ if(e.key==='Enter') goLive(); });
+  function goLive(){
+    var q=(el('prompt').value||'').trim() || 'Explain how a transformer predicts the next token, in two paragraphs.';
+    mode='live'; dts=[]; lastTok=0; count=0; elSrc.textContent='live · connecting'; elSrc.className='src live';
+    var body={ model:'openai', stream:true, messages:[{role:'user',content:q}] };
+    var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},30000);
+    fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctrl.signal})
+    .then(function(r){ if(!r.ok||!r.body) throw new Error('http '+r.status); elSrc.textContent='live · pollinations';
+      var reader=r.body.getReader(), dec=new TextDecoder(), buf2='';
+      function pump(){ return reader.read().then(function(res){
+        if(res.done){ clearTimeout(to); mode='echo'; nextSim=performance.now()+120; return; }
+        buf2+=dec.decode(res.value,{stream:true}); var lines=buf2.split('\n'); buf2=lines.pop();
+        for(var i=0;i<lines.length;i++){ var ln=lines[i].trim(); if(ln.indexOf('data:')!==0) continue; var p=ln.slice(5).trim(); if(p==='[DONE]') continue;
+          try{ var j=JSON.parse(p); var d=j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content; if(d) onToken(performance.now()); }catch(_){} }
+        return pump(); }); }
+      return pump(); })
+    .catch(function(){ clearTimeout(to); elSrc.textContent='echo · live unreachable'; elSrc.className='src'; mode='echo'; nextSim=performance.now()+100; });
+  }
+
+  // ---- cold blueprint field (shared measure-wing atmosphere) ----
+  var cv=el('gl'); var gl=cv.getContext('webgl',{antialias:false,alpha:false})||cv.getContext('experimental-webgl'); if(!gl) return;
+  var V="attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
+  var F=["precision highp float;uniform vec2 u_res;uniform float u_time;",
+  "const vec3 VOID=vec3(0.027,0.035,0.047);const vec3 BLUE=vec3(0.357,0.690,0.839);",
+  "float h21(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+  "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.0-2.0*f);float a=h21(i),b=h21(i+vec2(1,0)),c=h21(i+vec2(0,1)),d=h21(i+vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+  "float fbm(vec2 p){float s=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*vn(p);p=m*p;a*=0.5;}return s;}",
+  "void main(){vec2 uv=gl_FragCoord.xy/u_res;vec2 q=(gl_FragCoord.xy-0.5*u_res)/u_res.y;float t=u_time*0.03;",
+  "float haze=fbm(q*2.0+vec2(t,-t*0.6));vec3 col=mix(VOID,BLUE*0.15,smoothstep(0.2,1.0,haze));",
+  "vec2 g=abs(fract(q*9.0)-0.5);float grid=smoothstep(0.49,0.5,max(g.x,g.y));col+=BLUE*0.045*grid*(0.4+0.6*haze);",
+  "float scan=smoothstep(0.012,0.0,abs(uv.y-fract(u_time*0.05)));col+=BLUE*0.08*scan;",
+  "float st=step(0.9986,h21(floor(gl_FragCoord.xy)))*0.55;col+=vec3(0.6,0.75,0.85)*st;",
+  "col+=(h21(gl_FragCoord.xy+u_time)-0.5)*0.022;col*=0.4+0.6*smoothstep(1.35,0.2,length(q));",
+  "col=col/(col+vec3(0.92));gl_FragColor=vec4(col,1.0);}"].join("\n");
+  function mk(ty,s){var x=gl.createShader(ty);gl.shaderSource(x,s);gl.compileShader(x);return x;}
+  var pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,V));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,F));gl.linkProgram(pr);gl.useProgram(pr);
+  var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  var lp=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+  var uR=gl.getUniformLocation(pr,'u_res'),uT=gl.getUniformLocation(pr,'u_time');
+  function rzG(){cv.width=Math.floor(innerWidth*dpr);cv.height=Math.floor(innerHeight*dpr);gl.viewport(0,0,cv.width,cv.height);}
+  rzG();addEventListener('resize',rzG);
+  var g0=performance.now();
+  (function gloop(now){var tt=reduce||still?7.0:(now-g0)/1000;gl.uniform2f(uR,cv.width,cv.height);gl.uniform1f(uT,tt);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(gloop);})(g0);
+})();
+</script>
+</body>
+</html>
