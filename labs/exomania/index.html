@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exomania — Deep Field Survey</title>
+  <meta name="description" content="A starship-window survey of real Kepler exoplanets: each world ray-traced from its own measured radius, temperature and host star, live in your browser." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/exoplanet.css" />
+</head>
+<body>
+  <div id="exo-loading">charting the catalogue…</div>
+
+  <!-- the viewport: canvas behind glass, inside a window bezel -->
+  <div id="exo-stage">
+    <canvas id="exo-canvas" aria-label="Procedural exoplanet rendered from Kepler data"></canvas>
+    <div class="exo-glass" aria-hidden="true"></div>
+    <div class="exo-vignette" aria-hidden="true"></div>
+    <div class="exo-frame" aria-hidden="true">
+      <span class="fc tl"></span><span class="fc tr"></span><span class="fc bl"></span><span class="fc br"></span>
+    </div>
+    <!-- target reticle is injected here -->
+  </div>
+
+  <!-- chrome -->
+  <a href="index.html" class="exo-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
+  <div class="exo-brand">Exomania · Deep Field Survey</div>
+  <div class="exo-hint">drag to orbit · scroll to zoom</div>
+
+  <!-- HUD instrument clusters -->
+  <div id="hud-left" class="hud-cluster left"></div>
+  <div id="hud-right" class="hud-cluster right"></div>
+  <div id="hud-bottom" class="hud-bottom"></div>
+
+  <script type="module" src="assets/js/exoplanet/main.js"></script>
+</body>
+</html>

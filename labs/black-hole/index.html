@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Black Hole — Project Leyber 212</title>
+  <meta name="description" content="A ray-marched black-hole instrument: Schwarzschild, Kerr, near-extremal, charged, stellar-mass and supermassive holes — gravitational lensing, a doppler-shifted accretion disk and the photon ring, rendered live in your browser." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/black_hole.css" />
+</head>
+<body>
+  <div id="bh-loading">entering the well…</div>
+
+  <canvas id="bh-canvas" aria-label="Interactive black hole simulation"></canvas>
+
+  <a href="index.html" class="bh-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
+  <div class="bh-title">Schwarzschild · Black Hole</div>
+  <div class="bh-hint">drag to orbit · scroll to zoom</div>
+
+  <div id="bh-controls"></div>
+
+  <script type="module" src="assets/js/blackhole/main.js"></script>
+</body>
+</html>

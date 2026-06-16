@@ -1,0 +1,150 @@
+/* ============================================================
+   black_hole.css — the black-hole experience page + its control
+   panel. Consumes tokens.css. Replaces animation_control.css.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: var(--font-body); color: var(--text); }
+
+#bh-canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
+  cursor: grab; touch-action: none;
+}
+#bh-canvas:active { cursor: grabbing; }
+
+/* ---- top chrome ---- */
+.bh-back {
+  position: fixed; top: var(--s-4); left: var(--s-4); z-index: var(--z-header);
+  display: inline-flex; align-items: center; gap: .5em;
+  padding: .5em 1em; border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--void) 60%, transparent); backdrop-filter: blur(10px);
+  color: var(--text-dim); font-size: var(--t-stamp); letter-spacing: .08em; text-transform: uppercase;
+  transition: all var(--t-fast) var(--ease); text-decoration: none;
+}
+.bh-back:hover { color: var(--text-bright); border-color: var(--line-bright); }
+
+.bh-title {
+  position: fixed; top: var(--s-4); left: 50%; transform: translateX(-50%); z-index: var(--z-header);
+  font-family: var(--font-display); font-size: var(--t-stamp); letter-spacing: .42em; text-transform: uppercase;
+  color: var(--text-dim); pointer-events: none; text-align: center;
+}
+.bh-hint {
+  position: fixed; bottom: var(--s-4); left: 50%; transform: translateX(-50%); z-index: var(--z-header);
+  font-size: var(--t-micro); letter-spacing: .2em; text-transform: uppercase; color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* ---- control panel ---- */
+#bh-controls { position: fixed; top: var(--s-4); right: var(--s-4); z-index: var(--z-sidebar); width: min(290px, 84vw); }
+.bh-panel {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  backdrop-filter: blur(16px) saturate(140%); box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+.bh-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line);
+  font-family: var(--font-display); font-size: var(--t-stamp); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-bright);
+}
+.bh-collapse { width: 26px; height: 26px; border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim); line-height: 1; }
+.bh-collapse:hover { color: var(--accretion); border-color: var(--accretion-dim); }
+.bh-panel-body { padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); }
+
+/* ---- accordion sections ---- */
+.bh-acc { border-bottom: 1px solid var(--line); }
+.bh-acc:last-of-type { border-bottom: 0; }
+.bh-acc-head {
+  width: 100%; display: flex; align-items: center; gap: .5em;
+  background: none; border: 0; text-align: left;       /* reset default button chrome */
+  font-family: var(--font-display); font-size: var(--t-micro); letter-spacing: .22em;
+  text-transform: uppercase; color: var(--text-faint);
+  padding: var(--s-2) 0; cursor: pointer; transition: color var(--t-fast) var(--ease);
+}
+.bh-acc-head:hover, .bh-acc[data-open] > .bh-acc-head { color: var(--text-dim); } /* grey, never gold */
+.bh-acc-tag { margin-left: auto; font-size: .58rem; letter-spacing: .12em; color: var(--text-faint); }
+.bh-acc-glyph { margin-left: auto; font-family: var(--font-mono); color: var(--text-faint); line-height: 1; }
+.bh-acc-tag + .bh-acc-glyph { margin-left: .6em; }
+/* height-auto-safe expand via grid-template-rows 0fr<->1fr */
+.bh-acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--t-mid) var(--ease); }
+.bh-acc-inner { overflow: hidden; min-width: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+.bh-acc[data-open] > .bh-acc-body { grid-template-rows: 1fr; }
+.bh-acc[data-open] > .bh-acc-body > .bh-acc-inner { padding-bottom: var(--s-3); }
+
+/* ---- type families ---- */
+.bh-fam { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.bh-fam-head { font-family: var(--font-mono); font-size: .58rem; letter-spacing: .03em; color: var(--text-faint); overflow-wrap: anywhere; }
+.bh-fam-head em { color: var(--text-dim); font-style: normal; }
+
+/* type selector — 3-wide grid of regimes (minmax(0,1fr) so long labels wrap
+   instead of overflowing the panel on mobile) */
+.bh-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); min-width: 0; }
+.bh-type {
+  font-size: var(--t-micro); letter-spacing: .01em; padding: .5em .2em; line-height: 1.12;
+  border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim);
+  transition: all var(--t-fast) var(--ease); min-height: 2.6em;
+  overflow-wrap: anywhere; hyphens: auto;
+}
+.bh-type:hover { color: var(--text-bright); border-color: var(--line-bright); }
+.bh-type.on { color: var(--void); background: var(--accretion); border-color: var(--accretion); box-shadow: 0 0 12px -2px var(--accretion-glow); }
+
+/* view selector — angle presets */
+.bh-views { display: flex; gap: var(--s-2); }
+.bh-view {
+  flex: 1; font-size: var(--t-micro); letter-spacing: .04em; padding: .45em .2em;
+  border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim);
+  transition: all var(--t-fast) var(--ease);
+}
+.bh-view:hover { color: var(--text-bright); border-color: var(--line-bright); }
+
+/* derived-physics readout */
+.bh-readout {
+  display: flex; flex-wrap: wrap; gap: .2em .9em;
+  font-family: var(--font-mono); font-size: var(--t-micro); color: var(--text-dim);
+  padding: var(--s-2) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.bh-readout sub { font-size: .78em; color: var(--accretion-soft); }
+.bh-readout .bh-tag { letter-spacing: .12em; font-size: .92em; }
+.bh-tag-established { color: var(--text-dim); }
+.bh-tag-theoretical { color: var(--horizon-soft); }
+.bh-tag-speculative { color: var(--danger); }
+
+/* honesty note about the model */
+.bh-note {
+  font-size: 0.6rem; line-height: 1.5; letter-spacing: .02em; color: var(--text-faint);
+  border-left: 2px solid var(--line-bright); padding-left: var(--s-2); margin-top: var(--s-1);
+}
+
+.bh-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .3em .6em; }
+.bh-row-label { font-size: var(--t-micro); letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+.bh-row-val { font-family: var(--font-mono); font-size: var(--t-micro); color: var(--accretion); text-align: right; min-width: 3ch; }
+.bh-slider { grid-column: 1 / -1; -webkit-appearance: none; appearance: none; height: 3px; border-radius: 2px; background: var(--line-bright); outline: none; }
+.bh-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accretion); cursor: pointer; box-shadow: 0 0 8px var(--accretion-glow); }
+.bh-slider::-moz-range-thumb { width: 14px; height: 14px; border: none; border-radius: 50%; background: var(--accretion); cursor: pointer; }
+
+.bh-pause { margin-top: var(--s-2); padding: .6em; border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; font-size: var(--t-micro); transition: all var(--t-fast) var(--ease); }
+.bh-pause:hover { color: var(--text-bright); border-color: var(--line-bright); }
+
+/* ---- loading veil + no-webgl ---- */
+#bh-loading {
+  position: fixed; inset: 0; z-index: var(--z-overlay); display: grid; place-items: center;
+  background: #000; color: var(--text-dim); font-size: var(--t-stamp); letter-spacing: .3em; text-transform: uppercase;
+  transition: opacity var(--t-slow) var(--ease); }
+#bh-loading.hidden { opacity: 0; pointer-events: none; }
+.bh-nowebgl { position: fixed; inset: 0; display: grid; place-items: center; color: var(--text-dim); background: #000; }
+
+/* respect reduced-motion: no accordion height animation */
+@media (prefers-reduced-motion: reduce) {
+  .bh-acc-body { transition: none; }
+}
+
+@media (max-width: 600px) {
+  .bh-title { display: none; }
+  #bh-controls { top: auto; bottom: var(--s-4); right: var(--s-4); left: var(--s-4); width: auto; max-width: 100vw; }
+  /* cap height so the bottom-docked panel can't grow off-screen — keeps the
+     readout + Pause reachable; the folded Appearance/Model keep it short at rest */
+  .bh-panel-body { max-height: 72vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  /* 2-up type grid on phones so the longest labels never crowd */
+  .bh-types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

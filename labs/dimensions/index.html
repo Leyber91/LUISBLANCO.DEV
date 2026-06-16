@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dimensions — Project Leyber 212</title>
+  <meta name="description" content="WITNESS — an instrument for higher-dimensional rotation. Turn an axis you cannot see by hand and watch a tesseract project, swell and turn inside-out, while a live ledger names which hidden dimension is bending the shadow. 1D to 10D, real maths, rendered in your browser." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/dimensions.css" />
+</head>
+<body>
+  <div id="dx-loading">mapping the lattice…</div>
+
+  <canvas id="dx-canvas" aria-label="Interactive N-dimensional hypercube"></canvas>
+  <div class="dx-vignette"></div>
+
+  <a href="index.html" class="dx-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
+  <div class="dx-title">Dimensions</div>
+  <div class="dx-caption"></div>
+  <div class="dx-hint">drag to orbit · scroll to zoom · turn the dial to fold a hidden axis</div>
+
+  <div id="dx-ledger" class="empty"></div>
+  <div id="dx-controls"></div>
+
+  <!-- Three.js r128 (global build) + matching examples (classic scripts).
+       Load order matters: EffectComposer.js defines THREE.Pass, which every
+       *Pass extends — so it must come BEFORE ShaderPass/RenderPass/Bloom. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+  <script type="module" src="assets/js/dimensional_mania/main.js"></script>
+</body>
+</html>
