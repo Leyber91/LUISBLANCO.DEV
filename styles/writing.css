@@ -74,6 +74,7 @@ html.reduced-motion .wr-track::after{ animation:none; display:none; }
 .wr-state.draft{ color:var(--gold); }
 .wr-title{ font-size:13.5px; line-height:1.32; color:var(--ink); }
 .wr-ax{ font-size:10px; letter-spacing:.06em; color:var(--faint); margin-top:7px; }
+.wr-hook{ display:none; font-size:12px; line-height:1.55; color:var(--ink-dim); margin-top:9px; }  /* desktop: hover→readout; mobile: inline */
 
 /* foot: live readout + horizon notes */
 .wr-foot{ max-width:1000px; margin:26px auto 0; display:flex; justify-content:space-between;
@@ -87,8 +88,20 @@ html.reduced-motion .wr-track::after{ animation:none; display:none; }
 @media (max-width:760px){
   .wr-main{ padding:64px 18px 0; }
   .wr-controls{ flex-direction:column; align-items:flex-start; }
-  .wr-track{ height:330px; padding:0 16vw; }
-  .wr-post{ width:200px; }
-  .wr-card{ width:176px; }
+  /* ── the timeline becomes a vertical, tappable list: native scroll, hooks inline, no hover ── */
+  .wr-timeline{ overflow:visible; cursor:default; touch-action:auto; margin-top:18px;
+    -webkit-mask-image:none; mask-image:none; }
+  .wr-track{ display:flex; flex-direction:column; align-items:stretch; gap:12px;
+    width:auto; height:auto; padding:0; }
+  .wr-track::before, .wr-track::after{ display:none; }     /* kill the rail line + travelling current */
+  .wr-post{ width:100%; height:auto; }
+  .wr-post.dim{ display:none; }                            /* axis filter hides off-axis (list compacts) */
+  .wr-stem, .wr-node{ display:none; }
+  .wr-card,
+  .wr-post.up .wr-card, .wr-post.down .wr-card{ position:static; transform:none; width:auto;
+    bottom:auto; top:auto; padding:14px 15px; }
+  .wr-post.shipped:active .wr-card{ border-color:var(--gold-dim); }
+  .wr-hook{ display:block; }
+  .wr-scrub, .wr-readout{ display:none; }                  /* hooks are inline now */
   .wr-foot{ flex-direction:column; align-items:flex-start; }
 }
