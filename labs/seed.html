@@ -208,9 +208,8 @@
         if(count<MINT_THRESH) continue;
         var saved=count*(len-1);                              // symbols removed by X<-sub
         if(!best || saved>best.saved || (saved===best.saved && len>best.len))
-          best={ motif:sub, count:count, len:len, saved:saved };
+          best={ motif:sub, count:count, len:len, saved:saved };   // global max-savings, longest on ties
       }
-      if(best) break;   // prefer the longest motif length that yields a mint
     }
     return best;
   }
@@ -238,8 +237,9 @@
   function expand(str){
     var s=str, guard=0;
     while(/[JKLMNPQRSTUVWZ]/.test(s) && guard++<24){
-      var out=""; for(var i=0;i<s.length;i++){ var c=s[i]; out+= S.minted[c]? S.minted[c].motif : c; }
-      s=out; if(s.length>CAP_EXPAND){ s=s.slice(0,CAP_EXPAND); break; }
+      var prev=s, out=""; for(var i=0;i<s.length;i++){ var c=s[i]; out+= S.minted[c]? S.minted[c].motif : c; }
+      s=out; if(s===prev) break;                       // a stray (non-minted) pool letter: stop, don't spin
+      if(s.length>CAP_EXPAND){ s=s.slice(0,CAP_EXPAND); break; }
     }
     return s;
   }
@@ -299,10 +299,10 @@
     walk(expanded,function(x0,y0,x1,y1,depth){ if(depth>maxDepth)maxDepth=depth;
       ctx.moveTo(ox+x0*sc,oy+y0*sc); ctx.lineTo(ox+x1*sc,oy+y1*sc); });
     ctx.strokeStyle='rgba(120,196,230,0.62)'; ctx.shadowColor='rgba(91,176,214,0.35)'; ctx.shadowBlur=4*dpr; ctx.stroke(); ctx.shadowBlur=0;
-    // amber overlay: the freshly-crystallised skill's segments FIRE amber on its mint generation only
-    if(g.mint && S.minted[g.mint] && !reduce){
-      var motif=S.minted[g.mint].motif, em=expand(motif);
-      // re-derive the full expanded string but only stroke the spans produced by the minted symbol
+    // amber overlay: the freshly-crystallised skill's segments FIRE amber on its mint generation.
+    // a single static stroke (no animation), so it is painted in reduced-motion / ?still too — the
+    // fired-skill must be visible in the screenshot, which is the exhibit's whole point.
+    if(g.mint && S.minted[g.mint]){
       drawMinted(g.str, g.mint, ox,oy,sc);
     }
   }
@@ -312,10 +312,11 @@
     var s=carried, mark=carried.split("").map(function(c){return c===sym;});
     var guard=0;
     while(/[JKLMNPQRSTUVWZ]/.test(s) && guard++<24){
-      var out="",nm=[]; for(var i=0;i<s.length;i++){ var c=s[i];
+      var prev=s, out="",nm=[]; for(var i=0;i<s.length;i++){ var c=s[i];
         if(S.minted[c]){ var mt=S.minted[c].motif; for(var j=0;j<mt.length;j++){ out+=mt[j]; nm.push(mark[i]||c===sym); } }
         else { out+=c; nm.push(mark[i]); } }
-      s=out; mark=nm; if(s.length>CAP_EXPAND){ s=s.slice(0,CAP_EXPAND); mark=mark.slice(0,CAP_EXPAND); break; }
+      s=out; mark=nm; if(s===prev) break;
+      if(s.length>CAP_EXPAND){ s=s.slice(0,CAP_EXPAND); mark=mark.slice(0,CAP_EXPAND); break; }
     }
     var x=0,y=0,a=-Math.PI/2, st=[], step=10, ang=S.angle*Math.PI/180;
     ctx.beginPath();
@@ -365,11 +366,11 @@
     minted.forEach(function(k){ var m=S.minted[k];
       var d=document.createElement('div'); d.className='rule cr'+(k===freshSym?' fresh':'');
       d.innerHTML='<span class="sym">'+k+' &rarr;</span><span class="body">'+esc(m.motif)+
-        '<span class="prov">crystallised at gen '+m.gen+' · saved '+m.saved+' symbols / use</span></span>';
+        '<span class="prov">crystallised at gen '+m.gen+' · saved '+m.saved+' symbols total</span></span>';
       host.appendChild(d);
     });
     if(!minted.length){ var e=document.createElement('div'); e.className='empty';
-      e.textContent='no crystallised rules yet — grow a few generations, then press crystallise to lock the motif it repeats most into a reusable skill.'; host.appendChild(e); }
+      e.textContent='no crystallised rules yet — grow a few generations, then press crystallise to lock the recurring motif that saves the most symbols into a reusable skill.'; host.appendChild(e); }
     el('rl_count').textContent='· '+baseKeys.length+' base + '+minted.length+' built';
   }
   function esc(s){ return s.replace(/[<>&]/g,function(c){return({'<':'&lt;','>':'&gt;','&':'&amp;'})[c];}); }
@@ -380,8 +381,9 @@
   el('reset').addEventListener('click',function(){ loadPreset(S.key); });
   el('auto').addEventListener('click',function(){
     var guard=0;
-    while(guard++<MAX_GEN){ if(!grow()) break; if(crystallise()){} if(plateau()) break; }
-    syncAfter();
+    while(guard++<MAX_GEN){ if(!grow()) break; if(plateau()) break; }   // grow to the ceiling first,
+    crystallise(); crystallise(); crystallise();                        // then crystallise the mature structure
+    syncAfter();                                                        // (distinct, composing skills — like the poster)
   });
   el('axiom').addEventListener('change',function(){ S.axiom=el('axiom').value||'F';
     S.gens=[{str:S.axiom,ops:0,ent:entropy(S.axiom),mint:null}]; S.minted={}; S.mintOrder=0; S.cur=0; syncAfter(); });
