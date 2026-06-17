@@ -23,6 +23,11 @@
       href: 'labs/honesty-decoder.html',
     },
     {
+      name: 'The Figure', tag: 'recursive MoA · live',
+      blurb: 'A mixture-of-agents, run live. Your question fans out to three persona-framed calls on a reasoning model; a local router clusters where they agree and where they dissent; a fourth call synthesises the disagreement. Strictly sequential, streamed token-by-token — you watch orchestration actually think. Diversity is by persona, not vendor (the multi-model swarm is now key-gated); recorded trace as fallback.',
+      href: 'labs/figure.html',
+    },
+    {
       name: 'Exomania', tag: 'exoplanet survey',
       blurb: 'A starship-window survey of real Kepler exoplanets — each world ray-traced from its own measured radius, temperature and host star, live in WebGL.',
       href: 'labs/exomania.html',
@@ -135,7 +140,16 @@
     expEl.querySelector('.le-back').addEventListener('click', backToGrid);
     expEl.querySelector('.le-x').addEventListener('click', closeAll);
   }
-  function teardown() { if (expEl) { expEl.remove(); expEl = null; } }
+  function teardown() {
+    if (!expEl) return;
+    // Navigate the iframe to about:blank BEFORE removing it, so the embedded page unloads and its
+    // WebGL/GPU context is released now. Browsers do not reliably free a removed iframe's WebGL
+    // context immediately, so cycling through several WebGL experiments can otherwise exhaust the
+    // ~16-context limit and the next getContext() returns null ("WebGL is required to render...").
+    var fr = expEl.querySelector('iframe');
+    if (fr) { try { fr.src = 'about:blank'; } catch (_) {} }
+    expEl.remove(); expEl = null;
+  }
 
   function openExp(e) {
     if (!e) return;
