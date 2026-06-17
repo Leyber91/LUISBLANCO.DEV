@@ -18,6 +18,11 @@
 
   const EXPERIMENTS = [
     {
+      name: 'Honesty Decoder', tag: 'honesty · the receipt',
+      blurb: 'Every system in this lab, decoded: the myth it could be sold as on the left, the plain mechanism on the right, and a live reality-percentage meter between them — my own honest estimate, stated not hidden. The anti-evangelism stance made into a running receipt; every other exhibit carries one of its rows.',
+      href: 'labs/honesty-decoder.html',
+    },
+    {
       name: 'Exomania', tag: 'exoplanet survey',
       blurb: 'A starship-window survey of real Kepler exoplanets — each world ray-traced from its own measured radius, temperature and host star, live in WebGL.',
       href: 'labs/exomania.html',

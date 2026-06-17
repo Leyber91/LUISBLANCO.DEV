@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Honesty Decoder — myth vs mechanism</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* THE LAB experience standard — HONESTY wing. amber = the fired/active accent only. */
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --blue:#5BB0D6; --dim:#6B7682;
+         --hair:rgba(91,176,214,.14); --panel:rgba(12,16,21,.5); --real:#5BB0D6; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;
+    font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .veil{position:fixed;inset:0;background:radial-gradient(120% 95% at 50% 28%,transparent 44%,rgba(3,5,7,.72) 100%);pointer-events:none;z-index:0}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+  .stage{position:fixed;inset:0;z-index:1;padding:34px 46px 28px;display:grid;grid-template-rows:auto auto 1fr auto;gap:20px}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:22px}
+  .back{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px;transition:.18s}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .brand b{color:var(--ink);font-weight:600}
+  .head .kick{font-size:11.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+  h1{font-size:33px;line-height:1.08;letter-spacing:-.01em;font-weight:600} h1 .lo{color:var(--blue)}
+  .sub{font-size:13px;line-height:1.55;color:#9AA6AF;max-width:84ch;margin-top:9px}
+  /* the decoder: claim | meter | mechanism */
+  .decode{display:grid;grid-template-columns:1fr 280px 1fr;gap:30px;min-height:0;align-items:stretch}
+  .reg{border:1px solid var(--hair);background:var(--panel);padding:22px 24px;display:flex;flex-direction:column;gap:13px;backdrop-filter:blur(2px);min-height:0;overflow:auto}
+  .reg .rk{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+  .reg.claim .rk{color:var(--amber)} .reg.mech .rk{color:var(--blue)}
+  .reg .nm{font-size:20px;font-weight:600;line-height:1.12;letter-spacing:-.01em}
+  .reg .ln{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+  .reg .tx{font-size:13.5px;line-height:1.6;color:#C7D0D6}
+  .reg.claim .tx{color:#C9B79A;font-style:italic} /* the myth reads as aspiration */
+  .reg .ev{font-size:11px;line-height:1.5;color:var(--dim);border-top:1px solid var(--hair);padding-top:11px;margin-top:auto}
+  .reg .ev b{color:var(--blue);font-weight:500;letter-spacing:.1em;text-transform:uppercase;font-size:9.5px}
+  /* meter */
+  .meter{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
+  .mnum{font-size:60px;font-weight:600;line-height:.9;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .mnum span{font-size:22px;color:var(--dim)}
+  .mcap{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+  .bar2{width:100%;height:14px;border:1px solid var(--hair);background:rgba(0,0,0,.3);position:relative;overflow:hidden}
+  .fill{position:absolute;inset:0 auto 0 0;width:0%;background:linear-gradient(90deg,rgba(91,176,214,.35),var(--real));transition:width .9s cubic-bezier(.4,0,.1,1)}
+  .asp{position:absolute;inset:0 0 0 auto;width:0%;background:repeating-linear-gradient(45deg,rgba(242,169,59,.16) 0 6px,transparent 6px 12px);transition:width .9s cubic-bezier(.4,0,.1,1)}
+  .split{display:flex;justify-content:space-between;width:100%;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .split .r{color:var(--blue)} .split .a{color:var(--amber)}
+  /* selector */
+  .pick{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+  .chip{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#9AA6AF;font:inherit;font-size:11px;letter-spacing:.08em;padding:7px 12px;transition:.16s;white-space:nowrap}
+  .chip:hover{border-color:var(--blue);color:var(--ink)}
+  .chip.on{border-color:var(--amber);color:var(--amber);background:rgba(242,169,59,.08)}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:20px}
+  .tag{display:inline-flex;gap:9px;align-items:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);max-width:80ch}
+  .tag i{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);flex:none}
+  .meta{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);white-space:nowrap}
+  @media (max-width:820px){
+    .stage{padding:64px 18px 20px;gap:14px;grid-template-rows:auto auto 1fr auto;overflow:auto}
+    h1{font-size:23px} .sub{font-size:12px}
+    .decode{grid-template-columns:1fr;gap:12px}
+    .meter{order:-1;padding:8px 0} .mnum{font-size:46px}
+    .reg{padding:15px 16px;gap:9px} .reg .nm{font-size:17px}
+    .foot{flex-direction:column;align-items:flex-start;gap:8px}
+  }
+</style>
+</head>
+<body>
+<div class="veil"></div>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left">
+      <button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">HONESTY DECODER <span class="on">/ honesty wing</span></div>
+    </div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="head">
+    <div class="kick">doctrine 8 · honesty as infrastructure</div>
+    <h1>Every system in this lab, <span class="lo">decoded</span>.</h1>
+    <p class="sub">The name makes a promise; the mechanism keeps a smaller one. This instrument states the gap out loud — for my own systems first. Pick one: left is the myth it could be sold as, right is what it actually does, and the meter is how much of the claim is real — my own honest estimate, not a benchmark.</p>
+  </div>
+  <div class="decode">
+    <div class="reg claim">
+      <div class="rk">the claim — what it sounds like</div>
+      <div class="nm" id="cName">—</div>
+      <div class="ln" id="cLine">—</div>
+      <div class="tx" id="cClaim">—</div>
+    </div>
+    <div class="meter">
+      <div class="mcap">reality</div>
+      <div class="mnum"><span id="mPre"></span><b id="mNum">0</b><span>%</span></div>
+      <div class="bar2"><div class="fill" id="mFill"></div><div class="asp" id="mAsp"></div></div>
+      <div class="split"><span class="r" id="mReal">real</span><span class="a" id="mAspL">aspiration</span></div>
+    </div>
+    <div class="reg mech">
+      <div class="rk">the mechanism — what it does</div>
+      <div class="nm" id="hName">—</div>
+      <div class="ln">verifiable</div>
+      <div class="tx" id="hMech">—</div>
+      <div class="ev"><b>evidence</b><br><span id="hEv">—</span></div>
+    </div>
+  </div>
+  <div class="pick" id="pick"></div>
+  <div class="foot">
+    <span class="tag"><i></i>these are my own systems, graded by me — an honest estimate, not a benchmark. every exhibit in this lab carries a decoder row; this is where they live.</span>
+    <span class="meta" id="meta">8 systems · zero network</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // ---- the shared honesty table: other lab exhibits import a row from here ----
+  // reality = % of the claim that is mechanically true, by Luis's own estimate.
+  var DECODER = [
+    { name:"Black Hole · Exomania", line:"Aether line", reality:88,
+      claim:"Real astrophysics, computed live in your browser.",
+      mech:"Genuinely computed every frame, no echo: a fragment shader integrates photon geodesics in the Schwarzschild field — disk Doppler, gravitational redshift, the photon ring; the exoplanet viewer ray-marches real worlds from the NASA archive (mass-radius, scale height, blackbody colour).",
+      ev:"per-pixel geodesic shader + an 8.5 MB real NASA archive, recomputed every frame. docks only for honest approximation — spin/charge and surface relief are physically-motivated, not exact." },
+    { name:"DATASPACE", line:"Compression line", reality:80,
+      claim:"Compress a whole conversation into a capsule only a model can rebuild.",
+      mech:"The default is a live keyless round-trip — compress, then a fresh model rebuilds from the capsule alone, with a recorded fallback. The science is real and in-browser: Shannon bits, a DEFLATE lossless floor, an LCS token-diff.",
+      ev:"collapse() calls the live model first (recorded fallback on failure); DEFLATE floor + LCS diff computed in-browser. honest caveat — the capsule is lossy summarisation, not reversible compression." },
+    { name:"Token EKG", line:"Honesty line", reality:55,
+      claim:"The machine's living heartbeat — watch the model's pulse as it thinks.",
+      mech:"Real measurement math (tokens/sec, inter-arrival, jitter, a 9-band DFT) — but the default trace is a SIMULATED cadence. A genuinely keyless live stream exists, opt-in behind one button. The rhythm is the serving pipeline, never a pulse.",
+      ev:"boots mode='echo' (a random cadence generator); the keyless live SSE stream fires only on the 'stream live' click. the measurement is real; the default input is fabricated." },
+    { name:"AEA", line:"the framework", reality:50,
+      claim:"A blueprint for building autonomous minds.",
+      mech:"The Autonomous Entity Architecture — an authored design vocabulary (5 axes, 10 seeds, 4 mechanics) that makes agent-system choices explicit, partly reduced to a reference runtime. A lens you think with; it does not ship an autonomous mind.",
+      ev:"encoded as data (aea-framework.js) and authored as Part I of a sealed Paradigm Book; the runtime side is partial. the vocabulary is real; the 'mind' is the aspiration." },
+    { name:"Ouroboros", line:"Ouroboros line", reality:45,
+      claim:"An AI that rewrites its own code and evolves itself.",
+      mech:"What has actually run is a bounded self-versioning loop — not source self-editing: an 8-step tick that steps the model along a known lineage when it stalls, crystallises repeated work into skills, and keeps every prior version rollback-reachable with a kill-switch.",
+      ev:"a real 8-step tick ran on local Ollama (hundreds of ticks), predecessor preserved with auto-rollback. built on forked groundwork whose authorship is under audit — a research runtime, not a finished autonomous AI." },
+    { name:"Altverse", line:"Aether · generative", reality:34,
+      claim:"A what-if engine: change one constant and it weaves a whole consistent world.",
+      mech:"The full live pipeline (a schema-guarded reasoning DAG) is built but DORMANT by default — the public site REPLAYS about three hand-authored worlds plus a thin generic template, and the on-screen 'reasoning' is a scripted type-out.",
+      ev:"the worker endpoint defaults empty, so the public site falls to a curated echo of ~3 authored worlds. real engine, staged by default." },
+    { name:"The Figure", line:"Metapower · Recursive-MoA", reality:28,
+      claim:"A recursive mixture-of-agents you watch orchestrate, all the way down.",
+      mech:"Stage 1: a single RECORDED trace — the proposer answers and the synthesis are fixed strings, replayed with a typewriter. The agreement clustering (token-set Jaccard) is real, but runs over that frozen text. No live orchestration yet.",
+      ev:"the proposer/synthesis are hardcoded strings; zero live calls in the file. the recursion-dive and the game are the plan, not the build — it self-labels 'stage 1'." },
+    { name:"“AGI on my Ryzen 9”", line:"the honest floor", reality:18,
+      claim:"Artificial general intelligence, running on my home PC.",
+      mech:"Quantised 7–13B open models served locally via Ollama, doing narrow useful tasks — drafting, routing, classification. Genuinely local and capable; not general, not learning at runtime, not AGI.",
+      ev:"real hardware (Ryzen 9, RTX 4070), real quantised local models on narrow tasks. the name is the joke; the gap is the exhibit — kept low on purpose as the true floor." },
+  ];
+
+  var el=function(id){return document.getElementById(id);};
+  el('back').addEventListener('click',function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if(window.self!==window.top){ var _b=el('back'); if(_b) _b.style.display='none'; }
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var still=/[?&]still/.test(location.search);
+
+  el('meta').textContent = DECODER.length + " systems · zero network";
+
+  // chips
+  var pick=el('pick'), chips=[];
+  DECODER.forEach(function(d,i){
+    var b=document.createElement('button'); b.className='chip'; b.type='button'; b.textContent=d.name;
+    b.addEventListener('click',function(){ select(i); });
+    pick.appendChild(b); chips.push(b);
+  });
+
+  var numTimer=null;
+  function setNum(target){
+    if(numTimer){clearInterval(numTimer);numTimer=null;}
+    if(reduce||still){ el('mNum').textContent=target; return; }
+    var cur=0; el('mNum').textContent='0';
+    numTimer=setInterval(function(){
+      cur+=Math.max(1,Math.round((target-cur)/6));
+      if(cur>=target){cur=target;clearInterval(numTimer);numTimer=null;}
+      el('mNum').textContent=cur;
+    },28);
+  }
+
+  function select(i){
+    var d=DECODER[i];
+    chips.forEach(function(c,j){ c.classList.toggle('on', j===i); });
+    el('cName').textContent=d.name; el('cLine').textContent=d.line; el('cClaim').textContent=d.claim;
+    el('hName').textContent=d.name; el('hMech').textContent=d.mech; el('hEv').textContent=d.ev||'';
+    el('mReal').textContent=d.reality+'% real'; el('mAspL').textContent=(100-d.reality)+'% aspiration';
+    // meter
+    var fill=el('mFill'), asp=el('mAsp');
+    if(reduce||still){ fill.style.transition='none'; asp.style.transition='none'; }
+    fill.style.width=d.reality+'%'; asp.style.width=(100-d.reality)+'%';
+    setNum(d.reality);
+  }
+
+  // expose the table so sibling exhibits can pull their own decoder row
+  window.L212_DECODER = DECODER;
+  select(0);
+})();
+</script>
+</body>
+</html>
