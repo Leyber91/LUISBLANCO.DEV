@@ -33,10 +33,18 @@ jobs:
         run: |
           curl -fsS --retry 3 --retry-delay 10 \
             "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name,hostname,sy_dist,pl_orbper,pl_orbsmax,pl_rade,pl_masse,pl_eqt,st_teff+from+ps&format=json" \
-            -o labs/exoplanet_data.json
+            -o /tmp/exoplanet_raw.json
           # guard: must be a non-trivial JSON array, else the step fails and the
           # previous good file stays committed (no overwrite-with-garbage).
-          python3 -c "import json; d=json.load(open('labs/exoplanet_data.json')); assert isinstance(d, list) and len(d) > 1000, 'unexpected payload'; print(f'rows: {len(d)}')"
+          python3 -c "import json; d=json.load(open('/tmp/exoplanet_raw.json')); assert isinstance(d, list) and len(d) > 1000, 'unexpected payload'; print(f'raw rows: {len(d)}')"
+
+      - name: Pre-bake the catalogue (dedup + normalise ONCE, here, not in every browser)
+        run: |
+          # Turns the ~8 MB raw `ps` dump (~40k repeated-measurement rows) into a ~0.8 MB
+          # ready catalogue (~4.7k unique worlds, 9 fields). The viewer then loads a small
+          # file and skips the heavy client-side dedup — this is what fixes the slow boot.
+          python3 .github/prebake_exoplanets.py /tmp/exoplanet_raw.json labs/exoplanet_data.json
+          python3 -c "import json, os; d = json.load(open('labs/exoplanet_data.json')); assert isinstance(d, list) and len(d) > 1000, 'prebake produced too few worlds'; print('baked worlds:', len(d), '| KB:', os.path.getsize('labs/exoplanet_data.json') // 1024)"
 
       - name: Commit only if the catalogue changed
         run: |
