@@ -238,7 +238,28 @@ html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
 @media (prefers-reduced-motion: reduce) {
   .load-orbit i, .load-status::after, .load-track.indet .load-fill { animation: none; }
 }
-.exo-nowebgl { position: fixed; inset: 0; display: grid; place-items: center; color: var(--text-dim); background: #000; }
+.exo-nowebgl { position: fixed; inset: 0; z-index: var(--z-overlay); display: grid; place-items: center;
+  color: var(--text-dim); background: radial-gradient(130% 100% at 50% 50%, #05070b 0%, #000 72%); }
+.exo-fail-card { width: min(34em, 82vw); text-align: center; padding: 1.2em; line-height: 1.6; }
+.exo-fail-msg { color: var(--text-bright); font-family: var(--font-display); font-size: var(--t-stamp);
+  letter-spacing: .06em; }
+.exo-fail-gpu { margin-top: .9em; font-family: var(--font-mono); font-size: var(--t-micro); color: var(--text-faint);
+  letter-spacing: .03em; word-break: break-word; }
+
+/* ---- "another world" jump (the desktop control panel holding this is hidden on mobile) ---- */
+.exo-shuffle { display: none; }
+@media (max-width: 820px) {
+  .exo-shuffle {
+    position: fixed; top: var(--s-5); right: var(--s-3); z-index: var(--z-header);
+    display: inline-flex; align-items: center; gap: .5em;
+    padding: .6em 1.05em; border: 1px solid var(--accretion-dim); border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--accretion) 14%, color-mix(in srgb, var(--void) 62%, transparent));
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--accretion-soft); font-family: var(--font-mono); font-size: var(--t-stamp);
+    letter-spacing: .08em; text-transform: uppercase; cursor: pointer; white-space: nowrap;
+    transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease); }
+  .exo-shuffle:active { color: var(--void); background: var(--accretion); }
+}
 
 /* ---------- responsive ---------- */
 @media (max-width: 820px) {
