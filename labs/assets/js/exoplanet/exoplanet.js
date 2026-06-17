@@ -835,31 +835,79 @@ export class Exoplanet {
     this.t0 = performance.now();
     this.running = false;
 
+    this._losses = 0;
+
     const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' })
             || canvas.getContext('experimental-webgl');
-    if (!gl) { this._noWebGL(); return; }
+    if (!gl) { this._fail('WebGL is required to render the planet.'); return; }
     this.gl = gl;
-    this.prog = this._program(VERT, FRAG);
-    if (!this.prog) { this._noWebGL(); return; }
+    this.renderer = this._rendererInfo(gl);
+    console.info('[exomania] GL renderer:', this.renderer);   // surfaced so a failing machine can be identified from the console
 
+    // This is a heavy single-pass ray-marcher. On a large desktop framebuffer the
+    // first frame can outrun the GPU watchdog and the driver drops the context
+    // (CONTEXT_LOST_WEBGL) — which is why it can die on desktop yet run on a phone
+    // (tiny canvas) and why the lighter Black-Hole shader survives the same buffer.
+    // Handle it for real: keep the canvas, rebuild the GL resources when the context
+    // comes back, and step the resolution down so the retry is cheaper.
+    canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this._lost(); }, false);
+    canvas.addEventListener('webglcontextrestored', () => this._restore(), false);
+
+    this._resize = this._resize.bind(this);
+    this._frame = this._frame.bind(this);
+    if (!this._buildGL() && !gl.isContextLost()) { this._fail('The planet shader could not be built on this GPU.'); return; } // a real shader/link failure is fatal; a lost context recovers via the restore event
+    this._bindPointer();
+    window.addEventListener('resize', this._resize, { passive: true });
+    this._resize();
+    // if the context was lost at start-up and never returns, say so (with the GPU id) instead of a silent black frame
+    setTimeout(() => { if (!this.prog && !this._failEl) this._fail('The GPU dropped the WebGL context during start-up.'); }, 6000);
+  }
+
+  _rendererInfo(gl) {
+    try {
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      return String((ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)) || 'unknown');
+    } catch (_) { return 'unknown'; }
+  }
+
+  // (re)build the program + fullscreen-triangle buffer + uniform table. Run at
+  // construction and again after the context is restored (locations are invalidated
+  // on loss). Returns false if the program could not be linked.
+  _buildGL() {
+    const gl = this.gl;
+    this.prog = this._program(VERT, FRAG);
+    if (!this.prog) { this.u = null; return false; }
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(this.prog, 'aPos');
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
     this.u = {};
     UNIFORMS.forEach((n) => this.u[n] = gl.getUniformLocation(this.prog, n));
-
-    this._bindPointer();
-    this._resize = this._resize.bind(this);
-    this._frame = this._frame.bind(this);
-    window.addEventListener('resize', this._resize, { passive: true });
-    this._resize();
+    return true;
   }
 
-  ok() { return !!this.gl && !!this.prog; }   // prog is null if the context was lost during init -> fail gracefully, never crash _draw
+  _lost() {
+    // _draw() bails while prog is null; the rAF loop keeps ticking and self-heals on restore.
+    this.prog = null;
+    this._losses += 1;
+    this.cfg.resScale = Math.max(0.35, (this.cfg.resScale || 0.9) - 0.2);   // cheaper retry each time
+    console.warn('[exomania] WebGL context lost (' + this._losses + ') · GPU:', this.renderer, '· retry resScale', this.cfg.resScale.toFixed(2));
+    if (this._losses >= 3) { this.running = false; this._fail('The GPU kept dropping the WebGL context (' + this._losses + ' attempts).'); }
+  }
+
+  _restore() {
+    if (this._losses >= 3) return;              // gave up — leave the diagnostic up
+    if (!this.gl || !this._buildGL()) return;   // wait for a cleaner restore if the rebuild fails
+    this._clearFail();
+    this._resize();
+    console.info('[exomania] WebGL context restored');
+    if (this.still) { this._draw(); return; }
+    if (!this.running) { this.running = true; requestAnimationFrame(this._frame); }   // else the existing loop picks it up
+  }
+
+  ok() { return !!this.gl && (!!this.prog || this.gl.isContextLost()); }   // a merely-lost context recovers; only (gl ok, no prog) is a fatal shader failure
   load(params = {}) { Object.assign(this.cfg, params); if (!this.running) this._draw(); }
   set(key, val) { this.cfg[key] = val; if (!this.running) this._draw(); }
   surface(on) { this.cfg.camMode = on ? 'surface' : 'orbit'; if (!this.running) this._draw(); }
@@ -943,8 +991,14 @@ export class Exoplanet {
   _resize() {
     if (!this.gl) return;
     const scale = this.still ? 1.0 : this.cfg.resScale;
-    const w = Math.max(1, Math.round(this.canvas.clientWidth * scale));
-    const h = Math.max(1, Math.round(this.canvas.clientHeight * scale));
+    let w = Math.max(1, Math.round(this.canvas.clientWidth * scale));
+    let h = Math.max(1, Math.round(this.canvas.clientHeight * scale));
+    // Cap the long edge. The per-pixel cost is high (procedural surface + analytic
+    // atmosphere); on a 2560/4K monitor an uncapped buffer is what can trip the
+    // watchdog on the first frame. Bounding it keeps the worst-case frame near what
+    // a phone / the Black-Hole shader already survive; CSS upscales to fill.
+    const MAXLONG = 1600, long = Math.max(w, h);
+    if (long > MAXLONG) { const k = MAXLONG / long; w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k)); }
     this.canvas.width = w; this.canvas.height = h;
     this.gl.viewport(0, 0, w, h);
     if (!this.running) this._draw();
@@ -1068,10 +1122,17 @@ export class Exoplanet {
     cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); }, { passive: false });
   }
 
-  _noWebGL() {
+  // a soft failure notice OVER the canvas (never replaces it, so a later context
+  // restore can clear it and render). Shows the GPU id so the cause is visible.
+  _fail(msg) {
+    if (this._failEl) { this._failEl.querySelector('.exo-fail-msg').textContent = msg; return; }
     const m = document.createElement('div');
-    m.className = 'exo-nowebgl';
-    m.textContent = 'WebGL is required to render the planet.';
-    this.canvas?.replaceWith(m);
+    m.className = 'exo-nowebgl'; m.id = 'exo-fail';
+    m.innerHTML = '<div class="exo-fail-card"><div class="exo-fail-msg"></div>'
+      + '<div class="exo-fail-gpu">' + (this.renderer ? 'GPU: ' + this.renderer : '') + '</div></div>';
+    m.querySelector('.exo-fail-msg').textContent = msg;
+    (document.getElementById('exo-stage') || document.body).appendChild(m);
+    this._failEl = m;
   }
+  _clearFail() { if (this._failEl) { this._failEl.remove(); this._failEl = null; } }
 }

@@ -79,9 +79,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     narrator.describe(p);
   }
 
-  const controls = buildControls(document.getElementById('hud-right'), engine, {
-    onRandom: () => select(catalogue[Math.floor(Math.random() * catalogue.length)]),
-  });
+  const jumpRandom = () => { if (catalogue.length) select(catalogue[Math.floor(Math.random() * catalogue.length)]); };
+  const controls = buildControls(document.getElementById('hud-right'), engine, { onRandom: jumpRandom });
+
+  // the desktop "Jump to random world" control lives in a panel that CSS hides on
+  // phones, leaving no quick way off the first world — this chrome button always works.
+  const shuffleBtn = document.getElementById('exo-shuffle');
+  if (shuffleBtn) shuffleBtn.addEventListener('click', jumpRandom);
 
   function pickInitial() {
     const params = new URLSearchParams(location.search);
