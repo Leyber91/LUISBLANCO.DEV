@@ -87,7 +87,7 @@
     </div>
   </div>
   <div class="foot">
-    <span class="tag"><i></i>real telemetry of token inter-arrival (batching · KV-cache · scheduler jitter) — not brainwaves. live stream is keyless (pollinations); default is a simulated cadence.</span>
+    <span class="tag"><i></i>real telemetry of token inter-arrival (batching · KV-cache · scheduler jitter) — not brainwaves. streams a real keyless model by default (pollinations); simulated cadence only covers the connect gap and the offline fallback.</span>
     <span class="label">trace: canvas · field: GLSL</span>
   </div>
 </div>
@@ -186,14 +186,17 @@
   requestAnimationFrame(loop);
 
   // live streaming from pollinations (keyless, OpenAI-compatible SSE)
-  el('go').addEventListener('click', goLive);
+  el('go').addEventListener('click', function(){ goLive(); });   // wrapper: never pass the click Event as `auto`
   el('prompt').addEventListener('keydown', function(e){ if(e.key==='Enter') goLive(); });
   function resetTrace(){ buf=new Float32Array(W); wp=0; qIdx=-1; dts=[]; lastTok=0; tps=8.0; count=0;
     elTps.textContent='0.0'; elDt.textContent='—'; elJit.textContent='—'; elN.textContent='0'; }
-  function goLive(){
+  function goLive(auto){
     var q=(el('prompt').value||'').trim() || 'Explain, in two short paragraphs, how a transformer predicts the next token.';
-    // visible reaction the instant you click: wipe the trace, reset the meters, switch to live
-    mode='live'; resetTrace(); elSrc.textContent='live · connecting'; elSrc.className='src live';
+    // manual click = instant reaction (wipe + switch). auto-default-on-load = let the sim keep the trace
+    // alive across the ~connect gap, then switch to live on the FIRST real token (the reasoning model
+    // takes ~8-25s to start), so the page is never a dead flat line while it connects.
+    elSrc.textContent='live · connecting'; elSrc.className='src live';
+    if(!auto){ mode='live'; resetTrace(); }
     // GET + stream=true is the path that actually streams (POST /openai stalls); a GET is also a
     // simple request, so no CORS preflight — which is what made the old POST read "unreachable".
     var url='https://text.pollinations.ai/'+encodeURIComponent(q)+'?model=openai&stream=true&referrer=l212';
@@ -208,11 +211,15 @@
           var p=ln.slice(5).trim(); if(!p||p==='[DONE]') continue;
           try{ var j=JSON.parse(p); var dl=j.choices&&j.choices[0]&&j.choices[0].delta;
             var d=dl&&(dl.content||dl.reasoning);   // count reasoning + answer tokens — real cadence
-            if(d){ if(!got){ got=1; clearTimeout(to); elSrc.textContent='live · pollinations'; } onToken(performance.now()); } }catch(_){} }
+            if(d){ if(!got){ got=1; clearTimeout(to); if(mode!=='live'){ mode='live'; resetTrace(); } elSrc.textContent='live · pollinations'; } onToken(performance.now()); } }catch(_){} }
         return pump(); }); }
       return pump(); })
     .catch(function(){ clearTimeout(to); elSrc.textContent='echo · live unreachable'; elSrc.className='src'; mode='echo'; nextSim=performance.now()+150; });
   }
+
+  // LIVE BY DEFAULT — attempt a real keyless stream the moment the lab opens (echo sim is only the
+  // connect-gap cover + the offline fallback). The src pill states live vs echo truthfully throughout.
+  if(!still) goLive(true);
 
   // ---- cold blueprint field (shared measure-wing atmosphere) ----
   var cv=el('gl'); var gl=cv.getContext('webgl',{antialias:false,alpha:false})||cv.getContext('experimental-webgl'); if(!gl) return;
