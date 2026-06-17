@@ -50,6 +50,11 @@ export function buildRegistry(host, catalogue, onSelect, opts = {}) {
   const headEl = el('div', 'hud-head', `<span>Nav · Catalogue</span>`);
   const tools = el('span', 'hud-head-tools');
   tools.appendChild(el('span', 'hud-count', total));
+  const shuffleBtn = el('button', 'nav-refresh', '<i class="fa-solid fa-shuffle"></i>');
+  shuffleBtn.title = 'Shuffle — surface a different set of worlds';
+  shuffleBtn.setAttribute('aria-label', 'Shuffle catalogue');
+  shuffleBtn.addEventListener('click', () => { groups.forEach((g) => shuffleArr(g.items)); render(); });
+  tools.appendChild(shuffleBtn);
   const refreshBtn = el('button', 'nav-refresh', '<i class="fa-solid fa-arrows-rotate"></i>');
   refreshBtn.title = 'Refresh the catalogue from the Kepler archive';
   refreshBtn.setAttribute('aria-label', 'Refresh catalogue');
@@ -68,6 +73,10 @@ export function buildRegistry(host, catalogue, onSelect, opts = {}) {
   let active = null;
   const expanded = new Set(['hz', 'saved']);   // habitable zone + saved open by default
   const PER = 26;
+  // Fisher-Yates re-roll for a category's worlds, so a capped group isn't always the
+  // same alphabetical first-N (the gas-giant / large groups otherwise look identical
+  // every visit). Re-orders the per-group array in place; search + saved are unaffected.
+  function shuffleArr(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = a[i]; a[i] = a[j]; a[j] = t; } }
 
   function toggleSave(name) {
     saved.has(name) ? saved.delete(name) : saved.add(name);
@@ -135,7 +144,17 @@ export function buildRegistry(host, catalogue, onSelect, opts = {}) {
         const body = el('div', 'nav-sec-body');
         const cap = q ? 80 : PER;
         items.slice(0, cap).forEach((p) => body.appendChild(rowEl(p, g.meta.accent)));
-        if (items.length > cap) body.appendChild(el('div', 'nav-more', `+ ${items.length - cap} more — refine search`));
+        if (items.length > cap) {
+          if (q) {
+            body.appendChild(el('div', 'nav-more', `+ ${items.length - cap} more — refine search`));
+          } else {
+            // not searching -> let the user re-roll THIS category to see different worlds
+            const more = el('button', 'nav-more nav-more-btn', `+ ${items.length - cap} more — shuffle this list`);
+            more.title = 'Shuffle — show a different set from this category';
+            more.addEventListener('click', () => { shuffleArr(g.items); render(); });
+            body.appendChild(more);
+          }
+        }
         sec.appendChild(body);
       }
       frag.appendChild(sec);

@@ -84,12 +84,13 @@
   let expEl = null;  // the experiment iframe layer
 
   function mountRing() {
-    const a = document.createElement('button');
+    // The lab ring NAVIGATES to the labs hub page (labs/index.html) rather than opening
+    // an in-page modal overlay — a real page, not a dialog stacked on the current one.
+    const a = document.createElement('a');
     a.id = 'labRing';
-    a.type = 'button';
+    a.href = 'labs/index.html';
     a.setAttribute('aria-label', 'the lab — interactive experiments');
     a.innerHTML = '<span class="lb-dot"></span>';
-    a.addEventListener('click', open);
     document.body.appendChild(a);
   }
 

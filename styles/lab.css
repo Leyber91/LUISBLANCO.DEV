@@ -3,7 +3,7 @@
    Reuses the codex keyframes (cxOrbit / cxBreathe / cxFadeIn) loaded by codex.css. */
 
 /* ── the ring (top right, just left of the codex ring) ────────────── */
-#labRing{ position:fixed; top:22px; right:80px; z-index:40;
+#labRing{ position:fixed; top:22px; right:80px; z-index:40; text-decoration:none;
   width:36px; height:36px; border-radius:50%; cursor:pointer;
   background:rgba(8,11,18,0.55); border:1px solid var(--line-soft);
   display:flex; align-items:center; justify-content:center;
