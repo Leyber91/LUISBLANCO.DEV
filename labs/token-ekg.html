@@ -195,8 +195,10 @@
     // manual click = instant reaction (wipe + switch). auto-default-on-load = let the sim keep the trace
     // alive across the ~connect gap, then switch to live on the FIRST real token (the reasoning model
     // takes ~8-25s to start), so the page is never a dead flat line while it connects.
-    elSrc.textContent='live · connecting'; elSrc.className='src live';
-    if(!auto){ mode='live'; resetTrace(); }
+    // amber = LIVE only. on auto the sim still drives the trace during the gap, so the pill stays
+    // blue/echo until the first REAL token lands; on a manual click the trace is wiped, so amber is honest.
+    if(auto){ elSrc.textContent='echo · connecting live'; elSrc.className='src'; }
+    else { elSrc.textContent='live · connecting'; elSrc.className='src live'; mode='live'; resetTrace(); }
     // GET + stream=true is the path that actually streams (POST /openai stalls); a GET is also a
     // simple request, so no CORS preflight — which is what made the old POST read "unreachable".
     var url='https://text.pollinations.ai/'+encodeURIComponent(q)+'?model=openai&stream=true&referrer=l212';
@@ -204,8 +206,8 @@
     fetch(url,{signal:ctrl.signal}).then(function(r){ if(!r.ok||!r.body) throw new Error('http '+r.status);
       var reader=r.body.getReader(), dec=new TextDecoder(), acc='';
       function pump(){ return reader.read().then(function(res){
-        if(res.done){ clearTimeout(to); elSrc.textContent=got?'live · complete':'echo · empty response';
-          if(!got) elSrc.className='src'; mode='echo'; nextSim=performance.now()+(got?700:150); return; }
+        if(res.done){ clearTimeout(to); elSrc.textContent=got?'echo · live complete':'echo · empty response';
+          elSrc.className='src'; mode='echo'; nextSim=performance.now()+(got?700:150); return; }   // sim resumes -> blue, not amber
         acc+=dec.decode(res.value,{stream:true}); var lines=acc.split('\n'); acc=lines.pop();
         for(var i=0;i<lines.length;i++){ var ln=lines[i].trim(); if(ln.indexOf('data:')!==0) continue;
           var p=ln.slice(5).trim(); if(!p||p==='[DONE]') continue;
@@ -218,7 +220,8 @@
   }
 
   // LIVE BY DEFAULT — attempt a real keyless stream the moment the lab opens (echo sim is only the
-  // connect-gap cover + the offline fallback). The src pill states live vs echo truthfully throughout.
+  // connect-gap cover + the offline fallback). The pill goes amber/live ONLY while real tokens stream;
+  // blue/echo during the connect gap and after the response completes (the sim then resumes) — honest throughout.
   if(!still) goLive(true);
 
   // ---- cold blueprint field (shared measure-wing atmosphere) ----
