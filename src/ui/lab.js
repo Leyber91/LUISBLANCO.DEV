@@ -28,6 +28,11 @@
       href: 'labs/figure.html',
     },
     {
+      name: 'Primordial Seed', tag: 'L-system · self-growth',
+      blurb: 'One symbol, four rules, no orchestrator — a Lindenmayer system rewrites every symbol at once until a whole organism unfolds. Then it does what a fractal never does: it finds the motif it keeps repeating, crystallises it into a NEW reusable rule, and the growth gets cheaper. The picture is nothing but the deterministic output of the rules you can read. No model, no network.',
+      href: 'labs/seed.html',
+    },
+    {
       name: 'Exomania', tag: 'exoplanet survey',
       blurb: 'A starship-window survey of real Kepler exoplanets — each world ray-traced from its own measured radius, temperature and host star, live in WebGL.',
       href: 'labs/exomania.html',
