@@ -87,6 +87,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const shuffleBtn = document.getElementById('exo-shuffle');
   if (shuffleBtn) shuffleBtn.addEventListener('click', jumpRandom);
 
+  // hide-panels toggle: a clean, unobstructed view of the planet (the toggle itself stays visible)
+  const cleanBtn = document.getElementById('exo-clean');
+  if (cleanBtn) cleanBtn.addEventListener('click', () => {
+    const hidden = document.body.classList.toggle('exo-clean');
+    cleanBtn.innerHTML = hidden ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+    cleanBtn.setAttribute('aria-label', hidden ? 'Show panels' : 'Hide panels — see the planet');
+  });
+
   function pickInitial() {
     const params = new URLSearchParams(location.search);
     const want = params.get('p') && catalogue.find((p) => p.pl_name === params.get('p'));
