@@ -302,6 +302,7 @@ vec3 background(vec3 dir){
 }
 
 // ---------- surface climate colour (temperate worlds) ----------
+#ifndef EXO_SURFACE
 vec3 landColor(float e, float lat, float moist){
   float warm = clamp(uTempBias + 0.15 - lat*1.05 - e*0.55, 0.0, 1.0);
   vec3 desert=vec3(0.62,0.48,0.26), savanna=vec3(0.45,0.42,0.18),
@@ -423,6 +424,7 @@ vec3 shadeSurface(vec3 pos, vec3 rd){
 }
 
 // ---------- atmosphere (single scattering shell) ----------
+#endif
 vec2 raySph(vec3 ro, vec3 rd, float R){
   float b=dot(ro,rd), c=dot(ro,ro)-R*R, d=b*b-c;
   if(d<0.0) return vec2(1.0,-1.0);
@@ -525,6 +527,7 @@ vec3 atmosphere(vec3 ro, vec3 rd, vec3 bg, bool planetHit, float tSurface){
 }
 
 // ---------- inside a gas giant: there is no surface, only deepening cloud ----------
+#ifdef EXO_SURFACE
 vec3 gasInterior(vec3 ro, vec3 rd){
   vec3 L = normalize(uLightDir);
   vec3 up = normalize(ro);
@@ -743,6 +746,7 @@ vec3 surfaceView(vec3 ro, vec3 rd){
   return col;
 }
 
+#endif
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5*uRes)/uRes.y;
   vec3 ro = uCam;
@@ -755,19 +759,20 @@ void main(){
   vec3 upv = cross(rgt, fwd);
   vec3 rd  = normalize(uv.x*rgt + uv.y*upv + uFov*fwd);
 
+#ifdef EXO_SURFACE
+  // SURFACE program (compiled on demand): the camera is on/inside the world.
   // a gas giant has no surface to stand on — descend into the cloud deck instead
-  if(uSurfaceMode == 1 && uIsGasGiant == 1){
+  if(uIsGasGiant == 1){
     vec3 gc = gasInterior(ro, rd);
     gc *= uExposure; gc = gc/(gc+vec3(1.0)); gc = pow(gc, vec3(0.4545));
     gl_FragColor = vec4(gc, 1.0); return;
   }
   // a rocky/ice/lava/airless world: sphere-trace the displaced-unit-sphere terrain
-  if(uSurfaceMode == 1 && uIsGasGiant == 0){
-    vec3 sc = surfaceView(ro, rd);
-    sc *= uExposure; sc = sc/(sc+vec3(1.0)); sc = pow(sc, vec3(0.4545));
-    gl_FragColor = vec4(sc, 1.0); return;
-  }
-
+  vec3 sc = surfaceView(ro, rd);
+  sc *= uExposure; sc = sc/(sc+vec3(1.0)); sc = pow(sc, vec3(0.4545));
+  gl_FragColor = vec4(sc, 1.0);
+#else
+  // ORBIT program (compiled at start-up): the default deep-field view.
   vec2 ps = raySph(ro, rd, 1.0);
   bool planetHit = (ps.x <= ps.y) && (ps.x > 0.0);
   float tS = ps.x;
@@ -784,6 +789,7 @@ void main(){
   col = col/(col+vec3(1.0));
   col = pow(col, vec3(0.4545));
   gl_FragColor = vec4(col, 1.0);
+#endif
 }
 `;
 
@@ -870,27 +876,60 @@ export class Exoplanet {
     } catch (_) { return 'unknown'; }
   }
 
-  // (re)build the program + fullscreen-triangle buffer + uniform table. Run at
-  // construction and again after the context is restored (locations are invalidated
-  // on loss). Returns false if the program could not be linked.
-  _buildGL() {
+  // compile one shader variant + its uniform table. surface=true pulls in the heavy
+  // on-foot terrain march via the EXO_SURFACE define.
+  _compile(surface) {
     const gl = this.gl;
-    this.prog = this._program(VERT, FRAG);
-    if (!this.prog) { this.u = null; return false; }
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(this.prog, 'aPos');
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    this.u = {};
-    UNIFORMS.forEach((n) => this.u[n] = gl.getUniformLocation(this.prog, n));
+    const prog = this._program(VERT, (surface ? '#define EXO_SURFACE 1\n' : '') + FRAG);
+    if (!prog) return null;
+    const u = {};
+    UNIFORMS.forEach((n) => u[n] = gl.getUniformLocation(prog, n));
+    return { prog, u };
+  }
+
+  // point this.prog/this.u at the program for `mode`, compiling the surface program
+  // on first demand. The full fragment shader is too large for some desktop ANGLE/
+  // D3D compilers to build as one monolith (it hangs past the GPU-process watchdog ->
+  // CONTEXT_LOST), so the light orbit program ships at start-up and the on-foot
+  // surface program is built only when the visitor actually drops to the ground.
+  _activate(mode) {
+    const gl = this.gl;
+    if (mode === 'surface') {
+      if (!this.progSurface) {
+        const s = this._compile(true);
+        if (!s) return false;            // compile failed / context lost — caller stays put
+        this.progSurface = s.prog; this.uSurface = s.u;
+      }
+      this.prog = this.progSurface; this.u = this.uSurface;
+    } else {
+      this.prog = this.progOrbit; this.u = this.uOrbit;
+    }
+    gl.useProgram(this.prog);
     return true;
   }
 
+  // (re)build GL resources. Run at construction and after a context restore (programs
+  // + uniform locations are invalidated on loss). Builds the orbit program now; the
+  // surface program stays lazy. Returns false if the orbit program could not be built.
+  _buildGL() {
+    const gl = this.gl;
+    const orbit = this._compile(false);
+    if (!orbit) { this.prog = this.progOrbit = null; this.u = null; return false; }
+    this.progOrbit = orbit.prog; this.uOrbit = orbit.u;
+    this.progSurface = null; this.uSurface = null;   // rebuilt on demand
+    // one fullscreen triangle, shared by both programs (aPos is location 0 in each)
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    this._activate('orbit');   // always come up on the cheap orbit program; surface is (re)built lazily off the hot path
+    return !!this.prog;
+  }
+
   _lost() {
-    // _draw() bails while prog is null; the rAF loop keeps ticking and self-heals on restore.
-    this.prog = null;
+    // _draw() bails while progOrbit is null; the rAF loop keeps ticking and self-heals on restore.
+    this.prog = this.progOrbit = this.progSurface = null;
     this._losses += 1;
     this.cfg.resScale = Math.max(0.35, (this.cfg.resScale || 0.9) - 0.2);   // cheaper retry each time
     console.warn('[exomania] WebGL context lost (' + this._losses + ') · GPU:', this.renderer, '· retry resScale', this.cfg.resScale.toFixed(2));
@@ -899,18 +938,38 @@ export class Exoplanet {
 
   _restore() {
     if (this._losses >= 3) return;              // gave up — leave the diagnostic up
-    if (!this.gl || !this._buildGL()) return;   // wait for a cleaner restore if the rebuild fails
+    if (!this.gl || !this._buildGL()) return;   // rebuilds + activates ORBIT only (never the heavy surface compile)
     this._clearFail();
     this._resize();
     console.info('[exomania] WebGL context restored');
-    if (this.still) { this._draw(); return; }
+    if (this.still) { if (this.cfg.camMode === 'surface') this._activate('surface'); this._draw(); return; }
     if (!this.running) { this.running = true; requestAnimationFrame(this._frame); }   // else the existing loop picks it up
+    // if we lost the context while standing on a world, rebuild the surface program
+    // through the SAME deferred/veiled path the button uses — never inline in the
+    // restore handler, or the heavy compile just re-trips the watchdog.
+    if (this.cfg.camMode === 'surface') this.surface(true);
   }
 
   ok() { return !!this.gl && (!!this.prog || this.gl.isContextLost()); }   // a merely-lost context recovers; only (gl ok, no prog) is a fatal shader failure
   load(params = {}) { Object.assign(this.cfg, params); if (!this.running) this._draw(); }
   set(key, val) { this.cfg[key] = val; if (!this.running) this._draw(); }
-  surface(on) { this.cfg.camMode = on ? 'surface' : 'orbit'; if (!this.running) this._draw(); }
+  surface(on) {
+    this.cfg.camMode = on ? 'surface' : 'orbit';
+    // first descent compiles the heavy surface program — can stall a beat on a slow
+    // compiler, so paint a notice, then build on the next frame (lets the notice show).
+    if (on && this.gl && !this.progSurface && !this.gl.isContextLost()) {
+      this._note('Preparing surface view…');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const built = this._activate('surface');
+        this._clearNote();
+        if (!built) { this.cfg.camMode = 'orbit'; this._activate('orbit'); this._note('Surface view unavailable on this GPU', true); }
+        if (!this.running) this._draw();
+      }));
+      return;
+    }
+    this._activate(on ? 'surface' : 'orbit');
+    if (!this.running) this._draw();
+  }
 
   _program(vs, fs) {
     const gl = this.gl;
@@ -921,9 +980,10 @@ export class Exoplanet {
     };
     const v = c(gl.VERTEX_SHADER, vs), f = c(gl.FRAGMENT_SHADER, fs);
     if (!v || !f) return null;
-    const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p);
+    const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f);
+    gl.bindAttribLocation(p, 0, 'aPos');   // force aPos -> location 0 in BOTH programs, so one bound buffer drives either
+    gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(p)); return null; }
-    gl.useProgram(p);
     return p;
   }
 
@@ -1004,12 +1064,26 @@ export class Exoplanet {
     if (!this.running) this._draw();
   }
 
-  start() { if (!this.gl || this.running) return; if (this.still) { this._draw(); return; } this.running = true; requestAnimationFrame(this._frame); }
+  start() {
+    if (!this.gl || this.running) return;
+    // deep-link ?view=surface: build it now, behind the loading veil; if it can't, drop to orbit with a notice
+    if (this.cfg.camMode === 'surface' && !this._activate('surface')) {
+      this.cfg.camMode = 'orbit'; this._activate('orbit'); this._note('Surface view unavailable on this GPU', true);
+    }
+    if (this.still) { this._draw(); return; }
+    this.running = true; requestAnimationFrame(this._frame);
+  }
   stop() { this.running = false; }
   _frame() { if (!this.running) return; this._draw(); requestAnimationFrame(this._frame); }
 
   _draw() {
-    const gl = this.gl; if (!gl || !this.prog || !this.u) return;   // bail if the context/program was lost
+    const gl = this.gl; if (!gl || !this.progOrbit) return;   // bail if the context/program was lost
+    // follow camMode every frame: surface program when it's compiled, else orbit. A
+    // preset / close-orbit / leave-surface switch lands here and flips back instantly.
+    const wantSurface = (this.cfg.camMode === 'surface') && !!this.progSurface;
+    this.prog = wantSurface ? this.progSurface : this.progOrbit;
+    this.u    = wantSurface ? this.uSurface    : this.uOrbit;
+    if (!this.prog || !this.u) return;
     const u = this.u, cfg = this.cfg;
     gl.useProgram(this.prog);
     const cam = this._camera();
@@ -1036,7 +1110,7 @@ export class Exoplanet {
     gl.uniform1i(u.uType, cfg.type | 0);
     gl.uniform1i(u.uIsGasGiant, cfg.isGasGiant | 0);
     gl.uniform1i(u.uSteam, cfg.steam | 0);
-    gl.uniform1i(u.uSurfaceMode, cfg.camMode === 'surface' ? 1 : 0);
+    gl.uniform1i(u.uSurfaceMode, wantSurface ? 1 : 0);   // follow the program actually bound, not just camMode (they differ while the surface program is still compiling / unavailable)
     gl.uniform1f(u.uSeed, cfg.seed);
     gl.uniform1f(u.uSpin, cfg.spin);
     gl.uniform1f(u.uSeaLevel, cfg.seaLevel);
@@ -1135,4 +1209,19 @@ export class Exoplanet {
     this._failEl = m;
   }
   _clearFail() { if (this._failEl) { this._failEl.remove(); this._failEl = null; } }
+
+  // a small transient pill notice (e.g. "Preparing surface view…"); sticky=auto-clear after a beat.
+  _note(msg, sticky) {
+    this._clearNote();
+    const n = document.createElement('div');
+    n.id = 'exo-note'; n.textContent = msg;
+    n.style.cssText = 'position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:60;'
+      + 'padding:.7em 1.2em;border:1px solid rgba(212,162,76,.5);border-radius:999px;'
+      + 'background:rgba(8,10,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#F0C674;'
+      + 'font:600 .78rem/1 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;';
+    (document.getElementById('exo-stage') || document.body).appendChild(n);
+    this._noteEl = n;
+    if (sticky) setTimeout(() => this._clearNote(), 3200);
+  }
+  _clearNote() { if (this._noteEl) { this._noteEl.remove(); this._noteEl = null; } }
 }
