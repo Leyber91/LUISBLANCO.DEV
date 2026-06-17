@@ -859,7 +859,7 @@ export class Exoplanet {
     this._resize();
   }
 
-  ok() { return !!this.gl; }
+  ok() { return !!this.gl && !!this.prog; }   // prog is null if the context was lost during init -> fail gracefully, never crash _draw
   load(params = {}) { Object.assign(this.cfg, params); if (!this.running) this._draw(); }
   set(key, val) { this.cfg[key] = val; if (!this.running) this._draw(); }
   surface(on) { this.cfg.camMode = on ? 'surface' : 'orbit'; if (!this.running) this._draw(); }
@@ -955,7 +955,7 @@ export class Exoplanet {
   _frame() { if (!this.running) return; this._draw(); requestAnimationFrame(this._frame); }
 
   _draw() {
-    const gl = this.gl; if (!gl) return;
+    const gl = this.gl; if (!gl || !this.prog || !this.u) return;   // bail if the context/program was lost
     const u = this.u, cfg = this.cfg;
     gl.useProgram(this.prog);
     const cam = this._camera();
