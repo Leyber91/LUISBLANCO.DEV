@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Primordial Seed — a kernel that writes its own rules</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* THE LAB — OUROBOROS line. amber = a BUILT/crystallized rule only; the organism is cold structure. */
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --amber2:#FFD27A; --blue:#5BB0D6; --dim:#6B7682; --hair:rgba(91,176,214,.15); --panel:rgba(9,12,17,.62); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased}
+  #bg,#org{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .veil{position:fixed;inset:0;pointer-events:none;background:radial-gradient(125% 100% at 50% 32%,transparent 46%,rgba(3,5,7,.7) 100%)}
+  .stage{position:fixed;inset:0;padding:30px 40px 24px;display:grid;grid-template-rows:auto auto 1fr auto;gap:14px;pointer-events:none}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:20px}
+  .back{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .brand b{color:var(--ink);font-weight:600}
+  .head .kick{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:7px}
+  h1{font-size:27px;line-height:1.08;letter-spacing:-.01em;font-weight:600} h1 .lo{color:var(--blue)}
+  .sub{font-size:12px;line-height:1.5;color:#97A2AB;max-width:88ch;margin-top:7px}
+  .cols{display:grid;grid-template-columns:300px 1fr 312px;gap:22px;min-height:0;align-items:stretch}
+  .panel{pointer-events:auto;border:1px solid var(--hair);background:var(--panel);backdrop-filter:blur(3px);padding:15px 16px;display:flex;flex-direction:column;min-height:0}
+  .pt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+  /* left console */
+  .row{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+  .row label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  select,input.f{pointer-events:auto;background:rgba(0,0,0,.3);border:1px solid var(--hair);color:var(--ink);font:inherit;font-size:11.5px;padding:7px 9px;outline:none;width:100%}
+  select:focus,input.f:focus{border-color:var(--blue)}
+  .two{display:flex;gap:9px} .two .row{flex:1}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+  .btn{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#C2CBD3;font:inherit;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:9px 6px;transition:.15s}
+  .btn:hover{border-color:var(--blue);color:var(--ink)}
+  .btn.go{border-color:var(--amber);color:var(--amber);background:rgba(242,169,59,.1)} .btn.go:hover{background:var(--amber);color:#0a0c0f}
+  .btn.wide{grid-column:1 / -1}
+  /* readouts */
+  .reads{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:11px 14px;padding-top:14px;border-top:1px solid var(--hair)}
+  .rd{display:flex;flex-direction:column;gap:2px} .rd .k{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .rd .v{font-size:18px;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)} .rd .v small{font-size:10px;color:var(--dim)}
+  .rd .v.amber{color:var(--amber)}
+  .ceil{grid-column:1 / -1;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)} .ceil.plateau{color:var(--amber)}
+  /* right rules panel */
+  .rules{overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+  .rule{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:baseline;font-size:11.5px;line-height:1.4}
+  .rule .sym{color:var(--blue);font-weight:600;min-width:14px}
+  .rule input.s{pointer-events:auto;background:rgba(0,0,0,.25);border:1px solid transparent;border-bottom:1px solid var(--hair);color:#C9D2DA;font:inherit;font-size:11px;padding:3px 4px;outline:none;width:100%}
+  .rule input.s:focus{border-color:var(--blue)}
+  .rule.cr{padding:8px 9px;border:1px solid rgba(242,169,59,.4);background:rgba(242,169,59,.06)}
+  .rule.cr .sym{color:var(--amber)}
+  .rule.cr .body{color:var(--amber2);word-break:break-all}
+  .rule.cr .prov{display:block;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+  .rule.cr.fresh{animation:flash 1.4s ease-out}
+  @keyframes flash{0%{background:rgba(242,169,59,.35)}100%{background:rgba(242,169,59,.06)}}
+  .empty{font-size:11px;color:var(--dim);line-height:1.5;font-style:italic}
+  /* scrubber + foot */
+  .scrub{pointer-events:auto;display:flex;align-items:center;gap:14px}
+  .scrub .gl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+  .scrub input[type=range]{flex:1;accent-color:var(--amber);height:3px}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:18px;pointer-events:none}
+  .tag{display:inline-flex;gap:9px;align-items:baseline;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);line-height:1.5}
+  .tag i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 9px rgba(91,176,214,.5);transform:translateY(3px)}
+  .tag b{color:#9FB0BC;font-weight:500}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+  @media (max-width:880px){
+    html,body{overflow-y:auto;overflow-x:hidden;height:auto;min-height:100%}
+    #bg,#org{position:fixed;height:100vh}
+    .stage{position:relative;inset:auto;display:block;padding:16px 14px 36px}
+    .bp{display:none} .cols{display:block} .head h1{font-size:21px} .sub{max-width:none}
+    .panel{margin-bottom:14px;backdrop-filter:none;background:rgba(9,12,17,.8)}
+    .rules{max-height:240px} #org{opacity:.5}
+    .foot{display:block;margin-top:14px} .foot .tag{display:flex;margin-bottom:6px}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<canvas id="org"></canvas>
+<div class="veil"></div>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left"><button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">PRIMORDIAL SEED <span class="on">/ ouroboros line</span></div></div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="head">
+    <div class="kick">the kernel that grows itself</div>
+    <h1>A seed that <span class="lo">writes its own rules.</span></h1>
+    <p class="sub">One symbol, four rules, no orchestrator. Each generation every symbol is rewritten at once (a Lindenmayer system) until a whole structure unfolds. Then it does what no fractal does: it finds a motif it keeps repeating, crystallises that motif into a NEW rule, and reuses it — and the growth gets cheaper. The picture is nothing but the deterministic output of the rules you can see. No model. No network.</p>
+  </div>
+  <div class="cols">
+    <!-- left: the seed console -->
+    <div class="panel">
+      <div class="pt">the seed</div>
+      <div class="row"><label>grammar</label>
+        <select id="preset"></select></div>
+      <div class="row"><label>axiom (the seed)</label>
+        <input class="f" id="axiom" spellcheck="false" /></div>
+      <div class="two">
+        <div class="row"><label>angle&deg;</label><input class="f" id="angle" inputmode="decimal" /></div>
+        <div class="row"><label>generation</label><input class="f" id="genin" inputmode="numeric" /></div>
+      </div>
+      <div class="btns">
+        <button class="btn" id="grow" type="button">grow &rarr;</button>
+        <button class="btn go" id="cryst" type="button">&#9670; crystallise</button>
+        <button class="btn wide" id="auto" type="button">&#10227; auto-grow to the ceiling</button>
+        <button class="btn wide" id="reset" type="button">reset to the seed</button>
+      </div>
+      <div class="reads">
+        <div class="rd"><span class="k">generation</span><span class="v" id="r_gen">0</span></div>
+        <div class="rd"><span class="k">carried symbols</span><span class="v" id="r_carry">1</span></div>
+        <div class="rd"><span class="k">drawn segments</span><span class="v" id="r_seg">0</span></div>
+        <div class="rd"><span class="k">skill leverage</span><span class="v amber" id="r_lev">1.0&times;</span></div>
+        <div class="rd"><span class="k">rewrite ops / gen</span><span class="v" id="r_ops">0</span></div>
+        <div class="rd"><span class="k">symbol entropy</span><span class="v" id="r_ent">0.00 <small>bits</small></span></div>
+        <div class="ceil" id="r_ceil">growing &middot; no plateau</div>
+      </div>
+    </div>
+    <!-- centre: the organism renders on the canvas behind -->
+    <div></div>
+    <!-- right: the rule-set = full provenance -->
+    <div class="panel">
+      <div class="pt">the rules <span id="rl_count" style="color:var(--dim)"></span></div>
+      <div class="rules" id="rules"></div>
+    </div>
+  </div>
+  <div class="foot">
+    <span class="tag" id="foot"><i></i><span id="foot_t"><b>[real]</b> D0L Lindenmayer rewriting + crystallise-a-motif-into-a-rule + entropy ceiling, all deterministic in-browser &mdash; the image IS the output of the visible rules &nbsp;·&nbsp; crystallised motifs are frozen reusable skills (reuse over re-growth &mdash; the visible trade-off) &nbsp;·&nbsp; <b>[illustrative]</b> the "seed / organism" naming</span></span>
+    <span class="scrub"><span class="gl">replay gen</span><input type="range" id="scrub" min="0" max="0" value="0" /></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var el=function(id){return document.getElementById(id);};
+  el('back').addEventListener('click',function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if(window.self!==window.top){ var _b=el('back'); if(_b)_b.style.display='none'; }
+  var still=/[?&]still/.test(location.search);
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches || still;
+
+  // ===================================================================
+  //  PRIMORDIAL SEED — a deterministic D0L L-system that crystallises its
+  //  own recurring motifs into new, reusable (frozen) rules. No model, no
+  //  network: every pixel is the rewrite of rules you can read on the right.
+  //  CRYSTALLISE: find the motif that saves the most symbols, mint X->motif,
+  //  replace it everywhere. A minted symbol is a FROZEN SKILL — it is reused
+  //  as-is and not re-grown, which is exactly why carried-work drops while the
+  //  rendered structure is preserved. CEILING: halt when symbol-entropy plateaus.
+  // ===================================================================
+  var DRAW="FGAB";                 // symbols the turtle draws a segment for (incl. early minted)
+  var TERMINAL="+-[]";             // turtle ops that never rewrite
+  var MAX_GEN=8, CAP_CARRY=200000, CAP_EXPAND=600000, MOTIF_MIN=2, MOTIF_MAX=9, MINT_THRESH=3;
+  // minting alphabet: letters not used as base symbols/ops, drawn as structure (expand at render)
+  var MINT_POOL="JKLMNPQRSTUVWZ".split("");
+
+  var PRESETS={
+    plant:{ name:"Fractal plant", axiom:"X", angle:25, rules:{ X:"F+[[X]-X]-F[-FX]+X", F:"FF" } },
+    bush:{  name:"Bushy weed",    axiom:"F", angle:22.5, rules:{ F:"FF+[+F-F-F]-[-F+F+F]" } },
+    koch:{  name:"Koch island",   angle:90,  axiom:"F-F-F-F", rules:{ F:"F-F+F+FF-F-F+F" } },
+    dragon:{name:"Dragon curve",  angle:90,  axiom:"F", rules:{ F:"F+G", G:"F-G" } },
+    sierp:{ name:"Sierpinski",    angle:120, axiom:"F-G-G", rules:{ F:"F-G+F+G-F", G:"GG" } }
+  };
+
+  // ---- state ----
+  var S={ key:'plant', axiom:'', angle:25, base:{}, minted:{}, gens:[], cur:0, mintOrder:0 };
+
+  function freshFrom(p){
+    S.axiom=p.axiom; S.angle=p.angle; S.base={}; for(var k in p.rules) S.base[k]=p.rules[k];
+    S.minted={}; S.mintOrder=0;
+    S.gens=[{ str:p.axiom, ops:0, ent:entropy(p.axiom), mint:null }];
+    S.cur=0;
+  }
+  function loadPreset(key){ S.key=key; var p=PRESETS[key]; freshFrom(p);
+    el('axiom').value=S.axiom; el('angle').value=S.angle; syncAfter(); }
+
+  // ---- the L-system: one parallel rewrite (frozen minted symbols stay put) ----
+  function rewrite(str){
+    var out=[], ops=str.length;
+    for(var i=0;i<str.length;i++){ var c=str[i];
+      if(S.minted[c]) out.push(c);           // crystallised skill = FROZEN, reused as-is
+      else if(S.base[c]!=null) out.push(S.base[c]);
+      else out.push(c);                       // terminal / structural symbol
+    }
+    var s=out.join("");
+    if(s.length>CAP_CARRY) s=s.slice(0,CAP_CARRY);
+    return { str:s, ops:ops };
+  }
+
+  // ---- crystallise: mint the motif that saves the most carried symbols ----
+  function bestMotif(str){
+    var best=null;
+    for(var len=MOTIF_MAX;len>=MOTIF_MIN;len--){
+      var seen={};
+      for(var i=0;i+len<=str.length;i++){
+        var sub=str.substr(i,len);
+        if(/[\[\]]/.test(sub) && !balanced(sub)) continue;   // keep brackets sane in a skill
+        if(seen[sub]!=null) continue; seen[sub]=1;
+        // count NON-overlapping occurrences exactly as the replace will collapse them
+        var count=str.split(sub).length-1;
+        if(count<MINT_THRESH) continue;
+        var saved=count*(len-1);                              // symbols removed by X<-sub
+        if(!best || saved>best.saved || (saved===best.saved && len>best.len))
+          best={ motif:sub, count:count, len:len, saved:saved };
+      }
+      if(best) break;   // prefer the longest motif length that yields a mint
+    }
+    return best;
+  }
+  function balanced(s){ var d=0; for(var i=0;i<s.length;i++){ if(s[i]==='[')d++; else if(s[i]===']'){d--; if(d<0)return false;} } return d===0; }
+
+  function freeSymbol(){ for(var i=0;i<MINT_POOL.length;i++){ var c=MINT_POOL[i];
+    if(!S.minted[c] && S.base[c]==null && DRAW.indexOf(c)<0 && TERMINAL.indexOf(c)<0) return c; } return null; }
+
+  function crystallise(){
+    var g=S.gens[S.cur]; var b=bestMotif(g.str); if(!b) return false;
+    // REUSE an existing skill if this exact motif was already crystallised; only MINT a new
+    // symbol for genuinely new structure (so the system writes new rules, never duplicate ones).
+    var sym=null; for(var k in S.minted){ if(S.minted[k].motif===b.motif){ sym=k; break; } }
+    var fresh=!sym;
+    if(fresh){ sym=freeSymbol(); if(!sym) return false;
+      S.minted[sym]={ motif:b.motif, gen:S.cur, saved:b.saved, order:++S.mintOrder }; }
+    var ns=g.str.split(b.motif).join(sym);
+    if(ns===g.str){ if(fresh){ delete S.minted[sym]; S.mintOrder--; } return false; }
+    S.gens[S.cur]={ str:ns, ops:g.ops, ent:entropy(ns), mint:sym };
+    S.gens=S.gens.slice(0,S.cur+1);   // anything derived after this point is stale
+    return true;
+  }
+
+  // ---- expand minted symbols to terminals for the turtle (render only) ----
+  function expand(str){
+    var s=str, guard=0;
+    while(/[JKLMNPQRSTUVWZ]/.test(s) && guard++<24){
+      var out=""; for(var i=0;i<s.length;i++){ var c=s[i]; out+= S.minted[c]? S.minted[c].motif : c; }
+      s=out; if(s.length>CAP_EXPAND){ s=s.slice(0,CAP_EXPAND); break; }
+    }
+    return s;
+  }
+
+  function entropy(str){ var f={},n=str.length; if(!n) return 0;
+    for(var i=0;i<n;i++) f[str[i]]=(f[str[i]]||0)+1;
+    var h=0; for(var k in f){ var p=f[k]/n; h-=p*Math.log(p)/Math.LN2; } return h; }
+
+  // ---- grow one generation ----
+  function grow(){
+    if(S.cur>=MAX_GEN) return false;
+    var g=S.gens[S.cur]; var r=rewrite(g.str);
+    if(r.str===g.str) return false;                         // nothing rewrote (all frozen/terminal)
+    S.gens=S.gens.slice(0,S.cur+1);
+    S.gens.push({ str:r.str, ops:r.ops, ent:entropy(r.str), mint:null });
+    S.cur=S.gens.length-1;
+    return true;
+  }
+  function plateau(){
+    if(S.gens.length<3) return false;
+    var a=S.gens[S.cur].ent, b=S.gens[S.cur-1].ent;
+    return Math.abs(a-b) < 0.02 && S.cur>=3;                 // symbol-entropy has stopped moving
+  }
+
+  // ---- turtle render ----
+  var org=el('org'), ctx=org.getContext('2d'); var dpr=Math.min(window.devicePixelRatio||1, still?1.4:1.8);
+  var Wd=0,Hd=0;
+  function size(){ Wd=org.width=Math.floor(innerWidth*dpr); Hd=org.height=Math.floor(innerHeight*dpr); }
+  size(); addEventListener('resize',function(){ size(); draw(); });
+
+  function walk(expanded, cb){
+    var x=0,y=0,a=-Math.PI/2, st=[], step=10, ang=S.angle*Math.PI/180, seg=0;
+    for(var i=0;i<expanded.length;i++){ var c=expanded[i];
+      if(c==='F'||c==='G'||c==='A'||c==='B'){ var nx=x+Math.cos(a)*step, ny=y+Math.sin(a)*step; cb&&cb(x,y,nx,ny,st.length); x=nx;y=ny; seg++; }
+      else if(c==='f'){ x+=Math.cos(a)*step; y+=Math.sin(a)*step; }
+      else if(c==='+'){ a-=ang; } else if(c==='-'){ a+=ang; }
+      else if(c==='['){ st.push([x,y,a]); } else if(c===']'){ var s=st.pop(); if(s){ x=s[0];y=s[1];a=s[2]; } }
+    }
+    return seg;
+  }
+  var lastSeg=0;
+  function draw(){
+    ctx.clearRect(0,0,Wd,Hd);
+    var g=S.gens[S.cur]; if(!g) return;
+    var expanded=expand(g.str);
+    // pass 1: bounds
+    var minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+    lastSeg=walk(expanded,function(x0,y0,x1,y1){ if(x1<minX)minX=x1; if(x1>maxX)maxX=x1; if(y1<minY)minY=y1; if(y1>maxY)maxY=y1; if(x0<minX)minX=x0; if(x0>maxX)maxX=x0; if(y0<minY)minY=y0; if(y0>maxY)maxY=y0; });
+    if(minX>maxX){ return; }
+    var bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY);
+    var pad=Math.min(Wd,Hd)*0.10;
+    var sc=Math.min((Wd-pad*2)/bw,(Hd-pad*2)/bh);
+    var ox=(Wd-bw*sc)/2 - minX*sc, oy=(Hd-bh*sc)/2 - minY*sc;
+    var maxDepth=1; // pass 2 draw
+    ctx.lineCap='round'; ctx.lineWidth=Math.max(0.6, 1.15*dpr);
+    ctx.beginPath();
+    walk(expanded,function(x0,y0,x1,y1,depth){ if(depth>maxDepth)maxDepth=depth;
+      ctx.moveTo(ox+x0*sc,oy+y0*sc); ctx.lineTo(ox+x1*sc,oy+y1*sc); });
+    ctx.strokeStyle='rgba(120,196,230,0.62)'; ctx.shadowColor='rgba(91,176,214,0.35)'; ctx.shadowBlur=4*dpr; ctx.stroke(); ctx.shadowBlur=0;
+    // amber overlay: the freshly-crystallised skill's segments FIRE amber on its mint generation only
+    if(g.mint && S.minted[g.mint] && !reduce){
+      var motif=S.minted[g.mint].motif, em=expand(motif);
+      // re-derive the full expanded string but only stroke the spans produced by the minted symbol
+      drawMinted(g.str, g.mint, ox,oy,sc);
+    }
+  }
+  // stroke only the segments contributed by a minted symbol (the "skill" lighting up)
+  function drawMinted(carried, sym, ox,oy,sc){
+    // expand while tracking which output chars came from `sym`
+    var s=carried, mark=carried.split("").map(function(c){return c===sym;});
+    var guard=0;
+    while(/[JKLMNPQRSTUVWZ]/.test(s) && guard++<24){
+      var out="",nm=[]; for(var i=0;i<s.length;i++){ var c=s[i];
+        if(S.minted[c]){ var mt=S.minted[c].motif; for(var j=0;j<mt.length;j++){ out+=mt[j]; nm.push(mark[i]||c===sym); } }
+        else { out+=c; nm.push(mark[i]); } }
+      s=out; mark=nm; if(s.length>CAP_EXPAND){ s=s.slice(0,CAP_EXPAND); mark=mark.slice(0,CAP_EXPAND); break; }
+    }
+    var x=0,y=0,a=-Math.PI/2, st=[], step=10, ang=S.angle*Math.PI/180;
+    ctx.beginPath();
+    for(var i=0;i<s.length;i++){ var c=s[i];
+      if(c==='F'||c==='G'||c==='A'||c==='B'){ var nx=x+Math.cos(a)*step, ny=y+Math.sin(a)*step;
+        if(mark[i]){ ctx.moveTo(ox+x*sc,oy+y*sc); ctx.lineTo(ox+nx*sc,oy+ny*sc); } x=nx;y=ny; }
+      else if(c==='f'){ x+=Math.cos(a)*step; y+=Math.sin(a)*step; }
+      else if(c==='+'){ a-=ang; } else if(c==='-'){ a+=ang; }
+      else if(c==='['){ st.push([x,y,a]); } else if(c===']'){ var sp=st.pop(); if(sp){x=sp[0];y=sp[1];a=sp[2];} }
+    }
+    ctx.strokeStyle='rgba(242,169,59,0.95)'; ctx.shadowColor='rgba(242,169,59,0.6)'; ctx.shadowBlur=9*dpr; ctx.lineWidth=Math.max(1.1,1.7*dpr); ctx.stroke(); ctx.shadowBlur=0;
+  }
+
+  // ---- UI sync ----
+  function fmt(n){ return n>=1000? n.toLocaleString() : ''+n; }
+  function syncAfter(){
+    var g=S.gens[S.cur];
+    var expanded=expand(g.str); var seg=0,a=-Math.PI/2; // count drawn segments
+    for(var i=0;i<expanded.length;i++){ var c=expanded[i]; if(c==='F'||c==='G'||c==='A'||c==='B') seg++; }
+    el('r_gen').textContent=S.cur;
+    el('r_carry').textContent=fmt(g.str.length);
+    el('r_seg').textContent=fmt(seg);
+    var lev=g.str.length? (expanded.length/g.str.length):1;
+    el('r_lev').textContent=lev.toFixed(1)+'×';
+    el('r_ops').textContent=fmt(g.ops);
+    el('r_ent').innerHTML=g.ent.toFixed(2)+' <small>bits</small>';
+    var pl=plateau();
+    el('r_ceil').textContent= S.cur>=MAX_GEN? 'ceiling · max depth reached' : (pl? 'ceiling · entropy plateau — stop growing' : 'growing · no plateau');
+    el('r_ceil').className='ceil'+(pl||S.cur>=MAX_GEN?' plateau':'');
+    el('genin').value=S.cur;
+    // scrubber
+    var sc=el('scrub'); sc.max=S.gens.length-1; sc.value=S.cur;
+    renderRules(); draw();
+  }
+  function renderRules(){
+    var host=el('rules'); host.innerHTML='';
+    var baseKeys=Object.keys(S.base);
+    baseKeys.forEach(function(k){
+      var d=document.createElement('div'); d.className='rule';
+      d.innerHTML='<span class="sym">'+k+' &rarr;</span>';
+      var inp=document.createElement('input'); inp.className='s'; inp.value=S.base[k]; inp.spellcheck=false;
+      inp.addEventListener('change',function(){ S.base[k]=inp.value; });
+      d.appendChild(inp); host.appendChild(d);
+    });
+    var minted=Object.keys(S.minted).sort(function(a,b){return S.minted[a].order-S.minted[b].order;});
+    var freshSym=S.gens[S.cur]&&S.gens[S.cur].mint;
+    minted.forEach(function(k){ var m=S.minted[k];
+      var d=document.createElement('div'); d.className='rule cr'+(k===freshSym?' fresh':'');
+      d.innerHTML='<span class="sym">'+k+' &rarr;</span><span class="body">'+esc(m.motif)+
+        '<span class="prov">crystallised at gen '+m.gen+' · saved '+m.saved+' symbols / use</span></span>';
+      host.appendChild(d);
+    });
+    if(!minted.length){ var e=document.createElement('div'); e.className='empty';
+      e.textContent='no crystallised rules yet — grow a few generations, then press crystallise to lock the motif it repeats most into a reusable skill.'; host.appendChild(e); }
+    el('rl_count').textContent='· '+baseKeys.length+' base + '+minted.length+' built';
+  }
+  function esc(s){ return s.replace(/[<>&]/g,function(c){return({'<':'&lt;','>':'&gt;','&':'&amp;'})[c];}); }
+
+  // ---- controls ----
+  el('grow').addEventListener('click',function(){ if(grow()) syncAfter(); });
+  el('cryst').addEventListener('click',function(){ if(crystallise()) syncAfter(); });
+  el('reset').addEventListener('click',function(){ loadPreset(S.key); });
+  el('auto').addEventListener('click',function(){
+    var guard=0;
+    while(guard++<MAX_GEN){ if(!grow()) break; if(crystallise()){} if(plateau()) break; }
+    syncAfter();
+  });
+  el('axiom').addEventListener('change',function(){ S.axiom=el('axiom').value||'F';
+    S.gens=[{str:S.axiom,ops:0,ent:entropy(S.axiom),mint:null}]; S.minted={}; S.mintOrder=0; S.cur=0; syncAfter(); });
+  el('angle').addEventListener('change',function(){ var v=parseFloat(el('angle').value); if(!isNaN(v)){ S.angle=v; draw(); } });
+  el('genin').addEventListener('change',function(){ var v=parseInt(el('genin').value,10);
+    if(!isNaN(v)){ while(S.cur<v && grow()){} S.cur=Math.max(0,Math.min(v,S.gens.length-1)); syncAfter(); } });
+  el('scrub').addEventListener('input',function(){ S.cur=parseInt(el('scrub').value,10)||0; syncAfter(); });
+
+  // preset select
+  (function(){ var sel=el('preset'); for(var k in PRESETS){ var o=document.createElement('option'); o.value=k; o.textContent=PRESETS[k].name; sel.appendChild(o); }
+    sel.addEventListener('change',function(){ loadPreset(sel.value); }); })();
+
+  // ---- boot ----
+  loadPreset('plant');
+  if(still){ // deterministic snapshot: grow, then crystallise a few times to surface DISTINCT skills
+    for(var i=0;i<5;i++){ grow(); }
+    crystallise(); crystallise(); crystallise();
+    syncAfter();
+  }
+  requestAnimationFrame(function r(){ draw(); if(!still && !reduce){} });
+  draw();
+
+  // ---- cold substrate field (shared idiom) ----
+  var bg=el('bg'); var gl=bg.getContext('webgl',{antialias:false,alpha:false})||bg.getContext('experimental-webgl');
+  if(gl){
+    var V="attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
+    var F=["precision highp float;uniform vec2 u_res;uniform float u_time;",
+    "const vec3 VOID=vec3(0.027,0.035,0.047);const vec3 BLUE=vec3(0.357,0.690,0.839);",
+    "float h(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+    "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.0-2.0*f);float a=h(i),b=h(i+vec2(1,0)),c=h(i+vec2(0,1)),d=h(i+vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+    "float fbm(vec2 p){float s=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*vn(p);p=m*p;a*=0.5;}return s;}",
+    "void main(){vec2 uv=gl_FragCoord.xy/u_res;vec2 q=(gl_FragCoord.xy-0.5*u_res)/u_res.y;float t=u_time*0.015;",
+    "float hz=fbm(q*1.6+vec2(t,-t*0.5));vec3 col=mix(VOID,BLUE*0.10,smoothstep(0.3,1.0,hz));",
+    "float st=step(0.9989,h(floor(gl_FragCoord.xy)))*0.45;col+=vec3(0.6,0.75,0.85)*st;",
+    "col+=(h(gl_FragCoord.xy+u_time)-0.5)*0.02;col*=0.45+0.55*smoothstep(1.45,0.2,length(q));",
+    "col=col/(col+vec3(0.96));gl_FragColor=vec4(col,1.0);}"].join("\n");
+    function mk(t,s){var x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);return x;}
+    var pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,V));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,F));gl.linkProgram(pr);gl.useProgram(pr);
+    var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    var lp=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    var uR=gl.getUniformLocation(pr,'u_res'),uT=gl.getUniformLocation(pr,'u_time');
+    function rzb(){bg.width=Math.floor(innerWidth*dpr);bg.height=Math.floor(innerHeight*dpr);gl.viewport(0,0,bg.width,bg.height);}
+    rzb();addEventListener('resize',rzb);var b0=performance.now();
+    (function bl(now){var tt=reduce?6.0:(now-b0)/1000;gl.uniform2f(uR,bg.width,bg.height);gl.uniform1f(uT,tt);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(bl);})(b0);
+  }
+})();
+</script>
+</body>
+</html>
