@@ -149,17 +149,15 @@
     var fr = expEl.querySelector('iframe');
     if (fr) { try { fr.src = 'about:blank'; } catch (_) {} }
     expEl.remove(); expEl = null;
-    // restore the LUMEN substrate now the experiment (and its GPU context) is gone
-    try { if (window.LB_LUMEN && window.LB_LUMEN.init) window.LB_LUMEN.init(); } catch (_) {}
   }
 
   function openExp(e) {
     if (!e) return;
-    // Free the LUMEN substrate's WebGL2 context (262k particles) before opening a lab. A WebGL
-    // experiment (Exomania, Black Hole, ...) + LUMEN both live = two heavy GPU contexts, which can
-    // force a CONTEXT_LOST and collapse the experiment. LUMEN is invisible behind the full-viewport
-    // lab anyway; we destroy it on open and re-init it on teardown.
-    try { if (window.LB_LUMEN && window.LB_LUMEN.destroy) window.LB_LUMEN.destroy(); } catch (_) {}
+    // NOTE: we deliberately do NOT touch the LUMEN substrate here. An earlier version destroyed +
+    // re-created LUMEN's WebGL2 context on every lab open/close on a (wrong) GPU-contention theory;
+    // that context churn dropped the contexts the home background + AEA schema depend on. The real
+    // Exomania fix was splitting its shader (see exoplanet.js), so LUMEN stays untouched — the
+    // background is never torn down.
     if (root) root.hidden = false;             // the grid waits underneath
     buildLayer(e);
     try { history.pushState({ labExp: e.slug }, ''); } catch (_) {}
