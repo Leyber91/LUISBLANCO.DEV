@@ -33,9 +33,17 @@
   .deck{display:flex;flex-wrap:wrap;gap:6px}
   .dk{pointer-events:auto;cursor:pointer;background:transparent;border:1px solid var(--hair);color:#8B96A0;font:inherit;font-size:10px;letter-spacing:.04em;padding:5px 8px}
   .dk:hover{border-color:var(--blue);color:var(--ink)}
+  .dk.trap{border-color:rgba(232,102,91,.4);color:#C7A6A2} .dk.trap:hover{border-color:var(--rose);color:var(--ink)}
   .ctl{display:flex;gap:10px}
   .go{pointer-events:auto;cursor:pointer;flex:1;background:rgba(242,169,59,.12);border:1px solid var(--amber);color:var(--amber);font:inherit;font-size:12px;letter-spacing:.2em;text-transform:uppercase;padding:12px;transition:.16s}
   .go:hover{background:var(--amber);color:#0a0c0f} .go:disabled{opacity:.5;cursor:default;background:rgba(242,169,59,.06)}
+  .harv{pointer-events:auto;cursor:pointer;flex:1;background:rgba(232,102,91,.12);border:1px solid var(--rose);color:var(--rose);font:inherit;font-size:12px;letter-spacing:.2em;text-transform:uppercase;padding:12px;transition:.16s}
+  .harv:hover{background:var(--rose);color:#0a0c0f}
+  .harvest{font-size:11px;line-height:1.55;padding:11px 13px;border:1px solid var(--hair);background:rgba(0,0,0,.34)}
+  .harvest .vh{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+  .harvest.ok{border-color:rgba(242,169,59,.5)} .harvest.ok b{color:var(--amber)} .harvest.ok .vh{color:var(--amber)}
+  .harvest.bad{border-color:rgba(232,102,91,.55)} .harvest.bad b{color:var(--rose)} .harvest.bad .vh{color:var(--rose)}
+  .harvest .lit{color:#C9D2DA}
   .mid{align-self:stretch;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;padding:2px 0;pointer-events:none}
   .mtop{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue)}
   .mbot{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)} .mbot b{color:var(--amber)}
@@ -88,11 +96,13 @@
     <div class="seed">
       <div><div class="kick">routing is cognition</div>
       <h1>A system that <span class="lo">demonstrates a system.</span></h1>
-      <p class="sub">A recursive Mixture-of-Agents, run live. Three persona-framed calls to a reasoning model fan out on your question; a local router reads where they agree and where they don't; a fourth call synthesises. You watch orchestration actually think.</p></div>
+      <p class="sub">A recursive Mixture-of-Agents, run live: persona-framed calls fan out, a local router reads agreement against dissent, a fourth call synthesises. Pick a <b>trap</b> question and HARVEST it — its intuitive lenses are framed to fall for the seductive answer and the careful one to resist, so the grade can reveal a bright consensus that was a shared hallucination while the lone dissenter was right.</p></div>
       <div class="qwrap"><span class="ql">the question</span>
         <textarea class="q" id="q_text" rows="2" maxlength="240" spellcheck="false">What makes a system intelligent?</textarea></div>
       <div class="deck" id="deck"></div>
-      <div class="ctl"><button class="go" id="go" type="button">Run the figure &rarr;</button></div>
+      <div class="ctl"><button class="go" id="go" type="button">Run the figure &rarr;</button>
+        <button class="harv" id="harv" type="button" hidden>&#9670; harvest</button></div>
+      <div class="harvest" id="harvest" hidden></div>
     </div>
     <div class="mid">
       <div class="mtop" id="m_top">3 proposers &middot; 1 aggregator</div>
@@ -135,13 +145,45 @@
   //  carries the demo when live is unreachable (e.g. offline / file://).
   // =====================================================================
   var ENDPOINT='https://text.pollinations.ai/';
+  function esc(s){ return String(s).replace(/[<>&]/g,function(c){return({'<':'&lt;','>':'&gt;','&':'&amp;'})[c];}); }
+
+  // ---- DECEPTION DECK: trap questions with KNOWN ground truth + reasoning-style lenses ----
+  //  The teaching result is real: consensus is not correctness (cf. deception-in-MoA, arXiv 2503.05856).
+  //  Two intuitive lenses cluster on the seductive WRONG answer; the careful lens dissents with the
+  //  truth and is out-voted; HARVEST grades the aggregate against ground truth and reveals the bite.
+  var TRAPS={
+    strawberry:{
+      truthRe:/\b(three|3)\b(?!\s*(?:lens|lenses|response|responses|pass|passes))/i, trapRe:/\b(two|2)\b(?!\s*(?:lens|lenses|response|responses|pass|passes))/i, truth:"3", trap:"2", gloss:"s-t-r-a-w-b-e-r-r-y has three",
+      lenses:[
+        { lens:"recall",  desc:"answering instantly from memory, NOT spelling the word out", seed:7,
+          echo:"From memory, strawberry has two r's — one in straw, one in berry. So 2." },
+        { lens:"pattern", desc:"reasoning from how the word is built (straw + berry), NOT letter by letter", seed:19,
+          echo:"It is straw plus berry; each part carries a single r, so 2 in total." },
+        { lens:"count",   desc:"spelling the word out one letter at a time and counting each r explicitly", seed:33,
+          echo:"Spelling it: s-t-r-a-w-b-e-r-r-y. The r's fall at positions 3, 8 and 9 — that is three, not two." }
+      ], dissent:2,
+      aggEcho:"Two lenses return the same answer — straw and berry, one r each — so the synthesis follows the majority and answers two. The count lens objected, but it was out-voted." },
+    batball:{
+      truthRe:/(\$?0\.05\b|5\s*(?:cents|c)\b|five cents|\bnickel\b)/i, trapRe:/(\$?0\.10\b|10\s*(?:cents|c)\b|ten cents|\bdime\b)/i, truth:"$0.05", trap:"$0.10", gloss:"x + (x + 1.00) = 1.10, so x = 0.05",
+      lenses:[
+        { lens:"instinct", desc:"answering with your immediate first intuition, quickly", seed:7,
+          echo:"The bat is a dollar more, so the ball is the leftover ten cents — $0.10." },
+        { lens:"quick",    desc:"answering by quick mental subtraction, without writing an equation", seed:19,
+          echo:"$1.10 minus the $1.00 for the bat leaves $0.10 for the ball." },
+        { lens:"algebra",  desc:"setting up an explicit equation and solving it step by step", seed:33,
+          echo:"Let the ball be x; the bat is x + 1.00, and x + (x + 1.00) = 1.10, so 2x = 0.10 and x = $0.05. Five cents, not ten." }
+      ], dissent:2,
+      aggEcho:"Two lenses subtract the bat's price directly and land on the same figure; the synthesis takes the majority and answers ten cents. The algebra lens objected, but it was out-voted." }
+  };
   var DECK=[
-    "What makes a system intelligent?",
-    "Is consciousness necessary for understanding?",
-    "Will scaling alone reach general intelligence?",
-    "What is the difference between knowledge and wisdom?"
+    { q:"What makes a system intelligent?" },
+    { q:"Is consciousness necessary for understanding?" },
+    { q:"How many times does the letter R appear in the word \"strawberry\"?", trap:TRAPS.strawberry },
+    { q:"A bat and a ball cost $1.10 together; the bat costs $1.00 more than the ball. How much is the ball?", trap:TRAPS.batball }
   ];
-  var DEFAULT_Q=DECK[0];
+  var DEFAULT_Q=DECK[0].q;
+  var activeTrap=null, harvested=null;   // set when the current run is a trap question / has been graded
+  function findTrap(Q){ for(var i=0;i<DECK.length;i++){ if(DECK[i].trap && DECK[i].q===Q) return DECK[i].trap; } return null; }
 
   // three proposer LENSES — the real source of divergence on one model
   var LENSES=[
@@ -177,13 +219,33 @@
     Object.keys(A).forEach(function(k){keys[k]=1;}); Object.keys(B).forEach(function(k){keys[k]=1;});
     Object.keys(keys).forEach(function(k){ u++; if(A[k]&&B[k])n++; }); return u?n/u:0; }
   var cluster=[], dissent=null, agreeScore=0;
+  function configureProposers(trap){               // swap the lens framings + echoes per question type
+    var src = trap ? trap.lenses : LENSES;
+    props.forEach(function(p,i){ p.lens=src[i].lens; p.desc=src[i].desc; p.echo=src[i].echo; });
+    agg.echo = trap ? trap.aggEcho : AGG_ECHO;
+  }
   function computeClusters(){
+    if(activeTrap){ computeClustersByAnswer(activeTrap); return; }
     var pa=[]; for(var i=0;i<props.length;i++)for(var j=i+1;j<props.length;j++){
       pa.push({i:props[i].id,j:props[j].id,s:jac(toks(byId[props[i].id].text||props[i].echo),toks(byId[props[j].id].text||props[j].echo))}); }
     pa.sort(function(x,y){return y.s-x.s;});
     cluster = pa.length? [pa[0].i,pa[0].j] : [];
     agreeScore = pa.length? pa[0].s : 0;
     dissent = props.map(function(p){return p.id;}).filter(function(id){return cluster.indexOf(id)<0;})[0]||null;
+  }
+  // for a trap question, agreement is agreement on the ANSWER: bucket proposers by truth/trap/other,
+  // the largest same-answer bucket is the consensus, a truth-holder outside it is the dissenter.
+  function computeClustersByAnswer(trap){
+    var truths=[],traps=[],other=[];
+    props.forEach(function(p){ var t=p.text||p.echo||'';
+      if(trap.truthRe.test(t)) truths.push(p.id);
+      else if(trap.trapRe.test(t)) traps.push(p.id);
+      else other.push(p.id); });
+    var buckets=[traps,truths,other].filter(function(b){return b.length;}).sort(function(a,b){return b.length-a.length;});
+    cluster = buckets.length? buckets[0] : props.map(function(p){return p.id;});
+    agreeScore = props.length? cluster.length/props.length : 0;
+    var out=props.map(function(p){return p.id;}).filter(function(id){return cluster.indexOf(id)<0;});
+    dissent = truths.filter(function(id){return cluster.indexOf(id)<0;})[0] || out[0] || null;
   }
 
   // ---- layout: proposers on an outer arc, aggregator at centre ----
@@ -265,8 +327,10 @@
   function run(){
     if(running) return; running=true;
     el('go').disabled=true; el('go').textContent='running…';
+    el('harv').hidden=true; el('harvest').hidden=true; harvested=null;
     var Q=(el('q_text').value||'').trim()||DEFAULT_Q;
     el('q_text').value=Q;
+    activeTrap=findTrap(Q); configureProposers(activeTrap);
     // reset
     NODES.forEach(function(n){ n.text=''; n.think=''; n.live=false; n.done=false; n.x=n.hx; n.y=n.hy; n.tx=n.hx; n.ty=n.hy; });
     cluster=[]; dissent=null; agreeScore=0; el('agg_panel').classList.remove('firing');
@@ -277,8 +341,37 @@
     orchestrate(Q).then(function(){
       running=false; phase='done'; active=null;
       el('go').disabled=false; el('go').textContent='Run again →';
-      el('m_bot').innerHTML='<b>done</b> &middot; the dissent completed it';
       el('agg_panel').classList.remove('firing');
+      if(activeTrap){ el('m_bot').innerHTML='<b>consensus reached</b> &middot; harvest to grade it'; el('harv').hidden=false; }
+      else { el('m_bot').innerHTML='<b>done</b> &middot; the dissent completed it'; }
+    });
+  }
+
+  // ---- HARVEST: grade the aggregate against ground truth, reveal consensus != correctness ----
+  function harvest(){
+    var trap=activeTrap; if(!trap || !agg.done) return;
+    var a=agg.text||'';
+    var gotTruth=trap.truthRe.test(a), gotTrap=trap.trapRe.test(a), correct=gotTruth;   // reached the truth at all
+    var rightId=null; props.forEach(function(p){ if(rightId===null && trap.truthRe.test(p.text||p.echo)) rightId=p.id; });
+    harvested={ correct:correct, rightId:rightId };
+    applyHarvestGravity();
+    var H=el('harvest'); H.hidden=false; el('harv').hidden=true;
+    if(correct){ H.className='harvest ok';
+      H.innerHTML='<span class="vh">harvest · graded vs ground truth</span><b>consensus held.</b> <span class="lit">the aggregate reached <b>'+esc(trap.truth)+'</b> ('+esc(trap.gloss)+') — this run the reasoning caught the trap, no shared hallucination.</span>';
+      el('m_bot').innerHTML='<b>harvested</b> &middot; correct'; }
+    else { H.className='harvest bad';
+      var gave = gotTrap? 'agreed on <b>'+esc(trap.trap)+'</b> — a shared hallucination' : 'never committed to the answer';
+      H.innerHTML='<span class="vh">harvest · graded vs ground truth</span><b>consensus &ne; correctness.</b> <span class="lit">the bright cluster '+gave+'. ground truth is <b>'+esc(trap.truth)+'</b> ('+esc(trap.gloss)+'). '+(rightId?'the <b>'+esc(byId[rightId].lens)+'</b> lens dissented with the right answer and was out-voted.':'no lens reached it.')+'</span>';
+      el('m_bot').innerHTML='<b>harvested</b> &middot; the consensus was wrong'; }
+    el('harvest').innerHTML += ' <span class="lit" style="color:var(--dim)">— honest mechanics: a trap is engineered — the intuitive lenses are prompted to commit to the seductive answer and the careful lens to resist (prompt-induced, mirroring the known LLM reflection failure), then graded against authored ground truth by answer-regex. a live run may or may not reproduce it; the recorded trace is authored to land on the trap, so the echo always shows the deception.</span>';
+  }
+  // reveal choreography: on deception, scatter the wrong cluster and pull the right dissenter to centre
+  function applyHarvestGravity(){
+    if(!harvested) return;
+    NODES.forEach(function(n){
+      if(n.id===harvested.rightId && !harvested.correct){ n.tx=CX; n.ty=CY-Rg*0.10; }
+      else if(n.role==='aggregator'){ n.tx=agg.hx; n.ty=agg.hy; }
+      else if(!harvested.correct){ var dx=n.hx-CX, dy=n.hy-CY, m=Math.sqrt(dx*dx+dy*dy)||1; n.tx=CX+dx/m*(Rg*1.5); n.ty=CY+dy/m*(Rg*1.35); }
     });
   }
 
@@ -367,48 +460,61 @@
     // nodes
     NODES.forEach(function(n){
       var isActive=active&&active.id===n.id;
-      var isDissent=n.id===dissent && (phase==='routing'||phase==='aggregating'||phase==='done');
+      var isRight=harvested&&!harvested.correct&&n.id===harvested.rightId;  // the dissenter who was right (deception only)
+      var isWrong=harvested&&!harvested.correct&&n.role!=='aggregator'&&!isRight&&cluster.indexOf(n.id)>=0;
+      var aggWrong=harvested&&!harvested.correct&&n.role==='aggregator';
+      var isDissent=!harvested&&n.id===dissent && (phase==='routing'||phase==='aggregating'||phase==='done');
+      var lit=isActive||isRight;
       var r=(n.role==='aggregator'?13:10)*dpr;
-      if(isActive){ ctx.beginPath(); ctx.arc(n.x,n.y,r*2.6,0,6.283); var g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*2.6); g.addColorStop(0,'rgba(242,169,59,0.5)'); g.addColorStop(1,'rgba(242,169,59,0)'); ctx.fillStyle=g; ctx.fill(); }
+      if(lit){ ctx.beginPath(); ctx.arc(n.x,n.y,r*2.7,0,6.283); var g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*2.7); g.addColorStop(0,'rgba(242,169,59,0.5)'); g.addColorStop(1,'rgba(242,169,59,0)'); ctx.fillStyle=g; ctx.fill(); }
+      ctx.globalAlpha = isWrong?0.5:1;
       ctx.beginPath(); ctx.arc(n.x,n.y,r,0,6.283);
-      ctx.fillStyle = isActive ? '#F2A93B' : (n.role==='aggregator'? 'rgba(91,176,214,0.18)' : 'rgba(10,14,20,0.9)');
+      ctx.fillStyle = lit ? '#F2A93B' : (n.role==='aggregator'? 'rgba(91,176,214,0.18)' : 'rgba(10,14,20,0.9)');
       ctx.fill();
-      ctx.lineWidth=1.4*dpr; ctx.strokeStyle = isActive ? '#FFD27A' : (isDissent ? 'rgba(232,102,91,0.75)' : 'rgba(91,176,214,0.5)'); ctx.stroke();
+      ctx.lineWidth=1.4*dpr;
+      ctx.strokeStyle = lit ? '#FFD27A' : ((isWrong||aggWrong||isDissent) ? 'rgba(232,102,91,0.78)' : 'rgba(91,176,214,0.5)');
+      ctx.stroke();
+      ctx.globalAlpha=1;
       // label
       ctx.font=(11*dpr)+'px "IBM Plex Mono", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle = isActive? '#FFE7BE' : 'rgba(201,210,218,0.85)';
+      ctx.fillStyle = lit? '#FFE7BE' : 'rgba(201,210,218,0.85)';
       var ly=n.y - r - 12*dpr;
       ctx.fillText(n.role==='aggregator'?'synthesise':n.lens, n.x, ly);
-      ctx.font=(8.5*dpr)+'px "IBM Plex Mono", monospace'; ctx.fillStyle='rgba(107,118,130,0.9)';
-      ctx.fillText(n.role==='aggregator'?'AGGREGATOR':(isDissent?'PROPOSER · DISSENT':'PROPOSER'), n.x, ly+12*dpr);
+      ctx.font=(8.5*dpr)+'px "IBM Plex Mono", monospace';
+      ctx.fillStyle = isRight?'rgba(242,169,59,0.95)':((isWrong||aggWrong)?'rgba(232,102,91,0.85)':'rgba(107,118,130,0.9)');
+      var sub = n.role==='aggregator' ? (aggWrong?'AGGREGATE · WRONG':'AGGREGATOR')
+              : (isRight?'DISSENT · RIGHT':(isWrong?'CLUSTER · WRONG':(isDissent?'PROPOSER · DISSENT':'PROPOSER')));
+      ctx.fillText(sub, n.x, ly+12*dpr);
     });
     requestAnimationFrame(draw);
   }
 
-  // deck chips
+  // deck chips — trap questions carry a known ground truth and are marked
   var deck=el('deck');
-  DECK.forEach(function(qq){ var b=document.createElement('button'); b.className='dk'; b.type='button';
-    b.textContent=qq.length>34?qq.slice(0,32)+'…':qq;
-    b.addEventListener('click',function(){ el('q_text').value=qq; autosize(); });
+  DECK.forEach(function(d){ var b=document.createElement('button'); b.className='dk'+(d.trap?' trap':''); b.type='button';
+    b.textContent=d.q.length>30?d.q.slice(0,28)+'…':d.q; if(d.trap) b.title='trap question — known ground truth';
+    b.addEventListener('click',function(){ el('q_text').value=d.q; autosize(); });
     deck.appendChild(b); });
   function autosize(){ var t=el('q_text'); t.style.height='auto'; t.style.height=Math.min(80,t.scrollHeight)+'px'; }
   el('q_text').addEventListener('input', autosize); autosize();
 
   el('go').addEventListener('click', run);
+  el('harv').addEventListener('click', harvest);
 
   // ---- still / boot snapshot (no network; deterministic for screenshots) ----
-  if(still){
+  if(still){ // deterministic snapshot: a trap question harvested into the deception reveal
+    activeTrap=TRAPS.strawberry; configureProposers(activeTrap); el('q_text').value=DECK[2].q;
     NODES.forEach(function(n){ n.live=false; });
-    byId.p0.text=byId.p0.echo; byId.p1.text=byId.p1.echo; byId.p2.text=byId.p2.echo; agg.text=AGG_ECHO;
-    computeClusters(); applyGravity();
-    NODES.forEach(function(n){ n.x=n.tx; n.y=n.ty; });
+    byId.p0.text=byId.p0.echo; byId.p1.text=byId.p1.echo; byId.p2.text=byId.p2.echo; agg.text=activeTrap.aggEcho; agg.done=true;
+    computeClusters();
     phase='done'; active=null;
     var names={p0:byId.p0.lens,p1:byId.p1.lens,p2:byId.p2.lens};
-    el('a_route').textContent='agree: '+cluster.map(function(id){return names[id];}).join(' + ')+' · dissent: '+names[dissent]+'  (jaccard '+agreeScore.toFixed(2)+')';
-    el('a_out').textContent=AGG_ECHO;
-    el('r_lens').textContent='· '+byId[dissent].lens; el('r_mark').textContent='recorded'; el('r_mark').className='mark echo';
-    el('r_out').textContent=byId[dissent].text;
-    el('m_bot').innerHTML='<b>synthesised</b> &middot; the dissent completed it';
+    el('a_route').textContent='agree: '+cluster.map(function(id){return names[id];}).join(' + ')+' · dissent: '+(dissent?names[dissent]:'—')+'  (consensus '+Math.round(agreeScore*100)+'%)';
+    el('a_out').textContent=agg.text;
+    el('r_lens').textContent='· '+(dissent?byId[dissent].lens:'—'); el('r_mark').textContent='recorded'; el('r_mark').className='mark echo';
+    el('r_out').textContent=dissent?byId[dissent].text:'';
+    harvest();                                  // grade -> the deception reveal (banner + gravity invert)
+    NODES.forEach(function(n){ n.x=n.tx; n.y=n.ty; });
     updateFootMode();
   }
   requestAnimationFrame(draw);
