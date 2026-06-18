@@ -82,6 +82,11 @@
       blurb: 'Your earliest idea (2023): compress a conversation into a capsule only the model can decode. Paste real text — it falls into a lensed horizon as its own measured bits, crushes to a capsule, a fresh model rebuilds it from the capsule alone, and every word that does not survive escapes as Hawking radiation. Degradation, measured against the lossless floor.',
       href: 'labs/dataspace.html',
     },
+    {
+      name: 'Heptapod Codec', tag: 'compression · language',
+      blurb: 'Type a sentence and a closed lexicon encodes it into circular logograms whose SHAPE carries the meaning — limbs for agency, a closed ring for a completed idea, weight for certainty. Hover a glyph and it blooms back into the proposition it holds: the codec is reversible. Feed it a word it never learned and watch it fall back to a marked base glyph — the honest failure of a closed vocabulary. Arrival’s premise as a working, breakable codec. No model, no network.',
+      href: 'labs/heptapod.html',
+    },
   ];
   EXPERIMENTS.forEach((e) => { e.slug = e.href.split('/').pop().replace(/\.html$/, ''); });
 

@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Heptapod Codec — a glyph is a whole proposition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* THE LAB — COMPRESSION line. amber = the live/active glyph only; the codec is cold structure. */
+  :root{ --void:#07090C; --ink:#F4F6F8; --amber:#F2A93B; --amber2:#FFD27A; --blue:#5BB0D6; --dim:#6B7682; --rose:#E8665B; --hair:rgba(91,176,214,.15); --panel:rgba(9,12,17,.62); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--void);color:var(--ink);overflow:hidden;font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;-webkit-font-smoothing:antialiased}
+  #bg{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .veil{position:fixed;inset:0;pointer-events:none;background:radial-gradient(125% 100% at 50% 30%,transparent 44%,rgba(3,5,7,.72) 100%)}
+  .stage{position:fixed;inset:0;padding:30px 40px 24px;display:grid;grid-template-rows:auto auto 1fr auto;gap:16px;z-index:1}
+  .bar{display:flex;justify-content:space-between;align-items:center}
+  .left{display:flex;align-items:center;gap:20px}
+  .back{cursor:pointer;background:transparent;border:1px solid var(--hair);color:#AEB8C0;font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;padding:7px 13px}
+  .back:hover{border-color:var(--amber);color:var(--ink)}
+  .label{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .label .on{color:var(--blue)}
+  .brand{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)} .brand b{color:var(--ink);font-weight:600}
+  .head .kick{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:7px}
+  h1{font-size:27px;line-height:1.08;letter-spacing:-.01em;font-weight:600} h1 .lo{color:var(--blue)}
+  .sub{font-size:12px;line-height:1.5;color:#97A2AB;max-width:90ch;margin-top:7px}
+  /* input row */
+  .inrow{display:flex;gap:12px;align-items:stretch}
+  .inwrap{flex:1;border:1px solid var(--hair);background:rgba(0,0,0,.3);display:flex;align-items:center;padding:0 12px}
+  .inwrap input{flex:1;background:transparent;border:0;color:var(--ink);font:inherit;font-size:13px;padding:12px 0;outline:none}
+  .inwrap input::placeholder{color:var(--dim)}
+  .ratio{display:flex;align-items:center;gap:9px;border:1px solid var(--hair);background:var(--panel);padding:0 16px;white-space:nowrap;font-size:12px;color:var(--dim)}
+  .ratio b{color:var(--amber);font-size:15px;font-variant-numeric:tabular-nums} .ratio .g{color:var(--blue);font-variant-numeric:tabular-nums}
+  /* glyph field */
+  .field{position:relative;min-height:0;display:flex;flex-direction:column;gap:14px}
+  .glyphs{flex:1;min-height:0;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:18px;overflow:auto;padding:6px}
+  .gcell{position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;border:1px solid transparent;transition:.16s}
+  .gcell:hover,.gcell.on{border-color:rgba(242,169,59,.4);background:rgba(242,169,59,.05)}
+  .gcell svg{display:block;overflow:visible}
+  .gcell .gloss{font-size:10px;letter-spacing:.04em;color:var(--dim);text-align:center;max-width:120px}
+  .gcell.on .gloss{color:var(--amber2)}
+  .gcell.miss{cursor:default}
+  .gcell.miss .gloss{color:var(--rose)}
+  /* decode readout */
+  .decode{border:1px solid var(--hair);background:var(--panel);backdrop-filter:blur(3px);padding:13px 16px;display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+  .decode .dt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);flex:none}
+  .decode .dv{font-size:12.5px;line-height:1.5;color:#C9D2DA}
+  .decode .dv .miss{color:var(--rose)} .decode .dv .lit{color:var(--amber2)}
+  /* deck */
+  .deck{display:flex;flex-wrap:wrap;gap:7px}
+  .dk{cursor:pointer;background:transparent;border:1px solid var(--hair);color:#8B96A0;font:inherit;font-size:10.5px;padding:6px 9px}
+  .dk:hover{border-color:var(--blue);color:var(--ink)}
+  .foot{display:flex;justify-content:space-between;align-items:baseline;gap:18px}
+  .tag{display:inline-flex;gap:9px;align-items:baseline;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);line-height:1.5}
+  .tag i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 9px rgba(91,176,214,.5);transform:translateY(3px)}
+  .tag b{color:#9FB0BC;font-weight:500}
+  .bp{position:fixed;width:17px;height:17px;border:1px solid var(--amber);opacity:.85;z-index:3}
+  .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
+  .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
+  @media (max-width:820px){
+    html,body{overflow-y:auto;overflow-x:hidden;height:auto;min-height:100%}
+    #bg{position:fixed;height:100vh;opacity:.85}
+    .stage{position:relative;inset:auto;display:block;padding:16px 14px 36px}
+    .bp{display:none} .head h1{font-size:21px} .sub{max-width:none}
+    .inrow{flex-direction:column} .ratio{justify-content:center;padding:10px}
+    .glyphs{gap:14px;margin:16px 0} .decode{margin-bottom:14px}
+    .foot{display:block} .foot .tag{display:flex;margin-bottom:6px}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="veil"></div>
+<span class="bp tl"></span><span class="bp tr"></span><span class="bp bl"></span><span class="bp br"></span>
+<div class="stage">
+  <div class="bar">
+    <div class="left"><button class="back" id="back" type="button">&larr; back</button>
+      <div class="label">HEPTAPOD CODEC <span class="on">/ compression line</span></div></div>
+    <div class="brand">THE LAB — <b>L212</b></div>
+  </div>
+  <div class="head">
+    <div class="kick">a glyph is a whole proposition</div>
+    <h1>An invented language is a <span class="lo">learned dictionary</span>, not magic.</h1>
+    <p class="sub">Type a sentence. A closed lexicon encodes it into circular logograms whose SHAPE carries the meaning — limbs for agency, a closed ring for a completed idea, weight for certainty. Hover a glyph and it blooms back into the proposition it holds — every glyph round-trips to exactly one meaning (a canonical decode; synonyms and function words collapse, so it recovers the proposition, not your wording). Feed it a word the lexicon never learned and watch it fall back to a marked base glyph — the honest failure of a closed vocabulary, shown not hidden.</p>
+  </div>
+  <div class="inrow">
+    <div class="inwrap"><input id="in" type="text" maxlength="160" spellcheck="false" placeholder="type a sentence — e.g. the visitors offer a tool we do not understand" /></div>
+    <div class="ratio"><span id="rt_src">0</span>&nbsp;&#8776;tokens&nbsp;&rarr;&nbsp;<b id="rt_g">0</b>&nbsp;glyphs&nbsp;<span class="g" id="rt_ratio"></span></div>
+  </div>
+  <div class="field">
+    <div class="glyphs" id="glyphs"></div>
+    <div class="decode"><span class="dt">round-trip decode</span><span class="dv" id="decode">—</span></div>
+  </div>
+  <div class="foot">
+    <span class="tag"><i></i><span><b>[real]</b> reversible codec — greedy longest-match over a closed lexicon, glyph&harr;proposition round-trip, token&rarr;glyph ratio &nbsp;·&nbsp; <b>[illustrative]</b> the shape&rarr;meaning morphology (limbs/closure/weight) &nbsp;·&nbsp; unseen words fall back to marked base glyphs (the honest limit), function words are elided as a logographic script does</span></span>
+    <span class="deck" id="deck"></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var el=function(id){return document.getElementById(id);};
+  el('back').addEventListener('click',function(){ if(history.length>1) history.back(); else location.href='../index.html'; });
+  if(window.self!==window.top){ var _b=el('back'); if(_b)_b.style.display='none'; }
+  var still=/[?&]still/.test(location.search);
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches || still;
+  var SVGNS='http://www.w3.org/2000/svg';
+
+  // ===================================================================
+  //  HEPTAPOD CODEC — a reversible English<->logogram codec.
+  //  The lexicon is a closed, learned dictionary: phrase(s) -> a semantic
+  //  FEATURE VECTOR. A deterministic generator turns that vector into a
+  //  circular logogram, so similar meanings make similar shapes (morphology
+  //  encodes semantics — the FHL idea, tagged illustrative). Encoding is a
+  //  greedy longest-match; decoding reads each glyph back to its proposition.
+  //  Unseen content words degrade to a MARKED base glyph (the honest failure).
+  //  Deterministic, keyless, file://-safe — the dictionary IS the product.
+  //  f = { limbs:agency/arity, closed:aspect(done vs ongoing), w:certainty,
+  //        neg:negation, plural:plurality, orbit:domain-ring }
+  // ===================================================================
+  var LEX=[
+    { p:["human","person","people","man","woman","one"], g:"human", f:{limbs:2,closed:true,w:.85,plural:false} },
+    { p:["we","us","ourselves"], g:"we (together)", f:{limbs:3,closed:true,w:.8,plural:true,orbit:true} },
+    { p:["you"], g:"you (addressee)", f:{limbs:2,closed:true,w:.8,orbit:true} },
+    { p:["visitor","visitors","other","others","they","them","alien","aliens","stranger"], g:"the others", f:{limbs:3,closed:false,w:.6,plural:true} },
+    { p:["offer","give","gift","grant","present"], g:"offer (give)", f:{limbs:3,closed:true,w:.9} },
+    { p:["take","receive","accept"], g:"receive", f:{limbs:3,closed:false,w:.7} },
+    { p:["tool","weapon","instrument","device"], g:"tool / weapon", f:{limbs:2,closed:false,w:.5,neg:false} },
+    { p:["ask","question","why","what","inquire"], g:"question", f:{limbs:1,closed:false,w:.55} },
+    { p:["answer","tell","reply","say","speak"], g:"answer / speak", f:{limbs:2,closed:true,w:.8} },
+    { p:["understand","know","comprehend","grasp"], g:"understand", f:{limbs:2,closed:true,w:.95,orbit:true} },
+    { p:["learn","teach","study"], g:"learn", f:{limbs:1,closed:false,w:.7,orbit:true} },
+    { p:["language","word","words","writing","speech"], g:"language", f:{limbs:4,closed:true,w:.85,orbit:true} },
+    { p:["see","observe","witness","watch","perceive","look"], g:"perceive", f:{limbs:1,closed:true,w:.75} },
+    { p:["time"], g:"time", f:{limbs:0,closed:true,w:.9,orbit:true} },
+    { p:["future","ahead","will","tomorrow"], g:"time-ahead", f:{limbs:1,closed:false,w:.7,orbit:true} },
+    { p:["past","before","yesterday","was"], g:"time-behind", f:{limbs:1,closed:true,w:.7,orbit:true} },
+    { p:["now","present","today"], g:"this-moment", f:{limbs:0,closed:false,w:.8} },
+    { p:["arrive","arrival","come","approach","land"], g:"arrive", f:{limbs:3,closed:false,w:.8} },
+    { p:["leave","depart","go","return"], g:"depart", f:{limbs:2,closed:false,w:.65} },
+    { p:["help","aid","assist","cooperate"], g:"help", f:{limbs:3,closed:true,w:.85,orbit:true} },
+    { p:["need","want","require","desire"], g:"need", f:{limbs:2,closed:false,w:.6} },
+    { p:["fear","afraid","threat","danger"], g:"fear", f:{limbs:1,closed:false,w:.45,neg:true} },
+    { p:["trust","faith","believe"], g:"trust", f:{limbs:3,closed:true,w:.9,orbit:true} },
+    { p:["death","die","end","ending","destroy"], g:"ending", f:{limbs:0,closed:true,w:.95,neg:true} },
+    { p:["life","live","living","alive"], g:"living", f:{limbs:4,closed:false,w:.85} },
+    { p:["purpose","meaning","reason","intent"], g:"purpose", f:{limbs:2,closed:true,w:.8,orbit:true} },
+    { p:["world","earth","home","planet","here","place"], g:"world / place", f:{limbs:0,closed:true,w:.85,orbit:true} },
+    { p:["many","all","every","much"], g:"many", f:{limbs:4,closed:true,w:.7,plural:true} },
+    { p:["not","no","never","without"], g:"negation", f:{limbs:0,closed:true,w:.6,neg:true} },
+    { p:["together","unite","join","bond"], g:"together", f:{limbs:4,closed:true,w:.9,orbit:true,plural:true} },
+    { p:["change","become","transform"], g:"change", f:{limbs:2,closed:false,w:.65} },
+    { p:["choose","decide","choice"], g:"choose", f:{limbs:2,closed:false,w:.7} },
+    { p:["remember","memory"], g:"remember", f:{limbs:1,closed:true,w:.75,orbit:true} },
+    { p:["begin","start","origin","seed"], g:"begin", f:{limbs:1,closed:false,w:.8} },
+    { p:["before and after","sequence","order"], g:"linear time", f:{limbs:2,closed:true,w:.7,orbit:true} },
+    { p:["look at","attend to","focus"], g:"attend to", f:{limbs:1,closed:false,w:.65} }
+  ];
+  // build the lookup: phrase(string) -> entry ; track max phrase word-length
+  var MAP={}, MAXW=1;
+  LEX.forEach(function(e){ e.p.forEach(function(ph){ MAP[ph]=e; var n=ph.split(' ').length; if(n>MAXW)MAXW=n; }); });
+  // function words a logographic script elides (no glyph), tracked for honesty
+  var STOP={ "the":1,"a":1,"an":1,"of":1,"to":1,"is":1,"are":1,"be":1,"am":1,"do":1,"does":1,"did":1,
+    "and":1,"or":1,"in":1,"on":1,"at":1,"it":1,"its":1,"that":1,"this":1,"for":1,"with":1,"as":1,"by":1,"so":1 };
+
+  // ---- deterministic per-gloss seed (xmur3 -> mulberry32) so a glyph is stable ----
+  function rng(str){ var h=1779033703^str.length;
+    for(var i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; }
+    return function(){ h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); h^=h>>>16; return (h>>>0)/4294967296; };
+  }
+
+  // ---- the glyph generator: feature vector -> SVG logogram ----
+  function arc(cx,cy,r,a0,a1){ var x0=cx+Math.cos(a0)*r,y0=cy+Math.sin(a0)*r,x1=cx+Math.cos(a1)*r,y1=cy+Math.sin(a1)*r;
+    var large=(a1-a0)>Math.PI?1:0; return 'M'+x0.toFixed(2)+' '+y0.toFixed(2)+' A'+r+' '+r+' 0 '+large+' 1 '+x1.toFixed(2)+' '+y1.toFixed(2); }
+  function mkPath(d,sw,cls){ var p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',d); p.setAttribute('fill','none');
+    p.setAttribute('stroke-width',sw.toFixed(2)); p.setAttribute('stroke-linecap','round'); if(cls)p.setAttribute('class',cls); return p; }
+
+  function glyph(entry, miss){
+    var SZ=104, cx=SZ/2, cy=SZ/2, R=SZ*0.30;
+    var svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('width',SZ); svg.setAttribute('height',SZ); svg.setAttribute('viewBox','0 0 '+SZ+' '+SZ);
+    if(miss){ // honest-failure base glyph: a dashed, broken ring + the literal letters as dots
+      var rr=rng(entry); var c=document.createElementNS(SVGNS,'circle'); c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',R);
+      c.setAttribute('fill','none'); c.setAttribute('stroke','var(--rose)'); c.setAttribute('stroke-width','1.3'); c.setAttribute('stroke-dasharray','3 5'); c.setAttribute('opacity','.8'); svg.appendChild(c);
+      var n=Math.min(entry.length,7); for(var i=0;i<n;i++){ var a=rr()*6.283, rad=R*0.5*rr(); var d=document.createElementNS(SVGNS,'circle');
+        d.setAttribute('cx',(cx+Math.cos(a)*rad).toFixed(1)); d.setAttribute('cy',(cy+Math.sin(a)*rad).toFixed(1)); d.setAttribute('r','1.5'); d.setAttribute('fill','var(--rose)'); d.setAttribute('opacity','.7'); svg.appendChild(d); }
+      return svg;
+    }
+    var f=entry.f, rr=rng(entry.g), w=1.1+f.w*3.0, rot=rr()*6.283;
+    var g=document.createElementNS(SVGNS,'g'); g.setAttribute('class','gpath'); g.setAttribute('stroke','var(--blue)');
+    // domain orbit ring (a faint outer circle for "abstract/relational" concepts)
+    if(f.orbit){ var o=document.createElementNS(SVGNS,'circle'); o.setAttribute('cx',cx);o.setAttribute('cy',cy);o.setAttribute('r',(R*1.42).toFixed(1));
+      o.setAttribute('fill','none'); o.setAttribute('stroke-width','0.8'); o.setAttribute('opacity','.32'); g.appendChild(o); }
+    // main body ring — closed (completed) full circle, else an open arc (ongoing) with a gap
+    if(f.closed){ var c=document.createElementNS(SVGNS,'circle'); c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',R.toFixed(1));
+      c.setAttribute('fill','none'); c.setAttribute('stroke-width',w.toFixed(2)); g.appendChild(c); }
+    else { var gap=0.7+rr()*0.8, a0=rot, a1=rot+(6.283-gap); g.appendChild(mkPath(arc(cx,cy,R,a0,a1),w)); }
+    // radial limbs = agency / number of participants — placed systematically, jittered by seed
+    var L=f.limbs||0;
+    for(var i=0;i<L;i++){ var a=rot+(i/Math.max(1,L))*6.283+(rr()-0.5)*0.5;
+      var r2=R+SZ*(0.10+rr()*0.13), x1=cx+Math.cos(a)*R, y1=cy+Math.sin(a)*R, x2=cx+Math.cos(a)*r2, y2=cy+Math.sin(a)*r2;
+      var bend=(rr()-0.5)*0.9, mx=cx+Math.cos(a+bend)*((R+r2)/2), my=cy+Math.sin(a+bend)*((R+r2)/2);
+      g.appendChild(mkPath('M'+x1.toFixed(2)+' '+y1.toFixed(2)+' Q'+mx.toFixed(2)+' '+my.toFixed(2)+' '+x2.toFixed(2)+' '+y2.toFixed(2), w*0.78));
+      if(f.plural){ var dot=document.createElementNS(SVGNS,'circle'); dot.setAttribute('cx',x2.toFixed(1));dot.setAttribute('cy',y2.toFixed(1));dot.setAttribute('r',(w*0.8).toFixed(1));
+        dot.setAttribute('fill','var(--blue)'); dot.setAttribute('stroke','none'); g.appendChild(dot); }
+    }
+    // certainty: an inner concentric ring whose radius tracks weight
+    var inner=document.createElementNS(SVGNS,'circle'); inner.setAttribute('cx',cx);inner.setAttribute('cy',cy);inner.setAttribute('r',(R*(0.30+f.w*0.30)).toFixed(1));
+    inner.setAttribute('fill','none'); inner.setAttribute('stroke-width','0.9'); inner.setAttribute('opacity',(0.25+f.w*0.5).toFixed(2)); g.appendChild(inner);
+    // negation: a stroke struck through the body
+    if(f.neg){ var na=rot+0.6; g.appendChild(mkPath('M'+(cx+Math.cos(na)*R*1.25).toFixed(2)+' '+(cy+Math.sin(na)*R*1.25).toFixed(2)+
+      ' L'+(cx+Math.cos(na+Math.PI)*R*1.25).toFixed(2)+' '+(cy+Math.sin(na+Math.PI)*R*1.25).toFixed(2), w*0.7)); }
+    svg.appendChild(g);
+    return svg;
+  }
+
+  // ---- the encoder: greedy longest-match over the closed lexicon ----
+  function tokenize(text){ return (text.toLowerCase().match(/[a-z']+/g)||[]); }
+  function encode(text){
+    var words=tokenize(text), out=[], i=0, elided=0;
+    while(i<words.length){
+      // try the longest phrase window first
+      var matched=null, take=0;
+      for(var n=Math.min(MAXW,words.length-i); n>=1; n--){ var key=words.slice(i,i+n).join(' ');
+        if(MAP[key]){ matched=MAP[key]; take=n; break; } }
+      if(!matched){ // light morphology: a plural/possessive maps to its lexicon root (honest normalisation)
+        var w0=words[i].replace(/'s$/,'').replace(/s$/,'');
+        if(w0 && MAP[w0]){ matched=MAP[w0]; take=1; } }
+      if(matched){ out.push({type:'glyph',entry:matched,src:words.slice(i,i+take).join(' ')}); i+=take; continue; }
+      if(STOP[words[i]]){ elided++; i++; continue; }            // logographic: function words carry no glyph
+      out.push({type:'miss',word:words[i]}); i++;               // unseen content word -> honest fallback
+    }
+    return {seq:out, words:words.length, elided:elided};
+  }
+  // rough BPE-ish token estimate of the SOURCE (the honest "~tokens" figure)
+  function estTokens(text){ var t=text.trim(); if(!t)return 0; return Math.max(tokenize(t).length, Math.ceil(t.length/4)); }
+
+  // ---- render ----
+  var glyphsHost=el('glyphs'), decodeHost=el('decode'), current='';
+  function setActive(cell, on){ if(!cell)return; cell.classList.toggle('on',on);
+    var paths=cell.querySelectorAll('.gpath'); for(var k=0;k<paths.length;k++) paths[k].setAttribute('stroke', on?'var(--amber)':'var(--blue)');
+    var dots=cell.querySelectorAll('.gpath circle[fill]'); for(var d=0;d<dots.length;d++){ if(dots[d].getAttribute('fill')!=='none') dots[d].setAttribute('fill', on?'var(--amber)':'var(--blue)'); }
+  }
+  function render(text){
+    var r=encode(text); glyphsHost.innerHTML=''; var glyphCount=0, realGlyphs=0, miss=0, decodeParts=[];
+    r.seq.forEach(function(tok){
+      var cell=document.createElement('div'); cell.className='gcell'+(tok.type==='miss'?' miss':'');
+      if(tok.type==='glyph'){
+        cell.appendChild(glyph(tok.entry,false));
+        var gl=document.createElement('div'); gl.className='gloss'; gl.textContent=tok.entry.g; cell.appendChild(gl);
+        cell.addEventListener('mouseenter',function(){ setActive(cell,true); });
+        cell.addEventListener('mouseleave',function(){ setActive(cell,false); });
+        glyphCount++; realGlyphs++; decodeParts.push('<span class="lit">'+esc(tok.entry.g)+'</span>');
+      } else {
+        cell.appendChild(glyph(tok.word,true));
+        var gl2=document.createElement('div'); gl2.className='gloss'; gl2.textContent='['+tok.word+']'; cell.appendChild(gl2);
+        glyphCount++; miss++; decodeParts.push('<span class="miss">['+esc(tok.word)+']</span>');
+      }
+      glyphsHost.appendChild(cell);
+    });
+    // readouts — density is over MATCHED glyphs only (a miss is not compression); misses named honestly
+    el('rt_src').textContent=estTokens(text);
+    el('rt_g').textContent=glyphCount;
+    var src=estTokens(text), notes=(r.elided?', '+r.elided+' elided':'')+(miss?', '+miss+' unmapped':'');
+    el('rt_ratio').textContent = (realGlyphs && src) ? '('+(src/realGlyphs).toFixed(1)+'× denser'+notes+')' : (miss?'('+miss+' unmapped)':'');
+    decodeHost.innerHTML = decodeParts.length? decodeParts.join(' &middot; ') : '—';
+    return r;
+  }
+  function esc(s){ return String(s).replace(/[<>&]/g,function(c){return({'<':'&lt;','>':'&gt;','&':'&amp;'})[c];}); }
+
+  // ---- deck ----
+  var DECK=[
+    "the visitors offer a tool we do not understand",
+    "why are you here on earth",
+    "we offer a gift not a weapon",
+    "they perceive time without before and after",
+    "humans learn the language and remember the future"
+  ];
+  (function(){ var d=el('deck'); DECK.forEach(function(s){ var b=document.createElement('button'); b.className='dk'; b.type='button';
+    b.textContent=s.length>30?s.slice(0,28)+'…':s; b.title=s;
+    b.addEventListener('click',function(){ el('in').value=s; render(s); }); d.appendChild(b); }); })();
+
+  el('in').addEventListener('input',function(){ render(el('in').value); });
+
+  // ---- boot ----
+  var DEFAULT=DECK[0];
+  el('in').value=DEFAULT;
+  var first=render(DEFAULT);
+  if(still){ // deterministic snapshot: bloom one matched glyph amber so the active-state reads in the shot
+    var cells=glyphsHost.querySelectorAll('.gcell:not(.miss)');
+    if(cells.length){ var pick=cells[Math.min(2,cells.length-1)]; setActive(pick,true); }
+  }
+
+  // ---- cold substrate field ----
+  var bg=el('bg'); var gl=bg.getContext('webgl',{antialias:false,alpha:false})||bg.getContext('experimental-webgl');
+  if(gl){
+    var V="attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}";
+    var F=["precision highp float;uniform vec2 u_res;uniform float u_time;",
+    "const vec3 VOID=vec3(0.027,0.035,0.047);const vec3 BLUE=vec3(0.357,0.690,0.839);",
+    "float h(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}",
+    "float vn(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.0-2.0*f);float a=h(i),b=h(i+vec2(1,0)),c=h(i+vec2(0,1)),d=h(i+vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}",
+    "float fbm(vec2 p){float s=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<5;i++){s+=a*vn(p);p=m*p;a*=0.5;}return s;}",
+    "void main(){vec2 uv=gl_FragCoord.xy/u_res;vec2 q=(gl_FragCoord.xy-0.5*u_res)/u_res.y;float t=u_time*0.015;",
+    "float hz=fbm(q*1.7+vec2(t,-t*0.5));vec3 col=mix(VOID,BLUE*0.10,smoothstep(0.3,1.0,hz));",
+    "float ring=abs(length(q)-0.5-0.06*sin(u_time*0.1));col+=BLUE*0.02*smoothstep(0.06,0.0,ring);",
+    "float st=step(0.9989,h(floor(gl_FragCoord.xy)))*0.45;col+=vec3(0.6,0.75,0.85)*st;",
+    "col+=(h(gl_FragCoord.xy+u_time)-0.5)*0.02;col*=0.45+0.55*smoothstep(1.45,0.2,length(q));",
+    "col=col/(col+vec3(0.96));gl_FragColor=vec4(col,1.0);}"].join("\n");
+    function mk(t,s){var x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);return x;}
+    var pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,V));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,F));gl.linkProgram(pr);gl.useProgram(pr);
+    var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    var lp=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    var uR=gl.getUniformLocation(pr,'u_res'),uT=gl.getUniformLocation(pr,'u_time');
+    function rzb(){var dpr=Math.min(window.devicePixelRatio||1,1.6);bg.width=Math.floor(innerWidth*dpr);bg.height=Math.floor(innerHeight*dpr);gl.viewport(0,0,bg.width,bg.height);}
+    rzb();addEventListener('resize',rzb);var b0=performance.now();
+    (function bl(now){var tt=reduce?6.0:(now-b0)/1000;gl.uniform2f(uR,bg.width,bg.height);gl.uniform1f(uT,tt);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(bl);})(b0);
+  }
+})();
+</script>
+</body>
+</html>
