@@ -12,4 +12,4 @@ merged. A run that changed nothing still writes its entry, with the reason.
   it.
 - The Codex is offline until it is rebuilt under a new key. The rest of the site is unchanged.
 - Added the gates workflow (privacy, site checks), tools/privacy_gate.py, ROADMAP.md, this file and SITE_RULES.md.
-- The daily routine starts on the morning of 2026-11-11.
+- The daily routine runs at 05:00 UTC (06:00 in Madrid in winter). Its first run was started by hand on setup day.
