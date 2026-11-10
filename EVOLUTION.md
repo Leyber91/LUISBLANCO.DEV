@@ -22,7 +22,9 @@ merged. A run that changed nothing still writes its entry, with the reason.
   missing image, directory without index.html, link into an underscore path, missing doctype, missing hub config) and
   reported all six. Render: no page changed, so nothing to render. Forbidden-name check: runs in the gates workflow
   on the pull request.
-- Merged: pending the gates workflow.
+- Gates on pull request #1: privacy passed (selftest and forbidden-name scan), site passed (19 pages, 0 findings),
+  GitGuardian passed. The gates run started about four minutes after the pull request opened.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-10, setup (not a routine run)
 
