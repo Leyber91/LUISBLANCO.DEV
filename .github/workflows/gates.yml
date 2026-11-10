@@ -1,0 +1,39 @@
+name: gates
+
+# The gates every change must pass before it reaches main (main is what GitHub Pages publishes).
+# privacy: forbidden names (from the WATCHLIST secret, never stored in the repository), secret-shaped strings, passphrases.
+# site: the site's own checks in tools/site_check.mjs, when that file exists.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: privacy gate selftest
+        run: python tools/privacy_gate.py --selftest
+      - name: privacy gate
+        env:
+          WATCHLIST: ${{ secrets.WATCHLIST }}
+        run: python tools/privacy_gate.py
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: site checks
+        run: |
+          if [ -f tools/site_check.mjs ]; then node tools/site_check.mjs; else echo "NOT_CHECKED: tools/site_check.mjs does not exist yet (the first roadmap item builds it)"; fi
