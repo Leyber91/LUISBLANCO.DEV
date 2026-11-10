@@ -9,19 +9,18 @@ site already knows), then builds it on the next run. It never adds more than one
 
 ## Next
 
-1. Site checks. Write tools/site_check.mjs (Node, no dependencies): every local link, script, stylesheet and image
-   referenced from each HTML page resolves to a file in the repository; every page parses; every labs/ page listed on
-   the labs hub exists. Wire it into the gates workflow (it already runs the file when present). Fix nothing else in
-   the same run; record what it finds as roadmap items.
-2. Fix what the site checks found, one finding per run, most visible page first.
-3. The labs hub links to labs/weather/, which returns 404. Build the lab, or remove the link and say so in the log.
-4. Home page: a dated "What changed" strip that reads the last five entries of EVOLUTION.md, so a visitor sees the
+1. Fix what the site checks found, one finding per run, most visible page first.
+2. The labs hub links to labs/weather/, which returns 404. Build the lab, or remove the link and say so in the log.
+3. Home page: a dated "What changed" strip that reads the last five entries of EVOLUTION.md, so a visitor sees the
    site is alive.
-5. Mobile pass on the home page and the labs hub at 390 px wide: nothing overflows sideways, every control reachable.
+4. Mobile pass on the home page and the labs hub at 390 px wide: nothing overflows sideways, every control reachable.
 
 ## Done
 
 (The routine moves items here with the date and the commit.)
+
+- 2026-11-10: Site checks. tools/site_check.mjs checks the 19 published HTML pages and the labs hub config; it found
+  nothing on published pages. Pull request "evolve 2026-11-10: site checks".
 
 ## Struck
 
