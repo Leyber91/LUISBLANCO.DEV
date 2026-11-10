@@ -24,6 +24,7 @@ every merge to main is published at luisblanco.dev within minutes.
 - Never present a fork as original work. "I forked X to study Y" is the form.
 - No emoji anywhere: code, copy or commit messages.
 - Never touch codex.enc.json, tools/build_codex.mjs or the exoplanet data workflow and its data files.
+- Never touch desk/. It is Luis's private desk, kept by his own session; its data lives in a private store, never here.
 - Never weaken a gate. tools/privacy_gate.py and the privacy job in .github/workflows/gates.yml change only when Luis
   asks. The site job may gain checks; it never loses one. A pull request that edits the privacy gate is not merged by
   the routine.

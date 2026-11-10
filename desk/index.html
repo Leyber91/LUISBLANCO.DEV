@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Luis's Desk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* One thumb-width column: a sticky bar with the sync time and what waits, the note to the sessions, then the desk's
+   groups in the order to act on them. The store behind it is private; this file holds no desk data. */
+:root{color-scheme:dark;--ground:#0e0c0a;--panel:#15120f;--panel-2:#1d1914;--rule:#2d271f;--ink:#efe7d9;--ink-2:#bcb09c;
+  --ink-3:#857b6c;--amber:#f2a23a;--on-amber:#1a1206;--wash:rgba(242,162,58,.12);--ok:#8cc27f;--warn:#e0785a;
+  --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--f-body:"Inter",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace}
+@media (prefers-color-scheme:light){:root{color-scheme:light;--ground:#f4f2ee;--panel:#fbfaf7;--panel-2:#efece6;--rule:#e0dbd1;
+  --ink:#1c1813;--ink-2:#4b4337;--ink-3:#6f6658;--amber:#a85f00;--on-amber:#fffaf2;--wash:rgba(184,106,0,.10);--ok:#2f7a2a;--warn:#b0452a}}
+*{box-sizing:border-box}
+html{background:var(--ground)}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;
+  padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.bar{position:sticky;top:0;z-index:5;background:var(--ground);border-bottom:1px solid var(--rule);padding:12px 0 10px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bar h1{margin:0;font:600 20px/1.2 var(--f-display);letter-spacing:.01em}
+.bar .sync{font:400 12px/1.4 var(--f-mono);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.bar .sync b{color:var(--amber);font-weight:500}
+.rule{font-size:13px;color:var(--ink-2);background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;margin:0}
+.rule strong{color:var(--ink)}
+h2{margin:6px 0 0;font:600 15px/1.3 var(--f-display);letter-spacing:.02em;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+h2 .sub{font:400 12px/1.3 var(--f-body);color:var(--ink-3);letter-spacing:0}
+h2 .n{font:500 11px/1 var(--f-mono);color:var(--ink-3)}
+.group{display:flex;flex-direction:column;gap:10px}
+details.card{background:var(--panel);border:1px solid var(--rule);border-radius:12px}
+details.card[open]{border-color:color-mix(in srgb,var(--amber) 35%,var(--rule))}
+details.card.done{opacity:.72}
+summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start}
+summary::-webkit-details-marker{display:none}
+summary:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible,label.opt:focus-within{outline:2px solid var(--amber);outline-offset:2px}
+.t{font-weight:600;line-height:1.35;text-wrap:balance}
+.min{font:500 11px/1.6 var(--f-mono);color:var(--ink-2);background:var(--panel-2);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.state{grid-column:1/-1;font:400 12px/1.4 var(--f-mono);color:var(--ink-3)}
+.state.ok{color:var(--ok)}.state.saved{color:var(--amber)}
+.body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.k{font:500 11px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:2px}
+.p{margin:0;color:var(--ink-2);overflow-wrap:anywhere}
+ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.rec{background:var(--wash);border-radius:8px;padding:8px 10px;color:var(--ink)}
+.copy{display:flex;flex-direction:column;gap:6px}
+.copy pre{margin:0;background:var(--ground);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;
+  font:400 12.5px/1.5 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto;color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:500 13px/1 var(--f-body);border-radius:8px;border:1px solid var(--rule);background:var(--panel-2);color:var(--ink);
+  padding:10px 14px;min-height:40px;cursor:pointer}
+button.primary{background:var(--amber);border-color:var(--amber);color:var(--on-amber)}
+button:disabled{opacity:.5;cursor:default}
+.opts{display:flex;flex-direction:column;gap:6px}
+label.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--rule);border-radius:8px;padding:9px 10px;cursor:pointer;background:var(--ground)}
+label.opt input{margin-top:3px;accent-color:var(--amber)}
+label.opt.on{border-color:var(--amber);background:var(--wash)}
+textarea,input[type=email]{width:100%;font:400 14px/1.45 var(--f-body);color:var(--ink);background:var(--ground);
+  border:1px solid var(--rule);border-radius:8px;padding:9px 10px}
+textarea{min-height:72px;resize:vertical}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink-2)}
+.check input{width:18px;height:18px;accent-color:var(--amber)}
+.note{font-size:12px;color:var(--ink-3);margin:0}
+.msg{font:400 12px/1.4 var(--f-mono);color:var(--ink-3)}
+.msg.err{color:var(--warn)}
+.more summary{padding:0;display:block;font-size:13px;color:var(--amber)}
+.more pre{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:400 13px/1.5 var(--f-body);color:var(--ink-2)}
+.notes{display:flex;flex-direction:column;gap:8px}
+.notes .n1{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:9px 12px;font-size:14px}
+.notes .n1 .when{font:400 11px/1.4 var(--f-mono);color:var(--ink-3);margin-top:4px}
+.empty{color:var(--ink-3);font-size:14px;background:var(--panel);border:1px dashed var(--rule);border-radius:10px;padding:14px;margin:0}
+.signin{display:flex;flex-direction:column;gap:10px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <h1>Desk</h1>
+    <div class="row"><span class="sync" id="sync">connecting</span><button id="refresh" type="button" hidden>Refresh</button></div>
+  </header>
+
+  <section class="signin" id="signin" hidden>
+    <p class="rule">This desk is private. Sign in with the email link to see it.</p>
+    <label for="email" class="k">Email</label>
+    <input type="email" id="email" autocomplete="email" inputmode="email">
+    <div class="row"><button class="primary" id="send-link" type="button">Send me a sign-in link</button><span class="msg" id="signin-msg"></span></div>
+  </section>
+
+  <div id="app" hidden>
+    <p class="rule"><strong>How it works.</strong> What you save here goes to the session on your computer, which reads it every
+      two hours and when you say <strong>desk</strong> in its chat. These answers are notes for the session. Anything sent,
+      posted, paid or signed in your name still needs your yes, typed in the session chat; a card that needs one gives you
+      the line to paste.</p>
+
+    <section class="group" aria-labelledby="h-notes">
+      <h2 id="h-notes">Tell the sessions <span class="sub">a direction, a correction, "done with X"</span></h2>
+      <textarea id="note" placeholder="For example: send-02 is sent. Next, draft the letter."></textarea>
+      <div class="row"><button class="primary" id="send-note" type="button">Send to the sessions</button><span class="msg" id="note-msg"></span></div>
+      <div class="notes" id="notes"></div>
+    </section>
+
+    <div id="desk"></div>
+    <div class="row"><button id="signout" type="button">Sign out</button></div>
+  </div>
+
+  <p class="empty" id="offline" hidden></p>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
+  integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
+<script>
+(function () {
+  "use strict";
+  var GROUPS = [["now", "Do now", "paste and type"], ["decide", "Read and decide", "with my recommendation"],
+    ["hands", "By hand", "in your name, so you do them"], ["waiting", "Waiting on something else", ""],
+    ["recorded", "What I took from your words", "correct anything I got wrong"], ["done", "Done", ""]];
+  var ITEMS = [], ANS = {}, META = null, NOTES = [], SB = null, drafts = {}, openIds = {};
+  var $ = function (id) { return document.getElementById(id); };
+  var syncEl = $("sync"), deskEl = $("desk");
+
+  function h(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function stamp() { var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()); }
+  function hm(s) { s = String(s || ""); return s.length >= 16 ? s.slice(11, 16) : s; }
+  function isDone(it) { var a = ANS[it.id]; return !!((it.local && it.local.done) || (a && a.done)); }
+  function groupOf(it) { return isDone(it) && it.group !== "recorded" ? "done" : (it.group || "waiting"); }
+  function offline(text) { $("offline").textContent = text; $("offline").hidden = false; syncEl.textContent = "not connected"; }
+
+  function copyText(text, btn, pre) {
+    function sel() { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      btn.textContent = "Selected: long-press to copy"; }
+    try { navigator.clipboard.writeText(text).then(function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1600); }, sel); }
+    catch (e) { sel(); }
+  }
+
+  function card(it) {
+    var a = ANS[it.id] || null, done = isDone(it);
+    var c = h("details", "card" + (done && it.group !== "recorded" ? " done" : ""));
+    if (openIds[it.id] != null ? openIds[it.id] : (!done && (it.group === "now" || it.group === "decide" || it.group === "hands"))) c.open = true;
+    c.addEventListener("toggle", function () { openIds[it.id] = c.open; });
+    var s = h("summary");
+    s.appendChild(h("span", "t", it.title || it.id));
+    if (it.minutes != null && it.minutes !== "") s.appendChild(h("span", "min", String(it.minutes) + (/^\d+$/.test(String(it.minutes)) ? " min" : "")));
+    var st = "", stc = "state";
+    if (a && a.merged_at) { st = "Saved here " + hm(a.at) + ", the session has it (" + hm(a.merged_at) + ")"; stc += " ok"; }
+    else if (a) { st = "Saved here " + hm(a.at) + ", waiting for the session"; stc += " saved"; }
+    else if (it.local && it.local.answered) { st = "Answered on the computer " + hm(it.local.at); stc += " ok"; }
+    else if (it.checked && it.checked.note) { st = (it.checked.ok === false ? "Check failed " : "Checked ") + hm(it.checked.at); stc += it.checked.ok === false ? "" : " ok"; }
+    if (st) s.appendChild(h("span", stc, st));
+    c.appendChild(s);
+
+    var b = h("div", "body");
+    function field(label, text, cls) { if (!text) return; var d = h("div"); d.appendChild(h("div", "k", label)); d.appendChild(h("p", "p " + (cls || ""), text)); b.appendChild(d); }
+    field("Where", it.where);
+    field("Why", it.why);
+    if (it.blocked_by) field("Waits on", it.blocked_by);
+    if (it.steps && it.steps.length) { var d0 = h("div"); d0.appendChild(h("div", "k", "Steps")); var ol = h("ol", "steps");
+      it.steps.forEach(function (x) { ol.appendChild(h("li", "", x)); }); d0.appendChild(ol); b.appendChild(d0); }
+    (it.copy || []).forEach(function (cp) { var d = h("div", "copy"); d.appendChild(h("div", "k", cp.label || "Paste this"));
+      var pre = h("pre", "", cp.text || ""); d.appendChild(pre); var btn = h("button", "", "Copy"); btn.type = "button";
+      btn.addEventListener("click", function () { copyText(cp.text || "", btn, pre); }); var r = h("div", "row"); r.appendChild(btn); d.appendChild(r); b.appendChild(d); });
+    if (it.recommend) { var rd = h("div"); rd.appendChild(h("div", "k", "My recommendation")); rd.appendChild(h("p", "p rec", it.recommend)); b.appendChild(rd); }
+    if (it.detail_md) { var m = h("details", "more"); m.appendChild(h("summary", "", "Read the detail")); m.appendChild(h("pre", "", it.detail_md)); b.appendChild(m); }
+    if (it.sources && it.sources.length) field("Sources (on the computer)", it.sources.filter(Boolean).join(" / "));
+    if (it.checked && it.checked.note) field("Last check" + (it.checked.at ? ", " + it.checked.at : ""), it.checked.note);
+    else if (it.check) field("How I check it", it.check);
+
+    var dr = drafts[it.id] || (drafts[it.id] = { choice: a ? a.choice || "" : "", text: a ? a.text || "" : "", done: a ? !!a.done : false });
+    var inp = it.input || {};
+    if (inp.kind === "choice" && inp.options && inp.options.length) {
+      var od = h("div", "opts"); od.setAttribute("role", "radiogroup");
+      inp.options.forEach(function (o, i) {
+        var l = h("label", "opt" + (dr.choice === o ? " on" : "")), r = document.createElement("input");
+        r.type = "radio"; r.name = "c-" + it.id; r.id = "c-" + it.id + "-" + i; r.checked = dr.choice === o;
+        r.addEventListener("change", function () { dr.choice = o; od.querySelectorAll("label.opt").forEach(function (x) { x.classList.remove("on"); }); l.classList.add("on"); });
+        l.appendChild(r); l.appendChild(h("span", "", o)); od.appendChild(l);
+      });
+      var od0 = h("div"); od0.appendChild(h("div", "k", "Your choice")); od0.appendChild(od); b.appendChild(od0);
+    }
+    if (inp.note) b.appendChild(h("p", "note", inp.note));
+    var ta = document.createElement("textarea"); ta.id = "t-" + it.id; ta.value = dr.text;
+    ta.placeholder = inp.kind === "text" ? (inp.placeholder || "Your answer") : "A note for the session (optional)";
+    ta.addEventListener("input", function () { dr.text = ta.value; });
+    b.appendChild(ta);
+    var ck = h("label", "check"), cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "d-" + it.id; cb.checked = dr.done;
+    cb.addEventListener("change", function () { dr.done = cb.checked; });
+    ck.appendChild(cb); ck.appendChild(h("span", "", "I did this")); b.appendChild(ck);
+    var row = h("div", "row"), save = h("button", "primary", a ? "Update answer" : "Save answer"), msg = h("span", "msg");
+    save.type = "button";
+    save.addEventListener("click", function () {
+      if (!dr.choice && !dr.text.trim() && !dr.done) { msg.textContent = "Pick a choice, write a note or tick the box first."; return; }
+      save.disabled = true; msg.className = "msg"; msg.textContent = "Saving";
+      var row1 = { item: it.id, choice: dr.choice || "", text: dr.text.trim(), done: !!dr.done, at: stamp(), merged_at: null, updated_at: new Date().toISOString() };
+      SB.from("desk_answers").upsert(row1).then(function (r) {
+        save.disabled = false;
+        if (r.error) { msg.className = "msg err"; msg.textContent = "Not saved: " + r.error.message; return; }
+        ANS[it.id] = row1; msg.textContent = "Saved"; render();
+      });
+    });
+    row.appendChild(save); row.appendChild(msg); b.appendChild(row);
+    c.appendChild(b);
+    return c;
+  }
+
+  function countWaiting() { return ITEMS.filter(function (it) { var g = groupOf(it); return g === "now" || g === "decide" || g === "hands"; }).length; }
+
+  function render() {
+    syncEl.textContent = "";
+    syncEl.appendChild(document.createTextNode("synced " + (META && META.synced_at || "never") + " · "));
+    syncEl.appendChild(h("b", "", countWaiting() + " waiting"));
+    deskEl.textContent = "";
+    if (!ITEMS.length) { deskEl.appendChild(h("p", "empty", "Nothing to show. If this is your first sign-in, tell the session \"register me on the desk\" in its chat; until then the desk shows its owner nothing.")); return; }
+    var by = {}; ITEMS.forEach(function (it) { var g = groupOf(it); (by[g] = by[g] || []).push(it); });
+    GROUPS.forEach(function (g) {
+      var list = by[g[0]]; if (!list || !list.length) return;
+      list.sort(function (x, y) { return (x.order || 0) - (y.order || 0); });
+      var sec = h("section", "group"), hd = h("h2", "", g[1]);
+      if (g[2]) hd.appendChild(h("span", "sub", g[2])); hd.appendChild(h("span", "n", String(list.length)));
+      sec.appendChild(hd); list.forEach(function (it) { sec.appendChild(card(it)); }); deskEl.appendChild(sec);
+    });
+    var nEl = $("notes"); nEl.textContent = "";
+    NOTES.slice(0, 6).forEach(function (n) { var d = h("div", "n1"); d.appendChild(h("div", "", n.text || ""));
+      d.appendChild(h("div", "when", hm(n.at) + (n.seen_at ? ", the session read it at " + hm(n.seen_at) : ", waiting for the session"))); nEl.appendChild(d); });
+  }
+
+  function load() {
+    syncEl.textContent = "loading";
+    return Promise.all([
+      SB.from("desk_items").select("doc"),
+      SB.from("desk_meta").select("v").eq("k", "sync"),
+      SB.from("desk_answers").select("*"),
+      SB.from("desk_notes").select("*").order("created_at", { ascending: false }).limit(20)
+    ]).then(function (r) {
+      var err = r.filter(function (x) { return x.error; })[0];
+      if (err) { offline("The desk store refused the request: " + err.error.message); return; }
+      ITEMS = (r[0].data || []).map(function (x) { return x.doc; });
+      META = r[1].data && r[1].data[0] ? r[1].data[0].v : null;
+      ANS = {}; (r[2].data || []).forEach(function (x) { ANS[x.item] = x; });
+      NOTES = r[3].data || [];
+      render();
+    });
+  }
+
+  function show(session) {
+    $("signin").hidden = !!session; $("app").hidden = !session; $("refresh").hidden = !session;
+    if (session) load(); else syncEl.textContent = "signed out";
+  }
+
+  var cfg = window.DESK_CONFIG || {};
+  if (!cfg.url || !cfg.anonKey) { offline("The desk is not connected to its store yet."); return; }
+  if (!window.supabase || !window.supabase.createClient) { offline("The sign-in library did not load. Reload the page."); return; }
+  SB = window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
+
+  $("send-link").addEventListener("click", function () {
+    var email = $("email").value.trim(), msg = $("signin-msg");
+    if (!email) { msg.textContent = "Enter your email first."; return; }
+    msg.className = "msg"; msg.textContent = "Sending";
+    SB.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true } })
+      .then(function (r) { if (r.error) { msg.className = "msg err"; msg.textContent = r.error.message; } else msg.textContent = "Check your mail and open the link on this device."; });
+  });
+  $("send-note").addEventListener("click", function () {
+    var ta = $("note"), msg = $("note-msg"), t = ta.value.trim();
+    if (!t) { msg.textContent = "Write something first."; return; }
+    msg.className = "msg"; msg.textContent = "Sending";
+    SB.from("desk_notes").insert({ text: t, at: stamp() }).then(function (r) {
+      if (r.error) { msg.className = "msg err"; msg.textContent = "Not sent: " + r.error.message; return; }
+      ta.value = ""; msg.textContent = "Sent"; load();
+    });
+  });
+  $("refresh").addEventListener("click", load);
+  $("signout").addEventListener("click", function () { SB.auth.signOut().then(function () { show(null); }); });
+  SB.auth.getSession().then(function (r) { show(r.data && r.data.session); });
+  SB.auth.onAuthStateChange(function (ev, session) { if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") show(session); });
+})();
+</script>
+</body>
+</html>
