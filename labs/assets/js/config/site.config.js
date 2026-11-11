@@ -67,7 +67,7 @@ export const CATEGORIES = [
     projects: [
       { id: 'heptapod', title: 'Heptapod Codec', status: 'built',
         href: 'heptapod.html',
-        blurb: 'Type a sentence and a closed lexicon encodes it into circular logograms whose shape carries the meaning; hover one and it blooms back into its proposition. The premise of Arrival as a working, breakable codec.' },
+        blurb: 'An original semasiographic script on the idea of Ted Chiang’s Story of Your Life: a whole proposition is one ring, solved as one curve and written all at once; a pixel decoder reads it back until you break it with ink.' },
       { id: 'timeline', title: 'Interactive Timeline', status: 'planned',
         blurb: 'A navigable timeline of the Tryverse — branch points, dimensions and the people inside them.' },
       { id: 'last-witness', title: 'Time-Slip: The Last Witness', status: 'beta',

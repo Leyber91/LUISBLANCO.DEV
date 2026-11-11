@@ -1,0 +1,576 @@
+{
+ "script": "1.0.0",
+ "date": "2026-11-11",
+ "propositions": 200,
+ "types": {
+  "jitter": {
+   "unit": "peak tremor, % of ring radius",
+   "rows": [
+    {
+     "level": 0,
+     "value": 0,
+     "exact": 1,
+     "fields": {}
+    },
+    {
+     "level": 0.005,
+     "value": 0.5,
+     "exact": 1,
+     "fields": {}
+    },
+    {
+     "level": 0.01,
+     "value": 1,
+     "exact": 1,
+     "fields": {}
+    },
+    {
+     "level": 0.015,
+     "value": 1.5,
+     "exact": 0.96,
+     "fields": {
+      "clause.patient": 5,
+      "patient": 3,
+      "clause.pred": 2,
+      "clause.agent": 2,
+      "clause.recipient": 2,
+      "clause.evid": 2
+     }
+    },
+    {
+     "level": 0.02,
+     "value": 2,
+     "exact": 0.915,
+     "fields": {
+      "clause.agent": 8,
+      "clause.patient": 9,
+      "clause.recipient": 7,
+      "clause.neg": 1,
+      "clause.pred": 10,
+      "patient": 1,
+      "clause.mood": 2,
+      "clause.evid": 2,
+      "agent": 1
+     }
+    },
+    {
+     "level": 0.025,
+     "value": 2.5,
+     "exact": 0.83,
+     "fields": {
+      "clause.pred": 9,
+      "clause.patient": 16,
+      "clause.recipient": 8,
+      "clause.neg": 1,
+      "patient": 6,
+      "recipient": 3,
+      "pred": 2,
+      "clause.agent": 9,
+      "agent": 7,
+      "evid": 2,
+      "mood": 1,
+      "clause.mood": 2,
+      "clause.evid": 2,
+      "neg": 1
+     }
+    },
+    {
+     "level": 0.03,
+     "value": 3,
+     "exact": 0.765,
+     "fields": {
+      "clause.patient": 14,
+      "clause.recipient": 10,
+      "clause.neg": 3,
+      "patient": 15,
+      "clause.pred": 12,
+      "recipient": 3,
+      "agent": 15,
+      "mood": 1,
+      "pred": 5,
+      "evid": 4,
+      "clause.agent": 9,
+      "clause.evid": 2,
+      "clause.time": 1
+     }
+    },
+    {
+     "level": 0.04,
+     "value": 4,
+     "exact": 0.27,
+     "fields": {
+      "agent": 84,
+      "recipient": 47,
+      "patient": 81,
+      "neg": 10,
+      "pred": 54,
+      "clause.pred": 14,
+      "clause.agent": 12,
+      "clause.patient": 16,
+      "clause.recipient": 13,
+      "clause.neg": 3,
+      "evid": 12,
+      "clause.evid": 5,
+      "mood": 7,
+      "clause.mood": 3
+     }
+    },
+    {
+     "level": 0.05,
+     "value": 5,
+     "exact": 0.04,
+     "fields": {
+      "agent": 158,
+      "pred": 119,
+      "patient": 145,
+      "recipient": 82,
+      "clause.pred": 16,
+      "clause.agent": 15,
+      "clause.patient": 15,
+      "clause.recipient": 15,
+      "clause.neg": 8,
+      "evid": 24,
+      "mood": 17,
+      "neg": 17,
+      "clause.evid": 6,
+      "clause.aspect": 3,
+      "clause.mood": 1
+     }
+    },
+    {
+     "level": 0.06,
+     "value": 6,
+     "exact": 0.01,
+     "fields": {
+      "agent": 193,
+      "recipient": 139,
+      "pred": 173,
+      "patient": 196,
+      "neg": 35,
+      "clause.pred": 15,
+      "clause.agent": 15,
+      "clause.patient": 16,
+      "clause.recipient": 13,
+      "clause.neg": 7,
+      "evid": 40,
+      "mood": 21,
+      "aspect": 3,
+      "clause.evid": 5,
+      "clause.mood": 5,
+      "clause.aspect": 2,
+      "clause.time": 1
+     }
+    }
+   ],
+   "breaking": 3.54
+  },
+  "dropout": {
+   "unit": "% of stroke length erased",
+   "rows": [
+    {
+     "level": 0,
+     "value": 0,
+     "exact": 1,
+     "fields": {}
+    },
+    {
+     "level": 0.025,
+     "value": 2.5,
+     "exact": 0.865,
+     "fields": {
+      "rel": 2,
+      "mood": 22,
+      "evid": 4,
+      "agent": 1
+     }
+    },
+    {
+     "level": 0.05,
+     "value": 5,
+     "exact": 0.81,
+     "fields": {
+      "mood": 32,
+      "patient": 6,
+      "evid": 3,
+      "rel": 3,
+      "agent": 2,
+      "neg": 2,
+      "clause.recipient": 1,
+      "clause.evid": 1,
+      "recipient": 2,
+      "clause.pred": 1
+     }
+    },
+    {
+     "level": 0.075,
+     "value": 7.5,
+     "exact": 0.725,
+     "fields": {
+      "mood": 46,
+      "rel": 6,
+      "patient": 10,
+      "recipient": 3,
+      "neg": 4,
+      "agent": 7,
+      "evid": 4,
+      "clause.recipient": 1,
+      "clause.evid": 1,
+      "clause.pred": 1,
+      "clause.agent": 1,
+      "clause.mood": 1,
+      "clause.neg": 1
+     }
+    },
+    {
+     "level": 0.1,
+     "value": 10,
+     "exact": 0.64,
+     "fields": {
+      "mood": 65,
+      "patient": 17,
+      "agent": 8,
+      "recipient": 5,
+      "evid": 11,
+      "rel": 9,
+      "pred": 3,
+      "neg": 3,
+      "clause.agent": 1,
+      "clause.patient": 1,
+      "clause.mood": 2,
+      "clause.evid": 1
+     }
+    },
+    {
+     "level": 0.15,
+     "value": 15,
+     "exact": 0.55,
+     "fields": {
+      "rel": 9,
+      "mood": 73,
+      "neg": 12,
+      "patient": 31,
+      "recipient": 14,
+      "evid": 20,
+      "agent": 17,
+      "pred": 1,
+      "clause.agent": 2,
+      "clause.patient": 2,
+      "clause.mood": 2,
+      "clause.evid": 4,
+      "clause.recipient": 2
+     }
+    },
+    {
+     "level": 0.2,
+     "value": 20,
+     "exact": 0.465,
+     "fields": {
+      "rel": 9,
+      "mood": 87,
+      "evid": 30,
+      "patient": 39,
+      "agent": 17,
+      "recipient": 18,
+      "pred": 7,
+      "neg": 10,
+      "clause.mood": 3,
+      "clause.neg": 2,
+      "clause.patient": 1,
+      "clause.recipient": 1,
+      "clause.evid": 1,
+      "clause.agent": 1,
+      "clause.pred": 1
+     }
+    },
+    {
+     "level": 0.25,
+     "value": 25,
+     "exact": 0.425,
+     "fields": {
+      "rel": 13,
+      "mood": 88,
+      "evid": 46,
+      "patient": 42,
+      "agent": 28,
+      "neg": 7,
+      "recipient": 15,
+      "pred": 3,
+      "clause.patient": 2,
+      "clause.recipient": 3,
+      "clause.mood": 2,
+      "clause.evid": 3,
+      "clause.agent": 1,
+      "clause.pred": 1
+     }
+    },
+    {
+     "level": 0.3,
+     "value": 30,
+     "exact": 0.355,
+     "fields": {
+      "rel": 24,
+      "mood": 98,
+      "evid": 50,
+      "patient": 53,
+      "agent": 41,
+      "neg": 17,
+      "recipient": 23,
+      "pred": 7,
+      "clause.agent": 3,
+      "clause.patient": 5,
+      "clause.recipient": 5,
+      "clause.mood": 3,
+      "clause.evid": 5,
+      "clause.neg": 3,
+      "clause.pred": 1
+     }
+    },
+    {
+     "level": 0.4,
+     "value": 40,
+     "exact": 0.295,
+     "fields": {
+      "rel": 16,
+      "agent": 49,
+      "mood": 110,
+      "evid": 54,
+      "patient": 77,
+      "recipient": 26,
+      "neg": 19,
+      "pred": 13,
+      "aspect": 4,
+      "clause.agent": 4,
+      "clause.patient": 6,
+      "clause.recipient": 4,
+      "clause.aspect": 1,
+      "clause.mood": 3,
+      "clause.evid": 5,
+      "clause.neg": 2
+     }
+    }
+   ],
+   "breaking": 17.94
+  },
+  "blots": {
+   "unit": "ink blots on the page",
+   "rows": [
+    {
+     "level": 0,
+     "value": 0,
+     "exact": 1,
+     "fields": {}
+    },
+    {
+     "level": 5,
+     "value": 5,
+     "exact": 0.965,
+     "fields": {
+      "agent": 1,
+      "clause.aspect": 1,
+      "neg": 1,
+      "pred": 1,
+      "clause.pred": 1,
+      "patient": 1,
+      "clause.agent": 1,
+      "clause.patient": 1,
+      "clause.recipient": 1,
+      "clause.evid": 1
+     }
+    },
+    {
+     "level": 10,
+     "value": 10,
+     "exact": 0.895,
+     "fields": {
+      "clause.evid": 1,
+      "clause.neg": 3,
+      "pred": 6,
+      "agent": 3,
+      "patient": 4,
+      "recipient": 2,
+      "neg": 1,
+      "clause.recipient": 2,
+      "clause.patient": 4,
+      "clause.mood": 3,
+      "clause.agent": 1,
+      "clause.aspect": 1
+     }
+    },
+    {
+     "level": 20,
+     "value": 20,
+     "exact": 0.87,
+     "fields": {
+      "clause.pred": 2,
+      "clause.patient": 3,
+      "clause.evid": 2,
+      "pred": 5,
+      "patient": 6,
+      "recipient": 2,
+      "evid": 2,
+      "agent": 5,
+      "time": 1,
+      "clause.agent": 1,
+      "clause.recipient": 1,
+      "neg": 1,
+      "rel": 1
+     }
+    },
+    {
+     "level": 30,
+     "value": 30,
+     "exact": 0.72,
+     "fields": {
+      "clause.agent": 3,
+      "clause.patient": 3,
+      "clause.recipient": 4,
+      "clause.aspect": 2,
+      "clause.neg": 2,
+      "patient": 18,
+      "pred": 10,
+      "evid": 1,
+      "agent": 13,
+      "rel": 2,
+      "recipient": 8,
+      "neg": 5,
+      "time": 2,
+      "aspect": 2,
+      "clause.pred": 3,
+      "clause.evid": 4,
+      "clause.mood": 1,
+      "mood": 1
+     }
+    },
+    {
+     "level": 40,
+     "value": 40,
+     "exact": 0.675,
+     "fields": {
+      "pred": 14,
+      "patient": 26,
+      "agent": 19,
+      "clause.recipient": 5,
+      "clause.mood": 2,
+      "clause.evid": 3,
+      "clause.neg": 3,
+      "aspect": 5,
+      "neg": 8,
+      "recipient": 11,
+      "time": 1,
+      "evid": 2,
+      "clause.pred": 3,
+      "clause.patient": 5,
+      "clause.aspect": 1,
+      "clause.agent": 2,
+      "mood": 3
+     }
+    },
+    {
+     "level": 60,
+     "value": 60,
+     "exact": 0.47,
+     "fields": {
+      "clause.patient": 11,
+      "patient": 39,
+      "pred": 28,
+      "mood": 7,
+      "neg": 9,
+      "agent": 32,
+      "recipient": 17,
+      "evid": 7,
+      "clause.mood": 3,
+      "clause.evid": 5,
+      "time": 5,
+      "aspect": 2,
+      "clause.neg": 4,
+      "clause.pred": 2,
+      "clause.agent": 5,
+      "clause.recipient": 2,
+      "clause.time": 2,
+      "clause.aspect": 2
+     }
+    },
+    {
+     "level": 80,
+     "value": 80,
+     "exact": 0.365,
+     "fields": {
+      "pred": 34,
+      "clause.patient": 14,
+      "clause.mood": 7,
+      "clause.neg": 4,
+      "time": 11,
+      "mood": 14,
+      "agent": 35,
+      "patient": 50,
+      "recipient": 34,
+      "evid": 10,
+      "clause.pred": 5,
+      "clause.recipient": 7,
+      "clause.aspect": 4,
+      "aspect": 4,
+      "neg": 11,
+      "clause.time": 2,
+      "clause.evid": 4,
+      "clause.agent": 6,
+      "rel": 2
+     }
+    },
+    {
+     "level": 100,
+     "value": 100,
+     "exact": 0.245,
+     "fields": {
+      "time": 15,
+      "clause.patient": 12,
+      "clause.mood": 4,
+      "clause.evid": 9,
+      "patient": 63,
+      "mood": 13,
+      "evid": 14,
+      "recipient": 23,
+      "aspect": 12,
+      "agent": 60,
+      "neg": 13,
+      "pred": 48,
+      "clause.neg": 5,
+      "clause.agent": 6,
+      "rel": 2,
+      "clause.aspect": 6,
+      "clause.pred": 4,
+      "clause.recipient": 8,
+      "clause.time": 1
+     }
+    },
+    {
+     "level": 120,
+     "value": 120,
+     "exact": 0.215,
+     "fields": {
+      "time": 20,
+      "agent": 67,
+      "aspect": 10,
+      "neg": 22,
+      "pred": 48,
+      "clause.patient": 13,
+      "clause.recipient": 11,
+      "clause.aspect": 5,
+      "clause.evid": 9,
+      "clause.neg": 5,
+      "mood": 17,
+      "evid": 20,
+      "patient": 72,
+      "recipient": 43,
+      "rel": 8,
+      "clause.pred": 5,
+      "clause.agent": 7,
+      "clause.mood": 6,
+      "clause.time": 4
+     }
+    }
+   ],
+   "breaking": 57.07
+  }
+ },
+ "seconds": 513
+}
