@@ -26,6 +26,10 @@
         "G0": {
           "level": 3,
           "evidence": "n_dimensional_cube.js HyperCube builds only the n-cube ({-1,+1}^n, edges by one-bit XOR) for CONFIG.minDim 1 to maxDim 10; Console._syncReadout shows vertices, edges, faces, cells, facets from faceCount = C(n,k)·2^(n−k) (screenshot at 4D: 16 / 32 / 24 / 8 / 8). No simplex, orthoplex or exceptional polytope exists, so rung 4 fails."
+        },
+        "G1": {
+          "level": 7,
+          "evidence": "polytopes.js REGISTRY builds simplex 2-10D, cube 1-10D, cross 2-10D, the pentagon and hexagon, dodecahedron, icosahedron, 24-cell, 600-cell and 120-cell from coordinates; polytope() builds rank 0, measures ranks 1, n-2 and n-1, enumerates rank 2, and the 4D exceptionals match REFERENCE (24/96/96/24, 120/720/1200/600, 600/1200/720/120); engine.test.mjs runs 371 passed, 0 failed. Rung 8 fails (skeptic upheld): polytope() sets ref = familyCount(family, n, k) for every rank whose count is itself familyCount (k = 3..n-3 from 6D up) and ref = nv for the polygons' rank 0, so engine.test's f.count === f.ref cannot fail on those entries and the page's Table I column prints the same number twice ('formula ... match'): not every shown f-vector is checked against an independent Coxeter value. The Euler-Poincare line itself holds (simplex still shot: '5 - 10 + 10 - 5 = 0 expected 1 - (-1)^4 = 0 holds'). Rung 9 fails anyway: App.dual() swaps the object instantly with set({obj: d}), no continuous truncation."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 3,
           "evidence": "PlaneSet.rebuild builds all C(n,2) planes and Console._syncReadout shows planes = binomial(n,2) (6 at 4D in the screenshot); HyperCube.project applies the Givens rotations; the Plane Dial and the ±180° scrub set one angle in degrees. Rung 4 fails: PRESETS.iso spins the selected plane and one disjointOf partner only, so at 6D–10D it turns 2 of the 3–5 disjoint planes and is not isoclinic, while the button reads Iso at every n. Rung 5 would also fail: selectorPlanes keeps only !p.hidden || p.i < PLANE.hiddenFrom, so W–V cannot be chosen."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Rungs 2-5 hold: leftGivens turns the pose; controls._planes builds all C(n,2) chips (the count appears only in the narrator's 'N planes are turning' line under 'all planes'); the dial reads 'turned N deg'; PRESETS single, double and iso, iso turning floor(n/2) disjoint planes at one speed (tested n = 4..10); hidden-by-hidden chips are selectable and turned by hand. Rung 6 fails (skeptic upheld): panels.js MatrixView.draw sets nums = n <= 6, so from 7D to 10D R is drawn as shaded cells with no numbers, and main.mechanismText never prints R; the checks line does show ('max|RR^T - I| 2.2e-16 . |det R - 1|'). Rung 7 fails on its own terms too: main._readouts lists canonicalPlanes with Math.round(angle) degrees (whole degrees, not 0.1 deg) and names each block only by its nearest coordinate plane plus an overlap weight (simplex still shot: 'POSE 0 deg ~ X-Z (0.50), 0 deg ~ Y-W (0.50)'), not the invariant plane itself."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 0,
           "evidence": "No slicing code anywhere in labs/assets/js/dimensional_mania/ (grep for slice finds only Array.slice); Renderer.buildCube draws the projected edges and vertex points and nothing else."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Not disputed; rater's grade kept. slice.js slice() cuts at x_(n-1) = h from edge crossings, and sliceFaces fills the 4D cut as a closed solid recomputed from the turned X each frame (the rater's xw30.png shows the gold solid cut inside the shadow). Rung 4 fails: the views are shadow, slice and shadow+slice (the cut drawn inside the shadow); no slice view sits beside the projection, and the 'one down' inset shows the analogous cube cut, not this slice. Beyond: no reduced-motion 7-step sweep (rung 6), and no measure above 4D (rung 7)."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 0,
           "evidence": "Hopf appears only in code comments (constants.js ISO and TRAIL, TrailField.js, PlaneSet.js, Witness.js); no page text, meta description or hub blurb names S^3 or a fibration, and there is no stereographic projection. The vertex trails are credited under projection-views."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Not disputed; rater's grade kept. Under the hopf flow preset (?d=4&o=cube&m=f&p=s, the rater's hopfcube.png) the tesseract's vertices run on 4 closed gold Hopf circles, the motion line reads 'isoclinic (equal)', the narrator names them great circles / Hopf fibres (Hopf 1931) and the linkline reads 'linking number 1.000'. Rung 3 fails: project.js has the stereographic map but no pole marker is drawn anywhere. Under the plain 'isoclinic' preset trails are only CONFIG.trailArc 2.4 rad. The Hopf object, base-sphere probe and fibration() test exist but sit above the failed rung 3."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 3,
           "evidence": "HyperCube.project folds nD to 3D by perspective division axis by axis or orthographically (PROJECTION auto / perspective / orthographic); vertex colour ramps WIRE.cold to WIRE.warm with hidden-axis depth. Rung 4 fails: TrailField draws trails up to TRAIL.maxVerts 64, but no projected-axis star exists."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Rung 2 holds: project.js projectAll gives a perspective cascade, orthographic and 4D stereographic, with OrbitControls orbit and zoom. Rung 3 fails (skeptic upheld): projectAll sets depth[v] = 0.5 + 0.5*X[v, n-1], the signed last-axis coordinate, not a distance into the hidden axes, so w = -1 and w = +1 take opposite ends of the ramp, a vertex in our 3-space (w = 0) takes the middle, and from 5D up the other hidden axes never affect colour; main._ramp runs PALETTE.far #3A4254 -> mid #9FB3D6 -> near #EAF0FB, all cool, with no warm end (G0's WIRE.cold -> WIRE.warm ramp was removed). Checked in node: the identity-pose 4D simplex gets depths 0.625 x4 and 0.000. Rung 4 also fails: no axis star exists in any module."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 4,
           "evidence": "dimensions.css takes every colour from tokens.css variables except black (#000, rgba(0,0,0,.55)); gold (--accretion family) marks .on states, slider and dial handles, readout values and the hot ledger row, --horizon the fold chain and ledger fills; all text is IBM Plex Mono through the --font-* tokens; button and range chrome are reset. The 1440 px screenshot shows panel right, ledger bottom-left, caption and hint bottom-centre, title top, none overlapping; .dx-panel-body scrolls. Rung 5 fails: .dx-gloss is 0.66rem (10.6 px). Noted for rungs 9 and 10: the canvas palette in constants.js (WIRE.cold #5BB0D6, WIRE.warm #F2A93B, RENDER.background #080A0C) does not match tokens.css (--horizon #9FB3D6, --accretion #D4A24C, --void #06080D), and the page loads Orbitron and Space Grotesk that no token uses."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Not disputed; rater's grade kept. dimensions.css uses colour tokens and var(--font-mono), and button and range chrome is replaced. Rung 2 fails: no spacing tokens (var(--s-*)) and no type-scale tokens are consumed (G0 used --s-1..--s-6 and --t-micro/--t-stamp). Rung 3 also fails: about 20 raw rgba() literals, gold rgba(212,162,76,...) on .tour-start, .seg .on, .pc.sel and .dial, and gold used decoratively (.kick, the .bp corner brackets, .vk labels, the h2::before diamond, .dot.real); panels.js also paints raw rgba() fills. Regression from G0's 4."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 4,
           "evidence": "Console.js builds the −/+ stepper (1D–10D), plane chips, the Plane Dial (pointerdown/move) and ±180° .dx-scrub, five PRESETS buttons, Auto/Perspect/Ortho toggles, Fold distance / Speed / Scale sliders with printed values (3.20, 0.60, 1.50 in the screenshot), Vertices / Trails / Reset view and Pause; OrbitControls gives orbit and zoom. Rung 5 fails: canvas drag only orbits the 3D camera; a hidden plane turns only through the panel."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Not disputed; rater's grade kept. Rung 2 holds: the 1-10D stepper (controls._build) plus OrbitControls orbit and zoom. Rung 3 fails: chips, dial and six presets exist, but no +/-180 deg angle slider (the only ranges are fold, zoom, speed and height; G0's .dx-scrub was removed). Rung 4 would also fail: no Auto projection toggle and no scale slider. Shift/two-finger hidden turn, the 'drag orbits' toggle, _pickAt vertex picking and the X-W/Y-W pad exist above the failed rung. Regression from G0's 4."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 3,
           "evidence": "Counts come from binomial and faceCount in n_dimensional_cube.js, names from POLY_NAMES (segment … dekeract); main.js reads ?d=n (PARAMS.dim) and calls setDim on load. Rung 4 fails: nothing writes the URL, and plane angles, preset, projection and slider values never reach it; no Schläfli symbol, citation or export exists."
+        },
+        "G1": {
+          "level": 7,
+          "evidence": "Rungs 2-7 hold: counts from familyCount and measured ranks, CUBE_NAMES segment ... dekeract; share.js encodeState writes d, o, v, p, m, pl, h, sw, tr, D, sp and the C(n,2) Givens angles r, App._writeURL replaces the URL live and copyLink copies it; the objline shows Schlafli symbol and group (simplex still shot: '5-cell [3,3,3] symmetry A4, order 120') and SOURCES cites Coxeter 1973; savePNG (2x), saveJSON, saveOBJ and savePlate (SVG). Rung 8 fails (skeptic upheld, narrow): polytope() sets metrics = null for n < 2, so the 1D segment, a catalogue polytope (engine.test's catalogue-size check counts '+ segment'), shows no R/e on the objline (controls.js builds the met span only when o.metrics && o.ref), and engine.test skips it via if (o.ref && o.metrics) although referenceMetrics('cube', 1) returns re 0.5. Every other closed form checks out (600-cell phi and 164.48 deg, 120-cell phi^2*sqrt2 and 144 deg, 24-cell 1 and 120 deg, simplex, cross, dodecahedron, icosahedron). Rung 9 fails anyway: no whole-catalogue versioned JSON."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 2,
           "evidence": "Console._buildLedger and _tickLedger draw one bar per hidden axis (LEDGER.maxRows 6) from the stress array that HyperCube.project fills with max |D/(D−w) − 1|, toggle .hot (gold) on the largest above 0.02, and _tickCaption switches between extruding, legibility-wall and rotating states. Rung 3 fails: in Auto at 6D and above and in Ortho at any n, HyperCube.project skips the divide while still filling stress, so the bars and the gold flag describe a distortion the drawn shadow does not have. No numbers, sentence or model call exist."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Rung 2: panels.js LedgerView builds per-axis bars of max|D/(D-w) - 1| (up to 7 rows). Rung 3: the hottest row turns gold (.hot), _narrate switches between extrusion, n >= 6 legibility and spin lines, and the ortho ledger reads 'depth dropped'. Rung 4 fails (skeptic upheld): LedgerView.tick prints (1 + s)x and main._readouts writes 'up to (1 + hot.value)x on its nearest corner' with s = max|D/(D-w) - 1|, which is wrong whenever the largest deviation is a shrink. Still shot ?d=4&o=simplex&v=s&p=p&m=h&r=gAgAgAgAgAgA&still: the ledger reads 'W 1.29x' and 'W bends the shadow most: up to 1.29x on its nearest corner', while the Witness line on the same screen reads 'vertex 1 of 5 sits at W = +0.25, so perspective draws it 1.12 times its size'; in node projectAll gives stress 0.294 from the far corner at w = -1 (drawn 0.71x) and 1.116x for the nearest. Bar and sentence also refresh on different frames (phone shot during the opening: 1.11x against 1.05x). Rung 5 would fail anyway: observer.js coincidence uses 0.012*fitR, not 1% of the projected circumradius."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 2,
           "evidence": "constants.js GLOSS has one line per dimension 1D–6D (glossFor); Console._syncReadout prints the fold chain (4D → 3D in the screenshot); .dx-hint gives drag / scroll / dial; _tickCaption names plane and angle. Rung 3 fails: past 6D, GLOSS[6] ('past here one 3D shadow cannot separate the corners. read the rule, not the shape.') and the legibility-wall caption ('one shadow can't hold 1,024 corners apart') assert that the corners cannot be separated but give no reason."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Rung 1 fails (skeptic upheld): the title 'Turn an axis you cannot point at.' is present, but no line tells the visitor how to drag and zoom. A grep of md_animation_page.html, main.js, controls.js, constants.js, narrator.js and observer.js finds no orbit, scroll, wheel or pinch hint; the only related text is the 'drag orbits' toggle label and its hover title, the 'zoom' slider label, and the keys line inside the collapsed 'sources and keys' details, which names only shift-drag / two-finger hidden turns and vertex clicks. Neither the desk nor the phone shot shows a hint; G0's .dx-hint line was removed. The 11-step TOUR, the Flatland step, EXPLAIN, the mechanism drawer and the quiz sit above the failed rung 1 (and rung 2 fails too: no fold chain, no per-dimension gloss)."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 3,
           "evidence": "main.js shows .dx-nowebgl when Renderer init fails; RENDER.pixelRatioMax 1.5 and LOOP.maxDt 0.05; dom.js resolveMotion freezes on prefers-reduced-motion or ?still (paused, unfold 1, trails off) with a ?motion override, and the CSS drops transitions. Rung 4 fails: at 600 px and below the bottom-sheet panel covers the fixed #dx-ledger and caption. Rung 5 would also fail: .dx-slider and .dx-scrub set outline: none and the dial div takes no focus."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Not disputed; rater's grade kept. Rung 2: #nogl plus NullStage without WebGL, pixelRatio min(dpr, 1.5), dt = min(0.05, raw). Rung 3: dom.resolveMotion honours ?still and prefers-reduced-motion (paused, ign = 1, static trails) with a ?motion override (still shot: the pause button reads 'still', disabled). Rung 4 fails: at phone width the caption, figure, ledger and witness do not overlap, but the panel is a stacked scroll, not a bottom sheet, and _canvasHands sets stage.controls.enabled = false on a second pointer, so pinch zoom is reassigned to the hidden-plane turn."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 3,
           "evidence": "Nine ES module files (main, constants, dom, n_dimensional_cube, PlaneSet, Renderer, TrailField, Witness, Console) with constants.js for tuning meet rung 3; PRESETS, PROJECTION and SLIDERS are row tables. Rung 4 fails: the 0.3 denominator clamp in HyperCube.project, PointsMaterial opacity 0.9 in Renderer.buildCube, unfold < 0.98 in Console._tickCaption, and the literal 3 for the first hidden axis in HyperCube.project instead of PLANE.hiddenFrom; foldPlanes and SPATIAL_PLANES in n_dimensional_cube.js are exported and imported nowhere. No tests exist."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Not disputed; rater's grade kept. Separate ES modules for geometry (linalg, polytopes, slice, project), rendering (stage3d, panels, inset), controller (main), UI (controls) and constants.js; node engine.test.mjs runs with no browser (371 passed, 0 failed). Rung 4 fails: bare literals remain outside constants.js (observer.js 0.012 duplicating the unused RENDER.coincide, inset.js clamp 0.3, main.mechanismText 0.035, main._linking 0.93/0.04, panels.js MatrixView rgba opacities and n <= 6, stage3d sheet opacity 0.85, slice.js ON = 1e-9), and projection and inset modes dispatch through if/else chains."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "ddbf7ec" }
   ]
 }
