@@ -151,6 +151,17 @@ export function analyze(trace, upto) {
 
   // a stream that did not come out of a generator at generation speed
   const buffered = iti.length >= 8 && coalesced / iti.length > 0.5;
+  // fresh-generation guards: more than half the waits under 1 ms (a cache or a replay), or over 90 percent
+  // of the chunks inside one 50 ms window (a whole answer delivered in one burst)
+  const cached = iti.length >= 8 && iti.filter((x) => x < 1).length / iti.length > 0.5;
+  let densest = 0;
+  for (let i = 0, j = 0; i < n; i++) {
+    while (chunks[i].t - chunks[j].t > 50) j++;
+    densest = Math.max(densest, i - j + 1);
+  }
+  const oneBurst = n >= 10 && densest / n > 0.9;
+  const invalid = oneBurst ? 'the whole answer arrived in one burst: over 90% of the chunks inside 50 ms'
+    : cached ? 'more than half the waits are under 1 ms: a cached or replayed stream, not fresh generation' : '';
 
   return {
     n,
@@ -161,7 +172,7 @@ export function analyze(trace, upto) {
     tDone: complete ? trace.tDone : NaN,
     span,
     rateAll: n > 1 ? (n - 1) / (span / 1000) : NaN,
-    rate: pos.length ? pos.length / (pos.reduce((s, x) => s + x, 0) / 1000) : NaN,
+    rate: !invalid && pos.length ? pos.length / (pos.reduce((s, x) => s + x, 0) / 1000) : NaN,
     think: hasThink ? { n: nThink, rate: phaseRate(0, firstAnswer < 0 ? n : firstAnswer) } : null,
     answer: hasThink && firstAnswer >= 0 ? { n: n - firstAnswer, rate: phaseRate(firstAnswer, n) } : null,
     iti,
@@ -186,6 +197,9 @@ export function analyze(trace, upto) {
     drift: { msPer1k: fit.slope * 1000, r2: fit.r2, n: xs.length, from: xs[0], to: xs[xs.length - 1] },
     coalesced,
     buffered,
+    cached,
+    oneBurst,
+    invalid,
     server,
     chars: chunks.slice(0, n).reduce((s, c) => s + c.text.length, 0),
   };

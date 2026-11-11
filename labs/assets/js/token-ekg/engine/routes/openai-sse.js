@@ -32,6 +32,7 @@ export async function record(o) {
     stream_options: { include_usage: true },
     ...(o.options?.temperature != null ? { temperature: o.options.temperature } : {}),
     ...(o.options?.num_predict != null ? { max_tokens: o.options.num_predict } : {}),
+    ...(o.options?.seed != null ? { seed: o.options.seed } : {}),
   };
   const t0 = clock();
   const res = await fetch(o.base.replace(/\/+$/, '') + ROUTE.path, {
@@ -50,11 +51,13 @@ export async function record(o) {
   const reader = res.body.getReader();
   const dec = new TextDecoder();
   const chunks = [], handler = [];
-  let buf = '', reads = 0, coalesced = 0, usage = null, model = o.model, tDone = null, finish = '';
+  let buf = '', reads = 0, coalesced = 0, usage = null, model = o.model, tDone = null, finish = '', sawData = false, sample = '';
 
   const take = (line, t, counter) => {
     const L = line.trim();
+    if (!sample && L) sample = L.slice(0, 120);
     if (!L.startsWith('data:')) return;
+    sawData = true;
     const p = L.slice(5).trim();
     if (!p) return;
     if (p === '[DONE]') { tDone = t; return; }
@@ -90,6 +93,7 @@ export async function record(o) {
   }
   if (buf.trim()) take(buf, clock() - t0, { n: 0 });
   if (tDone == null) tDone = clock() - t0;
+  if (!sawData) throw new Error(`the body was not server-sent events${sample ? ': ' + sample : ''}`);
 
   const text = chunks.map((c) => c.text).join('');
   handler.sort((a, b) => a - b);

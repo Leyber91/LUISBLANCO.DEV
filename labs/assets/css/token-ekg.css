@@ -439,3 +439,6 @@ input[type="number"]:focus, input[type="text"]:focus { border-color: var(--horiz
   .transport { gap: 6px; }
 }
 .seg button { white-space: nowrap; }
+
+/* the shared route pill: its public-route dot is gold in other labs; here gold is kept for a live measurement */
+#route .lbr[data-route="pollinations"] .lbr-dot { background: var(--horizon); box-shadow: none; }

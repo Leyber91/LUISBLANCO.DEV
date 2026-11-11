@@ -20,7 +20,7 @@ import { mountRoutePanel } from '../ai/route-panel.js';
 import { OLLAMA, PROMPTS, LIVE_PRESETS, SWEEP, PARALLEL, TOKENIZERS, ANALYSIS, longContext } from './config.js';
 import { analyze, fmtMs, quantile, mannWhitney, ks2, events } from './engine/stats.js';
 import * as Ollama from './engine/routes/ollama.js';
-import * as SSE from './engine/routes/openai-sse.js';
+import { streamingRoutes } from './engine/routes/index.js';
 import * as Shelf from './engine/traces.js';
 import { validateTrace } from './engine/schema.js';
 import { headline, provenance, TOUR } from './engine/narrate.js';
@@ -155,7 +155,7 @@ function renderNarr() {
   const t = S.A;
   const live = isLiveTrace(t);
   const tag = S.tour.on ? `<span class="tag">tour ${S.tour.i + 1} / ${tourList().length}</span>` : live ? '<span class="tag live">live</span>' : '';
-  const warn = S.aFull.buffered ? ' Most chunks arrived together: this stream was buffered on the way, so its intervals time the transport, not the model.' : '';
+  const warn = S.aFull.invalid ? ` Not measured as generation: ${S.aFull.invalid}; no decode rate is given.` : S.aFull.buffered ? ' Most chunks arrived together: this stream was buffered on the way, so its intervals time the transport, not the model.' : '';
   const notice = t.notice ? ` The reply was a notice, not model output: "${t.notice}".` : '';
   $('narr').innerHTML = tag + esc(headline(t, S.aFull) + warn + notice);
 }
@@ -164,8 +164,9 @@ function renderSource() {
   const t = S.A;
   const p = provenance(t);
   const live = isLiveTrace(t);
-  $('badge').dataset.k = live ? 'live' : S.aFull.buffered ? 'buffered' : t.origin;
-  $('badge-what').textContent = live ? 'live stream' : S.aFull.buffered ? 'buffered stream' : t.kind === 'oneshot' ? `${p.what} · one reply` : p.what;
+  const a = S.aFull;
+  $('badge').dataset.k = live ? 'live' : a.invalid ? 'buffered' : a.buffered ? 'buffered' : t.origin;
+  $('badge-what').textContent = live ? 'live stream' : a.oneBurst ? 'invalid: one burst' : a.cached ? 'cached' : t.failed ? 'failed' : t.stopped ? 'stopped' : a.buffered ? 'buffered stream' : t.kind === 'oneshot' ? `${p.what} · one reply` : p.what;
   const place = t.placement && t.placement.size ? ` · ${(t.placement.sizeVram / 1e9).toFixed(1)} of ${(t.placement.size / 1e9).toFixed(1)} GB on GPU` : '';
   const opts = t.options && t.options.num_ctx ? ` · num_ctx ${fmt(t.options.num_ctx)}` : '';
   const pt = promptTokens(t);
@@ -285,8 +286,8 @@ function renderReadouts() {
   const [p, pu] = splitMs(a.p99);
   const [r, ru] = splitMs(a.rmssd);
   RO.innerHTML =
-    cell(waiting ? 'waiting' : 'first token', f, fu, 'request sent to first chunk read', 'TTFT = t of the first chunk, ms after the request was sent', waiting && live) +
-    cell('decode rate', fmt(a.rate, 1), 'tok/s', 'unbuffered waits / their sum', 'rate = count(waits >= 2 ms) / sum(those waits); one chunk is one token on Ollama', live && !waiting) +
+    cell(waiting ? 'waiting' : 'first token', f, fu, Number.isFinite(a.ttfa) ? `first answer token ${fmtMs(a.ttfa)}, after the thinking` : 'request sent to first chunk read', 'TTFT = t of the first chunk, ms after the request was sent; with thinking, the first answer token is the second figure', waiting && live) +
+    cell('decode rate', fmt(a.rate, 1), 'tok/s', a.invalid ? 'none: not fresh generation' : 'unbuffered waits / their sum', 'rate = count(waits >= 2 ms) / sum(those waits); one chunk is one token on Ollama', live && !waiting) +
     cell('median wait', m, mu, `mean ${fmtMs(a.mean)} ± ${fmtMs(a.sd)} sd`, 'p50 of the unbuffered waits between chunks') +
     cell('p99 wait', p, pu, `p90 ${fmtMs(a.p90)}; 1 in 100 is longer`, '99th percentile of the unbuffered waits, linear interpolation') +
     cell('RMSSD', r, ru, 'root mean square of successive differences', 'sqrt(mean((w_i - w_(i-1))^2)), Task Force 1996') +
@@ -329,7 +330,10 @@ function renderCheck() {
   if (mt && bench?.tk?.[mt.id] && a.n) {
     const txt = t.chunks.slice(0, a.n).map((c) => c.text).join('');
     const n = bench.tk[mt.id].encode(txt).length;
-    html += row('re-tokenized', `${fmt(n)} tok`, show ? `${fmt(s.evalCount - 1)} = eval_count - 1` : pend, `the streamed text through the model's own tokenizer (${esc(mt.short)}, in this page)${show ? (n === s.evalCount - 1 ? ': exact' : `: differs by ${n - (s.evalCount - 1)}`) : ''}`);
+    const eos = show && s.doneReason === 'stop' ? 1 : 0;
+    const think = show && a.think ? ' (a thinking run also spends tokens on the tags around its reasoning, which are not sent, so it does not add up here)' : '';
+    html += row('re-tokenized', `${fmt(n)} + ${eos} = ${fmt(n + eos)} tok`, show ? `${fmt(s.evalCount)} eval_count` : pend,
+      `the streamed text through the model's own tokenizer (${esc(mt.short)}, in this page), plus ${eos ? 'one end-of-turn token (done_reason stop)' : 'no end-of-turn token (the run hit its length limit)'}${show ? (n + eos === s.evalCount ? ': exact' : `: differs by ${n + eos - s.evalCount}`) : ''}${think}`);
   }
   if (s || !t.final) {
     html += row('decode rate', `${fmt(a.rate, 1)} tok/s`, show ? `${fmt(s.rate, 1)} tok/s` : (t.final === null && t.tDone != null ? 'not reported' : pend), show ? `differ by ${fmt(Math.abs(1 - a.rate / s.rate) * 100, 1)}%` : '');
@@ -377,7 +381,7 @@ function tokensPerChunk(t, a) {
   if (!k || !a.n) return row('tokens per chunk', '-', '-', 'needs the model\'s own tokenizer (Qwen3 or Mistral here)');
   const dist = {};
   let tot = 0;
-  for (const c of t.chunks.slice(0, a.n)) { const m = k.encode(c.text).length; dist[m] = (dist[m] || 0) + 1; tot += m; }
+  for (const c of t.chunks.slice(0, a.n)) { const m = k.encode(c.text, { noPrefix: true }).length; dist[m] = (dist[m] || 0) + 1; tot += m; }
   return row('tokens per chunk', `${fmt(tot)} tokens`, `${fmt(tot / a.n, 2)} per chunk`,
     `${esc(mt.short)} tokenizer on each chunk alone; chunks holding k tokens: ${Object.entries(dist).map(([x, v]) => `${x}: ${v}`).join(', ')}`);
 }
@@ -598,14 +602,7 @@ $('clear-saved').addEventListener('click', () => {
 /* ---------------- measure: live streams ---------------- */
 let models = [];
 let udhrFull = null;
-const ROUTES = () => {
-  const own = LLM.ownKey();
-  return [
-    { id: 'ollama', label: 'Ollama /api/chat (NDJSON)', adapter: Ollama, base: OLLAMA.base },
-    { id: 'ollama-v1', label: 'Ollama /v1 (OpenAI SSE)', adapter: SSE, base: OLLAMA.base + '/v1' },
-    ...(own ? [{ id: 'own-key', label: `your key: ${own.base}`, adapter: SSE, base: own.base, key: own.key, model: own.model }] : []),
-  ];
-};
+const ROUTES = () => streamingRoutes({ ollamaUp: models.length > 0 });
 
 async function probeOllama() {
   const ctrl = new AbortController();
@@ -697,7 +694,7 @@ async function recordOne(cfg, i, n) {
   const meta = models.find((m) => m.name === model) || {};
   const trace = {
     id: Shelf.newId('live'), label: `${model}, ${kind === 'custom' ? 'your prompt' : PROMPTS[kind].label}${think ? ', thinking' : ''}${n > 1 ? `, run ${i + 1} of ${n}` : ''}`,
-    origin: 'live', kind: 'stream', route: route.adapter.ROUTE.id, recorder: `browser, engine/routes/${route.adapter === Ollama ? 'ollama' : 'openai-sse'}.js`,
+    origin: 'live', kind: 'stream', route: route.id, recorder: `browser, engine/routes/${route.adapter === Ollama ? 'ollama' : 'openai-sse'}.js`,
     recorded: new Date().toISOString(), model, params: meta.params || '', quant: meta.quant || '',
     promptKey: kind, promptChars: prompt.length,
     promptPreview: kind === 'long' ? `[the full UDHR in English, ${udhrFull.length} characters] ${PROMPTS.long.text}` : prompt,
@@ -771,7 +768,9 @@ $('m-go').addEventListener('click', async () => {
   $('m-go').disabled = true; $('m-stop').disabled = false;
   const done = [];
   for (let i = 0; i < n; i++) {
-    const r = await recordOne({ route, model: $('m-model').value, kind, prompt, options: { ...options, ...(n > 1 ? { seed: 1000 + i } : {}) }, think, batch }, i, n);
+    // a fresh seed on every run: a nonce, so no cache can answer a repeated prompt
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    const r = await recordOne({ route, model: route.model || $('m-model').value, kind, prompt, options: { ...options, seed }, think, batch }, i, n);
     if (r.trace.chunks.length) done.push(r.trace);
     if (r.aborted) break;
   }

@@ -73,6 +73,18 @@ for (const [name, tk] of Object.entries(toks)) {
   }
 }
 
+{
+  // three prompts per tokenizer, two of them cut by the length limit (no end-of-turn token)
+  const rec = JSON.parse(read('traces.json')).traces.filter((t) => t.group === 'retok');
+  for (const t of rec) {
+    const tk = t.model.startsWith('qwen3') ? toks.qwen3 : toks['mistral-v03'];
+    const n = tk.encode(t.chunks.map((c) => c[2]).join('')).length;
+    const eos = t.final.done_reason === 'stop' ? 1 : 0;
+    ok(n + eos === t.final.eval_count, `${t.id}: re-tokenized ${n} + ${eos} end-of-turn = eval_count ${t.final.eval_count}`);
+  }
+  console.log(`re-tokenize: ${rec.length} recordings on ${new Set(rec.map((t) => t.promptKey)).size} prompts checked against eval_count`);
+}
+
 /* ---- 2. statistics ---- */
 const rec = JSON.parse(read('traces.json')).traces.map((t) => ({ ...t, chunks: t.chunks.map(([t0, k, x]) => ({ t: t0, kind: k, text: x })) }));
 const byId = Object.fromEntries(rec.map((t) => [t.id, t]));

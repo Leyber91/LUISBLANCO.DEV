@@ -105,7 +105,7 @@ export const CATEGORIES = [
     projects: [
       { id: 'token-ekg', title: 'Token EKG', status: 'built',
         href: 'token-ekg.html',
-        blurb: 'Times a token stream chunk by chunk and checks the page\'s clock against the server\'s own counters, with 74 recorded runs to replay and compare. Four real tokenizers price one sentence in 23 languages, from 33 tokens to 512.' },
+        blurb: 'Times a token stream chunk by chunk and checks the page\'s clock against the server\'s own counters, with 80 recorded runs to replay and compare. Four real tokenizers price one sentence in 23 languages, from 33 tokens to 512.' },
       { id: 'dataspace', title: 'DATASPACE', status: 'built',
         href: 'dataspace.html',
         blurb: 'Compress a whole conversation into a capsule only a model can rebuild: it falls to a lensed horizon as measured bits, a fresh model reconstitutes it, and every lost word escapes as radiation. Degradation, measured.' },

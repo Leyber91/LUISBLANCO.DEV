@@ -220,9 +220,10 @@ export function sentencePieceFromText(id, text) {
     return utf8.encode(s.split(META).join(' '));
   }
 
-  function encode(text) {
+  /** opts.noPrefix: leave out the start-of-text space marker, to count a piece cut from the middle of a text. */
+  function encode(text, opts = {}) {
     const out = [];
-    let first = true;
+    let first = !opts.noPrefix;
     for (const part of splitSpecials(text, specialRe, specials)) {
       if (part.special !== undefined) { out.push(part.special); first = false; continue; }
       let s = part.text.split(' ').join(META);
