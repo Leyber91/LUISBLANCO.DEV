@@ -264,8 +264,11 @@ function regenerate(p, lab, msg) {
     const w = run('node', ['tools/levels.mjs', 'write'], { cwd: p });
     if (w.ok && git(['status', '--porcelain', '--', ...GENERATED], p).out) {
       git(['add', '--', ...GENERATED], p);
-      git(['commit', '-m', 'levels: regenerate table and hub data'], p);
-      msg += '; regenerated the level table';
+      // Line-ending normalisation can make status report a change that add then erases.
+      if (!git(['diff', '--cached', '--quiet', '--', ...GENERATED], p).ok) {
+        git(['commit', '-m', 'levels: regenerate table and hub data'], p);
+        msg += '; regenerated the level table';
+      }
     }
   }
   console.log(msg);
