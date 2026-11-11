@@ -177,7 +177,7 @@ export const CATEGORIES = [
         blurb: 'Watch a reasoning model argue with itself about what is funny — draft a slate, score each line against a taste rubric, commit, and composite a downloadable event-horizon meme.' },
       { id: 'trends', title: 'Trending Topics', status: 'built',
         href: 'trending.html',
-        blurb: 'A live agentic scan: it fetches real signals from the open web in your browser, ranks what is actually rising, and a model explains why.' },
+        blurb: 'What is rising across Hacker News, GitHub and three Wikipedia editions, measured from your browser: rates against baselines with 95% intervals, topics joined across sources, and stored scans that check whether the last calls held.' },
       { id: 'ugc', title: 'User-Generated Content', status: 'planned',
         blurb: 'Tools that turn an audience into co-authors.' },
     ],
