@@ -51,6 +51,7 @@ const POLL_WINDOW_MS = 46000;            // 45 s per IP, plus a second of slack
 // 127.0.0.1, not localhost: on Windows localhost tries ::1 first and took 1.6 s to connect (2026-11-11).
 const OLLAMA_BASE = 'http://127.0.0.1:11434';
 const OLLAMA_PROBE_MS = 2500;
+const OLLAMA_NUM_CTX = 8192;
 const OLLAMA_PREFER = ['qwen2.5:14b', 'llama3.1:8b', 'qwen3:8b', 'gemma2:9b'];
 const DEFAULT_TIMEOUT_MS = 60000;
 const OWN_KEY_STORE = 'lb.llm.ownkey';
@@ -218,7 +219,9 @@ class Route {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
       body: JSON.stringify({
         model: this._ollamaModel, messages, stream: false,
-        options: { temperature: opt.temperature ?? 0.7, ...(opt.seed != null ? { seed: opt.seed } : {}) },
+        // num_ctx: an Ollama app set to a 262k context loads llama3.1:8b at 131k and 21.6 GB of memory
+        // (measured 2026-11-11); 8k is ample for a lab call.
+        options: { temperature: opt.temperature ?? 0.7, num_ctx: OLLAMA_NUM_CTX, ...(opt.seed != null ? { seed: opt.seed } : {}) },
         ...(opt.json ? { format: 'json' } : {}),
       }),
     });
