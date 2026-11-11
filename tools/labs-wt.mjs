@@ -203,9 +203,23 @@ function cmdSync(n, from = 'main') {
   const lab = byName(n);
   const p = wtPath(lab);
   if (git(['status', '--porcelain'], p).out) die(`${lab.name} has uncommitted changes; commit them first`);
+  // A branch cut before the latest foundation commit takes the foundation first, so a squash-merged
+  // main does not meet it as a set of "both added" conflicts.
+  if (from === 'main' && git(['rev-parse', '--verify', 'labs/foundation']).ok &&
+      !git(['merge-base', '--is-ancestor', 'labs/foundation', 'HEAD'], p).ok) {
+    const f = git(['merge', '--no-edit', 'labs/foundation'], p);
+    if (!f.ok) {
+      git(['merge', '--abort'], p);
+      die(`merge of labs/foundation into labs/${lab.name} conflicted and was aborted:\n${f.out}`);
+    }
+  }
   const r = git(['merge', '--no-edit', from], p);
-  console.log(r.ok ? `merged ${from} into labs/${lab.name}` : `merge of ${from} into labs/${lab.name} stopped:\n${r.out}\n${r.err}`);
-  if (!r.ok) process.exitCode = 1;
+  if (r.ok) { console.log(`merged ${from} into labs/${lab.name}`); return; }
+  const conflicts = git(['diff', '--name-only', '--diff-filter=U'], p).out;
+  git(['merge', '--abort'], p);
+  console.log(`FAILED: merge of ${from} into labs/${lab.name} conflicted and was aborted; the worktree is unchanged.\n` +
+    `conflicting files:\n${conflicts || r.out}`);
+  process.exitCode = 1;
 }
 
 async function cmdShip(n) {
