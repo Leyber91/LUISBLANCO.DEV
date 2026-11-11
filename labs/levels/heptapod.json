@@ -26,6 +26,10 @@
         "G0": {
           "level": 1,
           "evidence": "LEX entries in heptapod.html carry fixed features f={limbs,closed,w,neg,plural,orbit} that glyph() draws as limbs, ring closure, stroke weight, plural dots, orbit ring and strike-through (rung 1); nothing comes from the sentence. Fails rung 2: 'not' maps to its own 'negation' LEX entry and draws a separate struck circle (screenshot), and 'we offer' and 'they offer' draw the identical 'offer (give)' glyph. No roles, tense, aspect, mood, evidentiality or embedding."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Dispute upheld; rater's 5 lowered to 4. Rungs 1-4 hold as the rater found: each concept's class radical sits in cell 0 of its six-cell code (script.js makeCode); negation is the 14-degree cut in the proposition ring (CATEGORIES.neg), with no separate element; agent, patient and recipient take the W, E and S sectors; tense (tendril lean) and aspect (slot mark) are separate operators, and the 9 tense-aspect combinations draw 9 distinct semagrams. Fails rung 5: the rung asks declarative, interrogative and imperative to 'map to three predicate operators', but script.js CATEGORIES.mood.values.indicative is {band:'none', mark:null, op:'nothing'} (confirmed headless), so only two mood operators exist (hook, spear) and a statement draws none. The same rung allows number to be marked 'without and with a number operator', so the unmarked option was offered for number and not for mood. Rung 6 also fails (rater): 'must' does not parse, 'may' folds into the potential mood, and 'they say' sets no reported evidential. Rung 7 fails too: clauses nest only one level deep."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 1,
           "evidence": "render() appends one .gcell per token into the flex-wrap .glyphs row, so every content word gets a mark (rung 1); the screenshot shows 6 separate circles in a row for 'the visitors offer a tool we do not understand'. Fails rung 2: each glyph() call returns a stand-alone 104 px SVG with no shared core stroke, seeded by rng(entry.g) alone, so no edit to one word changes another word's glyph."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Two disputes, both upheld; the lower (0) stands. Fails rung 1 ('every content word of the input is represented by at least one drawn mark'). grammar.js parseNP drops any unknown word between a determiner and a noun ('qualities are not written in this script'), and the lexicon has no adjectives. A headless parse and a shot of heptapod.html?still#s=The+tall+visitors+gave+us+a+new+language. agree: the token strip tags 'tall' and 'new' UNK, the status line says both were dropped, the semantic graph holds 9 fields with no place for either, and the page reads back 'The visitors gave us a language.' An unknown adverb or verb blocks the whole encode, so nothing new is drawn: 'The visitors quickly gave us a language.' gives '\"quickly\" is not a verb in the lexicon'. The connective dispute also holds and would cap the axis at 4. grammar.js CONN holds only because, although, though, after and before. 'We learned the language but/and/so the ship left.' each give '\"but\" (\"and\", \"so\") is not something this grammar can place'. The work above rung 1 (one ring per clause, paraphrase pairs drawing equal graphs, the whole-ring layout in script.js layoutFor, a two-clause composite with a REF coreference code for 'even though') runs but cannot count."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 1,
           "evidence": "The 'round-trip decode' pane lists each glyph's gloss (rung 1), but render() fills it from tok.entry.g, the encoder's own token list. Fails rung 2: no function reads the SVG geometry and there is no noise, so 'every glyph round-trips to exactly one meaning' holds by construction and is never tested."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Dispute upheld; rater's 6 lowered to 1. Rung 1: the hero's 'read back from the pixels' line and the noise panel's per-field list (views.js showFields) give the meaning of each drawn element. Fails rung 2 on 'with a pass count shown'. The page shows only one sentence's field tally: main.js readBack writes 'N of M graph fields recovered', and views.js update writes 'PASS: all N fields recovered'. A grep of main.js, views.js and heptapod.html finds no count of deck or typed sentences decoded exactly. The only sentence-level count, 'pixel round trip: 163 / 163', is selftest.mjs console output. The 'measure' sweep counts inkings of one sentence. The skeptic's secondary point about a 'canvas' image is not used here: reader.js reads a byte raster that ink.js renders. Above the failed rung, the raster decoder, the live jitter, dropout and blot controls, and the bench curve cannot count. The bench curve also comes from the stored bench.json: jitter 3.54, dropout 17.94, blots 57.07, and the rater's rerun gives dropout 17.89."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 2,
           "evidence": "Free text encodes against LEX in heptapod.html: 36 hand-listed concepts with synonym lists, 144 listed trigger phrases, 143 distinct ('present' is listed under both offer and this-moment; MAP keeps the later one), a 26-word STOP list; unseen content words draw the rose dashed fallback glyph (rung 2). Fails rung 3: 36 concepts, no part of speech, no source, no coverage measurement."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "No dispute; rater's grade kept. Rung 1: the presets encode against the stored lexicon (lexicon-data.js). Fails rung 2: an unknown noun gets the fallback radical (read back as 'something'), but an unknown adjective is dropped with only a text warning (grammar.js parseNP; confirmed headless and in a shot of 'The tall visitors gave us a new language.'). An unknown verb or adverb blocks the whole encode ('quickly'). Synonym folding covers nouns only (lexicon.js NOUN_SYN). The 322 concepts with part of speech and gloss would meet rung 3, but rungs are cumulative, so they cannot count."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 1,
           "evidence": "encode() in heptapod.html maps typed words to LEX concepts by greedy longest-match over MAP (MAXW-word window) with a regex strip of 's and s and STOP elision (rung 1). Fails rung 2: it returns a flat token list; no predicate or argument slot exists, and the decode pane shows a flat gloss list. llm.js is not loaded."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Two disputes, both upheld; the lower (0) stands. Fails rung 1, 'dictionary lookup, single or multi-word, with suffix stripping'. grammar.js tokenize matches /[a-z]+/ one token at a time, and lexicon.js NOUN_FORMS and VERB_FORMS hold 0 keys containing a space (counted headless), so no multi-word expression is ever looked up. Inflections come from pre-generated full-form tables (regPlural, regS, regPast, regIng), not from suffix stripping. G0 earned rung 1 with a multi-word longest match, and G1 removed it. On the page path, 'The visitors gave up the ship.' becomes 'The visitors gave something the ship.' Rung 3 fails independently, so even a lenient reading of rung 1 gives 2. tagTokens has no adjective tag and no general adverb tag: 'tall', 'new' and 'quickly' are tagged UNK, the label an unknown noun gets (desk shot of 'The tall visitors gave us a new language.'), so modifiers are not told apart. The role parser, the llm.js model route with its validateGraph fallback and the showCompare side-by-side all run, but they cannot count."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "glyph() builds 104 px SVGs procedurally from each entry's feature vector f (circles, arcs, quadratic limbs), and setActive() recolors blue to amber on hover (rung 2). Fails rung 3: stroke-width is set once per path, a constant width. Every glyph appears at once with no writing animation; the WebGL fbm shader is background only."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Two disputes, both upheld; the lower (2) stands. Rung 1 holds: a mark is drawn for each encoded concept. Rung 2 holds: strokes are computed from the spec (geometry.js specStrokes and propStrokes), and the hovered role recolors gold (render.js drawInk goldOf). Fails rung 3, 'width varies along its length by a pressure profile'. render.js fillStroke does fill a variable-width outline. But in propStrokes, every ring stroke (every role and slot sector, most of the ink) takes w = W0 * nib(deg) * ringW(wmul, deg). That width comes from the broad nib's direction of travel and the plural weight, with a taper only beside a negation cut. No pressure profile runs along a ring stroke; only the marks, the tendril and the bridge carry a w0-to-w1 taper. Rung 4 also fails; I checked it headless with specStrokes. Mark dots carry ts = 0.4 + 0.2*di, so the inferred evidential's three dots appear at 0.40, 0.60 and 0.80 of the grow. The tendril's tip dot has ts 1.00. For 'Apparently, the visitors were not giving us a gift.' the ring strokes on either side of the negation cut start at ts 0.37 and 0.33. render.js drawInk skips any dot or segment whose ts exceeds p, so on the real grow path these strokes start at different times."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 1,
           "evidence": "Site tokens applied (--void, IBM Plex Mono, blue strokes, .bp corner marks) (rung 1). Fails rung 2: amber is not kept for the active glyph; the decode readout .lit spans (--amber2 #FFD27A) and the glyph count (.ratio b, --amber) are amber at rest in the screenshot. Glyphs are generic rings with radial limbs, close to the film's circular logograms. Also fails rung 3: .stage declares grid-template-rows 'auto auto 1fr auto' for 5 children, so the input row takes the 1fr track; the screenshot shows a ~450 px tall input panel and the glyphs squeezed into a ~130 px band below it."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "No dispute; rater's grade kept. Rung 1: the tokens.css palette, IBM Plex Mono and the .bp corner marks are applied (desk.png). Fails rung 2: amber appears at rest in lab content that is neither hovered nor selected. Examples are the key cards' .param lines and the once panel's reader verdict (rater). On the noise chart, views.js drawChart strokes the breaking-point line in P.gold and writes its 'breaks at' label in P.goldSoft whenever bench.json loads, with no hover involved."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 2,
           "evidence": "The input listener re-renders on every keystroke, 5 DECK buttons fill the input, and .gcell highlights on mouseenter/mouseleave (rung 2). Fails rung 3: no click, tap or keyboard selection or pin; no grammar controls, no URL state."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Both disputes upheld; rater's 6 lowered to 5. Rungs 1-5 hold (rater): preset chips; the input re-encodes 320 ms after typing; a click on #sem pins an element; editor.js toggles morph the ring and rewrite the English; brush erase and ink discs on the np-page canvas re-read through views.js update(). Fails rung 6, 'sentence, toggles and noise are encoded in the link'. main.js writeHash stores only s, a/r/b and n=type:value. The ink seed is left out: the views.js 'reink' handler changes st.seed and calls schedule() but never state.onUrl, and the hash has no seed key. The brushed damage (st.brush) is left out too, though rung 5 itself calls it noise. There is no hashchange listener. A shared damaged semagram therefore reloads with seed 1 and no brush marks. The skeptic's live test showed this: jitter 3 reads PASS on load and FAIL after one 'new ink', with the hash unchanged. Sentence and toggles do restore."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 1,
           "evidence": "Title, kicker and .sub caption present (rung 1); the .sub and footer describe limbs/closure/weight and carry [real]/[illustrative] tags. Fails rung 2 on false statements: the footer says function words are elided 'as a logographic script does', but Chinese writes them (de, le, bu each have a character); the kicker says 'a glyph is a whole proposition' while each glyph encodes one concept; the [real]-tagged ratio labels estTokens() over a glyph count from a lossy codec '2.0x denser', which measures no information. The page also calls the script 'logograms'; no legend for orbit, plural dots, strike or inner ring; no Chiang citation, no Fermat panel."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "No dispute; rater's grade kept. Rung 1: title, kicker and .sub caption. Fails rung 2 on a false [REAL]-tagged claim. Line 220 of heptapod.html says 'every round-trip count, field accuracy and breaking point on this page is measured in your browser when you look at it'. But the breaking points are fetched from the stored bench.json (views.js fetch, showBench, and the 'breaks at' label in drawChart), and the rater's rerun of bench.mjs gives dropout 17.89 against the stored 17.94. A second false claim: the key says one misread cell is caught by the check cell, but reader.js never imports codeValid and returns the nearest codeword, so misreads pass silently (rater)."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 2,
           "evidence": "@media (max-width:820px) restacks the stage; prefers-reduced-motion or ?still pins the shader time at 6.0, so the background freezes, though the requestAnimationFrame loop still redraws every frame (rung 2). Fails rung 3: .gcell divs are not focusable and react to mouse hover only; the SVG glyphs have no role or accessible name."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "No dispute; rater's grade kept. Rung 1: the page loads with 0 console errors (my shoot). Rung 2: phone.png restacks to one column at 390 px, and prefersReduced() (or ?still) makes SemaStage.set draw with 'none'. Fails rung 3: the arrow keys walk main.js ORDER_KEYS, which holds top-level roles only. The default hero sentence's nested clause elements (sub.*) can be hovered and tapped but not selected by keyboard. Rung 4 also fails: only the hero canvas gets a decoded aria-label."
         }
       }
     },
@@ -276,11 +316,16 @@
         "G0": {
           "level": 2,
           "evidence": "One inline IIFE in heptapod.html (321 lines in the file); LEX and STOP are data tables declared above tokenize/encode/glyph/render and DECK is a data table declared after them (line 272, after render() at 244), but parser, renderer, decode readout and the WebGL background share one closure (rung 2). Fails rung 3: no module, no test."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Dispute upheld; rater's 7 lowered to 4. Rungs 1-3 hold: ES modules under labs/assets/js/heptapod/, with data tables declared apart from the functions and main.js as the wiring. Rung 4 holds: script.js CATEGORIES drives SLOT_KEYS, markFor and the reader's slots; the skeptic added a 'modal' category with only a CATEGORIES row and a GEOM.ORDER entry, and it inked and read back. Fails rung 5, 'a node test encodes and decodes at least 100 sentences'. Section 3 of selftest.mjs inks and reads 163 cases, but only 13 are sentences: the 9 PRESETS and the 4 COMPOSE_PRESETS, which go through parse (counts confirmed headless). The other 150 are randomGraph(lcg(11)) objects that never pass through English. Section 1's 3000-graph parse(realize(g)) round trip never inks or reads a semagram. So no test takes 100 sentences through encode and decode. The decoder isolation (reader.js imports only config.js, script.js and raster.js) and the four llm.js stubs in section 4 exist, but they cannot count above rung 5."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "22c8e87" }
   ]
 }
