@@ -268,9 +268,9 @@ class Route {
       const r = await fetch(POLL_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
         body: JSON.stringify({
+          // No temperature or seed: the anonymous route serves a reasoning model, and a call carrying
+          // temperature 0.1 and seed 7 came back HTTP 400 (2026-11-11); calls without them succeed.
           model: POLL_MODEL, messages, referrer: 'luisblanco.dev',
-          ...(opt.temperature != null ? { temperature: opt.temperature } : {}),
-          ...(opt.seed != null ? { seed: opt.seed } : {}),
           ...(opt.json ? { response_format: { type: 'json_object' } } : {}),
         }),
       });
