@@ -19,13 +19,16 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const JS = path.join(ROOT, 'labs', 'assets', 'js');
 
+/* The file names labs use for a self-contained Node check. */
+const TEST_NAMES = new Set(['tests.mjs', 'test.mjs', 'verify.mjs', 'selftest.mjs', 'self-test.mjs', 'check.mjs']);
+
 function findTests(dir) {
   const out = [];
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) out.push(...findTests(p));
-    else if (e.name === 'tests.mjs' || e.name.endsWith('.test.mjs') ||
-      (e.name === 'run.mjs' && path.basename(dir) === 'tests') || e.name === 'verify.mjs') out.push(p);
+    else if (TEST_NAMES.has(e.name) || e.name.endsWith('.test.mjs') ||
+      (e.name === 'run.mjs' && path.basename(dir) === 'tests')) out.push(p);
   }
   return out;
 }
