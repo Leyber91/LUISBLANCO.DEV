@@ -9,7 +9,7 @@ merged. A run that changed nothing still writes its entry, with the reason.
   rate-distortion curve and scores what survived on numbers, dates, names and turns as well as letters.
 - A lossless floor is measured live in the browser by three compressors (DEFLATE, Brotli, PPM order 4). On the
   Canterbury Corpus file alice29.txt the page is within 0.56% of gzip -6.
-- 160 recorded runs from three local models (llama3.1:8b, qwen3:8b, granite4.1:3b) ship with their prompts, seeds
+- 159 recorded runs from three local models (llama3.1:8b, qwen3:8b, granite4.1:3b) ship with their prompts, seeds
   and raw replies. On the default sample a plain head-cut baseline beats all three models on letter-level fidelity
   at levels 1 to 4; the page shows that as measured.
 - Independent grade on the lab's own ladder (a rater who did not build it, two skeptics): level 2 to 3. Weakest:

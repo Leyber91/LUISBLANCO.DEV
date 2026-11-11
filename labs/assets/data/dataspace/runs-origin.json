@@ -60,41 +60,6 @@
    "at": "2026-11-11T10:15:02.350Z",
    "error": null
   },
-  "b.origin.llama3.1-8b.r1.L1": {
-   "id": "b.origin.llama3.1-8b.r1.L1",
-   "stage": "rebuild",
-   "ok": true,
-   "model": "llama3.1:8b",
-   "seed": 1,
-   "request": {
-    "model": "llama3.1:8b",
-    "messages": [
-     {
-      "role": "system",
-      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
-     },
-     {
-      "role": "user",
-      "content": "CAPSULE:\nUser restarts AI project under different names; Assistant identifies common goal, names DATASPACE as first iteration."
-     }
-    ],
-    "stream": false,
-    "options": {
-     "temperature": 0.7,
-     "seed": 1,
-     "num_ctx": 8192
-    }
-   },
-   "status": 200,
-   "raw": "USER: I'm excited to start this new project, \"Eclipse\".\n\nASSISTANT: I've noticed you've been exploring similar ideas in your previous projects, \"Nova\" and \"Aurora\". It seems like you're looking to create a comprehensive data management system.\n\nUSER: That's right! I'm trying to create a platform that can handle vast amounts of data and provide insights for businesses.\n\nASSISTANT: I think I can help you with that. The first iteration of your project could be called \"DATASPACE\", which would focus on data storage and retrieval.\n\nUSER: DATASPACE sounds like a good starting point. What features would it include?\n\nASSISTANT: DATASPACE could include data warehousing, data mining, and data visualization tools to help businesses make sense of their data.",
-   "thinking": "",
-   "promptTokens": 86,
-   "completionTokens": 166,
-   "ollamaMs": 2609,
-   "ms": 2612,
-   "at": "2026-11-11T10:15:04.049Z",
-   "error": null
-  },
   "b.origin.llama3.1-8b.r1.L2": {
    "id": "b.origin.llama3.1-8b.r1.L2",
    "stage": "rebuild",
@@ -2120,30 +2085,6 @@
  },
  "runs": [
   {
-   "id": "origin.llama3.1-8b.r1.L1",
-   "kind": "recorded",
-   "preset": "origin",
-   "level": 1,
-   "budgetWords": 47,
-   "capsule": "User restarts AI project under different names; Assistant identifies common goal, names DATASPACE as first iteration.",
-   "rebuild": "USER: I'm excited to start this new project, \"Eclipse\".\n\nASSISTANT: I've noticed you've been exploring similar ideas in your previous projects, \"Nova\" and \"Aurora\". It seems like you're looking to create a comprehensive data management system.\n\nUSER: That's right! I'm trying to create a platform that can handle vast amounts of data and provide insights for businesses.\n\nASSISTANT: I think I can help you with that. The first iteration of your project could be called \"DATASPACE\", which would focus on data storage and retrieval.\n\nUSER: DATASPACE sounds like a good starting point. What features would it include?\n\nASSISTANT: DATASPACE could include data warehousing, data mining, and data visualization tools to help businesses make sense of their data.",
-   "provenance": {
-    "route": "ollama, local recorder (record.mjs)",
-    "model": "llama3.1:8b",
-    "digest": "46e0c10c039e",
-    "quant": "Q4_K_M",
-    "params": "8.0B",
-    "ollamaVersion": "0.40.15",
-    "date": "2026-11-11T10:15:04.049Z",
-    "promptVersion": "p1",
-    "seed": 1,
-    "temperature": 0.7,
-    "repeat": 1,
-    "compressCall": "c.origin.llama3.1-8b.r1.s1",
-    "rebuildCall": "b.origin.llama3.1-8b.r1.L1"
-   }
-  },
-  {
    "id": "origin.llama3.1-8b.r1.L2",
    "kind": "recorded",
    "preset": "origin",
@@ -3200,5 +3141,13 @@
    }
   }
  ],
- "generatedAt": "2026-11-11T11:07:03.464Z"
+ "generatedAt": "2026-11-11T11:07:03.464Z",
+ "removed": [
+  {
+   "run": "origin.llama3.1-8b.r1.L1",
+   "call": "b.origin.llama3.1-8b.r1.L1",
+   "date": "2026-11-11",
+   "reason": "The model's rebuild of this capsule invented project names, one of which is on the site's privacy watchlist. The run and its rebuild call were removed rather than edited, so every remaining record stays verbatim; the shared compress call is kept for the run's other levels."
+  }
+ ]
 }
