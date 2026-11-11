@@ -1,0 +1,249 @@
+{
+  "id": "challenges",
+  "title": "Community Challenges",
+  "page": null,
+  "thesis": "A visitor runs a challenge of their own, watches the raw leaderboard crown three lucky attempts while Wilson bounds and empirical-Bayes shrinkage rank only what the data support, sees regression to the mean and survivorship act on the board, tries to game it with small samples and fails, and leaves with a challenge link whose ranking no small sample can buy.",
+  "axes": [
+    {
+      "id": "rate-estimators",
+      "name": "Rate estimator coverage",
+      "frame": "model",
+      "metric": "Which estimators of each participant's underlying success rate the engine computes and how they are checked: count of estimators and interval methods, interval coverage measured by simulation (percent of intervals that contain the true rate, against the nominal level), and agreement with published values; read the estimator module and switch the ranking rule on the page. The level is the highest rung k such that rungs 1 to k all hold.",
+      "ladder": [
+        "Absent: no estimator runs and nothing is ranked.",
+        "A static leaderboard typed into the page; no rate is computed.",
+        "Raw success rate (successes / attempts) computed per participant and sorted descending; a participant with 0 attempts is shown as unranked, never as 0% or NaN.",
+        "Wilson score interval (Wilson 1927, Journal of the American Statistical Association) at a confidence level chosen from at least 80%, 90%, 95% and 99%, with the normal quantile computed in code (not a hardcoded 1.96), and a second ranking by its lower bound shown beside the raw ranking.",
+        "Empirical-Bayes beta-binomial shrinkage: a Beta(alpha, beta) prior fitted to all participants by the method of moments, the posterior mean (s + alpha) / (n + alpha + beta) shown per participant, and the fitted alpha and beta printed. When the observed variance of raw rates is below the mean binomial variance, the page states the clamp it applies to the prior variance (checkable with the null challenge).",
+        "The prior is also fitted by marginal maximum likelihood of the beta-binomial and shown beside the moment fit. Both fits' log-likelihoods are printed, the ML value at least the moment value.",
+        "Equal-tailed Beta posterior credible interval at the chosen level, computed from the inverse regularized incomplete beta function and drawn beside the Wilson interval for each participant.",
+        "Coverage simulation: over at least 10,000 simulated participants, the percent of Wald (normal-approximation), Wilson and credible intervals that contain the true rate is shown per n bucket (at least 1-5, 6-20, 21-100, over 100) against the nominal level, with the Wald shortfall at small n visible (as documented by Brown, Cai and DasGupta 2001, Statistical Science).",
+        "Checked against published values: on the bundled 1970 batting data of Efron and Morris (1975, Journal of the American Statistical Association), 18 players with 45 at-bats each, the page shows for each player the paper's published James-Stein estimate (typed from the paper's table, table number cited), the page's own estimate under the transformation the paper states, and their absolute difference, every difference at most 0.0005 (half the last published digit). It also prints the total squared error of raw, James-Stein and beta-binomial estimates against the rest-of-season averages.",
+        "Hierarchical Bayes: the prior's hyperparameters are integrated over a stated hyperprior (grid quadrature, or MCMC with at least 2 chains and R-hat under 1.01 shown) instead of plugged in, and each participant's interval width under full Bayes is shown beside its empirical-Bayes width.",
+        "Three metric families, each with raw, interval and shrinkage estimators validated by the rung 7 coverage simulation: binomial success rates, Poisson counts over a fixed challenge window with a gamma prior, and Gaussian continuous scores such as times with a normal prior and per-participant standard error; the challenge picks its family and every view follows. The Poisson family also offers Robbins' nonparametric empirical-Bayes estimator (Robbins 1956, Proceedings of the Third Berkeley Symposium on Mathematical Statistics and Probability) beside the gamma-prior fit, both scored by mean squared error against the true rates on simulated challenges. Reference standards exceeded: Robinson (2017, Introduction to Empirical Bayes: Examples from Baseball Statistics), the standard static walkthrough of beta-binomial shrinkage on batting data, and the empirical Bayes and James-Stein chapters of Efron and Hastie (2016, Computer Age Statistical Inference, Cambridge University Press)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; site.config.js lists challenges with status 'planned' and no file under labs/ or labs/assets/js/ computes a rate or an interval for it" } }
+    },
+    {
+      "id": "rank-uncertainty",
+      "name": "Rank uncertainty",
+      "frame": "model",
+      "metric": "Whether the page computes the uncertainty of each participant's rank, not only of their rate: count of rank outputs (pairwise difference intervals, rank intervals, P(rank = k), P(top k), pairwise P(A beats B), joint rank sets), the number of posterior or bootstrap draws behind them, and their cross-checks; read the rank module and open the rank view on the page.",
+      "ladder": [
+        "Absent: ranks are shown as exact integers with no uncertainty.",
+        "A text note says ranks are uncertain; nothing is computed.",
+        "Each neighbouring pair on the board gets a 95% interval for the difference of their two rates by Newcombe's hybrid score method (Newcombe 1998, Statistics in Medicine), pairs whose difference interval contains 0 are marked not separable, and the page states that overlap of the two single intervals is not the test (Schenker and Gentleman 2001, The American Statistician).",
+        "Monte Carlo rank distribution: at least 1,000 draws of every participant's rate from its Beta posterior, each draw re-ranked, giving each participant a 95% rank interval, as argued for league tables by Goldstein and Spiegelhalter (1996, Journal of the Royal Statistical Society Series A).",
+        "P(rank 1) and P(top k) per participant from the same draws, with k a control, and the number of draws and the Monte Carlo standard error shown.",
+        "Full rank-probability matrix P(participant i holds rank k), shown for every challenge of up to 50 participants, from at least 10,000 draws.",
+        "Pairwise P(A beats B) for any two participants the visitor picks, computed by numerical integration over the two Beta posteriors and shown beside the Monte Carlo value and its Monte Carlo standard error, the two agreeing within 3 standard errors.",
+        "Posterior expected rank and P(top k) are offered as ranking rules beside raw, Wilson lower bound and posterior mean, with the number of positions each rule moves each participant relative to their raw rank.",
+        "Frequentist cross-check: parametric bootstrap rank intervals from at least 2,000 resamples shown beside the Bayesian rank intervals, with their disagreement in positions reported per participant.",
+        "Simultaneous 95% rank intervals, a joint confidence region for the whole ranking in the sense of Klein, Wright and Wieczorek (2020, Journal of the Royal Statistical Society Series C), built here from Newcombe intervals for every pairwise difference at the Bonferroni level 1 - 0.05 / (N(N - 1) / 2), each participant's rank bounds set by the count of participants significantly above and below them, with the construction named on the page. Over at least 500 replicate challenges, the percent in which every participant's true rank lies inside its interval is printed and is at least 95. The board groups participants into tiers whose ranks the joint set cannot separate.",
+        "Attempts-to-separation planner: for any participant and target (for example top 3 with P at least 0.9), the page computes by simulation the number of further attempts needed at the current posterior and states the probability of reaching the target with that many. It then runs at least 500 forward simulations from the posterior predictive (every participant's rate drawn from its posterior, the further attempts simulated) and shows the share that reach the target, which lies within 5 points of the stated probability."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no ranking code for this lab anywhere in the repo, so no rank is computed, let alone its uncertainty" } }
+    },
+    {
+      "id": "challenge-sim",
+      "name": "Challenge simulator and ground truth",
+      "frame": "model",
+      "metric": "How the simulated challenge generates participants and whether each ranking rule is scored against the hidden true skills: features of the generative model (skill distribution, attempt-count distribution, dropout, period split) and the agreement scores (Spearman rank correlation and top-10 recall, unitless 0 to 1) over replicate challenges; read the simulator module and run a simulation on the page (top-10 recall = share of the true-rate top 10 that appear in a rule's top 10).",
+      "ladder": [
+        "Absent: no simulated challenge.",
+        "A fixed list of invented participants and results typed into the code.",
+        "The simulator draws N participants, each with a true rate from one Beta distribution and the same number of Bernoulli attempts; each run gives new results.",
+        "Seeded pseudo-random generator: the seed is shown and editable, and the same seed reproduces the same challenge exactly.",
+        "Unequal effort: attempts per participant come from a log-normal or discrete Pareto distribution with its parameters shown. The page prints the minimum and maximum n, and the default challenge spans n from 1 to at least 500.",
+        "Null-challenge check: one setting gives every participant the same true rate p. For n buckets with stated edges, the page prints, from at least 1,000 simulated participants per bucket, the variance of the raw rate, its Monte Carlo standard error and the bucket's mean of p(1 - p) / n, each bucket agreeing within 3 standard errors. It also lists the n of each participant in the raw top 10.",
+        "Ground truth scored: each ranking rule's Spearman correlation with the true-rate ranking and its top-10 recall are shown for the current challenge.",
+        "Replicates: at least 500 replicate challenges with the same settings give each rule's mean and 90% range of Spearman correlation and top-10 recall.",
+        "Survivorship: participants drop out with a stated probability that depends on their early results, dropouts stay in the data and can be hidden, and the page shows by how many points the survivors' mean rate exceeds the full population's.",
+        "Regression to the mean measured: the challenge splits into two periods, and the page shows the period-1 top 10's mean rate in period 2 beside their period-1 mean and beside the shrinkage prediction, with each gap in points, drawn as a period-1 against period-2 scatter with the 45-degree line and the fitted slope printed.",
+        "Rule map: a sweep over skill spread and median attempts (at least a 5 by 5 grid, at least 200 replicates per cell) shows which ranking rule has the highest top-10 recall in each cell, so the visitor sees where raw ranking is safe and where it is noise."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no simulator, RNG or participant generator for this lab in labs/assets/js/" } }
+    },
+    {
+      "id": "gaming-resistance",
+      "name": "Small-sample gaming resistance",
+      "frame": "model",
+      "metric": "How far each ranking rule resists entrants who exploit small samples: for each attack strategy, the probability (percent, over at least 1,000 simulated runs) that an attacker whose true rate equals the population mean reaches the top 10 under each rule, and the cost of each defence to honest low-n participants; read the attack module and the attack table on the page.",
+      "ladder": [
+        "Absent: no attack is modelled.",
+        "A text claim that the leaderboard resists gaming; nothing is simulated.",
+        "One scripted attack: a participant with the population-mean true rate enters with 5 attempts, and the page shows the rank it reaches under the raw rule in one run.",
+        "The 5-attempt attack runs at least 1,000 times and gives the attacker's P(top 10) under raw, Wilson lower bound and posterior mean side by side.",
+        "Optional-stopping attack: the attacker stops the first time their displayed rate passes a threshold (a control), with the same P(top 10) table per rule.",
+        "Restart attack: the attacker abandons and re-enters as a new account up to K times (K a control) and keeps the best account, with P(top 10) per rule plotted as K rises.",
+        "Selective-reporting attack: the attacker submits only sessions above their own median, with the same P(top 10) table per rule. A session-level dispersion test (chi-square of per-session success counts against binomial variance at the participant's pooled rate, lower tail) flags under-dispersed accounts, with its flag rate on attackers and on honest participants shown; for results entered as totals only, the page shows the test as unavailable.",
+        "Defences scored: a minimum-attempts gate and an entry cost (new accounts start with pseudo-counts of a stated total centred on the population's 10th-percentile rate, a pessimistic prior distinct from the fitted prior of the posterior-mean rule) are each run against every attack. Beside each defence is, of the honest participants with under 20 attempts who sit in the raw top 10, the share that leave the top 10 under that defence.",
+        "Anytime-valid rule: a ranking by the lower bound of a confidence sequence that stays valid under optional stopping (Howard, Ramdas, McAuliffe and Sekhon 2021, Annals of Statistics) is added, and the optional-stopping attacker's P(top 10) under it is shown with its Monte Carlo interval beside an honest participant's.",
+        "Attack search: the page searches at least 100 settings of stop threshold, restart count K from 0 to at least 20, and session filter, each range printed on the page. It finds the strategy that maximizes an average attacker's P(top 10) against each rule and reports the worst case per rule with its setting.",
+        "The far edge: one rule, named on the page, under which the rung 9 worst-case attacker's P(top 10) has the upper end of its 95% Monte Carlo interval at or below 1%, with the restart bound K under which this holds stated. For honest participants its top-10 recall against true skill is within 0.05 of the highest-recall undefended rule (raw, Wilson lower bound or posterior mean), and of the honest participants with at least 20 attempts in that rule's top 10, at most 10% leave the top 10; all these numbers are printed side by side."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no attack or defence is modelled anywhere in the repo for this lab" } }
+    },
+    {
+      "id": "uncertainty-views",
+      "name": "Leaderboard uncertainty views",
+      "frame": "graphics",
+      "metric": "Which views make rates, intervals, shrinkage and ranks visible and how they link: count of distinct live views, and whether one selection highlights the same participant in every view; check the running page at 1440 px and at 400 px. A view counts only if it redraws from the current challenge state when the seed changes; a static image of a chart satisfies no rung above 1.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "A static image or mock of a leaderboard.",
+        "One live leaderboard table, redrawn when the data change, with rank, name, successes, attempts and rate.",
+        "Interval plot: every participant's estimate and 95% interval drawn on one shared rate axis, sorted by the active rule.",
+        "Funnel plot of rate against attempts with 95% and 99.8% control limits around the overall rate (Spiegelhalter 2005, Statistics in Medicine), one point per participant.",
+        "Shrinkage plot: one arrow per participant from raw rate to posterior mean, longer at small n, in the form of the Efron and Morris (1977, Scientific American) baseball figure.",
+        "Rule-switch bump chart: ranks under raw, Wilson lower bound and posterior mean drawn as connected columns, so every rank change is a visible line crossing.",
+        "Rank-probability heatmap of P(participant i holds rank k) as a participant-by-rank grid, rows sorted by the active rule, and a hypothetical-outcome board that steps through the same posterior draws at 1 to 5 frames per second, re-ranking every participant each frame, so how often a pair swaps shows as flicker (Hullman, Resnick and Adar 2015, PLOS ONE).",
+        "Linked views: selecting one participant highlights it in every view at once, and brushing an attempts range filters every view.",
+        "Object constancy: switching rule moves each row and mark to its new position over 300 to 600 ms, each participant keeping its identity (data key) across the move.",
+        "Day-by-day replay: the challenge plays forward with a counter of leader changes per rule, dropouts stay as ghosts where they stood, a sparkline traces each rule's Spearman correlation with truth over time, and all eight views (table, interval, funnel, shrinkage, bump, heatmap, outcome board, and the period-1 against period-2 regression scatter) sit linked in one layout at a 1440 by 900 viewport with none scrolled off screen."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing for this lab is rendered on the site" } }
+    },
+    {
+      "id": "board-grammar",
+      "name": "Leaderboard visual grammar",
+      "frame": "style",
+      "metric": "Whether one documented encoding carries across every view inside the site's design language: count of encoding rules held in every view (point = estimate, line = interval, arrow = shrinkage, one channel for n, --accretion tokens only for what is active), plus measured contrast ratios and colour-vision checks; inspect the CSS tokens in labs/assets/css/tokens.css, the encoding key and each view.",
+      "ladder": [
+        "Absent: no styling; browser defaults.",
+        "The site's shared stylesheet loads; the lab itself is default form controls and a default table.",
+        "Site colour and type tokens (CSS variables from the shared stylesheet) applied to the table and controls; charts carry no styling of their own.",
+        "Numeric columns use tabular figures and right alignment, rates show a fixed, stated number of decimals, and n appears beside every rate.",
+        "An encoding key on the page defines point = estimate, horizontal line = interval and arrow = shrinkage, and every chart follows it.",
+        "The --accretion tokens from tokens.css (--accretion, --accretion-soft, --accretion-dim, --accretion-glow) appear only on the active selection and the active rule, and --warn is not used for chart marks; with nothing selected, no view has an --accretion fill or stroke (checked in the computed styles or the SVG).",
+        "Sample size has one visual channel used in every view (mark area or interval opacity scaled to n), with its legend.",
+        "Text reaches a contrast ratio of at least 4.5:1 and chart marks at least 3:1 against their background (WCAG 2.1 success criteria 1.4.3 and 1.4.11, measured in DevTools). In every view, no two categories differ by hue alone: each also differs by shape, dash pattern or a direct label, checked under DevTools deuteranopia and protanopia emulation.",
+        "Motion grammar: one easing curve and one duration scale, defined as CSS custom properties and read by every CSS and JS transition (a grep finds no literal duration or easing elsewhere in the lab's code); nothing animates unless its value changed.",
+        "Every view's marks come from one grammar module (tokens, marks, motion), so a rater who changes one token, such as the interval colour, sees it change in every view at once.",
+        "Uncertainty in colour: the rate column and the funnel plot's points use a value-suppressing uncertainty palette (Correll, Moritz and Heer 2018, CHI) with at least 3 uncertainty levels, built from non-accretion tokens, so a participant whose 95% interval is wider than 20 points gets the palette's single most-uncertain colour whatever its rate, and the palette's two-dimensional legend is on the page."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no lab-specific CSS or chart styling for challenges in the repo" } }
+    },
+    {
+      "id": "challenge-play",
+      "name": "Challenge authoring and play",
+      "frame": "interaction",
+      "metric": "What the visitor can do: count of distinct actions (set parameters, enter own results, edit a participant, switch rule, scrub time, run an attack, share, merge a group link), and whether the state survives a reload through the URL; perform each action on the page (touch operation at 400 px is graded on the compute-reach axis).",
+      "ladder": [
+        "Absent: nothing to touch.",
+        "One button runs a fixed demo challenge.",
+        "Sliders for participant count and skill spread re-run the simulation and the board updates.",
+        "A rule switch (raw, Wilson lower bound, posterior mean) re-sorts the board at once without re-simulating.",
+        "The visitor enters their own result (successes and attempts) as a named participant, validated as integers with successes not above attempts, and sees their rank under every rule.",
+        "The visitor edits any participant's successes and attempts (drag or type, successes kept at or below attempts), and that participant's interval, shrinkage and rank update while the drag is in progress.",
+        "Shareable by URL: seed, parameters, visitor entries and active rule encode into the URL, and opening that URL in a fresh browser reproduces the identical board.",
+        "Paste or upload a CSV of results (name, successes, attempts) with a row-level error report for rejected lines.",
+        "Play the gamer: the visitor picks an attack and its knobs (stop threshold, restarts) and sees on the live board whether it lifts them into the top 10 under each rule.",
+        "Time scrub: a timeline slider replays the challenge attempt by attempt and every view follows the scrubbed moment.",
+        "Group challenge without a backend: several visitors open the same challenge link, append their own results and pass on the new link, which carries every entry in the URL fragment. Two links forked from the same parent merge into one board, with entries deduplicated by entry id. Each entry is signed with a per-browser Web Crypto key (ECDSA P-256 or Ed25519) and its id is derived from the author's public key, so the board flags any entry edited by anyone but its author. A link carrying 50 signed entries stays under 12,000 characters (compact binary encoding), and the page states the entry limit per link and that signatures cannot stop an author inventing their own results."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the hub card for challenges in site.config.js has no href, so there is nothing to interact with" } }
+    },
+    {
+      "id": "results-provenance",
+      "name": "Results provenance",
+      "frame": "data",
+      "metric": "Where the results on the board come from and what leaves the page: whether simulated, visitor and real rows are tagged, count of bundled real datasets with source, retrieval date and licence shown, and the export formats; read the lab's data folder and the provenance panel on the page.",
+      "ladder": [
+        "Absent: no data.",
+        "Invented participants with no label saying they are invented.",
+        "Simulated results labelled as simulated on the board, with the seed shown.",
+        "Visitor-entered rows tagged as visitor data and filterable apart from simulated rows.",
+        "One bundled real dataset with known truth: the Efron and Morris 1970 batting data (18 players, first 45 at-bats, rest-of-season averages as truth), cited on the page.",
+        "Every row carries a source tag (simulated, visitor, real) shown in the table and in each view's tooltip.",
+        "Export: the current board with every estimator, interval bound and rank interval downloads as CSV and as JSON with seed and settings included, and each view exports as a PNG with the encoding key, title, n, active rule, seed and date stamped on the image.",
+        "A second real dataset from a non-sport domain whose licence permits redistribution, with source, retrieval date and licence shown (for example per-user accepted-answer rates from the Stack Exchange data dump, CC BY-SA, split by date into earlier results and later truth).",
+        "A data card per bundled dataset gives row count, how the split was made and the SHA-256 of the bundled file. For each dataset with a downloadable source, a node script in the repo rebuilds the bundled file byte-identically from it. A dataset typed from a paper names the table and page it was typed from.",
+        "Three real datasets from three domains (for example sport, product ratings, fitness logs), each with held-out results that serve as truth.",
+        "Every number on the page traces to its rows: selecting any plotted point or rank opens its raw counts, source tag, dataset citation and the formula that produced it."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no dataset, data file or export for challenges anywhere under labs/" } }
+    },
+    {
+      "id": "board-auditor",
+      "name": "Board auditor and model contribution",
+      "frame": "intelligence",
+      "metric": "What the lab does without being asked and what a language model adds over the deterministic engine: count of automatic findings, whether each number in model text is checked against engine output, the count of model-proposed attacks that beat the searched worst case, and which route answered; trigger each on the page with the route panel open.",
+      "ladder": [
+        "Absent: the page does nothing on its own.",
+        "A fixed caption under the board, the same for every challenge.",
+        "Deterministic flags: participants whose raw rank and posterior-mean rank differ by 5 or more positions are marked, with their count stated.",
+        "A findings list generated per challenge by the engine, at least 3 findings each with its number (for example how many of the raw top 10 have under 10 attempts, the survivor-mean gap, the regression-to-the-mean gap), changing when the seed changes.",
+        "Guided tour of at least 5 steps that sets the controls to show small-n luck, Wilson bounds, shrinkage, regression to the mean and survivorship in turn, runnable with no model.",
+        "One batched model call through labs/assets/js/ai/llm.js turns the computed findings into a plain-language audit of the visitor's board, route-panel.js shows which route answered, and the offline engine writes the audit from templates when no route answers.",
+        "Number check: every number in the model's audit is matched against the engine's values, any sentence whose number does not match is struck through and marked, and the count of struck sentences is shown; a bundled test reply containing one wrong number (selectable with ?fixture=wrong-number on the page, or run in a node test) shows the strike.",
+        "Recovery: on FREE_LIMIT or a timeout the page shows the countdown, keeps the template audit visible, and swaps in the model audit when it arrives, with no reload.",
+        "Model-proposed attacks: the model returns at least 3 strategies as JSON in a strategy grammar that also admits composite and adaptive rules outside the gaming-resistance rung 9 search grid (for example a stop threshold that moves with the current leader's rate). The engine simulates each one against every rule. The page shows each proposal's P(top 10) beside the searched worst case and counts a proposal as a model contribution only when it beats that worst case.",
+        "Contribution count: the page reports per session how many findings came from the engine and how many from the model, and how many model-proposed attacks beat the searched worst case, so the model's share is a number on screen.",
+        "Defence loop: when any attack beats the active rule, the page proposes a defence change (gate size or prior strength), re-runs the full attack table, and shows before and after numbers for both attackers and honest participants, the visitor deciding whether to keep it."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing for challenges imports labs/assets/js/ai/llm.js or runs any automatic audit" } }
+    },
+    {
+      "id": "ranking-literacy",
+      "name": "Ranking literacy",
+      "frame": "explanation",
+      "metric": "What the visitor can explain after five minutes and whether every claim is tagged and sourced: count of concepts with a live demonstration (small-n luck, Wilson interval, shrinkage, regression to the mean, survivorship, optional stopping) and count of claims with a tag; read the page text and run each demonstration.",
+      "ladder": [
+        "Absent: no explanation.",
+        "A one-paragraph introduction states the lab's idea.",
+        "Each ranking rule has a one-sentence definition beside its switch.",
+        "The Wilson interval and the posterior mean formulas are shown with the selected participant's own numbers substituted live.",
+        "Small-n luck demonstrated live: the null challenge fills the raw top 10 with low-n participants, beside de Moivre's equation (standard error falls as 1 / sqrt(n)), citing Wainer (2007, American Scientist, The Most Dangerous Equation).",
+        "Regression to the mean and survivorship each demonstrated on the visitor's own challenge with the numbers it produced, regression citing Galton (1886, Journal of the Anthropological Institute).",
+        "Every claim on the page carries a tag: established (with citation), computed here (with the number) or illustrative (simulation only), and a sources panel lists every cited reference in full (at least 6).",
+        "Captions tied to the running state name what is happening as the simulation plays (for example 'rank 1 has 4 attempts; its interval spans 40 points').",
+        "A predict-then-reveal question for each of at least 5 concepts records the visitor's answer before showing the result, and the page reports how many they got right.",
+        "An assumptions section states what each rule assumes (independent attempts, constant skill, exchangeable participants, honestly reported counts) and that no ranking rule defends against invented results. At least 2 assumptions can be broken by a simulator toggle (skill drift, correlated attempts), and the Wilson interval's coverage of each participant's current true rate before and after each break is shown as percents.",
+        "The visitor leaves with an artifact: an exported plain-language audit of their own challenge, every sentence tagged and every number traceable to the board, that says for each top-10 participant whether their rank is distinguishable from their neighbours, and opens again from its link. Reference standard exceeded: Seeing Theory (Brown University), the reference interactive for statistics teaching, whose demonstrations run on fixed examples where this page runs each concept on the visitor's own challenge."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the only text is the hub blurb 'Shared goals, honest leaderboards.' in site.config.js" } }
+    },
+    {
+      "id": "compute-reach",
+      "name": "Simulation budget and reach",
+      "frame": "performance",
+      "metric": "Load and compute cost and who can use the page: time to first board (ms), time for 10,000 rank draws and for 1,000 replicate challenges (ms), main-thread long tasks during compute, frame time in transitions, and reach at 400 px and by touch, under reduced motion, by keyboard and by screen reader; measure with Chrome DevTools Performance and Lighthouse.",
+      "ladder": [
+        "Absent: no page loads.",
+        "A page loads; nothing interactive runs.",
+        "The default challenge (100 participants) simulates and ranks in under 500 ms, measured in the DevTools Performance panel with no CPU throttling, from the run start to the board's first paint.",
+        "The lab's own script and data total under 200 KB compressed, and the board appears within 1.5 s, measured as navigation start to the board's first paint in the same panel.",
+        "Usable at 400 px: no horizontal page scroll, tables and charts reflow or scroll inside their own container, and every control is operable by touch under DevTools device emulation.",
+        "Under prefers-reduced-motion every transition jumps to its end state and the hypothetical-outcome board advances one draw per click instead of auto-playing, checked with DevTools rendering emulation.",
+        "Heavy compute (10,000 rank draws, 1,000 replicates, attack runs) runs in a Web Worker with a progress readout, and the Performance panel shows no main-thread task over 50 ms while it runs.",
+        "Every control is reachable and operable by keyboard with a visible focus ring, every chart has a data-table alternative exposed to screen readers, and Lighthouse accessibility scores at least 95.",
+        "Stated performance tiers up to 10,000 participants (draw counts scaled per tier), with transitions under 16.7 ms per frame at 1,000 participants, measured in the Performance panel with no CPU throttling.",
+        "Under DevTools 4x CPU throttling at 400 px, the default challenge plus 10,000 rank draws completes in under 2 s and transitions stay under 33 ms per frame.",
+        "Lighthouse mobile scores 100 for performance, accessibility and best practices, the lab works offline after its first load, and the guided tour is completed end to end with the NVDA screen reader."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing loads, so nothing can be timed or reached" } }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Ranking engine architecture",
+      "frame": "architecture",
+      "metric": "Code shape: count of separate modules from the list estimators, simulator, attacks, rules, state codec, views (0 to 6), whether a new rule or attack is one registry entry, and count of passing tests that check the engine against independent values; read the lab's modules under labs/assets/js and run its tests.",
+      "ladder": [
+        "Absent: no code.",
+        "One inline script in the HTML page holds everything.",
+        "The lab's script is an ES module file separate from the page, still a single file.",
+        "Estimators and intervals live in a module with no DOM access, imported by the page.",
+        "Seeded RNG and simulator live in their own module, so a node script runs a challenge with no browser.",
+        "Ranking rules sit in a registry: adding a rule is one entry (name, estimator, interval, sort key) and it appears in every view with no view code changed.",
+        "Attacks sit in a registry of the same shape, and challenge parameters and defaults live in a config object apart from the logic.",
+        "A node test script in the repo checks the Wilson bounds against a committed fixture of at least 50 (successes, attempts, confidence) cases, generated by R binom::binom.confint or Python statsmodels proportion_confint with method 'wilson'. The generating command is recorded beside the fixture and the bounds agree to 1e-9. The script also checks the Efron and Morris estimates against the paper's table, and it passes.",
+        "A URL state codec module with a version field and a round-trip test (100 random states encode and decode to identical state), so links made by older versions still open.",
+        "Every view renders from a state object alone: a test renders at least 20 random states twice each and the serialized SVG (or canvas pixels) match exactly.",
+        "The ranking engine and its registries are imported by a second consumer in the repo (for example the labs hub or Trending ranking by the same rules) with no challenge-specific code, and its tests run in the site checks."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no module for challenges under labs/assets/js/ and no test for it" } }
+    }
+  ],
+  "history": [ { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" } ]
+}

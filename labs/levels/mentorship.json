@@ -1,0 +1,275 @@
+{
+  "id": "mentorship",
+  "title": "Virtual Mentorship",
+  "page": null,
+  "thesis": "A mentor that answers a visitor's question, what-should-I-do questions included, only from a bundled corpus of public-domain counsel: the visitor sees the BM25-ranked passages it read with their scores, gets one model answer that covers the question's key points and whose every numbered citation a deterministic verifier has checked against its passage, sees it refuse when retrieval is weak, and can trace every claim to its source in one click.",
+  "axes": [
+    {
+      "id": "retrieval-fidelity",
+      "name": "Retrieval fidelity",
+      "frame": "model",
+      "metric": "Retrieval quality and scoring correctness: Recall@5 and nDCG@10 (0 to 1) on a shipped labeled query set, and the maximum absolute BM25 score difference against a reference implementation. A rater reads the retriever module and its tests, and reads the eval table on the page.",
+      "ladder": [
+        "Absent: no passage is retrieved for any query.",
+        "Passages containing at least one query word are returned, ranked by a score that rises with the number of distinct query words matched.",
+        "Term weighting by inverse document frequency (TF-IDF or a later IDF-weighted scheme), with lowercase tokenization and a stopword list of at least 100 English words.",
+        "BM25 (Robertson and Zaragoza 2009, Foundations and Trends in Information Retrieval) with k1 and b read from config (defaults 1.2 and 0.75), length normalized by average passage length, and the non-negative IDF variant Lucene's BM25Similarity uses, ln(1 + (N - n + 0.5) / (n + 0.5)), stated as a variant in the code.",
+        "An inverted index (term to postings of passage id and term frequency) is built once, and a query reads only the postings of its own terms; the code does not loop over every passage per query.",
+        "The tokenizer passes a shipped list of at least 30 hard cases (hyphenated words, apostrophes, numbers with units, accented letters folded to ASCII), and the Porter stemmer (Porter 1980, Program) runs on both index and query.",
+        "A labeled set of at least 30 queries with graded relevance judgments over the corpus ships with the lab, and the page recomputes Recall@5 and nDCG@10 (Jarvelin and Kekalainen 2002, ACM TOIS) from those judgments whenever k1 or b changes, so a rater who moves k1 sees the numbers change.",
+        "Scores match a named reference BM25 implementation (Lucene's BM25Similarity through Pyserini, or another stated one) within 0.0001 on every query-passage pair of the labeled set, given the same tokens, with that implementation's length quantization and constant factors reproduced; a test enforces it.",
+        "A second lexical ranker toggles on: pseudo-relevance feedback that expands the query with the top 10 terms of the top 10 passages, and the eval table shows both rankers on the same queries.",
+        "Hybrid retrieval: an in-browser dense embedding model ranks beside BM25, the two are fused by reciprocal rank fusion (Cormack, Clarke and Buettcher 2009, SIGIR), and the table shows BM25, dense, and fused results on at least 100 labeled queries.",
+        "Reference: on a BEIR dataset bundled in full (SciFact or NFCorpus; Thakur et al. 2021, NeurIPS Datasets and Benchmarks), the in-browser BM25 reproduces Pyserini's BM25 flat nDCG@10 from its BEIR regression page within 0.005, the in-browser dense model reproduces its own MTEB leaderboard nDCG@10 on the same dataset within 0.01, the fused ranker's nDCG@10 is published beside both, and per-query results on at least 200 of the lab's own labeled queries are published."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists mentorship as planned in labs/assets/js/config/site.config.js, and the repo holds no BM25, index, or retrieval code (a grep for bm25 finds only portfolio prose in the root index.html, line 321)" }
+      }
+    },
+    {
+      "id": "citation-verifier",
+      "name": "Citation verification",
+      "frame": "model",
+      "metric": "The checks the deterministic verifier runs per citation (marker range, quote match, content-word support, numbers, negations, names), the share of citations it covers (percent), and its precision and recall (0 to 1) for the unsupported verdict on labeled claim-passage pairs drawn from real model answers. A rater reads the verifier module and its tests, and reads the verdicts on one live answer.",
+      "ladder": [
+        "Absent: citations in the answer are not checked.",
+        "Every [n] marker is parsed from the answer and checked to point at one of the passages sent to the model; out-of-range and missing markers are flagged.",
+        "Every answer sentence is classed as cited or uncited, and uncited sentences are marked in the answer.",
+        "Each citation carries a verbatim quote returned by the model, checked as an exact substring of the cited passage after case and whitespace folding; each citation shows pass or fail.",
+        "Quote matching tolerates punctuation, ellipses, and up to 2 token edits by token-level alignment, and each citation reports the edit count of its match.",
+        "Support score per citation: the share of the claim's content words (stopwords removed, stemmed) found in the cited passage, with a stated threshold splitting supported, partial, and unsupported.",
+        "Fact checks per citation: every number with its unit, every negation word (from a shipped list of at least 10), and every capitalized word not at sentence start in the claim must appear in the cited passage, and a failed check names itself in the verdict.",
+        "A labeled set of at least 100 claim-passage pairs, taken from real model answers to the lab's shipped questions (not written to exercise the checks), at least 30 of them unsupported, ships with the lab; a button on the page or the node eval script recomputes the verifier's precision and recall for the unsupported verdict from it, both at least 0.75.",
+        "An in-browser natural language inference model, loaded on demand, scores entailment for each claim-passage pair as a further check, and on the labeled pairs the page shows the combined verifier's precision and recall for the unsupported verdict beside the lexical verifier's.",
+        "Answer-level citation recall and citation precision as defined in ALCE (Gao et al. 2023, EMNLP), with the in-browser entailment model as the judge in place of ALCE's (stated on the page), are shown for every answer, and the combined verifier reaches precision of at least 0.90 and recall of at least 0.85 on at least 300 labeled pairs drawn from real model answers.",
+        "Reference: on at least 500 claim-citation pairs judged by humans under the Attributable to Identified Sources protocol (Rashkin et al. 2023, Computational Linguistics), the verifier agrees with the human labels at Cohen's kappa of at least 0.75, and its errors are published, itemized by check."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the repo holds no citation parser or verifier code for this lab" }
+      }
+    },
+    {
+      "id": "refusal-calibration",
+      "name": "Refusal calibration",
+      "frame": "intelligence",
+      "metric": "Refusal behavior on the lab's question file, split into answerable and off-corpus questions: the refusal rate on each half (percent) and the area under the risk-coverage curve (AURC), where coverage is the share of questions answered and risk is the share of answered questions that are off-corpus. A rater reads the refusal policy code and the eval table on the page, and asks one question the corpus cannot answer.",
+      "ladder": [
+        "Absent: the mentor answers every question, whatever retrieval found.",
+        "Refuses when no passage matches any query term, and says no source was found.",
+        "Refuses when the top BM25 score is under a fixed threshold in config, and the refusal shows the top score beside the threshold.",
+        "The threshold is query-normalized: the top score is divided by the query's upper bound, the sum over its terms of each term's maximum possible contribution under the implemented scoring formula (IDF x (k1 + 1) with the classic numerator, IDF alone for Lucene 8 and later), so one threshold holds for short and long queries and for any k1.",
+        "A second signal joins the decision (the share of query terms matched by the top 3 passages), and a refusal names which signal failed.",
+        "Partial answers: when at least 1 query content term occurs in the top k passages and at least 1 occurs in none of them, the mentor answers from the passages and lists the terms found in none.",
+        "The lab's question file holds at least 40 questions, half answerable from the corpus and half not, each marked as such, and the page shows the refusal rate on each half at the shipped threshold.",
+        "A threshold slider reruns the question file live and draws the risk-coverage curve (El-Yaniv and Wiener 2010, JMLR), coverage being the share of questions answered and risk the share of answered questions that are off-corpus, with the shipped threshold marked on it and the AURC printed.",
+        "A post-answer gate: when the verifier finds under a stated share of claims supported, the answer is withheld with the reason, and the eval reports the combined pre- and post-answer policy.",
+        "A logistic regression over at least 3 query performance predictors (normalized top score, the spread of the top 10 scores as in NQC by Shtok et al. 2012, ACM TOIS, and query term coverage), fit on one half of the question file with a fixed seed or by 5-fold cross-validation, gives the probability a question is answerable; it gates after the rung-3 threshold, each refusal shows the probability beside its cutoff and every predictor's value, and the page shows the held-out expected calibration error over 10 equal-width bins and the held-out AURC.",
+        "Reference: on at least 200 questions, including adversarial unanswerables written against the corpus in the manner of SQuAD 2.0 (Rajpurkar, Jia and Liang 2018, ACL), the policy refuses at least 90% of unanswerables while answering at least 85% of answerables with key-point recall of at least 0.5 against their gold key points, published per question with its AURC."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the repo holds no refusal policy, threshold, or question file for this lab" }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "What the model adds over the deterministic engine: model calls per question, the share of claims by origin (model or extractive engine), and on the answerable questions of the question file each origin's verified-claim rate and key-point recall (percent). A rater asks one question, reads the ledger and the route panel, and reads the prompt-building and parsing code.",
+      "ladder": [
+        "Absent: no model is called.",
+        "One model call through labs/assets/js/ai/llm.js returns an answer to the visitor's question, shown as text.",
+        "The call carries the top-k retrieved passages numbered [1] to [k] with an instruction to cite by number, and the route panel (route-panel.js) shows which route answered.",
+        "The call asks for JSON (a list of claims, each with citation numbers and a verbatim quote), and a malformed reply is repaired or rejected with the reason shown.",
+        "Offline engine: when no route answers, a deterministic extractive answer (the top sentences of the top passages, each with its citation) is composed and labeled as offline.",
+        "Exactly one model call per answered question and zero per refusal, enforced in code and shown on the page with the route and its wait for the 45-second public window.",
+        "A ledger per answer lists every claim with its origin (model or extractive engine), its citation, and its verifier verdict, with totals per origin.",
+        "Side by side: the same question answered by the extractive engine and by the model, each with its claim count and verified-claim count, and, for a question from the question file, the share of its gold key points each covers.",
+        "A stored run over the answerable questions of the question file reports, for the model and the extractive engine, key-point recall against the gold key points, verified-claim rate, citation precision, and answered share, with the model name and run date, and states the model's margin over the engine on key-point recall.",
+        "Unsupported model claims go through one deterministic repair (dropped, or reattached to another sent passage that verifies) with no second model call, and the ledger shows each drop and reattachment.",
+        "Reference: a published table across at least 3 named models (the local Ollama default, the public route model, and one own-key model) on at least 100 questions gives key-point recall, verified-claim rate, citation precision and recall, and refusal agreement per model, with the extractive engine as the baseline row."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the shared route labs/assets/js/ai/llm.js exists but nothing in this lab calls it, so no model call is made" }
+      }
+    },
+    {
+      "id": "answer-adequacy",
+      "name": "Answer adequacy",
+      "frame": "intelligence",
+      "metric": "Key-point recall (percent): the share of each answerable question's gold key points that the answer covers, for the model and for the extractive engine; and the share of applied-advice sentences that cite the principle they apply (percent). A rater asks 3 questions from the question file, reads each one's gold key points and coverage readout, and reads the eval table.",
+      "ladder": [
+        "Absent: no answer is produced.",
+        "An answer is produced for a typed question, from the model or the offline engine, and is shown in full.",
+        "Every question gets a type (fact, explanation, or situational advice): questions in the lab's question file carry one, a typed question is classed by a stated rule shown beside its answer, and the prompt template sends a different instruction per type, readable in the code.",
+        "Every answerable question in the question file carries 2 to 6 gold key points written from the corpus, each listing the passage ids that support it.",
+        "Each answer to a question from the question file shows which gold key points it covers, judged by content-word support of the answer against each key point at a stated threshold, with the covered share as a percent.",
+        "Answer sentences are labeled source statement or applied advice; every applied-advice sentence cites the passage whose principle it applies, and advice with no cited principle is flagged on the page.",
+        "At least 30 answerable questions in the question file are situational (a visitor's circumstance, not a lookup), and the page shows the mean key-point recall of the model's answers on them from a stored run with its date.",
+        "At least 10 answerable questions need key points from 2 or more works in the corpus, and the eval reports key-point recall on them separately.",
+        "Key-point coverage is also judged by an in-browser entailment model, and its agreement with one human judge on at least 100 answer and key-point pairs is shown as Cohen's kappa.",
+        "At least 5 questions in the question file have passages that disagree; the answer states each position with its citation, and the eval checks that both positions appear.",
+        "Reference: nugget-style evaluation as in the TREC question answering and RAG tracks, on at least 200 questions with human-written key points, published per question and per model beside the extractive baseline, with the mentor's key-point recall at least 0.15 above that baseline."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no question file, gold key points, or answer code exists for this lab" }
+      }
+    },
+    {
+      "id": "evidence-view",
+      "name": "Evidence view",
+      "frame": "graphics",
+      "metric": "Count of linked views of retrieval and verification state (answer, passage list with scores, per-term score decomposition, score distribution with threshold, claim-to-passage map, rank-stability grid) and whether selecting an element highlights its counterparts. A rater types one question of their own before counting, counts the views at 1440 px and 400 px, and hovers or focuses one citation.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "The answer is shown as text with its [n] markers inline.",
+        "For any question the rater types (not only the sample questions), the retrieved passages are listed under the answer with rank, source title, and BM25 score to 2 decimals.",
+        "Each passage carries a score bar on a scale shared by all passages, and matched query terms are highlighted inside the passage text.",
+        "Per-term decomposition: each score bar splits into segments, one per query term, sized by that term's BM25 contribution, with a legend keyed to the query terms.",
+        "Linked citations: hovering or focusing [n] in the answer highlights passage n and its matched quote span, and focusing a passage highlights every claim that cites it.",
+        "Verdict marks: each citation marker shows supported, partial, or unsupported by glyph and label (not color alone), and focusing it lists the checks that passed and failed.",
+        "A score distribution chart plots the top 20 scores for the query with the refusal threshold as a line, updating live as the query, k1, or b changes.",
+        "Rank transitions: a change of query, k1, or b animates passages to their new ranks FLIP-style over --t-mid (320 ms in tokens.css) or less, replaced by an instant reorder under prefers-reduced-motion.",
+        "A claim-to-passage map draws every claim as a node joined to the passages it cites, edge style by verdict, and selecting any node filters the passage list and the answer.",
+        "Reference: answer, passage list, term decomposition, score chart, claim map, and a rank-stability grid (a k1 by b grid of at least 25 parameter pairs giving each top-10 passage's rank at every pair) are linked, so selecting any element highlights its counterparts in the other five views, at 1440 px and at 400 px (reference standard: the numbered-citation display of answer engines such as Perplexity, extended here with the evidence behind each number)."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; there is no screenshot to grade and no view code for this lab" }
+      }
+    },
+    {
+      "id": "citation-apparatus",
+      "name": "Citation apparatus",
+      "frame": "style",
+      "metric": "Conformance of the reading and citation typography to labs/assets/css/tokens.css and a written apparatus spec: citation mark form, answer, passage and source-line registers, verdict glyphs, number setting, motion tokens, and the count of gold elements at rest. A rater inspects computed styles in devtools and counts gold elements before any interaction.",
+      "ladder": [
+        "Absent: no page to style.",
+        "A page exists for the lab at a URL under labs/; any styling, browser defaults included, qualifies.",
+        "The page links labs/assets/css/tokens.css, the lab's CSS sets every color through var(--...) with no raw hex outside tokens.css, and a header carries the lab title and a link back to labs/index.html.",
+        "Answer, passages, and source lines are three typographic registers: the answer at a computed 16 to 18 px with a measure of 60 to 75 characters (--measure is 64ch), the passages at a computed 13 to 15 px, and each passage under a source line set at --t-stamp or smaller in --text-dim.",
+        "Citation markers are bracketed numerals [n], and scores are right-aligned tabular figures with a fixed number of decimals.",
+        "Gold is kept for the active element: at rest at most 1 element (the Ask button) computes a gold token (--accretion, --accretion-soft, --accretion-dim, or --accretion-glow) in its color, background, or border, and while a citation is focused only that citation and its passage add gold.",
+        "Every text and mark color pair the page uses passes WCAG 2.2 AA against its ground (4.5:1 for text, 3:1 for score bars, verdict glyphs, and focus rings), checked with the devtools contrast readout on each of these the page shows: answer text, passage text, source line, score figure, citation marker, each verdict glyph, score bar, and focus ring; --text-faint (#424B57) is not used for readable text.",
+        "Motion uses only the shared tokens in tokens.css (--t-fast, --t-mid, --t-slow; --ease, --ease-out, --ease-in): passage highlight, citation link, and rank change reference them, and the lab's CSS and JS contain no raw millisecond duration and no cubic-bezier literal.",
+        "Sidenotes at 1440 px: each citation renders as a margin note aligned with its claim line (as in tufte-css), collapsing to an inline expandable note at 400 px.",
+        "A drawn glyph set (inline SVG, at least 6 marks: supported, partial, unsupported, uncited, refused, offline) on a shared 16 px grid replaces text symbols and icon fonts.",
+        "Reference: a written apparatus spec in the repo lists at least 20 elements by CSS selector with their expected computed font-size, line-height, color, and margin, plus the type scale, mark forms, glyph set, and motion tokens, and a devtools audit of those 20 finds zero deviations; every citation also opens on hover or focus a preview card of its passage with its source line, set to the spec (reference standards: tufte-css sidenotes, gwern.net's link popups, and Distill.pub's hover citations)."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; there is no screenshot or stylesheet for this lab to grade" }
+      }
+    },
+    {
+      "id": "inquiry-controls",
+      "name": "Inquiry controls",
+      "frame": "interaction",
+      "metric": "Count of visitor actions that change retrieval or the answer (ask, sample questions, live retrieval, k1, b and k sliders, pin or exclude, URL state, follow-up, counterfactual removal, reverse mode) and whether each reruns with visible feedback. A rater performs each action on the page.",
+      "ladder": [
+        "Absent: nothing to operate.",
+        "A question field and an Ask button.",
+        "At least 5 sample questions fill the field on click, at least 1 of them off-corpus so it triggers a refusal.",
+        "Retrieval runs as the visitor types (debounced at 150 ms or less), so the passages the mentor will read are visible before the model is asked.",
+        "Sliders for k1 and b rerank the passage list live, and a k slider (1 to 10) sets how many passages are sent to the model, each with its value shown.",
+        "The visitor can pin or exclude individual passages before asking, the model call uses the edited set, and the ids of the passages actually sent are listed beside the answer.",
+        "URL state: query, k1, b, k, and pinned and excluded passage ids live in the URL, and opening it restores the same retrieval.",
+        "Follow-up turns: a follow-up retrieves with the previous turn's terms at a stated weight, and each turn keeps its own passages and citations.",
+        "Counterfactual removal: the visitor removes one cited passage and the verifier reruns on the same answer, showing which claims lose support, with no new model call.",
+        "Reverse mode: the visitor types a claim of their own, the lab retrieves the passages that best match it, and the verifier gives it a verdict with the failing checks named.",
+        "Reference: every pipeline intermediate (tokens, postings, scores, prompt, raw reply, parsed claims, verifier checks) opens for editing, and each edit recomputes the stages downstream of it, with only the answer stage needing the model."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no controls exist for this lab" }
+      }
+    },
+    {
+      "id": "corpus-provenance",
+      "name": "Corpus provenance",
+      "frame": "data",
+      "metric": "Size of the bundled corpus (works, passages), the share of passages (percent) carrying source URL, author, year, and license, and whether the corpus build is reproducible by content hash. A rater reads the corpus manifest and opens the source lines of 3 random passages.",
+      "ladder": [
+        "Absent: no corpus.",
+        "A corpus of at least 1 passage exists, possibly hard-coded in the page script and without sources.",
+        "A bundled corpus of at least 50 passages from at least 3 public-domain or openly licensed works of counsel or advice (for example Seneca's Moral Letters to Lucilius in Gummere's Loeb translation, 1917 to 1925), each passage carrying its work's title.",
+        "Every passage carries source URL, author, publication year, and license (public domain or a named Creative Commons license), shown in its source line.",
+        "A corpus manifest (JSON) lists every work with license, retrieval date, and passage count, and the corpus loads from a data file rather than from code.",
+        "Passages are cut by a stated chunking rule (paragraph boundaries, at most N tokens, M tokens of overlap), and each carries a stable id and its character offsets in its source text.",
+        "At least 1,000 passages from at least 10 works by at least 5 authors, all with complete provenance, with the counts shown on the page.",
+        "A build script regenerates passages and index from the source documents, the manifest records a content hash the page displays, and a rebuild reproduces the same hash.",
+        "Export: an answer saves as markdown and as JSON with each citation's passage id, quoted span, offsets, source URL, and the corpus hash.",
+        "The visitor can add their own documents (paste or file) to a local in-browser index, kept apart from the bundled corpus and labeled as visitor-supplied in every citation.",
+        "Reference: every passage stores a link to an HTML source with a #:~:text= fragment built from its span, a shipped node script reports that the fragment text occurs verbatim in the fetched source's text for 100% of passages, 5 random citations opened in Chromium show the span highlighted, and the corpus with its manifest is published as a versioned dataset with a DOI."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the repo holds no corpus, manifest, or passage file for this lab, only the hub blurb in site.config.js" }
+      }
+    },
+    {
+      "id": "mechanism-explained",
+      "name": "Mechanism explained",
+      "frame": "explanation",
+      "metric": "Count of pipeline stages (tokenize, index, score, refuse, prompt, parse, verify) the page explains with the live values of the current question, and the share of numbers outside the live score readouts and of prose claims tagged real or illustrative (percent). A rater reads the page for 10 minutes and counts both.",
+      "ladder": [
+        "Absent: no explanation.",
+        "An intro paragraph says what the mentor does.",
+        "The intro states that answers come only from the bundled corpus, and names the corpus and its size.",
+        "At least 5 terms of art the page uses (BM25, passage, citation, verifier, refusal threshold) are each defined in one sentence at their first use on the page.",
+        "The BM25 formula the code implements is shown, cited to Robertson and Zaragoza 2009, with each difference of the implemented variant stated (IDF form, numerator constant, length quantization), and with the live values of one selected passage substituted (tf, df, N, passage length, average length, k1, b).",
+        "A guided tour of at least 5 steps walks one question from tokens to verified answer, highlighting the view each step describes, operable by keyboard.",
+        "The prompt sent to the model and its raw reply are viewable for every answer, beside the parsed claims.",
+        "A live narration line states each stage as it runs, with its counts (passages retrieved, passages above threshold, route called, claims verified).",
+        "Every number outside the live score readouts (corpus counts, thresholds, eval figures, example values) and every claim in the prose is tagged real (computed from this corpus now) or illustrative, and each eval table states its sample size and run date.",
+        "Live failure demos: one click runs a synonym query that BM25 misses (vocabulary mismatch), another runs a claim the verifier misjudges, each with the reason shown.",
+        "Reference: an explorable explanation in the sense of Bret Victor's Explorable Explanations (2011), where every formula term, threshold, and check named in the text is a live readout or control bound to the current question, and an in-page exercise of at least 5 predictions (a rerank, a refusal, a verdict) is checked by running each one."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the only text is the one-line hub blurb in site.config.js, 'A retrieval-grounded mentor that cites what it draws on.'" }
+      }
+    },
+    {
+      "id": "query-speed-reach",
+      "name": "Query speed and reach",
+      "frame": "performance",
+      "metric": "Query-to-ranked-passages latency (ms, median of the last 20 queries, at a stated corpus size), corpus and index transfer size (KB gzip), index load time (ms), main-thread long tasks, Lighthouse mobile scores, and keyboard and screen-reader reach. A rater measures in devtools at 1440 px and at 400 px with 4x CPU throttling.",
+      "ladder": [
+        "Absent: nothing loads.",
+        "The page loads and a query returns passages in a desktop browser.",
+        "At 400 px width the page has no horizontal scroll and every control is reachable.",
+        "Ranked passages appear within 100 ms of a query on desktop over a corpus of at least 200 passages: the page times each query with performance.now and shows the median of the last 20 queries run.",
+        "Corpus and index load after first paint, and the page states their gzip transfer size.",
+        "prefers-reduced-motion removes rank animations and highlight transitions, and every control works from the keyboard with a visible focus ring.",
+        "The answer region is an aria-live polite region, each citation is a link whose accessible name includes its source title, and each verdict is present as text.",
+        "The index ships prebuilt and serialized, and over at least 1,000 passages it loads in under 200 ms and queries stay under 50 ms median, both under 4x CPU throttling.",
+        "Indexing and search run in a Web Worker, and the Performance panel shows no main-thread task over 50 ms during load or query.",
+        "Lighthouse mobile gives Performance at least 90 and Accessibility 100, with corpus and index at most 1.5 MB gzip for at least 1,000 passages.",
+        "Reference: a 10,000-passage corpus queried in under 20 ms median under 4x throttling, its postings variable-byte compressed and split into fragments so that a query fetches only its own terms' fragments (as Pagefind does for static sites), with the index at most 3 MB gzip, zero axe-core violations, and the whole pipeline except the model call working offline after first load through a service worker."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; nothing loads to measure" }
+      }
+    },
+    {
+      "id": "pipeline-modules",
+      "name": "Pipeline modularity",
+      "frame": "architecture",
+      "metric": "Separation of tokenizer, index, retriever, refusal policy, prompt builder, parser, verifier, and views into modules; config, corpus, and the model call kept out of logic; count of passing tests. A rater reads the lab's folder under labs/assets/js and runs its tests with node.",
+      "ladder": [
+        "Absent: no code.",
+        "The lab's code exists and runs on its page; inline script in a single HTML file qualifies.",
+        "The lab's script is its own module under labs/assets/js, and every model call goes through labs/assets/js/ai/llm.js with no direct fetch to a model endpoint.",
+        "Each stage is a pure exported function (tokenize, buildIndex, search, decide, buildPrompt, parse, verify), and only the view module touches the DOM.",
+        "A config module holds k1, b, k, the refusal thresholds, and the prompt template, and changing any of them needs no edit to logic.",
+        "The model call sits behind one function (prompt in, reply out) that the pipeline receives as a parameter, so a node test runs the full pipeline with a stub reply and no network.",
+        "Unit tests run under node with no dependencies (tokenizer hard cases, BM25 on a hand-computed 3-passage example, verifier cases, and at least 3 malformed corpus fixtures that the loader rejects by naming the passage id), at least 30 assertions passing.",
+        "A golden eval script runs the labeled query and claim sets and exits non-zero when Recall@5, nDCG@10, or verifier precision or recall falls below stored values.",
+        "Retriever and verifier are registries: a second implementation of each plugs in without editing the pipeline, shown by at least 2 registered retrievers.",
+        "The same core modules run headless in node and in the browser, and a trace exported as JSON (every stage for one question) replays in the page with identical output.",
+        "Reference: the core is a documented, versioned module others can import (an API README, zero runtime dependencies, at least 90% line coverage as reported by node --test --experimental-test-coverage over the lab's test folder), with the golden eval run on every change by the site's checks."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no module for this lab exists under labs/assets/js" }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}

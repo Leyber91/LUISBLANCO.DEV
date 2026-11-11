@@ -1,0 +1,251 @@
+{
+  "id": "last-witness",
+  "title": "Time-Slip: The Last Witness",
+  "page": null,
+  "thesis": "At level 10 the visitor flies a ship to a black hole at its sourced distance, sees exactly how far real relativity stretches ship hours (about 10.8 to 1 on an orbit at the Thorne spin limit) and what the story's ten thousand outside years would demand, tagged illustrative, lives or dies by tides, thrust and fuel, questions the last machine mind awake about a world generated from their own choices, and leaves with a replayable witness record in which every number is sourced or tagged illustrative.",
+  "axes": [
+    {
+      "id": "dilation-fidelity",
+      "name": "Time-dilation fidelity",
+      "frame": "model",
+      "metric": "Which relativistic effects compute the ratio of outside (coordinate) time to ship (proper) time, and the relative error of the displayed outside time against closed-form or published values. A rater reads the physics module, runs its test cases, and enters the same cases on the page to compare the displayed figures.",
+      "ladder": [
+        "Absent: no page, nothing computes elapsed time.",
+        "Outside elapsed time is a fixed figure in the text (such as '10,000 years'), not computed from any input.",
+        "One formula computes the outside time from one visitor input: either the special-relativity factor gamma = 1/sqrt(1 - v^2/c^2) or the Schwarzschild static factor sqrt(1 - r_s/r).",
+        "Both factors compute, with r_s = 2GM/c^2 from a chosen mass, and compose multiplicatively for an observer moving at radius r (speed measured by a local static observer); the chosen configuration shows ship hours and outside years side by side.",
+        "Circular orbits use the Schwarzschild circular-orbit factor sqrt(1 - 3r_s/(2r)), and the limits are enforced: no stable orbit offered inside the ISCO at 3 r_s, no hover offered at or inside r_s.",
+        "The journey has at least 5 legs (transit out, fall, orbit or hover, climb-out, transit home). Transit legs use the hole's sourced distance and their outside time is never below distance/c, unless the page states that the ship starts in the hole's neighbourhood. Each leg's ship and outside time is summed numerically over a prescribed radius-and-speed profile in at least 100 steps (not yet a geodesic), and a ledger totals both clocks.",
+        "Kerr spin is a visitor choice, entered and computed as epsilon = 1 - a/M so near-extremal spins stay finite in float64 (where 1 - 1e-21 === 1): equatorial prograde circular orbits use the Bardeen, Press and Teukolsky (1972, ApJ 178) expressions for the ISCO radius and dt/dtau, and a test at epsilon = 1e-21 returns a finite ratio of about 1.45e7, within 1 percent of the near-extremal asymptote (2^(4/3)/sqrt 3) epsilon^(-1/3). The page shows the largest orbital ratio within the Thorne (1974, ApJ 191) limit a/M = 0.998 (about 10.8 at the ISCO) beside the epsilon the visitor's target needs (about 4.6e-21 for 10,000 outside years in 10 ship hours), and tags any spin above the limit illustrative.",
+        "Falls and climbs are integrated as trajectories in the metric (geodesic, or powered at a stated proper acceleration) with RK4 or an adaptive integrator. On unpowered segments the relative drift of E, L and the normalization u.u = -1 stays below 1e-6; on powered segments u.u = -1 and u.a = 0 (relative to |a|) hold within 1e-6. Both are printed per leg.",
+        "A test table, runnable on the page or as a node test file, checks at least 12 cases: closed forms within 1e-6 relative error; the GPS net clock rate of +38.6 microseconds per day (fractional 4.4647e-10; Ashby 2003, Living Reviews in Relativity) within 1 percent; and Miller's planet, where the epsilon the code solves for a 1 hour to 7 year ISCO orbit (ratio 61,362) lies within a factor of 2 of the near-extremal spin Thorne states (Thorne 2014, The Science of Interstellar), with the inputs written in the test.",
+        "Signals cross the boundary: the frequency shift and arrival rate of light and messages from outside during orbit or hover are computed from the same factors (blueshift of 1/sqrt(1 - r_s/r) for a static observer) and drive what the visitor sees and hears of outside history.",
+        "Reference grade: every number on the page links to its formula; the on-page test table passes every case in the rater's browser; Kerr geodesics conserve E, L and the Carter constant Q to 1e-6 relative; Kerr circular orbits (BPT), Schwarzschild radial free fall and redshift match their closed forms to 1e-6; an independent rater reproduces the story's outside time from the shown inputs; and the effects computed include fall and orbit clock rates and the blueshift and aberration of the outside sky. Reference standard: Andrew Hamilton's Black Hole Flight Simulator (JILA)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: labs/foundation has no last-witness page, script or physics module; the lab is only a hub entry in labs/assets/js/config/site.config.js" } }
+    },
+    {
+      "id": "tide-energy",
+      "name": "Tide and energy limits",
+      "frame": "model",
+      "metric": "How many computed physical limits gate the visitor's choices: tidal stretch across the ship in g, proper acceleration needed to hover in g against the ship's thrust and the crew's tolerance, and propellant mass left after each burn and hover, all from the hole's mass and spin and the ship's stated length, thrust, mass and exhaust speed. A rater reads the constraint code and tries choices on the page that the physics should refuse.",
+      "ladder": [
+        "Absent: no page, no choice is constrained by physics.",
+        "The text mentions tides or fuel, but no number is computed and no choice is ever refused.",
+        "One limit computes: radial tidal acceleration across the ship, about 2GM L / r^3 for ship length L, shown in g at the chosen radius.",
+        "The tide refuses or ends: a choice whose tide exceeds a stated survivable threshold in g (sourced, or tagged illustrative) is blocked or ends the run, and the page names both numbers.",
+        "Hover cost computes: the proper acceleration of a static observer, GM/(r^2 sqrt(1 - r_s/r)), is shown in g, and any hover leg that needs more than the ship's stated thrust, or more than the crew's stated g tolerance (sourced or tagged illustrative), is refused with both numbers shown.",
+        "A propellant budget runs across the whole journey with the relativistic rocket equation, delta-v = c tanh((v_e/c) ln(m0/m1)); every burn draws it down, hover legs draw propellant as m1 = m0 exp(-a tau / v_e) for proper acceleration a over ship time tau, and the remaining mass is shown after every leg, hover legs included.",
+        "Mass choice trades the limits in view: before committing, the visitor sees the tide at the same multiple of r_s (such as 3 r_s, the Schwarzschild ISCO) for a stellar-mass hole (lethal: about 4e7 g across a 100 m ship at 10 solar masses) and a hole of millions of solar masses (survivable: about 2e-4 g at 4 million), both numbers on screen in g.",
+        "Every choice point shows its feasibility region: a chart of radius against tide, hover acceleration and propellant, with the infeasible region shaded and the current plan marked.",
+        "Around a spinning hole a Penrose-process maneuver inside the ergosphere (outer boundary r = 2M at the equator) is an available choice, with its energy gain computed and capped by the hole's mass minus its irreducible mass.",
+        "A solver finds and displays the minimum-propellant plan that reaches the visitor's outside-time target within the tide, thrust, crew and spin limits. When no plan exists, it says so, shows the largest ratio reachable and names the limit that binds. The run's ledger reports how close the visitor came to either.",
+        "Reference grade: every limit is cited or tagged illustrative; the solver's plan is checked against an independent calculation in a test file; a constraint log names, for every allowed or refused choice, the computed limit that decided it, and a rater sampling 10 choices finds none gated by a story flag alone. Reference standard: Outer Wilds (Mobius Digital, 2019)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no tide, thrust or propellant code anywhere in the repo for this lab" } }
+    },
+    {
+      "id": "deep-time-world",
+      "name": "Ten-thousand-year world",
+      "frame": "model",
+      "metric": "How the world the visitor returns to is derived: the count of choice variables and computed quantities (outside time, radius, cargo) that feed it, and the count of deep-time processes applied at real rates over the elapsed span. A rater plays two runs with different choices, diffs the returned worlds, and reads the generator.",
+      "ladder": [
+        "Absent: no page, no returned world.",
+        "One fixed future is described in text; it is the same on every run.",
+        "The returned world varies with one input: the computed outside time selects one of at least 3 written futures.",
+        "At least 4 choice variables made before departure (what was left behind, who was told, what the ship carried, the chosen radius) each change at least one named element of the returned world.",
+        "At least 3 deep-time processes apply at stated rates to the elapsed span, chosen from axial precession (about 26,000-year cycle), stellar proper motion, radioactive decay by half-life and material decay timescales, each with its rate shown.",
+        "The world is generated from a seed plus the choice state: the same seed and choices reproduce the same world exactly, different seeds give distinct worlds, and the seed is shown.",
+        "The return sky is computed: at least 20 named bright stars move by their catalogued proper motions over the elapsed span (from a cited catalogue such as Hipparcos, ESA 1997), and the pole star shown follows precession.",
+        "The generated timeline spans the whole outside time with at least 12 dated eras, each traceable to the choice variables or processes that caused it, in a timeline the visitor can scrub.",
+        "The machine mind's account of the gap is consistent with the generated world: a test confirms every event it narrates exists in the generated timeline, with zero contradictions across 20 seeded runs.",
+        "The generator has at least 5 process modules (language drift, machine survival, orbital debris, sky, settlement), each driven by a computed rate stated in code; a test runs the same choices at 100, 10,000 and 1,000,000 outside years and finds worlds that differ in at least 4 of the 5 modules, and for spans over 100,000 years the sky moves stars by 3D space motion (proper motion, parallax and radial velocity), not linear proper motion.",
+        "Reference grade: a generator document in the repo cites a source for every rate, and two raters, each given only a seed and a choice record, independently reproduce the same world and timeline. Reference standard for causal traceability: the Legends mode of Dwarf Fortress (Bay 12 Games)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no world generator, seed or timeline code for this lab on labs/foundation" } }
+    },
+    {
+      "id": "horizon-cinematics",
+      "name": "Horizon cinematics",
+      "frame": "graphics",
+      "metric": "What the visitor sees of the journey and the return: which relativistic visual effects render, driven by which computed numbers, and how many shots are choreographed to the story's beats. A rater watches the running page at 1440 px and 400 px, changes the ship's radius and spin, and reads the render code.",
+      "ladder": [
+        "Absent: no page, nothing is drawn.",
+        "A static image or CSS gradient stands for the black hole; nothing moves.",
+        "One live canvas view animates: a dark disk with a ring or starfield whose apparent size is set by the current leg's radius.",
+        "Gravitational lensing renders in WebGL by tracing light paths around a Schwarzschild hole per pixel, every frame, from the ship's current radius (no precomputed lensing image). The shadow edge sits at the critical impact parameter b = (3 sqrt 3 / 2) r_s, about 2.6 r_s (photon sphere at r = 1.5 r_s), and its angular size changes when the rater changes the radius.",
+        "The sky's color and brightness shift by the computed gravitational and Doppler factors (blueshift ahead of the motion and during hover), from the same numbers the ledger shows.",
+        "Outside history plays as a time-lapse at the computed rate: during orbit or hover the outside sky (star motion, a home star, a beacon's pulses) advances by the ledger's outside years per ship second.",
+        "At least 6 choreographed shots cover 6 named beats (departure, approach, fall, orbit or hover, climb-out, return; departure and approach split the transit-out leg), each with its own camera move and a cut timed to the narration.",
+        "A spinning hole renders with Kerr lensing: the shadow's asymmetry and the dragged sky change with the chosen a/M, and a toggleable overlay draws the analytic Kerr shadow outline for a distant observer (Bardeen 1973) at that a/M and viewing angle, with the rendered edge within 2 px of it at 1440 px (reference images: James, von Tunzelmann, Franklin and Thorne 2015, Classical and Quantum Gravity 32).",
+        "The return is staged from data: the sky with moved stars, the ruin or settlement and the machine mind's housing render from the world generator's output, not a fixed image.",
+        "An accretion disk renders around the spinning hole with Doppler beaming and gravitational redshift, its observed intensity scaled by the redshift factor to the fourth power (g^4) in the shader.",
+        "Reference grade: Kerr lensing, disk beaming and the time-lapse sky run in the browser with a median frame time under 33 ms at 1440 px on a laptop integrated GPU (the GPU named in the recorded measurement), and the page shows its render beside the James et al. (2015) DNGR figure for the same spin and inclination, linked or reproduced under its licence, with the shadow width within 5 percent."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no canvas, shader or image for this lab; the Black Hole lab's renderer is not wired to it" } }
+    },
+    {
+      "id": "screen-sound",
+      "name": "Prose, screen and sound craft",
+      "frame": "style",
+      "metric": "Counts: authored scenes and words (from a content-count script), voices with their own CSS type tokens (of 3), style-lint violations in story text, synthesized layers in the Web Audio graph, and cue-sheet beats implemented as written (of those listed). A rater runs the content-count and lint scripts, plays with sound on, inspects the CSS custom properties and the audio graph in DevTools, and reads the cue sheet.",
+      "ladder": [
+        "Absent: no page, no story text, no design language.",
+        "Story text exists as unstyled paragraphs in the site's base stylesheet; no sound.",
+        "One complete path is authored end to end, at least 12 scenes and 3,000 words, and the 3 voices (narration, the visitor, the machine mind) each have their own face, size or weight set in CSS tokens.",
+        "A style guide in the repo states the prose rules for each voice (sentence length, tense, banned words), and a lint script checks every story string against it with zero violations.",
+        "The machine mind's replies reveal at a stated character rate that slows or breaks when its trust or energy drops, and gold marks only the current choice, the live clocks and the speaking voice; a rater finds no gold on an inert element.",
+        "Generated sound: a Web Audio drone (no audio files) plays under each leg, starts only after a visitor gesture, and has a visible mute control.",
+        "Sound follows the physics: the drone's pitch or pulse rate is mapped from the ledger's dilation factor (the mapping stated in code), so outside time audibly speeds up during orbit or hover.",
+        "The machine mind has a synthesized voice (oscillators or formant filters, no recorded speech) that sounds with each reply, with at least 3 timbre states tied to its trust or energy.",
+        "Authored depth: the content-count script reports at least 40 scenes and 25,000 words across all paths, and every ending carries at least 300 words of its own text.",
+        "At least 6 beats (crossing, first word, disclosure, refusal, ending, record) each have a palette, type, prose-register and sound change listed in a cue sheet in code, and a reader test of at least 5 first-time readers is recorded in the repo with completion rate and median session time.",
+        "Reference grade: at least 60,000 authored words; a recorded reader test of at least 10 first-time readers shows at least 70 percent finishing a run; the cue sheet lists at least 12 beats, each with a reduced-motion and a muted variant; the generated score has at least 4 layers positioned with a Web Audio PannerNode (HRTF) so outside signals arrive from their direction in the sky; and a rater holding the cue sheet and style guide finds every beat implemented as written. Reference standards: Heaven's Vault (inkle, 2019) and Event[0] (Ocelot Society, 2016)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no story text, stylesheet, audio code or cue sheet for this lab" } }
+    },
+    {
+      "id": "question-agency",
+      "name": "Question agency",
+      "frame": "interaction",
+      "metric": "How much of the outcome depends on what the visitor asks and chooses: the count of distinct endings, the count of state variables that gate them, whether free-text questions are accepted and change state, and the count of reachable final states. A rater plays through and reads the story graph and its coverage test.",
+      "ladder": [
+        "Absent: no page, nothing to choose.",
+        "A linear story advances with a single Next button; every visitor sees the same text.",
+        "At least 3 choice points with 2 or more options each lead to at least 2 different endings.",
+        "Choices set at least 4 state variables (such as propellant, radius, what was revealed, trust), and at least 4 endings are gated by them, not by the last click alone.",
+        "The visitor can type free-text questions to the machine mind; the offline engine maps them to at least 30 intents by keyword and synonym matching, and an unmatched question gets an in-character reply, never an error.",
+        "What is asked changes the ending: at least 3 endings are reachable only by asking specific questions (about the ship, the gap, the mind itself), and a rater reaches each by asking.",
+        "Questions about any element of the generated world (a star, an era, a ruin) are answered from the world state, checked by asking about 10 generated elements in a fresh run.",
+        "Asking costs: every question spends the machine mind's energy or the visitor's air, shown as a budget, so a visitor cannot ask everything and must choose what to learn.",
+        "At least 8 endings, each a distinct combination of what was disclosed and what the visitor chose to do, and an endings map shows which ones the visitor's runs have reached.",
+        "Endings condition on at least 10 state variables, and a coverage test over the story graph counts at least 200 reachable final states that each produce a different ending text or witness record.",
+        "Reference grade: a drama manager module chooses the next beat from at least 40 authored beats by scoring the run state against a target tension arc; across 10 seeded runs with different question orders, at least 6 distinct beat sequences occur, the coverage test reaches every beat, and the ending is computed from the set of disclosures learned. Reference standards: Facade (Mateas and Stern, 2005) and Her Story (Sam Barlow, 2015)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no story graph, choice or input handling for this lab" } }
+    },
+    {
+      "id": "witness-record",
+      "name": "Witness record",
+      "frame": "data",
+      "metric": "Where the lab's facts come from and what the visitor can keep: the count of physical constants and astronomical values (mass, distance, spin) carrying a dated source or an illustrative tag, and what the exported record contains and restores. A rater reads the source list on the page, exports a record, and reopens it.",
+      "ladder": [
+        "Absent: no page, no facts and no record.",
+        "Physical numbers appear in the text without any source or tag.",
+        "Constants come from one constants table in code that names its sources: G and c from CODATA (2018 or 2022), and the nominal solar mass parameter GM_sun from IAU 2015 Resolution B3.",
+        "Every black hole offered (at least 3 real ones, such as Sagittarius A*, M87* and Gaia BH1) carries its mass and distance with source and year (such as the Event Horizon Telescope Collaboration 2019 for M87* and 2022 for Sagittarius A*, and El-Badry et al. 2023, MNRAS, for Gaia BH1), plus its spin, either with a source or tagged illustrative.",
+        "The run ends with a ledger on screen: every leg's ship hours, outside years, tide and propellant, with units.",
+        "The record is keepable: the visitor can copy or save a witness record (text or JSON) holding the ledger, the choices, the seed and the transcript of the conversation.",
+        "The record is shareable by URL: a link encodes the seed and choices, and opening it replays the same journey and world.",
+        "Every number in the record cites its source or carries an illustrative tag, and the record states the date and the code version that produced it.",
+        "A saved record reopens: loading it restores the full run (ledger, world, transcript), and a checksum shows whether it was edited.",
+        "The record also exports as a rendered image (the return sky, the two clocks, the mind's last words) alongside the JSON, with the format documented in the repo.",
+        "Reference grade: the record has a versioned JSON schema and a README in the repo, a stable record ID and a suggested citation line, and its checksum is SHA-256; a migration test in the repo proves that a record saved by the previous tagged code version replays in the current one, by URL and by file."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no constants table, source list or export for this lab" } }
+    },
+    {
+      "id": "witness-mind",
+      "name": "Witness mind",
+      "frame": "intelligence",
+      "metric": "What the machine mind is with no model at all: the count of persistent state variables (memory, trust, disclosure, energy), the count of disclosure tiers, the reply behaviours its state drives, and the count of distinct reply strings a coverage script finds. A rater plays with the model route disabled and reads the character engine, its config and its tests.",
+      "ladder": [
+        "Absent: no page, no machine mind.",
+        "The machine mind speaks fixed lines in order and holds no state.",
+        "It remembers one thing: a fact the visitor said or did earlier is referenced in a later reply.",
+        "It holds at least 3 persistent variables (trust, energy, what it has disclosed) that change with what the visitor says and gate which lines it can say.",
+        "Disclosure is tiered: at least 4 tiers of what it will tell (surface, the gap, its own failure, its secret), each unlocked by a trust threshold a rater can find in config.",
+        "A written character profile in config (wants, fear, what it hides, speech rules) drives at least 3 reply behaviours (deflection, refusal, confession), each observable in play.",
+        "Its memory is episodic and inspectable: it recalls at least 10 kinds of visitor acts by turn number, and a debug view lists its memory and current trust.",
+        "It lies and can be caught: at least 2 early statements contradict facts the visitor can check in the ledger or the world, and confronting it changes trust and opens a different line.",
+        "It takes initiative: when the visitor is silent or wastes energy it makes at least 3 kinds of moves (asks a question, withholds, spends its last energy on a disclosure), chosen from its state, not by a timer alone.",
+        "Its replies are composed, not canned: the offline engine builds sentences from grammar templates over its state and the world; a coverage script enumerating states and world seeds yields at least 500 distinct reply strings, and in a scripted 60-turn playthrough no reply string repeats.",
+        "Reference grade: a scripted 120-turn offline transcript test in the repo (about 30 minutes of play) passes with no exact repeated reply and zero contradictions between replies and the memory log, as checked by the test. Reference standards: Kaizen in Event[0] (Ocelot Society, 2016) and Facade (Mateas and Stern, 2005)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no character engine, memory or trust state for this lab" } }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "What the language model adds over the deterministic engine and how plainly the page says which answered: calls per visitor turn against the public limit of 1 reply per 45 s per IP, what the model may change, and measured shares of replies from model versus offline. A rater uses the route panel, the network log and a side-by-side run with the model route disabled.",
+      "ladder": [
+        "Absent: no page, no model call.",
+        "The page calls a model through labs/assets/js/ai/llm.js but shows nothing when no route answers.",
+        "Every model call passes a deterministic fallback, and the route that answered (ollama, own key, worker, public, offline) is shown on screen through the route panel.",
+        "One batched call per visitor turn: the call returns a JSON object (reply, intent, trust change) that the engine validates against a schema, and the page never makes a second call inside the 45 s public window.",
+        "The engine bounds the model: the call carries the character profile, the current disclosure tier and the world facts, and a validator rejects replies that disclose above the tier or contradict the ledger, falling back to the offline reply.",
+        "The wait is part of the fiction: while the public window counts down, the offline engine speaks (signal lag, the mind thinking) and the countdown is shown, so no visitor meets a dead screen.",
+        "The contribution is counted: over a fixed set of 20 questions the page or a test reports how many replies came from the model, how many the validator rejected, and why.",
+        "The same 20-question set runs in both modes; for each mode the page reports the share of replies passing the rung-4 validator (within tier, consistent with the ledger) and the share whose intent equals the offline mapping's intent.",
+        "Model output enters memory under rules: facts the model states are extracted and checked against the world, only consistent ones are written to the mind's memory, and rejected ones are listed in the debug view.",
+        "Offline parity: with the model route disabled a test reaches every ending and every disclosure tier, and the page states the model's measured share of reply surfaces in a seeded run, with its method.",
+        "Reference grade: at least 5 blind raters score at least 20 paired transcripts (model versus offline, same questions) on a published rubric; the scores and protocol are on the page, the model's contribution is stated as the measured score difference with its confidence interval, and the lab stays complete at 1 reply per 45 s."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: llm.js and route-panel.js exist in labs/assets/js/ai but nothing for this lab calls them" } }
+    },
+    {
+      "id": "relativity-explanation",
+      "name": "Relativity explanation",
+      "frame": "explanation",
+      "metric": "Counts in one playthrough: physics claims shown and the percent tagged real or illustrative, legs with a computed why-line (of all legs), and misconceptions corrected (of the 6 named at rung 8); rung 10 adds a measured pre/post score. A rater plays once with a tally and reads the content files.",
+      "ladder": [
+        "Absent: no page, nothing explained.",
+        "The page asserts that time dilated, with no formula and no tags.",
+        "An end note names the two effects (speed and gravity) and shows the formula used.",
+        "Each leg in the ledger has a one-line why: which effect dominates on that leg and its factor, such as 'orbit at the ISCO of a/M = 0.998: gravity and speed, factor 10.8'.",
+        "Every physics claim in the story text carries a tag, real (established physics, with a source) or illustrative (story invention); a rater finds no untagged physics claim in one playthrough, and every illustrative tag links to an entry in a liberties list that states what real physics says instead.",
+        "A two-clocks view runs beside the story: the ship clock and the outside clock tick together, so the visitor watches the ratio change as the radius changes.",
+        "The visitor can ask the machine mind why: questions about dilation, tides or the horizon get answers computed from the visitor's own run (their radius, their factor), not generic text.",
+        "A guided replay after the ending walks through the journey leg by leg with the formula, the visitor's inputs and the result, in under 3 minutes.",
+        "These 6 misconceptions are each corrected where the story invites them, each tagged real: the traveler's own clock does not stop at the horizon; nothing returns from inside the horizon, so no one crosses a singularity and comes back (the hub blurb's claim); only a hovering ship sees the outside future sped up and blueshifted, a falling one does not; a hovering ship feels enormous acceleration while an orbiting one is weightless; tides at the horizon are weaker for larger holes; far from the hole its gravity equals that of a star of the same mass.",
+        "The page explains its own mechanism while it runs: a toggle shows, at any moment, the live formula and the current numbers behind the scene.",
+        "Reference grade: a pre-test and post-test on a fresh case (compute the outside time for a stated orbit or hover), taken by at least 10 finishers and published on the page, shows at least 70 percent within 10 percent of the answer after, against the stated rate before. Reference standard: Kip Thorne, The Science of Interstellar (2014)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: the only text is the hub blurb, which says 'cross a singularity', a claim the lab will have to correct or tag" } }
+    },
+    {
+      "id": "reach",
+      "name": "Reach and frame time",
+      "frame": "performance",
+      "metric": "Load weight, frame time, phone width, reduced motion, keyboard and screen-reader reach of the whole story. A rater measures with DevTools (transfer size, performance panel, accessibility tree) at 1440 px and 400 px, with prefers-reduced-motion on, and keyboard only.",
+      "ladder": [
+        "Absent: no page to load.",
+        "A page loads at desktop width; nothing else holds.",
+        "The story is readable and playable at 400 px width with no horizontal scroll.",
+        "Every choice and the question box are reachable and operable by keyboard alone, with a visible focus ring.",
+        "The machine mind's replies land in an aria-live=polite region, every choice is a native button with an accessible name, and the DevTools accessibility tree shows no unnamed control.",
+        "prefers-reduced-motion stops the lensing animation and the text-reveal effect while keeping the story complete, and sound starts muted until the visitor turns it on.",
+        "The first story text appears in under 2 s on the Chrome DevTools Slow 4G preset with cache disabled, and the initial transfer stays under 500 KB, with the WebGL scene loaded on demand.",
+        "Render tiers: at least 3 quality levels are chosen automatically from measured frame time; the page shows the chosen tier and its live median frame time, the auto-chosen tier holds a median under 16.7 ms on the rater's machine, and a manual override switches tiers.",
+        "A text-only mode plays the whole story with no canvas and no audio, and every visual beat and sound cue has a text caption.",
+        "On a low-end Android phone (4 GB RAM class) the full crossing sequence holds a median frame time under 33 ms and stays under 300 MB of memory, with the numbers recorded in the repo.",
+        "Reference grade: Lighthouse mobile scores of 95 or more for performance and accessibility, a WCAG 2.2 AA audit recorded in the repo with no open failures, and a recording or written log of a screen-reader user (NVDA or VoiceOver) finishing the story unaided is linked in the repo."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: nothing loads, so nothing can be measured" } }
+    },
+    {
+      "id": "engine-shape",
+      "name": "Story engine shape",
+      "frame": "architecture",
+      "metric": "Code shape: story content as data separate from the engine, a pure physics module, one serializable and deterministic run state, and what can be added (a scene, an ending, a black hole, an intent) without touching core code. A rater reads the module tree, runs the schema and graph scripts, and adds one scene through the content files alone.",
+      "ladder": [
+        "Absent: no page, no code.",
+        "All story text, logic and rendering sit in one HTML file.",
+        "Story text lives in a content file (JSON or a story script format) separate from the engine code.",
+        "The physics is a pure module with no DOM access, exporting the dilation, tide and energy functions used by both the story and the renderer.",
+        "Run state (choices, ledger, mind memory, seed) is one serializable object that the engine renders from, and the model is reached only through one adapter over labs/assets/js/ai/llm.js.",
+        "A new scene or ending is added by editing content files only; a rater adds one and sees it in play without touching engine code.",
+        "A schema script validates the content files and fails on a dangling link, an unreachable ending or an unknown state variable; run on a deliberately broken copy, it exits non-zero.",
+        "Black holes, ships and the mind's character profile are config entries: adding a black hole with its mass, distance, spin and source takes one config edit.",
+        "Determinism: replaying a seed and choice record yields a byte-identical run state, checked by a test over 20 recorded runs, in node and in the browser.",
+        "A story-graph tool, run as a check, prints the reachability of every scene, ending and disclosure tier with the shortest path to each.",
+        "Reference grade: the module boundaries (content, state, physics, render, model) are documented in the repo, and a second story of at least 5 scenes runs on the same engine with only new content and config files and no engine edit. Reference standard: ink (inkle's open-source narrative scripting language), which separates story from runtime."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no module, content file or config for this lab on labs/foundation" } }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "id": "trends",
+  "title": "Trending Topics",
+  "page": "trending.html",
+  "thesis": "At level 10 Trending Topics is where a visitor sees what is actually rising across the open web right now: eight or more live sources scanned from the browser, every signal scored against its own expected rate with the mathematics printed, topics merged across sources and tracked over stored history in a signal field the visitor can replay, the top signals explained in one batched, fact-checked model call whose route and limits are always named, and every past rising call checked against what happened next.",
+  "axes": [
+    {
+      "id": "velocity-math",
+      "name": "Velocity mathematics",
+      "frame": "model",
+      "metric": "How each source's rank score measures rise: rate or change against raw total, per-hour units, comparison with the item's own baseline, small-count noise and comparability across sources. The rater reads each lens's fetch() in labs/assets/js/trending/lenses.js (and any scoring module), then recomputes one item's score by hand from the raw API response captured in DevTools Network.",
+      "ladder": [
+        "No ranking: signals appear in the order the source returns them, or not at all.",
+        "Every source is ranked by a raw total (points, page views or stars); nothing is divided by time or compared with an earlier value.",
+        "One source is ranked by a rate: its total divided by item age in hours, with an age floor set in code so a brand-new item's rate stays finite (Hacker News points per hour); the other sources still rank by raw totals.",
+        "Every source ranks by a rate or a change, none by a total: Wikipedia by the ratio of the article's latest-day views to an earlier baseline (at minimum its views the day before, from a second pageviews call), GitHub by stars per day since the repository's created_at.",
+        "Every score carries one unit per source (per hour or per day) printed beside the number, and a snapshot or fallback item is never shown under a rate label when its score is a total.",
+        "Rise is measured against the item's own baseline in at least two sources: Wikipedia views over the median of the same weekday in the article's trailing 4 weeks (per-article pageviews endpoint), so a weekly cycle is not read as a rise, and one other source over its previous stored observation; an item with no baseline is labelled new instead of given an infinite ratio.",
+        "Acceleration: from at least three observations of one item (stored scans or the source's own time series) the change in rate per hour is computed, and each item is labelled accelerating, steady or decaying against a threshold printed on the page.",
+        "Small counts are tempered: every score carries an interval (a 95 percent Poisson interval on the count, or a Gamma-Poisson posterior shrunk toward the source's median rate with the prior strength printed on the page), ranking uses the interval's lower bound, and a test fixture in the repo holds a pair that the raw rate orders one way and the lower bound the other (for example 8 points at 24 minutes against 60 points at 4 hours: raw 20 against 15 points per hour, Poisson lower bounds 8.6 against 11.4).",
+        "Burst detection by a named method runs on each item's time series (Kleinberg's two-state burst automaton, KDD 2002, or a CUSUM change-point test with its threshold printed on the page) and marks the burst onset time on the item.",
+        "Scores from different sources share one unit: each source's score becomes a median-based z-score (median and median absolute deviation) or a percentile against that source's own stored distribution, the conversion is shown, and one merged cross-source ranking is computed from it.",
+        "Rise is scored against an expected rate: each item's expected rate for the current hour of the week is fitted from its own stored and backfilled history (weekly and daily cycles), the score is the residual over that expectation in units of its standard deviation, and the fit's error on held-out days is printed on the page; reference standard: the rising and breakout lists of Google Trends."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "lenses.js tech.fetch scores round(points / max(0.4, age hours)), a real rate, with the floor set in code (TUNING.minVelocityAgeH = 0.4 in constants.js, never shown on the page), which meets rung 2. Rung 3 fails: culture.fetch ranks by a.views, one day's raw total with no comparison day; dev.fetch ranks repos created in the last 14 days by stargazers_count, a total with no age division. Rung 4 would also fail: the snapshot fallback sets score = points, yet FeaturedView prints it under the rate label, and the ?demo render at 1440 px shows 'velocity 982 · points 982'."
+        }
+      }
+    },
+    {
+      "id": "rise-validation",
+      "name": "Rising-call verification",
+      "frame": "model",
+      "metric": "Whether the page checks its own rising calls against what happened next: calls stored, follow-up observations, hit rate against baselines, rank agreement, and calibration of the probabilities it prints. The rater runs two scans of one lens at least an hour apart, or reads the stored history and the published record, and reads the scoring code.",
+      "ladder": [
+        "No check: a signal called rising is never revisited.",
+        "Each scan's top 10 rising calls are stored with time, source, item id and score.",
+        "On a later scan of the same source, every earlier call shows whether the item's measured rate since then rose, held or fell, with the elapsed time.",
+        "A hit rate is printed: the share of stored calls whose metric gain over the following 24 hours (or up to the next observation, with the gap printed) exceeds the source's median gain over the same span, with the number of calls behind it.",
+        "The same hit rate is printed for the top 10 of two baseline rankings over the same scans, rank by raw total and rank by total over age, with the gap between this method and each baseline.",
+        "Spearman rank correlation between the scan's score and each item's subsequent 24-hour gain is printed per source, with the sample size.",
+        "Every figure carries a 90 percent bootstrap interval over scans, and a figure from fewer than 30 calls is labelled too few to judge.",
+        "Each rising call prints the probability that the item's rate is still above its baseline 6 hours later, computed from the stored outcomes of earlier calls in the same score decile.",
+        "A reliability diagram (printed probability in 10 bins against observed frequency) and the Brier score (Brier, Monthly Weather Review, 1950) are drawn from stored outcomes.",
+        "Parameters are fitted on one period of the archive, and every figure is reported on a later period never used for fitting, with both date ranges printed.",
+        "A daily verification record built from the scheduled public archive reports precision at 10 against the subsequent 24-hour gain, Spearman agreement and Brier score per source over at least 90 days, with the method ahead of both baselines; reference standard: operational weather-forecast verification (reliability diagrams and Brier scores published per forecast)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "No call is stored or revisited: labs/assets/js/trending/ has no localStorage, sessionStorage or IndexedDB call (grep), and Trending.scan() clears the trace and board at the start of every scan, discarding the previous result."
+        }
+      }
+    },
+    {
+      "id": "topic-merging",
+      "name": "Cross-source topic merging",
+      "frame": "model",
+      "metric": "Whether signals are grouped into topics within and across sources: the method (shared terms, entity links, embeddings), its threshold, the count of topics joining two or more sources, and the measured precision and recall of the same-topic decision. The rater scans two or more sources (or loads ?demo with its recorded fixture), counts topics that join items from different sources, then reads the clustering code and its labelled test set.",
+      "ladder": [
+        "No topics: every signal stands alone as a title from one source.",
+        "Titles are normalized (case folded, punctuation and stopwords stripped) and duplicates within one source are merged into one row.",
+        "Each signal shows 1 to 3 key terms extracted by a method printed on the page (TF-IDF over the scan's titles, or capitalized-phrase detection).",
+        "Signals sharing key terms within one scan group into topics by a rule printed on the page (for example Jaccard similarity of term sets of 0.3 or more), each topic shows its member count, and the board switches between items and topics.",
+        "Signals from at least two sources are compared in one pass, and a subject present in two sources shows as one topic carrying both source badges; a recorded fixture loaded by ?demo contains one HN story and one Wikipedia article on the same subject, which the page shows as one topic carrying both badges.",
+        "Topic terms are linked to canonical entities through the Wikipedia search API, so variant titles of one subject join on one entity with its article link.",
+        "Titles are embedded in the browser with a sentence-embedding model (for example all-MiniLM-L6-v2 through transformers.js) and clustered by cosine similarity with the threshold printed, each topic shows its mean within-topic similarity, and the ?demo fixture includes one same-topic pair with no shared word, which the page joins.",
+        "A labelled set of at least 100 title pairs in the repo, scored by a Node script anyone can rerun, gives same-topic precision of 0.85 or more and recall of 0.70 or more, and both figures are printed on the page beside the similarity threshold.",
+        "A topic's score combines its members' normalized scores across sources by a rule printed on the page, and the board ranks topics by it.",
+        "Topics keep a stable id across stored scans as members come and go, and each topic shows when each source first picked it up and the lead in hours of the first source.",
+        "Lead and lag across sources is measured over stored history: a table on the page gives, per pair of sources, the median lead in hours and the topic count behind it; reference standard: the source-lag measurement of Leskovec, Backstrom and Kleinberg, Meme-tracking and the dynamics of the news cycle (KDD 2009)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Each lens fetch() in lenses.js returns its own items and BoardView renders titles verbatim; there is no term extraction, normalization, deduplication or comparison between lenses anywhere in labs/assets/js/trending/, and Trending.scan(lensKey) scans one lens at a time."
+        }
+      }
+    },
+    {
+      "id": "scan-memory",
+      "name": "Scan memory",
+      "frame": "data",
+      "metric": "What the page keeps between scans and what it measures from it: stored scans (count), observations per item, measured change per elapsed time, history views and exports. The rater runs two scans of one lens a few minutes apart, reloads, and reads DevTools Application (localStorage, IndexedDB) and the code for storage calls.",
+      "ladder": [
+        "No memory: each scan replaces the last, nothing is stored, and a reload starts empty.",
+        "Within one visit each lens keeps its last scan, so switching back to a lens re-shows its board with its fetch time and makes no new request.",
+        "Every scan is saved to localStorage or IndexedDB with timestamp, source, item ids and metric values and survives a reload, and the page shows the stored scan count, the storage size in KB and a clear-history control.",
+        "On a rescan each board row shows its rank change since the previous stored scan of that lens: up n, down n, or new.",
+        "Each row shows its metric change since the previous stored scan with units and elapsed time (for example +142 points in 38 min = 224 points per hour), a rate measured between two observations rather than inferred from age.",
+        "A history panel lists stored scans by time per lens; the visitor picks any two and sees which items entered, left and moved, with counts.",
+        "Every item with three or more stored observations draws a sparkline of its metric, with the first and last observation times labelled.",
+        "While the tab is open the page re-polls the enabled sources on an interval printed on the page, inside each source's rate limit (GitHub's unauthenticated search allows 10 requests per minute), with a visible countdown and a pause control, so history grows without clicks.",
+        "History is backfilled on first visit from public historical endpoints (at least Wikipedia per-article daily pageviews for the last 30 days), so the first scan already has a baseline, and backfilled points are drawn with a different mark from observed ones.",
+        "History exports as versioned JSON and as CSV rows of (time, source, item, metric), and an exported JSON file imported into an empty browser reproduces the same history panel.",
+        "A dated public archive of daily scans, written by a scheduled job and committed to the site and backfilled to at least 365 days wherever a historical endpoint exists (at least Wikipedia per-article daily pageviews), gives every visitor that history without polling, and the visitor's own local observations merge with it on one timeline; reference standard: the Wikimedia Pageviews Analysis tool, whose per-article history runs from July 2015."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Trending.js scan() clears the trace and board and keeps nothing from earlier scans; no localStorage, sessionStorage or IndexedDB call exists anywhere in labs/assets/js/trending/; setLens() switches the toggle without restoring that lens's last result, and a reload returns to the empty resting panel shown in the audit screenshot."
+        }
+      }
+    },
+    {
+      "id": "source-coverage",
+      "name": "Source coverage and provenance",
+      "frame": "data",
+      "metric": "How many live keyless sources the page reaches from the browser, and whether each displayed signal carries its source, endpoint, fetch time and the exact time window its data covers, with offline data dated. The rater runs every lens with DevTools Network open, counts hosts answering 200, and checks the scan header and rows against the request actually made.",
+      "ladder": [
+        "No sources: the signals are invented or hard-coded with no stated origin.",
+        "A hard-coded list of real items copied from a named source, with no live fetch.",
+        "One live public source is fetched from the browser and its items rendered.",
+        "Three live sources of different kinds (discussion forum, encyclopedia readership, code host), each selectable, and when a fetch fails a snapshot of real items is shown labelled with its capture date.",
+        "Every scan shows its host, endpoint, fetch clock time and the exact window its data covers (for example 'views on 2026-11-10'), taken from the request actually made, and the live/snapshot pill never reads live for snapshot data.",
+        "At least five live keyless sources from at least three kinds of source (discussion forum, encyclopedia readership, code host, research papers, social), with Lobsters and HN counting as one kind (for example Lobsters, Mastodon trending tags, arXiv new listings, a second Wikipedia language edition), and the page lists by name which sources answered and which failed in the current scan.",
+        "One action scans all enabled sources in parallel, each with its own timeout and status, and a failed source never blanks the others.",
+        "Each source's rate limit is printed on the page, remaining calls are read from response headers where the source sends them (GitHub's X-RateLimit-Remaining), and the page waits with a countdown instead of failing when a limit is reached.",
+        "Every row opens its raw origin: a control shows the exact API URL requested and the JSON fields the score was computed from.",
+        "The offline snapshot is regenerated on a schedule by a script in the repo, never more than 7 days old, with capture time per source, and the page prints the snapshot's age in days.",
+        "At least eight live sources across at least four kinds of source (discussion forum, encyclopedia readership, code host, research papers, social), each carrying a provenance record (endpoint, window, fetch time, rate limit, data licence) that travels with every export."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "lenses.js fetches three live hosts of three kinds (hn.algolia.com front_page, wikimedia.org pageviews top, api.github.com repository search), one per lens, and on failure Trending._snapshotResult() shows SNAPSHOT items labelled 'captured 2026-06-16' (five months old on 2026-11-11). Rung 4 fails: MetaView prints the static endpointLabel 'most-read, prior full day' even when culture.fetch backs off 2 or 3 days (TUNING.wikiBackoffDays), the date actually used (ageText) is never displayed, and the HN lens states no window."
+        }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "What the model adds over the deterministic engine: signals explained per scan, model calls per scan, the evidence the prompt carries, the checks run on the reply, which route answered and how the fallback is labelled. The rater runs a scan with DevTools Network open, counts model requests and explained items, reads the prompt in the request, compares the reply with the deterministic text, and runs the recorded-reply fixtures.",
+      "ladder": [
+        "No model: nothing on the page is generated.",
+        "A fixed template sentence per source with the metric value inserted stands in for an explanation, labelled as built-in.",
+        "One model call explains the top signal from its title and metric, a template stands in when the call fails, and the label names which of the two answered.",
+        "The call goes through the shared route (labs/assets/js/ai/llm.js: local Ollama, visitor key, worker, public service, offline engine), the page names the route that answered, and the route panel shows the wait when the public route's 45-second limit applies.",
+        "The prompt carries fetched evidence beyond the title: the item's measured numbers (score, rate, age, rank change) plus text fetched from the source (top HN comments, the Wikipedia article summary, or the repository description), and the reply names at least one of them.",
+        "One batched call per scan explains the top 5 signals and returns JSON with one entry per item, validated against a schema; a malformed entry falls back to the deterministic engine for that item, never to a blank, verified by a recorded-reply fixture (a ?fixture parameter or a Node test) with one malformed entry.",
+        "Every number or date in the model's reply is checked against the fetched data, and mismatches are struck through or flagged on the page, verified by a recorded-reply fixture with one wrong number, which the page flags.",
+        "The same call assigns each signal a cause from a fixed list (launch, outage, news event, death, release, controversy, sports result, anniversary) with a confidence; when no model answers, the deterministic engine assigns a cause from the same list by keyword rules, labelled as such; the board filters by cause.",
+        "The same single call also names the cross-source topics and writes a one-paragraph digest of the scan, and the deterministic engine writes a digest of the same shape when no model answers.",
+        "The page shows the deterministic summary and the model's explanation of the same items side by side, and lists the facts (numbers, dates, URLs and capitalized names) found in each and missing from the other, with their counts.",
+        "Explanations are scored: a stored set of at least 100 past signals with causes verified from dated news reports measures cause accuracy for the model and for the deterministic engine, both published on the page with the set's date and a 90 percent bootstrap interval, and the 90 percent interval of the difference (model minus engine) lies above zero."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "ReasoningService.reason() GETs text.pollinations.ai itself (not llm.js) for items[0] only, with the title, one metric and ageText in the prompt. On non-2xx, timeout or a reply under 24 characters it types a HEURISTICS template labelled 'built-in heuristic'. The adversarial review measured the route on 2026-11-11: HTTP 200 in 20.1 s with an invented description of Iroh 1.0 (it called a P2P library an all-in-one Docker framework), which the page labels 'pollinations (live)'; the same endpoint also served a budget-exhausted message as HTTP 200 text, which the /^\\s*(error|\\{)/i guard would display as an explanation; a second call within 45 s returns 402. No route panel, no batching, no evidence beyond the title and one number."
+        }
+      }
+    },
+    {
+      "id": "signal-field",
+      "name": "Signal field",
+      "frame": "graphics",
+      "metric": "What the page draws from a scan: the number of data views, the quantities each encodes visually (rank, rate, size, source, age, change over time, topic), and whether the views are linked. The rater runs a scan (or ?demo) at 1440 px and 400 px and lists every view with its encodings.",
+      "ladder": [
+        "Nothing drawn: results are text only.",
+        "A ranked list of signal titles with their metric numbers and no graphic encoding.",
+        "Each row carries a bar whose length encodes its score relative to the top item.",
+        "A signal-field chart places every signal of the scan as a mark on two labelled data axes with ticks and units: rate on a log y axis against item age in hours where the source has one (HN, GitHub), and against baseline ratio or rank where it has none (Wikipedia), with the x quantity named on the axis.",
+        "Mark area encodes a third quantity (comments, views or stars) and mark shape encodes source, with a legend, and hovering or focusing a mark shows its title and values.",
+        "Field and board are linked: selecting a row highlights its mark and selecting a mark scrolls to and focuses its row; at 400 px the field shows every mark with no tick or axis label overlapping another and no text under 11 px.",
+        "With stored scans each mark trails its previous positions, so movement between scans is visible in the field.",
+        "Cross-source topics are drawn as hulls or edges joining their member marks, labelled with the topic name.",
+        "Between scans each item keeps its mark and moves to its new position over 400 to 800 ms (object constancy), with a static redraw under prefers-reduced-motion.",
+        "A time scrubber replays stored history: dragging it moves every mark through its recorded positions, with the scan time shown.",
+        "A stacked-graph or bump-chart view of topic rank over stored history (stacked layout after Byron and Wattenberg, IEEE InfoVis 2008) is linked to the field, so one topic can be followed from first appearance to peak to decay in both views; reference standard: the Google Trends explore view."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "views.js BoardView.render() gives each row an 80 px .heat bar with fill width max(4, round(score / top score x 100)) percent; there is no chart. The audit screenshot at 1440 px shows only the resting panel (three breathing squares and two sentences) before a scan; the ?demo render shows ranked rows with bars and nothing else drawn."
+        }
+      }
+    },
+    {
+      "id": "design-language",
+      "name": "Design language",
+      "frame": "style",
+      "metric": "Whether the page is built on the site's tokens and its warm-for-active, cold-for-structure colour rule, whether every live state and data mark has a designed form, and whether the resting state is composed. The rater reads labs/assets/css/trending.css against labs/assets/css/tokens.css, lists every selector that uses an accretion token or a warm colour literal, and compares the 1440 px and 400 px screenshots.",
+      "ladder": [
+        "Unstyled: browser default type and colours.",
+        "Custom colours and fonts set per page, not drawn from the site's tokens.",
+        "Built on the shared design tokens (tokens.css custom properties for colour, type scale, spacing, radius) and the labs' shared chrome (sticky header with back link, status pill, footer).",
+        "Colour follows the rule printed in the CSS header of trending.css: accretion tokens and warm colour literals appear only on live, active or hot elements (selected lens, scan button, featured card and rank, heat bars, think dot, model label and cursor, hover states), cold horizon on structure and links, ok and warn on live and snapshot; no other selector in trending.css uses an accretion token or a warm literal.",
+        "Every live state has its own mark: each trace step kind (request, ok, think, warn) has its own dot colour, the live pill pulses only while live, and a cursor shows while the model is thinking.",
+        "The resting state is composed: before any scan the output panel shows a preview of what a scan produces (the last stored scan or a labelled sample field), not a placeholder sentence.",
+        "Data marks have their own vocabulary: per-source glyphs, a rate scale and change markers (up, down, new) drawn from one specified set of shapes and line weights, documented in the CSS header.",
+        "The scan plays as one timed sequence (request, fetch, rank, field, reason) in which each stage's mark appears as it completes, with durations from tokens and no single transition over 800 ms.",
+        "Every scan state (idle, scanning, live, snapshot, rate-limited wait, model thinking, model failed, empty result) has its own panel state with distinct copy and mark, a contact sheet of all eight at 1440 and 400 px is committed in the repo, and metric numerals are tabular (font-variant-numeric: tabular-nums).",
+        "A share card: the current top signals render to a 1200 by 630 image in the lab's design language (title, field thumbnail, source glyphs, timestamp), the artifact a visitor posts.",
+        "One signature mark set: field, board, share card and the hub card thumbnail render from one mark module using live or stored data, a design note in the repo states the mark rules (glyph per source, size scale, colour per state, motion timings), and a check script reports zero colour, size or duration literals outside tokens.css and one named block of lab tokens; reference standard: the data essays of The Pudding."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "trending.css builds on tokens.css and the shared chrome (rung 2). Rung 3 fails because warm accretion decorates things that are not live, active or hot: .intro h1 .x ('Topics' in --accretion with a 28px accretion glow, the largest warm element in the audit screenshot), the .eyebrow i fire icon, the dashed --accretion-dim underline on em in the lede ('live agentic scan', 'why'), and the warm radial gradient rgba(242,169,59,.10) in .void-bg. The rung 4 marks exist (a dot colour per trace kind, a pill that pulses only when live, a thinking cursor) but do not count above a failed rung."
+        }
+      }
+    },
+    {
+      "id": "scan-control",
+      "name": "Scan control",
+      "frame": "interaction",
+      "metric": "What the visitor can change: the count of controls that alter what is fetched, how it is ranked, filtered or shown, whether the visitor can pose a question of their own, and which states the address bar records and a URL reproduces. The rater lists every control on the page, every query parameter handled in Trending.js init(), and every history.replaceState or pushState call.",
+      "ladder": [
+        "No controls: the page shows a fixed result.",
+        "One button runs a scan of one fixed source.",
+        "The visitor picks one of several sources, runs a scan, can stop it mid-flight, and opens any signal at its source.",
+        "Scanning writes ?scan=<lens> into the address bar (history.replaceState), and opening that URL selects the lens and starts its scan, so copying the address shares the same scan.",
+        "The visitor switches the ranking score among every score the page computes (at least rate and total), and the board re-ranks from data already fetched, with no new request in the Network panel.",
+        "The visitor toggles any subset of sources and scans them together into one board, then filters the board by source and by item age window where the source has item ages.",
+        "The visitor types up to five terms and the page looks each up in every source (HN Algolia search, Wikipedia per-article pageviews, GitHub search) and draws their rates against baseline on one comparison chart: questions the designer did not script; reference: the term comparison of the Google Trends explore view.",
+        "Selecting a signal by click or Enter opens a detail view of that item with its metric history from stored scans and a control that asks the model about that item alone in one call; Escape closes it and returns focus to the row.",
+        "The whole state (sources, score, window, selected item, the typed lookup terms) is written to the URL, so any view reloads and shares exactly.",
+        "Watchlist: the visitor pins terms or items, pinned ones are re-polled while the page is open, each is flagged when its rate crosses a threshold the visitor sets, and pinned terms are written to the URL.",
+        "The visitor edits the score formula (weights of rate, baseline ratio, cross-source count) in a live editor, board and field re-rank on every change, the formula is kept in the URL, and a panel lists which items moved against the default formula and by how many places."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "trending.html offers three lens buttons (aria-pressed), the scan button, a Stop button that aborts the AbortController, and row and featured links that open the source in a new tab (rung 2). Rung 3 fails: Trending.init() reads ?scan and ?demo, but nothing in labs/assets/js/trending/ calls history.replaceState or pushState (grep), so scanning never changes the address bar and a visitor never gets a shareable link. No ranking, window, filter, multi-source or free-term control exists."
+        }
+      }
+    },
+    {
+      "id": "method-transparency",
+      "name": "Method transparency",
+      "frame": "explanation",
+      "metric": "What a visitor knows after five minutes, without opening code, about how 'rising' was computed and how far to trust each line: what each source measures and over what window, the formula, its limits, and whether every claim is tagged live, snapshot, model or heuristic correctly in every mode. The rater reads the page in a live scan, in the offline fallback and in ?demo, and lists what it states and where a tag is wrong.",
+      "ladder": [
+        "No explanation: results appear with no statement of what they mean.",
+        "A lede states in one paragraph what the page does.",
+        "Each source states in words what it measures and over what window (for example points per hour since posting; the prior full day's most-read).",
+        "Every displayed claim is tagged by origin (live data, dated snapshot, model, built-in heuristic); in any mode, no tag, trace line or headline says live for snapshot or sample content, and none says rising or velocity for a list ranked by a raw total.",
+        "A method panel prints each source's score as an equation with units and parameter values beside the board it ranks.",
+        "Each source carries a one-line caveat on what its metric cannot see (front page only; daily totals that lag up to a day; stars that coordinated starring can inflate).",
+        "A walkthrough of 3 to 6 steps points at trace, score, field and explanation in turn, can be skipped and replayed, and runs from the keyboard.",
+        "During a scan the trace states in plain words why the top item is first: its score against the runner-up's, with the difference in units.",
+        "A worked example recomputes one signal's score step by step from raw API fields shown on the page, so the visitor checks one ranking by hand.",
+        "A short section explains why trending is hard to measure, and for each of its three points shows a number computed from the current scan: the top item by total against the top item by rate; the widest score interval on the board; one item's score in each source's unit next to the shared unit.",
+        "Predict and check: before a rescan the visitor marks the items they expect to rise, and afterwards the page scores the guesses against the measured change and shows the visitor's hit rate beside the method's; reference standard: The New York Times Upshot's 'You Draw It' (Aisch, Cox and Quealy, 2015)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The lede and the lens.what strings in lenses.js say what each source measures and over what window (rung 2). Rung 3 fails five ways: the ?demo trace prints 'reasoning complete (pollinations, live)' beside the canned DEMO_WHY labelled 'sample'; renderDemo() prints a frozen trace of a request that never ran ('GET hn.algolia.com — front page', '30 signals fetched 214ms'); snapshot point totals are printed as 'velocity'; the HEURISTICS templates in ReasoningService.js assert facts the code never computed ('cleared the front-page baseline by a wide margin', 'climbing far faster than the median project'); and the lede and scan status say 'rising' while Wikipedia and GitHub rank raw totals."
+        }
+      }
+    },
+    {
+      "id": "reach-speed",
+      "name": "Reach and speed",
+      "frame": "performance",
+      "metric": "Failure handling, phone width, reduced motion, keyboard and screen-reader reach, text contrast, request and byte budget per scan, and Lighthouse mobile scores. The rater uses DevTools (Network for requests and KB per scan, request blocking, a Lighthouse mobile run), a 400 px viewport, prefers-reduced-motion emulation, a contrast checker and a keyboard-only pass.",
+      "ladder": [
+        "The page fails to load or a scan never completes.",
+        "A scan completes on desktop, with no handling of narrow screens, motion preference or a stalled network.",
+        "Every fetch has a hard timeout and an abort, and a failed fetch falls back to a labelled result instead of hanging.",
+        "The layout stacks to one column below 860 px and the board reads at 400 px with no horizontal scroll.",
+        "prefers-reduced-motion stops pulses and transitions and prints model text at once instead of typing it; lens and trace controls expose aria-pressed and aria-expanded; a polite live region announces scan start and end, a stopped scan included; and every text that carries data (row sub-lines, ranks, trace durations, resting copy) meets WCAG 2.1 AA contrast of 4.5:1 against its background.",
+        "Lighthouse mobile accessibility of 95 or more and performance of 85 or more for the page, recorded in the repo with the date.",
+        "The request budget per scan is printed on the page per source, and the DevTools Network count never exceeds it, with at most one model call per scan; the scan's received data (the byte length of each response body as the page reads it, summed) is shown in KB, within 10 percent of the DevTools resource-size total for those requests.",
+        "Content paints without waiting on any data request: with the API hosts blocked in DevTools request blocking, the output panel still shows the last stored scan or a labelled sample, and Lighthouse mobile First Contentful Paint is 1.8 s or less, recorded with the date.",
+        "Field and board are fully keyboard-reachable (arrow keys move between marks, Enter opens a signal), and a screen reader announces each signal as title, source, score with unit, and change.",
+        "Third-party weight is cut: Font Awesome is replaced by inline SVG for the glyphs used, the page transfers under 300 KB before any data request (DevTools Network, cache disabled), recorded in the repo with the date, and a CI check fails when that weight is exceeded.",
+        "A CI check fails when requests per scan exceed or Lighthouse scores fall below the recorded thresholds, and ?stress=200 fills the field with 200 marks that hold 60 fps with no long task over 50 ms in a DevTools Performance recording under 4x CPU throttling."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "dom.js fetchWithTimeout() aborts at TUNING.fetchTimeoutMs 12000 and reasonTimeoutMs 25000, and failures fall back to the labelled snapshot or heuristic (rung 2); @media (max-width: 860px) stacks the bench, and a 400 px render of ?demo on 2026-11-11 shows one column with no horizontal scroll (rung 3). Rung 4 fails on contrast and the live region: .row-sub, .row-rank and .trace-step .dur use --text-faint #424B57 on --surface-2 #11161F, 2.05:1; .resting .sub is #424B57 on --surface #0B0E13, 2.19:1 and near-illegible in the audit screenshot; and a stopped scan leaves #scan-status reading 'Scanning ...' because _abortCleanup() never updates it. The reduced-motion block, aria-pressed and aria-expanded are present. No Lighthouse record exists."
+        }
+      }
+    },
+    {
+      "id": "source-architecture",
+      "name": "Source plug-in architecture",
+      "frame": "architecture",
+      "metric": "How the code is shaped: module roles, config apart from logic, the number of files touched to add a source, a score or a view, whether items are validated before rendering, and whether pure logic is tested. The rater reads labs/assets/js/trending/ and counts the files a fourth source would touch.",
+      "ladder": [
+        "No code of its own: the page is static markup.",
+        "One inline script holds fetching, ranking and rendering together.",
+        "Separate ES modules for controller, views and helpers, and one constants module whose selector map and tuning block (timeouts, result counts, the age floor) the controller and views import; a literal elsewhere does not fail this rung (zero literals outside the constants module is rung 9).",
+        "Sources are a strategy registry: each source is one entry (labels plus fetch() returning normalized items { title, url, metricLabel, metricValue, sub, ageText, score }), and adding a source needs no edit to the controller.",
+        "Lens items pass one schema module before any view renders them (required fields present, finite non-negative score, absolute https URL), and an item that fails is reported in the trace instead of rendered.",
+        "Scoring is apart from fetching: sources return raw observations (counts with timestamps) and one scoring module computes rates, baselines and normalization, so a new score is one function.",
+        "One storage module owns persisted scans behind a versioned schema with a migration function, and no other module touches localStorage or IndexedDB.",
+        "Pure logic is tested: a Node test runs the scoring, clustering and history-diff functions on recorded API responses, with at least 20 assertions passing.",
+        "Each source has a dated recorded response in the repo, and a contract test fails when a live response no longer carries the fields its source module reads.",
+        "Views subscribe to one scan state object (sources, items, topics, history, selection) and re-render from it; lens buttons and views are generated from registries, so a source or view is added without touching the HTML or the controller, and no selector, tuning number or user-facing string appears outside the constants and registry modules.",
+        "The scan engine runs headless: the same modules run under Node to write the dated public scan archive the page reads (fetch, score, cluster, explain), with zero browser-only imports in the engine, so the scheduled job and the page share one implementation."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Seven modules (main, Trending controller, views, ReasoningService, lenses, constants, dom); constants.js holds SEL and TUNING, imported by Trending.js and views.js (rung 2; literals remain elsewhere, such as querySelector('span') and 'Scanning…' in Trending._setBusy() and per_page=20 in lenses.js dev.fetch, which only rung 9 forbids). LENSES is a strategy registry whose fetch() returns normalized items, so a fourth source needs no Trending.js edit, only a LENSES entry, a SNAPSHOT entry and a button in trending.html (rung 3). Rung 4 fails: no schema check exists and views render whatever fetch() returns. The page-local pollinations fetch in ReasoningService is graded on model-contribution rung 3. No tests."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

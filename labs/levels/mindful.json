@@ -1,0 +1,249 @@
+{
+  "id": "mindful",
+  "title": "Mindfulness",
+  "page": null,
+  "thesis": "A visitor breathes with a pacer that finds their own resonance rate from their live heartbeat, inside a generative soundscape and an ink field that follow every breath and beat, and leaves with a private, exportable session record in which every parameter is adjustable and every default carries its source.",
+  "axes": [
+    {
+      "id": "pacer-timing",
+      "name": "Pacer timing fidelity",
+      "frame": "model",
+      "metric": "How exactly the pacer sets and keeps the breath rhythm: rate range and step (breaths per minute), inhale:exhale ratio and hold options (seconds), breath curve, and three timing figures in ms. Audio drift, per cycle k: the AudioContext time the pacer assigns to boundary k (the time its cue or turn event is scheduled for) minus (session start + planned boundary k), reported as max |drift|. Visual lag, per cycle k: AudioContext.currentTime read in the requestAnimationFrame callback of the first frame that draws the new phase, minus (session start + planned boundary k), reported as mean and max. Sound-to-image gap (from rung 6): the cue's scheduled time converted to performance.now through AudioContext.getOutputTimestamp, minus the requestAnimationFrame timestamp of the first frame showing the turn, reported as mean |gap|. Rater reads the pacer module and the page's drift readout, or logs the same figures from the console.",
+      "ladder": [
+        "Absent: no breath pacer runs.",
+        "A breathing instruction or a looping CSS animation of one breath cycle is on the page.",
+        "A scripted pacer at one fixed rate of 6 breaths per minute (5 s in, 5 s out), with the rate printed on the page.",
+        "Rate adjustable over at least 3 to 10 breaths per minute in steps of 0.5, inhale:exhale ratio adjustable over at least 1:1, 1:1.5 and 1:2, and the cycle length in seconds shown.",
+        "Phase is computed from one monotonic clock (AudioContext.currentTime) as elapsed time over period, not from summed frame deltas or timers; the page's drift readout shows max audio drift and mean and max visual lag in ms, and after 10 minutes max audio drift and max visual lag both stay under 50 ms.",
+        "Rate step of 0.1 breaths per minute, optional holds after the inhale and after the exhale (0 to 10 s), and an optional second inhale phase (the double inhale of cyclic sighing); a change applies at the next cycle boundary with no jump in phase.",
+        "Audio cues are scheduled earlier by AudioContext.outputLatency (baseLatency where outputLatency is undefined), the page labels that figure as browser-reported, and the drift readout logs the sound-to-image gap per cycle with a mean |gap| under 20 ms.",
+        "The breath curve is selectable (linear, sine, eased), and ramped sessions glide from a start rate to a target over a set number of minutes, with phase integrated from instantaneous frequency (no cycle restarts).",
+        "While the tab is hidden for 60 s the audio cue still sounds at every boundary (cues scheduled ahead on the AudioContext clock); on return the visual resumes at the planned phase with no cycle restart and the first boundary after return shows a visual lag under 50 ms; a committed node test drives the pacer with a simulated frame clock (16.7 ms mean interval, 8 ms jitter, one 60 s gap) for 30 simulated minutes and fails if any boundary's audio drift exceeds 1 ms.",
+        "Every cycle boundary is written to the session record at 1 ms resolution as three times on the AudioContext clock: planned, audio heard (scheduled time plus the latency applied) and visual (the time read in the first frame drawing the new phase); a script in the repo recomputes rate and ratio from an export and reports the largest planned-to-observed gap, under 2 ms for audio and under one frame interval (17 ms at 60 Hz) for the visual.",
+        "A loopback calibration (the page plays a click and detects it through the microphone) measures round-trip latency for each output route used (speaker, wired headphones), derives output latency in ms by subtracting the microphone track's reported input latency (MediaTrackSettings.latency, or half the round trip, labelled as an assumption, where none is reported), shows it and applies it to the audio cue in place of the browser-reported figure; with this the pacer covers the parameters of dedicated biofeedback breath pacers (reference class: the Biofeedback Federation of Europe's EZ-Air Plus: rate, ratio, holds) plus curves, ramps and per-cycle export."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; site.config.js lists mindful with status 'planned' and no href, and no pacer code exists anywhere under labs/assets/js/ (no labs/assets/js/mindful/ folder)" } }
+    },
+    {
+      "id": "resonance-assessment",
+      "name": "Resonance-frequency assessment",
+      "frame": "model",
+      "metric": "How the lab arrives at the visitor's breathing rate: a population default, a stepped protocol, or a measurement from the visitor's own live heartbeat by named criteria (peak-to-trough heart-rate amplitude in beats per minute, low-frequency power in ms², LF peak frequency in Hz, heart-rate to breath phase in degrees, the six criteria of Shaffer and Meehan 2020); rater runs the assessment on the page with a live sensor, checks the computation with the bundled sample recording, and reads the analysis module.",
+      "ladder": [
+        "Absent: no breathing rate is proposed.",
+        "Text names 6 breaths per minute as the rate to breathe at.",
+        "The pacer opens at 6 breaths per minute (0.1 Hz) labelled as a population default, and the rate control marks 4.5 to 7 breaths per minute as the band where individual resonance rates usually fall.",
+        "A stepped protocol runs 2 minutes each at 6.5, 6.0, 5.5, 5.0 and 4.5 breaths per minute (after Lehrer, Vaschillo and Vaschillo 2000, Applied Psychophysiology and Biofeedback); the visitor rates comfort per step, the most comfortable rate is saved, and the page says this is self-report, not a resonance measurement.",
+        "With a live heart signal from the visitor (Bluetooth strap or fingertip camera, Heart and breath capture rung 4 or 5; tapped beats do not count, and the bundled recording serves only to check the analysis), a 2-minute unpaced resting recording opens the protocol, each period yields the mean peak-to-trough heart-rate amplitude in beats per minute (successive heart-rate maxima minus minima, per breath cycle in the paced steps), and the resting value and the five step values show side by side.",
+        "Spectral analysis per step: either RR intervals resampled at 4 Hz with a Welch spectrum, or the raw RR series with a Lomb-Scargle periodogram, gives low-frequency power (0.04 to 0.15 Hz, Task Force of the ESC and NASPE 1996, Circulation) in ms² and the peak frequency in Hz, shown beside the amplitude.",
+        "Heart-rate to breath phase per step in degrees, from the cross-spectrum of the pacer signal and instantaneous heart rate at the pacing frequency; the step closest to 0 degrees is flagged as the phase winner (Vaschillo et al. 2002, Applied Psychophysiology and Biofeedback).",
+        "The rate is chosen from the six weighted criteria of Shaffer and Meehan 2020 (Frontiers in Neuroscience): phase synchrony, peak-to-trough amplitude, LF power, maximum LF peak amplitude, smoothness of the heart-rate envelope (scored by a stated number) and fewest LF peaks; each criterion's winning step is shown, and ties are broken by a precedence rule written on the page (the paper's order, phase synchrony first).",
+        "On at least 3 RR files, LF power (ms²), LF peak frequency (Hz) and RMSSD (ms) match Kubios HRV (Tarvainen et al. 2014, Computer Methods and Programs in Biomedicine) within 5 percent, with the Kubios settings stated (detrending, interpolation rate, spectrum method); on synthetic RR series with known modulation depth and phase, peak-to-trough amplitude matches within 5 percent and heart-rate to breath phase within 5 degrees; both tables are committed in the repo.",
+        "A refinement pass tests 0.1 breaths-per-minute steps around the winner, repeat assessments on different days are stored, and the page reports the day-to-day spread of the chosen rate in breaths per minute.",
+        "The full assessment runs in the browser from raw beats to chosen rate and exports one report holding the per-step table of all six criteria, the raw RR series and the decision, and a script in the repo, given only the exported report, prints the same chosen rate."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no assessment, spectral or HRV code in the repo for this lab (planned in site.config.js)" } }
+    },
+    {
+      "id": "heart-signal",
+      "name": "Heart and breath capture",
+      "frame": "data",
+      "metric": "Where the heartbeat data comes from and how far it is trusted: source types supported (count), beat timing resolution (ms), artifact handling (beats corrected per session) and agreement with a reference (ECG, or a chest strap with a cited validation against ECG) as mean absolute RR error in ms; rater connects a source or loads the bundled recording, reads the signal-quality readout and the capture modules.",
+      "ladder": [
+        "Absent: the page reads no heart signal.",
+        "A tap target asks the visitor to tap along with their pulse.",
+        "Tapped beats are timestamped with performance.now and shown as heart rate in beats per minute, labelled on the page as an estimate.",
+        "A bundled RR-interval recording of a real paced-breathing session, with its source and date, plays through the analysis, so every downstream view works with no device.",
+        "Web Bluetooth Heart Rate Service (GATT 0x180D, Heart Rate Measurement characteristic 0x2A37) connects a chest strap and parses the RR-interval field in 1/1024 s units; each beat shows as it arrives.",
+        "Phone fingertip photoplethysmography: rear camera with torch through getUserMedia constraints, beats detected from the red-channel mean, inter-beat intervals shown, and a signal-quality index that blocks analysis below its threshold; a line beside the camera button states that frames are analysed in memory and never stored or sent, and the code confirms it: the only value taken from each frame is the red-channel mean.",
+        "Artifact detection and correction on the RR series (ectopic, missed and extra beats) by a named method such as Lipponen and Tarvainen 2019 (Journal of Medical Engineering and Technology), with the count of corrected beats shown per session.",
+        "A breath signal is captured too (microphone envelope with headphones on), so the page plots the visitor's actual breath against the pacer and reports the mean deviation from the set rate in breaths per minute.",
+        "Agreement with a reference: fingertip PPG and a chest strap recorded together on at least 5 sessions, the strap model named with its published validation against ECG cited, and mean absolute RR error in ms and Bland-Altman limits of agreement (Bland and Altman 1986, The Lancet) shown on the page with the data committed.",
+        "Face-video remote PPG from a laptop webcam by a named method such as POS (Wang et al. 2017, IEEE Transactions on Biomedical Engineering) as a third source, with the same reference comparison published.",
+        "Three sources (strap, fingertip, webcam) chosen live by signal quality: the picker shows each source's current signal-quality index and its agreement figure against the rung-8 reference, switches automatically when the active source stays below its threshold for 5 s, and every exported beat carries its source and a per-beat quality flag; all processing happens on the device."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no Web Bluetooth, camera or tap-capture code anywhere in the repo for this lab" } }
+    },
+    {
+      "id": "session-record",
+      "name": "Session record",
+      "frame": "data",
+      "metric": "What a session leaves behind: fields per record (count), storage location and schema version, deletion control, export and import formats, and whether history figures are computed from the stored records; rater runs two short sessions, reloads, inspects the history view and the browser storage, and round-trips an export.",
+      "ladder": [
+        "Absent: nothing about a session is kept.",
+        "A completion message appears at the end of a session.",
+        "Each finished session is saved in browser storage (localStorage or IndexedDB) with date, duration and rate, every storage access inside try/catch, and is listed again after a reload.",
+        "Each record holds at least 8 fields, always including start time, duration, rate, ratio and completed or stopped early, and filling the rest from settings the page has (holds, plan segments, soundscape preset, curve); a history view lists records newest first.",
+        "Before and after self-ratings (calm on a 0 to 10 scale, optional note) are stored per session, and the history shows the change for each session.",
+        "Records live in IndexedDB with a schema version number and an onupgradeneeded handler that converts records in the rung-2 localStorage format, shown by a committed test on a fixture in that format; the visitor can delete one session or all of them.",
+        "History charts drawn from the stored records: minutes per week, rate over time and before-after change, each with its count n.",
+        "Export as JSON and as CSV (every field, one row per session), and importing a JSON export restores the history in another browser.",
+        "With a heart signal, each record stores its corrected RR series and the per-cycle pacer boundary times on one clock, the session's mean peak-to-trough heart-rate amplitude in beats per minute and the resting amplitude it is compared with, and the export carries all of them so the analysis can be recomputed offline.",
+        "RR data also exports as plain RR text that Kubios HRV opens, and a script in the repo recomputes every history chart value from a JSON export and matches the page exactly.",
+        "A passphrase-encrypted export (Web Crypto AES-GCM, key from PBKDF2), imported in a second browser, restores a history that re-exports byte-identical to the original, shown by a committed test over 50 synthetic sessions."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no storage or export code for this lab in the repo" } }
+    },
+    {
+      "id": "soundscape",
+      "name": "Breath-coupled soundscape",
+      "frame": "style",
+      "metric": "How the generative WebAudio score follows the breath and body: voices (count), whether parameters are scheduled on the audio clock, longest exact repeat in a seeded event list (in breath cycles), peak level (dBFS) and loudness spread across presets (LU, ITU-R BS.1770), and which signals drive which sound parameters; rater listens to a session, greps the audio module, and runs the repo's event-list and loudness scripts where they exist.",
+      "ladder": [
+        "Absent: the page makes no sound.",
+        "At least one audio source (a looping file or one tone) plays during the session.",
+        "A WebAudio oscillator or noise source started from a visitor gesture, whose gain rises on the inhale and falls on the exhale from the pacer phase.",
+        "At least 3 layered voices (drone, filtered noise as air, a tonal cue at each phase turn) with breath phase mapped to gain and filter cutoff, and a master volume control.",
+        "Every AudioParam change uses setValueAtTime, linearRampToValueAtTime or setTargetAtTime with a time argument on the AudioContext clock, and no AudioParam .value is assigned inside the animation loop (checked by grep in the audio module).",
+        "At least 3 named presets differing in timbre and tuning, all synthesized with no audio files, and the phase cues switch off separately from the bed.",
+        "Seeded generative variation: notes and textures are drawn from a scale or tuning named on the page, the seed is shown and reusable, and a script in the repo expands a seed into its 30-minute event list and reports the longest exact repeated run, which is shorter than one breath cycle.",
+        "Loudness managed: a limiter on the master bus keeps peaks under -1 dBFS, presets sit within 2 LU of each other in integrated loudness measured per ITU-R BS.1770 (LUFS) by a committed script on OfflineAudioContext renders, and sessions fade in and out over at least 5 s.",
+        "The sound follows the measured body, not only the pacer: with a heart signal, one voice tracks heart rate or sounds each beat, and heart-breath phase synchrony opens a filter or adds a harmonic, with the mapping shown in a legend.",
+        "A headphone mode renders the air layer through a PannerNode with panningModel HRTF whose position moves with the breath phase.",
+        "At least 4 generative voices run seeded loops of mutually incommensurate lengths and the rung-6 script confirms the combined pattern does not recur within 24 hours (the loop method of Brian Eno's Music for Airports, 1978), an OfflineAudioContext render saves the session's soundscape as a WAV file the visitor keeps, and still no sample files are used. Reference class: Brian Eno and Peter Chilvers' Bloom (2008)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no WebAudio code for this lab anywhere under labs/assets/js/" } }
+    },
+    {
+      "id": "ink-field",
+      "name": "Ink-field visual",
+      "frame": "graphics",
+      "metric": "What the visitor sees of breath and body: views present (count), whether the field is driven by pacer phase and by measured beats, solver type and resolution, and frame rate (fps) at 1440 px on an integrated-GPU laptop and on an iPhone 11 or a Pixel 5; rater runs a session with the on-page frame-rate readout and reads the renderer module.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "An image or a shape that marks the breath is on the page (a CSS circle scaling on a loop counts).",
+        "A canvas form grows on the inhale and shrinks on the exhale from the pacer phase (the ink field of rung 3 counts), with the phase word (in, hold, out) written.",
+        "An ink field: an advected-particle or grid flow in canvas or WebGL whose source strength follows the breath phase, so ink blooms outward on the inhale and settles on the exhale.",
+        "An on-page frame-rate readout shows at least 58 fps at 1440 px on an integrated-GPU laptop (Intel Iris Xe or Apple M1) with at least 10,000 particles or a 256 by 256 grid, and each phase turn is visible as a change in flow direction, not only in size.",
+        "A second view, a breath-wave strip showing the last 3 cycles of the pacer curve with a cursor and the seconds to the next turn, sits beside the field.",
+        "The field is a GPU fluid solver with semi-Lagrangian advection and pressure projection (stable fluids, Stam 1999, SIGGRAPH) carrying dye and velocity; the inhale injects dye at the center, the exhale draws it back, and the dye hue marks the phase (one hue band each for in, hold and out).",
+        "Measured signals drawn: with a live heart signal, each beat leaves a mark in the field and a heart-rate trace overlays the breath wave, and the current cycle's peak-to-trough heart-rate amplitude in beats per minute is shown beside it against the visitor's resting amplitude (Resonance-frequency assessment rung 4), so the visitor sees the swing they are training.",
+        "Linked views: field, breath-and-heart trace, per-step resonance chart and session history share one time cursor, and scrubbing a past session replays it in the field.",
+        "Each session renders a keepsake, a still image or short clip of the field shaped by that session's own breath and heart data (canvas toBlob or captureStream), so two sessions give two different keepsakes.",
+        "The solver carries the feature set of Pavel Dobryakov's WebGL Fluid Simulation (the reference): vorticity confinement, at least 20 pressure iterations and bloom, at simulation and dye resolutions at least those of its default desktop config, and holds 60 fps at those settings on an iPhone 11 or a Pixel 5."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no canvas or WebGL renderer for this lab in the repo" } }
+    },
+    {
+      "id": "calm-language",
+      "name": "Calm design language",
+      "frame": "style",
+      "metric": "Whether type, color, light and motion follow the site's tokens under a calm-instrument brief: elements visible during a session (count), motions not driven by breath or heart (count), text contrast ratio against the brightest field pixel behind it, maximum relative luminance of a 1440 px screenshot in night mode, and --accretion kept for the active phase; rater inspects the session screen at 1440 px and 400 px, the lab's CSS and labs/assets/css/tokens.css.",
+      "ladder": [
+        "Absent: no page exists.",
+        "A page exists in the lab template with the lab title.",
+        "labs/assets/css/tokens.css applied: --void ground, the site type stack (--font-body, --font-display), --accretion as the only accent.",
+        "Custom controls for rate, ratio and sound use appearance:none and are drawn with the --line and --line-bright hairline tokens from labs/assets/css/tokens.css, with no hard-coded hex in the lab's CSS; --accretion (gold) is used only on the active breath phase and the focused control.",
+        "Session mode: after 5 s without input every control fades out and at most 3 elements stay on screen (field, phase word, exit); any input brings them back.",
+        "Motion tokens: every transition in the lab's CSS uses the easing and duration tokens of tokens.css (the --ease family and the --t- duration scale), and during a session the only moving elements are those the breath or heart drives.",
+        "Phase words and numbers are at least 18 px, with contrast at least 7:1 (WCAG AAA) measured against the brightest field pixel behind them in a 1440 px screenshot; a night mode halves the maximum relative luminance of any pixel in that screenshot.",
+        "Choreographed opening and closing: a settling sequence of at least 8 s (light dims, sound fades in, the first cycle begins on an exhale) and a matching close, each written as one timeline in one module.",
+        "Each soundscape preset ships with its matched ink palette, grain and motion tempo in one preset record, so sound and image change together.",
+        "Phase reads without words or scale: in a muted 10 s clip at 400 px, with the phase word hidden and the field's overall size held fixed (a test switch on the page or in its URL), a rater names in, hold or out correctly at every turn from flow direction and color alone.",
+        "The language is documented in the repo as a calm-instrument system (tokens, phase marks, palette and sound pairs, choreography, a reason for each choice) and is imported by at least one other lab. Reference: Apple's Breathe session in the watchOS Mindfulness app."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no CSS or markup for this lab beyond its planned hub card" } }
+    },
+    {
+      "id": "practice-control",
+      "name": "Practice control",
+      "frame": "interaction",
+      "metric": "How the visitor shapes and steers a session: parameters reachable (count), input methods (pointer, touch, keyboard, own breath), named protocols and presets, URL state, and whether the pacer can follow the visitor's breathing; rater builds and runs a session with the keyboard only, then by touch only at 400 px.",
+      "ladder": [
+        "Absent: nothing to operate.",
+        "A start button begins a session.",
+        "Start, pause and stop, with session length chosen from at least 3 durations.",
+        "Every session setting the page supports (at least rate, ratio and duration; holds and soundscape preset once they exist) is set from on-page controls, each value with its unit, and the pacer animation and sound play the new setting within one cycle of a change, before Start is pressed.",
+        "Keyboard map (space to start and pause, arrow keys change rate by 0.1, Escape to stop) and touch control (vertical drag on the field changes rate), with the new value shown for 1 s.",
+        "At least 4 named protocols: resonance at 6 per minute, extended exhale 1:2, box 4-4-4-4, and cyclic sighing (two inhales, one long exhale; Balban et al. 2023, Cell Reports Medicine) drawn as a long nasal inhale, a short top-up inhale and a long exhale, each its own phase; plus custom presets saved locally.",
+        "State shareable by URL: every session parameter is encoded in the query string, and opening the link restores it exactly.",
+        "Plan editor: the visitor composes a multi-segment session (rate, ratio, holds, minutes per segment) on a timeline, reorders segments by drag or keyboard, sees the total duration, and the plan runs end to end with each segment change landing on a cycle boundary.",
+        "Breath following: with the microphone or a heart signal, the pacer sets its period from the measured breath (within 0.5 s) for a set number of cycles (default 3), then glides toward the target rate at a stated change in breaths per minute per minute, and the visitor switches between lead and follow during the session.",
+        "Eyes-closed mode: sound and optional vibration (navigator.vibrate where supported) carry every phase turn; a single tap anywhere pauses and resumes, and a 1 s press anywhere stops.",
+        "Open instrument: a parameter list on the page (count shown) where each listed pacer, sound, ink and analysis parameter has a live control and a Web MIDI learn binding, and every change during a session is logged to the session record with its time."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the hub card in site.config.js has no href and nothing can be operated" } }
+    },
+    {
+      "id": "guidance",
+      "name": "Adaptive guidance",
+      "frame": "intelligence",
+      "metric": "What the instrument decides on its own and what an optional language model adds: decisions the deterministic engine makes from the visitor's data (count, each with its rule shown), rule hit rates on a held-out test set (percent), and for model calls the route used and the blinded preference rate of model reflections over template reflections (percent of pairs); rater runs sessions with and without a model route, reads the route panel, the guidance module and the committed test and rating files.",
+      "ladder": [
+        "Absent: the lab makes no decision for the visitor.",
+        "At least 3 fixed tips exist and one is shown per session.",
+        "A scripted first session (settle, 6 per minute, close) runs with timed captions.",
+        "Deterministic suggestions from the session record: a rate from the assessment or the last comfortable rate, a length from the median of recent sessions, each with the rule that produced it shown.",
+        "Pace cue: from the microphone breath signal or the heart signal, the engine detects a measured rate more than 0.5 breaths per minute off the pacer for 3 cycles and shows a cue (one line of text in --text-dim) naming the measured and target rates.",
+        "Progression rule: the engine lengthens a session or lowers the rate only after 3 consecutive completed sessions with a mean before-after calm change of at least +1, in steps of 1 minute or 0.5 breaths per minute, and the visitor sees and can refuse each change.",
+        "Optional model route through labs/assets/js/ai/llm.js: one call per session turns the record into a short reflection, the route panel names which route answered, and a deterministic template writes the reflection when no route answers.",
+        "Model contribution shown: the template and the model reflections are both viewable, and the model text is checked against the record (every number it cites must appear in the record) before display, or replaced by the template.",
+        "With a heart signal, the engine proposes a short resonance re-check when session peak-to-trough amplitude stays below 80 percent of the visitor's baseline (the median session amplitude of their first 3 sessions with a heart signal) for 3 consecutive sessions, and names the trigger.",
+        "A test set of at least 30 anonymized recorded sessions from at least 10 people in the repo scores the rules against outcomes they did not see: the rate suggested from each person's first 3 sessions against the rate a later full assessment picks (a hit is within 0.5 breaths per minute), and pace cues against hand-labelled deviations (precision and recall within 3 cycles); the scores are printed on the page.",
+        "The model route is on by default only if a blinded pairwise comparison against the template on the test set (at least 3 raters, rating file committed in the repo) preferred the model in at least 60 percent of pairs, and the page prints that rate beside the route switch."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no guidance logic and no llm.js call for this lab" } }
+    },
+    {
+      "id": "grounding",
+      "name": "Grounding and claims",
+      "frame": "explanation",
+      "metric": "What the visitor understands after five minutes about why slow breathing changes heart rhythm, whether the page names its method honestly (paced resonance breathing, not mindfulness meditation), and whether every claim and default is tagged established, plausible or illustrative with a source: claims on the page (count) and the share carrying a tag and source; rater reads the page text, the controls and the claims file.",
+      "ladder": [
+        "Absent: no explanation.",
+        "At least one sentence says what slow breathing does.",
+        "A short text names the method plainly (paced resonance breathing, a physiological technique, not mindfulness meditation), gives the default of about 6 breaths per minute and cites Lehrer and Gevirtz 2014 (Frontiers in Psychology).",
+        "The mechanism in plain words with one diagram: breathing modulates heart rate (respiratory sinus arrhythmia), and near 0.1 Hz the breath rhythm lines up with the baroreflex rhythm so heart-rate swings grow largest.",
+        "Every default (rate, ratio, hold length, session length) shows its source or the label design choice beside its control.",
+        "Every claim carries a tag (established with a citation, plausible, illustrative); a medical boundary is stated (not a treatment, consult a clinician with a heart or breathing condition), a warning appears beside any hold set above 5 s, and the page states that nothing leaves the device.",
+        "The page explains itself while it runs: with a heart signal, a caption names what the trace shows at that moment (heart rate rising on the inhale); without one, it says the trace is the pacer only.",
+        "A 5-minute guided explainer covers respiratory sinus arrhythmia and the baroreflex as a delayed feedback loop, with an interactive toy model (a delayed negative-feedback loop driven at a chosen frequency) whose swing amplitude peaks at a rate set by the delay.",
+        "Evidence summary: effect sizes from a named meta-analysis (Lehrer et al. 2020, Applied Psychophysiology and Biofeedback), what was and was not found, and the limits of the evidence, each tagged.",
+        "Three embedded questions (what resonance is, why 6 per minute is only a default, what the lab does not claim), each with its answer and the source shown after the visitor answers.",
+        "Every claim on the page resolves by id to an entry in a claims file in the repo (source, section, tag), and the toy model's predicted resonance rate for the visitor's chosen delay sits beside their own measured assessment."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the only text is the hub blurb 'Breath and focus sessions, generative soundscapes.' with no source" } }
+    },
+    {
+      "id": "steady-reach",
+      "name": "Steady reach",
+      "frame": "performance",
+      "metric": "Whether the instrument runs steadily for everyone: frame time (ms, p95) at 1440 px and 400 px, audible gaps per 10 minutes, transfer size before start (KB) on Chrome DevTools' Slow 4G preset, reduced-motion behaviour, keyboard and screen-reader reach, survival of a hidden tab and a phone screen lock, and offline use; rater runs Lighthouse, a session with the performance panel, a keyboard and screen-reader pass, and reads the committed performance report.",
+      "ladder": [
+        "Absent: nothing runs.",
+        "The page loads with 0 console errors, and the pacer runs while the tab has focus.",
+        "The pacer runs at 1440 px with no dropped cycle for 5 minutes.",
+        "Works at 400 px: controls reachable by touch, no horizontal scroll, the field sized to the viewport.",
+        "prefers-reduced-motion replaces the ink field with a slow opacity fade while sound and phase words stay, and Lighthouse accessibility scores at least 90.",
+        "Performance tiers: the field lowers particle count or grid size when frame time stays above 20 ms for 2 s, and the active tier is shown on the page.",
+        "Screen-reader reach: an optional aria-live region announces each phase turn, every control has a label, and a full session is configured and run by keyboard alone with visible focus.",
+        "Phone survival: Screen Wake Lock keeps the screen on where supported, audio continues with the screen locked on iOS Safari and Android Chrome, and the session resumes in phase after an interruption.",
+        "Load budget: on Chrome DevTools' Slow 4G network preset with cache disabled, the first pacer cycle starts within 2 s, transfer before the visitor presses start is under 300 KB, and WebGL code loads only when the field is shown.",
+        "A performance report committed in the repo, from a 30-minute session on an iPhone 11 or a Pixel 5 (model named in the report), gives frame time p95 under 20 ms, 0 audible gaps counted by ear over a recorded 10-minute stretch, and battery drain in percent per 10 minutes; the page prints that report beside frame time p95 measured live on the visitor's own device.",
+        "Installable and offline: a service worker and a web app manifest let a full session (pacer, sound, field, storage) run with the network off after the first visit, and the rung 6 keyboard and screen-reader pass succeeds with the network off."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing loads or runs for this lab" } }
+    },
+    {
+      "id": "instrument-architecture",
+      "name": "Instrument architecture",
+      "frame": "architecture",
+      "metric": "How the code is shaped: modules (count) with one responsibility each, protocols and presets as data apart from engine code, tests on the clock, the analysis and storage, whether the gates run them, and what can be added (a preset, a protocol, a sensor, a mapping) without touching the core; rater reads the lab's folder under labs/assets/js/, its tests and .github/workflows/gates.yml.",
+      "ladder": [
+        "Absent: no code.",
+        "Code for the lab exists in the repo; inline script in its page counts.",
+        "Script in its own ES module under labs/assets/js/mindful/; pacer, sound and visuals may share the file.",
+        "Separate modules for the clock and pacer, the soundscape, the renderer and the UI, and the renderer and the audio module read phase from one exported phase function (one call site each).",
+        "Protocols and soundscape presets live in a config file as data, and adding a preset changes no engine code.",
+        "A pure analysis module (RR cleaning, spectra, phase) with no DOM access, unit-tested in node against hand-computed values.",
+        "Sensor adapters behind one interface (tap, Bluetooth strap, fingertip camera, sample file) emitting timestamped beats; adding a source means one new adapter file.",
+        "Storage sits behind one repository module that holds the schema versions and migrations, and no other module touches IndexedDB or localStorage (grep finds one file).",
+        "The gates workflow (.github/workflows/gates.yml) runs the lab's node test suite (clock, analysis, storage) on every pull request, and a failing test fails the pull request.",
+        "A mapping layer: every sound and visual mapping is a declarative record (signal, transform, target, range) loaded from config, so a new mapping is data, not code.",
+        "A reusable breath-instrument kit: clock, analysis, sensor adapters and mapping layer imported unchanged by another lab, with typed interfaces (JSDoc or TypeScript) and engine line coverage of at least 90 percent."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no labs/assets/js/mindful/ folder and no module for this lab" } }
+    }
+  ],
+  "history": [ { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" } ]
+}
