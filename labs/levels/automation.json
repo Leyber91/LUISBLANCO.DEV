@@ -1,0 +1,275 @@
+{
+  "id": "automation",
+  "title": "Automation & Integration",
+  "page": null,
+  "thesis": "A visitor wires live public APIs, a cron or new-items trigger, safe typed transforms and one model call into a flow on a node canvas, runs it in their own browser with no backend, watches every value travel its wire, pauses, steps and replays any run offline, and leaves with a URL that rebuilds and reruns the same flow anywhere without carrying their keys.",
+  "axes": [
+    {
+      "id": "execution-semantics",
+      "name": "Dataflow execution semantics",
+      "frame": "model",
+      "metric": "How the runtime evaluates a flow graph: firing order, cycle handling, concurrency of async nodes, item semantics, error, purity and cache rules, cancellation and retry, determinism under completion order, and the pass count on a fixture of flows with expected outputs. A rater runs the bundled sample and fixture flows, reads the run report and run log, reads the runtime module, and checks each rung yes or no.",
+      "ladder": [
+        "Absent: no runtime executes a flow.",
+        "A page shows a flow diagram and a Run control that plays a run over it when pressed; a canned animation over a fixed diagram qualifies.",
+        "A linear chain of at least 3 nodes executes in order on Run, each node's output passed as the next node's input, and changing one node's config changes the final output.",
+        "Branching graphs execute in topological order (Kahn's algorithm or a depth-first sort), a node with two inputs fires only when both are ready, and a cycle is refused before the run with the nodes of the cycle highlighted.",
+        "Independent async nodes run concurrently: a bundled sample flow with two independent 1-second Delay nodes reports a total run time under 1.5 s in the run report, and a per-run concurrency limit is shown and settable in the run settings.",
+        "Error semantics: each node carries a policy of stop, continue with null, or route to an error port; under stop a failing node marks its descendants skipped, not failed; and the run report counts succeeded, failed and skipped nodes.",
+        "Item semantics: each node declares per-item or per-batch firing, a per-item node fed an array of 100 fires 100 times with item order and index preserved, and the pairing rule for two array inputs (by index, or cross product) is stated on the node.",
+        "Incremental re-run: pure nodes are cached by a hash of inputs and config; nodes declared impure (fetch, model, clock, trigger) are reused from cache only on edit re-runs and always fire on a triggered or Run all run; editing one node re-runs only it and its descendants; and the run report lists cache hits and marks each node pure or impure.",
+        "Cancellation and retry: Stop aborts in-flight fetches through AbortSignal, and the run log records the Stop event and each fetch's abort with timestamps, every abort within 200 ms of Stop. Per-node retry uses exponential backoff with full jitter, and on HTTP 429 the wait comes from Retry-After or X-RateLimit-Reset when the provider exposes them in Access-Control-Expose-Headers, else from a reset time stated in the response body, else from the connector's declared rate limit, with the node showing which of the three sources it used.",
+        "A fixture of at least 30 flows with recorded inputs and expected outputs (diamonds, fan-out of 10, error routing, item pairing, cancellation mid-run) runs headless in Node from the repo and in the page's test view, printing a pass count with every flow passing.",
+        "Reference standard, a stated and tested semantics: the firing, ordering, item, error, purity and cache rules are written as a one-page spec in the lab; a property-based test in the manner of QuickCheck (Claessen and Hughes 2000, ICFP) runs at least 1,000 random graphs against a naive reference interpreter with 0 output mismatches and the seed shown; and every fixture flow gives byte-identical outputs (timings excluded) at concurrency limits 1, 4 and unlimited across 100 randomized completion orders per flow, the determinism property of Kahn process networks (Kahn 1974, IFIP Congress)."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: labs/assets/js/config/site.config.js lists automation as status 'planned' with no href, and no runtime or flow code exists under labs/" }
+      }
+    },
+    {
+      "id": "transform-language",
+      "name": "Transform expression language",
+      "frame": "model",
+      "metric": "The safe expression language of transform nodes, a declared subset of JSONata: constructs covered, sandbox guarantees (no eval, no reach into globals or prototypes), error positions, resource limits, type inference, and the share of the JSONata test suite covered and passed. A rater types test expressions into a transform node, searches the code for calls to eval( and new Function(, reads the parser module, and runs the page's test view.",
+      "ladder": [
+        "Absent: no transform language exists.",
+        "A transform node applies at least 2 operations the visitor chooses between (for example uppercase, pick one field); a fixed dropdown qualifies.",
+        "Typed expressions in JSONata syntax support field paths (a.b[0].c), number and string literals and the operators + - * / = !=, evaluated against the incoming value by a hand-written parser, and no call to eval( or new Function( appears in the lab's code.",
+        "Sandbox: the evaluator walks its own syntax tree and field paths read only own properties of the incoming value, so the paths __proto__, constructor, prototype, window and globalThis yield no value unless the input holds that key, and a call to an undefined function such as $eval or $Function is refused with an error naming it, each case shown by a sample expression on the page.",
+        "Parse errors give line and column with a caret under the offending token, and a path that yields no value gets a diagnostic beside the result naming the first step that matched nothing (for example items[3]: items has 3 entries), while the result itself stays empty as JSONata specifies.",
+        "Collection operations in JSONata form: $map, $filter, $sort, $sum, $count, $min, $max, grouping with the {} object constructor and the ~> chain operator, with at least 20 named built-in functions listed in an on-page reference with one runnable example each.",
+        "Resource limits: evaluation stops with a stated error after 100,000 steps or 50 ms, whichever comes first, and nesting and call depth are capped at a stated number of at most 256, so a typed expression cannot hang the tab, shown by 3 sample expressions, one hitting each limit.",
+        "Static types: each port declares a type, the expression's result type is inferred before running, and a mismatch with the downstream port is flagged in the editor with both types named.",
+        "Editor support: syntax highlighting, autocomplete of field names taken from the last value seen on the incoming wire, and a live result preview recomputed against that value on every keystroke.",
+        "The grammar is published on the page in EBNF, and a fuzz test of at least 10,000 generated expressions, whose generator includes the canary names among its field and function names, runs against an evaluator with canary getters and setters planted on globalThis and Object.prototype, reporting 0 canary reads or writes and 0 uncaught exceptions, with the seed and count shown.",
+        "Reference standard, conformance to JSONata: the language is a declared subset of JSONata whose covered constructs account for at least 60% of the cases in the JSONata project's own test suite; those cases run in the page's test view at a 100% pass rate, with the JSONata version they were taken from stated and every uncovered case listed."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: labs/assets/js/config/site.config.js lists automation as 'planned', and no parser, evaluator or transform node exists in the repo" }
+      }
+    },
+    {
+      "id": "trigger-fidelity",
+      "name": "Trigger and schedule fidelity",
+      "frame": "model",
+      "metric": "How exactly the trigger nodes decide when a flow runs: cron syntax coverage, the crontab(5) day-of-month and day-of-week rule, calendar boundaries, time zone and daylight-saving policy, in-tab firing honesty with missed-run counts, the polling trigger's seen-set across runs, dialect translation, and agreement with a pinned reference library on a fixture. A rater types test expressions, checks the listed next runs against a hand calculation, runs the polling sample twice, and reads the parser and trigger modules.",
+      "ladder": [
+        "Absent: no trigger or schedule exists.",
+        "A schedule control offers at least 2 choices (every hour, every day) and shows the chosen schedule on the trigger node; a fixed dropdown qualifies.",
+        "Five-field expressions with *, single values and comma lists parse, an invalid field is rejected with the field named, and the next 5 run times are listed in the visitor's local time.",
+        "Ranges (1-5), steps (*/15, 10-50/10), month and weekday names (JAN, MON) and the macros @hourly, @daily, @weekly, @monthly and @yearly parse, each with an on-page example.",
+        "The crontab(5) rule holds: when both day-of-month and day-of-week are restricted a time matches if either one matches, shown on the page with 0 0 13 * 5 listing both the 13ths and the Fridays.",
+        "Calendar boundaries: 0 0 31 * * lists only months with 31 days, and 0 0 29 2 * lists only 29 February of leap years (2028-02-29 and 2032-02-29 as its next two runs when checked in 2026 or 2027).",
+        "Time zone: the schedule is evaluated in a chosen IANA zone via Intl.DateTimeFormat, and on the spring-forward and fall-back dates of Europe/Madrid the page shows the skipped and repeated local hours with its stated policy for each.",
+        "Firing honesty: the cron node triggers a flow run while the tab is open, the page states that nothing runs while the tab is closed, missed runs are computed from the wall-clock gap since the last fire on every tick and on visibilitychange, and a test control that advances the scheduler clock by 10 minutes on a * * * * * schedule shows 10 missed runs.",
+        "Polling trigger: a New items node passes downstream only items whose declared id field it has not seen; it keeps the seen set in IndexedDB across runs and reloads, capped at 10,000 ids with the oldest dropped, shows the seen count with a reset control, and on its first run offers to mark the current items as seen instead of firing on all of them.",
+        "A fixture of at least 500 expressions with next-10-run times recorded from one named reference library at a pinned version, whose header states that version, its day-of-month/day-of-week and DST settings and every case where they differ from the page's stated policy, including DST dates in 3 zones, runs in the page's test view with 0 mismatches.",
+        "Reference standard, crontab.guru and beyond: each expression gets an English reading generated from the parsed fields; under a named dialect switch the parser reads Vixie, Quartz (seconds field, L, W, #) and systemd OnCalendar input; each schedule is shown translated into the other two, and every translation is verified by computing its next 100 runs from the translated text and matching the original, over every translatable fixture expression in the test view with 0 mismatches; the cases that cannot be translated are named (the day-of-month-or-day-of-week rule needs two OnCalendar lines and has no single Quartz form); and a 12-month calendar strip of run density marks the chosen zone's DST dates."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no cron parser, schedule or trigger node, seen-set store or timeline anywhere under labs/assets/js (a search for cron finds nothing)" }
+      }
+    },
+    {
+      "id": "canvas-views",
+      "name": "Graph canvas and run views",
+      "frame": "graphics",
+      "metric": "What the editor draws: nodes, typed port and wire glyphs, a run's live state on the canvas, values on the wires, navigation, the count of linked views (canvas, inspector, run waterfall, cron timeline), automatic layout, and inline output visualizations. A rater loads a sample flow, runs it, counts views, checks that selecting in one view selects in the others, and reads the wire-crossing counts before and after Layout.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "An image, SVG or canvas of a flow is shown on the lab page; a static picture qualifies.",
+        "A live canvas draws the loaded flow's nodes as boxes with named input and output ports, and wires as curves between ports, redrawn whenever the flow changes.",
+        "Typed marks: port glyphs that differ by shape for at least 4 data types (for example circle for any, square for object, diamond for array, triangle for text), repeated as a glyph at each wire's midpoint, all drawn in the ink-gray scale of labs/assets/css/tokens.css so gold stays reserved for active elements.",
+        "Run state on the canvas: each node shows idle, running, succeeded, failed or skipped by a distinct mark with its elapsed milliseconds, and after a run each wire shows its item count and a one-line preview of the value it carried.",
+        "Navigation: pan and zoom by wheel and drag from 25% to 400%, and a minimap showing the whole flow with the viewport box, draggable to move the view.",
+        "A run waterfall draws one bar per node from start to end time on a shared millisecond axis, and clicking a bar selects that node and scrolls the canvas to it.",
+        "Execution choreography: during a run a pulse travels each wire at the moment its value is emitted, in event order, and under reduced motion the pulses are replaced by a step highlight.",
+        "Automatic layout: a Layout action arranges the flow left to right by a layered method (Sugiyama, Tagawa and Toda 1981, IEEE Transactions on Systems, Man, and Cybernetics), and the count of wire crossings is shown before and after, with the after count no higher than the before count on every bundled sample flow.",
+        "Four linked views: canvas, inspector, run waterfall, and a cron timeline spanning the last and next 7 days with one tick per scheduled or completed run; selecting a node in the canvas, inspector or waterfall selects it in the other two, selecting the tick of a completed run loads that run into all three, and hovering a value in the inspector lights the wire that carried it.",
+        "Reference standard, Enso's inline node visualizations and n8n's output views: every node can show its last output beneath itself as a table, JSON or schema; arrays of numbers or of dated values draw as a chart; labelled frames group nodes and collapse; and each wire keeps a value history of its last 10 runs, scrubbed on a timeline beside the wire."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists, so nothing is drawn; no screenshot of an automation page exists" }
+      }
+    },
+    {
+      "id": "editor-style",
+      "name": "Editor design language",
+      "frame": "style",
+      "metric": "The design system of the editor: tokens drawn from labs/assets/css/tokens.css, at most 4 type roles, gold (the --accretion family) reserved for what is running or selected, one node anatomy, status marks that read without color, non-text contrast and forced-colors behavior, and a wire mark language. A rater inspects the CSS custom properties, searches the lab's CSS for literal colors, sizes and durations, and checks the gold rule on a running flow at 1440 px and 390 px.",
+      "ladder": [
+        "Absent: no page or styles exist.",
+        "The lab page carries at least one style rule of its own; browser-default form controls still qualify.",
+        "Colors, fonts, spacing, radii, motion durations and easings come from the custom properties in labs/assets/css/tokens.css, and the lab's own CSS and inline styles contain no hex, rgb(), rgba(), hsl() or named color literals (transparent and currentColor excepted) and no literal millisecond or second values.",
+        "Type roles are fixed at no more than 4 (title, label, value, note), each one font-size and font-weight pair declared as a custom property, and the lab's CSS contains no other font-size or font-weight values.",
+        "Gold is reserved for what is active: --accretion, --accretion-soft, --accretion-dim and --accretion-glow appear only on the selected node, the running node and the wires carrying data in the current run, checked on a running flow.",
+        "One node anatomy for every node type: a header with a category glyph, port rows, a status mark and a footer metric, sized on an 8 px grid.",
+        "Status marks read without color: idle, queued, running, succeeded, failed and skipped each have a distinct glyph shape, so all 6 states can be told apart in a grayscale screenshot of a running flow.",
+        "Forced colors and contrast: every port glyph, wire and status mark has a contrast ratio of at least 3:1 against --void and --surface (WCAG 2.1 SC 1.4.11 non-text contrast), and under forced-colors: active (Windows high contrast) the ports, wires, selected node and running node stay distinguishable using system colors.",
+        "Wire mark language: wire weight encodes item count on a stated log scale, dashed wires mark cached values, a pin glyph marks pinned data, and a legend panel lists every mark the canvas uses.",
+        "A style sheet view inside the lab shows every token, type role, node state, port glyph and wire mark with a live sample drawn by the canvas's own drawing functions, so a token changed in DevTools changes the sample and the canvas together.",
+        "Reference standard, the canvas craft of Blender's node editor and Figma: an in-lab audit of the rendered canvas reports 0 ports off the 8 px grid, 0 texts outside the 4 type roles and 0 gold elements outside the active set, at 1440 px and 390 px in normal and forced-colors modes, and any flow exports as an SVG that reproduces the canvas marks, glyphs and legend at print scale with text kept as text."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no automation CSS file in labs/assets/css and no markup to style" }
+      }
+    },
+    {
+      "id": "graph-editing",
+      "name": "Graph editing",
+      "frame": "interaction",
+      "metric": "What the visitor can do to a flow by mouse, keyboard and touch: editing operations available, type-checked connections, undo depth, quick add, keyboard-only and touch reach, and the action count to build a reference flow. A rater builds the 4-node sample from an empty canvas with a mouse, again with only the keyboard, and again on a 390 px touch screen, counting operations and reading the page's action counter.",
+      "ladder": [
+        "Absent: no flow can be edited.",
+        "One sample flow loads and runs, and the visitor can edit at least one of its config fields.",
+        "Nodes are added from a palette, dragged into place and deleted, and connected by dragging from an output port to an input port.",
+        "Connections are type-checked while dragging: incompatible ports dim, a refused drop says why, and an input port accepts one wire unless declared multi.",
+        "Undo and redo of at least 50 steps covers add, delete, move, connect and config edits, bound to Ctrl+Z and Ctrl+Shift+Z.",
+        "Quick add: typing on the canvas opens a searchable node list, and dropping a wire on empty space opens the same list filtered to nodes whose input type matches.",
+        "Multi-select by box drag and shift-click, copy and paste of a selection as flow JSON on the clipboard (also into another tab), and duplicate with Ctrl+D.",
+        "Keyboard-only editing: Tab moves between nodes in flow order, arrow keys follow wires, Enter opens a node's config, and a 6-node flow can be built without a pointer using the key map shown on the page.",
+        "Subflows: a selection collapses into one node exposing its open ports, expands in place, and is reusable from the palette within the flow.",
+        "Touch: on a 390 px phone a flow is built and run with one-finger drag, two-finger pan and pinch zoom, with port hit targets of at least 44 by 44 CSS px.",
+        "Reference standard, the editors of Node-RED, n8n and ComfyUI: an on-page action counter shows the 4-node sample (HN fetch, filter, map, output) built from an empty canvas in at most 12 pointer actions (each click, drag or wheel gesture counts once) and, with the keyboard alone, in at most 30 key presses, in both cases not counting the characters of the filter and map expressions, with the counting rule shown beside the counts."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no palette, canvas or editing handlers exist in the repo" }
+      }
+    },
+    {
+      "id": "run-inspection",
+      "name": "Run inspection and replay",
+      "frame": "interaction",
+      "metric": "How far the visitor can see and steer inside a run: inspector depth, the event log, breakpoints and stepping, pinned data, run history with diffs, offline replay with a mismatch check, time travel and item lineage. A rater runs a sample flow, sets a breakpoint, steps, pins and edits a value, diffs two runs, replays a past run with the network off, and clicks an output item to trace its inputs.",
+      "ladder": [
+        "Absent: no run can be inspected.",
+        "A run shows its final result or one log line.",
+        "Clicking a node after a run shows its input and output values as collapsible JSON.",
+        "Each node shows its duration in ms, fetch nodes show HTTP status and bytes received, and a failed node shows its error message with the failing expression or request.",
+        "A run log lists every node event (queued, started, emitted, finished, failed) with a time relative to run start, and clicking an event selects its node.",
+        "Breakpoints: a breakpoint pauses the run before its node fires, Step fires exactly one ready node, and the queue of ready nodes is shown while paused.",
+        "Pinned data: a node's output can be frozen and edited by hand, downstream nodes run on the pinned value without refetching, and pinned nodes carry a visible pin mark.",
+        "Run history keeps the last 20 runs in IndexedDB with inputs, outputs and timings, and any two runs diff node by node with changed values highlighted.",
+        "Offline replay: a past run re-executes from its recorded fetch and model responses with the network off, each node shows match or mismatch against the original output, and changing one node's config before replay shows mismatch on that node and on exactly those descendants whose outputs changed.",
+        "Time travel: a scrubber over a run's event log restores the canvas, wires and inspector to the state at any event, forward and back.",
+        "Reference standard, Redux DevTools' time travel, Chrome DevTools' network panel and n8n's item linking: clicking any output item highlights the input items it was derived from in every upstream node, a run exports as one file (events, values, timings, recorded responses) that the page reopens and replays offline, and a shared run URL opens at a chosen event."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no runtime exists, so there is no run, log, inspector or history to open" }
+      }
+    },
+    {
+      "id": "api-connectors",
+      "name": "Public API connectors",
+      "frame": "data",
+      "metric": "The fetch nodes that reach real public APIs from the browser: count of keyless CORS-reachable connectors, what each declares (endpoint, schema, rate limit with source, date checked), CORS and failure diagnosis, recorded fixtures, and a live contract check. A rater opens the connector list, runs each connector, reads the connector config, and repeats with DevTools set offline.",
+      "ladder": [
+        "Absent: no node fetches data.",
+        "A fetch node outputs a JSON object that downstream nodes receive; a sample object bundled with the page qualifies.",
+        "One connector makes a live request to a public API the labs already call (HN Algolia search, Wikimedia pageviews or GitHub repository search) and passes the JSON downstream.",
+        "At least 4 named connectors to keyless public APIs (HN Algolia, Wikimedia pageviews, GitHub repository search, and one more keyless CORS-enabled API), with their parameters as typed config fields; the labs' exoplanet_data.json is offered as a File node and does not count toward the 4.",
+        "One config table declares for each connector its endpoint, its documented rate limit with a link to the provider's docs, its response schema, and the date it was last checked.",
+        "A generic HTTP node (GET and POST, headers, query builder) tells a CORS refusal from a network failure by repeating the request as a simple GET with mode: 'no-cors' (an opaque response means the host answered but sent no CORS headers), reports the first as a CORS block naming the target host and the second as host unreachable, checked once on a bundled sample pointed at a host that sends no Access-Control-Allow-Origin header and once with DevTools set offline.",
+        "Each connector ships a recorded response with its capture date; with the network off the flow runs on it and every resulting value is tagged recorded with that date instead of live.",
+        "Paged APIs fetch up to a visitor-set page count, a per-connector request budget is shown before the run, and HTTP 429 or 403 rate-limit replies surface the provider's reset time.",
+        "At least 10 keyless CORS-enabled connectors, each with a one-node example flow in the palette.",
+        "Every live response is validated against the declared schema, and a connector status board runs a contract check on demand showing pass, schema drift (with the field that drifted) or down per connector, with the check time.",
+        "Reference standard, an n8n-style connector library with no backend: at least 20 keyless connectors each with schema, recorded response, rate limit and contract check, plus a visitor-supplied OpenAPI 3 document for a CORS-enabled API generating a working connector node in the page."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: the HN Algolia, Wikimedia pageviews and GitHub repository search calls live only in labs/assets/js/trending/lenses.js; no automation connector exists" }
+      }
+    },
+    {
+      "id": "model-node",
+      "name": "Model node contribution",
+      "frame": "intelligence",
+      "metric": "What the model adds to a flow beyond the deterministic engine: the model node's contract (llm.js route, JSON schema, computed offline fallback), model calls per run against the public route's reply limit as read from llm.js, recorded replies, flow drafting and run diagnosis, and a measured pass rate of model-made flows against a deterministic baseline. A rater runs the model sample flows on the public route and offline, reads the model node module, and checks each rung.",
+      "ladder": [
+        "Absent: no node calls a model.",
+        "A model node shows reply text on the canvas; a canned reply qualifies.",
+        "A model node calls LLM.complete from labs/assets/js/ai/llm.js with a prompt template filled from its input, and passes the reply text downstream.",
+        "The route that answered (ollama, own-key, worker, pollinations or offline) is shown on the node and in the panel from route-panel.js, and the offline fallback computes its output from the input by a method stated on the node (for a summary node, the 3 highest-scoring sentences by word frequency; for a classify node, a keyword table shown on the node), so two different inputs give two different outputs, the same input always gives the same output, and the output is tagged offline.",
+        "Structured output: the node declares a JSON schema, calls with json: true, validates the reply, and on a schema failure routes to its error port with the failing field named.",
+        "Budget-aware runs: before a run the page counts the model calls the flow will make and the wait implied by the public route's current limit, read from llm.js (POLL_WINDOW_MS, 46,000 ms on 2026-11-11: 45 s per IP plus 1 s of slack) or from the provider's last retry-after reply, and merges model nodes with no data dependency between them into one request.",
+        "Recorded replies: every model reply is stored with route, model name, prompt and latency, and replays and shared flows reuse it without a new call.",
+        "Flow drafting: one model call turns a sentence typed by the visitor into flow JSON, the editor type-checks it before loading, and refused nodes or wires are listed with the reason.",
+        "Run diagnosis: after a failed run one model call receives the run log and returns a cause and a proposed fix as an edit to the flow, shown as a diff the visitor accepts or rejects.",
+        "Contribution measured: on a fixed set of at least 20 automation tasks the page reports, per route, how many model-drafted flows type-check, how many produce the expected output, and how many a deterministic keyword-to-template baseline solves alone.",
+        "Reference standard, a reproducible benchmark: the task set, expected outputs, per-route pass rates, model names and run dates are on the page and export as JSON, and any visitor can rerun the set on their own route and see their result beside the recorded table."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: labs/assets/js/ai/llm.js and labs/assets/js/ai/route-panel.js are in the repo, but nothing in an automation lab calls them" }
+      }
+    },
+    {
+      "id": "flow-legibility",
+      "name": "Flow legibility",
+      "frame": "explanation",
+      "metric": "What a visitor understands about automation and about this runtime after five minutes: per-node help, sample flows, computed live/recorded/illustrative tags on every value, the guided tour, run narration, the stated limits of a backend-free runtime, and a scored self-check. A rater takes the tour in a fresh profile, answers the page's questions, checks every displayed value for a tag, and re-runs a sample flow with DevTools set offline.",
+      "ladder": [
+        "Absent: nothing is explained.",
+        "A paragraph of intro text on the lab page says what the lab does.",
+        "Each node type has a one-line description in the palette and a help panel listing its inputs, outputs and one example.",
+        "Three sample flows load from the start screen (HN fetch and filter, cron plus Wikimedia pageviews, a model summary), each with a caption saying what it demonstrates.",
+        "Every value on the canvas and in the inspector is tagged live, recorded with its date, or illustrative, the tag legend stays on screen, and the tags are computed, not fixed: with DevTools set offline, re-running the same flow changes every connector value's tag from live to recorded with its capture date, or to unavailable when no recording exists.",
+        "A guided tour of at most 8 steps builds and runs a flow with the visitor, each step highlighting the element it explains, skippable and resumable.",
+        "During a run a narration line states each firing in plain words (for example: filter fired, both inputs ready, 12 of 30 items passed).",
+        "A limits note states what a backend-free runtime cannot do: no inbound webhooks (nothing on the internet can call a static page, though the hub blurb names webhooks), no runs while the tab is closed, CORS decides which APIs are reachable, and the public model route's reply limit as currently read by llm.js; each limit is demonstrated by a sample flow, the webhook limit by a tab-to-tab BroadcastChannel trigger as the in-browser stand-in.",
+        "A concept map links each idea in the lab to its counterpart in n8n, Node-RED and Zapier (trigger, node, item, expression, credential), so the visitor knows what carries over to those tools.",
+        "A 5-question self-check closes the tour (predict which nodes re-run after an edit, predict the next cron run, spot the CORS block), scored on the page with each answer shown on the running canvas.",
+        "Reference standard, an explorable explanation in Bret Victor's sense (Explorable Explanations, 2011): every node help panel and every paragraph of the limits note embeds a live example the visitor edits in place, the page shows the count of embedded examples against paragraphs (k of k), and changing an embedded example re-runs it on the canvas."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: the only text is the hub blurb in labs/assets/js/config/site.config.js, 'Glue between tools — webhooks, schedules, small agents.'" }
+      }
+    },
+    {
+      "id": "runtime-reach",
+      "name": "Runtime cost and reach",
+      "frame": "performance",
+      "metric": "Load weight in KB compressed, runtime overhead in ms per node chain and per 10,000 items, 95th-percentile canvas frame time on stress flows, phone width, reduced motion, worker isolation of runs, and keyboard and screen-reader reach of the graph. A rater measures in Chrome DevTools (network transfer, performance panel with 4x and 6x CPU throttling), opens the stress flows, and tests at 390 px with a screen reader and an axe-core scan.",
+      "ladder": [
+        "Absent: no page exists.",
+        "A lab page exists, and the editor loads in desktop Chrome at 1440 px.",
+        "First load transfers under 300 KB compressed before any connector fetch, measured in the network panel.",
+        "Runtime overhead: a 100-node chain of identity nodes runs in under 50 ms, and a per-item map followed by a filter over a 10,000-item array runs in under 300 ms, both with 4x CPU throttling, timed by an on-page benchmark button that prints both results.",
+        "At 390 px the panels stack, the canvas fills the width, and the page body never scrolls horizontally.",
+        "prefers-reduced-motion stops wire pulses and animated transitions, read at load and on change.",
+        "A bundled 200-node, 300-wire stress flow pans and zooms with a 95th-percentile frame time under 16.7 ms over a 5-second pan in the performance panel with 4x CPU throttling, by drawing only nodes inside the viewport.",
+        "Runs execute in a Web Worker, so the canvas holds its frame time during a 1-second CPU-bound transform, shown by an on-page frame-time meter.",
+        "Screen-reader reach: the flow is mirrored as an outline (nodes in topological order, each listing its input and output wires), node status changes are announced through aria-live, and an axe-core scan reports 0 serious or critical issues.",
+        "Performance tiers: the page drops to a static-wire tier (no pulses, no shadows) when the median frame time over its first 2 s exceeds 20 ms, with the tier shown and switchable.",
+        "Reference standard, the frame budget of Figma-class canvas tools: a bundled 1,000-node flow pans with a 95th-percentile frame time under 16.7 ms with 4x CPU throttling at 1440 px and under 33 ms with 6x CPU throttling at a 390 px viewport, the full editor stays under 300 KB compressed, and a WCAG 2.2 AA audit report for the outline view, linked from the page with its date and auditor, lists 0 failed success criteria."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: nothing loads, so there is nothing to measure" }
+      }
+    },
+    {
+      "id": "flow-contract",
+      "name": "Flow schema and node contract",
+      "frame": "architecture",
+      "metric": "The contract between flows and the runtime: the serialized flow format, URL sharing with credentials kept out of it, schema versions and migrations, the node definition interface and registry, CSP-sandboxed third-party nodes, and interchange with other tools. A rater reads the runtime and node modules, adds a node type by following the lab's instructions, shares a flow holding a key, and opens a flow URL saved from an older version.",
+      "ladder": [
+        "Absent: no code exists.",
+        "Lab code exists that holds a flow, a runtime and a UI in any shape; one inline script with node types as switch cases qualifies.",
+        "The flow is plain JSON (nodes with id, type and config; wires with source and target ports) kept apart from view state, and Export then Import round-trips it unchanged.",
+        "The runtime is an ES module with no DOM access, imported by the editor and runnable headless in Node 22 or later against a flow JSON file.",
+        "Node types share one interface (id, version, typed ports, config schema, run function) and register in a registry, and the runtime contains no node-specific code.",
+        "Flows serialize into the URL fragment, compressed with CompressionStream deflate and base64url, opening the URL rebuilds the same flow, and the encoded size in bytes is shown when sharing. Credentials never enter the URL: keys live in a credential store in IndexedDB on this device and the flow references them by name, and the share dialog lists every header or config value matching a key pattern (Authorization, Bearer, token=, key=, sk-) and strips it before encoding.",
+        "The flow format carries a schema version, one migration function per version upgrades old flows, and a flow URL saved from the first released version still loads, kept as a test fixture.",
+        "A new node type is added by one new file plus one registry line, demonstrated by a documented example node, with no change to the runtime or editor.",
+        "Third-party nodes: a node module loaded from a visitor-given URL runs in an iframe with sandbox=\"allow-scripts\" (no allow-same-origin) whose Content-Security-Policy sets default-src 'none', allows the module's own URL in script-src and only the node's declared hosts in connect-src; the node exchanges data with the runtime only by postMessage on its declared ports; its declared hosts are shown before it loads; and a bundled test node that fetches an undeclared host is shown blocked by CSP in the page's test view.",
+        "Interchange: a flow exports to Node-RED flow JSON for node types with a counterpart (inject, http request, function, switch, debug), the nodes that do not map are listed, and a committed fixture records the export of each sample flow and its error-free import into a named Node-RED version.",
+        "Reference standard, the node contracts of Node-RED and n8n with no backend: the flow format and node interface are published as JSON Schema in the lab, every bundled flow and node validates against it in the page's test view, and a node written to that interface outside the repo loads without a core change."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no flow format, runtime module or node registry exists under labs/assets/js" }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}

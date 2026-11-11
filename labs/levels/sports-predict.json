@@ -1,0 +1,251 @@
+{
+  "id": "sports-predict",
+  "title": "Predictive Analytics",
+  "page": null,
+  "thesis": "A visitor watches a Dixon-Coles model fit decades of open football results in the browser, simulates any season with its uncertainty drawn, and sees beside every probability how often the model's past forecasts of that size came true, scored in public against Elo, naive baselines and the closing betting market.",
+  "axes": [
+    {
+      "id": "score-model",
+      "name": "Score model fidelity",
+      "frame": "model",
+      "metric": "Which goal model the engine fits and how far it is checked: read the engine module for the likelihood, the fitted parameters and their comparison against an independent fit; the level is the highest rung whose named feature is present in code and visible on the page (rungs are cumulative).",
+      "ladder": [
+        "Absent: no match model runs.",
+        "A static table of match probabilities typed into the page; nothing is computed.",
+        "One Poisson goal model with league-wide home and away scoring rates computes home, draw and away probabilities, identical for every team.",
+        "Independent Poisson model with one attack and one defence parameter per team and one home-advantage parameter, fitted by maximum likelihood on the bundled results (after Maher 1982, Statistica Neerlandica), with attack parameters constrained to sum to zero.",
+        "The scoreline matrix runs from 0 to at least 10 goals per side and is extended until the probability mass outside it is under 1e-9; the page prints that truncated mass for the selected fixture, and a node test confirms P(home) + P(draw) + P(away) = 1 within 1e-9 with no renormalization step.",
+        "The Dixon-Coles low-score correction tau on the 0-0, 1-0, 0-1 and 1-1 cells (Dixon and Coles 1997, Journal of the Royal Statistical Society Series C), with rho fitted jointly with the team parameters, held inside max(-1/lambda, -1/mu) <= rho <= min(1/(lambda*mu), 1) for every fixture in the fit, and printed on the page; a node test confirms the corrected matrix sums to the uncorrected total within 1e-12 (tau preserves total mass).",
+        "Time-decay weighting of the likelihood by exp(-xi * days since the match), as in Dixon and Coles (1997), with xi stated on the page; a team with no matches in the training window (a promoted side) starts from a stated prior, the mean fitted attack and defence of promoted sides in earlier bundled seasons, printed beside its forecasts.",
+        "Standard errors for every team parameter, home advantage and rho, from the inverse observed information (Hessian) at the optimum, shown beside each estimate.",
+        "Fitted parameters agree within 0.001 on every parameter (log-scale attack, defence and home advantage, and rho) with a named, version-pinned independent implementation (for example the R package goalmodel or the Python package penaltyblog) fitted on the same matches with the same xi and the same sum-to-zero constraint (or re-expressed under it); the reference script, its output file and a node check that diffs the engine's fit against that file are committed, and the check passes.",
+        "Parameter uncertainty propagates into match probabilities: at least 1,000 draws from the fitted parameter distribution (Laplace approximation or bootstrap) give a 90% interval on each of P(home), P(draw) and P(away).",
+        "The visitor switches the same data between Dixon-Coles, a bivariate Poisson (Karlis and Ntzoufras 2003, The Statistician), a hierarchical Bayesian model with partial pooling (Baio and Blangiardo 2010, Journal of Applied Statistics) and a dynamic model whose team strengths follow a random walk over time (Rue and Salvesen 2000, The Statistician); each is fitted in the browser, with its walk-forward log loss and ranked probability score shown side by side on the identical matches."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; site.config.js lists sports-predict with status 'planned' and there is no engine file under labs/assets/js/" } }
+    },
+    {
+      "id": "season-sim",
+      "name": "Season simulation",
+      "frame": "model",
+      "metric": "How the season projection is computed: runs per projection (count), the uncertainty sources included, whether the table engine reproduces official tables, and whether season-level probabilities are checked against real final tables and against rival simulations; read the simulation module and run a projection on the page. Reference standard, context only: FiveThirtyEight's club soccer predictions (2017 to 2023).",
+      "ladder": [
+        "Absent: no season projection.",
+        "A static projected final table typed into the page.",
+        "One simulated run draws a full scoreline for every remaining fixture from the model's score matrix, not only a home, draw or away label, and produces one final table with points, goals for, goals against and goal difference.",
+        "Monte Carlo of the remaining fixtures with at least 1,000 runs gives each team a probability for every finishing position.",
+        "At least 10,000 runs, and each title, top-four and relegation probability shows its Monte Carlo standard error sqrt(p(1-p)/N).",
+        "A table engine applies the bundled league's points and tie-break order (goal difference, goals scored, then head to head where that league uses it); fed each completed bundled season's real results and its listed points adjustments, it reproduces the official final table order exactly, including every tie on points, checked by a node test.",
+        "The simulation starts from the real state at the cut-off: points deductions and awarded or annulled matches from the adjustments file apply from their effective dates only, so the starting table printed for any cut-off matches the official table on that date on points and goal difference; a node test with a mid-season deduction confirms the date handling.",
+        "Each run first draws a parameter set from the fitted uncertainty; title and relegation probabilities are shown with and without parameter uncertainty side by side.",
+        "Retro replay: the simulation starts from any matchweek of a completed bundled season, the real final table is overlaid, and the probability the model gave the real champion and each relegated side is printed.",
+        "Season outcomes are back-tested: across every bundled season and at least 4 checkpoints per season, predicted title, top-four and relegation probabilities are binned against observed frequencies, with a Brier score per outcome type.",
+        "Season forecasts are benchmarked: on the rung 9 checkpoints, the Dixon-Coles simulation's title, top-four and relegation Brier scores sit beside those of the same simulation driven by walk-forward Elo and of a points-per-game extrapolation baseline, with a paired bootstrap 95% interval (at least 1,000 resamples) on each difference."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no simulation code anywhere in the repo for this lab (planned in site.config.js)" } }
+    },
+    {
+      "id": "forecast-calibration",
+      "name": "Forecast calibration",
+      "frame": "model",
+      "metric": "Out-of-sample scores: Brier = sum over home, draw and away of (p - o)^2, averaged over matches (range 0 to 2); ranked probability score over the ordered outcomes home, draw, away (range 0 to 1); log loss in nats; for all three, lower means closer to what happened. Plus reliability bins with counts, and reproducibility. Check the calibration view on the page and the scoring module.",
+      "ladder": [
+        "Absent: no measure of forecast quality.",
+        "A typed claim about accuracy, not computed from data.",
+        "In-sample hit rate: the share of bundled matches where the most likely outcome happened, computed by the page.",
+        "Walk-forward out-of-sample forecasts: each match is predicted only from matches before its date; xi and every other tuned setting are chosen on seasons before the scored season, and the page names the tuning seasons and the scored season; every played match of the scored season is scored, promoted teams' first matches included, with the scored count printed beside the season's played-match count; the multi-class Brier score over at least one full season is shown.",
+        "Ranked probability score (Epstein 1969, Journal of Applied Meteorology) and log loss shown beside the Brier score, each to 3 decimals, with the match count n.",
+        "Reliability diagram pooling the home, draw and away probabilities of every scored match as 3n binary forecasts, with at least 10 equal-width bins and the forecast count printed for each bin.",
+        "Consistency bands on the reliability diagram from resampling under perfect calibration (Bröcker and Smith 2007, Weather and Forecasting), so a rater can see which bins fall outside chance.",
+        "Murphy decomposition of the Brier score into reliability, resolution and uncertainty (Murphy 1973, Journal of Applied Meteorology), with the within-bin term reported, summing to the shown Brier score to 3 decimals.",
+        "Separate reliability diagrams for home win, draw and away win, each with its own Murphy reliability term, redrawn for any one season by a season selector; a table prints, for every scored season, the observed draw frequency beside the mean forecast draw probability.",
+        "A node script in the repo recomputes every score and every bin on the calibration view from the bundled data and prints values identical to the page.",
+        "Pre-registered forecasts: probabilities for upcoming fixtures reach the public repo before kickoff, timed by the server (the GitHub merge time of the pull request that added them, not the commit author or committer date), and are scored after the match; the page lists every one of at least 200 scored forecasts, hits and misses, with the running Brier score and its own reliability diagram (reference: FiveThirtyEight's Checking Our Work, 2019)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no forecasts are produced, so nothing is scored" } }
+    },
+    {
+      "id": "rival-benchmark",
+      "name": "Elo, baseline and market contest",
+      "frame": "model",
+      "metric": "What the forecasts are compared against: count of rival models and baselines scored on the identical match set, whether rival tuning stays out of the scored season, and whether score differences carry intervals; read the benchmark table on the page and the scoring harness in code.",
+      "ladder": [
+        "Absent: no rival model.",
+        "Elo and naive baselines are named as comparisons in text only.",
+        "Two naive baselines on the bundled matches: uniform one third per outcome, and the training window's home, draw and away frequencies, each with its Brier score.",
+        "Elo ratings computed from the bundled results with a fixed K-factor and shown as a table.",
+        "Elo rating difference converted to home, draw and away probabilities by an ordered logit fitted on the training window (as in Hvattum and Arntzen 2010, International Journal of Forecasting).",
+        "Elo forecasts produced walk-forward on exactly the same matches as the Dixon-Coles forecasts, with both baselines scored on that same match set.",
+        "Elo K-factor and home bonus tuned on the seasons before the scored season (the same tuning seasons as Dixon-Coles), with the values stated.",
+        "One table gives Brier score, ranked probability score and log loss for every model and baseline on the identical match set, with n.",
+        "A paired bootstrap of at least 1,000 resamples gives a 95% interval on the score difference between Dixon-Coles and Elo, and between Dixon-Coles and each baseline.",
+        "Bookmaker closing-odds probabilities for the scored matches (for example the closing-odds columns of football-data.co.uk) enter the score table as the market benchmark on the identical match set, with the margin removed both by proportional normalization and by Shin's method (Shin 1993, Economic Journal), the paired interval against Dixon-Coles shown, and the odds source and its license cited; a sentence explaining why odds are absent does not meet this rung.",
+        "Open contest: the visitor pastes a CSV of their own probabilities for the scored matches and is ranked against every model and the market with the same paired intervals, all in the browser."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no Elo, baseline or odds code in the repo for this lab" } }
+    },
+    {
+      "id": "probability-graphics",
+      "name": "Probability graphics",
+      "frame": "graphics",
+      "metric": "Count of distinct live chart types drawn from computed data, whether they are linked, and whether they draw uncertainty as distributions; check on the page at 1440 px and in the render code.",
+      "ladder": [
+        "Absent: nothing drawn.",
+        "Probabilities appear as text or a static image only.",
+        "One live chart: a home, draw and away probability bar for the selected fixture.",
+        "A scoreline probability heatmap of at least 7 by 7 goals for the selected fixture, with the most likely score marked.",
+        "A team-strength scatter of attack against defence for every team in the league.",
+        "A season heat table: one row per team, one column per finishing position, cell shade equal to the probability.",
+        "A reliability diagram drawn with bin counts encoded (dot area or a histogram beneath it).",
+        "Linked views: selecting a team in the scatter, the season table or the fixture list highlights its mark in the other two, and redraws the reliability view from that team's matches only, with its n printed, in one interaction.",
+        "Uncertainty drawn as distributions: each team's projected points in the season table as a quantile dotplot of 20 dots (Kay, Kola, Hullman and Munson 2016, CHI), and each team's attack and defence in the scatter with a 90% interval bar on both axes.",
+        "Hypothetical outcome plots (Hullman, Resnick and Adar 2015, PLOS ONE): the visitor steps through individual simulated seasons as successive frames.",
+        "A probability-over-time chart of every team's title, top-four and relegation odds at every matchweek of the selected season, with each real result annotated on the line; clicking a matchweek on it sets the heatmap, scatter, season table and reliability view to the forecasts as of that date."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; there is no screenshot because nothing renders" } }
+    },
+    {
+      "id": "forecast-grammar",
+      "name": "Forecast visual grammar",
+      "frame": "style",
+      "metric": "Conformance of the page to a visual grammar written for forecasts (forecast, observed, interval, active and out-of-sample marks): count of views violating each rung's rule, checked on every view at 1440 px and 400 px and in the lab's CSS against labs/assets/css/tokens.css. Reference standard, context only: FiveThirtyEight's forecast pages.",
+      "ladder": [
+        "Absent: no styled page.",
+        "Template or browser-default styling, with no site tokens.",
+        "The lab's CSS imports labs/assets/css/tokens.css and contains zero hard-coded hex colours (grep the lab stylesheet).",
+        "Every forecast probability (match outcome, finishing position, title, top four, relegation) uses tabular numerals at whole-percent precision on every view, with values under 1% printed as <1% and over 99% as >99%, so no uncertain event reads 0% or 100%; each diagnostic quantity (scores, standard errors, truncated mass) uses one stated format throughout.",
+        "One sequential probability colour scale, built from tokens.css, is shared by every chart that encodes probability, and each such chart carries a legend for it.",
+        "Encoding roles fixed on every view: forecasts in the cool ink-gray probability scale (the --horizon tokens), observed results (actual score, real final table) in luminous white (--text-bright) with a distinct mark shape, and gold (--accretion) only for the active selection, per tokens.css; a rater finds no view where gold marks a forecast or an observed value.",
+        "Every chart carries a title, a unit, a data source line and the data date.",
+        "Every match probability, team-strength estimate and projected-points value printed on the page carries its 90% interval in one format (for example 48% [41, 55]), and every interval drawn on a chart uses one treatment (same fill token, opacity and end caps); a rater finds zero bare point values among these three quantities.",
+        "Changing fixture or matchweek moves the data marks to their new positions in at most 400 ms, with no blank frame between states.",
+        "The probability palette passes a deuteranopia and protanopia simulation check, every text colour pair has contrast at least 4.5:1 (WCAG 2.1 SC 1.4.3), and every line, dot and bar mark has contrast at least 3:1 against its ground (SC 1.4.11); all three results are recorded in the repo with the tool used.",
+        "The grammar for forecast, observed, interval, active and out-of-sample marks is written as a named spec in the lab's CSS header, every rule maps to a CSS class, and a rater walking every view at 1440 px and 400 px finds zero violations."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no lab stylesheet or markup to inspect" } }
+    },
+    {
+      "id": "what-if",
+      "name": "What-if control",
+      "frame": "interaction",
+      "metric": "What a visitor can change and ask: count of independent what-if controls and query forms, with the response time in ms for parameter changes (timed under the compute-budget axis's conditions); try each control on the page.",
+      "ladder": [
+        "Absent: no controls.",
+        "One button reveals a fixed prediction.",
+        "Pick any two teams of the bundled league and get home, draw and away probabilities.",
+        "Pick the season and a matchweek cut-off (and the league, once more than one is bundled); the model refits on the matches before that date and the fit date is printed.",
+        "Sliders for home advantage and rho recompute the selected fixture's scoreline matrix and probabilities within 100 ms of release; an xi slider triggers a refit that finishes within 500 ms and prints its refit time and the refitted parameters.",
+        "Lock the result of any remaining fixture and re-run the season simulation.",
+        "Adjust one team's attack or defence (an injury or transfer what-if) and see its title and relegation odds move, with the change printed.",
+        "The full state (league, season, cut-off, locks, overrides) is encoded in the URL and restored on load.",
+        "Beat the model: the visitor enters their own home, draw and away probabilities for at least 10 past fixtures before the results are revealed, and is scored against the model by Brier score on those same fixtures.",
+        "A query builder over the stored simulation runs answers at least 3 question forms the page does not precompute (team A finishes above team B, the title is decided on goal difference, a team reaches N points), each with its Monte Carlo standard error; cross-season matchups are refused, with the reason printed (team parameters share a scale only within one fit).",
+        "The visitor loads their own results CSV (any league, documented columns) and the whole pipeline (fit, simulation, back-test, calibration) runs on it in the browser."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no controls of any kind" } }
+    },
+    {
+      "id": "data-provenance",
+      "name": "Results data provenance",
+      "frame": "data",
+      "metric": "Provenance and volume of the facts: league-seasons bundled (count), citation and license per source (results and betting odds recorded separately), integrity and table-reproduction checks, and exports; read the data files, the adjustments file, the data card and the page's data line.",
+      "ladder": [
+        "Absent: no data.",
+        "Invented teams and results.",
+        "One real season of one league bundled, with the source named.",
+        "Source cited with name, URL and license (public domain or CC0, for example openfootball), with the retrieval date on the page.",
+        "At least 5 consecutive seasons of one league bundled.",
+        "Integrity checks at load: each season has the match count its format implies (n(n-1) for a double round robin of n teams), no duplicate fixtures, team names normalized across seasons; failures reported on the page.",
+        "Every points deduction and awarded or annulled match in the bundled seasons is listed in an adjustments file with its source, and a node check confirms that the bundled results plus those adjustments reproduce each bundled season's published final table (bundled as a reference file, source cited) on points and goal difference.",
+        "Walk-forward predictions and their scores export as CSV, with a header naming the model version and the data date.",
+        "At least 40 league-seasons across at least 3 leagues, including at least 20 consecutive seasons of one league, with the count printed on the page's data line.",
+        "A build script in the repo regenerates the bundled data from the raw public source, its output hash matches the shipped file, and it also writes the data card file (rows, date range, known gaps, and the license of each source, with results and betting odds listed separately).",
+        "Dated snapshots: at least 2 data refreshes are kept as versioned files with their hashes, and the page rescores any past forecast against the snapshot it was made from, naming that snapshot."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no football results data file in labs/ or labs/assets/" } }
+    },
+    {
+      "id": "self-audit",
+      "name": "Forecaster self-audit",
+      "frame": "intelligence",
+      "metric": "What the forecaster decides and reports about itself without being asked: count of the self-audit behaviours below present; check by loading the page with no input and reading the engine's audit code and its node tests.",
+      "ladder": [
+        "Absent: the page does nothing on its own.",
+        "Opens on a precomputed default league, season and fixture, so it is not empty until clicked.",
+        "Fits at load on its own and reports convergence: iterations, final log-likelihood, and gradient norm under a stated tolerance.",
+        "Flags low-information forecasts: a team with fewer than 19 matches in the training window (half a 20-team season, for example a promoted side) is marked on every view it appears in, with its match count.",
+        "Chooses xi on its own by out-of-sample log-likelihood over a grid of at least 5 values, computed only on seasons before the scored one, with the curve and the tuning seasons shown.",
+        "Writes verdicts from computed numbers by template (for example: overconfident above 60%, forecast 66%, observed 54%, n = 41); every number in the text matches a table cell.",
+        "Flags drift: the rolling Brier score over the last 50 matches is compared with a resampled 90% band for the season, an excursion is announced on the page, and a node test with an injected miscalibrated stretch triggers the announcement.",
+        "Lists its own 5 largest misses (lowest probability given to what happened) with the probability it gave each.",
+        "Optional narration through labs/assets/js/ai/llm.js in one batched call fed only engine numbers; a check rejects any narration containing a number absent from the engine output and falls back to the template verdict; the answering route is shown.",
+        "Every displayed probability carries its back-test track record for that probability bin (for example: said 60 to 65%, happened 58%, n = 340).",
+        "Abstains where it has failed before: a table lists every probability bin, league and promoted-side group with its back-test calibration and consistency band; where calibration falls outside the band the forecast is widened or withheld with the reason printed, and a node test with an injected out-of-band bin shows the withheld forecast."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing runs, so nothing is decided or reported" } }
+    },
+    {
+      "id": "mechanism-explained",
+      "name": "Mechanism explanation",
+      "frame": "explanation",
+      "metric": "What a visitor can state after five minutes, and whether claims are tagged: count of mechanism steps explained with live numbers, presence of real or illustrative tags, references and limits; read the page text and run the walkthrough.",
+      "ladder": [
+        "Absent: no explanation.",
+        "One paragraph says what the lab does.",
+        "The model stated in words: goals as Poisson counts driven by attack, defence and home advantage.",
+        "The match formula shown with the selected fixture's fitted numbers substituted (both expected goal rates, lambda and mu).",
+        "The Dixon-Coles correction explained on the heatmap: the 0-0, 1-0, 0-1 and 1-1 cells highlighted with their probability before and after tau.",
+        "A guided walkthrough of 5 steps (data, fit, match, season, calibration), each showing live numbers from the current fit, that works at 400 px width.",
+        "Calibration explained with the page's own numbers: the model's Brier score beside the uniform one-third baseline's Brier score on the same matches, and the Brier skill score 1 - BS_model / BS_uniform printed to 3 decimals with one sentence stating it as the percentage reduction in Brier score.",
+        "Every claim tagged real (computed from bundled data) or illustrative, across all text on the page.",
+        "A references section cites Maher (1982), Dixon and Coles (1997), Hvattum and Arntzen (2010), Epstein (1969) and Murphy (1973) with their venues.",
+        "A limits section names what the model ignores (lineups, injuries, red cards, shot quality, market information) and prints its measured gap to the strongest benchmark in score units.",
+        "Every symbol in the displayed equations is linked: hovering or focusing it highlights its value and its mark in the live charts (reference standard, context only: the linked-figure articles of Distill)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the only text is the one-line hub blurb in site.config.js" } }
+    },
+    {
+      "id": "compute-budget",
+      "name": "Fit and simulation budget",
+      "frame": "performance",
+      "metric": "Load time (s), fit and simulation time (ms), phone width, reduced motion, keyboard and screen-reader reach; measured with DevTools, Lighthouse and the timings the page prints; desktop timings with DevTools cache disabled and no CPU throttling, phone timings under DevTools 4x CPU slowdown.",
+      "ladder": [
+        "Absent: nothing loads.",
+        "The page loads; no timing is measured or shown.",
+        "First render with the bundled data in under 3 s on desktop (DevTools performance trace).",
+        "One season's Dixon-Coles fit (380 matches, about 41 free parameters) completes in under 500 ms on desktop, with the time shown on the page.",
+        "A 10,000-run season simulation completes in under 2 s in a Web Worker or in chunks, with no main-thread long task over 50 ms (the Long Tasks API threshold).",
+        "Works at 400 px width with no horizontal scroll, and prefers-reduced-motion turns off all animation.",
+        "Every control is reachable and operable by keyboard with a visible focus ring.",
+        "Every chart has a data-table alternative reachable by a screen reader.",
+        "A full-season walk-forward back-test (at least 38 refits) completes in under 10 s with warm-started fits and a progress indicator.",
+        "Lighthouse mobile performance and accessibility scores both at least 90.",
+        "Under DevTools 4x CPU slowdown at 400 px width, the full walk-forward back-test over every bundled league-season (at least 40) completes in the browser in under 60 s with a progress indicator, while no main-thread long task exceeds 50 ms and transitions hold frame time under 16 ms; the performance trace is committed to the repo."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing to load or time" } }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Forecast engine architecture",
+      "frame": "architecture",
+      "metric": "Code shape: module boundaries, league config separate from logic, tests, and what can be added without touching the engine; read the file tree, diff a league addition, and run the tests.",
+      "ladder": [
+        "Absent: no code.",
+        "One inline script in the page.",
+        "Logic in its own files under labs/assets/js/sports-predict/.",
+        "The engine (likelihood, fit, probabilities, simulation, scoring) is pure ES modules with no DOM access.",
+        "League config (teams, points, tie-break order) lives in a config file separate from logic.",
+        "A node test runs the engine against fixed reference values (Poisson pmf values, a small hand-checked fit) and passes.",
+        "Every model implements one interface (fit(matches), then predict(home, away) returning pH, pD, pA, plus a score matrix or null when the model has none, as Elo does), so Poisson, Dixon-Coles and Elo run through the same back-test and scoring harness.",
+        "Adding a league is one data file and one config entry with no engine edit (a rater checks with a diff).",
+        "Simulations use a seeded RNG: the same seed gives identical results, and the seed is in the URL.",
+        "Engine modules reach at least 80% line coverage under node --test with coverage enabled.",
+        "A third-party model added as one file implementing the interface appears in every view and in the benchmark table with no other edit, documented in the lab's README."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no directory labs/assets/js/sports-predict/ and no engine module" } }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

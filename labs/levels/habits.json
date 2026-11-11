@@ -1,0 +1,249 @@
+{
+  "id": "habits",
+  "title": "Habit Formation",
+  "page": null,
+  "thesis": "A visitor logs a habit in a local-first tracker that fits the Lally et al. (2010) asymptotic automaticity curve to their own check-ins, shows how far along that curve they stand with a 90% interval, and simulates in days what any missed day really costs, while the check-ins themselves never leave their browser.",
+  "axes": [
+    {
+      "id": "automaticity-fit",
+      "name": "Automaticity curve fit",
+      "frame": "model",
+      "metric": "Which automaticity model the engine fits to the visitor's ratings and how far the fit is checked: read the engine module for the curve, the estimator and its outputs (a, b, c, t95 in days), then run the page on the history it can load (check-ins entered by hand, the demo once it exists) and on the synthetic test histories of the repo's recovery script (rung 7), loaded through JSON import once it exists; the level is the highest rung whose named feature is present in code and visible on the page (rungs are cumulative).",
+      "ladder": [
+        "Absent: no automaticity model runs.",
+        "A rising automaticity curve is shown, at least as a fixed picture identical for every visitor.",
+        "The asymptotic curve y = a - b*exp(-c*t) (t in days, y in automaticity points) is drawn by code from parameters a, b and c; typed constants or sliders are enough at this rung.",
+        "a, b and c are fitted to the visitor's daily automaticity ratings by nonlinear least squares (Gauss-Newton or Levenberg-Marquardt), and the fitted values are printed on the page.",
+        "Days to 95% of the asymptote, t95 = ln(20b/a)/c, are computed from the fit and printed, the measure Lally, van Jaarsveld, Potts and Wardle (2010, European Journal of Social Psychology) report; when 20b/a <= 1 the page states the habit already starts above 95%.",
+        "Parameter constraints are enforced in code (c > 0, b >= 0, asymptote a inside the rating scale); when the asymptotic fit does not converge within a stated iteration limit, the page falls back to a straight-line fit and says so.",
+        "The asymptotic curve is compared with a straight line and a quadratic on the same ratings by AIC (Akaike 1974, IEEE Transactions on Automatic Control), and the page names the winning model and the AIC gap.",
+        "Recovery test in the repo: on at least 100 synthetic 84-day histories with true t95 spread evenly from 18 to 84 days, asymptote a between 4 and 7 on the 1 to 7 scale and rating noise SD 0.5 points, the fitter recovers t95 within 10% for at least 90% of them, and the script prints the share and the parameter grid.",
+        "Prior shrinkage: a, b and c are estimated as the posterior mode under a stated population prior whose implied t95 distribution has a median of 66 days and holds the 18 to 254 day range of Lally et al. (2010) inside its central 95%; with fewer than 14 ratings the estimate is labelled 'mostly the population prior'; and the page states that this prior describes only the Lally et al. participants whose ratings the asymptotic curve fitted, with that count as the paper gives it.",
+        "Full Bayesian posterior over a, b and c by MCMC in the browser: at least 2,000 draws across at least 2 chains, R-hat under 1.01 for every parameter printed (Gelman and Rubin 1992, Statistical Science), and t95 reported as a posterior median with a 90% interval.",
+        "Reference agreement, with script and table committed in the repo: on 20 fixed histories from the rung 7 generator the page's unpooled least-squares a, b, c and t95 agree with R nls() or SciPy curve_fit within 0.1%, and its posterior medians agree within 2% with a Stan fit (Carpenter et al. 2017, Journal of Statistical Software) of the same model and prior."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; site.config.js lists habits with status 'planned' and no file under labs/ or labs/assets/js/ fits any curve" } }
+    },
+    {
+      "id": "fit-honesty",
+      "name": "Small-sample fit honesty",
+      "frame": "model",
+      "metric": "What the page claims when the data cannot support a claim: minimum-data rules, intervals on every estimate, extrapolation flags, held-out error in rating points and interval coverage in percent; a rater builds or imports histories of 3, 10, 30 and 84 rated days (committed test files, through JSON import once it exists), reads what the page states at each, then reads the fit module and its tests.",
+      "ladder": [
+        "Absent: no estimate carries any uncertainty and no data threshold exists.",
+        "A t95 computed from the visitor's own ratings is printed with the count of ratings it rests on beside it; no interval or data threshold is required yet.",
+        "Minimum-data rule, counted in rated days: a day performed but not rated is a missing observation, never a 0 and never a miss; below a stated count of ratings (at least 10) no t95 fitted from the visitor's ratings alone is shown, any figure shown instead is labelled 'mostly the population prior', and the page states how many more ratings are needed.",
+        "Fit-quality rule: R squared of the fit is computed and shown, and when it is under a stated threshold the page shows a 'the curve does not describe your ratings yet' state instead of a t95, mirroring Lally et al. (2010), where the asymptotic curve did not describe every participant's ratings.",
+        "A 90% interval on a, b, c and t95, from asymptotic standard errors at the optimum or a bootstrap of at least 500 resamples, is printed beside every estimate, and every estimate also shows its n and its data window (first to last check-in date).",
+        "Extrapolation flag: when t95 falls after the last check-in the value is labelled extrapolated and the curve past the data is drawn dashed; the page notes that Lally et al.'s upper value of 254 days lies past their 84-day study window.",
+        "Held-out check: the last 7 ratings are predicted from a fit on the earlier ones, and the mean absolute error in rating points is shown next to the curve.",
+        "Residual noise is estimated and shown in rating points, and a day-to-day change smaller than twice that SD is labelled noise in the page's text, not progress and not loss.",
+        "Coverage test in the repo: on at least 200 synthetic histories from the same generator as automaticity-fit rung 7, the stated 90% interval contains the true t95 between 85% and 95% of the time, and the script prints the coverage.",
+        "Change detection: a likelihood-ratio test between one curve and a two-segment curve with an estimated break day flags the day a habit's trajectory changed (a new cue, a move, an illness), with its p-value from a parametric bootstrap of at least 200 histories simulated from the one-curve fit; on a committed test history with a break planted at day 40 (asymptote shifted by 1.5 rating points, noise SD 0.5) the page flags a day within 3 days of 40, and a script in the repo counts at most 15 false alarms at p < 0.05 on 200 break-free synthetic histories.",
+        "Value of information: for the current history the page computes, by at least 200 simulated continuations, how many more ratings would narrow the t95 interval to plus or minus 7 days, and a script in the repo shows the forecast within 20% of the realized count for at least 80 of 100 synthetic histories continued from their true parameters."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no estimate is produced, so no uncertainty is reported" } }
+    },
+    {
+      "id": "miss-cost",
+      "name": "Missed-day cost model",
+      "frame": "model",
+      "metric": "How the page computes what a missed day costs: the miss model, its parameters, the unit of cost (days of delay to t95 and automaticity points), and whether the model is fitted to and checked against the visitor's own ratings after misses; read the simulation module, mark misses on a loaded history (the demo once it exists) and read the printed cost.",
+      "ladder": [
+        "Absent: missed days are not modelled.",
+        "Missed days are recorded separately from done days, and their count is shown on the page.",
+        "Each miss is shown with a cost in days on the page; a fixed typed rule identical for every visitor is enough at this rung.",
+        "Pause model tied to the fit: automaticity rises only on performed days, A <- A + alpha*(a - A) with alpha = 1 - exp(-c) from the fitted curve, the engine projects the curve for the visitor's actual schedule of done and missed days, and the page states the consequence: under pause, each miss before t95 costs exactly one day.",
+        "Decay model: on a missed day automaticity moves toward the fitted starting level y0 = a - b, A <- A - delta*(A - y0) with delta stated on the page, generalizing the habit-strength update of Miller, Shenhav and Ludvig (2019, Psychological Review), where strength moves toward 1 on a performed action and toward 0 otherwise; the visitor switches the active model and the projected curve redraws under it.",
+        "Cost table under both models side by side: the delay to t95 in days, printed to 0.1 day, against the same schedule with every day performed, for each miss and for all misses together; under decay, misses on days 10 and 11 and misses on days 10 and 40 print different delays.",
+        "delta is fitted to the visitor's own ratings on the days after misses and printed with its 90% interval; with fewer than 3 misses followed by a rating the population default is used and labelled as such.",
+        "Pattern table: the delays in days for one miss, two consecutive misses, a missed weekend, one miss per week for 12 weeks, and one week performed out of the cue context (modelled as repetitions with a separate gain, fitted or defaulted and labelled as a model assumption), each simulated from the visitor's fit and printed together.",
+        "Sensitivity boundary: over a simulated cohort of 82 people for 84 days drawn from the population prior, each with one miss on a random day, the page finds the decay rate delta at which that miss delays median t95 by more than 7 days (the page's stated threshold for material, about 10% of the 66-day median; Lally et al. give none) and prints it beside the alpha and delta in use, so the visitor sees how far the model sits from contradicting Lally et al.'s (2010) single-miss finding.",
+        "Model choice on the visitor's own data: pause and decay are compared by held-out mean absolute error on post-miss ratings (rating points) and by AIC, both printed, and the page states which model the data support; with fewer than 3 misses followed by a rating it states that the data cannot yet decide.",
+        "For any miss pattern the visitor draws, the cost is a distribution: at least 1,000 draws from the fitted parameter uncertainty give the median delay in days and a 90% interval; Loop Habit Tracker's habit-strength score, which a few missed days do not erase, is the miss-tolerant reference, and this rung adds what its fixed score formula lacks, a decay fitted per person with its uncertainty."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the hub blurb in site.config.js promises streaks that survive missed days, but no code models a miss" } }
+    },
+    {
+      "id": "curve-views",
+      "name": "Curve and calendar views",
+      "frame": "graphics",
+      "metric": "What becomes visible: the count of distinct linked views, which estimates are drawn with their uncertainty, and how the views respond to each other. A view is a separately positioned panel with its own axes or grid (for example the curve plot, the calendar, the cohort fan, the miss-cost table). A rater counts the views at 1440 px, hovers and brushes them, and reads the rendering module.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "A curve or calendar image appears on the page; a static picture not generated from data is enough at this rung.",
+        "One SVG or canvas plot draws a single asymptotic curve from parameters in code, fixed values being enough, with labelled axes in days and automaticity points.",
+        "The visitor's own ratings are plotted as points over their fitted curve, with the t95 day marked by a vertical rule and its value.",
+        "A calendar of done and missed days sits beside the curve and is linked to it: hovering a day highlights its rating point and the curve value on that day.",
+        "The 90% interval is drawn as a band around the curve and as a bracket around the t95 marker, both redrawn when a check-in changes.",
+        "Counterfactual overlay: the curve for the actual schedule and the curve for the same schedule with no misses are drawn together, and the gap at t95 is labelled in days.",
+        "Cohort fan: the visitor's curve is drawn against a fan of at least 200 simulated people built from the population prior (median t95 66 days), with the visitor's percentile printed.",
+        "Brushing a date range on the calendar refits on that window and redraws at least 4 views by the metric's definition (such as curve plot, calendar, cohort fan and miss-cost table) in one transition of 200 to 400 ms.",
+        "Replay: a scrubber replays the history day by day; the curve, band and t95 bracket narrow as each check-in arrives, the day number and current t95 are printed at each step, and the t95 marker leaves a trail of its past estimates.",
+        "Small multiples (Tufte 1983, The Visual Display of Quantitative Information) of every tracked habit on shared axes, sorted by t95, each with its band and miss marks, plus a predictive-check view: each rating plotted against its 90% predictive band, every rating outside its band marked, and a residual strip aligned to the calendar."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no screenshot exists to grade" } }
+    },
+    {
+      "id": "miss-grammar",
+      "name": "Miss-forgiving visual grammar",
+      "frame": "style",
+      "metric": "How the design language treats a miss and a number: the mark vocabulary, colour roles (gold kept for what is active), motion, the typesetting of estimates and the copy shown after a miss; checked against labs/assets/css/tokens.css and a screenshot audit at 400 and 1440 px.",
+      "ladder": [
+        "Absent: no design language is applied.",
+        "The page loads a stylesheet of its own; site tokens are not yet required.",
+        "The site's near-black ground, amber accent and type scale come from labs/assets/css/tokens.css, not redefined in the page.",
+        "A missed day is drawn as a neutral hollow mark, never red and never a cross, at 3:1 non-text contrast against the ground (WCAG 2.1 1.4.11) and distinguishable without colour (1.4.1); no progress counter drops to zero after a miss, the only figure allowed to is a streak labelled as the naive comparison.",
+        "Gold is kept for what is active: only today's cell, the live estimate and the control in use carry the gold token; past done days use a dimmer tone.",
+        "The headline number is automaticity as a percentage of the fitted asymptote, not a consecutive-day count; a naive streak appears only as a muted comparison label.",
+        "One mark vocabulary across every view: done, missed, hypothetical miss and rated day each have one shape, used identically in calendar, curve and legend.",
+        "A miss renders as the modelled change under the active miss model (a flat step under pause, a downward step under decay), never as a gap in the line, and every curve update uses one named easing function defined once in the lab's code.",
+        "Every estimate is typeset with tabular figures, its unit (days or rating points) and its interval in one pattern, value (90% interval low to high) unit, across all views.",
+        "A copy audit in the repo lists every string the page can show after a miss, and none addressed to the visitor's record uses loss language: no 'lost', 'broken', 'failed', 'reset' or 'start over'; 'reset' appears only in the label of the naive-streak comparison.",
+        "Drawn magnitude equals modelled cost, a Lie Factor of 1 (Tufte 1983): a script in the repo reads the rendered SVG at 400 and 1440 px in 4 states (empty, 3 days, 84 days with misses, every habit at plateau) and checks that every miss step and the counterfactual gap match the engine's values within 1 px, with the audit table and those screenshots committed."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no habit-specific CSS file exists under labs/assets/css/" } }
+    },
+    {
+      "id": "check-in-loop",
+      "name": "Check-in and what-if control",
+      "frame": "interaction",
+      "metric": "How the visitor records a habit and questions it: the count of check-in actions, seconds for a daily check-in, which what-if controls exist and whether scenarios are shareable; a rater performs a check-in, edits a past day, plans hypothetical misses and reloads a shared URL.",
+      "ladder": [
+        "Absent: nothing can be recorded.",
+        "A check-in control is on the page, at least as a mock that records nothing.",
+        "One 'done today' button marks today for one habit, and the mark shows on the page.",
+        "Any of the last 84 days can be marked done or missed by clicking its calendar cell, and every edit updates the calendar and the miss count at once.",
+        "Daily automaticity rating: the four items of the Self-Report Behavioural Automaticity Index (Gardner, Abraham, Lally and de Bruijn 2012, International Journal of Behavioral Nutrition and Physical Activity), each on a 1 to 7 scale, answered in under 20 seconds, once per day, and every rating or edit refits the curve.",
+        "At least 3 habits, each with its cue context written as in Lally et al.'s protocol ('after breakfast') and its own calendar and curve; each check-in records whether it happened in that context (yes or no).",
+        "What-if misses: the visitor marks hypothetical future misses on the calendar and sees the projected t95 move in days, without changing the recorded history.",
+        "Schedule simulator: the visitor sets a chance of performing each day (0 to 100%) and a pattern (weekdays only, every other day), and at least 500 simulated futures give a t95 distribution.",
+        "A what-if scenario (model parameters, miss pattern, schedule; never the visitor's recorded check-ins) encodes into the URL hash and restores exactly on load.",
+        "Comparison mode: two habits or two scenarios side by side on shared axes, with the difference in t95 printed in days and its interval.",
+        "Tracker ergonomics at the level of Loop Habit Tracker (open source, Android): weekly targets such as 3 times per week, which the engine models as 3 opportunities per week with each one not taken by the week's end counted as one miss; numeric habits; reminders through the Notification API; on top of the what-if and simulation controls Loop does not offer."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; there is no control to operate" } }
+    },
+    {
+      "id": "evidence-provenance",
+      "name": "Habit research provenance",
+      "frame": "data",
+      "metric": "Where every habit-science fact on the page comes from: the count of numbers traced to a source with authors, year, venue and DOI, the labelling of synthetic data, and the stated limits of the evidence; a rater lists every number on the page and finds its source.",
+      "ladder": [
+        "Absent: no habit-science facts are given.",
+        "At least one habit-science figure (such as 66 days) appears on the page, with or without a source.",
+        "Lally, van Jaarsveld, Potts and Wardle (2010, European Journal of Social Psychology) is cited on the page with a link to its DOI.",
+        "Every figure taken from that paper (96 volunteers, 82 analysed, a 12-week window, median 66 days, range 18 to 254 days, and the number of participants the median and range were computed on, as the paper states it) appears with the citation beside it, and the page says the median and range cover only participants whose curve fitted.",
+        "One button loads a synthetic 84-day demo history; it is labelled synthetic on screen, and its generating parameters (a, b, c, noise SD, miss pattern) are printed.",
+        "Every number on the page carries one of four tags: your data, cited study, model assumption, or illustrative.",
+        "At least two further peer-reviewed sources on habit measurement or habit formation are cited, among them Wood and Neal (2007, Psychological Review) on habit as context-cued responding distinct from goals, each with authors, year, venue and sample size where it applies, and each tied to the claim it supports.",
+        "A methods note in the repo derives the population prior from the published summary figures, with every input number traced to the paper's text.",
+        "A sources file in the repo holds each claim's DOI, access date and the quoted sentence it rests on, and a node script fails when a number on the page is missing from it.",
+        "The page states the limits of the evidence: a volunteer sample, self-reported automaticity, one behaviour per person, and t95 values past the 84-day window being extrapolations.",
+        "An evidence table of at least 10 studies of habit-formation time course, each with sample size, behaviour, automaticity measure, time-to-plateau estimate and DOI, kept with a dated changelog of additions."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the only text is the hub blurb in site.config.js, which cites no source" } }
+    },
+    {
+      "id": "local-first",
+      "name": "Local-first ownership",
+      "frame": "data",
+      "metric": "Where the visitor's check-ins live and who holds them: the storage layer, the count of network requests carrying check-ins (devtools network panel), export and import formats, and round-trip exactness; a rater logs check-ins, reloads, exports, clears and re-imports.",
+      "ladder": [
+        "Absent: no check-in is stored.",
+        "Check-ins are held in page memory for the session; persistence across reloads is not yet required.",
+        "Check-ins for one habit persist in localStorage across reloads.",
+        "With the coach off, the devtools network panel shows zero requests while check-ins are logged; no request ever carries raw check-ins (dates, done marks, ratings) or a stored habit name or cue text, text the visitor types into a coach request leaves only after its payload is shown; and the page says the check-ins stay in this browser.",
+        "Storage access is wrapped in try/catch; in a private window the page runs from memory and shows a notice that nothing will be kept, and a delete-everything control asks for confirmation inside the page before clearing.",
+        "Export to JSON and to CSV, one row per day: date, habit, done, in context where recorded, and the four automaticity ratings.",
+        "Import of an exported JSON file restores the state exactly, checked by a round-trip test in the repo.",
+        "A versioned schema with a migration function: an export file from an older schema version imports without loss, tested in the repo.",
+        "An append-only event log in IndexedDB: each check-in and each edit is an event with a timestamp, and an as-of date control on the page shows the fit exactly as it stood on any chosen past date.",
+        "Moving data between the visitor's own devices through a passphrase-encrypted export file (Web Crypto, PBKDF2 key derivation, AES-GCM), so no server ever holds readable check-ins.",
+        "The page publishes a checklist against the seven ideals of local-first software (Kleppmann, Wiggins, van Hardenberg and McGranaghan 2019, Onward!), with only 'collaboration' allowed as not applicable; two exports edited on two devices since their last sync merge from the rung 8 event log with no event lost, checked by a merge test in the repo; and every ideal marked met is demonstrable on the page."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing is stored" } }
+    },
+    {
+      "id": "coach",
+      "name": "Coach contribution versus engine",
+      "frame": "intelligence",
+      "metric": "What the page does on its own and what a model adds beyond the deterministic engine: the count of engine-detected states, whether model text is checked against engine numbers, what the request body carries, the route that answered, and the fallback when every route fails; read the coach module and its use of labs/assets/js/ai/llm.js, inspect the request body in the network panel, then run the page with the network off.",
+      "ladder": [
+        "Absent: the page says nothing on its own.",
+        "The page shows at least one tip of its own, even a fixed string identical for every visitor.",
+        "At least 5 deterministic messages chosen by rules from the visitor's data, such as the first miss citing Lally et al.'s single-miss finding.",
+        "The engine names the habit's state with its numbers: too little data, still rising (percent of asymptote), plateau reached (at or above 95% of the fitted asymptote), or flat (fitted c below 0.005 per day, or b below 1 rating point), with the thresholds stated in the engine config.",
+        "One model call through labs/assets/js/ai/llm.js, made only after the visitor opts in and batching every coach stage into one call per visitor action, turns the engine's summary JSON (a, b, c, t95, miss count, state) into a weekly reading; the reading call's exact payload is shown before sending and contains no dates, ratings, habit names or cue text; route-panel.js shows which route answered; when every route fails or the visitor declines, the engine's own template text appears.",
+        "Numeric grounding: every number in the model's text is matched against the engine JSON, and a sentence with an unmatched number is removed and the removal counted on screen.",
+        "Contribution shown: a toggle sets the engine-only reading beside the model reading, and the model's additions are marked as wording and suggestions, never as computed values.",
+        "The coach drafts an if-then plan for a cue the visitor types into the plan request (implementation intentions, Gollwitzer 1999, American Psychologist); the visitor marks the day it was adopted, and from that day the engine compares the ratings with the pre-plan curve's projection and reports the mean residual in rating points with a 90% interval, labelled as one person's observational before-and-after, not an effect of the plan; shown on the demo history, which marks a plan adopted at day 30.",
+        "State-faithful filter: each model sentence that names a state (too little data, rising, plateau, flat) is checked against the engine's state and removed when it disagrees, and when the engine marks an estimate below the data minimum, extrapolated, or 'the curve does not describe your ratings yet', every sentence with a day count or a forecast of reaching automaticity is removed; removals are counted on screen, and a script runs the filter on at least 10 committed low-data, extrapolated and poor-fit histories with planted model replies, with zero contradicting or forecasting sentences surviving.",
+        "Free-form questions ('what if I skip weekends?') are turned by the model into an engine simulation call; the engine runs it, and the answer quotes the engine's result with the call shown.",
+        "An evaluation set of at least 100 synthetic histories and 100 what-if questions, each with its expected engine call (function and arguments) and expected state, is committed in the repo; a script reports engine-call accuracy, a question counting as right when the emitted call has the expected function and arguments (at least 95%), and, per route, the share of model sentences containing a number absent from the engine JSON before filtering, both with 95% Clopper-Pearson intervals."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no lab code calls labs/assets/js/ai/llm.js for habits" } }
+    },
+    {
+      "id": "habit-science",
+      "name": "Habit science explained",
+      "frame": "explanation",
+      "metric": "What a visitor understands after five minutes: which concepts are explained (automaticity, the asymptotic curve, t95, the single-miss finding), whether every claim is tagged with its kind, and whether the explanation drives the live model; a rater reads the page and checks each concept and tag.",
+      "ladder": [
+        "Absent: no explanation.",
+        "At least one paragraph says what the lab is about, with or without figures or sources.",
+        "In at most 120 words the page defines automaticity (behaviour started by a cue without deliberation) and says how it is measured (self-report, the four SRBAI items).",
+        "The curve is explained: the formula y = a - b*exp(-c*t) is shown with each of a, b and c named in plain words, and t95 is defined.",
+        "The single-miss finding is quoted from Lally et al. (2010) and shown in one side-by-side example: the same 30-day history with one miss, scored as a reset-to-zero streak and as the page's automaticity estimate.",
+        "A guided tour of at least 4 steps drives the live views: it loads the demo, adds a miss, shows the cost and opens the cohort.",
+        "Every prose claim carries one of the same four tags used for numbers (your data, cited study, model assumption, illustrative), and each cited-study tag links to its source.",
+        "The page explains its own mechanism while it runs: after each refit a caption names the parameter with the largest relative change, its old and new value, and the check-in that caused it (its date and rating).",
+        "A myths section traces the 21-day figure to Maxwell Maltz's Psycho-Cybernetics (1960) and sets it against the measured 18 to 254 day range drawn on the live cohort view.",
+        "Predict first: before seeing any curve the visitor types a guess of days to automaticity, and the page later shows that guess against the cohort distribution with its percentile.",
+        "Every numeric claim in the prose has an inline control that runs it on the live model, the standard Bret Victor set out in Explorable Explanations (2011)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the hub blurb is one sentence with no figures" } }
+    },
+    {
+      "id": "reach",
+      "name": "Fit speed and reach",
+      "frame": "performance",
+      "metric": "Load, fit time and reach: transfer size (KB), time per refit (ms, logged by the page), main-thread task length during fits (ms), phone width, reduced motion, keyboard and screen-reader paths; measured with Chrome devtools, an axe-core run and a keyboard-only pass.",
+      "ladder": [
+        "Absent: nothing loads.",
+        "The page loads at 1440 px with zero console errors.",
+        "The load event fires in under 3 s with devtools network throttling set to a custom profile of 1.6 Mbps down, 750 kbps up and 150 ms latency, and total transfer is under 500 KB.",
+        "One refit of 84 days of ratings completes in under 50 ms on a desktop, timed with performance.now() and shown in a debug readout.",
+        "At 400 px width there is no horizontal scroll, and every check-in target is at least 44 by 44 px.",
+        "prefers-reduced-motion turns curve tweens into instant updates and the replay into steps.",
+        "Every control is reachable and operable by keyboard, and the calendar follows the ARIA grid pattern with arrow-key movement between days.",
+        "Screen-reader path: the curve has a text alternative stating the current estimate, t95 and interval; each check-in is announced through an aria-live region; axe-core reports 0 violations.",
+        "The fit and every simulation of 200 or more runs execute in a Web Worker, and the Performance panel shows no main-thread task longer than 50 ms during a full refit plus cohort simulation.",
+        "Offline: a service worker caches the page so it opens and records check-ins with the network off, and a web app manifest makes it installable.",
+        "Lighthouse mobile scores 100 on performance, accessibility and best practices, and a full fit of 365 days for 10 habits with the page's most expensive estimator finishes in under 2 s with devtools CPU throttling at 4x slowdown, logged on the page."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing loads to measure" } }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Tracker engine architecture",
+      "frame": "architecture",
+      "metric": "Code shape: module boundaries between engine, storage, views and coach, where constants and citations live, tests that run with node, and what can be added without touching the core; read the lab's files under labs/assets/js/ and run its tests.",
+      "ladder": [
+        "Absent: no code.",
+        "The lab's code exists in at least one script, even an inline one that mixes storage, fitting and DOM.",
+        "The lab has its own folder under labs/assets/js/, with named constants (66, 18, 254, 84) at the top of a file, not scattered through logic.",
+        "A pure engine module (fit, project, simulate) with no DOM or storage access, imported as an ES module by the page.",
+        "A storage adapter with one interface (load, save, export, import), so localStorage and IndexedDB swap without touching the engine.",
+        "Habit-science parameters and their citations live in a config module, read by the engine and the page text alike.",
+        "A node test script imports the engine module directly, with no browser globals and no DOM shim, runs at least 10 assertions against committed fixtures (fit, project and simulate on fixed inputs with expected outputs), and exits 1 on any mismatch.",
+        "Miss models are plug-ins with one signature, step(state, day, params), where day carries the performed and in-context flags, registered in one file; adding a third model changes no engine or view code.",
+        "Views subscribe to one state store; a new view is added by registering it, with no change to engine or storage.",
+        "Property tests of at least 100 random cases each: adding a miss never shortens t95 under any registered miss model, and t95 from the closed form ln(20b/a)/c equals the first crossing of 95% of the asymptote found by bisection on the engine's continuous-time projection of an all-performed schedule, within 0.01 day; they run from tools/site_check.mjs and fail it on any violation.",
+        "A node command fits a CSV export of check-ins and prints the same a, b, c, t95 and miss costs as the page to 3 decimals, using the same engine module with no browser code and the page's random seed, which the page shows and the command takes as an argument."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; there is no folder for habits under labs/assets/js/" } }
+    }
+  ],
+  "history": [ { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" } ]
+}

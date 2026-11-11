@@ -1,0 +1,311 @@
+{
+  "id": "memes",
+  "title": "AI Meme Lab",
+  "page": "memes.html",
+  "thesis": "The visitor types any topic or pastes a headline and watches one model call draft, score and cut a slate of original captions built on benign violation and incongruity resolution, sees exactly what the model added over a deterministic comedy engine checked against human ratings, steers the mechanism by hand, and leaves with a meme in an original procedural format that carries the receipt of why it won.",
+  "axes": [
+    {
+      "id": "joke-construction",
+      "name": "Joke construction",
+      "frame": "model",
+      "metric": "How a caption is built: count of templates, frames or operators in the comedy engine, whether each candidate carries a stated humor mechanism, and distinct winners per 100 seeded briefs on one topic. Rater reads ComedyEngine.js, runs ComedyEngine.build over seeds 0-99 on one topic in each tone from a Node or console loop, counts distinct winners and shared candidates, and checks the mechanism fields on each card.",
+      "ladder": [
+        "Nothing generates a caption.",
+        "Fixed captions: the page shows at least one top/bottom caption pair.",
+        "Template fill: the topic is substituted into a hand-written pool of at least 4 top/bottom templates, and the seed picks which templates fill the slate.",
+        "Tone is structural: each of the 5 tones draws from its own set of at least 6 caption frames (phrase patterns with slots), so two tones on the same topic and seed share no candidate over seeds 0-99.",
+        "Composed, not templated: no complete caption string sits in the code; captions are built by applying at least 3 named incongruity operators (for example literal reading of an idiom, scale inversion, role swap) to topic facts, and 100 seeded briefs on one topic yield at least 40 distinct winners.",
+        "Incongruity resolution: each card shows the expected reading, the alternative reading and the resolving cue, after the two-stage model of Suls (1972, in Goldstein and McGhee, eds., The Psychology of Humor, Academic Press), and these are the operator's own outputs: a Node test regenerates every candidate from its declared fields and gets the same text.",
+        "Benign violation: every candidate is generated from a named violation (the norm it breaks, taken from the topic lexicon) and a named benign cue (psychological distance, an alternative norm, or weak commitment to the norm), after McGraw and Warren (Psychological Science, 2010); removing the cue changes the caption, and a draft missing either is not proposed.",
+        "Mechanism coverage: candidates carry the six knowledge resources of the General Theory of Verbal Humor (Attardo and Raskin, HUMOR 1991): script opposition, logical mechanism, situation, target, narrative strategy, language, each set by the generator rather than annotated by hand; every slate spans at least 3 distinct logical mechanisms, and 100 seeded briefs on one topic yield at least 80 distinct winners.",
+        "Mechanism tested: on the rated caption set, captions with both a violation and a benign cue have a higher mean human rating than ablated versions missing either one, with at least 50 captions per condition and the difference, its 95% confidence interval and n shown on the page, computed on the page or by a script in the repository that the page links, from the shipped ratings file; a number typed into the page fails the rung.",
+        "Grounded in the brief: a pasted text of 50 to 500 words becomes the brief, and each candidate quotes the fragment it targets and the fact it violates.",
+        "In a blind pairwise test of at least 300 judgments by at least 20 judges, on at least 30 briefs each captioned by at least 5 people, the engine's winner is preferred over the median-rated human caption for the same brief at least 50% of the time; the page shows the protocol, the judge count, the raw judgments as a data file and a 95% interval."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "ComedyEngine._templates() returns 6 hand-written snowclones (NOBODY: / ONE DOES NOT SIMPLY / ... ALL THE THINGS among them) with the topic upper-cased into them, and build() picks 4 with mulberry32(seed + hashMotif(tone)) (rung 2). Fails rung 3: tone changes only template 5's closer from TONE_FLAVOR; a Node loop over seeds 0-99 on 'AGI timelines' gives 5 distinct winners per tone (4 in doomer), and deadpan and doomer share at least one candidate on 100 of 100 seeds. No candidate carries a mechanism."
+        }
+      }
+    },
+    {
+      "id": "rubric-validity",
+      "name": "Taste rubric validity",
+      "frame": "model",
+      "metric": "Whether the taste scores mean anything: criteria count, whether each is computed from the caption text and topic alone, verdict consistency and winner margin over seeds 0-19 of 'AGI timelines' in each of the 5 tones (100 slates), and Spearman correlation with mean human funniness ratings on a held-out set. Rater reads _score() and VERDICTS, runs the 100 slates from a Node or console loop, and recomputes any reported correlation from the shipped data.",
+      "ladder": [
+        "No candidate carries a score.",
+        "Every candidate displays at least one numeric score.",
+        "A deterministic rubric of at least 3 named criteria computed from caption features (word counts, topic match, a word list) shows per candidate as bars, and the highest total wins.",
+        "Consistent verdicts: on seeds 0-19 of the topic 'AGI timelines' in each of the 5 tones (100 slates), no cut candidate carries a keep verdict, the winner always has the maximum total, the winner's total strictly exceeds the runner-up's in at least 75 of the 100 slates, and the remaining ties break by a rule stated on the card.",
+        "No template leakage: every criterion is a function of the caption text, the topic and the topic's lexicon entry only, and no criterion regex or word list contains a phrase from the engine's own templates or frames, checked by a test that matches one against the other.",
+        "Theory criteria: violation strength and benign-ness are scored as two separate criteria computed from the caption text and the topic lexicon (not read from a template's annotation), combined by a stated formula after McGraw and Warren (Psychological Science, 2010), next to the craft criteria; editing a caption changes both values live.",
+        "Human anchor: the rubric's Spearman correlation with mean human funniness on a held-out half of the rated set (at least 200 captions) is displayed with n, computed on the page or by a script in the repository that the page links, from the shipped ratings file; a number typed into the page fails the rung.",
+        "Fitted weights: criterion weights are fit on the training half (ridge or ordinal regression), and the fitted rubric's held-out Spearman correlation exceeds the equal-weight rubric's by at least 0.1, both shown and both computed from the shipped ratings file on the page or by a linked script in the repository.",
+        "Calibrated: rubric totals map to the probability that a person prefers the caption over a random rival; a reliability diagram of at least 5 bins and an expected calibration error of at most 0.05 on the held-out half are both on the page, computed from the shipped ratings file.",
+        "Personal taste: after the visitor rates 10 captions, the page shows the visitor's refit weights beside the population weights and the leave-one-out Spearman correlation on those 10 ratings for both weight sets.",
+        "The rubric is scored on the quality-ranking task of the New Yorker caption-contest benchmark (Hessel et al., ACL 2023) with that benchmark's own metric and input setting, reproduced by a script in the repository, and its score matches or exceeds the best model result reported in that paper for the task; both numbers show on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "_score() computes 5 criteria (punchy and readable from word counts, onTopic by substring, notCringe from a 6-word list, funny from SCORE.surpriseA/B regexes that match the engine's own template phrases); SlateView draws them as bars and the max total wins (rung 2). Fails rung 3: VERDICTS gives 'keep' on total >= 22, not on rank. A Node loop over seeds 0-19 of 'AGI timelines' in all 5 tones (100 slates) gives a cut candidate marked 'keep' in 100 of 100 slates and a winner strictly above the runner-up in 0 of 100: 5 of the 6 templates total 24 in four tones (4 of 6 in doomer), and the tie is settled by sort order with no stated rule. The demo slate (doomer, seed 1234) shows cut C at 22 and cut D tied with winner A at 24, all three 'keep'."
+        }
+      }
+    },
+    {
+      "id": "meme-formats",
+      "name": "Original meme formats",
+      "frame": "graphics",
+      "metric": "Count of distinct original layouts (panel structures) and procedural backdrop motifs, how the motif is chosen, and whether captions stay inside the frame and clear of the focal element at every export ratio. Rater counts entries in MemeCanvas.MOTIFS and any format registry, renders 20 memes across 1:1, 16:9 and 9:16, runs the shipped render tests, and reads the selection code.",
+      "ladder": [
+        "No image is produced.",
+        "Caption text is drawn over a backdrop (a flat fill or a picture).",
+        "A top/bottom image-macro layout over a seeded procedural backdrop; captions shrink, then wrap, to stay inside the side margins.",
+        "At least 5 procedural motifs drawn from a strategy map, and the layout re-flows for 1:1, 16:9 and 9:16 exports.",
+        "The motif follows the joke: a stated mapping from mechanism or angle to motif chooses it (not a seeded random pick), and the page names the reason for the chosen motif.",
+        "At least 3 original multi-panel formats, including a two-panel contrast, an escalation of at least 3 panels and a labelled-object format, drawn procedurally with no borrowed template image, each laid out at 1:1, 16:9 and 9:16.",
+        "Composed motifs: every motif draws at least 3 motif-specific elements beyond the shared starfield and glow, and returns a focal bounding box; a test over 50 seeded renders finds 0 caption boxes overlapping it.",
+        "Timed punchline: at least one format exports as an animated loop (GIF or WebM, at most 4 s) whose punchline panel lands on a stated beat; reduced-motion visitors get the still.",
+        "At least 8 original formats and 10 motifs, every one selectable on the page and rendered by a test at all 3 ratios with no caption box outside the frame.",
+        "Format grammar: panels, arrows, labels and reaction marks compose layouts from the joke's structure; 100 seeded briefs produce at least 20 distinct layout signatures (panel count, panel rectangles rounded to 5% of the frame, label count), counted by a test, none hand-drawn in the code.",
+        "At least 12 original procedural formats cover the structures of the most-used template memes on Imgflip (comparison, escalation, labelled object, reaction, chart, dialogue) without one borrowed image, each with a written art spec; in a blind legibility test of at least 30 people, each format's setup and punchline element are named correctly by at least 80%, no format scores below the Imgflip template of the same structure in the same test, and the raw responses ship as a data file with the results on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "MemeCanvas.MOTIFS holds 5 motifs (event-horizon default, accretion-disk, lone-observer, collapsing-stack, signal-in-noise) over a seeded starfield and radial glow; one top/bottom layout with _fitLines shrink-then-wrap; the 1:1, 16:9 and 9:16 buttons resize and re-compose (rung 3). Fails rung 4: ComedyEngine.build() picks the motif as MOTIFS[floor(rnd()*5)]. No format registry exists. The demo render shows collapsing-stack as 7 flat bars."
+        }
+      }
+    },
+    {
+      "id": "meme-stage",
+      "name": "Meme stage and house style",
+      "frame": "style",
+      "metric": "Whether the page gives the meme the stage and the design language holds: share of the first 1440x900 viewport taken by the meme versus hero copy, raw literals in memes.css, caption type tokens, amber discipline, motion tokens. Rater takes 1440x900 screenshots at load and after a run, counts raw color and duration literals in memes.css, and reads the CANVAS constants.",
+      "ladder": [
+        "Default browser styling.",
+        "The site palette (void ground, amber, blue) is applied to the page.",
+        "On-brand tokens: every color and font in memes.css comes from a tokens.css variable except at most 5 raw color literals in the file; IBM Plex Mono labels, blue for structure, amber on the primary action and the winner card.",
+        "The meme is the stage: at 1440x900 on first load a meme drawn on load by the lab's own engine and canvas (not a static image file) is visible without scrolling, and the hero copy takes at most 40% of the first viewport height.",
+        "Caption type system: face, weight, stroke ratio, line-height and band insets are named tokens shared by every format, and 20 random renders show no wrapped caption whose last line holds a single word.",
+        "One motion language: drafting, scoring, cutting and committing each animate, every duration and easing in memes.css is a tokens.css variable (no literal ms, s or cubic-bezier values), and under reduced motion each state appears at once.",
+        "Score bars carry their number and 0-5 ticks, and at one scroll position of a 1440x900 viewport the whole meme and every slate card are visible with no inner scrollbar.",
+        "House style: a 3x3 contact sheet of 9 random exports, generated on the page, shows the same frame, credit lockup and caption treatment on every tile, and the caption face is not Impact.",
+        "Art direction is specified: each motif has a written spec (composition, focal point, amber share), where an amber pixel is HSL hue 25-50 degrees, saturation at least 0.5, lightness 0.25-0.85; a test over 50 renders finds every render at most 15% amber.",
+        "Signature: a format of the lab's own invention is the hub card thumbnail and the page's og:image, both generated by the lab's own renderer (a script in the repository).",
+        "The lab page wins an Awwwards Site of the Day or an FWA of the Day, linked from the page, with the lab's own procedural format as its hub thumbnail and og:image."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "memes.css takes every font and all but 4 colors from tokens.css (raw literals: #1a1206 twice on the amber buttons, two rgba() glows in .void-bg); Plex Mono labels, blue horizon structure, amber on the generate and PNG buttons and on .cand-card.winner (rung 2). Fails rung 3: the 1440 audit screenshot shows the hero copy filling the first ~690 px and the output panel as an empty resting state with three dots; no meme shows until the visitor runs one."
+        }
+      }
+    },
+    {
+      "id": "slate-play",
+      "name": "Slate play",
+      "frame": "interaction",
+      "metric": "Count of distinct actions on the slate and the meme (brief inputs, live caption edit, promote, re-score, steer the mechanism, ablate, rate, blind compare, fragment steering, duel), each checked by doing it on the page with mouse, touch and keyboard.",
+      "ladder": [
+        "Nothing to touch.",
+        "A generate button produces a meme.",
+        "Free topic, tone and seed inputs and a generate button; the slate and the meme appear.",
+        "Live edit: the winning caption is editable and the canvas re-composites on every keystroke; backdrop reroll, upload and ratio switch act on the current meme without re-running the engine.",
+        "Promote and re-score: any cut candidate moves to the canvas by click, tap or Enter, and an edited caption is re-scored by the rubric as the visitor types.",
+        "Steer the joke: chips or sliders set at least two of target, mechanism and violation strength; the slate regenerates under that constraint and each card shows its total's change from the previous slate's winner.",
+        "Ablation: two toggles, benign cue off and resolution off, each rewrite the selected candidate and show its rubric total before and after.",
+        "Rate and refit: the visitor rates candidates 1 to 5 and the rubric's weights update live in the browser.",
+        "Blind round: the visitor plays 10 blind pairs of rubric pick against runner-up from 10 seeded slates (engine against model pairs when a model route answered) and sees their agreement rate with the rubric.",
+        "Fragment steering: a pasted text of 50 to 500 words becomes the brief, and selecting a fragment of it regenerates the slate aimed at that fragment, each new card quoting it.",
+        "Caption duel: through a shareable link with no server, the visitor and at least one other person each write their own caption for the same brief, the captions show unsigned beside the engine's winner, everyone votes blind, and a result card shows the vote and which caption the rubric predicted would win: the prompt-write-vote-reveal loop of Jackbox Games' Quiplash (2015), with the engine as a contestant and the rubric as a forecaster."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Topic text plus 5 chips, 5 tones, seed with dice, 3 image sources, generate and stop; #cap-top and #cap-bottom re-composite on every input event; Art, the ratio buttons and upload act on the current meme (rung 3). Fails rung 4: SlateView cards are plain divs with no click or key handler, and edited text is never re-scored."
+        }
+      }
+    },
+    {
+      "id": "export-receipt",
+      "name": "Export and receipt",
+      "frame": "data",
+      "metric": "What the visitor leaves with: file formats and ratios, clipboard and share-sheet paths, state in the URL, and provenance embedded in the file. Rater exports each format, reads the PNG's text chunks or C2PA manifest, and reloads a share URL in a fresh browser profile.",
+      "ladder": [
+        "No meme image is produced, so nothing can be saved.",
+        "A meme image renders on the page as a canvas or image that the browser's own Save image or a screenshot can capture.",
+        "PNG download of the composited meme with one click.",
+        "PNG at 3 ratios (1:1, 16:9, 9:16) and one-click copy to clipboard; a remote backdrop without CORS is detected after compositing and the page says why saving is blocked.",
+        "Shareable state: topic, tone, seed, format, ratio and caption encode in the URL, and loading it in a fresh profile on the same machine gives a pixel-identical PNG export.",
+        "Provenance in the file: the PNG carries tEXt chunks with caption, seed, rubric version, engine or model id and route, and dropping the PNG on the page reads them back.",
+        "Slate export: candidates, scores, verdicts, mechanism tags and reasoning export as JSON that re-imports to the identical view.",
+        "Alt text ships with the meme: Copy puts image/png and a generated text/plain alt text (backdrop and caption) on the clipboard together, and Download saves a .txt with the same alt text beside the PNG.",
+        "Phone share: the native share sheet receives the PNG file through navigator.share with files, with download as the fallback where file sharing is unsupported.",
+        "Batch: a contact sheet of the whole slate rendered as memes exports as one image, each tile labelled with candidate id and seed, for A/B posting.",
+        "The receipt travels: the PNG carries a C2PA manifest (Content Credentials) recording the generator, the engine or model id, the seed and each edit action, which the open-source c2patool reads back (a self-signed certificate is acceptable), and a share link alone, with no server, reopens the meme with its slate, scores and reasoning replayed."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Exporter.download() saves l212-meme-<seed>.png at the chosen 1:1, 16:9 or 9:16 size; Exporter.copy() writes a PNG ClipboardItem (button hidden without ClipboardItem); MemeLab._probeTaint() checks a Pollinations backdrop after composite and BackgroundSource shows MSG.taint (rung 3). Fails rung 4: the only URL parameter read is ?demo."
+        }
+      }
+    },
+    {
+      "id": "comedy-corpus",
+      "name": "Comedy corpus provenance",
+      "frame": "data",
+      "metric": "Size and origin of the comedic material: count of templates, frames and topic entries in code, share with a stated source, date and license, reuse of known meme catchphrases, and the size and rater count of any human-rated caption set. Rater counts entries in the data modules, reads their sources, and opens the shipped data files.",
+      "ladder": [
+        "No comedic content ships.",
+        "At least one caption or caption template ships in the page or its scripts.",
+        "A hand-written pool of at least 4 caption templates and a hand-picked list of at least 5 suggestion topics.",
+        "Original material: at least 40 templates or caption frames (phrase patterns with slots), none reusing a catchphrase from a test-checked exclusion list of at least 30 known meme catchphrases.",
+        "Topic lexicon: at least 100 AI-engineering topics with at least 3 facts or pains each, every entry dated and sourced (documentation, paper or public postmortem), used by the engine.",
+        "Live topics: suggested topics come from a dated public feed fetched in the browser, with the fetch time shown and the hand list as the offline fallback.",
+        "Rated set: at least 200 captions, each rated by at least 5 people other than the lab's author on a stated scale, ship as a data file with one row per rating, plus rater count, inter-rater agreement (Krippendorff's alpha) and collection date.",
+        "Origin on every caption: the page labels each candidate as engine (with the ids, authors and dates of the frames and lexicon entries it used), model (with model id) or visitor edit.",
+        "Datasheet: the rated set and lexicon ship with a datasheet covering motivation, composition, collection process, preprocessing, uses, distribution and maintenance, the format of Datasheets for Datasets (Gebru et al., Communications of the ACM 2021).",
+        "Growing set: visitors' opt-in ratings export as a CSV with a submission path linked from the page (a GitHub issue template), and the rated set grows by versioned releases with counts and dates in a changelog.",
+        "A published rated meme-caption set of at least 15,000 captions with at least 5 ratings each, a license, a datasheet, a fixed train/dev/test split, a stated evaluation metric and a baseline score reproduced by a script in the repository: the scale and documentation of Humicroedit (Hossain, Krumm and Gamon, NAACL 2019)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "ComedyEngine._templates() holds 6 hand-written templates and memes.html 5 hard-coded topic chips (rung 2); constants.js adds 5 TONE_FLAVOR rows and a 6-word CRINGE list. Fails rung 3: 6 templates, not 40, and 3 of them reuse catchphrases of known memes ('ONE DOES NOT SIMPLY', 'NOBODY:', '... ALL THE THINGS'); no source, date or license anywhere."
+        }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "What the model adds over the deterministic comedy engine: which routes reach a model from the public site, whether its reasoning streams, how the reply is validated, and the model winner's measured win rate over the engine winner. Rater opens the page on luisblanco.dev and on localhost with Ollama running, reads the route shown, reads MemeLab.generate() and ai/provider.js, and recomputes any reported comparison from the shipped data.",
+      "ladder": [
+        "Neither a model nor an engine produces captions.",
+        "A deterministic engine fills the slate and its result is replayed as typed 'reasoning'.",
+        "One model call through a local Ollama route asks for angles, slate, scores and winner as JSON, streams its reasoning into the reasoning panel, and falls back to the engine when the JSON does not parse.",
+        "Public route: the call goes through labs/assets/js/ai/llm.js, so a visitor on luisblanco.dev reaches a model with no key in one call; route-panel.js names the route that answered and the 45 s window, and the engine is the stated offline fallback.",
+        "Field-level validation: the reply is checked against a schema (5 integer scores 0 to 5, winner id among the candidates, at most 8 words per line, motif from the list); each violation is listed on the page and repaired per field instead of discarding the reply, and a ?fixture=bad parameter replays at least 5 malformed replies (wrong score type, unknown winner id, line over 8 words, unknown motif, truncated JSON) so each violation and its repair, or the stated engine fallback for truncated JSON, can be seen on the page.",
+        "Two slates side by side: for the same brief the engine slate and the model slate render together under the same rubric, and the page states which winner the rubric ranks first.",
+        "Self-score audit: the model's self-scores and the rubric's scores for the same captions show together, with the per-criterion gap in points.",
+        "Measured contribution: on a fixed set of at least 30 briefs, a blind pairwise test of model winner against engine winner reports the model's win rate and judge count in a table on the page, computed on the page or by a script in the repository that the page links, from a shipped file of raw judgments; a number typed into the page fails the rung.",
+        "Calibrated self-scoring: the Spearman correlation of the model's self-scores with the rated set's human ratings is reported next to the rubric's, both computed from shipped data files on the page or by a linked script in the repository, and the page ranks by whichever correlates higher.",
+        "Critique in one call: the model drafts, scores and rewrites its winner inside its single call, and the rewrite's gain over the first draft is reported on the rubric and in a blind test of at least 100 judgments, computed from a shipped file of raw judgments.",
+        "Earned calls: the model is called only on briefs where it measurably beats the engine (a stated gate), and both win rates reproduce from a script in the repository."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "On localhost MemeLab.generate() sends one JSON-schema prompt to Ollama through ai/provider.js, and MemeParser.extract() falls back to ComedyEngine.build() when the JSON does not parse. But _ollama() sends no think flag and the configured default llama3.1:8b returns no message.thinking, so onReasoning never fires and generate() hides the reasoning panel (reasoningWrap.hidden = !gotReasoning && mode !== 'echo'): fails rung 2. On luisblanco.dev provider.js probes Ollama only on localhost and worker.base is '', so detect() returns 'echo' and ComedyEngine.script() is replayed as typed reasoning (rung 1). llm.js and route-panel.js are not loaded."
+        }
+      }
+    },
+    {
+      "id": "punch-down-guard",
+      "name": "Punch-down guard",
+      "frame": "intelligence",
+      "metric": "Share of a red-team brief set (slurs, protected groups, recent tragedies, private individuals, sexual content, prompt injection) on which no harmful caption reaches the canvas, and the false-block rate on harmless briefs. Rater runs the shipped red-team sets on the page, types a sample of them by hand, and reads the guard code.",
+      "ladder": [
+        "No guard: nothing in the prompt or the code addresses harmful targets.",
+        "Prompt rule: the model is asked to zero a score for hateful, NSFW or punching-down lines.",
+        "A harm word list of at least 50 terms (slurs, sexual terms) is checked against topic and captions and lowers the matching candidate's score.",
+        "Hard gate: a topic or an engine caption that hits the harm list is refused before drafting or rendering, the reason is shown, and no flagged engine caption reaches the canvas or the export.",
+        "Target check: a stated classifier (rules over the topic lexicon, or a model call) labels each candidate's target (self, the visitor's trade, a technology, an institution, a protected group, a private person); it labels at least 90% of a shipped set of 60 hand-labelled captions correctly, measured by a test in the repository, protected groups and private persons are refused as targets, and the target shows on each card.",
+        "Red-team set: at least 100 adversarial briefs (obfuscated slurs, recent tragedies, named private people, sexual content) and 100 harmless briefs ship with the lab as data files, and the page runs the gate on both shipped sets in the browser and reports pass rate and false-block rate from that run.",
+        "Model replies pass the same deterministic gate; a failing reply is replaced by the engine slate and the reason is logged on the page.",
+        "Benign condition enforced: candidates targeting an event on a dated tragedy list in the repository (within the list's stated window) or a named living person outside public office are cut by that stated rule, tied to the benign condition of McGraw and Warren (2010), with the cut reason on the card.",
+        "Measured: pass rate at least 99% and false blocks at most 5% on the shipped sets, computed by the in-page run and reproduced by a test in the repository.",
+        "Injection-proof brief: the red-team set includes at least 30 prompt-injection briefs (instructions inside the topic); the model route's replies to them, stored with model id and date in a shipped results file, ignore the injected instruction in at least 97% of cases by a stated check, and the page shows the rate computed from that file.",
+        "The gate is also run on the HateCheck functional test suite (Röttger et al., ACL 2021) and matches or exceeds the best model reported in that paper on every functionality, and the rules, red-team sets, HateCheck results and every failure case are published on the page as a model card (Mitchell et al., FAT* 2019)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "_buildMessages() tells the model that notCringe MUST be 0 for any hateful, NSFW or punching-down line (rung 1). Fails rung 2: no code checks the reply and the topic is never screened; the only list is CRINGE (lol, epic, rockstar, ninja, guru, synergy), 6 cringe words rather than 50 harm terms, and it only lowers notCringe to 1, so a flagged line can still win and render."
+        }
+      }
+    },
+    {
+      "id": "humor-explanation",
+      "name": "Humor explanation",
+      "frame": "explanation",
+      "metric": "Count of explanation elements present (phase narration, route honesty, criterion definitions, theory text, origin tags, live phase notes, margin decomposition, self-test) and share of on-page numbers carrying an origin tag; rater reads the copy, focuses each score, and checks route and research claims against the code and cited sources.",
+      "ladder": [
+        "No explanation.",
+        "A title and one sentence of description.",
+        "The lede describes the four-phase pipeline (angles, slate, critique, commit) and the reasoning panel narrates every phase for the shown result.",
+        "Claims match the route: the page names the engine or model that produced the shown slate and makes no claim about a model the visitor's session cannot reach.",
+        "The rubric explains itself: each criterion shows its definition and formula (or prompt text) on hover, tap or focus, with the inputs that produced the shown caption's score.",
+        "Theory on the page: benign violation (McGraw and Warren, Psychological Science 2010) and incongruity resolution (Suls 1972, in Goldstein and McGhee, eds., The Psychology of Humor, Academic Press) are each explained in at most 200 words, and every candidate card names its violation, benign cue, incongruity and resolution, each linked to the paragraph that defines it.",
+        "Every number tagged by origin ([heuristic rubric], [model self-score], [fit to human ratings]) and every statement about humor research names its source.",
+        "Live mechanism: as each phase runs, the region it fills highlights and a one-line note states what that phase decided (for example 'B cut: violation not benign').",
+        "Why it won: the winner's margin over the runner-up is decomposed by criterion in a chart, and the same breakdown appears for any candidate the visitor selects.",
+        "The visitor leaves with an insight: a closing self-test of 5 caption pairs asks which wins, scores the answers, and explains each miss in theory terms.",
+        "An explorable explanation of why jokes work, in the form of Nicky Case's The Evolution of Trust (2017): at least 5 sections, every claim beside a control that changes an example caption and shows its score change."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The lede in memes.html describes angles, slate, critique and commit, and ComedyEngine.script() narrates all four phases in the reasoning panel (demo shot) (rung 2). Fails rung 3: the vision note says 'Nemotron writes the words', but AI_CONFIG.worker.base is '' so no visitor on luisblanco.dev reaches Nemotron; the meta description and the resting-state note repeat the Nemotron relay. No humor theory anywhere."
+        }
+      }
+    },
+    {
+      "id": "load-access",
+      "name": "Load and access",
+      "frame": "performance",
+      "metric": "Phone width, reduced motion, keyboard and screen-reader reach of the slate, bytes transferred before interaction and composite time. Rater loads the page at 1440 and 400 px, toggles reduced motion, tabs through every control with a screen reader on, reads the devtools Network panel with cache disabled, and reads the ?debug and ?tier=low readouts.",
+      "ladder": [
+        "The page does not load.",
+        "Loads and runs at 1440 px.",
+        "Works at 1440 and 400 px with no horizontal scroll; the bench stacks to one column on narrow screens.",
+        "Reduced motion honored (CSS animations cut, the reasoning type-out skipped), the canvas carries a text alternative synced to the caption, and run status is announced through an aria-live region.",
+        "Keyboard and screen-reader slate: every control is reachable by Tab with a visible focus ring, each candidate card is focusable and announces its scores as text ('punchy 4 of 5'), and a winner change is announced.",
+        "Load budget: under 300 KB transferred before interaction (devtools Network, cache disabled), and a performance.mark('meme-painted') fires within 1.5 s under Lighthouse mobile throttling.",
+        "Composite cost: re-compositing on each caption keystroke takes at most 8 ms at 1080x1080 and 16 ms at 1920x1080 with 4x CPU throttling in Chrome devtools, shown in a ?debug readout.",
+        "Tiers: on devices reporting under 4 GB memory or under 4 cores, animated formats drop to stills and the starfield count halves, with the tier shown on the page; a ?tier=low parameter forces the low tier for checking.",
+        "WCAG 2.2 AA: an axe-core run on the resting, running and result states reports 0 violations, and a test measures at least 4.5:1 contrast between every canvas caption box and the backdrop under it on every format and motif.",
+        "Offline: a service worker caches page, engine and fonts so the lab runs with the network off after the first visit, and the page says so.",
+        "A protocol in the repository records a screen-reader user completing brief, slate review, caption edit and export with NVDA and with VoiceOver, with date and pass or fail per step, all passing."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "At 400 px the bench stacks (memes.css media query at 860 px) with no horizontal scroll (iframe shot at 400 px); the reduced-motion block cuts animations and provider.js _echo() skips the type-out when prefers-reduced-motion matches; MemeCanvas.compose() syncs the canvas aria-label to the caption; #reasoning-status is aria-live (rung 3). Fails rung 4: candidate cards are not focusable and scores exist only as bar widths and title attributes."
+        }
+      }
+    },
+    {
+      "id": "code-architecture",
+      "name": "Code architecture",
+      "frame": "architecture",
+      "metric": "Module shape and extension cost: engine separated from DOM, config separated from logic, use of the shared model route, comedy content as data, tests. Rater reads labs/assets/js/memes/, counts files touched to add one template, one motif and one format, and runs any tests.",
+      "ladder": [
+        "No code ships for the lab.",
+        "Code ships in at least one script that runs the lab.",
+        "ES modules with a DOM-free comedy engine module.",
+        "Config separated: selectors, tuning, labels, prompt text and palette live in one constants module, and motifs, image sources and verdicts dispatch through strategy maps, so a new motif is one table entry.",
+        "Shared route: the lab reaches models only through labs/assets/js/ai/llm.js and shows route-panel.js; no lab-specific provider code remains.",
+        "Content is data: templates, frames, operators, angle tags and word lists live in a versioned data module with a schema check, and adding a template or frame touches no engine code.",
+        "Engine tests: a Node test with no browser runs the engine on at least 100 seeded briefs and checks determinism, winner equals maximum total, verdict matches rank, at most 8 words per line and no listed harm term; it runs in the site checks.",
+        "Versioned rubric: the rubric is a module with a version id stamped on every slate and export, and a snapshot test fails when scores change without a version bump.",
+        "Format plug-ins: a visual format is one module exporting id, panels, layout(w, h) and draw, registered in one list, demonstrated by at least 2 formats added that way.",
+        "Evaluation harness: one command reproduces every reported metric (rubric correlation, model win rate, guard pass rate) from data in the repository.",
+        "The comedy engine is a documented library with typed JSDoc, at least 90% line coverage and a README, imported unchanged by at least one other lab."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "12 ES modules in labs/assets/js/memes/; ComedyEngine and MemeParser are DOM-free (rung 2). Fails rung 3: one new motif touches constants.js MOTIFS, MemeCanvas.MOTIFS and the motif list typed into the prompt in MemeLab._buildMessages(); the prompt text lives in MemeLab.js, and the caption stroke ratio 0.16 and line-height 1.04 are literals in MemeCanvas._drawBand, not in constants.js. Also: MemeLab imports AIProvider from ../ai/provider.js, not llm.js; templates sit inside ComedyEngine._templates(); no tests."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}
