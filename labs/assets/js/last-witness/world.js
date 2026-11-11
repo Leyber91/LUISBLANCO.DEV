@@ -70,7 +70,10 @@ export function buildWorld(plan, message) {
   const msg = (message || '').trim() || LAB.defaultMessage;
   const seed = hashStr([plan.method, plan.D.toPrecision(6), msg.toLowerCase()].join('|'));
   const R = rng(seed);
-  const T = LAB.outsideYears;
+  // Home's elapsed years: the sum of the crossing's integrated legs
+  // (physics.js), never a constant. Every era below is laid out inside it.
+  const T = plan.outsideS / YEAR;
+  if (!(T > 0)) throw new Error('buildWorld: the crossing gives no outside time');
   const maps = timeMaps(plan);
   const beacon = beaconAtHome(plan, { heartHz: LAB.heartHz, carrierHz: LAB.carrierHz });
   const flight = plan.method === 'flight';
@@ -88,16 +91,21 @@ export function buildWorld(plan, message) {
   const carrierMinHz = beacon.carrierMinHz;
   const halfWaveM = beacon.halfWaveM;
 
-  /* ---- the eras [ILLUSTRATIVE: seeded] ---- */
-  const y1 = Math.round(between(R, 140, 320));
-  const y2 = Math.round(between(R, 1400, 2500));
-  const y3 = Math.round(y2 + between(R, 1500, 2600));
-  const y4 = Math.round(Math.min(8200, y3 + between(R, 1400, 2600)));
+  /* ---- the eras [ILLUSTRATIVE: seeded] ----
+     The Watch lasts a few human lifetimes, in absolute years, so that by
+     its end no one alive has met you. Every later boundary is a seeded
+     fraction of the computed span T (at T = 10,000 these are the same
+     draws as years 1,400 to 2,500, and so on). */
+  const y1Draw = Math.round(between(R, 140, 320));
+  const y2 = Math.round(T * between(R, 0.14, 0.25));
+  const y1 = Math.min(y1Draw, y2 - 1);
+  const y3 = Math.round(y2 + T * between(R, 0.15, 0.26));
+  const y4 = Math.round(Math.min(0.82 * T, y3 + T * between(R, 0.14, 0.26)));
   const reading = R() < (flight ? 0.35 : 0.55) ? 'reverence' : 'dread';
   const fw = { ...FATE_WEIGHTS[plan.method] };
   if (reading === 'dread') { fw.hush *= 1.6; fw.thinning *= 1.2; } else { fw.going *= 1.5; fw.slowing *= 1.4; }
   const fate = weighted(R, fw);
-  let y5 = Math.round(Math.min(9700, y4 + between(R, 300, Math.max(400, 9700 - y4))));
+  let y5 = Math.round(Math.min(0.97 * T, y4 + between(R, 0.03 * T, Math.max(0.04 * T, 0.97 * T - y4))));
   const pulseWord = word(R);
   const lastName = pick(R, LAST_NAMES);
 
@@ -124,7 +132,7 @@ export function buildWorld(plan, message) {
     fateD.ships = Math.round(between(R, 3, 30));
     fateD.speedC = Math.round(between(R, 0.004, 0.02) * 1000) / 1000;
     fateD.distLy = 0.6;                        // the hole sits 0.6 light-years out [ILLUSTRATIVE]
-    fateD.departYear = y4 + Math.round(between(R, 20, 200));
+    fateD.departYear = y4 + Math.round(T * between(R, 0.002, 0.02));
     fateD.arriveYear = Math.round(fateD.departYear + fateD.distLy / fateD.speedC);
     fateD.lastYear = fateD.arriveYear + Math.round(fateD.distLy) + Math.round(between(R, 3, 40));
   }
@@ -180,10 +188,13 @@ export function buildWorld(plan, message) {
       : fate === 'going' ? { lat: between(R, -6, 6), lon: between(R, -150, 150) } : null,
   };
 
+  // the moment home heard your beats furthest apart (for the flight, near the turn)
+  const peak = beacon.samples.reduce((a, s) => (s.factor > a.factor ? s : a), beacon.samples[0]);
+
   return {
-    seed, method: plan.method, years: T, msg,
+    seed, method: plan.method, years: T, storyYears: LAB.storyYears, msg,
     plan: {
-      D: plan.D, shipS: plan.shipS, factorMax,
+      D: plan.D, shipS: plan.shipS, stayS: plan.stayS, outsideS: plan.outsideS, factorMax,
       mSun: plan.mSun, delta: plan.delta, aG: plan.aG,
       periodFarS: plan.periodFarS, gammaMax: plan.gammaMax, xMaxLy: plan.xMaxLy, tauQ: plan.tauQ,
     },
@@ -191,6 +202,7 @@ export function buildWorld(plan, message) {
       beatS, beatsSent: beacon.beatsSent, beatMaxS: beatS * factorMax,
       carrierHz: LAB.carrierHz, carrierMinHz, halfWaveM,
       profile: flight ? 'slowing-then-quickening' : 'steady',
+      peakYear: peak.rxYears,
       lastBurstYears: flight ? (T - maps.rx(2 * plan.tauQ) / YEAR) : 0,
       samples: beacon.samples,
     },
@@ -204,6 +216,20 @@ export function buildWorld(plan, message) {
     lastBeatDays: flight ? 0 : Math.round(between(R, 4, 19)),
     shipLog,
   };
+}
+
+/* Home's computed years against the figure the story was written for,
+   said plainly. Returns { years, story, diff, inSpan, text }. */
+export function storyCompare(years) {
+  const story = LAB.storyYears, [lo, hi] = LAB.spanYears;
+  const diff = (years - story) / story;
+  const inSpan = years >= lo && years <= hi;
+  const got = years >= 2 ? `${fmtInt(years)} years` : fmtDur(years * YEAR);
+  let text;
+  if (Math.round(years) === story) text = `This crossing gives ${got}, the figure the story was written for.`;
+  else if (Math.abs(diff) < 0.1) text = `This crossing gives ${got}, ${(Math.abs(diff) * 100).toFixed(2)} % ${diff > 0 ? 'more' : 'less'} than the ${fmtInt(story)} the story was written for.`;
+  else text = `This crossing gives ${got}, not the ${fmtInt(story)} the story was written for (${diff > 0 ? `${fmtSci(years / story)} times as long` : `${fmtSci(years / story)} of it`}).`;
+  return { years, story, diff, inSpan, text };
 }
 
 /* Short human names for numbers and durations. */

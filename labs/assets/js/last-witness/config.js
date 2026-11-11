@@ -7,7 +7,13 @@ export const LAB = {
   id: 'last-witness',
   title: 'Time-Slip: The Last Witness',
   mindName: 'TALLY',
-  outsideYears: 10000,          // the mission returns when home's clock has advanced this far
+  // The figure the story was written for. It is never used as a result:
+  // home's elapsed time is computed from the crossing (physics.js), and
+  // the page compares the two out loud when they differ.
+  storyYears: 10000,
+  // The span of outside time the generated world is written for [ILLUSTRATIVE]:
+  // below it no era has time to happen; above it the deep-time facts stop holding.
+  spanYears: [2500, 100000],
   heartHz: 64 / 60,             // the pilot's resting heart, carried in the beacon [ILLUSTRATIVE]
   carrierHz: 8.42e9,            // deep-space X-band downlink, inside the 8400-8450 MHz allocation
   bitRate: 1000,                // beacon text channel, bit/s [ILLUSTRATIVE]
@@ -43,6 +49,7 @@ export const MODES = {
     params: {
       logM: { label: 'mass', min: 1, max: 10.5, step: 0.001, value: Math.log10(4.0e6), unit: 'Msun' },
       logDelta: { label: 'spin', min: -26, max: 0, step: 0.1, value: -20, unit: '1 - a*' },
+      logStay: { label: 'stay', min: 2, max: 9.19, step: 0.01, value: 4.67, unit: 'log10 s, your clock' },
     },
   },
   hover: {
@@ -51,6 +58,7 @@ export const MODES = {
     params: {
       logM: { label: 'mass', min: 1, max: 10.5, step: 0.001, value: Math.log10(6.5e9), unit: 'Msun' },
       logF: { label: 'height', min: -6, max: 1, step: 0.05, value: -3, unit: 'r/rs - 1' },
+      logStay: { label: 'stay', min: 2, max: 9.19, step: 0.01, value: 4.67, unit: 'log10 s, your clock' },
     },
   },
   flight: {
@@ -58,6 +66,7 @@ export const MODES = {
     blurb: 'Accelerate away, turn, and come back. Nothing to fall into; everything to burn.',
     params: {
       aG: { label: 'thrust', min: 0.5, max: 3, step: 0.05, value: 1, unit: 'g' },
+      shipY: { label: 'time aboard', min: 1, max: 50, step: 0.1, value: 33.1, unit: 'years, your clock' },
     },
   },
 };
@@ -136,6 +145,17 @@ export const SOURCES = [
 
 /* Disclosure thresholds on trust (0..1). */
 export const DISCLOSE = [0, 0.3, 0.45, 0.6, 0.78];
+
+/* What the visitor must ASK to open each tier above surface. Tier i opens
+   only when trust reaches DISCLOSE[i] AND the visitor has asked a question
+   on gate i's topics, and on every gate below it. Statements build trust;
+   they never open a tier. The intents are mind.js classifier names. */
+export const ASK_GATES = [
+  { tier: 1, about: 'TALLY', intents: ['who', 'about_mind'] },
+  { tier: 2, about: 'the pulse', intents: ['pulse', 'beats', 'called', 'told', 'happened', 'message'] },
+  { tier: 3, about: 'the people', intents: ['people', 'feature', 'told'] },
+  { tier: 4, about: 'why TALLY is still awake', intents: ['why_awake', 'secret', 'answer'] },
+];
 
 /* Fate weights by crossing. The pulse's shape changes how it was read. */
 export const FATE_WEIGHTS = {

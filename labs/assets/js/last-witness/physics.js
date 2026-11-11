@@ -1,8 +1,10 @@
 /* ============================================================
    last-witness/physics.js — the clocks. Pure functions, no DOM.
 
-   Three ways to let ten thousand years pass outside while little
-   passes for you, each with its real formula and its real cost:
+   Three ways to let a long time pass outside while little passes
+   for you, each with its real formula and its real cost. The visitor
+   chooses the crossing and how long to stay; home's elapsed time is
+   the RESULT, summed over the integrated legs, never an input:
 
      hover   a static observer at radius r outside a Schwarzschild
              hole: dtau/dt = sqrt(1 - rs/r). Proper acceleration
@@ -139,7 +141,7 @@ export const timeM = (mSun) => massSI(mSun) / (C * C * C); // GM/c^3, seconds
    Schwarzschild; an order-one estimate for an orbit near a spinning hole. */
 export const tidal = (mSun, rMetres, L) => 2 * massSI(mSun) * L / Math.pow(rMetres, 3);
 
-/* ---------- the journey: four legs, each integrated ----------
+/* ---------- the journey: five legs, each integrated ----------
 
    depart    leave the station, holding its orbit far out at r0; the ship
              starts at the hole, so there is no transit from home to count
@@ -147,10 +149,13 @@ export const tidal = (mSun, rMetres, L) => 2 * massSI(mSun) * L / Math.pow(rMetr
    fall      spiral in through circular orbits (or lower the station) to
              the working radius; r(s) = rd + (r0 - rd) 10^(-K s), so the
              integration is dense where the clock rate climbs fastest
-   dwell     the orbit or the hover itself; its proper time is solved so
-             that the four legs total exactly the outside target
+   dwell     the orbit or the hover itself, for the stay the visitor
+             chose (ship seconds). Its radius is fixed, so its rate is
+             one number and its home time is stay x rate, exactly
    climb     the fall in reverse
    return    back to the station at r0
+   Home's elapsed time is the sum of the five legs' home times. Nothing
+   is solved for a target: the outside time is what the crossing gives.
    Each leg integrates dt/dtau along its path with classical RK4. The
    rate depends on tau only through r(tau), so each RK4 step reduces to
    Simpson's rule; N steps per leg. Energy E is the conserved energy per
@@ -173,15 +178,15 @@ export function rk4Leg(rate, shipS, n = LEG_N) {
   return { homeS: t, tab, h };
 }
 
-export function buildLegs({ method, rd, rateAt, energyAt, outsideS, r0, approachShipS = 300, fallShipS = 2400 }) {
+export function buildLegs({ method, rd, rateAt, energyAt, stayS, r0, approachShipS = 300, fallShipS = 2400, n = LEG_N }) {
   const path = (sFrac) => rd + (r0 - rd) * Math.pow(10, -LEG_K * sFrac);
   const approach = rk4Leg(() => rateAt(r0), approachShipS, 200);
-  const fall = rk4Leg((tau) => rateAt(path(tau / fallShipS)), fallShipS);
+  const fall = rk4Leg((tau) => rateAt(path(tau / fallShipS)), fallShipS, n);
   const climbRate = (tau) => rateAt(path(1 - tau / fallShipS));
-  const climb = rk4Leg(climbRate, fallShipS);
+  const climb = rk4Leg(climbRate, fallShipS, n);
   const dwellRate = rateAt(rd);
   const back = rk4Leg(() => rateAt(r0), approachShipS, 200);
-  const dwellShipS = Math.max(0, (outsideS - approach.homeS - fall.homeS - climb.homeS - back.homeS) / dwellRate);
+  const dwellShipS = Math.max(0, Number(stayS) || 0);
   const dwell = { homeS: dwellShipS * dwellRate };
   const E0 = energyAt(r0), Ed = energyAt(rd), Eend = energyAt(path(1));
   const legs = [
@@ -193,7 +198,7 @@ export function buildLegs({ method, rd, rateAt, energyAt, outsideS, r0, approach
   ];
   let ts = 0, th = 0;
   for (const l of legs) { l.ship0 = ts; l.home0 = th; ts += l.shipS; th += l.homeS; }
-  return { legs, shipS: ts, homeS: th, path, rateAt, method };
+  return { legs, shipS: ts, homeS: th, path, rateAt, method, dwellRate, transitHomeS: th - dwell.homeS };
 }
 
 /* Home time at ship time tau, from the integrated legs. */
@@ -225,14 +230,14 @@ export function legsRate(J, tau) {
  * orbit: a circular orbit at radius factor k >= 1 times the ISCO.
  * Returns the clock ratio and every cost the planner shows.
  */
-export function planOrbit({ mSun, delta, k = 1, outsideYears, bodyL, craftKg }) {
+export function planOrbit({ mSun, delta, k = 1, stayS, bodyL, craftKg, n }) {
   const r0 = iscoM(delta);
   const rM = r0 * Math.max(1, k);
   const o = circularOrbit(rM, delta);
   if (!o) return null;
   const D = o.ut;                                     // outside seconds per ship second, at the orbit
   const J = buildLegs({
-    method: 'orbit', rd: rM, r0: Math.max(40, rM * 4), outsideS: outsideYears * YEAR,
+    method: 'orbit', rd: rM, r0: Math.max(40, rM * 4), stayS, n,
     rateAt: (r) => circularOrbit(r, delta).ut, energyAt: (r) => circularOrbit(r, delta).E,
   });
   const shipS = J.shipS;
@@ -240,7 +245,7 @@ export function planOrbit({ mSun, delta, k = 1, outsideYears, bodyL, craftKg }) 
   const periodFar = 2 * Math.PI / o.omegaM * timeM(mSun); // s, far-away clock
   const bind = 1 - o.E;                                // fraction of rest mass to shed going in, and to find coming out
   return {
-    method: 'orbit', D, shipS, outsideS: outsideYears * YEAR, journey: J,
+    method: 'orbit', D, shipS, stayS: J.legs[2].shipS, outsideS: J.homeS, outsideYears: J.homeS / YEAR, journey: J,
     rM, iscoM: r0, horizonM: horizonM(delta), rSI,
     E: o.E, L: o.L, bind,
     accelG: 0,                                         // free fall: weightless
@@ -254,20 +259,20 @@ export function planOrbit({ mSun, delta, k = 1, outsideYears, bodyL, craftKg }) 
 /**
  * hover: hold station at r = f * rs with engines (Schwarzschild).
  */
-export function planHover({ mSun, f, outsideYears, bodyL, craftKg }) {
+export function planHover({ mSun, f, stayS, bodyL, craftKg, n }) {
   const ff = Math.max(1 + 1e-12, f);
   const rs = 2 * lengthM(mSun);
   const r = ff * rs;
   const alpha = Math.sqrt(1 - 1 / ff);               // dtau/dt for a static observer
   const D = 1 / alpha;
   const J = buildLegs({
-    method: 'hover', rd: 2 * ff, r0: Math.max(80, 8 * ff), outsideS: outsideYears * YEAR,
+    method: 'hover', rd: 2 * ff, r0: Math.max(80, 8 * ff), stayS, n,
     rateAt: (rM) => 1 / Math.sqrt(1 - 2 / rM), energyAt: (rM) => Math.sqrt(1 - 2 / rM),
   });
   const shipS = J.shipS;
   const aProper = massSI(mSun) / (r * r * alpha);      // m/s^2 the engines must supply
   return {
-    method: 'hover', D, shipS, outsideS: outsideYears * YEAR, journey: J,
+    method: 'hover', D, shipS, stayS: J.legs[2].shipS, outsideS: J.homeS, outsideYears: J.homeS / YEAR, journey: J,
     rM: 2 * ff, rSI: r, alpha,
     accelG: aProper / G0,
     tidalG: tidal(mSun, r, bodyL) / G0,
@@ -283,18 +288,20 @@ export function planHover({ mSun, f, outsideYears, bodyL, craftKg }) {
 
 /**
  * flight: out and back in four legs of equal proper duration at
- * constant proper acceleration aG (in g).
+ * constant proper acceleration aG (in g), for a total ship time shipS
+ * the visitor chose. Home's time is the result: per leg
+ * t = (c/a) sinh(a tau_leg / c), and each leg is also integrated with RK4.
  */
-export function planFlight({ aG, outsideYears, craftKg }) {
+export function planFlight({ aG, shipS, craftKg }) {
   const a = aG * G0;
-  const T = outsideYears * YEAR;
   const k = C / a;                                     // s
-  const tauQ = k * Math.asinh(T / (4 * k));            // proper time per leg
+  const tauQ = Math.max(0, Number(shipS) || 0) / 4;   // proper time per leg
   const phi = tauQ / k;                                // rapidity at the end of leg 1
   const gammaMax = Math.cosh(phi);
   const xMax = 2 * (C * k) * (Math.cosh(phi) - 1);     // farthest distance, m
   const lnRatio = 4 * phi;                             // ideal photon rocket, four burns
   const t1 = k * Math.sinh(phi);                       // coordinate time per leg, closed form
+  const T = 4 * t1;                                    // home's elapsed time: the result
   const ids = ['accelerate', 'brake', 'return', 'arrive'];
   const legs = ids.map((id, i) => {
     const up = i % 2 === 0;                             // rapidity rising on legs 1 and 3
@@ -304,12 +311,32 @@ export function planFlight({ aG, outsideYears, craftKg }) {
       massRatio: Math.exp(phi), dE: 0, ship0: i * tauQ, home0: i * t1 };
   });
   return {
-    method: 'flight', D: T / (4 * tauQ), shipS: 4 * tauQ, outsideS: T, journey: { legs, shipS: 4 * tauQ, homeS: 4 * t1, method: 'flight' },
+    method: 'flight', D: T / (4 * tauQ), shipS: 4 * tauQ, stayS: 4 * tauQ, outsideS: T, outsideYears: T / YEAR,
+    journey: { legs, shipS: 4 * tauQ, homeS: 4 * t1, method: 'flight' },
     aG, accelG: aG, tidalG: 0, tauQ, phi, gammaMax,
     betaMax: Math.tanh(phi), xMaxLy: xMax / (C * YEAR),
     lnRatio, massRatio: Math.exp(Math.min(700, lnRatio)),
     energyJ: (Math.exp(Math.min(700, lnRatio)) - 1) * craftKg * C * C,
   };
+}
+
+/* Home's elapsed time for a four-leg flight, closed form: 4 (c/a) sinh(a tau / 4c). */
+export function flightOutsideS(aG, shipS) {
+  const k = C / (aG * G0);
+  return 4 * k * Math.sinh(shipS / (4 * k));
+}
+
+/* The stay that would bring home's clock to targetS for this crossing:
+   the inverse of the sum above, shown beside the result, never used as
+   the result. Orbit and hover: (target - transit legs) / dwell rate.
+   Flight: total ship time 4 (c/a) asinh(target a / 4c). */
+export function stayFor(plan, targetS) {
+  if (plan.method === 'flight') {
+    const k = C / (plan.aG * G0);
+    return 4 * k * Math.asinh(targetS / (4 * k));
+  }
+  const J = plan.journey;
+  return Math.max(0, (targetS - J.transitHomeS) / J.dwellRate);
 }
 
 /* ---------- the round trip in time, for the film and the pulse ----------

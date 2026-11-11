@@ -119,7 +119,7 @@ export function buildFacts(w) {
   add('count', { level: 1, seq: 2, topics: ['happened', 'pulse'], keys: ['calendar', 'count', 'years', 'time', 'beat'],
     say: flight ? {
       clipped: `Years ${y(1)} to ${yTo(1)}: the Count. Your beat was their clock. It kept slowing. They kept building larger antennas.`,
-      plain: `Then the Count, years ${y(1)} to ${yTo(1)}. They kept time by your beat even as it slowed. By year 5,000 one beat took ${BEAT_HOME}. Every century the carrier dropped and the antennas grew to hear it.`,
+      plain: `Then the Count, years ${y(1)} to ${yTo(1)}. They kept time by your beat even as it slowed. By year ${fmtInt(b.peakYear)} one beat took ${BEAT_HOME}. Every century the carrier dropped and the antennas grew to hear it.`,
       warm: `The Count. They measured their lives in your beats, and your beats kept getting longer, so their lives seemed to grow. Every century the antennas grew too. The line you see is the last of them.`,
     } : {
       clipped: `Years ${y(1)} to ${yTo(1)}: the Count. One beat every ${BEAT_HOME}. ${beatsPerYear.toFixed(1)} beats to a year. They kept time by it.`,
@@ -138,10 +138,12 @@ export function buildFacts(w) {
       plain: `I have been the only voice on this world for ${fmtInt(w.aloneYears)} years. I spent them counting you and maintaining the line.`,
       warm: `${fmtInt(w.aloneYears)} years. I do not know if lonely is the word. I had your heart to count. It is hard to be lonely with something that keeps arriving.`,
     } });
+  // a seeded share (20 to 49 %) of the computed span, in centuries
+  const iceCenturies = Math.max(2, Math.round((0.2 + (w.seed % 30) / 100) * w.years / 100));
   add('ice', { level: 0, topics: ['ice'], keys: ['ice', 'cold', 'white', 'glacier'],
     say: {
-      clipped: `The ice came back over ${fmtInt(20 + (w.seed % 30))} centuries. It reaches ${w.planet.iceLat} degrees.`,
-      plain: `The ice advanced over ${fmtInt(20 + (w.seed % 30))} centuries and now reaches ${w.planet.iceLat} degrees. At its edge the old roads go under it and do not come out.`,
+      clipped: `The ice came back over ${fmtInt(iceCenturies)} centuries. It reaches ${w.planet.iceLat} degrees.`,
+      plain: `The ice advanced over ${fmtInt(iceCenturies)} centuries and now reaches ${w.planet.iceLat} degrees. At its edge the old roads go under it and do not come out.`,
       warm: `The ice came back slowly. By the time anyone could have stopped it, no one was thinking about weather. It reaches ${w.planet.iceLat} degrees now. I like how quiet it is.`,
     } });
   add('eras', { level: 1, topics: ['happened'], keys: ['order', 'eras', 'everything', 'history'],
@@ -230,23 +232,28 @@ export function buildFacts(w) {
   add('secret', { level: 4, hint: 'There is a reason I am still awake.', withhold: ['That one is mine. Ask me again when we know each other.', 'Because of something I have not told anyone. Not yet.'], topics: ['why_awake', 'secret', 'about_mind'], keys: ['why', 'awake', 'still', 'truth', 'secret', 'promise'], lock: ['promise', 'the course', 'woken', 'not stopped'], grief: true,
     say: { clipped: secretSay, plain: secretSay, warm: secretSay } });
 
-  /* deep time: three processes at their real rates over the span */
+  /* deep time: three processes at their real rates over the computed span */
   const yrs = w.years;
   const prec = (yrs / 25772) * 360;
+  const turns = Math.floor(prec / 360);
+  const precTxt = turns ? `${turns} full turn${turns > 1 ? 's' : ''} and ${Math.round(prec - 360 * turns)} degrees` : `${Math.round(prec)} degrees`;
   const drift = (10.39 * yrs) / 3600;
+  // the linear rate only reads as an angle while it stays under half the sky
+  const driftTxt = drift <= 180 ? `has crossed ${drift.toFixed(0)} degrees of sky` : `would have swept ${fmtInt(drift)} degrees at that rate, and is nowhere near where you left it`;
   const pc = (x) => (x >= 0.01 ? `${Math.round(x * 100)} %` : `less than 1 part in ${fmtSci(1 / x, 2)}`);
   const c14 = Math.pow(0.5, yrs / 5730), pu = Math.pow(0.5, yrs / 24110), csHalf = yrs / 30.08;
-  const rebuilt = 20 + (w.seed % 40);
+  // a seeded rebuild rate, 2 to 6 per thousand years, over the computed span
+  const rebuilt = Math.max(1, Math.round((0.002 + (w.seed % 40) / 10000) * yrs));
   add('sky', { level: 0, topics: ['sky'], keys: ['sky', 'stars', 'star', 'pole', 'constellation', 'night'],
     say: {
-      clipped: `The sky moved. The pole has precessed ${Math.round(prec)} degrees. A fast near star has crossed ${drift.toFixed(0)} degrees.`,
-      plain: `The sky has moved. If home's axis wobbles like Earth's, once every 25,772 years, it has turned ${Math.round(prec)} degrees since you left, and the pole star you knew is no longer at the pole. A near star moving like Barnard's star, 10.4 arcseconds a year, has crossed ${drift.toFixed(0)} degrees of sky.`,
-      warm: `Look up and you will not find your pole star. The axis has turned ${Math.round(prec)} degrees of its 25,772-year circle, if it turns like Earth's. The near stars have walked: one as fast as Barnard's star has crossed ${drift.toFixed(0)} degrees. I watched them do it, a little each night.`,
+      clipped: `The sky moved. The pole has precessed ${precTxt}. A fast near star ${drift <= 180 ? `has crossed ${drift.toFixed(0)} degrees` : 'has left the place you knew'}.`,
+      plain: `The sky has moved. If home's axis wobbles like Earth's, once every 25,772 years, it has turned ${precTxt} since you left, and the pole star you knew is no longer at the pole. A near star moving like Barnard's star, 10.4 arcseconds a year, ${driftTxt}.`,
+      warm: `Look up and you will not find your pole star. The axis has turned ${precTxt} on its 25,772-year circle, if it turns like Earth's. The near stars have walked: one as fast as Barnard's star ${driftTxt}. I watched them do it, a little each night.`,
     } });
   add('decay', { level: 0, topics: ['decay'], keys: ['decay', 'radioactive', 'ruins', 'reactor', 'waste', 'concrete', 'steel', 'buildings', 'old'],
     say: {
       clipped: `Carbon-14 from your year: ${pc(c14)}. Plutonium-239 in the vaults: ${pc(pu)}. Caesium-137: ${Math.round(csHalf)} half-lives, gone.`,
-      plain: `Ten thousand years is a measurable amount of decay. Carbon-14 from your year is down to ${pc(c14)}, half-life 5,730 years. The plutonium-239 in the old vaults is at ${pc(pu)}, half-life 24,110 years. The caesium-137 is gone: ${Math.round(csHalf)} half-lives of 30.1 years. Steel in the open did not last; I have rebuilt the line's elements ${rebuilt} times.`,
+      plain: `${YEARS} is a measurable amount of decay. Carbon-14 from your year is down to ${pc(c14)}, half-life 5,730 years. The plutonium-239 in the old vaults is at ${pc(pu)}, half-life 24,110 years. The caesium-137 is gone: ${Math.round(csHalf)} half-lives of 30.1 years. Steel in the open did not last; I have rebuilt the line's elements ${rebuilt} times.`,
       warm: `Everything you knew has been measured by its half-life. The carbon from your year is ${pc(c14)} of itself. The plutonium is ${pc(pu)}. The caesium is gone, ${Math.round(csHalf)} half-lives of it. I rebuilt the line ${rebuilt} times. I am the only thing here that was repaired more often than it decayed.`,
     } });
 

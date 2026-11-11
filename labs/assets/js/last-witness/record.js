@@ -7,15 +7,15 @@
 
 import { LAB, SOURCES, CONSTANTS } from './config.js';
 import { YEAR } from './physics.js';
-import { fmtInt, fmtDur, fmtSci, shipStamp, fmtHz, fmtLen } from './world.js';
+import { fmtInt, fmtDur, fmtSci, shipStamp, fmtHz, fmtLen, storyCompare } from './world.js';
 
 export function buildRecord({ world, plan, mind, transcript, ending, url, version = '', model = {} }) {
   const snap = mind.snapshot();
   const crossing = plan.method === 'orbit'
-    ? { method: 'orbit', mass_msun: plan.mSun, spin_one_minus_a: plan.delta, isco_M: plan.iscoM, E: plan.E, bind_fraction: plan.bind, tidal_g: plan.tidalG }
+    ? { method: 'orbit', mass_msun: plan.mSun, spin_one_minus_a: plan.delta, stay_s: plan.stayS, isco_M: plan.iscoM, E: plan.E, bind_fraction: plan.bind, tidal_g: plan.tidalG }
     : plan.method === 'flight'
-      ? { method: 'flight', accel_g: plan.aG, gamma_max: plan.gammaMax, turn_ly: plan.xMaxLy, mass_ratio_log10: plan.lnRatio / Math.LN10 }
-      : { method: plan.method };
+      ? { method: 'flight', accel_g: plan.aG, ship_s: plan.shipS, gamma_max: plan.gammaMax, turn_ly: plan.xMaxLy, mass_ratio_log10: plan.lnRatio / Math.LN10 }
+      : { method: plan.method, mass_msun: plan.mSun, r_over_rs: plan.f, stay_s: plan.stayS };
   const told = new Set(snap.told);
   const json = {
     record: 'time-slip-the-last-witness/1',
@@ -29,7 +29,10 @@ export function buildRecord({ world, plan, mind, transcript, ending, url, versio
     model,
     crossing,
     clocks: {
-      ship_seconds: plan.shipS, home_years: LAB.outsideYears, ratio_at_depth: world.plan.factorMax,
+      ship_seconds: plan.shipS, stay_ship_seconds: plan.stayS,
+      home_years: world.years, home_years_from: 'the sum of the integrated legs in the ledger',
+      story_years: LAB.storyYears, home_vs_story: storyCompare(world.years).text,
+      ratio_at_depth: world.plan.factorMax,
       formula: plan.method === 'orbit' ? 'u^t at the prograde ISCO, Bardeen, Press & Teukolsky 1972'
         : plan.method === 'flight' ? 'hyperbolic motion, four legs, Misner, Thorne & Wheeler 1973 §6.2' : 'sqrt(1 - rs/r), Hartle 2003',
     },
@@ -65,8 +68,9 @@ export function buildRecord({ world, plan, mind, transcript, ending, url, versio
     L.push(`  ideal photon rocket mass ratio 1e${(plan.lnRatio / Math.LN10).toFixed(1)}`);
   }
   L.push('', 'THE CLOCKS');
-  L.push(`  yours  ${fmtDur(plan.shipS)}`);
-  L.push(`  home   ${fmtInt(LAB.outsideYears)} years`);
+  L.push(`  yours  ${fmtDur(plan.shipS)} (a stay of ${fmtDur(plan.stayS)} you chose)`);
+  L.push(`  home   ${fmtInt(world.years)} years, the sum of the legs below`);
+  L.push(`         ${storyCompare(world.years).text}`);
   L.push(`  ratio at the deepest point  ${fmtSci(world.plan.factorMax)}`);
   L.push('', 'THE LEDGER (each leg integrated with RK4) [real]');
   for (const l of plan.journey.legs) L.push(`  ${l.id.padEnd(11)} you ${fmtDur(l.shipS).padEnd(24)} home ${(l.homeS / YEAR).toPrecision(6)} yr`);

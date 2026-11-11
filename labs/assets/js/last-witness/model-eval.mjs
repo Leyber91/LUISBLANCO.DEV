@@ -37,7 +37,7 @@ const QUESTIONS = [
 async function ask(req) {
   const r = await fetch('http://localhost:11434/api/chat', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, stream: false, format: 'json', options: { temperature: 0.6, seed: 7 },
+    body: JSON.stringify({ model: MODEL, stream: false, format: 'json', options: { temperature: 0.6, seed: 7, num_ctx: 8192 },
       messages: [{ role: 'system', content: req.system + '\n\nReply with one JSON object and nothing else.' }, { role: 'user', content: req.prompt }] }),
   });
   if (!r.ok) throw new Error('http ' + r.status);
@@ -45,7 +45,7 @@ async function ask(req) {
   return j.message?.content || '';
 }
 
-const plan = { ...P.planOrbit({ mSun: 4e6, delta: 1e-20, outsideYears: 1e4, bodyL: 2, craftKg: 1e5 }), mSun: 4e6, delta: 1e-20 };
+const plan = { ...P.planOrbit({ mSun: 4e6, delta: 1e-20, stayS: 10 ** 4.67, bodyL: 2, craftKg: 1e5 }), mSun: 4e6, delta: 1e-20 };
 const world = buildWorld(plan, 'Tell them the sky down here is full of light. I will be home before the tea goes cold.');
 const mind = new Mind(world);
 mind.opening();
@@ -72,7 +72,7 @@ const why = {};
 rows.filter((r) => !r.ok).forEach((r) => { const k = r.why.split(':')[0]; why[k] = (why[k] || 0) + 1; });
 const intentMatch = rows.filter((r) => r.modelIntent === r.engineIntent).length;
 const out = {
-  measured: new Date().toISOString(), model: MODEL, route: 'ollama (local)', questions: rows.length,
+  measured: new Date().toISOString(), model: MODEL, route: 'ollama (local)', questions: rows.length, validator: 'clock-roles',
   model_mode: { voiced, refused: rows.length - voiced, refused_by_reason: why, intent_matches_engine: intentMatch, heavy_turns: rows.filter((r) => r.heavy).length },
   engine_mode: { voiced: rows.length, refused: 0, note: 'the engine reply is the validator reference, so it passes by construction' },
   rows,

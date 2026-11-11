@@ -113,6 +113,8 @@ textarea:focus, .ask input:focus { border-color: var(--horizon-dim); }
 .ck { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--text-dim); }
 .cv { font-size: 19px; color: var(--text-bright); font-variant-numeric: tabular-nums; font-weight: 500; }
 .ratio { margin-top: 6px; font-size: 11px; color: var(--horizon); letter-spacing: .04em; }
+.cnote { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--text-dim); }
+.cnote.differs { color: var(--text); }
 .ticker { margin-top: 8px; font-size: 11px; line-height: 1.55; color: var(--text-dim); font-variant-numeric: tabular-nums; border-top: 1px dashed var(--line); padding-top: 8px; }
 .ticker b { color: var(--text-bright); font-weight: 500; }
 .cost { display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; padding: 5px 0; border-bottom: 1px dashed var(--line); font-size: 11px; }
@@ -122,6 +124,7 @@ textarea:focus, .ask input:focus { border-color: var(--horizon-dim); }
 .cost .n { grid-column: 1 / 3; font-size: 9.5px; color: var(--text-faint); line-height: 1.4; }
 .cost[data-v="lethal"] .v { color: var(--danger); } .cost[data-v="risk"] .v { color: var(--warn); }
 .cost[data-v="sf"] .n { color: var(--text-dim); }
+.cost[data-v="span"] .v { color: var(--warn); }
 .ledger, .flegs { width: 100%; border-collapse: collapse; font-size: 10px; font-variant-numeric: tabular-nums; margin-top: 8px; }
 .ledger td, .flegs td { padding: 2px 0; color: var(--text-dim); border-top: 1px dashed var(--line); }
 .ledger td:nth-child(n+2), .flegs td:nth-child(n+2) { text-align: right; color: var(--text); }

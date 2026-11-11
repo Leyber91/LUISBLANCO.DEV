@@ -5,7 +5,8 @@
      trust       0..1, moved by what the visitor does (asks about the
                  mind, answers its questions, shares, waits; or
                  demands, insults, tries to take things)
-     level       0..4 disclosure, gated on trust (config DISCLOSE)
+     level       0..4 disclosure: what trust allows (config DISCLOSE),
+                 capped by what the visitor has asked (config ASK_GATES)
      mood        derived each turn from trust, its last change and
                  the topic (guarded, measuring, open, warm, grieving)
      knowledge   facts generated from the world, each with a level,
@@ -19,10 +20,71 @@
    engine could not place). The engine's reply is always complete.
    ============================================================ */
 
-import { LAB, DISCLOSE, PROFILE } from './config.js';
+import { LAB, DISCLOSE, ASK_GATES, PROFILE } from './config.js';
 import { YEAR } from './physics.js';
 import { rng, fmtInt, fmtDur } from './world.js';
 import { buildFacts, QUESTIONS, LINES, composeEnding, ACTS } from './story.js';
+
+/* ---------- clock roles ----------
+   A reply may carry every right number and still swap the two clocks
+   ("10,000 years by your clock and 14 hours by mine"). So every duration
+   in a reply is parsed, matched against the engine's own clock values,
+   and checked against the nearest words that say whose clock it is. */
+const UNIT_S = { year: YEAR, yr: YEAR, month: YEAR / 12, mo: YEAR / 12, week: 604800, day: 86400, d: 86400, hour: 3600, hr: 3600, h: 3600, minute: 60, min: 60, second: 1, sec: 1 };
+const DUR_RE = /(?<![\d.,e])(\d[\d,]*(?:\.\d+)?)\s*(years?|yrs?|months?|mo|weeks?|days?|d|hours?|hrs?|h|minutes?|mins?|seconds?|secs?|s|ms|µs)(?![a-z])/gi;
+const unitS = (u) => { const x = u.toLowerCase(); if (x === 'ms') return 1e-3; if (x === 'µs') return 1e-6; if (x === 's') return 1; return UNIT_S[x.replace(/s$/, '')]; };
+const SHIP_MARK = /\b(by your (own )?clock|on your (own )?clock|your (own )?clock|your (own )?time|your (own )?seconds?|of your life|by yours|yours|for you|to you|you (had |have )?lived|you aged|you were away)\b/gi;
+const HOME_MARK = /\b(by my (own )?clock|on my (own )?clock|my (own )?clock|my (own )?time|my seconds?|seconds? of mine|by mine|on mine|of mine|mine|for me|from here|here|at home|home's|i was here|i counted|i waited|i (have )?kept|i watched|this world)\b/gi;
+
+/* Durations in a text, compound ones merged ("14 hours 26 minutes"). */
+export function durations(text) {
+  const raw = [...text.matchAll(DUR_RE)].map((m) => ({ start: m.index, end: m.index + m[0].length, unit: unitS(m[2]), s: Number(m[1].replace(/,/g, '')) * unitS(m[2]) }));
+  const out = [];
+  for (const d of raw) {
+    const prev = out[out.length - 1];
+    if (prev && d.unit < prev.unit && /^\s*(and\s+)?$/i.test(text.slice(prev.end, d.start))) { prev.end = d.end; prev.s += d.s; prev.unit = d.unit; }
+    else out.push({ ...d });
+  }
+  return out;
+}
+
+/* values: [{ what, role: 'ship'|'home'|'rate', s, shown: [strings the engine prints] }].
+   'rate' is home time per ship second: its "second" must be yours and its
+   value home's. Returns null, or the first clock said with the wrong owner. */
+export function clockSwap(text, values, windowChars = 40) {
+  const shownS = (str) => durations(str).reduce((a, d) => a + d.s, 0);
+  const vals = values.filter((v) => v.s > 0).map((v) => ({ ...v, shownS: (v.shown || []).map(shownS).filter((x) => x > 0) }));
+  const matches = (d, v) => v.shownS.some((x) => Math.abs(d.s - x) <= 1e-6 * x) || Math.abs(d.s - v.s) <= 0.01 * v.s;
+  const gap = (a, b) => (a.end <= b.start ? b.start - a.end : b.end <= a.start ? a.start - b.end : 0);
+  for (const sentence of text.split(/(?<=[.;?!])\s+/)) {
+    const marks = [
+      ...[...sentence.matchAll(SHIP_MARK)].map((m) => ({ role: 'ship', start: m.index, end: m.index + m[0].length, unitWord: /second/i.test(m[0]) })),
+      ...[...sentence.matchAll(HOME_MARK)].map((m) => ({ role: 'home', start: m.index, end: m.index + m[0].length, unitWord: /second/i.test(m[0]) })),
+    ];
+    const durs = durations(sentence);
+    const nearest = (span, pool) => pool.filter((k) => gap(span, k) <= windowChars).sort((a, b) => gap(span, a) - gap(span, b) || b.start - a.start)[0] || null;
+    for (const d of durs) {
+      const hit = vals.filter((v) => matches(d, v));
+      const roles = new Set(hit.map((v) => v.role));
+      if (roles.size !== 1) continue;                       // not a clock value, or ambiguous between two
+      const v = hit[0];
+      if (v.role === 'rate') {
+        // the unit second it is measured against: the nearest bare "second" word outside any duration
+        const secs = [...sentence.matchAll(/\bseconds?\b/gi)].map((m) => ({ start: m.index, end: m.index + m[0].length }))
+          .filter((w) => !durs.some((x) => w.start >= x.start && w.end <= x.end));
+        const sec = nearest(d, secs.map((w) => ({ ...w, role: 'unit' })));
+        const secOwner = sec ? nearest(sec, marks.filter((k) => gap(sec, k) <= 12)) : null;
+        if (secOwner && secOwner.role === 'home') return { value: v, said: sentence.slice(d.start, d.end), owner: 'home', why: `one of home's seconds called ${sentence.slice(d.start, d.end)}` };
+        const own = nearest(d, marks.filter((k) => k !== secOwner && !k.unitWord));
+        if (own && own.role === 'ship') return { value: v, said: sentence.slice(d.start, d.end), owner: 'ship', why: `home's ${v.what} given to your clock` };
+        continue;
+      }
+      const own = nearest(d, marks.filter((k) => !k.unitWord));
+      if (own && own.role !== v.role) return { value: v, said: sentence.slice(d.start, d.end), owner: own.role, why: `${v.what} (${sentence.slice(d.start, d.end)}) said as ${own.role === 'ship' ? 'your clock' : "home's"}` };
+    }
+  }
+  return null;
+}
 
 /* Words that state an outcome. A voiced reply may use one only if the engine's facts already do. */
 const CLAIMS = ['die', 'died', 'dead', 'death', 'survive', 'survived', 'killed', 'destroyed', 'extinct', 'alive', 'war', 'plague', 'god', 'gods', 'alien', 'aliens', 'returned', 'return', 'murdered', 'forgave', 'forgive', 'blame'];
@@ -91,10 +153,15 @@ export class Mind {
       pendingQ: null, asked: new Set(), answered: new Set(), lastAskTurn: -9, lastIntent: null, lastLocked: null, lastDelta: 0,
       visitor: { quotedMsg: false, whyGo: '', howLong: '', seen: '', shared: [] },
       returnedAt: Date.now(), ended: false, memory: [],
+      gates: new Set(),           // ASK_GATES tiers the visitor has opened by asking
     };
   }
 
-  level() { let l = 0; DISCLOSE.forEach((t, i) => { if (this.s.trust >= t) l = i; }); return l; }
+  /* Disclosure tier: what trust allows, capped by what the visitor has asked.
+     Trust alone never opens a tier; asking about it does (config ASK_GATES). */
+  level() { return Math.min(this.trustLevel(), this.askedLevel()); }
+  trustLevel() { let l = 0; DISCLOSE.forEach((t, i) => { if (this.s.trust >= t) l = i; }); return l; }
+  askedLevel() { let k = 0; while (k < ASK_GATES.length && this.s.gates.has(ASK_GATES[k].tier)) k++; return k; }
 
   mood(topicGrief = false) {
     const t = this.s.trust;
@@ -129,6 +196,8 @@ export class Mind {
 
     let intent = classify(text);
     const isQuestion = /\?\s*$/.test(text) || /^(who|what|why|how|when|where|is|are|do|did|can|could|will|would)\b/i.test(text);
+    // asking: a question, or a plain request to be told ("tell me about the people")
+    const asks = isQuestion || /\b(tell me|explain|describe|i want to know|i would like to know|i'd like to know)\b/i.test(text);
 
     // an answer to TALLY's own question comes first
     const quoting = this._quotesMessage(text);
@@ -140,6 +209,8 @@ export class Mind {
     if (s.pendingQ && isQuestion) s.pendingQ = null;   // the visitor moved on; it does not insist
     if (intent === 'self_share' && isQuestion) intent = 'open';
     if (quoting) intent = 'quote';
+    // what the visitor asks about opens the tier that holds it; a statement opens nothing
+    if (asks) for (const g of ASK_GATES) if (g.intents.includes(intent)) s.gates.add(g.tier);
 
     const delta = this._trustDelta(intent, text);
     this._applyTrust(delta);
@@ -193,9 +264,11 @@ export class Mind {
     // topical: find the best fact for the intent, or retrieve by words
     const tk = new Set(tokens(text));
     const overlap = (f) => f.keys.reduce((n, k) => n + (tk.has(stem(k)) ? 1 : 0), 0);
-    const sayable = (f) => !(f.lie && (this.F[f.truth].told || f.admitted));
+    // a protective lie is told only in answer to a question, so a confession
+    // (which tells the truth whatever the tier) can only follow an ask
+    const sayable = (f) => !(f.lie && (!asks || this.F[f.truth].told || f.admitted));
     const topicFacts = Object.values(this.F).filter((f) => f.topics.includes(intent) && sayable(f));
-    const pickFrom = topicFacts.length ? topicFacts : this._retrieve(text);
+    const pickFrom = (topicFacts.length ? topicFacts : this._retrieve(text)).filter(sayable);
     if (!pickFrom.length) {
       return this._plan({ intent: 'open', text: this._pickLine(LINES.unknown(this.w)), facts: [], weight: 2, unknown: true, pause: 1600, ask: true });
     }
@@ -457,6 +530,22 @@ export class Mind {
     return { system, prompt };
   }
 
+  /* Every clock value the engine can say, with whose clock it is and the
+     exact strings the facts print it as (see clockSwap). */
+  clockValues() {
+    const w = this.w, p = w.plan;
+    const v = [
+      { what: 'your clock', role: 'ship', s: p.shipS, shown: [fmtDur(p.shipS), fmtDur(p.shipS, { short: true })] },
+      { what: "home's clock", role: 'home', s: w.years * YEAR, shown: [`${fmtInt(w.years)} years`] },
+      { what: 'one of your seconds, at home', role: 'rate', s: p.D, shown: [fmtDur(p.D)] },
+    ];
+    if (p.periodFarS) v.push({ what: 'a lap seen from home', role: 'home', s: p.periodFarS, shown: [fmtDur(p.periodFarS)] },
+      { what: 'a lap by your clock', role: 'ship', s: p.periodFarS / p.D, shown: [fmtDur(p.periodFarS / p.D)] });
+    if (p.tauQ) v.push({ what: 'one burn by your clock', role: 'ship', s: p.tauQ, shown: [fmtDur(p.tauQ)] });
+    if (w.argumentShipS) v.push({ what: 'your clock at the Argument', role: 'ship', s: w.argumentShipS, shown: [fmtDur(w.argumentShipS)] });
+    return v;
+  }
+
   /* Accept the model's reply only when it keeps the engine's facts. */
   validate(json, plan, visitorText) {
     const r = json && typeof json.reply === 'string' ? json.reply.trim() : '';
@@ -467,6 +556,11 @@ export class Mind {
     if (/\b(as an ai|language model|assistant|i'm an ai|i am an ai)\b/i.test(r)) return { ok: false, why: 'persona' };
     const low = r.toLowerCase();
     for (const f of this.locked()) for (const k of f.lock || []) if (k && low.includes(k)) return { ok: false, why: 'leak:' + f.id };
+    // every clock value it says must sit with its own clock: yours, or home's
+    const swap = clockSwap(r, this.clockValues());
+    if (swap) return { ok: false, why: 'clock: ' + swap.why };
+    // a figure spelled out in words escapes the number check below, so it must be in digits like the draft
+    if (/\b(hundred|thousand|million|billion)\s+(years|days|hours|minutes|beats)\b/i.test(r) && !/\b(hundred|thousand|million|billion)\b/i.test(plan.text)) return { ok: false, why: 'number: in words' };
     // every number it says must already be in the allowed facts, the draft or the visitor's words
     const L = plan.level;
     const corpus = (plan.text + ' ' + visitorText + ' ' + Object.values(this.F).filter((f) => f.level <= L).map((f) => Object.values(f.say).join(' ')).join(' ')).replace(/,/g, '');
@@ -489,6 +583,7 @@ export class Mind {
     const s = this.s;
     return {
       trust: s.trust, mood: s.mood, level: this.level(), turn: s.turn,
+      trustLevel: this.trustLevel(), askedLevel: this.askedLevel(), gates: [...s.gates],
       told: Object.values(this.F).filter((f) => f.told).map((f) => f.id),
       total: Object.keys(this.F).length,
       visitor: s.visitor, memory: s.memory.slice(-40),

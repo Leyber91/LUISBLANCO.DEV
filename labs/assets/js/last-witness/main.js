@@ -11,8 +11,8 @@ import { mountRoutePanel } from '../ai/route-panel.js';
 import { voiceTurn, routeStatus } from './voice.js';
 import { LAB, BODY, MODES, MASS_MARKS, SPIN_MARKS, SOURCES, CONSTANTS, MISCONCEPTIONS, HOLES } from './config.js';
 import { ENDING_VARIANTS } from './story.js';
-import { YEAR, G0, GM_SUN, planOrbit, planHover, planFlight, timeMaps, referenceChecks, iscoM, circularOrbit, propellant } from './physics.js';
-import { buildWorld, fmtInt, fmtDur, fmtSci, fmtWordsBig, fmtHz, fmtLen, shipStamp } from './world.js';
+import { YEAR, G0, GM_SUN, planOrbit, planHover, planFlight, timeMaps, referenceChecks, iscoM, propellant, tidal, lengthM, massSI, stayFor, flightOutsideS } from './physics.js';
+import { buildWorld, fmtInt, fmtDur, fmtSci, fmtWordsBig, fmtHz, fmtLen, shipStamp, storyCompare } from './world.js';
 import { Mind, LEVEL_NAMES } from './mind.js';
 import { Scene, lookAt, lookAlong, projectLatLon } from './scene.js';
 import { Sound } from './audio.js';
@@ -57,18 +57,18 @@ function readHash() {
   if (c && MODES[c]) S.mode = c;
   const num = (k) => { const v = Number(h.get(k)); return Number.isFinite(v) && h.has(k) ? v : null; };
   const put = (m, key, v) => { if (v == null) return; const p = MODES[m].params[key]; S.vals[m][key] = clamp(v, p.min, p.max); };
-  put('orbit', 'logM', num('m')); put('orbit', 'logDelta', num('s'));
-  put('hover', 'logM', num('hm')); put('hover', 'logF', num('f'));
-  put('flight', 'aG', num('g'));
+  put('orbit', 'logM', num('m')); put('orbit', 'logDelta', num('s')); put('orbit', 'logStay', num('st'));
+  put('hover', 'logM', num('hm')); put('hover', 'logF', num('f')); put('hover', 'logStay', num('hs'));
+  put('flight', 'aG', num('g')); put('flight', 'shipY', num('y'));
   const msg = h.get('msg');
   $('msg').value = msg ? msg.slice(0, 160) : LAB.defaultMessage;
 }
 function writeHash() {
   const h = new URLSearchParams();
   h.set('c', S.mode);
-  if (S.mode === 'orbit') { h.set('m', S.vals.orbit.logM.toFixed(3)); h.set('s', S.vals.orbit.logDelta.toFixed(1)); }
-  if (S.mode === 'hover') { h.set('hm', S.vals.hover.logM.toFixed(3)); h.set('f', S.vals.hover.logF.toFixed(2)); }
-  if (S.mode === 'flight') h.set('g', S.vals.flight.aG.toFixed(2));
+  if (S.mode === 'orbit') { h.set('m', S.vals.orbit.logM.toFixed(3)); h.set('s', S.vals.orbit.logDelta.toFixed(1)); h.set('st', S.vals.orbit.logStay.toFixed(2)); }
+  if (S.mode === 'hover') { h.set('hm', S.vals.hover.logM.toFixed(3)); h.set('f', S.vals.hover.logF.toFixed(2)); h.set('hs', S.vals.hover.logStay.toFixed(2)); }
+  if (S.mode === 'flight') { h.set('g', S.vals.flight.aG.toFixed(2)); h.set('y', S.vals.flight.shipY.toFixed(1)); }
   const msg = $('msg').value.trim();
   if (msg && msg !== LAB.defaultMessage) h.set('msg', msg);
   history.replaceState(null, '', '#' + h.toString());
@@ -93,37 +93,50 @@ function renderLedger(P) {
 }
 
 /* The map of possible crossings: every cell is a full feasibility check
-   (tide, acceleration, your lifetime) at that mass and spin, height or thrust. */
+   (tide, acceleration, your lifetime, and whether home's computed time
+   lands in the span the story is written for) at that mass and spin,
+   height or thrust, for the stay you chose. Home's time per cell is the
+   same leg sum as the plan: transit legs (integrated, coarser steps) plus
+   stay x the dwell rate. */
 function renderFeas(P) {
   const cv = $('feasc'); const g = cv.getContext('2d');
   const W = cv.width, H = cv.height;
   g.clearRect(0, 0, W, H);
   const def = MODES[S.mode].params;
+  const v0 = S.vals[S.mode];
   const nx = 60, ny = 24;
+  const [spanLo, spanHi] = LAB.spanYears;
+  const outOfSpan = (years) => years < spanLo || years > spanHi;
+  const rowY = (key, y) => def[key].min + (def[key].max - def[key].min) * (y + 0.5) / ny;
+  const rows = [];
+  if (S.mode === 'orbit' || S.mode === 'hover') {
+    const stayS = 10 ** v0.logStay;
+    for (let y = 0; y < ny; y++) {
+      const p = S.mode === 'orbit'
+        ? planOrbit({ mSun: 1, delta: 10 ** rowY('logDelta', y), stayS, bodyL: 1, craftKg: 1, n: 200 })
+        : planHover({ mSun: 1, f: 1 + 10 ** rowY('logF', y), stayS, bodyL: 1, craftKg: 1, n: 200 });
+      rows.push({ years: p.journey.homeS / YEAR, shipYears: p.shipS / YEAR, d: p.method === 'orbit' ? 10 ** rowY('logDelta', y) : 0, f: p.method === 'hover' ? 1 + 10 ** rowY('logF', y) : 0 });
+    }
+  }
   const cell = (x, y) => {
     if (S.mode === 'orbit') {
       const logM = def.logM.min + (def.logM.max - def.logM.min) * (x + 0.5) / nx;
-      const logD = def.logDelta.min + (def.logDelta.max - def.logDelta.min) * (y + 0.5) / ny;
-      const d = 10 ** logD, r = iscoM(d), o = circularOrbit(r, d);
-      const tide = 2 * (10 ** logM) * GM_SUN * LAB.bodyL / Math.pow(r * (10 ** logM) * GM_SUN / (299792458 ** 2), 3) / G0;
-      const life = (LAB.outsideYears * YEAR / o.ut) / YEAR;
-      return tide > 1 ? 'tide' : life > LAB.maxShipYears ? 'life' : 'ok';
+      const row = rows[y], r = iscoM(row.d);
+      const tide = tidal(10 ** logM, r * lengthM(10 ** logM), LAB.bodyL) / G0;
+      return tide > 1 ? 'tide' : row.shipYears > LAB.maxShipYears ? 'life' : outOfSpan(row.years) ? 'span' : 'ok';
     }
     if (S.mode === 'hover') {
       const logM = def.logM.min + (def.logM.max - def.logM.min) * (x + 0.5) / nx;
-      const logF = def.logF.min + (def.logF.max - def.logF.min) * (y + 0.5) / ny;
-      const f = 1 + 10 ** logF, mS = 10 ** logM, alpha = Math.sqrt(1 - 1 / f);
-      const r = 2 * f * mS * GM_SUN / (299792458 ** 2);
-      const acc = mS * GM_SUN / (r * r * alpha) / G0;
-      const life = LAB.outsideYears * alpha;
-      return acc > 3 ? 'accel' : life > LAB.maxShipYears ? 'life' : 'ok';
+      const row = rows[y], mS = 10 ** logM, alpha = Math.sqrt(1 - 1 / row.f);
+      const r = 2 * row.f * lengthM(mS);
+      const acc = massSI(mS) / (r * r * alpha) / G0;
+      return acc > 3 ? 'accel' : row.shipYears > LAB.maxShipYears ? 'life' : outOfSpan(row.years) ? 'span' : 'ok';
     }
     const aG = def.aG.min + (def.aG.max - def.aG.min) * (x + 0.5) / nx;
-    const k = 299792458 / (aG * G0);
-    const ship = 4 * k * Math.asinh(LAB.outsideYears * YEAR / (4 * k)) / YEAR;
-    return aG > 3 ? 'accel' : ship > LAB.maxShipYears ? 'life' : aG > 1.25 ? 'risk' : 'ok';
+    const years = flightOutsideS(aG, v0.shipY * YEAR) / YEAR;
+    return aG > 3 ? 'accel' : v0.shipY > LAB.maxShipYears ? 'life' : outOfSpan(years) ? 'span' : aG > 1.25 ? 'risk' : 'ok';
   };
-  const col = { ok: 'rgba(212,162,76,.16)', risk: 'rgba(231,184,92,.08)', tide: 'rgba(224,108,117,.10)', life: 'rgba(66,75,87,.35)', accel: 'rgba(224,108,117,.10)' };
+  const col = { ok: 'rgba(212,162,76,.16)', risk: 'rgba(231,184,92,.08)', tide: 'rgba(224,108,117,.10)', life: 'rgba(66,75,87,.35)', span: 'rgba(66,75,87,.35)', accel: 'rgba(224,108,117,.10)' };
   for (let x = 0; x < nx; x++) for (let y = 0; y < ny; y++) {
     g.fillStyle = col[cell(x, y)];
     g.fillRect(Math.floor(x * W / nx), Math.floor(H - (y + 1) * H / ny), Math.ceil(W / nx), Math.ceil(H / ny));
@@ -137,23 +150,24 @@ function renderFeas(P) {
   g.beginPath(); g.arc(px * W, H - py * H, 3.2, 0, Math.PI * 2); g.fill();
   g.beginPath(); g.moveTo(px * W, 0); g.lineTo(px * W, H); g.moveTo(0, H - py * H); g.lineTo(W, H - py * H);
   g.globalAlpha = 0.35; g.stroke(); g.globalAlpha = 1;
-  $('feasl').innerHTML = S.mode === 'orbit' ? '<span>mass →, slower spin ↑</span><span>gold crossable · red tides · grey age</span>'
-    : S.mode === 'hover' ? '<span>mass →, height ↑</span><span>red engines crush you · grey age</span>'
-      : '<span>thrust →</span><span>gold crossable · amber risk · red lethal</span>';
+  const spanTxt = `grey: home's time outside ${fmtInt(spanLo)} to ${fmtInt(spanHi)} years`;
+  $('feasl').innerHTML = S.mode === 'orbit' ? `<span>mass →, slower spin ↑</span><span>gold crossable · red tides · ${spanTxt}</span>`
+    : S.mode === 'hover' ? `<span>mass →, height ↑</span><span>red engines crush you · ${spanTxt}</span>`
+      : `<span>thrust →</span><span>gold crossable · amber risk · red lethal · ${spanTxt}</span>`;
 }
 
 function computePlan() {
   const v = S.vals[S.mode];
-  const common = { outsideYears: LAB.outsideYears, bodyL: LAB.bodyL, craftKg: LAB.craftKg };
+  const common = { bodyL: LAB.bodyL, craftKg: LAB.craftKg };
   if (S.mode === 'orbit') {
     const mSun = 10 ** v.logM, delta = 10 ** v.logDelta;
-    return { ...planOrbit({ mSun, delta, ...common }), mSun, delta };
+    return { ...planOrbit({ mSun, delta, stayS: 10 ** v.logStay, ...common }), mSun, delta };
   }
   if (S.mode === 'hover') {
     const mSun = 10 ** v.logM, f = 1 + 10 ** v.logF;
-    return { ...planHover({ mSun, f, ...common }), mSun, f };
+    return { ...planHover({ mSun, f, stayS: 10 ** v.logStay, ...common }), mSun, f };
   }
-  return { ...planFlight({ aG: v.aG, ...common }), aG: v.aG };
+  return { ...planFlight({ aG: v.aG, shipS: v.shipY * YEAR, ...common }), aG: v.aG };
 }
 
 const band = (bands, x) => bands.find((b) => x <= b.max) || bands[bands.length - 1];
@@ -163,10 +177,10 @@ function hoverLimit(mSun, aMaxG) {
   let lo = -12, hi = 6;
   for (let i = 0; i < 80; i++) {
     const mid = (lo + hi) / 2;
-    const p = planHover({ mSun, f: 1 + 10 ** mid, outsideYears: 1, bodyL: 1, craftKg: 1 });
+    const p = planHover({ mSun, f: 1 + 10 ** mid, stayS: 0, bodyL: 1, craftKg: 1, n: 8 });
     if (p.accelG > aMaxG) lo = mid; else hi = mid;
   }
-  return planHover({ mSun, f: 1 + 10 ** hi, outsideYears: LAB.outsideYears, bodyL: LAB.bodyL, craftKg: LAB.craftKg });
+  return planHover({ mSun, f: 1 + 10 ** hi, stayS: LAB.maxShipYears * YEAR, bodyL: LAB.bodyL, craftKg: LAB.craftKg });
 }
 
 function costsOf(P) {
@@ -193,7 +207,7 @@ function costsOf(P) {
     rows.push({ k: 'tidal stretch, head to foot', v: `${fmtSci(P.tidalG)} g`, verdict: t.verdict, n: t.text });
     const lim = hoverLimit(P.mSun, 1.25);
     rows.push({ k: 'the deepest you can hover at 1.25 g', v: `×${fmtSci(lim.D)}`, verdict: 'sf',
-      n: `this hole's surface gravity is ${fmtSci(P.kappaG)} g, and near the horizon a ≈ κ/α; at 1.25 g, ten thousand years would take ${fmtDur(lim.shipS)} of your life` });
+      n: `this hole's surface gravity is ${fmtSci(P.kappaG)} g, and near the horizon a ≈ κ/α; at 1.25 g, ${LAB.maxShipYears} years of your life there buy ${fmtYearsLong(lim.outsideYears)} at home, and the story's ${fmtInt(LAB.storyYears)} years would take ${fmtDur(stayFor(lim, LAB.storyYears * YEAR))}` });
     const pr = propellant(P, LAB.craftKg);
     rows.push({ k: 'propellant, ideal photon rocket', v: `mass ratio e^${fmtSci(pr.lnTotal, 3)}`, verdict: 'sf',
       n: 'holding station burns continuously: m1 = m0 exp(−∫a dτ / c) over every leg' });
@@ -207,9 +221,18 @@ function costsOf(P) {
     rows.push({ k: 'energy', v: `${fmtSci(P.energyJ)} J`, verdict: 'sf', n: `${fmtSci(P.energyJ / LAB.sunJperYear)} years of the Sun's entire output` });
   }
   rows.push(lifeRow);
+  // home's elapsed time is the result of everything above; the story only holds inside its span
+  const cmp = storyCompare(P.outsideYears);
+  const [lo, hi] = LAB.spanYears;
+  rows.push({ k: 'home waits', v: fmtYearsLong(P.outsideYears), verdict: cmp.inSpan ? 'ok' : 'span',
+    n: cmp.inSpan ? 'the sum of the legs; the world you return to is generated for this span [illustrative world]'
+      : `the sum of the legs; the world in this story needs ${fmtInt(lo)} to ${fmtInt(hi)} years to happen [illustrative world]` });
   const lethal = rows.filter((r) => r.verdict === 'lethal');
-  return { rows, ok: lethal.length === 0, lethal, risk: rows.some((r) => r.verdict === 'risk'), sf: rows.filter((r) => r.verdict === 'sf').length };
+  return { rows, ok: lethal.length === 0 && cmp.inSpan, lethal, inSpan: cmp.inSpan, cmp, risk: rows.some((r) => r.verdict === 'risk'), sf: rows.filter((r) => r.verdict === 'sf').length };
 }
+
+/* Years as a phrase: whole years from two up, a duration below. */
+function fmtYearsLong(y) { return y >= 2 ? `${fmtInt(y)} years` : fmtDur(y * YEAR); }
 
 function renderModes() {
   const host = $('modes');
@@ -236,6 +259,8 @@ function paramValueText(mode, key, x) {
   if (key === 'logDelta') return x >= -0.01 ? `a* = 0 <small>no spin</small>` : `a* = 1 − 1e${x.toFixed(1)}`;
   if (key === 'logF') return `r = rs (1 + 1e${x.toFixed(2)})`;
   if (key === 'aG') return `${x.toFixed(2)} <small>g</small>`;
+  if (key === 'logStay') return `${fmtDur(10 ** x)} <small>${mode === 'hover' ? 'hovering' : 'in orbit'}, your clock</small>`;
+  if (key === 'shipY') return `${x.toFixed(1)} <small>years, your clock</small>`;
   return String(x);
 }
 
@@ -273,15 +298,16 @@ function spark(P) {
   const b = buildWorldPreviewBeacon(P);
   const W = 300, H = 58, lo = -4, hi = 8;
   const y = (s) => H - 6 - ((clamp(Math.log10(s), lo, hi) - lo) / (hi - lo)) * (H - 14);
-  const pts = b.samples.map((s) => `${(s.rxYears / LAB.outsideYears * W).toFixed(1)},${y(b.beatS * s.factor).toFixed(1)}`);
+  const pts = b.samples.map((s) => `${(s.rxYears / P.outsideYears * W).toFixed(1)},${y(b.beatS * s.factor).toFixed(1)}`);
   const ticks = [[1, '1 s'], [3600, '1 h'], [86400 * 30, '1 mo']].map(([s, t]) => `<line class="axis" x1="0" x2="${W}" y1="${y(s)}" y2="${y(s)}" stroke-dasharray="2 4" opacity=".5"/><text x="${W - 2}" y="${y(s) - 2}" text-anchor="end" font-size="8" fill="#424B57">${t}</text>`).join('');
+  const endLabel = P.outsideYears >= 2 ? `year ${fmtInt(P.outsideYears)}` : fmtDur(P.outsideS, { short: true });
   svg.innerHTML = `${ticks}<polygon class="fillc" points="0,${H} ${pts.join(' ')} ${W},${H}"/><polyline class="curve" points="${pts.join(' ')}"/>
-    <text x="2" y="${H - 1}" font-size="8" fill="#424B57">year 0</text><text x="${W - 2}" y="${H - 1}" font-size="8" fill="#424B57" text-anchor="end">10,000</text>`;
+    <text x="2" y="${H - 1}" font-size="8" fill="#424B57">year 0</text><text x="${W - 2}" y="${H - 1}" font-size="8" fill="#424B57" text-anchor="end">${esc(endLabel)}</text>`;
   const ht = $('heardt');
   if (P.method === 'flight') {
-    ht.innerHTML = `Your beats stretch to <b>${fmtDur(b.beatS * b.factorMax)}</b> apart by year 5,000, then close up again; the whole return leg arrives in the last <b>${fmtDur(b.lastBurstS)}</b>. The carrier falls to <b>${fmtHz(LAB.carrierHz / b.factorMax)}</b>.`;
+    ht.innerHTML = `Your beats stretch to <b>${fmtDur(b.beatS * b.factorMax)}</b> apart by year ${fmtInt(b.peakYear)}, then close up again; the whole return leg arrives in the last <b>${fmtDur(b.lastBurstS)}</b>. The carrier falls to <b>${fmtHz(LAB.carrierHz / b.factorMax)}</b>.`;
   } else {
-    ht.innerHTML = `One beat every <b>${fmtDur(b.beatS * P.D)}</b>, for ten thousand years. Your ${fmtHz(LAB.carrierHz)} carrier arrives at <b>${fmtHz(LAB.carrierHz / P.D)}</b>; hearing it takes an antenna element <b>${fmtLen(299792458 / (2 * LAB.carrierHz / P.D))}</b> long.`;
+    ht.innerHTML = `One beat every <b>${fmtDur(b.beatS * P.D)}</b>, for ${esc(fmtYearsLong(P.outsideYears))}. Your ${fmtHz(LAB.carrierHz)} carrier arrives at <b>${fmtHz(LAB.carrierHz / P.D)}</b>; hearing it takes an antenna element <b>${fmtLen(299792458 / (2 * LAB.carrierHz / P.D))}</b> long.`;
   }
 }
 
@@ -292,9 +318,9 @@ function buildWorldPreviewBeacon(P) {
     const tau = P.shipS * i / N;
     samples.push({ rxYears: maps.rx(tau) / YEAR, factor: P.method === 'flight' ? maps.rate(tau) : P.D });
   }
-  const factorMax = Math.max(...samples.map((s) => s.factor));
-  const lastBurstS = P.method === 'flight' ? (LAB.outsideYears * YEAR - maps.rx(2 * P.tauQ)) : 0;
-  return { samples, factorMax, beatS: 1 / LAB.heartHz, lastBurstS };
+  const peak = samples.reduce((a, s) => (s.factor > a.factor ? s : a), samples[0]);
+  const lastBurstS = P.method === 'flight' ? (P.outsideS - maps.rx(2 * P.tauQ)) : 0;
+  return { samples, factorMax: peak.factor, peakYear: peak.rxYears, beatS: 1 / LAB.heartHz, lastBurstS };
 }
 
 function formulaFor(P) {
@@ -317,18 +343,34 @@ function update() {
   S.plan = P;
   const C = costsOf(P);
   $('c_you').textContent = fmtDur(P.shipS);
+  // home's clock: the sum of the legs in the ledger below, never a constant
+  $('c_home').textContent = fmtYearsLong(P.outsideYears);
+  const story10k = stayFor(P, LAB.storyYears * YEAR);
+  const exact = Math.round(P.outsideYears) === LAB.storyYears;
+  $('c_note').textContent = `${C.cmp.text}${exact ? '' : ` ${P.method === 'flight' ? 'A time aboard' : 'A stay'} of ${fmtDur(story10k)} would give ${fmtInt(LAB.storyYears)}.`}`;
+  $('c_note').classList.toggle('differs', !exact);
+  $('h1lo').textContent = P.outsideYears >= 2 ? `Come home ${fmtInt(P.outsideYears)} years late.` : `Come home ${fmtDur(P.outsideS)} late.`;
   $('c_ratio').textContent = P.method === 'flight'
     ? `average ×${fmtSci(P.D)}; at top speed your clock runs ×${fmtSci(P.gammaMax)} slow`
     : `×${fmtSci(P.D)}: one of your seconds is ${fmtDur(P.D)} at home`;
   $('costs').innerHTML = C.rows.map((r) => `<div class="cost" data-v="${r.verdict}"><span class="k">${esc(r.k)}</span><span class="v">${esc(r.v)}</span><span class="n">${esc(r.n)}</span></div>`).join('');
   const vd = $('verdict');
   if (C.ok) { vd.className = 'verdict ok'; vd.textContent = `crossable${C.risk ? ', at a risk' : ''}${C.sf ? ` · ${C.sf} cost${C.sf > 1 ? 's' : ''} beyond any engine` : ''}`; }
-  else { vd.className = 'verdict'; vd.textContent = `not survivable · ${C.lethal.map((r) => r.k).join(', ')}`; }
+  else if (C.lethal.length) { vd.className = 'verdict'; vd.textContent = `not survivable · ${C.lethal.map((r) => r.k).join(', ')}`; }
+  else { vd.className = 'verdict'; vd.textContent = `survivable · home's time is outside the story's span`; }
   $('cross').disabled = !C.ok;
   const why = $('why');
-  if (!C.ok) {
+  if (C.lethal.length) {
     const r = C.lethal[0];
-    why.innerHTML = `<b>The physics refuses.</b> ${esc(r.k)}: ${esc(r.v)}. ${S.mode === 'hover' ? 'No known hole is heavy enough to hover your way ten thousand years ahead.' : S.mode === 'orbit' ? 'Spin the hole faster, or choose a heavier hole.' : ''}`;
+    let more = S.mode === 'orbit' ? 'Spin the hole faster, or choose a heavier hole.' : '';
+    if (S.mode === 'hover') {
+      const lim = hoverLimit(P.mSun, 1.25);
+      more = `At 1.25 g the deepest this hole lets you hover runs your clock ×${fmtSci(lim.D)} slow: ${LAB.maxShipYears} years of your life there buy ${fmtYearsLong(lim.outsideYears)} at home.`;
+    }
+    why.innerHTML = `<b>The physics refuses.</b> ${esc(r.k)}: ${esc(r.v)}. ${esc(more)}`;
+  } else if (!C.inSpan) {
+    const [lo, hi] = LAB.spanYears;
+    why.innerHTML = `<b>The story refuses, not the physics.</b> Home would wait ${esc(fmtYearsLong(P.outsideYears))}; the world in this story needs ${fmtInt(lo)} to ${fmtInt(hi)} years to happen. ${P.method === 'flight' ? 'A time aboard' : 'A stay'} of ${esc(fmtDur(story10k))} would give ${fmtInt(LAB.storyYears)}.`;
   } else {
     why.textContent = P.method === 'orbit' && P.delta < 0.002 ? 'The orbit is real physics; the spin it needs is not known to exist. The page lets you go.' : P.method === 'flight' ? 'The kinematics are exact; the fuel is fiction. The page lets you go.' : '';
   }
@@ -394,12 +436,16 @@ function phase(name) {
 }
 
 /* ---------------- II. the film ---------------- */
-const AXIS_MAX = Math.log10(LAB.outsideYears * YEAR * 1.05);
+// the film's log axis ends just past home's computed elapsed time
+let AXIS_MAX = Math.log10(LAB.storyYears * YEAR * 1.05);
 const axisX = (s) => clamp(Math.log10(Math.max(1, s)) / AXIS_MAX, 0, 1);
 
-function buildAxis() {
-  const marks = [[1, '1 s'], [60, '1 min'], [3600, '1 h'], [86400, '1 d'], [YEAR, '1 yr'], [100 * YEAR, '100 yr'], [LAB.outsideYears * YEAR, '10,000 yr']];
-  $('axis').innerHTML = marks.map(([s, t]) => `<span style="left:${axisX(s) * 100}%">${t}</span>`).join('');
+function buildAxis(P) {
+  AXIS_MAX = Math.log10(P.outsideS * 1.05);
+  const end = P.outsideYears >= 2 ? `${fmtInt(P.outsideYears)} yr` : fmtDur(P.outsideS, { short: true });
+  const marks = [[1, '1 s'], [60, '1 min'], [3600, '1 h'], [86400, '1 d'], [YEAR, '1 yr'], [100 * YEAR, '100 yr']].filter(([s]) => s < P.outsideS * 0.5);
+  marks.push([P.outsideS, end]);
+  $('axis').innerHTML = marks.map(([s, t]) => `<span style="left:${axisX(s) * 100}%">${esc(t)}</span>`).join('');
 }
 
 function startCrossing() {
@@ -412,7 +458,7 @@ function startCrossing() {
   S.ending = null;
   S.idleCount = 0;
   phase('film');
-  buildAxis();
+  buildAxis(P);
   $('flog').innerHTML = '';
   $('b_home').parentElement.querySelectorAll('.tick').forEach((t) => t.remove());
   const maps = timeMaps(P);
@@ -873,7 +919,7 @@ function end(kind) {
   $('end-h').textContent = e.title;
   $('endtext').innerHTML = e.text.split('\n\n').map((p) => `<p>${esc(p)}</p>`).join('');
   const sn = S.mind.snapshot(), W = S.world;
-  $('endnums').innerHTML = `your clock ${esc(fmtDur(S.plan.shipS))} · home ${fmtInt(W.years)} years · ratio ×${esc(fmtSci(W.plan.factorMax))}<br>
+  $('endnums').innerHTML = `your clock ${esc(fmtDur(S.plan.shipS))} · home ${fmtInt(W.years)} years, computed · ratio ×${esc(fmtSci(W.plan.factorMax))}<br>
     TALLY told you ${sn.told.length} of the ${sn.total} things it knew · ${S.modelCalls} model call${S.modelCalls === 1 ? '' : 's'} · ${S.transcript.filter((t) => t.who === 'you').length} things you said`;
   const P = S.plan;
   const tideAt = (rM) => P.method === 'flight' ? 0 : 2 * P.mSun * GM_SUN * LAB.bodyL / Math.pow(rM * P.mSun * GM_SUN / (299792458 ** 2), 3) / G0;
@@ -884,7 +930,7 @@ function end(kind) {
     `<td>${P.method === 'flight' ? '0 g' : esc(fmtSci(tideAt(Math.min(l.rFrom, l.rTo))) + ' g')}</td>` +
     `<td>${esc(tons(prop.legs[i].massAfterKg))}</td></tr>`).join('');
   $('replay').innerHTML = P.journey.legs.map((l, i) => `<li><b>${i + 1}. ${esc(LEG_NAMES[l.id] || l.id)}</b> · ${esc(legWhy(P, l))}. You: ${esc(fmtDur(l.shipS))}. Home: ${esc(fmtYears(l.homeS))}.</li>`).join('') +
-    `<li><b>total</b> · ${esc(fmtDur(P.shipS))} for you, ${fmtInt(LAB.outsideYears)} years at home. ${esc(formulaFor(P).cite.replace(/&amp;/g, '&'))}</li>`;
+    `<li><b>total</b> · ${esc(fmtDur(P.shipS))} for you, ${esc(fmtYearsLong(W.years))} at home, the sum of the legs above. ${esc(storyCompare(W.years).text)} ${esc(formulaFor(P).cite.replace(/&amp;/g, '&'))}</li>`;
   scene.u.glow = 0.55;
   sound.ping(660, 0.1);
   const seen = readEndings(); seen.add(e.variant); try { localStorage.setItem('lw.endings', JSON.stringify([...seen])); } catch { /* storage blocked */ }
@@ -929,7 +975,7 @@ function renderSources() {
     if (!e) { n.textContent = 'Measured contribution: no evaluation file.'; return; }
     const mm = e.model_mode;
     const why = Object.entries(mm.refused_by_reason).map(([k, v]) => `${v} ${k}`).join(', ') || 'none';
-    n.textContent = `Measured contribution (${e.measured.slice(0, 10)}, ${e.model} on ${e.route}, ${e.questions} fixed lines, every line sent to the model): ${mm.voiced} replies accepted, ${mm.refused} refused (${why}); the model's stated intent matched the engine's on ${mm.intent_matches_engine} of ${e.questions}. Method: model-eval.mjs in this lab's folder.`;
+    n.textContent = `Measured contribution (${e.measured.slice(0, 10)}, ${e.model} on ${e.route}, ${e.questions} fixed lines, every line sent to the model): ${mm.voiced} replies accepted, ${mm.refused} refused (${why}); the model's stated intent matched the engine's on ${mm.intent_matches_engine} of ${e.questions}. Method: model-eval.mjs in this lab's folder. ${e.validator === 'clock-roles' ? '' : 'This run predates two engine changes: the validator now also refuses a reply that gives a clock to the wrong owner, and the outside time is computed from the crossing instead of fixed at 10,000 years. Its counts are not yet re-measured.'}`;
   }).catch(() => {});
 }
 

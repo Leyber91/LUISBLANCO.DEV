@@ -72,7 +72,7 @@ export const CATEGORIES = [
         blurb: 'A navigable timeline of the Tryverse — branch points, dimensions and the people inside them.' },
       { id: 'last-witness', title: 'Time-Slip: The Last Witness', status: 'built',
         href: 'last-witness.html',
-        blurb: 'Choose a black hole orbit or a relativistic flight, come home ten thousand years late by the real formulas, and speak with the last machine mind awake. It counted your heartbeat the whole time.' },
+        blurb: 'Choose a black hole orbit or a relativistic flight and how long you stay; the real formulas compute how late you come home. Then speak with the last machine mind awake. It counted your heartbeat the whole time.' },
       { id: 'alt-reality', title: 'Alternate Reality Scenarios', status: 'beta',
         href: 'altverse.html',
         blurb: 'A what-if engine: change one constant and a deterministic pipeline weaves a complete, consistent world — premise, chronology, map and the causal record of how it differs from ours.' },
