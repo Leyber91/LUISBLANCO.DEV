@@ -2,8 +2,8 @@
 /* ============================================================
    tools/lab_tests.mjs — run every lab's own tests.
 
-   A lab ships its tests as labs/assets/js/<lab>/tests.mjs (or any
-   *.test.mjs under labs/assets/js/). Each file runs in Node on its
+   A lab ships its tests as labs/assets/js/<lab>/tests.mjs, any
+   *.test.mjs, or tests/run.mjs, under labs/assets/js/. Each file runs in Node on its
    own; a non-zero exit, an uncaught error or a run over 120 s fails
    the gate. Labs without tests are listed, not failed.
 
@@ -19,12 +19,16 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const JS = path.join(ROOT, 'labs', 'assets', 'js');
 
+/* The file names labs use for a self-contained Node check. */
+const TEST_NAMES = new Set(['tests.mjs', 'test.mjs', 'verify.mjs', 'selftest.mjs', 'self-test.mjs', 'check.mjs']);
+
 function findTests(dir) {
   const out = [];
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) out.push(...findTests(p));
-    else if (e.name === 'tests.mjs' || e.name.endsWith('.test.mjs')) out.push(p);
+    else if (TEST_NAMES.has(e.name) || e.name.endsWith('.test.mjs') ||
+      (e.name === 'run.mjs' && path.basename(dir) === 'tests')) out.push(p);
   }
   return out;
 }
