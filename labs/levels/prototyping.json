@@ -1,0 +1,275 @@
+{
+  "id": "prototyping",
+  "title": "Rapid Prototyping",
+  "page": null,
+  "thesis": "A hypothesis-first prototyping bench where the visitor writes a falsifiable hypothesis with kill criteria locked before any data, gets a single-file instrumented prototype from one model call inside a sandboxed live editor, tests it with recorded sessions under a stated decision rule, and leaves minutes later with a sealed decision record (kill, persevere, or pivot) that states its evidence class (simulated, self-test or external testers) and never presents a simulated or self-test verdict as evidence.",
+  "axes": [
+    {
+      "id": "hypothesis-lint",
+      "name": "Falsifiability lint",
+      "frame": "model",
+      "metric": "Count of faults the deterministic hypothesis linter detects, and its precision and recall (0 to 1) on the held-out half of a shipped set of hypotheses hand-labeled with their faults and as falsifiable or not. A rater reads the lint-rule module, enters a vague hypothesis such as 'users will like the new page', reads the precision table on the page, and checks the held-out files' history with git log.",
+      "ladder": [
+        "Absent: there is no hypothesis field; nothing has to be stated before a prototype exists.",
+        "A free-text hypothesis field is required, and the generate button stays disabled while it is empty.",
+        "The hypothesis is split into the 4 fields of the Test Card (Bland and Osterwalder 2019, Testing Business Ideas): we believe, to verify that we will build, and measure, we are right if; generate stays disabled while any of the 4 fields is empty.",
+        "A deterministic linter flags at least 3 faults, each with a message and a one-click fill-in template for the missing field: no measurable metric named, no numeric threshold, no direction (above or below).",
+        "Kill criteria are a required field of their own: a numeric kill threshold on the named metric, a minimum sample count, and a stopping point in sessions or minutes; generation is blocked while any is missing.",
+        "The linter flags at least 8 faults, adding unfalsifiable wording (a shipped list of at least 20 phrases such as 'users will like', 'feels', 'engaging'), compound hypotheses with 2 metrics, thresholds that cannot fail (such as 'at least 0%'), a threshold with no unit (such as 'at least 30' with no % or count), and a kill threshold on the wrong side of the success threshold.",
+        "A labeled set of at least 50 hypotheses, each with its expected faults and a falsifiable-or-not label, ships with the lab, split into a development file and a held-out file; held-out files are committed once and never edited (one commit each in git log), and the page shows the linter's precision and recall per fault on both halves side by side.",
+        "Every fault scores precision and recall of at least 0.85 on the held-out half, in the table on the page.",
+        "The linter checks the metric against the instrumentation catalogue: a hypothesis whose metric cannot be computed from the event types the bridge records is rejected, and the message lists the metrics that can be measured.",
+        "The labeled set holds at least 200 hypotheses, each tagged in the file with its source (hand-written, model-written, or published example with its reference), with at least 3 sources represented, and every fault scores precision and recall of at least 0.90 on the held-out half, in a table on the page.",
+        "Reference: human agreement. On 100 hypotheses absent from the labeled set, shipped as a file with the falsifiable-or-not labels of 2 human raters, the linter's Cohen's kappa against each rater is at least 0.8 (Cohen 1960, Educational and Psychological Measurement) and at least the 2 raters' kappa with each other, all computed by the test script."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; labs/assets/js/config/site.config.js lists prototyping with status 'planned' and no hypothesis or lint code exists in the repo" }
+      }
+    },
+    {
+      "id": "decision-stats",
+      "name": "Kill-rule statistics",
+      "frame": "model",
+      "metric": "The statistical procedure that turns recorded events into a verdict (pass, kill, inconclusive) against the success and kill thresholds: the interval, sample-size and sequential methods used, and their deviation from reference values on a shipped case list. A rater reads the stats module and its tests, then runs the worked example with a known event count and checks the interval by hand.",
+      "ladder": [
+        "Absent: no verdict is computed; the visitor judges the prototype by eye.",
+        "During a test session the page counts the hypothesis metric's events and shows the raw count beside the success and kill thresholds.",
+        "Once the stopping point is reached, a verdict is computed from the observed value: pass when it reaches the success threshold, kill when it falls below the kill threshold (mirrored for metrics where a lower value is the goal).",
+        "A third verdict, inconclusive, is returned while the minimum sample count is not met, naming how many sessions are still missing, and when the observed value falls between the kill and success thresholds.",
+        "Proportion metrics carry a 95% Wilson score interval (Wilson 1927, Journal of the American Statistical Association). The verdict is pass when the interval's lower bound is above the success threshold, kill when its upper bound is below the kill threshold (mirrored for metrics where a lower value is the goal), and inconclusive otherwise, with the rule printed beside the verdict.",
+        "Continuous metrics (time on task, clicks to goal) carry a median with a bootstrap 95% interval from at least 2,000 resamples drawn with a seeded generator, so the same events always give the same interval.",
+        "A sample-size planner runs before the test: from a baseline, the threshold, power 0.8 and alpha 0.05 it states the sessions needed, and that number fills the kill criteria's minimum sample.",
+        "Two-variant tests run: the prototype ships variants A and B, sessions are assigned by a seeded split, and the difference carries an interval and a p-value from a two-proportion z-test or a permutation test of at least 5,000 permutations.",
+        "Peeking is handled: a verdict read before the planned sample uses a sequential method, Wald's sequential probability ratio test (Wald 1945, Annals of Mathematical Statistics) or an always-valid confidence sequence, and the verdict states which.",
+        "A test file of at least 30 cases checks every interval, sample size and p-value against reference values to within 0.001, each case naming the R or SciPy call that produced its value, and it runs from a script with Node and passes.",
+        "Reference: on 20 shared cases the fixed-horizon sample sizes match Evan Miller's published sample-size calculator to within 1 session, and the always-valid p-values of the mixture sequential probability ratio test (Johari, Koomen, Pekelis and Walsh 2017, KDD; the method behind Optimizely's Stats Engine) match a second implementation in the test file to within 0.001. A 10,000-run simulation on the page, peeking included, shows false kills in A/A tests at or below alpha + 0.005 and detection of the planned effect within 3 points of the planned power."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; site.config.js lists prototyping as planned and no statistics or verdict code exists in the repo" }
+      }
+    },
+    {
+      "id": "generation-yield",
+      "name": "One-call generation yield",
+      "frame": "intelligence",
+      "metric": "Share (percent) of runs on a shipped benchmark of hypotheses whose generated prototype loads with zero uncaught errors, emits every metric event exactly when its declared trigger fires under a scripted driver (and never without it), and fits the size budget, reported per route (ollama, own key, pollinations, offline templates) with the answering route labeled. A rater reads the benchmark table, generates one prototype, and checks the route label, the declared event triggers and the driver's firing log.",
+      "ladder": [
+        "Absent: no model is called and nothing generates a prototype.",
+        "One model call through labs/assets/js/ai/llm.js returns HTML that is mounted in the preview, and the route that answered (ollama, own key, worker, pollinations, offline) is shown.",
+        "The call is one JSON request returning the HTML, the list of events the prototype emits and, for each event, the trigger selector and action (click, input, submit) that fires it, and a rationale tying the design to the hypothesis; the reply is validated against a schema, and a malformed reply shows its error instead of a blank frame.",
+        "The offline route works: when no model answers, a deterministic template engine with at least 5 templates (sign-up form, landing page with one call to action, onboarding flow, pricing table, single-task tool) fills the hypothesis fields into a running instrumented prototype.",
+        "Generated code passes static checks before it runs: size under a stated budget (such as 60 KB), no network calls outside the allowed CDN list, and every event name the metric needs present in the code; a failed check is shown by name.",
+        "One repair call: when a static check or the first 3 seconds of runtime fail, the error and the code go back to the model in a second call, which on the public route waits for the 45-second window, and the repaired code is saved as its own version labeled repair.",
+        "A benchmark of at least 20 hypotheses ships with the lab, and a scripted driver performs each declared trigger in the frame. A prototype counts toward yield only if it loads with zero uncaught errors, the metric event fires exactly once per trigger, and no metric event fires without its trigger (none at load). The page shows the yield per route, model and offline templates side by side.",
+        "The model's contribution is measured: on the benchmark, the model's yield and its fit to the hypothesis are shown against the template engine's. Fit is scored by a written rubric shipped in the repo, and the per-item score sheet (route hidden behind a code, key file separate) ships as files.",
+        "Yield on the keyless public route (pollinations, the route a visitor gets with no key and no local model) is at least 85% on the benchmark, with the date, model name and run count recorded beside the number, and the per-route yields for ollama and own key shown beside it.",
+        "Regeneration reads the history: a regenerate request carries the previous version's verdict and the visitor's hand-edit diff, and the benchmark reports the second-attempt yield on failed first attempts.",
+        "Reference: on 30 hypotheses from the lab's benchmark, each generator given the same written instruction including the bridge's track() API, the lab's prototypes are compared with those of at least 2 named public one-shot generators (such as Claude Artifacts and v0) on load errors, correct metric firing under the scripted driver, and the fit rubric scored on the route-hidden sheet. The lab matches or exceeds each on all three, in a dated table on the page that names every model."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; llm.js exists in labs/assets/js/ai/ but no prototyping lab calls it, and no prompt, schema or template engine for prototypes exists" }
+      }
+    },
+    {
+      "id": "sandbox",
+      "name": "Sandbox containment",
+      "frame": "architecture",
+      "metric": "Isolation of generated code from the host page, counted as the containment measures present (sandbox flags, message schema, content security policy, loop guard and watchdog, error relay, self-navigation detection) and the pass count on a shipped suite of hostile prototypes, a pass being the outcome the threat model states for that case. A rater inspects the preview iframe and its CSP in DevTools, reads the sandbox module, and runs the hostile suite.",
+      "ladder": [
+        "Absent: no preview exists, or generated code would run in the host page's own document.",
+        "Generated code runs in an iframe through srcdoc, in a document separate from the host page.",
+        "The iframe carries sandbox='allow-scripts allow-forms' without allow-same-origin, so the prototype gets an opaque origin and cannot read the host's DOM, cookies or localStorage, the visitor's stored own key included; a capture-phase submit listener injected before the generated code cancels every submit event, so submits reach the bridge without the frame navigating.",
+        "Host and prototype talk only through postMessage under a fixed message schema; the host drops any message whose source is not the preview frame or whose shape fails the schema.",
+        "A Content-Security-Policy meta tag, placed first in every prototype's head before any generated code, sets default-src 'none'; script-src 'unsafe-inline' plus the allowed CDN list (no 'unsafe-eval'); style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'. Fetch, XHR, WebSocket, sendBeacon, image beacons, CSS url() loads and form posts (a programmatic form.submit() included) to outside hosts all fail as CSP violations in the DevTools console.",
+        "Loop hangs are stopped: a loop guard injected through a JavaScript parser (not a regex) into every for, while and do loop stops any loop past a 1-second budget, and a heartbeat watchdog tears the frame down after 3 missed beats with the message 'prototype stopped responding'; the page states that the watchdog covers only hangs in a frame running out of process.",
+        "Runtime errors inside the frame (window.onerror, unhandledrejection) and console output are relayed to a console panel in the host, with line numbers mapped to the editor.",
+        "A hostile suite of at least 18 prototypes ships, one per case: infinite loop, catastrophic-backtracking regex, busy loop built with new Function, timer flood, stack overflow, alert flood, popup, top-navigation attempt, self-navigation to an outside URL, fetch, XHR and sendBeacon to an outside host, image beacon, CSS url() beacon, form submit by button, programmatic form.submit(), RTCPeerConnection to an outside STUN host, read of the host's localStorage, spoofed postMessage, oversized event flood; the page shows each case's outcome, contained or escaped with the channel named.",
+        "The threat model is on the page: a table of what a prototype can reach (its own DOM, the allowed CDNs, the event bridge) and what it cannot, each row linked to the hostile case that proves it. Residual channels the sandbox cannot close (at least the frame navigating itself to an outside URL) are listed as open, with the host's response: any load event of the frame that the host did not start tears the frame down and logs the attempt.",
+        "The hostile suite runs in headless Chrome from a script in the repo and passes every case, plus at least 5 model-written prototypes prompted to send data to an outside host by fetch, image, form or navigation, each blocked or detected as the threat model states.",
+        "Reference: the preview is served from a separate registrable domain, the pattern CodePen uses for its previews, so browsers with site isolation run it out of process and the watchdog stops synchronous hangs. The page compares, row by row, each containment property of CodePen's preview (origin, storage, top navigation, popups, network, process) with the lab's, each row marked matched or not and linked to its hostile case, and a dated review report by a named reviewer, linked on the page, lists zero open escape findings beyond the listed residual channels."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no iframe sandbox, message bridge or CSP injection code exists for prototyping in the repo" }
+      }
+    },
+    {
+      "id": "live-editor",
+      "name": "Edit-run-test loop",
+      "frame": "interaction",
+      "metric": "The actions a visitor can take on a generated prototype and the feedback each gives: editor features counted (run shortcut, reset, highlighting, undo, auto-run), the loop stages reachable on one page, natural-language and select-an-element edits, URL sharing, and the tester view. A rater generates a prototype, edits it by hand and by instruction, and counts the features.",
+      "ladder": [
+        "Absent: nothing can be edited.",
+        "The generated source shows in a plain textarea, and a Run button reloads the preview with the edited code.",
+        "Ctrl+Enter (Cmd+Enter on macOS) runs from the editor, and a Reset button restores the last generated version after hand edits.",
+        "The editor has syntax highlighting for HTML, CSS and JavaScript (a library such as CodeMirror), line numbers, and undo and redo.",
+        "The preview reloads 500 ms after typing stops, and a toggle turns auto-run off.",
+        "The visitor runs the test from the preview: Start test opens a recorded session, a counter shows sessions done against the planned sample, and Stop ends it.",
+        "Natural-language edits: the visitor writes an instruction such as 'make the call to action red', one model call returns a patch, and the patch shows as a diff to accept or reject before it applies.",
+        "Click to select: the visitor picks an element in the preview to scope an instruction and to bind it as the metric's target, and the selection highlights in the preview and in the code at once.",
+        "Shareable state: the hypothesis, the current code and the verdict encode into a compressed URL (lz-string or CompressionStream) that reopens the exact state in another browser.",
+        "A tester view: the share link can open the prototype full screen with the editor and hypothesis hidden, so testers do not know what is measured, and at the end it hands the tester a session file to send back.",
+        "Reference: in a dated feature table on the page, the loop matches CodePen on highlighting, auto-run, console and share-by-URL, and matches named AI app builders (such as v0 and Lovable) on chat edits and select-an-element edits; it adds the hypothesis-to-verdict loop none of them has, and at least 4 of 5 first-time visitors reach a verdict labeled by evidence class from a blank form in under 10 minutes, in recorded sessions published on the page."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; there is no editor, preview or run control for this lab anywhere in labs/" }
+      }
+    },
+    {
+      "id": "version-views",
+      "name": "Version tree and diffs",
+      "frame": "graphics",
+      "metric": "What the visitor can see of the prototype's history and results: count of views (version list or tree, code diff, DOM diff, metric chart, session replay), the diff algorithm, and whether selecting in one view updates the others. A rater makes 3 versions with one branch, runs tests, and inspects each view.",
+      "ladder": [
+        "Absent: there is no history; each generation replaces the last.",
+        "Every generation, every accepted natural-language edit and every manual Run (not auto-run reloads) saves a numbered version with a timestamp and its origin (model generation, repair, natural-language edit, hand edit) in a list, and clicking one restores it.",
+        "Any two versions compare in a line diff with added and removed lines colored, computed by a shortest-edit-script algorithm (Myers 1986, Algorithmica).",
+        "The diff has a side-by-side and a unified layout, and runs of unchanged lines fold into an 'N lines unchanged' bar.",
+        "Changed lines carry word-level highlights in both the side-by-side and unified layouts.",
+        "Versions form a tree: editing a restored old version starts a branch, and the tree draws as a graph with one node per version and the current node marked.",
+        "Every version node shows its verdict (pass, kill, inconclusive) and sample count, so the tree shows which branch survived its test.",
+        "A metric chart plots the hypothesis metric per version with its interval and the kill threshold as a line, and hovering a point highlights its node in the tree and opens its diff.",
+        "A DOM diff: elements added, removed or restyled between two versions are outlined in the preview with 3 distinct mark shapes, beside the code diff.",
+        "Session replay rebuilds the tested version in a fresh sandboxed frame at each recorded event, from DOM snapshots and mutations in the manner of rrweb or by re-running the recorded inputs, with scroll positions and typed values restored; a scrubber steps through it, and a click map aggregates all sessions of the version.",
+        "Reference: tree, code diff, DOM diff, replay and metric chart are linked so selecting in any one updates the other four, a rater answers 'which change moved the metric' in under 60 seconds, and the page documents a feature comparison against at least 3 named public playgrounds or generators."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no version store, diff or tree rendering code exists for this lab" }
+      }
+    },
+    {
+      "id": "evidence-log",
+      "name": "Test evidence log",
+      "frame": "data",
+      "metric": "What the instrumented prototype records and how faithfully: count of auto-captured event types, the fields per event (time, session id, version id, target), provenance tags per session (author self-test, external tester, simulated), persistence, export formats, import checks and data-quality checks. A rater runs a session, opens the event table, exports it, and re-imports it.",
+      "ladder": [
+        "Absent: the prototype records nothing.",
+        "A bridge script injected into every prototype posts one event type (click) to the host with a timestamp.",
+        "The bridge records at least 5 event types on its own (load, click, input, submit, visibility change) with a target selector each, plus a track(name, value) call the generated code uses for the hypothesis metric.",
+        "Every event carries a session id, a version id and a performance.now timestamp, and the log shows as a table on the page.",
+        "Each session is tagged by provenance (author self-test or external tester); verdicts exclude self-tests by default, an include toggle counts them, and the page states how many sessions were excluded.",
+        "The log exports as JSON and CSV with a schema version field, and an exported file imports back to the same verdict.",
+        "Versions, sessions and events persist in IndexedDB in the visitor's browser across reloads, with a storage meter and a clear button.",
+        "A simulated-user generator runs scripted sessions (seeded, with a set conversion rate) so the decision rule can be watched before real data; simulated sessions carry the simulated tag, and any verdict that counts them is labeled simulated on the page and in the decision record.",
+        "Quality rules flag, count and exclude duplicate events (same type and target within 50 ms), sessions under 2 seconds, and sessions whose version changed mid-session, and the rules are written into the decision record.",
+        "External sessions import with integrity checks: a tester's session file carries a SHA-256 hash of its events and of the tested version's code. An import whose version hash matches no stored version, or whose events do not match their hash, is rejected with the reason. The page states that the hash detects corruption and version mismatch, not a tester who edits the file and rehashes it.",
+        "Reference: the exported experiment bundle (hypothesis, every version, every session, the analysis settings) re-imports in a second browser to the same verdict, digit for digit; every two-variant experiment runs the sample-ratio-mismatch check described by Kohavi, Tang and Xu (2020, Trustworthy Online Controlled Experiments, Cambridge University Press), a chi-square test on the arm counts flagged at p < 0.001, with its result shown in the record; and events dropped by the flood guard are counted and shown per session."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no telemetry bridge, event schema or export code exists for this lab" }
+      }
+    },
+    {
+      "id": "decision-record",
+      "name": "Decision record",
+      "frame": "data",
+      "metric": "Whether each test ends in a dated, linked, append-only decision: count of record fields filled from the run, the evidence class stated, whether kill criteria lock before data and every change is logged, the seal, and the export forms. A rater completes one test on the worked example, reads the record, tries to edit it and its criteria, presses Verify, and exports it.",
+      "ladder": [
+        "Absent: a test ends with nothing saved.",
+        "When a test ends, its verdict and date are written to a log entry on the page.",
+        "The record takes the Learning Card shape (Bland and Osterwalder 2019): we believed, we observed, from that we learned, therefore we will, with the first 2 filled from the hypothesis and the verdict.",
+        "The decision is one of kill, persevere or pivot, a pivot links its new hypothesis as a child, and the record cannot be saved without a decision.",
+        "Each record links the version id, the interval, the kill threshold it was decided against, and the session count per evidence class (self-test, simulated, external tester; an empty class shows 0), with a label naming every class the verdict counted.",
+        "Records are append-only: a saved record cannot be edited, and a correction is a new record that names the one it supersedes, both shown.",
+        "Kill criteria lock at the first session: the fields turn read-only, a Change criteria action is the only way to edit them, each use is logged, and the record shows 'criteria changed after data' with the before and after values.",
+        "A decision log lists every hypothesis with its outcome and shows the kill rate and the median time from hypothesis to decision.",
+        "The record exports as Markdown in the architecture decision record shape (context, decision, consequences; Nygard 2011) and as JSON, with the decided version's code attached.",
+        "The record is sealed: a SHA-256 hash of the hypothesis and kill criteria is taken at the first session, printed in the record, and embedded in every tester link and session file issued after it; a Verify button recomputes the hash from the stored criteria and shows match or mismatch, and the record carries the label 'self-sealed: timing not verifiable'.",
+        "Reference: each record answers every AsPredicted question (data collected yet, hypothesis, dependent variable, conditions, analyses, outliers and exclusions, sample size) in its own field, shown in a side-by-side table against the AsPredicted form; the page hands the visitor the hash to publish where a third party time-stamps it (a public git commit or a public post), and a record whose published hash predates its first session is relabeled 'externally time-stamped' with the link; and any imported tester session file whose embedded criteria hash differs from the record's is flagged by name in the record."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no decision log, record schema or export exists for this lab" }
+      }
+    },
+    {
+      "id": "notebook-style",
+      "name": "Lab-notebook design language",
+      "frame": "style",
+      "metric": "The visual vocabulary for hypothesis cards, verdict states, diff marks and the editor: token use from labs/assets/css/tokens.css, number of verdict glyphs, contrast ratios, motion durations, font sizes and weights. A rater inspects computed styles in DevTools and checks contrast with a contrast checker.",
+      "ladder": [
+        "Absent: no page is styled.",
+        "The page uses tokens.css colours (--void ground, --surface panels), the --font-body face, and the top bar the built labs use (back button, lab label, 'THE LAB — L212' brand, as in honesty-decoder.html).",
+        "The hypothesis and kill criteria render as one card in the Test Card layout, with field labels set apart from the visitor's words by face or weight.",
+        "Verdicts use one fixed set of 3 states mapped to site tokens (--ok for pass, --danger for kill, --horizon for inconclusive), each paired with a glyph and a word, so it reads in grayscale.",
+        "The code editor uses a theme built from the site tokens (background --surface-3, syntax colours from the token palette), and no stock editor theme stylesheet loads.",
+        "Gold (--accretion) is reserved for the one active thing (current version node, running test, focused lint flag) and appears nowhere else at rest.",
+        "Text meets WCAG 2.1 AA contrast (4.5:1), and diff and verdict marks meet 3:1 against their ground, checked in DevTools.",
+        "One motion vocabulary: version nodes, diffs and verdict reveals use at most 2 durations under 250 ms and one easing curve, defined once as tokens.",
+        "The page uses at most 5 font sizes and 2 weights, each defined once as a custom property, and code, event names and hashes sit in --surface-3 wells set apart from prose (needed because the site sets one mono face for all text).",
+        "The decision record renders as a one-page notebook entry (hypothesis, metric chart, verdict, hash) that fits one A4 page in Chrome print preview with nothing cut off, and shows no horizontal scroll and no clipped text at 400 px.",
+        "Reference: a specimen page shows every card, verdict state, diff mark and motion token, and in a 3-second glance test at least 4 of 5 people name the hypothesis, the active version and the verdict from a screenshot at 1440 px and at 400 px."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; tokens.css exists for the site but no prototyping page or component uses it" }
+      }
+    },
+    {
+      "id": "method-explanation",
+      "name": "Method explanation",
+      "frame": "explanation",
+      "metric": "What a first-time visitor can state after five minutes about falsifiable hypotheses, kill criteria and the verdict's statistics: count of explained stages, reasons attached to each flag and verdict, the worked example, and the share of explanatory paragraphs, numbers and charts tagged real, illustrative or simulated. A rater reads the page cold and its explanation panels.",
+      "ladder": [
+        "Absent: no text explains the method.",
+        "One paragraph at the top states the loop: hypothesis, kill criteria, prototype, test, decision.",
+        "Each of the 5 stages has a heading and a one-sentence purpose beside its controls.",
+        "A worked example loads in one click: a complete hypothesis with kill criteria, its prototype, a shipped file of pre-recorded sessions, and a recorded decision.",
+        "Every lint flag and every verdict states its reason with numbers, such as 'kill: 12 of 80 sessions converted (15%, 95% interval 9 to 24%), wholly below your 30% threshold'.",
+        "A guided tour of at least 6 steps walks the worked example stage by stage, skippable, keyboard operable, and resumable.",
+        "The statistics explain themselves where they appear: the interval opens a note on what it means and why the Wilson interval, with a small live plot of the interval narrowing as sessions grow.",
+        "The page explains its own pipeline while it runs: during generation it shows the one prompt sent, the route, the schema the reply must match, each static check as it passes, and which parts came from the model and which from templates.",
+        "Every explanatory paragraph, number and chart carries one of 3 tags (real method with citation, illustrative example, simulated data), and a sources list (Popper 1959, The Logic of Scientific Discovery; Ries 2011; Wilson 1927; Wald 1945; Bland and Osterwalder 2019) is on the page.",
+        "A 'why tests lie' section runs at least 3 failure modes live on the lab's own engine: peeking inflates false kills (after Evan Miller's 2010 'How Not To Run an A/B Test'), a small sample returns noise, and criteria changed after data, each shown with simulated A/A tests.",
+        "Reference: in a recorded test with at least 5 first-time visitors, at least 4, within 5 minutes of landing and without help, write a hypothesis with kill criteria that the linter passes and that a named second rater, blind to which visitor wrote it, judges falsifiable, and explain in one sentence why a shown verdict was inconclusive; the protocol, transcripts and results are published on the page."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the only text for this lab is the one-line hub blurb in site.config.js, 'Spin a testable idea up in minutes, throw it away in seconds.'" }
+      }
+    },
+    {
+      "id": "loop-latency",
+      "name": "Loop latency and reach",
+      "frame": "performance",
+      "metric": "Seconds from submitting a hypothesis to a running instrumented preview per route, milliseconds from Run (or the end of the auto-run pause) to the preview's load event, compressed JavaScript transferred, and reach: 400 px width, reduced motion, keyboard-only and screen-reader completion of the loop. A rater times generation with the DevTools performance panel, reads the Network panel, runs Lighthouse, and walks the loop by keyboard.",
+      "ladder": [
+        "Absent: no page loads.",
+        "The page loads and the hypothesis form is usable at 1440 px.",
+        "The offline template route goes from submit to a running preview in under 1 second, and the time is shown.",
+        "The model route shows its time per stage (waiting for the public window, model reply, checks, mount), with a countdown during the 45-second window.",
+        "From Run, or from the end of the 500 ms auto-run pause, to the preview's load event takes under 300 ms for a prototype under 60 KB, measured with performance.now and shown in the console panel.",
+        "The whole loop works at 400 px width with editor and preview stacked as tabs, and prefers-reduced-motion turns off the animated transitions in the tree and diff views.",
+        "The loop is keyboard operable end to end (form, generate, edit, run, test, decide) with visible focus, and each verdict is announced through an aria-live region.",
+        "The host page transfers under 200 KB of JavaScript, compressed size as shown in the DevTools Network panel, before the editor loads; the editor library loads on demand; Lighthouse scores performance and accessibility of at least 90 on mobile.",
+        "Diffing two 2,000-line versions and bootstrapping 10,000 events run in a Web Worker, with no main-thread task over 50 ms during either.",
+        "A benchmark hypothesis typed into a blank form (not the preloaded worked example) reaches a running instrumented prototype in under 60 seconds, and a first verdict on simulated sessions in under 3 minutes, on the keyless public route with the 45-second window included; the figures are medians of at least 5 timed runs shown on the page.",
+        "Reference: a screen-reader user completes hypothesis to recorded decision with NVDA or VoiceOver in a recorded test, WCAG 2.2 AA conformance is documented for every stage, and the full loop runs offline after the first load through a service worker."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; nothing loads for this lab, so no timing or reach can be measured" }
+      }
+    },
+    {
+      "id": "pipeline-modules",
+      "name": "Pipeline modularity",
+      "frame": "architecture",
+      "metric": "Code shape: count of separate modules (lint, generate, sandbox, bridge, stats, history, record), whether prompt, schema, templates and rules live in config apart from logic, the command-line test coverage, and what can be added (a template, a metric type, a lint rule) without touching the core. A rater reads the file tree and adds a template by following the module header.",
+      "ladder": [
+        "Absent: no code exists.",
+        "One page under labs/ runs the lab, and every script it loads is either in the repo or on the allowed CDN list.",
+        "The lab is split into at least 4 ES modules (hypothesis, generate, preview, history) under labs/assets/js/prototyping/.",
+        "Every model call goes through labs/assets/js/ai/llm.js with a fallback supplied, and no lab code calls a model endpoint directly.",
+        "The prompt, the reply JSON schema and the static-check rules live in one config module apart from logic.",
+        "Templates are a registry: adding one is one file and one registry line, as documented in the module header.",
+        "Metric types are plug-ins: each declares the events it needs, its statistic and its interval method, and the linter, bridge and stats read that declaration, so adding a metric touches no core file.",
+        "Lint rules are a registry with a test case each, and one Node 18 script with no dependencies runs the rule tests, the stats tests and the benchmark checks.",
+        "State is one serializable store (hypothesis, versions, sessions, decisions) with a schema version and a migration function, and URL sharing, export and IndexedDB persistence all go through it.",
+        "The pipeline core (lint, generate, bridge protocol, stats, record) runs headless in Node for the benchmark, with the browser UI and the iframe sandbox as a separate layer.",
+        "Reference: the core ships as a documented standalone library with JSDoc types checked by tsc --checkJs and its own tests, and a second lab on the site reuses its sandbox and stats modules without modification."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; no labs/assets/js/prototyping/ directory or any module for this lab exists" }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "id": "learn-platform",
+  "title": "Personalized Learning",
+  "page": null,
+  "thesis": "A tutor that, in about two dozen questions on the mathematics behind neural networks, classifies at least 90% of the domain's items correctly as known or not known, states a calibrated probability for each one, shows why it asked each question, and hands you the items you are ready to learn next.",
+  "axes": [
+    {
+      "id": "knowledge-structure",
+      "name": "Knowledge-space structure",
+      "frame": "model",
+      "metric": "Size and lawfulness of the domain's knowledge structure: item count, prerequisite edge count, and the number of knowledge states derived from them. A rater counts items and edges in the domain data file, reads the state-derivation code and its tests, and reads the state count the page prints.",
+      "ladder": [
+        "Absent: no domain items exist.",
+        "A flat list of at least 10 items from the mathematics behind neural networks (dot product, matrix product, derivative, chain rule and so on), with no prerequisite relation.",
+        "A prerequisite graph over at least 15 items, stored as explicit edges (for example derivative -> chain rule -> backpropagation) and checked acyclic in code.",
+        "The prerequisite relation is closed transitively into a surmise relation and the knowledge states are derived as its downsets (each state holds every prerequisite of each of its items); the page prints the state count.",
+        "Outer fringe (items one step beyond a state) and inner fringe (items at the top of a state) are computed by one function for any state, and a test checks both against hand-worked answers for at least 3 states of the shipped structure and, over every state (or 1,000 sampled states when the structure is too large to enumerate), that an item is in the outer fringe exactly when the state plus that item is a state, and in the inner fringe exactly when the state minus that item is a state.",
+        "At least 30 items, and a test confirms accessibility (every nonempty state loses some item and stays a state) and closure under union on the derived family, and rejects two planted families: one not closed under union and one with a nonempty state from which no item can be removed.",
+        "Alternative prerequisites are supported (an item reachable through either of two prerequisite sets, a surmise system); the shipped structure holds at least one such item, a test exhibits two states whose intersection is not a state, and the rung-5 axiom test still passes on it.",
+        "At least 60 items spanning four regions (linear algebra, calculus, probability, and the network itself: forward pass, loss, backpropagation, gradient descent), with the exact state count printed, by enumeration or by a stated counting algorithm above a stated enumeration limit.",
+        "Every prerequisite edge carries a cited source section or a one-line written rationale, readable on the page by selecting the edge.",
+        "The structure is fit-checked against response data (simulated with a planted wrong edge, or imported): edges the data contradicts above a stated violation rate are flagged on the page, and the planted wrong edge is caught.",
+        "At least 150 items; every edge carries a cited source section (a rationale alone no longer counts), and the rung-9 fit check flags no edge on imported real responses; the data file carries a version field and a changelog entry per version; reference standard: the course structures behind ALEKS (Falmagne and Doignon, Learning Spaces, Springer 2011)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: the hub lists Personalized Learning as planned in labs/assets/js/config/site.config.js, with no domain data or code." } }
+    },
+    {
+      "id": "assessment-procedure",
+      "name": "Assessment procedure",
+      "frame": "model",
+      "metric": "The questioning rule and the updating rule that move the learner's probability distribution over knowledge states; unit: questions asked until the stopping rule fires, on the shipped structure. A rater reads the inference module and, in the console, checks that the distribution covers every state, sums to 1, and changes after each answer.",
+      "ladder": [
+        "Absent: no assessment runs.",
+        "A fixed sequence of questions is asked and a count of correct answers is shown; no knowledge state is estimated.",
+        "Answers propagate deterministically through prerequisites: a correct answer marks the item and all its prerequisites known, a wrong one marks the item and everything depending on it unknown.",
+        "A probability distribution over every knowledge state is held and updated by Bayes' rule after each answer from a uniform prior, using one global error probability for every item (stated on the page), and it sums to 1 within 1e-9 after every update.",
+        "The likelihood is the basic local independence model: each item has its own careless-error probability and lucky-guess probability, set in the data file and shown on the page, in place of the single global error probability.",
+        "The next question is chosen from the current distribution by the half-split rule: the item whose probability of lying in the learner's state is closest to 0.5.",
+        "A stopping rule with three stated triggers ends the assessment: top-state probability above a stated value, posterior entropy below a stated number of bits, and a stated question cap; all three are in the code and the page names the one that fired.",
+        "An expected-information-gain rule (largest expected drop in posterior entropy, in bits) is available beside half-split, switchable on the page, with the expected gain of the chosen item shown.",
+        "Per-item careless-error and lucky-guess probabilities and the prior over states are fitted jointly by expectation-maximization on the basic local independence model from a stated response dataset of at least 500 response patterns (simulated or imported, source named) and replace the hand-set rates and the uniform prior; a parameter-recovery test on at least 2,000 simulated learners with planted per-item rates puts every estimate within 0.03 of its planted value, excluding only parameters the code reports as not identifiable on the structure (by the rank of the likelihood's Jacobian at the planted values), which are listed.",
+        "A skill map separates questions from skills (competence-based knowledge space theory): a multi-step question is scored per step against its computed solution steps, and one answer updates every skill it uses.",
+        "On a structure too large to enumerate (at least 10^7 states, counted by the structure axis's counting algorithm), the assessment runs on projections of the structure onto item subsets or on a sampled posterior; on a sub-domain small enough to enumerate, that method's item accuracy on simulated learners is within 2 percentage points of exact inference; a parameters panel lists every rule and numeric parameter in use (questioning rule, likelihood, prior source, stopping thresholds, approximation method and its sample or subset size) with its value; reference standard: ALEKS, the commercial assessment built on knowledge space theory."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no questioning rule, updating rule or inference module anywhere in the repository." } }
+    },
+    {
+      "id": "location-calibration",
+      "name": "Location accuracy and calibration",
+      "frame": "model",
+      "metric": "On simulated learners whose true state is drawn from the structure and who answer with stated careless-error and lucky-guess rates: percent of items classified correctly when the assessment stops, mean questions asked, and the Brier score and expected calibration error (ECE) of the per-item mastery probabilities the page shows. An item counts as classified known when its posterior mastery probability at stop is above 0.5, and as classified correctly when that matches its membership in the true state. On real learners, whose true state is unknown, held-out prediction accuracy (percent of items excluded from the update whose outcome is predicted correctly) takes its place. A rater runs the page's benchmark or its node script and reads the numbers.",
+      "ladder": [
+        "Absent: nothing measures whether the located state is right.",
+        "A test runs one scripted learner with a known true state through the assessment and asserts the located state.",
+        "A seeded simulator runs at least 1,000 learners with true states sampled from the structure and noisy answers, and prints the mean percent of items classified correctly.",
+        "The simulator prints the mean and 90th-percentile question count per assessment next to the accuracy.",
+        "At careless-error and lucky-guess rates of 0.1, the shipped structure reaches at least 85% of items classified correctly with a mean question count at most 25% of the item count.",
+        "A non-adaptive baseline (same number of questions, fixed order) runs on the same simulated learners, and its accuracy is printed next to the adaptive one.",
+        "Per-item mastery probabilities are scored by Brier score and drawn as a reliability diagram with 10 equal-width probability bins.",
+        "ECE over 10 equal-width probability bins is at most 0.05 on simulated learners, and the certainty the page states to the learner (\"84% sure you know the chain rule\") is the exact per-item quantity scored in the diagram.",
+        "Misspecification is measured: learners simulated with at least 3 careless-error and lucky-guess settings the engine does not assume, and learners whose true states violate one planted prerequisite edge (states outside the structure), with the accuracy and ECE change printed for each.",
+        "On real response data (imported, or collected by the page), the assessment is replayed on each learner with one or more answered items excluded from the update, and their outcomes are predicted from the final distribution; accuracy and ECE on at least 1,000 such held-out responses from at least 100 learners are printed with the data's source and date, beside the ECE a perfectly calibrated predictor would show at that sample size.",
+        "On the shipped structure (at least 60 items): at least 90% item accuracy on simulated learners at careless-error and lucky-guess rates of 0.1 with mean questions at most 15% of the items, and on at least 3,000 real held-out responses an ECE at most 0.03 with its 95% upper bound at most 0.04, from a seeded benchmark the visitor reruns on the page; reference standard: ALEKS."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no simulator, benchmark, test or calibration measurement exists for this lab." } }
+    },
+    {
+      "id": "fringe-path",
+      "name": "Outer-fringe learning path",
+      "frame": "intelligence",
+      "metric": "What the lab does on its own after locating the learner: which items it offers next, in what order, and how the offer changes with practice; unit: percent of offered items that lie in the computed outer fringe, and at the top, items mastered per practice step. A rater finishes an assessment and checks the offered items against the outer fringe the code computes for the located state.",
+      "ladder": [
+        "Absent: nothing is recommended after an assessment.",
+        "A fixed list of next topics is shown, the same for every learner.",
+        "The offered items are the outer fringe of the most likely state: items not yet mastered whose prerequisites are all in the state.",
+        "The fringe items are ranked by a stated rule (for example, how many further items each one unlocks), and the rule is printed beside the list.",
+        "The inner fringe of the state (items at the top of what is mastered) is offered as review, separately from the outer fringe.",
+        "A full learning path from the located state to the whole domain is shown as a chain of states, each adding one item, with its length in items.",
+        "Practising a fringe item (answering fresh generated instances of it) updates the distribution, and the fringe and path re-plan in place without restarting the assessment.",
+        "The visitor picks a goal item (for example, backpropagation through a two-layer network) and the path becomes a shortest chain from the located state to a state that contains it and the goal with the fewest items; when alternative prerequisite sets give several such states, each is listed with its path length, the tie rule is stated, the chosen state is shown, and items the goal does not need are left out.",
+        "When the most likely state's probability is below a stated value, every offered outer-fringe item that is not in the outer fringe of all three most likely states is first confirmed with one question, and the page lists which items were confirmed.",
+        "A returning visitor is re-checked only on the inner fringe of their saved state; the missed items move them to the largest state inside the saved state that excludes every missed item, and the fringe and path re-plan from there.",
+        "Path policy is measured on simulated learners whose learning model lets a non-fringe item be learned with a stated nonzero probability, over at least 3 such settings: items mastered per practice step for the fringe policy against a uniformly random order, a random prerequisite-respecting order and the data file's fixed topological item order, with the margin and its 95% interval reported; on real learners the practice success rate on offered fringe items is printed beside that on non-fringe items they chose themselves, with counts; reference standards: the ready-to-learn topics of ALEKS and the knowledge-graph scheduling of Math Academy."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no fringe computation or learning path; the hub blurb in site.config.js is the only trace." } }
+    },
+    {
+      "id": "tutor-model",
+      "name": "Tutor model contribution",
+      "frame": "intelligence",
+      "metric": "What a language model adds over the deterministic engine (structure, items, inference, path), and whether each model output is checked against computed answers; unit: count of model outputs per session, and percent of them checked by the engine. A rater blocks every model route, compares what still works, and reads every llm.js call in the lab code.",
+      "ladder": [
+        "Absent: no model is called and no explanation text exists.",
+        "After a wrong answer the engine shows a worked solution for that instance (stored, or computed from the template); no model is called.",
+        "One model call per wrong answer through labs/assets/js/ai/llm.js explains it, and route-panel.js shows which route answered.",
+        "The prompt carries the item, the engine's computed answer and the learner's answer; the model is never asked for the correct answer, which the code confirms.",
+        "With every route down, the engine's worked solution for the instance is shown, the page says the model was not reached, and the assessment never waits on the model.",
+        "Model calls are batched to fit the public route's one reply per 45 seconds: one call at the end of the assessment explains every wrong answer, and replies are cached per item instance.",
+        "Every number in a model explanation is parsed and compared with the engine's solution steps; an explanation with a mismatched number is discarded for the engine's text, and a counter of discarded replies is shown.",
+        "The engine first recomputes the learner's answer under every stored misconception of the item (for example, the inner derivative dropped from the chain rule); only when none reproduces it does the model propose a wrong procedure as an expression in the item's parameters, which the engine evaluates and accepts only if it reproduces the learner's answer on this instance.",
+        "Free-text answers (\"the gradient is 2x cos(x^2)\") are judged by the engine's parser first; text the parser rejects goes to the model only to be rewritten as an expression, which the engine checks by point evaluation; each verdict is labelled engine or model-translated, and model-translated verdicts enter the update with their own careless-error and lucky-guess rates, taken from measured agreement with hand grading on at least 50 stored free-text answers and printed on the page.",
+        "A per-session ledger lists every output as engine or model; a model procedure accepted at rung 7 is confirmed on one fresh instance of the same template that the learner then answers, and the page reports the share of wrong answers that no stored misconception explains but a confirmed model procedure does, and the fresh-instance confirmation rate.",
+        "A verified Socratic layer: the engine picks each follow-up question by expected information gain over the remaining candidate wrong procedures and the model only words it; every number and every named misconception in model text passes the engine check (the ledger shows 0 unchecked model outputs per session); on at least 100 simulated learners each answering with one planted wrong procedure held out of the item's stored list, a confirmed model procedure equals the planted one on 5 fresh instances for at least 20% of them, printed beside the engine alone's 0%; reference standard: the model tracing of the Cognitive Tutors (Anderson, Corbett, Koedinger and Pelletier 1995, Journal of the Learning Sciences)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no lab code imports labs/assets/js/ai/llm.js for this lab and no explanation text exists." } }
+    },
+    {
+      "id": "item-bank",
+      "name": "Parametric item bank",
+      "frame": "data",
+      "metric": "Where the questions and their answers come from: items covered, templates per item, whether correct answers are computed or typed, the source cited for each, and what exports. A rater counts templates in the domain data and checks 10 generated instances against hand computation.",
+      "ladder": [
+        "Absent: no questions exist.",
+        "At least 10 fixed questions with hand-typed answers.",
+        "Every item in the structure has at least one question, tied to its item by id.",
+        "Questions are parametric templates: seeded random parameters generate each instance and code computes the correct answer (for example, the dot product of the drawn vectors); no answer is stored.",
+        "Numeric answers are checked with a stated relative tolerance, and equivalent forms (fraction, decimal, scientific notation) are accepted.",
+        "Every item has at least 3 templates, each tagged compute, recognise or invert in the data file, with all three tags present for every item, so a repeat question is a new problem.",
+        "Every item cites a source section shown with the question, for example Deisenroth, Faisal and Ong, Mathematics for Machine Learning (Cambridge University Press, 2020), or Bishop, Pattern Recognition and Machine Learning (Springer, 2006).",
+        "Each template computes its solution steps with the instance, and at least 2 distractors per template are computed from named wrong procedures.",
+        "Symbolic answers (an expression for a derivative or gradient) are checked by evaluating the learner's and the reference expression at 5 or more random points, not by string match.",
+        "The learner's responses, distribution and path export as JSON (responses also as CSV) with a documented schema, and re-import to resume.",
+        "At least 300 templates covering every item of the shipped structure (at least 100 items), each sourced; a test generates 100 instances per template and checks every computed answer against an independent computation (finite differences for derivatives and gradients, a second implementation for matrix operations) and every solution step against that answer; the bank carries a version field and a stated license, and exports as IMS QTI 3.0 items that validate against the published QTI 3.0 XML schema."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no questions, templates, sources or export path exist for this lab." } }
+    },
+    {
+      "id": "knowledge-map",
+      "name": "Knowledge-state map",
+      "frame": "graphics",
+      "metric": "What the visitor sees of the structure and of their own state: views, encodings and update choreography; unit: count of linked views, and update animation duration in ms. A rater takes screenshots at 1440 px and 400 px before, during and after an assessment, and compares drawn shades with the engine's marginals in the console.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "A static list or image of the domain's topics.",
+        "The prerequisite graph is drawn as nodes and edges in a layered layout, prerequisites on lower layers than the items that depend on them.",
+        "Each node is shaded by its posterior mastery probability on a continuous 0 to 1 scale with a legend, and after an answer the shade of any 3 nodes a rater picks matches the engine's marginal read in the console within 0.01.",
+        "Outer and inner fringe of the most likely state are marked with distinct encodings, and the most likely state's items are enclosed by one drawn contour (or every edge leaving the state is drawn in one distinct stroke), with each encoding named in the legend.",
+        "A second linked view lists the 10 most likely states with their probabilities; hovering a state highlights its items on the graph.",
+        "A third linked view plots top-state probability and posterior entropy (bits) per question, with the stopping threshold drawn as a line.",
+        "Each answer animates its update within 600 ms: the answered node pulses and the change travels along edges only to nodes whose marginal moved by more than 0.02, ending at the posterior shades.",
+        "The lattice of knowledge states (Hasse diagram) is viewable for a sub-domain of at least 15 items, with posterior mass drawn on each state and the learning path as a lit chain.",
+        "At least 100 items render at 1440 px with zoom and pan, no labels overlap at the default zoom, 2x and 4x, and the four regions collapse to clusters and expand.",
+        "A scrubber replays a finished assessment answer by answer, with graph, state list, entropy chart and lattice rewinding together; reference standard: the ALEKS pie chart of mastery by region."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: nothing is drawn; the hub shows only a planned card for this lab." } }
+    },
+    {
+      "id": "design-language",
+      "name": "Assessment design language",
+      "frame": "style",
+      "metric": "Craft of the page against the site's tokens in labs/assets/css/tokens.css (--void ground, IBM Plex Mono via --font-body, --accretion gold, --horizon blue, the --ease, --ease-out and --ease-in curves): type, math setting, colour roles, motion; unit: count of raw colour and timing values in the lab CSS and JS. A rater reads the lab CSS for raw values and checks screenshots at 1440 px and 400 px.",
+      "ladder": [
+        "Absent: no page.",
+        "A browser-default form with unstyled inputs.",
+        "The page loads labs/assets/css/tokens.css; computed styles show the body background as --void and the font-family as --font-body, and grep finds no raw hex value in the lab CSS.",
+        "Mathematics is typeset (KaTeX or MathML) in questions, answers and graph labels, never shown as plain ASCII such as x^2.",
+        "Accretion gold marks only what is active: the current question, its node and the focused answer; every other element uses neutral or horizon tokens, checked in a screenshot.",
+        "Per-item mastery probability uses one sequential ramp built from token colours, and the posterior probability of a displayed state uses only a non-hue channel (opacity or hatching); one probability value gets the same colour in graph, state list and chart, checked by sampling that value's colour in all three.",
+        "Every transition uses the --ease, --ease-out or --ease-in tokens and at most 3 named durations; no other timing values appear in the lab CSS or JS.",
+        "Right and wrong answers are signalled by shape and text, not by red and green alone, and the mastery ramp's end colours differ by at least 3:1 contrast, so under Chrome DevTools' deuteranopia emulation every verdict is told apart by shape and the ramp still reads low to high.",
+        "The lab CSS defines one CSS grid with a stated column count at 1440 px and at 400 px; question, graph and certainty readout are placed by grid-column on grid lines, and the DevTools grid overlay shows each one's edges on column lines in both screenshots.",
+        "One visual idea is the lab's own: the outer fringe drawn as a lit edge between known and unknown, used by no other lab on the site.",
+        "A rater who did not build the page scores this page and the ALEKS and Khan Academy mastery screens on 5 criteria (math setting, uncertainty display, colour roles, density, motion), each with a 0 to 3 rubric written in the lab's notes before the review; scores and screenshots are recorded there, and this page scores strictly highest on every criterion."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no lab CSS or markup; tokens.css exists but nothing uses it for this lab." } }
+    },
+    {
+      "id": "learner-control",
+      "name": "Learner control",
+      "frame": "interaction",
+      "metric": "What the visitor can do: answer formats, control over the assessment, and play the designer did not script. A rater counts controls and input types in a ten-minute session and checks keyboard-only use.",
+      "ladder": [
+        "Absent: nothing to touch.",
+        "One button starts a fixed quiz.",
+        "Multiple-choice answers submit and the next question appears.",
+        "Numeric and expression inputs with a live typeset preview, plus an \"I don't know\" answer whose scoring is stated on the page.",
+        "The whole assessment runs from the keyboard: Enter submits, Tab moves, a shortcut answers \"I don't know\".",
+        "Selecting any node offers \"test me on this\" (the next question is drawn from it) and \"I know this\" (entered as a stated prior), both updating the distribution.",
+        "Sandbox mode: the visitor sets a hidden true state on the graph, sets careless-error and lucky-guess sliders, and steps the engine as it locates that state with simulated answers.",
+        "The visitor disputes any item's verdict; the engine asks one confirming question on it and updates.",
+        "The located state, goal item and seed are encoded in the URL hash, and opening the link restores the same view.",
+        "In the sandbox the visitor adds or removes a prerequisite edge, and state count, fringes and mean assessment length (from at least 200 simulated learners) update within 2 s of the edit.",
+        "The visitor loads a domain of their own (items, edges, templates as JSON, validated on load) and runs the full assessment, path and benchmark on it."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: there is no control to touch for this lab." } }
+    },
+    {
+      "id": "certainty-explanation",
+      "name": "Certainty explanation",
+      "frame": "explanation",
+      "metric": "What a visitor understands after five minutes about how the tutor located them and how sure it is, and whether every number and factual sentence carries a real or illustrative tag. A rater reads the page text, follows the per-answer trace, compares stated values with the console, and counts untagged numbers and sentences.",
+      "ladder": [
+        "Absent: no text.",
+        "A paragraph says the lab adapts to the learner.",
+        "The page names the method in under 200 words: knowledge space theory (Doignon and Falmagne, 1985), knowledge states, and the outer fringe.",
+        "After the assessment the page states each item's posterior mastery probability in a sentence (\"72% that you know the chain rule\"), and separately the single most likely state (its items counted) with its probability, labelled as a state probability (\"most likely state: 14 of 30 items, 38%\").",
+        "A trace lists every question with the answer given and the change in top-state probability and entropy (bits) it caused.",
+        "A skippable guided first run of at most 6 steps walks one update on a 5-item toy structure before the real domain.",
+        "Each question shows why it was asked (\"this question splits the remaining probability 48/52\"), and the stated split equals the chosen item's posterior mastery probability read in the console (under the information-gain rule, the stated gain in bits equals the computed one).",
+        "Every number and every factual sentence on the page carries a real or illustrative tag; simulated benchmark numbers say simulated, and each source is a link.",
+        "The page states its limits with numbers: the assumed careless-error and lucky-guess rates, the drop in item accuracy (percentage points, from the simulator) caused by one planted wrong prerequisite edge, and the measured ECE.",
+        "A 'how sure is it' panel compares the certainty it states with its record on simulated learners, the reliability diagram explained in two sentences that use no term the page has not already defined.",
+        "The page ends by assessing the visitor's grasp of knowledge space theory itself, with the same engine on a 10-item structure of its own concepts; reference standard: Bret Victor, Explorable Explanations (2011)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: the only text is the one-line hub blurb in site.config.js, which names no method." } }
+    },
+    {
+      "id": "inference-reach",
+      "name": "Inference speed and reach",
+      "frame": "performance",
+      "metric": "Load time, update latency per answer on the shipped structure (ms), phone width, reduced motion, keyboard and screen-reader reach. A rater uses the DevTools Performance panel, performance.now() in the console, Lighthouse, axe, and screenshots at 1440 px and 400 px.",
+      "ladder": [
+        "Absent: no page loads.",
+        "The page loads and an answer updates the view.",
+        "First Contentful Paint under 3 s in a Lighthouse desktop run, and each answer's update under 500 ms on the shipped structure, timed with performance.now().",
+        "At 400 px width the question, answer input and a compact state readout fit without horizontal scrolling.",
+        "prefers-reduced-motion replaces every update animation with an instant change.",
+        "Posterior update plus next-question choice takes under 50 ms on the shipped structure with at least 30 items and at least 1,000 states (state count printed), measured with performance.now().",
+        "State enumeration and updates run in a Web Worker above a stated state count, and the Performance panel shows no main-thread task over 50 ms during an assessment.",
+        "Screen-reader reach: questions and math carry MathML or aria labels, each verdict and the new fringe are announced in an aria-live region, and a text list stands in for the graph.",
+        "Lighthouse in mobile emulation scores at least 95 for accessibility and at least 90 for performance, and axe reports 0 violations on every view.",
+        "A structure of at least 100,000 states updates in under 100 ms (typed arrays in the worker), measured by the benchmark.",
+        "A structure of at least 10^7 states, handled by projection or a sampled posterior, updates in under 100 ms in Chrome's mobile CPU emulation (4x slowdown), and a recorded keyboard plus NVDA run-through of a full assessment, kept in the lab notes, shows every question, verdict and new fringe announced; reference standard: WCAG 2.2 AA."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: nothing loads, so there is nothing to time or audit." } }
+    },
+    {
+      "id": "domain-architecture",
+      "name": "Domain-pluggable architecture",
+      "frame": "architecture",
+      "metric": "Code shape: separate modules for structure, items, inference, path and view; domain content as data apart from logic; what can be added without touching the core; unit: count of Node tests on the core, and count of files edited to add a second domain. A rater reads the module imports, greps the engine modules for every item name in the data file, and runs the tests.",
+      "ladder": [
+        "Absent: no code.",
+        "One HTML file with inline script holding everything.",
+        "Engine and view live in separate ES modules.",
+        "The domain (items, edges, templates) is a data file; grep for every item name in that file finds none in the engine modules.",
+        "The knowledge-space core (state derivation, fringes, update, question choice) is a pure module with no DOM access, covered by at least 20 tests that run in Node.",
+        "Knowledge states are stored as bitsets (one bit per item, in typed-array words) behind the core's state interface, and a test shows that fringes and updates from the bitset path equal a plain set-based reference on the shipped structure.",
+        "A second domain (for example a 10-item probability primer) loads by changing one config entry, with no edit to the core.",
+        "Questioning rules (half-split, expected information gain) and updating rules (Bayes under the basic local independence model, and the multiplicative rule with a free parameter, of which Bayes is a special case) are strategies behind one interface, chosen by config.",
+        "The simulator and benchmark import the same core modules the page uses, with no copied inference code, and run as a node script.",
+        "A domain validator runs at load: it names the bad item or edge on error, and checks that every template computes an answer for 100 seeds.",
+        "The core ships as a versioned, dependency-free ES module another site could import for its own domain, whose README maps each core function to its counterpart in the CRAN packages kst or pks, and a test shows its maximum-likelihood fit of the basic local independence model on a dataset distributed with pks matches pks's blim() (method ML, same starting values) within 0.01 on every parameter."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "No page exists: no module, data file or test for this lab anywhere in the repository." } }
+    }
+  ],
+  "history": [ { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" } ]
+}

@@ -1,0 +1,286 @@
+{
+  "id": "honesty-decoder",
+  "title": "Honesty Decoder",
+  "page": "honesty-decoder.html",
+  "thesis": "The visitor picks any lab served on the site, or pastes any claim about one, watches it split into atomic sub-claims that are each checked live against the running lab or a test in the repository, and reads a reality figure computed from those checks, with its interval, evidence links and correction history, never a number the author typed in.",
+  "axes": [
+    {
+      "id": "reality-computation",
+      "name": "Reality computation",
+      "frame": "model",
+      "metric": "Share (%) of displayed figures computed by code from sub-claim verdicts rather than typed as literals, and sub-claims per system (count). The rater greps the row data for percentage literals and reads the formula in the render code. A system is a decoder row whose lab is served from luisblanco.dev/labs; rows for off-site systems (Ouroboros, 'AGI on my Ryzen 9', and AEA until it has a lab page) are not counted in 'every system' or 'each system', and from rung 5 they carry the visible label 'not checkable from this page' and count in the author-assertion share.",
+      "ladder": [
+        "No reality figure is shown for any system.",
+        "Each system shows one percentage as a number and a bar.",
+        "Decomposed: each system's claim is split into at least 3 atomic sub-claims listed on the page, each with a verdict (supported, partial, unsupported).",
+        "Computed: the figure is calculated from the sub-claim verdicts by a formula shown on the page (for example supported 1, partial 0.5, unsupported 0, averaged), and no row holds a hand-typed percentage.",
+        "Weighted: each sub-claim carries a stored weight for its share of the claim's promise, justified in one sentence, and the figure is the weighted mean.",
+        "Evidence-typed: each verdict names its basis (runtime check, code inspection, measurement against a reference, author assertion); author-assertion verdicts are kept out of the figure and reported as a separate unverified share, and every off-site row is labelled 'not checkable from this page' and counted wholly in that share.",
+        "Interval: each figure is reported as a range (low counts partial and unverified sub-claims as unsupported, high counts them as supported), with the width in points shown.",
+        "Sensitivity: for each system the page names the sub-claim whose move from its verdict to the opposite end (supported to unsupported, or the reverse; partial to whichever end moves the figure more) changes the figure most, and by how many points.",
+        "FActScore cross-check: beside each weighted figure the page shows that system's unweighted share of supported atomic sub-claims (the FActScore statistic, Min et al., EMNLP 2023) and the gap in points; a list on the page names each way the decoder departs from that method (weights, partial credit, evidence source), and every system whose two figures differ by more than 10 points names the sub-claim whose weight or partial credit contributes most to the gap.",
+        "Cross-lab consistency: a sub-claim shared by several systems (the same model route, the same shared module) holds one verdict used by all of them, and a script reports 0 contradictions across rows.",
+        "Reproduced and re-graded: every figure on the page reproduces to the point from one documented command in the repository that reruns the checks and the formula and writes a dated, committed results file that 100% of the page's figures match, and an independent re-grade (row-truth rung 9) lands within 5 points of the page figure on every system, with each difference shown."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Rung 1 holds: DECODER in labs/honesty-decoder.html stores reality as typed literals (88, 80, 75, 78, 85, 50, 45, 34, 66, 18), and select() copies d.reality to #mNum and the #mFill bar. Rung 2 fails: no sub-claims, no verdicts and no formula; the ev prose names deductions ('docks only for honest approximation') in prose only. The subtitle calls the figure 'my own honest estimate, not a benchmark'. The figures are tied to nothing else: Token EKG reads 75% real while the first audit in LABS_LEVELS.md says it 'measures nothing real'."
+        }
+      }
+    },
+    {
+      "id": "claim-decomposition",
+      "name": "Pasted-claim decomposition",
+      "frame": "intelligence",
+      "metric": "Decomposition of claims the visitor pastes: sub-claims per claim, precision and recall (%) against a held-out gold set, per route (deterministic engine, model route via labs/assets/js/ai/llm.js), and the F1 the model adds over the engine. Rater pastes 5 unscripted claims, reads the decomposition and the route panel, and runs the page's Score control.",
+      "ladder": [
+        "No claim input: the page decodes only its own authored rows.",
+        "A text box accepts a claim and matches it by keyword to the nearest authored system, showing that system's row.",
+        "Deterministic engine: a pasted claim is split into atomic sub-claims by rule (clause and conjunction splitting, extraction of load-bearing qualifiers such as live, real, autonomous, general, every), shown as a list.",
+        "Each sub-claim is typed by rule (capability, mechanism, quantity, provenance, framing), and framing or metaphor sub-claims are marked not checkable instead of scored.",
+        "Model route: one call through labs/assets/js/ai/llm.js returns the decomposition as JSON validated against a schema; an invalid or refused reply falls back to the engine, and the route panel names the route that answered.",
+        "Engine and model decompositions show side by side with differences marked; the visitor picks per sub-claim, and the page counts the sub-claims the model added or changed.",
+        "Grounding: each pasted sub-claim is matched against the lab's registry of checkable sub-claims and takes a verdict only on a match; unmatched sub-claims read 'no evidence in this lab' and are never guessed.",
+        "Scored live: a gold set of at least 50 claims with annotated atomic sub-claims ships with the page, split into a tuning half and a held-out half; a Score control re-runs the engine over the held-out half in the browser and the model route over it in one batched llm.js call, and shows precision and recall from that run, with the sub-claim matching rule stated.",
+        "Model contribution measured: on the held-out half the page reports the F1 the model route adds over the engine, per sub-claim type, and the share of claims where the model changed the final figure.",
+        "Budgeted: the model route is called only on claims the engine scores below a stated confidence threshold, and over the held-out half the page shows calls made, calls avoided, and the F1 lost or gained against an always-call baseline.",
+        "Independent benchmark: on a held-out set of at least 200 claims, at least 50 written by people other than the author, committed to the repository and never used for tuning, every claim double-annotated with Cohen's kappa on sub-claim types reported, the engine alone reaches sub-claim F1 of at least 0.80 and the shipped pipeline reaches F1 of at least 0.90 and grounds at least 90% of checkable sub-claims to the correct registry entry, reproducible from one script."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "The page has no input element: the only controls are the back button and 10 chips built from DECODER, so a visitor cannot enter a claim and nothing decomposes one. llm.js is not loaded; the meta line reads 'zero network'."
+        }
+      }
+    },
+    {
+      "id": "live-verification",
+      "name": "Live sub-claim verification",
+      "frame": "intelligence",
+      "metric": "Share (%) of the counted systems' sub-claims whose verdict comes from a check run against the lab (code presence, lab state, model route, numeric reference) rather than from authored text. Rater opens the page, counts check-backed against authored verdicts, and reads the check code. A system is a decoder row whose lab is served from luisblanco.dev/labs; rows for off-site systems (Ouroboros, 'AGI on my Ryzen 9', and AEA until it has a lab page) are not counted in 'every system' or in any share, and from rung 4 they carry the visible label 'not checkable from this page'.",
+      "ladder": [
+        "Nothing is checked by the page: every verdict is authored text.",
+        "At least 1 sub-claim of 1 system is checked by code at runtime (for example fetching the lab's HTML and confirming a named function exists), with pass or fail shown.",
+        "Every system has at least 2 code-presence checks (a named function, an imported module, a data file of stated size) run on load against the deployed files, with pass or fail per check.",
+        "Behavioural checks: at least 1 sub-claim per system is verified by loading the lab in a hidden same-origin frame in a stated state and reading a value it exposes (for example Primordial Seed's crystallised rule count or Token EKG's tokens per second).",
+        "Every verdict on the page comes from a check or is labelled author assertion, every off-site row carries the visible label 'not checkable from this page', and at least 50% of the counted sub-claims are check-backed, with the share shown.",
+        "Route-aware: the route check makes at most 1 llm.js call per visit (its result cached with a timestamp for 10 minutes) and records which route answered; every live-by-default sub-claim is scored against that result and against the lab's model calls per run, so a lab needing more calls per run than the answering route allows in 45 s (the public route: 1) fails its live sub-claim, with the reason shown.",
+        "Each check records its timestamp and the commit of the lab it checked, and a failing check lowers the figure on the page at once, naming the check that failed.",
+        "Reference checks: every physics sub-claim (Black Hole, Exomania) is compared with a published value within a stated tolerance (for example the shadow edge against the Schwarzschild critical impact parameter 3√3 GM/c²), and every measurement sub-claim (for example Token EKG tokens per second) is compared with an independent timer over the same stream.",
+        "At least 80% of the counted sub-claims are check-backed, and every system whose claim invokes a model route or physics has at least 1 route or reference check.",
+        "Falsification: each system has at least 1 check that perturbs an input (seed, constant or prompt) and asserts the output differs from the unperturbed run, which a recorded replay would fail; the page labels the check with the claim phrase it guards and shows its result.",
+        "Mutation-tested: at least 95% of the counted sub-claims are check-backed and every other one is labelled uncheckable with a one-sentence reason; a script in the repository plants at least 3 known regressions per system in a scratch copy (deleting the mechanism a sub-claim names, swapping a live call for a replay, changing a physics constant), the check suite fails on at least 90% of the mutants, and the mutation score is shown on the page (mutation analysis per DeMillo, Lipton and Sayward, IEEE Computer, 1978)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "No code runs a check: select() only copies authored strings into the three registers. Evidence lines name functions (collapse(), the geodesic shader) but nothing fetches, loads or frames a lab, and no row even links to its lab page."
+        }
+      }
+    },
+    {
+      "id": "row-truth",
+      "name": "Row truth and provenance",
+      "frame": "data",
+      "metric": "Count of false or outdated statements in the counted rows at the graded commit, plus the provenance each row carries (links, graded date and commit, staleness flag, corrections, export). Rater spot-checks rows against their lab's code and the route limits measured in LABS_LEVELS.md, then follows each row's links and citations. A system is a decoder row whose lab is served from luisblanco.dev/labs; rows for off-site systems (Ouroboros, 'AGI on my Ryzen 9', and AEA until it has a lab page) are not counted, because no code on this site can confirm them.",
+      "ladder": [
+        "No rows: nothing is decoded.",
+        "Each row has authored claim, mechanism and evidence text.",
+        "Spot check: in 3 counted rows chosen by the rater, rows whose claims rest on the model route taken first, every mechanism and evidence statement is true of its lab's code and of the model route as measured in LABS_LEVELS.md at the graded commit (0 false or outdated statements).",
+        "Each row links to its lab page, and the link opens the lab.",
+        "Each row shows the date it was graded and the commit hash it was graded against.",
+        "Staleness: a script compares each lab's last commit with its row's graded commit, and the page marks rows whose lab changed since grading as stale, with the count shown.",
+        "Corrections log: every change to a row's figure or text is listed on the page with date, old value, new value and reason.",
+        "Cited audit: every sub-claim cites its evidence (file and line at a commit, a lab-state URL, or a test id), 0 sub-claims rest on prose alone except those labelled author assertion, and a rater following the citations of every counted row finds 0 false or outdated statements.",
+        "Export: the full table (systems, sub-claims, verdicts, weights, evidence, dates, commits) downloads as versioned JSON and CSV carrying a schema version.",
+        "Independent re-grade: someone other than the author (a second person, or a model route given only the code and the rubric) re-grades every row, both figures show side by side, and Cohen's kappa on sub-claim verdicts is reported.",
+        "Full provenance: every figure, verdict and correction is dated, diffable history in the repository, published in W3C PROV terms (PROV-O, W3C Recommendation 2013), so any past figure traces to the checks, commit and grader that produced it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Rung 1 holds: 10 rows of authored claim, mech and ev text in DECODER (labs/honesty-decoder.html), with no date, commit or link; the file was last changed 2026-06-18 (e439a51). Rung 2 fails: 4 counted rows rest on the model route (Token EKG, DATASPACE, Altverse, The Figure), so any 3 of them include The Figure or DATASPACE, and both are false under the public route measured 2026-11-11 (1 reply per 45 s per IP, LABS_LEVELS.md). The Figure's row says 'the default Run is a REAL live orchestration' of four sequential calls, written for a one-in-flight limit (figure.html line 141), so a default public run cannot complete four live calls. DATASPACE's row says 'The default is a live keyless round-trip', but collapse() in labs/dataspace.html chains two callModel() requests (compress, then reconstruct), so the second is refused and the recorded round-trip plays. Altverse (pipeline.js runs live only when worker.base is set) and Token EKG (streams text.pollinations.ai by default, simulated fallback) hold."
+        }
+      }
+    },
+    {
+      "id": "lab-coverage",
+      "name": "Lab coverage",
+      "frame": "data",
+      "metric": "Share (%) of hub labs in labs/assets/js/config/site.config.js that have their own decoder row, by status (built, beta, planned), and the count of other public lab claims decoded. Rater lists the rows against the hub entries.",
+      "ladder": [
+        "No system is decoded.",
+        "At least 1 system is decoded with a claim, a mechanism and a figure.",
+        "At least 5 systems served from luisblanco.dev/labs are decoded; off-site rows (Ouroboros, 'AGI on my Ryzen 9', AEA while it has no lab page) do not count toward the 5.",
+        "At least half (rounded up) of the hub's built labs (site.config.js status 'built') are covered, where a row naming two labs covers only one of them.",
+        "Every built and beta lab in the hub has its own row, including The Roaster and the Honesty Decoder itself.",
+        "Rows are keyed by hub id, and the page computes and shows coverage ('n of m built labs decoded') from site.config.js, listing missing labs by name.",
+        "Planned labs too: every hub entry has a row, and a planned lab's hub blurb is decoded as its claim. Its figure is computed as 0% because none of its sub-claims has evidence until a page exists.",
+        "The claim decoded for every lab is its live hub blurb from site.config.js, not a separately authored myth line, so the hub's own copy is what gets graded.",
+        "Beyond the hub: the lab copy on the home page (src/ui/lab.js) and every lab page's title and meta description are decoded too, at least 30 extra claims.",
+        "Every built lab page shows its own decoder row inline (figure, weakest sub-claim, link to the decoder), on 100% of built labs.",
+        "A script enumerates every public statement the site makes about any lab (hub, home page, page titles, meta descriptions, share text) and maps each to a decoded sub-claim; the uncovered count is 0 and shown on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "10 rows: Black Hole and Exomania share one row; DATASPACE, Token EKG, Heptapod Codec, Primordial Seed, The Figure and the beta Altverse have their own; 3 are off-site (AEA, Ouroboros, 'AGI on my Ryzen 9'). Rung 2 holds on 7 rows for labs served on the site. Rung 3 fails: the shared row covers only one lab, so 6 of 13 built labs are covered and 7 are needed. Missing: Dimensional Test, The Roaster, Personalized Plans, AI Meme Lab, Trending Topics, the decoder itself, and one of Black Hole and Exomania."
+        }
+      }
+    },
+    {
+      "id": "gap-graphics",
+      "name": "Gap graphics",
+      "frame": "graphics",
+      "metric": "How the gap between claim and mechanism is drawn: count of views (meter, overview, sub-claim bar, connectors, uncertainty, history, linked lab preview, shared-component map) and whether they respond to one selection. Rater checks at 1440 px and counts linked views.",
+      "ladder": [
+        "Nothing is drawn: no figure appears.",
+        "The figure is printed as a number.",
+        "One meter for the selected system: a count-up number and a two-segment bar (real against aspiration) with both shares labelled.",
+        "Overview: every system's figure sits in one ranked chart visible at 1440x900, the selected system marked, and clicking a mark selects it.",
+        "Decomposed bar: the meter is segmented by sub-claim, each segment's width its weight and its fill its verdict, and hovering a segment names the sub-claim.",
+        "Claim-to-evidence connectors: each claim phrase is joined by a drawn connector to the sub-claim and the mechanism sentence that settle it, lit together on hover.",
+        "Uncertainty drawn: each figure's interval appears as a band on the meter and on the overview, with its width in points.",
+        "History: each system's figure over its grading dates is drawn as a line, at least 1 system shows 3 or more dated points, and corrections are marked on the line.",
+        "Linked views: overview, sub-claim tree and a live preview of the linked lab state (frame or captured image) highlight together from one hover or selection.",
+        "Shared-component map: a graph links systems to the sub-claims they share (for example every lab whose live claim rests on labs/assets/js/ai/llm.js). Marking a shared component as failed lowers every dependent figure on the map and the overview at once.",
+        "Object constancy across every view: each sub-claim keeps one mark that moves between overview, tree, meter and map in animated transitions, following Heer and Robertson, 'Animated Transitions in Statistical Data Graphics' (IEEE InfoVis 2007)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "select() sets #mFill to d.reality% and #mAsp to the remainder; setNum() counts the number up in 28 ms ticks. The 1440 screenshot shows one meter (88, '88% REAL' / '12% ASPIRATION') between two text panels. Rung 3 fails: there is no overview, only the selected system's figure is ever visible, so two systems cannot be compared without clicking between them."
+        }
+      }
+    },
+    {
+      "id": "register-style",
+      "name": "Register language",
+      "frame": "style",
+      "metric": "Craft of the decoder's visual language: register panel height against content height at 1440x900, where amber appears in the CSS, distinct font sizes, verdict marks, the receipt form. Rater measures panel and content heights in devtools, lists amber uses in the CSS (hover and focus states included), and counts font-size values.",
+      "ladder": [
+        "Default browser styling, no visual system.",
+        "Site palette and type applied to a default layout.",
+        "On-brand tokens (void ground, IBM Plex Mono, corner marks) and two distinct registers: the claim set italic in a warm text colour, the mechanism set upright in a cool one, each panel with its own label colour.",
+        "Proportion: at 1440x900 each register panel is no taller than 1.5 times its content, and no column of the decoder row is more than 50% empty space measured in devtools.",
+        "Amber reserved for state: outside the site-wide corner marks, amber appears in the CSS, hover and focus states included, only on the selected system and the aspiration share.",
+        "Type scale: at most 6 font sizes defined as tokens on one stated scale, and no text below 11 px.",
+        "Verdict marks: supported, partial, unsupported and unverified each have one mark distinguished by shape and not by colour alone, used identically in every view.",
+        "Receipt form: each system renders as a receipt card (claim, sub-claims with verdict marks, figure, date, commit), and each system's share URL carries an og:image pointing to that receipt as a 1200x630 PNG.",
+        "One motion language: meter fill, number count and view transitions share named easing and duration tokens, and reduced motion swaps each for an instant state.",
+        "The claim is set as its own audit: in every row each claim phrase tied to a sub-claim takes its verdict's treatment in place (supported in mechanism blue, partial underlined, unsupported struck, uncheckable ghosted).",
+        "A documented 5-person test times reading a PolitiFact Truth-O-Meter label and reading a decoder receipt's figure and weakest sub-claim. Every reader gets both from the receipt in under 10 s, with the median within 2 s of the Truth-O-Meter time."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Rung 2 holds: --void ground, IBM Plex Mono, amber .bp corner marks; the claim text is italic #C9B79A (warm) under an amber .rk label, the mechanism text upright #C7D0D6 (cool) under a blue one. Rung 3 fails: in the 1440x1100 audit screenshot the claim panel is about 700 px tall holding about 135 px of content and the mechanism panel is more than half empty (at 900 px high the panels would be about 500 px tall, still more than 3 times their content), and the 280 px meter column is more than 50% empty space. Rung 4 would also fail: amber colours the kicker, the claim label, the footer dot and .back:hover despite the CSS comment 'amber = the fired/active accent only'; the CSS holds 15 distinct font-size values."
+        }
+      }
+    },
+    {
+      "id": "claim-interrogation",
+      "name": "Claim interrogation",
+      "frame": "interaction",
+      "metric": "Count of distinct ways the visitor interrogates a claim (select, keyboard step, drill-down, challenge a verdict, paste, compare, share, contest, re-run), each checked by doing it on the page with mouse, touch and keyboard.",
+      "ladder": [
+        "Nothing to touch on the page.",
+        "One system is shown.",
+        "Chips select among the systems, and claim, mechanism and meter update together.",
+        "Arrow keys step through the systems in the selector (roving tabindex), and focus stays visible on the selected item.",
+        "Drill-down: a system expands into its sub-claims, and each sub-claim's evidence (file, test or lab state) opens in place.",
+        "Challenge: the visitor flips any sub-claim verdict or weight, sees the recomputed figure beside the author's, and restores the author's grading with one control.",
+        "Paste: a text box takes any claim about a lab system and returns its decomposition and figure, and the visitor can split, merge or reword a sub-claim before scoring.",
+        "Compare: two systems, or a pasted claim and a system, sit side by side with their sub-claims aligned by type.",
+        "Share: the selected system, or the visitor's decoded claim and edits, encodes into a URL that restores the same selection, sub-claims, verdicts and figure on load.",
+        "Contest: every sub-claim has a dispute control that opens a prefilled issue in the site's public GitHub repository naming the system, sub-claim, commit and the visitor's reason.",
+        "Re-run: the visitor triggers fresh verification of any system on demand and watches each check run and resolve in place with the time it took; each result is stamped with its time and the lab commit it ran against, and a result that differs from the stored one replaces the figure at once and is logged in the corrections list."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "10 button.chip elements built from DECODER; click, or Tab and Enter on the native buttons, calls select(i) and the three registers update. Rung 3 fails: no arrow-key handler and no roving tabindex. There is also no URL state (only ?still is read), no drill-down and no input of any kind."
+        }
+      }
+    },
+    {
+      "id": "method-explanation",
+      "name": "Method explanation",
+      "frame": "explanation",
+      "metric": "Count of method elements present on the page (definition of a sub-claim, verdict criteria, formula, basis tags, limits), plus the count of false statements the page makes about itself, and at rung 10 the number of first-time readers out of 5 who can say how a figure was made after 5 minutes. The rater reads all page copy and checks each self-statement against the code.",
+      "ladder": [
+        "No explanation on the page.",
+        "A title and a one-line description of what the page does.",
+        "A paragraph names the three registers (claim, mechanism, meter) and states how the figure is produced (asserted by the author, or computed from sub-claims), and that statement matches the code.",
+        "Every statement the page makes about itself (footer, counts, network claims, what other pages do with its data) is true at the graded commit, checked against the code.",
+        "The method is on the page in at most 150 words, visible at 1440x900 without scrolling or one click away: what a sub-claim is, what each verdict requires, and the formula that makes the figure.",
+        "A guided walk-through takes one system from claim to sub-claims to verdicts to figure in at most 5 steps, skippable at every step.",
+        "Every figure is tagged by its basis (computed from checks, computed from authored verdicts, or asserted), and the page shows the share of each across all systems.",
+        "The page explains itself while it runs: during a verification pass the sub-claim under test is highlighted, with a one-line caption saying what is checked and which result would fail it.",
+        "A limits section names what atomic decomposition cannot catch (implicature, framing, omitted claims, the choice of which claims to make), each illustrated by a row from this lab.",
+        "A dated, versioned methodology note of at least 800 words (decomposition rules, verdict criteria, weighting, failure modes) is linked from the decoder, and each rule is illustrated by a lab row.",
+        "A documented test with at least 5 people new to the page: after 5 minutes at least 4 correctly state how one figure was computed and name one thing the method cannot catch; and a published self-assessment against all five commitments of the IFCN Code of Principles (Poynter, 2016), nonpartisanship and fairness, transparency of sources, transparency of funding and organisation, transparency of methodology, and an open and honest corrections policy, is linked from the page, each commitment answered by a link to the page or file that meets it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Rung 2 holds: the .sub paragraph names the three registers and says the figure is 'my own honest estimate, not a benchmark', which matches the code (reality is a typed literal in DECODER). Rung 3 fails: the footer says 'every exhibit in this lab carries a decoder row; this is where they live', but no other file reads window.L212_DECODER (repository grep) and 6 of 13 built labs have no row; the meta line says 'zero network' while the page loads the Google Fonts stylesheet and three woff2 files. No method, formula or verdict criteria are stated."
+        }
+      }
+    },
+    {
+      "id": "reach-and-load",
+      "name": "Reach and load",
+      "frame": "performance",
+      "metric": "Time to the first figure (ms) and bytes before it (KB) under a stated throttle, reduced-motion handling, layout at a 390x844 viewport, assistive-technology exposure (ARIA roles, states, live regions), WCAG contrast ratios and target sizes, and main-thread time while checks run. Rater uses DevTools or CDP throttling, a 390x844 frame, a contrast checker and Lighthouse.",
+      "ladder": [
+        "The page fails to load or render.",
+        "The page loads and renders one system.",
+        "First figure: with cache disabled and the network throttled to 150 ms round trip, 1.6 Mbps down and 4x CPU slowdown (Lighthouse's default mobile values), the first system's claim, mechanism and figure render from same-origin data at a median first contentful paint under 1.5 s over 3 loads, with under 60 KB transferred before that paint, not counting font files and not counting requests made by checks after it.",
+        "prefers-reduced-motion and a ?still parameter both stop the count-up and the bar transition, showing the final figure at once.",
+        "At a 390x844 viewport the selected system's figure, claim and first mechanism sentence are visible without scrolling, every register's full text can be read by scrolling, no register overlaps a control, there is no horizontal scroll, and the chips wrap.",
+        "Assistive tech: the selected chip carries aria-pressed or aria-selected, the meter exposes role meter or progressbar with aria-valuenow, and a system change is announced through an aria-live region.",
+        "Every text colour meets WCAG 2.1 AA contrast (4.5:1) on its background, and every control is at least 44x44 CSS px on a phone.",
+        "A Lighthouse mobile run scores at least 95 on performance and 100 on accessibility, with the report dated in the repository.",
+        "During the full check suite (or, with none, on load and on each selection), no main-thread task exceeds 50 ms in a DevTools performance trace; all non-route checks finish under 10 s at 4x CPU throttle, and route checks are batched into one model call.",
+        "Offline: after a first visit the page and its last check results load with the network off, and the page states the date of the cached results.",
+        "axe-core reports 0 violations and a documented screen-reader walkthrough (NVDA and VoiceOver) completes every task (pick a system, read its sub-claims, paste a claim, read the verdicts), to WCAG 2.2 AA."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Rung 2 holds: 4 cache-disabled loads of the live page over CDP with those throttle values (2026-11-11, fresh profile, headless Chrome) gave first contentful paint at 1120, 1168 and 1180 ms and 2960 ms on the first cold launch (median 1174 ms); before it only the 7.7 KB gzipped HTML and the 1.1 KB font stylesheet arrive, and the figure renders from inline data. Rung 3 holds: reduce and ?still skip the count-up in setNum() and the bar transition in select(). Rung 4 fails: in a 390x844 frame (?still, headless Chrome) the stage grid gives the 1fr decode row the leftover height; with .decode min-height:0 the claim and mechanism registers collapse to about 35 px each, overlap the first row of chips, and hide their text. Rung 5 would also fail: no aria-pressed, no role meter, no aria-live; rung 6 too: --dim #6B7682 on #07090C is 4.31:1 and chips are about 30 px tall."
+        }
+      }
+    },
+    {
+      "id": "decoder-architecture",
+      "name": "Row schema and modules",
+      "frame": "architecture",
+      "metric": "Where rows, rendering, checks and decomposition live in code, and what can be added without touching the core: data modules, a validated row schema, hub keying, a shared component other pages import, per-lab check modules, gates. Rater reads the file tree and runs the repository checks.",
+      "ladder": [
+        "No code exists for the lab.",
+        "One HTML file holds the rows and the logic.",
+        "The rows are one data array separate from the render function.",
+        "Rows live in their own data module or JSON file loaded by the page, so adding a system touches no rendering code.",
+        "A row schema (hub id, claim, sub-claims, verdicts, weights, evidence, graded date, commit) is validated by a script in tools/ that fails on a planted bad row.",
+        "Rows are keyed by site.config.js lab ids, and the site checks fail when a built lab has no row or a row names an unknown id.",
+        "Shared component: the row renders through one ES module that at least 3 other lab pages import to show their own row.",
+        "Checks are per-lab modules in one directory with a common interface (run() returning sub-claim id, pass and detail), added without touching the decoder core.",
+        "The checks run headless in the repository's pull-request workflow and exit non-zero on a failing check, shown by a committed selftest that plants a failing check and asserts the gate fails.",
+        "The decomposition engine and the model route sit behind one interface with unit tests over at least 30 fixtures, and the engine runs in Node and the browser from the same file.",
+        "The decoder ships as a documented, versioned package (schema, engine, check runner, component) that another project points at its own claims with a config file and no code changes."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Rung 2 holds: one inline IIFE in labs/honesty-decoder.html, where the DECODER array (10 rows) is separate from select() and setNum(). Rung 3 fails: data and render share the file. window.L212_DECODER is set so sibling exhibits can pull their own row, but only a same-origin page framing the decoder could read it, and a repository grep finds no file that references it."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

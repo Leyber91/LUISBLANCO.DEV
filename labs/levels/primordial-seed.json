@@ -1,0 +1,311 @@
+{
+  "id": "primordial-seed",
+  "title": "Primordial Seed",
+  "page": "seed.html",
+  "thesis": "At level 10 the visitor watches a seed grow into a living plant under bracketed, stochastic and parametric rules, sees the page induce its own rules live while the organism keeps growing true under them, reads by measurement how far those rules compress the growth against DEFLATE and against the generating grammar, and breeds new grammars by selection, with every segment traceable to a rule they can edit, share and export.",
+  "axes": [
+    {
+      "id": "rewriting-engine",
+      "name": "Rewriting engine coverage",
+      "frame": "model",
+      "metric": "Which L-system classes the engine derives exactly, counted against the classes of The Algorithmic Beauty of Plants chapter 1 (bracketed, stochastic, parametric, context-sensitive, 3D) plus timed L-systems (chapter 6). A rater loads one preset per class, compares derived string length and segment count at depth n with the closed-form or published value, and reads rewrite() and walk().",
+      "ladder": [
+        "No rewriting engine runs on the page.",
+        "A turtle draws a string of F, + and - symbols on the page.",
+        "One D0L grammar rewrites every symbol in parallel once per click.",
+        "Bracketed D0L: [ and ] push and pop the turtle's position and heading, so branching plants derive from at least 2 bracketed preset grammars.",
+        "No string is ever truncated: when the next generation would exceed the length cap, grow refuses, and the page states the cap and the length the step would have reached.",
+        "Stochastic L-systems: a symbol may carry several successors with probabilities, the seed is shown, and the same seed reproduces the same organism.",
+        "Parametric L-systems: modules carry numeric parameters, productions take conditions and arithmetic (e.g. F(l) -> F(l*1.456)), with at least 2 parametric presets.",
+        "Context-sensitive L-systems (1L and 2L) with an ignore list for turtle symbols, with at least one signal-propagation preset from ABOP chapter 1.",
+        "3D turtle: the ABOP symbols & ^ \\ / | (pitch, roll, turn around) change a 3D heading, with at least 2 3D presets.",
+        "Timed or differential L-systems (Prusinkiewicz, Hammel and Mjolsness, SIGGRAPH 1993): module ages advance continuously between derivation steps.",
+        "Parity with L-Py and L-studio/vlab on every class above, in the browser, checked by a test suite matching their derived strings and segment counts on at least 20 shared grammars, at least 6 of them ABOP chapter 1 figures at their published depth."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "rewrite() does a parallel D0L rewrite; walk() handles [ ] push/pop, f, + and -; PRESETS holds 5 grammars including two bracketed plants (Fractal plant, Bushy weed). Rung 4 fails: rewrite() slices the string at CAP_CARRY=200000 with no message, mid-bracket (Bushy weed at gen 6, Koch island at gens 5 and 6), and grow carries on from the cut string."
+        }
+      }
+    },
+    {
+      "id": "compression-accounting",
+      "name": "Compression accounting",
+      "frame": "model",
+      "metric": "Whether the claim 'the growth gets cheaper' is measured: which sizes are computed per generation (carried symbols, rule-table symbols, derived length, bits per symbol, grammar bits and bytes, DEFLATE bytes) and against which bounds. A rater reads the readouts on the page after auto-grow and after manual grow and crystallise, and the code that computes them in syncAfter().",
+      "ladder": [
+        "No size or cost of the growth is shown.",
+        "One count is shown, such as the generation number or the string length.",
+        "Carried string length and drawn segment count are shown for the current generation and update on every grow and scrub.",
+        "A leverage ratio whose denominator charges the rule table (carried length plus every minted rule body plus one per rule), and the order-0 Shannon entropy of the carried string labelled in bits per symbol, both updating on every grow and crystallise.",
+        "No size readout is computed from a cut string without notice: whenever a length cap cuts the string a readout measures, that readout is flagged on the page (a rater grows Bushy weed to its deepest generation to check).",
+        "Both sides are shown in bits: the raw derived string (order-0 entropy x length) against the induced grammar (symbols x log2 of its alphabet size).",
+        "A general-purpose baseline: the derived string compressed in the browser with CompressionStream(\"deflate-raw\") (DEFLATE, RFC 1951), its byte count shown beside the induced grammar's size in bytes (its rung-5 bits divided by 8).",
+        "At every generation grown after a mint, the uncrystallised derivation's segment count is shown beside the crystallised count, with their difference.",
+        "The generating L-system's own size (axiom plus base rules) is shown as the floor, with the induced grammar's ratio to it.",
+        "A benchmark runs every preset to its maximum permitted depth and tabulates grammar bytes, DEFLATE bytes and their ratio, marking each row where the grammar is smaller.",
+        "The LZ77 phrase count of the derived string, a lower bound on its smallest grammar (Charikar et al., IEEE Transactions on Information Theory 2005), is shown beside the induced grammar's size with their ratio, on the visitor's own run."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "syncAfter() shows carried symbols (r_carry) and drawn segments (r_seg) for the current generation, refreshed on every grow and scrub (rung 2). Rung 3 fails: 'skill leverage' = expanded.length / carried length charges no rule body (Sierpinski after auto-grow: 6.4x shown, 2.9x with its 3 minted rule bodies charged, replayed in Node), and the entropy readout is labelled 'bits', not bits per symbol."
+        }
+      }
+    },
+    {
+      "id": "motif-induction",
+      "name": "Motif induction",
+      "frame": "intelligence",
+      "metric": "The quality of the grammar the page induces from its own growth: grammar size (start string plus all rule bodies) as a fraction of the derived length, whether the induced grammar round-trips at the mint generation and keeps deriving the true growth after it, and which published inducers it is compared with. A rater runs induction on each preset at generation 4, grows two more generations, compares the expanded string with the uncrystallised derivation, and reads bestMotif() and crystallise().",
+      "ladder": [
+        "Nothing is induced; the rule set never changes on its own.",
+        "A crystallise control adds a new rule to the rule set.",
+        "A press searches the carried string for a repeated substring, replaces its non-overlapping occurrences with a fresh symbol, and lists the new rule.",
+        "The motif chosen maximises a savings score stated in words on the page, searched over every bracket-balanced repeated substring from length 2 up to the longest repeat in the carried string (no fixed length cap), among motifs occurring at least twice.",
+        "The score charges the rule's own cost (net savings = count x (len - 1) - (len + 1)), and a press with no positive net savings mints nothing and says why.",
+        "One press runs induction until no candidate has positive net savings (never stopping because a symbol pool ran out), building rules over earlier minted symbols, and reports the number of rules minted and the final grammar size against the derived length.",
+        "Every press is verified: expanding the induced grammar reproduces the derived string symbol for symbol, shown as a pass mark beside the rule table.",
+        "Crystallisation keeps the organism alive: every minted symbol also gets a successor (the rewrite of its motif, re-encoded over minted symbols), so after a mint at generation k the expanded string at every later generation equals the uncrystallised derivation symbol for symbol, asserted by a test on every preset, while the carried string stays shorter.",
+        "Sequitur (Nevill-Manning and Witten, Journal of Artificial Intelligence Research 1997) and Re-Pair (Larsson and Moffat, Proceedings of the IEEE 2000) run on the same string, and the three grammar sizes are tabulated per generation.",
+        "L-system inference: from the derived strings of consecutive generations alone, the page recovers the generating D0L rules for every deterministic preset.",
+        "Inference extends to stochastic and parametric presets: from derived strings the page infers their productions with probabilities or parameters, and shows the log-likelihood of the observed strings under the inferred grammar beside that under the true grammar. Reference standard for inference: the Plant Model Inference Tool (PMIT) work of Bernard and McQuillan."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "crystallise() replaces the non-overlapping occurrences of the bestMotif() result with a fresh MINT_POOL symbol and renderRules() lists it (rung 2). Rung 3 fails: MOTIF_MAX=9 caps the search and binds on 4 of 5 presets (at gen 3 the first press on plant, bush, Koch and Sierpinski mints a 9-symbol motif; with the cap raised to 60 it recovers the generating rule body, e.g. F-F+F+FF-F-F+F on Koch island, replayed in Node), MINT_THRESH=3 excludes motifs that occur twice, and the savings rule appears only in a code comment; the page shows only 'saved N symbols total'."
+        }
+      }
+    },
+    {
+      "id": "autonomous-growth",
+      "name": "Autonomous growth and selection",
+      "frame": "intelligence",
+      "metric": "What the seed does without the visitor choosing each step: how a run decides when to stop and whether the page reports that reason truthfully, how many rules it mints on its own, and whether grammars vary and are selected. A rater presses the autonomous controls on every preset and reads the stop reason, the minted count and any lineage or fitness readout.",
+      "ladder": [
+        "Nothing runs without one click per step.",
+        "One control runs at least 2 grow steps in a row.",
+        "The run stops on a computed condition (a depth cap or a measured plateau) and, after the run finishes, the readout names the condition that stopped it.",
+        "The run chains growth and induction with no further clicks: it grows to the stop condition, then crystallises a fixed number of motifs.",
+        "The stop rule reads structure, not symbol frequencies: growth stops when the induced grammar's size stops falling relative to the derived length, with the threshold shown; an order-0 entropy plateau alone does not count.",
+        "A mutate control yields at least 6 syntax-valid variants of the grammar (balanced brackets, every variant renders), shown as thumbnails.",
+        "Interactive selection: the visitor picks a parent, the next brood descends from it, and a seeded lineage strip replays the same run (as in Dawkins's Biomorphs, The Blind Watchmaker, 1986).",
+        "Automatic selection on a fitness tied to the lab's thesis, the compression ratio of the induced grammar, plotted per round.",
+        "A population of at least 50 evolves for at least 100 rounds in a Web Worker in under 10 s with no DevTools CPU throttle, and no main-thread task exceeds 50 ms during the run.",
+        "Two-objective selection (e.g. compressibility against segment count) with the Pareto front drawn and any member loadable onto the main stage.",
+        "Lineages are shareable by URL and branchable: opening a shared lineage URL restores the population and its history, and the next round descends from it, as Picbreeder (Secretan et al., CHI 2008) does for images."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "The auto-grow handler loops grow() until plateau() or MAX_GEN=8 (rung 1). Rung 2 fails: on Fractal plant (the default), Koch island and Sierpinski it stops at gen 3 on plateau() (plant H 2.565 to 2.558 bits), then calls crystallise() three times, which rewrites S.gens[S.cur].ent (plant 2.632, Koch 1.457 to 1.869, Sierpinski 1.922 to 2.170); syncAfter() re-evaluates plateau() as false, so r_ceil reads 'growing · no plateau' after the run (replayed in Node; reviewers saw the same in headless Chrome)."
+        }
+      }
+    },
+    {
+      "id": "organism-render",
+      "name": "Organism render",
+      "frame": "graphics",
+      "metric": "What the turtle draws from the derived string: what is visible on arrival and whether it is clear of the panels, how branch order and crystallised rules are encoded, motion and dimensionality. A rater opens the page with no clicks at 1440 px, then grows and crystallises the default preset, and reads draw(), walk() and drawMinted().",
+      "ladder": [
+        "Nothing is drawn.",
+        "A picture of a plant is shown on the page.",
+        "A turtle draws the derived string as line segments, auto-fitted to the viewport, after the visitor grows it.",
+        "The page opens on a grown organism: the default preset at generation 4 or deeper with no click, fitted so no segment lies under a panel or the header copy at 1440 px.",
+        "The segments drawn by the newest crystallised rule are overdrawn in amber on its mint generation, so the skill is seen firing.",
+        "Branch order is drawn: stroke width tapers with bracket depth from trunk to tips, and tip segments differ in colour from the trunk.",
+        "Every crystallised rule keeps its own colour at every generation, not only its mint generation, with a legend tying each colour to its rule.",
+        "Growth is animated: each derivation step draws the new generation's segments in turtle order over at least 400 ms. Reduced motion shows the end state at once.",
+        "A 3D turtle in WebGL with pitch and roll, orbitable by drag, drawing branches as cylinders.",
+        "Continuous development with timed L-systems (Prusinkiewicz, Hammel and Mjolsness 1993): segments elongate with module age, so the organism grows smoothly between derivation steps.",
+        "Leaves drawn as filled polygons from the { } polygon syntax, shaded 3D branches bent by a stated tropism vector, at 30 fps or more for 100,000 segments in the browser; reference standard: the L-studio/vlab renderings of ABOP figures."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "draw() strokes the walk() of the expanded string as one Canvas 2D path in rgba(120,196,230,.62), auto-fitted by a bounds pass (rung 2). Rung 3 fails twice: the 1440 px screenshot shows an empty centre at gen 0 (axiom X draws 0 segments) until the visitor clicks grow, only ?still grows on load; and draw() fits to the full viewport minus a 10% pad, so a gen-4 Koch island spans about x 280 to 1160 at 1440 px, under both panels (left ends near 340, right starts near 1088). drawMinted()'s amber overlay sits above the failed rung."
+        }
+      }
+    },
+    {
+      "id": "derivation-views",
+      "name": "Derivation views",
+      "frame": "graphics",
+      "metric": "The number of views onto the derivation besides the organism (readouts, rule table, string, filmstrip, tree, size chart) and how they are linked. A rater counts the views on the page and hovers or scrubs one to see whether the others respond.",
+      "ladder": [
+        "Only the organism is shown; no other view of the derivation.",
+        "A panel of numeric readouts (generation, counts) sits beside the organism.",
+        "The rule table is shown and gains a row whenever a rule is minted, each minted row stating its generation and symbols saved.",
+        "A generation scrubber replays any stored generation, redrawing organism, readouts and rule highlights together.",
+        "The carried string is shown as text with minted symbols coloured, truncated with a stated symbol count when long.",
+        "A filmstrip of thumbnails, one per generation from 0 to the current, each clickable to jump there.",
+        "Linked hover both ways: hovering a rule lights its segments and its occurrences in the string; hovering a segment lights the rule and the symbol that drew it.",
+        "A derivation tree traces any segment's ancestry back to the axiom, collapsible, with minted rules as named subtrees.",
+        "A per-generation size chart (raw length, grammar size, segments) is linked to the scrubber, with the current generation marked.",
+        "Split view: crystallised and uncrystallised organisms side by side at the same generation, panned and zoomed in lockstep, with differing segments marked.",
+        "A space-time view: all generations stacked as one strip, each segment's producing rule traceable across time, linked to every other view at 60 fps while scrubbing 100,000 segments."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Six readouts in .reads (rung 1); renderRules() lists base and minted rules, each minted row stating 'crystallised at gen N · saved S symbols total' (rung 2); the 'replay gen' range input calls syncAfter() to redraw organism, readouts and rules together (rung 3). Rung 4 fails: the carried string is never shown on the page."
+        }
+      }
+    },
+    {
+      "id": "design-language",
+      "name": "Ouroboros design language",
+      "frame": "style",
+      "metric": "Conformance to the L212 design language (near-black ground, IBM Plex Mono, blue structure, amber kept for what is built, hairline panels, corner brackets) and the craft of type, line and motion. A rater inspects the CSS tokens and the page at rest at 1440 px and 390 px, and measures text contrast with a checker.",
+      "ladder": [
+        "Unstyled browser defaults.",
+        "A dark background and one accent colour are set in CSS.",
+        "The L212 tokens are applied: near-black ground, IBM Plex Mono, blue for structure, hairline panel borders, corner brackets.",
+        "At rest, outside the shared L212 chrome (kicker line and corner brackets), amber appears only on minted rules, their segments, the crystallise control, and the leverage readout once at least one rule is minted; every other element, the stop message and the replay scrubber included, is blue, ink or dim.",
+        "Every text label is at least 11 px and meets WCAG 2.1 AA contrast (4.5:1) against its panel.",
+        "A type scale of at most 5 sizes and one spacing scale are declared as CSS custom properties and used for every rule; no font-size literal appears outside :root.",
+        "Motion has one vocabulary: minting, growth and scrubbing use durations and easings from tokens, and the mint flash is the only amber motion.",
+        "Organism stroke width is a function of segment count stated in code, clamped between 1 and 3 CSS px. At gen 1 and gen 7 of the fractal plant (3 and 24,384 segments) the two computed widths differ and both lie inside the clamp.",
+        "A ground line under the organism and a scale mark labelled in segment lengths are drawn on the canvas.",
+        "The rule table is typeset as a production table: predecessor column, aligned arrows, minted symbols in a distinct font weight.",
+        "A plate view sets the organism above a caption of its axiom, rules, depth and angle in the layout of the figures of The Algorithmic Beauty of Plants, with each minted rule labelled on the organism by a leader line to its segments, and a grep of the page finds no colour or font-size literal outside :root and no inline style attribute. Reference standard: Bartosz Ciechanowski's explorable articles."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": ":root declares --void, --amber, --blue, --dim, --hair; IBM Plex Mono; hairline panels; .bp corner brackets (rung 2). Rung 3 fails: the 1440 px screenshot shows 'skill leverage 1.0×' in amber at gen 0 with '2 base + 0 built' (#r_lev carries class amber from load), .ceil.plateau colours the stop message amber, and the replay scrubber uses accent-color:var(--amber)."
+        }
+      }
+    },
+    {
+      "id": "grammar-workbench",
+      "name": "Grammar workbench",
+      "frame": "interaction",
+      "metric": "What the visitor can change and how directly: count of editable grammar parts, latency from edit to redraw, direct manipulation on the canvas, motif choice, undo and URL state. A rater operates every control on the page and notes what redraws and when.",
+      "ladder": [
+        "No controls.",
+        "One button advances the growth.",
+        "A preset picker plus grow and reset buttons.",
+        "Axiom, angle and every base rule are editable fields; a generation field jumps to a depth; a scrubber replays stored generations.",
+        "Editing a rule or the axiom re-derives the current generation at once with no extra grow click, and unbalanced brackets are flagged inline instead of drawn.",
+        "Rules can be added and deleted for any symbol, and a crystallised rule can be dissolved back into the string.",
+        "Direct manipulation on the canvas: pan, wheel and pinch zoom, and a horizontal drag with a modifier key named on the page changes the angle and redraws at 30 fps or more.",
+        "The visitor can choose which motif to crystallise from a ranked list of the top 5 candidates with their net savings, besides the automatic best.",
+        "Full state in the URL (grammar, depth, minted rules, seed), so any organism reloads identical from a shared link.",
+        "Undo and redo across every edit, and keyboard-complete: keys for grow, crystallise, scrub and undo, listed in a help overlay.",
+        "Every numeric constant in the grammar gets a slider that re-derives live, syntax errors are marked at the offending character, and each preset retyped from scratch re-derives in under 100 ms per keystroke at 10,000 segments (reference standard: the L-Py editor)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Preset select (5 grammars), axiom, angle and generation inputs, base-rule inputs built in renderRules(), grow, crystallise, auto-grow, reset, replay scrubber. Rung 4 fails: a rule edit only sets S.base[k] and redraws nothing until the next grow; unbalanced brackets are accepted with no flag."
+        }
+      }
+    },
+    {
+      "id": "grammar-corpus",
+      "name": "Grammar corpus and exports",
+      "frame": "data",
+      "metric": "Provenance and breadth of the preset grammars, and what the visitor can take away or bring in. A rater counts presets and presets with a cited source on the page, and tries every export and import control.",
+      "ladder": [
+        "No grammars are supplied.",
+        "One built-in grammar.",
+        "At least 3 named presets, each with axiom, angle and rules.",
+        "At least 5 presets spanning the branching (plant, bush), island (Koch) and curve (dragon, Sierpinski) families.",
+        "Every preset cites its source (ABOP figure number or the original paper) with its published depth and angle, shown on the page.",
+        "Export of the current grammar, minted rules included, as JSON and as text in ABOP notation.",
+        "Export of the current organism as SVG and PNG.",
+        "Import of a grammar pasted as text in ABOP notation, validated, with errors reported by line.",
+        "At least 20 presets covering every class the engine supports, each with its ABOP figure citation and a default depth matching the figure.",
+        "Export of the full induction trace (each mint: generation, motif, count, net savings, sizes) and the per-generation size table as CSV.",
+        "The corpus and its compression measurements are published as a versioned JSON file at a stable URL with date and checksum, regenerated by one stated command, covering every L-system figure of Prusinkiewicz and Lindenmayer 1990 chapter 1, each listed by figure number."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "PRESETS holds 5 grammars: Fractal plant and Bushy weed (branching), Koch island (island), Dragon curve and Sierpinski (curves), each with axiom, angle and rules. Rung 4 fails: no preset names a source, figure or published depth, and no export or import exists."
+        }
+      }
+    },
+    {
+      "id": "rewrite-legibility",
+      "name": "Rewrite legibility",
+      "frame": "explanation",
+      "metric": "Which explanation elements are on the page (copy, real/illustrative tags, a spelled-out derivation step, walkthrough steps, citations, stated limits, formula reveals), counted, and whether each claim matches the code. A rater reads the copy, walks the explanation path and checks each claim against seed.html.",
+      "ladder": [
+        "No explanation on the page.",
+        "A title and one line of copy.",
+        "A paragraph explains parallel rewriting and crystallisation in plain words.",
+        "Every claim in the copy is tagged [real] or [illustrative], and no claim is contradicted by the running page or its code: symbol and rule counts in the copy match the selected preset, and a claim that crystallising makes growth cheaper states whether crystallised symbols keep growing.",
+        "A derivation step is spelled out: the axiom, each symbol's successor and the resulting string for generation 0 to 1, and on demand for any step.",
+        "A guided walkthrough of at least 5 steps (seed, rewrite, turtle, crystallise, stop rule) drives the live page at each step, skippable, respecting reduced motion.",
+        "The page cites its methods: Lindenmayer 1968 for L-systems, Prusinkiewicz and Lindenmayer 1990 for the turtle and presets, and Sequitur (Nevill-Manning and Witten 1997) as the reference for motif induction.",
+        "The page states every limit of the current engine beside the readout it qualifies, at minimum: whether crystallised symbols keep growing, what the stop rule ignores, and any cap on length or depth.",
+        "Tapping any readout shows its formula with the current numbers substituted (e.g. leverage = 48,479 / (1,203 + 41) = 39.0x).",
+        "On the visitor's own run, a panel states with that run's numbers how many symbols the repeats saved, the size of the generating L-system as the shortest known description of this growth, and the induced grammar's ratio to it.",
+        "Each walkthrough step (seed, rewrite, turtle, crystallise, stop rule) opens with a control the visitor operates before the text explains it, as in Bret Victor's Up and Down the Ladder of Abstraction (2011), and a closing five-question check scores the visitor."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The .sub paragraph explains parallel rewriting and crystallisation in plain words, and the footer tags [real] and [illustrative] (rung 2). Rung 3 fails: .sub says 'One symbol, four rules' while the default Fractal plant has 2 rules (screenshot: '2 base + 0 built'), no preset has more than 2, and the Koch island axiom is 7 symbols."
+        }
+      }
+    },
+    {
+      "id": "derivation-budget",
+      "name": "Derivation budget and reach",
+      "frame": "performance",
+      "metric": "The largest organism the page grows and draws within a frame budget, and who can reach it: frame time in ms at a stated segment count (DevTools Performance), main-thread blocking during grow, behaviour at 390 px, reduced motion, keyboard and screen-reader access.",
+      "ladder": [
+        "The page freezes or fails to draw the default preset.",
+        "The default preset draws at generation 3 without blocking input for more than 1 s.",
+        "Hard caps on depth and string length bound the work done by any grow.",
+        "At 390 px there is no horizontal overflow, the grown organism has its own unobstructed band at least 300 px tall, and prefers-reduced-motion freezes the background animation.",
+        "Under prefers-reduced-motion, a 5 s idle DevTools trace shows no requestAnimationFrame callback issuing draw calls. With motion allowed, the organism canvas redraws only on state change or resize.",
+        "Every control has a visible focus ring, readouts sit in an aria-live region, and the canvas has a text alternative naming preset, generation and segment count.",
+        "Derivation and expansion run in a Web Worker; no main-thread task exceeds 50 ms during grow or crystallise at the deepest permitted generation.",
+        "100,000 segments draw in under 16 ms (batched paths or WebGL lines, no shadowBlur over the full path), with a frame-time readout on the page.",
+        "Performance tiers: segment budget and glow drop automatically on a 390 px phone profile, and the page states which tier is active.",
+        "1,000,000 segments pan and zoom at 30 fps or more through GPU instancing.",
+        "Lighthouse mobile performance and accessibility both 95 or more, and every preset at its full published depth grows, crystallises and renders with no main-thread task over 200 ms at 390 x 844 under DevTools 4x CPU slowdown."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "MAX_GEN=8, CAP_CARRY=200000 and CAP_EXPAND=600000 bound every grow and expansion (rung 2). Rung 3 fails: below 880 px #org is a fixed full-viewport canvas at opacity .5 behind panels painted rgba(9,12,17,.8), so at 390 px the organism is a faint ghost under the controls with no band of its own (overflow-x is hidden and reduce pins u_time at 6.0, so the other two clauses pass)."
+        }
+      }
+    },
+    {
+      "id": "engine-modularity",
+      "name": "Engine modularity",
+      "frame": "architecture",
+      "metric": "Code shape: whether the rewriting engine, inducer, renderer, measurements and UI are separate modules with tests, and what can be added (a preset, an L-system class, an inducer, a renderer) without editing the core. A rater reads the source tree and runs the tests.",
+      "ladder": [
+        "No code runs.",
+        "Page script runs (logic may sit in inline event handlers).",
+        "Presets are one config object, and the depth cap, the length caps and the motif thresholds are named constants declared once, not repeated as literals.",
+        "Engine and inducer are pure functions (string and grammar in, string or grammar out) with no global state and no DOM access; the turtle walk exists once.",
+        "Engine and inducer live in their own ES modules under labs/assets/js/, imported by seed.html, with presets in a separate data file.",
+        "A Node test file runs engine and inducer headless (derived length of each preset per depth against its closed-form count, e.g. Koch island 7, 59, 475, 3803 symbols; round-trip of every induced grammar) with one command, and the site's check gate runs it.",
+        "At least two inducers exist as separate modules implementing one interface (string in; rules, start string and size out), chosen from a registry list; the engine imports neither.",
+        "Production types (D0L plus at least one of stochastic or parametric) are separate parser modules in a registry the rewrite loop dispatches through; the rewrite loop names no production type.",
+        "Renderers are swappable (Canvas 2D, SVG export, WebGL) behind one segment buffer in typed arrays, filled once per generation instead of re-walking the string per consumer.",
+        "The engine module is imported unchanged by at least one other lab page.",
+        "The engine ships as a standalone versioned package: a semver tag, a CHANGELOG, a typed API reference for every export (JSDoc or .d.ts), and 90% or more line coverage reported by the test command."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "All logic is one inline IIFE in seed.html wired with addEventListener (rung 1); PRESETS is one config object and MAX_GEN, CAP_CARRY, CAP_EXPAND, MOTIF_MIN, MOTIF_MAX and MINT_THRESH are declared once (rung 2). Rung 3 fails: rewrite(), crystallise() and expand() read and mutate the global S; the turtle walk is duplicated in walk() and drawMinted(), expand()'s 24-pass guard and minted-alphabet regex are repeated in drawMinted(), and segments are counted a third time in syncAfter()."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}
