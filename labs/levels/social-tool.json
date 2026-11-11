@@ -1,0 +1,275 @@
+{
+  "id": "social-tool",
+  "title": "Social Manager",
+  "page": null,
+  "thesis": "A visitor drops their own social analytics export into the page and, without a row of it leaving the browser, gets posting windows and engagement half-lives whose intervals are calibrated and which say plainly when the data cannot tell (and offer the randomized schedule that could), checks a draft against each platform's counting rules, and leaves with a calendar file of the slots they chose.",
+  "axes": [
+    {
+      "id": "posting-windows",
+      "name": "Posting-window inference",
+      "frame": "model",
+      "metric": "How the page ranks day-of-week by hour posting windows from the loaded posts: the rate it ranks, the interval method, the minimum-n gate, the adjustment for format and trend, the multiplicity control, the measured coverage of its intervals, and whether it can turn 'cannot tell' into a randomized test. A rater loads the synthetic sample and a planted-null sample, reads the on-page method note and the stats module, and checks each rung yes or no.",
+      "ladder": [
+        "Absent: no posting-window computation exists.",
+        "A fixed list of 'best times' is shown and it stays the same when a different file is loaded.",
+        "Engagement from the loaded rows is aggregated into 7 x 24 day-of-week by hour bins and the top 3 bins are listed; loading another file changes the list.",
+        "Bins rank an engagement rate computed as summed engagements over summed impressions (per follower only when the export carries a follower count at each post's date), not raw counts. Posts still accumulating at export (younger than 7 days, or than three fitted half-lives once the decay fit identifies one) are excluded or replaced by their projected totals, their count is shown, and the rate used is named beside the ranking.",
+        "A minimum-n gate: any bin with fewer than 5 posts is marked insufficient and excluded from the ranking, the gate value and the count of bins that clear it are shown, and the synthetic sample is sized so at least 10 bins clear it.",
+        "Each bin carries a 95% percentile-bootstrap interval from at least 1,000 resamples of its posts (Efron and Tibshirani 1993), and windows rank by the interval's lower bound, not the point estimate.",
+        "Bin estimates are shrunk toward the account mean by empirical-Bayes partial pooling (a gamma-Poisson or beta-binomial prior fitted to all bins). Raw and shrunk values are shown side by side with each bin's shrinkage weight, and sorting the bin table by impressions shows the weight falling as impressions rise.",
+        "A negative-binomial (or quasi-Poisson) regression of engagements on hour-of-week, post format and a time trend, with log impressions as an offset so zero-engagement posts are kept, separates the window effect from format mix and follower growth; each window's rate ratio is shown with its 95% interval.",
+        "Window-versus-average comparisons are corrected for multiplicity across all bins (Benjamini and Hochberg 1995 at q = 0.05, or Holm 1979 at a family-wise level of 0.05), the count of surviving windows is printed, and when none survive the page says no window beats the account average instead of naming one.",
+        "A built-in simulation of at least 200 synthetic accounts with a planted window effect reports the share of (account, bin) pairs whose 95% interval the page ranks by contains the planted bin rate, reading between 92% and 98%. The generator draws engagements from a heavy-tailed distribution (negative binomial with size parameter at most 1, or log-normal with sigma at least 1), includes follower growth across the series and a format mix that correlates with hour, and shows every setting; on a planted-null account the page declines to recommend a window in at least 95% of runs.",
+        "Reference standard, the randomized experiment that observational data cannot replace: from the file's own dispersion the page computes how many posts per window a randomized posting schedule needs to detect a 1.2x lift at 80% power and a two-sided 0.05 level, exports that schedule as an .ics file, and, when the follow-up export is loaded (a bundled synthetic follow-up loads with one click), analyses it as an experiment and reports the lift with its interval; the coverage table at 50%, 80% and 95% nominal across 3 planted scenarios (null, one strong window, two weak windows), with the seed shown, stays on the page."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: site.config.js lists social-tool as status 'planned' with no href, and no lab module computes anything" }
+      }
+    },
+    {
+      "id": "decay-curves",
+      "name": "Engagement decay fit",
+      "frame": "model",
+      "metric": "How the page models engagement accumulating after a post goes out: whether the export can identify a half-life at all, the curve families fitted, the half-life in hours with its interval, the correction for posts still young at export time, and recovery of a planted half-life. A rater loads the sample and the two-snapshot sample, reads the fit module and the on-page fit report, and checks each rung.",
+      "ladder": [
+        "Absent: no decay curve is computed.",
+        "A decay curve is drawn as an illustration and it is identical for every file loaded.",
+        "Each post's total engagement is plotted against its age at export time (hours from publish to the export date the visitor confirms), from the loaded rows.",
+        "One saturating curve E(t) = E_inf * (1 - exp(-t / tau)) is fitted by least squares to each post's total divided by the account median for its format, and the half-life tau * ln 2 is printed in hours only when at least 10 posts are younger than 7 days at export; otherwise the page states that this export cannot identify a half-life and asks for a second export (snapshot mode).",
+        "A second family (log-normal or Weibull cumulative) is fitted and the two are compared by AIC or held-out error, with the chosen family named on the page.",
+        "Posts younger than three half-lives at export are flagged as still growing, their projected final total is drawn dashed as projected, and the window statistics use the projected total for those posts in place of their partial total (the method note says so).",
+        "The half-life carries a 95% bootstrap interval from at least 1,000 resamples of posts, drawn as a band around the fitted curve.",
+        "Snapshot mode: two or more exports of the same account merge by post id into within-post growth curves, the fit uses them instead of the cross-section when present, and the sample offers a two-snapshot synthetic pair that loads with one click.",
+        "Separate fits per post format (text, image, video, link) are shown side by side with half-life, interval and RMSE for each family.",
+        "On at least 200 synthetic accounts with a planted half-life and heavy-tailed totals (log-normal with sigma at least 1), every generator setting shown, the page reports how often its 95% interval contains the planted value, and the figure reads between 92% and 98%.",
+        "Reference standard, a calibrated nowcast: for a post under 6 hours old the page projects its 7-day total with an 80% interval, and a backtest over posts with snapshots both under 6 hours and at 7 days or later (the bundled snapshot sample, and the visitor's own snapshots when loaded) reports the interval's hit rate, reading between 75% and 85%."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: social-tool is 'planned' in site.config.js and there is no fit code anywhere under labs/" }
+      }
+    },
+    {
+      "id": "composer-checks",
+      "name": "Composer checks",
+      "frame": "interaction",
+      "metric": "The number of deterministic checks the composer runs on a draft as it is typed, the platforms whose length it counts in that platform's own unit, and what the visitor can do from a flag. A rater types test drafts (a URL, CJK text, an emoji with a skin-tone modifier, 31 hashtags, a near-copy of a post in the sample) and counts flags, fixes and previews.",
+      "ladder": [
+        "Absent: no composer exists.",
+        "A textarea with a plain character count (JavaScript string length) and no platform rules.",
+        "A length limit is checked for at least 3 named platforms, with each limit, its source and the date it was checked in one config table.",
+        "Length is counted in each platform's own unit, named per platform in the config table: X's weighted count as in the open-source twitter-text library (every URL at 23, CJK characters at weight 2), Bluesky's grapheme count via Intl.Segmenter, Mastodon's characters with every URL at 23; any platform whose unit is unverified is marked unverified.",
+        "At least 9 named checks run on every keystroke (length, hashtag count, mention count, link count, line breaks, all-caps ratio, trailing whitespace, near-duplicate of a post in the loaded export at character 3-gram Jaccard similarity of 0.8 or more with the threshold in the config module, and spacing: two scheduled posts on one platform closer than the set gap, default 3 h), each shown pass or fail with its reason.",
+        "Flags are inline: the offending span of each failing check is highlighted in the draft, and clicking a failed check moves the caret to its span.",
+        "Each failing check with a deterministic remedy offers a one-click fix (trim at a word boundary, CamelCase a hashtag, move hashtags to the end) and every fix can be undone.",
+        "A per-platform preview shows the draft as it will be cut: an X thread split into numbered parts at sentence boundaries, and the truncation point for each platform taken from the config table.",
+        "The composer shows the recommended window from the analysis and the expected engagement rate for the draft's format at that window with its interval, and one action places the draft in the scheduler at that slot.",
+        "Screen-reader reach: every change in a check result is announced through an aria-live region, the draft's emoji are listed with their Unicode CLDR short names (what a screen reader speaks), and an image-attach control takes alt text, with an attached image whose alt text is empty blocking the schedule action and the reason stated.",
+        "Reference standard, platform conformance: X counting passes the twitter-text conformance validation fixtures, every other platform passes a fixture of at least 50 drafts with recorded platform counts, and the pass rate is shown on the page at 100%."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: social-tool has no href in site.config.js, so there is no composer, textarea or check code" }
+      }
+    },
+    {
+      "id": "uncertainty-views",
+      "name": "Uncertainty views",
+      "frame": "graphics",
+      "metric": "The number of live views of the loaded data, how each draws uncertainty and sample size, and how views link. A rater loads the sample, counts views, clicks a heatmap cell to test linking, and checks that intervals are drawn as marks, not only printed as numbers.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "A static image or mock chart is shown that no file changes.",
+        "One live 7 x 24 heatmap of the binned estimates redraws from the loaded file.",
+        "Heatmap cells encode the estimate by color and the post count by a visible mark (dot size or fill fraction), and insufficient cells are hatched.",
+        "A second view draws the fitted decay curve over the post scatter it was fitted to.",
+        "A third view draws the ranked windows as an interval plot (point and 95% whiskers) beside the heatmap.",
+        "Linked selection: clicking a heatmap cell highlights its posts in the scatter and lists them, and the selection is stored in the URL hash.",
+        "Resampling made visible: at least 20 bootstrap estimates for the selected bin are animated as a hypothetical outcome plot, with a static strip of the same estimates under reduced motion.",
+        "A fourth view, a week calendar of scheduled slots showing each slot's expected engagement band, joins the linked selection: selecting a slot highlights its bin in the heatmap and its row in the interval plot.",
+        "Every chart exports as SVG and PNG with a caption naming the data source (sample or own file), n and the interval method.",
+        "Reference standard, the uncertainty-visualization literature: one toggle switches the window ranking between interval whiskers, a quantile dotplot (Kay, Kola, Hullman and Munson 2016, CHI) and a hypothetical outcome plot (Hullman, Resnick and Adar 2015, PLOS ONE), all three drawn from the same bootstrap draws."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no chart, canvas or SVG code exists for social-tool under labs/" }
+      }
+    },
+    {
+      "id": "instrument-style",
+      "name": "Instrument styling",
+      "frame": "style",
+      "metric": "The design language of the instrument against the site's token system in labs/assets/css/tokens.css: tokens used, numeral typography, the gold rule, the uncertainty marks, the type scale and motion timing. A rater greps the lab's stylesheet and chart code and inspects the computed styles of the main views at 1440 px and 360 px.",
+      "ladder": [
+        "Absent: no page or stylesheet exists.",
+        "The page uses browser default styles or a generic template unrelated to the site.",
+        "The page loads labs/assets/css/tokens.css and the lab's CSS holds no hex or rgb color outside it (one grep confirms).",
+        "Every number is set in --font-mono with font-variant-numeric: tabular-nums, so columns of rates align digit under digit.",
+        "Gold appears only on the active selection and the recommended window: a grep of the lab's CSS and chart code for accretion, status-built and glow-warm finds uses only in the rules for those two states.",
+        "One uncertainty grammar across all views: whisker width, band opacity, the hatch pattern and the projection dash array are each defined once, as CSS custom properties or in one constants module, and a grep finds no chart setting its own values for them.",
+        "The heatmap ramp is built from the --horizon tokens (not gold), its lightness rises monotonically in CIE L*, it stays ordered under DevTools deuteranopia emulation, and a legend states the unit.",
+        "Transitions on file load, cell selection and refit use only --t-fast or --t-mid as duration and only --ease as timing function; a grep of the lab's CSS and chart code finds no other duration or easing value.",
+        "The lab's CSS sets font-size only through the type-size tokens (--t-micro, --t-stamp, --t-body, --t-lead, --t-h3, --t-h2, --t-h1), uses at most 5 of them and at most 2 font weights; one grep of font-size and font-weight confirms it.",
+        "The 'SYNTHETIC · illustrative' tag is drawn inside each chart's own SVG or canvas as one hatched corner mark of fixed size and position, not as an HTML overlay, so a screenshot cropped to any chart still carries it.",
+        "Reference standard, a printed mark legend held to WCAG 2.2: the page prints a legend of every mark (interval whisker, insufficient hatch, dashed projection, gold active, the 'SYNTHETIC · illustrative' tag), every mark reaches at least 3:1 contrast against its ground (WCAG 2.2 success criterion 1.4.11, non-text contrast), and a rater sampling 10 marks across all views at 360 px and 1440 px finds 10 of 10 match the legend and reach 3:1."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no social-tool stylesheet in labs/assets/css (tokens.css, hub.css and other labs' sheets only)" }
+      }
+    },
+    {
+      "id": "export-ingestion",
+      "name": "Export ingestion",
+      "frame": "data",
+      "metric": "Which analytics exports the page parses locally and how faithfully: platform layouts recognized, file types (CSV, and .xlsx where a platform exports it), encodings, delimiters, date, time zone and number formats, and rows rejected with reasons. A rater feeds fixture files (UTF-16 tab-separated, semicolon-delimited with comma decimals, quoted newlines, a date-only export, hourly posts across a DST change) and reads the import report.",
+      "ladder": [
+        "Absent: no data input exists.",
+        "Data comes from a hard-coded array or values typed into the page; no file input exists.",
+        "One CSV file can be dropped or chosen, is parsed in the browser, and its row count is shown.",
+        "A synthetic sample dataset loads with one click, labeled with the exact tag 'SYNTHETIC · illustrative', with its seed and generator parameters (post count, planted windows, planted half-life) shown on the page.",
+        "RFC 4180 parsing: quoted fields, doubled quotes and newlines inside quotes parse correctly, and the delimiter (comma, semicolon, tab) is sniffed from the file.",
+        "A column-mapping step assigns each file header to a lab field (post id, timestamp, impressions, engagements, format) from a dropdown, and a preview of the first 10 rows updates as each mapping changes.",
+        "Encodings and locales: UTF-8 with or without BOM and UTF-16 LE decode correctly, a decimal-separator setting is auto-detected from the file and editable, and '1.234,5' and '1,234.5' parse to the same value under their respective settings.",
+        "Timestamps parse in an explicit IANA time zone, chosen or detected and shown beside every time on the page, and a repo fixture of hourly posts across the 2026-03-29 Europe/Madrid DST change loads with every post in its correct hour bin; an export whose timestamps carry no time of day disables hour-level windows, falls back to day-of-week and says why.",
+        "At least 3 named platform export layouts (for example X post analytics CSV, Meta Business Suite CSV, LinkedIn content analytics .xlsx read in the browser) are recognized by header signature and mapped with no manual step, each adapter carrying the date its layout was last checked against a real export.",
+        "An import report lists every rejected or coerced row with line number and reason, and accepted plus coerced plus rejected equals the file's data-row count.",
+        "Reference standard, a parser held to fixtures: at least 20 fixture files (every adapter, every encoding, every malformed case) run as a repo test at 100% pass, and an unknown layout falls back to manual mapping with its unmatched headers named."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no file input, CSV parser or sample dataset exists for social-tool in the repo" }
+      }
+    },
+    {
+      "id": "calendar-export",
+      "name": "Schedule and .ics fidelity",
+      "frame": "data",
+      "metric": "Whether slots can be placed and edited on a week grid, and how faithfully the exported .ics file follows RFC 5545 (iCalendar). A rater schedules a week with one recurring slot and a multibyte draft, exports twice and diffs the files, reads the .ics text, and runs it through the icalendar.org validator.",
+      "ladder": [
+        "Absent: no scheduler or export exists.",
+        "Scheduled posts sit on a week grid where a slot can be added, moved (drag and arrow keys) and removed; no export exists.",
+        "A .ics file downloads with VCALENDAR, VERSION:2.0, PRODID and one VEVENT per scheduled post.",
+        "Each VEVENT carries a UID that is identical across two exports of the same schedule (a diff of the two files shows it) and a DTSTAMP in UTC, and editing a slot then re-exporting increments that event's SEQUENCE.",
+        "Text follows RFC 5545 escaping (commas, semicolons, backslashes, newlines), DESCRIPTION holds the draft text, and lines are folded at 75 octets, checked with a multibyte draft that would split a character.",
+        "Times carry a TZID with a matching VTIMEZONE block, or are UTC with a Z suffix, and the exported zone equals the one shown on the page.",
+        "Recurring slots export as one VEVENT with an RRULE (for example FREQ=WEEKLY;BYDAY=TU) instead of one event per week.",
+        "Each event carries a VALARM whose TRIGGER equals the lead time the visitor sets (default -PT15M), and changing the lead time changes every TRIGGER in the next export.",
+        "The file passes the icalendar.org validator with zero errors, and import screenshots from Google Calendar, Apple Calendar and Outlook showing the scheduled times unchanged are kept in the repo.",
+        "Round trip: the page parses its own exported .ics back and shows a diff against the schedule, which reads zero differences.",
+        "Reference standard, two independent parsers agree: at least 10 fixture schedules (DST edges, multibyte text, RRULE with EXDATE) round-trip with zero differences in a repo test through both the page's own parser and ical.js (the Mozilla iCalendar library behind Thunderbird's calendar), and the calendar carries RFC 7986 NAME and COLOR plus X-WR-CALNAME."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no week grid, scheduler or iCalendar writer exists for social-tool in the repo" }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution, measured",
+      "frame": "intelligence",
+      "metric": "What the language model adds over the deterministic engine and what guards it: tasks given to the model, consent and the payload it sees, the share of its output a validator accepts, and the route that answered (labs/assets/js/ai/llm.js). A rater runs the lab with the model route on and off, reads the payload preview, and compares outputs.",
+      "ladder": [
+        "Absent: no model call and no generated guidance exist.",
+        "A model call sends the visitor's text to one endpoint with no fallback and shows its reply raw.",
+        "Calls go through labs/assets/js/ai/llm.js with a deterministic offline fallback, and the route panel names which route answered.",
+        "The model route is off by default. Turning it on shows, before each send, the exact JSON and the destination host, and nothing is sent until the visitor confirms; the payload holds only aggregates, column headers or the visitor's own draft, never raw export rows.",
+        "Each model task is one call at its own moment (header-mapping suggestions at import, a findings summary after analysis, 3 draft variants in the composer), at most one call per visitor action. Each reply is one JSON object validated against that task's schema in the lab's code, and an invalid reply falls back to the engine, with the fallback named in the route panel.",
+        "Number guard: every number in the model's summary is matched to a computed statistic within the page's displayed rounding (same value at the same decimal places), unmatched numbers are struck out, and their count is shown.",
+        "Model draft variants run through the composer checks, only passing variants are offered, and the pass rate is shown.",
+        "A model on/off toggle shows the engine's output beside the model's for the same input, so the visitor sees what the model adds.",
+        "Contribution scored live: a run button computes, on at least 5 bundled fixtures (about 4 minutes on the public route at one reply per 45 s), header-mapping accuracy with and without the model and the number guard's rejection rate, and prints the route that answered and the time of the run.",
+        "Claim guard: the summary is flagged whenever it names a best window that the multiplicity test did not keep, or states a half-life outside the computed interval, and the flag count is shown.",
+        "Reference standard, a published evaluation: on a fixed set of at least 30 exports and drafts kept in the repo, a stored table shown on the page gives header-mapping accuracy, guard rejection rate and median latency per route that answered (ollama, own-key, worker, pollinations, offline), with the date of the run and the model name for each route."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no social-tool module imports labs/assets/js/ai/llm.js and no model call is defined" }
+      }
+    },
+    {
+      "id": "uncertainty-literacy",
+      "name": "Uncertainty literacy",
+      "frame": "explanation",
+      "metric": "The explanation features present (method note, walkthrough, recommendation sentences, interval-width panel, naive-chart section, what-this-cannot-tell-you panel, coverage demonstration, self-check), and the share of displayed numbers, in percent, that carry a unit, an n and a real or illustrative tag. A rater samples 20 numbers across all views on the sample dataset and reads every explanation on the page.",
+      "ladder": [
+        "Absent: no explanation exists.",
+        "One paragraph describes the lab with no account of the method.",
+        "Every number shown names its unit and its n (the posts behind it).",
+        "The sample dataset and every chart drawn from it carry the tag 'SYNTHETIC · illustrative', and the visitor's own file carries 'YOUR FILE · real', everywhere either appears.",
+        "A method note names each estimator (rate definition, minimum-n gate, bootstrap, decay family) in plain language and is reachable from each chart.",
+        "A guided walkthrough of at least 4 steps (load the sample, read the heatmap, read an interval, decide a slot) runs on the sample dataset.",
+        "Each recommendation is a sentence built from the numbers, of the form 'Tuesday 09:00 shows 1.3x your average rate (95% interval 1.1x to 1.6x, 14 posts)'; it changes when another file is loaded, and it says the data cannot tell whenever the page's own decision rule rejects the window: the interval crossing 1x, or, once a multiplicity correction exists, the window failing it.",
+        "A 'why is this interval wide' panel shows, for the selected bin, how post count and spread set the width, with a control that previews the width at twice the posts.",
+        "A section shows live, on the sample, why naive best-time charts mislead: toggling off the minimum-n gate, the multiplicity correction and the trend term each changes the recommendation, and the page says how.",
+        "A 'what this cannot tell you' panel states that posting time was chosen by the poster, not randomized, names at least 3 confounds an export cannot measure (content quality, platform ranking changes, audience time zones), states which of them the page's estimates adjust for (none, or format and trend once the regression exists), and names a randomized posting schedule as the test that would settle it.",
+        "Reference standard, Kristoffer Magnusson's 'Interpreting Confidence Intervals' (rpsychologist.com) run on the visitor's own numbers: for the selected window the page draws 100 simulated datasets of its post count and spread with its estimate planted as the truth, shows each one's 95% interval and counts how many cover the truth; a 3-question self-check (which window, does it beat the average, how many posts back it) scores each answer against the page's computed statistics, not the language model, and shows the correct value beside the visitor's answer."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: the only text is the hub blurb in site.config.js ('Schedule, draft and analyse')" }
+      }
+    },
+    {
+      "id": "local-performance",
+      "name": "Local compute and reach",
+      "frame": "performance",
+      "metric": "Time to parse and analyse a file in the visitor's browser, main-thread responsiveness during analysis, bytes transferred, and reach: phone width, reduced motion, keyboard and screen reader. A rater times the 1,000-row and 50,000-row fixtures and the coverage simulation in the Chrome DevTools Performance panel with CPU throttling off unless a rung says otherwise, reads transferred bytes in the Network panel, and runs Lighthouse accessibility.",
+      "ladder": [
+        "Absent: no page exists to measure.",
+        "A page loads; nothing about timing or reach is handled.",
+        "A 1,000-row file parses and draws its first chart within 2 s of being chosen, timed in DevTools.",
+        "At 360 px wide every view and the composer stack in one column with no horizontal page scroll.",
+        "Parsing and the bootstrap run in a Web Worker, progress is shown, and DevTools records no main-thread long task above 200 ms during analysis.",
+        "prefers-reduced-motion removes every animation, and every control works by keyboard with a visible focus ring.",
+        "A 50,000-row file parses in under 3 s and a 2,000-resample bootstrap over 168 bins finishes in under 2 s with DevTools CPU throttling off, and the page prints both timings and navigator.hardwareConcurrency beside them.",
+        "The heatmap has a screen-reader table alternative carrying the same estimates, intervals and n, and Lighthouse accessibility scores at least 95.",
+        "The first load transfers under 300 KB excluding the sample data, and a repeat load transfers under 30 KB from the browser or service-worker cache, both read from the DevTools Network panel's transferred total.",
+        "The 200-account coverage simulation runs in a Worker with progress and a cancel button in under 30 s with DevTools CPU throttling off, the page prints its time beside navigator.hardwareConcurrency, and the tab's memory stays under 300 MB in DevTools.",
+        "Reference standard, Core Web Vitals: under 4x CPU throttle in DevTools a 50,000-row analysis finishes in under 8 s, and interaction to next paint stays at or under 200 ms (the Core Web Vitals INP pass threshold) throughout."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no social-tool HTML file in labs/ to load, time or audit" }
+      }
+    },
+    {
+      "id": "local-only",
+      "name": "Never-leaves-the-browser guarantee",
+      "frame": "architecture",
+      "metric": "Whether the visitor's export provably stays on their device: network requests after a file is chosen, the Content-Security-Policy meta tag that forbids sending it, and the code paths that could. A rater loads a file with the DevTools Network panel open, reads the page's CSP, and greps the lab's modules for fetch, XMLHttpRequest, WebSocket, EventSource, sendBeacon, RTCPeerConnection, 'new Image' and dynamic import(.",
+      "ladder": [
+        "Absent: no page or data handling exists.",
+        "The page says data stays local, and nothing enforces or shows it.",
+        "Files are read with the File API (Blob.text or FileReader), no upload code exists, and DevTools shows 0 requests while a file is parsed.",
+        "The lab's parse and stats modules contain no fetch, XMLHttpRequest, WebSocket, EventSource, sendBeacon, RTCPeerConnection, 'new Image' or dynamic import( call; one grep confirms it.",
+        "A live network ledger built from PerformanceObserver resource entries lists every request with its host and time; the count of requests made after the file was chosen reads 0 once parsing and analysis finish with the model route off, and it rises by one when the ledger's test button makes one same-origin request, which shows the counter is live.",
+        "A Content-Security-Policy meta tag limits connect-src to 'self' and the named model-route hosts and img-src to 'self' data: blob:, readable in the page source.",
+        "Parsed data lives in memory only by default; saving to IndexedDB is opt-in, named, and one button deletes it.",
+        "The parser and stats run in a Worker whose module graph imports nothing that touches the network, asserted by a test in the repo.",
+        "With the network disabled after first load, import, analysis, composer and .ics export all still work.",
+        "A single-file build of the lab (one HTML file) runs from file:// with the network off, so a visitor can audit it and run it without the site.",
+        "Reference standard, a guarantee the visitor can verify: a headless-browser CI run loads a fixture export and asserts zero requests after the file is chosen plus the CSP meta tag's connect-src (GitHub Pages serves no custom headers), every script tag carries a Subresource Integrity hash, and the page shows the commit, the SHA-256 hash of each script file and the date of the latest linked CI run that tested them."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: social-tool has no code, so there is no file handling, CSP or network ledger to check" }
+      }
+    },
+    {
+      "id": "pipeline-shape",
+      "name": "Adapter and stats-core shape",
+      "frame": "architecture",
+      "metric": "Code shape: separation of platform adapters, stats core, composer check registry and iCalendar writer; config kept out of logic; tests; and what a contributor can add without touching the core. A rater reads the module tree and tries adding a fake platform adapter and a fake composer check.",
+      "ladder": [
+        "Absent: no code exists.",
+        "One HTML file holds all logic in inline script.",
+        "The lab is ES modules under labs/assets/js/ with the page holding markup and one entry import.",
+        "Platform limits, check thresholds and the minimum-n gate live in one config module, and no logic file holds those numbers.",
+        "The stats core (rates, bootstrap, shrinkage, decay fit) is pure functions with no DOM access, importable in Node.",
+        "The stats core has unit tests run by node with a seeded bootstrap, at least 15 assertions passing.",
+        "Each platform export layout is one adapter file implementing one interface (detect, map, coerce); adding a platform touches no core file.",
+        "Composer checks are a registry where each check is one object (id, test, message, fix), and adding a check changes no composer code.",
+        "The iCalendar writer is its own module with RFC 5545 fixture tests (folding, escaping, TZID, RRULE).",
+        "One named seeded generator (for example mulberry32) drives the bootstrap, the simulations and the sample dataset, so any result reproduces from the seed shown on the page.",
+        "Reference standard, a reusable library: the stats core ships as a standalone module with typed signatures (JSDoc or .d.ts), its own README and test suite, and runs unchanged outside the lab."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no social-tool modules exist under labs/assets/js (only ai, altverse, blackhole and other labs' folders)" }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}
