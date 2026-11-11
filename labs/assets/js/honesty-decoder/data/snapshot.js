@@ -2,7 +2,7 @@
    Commit, date, LF-normalised SHA-256 and anchor lines of every file a decoder row cites. */
 export const SNAPSHOT = {
  "generated": "2026-11-11",
- "head": "a0b5b77",
+ "head": "14313e5",
  "files": {
   ".github/workflows/update_exoplanet_data.yml": {
    "commit": "7a765ce",
