@@ -201,7 +201,7 @@ export const SEL = {
   top: '#top', explained: '#explained', digest: '#digest',
   board: '#board', boardHead: '#board-head', viewToggle: '#view-toggle', boardFilters: '#board-filters',
   history: '#history', diff: '#diff', store: '#store',
-  verify: '#verify', method: '#method', worked: '#worked', hard: '#hard',
+  verify: '#verify', method: '#method', worked: '#worked', hard: '#hard', provenance: '#provenance',
   lookupForm: '#lookup', lookupInput: '#lookup-terms', lookupOut: '#lookup-out',
   detail: '#detail', tour: '#tour', tourBtn: '#tour-btn', expRoute: '#exp-route',
   fileImport: '#import-file', evidence: '#evidence',

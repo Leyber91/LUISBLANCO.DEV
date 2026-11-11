@@ -476,6 +476,34 @@ onset = the first day of the run that crossed`),
   if (model.budget) host.append(el('p', 'note num', model.budget));
 }
 
+/* Provenance of the scan on screen: one row per source, from the requests actually made. */
+export function renderProvenance(host, model) {
+  clear(host);
+  const wrap = el('div', 'tscroll');
+  const tb = el('table', 't num');
+  const hr = el('tr');
+  for (const h of ['source', 'status', 'fetched (UTC)', 'window the data covers', 'requests', 'received', 'first request']) hr.append(el('th', null, h));
+  tb.append(hr);
+  for (const src of SOURCE_ORDER) {
+    const v = model.scan.sources[src];
+    if (!v) continue;
+    const tr = el('tr');
+    const rate = v.rate?.remaining != null ? `, ${v.rate.remaining} of ${v.rate.limit} search calls left` : '';
+    tr.append(el('td', null, S(src).label),
+      el('td', null, `${v.status}${v.reshown ? ' (last stored result, no new request)' : ''}${v.error ? `: ${v.error}` : ''}${rate}`),
+      el('td', null, v.fetchedAt ? utc(v.fetchedAt).slice(0, 16) : 'n/a'),
+      el('td', null, v.window || 'n/a'),
+      el('td', 'n', v.requests != null ? String(v.requests) : 'n/a'),
+      el('td', 'n', v.bytes != null ? kb(v.bytes) : 'n/a'));
+    const td = el('td');
+    if (v.urls?.[0]) td.append(el('code', null, v.urls[0]));
+    tr.append(td);
+    tb.append(tr);
+  }
+  wrap.append(tb);
+  host.append(el('p', 'note', `Origin of the scan on screen: ${model.origin === 'live' ? 'fetched live from this browser' : model.origin === 'stored' ? 'stored in this browser' : 'recorded with the same engine on the date shown'}.`), wrap);
+}
+
 export function renderWorked(host, model) {
   clear(host);
   const it = model.items[0];

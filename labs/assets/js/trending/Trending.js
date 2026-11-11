@@ -313,6 +313,7 @@ export class Trending {
     this._renderMemory(m);
     V.renderVerify(this.n.verify, m);
     V.renderMethod(this.n.method, m);
+    V.renderProvenance(this.n.provenance, m);
     V.renderWorked(this.n.worked, m);
     V.renderHard(this.n.hard, m);
     this._writeURL();
