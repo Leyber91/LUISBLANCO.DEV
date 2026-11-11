@@ -14,6 +14,26 @@ import { YEAR } from './physics.js';
 import { rng, fmtInt, fmtDur, fmtSci, fmtWordsBig, fmtHz, fmtLen, shipStamp } from './world.js';
 
 /* ---------- the knowledge, generated from the world ---------- */
+/* What each fact rests on. Shown under every reply that carries it. */
+export const TAGS = {
+  clocks: '[real] the clocks: u^t integrated over five legs (Bardeen, Press & Teukolsky 1972)',
+  physics: '[real] your crossing: Kerr orbit or hyperbolic motion (BPT 1972; MTW 1973 §6.2)',
+  beacon: '[real] beats sent = your ship time x 64 a minute; gaps stretched by the clock ratio',
+  message: '[real] bits / 1 kbit/s, stretched by the clock ratio at the orbit',
+  line: '[real] half-wave element = c / 2f for the lowest carrier home received',
+  line0: '[illustrative] the antenna as a story object; its length is real once TALLY explains it',
+  count: '[real] the beat interval; [illustrative] the calendar built on it',
+  argument: '[real] your ship time at that home year; [illustrative] the people and the dispute',
+  answer: '[real] compression and blueshift by the clock ratio, power x ratio²; [illustrative] the words',
+  sky: '[real] Barnard\'s star 10.39"/yr; precession 25,772 yr [illustrative: applied to home]',
+  decay: '[real] half-lives (NNDC); [illustrative] the vaults and the rebuilt line',
+  ice: '[illustrative] seeded climate',
+  self: '[illustrative] TALLY is a character', alone_now: '[illustrative] story', alone_long: '[illustrative] seeded era years',
+  surface: '[illustrative] the seeded planet', watch: '[illustrative] seeded era', eras: '[illustrative] seeded eras',
+  reading: '[illustrative] seeded era and word', told_them: '[illustrative] story', fate: '[illustrative] seeded fate; [real] speeds and light delays where given',
+  last_voice: '[illustrative] story', secret: '[illustrative] story', answer_lie: '[illustrative] a lie TALLY tells', told_lie: '[illustrative] a lie TALLY tells',
+};
+
 export function buildFacts(w) {
   const flight = w.method === 'flight';
   const b = w.beacon, p = w.plan, e = w.eras, a = w.answer, f = w.fateD;
@@ -33,7 +53,7 @@ export function buildFacts(w) {
   const lastStop = flight ? 'when you arrived' : `${w.lastBeatDays} days ago, when you climbed out`;
 
   const F = {};
-  const add = (id, o) => { F[id] = { id, told: false, ...o }; };
+  const add = (id, o) => { F[id] = { id, told: false, tag: TAGS[id] || '[illustrative] story', ...o }; };
 
   /* L0: surface. Anyone can have these. */
   add('self', { level: 0, topics: ['about_mind', 'greet', 'who'], keys: ['name', 'tally', 'who', 'built', 'station'],

@@ -780,6 +780,10 @@ async function present(plan, { source = 'engine', model = '', note = '' } = {}) 
     s.textContent = source === 'engine' ? `TALLY's own engine${note ? ` · ${note}` : ''}` : `voiced by ${model || source}${source === 'ollama' ? ' on your machine' : source === 'pollinations' ? ' via the public route' : ''} · checked against the engine's facts`;
     div.appendChild(s);
   }
+  // every reply that carries a fact says what the fact rests on
+  const extra = plan.intent === 'opening' ? ['clocks', 'beacon'] : plan.intent === 'answer-to-tally' && /beats/.test(plan.text) ? ['clocks'] : plan.intent === 'idle' ? ['beacon'] : [];
+  const tags = [...new Set([...extra, ...(plan.facts || [])].map((id) => S.mind.F[id]?.tag).filter(Boolean))];
+  if (tags.length) { const t = document.createElement('span'); t.className = 'src tagline'; t.textContent = tags.join(' · '); div.appendChild(t); }
   $('transcript').scrollTop = 1e9;
   renderLog(); renderEngine(plan); renderChips(); renderActs(plan.acts);
   S.lastActivity = performance.now();
