@@ -140,7 +140,7 @@ export const CATEGORIES = [
     projects: [
       { id: 'honesty-decoder', title: 'Honesty Decoder', status: 'built',
         href: 'honesty-decoder.html',
-        blurb: 'Every system in this lab, decoded: the myth it could be sold as, the plain mechanism, and an honest reality-percentage between them. The anti-evangelism stance as a running receipt.' },
+        blurb: "Every lab's hub blurb, split into atomic sub-claims and checked against the running code: the reality figure is computed from those checks, with its interval and its weakest sub-claim. Paste any claim and it is split, typed and matched against the same checks." },
       { id: 'roaster', title: 'The Roaster', status: 'built',
         href: 'roaster.html',
         blurb: 'A model that loves real engineering too much to let it lie about itself — name a system and it roasts the myth live: brutal on the hype, precise on the mechanism, graded for how much is real.' },
