@@ -60,7 +60,7 @@ vec3 tonemap(vec3 c){c=c/(1.0+c);return pow(c,vec3(0.9));}
 
 const HOLE = COMMON + `
 uniform vec3 u_cam; uniform vec3 u_right; uniform vec3 u_up; uniform vec3 u_fwd;
-uniform float u_fov; uniform float u_disk; uniform float u_blue; uniform float u_flash; uniform float u_steps; uniform float u_shift;
+uniform float u_fov; uniform float u_disk; uniform float u_blue; uniform float u_flash; uniform float u_steps; uniform float u_shift; uniform float u_home;
 const float RIN=3.0; const float ROUT=7.6;
 vec3 gold(float x){
   vec3 a=vec3(0.16,0.09,0.03), b=vec3(0.59,0.41,0.12), c=vec3(0.83,0.64,0.30), d=vec3(0.94,0.78,0.45), e=vec3(1.0,0.96,0.88);
@@ -104,7 +104,14 @@ void main(){
     if(length(p)>70.0&&dot(p,v)>0.0) break;
   }
   vec3 col=acc;
-  if(!cap) col+=(1.0-alpha)*sky(normalize(v),u_blue);
+  if(!cap){
+    vec3 dv=normalize(v);
+    col+=(1.0-alpha)*sky(dv,u_blue);
+    // home: one star, lensed like the rest, flashing once per home century
+    float hd=1.0-dot(dv,normalize(vec3(-0.55,0.22,0.8)));
+    col+=(1.0-alpha)*vec3(1.0,0.88,0.62)*(0.25+2.5*u_home)*exp(-hd*9000.0);
+    col+=(1.0-alpha)*vec3(0.83,0.64,0.30)*u_home*0.35*exp(-hd*300.0);
+  }
   // the photon ring lives in the lensed disk; a faint flash marks the anomaly
   col+=vec3(0.95,0.78,0.45)*u_flash*0.35*exp(-dot(uv,uv)*3.0);
   float vig=smoothstep(1.35,0.25,length(uv));
@@ -282,12 +289,14 @@ export class Scene {
   /* Frame-time governor: after a warm-up, step the tier down when frames
      run long and up when there is room. */
   _govern(dt) {
-    if (this.still || this.lockTier) return;
+    if (this.still) return;
     this.frames.push(dt);
     if (this.frames.length < 40) return;
     const avg = this.frames.reduce((a, b) => a + b, 0) / this.frames.length;
+    this.medianMs = this.frames.slice().sort((a, b) => a - b)[this.frames.length >> 1];
     this.fps = Math.round(1000 / avg);
     this.frames.length = 0;
+    if (this.lockTier) { this.frames.length = 0; return; }
     if (avg > 26 && this.tier > 0) this.setTier(this.tier - 1);
     else if (avg < 12 && this.tier < 2) this.setTier(this.tier + 1);
   }
@@ -314,7 +323,7 @@ export class Scene {
     f1('u_shift', u.shift ?? 0);
     if (this.mode === 'hole') {
       f3('u_cam', u.cam); f3('u_right', u.right); f3('u_up', u.up); f3('u_fwd', u.fwd);
-      f1('u_disk', u.disk ?? 1); f1('u_blue', u.blue ?? 0);
+      f1('u_disk', u.disk ?? 1); f1('u_blue', u.blue ?? 0); f1('u_home', u.home ?? 0);
     } else if (this.mode === 'flight') {
       f3('u_right', u.right); f3('u_up', u.up); f3('u_fwd', u.fwd);
       f1('u_beta', u.beta ?? 0);

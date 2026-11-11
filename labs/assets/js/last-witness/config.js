@@ -64,9 +64,9 @@ export const MODES = {
 
 /* Real holes on the mass slider, each with its measured mass and source. */
 export const HOLES = [
-  { id: 'cygx1', name: 'Cygnus X-1', mSun: 21.2, src: 'Miller-Jones et al. 2021, Science 371, 1046' },
-  { id: 'sgra', name: 'Sgr A*', mSun: 4.0e6, src: 'EHT Collaboration 2022, ApJL 930, L12' },
-  { id: 'm87', name: 'M87*', mSun: 6.5e9, src: 'EHT Collaboration 2019, ApJL 875, L1' },
+  { id: 'cygx1', name: 'Cygnus X-1', mSun: 21.2, distLy: 7240, src: 'Miller-Jones et al. 2021, Science 371, 1046 (21.2 Msun, 2.22 kpc)' },
+  { id: 'sgra', name: 'Sgr A*', mSun: 4.0e6, distLy: 26670, src: 'EHT Collaboration 2022, ApJL 930, L12 (mass); GRAVITY Collaboration 2019, A&A 625, L10 (8.178 kpc)' },
+  { id: 'm87', name: 'M87*', mSun: 6.5e9, distLy: 5.48e7, src: 'EHT Collaboration 2019, ApJL 875, L1 (6.5e9 Msun, 16.8 Mpc)' },
 ];
 export const MASS_MARKS = HOLES.map((h) => ({ logM: Math.log10(h.mSun), label: h.name, hole: h }));
 
@@ -82,6 +82,16 @@ export const CONSTANTS = [
   { k: 'precession', v: '25,772 yr', src: "Earth's axial precession period, applied to home [illustrative]" },
   { k: "Barnard's star", v: '10.39 arcsec/yr', src: 'Gaia DR3 proper motion' },
 ];
+
+/* The voices and their prose rules. test.mjs lints every story string
+   against TALLY's; the narration rules bind the endings and captions. */
+export const VOICES = {
+  tally: { face: 'IBM Plex Mono 400, text-bright, 13 px', tense: 'past for what happened, present for what is',
+    maxSentenceWords: 48, banned: ['as an ai', 'language model', '!', '\u2014', '\u2013', 'suddenly', 'amazing', 'incredible'] },
+  narration: { face: 'IBM Plex Mono 400, text, 13.5 px, endings and captions', tense: 'second person, present',
+    maxSentenceWords: 52, banned: ['!', '\u2014', '\u2013', 'suddenly'] },
+  visitor: { face: 'IBM Plex Mono 400, text-dim, ruled left', tense: 'free', maxSentenceWords: Infinity, banned: [] },
+};
 
 /* TALLY's character. The engine and the model prompt both read this. */
 export const PROFILE = {

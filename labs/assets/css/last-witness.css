@@ -244,6 +244,13 @@ body[data-phase="end"] .labels { opacity: .55; }
 .endcard { width: min(620px, 100%); border: 1px solid var(--line-bright); background: rgba(7,9,13,.84); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   padding: 22px 24px; max-height: 100%; overflow-y: auto; }
 .endtext p { font-size: 13.5px; line-height: 1.7; color: var(--text); margin: 0 0 12px; }
+.endledger { margin: 4px 0 10px; }
+.replay { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
+.replay summary { cursor: pointer; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--accretion-soft); }
+.replay ol { margin: 6px 0 0; padding-left: 16px; line-height: 1.55; }
+.replay b { color: var(--text-bright); font-weight: 500; }
+.turn.narr { color: var(--text); font-size: 12px; }
+.turn.narr .who { color: var(--horizon-dim); }
 .endmap { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; font-size: 9.5px; }
 .endmap .ek { width: 100%; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-faint); }
 .endmap .em { border: 1px dashed var(--line-bright); color: var(--text-faint); padding: 2px 6px; }
@@ -252,7 +259,8 @@ body[data-phase="end"] .labels { opacity: .55; }
 .eng details.mem { width: 100%; font-size: 10px; }
 .eng details.mem summary { cursor: pointer; color: var(--text-dim); letter-spacing: .14em; text-transform: uppercase; font-size: 9px; }
 .eng details.mem ol { margin: 4px 0 0; padding-left: 16px; max-height: 110px; overflow-y: auto; color: var(--text-dim); }
-body.textmode #gl, body.textmode .veil { display: none; }
+body.textmode #gl, body.textmode .veil, body.textmode .lab, body.textmode .leaders { display: none; }
+body.textmode .legend { left: 40px; right: auto; max-width: 40%; font-size: 10px; }
 body.textmode { background: var(--void); }
 .endnums { font-size: 10.5px; color: var(--text-dim); line-height: 1.6; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 6px; font-variant-numeric: tabular-nums; }
 

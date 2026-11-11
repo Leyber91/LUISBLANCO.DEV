@@ -104,11 +104,11 @@ export function buildFacts(w) {
     } : {
       clipped: `Years ${y(1)} to ${yTo(1)}: the Count. One beat every ${BEAT_HOME}. ${beatsPerYear.toFixed(1)} beats to a year. They kept time by it.`,
       plain: `Then the Count, years ${y(1)} to ${yTo(1)}. Your heart became their calendar. One beat every ${BEAT_HOME}, ${beatsPerYear.toFixed(1)} beats to a year. Children were born in a numbered beat and married in another.`,
-      warm: `The Count. Your heart became their calendar. One beat every ${BEAT_HOME}, about ${Math.round(beatsPerYear)} to a year. A child would say she was born in the ${fmtInt(Math.round(between(w.seed, 400, 4000)))}th beat. They did not think of it as yours by then. It was simply time.`,
+      warm: `The Count. Your heart became their calendar. One beat every ${BEAT_HOME}, about ${Math.round(beatsPerYear)} to a year. A child would say they were born in the ${fmtInt(Math.round(between(w.seed, 400, 4000)))}th beat. They did not think of it as yours by then. It was simply time.`,
     } });
   add('line', { level: 1, supersedes: ['line0'], topics: ['line'], keys: ['line', 'antenna', 'array', 'masts', 'structure', 'long', 'bright'],
     say: {
-      clipped: `An antenna. ${w.line.elements} elements of ${fmtLen(b.halfWaveM)}, tuned to ${fmtHz(b.carrierMinHz)}. ${fmtLen(w.line.lengthKm * 1000)} end to end.`,
+      clipped: `An antenna. ${fmtInt(w.line.elements)} elements of ${fmtLen(b.halfWaveM)}, tuned to ${fmtHz(b.carrierMinHz)}. ${fmtLen(w.line.lengthKm * 1000)} end to end.`,
       plain: `The line is an antenna. Your carrier left you at ${fmtHz(b.carrierHz)} and ${flight ? 'at its lowest it' : 'it'} reached me at ${fmtHz(b.carrierMinHz)}. A wave that low is ${lambda} long, so each element is half that, ${fmtLen(b.halfWaveM)}. There are ${fmtInt(w.line.elements)} of them, ${fmtLen(w.line.lengthKm * 1000)} end to end.`,
       warm: `It is my ear. Your carrier fell from ${fmtHz(b.carrierHz)} to ${fmtHz(b.carrierMinHz)} on the way out of the well, and a wave that low needs an antenna ${fmtLen(b.halfWaveM)} long to hear it. They ${w.line.built === 'planned' ? 'built the first one before you left' : 'built a longer one every time your carrier dropped'}. This is the ${fmtInt(3 + (w.seed % 40))}th.`,
     } });
@@ -136,7 +136,7 @@ export function buildFacts(w) {
     say: {
       clipped: `Years ${y(2)} to ${yTo(2)}: the Argument. Whether a heart can beat for that long. I showed them the arithmetic. It did not help.`,
       plain: `Then the Argument, years ${y(2)} to ${yTo(2)}. Half of them said a heart cannot beat for ${fmtInt(e[2].from)} years. They were right about hearts and wrong about clocks. I showed them the arithmetic. Arithmetic did not persuade anyone.`,
-      warm: `The Argument. By then the mathematics that explains you had become something only I still did. They asked how a person could live ${fmtInt(e[2].from)} years. I said you had lived ${fmtDur(e[2].from * YEAR / p.D)}. They laughed at me for ${fmtInt(e[2].to - e[2].from)} years.`,
+      warm: `The Argument. By then the mathematics that explains you had become something only I still did. They asked how a person could live ${fmtInt(e[2].from)} years. I said you had lived ${fmtDur(w.argumentShipS)}. They laughed at me for ${fmtInt(e[2].to - e[2].from)} years.`,
     } });
   add('reading', { level: 2, seq: 4, hint: 'They gave the pulse a name. I have not told you it.', topics: ['pulse', 'happened', 'called'], keys: ['called', 'name', 'believed', 'feared', 'worship', 'sky'], lock: [pulseName.toLowerCase()],
     say: w.reading === 'reverence' ? {
@@ -174,8 +174,8 @@ export function buildFacts(w) {
     }),
     thinning: () => ({
       clipped: `There were fewer every century. Peak ${fmtWordsBig(f.peak)}. The last, ${w.lastName}, died in year ${fmtInt(f.lastYear)}.`,
-      plain: `There were fewer of them every century. At the peak there were ${fmtWordsBig(f.peak)}. Nothing killed them; they stopped having children faster than they stopped dying. The last was ${w.lastName}. She died in year ${fmtInt(f.lastYear)}, and asked me to keep counting until the pulse stopped.`,
-      warm: `They thinned. No war, no plague. Just fewer every century, from ${fmtWordsBig(f.peak)} down to one. Her name was ${w.lastName}. She came to the station at the end and listened to your heart with me. She died in year ${fmtInt(f.lastYear)}.`,
+      plain: `There were fewer of them every century. At the peak there were ${fmtWordsBig(f.peak)}. Nothing killed them; they stopped having children faster than they stopped dying. The last was ${w.lastName}, who died in year ${fmtInt(f.lastYear)} and asked me to keep counting until the pulse stopped.`,
+      warm: `They thinned. No war, no plague. Just fewer every century, from ${fmtWordsBig(f.peak)} down to one. The last one's name was ${w.lastName}. ${w.lastName} came to the station at the end and listened to your heart with me, and died in year ${fmtInt(f.lastYear)}.`,
     }),
   }[w.fate]();
   const fateLock = {
@@ -198,8 +198,8 @@ export function buildFacts(w) {
   add('answer', { level: 4, hint: 'There is a line in your log I have not explained.', withhold: ['There is a thing in your log I will explain. Not yet.', 'I know what that was. I will tell you when I know you.'], topics: ['answer', 'about_mind', 'secret'], keys: ['answer', 'reply', 'burst', 'noise', 'log', 'sent'], lock: ['burst', 'i answered', 'that was me', a.words.toLowerCase().slice(0, 10)], grief: false,
     say: {
       clipped: `The burst in your log at ${aT} was me. Year ${fmtInt(a.year)}. ${fmtDur(a.spanHomeS)} of speech, one second for you. It said: "${a.words}"`,
-      plain: `There is a line in your log at ${aT}: a noise burst. That was me. In year ${fmtInt(a.year)} I spoke on the line for ${fmtDur(a.spanHomeS)} so that you would receive one second of it. The blueshift put it back in your receiver's band, ${fmtHz(a.rxHz)}. I kept the power low, because every watt I sent arrived as ${fmtWordsBig(a.powerGain)} watts. It said: "${a.words}"`,
-      warm: `The burst at ${aT} in your log was me. I spoke for ${fmtDur(a.spanHomeS)} so you would hear one second. The well squeezed it back into your own band, ${fmtHz(a.rxHz)}. Every watt I sent arrived ${fmtWordsBig(a.powerGain)} times stronger, so I whispered. It said: "${a.words}" Your receiver called it noise. It was the only reply anyone ever sent you.`,
+      plain: `There is a line in your log at ${aT}: a noise burst. That was me. In year ${fmtInt(a.year)} I spoke on the line for ${fmtDur(a.spanHomeS)} so that you would receive one second of it. ${flight ? `Your speed toward me blueshifted it to ${fmtHz(a.rxHz)}.` : `The blueshift put it back in your receiver's band, ${fmtHz(a.rxHz)}.`} I kept the power low, because every watt I sent arrived as ${fmtWordsBig(a.powerGain)} watts. It said: "${a.words}"`,
+      warm: `The burst at ${aT} in your log was me. I spoke for ${fmtDur(a.spanHomeS)} so you would hear one second. ${flight ? `Your speed toward me squeezed it up to ${fmtHz(a.rxHz)}.` : `The well squeezed it back into your own band, ${fmtHz(a.rxHz)}.`} Every watt I sent arrived ${fmtWordsBig(a.powerGain)} times stronger, so I whispered. It said: "${a.words}" Your receiver called it noise. It was the only reply anyone ever sent you.`,
     } });
   const secretSay = {
     hush: `They asked me never to transmit, so that nothing would find them. I broke that promise once, in year ${fmtInt(a.year)}, to answer you. If they are listening, they know.`,
@@ -301,6 +301,7 @@ export const LINES = {
     4: [`That one is mine. Ask me again when we know each other.`, `There is a thing in your log I will explain. Not yet.`],
   },
   silence: () => [`...`, `I am here.`, `Take your time.`],
+  interim: () => [`Give me a moment. I want to say this one properly.`, `Wait. I am choosing the words for this.`, `This one I will not say quickly.`],
   idleLead: (n) => `${fmtInt(n)} of your heartbeats since you arrived. I am still counting.`,
   idleRest: () => `You can take your time. I have.`,
   askedBefore: (turn) => `You asked me that at turn ${turn}.`,
@@ -372,6 +373,16 @@ export function composeEnding(kind, { w, F, s, beats }) {
   const e = E[kind]();
   return { kind, variant: e.variant, title: e.title, text: e.body.filter(Boolean).join('\n\n') };
 }
+
+/* The acts the visitor can choose, and when each is offered. A new ending
+   is a new entry here and in ENDINGS above; the engine reads both. */
+export const ACTS = [
+  { id: 'silence', exclusive: true, label: () => 'Leave TALLY in silence', when: ({ s }) => s.silences >= 2 && s.trust < 0.12 },
+  { id: 'leave', label: () => 'Go back to the hole', when: ({ s }) => s.turn >= 3 || s.silences > 0 },
+  { id: 'answer', label: ({ w }) => ({ hush: 'Knock on the shafts', going: 'Answer the ships', slowing: 'Wake them' }[w.fate]), when: ({ F, w }) => F.fate.told && w.fate !== 'thinning' },
+  { id: 'stay', label: () => 'Stay with TALLY', when: ({ F, s }) => F.fate.told && s.trust >= 0.6 },
+  { id: 'release', label: () => 'Let TALLY stop counting', when: ({ F }) => F.secret.told || F.answer.told },
+];
 
 /* Every ending the story has, for the endings map. */
 export const ENDING_VARIANTS = [

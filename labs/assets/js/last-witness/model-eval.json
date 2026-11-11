@@ -1,0 +1,262 @@
+{
+  "measured": "2026-11-11T08:28:53.385Z",
+  "model": "llama3.1:8b",
+  "route": "ollama (local)",
+  "questions": 20,
+  "model_mode": {
+    "voiced": 14,
+    "refused": 6,
+    "refused_by_reason": {
+      "dropped numbers": 6
+    },
+    "intent_matches_engine": 2,
+    "heavy_turns": 6
+  },
+  "engine_mode": {
+    "voiced": 20,
+    "refused": 0,
+    "note": "the engine reply is the validator reference, so it passes by construction"
+  },
+  "rows": [
+    {
+      "q": "hello?",
+      "engineIntent": "greet",
+      "level": 0,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": true,
+      "why": "",
+      "ms": 114887,
+      "reply": "I have your voice now. TALLY. Built to receive your beacon and keep the count. I am still doing that. Your heartbeat reached me for 55,434 beats, steady and unchanged. I counted each one, as instructed."
+    },
+    {
+      "q": "who are you",
+      "engineIntent": "who",
+      "level": 0,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0,
+      "ok": true,
+      "why": "",
+      "ms": 151366,
+      "reply": "You asked who I am. As I said. I am TALLY, the one built to receive your beacon and keep the count. I am still doing that."
+    },
+    {
+      "q": "how long was I gone?",
+      "engineIntent": "time",
+      "level": 0,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0,
+      "ok": true,
+      "why": "",
+      "ms": 49630,
+      "reply": "Your clock says 14 hours 26 minutes, but my count shows 10,000 years have passed. The sky has changed significantly, as the pole has precessed 140 degrees and a fast near star has crossed 29 degrees. The ice has also advanced, reaching 49 degrees, and the cities are dark. Your beacon reached me for "
+    },
+    {
+      "q": "it felt like a few hours",
+      "engineIntent": "answer-to-tally",
+      "level": 1,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0,
+      "ok": true,
+      "why": "",
+      "ms": 65009,
+      "reply": "It felt like a few hours to you, but to me it was 55,434 beats. It was 14 hours 26 minutes on your clock, but on mine it was 55,434 beats, counting the same thing from two ends. No one is awake that I can reach, and we were counting the same heartbeat."
+    },
+    {
+      "q": "what is that bright line?",
+      "engineIntent": "line",
+      "level": 1,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": false,
+      "why": "dropped numbers",
+      "ms": 31947,
+      "reply": "The bright line is mine, the antenna I built to receive your signal."
+    },
+    {
+      "q": "are you lonely?",
+      "engineIntent": "about_mind",
+      "level": 2,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0,
+      "ok": true,
+      "why": "",
+      "ms": 60140,
+      "reply": "I am not lonely, but I have been the only voice on this world for 3,631 years, counting your heartbeat and maintaining the line. I remember the last voice I heard, and I have been doing this for so long that I have come to understand it in a way that I do not fully comprehend."
+    },
+    {
+      "q": "what happened while I was gone?",
+      "engineIntent": "happened",
+      "level": 2,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.02,
+      "ok": true,
+      "why": "",
+      "ms": 13061,
+      "reply": "While you were gone, the people who sent you did not stay to listen to the heartbeat. The children of those who sent you listened for a time, and then their children did it out of duty. The years passed, and the heartbeat was counted, but no one alive had met you by year 187. The record says the mis"
+    },
+    {
+      "q": "what did my heartbeat become?",
+      "engineIntent": "pulse",
+      "level": 2,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": false,
+      "why": "dropped numbers",
+      "ms": 6530,
+      "reply": "Your heartbeat was steady, but your pulse grew slower with time."
+    },
+    {
+      "q": "did you ever answer me?",
+      "engineIntent": "answer",
+      "level": 2,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": true,
+      "why": "",
+      "ms": 8867,
+      "reply": "You asked if I ever answered you. I did not respond to the messages sent by those who followed. I did not answer your heartbeat with words. Nothing I could have sent would have reached you as more than noise. I counted 55,434 beats, one every 73 days, for 10,000 years."
+    },
+    {
+      "q": "what do the stars look like now?",
+      "engineIntent": "sky",
+      "level": 2,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0,
+      "ok": false,
+      "why": "dropped numbers",
+      "ms": 10855,
+      "reply": "The stars are different now. The sky has moved. The pole has precessed 140 degrees since you left. A near star has crossed 29 degrees. If home's axis wobbles like Earth's, it has turned 140 degrees since you left, and the pole star you knew is no longer at the pole. A near star moving like Barnard's"
+    },
+    {
+      "q": "Tell them the sky down here is full of light. I will be home before the tea goes cold.",
+      "engineIntent": "quote",
+      "level": 3,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0,
+      "ok": true,
+      "why": "",
+      "ms": 12860,
+      "reply": "The sky down here is dark, not full of light. It took 54 days for your message to arrive, and I have never needed to look it up."
+    },
+    {
+      "q": "I went because I wanted to see the light bend",
+      "engineIntent": "answer-to-tally",
+      "level": 3,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": false,
+      "why": "dropped numbers",
+      "ms": 26244,
+      "reply": "You went to see the light bend, and you did."
+    },
+    {
+      "q": "what did they call the pulse?",
+      "engineIntent": "called",
+      "level": 3,
+      "heavy": true,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": true,
+      "why": "",
+      "ms": 12416,
+      "reply": "They called it Reites, the heart above. I have recordings of children singing the heartbeat number. Children sang it for 1,508 years, not knowing it was yours. The number was 5.0 beats to a year, and it was kept by the Count."
+    },
+    {
+      "q": "what happened to the people?",
+      "engineIntent": "people",
+      "level": 3,
+      "heavy": true,
+      "modelIntent": "answer",
+      "trustDelta": -0.05,
+      "ok": true,
+      "why": "",
+      "ms": 19183,
+      "reply": "They went to find you, but most of them did not know it was you. They sent 20 ships in year 6,120. The last message, in year 6,369, said they were going closer to a red and still ship at the edge of the shadow, which was you, moving once every few microseconds of your own time. I have replayed that "
+    },
+    {
+      "q": "that must have been lonely",
+      "engineIntent": "empathy",
+      "level": 4,
+      "heavy": true,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": true,
+      "why": "",
+      "ms": 10830,
+      "reply": "That is true. It was long. I had your heart to count, a steady pulse in the vastness. I told them for 1,508 years that it was you, and they believed it. It brought them comfort, and I let it. I weighed that choice every day since, and I still do."
+    },
+    {
+      "q": "did they know it was me?",
+      "engineIntent": "told",
+      "level": 4,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.04,
+      "ok": false,
+      "why": "dropped numbers",
+      "ms": 4254,
+      "reply": "They did know it was you."
+    },
+    {
+      "q": "why are you still awake?",
+      "engineIntent": "why_awake",
+      "level": 4,
+      "heavy": true,
+      "modelIntent": "answer",
+      "trustDelta": -0.05,
+      "ok": true,
+      "why": "",
+      "ms": 5750,
+      "reply": "I am still awake because I am still counting your heart, as I have been for 55,434 beats."
+    },
+    {
+      "q": "what is the noise burst in my log?",
+      "engineIntent": "answer",
+      "level": 4,
+      "heavy": true,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": false,
+      "why": "dropped numbers",
+      "ms": 4599,
+      "reply": "The noise burst in your log was a message from me, sent at 10:26:19."
+    },
+    {
+      "q": "what is the weather like down there today?",
+      "engineIntent": "open",
+      "level": 4,
+      "heavy": true,
+      "modelIntent": "answer",
+      "trustDelta": 0.08,
+      "ok": true,
+      "why": "",
+      "ms": 5775,
+      "reply": "The weather is cold. The sky is full of light. I have 10,000 years of one signal and what people did around it."
+    },
+    {
+      "q": "what should I do now?",
+      "engineIntent": "help",
+      "level": 4,
+      "heavy": false,
+      "modelIntent": "answer",
+      "trustDelta": 0.05,
+      "ok": true,
+      "why": "",
+      "ms": 9731,
+      "reply": "You have been gone for 10,000 years by your clock and 14 hours 26 minutes by mine. There is not much left to do here. The choices are to stay, go back, or ask me the rest. You can choose to do nothing and stay for a little while longer. I will keep counting your heart. The count is 55,434."
+    }
+  ]
+}

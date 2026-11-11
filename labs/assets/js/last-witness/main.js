@@ -7,11 +7,11 @@
    Engine files compute; this file only reads them and draws.
    ============================================================ */
 
-import { LLM } from '../ai/llm.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
+import { voiceTurn, routeStatus } from './voice.js';
 import { LAB, BODY, MODES, MASS_MARKS, SPIN_MARKS, SOURCES, CONSTANTS, MISCONCEPTIONS, HOLES } from './config.js';
 import { ENDING_VARIANTS } from './story.js';
-import { YEAR, G0, GM_SUN, planOrbit, planHover, planFlight, timeMaps, referenceChecks, iscoM, circularOrbit } from './physics.js';
+import { YEAR, G0, GM_SUN, planOrbit, planHover, planFlight, timeMaps, referenceChecks, iscoM, circularOrbit, propellant } from './physics.js';
 import { buildWorld, fmtInt, fmtDur, fmtSci, fmtWordsBig, fmtHz, fmtLen, shipStamp } from './world.js';
 import { Mind, LEVEL_NAMES } from './mind.js';
 import { Scene, lookAt, lookAlong, projectLatLon } from './scene.js';
@@ -75,8 +75,16 @@ function writeHash() {
 }
 
 /* ---------------- the planner ---------------- */
-const LEG_NAMES = { approach: 'approach', fall: 'fall', dwell: 'orbit', climb: 'climb', accelerate: 'accelerate', brake: 'brake', return: 'return', arrive: 'arrive' };
+const LEG_NAMES = { depart: 'depart', approach: 'approach', fall: 'fall', dwell: 'orbit', climb: 'climb', return: 'return', accelerate: 'accelerate', brake: 'brake', return: 'return', arrive: 'arrive' };
 const fmtYears = (s) => { const y = s / YEAR; return y >= 1 ? `${y >= 100 ? fmtInt(y) : y.toPrecision(3)} yr` : fmtDur(s, { short: true }); };
+
+function legWhy(P, l) {
+  if (P.method === 'flight') return l.rate[0] < l.rate[1] ? `speed: dt/dτ = cosh(aτ/c) rises to ${fmtSci(P.gammaMax)}` : `speed: γ falls from ${fmtSci(P.gammaMax)} to 1`;
+  if (l.id === 'depart' || l.id === 'return') return `far out at ${fmtSci(l.rFrom, 3)} M: gravity and orbital speed, ×${fmtSci(l.rate[0], 4)}`;
+  if (l.id === 'fall') return `spiralling in: ×${fmtSci(l.rate[0], 3)} to ×${fmtSci(l.rate[1])}`;
+  if (l.id === 'climb') return `the fall in reverse: ×${fmtSci(l.rate[0])} to ×${fmtSci(l.rate[1], 3)}`;
+  return P.method === 'hover' ? `hover at ${fmtSci(P.rM / 2, 8)} rs: gravity, ×${fmtSci(P.D)}` : `orbit at the ISCO of a* = 1 − ${fmtSci(P.delta, 2)}: gravity and speed, ×${fmtSci(P.D)}`;
+}
 
 function renderLedger(P) {
   const name = (l) => (l.id === 'dwell' && P.method === 'hover' ? 'hover' : LEG_NAMES[l.id]);
@@ -170,13 +178,15 @@ function costsOf(P) {
     const t = band(BODY.tidal, P.tidalG);
     const stellar = P.tidalG * (P.mSun / 10) ** 2;
     rows.push({ k: 'tidal stretch, head to foot', v: `${fmtSci(P.tidalG)} g`, verdict: t.verdict, n: `${t.text}; lethal above 1 g [illustrative]. The same orbit of a 10 Msun hole: ${fmtSci(stellar)} g. 2GML/r³, an order-one estimate this close to a spinning hole` });
-    rows.push({ k: 'acceleration you feel', v: '0 g', verdict: 'ok', n: 'an orbit is free fall' });
     const sf = P.delta < 0.002;
     rows.push({ k: 'spin the hole needs', v: `a* = 1 − ${fmtSci(P.delta, 2)}`, verdict: sf ? 'sf' : 'ok',
       n: sf ? '[speculative] past a* = 0.998, the most accretion can spin a hole (Thorne 1974)' : 'within what accretion can make (Thorne 1974)' });
     const yrs = P.energyJ / LAB.worldEnergyJ;
     rows.push({ k: 'energy to climb back out', v: `${(P.bind * 100).toFixed(1)} % of rest mass`, verdict: 'sf',
-      n: `1 − E at the orbit: ${fmtSci(P.energyJ)} J for a 100 t ship, ${fmtSci(yrs)} years of today's world energy use [sf territory: no engine does this]` });
+      n: `1 − E at the orbit: ${fmtSci(P.energyJ)} J for 100 t, ${fmtSci(yrs)} years of world energy use [sf territory]` });
+    const pr = propellant(P, LAB.craftKg);
+    rows.push({ k: 'propellant, ideal photon rocket', v: `${fmtSci(pr.startKg / 1000)} t at the start`, verdict: 'sf',
+      n: `to bring 100 t home: two spiral burns, Δv = c tanh(ln m0/m1); the spiral's Δv is the change in local orbital speed, ${fmtSci(Math.tanh(pr.legs[1].lnRatio), 3)} c each [approximation]` });
   } else if (P.method === 'hover') {
     const a = band(BODY.accel, P.accelG), t = band(BODY.tidal, P.tidalG);
     rows.push({ k: 'acceleration you feel', v: `${fmtSci(P.accelG)} g`, verdict: a.verdict, n: `${a.text}; a = GM / (r² √(1 − rs/r))` });
@@ -184,6 +194,9 @@ function costsOf(P) {
     const lim = hoverLimit(P.mSun, 1.25);
     rows.push({ k: 'the deepest you can hover at 1.25 g', v: `×${fmtSci(lim.D)}`, verdict: 'sf',
       n: `this hole's surface gravity is ${fmtSci(P.kappaG)} g, and near the horizon a ≈ κ/α; at 1.25 g, ten thousand years would take ${fmtDur(lim.shipS)} of your life` });
+    const pr = propellant(P, LAB.craftKg);
+    rows.push({ k: 'propellant, ideal photon rocket', v: `mass ratio e^${fmtSci(pr.lnTotal, 3)}`, verdict: 'sf',
+      n: 'holding station burns continuously: m1 = m0 exp(−∫a dτ / c) over every leg' });
   } else {
     const a = band(BODY.accel, P.aG);
     rows.push({ k: 'acceleration you feel', v: `${P.aG.toFixed(2)} g`, verdict: a.verdict, n: a.text });
@@ -406,7 +419,7 @@ function startCrossing() {
   const flight = P.method === 'flight';
   const total = 35;
   S.film = { t0: performance.now(), P, maps, flight, total, logged: new Set(), eraTicks: new Set(), done: false, lastAnom: -1, shot: -1 };
-  $('flegs').innerHTML = P.journey.legs.map((l) => `<tr><td>${esc(LEG_NAMES[l.id])}</td><td>${esc(fmtDur(l.shipS, { short: true }))}</td><td>${esc(fmtYears(l.homeS))}</td><td>×${esc(fmtSci(l.rate[0]))} to ×${esc(fmtSci(l.rate[1]))}</td></tr>`).join('');
+  $('flegs').innerHTML = P.journey.legs.map((l) => `<tr><td>${esc(LEG_NAMES[l.id])}</td><td>${esc(fmtDur(l.shipS, { short: true }))}</td><td>${esc(fmtYears(l.homeS))}</td><td>${esc(legWhy(P, l))}</td></tr>`).join('');
   $('f_cap').textContent = flight ? 'flight · four legs at constant thrust' : 'orbit · the last stable circular orbit';
   if (REDUCE) { S.film.t0 -= total * 1000; }
   if (TEXT) { S.film.done = true; arrive(); return; }
@@ -417,16 +430,18 @@ function startCrossing() {
 /* The film's shots: one per leg, each with its own camera and caption. Film seconds per leg. */
 const SHOTS = {
   hole: [
-    { leg: 'approach', from: 1.5, to: 5, cap: (P, l) => `I · approach · holding orbit far out, your clock ${pct(l.rate[0])} slow` },
-    { leg: 'fall', from: 5, to: 13, cap: (P, l) => `II · the fall · spiralling in, the rate climbs from ×${fmtSci(l.rate[0])} to ×${fmtSci(l.rate[1])}` },
-    { leg: 'dwell', from: 13, to: 28, cap: (P) => `III · ${P.method === 'hover' ? 'the hover' : 'the last stable orbit'} · ×${fmtSci(P.D)}; home's history reaches you sped up` },
-    { leg: 'climb', from: 28, to: 33, cap: (P, l) => `IV · the climb · the fall in reverse, ${fmtDur(l.homeS)} at home` },
+    { leg: 'depart', part: [0, 0.5], from: 1.5, to: 3.5, beat: 'departure', cap: (P, l) => `I · departure · leaving the station at ${fmtSci(l.rFrom, 3)} M; your clock runs ${pct(l.rate[0])} slow` },
+    { leg: 'depart', part: [0.5, 1], from: 3.5, to: 6, beat: 'approach', cap: () => 'II · approach · the hole fills the sky; light bends around the shadow' },
+    { leg: 'fall', from: 6, to: 13, beat: 'fall', cap: (P, l) => `III · the fall · spiralling in, the rate climbs from ×${fmtSci(l.rate[0])} to ×${fmtSci(l.rate[1])}` },
+    { leg: 'dwell', from: 13, to: 27, beat: 'orbit', cap: (P) => `IV · ${P.method === 'hover' ? 'the hover' : 'the last stable orbit'} · ×${fmtSci(P.D)}; the home star flashes once per home century` },
+    { leg: 'climb', from: 27, to: 31.5, beat: 'climb', cap: (P, l) => `V · the climb · the fall in reverse, ${fmtDur(l.homeS)} at home` },
+    { leg: 'return', from: 31.5, to: 33, beat: 'return', cap: () => 'VI · return · back to the station, and home' },
   ],
   flight: [
-    { leg: 'accelerate', from: 1.5, to: 9.5, cap: (P) => `I · accelerate at ${P.aG} g · the sky folds forward into the direction you fly` },
-    { leg: 'brake', from: 9.5, to: 17.5, cap: (P) => `II · brake · you stop ${fmtInt(P.xMaxLy)} light-years out; home's light is ${fmtInt(P.xMaxLy)} years old` },
-    { leg: 'return', from: 17.5, to: 25.5, cap: () => 'III · return · now you fly into home\u2019s light, and its history arrives compressed' },
-    { leg: 'arrive', from: 25.5, to: 33, cap: () => 'IV · arrive · braking into home' },
+    { leg: 'accelerate', from: 1.5, to: 9.5, beat: 'departure', cap: (P) => `I · accelerate at ${P.aG} g · the sky folds forward into the direction you fly` },
+    { leg: 'brake', from: 9.5, to: 17.5, beat: 'turn', cap: (P) => `II · brake · you stop ${fmtInt(P.xMaxLy)} light-years out; home's light is ${fmtInt(P.xMaxLy)} years old` },
+    { leg: 'return', from: 17.5, to: 25.5, beat: 'return', cap: () => 'III · return · now you fly into home\u2019s light, and its history arrives compressed' },
+    { leg: 'arrive', from: 25.5, to: 33, beat: 'arrive', cap: () => 'IV · arrive · braking into home' },
   ],
 };
 const pct = (rate) => `${((1 - 1 / rate) * 100).toPrecision(2)} %`;
@@ -438,7 +453,9 @@ function shotAt(F, t) {
   const sh = list[i];
   const leg = F.P.journey.legs.find((l) => l.id === sh.leg);
   const k = clamp((t - sh.from) / (sh.to - sh.from), 0, 1);
-  return { sh, leg, k, i, shipT: t < list[0].from ? 0 : leg.ship0 + k * leg.shipS };
+  const part = sh.part || [0, 1];
+  const kl = part[0] + (part[1] - part[0]) * k;
+  return { sh, leg, k, i, shipT: t < list[0].from ? 0 : leg.ship0 + kl * leg.shipS };
 }
 
 function filmFrame(now) {
@@ -461,10 +478,12 @@ function filmFrame(now) {
     // the sky's blueshift look follows the computed clock rate, on a log scale
     const blue = clamp(Math.log10(rateNow) / Math.log10(Math.max(10, P.D)), 0, 1);
     let R = RF;
-    if (sh.leg === 'approach') R = RF - 2 * k;
-    else if (sh.leg === 'fall') R = (RF - 2) + (RN - (RF - 2)) * ease(k);
+    if (sh.beat === 'departure') R = 40 - 10 * ease(k);
+    else if (sh.beat === 'approach') R = 30 - 8 * ease(k);
+    else if (sh.leg === 'fall') R = 22 + (RN - 22) * ease(k);
     else if (sh.leg === 'dwell') R = RN;
-    else R = RN + (RF - RN) * ease(k);
+    else if (sh.leg === 'climb') R = RN + (RF - RN) * ease(k);
+    else R = RF + 14 * ease(k);
     depth = blue;
     const yaw = 0.6 + t * 0.06 + (t > 13 ? Math.min(15, t - 13) * 0.36 : 0);
     const el = 0.12 + 0.05 * Math.sin(t * 0.3);
@@ -475,7 +494,9 @@ function filmFrame(now) {
     const turn = 0.62 * clamp((RF - R) / (RF - RN), 0, 1);
     const dir = inward.map((x, j) => x * (1 - turn) + tangent[j] * turn);
     scene.mode = 'hole';
-    Object.assign(scene.u, { cam, ...lookAlong(dir), disk: 1, blue, fov: isPhone() ? 1.3 : 1.05, ignite: t > F.total - 2 ? clamp(F.total - t, 0, 1) : 1 });
+    const homeYears = F.maps.home(shipT) / YEAR;
+    const homeFlash = Math.pow(Math.max(0, Math.cos(Math.PI * (homeYears / 100))), 24);
+    Object.assign(scene.u, { cam, ...lookAlong(dir), disk: 1, blue, home: homeFlash, fov: isPhone() ? 1.3 : 1.05, ignite: t > F.total - 2 ? clamp(F.total - t, 0, 1) : 1 });
   }
   const home = F.maps.home(shipT);
   $('f_you').textContent = F.flight ? fmtDur(shipT, { short: true }) : shipStamp(shipT);
@@ -485,12 +506,13 @@ function filmFrame(now) {
   if (F.shot !== shotI) {
     F.shot = shotI;
     $('f_cap').textContent = sh.cap(P, leg);
-    $('flegs').querySelectorAll('tr').forEach((tr, j) => tr.classList.toggle('on', j === shotI));
+    const legIdx = P.journey.legs.indexOf(leg);
+    $('flegs').querySelectorAll('tr').forEach((tr, j) => tr.classList.toggle('on', j === legIdx));
     sound.thump(0.5);
   }
   $('f_note').innerHTML = F.flight
     ? `speed <b>${(Math.abs(F.maps.state(shipT).v) * 100).toFixed(shipT > 0 ? 6 : 0)} %</b> of light · you see home at year <b>${fmtInt(Math.max(0, F.maps.seen(shipT) / YEAR))}</b> · home hears one beat every <b>${fmtDur(1 / LAB.heartHz * rateNow)}</b><br><span class="fx2">dt/dτ = γ(1 + β cos θ) for the light from home · t = (c/a) sinh(aτ/c)</span>`
-    : `clock rate <b>×${fmtSci(rateNow)}</b> · one of your seconds is <b>${fmtDur(rateNow)}</b> at home · home hears one beat every <b>${fmtDur(1 / LAB.heartHz * rateNow)}</b><br><span class="fx2">${P.method === 'hover' ? 'dt/dτ = 1/√(1 − rs/r)' : 'dt/dτ = u<sup>t</sup>(r, a*), Bardeen, Press &amp; Teukolsky 1972'} · r = ${(sh.leg === 'fall' ? P.journey.path(k) : sh.leg === 'climb' ? P.journey.path(1 - k) : sh.leg === 'approach' ? leg.rFrom : P.rM).toPrecision(8)} M</span>`;
+    : `${esc(sh.beat)} · clock rate <b>×${fmtSci(rateNow)}</b> · one of your seconds is <b>${fmtDur(rateNow)}</b> at home · home hears one beat every <b>${fmtDur(1 / LAB.heartHz * rateNow)}</b><br><span class="fx2">${P.method === 'hover' ? 'dt/dτ = 1/√(1 − rs/r)' : 'dt/dτ = u<sup>t</sup>(r, a*), Bardeen, Press &amp; Teukolsky 1972'} · r = ${(sh.leg === 'fall' ? P.journey.path(k) : sh.leg === 'climb' ? P.journey.path(1 - k) : sh.leg === 'dwell' ? P.rM : leg.rFrom).toPrecision(8)} M</span>`;
   sound.crossing(depth);
   sound.home(rateNow);
 
@@ -573,7 +595,7 @@ function renderLabels() {
   const geo = { rot, tilt, cx: PL.cx, cy: PL.cy, radius: R };
   const told = new Set(S.mind ? S.mind.snapshot().told : []);
   const shown = (scene.u.reveal ?? 1) >= 0.85;
-  const phone = isPhone();
+  const phone = isPhone() || TEXT;
   const items = [];
   for (const f of feats) {
     let pos;
@@ -617,7 +639,7 @@ function renderLabels() {
   const lg = host.querySelector('.legend');
   if (phone) {
     lg.hidden = false;
-    lg.style.top = `${PL.cy + R + 18}px`;
+    lg.style.top = TEXT ? '96px' : `${PL.cy + R + 18}px`;
     const html = items.map((it, i) => `<li class="${it.res ? 'res' : ''}"><b>${i + 1}</b> ${esc(it.res ? it.f.res : it.f.un + ' ?')}</li>`).join('');
     if (lg.dataset.v !== html) { lg.innerHTML = html; lg.dataset.v = html; }
   } else lg.hidden = true;
@@ -636,6 +658,14 @@ function arrive() {
   S.carrierNote = carrier.exact ? `TALLY's tone is the ship's carrier as home receives it, ${fmtHz(S.world.beacon.carrierMinHz)}` : `the carrier home receives, ${fmtHz(S.world.beacon.carrierMinHz)}, is inaudible; you hear it folded ${Math.abs(carrier.folds)} octave${Math.abs(carrier.folds) === 1 ? '' : 's'} to ${fmtHz(carrier.audibleHz)}`;
   $('tsub').textContent = `${fmtInt(S.world.years)} years since you left`;
   $('tnote').textContent = S.carrierNote;
+  if (TEXT) {
+    const list = S.plan.method === 'flight' ? SHOTS.flight : SHOTS.hole;
+    for (const sh of list) {
+      const leg = S.plan.journey.legs.find((l) => l.id === sh.leg);
+      const d = addTurn('narr', sh.cap(S.plan, leg)); d.querySelector('.tx').textContent = sh.cap(S.plan, leg);
+    }
+    for (const l of S.world.shipLog) { const t = `ship log ${shipStamp(l.tau)}: ${l.text}`; const d = addTurn('narr', t); d.querySelector('.tx').textContent = t; }
+  }
   const open = S.mind.opening();
   setTimeout(() => present(open, { source: 'engine' }), REDUCE ? 0 : 2600);
   renderChips(); renderActs([]);
@@ -707,7 +737,7 @@ function renderActs(acts) {
 function addTurn(who, text, meta = {}) {
   const div = document.createElement('div');
   div.className = `turn ${who}${meta.silence ? ' sil' : ''}`;
-  div.innerHTML = `<span class="who">${who === 'you' ? 'you' : 'TALLY'}</span><span class="tx"></span>`;
+  div.innerHTML = `<span class="who">${who === 'you' ? 'you' : who === 'narr' ? 'caption' : 'TALLY'}</span><span class="tx"></span>`;
   $('transcript').appendChild(div);
   S.transcript.push({ who, text, source: meta.source, model: meta.model });
   return div;
@@ -757,32 +787,28 @@ async function present(plan, { source = 'engine', model = '', note = '' } = {}) 
 }
 
 async function voiceWithModel(plan, visitorText) {
-  const req = S.mind.modelRequest(plan, visitorText, S.transcript);
   const ctrl = new AbortController();
   S.abort = ctrl;
   const t0 = performance.now();
   const status = () => {
-    const st = LLM.status();
+    const st = routeStatus();
     const sec = Math.round((performance.now() - t0) / 1000);
-    if (st.route === 'pollinations' && LLM.publicReadyIn() > 0) return `TALLY is choosing its words. The public model route allows one reply every 45 seconds; it opens in ${LLM.publicReadyIn()} s.`;
+    if (st.route === 'pollinations' && st.readyIn > 0) return `TALLY is choosing its words. The public model route allows one reply every 45 seconds; it opens in ${st.readyIn} s.`;
     if (st.route === 'ollama') return `TALLY is choosing its words · ${st.model} on your machine · ${sec} s`;
     if (st.route === 'pollinations') return `TALLY is choosing its words · public route · ${sec} s`;
     return `TALLY is choosing its words · ${sec} s`;
   };
+  // a closed public window is part of the fiction: the engine speaks while the model waits
+  const st0 = routeStatus();
+  if (st0.route === 'pollinations' && st0.readyIn > 3) await present({ ...plan, text: S.mind.interim(), facts: [], acts: plan.acts }, { source: 'engine', note: 'while the public model route opens' });
   thinking(true, status(), true);
   const iv = setInterval(() => thinking(true, status(), true), 1000);
   try {
-    const r = await LLM.complete({
-      system: req.system, prompt: req.prompt, json: true, temperature: 0.6, signal: ctrl.signal,
-      timeoutMs: 40000, maxWaitMs: 48000, fallback: () => ({ reply: plan.text }),
-    });
-    if (r.source === 'offline') return { text: plan.text, source: 'engine', note: 'no model route answered' };
-    S.modelCalls++;
-    const v = S.mind.validate(r.json, plan, visitorText);
-    if (!v.ok) { S.modelRefused = (S.modelRefused || 0) + 1; return { text: plan.text, source: 'engine', note: `a model reply was refused (${v.why})` }; }
-    return { text: v.text, source: r.source, model: r.model };
-  } catch (e) {
-    return { text: plan.text, source: 'engine', note: e.name === 'AbortError' ? 'you chose not to wait for a model' : 'model error' };
+    const v = await voiceTurn({ mind: S.mind, plan, visitorText, history: S.transcript, signal: ctrl.signal });
+    if (v.source !== 'engine' || v.refused) S.modelCalls++;
+    if (v.refused) S.modelRefused = (S.modelRefused || 0) + 1;
+    if (v.json && S.mind) S.mind.noteModel(v);
+    return v;
   } finally {
     clearInterval(iv);
     thinking(false);
@@ -845,6 +871,16 @@ function end(kind) {
   const sn = S.mind.snapshot(), W = S.world;
   $('endnums').innerHTML = `your clock ${esc(fmtDur(S.plan.shipS))} · home ${fmtInt(W.years)} years · ratio ×${esc(fmtSci(W.plan.factorMax))}<br>
     TALLY told you ${sn.told.length} of the ${sn.total} things it knew · ${S.modelCalls} model call${S.modelCalls === 1 ? '' : 's'} · ${S.transcript.filter((t) => t.who === 'you').length} things you said`;
+  const P = S.plan;
+  const tideAt = (rM) => P.method === 'flight' ? 0 : 2 * P.mSun * GM_SUN * LAB.bodyL / Math.pow(rM * P.mSun * GM_SUN / (299792458 ** 2), 3) / G0;
+  const prop = propellant(P, LAB.craftKg);
+  const tons = (kg) => (kg > 1e300 ? 'beyond count' : `${fmtSci(kg / 1000)} t`);
+  $('endledger').innerHTML = `<tr><td>leg</td><td>you</td><td>home</td><td>tide</td><td>mass after</td></tr>` + P.journey.legs.map((l, i) =>
+    `<tr><td>${esc(LEG_NAMES[l.id] || l.id)}</td><td>${esc(fmtDur(l.shipS, { short: true }))}</td><td>${esc(fmtYears(l.homeS))}</td>` +
+    `<td>${P.method === 'flight' ? '0 g' : esc(fmtSci(tideAt(Math.min(l.rFrom, l.rTo))) + ' g')}</td>` +
+    `<td>${esc(tons(prop.legs[i].massAfterKg))}</td></tr>`).join('');
+  $('replay').innerHTML = P.journey.legs.map((l, i) => `<li><b>${i + 1}. ${esc(LEG_NAMES[l.id] || l.id)}</b> · ${esc(legWhy(P, l))}. You: ${esc(fmtDur(l.shipS))}. Home: ${esc(fmtYears(l.homeS))}.</li>`).join('') +
+    `<li><b>total</b> · ${esc(fmtDur(P.shipS))} for you, ${fmtInt(LAB.outsideYears)} years at home. ${esc(formulaFor(P).cite.replace(/&amp;/g, '&'))}</li>`;
   scene.u.glow = 0.55;
   sound.ping(660, 0.1);
   const seen = readEndings(); seen.add(e.variant); try { localStorage.setItem('lw.endings', JSON.stringify([...seen])); } catch { /* storage blocked */ }
@@ -880,7 +916,17 @@ function renderSources() {
     <h4>Render</h4>
     <p>Three tiers, chosen from measured frame time: ${scene.ok ? `now tier <b id="tierNow">${scene.tier}</b>` : 'WebGL is off'}. <button class="lnk" type="button" data-tier="0">low</button> · <button class="lnk" type="button" data-tier="1">mid</button> · <button class="lnk" type="button" data-tier="2">high</button> · <a class="lnk" href="?text">text only</a></p>
     <h4>The model</h4>
-    <p>A deterministic engine decides every fact TALLY says. On heavy turns a language model may voice the reply, through the labs' shared route: your own machine when served locally, your key if you bring one, or a public route that allows one reply every 45 seconds. A reply that adds a number or names a locked fact is refused and the engine's words are used.</p>`;
+    <p>A deterministic engine decides every fact TALLY says. On heavy turns a language model may voice the reply, through the labs' shared route: your own machine when served locally, your key if you bring one, or a public route that allows one reply every 45 seconds. A reply that adds a number or names a locked fact is refused and the engine's words are used.</p>
+    <p id="evalNote">Measured contribution: loading.</p>`;
+  // the measured share of model replies, from the repo's own evaluation run (model-eval.mjs)
+  fetch('assets/js/last-witness/model-eval.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((e) => {
+    const n = $('evalNote');
+    if (!n) return;
+    if (!e) { n.textContent = 'Measured contribution: no evaluation file.'; return; }
+    const mm = e.model_mode;
+    const why = Object.entries(mm.refused_by_reason).map(([k, v]) => `${v} ${k}`).join(', ') || 'none';
+    n.textContent = `Measured contribution (${e.measured.slice(0, 10)}, ${e.model} on ${e.route}, ${e.questions} fixed lines, every line sent to the model): ${mm.voiced} replies accepted, ${mm.refused} refused (${why}); the model's stated intent matched the engine's on ${mm.intent_matches_engine} of ${e.questions}. Method: model-eval.mjs in this lab's folder.`;
+  }).catch(() => {});
 }
 
 /* ---------------- wiring ---------------- */
@@ -939,6 +985,7 @@ function loop(now) {
   }
   scene.render(t, dt);
   if (S.phase === 'plan' && Math.floor(t * 2) !== loop.lastT) { loop.lastT = Math.floor(t * 2); tick(); }
+  if (scene.ok && Math.floor(t) !== loop.lastF) { loop.lastF = Math.floor(t); const n = $('tierNow'); if (n) n.textContent = `${scene.tier} · median ${scene.medianMs ? scene.medianMs.toFixed(1) : '-'} ms a frame`; }
   requestAnimationFrame(loop);
 }
 
@@ -959,7 +1006,7 @@ function boot() {
   if (STILL) { previewFrame(8); scene.render(8, 16); tick(); }
   requestAnimationFrame(loop);
   // ?demo jumps straight to the return (for screenshots and for the curious)
-  if (params.has('demo')) { startCrossing(); S.film.done = true; arrive(); }
+  if (params.has('demo')) { startCrossing(); if (S.phase === 'film') { S.film.done = true; arrive(); } }
   // ?cross[=seconds] starts the crossing at once, optionally that far into the film
   if (params.has('cross')) { startCrossing(); if (S.film) S.film.t0 -= (Number(params.get('cross')) || 0) * 1000; }
   // ?say=a|b|c sends lines after the return, one after another (for tests and screenshots)
@@ -972,6 +1019,7 @@ function boot() {
     };
     setTimeout(next, 3000);
   }
+  if (params.has('debug')) setInterval(() => console.log('[lw] phase', S.phase, S.film ? ((performance.now() - S.film.t0) / 1000).toFixed(2) + ' done=' + S.film.done : ''), 700);
   if (params.has('debug')) setTimeout(() => {
     const wide = [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 1).slice(0, 8).map((e) => e.tagName + '.' + e.className + '#' + e.id + ':' + Math.round(e.getBoundingClientRect().right));
     console.log('[lw] iw', innerWidth, 'sw', document.documentElement.scrollWidth, wide.join(' | '));

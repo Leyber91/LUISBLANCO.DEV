@@ -153,7 +153,7 @@ export function buildWorld(plan, message) {
      in your receiver's own band, compressed to one second [REAL]. ---- */
   const answerYear = Math.round(y5 + between(R, 0.15, 0.85) * (T - y5));
   const answerTau = invert(maps.seen, answerYear * YEAR, plan.shipS);
-  const answerFactor = maps.rate(answerTau);
+  const answerFactor = maps.seenRate(answerTau);
   const answerSpanShipS = 1;                   // what TALLY wanted you to hear: one second
   const answerSpanHomeS = answerSpanShipS * answerFactor;
   const answerWords = pick(R, ['Heard you. Still counting.', 'We hear you. Come home.', 'Still here. Still counting.', 'Heard. Come home.']);
@@ -200,6 +200,7 @@ export function buildWorld(plan, message) {
     answer: { year: answerYear, tau: answerTau, factor: answerFactor, spanHomeS: answerSpanHomeS, words: answerWords,
       powerGain, rxHz: carrierMinHz * answerFactor },
     aloneYears: T - y5,
+    argumentShipS: invert(maps.home, y2 * YEAR, plan.shipS),
     lastBeatDays: flight ? 0 : Math.round(between(R, 4, 19)),
     shipLog,
   };

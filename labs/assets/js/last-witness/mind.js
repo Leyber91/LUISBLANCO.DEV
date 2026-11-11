@@ -22,7 +22,7 @@
 import { LAB, DISCLOSE, PROFILE } from './config.js';
 import { YEAR } from './physics.js';
 import { rng, fmtInt, fmtDur } from './world.js';
-import { buildFacts, QUESTIONS, LINES, composeEnding } from './story.js';
+import { buildFacts, QUESTIONS, LINES, composeEnding, ACTS } from './story.js';
 
 /* Words that state an outcome. A voiced reply may use one only if the engine's facts already do. */
 const CLAIMS = ['die', 'died', 'dead', 'death', 'survive', 'survived', 'killed', 'destroyed', 'extinct', 'alive', 'war', 'plague', 'god', 'gods', 'alien', 'aliens', 'returned', 'return', 'murdered', 'forgave', 'forgive', 'blame'];
@@ -72,7 +72,9 @@ const INTENTS = [
   ['goodbye', /\b(goodbye|bye|farewell|i have to go|i should go)\b/],
 ];
 
-function classify(text) {
+export const INTENT_IDS = new Set(INTENTS.map(([id]) => id));
+
+export function classify(text) {
   const s = text.toLowerCase();
   for (const [id, re] of INTENTS) if (re.test(s)) return id;
   return 'open';
@@ -239,15 +241,22 @@ export class Mind {
   }
 
   /* ---- endings ---- */
+  /* While a model is still choosing words, the engine says so in character. */
+  interim() { return this._pickLine(LINES.interim()); }
+
+  /* A voiced reply enters memory with what the model claimed about the turn,
+     and whether the engine accepted it; the claim never moves trust by itself. */
+  noteModel(v) {
+    const j = v.json || {};
+    this.s.memory.push({ turn: this.s.turn, who: 'model', intent: typeof j.intent === 'string' ? j.intent : '?',
+      text: v.refused ? `refused: ${v.check?.why || ''}` : 'voiced, checked against the facts', delta: typeof j.trust_delta === 'number' ? Number(j.trust_delta.toFixed(2)) : 0 });
+  }
+
   acts() {
-    const F = this.F, s = this.s, w = this.w;
-    const out = [];
-    if (s.silences >= 2 && s.trust < 0.12) return [{ id: 'silence', label: 'Leave TALLY in silence' }];
-    if (s.turn >= 3 || s.silences) out.push({ id: 'leave', label: 'Go back to the hole' });
-    if (F.fate.told && w.fate !== 'thinning') out.push({ id: 'answer', label: { hush: 'Knock on the shafts', going: 'Answer the ships', slowing: 'Wake them' }[w.fate] });
-    if (F.fate.told && s.trust >= 0.6) out.push({ id: 'stay', label: 'Stay with TALLY' });
-    if (F.secret.told || F.answer.told) out.push({ id: 'release', label: 'Let TALLY stop counting' });
-    return out;
+    const ctx = { F: this.F, s: this.s, w: this.w };
+    const on = ACTS.filter((a) => a.when(ctx));
+    const ex = on.find((a) => a.exclusive);
+    return (ex ? [ex] : on).map((a) => ({ id: a.id, label: a.label(ctx) }));
   }
 
   ending(kind) {
@@ -435,7 +444,7 @@ export class Mind {
       `You want ${PROFILE.wants}. You fear ${PROFILE.fears}.`,
       `Voice: plain, exact, calm sentences. Numbers carry units. You never use emoji, lists, dashes or exclamation marks, and you never call yourself an AI, a model or an assistant.`,
       `You know only the facts you are given. You never invent a number. You do not speak about: ${lockedTopics.join('; ') || 'nothing is withheld now'}. If asked, you decline in one short sentence.`,
-      `Reply with JSON: {"reply": "<what TALLY says>"}.`,
+      `Reply with JSON: {"reply": "<what TALLY says>", "intent": "<one of: ${[...INTENT_IDS].join(', ')}, open>", "trust_delta": <number from -0.1 to 0.1>}.`,
     ].join('\n');
     const recent = history.slice(-6).map((h) => `${h.who === 'you' ? 'Visitor' : 'TALLY'}: ${h.text}`.slice(0, 280)).join('\n');
     const prompt = [
@@ -451,7 +460,9 @@ export class Mind {
   /* Accept the model's reply only when it keeps the engine's facts. */
   validate(json, plan, visitorText) {
     const r = json && typeof json.reply === 'string' ? json.reply.trim() : '';
-    if (r.length < 8 || r.length > 900) return { ok: false, why: 'length' };
+    if (r.length < 8 || r.length > 900) return { ok: false, why: 'schema: reply' };
+    if (json.intent != null && !(typeof json.intent === 'string' && (INTENT_IDS.has(json.intent) || json.intent === 'open'))) return { ok: false, why: 'schema: intent' };
+    if (json.trust_delta != null && !(typeof json.trust_delta === 'number' && Math.abs(json.trust_delta) <= 0.1)) return { ok: false, why: 'schema: trust_delta' };
     if (/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(r)) return { ok: false, why: 'emoji' };
     if (/\b(as an ai|language model|assistant|i'm an ai|i am an ai)\b/i.test(r)) return { ok: false, why: 'persona' };
     const low = r.toLowerCase();

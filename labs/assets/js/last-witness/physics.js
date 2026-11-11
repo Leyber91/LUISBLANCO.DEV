@@ -65,6 +65,62 @@ export function circularOrbit(rM, delta) {
   return { ut, dtaudt: 1 / ut, E, L, omegaM };
 }
 
+/* Speed of a prograde circular orbit measured by the local zero-angular-
+   momentum observer: gamma = alpha u^t, with the equatorial lapse
+   alpha^2 = r^2 Delta / A, A = (r^2 + a^2)^2 - a^2 Delta,
+   Delta = (r - 1)^2 - delta (2 - delta) (no cancellation near a* = 1).
+   Checks: 1/2 at the Schwarzschild ISCO, tending to 1/2 at the extremal
+   ISCO (Bardeen, Press & Teukolsky 1972). */
+export function zamoSpeed(rM, delta) {
+  const d = Math.min(1, Math.max(0, delta));
+  const a = 1 - d;
+  const o = circularOrbit(rM, d);
+  if (!o) return NaN;
+  const Delta = (rM - 1) * (rM - 1) - d * (2 - d);
+  const A = (rM * rM + a * a) ** 2 - a * a * Delta;
+  const alpha = Math.sqrt(rM * rM * Delta / A);
+  const gamma = alpha * o.ut;
+  return Math.sqrt(Math.max(0, 1 - 1 / (gamma * gamma)));
+}
+
+/* Propellant for the whole journey, ideal photon rocket (exhaust at c):
+   each burn needs m0/m1 = exp(dpsi), dpsi the change in rapidity
+   (delta-v = c tanh(ln(m0/m1)) for v_e = c).
+     flight  four burns of rapidity phi each, exact
+     hover   continuous thrust: m1 = m0 exp(-integral of a dtau / c), exact
+     orbit   a slow spiral between circular orbits; dpsi is taken as the
+             change in local orbital rapidity, the Newtonian low-thrust
+             spiral result applied to zero-angular-momentum-observer
+             speeds [approximation, tagged on the page]
+   Masses are counted backward from the craft that comes home. */
+export function propellant(plan, craftKg) {
+  const legs = plan.journey.legs;
+  const lnR = legs.map((l) => {
+    if (plan.method === 'flight') return plan.phi;
+    if (plan.method === 'hover') {
+      const k = C * C / (plan.mSun * GM_SUN);          // 1/M in 1/m, so a = k c^2 * aM
+      const aAt = (rM) => (k * C * C) * (1 / (rM * rM)) / Math.sqrt(1 - 2 / rM);
+      if (l.id === 'fall' || l.id === 'climb') {
+        const n = 400; let s = 0;
+        for (let i = 0; i < n; i++) { const x = (i + 0.5) / n; s += aAt(plan.journey.path(l.id === 'fall' ? x : 1 - x)); }
+        return (s / n) * l.shipS / C;
+      }
+      return aAt(l.rFrom) * l.shipS / C;
+    }
+    if (l.id !== 'fall' && l.id !== 'climb') return 0;
+    const psi = (rM) => Math.atanh(Math.min(0.999999, zamoSpeed(rM, plan.delta)));
+    return Math.abs(psi(plan.journey.path(1)) - psi(l.id === 'fall' ? l.rFrom : l.rTo));
+  });
+  const out = new Array(legs.length);
+  let m = craftKg;
+  for (let i = legs.length - 1; i >= 0; i--) {
+    const after = m;
+    m = after * Math.exp(Math.min(700, lnR[i]));
+    out[i] = { id: legs[i].id, lnRatio: lnR[i], massBeforeKg: m, massAfterKg: after, dvC: Math.tanh(lnR[i]) };
+  }
+  return { legs: out, startKg: m, lnTotal: lnR.reduce((s, x) => s + x, 0) };
+}
+
 /* Horizon radius r+ = M (1 + sqrt(1 - a^2)), in units of M. */
 export function horizonM(delta) {
   const d = Math.min(1, Math.max(0, delta));
@@ -85,13 +141,16 @@ export const tidal = (mSun, rMetres, L) => 2 * massSI(mSun) * L / Math.pow(rMetr
 
 /* ---------- the journey: four legs, each integrated ----------
 
-   approach  hold a circular orbit (or station) far out, at r0
+   depart    leave the station, holding its orbit far out at r0; the ship
+             starts at the hole, so there is no transit from home to count
+             [illustrative: no hole is known near any inhabited world]
    fall      spiral in through circular orbits (or lower the station) to
              the working radius; r(s) = rd + (r0 - rd) 10^(-K s), so the
              integration is dense where the clock rate climbs fastest
    dwell     the orbit or the hover itself; its proper time is solved so
              that the four legs total exactly the outside target
    climb     the fall in reverse
+   return    back to the station at r0
    Each leg integrates dt/dtau along its path with classical RK4. The
    rate depends on tau only through r(tau), so each RK4 step reduces to
    Simpson's rule; N steps per leg. Energy E is the conserved energy per
@@ -114,21 +173,23 @@ export function rk4Leg(rate, shipS, n = LEG_N) {
   return { homeS: t, tab, h };
 }
 
-export function buildLegs({ method, rd, rateAt, energyAt, outsideS, r0, approachShipS = 600, fallShipS = 2400 }) {
+export function buildLegs({ method, rd, rateAt, energyAt, outsideS, r0, approachShipS = 300, fallShipS = 2400 }) {
   const path = (sFrac) => rd + (r0 - rd) * Math.pow(10, -LEG_K * sFrac);
   const approach = rk4Leg(() => rateAt(r0), approachShipS, 200);
   const fall = rk4Leg((tau) => rateAt(path(tau / fallShipS)), fallShipS);
   const climbRate = (tau) => rateAt(path(1 - tau / fallShipS));
   const climb = rk4Leg(climbRate, fallShipS);
   const dwellRate = rateAt(rd);
-  const dwellShipS = Math.max(0, (outsideS - approach.homeS - fall.homeS - climb.homeS) / dwellRate);
+  const back = rk4Leg(() => rateAt(r0), approachShipS, 200);
+  const dwellShipS = Math.max(0, (outsideS - approach.homeS - fall.homeS - climb.homeS - back.homeS) / dwellRate);
   const dwell = { homeS: dwellShipS * dwellRate };
   const E0 = energyAt(r0), Ed = energyAt(rd), Eend = energyAt(path(1));
   const legs = [
-    { id: 'approach', shipS: approachShipS, homeS: approach.homeS, rFrom: r0, rTo: r0, rate: [rateAt(r0), rateAt(r0)], dE: 0, tab: approach.tab },
+    { id: 'depart', shipS: approachShipS, homeS: approach.homeS, rFrom: r0, rTo: r0, rate: [rateAt(r0), rateAt(r0)], dE: 0, tab: approach.tab },
     { id: 'fall', shipS: fallShipS, homeS: fall.homeS, rFrom: r0, rTo: rd, rate: [rateAt(r0), rateAt(path(1))], dE: Eend - E0, tab: fall.tab },
     { id: 'dwell', shipS: dwellShipS, homeS: dwell.homeS, rFrom: rd, rTo: rd, rate: [dwellRate, dwellRate], dE: Ed - Eend, tab: null },
     { id: 'climb', shipS: fallShipS, homeS: climb.homeS, rFrom: rd, rTo: r0, rate: [rateAt(path(1)), rateAt(r0)], dE: E0 - Ed, tab: climb.tab },
+    { id: 'return', shipS: approachShipS, homeS: back.homeS, rFrom: r0, rTo: r0, rate: [rateAt(r0), rateAt(r0)], dE: 0, tab: back.tab },
   ];
   let ts = 0, th = 0;
   for (const l of legs) { l.ship0 = ts; l.home0 = th; ts += l.shipS; th += l.homeS; }
@@ -154,6 +215,7 @@ export function legsRate(J, tau) {
     const x = Math.max(0, Math.min(1, (tau - l.ship0) / (l.shipS || 1)));
     if (l.id === 'fall') return J.rateAt(J.path(x));
     if (l.id === 'climb') return J.rateAt(J.path(1 - x));
+    if (l.id === 'return' || l.id === 'depart') return l.rate[0];
     return l.rate[0];
   }
   return 1;
@@ -263,7 +325,8 @@ export function timeMaps(plan) {
   if (plan.method !== 'flight') {
     const J = plan.journey;
     const home = (tau) => legsHome(J, tau);
-    return { home, rx: home, seen: home, rate: (tau) => legsRate(J, tau) };
+    const rate = (tau) => legsRate(J, tau);
+    return { home, rx: home, seen: home, rate, seenRate: rate };
   }
   const a = plan.aG * G0, k = C / a, tq = plan.tauQ;
   const t1 = k * Math.sinh(tq / k), x1 = C * k * (Math.cosh(tq / k) - 1);
@@ -283,8 +346,10 @@ export function timeMaps(plan) {
     home: (tau) => state(tau).t,
     rx: (tau) => { const s = state(tau); return s.t + s.x / C; },
     seen: (tau) => { const s = state(tau); return s.t - s.x / C; },
-    // received-rate factor: time dilation times Doppler, sqrt((1+b)/(1-b))
+    // received-rate factor at home: time dilation times Doppler, sqrt((1+b)/(1-b))
     rate: (tau) => { const v = state(tau).v; return Math.sqrt((1 + v) / (1 - v)); },
+    // how fast the ship sees home's clock run: d seen / d tau = gamma (1 - b) = sqrt((1-b)/(1+b))
+    seenRate: (tau) => { const v = state(tau).v; return Math.sqrt((1 - v) / (1 + v)); },
     state,
   };
 }

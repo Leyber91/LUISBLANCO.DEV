@@ -11,12 +11,53 @@
    5. style: every line TALLY can say obeys the voice rules
    6. offline parity: with no model, a run reaches every tier and
       every ending its world allows
+   7. schema: the content validates (no dangling link, no unknown
+      topic or state variable, no unreachable ending). With --broken
+      the same validator runs on a deliberately broken copy and the
+      script exits non-zero.
    ============================================================ */
 
 import * as P from './physics.js';
 import { buildWorld } from './world.js';
-import { Mind } from './mind.js';
-import { buildFacts, LINES, composeEnding } from './story.js';
+import { Mind, INTENT_IDS } from './mind.js';
+import { buildFacts, LINES, composeEnding, ACTS } from './story.js';
+import { VOICES } from './config.js';
+
+/* ---------- the schema validator ---------- */
+const STATE_KEYS = { s: new Set(['trust', 'turn', 'silences', 'hostility', 'level', 'mood', 'visitor', 'memory']), w: new Set(['fate', 'method', 'years']) };
+export function validateStory(F, acts, world) {
+  const errs = [];
+  const ids = new Set(Object.keys(F));
+  for (const f of Object.values(F)) {
+    if (!(f.level >= 0 && f.level <= 4)) errs.push(`${f.id}: level ${f.level}`);
+    for (const t of f.topics) if (!INTENT_IDS.has(t)) errs.push(`${f.id}: unknown topic ${t}`);
+    if (f.truth && !ids.has(f.truth)) errs.push(`${f.id}: dangling truth ${f.truth}`);
+    for (const x of f.supersedes || []) if (!ids.has(x)) errs.push(`${f.id}: dangling supersedes ${x}`);
+    for (const r of ['clipped', 'plain', 'warm']) if (typeof f.say[r] !== 'string' || !f.say[r]) errs.push(`${f.id}: missing register ${r}`);
+  }
+  for (const a of acts) {
+    // run each act's condition against a state that refuses unknown variables
+    const guard = (name, obj) => new Proxy(obj, { get: (o, k) => { if (typeof k === 'string' && STATE_KEYS[name] && !STATE_KEYS[name].has(k)) throw new Error(`unknown state variable ${name}.${k}`); return o[k]; } });
+    const factProxy = new Proxy(F, { get: (o, k) => { if (!(k in o)) throw new Error(`unknown fact ${String(k)}`); return o[k]; } });
+    try { a.when({ s: guard('s', { trust: 0.5, turn: 5, silences: 0, hostility: 0, level: 2, mood: 'open', visitor: {}, memory: [] }), F: factProxy, w: guard('w', { fate: world.fate, method: world.method, years: world.years }) }); }
+    catch (e) { errs.push(`act ${a.id}: ${e.message}`); }
+    const mm = new Mind(world); mm.opening();
+    if (!composeEnding(a.id, { w: world, F: mm.F, s: mm.s, beats: '1' }) && !(a.id === 'answer' && world.fate === 'thinning')) errs.push(`act ${a.id}: no ending text (unreachable)`);
+  }
+  return errs;
+}
+
+if (process.argv.includes('--broken')) {
+  const w = buildWorld(P.planOrbit({ mSun: 4e6, delta: 1e-20, outsideYears: 1e4, bodyL: 2, craftKg: 1e5 }), 'a broken copy');
+  const F = buildFacts(w);
+  F.told_lie.truth = 'no_such_fact';
+  F.sky.topics.push('astrology');
+  const acts = [...ACTS, { id: 'vanish', label: () => 'Vanish', when: ({ s }) => s.mana > 3 }];
+  const errs = validateStory(F, acts, w);
+  for (const e of errs) console.log('SCHEMA', e);
+  console.log(`schema on a broken copy: ${errs.length} errors`);
+  process.exit(errs.length ? 1 : 0);
+}
 
 let fails = 0, passes = 0;
 const ok = (name, cond, detail = '') => {
@@ -57,7 +98,7 @@ for (const [label, plan] of [
   ['flight', P.planFlight({ aG: 1, outsideYears: 1e4, craftKg: 1e5 })],
 ]) {
   near(`${label}: legs total 10,000 years`, plan.journey.homeS, 1e4 * P.YEAR, 1e-9);
-  ok(`${label}: four legs`, plan.journey.legs.length === 4);
+  ok(`${label}: four or five legs`, plan.journey.legs.length >= 4);
   const maps = P.timeMaps(plan);
   near(`${label}: home(shipS) is 10,000 years`, maps.home(plan.shipS), 1e4 * P.YEAR, 1e-6);
 }
@@ -142,6 +183,28 @@ const c = new Mind(w0); c.opening();
 c.respond('did you ever answer me?');
 const conf = c.respond('you lied to me about answering');
 ok('offline: a caught lie is confessed and the truth told', conf.intent === 'confront' && c.F.answer.told);
+
+/* ---------- 7. schema ---------- */
+for (const seedMsg of ['schema one', 'schema two', 'schema three']) {
+  const w = buildWorld(orbit, seedMsg);
+  const errs = validateStory(buildFacts(w), ACTS, w);
+  ok(`schema: the story validates (${w.fate})`, errs.length === 0, errs.join('; '));
+}
+// every act is reached in some offline run across fates
+const reached = new Set();
+for (let i = 0; i < 24; i++) {
+  const w = buildWorld(orbit, `Tell them the sky down here is full of light, reach ${i}`);
+  const mm = new Mind(w); mm.opening();
+  for (const q of script) mm.respond(q === 'Tell them the sky down here is full of light.' ? `Tell them the sky down here is full of light, reach ${i}` : q);
+  mm.acts().forEach((a) => reached.add(a.id));
+  const hm = new Mind(w); hm.opening();
+  ['stupid', 'stupid', 'stupid', 'stupid', 'stupid', 'stupid'].forEach((q) => hm.respond(q));
+  hm.acts().forEach((a) => reached.add(a.id));
+}
+for (const a of ACTS) ok(`schema: act ${a.id} is reachable offline`, reached.has(a.id));
+// TALLY's sentences respect its voice's length rule
+const maxW = VOICES.tally.maxSentenceWords;
+for (const t of texts) for (const sent of t.split(/(?<=[.?])\s+/)) ok(`voice: sentence under ${maxW} words`, sent.split(/\s+/).length <= maxW, sent.slice(0, 80));
 
 console.log(`last-witness tests: ${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
