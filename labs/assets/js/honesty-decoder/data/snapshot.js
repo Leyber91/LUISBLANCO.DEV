@@ -2,7 +2,7 @@
    Commit, date, LF-normalised SHA-256 and anchor lines of every file a decoder row cites. */
 export const SNAPSHOT = {
  "generated": "2026-11-11",
- "head": "0fd5713",
+ "head": "a0b5b77",
  "files": {
   ".github/workflows/update_exoplanet_data.yml": {
    "commit": "7a765ce",
@@ -137,20 +137,20 @@ export const SNAPSHOT = {
    "bytes": 15970
   },
   "labs/assets/js/honesty-decoder/checks/runner.js": {
-   "commit": "uncommitted",
-   "date": "",
+   "commit": "68d5ee9",
+   "date": "2026-11-11",
    "sha256": "8d9901ff82d5aec0a9eb239696c9b3a84a32afec55634a75f529c5df648fa2eb",
    "bytes": 10899
   },
   "labs/assets/js/honesty-decoder/engine.js": {
-   "commit": "uncommitted",
-   "date": "",
+   "commit": "68d5ee9",
+   "date": "2026-11-11",
    "sha256": "62bed099fe3113fd0b31349c4eaccb13bc499683f096f381c383eb7b8183595b",
    "bytes": 23811
   },
   "labs/assets/js/honesty-decoder/registry.js": {
-   "commit": "uncommitted",
-   "date": "",
+   "commit": "68d5ee9",
+   "date": "2026-11-11",
    "sha256": "6f61d37dce19bce295d16635a50167125d9ba641598c567d5ce5ac3a5d1e34ba",
    "bytes": 52770
   },
@@ -251,8 +251,8 @@ export const SNAPSHOT = {
    "bytes": 25035
   },
   "labs/honesty-decoder.html": {
-   "commit": "e439a51",
-   "date": "2026-06-18",
+   "commit": "68d5ee9",
+   "date": "2026-11-11",
    "sha256": "4317673a6e6f73bec4419001a0405aafd37eb2d5bb20d12445c60a0105d809f4",
    "bytes": 5761
   },
@@ -337,8 +337,8 @@ export const SNAPSHOT = {
    "date": "2026-06-17"
   },
   "honesty-decoder": {
-   "commit": "e439a51",
-   "date": "2026-06-18"
+   "commit": "68d5ee9",
+   "date": "2026-11-11"
   },
   "roaster": {
    "commit": "b01187f",
@@ -369,7 +369,7 @@ export const SNAPSHOT = {
    "primordial-seed": "135fda3",
    "token-ekg": "135fda3",
    "dataspace": "d4e7052",
-   "honesty-decoder": "e439a51",
+   "honesty-decoder": "68d5ee9",
    "roaster": "b01187f",
    "workout-plans": "78a22cd",
    "memes": "78a22cd",
