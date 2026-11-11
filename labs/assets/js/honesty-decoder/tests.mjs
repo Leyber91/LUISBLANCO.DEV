@@ -93,7 +93,16 @@ const rowIds = new Set(ROWS.map((r) => r.id));
 for (const p of ALL_PROJECTS) {
   if (p.href && (p.status === 'built' || p.status === 'beta')) drift(rowIds.has(p.id), `coverage: ${p.status} lab "${p.title}" (${p.id}) has a page but no decoder row`);
 }
-for (const r of ROWS) drift(!!HUB[r.id], `coverage: row ${r.id} names no hub entry`);
+for (const r of ROWS) ok(!!HUB[r.id], `coverage: row ${r.id} names no hub entry in site.config.js`);
+/* every hub entry gets a row on the page: graded (registry.js), generated for a
+   lab with a page but no graded row yet, or generated for a lab with no page */
+const pageRows = ALL_PROJECTS.map((p) => (rowIds.has(p.id) ? 'graded' : p.href ? 'ungraded' : 'no page'));
+ok(pageRows.every(Boolean), 'coverage: a hub entry would get no row on the page');
+for (const p of ALL_PROJECTS) {
+  if (!p.href) continue;
+  const sys = E.decompose(p.blurb);
+  ok(rowIds.has(p.id) || sys.length > 0, `coverage: ${p.id} has a page and neither a graded row nor a decodable blurb`);
+}
 const cov = E.coverage(ALL_PROJECTS, [...rowIds, ...ALL_PROJECTS.filter((p) => !p.href).map((p) => p.id)]);
 console.log(`coverage: ${cov.n} of ${cov.m} hub entries have a row (graded or no-page)`);
 

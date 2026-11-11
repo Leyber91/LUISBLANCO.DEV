@@ -13,7 +13,6 @@
 
 import { ALL_PROJECTS } from '../config/site.config.js';
 import { ROWS, SHARED, OFFSITE } from './registry.js';
-import { SNAPSHOT } from './data/snapshot.js';
 import { HEAVY_MIN_WIDTH } from './config.js';
 import * as E from './engine.js';
 import { renderLedger } from './view/ledger.js';
@@ -36,10 +35,20 @@ function noPageRow(p) {
   return { id: p.id, subs, files: [], mech: [['No page exists for this lab yet: its entry in site.config.js has no href. The rule engine split its blurb; every checkable piece is unsupported until a page exists.', subs.map((s) => s.id)]] };
 }
 
+/* A lab with a page but no graded row yet: decoded by the rule engine,
+   every piece unverified until a grader adds its row to registry.js. */
+function ungradedRow(p) {
+  const subs = E.decompose(p.blurb).map((s, i) => ({
+    id: `${p.id}.${i + 1}`, phrase: s.text, text: s.text, type: s.type, w: E.TYPE_WEIGHT[s.type] || 1,
+    why: 'default weight by type: not graded yet', verdict: 'unsupported', note: 'not graded yet: no row in registry.js, so nothing backs this', ungraded: true, ev: [],
+  }));
+  return { id: p.id, ungraded: true, subs, files: [], mech: [['This lab has a page but no graded row yet. The rule engine split its blurb; every piece stays unverified until a grader cites the code that backs it.', subs.map((s) => s.id)]] };
+}
+
 const systems = [];
 for (const p of ALL_PROJECTS) {
   const has = !!p.href;
-  const row = has && rowById[p.id] ? rowById[p.id] : has ? null : noPageRow(p);
+  const row = has && rowById[p.id] ? rowById[p.id] : has ? ungradedRow(p) : noPageRow(p);
   systems.push({ id: p.id, kind: has ? 'lab' : 'nopage', title: p.title, status: p.status, href: p.href || null, blurb: p.blurb, row, category: p.categoryLabel });
 }
 for (const o of OFFSITE) {
@@ -48,7 +57,7 @@ for (const o of OFFSITE) {
 }
 // rows whose lab is gone from the hub still show, flagged
 for (const r of ROWS) if (!systems.find((s) => s.id === r.id)) systems.push({ id: r.id, kind: 'lab', title: r.id, status: 'not in hub', href: null, blurb: '', row: r, orphan: true });
-const missingRows = systems.filter((s) => s.kind === 'lab' && !s.row).map((s) => s.title);
+const missingRows = systems.filter((s) => s.kind === 'lab' && s.row?.ungraded).map((s) => `${s.title} (ungraded)`);
 
 /* Blurb drift: a graded phrase no longer in the live blurb. */
 for (const s of systems) {
@@ -62,7 +71,7 @@ const coverage = E.coverage(ALL_PROJECTS, systems.filter((s) => s.row && s.kind 
 /* ---------------------------------------------------------- state */
 const app = {
   systems, byId: Object.fromEntries(systems.map((s) => [s.id, s])), coverage, missingRows,
-  snapshot: SNAPSHOT, shared: SHARED,
+  snapshot: { files: {}, labs: {}, grading: null, anchors: {}, loading: true }, shared: SHARED,
   results: {}, route: 'pollinations', routeNote: 'not yet called: graded under the public route', routeAnswered: null,
   sel: 'the-figure', focus: null, hover: null, testing: null,
   over: {}, weights: {}, compare: null,
@@ -72,7 +81,7 @@ const app = {
 };
 window.L212_DECODER = app; // read-only handle for a sibling page or a console
 
-const counted = () => systems.filter((s) => s.kind === 'lab' && s.row);
+const counted = () => systems.filter((s) => s.kind === 'lab' && s.row && !s.row.ungraded);
 app.counted = counted;
 
 app.score = (sys) => {
@@ -84,7 +93,7 @@ app.graded = (sys) => (sys?.row ? E.scoreRow(sys.row, {}, 'pollinations') : null
 app.author = (sys) => (sys?.row ? E.figureOf(sys.row.subs.map((s) => ({ id: s.id, w: s.w, v: E.vOf(s.verdict), type: s.type }))) : null);
 app.stale = (sys) => {
   if (!sys?.row || sys.kind !== 'lab') return null;
-  const g = SNAPSHOT.grading?.labs?.[sys.id], now = SNAPSHOT.labs?.[sys.id]?.commit;
+  const g = app.snapshot.grading?.labs?.[sys.id], now = app.snapshot.labs?.[sys.id]?.commit;
   const changedFiles = (sys.row.files || []).filter((f) => {
     const r = Object.values(app.results).find((x) => x?.lines?.some((l) => l.f === f));
     return r && r.lines.find((l) => l.f === f)?.changed;
@@ -169,8 +178,9 @@ app.restore = () => { delete app.over[app.sel]; delete app.weights[app.sel]; app
 let runner = null;
 async function runChecks({ only = null, heavy = app.heavy } = {}) {
   const { Runner } = await import('./checks/runner.js');
+  await snapshotReady;
   if (!runner) {
-    runner = new Runner({ rows: ROWS, shared: SHARED, snapshot: SNAPSHOT, self: () => ({ coverage, counted: ROWS, results: app.results }) });
+    runner = new Runner({ rows: ROWS, shared: SHARED, snapshot: app.snapshot, self: () => ({ coverage, counted: ROWS, results: app.results }) });
     app.runner = runner;
     runner.addEventListener('start', (e) => { app.testing = e.detail; app.render('caption'); });
     runner.addEventListener('result', (e) => {
@@ -256,6 +266,9 @@ if (!still && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
 addEventListener('resize', () => app.render('resize'));
 $('rerun').addEventListener('click', () => runChecks({ only: app.sel, heavy: true }));
 $('walk-go').addEventListener('click', async () => { const t = await import('./view/tools.js'); t.walk(app); });
+
+/* The snapshot (commits, hashes, anchor lines) is not needed for the first figure. */
+const snapshotReady = import('./data/snapshot.js').then((m) => { app.snapshot = m.SNAPSHOT; app.render(); }).catch(() => { app.snapshot.loading = false; });
 
 const idle = window.requestIdleCallback || ((f) => setTimeout(f, 60));
 idle(async () => {

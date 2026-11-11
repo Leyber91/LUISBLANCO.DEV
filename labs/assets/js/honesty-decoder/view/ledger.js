@@ -39,7 +39,7 @@ export function renderLedger(app, el) {
       const aria = s.kind === 'offsite' ? `${s.title}, not checkable from this page`
         : `${s.title}, ${f?.point != null ? `${fmt(f.point)} percent, interval ${fmt(f.low)} to ${fmt(f.high)}` : 'no checked sub-claims'}${st?.any ? ', stale' : ''}`;
       html += `<li class="${cls}" role="option" id="lg-${esc(s.id)}" data-id="${esc(s.id)}" aria-selected="${on}" tabindex="${on ? 0 : -1}" aria-label="${esc(aria)}" style="--i:${rank++}">
-        <span class="nm" title="${esc(s.title)}">${esc(s.title)}</span><span class="tr" aria-hidden="true">${band}${pt}</span><span class="num">${num}</span></li>`;
+        <span class="nm" title="${esc(s.title)}">${esc(s.title)}</span><span class="tr" aria-hidden="true" title="${f && f.low != null && s.kind !== 'offsite' ? `interval ${fmt(f.low)} to ${fmt(f.high)}, width ${fmt(f.high - f.low)} pts` : ''}">${band}${pt}</span><span class="num">${num}</span></li>`;
     }
     html += '</ul>';
   }
@@ -51,7 +51,7 @@ export function renderLedger(app, el) {
   const sh = sharesOf(app);
   const p = app.progress;
   html += `<div class="lg-foot">
-    <div>coverage <b>${built.n} of ${built.m}</b> built labs decoded · <b>${beta.n} of ${beta.m}</b> beta · <b>${planned.n} of ${planned.m}</b> planned${app.missingRows.length ? ` · missing: ${esc(app.missingRows.join(', '))}` : ''}</div>
+    <div>coverage <b>${built.n} of ${built.m}</b> built labs decoded (${app.counted().filter((x) => x.status === 'built').length} graded) · <b>${beta.n} of ${beta.m}</b> beta · <b>${planned.n} of ${planned.m}</b> planned${app.missingRows.length ? ` · missing: ${esc(app.missingRows.join(', '))}` : ''}</div>
     <div>check-backed <b>${Math.round(sh.checked)}%</b> of counted sub-claims · author assertion <b>${Math.round(sh.author)}%</b> · basis of figures: <b>${sh.fromChecks}</b> from checks, <b>${sh.fromAuthored}</b> from authored verdicts, <b>${sh.asserted}</b> asserted</div>
     <div>shared components <b>${Object.keys(app.shared).length}</b> · contradictions across rows <b>${cons.contradictions.length}</b> · stale rows <b>${sh.stale}</b></div>
     <div>checks <b>${p.done} of ${p.total}</b> run${p.failed ? ` · <b>${p.failed}</b> failed` : ''}${p.skipped ? ` · ${p.skipped} deep check${p.skipped === 1 ? '' : 's'} waiting` : ''}${p.ms ? ` · ${(p.ms / 1000).toFixed(1)} s` : ''}</div>

@@ -140,6 +140,7 @@ export function basisOf(sub) {
 export function effective(sub, results, route, opts = {}) {
   const graded = opts.override?.[sub.id] || sub.verdict;
   if (sub.type === 'framing') return { verdict: graded, v: null, status: 'framing', basis: 'framing', excluded: true };
+  if (sub.ungraded) return { verdict: 'unverified', v: null, status: 'author', basis: 'author', graded: 'ungraded', computed: { reason: 'not graded yet: no row in registry.js' } };
   if (sub.nopage) return { verdict: 'unsupported', v: 0, status: 'pass', basis: 'self', graded: 'unsupported', computed: { reason: 'no page exists: the hub entry has no href' } };
   const basis = basisOf(sub);
   if (basis === 'author') return { verdict: 'unverified', v: null, status: 'author', basis, graded };

@@ -49,7 +49,7 @@ export function renderReceipt(app, el) {
   const link = sys.href ? `<a href="${esc(sys.href)}">${esc(sys.href)}</a>` : sys.kind === 'nopage' ? 'no page' : 'off-site';
   const snapLab = app.snapshot.labs?.[sys.id];
   const meta = sys.kind === 'lab'
-    ? `<span>graded <b>${esc(app.snapshot.grading?.date || '2026-11-11')}</b> at <b>${esc(st?.graded || snapLab?.commit || 'uncommitted')}</b></span>
+    ? `<span>graded <b>${esc(app.snapshot.grading?.date || '2026-11-11')}</b> at <b>${esc(st?.graded || snapLab?.commit || (app.snapshot.loading ? '...' : 'uncommitted'))}</b></span>
        <span>lab now <b>${esc(st?.now || '—')}</b>${st?.any ? ` <span class="stale">stale: ${esc([st.commitStale ? 'lab committed since grading' : '', st.changedFiles.length ? `${st.changedFiles.length} file${st.changedFiles.length > 1 ? 's' : ''} changed since the snapshot` : '', st.drift.length ? `blurb changed (${st.drift.length} phrase${st.drift.length > 1 ? 's' : ''} gone)` : ''].filter(Boolean).join('; '))}</span>` : ' (fresh)'}</span>`
     : offsite ? '<span><b>not checkable from this page</b>: every sub-claim is the author\'s own assertion</span>'
       : '<span>the hub entry has no page: every checkable sub-claim is unsupported</span>';
