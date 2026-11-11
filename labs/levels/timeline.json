@@ -23,7 +23,8 @@
         "Reference standard: the calendar-conversion rigour of Reingold and Dershowitz, Calendrical Calculations (Cambridge University Press): every displayed date, native conversion and uncertainty band is derived by the engine from CODEX-sourced constraints with 0 hand-placed positions; a test regenerates all positions and diffs them against the shipped data with 0 changes, and every unsatisfiable constraint is reported with both source lines."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: the hub lists 'timeline' as planned in labs/assets/js/config/site.config.js, and no module computes TRIVERSE dates or calendars. The site's only chronology code, labs/assets/js/altverse/render/chronology.js (48 lines, fmtYear formats Gyr/Myr/kyr), serves Altverse and is not part of this lab; the unported prototype TRIVERSE_TIMELINE.html in the TRIVERSE repo is not on the site and does not count." }
+        "G0": { "level": 0, "evidence": "no page exists: the hub lists 'timeline' as planned in labs/assets/js/config/site.config.js, and no module computes TRIVERSE dates or calendars. The site's only chronology code, labs/assets/js/altverse/render/chronology.js (48 lines, fmtYear formats Gyr/Myr/kyr), serves Altverse and is not part of this lab; the unported prototype TRIVERSE_TIMELINE.html in the TRIVERSE repo is not on the site and does not count." },
+        "G1": { "level": 2, "evidence": "Settled at 2 (rater 3, skeptic 2; the dispute holds). Rung 2 met: every event carries a numeric CE year y, and view-canvas.js x(t) places it. Rung 3 fails on its scale clause. The main axis, view-canvas.js x()/tAt(), is one plain linear map with no breakpoints and no log, so at the widest view all of human history falls within about one pixel. Only the 'ALL OF TIME' strip (view-canvas.js _mx) is a log lookback, and its ticks read '4 Ga ... 100 ka ... 1 y', not Gyr ago, BCE or CE. The main-axis labels from chronology.js fmtTick use 'ka' between 200 ka and 200 Ma, a unit the rung does not list. Neither scale meets every clause, so rung 3 is not met. Not counted above it: fmtAT writes negative A.T. years in words (engine.js compare(-8000) gives Terra '4,463 years before 0 A.T.') where canon says pre-A.T. The Cycle math is right (C90.Y68 at 2068; tests/engine.test.mjs passes). checkCalendarRows computes the discrepancy list at runtime, so the table test cannot fail on an unlisted mismatch." }
       }
     },
     {
@@ -45,7 +46,8 @@
         "Structure complete against canon: a script checks that every dimension, era, discovery point, cross-dimension link and named character in CODEX/CHRONOLOGY appears in the graph or in a documented exclusion list with a reason (spoiler, scaffold), with 0 unexplained gaps."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: there is no event data or schema on the site, so no dimension field, discovery event, lane, link or thread exists." }
+        "G0": { "level": 0, "evidence": "no page exists: there is no event data or schema on the site, so no dimension field, discovery event, lane, link or thread exists." },
+        "G1": { "level": 1, "evidence": "Undisputed; rater's grade kept. Rung 2 fails: hs-origin ('One species, three dimensions') has world 'shared'. That value is not one of the six canon dimensions; events.schema.json allows it, and the page shows it as 'all three'. The other 106 events use canon values. Above the gate, not counted: kr-disc, te-disc and ea-access are typed discoveries with correct signed offsets, and rulings.json records 2031 with a reason. The artifact rings come from config.js WORLDS.found, not events.json (view-draw.js artifacts()). No module loads rulings.json, so Earth's canon dates 1944 and 2068 are never listed. The three strands do not fork." }
       }
     },
     {
@@ -67,7 +69,8 @@
         "Reference standard ChronoZoom (UC Berkeley and Microsoft Research, 2012) for zoom continuity, joined to diverging lanes and storyline threads in one view: a rater zooms from the oldest event down to a 1-week window, the finest dating canon gives (MASTER_TIMELINE's week-level 2068 rows), in one gesture sequence with no reload, no blank frame and 0 label overlaps."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: nothing draws this lab. The only timeline renderer on the site, labs/assets/js/altverse/render/chronology.js (48 lines), draws Altverse era bands as a DOM list with no zoom or lanes, and is not part of this lab." }
+        "G0": { "level": 0, "evidence": "no page exists: nothing draws this lab. The only timeline renderer on the site, labs/assets/js/altverse/render/chronology.js (48 lines), draws Altverse era bands as a DOM list with no zoom or lanes, and is not part of this lab." },
+        "G1": { "level": 3, "evidence": "Settled at 3 (rater 8, skeptic 3; the dispute holds). Rung 3 met: the three expression lanes, their marks and labels draw on one axis. At the default 1440 px view no labels overlap and canvas text is 11 px (view-draw.js claim(), axis()). Rung 4 fails on 'tick labels recomputed at every zoom level': chronology.js fmtTick picks its unit from the lookback, not from the visible span, so at several zooms every tick reads the same. My 1440 px shoots: #v=2063,2068 reads '2063 2064 2064 2065 2065 2066 2066 2067 2067', because tickStep gives 0.5-year ticks and fmtTick labels them with Math.floor. #v=-300500,-299500 reads '302 ka' on all 9 ticks. #v=-4.5425e9,-4.5375e9 reads '4.5 Ga' on all 9 ticks. The axis cannot be read at these views. Several things run but sit above the failed rung and do not count: wheel, drag and pinch zoom anchored on the pointer (zoomAt, pinch), the 5.2e9 to 0.012-year span range, counted clusters, the van Wijk-Nuij flight (setView, rho = sqrt 2, capped at 1500 ms) and the log overview strip." }
       }
     },
     {
@@ -89,7 +92,8 @@
         "Every state (rest, hover, select, compare, tour, answer highlight, spoiler-hidden) has a 1440 px and a 400 px screenshot on a style sheet in the repo, and each passes every check above with 0 exceptions; reference standard Histography (Matan Stauber, 2015) for a timeline carried by its marks: with all text hidden, the rest-frame screenshot still shows the 3 expression lanes, the 3 divergence markers and the tag badges as marks that can be told apart."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no timeline stylesheet under labs/assets/css/ and nothing rendered to screenshot." }
+        "G0": { "level": 0, "evidence": "no page exists: no timeline stylesheet under labs/assets/css/ and nothing rendered to screenshot." },
+        "G1": { "level": 2, "evidence": "Undisputed; rater's grade kept. Rung 2 met: tokens.css and IBM Plex Mono load, and a grep of timeline.css, the lab JS and timeline.html finds 0 hex or rgb literals (colours come from tokens via al()). Rung 3 fails the pixel test. The 1440 px shots carry about 1,355-1,376 pixels with OKLCH chroma > 0.07 at hue 246-272 deg: LCD colour fringes on the .tl-legend text (y 762-791). A selected mark adds about 17 more at hue 105 deg from the 'lighter' gold glow. Rung 4 would also fail: view-draw.js cursors() always draws the gold cursor, so a rest frame with nothing selected has 811 pixels with chroma > 0.07 inside the timeline." }
       }
     },
     {
@@ -111,7 +115,8 @@
         "Reference standard: the continuous zoom of ChronoZoom with the story stepping of TimelineJS (Northwestern University Knight Lab) in one interface, every action reachable by mouse, touch and keyboard, each one verified at 400 px and at 1440 px."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no control, event or URL state exists for the timeline on the site." }
+        "G0": { "level": 0, "evidence": "no page exists: no control, event or URL state exists for the timeline on the site." },
+        "G1": { "level": 8, "evidence": "Undisputed; rater's grade kept. Driven through CDP at 1440 px. A table row opens #tl-card with the title, three dates, dimension and CODEX source. Dimension, narrative-tag and evidence chips filter at once (hiding Kha-Ren gives '61 of 107'). Searching 'corridor' returns 3 rows and selects e=kr-corridor. The jump buttons and the card's 'next in Terra' work. A fresh load with t, v, e, f, n, p, c and tr in the hash restores the cursor, the card, the filters, the pin, the followed person and a 3-step trail. Following Samantha steps born, meets, partners and back. Arrows pan, + zooms, ] steps, / focuses search and ? opens help. Rung 9 fails: jumps, filters, choosing a person, add-to-trail and share have no key and are missing from the help overlay, and [ and ] step through all lanes rather than the current one. Minor: view-draw.js characters() ignores the dimension filter, so Nasha's lifeline label stays when Kha-Ren is hidden." }
       }
     },
     {
@@ -133,7 +138,8 @@
         "Every CODEX MASTER_TIMELINE row at or below the spoiler ceiling is reproduced by the cursor panel with 0 mismatches outside the canon-discrepancy list (chronology-engine rung 8); each listed row is flagged in the panel with the reading it follows, and both alignments and the indicator strip work at 400 px."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no lanes, cursor or comparison panel exist on the site." }
+        "G0": { "level": 0, "evidence": "no page exists: no lanes, cursor or comparison panel exist on the site." },
+        "G1": { "level": 3, "evidence": "Settled at 3 (rater 8, two skeptics 3; both disputes hold). Rung 3 met: at all 5 fixed dates the panel gives each lane its native date and latest event. For example, engine.js compare(2068) gives Cycle 90, Year 68, 2068 CE and 5605 A.T. with kr-present, ea-present and te-present, and compare(-3537) gives C16.Y13, 3537 BCE and 0 A.T. with te-disc. Rung 4 fails at 2068: view-panels.js shows Earth's stage as the era 'the opening' ('The years just before Book 1 opens.', src eaHistory, events.json eras 2065-2068). CODEX/WORLDS/EARTH/HISTORY.md has no such era; it runs Climate Decade, Stagnation, Quiet Desperation, then '2068: Story Present'. 'The Opening' is the title of Book 1 and of Trilogy I. CODEX/CHRONOLOGY/DIVERGENCE_POINTS.md gives Earth's stage as 'Information Age', and the page's own 'information age' era ends in 2025. At -8000, Kha-Ren's stage reads 'containment', which is its response; DIVERGENCE_POINTS gives Neolithic. The stage is therefore not correct at 5 of 5 dates. Several features run but do not count above the failed rung: snapping, typed dates in all three calendars, the two-moment pin, align by discovery, and the copy-as-text and URL export." }
       }
     },
     {
@@ -155,7 +161,8 @@
         "Coverage proven: a test shows 100% of dated rows in CODEX/CHRONOLOGY appear as events or sit in a documented exclusion list with a reason (spoiler, scaffold, duplicate), 0 contradictions are open without an author ruling (a rulings entry from a commit with no Co-Authored-By: Claude trailer), and 100% of shown events are author-reviewed."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no event data file exists under labs/, so nothing is sourced or tagged." }
+        "G0": { "level": 0, "evidence": "no page exists: no event data file exists under labs/, so nothing is sourced or tagged." },
+        "G1": { "level": 2, "evidence": "Undisputed; rater's grade kept. Rung 2 met: data/events.json holds 100 events with stable ids, plus 7 births computed from the age table. Rung 3 fails 'every event names its source as a CODEX file path and section'. Seven events (ea-formed, ea-holocene, ea-joule, ea-sondhauss, ea-helm63, ea-kundt, ea-swift) carry src 'real' and sec 'published science', with no CODEX path. A sample of 10 codex-sourced events matched their file and section: kr-disc, te-disc, ea-access, kr-engage, te-move, ea-grey, te-alex-research, ea-emily-meets, kr-c1, kr-reform. Not counted above: 90 events, not 100, come from CHRONOLOGY and WORLDS; Haven has no event. The supersession check (checks/gate.mjs with terms.json) is run by neither tools/lab_tests.mjs nor gates.yml." }
       }
     },
     {
@@ -177,7 +184,8 @@
         "One gate for every channel: a single function gates render, search, URL, export, comparison and model context, with one test per channel (6 tests) run in the gates workflow, and that function is the only importer of the raw event file (grep)."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no event data ships and no ceiling file or gate exists, so nothing is gated." }
+        "G0": { "level": 0, "evidence": "no page exists: no event data ships and no ceiling file or gate exists, so nothing is gated." },
+        "G1": { "level": 1, "evidence": "Undisputed; rater's grade kept. Rung 2 fails: data/ceiling.json reads 'awaiting Luis's own wording and signature', and its only commit, 934f872, is co-authored by Claude. Luis has not set the ceiling. Several parts work but do not count above that: engine.js readable() hides an event with no tier, and #r=0 restores the reading position. Leaks at r=0: the reading-position select still names every character by chapter ('ch. 7: adds Nasha'), and the discrepancy list names Sera and Alexander. checks/gate.mjs is not in .github/workflows/gates.yml and fails today on 8 hits in other site files. Open for Luis: the legend's 'Vortex: inhabited / Haven: empty' and the 4 Ga event 'Something begins to live in the Vortex'. MASTER_TIMELINE places that distinction at Book 1 Ch20, above the ch.7 ceiling." }
       }
     },
     {
@@ -199,7 +207,8 @@
         "At least 97% on the 40-question set with citation precision and recall reported (as defined in ALCE, Gao et al., EMNLP 2023), 0 uncited claims and 0 spoiler leaks (as spoiler-boundary rung 8 defines a leak) on every llm.js route including the offline engine, and the eval harness runs from the repo with one command."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no question input, retrieval or llm.js call exists for the timeline." }
+        "G0": { "level": 0, "evidence": "no page exists: no question input, retrieval or llm.js call exists for the timeline." },
+        "G1": { "level": 2, "evidence": "Settled at 2 (rater 4, skeptics 3 and 2; both disputes hold, and the lower is taken). Rung 2 met: qa.js deterministicAnswer parses names, worlds and dates and returns event ids with no model and no network. Rung 3 fails on 'the retrieved events as the only context'. ask.js does make one LLM.complete call through labs/assets/js/ai/llm.js, and the route pill names the route. But qa.js packContext adds to every call the calendar formulas, all 3 WORLDS summaries (stage and response) and all 4 LAYERS texts, whatever retrieval found: 'Who is Samantha?' sends 6 events plus 3 worlds and 4 layers. validateModelReply accepts a reply with an empty events array, so a model answer phrased from that fixed text cites nothing. Rung 4 also fails: qa.js age() always returns events: [] ('How old is 42 Earth years in Terran years?'), and conversion() returns none when no event lies near the date ('What is 1500 A.T. in the other calendars?'). Not counted: no unanswerable-question set from the rater or Luis exists (tests/questions.json is the builder's), and only 1 of 12 fresh unanswerable questions was refused." }
       }
     },
     {
@@ -221,7 +230,8 @@
         "0 untagged claims: a script confirms every sentence of event text, notes, tour copy and answers carries an evidence or narrative tag; every [ESTABLISHED] and [THEORETICAL] citation stores a quoted passage or a section, figure or equation number from the paper that supports the note, and 5 of 5 sampled check out; every [SF TERRITORY] step names the real framework it extends, and a physics-only view hides the fiction and leaves the cited science standing. Reference standard: Kip Thorne, The Science of Interstellar (W. W. Norton, 2014), which labels every claim as truth, educated guess or speculation."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no intro, physics note, evidence tag, citation or tour exists for the timeline." }
+        "G0": { "level": 0, "evidence": "no page exists: no intro, physics note, evidence tag, citation or tour exists for the timeline." },
+        "G1": { "level": 3, "evidence": "Kept at 3 (rater 3, skeptic 1; the dispute does not hold). The skeptic is right that the .tl-sub paragraph names only 'one substrate beneath them'. But the rung asks for an intro with a diagram, and the diagram does more than name the layers. Under 'WHAT THEY HANG ON' it draws Vortex (Structural A), Haven (Structural B) and Core (the sixth dimension) beneath the three expression strands. The legend gives each a property: 'Vortex: inhabited, chaotic', 'Haven: empty, still', 'Core: the foundation', 'an artifact, hung from the Core'. Each lane label is a button on the diagram that opens the config.js LAYERS explanation. That covers the six dimensions that data/ceiling.json admits, and the hero says the timing of each artifact find makes the worlds different. The footer's 'a legend, not data' is about the line textures, not about the explanation. Rung 3 met: 28 events have physics: true, and 19 of them link a note whose claim plus detail runs to at least 80 words (for example p-kundt 95, p-sondhauss 93, p-webb 90, p-higgs 85). Rung 4 fails: 10 of 24 notes have tagFrom null but still show a builder-chosen rung badge. p-higgs, p-42, p-82, p-age, p-hublin and p-holocene show ESTABLISHED; p-vortex, p-unified and p-axiom show SF TERRITORY; p-110 shows SPECULATIVE. view-panels.js physicsItem only adds small print, where the rung requires the badge itself to read 'untagged'." }
       }
     },
     {
@@ -243,7 +253,8 @@
         "WCAG 2.2 AA (W3C, 2023): 0 axe-core violations in every view and state, a manual screen-reader pass recorded in the repo, and the rung 8 and rung 9 numbers held at 400 px under Lighthouse mobile throttling and DevTools 6x CPU slowdown."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: nothing loads, so there is nothing to time, trace or audit." }
+        "G0": { "level": 0, "evidence": "no page exists: nothing loads, so there is nothing to time, trace or audit." },
+        "G1": { "level": 2, "evidence": "Undisputed; rater's grade kept. Rung 2 met: the labs-wt shoot, rerun for this grading, reports 0 console errors, and CDP runs logged none while zooming. The lab's HTML, CSS, JS, events.json, eval.json and llm modules come to 93.4 KB gzipped. Rung 3 fails at 400 px. The body does not scroll sideways, but 10 tap targets are under 44 px: the lane-label buttons (timeline.css .tl-lane min-height 30px under the touch query), the route pill (213x27) and short-title table buttons (33-40 px wide). Not counted: reduced motion stops the tour; #tl-canvas shows no focus ring; and a probe read about 6 fps while wheel-zooming, which runs on headless swiftshader and is not treated as decisive. The shoot tool's phone.png came out black on this run, so the 400 px findings rest on the CDP runs." }
       }
     },
     {
@@ -265,11 +276,13 @@
         "The engine is a documented standalone module with a published schema, used by at least 2 pages on the site, its tests, schema check and spoiler gate run in the site's gates, and adding an event type, calendar or lane needs 0 core edits."
       ],
       "levels": {
-        "G0": { "level": 0, "evidence": "no page exists: no timeline module, schema, config or test exists in the repo." }
+        "G0": { "level": 0, "evidence": "no page exists: no timeline module, schema, config or test exists in the repo." },
+        "G1": { "level": 2, "evidence": "Settled at 2 (rater 4, skeptic 2; the dispute holds). Rung 2 met: config.js DATA_URL fetches data/events.json at runtime. Rung 3 is half met. Chronology (chronology.js, 209 lines), rendering (view-draw.js, 596) and questions (qa.js 269, ask.js 54) each have a module under 600 lines, but layout has no module apart from UI. view-canvas.js, whose header calls it 'geometry, flights, gestures and the frame loop', holds the layout: resize() lane y positions, x()/tAt(), laneY(), clampView() and fitFor(). It also holds UI: _labels() builds the lane-label buttons and their click handlers and the tooltip DOM, and _bind()/_key() handle pointer, wheel, pinch and keys. The divergence geometry (divergence()) sits in engine.js beside the gate and the comparison. Not counted above: data/events.schema.json with checks/check-data.mjs passes at 0 errors. Adding a lane or a calendar still needs core edits: chronology.js nativeDate branches, engine.js KR/TE/EA constants and whyText, and the fixed lane y values in view-canvas.js resize()." }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "beca4c6" }
   ]
 }
