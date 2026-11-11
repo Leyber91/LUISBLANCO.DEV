@@ -80,6 +80,10 @@ function axioms(w) {
   if (ctx.ter && ctx.ter.sea < -20) list.push({ re: /\b(sea[- ]level (rise|rises|rising)|rising seas?|seas? rise|flooded coasts?)\b/i, why: `sea level here stands ${Math.round(-ctx.ter.sea)} m lower than ours` });
   if (ctx.ter && ctx.ter.sea > 20) list.push({ re: /\b(sea[- ]level (falls?|drops?|lower)|falling seas?|exposed shelves)\b/i, why: `sea level here stands ${Math.round(ctx.ter.sea)} m higher than ours` });
   if (k.iceDensity > 1) list.push({ re: /\b((no|lack of|without) ((seasonal|sea|winter) )+ice|(no|lack of|without) ice cover(age)?|ice[- ]free (polar )?seas?|year[- ]round (open|liquid) (polar )?(water|seas?))\b/i, why: 'seas that freeze here keep their ice and fill solid' });
+  // what the divergence left alone may not be claimed to change
+  if (k.dayHours === 24 && k.moon !== 0) list.push({ re: /\b((faster|slower|more rapid|rapid|quicker) (rotation|spin)|longer days|shorter days|days? (grows?|becomes?) (longer|shorter)|day length (changes|increases|decreases|grows|shrinks))\b/i, why: 'the day here is 24 hours, as in ours' });
+  if (k.moon === 1 && k.moonDist === 1) list.push({ re: /\b((more extreme|extreme|larger|stronger|higher|weaker|smaller|lower) tid(es|al ranges?)|tid(es|al ranges?) (grow|rise|increase|weaken|shrink))\b/i, why: 'tides here are as in ours' });
+  if (k.tiltDeg === 23.44 && k.moon !== 0) list.push({ re: /\b((more|less) extreme seasons|(axial )?tilt (changes|increases|decreases|shifts))\b/i, why: 'the axial tilt here is 23.4 degrees, as in ours' });
   if (!k.impact) list.push({ re: /\bmammals? (dominate|rule|took over|inherit)/i, why: 'the impact never happened, dinosaurs keep the land' });
   if (k.o2Frac < 0.15) list.push({ re: /\b(fires?|burn(s|ing|ed)?|smelt(s|ing|ed)?|forges?|kilns?|furnaces?|cook(s|ing|ed)?)\b/i, why: 'fire cannot burn below 15% oxygen', stages: ['history', 'technology', 'culture'] });
   if (k.gFactor > 1.1) list.push({ re: /\b(skyscrapers?|towering forests?|giant trees)\b/i, why: 'gravity caps how tall things stand' });

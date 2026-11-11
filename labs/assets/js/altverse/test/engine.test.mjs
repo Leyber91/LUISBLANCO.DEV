@@ -126,6 +126,8 @@ console.log('5. planted faults: each validator rule fires');
   t('R6 physics: a stated gravity that is wrong', () => assert.ok(checkPhysics('Surface gravity here is 9.81 m/s2.', heavy)));
   t('R6 physics: a stated gravity that is right passes', () => assert.equal(checkPhysics('Surface gravity here is 12.7 m/s2.', heavy), null));
   t('R7 axioms: floating ice in a world where ice sinks', () => assert.ok(checkAxioms('Skaters cross the lakes on floating ice.', w, 'culture')));
+  t('R7 axioms: a change the divergence did not make (faster rotation in a heavier world)', () => assert.ok(checkAxioms('Stronger gravity leads to a more rapid rotation and longer days.', worlds.get(PRESETS[2].text), 'physics')));
+  t('R7 axioms: tides claimed to change where the Moon is ours', () => assert.ok(checkAxioms('Coasts see more extreme tidal ranges.', worlds.get(PRESETS[2].text), 'geography')));
   t('R7 axioms: a negated mention passes', () => assert.equal(checkAxioms('No ice ever floats here.', w, 'culture'), null));
   t('R7 axioms: moonlight in a world with no Moon', () => assert.ok(checkAxioms('They dance by moonlight.', worlds.get(PRESETS[3].text), 'culture')));
   t('R7 axioms: warming in a world the climate stage computes colder', () => assert.ok(checkAxioms('The ice-albedo loop amplifies the temperature increase.', w, 'physics')));

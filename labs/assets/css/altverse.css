@@ -315,7 +315,7 @@ body.weaving .bp { border-color: var(--accretion); }
 .cmp-tab { width: 100%; border-collapse: collapse; font-size: var(--fs-2); margin-top: 12px; }
 .cmp-tab th { text-align: left; font-weight: 500; color: var(--text-dim); font-size: var(--fs-1); letter-spacing: .14em; text-transform: uppercase; padding: 4px 6px; border-bottom: 1px solid var(--line); }
 .cmp-tab td { padding: 5px 6px; border-bottom: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
-.cmp-tab td.d { color: var(--accretion-soft); }
+.cmp-tab td.d { color: var(--text-bright); }
 .cmp-ev { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; font-size: var(--fs-2); }
 .cmp-ev h5 { margin: 0 0 4px; font-size: var(--fs-1); letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); font-weight: 500; }
 .cmp-ev ul { list-style: none; margin: 0; padding: 0; }
