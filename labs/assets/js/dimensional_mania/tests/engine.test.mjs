@@ -1,0 +1,202 @@
+/* ============================================================
+   tests/engine.test.mjs — the Dimensions engine, checked without a browser.
+
+     node labs/assets/js/dimensional_mania/tests/engine.test.mjs
+
+   Covers: every catalogue f-vector against Coxeter (1973, Table I) and the
+   Euler-Poincare relation; metric values (circumradius/edge, dihedral angle)
+   against their closed forms; Hopf fibrations of the 4D polytopes; rotation
+   matrices (R·R^T = I, det R = +1, Givens round trip, canonical planes);
+   projection of known points; slices against the cube's closed form and the
+   named corner-first sequence; the Hopf linking number; the URL state.
+   Exit code 1 on any failure.
+   ============================================================ */
+
+import * as P from '../polytopes.js';
+import * as L from '../linalg.js';
+import * as S from '../slice.js';
+import * as J from '../project.js';
+import { encodeState, decodeState, encodePose, decodePose } from '../share.js';
+import { validateShow } from '../narrator.js';
+import { nextTier } from '../constants.js';
+
+let pass = 0, fail = 0;
+const check = (name, ok, detail = '') => {
+  if (ok) pass++; else { fail++; console.log(`FAIL ${name} ${detail}`); }
+};
+let seed = 12345;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const randomRotation = (n, turns = 3 * n) => {
+  const R = L.eye(n);
+  for (let k = 0; k < turns; k++) {
+    const i = Math.floor(rnd() * n); let j = Math.floor(rnd() * n); if (j === i) j = (i + 1) % n;
+    L.leftGivens(R, n, Math.min(i, j), Math.max(i, j), (rnd() - 0.5) * 6.2);
+  }
+  return R;
+};
+
+/* ---- the catalogue ---- */
+let objects = 0;
+for (let n = 1; n <= 10; n++) {
+  for (const c of P.catalogue(n)) {
+    const o = P.build(c.id, n);
+    if (o.curved) continue;
+    objects++;
+    for (const f of o.fvec) check(`f-vector ${c.id} ${n}D rank ${f.k}`, f.count === f.ref, `${f.count} vs ${f.ref}`);
+    check(`Euler-Poincare ${c.id} ${n}D`, o.euler.ok, `${o.euler.chi} vs ${o.euler.expected}`);
+    if (o.ref && o.metrics) {
+      check(`circumradius/edge ${c.id} ${n}D`, Math.abs(o.metrics.re - o.ref.re) < 1e-9, `${o.metrics.re} vs ${o.ref.re}`);
+      if (o.ref.dihedral != null) check(`dihedral ${c.id} ${n}D`, Math.abs(o.metrics.dihedral - o.ref.dihedral) < 1e-7, `${o.metrics.dihedral} vs ${o.ref.dihedral}`);
+    }
+  }
+}
+check('catalogue size: 3 families x 9 dims + segment + 2 polygons + 2 solids + 3 cells', objects === 27 + 1 + 2 + 2 + 3, String(objects));
+const counts = { 3: 5, 4: 6, 5: 3, 10: 3 };
+for (const n in counts) check(`regular polytopes in ${n}D`, P.catalogue(+n).filter((c) => !c.curved).length === counts[n]);
+const t = P.build('torus', 4);
+check('Clifford torus grid: V - E + F = 0', t.euler.chi === 0);
+
+/* ---- Hopf fibrations of the 4D polytopes ---- */
+for (const [id, k, m] of [['c24', 4, 6], ['c600', 12, 10], ['c120', 60, 10], ['cube', 4, 4], ['cross', 2, 4]]) {
+  const f = P.fibration(P.build(id, 4));
+  check(`fibration ${id}: ${k} circles of ${m}`, f.count === k && f.perCircle === m, `${f.count} x ${f.perCircle}`);
+  // the flow exp(tG) carries every vertex along its own circle
+  const o = P.build(id, 4);
+  const E = L.expSkew(f.G, 4, 0.37);
+  let worst = 0;
+  for (let v = 0; v < o.nv; v++) {
+    const x = L.apply(E, 4, o.V.subarray(v * 4, v * 4 + 4));
+    const c = f.circles[f.group[v]];
+    const px = x[0] * c.x[0] + x[1] * c.x[1] + x[2] * c.x[2] + x[3] * c.x[3];
+    const py = x[0] * c.y[0] + x[1] * c.y[1] + x[2] * c.y[2] + x[3] * c.y[3];
+    worst = Math.max(worst, Math.abs(px * px + py * py - 1));
+  }
+  check(`flow stays on its fibre ${id}`, worst < 1e-9, worst.toExponential(2));
+}
+
+/* ---- rotations ---- */
+for (let n = 2; n <= 10; n++) {
+  let orth = 0, det = 0, trip = 0;
+  for (let k = 0; k < 120; k++) {
+    const R = randomRotation(n);
+    const c = L.rotationChecks(R, n);
+    orth = Math.max(orth, c.err); det = Math.max(det, Math.abs(c.det - 1));
+    const R2 = L.givensCompose(L.givensDecompose(R, n), n);
+    for (let i = 0; i < n * n; i++) trip = Math.max(trip, Math.abs(R[i] - R2[i]));
+  }
+  check(`R·R^T = I in ${n}D`, orth < 1e-12, orth.toExponential(2));
+  check(`det R = +1 in ${n}D`, det < 1e-12, det.toExponential(2));
+  check(`Givens round trip in ${n}D`, trip < 1e-12, trip.toExponential(2));
+  const enc = decodePose(encodePose(randomRotation(n), n), n);
+  check(`URL pose decodes to a rotation in ${n}D`, L.rotationChecks(enc, n).err < 1e-12);
+}
+{
+  const R = L.eye(6);
+  L.leftGivens(R, 6, 0, 1, 0.4); L.leftGivens(R, 6, 2, 5, 1.1); L.leftGivens(R, 6, 3, 4, 2.0);
+  const cp = L.canonicalPlanes(R, 6).map((p) => [Math.round(p.angle * 1e6) / 1e6, p.i, p.j]);
+  check('canonical planes of a 6D rotation', JSON.stringify(cp) === JSON.stringify([[2, 3, 4], [1.1, 2, 5], [0.4, 0, 1]]), JSON.stringify(cp));
+  const sp = L.generatorSpeeds([{ i: 0, j: 1, omega: 0.3 }, { i: 0, j: 3, omega: 0.5 }, { i: 1, j: 3, omega: 0.2 }, { i: 2, j: 3, omega: 0.4 }], 4);
+  const A = L.generatorOf([{ i: 0, j: 1, omega: 0.3 }, { i: 0, j: 3, omega: 0.5 }, { i: 1, j: 3, omega: 0.2 }, { i: 2, j: 3, omega: 0.4 }], 4);
+  const E = L.expSkew(A, 4, 1);
+  const ang = L.poseAngles(E, 4);
+  check('generator speeds = angles of exp(A)', Math.abs(ang[0] - sp[0]) < 1e-9 && Math.abs(ang[1] - sp[1]) < 1e-9, `${ang} vs ${sp}`);
+}
+
+/* ---- projections of known points ---- */
+{
+  const out = new Float32Array(3), st = new Float64Array(4);
+  J.projectAll(Float64Array.from([1, 0, 0, 0.5]), 4, 1, 'persp', 2, out, st);
+  check('perspective: (1,0,0,0.5), D = 2 -> x = 4/3', Math.abs(out[0] - 4 / 3) < 1e-6 && Math.abs(st[3] - 1 / 3) < 1e-9);
+  J.projectAll(Float64Array.from([0.6, 0, 0.8, 0]), 4, 1, 'stereo', 0, out);
+  check('stereographic: a point on the equator stays put', Math.abs(out[0] - 0.6) < 1e-6 && Math.abs(out[2] - 0.8) < 1e-6);
+  J.projectAll(Float64Array.from([0, 0, 0.6, 0.8]), 4, 1, 'stereo', 0, out);
+  check('stereographic: (0,0,0.6,0.8) -> z = 3', Math.abs(out[2] - 3) < 1e-5);
+  J.projectAll(Float64Array.from([0.3, -0.2, 0.1, 0.9, 0.4]), 5, 1, 'ortho', 0, out);
+  check('orthographic drops the hidden axes', Math.abs(out[0] - 0.3) < 1e-6 && Math.abs(out[1] + 0.2) < 1e-6 && Math.abs(out[2] - 0.1) < 1e-6);
+}
+
+/* ---- slices ---- */
+{
+  const cube4 = P.build('cube', 4);
+  const id = S.slice(cube4, S.turn(cube4, L.eye(4)), 0.2);
+  check('tesseract cell first: a unit cube', id.name.startsWith('hexahedron') && Math.abs(id.measure - 1) < 1e-12);
+  const R = L.alignRotation([1, 1, 1, 1], 3, 4);
+  const X = S.turn(cube4, R);
+  const seq = [-0.85, -0.4, 0].map((h) => S.slice(cube4, X, h).name);
+  check('tesseract corner first: tetrahedron, truncated tetrahedron, octahedron', seq.join('|') === 'tetrahedron|truncated tetrahedron|octahedron', seq.join('|'));
+  check('corner-first central cut has volume 4/3', Math.abs(S.slice(cube4, X, 0).measure - 4 / 3) < 1e-12);
+  for (const n of [2, 3, 4]) {
+    const o = P.build('cube', n);
+    let worst = 0;
+    for (let k = 0; k < 25; k++) {
+      const Rn = randomRotation(n);
+      const p = S.profile(o, S.turn(o, Rn), Rn, 61);
+      worst = Math.max(worst, p.maxDev);
+    }
+    check(`${n}-cube cuts match the closed form`, worst < 1e-9, worst.toExponential(2));
+  }
+  const c24 = P.build('c24', 4);
+  check('24-cell equatorial cut is a cuboctahedron', S.slice(c24, S.turn(c24, L.eye(4)), 0).name === 'cuboctahedron');
+}
+
+/* ---- the Hopf linking number ---- */
+{
+  const o = P.build('hopf', 4);
+  const A = o.fibres.find((f) => f.ring === 2), B = o.fibres.find((f) => f.ring === 1);
+  const pos = new Float32Array(o.nv * 3);
+  J.projectAll(o.V, 4, o.nv, 'stereo', 0, pos);
+  const lk = P.linkingNumber(pos.slice(A.start * 3, (A.start + A.count) * 3), pos.slice(B.start * 3, (B.start + B.count) * 3));
+  check('two Hopf fibres link once', Math.abs(Math.abs(lk) - 1) < 0.01, lk.toFixed(4));
+  check('a ring of at least 24 fibres', o.fibres.filter((f) => f.ring === 2).length >= 24);
+}
+
+/* ---- state ---- */
+{
+  const st = { n: 6, obj: 'cube', view: 'both', proj: 'ortho', preset: 'iso', plane: [0, 3], h: 0.123, sweep: true, trails: false, D: 2.4, speed: 1.25 };
+  const back = decodeState('?' + encodeState(st, randomRotation(6)));
+  const same = ['n', 'obj', 'view', 'proj', 'preset', 'h', 'sweep', 'trails', 'D', 'speed'].every((k) => back[k] === st[k]) && back.plane.join() === st.plane.join();
+  check('URL state round trip', same, JSON.stringify(back));
+  check('model show is validated', JSON.stringify(validateShow({ n: 4, obj: 'c120', proj: 'stereo', view: 'bogus', sweep: 'yes' }, { n: 3 })) === '{"n":4,"obj":"c120","proj":"stereo"}');
+}
+
+/* ---- isoclinic presets turn every disjoint plane ---- */
+{
+  const { PRESETS } = await import('../constants.js');
+  for (let n = 4; n <= 10; n++) {
+    const sp = PRESETS.iso.build(n, [0, 3]);
+    const axes = new Set(sp.flatMap((p) => [p.i, p.j]));
+    const speeds = L.generatorSpeeds(sp, n);
+    check(`isoclinic in ${n}D: ${Math.floor(n / 2)} disjoint planes at one speed`, sp.length === Math.floor(n / 2) && axes.size === 2 * sp.length && speeds.every((x) => Math.abs(x - speeds[0]) < 1e-12));
+  }
+  const R = L.eye(4); L.leftGivens(R, 4, 0, 3, Math.PI / 6); L.leftGivens(R, 4, 1, 2, (5 * Math.PI) / 18);
+  const cp = L.canonicalPlanes(R, 4).map((p) => `${((p.angle * 180) / Math.PI).toFixed(1)}:${p.i}${p.j}`).sort();
+  check('X–W 30 and Y–Z 50 read back as exactly those planes', cp.join() === '30.0:03,50.0:12', cp.join());
+}
+
+/* ---- the cube's cut profiles, n = 2..10, against two closed forms ---- */
+{
+  const ih = (x, n) => { let s = 0; for (let k = 0; k <= n; k++) { const z = x - k; if (z > 0) s += (k % 2 ? -1 : 1) * binom(n, k) * z ** (n - 1); } let f = 1; for (let i = 2; i < n; i++) f *= i; return s / f; };
+  function binom(a, b) { let c = 1; for (let i = 0; i < b; i++) c = (c * (a - i)) / (i + 1); return c; }
+  let worstA = 0, worstV = 0;
+  for (let n = 2; n <= 10; n++) {
+    const L2 = 2; // the cube [-1, 1]^n
+    for (const h of [-0.7, -0.2, 0, 0.35, 0.9]) {
+      const u = Array.from({ length: n }, (_, k) => (k === n - 1 ? 1 : 0));
+      worstA = Math.max(worstA, Math.abs(S.cubeSection(u, L2, h) - 2 ** (n - 1)));
+      const v = Array(n).fill(1 / Math.sqrt(n));
+      const ref = 2 ** (n - 1) * Math.sqrt(n) * ih((n + h * Math.sqrt(n)) / 2, n);
+      worstV = Math.max(worstV, Math.abs(S.cubeSection(v, L2, h) - ref));
+    }
+  }
+  check('axis-aligned cut of [-1,1]^n is 2^(n-1), n = 2..10', worstA < 1e-6, worstA.toExponential(2));
+  check('vertex-first cut matches 2^(n-1)·sqrt(n)·IrwinHall, n = 2..10', worstV < 1e-6, worstV.toExponential(2));
+}
+
+/* ---- the tier ladder ---- */
+check('tier: slow frames step full -> lean', nextTier('auto', 'full', 20, 5000, 0) === 'lean');
+check('tier: then lean -> lite -> min, and min stays', nextTier('auto', 'lean', 20, 8000, 5000) === 'lite' && nextTier('auto', 'lite', 20, 11000, 8000) === 'min' && nextTier('auto', 'min', 20, 14000, 11000) === null);
+check('tier: no step in the first 2 s or within 2 s of the last', nextTier('auto', 'full', 20, 1500, 0) === null && nextTier('auto', 'lean', 20, 6000, 5000) === null);
+check('tier: fast frames or a chosen tier never step', nextTier('auto', 'full', 58, 5000, 0) === null && nextTier('full', 'full', 10, 5000, 0) === null);
+
+console.log(`engine tests: ${pass} passed, ${fail} failed`);
+process.exit(fail ? 1 : 0);

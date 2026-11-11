@@ -1,13 +1,9 @@
 /* ============================================================
-   dimensional_mania/dom.js — tiny shared helpers: element
-   construction, number/angle formatting, and the reduced-motion
-   resolution (the ?still / ?motion / OS-preference rule, decided
-   once). Mirrors hub/dom.js.
+   dimensional_mania/dom.js — small shared helpers: element
+   construction, number formatting, and the motion policy
+   (?still / ?motion / the OS preference), decided once.
    ============================================================ */
 
-import { PARAMS } from './constants.js';
-
-/** build an element with optional class + innerHTML (matches the hub idiom) */
 export const el = (tag, cls, html) => {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
@@ -15,26 +11,28 @@ export const el = (tag, cls, html) => {
   return node;
 };
 
-/** thousands-separated integer */
-export const fmt = (v) => v.toLocaleString('en-US');
+export const fmt = (v) => (typeof v === 'number' && isFinite(v) ? v.toLocaleString('en-US') : String(v));
 
-/** radians -> integer degrees in [0,360) */
-export const deg = (rad) =>
-  Math.round(((rad % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2) * 180 / Math.PI);
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+export const sup = (n) => String(n).split('').map((c) => SUP[c] || c).join('');
+
+/** signed number with a real minus sign */
+export const sgn = (v, d = 2) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d);
+
+export const degOf = (rad) => Math.round((rad * 180) / Math.PI);
+
+export const escapeHTML = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /**
- * Resolve the motion policy from the URL + OS preference, once.
- * ?still  -> frozen (also tags <html> with .still for CSS)
- * ?motion -> force full motion even when the OS asks to reduce it
- * otherwise -> follow prefers-reduced-motion
- * @returns {{ still: boolean, forceMotion: boolean, reduced: boolean }}
+ * ?still  -> frozen composed frame (screenshots), also tags <html>.still
+ * ?motion -> full motion even when the OS asks to reduce it
+ * else    -> follow prefers-reduced-motion
  */
-export const resolveMotion = () => {
-  const params = new URLSearchParams(location.search);
-  const still = params.has(PARAMS.still);
-  const forceMotion = params.has(PARAMS.motion);
-  const reduced = still ||
-    (!forceMotion && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+export function resolveMotion() {
+  const q = new URLSearchParams(location.search);
+  const still = q.has('still');
+  const force = q.has('motion');
+  const reduced = still || (!force && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   if (still) document.documentElement.classList.add('still');
-  return { still, forceMotion, reduced };
-};
+  return { still, reduced };
+}

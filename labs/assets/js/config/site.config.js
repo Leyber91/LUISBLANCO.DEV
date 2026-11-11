@@ -53,7 +53,7 @@ export const CATEGORIES = [
         blurb: 'A Schwarzschild black hole with a doppler-asymmetric accretion disk and real-time gravitational lensing.' },
       { id: 'dimensional', title: 'Dimensional Test', status: 'built',
         href: 'md_animation_page.html',
-        blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
+        blurb: 'Every regular polytope from 1D to 10D as shadow and slice: counts checked against Coxeter, cuts against a closed form, Hopf flows, and a witness that names what bends the shadow.' },
       { id: 'exomania', title: 'Exomania', status: 'built',
         href: 'exomania.html',
         blurb: 'Fly between procedurally lit exoplanets, fed daily by NASA Exoplanet Archive data.' },

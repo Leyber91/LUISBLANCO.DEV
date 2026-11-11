@@ -1,45 +1,180 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dimensions — luisblanco.dev Labs</title>
-  <meta name="description" content="WITNESS — an instrument for higher-dimensional rotation. Turn an axis you cannot see by hand and watch a tesseract project, swell and turn inside-out, while a live ledger names which hidden dimension is bending the shadow. 1D to 10D, real maths, rendered in your browser." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <link rel="stylesheet" href="assets/css/tokens.css" />
-  <link rel="stylesheet" href="assets/css/dimensions.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dimensions · shadow and slice, 1D to 10D</title>
+<meta name="description" content="WITNESS, an instrument for hidden axes. Every regular polytope from 1D to 10D built from coordinates and counted from its geometry, shown as a shadow, cut by a hyperplane, turned by a rotation matrix you can read, and flowed along its own Hopf circles. Slices checked against a closed formula." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/dimensions.css" />
 </head>
 <body>
-  <div id="dx-loading">mapping the lattice…</div>
+<canvas id="gl" role="img" aria-label="The shadow of a tesseract"></canvas>
+<svg id="reticle" aria-hidden="true"></svg>
+<div class="veil" aria-hidden="true"></div>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+<div id="loading" class="loading">assembling the lattice</div>
+<p id="nogl" class="nogl" hidden>This browser gave no WebGL context, so the picture is off. The counts, the matrix, the cut and the witness still run from the same engine.</p>
+<div id="picktag" class="picktag" hidden></div>
+<p id="sr" class="sr" aria-live="polite"></p>
 
-  <canvas id="dx-canvas" aria-label="Interactive N-dimensional hypercube"></canvas>
-  <div class="dx-vignette"></div>
+<header class="bar">
+  <div class="left">
+    <a class="back" href="index.html">&larr; labs</a>
+    <div class="label">DIMENSIONS <span class="on">/ shadow and slice</span></div>
+  </div>
+  <div class="right">
+    <span id="route" class="route"></span>
+    <div class="brand">THE LAB &middot; <b>L212</b></div>
+  </div>
+</header>
 
-  <a href="index.html" class="dx-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
-  <div class="dx-title">Dimensions</div>
-  <div class="dx-caption"></div>
-  <div class="dx-hint">drag to orbit · scroll to zoom · turn the dial to fold a hidden axis</div>
+<main class="stage">
+  <aside class="rail rail-l" aria-label="object and counts">
+    <div class="intro">
+      <div class="kick">witness &middot; an instrument for hidden axes</div>
+      <h1>Turn an axis <span class="lo">you cannot point at.</span></h1>
+      <p class="sub">Every regular polytope from 1D to 10D, built from coordinates and counted from its geometry. Watch its shadow, cut it, read its rotation.</p>
+    </div>
+    <section class="blk" aria-labelledby="h-obj">
+      <h2 id="h-obj">object <button type="button" id="dual" class="dualbtn">dual</button></h2>
+      <div class="dims" id="dims" role="group" aria-label="dimension"></div>
+      <div class="objs" id="objs" role="group" aria-label="object"></div>
+      <div class="objline" id="objline"></div>
+    </section>
+    <section class="blk" aria-labelledby="h-counts">
+      <h2 id="h-counts">counts <span class="tg">[real]</span><span class="rcline" id="rcline"></span></h2>
+      <div id="counts"></div>
+    </section>
+    <section class="blk" aria-labelledby="h-second">
+      <h2 id="h-second">second view <span class="tg">[real]</span></h2>
+      <div class="seg" id="insetModes" role="group" aria-label="second view"></div>
+      <div class="facetrow" id="facetRow"><button type="button" id="facetPrev" aria-label="previous facet">&lsaquo;</button><span id="facetLabel"></span><button type="button" id="facetNext" aria-label="next facet">&rsaquo;</button></div>
+      <button type="button" id="farSide" class="far" hidden>far side</button>
+      <canvas id="inset" aria-label="the second view"></canvas>
+    </section>
+  </aside>
 
-  <div id="dx-ledger" class="empty"></div>
-  <div id="dx-controls"></div>
+  <section class="center" aria-label="the view">
+    <div class="caption" id="caption"></div>
+    <div class="spacer" aria-hidden="true"></div>
+    <div class="lower">
+      <section class="ledgerstrip" aria-labelledby="ledgerHead">
+        <h2 id="ledgerHead">shadow ledger</h2>
+        <div id="ledger" class="ledger"></div>
+        <p id="ledgerline" class="ledgerline"></p>
+      </section>
+      <div class="linkline" id="linkline" hidden></div>
+      <div class="voice">
+        <span class="vk">witness</span>
+        <p id="witness" aria-live="polite"></p>
+      </div>
+      <div class="startrow">
+        <button type="button" class="tour-start" id="tourStart">walk the ladder &middot; 11 steps</button>
+        <div class="suggest" id="suggest" hidden><span class="vk">next</span><span id="sugText"></span><button type="button" id="sugTry">try it</button></div>
+      </div>
+      <div class="tour" id="tour" hidden>
+        <div class="tour-head"><span id="tourStep"></span><b id="tourTitle"></b><button type="button" class="tx" id="tourExit" aria-label="leave the ladder">leave</button></div>
+        <p id="tourText"></p>
+        <div class="tour-nav"><button type="button" id="tourPrev">back</button><span class="tour-track"><i id="tourBar"></i></span><button type="button" id="tourNext" class="go">next</button></div>
+      </div>
+      <div class="tour quiz" id="quiz" hidden>
+        <div class="tour-head"><span>3 questions</span><b>Check yourself against the engine</b><button type="button" class="tx" id="quizClose">done</button></div>
+        <form data-quiz="0"><label>How many cubic cells bound the 5-cube?</label><span class="qi"><input type="text" inputmode="numeric" autocomplete="off" aria-label="answer 1" /><button type="submit">check</button></span><p class="qa"></p></form>
+        <form data-quiz="1"><label>How many planes can a 6D object turn in?</label><span class="qi"><input type="text" inputmode="numeric" autocomplete="off" aria-label="answer 2" /><button type="submit">check</button></span><p class="qa"></p></form>
+        <form data-quiz="2"><label>Corner first, what is the tesseract’s cut through its centre?</label><span class="qi"><input type="text" autocomplete="off" aria-label="answer 3" /><button type="submit">check</button></span><p class="qa"></p></form>
+      </div>
+      <form class="ask" id="ask" autocomplete="off">
+        <label for="q" class="vk">ask</label>
+        <input id="q" type="text" maxlength="240" spellcheck="false" placeholder="why does the inner cube grow? what is the 120-cell?" />
+        <button type="submit">ask</button>
+      </form>
+      <div class="quick" aria-label="questions to try">
+        <button type="button" data-q="What does a 4D cube look like passing through our space?">a 4D cube passing through</button>
+        <button type="button" data-q="Show me the Hopf fibration">Hopf fibres</button>
+        <button type="button" data-q="Why are there only three regular polytopes above 4D?">why only three above 4D</button>
+      </div>
+      <div class="answer" id="answer" hidden aria-live="polite"></div>
+    </div>
+  </section>
 
-  <!-- Three.js r128 (global build) + matching examples (classic scripts).
-       Load order matters: EffectComposer.js defines THREE.Pass, which every
-       *Pass extends — so it must come BEFORE ShaderPass/RenderPass/Bloom. -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <aside class="rail rail-r" aria-label="view, rotation and slice">
+    <section class="blk" aria-labelledby="h-view">
+      <h2 id="h-view">view</h2>
+      <div class="seg" id="views" role="group" aria-label="what to show"></div>
+      <div class="seg" id="projs" role="group" aria-label="projection"></div>
+      <p class="note" id="projNote"></p>
+      <div class="tworow">
+        <label class="row" id="foldRow"><span class="rl">fold <i class="mth">D</i></span><input type="range" id="fold" /><span class="rv" id="foldVal"></span></label>
+        <label class="row"><span class="rl">zoom</span><input type="range" id="zoom" /><span class="rv" id="zoomVal"></span></label>
+      </div>
+      <div class="btns"><button type="button" id="pause">pause</button><button type="button" id="trails">trails</button><button type="button" id="pose">new pose</button><button type="button" id="resetView">camera</button></div>
+      <div class="btns"><button type="button" id="handTurn" title="On: a one-finger or mouse drag on the view turns the chosen plane instead of orbiting the camera. Shift-drag or two fingers always turn it.">drag orbits</button></div>
+    </section>
+    <section class="blk" aria-labelledby="h-rot">
+      <h2 id="h-rot">rotation <span class="tg">[real]</span></h2>
+      <div class="seg seg6" id="presets" role="group" aria-label="motion"></div>
+      <div class="rotgrid">
+        <div class="planes" id="planes" role="group" aria-label="choose a plane for the dial"></div>
+        <div class="dialbox">
+          <div class="dial" id="dial" tabindex="0" role="slider" aria-label="turn the selected plane, 1 degree per arrow key" aria-valuemin="-100000" aria-valuemax="100000" aria-valuenow="0"></div>
+          <div class="dialread" id="dialread"></div>
+        </div>
+        <div class="pad" id="pad" tabindex="0" role="application" aria-label="pad: arrows turn X–W and Y–W"><span class="padx mth">X–W</span><span class="pady mth">Y–W</span></div>
+      </div>
+      <div class="seg mini" id="matShow" role="group" aria-label="show the pose or the generator"></div>
+      <canvas id="matrix" aria-label="the rotation matrix"></canvas>
+      <div class="spectrum" id="spectrum"></div>
+      <label class="row"><span class="rl">speed</span><input type="range" id="speed" /><span class="rv" id="speedVal"></span></label>
+    </section>
+    <section class="blk" id="sliceBlk" aria-labelledby="h-slice">
+      <h2 id="h-slice">slice <span class="tg">[real]</span></h2>
+      <div class="cutrow"><span class="rl">first through a</span><div class="seg mini" id="cuts" role="group" aria-label="cut presets"></div></div>
+      <div class="row row-h"><span class="rl">height</span><input type="range" id="hslide" /><span class="rv" id="hslideVal"></span><button type="button" id="sweep">sweep</button></div>
+      <canvas id="profile" aria-label="measure of the cut against height"></canvas>
+      <div class="sliceinfo" id="sliceinfo"></div>
+    </section>
+  </aside>
+</main>
 
-  <script type="module" src="assets/js/dimensional_mania/main.js"></script>
+<section class="drawer" id="drawer" hidden aria-labelledby="drawerTitle">
+  <div class="drawer-head"><b id="drawerTitle"></b><button type="button" id="drawerCopy" hidden>copy</button><button type="button" id="drawerClose">close</button></div>
+  <div id="drawerBody"></div>
+</section>
+
+<footer class="foot">
+  <div class="evidence">
+    <span class="tagline"><i class="dot real"></i><span><b>[real]</b> counts and metrics from coordinates, checked against Coxeter's Table I · cuts against the cube's closed form · the matrix and its checks · the projections · Hopf circles and linking numbers · 371 tests</span></span>
+    <span class="tagline"><i class="dot ill"></i><span><b>[illustrative]</b> plane speeds, colours, the opening, the camera and the fold distance <i class="mth">D</i> · model replies pass a number check, not a proof</span></span>
+  </div>
+  <div class="tools">
+    <button type="button" id="copyLink">copy link</button>
+    <details class="keep"><summary>save</summary><div class="keep-menu"><button type="button" id="savePlate">plate (svg)</button><button type="button" id="savePNG">png 2×</button><button type="button" id="saveJSON">coordinates (json)</button><button type="button" id="saveOBJ">shadow + cut (obj)</button><label class="openfile">open a saved file<input type="file" id="openFile" accept=".json,.svg,.obj,.png,application/json,image/svg+xml,image/png,text/plain" /></label></div></details>
+    <button type="button" id="mechBtn">mechanism</button>
+    <button type="button" id="explainBtn">explain</button>
+    <button type="button" id="logBtn">log</button>
+    <span class="tiers"><span class="vk">tier</span><span id="tiers" class="seg mini" role="group" aria-label="performance tier"></span></span>
+    <span class="fps" id="fps"></span>
+  </div>
+  <details class="sources"><summary>sources and keys</summary><ol id="sources"></ol>
+    <p class="keys">keys: - and = dimension · , and . object · [ and ] slice height · space pause · v view · p projection · t ladder · arrows on the dial and the pad · shift-drag or two fingers on the view turn the chosen plane · click a vertex to read it</p>
+    <p class="keys">tests: <code>node labs/assets/js/dimensional_mania/tests/engine.test.mjs</code></p>
+  </details>
+</footer>
+
+<!-- Three.js r128 (global build) and its classic examples. EffectComposer.js
+     defines THREE.Pass, which every pass extends, so it loads before them. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script type="module" src="assets/js/dimensional_mania/main.js"></script>
 </body>
 </html>
