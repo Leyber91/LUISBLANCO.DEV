@@ -3,6 +3,16 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-11, Labs: Trending Topics measures what is rising
+
+- Six keyless sources (Hacker News, Show HN, GitHub, Wikipedia in English, German and Spanish) are scored as rates
+  against each item's own baseline, with exact 95% Poisson intervals and the formulas on the page.
+- Scans are stored in the browser and earlier "rising" calls are checked on later scans.
+- The page reports its own backtest: over 42, 23 and 30 days of Wikipedia data, ranking by rise beats a naive
+  day-over-day ranking by about 3 points and loses to plain size on next-day views by 7 to 13 points.
+- Independent grade: level 2 to 3. Weakest: rising-call verification, design language.
+- Checks: 82 assertions in labs/assets/js/trending/tests.mjs, run by the site gate.
+
 ## 2026-11-11, Labs: Honesty Decoder computes its figures
 
 - No percentage is typed in any more. Each system's claim is split into sub-claims, and each sub-claim is checked
