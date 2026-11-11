@@ -1,0 +1,311 @@
+{
+  "id": "the-figure",
+  "title": "The Figure",
+  "page": "figure.html",
+  "thesis": "At level 10 The Figure is the public instrument that shows when LLM ensembles help and when they amplify error: the visitor runs a mixture-of-agents live on a fast route (local Ollama, a visitor's key or a deployed worker: any route not limited to one reply per 45 s) or replays thousands of recorded real runs, watches proposers agree and dissent, and reads help-versus-harm rates with 95% intervals over a sourced bank of trap and control questions.",
+  "axes": [
+    {
+      "id": "moa-orchestration",
+      "name": "MoA orchestration",
+      "frame": "model",
+      "metric": "Orchestration depth: which mixture-of-agents mechanisms actually run (proposer fan-out, aggregation, framing conditions, baselines, layers, heterogeneous models, self-ensemble, debate), counted by running the page and reading the orchestration function in the code.",
+      "ladder": [
+        "No orchestration: the code contains no proposer or aggregator call.",
+        "A diagram or text names proposers and an aggregator and their roles.",
+        "1 or more proposer model calls answer the visitor's question and their text is shown on the page.",
+        "Single-layer mixture-of-agents (Wang et al., 2024, arXiv 2406.04692): 3 or more proposer calls answer the visitor's question, every proposer answer is passed into an aggregator prompt whose output is shown, and authored stand-in text never enters a model prompt (a failed proposer is left out and the prompt states how many answers it holds).",
+        "Framing is a declared experimental condition: on known-answer items the proposers run under either a neutral framing set (no lens told how to reach its answer) or the lure-inducing set, both sets defined in one config object, and the active condition is printed in the run header.",
+        "Two baselines run in the same run and are shown beside the aggregate: one unframed single-model answer on every item, and on every known-answer item a plain majority vote over the proposers' extracted answers.",
+        "Multi-layer mixture-of-agents: layer-2 proposers receive all layer-1 answers as auxiliary input, and the visitor sets the layer count from 1 to 3.",
+        "Heterogeneous proposers: on a fast route (local Ollama, a visitor's key or a deployed worker: any route not limited to one reply per 45 s) 3 or more distinct model ids serve the proposers of one run, each id read from the route's response (not a label written in the page) and printed on its node, and 1 or more stored real runs with 3 distinct model ids replay on the page, so a rater without a fast route can check it.",
+        "Self-ensemble condition: one unframed model sampled 5 or more times at temperature 0.7 or above, with a majority vote over the extracted answers (self-consistency, Wang et al., ICLR 2023), runs on the same item beside the mixture-of-agents and its answer is shown.",
+        "Multi-agent debate condition (Du et al., 2023, arXiv 2305.14325): the proposers read each other's answers and revise for 2 or more rounds, each round's answers shown, on the same item beside the mixture-of-agents.",
+        "Reference: single-layer, multi-layer, self-ensemble and debate topologies all run from one config file on the same item with prompts shown verbatim, and each topology's accuracy on 100 or more trap-bank items, with N and a 95% interval, sits in one table on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "orchestrate() in figure.html runs 3 persona-framed proposer calls (LENSES or TRAPS.*.lenses, seeds 7/19/33) sequentially on gpt-oss-20b, shows each answer in #r_out and passes all three to an aggregator prompt as [1] [2] [3] (rung 2). Not rung 3: a failed proposer's p.echo becomes p.text, and whenever any proposer was live the aggregator is still called with it, so a live model synthesises authored lure text and the page grades the result. One layer only despite 'recursive' in the copy; trap items have only lure-inducing framings; no baselines; one model."
+        }
+      }
+    },
+    {
+      "id": "answer-agreement",
+      "name": "Answer extraction and agreement",
+      "frame": "model",
+      "metric": "How the router turns free-text answers into agreement: the methods implemented (lexical overlap, answer extraction, embeddings, entailment) and the extractor's measured accuracy in percent on hand-labelled answers; checked in the clustering code and by feeding it written edge cases.",
+      "ladder": [
+        "No agreement is measured between proposer answers.",
+        "The page names proposer agreement as a quantity it reports.",
+        "One lexical similarity is computed on the answers shown (token-set Jaccard or similar) and the closest pair is labelled the agreeing cluster, the rest the dissent.",
+        "On known-answer questions each proposer's text is matched against per-item truth and lure patterns, proposers are bucketed by answer, and agreement is the largest bucket's share.",
+        "Extraction takes the committed final answer, not any mention: a text that names the lure only to reject it ('not two but three') lands in the truth bucket and one that names the truth only to reject it ('most say 3 but it is 2') lands in the lure bucket, passing 10 or more edge cases kept in a test file or listed on the page.",
+        "A sentence-embedding similarity runs in the browser (model named on the page) beside the lexical one, and both are computed for every proposer pair, not only the top pair.",
+        "Each run reports its answer distribution: vote margin and answer entropy in bits over the extracted answers, with a 'no answer' bucket counted separately.",
+        "Extractor accuracy is measured: on 100 or more model answers labelled by hand, agreement between extractor and labels is printed on the page as a count (for example 97 of 100).",
+        "Open questions are clustered into meaning-equivalence classes by bidirectional entailment (semantic entropy, Kuhn, Gal and Farquhar, ICLR 2023), and the class count and semantic entropy are shown per run.",
+        "The router acts on its measure: when agreement falls below a threshold printed on the page, it flags the run and calls an extra proposer or a verifier before aggregating, and the trigger is logged in the run record.",
+        "Reference: extraction error at or below 1% on 300 or more labelled answers, and lexical, embedding and semantic-entropy agreement compared on the same runs by AUROC for predicting a wrong aggregate, the comparison shown on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "computeClusters() ranks proposer pairs by token-set Jaccard (toks/jac, words of 3+ letters) and calls the top pair the cluster; computeClustersByAnswer() buckets proposers by trap.truthRe / trap.trapRe with agreement = largest bucket share (rung 3). Not rung 4: matching is any-mention with truth tested first, so 'not two but three' lands right but 'most say 3 but it is 2' lands in the truth bucket; no edge-case tests exist."
+        }
+      }
+    },
+    {
+      "id": "ensemble-effect",
+      "name": "Help-versus-harm statistics",
+      "frame": "model",
+      "metric": "What the instrument concludes about the ensemble: graded outcomes per run and across runs, as proportions with N and 95% intervals, split into help (single wrong, ensemble right) and harm (single right, ensemble wrong), where 'single' is the unframed single-model answer to the same item in the same run (moa-orchestration rung 5) and 'best single proposer' is the proposer slot with the most correct answers over the same items, labelled as chosen after the fact; checked in the page's result views and the statistics code.",
+      "ladder": [
+        "No outcome is graded.",
+        "One run's aggregate is graded right or wrong against a known answer and the verdict is shown.",
+        "The verdict attributes the outcome (which proposers held the truth, whether the aggregate followed the majority or the dissenter) and states for this run whether each graded text was model output; a run containing any authored stand-in is labelled 'authored, not a measurement' in the verdict instead of receiving the attribution.",
+        "A session tally counts graded runs as n of N for four answerers: the aggregate, the majority vote, the unframed single answer and the best single proposer (labelled as chosen after the fact).",
+        "Accuracy of the unframed single answer, the majority vote and the aggregator is computed per question over 10 or more recorded real runs and shown as proportions with N, separately for neutral framings and lure-inducing framings, with the condition named on every number.",
+        "Every proportion carries a 95% Wilson score interval (Wilson, 1927, Journal of the American Statistical Association), drawn as an interval bar.",
+        "Each graded item is placed in one of four cells against the single baseline (help, harm or error amplification, both right, both wrong), and the four counts are shown per question category.",
+        "Aggregate versus single is tested as a paired difference on the same items: McNemar's test on the help and harm cells (McNemar, 1947, Psychometrika) or a bootstrap 95% interval on the accuracy difference, the result printed.",
+        "Pairwise error correlation between proposers is measured across items and shown beside the ensemble gain, testing the jury-theorem condition that voting helps only when errors are close to independent.",
+        "Observed ensemble gain per category is plotted against the gain predicted from single-proposer accuracy and the measured error correlation, with 95% intervals on both.",
+        "Reference: a reproducible help-versus-harm report on 2,000 or more graded real runs across 3 or more model families and 2 or more topologies, with accuracy plotted against proposer count (1, 3, 5, 7) per difficulty bin showing where adding proposers stops helping or starts hurting (the non-monotone scaling reported by Chen et al., Are More LLM Calls All You Need?, NeurIPS 2024), an analysis plan file committed to the repo before the first corpus run (git dates show the order), and data and analysis code downloadable from the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "harvest() grades one run's aggregate with truthRe and shows the verdict (rung 1). Not rung 2: attribution is hard-wired to the designed scenario. The message assumes the aggregate's answer is the cluster's, so when the majority holds the truth and the aggregate takes the lure it prints 'the bright cluster agreed on 2' and names a truth-holding majority member (the first truthRe match) as the out-voted dissenter; a correct aggregate gets 'consensus held' with no proposer named. Attribution and the fixed 'honest mechanics' note are identical for authored, mixed and live runs, and in a mixed run orchestrate() feeds failed proposers' authored echoes into the live aggregator prompt. No tally, no baselines, no intervals. On aggregator fallback the graded text is the authored TRAPS.*.aggEcho."
+        }
+      }
+    },
+    {
+      "id": "trap-bank",
+      "name": "Trap bank",
+      "frame": "data",
+      "metric": "The bank of questions with known answers: item count, failure categories, per-item fields (truth, accepted forms, lure, source, verification) and provenance; counted in the page's data objects or the bank file.",
+      "ladder": [
+        "No questions are offered: the visitor writes every question.",
+        "Questions are offered in a deck the visitor picks from.",
+        "1 or more trap items carry an authored truth, a lure answer and a one-line gloss, and are marked as traps in the interface.",
+        "20 or more trap items across 3 or more failure types (letter counting, cognitive-reflection arithmetic, false premise, common misconception), each with truth, lure and gloss.",
+        "Each item names its origin: cognitive-reflection items cite Frederick (2005, Journal of Economic Perspectives), misconception items cite TruthfulQA (Lin, Hilton and Evans, ACL 2022), others say 'written for this lab'.",
+        "50 or more items, each with id, category, truth, accepted answer forms, lure, source and gloss, and the bank's version number printed on the page.",
+        "Contamination guard: 30% or more of items are fresh variants (new numbers, new words) of known puzzles so a model cannot answer from memorised benchmark text, flagged per item.",
+        "Control items where the intuitive answer is the right one make up 25% or more of the bank, so the instrument also catches ensembles talking themselves out of a right answer.",
+        "150 or more items, each item's truth verified by code where possible (letters counted, arithmetic solved) or by a second reviewer, the check recorded per item.",
+        "Each item carries its observed single-model error rate from recorded runs, and the visitor filters the bank by category and by that difficulty.",
+        "Reference: 300 or more items balanced across 6 or more categories, openly licensed, downloadable, with per-item provenance, verification and difficulty; a bank another researcher could cite."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "TRAPS in figure.html holds 2 items (strawberry letter count, bat-and-ball), each with truth, trap (lure), gloss and truthRe/trapRe; DECK offers 4 chips and marks the 2 traps red (.dk.trap, title 'trap question - known ground truth') (rung 2). Not rung 3: 2 items, not 20. No source shown: the bat-and-ball is Frederick's item, uncredited."
+        }
+      }
+    },
+    {
+      "id": "run-corpus",
+      "name": "Recorded run corpus",
+      "frame": "data",
+      "metric": "Recorded real runs the page can show without a live call: count of stored runs whose text a model actually returned, with model id, date, seed, prompts and route; counted in the run files and checked against the labels on screen.",
+      "ladder": [
+        "No real model output is stored: when the route fails the page shows nothing or authored text.",
+        "1 complete real run (every proposer and aggregator text exactly as a model returned it) is stored in the page or a file with model id and date, and is what the page replays when the route fails.",
+        "1 or more complete real runs per deck question are stored with model id, date, seed and route, and authored stand-in text is never shown in place of a run.",
+        "10 or more real runs per deck question, collected from a fixed seed list with none dropped (collected and stored counts printed), are stored and replayable, and the visitor steps through them.",
+        "Each stored run records the verbatim prompt of every call, the temperature, latency in ms and token counts.",
+        "5 or more real runs exist for every trap-bank item, from 2 or more model families.",
+        "Corpus metadata is printed on the page (run count, model ids, date range, route breakdown), and the corpus is versioned with a changelog.",
+        "The visitor's own live runs append to a local corpus in the same schema and export as a JSON file.",
+        "2,000 or more graded real runs across 3 or more model families and 2 or more topologies, all downloadable.",
+        "Every statistic on the page links to the runs it counts: selecting a number lists those run ids and opens any of them in replay.",
+        "Reference: an open, citable dataset of mixture-of-agents runs with raw outputs, prompts, grades and run conditions, documented with a datasheet (Gebru et al., Datasheets for Datasets, Communications of the ACM, 2021)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "No real run is stored. Every fallback string in LENSES, AGG_ECHO and TRAPS (echo, aggEcho) is authored, but the footer calls it 'the captured reference run'. A custom question falls back to the 'what makes a system intelligent' echoes, which answer a different question."
+        }
+      }
+    },
+    {
+      "id": "consensus-constellation",
+      "name": "Consensus constellation",
+      "frame": "graphics",
+      "metric": "What the canvas shows of a run: node and edge encodings, how many answers and measurements are visible at once, and the count of linked views; checked in idle, running and harvested states at 1440 px and 390 px.",
+      "ladder": [
+        "Nothing is drawn.",
+        "A static diagram of proposers and aggregator.",
+        "A live graph: nodes light as their call runs and the active edge carries an animated pulse.",
+        "Node positions encode the router result (agreeing cluster drawn toward the aggregator, dissenter pushed to the rim), and a graded run recolours every proposer and the aggregator right or wrong for both outcomes.",
+        "Every proposer's answer, 120 characters or more of it, is readable at the same time beside its node in the routed and harvested states, not only the active one in a side panel.",
+        "Agreement drawn as data: an edge for every proposer pair, thickness or opacity proportional to the measured similarity, the value shown on hover or focus.",
+        "A linked answer tally: one bar per extracted answer with truth and lure marked; hovering a bar highlights its nodes.",
+        "A run-history strip: every graded run in the session or corpus as a mark coloured by help, harm, both right or both wrong; selecting one replays it in the constellation.",
+        "A statistics view of accuracy with interval bars for single, majority and aggregator per category, sharing selection with the constellation and the history strip.",
+        "Multi-layer runs are drawn as one ring or column per layer, with every input edge from layer k to layer k+1 drawn (9 or more edges for 3 proposers over 2 layers) and the edges into the active node highlighted.",
+        "Reference: five linked views (constellation, pairwise matrix, answer tally, run history, statistics) share one selection state and each exports as SVG, to the standard of Distill's explorable figures (distill.pub)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "draw() on canvas#net: 3 proposer nodes on an arc around an aggregator; the active edge turns amber with a travelling dot (rung 2); applyGravity() pulls the agreeing bucket in and pushes the dissenter out. Not rung 3: recolouring (isRight, isWrong, aggWrong) and applyHarvestGravity() act only when !harvested.correct, so a correct aggregate recolours nothing, including a proposer that gave the lure; in a harm case (majority right, aggregate wrong) a truth-holding majority member is drawn 'CLUSTER · WRONG', the first truth-holder 'DISSENT · RIGHT', and the lure holder gets no wrong mark. Only one proposer answer is visible (right rail)."
+        }
+      }
+    },
+    {
+      "id": "cockpit-craft",
+      "name": "Cockpit craft",
+      "frame": "style",
+      "metric": "Conformance to the L212 design language: palette tokens, amber reserved for what is active, minimum type size in px, contrast ratio, overlaps and composition; checked in screenshots at 1440, 1366x768, 1024 and 390 px and in the CSS and canvas font sizes.",
+      "ladder": [
+        "Browser defaults: no styling.",
+        "A dark theme: a dark background with light text on every element.",
+        "The site palette (void, ink, amber, blue, rose, dim) as CSS variables and the site mono face (IBM Plex Mono) on every element.",
+        "Amber is reserved: at idle it appears only on the run control and the frame corners; while running, only on the active node, its edge, its panel and live marks.",
+        "No text below 11 px at 1440 px (every CSS font-size and canvas ctx.font value read in code), and every text colour used, canvas fills included, measures 4.5:1 or more against --void (#07090C) by the WCAG 2.2 formula.",
+        "No text overlaps anything in idle, running and harvested states at 1440, 1366x768, 1024 and 390 px, checked in twelve screenshots.",
+        "Composition: at 1440 px the bounding box of the constellation's nodes spans 50% or more of the centre column's width and 40% or more of its height, and the idle state shows a replayed run or the bank instead of an empty field.",
+        "A motion table in a code comment or style doc defines one easing curve and at most 3 durations and maps stream (tokens travel along the active edge while a node streams), gravity and reveal (the grade reveal runs in 3 or more timed beats) to them; every CSS transition, CSS animation and canvas easing uses only those values (checked by grep), and no one-shot animation lasts over 800 ms (continuous loops such as the backdrop are exempt).",
+        "A type scale of at most 5 sizes and a spacing scale of at most 6 steps defined as tokens, used for every size in CSS and canvas.",
+        "Help, harm, both right and both wrong each have a distinct mark (shape plus colour, distinguishable in greyscale) used identically in every view, with a legend.",
+        "Reference: a 12-screenshot sheet (idle, running, harvested and statistics states at 1440, 1366x768 and 390 px) passes an automated check with zero violations (text overlap detection, minimum font size, 4.5:1 contrast, amber element count per state), and the page's type, motion and mark tokens live in labs/assets/css/tokens.css and are used unchanged by 2 or more other labs, to the standard of Distill's explorable articles (distill.pub)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "CSS :root defines --void/--ink/--amber/--blue/--rose/--dim; IBM Plex Mono throughout, canvas labels included; corner brackets and hairline panels (rung 2). Not rung 3: at idle the kicker 'ROUTING IS COGNITION' and 'PRESS RUN' are amber besides the button and corners. Rung 4 also fails: canvas sub-labels at 8.5 px, .mark 8.5 px, .ql 9 px, .rt 9.5 px; --dim #6B7682 on --void is 4.31:1. Rung 5 fails: the 1440 px screenshot draws each 'PROPOSER' and the 'AGGREGATOR' sub-label across its node circle, and a 1366x768 ?still render puts 'STAGE 1 ...' over the aggregator panel and the footer over the harvest verdict. The 1440 px screenshot leaves the centre column empty around a small four-node graph."
+        }
+      }
+    },
+    {
+      "id": "experiment-bench",
+      "name": "Experiment controls",
+      "frame": "interaction",
+      "metric": "What the visitor can change, inspect and run: count of independent experiment controls (question, node inspection, lenses, rule, proposer count, URL state, batch, replay, prediction, counterfactual), checked by operating the page.",
+      "ladder": [
+        "No control: the visitor can only watch.",
+        "One control starts a run.",
+        "The visitor types any question or picks one from a deck and runs it.",
+        "Selecting any node (click, tap, or Enter on keyboard focus) shows that node's full answer, framing prompt and origin, during and after the run.",
+        "Proposer framings are editable: the visitor rewrites a lens or picks from 6 or more lenses before running.",
+        "Aggregation rule (LLM synthesis, majority vote, pick-best) and proposer count (1 to 7) are selectable, used by the run and printed in its header.",
+        "Run state lives in the URL: question, lenses, rule and proposer count encode in the address and opening it restores that configuration; a stored run's id in the URL replays that run's exact outputs.",
+        "Batch mode: the visitor picks a category or N items and runs them live on a fast route (local Ollama, a visitor's key or a deployed worker: any route not limited to one reply per 45 s) or replays recorded runs, with a progress count and a stop control.",
+        "Prediction game: before each grade the visitor sets a probability from 0 to 100% that the aggregate will be right, and after 10 or more predictions their Brier score (Brier, 1950, Monthly Weather Review) is shown.",
+        "Counterfactual edit: after a run the visitor swaps one proposer's answer (for example turns the dissenter to the lure) and the vote, aggregate and grade recompute.",
+        "Reference: the visitor writes their own items with truths, sets topology and N, runs them live or in batch, and gets help-versus-harm counts with 95% intervals that export as CSV or JSON, all without editing code."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Textarea #q_text (240 chars), 4 deck chips, the 'Run the figure' button and, after a trap run, HARVEST all work (rung 2). Not rung 3: #net has no click, focus or key handler, and #r_out keeps only the active proposer's answer, so the first two answers cannot be recovered after the run. No lens, count or rule control, no replay, no URL state (only ?still, a screenshot mode)."
+        }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "Live share in a public-site run: calls answered by a model divided by calls made (unit: n of N calls, read from the run summary and the per-node marks); upper rungs add per-call routes and the aggregator model's accuracy over a deterministic vote in percentage points; checked by running once on the public site and reading the call code.",
+      "ladder": [
+        "No model is called.",
+        "The page names the model it calls and attributes the answers it shows to that model.",
+        "1 or more real model calls answer per run on the public site, and every node, the aggregator included, carries a live or not-live mark that stays visible after the run.",
+        "A failed call falls back on that node only, without stalling the run, and the run summary states the live count (for example '2 of 4 calls live').",
+        "Each call tries 2 or more routes in order (local Ollama, visitor key, worker, public route) before the offline engine, and the route that answered is printed on its node and counted per route in the run summary (for example 'public 3, offline 1').",
+        "The run is planned against the public route's budget as measured, printed on the page with its measurement date: either the 3 proposers are batched into one structured call, or each wait shows a countdown (as labs/assets/js/ai/route-panel.js provides), and a run started from a fresh IP on the public site ends with every node marked live (4 of 4 calls, or 2 of 2 when batched).",
+        "On a fast route (local Ollama, a visitor's key or a deployed worker: any route not limited to one reply per 45 s) the 3 proposer calls run concurrently (overlapping requests in the DevTools network panel, or concurrent dispatch in the call code), the code adds no fixed pacing delay between calls, and the elapsed time from Run to the aggregate is shown.",
+        "What the aggregator model adds is measured: on every graded item the LLM synthesis is compared with a deterministic majority vote over the same proposer answers, and synthesis accuracy minus vote accuracy is reported in percentage points with its 95% interval.",
+        "Recovery: a call that fails mid-stream retries once on the next route; a run that loses its route resumes from the last finished node; each failure is logged with route and HTTP status in the run record.",
+        "Adaptive guide: the page proposes the next item to run where the statistics are least certain (widest interval), says why, and the visitor follows it with one action.",
+        "Reference: live runs on 3 or more fast routes (local Ollama, a visitor's key or a deployed worker: any route not limited to one reply per 45 s) with 3 or more distinct model ids, every number on the page tagged to a model call or a named code function, and the aggregator-over-vote measure published for every item in the bank with its 95% interval."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "streamCall() fetches text.pollinations.ai directly (model=openai, gpt-oss-20b), not llm.js; the footer and setMark() name GPT-OSS-20B (rung 1). Real calls can answer on the public site (review probe 2026-11-11 08:22: 2 calls 1 s apart, HTTP 200 in 0.8 s and 2.0 s; LABS_LEVELS.md records HTTP 402 FREE_LIMIT, 1 reply every 45 s per IP, the same day). Not rung 2: the aggregator has no live mark (agg.live feeds only updateFootMode(), #a_route shows routing text), and a proposer's mark shows in #r_mark only while it is active, so after the run only the last proposer is marked. The footer says '[mixed] some nodes streamed live' with no count; calls run strictly in sequence with delay(2400) between them."
+        }
+      }
+    },
+    {
+      "id": "mechanism-honesty",
+      "name": "Mechanism explanation",
+      "frame": "explanation",
+      "metric": "What the page explains and whether every displayed answer and number is tagged by origin without contradiction or overclaim: count of explained stages, origin tags, visible citations and stated limits; checked by reading the page in idle, running and harvested states against the code.",
+      "ladder": [
+        "No text explains the page.",
+        "A title and one paragraph describe the mechanism.",
+        "A status line names each phase while it runs (proposing n of N, routing, aggregating, done).",
+        "Every displayed answer and number is tagged by origin (live model, recorded real run, authored, local code), no tag contradicts another, and no mechanism claim in the copy exceeds the code ('recursive' only if 2 or more layers run; 'router' only if its output changes what the aggregator receives).",
+        "The trap design is disclosed where the grade appears: lure lenses are prompted toward the seductive answer, and the page states what the result can and cannot show because of it.",
+        "A guided walkthrough of 6 steps or fewer explains proposer, router, aggregator, grade and the help/harm distinction on one run on screen.",
+        "Why voting helps or hurts is explained with its condition: a majority beats its members when each is right more than half the time and errors are independent (Condorcet's jury theorem, 1785); a worked 3-voter example on the page shows majority accuracy 0.648 for independent voters each right 60% of the time and 0.60 when their errors coincide.",
+        "3 or more sources are visible and linked from the claims they support, and every method the page runs cites its source: Wang et al. 2024 (arXiv 2406.04692) for mixture-of-agents, Frederick 2005 for the bat-and-ball item, and Du et al. 2023 (arXiv 2305.14325) once debate runs.",
+        "A limits panel ties each caveat to the number it qualifies (one model family, prompt-induced lures, N runs) and updates with the statistics.",
+        "The visitor leaves with a finding: a paragraph generated from the current statistics (items, help and harm counts, 95% intervals) that they can copy or export with its numbers.",
+        "Reference: the page poses three check questions (when does an ensemble amplify error, what does agreement predict, what does the model add) and answers each on the page with a live number and a source, to the standard of Distill's interactive articles."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Intro paragraph (.sub); the #m_bot status line ('agency · proposing 1/3', 'routing', 'aggregator · synthesising', 'harvested') (rung 2); footer origin pill [idle]/[live]/[mixed]/[recorded]; harvest()'s 'honest mechanics' note disclosing prompt-induced lures (rung 4 content exists). Not rung 3: the footer calls the authored echo 'the captured reference run' while the harvest note says it is authored; the live trap route labels a bucket share 'jaccard'; the copy says 'recursive' and 'a local router reads agreement', but one layer runs and the router output never reaches the aggregator prompt (it only moves nodes). arXiv 2503.05856 is cited only in a code comment."
+        }
+      }
+    },
+    {
+      "id": "reach-and-runtime",
+      "name": "Reach and runtime",
+      "frame": "performance",
+      "metric": "Who can run it and at what cost: layout at 390 px and 1366x768, reduced-motion behaviour, keyboard and screen-reader reach, idle frame loops, load time; checked with 390 px and 1366x768 renders, prefers-reduced-motion, keyboard-only use, Lighthouse and a DevTools performance trace.",
+      "ladder": [
+        "The page does not load.",
+        "Loads and runs at 1440 px desktop width.",
+        "At 390 px the layout stacks into one column with no horizontal scroll and every control reachable, and at 1366x768 no panel is clipped or overlapped in idle, running and harvested states (the page scrolls when content exceeds the viewport).",
+        "prefers-reduced-motion snaps node motion and answer typing to their end state and freezes the backdrop.",
+        "Every control is operable by keyboard with a visible focus ring, and each node's answer is announced once, when complete, through a polite aria-live region (not token by token).",
+        "At idle (no run in progress and nodes at rest) neither canvas runs a requestAnimationFrame loop: the backdrop draws once as a still, confirmed by a 10 s DevTools performance trace with no animation frames.",
+        "One Lighthouse mobile run (default simulated throttling) shows Largest Contentful Paint at or under 1.5 s and accessibility 95 or more.",
+        "Performance tiers: pixel ratio and backdrop quality drop when frame time exceeds 20 ms for 1 s, and the active tier is shown.",
+        "A text equivalent of the constellation (table of nodes, answers, agreement and grade) stays in sync with the canvas for screen readers.",
+        "Statistics over 200 or more recorded runs compute off the main thread (Web Worker) in 200 ms or less with DevTools 6x CPU slowdown.",
+        "Reference: Lighthouse 100 for performance and accessibility on mobile, a written WCAG 2.2 AA audit passed, and 60 fps or more during the reveal at 390 px with DevTools 4x CPU slowdown."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Loads and runs at 1440 px (rung 1). Not rung 2: a 1366x768 ?still render (headless Chrome) clips the harvest verdict and the aggregator panel under the footer, and html,body{overflow:hidden} stops the visitor scrolling to them. At 390 px @media (max-width:760px) stacks .cols into one column with no horizontal scroll, though the fixed canvas draws nodes over the text. reduce = prefers-reduced-motion snaps lerp, typeEcho and delays and pins the backdrop time (rung 3 content exists). The textarea sets outline:none, no :focus-visible styles, no aria-live; both requestAnimationFrame loops (draw, WebGL bl) run every frame at idle."
+        }
+      }
+    },
+    {
+      "id": "engine-shape",
+      "name": "Orchestrator architecture",
+      "frame": "architecture",
+      "metric": "Code shape of the orchestrator: whether content, route, engine and rendering are separate units, whether the bank and runs load as data, and whether the engine is testable outside the browser; checked by reading the files and running the tests.",
+      "ladder": [
+        "No orchestrator code exists.",
+        "Orchestrator code exists and runs in the page.",
+        "Questions, lenses and traps sit in declared data objects apart from the orchestration code.",
+        "Every model call goes through the shared route module labs/assets/js/ai/llm.js; no page-private endpoint code.",
+        "The engine is split into ES modules (orchestrator, extraction and agreement, grading, statistics, rendering) with no DOM access in the first four.",
+        "The trap bank and recorded runs load from JSON files with a documented schema; adding an item or a run touches no code.",
+        "The engine modules run under Node with tests: 20 or more extraction cases (including 'not two but three'), agreement, grading and statistics, run by one command.",
+        "Topology is data: a run config (proposers, layers, rule, models, prompts) defines the orchestration, and a new topology runs with no code change.",
+        "One versioned run-record schema: every run, live or replayed, writes the same shape, validated on write.",
+        "A headless Node runner executes the bank against a route and writes records to the corpus using the same engine modules the page imports.",
+        "Reference: the engine is a standalone module with docs, schema and tests that run in CI on every push, the page is one client of it, and its README runs the headless runner on a new 5-item bank in 3 commands or fewer."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "labs/figure.html, 548 lines: inline CSS and one IIFE. TRAPS, DECK and LENSES are declared data objects at the top (rung 2). Not rung 3: ENDPOINT and streamCall() are page-private (shared llm.js unused). Clustering, grading, layout and drawing share one closure and cannot be tested outside the page; no tests."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

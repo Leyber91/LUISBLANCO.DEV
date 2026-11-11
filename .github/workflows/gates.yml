@@ -37,3 +37,9 @@ jobs:
       - name: site checks
         run: |
           if [ -f tools/site_check.mjs ]; then node tools/site_check.mjs; else echo "NOT_CHECKED: tools/site_check.mjs does not exist yet (the first roadmap item builds it)"; fi
+      - name: level ladders
+        run: |
+          if [ -f tools/levels.mjs ]; then node tools/levels.mjs selftest && node tools/levels.mjs check; else echo "NOT_CHECKED: tools/levels.mjs does not exist"; fi
+      - name: lab tests
+        run: |
+          if [ -f tools/lab_tests.mjs ]; then node tools/lab_tests.mjs; else echo "NOT_CHECKED: tools/lab_tests.mjs does not exist"; fi

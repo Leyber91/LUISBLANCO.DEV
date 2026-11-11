@@ -1,0 +1,275 @@
+{
+  "id": "ugc",
+  "title": "User-Generated Content",
+  "page": null,
+  "thesis": "A visitor opens a link that is the whole story: every contribution hash-chained to the one before and signed by its author's key, forks drawn as a tree that merges with any other link to the same story, model-proposed continuations marked inside the signed bytes so a third party cannot strip the mark without breaking the accepting author's signature, and a verify report that says what the link proves and what it cannot. No server stores the story, and the only story bytes that leave the browser are the branch text a visitor chooses to send for proposals, shown before sending.",
+  "axes": [
+    {
+      "id": "chain-integrity",
+      "name": "Hash-chain tamper evidence",
+      "frame": "model",
+      "metric": "Attacks detected, of the 5 threat-model fixtures: whether each contribution is bound to its parent by a SHA-256 hash over a canonical encoding, whether the page detects and locates an edit to any past contribution, and which attacks it detects versus cannot. A rater opens the shipped fixture links (clean, tampered, rewritten, older copy, sibling fork), uses the page's tamper control, reads the verify report, and reads the chain module.",
+      "ladder": [
+        "Absent: no contribution chain and no hash exist.",
+        "Contributions are stored as a plain list with no hash; editing a past contribution leaves no trace.",
+        "Each contribution carries a SHA-256 digest computed with crypto.subtle.digest over its text, shown as a hex prefix beside it.",
+        "Each contribution's hash covers its parent's hash, its text, its author label and its claimed time, so the links run root to head and the head hash is shown.",
+        "The hashed bytes are a canonical encoding (fixed field order, UTF-8, text normalized to NFC, length-prefixed fields) written down on the page with one test vector, and the vector's hash matches in Chrome and Firefox.",
+        "Verification runs on every load and recomputes every link. On a shipped tampered fixture link (one altered contribution below a fork), the page marks that contribution and every descendant of it as unverified, leaves the sibling branch verified, and shows the count of unverified contributions.",
+        "A tamper control changes one character in any past contribution and verification fails at exactly that link; restoring the character makes the whole chain verify again.",
+        "Head pinning: the visitor can pin a head they received, and the page keeps that head's root-to-head path of hashes locally. A later link of the same root that is missing one or more hashes of the pinned path is flagged as not holding the pinned history, even when every one of its own links recomputes, naming the last contribution both share and whether the link carries a different contribution in its place (rewrite or fork) or nothing (older copy); a path hash below a contribution the link names as a pruned branch counts as present. Three shipped fixture links check it: a rewrite is flagged with a different contribution in place, an older copy is flagged as older, and a link that only adds a sibling branch is not flagged.",
+        "Redaction without breaking the proof: each link hashes a content hash rather than the raw text, so a reader can drop the text of one contribution, share the link, and the chain still verifies with that contribution shown as redacted.",
+        "A threat model on the page lists at least 5 attacks (edit one contribution, reorder, truncate, full rewrite with recomputed hashes, forged author) and marks each detected, detected only with a pinned head, or detected only with signatures, each with a shipped fixture link that demonstrates it.",
+        "Reference standard, the Merkle audit paths of Certificate Transparency (Laurie, Langley and Kasper 2013, RFC 6962 section 2.1.1), applied per branch: the contributions on the selected root-to-head path, in path order, are the leaves of a Merkle tree whose root is shown beside the head hash. A quote link carrying one contribution and its audit path verifies against that root without the rest of the story, the page shows the path's hash count (at most ceil(log2 n) for n leaves), and a repo test accepts every leaf's proof for every tree size from 1 to 64 and rejects each proof with one hash altered."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: site.config.js lists ugc as status 'planned' with no href, and no module under labs/ computes a hash for it (the only crypto or compression call in labs/ is CompressionStream in dataspace.html, another lab)" }
+      }
+    },
+    {
+      "id": "author-signatures",
+      "name": "Author signatures",
+      "frame": "model",
+      "metric": "Forged fixtures flagged, of those shipped: whether each contribution proves which key wrote it, covering key generation, signature algorithm, what is signed, verification on load, key storage, backup and rotation. A rater writes contributions in two browser profiles, opens the shipped forged-author and key-rotation fixture links, and reads the verify report and the signature module.",
+      "ladder": [
+        "Absent: contributions carry no author identity.",
+        "A free-text author name is stored with each contribution and anyone can type any name.",
+        "Each browser generates one key pair with crypto.subtle.generateKey (ECDSA P-256 or Ed25519), and the SHA-256 fingerprint of the public key is shown as the author id.",
+        "Each contribution carries a signature by its author's private key over its link hash, and the public key travels in the link.",
+        "Verification on load checks every signature. On a shipped fixture link with one author field swapped, that contribution is marked forged with its author id struck through, and the count of forged contributions is shown.",
+        "The working private key is stored in IndexedDB as a non-extractable CryptoKey (extractable: false), so page script can sign with it but cannot read or export it.",
+        "Each author id renders as a deterministic mark derived from the fingerprint plus an 8-character fingerprint prefix, so two authors who typed the same display name are told apart in every view.",
+        "Key backup: at creation, before the key is stored, the visitor can save a key file wrapped under a passphrase (PBKDF2-HMAC-SHA256 with at least 600,000 iterations, then AES-GCM). The stored working key stays non-extractable (rung 5 still holds), and importing the file in another browser signs under the same author id.",
+        "An author roster lists every author id in the open story with display name, mark, contribution count and character share, and an author id that signs under two different display names is flagged.",
+        "Key rotation: an author signs a rotation record naming a new key. Contributions that descend from that record and are signed by the new key verify under the same author id, and any contribution that descends from it but is signed by the old key is flagged, checked on a shipped fixture link.",
+        "Reference standard, out-of-band verification as in Signal's safety numbers: two co-authors compare a 60-digit number in 12 groups of 5 or scan each other's QR code in person, and the page then shows that author as verified by you, a state distinct from signed."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no ugc module, so no generateKey, sign or verify call exists anywhere under labs/" }
+      }
+    },
+    {
+      "id": "fork-merge",
+      "name": "Fork merging",
+      "frame": "model",
+      "metric": "Fixture pairs whose merge gives identical hash sets in both orders, of those shipped: how the page combines the histories carried by different links to one story, covering content addressing, the merge rule, order independence, refusal of foreign or broken input, joins of two branches and delta exchange. A rater opens two links forked from one fixture story, merges them in both orders, compares the hash sets and head lists, opens the shipped foreign-root and orphan fixtures, and reads the merge module.",
+      "ladder": [
+        "Absent: no fork and no merge exist.",
+        "A story is one linear list per link; opening a second link replaces the first.",
+        "The story is a tree: a contribution can have several children, and the link carries every branch the sender holds, not only the current path.",
+        "A paste field takes a second link with the same root and merges it as a set union keyed by link hash: the merged tree shows contributions from both links, a contribution present in both appears once, and the page shows the node count before and after the merge.",
+        "The merged tree re-encodes into one share link, and a fresh profile opening it shows the same hash set as the merged view.",
+        "Merge is order-independent and idempotent: A into B, B into A, and A twice give the same hash set, checked by a repo test on at least 5 fixture pairs (the grow-only set of Shapiro, Preguica, Baquero and Zawirski 2011, SSS).",
+        "A link with a different root is refused with the reason named. A contribution whose parent is missing is kept out of the tree and listed as orphaned with its missing parent hash. Both are checked with shipped fixture links.",
+        "Every leaf of the merged tree is listed as a branch head with its depth, author count and last author, and the visitor picks which head the share link points at.",
+        "After a merge, a what-arrived list shows each contribution the incoming link added, grouped by branch, with its author.",
+        "Join contribution: an author can write one contribution with two parents, joining two branches, and verification checks both parent hashes.",
+        "Reference standard, git's want/have fetch negotiation: the recipient's page produces a have-code (its head hashes, truncated to a length set in config) and the sender pastes it in; the sender's page builds a link carrying only the contributions the recipient lacks, and merging it reproduces the sender's hash set exactly. A repo test on at least 10 fixture pairs, in each of which the recipient already holds at least 90% of the sender's contributions, shows every delta link under 25% of the full link's length, and for any two heads the page shows their merge base and ahead and behind counts, matching what git merge-base and git rev-list --left-right --count report on the fixture histories mirrored as git commits."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no ugc code exists, so there is no tree structure, link parser or merge function to test" }
+      }
+    },
+    {
+      "id": "url-codec",
+      "name": "Story-in-link codec",
+      "frame": "data",
+      "metric": "URL characters per character of story: how the story is carried in its link, covering where in the URL it sits, the compression, the length budget and what happens past it, refusal of hostile input, and round-trip exactness. A rater shares a 2,000-character fixture story, measures the URL length, opens it in a fresh browser profile, checks the request URL in DevTools, opens the shipped unknown-version and deflate-bomb fixtures, and reads the codec module.",
+      "ladder": [
+        "Absent: the story is not carried in the link.",
+        "The story is kept in localStorage or on the page only; a shared link opens an empty story.",
+        "The whole story (text, parent hashes, authors) is serialized into the URL, and a fresh browser profile opening the link shows the same story.",
+        "The payload sits in the fragment after #, so the static host never receives it; the page says so and the DevTools request URL shows no fragment.",
+        "The payload is compressed in the browser (CompressionStream deflate-raw, or a named library such as lz-string) and base64url-encoded, and the page shows story bytes, URL characters and their ratio.",
+        "The decoder refuses input it cannot safely read: a format version byte leads the payload, a version-1 fixture link kept in the repo opens in a repo test, a link with an unknown version byte is refused with that version named, and decompression stops at a size cap set in config, so a shipped deflate-bomb fixture link is refused with the reason shown within 1 s instead of hanging the tab.",
+        "Round trip is exact: a repo test encodes and decodes at least 50 fixture stories, including emoji, combining marks, right-to-left text and a 10,000-character story, and every decoded story verifies with identical hashes.",
+        "Length budget: the page shows the URL length against a budget for at least 3 named share channels, each with its limit, source and date checked in one config table, and warns while typing before a contribution would cross the chosen budget.",
+        "The payload carries no derivable bytes: link hashes are recomputed on decode rather than sent, parents are varint indices into the payload, each author's public key appears once, and signatures travel as raw 64-byte values in a binary layout (length-prefixed fields or CBOR, RFC 8949), not hex inside JSON. For each unredacted human contribution of a signed 50-contribution fixture the payload holds its text bytes, its signature and at most 12 more bytes, and the page prints bytes per contribution and URL characters beside a deflate-raw plain-JSON-with-hex baseline, with its own layout shorter.",
+        "Past the budget the link carries the chosen branch only: each pruned sibling branch is named by the hash of its first contribution with its contribution count, the pruned link still verifies, and a head pinned on a pruned branch is reported as pruned, not as missing (chain-integrity rung 7).",
+        "Reference standard, the strongest general compressors: for 5 fixture stories from 500 to 20,000 characters the page tables URL characters under its own codec beside deflate-raw and Brotli at quality 11 (a WASM build), each run both on the plain-JSON payload and on the lab's own binary payload, and its codec is shortest on every fixture against all four."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no ugc page reads or writes location.hash (the only reader in labs/ is altverse/main.js, another lab), and no codec module exists for it" }
+      }
+    },
+    {
+      "id": "archive-interchange",
+      "name": "Archive and interchange",
+      "frame": "data",
+      "metric": "Export formats that pass their check, of those offered (re-import with every link verifying for JSON and .story; a named validator for EPUB, Twee and PROV): what a visitor can take away and bring back. A rater exports a fixture tree in every offered format, re-imports each importable one in a fresh profile, checks the hashes, and reads the validator reports committed in the repo.",
+      "ladder": [
+        "Absent: nothing can be exported or imported.",
+        "The visitor can select and copy the story text on the page; nothing else leaves it.",
+        "A plain-text or Markdown manuscript of the chosen branch downloads with author names in order.",
+        "A JSON export of the whole tree (every contribution with parent hash, text, author id, claimed time and hash) downloads, and importing it in a fresh profile rebuilds the same tree with every link verifying.",
+        "The JSON follows a JSON Schema (draft 2020-12) kept in the repo, and import rejects a file that fails it, naming the failing path.",
+        "The JSON export carries a header with format version, export date and head hash, and import of a file from a newer format version is refused with that version named.",
+        "The Markdown manuscript carries one footnote per contribution with author id and hash prefix and closes with the head hash, so a printed copy can be checked against its link.",
+        "A .story file (the binary link payload saved as a file) opens by drag and drop or file chooser and gives the same tree as its link, for stories past the URL budget.",
+        "An EPUB 3 of a chosen branch builds in the browser with one contents entry per contribution and a colophon listing authors and the head hash, and the EPUBCheck report for the fixture EPUB, showing 0 errors, is committed in the repo next to a script that reproduces it.",
+        "A Twee 3 export of the whole tree (StoryTitle and StoryData passages, one passage per contribution named by hash prefix, one link per child, author id and hash prefix as passage tags) compiles with Tweego with 0 errors, the build log for the fixture tree is committed next to the script that reproduces it, and the compiled story has one passage per contribution.",
+        "Reference standard, W3C PROV (2013) serialized as PROV-JSON: the export also writes the history with each contribution a prov:Entity, each author a prov:Agent, wasDerivedFrom to its parent, wasAttributedTo its author, and model text attributed to a software agent, and the file parses with the prov Python package with 0 errors."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no ugc export, import or schema in the repo" }
+      }
+    },
+    {
+      "id": "fork-tree",
+      "name": "Fork tree view",
+      "frame": "graphics",
+      "metric": "Largest fixture (5, 50 or 500 contributions) drawn with no two nodes overlapping, plus what each node and edge encodes, reading the chosen path, and linked views. A rater opens the 5-, 50- and 500-contribution fixture links and checks the layout, the encodings and the link between the tree and the reading pane.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "The story shows as plain text with no branch structure visible.",
+        "The tree of contributions draws as nodes and edges from the loaded link, one node per contribution.",
+        "The layout is a tidy tree (Reingold and Tilford 1981, IEEE Transactions on Software Engineering, as d3.tree implements it) laid out on each contribution's first parent, with a join contribution's second parent drawn as a dashed edge and no two nodes overlapping on the 50-contribution fixture.",
+        "Clicking a node selects its root-to-node path, following first parents, which draws highlighted in the tree and reads as continuous prose in a reading pane beside it.",
+        "Node marks encode author and verification state with a legend covering every state the page can show.",
+        "Adding a contribution, merging a link and switching branch animate node positions from the old layout to the new one, with an instant swap under prefers-reduced-motion.",
+        "The 500-contribution fixture draws with no two nodes overlapping; subtrees collapse and expand by pointer and by keyboard, a collapsed subtree showing its contribution count; and the view pans and zooms by pointer and by keyboard.",
+        "At a fork, the reading pane shows sibling continuations side by side aligned at the fork point, and selecting a sibling there selects its node in the tree.",
+        "Blame mode: every character of the reading pane is tinted by the contribution that wrote it, and hovering or focusing a span highlights its node in the tree.",
+        "Reference standard, a Gource-style growth replay: a scrubber replays the tree's growth contribution by contribution in claimed-time order with tree, reading pane and blame moving together, and the replay exports as a WebM video (canvas captureStream and MediaRecorder)."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no SVG, canvas or layout code exists for ugc under labs/" }
+      }
+    },
+    {
+      "id": "ledger-style",
+      "name": "Manuscript and ledger style",
+      "frame": "style",
+      "metric": "Grep hits of raw colors and off-token values in the lab's CSS and drawing code (target 0), plus whether the two registers, prose to read and proof to inspect, stay distinct against labs/assets/css/tokens.css: the prose measure, how hashes and fingerprints are set, the gold rule, state marks and motion timing. A rater greps the lab's stylesheet and drawing code and inspects computed styles at 1440 px and 360 px.",
+      "ladder": [
+        "Absent: no page and no stylesheet exist.",
+        "A page exists and does not load labs/assets/css/tokens.css.",
+        "The page loads labs/assets/css/tokens.css and the lab's CSS holds no hex or rgb color outside it (one grep confirms).",
+        "Story prose sets in var(--font-body) at --t-body or --t-lead within var(--measure), with line-height at least 1.6, text-wrap: pretty and hyphens: auto under the story's lang attribute; every hash, fingerprint and byte count sets in var(--font-mono) at --t-stamp or --t-micro in --text-dim with font-variant-numeric: tabular-nums. A grep of the lab's CSS confirms the tokens, and the two registers differ in computed size, line-height and color, because tokens.css maps both families to IBM Plex Mono and the face alone cannot separate them.",
+        "Hashes display one way everywhere: the same prefix length in the same mono size, the full value on focus or hover, and a copy action beside it.",
+        "Gold (--accretion and its variants, --status-built, the gold-valued --warn and --shadow-glow-warm) appears only on the selected path and the head being shared, and a grep of the lab's CSS and drawing code finds no other use.",
+        "One state grammar across tree, reading pane and ledger: every state the page can show (at least verified, unverified, forged, redacted and model-proposed) has one mark used identically in every view, with a legend.",
+        "Model-proposed text carries a tag reading 'proposed by model' and is set in var(--horizon) in every view until a human commits it, and committed model text keeps a var(--horizon) left rule in the reading pane.",
+        "Transitions use --t-fast or --t-mid on the --ease token only, and prefers-reduced-motion removes them.",
+        "At most 5 type sizes, all drawn from --t-micro, --t-stamp, --t-body, --t-lead, --t-h3, --t-h2 and --t-h1, and at most 2 font weights appear in the computed styles of the page, counted by a DevTools snippet kept in the repo that walks every element.",
+        "Reference standard, an annotated scholarly edition: contribution boundaries sit as marginal glosses carrying author mark and hash prefix beside the prose (moving inline under 600 px), and a rater sampling 10 state marks across all views at 360 px and 1440 px finds 10 of 10 match the legend."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no ugc stylesheet in labs/assets/css (tokens.css, hub.css and other labs' sheets only)" }
+      }
+    },
+    {
+      "id": "co-writing",
+      "name": "Co-writing flow",
+      "frame": "interaction",
+      "metric": "Actions to complete each task (start, continue, fork, constrain, share, mute), and which tasks a visitor can do by hand at all. A rater starts a story, adds 3 contributions, forks at the second, sets a rule, mutes an author on a fixture link, and shares to a phone, counting actions and checking each rung.",
+      "ladder": [
+        "Absent: there is no way to write.",
+        "A text box appends text to one story on the page, and nothing can be shared.",
+        "A visitor writes a contribution under a chosen name and the share link updates to include it; opening that link in another profile shows the contribution.",
+        "Starting a story takes one field and one action, a share link exists before the second contribution is written, and an unsent contribution survives a reload as a local draft.",
+        "Fork from anywhere: one action on any node opens the composer with that node as parent, and the new branch appears in the tree.",
+        "Turn rules live in config and show live while typing (a character cap per contribution, no two contributions in a row by one author), and the composer refuses a contribution that breaks one, naming the rule.",
+        "Exquisite-corpse mode: the story's creator sets how much prior text the next author sees (all, the last contribution, or the last N words), and the setting is bound into the root hash. The composer, reading pane and tree show only that much, and the page states that the hidden text still travels in the link and can be read by decoding it.",
+        "The share action offers copy link, the Web Share API where the device has it, and a QR code for payloads within version 40-L binary capacity (2,953 bytes), each checked on a phone.",
+        "Moderation without a server: a reader can mute an author id (kept locally), which collapses that author's contributions behind a muted mark in every view, and can share a link with that author's text redacted (chain-integrity rung 8), with the count of redacted contributions shown and the redacted link still verifying.",
+        "A rules editor lets the creator compose constraints the lab did not preset (word-count range, a required word, a banned letter as a lipogram, a maximum sentence length in words), bound into the root, and every later contribution is checked against them.",
+        "Reference standard, a recorded relay playtest: at least 5 co-authors on at least 3 device types pass one link along, and the page publishes the resulting tree with the median seconds from opening a link to committing a contribution, under 60 s."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: the only trace of the lab is the hub blurb in site.config.js ('Tools that turn an audience into co-authors.')" }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model continuations, measured",
+      "frame": "intelligence",
+      "metric": "Share of committed characters from the model, in percent, plus what the language model adds over the deterministic proposer and how its text is held to account: proposals per call, rule compliance, the fallback, provenance inside the chain. A rater requests continuations with the model route on and off (labs/assets/js/ai/llm.js), commits one edited proposal, runs the repo test with the malformed-reply fixture, and reads the payload preview and the co-authorship figures.",
+      "ladder": [
+        "Absent: no model call and no proposed continuation exist.",
+        "A model call sends the story to one endpoint with no fallback and shows its reply raw.",
+        "Calls go through labs/assets/js/ai/llm.js with a deterministic offline proposer (for example an n-gram model built from the story's own text), and the route panel names which route answered.",
+        "One call per request returns at least 3 continuations as one JSON reply checked against a schema. A repo test feeds a malformed reply fixture and gets the offline proposer's continuations, and the page says when a fallback happened.",
+        "A payload preview shows the exact prompt and branch text before sending; only the selected root-to-head path is sent, never other branches or author keys, and in exquisite-corpse mode only the text the requesting author may see.",
+        "Every proposal runs through the same turn and game rules as a human contribution, only passing proposals are offered, and the pass rate is shown.",
+        "Provenance in the chain: a committed proposal records author 'model', the route and model name, and the human who accepted it inside the hashed and signed bytes. A third party who strips the mark breaks the accepting author's signature, and the page states that the accepting author could still re-commit the text unmarked.",
+        "When a human edits a proposal before committing, the Levenshtein distance in characters (insert, delete, substitute, each cost 1) between proposal and committed text is recorded in the contribution, and the share of characters kept from the model is shown on it.",
+        "A co-authorship ledger reports, for the selected branch, the share of characters written by humans, by the model verbatim and by the model then edited, computed from the chain alone, so every reader of the link sees the same figures.",
+        "A blind mode shows the offline proposer's and the model's continuations for the same branch unlabeled and in random order, reveals each source only after the pick, and reports this browser's pick rate per source with the number of picks.",
+        "Reference standard, CoAuthor (Lee, Liang and Yang 2022, CHI): every proposal request, proposal shown, acceptance, edit and rejection is logged as a replayable session in the export. On a fixed set of at least 30 story branches the page tables, for each llm.js route (ollama, own-key, worker, pollinations, offline) reachable on the run date and at least 3 of them, the rule-compliance rate, schema-failure rate, median latency, acceptance rate and share of final text from the model, from a recorded playtest of at least 5 writers, with the date it was run."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no ugc module imports labs/assets/js/ai/llm.js and no proposer exists" }
+      }
+    },
+    {
+      "id": "proof-literacy",
+      "name": "Proof literacy",
+      "frame": "explanation",
+      "metric": "Does-not-prove items stated, of the 5 named in rung 3, plus whether every story on the page is tagged real or illustrative, and whether tamper and fork mechanics are shown running with live values. A rater reads every explanation on the page, runs the guided tour, checks the seed sources, and follows each code link.",
+      "ladder": [
+        "Absent: no explanation exists.",
+        "One paragraph describes the lab with no account of the mechanism.",
+        "A method note says what a hash is, that each contribution's hash covers the one before, and that the story lives in the link, and defines every technical term it uses (hash, SHA-256, fragment) where it first appears.",
+        "The page states what the link does not prove: claimed times are self-reported; anyone holding the link can fork it; a full rewrite with recomputed hashes passes unless the reader kept an older head; a signature proves which key signed, not which person; and a model mark exists only for proposals committed through the page, so model text pasted in by hand carries none.",
+        "Every story the lab ships is tagged. At least 10 public-domain seed openings each carry author, title, year and Project Gutenberg ebook number. Lab-written examples are tagged illustrative, and every story a visitor writes is tagged as theirs, everywhere each appears.",
+        "A guided walkthrough of at least 5 steps (start, continue, fork, tamper, verify) runs on a fixture story, operable by keyboard and skippable.",
+        "The walkthrough changes one character in a past contribution and shows, link by link, the recomputed hash diverging from the stored one, with both hex values on screen and computed live: when the rater picks a different character than the tour's default, the shown hash changes and equals crypto.subtle.digest run in the console on the canonical bytes the page offers as hex to copy.",
+        "A verify report lists each link of the open story in a sentence of the form 'contribution 4 by a1f3c2e0: hash matches, signature valid', and a failure names the first broken link.",
+        "A panel compares this lab with a server-hosted story on at least 5 properties (global order, trusted time, deletion, moderation, availability), marking each kept, lost or replaced and by what.",
+        "Each item of the does-not-prove list, the threat model and the verify-report legend links to the file and line of code it describes, and none lacks a link.",
+        "Reference standard, an explorable explanation in the sense of Bret Victor (2011): a 4-question self-check on the visitor's own link (which contribution breaks if edited, which attack a pinned head catches, what a signature adds, which text the model wrote) grades each answer against the live chain."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: the only text is the hub blurb in site.config.js, which explains no mechanism" }
+      }
+    },
+    {
+      "id": "load-reach",
+      "name": "Verify speed and reach",
+      "frame": "performance",
+      "metric": "Milliseconds to decode, verify and draw a story from its link in the visitor's browser, main-thread long tasks while hashing and checking signatures, and Lighthouse accessibility score; reach covers phone width, keyboard and screen reader (reduced motion is graded under fork-tree and ledger-style). A rater opens the 50- and 1,000-contribution fixture links with the DevTools Performance panel recording, CPU throttle off unless a rung says otherwise, takes the median of 3 loads, and runs Lighthouse accessibility.",
+      "ladder": [
+        "Absent: no page exists to measure.",
+        "A page loads; nothing about timing or reach is handled.",
+        "A 50-contribution link decodes, verifies and draws its tree within 1 s of navigation, and first load transfers under 200 KB excluding fonts shared with the site, both read in DevTools with CPU throttle off, median of 3 loads.",
+        "At 360 px wide the reading pane, composer and tree stack in one column with no horizontal page scroll.",
+        "Every control, tree nodes included, works by keyboard alone with a visible focus ring, and a rater completes start, continue, fork and share without a pointer.",
+        "The tree has a screen-reader form: an ARIA tree (role tree and treeitem with aria-level and aria-expanded) whose items read author, verification state and the first words of each contribution.",
+        "A signed 1,000-contribution link recomputes every SHA-256 link and checks every signature in under 300 ms with CPU throttle off (median of 3 loads), with the verify time printed on the page.",
+        "Decoding and verification run in a Web Worker with progress shown, and DevTools records no main-thread long task above 200 ms while a signed 1,000-contribution link opens.",
+        "Lighthouse accessibility scores at least 95 with the 50-contribution fixture loaded.",
+        "After first load a service-worker cache lets the visitor open, verify, write and share a link with the network disabled, with proposals falling back to the offline proposer.",
+        "Reference standard, Core Web Vitals: under 4x CPU throttle in DevTools a 1,000-contribution link reaches a drawn tree in under 3 s, and interaction to next paint stays at or under 200 ms (the INP pass threshold) while writing and switching branches."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no ugc HTML file in labs/ to load, time or audit" }
+      }
+    },
+    {
+      "id": "protocol-shape",
+      "name": "Serverless protocol shape",
+      "frame": "architecture",
+      "metric": "Passing test assertions, and network-call and HTML-sink grep hits outside their allowed places (target 0): separation of codec, chain, signatures, merge and views; where the network can be touched; a written format spec; and whether a script outside the lab can verify a link. A rater reads the module tree, greps for network calls and HTML sinks, runs the repo tests with node, and checks the spec against the codec.",
+      "ladder": [
+        "Absent: no code exists.",
+        "One HTML file holds all logic in inline script.",
+        "The lab is ES modules under labs/assets/js/ with the page holding markup and one entry import.",
+        "Codec, chain, signature and merge logic are pure modules with no DOM access, importable in Node through globalThis.crypto.",
+        "A grep of the codec, chain, signature and merge modules finds no fetch, XMLHttpRequest, WebSocket or sendBeacon, and the only module of the lab that reaches the network is labs/assets/js/ai/llm.js. A grep of the whole lab finds no innerHTML, insertAdjacentHTML or document.write on any path that renders contribution text, and a shipped fixture link whose contributions hold <script> and <img onerror> markup renders it as literal text.",
+        "Turn rules, URL budgets, hash prefix length and format version live in one config module, and no logic file holds those numbers.",
+        "Unit tests run with node and no dependencies, with at least 25 assertions passing across codec round trip, chain verification and tamper fixtures.",
+        "A versioned format spec in the repo gives the byte layout, the canonical encoding and the hash inputs, and a test decodes every spec example to the hashes the spec states.",
+        "The store module exports subscribe(); tree, reading pane and ledger import only the store and config; and a grep shows no core module (codec, chain, signature, merge) imports any view module.",
+        "An independent verifier of under 200 lines, a node script in the repo that imports only node: built-ins and no lab module (a grep confirms), verifies a link the page produced and rejects every shipped tamper fixture link.",
+        "Reference standard, an interoperable protocol: the spec publishes test vectors (inputs, canonical bytes, hashes, signatures) in the manner of an RFC appendix, and the page runs them on load, shows the pass count, and refuses to write if any fails."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no ugc folder under labs/assets/js (only ai, altverse, blackhole and other labs' folders)" }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}
