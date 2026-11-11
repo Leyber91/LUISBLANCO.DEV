@@ -25,7 +25,7 @@ function findTests(dir) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) out.push(...findTests(p));
     else if (e.name === 'tests.mjs' || e.name.endsWith('.test.mjs') ||
-      (e.name === 'run.mjs' && path.basename(dir) === 'tests')) out.push(p);
+      (e.name === 'run.mjs' && path.basename(dir) === 'tests') || e.name === 'verify.mjs') out.push(p);
   }
   return out;
 }
