@@ -3,6 +3,16 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-11, Labs: Personalized Plans rebuilt around a planner
+
+- A deterministic planner makes every decision: session load (Foster et al., 2001), a fitness-fatigue model
+  (Banister et al., 1975), periodisation, and a constraint solver for days, kit and injuries with an exercise
+  substitution graph. Logging a missed or hard week re-plans the rest of the block.
+- The model only narrates the planner's log; any narrated sentence with a number or lift not in the log is struck
+  through on the page. Not medical advice.
+- Independent grade: level 1 to 1. The muscle volume map's first rung is not met, which caps the lab.
+- Checks: 8,351,171 planner checks in labs/assets/js/workout-plans/test/planner.test.mjs, run by the site gate.
+
 ## 2026-11-11, Labs: Honesty Decoder computes its figures
 
 - No percentage is typed in any more. Each system's claim is split into sub-claims, and each sub-claim is checked
