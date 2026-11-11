@@ -1019,6 +1019,7 @@ function boot() {
     };
     setTimeout(next, 3000);
   }
+  if (params.has('sources')) $('src').open = true;
   if (params.has('debug')) setInterval(() => console.log('[lw] phase', S.phase, S.film ? ((performance.now() - S.film.t0) / 1000).toFixed(2) + ' done=' + S.film.done : ''), 700);
   if (params.has('debug')) setTimeout(() => {
     const wide = [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 1).slice(0, 8).map((e) => e.tagName + '.' + e.className + '#' + e.id + ':' + Math.round(e.getBoundingClientRect().right));
