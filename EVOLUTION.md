@@ -20,6 +20,9 @@ merged. A run that changed nothing still writes its entry, with the reason.
   390 px wide; the strip showed the two existing entries at both widths, no console errors at either width. The page
   scroll width (1549 px at 1280, 391 px at 390) is the same on main without this change, and the body clips it, so
   this change adds no sideways overflow. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #2: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed. The
+  gates ran within seconds of the pull request opening.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-10, Site checks (roadmap item 1)
 
