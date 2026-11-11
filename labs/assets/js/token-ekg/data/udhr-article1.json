@@ -1,0 +1,189 @@
+{
+ "about": "Universal Declaration of Human Rights, Article 1, extracted verbatim from the UDHR in XML project (https://github.com/eric-muller/udhr, data/udhr/udhr_<code>.xml at commit 588b3f4b2d0467aff54842a4b926551b69d5a66a, 2026-07-28), which reproduces the translations of the OHCHR UDHR Translation Project. The project states: \"The UDHR and all its translations are obviously part of our commons.\"",
+ "languages": [
+  {
+   "code": "eng",
+   "name": "English",
+   "lang": "en",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood."
+  },
+  {
+   "code": "spa",
+   "name": "Spanish",
+   "lang": "es",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Todos los seres humanos nacen libres e iguales en dignidad y derechos y, dotados como están de razón y conciencia, deben comportarse fraternalmente los unos con los otros."
+  },
+  {
+   "code": "cat",
+   "name": "Catalan",
+   "lang": "ca",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Tots els éssers humans neixen lliures i iguals en dignitat i en drets. Són dotats de raó i de consciència, i han de comportar-se fraternalment els uns amb els altres."
+  },
+  {
+   "code": "fra",
+   "name": "French",
+   "lang": "fr",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Tous les êtres humains naissent libres et égaux en dignité et en droits. Ils sont doués de raison et de conscience et doivent agir les uns envers les autres dans un esprit de fraternité."
+  },
+  {
+   "code": "deu_1996",
+   "name": "German",
+   "lang": "de",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Alle Menschen sind frei und gleich an Würde und Rechten geboren. Sie sind mit Vernunft und Gewissen begabt und sollen einander im Geist der Brüderlichkeit begegnen."
+  },
+  {
+   "code": "tur",
+   "name": "Turkish",
+   "lang": "tr",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Bütün insanlar hür, haysiyet ve haklar bakımından eşit doğarlar. Akıl ve vicdana sahiptirler ve birbirlerine karşı kardeşlik zihniyeti ile hareket etmelidirler."
+  },
+  {
+   "code": "swh",
+   "name": "Swahili",
+   "lang": "sw",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Watu wote wamezaliwa huru, hadhi na haki zao ni sawa. Wote wamejaliwa akili na dhamiri, hivyo yapasa watendeane kindugu."
+  },
+  {
+   "code": "yor",
+   "name": "Yoruba",
+   "lang": "yo",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Gbogbo ènìyàn ni a bí ní òmìnira; iyì àti ẹ̀tọ́ kọ̀ọ̀kan sì dọ́gba. Wọ́n ní ẹ̀bùn ti làákàyè àti ti ẹ̀rí‐ọkàn, ó sì yẹ kí wọn ó máa hùwà sí ara wọn gẹ́gẹ́ bí ọmọ ìyá."
+  },
+  {
+   "code": "vie",
+   "name": "Vietnamese",
+   "lang": "vi",
+   "script": "Latn",
+   "dir": "ltr",
+   "text": "Tất cả mọi người sinh ra đều được tự do và bình đẳng về nhân phẩm và quyền. Mọi con người đều được tạo hoá ban cho lý trí và lương tâm và cần phải đối xử với nhau trong tình bằng hữu."
+  },
+  {
+   "code": "rus",
+   "name": "Russian",
+   "lang": "ru",
+   "script": "Cyrl",
+   "dir": "ltr",
+   "text": "Все люди рождаются свободными и равными в своем достоинстве и правах. Они наделены разумом и совестью и должны поступать в отношении друг друга в духе братства."
+  },
+  {
+   "code": "ukr",
+   "name": "Ukrainian",
+   "lang": "uk",
+   "script": "Cyrl",
+   "dir": "ltr",
+   "text": "Всі люди народжуються вільними і рівними у своїй гідності та правах. Вони наділені розумом і совістю і повинні діяти у відношенні один до одного в дусі братерства."
+  },
+  {
+   "code": "ell_monotonic",
+   "name": "Greek",
+   "lang": "el",
+   "script": "Grek",
+   "dir": "ltr",
+   "text": "Όλοι οι άνθρωποι γεννιούνται ελεύθεροι και ίσοι στην αξιοπρέπεια και τα δικαιώματα. Είναι προικισμένοι με λογική και συνείδηση, και οφείλουν να συμπεριφέρονται μεταξύ τους με πνεύμα αδελφοσύνης."
+  },
+  {
+   "code": "arb",
+   "name": "Arabic",
+   "lang": "ar",
+   "script": "Arab",
+   "dir": "rtl",
+   "text": "يولد جميع الناس أحرارًا متساوين في الكرامة والحقوق. وقد وهبوا عقلاً وضميرًا وعليهم أن يعامل بعضهم بعضًا بروح الإخاء."
+  },
+  {
+   "code": "heb",
+   "name": "Hebrew",
+   "lang": "he",
+   "script": "Hebr",
+   "dir": "rtl",
+   "text": "כל בני אדם נולדו בני חורין ושווים בערכם ובזכויותיהם. כולם חוננו בתבונה ובמצפון, לפיכך חובה עליהם לנהוג איש ברעהו ברוח של אחוה."
+  },
+  {
+   "code": "hin",
+   "name": "Hindi",
+   "lang": "hi",
+   "script": "Deva",
+   "dir": "ltr",
+   "text": "सभी मनुष्यों को गौरव और अधिकारों के मामले में जन्मजात स्वतन्त्रता और समानता प्राप्त है । उन्हें बुद्धि और अन्तरात्मा की देन प्राप्त है और परस्पर उन्हें भाईचारे के भाव से बर्ताव करना चाहिए ।"
+  },
+  {
+   "code": "ben",
+   "name": "Bengali",
+   "lang": "bn",
+   "script": "Beng",
+   "dir": "ltr",
+   "text": "সমস্ত মানুষ স্বাধীনভাবে সমান মর্যাদা এবং অধিকার নিয়ে জন্মগ্রহণ করে। তাঁদের বিবেক এবং বুদ্ধি আছে; সুতরাং সকলেরই একে অপরের প্রতি ভ্রাতৃত্বসুলভ মনোভাব নিয়ে আচরণ করা উচিত।"
+  },
+  {
+   "code": "tam",
+   "name": "Tamil",
+   "lang": "ta",
+   "script": "Taml",
+   "dir": "ltr",
+   "text": "மனிதப் பிறிவியினர் சகலரும் சுதந்திரமாகவே பிறக்கின்றனர்; அவர்கள் மதிப்பிலும், உரிமைகளிலும் சமமானவர்கள், அவர்கள் நியாயத்தையும் மனச்சாட்சியையும் இயற்பண்பாகப் பெற்றவர்கள். அவர்கள் ஒருவருடனொருவர் சகோதர உணர்வுப் பாங்கில் நடந்துகொள்ளல் வேண்டும்."
+  },
+  {
+   "code": "tha",
+   "name": "Thai",
+   "lang": "th",
+   "script": "Thai",
+   "dir": "ltr",
+   "text": "มนุษย์ทั้งหลายเกิดมามีอิสระและเสมอภาคกันในเกียรติศักด[เกียรติศักดิ์]และสิทธิ ต่างมีเหตุผลและมโนธรรม และควรปฏิบัติต่อกันด้วยเจตนารมณ์แห่งภราดรภาพ"
+  },
+  {
+   "code": "mya",
+   "name": "Burmese",
+   "lang": "my",
+   "script": "Mymr",
+   "dir": "ltr",
+   "text": "လူတိုင်းသည် တူညီ လွတ်လပ်သော ဂုဏ်သိက္ခာဖြင့် လည်းကောင်း၊ တူညီလွတ်လပ်သော အခွင့်အရေးများဖြင့် လည်းကောင်း၊ မွေးဖွားလာသူများ ဖြစ်သည်။ ထိုသူတို့၌ ပိုင်းခြား ဝေဖန်တတ်သော ဉာဏ်နှင့် ကျင့်ဝတ် သိတတ်သော စိတ်တို့ရှိကြ၍ ထိုသူတို့သည် အချင်းချင်း မေတ္တာထား၍ ဆက်ဆံကျင့်သုံးသင့်၏။"
+  },
+  {
+   "code": "amh",
+   "name": "Amharic",
+   "lang": "am",
+   "script": "Ethi",
+   "dir": "ltr",
+   "text": "የሰው፡ልጅ፡ሁሉ፡ሲወለድ፡ነጻና፡በክብርና፡በመብትም፡እኩልነት፡ያለው፡ነው።፡የተፈጥሮ፡ማስተዋልና፡ሕሊና፡ስላለው፡አንዱ፡ሌላውን፡በወንድማማችነት፡መንፈስ፡መመልከት፡ይገባዋል።"
+  },
+  {
+   "code": "cmn_hans",
+   "name": "Chinese (simplified)",
+   "lang": "zh-Hans",
+   "script": "Hans",
+   "dir": "ltr",
+   "text": "人人生而自由，在尊严和权利上一律平等。他们赋有理性和良心，并应以兄弟关系的精神相对待。"
+  },
+  {
+   "code": "jpn",
+   "name": "Japanese",
+   "lang": "ja",
+   "script": "Jpan",
+   "dir": "ltr",
+   "text": "すべての人間は、生まれながらにして自由であり、かつ、尊厳と権利とについて平等である。人間は、理性と良心とを授けられており、互いに同胞の精神をもって行動しなければならない。"
+  },
+  {
+   "code": "kor",
+   "name": "Korean",
+   "lang": "ko",
+   "script": "Hang",
+   "dir": "ltr",
+   "text": "모든 인간은 태어날 때부터 자유로우며 그 존엄과 권리에 있어 동등하다. 인간은 천부적으로 이성과 양심을 부여받았으며 서로 형제애의 정신으로 행동하여야 한다."
+  }
+ ]
+}
