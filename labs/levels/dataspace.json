@@ -26,6 +26,10 @@
         "G0": {
           "level": 3,
           "evidence": "infoBits() sums -log2(freq/n) over the TOKRE regex pre-tokenizer (commented 'GPT-2-ish regex pre-tokenizer') for both source and capsule (rung 2); deflateBits() measures deflate-raw through CompressionStream and prints it as 'deflate floor' (rung 3). Rung 4 fails: the 1440 px screenshot shows source 759 bits beside 'deflate floor 3.1k bits' (recomputed on the 596-character sample: 759 vs 3064 bits), because the self-information omits the vocabulary cost and no comment names an accounting; updateRatioBar() then clamps the floor mark at 100%."
+        },
+        "G1": {
+          "level": 8,
+          "evidence": "Not disputed; the rater's grade stands. Rungs 1-8 hold. measures.js twoPartBits() charges -log2(c/n) plus the vocabulary spelling (8 bits per byte + terminator + Elias gamma), and its header comment names that accounting. bpe.js bundles the 50,000 GPT-2 merges; tests.mjs checks 4 strings against Hugging Face counts and tokens (699 of 699 checks pass). On the default sample the floor table shows zeroth order 943, two-part 5,839 (9.797 bpc), PPM-C order 4 primed on alice29 2,031 (3.408), DEFLATE 3,064 (5.141) and Brotli-wasm 2,192 (3.678), so the floor sits below the source (desk.png plate: source 5,839, floor 3,064). The same rows are measured live on the visitor's text. The alice29 table shows DEFLATE 54,102 B against gzip 1.14 -6 at 54,405 B (-0.56%) and Brotli 46,492 B against brotli 1.1.0 -q11 at 46,487 B (+0.01%); commands, versions and outputs are in reference.json. measureSource() warns under 50 bytes. Rung 9 fails: there is no LLM cross-entropy and no per-token log-probability run file."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 3,
           "evidence": "fidelity() computes a token LCS (capped at 1200 tokens); renderDiff() prints kept / dropped / invented counts, and the plate labels the score 'lexical - surface, not meaning' (rung 3). No number, date or entity extraction exists: in the bundled run 'Feb 2023' -> 'in 2023' scores ' Feb' and ' 2023' as dropped and ' in' and ' 2023' as invented, and 'two years early' -> 'very early' scores ' two' and ' years' as dropped and ' very' as invented (recomputed with the page's own tokenizer and LCS; rung 4 fails)."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Dispute upheld (rater 6). Rungs 1-4 hold: extractNumbers() and survival() mark each number or date survived, altered or lost, the test reads 'Feb 2023' back as '2023' and marks it altered, and the plate shows NUMBERS 0/3 on the default run. Rung 5 fails: the rung's named entities include handles, and measures.js extractEntities() rules E1-E4 have no handle rule. Re-run in Node with the page's bpe.js, 'USER: @leyber91 asked @sam_k and Marco about it.' returns only E4:sam_k (caught by the snake_case rule, without the @) and E1:Marco. '@leyber91' is never extracted, so a lost handle can never score as lost. turnScores() fills the turns table (rung 6 work), but it cannot count above a failed rung 5. Rung 7 would fail anyway: no sentence-embedding model runs in the browser."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 1,
           "evidence": "budgetWords() maps the dial to a 140-to-30 word budget inside the compress prompt only (rung 1). Rung 2 fails: neither the budget nor the capsule's word count is displayed (the plate shows capsule bits only), so requested and achieved length cannot be compared; there is no run history and no plot, and on fallback the dial changes nothing because ECHO_CAP is one fixed capsule."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Dispute upheld (rater 9). Rungs 1-4 hold: LEVELS budgets go into PROMPTS.compressUser(), the capsule panel shows '6 words of 17 asked', the runs table keeps every run, and the plot puts two-part rate on x with the DEFLATE floor marked at rate 0.52 and distortion 0 (desk.png mini plot). Rung 5 fails on two counts. First, main.js plotData() builds 'series', the only model polylines and spread bands, from runs with kind 'recorded' only. plot.js renderPlot() draws live and engine runs as bare markers, so a sweep on the visitor's own text lands as five unjoined dots, not a curve; the rater saw this too. Second, the rung's public-route path does not run. The rater's 5-level sweep got HTTP 400 on its compress call. In my headless page test on the public route (page served as dataspace.test so llm.js never probes Ollama), even the single-level L1 compress call got HTTP 400 and fell to engine capsules, which make no rebuild calls and never enter the 45 s queue. Rungs 6 to 9 have working parts (3 recorded runs per level with bands, the distortion select with a lexical ghost line, three recorded models overlaid), but rungs are cumulative."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 3,
           "evidence": "The FRAG shader ray-marches 200 geodesic steps with photon ring and Doppler-boosted disk (rung 2); draw() binds uCapLum (capsule/source bits) to core glow, uDeg to Hawking spark intensity, uFid to how much disk re-forms, uAvgBits to disk warmth and source bits to horizon radius (rung 3). Rung 4 fails: uploadHist() uploads the 64-bin per-token histogram but the shader never samples it, and the screenshot shows one washed cream disk; uFloorR is clamped to 9 and the floor ring falls off screen."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Dispute upheld (rater 8; both disputes support 5). Rungs 1-5 hold: FRAG ray-marches Schwarzschild geodesics and the scene orbits. Band brightness from bits per token (uBands), the kept share, and rate to the gold core drive distinct channels, and the legend names each mapping with units (4 to 40 bits per token; full glow at rate 0.5). On the default sample 32 of 64 bands clip at the 40-bit cap (mean 39.9 bits per content token, recomputed in Node), but the other bands still separate high and low passages. Rung 6 fails. main.js sceneFor() makes a mote only for a dropped token that holds a letter or digit, and it stops at 161 marks ('if (lost.length > 160) break'). The legend's #lg_lost prints m.lex.dropped. I re-scored all 160 recorded runs in Node with measures.js and bpe.js. On the default run origin.llama3.1-8b.r1.L3 the legend says '124 tokens, 6 facts' (desk.png shows the same text), but the scene builds 102 token motes and 6 fact motes; the 22 dropped punctuation tokens get none. In 70 of the 160 runs the cap also removes dropped word tokens (worst: replica.llama3.1-8b.r2.L5, with 195 dropped word tokens and 141 motes). So 'each dropped token or fact is one escaping particle' does not hold, and the legend counts more motes than the scene draws. Rungs 7 and 8 work (the stage strip follows real progress, and compare mode draws two horizons), but they cannot count above rung 6."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 2,
           "evidence": ".plate shows source, capsule, ratio, fidelity and degradation with unit lines (rung 2). Rung 3 fails: applyResult() measures the capsule but never prints its text. #d_toks and #m_bar exist, but #m_floormark is clamped by Math.min(1, floor/src) and sits at the right end of the bar after every collapse on natural text (and at the left end before one, since updateRatioBar() returns early without a capsule)."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Dispute upheld (rater 8; disputes support 7 and 1, the lower is taken). Rung 1 holds: figures print as text. Rung 2 fails. It names five plate figures: source bits, capsule bits, ratio, fidelity and degradation. The G1 plate (dataspace.html #plate) shows source, capsule, rate, lossless floor, lexical, numbers, names and turns. It prints no degradation or distortion figure; distortion appears only on the plot's y axis (the desk.png plate confirms this). Rungs 3 to 7 work: the capsule panel reads '6 words of 17 asked · 16 tokens · 48 chars · 584 bits'; the coloured diff and the rate bar put the floor at its true position; the strip and heat views shade tokens by bits; hover links the views; and clicking a plot point loads that run. Rung 8 would fail too. The per-unit table has numbers and names only. measures.js scoreRun() builds units from extractNumbers() and extractEntities() alone, the DISTORTIONS registry has no claim measure, and a search for 'claim' in the lab's modules finds only prose. One labelled degradation figure on the plate would lift the axis to 7."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "IBM Plex Mono on all text and every colour set in the page's CSS (rung 1); CSS variables --void/--amber/--blue/--red, hairline .plate and amber .bp corner brackets, no overlap at 1440 px (rung 2). Rung 3 fails: in the screenshot #mid_cap (amber, where the capsule bits and ratio print after a run), the .sub paragraph and the COLLAPSE button sit unbacked on the bright cream disk and are close to unreadable; the plate's #6B7682 unit lines on grey glass are also far under 4.5:1. The CSS uses 9 px and 9.5 px text."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Dispute upheld (rater 2). Rung 1 holds: IBM Plex Mono on all text, and every colour comes from the page's CSS. Rung 2 fails on 'no overlap at 1440 px'. In my official desk.png (1440, default URL), cropped and enlarged 4x, mote dots sit on the glyphs of the lost-fact labels: on the 'b' of 'Ouroboros', the 'e' of 'Degradation' and the 'e' of 'one'. scene.js drawMarks() draws v.motes in one pass, with the fact labels first (sceneFor pushes units first) and the token dots after them, and it does no collision avoidance. Because the labels drift, the rater's own desk.png also had 'AEA' over 'Ouroboros'. The rater's contrast failures above rung 2 stand: the '0.5' tick at 3.40:1, the '?' glyphs at 3.63:1, and the selected chip at 4.29:1."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 2,
           "evidence": "#go starts a run (rung 1); the #src textarea re-runs measureSource() on input (rung 2). Rung 3 fails: the dial changes the capsule only at positions the route has cached for the default sample; at any other position, or on the visitor's own text, the reconstruct call gets HTTP 402 and fail() plays the fixed ECHO_CAP. Orbit is mouse and wheel only; no touch or key handlers, no URL state."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Dispute upheld in substance (rater 8). Rungs 1-2 hold: #go runs a collapse, and #src input re-measures the source within 220 ms. Rung 3 fails on its public-route half. I drove the page on the public route in headless Chrome, served as dataspace.test so that llm.js isLocalPage() is false and Ollama is never probed, using the default sample. At L1 gentle the compress call got HTTP 400, and the page fell to the engine ('33 words of 47 asked', header 'engine · offline engine (extractive)'). At L5 brutal the run went live ('5 words of 5 asked', gpt-oss-20b, rebuilt after a 45 s countdown). The rater's 4 public-route page runs and the skeptic's replay also got HTTP 400 (output_token_limit_exceeded). One direct replay of an L3 request returned 200. So the skeptic's 'never returns a capsule' is too strong, but no page run has produced a gentle capsule on the public route, and the gentle-versus-brutal check on that route fails. Rungs 4 to 8 work (touch, keys, presets, hand-edited rebuild, URL state, pins), but they cannot count above rung 3."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 1,
           "evidence": "SAMPLE is one bundled conversation (rung 1). Rung 2 fails: ECHO_CAP names Luis, who is absent from SAMPLE (checked by string search), so it is not a run of this page's prompt on this sample, yet #src_pill labels it 'recorded round-trip' with no model, date or prompt behind it."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Dispute upheld (rater 8; both disputes support 5). Rungs 1-5 hold. runs-origin, -replica, -ledger and -flatbread.json hold 160 recorded runs (45, 45, 40, 30), each preset at 5 levels, with digest, quant, params, Ollama 0.40.15, seed, date, prompt version and the verbatim calls; tests.mjs confirms each rebuild equals its stored reply. Rung 6 fails: live runs are not logged with the same provenance fields. flow.js collapse() and rebuildOnly() store only route, model, date, promptVersion, seed, temperature and repeat, and llm.js returns only the model tag. So views.js renderCalls() prints 'weights -' and 'Ollama -' for every live run, while recorded runs show '46e0c10c039e · Q4_K_M · 8.0B' and v0.40.15. Rungs 7 and 8 work (three named models with verbatim replies, and export then reload reproduces 45 of 45 runs), but they cannot count above rung 6."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 2,
           "evidence": "collapse() chains two callModel() GETs to text.pollinations.ai on the textarea text and falls back to ECHO_CAP/ECHO_REC, with #src_pill naming live or recorded (rung 2). Measured 2026-11-11: on the visitor's own text the reconstruct call, fired at once after the compress call, gets HTTP 402 FREE_LIMIT; only the default sample at the default dial completes, because the route answers both prompts from its cache in under 400 ms, and the pill then says live. Rung 3 fails: fail() calls applyResult(ECHO_CAP, ECHO_REC), scoring the visitor's textarea against the sample's reconstruction; collapse() also sends only the first 1500 characters while applyResult() scores the whole textarea, with no notice."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Dispute rejected (skeptic 1); the rater's 2 stands. The dispute's main fact is wrong: on the public route the page does make two calls. In my headless page test (served as dataspace.test, so llm.js picks pollinations), the L5 collapse on the default sample sent the compress call (HTTP 200 at 74 s), counted down 'WAITING ... next call (rebuild L5) in 27 s', then sent the rebuild (HTTP 200 at 131 s), and the header read 'live · gpt-oss-20b · L5 brutal'. Bundled recorded runs load and play offline with 'recorded' in the header. A failed call is labelled 'engine' with 'No live run happened'. Rung 3 fails as the rater found: LIMITS.sourceChars cuts the text sent to the model at 4,000 characters, but measureSource() measures all of S.source, so the plate mixes full-text and cut-text figures. A hand-edited capsule whose rebuild never ran is also labelled 'live'. Rung 5 also fails: in the same test the L1 gentle compress call got HTTP 400 and fell to the engine. The L5 compress also waited inside _pollinations() with no countdown, because waitWindow() checks the route before the route is known."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 1,
           "evidence": "The h1 'Compress a conversation. Watch what dies.' and the .sub premise paragraph (rung 1). Captions exist (#mid_src 'bits falling in', #mid_cap capsule bits and ratio, #mid_lost 'escaped as radiation') and the footer .tag splits [real] from [metaphor], but rung 2 fails on the tags' truth: the footer tags 'live round-trip' [real], yet on the published site the visitor's own text never completes one (the reconstruct call gets HTTP 402 and fail() plays the bundled ECHO_CAP), and the default sample's 'live' reply is served from the route's cache."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Not disputed; the rater's grade stands. Rung 1 holds: the h1 and the .sub premise. Rung 2 fails on the truth of the footer tags. The footer tags 'live runs through the route the pill names' as [REAL], but on the public route, the route of the published site, the rater's 4 page runs, including both on the visitor's own text, got HTTP 400 and fell to the offline engine. My public-route page test went live once (L5 on the default sample) and fell back once (L1), so live runs there are intermittent. No live run on a visitor's own text has been shown. Everything above rung 2 exists and works: DEFS behind each '?', the floor relation copy, a 5-step tour, the metaphor table, limitsNote quoting the run's own example, methods citing Shannon 1948 and 1959, RFC 1951 and Wagner-Fischer 1974, and a findings card. Rung 10 would still fail, because entropy and fidelity have no manipulable example."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 3,
           "evidence": "rz() caps devicePixelRatio at 1.5 with a 0.85 render scale, and mk()/link errors print a visible WEBGL SHADER ERROR block (rung 2); the @media (max-width:760px) block stacks panelL, mid, plate and diff into one column; a ?still shot in a true 400 px iframe shows every block readable with nothing clipped (rung 3). Rung 4 fails: the variable reduce reads prefers-reduced-motion and is never used, so rotation and collapse run regardless. Reference GPU Intel UHD Graphics; no frame time was graded at G0 because rung 4 fails first."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Dispute upheld (rater 8). Rungs 1-4 hold: resize() caps DPR at 1.5 with render-scale tiers, and shader errors print into #nogl. At 400 px the page is one column with scrollWidth 400. With reduced motion the loop stops and kick() draws once per change. Rung 5 fails: 'load a run file' has no visible focus. dataspace.css sets '.file input { position:absolute; inset:0; opacity:0 }' and '.file { overflow:hidden }', and no :focus-within rule exists. In headless Chrome at 1440 I focused the control before it (#exRuns) and pressed a real Tab. document.activeElement became #imRun, :focus-visible matched, and its computed outline was 2px solid rgb(212,162,76) at opacity 0. The label's pixels before and after focus differ in 0 pixels. The rest of the rung works: aria-live #status, and the canvas has role=img with aria-describedby. Rungs 6 to 8 have working parts (adapt() tiers, the visibilitychange stop, the bits mark at 1.43 s, the 2D stand-in without WebGL). Rung 6 was timed with readPixels sync, not the 10 s DevTools trace the metric names."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 2,
           "evidence": "One file, labs/dataspace.html, with CSS, prompts, sample data, measures and shader inline (rung 1). tokenize(), infoBits(), deflateBits() and fidelity() take and return plain values (rung 2). Rung 3 fails: under ?still draw() still feeds uTime=(now-t0)/1000, so rotation (rot=omega*uTime*3.0), fbm turbulence, the ign() jitter and dith() change between shots; only uPhase (ST.phase=1.55) and the resolution are frozen. Rung 4 would fail too: uploadHist() fills a texture the shader never samples, reduce is never read, and the shader keeps unused capR, cd and hr."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Not disputed; the rater's grade stands. Rungs 1-3 hold: the lab is split into modules, measures.js is pure, and two ?still 1440 screenshots taken 5 s apart differ in 0 pixels. Rung 4 fails because the page sets values it never reads: scene.js:114 'this.running = true', scene.js:167 the per-view 'prevStage', flow.js:73 'this.detail', flow.js:133 'run.sourceCut', and lossless.worker.js:35 'ref.brotliMs'. Higher rungs already exist (tests.mjs 699 of 699 with 160 runs re-scored identically, config.js data, the flow.js state machine, scene and views taking plain objects, the DISTORTIONS registry), so removing these fields would lift the axis to about 8."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "da78a3d" }
   ]
 }
