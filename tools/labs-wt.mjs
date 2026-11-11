@@ -223,12 +223,52 @@ function cmdSync(n, from = 'main') {
     }
   }
   const r = git(['merge', '--no-edit', from], p);
-  if (r.ok) { console.log(`merged ${from} into labs/${lab.name}`); return; }
-  const conflicts = git(['diff', '--name-only', '--diff-filter=U'], p).out;
-  git(['merge', '--abort'], p);
-  console.log(`FAILED: merge of ${from} into labs/${lab.name} conflicted and was aborted; the worktree is unchanged.\n` +
-    `conflicting files:\n${conflicts || r.out}`);
-  process.exitCode = 1;
+  if (r.ok) { regenerate(p, lab, `merged ${from} into labs/${lab.name}`); return; }
+  const conflicts = git(['diff', '--name-only', '--diff-filter=U'], p).out.split(/\r?\n/).filter(Boolean);
+  const plan = conflicts.map((f) => ({ f, how: resolution(f, p) }));
+  const stuck = plan.filter((x) => !x.how);
+  if (stuck.length) {
+    git(['merge', '--abort'], p);
+    console.log(`FAILED: merge of ${from} into labs/${lab.name} conflicted and was aborted; the worktree is unchanged.\n` +
+      `files that need a person:\n${stuck.map((x) => '  ' + x.f).join('\n')}`);
+    process.exitCode = 1;
+    return;
+  }
+  for (const { f, how } of plan) {
+    git(['checkout', how === 'ours' ? '--ours' : '--theirs', '--', f], p);
+    git(['add', '--', f], p);
+    console.log(`  resolved ${f}: ${how === 'ours' ? 'kept the branch copy (it equals labs/foundation, newer than main)' : 'took main, to regenerate'}`);
+  }
+  const c = git(['commit', '--no-edit'], p);
+  if (!c.ok) { git(['merge', '--abort'], p); die('could not commit the resolved merge: ' + c.err); }
+  regenerate(p, lab, `merged ${from} into labs/${lab.name} (conflicts resolved by rule)`);
+}
+
+/* Which side wins a conflict, by rule. null means a person decides. */
+const GENERATED = ['LABS_LEVELS.md', 'labs/assets/js/config/levels.data.js'];
+const FOUNDATION_OWNED = [/^tools\//, /^labs\/assets\/js\/ai\//, /^\.github\/workflows\//];
+function resolution(file, p) {
+  if (GENERATED.includes(file)) return 'theirs';
+  if (FOUNDATION_OWNED.some((re) => re.test(file))) {
+    // Keep the branch copy only when it is exactly the foundation's current copy.
+    const mine = git(['rev-parse', `HEAD:${file}`], p).out;
+    const found = git(['rev-parse', `labs/foundation:${file}`]).out;
+    return mine && mine === found ? 'ours' : null;
+  }
+  return null;
+}
+
+/* Regenerate the level table and hub data from the ladder files, and commit if they changed. */
+function regenerate(p, lab, msg) {
+  if (fs.existsSync(path.join(p, 'tools', 'levels.mjs'))) {
+    const w = run('node', ['tools/levels.mjs', 'write'], { cwd: p });
+    if (w.ok && git(['status', '--porcelain', '--', ...GENERATED], p).out) {
+      git(['add', '--', ...GENERATED], p);
+      git(['commit', '-m', 'levels: regenerate table and hub data'], p);
+      msg += '; regenerated the level table';
+    }
+  }
+  console.log(msg);
 }
 
 async function cmdShip(n) {
