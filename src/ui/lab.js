@@ -73,8 +73,8 @@
       href: 'labs/roaster.html',
     },
     {
-      name: 'Token EKG', tag: 'instrumented AI · biosignal',
-      blurb: 'A model does not emit tokens evenly — it stalls on cache pressure, bursts when the batch clears, jitters with the scheduler. Token EKG timestamps each token as it streams and draws that hidden cadence as a live trace with a spectral read of its rhythm. Real telemetry of the serving pipeline — honestly not a brain.',
+      name: 'Token EKG', tag: 'measurement · tokens',
+      blurb: 'Times a model\'s reply chunk by chunk as it streams from your own Ollama, and checks the page\'s clock against the server\'s counters: first token, waits, stalls, decode rate. Without a local model it replays 80 runs recorded on a laptop GPU and times one public reply. Four tokenizers, checked against their reference libraries, price one sentence in 23 languages: 33 tokens in English, 512 in Burmese.',
       href: 'labs/token-ekg.html',
     },
     {

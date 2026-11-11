@@ -5,7 +5,7 @@
      node labs/assets/js/token-ekg/record-traces.mjs [plan.json] > traces.raw.json
 
    It calls the same recordOllamaStream() the page runs in the browser
-   (engine/routes/ollama.js), so a recording and a live trace come from one
+   (labs/assets/js/ai/stream/ollama.js), so a recording and a live trace come from one
    parser and one clock rule. Each run notes which models were resident
    on the server when it started, because a shared machine is a confound:
    another process using the GPU changes the cadence.
@@ -18,7 +18,7 @@
    ============================================================ */
 
 import { readFileSync } from 'node:fs';
-import { recordOllamaStream } from './engine/routes/ollama.js';
+import { recordOllamaStream } from '../ai/stream/ollama.js';
 import { OLLAMA, PROMPTS, longContext } from './config.js';
 
 const base = OLLAMA.base;
@@ -89,7 +89,7 @@ for (const run of plan) {
       group: run.group || null,
       recorded: started,
       route: 'ollama-local',
-      recorder: `node ${process.versions.node}, engine/routes/ollama.js`,
+      recorder: `node ${process.versions.node}, ai/stream/ollama.js`,
       server: `Ollama ${version}`,
       params: meta.parameter_size || '',
       quant: meta.quantization_level || '',

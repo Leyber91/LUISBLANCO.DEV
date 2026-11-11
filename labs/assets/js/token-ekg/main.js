@@ -19,14 +19,15 @@ import { LLM } from '../ai/llm.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { OLLAMA, PROMPTS, LIVE_PRESETS, SWEEP, PARALLEL, TOKENIZERS, ANALYSIS, longContext } from './config.js';
 import { analyze, fmtMs, quantile, mannWhitney, ks2, events } from './engine/stats.js';
-import * as Ollama from './engine/routes/ollama.js';
-import { streamingRoutes } from './engine/routes/index.js';
+import * as Ollama from '../ai/stream/ollama.js';
+import { streamingRoutes } from '../ai/stream/index.js';
 import * as Shelf from './engine/traces.js';
 import { validateTrace } from './engine/schema.js';
 import { headline, provenance, TOUR } from './engine/narrate.js';
 import { Strip, lowerBound } from './view/strip.js';
 import { drawTachogram, drawHistogram, drawPoincare, drawPeriodogram } from './view/plots.js';
 import { TokenBench } from './view/tokens-view.js';
+import { loadTokenizer } from './engine/tokens.js';
 import { renderDataset } from './view/dataset.js';
 import { cardSVG, toCSV } from './view/export.js';
 
@@ -103,7 +104,7 @@ $('shelf').addEventListener('click', (e) => {
   if (!b) return;
   const t = byId(b.closest('.tr').dataset.id);
   if (!t) return;
-  if (b.dataset.act === 'play') { stopTour(); setA(t, { play: true }); }
+  if (b.dataset.act === 'play') { stopTour(); setA(t, { play: true, user: true }); }
   if (b.dataset.act === 'pin') setB(S.B === t ? null : t);
 });
 
@@ -121,7 +122,7 @@ function setB(t) {
 /* ---------------- the trace playing ---------------- */
 function isLiveTrace(t) { return !!(S.live && S.live.trace === t); }
 
-function setA(t, { play = true, at = 0 } = {}) {
+function setA(t, { play = true, at = 0, user = false } = {}) {
   S.A = t;
   S.aFull = analyze(t);
   strip.live = isLiveTrace(t);
@@ -147,8 +148,27 @@ function setA(t, { play = true, at = 0 } = {}) {
   $('ticker').classList.toggle('live', strip.live);
   updatePlayBtn();
   renderDatasetSel();
+  if (user) wantTokenizers(t);
   tick(true);
   syncURL();
+}
+
+/* ---------------- tokenizers, on demand ----------------
+   None loads with the page. All four load when the cost section comes near the screen; the
+   cadence section's tokenizer rows load just the one they need when the visitor picks a trace
+   that uses it (o200k for a one-piece reply, the model's own vocabulary for Qwen3 or Mistral). */
+const TK = {};
+async function ensureTokenizer(id) {
+  if (TK[id]) return TK[id];
+  try { TK[id] = await loadTokenizer(id, HERE); } catch { return null; }
+  if (S.A) { renderCheck(); renderStats(); renderReadouts(); }
+  return TK[id];
+}
+function wantTokenizers(t) {
+  if (!t) return;
+  if (t.kind === 'oneshot') ensureTokenizer('o200k_base');
+  const mt = matchingTokenizer(t.model);
+  if (mt) ensureTokenizer(mt.id);
 }
 
 function renderNarr() {
@@ -255,7 +275,7 @@ function splitMs(ms) {
   return [ms >= 100 ? Math.round(ms).toString() : ms.toFixed(1), 'ms'];
 }
 
-function o200() { return bench?.tk?.o200k_base || null; }
+function o200() { return TK.o200k_base || null; }
 
 function renderReadouts() {
   const t = S.A, a = S.aNow || S.aFull;
@@ -327,9 +347,12 @@ function renderCheck() {
   html += row('tokens', `${fmt(a.n)} chunks`, show ? `${fmt(s.evalCount)} eval_count` : (t.usage ? `${fmt(t.usage.completion_tokens)} usage` : pend),
     show ? (s.evalCount - a.n === 1 ? 'one more than the chunks: the end-of-turn token is counted, not sent' : `${fmt(s.evalCount - a.n)} more than the chunks${a.think ? ': thinking tags and the end-of-turn token are counted, not sent' : ''}`) : '');
   const mt = matchingTokenizer(t.model);
-  if (mt && bench?.tk?.[mt.id] && a.n) {
+  if (mt && !TK[mt.id] && a.n) {
+    html += row('re-tokenized', '-', show ? `${fmt(s.evalCount)} eval_count` : pend, `the ${esc(mt.short)} tokenizer loads when you play this trace yourself or open the cost section`);
+  }
+  if (mt && TK[mt.id] && a.n) {
     const txt = t.chunks.slice(0, a.n).map((c) => c.text).join('');
-    const n = bench.tk[mt.id].encode(txt).length;
+    const n = TK[mt.id].encode(txt).length;
     const eos = show && s.doneReason === 'stop' ? 1 : 0;
     const think = show && a.think ? ' (a thinking run also spends tokens on the tags around its reasoning, which are not sent, so it does not add up here)' : '';
     html += row('re-tokenized', `${fmt(n)} + ${eos} = ${fmt(n + eos)} tok`, show ? `${fmt(s.evalCount)} eval_count` : pend,
@@ -377,8 +400,8 @@ function renderStats() {
 /** With the model's own tokenizer loaded, count the tokens each chunk carried (a chunk can hold more than one). */
 function tokensPerChunk(t, a) {
   const mt = matchingTokenizer(t.model);
-  const k = mt && bench?.tk?.[mt.id];
-  if (!k || !a.n) return row('tokens per chunk', '-', '-', 'needs the model\'s own tokenizer (Qwen3 or Mistral here)');
+  const k = mt && TK[mt.id];
+  if (!k || !a.n) return row('tokens per chunk', '-', '-', mt ? `the ${esc(mt.short)} tokenizer loads when you play this trace yourself or open the cost section` : 'needs the model\'s own tokenizer (Qwen3 or Mistral here)');
   const dist = {};
   let tot = 0;
   for (const c of t.chunks.slice(0, a.n)) { const m = k.encode(c.text, { noPrefix: true }).length; dist[m] = (dist[m] || 0) + 1; tot += m; }
@@ -592,7 +615,7 @@ $('import').addEventListener('change', async (e) => {
     S.extra.unshift(...list);
     renderShelf();
     stopTour();
-    setA(list[0]);
+    setA(list[0], { user: true });
     $('shelf-msg').textContent = `imported ${list.length} trace${list.length > 1 ? 's' : ''}`;
   } catch (err) {
     $('shelf-msg').textContent = `not imported: ${err.message}`;
@@ -701,7 +724,7 @@ async function recordOne(cfg, i, n) {
   const meta = models.find((m) => m.name === model) || {};
   const trace = {
     id: Shelf.newId('live'), label: `${model}, ${kind === 'custom' ? 'your prompt' : PROMPTS[kind].label}${think ? ', thinking' : ''}${n > 1 ? `, run ${i + 1} of ${n}` : ''}`,
-    origin: 'live', kind: 'stream', route: route.id, recorder: `browser, engine/routes/${route.adapter === Ollama ? 'ollama' : 'openai-sse'}.js`,
+    origin: 'live', kind: 'stream', route: route.id, recorder: `browser, ai/stream/${route.adapter === Ollama ? 'ollama' : 'openai-sse'}.js`,
     recorded: new Date().toISOString(), model, params: meta.params || '', quant: meta.quant || '',
     promptKey: kind, promptChars: prompt.length,
     promptPreview: kind === 'long' ? `[the full UDHR in English, ${udhrFull.length} characters] ${PROMPTS.long.text}` : prompt,
@@ -783,7 +806,7 @@ $('m-go').addEventListener('click', async () => {
   }
   $('m-go').disabled = false; $('m-stop').disabled = true;
   const last = done[done.length - 1];
-  if (last) setA(last, { play: false, at: 'end' }); else renderShelf();
+  if (last) setA(last, { play: false, at: 'end', user: true }); else renderShelf();
   if (done.length > 1) {
     S.repeat = done;
     $('m-msg').textContent = repeatSummary(done);
@@ -852,7 +875,7 @@ $('p-go').addEventListener('click', async () => {
   if (Shelf.save(trace)) S.saved = Shelf.loadSaved(); else S.extra.unshift(trace);
   $('p-msg').textContent = `measured: ${fmtMs(r.ms)} via ${r.source}`;
   stopTour();
-  setA(byId(trace.id) || trace, { play: true });
+  setA(byId(trace.id) || trace, { play: true, user: true });
 });
 
 /* ---------------- URL state ---------------- */
@@ -908,8 +931,31 @@ function clockResolution() {
   return min;
 }
 
-/* ---------------- boot ---------------- */
+/* ---------------- the cost section: built when it is first needed ---------------- */
 let bench = null;
+async function initBench(udhr) {
+  if (bench) return;
+  bench = new TokenBench({
+    text: $('tok-text'), chips: $('chips'), chips2: $('chips2'), h1: $('chips-h1'), h2: $('chips-h2'), inspect: $('inspect'), read: $('tok-read'),
+    langs: $('langs'), sum: $('lang-sum'), encsw: $('encsw'), langLabel: $('tok-lang'), hint: $('lang-hint'), viewsw: $('viewsw'), cmp: $('tok-cmp'),
+  }, { onChange: syncURL, base: HERE });
+  try {
+    await bench.init(udhr, { enc: params.get('enc'), cmp: params.get('cmp'), lang: params.get('lang') });
+    Object.assign(TK, bench.tk);
+    renderCheck();
+    renderStats();
+    renderReadouts();
+    const v = await bench.verify();
+    const okAll = v.results.every((r) => r.ok === r.n);
+    $('verify').innerHTML = `Checked just now in this browser: ` + v.results.map((r) => `${esc(TOKENIZERS.find((t) => t.id === r.id).short)} <b>${r.ok}/${r.n}</b>`).join(', ') +
+      ` texts give exactly the reference libraries' token ids (reference made ${esc(v.made)}).` + (okAll ? '' : ` Differences: ${v.results.filter((r) => r.bad.length).map((r) => `${r.id}: ${r.bad.slice(0, 4).join(', ')}`).join('; ')}.`);
+  } catch (e) {
+    $('tok-read').innerHTML = `<div class="ro"><div class="k">tokenizer</div><div class="v">not loaded</div><div class="h">${esc(e.message || e)}</div></div>`;
+    $('verify').textContent = 'The tokenizers did not load, so nothing was checked.';
+  }
+}
+
+/* ---------------- boot ---------------- */
 renderSpeeds();
 renderFilter();
 reveal();
@@ -930,34 +976,26 @@ reveal();
   if (qd && Number(qd) > 0) { S.divAuto = false; S.div = Number(qd); }
   if (qb && byId(qb)) { S.B = byId(qb); S.bFull = analyze(S.B); strip.setB(S.B); }
   const first = qa && byId(qa);
-  if (first) setA(first, { play: !reduce && !still });
+  if (first) setA(first, { play: !reduce && !still, user: true });
   else if (!reduce && !still) startTour(0);
   else setA(byId('qwen8-think') || all()[0], { play: false, at: 'end' });
   if (reduce || still) { S.tau = strip.end(); S.playing = false; updatePlayBtn(); tick(true); }
   requestAnimationFrame(loop);
   setupLive();
   publicText();
-  renderDataset($('ds'), $('ds-note'), S.runs, (id) => { stopTour(); setA(byId(id), { play: true }); $('cadence').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); });
+  renderDataset($('ds'), $('ds-note'), S.runs, (id) => { stopTour(); setA(byId(id), { play: true, user: true }); $('cadence').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); });
   renderDatasetSel();
   const res = clockResolution();
   $('ev-clock').textContent = `This browser's clock resolution, measured on load: ${Number.isFinite(res) ? fmtMs(res) : 'unknown'}.`;
 
+  $('tok-read').innerHTML = '<div class="ro"><div class="k">tokenizers</div><div class="v">waiting</div><div class="h">four vocabularies, about 2.5 MB, load when this section comes into view</div></div>';
   if (udhr) {
-    bench = new TokenBench({
-      text: $('tok-text'), chips: $('chips'), chips2: $('chips2'), h1: $('chips-h1'), h2: $('chips-h2'), inspect: $('inspect'), read: $('tok-read'),
-      langs: $('langs'), sum: $('lang-sum'), encsw: $('encsw'), langLabel: $('tok-lang'), hint: $('lang-hint'), viewsw: $('viewsw'), cmp: $('tok-cmp'),
-    }, { onChange: syncURL, base: HERE });
-    try {
-      await bench.init(udhr, { enc: params.get('enc'), cmp: params.get('cmp'), lang: params.get('lang') });
-      renderCheck();
-      renderReadouts();
-      const v = await bench.verify();
-      const okAll = v.results.every((r) => r.ok === r.n);
-      $('verify').innerHTML = `Checked just now in this browser: ` + v.results.map((r) => `${esc(TOKENIZERS.find((t) => t.id === r.id).short)} <b>${r.ok}/${r.n}</b>`).join(', ') +
-        ` texts give exactly the reference libraries' token ids (reference made ${esc(v.made)}).` + (okAll ? '' : ` Differences: ${v.results.filter((r) => r.bad.length).map((r) => `${r.id}: ${r.bad.slice(0, 4).join(', ')}`).join('; ')}.`);
-    } catch (e) {
-      $('tok-read').innerHTML = `<div class="ro"><div class="k">tokenizer</div><div class="v">not loaded</div><div class="h">${esc(e.message || e)}</div></div>`;
-      $('verify').textContent = 'The tokenizers did not load, so nothing was checked.';
+    const start = () => initBench(udhr);
+    if (params.get('enc') || params.get('cmp') || params.get('lang')) start();
+    else {
+      const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: '300px 0px' });
+      io.observe($('tokens'));
+      $('tokens').addEventListener('focusin', start, { once: true });
     }
   }
 })();

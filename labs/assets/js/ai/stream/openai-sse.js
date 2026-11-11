@@ -1,5 +1,5 @@
 /* ============================================================
-   token-ekg/engine/routes/openai-sse.js — route adapter: any
+   ai/stream/openai-sse.js — route adapter: any
    OpenAI-compatible POST /chat/completions with stream: true
    (server-sent events). Same record() shape as ollama.js.
 
@@ -10,7 +10,7 @@
 
    Timing semantics differ from Ollama's NDJSON: an SSE "chunk" is
    whatever the server flushed in one event, and a proxy may batch
-   several events into one read. analyze() marks intervals under
+   several events into one read. Token EKG's analyze() marks intervals under
    ANALYSIS.BUFFER_MS as buffered and keeps them out of the rate.
    Server counters: the usage object, when the server sends it
    (stream_options.include_usage). No durations are reported by this

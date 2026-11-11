@@ -1,5 +1,5 @@
 /* ============================================================
-   token-ekg/engine/routes/ollama.js — route adapter: Ollama's
+   ai/stream/ollama.js — route adapter: Ollama's
    native streaming chat (POST /api/chat, stream: true, NDJSON).
 
    Every route adapter exports the same record() shape:
