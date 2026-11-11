@@ -1,0 +1,311 @@
+{
+  "id": "alt-reality",
+  "title": "Alternate Reality Scenarios",
+  "page": "altverse.html",
+  "thesis": "The visitor dials or types any change to physics or history, watches a validated stage graph of rules and models weave a world with every rejection shown, then forks it into a navigable tree of worlds whose maps, chronologies and causal graphs trace each claim back to the divergence and travel as a shareable artifact.",
+  "axes": [
+    {
+      "id": "divergence-propagation",
+      "name": "Divergence propagation",
+      "frame": "model",
+      "metric": "How a world's facts are produced from the divergence: count of world values computed by code from typed divergence parameters or evaluated rules versus read from a table keyed by divergence id, counted by tracing generateEcho and the pipeline in the source, plus whether rater-chosen parameter values yield worlds with no placeholder strings.",
+      "ladder": [
+        "No world is produced; nothing runs after a divergence is chosen.",
+        "At least one complete world (premise, effects, regions, eras, events, peoples, contrasts) appears after a divergence is chosen, whether read from a hand-authored table keyed by divergence id or computed, and its parts cross-reference by ids (fx-, rg-, ev-).",
+        "Code reads at least one numeric divergence parameter (e.g. g in m/s2, c in km/s) and computes at least 3 world values from it by formulas visible in the source.",
+        "A rule base of at least 20 typed propagation rules (condition evaluated on the divergence record, cause, effect, mechanism, certainty tag) emits the first-order effects of every preset; no table keyed by divergence id (as echo-world.js CONTENT is today) supplies any first-order effect.",
+        "Second-order effects come from chaining rules at least 2 hops from the divergence; each effect stores its parent ids and a domain from schemas.js DOMAINS, and one world's chained effects span at least 3 of those domains.",
+        "For 5 values of one parameter chosen by the rater across its legal range, each woven world fills all 7 slots (premise, first-order, geography, chronology, civilizations, contrast, arrival) and contains no string matching the genericPhysics placeholders (/^(Region|Era|People|Turning point|Direct consequence) \\d/ or 'situation N').",
+        "Derived quantities carry units and come from named scaling laws (e.g. atmospheric scale height H = kT/(mg)), with the formula shown beside each number on the page.",
+        "A non-physics domain (history or biology) propagates through the same rule engine: at least 10 typed rules for that domain, taking dated baseline events as inputs.",
+        "A repository test checks at least 10 derived quantities: the no-divergence baseline reproduces Earth's values (scale height about 8.5 km, g 9.81 m/s2) within 5%.",
+        "The visitor sweeps a parameter and sees which downstream facts flip at which threshold, computed from at least 20 engine re-runs across the range.",
+        "Every generated fact traces to an executed rule or simulation step with its formula, and history is simulated step by step over at least 500 years, producing at least 300 events and 10 peoples, each event with a recorded cause chain and browsable by year (reference: Dwarf Fortress legends mode), driven by a changed constant or event."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "echo-world.js generateEcho copies one of three hand-authored worlds from CONTENT keyed by preset id (ice-sinks VETHLEND, slow-light LENTUA, strong-gravity BARUND) into createWorld's shape; parts cross-reference by typed ids (rung 1). No value is computed from the divergence and no divergence parameter is read as a number anywhere. genericPhysics is unreachable from the three presets and emits 'Region 1' / 'Direct consequence 1'. Rung 2 fails."
+        }
+      }
+    },
+    {
+      "id": "consistency-enforcement",
+      "name": "Consistency enforcement",
+      "frame": "model",
+      "metric": "Number of decidable consistency rules computed over the world graph on the path the public page runs, the validator's depth (structural, full schema, semantic), and whether violations are shown, repaired or blocked; counted in worldstate.js computeConsistency, schemas.js and the consistency ledger on altverse.html?still&tab=dossier (add &demo=slow-light or &demo=strong-gravity for the other worlds).",
+      "ladder": [
+        "No check runs on world content.",
+        "At least 1 decidable rule (e.g. id uniqueness) runs over every shown world, whatever produced it, and its result is shown on the page.",
+        "At least 5 structural rules over the world graph (id uniqueness, era order, cause resolution, bbox validity, path resolution) are computed in code and listed as pass or flag on the page.",
+        "At least 8 rules, including certainty non-inflation along every parent link (event to its cause, contrast to each path id, first-order effect and region to the premise and the preset ceiling), with passed and flagged counts shown on the page.",
+        "Every slot is validated against a full JSON Schema (required keys, types, enums, numeric ranges, array lengths), and each failure names its field path.",
+        "Rejections are visible to the visitor: the failing stage, the rule, the offending value, and whether a repair pass fixed it; a documented URL flag (e.g. ?fault=<rule>) plants a bad value so a rater can force one.",
+        "Each first-order effect is checked against every binding axiom (by rule or classifier), and contradictions are listed with the axiom they break.",
+        "At least 15 rules including cross-view invariants (every region named in chronology, peoples and threads exists on the map; every event year lies inside its era; no two region bboxes overlap unless marked contested), with a planted-fault test proving each rule fires.",
+        "The semantic causal audit (strong, weak or none per edge) is scored against human labels on at least 50 labeled cause-to-effect pairs kept in the repo, and the agreement percentage is shown on the page.",
+        "The visitor edits any fact and the ledger re-runs live, flagging every downstream fact the edit invalidates through stored parent ids.",
+        "Justification-based truth maintenance in the sense of Doyle (1979, Artificial Intelligence): every fact stores its justification set, retracting a fact cascades to its dependants, and every shipped preset world passes all of at least 25 rules with zero flags."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "On every shown world (altverse.html?still&tab=dossier, &demo=slow-light, &demo=strong-gravity) generateEcho calls worldstate.js computeConsistency, which runs 8 structural rules, and render/dossier.js lists each PASS/FLAG under '8/8 structural checks passed' (rungs 1 and 2); shared (#w=) and saved worlds show the ledger stored at weave time. Rung 3 fails: the inflation rule covers only event to cause, so LENTUA fx-003 and rg-004 (THEORETICAL under a SPECULATIVE premise and ceiling) pass unflagged; generateEcho run in Node on 2026-11-11 reports 8/8, 0 flagged for all three worlds. VETHLEND rg-003 and rg-005 overlap and no rule catches it. schemas.js guardKeys/guardItems run only in pipeline.js runLive, which the public page never reaches."
+        }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "Share of the 7 world slots (premise, first-order, geography, chronology, civilizations, contrast, arrival) filled by a model call in the visitor's session, with the answering route named, plus the count of validated facts the model added that the deterministic engine does not produce for the same divergence; measured by weaving a divergence on the public site, reading pipeline.js, and reading the route and provenance shown on the page.",
+      "ladder": [
+        "No model-call code exists in the lab.",
+        "A model client exists in the lab's code, and any world produced without a model is badged on the page as an offline sample.",
+        "A model fills at least one world slot on a route the visitor can enable (local Ollama or a key they bring), and that slot is marked as model-written.",
+        "On the keyless public route, one batched call per divergence (inside the 1 reply per 45 s limit) fills at least 3 slots; the page names the route that answered and shows the 45 s countdown and a cancel control while waiting.",
+        "All 7 slots can be model-filled in one weave (one call per stage on fast routes, one batched call on the public route), and the page shows how many of the 7 slots a model filled.",
+        "Every model output passes the schema and consistency validators before it enters the world; a failing slot gets one repair call, then falls back to the deterministic engine, and the world records per slot which of the three happened with the validator's failing field path; a documented fault flag corrupts one real reply so a rater can watch it.",
+        "Each slot shows a provenance chip (model and route, deterministic rule, or authored).",
+        "The visitor re-runs any one stage on a model route without regenerating the others, and stages downstream of it are marked stale until re-run.",
+        "Per-stage outcome rates (valid on first try, repaired, fell back, in %) are shown for the session and for a benchmark of at least 30 divergences whose results file is in the repo and linked from the page; the file also counts, per divergence, the validated facts the model added that the engine-only weave of the same divergence lacks.",
+        "The model proposes at least 3 typed fork points per world that pass the validator and open as branches in the world tree.",
+        "On that benchmark of at least 30 divergences, model-filled worlds of at least 50 id-bearing items each pass every consistency rule (at least 15) with zero flags after repair, and a blind rating recorded in the repo (at least 5 raters) scores them above the engine-only worlds for the same divergences on novelty."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "nemotron-client.js and prompts.js exist (rung 1, first half), but pipeline.js runWorld goes live only when provider.detect() returns 'worker' and AI_CONFIG.worker.base is set; labs/assets/js/ai/config.js has worker.base '' so every route, local Ollama included, falls to runEcho. The lab does not import labs/assets/js/ai/llm.js. render/world-view.js badges tier 'echo' as OFFLINE SAMPLE in the world header (rung 1, second half). Rung 2 fails."
+        }
+      }
+    },
+    {
+      "id": "cartography",
+      "name": "Generated cartography",
+      "frame": "graphics",
+      "metric": "What the Mapamundi draws from world data: geometry type (rectangles, polygons, heightfield, globe), plate overlaps, number of toggleable layers, whether the divergence changes the map by a stated rule, and links to other views; checked on altverse.html?still&tab=map (add &demo=slow-light or &demo=strong-gravity) at 1440 px and 390 px, and in render/map-canvas.js.",
+      "ladder": [
+        "No map exists.",
+        "Regions are listed by name.",
+        "Regions are drawn from stored coordinates on an equirectangular graticule, labeled at their centroid, tinted cold to warm from each region's climate field, and the canvas carries a projection label marking the map as stylized.",
+        "Hovering a legend entry highlights its region, and no two region plates overlap unless the overlap is drawn and labeled as contested.",
+        "Regions are generated polygons with irregular coastlines from seeded noise; the same seed redraws the same coastline.",
+        "Land and ocean come from a generated heightfield, and at least 3 layers toggle (elevation, climate bands, peoples).",
+        "The map responds to the divergence by a stated rule (e.g. ice extent from the freezing rule, relief scaled by 1/g), with the rule printed in the map caption.",
+        "Pan and zoom (drag, wheel or pinch, and +/- buttons) work, and at every zoom step no two drawn labels overlap (colliding labels are culled).",
+        "Climate bands are computed from latitude insolation and a stated lapse rate, and the no-divergence baseline puts its band edges within 10 degrees of reference latitudes printed on the page (tropics 23.4, subtropical arid belt 15 to 35, polar circles 66.6).",
+        "An era slider redraws the map for each era of the chronology, and regions, ice extent or peoples differ between at least 2 eras.",
+        "Heightmap, rivers, biomes, states and routes draw as separate toggleable layers, also on a globe the visitor rotates (the feature set of Azgaar's Fantasy Map Generator), and clicking any feature names the divergence rule that placed it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "render/map-canvas.js AltMap draws each region.bbox as a rounded-rect plate on an equirectangular graticule, tinted by a tempOf() regex on climate and biome, labeled at the centroid, and stamps 'PROJECTION: EQUIRECTANGULAR · STYLIZED / PLAUSIBLE' (rung 2); render/world-view.js legend mouseenter calls map.setHover. Rung 3 fails: on altverse.html?still&tab=map (VETHLEND) The Sere Equator (rg-003, lon -65..95, lat -16..16) and The Drowned Shelves (rg-005, lon 80..165, lat -42..8) are drawn over each other and their labels collide at 1440 px and at 390 px."
+        }
+      }
+    },
+    {
+      "id": "causal-graph",
+      "name": "Causal graph and timeline",
+      "frame": "graphics",
+      "metric": "How the causal record and chronology are drawn: ids as text, a scaled time axis, a node-link graph, and the number of views (graph, chronology, map) that highlight the same ids together; checked on altverse.html?still&tab=chrono and ?still&tab=dossier (add &demo=slow-light or &demo=strong-gravity) and in render/chronology.js and render/dossier.js.",
+      "ladder": [
+        "No causal record appears anywhere on the page.",
+        "Causes are stated in prose inside descriptions.",
+        "Events and contrasts print their cause ids (e.g. an event tagged with fx-003, a contrast path fx-001 then fx-003), and eras are listed top to bottom with their year spans.",
+        "The chronology is drawn on a time axis with a log or piecewise scale and era bands sized by duration, and at 1440 px every era band is at least 16 px tall, both the 3.5 Gyr Cold Genesis and the 350-year Thaw Engines included.",
+        "The causal record is drawn as a node-link graph from the divergence to effects, events, peoples and contrasts, every edge taken from stored ids.",
+        "Hovering or focusing a graph node highlights its ancestors and descendants; the same ids highlight in the chronology, and on the map for every id tied to a region (regions, peoples, events with a regionId).",
+        "Edge style encodes the certainty tag and the audit verdict (strong, weak, none), with a legend.",
+        "During weaving the graph grows in stage order as stages complete; under reduced motion it appears complete.",
+        "A layered layout with crossing minimization (Sugiyama-style) draws a world of at least 40 nodes at 1440 px with zero overlapping node labels; at 390 px branches collapse into an expandable list.",
+        "Clicking any edge shows the rule or model output that created it and its validator result.",
+        "The graph filters by era and by region and exports as SVG or PNG (reference standard: DAGitty, the browser causal-DAG editor at dagitty.net, extended here with time and space)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "On altverse.html?still&tab=chrono render/chronology.js lists eras top to bottom with year spans and each event with year, title, tag and '← fx-00N'; on ?still&tab=dossier render/dossier.js prints contrast paths as code ids joined by arrows (rung 2). Rung 3 fails: eras are equal-height blocks with no time axis; measured in headless Chrome at 1440 px on 2026-11-11, the 3.46 Gyr Cold Genesis and the 350-year Thaw Engines are both 85 px tall. No graph drawing exists. At 390 px the cause ids are hidden (see reach-and-speed)."
+        }
+      }
+    },
+    {
+      "id": "divergence-authoring",
+      "name": "Divergence authoring",
+      "frame": "interaction",
+      "metric": "What the visitor can change before weaving: count of preset divergences and domains, typed parameters with unit and range, free-text entry, compound divergences, dated historical events; counted on the compose screen (altverse.html) and in divergence-presets.js.",
+      "ladder": [
+        "No way to choose a divergence exists.",
+        "At least one divergence can be woven from the page.",
+        "At least 3 preset divergence cards, each one click to weave.",
+        "At least 8 presets across at least 3 of the schemas.js DOMAINS (physics, history, biology, geography, technology).",
+        "Every preset with a numeric parameter (c, g, ...) exposes it as a slider or number field with unit and legal range, and worlds woven at the two ends of the range differ in at least 3 facts.",
+        "A typed divergence builder (domain, then parameter or event, then magnitude, then plausibility ceiling) shows the composed record before weaving.",
+        "Free-text entry is parsed into that typed record (by rules or a model) and is editable before weaving; text that cannot be parsed gets a stated reason.",
+        "Compound divergences: 2 or more combine in one world; two divergences that set the same parameter, or whose axioms contradict under a stated rule, are refused before weaving with the reason shown.",
+        "Historical-event divergences pin to a date on a baseline timeline, and baseline events after that date are marked at risk.",
+        "Any generated fact opens in the divergence builder as a pre-filled typed record (domain, parameter or event, magnitude) that the visitor negates or edits before weaving.",
+        "At least 30 typed parameters across all 5 schemas.js DOMAINS, each with unit, range and our-reality default; any 3 rater-chosen parameters combine and weave with no placeholder string (reference: Universe Sandbox's per-object property editor, extended from planets to history)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "altverse.html (compose, also the audit screenshot altverse.png) shows three PHYSICS cards (ice sinks, slow light, 30% stronger gravity), each a button that starts the Loom (main.js screenCompose). divergence-presets.js holds exactly 3 presets, all domain 'physics'; its header defers free-text to Phase 4. Rung 3 fails."
+        }
+      }
+    },
+    {
+      "id": "world-tree",
+      "name": "World tree",
+      "frame": "interaction",
+      "metric": "Whether worlds persist, travel and fork: saved-world shelf, share link fidelity, parent links, a drawn tree, diffs and fork depth; checked by weaving, saving, sharing and forking on the page and reading store.js.",
+      "ladder": [
+        "Each world vanishes when the page closes.",
+        "Woven worlds are saved in the browser and listed on the compose screen for reopening.",
+        "A share link carries the whole world and replays it exactly, with no regeneration.",
+        "From an open world the visitor forks a child by adding a divergence; the saved child stores its parent world id and the forking divergence.",
+        "The saved-worlds shelf shows lineage: each child names its parent and its fork divergence, and opens the parent in one click.",
+        "The tree is drawn (nodes are worlds, edges are labeled with divergences) and navigable by click at least 3 levels deep.",
+        "Two worlds open side by side with a computed diff of their facts (added, removed, changed), keyed by fact ids inherited from their common ancestor.",
+        "Forking works from any event or effect node, and the child inherits every fact upstream of the fork point.",
+        "The tree is navigable by keyboard (arrows to parent, child, sibling), and the selected node is held in the URL.",
+        "The whole tree exports and imports as one JSON file, and one share link opens the tree, not a single world.",
+        "Convergence marks appear where two branches reach the same fact (same canonical key: domain, subject, claim) by different paths, and a tree of at least 100 worlds supports collapse, bookmarks and search by fact text (reference: the open-source loom interface for branching language-model text, not this lab's Loom screen)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "store.js saveWorld/listWorlds keep up to 60 worlds in localStorage and main.js renders a 'Saved worlds' shelf on compose (rung 1); Share copies shareURL, which encodes the full world as #w= base64, and boot() replays it through decodeShareHash with no regeneration (rung 2). No fork action exists and createWorld (worldstate.js) stores no parent id, so rung 3 fails."
+        }
+      }
+    },
+    {
+      "id": "baseline-grounding",
+      "name": "Baseline grounding",
+      "frame": "data",
+      "metric": "Where the facts come from: share of baseline constants and claims shown on the page with unit, certainty tag and a named source, gating of the ESTABLISHED tag, and export formats; counted on altverse.html?still&tab=dossier and ?still&tab=chrono for each preset at 1440 px and 390 px, and in divergence-presets.js and echo-world.js.",
+      "ladder": [
+        "No baseline facts are stated.",
+        "On the page, each world states our reality's baseline for what it changes (a baseline line, or an Our reality line per contrast).",
+        "On the page, baseline numbers carry units (c about 299,792 km/s, g about 9.81 m/s2), and at 1440 px every first-order effect, event and contrast shows a certainty tag (ESTABLISHED, THEORETICAL, SPECULATIVE, SF).",
+        "A per-world fact index lists at least 10 named facts, each with a tag, and a magnitude with unit wherever the fact is numeric.",
+        "Every claim type carries a displayed tag, regions, peoples and axioms included; no untagged claim on any tab at 1440 px or at 390 px.",
+        "Every baseline constant names its source of record and year on the page (e.g. the SI definition of c, standard gravity 9.80665 m/s2, water's density maximum near 3.98 C).",
+        "The ESTABLISHED tag is gated: a validator rule refuses ESTABLISHED on any claim without a linked source.",
+        "A page action saves the world as schema-versioned JSON, beside the World Card PNG.",
+        "Historical-domain divergences draw baseline events from a bundled dated dataset of at least 200 events, each with a source.",
+        "Export to a graph file (GraphML or JSON-LD) that opens in a named external tool (Gephi or yEd), each node carrying its tag and source.",
+        "Every quantitative claim in every world resolves to a dated source or a derivation from sourced constants, enforced by a repository test that fails on any unsourced number, and a corpus of at least 30 woven worlds with their ledgers ships dated and versioned (reference standard: Our World in Data, where every chart names its sources and offers its data for download)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "On altverse.html?still&tab=dossier every world's contrasts print 'Our reality' lines (rung 1). Rung 2 fails: the baseline strings in divergence-presets.js carry units (c ≈ 299,792 km/s, g ≈ 9.81 m/s²) but no renderer reads divergence.baseline (only the unreachable live prompt in prompts.js does), so no baseline number appears on any screen; the fact index shows the divergent values (≈ 30,000 km/s, ≈ 12.7 m/s²), not ours. Toward rung 3: factIndex holds 3/2/2 facts (VETHLEND/LENTUA/BARUND, generateEcho run in Node 2026-11-11), and BARUND's 'tallest mountains: far lower than ours' has no magnitude."
+        }
+      }
+    },
+    {
+      "id": "causal-explanation",
+      "name": "Causal explanation",
+      "frame": "explanation",
+      "metric": "Count of ladder features present on the page, plus the count of copy-versus-code mismatches (claims on any screen that pipeline.js, echo-world.js or main.js contradict), checked by reading every screen at 1440 px against the code.",
+      "ladder": [
+        "No text explains the lab.",
+        "A headline and a subtitle state what the lab does.",
+        "The page states truthfully what produced the world (authored table, rule engine, or model and route); no copy claims a propagation engine or live reasoning where content is replayed from a table.",
+        "Each world shows its premise, the first mechanism, and a list of contrasts between our reality and the world.",
+        "A key on the page defines, one line each, the four certainty tags (ESTABLISHED, THEORETICAL, SPECULATIVE, SF) and every id prefix the visitor meets (fx-, rg-, er-, ev-, civ-, con-).",
+        "A guided first run of at most 5 steps walks from the divergence through one causal chain to a contrast; it is skippable and replayable.",
+        "Causal paths read as sentences with the mechanism and tag at each hop (ice is denser, so lakes freeze from the bed, so no fish overwinter), not bare ids.",
+        "The Loom explains its own stage graph while it runs: each stage shows its inputs, its validator and its output counts.",
+        "A weakest-links view lists the 3 lowest-certainty or weakest-audited hops in the world, with the reason for each.",
+        "The visitor saves a one-page causal dossier as Markdown carrying the chain, tags and sources.",
+        "Every number in the dossier is an inline control: editing or dragging it re-runs the engine and updates every dependent fact in place, for every preset (Bret Victor, Explorable Explanations, 2011)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "The compose screen (altverse.html) has a headline ('Change one thing. Watch a world diverge.') and a subtitle (rung 1). Rung 2 fails: the subtitle in main.js screenCompose and the meta description in altverse.html say 'A deterministic engine propagates the consequences', while echo-world.js copies authored worlds from CONTENT and the Loom's COGITATION stream replays authored reasoning strings on 240 ms timers (pipeline.js runEcho). Premise, mechanism and contrasts do show on ?still&tab=dossier, but they sit above the failed rung."
+        }
+      }
+    },
+    {
+      "id": "world-identity-style",
+      "name": "Loom and world identity",
+      "frame": "style",
+      "metric": "Design craft across the 4 screens (compose, Loom, map, dossiers): token use, per-world identity derivation and contrast, gold reserved for active state, Loom choreography, type system; checked on altverse.html, altverse.html?loom=ice-sinks, ?still&tab=map and ?still&tab=dossier at 1440 px, and in altverse.css and identity.js.",
+      "ladder": [
+        "The page is unstyled HTML.",
+        "A lab stylesheet sets colors, fonts and spacing on all 4 screens.",
+        "Site tokens (tokens.css: void ground, amber accent, display, body and mono families, bordered cards) apply on all 4 screens.",
+        "Each world derives its own accent and void tint from its data, scoped to the world root, and the code's contrast clamp holds the accent at no less than 4.5:1 on the void (WCAG 2.2 SC 1.4.3, since the accent colors small text).",
+        "Gold (the --accretion, --accretion-soft and --accretion-dim tokens, and any per-world accent within 15 degrees of the hue of #F2A93B) appears only on interactive or active state: every such use in altverse.css sits on a button, :hover, :focus-visible or [aria-selected] selector, and the 4 screens at 1440 px show it only on controls.",
+        "Every Loom stage transition fires from the completion callback of that stage's own computation or model call, with no setTimeout-paced replay of a precomputed world (runEcho does that replay today), and reduced motion shows the end state.",
+        "Header, map and World Card share one identity (accent, graticule density, plate radius), and any two preset worlds differ by at least 30 degrees of accent hue or 8 degrees of graticule step.",
+        "At most 3 type families, at most 6 sizes on a modular scale, and prose blocks measured at 45 to 75 characters per line.",
+        "Cartographic styling: a biome palette with legend, hillshading, and a 3-tier label hierarchy (region, people, feature).",
+        "The World Card (2400 px wide) lays out on a column grid stated in card.js and carries the map, a causal excerpt of at least one 2-hop path with tags, and the world's accent and void.",
+        "A blind test recorded in the repo (5 viewers, 5 World Cards) shows each viewer matched at least 4 of 5 cards to their divergence from the card alone."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "altverse.css styles all 4 screens with tokens.css variables (void, --accretion, Orbitron / Space Grotesk / IBM Plex Mono, bordered cards) (rung 2). identity.js deriveIdentity computes accent and void tint per world and applyIdentity scopes them to .av-world; measured on their voids: VETHLEND #5c9ad5 6.60:1, LENTUA #5797da 6.38:1, BARUND #f1b53c 10.57:1. Rung 3 fails: deriveIdentity calls ensureContrast(accent, voidTint, 3.0), so the clamp admits a 3:1 accent on small text (.av-id, .av-legend-head, the motto) for any world whose derived accent starts dark. Rung 4 also fails: the ALTVERSE wordmark, the chronology spine and era dots, the WORLD LEDGER heading and SPECULATIVE/SF tags are gold on static elements, and BARUND's accent (hue 40, within 15 degrees of #F2A93B) colors its static name and headings."
+        }
+      }
+    },
+    {
+      "id": "reach-and-speed",
+      "name": "Reach and speed",
+      "frame": "performance",
+      "metric": "Time from click to a rendered world (ms), horizontal overflow and hidden or clipped content at a 390 px viewport (documentElement.scrollWidth vs clientWidth, computed display of tags and ids), reduced-motion handling, keyboard and screen-reader reach, Lighthouse mobile scores; measured in headless Chrome with device-metrics emulation, by tabbing, and in altverse.css and main.js.",
+      "ladder": [
+        "The page does not load.",
+        "The page loads at 1440 px without console errors and renders a world.",
+        "A rendered world is reachable within 2 s of a click on Skip to world or of loading a ?still URL, and prefers-reduced-motion removes CSS animation and Loom timers.",
+        "At a 390 px viewport, compose, Loom, map, chronology and dossiers have no horizontal scroll (scrollWidth equals clientWidth), and no tag, id or label shown at 1440 px is hidden or clipped.",
+        "Every control is a native button operable by Tab and Enter with a visible focus ring, map legend entries included, which highlight their region on focus as on hover.",
+        "Tabs follow the ARIA tablist pattern (tablist, tab, tabpanel, arrow keys), the map has a text alternative, and the Loom stream is an aria-live region.",
+        "Lighthouse mobile scores reach at least 95 accessibility and 90 performance on compose and explore.",
+        "Generation runs in a Web Worker, and Interaction to Next Paint stays under 100 ms while weaving (DevTools Performance panel, 4x CPU slowdown).",
+        "Map rendering steps down a tier (fewer layers) when frame time exceeds 20 ms, and the page states the tier.",
+        "After first load the engine and presets work offline (service worker), and a share link opens a world in under 1 s.",
+        "A manual WCAG 2.2 AA audit and an NVDA walk through compose, weave, map, chronology and dossiers are recorded in the repo with zero open failures, and map interaction holds 60 fps at 390 px under DevTools 4x CPU slowdown."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Headless Chrome on 2026-11-11 (local static server): no script errors at 1440 px and a world renders (rung 1). runEcho hands the whole world to onWorld before the replay, so Skip to world is live at once; ?still renders the world directly; reduced motion sets wait() to 0 and skips the tick interval, and the CSS media query kills animation and transitions (rung 2). At 390 px with device-metrics emulation, scrollWidth 390 = clientWidth on altverse.html, ?loom=ice-sinks and ?still&tab=map|chrono|dossier for ice-sinks, slow-light and strong-gravity. Rung 3 fails: the 880 px media query in altverse.css sets .av-event-cause and .av-event .av-tag to display:none (0 of 6 VETHLEND event tags and 0 of 6 cause ids visible at 390 px), and on ?still&tab=map at 390 px the canvas cuts 'volcanic warm springs', 'The Drowned Shelves' and 'tidal flats over sunken ice' at its edges."
+        }
+      }
+    },
+    {
+      "id": "stage-graph-architecture",
+      "name": "Stage graph architecture",
+      "frame": "architecture",
+      "metric": "Code shape of labs/assets/js/altverse: module separation, who mints ids, whether the stage graph is one data definition read by Loom, pipeline and prompts, use of the shared model route, data-only extension, tests; checked by reading the modules.",
+      "ladder": [
+        "No code exists.",
+        "Data, logic and rendering exist as code (a single script qualifies).",
+        "ES modules separate presets, world state, generator, pipeline, prompts, schemas and renderers (at least 10 modules), and renderers read one world shape whatever produced it.",
+        "The orchestrator mints every id (no id typed into authored data or taken from model output), and one module defines the world shape that every producer (authored, rule engine, model) imports.",
+        "The stage graph is data (records of id, inputs, output schema, prompt, validator) defined once; the Loom, the pipeline and the prompts read it, and adding a stage is one record.",
+        "Model calls go through the site's shared route chain (labs/assets/js/ai/llm.js: local Ollama, own key, worker, public route, deterministic), not a lab-private client pinned to one provider.",
+        "Presets and domain rule sets are data files loaded by the engine; adding a divergence touches no .js module.",
+        "Node unit tests cover engine, validator and store with at least 30 assertions, run by one command (node --test) that exits non-zero on any failure.",
+        "Worlds store a schema version, and an older saved or shared world migrates on load, tested with a version-1 fixture.",
+        "The engine runs headless in Node with no DOM; a CLI weaves a world from a JSON divergence and matches the browser byte for byte for the same seed.",
+        "A new domain (rules, presets, map layer, prompts) ships as one folder against a documented plug-in contract, verified by a contract test, with no edits to the core."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "17 ES modules under labs/assets/js/altverse (12 top-level: divergence-presets, worldstate, echo-world, pipeline, prompts, schemas, store, identity, rng, json-extract, nemotron-client, main; 5 in render/: card, chronology, dossier, map-canvas, world-view), importing ../ai/config.js and ../ai/provider.js; renderers take one world shape from worldstate.js createWorld (rung 2). Rung 3 fails: worldstate.js makeMinter is never called, ids are typed into echo-world.js CONTENT and required from model output by schemas.js. Stage lists are duplicated in main.js STAGES, pipeline.js SPINE_ORDER and runLive's hand-written gen() calls."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}
