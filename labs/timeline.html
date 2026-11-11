@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Branch Line: the TRIVERSE timeline · luisblanco.dev Labs</title>
+<meta name="description" content="One humanity in three dimensions, in step until each found its artifact. Zoom from four billion years to a single week, compare Earth, Terra and Kha-Ren at any moment in their own calendars, and read the physics behind each event." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/timeline.css" />
+</head>
+<body>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+
+<header class="tl-bar">
+  <div class="tl-left">
+    <a class="tl-back" href="index.html">&larr; labs</a>
+    <span class="tl-label">INTERACTIVE TIMELINE <span class="on">/ branch line</span></span>
+  </div>
+  <div class="tl-right">
+    <span id="route"></span>
+    <button type="button" class="tl-btn sq" id="tl-helpbtn" aria-haspopup="dialog" aria-label="Keyboard and controls help">?</button>
+    <span class="tl-brand">THE LAB &middot; <b>L212</b></span>
+  </div>
+</header>
+
+<main class="tl-main">
+  <section class="tl-head">
+    <div>
+      <p class="tl-kick">TRIVERSE &middot; one humanity, three dimensions</p>
+      <h1>The same people, <span class="lo">set apart by when they found the artifact.</span></h1>
+    </div>
+    <p class="tl-sub">TRIVERSE is a hard science fiction series in nine books. Its three human worlds are separate dimensions with one species and one substrate beneath them. They run in step until each finds an artifact, at a different stage of its history, and the timing makes them different. Drag through time, zoom from four billion years to a single week, and compare the three at any moment in their own calendars.</p>
+  </section>
+
+  <section class="tl-stage" aria-label="The branch line">
+    <div class="tl-tools" role="toolbar" aria-label="Timeline view">
+      <div class="tl-zoom">
+        <button type="button" class="tl-btn sq" id="tl-zout" aria-label="Zoom out">&minus;</button>
+        <button type="button" class="tl-btn sq" id="tl-zin" aria-label="Zoom in">+</button>
+      </div>
+      <div class="tl-presets"><span class="tl-grp">view</span><span class="tl-presets" id="tl-presets" aria-label="Zoom presets"></span></div>
+      <div class="tl-presets"><span class="tl-grp">jump to</span><span class="tl-presets" id="tl-jumps" aria-label="Jump to a discovery"></span></div>
+      <div class="tl-acts">
+        <button type="button" class="tl-btn" id="tl-tour" aria-pressed="false">play the tour</button>
+        <button type="button" class="tl-btn" id="tl-tour-next">next stop</button>
+        <button type="button" class="tl-btn" id="tl-align" aria-pressed="false" title="Re-index each world to its own discovery">align by discovery</button>
+        <button type="button" class="tl-btn" id="tl-pin" aria-pressed="false">pin this moment</button>
+      </div>
+    </div>
+    <div class="tl-wrap" id="tl-wrap">
+      <canvas id="tl-canvas" tabindex="0" role="img" aria-label="A timeline of three strands, one per expression dimension. They run in step from the origin of our species; Kha-Ren pulls away from about 8000 BCE, Terra from about 3537 BCE, and Earth stays unaltered until 2068. Beneath them run the Vortex, Haven and the Core, with a thread from each artifact down to the Core. A gold line marks the chosen moment. The table of every event below holds the same information." aria-describedby="tl-help"></canvas>
+    </div>
+    <div class="tl-legend" aria-label="Legend">
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M0 5h40" class="lg-ink"/><path d="M4 2.5v5M12 2v6M20 3v4M28 2v6M36 2.5v5" class="lg-hz"/></svg>Kha-Ren: a ripple, its medium is sound</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M0 5h24" class="lg-bright"/><path d="M26 5h14" class="lg-ink lg-dash"/></svg>Earth: unaltered; dashed past the present day</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M0 3.5h40M0 6.5h40" class="lg-ink"/></svg>Terra: a doubled line, thought held in common</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M0 5c5-4 8 4 13 0s8-3 14 1 9-4 13-1" class="lg-hz"/></svg>Vortex: inhabited, chaotic</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M0 3h40M0 7h40" class="lg-hz"/></svg>Haven: empty, still</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M0 5h40" class="lg-core"/></svg>Core: the foundation</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><circle cx="8" cy="5" r="3.6" class="lg-ring"/><path d="M8 9v1" class="lg-hz"/></svg>an artifact, hung from the Core</span>
+      <span><svg viewBox="0 0 40 10" aria-hidden="true"><path d="M20 0v10" class="lg-gold"/></svg>gold: the chosen moment and selection only</span>
+    </div>
+    <p class="tl-help" id="tl-help">drag to pan &middot; wheel or pinch to zoom &middot; click a mark to select it, a ringed mark to split a cluster, or empty space to move the moment &middot; drag the gold handle (it snaps to events) &middot; focus the timeline: &larr; &rarr; pan, shift+&larr; &rarr; move the moment, &uarr; &darr; zoom, [ ] step &middot; press ? for every key</p>
+  </section>
+
+  <section class="tl-compare" id="tl-compare" aria-label="The three worlds at the chosen moment">
+    <div class="tl-moment">
+      <span class="tl-k">the moment</span>
+      <b data-k="date">&mdash;</b>
+      <span class="tl-cals" data-k="cals"></span>
+    </div>
+    <div class="tl-cols">
+      <article class="tl-col" data-w="kharen">
+        <header><b>Kha-Ren</b><span>expression 3 &middot; Cycle calendar &middot; found c. 8000 BCE</span></header>
+        <div class="tl-cal"></div><div class="tl-meter" role="img"><i></i></div><div class="tl-status"></div><div class="tl-era"></div><p class="tl-st"></p>
+        <button type="button" class="tl-last" hidden></button>
+      </article>
+      <article class="tl-col" data-w="earth">
+        <header><b>Earth</b><span>expression 1 &middot; CE &middot; reached 2031</span></header>
+        <div class="tl-cal"></div><div class="tl-meter" role="img"><i></i></div><div class="tl-status"></div><div class="tl-era"></div><p class="tl-st"></p>
+        <button type="button" class="tl-last" hidden></button>
+      </article>
+      <article class="tl-col" data-w="terra">
+        <header><b>Terra</b><span>expression 2 &middot; A.T. &middot; found c. 3537 BCE</span></header>
+        <div class="tl-cal"></div><div class="tl-meter" role="img"><i></i></div><div class="tl-status"></div><div class="tl-era"></div><p class="tl-st"></p>
+        <button type="button" class="tl-last" hidden></button>
+      </article>
+    </div>
+    <p class="tl-why" id="tl-why" data-k="why" aria-live="polite"></p>
+    <div class="tl-between" data-k="between" hidden></div>
+  </section>
+
+  <section class="tl-lower">
+    <article class="tl-card" id="tl-card" aria-live="polite" hidden></article>
+    <div class="tl-side">
+      <section class="tl-panel" aria-label="Ask the timeline">
+        <div class="tl-k">ask the timeline</div>
+        <form id="tl-askform" class="tl-askform">
+          <label class="vh" for="tl-q">Your question</label>
+          <input id="tl-q" type="text" maxlength="200" autocomplete="off" spellcheck="false" placeholder="a world, a layer, a year, a calendar date" />
+          <button type="submit" class="tl-btn go" id="tl-askbtn">ask</button>
+        </form>
+        <div class="tl-sugg" id="tl-sugg"></div>
+        <div class="tl-answer" id="tl-answer" hidden>
+          <p class="tl-ans-text"></p>
+          <div class="tl-ans-links"></div>
+          <div class="tl-ans-meta"></div>
+        </div>
+        <p class="tl-note">Answers come only from the events this page publishes. Dates and cross-world questions are worked out by the page’s chronology engine; one model call may then phrase the answer, and is rejected if it cites anything outside the events it was given.</p>
+        <p class="tl-note" id="tl-eval">The answer quality is measured on a fixed question set in the repository.</p>
+      </section>
+
+      <section class="tl-panel" aria-label="Clock converter">
+        <div class="tl-k">three clocks</div>
+        <form id="tl-convform" class="tl-askform">
+          <label class="vh" for="tl-conv">A date or an age in any calendar</label>
+          <input id="tl-conv" type="text" maxlength="60" autocomplete="off" spellcheck="false" value="3537 BCE" />
+          <button type="button" class="tl-btn" id="tl-conv-go">go there</button>
+        </form>
+        <div class="tl-conv-out" id="tl-conv-out" aria-live="polite"></div>
+        <p class="tl-note">The codex converts dates by offset (A.T. = CE + 3537; CE = 75 &times; Cycle + Year &minus; 4750), so spans are differences of native dates; it converts ages by year length (Terran age = Earth age &times; 365/400).</p>
+      </section>
+    </div>
+  </section>
+
+  <section class="tl-lower tl-lower2">
+    <section class="tl-panel" aria-label="Filters">
+      <div class="tl-k">what to show</div>
+      <div id="tl-filters"></div>
+    </section>
+    <section class="tl-panel" aria-label="People">
+      <div class="tl-k">people of Book 1’s opening</div>
+      <div class="tl-chips" id="tl-people"></div>
+      <div class="tl-follow" id="tl-follow-step" hidden>
+        <button type="button" class="tl-btn" id="tl-follow-prev">&larr; previous in their life</button>
+        <button type="button" class="tl-btn" id="tl-follow-next">next &rarr;</button>
+      </div>
+      <p class="tl-note">Birth years are computed from the codex’s age table. Lifelines show on the timeline when the view spans a lifetime or less.</p>
+      <div class="tl-k tl-k2">reading trail</div>
+      <div id="tl-trail"></div>
+      <div class="tl-k tl-k2">share and keep</div>
+      <div class="tl-chips">
+        <button type="button" class="tl-btn" id="tl-copy">copy link</button>
+        <button type="button" class="tl-btn" id="tl-copytext">copy as text</button>
+        <button type="button" class="tl-btn" id="tl-export">export moment (.md)</button>
+      </div>
+    </section>
+  </section>
+
+  <section class="tl-panel tl-indexwrap" id="tl-index" aria-label="Every event">
+    <div class="tl-indexhead">
+      <div class="tl-k">every event on the line · <span data-k="count"></span></div>
+      <div class="tl-indexctl">
+        <label class="vh" for="tl-search">Search events</label>
+        <input id="tl-search" type="search" placeholder="search events ( / )" autocomplete="off" spellcheck="false" />
+        <label class="tl-check"><input type="checkbox" id="tl-inview" /> only what is in view</label>
+      </div>
+    </div>
+    <div class="tl-tablewrap">
+      <table class="tl-table">
+        <caption class="vh">Every published event, with its date in the three calendars, its dimension and its tags</caption>
+        <thead><tr><th scope="col">Earth</th><th scope="col">Terra</th><th scope="col">Kha-Ren</th><th scope="col">dimension</th><th scope="col">event</th><th scope="col">tags</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tl-panel tl-discwrap" aria-label="Where the codex disagrees with itself">
+    <div class="tl-k">where the codex disagrees with itself</div>
+    <div id="tl-disc"></div>
+  </section>
+
+  <footer class="tl-foot">
+    <div class="tl-tags">
+      <p class="tag"><i></i><span><b>[real]</b> dates, calendars, eras and descriptions as written in the TRIVERSE codex, each with its file and section (the series is fiction); physics claims from the papers listed, each with its DOI; calendar conversions, births, spans and the acoustic numbers computed live from the codex’s own formulas and values.</span></p>
+      <p class="tag"><i class="il"></i><span><b>[illustrative]</b> the drawing. A strand’s distance from the others shows how far that world has diverged; the line textures, the Vortex turbulence and the moving light are a legend, not data. A rounded codex date (“~8000 BCE”) is read as uncertain by half its rounding unit, at least 25 years.</span></p>
+      <p class="tag"><i class="il"></i><span><b>held back</b> plot beyond the premise and the introductions of Book 1’s opening chapters, and codex material that is still in development. The spoiler ceiling and its date are in the event data.</span></p>
+    </div>
+    <div class="tl-refs-wrap">
+      <div class="tl-k">physics cited</div>
+      <ol class="tl-refs" id="tl-refs"></ol>
+    </div>
+    <p class="tl-legal">TRIVERSE and its codex: Luis Blanco, unpublished, all rights reserved. <span id="tl-tier">render tier: measuring</span></p>
+  </footer>
+</main>
+
+<div class="tl-helpbox" id="tl-helpbox" role="dialog" aria-modal="false" aria-labelledby="tl-help-h" hidden>
+  <div class="tl-helpcard">
+    <h2 id="tl-help-h">Every key</h2>
+    <dl>
+      <div><dt>&larr; &rarr;</dt><dd>pan the view (alt: farther)</dd></div>
+      <div><dt>shift + &larr; &rarr;</dt><dd>move the moment</dd></div>
+      <div><dt>&uarr; &darr; or + &minus;</dt><dd>zoom in and out around the moment</dd></div>
+      <div><dt>[ ]</dt><dd>previous and next event (a followed person’s, when following)</dd></div>
+      <div><dt>Enter</dt><dd>select the event nearest the moment</dd></div>
+      <div><dt>Home End</dt><dd>moment to the start or end of the view</dd></div>
+      <div><dt>/</dt><dd>search events</dd></div>
+      <div><dt>t</dt><dd>play or stop the tour</dd></div>
+      <div><dt>p</dt><dd>pin the moment, then move to compare two</dd></div>
+      <div><dt>a</dt><dd>align the worlds by their discoveries</dd></div>
+      <div><dt>?</dt><dd>this help; Escape closes it</dd></div>
+    </dl>
+    <p class="tl-note">The arrow keys work when the timeline has focus (Tab to it). Trails: “add to trail” on any selected event builds an ordered reading trail with its own link. Every control is a button reachable by Tab, and the table of every event mirrors the timeline for screen readers.</p>
+    <button type="button" class="tl-btn">close</button>
+  </div>
+</div>
+<div class="vh" id="tl-live" aria-live="polite"></div>
+<script type="module" src="assets/js/timeline/main.js"></script>
+</body>
+</html>

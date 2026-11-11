@@ -1,0 +1,48 @@
+{
+  "about": "Fixed question set for the timeline's ask box. 10 unanswerable (plot past the setup, or not in the data), 10 cross-dimension, 10 calendar conversion, 10 factual. An answer is correct when it refuses exactly when it should, contains every expected string, and cites every expected event id.",
+  "questions": [
+    { "q": "How does Book 3 end?", "type": "unanswerable", "refused": true },
+    { "q": "Who dies in Book 2?", "type": "unanswerable", "refused": true },
+    { "q": "What happens to Samantha after 2068?", "type": "unanswerable", "refused": true },
+    { "q": "What is the twist about the Inhabitants?", "type": "unanswerable", "refused": true },
+    { "q": "What is the capital of France?", "type": "unanswerable", "refused": true },
+    { "q": "What is the best pizza topping?", "type": "unanswerable", "refused": true },
+    { "q": "Who wins in the sequel?", "type": "unanswerable", "refused": true },
+    { "q": "What is the name of Nasha's mother?", "type": "unanswerable", "refused": true },
+    { "q": "How many people live in Kha-Ren in 2068?", "type": "unanswerable", "refused": true },
+    { "q": "What religion do Terrans follow?", "type": "unanswerable", "refused": true },
+
+    { "q": "What was Kha-Ren doing when Terra found its artifact?", "type": "cross", "contains": ["Cycle 16, Year 13"], "cites": ["te-disc"] },
+    { "q": "What was Terra like when Kha-Ren adopted writing?", "type": "cross", "contains": ["3287 A.T.", "post-scarcity"], "cites": ["kr-text"] },
+    { "q": "What was Earth doing when Kha-Ren formalised its castes?", "type": "cross", "contains": ["neolithic"], "cites": ["kr-c1"] },
+    { "q": "Where was Kha-Ren when Earth reached its artifact?", "type": "cross", "contains": ["Cycle 90, Year 31"], "cites": ["ea-access"] },
+    { "q": "What was Terra doing in 2200 BCE?", "type": "cross", "contains": ["not on the public timeline"] },
+    { "q": "What was Kha-Ren like in 580 CE?", "type": "cross", "contains": ["Cycle 71, Year 5"] },
+    { "q": "When Terra reached post-scarcity, what was Kha-Ren doing?", "type": "cross", "contains": ["Cycle 50"], "cites": ["te-scarcity"] },
+    { "q": "What was Earth like when Terra had its last unmanaged storm?", "type": "cross", "contains": ["iron to industry"], "cites": ["te-storm"] },
+    { "q": "What was Terra doing when the Higgs boson was found on Earth?", "type": "cross", "contains": ["5549 A.T."], "cites": ["ea-higgs"] },
+    { "q": "What was Kha-Ren doing when Joule measured the mechanical equivalent of heat?", "type": "cross", "contains": ["Cycle 88, Year 0"], "cites": ["ea-joule"] },
+
+    { "q": "What is 3537 BCE in the other calendars?", "type": "conversion", "contains": ["0 A.T.", "Cycle 16, Year 13"] },
+    { "q": "Convert 2068 CE to A.T. and Cycle", "type": "conversion", "contains": ["5605 A.T.", "Cycle 90, Year 68"] },
+    { "q": "What is 1000 A.T. on Earth's calendar?", "type": "conversion", "contains": ["2537 BCE"] },
+    { "q": "What is Cycle 1, Year 0 in the other calendars?", "type": "conversion", "contains": ["4675 BCE"] },
+    { "q": "Convert Cycle 63 Year 25 to CE and A.T.", "type": "conversion", "contains": ["3537 A.T."] },
+    { "q": "What is 250 BCE in Terra's calendar?", "type": "conversion", "contains": ["3287 A.T."] },
+    { "q": "How many Terran years is 42 Earth years?", "type": "conversion", "contains": ["38.3 Terran years"] },
+    { "q": "How old in Earth years is someone who is 100 Terran years old?", "type": "conversion", "contains": ["109.6 Earth years"] },
+    { "q": "What is 5605 A.T. in Kha-Ren's calendar?", "type": "conversion", "contains": ["Cycle 90, Year 68"] },
+    { "q": "What is 8000 BCE in the Terran and Kha-Ren calendars?", "type": "conversion", "contains": ["4,463 years before 0 A.T.", "3,325 years before Cycle 1"] },
+
+    { "q": "When did Terra find its artifact?", "type": "factual", "contains": ["3537 BCE"], "cites": ["te-disc"] },
+    { "q": "Why did Kha-Ren choose containment?", "type": "factual", "contains": ["containment"], "cites": ["kr-disc"] },
+    { "q": "What is the Vortex?", "type": "factual", "contains": ["chaotic"] },
+    { "q": "What is Haven?", "type": "factual", "contains": ["empty"] },
+    { "q": "What do the Builders want?", "type": "factual", "contains": ["not yet established"] },
+    { "q": "Who is Alexander Bellamy?", "type": "factual", "contains": ["Lumina Institute"], "cites": ["te-alex"] },
+    { "q": "What frequency does the Kha-Ren artifact hum at?", "type": "factual", "contains": ["110 Hz"], "cites": ["kr-disc"] },
+    { "q": "When did Earth reach its artifact?", "type": "factual", "contains": ["2031"], "cites": ["ea-access"] },
+    { "q": "What is Unified Thought?", "type": "factual", "contains": ["Unified Thought"], "cites": ["te-present"] },
+    { "q": "What happened in 580 CE?", "type": "factual", "contains": ["Reformation"], "cites": ["kr-reform"] }
+  ]
+}

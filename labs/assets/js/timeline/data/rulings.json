@@ -1,0 +1,26 @@
+{
+  "about": "Choices this page makes where the codex gives more than one answer. Each names the options, the choice and the reason. Luis can overrule any of them.",
+  "rulings": [
+    {
+      "id": "earth-discovery",
+      "question": "Which date is Earth's artifact discovery, the point its lane is aligned on?",
+      "options": [
+        { "date": 1944, "what": "instruments first register anomalies", "source": "CODEX/SCIENCE/ARTIFACTS.md § Earth Artifact, Discovery" },
+        { "date": 2031, "what": "the artifact is accessed", "source": "CODEX/WORLDS/EARTH/OVERVIEW.md § IDENTITY (2031 found / 2068 activated)" },
+        { "date": 2068, "what": "the discovery date in the divergence table; Earth's divergence begins", "source": "CODEX/CHRONOLOGY/DIVERGENCE_POINTS.md § THE THREE DISCOVERY MOMENTS" }
+      ],
+      "choice": 2031,
+      "reason": "2031 is the first date at which Earth's humanity is in contact with its artifact, the same kind of moment the Kha-Ren and Terra discovery dates mark. 1944 is a detection by instruments with nobody aware of what they found; 2068 is when Earth's divergence begins, which the page shows separately as the story present."
+    },
+    {
+      "id": "spans",
+      "question": "How are spans between two dates converted between calendars?",
+      "options": [
+        { "what": "by the offset formulas, so a span is the difference of the native date numbers", "source": "CODEX/CHRONOLOGY/CALENDAR_SYSTEMS.md § Conversion" },
+        { "what": "by year length (a Terran year is about 400 days)", "source": "CODEX/CHRONOLOGY/CALENDAR_SYSTEMS.md § Terra: After Terra (A.T.)" }
+      ],
+      "choice": "offset",
+      "reason": "The codex converts every date by offset and only ages by year length (× 365/400). The page does the same and lists the inconsistency under the codex discrepancies."
+    }
+  ]
+}

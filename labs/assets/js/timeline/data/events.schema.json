@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TRIVERSE timeline event data",
+  "description": "The published event data of the Branch Line lab. Checked by checks/check-data.mjs (no dependencies). Years are on Earth's clock: CE, negative for BCE, no year-zero correction.",
+  "type": "object",
+  "required": ["_meta", "sources", "events", "characters", "eras", "held", "physics", "calRows", "discrepancies"],
+  "properties": {
+    "sources": {
+      "type": "object",
+      "additionalProperties": { "type": "object", "required": ["file", "label"], "properties": { "file": { "type": "string" }, "label": { "type": "string" } } }
+    },
+    "events": {
+      "type": "array",
+      "minItems": 100,
+      "items": {
+        "type": "object",
+        "required": ["id", "world", "y", "imp", "tier", "tag", "title", "text", "src", "sec"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "world": { "enum": ["kharen", "earth", "terra", "vortex", "haven", "core", "shared"] },
+          "y": { "type": "number", "description": "Earth CE year; BCE negative" },
+          "y0": { "type": "number", "description": "start of a codex range" },
+          "y1": { "type": "number", "description": "end of a codex range" },
+          "c": { "type": "boolean", "description": "a rounded codex date (~)" },
+          "imp": { "enum": [1, 2, 3], "description": "1 always labelled, 3 marker only until zoomed in" },
+          "tier": { "type": "integer", "minimum": 0, "description": "0 premise, else the Book 1 chapter that introduces it; never above the ceiling" },
+          "tag": { "enum": ["CANON", "UNTAGGED", "REAL"], "description": "the narrative tag of the source section" },
+          "title": { "type": "string", "maxLength": 60 },
+          "text": { "type": "string" },
+          "src": { "type": "string", "description": "a key of sources" },
+          "sec": { "type": "string", "description": "the section heading in the source file" },
+          "phys": { "type": "array", "items": { "type": "string", "description": "a key of physics" } },
+          "par": { "type": "string", "description": "the id of the same physics on another world's clock" },
+          "cause": { "type": "array", "items": { "type": "object", "required": ["id", "t"], "properties": { "id": { "type": "string" }, "t": { "enum": ["enabled", "caused", "responded to"] } } } },
+          "who": { "type": "array", "items": { "type": "string", "description": "a character id" } },
+          "view": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "real": { "type": "boolean" },
+          "today": { "type": "boolean", "description": "the present-day marker; its year is set at runtime" }
+        }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "name", "world", "age", "tier", "role", "src", "sec"], "properties": { "age": { "type": "number", "description": "Earth-equivalent age at 2068 from the codex age table" }, "nativeAge": { "type": "number" } } }
+    },
+    "eras": { "type": "array", "items": { "type": "object", "required": ["world", "y", "y2", "name", "text", "src"] } },
+    "held": { "type": "array", "items": { "type": "object", "required": ["world", "y", "y2", "text"] } },
+    "physics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["rung", "title", "claim", "src", "sec"],
+        "properties": {
+          "rung": { "enum": ["ESTABLISHED", "THEORETICAL", "SPECULATIVE", "SF TERRITORY"] },
+          "refs": { "type": "array", "items": { "type": "object", "required": ["cite"], "properties": { "doi": { "type": ["string", "null"] }, "title": { "type": "string" }, "author": { "type": "string" }, "year": { "type": "integer" }, "book": { "type": "boolean" } } } },
+          "ext": { "type": "object", "required": ["rung", "text"] },
+          "calc": { "enum": ["lambda", "power", "stone"] }
+        }
+      }
+    },
+    "calRows": { "type": "array", "items": { "type": "object", "required": ["src", "sec", "ce"] } },
+    "discrepancies": { "type": "array", "items": { "type": "object", "required": ["topic", "a", "aSrc", "b", "bSrc", "note"] } }
+  }
+}

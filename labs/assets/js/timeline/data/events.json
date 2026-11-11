@@ -1,0 +1,3306 @@
+{
+ "_meta": {
+  "title": "TRIVERSE timeline, published event data",
+  "source": "The TRIVERSE codex, the unpublished worldbuilding reference of the novel series by Luis Blanco, restricted to premise-level and structural canon and the setup of Book 1 (chapter introductions only). Real-history and science items cite their published sources.",
+  "licence": "TRIVERSE and its codex: Luis Blanco, all rights reserved. Not for reuse.",
+  "codexRead": "2026-11-11",
+  "ceiling": "see data/ceiling.json"
+ },
+ "sources": {
+  "divergence": {
+   "file": "CODEX/CHRONOLOGY/DIVERGENCE_POINTS.md",
+   "label": "divergence points"
+  },
+  "masterTimeline": {
+   "file": "CODEX/CHRONOLOGY/MASTER_TIMELINE.md",
+   "label": "master timeline"
+  },
+  "calendar": {
+   "file": "CODEX/CHRONOLOGY/CALENDAR_SYSTEMS.md",
+   "label": "calendar systems"
+  },
+  "seldon": {
+   "file": "CODEX/SELDON_PLAN.md",
+   "label": "series architecture"
+  },
+  "dimPhysics": {
+   "file": "CODEX/SCIENCE/DIMENSIONAL_PHYSICS.md",
+   "label": "dimensional physics"
+  },
+  "sciOverview": {
+   "file": "CODEX/SCIENCE/OVERVIEW.md",
+   "label": "science overview"
+  },
+  "artifacts": {
+   "file": "CODEX/SCIENCE/ARTIFACTS.md",
+   "label": "the artifacts"
+  },
+  "transit": {
+   "file": "CODEX/SCIENCE/TRANSIT.md",
+   "label": "Haven and synchronisation physics"
+  },
+  "vortex": {
+   "file": "CODEX/WORLDS/VORTEX/OVERVIEW.md",
+   "label": "Vortex overview"
+  },
+  "krOverview": {
+   "file": "CODEX/WORLDS/KHA-REN/00_CORE/OVERVIEW.md",
+   "label": "Kha-Ren overview"
+  },
+  "krHistory": {
+   "file": "CODEX/WORLDS/KHA-REN/00_CORE/HISTORY.md",
+   "label": "Kha-Ren history"
+  },
+  "krGenesis": {
+   "file": "CODEX/WORLDS/KHA-REN/00_CORE/KHA_REN_GENESIS.md",
+   "label": "Kha-Ren genesis"
+  },
+  "krFoundation": {
+   "file": "CODEX/WORLDS/KHA-REN/01_ERA_REPORTS/KR_01_FOUNDATION.md",
+   "label": "Kha-Ren foundation era"
+  },
+  "krTech": {
+   "file": "CODEX/WORLDS/KHA-REN/02_TECHNOLOGY/TECH_TREE.md",
+   "label": "Kha-Ren technology tree"
+  },
+  "krPlan": {
+   "file": "CODEX/WORLDS/KHA-REN/00_CORE/MASTER_PLAN.md",
+   "label": "Kha-Ren research log"
+  },
+  "teOverview": {
+   "file": "CODEX/WORLDS/TERRA/OVERVIEW.md",
+   "label": "Terra overview"
+  },
+  "teHistory": {
+   "file": "CODEX/WORLDS/TERRA/HISTORY.md",
+   "label": "Terra history"
+  },
+  "eaOverview": {
+   "file": "CODEX/WORLDS/EARTH/OVERVIEW.md",
+   "label": "Earth overview"
+  },
+  "eaHistory": {
+   "file": "CODEX/WORLDS/EARTH/HISTORY.md",
+   "label": "Earth history"
+  },
+  "plot": {
+   "file": "CODEX/PLOT/TRILOGY_I.md",
+   "label": "Book 1 structure, Act 1 introductions only"
+  },
+  "real": {
+   "file": "",
+   "label": "published history and science, cited"
+  }
+ },
+ "events": [
+  {
+   "id": "inh-emerge",
+   "world": "vortex",
+   "y": -4000000000.0,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "CANON",
+   "title": "Something begins to live in the Vortex",
+   "text": "The codex dates the Inhabitants of the Vortex to about four billion years. They are vast, ancient and hard for human minds to scale. At the story present no humanity knows what they intend.",
+   "src": "vortex",
+   "sec": "WHAT HUMANS EXPERIENCE IN VORTEX [CANON], Sensory Vocabulary",
+   "phys": [
+    "p-vortex"
+   ],
+   "view": [
+    -4600000000.0,
+    2075
+   ],
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "hs-origin",
+   "world": "shared",
+   "y": -300000,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "CANON",
+   "title": "One species, three dimensions",
+   "text": "Homo sapiens. The codex holds the three expression dimensions to the same species, the same DNA and the same cognitive architecture. They are separate dimensions, never one past that splits; what differs later is when each found its artifact.",
+   "src": "divergence",
+   "sec": "THE SAME-HUMANITY PRINCIPLE [CANON]",
+   "phys": [
+    "p-hublin"
+   ],
+   "view": [
+    -340000,
+    6000
+   ],
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-holocene",
+   "world": "earth",
+   "y": -9700,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "The Holocene begins",
+   "text": "The present interglacial begins about 11,700 years before 2000 CE, dated in the Greenland ice. Farming spreads in the Near East soon after.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-holocene"
+   ],
+   "real": true,
+   "off": -11731,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-neo",
+   "world": "earth",
+   "y": -8000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Neolithic communities, in step",
+   "text": "Earth at about 8000 BCE, in the codex’s master timeline: Neolithic communities in the Fertile Crescent. Our own history, and the stage every lane shares at this date.",
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~8000 BCE",
+   "off": -10031,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-neo",
+   "world": "terra",
+   "y": -8000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Neolithic communities, in step",
+   "text": "Terra at about 8000 BCE: Neolithic communities on its Mediterranean-equivalent coasts, at the same stage as Earth’s.",
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~8000 BCE",
+   "off": -4463,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-disc",
+   "world": "kharen",
+   "y": -8000,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Kha-Ren finds its artifact",
+   "text": "A Pre-Pottery Neolithic community of perhaps 200 to 500 people, at the confluence of the rivers Seren and Kelar in the Valorian basin of Upper Mesopotamia, finds a three-metre sphere set in limestone. Its surface holds at -3 °C. It hums at 110 Hz, 138 dB at the surface, and water condenses on it every day. This is the earliest discovery of the three.",
+   "src": "krFoundation",
+   "sec": "ERA NARRATIVE, The Discovery (~8000 BCE)",
+   "phys": [
+    "p-acoustic",
+    "p-110",
+    "p-axiom"
+   ],
+   "off": 0,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-engage",
+   "world": "kharen",
+   "y": -7800,
+   "y0": -8000,
+   "y1": -7500,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "CANON",
+   "title": "Engagement, then catastrophe",
+   "text": "The first communities try to engage with what they found: practices to strengthen perception, specialists to interpret it. It works for a while. Then something goes catastrophically wrong, and everything after is built around one lesson: no single person may hold the whole picture.",
+   "src": "krOverview",
+   "sec": "THE HIDDEN FUNCTION [CANON]",
+   "off": 200,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-sealed",
+   "world": "kharen",
+   "y": -7500,
+   "y0": -8000,
+   "y1": -7000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Access restricted",
+   "text": "The artifact is sealed and access is restricted to the few who know how to approach it.",
+   "src": "krHistory",
+   "sec": "PHASE 2: THE CONTAINMENT RESPONSE, row ~8000-7000 BCE",
+   "cause": [
+    {
+     "id": "kr-engage",
+     "t": "responded to"
+    }
+   ],
+   "off": 500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-frost",
+   "world": "kharen",
+   "y": -7500,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The frost moves with the sound",
+   "text": "Ice gathers where the air around the artifact is still, at the nodes of its standing wave, and is swept away where the air oscillates. The ground carries a pattern. The codex makes this Kha-Ren’s first mathematics.",
+   "src": "krTech",
+   "sec": "C2.0 \"The frost moves with the sound\" (~7500 BCE)",
+   "phys": [
+    "p-kundt"
+   ],
+   "par": "ea-kundt",
+   "off": 500,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-copper",
+   "world": "kharen",
+   "y": -7500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Copper beside the sphere",
+   "text": "Native copper is cold-hammered near the artifact: the start of a metallurgy chain in which work done inside the sound comes out stronger.",
+   "src": "krTech",
+   "sec": "C3.0 Native copper cold-hammered near artifact (~7500 BCE)",
+   "off": 500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-nodes",
+   "world": "kharen",
+   "y": -7000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Nodes found by ear",
+   "text": "People learn to locate the nodes of the standing wave by listening.",
+   "src": "krTech",
+   "sec": "C2.1 Standing wave node location by ear (~7000 BCE)",
+   "cause": [
+    {
+     "id": "kr-frost",
+     "t": "enabled"
+    }
+   ],
+   "off": 1000,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-pottery",
+   "world": "kharen",
+   "y": -7000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Fired pottery",
+   "text": "Pottery reaches Upper Mesopotamia, as radiocarbon dates it on Earth at sites such as Tell Sabi Abyad. Fired ceramic tubes become possible.",
+   "src": "krTech",
+   "sec": "C1.0 Pottery available in Upper Mesopotamia (~7000 BCE)",
+   "off": 1000,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-songs",
+   "world": "kharen",
+   "y": -6500,
+   "y0": -7000,
+   "y1": -6000,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The Sacred Songs",
+   "text": "A first priestly class appears, and the Sacred Songs are codified: procedures for living beside the artifact, encoded as acoustic structures.",
+   "src": "krHistory",
+   "sec": "PHASE 2: THE CONTAINMENT RESPONSE, row ~7000-6000 BCE",
+   "cause": [
+    {
+     "id": "kr-sealed",
+     "t": "enabled"
+    }
+   ],
+   "off": 1500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-tube",
+   "world": "kharen",
+   "y": -6500,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "A fire in a tube sings",
+   "text": "With fired ceramic tubes, Kha-Ren finds that a heated tube makes sound by itself. It is the first link in a chain that runs from fire to sound to power to cooling.",
+   "src": "krTech",
+   "sec": "C1.1 Fire-in-tube makes noise (~6500 BCE)",
+   "phys": [
+    "p-sondhauss"
+   ],
+   "par": "ea-sondhauss",
+   "cause": [
+    {
+     "id": "kr-pottery",
+     "t": "enabled"
+    }
+   ],
+   "off": 1500,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-beats",
+   "world": "kharen",
+   "y": -6500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Beats heard",
+   "text": "Two resonators slightly out of tune beat against each other. Listening for the beat gives sub-percent precision without any instrument.",
+   "src": "krTech",
+   "sec": "C2.3 Beat frequency detection (~6500 BCE)",
+   "cause": [
+    {
+     "id": "kr-nodes",
+     "t": "enabled"
+    }
+   ],
+   "off": 1500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-82",
+   "world": "kharen",
+   "y": -6200,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The 8.2 ka cold event",
+   "text": "An abrupt cold, dry spell about 8,200 years ago, recorded on Earth in the Greenland ice. The codex keeps Earth’s climate history in Kha-Ren’s world and makes this the pressure that hardened its social order.",
+   "src": "krPlan",
+   "sec": "E-03 findings: the 8.2 ka event as forge",
+   "phys": [
+    "p-82"
+   ],
+   "off": 1800,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-specialists",
+   "world": "kharen",
+   "y": -5750,
+   "y0": -6000,
+   "y1": -5500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Society reorganises around the artifact",
+   "text": "Specialist classes solidify around managing the artifact.",
+   "src": "krHistory",
+   "sec": "PHASE 2: THE CONTAINMENT RESPONSE, row ~6000-5500 BCE",
+   "cause": [
+    {
+     "id": "kr-songs",
+     "t": "enabled"
+    }
+   ],
+   "off": 2250,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-pitch",
+   "world": "kharen",
+   "y": -5500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Length tunes the pitch",
+   "text": "Tube length and pitch are optimised together, with thin, repeatable ceramic forms.",
+   "src": "krTech",
+   "sec": "C1.2 Tube-length/pitch optimization (~5500 BCE)",
+   "cause": [
+    {
+     "id": "kr-tube",
+     "t": "enabled"
+    }
+   ],
+   "off": 2500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-distrib",
+   "world": "kharen",
+   "y": -5250,
+   "y0": -5500,
+   "y1": -5000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Knowledge divided",
+   "text": "Knowledge distribution is formalised: different groups hold different pieces.",
+   "src": "krHistory",
+   "sec": "PHASE 2: THE CONTAINMENT RESPONSE, row ~5500-5000 BCE",
+   "cause": [
+    {
+     "id": "kr-specialists",
+     "t": "enabled"
+    }
+   ],
+   "off": 2750,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-castings",
+   "world": "kharen",
+   "y": -5000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Better castings near the sound",
+   "text": "Metal cast near the artifact is consistently better than metal cast elsewhere.",
+   "src": "krTech",
+   "sec": "C3.1 Castings near artifact consistently superior (~5000 BCE)",
+   "cause": [
+    {
+     "id": "kr-copper",
+     "t": "enabled"
+    }
+   ],
+   "off": 3000,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-ratios",
+   "world": "kharen",
+   "y": -4500,
+   "y0": -5000,
+   "y1": -4000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Ratios from overtones",
+   "text": "Overtones teach whole-number ratios, 2:1, 3:2 and 4:3, between about 5000 and 4000 BCE.",
+   "src": "krTech",
+   "sec": "C2.2 Ratio theory from overtones (~5000-4000 BCE)",
+   "cause": [
+    {
+     "id": "kr-nodes",
+     "t": "enabled"
+    }
+   ],
+   "off": 3500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-c1",
+   "world": "kharen",
+   "y": -4675,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Cycle 1, Year 0: the castes",
+   "text": "Four castes are formalised and Kha-Ren’s calendar begins. The seventeen Sacred Songs are frozen in exact pronunciation. Knowledge is divided among the castes so no single person holds enough to be destroyed by it, and the tradition stays oral. A Cycle is 75 years, about one lifetime.",
+   "src": "krHistory",
+   "sec": "PHASE 3: THE CASTE CRYSTALLIZATION (~4675 BCE / Cycle 1, Year 0)",
+   "cause": [
+    {
+     "id": "kr-distrib",
+     "t": "enabled"
+    },
+    {
+     "id": "kr-82",
+     "t": "enabled"
+    }
+   ],
+   "off": 3325,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-corridor",
+   "world": "kharen",
+   "y": -4000,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Stone becomes a channel",
+   "text": "The first corridor: a cut-and-cover limestone channel that carries tapped signals through the bedrock. By the story present the codex gives the network 15,000 to 20,000 km, with a full alert in 33 seconds.",
+   "src": "krTech",
+   "sec": "C2.1a Corridor voice network physics (first corridor ~4000 BCE)",
+   "phys": [
+    "p-stone"
+   ],
+   "off": 4000,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-hammer",
+   "world": "kharen",
+   "y": -4000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Rhythmic hammering",
+   "text": "Rhythmic hammering is found to improve castings. The codex marks this date with a question mark.",
+   "src": "krTech",
+   "sec": "C3.2 Rhythmic hammering discovered to improve castings (~4000 BCE?)",
+   "cause": [
+    {
+     "id": "kr-castings",
+     "t": "enabled"
+    }
+   ],
+   "off": 4000,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-bronze",
+   "world": "kharen",
+   "y": -3500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Bronze resonators",
+   "text": "Bronze resonators and copper heat exchangers replace ceramic.",
+   "src": "krTech",
+   "sec": "C1.3 Bronze resonators + copper heat exchangers (~3500 BCE)",
+   "cause": [
+    {
+     "id": "kr-pitch",
+     "t": "enabled"
+    }
+   ],
+   "off": 4500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-c16",
+   "world": "kharen",
+   "y": -3537,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The castes are 1,100 years old",
+   "text": "When Terra finds its artifact, Kha-Ren’s castes are about 1,100 years old. The codex table gives Cycle 15 for this date; its own conversion formula gives Cycle 16, Year 13. Both are listed under the canon discrepancies.",
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~3537 BCE",
+   "off": 4463,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-clicks",
+   "world": "kharen",
+   "y": -3175,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Clicks leave everyday speech",
+   "text": "Around Cycle 20, click consonants fall out of everyday speech. They survive only in the Sacred Register, which is still pronounced as it was in 4675 BCE.",
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, Last click speaker (vernacular)",
+   "off": 4825,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-corr200",
+   "world": "kharen",
+   "y": -3000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The corridor reaches 200 km",
+   "text": "The stone network runs about 200 km.",
+   "src": "krTech",
+   "sec": "C2.1a corridor timeline (200 km by 3000 BCE)",
+   "cause": [
+    {
+     "id": "kr-corridor",
+     "t": "enabled"
+    }
+   ],
+   "off": 5000,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-trig",
+   "world": "kharen",
+   "y": -2500,
+   "y0": -3000,
+   "y1": -2000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Sine waves made audible",
+   "text": "A proto-trigonometry grows from sine waves that can be heard, between about 3000 and 2000 BCE.",
+   "src": "krTech",
+   "sec": "C2.4 Proto-trigonometry from sine waves made audible (~3000-2000 BCE)",
+   "cause": [
+    {
+     "id": "kr-ratios",
+     "t": "enabled"
+    }
+   ],
+   "off": 5500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-energy",
+   "world": "kharen",
+   "y": -2500,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The hidden source",
+   "text": "Kha-Ren scholars measure the artifact’s sound and the ice it melts, then wrap it. It stays at -3 °C anyway. Energy comes out with nothing going in, and they formally propose a hidden source.",
+   "src": "krGenesis",
+   "sec": "Chain 5: EMPIRICAL METHOD",
+   "phys": [
+    "p-energy",
+    "p-axiom"
+   ],
+   "par": "ea-joule",
+   "cause": [
+    {
+     "id": "kr-beats",
+     "t": "enabled"
+    }
+   ],
+   "off": 5500,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-reverse",
+   "world": "kharen",
+   "y": -2500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Sound that cools",
+   "text": "Run in reverse, the sound engines pump heat away: sound becomes cooling.",
+   "src": "krTech",
+   "sec": "C1.4 Reverse effect: sound to cooling (~2500 BCE)",
+   "phys": [
+    "p-thermo"
+   ],
+   "cause": [
+    {
+     "id": "kr-bronze",
+     "t": "enabled"
+    }
+   ],
+   "off": 5500,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-42",
+   "world": "kharen",
+   "y": -2200,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The 4.2 ka drought",
+   "text": "An abrupt aridification about 2200 BCE that emptied settlements on the plains of northern Mesopotamia on Earth. In Kha-Ren it forces qanat-cistern irrigation and food preservation, and Kha-Ren becomes a refuge for its neighbours.",
+   "src": "krHistory",
+   "sec": "Crisis-Driven Innovation, 4.2 ka aridification",
+   "phys": [
+    "p-42"
+   ],
+   "off": 5800,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-coolers",
+   "world": "kharen",
+   "y": -2000,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Fire that makes cold",
+   "text": "Practical fire-driven food coolers.",
+   "src": "krTech",
+   "sec": "C1.5 Practical fire-driven food coolers (~2000 BCE)",
+   "phys": [
+    "p-thermo"
+   ],
+   "cause": [
+    {
+     "id": "kr-reverse",
+     "t": "enabled"
+    }
+   ],
+   "off": 6000,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-fourier",
+   "world": "kharen",
+   "y": -2000,
+   "y0": -2500,
+   "y1": -1500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Sound taken apart",
+   "text": "Banks of tuned resonators split a sound into its frequencies: an empirical Fourier analysis, between about 2500 and 1500 BCE.",
+   "src": "krTech",
+   "sec": "C2.5 Empirical Fourier via Helmholtz resonator banks (~2500-1500 BCE)",
+   "phys": [
+    "p-helmres"
+   ],
+   "par": "ea-helm63",
+   "cause": [
+    {
+     "id": "kr-trig",
+     "t": "enabled"
+    }
+   ],
+   "off": 6000,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-portable",
+   "world": "kharen",
+   "y": -1500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Cooling to carry",
+   "text": "Portable ceramic-bronze cooling devices make cold a trade good.",
+   "src": "krTech",
+   "sec": "C1.6 Portable ceramic-bronze hybrid devices (~1500 BCE)",
+   "cause": [
+    {
+     "id": "kr-coolers",
+     "t": "enabled"
+    }
+   ],
+   "off": 6500,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-corrfull",
+   "world": "kharen",
+   "y": -1250,
+   "y0": -1500,
+   "y1": -1000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The corridor at full capability",
+   "text": "The stone network reaches full capability between about 1500 and 1000 BCE.",
+   "src": "krTech",
+   "sec": "C2.1a corridor timeline (full capability ~1500-1000 BCE)",
+   "cause": [
+    {
+     "id": "kr-corr200",
+     "t": "enabled"
+    }
+   ],
+   "off": 6750,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-iron",
+   "world": "kharen",
+   "y": -1100,
+   "y0": -1200,
+   "y1": -1000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Acoustic iron and steel",
+   "text": "Vibration during solidification refines iron and steel as it refined bronze.",
+   "src": "krTech",
+   "sec": "C3.5 Acoustic iron/steel (~1200-1000 BCE)",
+   "cause": [
+    {
+     "id": "kr-hammer",
+     "t": "enabled"
+    }
+   ],
+   "off": 6900,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-c50",
+   "world": "kharen",
+   "y": -937,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Cycle 50",
+   "text": "When Terra reaches post-scarcity, Kha-Ren is in Cycle 50.",
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~937 BCE",
+   "off": 7063,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-press",
+   "world": "kharen",
+   "y": -750,
+   "y0": -1000,
+   "y1": -500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Pressure vessels",
+   "text": "Sealed bronze vessels at 2 to 3 atmospheres triple the power of the sound engines.",
+   "src": "krTech",
+   "sec": "C1.7b Low-pressure vessels 2-3 atm (~1000-500 BCE)",
+   "cause": [
+    {
+     "id": "kr-sealedvessel",
+     "t": "enabled"
+    }
+   ],
+   "off": 7250,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-text",
+   "world": "kharen",
+   "y": -250,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Kha-Ren writes",
+   "text": "Writing is adopted about 4,400 years after the castes were formalised. Law and commerce move into text; sacred acoustic knowledge stays mostly oral.",
+   "src": "krHistory",
+   "sec": "Crisis-Driven Innovation, Textualization (~250 BCE)",
+   "off": 7750,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-spectral",
+   "world": "kharen",
+   "y": -200,
+   "y0": -300,
+   "y1": -100,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Spectral analysis",
+   "text": "Empirical spectral analysis, between about 300 and 100 BCE.",
+   "src": "krTech",
+   "sec": "C2.8 Empirical spectral analysis (~300-100 BCE)",
+   "cause": [
+    {
+     "id": "kr-fourier",
+     "t": "enabled"
+    }
+   ],
+   "off": 7800,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-thread",
+   "world": "kharen",
+   "y": -195,
+   "y0": -230,
+   "y1": -160,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Threads cut in bronze",
+   "text": "Thread-cutting, between about 230 and 160 BCE, makes vessels at 5 to 50 atmospheres possible.",
+   "src": "krTech",
+   "sec": "C1.7c Medium-pressure vessels 5-50 atm (thread-cutting ~230-160 BCE)",
+   "cause": [
+    {
+     "id": "kr-press",
+     "t": "enabled"
+    }
+   ],
+   "off": 7805,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-loop",
+   "world": "kharen",
+   "y": -115,
+   "y0": -150,
+   "y1": -80,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The looped engine",
+   "text": "Kha-Ren builds a travelling-wave thermoacoustic engine around a looped tube. At 3 to 5 atmospheres it reaches 15 to 25 percent of the Carnot limit.",
+   "src": "krTech",
+   "sec": "C1.7d Traveling-wave looped topology (~150-80 BCE)",
+   "phys": [
+    "p-thermo"
+   ],
+   "par": "ea-swift",
+   "cause": [
+    {
+     "id": "kr-thread",
+     "t": "enabled"
+    }
+   ],
+   "off": 7885,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-amber",
+   "world": "kharen",
+   "y": 350,
+   "y0": 200,
+   "y1": 500,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The fifth caste",
+   "text": "A sequence of epidemics between about 200 and 500 CE forces recruitment across caste lines. The Amber caste emerges: specialists who hold both practical and theoretical knowledge.",
+   "src": "krHistory",
+   "sec": "Crisis-Driven Innovation, Epidemic sequence (~200-500 CE)",
+   "off": 8350,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-reform",
+   "world": "kharen",
+   "y": 580,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The Reformation",
+   "text": "Kha-Ren reforms without rejecting its artifact. The Acoustic Compact replaces Keeper autocracy with a written constitutional framework, the five-caste model is formalised, and apprenticeship rights for the Brown caste are written into law.",
+   "src": "krHistory",
+   "sec": "PHASE 5: The Reformation (~580 CE)",
+   "cause": [
+    {
+     "id": "kr-amber",
+     "t": "caused"
+    }
+   ],
+   "off": 8580,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-c90",
+   "world": "kharen",
+   "y": 2000,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Cycle 90 begins",
+   "text": "By the codex’s conversion, Cycle 90 begins in 2000 CE; the story present is its 68th year.",
+   "src": "calendar",
+   "sec": "Cycles (the Kha-Ren calendar), Conversion",
+   "off": 10000,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-present",
+   "world": "kharen",
+   "y": 2068,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Cycle 90, Year 68",
+   "text": "Kha-Ren at the story present: a divergent acoustic civilisation, ten thousand years of innovation without electrical industry, built on thermoacoustic engines, vibrational metallurgy and acoustic medicine. Caste is audible, because each caste speaks its own register. The capital, Valoria, is built in concentric rings by caste around the Sacred Circle, where the Keepers of Continuity hold the artifact.",
+   "src": "krOverview",
+   "sec": "IDENTITY; WHAT MAKES KHA-REN DIFFERENT; KEY LOCATIONS",
+   "phys": [
+    "p-thermo"
+   ],
+   "off": 10068,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "kr-nasha",
+   "world": "kharen",
+   "y": 2068.3,
+   "imp": 2,
+   "tier": 7,
+   "tag": "CANON",
+   "title": "Nasha",
+   "text": "Nasha, 17, a Green-caste weaver whose patterns the Keepers are watching.",
+   "src": "krOverview",
+   "sec": "CHARACTERS BASED ON KHA-REN [CANON]",
+   "who": [
+    "nasha"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 10068.3,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-formed",
+   "world": "earth",
+   "y": -4540000000.0,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "The planet forms",
+   "text": "Earth forms about 4.54 billion years ago. The codex dates the Vortex’s Inhabitants to about four billion years, half a billion years younger than the planet.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-age"
+   ],
+   "view": [
+    -4800000000.0,
+    2075
+   ],
+   "real": true,
+   "off": -4540002031.0,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "te-lumina",
+   "world": "terra",
+   "y": -3537,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Lumina",
+   "text": "Lumina, Terra’s capital, stands on the discovery site and has been lived in continuously for the 5,605 years since.",
+   "src": "teOverview",
+   "sec": "KEY LOCATIONS, Lumina",
+   "off": 0,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-sealedvessel",
+   "world": "kharen",
+   "y": -1250,
+   "y0": -1500,
+   "y1": -1000,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Sealed vessels behave differently",
+   "text": "Capped bronze tubes are found to behave differently from open ones, between about 1500 and 1000 BCE: the first step toward pressurised engines.",
+   "src": "krTech",
+   "sec": "C1.7a Sealed-vessel observation (~1500-1000 BCE)",
+   "cause": [
+    {
+     "id": "kr-portable",
+     "t": "enabled"
+    }
+   ],
+   "off": 6750,
+   "reveal": "premise"
+  },
+  {
+   "id": "kr-trav",
+   "world": "kharen",
+   "y": 225,
+   "y0": -50,
+   "y1": 500,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Pressure and the loop together",
+   "text": "Between about 50 BCE and 500 CE the pressurised vessel and the looped engine are combined, at 15 to 25 percent of the Carnot limit: the codex’s ceiling for Kha-Ren bronze.",
+   "src": "krTech",
+   "sec": "C1.7e Pressurized + traveling-wave combined (~50 BCE-500 CE)",
+   "phys": [
+    "p-thermo"
+   ],
+   "cause": [
+    {
+     "id": "kr-loop",
+     "t": "enabled"
+    }
+   ],
+   "off": 8225,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "te-disc",
+   "world": "terra",
+   "y": -3537,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Terra finds its artifact: 0 A.T.",
+   "text": "On Terra’s Mediterranean-equivalent coast, workers rebuilding a collapsed library dig into a chamber that should not exist, and find the artifact. Terra’s calendar starts here, Year 0 After Terra. The society that finds it already has cities, writing and scholars, who first take it for a relic of an older civilisation.",
+   "src": "teHistory",
+   "sec": "PHASE 1: ARTIFACT DISCOVERY (~3537 BCE / Year 0 A.T.)",
+   "phys": [
+    "p-defect",
+    "p-zeno",
+    "p-casimir"
+   ],
+   "off": 0,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "te-dreams",
+   "world": "terra",
+   "y": -3437,
+   "y0": -3537,
+   "y1": -3337,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Shared dreams",
+   "text": "Those who study the artifact report shared dreams, sudden insight and thinking together. Within a generation they become a new intellectual elite, and in the first two centuries the study community grows into a proto-civilisation.",
+   "src": "teHistory",
+   "sec": "PHASE 1: First Contact; PHASE 2, row 0-200 A.T.",
+   "cause": [
+    {
+     "id": "te-disc",
+     "t": "caused"
+    }
+   ],
+   "off": 100,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-field",
+   "world": "terra",
+   "y": -3187,
+   "y0": -3337,
+   "y1": -3037,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The field spreads",
+   "text": "Between about 200 and 500 A.T. the artifact’s cognitive effects reach beyond its vicinity. Many languages are still spoken, and violence is still common.",
+   "src": "teHistory",
+   "sec": "PHASE 2: EARLY ARTIFACT ERA, row 200-500 A.T.",
+   "cause": [
+    {
+     "id": "te-dreams",
+     "t": "enabled"
+    }
+   ],
+   "off": 350,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-science",
+   "world": "terra",
+   "y": -2887,
+   "y0": -3037,
+   "y1": -2737,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Science accelerates",
+   "text": "Between about 500 and 800 A.T. Terran climate science, materials science and medicine advance by orders of magnitude.",
+   "src": "teHistory",
+   "sec": "PHASE 2: EARLY ARTIFACT ERA, row 500-800 A.T.",
+   "cause": [
+    {
+     "id": "te-field",
+     "t": "enabled"
+    }
+   ],
+   "off": 650,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-consol",
+   "world": "terra",
+   "y": -1237,
+   "y0": -1537,
+   "y1": -937,
+   "c": true,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Consolidation",
+   "text": "From about 2000 to 2600 A.T. Terra settles into one language and one framework of thought, and climate engineering works at continental scale.",
+   "src": "teHistory",
+   "sec": "PHASE 4: CONSOLIDATION (2000-2600 A.T.)",
+   "off": 2300,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-move",
+   "world": "terra",
+   "y": -932,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The artifact is moved",
+   "text": "About three thousand years before the story present, Terra moves its artifact from the discovery site into a secured facility, where it has been studied ever since.",
+   "src": "artifacts",
+   "sec": "Terra Artifact — Lumina Secured Facility",
+   "off": 2605,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-scarcity",
+   "world": "terra",
+   "y": -937,
+   "c": true,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Post-scarcity",
+   "text": "Around 2600 A.T. Terra ends material want, about three thousand years before Earth’s 2068.",
+   "src": "teHistory",
+   "sec": "PHASE 4: CONSOLIDATION; Post-scarcity achieved ~2600 A.T.",
+   "cause": [
+    {
+     "id": "te-consol",
+     "t": "enabled"
+    }
+   ],
+   "off": 2600,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-extinct",
+   "world": "terra",
+   "y": -737,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Extinction halted",
+   "text": "Around 2800 A.T. Terra stops extinction. From here every ecosystem is curated.",
+   "src": "teHistory",
+   "sec": "PHASE 5: THE TERRAN GOLDEN AGE",
+   "cause": [
+    {
+     "id": "te-scarcity",
+     "t": "enabled"
+    }
+   ],
+   "off": 2800,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-storm",
+   "world": "terra",
+   "y": -337,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The last unmanaged storm",
+   "text": "Around 3200 A.T. After it, Terra’s weather is managed.",
+   "src": "teOverview",
+   "sec": "WHAT MAKES TERRA DIFFERENT, Weather",
+   "cause": [
+    {
+     "id": "te-scarcity",
+     "t": "enabled"
+    }
+   ],
+   "off": 3200,
+   "reveal": "premise"
+  },
+  {
+   "id": "te-alex-research",
+   "world": "terra",
+   "y": 2066,
+   "c": true,
+   "imp": 3,
+   "tier": 3,
+   "tag": "UNTAGGED",
+   "title": "Alexander turns to dimensional research",
+   "text": "Alexander Bellamy begins the dimensional research he is doing when Book 1 opens.",
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row ~2066",
+   "who": [
+    "alexander"
+   ],
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 5603,
+   "reveal": "book 1"
+  },
+  {
+   "id": "te-present",
+   "world": "terra",
+   "y": 2068,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "5605 A.T.",
+   "text": "Terra at the story present: about 12 billion people living 300 years and more, no war, no poverty, managed weather and a complete dimensional physics that corrected its variable constants long ago. Light is sourceless and diffuse, so shadows do not know which way to fall. Governance is by consensus through Unified Thought, a cognitive framework the artifact made possible; the codex rules out telepathy and a hive mind. The capital is Lumina, and a Terran year is about 400 days.",
+   "src": "teOverview",
+   "sec": "IDENTITY; WHAT MAKES TERRA DIFFERENT; UNIFIED THOUGHT, What It Is",
+   "phys": [
+    "p-unified",
+    "p-webb"
+   ],
+   "off": 5605,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "te-alex",
+   "world": "terra",
+   "y": 2068.3,
+   "imp": 2,
+   "tier": 3,
+   "tag": "UNTAGGED",
+   "title": "Alexander Bellamy",
+   "text": "A senior researcher at the Lumina Institute on Terra, doing dimensional research when Book 1 opens.",
+   "src": "plot",
+   "sec": "Chapter 3: The Scholar",
+   "who": [
+    "alexander"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 5605.3,
+   "reveal": "book 1"
+  },
+  {
+   "id": "te-sera",
+   "world": "terra",
+   "y": 2068.35,
+   "imp": 3,
+   "tier": 4,
+   "tag": "UNTAGGED",
+   "title": "Sera, archivist",
+   "text": "An archivist in Lumina, 67 by the Earth reckoning and 61 in Terran years.",
+   "src": "plot",
+   "sec": "Chapter 4: The Warning",
+   "who": [
+    "sera"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 5605.35,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-bronze",
+   "world": "earth",
+   "y": -3537,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Bronze Age civilisations",
+   "text": "Earth at about 3537 BCE, the year Terra finds its artifact: Bronze Age civilisations, with no artifact found and none noticed.",
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~3537 BCE",
+   "off": -5568,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-auenbrugger",
+   "world": "earth",
+   "y": 1761,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "Tapping the chest",
+   "text": "Auenbrugger publishes percussion of the chest: tapping the body and listening to it. The codex cites this as the equivalent of Kha-Ren’s thirty-second acoustic triage, which it does not date.",
+   "src": "krGenesis",
+   "sec": "Chain 4: BIOLOGICAL ACOUSTICS, Percussion diagnostics",
+   "view": [
+    1740,
+    2075
+   ],
+   "real": true,
+   "off": -270,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-laennec",
+   "world": "earth",
+   "y": 1816,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "The stethoscope",
+   "text": "Laënnec listens to the chest through a rolled tube, the first stethoscope. The codex pairs it with Auenbrugger as Earth’s version of Kha-Ren’s acoustic diagnosis.",
+   "src": "krGenesis",
+   "sec": "Chain 4: BIOLOGICAL ACOUSTICS, Percussion diagnostics",
+   "view": [
+    1740,
+    2075
+   ],
+   "real": true,
+   "off": -215,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-joule",
+   "world": "earth",
+   "y": 1850,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "The mechanical equivalent of heat",
+   "text": "Joule measures how much work makes a given amount of heat, the experimental footing of energy conservation. Kha-Ren balanced the same kind of books around 2500 BCE, because its artifact broke them.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-energy"
+   ],
+   "par": "kr-energy",
+   "view": [
+    1830,
+    2075
+   ],
+   "real": true,
+   "off": -181,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-sondhauss",
+   "world": "earth",
+   "y": 1850.4,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "Sondhauss: a heated tube sings",
+   "text": "Sondhauss describes glass tubes that sing when heated at one end. Kha-Ren found the effect about 8,350 years earlier.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-sondhauss"
+   ],
+   "par": "kr-tube",
+   "view": [
+    1830,
+    2075
+   ],
+   "real": true,
+   "off": -180.6,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-helm63",
+   "world": "earth",
+   "y": 1863,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "Helmholtz’s resonators",
+   "text": "Helmholtz analyses sound with sets of tuned resonators, each answering one frequency.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-helmres"
+   ],
+   "par": "kr-fourier",
+   "view": [
+    1830,
+    2075
+   ],
+   "real": true,
+   "off": -168,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-kundt",
+   "world": "earth",
+   "y": 1866,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "Kundt’s tube",
+   "text": "Kundt makes standing sound waves visible: fine powder in a resonating tube collects at the nodes.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-kundt"
+   ],
+   "par": "kr-frost",
+   "view": [
+    1830,
+    2075
+   ],
+   "real": true,
+   "off": -165,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-anom",
+   "world": "earth",
+   "y": 1944,
+   "imp": 2,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Instruments flag a mesa",
+   "text": "In the codex, instruments first register anomalies around a mesa in New Mexico. It is the first sign of Earth’s artifact.",
+   "src": "artifacts",
+   "sec": "Earth Artifact — Oscura Cavern, Discovery",
+   "view": [
+    1930,
+    2075
+   ],
+   "off": -87,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-cavern",
+   "world": "earth",
+   "y": 1987,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "A cavern below Mesa Oscura",
+   "text": "Deep seismic mapping finds a natural volcanic cavern about 400 feet below Mesa Oscura in the Jemez Mountains.",
+   "src": "artifacts",
+   "sec": "Earth Artifact — Oscura Cavern, Discovery",
+   "cause": [
+    {
+     "id": "ea-anom",
+     "t": "enabled"
+    }
+   ],
+   "view": [
+    1930,
+    2075
+   ],
+   "off": -44,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-webb",
+   "world": "earth",
+   "y": 1999,
+   "imp": 3,
+   "tier": 0,
+   "tag": "CANON",
+   "title": "Is the fine-structure constant constant?",
+   "text": "Quasar spectra are reported to show the fine-structure constant slightly different in the early universe. The result is debated. In the codex, constants are local near dimensional boundaries, and Terra corrected for this long ago.",
+   "src": "dimPhysics",
+   "sec": "The Webb Discrepancy [CANON]",
+   "phys": [
+    "p-webb"
+   ],
+   "view": [
+    1930,
+    2075
+   ],
+   "real": true,
+   "off": -32,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-swift",
+   "world": "earth",
+   "y": 1999.5,
+   "imp": 3,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "A looped heat engine",
+   "text": "Backhaus and Swift build a travelling-wave thermoacoustic engine with no moving parts and 30 percent thermal efficiency. Kha-Ren’s looped engine is about 2,100 years older.",
+   "src": "real",
+   "sec": "published science",
+   "phys": [
+    "p-thermo"
+   ],
+   "par": "kr-loop",
+   "view": [
+    1930,
+    2075
+   ],
+   "real": true,
+   "off": -31.5,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-gps",
+   "world": "earth",
+   "y": 2000,
+   "y0": 1998,
+   "y1": 2003,
+   "c": true,
+   "imp": 3,
+   "tier": 0,
+   "tag": "CANON",
+   "title": "Clocks drift near the mesa",
+   "text": "GPS timing anomalies appear in the Jemez region from the late 1990s. The official explanation is terrain interference. The codex’s is a local time dilation around the artifact.",
+   "src": "dimPhysics",
+   "sec": "GPS Timing Anomalies [CANON]",
+   "view": [
+    1930,
+    2075
+   ],
+   "off": -31,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-higgs",
+   "world": "earth",
+   "y": 2012,
+   "imp": 2,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "The Higgs boson",
+   "text": "The Higgs boson is found at the Large Hadron Collider. In the codex it is the last fundamental discovery before a long desert.",
+   "src": "eaOverview",
+   "sec": "THE PHYSICS COMMUNITY",
+   "phys": [
+    "p-higgs"
+   ],
+   "view": [
+    1990,
+    2075
+   ],
+   "real": true,
+   "off": -19,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-today",
+   "world": "earth",
+   "y": 2026,
+   "imp": 2,
+   "tier": 0,
+   "tag": "REAL",
+   "title": "The present day",
+   "text": "Where real history stops. Everything on Earth’s line to the right of this marker is the codex’s forecast.",
+   "src": "eaHistory",
+   "sec": "PURPOSE",
+   "view": [
+    2000,
+    2075
+   ],
+   "real": true,
+   "today": true,
+   "off": -5,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-fusion28",
+   "world": "earth",
+   "y": 2028,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "A first fusion plant",
+   "text": "In the codex’s forecast, the first operational fusion plant opens in France: expensive, not yet scalable.",
+   "src": "eaHistory",
+   "sec": "2025–2035: The Climate Decade",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": -3,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-climate",
+   "world": "earth",
+   "y": 2030,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Population peaks",
+   "text": "Climate adaptation dominates policy and coasts retreat. The codex has world population peak at about 10.2 billion in 2030.",
+   "src": "eaHistory",
+   "sec": "2025–2035: The Climate Decade",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": -1,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-access",
+   "world": "earth",
+   "y": 2031,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Earth reaches its artifact",
+   "text": "The artifact beneath Mesa Oscura is accessed and studied in secret: a sphere about three metres across, dark grey to deep blue, shifting colour with the angle, patterns moving inside its surface, always -3 °C. It stays dormant, and Earth’s humanity is still unaltered by it.",
+   "src": "artifacts",
+   "sec": "Earth Artifact — Oscura Cavern; SHARED PROPERTIES [CANON]",
+   "phys": [
+    "p-zeno",
+    "p-casimir"
+   ],
+   "cause": [
+    {
+     "id": "ea-cavern",
+     "t": "enabled"
+    }
+   ],
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 0,
+   "reveal": "premise",
+   "physics": true
+  },
+  {
+   "id": "ea-qc",
+   "world": "earth",
+   "y": 2033,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Quantum computers at work",
+   "text": "Quantum computing reaches practical scale for cryptography and materials simulation.",
+   "src": "eaHistory",
+   "sec": "2025–2035: The Climate Decade",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 2,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-sm",
+   "world": "earth",
+   "y": 2040,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "The Standard Model, again",
+   "text": "The Standard Model is confirmed to unprecedented precision, and the physics community’s despair deepens.",
+   "src": "eaHistory",
+   "sec": "2035–2050: The Stagnation",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 9,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-oscura",
+   "world": "earth",
+   "y": 2041,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Oscura is announced",
+   "text": "Oscura Laboratory is announced publicly as a joint US and EU project on the mesa.",
+   "src": "eaHistory",
+   "sec": "2035–2050: The Stagnation",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 10,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-fcc",
+   "world": "earth",
+   "y": 2048,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "A collider finds nothing new",
+   "text": "In the codex, the Future Circular Collider at CERN begins operating and confirms the Standard Model. Nothing new.",
+   "src": "eaHistory",
+   "sec": "2035–2050: The Stagnation",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 17,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-ai",
+   "world": "earth",
+   "y": 2050,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Narrow AI everywhere",
+   "text": "Narrow AI is everywhere and general AI has not arrived. The gap between known physics and anything new seems endless.",
+   "src": "eaHistory",
+   "sec": "2035–2050: The Stagnation",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 19,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-cepc",
+   "world": "earth",
+   "y": 2055,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Higher energies, nothing new",
+   "text": "China’s Circular Electron-Positron Collider reaches higher energies and finds nothing new.",
+   "src": "eaHistory",
+   "sec": "2050–2065: The Quiet Desperation",
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 24,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-op",
+   "world": "earth",
+   "y": 2056,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Oscura opens",
+   "text": "The laboratory becomes operational and begins work on accelerator physics.",
+   "src": "eaHistory",
+   "sec": "2050–2065: The Quiet Desperation",
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 25,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-fusion58",
+   "world": "earth",
+   "y": 2058,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Fusion pays",
+   "text": "Fusion power becomes commercially viable but stays expensive; the grid is still mixed.",
+   "src": "eaHistory",
+   "sec": "2050–2065: The Quiet Desperation",
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 27,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-moon",
+   "world": "earth",
+   "y": 2060,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Bases on the Moon",
+   "text": "Moon bases are established by the US, China and an EU consortium; Mars missions are in planning.",
+   "src": "eaHistory",
+   "sec": "2050–2065: The Quiet Desperation",
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 29,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-gene",
+   "world": "earth",
+   "y": 2063,
+   "imp": 3,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "Gene therapy is routine",
+   "text": "Gene therapy becomes routine for common conditions; average lifespan in developed nations is about 85.",
+   "src": "eaHistory",
+   "sec": "2050–2065: The Quiet Desperation",
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 32,
+   "reveal": "premise"
+  },
+  {
+   "id": "ea-emily-board",
+   "world": "earth",
+   "y": 2052,
+   "c": true,
+   "imp": 3,
+   "tier": 2,
+   "tag": "UNTAGGED",
+   "title": "Emily Chen joins Oscura’s ethics board",
+   "text": "Emily Chen joins the Oscura Ethics Advisory Board.",
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row ~2052",
+   "who": [
+    "emily"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 21,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-emily-meets",
+   "world": "earth",
+   "y": 2058,
+   "imp": 3,
+   "tier": 2,
+   "tag": "UNTAGGED",
+   "title": "Emily meets Samantha",
+   "text": "Emily Chen meets Samantha Lee at a conference in Geneva.",
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2058",
+   "who": [
+    "emily",
+    "samantha"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 27,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-partners",
+   "world": "earth",
+   "y": 2059,
+   "c": true,
+   "imp": 3,
+   "tier": 1,
+   "tag": "UNTAGGED",
+   "title": "Samantha and John start working together",
+   "text": "The partnership Book 1 opens on is nine years old in 2068.",
+   "src": "plot",
+   "sec": "Chapter 1: The Patterns",
+   "who": [
+    "samantha",
+    "john"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 28,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-grey",
+   "world": "earth",
+   "y": 2038,
+   "imp": 3,
+   "tier": 6,
+   "tag": "UNTAGGED",
+   "title": "Grey Dynamics is founded",
+   "text": "Martin Grey’s company, Grey Dynamics, is founded.",
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2038",
+   "who": [
+    "martin"
+   ],
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 7,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-sam",
+   "world": "earth",
+   "y": 2065,
+   "imp": 2,
+   "tier": 1,
+   "tag": "UNTAGGED",
+   "title": "Samantha Lee joins Oscura",
+   "text": "A quantum physicist, recruited to Oscura at 35.",
+   "src": "eaHistory",
+   "sec": "2050–2065: The Quiet Desperation, 2065",
+   "who": [
+    "samantha"
+   ],
+   "view": [
+    2040,
+    2070
+   ],
+   "off": 34,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-patterns",
+   "world": "earth",
+   "y": 2068.02,
+   "imp": 1,
+   "tier": 1,
+   "tag": "UNTAGGED",
+   "title": "Something in the data",
+   "text": "Early 2068. Working late, Samantha Lee finds a pattern in her data that matches no model. Book 1 opens here.",
+   "src": "plot",
+   "sec": "Chapter 1: The Patterns",
+   "who": [
+    "samantha",
+    "john"
+   ],
+   "view": [
+    2060,
+    2069
+   ],
+   "off": 37.02,
+   "reveal": "book 1"
+  },
+  {
+   "id": "ea-present",
+   "world": "earth",
+   "y": 2068,
+   "imp": 1,
+   "tier": 0,
+   "tag": "UNTAGGED",
+   "title": "2068 CE",
+   "text": "Earth at the story present: about 10 billion people, quantum computing for specialised tasks, narrow AI everywhere and no general AI, fusion arriving, bases on the Moon, and particle physics 56 years without a fundamental discovery. Its humanity is unaltered by its artifact. Earth’s divergence begins here.",
+   "src": "eaOverview",
+   "sec": "IDENTITY; TECHNOLOGY LEVEL; THE PHYSICS COMMUNITY",
+   "view": [
+    2020,
+    2070
+   ],
+   "off": 37,
+   "reveal": "premise"
+  },
+  {
+   "id": "sync",
+   "world": "core",
+   "y": 2068.5,
+   "imp": 1,
+   "tier": 0,
+   "tag": "CANON",
+   "title": "One now",
+   "text": "At the story present the three worlds are synchronised: 2068 CE on Earth is 5605 A.T. on Terra and Cycle 90, Year 68 in Kha-Ren. The codex makes this a property of the substrate the three share. Earlier dates on this page are placed on Earth’s clock, as the codex places them.",
+   "src": "calendar",
+   "sec": "TIME SYNCHRONIZATION [CANON]",
+   "phys": [
+    "p-warp"
+   ],
+   "view": [
+    2060,
+    2069
+   ],
+   "reveal": "premise",
+   "physics": true
+  }
+ ],
+ "characters": [
+  {
+   "id": "samantha",
+   "name": "Samantha Lee",
+   "world": "earth",
+   "age": 38,
+   "tier": 1,
+   "role": "quantum physicist at Oscura",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  },
+  {
+   "id": "john",
+   "name": "John Peters",
+   "world": "earth",
+   "age": 41,
+   "tier": 1,
+   "role": "methodologist, Samantha’s partner",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  },
+  {
+   "id": "emily",
+   "name": "Emily Chen",
+   "world": "earth",
+   "age": 73,
+   "tier": 2,
+   "role": "mentor",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  },
+  {
+   "id": "alexander",
+   "name": "Alexander Bellamy",
+   "world": "terra",
+   "age": 42,
+   "nativeAge": 38.3,
+   "tier": 3,
+   "role": "researcher, Lumina Institute",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  },
+  {
+   "id": "sera",
+   "name": "Sera",
+   "world": "terra",
+   "age": 67,
+   "nativeAge": 61.3,
+   "tier": 4,
+   "role": "archivist in Lumina",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  },
+  {
+   "id": "martin",
+   "name": "Martin Grey",
+   "world": "earth",
+   "age": 52,
+   "tier": 6,
+   "role": "Grey Dynamics",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  },
+  {
+   "id": "nasha",
+   "name": "Nasha",
+   "world": "kharen",
+   "age": 17,
+   "tier": 7,
+   "role": "Green-caste weaver",
+   "src": "calendar",
+   "sec": "AGE EQUIVALENCE CONVENTION [CANON]"
+  }
+ ],
+ "eras": [
+  {
+   "world": "kharen",
+   "y": -300000,
+   "y2": -10000,
+   "name": "paleolithic",
+   "text": "Hunter-gatherers, the same people in every dimension.",
+   "src": "real"
+  },
+  {
+   "world": "earth",
+   "y": -300000,
+   "y2": -10000,
+   "name": "paleolithic",
+   "text": "Hunter-gatherers, the same people in every dimension.",
+   "src": "real"
+  },
+  {
+   "world": "terra",
+   "y": -300000,
+   "y2": -10000,
+   "name": "paleolithic",
+   "text": "Hunter-gatherers, the same people in every dimension.",
+   "src": "real"
+  },
+  {
+   "world": "kharen",
+   "y": -10000,
+   "y2": -8000,
+   "name": "neolithic",
+   "text": "Neolithic communities, in step with the other two dimensions.",
+   "src": "masterTimeline"
+  },
+  {
+   "world": "earth",
+   "y": -10000,
+   "y2": -4000,
+   "name": "neolithic",
+   "text": "Neolithic communities in the Fertile Crescent, in step with Terra.",
+   "src": "masterTimeline"
+  },
+  {
+   "world": "terra",
+   "y": -10000,
+   "y2": -4000,
+   "name": "neolithic",
+   "text": "Neolithic communities on Mediterranean-equivalent coasts, in step with Earth.",
+   "src": "masterTimeline"
+  },
+  {
+   "world": "earth",
+   "y": -4000,
+   "y2": -1200,
+   "name": "bronze age",
+   "text": "Cities, writing and Bronze Age civilisations, in step with Terra until Terra’s discovery.",
+   "src": "masterTimeline"
+  },
+  {
+   "world": "terra",
+   "y": -4000,
+   "y2": -3537,
+   "name": "bronze age",
+   "text": "An urban Bronze Age civilisation with writing and scholars, in step with Earth.",
+   "src": "divergence"
+  },
+  {
+   "world": "kharen",
+   "y": -8000,
+   "y2": -4675,
+   "name": "containment",
+   "text": "Engagement, then catastrophe, then 3,300 years of building a social order around the artifact.",
+   "src": "krHistory"
+  },
+  {
+   "world": "kharen",
+   "y": -4675,
+   "y2": -250,
+   "name": "the oral caste era",
+   "text": "Four castes, an oral tradition and the frozen Sacred Register, while five acoustic technology chains grow inside the constraints.",
+   "src": "krHistory"
+  },
+  {
+   "world": "kharen",
+   "y": -250,
+   "y2": 580,
+   "name": "writing to reform",
+   "text": "Writing transforms law and commerce; epidemics produce a fifth caste.",
+   "src": "krHistory"
+  },
+  {
+   "world": "kharen",
+   "y": 580,
+   "y2": 2068,
+   "name": "the Compact",
+   "text": "Governance under the Acoustic Compact, a written constitutional framework, after the Reformation.",
+   "src": "krOverview"
+  },
+  {
+   "world": "terra",
+   "y": -3537,
+   "y2": -2537,
+   "name": "early artifact era",
+   "text": "The artifact study community grows into a civilisation. Many languages are still spoken; violence is still common.",
+   "src": "teHistory"
+  },
+  {
+   "world": "terra",
+   "y": -1537,
+   "y2": -937,
+   "name": "consolidation",
+   "text": "One language and one framework of thought; climate engineering at continental scale.",
+   "src": "teHistory"
+  },
+  {
+   "world": "terra",
+   "y": -937,
+   "y2": 2068,
+   "name": "post-scarcity",
+   "text": "About three thousand years without war or want, with lifespans past three hundred years.",
+   "src": "teHistory"
+  },
+  {
+   "world": "earth",
+   "y": -1200,
+   "y2": 1760,
+   "name": "iron to industry",
+   "text": "Our own history: iron, empires, print and science.",
+   "src": "real"
+  },
+  {
+   "world": "earth",
+   "y": 1760,
+   "y2": 1950,
+   "name": "industrial age",
+   "text": "Our own history: steam, electricity, the physics that built the Standard Model.",
+   "src": "real"
+  },
+  {
+   "world": "earth",
+   "y": 1950,
+   "y2": 2025,
+   "name": "information age",
+   "text": "Our own history: computers, networks, the Higgs boson.",
+   "src": "divergence"
+  },
+  {
+   "world": "earth",
+   "y": 2025,
+   "y2": 2035,
+   "name": "climate decade",
+   "text": "Adaptation dominates policy; the codex forecast begins.",
+   "src": "eaHistory"
+  },
+  {
+   "world": "earth",
+   "y": 2035,
+   "y2": 2050,
+   "name": "the stagnation",
+   "text": "The Standard Model is confirmed again and again and nothing new appears.",
+   "src": "eaHistory"
+  },
+  {
+   "world": "earth",
+   "y": 2050,
+   "y2": 2065,
+   "name": "quiet desperation",
+   "text": "Narrow AI everywhere, no general AI, colliders that find nothing.",
+   "src": "eaHistory"
+  },
+  {
+   "world": "earth",
+   "y": 2065,
+   "y2": 2068,
+   "name": "the opening",
+   "text": "The years just before Book 1 opens.",
+   "src": "eaHistory"
+  }
+ ],
+ "held": [
+  {
+   "world": "terra",
+   "y": -2537,
+   "y2": -1537,
+   "text": "This millennium of Terran history is not on the public timeline."
+  },
+  {
+   "world": "kharen",
+   "y": 900,
+   "y2": 2068,
+   "text": "Kha-Ren history after the Reformation is still being developed in the codex and is not published here; the present-day picture is."
+  }
+ ],
+ "physics": {
+  "p-brane": {
+   "rung": "THEORETICAL",
+   "title": "Branes in a bulk",
+   "claim": "Our universe may be a 3+1-dimensional membrane in a higher-dimensional bulk. Gravity reaches into the bulk; the other forces stay on the brane.",
+   "refs": [
+    {
+     "cite": "Randall & Sundrum (1999), Physical Review Letters 83, 3370",
+     "doi": "10.1103/PhysRevLett.83.3370",
+     "title": "Large Mass Hierarchy from a Small Extra Dimension",
+     "author": "Randall",
+     "year": 1999
+    },
+    {
+     "cite": "Randall & Sundrum (1999), Physical Review Letters 83, 4690",
+     "doi": "10.1103/PhysRevLett.83.4690",
+     "title": "An Alternative to Compactification",
+     "author": "Randall",
+     "year": 1999
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "The three expression worlds are three branes on one bulk; the Vortex and Haven are the geometry of that bulk."
+   },
+   "src": "dimPhysics",
+   "sec": "Brane Cosmology [THEORETICAL → SF TERRITORY]",
+   "detail": "Randall and Sundrum showed that a warped extra dimension can explain why gravity is so much weaker than the other forces, and that a brane can sit in an infinite bulk without the extra dimension showing up in everyday physics. No experiment has detected an extra dimension yet; collider searches have only set limits on them.",
+   "tagFrom": {
+    "src": "dimPhysics",
+    "sec": "Brane Cosmology [THEORETICAL → SF TERRITORY]"
+   }
+  },
+  "p-warp": {
+   "rung": "THEORETICAL",
+   "title": "Each brane keeps its own time",
+   "claim": "In Randall–Sundrum geometry the metric carries a warp factor, ds² = e^(−2|y|/ℓ) η dx dx + dy², so clocks on different branes run at different rates. There is no single bulk time.",
+   "refs": [
+    {
+     "cite": "Randall & Sundrum (1999), Physical Review Letters 83, 3370",
+     "doi": "10.1103/PhysRevLett.83.3370",
+     "title": "Large Mass Hierarchy from a Small Extra Dimension",
+     "author": "Randall",
+     "year": 1999
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "The codex synchronises the three worlds at the story present through their shared substrate. Older dates are aligned to Earth’s clock by convention."
+   },
+   "src": "transit",
+   "sec": "RS Warped Time [THEORETICAL]",
+   "detail": "The warp factor falls exponentially with distance into the extra dimension, so the same process runs at different rates on branes at different depths. Two worlds on two branes have no shared clock unless something links them, which is why this page places every date on Earth’s clock and says where the codex itself aligns them.",
+   "tagFrom": {
+    "src": "transit",
+    "sec": "RS Warped Time [THEORETICAL]"
+   }
+  },
+  "p-defect": {
+   "rung": "THEORETICAL",
+   "title": "Topological defects",
+   "claim": "When a symmetry breaks in a phase transition, regions that chose differently leave stable defects where they meet: domain walls, cosmic strings, monopoles. Cosmic strings could carry current and close into stable loops.",
+   "refs": [
+    {
+     "cite": "Kibble (1976), Journal of Physics A 9, 1387",
+     "doi": "10.1088/0305-4470/9/8/029",
+     "title": "Topology of cosmic domains and strings",
+     "author": "Kibble",
+     "year": 1976
+    },
+    {
+     "cite": "Witten (1985), Nuclear Physics B 249, 557",
+     "doi": "10.1016/0550-3213(85)90022-7",
+     "title": "Superconducting strings",
+     "author": "Witten",
+     "year": 1985
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "Each artifact is a stabilised topological defect, an object of spacetime rather than an object in it, engineered by the Builders as infrastructure."
+   },
+   "src": "artifacts",
+   "sec": "The Physics [THEORETICAL → SF TERRITORY]",
+   "detail": "Kibble showed that a cooling universe must leave such defects behind, because regions too far apart to exchange signals cannot agree on how to break a symmetry. Witten showed that cosmic strings could carry current without resistance. None has been observed; cosmic strings remain a prediction searched for in gravitational waves and the microwave background.",
+   "tagFrom": {
+    "src": "artifacts",
+    "sec": "The Physics, Topological defects [THEORETICAL]"
+   }
+  },
+  "p-casimir": {
+   "rung": "ESTABLISHED",
+   "title": "Negative energy density is real",
+   "claim": "The Casimir force between closely spaced surfaces was measured to within about 5 percent of theory.",
+   "refs": [
+    {
+     "cite": "Lamoreaux (1997), Physical Review Letters 78, 5",
+     "doi": "10.1103/PhysRevLett.78.5",
+     "title": "Demonstration of the Casimir Force in the 0.6 to 6 μm Range",
+     "author": "Lamoreaux",
+     "year": 1997
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "The artifact shifts colour with the viewing angle through Casimir-like effects at its boundary."
+   },
+   "src": "artifacts",
+   "sec": "Exotic Matter [ESTABLISHED → SF TERRITORY]",
+   "detail": "Two uncharged metal plates a fraction of a micrometre apart are pushed together because the vacuum between them supports fewer electromagnetic modes than the vacuum outside. Lamoreaux measured the force with a torsion pendulum. It shows that empty space carries measurable energy that geometry can change, the idea the codex builds the artifact’s surface on.",
+   "tagFrom": {
+    "src": "artifacts",
+    "sec": "Exotic Matter [ESTABLISHED → SF TERRITORY]"
+   }
+  },
+  "p-zeno": {
+   "rung": "ESTABLISHED",
+   "title": "Watching changes the outcome",
+   "claim": "Frequent measurement freezes the evolution of a quantum system (the Zeno effect); some measurement schedules speed transitions up instead (anti-Zeno).",
+   "refs": [
+    {
+     "cite": "Itano, Heinzen, Bollinger & Wineland (1990), Physical Review A 41, 2295",
+     "doi": "10.1103/PhysRevA.41.2295",
+     "title": "Quantum Zeno effect",
+     "author": "Itano",
+     "year": 1990
+    },
+    {
+     "cite": "Fischer, Gutiérrez-Medina & Raizen (2001), Physical Review Letters 87, 040402",
+     "doi": "10.1103/PhysRevLett.87.040402",
+     "title": "Observation of the Quantum Zeno and Anti-Zeno Effects in an Unstable System",
+     "author": "Fischer",
+     "year": 2001
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "The patterns inside every artifact speed up when watched and slow down when not, through a Zeno-type coupling."
+   },
+   "src": "artifacts",
+   "sec": "The Material Puzzle; quantum Zeno [ESTABLISHED]",
+   "detail": "Itano and colleagues at NIST held trapped ions in one state by probing them with laser pulses: the more often they looked, the less the state changed. Raizen’s group then showed the opposite regime, in which measurement speeds a decay up. Observation is a physical interaction, not a passive record, which is what the codex borrows for an artifact that responds to being watched.",
+   "tagFrom": {
+    "src": "artifacts",
+    "sec": "evidence table, Quantum Zeno effect [ESTABLISHED]"
+   }
+  },
+  "p-webb": {
+   "rung": "ESTABLISHED",
+   "title": "Is the fine-structure constant constant?",
+   "claim": "Absorption lines in distant quasar spectra were reported to show α ≈ 1/137.036 slightly different in the early universe. The measurement is published; whether α really varies is still debated.",
+   "refs": [
+    {
+     "cite": "Webb, Flambaum, Churchill, Drinkwater & Barrow (1999), Physical Review Letters 82, 884",
+     "doi": "10.1103/PhysRevLett.82.884",
+     "title": "Search for Time Variation of the Fine Structure Constant",
+     "author": "Webb",
+     "year": 1999
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "Constants are local near dimensional boundaries. Terra measured and corrected for this long before 2068."
+   },
+   "src": "dimPhysics",
+   "sec": "The Webb Discrepancy [CANON]",
+   "detail": "Webb and colleagues compared absorption lines of different elements in light from distant quasars, light that records the fine-structure constant as it was billions of years ago, and reported a tiny shift. Later surveys found possible patterns across the sky and possible systematic errors; the question is open. The codex turns the open question into a fact of its world.",
+   "tagFrom": {
+    "src": "dimPhysics",
+    "sec": "VARIABLE CONSTANTS, The Problem [ESTABLISHED → SF TERRITORY]"
+   }
+  },
+  "p-sondhauss": {
+   "rung": "ESTABLISHED",
+   "title": "Heat makes sound",
+   "claim": "A tube heated at one end can sustain an acoustic oscillation by itself: heat drives sound.",
+   "refs": [
+    {
+     "cite": "Sondhauss (1850), Annalen der Physik 155, 1",
+     "doi": "10.1002/andp.18501550102",
+     "title": "Ueber die Schallschwingungen der Luft in erhitzten Glasröhren und in gedeckten Pfeifen von ungleicher Weite",
+     "author": "Sondhauss",
+     "year": 1850
+    }
+   ],
+   "src": "krGenesis",
+   "sec": "Chain 1: THERMOACOUSTICS, Fire-in-tube = noise",
+   "detail": "Glassblowers had long noticed that a hot bulb on a narrow tube can sing. Sondhauss studied the effect systematically and showed that the pitch follows the tube’s length and the bulb’s volume. Heat added where the gas is compressed and taken away where it expands feeds the oscillation. A heated tube is the simplest heat engine with no moving parts, and the codex makes it the first link of Kha-Ren’s thermoacoustic chain, about 8,350 years before Sondhauss.",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "B. FIVE TECHNOLOGY DERIVATION CHAINS [ESTABLISHED physics]"
+   }
+  },
+  "p-thermo": {
+   "rung": "ESTABLISHED",
+   "title": "A heat engine made of sound",
+   "claim": "A travelling-wave thermoacoustic engine with no moving parts reached 30 percent thermal efficiency, 41 percent of the Carnot limit. Driven the other way, the same cycle pumps heat and cools.",
+   "refs": [
+    {
+     "cite": "Backhaus & Swift (1999), Nature 399, 335",
+     "doi": "10.1038/20624",
+     "title": "A thermoacoustic Stirling heat engine",
+     "author": "Backhaus",
+     "year": 1999
+    }
+   ],
+   "ext": {
+    "rung": "THEORETICAL",
+    "text": "The codex caps Kha-Ren bronze engines at 15 to 25 percent of Carnot and scales them to city-wide cooling."
+   },
+   "src": "krGenesis",
+   "sec": "Chain 1: THERMOACOUSTICS, Traveling-wave",
+   "detail": "Backhaus and Swift built a looped tube in which the sound wave travels around a ring and passes through a regenerator in the right phase to run a Stirling cycle, with no pistons or valves. Their engine reached 30 percent thermal efficiency, comparable with the petrol engines of its day.",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "Chain 1, Traveling-wave: ESTABLISHED"
+   }
+  },
+  "p-kundt": {
+   "rung": "ESTABLISHED",
+   "title": "Standing waves made visible",
+   "claim": "Fine powder in a resonating tube collects at the nodes of the standing wave, where the air does not move.",
+   "refs": [
+    {
+     "cite": "Kundt (1866), Annalen der Physik 203, 497",
+     "doi": "10.1002/andp.18662030402",
+     "title": "Ueber eine neue Art akustischer Staubfiguren",
+     "author": "Kundt",
+     "year": 1866
+    }
+   ],
+   "calc": "lambda",
+   "src": "krFoundation",
+   "sec": "The First Century: Engagement, the frost patterns",
+   "detail": "Kundt sprinkled fine powder in a glass tube, set the air inside resonating, and saw the powder gather into regular heaps at the nodes, where the air does not move: a direct way to measure the speed of sound in a gas. Around the artifact the codex has ice do the same. Frost settles where the air is still and is swept from where it oscillates, so the standing wave is drawn on the ground.",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "A. THE ARTIFACT, Physical Properties [ESTABLISHED unless noted]"
+   }
+  },
+  "p-helmres": {
+   "rung": "ESTABLISHED",
+   "title": "A bank of resonators is a spectrum analyser",
+   "claim": "Each tuned resonator answers one frequency, so a set of them splits a sound into its components.",
+   "refs": [
+    {
+     "cite": "Helmholtz (1863), Die Lehre von den Tonempfindungen (a book; it has no DOI)",
+     "doi": null,
+     "book": true
+    }
+   ],
+   "src": "krTech",
+   "sec": "C2.5 Empirical Fourier via Helmholtz resonator banks",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "Chain 2, Helmholtz decomposition: ESTABLISHED"
+   }
+  },
+  "p-energy": {
+   "rung": "ESTABLISHED",
+   "title": "Energy is conserved",
+   "claim": "Work and heat are the same quantity in different forms, at a fixed exchange rate; energy can change form but the total stays fixed.",
+   "refs": [
+    {
+     "cite": "Joule (1850), Philosophical Transactions of the Royal Society 140, 61",
+     "doi": "10.1098/rstl.1850.0004",
+     "title": "III. On the mechanical equivalent of heat",
+     "author": "Joule",
+     "year": 1850
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "The artifact puts out 58 to 70 kW without stopping: 1.8 kW of sound into the air, about 50 kW into the rock, and 6 to 18 kW holding its cold. Nothing goes in. The codex calls this its single fictional axiom."
+   },
+   "src": "krGenesis",
+   "sec": "A. THE ARTIFACT, Total energy output",
+   "detail": "Joule stirred water with paddles driven by falling weights and measured how much warmer it became, showing that a fixed amount of work always makes the same amount of heat. That measurement is the experimental footing of the first law of thermodynamics.",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "B. FIVE TECHNOLOGY DERIVATION CHAINS [ESTABLISHED physics]"
+   }
+  },
+  "p-axiom": {
+   "rung": "SF TERRITORY",
+   "title": "The single fictional axiom",
+   "claim": "The Kha-Ren codex allows itself one impossible thing: the artifact’s energy has no source in its world. Everything downstream of that is meant to be real physics.",
+   "src": "krGenesis",
+   "sec": "A. THE ARTIFACT, Total energy output",
+   "tagFrom": null
+  },
+  "p-acoustic": {
+   "rung": "ESTABLISHED",
+   "title": "138 dB from a three-metre sphere",
+   "claim": "Sound pressure level fixes the intensity at the surface, I = p²/ρc, and the surface area fixes the power.",
+   "calc": "power",
+   "src": "krGenesis",
+   "sec": "A. THE ARTIFACT, SPL at surface",
+   "detail": "The decibel scale is logarithmic: every 20 dB is a factor of ten in pressure, so 138 dB is a swing of about 159 pascals, roughly eight million times the threshold of hearing at 20 micropascals. Spread over the surface of a three-metre sphere, that intensity carries about 1.7 kilowatts of sound, close to the codex’s stated 1.8 kW, so its numbers hold together.",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "A. THE ARTIFACT, Physical Properties [ESTABLISHED unless noted]"
+   }
+  },
+  "p-110": {
+   "rung": "SPECULATIVE",
+   "title": "Does 110 Hz change how the brain works?",
+   "claim": "A pilot study of 30 people reported that 110 Hz tones shifted activity away from left-temporal language areas. It has not been independently replicated. The codex itself grades it low and builds instead on sturdier effects such as group neural synchronisation.",
+   "refs": [
+    {
+     "cite": "Cook, Pajot & Leuchter (2008), Time and Mind 1, 95",
+     "doi": "10.2752/175169608783489099",
+     "title": "Ancient Architectural Acoustic Resonance Patterns and Regional Brain Activity",
+     "author": "Cook",
+     "year": 2008
+    }
+   ],
+   "src": "krGenesis",
+   "sec": "A. THE ARTIFACT, 110 Hz neurological effect",
+   "tagFrom": null
+  },
+  "p-stone": {
+   "rung": "ESTABLISHED",
+   "title": "Stone is faster than air",
+   "claim": "Compressional waves cross dense limestone at about 6,000 m/s. Sound in air at 20 °C travels at 343 m/s.",
+   "calc": "stone",
+   "src": "krGenesis",
+   "sec": "C. CORRIDOR NETWORK",
+   "detail": "Sound travels faster in stiff, dense rock than in air because the restoring force between neighbouring particles is far stronger. Seismologists use these compressional waves, called P waves, to locate earthquakes. A signal tapped into limestone reaches a listener with an ear to the rock long before a shout arrives through the air, and loses less of its energy on the way, which is what the codex’s corridor network relies on.",
+   "tagFrom": {
+    "src": "krGenesis",
+    "sec": "C. CORRIDOR NETWORK [ESTABLISHED physics, THEORETICAL for scale]"
+   }
+  },
+  "p-kitaev": {
+   "rung": "THEORETICAL",
+   "title": "Topological protection",
+   "claim": "Information stored in global, non-local topological properties resists local errors.",
+   "refs": [
+    {
+     "cite": "Kitaev (2003), Annals of Physics 303, 2",
+     "doi": "10.1016/S0003-4916(02)00018-0",
+     "title": "Fault-tolerant quantum computation by anyons",
+     "author": "Kitaev",
+     "year": 2003
+    }
+   ],
+   "ext": {
+    "rung": "SF TERRITORY",
+    "text": "Haven has more than three spatial dimensions, and the codex grounds its stability in this kind of protection."
+   },
+   "src": "transit",
+   "sec": "Haven Transit Physics, Topological Protection [THEORETICAL]",
+   "detail": "Kitaev proposed storing quantum information in the collective state of many particles arranged with a particular topology, so that no local disturbance can change it: to corrupt the information an error would have to stretch across the whole system. This is the basis of topological quantum computing, still being built in laboratories. The codex uses the idea to explain why Haven, which has more room than three dimensions, holds still.",
+   "tagFrom": {
+    "src": "transit",
+    "sec": "Haven Transit Physics, Topological Protection [THEORETICAL]"
+   }
+  },
+  "p-vortex": {
+   "rung": "SF TERRITORY",
+   "title": "Chaotic substrate",
+   "claim": "In the codex the Vortex is a higher-dimensional geometry under ordinary space whose physics is chaotic because something is active in it. It extends the bulk of brane cosmology; no real physics describes its contents.",
+   "src": "vortex",
+   "sec": "WHAT VORTEX IS",
+   "tagFrom": null
+  },
+  "p-unified": {
+   "rung": "SF TERRITORY",
+   "title": "Unified Thought",
+   "claim": "In the codex, a change in local physics, made by the artifact’s influence, that alters how consciousness works and lets people think together at very large scale. It is the series’ own invention; no real physics grounds it.",
+   "src": "teOverview",
+   "sec": "UNIFIED THOUGHT, What It Is",
+   "tagFrom": null
+  },
+  "p-82": {
+   "rung": "ESTABLISHED",
+   "title": "The 8.2 ka event",
+   "claim": "Greenland ice cores record an abrupt, widespread cold event about 8,200 years ago.",
+   "refs": [
+    {
+     "cite": "Alley et al. (1997), Geology 25, 483",
+     "doi": "10.1130/0091-7613(1997)025<0483:HCIAPW>2.3.CO;2",
+     "title": "Holocene climatic instability: A prominent, widespread event 8200 yr ago",
+     "author": "Alley",
+     "year": 1997
+    }
+   ],
+   "src": "krPlan",
+   "sec": "E-03 findings",
+   "detail": "The event appears in the Greenland ice cores as an abrupt drop in temperature, and in climate records around the North Atlantic. It is usually linked to a sudden release of glacial meltwater into the ocean, which weakened the currents that carry heat north. The codex makes it the cold, dry pressure under which Kha-Ren’s social order hardened into castes.",
+   "tagFrom": null
+  },
+  "p-42": {
+   "rung": "ESTABLISHED",
+   "title": "The 4.2 ka event",
+   "claim": "Abrupt aridification around 2200 BCE coincides with the abandonment of settlements on the Habur plains of northern Mesopotamia.",
+   "refs": [
+    {
+     "cite": "Weiss et al. (1993), Science 261, 995",
+     "doi": "10.1126/science.261.5124.995",
+     "title": "The Genesis and Collapse of Third Millennium North Mesopotamian Civilization",
+     "author": "Weiss",
+     "year": 1993
+    }
+   ],
+   "src": "krHistory",
+   "sec": "Crisis-Driven Innovation",
+   "detail": "Weiss and colleagues dated the abandonment of Tell Leilan and other sites on the Habur plains to an abrupt drying around 2200 BCE, and later records from lakes, caves and the ocean show a widespread climate shift at about the same time; how widespread and how sharp is still argued. The codex keeps the event in Kha-Ren’s world, where it forces irrigation and food preservation and makes Kha-Ren a refuge.",
+   "tagFrom": null
+  },
+  "p-higgs": {
+   "rung": "ESTABLISHED",
+   "title": "The Higgs boson",
+   "claim": "A new boson near 125 GeV is observed independently by two experiments at the Large Hadron Collider.",
+   "refs": [
+    {
+     "cite": "ATLAS Collaboration (2012), Physics Letters B 716, 1",
+     "doi": "10.1016/j.physletb.2012.08.020",
+     "title": "Observation of a new particle in the search for the Standard Model Higgs boson",
+     "author": "Aad",
+     "year": 2012
+    },
+    {
+     "cite": "CMS Collaboration (2012), Physics Letters B 716, 30",
+     "doi": "10.1016/j.physletb.2012.08.021",
+     "title": "Observation of a new boson at a mass of 125 GeV",
+     "author": "Chatrchyan",
+     "year": 2012
+    }
+   ],
+   "src": "eaOverview",
+   "sec": "THE PHYSICS COMMUNITY",
+   "detail": "The Higgs boson was the last particle the Standard Model predicted and had not yet seen; its discovery completed the model nearly fifty years after the mechanism was proposed. Since then the Large Hadron Collider has found no new fundamental particle. The codex extrapolates that drought forward: in its 2068 two larger colliders have confirmed the Standard Model and found nothing new, the despair Book 1 opens into.",
+   "tagFrom": null
+  },
+  "p-age": {
+   "rung": "ESTABLISHED",
+   "title": "How old is the Earth?",
+   "claim": "Radiometric dating of meteorites and the oldest minerals puts the Earth’s age at about 4.54 billion years, within about one percent.",
+   "refs": [
+    {
+     "cite": "Dalrymple (2001), Geological Society, London, Special Publications 190, 205",
+     "doi": "10.1144/gsl.sp.2001.190.01.14",
+     "title": "The age of the Earth in the twentieth century: a problem (mostly) solved",
+     "author": "Dalrymple",
+     "year": 2001
+    }
+   ],
+   "src": "real",
+   "sec": "published science",
+   "tagFrom": null
+  },
+  "p-hublin": {
+   "rung": "ESTABLISHED",
+   "title": "How old is our species?",
+   "claim": "Fossils from Jebel Irhoud, Morocco, place early Homo sapiens at about 300,000 years ago.",
+   "refs": [
+    {
+     "cite": "Hublin et al. (2017), Nature 546, 289",
+     "doi": "10.1038/nature22336",
+     "title": "New fossils from Jebel Irhoud, Morocco and the pan-African origin of Homo sapiens",
+     "author": "Hublin",
+     "year": 2017
+    }
+   ],
+   "src": "real",
+   "sec": "published science",
+   "tagFrom": null
+  },
+  "p-holocene": {
+   "rung": "ESTABLISHED",
+   "title": "Dating the Holocene",
+   "claim": "The base of the Holocene is set in the Greenland NGRIP ice core at 11,700 years before 2000 CE.",
+   "refs": [
+    {
+     "cite": "Walker et al. (2009), Journal of Quaternary Science 24, 3",
+     "doi": "10.1002/jqs.1227",
+     "title": "Formal definition and dating of the GSSP for the base of the Holocene",
+     "author": "Walker",
+     "year": 2009
+    }
+   ],
+   "src": "real",
+   "sec": "published science",
+   "tagFrom": null
+  }
+ },
+ "calRows": [
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": -4675,
+   "cycle": [
+    1,
+    0
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": -3537,
+   "at": 0,
+   "cycle": [
+    15,
+    13
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": -2537,
+   "at": 1000,
+   "cycle": [
+    28,
+    38
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": -1537,
+   "at": 2000,
+   "cycle": [
+    41,
+    63
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": -937,
+   "at": 2600,
+   "cycle": [
+    49,
+    88
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": 1,
+   "at": 3538,
+   "cycle": [
+    62,
+    25
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": 1944,
+   "at": 5481,
+   "cycle": [
+    88,
+    19
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": 2031,
+   "at": 5568,
+   "cycle": [
+    89,
+    56
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "CROSS-CALENDAR REFERENCE TABLE",
+   "ce": 2068,
+   "at": 5605,
+   "cycle": [
+    90,
+    68
+   ]
+  },
+  {
+   "src": "calendar",
+   "sec": "Cycles (the Kha-Ren calendar), Conversion example",
+   "ce": 2068,
+   "cycle": [
+    90,
+    68
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 1920s",
+   "ce": 1920,
+   "at": 5457,
+   "cycle": [
+    87,
+    50
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 1944",
+   "ce": 1944,
+   "at": 5481,
+   "cycle": [
+    88,
+    20
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 1987",
+   "ce": 1987,
+   "at": 5524,
+   "cycle": [
+    89,
+    18
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2012",
+   "ce": 2012,
+   "at": 5549,
+   "cycle": [
+    89,
+    38
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2025",
+   "ce": 2025,
+   "at": 5562,
+   "cycle": [
+    89,
+    50
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2031",
+   "ce": 2031,
+   "at": 5568,
+   "cycle": [
+    89,
+    56
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2041",
+   "ce": 2041,
+   "at": 5578,
+   "cycle": [
+    89,
+    66
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2056",
+   "ce": 2056,
+   "at": 5593,
+   "cycle": [
+    90,
+    6
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "MODERN ERA, row 2065",
+   "ce": 2065,
+   "at": 5602,
+   "cycle": [
+    90,
+    15
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "STORY PRESENT (2068 CE)",
+   "ce": 2068,
+   "at": 5605,
+   "cycle": [
+    90,
+    68
+   ]
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~3537 BCE",
+   "ce": -3537,
+   "at": 0,
+   "cycleOnly": 15
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~1537 BCE",
+   "ce": -1537,
+   "at": 2000,
+   "cycleOnly": 42
+  },
+  {
+   "src": "masterTimeline",
+   "sec": "DEEP HISTORY, row ~937 BCE",
+   "ce": -937,
+   "at": 2600,
+   "cycleOnly": 50
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, Last click speaker",
+   "ce": -3175,
+   "cycleOnly": 20
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, 4.2 ka aridification",
+   "ce": -2200,
+   "cycleOnly": 33
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, Late Bronze Age Collapse",
+   "ce": -1200,
+   "cycleOnly": 47
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, Surface militaristic empire expansion",
+   "ce": -900,
+   "cycleOnly": 51
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, First universal empire encounter",
+   "ce": -330,
+   "cycleOnly": 59
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, Textualization",
+   "ce": -250,
+   "cycleOnly": 60
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, The Reformation",
+   "ce": 580,
+   "cycleOnly": 70
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, row ~Cycle 90, Year 40",
+   "ce": 2040,
+   "cycle": [
+    90,
+    40
+   ]
+  },
+  {
+   "src": "krHistory",
+   "sec": "KEY HISTORICAL EVENTS, Story present",
+   "ce": 2068,
+   "cycle": [
+    90,
+    68
+   ]
+  }
+ ],
+ "discrepancies": [
+  {
+   "topic": "Terra’s year length",
+   "a": "A Terran year is about 400 days.",
+   "aSrc": "calendar",
+   "aSec": "Terra: After Terra (A.T.)",
+   "b": "A.T. = CE + 3537, so 5605 A.T. falls in 2068 CE.",
+   "bSrc": "calendar",
+   "bSec": "Terra: Conversion",
+   "note": "At 400 days a year, 5,605 Terran years are about 6,138 Earth years, which would put 0 A.T. near 4070 BCE. This page does what the codex does: dates and spans convert by the offset formula, and only ages convert by year length (× 365/400).",
+   "events": [
+    "te-disc",
+    "te-present"
+   ]
+  },
+  {
+   "topic": "How many dimensions",
+   "a": "Six dimensions: three expression, two structural, one core.",
+   "aSrc": "seldon",
+   "aSec": "THE DIMENSIONAL ARCHITECTURE",
+   "b": "The science overview’s consistency matrix still counts one dimension fewer and marks that count consistent.",
+   "bSrc": "sciOverview",
+   "bSec": "PHYSICS CONSISTENCY MATRIX [CANON]",
+   "note": "The codex explains the older count as written before the Core was added. This page follows six."
+  },
+  {
+   "topic": "Kha-Ren at discovery",
+   "a": "Artifact discovery ~8000 BCE in a Halaf context.",
+   "aSrc": "krOverview",
+   "aSec": "IDENTITY",
+   "b": "The discovering community is Pre-Pottery Neolithic B.",
+   "bSrc": "krFoundation",
+   "bSec": "The Discovery (~8000 BCE)",
+   "note": "On Earth the Halaf culture is dated well after 8000 BCE. This page follows the era report: Pre-Pottery Neolithic.",
+   "events": [
+    "kr-disc"
+   ]
+  },
+  {
+   "topic": "When Kha-Ren writes",
+   "a": "Writing adopted about 5,000 years after the castes.",
+   "aSrc": "krHistory",
+   "aSec": "TIMELINE OVERVIEW",
+   "b": "Castes formalised c. 4675 BCE; writing c. 250 BCE.",
+   "bSrc": "krHistory",
+   "bSec": "KEY HISTORICAL EVENTS",
+   "note": "The two dates are about 4,425 years apart. This page uses the dates.",
+   "events": [
+    "kr-text"
+   ]
+  },
+  {
+   "topic": "The brane rung",
+   "a": "Brane cosmology is tagged [THEORETICAL].",
+   "aSrc": "dimPhysics",
+   "aSec": "Brane Cosmology",
+   "b": "Brane cosmology is tagged [ESTABLISHED].",
+   "bSrc": "transit",
+   "bSec": "evidence table",
+   "note": "No experiment has observed extra dimensions. This page uses theoretical."
+  },
+  {
+   "topic": "The α rung",
+   "a": "The Webb result is tagged [ESTABLISHED → SF TERRITORY].",
+   "aSrc": "dimPhysics",
+   "aSec": "VARIABLE CONSTANTS",
+   "b": "Whether α varies is still debated in the literature, the codex’s own definition of speculative.",
+   "bSrc": "real",
+   "bSec": "published science",
+   "note": "This page copies the codex rung, established for the published measurement, and says in the note that the variation itself is debated.",
+   "events": [
+    "ea-webb"
+   ]
+  },
+  {
+   "topic": "Sera’s age in Terran years",
+   "a": "Sera is 67 in Earth-equivalent years and 61.3 in Terran years.",
+   "aSrc": "calendar",
+   "aSec": "AGE EQUIVALENCE CONVENTION [CANON]",
+   "b": "A Terran year is about 400 days, and the table’s own rule is age × 365/400.",
+   "bSrc": "calendar",
+   "bSec": "Terra: Conversion, Age adjustment",
+   "note": "67 × 365 / 400 = 61.1. Alexander’s 42 → 38.3 follows the rule; Sera’s 61.3 is off by 0.2.",
+   "events": [
+    "born-sera"
+   ]
+  },
+  {
+   "topic": "A Cycle’s years",
+   "a": "Years within a Cycle run 1 to 75.",
+   "aSrc": "krHistory",
+   "aSec": "PHASE 3, The Calendar System",
+   "b": "Cycle 1, Year 0 is the epoch, and the conversion formula yields years 0 to 74.",
+   "bSrc": "calendar",
+   "bSec": "Cycles (the Kha-Ren calendar)",
+   "note": "This page follows the formula: years 0 to 74."
+  }
+ ],
+ "uncertainty": {
+  "tilde": {
+   "percentOfLookback": 1,
+   "minYears": 1
+  },
+  "range": "the stated endpoints",
+  "text": "A rounded codex date (~) is read as uncertain by 1 percent of its distance from the story present, at least a year; a codex range keeps its stated endpoints."
+ }
+}

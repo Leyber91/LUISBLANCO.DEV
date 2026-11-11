@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-11",
+  "status": "Set by the labs brief for this pass, which carries Luis Blanco's instruction; awaiting Luis's own wording and signature.",
+  "ceiling": { "book": 1, "chapter": 7, "tier": 7, "scope": "the premise of the series and the chapter introductions of Book 1, Act 1" },
+  "published": [
+    "the six dimensions and how the three expression dimensions relate",
+    "how and when each humanity found its artifact, and the eras that followed, at era level",
+    "the physics behind events, with the codex's own evidence grading",
+    "who Book 1 opens on, in the chapter that introduces them, with no plot past the introduction"
+  ],
+  "never": [
+    "plot resolutions of any book, twists, endings or deaths",
+    "codex sections tagged as deep lore, as Book 3 only, or as scaffold",
+    "anything the codex marks private or draft-only"
+  ],
+  "tiers": { "0": "premise", "1": "Book 1, chapter 1", "2": "chapter 2", "3": "chapter 3", "4": "chapters 4 and 5", "6": "chapter 6", "7": "chapter 7" }
+}

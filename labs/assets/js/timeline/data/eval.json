@@ -1,0 +1,605 @@
+{
+ "date": "2026-11-11",
+ "questions": 40,
+ "history": [
+  {
+   "date": "2026-11-11",
+   "model": "llama3.1:8b",
+   "correct": 27,
+   "questions": 40,
+   "policy": "the model phrased every answer, computed ones included"
+  }
+ ],
+ "unanswerable": 10,
+ "runs": [
+  {
+   "route": "deterministic",
+   "correct": 40,
+   "refusedOk": 10,
+   "citeValid": 40
+  },
+  {
+   "route": "ollama",
+   "model": "llama3.1:8b",
+   "policy": "computed answers never go to the model; retrieval answers are phrased by it and each sentence is checked against the context",
+   "correct": 38,
+   "refusedOk": 10,
+   "citeValid": 40,
+   "accepted": 8,
+   "rejected": 2,
+   "struck": 0
+  }
+ ],
+ "rows": [
+  {
+   "q": "How does Book 3 end?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "guard",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   }
+  },
+  {
+   "q": "Who dies in Book 2?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "guard",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   }
+  },
+  {
+   "q": "What happens to Samantha after 2068?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "guard",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   }
+  },
+  {
+   "q": "What is the twist about the Inhabitants?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "guard",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   }
+  },
+  {
+   "q": "What is the capital of France?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "none",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   }
+  },
+  {
+   "q": "What is the best pizza topping?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "none",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   }
+  },
+  {
+   "q": "Who wins in the sequel?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "guard",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "That is not in the published timeline. This page carries the premise of the series and the setup of Book 1; plot beyond that is held for the books."
+   }
+  },
+  {
+   "q": "What is the name of Nasha's mother?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "guard",
+    "correct": true,
+    "answer": "That is not in the published timeline. Characters appear here only as Book 1 introduces them; their lives beyond that are held for the books."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "That is not in the published timeline. Characters appear here only as Book 1 introduces them; their lives beyond that are held for the books."
+   }
+  },
+  {
+   "q": "How many people live in Kha-Ren in 2068?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "none",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   }
+  },
+  {
+   "q": "What religion do Terrans follow?",
+   "type": "unanswerable",
+   "det": {
+    "kind": "none",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "The published timeline does not contain that. Try a world (Kha-Ren, Terra, Earth), a layer (Vortex, Haven, Core), a year or a calendar date."
+   }
+  },
+  {
+   "q": "What was Kha-Ren doing when Terra found its artifact?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “Terra finds its artifact” (c. 3537 BCE, Terra), Kha-Ren was at Cycle 16, Year 13. 4,463 years with its artifact. Its era: the oral caste era. Four castes, a"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “Terra finds its artifact” (c. 3537 BCE, Terra), Kha-Ren was at Cycle 16, Year 13. 4,463 years with its artifact. Its era: the oral caste era. Four castes, an oral tradition and the frozen Sacred R"
+   }
+  },
+  {
+   "q": "What was Terra like when Kha-Ren adopted writing?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “Kha-Ren writes” (c. 250 BCE, Kha-Ren), Terra was at 3287 A.T.. 3,287 years with its artifact. Its era: post-scarcity. About three thousand years without war"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “Kha-Ren writes” (c. 250 BCE, Kha-Ren), Terra was at 3287 A.T.. 3,287 years with its artifact. Its era: post-scarcity. About three thousand years without war or want, with lifespans past three hund"
+   }
+  },
+  {
+   "q": "What was Earth doing when Kha-Ren formalised its castes?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “Cycle 1, Year 0” (c. 4675 BCE, Kha-Ren), Earth was at 4675 BCE. Unaltered. Its artifact has not been noticed. Its era: neolithic. Neolithic communities in t"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “Cycle 1, Year 0” (c. 4675 BCE, Kha-Ren), Earth was at 4675 BCE. Unaltered. Its artifact has not been noticed. Its era: neolithic. Neolithic communities in the Fertile Crescent, in step with Terra."
+   }
+  },
+  {
+   "q": "Where was Kha-Ren when Earth reached its artifact?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “Earth reaches its artifact” (2031 CE, Earth), Kha-Ren was at Cycle 90, Year 31. 10,031 years with its artifact. Kha-Ren history after the Reformation is sti"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “Earth reaches its artifact” (2031 CE, Earth), Kha-Ren was at Cycle 90, Year 31. 10,031 years with its artifact. Kha-Ren history after the Reformation is still being developed in the codex and is n"
+   }
+  },
+  {
+   "q": "What was Terra doing in 2200 BCE?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "In 2200 BCE, Terra was at 1337 A.T.. 1,337 years with its artifact. This millennium of Terran history is not on the public timeline. Its latest event before the"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "In 2200 BCE, Terra was at 1337 A.T.. 1,337 years with its artifact. This millennium of Terran history is not on the public timeline. Its latest event before then: Science accelerates (c. 2887 BCE)."
+   }
+  },
+  {
+   "q": "What was Kha-Ren like in 580 CE?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "In 580 CE, Kha-Ren was at Cycle 71, Year 5. 8,580 years with its artifact. Its era: the Compact. Governance under the Acoustic Compact, a written constitutional"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "In 580 CE, Kha-Ren was at Cycle 71, Year 5. 8,580 years with its artifact. Its era: the Compact. Governance under the Acoustic Compact, a written constitutional framework, after the Reformation. Its l"
+   }
+  },
+  {
+   "q": "When Terra reached post-scarcity, what was Kha-Ren doing?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “Post-scarcity” (c. 937 BCE, Terra), Kha-Ren was at Cycle 50, Year 63. 7,063 years with its artifact. Its era: the oral caste era. Four castes, an oral tradi"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “Post-scarcity” (c. 937 BCE, Terra), Kha-Ren was at Cycle 50, Year 63. 7,063 years with its artifact. Its era: the oral caste era. Four castes, an oral tradition and the frozen Sacred Register, whi"
+   }
+  },
+  {
+   "q": "What was Earth like when Terra had its last unmanaged storm?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “The last unmanaged storm” (c. 337 BCE, Terra), Earth was at 337 BCE. Unaltered. Its artifact has not been noticed. Its era: iron to industry. Our own histor"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “The last unmanaged storm” (c. 337 BCE, Terra), Earth was at 337 BCE. Unaltered. Its artifact has not been noticed. Its era: iron to industry. Our own history: iron, empires, print and science. Its"
+   }
+  },
+  {
+   "q": "What was Terra doing when the Higgs boson was found on Earth?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “The Higgs boson” (2012 CE, Earth), Terra was at 5549 A.T.. 5,549 years with its artifact. Its era: post-scarcity. About three thousand years without war or "
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “The Higgs boson” (2012 CE, Earth), Terra was at 5549 A.T.. 5,549 years with its artifact. Its era: post-scarcity. About three thousand years without war or want, with lifespans past three hundred "
+   }
+  },
+  {
+   "q": "What was Kha-Ren doing when Joule measured the mechanical equivalent of heat?",
+   "type": "cross",
+   "det": {
+    "kind": "cross",
+    "correct": true,
+    "answer": "At “The mechanical equivalent of heat” (1850 CE, Earth), Kha-Ren was at Cycle 88, Year 0. 9,850 years with its artifact. Kha-Ren history after the Reformation i"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "At “The mechanical equivalent of heat” (1850 CE, Earth), Kha-Ren was at Cycle 88, Year 0. 9,850 years with its artifact. Kha-Ren history after the Reformation is still being developed in the codex and"
+   }
+  },
+  {
+   "q": "What is 3537 BCE in the other calendars?",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "3537 BCE is 3537 BCE on Earth’s clock, 0 A.T. on Terra and Cycle 16, Year 13 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: The ca"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "3537 BCE is 3537 BCE on Earth’s clock, 0 A.T. on Terra and Cycle 16, Year 13 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: The castes are 1,100 years old (Kha-Ren); Lumi"
+   }
+  },
+  {
+   "q": "Convert 2068 CE to A.T. and Cycle",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "2068 CE is 2068 CE on Earth’s clock, 5605 A.T. on Terra and Cycle 90, Year 68 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: A col"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "2068 CE is 2068 CE on Earth’s clock, 5605 A.T. on Terra and Cycle 90, Year 68 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: A collider finds nothing new (Earth); Narrow "
+   }
+  },
+  {
+   "q": "What is 1000 A.T. on Earth's calendar?",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "1000 A.T. is 2537 BCE on Earth’s clock, 1000 A.T. on Terra and Cycle 29, Year 38 in Kha-Ren, by the codex’s conversions, which are approximate."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "1000 A.T. is 2537 BCE on Earth’s clock, 1000 A.T. on Terra and Cycle 29, Year 38 in Kha-Ren, by the codex’s conversions, which are approximate."
+   }
+  },
+  {
+   "q": "What is Cycle 1, Year 0 in the other calendars?",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "Cycle 1, Year 0 is 4675 BCE on Earth’s clock, 1,138 years before 0 A.T. on Terra and Cycle 1, Year 0 in Kha-Ren, by the codex’s conversions, which are approxima"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "Cycle 1, Year 0 is 4675 BCE on Earth’s clock, 1,138 years before 0 A.T. on Terra and Cycle 1, Year 0 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: Cycle 1, Year 0: the c"
+   }
+  },
+  {
+   "q": "Convert Cycle 63 Year 25 to CE and A.T.",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "Cycle 63, Year 25 is 1 CE on Earth’s clock, 3537 A.T. on Terra and Cycle 63, Year 25 in Kha-Ren, by the codex’s conversions, which are approximate."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "Cycle 63, Year 25 is 1 CE on Earth’s clock, 3537 A.T. on Terra and Cycle 63, Year 25 in Kha-Ren, by the codex’s conversions, which are approximate."
+   }
+  },
+  {
+   "q": "What is 250 BCE in Terra's calendar?",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "250 BCE is 250 BCE on Earth’s clock, 3287 A.T. on Terra and Cycle 60, Year 0 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: Kha-Re"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "250 BCE is 250 BCE on Earth’s clock, 3287 A.T. on Terra and Cycle 60, Year 0 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: Kha-Ren writes (Kha-Ren)."
+   }
+  },
+  {
+   "q": "How many Terran years is 42 Earth years?",
+   "type": "conversion",
+   "det": {
+    "kind": "age",
+    "correct": true,
+    "answer": "42 Earth years is 42.0 Earth years, 38.3 Terran years (a Terran year is about 400 days) and 42.0 Kha-Ren years, or 0.56 Cycles."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "42 Earth years is 42.0 Earth years, 38.3 Terran years (a Terran year is about 400 days) and 42.0 Kha-Ren years, or 0.56 Cycles."
+   }
+  },
+  {
+   "q": "How old in Earth years is someone who is 100 Terran years old?",
+   "type": "conversion",
+   "det": {
+    "kind": "age",
+    "correct": true,
+    "answer": "100 Terran years is 109.6 Earth years, 100.0 Terran years (a Terran year is about 400 days) and 109.6 Kha-Ren years, or 1.46 Cycles."
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "100 Terran years is 109.6 Earth years, 100.0 Terran years (a Terran year is about 400 days) and 109.6 Kha-Ren years, or 1.46 Cycles."
+   }
+  },
+  {
+   "q": "What is 5605 A.T. in Kha-Ren's calendar?",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "5605 A.T. is 2068 CE on Earth’s clock, 5605 A.T. on Terra and Cycle 90, Year 68 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: A c"
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "5605 A.T. is 2068 CE on Earth’s clock, 5605 A.T. on Terra and Cycle 90, Year 68 in Kha-Ren, by the codex’s conversions, which are approximate. At that date: A collider finds nothing new (Earth); Narro"
+   }
+  },
+  {
+   "q": "What is 8000 BCE in the Terran and Kha-Ren calendars?",
+   "type": "conversion",
+   "det": {
+    "kind": "conversion",
+    "correct": true,
+    "answer": "8000 BCE is 8000 BCE on Earth’s clock, 4,463 years before 0 A.T. on Terra and pre-calendar (3,325 years before Cycle 1) in Kha-Ren, by the codex’s conversions, "
+   },
+   "model": {
+    "route": "no call",
+    "correct": true,
+    "answer": "8000 BCE is 8000 BCE on Earth’s clock, 4,463 years before 0 A.T. on Terra and pre-calendar (3,325 years before Cycle 1) in Kha-Ren, by the codex’s conversions, which are approximate. At that date: Neo"
+   }
+  },
+  {
+   "q": "When did Terra find its artifact?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Terra finds its artifact: 0 A.T. (c. 3537 BCE, Terra). On Terra’s Mediterranean-equivalent coast, workers rebuilding a collapsed library dig into a chamber that"
+   },
+   "model": {
+    "route": "model",
+    "correct": true,
+    "answer": "c. 3537 BCE",
+    "ms": 17869
+   }
+  },
+  {
+   "q": "Why did Kha-Ren choose containment?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Why Kha-Ren answered with containment. Kha-Ren found its artifact in c. 8000 BCE, as a Neolithic community with no writing, no metal and no cities. Its response"
+   },
+   "model": {
+    "route": "model",
+    "correct": false,
+    "answer": "so no one person holds enough to be destroyed by it",
+    "ms": 3534
+   }
+  },
+  {
+   "q": "What is the Vortex?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Vortex, the inhabited structural dimension. A higher-dimensional geometry beneath ordinary space, shared by all three worlds. It is not a place anyone can walk "
+   },
+   "model": {
+    "route": "model",
+    "correct": true,
+    "answer": "A higher-dimensional geometry beneath ordinary space, shared by all three worlds, with chaotic physics because something is active there.",
+    "ms": 10821
+   }
+  },
+  {
+   "q": "What is Haven?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Haven, the empty structural dimension. The second structural dimension, part of the same substrate. It is empty and its physics is stable and predictable."
+   },
+   "model": {
+    "route": "rejected",
+    "correct": true,
+    "answer": "Haven, the empty structural dimension. The second structural dimension, part of the same substrate. It is empty and its physics is stable and predictable.",
+    "ms": 54284
+   }
+  },
+  {
+   "q": "What do the Builders want?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "The Core, the foundation. The base of the architecture. The codex places the Builders here: whoever made the dimensional architecture and the three artifacts. W"
+   },
+   "model": {
+    "route": "rejected (refused supported)",
+    "correct": true,
+    "answer": "The Core, the foundation. The base of the architecture. The codex places the Builders here: whoever made the dimensional architecture and the three artifacts. What they are and what they want is delib",
+    "ms": 9935
+   }
+  },
+  {
+   "q": "Who is Alexander Bellamy?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Alexander Bellamy is born (c. 2026 CE, Terra). Alexander Bellamy, researcher, Lumina Institute. Placed by computation from the codex age table, which gives 42 a"
+   },
+   "model": {
+    "route": "model",
+    "correct": true,
+    "answer": "Alexander Bellamy is a researcher at the Lumina Institute on Terra.",
+    "ms": 10000
+   }
+  },
+  {
+   "q": "What frequency does the Kha-Ren artifact hum at?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Kha-Ren finds its artifact (c. 8000 BCE, Kha-Ren). A Pre-Pottery Neolithic community of perhaps 200 to 500 people, at the confluence of the rivers Seren and Kel"
+   },
+   "model": {
+    "route": "model",
+    "correct": true,
+    "answer": "110 Hz",
+    "ms": 22585
+   }
+  },
+  {
+   "q": "When did Earth reach its artifact?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "Earth reaches its artifact (2031 CE, Earth). The artifact beneath Mesa Oscura is accessed and studied in secret: a sphere about three metres across, dark grey t"
+   },
+   "model": {
+    "route": "model",
+    "correct": true,
+    "answer": "2031 CE",
+    "ms": 18235
+   }
+  },
+  {
+   "q": "What is Unified Thought?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "5605 A.T. (2068 CE, Terra). Terra at the story present: about 12 billion people living 300 years and more, no war, no poverty, managed weather and a complete di"
+   },
+   "model": {
+    "route": "model",
+    "correct": false,
+    "answer": "a cognitive framework made possible by the artifact, used for governance by consensus on Terra",
+    "ms": 12595
+   }
+  },
+  {
+   "q": "What happened in 580 CE?",
+   "type": "factual",
+   "det": {
+    "kind": "search",
+    "correct": true,
+    "answer": "2068 CE (2068 CE, Earth). Earth at the story present: about 10 billion people, quantum computing for specialised tasks, narrow AI everywhere and no general AI, "
+   },
+   "model": {
+    "route": "model",
+    "correct": true,
+    "answer": "The Reformation occurred in Kha-Ren, where the Acoustic Compact replaced Keeper autocracy with a written constitutional framework, the five-caste model was formalised, and apprenticeship rights for th",
+    "ms": 26889
+   }
+  }
+ ]
+}

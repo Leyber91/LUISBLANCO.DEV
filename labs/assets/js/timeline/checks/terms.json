@@ -1,0 +1,76 @@
+{
+ "about": "SHA-256 of lower-cased, punctuation-stripped one- to three-word phrases. The plaintext is kept out of the public repository on purpose; a plaintext watchlist can also come from the SPOILER_WATCHLIST environment variable (a repository secret), one phrase per line.",
+ "spoiler": [
+  "c1a4373e1006096b0e1c0dcc8e2bc05f8063e3520cc0502a7292627b14bb9061",
+  "06ffaca77b9e061c99f5e3ff25851ba2a587068b9f16d30b1d1c5e612321fb2a",
+  "f0c3f4f831c64fa778e69b4dc57972591a6fbcd4f0bee13b1f4bdf37d7b814e2",
+  "b4596eae94377941d1ad9c93321fbe58da727c44fc5d2f3490f79197ac35e934",
+  "c548e8d6658a7b143ba1ec27b675a34637e7ee2468c84bca6499544c9f9e0d3b",
+  "b199b01ff6d961cbe1d08acb3da448fbed1a7e7afc623239b81f8843c1772dfb",
+  "c4ddeffba8c2336a2af52d753c6079645d69db148800e2a79048e28196181b6e",
+  "e73eaf1ee7a9bb55c485dd66f3089111545040a44b4c7fc73e01cdbac605d6ba",
+  "80e4d1617020e166c955422ed60ab60fea455b557bb53429f3e0594801e996cb",
+  "35afb1fd32c63410aab1a5077f23ac8bd5be52bb001e16ca91d88e88c6a93db3",
+  "7937c8915fa6b530407bc78f3ea7e2de8a6f06bcac020513bf141f3eea661b44",
+  "c4c60796b2a813e5ebe3f45080dba81ac7e22a680f2f42708f737de96cbec6b2",
+  "20322c671eb4303da19eccef493f2ed8ebcbf1d319c92d75a3cb9d2e785c578c",
+  "2baaf8c0085ac22824b1270fe5614be8a92ea805bdc35ac467347e89c8d5d9c5",
+  "2bc35ab40940fd2751511b58f68f8041b065ec21a553cd35ce65cbcdabe46adf",
+  "282e815a7f68a4d5bb84753ad49c49136c30c75db459a176c3be0e5a75ec0314",
+  "0e8b455b151738b0180e7bc6d8933d99f59cd61fb0e6216dfe00740219a85e22",
+  "6f483cd8bdd15034edd4ef0f2fcc48a18272298440a40a7f69572952a0576e5c",
+  "bc068af8a11af84b0bdc808864f7966832b62042337f5db8ff5cacf0c61b3787",
+  "42a07eafe226a28b2593955ed75839734ffa684d1764b033177f031a7346a6a0",
+  "ce26894d007e8ced71e98c9dd394b492ab7608237de40fdfe73ba67fd72144ea"
+ ],
+ "labOnly": [
+  "459ba967bb5a71d628aafe49ce32dd02e85f08bb626f493ea2ec50697c63fba4",
+  "c5783e7f296112c4ea51db4b6f100b3913bf680319501ea84711610067be3a56",
+  "396e9ba2beda7b4635894f96a0b8fc1f7c8b75e51f68cf8e237fcf8214baaa97",
+  "a1954b15a7459a2f7f6c03d87b73963830616feef7c93853fe5c05be996276bc",
+  "f1c6127b16ff422bfa09b98334abe44c5f88327e2a2185a2fe00ce26cdcf0075",
+  "e6b2cc2ee3d9d3fe0d7794e8c8050e3af9d81e7b0f9c8a5d8fbff0854802ac91",
+  "3c38aafb0579dafe18bb584dce2786ccaab6835245f2979af4bb7dd2b6b90775",
+  "0ce93c9606f0685bf60e051265891d256381f639d05c0aec67c84eec49d33cc1",
+  "e1eb53f47478f5c10d5d63635e2fa15eeaf4869bd361e4968333a4ce6d89a23f",
+  "3fc4387ab6fa8790b8e963d64000140ce274da33a147a131f131bda43197c46c",
+  "f2194b9300b02103b93840836996435208af16fe142963fe1001fd0b35099123",
+  "b9468493da81da9e1d9b04d0a075641383d55cde7076e3e8f1ebf944dadee6bf",
+  "57ff186aa65a25589f365a82855ddd0b800964030d086b887865f7e95d97eb02"
+ ],
+ "superseded": [
+  {
+   "hash": "6fb8c37498cb885e0be9e8ab4369e5433e481b4bbb5a37ec0e7731097b6d1891",
+   "supersededBy": "Kha-Ren",
+   "source": "CODEX/WORLDS/KHA-REN/00_CORE/OVERVIEW.md, IDENTITY (Native Name: Kha-Ren)"
+  },
+  {
+   "hash": "677697c5a2c21823b0623a7d8db07e70b1b4d0f905d229a0c12e3ce2670b6ba8",
+   "supersededBy": "Kha-Ren",
+   "source": "CODEX/WORLDS/KHA-REN/00_CORE/OVERVIEW.md, IDENTITY (Native Name: Kha-Ren)"
+  },
+  {
+   "hash": "606d4311639885ecc409291c03f8e372041b62897c01a9de4fc994af60938d25",
+   "supersededBy": "a divergent acoustic civilisation",
+   "source": "CODEX/WORLDS/KHA-REN/00_CORE/HISTORY.md, PHASE 4 note; TRIVERSE CLAUDE.md, rule 5"
+  },
+  {
+   "hash": "a8673f251e8f1d1b49ba12aa351f8fb51a4726472241f6d5970e24a56b9d34dd",
+   "supersededBy": "six dimensions",
+   "source": "CODEX/SELDON_PLAN.md, THE DIMENSIONAL ARCHITECTURE; TRIVERSE CLAUDE.md, rule 1"
+  },
+  {
+   "hash": "82ac3cc18d356232106d4ed3c7538d41eb0db2f7271a7e80a76211d14f51448c",
+   "supersededBy": "six dimensions",
+   "source": "TRIVERSE CLAUDE.md, rule 1"
+  },
+  {
+   "hash": "53bd5d0012a3266c534fdb337e25bf235e2f9c36ef7244b163c34537e612eb10",
+   "supersededBy": "six dimensions",
+   "source": "TRIVERSE CLAUDE.md, rule 1"
+  }
+ ],
+ "selftest": [
+  "082c9b968d2e4889b5e785296565627f1b208c2e0fc6055c80d38a47038b6fc7"
+ ]
+}

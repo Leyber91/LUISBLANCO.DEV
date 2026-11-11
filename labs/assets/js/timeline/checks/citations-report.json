@@ -1,0 +1,353 @@
+{
+ "date": "2026-11-11",
+ "source": "api.crossref.org",
+ "references": 22,
+ "mismatches": 0,
+ "rows": [
+  {
+   "cite": "Randall & Sundrum (1999), Physical Review Letters 83, 3370",
+   "doi": "10.1103/PhysRevLett.83.3370",
+   "status": "match",
+   "crossref": {
+    "title": "Large Mass Hierarchy from a Small Extra Dimension",
+    "firstAuthor": "Randall",
+    "year": 1999
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-brane",
+    "p-warp"
+   ]
+  },
+  {
+   "cite": "Randall & Sundrum (1999), Physical Review Letters 83, 4690",
+   "doi": "10.1103/PhysRevLett.83.4690",
+   "status": "match",
+   "crossref": {
+    "title": "An Alternative to Compactification",
+    "firstAuthor": "Randall",
+    "year": 1999
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-brane"
+   ]
+  },
+  {
+   "cite": "Kibble (1976), Journal of Physics A 9, 1387",
+   "doi": "10.1088/0305-4470/9/8/029",
+   "status": "match",
+   "crossref": {
+    "title": "Topology of cosmic domains and strings",
+    "firstAuthor": "Kibble",
+    "year": 1976
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-defect"
+   ]
+  },
+  {
+   "cite": "Witten (1985), Nuclear Physics B 249, 557",
+   "doi": "10.1016/0550-3213(85)90022-7",
+   "status": "match",
+   "crossref": {
+    "title": "Superconducting strings",
+    "firstAuthor": "Witten",
+    "year": 1985
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-defect"
+   ]
+  },
+  {
+   "cite": "Lamoreaux (1997), Physical Review Letters 78, 5",
+   "doi": "10.1103/PhysRevLett.78.5",
+   "status": "match",
+   "crossref": {
+    "title": "Demonstration of the Casimir Force in the 0.6 to\n                    <mml:math xmlns:mml=\"http://www.w3.org/1998/Math/MathML\" display=\"inline\">\n                      <mml:mn>6</mml:mn>\n                      <mml:mi/>\n                      <mml:mi>μ</mml:mi>\n                      <mml:mi>m</mml:mi>\n                    </mml:math>\n                    Range",
+    "firstAuthor": "Lamoreaux",
+    "year": 1997
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-casimir"
+   ]
+  },
+  {
+   "cite": "Itano, Heinzen, Bollinger & Wineland (1990), Physical Review A 41, 2295",
+   "doi": "10.1103/PhysRevA.41.2295",
+   "status": "match",
+   "crossref": {
+    "title": "Quantum Zeno effect",
+    "firstAuthor": "Itano",
+    "year": 1990
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-zeno"
+   ]
+  },
+  {
+   "cite": "Fischer, Gutiérrez-Medina & Raizen (2001), Physical Review Letters 87, 040402",
+   "doi": "10.1103/PhysRevLett.87.040402",
+   "status": "match",
+   "crossref": {
+    "title": "Observation of the Quantum Zeno and Anti-Zeno Effects in an Unstable System",
+    "firstAuthor": "Fischer",
+    "year": 2001
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-zeno"
+   ]
+  },
+  {
+   "cite": "Webb, Flambaum, Churchill, Drinkwater & Barrow (1999), Physical Review Letters 82, 884",
+   "doi": "10.1103/PhysRevLett.82.884",
+   "status": "match",
+   "crossref": {
+    "title": "Search for Time Variation of the Fine Structure Constant",
+    "firstAuthor": "Webb",
+    "year": 1999
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-webb"
+   ]
+  },
+  {
+   "cite": "Sondhauss (1850), Annalen der Physik 155, 1",
+   "doi": "10.1002/andp.18501550102",
+   "status": "match",
+   "crossref": {
+    "title": "Ueber die Schallschwingungen der Luft in erhitzten Glasröhren und in gedeckten Pfeifen von ungleicher Weite",
+    "firstAuthor": "Sondhauss",
+    "year": 1850
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-sondhauss"
+   ]
+  },
+  {
+   "cite": "Backhaus & Swift (1999), Nature 399, 335",
+   "doi": "10.1038/20624",
+   "status": "match",
+   "crossref": {
+    "title": "A thermoacoustic Stirling heat engine",
+    "firstAuthor": "Backhaus",
+    "year": 1999
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-thermo"
+   ]
+  },
+  {
+   "cite": "Kundt (1866), Annalen der Physik 203, 497",
+   "doi": "10.1002/andp.18662030402",
+   "status": "match",
+   "crossref": {
+    "title": "Ueber eine neue Art akustischer Staubfiguren und über die Anwendung derselben zur Bestimmung der Schallgeschwindigkeit in festen Körpern und Gasen",
+    "firstAuthor": "Kundt",
+    "year": 1866
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-kundt"
+   ]
+  },
+  {
+   "cite": "Helmholtz (1863), Die Lehre von den Tonempfindungen (a book; it has no DOI)",
+   "doi": null,
+   "status": "book: no DOI exists",
+   "notes": [
+    "p-helmres"
+   ]
+  },
+  {
+   "cite": "Joule (1850), Philosophical Transactions of the Royal Society 140, 61",
+   "doi": "10.1098/rstl.1850.0004",
+   "status": "match",
+   "crossref": {
+    "title": "III. On the mechanical equivalent of heat",
+    "firstAuthor": "Joule",
+    "year": 1850
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-energy"
+   ]
+  },
+  {
+   "cite": "Cook, Pajot & Leuchter (2008), Time and Mind 1, 95",
+   "doi": "10.2752/175169608783489099",
+   "status": "match",
+   "crossref": {
+    "title": "Ancient Architectural Acoustic Resonance Patterns and Regional Brain Activity",
+    "firstAuthor": "Cook",
+    "year": 2008
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-110"
+   ]
+  },
+  {
+   "cite": "Kitaev (2003), Annals of Physics 303, 2",
+   "doi": "10.1016/S0003-4916(02)00018-0",
+   "status": "match",
+   "crossref": {
+    "title": "Fault-tolerant quantum computation by anyons",
+    "firstAuthor": "Kitaev",
+    "year": 2003
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-kitaev"
+   ]
+  },
+  {
+   "cite": "Alley et al. (1997), Geology 25, 483",
+   "doi": "10.1130/0091-7613(1997)025<0483:HCIAPW>2.3.CO;2",
+   "status": "match",
+   "crossref": {
+    "title": "Holocene climatic instability: A prominent, widespread event 8200 yr ago",
+    "firstAuthor": "Alley",
+    "year": 1997
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-82"
+   ]
+  },
+  {
+   "cite": "Weiss et al. (1993), Science 261, 995",
+   "doi": "10.1126/science.261.5124.995",
+   "status": "match",
+   "crossref": {
+    "title": "The Genesis and Collapse of Third Millennium North Mesopotamian Civilization",
+    "firstAuthor": "Weiss",
+    "year": 1993
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-42"
+   ]
+  },
+  {
+   "cite": "ATLAS Collaboration (2012), Physics Letters B 716, 1",
+   "doi": "10.1016/j.physletb.2012.08.020",
+   "status": "match",
+   "crossref": {
+    "title": "Observation of a new particle in the search for the Standard Model Higgs boson with the ATLAS detector at the LHC",
+    "firstAuthor": "Aad",
+    "year": 2012
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-higgs"
+   ]
+  },
+  {
+   "cite": "CMS Collaboration (2012), Physics Letters B 716, 30",
+   "doi": "10.1016/j.physletb.2012.08.021",
+   "status": "match",
+   "crossref": {
+    "title": "Observation of a new boson at a mass of 125 GeV with the CMS experiment at the LHC",
+    "firstAuthor": "Chatrchyan",
+    "year": 2012
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-higgs"
+   ]
+  },
+  {
+   "cite": "Dalrymple (2001), Geological Society, London, Special Publications 190, 205",
+   "doi": "10.1144/gsl.sp.2001.190.01.14",
+   "status": "match",
+   "crossref": {
+    "title": "The age of the Earth in the twentieth century: a problem (mostly) solved",
+    "firstAuthor": "Dalrymple",
+    "year": 2001
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-age"
+   ]
+  },
+  {
+   "cite": "Hublin et al. (2017), Nature 546, 289",
+   "doi": "10.1038/nature22336",
+   "status": "match",
+   "crossref": {
+    "title": "New fossils from Jebel Irhoud, Morocco and the pan-African origin of Homo sapiens",
+    "firstAuthor": "Hublin",
+    "year": 2017
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-hublin"
+   ]
+  },
+  {
+   "cite": "Walker et al. (2009), Journal of Quaternary Science 24, 3",
+   "doi": "10.1002/jqs.1227",
+   "status": "match",
+   "crossref": {
+    "title": "Formal definition and dating of the GSSP (Global Stratotype Section and Point) for the base of the Holocene using the Greenland NGRIP ice core, and selected auxiliary records",
+    "firstAuthor": "Walker",
+    "year": 2008
+   },
+   "okTitle": true,
+   "okAuthor": true,
+   "okYear": true,
+   "notes": [
+    "p-holocene"
+   ]
+  }
+ ]
+}
