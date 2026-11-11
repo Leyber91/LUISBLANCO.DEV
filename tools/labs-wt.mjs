@@ -326,6 +326,8 @@ async function cmdShip(n) {
   const push = git(['push', '-u', 'origin', br], p);
   if (!push.ok) die('push failed: ' + push.err);
   let pr = run('gh', ['pr', 'view', br, '--json', 'number,state,url'], { cwd: p });
+  // A branch whose last pull request was already merged gets a new one.
+  if (pr.ok && JSON.parse(pr.out).state !== 'OPEN') pr = { ok: false };
   if (!pr.ok) {
     const title = git(['log', '-1', '--format=%s', br]).out || `labs: ${lab.name}`;
     const body = `One lab per pull request. Level sheet: \`node tools/levels.mjs sheet ${lab.hubId}\`.\n\n` +
