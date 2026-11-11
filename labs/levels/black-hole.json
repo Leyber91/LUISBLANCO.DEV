@@ -1,0 +1,311 @@
+{
+  "id": "black-hole",
+  "title": "Black Hole",
+  "page": "bh_animation_page.html",
+  "thesis": "The visitor picks M87*, Sgr A*, Cygnus X-1 or any mass, spin and charge, sees the exact Kerr image (shadow, photon sub-rings, a relativistic thin disk shifted by gravity and motion) measured against the Event Horizon Telescope rings, then falls in on a timelike geodesic watching two clocks and the tides, and leaves with a link and an image that reproduce exactly what they saw.",
+  "axes": [
+    {
+      "id": "geodesic-fidelity",
+      "name": "Geodesic fidelity",
+      "frame": "model",
+      "metric": "Correctness of the traced light paths: which metric is traced exactly (Schwarzschild, Kerr, Kerr-Newman), whether every bright feature near the shadow is traced light rather than a painted term, and the error of the rendered shadow edge and photon sub-rings against analytic values, in percent. Rater reads the integrator, capture logic and compositing in the shader (labs/assets/js/blackhole/) and runs or reads the repo tests that compare the rendered shadow with the static-observer radius (Synge 1966) or the Kerr critical curve.",
+      "ladder": [
+        "Absent: rays travel in straight lines; no light bending anywhere in the image.",
+        "Light bending is visible: sky or disk features near the hole are displaced from their straight-line positions (a 2D screen-space warp is enough).",
+        "Per-pixel ray march of the Schwarzschild null-geodesic orbit equation (d²x/dλ² = −(3/2)h²x/r⁵ in r_s units, or an equivalent form); the far side of the disk appears above the shadow.",
+        "A ray keeps marching after its first disk crossing and composites later crossings, so the n = 1 secondary image of the disk is produced by the tracer, and no additive term paints a ring at the shadow edge: all light near the shadow is traced disk or sky light.",
+        "A test or script in the repo measures the rendered Schwarzschild shadow radius at 3 camera distances, one of them 8 r_s or closer, and finds each within 1% of the static-observer value sin α = (3√3 M / r_o)·√(1 − 2M/r_o) (Synge 1966, MNRAS); any integrator.",
+        "Exact Kerr-Newman null geodesics for a² + Q² ≤ M² (Hamiltonian form with Δ = r² − 2Mr + a² + Q², Kerr at Q = 0, or the analytic elliptic-integral solution): the a = 0.9 shadow is shifted and flattened on the prograde side and Q shrinks the shadow, with no capture-radius modification.",
+        "An automated test samples the rendered shadow outline at 360 polar angles, with the camera at 1,000 M or farther, and finds the maximum radial deviation from the Bardeen critical curve (Bardeen 1973, Les Houches lectures 'Black Holes') under 1% of its mean radius, at a = 0.9 and a = 0.998, inclinations 17° and 90°.",
+        "A repo test runs the renderer's step rule and tolerances on 1,000 rays at a = 0.998 and reports maximum relative drift under 1e-6 in the Carter constant and the null condition, and in E and L_z wherever they are integrated rather than fixed (an analytic elliptic-integral tracer instead reports endpoint error under 1e-6 against a high-precision reference).",
+        "Photon sub-rings n = 1 and n = 2, both from traced rays, are resolved separately in a zoom view, and a repo script measures their width ratio within 20% of the Lyapunov demagnification e^(−γ) for the current spin (e^(−π) ≈ 1/23 at a = 0; Johnson et al. 2020, Science Advances).",
+        "Naked singularity traced: for a² + Q² > M² rays run with no capture surface, rays crossing the r = 0 disk continue into negative r and end on a second sky drawn there (the rule stated on the page), so the Naked singularity preset at inclination 90° shows no closed dark outline.",
+        "Validated reference: a repo test traces 10,000 rays at each of a = 0, 0.9 and 0.998 with inclinations 17° and 85°, compares each ray's endpoint (disk-crossing radius, or escape direction) with geokerr (Dexter & Agol 2009, ApJ) or GRay (Chan, Psaltis & Özel 2013, ApJ), and finds at least 99% within 10⁻³ M in radius or 10⁻³ rad in direction."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "blackhole.js FRAG accel() integrates the Schwarzschild orbit equation a = -1.5 h² r/|r|⁵ (r_s = 1) per pixel with v renormalised each step, and the 1440 px screenshot shows the far side of the disk arched above the shadow (rung 2). The march continues after a disk crossing and composites later crossings through transmit. Rung 3 fails: main() adds a painted rim to every escaped ray, ring = smoothstep(0.5, 0.0, |minr - uPhotonR|)² × 1.7 × (0.7 + 0.5·uMdot), keyed to the fitted photonR = 1.5 - 0.35a - 0.2q from _physics(); it is the thin bright rim around the shadow in the screenshot and covers the traced n ≥ 1 light there. Beyond that: first-order update (v then p, dt = 0.055 r, fixed STEPS 360), no shadow-size test in the repo, and ray directions are built in coordinate space with no static-observer frame: the screenshot shadow radius is 221 px (dark span x = 499 to 940 on row 450), matching b = 3√3 M for coordinate directions (222 px), not the 215 px Synge value at r_o = 16 r_s and 900 px height. Kerr is a capture-radius hack (capR = uHorizon·(1 - 0.22·a·side))."
+        }
+      }
+    },
+    {
+      "id": "disk-emission",
+      "name": "Disk thermodynamics and beaming",
+      "frame": "model",
+      "metric": "Physical content of the accretion-disk emission: the temperature law, the redshift factor g (dimensionless), the intensity transfer, the colour model and the accretion scale (Eddington ratio), with temperatures in kelvin. Rater reads diskTemp() and diskShade() (or their successors) in the shader and checks temperatures, efficiencies and spectra shown on the page, and any repo comparison script, against the formulas named in the rungs.",
+      "ladder": [
+        "No disk, or a flat-coloured ring with no radial structure.",
+        "An annulus with radial structure (texture or brightness varying with radius) is drawn around the shadow.",
+        "Radial temperature law T ∝ r^(−3/4)(1 − √(r_in/r))^(1/4) (zero-torque thin disk, Shakura & Sunyaev 1973, A&A) sets each pixel's colour, inner edge at the prograde ISCO from Bardeen, Press & Teukolsky (1972, ApJ).",
+        "The approaching side is brighter than the receding side through a Doppler factor computed at each disk hit from the local orbital velocity direction and the bent photon direction there (not from screen position), raised to a power; a gravitational dimming term darkens the inner edge.",
+        "One redshift factor g per pixel combines Doppler and gravitational shift from the emitter's circular-orbit 4-velocity in the traced metric and the photon's conserved momentum; observed intensity scales as g⁴ (from I_ν/ν³ invariance).",
+        "Absolute temperature: the accretion control reads in Eddington ratio Ṁ/Ṁ_Edd, the page shows peak disk temperature in kelvin from σT⁴ = 3GMṀ/(8πr³)·(1 − √(r_in/r)) or its relativistic successor (rung 7), and raising M by 10⁴ at fixed Eddington ratio and spin lowers T_peak by a factor 10 within 2%.",
+        "Colour from spectra: each pixel's colour is the Planck spectrum at g·T integrated against the CIE 1931 colour-matching functions, so the redshifted inner disk changes hue, not only brightness.",
+        "Relativistic Novikov-Thorne / Page-Thorne (1974, ApJ) flux profile with its spin-dependent correction factors, and the page reports radiative efficiency 1 − E_ISCO: 5.7% at a = 0 and 32% at a = 0.998 within 0.5 points.",
+        "Atmosphere: a colour-correction factor f_col (slider 1.0 to 1.8, default 1.7) shifts observed colour as a diluted blackbody, and emitted intensity follows the electron-scattering limb-darkening law I(μ) ∝ 1 + 2.06μ.",
+        "A live νF_ν spectrum of the whole visible disk, and a repo script comparing its peak frequency and peak νF_ν with kerrbb (Li et al. 2005, ApJS) at 3 parameter sets of spin and inclination, both within 10%.",
+        "Low-accretion mode: a second emission model (optically thin, polarized 230 GHz synchrotron in a semi-analytic hot flow) renders M87* at inclination 17° with the spin axis pointing away from Earth and the jet at position angle 288°; the ring diameter measured on the traced image lies within 42 ± 3 µas and the brightness peak in the southern half (EHT Collaboration 2019, ApJL 875, L1), and the drawn polarization ticks wind in a spiral around the ring as in EHT Collaboration 2021 (ApJL 910, L12); polarized GR ray tracing such as ipole (Mościbrodzka & Gammie 2018, MNRAS) is the reference standard."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "diskTemp() uses T ∝ r^-3/4 (1 - √(r_in/r))^1/4 normalised to its peak (uTnorm) and mapped through the temp2color() ramp; the inner edge is the Kerr prograde ISCO from the Bardeen-Press-Teukolsky formula in _physics() (charge scales it by an ad hoc 1 - 0.45q²). diskShade() takes the Doppler factor from the orbital direction vdir = cross(y, hit) and the incoming ray direction vIn at each hit (mu = dot(vdir, -normalize(v))), applies pow(doppler, 2.7), and dims the inner edge by mix(0.45, 1, √(1 - 1/r)) (rung 3). Rung 4 fails: beta = √(0.5/(r - 0.5))·(1 + 0.25a) is not the Keplerian speed (r_s units give √(0.5/(r - 1))), the Doppler and gravitational terms are separate fudges with no single g, no temperature in kelvin exists, mdot is a unitless 0.2 to 2, and colour is an artistic ramp times a mass tint (uMassTemp), not a spectrum."
+        }
+      }
+    },
+    {
+      "id": "infall-clocks",
+      "name": "Fall-in clocks and tides",
+      "frame": "model",
+      "metric": "What the page computes about time and tides for a massive observer: proper time τ and distant time t in seconds for the chosen mass, tidal acceleration on a body in m/s² and g, and the view along the fall. Rater runs the fall-in mode and compares readouts with 4M/3, πM, 2GML/r³ and √(1 − 3M/r).",
+      "ladder": [
+        "Nothing on the page about time, clocks or tides near the hole.",
+        "The page states at least one time effect with a number (for example, a static clock at 1.5 r_s ticks at 58% of a distant clock's rate).",
+        "A live readout of static-observer time dilation √(1 − r_s/r) at the camera radius, updating as the camera zooms.",
+        "Fall-in mode: the camera follows a radial timelike geodesic from rest at a chosen radius, re-rendering the lensed view every frame along the path.",
+        "Two clocks during the fall: the faller's proper time τ and a distant observer's time t, in seconds for the chosen mass; t diverges at the horizon while τ stays finite.",
+        "At the horizon crossing the page shows the proper time left to r = 0, computed analytically: 4M/3 for a fall from rest at infinity (a start option), in seconds for the chosen mass within 1%, with the maximum πM stated beside it.",
+        "Tidal stretch on a 2 m body (Δa = 2GM·L/r³) shown in m/s² and in g along the fall, with the radius where it passes 10 g marked: outside the horizon at 10 M☉, inside it at 10⁶ M☉.",
+        "The fall view is computed in the faller's frame: aberration and Doppler shift from the faller's 4-velocity are applied, and a toggle compares it with a static observer at the same radius.",
+        "Orbits as well as plunges: circular and eccentric timelike orbits in Kerr with the clock factor dτ/dt shown; a test reproduces dτ/dt = 0.707 at r = 6M, a = 0 within 0.1%.",
+        "The fall continues inside the horizon in horizon-penetrating coordinates (Painlevé-Gullstrand or Kerr-Schild) to r = 0 for Schwarzschild, showing the outside sky from within; the standard set by Andrew Hamilton's Black Hole Flight Simulator (JILA, University of Colorado).",
+        "Kerr interior: a fall in a spinning hole continues through the outer horizon down to the inner horizon r₋ = M − √(M² − a²) in horizon-penetrating coordinates, with proper time τ and the horizon-penetrating time both shown, and the trajectory (τ, t, r, tidal acceleration per step) downloads as CSV."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "No code or text about proper time, time dilation, tides or infall: bh_animation_page.html, blackhole.js and ui.js hold no clock, no timelike geodesic and no tidal value; the camera only orbits at a chosen distance (camDist clamped 4 to 90 r_s in _bindPointer())."
+        }
+      }
+    },
+    {
+      "id": "lensed-image",
+      "name": "Lensed image quality",
+      "frame": "graphics",
+      "metric": "Visual fidelity of the main render at 1440 px: samples per pixel, banding, clipping and hue retention under the tone map, sky model, transitions and sub-ring resolution. Rater inspects a full screenshot and 200% crops of the photon ring, the disk-to-sky gradient and the starfield, runs a pixel script over the render area for the clipping and chroma thresholds, and reads the shader's sampling and tone-map code.",
+      "ladder": [
+        "No black-hole image on the page.",
+        "A black-hole image is on the page (a static picture, a video, or a live render).",
+        "One live GPU-rendered view of shadow and disk that responds to orbit and zoom.",
+        "The sky is sampled along each bent ray: stars near the shadow edge are displaced and appear as primary and secondary images.",
+        "Contour control: dithering and per-pixel march jitter leave no visible 8-bit banding in the disk-to-sky gradient at 1440 px.",
+        "Anti-aliasing: 4 or more samples per pixel, or temporal accumulation while the view is still, so a 200% crop of the photon-ring edge shows no stair-steps.",
+        "A named filmic tone map (ACES fitted or AgX) on linear radiance replaces per-channel x/(x+1); at default exposure, in 1440 px screenshots of each regime preset (13 today), under 0.5% of render pixels have all channels at or above 250 and the brightest 5% of render pixels have median CIELAB chroma C* of at least 15, so the temperature hue survives.",
+        "Continuous transitions: changing regime or spin interpolates the metric and disk parameters over 1 to 2 s, so the shadow deforms on screen with no frame cut.",
+        "Real sky: a catalog of at least 5,000 stars at true positions with B−V colours drawn as point sources, each star's flux multiplied by the lensing magnification from the ray-bundle Jacobian, and a control that centres a named star behind the hole, producing an Einstein ring whose summed flux exceeds the unlensed star's.",
+        "Adaptive sampling (samples per pixel set by local variance) plus a field-of-view zoom: at 16× FOV magnification on the ring edge, the n = 1 and n = 2 rings each show as an unbroken line across a 200 px crop, with pixel standard deviation along each ring under 5% of its mean.",
+        "Reference stills: a 3840 px export at a = 0.998, inclination 90°, shows the shadow, the n = 1 and n = 2 rings, the secondary disk image and a star's Einstein ring, with 200% crops passing the rung 4 to 6 checks; reference standards are DNGR offline (James et al. 2015, Class. Quantum Grav.) and Bruneton's real-time Schwarzschild renderer (Bruneton 2020, arXiv, 'Real-time High-Quality Rendering of Non-Rotating Black Holes'), which has no spin."
+      ],
+      "levels": {
+        "G0": {
+          "level": 4,
+          "evidence": "One WebGL1 full-screen fragment shader (blackhole.js FRAG) re-renders under drag, wheel and pinch; background(v) samples the sky along the bent final direction, and the 1440 px screenshot shows lensed stars inside the arc around the shadow; dither01() TPDF dither after gamma and ign() march-start jitter, with no visible contouring in the screenshot. Rung 5 fails: one sample per pixel at resScale 0.85 upscaled by CSS, no accumulation. Rung 6 fails too: the per-channel x/(x+1) tone map leaves a desaturated beige-grey disk; in the screenshot's render area (x < 1130) the maximum channel value is 240, no pixel has all channels at 245 or above, 29% of pixels have every channel at 180 or above, and the brightest 5% have median CIELAB chroma C* 5.2."
+        }
+      }
+    },
+    {
+      "id": "linked-views",
+      "name": "Linked diagram views",
+      "frame": "graphics",
+      "metric": "Number of secondary views (readouts, diagrams, plots) linked live to the render's state, and whether selecting in one highlights the others. Rater counts the views at 1440 px and checks that each updates when spin, charge or inclination changes, and checks plotted radii against the formulas named in the rungs.",
+      "ladder": [
+        "The render is the only view; nothing else shows the state.",
+        "A live numeric readout of derived radii (horizon, ISCO) sits beside the render and updates as the physics sliders move.",
+        "A to-scale equatorial cross-section (horizon, prograde and retrograde photon orbits r = 2M{1 + cos[(2/3) arccos(∓a/M)]} from Bardeen, Press & Teukolsky (1972, ApJ) with Kerr-Newman values when Q ≠ 0, ISCO, disk extent, camera position and inclination) updates with spin and charge.",
+        "The cross-section draws the traced path of the ray under the cursor, or a fan of 9 rays, computed with the same integrator as the render.",
+        "A radial plot of disk temperature and flux versus r with the ISCO marked; hovering a radius highlights that annulus on the image.",
+        "An effective-potential plot for photons and massive particles at the current spin, with the photon-orbit and ISCO extrema matching the readout values.",
+        "A sky-plane plot of the shadow outline (α, β in M) overlaid with the analytic critical curve for the current spin and inclination.",
+        "Brushing across views: selecting a region in any view highlights the matching pixels, radii and rays in all others.",
+        "A light-curve view of a hotspot orbiting at a chosen radius (flux against time) whose period equals the Kerr circular-orbit period at that radius within 1%, following inclination and spin.",
+        "A fall-in timeline: τ and t clocks, tidal stress and the shrinking sky window plotted along the trajectory, scrubbable, with the render following the scrub.",
+        "Six or more linked views composed into one dashboard at 1440 px and a stacked layout at 400 px, transitioning together on regime change; the multi-panel figures of the EHT and Interstellar papers, live."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "ui.js updateReadout() writes r_horizon and r_ISCO in r_s and a one-word shadow descriptor into the pinned readout, refreshed on every physics slider input. No diagram, plot or second rendered view exists on the page; the photonR that a cross-section would draw today is the fit 1.5 - 0.35a - 0.2q (1.15 r_s at a = 0.998, against the true prograde 0.537 r_s)."
+        }
+      }
+    },
+    {
+      "id": "instrument-style",
+      "name": "Instrument craft",
+      "frame": "style",
+      "metric": "Count of design-language checks passed in a 1440 px and a 400 px screenshot and in black_hole.css: token colours, the token type system, gold only for what is active, control states, text size in px, contrast ratio against the render behind it, numeral format and motion tokens. Rater inspects the screenshots (2× crops of labels and buttons), computed styles in DevTools, and black_hole.css.",
+      "ladder": [
+        "Browser default styles only; no site tokens.",
+        "Every colour in black_hole.css is a tokens.css variable or a color-mix of one, except pure black #000; the panel's padding and corner radius at desktop width come from --s-* and --r-* tokens.",
+        "One type system: every text element, buttons and inputs included, computes to the token font stack (var(--font-display), var(--font-body), var(--font-mono); IBM Plex Mono today), with roles told apart by token size (--t-*), tracking and case; zero elements render in a user-agent default font.",
+        "Gold marks only what is active: the selected regime, slider thumbs and live values; idle controls and static labels are neutral.",
+        "No control shows user-agent styling: every button and slider has token styles for default, hover, focus-visible and active; a 1440 px screenshot shows zero white browser-default buttons.",
+        "Legible over the render: every text element is at least 11 px and reaches 4.5:1 contrast against what lies behind it at 1440 and 400 px, including the title strip over the bright disk.",
+        "Numerals as an instrument: every live numeric value in the panel and on the image shows its unit beside it (dimensionless ones named as a/M, Q/M or Ṁ/Ṁ_Edd) and exactly 3 significant figures (mass as 3.16×10⁶ M☉, not 10⁶ M☉; zero as 0.00).",
+        "An on-image annotation layer in the same language: 1 px lines and mono labels for photon ring, ISCO and horizon at model-computed screen positions, toggleable.",
+        "Motion system: every panel, overlay and caption transition uses var(--ease), var(--ease-out) or var(--ease-in) with var(--t-fast), var(--t-mid) or var(--t-slow) (180 to 560 ms); only the metric interpolation of lensed-image rung 7 may run longer; under prefers-reduced-motion all of them complete in 0 ms.",
+        "A title card on first load: 3 s or less, ended by any input, not shown under prefers-reduced-motion, set in the token type system.",
+        "An automated check in the repo (axe-core colour contrast plus a script asserting token-only colours, the token font stack, hover, focus-visible and active styles on every control, and 11 px minimum text) runs at 320, 400, 768, 1440 and 2560 px with zero failures, and its log is committed."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Every colour in black_hole.css is a tokens.css variable or a color-mix of one except #000 (html/body, #bh-loading, .bh-nowebgl, the phone panel shadow), and the desktop panel uses --s-3/--s-4 padding and --r-lg radius (rung 1). Rung 2 fails: tokens.css maps --font-display, --font-body and --font-mono all to IBM Plex Mono, so the Orbitron and Space Grotesk the HTML loads are never used; .bh-type, .bh-view, .bh-pause and .bh-collapse set no font-family and neither CSS file resets button fonts, so the 1440 px screenshot shows the regime and view labels in the user-agent sans on white buttons; .bh-fam-head and .bh-acc-tag (.58rem) and .bh-note (.6rem) use raw sizes, not --t-* tokens. Rung 3 fails too: .bh-readout sub paints the label subscripts horizon, ISCO and s in --accretion-soft gold while the live values beside them are --text-dim grey."
+        }
+      }
+    },
+    {
+      "id": "probe-and-share",
+      "name": "Probe and share",
+      "frame": "interaction",
+      "metric": "Degrees of freedom the visitor controls and can keep: input methods, physical parameters, URL-encoded state, numeric entry, per-pixel probing, export and unscripted objects. Rater lists every control, tests a copied URL in a fresh tab, and clicks pixels to probe.",
+      "ladder": [
+        "No input changes the image.",
+        "One control (a button or a slider) changes the rendered image.",
+        "Drag to orbit and wheel or pinch to zoom the camera around the hole.",
+        "Regime presets plus continuous sliders for mass, spin, charge and accretion rate, each change visible on the next frame.",
+        "Deep links restore a regime and a viewing angle (?type= and ?view=).",
+        "Full state in the URL: every slider, camera yaw, pitch and distance and the active mode encoded and restored exactly, with a copy-link control.",
+        "Numeric entry: inclination in degrees (0 to 180), observer distance in r_s, spin and charge typed directly, and the image matches the typed state.",
+        "Click-to-probe: clicking a pixel reports that ray's fate (captured, escaped, or disk crossing number n), its impact parameter in M, and the redshift factor g of what it hit.",
+        "Export: a PNG of the render up to 3840 px wide with an embedded parameter stamp, and a JSON of the full state whose import reproduces the frame.",
+        "Unscripted play: the visitor places test objects (a star, a clock, a gas blob) on orbits of chosen radius, including inside the ISCO where they plunge, and watches them lensed, beamed and time-dilated.",
+        "Compare mode: two states side by side with linked cameras (for example a = 0 and a = 0.998), each with its own panel, and the pair restored from one URL."
+      ],
+      "levels": {
+        "G0": {
+          "level": 4,
+          "evidence": "_bindPointer() in blackhole.js gives mouse-drag orbit, wheel zoom (4 to 90 r_s), one-finger orbit and two-finger pinch; ui.js offers 13 regime presets, 4 physics sliders, 7 appearance sliders, 3 view presets and pause; main.js restores ?type= and ?view=. Rung 5 fails: slider values, yaw and distance are not written to the URL and there is no copy-link control."
+        }
+      }
+    },
+    {
+      "id": "sourced-objects",
+      "name": "Real objects and EHT check",
+      "frame": "data",
+      "metric": "Number of real black holes with cited parameters (mass, distance, spin, inclination, each with author, year, venue), agreement between stated and rendered values, and the computed critical-curve diameter in microarcseconds against EHT ring measurements, in sigma. Rater reads the regime data and compares the page's numbers with the cited papers.",
+      "ladder": [
+        "No value on the page is tied to any real object or class of object.",
+        "Regimes carry order-of-magnitude masses for object classes (stellar, supermassive, Sgr A*-like) in their captions.",
+        "Every mass stated in a caption equals the mass the renderer uses; no label contradicts its slider value.",
+        "At least 3 named real objects (Sgr A*, M87*, Cygnus X-1) with mass, distance and spin estimate, each value with author, year and venue.",
+        "Units bridge: for the selected real object every radius also shows in km and AU, and the shadow in microarcseconds at the object's distance.",
+        "EHT check for M87*: the page computes the critical-curve diameter for a distant observer at the cited mass and distance (2√27·GM/(c²D) at a = 0, the Kerr curve otherwise; about 39.7 µas for 6.5×10⁹ M☉ at 16.8 Mpc) and shows it beside the 42 ± 3 µas ring of EHT Collaboration 2019 (ApJL 875, L1), with the difference in sigma and one line on why the emission ring and the critical curve differ.",
+        "EHT check for Sgr A*: the same critical-curve computation beside 51.8 ± 2.3 µas (EHT Collaboration 2022, ApJL 930, L12), with the mass, distance, spin and inclination assumptions for both objects cited.",
+        "A catalog of at least 12 objects across mass classes (X-ray binaries with dynamical masses, gravitational-wave merger remnants, AGN), each with a source and a retrieval date, filterable on the page.",
+        "Uncertainty carried through: each object's mass and distance errors propagate to a shaded band on its predicted shadow size, and the EHT comparisons use those bands.",
+        "Export: the object table and every computed comparison download as CSV or JSON with sources, and the dataset carries a version and a changelog date.",
+        "The catalog holds at least one entry each from EHT, GRAVITY and the LIGO-Virgo-KAGRA GWTC catalogs whose source publication date is within 12 months of the dataset's version date, and every real-object view stamps its parameter sources on the image."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "ui.js TYPES captions carry uncited class masses (~10 M☉, ~10⁹ M☉, Sgr A*-like ~4×10⁶ M☉, TON 618-class ~6.6×10¹⁰ M☉). Rung 2 fails: Primordial is captioned asteroid-mass but sets mass 0.7 (10^0.7 ≈ 5 M☉); Ultramassive is captioned ~6.6×10¹⁰ M☉ but sets 9.8 (≈ 6.3×10⁹ M☉, the slider maximum). No object has a source, a distance or a date."
+        }
+      }
+    },
+    {
+      "id": "guide",
+      "name": "Tour and answers",
+      "frame": "intelligence",
+      "metric": "What the page does without the visitor driving: state captions, idle behaviour, tour stops (count), questions answered through labs/assets/js/ai/llm.js with the live state as context, and the offline fallback (count of question types). Rater idles 30 s, runs the tour, and asks 5 questions with the network on and off.",
+      "ladder": [
+        "Nothing changes unless the visitor acts, and no caption reflects the state.",
+        "Selecting a regime swaps a one-line caption that describes it.",
+        "Idle mode: after 20 s without input the camera drifts or the page cycles regimes, stopping on the first input.",
+        "A scripted tour of at least 6 stops covering at least shadow, photon ring, ISCO, beaming and spin, each stop setting regime, camera and caption, with next, back and exit controls.",
+        "Tour stops point at the image: callouts sit at the photon ring, ISCO and approaching limb at screen positions computed from the model, not fixed coordinates.",
+        "The tour follows the visitor: when a slider moves mid-tour the caption recomputes its numbers from the live model (for example ISCO radius in r_s and in km for the chosen mass).",
+        "A question box answers free questions about the current state through labs/assets/js/ai/llm.js in one batched call, sending regime, M, a, Q, Ṁ, inclination and derived radii as context, shows which route answered, and applies on one click a state the answer returns (for example edge-on at a = 0.998).",
+        "Offline answers: when no model route answers, a deterministic engine answers from the live state for at least 15 question types (ISCO here, time to fall in, which side is brighter and why), so the box never returns empty.",
+        "Answers are checked: every number in a model answer that names a readout quantity is compared with the live value, and differences over 2% are flagged beside the answer.",
+        "Auto-director: a camera mode composes paths (fly-by, orbit at the ISCO, plunge) with narration timed to features entering the frame, generated from the current state rather than keyed by hand per regime.",
+        "The guide keeps a session: it tracks which phenomena the visitor has seen, proposes the next unseen one, and ends with a summary card of their path and the numbers they met."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "applyType() in ui.js rewrites the .bh-title caption per regime (for example 'Kerr · spinning · a = 0.90'). Nothing else happens without input: no idle mode, no tour, no model call; the blackhole modules do not import llm.js."
+        }
+      }
+    },
+    {
+      "id": "physics-legibility",
+      "name": "Physics legibility and honesty",
+      "frame": "explanation",
+      "metric": "Share of on-page claims that are tagged correctly, numeric with units, consistent with the render, and traceable to an equation and a source; rater lists every claim visible in five minutes of use, checks each against the code, and counts features the page names on the image.",
+      "ladder": [
+        "No text about the physics on the page.",
+        "A model note states what is computed exactly and what is approximated.",
+        "Each regime carries an evidence tag (ESTABLISHED, THEORETICAL, SPECULATIVE) shown with it, and every tag matches the page's own legend: each class with observed members (stellar-mass, supermassive, quasar/AGN, Sgr A*-like) is ESTABLISHED.",
+        "An always-visible legend (outside any collapsed section) names the dark disk as the shadow, the thin bright ring as the photon ring and the bright band as the accretion disk.",
+        "Tags and captions agree with the render: no regime claims a phenomenon the renderer does not compute (a 'no event horizon' regime renders no capture surface; a 'Hawking-hot' regime shows a Hawking temperature).",
+        "Readout in words: every readout value names its quantity in words with its unit and a one-line meaning (for example 'ISCO, innermost stable circular orbit: the disk's inner edge, 3.00 r_s'), and the shadow radius (2.60 r_s at a = 0) sits beside the horizon radius with one line on why they differ.",
+        "Hover or tap on any of 5 image features (shadow, photon ring, n = 1 disk image, ISCO edge, approaching limb) names it with a one-line cause and its current number.",
+        "Each feature opens a derivation showing the equation the code uses, identical to the code's formula, with its evidence tag.",
+        "Every equation and constant cites its source (author, year, venue), and each approximation states its error on the readout it affects.",
+        "A five-minute check: 5 questions on shadow size, ISCO, the bright side, time dilation and tides, built from the visitor's own explored states, with correct answers computed by the page's physics code (not a language model) and a score out of 5 shown.",
+        "Every visible feature, number and claim traces to an equation, a citation and a line of code, and a reader test with 10 lay readers, its protocol and raw answers committed to the repo, shows at least 8 scoring 4 of 5 or more."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "The collapsed Model section holds the note 'Exact Schwarzschild geodesics. Spin · charge · mass act on the ISCO, beaming, horizon and disk as physically-motivated approximations — not full Kerr ray tracing' (rung 1). Rung 2 fails: ui.js TYPES tags Quasar / AGN THEORETICAL, although the legend in the same note defines ESTABLISHED as a real class and quasars are an observed class. Rung 3 fails too: the only explanatory text sits in the collapsed Model section, and nothing on the page names the shadow, photon ring or disk. Rung 4 would fail as well: the Naked singularity regime sets spinA 1.15, which _physics() clamps to 0.998 with horizon 0.5 r_s, so the shader still captures rays and draws a shadow while the readout says 'none — exposed core'; Primordial is captioned Hawking-hot but no Hawking quantity is computed."
+        }
+      }
+    },
+    {
+      "id": "frame-budget",
+      "name": "Frame budget and reach",
+      "frame": "performance",
+      "metric": "Frame time in ms at 1440×900 on the named reference GPU (Intel Iris Xe class), number of quality tiers, reduced-motion behaviour, layout at 400 px, keyboard and screen-reader reach, and idle cost. Rater reads the on-page frame readout and the dated measurements in the repo or a DevTools performance trace, toggles OS reduced motion, and tabs through the page.",
+      "ladder": [
+        "The page fails to render, or blocks the main thread for more than 5 s.",
+        "Renders on desktop WebGL and shows a message instead of a blank canvas when WebGL is missing.",
+        "Renders below native resolution by a fixed factor to hold frame time, and a single-frame mode exists for capture.",
+        "At 400 px the controls become a bottom sheet that starts collapsed and the render stays full-screen.",
+        "Reduced motion: with prefers-reduced-motion set, disk rotation and camera animation stop by default, with a control to resume.",
+        "Measured: an on-page frame-time readout (median ms over the last 60 frames, with the WebGL renderer string), and a dated measurement committed to the repo showing 33 ms or less at 1440×900 at the default regime on a named Intel Iris Xe class GPU.",
+        "Three or more quality tiers (march steps, resolution, samples) chosen from frame time measured in the first 2 s, switchable by hand, active tier shown.",
+        "Keyboard and screen reader: orbit, zoom and every control reachable by keyboard with a visible focus ring, and a live text region announces regime and derived values on change.",
+        "Idle cost: when camera and parameters are unchanged for 2 s and disk animation is paused (or reduced motion is on), the page stops issuing draw calls, after finishing any fixed-count sample accumulation; a 10 s DevTools trace in that state shows no draw calls.",
+        "Phone tier: a dated measurement in the repo shows 30 fps or more on a named 2021 mid-range phone (for example Pixel 5a or Galaxy A52), and a performance.mark logged by the page shows the first WebGL frame under 2 s with DevTools Slow 4G and 4× CPU throttling.",
+        "16.7 ms median frame time at 2560×1440 on the rung 5 reference GPU with the exact Kerr tracer at the top tier, axe-core reports zero WCAG 2.2 AA violations, and at 320 px every control is reachable with no horizontal scroll."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "_noWebGL() replaces the canvas with a message when WebGL is missing; resScale 0.85 renders below native and ?still renders one frame; under 600 px the panel becomes a bottom sheet that starts collapsed (ui.js matchMedia, black_hole.css). Rung 4 fails: prefers-reduced-motion only disables the accordion transition, the disk keeps rotating every frame. No frame-time readout, no tiers (STEPS fixed at 360), no keyboard orbit, no live region, canvas has only an aria-label, sliders set outline: none."
+        }
+      }
+    },
+    {
+      "id": "physics-core",
+      "name": "Physics core separation",
+      "frame": "architecture",
+      "metric": "Separation of physics, rendering, UI and state: module count by role, whether the physics runs in Node without WebGL or DOM, test count and what they assert, and how many files a new metric or emission model touches. Rater reads labs/assets/js/blackhole/ and runs the tests.",
+      "ladder": [
+        "All code inline in the HTML page.",
+        "Scripts live in a file separate from the HTML.",
+        "ES modules split by role: entry, renderer, control panel.",
+        "Regime presets and slider schema are top-level data constants (TYPES, VIEWS, SCHEMA or equivalent) outside the function that builds the panel; the same file is allowed.",
+        "Physics derivations (horizon, ISCO, photon orbits, temperatures) live in their own module with no WebGL or DOM dependence, importable in Node.",
+        "Unit tests in Node check the physics against analytic values (ISCO 6M at a = 0 and 1.237M at a = 0.998, photon orbit 3M at a = 0, horizon M + √(M² − a²)) and pass with one command.",
+        "The shader is assembled from named chunks (metric, integrator, emission, sky, tone map), so a metric swaps without editing the integrator, and uniforms bind from one parameter table.",
+        "One state schema drives renderer, panel and URL serialisation; adding a parameter is one schema entry.",
+        "Plug-in points: a metric or an emission model is one module registered in a table with no edits to the core loop, shown by at least 2 metrics and 2 emission models living as modules.",
+        "Golden-image regression: a headless run renders 5 reference states and compares them with stored images within a stated tolerance before shipping.",
+        "The physics core is a documented, versioned library other labs can import (README with API and examples), tested against geokerr or analytic Kerr values in CI."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Three ES modules: main.js (entry), blackhole.js (shader string, physics, pointer input and renderer in one BlackHole class), ui.js (top-level TYPES, VIEWS and SCHEMA constants, then buildPanel()). Rung 4 fails: horizon, ISCO and photon-radius derivations sit in BlackHole._physics() inside the WebGL class; no tests exist."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}
