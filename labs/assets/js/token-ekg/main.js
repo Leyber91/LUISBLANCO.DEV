@@ -121,6 +121,8 @@ function setB(t) {
 
 /* ---------------- the trace playing ---------------- */
 function isLiveTrace(t) { return !!(S.live && S.live.trace === t); }
+/** A live run that ended (stopped, failed, or closed empty) before its first chunk arrived. */
+function endedEmpty(t) { return !!(t && t.kind !== 'oneshot' && !t.chunks.length && (t.stopped || t.failed) && !isLiveTrace(t)); }
 
 function setA(t, { play = true, at = 0, user = false } = {}) {
   S.A = t;
@@ -185,7 +187,8 @@ function renderSource() {
   const p = provenance(t);
   const live = isLiveTrace(t);
   const a = S.aFull;
-  $('badge').dataset.k = live ? 'live' : a.invalid ? 'buffered' : a.buffered ? 'buffered' : t.origin;
+  // gold ("live") only while the stream is being measured; a run that ended early is never gold
+  $('badge').dataset.k = live ? 'live' : (t.failed || t.stopped) ? 'ended' : a.invalid ? 'buffered' : a.buffered ? 'buffered' : t.origin;
   $('badge-what').textContent = live ? 'live stream' : a.oneBurst ? 'invalid: one burst' : a.cached ? 'cached' : t.failed ? 'failed' : t.stopped ? 'stopped' : a.buffered ? 'buffered stream' : t.kind === 'oneshot' ? `${p.what} · one reply` : p.what;
   const place = t.placement && t.placement.size ? ` · ${(t.placement.sizeVram / 1e9).toFixed(1)} of ${(t.placement.size / 1e9).toFixed(1)} GB on GPU` : '';
   const opts = t.options && t.options.num_ctx ? ` · num_ctx ${fmt(t.options.num_ctx)}` : '';
@@ -300,14 +303,18 @@ function renderReadouts() {
       cell('characters / s', arrived ? fmt(text.length / (t.tDone / 1000), 0) : '-', '', 'answer length over the whole wait', 'characters of the answer divided by the wait in seconds');
     return;
   }
-  const waiting = !a.n;
-  const [f, fu] = waiting ? splitMs(Math.max(0, S.tau)) : splitMs(a.ttft);
+  const ended = endedEmpty(t);
+  const waiting = !a.n && !ended;
+  const [f, fu] = ended ? splitMs(t.tDone) : waiting ? splitMs(Math.max(0, S.tau)) : splitMs(a.ttft);
   const [m, mu] = splitMs(a.median);
   const [p, pu] = splitMs(a.p99);
   const [r, ru] = splitMs(a.rmssd);
+  // the window the rate is taken over: the whole run, or the chunks that have arrived so far
+  const win = live || a.n < t.chunks.length ? `chunks 1 to ${fmt(a.n)} so far` : `whole run, ${fmt(a.n)} chunks`;
+  const firstHow = ended ? `${t.failed ? 'failed' : 'stopped'} after this long; no chunk arrived` : Number.isFinite(a.ttfa) ? `first answer token ${fmtMs(a.ttfa)}, after the thinking` : 'request sent to first chunk read';
   RO.innerHTML =
-    cell(waiting ? 'waiting' : 'first token', f, fu, Number.isFinite(a.ttfa) ? `first answer token ${fmtMs(a.ttfa)}, after the thinking` : 'request sent to first chunk read', 'TTFT = t of the first chunk, ms after the request was sent; with thinking, the first answer token is the second figure', waiting && live) +
-    cell('decode rate', fmt(a.rate, 1), 'tok/s', a.invalid ? 'none: not fresh generation' : 'unbuffered waits / their sum', 'rate = count(waits >= 2 ms) / sum(those waits); one chunk is one token on Ollama', live && !waiting) +
+    cell(ended ? 'no first token' : waiting ? 'waiting' : 'first token', f, fu, firstHow, 'TTFT = t of the first chunk, ms after the request was sent; with thinking, the first answer token is the second figure', waiting && live) +
+    cell('decode rate', fmt(a.rate, 1), 'tok/s', a.invalid ? 'none: not fresh generation' : a.n > 1 ? `(n - 1) / (t_last - t_first), ${win}` : '(n - 1) / (t_last - t_first): needs two chunks', 'rate = (n - 1) / (t_last - t_first) over the chunks arrived; buffered chunks count; one chunk is one token on Ollama', live && !waiting) +
     cell('median wait', m, mu, `mean ${fmtMs(a.mean)} ± ${fmtMs(a.sd)} sd`, 'p50 of the unbuffered waits between chunks') +
     cell('p99 wait', p, pu, `p90 ${fmtMs(a.p90)}; 1 in 100 is longer`, '99th percentile of the unbuffered waits, linear interpolation') +
     cell('RMSSD', r, ru, 'root mean square of successive differences', 'sqrt(mean((w_i - w_(i-1))^2)), Task Force 1996') +
@@ -480,7 +487,8 @@ function renderTicker(n) {
     const cls = i === n - 1 ? 'now' : c.kind === 't' ? 'tk-t' : 'tk-a';
     html = `<span class="${cls}">${esc(txt)}</span>` + html;
   }
-  $('ticker').innerHTML = `<div>${html || `<span class="tk-t">${t.kind === 'oneshot' ? 'the reply arrives in one piece' : 'no text yet'}</span>`}</div>`;
+  const none = t.kind === 'oneshot' ? 'the reply arrives in one piece' : endedEmpty(t) ? `no text: the run ${t.failed ? 'failed' : 'was stopped'} before the first token` : 'no text yet';
+  $('ticker').innerHTML = `<div>${html || `<span class="tk-t">${esc(none)}</span>`}</div>`;
 }
 
 /* ---------------- event captions: the page says what just happened ---------------- */
@@ -496,7 +504,7 @@ function renderEvent() {
   const el = $('evline');
   el.classList.toggle('live', isLiveTrace(t));
   if (!e) { el.textContent = ''; return; }
-  const what = { sent: 'request', first: 'first token', phase: 'phase', stall: 'stall', burst: 'burst', end: 'cross-check' }[e.kind] || e.kind;
+  const what = { sent: 'request', first: 'first token', phase: 'phase', stall: 'stall', burst: 'burst', end: 'cross-check', ended: t.failed ? 'failed' : 'stopped' }[e.kind] || e.kind;
   let text = e.text;
   if (e.kind === 'sent') text = t.kind === 'oneshot' ? 'request sent; a non-streamed reply arrives in one piece' : 'request sent; the dotted line is the wait for the first token';
   if (e.kind === 'end') {
@@ -701,7 +709,13 @@ function showLivePanel() {
   syncPrompt();
   fillModels();
   for (const id of ['m-temp', 'm-max', 'm-ctx', 'm-n']) $(id).addEventListener('change', syncURL);
-  $('m-custom').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('m-go').click(); } });
+  // Enter starts the run (Ctrl or Cmd + Enter too), Shift+Enter adds a line; an IME composition keeps its
+  // own Enter, and a held key does not start a second run. Assigned, not added: this panel can be built twice.
+  $('m-custom').onkeydown = (e) => {
+    if (e.key !== 'Enter' || e.shiftKey || e.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    if (!e.repeat) $('m-go').click();
+  };
   $('rec-live').hidden = false;
   $('rec-hint').textContent = models.length ? `Ollama at ${OLLAMA.base}: ${models.length} models, streamed straight from this page` : 'your own key, from the route panel';
 }
@@ -761,9 +775,17 @@ async function recordOne(cfg, i, n) {
     }
   } catch (err) {
     trace.tDone = performance.now() - S.live.t0;
-    trace.note = ctrl.signal.aborted ? 'Stopped before the stream ended.' : `The stream failed: ${err.message}`;
+    const before = trace.chunks.length ? '' : ', before the first token';
+    trace.note = ctrl.signal.aborted ? `Stopped${before || ' before the stream ended'}.` : `The stream failed${before}: ${err.message}`;
     trace.failed = !ctrl.signal.aborted;
     trace.stopped = ctrl.signal.aborted;
+    trace.error = ctrl.signal.aborted ? '' : String(err.message || err);
+  }
+  if (!trace.chunks.length && !trace.stopped && !trace.failed && trace.kind === 'stream') {
+    // the server closed the stream without one token: nothing to measure, and the page says so
+    trace.failed = true;
+    trace.error = trace.notice || 'the stream closed without a single token';
+    trace.note = `The stream ended before the first token: ${trace.error}.`;
   }
   document.removeEventListener('visibilitychange', onVis);
   trace.hidden = trace.hidden.filter(([x, y]) => y != null);
@@ -773,16 +795,21 @@ async function recordOne(cfg, i, n) {
     trace.origin = 'saved';
     if (Shelf.save(trace)) S.saved = Shelf.loadSaved(); else S.extra.unshift(trace);
   }
-  return { trace: byId(trace.id) || trace, aborted: ctrl.signal.aborted };
+  const kept = byId(trace.id) || trace;
+  // the live state ends here, whatever happened: the badge, the gold trace, the ticker and the
+  // play button are rebuilt from the run as it ended (stopped, failed or complete)
+  if (S.A === trace) setA(kept, { play: false, at: 'end' });
+  return { trace: kept, aborted: ctrl.signal.aborted };
 }
 
 $('m-go').addEventListener('click', async () => {
-  if (S.live) return;
+  if (S.live || S.recBusy) return;
   const route = ROUTES().find((r) => r.id === $('m-route').value);
   if (!route) return;
   const kind = $('m-prompt').value;
   let prompt;
-  try { prompt = await buildPrompt(kind); } catch { $('m-msg').textContent = 'could not load the long-context document'; return; }
+  S.recBusy = true; // one run at a time, also while the long-context document loads
+  try { prompt = await buildPrompt(kind); } catch { S.recBusy = false; $('m-msg').textContent = 'could not load the long-context document'; return; }
   const ctx = $('m-ctx').value;
   const temp = Number($('m-temp').value);
   const max = Number($('m-max').value);
@@ -797,22 +824,34 @@ $('m-go').addEventListener('click', async () => {
   stopTour();
   $('m-go').disabled = true; $('m-stop').disabled = false;
   const done = [];
-  for (let i = 0; i < n; i++) {
-    // a fresh seed on every run: a nonce, so no cache can answer a repeated prompt
-    const seed = Math.floor(Math.random() * 2 ** 31);
-    const r = await recordOne({ route, model: route.model || $('m-model').value, kind, prompt, options: { ...options, seed }, think, batch }, i, n);
-    if (r.trace.chunks.length) done.push(r.trace);
-    if (r.aborted) break;
+  let lastTry = null, lastI = 0;
+  try {
+    for (let i = 0; i < n; i++) {
+      // a fresh seed on every run: a nonce, so no cache can answer a repeated prompt
+      const seed = Math.floor(Math.random() * 2 ** 31);
+      const r = await recordOne({ route, model: route.model || $('m-model').value, kind, prompt, options: { ...options, seed }, think, batch }, i, n);
+      lastTry = r.trace; lastI = i;
+      if (r.trace.chunks.length) done.push(r.trace);
+      if (r.aborted) break;
+    }
+  } finally {
+    $('m-go').disabled = false; $('m-stop').disabled = true;
+    S.recBusy = false;
+    S.live = null;
   }
-  $('m-go').disabled = false; $('m-stop').disabled = true;
   const last = done[done.length - 1];
-  if (last) setA(last, { play: false, at: 'end', user: true }); else renderShelf();
-  if (done.length > 1) {
-    S.repeat = done;
-    $('m-msg').textContent = repeatSummary(done);
-  } else {
-    $('m-msg').textContent = last ? `recorded: ${fmt(last.chunks.length)} chunks${last.failed ? ', then it failed' : last.stopped ? ', stopped' : ''}` : 'nothing arrived';
+  // a last run that ended before its first token stays on the strip (recordOne already drew it as
+  // stopped or failed); otherwise the last run with chunks is shown
+  const empty = lastTry && endedEmpty(lastTry) ? lastTry : null;
+  if (!empty && last) setA(last, { play: false, at: 'end', user: true }); else renderShelf();
+  const parts = [];
+  if (done.length > 1) { S.repeat = done; parts.push(repeatSummary(done)); }
+  else if (last) parts.push(`recorded: ${fmt(last.chunks.length)} chunks${last.failed ? ', then it failed' : last.stopped ? ', stopped' : ''}`);
+  if (empty) {
+    const which = n > 1 ? `Run ${lastI + 1} of ${n}` : 'The run';
+    parts.push(`${which} ${empty.stopped ? 'was stopped' : 'failed'} after ${fmtMs(empty.tDone)}, before the first token${empty.error ? ` (${empty.error})` : ''}; nothing was saved.`);
   }
+  $('m-msg').textContent = parts.join('. ').replace(/\.\. /g, '. ') || 'nothing arrived';
 });
 $('m-stop').addEventListener('click', () => S.live?.ctrl.abort());
 
@@ -834,6 +873,12 @@ function publicText() {
   $('rp-text').innerHTML = `<span class="tag">one reply</span>Sends the question below through ${where}, times the wait with performance.now(), and counts what came back against the route's own usage numbers. A reply that is not streamed has no cadence: the strip shows one spike.`;
 }
 $('p-prompt').value = params.get('pq') || PROMPTS.oneshot.text;
+// Enter in the question field times one reply, the same as the button (which is disabled while the route waits)
+$('p-prompt').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+  e.preventDefault();
+  if (!e.repeat) $('p-go').click();
+});
 LLM.onStatus((s) => {
   publicText();
   const wait = s.route === 'pollinations' ? s.readyIn : 0;

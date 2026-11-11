@@ -129,6 +129,48 @@ const byId = Object.fromEntries(rec.map((t) => [t.id, t]));
   ok(near(a.rmssd, Math.sqrt(d.reduce((s, x) => s + x * x, 0) / d.length), 1e-9), 'RMSSD formula');
 }
 {
+  /* decode rate against the server's own rate, on every recording that has one.
+     The page's rate is (n - 1) / (t_last - t_first). On every valid local recording it must
+     agree with the server's eval_count / eval_duration within 6% (the worst, retok-qwen-script,
+     carries 54 tokens in 51 chunks: 5.5%), and the median gap must stay under 1%.
+     ds-qwen3-4b-3 is the case the old formula, count(waits >= 2 ms) / sum(those waits), got
+     wrong: 141 of its 457 waits are buffered, and it showed 65.8 tok/s against the server's 96.6. */
+  const runs = JSON.parse(read('runs.json')).traces.map((t) => ({ ...t, chunks: t.chunks.map(([t0, k, x]) => ({ t: t0, kind: k, text: x })) }));
+  const every = [...rec, ...runs];
+  const gaps = [];
+  let formula = 0, wide = [];
+  for (const t of every) {
+    const a = analyze(t);
+    if (!a.server || !Number.isFinite(a.server.rate) || a.invalid || a.n < 2) continue;
+    const ch = t.chunks;
+    if (near(a.rate, (ch.length - 1) / ((ch[ch.length - 1].t - ch[0].t) / 1000), 1e-9)) formula++;
+    const gap = Math.abs(a.rate / a.server.rate - 1);
+    gaps.push(gap);
+    if (!(gap < 0.06)) wide.push(`${t.id} ${a.rate.toFixed(1)} vs ${a.server.rate.toFixed(1)}`);
+  }
+  gaps.sort((x, y) => x - y);
+  const medGap = gaps[(gaps.length - 1) >> 1];
+  ok(gaps.length >= 70, `decode rate checked on ${gaps.length} recordings with server counters (want >= 70)`);
+  ok(formula === gaps.length, `decode rate = (n - 1) / (t_last - t_first) on ${formula}/${gaps.length} recordings`);
+  ok(wide.length === 0, `decode rate within 6% of eval_count / eval_duration on every recording; outside: ${wide.join(', ')}`);
+  ok(medGap < 0.01, `median gap to the server's rate ${(medGap * 100).toFixed(2)}% (want < 1%)`);
+  console.log(`decode rate: ${gaps.length} recordings, gap to the server's rate median ${(medGap * 100).toFixed(2)}%, max ${(gaps[gaps.length - 1] * 100).toFixed(2)}%`);
+
+  const q = runs.find((t) => t.id === 'ds-qwen3-4b-3');
+  const qa = analyze(q);
+  ok(qa.coalesced > 100, `ds-qwen3-4b-3 has ${qa.coalesced} buffered waits (the case that broke the old formula)`);
+  ok(qa.rate.toFixed(1) === '94.8', `ds-qwen3-4b-3 decode rate ${qa.rate.toFixed(1)} = (458 - 1) / span = 94.8 tok/s`);
+  ok(Math.abs(qa.rate / qa.server.rate - 1) < 0.025, `ds-qwen3-4b-3 within 2.5% of the server's ${qa.server.rate.toFixed(1)} tok/s`);
+  const kept = qa.iti.filter((x) => x >= 2);
+  const old = kept.length / (kept.reduce((s, x) => s + x, 0) / 1000);
+  ok(old < 0.75 * qa.server.rate, `the old formula gives ${old.toFixed(1)} tok/s here, over 25% under the server: the regression this guards`);
+  console.log(`ds-qwen3-4b-3: ${qa.rate.toFixed(1)} tok/s here, ${qa.server.rate.toFixed(1)} by the server; the old formula gave ${old.toFixed(1)}`);
+
+  // a window: a replay stopped at chunk k shows (k - 1) / (t_(k-1) - t_0), the chunks so far
+  const k = 200, ch = q.chunks;
+  ok(near(analyze(q, k).rate, (k - 1) / ((ch[k - 1].t - ch[0].t) / 1000), 1e-9), 'replay window: rate over chunks 1 to 200 = 199 / (t_199 - t_0)');
+}
+{
   const a = analyze(byId['qwen8-think']);
   ok(a.think && a.think.n === 264, 'qwen8-think: 264 thinking chunks');
   ok(a.answer && a.answer.n === 122, 'qwen8-think: 122 answer chunks');

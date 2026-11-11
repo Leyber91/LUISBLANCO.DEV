@@ -66,9 +66,17 @@ export function linfit(x, y) {
  * Buffered arrivals: an interval under ANALYSIS.BUFFER_MS means the chunks
  * left the reader together (one network read, or a proxy flushing a batch).
  * Those intervals measure the transport, not generation, so they are
- * counted and shown, and kept out of the interval statistics and the
- * decode rate. Ollama sends one generated token per chunk, so for a local
- * stream a chunk is a token; the server's eval_count checks that.
+ * counted and shown, and kept out of the interval statistics.
+ *
+ * The decode rate is NOT an interval statistic: it is (n - 1) / (t_last -
+ * t_first) over the chunks analysed (the whole run, or chunks 1 to `upto`
+ * of a replay). A buffered chunk was generated during the long wait before
+ * it, so dropping it from the count while keeping that wait in the time
+ * (the old count(waits >= 2 ms) / sum(those waits)) undercounts tokens: on
+ * ds-qwen3-4b-3, 141 of 457 waits are buffered and that formula gave
+ * 65.8 tok/s against 94.8 by (n - 1) / span and 96.6 by the server.
+ * Ollama sends one generated token per chunk, so for a local stream a chunk
+ * is a token; the server's eval_count checks that.
  */
 export function analyze(trace, upto) {
   const chunks = trace.chunks || [];
@@ -171,8 +179,9 @@ export function analyze(trace, upto) {
     tLast,
     tDone: complete ? trace.tDone : NaN,
     span,
-    rateAll: n > 1 ? (n - 1) / (span / 1000) : NaN,
-    rate: !invalid && pos.length ? pos.length / (pos.reduce((s, x) => s + x, 0) / 1000) : NaN,
+    // (n - 1) / (t_last - t_first): every chunk analysed counts, its time is the first-to-last span
+    rateAll: n > 1 && span > 0 ? (n - 1) / (span / 1000) : NaN,
+    rate: !invalid && n > 1 && span > 0 ? (n - 1) / (span / 1000) : NaN,
     think: hasThink ? { n: nThink, rate: phaseRate(0, firstAnswer < 0 ? n : firstAnswer) } : null,
     answer: hasThink && firstAnswer >= 0 ? { n: n - firstAnswer, rate: phaseRate(firstAnswer, n) } : null,
     iti,
@@ -338,6 +347,9 @@ export function events(trace, a = analyze(trace)) {
     ev.push({ t: b.at, kind: 'burst', text: `burst: ${b.chunks} chunks arrived within 2 ms of each other, delivered together by the transport` });
   }
   if (a.complete) ev.push({ t: a.tLast, kind: 'end', text: `last chunk; ${a.n} chunks, server counted ${s ? s.evalCount : '?'} tokens` });
+  else if ((trace.stopped || trace.failed) && Number.isFinite(trace.tDone) && a.n === (trace.chunks || []).length) {
+    ev.push({ t: trace.tDone, kind: 'ended', text: `${trace.failed ? 'the request failed' : 'stopped'} at ${fmtMs(trace.tDone)}${a.n ? `, after ${a.n} chunks; no server counters` : ', before the first token; nothing was measured'}` });
+  }
   return ev.sort((x, y) => x.t - y.t);
 }
 

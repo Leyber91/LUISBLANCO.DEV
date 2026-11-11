@@ -220,6 +220,11 @@ export class Strip {
     } else if (chunks.length || t.kind === 'oneshot' || live) {
       ctx.fillStyle = live ? P.goldSoft : P.text;
       ctx.fillText(`waiting ${fmtMs(Math.max(0, tau))}`, Math.min(headX + 10, w - 100), y0 - 10);
+    } else if ((t.stopped || t.failed) && Number.isFinite(t.tDone) && tau >= t.tDone) {
+      // a run that ended before its first chunk: the dotted wait ends here, in ink
+      const msg = `${t.failed ? 'failed' : 'stopped'} at ${fmtMs(t.tDone)}, no token arrived`;
+      ctx.fillStyle = P.text;
+      ctx.fillText(msg, Math.max(GUTTER + 4, Math.min(x(t.tDone) + 10, w - ctx.measureText(msg).width - 6)), y0 - 10);
     }
     if (Number.isFinite(a.ttfa) && tau >= a.ttfa) {
       const xp = x(a.ttfa);

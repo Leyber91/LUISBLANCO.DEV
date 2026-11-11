@@ -24,6 +24,8 @@ export function headline(t, a) {
     const tail = u ? ` The route reported ${n0(u.prompt_tokens)} prompt tokens and ${n0(u.completion_tokens)} completion tokens.` : '';
     return `No stream: the whole reply arrived in one piece after ${fmtMs(t.tDone)}.${tail}`;
   }
+  if (!a.n && t.stopped) return `${t.model}: stopped after ${fmtMs(t.tDone)}, before the first token arrived. Nothing was measured or saved.`;
+  if (!a.n && t.failed) return `${t.model}: the request failed after ${fmtMs(t.tDone)}, before the first token arrived. Nothing was measured or saved.`;
   if (!a.n) return `${t.model}: waiting for the first token.`;
   const s = a.server;
   const parts = [];

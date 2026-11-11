@@ -151,7 +151,7 @@
           <div class="field"><label for="m-max">max tokens</label><input id="m-max" type="number" min="1" max="8192" step="1" placeholder="no limit" /></div>
           <div class="field"><label for="m-n">runs</label><select id="m-n"><option value="1">1</option><option value="5">5, same prompt</option></select></div>
           <div class="field chk"><label><input type="checkbox" id="m-think" /> separate thinking</label></div>
-          <textarea id="m-custom" rows="2" spellcheck="false" aria-label="Your own prompt; Ctrl+Enter starts" hidden></textarea>
+          <textarea id="m-custom" rows="2" spellcheck="false" aria-label="Your own prompt; Enter starts the run, Shift+Enter adds a line" placeholder="your prompt; Enter starts, Shift+Enter adds a line" hidden></textarea>
           <div class="rec-btns">
             <button type="button" class="go" id="m-go">record a live stream</button>
             <button type="button" class="tb" id="m-stop" disabled>stop</button>
@@ -244,7 +244,7 @@
       <dl>
         <dt>first token</dt><dd>t of the first chunk, ms after the request was sent.</dd>
         <dt>wait (interval)</dt><dd>t<sub>i</sub> - t<sub>i-1</sub>, ms. Under 2 ms counts as buffered and is left out of the statistics below.</dd>
-        <dt>decode rate</dt><dd>unbuffered waits counted, divided by their sum, in tokens per second (one chunk is one token on Ollama). The server's rate is eval_count / eval_duration.</dd>
+        <dt>decode rate</dt><dd>(n - 1) / (t<sub>last</sub> - t<sub>first</sub>), in tokens per second, over the chunks shown: the whole run, or chunks 1 to n while a replay or a live stream is still arriving (one chunk is one token on Ollama). Buffered chunks count: each was generated during the wait before it. The server's rate is eval_count / eval_duration.</dd>
         <dt>mean, sd, p50, p90, p99</dt><dd>of the unbuffered waits; percentiles by linear interpolation.</dd>
         <dt>RMSSD</dt><dd>sqrt(mean((w<sub>i</sub> - w<sub>i-1</sub>)<sup>2</sup>)), ms.</dd>
         <dt>SD1, SD2</dt><dd>SD1<sup>2</sup> = var(w<sub>i</sub> - w<sub>i-1</sub>) / 2; SD2<sup>2</sup> = 2 sd(w)<sup>2</sup> - SD1<sup>2</sup>.</dd>

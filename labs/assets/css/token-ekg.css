@@ -358,6 +358,9 @@ input[type="number"]:focus, input[type="text"]:focus { border-color: var(--horiz
 .ro .k .pv { margin-left: 6px; font-size: 8.5px; letter-spacing: .12em; color: var(--text-faint); border: 1px solid var(--line); padding: 0 3px; }
 .ro .k .pv.live { color: var(--accretion-soft); border-color: var(--accretion-dim); }
 .badge[data-k="buffered"] { border-color: var(--horizon-dim); color: var(--horizon); }
+/* a run that was stopped or failed: ink, never gold, a hollow dot */
+.badge[data-k="ended"] { border-color: var(--line-bright); color: var(--text-dim); }
+.badge[data-k="ended"] i { background: transparent; border: 1px solid var(--horizon-dim); }
 
 /* three tables under the plots */
 .tables { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin-top: 22px; }
