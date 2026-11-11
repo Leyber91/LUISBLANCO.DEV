@@ -279,6 +279,12 @@ function cmdSync(n, from = 'main') {
     return;
   }
   for (const { f, how } of plan) {
+    if (how === 'entries') {
+      fs.writeFileSync(path.join(p, f), mergeEntries(git(['show', `:2:${f}`], p).out, git(['show', `:3:${f}`], p).out));
+      git(['add', '--', f], p);
+      console.log(`  resolved ${f}: kept every entry from both sides, the branch's new ones first`);
+      continue;
+    }
     git(['checkout', how === 'ours' ? '--ours' : '--theirs', '--', f], p);
     git(['add', '--', f], p);
     console.log(`  resolved ${f}: ${how === 'ours' ? 'kept the branch copy (it equals labs/foundation, newer than main)' : 'took main, to regenerate'}`);
@@ -288,11 +294,30 @@ function cmdSync(n, from = 'main') {
   regenerate(p, lab, `merged ${from} into labs/${lab.name} (conflicts resolved by rule)`);
 }
 
+/* EVOLUTION.md is a log of "## " entries, newest first. Two branches that each added an entry at the top do not
+   really conflict: keep main's file and put the branch's entries that main lacks above them. */
+function mergeEntries(ours, theirs) {
+  const NL = '\n';
+  const split = (t) => {
+    const i = t.indexOf(NL + '## ');
+    const head = i < 0 ? t : t.slice(0, i + 1);
+    const body = i < 0 ? '' : t.slice(i + 1);
+    return { head, entries: body.split(/\n(?=## )/).map((e) => e.trimEnd()).filter(Boolean) };
+  };
+  const o = split(ours.replace(/\r\n/g, NL));
+  const t = split(theirs.replace(/\r\n/g, NL));
+  const key = (e) => e.split(NL)[0].trim();
+  const have = new Set(t.entries.map(key));
+  const mine = o.entries.filter((e) => !have.has(key(e)));
+  return t.head + [...mine, ...t.entries].join(NL + NL) + NL;
+}
+
 /* Which side wins a conflict, by rule. null means a person decides. */
 const GENERATED = ['LABS_LEVELS.md', 'labs/assets/js/config/levels.data.js'];
 const FOUNDATION_OWNED = [/^tools\//, /^labs\/assets\/js\/ai\//, /^\.github\/workflows\//];
 function resolution(file, p) {
   if (GENERATED.includes(file)) return 'theirs';
+  if (file === 'EVOLUTION.md') return 'entries';
   if (FOUNDATION_OWNED.some((re) => re.test(file))) {
     // Keep the branch copy only when it is exactly the foundation's current copy.
     const mine = git(['rev-parse', `HEAD:${file}`], p).out;
@@ -326,6 +351,8 @@ async function cmdShip(n) {
   const push = git(['push', '-u', 'origin', br], p);
   if (!push.ok) die('push failed: ' + push.err);
   let pr = run('gh', ['pr', 'view', br, '--json', 'number,state,url'], { cwd: p });
+  // A branch whose last pull request was already merged gets a new one.
+  if (pr.ok && JSON.parse(pr.out).state !== 'OPEN') pr = { ok: false };
   if (!pr.ok) {
     const title = git(['log', '-1', '--format=%s', br]).out || `labs: ${lab.name}`;
     const body = `One lab per pull request. Level sheet: \`node tools/levels.mjs sheet ${lab.hubId}\`.\n\n` +
