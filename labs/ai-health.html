@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Glass Ward · explainable triage on synthetic patients · THE LAB</title>
+<meta name="description" content="An educational interpretability demo on synthetic patients: the published NEWS2 early warning score and two models trained in your browser triage the same ward, with exact contributions, counterfactuals, subgroup failures, a shift test and an audited plain-language explanation. Not a medical device." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/ai-health.css" />
+</head>
+<body class="booting">
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span>
+<span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+
+<header class="bar">
+  <div class="bar-l">
+    <a class="back" href="index.html">&larr; labs</a>
+    <span class="label">GLASS WARD <span class="on">/ interpretability line</span></span>
+  </div>
+  <div class="bar-r">
+    <span id="route" class="route-host"></span>
+    <span class="brand">THE LAB &middot; <b>L212</b></span>
+  </div>
+</header>
+
+<aside class="boundary" role="note" aria-label="What this page is">
+  <span class="boundary-k">Educational demonstration of interpretability</span>
+  <span class="boundary-v">Every patient on this page is synthetic, generated in your browser from invented distributions. No real patient data is used or collected. This is not a medical device, not medical advice and not validated for any care decision; nothing here should inform the care of a real person.</span>
+</aside>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#ward">01 ward</a><a href="#patient">02 one patient</a><a href="#cohort">03 head to head</a><a href="#fails">04 where it fails</a><a href="#hidden">05 the hidden world</a><a href="#evidence">tags and sources</a>
+</nav>
+
+<main>
+  <!-- 01 THE WARD: the focal living element -->
+  <section id="ward" class="sec hero" aria-labelledby="h-ward">
+    <div class="hero-text">
+      <div class="kick">01 &middot; the ward</div>
+      <h1 id="h-ward">A published score and a learned model triage the same twenty beds.</h1>
+      <p class="sub">NEWS2 adds points from a chart printed in 2017. The model learned its weights from 3,000 synthetic patients in your browser a few seconds ago. Both fire alerts as the shift runs, and both explain themselves below.</p>
+
+      <div class="ward-modes" role="group" aria-label="Ward mode">
+        <button type="button" class="seg on" data-mode="watch" aria-pressed="true">watch the shift</button>
+        <button type="button" class="seg" data-mode="triage" aria-pressed="false">take the shift</button>
+      </div>
+      <div class="ward-ctl">
+        <button type="button" class="ctl" id="w-play">pause</button>
+        <button type="button" class="ctl" id="w-next" hidden>next hour &rarr;</button>
+        <button type="button" class="ctl" id="w-new">new shift</button>
+      </div>
+      <p class="ward-help" id="w-help">The shift plays on its own. Select a bed to read that patient below.</p>
+
+      <dl class="readout" aria-live="polite">
+        <div><dt>time</dt><dd id="w-clock">08:00</dd></div>
+        <div><dt>NEWS2 <span id="w-nt">&ge; 5</span></dt><dd id="w-na">0</dd></div>
+        <div><dt>model &ge; <span id="w-mt">8%</span></dt><dd id="w-ma">0</dd></div>
+        <div><dt>your calls</dt><dd id="w-ya">&ndash;</dd></div>
+      </dl>
+      <div class="scorecard" id="w-score" aria-live="polite"></div>
+    </div>
+
+    <div class="ward-wrap">
+      <div class="ward-head">
+        <span class="mini">shift <b id="w-seed">7</b> &middot; 08:00&ndash;20:00 &middot; hourly sets <span id="w-filter"></span></span>
+        <span class="legend">
+          <span class="lg"><i class="cat cat-low">L</i><i class="cat cat-red">LM</i><i class="cat cat-medium">M</i><i class="cat cat-high">H</i>NEWS2 category</span>
+          <span class="lg lg-model"><i></i>model risk</span>
+          <span class="lg lg-fire"><i></i>model fired</span>
+          <span class="lg lg-event"><i></i>deteriorated</span>
+          <span class="lg lg-you"><i></i>your call</span>
+        </span>
+      </div>
+      <div class="ward" id="ward-stage">
+        <canvas id="ward-canvas" aria-hidden="true"></canvas>
+        <ol class="beds" id="ward-beds" aria-label="Beds. Arrow keys move between beds and hours."></ol>
+      </div>
+      <p class="caption" id="w-caption">[ILLUSTRATIVE] Twenty synthetic patients. Six are written to deteriorate during the shift; which six is hidden until it happens. Each NEWS2 column is coloured by its RCP 2017 Chart 2 category and lettered.</p>
+    </div>
+  </section>
+
+  <!-- 02 ONE PATIENT -->
+  <section id="patient" class="sec" aria-labelledby="h-patient">
+    <div class="sec-head">
+      <div class="kick">02 &middot; one patient, three readings</div>
+      <h2 id="h-patient">The same observations, scored by a chart, a regression and a forest of trees.</h2>
+      <p class="sub">Edit any value and every reading updates. NEWS2 lights the chart cell that gave each point. The model splits its log-odds among its inputs: exactly for the regression, by Shapley values for the trees.</p>
+      <p class="sr-live" id="p-live" aria-live="polite"></p>
+    </div>
+    <div class="p-grid">
+      <div class="panel p-edit">
+        <div class="ph"><span>index observation set</span><span id="p-src" class="src-tag">&ndash;</span></div>
+        <div class="cases" id="p-cases" role="group" aria-label="Example patients"></div>
+        <form id="p-form" class="vitals" autocomplete="off"></form>
+        <div id="p-derived" class="derived"></div>
+        <div class="p-actions"><button type="button" class="ctl" id="p-reset">reset to source</button><span class="mini" id="p-ms"></span></div>
+      </div>
+      <div class="panel p-news">
+        <div class="ph"><span>NEWS2 &middot; RCP 2017 chart 1</span><span class="tag tag-real">[REAL]</span></div>
+        <div class="newsgrid-wrap"><table class="newsgrid" id="p-newsgrid"></table></div>
+        <div class="news-total" id="p-newstotal"></div>
+      </div>
+      <div class="panel p-wf">
+        <div class="ph"><span id="p-wf-title">model contributions</span>
+          <span class="seg-s" role="group" aria-label="Model">
+            <button type="button" class="seg" data-kind="lr" aria-pressed="false">regression</button><button type="button" class="seg on" data-kind="gbt" aria-pressed="true">trees</button>
+          </span>
+        </div>
+        <div id="p-wf" class="wf"></div>
+        <p class="note" id="p-wf-note"></p>
+      </div>
+    </div>
+    <div class="p-grid3">
+      <div class="panel p-obs">
+        <div class="ph"><span>observation chart &middot; every set, every cell scored</span><span class="mini" id="p-obs-k"></span></div>
+        <div class="obs-wrap"><table class="obs" id="p-obs"></table></div>
+      </div>
+      <div class="panel p-dist">
+        <div class="ph"><span>where this patient sits</span><span class="mini">test cohort</span></div>
+        <div id="p-dist"></div>
+      </div>
+    </div>
+    <div class="p-grid2">
+      <div class="panel p-cf">
+        <div class="ph"><span>smallest changes that flip the decision</span><span class="tag tag-real">[REAL]</span></div>
+        <div id="p-cf"></div>
+        <p class="note">Exact search over the recorded precision of each vital, one vital and then pairs; distance in units of about one standard deviation. Age and comorbidities are held fixed. Up to three counterfactuals per system, each changing a different vital (Wachter, Mittelstadt and Russell 2018).</p>
+      </div>
+      <div class="panel p-llm">
+        <div class="ph"><span>in plain language, then audited</span><span id="p-llm-src" class="src-tag">template</span></div>
+        <div id="p-llm-text" class="llm-text" aria-live="polite"></div>
+        <ul id="p-llm-audit" class="audit"></ul>
+        <div class="p-actions">
+          <button type="button" class="ctl act" id="p-llm-go">ask a model to explain &middot; 1 call</button>
+          <span class="mini" id="p-llm-status"></span>
+        </div>
+        <div class="tally mini" id="p-llm-tally"></div>
+        <details class="tmpl" id="p-llm-tmpl" hidden><summary>deterministic template, for comparison</summary><p></p></details>
+      </div>
+    </div>
+    <div class="p-grid2">
+      <div class="panel p-del">
+        <div class="ph"><span>is the explanation faithful? a deletion test</span><span class="tag tag-real">[REAL]</span></div>
+        <div id="p-del" class="plot"></div>
+        <p class="note" id="p-del-note"></p>
+      </div>
+      <div class="panel p-card">
+        <div class="ph"><span>model card</span><span class="mini">after Mitchell et al. 2019</span></div>
+        <dl id="p-card" class="card"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 HEAD TO HEAD -->
+  <section id="cohort" class="sec" aria-labelledby="h-cohort">
+    <div class="sec-head">
+      <div class="kick">03 &middot; head to head</div>
+      <h2 id="h-cohort">On 2,400 held-out patients, who catches deterioration, and at what cost in alerts?</h2>
+      <p class="sub">Every curve is computed live on the synthetic test cohort, which no model saw. The model's threshold starts where it fires as often as NEWS2, so the comparison holds alert burden equal.</p>
+    </div>
+    <div class="thr-bar">
+      <div class="thr">NEWS2 alerts at &ge;
+        <span class="stepper"><button type="button" class="st" data-st="nt-" aria-label="Lower NEWS2 threshold">&minus;</button><output id="c-nt">5</output><button type="button" class="st" data-st="nt+" aria-label="Raise NEWS2 threshold">+</button></span>
+      </div>
+      <label class="tog"><input type="checkbox" id="c-red" /> <span>or any single parameter scoring 3</span></label>
+      <label class="thr grow">model alerts at &ge; <output id="c-mt">8.0%</output>
+        <input type="range" id="c-mtr" min="0" max="1000" step="1" value="500" aria-label="Model threshold" />
+      </label>
+      <button type="button" class="ctl" id="c-match">match NEWS2 alert rate</button>
+    </div>
+    <div class="c-grid">
+      <figure class="panel chart"><div class="ph"><span>ROC</span><span class="mini" id="c-roc-k"></span></div><div id="c-roc" class="plot"></div><figcaption id="c-roc-cap"></figcaption></figure>
+      <figure class="panel chart"><div class="ph"><span>precision-recall</span><span class="mini" id="c-pr-k"></span></div><div id="c-pr" class="plot"></div><figcaption id="c-pr-cap"></figcaption></figure>
+      <figure class="panel chart"><div class="ph"><span>calibration</span><span class="mini" id="c-cal-k"></span></div><div id="c-cal" class="plot"></div><figcaption id="c-cal-cap"></figcaption></figure>
+      <figure class="panel chart"><div class="ph"><span>decision curve</span><span class="mini">net benefit</span></div><div id="c-dca" class="plot"></div><figcaption id="c-dca-cap"></figcaption></figure>
+    </div>
+    <div class="c-grid2">
+      <figure class="panel chart"><div class="ph"><span>confusion at the chosen thresholds</span></div><div id="c-conf" class="conf"></div><figcaption id="c-conf-cap"></figcaption></figure>
+      <div class="panel"><div class="ph"><span>does the model beat NEWS2? 200 bootstrap resamples</span><span class="mini" id="c-boot-k">running</span></div><div id="c-boot" class="tbl"></div><p class="verdict" id="c-boot-v"></p></div>
+      <div class="panel"><div class="ph"><span>shift test &middot; a second hospital, no refit</span><span class="tag tag-ill">[ILLUSTRATIVE]</span></div><div id="c-shift" class="tbl"></div><p class="note" id="c-shift-note"></p></div>
+    </div>
+  </section>
+
+  <!-- 04 WHERE IT FAILS -->
+  <section id="fails" class="sec" aria-labelledby="h-fails">
+    <div class="sec-head">
+      <div class="kick">04 &middot; where it fails</div>
+      <h2 id="h-fails">A model can look good on average and fail a group.</h2>
+      <p class="sub">The generator planted mechanisms that hide illness in some groups. Read the table, run the search over every group and every pair of groups, then reveal what was planted. Drop a feature or starve the training set of patients over 80 and read the rows again.</p>
+    </div>
+    <div class="f-grid">
+      <div class="panel f-ctl">
+        <div class="ph"><span>training</span><span class="mini" id="f-status">&ndash;</span></div>
+        <div class="seg-s wide" role="group" aria-label="Model kind">
+          <button type="button" class="seg" data-kind="lr" aria-pressed="false">logistic regression</button><button type="button" class="seg on" data-kind="gbt" aria-pressed="true">boosted trees</button>
+        </div>
+        <div class="mini lbl">model inputs &middot; select to drop and refit</div>
+        <div class="chips" id="f-feats" role="group" aria-label="Model inputs"></div>
+        <label class="rng">patients aged 80+ in training: <output id="f-old">21%</output>
+          <input type="range" id="f-oldr" min="0" max="40" step="1" value="21" aria-label="Share of patients aged 80 and over in training" />
+        </label>
+        <button type="button" class="ctl" id="f-pop">use the population's share</button>
+        <div id="f-split" class="tbl small"></div>
+        <div id="f-trace" class="trace" aria-label="Training loss"></div>
+        <div id="f-before" class="tbl small"></div>
+      </div>
+      <div class="f-right">
+        <div class="panel f-slices">
+          <div class="ph"><span>every slice at the chosen thresholds</span><span class="mini">95% bootstrap intervals</span></div>
+          <div id="f-table" class="slices"></div>
+          <p class="finding" id="f-finding" aria-live="polite"></p>
+        </div>
+        <div class="f-grid2">
+          <div class="panel f-search">
+            <div class="ph"><span>worst-slice search</span><span class="mini" id="f-search-k"></span></div>
+            <button type="button" class="ctl" id="f-search-go">search again at these thresholds</button>
+            <div id="f-search"></div>
+            <button type="button" class="ctl" id="f-reveal" hidden aria-expanded="false">reveal what the generator planted</button>
+            <div id="f-planted" class="planted" hidden></div>
+          </div>
+          <div class="panel f-terms">
+            <div class="ph"><span>what the regression learned, band by band</span><span class="mini">log-odds beside NEWS2 points</span></div>
+            <div id="f-terms" class="terms"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 THE HIDDEN WORLD -->
+  <section id="hidden" class="sec" aria-labelledby="h-hidden">
+    <div class="sec-head">
+      <div class="kick">05 &middot; the hidden world</div>
+      <h2 id="h-hidden">The ground truth both systems were guessing at, and the dials that made it.</h2>
+      <p class="sub">This generator made every patient on the page. Its coefficients are invented. The hidden-truth curve in section 03 ranks patients by the true probability each one had, which no model can observe, so it marks the ceiling. Change the world and everything regenerates and refits.</p>
+    </div>
+    <div class="h-grid">
+      <div class="panel h-world">
+        <div class="ph"><span>the world</span><span class="mini" id="h-world-k"></span></div>
+        <div class="world" id="h-world"></div>
+        <div class="p-actions"><button type="button" class="ctl act" id="h-regen">regenerate and refit</button><button type="button" class="ctl" id="h-default">defaults</button></div>
+      </div>
+      <div class="panel h-eq"><div class="ph"><span>generator</span><span class="tag tag-ill">[ILLUSTRATIVE]</span></div><pre id="h-eq" class="eq"></pre></div>
+      <div class="panel h-reveal"><div class="ph"><span>the selected patient, unmasked</span><span class="mini" id="h-who"></span></div>
+        <button type="button" class="ctl" id="h-show" aria-expanded="false">reveal hidden truth</button>
+        <dl id="h-truth" class="truth"></dl>
+      </div>
+    </div>
+    <div class="h-grid2">
+      <div class="panel h-checks"><div class="ph"><span>checks run on this load</span><span class="tag tag-real">[REAL]</span></div><div id="h-checks"></div></div>
+      <div class="panel h-data"><div class="ph"><span>datasheet and export</span><span class="mini">after Gebru et al. 2021</span></div>
+        <dl id="h-sheet" class="card"></dl>
+        <div class="exports">
+          <button type="button" class="ctl" id="x-csv">features (CSV)</button>
+          <button type="button" class="ctl" id="x-out">hidden outcomes (CSV)</button>
+          <button type="button" class="ctl" id="x-cohort">cohort with histories (JSON)</button>
+          <button type="button" class="ctl" id="x-json">metrics and models (JSON)</button>
+          <button type="button" class="ctl" id="x-link">copy link to this state</button>
+        </div>
+        <p class="mini" id="x-status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="evidence" class="evidence">
+  <div class="ev-col">
+    <div class="kick">tags</div>
+    <p class="mini tag-legend"><b class="tag-real">[REAL]</b> computed by this page from the published NEWS2 charts or from the models it trained, or taken from a cited source. <b class="tag-ill">[ILLUSTRATIVE]</b> invented to show a mechanism: the population, the hidden process and every number that depends on them.</p>
+    <ul class="ev" id="ev-list">
+      <li><b class="tag-real">[REAL]</b> NEWS2 parameter bands, aggregate thresholds, categories and responses, checked against RCP 2017 charts 1, 2 and 4; the checks in section 05 run on every load.</li>
+      <li><b class="tag-real">[REAL]</b> Both models are trained in this browser; every curve, interval, contribution and counterfactual is computed from them on load.</li>
+      <li><b class="tag-real">[REAL]</b> Regression contributions are exact; tree contributions are exact path-dependent Shapley values. Additivity is checked on screen for every patient.</li>
+      <li><b class="tag-ill">[ILLUSTRATIVE]</b> The population, its rates, the hidden deterioration process and every coefficient in section 05. Age blunting and oximeter over-reading follow documented directions (Norman 2000; Sjoding et al. 2020) with invented magnitudes.</li>
+      <li><b class="tag-ill">[ILLUSTRATIVE]</b> All performance numbers describe this synthetic world only. They say nothing about NEWS2 or any model on real patients.</li>
+    </ul>
+    <p class="mini" id="ev-perf"></p>
+  </div>
+  <div class="ev-col">
+    <div class="kick">sources</div>
+    <ol class="cites" id="ev-cites"></ol>
+  </div>
+</footer>
+
+<script type="module" src="assets/js/ai-health/main.js"></script>
+</body>
+</html>
