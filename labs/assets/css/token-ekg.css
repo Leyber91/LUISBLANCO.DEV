@@ -442,3 +442,7 @@ input[type="number"]:focus, input[type="text"]:focus { border-color: var(--horiz
 
 /* the shared route pill: its public-route dot is gold in other labs; here gold is kept for a live measurement */
 #route .lbr[data-route="pollinations"] .lbr-dot { background: var(--horizon); box-shadow: none; }
+
+.legend.states { margin-top: 4px; }
+.legend.states b { font-weight: 500; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); border: 1px solid var(--line-bright); padding: 0 4px; }
+.legend.states b.g { color: var(--accretion-soft); border-color: var(--accretion-dim); }

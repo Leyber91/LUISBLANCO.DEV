@@ -9,7 +9,8 @@
 import { fmtMs } from './stats.js';
 
 /** The tour played on load: one idea per recording, in this order. */
-export const TOUR = ['llama-warm', 'qwen06', 'llama-131k', 'qwen8-think', 'llama-long-1', 'llama-long-2', 'llama-cold',
+export const TOUR = ['llama-warm', 'llama-131k', 'qwen8-think', 'retok-qwen-script', 'llama-cold', 'public-oneshot'];
+export const TOUR_ALL = ['llama-warm', 'qwen06', 'llama-131k', 'qwen8-think', 'llama-long-1', 'llama-long-2', 'llama-cold',
   'llama-shared', 'public-oneshot'];
 
 const n0 = (x) => (Number.isFinite(x) ? Math.round(x).toLocaleString('en-US') : '-');

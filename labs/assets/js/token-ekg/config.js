@@ -63,7 +63,7 @@ export const PROMPTS = {
     // the context document (the full UDHR in English) is prepended at run time; see longContext()
     text: 'Using only the document above, which article protects freedom of movement, and what does it say? Answer in two sentences.',
   },
-  code: { label: 'code', text: 'Write a Python function that parses an ISO 8601 date string without any imports, with a docstring and three test cases.' },
+  code: { label: 'long code', text: 'Write a Python function that parses an ISO 8601 date string without any imports, with a docstring and three test cases.' },
   list: { label: 'numbered list', text: 'List the numbers from 1 to 60, one per line, each followed by its square.' },
   script: { label: 'non-Latin script', text: 'Translate into Hindi, Japanese and Arabic, one line each: "Every token arrives at its own time."' },
   reason: { label: 'reasoning task', text: 'A train leaves at 14:05 and arrives at 17:50, stopping twice for 7 minutes each. How long is it moving? Think step by step, then give the answer.' },

@@ -6,9 +6,9 @@
    1. tokenizers: the two in-repo BPE implementations (Qwen3, Mistral
       v0.3) re-encode every text in data/tokenizer-reference.json and
       must give the reference library's ids exactly. The tiktoken pair
-      (gpt-tokenizer) is checked the same way when the package can be
-      imported (set GPT_TOKENIZER=<path to gpt-tokenizer/esm>); the page
-      runs that check in the visitor's browser in any case.
+      (gpt-tokenizer 3.4.0) is checked the same way: the test downloads
+      the pinned ES modules from jsDelivr once (or uses GPT_TOKENIZER=
+      <path to gpt-tokenizer/esm>) and applies the page's own fix.
    2. statistics: analyze() on shipped recordings against values worked
       out by hand from the same files.
    3. schema: every recording in data/traces.json and data/runs.json
@@ -32,14 +32,35 @@ const ok = (cond, msg) => { if (cond) passes++; else { fails++; console.log('FAI
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 
 /* ---- 1. tokenizers ---- */
+/** Download the pinned gpt-tokenizer ES modules (the same files the page loads) into a temp folder, once. */
+async function fetchGptTokenizer() {
+  const { mkdirSync, writeFileSync, existsSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const V = '3.4.0';
+  const dir = join(tmpdir(), `gpt-tokenizer-${V}`, 'esm');
+  if (existsSync(join(dir, 'encoding', 'cl100k_base.js'))) return dir;
+  const list = await (await fetch(`https://data.jsdelivr.com/v1/package/npm/gpt-tokenizer@${V}/flat`)).json();
+  const files = list.files.map((f) => f.name).filter((n) => n.startsWith('/esm/') && n.endsWith('.js') && !n.includes('.test.'));
+  for (const n of files) {
+    const r = await fetch(`https://cdn.jsdelivr.net/npm/gpt-tokenizer@${V}${n}`);
+    if (!r.ok) throw new Error(`${n}: http ${r.status}`);
+    const out = join(tmpdir(), `gpt-tokenizer-${V}`, n);
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, await r.text());
+  }
+  writeFileSync(join(tmpdir(), `gpt-tokenizer-${V}`, 'package.json'), '{"type":"module"}');
+  return dir;
+}
+
 const ref = JSON.parse(read('tokenizer-reference.json'));
 const toks = {
   qwen3: byteLevelFromText('qwen3', read('tokenizers/qwen3.bpe.txt')),
   'mistral-v03': sentencePieceFromText('mistral-v03', read('tokenizers/mistral-v03.bpe.txt')),
 };
-if (process.env.GPT_TOKENIZER) {
+const gptDir = process.env.GPT_TOKENIZER || await fetchGptTokenizer().catch((e) => { console.log('  gpt-tokenizer not fetched: ' + e.message); return null; });
+if (gptDir) {
   for (const enc of ['o200k_base', 'cl100k_base']) {
-    const m = await import(pathToFileURL(join(process.env.GPT_TOKENIZER, 'encoding', enc + '.js')).href);
+    const m = await import(pathToFileURL(join(gptDir, 'encoding', enc + '.js')).href);
     patchBom(m.default.bytePairEncodingCoreProcessor); // the same fix the page applies
     toks[enc] = { encode: m.encode };
   }

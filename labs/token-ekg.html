@@ -60,6 +60,15 @@
         <li><i class="lg-b"></i>B, pinned for comparison</li>
         <li><i class="lg-live"></i>gold only while a live stream is measured</li>
       </ul>
+      <ul class="legend states" aria-label="States of the source badge">
+        <li><b>recording</b> replayed at recorded speed, ink trace</li>
+        <li><b>saved here</b> measured in this browser earlier</li>
+        <li><b class="g">live stream</b> being measured now, gold trace</li>
+        <li><b>waiting</b> dotted line until the first token</li>
+        <li><b>stopped</b> / <b>failed</b> the run ended early; the note says why</li>
+        <li><b>buffered</b> most chunks arrived together</li>
+        <li><b>cached</b> / <b>invalid</b> not fresh generation; no decode rate</li>
+      </ul>
       <div class="ticker" id="ticker" aria-hidden="true"></div>
       <canvas id="overview" tabindex="0" role="slider" aria-label="Position in the trace, and the server's phases" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></canvas>
       <div class="transport" role="toolbar" aria-label="Replay controls">

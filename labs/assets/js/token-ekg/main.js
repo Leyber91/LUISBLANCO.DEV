@@ -419,6 +419,13 @@ function drawPlots(force) {
   drawHistogram($('p-hist'), A, B, S.hover);
   drawPoincare($('p-poin'), A, B);
   drawPeriodogram($('p-freq'), A, S.A);
+  if (A && A.n > 2 && force) {
+    $('p-tach').setAttribute('aria-label', `Tachogram of ${S.A.label}: ${A.iti.length} waits, median ${fmtMs(A.median)}, longest ${fmtMs(A.max)}`);
+    $('p-hist').setAttribute('aria-label', `Distribution of waits: p50 ${fmtMs(A.median)}, p90 ${fmtMs(A.p90)}, p99 ${fmtMs(A.p99)}`);
+    $('p-poin').setAttribute('aria-label', `Poincare plot: SD1 ${fmtMs(A.sd1)}, SD2 ${fmtMs(A.sd2)}`);
+    const pk = $('p-freq').dataset.peak;
+    $('p-freq').setAttribute('aria-label', pk ? `Periodogram: peak at ${pk} Hz, false-alarm p ${Number($('p-freq').dataset.fap).toFixed(3)}` : 'Periodogram: too few waits');
+  }
 }
 
 /* ---------------- tooltip: the chunk under the pointer ---------------- */
@@ -466,7 +473,7 @@ function renderEvent() {
   const el = $('evline');
   el.classList.toggle('live', isLiveTrace(t));
   if (!e) { el.textContent = ''; return; }
-  const what = { sent: 'request', first: 'first token', phase: 'phase', stall: 'stall', end: 'end' }[e.kind] || e.kind;
+  const what = { sent: 'request', first: 'first token', phase: 'phase', stall: 'stall', burst: 'burst', end: 'cross-check' }[e.kind] || e.kind;
   let text = e.text;
   if (e.kind === 'sent') text = t.kind === 'oneshot' ? 'request sent; a non-streamed reply arrives in one piece' : 'request sent; the dotted line is the wait for the first token';
   if (e.kind === 'end') {

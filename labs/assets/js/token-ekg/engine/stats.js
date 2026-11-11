@@ -334,6 +334,9 @@ export function events(trace, a = analyze(trace)) {
   for (const st of a.stalls.slice(0, 3)) {
     ev.push({ t: st.at, kind: 'stall', ms: st.ms, text: `stall: ${fmtMs(st.ms)}, ${(st.ms / a.median).toFixed(1)} x the median interval` });
   }
+  for (const b of (a.bursts || []).slice(0, 2)) {
+    ev.push({ t: b.at, kind: 'burst', text: `burst: ${b.chunks} chunks arrived within 2 ms of each other, delivered together by the transport` });
+  }
   if (a.complete) ev.push({ t: a.tLast, kind: 'end', text: `last chunk; ${a.n} chunks, server counted ${s ? s.evalCount : '?'} tokens` });
   return ev.sort((x, y) => x.t - y.t);
 }
