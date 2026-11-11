@@ -1,0 +1,251 @@
+{
+  "id": "ai-health",
+  "title": "AI in Healthcare",
+  "page": null,
+  "thesis": "At level 10 a visitor runs a synthetic ward whose truth is known, watches the published NEWS2 bedside score and a model fitted in their own browser compete on the same patients, sees exactly why each patient was flagged, where each method fails and for whom, and which built-in mechanisms any lead comes from, and leaves knowing what an AI triage claim must prove before anyone trusts it, with every number checked and nothing offered as medical advice.",
+  "axes": [
+    {
+      "id": "news2-fidelity",
+      "name": "NEWS2 baseline fidelity",
+      "frame": "model",
+      "metric": "Agreement of the page's NEWS2 with the Royal College of Physicians 2017 charts (Chart 1 scoring, Chart 2 categories, Chart 4 clinical response) and its intended-population rules, counted as self-check and vignette cases passed out of cases run, plus which chart elements are implemented; the rater reads the scorer and its self-check, then enters band-edge vitals on the page.",
+      "ladder": [
+        "Absent: no NEWS2 scorer exists.",
+        "A NEWS2 aggregate is computed from the seven Chart 1 parameters (respiration rate, SpO2, air or oxygen, systolic BP, pulse, consciousness, temperature) for one observation set and shown as a number.",
+        "Every Scale 1 band of RCP 2017 Chart 1 is implemented with inclusive bounds, and a self-check of every band edge and its neighbour on each side (40 or more cases) passes on load.",
+        "SpO2 Scale 2 is implemented in full (83 or less: 3; 84-85: 2; 86-87: 1; 88-92, or 93 or more on air: 0; on oxygen 93-94: 1, 95-96: 2, 97 or more: 3), and each patient carries a Scale 1 or Scale 2 flag shown on the page.",
+        "Chart 2 categories are shown per patient with the precedence stated and self-checked: aggregate 7 or more high; else 5-6 medium; else any single parameter scoring 3 low-medium; else 0-4 low. The test cases include an aggregate of 3 from one red parameter (low-medium) and an aggregate of 6 that includes a red 3 (medium).",
+        "The Chart 4 clinical response is shown for each of its five trigger rows (aggregate 0: at least 12-hourly; 1-4: at least 4-6-hourly; a single parameter scoring 3: at least hourly; 5 or more: at least hourly with an urgent response; 7 or more: continuous monitoring with an emergency response), and a self-check of one case per row passes on load.",
+        "The intended population is enforced: the scorer refuses patients under 16 or pregnant, showing the RCP 2017 reason, and Scale 2 is applied only to patients with a recorded prescribed SpO2 target of 88-92 percent (hypercapnic respiratory failure), never from a diagnosis alone.",
+        "A missing parameter never scores 0 silently: the aggregate is marked incomplete on the patient card and in the ward, the count of incomplete sets is shown, and the self-check reaches 60 or more cases covering both SpO2 scales and one missing value per parameter.",
+        "Ten or more vignettes, each with its expected total, category and response written as literals in a test file (not computed), are checked on load; the page shows the pass count (for example 10 of 10), and every vignette can be viewed with its expected and computed values side by side.",
+        "Chart 4 frequencies drive each patient's timeline: each set's trigger row sets when the next set is due (12 h, 6 h at the upper end of 4-6-hourly, 1 h, 1 h, or continuous monitoring required), and sets recorded later than due are flagged with the delay in hours and counted per patient.",
+        "Reference: an exhaustive sweep over every recordable value (RR 0-60, pulse 20-250, systolic 40-300, SpO2 50-100 on both scales with air and oxygen, temperature 30.0-43.0 C by 0.1, every consciousness level) agrees, with zero disagreements reported on the page, with a second scorer that is a cell-by-cell transcription of RCP 2017 Chart 1 as a data table in its own file: one row per printed cell with the printed cell text quoted, importing nothing from the band config (grep check), so a rater can compare each quoted cell with the printed chart."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no NEWS2 scorer on labs/foundation at cd1e9f7 (no labs/ai-health page, no labs/assets/js/ai-health/ module); the hub lists ai-health as planned." } }
+    },
+    {
+      "id": "cohort-truth",
+      "name": "Synthetic cohort and hidden truth",
+      "frame": "data",
+      "metric": "How the synthetic patients are made and documented: cohort size N, seeded reproducibility, a ground-truth outcome kept apart from the features, the count of documented generator mechanisms, a named published reference check with stated tolerances, and whether the cohort exports; the rater reads the generator module and the cohort panel, and reloads with the same seed.",
+      "ladder": [
+        "Absent: no patient records exist.",
+        "A fixed, hand-written list of 20 or more invented patients with the seven NEWS2 vitals.",
+        "Patients are generated by a seeded PRNG: the seed is shown, the same seed gives an identical cohort, and N is 1,000 or more.",
+        "Each patient has a hidden ground-truth event (ICU admission, cardiac arrest or death) with an event time in hours from admission, or none, drawn from a hazard whose log is a sum of named terms, one per noise-free vital plus covariate terms, while a latent severity process moves the noise-free vitals over time. The outcome is stored in a separate structure the model code never imports (grep check), and prevalence within 24 h of admission is shown.",
+        "The generator's equations and every coefficient are rendered on the page from the config module the generator reads (changing a coefficient in config changes the listed value), each tagged [illustrative].",
+        "Each patient has 6 or more observation sets at irregular times, and a chart on the page shows the mean NEWS2 of event patients rising by 2 or more points over the 12 h before the event, while non-event patients stay within 1 point over their last 12 h of observation.",
+        "Measurement artefacts are generated and documented: missing parameters in 5 percent or more of observation sets, recording noise with a stated SD per vital listed on the page, and terminal-digit preference in at least one vital, visible as a last-digit histogram on the page.",
+        "Subgroup attributes with seeded mechanisms are generated, documented and each switchable in config: age band, sex, hypercapnic COPD with a prescribed 88-92 percent target (Scale 2), beta-blockade blunting the pulse response, and an oximeter that overestimates SpO2 in one group (the bias behind the occult hypoxaemia reported by Sjoding et al., NEJM 2020).",
+        "Reference check against Smith et al. (Resuscitation 2013, the NEWS validation on observation sets with a 24 h outcome; NEWS2 scores as NEWS on Scale 1 sets apart from new confusion): on the Scale 1 sets, NEWS2's AUROC for the combined 24 h outcome is shown beside the published 0.873 and lies within 0.03 of it, and the event rate per aggregate score (0 to 7 or more) is shown beside a published per-score rate (source with figure or table number on the page), every score within a factor of 2 of it, any score outside that range flagged.",
+        "The cohort exports as CSV and JSON with a data dictionary, the seed and the generator version, and the hidden outcomes export as a separate file, so anyone can refit offline.",
+        "Reference: a datasheet in the seven sections of Gebru et al. (Communications of the ACM 2021): motivation, composition, collection (here generation) process, preprocessing and labelling, uses (forbidden uses named, any clinical use among them), distribution and maintenance. Every question of the template is answered on the page or marked not applicable with a reason, counts and prevalences are bound to the current generator run and version, and the datasheet ships inside the export: the documentation standard of the Synthea synthetic-patient generator (Walonoski et al., JAMIA 2018)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no cohort generator or patient records on labs/foundation at cd1e9f7; the hub lists ai-health as planned." } }
+    },
+    {
+      "id": "learned-model",
+      "name": "Learned risk model",
+      "frame": "model",
+      "metric": "What the in-browser model is and how it is fitted: model family, patient-level data split, regularisation, feature set and its look-ahead guard, whether it recovers the generator's known per-vital hazard terms, and per-patient uncertainty; the rater reads the model module and the training panel (loss curve, fitted terms, fit time in ms).",
+      "ladder": [
+        "Absent: no model other than NEWS2.",
+        "A second risk output beside NEWS2 exists, but its weights are hard-coded rather than fitted.",
+        "A logistic regression is fitted in the browser on the cohort (gradient descent or IRLS), with the log-loss shown falling per iteration.",
+        "Fitting uses a train, validation and test split made by patient, so no patient's observation sets appear in two splits (asserted in code), with patient and set counts per split shown, and the L2 strength is chosen on validation from 5 or more candidate values.",
+        "Features capture non-linear risk (splines or binned vitals), so a U-shaped effect such as raised risk at both low and high pulse can be learned and is visible in the fitted terms.",
+        "Temporal features from the observation sequence enter the model (change since the previous set, slope over the last 3 sets, time since the last observation, missingness indicators), each computed only from sets at or before the prediction time, with a test that changing any later set leaves the prediction unchanged.",
+        "A second model family is fitted (gradient-boosted trees with 50 or more trees of depth 3 or less, or a GAM) and compared with the logistic regression on validation log-loss.",
+        "Truth recovery: each vital's learned effect (shape function, or coefficient times value) is plotted against the generator's log-hazard term for that vital, both centred at the reference patient, with the RMSE between the two curves over the cohort's 5th to 95th percentile of that vital shown per vital.",
+        "Post-hoc calibration (Platt scaling or isotonic regression fitted on validation) is applied, with the reliability curve before and after shown.",
+        "Per-patient uncertainty: a bootstrap ensemble of 20 or more refits, resampling patients, gives a 90 percent interval on each patient's risk, shown on the patient card.",
+        "Reference: a glass-box GA2M with pairwise interactions (Lou, Caruana, Gehrke and Hooker, KDD 2013; the approach of Caruana et al., KDD 2015 for pneumonia risk) fitted in the browser on 1,000 or more patients in 5 s or less under the fit-budget-reach timing protocol, with every shape function and interaction heatmap displayed."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no learned model or training code on labs/foundation at cd1e9f7; the hub lists ai-health as planned." } }
+    },
+    {
+      "id": "evaluation",
+      "name": "Head-to-head evaluation",
+      "frame": "model",
+      "metric": "Which comparisons of the learned model against NEWS2 the page computes against the hidden outcome, with values to 3 decimals. Unit = observation set, positive when the hidden event falls within 24 h after it (the convention of Smith et al., Resuscitation 2013); splits are by patient and bootstrap resamples are drawn by patient. The rater reads the metrics module and checks each figure on the page.",
+      "ladder": [
+        "Absent: nothing is scored against an outcome.",
+        "A confusion matrix (TP, FP, FN, TN) for NEWS2 at 5 or more against the hidden outcome, with the unit (observation set) and horizon (event within 24 h after the set) stated on the page and the cells summing to the number of observation sets scored.",
+        "The learned model is evaluated on a test split made by patient (an assertion in code checks that no patient has sets in both train and test), never used in fitting or tuning; NEWS2 is scored on the same sets, and test patients and test sets are both counted on the page.",
+        "ROC and precision-recall curves for both methods, with AUROC and AUPRC to 3 decimals and the prevalence baseline drawn on the precision-recall plot.",
+        "A reliability diagram with 10 or more bins and the Brier score for both, NEWS2 mapped to risk by its observed event rate per aggregate score on the training split.",
+        "Equal alert burden: the model's threshold is set to the alert rate of NEWS2 at 5 or more, and sensitivity, PPV, alerts per detected event and median lead time (hours from a patient's first alert to the event, over detected events) are compared at that burden.",
+        "Bootstrap 95 percent intervals (200 or more resamples of patients) on AUROC, AUPRC, Brier and the paired AUROC difference; the page says the model beats NEWS2 only when the difference interval excludes 0.",
+        "Null and ablation check: the model is refit on a null cohort whose event hazard depends only on the current NEWS2 aggregate (drift, noise, artefacts and every subgroup mechanism off), where NEWS2 is the best possible ranking by construction, and the paired AUROC difference interval there includes 0, shown beside the main result; an ablation table switches each generator mechanism on alone and shows the AUROC difference it creates, so the page names where any lead comes from.",
+        "Decision curve analysis: net benefit against threshold probability for both, with treat-all and treat-none lines (Vickers and Elkin, Medical Decision Making 2006).",
+        "Shift test: both are re-evaluated, without refitting, on a second cohort from a changed generator (other prevalence and case-mix), with the drop in AUROC and calibration shown side by side.",
+        "Reference: a TRIPOD+AI reporting panel (Collins et al., BMJ 2024) lists each applicable item and links to where the page satisfies it, so the comparison is reported to the standard asked of a published clinical prediction model."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no metrics code and no outcome to score against on labs/foundation at cd1e9f7; the hub lists ai-health as planned." } }
+    },
+    {
+      "id": "failure-slices",
+      "name": "Subgroup failure slices",
+      "frame": "model",
+      "metric": "Which subgroups the page slices, which metrics it computes per slice with their n and intervals, whether a search finds a failure planted where the builder did not choose, and whether mitigations and fairness criteria are tested on the cohort; the rater opens the slice view, counts attributes and metrics, and reads the slicing code.",
+      "ladder": [
+        "Absent: no metric is split by subgroup.",
+        "One metric (sensitivity of NEWS2 at 5 or more) is split by one attribute, such as age band, in a table.",
+        "Four or more attributes are sliced (age band, sex, hypercapnic COPD on Scale 2, the oximetry-bias group), with sensitivity, false-positive rate and alert rate per slice for NEWS2 and the model.",
+        "Each slice shows its n and event count, and slices with fewer than 30 events are flagged as too small to read.",
+        "Per-slice calibration: the observed-to-expected event ratio and a reliability curve per slice for the model.",
+        "Bootstrap 95 percent intervals on every slice metric, with the slice marked when its interval excludes the overall value.",
+        "A worst-slice search ranks every single attribute and every 2-way intersection with 30 or more events by slice sensitivity minus whole-test-set sensitivity, separately for NEWS2 at 5 or more and for the model at the same alert burden, and lists each method's top 5 with n and event count.",
+        "Planted-slice detection: a test mode plants the failure mechanism (oximeter overestimation of SpO2, after Sjoding et al., NEJM 2020) in a subgroup or 2-way intersection drawn at random per seed and hidden from the search; across 20 seeds the page shows how many times the planted slice is in the search's top 5, and in the default cohort the cause is revealed only after the visitor has opened the slice that exposes it.",
+        "Three or more mitigations are run (drop the biased feature, per-group threshold, reweighting, or a corrected SpO2), each shown as overall AUROC against worst-slice sensitivity.",
+        "Equal opportunity (TPR) gap, false-positive-rate gap and predictive parity (PPV) gap are shown side by side with within-group calibration of the score; three buttons each set per-group thresholds that bring one gap to 0.01 or less, and the page shows the other two gaps staying open on this cohort when base rates differ (Kleinberg, Mullainathan and Raghavan, ITCS 2017; Chouldechova, Big Data 2017).",
+        "Reference: slice exploration at the depth of the What-If Tool (Wexler et al., IEEE TVCG 2020): the visitor defines any slice by filters on any feature and gets its metrics, intervals and NEWS2-versus-model gap in under 1 s under the fit-budget-reach timing protocol."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no subgroup attributes, slices or slice metrics on labs/foundation at cd1e9f7; the hub lists ai-health as planned." } }
+    },
+    {
+      "id": "patient-explanation",
+      "name": "Patient explanation and safety framing",
+      "frame": "explanation",
+      "metric": "What a visitor can read about why one synthetic patient got their score and risk, how exact that explanation is (sum checks, named method), how far it agrees with the generator's known truth, whether it measurably improves the visitor's predictions, and whether the page frames itself as non-clinical with every claim tagged; the rater opens a patient card, checks the sums, and reads the page text at 1440 and 400 px.",
+      "ladder": [
+        "Absent: nothing explains any score.",
+        "Safety framing is visible without scrolling at 1440 and 400 px: synthetic patients only, not medical advice, not a clinical tool, not validated for any care decision.",
+        "Every panel and every prose claim carries a [real] or [illustrative] tag in the site's foot-tag style, with a legend. The rule is stated: published rules (NEWS2 bands, RCP 2017 charts) are [real]; anything computed on the synthetic cohort, including NEWS2 scores of synthetic patients, is [illustrative].",
+        "For a selected patient the NEWS2 total is broken down by parameter (seven rows with points each), and the rows sum to the total.",
+        "A contribution waterfall for the model: baseline log-odds plus one bar per feature, summing to the patient's predicted log-odds, with the sum check shown to 3 decimals.",
+        "The waterfall method is exact for the model family and named on the page: coefficient times (value minus reference) for logistic regression, or TreeSHAP for trees (Lundberg et al., Nature Machine Intelligence 2020), with the reference patient stated.",
+        "One counterfactual per patient: the change to at most 2 vitals that crosses the alert threshold with the least total change in SD units of each vital, found by an exhaustive grid at recording resolution within listed physiological bounds; it is computed for both NEWS2 and the model, and the distance and bounds are shown.",
+        "Counterfactuals hold age, sex and COPD fixed, and 3 or more are listed per patient, no two changing the same set of vitals, generated by a stated diversity objective in the manner of DiCE (Mothilal, Sharma and Tan, FAT* 2020).",
+        "A model card for the learned model (Mitchell et al., FAT* 2019) is on the page: intended use as a teaching demo, out-of-scope uses including any clinical decision, metrics by slice bound to the current engine run (they change when the seed changes), and known caveats.",
+        "Truth check: each patient's waterfall is compared with the generator's true contributions for that set (each log-hazard term at the patient's noise-free value minus the term at the reference value), with top-3 rank agreement shown per patient and across the cohort, and patients whose top model contributor has no term in the generator's hazard (a proxy, for example time since the last observation) are listed.",
+        "Reference: forward simulation in the manner of Hase and Bansal (ACL 2020): in a test mode that hides every waterfall, the visitor predicts the direction and size of the model's risk change for 5 edits, then for 5 more with waterfalls shown; a prediction counts as correct when the direction matches and the size is within 1 NEWS2 point or 5 percentage points of model risk, scored against the engine, and the page shows the accuracy gain the explanations produced."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no patient card, waterfall, counterfactual or safety statement on labs/foundation at cd1e9f7; the hub blurb is the only text." } }
+    },
+    {
+      "id": "ward-views",
+      "name": "Ward and evaluation views",
+      "frame": "graphics",
+      "metric": "How many distinct live views draw from the engine, whether a selection, threshold or time change propagates across them, and whether time and slices are visible; the rater counts views on the page, then changes the selected patient, the threshold and the playback hour and watches which views respond.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "One static table of patients with their NEWS2 totals.",
+        "A ward view of 20 or more beds in a grid, each bed coloured by its NEWS2 category (4 categories), drawn from the engine.",
+        "A patient observation chart in the layout of RCP 2017 Chart 3: each vital over time with every cell coloured by its score.",
+        "ROC and precision-recall curves drawn from engine data in SVG or canvas, with the operating points of NEWS2 at 5 and at 7 marked.",
+        "Reliability diagram and confusion matrix are drawn as well, 5 or more distinct engine-driven views in total, each with labelled axes (or rows and columns), units and a legend, and no tick labels overlapping at 1440 px.",
+        "Linked views: selecting a patient anywhere highlights them in the ward, observation chart, waterfall and score distribution; moving the threshold updates the confusion matrix, ROC point and ward colours together.",
+        "Ward playback: the ward advances through simulated hours, beds recolour as observations arrive, hidden events appear when they happen, and NEWS2 and model alerts sit on one shared timeline.",
+        "A slice view of small multiples (per-slice ROC or sensitivity bars with intervals), linked to the ward so that selecting a slice dims the beds outside it.",
+        "State changes (threshold move, refit, patient switch) animate in 320 ms or less (the --t-mid token) with object constancy, so a bed or a curve point can be followed through the change.",
+        "Reference: a time scrubber over the simulated hours drives every view at once, the views counted and listed on the page (ward, observation chart, waterfall, ROC and PR operating points, confusion matrix, slice small multiples), so scrubbing to any hour shows each method's risk, alerts and metrics computed from the sets recorded up to that hour: the linked-threshold explorable of Wattenberg, Viegas and Hardt (Google, 2016) extended through time."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: nothing is drawn for ai-health on labs/foundation at cd1e9f7; the hub shows a planned card only." } }
+    },
+    {
+      "id": "chart-language",
+      "name": "Observation-chart language",
+      "frame": "style",
+      "metric": "The lab's design system against the site tokens in labs/assets/css/tokens.css: NEWS2 category colour tokens with their contrast ratio and HSL hue distance from the gold accent, unit and numeral discipline, gold kept for the active element, one chart grammar, redundant encoding of risk, and type, spacing and motion through the shared tokens; the rater checks the screenshot and greps the lab CSS.",
+      "ladder": [
+        "Absent: no page to style.",
+        "The page sits in the site's shared labs shell: header, footer, type families and near-black ground.",
+        "Four NEWS2 category tokens (low, low-medium, medium, high) are defined once in CSS and used identically in ward, chart and tables, each at 3:1 or more contrast against --void; none is var(--accretion*) or var(--warn), and each sits 20 degrees or more of HSL hue from --accretion (#D4A24C, hue 38), so no risk colour falls in the amber band of --accretion and --warn.",
+        "Every vital and metric shows its unit (/min, %, mmHg, bpm, C) in tabular numerals with fixed decimals per quantity (temperature 1, AUROC 3).",
+        "var(--accretion*) appears only on the active element (selected patient, current threshold, focused control); a grep of the lab CSS finds it in no other rule.",
+        "Five or more charts share one mark grammar: the same axis line, grid weight, tick label size, series weight and legend placement.",
+        "Risk category is encoded twice (colour plus letter or pattern), so the ward reads in grayscale and under a deuteranopia filter.",
+        "Safety framing and the [real] and [illustrative] tags use only neutral tokens (--text-dim, --line, --surface), never a category token or gold, and a grep finds the four category tokens only in rules for risk-bearing elements (beds, chart cells, category badges, risk curves).",
+        "The lab's own CSS sets font-size only through the type tokens (--t-micro to --t-hero) and uses 5 or fewer of them, sets spacing only through var(--s-*), and caps prose at var(--measure).",
+        "Motion is tokens: every transition uses --t-fast, --t-mid or --t-slow and one easing token, nothing flashes more than 3 times per second, alarm states included (WCAG 2.3.1), and a grep finds zero colours, sizes or durations hard-coded in the lab CSS outside token definitions.",
+        "Reference: a print stylesheet renders the selected patient's Chart 3 observation chart and waterfall on one A4 page in monochrome, with category distinguished by letter or pattern and text at 8 pt or more, as the paper RCP 2017 NEWS2 chart reads on a ward."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no ai-health stylesheet or markup on labs/foundation at cd1e9f7; nothing to grade for type, colour or motion." } }
+    },
+    {
+      "id": "what-if-bench",
+      "name": "What-if bench",
+      "frame": "interaction",
+      "metric": "What the visitor can change and how directly the engine answers: count of manipulable inputs, recompute latency in ms (timed under the fit-budget-reach protocol: Chrome, devtools CPU throttling at 4x, median of 5 runs, read from the page's performance.now readout), whether states restore from a URL, and whether the visitor can edit the model itself; the rater operates every control and reads the latency readout.",
+      "ladder": [
+        "Absent: nothing can be touched.",
+        "One control: a button that generates a cohort or picks a patient.",
+        "Any patient can be selected from the ward or a list, showing their NEWS2 and model risk.",
+        "Each of the seven vitals of the selected patient can be edited with a slider or stepper, and NEWS2 and model risk recompute within 100 ms.",
+        "A threshold control for the model and a NEWS2 trigger choice (5 or more, 7 or more, single parameter 3) update the confusion matrix and the alerts live.",
+        "Cohort controls: seed, N, prevalence, and 2 or more generator mechanisms (for example oximetry bias size, missingness rate), each change regenerating the cohort and refitting the model.",
+        "State lives in the URL: seed, selected patient, threshold and vital edits restore from a shared link.",
+        "Build a patient: the visitor composes a new patient, subgroup and a sequence of observation sets included, and it is placed in the ward and scored; its card is marked synthetic, and the not-for-real-patients notice sits beside the entry form, not only at the top of the page.",
+        "The visitor removes or adds a feature (for example drop SpO2, add age) and refits, with metrics before and after side by side.",
+        "Every edit can be undone, and two saved states (for example the model with and without SpO2) are compared side by side across all metrics.",
+        "Reference: the visitor drags a learned shape function (for example risk against pulse) to encode clinical knowledge, and test metrics, slices and the ward update within 200 ms: the direct model editing of GAM Changer (Wang et al., KDD 2022), run on a live synthetic ward."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no controls for ai-health on labs/foundation at cd1e9f7; the hub card has no link to open." } }
+    },
+    {
+      "id": "checked-narrative",
+      "name": "Checked narrative",
+      "frame": "intelligence",
+      "metric": "What the language model contributes beyond the deterministic engine: the share of numeric and directional claims in its patient explanation that the engine verifies (k of n), advice-guard and refusal hits, the route that answered, and verified claims it adds beyond the template; the rater generates explanations on the public route and on the offline fallback and reads the claim-check panel, the prompt code and the test file.",
+      "ladder": [
+        "Absent: no written explanation, scripted or generated.",
+        "A deterministic template sentence explains a patient from engine values (for example NEWS2 6, medium: RR 24 scores 2, SpO2 93 scores 2), with no model call.",
+        "One call through labs/assets/js/ai/llm.js writes an explanation for the selected patient, the answering route is shown in the route panel, and the template is the offline fallback.",
+        "The call sends a JSON of engine facts (scores, contributions, counterfactual) with ids and asks for JSON back: each sentence lists the fact ids it uses.",
+        "Number check: every number in the model's text is extracted and compared with the engine value; mismatches are struck through and the pass rate (k of n) is shown.",
+        "Advice guard: the system prompt forbids diagnosis and treatment advice, the output is scanned for advice phrases (dose, prescribe, should take, diagnose), and any hit is blocked with the reason shown.",
+        "One batched call covers a ward summary and the selected patient within the 45 s public window, with the countdown shown and answers cached per seed and patient.",
+        "Direction check: each claim that a vital raises or lowers risk is verified against the sign of its contribution, and wrong-direction claims are flagged.",
+        "Contribution measured: template and model text side by side, the model's added claims that pass both checks counted, and a running tally across patients of verified, unverifiable and wrong claims.",
+        "Free questions: the visitor asks about the cohort or a patient, the model answers only by emitting a JSON plan of engine calls (filter, metric, counterfactual) that the page executes, and the answer cites the computed result; questions about the visitor's own or any real person's health are refused with a pointer to a clinician by a deterministic guard that runs before any model call, and a fixed set of 20 or more such questions in the test file is refused 20 of 20 on load.",
+        "Reference: a narrative eval (50 or more seeded patients plus the refusal set, through local Ollama and the public route) reporting number accuracy, wrong-direction rate, advice-block rate and plan-execution success is shown on the page with its raw responses shipped as JSON; a button re-runs it live whenever a local model or visitor key answers (the public route's 1 reply per 45 s limits it to the published JSON there), with live results beside the published baseline, and one Node command re-scores the shipped responses offline in under 60 s, reproducing the published figures exactly."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no ai-health caller of labs/assets/js/ai/llm.js and no template explainer on labs/foundation at cd1e9f7." } }
+    },
+    {
+      "id": "fit-budget-reach",
+      "name": "Fit budget and reach",
+      "frame": "performance",
+      "metric": "Time to generate and fit the cohort (ms), recompute latency after a vital edit (ms), main-thread long tasks during a refit, phone width, reduced motion, keyboard and screen-reader reach. All timings in Chrome with devtools CPU throttling at 4x slowdown, median of 5 runs, read from the page's own performance.now readout; the rater also uses the devtools performance panel, a 400 px viewport, reduced-motion emulation and a keyboard-only pass.",
+      "ladder": [
+        "Absent: no page loads.",
+        "The page loads and runs at 1440 px with no console errors.",
+        "Generating and fitting 1,000 patients finishes in 2 s or less under the stated throttle, with the measured ms shown on the page.",
+        "Usable at 400 px: ward and charts stack, and the page never scrolls sideways.",
+        "prefers-reduced-motion is honoured: playback and transitions become instant or stepwise.",
+        "Fitting runs in a Web Worker or in chunks, so devtools shows no main-thread task over 50 ms during a refit.",
+        "A vital edit recomputes NEWS2, model risk, waterfall and counterfactual in 50 ms or less, measured with performance.now and shown in a readout.",
+        "Keyboard: every control and every ward bed is reachable with Tab and arrow keys, with visible focus, and Enter selects.",
+        "Screen reader: every chart has a data table or text alternative, patient cards announce score, category and top contributors, and risk changes are announced through an aria-live polite region.",
+        "Lighthouse mobile scores of 90 or more for performance and 95 or more for accessibility, with the lab's own JS at 200 KB or less gzipped.",
+        "Reference: 100,000 synthetic patients generate and fit in 10 s or less in a worker, and every view holds 50 fps or more through canvas rendering, measured and shown on the page."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: nothing loads for ai-health on labs/foundation at cd1e9f7, so there is no load, latency or reach to measure." } }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Engine separation and tests",
+      "frame": "architecture",
+      "metric": "The code shape under labs/assets/js/ai-health/: module boundaries (config, rng, cohort, news2, models, metrics, views), purity of the engine, tests run by the gate workflow, and registries that let a model family or a second score be added without naming it in the core, each checked by grep; the rater reads the modules, greps them and runs the tests.",
+      "ladder": [
+        "Absent: no code.",
+        "A page with its logic in an inline script.",
+        "The engine lives in ES modules separate from the page, under labs/assets/js/ai-health/.",
+        "Every constant (NEWS2 bands, generator coefficients, citations) sits in one config module, and a grep finds no band or coefficient hard-coded in engine or view code.",
+        "Engine modules (news2, cohort, models, metrics) are pure functions with no DOM access and import in Node.",
+        "One seeded PRNG module feeds all randomness, and a test confirms the same seed gives an identical cohort and identical fitted weights.",
+        "A Node test file covers NEWS2 band edges, metric sanity (AUROC of a perfect score is 1, of a random one near 0.5, Brier between 0 and 1) and seed reproducibility, and is invoked by .github/workflows/gates.yml (directly or through tools/site_check.mjs), so a failing test fails the gate.",
+        "Views subscribe to one state store; a grep finds no import from views/ in any engine module and no view name in the store.",
+        "Model registry: each family is one file under models/ exporting fit, predict and explain, and the evaluation, slice and waterfall code iterate the registry and contain no family name (grep).",
+        "Score registry: a second early warning score (for example MEWS) ships as one config entry plus one scorer file, the views iterate the score registry and contain no score name (grep), and it appears as a second baseline in every view.",
+        "Reference: property-based tests over 1,000 or more seeded random vitals verify the invariants in the gate (waterfall sums equal predictions to 1e-9; each NEWS2 parameter never scores less moving outward from its 0 band; metrics unchanged by patient order), and a README in labs/assets/js/ai-health/ lists each engine module's exports with a Node usage example that runs as written."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: labs/assets/js/ai-health/ is absent from the tracked tree on labs/foundation at cd1e9f7." } }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}

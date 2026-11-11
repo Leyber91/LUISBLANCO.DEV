@@ -1,0 +1,311 @@
+{
+  "id": "roaster",
+  "title": "The Roaster",
+  "page": "roaster.html",
+  "thesis": "The visitor pastes any AI claim, from a launch post to a model card, and sees every hype span highlighted against a sourced lexicon, the claims split out, marked testable or not and linked to the evidence the text gives, a reality grade computed in the open with its uncertainty, an honest rewrite that keeps the meaning, and one model-written roast that quotes the flagged spans and names the true mechanism, each part labelled by origin; they leave able to spot the hype patterns themselves, with a card of the analysis to share.",
+  "axes": [
+    {
+      "id": "hype-spans",
+      "name": "Hype-span detection",
+      "frame": "model",
+      "metric": "How much of the hype in arbitrary pasted text the deterministic engine finds with no model call: lexicon size (entries, categories), context rules, and span precision and recall (0 to 1) on a labelled sentence set under a stated span match rule. Rater pastes 10 test claims with the network off, counts flagged spans against the expected ones, and reads the lexicon, test files and eval script in the code.",
+      "ladder": [
+        "No code reads the words of a claim; without a model, nothing in a claim is detected.",
+        "Static mock: the hype term of each fixed example is named in hand-written text (a 'deleted' line).",
+        "A keyword list of at least 15 hype terms (conscious, sentient, AGI, understands, reasons, thinks, revolutionary) is matched in code against any claim, and the matches are listed on the page with the network off.",
+        "The matcher returns each match as a character-offset span, overlapping matches resolve to one span by a stated rule (longest match first), and the span list with its offsets is shown on the page with the network off.",
+        "Lexicon of at least 80 entries in at least 5 named categories (mental-state verbs, sentience words, inevitability and scale superlatives, magic and alchemy metaphors, vague magnitudes), matched across inflections ('reasons', 'reasoning', 'reasoned'), with each span reporting its category.",
+        "Context rules: negation, quotation and attribution change whether a span is flagged or its weight ('is not conscious', 'so-called AGI', 'critics call it sentient'), shown by a list of at least 12 contrast pairs on the page whose flag or weight differs.",
+        "Two span classes beyond vocabulary: unsupported quantities (a number with no unit, baseline or source, such as '10x faster' or '99% accurate'), and boosters ('clearly', 'undeniably') against hedges ('in our tests', 'on benchmark X'), each flagged as its own span; a booster raises and a hedge lowers the weight of the spans in its sentence.",
+        "Measured: a labelled set of at least 150 sentences with annotated hype spans is in the repo, and span precision and recall, both at least 0.75, are printed on the page from that set, with the span match rule stated on the page (exact boundaries, or at least one shared token); the figures are recomputed by a committed node script from the set in the repo, and the page numbers match its output.",
+        "Per-category error table on the page (precision and recall for each category) and a per-genre breakdown across at least 3 genres: launch posts, paper abstracts, social posts.",
+        "The set is annotated by at least 2 people; pairwise human span F1 and token-level Cohen's kappa are printed beside the engine's span F1, category by category.",
+        "On a public set of at least 500 sentences the engine's span F1 is within 0.05 of pairwise human span F1, with lexicon, set and error list published; the correlation between the mental-state category's per-sentence score and AnthroScore (Cheng et al., 2024, EACL) on the same sentences is printed, and hedge cues are annotated and scored with the cue-level guidelines and F1 of the CoNLL-2010 shared task (Farkas et al., 2010, CoNLL), boosters with the same protocol."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "roastOwn() in roaster.html sends the textarea string straight to live() with no analysis. The only hype vocabulary is a word list inside SYS_PROMPT addressed to the model ('understands', 'conscious', 'sentient', 'AGI', 'reasons', 'knows'), and the 'del' line of each of the 8 SYS entries names that example's hype term by hand. With the network off, a visitor's claim gets no detection at all."
+        }
+      }
+    },
+    {
+      "id": "claim-units",
+      "name": "Claim extraction",
+      "frame": "model",
+      "metric": "Number of atomic claims the page separates out of a pasted passage, the share typed correctly (capability, mechanism, mental-state, quantitative, unfalsifiable), the checkability status given to each, and the supporting evidence each is linked to. Rater pastes a 5-sentence launch post holding 8 known claims and counts the rows produced, their types, the missing-evidence notes and the support links.",
+      "ladder": [
+        "The claim is an opaque string; no structure is shown.",
+        "One hand-written claim sentence per fixed example is shown in its own block, apart from the roast.",
+        "Pasted text is split into sentences in code and each sentence appears as its own claim row.",
+        "Compound sentences split into atomic claims at coordination and relative clauses ('it reasons, plans and understands meaning' gives 3 rows), each row linked to its source span.",
+        "Each atomic claim is typed by rule into at least 5 classes (capability, mechanism, mental-state attribution, quantitative performance, unfalsifiable), with the rule that fired shown on the row.",
+        "Checkability: each claim is marked testable, testable once a missing piece is supplied, or unfalsifiable, and the missing piece is named (no baseline, no dataset, no unit, no definition).",
+        "For each testable claim the page states the test that would settle it (task, metric, baseline), drawn from a table of at least 15 claim patterns.",
+        "Measured: on at least 100 multi-claim passages in the repo, segmentation F1 of at least 0.8, type accuracy of at least 0.7 and checkability-status accuracy of at least 0.7 are printed on the page; the figures are recomputed by a committed node script from the set in the repo, and the page numbers match its output.",
+        "Duplicate grouping: claims restating one capability in different words are grouped under one row with a count, and rows are ranked by their number of flagged spans; a committed test passage with at least 5 known duplicate pairs shows every pair grouped.",
+        "Evidence linking: each claim is linked to the sentence elsewhere in the same text that supports it (a named benchmark, a number with its baseline, a citation or link) or marked 'no support in text', and the count of supported claims is shown; a committed test passage with at least 10 annotated claim-to-support links shows every link found.",
+        "Atomic-claim decomposition follows the atomic-fact annotation protocol of FActScore (Min et al., 2023, EMNLP) on a public set of at least 300 AI claims: the engine's segmentation F1 is within 0.05 of pairwise human segmentation F1, its checkability-status Cohen's kappa against the human labels is within 0.05 of the human-to-human kappa, and the set, annotation guide and scores are published."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Each SYS entry carries one hand-written 'myth' sentence, shown in its own block (#claim_t under 'the claim'), apart from the roast. roastOwn() puts the whole textarea value into #claim_t as a single claim: the page's own placeholder ('it reasons, plans, and understands meaning') is three claims shown as one. No sentence splitting, typing, checkability or evidence linking exists in the code."
+        }
+      }
+    },
+    {
+      "id": "reality-grade",
+      "name": "Reality grade grounding",
+      "frame": "model",
+      "metric": "What the 0 to 100% reality grade rests on: computed or asserted, which inputs (hype density, claim types, evidence carried in the text), decomposed or not, stable under paraphrase (points of change across paraphrase pairs), in agreement with human graders (Spearman rho) and its mean absolute error in points on adversarial sets. Rater reloads one claim 3 times, enters paraphrases, and reads the grading function, test files and eval script.",
+      "ladder": [
+        "No grade is shown.",
+        "A percentage grade is shown for each claim.",
+        "A rubric on the page states what 0%, 50% and 100% mean and lists the factors that move the grade.",
+        "Computed: the grade comes from one function over the engine's analysis: hype density, claim types, and the share of claims whose own sentence carries evidence (a named benchmark, a number with its baseline, a link); the same text gives the same grade on every reload, and a model reply cannot change it.",
+        "Decomposed: the page shows each claim's or span's contribution to the grade, and the contributions sum to the total shown.",
+        "Uncertainty: the grade is shown with an interval (for example '62%, 54 to 70') from a named method such as resampling claim units or varying category weights.",
+        "Paraphrase-stable: at least 20 paraphrase pairs are in the repo, every pair grades within 10 points, and the result is printed on the page; the figures are recomputed by a committed node script from the set in the repo, and the page numbers match its output.",
+        "Human agreement: at least 60 claims graded by at least 2 people; the Spearman rho between engine and human mean, at least 0.6, is printed beside the human-to-human rho; the figures are recomputed by a committed node script from the set in the repo, and the page numbers match its output.",
+        "Model grade kept separate: when the model also grades, engine and model grades sit side by side, gaps over 20 points are flagged, and the model's spread (highest minus lowest, in points) over 5 runs on each human-graded claim is reported.",
+        "Adversarial sets: at least 40 hype claims written to evade the lexicon (euphemism, passive voice, hedged hype) and at least 40 sober claims that use hype words literally ('conscious sedation'); the mean absolute grade error in points against human grades on each set is printed and is at most 15.",
+        "On at least 300 claims the engine-to-human Spearman rho is within 0.05 of the human-to-human rho, and the grade error on each adversarial set is at most 1.5 times the error on the human-graded main set; rubric, benchmark, agreement and adversarial scores are published and versioned, with every grade change between versions listed: a rating scale with written criteria for each level, as explicit as PolitiFact's six-level Truth-O-Meter, plus measured human agreement."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "SYS[i].r is hand-set per example (66, 80, 93, 61, 44, 58, 84, 38); parseGrade() takes the last 'REALITY: NN%' from the model's text, and live() applies it with setGrade() for fixed examples as well as own claims. No rubric beyond the bar's 'pure hype' and 'real engineering' poles, and the footer says 'grades are estimates, not a benchmark'. The 1440 screenshot shows THE DECIPHER at 66% in the rail and 1% in the readout: live() replaces the hand-set grade with the model's REALITY line for the same claim, and no label says which is which (the bar beside it is mid-transition)."
+        }
+      }
+    },
+    {
+      "id": "rewrite-roast",
+      "name": "Honest rewrite and roast",
+      "frame": "intelligence",
+      "metric": "What the model's prose does for the claim: whether a rewrite exists and the deterministic engine verifies it (flagged spans left, content words kept, as counts), how many flagged spans the roast quotes, and whether the mechanism the roast names is the true one (mechanism errors per roast). Rater runs 5 claims, 2 of them fixed examples with documented mechanisms, counts spans quoted by each roast, spans left in each rewrite and wrong mechanisms named, and reads the output checks in the code.",
+      "ladder": [
+        "No text is generated or written about the claim.",
+        "Hand-written roasts exist for a fixed set of examples.",
+        "A model writes a roast of any visitor claim from a prompt that states rules (sentence count, three beats, no emoji, a final grade line).",
+        "The reply is checked in code against the prompt rules (3 to 6 sentences, no emoji, grade line present, no 'as an AI'); a failing reply is replaced or marked, and the rule it broke is named on the page.",
+        "Honest rewrite: beside the roast, a one-paragraph rewrite of the claim is shown, and the engine re-scores it on the page, showing 0 flagged spans left or listing those that remain.",
+        "Grounded roast: the roast quotes at least 2 engine-flagged spans verbatim, each quoted span in the roast is linked to the same span in the claim text, and each run prints how many of the flagged spans the roast quotes out of the total (for example '3 of 5 spans answered') and lists the unanswered ones.",
+        "Meaning kept: code checks that the rewrite keeps every number, named system and non-hype content noun of the original and lists any it dropped, so the rewrite is a sober restatement and not a new claim.",
+        "Mechanism fidelity: for each fixed example the prompt carries the system's documented mechanism (its keep line and repo facts), code checks that the roast names that mechanism's key terms, and a roast naming a different mechanism is flagged on the page; for a pasted claim, each mechanism term in the roast (matched against a committed vocabulary of at least 30 mechanism terms) is marked either as the lexicon's plain-term mapping of a flagged span or as 'model-asserted'.",
+        "Deterministic rewrite: with no model route, a template rewrite built from the lexicon's plain-term mapping ('understands' to 'maps inputs to outputs', 'thinks' to 'computes') passes the zero-span and meaning-kept checks on at least 70% of a committed set of at least 50 claims, with that pass rate shown.",
+        "Audited: on the committed set of at least 50 claims, each annotated with its true mechanism, a committed node script reports rewrite flagged-span count, meaning-kept rate, roast span coverage and mechanism-error rate, naming the route and model it ran on, and the page prints its output.",
+        "On a public set of at least 200 claims, at least 90% of rewrites pass the zero-span and meaning checks; in blind pairs against a human expert's rewrite of the same claim, raters judge the lab's rewrite at least as accurate in at least 50% of pairs; and blind raters judge the roast's named mechanism correct in at least 90% of roasts and prefer it to a plain-prompt baseline roast of the same claim in at least 70% of pairs."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "SYS_PROMPT asks for 3 to 6 sentences, three beats, no emoji and a closing 'REALITY: NN%' line; live() checks only txt.length >= 40 and strips the grade line. No rewrite exists. live() sends only d.myth, so the live roast names a wrong mechanism: the 1440 screenshot's live roast of THE DECIPHER calls it next-token prediction with temperature-controlled sampling, while the system is a requestAnimationFrame renderer (SYS[0].roast and its keep line), and it credits no engineering, missing the prompt's second beat. Nothing in code caught either."
+        }
+      }
+    },
+    {
+      "id": "model-route",
+      "name": "Model contribution and route",
+      "frame": "intelligence",
+      "metric": "Which routes can answer, how many model calls one analysis costs (and how many fire on load), whether each output field is labelled by origin, and what the model adds over the deterministic engine (measured gain in span recall and claim-segmentation F1 on a benchmark). Rater loads the page with the network panel open, counts model requests on load and per action, cuts the network, and reads the route code.",
+      "ladder": [
+        "No model is called.",
+        "A model is called and its output appears on the page.",
+        "A keyless endpoint answers; a pill names live versus offline-written text, and fixed examples fall back to their written roast when the call fails.",
+        "The call goes through the shared labs/assets/js/ai/llm.js (local Ollama, the visitor's own key, then the public route, then offline), and the answering route and model name are shown.",
+        "Budget-aware: no model call fires on page load; the page shows the seconds until the public route can answer again (one reply per 45 s per IP) and holds the visitor's request instead of failing.",
+        "One batched call per analysis: claims, rewrite, roast and model grade return in a single JSON reply checked against a schema; a malformed field is dropped and named, and the rest is used.",
+        "Every field on the page carries an origin mark (engine, model, written fallback), and the engine's spans, claims and grade render in full before and without the model reply.",
+        "The engine checks the model: model-proposed spans and claims are kept only where they map to character offsets in the text, and the count rejected is shown per run.",
+        "Run log: each reply records prompt version, route, model, latency and token count in a panel the visitor can open, and the exact prompt sent is viewable.",
+        "Contribution measured: on at least 50 benchmark claims a committed script runs engine alone and engine plus model, and reports the gain in span recall and claim-segmentation F1 for each route; the page prints the gains, the model-only span F1 baseline among them.",
+        "The model's marginal contribution is published per route and per model with confidence intervals, and the default route order in the page's config follows the measured gain, with the table linked from the route panel."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "live() fetches text.pollinations.ai by GET directly, not through llm.js, with a 24 s abort; #src reads 'live · pollinations' or 'echo · offline'. pickSystem(0, true) fires a live call on page load (the screenshot shows LIVE · POLLINATIONS before any click), spending the public route's one reply per 45 s before the visitor's own claim. A fixed example falls back to its written roast; a visitor's claim falls back only to an apology text."
+        }
+      }
+    },
+    {
+      "id": "claim-view",
+      "name": "Annotated claim view",
+      "frame": "graphics",
+      "metric": "What of the analysis becomes visible: grade display, in-text span highlighting, per-claim rows, rewrite diff, density map, comparison panels; counted as linked views, and whether focusing one lights the others. Rater runs a 3-sentence claim and a 500-word passage and counts the views and their links.",
+      "ladder": [
+        "Nothing about the claim is drawn.",
+        "The claim and its grade appear on the page as text.",
+        "A grade bar between labelled poles (pure hype, real engineering) fills to the grade, with one-line kept and deleted summaries beside it.",
+        "The claim text renders with flagged spans highlighted in place, one treatment per category, with a legend, and each span's category readable on hover and on keyboard focus.",
+        "Claim rows: one row per extracted claim with its type and its contribution bar; focusing a row lights its span in the text, and focusing a span lights its row.",
+        "Before and after: original and honest rewrite as a word diff (hype struck, mechanism words marked), with the grade bar moving from the original's grade to the rewrite's.",
+        "Density map: for text over 300 words, a strip of hype density per sentence runs beside the document, and clicking a band scrolls to that sentence.",
+        "Choreography: each analysis plays a sequence in reading order (spans light, claims split off, grade settles) in under 3 s, replaced by the end state under reduced motion.",
+        "Comparison: two claims, or two versions of one document, in linked panels with grade, density and category breakdown side by side; selecting a category highlights it in both.",
+        "Claim card: one image (SVG or PNG) of claim, highlighted spans, rewrite, grade and route, drawn in code, downloadable, 1080 px wide with no text smaller than 24 px.",
+        "In a documented test, 5 first-time readers each find every flagged span and its reason within 10 s on each of 5 committed test claims, and within 60 s on one committed 500-word passage, at 400 px and at 1440 px, with the times recorded in the repo: the line-by-line annotated speech transcripts that newsroom fact-checkers such as NPR publish, generated live for any pasted text."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The 1440 screenshot shows the claim as plain italic text (#claim_t), the roast as text, and one 9 px .track/.fill bar from 'pure hype' to 'real engineering' with kept and deleted lines and a 32 px percentage readout. No span is highlighted anywhere. The GLSL field behind the page is decoration, not data."
+        }
+      }
+    },
+    {
+      "id": "instrument-style",
+      "name": "Measure-wing design language",
+      "frame": "style",
+      "metric": "Conformance to the measure wing's own design rules: colour and type tokens, control styling, the contrast ratio of each text colour on the ground and on the panel, amber discipline (amber only on the active item and the live reading), count of font sizes, and whether readers name each hype-grammar treatment correctly. Rater reads the CSS, counts font-size values and amber uses, and measures contrast with a checker.",
+      "ladder": [
+        "Browser defaults: no styling of its own.",
+        "A dark page in the site's font, styled by the page's own CSS.",
+        "Colour tokens in :root (void, ink, amber, blue, dim, hair) and one typeface, IBM Plex Mono, across the page.",
+        "Every button, textarea and link sets its own border, background and focus style: no browser-default bevel, outline or form chrome shows on any control.",
+        "Every text colour reaches 4.5:1 contrast (WCAG 2.1 AA, 1.4.3) against --void and against the panel fill composited over --void, measured with a named contrast checker.",
+        "Amber discipline: amber marks only the selection, the action and the live reading; headings, labels and frame marks use ink, blue or dim.",
+        "Type scale of at most 6 font sizes, each a whole multiple of 4 px, each used for one named role.",
+        "Hype grammar: flagged span, struck hype, kept mechanism and model-written text each have one fixed visual treatment, identical in the claim text, the rewrite diff, the legend and the card.",
+        "Motion tokens: at most 3 named durations and 2 easings, defined once and used by every transition, the typing cursor and the grade fill.",
+        "Shared wing tokens: the Roaster and the Honesty Decoder import one token stylesheet, and an automated audit finds 0 hard-coded colours or font sizes outside it.",
+        "In a documented test with 5 first-time readers, each of the four hype-grammar treatments (flagged span, struck hype, kept mechanism, model-written text) is named correctly at least 95% of the time at 400 px, at 1440 px and on the 1080 px card; the language is documented as a token and pattern reference with do and don't examples per state, to the standard of IBM Carbon's data-visualisation guidance, and the page passes its own audit."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": ":root holds void, ink, amber, blue, dim, hair, panel and red, and the page uses IBM Plex Mono throughout. .terms .t sets only border-left, so every system button keeps the browser's outset border on three sides (grey bevels in the 1440 screenshot, zoomed), and no button sets a focus style. Higher rungs also fail: --dim #6B7682 is 4.31:1 on the void and the placeholder #5b646d 3.31:1; amber sits on the kicker heading and the 4 corner marks; 11 distinct font sizes, most not multiples of 4."
+        }
+      }
+    },
+    {
+      "id": "claim-intake",
+      "name": "Claim intake and probing",
+      "frame": "interaction",
+      "metric": "What the visitor can do to a claim: count of input paths, whether the analysis updates while typing (latency in ms), span probing, category toggles, URL state, batch input, challenge mode and counterfactual edits. Rater types, pastes a long text and a list of claims, clicks spans and toggles, and opens the copied URL in a new tab.",
+      "ladder": [
+        "No way to choose or enter a claim.",
+        "Fixed examples to click.",
+        "Fixed examples plus one free-text box with a submit button and a keyboard shortcut.",
+        "Live analysis: the deterministic result updates as the visitor types, within 300 ms of the last keystroke, with no model call.",
+        "Long input: the box takes a pasted text of at least 2000 words (press release, abstract, model card) and analyses all of it.",
+        "Probe a span: clicking or focusing a highlighted span shows why it was flagged (entry, category, source), and marking it a false positive re-scores the grade at once.",
+        "Category toggles: switching lexicon categories off and on moves the grade live, so the visitor can ask how much of the grade is anthropomorphism alone.",
+        "Shareable state: claim text, toggles and view encode in the URL; opening that URL in a new tab reproduces the deterministic analysis exactly.",
+        "Batch input: the visitor pastes a list of up to 50 claims (one per line, or CSV) and gets one row per claim with its grade and flag count, sortable by either.",
+        "Challenge mode: two scored challenges (edit a claim down to 0 flags; write a claim the visitor marks as hype that the engine grades above 70% real), and any claim the visitor marks as missed hype is exported as a prefilled GitHub issue link or a JSON file with the engine's output.",
+        "Counterfactual probing: selecting any span shows the grade with that span removed, negated, or replaced by its plain term, and the page computes and offers a set of edits that lifts the claim above 80% real, where undoing any one edit drops it to 80% or below, each edit applied with one action: the edit-and-see loop of live-highlighting editors such as the Hemingway Editor, extended to sourced, contestable judgements."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "8 buttons built from SYS into #terms, a textarea #claim with a 'Roast it' button and Ctrl or Cmd+Enter in roaster.html. Nothing updates while typing; every result for a visitor's claim waits on a model call. ?sys=N and ?still exist for screenshots only; a visitor's own claim cannot be put in the URL."
+        }
+      }
+    },
+    {
+      "id": "claim-corpus",
+      "name": "Claim corpus and lexicon sources",
+      "frame": "data",
+      "metric": "Where the claims and the hype vocabulary come from: count of claims with source and date, count of lexicon entries with a citation, evidence tags, exports and published test data. Rater opens the data files, counts sourced entries and follows 5 links.",
+      "ladder": [
+        "No claims or terms are shown.",
+        "Example claims are shown on the page.",
+        "A fixed set of at least 8 example claims about named systems, each with a grade and kept and deleted notes.",
+        "Every claim states who made it, where and when; each of Luis's own systems links to its repo or page.",
+        "At least 30 public AI claims from launch posts, press releases and papers, quoted with source URL and date and marked as quotations.",
+        "Sourced lexicon: every lexicon entry has term, category, weight and a source for why it signals hype (a cited paper, style guide or documented example), and the page shows the source of any entry.",
+        "Every figure the roasts state about Luis's systems (agent counts, line counts, endpoint counts) links to the code or page that shows it, and every claim and entry carries an evidence tag: measured, cited or illustrative.",
+        "Export: the analysis of any claim downloads as JSON (spans, claims, grade, rewrite, route), and the claim corpus with its sources and grades as CSV.",
+        "The labelled test set (at least 150 sentences with span annotations and grades) is downloadable from the page with its annotation guide and licence.",
+        "Dated corpus view: at least 100 sourced claims plotted by date and by source type (lab, startup, press, researcher), showing hype density over time.",
+        "At least 500 sourced, dated, span-annotated AI claims released as a versioned dataset with agreement statistics and a datasheet in the form of Gebru et al., 'Datasheets for Datasets' (2021, Communications of the ACM)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "SYS in roaster.html holds 8 claims about Luis's own systems, each with a hand-set r, keep and del, inline in the script. Facts inside the roasts ('~20 agents', '31 labeled props', '~200 lines') carry no link or date; no claim says where or when it was made; there is no external claim, no lexicon and no export."
+        }
+      }
+    },
+    {
+      "id": "method-explanation",
+      "name": "Method transparency",
+      "frame": "explanation",
+      "metric": "What a visitor can say after five minutes about how the grade and the roast were produced: stage map, glossary, guided tour steps, why-sentences per grade, limits stated with numbers, and quiz scores before and after the tour. Rater reads every on-page text block and tries to answer 'why this grade?' from the page alone.",
+      "ladder": [
+        "No text explains the page.",
+        "One line says what the page does.",
+        "An intro says what the lab does to a claim, and a footer says which text is model-generated and which is written in advance.",
+        "A 'how this works' block names each stage (span detection, claim split, grade, rewrite, roast) and says which run in the browser and which need the model.",
+        "Glossary: each term the page uses (span, category, atomic claim, checkability, reality grade, route) has a one-line definition reachable on hover and focus where it appears.",
+        "Guided tour: 4 to 6 steps on one sample claim walk through span detection, claim split, grade, rewrite and roast, each step lighting its part of the page.",
+        "Why in words: for any grade the page writes one plain sentence per input with its value and its points (for example '3 mental-state verbs: minus 18 points'), and the points in the sentences sum to the grade shown.",
+        "The page narrates its own run: one log line per stage as it happens (rules fired, claims found, route called, checks passed or failed).",
+        "Limits in numbers: the engine's measured precision and recall, its blind spots with examples (euphemism, sarcasm, non-English text) and the public route's rate limit are stated on the page.",
+        "Teaches the skill: a quiz of 6 unseen claims asks the visitor to mark the hype, then scores the visitor against the engine and against human annotators.",
+        "Teaches measurably: the quiz runs before and after the tour on 2 disjoint sets of 6 claims and shows each visitor their own hype-marking F1 change; in a documented test with at least 10 people the mean F1 rises by at least 0.2; and the method page maps each hype category to the pattern it teaches in Bergstrom and West, Calling Bullshit (Random House, 2020), and Narayanan and Kapoor, AI Snake Oil (Princeton University Press, 2024)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The .sub intro says a model roasts the myth and grades how much is real; the footer tag says 'live roasts are model-generated (pollinations, keyless); the 8 systems carry offline-written fallbacks. grades are estimates, not a benchmark.' Nothing names the stages or says how a grade is produced, and the 1% versus 66% readouts in the screenshot go unexplained."
+        }
+      }
+    },
+    {
+      "id": "reach",
+      "name": "Reach and speed",
+      "frame": "performance",
+      "metric": "Who can use it and how fast: layout at 400 px (count of clipped elements), reduced-motion handling, keyboard and screen-reader reach, analysis time in ms under 4x CPU throttling, median frame time in ms, page weight in KB, Lighthouse and axe scores. Rater loads the page at 400 px and 1440 px, tabs through it, runs Lighthouse and axe-core, and times an analysis.",
+      "ladder": [
+        "The page does not load.",
+        "Loads and is usable at 1440 px desktop width.",
+        "No build step and no raster assets; under prefers-reduced-motion nothing moves: no typing animation, a frozen shader clock and no grade-fill transition.",
+        "Works at 400 px: rail and panel stack, no text clipped, no horizontal scroll, the result and the grade on screen without zoom.",
+        "Keyboard and screen reader: every control reachable by Tab with a visible focus ring, the result and grade in an aria-live region, and spans labelled in text, not by colour alone.",
+        "The deterministic analysis of a 2000-word text finishes in under 50 ms, timed with performance.now() in Chrome with DevTools CPU throttling at 4x, and the time is shown on the page.",
+        "Render budget: under reduced motion the background draws one frame and stops its requestAnimationFrame loop, and median frame time is under 8 ms at 1440 px over a 5 s Chrome DevTools Performance recording.",
+        "Tiers: without WebGL, or with navigator.deviceMemory at most 2, a static CSS ground is drawn and the analysis still works.",
+        "Page weight under 150 KB before fonts; Lighthouse mobile accessibility 100 and performance at least 95; axe-core reports 0 violations.",
+        "Works offline after the first visit: the full deterministic analysis runs with no network, and a model request waits until a route answers.",
+        "WCAG 2.2 AA conformance checked criterion by criterion, and a full analysis completed by screen reader in NVDA and VoiceOver and recorded: the accessibility bar of the GOV.UK Design System."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "One HTML file, no raster assets. Under prefers-reduced-motion render() is instant and the shader time is 7.0, but the .fill width transition (0.7 s) still runs and the rAF loop draws every frame; ?still freezes neither the shader nor the loop (line 280 tests reduce only). At 400 px, html,body overflow:hidden and .inst columns 312px 1fr with no @media rule cut the headline, intro and footer at the right edge and push the roast panel off-screen. No aria-live on #roast or #pct."
+        }
+      }
+    },
+    {
+      "id": "engine-modularity",
+      "name": "Engine modularity",
+      "frame": "architecture",
+      "metric": "Code shape: where the engine, data, prompt and route live, how many files one change touches, and whether tests and an eval script exist. Rater lists the files the page loads, adds one lexicon entry and one claim and counts the files touched, and runs the tests.",
+      "ladder": [
+        "No code exists for the lab.",
+        "Code for the lab runs in the page.",
+        "Data (the example set), the prompt and the shader each sit in their own named constant or block, apart from the UI functions.",
+        "The analysis engine is its own ES module with no DOM access, imported by the page.",
+        "Config apart from logic: weights, thresholds, timeouts and the prompt sit in one config object or file, with no scattered literals in the engine.",
+        "Lexicon, claim corpus and prompt are JSON data loaded at runtime; adding an entry or a claim touches no code.",
+        "One engine for the measure wing: the Honesty Decoder and the Roaster import the same analysis module.",
+        "At least 40 unit tests (spans, negation, splitting, grade) run under node and pass in the site checks.",
+        "The benchmark eval is a node script in the repo whose output file is the only source of every metric shown on the page.",
+        "Plug-in analysers: a new detector (for example a quantity checker) is added by registering one module against a documented interface, with no edit to the engine core, and the page lists the loaded analysers.",
+        "The engine ships as a standalone versioned package with typed API documentation, its tests and its benchmark, and a usage example in the package runs under node outside the site."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "roaster.html is one file with an inline IIFE. Data (SYS), prompt (SYS_PROMPT, USER_TMPL) and the shader (VERT, FRAG and its setup) are separate blocks apart from the UI functions, which meets rung 2. But live() combines prompt assembly, URL and seed, timeout, fetch, parsing, staleness check, pill, render, grade and fallback copy, and pickSystem() fires the network call from the selection handler. The endpoint URL, the 24 s timeout and the seed formula are literals inside live(); no module, no config, no test."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}
