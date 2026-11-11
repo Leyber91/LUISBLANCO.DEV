@@ -250,10 +250,10 @@ export const OXIMETRY = { biasMu: 2.6, biasSd: 1.0, below: 96, otherMu: 0.2, oth
 export const CONFUSION = { b0: -5.4, s: 1.45, agePerYear: 0.03, from: 65 };
 export const OXYGEN = { pGivenLow: 0.85, pOther: 0.03, liftMin: 2, liftMax: 5 };
 
-/* Each cohort patient has 3 to 6 observation sets at irregular gaps
-   before the index set; acute patients worsen across them. [ILLUSTRATIVE] */
+/* Each cohort patient has 5 to 7 observation sets at irregular gaps
+   before the index set (6 to 8 in all); acute patients worsen across them. [ILLUSTRATIVE] */
 export const HISTORY = {
-  minSets: 3, maxSets: 6, gapMin: 1, gapMax: 4,          // hours between sets
+  minSets: 5, maxSets: 7, gapMin: 1, gapMax: 3.5,          // hours between sets
   trendAcute: { mu: 0.09, sd: 0.06 }, trendQuiet: { mu: 0.0, sd: 0.02 },   // severity change per hour
 };
 
@@ -363,7 +363,7 @@ export const MODEL_CARD = {
 };
 export const DATASHEET = [
   ['Motivation', 'To show, with a known truth, how an early warning score and a learned model differ and where each fails. Created for an educational web lab.'],
-  ['Composition', 'Each record is one synthetic adult admission: age, sex, COPD, heart failure, beta-blocker, a Scale 2 prescription, an oximeter-bias flag, 3 to 6 earlier observation sets and an index set of seven NEWS2 vitals, and a hidden outcome (deterioration within 24 h). No record describes a real person.'],
+  ['Composition', 'Each record is one synthetic adult admission: age, sex, COPD, heart failure, beta-blocker, a Scale 2 prescription, an oximeter-bias flag, 5 to 7 earlier observation sets and an index set of seven NEWS2 vitals (6 to 8 sets in all), and a hidden outcome (deterioration within 24 h). No record describes a real person.'],
   ['Generation', 'Seeded PRNG (mulberry32). Latent severity drives vitals through the published-style equations in section 05; artefacts (missing values, terminal-digit preference, oximeter bias) are added after; the outcome is drawn from the hidden logit.'],
   ['Intended use', 'Teaching interpretability and evaluation; refitting offline from the export.'],
   ['Forbidden use', 'Clinical decisions of any kind; validating or benchmarking a clinical tool; presenting results as evidence about real patients or about NEWS2.'],

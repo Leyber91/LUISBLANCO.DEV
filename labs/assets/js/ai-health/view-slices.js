@@ -39,6 +39,14 @@ export function computeSlices(test, sc, thr) {
     const st = sliceStats(ix, y, sc.news, sc.alertN, sc.model, thr);
     const yy = ix.map((i) => y[i]);
     const aucOk = st.ev && st.ev < ix.length;
+    // reliability in five equal-count bins of the model's risk within the slice
+    const ord = ix.slice().sort((a, b) => sc.model[a] - sc.model[b]);
+    const rel = [];
+    for (let b = 0; b < 5; b++) {
+      const part = ord.slice(Math.floor((b * ord.length) / 5), Math.floor(((b + 1) * ord.length) / 5));
+      if (part.length) rel.push({ pred: part.reduce((a, i) => a + sc.model[i], 0) / part.length, obs: part.reduce((a, i) => a + y[i], 0) / part.length });
+    }
+    st.rel = rel;
     return { ...sl, ix, ...st,
       aucN: aucOk ? roc(ix.map((i) => sc.news[i]), yy).auc : NaN, aucM: aucOk ? roc(ix.map((i) => sc.model[i]), yy).auc : NaN };
   });
@@ -73,7 +81,7 @@ export function drawSlices(host, rows, boot, modelName, onPick, picked) {
   const table = h('table', {},
     h('thead', {}, h('tr', {}, h('th', { text: 'slice' }), h('th', { text: 'n' }), h('th', { text: 'events' }),
       h('th', { text: 'sensitivity  ○ NEWS2  ● model' }), h('th', { text: 'sens N / M' }), h('th', { text: 'FPR N / M' }),
-      h('th', { text: 'alerts N / M' }), h('th', { text: 'AUROC N / M' }), h('th', { text: 'O/E' }))),
+      h('th', { text: 'alerts N / M' }), h('th', { text: 'AUROC N / M' }), h('th', { text: 'O/E' }), h('th', { text: 'reliability' }))),
     h('tbody', {}, ...rows.map((r) => {
       const fN = fails(r, 'news'), fM = fails(r, 'model');
       const small = r.id !== 'all' && r.ev < SMALL_SLICE_EVENTS;
@@ -83,13 +91,29 @@ export function drawSlices(host, rows, boot, modelName, onPick, picked) {
           small ? h('span', { class: 'small-flag', title: `fewer than ${SMALL_SLICE_EVENTS} events: too small to read` }, ' small') : null),
         h('td', { text: r.n }), h('td', { text: r.ev }), h('td', { class: 'dots' }, dot(r)),
         h('td', {}, h('span', { class: fN ? 'bad' : '', text: fmtPct(r.news.sens, 0) }), ' / ', h('span', { class: fM ? 'bad' : 'gold', text: fmtPct(r.model.sens, 0) })),
-        h('td', { text: `${fmtPct(r.news.fpr, 0)} / ${fmtPct(r.model.fpr, 0)}` }),
-        h('td', { text: `${fmtPct(r.news.alert, 0)} / ${fmtPct(r.model.alert, 0)}` }),
+        h('td', { title: ciText(ci(r.id, 'newsFpr'), ci(r.id, 'modelFpr')), text: `${fmtPct(r.news.fpr, 0)} / ${fmtPct(r.model.fpr, 0)}` }),
+        h('td', { title: ciText(ci(r.id, 'newsAlert'), ci(r.id, 'modelAlert')), text: `${fmtPct(r.news.alert, 0)} / ${fmtPct(r.model.alert, 0)}` }),
         h('td', { text: `${fmt(r.aucN, 3)} / ${fmt(r.aucM, 3)}` }),
         h('td', {}, h('span', { class: r.id !== 'all' && r.ev > r.expected && fM ? 'bad' : '', text: fmt(r.oe, 2) }),
-          oeCi ? h('span', { class: 'ci-t', text: ` (${fmt(oeCi[0], 2)}–${fmt(oeCi[1], 2)})` }) : null));
+          oeCi ? h('span', { class: 'ci-t', text: ` (${fmt(oeCi[0], 2)}–${fmt(oeCi[1], 2)})` }) : null),
+        h('td', { class: 'rel' }, relPlot(r)));
     })));
   fill(host, table);
+}
+
+const ciText = (a, b) => (a && b ? `95% bootstrap: NEWS2 ${fmtPct(a[0], 0)}–${fmtPct(a[1], 0)}, model ${fmtPct(b[0], 0)}–${fmtPct(b[1], 0)}` : 'bootstrap running');
+
+/* A reliability curve per slice: predicted (x) against observed (y), 0 to 50%. */
+function relPlot(r) {
+  const W = 64, H = 22, top = 0.5;
+  const x = scale(0, top, 2, W - 2), y = scale(0, top, H - 2, 2);
+  const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img',
+    'aria-label': `${r.label} reliability in five bins: ` + r.rel.map((b) => `${fmtPct(b.pred, 0)} predicted, ${fmtPct(b.obs, 0)} observed`).join('; ') });
+  svg.append(s('line', { x1: x(0), y1: y(0), x2: x(top), y2: y(top), class: 'ln-ref' }));
+  const pts = r.rel.map((b) => [x(Math.min(top, b.pred)), y(Math.min(top, b.obs))]);
+  svg.append(s('path', { d: pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''), class: 'ln-sel thin' }));
+  for (const p of pts) svg.append(s('circle', { cx: p[0], cy: p[1], r: 1.4, class: 'op-dot gold' }));
+  return svg;
 }
 
 /* One paragraph from the numbers. */

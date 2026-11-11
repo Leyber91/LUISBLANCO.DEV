@@ -107,7 +107,6 @@ async function generate() {
 }
 
 async function fit() {
-  if (S.metrics) S.before = snapshot();
   const t0 = performance.now();
   setStatus('fitting the regression…');
   const lr = await MODEL_BY_ID.lr.fit(S.data.train, S.data.valid, { dropped: S.dropped });
@@ -177,7 +176,7 @@ async function runBootstrap() {
   const ord = { news: sortedOrder(news), lr: sortedOrder(S.sc.lr), gbt: sortedOrder(S.sc.gbt) };
   const rng = streamFor(S.world.seed, 'bootstrap');
   const acc = { aucN: [], aucL: [], aucG: [], apN: [], apL: [], apG: [], brN: [], brL: [], brG: [], dSel: [], dOther: [] };
-  const slices = SLICES.map((sl) => ({ id: sl.id, ix: S.data.test.map((p, i) => (sl.test(p) ? i : -1)).filter((i) => i >= 0), newsSens: [], modelSens: [], oe: [] }));
+  const slices = SLICES.map((sl) => ({ id: sl.id, ix: S.data.test.map((p, i) => (sl.test(p) ? i : -1)).filter((i) => i >= 0), newsSens: [], modelSens: [], oe: [], newsFpr: [], modelFpr: [], newsAlert: [], modelAlert: [] }));
   const w = new Float64Array(n);
   for (let b = 0; b < BOOT_B; b++) {
     w.fill(0);
@@ -188,14 +187,18 @@ async function runBootstrap() {
     acc.brN.push(weightedBrier(newsRisk, y, w)); acc.brL.push(weightedBrier(S.sc.lr, y, w)); acc.brG.push(weightedBrier(S.sc.gbt, y, w));
     acc.dSel.push((K === 'lr' ? aL : aG) - aN); acc.dOther.push((K === 'lr' ? aG : aL) - aN);
     for (const sl of slices) {
-      let ev = 0, cN = 0, cM = 0, ps = 0;
+      let ev = 0, cN = 0, cM = 0, ps = 0, nw = 0, fN = 0, fM = 0, aN = 0, aM = 0;
       for (const i of sl.ix) {
         const wi = w[i];
         if (!wi) continue;
-        ps += wi * S.sc[K][i];
-        if (y[i]) { ev += wi; if (alertN[i]) cN += wi; if (S.sc[K][i] >= t) cM += wi; }
+        nw += wi; ps += wi * S.sc[K][i];
+        const fn = alertN[i], fm = S.sc[K][i] >= t;
+        if (fn) aN += wi; if (fm) aM += wi;
+        if (y[i]) { ev += wi; if (fn) cN += wi; if (fm) cM += wi; } else { if (fn) fN += wi; if (fm) fM += wi; }
       }
       if (ev) { sl.newsSens.push(cN / ev); sl.modelSens.push(cM / ev); }
+      if (nw - ev) { sl.newsFpr.push(fN / (nw - ev)); sl.modelFpr.push(fM / (nw - ev)); }
+      if (nw) { sl.newsAlert.push(aN / nw); sl.modelAlert.push(aM / nw); }
       if (ps) sl.oe.push(ev / ps);
     }
     if (b % 25 === 24) { await new Promise((r) => setTimeout(r, 0)); if (token !== bootToken) return; }
@@ -203,7 +206,8 @@ async function runBootstrap() {
   const ci = (a) => [percentile(a, 0.025), percentile(a, 0.975)];
   S.boot = {
     B: BOOT_B, other, stats: Object.fromEntries(Object.entries(acc).map(([k, v]) => [k, ci(v)])),
-    slices: Object.fromEntries(slices.map((sl) => [sl.id, { newsSens: ci(sl.newsSens), modelSens: ci(sl.modelSens), oe: ci(sl.oe) }])),
+    slices: Object.fromEntries(slices.map((sl) => [sl.id, { newsSens: ci(sl.newsSens), modelSens: ci(sl.modelSens), oe: ci(sl.oe),
+      newsFpr: ci(sl.newsFpr), modelFpr: ci(sl.modelFpr), newsAlert: ci(sl.newsAlert), modelAlert: ci(sl.modelAlert) }])),
   };
   renderBoot();
   renderSlices();
@@ -308,7 +312,7 @@ function renderTraining(animate) {
   fill($('#f-feats'), ...MODEL_FEATURES.map((k) => h('button', {
     type: 'button', class: 'chip' + (S.dropped.has(k) ? ' off' : ''), 'aria-pressed': String(!S.dropped.has(k)),
     title: S.dropped.has(k) ? 'dropped: select to add back and refit' : 'select to drop and refit',
-    onclick: () => { if (S.dropped.has(k)) S.dropped.delete(k); else if (MODEL_FEATURES.length - S.dropped.size > 2) S.dropped.add(k); refit(); },
+    onclick: () => { if (building) return; S.before = snapshot(); if (S.dropped.has(k)) S.dropped.delete(k); else if (MODEL_FEATURES.length - S.dropped.size > 2) S.dropped.add(k); refit(); },
   }, FEATURE_BY_KEY[k].short)));
   drawTable($('#f-split'), ['L2 per patient', 'validation log-loss', ''], lr.grid.map((g) => ({
     cls: g.l2 === lr.l2 ? 'sel' : '', cells: [String(g.l2), fmt(g.valLoss, 4), g.l2 === lr.l2 ? 'chosen' : ''],
@@ -574,12 +578,18 @@ function renderTruth() {
   drawTruth($('#h-truth'), $('#h-who'), S.source, S.extra, $('#h-show').getAttribute('aria-expanded') === 'true');
 }
 
-function renderChecks() {
+async function renderChecks() {
   const st = selfTest();
+  await tick();
+  const vig = checkVignettes(), sw = sweep();
+  await tick();
   let additivity = 0;
-  for (const p of S.data.test.slice(0, 200)) for (const m of Object.values(S.models)) {
-    const e = m.explain(p);
-    additivity = Math.max(additivity, Math.abs(e.base + e.phi.reduce((a, f) => a + f.c, 0) - e.logit));
+  for (let k = 0; k < 200; k += 25) {
+    for (const p of S.data.test.slice(k, k + 25)) for (const m of Object.values(S.models)) {
+      const e = m.explain(p);
+      additivity = Math.max(additivity, Math.abs(e.base + e.phi.reduce((acc, f) => acc + f.c, 0) - e.logit));
+    }
+    await tick();
   }
   const rr = streamFor(S.world.seed, 'test');
   let reproducible = true;
@@ -590,8 +600,8 @@ function renderChecks() {
   const randomScores = S.sc.y.map(() => rnd.u());
   const briers = [S.metrics.news.cal.brier, S.metrics.lr.cal.brier, S.metrics.gbt.cal.brier];
   const sanity = { perfect: roc(S.sc.y, S.sc.y).auc, random: roc(randomScores, S.sc.y).auc };
-  sanity.ok = sanity.perfect === 1 && Math.abs(sanity.random - 0.5) < 0.06 && briers.every((b) => b >= 0 && b <= 1);
-  drawChecks($('#h-checks'), { selfTest: { fails: st.length, checked: st.checked }, vignettes: checkVignettes(), sweep: sweep(), additivity, reproducible, seed: S.world.seed, sanity });
+  sanity.ok = sanity.perfect === 1 && Math.abs(sanity.random - 0.5) < 0.06 && briers.every((v) => v >= 0 && v <= 1);
+  drawChecks($('#h-checks'), { selfTest: { fails: st.length, checked: st.checked }, vignettes: vig, sweep: sw, additivity, reproducible, seed: S.world.seed, sanity });
 }
 
 function renderModelCard() {
@@ -629,19 +639,29 @@ function renderCases() {
 }
 
 /* ---------- everything that depends on model or thresholds ---------- */
-let bootTimer = 0;
-function refreshAll(opts = {}) {
+/* Everything that depends on the model or the thresholds, in stages that
+   yield to the page between them; a newer call cancels an older one. */
+let bootTimer = 0, refreshToken = 0;
+const tick = () => new Promise((r) => setTimeout(r, 0));
+async function refreshAll(opts = {}) {
+  const token = ++refreshToken;
+  const live = () => token === refreshToken;
   computeMetrics();
+  $$('[data-kind]').forEach((b) => { const on = b.dataset.kind === S.kind; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  if (ward && S.shift) ward.setThresholds(S.rule.t, thr());
+  if (S.patient) renderPatient();
+  writeURL();
+  await tick(); if (!live()) return;
   renderCohort();
+  await tick(); if (!live()) return;
   renderSlices();
   renderTraining(opts.trace);
+  await tick(); if (!live()) return;
   if (ward && S.shift) { ward.updateSeries(wardBeds()); ward.setThresholds(S.rule.t, thr()); }
   renderCases();
-  if (S.patient) renderPatient();
+  await tick(); if (!live()) return;
   renderModelCard();
   runSearch();
-  $$('[data-kind]').forEach((b) => { const on = b.dataset.kind === S.kind; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
-  writeURL();
   clearTimeout(bootTimer);
   bootTimer = setTimeout(runBootstrap, 120);
 }
@@ -650,7 +670,7 @@ let building = false;
 async function refit() {
   if (building) return;
   building = true;
-  try { await fit(); refreshAll({ trace: true }); renderChecks(); } finally { building = false; }
+  try { await fit(); await refreshAll({ trace: true }); setTimeout(renderChecks, 400); } finally { building = false; }
 }
 
 async function rebuild() {
@@ -662,8 +682,8 @@ async function rebuild() {
     syncOldSlider();
     computeMetrics();
     newShift(S.wardSeed, 4);
-    refreshAll({ trace: true });
-    renderChecks();
+    await refreshAll({ trace: true });
+    setTimeout(renderChecks, 400);
     const i = S.shift.beds.findIndex((b) => b.role === 'blunted');
     ward.select(i, Math.max(0, Math.min(4, S.shift.beds[i].eventHour - 1)));
   } finally { building = false; }
@@ -710,9 +730,9 @@ async function boot() {
   $('#c-match').addEventListener('click', () => { S.mt = null; refreshAll(); });
   $('#p-reset').addEventListener('click', () => { if (S.source) { S.patient = { ...S.source }; editor.set(S.patient, S.source); readEditor(); } });
   $('#p-llm-go').addEventListener('click', askModel);
-  $('#f-oldr').addEventListener('change', (e) => { S.world.oldPct = +e.target.value; rebuild(); });
+  $('#f-oldr').addEventListener('change', (e) => { if (building) return; S.before = snapshot(); S.world.oldPct = +e.target.value; rebuild(); });
   $('#f-oldr').addEventListener('input', (e) => { $('#f-old').textContent = e.target.value + '%'; });
-  $('#f-pop').addEventListener('click', () => { S.world.oldPct = null; rebuild(); });
+  $('#f-pop').addEventListener('click', () => { if (building) return; S.before = snapshot(); S.world.oldPct = null; rebuild(); });
   $('#f-search-go').addEventListener('click', runSearch);
   $('#f-reveal').addEventListener('click', (e) => {
     const open = e.currentTarget.getAttribute('aria-expanded') !== 'true';
@@ -727,7 +747,7 @@ async function boot() {
     e.currentTarget.textContent = open ? 'hide hidden truth' : 'reveal hidden truth';
     renderTruth();
   });
-  $('#h-regen').addEventListener('click', () => { S.world = { ...S.world, ...worldUI.read() }; rebuild(); });
+  $('#h-regen').addEventListener('click', () => { if (building) return; S.before = snapshot(); S.world = { ...S.world, ...worldUI.read() }; rebuild(); });
   $('#h-default').addEventListener('click', () => { S.world = { ...WORLD_DEFAULT, oldPct: null }; worldUI.set(S.world); rebuild(); });
   const stamp = () => `seed${S.world.seed}`;
   $('#x-csv').addEventListener('click', () => { download(`glass-ward-features-${stamp()}.csv`, featuresCSV(S.data.test, S.sc, S.world), 'text/csv'); $('#x-status').textContent = `${S.data.test.length} synthetic rows exported.`; });
@@ -750,11 +770,11 @@ async function boot() {
   ward.setShift(wardBeds(), S.sel?.src === 'ward' ? Math.min(S.sel.hour, WARD.hours) : openHour);
   ward.setThresholds(S.rule.t, thr());
   ward.start();
-  refreshAll({ trace: true });
+  await refreshAll({ trace: true });
   if (S.sel?.src === 'test') selectTest(S.sel.idx);
   else if (S.sel?.src === 'ward' && S.shift.beds[S.sel.bed]) ward.select(S.sel.bed, Math.min(S.sel.hour, S.shift.beds[S.sel.bed].obs.length - 1));
   else ward.select(opening, openHour);
-  setTimeout(renderChecks, 50);
+  setTimeout(renderChecks, 600);
 }
 
 function metricsJSON() {

@@ -81,6 +81,14 @@ check('independent scorer sweep', sw.bad.length === 0, `${sw.n - sw.bad.length}/
     err = Math.max(err, Math.abs(e.base + e.phi.reduce((s, f) => s + f.c, 0) - e.logit));
   }
   check('explanations sum to the prediction', err < 1e-9, `max error ${err.toExponential(1)}`);
+  // fit quality: both models must rank far better than chance and the regression must converge
+  const ya = a.test.map((p) => p.y);
+  const aucL = roc(a.test.map((p) => lr1.predict(p)), ya).auc, aucG = roc(a.test.map((p) => g1.predict(p)), ya).auc;
+  check('regression fits (test AUROC > 0.75, validation log-loss < 0.35)', aucL > 0.75 && lr1.valLoss < 0.35, `AUROC ${aucL.toFixed(3)}, log-loss ${lr1.valLoss.toFixed(3)}`);
+  check('trees fit (test AUROC > 0.75)', aucG > 0.75, `AUROC ${aucG.toFixed(3)}`);
+  // the line search keeps the penalised loss falling; the unpenalised trace may drift up slightly as L2 pulls
+  // weights in, but it must never blow up (a diverging Newton step shows as a jump)
+  check('regression converges without divergence', Math.max(...lr1.trace) < lr1.trace[0] + 0.05 && lr1.trace.length < 40, lr1.trace.map((v) => v.toFixed(3)).join(' '));
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

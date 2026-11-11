@@ -83,7 +83,7 @@ function lrRow(x, keys, cols, mu, sd) {
   return cols.map((c, i) => (c.kind === 'bin' ? (bandOf(c.key, byKey[c.key]) === c.bin ? 1 : 0) : (byKey[c.key] - mu[i]) / sd[i]));
 }
 
-function irls(Z, y, l2, iters, w0) {
+async function irls(Z, y, l2, iters, w0) {
   const n = Z.length, d = Z[0].length;
   let beta = w0 ? w0.slice() : new Array(d).fill(0);
   if (!w0) { const prev = y.reduce((a, b) => a + b, 0) / n; beta[0] = Math.log(prev / (1 - prev)); }
@@ -108,17 +108,38 @@ function irls(Z, y, l2, iters, w0) {
     for (let j = 0; j < d; j++) for (let k = 0; k < j; k++) H[j][k] = H[k][j];
     for (let j = 1; j < d; j++) { H[j][j] += lam; g[j] -= lam * beta[j]; }
     const step = solve(H.map((r) => Array.from(r)), Array.from(g));
-    beta = beta.map((b, j) => b + step[j]);
+    // backtracking: a Newton step on nearly separated data can overshoot, so
+    // halve it until the penalised loss falls
+    const f0 = penalised(Z, y, beta, lam);
+    let t = 1, next = beta.map((b, j) => b + step[j]);
+    while (t > 1e-4 && !(penalised(Z, y, next, lam) <= f0 + 1e-12)) { t /= 2; next = beta.map((b, j) => b + t * step[j]); }
+    const moved = Math.max(...step.map((v) => Math.abs(t * v)));
+    beta = next;
     trace.push(ll / n);
-    if (Math.max(...step.map(Math.abs)) < 1e-7) break;
+    if (moved < 1e-7) break;
+    await yieldToPage();
   }
   return { beta, trace };
+}
+
+function penalised(Z, y, beta, lam) {
+  let f = 0;
+  for (let i = 0; i < Z.length; i++) {
+    const z = Z[i];
+    let e = 0;
+    for (let j = 0; j < beta.length; j++) e += beta[j] * z[j];
+    f += logloss(sigmoid(e), y[i]);
+  }
+  for (let j = 1; j < beta.length; j++) f += 0.5 * lam * beta[j] * beta[j];
+  return f;
 }
 
 async function fitLR(train, valid, { dropped } = {}) {
   const keys = featureKeys(dropped);
   const cols = lrDesign(keys);
-  const Xtr = train.map((p) => featureRow(p, keys)), Xva = valid.map((p) => featureRow(p, keys));
+  const Xtr = train.map((p) => featureRow(p, keys));
+  await yieldToPage();
+  const Xva = valid.map((p) => featureRow(p, keys));
   const mu = cols.map((c) => (c.kind === 'lin' ? Xtr.reduce((s, r) => s + r[keys.indexOf(c.key)], 0) / Xtr.length : 0));
   const sd = cols.map((c, i) => (c.kind === 'lin' ? Math.sqrt(Xtr.reduce((s, r) => s + (r[keys.indexOf(c.key)] - mu[i]) ** 2, 0) / Xtr.length) || 1 : 1));
   const Ztr = Xtr.map((x) => [1, ...lrRow(x, keys, cols, mu, sd)]);
@@ -128,7 +149,7 @@ async function fitLR(train, valid, { dropped } = {}) {
   const grid = [];
   let best = null;
   for (const l2 of MODEL.lr.l2Grid) {
-    const fit = irls(Ztr, ytr, l2, MODEL.lr.iters, best?.beta);
+    const fit = await irls(Ztr, ytr, l2, MODEL.lr.iters, best?.beta);
     let vl = 0;
     for (let i = 0; i < Zva.length; i++) { let e = 0; for (let j = 0; j < fit.beta.length; j++) e += fit.beta[j] * Zva[i][j]; vl += logloss(sigmoid(e), yva[i]); }
     vl /= Zva.length;
@@ -227,6 +248,7 @@ async function fitGBT(train, valid, { dropped, onProgress } = {}) {
   const keys = featureKeys(dropped);
   const n = train.length, d = keys.length;
   const X = train.map((p) => featureRow(p, keys));
+  await yieldToPage();
   const Xv = valid.map((p) => featureRow(p, keys));
   const y = Float64Array.from(train, (p) => p.y), yv = valid.map((p) => p.y);
   const bins = keys.map((_, j) => makeBins(X.map((r) => r[j]), C.bins));
