@@ -1,30 +1,51 @@
-﻿<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Black Hole — luisblanco.dev Labs</title>
-  <meta name="description" content="A ray-marched black-hole instrument: Schwarzschild, Kerr, near-extremal, charged, stellar-mass and supermassive holes — gravitational lensing, a doppler-shifted accretion disk and the photon ring, rendered live in your browser." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <link rel="stylesheet" href="assets/css/tokens.css" />
-  <link rel="stylesheet" href="assets/css/black_hole.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Black Hole: a Kerr ray tracer, measured</title>
+<meta name="description" content="Light rays traced through the exact Kerr spacetime, a relativistic thin disk at its real temperature, the shadow measured against the Event Horizon Telescope, and a free fall with two clocks." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/black_hole.css" />
 </head>
 <body>
-  <div id="bh-loading">entering the well…</div>
+<canvas id="bh-canvas" tabindex="0" role="img" aria-label="Ray-traced image of a spinning black hole and its accretion disk. Arrow keys orbit, plus and minus zoom, Enter probes the centre pixel."></canvas>
+<svg id="bh-overlay" aria-hidden="true"></svg>
+<div class="bh-veil" id="bh-veil" aria-hidden="true"><div class="bh-veil-mark"><span class="bh-veil-k">THE LAB &middot; L212</span><b>BLACK HOLE</b><span>light traced through the Kerr spacetime</span><i></i></div></div>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
 
-  <canvas id="bh-canvas" aria-label="Interactive black hole simulation"></canvas>
+<header class="bh-bar">
+  <div class="bh-bar-l">
+    <a class="bh-back" id="bh-back" href="index.html">&larr; back</a>
+    <div class="bh-label">BLACK HOLE <span>/ kerr ray tracer</span></div>
+  </div>
+  <div class="bh-bar-r">
+    <span id="bh-route"></span>
+    <div class="bh-brand">THE LAB &mdash; <b>L212</b></div>
+  </div>
+</header>
 
-  <a href="index.html" class="bh-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
-  <div class="bh-title">Schwarzschild · Black Hole</div>
-  <div class="bh-hint">drag to orbit · scroll or pinch to zoom</div>
+<main class="bh-stage">
+  <section class="bh-left" id="bh-left" aria-label="Controls"></section>
+  <section class="bh-right" id="bh-right" aria-label="Instrument readouts"></section>
+</main>
 
-  <div id="bh-controls"></div>
+<div class="bh-caption" id="bh-caption" aria-live="polite"></div>
+<div class="bh-probe" id="bh-probe" role="dialog" aria-label="Ray probe" hidden></div>
 
-  <script type="module" src="assets/js/blackhole/main.js"></script>
+<footer class="bh-foot" id="bh-foot"></footer>
+<div class="bh-sources" id="bh-sources" role="dialog" aria-label="Sources" hidden></div>
+<div class="bh-sr" id="bh-sr" aria-live="polite"></div>
+
+<div class="bh-nogl" id="bh-nogl" hidden>
+  <p>This instrument traces light rays on the GPU and needs WebGL2.</p>
+  <p class="bh-nogl-why" data-why></p>
+</div>
+<noscript><div class="bh-nogl"><p>This instrument needs JavaScript and WebGL2.</p></div></noscript>
+
+<script type="module" src="assets/js/blackhole/main.js"></script>
 </body>
 </html>
