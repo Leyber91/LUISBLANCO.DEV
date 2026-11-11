@@ -2,330 +2,315 @@
   "id": "heptapod",
   "title": "Heptapod Codec",
   "page": "heptapod.html",
-  "thesis": "The visitor types any English, even a paragraph, and watches an original semasiographic script write the whole proposition at once as one semagram whose strokes carry roles, tense, aspect, mood, negation, evidentiality and embedding; they flip the grammar, smear the ink until the decoder breaks at a stated noise level, draw a semagram of their own and have it read, and leave knowing why Chiang tied this writing to Fermat's principle.",
+  "thesis": "The visitor speaks or types anything, in English or Spanish, and an original semasiographic script writes the whole thought at once as one closed line with no beginning and no end, condensing as ink in a volumetric fog at and beyond the film's measured level of detail; the far side answers in the script, a page or a whole conversation is one figure read from any lobe, real annotated meaning writes and reads back, a second implementation built from the published spec round-trips, and people learn to read it from the page.",
   "axes": [
     {
-      "id": "grammar-morphology",
-      "name": "Grammar in stroke morphology",
+      "id": "grammar",
+      "name": "Grammar and meaning model",
       "frame": "model",
-      "metric": "Count of grammatical categories that the sentence sets (not fixed per word) and that the semagram draws as a distinct stroke operator. A category is one grammatical dimension with at least 2 values (negation, semantic role, tense, aspect, mood, number, evidentiality, modality, embedding, quantifier scope, relative clause, ...); agent, patient and recipient are values of one category. Rater types minimal pairs ('we offer a gift' / 'we do not offer a gift' / 'did we offer a gift?' / 'they offer us a gift'), counts the categories whose change alters the drawing, and reads the grammar spec in the code.",
+      "metric": "Count of meaning categories (a category is one dimension with at least 2 values, as in the PLAN.md section 3.6 table) that the input sets and the semagram writes by a stated rule (where written, operator, reason), each verified by a live minimal pair that decodes back; uniqueness as decode(encode(g)) isomorphic to g under canonical labelling, with material detail off and on; Smatch-style triple F1 against gold meaning graphs. Rater types new sentences and minimal pairs, reads the spec table and reruns the repository tests.",
       "ladder": [
-        "No feature marks: the drawing encodes word identity only, or nothing is drawn.",
-        "Per-word semantic features stored with each word's lexicon entry (such as limbs for agency, ring closure, stroke weight, plural dots, strike-through) are drawn as marks on that word's strokes.",
-        "Negation is grammar: 'not' or 'never' adds a negation operator to the stroke of the predicate it scopes over, and no separate negation element is drawn; 'we offer' and 'we do not offer' differ by that operator.",
-        "Semantic roles: agent, patient and recipient attach to the predicate at three distinct, documented positions or stroke types; 'they offer us a tool' and 'we offer them a tool' draw different semagrams from the same concept strokes.",
-        "Tense and aspect as separate operators: tense (past, present, future: 'offered', 'offers', 'will offer') and aspect (simple, progressive, perfect: 'offers', 'is offering', 'has offered') draw as two independent operator sets on the predicate, and all 9 tense-aspect combinations draw 9 distinct semagrams.",
-        "Mood and number set by the sentence: declarative, interrogative and imperative ('they offer', 'do they offer?', 'offer!') map to three predicate operators, and 'visitor' and 'visitors' draw the same concept without and with a number operator; categories drawn: negation, role, tense, aspect, mood, number (6).",
-        "Evidentiality and modality: at least 3 evidential values (witnessed, inferred, reported, set by 'I saw', 'apparently', 'they say') and modal certainty ('may', 'must') draw as stroke operators (8 categories).",
-        "Embedding: a clause that is the argument of a verb ('we know that they offer a gift') draws as a nested sub-semagram inside the matrix semagram, to at least 2 levels of nesting (9 categories).",
-        "A grammar spec table, in the code and on the page, lists at least 12 categories (per the metric's definition) with stroke operator and example semagram each; it includes quantifier scope, where the two readings of 'every visitor offers a tool' (one shared tool / a tool each) draw as two distinct semagrams the visitor can switch between, and relative clauses ('the tool that they offer').",
-        "Uniqueness tested: a test encodes at least 1000 generated propositions covering every value of every category and every pair of categories, reports 0 collisions (two propositions, one drawing), and the result is shown on the page.",
-        "Reference grammar: one reference page documents at least 20 categories, each with its operator, its rule in one sentence and at least 3 example semagrams rendered live by the codec, every example decoding back to its stated proposition; a table maps each relation of Abstract Meaning Representation (Banarescu et al., 'Abstract Meaning Representation for Sembanking', Linguistic Annotation Workshop at ACL 2013) to the category that writes it or the reason none does, and tense, aspect and evidentiality, which AMR does not annotate, are among the 20 (documentation standard: Cowan, The Complete Lojban Language, 1997)."
+        "No meaning structure: the drawing encodes word identity only, or nothing is drawn.",
+        "Per-word features stored in each lexicon entry are drawn as marks; nothing in the drawing is set by the sentence.",
+        "A proposition schema: one predicate with agent, patient and recipient written at distinct documented places, and negation set by the sentence changes the drawing.",
+        "At least 8 categories are set by the sentence (for example role, tense, aspect, mood, negation, evidential, number, embedding), each a row in a spec table with where it is written, its operator and the reason for its shape, and each changes the drawing in a minimal pair.",
+        "The meaning layer is a graph, not English's feature bundle: an HMR schema (a Uniform Meaning Representation subset, Van Gysel et al. 2021) with events, entities, an origo and typed edges; time is written as a relation to an anchor (before, after, overlap, contains, timeless), never as absolute past, present or future; at least 12 categories, each with a rule and a minimal pair that decodes back.",
+        "A defined language: at least 20 categories of the PLAN.md 3.6 table, each with its rule, operator, reason and 3 live examples that decode back (live: the rater types a new sentence, or flips the category on a sentence the rater typed; preset buttons do not count), including coreference written once, coordination, embedding to depth 3, conditional and causal discourse relations, yes-no and wh-questions, modal strength on the 6 FactBank values with polarity written as inward bumps (the line is never cut), at least 4 evidential values and at least 5 aspect values; every value, defaults included, has its own motif, so lost ink is a decode error; core role is written twice, by collar and by neck angle to the event axis (parallel actor, perpendicular undergoer: Chiang's orientation rule).",
+        "Uniqueness tested: at least 10,000 generated HMR graphs covering every value of every category and every pair of categories satisfy decode(encode(g)) isomorphic to g under canonical labelling, with material detail off and on (different seeds do not count as different drawings), and node-id permutations of each graph give byte-identical masters; reported on the page and reproduced by a node script.",
+        "Scope and belief: quantifier scope draws as a scope lobe ('every visitor offers a tool' gives three drawings: two scope orders and unresolved), and nested conceivers ('the senator probably thinks that the bill could pass') draw as chained modal strengths; all decode back.",
+        "Reference grammar: one page documents at least 25 categories with operator, one-sentence rule and at least 3 live examples each decoding back, and a table maps every AMR relation (Banarescu et al. 2013) and every UMR category the lab covers to the rule that writes it, or states why none does.",
+        "Discourse as grammar: all four PDTB top-level classes and nuclearity are written; paragraphs of at least 4 sentences with cross-sentence coreference and temporal dependencies between events of different sentences decode back with triple F1 at least 0.98 on 20 gold paragraphs.",
+        "Real annotated meaning: at least 50 sentences of the released UMR 1.0 English data (data licence stated) encode as semagrams and decode back with Smatch-style triple F1 of at least 0.95 against their gold annotation, every UMR category present in that sample written by a rule; the score recomputes from a repository script."
       ],
       "levels": {
         "G0": {
-          "level": 1,
-          "evidence": "LEX entries in heptapod.html carry fixed features f={limbs,closed,w,neg,plural,orbit} that glyph() draws as limbs, ring closure, stroke weight, plural dots, orbit ring and strike-through (rung 1); nothing comes from the sentence. Fails rung 2: 'not' maps to its own 'negation' LEX entry and draws a separate struck circle (screenshot), and 'we offer' and 'they offer' draw the identical 'offer (give)' glyph. No roles, tense, aspect, mood, evidentiality or embedding."
-        },
-        "G1": {
-          "level": 4,
-          "evidence": "Dispute upheld; rater's 5 lowered to 4. Rungs 1-4 hold as the rater found: each concept's class radical sits in cell 0 of its six-cell code (script.js makeCode); negation is the 14-degree cut in the proposition ring (CATEGORIES.neg), with no separate element; agent, patient and recipient take the W, E and S sectors; tense (tendril lean) and aspect (slot mark) are separate operators, and the 9 tense-aspect combinations draw 9 distinct semagrams. Fails rung 5: the rung asks declarative, interrogative and imperative to 'map to three predicate operators', but script.js CATEGORIES.mood.values.indicative is {band:'none', mark:null, op:'nothing'} (confirmed headless), so only two mood operators exist (hook, spear) and a statement draws none. The same rung allows number to be marked 'without and with a number operator', so the unmarked option was offered for number and not for mood. Rung 6 also fails (rater): 'must' does not parse, 'may' folds into the potential mood, and 'they say' sets no reported evidential. Rung 7 fails too: clauses nest only one level deep."
+          "level": 3,
+          "evidence": "G1 (commit a84783b): script.js CATEGORIES holds rows with where, param, op and reason for 9 categories set by the sentence (role with agent/patient/recipient, time, aspect, mood, negation, evidence, number, embedded clause, relation), and each changes the drawing (the 8-step tour in views.js shows them one at a time): rung 3 holds. Fails rung 4: the schema is English's feature bundle (grammar.js ENUMS); time is absolute past/present/future drawn as a crown tendril leaning back or forward; there is no origo and no event graph; embedding is one level and at most two propositions join."
         }
       }
     },
     {
-      "id": "semagram-composition",
-      "name": "Semagram composition",
+      "id": "semagram-form",
+      "name": "One closed form, no beginning, no end",
       "frame": "model",
-      "metric": "How propositions become drawings: connected figures per clause, whether the layout is planned from the whole proposition before any stroke is placed, how local a one-feature change is (% of changed path coordinates inside the affected element), and how many clauses merge into one semagram. Rater enters paraphrase pairs, adds or removes one argument and diffs the core stroke's path data, reads the locality report, reads the seeding code, and enters multi-clause text, counting connected figures in the SVG or canvas.",
+      "metric": "Topology and invariance of the semagram: closed curves and holes in the ink skeleton, start marks present, exact-decode rate under rotation (1-degree steps), mirror and scale, form-synonym invariance (randomised cyclic child order, spanning tree and subtree reflection decode to one graph), local readability of crops (a disk around any lobe decodes to its induced subgraph), whether the layout is a stated global solve, locality share (%), and clauses per closed semagram on the 3x codec raster and, per tier, in the fog. Rater runs the repository invariance script, rotates and crops screenshots, reads the solver and counts curves.",
       "ladder": [
         "Nothing is drawn.",
-        "Every content word of the input is represented by at least one drawn mark.",
-        "One clause draws one connected semagram: each content word is a stroke group attached to one shared core stroke (the predicate), and no element's strokes come from a stand-alone glyph function (checked in code); a row of complete glyphs joined by connector lines does not count.",
-        "Order-free: the layout follows the proposition, not English word order; 3 paraphrase pairs (active and passive, fronted adverbial, dative shift) each draw identical semagrams.",
-        "Written all at once: the layout plans the whole proposition before placing any stroke, reserving one attachment site on the core stroke per argument, so adding or removing an argument anywhere in the sentence, its last word included, changes the core stroke's path data (SVG d attribute or the stroke list the renderer draws); no hash or seed of the input text drives geometry (randomness is seeded only from concept and feature ids, checked in code).",
-        "Two clauses joined by a connective ('because', 'but', 'so', 'and') merge into one compound semagram, and a participant shared by both clauses is drawn once.",
-        "A paragraph of at least 4 sentences composes into one compound semagram; participants that corefer across sentences are drawn once and linked.",
-        "Layout is the solution of a stated global objective (for example total stroke length plus crossing count), its value shown on the page; the same input always gives the same layout.",
-        "Locality is measured: for at least 20 minimal pairs listed on the page, each changing one grammatical feature (negation, tense, aspect, mood, evidential) or one argument, the page reports the share of changed path coordinates that lie inside the affected element's strokes (plus the core stroke for an argument change), and that share is at least 75% on every pair.",
-        "A text of at least 8 clauses composes into one semagram that fits the semagram field at 1440x900 without scrolling, and the page's decoder recovers all 8 clauses from it.",
-        "At least 12 clauses compose into one semagram that fits the semagram field at 1440x900; the decoder recovers the identical 12-clause proposition set when it starts reading from each of at least 5 different entry strokes, and removing any one clause changes the path data of the first-drawn stroke (the figure is re-planned, not cut): the whole-discourse semagram of Chiang's 'Story of Your Life' (1998)."
-      ],
-      "levels": {
-        "G0": {
-          "level": 1,
-          "evidence": "render() appends one .gcell per token into the flex-wrap .glyphs row, so every content word gets a mark (rung 1); the screenshot shows 6 separate circles in a row for 'the visitors offer a tool we do not understand'. Fails rung 2: each glyph() call returns a stand-alone 104 px SVG with no shared core stroke, seeded by rng(entry.g) alone, so no edit to one word changes another word's glyph."
-        },
-        "G1": {
-          "level": 0,
-          "evidence": "Two disputes, both upheld; the lower (0) stands. Fails rung 1 ('every content word of the input is represented by at least one drawn mark'). grammar.js parseNP drops any unknown word between a determiner and a noun ('qualities are not written in this script'), and the lexicon has no adjectives. A headless parse and a shot of heptapod.html?still#s=The+tall+visitors+gave+us+a+new+language. agree: the token strip tags 'tall' and 'new' UNK, the status line says both were dropped, the semantic graph holds 9 fields with no place for either, and the page reads back 'The visitors gave us a language.' An unknown adverb or verb blocks the whole encode, so nothing new is drawn: 'The visitors quickly gave us a language.' gives '\"quickly\" is not a verb in the lexicon'. The connective dispute also holds and would cap the axis at 4. grammar.js CONN holds only because, although, though, after and before. 'We learned the language but/and/so the ship left.' each give '\"but\" (\"and\", \"so\") is not something this grammar can place'. The work above rung 1 (one ring per clause, paraphrase pairs drawing equal graphs, the whole-ring layout in script.js layoutFor, a two-clause composite with a REF coreference code for 'even though') runs but cannot count."
-        }
-      }
-    },
-    {
-      "id": "decoder-noise",
-      "name": "Decoder noise tolerance",
-      "frame": "intelligence",
-      "metric": "Exact-decode accuracy (% of propositions fully recovered) as ink noise rises; the breaking point, the noise level (stroke jitter in % of semagram radius, or % of stroke length dropped) where accuracy falls below 50%; and exact-decode accuracy on freehand samples (%). Rater checks in the code that the decoder reads only drawn geometry, uses the noise controls, reads the reported curves, and reruns any repository script.",
-      "ladder": [
-        "No decode of any kind.",
-        "A decode readout on the page lists the meaning of each drawn element.",
-        "The decoder reads only drawn geometry (SVG path d strings, point coordinates or rendered pixels; no data-* attributes, class names, ids or encoder objects) back to concepts, exact on every deck sentence and on 20 sentences the rater types, at zero noise, with a pass count shown.",
-        "The decoder recovers the full proposition (concepts, roles and grammatical features) from geometry, and the page reports any round-trip mismatch instead of hiding it.",
-        "The decoder reads pixels: it works from a rasterized canvas image of the semagram, not from vector data.",
-        "Noise controls on the page (stroke jitter, stroke dropout, ink blot) degrade the ink live; the decoder re-reads the degraded image, and the page shows exact-decode pass or fail with the noise level in its unit.",
-        "An accuracy-versus-noise curve with at least 8 noise levels per noise type and 200 sampled propositions per level is plotted on the page, the breaking point (accuracy below 50%) is stated as a number in noise units for each type, and the stroke-dropout breaking point is at least 10% of stroke length.",
-        "The decoder shows a confidence per feature and returns ranked alternatives with probabilities, and a calibration plot of predicted confidence against observed accuracy in at least 5 bins is shown.",
-        "The script carries designed redundancy (a checksum stroke, or one feature written in two marks), and the page shows it raises the dropout breaking point by at least 10 percentage points over the same script without it.",
-        "Freehand: the decoder reads a semagram the visitor draws with mouse or touch; at least 50 drawn samples are stored in the repository as stroke files, exact-decode accuracy on them is at least 80%, and the figure the page reports recomputes from them.",
-        "The dropout breaking point is at least 30% of stroke length, matching the roughly 30% of codewords that QR Code error-correction level H is specified to restore (ISO/IEC 18004); breaking points with and without redundancy, freehand accuracy and a per-feature confusion matrix are reproduced by a node script in the repository, run without a browser, that prints the same numbers the page shows."
-      ],
-      "levels": {
-        "G0": {
-          "level": 1,
-          "evidence": "The 'round-trip decode' pane lists each glyph's gloss (rung 1), but render() fills it from tok.entry.g, the encoder's own token list. Fails rung 2: no function reads the SVG geometry and there is no noise, so 'every glyph round-trips to exactly one meaning' holds by construction and is never tested."
-        },
-        "G1": {
-          "level": 1,
-          "evidence": "Dispute upheld; rater's 6 lowered to 1. Rung 1: the hero's 'read back from the pixels' line and the noise panel's per-field list (views.js showFields) give the meaning of each drawn element. Fails rung 2 on 'with a pass count shown'. The page shows only one sentence's field tally: main.js readBack writes 'N of M graph fields recovered', and views.js update writes 'PASS: all N fields recovered'. A grep of main.js, views.js and heptapod.html finds no count of deck or typed sentences decoded exactly. The only sentence-level count, 'pixel round trip: 163 / 163', is selftest.mjs console output. The 'measure' sweep counts inkings of one sentence. The skeptic's secondary point about a 'canvas' image is not used here: reader.js reads a byte raster that ink.js renders. Above the failed rung, the raster decoder, the live jitter, dropout and blot controls, and the bench curve cannot count. The bench curve also comes from the stored bench.json: jitter 3.54, dropout 17.94, blots 57.07, and the rater's rerun gives dropout 17.89."
-        }
-      }
-    },
-    {
-      "id": "lexicon-coverage",
-      "name": "Lexicon coverage",
-      "frame": "data",
-      "metric": "Concepts in the lexicon (count in code), share of content words in a held-out English sample that draw without the fallback mark (%), and where the entries come from. Rater counts entries, pastes the page's reference sample (or any 100-word news paragraph) and counts fallback marks.",
-      "ladder": [
-        "No lexicon: nothing encodes.",
-        "Preset sentences encode against a stored lexicon.",
-        "Free typed text encodes against a lexicon that maps several English words (synonyms) to one concept; content words that nothing can encode draw a marked fallback mark instead of vanishing.",
-        "At least 300 concepts, each with a gloss and a part of speech.",
-        "Unseen words are composed, not dropped: a documented inventory of at most 80 semantic primitives (in the line of Wierzbicka and Goddard's Natural Semantic Metalanguage primes) and a stored definitions table (hand-written, or produced by the model route and saved) decompose at least 50 words outside the concept list; each such word draws from its primitives, its explication in primitives shows on the page, and it decodes back to them; no hash of the spelling selects primitives.",
-        "Coverage is measured: a fixed held-out English sample of at least 500 content words ships with the page, at least 80% of them draw from the lexicon or primitives, and the percentage is displayed.",
-        "Provenance: concept selection follows named sources (for example the Swadesh 207-item list plus a cited word-frequency list), shown with dates; at least 1000 concepts.",
-        "A lexicon browser on the page lists every concept with its semagram, gloss and source.",
-        "Export: the lexicon and the script spec download as versioned JSON carrying entry count and date.",
-        "Open vocabulary at 95%: coverage on the held-out sample is at least 95%, and for each word the page shows whether it came from the lexicon, the morphology rules, the primitives or the model route.",
-        "At least as many concepts as the current BCI Authorized Blissymbol Vocabulary (its entry count and edition date stated on the page with the source), with at least 98% held-out coverage, documented in a lexicon reference: the vocabulary standard of Blissymbolics, the semasiographic system from Charles Bliss's Semantography (1949)."
+        "Each word or concept is drawn as a separate mark; no figure joins them.",
+        "One clause draws one connected figure planned from the whole proposition: adding or removing an argument changes the core geometry, and no geometry is seeded from the input text.",
+        "No start: the drawing has no crown, start bar, cut, arrow or privileged angle, the reading frame comes from the figure's own geometry, and exact decode holds at every rotation in 1-degree steps (360 of 360) on at least 100 propositions.",
+        "One closed curve: the ink skeleton of every semagram is exactly one closed curve with 0 holes on 10,000 random graphs, solved as the minimiser of a stated energy whose value is shown against a sequential writer's, and propositions of 2 to 3 clauses are one curve that decodes identically in at least 5 form synonyms each (randomised cyclic child order, spanning-tree choice and subtree reflection).",
+        "No beginning and no end at text scale, tested so that a hidden order fails: on 1,000 graphs every form synonym (randomised cyclic child order, spanning-tree choice and subtree reflections) decodes to the same graph; a disk cropped around any lobe at a random rotation decodes to the induced subgraph of the lobes fully inside, with cut necks reported as open contacts; a mirrored image is detected and read, including semagrams whose motifs are at least 70% collar motifs; a paragraph of at least 4 sentences is one closed semagram with coreference drawn as kisses, every clause decoding; the silhouette meets the PLAN.md V1 hull floor by lobe count (none below 3 lobes, at least 0.75 from 5 lobes). Decoding from every entry lobe does not count as evidence, because the decoder takes no entry point.",
+        "Whole and local at once: removing any one clause moves every remaining lobe (the figure is re-planned, nothing pasted), while a one-feature change keeps at least 75% of the changed coordinates inside its own lobe on 20 listed minimal pairs, with the displacement threshold stated.",
+        "Non-tree edges at scale: on 1,000 graphs with dense coreference, non-planar ones included, every non-tree edge is a kiss or an echo lobe, decode is exact, and the share drawn as kisses versus echoes is reported.",
+        "Twelve clauses form one closed semagram that fits the 1440x900 field on the 3x codec raster with every margin met (neck width, kiss gap, clearance, pocket size), decodes exactly in every form synonym tested, and reports its layout energy and solve time; the page states the fog's measured decodable capacity per tier and reads larger semagrams from the master, saying so.",
+        "Sentence, paragraph and page differ only in size: a text of at least 50 clauses is one closed semagram, navigated by a hyperbolic focus+context viewer (after Lamping, Rao and Pirolli 1995) that re-centres any lobe without changing the semagram, decoding exactly from any centring.",
+        "A whole conversation of at least 20 turns is one closed semagram with no first position (turn order recoverable only from before/after relations), re-centring on any turn reads the same exchange, and the topology guarantees (one curve, no holes, necks equal lobes minus 1) hold on 100,000 random graphs with 0 failures in a published node script."
       ],
       "levels": {
         "G0": {
           "level": 2,
-          "evidence": "Free text encodes against LEX in heptapod.html: 36 hand-listed concepts with synonym lists, 144 listed trigger phrases, 143 distinct ('present' is listed under both offer and this-moment; MAP keeps the later one), a 26-word STOP list; unseen content words draw the rose dashed fallback glyph (rung 2). Fails rung 3: 36 concepts, no part of speech, no source, no coverage measurement."
-        },
-        "G1": {
-          "level": 1,
-          "evidence": "No dispute; rater's grade kept. Rung 1: the presets encode against the stored lexicon (lexicon-data.js). Fails rung 2: an unknown noun gets the fallback radical (read back as 'something'), but an unknown adjective is dropped with only a text warning (grammar.js parseNP; confirmed headless and in a shot of 'The tall visitors gave us a new language.'). An unknown verb or adverb blocks the whole encode ('quickly'). Synonym folding covers nouns only (lexicon.js NOUN_SYN). The 322 concepts with part of speech and gloss would meet rung 3, but rungs are cumulative, so they cannot count."
+          "evidence": "G1 draws one connected ring per clause, solved globally (geometry.js solveRing; layoutFor moves every element when an argument is added; no seeding from the text): rung 2 holds. Fails rung 3: config.js GEOM.ORDER fixes the predicate at the crown with every element clockwise from it, the key says 'Read it clockwise from the top', negation cuts the ring over 14 degrees, and on 30 propositions the reader decodes 30/30 upright, 1/30 at a 5-degree rotation and 0/30 at 15, 45, 90 and 180 degrees (research/plan-probes/g1_rotation.mjs, 2026-11-11). The energy comparison with a sequential pen exists but is credited only at rung 4."
         }
       }
     },
     {
-      "id": "english-parser",
-      "name": "English-to-proposition parser",
-      "frame": "intelligence",
-      "metric": "Share of free-English sentences turned into the correct proposition (predicate, roles, grammatical features) on the sealed test part of a gold set, per route: the deterministic engine, and the model route through labs/assets/js/ai/llm.js; the model's contribution is the accuracy it adds over the engine. Rater types unscripted sentences, reads the parse view and route panel, reads the reported accuracies, and checks the gold files' git history.",
-      "ladder": [
-        "No parser: nothing reads typed English.",
-        "Typed words map to concepts by dictionary lookup, single or multi-word, with suffix stripping and stop-word elision.",
-        "The output is a proposition: one predicate with its arguments in fixed slots for simple subject-verb-object sentences, shown on the page as predicate(arg1, arg2).",
-        "Deterministic part-of-speech tagging and lemmatization from rule tables feed the encoder; nouns, verbs and modifiers are told apart and labelled on the page.",
-        "A deterministic role parser extracts agent, verb, patient, recipient and negation for transitive, ditransitive and passive sentences, and the parse shows as a graph next to the semagram.",
-        "Model route: one call through labs/assets/js/ai/llm.js returns the proposition as JSON validated against a schema; an invalid or missing reply falls back to the engine, and the route panel names which route answered.",
-        "The page shows the model parse and the engine parse side by side with differing roles and features marked, and the visitor picks which one to draw.",
-        "A gold set of at least 60 annotated sentences ships with the page, split into a dev part and a sealed test part: the engine modules do not import the test file (only the scorer does), git history shows no edit or deletion of an existing test sentence, and at least half the test sentences come from a named public text not written for this lab; role and feature accuracy on the test part are shown as numbers for the engine (recomputed live) and for the model route (from per-sentence outputs stored in the repository with model name and date).",
-        "Parses are scored by triple-overlap F1 in the manner of Smatch (Cai and Knight, ACL 2013) per category (embedding, questions, modals, evidential markers), with the model's gain over the engine stated per category, and the test sentences each route gets wrong are listed on the page.",
-        "A free paragraph of at least 4 sentences parses into one compound proposition with pronouns resolved across sentences, and coreference accuracy on at least 20 gold paragraphs is shown.",
-        "The engine alone scores at least 0.90 F1 on every category of the sealed test part of a gold set of at least 200 sentences; a router in the code calls the model only for categories whose stored model F1 exceeds the engine's; both figures recompute from a script in the repository over stored outputs."
-      ],
-      "levels": {
-        "G0": {
-          "level": 1,
-          "evidence": "encode() in heptapod.html maps typed words to LEX concepts by greedy longest-match over MAP (MAXW-word window) with a regex strip of 's and s and STOP elision (rung 1). Fails rung 2: it returns a flat token list; no predicate or argument slot exists, and the decode pane shows a flat gloss list. llm.js is not loaded."
-        },
-        "G1": {
-          "level": 0,
-          "evidence": "Two disputes, both upheld; the lower (0) stands. Fails rung 1, 'dictionary lookup, single or multi-word, with suffix stripping'. grammar.js tokenize matches /[a-z]+/ one token at a time, and lexicon.js NOUN_FORMS and VERB_FORMS hold 0 keys containing a space (counted headless), so no multi-word expression is ever looked up. Inflections come from pre-generated full-form tables (regPlural, regS, regPast, regIng), not from suffix stripping. G0 earned rung 1 with a multi-word longest match, and G1 removed it. On the page path, 'The visitors gave up the ship.' becomes 'The visitors gave something the ship.' Rung 3 fails independently, so even a lenient reading of rung 1 gives 2. tagTokens has no adjective tag and no general adverb tag: 'tall', 'new' and 'quickly' are tagged UNK, the label an unknown noun gets (desk shot of 'The tall visitors gave us a new language.'), so modifiers are not told apart. The role parser, the llm.js model route with its validateGraph fallback and the showCompare side-by-side all run, but they cannot count."
-        }
-      }
-    },
-    {
-      "id": "ink-rendering",
-      "name": "Ink and simultaneous writing",
+      "id": "glyph-detail",
+      "name": "Film-grade ink detail",
       "frame": "graphics",
-      "metric": "What the semagram rendering shows: stroke model (constant line or variable-width brush), how writing unfolds in time (word by word or all strokes at once), the ink medium, and the count of linked views. Rater watches an encode at 1440 px, inspects the stroke geometry and render code in devtools, measures frame rate in the Performance panel, and counts views that respond to each other.",
+      "metric": "The form-agnostic film-detail suite (PLAN.md E7a), keyed to the known centreline: width along arc length, masses, filaments by type, satellites and flecks, striations and slivers, edge anisotropy, roughness at Gaussian sigmas tied to the median carrier width w_med (0.17 and 0.067 w_med), centreline wobble, code-period spectrum, breath taper, mirror symmetry, morpheme stability and a start-mark detector. The suite must first reproduce research/film.md 5.1 within 10% on the 18 production masters, and the committed negative controls (smooth rings and smooth lobed lines) must fail every detail gate. It is run on the lab's masters at 3300 px, with lengths in w_med and counts per 105 w_med of line length, and with ranges from the masters as statistics only (PLAN.md 1.1 V1 to V9, V15, V16, V18). Rater renders a fresh batch of at least 60 masters and runs the suite and its controls.",
       "ladder": [
         "Nothing is drawn.",
-        "A visual mark (image, icon or vector) is drawn for each encoded word.",
-        "Procedural vector strokes: each element's strokes (for example rings, arcs, curves) are computed from its feature vector, not taken from stored images, and the active element recolors on hover.",
-        "Variable-width brush: each stroke is a filled outline whose width varies along its length by a pressure profile, not a constant stroke-width.",
-        "Simultaneous writing: on encode, every stroke of the semagram starts at the same instant and finishes at the same instant; under reduced motion the final form appears at once.",
-        "Ink medium: a per-pixel water and pigment field is diffused each frame on GPU or canvas, producing spread and edge darkening on every stroke; an SVG or CSS filter does not count.",
-        "A second linked view, the proposition graph: hovering a stroke lights its node and hovering a node lights its strokes.",
-        "A third linked view, the decoder overlay, draws the decoded features in place on the ink.",
-        "Edits morph: changing the sentence morphs the semagram from the old geometry to the new by stroke correspondence instead of clearing and redrawing.",
-        "Stroke dynamics come from a physical brush model: width follows pen velocity and ink depletes along a stroke, with the model's parameters exposed on the page.",
-        "Real-time ink dispersion in the manner of MoXi (Chu and Tai, SIGGRAPH 2005): lattice-Boltzmann water flow through a paper-fibre texture with pigment deposition, at least 30 fps at 1440 px on a desktop for any typed input, and the decoder still reads the simulated ink at zero added noise."
+        "Marks are drawn as constant-width vector lines.",
+        "Variable-width strokes: width varies along each stroke by a stated rule (nib angle or pressure) with a coefficient of variation of at least 0.35.",
+        "A brush master: a brush model with 16 or more bristles renders each semagram as a deterministic master of at least 2048 px with striations along the stroke, seeded only by concept and feature ids; roughness at sigma 0.17 w_med is at least 1.07 on every master, while every committed smooth negative control stays below it.",
+        "Physics detail present: satellites, filaments with bulbs and dense masses are produced by stated physical rules at positions the geometry sets, the form-agnostic suite reproduces research/film.md 5.1 within 10% on the 18 film masters, and at least half of the rung-5 gates pass on 60 masters.",
+        "The film's level of detail, measured: on at least 60 masters at 3300 px every gate of the validated form-agnostic suite holds, each corpus median inside the film's interquartile range where one is stated, and every negative control fails: roughness at sigma 0.17 and 0.067 w_med inside the recomputed film ranges; width CV at least 0.5, with a breath in at least 60% of semagrams following the film taper (at most 0.16 w_med within 0.6 w_med of the thinnest point, at least 0.74 of median width by 4.4 w_med, never 0); dense masses per 105 w_med with depth 3.3 to 11.6 w_med, arc extent 2.9 to 22 w_med and the film's share of ink in masses; per mass, filament reach, length CV, angle to the local normal, tip types (bulb, pointed, hooked, branched) and inward share inside the film's p10 to p90, with crossing or looped filaments in at least the film's share of glyphs; satellites and flecks per 105 w_med with a log-log size slope in the film's range; striation holes, slivers and per-zone edge anisotropy in range; centreline wobble 0.01 to 0.065 r_i on 90% of lobes and no code-period spectral peak above the film's; no start mark; mirror-symmetric masses at or above the film's p25 share; the same concept across 10 propositions gives mass-silhouette IoU at least 0.8 in its lobe frame; ink/disc 0.09 to 0.40 rising with node count; every feature comes from the stated physics, and with each feature turned to its maximum in an ablation the decoder still reads every master at 100%.",
+        "Detail holds at every scale: the suite passes at 3300, 1600 and 800 px, and a 400 px phone render keeps roughness at sigma 0.17 w_med of at least 1.07.",
+        "Morphemes are stable down to the texture: the same concept renders the same rim code and ink texture in every proposition (per-lobe IoU at least 0.9 after aligning lobe frames, above rung 5's 0.8 silhouette test), and masters of 6 or more clauses pass the multi-clause ranges (2 to 5 dense masses per proposition, ink/disc at least 0.25).",
+        "Fidelity published: a page lists the suite's numbers for the lab's corpus next to the film corpus ranges per metric, with script names and date and no film image shown, all within range.",
+        "Detail is a physical result: edge breakup, filaments and satellites come from a simulation (dielectric-breakdown growth, Plateau-Rayleigh beading or a lattice-Boltzmann deposit) whose parameters are shown; turning the physics off removes them and the suite fails.",
+        "Indistinguishable from real ink: in a forced-choice test against crops of photographs of real ink the lab took itself (ink on paper and ink in water, matched scale), at least 20 raters score at most 60% accuracy, with crops, protocol and results published."
       ],
       "levels": {
         "G0": {
           "level": 2,
-          "evidence": "glyph() builds 104 px SVGs procedurally from each entry's feature vector f (circles, arcs, quadratic limbs), and setActive() recolors blue to amber on hover (rung 2). Fails rung 3: stroke-width is set once per path, a constant width. Every glyph appears at once with no writing animation; the WebGL fbm shader is background only."
-        },
-        "G1": {
-          "level": 2,
-          "evidence": "Two disputes, both upheld; the lower (2) stands. Rung 1 holds: a mark is drawn for each encoded concept. Rung 2 holds: strokes are computed from the spec (geometry.js specStrokes and propStrokes), and the hovered role recolors gold (render.js drawInk goldOf). Fails rung 3, 'width varies along its length by a pressure profile'. render.js fillStroke does fill a variable-width outline. But in propStrokes, every ring stroke (every role and slot sector, most of the ink) takes w = W0 * nib(deg) * ringW(wmul, deg). That width comes from the broad nib's direction of travel and the plural weight, with a taper only beside a negation cut. No pressure profile runs along a ring stroke; only the marks, the tendril and the bridge carry a w0-to-w1 taper. Rung 4 also fails; I checked it headless with specStrokes. Mark dots carry ts = 0.4 + 0.2*di, so the inferred evidential's three dots appear at 0.40, 0.60 and 0.80 of the grow. The tendril's tip dot has ts 1.00. For 'Apparently, the visitors were not giving us a gift.' the ring strokes on either side of the negation cut start at ts 0.37 and 0.33. render.js drawInk skips any dot or segment whose ts exceeds p, so on the real grow path these strokes start at different times."
+          "evidence": "G1 strokes vary in width by a broad-nib rule (script.js nib(); thickness CV 0.43 to 0.63 measured at 800 px on 5 deck sentences): rung 2 holds. Fails rung 3: no brush or bristle model and no master of 2048 px or more. Rendered natively at 3300 px with R = 1200 (research/plan-probes/g1_export_3300.mjs) the line is smooth: rough@0.01R 1.007 to 1.043 against the film minimum 1.073; rough@0.004R 1.002 to 1.004; satellites 0 to 3; outer spikes 1 to 4; mean thickness 0.037 to 0.051 R against 0.12 to 0.28 (film-tools/roughness.py and ink_detail_stats.py, 2026-11-11)."
         }
       }
     },
     {
-      "id": "script-identity",
-      "name": "Script identity and page craft",
+      "id": "ink-in-fog",
+      "name": "Ink in fog: medium and formation",
+      "frame": "graphics",
+      "metric": "What the visitor sees form: the medium (vector, 2D field, simulated fluid, volume); simultaneity (spread of the global phase at which each lobe crosses 50% coverage); ink mass conservation and ink displacement during formation; hold motion; detail retained at hold against the master (filament tips, satellites, width-tied roughness); rope texture; tone, tint and spatial frequency, measured on screenshots with grain off; morph by correspondence; IoU at hold; decode of the medium; frame rate. Rater records the formation at 1440 px, runs the phase, retention, tone and frequency scripts on captured frames and reads the Performance panel.",
+      "ladder": [
+        "Nothing is drawn.",
+        "The semagram is drawn on a background and appears with no formation.",
+        "Formation at once: every stroke starts and finishes at the same instant (no part drawn after another), and under reduced motion the final form appears at once.",
+        "A medium: a per-pixel ink field on GPU or canvas diffuses and advects each frame, so the semagram spreads and breathes; an SVG or CSS filter does not count.",
+        "A fluid that writes: a WebGL2 stable-fluids solver with a fixed time step carries ink from a conserved haze to the semagram target, and every lobe crosses 50% coverage within plus or minus 5% of one global phase.",
+        "Ink in fog at film detail. Formation: target-driven condensation (driving force and gathering after Fattal and Lischinski 2004) forms the whole semagram out of haze at once, with total ink mass conserved within plus or minus 5% (no alpha ramp on ink) and median ink displacement of at least 0.05 R during condensation. Hold: micro-motion with edge displacement of at least 0.5 CSS px/s at 1440 px and decode at 100% on every sampled hold frame, dropping to a low-cost idle hold after 20 s, never a stop while visible. Dissolve: into thin curling filaments, at least at the share measured on the film's dispersal still. On screenshots with grain off: rope texture of tangent-aligned fibres with beading CV 0.2 to 0.45, peeling wisps and soft shoulders (carrier FWHM about 1 w_med), within the ranges measured on at least 3 reference frames of at least 1920 px; at hold, at least 80% of the master's filament tips and 70% of its satellites survive in the thresholded optical depth at native canvas resolution, and width-tied roughness stays at least 1.07 (IoU alone is not a detail test). Tone: the densest ink reads at 0.27 to 0.55 of the local fog luminance and thin ink at 0.60 to 0.85; the ink is cool (B minus R 0 to +20 on 8-bit) with internal density variation inside masses. Fog: cool (B minus R +5 to +15), mid-band (0.01 W to 0.05 W) luminance std at most 0.025, fine-band std at most 0.004, low-pass p95 minus p5 of 0.15 to 0.40, at least 2 depth layers, a spatially varying veil, mild depth of field and self-shadow on. IoU at hold at least 0.85; at least 30 fps at 1440 px on an integrated GPU.",
+        "Morph and far side: a new proposition re-condenses from the old one's ink, each lobe's ink flowing to its corresponding lobe (correspondence shown), never cleared and redrawn, and a reply condenses in a far depth layer with visible parallax before coming forward.",
+        "Volume under view change: under a camera orbit of plus or minus 10 degrees the semagram reads as a thin coherent volume, not a decal; self-shadow stays consistent with the in-plane light, the depth layers show measured parallax, and rung 5's rope and retention statistics still hold at the orbit's extremes.",
+        "The decoder reads the medium: asynchronous readback of the optical-depth buffer at hold decodes 100% of the gold deck at zero added noise with no frame stall, and the IoU and decode verdict are shown live.",
+        "The visitor's hand is a limb: pointer or touch injects momentum into the same fluid, the damage spreads physically, the semagram re-gathers, and the decoder's live verdict tracks the damage and the recovery.",
+        "Beyond the film: a 3D slab simulation of at least 192x192x24 cells in WebGL2 3D textures, ray-marched with true parallax as the visitor tilts or drags the view, condenses the semagram in depth at 30 fps or more on the rater's desktop, with a second medium (ink in absorbent paper, lattice-Boltzmann after Chu and Tai 2005) behind the same interface."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "G1 draws Canvas2D filled outlines with a feathered blur glow on near-black (render.js), and the finished frame shows under reduced motion: rung 1 holds. Fails rung 2: not every stroke starts and finishes at the same instant. geometry.js line 475 gives mark dots ts = 0.4 + 0.2 * di, so marks appear at 0.40, 0.60 and 0.80 of the grow. The independent rater also measured the ring strokes beside a negation cut starting at ts 0.37 and 0.33 (labs/levels/heptapod.json G1, commit c37529c; the ts line checked for this revision). Rung 3 fails too: there is no per-pixel ink field, no fog and no fluid, and the ink is a luminous white line, the opposite tone of ink in bright fog (desk2.png)."
+        }
+      }
+    },
+    {
+      "id": "script-originality",
+      "name": "Script identity and originality",
       "frame": "style",
-      "metric": "Counted quantities: the semagram field's share of the 1440x900 viewport (%), lab-content elements drawn in amber at rest (count), stroke primitives in the inventory (count), stroke-rule violations in 20 random semagrams (count), deck sentences whose outline is a closed ring (count). Rater measures in devtools at 1440x900, reads the rule test, and compares deck outlines.",
+      "metric": "Measured distance from the film's logograms with the offline gate (polar normalised cross-correlation searched over rotation and mirror against the 38 production masters: maximum, p90, median; a cluster-level IoU gate on dense masses and filament groups), presence of excluded mark vocabulary and film-quoting text, the primitive inventory with reasons, staging, and page craft at 1440x900. Rater runs the gate, greps presets and the pipeline, and measures the page.",
       "ladder": [
         "No visual system: default browser styling.",
         "Site palette and type applied to the page.",
-        "On-brand tokens throughout (void ground, IBM Plex Mono, blue structure, corner marks); at rest amber appears only on site chrome (corner marks, kicker line), and in the lab's content it marks only the hovered or selected element.",
-        "The page gives the script the stage: at 1440x900 the semagram field is the largest element on screen by area, and no input or readout panel is taller than twice its content's height.",
-        "A stroke inventory of at least 8 primitives is drawn on the page as a specimen legend, all produced by one pen model with one stroke-contrast rule.",
-        "Original form: the base outline of a semagram is not the closed circular ink ring of the film Arrival; no deck sentence draws a closed ring as its outline.",
-        "Stated stroke rules (terminal shape, join angles, contrast ratio) hold on 20 random semagrams with 0 violations, checked by a rule test in the code.",
-        "One motion language: every animation the page runs (writing, and morphing or noise when present) reads its duration and easing from one token table in the code; grep finds no literal duration or easing value elsewhere.",
-        "A specimen sheet of at least 24 semagrams renders on the page and exports as one image.",
-        "The script is the lab's face: the hub card thumbnail and the share image are semagrams of the lab's own title generated by the codec.",
-        "A design rationale page documents the script like a type specimen (stroke rules, proportions, contrast, reason for each primitive, specimen at 3 sizes), the documentation standard of published constructed scripts such as Tolkien's Tengwar."
+        "On-brand tokens throughout, amber in lab content only for the active or selected element, and a credit line stating that the film's logograms belong to their makers and none are used.",
+        "An original primitive inventory drawn as a legend, each primitive with the reason for its shape, and no preset or deck sentence quotes or paraphrases the film's dialogue or the production file names (weapon, offer weapon, there is no linear time and the like).",
+        "Measured distance: the offline gate on at least 60 semagrams gives a maximum below 0.80 and a median at or below 0.46 (the film's unrelated-pair median), numbers committed and film images never.",
+        "Original at film detail: on at least 1,000 semagrams including paragraphs and final fog frames the gate holds (maximum below 0.80, every pair from 0.65 to 0.80 reviewed side by side and signed off, median at or below 0.46); the cluster-level gate, run on every concept's morpheme mass and every filament group, stays below the film's unrelated-pair 95th percentile; no outline is a near-circle (4 pi A / P^2 above 0.9) carrying radial spurs; the stage is a disc in fog (no glass wall, no seven-limbed creature); and the semagram field is the largest element at 1440x900.",
+        "Stated stroke rules (terminal shape, join angles, contrast ratio, neck and kiss geometry) hold on 100 random semagrams with 0 violations, checked by a rule test in the code.",
+        "One motion language: every animation the page runs reads its duration and easing from one token table; grep finds no literal duration or easing value elsewhere.",
+        "A specimen sheet of at least 48 semagrams, from single concepts to paragraphs, renders on the page and exports at print resolution with the gate's numbers printed on it.",
+        "The script is the lab's face: it has its own name (not Heptapod B, not Arrival), and the hub card, share image and title mark are semagrams of that name generated by the codec.",
+        "A type-specimen-grade design document: stroke rules, proportions, contrast, the reason for each primitive, specimens at 3 sizes, and the originality gate's method and numbers, at the documentation standard of published constructed scripts such as Tolkien's Tengwar (The Lord of the Rings, appendix E)."
       ],
       "levels": {
         "G0": {
           "level": 1,
-          "evidence": "Site tokens applied (--void, IBM Plex Mono, blue strokes, .bp corner marks) (rung 1). Fails rung 2: amber is not kept for the active glyph; the decode readout .lit spans (--amber2 #FFD27A) and the glyph count (.ratio b, --amber) are amber at rest in the screenshot. Glyphs are generic rings with radial limbs, close to the film's circular logograms. Also fails rung 3: .stage declares grid-template-rows 'auto auto 1fr auto' for 5 children, so the input row takes the 1fr track; the screenshot shows a ~450 px tall input panel and the glyphs squeezed into a ~130 px band below it."
-        },
-        "G1": {
-          "level": 1,
-          "evidence": "No dispute; rater's grade kept. Rung 1: the tokens.css palette, IBM Plex Mono and the .bp corner marks are applied (desk.png). Fails rung 2: amber appears at rest in lab content that is neither hovered nor selected. Examples are the key cards' .param lines and the once panel's reader verdict (rater). On the noise chart, views.js drawChart strokes the breaking-point line in P.gold and writes its 'breaks at' label in P.goldSoft whenever bench.json loads, with no hover involved."
+          "evidence": "G1 uses the site tokens and IBM Plex Mono: rung 1 holds. Fails rung 2: amber shows at rest in lab content. views.js drawChart strokes the noise chart's breaking-point line in P.gold and writes its label in P.goldSoft whenever bench.json loads, with no hover or selection (views.js lines 324 and 326, checked for this revision). The independent rater (commit c37529c) also found amber at rest on the key cards' .param lines. Above that, the presets lean on the film's dialogue ('Did they give us a weapon?'; research/ip.md rule 3), so rung 3 would fail too, although the gate numbers would already pass rung 4 (60 G1 glyphs: median 0.409, p90 0.468, maximum 0.623 against the 38 masters, research/ip.md)."
         }
       }
     },
     {
-      "id": "writing-interaction",
-      "name": "Writing and reading interaction",
+      "id": "translator-pod",
+      "name": "The translator pod",
       "frame": "interaction",
-      "metric": "Count of distinct ways the visitor acts on the script (type, select, toggle grammar, damage, share, edit the drawing, draw freehand, read, converse), each checked by doing it on the page with mouse and touch.",
+      "metric": "The ways the visitor acts in the pod, each checked by doing it at 1440 px and 390 px with mouse, touch and keyboard: type, speak, commit, read back, inspect from any lobe, transmit, receive and read a reply, reverse (image or lobe editor), converse, share; plus the semagram field's share of the first viewport (%) and the compute time from commit to first visible formation with no model (ms). Rater uses the running page with the network on and off.",
       "ladder": [
         "Nothing to touch.",
         "Preset sentence buttons draw their sentence.",
-        "Free text re-encodes as the visitor types, with no submit step; a deck of preset sentences fills the input, and hovering an element highlights it.",
-        "Select: a click or tap pins an element or stroke and shows its meaning until another is pinned or the pin is cleared.",
-        "Grammar toggles: controls flip negation, tense, aspect, mood and evidentiality on the current proposition; the semagram changes in place and the English updates to match.",
-        "Directed damage: the visitor brushes noise onto a chosen region of the semagram with pointer or touch, in addition to any global sliders, and the decoder re-reads after each brush stroke.",
-        "State in the URL: sentence, toggles and noise are encoded in the link and restored on load, so a semagram can be shared.",
-        "Inverse editing: the visitor drags a role branch to another participant or deletes a stroke on the drawing, and the English and proposition regenerate from the edited semagram.",
-        "Freehand writing: the visitor draws a semagram with mouse or touch and the decoder reads it into English.",
-        "Reading practice: the page shows an unseen semagram, the visitor composes its meaning from the grammar legend and is scored, with categories unlocking over at least 5 stages.",
-        "Conversation: the visitor writes a freehand semagram for a proposition not in the deck, the decoder reads it, and the page answers with a new semagram (engine or model route, route named) shown without English until the visitor asks for its decode; the exchange runs at least 5 turns, as Louise Banks converses with the heptapods in Chiang's 'Story of Your Life' (1998)."
+        "Free text encodes on submit, presets fill the input, and hovering an element highlights it.",
+        "Select and edit: a click or tap pins an element and shows its meaning, grammar controls flip features on the current proposition with the English updating, and the state is in the URL.",
+        "The pod is the page: at 1440x900 the stage fills the first viewport with the semagram field at least 50% of its area, one input line commits a sentence, formation starts within 300 ms of compute with no model, and the decoder's read-back appears under the stage.",
+        "The pod: type or speak (on-device recognition when the browser offers it, cloud recognition only behind a labelled toggle) any English sentence or short paragraph; it condenses in fog at once and is read back, with the read-back saying 'read from the master' above the fog's stated capacity; 'show it to them' sends it into the far side and a reply semagram condenses back with no English until the visitor reads it; a dropped image of a semagram, or one built in the lobe editor, is read into English; a conversation of at least 5 turns runs on the engine alone when no model answers, with its responder tagged [illustrative]; inspect starts reading at any lobe; the exchange is shareable by URL, with runtime-composed concepts carried in the share state and decoding in a clean browser profile.",
+        "Grammar play on the ink: the visitor flips modal strength, evidential, aspect, temporal relation and polarity by gestures on the formed semagram's lobes, and the fog semagram and the English update in place by morph.",
+        "Inverse editing on the ink: dragging a lobe to another neck, cutting a neck or drawing a kiss regenerates the proposition and the English from the edited drawing.",
+        "Reading practice: unseen semagrams to read, scored, with categories unlocking over at least 5 stages and progress kept per visitor.",
+        "Writing back in the script: the visitor answers the far side with semagrams drawn freehand, typing no English, for at least 5 turns, and the decoder reads each turn.",
+        "A fluent exchange: in a recorded session, a visitor who learned only from the page converses for at least 10 turns in freehand semagrams, with at least 80% of turns decoded as the meaning they wrote down beforehand, as Louise does with Flapper and Raspberry in Chiang's 'Story of Your Life' (1998)."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "The input listener re-renders on every keystroke, 5 DECK buttons fill the input, and .gcell highlights on mouseenter/mouseleave (rung 2). Fails rung 3: no click, tap or keyboard selection or pin; no grammar controls, no URL state."
-        },
-        "G1": {
-          "level": 5,
-          "evidence": "Both disputes upheld; rater's 6 lowered to 5. Rungs 1-5 hold (rater): preset chips; the input re-encodes 320 ms after typing; a click on #sem pins an element; editor.js toggles morph the ring and rewrite the English; brush erase and ink discs on the np-page canvas re-read through views.js update(). Fails rung 6, 'sentence, toggles and noise are encoded in the link'. main.js writeHash stores only s, a/r/b and n=type:value. The ink seed is left out: the views.js 'reink' handler changes st.seed and calls schedule() but never state.onUrl, and the hash has no seed key. The brushed damage (st.brush) is left out too, though rung 5 itself calls it noise. There is no hashchange listener. A shared damaged semagram therefore reloads with seed 1 and no brush marks. The skeptic's live test showed this: jitter 3 reads PASS on load and FAIL after one 'new ink', with the hash unchanged. Sentence and toggles do restore."
+          "level": 3,
+          "evidence": "G1 encodes free text, fills the input from presets and highlights on hover; a click on the semagram pins an element with its meaning (#pin); the semantic-graph editor flips time, aspect, mood, negation and evidence and the English updates; sentence, composite and noise live in the URL hash (main.js readHash and writeHash): rung 3 holds. Fails rung 4: the page is a seven-section explainer with the translator as one input in the hero's left column, and the semagram is about 360 to 400 px across in a 1440 px viewport (desk2.png), far below 50% of the first viewport. The ink seed and brushed damage are not in the hash (independent rater, commit c37529c); sentence and toggles restore, which is the select-and-edit state this rung names."
         }
       }
     },
     {
-      "id": "semasiography-explained",
-      "name": "Semasiography explained",
+      "id": "lexicon",
+      "name": "Lexicon and open vocabulary",
+      "frame": "data",
+      "metric": "Radical inventory size and sources, concept count with radical explications, coverage of held-out English samples (% of content words written from the lexicon or by composition, versus names spelled and stated refusals), wrong-concept substitutions (count), provenance per entry, and the correlation between radical overlap and human similarity. Rater counts entries, runs the held-out sample and reads the provenance fields.",
+      "ladder": [
+        "No lexicon: nothing encodes.",
+        "Preset sentences encode against a stored list.",
+        "Free typed text encodes against a hand list that maps synonyms to one concept, and a content word outside the list draws a marked fallback instead of vanishing.",
+        "At least 300 concepts, each with a gloss and a part of speech.",
+        "Compositional: every concept is an unordered multiset of 1 to 3 radicals from a documented inventory of at most 128 radicals with named sources (Natural Semantic Metalanguage primes checked against their source, with the primes that grammar already writes excluded or ruled by minimal pairs; class determinants), each concept's explication shows, related concepts share radicals (give, send and gift share one), and no hash of the spelling selects radicals.",
+        "Open vocabulary: at least 1,000 concepts with explications from named sources (the Swadesh 207 list, NSM primes, a cited frequency list). Unseen words are composed without a model by a determinative-plus-spelling tier (a class determinant from a bundled public lexical resource beside a spelled island, with a spelled-event variant for verbs), and by the model route (validated, cached and carried in the share state); proper names are spelled in a marked name lobe, and numbers are written ciphered-additively. On a held-out sample of at least 500 content words from a named public text, at least 90% are written, with coverage reported separately for in-table and out-of-table words; the rest are names or stated refusals, with 0 wrong-concept substitutions. Judges who see only radical glosses pick the intended word from 5 candidates at a stated floor per provenance tier. The coverage shows on the page.",
+        "Relatedness is legible: on SimLex-999 (Hill, Reichart and Korhonen 2015) word pairs covered by the lexicon, radical overlap correlates with human similarity at Spearman rho of at least 0.4, shown on the page.",
+        "A lexicon browser lists every concept with its semagram, explication, source, provenance and date, and the lexicon and radical inventory export as versioned JSON with entry count and date.",
+        "At least 3,000 concepts, with held-out coverage of at least 95% on 3 named public texts of different registers (news, fiction, technical).",
+        "Productive derivation: agent noun, causative, inchoative and opposite are radical operators, at least 200 derived concepts decode back to base plus operator, and the visitor can coin a concept by choosing radicals and see it written and read.",
+        "At least as many concepts as the BCI Authorized Blissymbol Vocabulary (entry count and edition stated with the source), held-out coverage of at least 98%, and a lexicon reference documenting every radical with the reason for its meaning, data licences stated."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "G1 encodes its presets against lexicon-data.js (322 concepts with gloss and part of speech): rung 1 holds. Fails rung 2: a content word outside the list does not always draw a marked fallback. grammar.js lines 318 to 320 drop an unknown adjective with only a text warning ('qualities are not written in this script'), so it vanishes from the drawing. An unknown verb or adverb blocks the whole encode ('quickly' is not a verb in the lexicon), and synonym folding covers nouns only (lexicon.js NOUN_SYN). Found by the independent rater (commit c37529c); the adjective drop checked for this revision. Above that, script.js makeCode writes a class trit, a base-3 index and a parity cell, so related concepts share nothing (rung 4)."
+        }
+      }
+    },
+    {
+      "id": "decoder",
+      "name": "Reading back",
+      "frame": "intelligence",
+      "metric": "Exact-decode accuracy (% of meaning graphs fully recovered) from pixels of the canonical raster, the 2D master, the fog render and composited frames (PNG, JPEG q=75, phone screenshots); invariance to rotation (1-degree steps), mirror and scale; noise breaking points (stroke jitter in % of R, dropout in % of line length, blots); silent misreads under single-cell flips; detection of closed kisses beside material holes; refusal rate on non-semagram images; freehand and photograph accuracy. Rater checks that the decoder imports only the spec, and runs the node bench and the page controls.",
+      "ladder": [
+        "No decode of any kind.",
+        "A readout lists each element's meaning, taken from the encoder's own data.",
+        "The decoder reads only drawn geometry back to the full proposition (concepts, roles, features), exact at zero noise on the deck and on 20 sentences the rater types.",
+        "It reads pixels: a rasterised image, with a seeded noise bench (jitter, dropout, blots; at least 8 levels and 200 propositions per level) that states breaking points and runs headless.",
+        "Invariant and self-checking: exact decode at every rotation in 1-degree steps (360 of 360), on mirrored images (detected, collar-heavy semagrams included) and from 0.5x to 2x scale, with no orientation assumption in the code; a curve-tracing reader bridges dropout gaps by tangent continuity; topology checksums (necks equal lobes minus 1, no holes once material holes are classified) and a per-lobe order-free checksum refuse corrupt reads; flipping every single cell of 10,000 lobes gives 0 silent misreads.",
+        "Reads what the visitor sees: the decoder reads the rendered 2D master, the fog render at hold and the composited PNG at 100%, and JPEG q=75 re-encodes and phone screenshots at least 95%, on the gold deck at zero added noise; a closed kiss is always detected and refused, never misread, with dropout gaps placed beside kisses and across necks; material holes (filament crossings and loops, dry-brush streaks) are classified and never refused as kisses; the dropout breaking point is at least 15% of line length; it refuses at least 99% of 500 non-semagram images (random blots, photographs, other scripts).",
+        "Confidence: per-feature confidence and ranked alternatives with probabilities, and a calibration plot of predicted confidence against observed accuracy in at least 5 bins.",
+        "Designed redundancy (role in collar and neck angle, mirrored collars) raises the dropout breaking point by at least 10 percentage points over the same script without it, shown on the page.",
+        "Freehand: at least 50 freehand semagrams, drawn by people from the printed key with no underlay and no tracing of renders, stored in the repository as stroke files, decode exactly at 80% or more, and the page figure recomputes from them.",
+        "Photographs: at least 30 stored phone photographs of semagrams printed or drawn on paper decode exactly at 90% or more.",
+        "The dropout breaking point is at least 30% of line length, matching what QR Code error-correction level H restores (ISO/IEC 18004); freehand accuracy at least 95%; breaking points, freehand and photograph accuracy and a per-feature confusion matrix are reproduced by a node script that prints the numbers the page shows."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "G1 reader.js reads a 1400x840 grey raster with no access to the geometry; pixel round trip 163/163 (selftest, 2026-11-11); bench.json sweeps jitter, dropout and blots with 200 propositions per level and states breaking points (jitter 3.54% of R, dropout 17.94%, 57 blots): rung 3 holds. Fails rung 4: it assumes the crown at 0 degrees and decodes 1/30 at a 5-degree rotation and 0/30 at 15 degrees or more (research/plan-probes/g1_rotation.mjs); it reads the codec raster, not the displayed render. A misread code is also returned as the nearest codeword (reader.js never imports codeValid), so a misread passes silently."
+        }
+      }
+    },
+    {
+      "id": "english-bridge",
+      "name": "English in, English out",
+      "frame": "intelligence",
+      "metric": "Share of free-English sentences turned into the correct meaning graph on the sealed test part of a gold set, per route (deterministic engine, model route), as triple F1 per category; silent corruptions on a frozen probe of visitor sentences (count); fidelity of English realised from decoded graphs; the model's gain per category; behaviour under the public route's one reply per 45 s. Rater types unscripted sentences, reads the route and parse panels, and reruns the scorer.",
+      "ladder": [
+        "No parser: nothing reads typed English.",
+        "Typed words map to concepts by dictionary lookup.",
+        "Simple subject-verb-object sentences become a proposition with fixed slots, shown on the page as a predicate and its arguments.",
+        "A deterministic role parser handles negation, tense and aspect, passive, ditransitive and one embedded clause, and round-trips parse(realize(g)) = g on at least 1,000 random graphs. On a frozen probe of at least 35 visitor sentences, committed before engine work, it makes 0 silent corruptions: any gold triple missing or wrong with no on-screen flag counts as one, and a word it cannot place is reported, never turned into another role or concept. A model route returns schema-validated JSON, with the engine as fallback and the route named.",
+        "A broad engine: a maintained tagger at a pinned version (compromise) plus the lab's rule layer handles copula, wh-questions, coordination, conditionals, infinitive complements, possession, properties, place and time adjuncts, numbers and greetings, and gets at least 30 of the 35 frozen probe sentences right and at least 25 of a sealed second probe of 35 that the engine's builder never saw.",
+        "Free English in and out. The gold set has at least 120 sentences, half from named public texts, frozen with a commit hash before engine work. It is annotated by someone who does not build the engine, plus a subset converted from UMR 1.0 gold by a published script, and it has a dev part and a sealed test part. The engine scores at least 0.85 triple F1 on the sealed part, with precision on attempted triples and coverage reported separately. The public model route's measured schema-valid rate, F1 gain and latency are stated. On the public route the engine's semagram forms at once and the model's refinement of the latest turn morphs in when it arrives: one call per committed turn, a 12 s reply deadline and the 45 s window shown, with late refinements of earlier turns offered, never auto-applied. English is realised back from the decoded graph of every gold sentence, and English to HMR to English to HMR reproduces the graph exactly on the dev part.",
+        "Side by side: the model parse and the engine parse show together with differing roles and features marked, and the visitor picks the one to draw.",
+        "Paragraphs: pronouns are resolved across at least 4 sentences, with coreference accuracy on at least 20 gold paragraphs shown.",
+        "Smatch-style triple F1 (Cai and Knight 2013) is reported per category (embedding, questions, modality, evidentials, discourse) with the model's gain per category, and the sealed sentences each route gets wrong are listed on the page.",
+        "The engine alone scores at least 0.90 F1 on every category of a sealed set of at least 200 sentences, and a router calls the model only for categories whose stored model F1 exceeds the engine's; both figures recompute from a repository script.",
+        "Beyond English: Spanish in and out at the same F1, so one semagram is written for an English sentence and for its Spanish translation and reads back in either language (semasiography shown, not claimed), and at least 3 judges rate at least 95% of 200 realised sentences as meaning-preserving."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "G1 grammar.js parses controlled English into a proposition with roles, tense, aspect, mood, negation, evidence and one embedded clause; the passive works; parse(realize(g)) = g holds on 3000 graphs; model.js validates model JSON with an engine fallback (4/4 stubs): rung 2 holds. Fails rung 3 on silent corruption: 'We come in peace.' becomes 'We come the peace to something.', 'Please do not leave.' becomes 'Something does not leave.', 'The big ship left quickly.' becomes 'The ship left something.' (research/plan-probes/g1_parse_probe.mjs; cause: the fallback radical in parseNP, grammar.js lines 326 to 331)."
+        }
+      }
+    },
+    {
+      "id": "language-explained",
+      "name": "Understanding the language",
       "frame": "explanation",
-      "metric": "What a visitor can state after five minutes: which stroke means what, why this is semasiographic writing rather than logographic or phonetic, how Chiang ties it to Fermat's principle, whether each claim is tagged real or illustrative, and the count of false statements about the code or about real writing systems. Rater reads the page, follows any tour, and checks tags, claims and citations.",
+      "metric": "What a visitor can state after five minutes: how a semagram is read (lobes, necks, kisses, rims), why it has no beginning, what semasiographic writing is, how Chiang ties it to Fermat's principle, and what the film changed; tag discipline ([real], [illustrative], [speculative]); count of false statements about the code or real writing systems; measured learnability. Rater reads the page, follows the tour, answers the insight check and audits claims and citations.",
       "ladder": [
         "No explanation on the page.",
         "A title and a one-line caption.",
-        "An intro paragraph describes the mechanism, a footer tags the codec [real] and the shape-to-meaning mapping [illustrative], and no statement on the page is false about the code or about real writing systems (rater checks the intro, the footer and every [real]-tagged claim).",
-        "A legend names every stroke feature the page draws, each next to an example mark.",
-        "Correct framing: the page explains semasiographic writing (meaning without reference to speech) against logographic and phonetic scripts, says which this script is, and cites Ted Chiang, 'Story of Your Life', Starlight 2 (1998).",
-        "A guided tour of at least 5 steps builds one semagram a grammatical category at a time, each step changing the drawing.",
-        "Selecting any stroke shows which morpheme it encodes and the reason for its shape, both read from the grammar spec table.",
-        "A Fermat panel: light crossing two media with adjustable refractive indices; the refraction point is computed both from Snell's law and by numerically minimizing total travel time, both values are displayed and agree within 0.1%, and a caption states Chiang's parallel: the path is fixed by its endpoints before it starts, as a semagram's first stroke is fixed by its whole proposition.",
-        "Every claim on the page carries an inline tag ([real], [illustrative], [speculative]), and a sources list names Chiang (1998), Sampson's Writing Systems (1985) on semasiography, and Bliss's Semantography (1949).",
-        "An insight check after the tour: at least 5 questions (read a semagram, predict a stroke change, predict the Fermat path) with each answer explained.",
-        "A comparison view writes one proposition in this script beside 3 real systems (Chinese characters as logographic, an alphabet as phonetic, Blissymbols as semasiographic), so the classification is shown, not asserted."
+        "An intro paragraph describes the mechanism, claims carry real or illustrative tags, and no statement on the page is false about the code or about real writing systems.",
+        "A legend names every primitive with an example mark, and the page frames semasiographic writing against logographic and phonetic writing, citing Chiang (1998) and Sampson (1985).",
+        "A guided tour of at least 5 steps builds one semagram a category at a time, a Fermat panel computes the refraction point both by Snell's law and by minimising travel time and shows their agreement, and a sources list backs the tags.",
+        "The language explained by its own algorithms: selecting any part of a semagram shows the meaning it writes and the rule and reason for its shape, read from the spec; the no-beginning demonstration runs the real decoder on the visitor's own semagram at the angle and crop the visitor chose, starting at any lobe; the page states what the film changed (the circle) and what the story specified (the nest, the whole sentence known first, Fermat), without film images; it states plainly that a relation to the writer's now is what tense is, and that the script's difference is first-class event-to-event relations, 'timeless' as a value and a far side that writes no now; it names spelled names as the script's one sequential island; the one-curve, no-holes argument is shown on the visitor's own semagram; no false statements.",
+        "An insight check of at least 5 questions (read a semagram, predict a change, look for the start that does not exist, predict the Fermat path), each answer explained.",
+        "A comparison view writes one proposition in this script beside 3 real systems (Chinese characters as logographic, an alphabet as phonetic, Blissymbols as semasiographic), so the classification is shown, not asserted.",
+        "The reference grammar is readable by a non-linguist: every category with a one-sentence rule and 3 live examples, linked from every inspect panel.",
+        "Learnability measured: at least 20 people who had not seen the script read held-out semagrams after the page's lessons, and their accuracy, time spent and protocol are published.",
+        "Learnable like a script: after at most 30 minutes of the page's lessons the median learner reads held-out single-clause semagrams at 80% exact or more, a result the lab's research found reported for no other non-linear script."
       ],
       "levels": {
         "G0": {
           "level": 1,
-          "evidence": "Title, kicker and .sub caption present (rung 1); the .sub and footer describe limbs/closure/weight and carry [real]/[illustrative] tags. Fails rung 2 on false statements: the footer says function words are elided 'as a logographic script does', but Chinese writes them (de, le, bu each have a character); the kicker says 'a glyph is a whole proposition' while each glyph encodes one concept; the [real]-tagged ratio labels estTokens() over a glyph count from a lossy codec '2.0x denser', which measures no information. The page also calls the script 'logograms'; no legend for orbit, plural dots, strike or inner ring; no Chiang citation, no Fermat panel."
-        },
-        "G1": {
-          "level": 1,
-          "evidence": "No dispute; rater's grade kept. Rung 1: title, kicker and .sub caption. Fails rung 2 on a false [REAL]-tagged claim. Line 220 of heptapod.html says 'every round-trip count, field accuracy and breaking point on this page is measured in your browser when you look at it'. But the breaking points are fetched from the stored bench.json (views.js fetch, showBench, and the 'breaks at' label in drawChart), and the rater's rerun of bench.mjs gives dropout 17.89 against the stored 17.94. A second false claim: the key says one misread cell is caught by the check cell, but reader.js never imports codeValid and returns the nearest codeword, so misreads pass silently (rater)."
+          "evidence": "G1 heptapod.html has a title, kicker and caption: rung 1 holds. Fails rung 2 on two false statements. First, a [REAL]-tagged line (heptapod.html line 220) says every round-trip count, field accuracy and breaking point on the page 'is measured in your browser when you look at it', but views.js line 287 fetches the stored bench.json for the breaking points. Second, the key says a misread cell is caught by the check cell, but reader.js never imports codeValid and returns the nearest codeword. Both were found by the independent rater (commit c37529c) and checked for this revision. The work above runs but cannot count while rung 2 fails: the key from CATEGORIES, the Sampson framing, the 8-step tour and the Fermat panel."
         }
       }
     },
     {
-      "id": "reach-access",
-      "name": "Reach and access",
+      "id": "reach",
+      "name": "Reach, budgets and access",
       "frame": "performance",
-      "metric": "Whether the codec works at 390 px, under reduced motion, by keyboard, through a screen reader, and within frame budget (ms per encode-layout-render, frame time in ms). Rater uses devtools device mode at 390 px, emulates prefers-reduced-motion, tabs through the page, inspects accessible names, reads the ?perf readout, and records the Performance panel with and without 6x CPU throttling.",
+      "metric": "Frame time per tier (median of 60 frames, ms), GPU time per stage, compute from commit to formation (ms), behaviour at 390 px, under reduced motion, with no WebGL2, by keyboard and screen reader, hold-loop behaviour when idle or hidden, and transfer size before first formation (MB). Rater uses devtools device mode, CPU throttling, the ?perf readout, axe-core and a screen reader.",
       "ladder": [
         "The page does not load.",
         "Loads and works on a desktop viewport.",
-        "A phone breakpoint restacks the layout, and reduced motion (or ?still) freezes the background animation.",
-        "Keyboard and touch reach everything hover reaches: each element or stroke is focusable, Enter or tap selects it, and the focus ring is visible.",
-        "Every semagram has an accessible name carrying its decoded proposition (role='img' with aria-label), and an aria-live region announces each new decode.",
-        "At 390 px there is no horizontal scroll, the semagram is at least 300 px wide and tap targets are at least 44 px; under reduced motion no requestAnimationFrame loop runs.",
-        "A ?perf readout shows the median of 20 encode, layout and render runs for a 20-word sentence, under 16 ms on the rater's desktop without CPU throttling, and the render loop stops requesting frames once the drawing has settled and no input has arrived for 2 s, resuming on input.",
-        "Performance tiers: when the median frame time over 60 frames exceeds 20 ms (triggerable with devtools 6x CPU throttling), the page steps down to a cheaper render tier (the ink simulation, when present, falls back to plain vector strokes), and the active tier is shown on the page.",
-        "Noise benchmarks run in a Web Worker: 200 decodes complete in under 2 s, and the Performance panel shows no main-thread task over 50 ms during the run.",
-        "axe-core reports 0 violations, and a screen reader can walk each semagram as a structure (proposition, then roles, then features), not one flat label.",
-        "A WCAG 2.2 AA audit recorded in the repository lists every success criterion with its result and method, all pass, and includes a recorded screen-reader session (NVDA or VoiceOver) that decodes 3 semagrams without sight."
+        "A phone breakpoint restacks the layout, and reduced motion freezes the animation.",
+        "Keyboard reaches everything hover reaches with a visible focus ring, each semagram has an accessible name carrying its decoded proposition, and an aria-live region announces each new decode.",
+        "Measured basics: a ?perf readout shows the median of 20 parse, layout and render runs for a 20-word sentence under 16 ms on the rater's desktop; at 390 px there is no horizontal scroll, the semagram is at least 300 px wide and tap targets are at least 44 px; under reduced motion no requestAnimationFrame loop runs.",
+        "Pod budgets hold: the fog stage at 1440 px runs at 30 fps or more on an integrated GPU and on one real phone at its tier (median of 60 frames, GPU time per stage in ?perf); tiers step down automatically down to a CPU vector tier that still forms, reads back and converses with no WebGL2; reduced motion forms the final frame in one burst; the hold breathes only while visible and drops to an idle hold of at most 1 ms GPU after 20 s idle, never running under reduced motion; keyboard and screen reader reach the whole pod (input, transmit, read, inspect any lobe).",
+        "Workers: layout, master building and decoding run in Web Workers, and the Performance panel shows no main-thread task over 50 ms during formation.",
+        "Load: the first formed semagram appears within 2.5 s on a mid-range phone over a 4G profile (a recorded Lighthouse or WebPageTest run), with at most 1.5 MB transferred before it.",
+        "axe-core reports 0 violations, and a screen reader walks a semagram as a structure, lobe by lobe from any starting lobe, not as one flat label.",
+        "Offline: after the first visit the pod works with the network off (service worker), lexicon and decoder included.",
+        "A WCAG 2.2 AA audit recorded in the repository lists every success criterion with its result and method, all pass, and includes a recorded screen-reader session that holds a 3-turn conversation without sight."
       ],
       "levels": {
         "G0": {
           "level": 2,
-          "evidence": "@media (max-width:820px) restacks the stage; prefers-reduced-motion or ?still pins the shader time at 6.0, so the background freezes, though the requestAnimationFrame loop still redraws every frame (rung 2). Fails rung 3: .gcell divs are not focusable and react to mouse hover only; the SVG glyphs have no role or accessible name."
-        },
-        "G1": {
-          "level": 2,
-          "evidence": "No dispute; rater's grade kept. Rung 1: the page loads with 0 console errors (my shoot). Rung 2: phone.png restacks to one column at 390 px, and prefersReduced() (or ?still) makes SemaStage.set draw with 'none'. Fails rung 3: the arrow keys walk main.js ORDER_KEYS, which holds top-level roles only. The default hero sentence's nested clause elements (sub.*) can be hovered and tapped but not selected by keyboard. Rung 4 also fails: only the hero canvas gets a decoded aria-label."
+          "evidence": "G1 loads and works on desktop, restacks at phone width (phone2_0.png), and ?still and prefers-reduced-motion give the finished frame: rung 2 holds. Fails rung 3: the arrow keys walk main.js ORDER_KEYS (line 91), the top-level roles only, so nested clause elements that hover reaches cannot be reached by keyboard; and only the hero canvas gets a decoded aria-label (main.js line 68). Found by the independent rater (commit c37529c) and checked for this revision. Rung 4 is also unverified: the 16 ms ?perf figure, 44 px tap targets at 390 px and the absence of a requestAnimationFrame loop under reduced motion."
         }
       }
     },
     {
       "id": "codec-architecture",
-      "name": "Codec architecture",
+      "name": "Spec and engine architecture",
       "frame": "architecture",
-      "metric": "Code shape of the codec: whether parser, grammar, layout, renderer and decoder are separate modules, whether the script spec is data, and whether round-trip, fallback and noise tests run headless. Rater reads the files under labs/, greps for constants, and runs any test with node.",
+      "metric": "Code shape: separation of meaning, layout, master, medium and decoder modules with one-way data flow; the script spec as one versioned data file imported by encoder, decoder, renderer and docs; the decoder's imports; headless gates (round trip, invariance, topology, film-detail suite, similarity gate, model stubs) run by one command; a second implementation from the spec. Rater reads the module graph, greps for constants and runs the gates.",
       "ladder": [
         "No codec code exists.",
-        "The codec (encode and draw) runs in the page, from an inline script or imported modules.",
-        "The lexicon, stop-word list and preset deck are data tables declared apart from the encode and draw functions.",
-        "The codec lives in ES modules under labs/assets/js/ (parse, encode, draw), separate from page wiring, and the page imports them.",
-        "The grammar spec is data: a table maps each category value to its stroke operator, so a new category is added by a table row without editing the renderer.",
-        "A node test encodes and decodes at least 100 sentences headless and exits non-zero on any round-trip mismatch.",
-        "The decoder module imports nothing from the encoder or the lexicon lookup except the shared script spec, so it can only read geometry; the module graph shows it.",
-        "A node test stubs llm.js to fail, to time out and to return schema-invalid JSON, and asserts that the engine parse is the one encoded in each case.",
-        "The script spec is one versioned JSON file that renderer, decoder and documentation all import; grep finds no stroke constant outside it.",
-        "The codec ships as a standalone documented package (README, API, spec version) with no dependency on the page, usable from node.",
-        "A second, independent renderer (for example a plotter or SVG exporter) built from the published spec alone round-trips through the decoder, the proof that the spec is the system."
+        "The codec runs in the page from an inline script or imported modules.",
+        "The lexicon, stop words and preset deck are data tables declared apart from the encode and draw functions.",
+        "ES modules separate parser, grammar, layout, renderer and decoder; a headless round-trip test exits non-zero on any mismatch; the decoder imports nothing from the writer except the shared spec.",
+        "Grammar as data: one categories table drives renderer, reader and on-page key; tests stub the model route to fail, time out and return invalid JSON; the noise bench runs headless.",
+        "Meaning and material split: skeleton, 2D master and fog medium are separate modules with one-way data flow. The spec is one versioned JSON (primitives, the motif code set with its partitions, category table, margins, material contract) that encoder, decoder, renderer and docs import, with no stroke constant outside it (grep). One command runs every gate headless and exits non-zero on any regression: round trip, form-synonym invariance and crop readability, topology checksums on 10,000 graphs, the single-cell flip test, canonical-labelling determinism, the validated film-detail suite on masters with its negative controls, and the model-route stubs.",
+        "The codec ships as a standalone documented package usable from node (README, API, spec version) with no dependency on the page.",
+        "Determinism: every random number is a hash of concept and feature ids; a test renders the same master byte-identical twice, and decodes of the fog render agree across two GPU vendors.",
+        "The decoder's rules are written as a constraint-multiset-grammar file (after Marriott 1994), and a test checks the reader against that file.",
+        "Extension points proven: a new medium, a new input language and a new category are each added by one shipped extension without editing the core modules.",
+        "A second, independent renderer (an SVG or pen-plotter writer) built from the published spec alone round-trips through the decoder at 100% on the gold set: the proof that the spec is the system."
       ],
       "levels": {
         "G0": {
-          "level": 2,
-          "evidence": "One inline IIFE in heptapod.html (321 lines in the file); LEX and STOP are data tables declared above tokenize/encode/glyph/render and DECK is a data table declared after them (line 272, after render() at 244), but parser, renderer, decode readout and the WebGL background share one closure (rung 2). Fails rung 3: no module, no test."
-        },
-        "G1": {
           "level": 4,
-          "evidence": "Dispute upheld; rater's 7 lowered to 4. Rungs 1-3 hold: ES modules under labs/assets/js/heptapod/, with data tables declared apart from the functions and main.js as the wiring. Rung 4 holds: script.js CATEGORIES drives SLOT_KEYS, markFor and the reader's slots; the skeptic added a 'modal' category with only a CATEGORIES row and a GEOM.ORDER entry, and it inked and read back. Fails rung 5, 'a node test encodes and decodes at least 100 sentences'. Section 3 of selftest.mjs inks and reads 163 cases, but only 13 are sentences: the 9 PRESETS and the 4 COMPOSE_PRESETS, which go through parse (counts confirmed headless). The other 150 are randomGraph(lcg(11)) objects that never pass through English. Section 1's 3000-graph parse(realize(g)) round trip never inks or reads a semagram. So no test takes 100 sentences through encode and decode. The decoder isolation (reader.js imports only config.js, script.js and raster.js) and the four llm.js stubs in section 4 exist, but they cannot count above rung 5."
+          "evidence": "G1 has ES modules under labs/assets/js/heptapod/ (grammar, geometry, script, reader, ink, render, stage); selftest.mjs checks round trips headless and exits 1 on failure; reader.js imports only config, script and raster; script.js CATEGORIES drives the marks, the reader's slot values and the key; the model route is stubbed four ways; bench.mjs runs the noise sweep headless: rung 4 holds. Fails rung 5: meaning and material are fused in one renderer, constants live in config.js and MARKS rather than one versioned JSON spec, and there is no film-detail gate."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
-    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "22c8e87" }
+    {
+      "gen": "G0",
+      "date": "2026-11-11",
+      "by": "v2 ladder from the deep plan (_reference/labs/heptapod/PLAN.md v2.1, revised after two critics' reviews); rung 5 is Luis's anchor; G0 rates the G1 code at commit a84783b strictly, folding in the independent v1 rater's findings (commit c37529c), each checked in the code; replaces the v1 ladder, whose G0 rated the pre-G1 page",
+      "commit": "a84783b"
+    }
   ]
 }
