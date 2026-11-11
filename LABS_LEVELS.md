@@ -3,11 +3,38 @@
 The level system for the labs at luisblanco.dev/labs, and each lab's rating before and after its evolution pass.
 Started 2026-11-11 on Luis's order: every lab rises on every axis, and the developed ones rise five levels.
 
-## The axes
+## Each lab has its own axes
 
-Nine axes, from the evolve skill's niche grid, named for what a lab is. A lab is rated on each.
+A black hole and a habit tracker do not climb the same ladder. Each lab defines its own axes in
+labs/levels/<id>.json: six to twelve of them, each named for what that lab does (geodesic fidelity, decoder
+robustness, forecast calibration), each with a measurable metric, and each with its own eleven-rung ladder from 0
+to 10 written for that lab. A rung is a concrete state a rater can check with a yes or no.
 
-| Axis | What "up" means |
+Three rules keep the ladders honest:
+
+1. A lab's ladders are written before its generation is graded, from the code as it stands, and reviewed by a second
+   pass that tries to break them (a rung nobody can check, a G0 set too high, a rung 10 that is not the best in the
+   field).
+2. The builder of a generation does not grade it. A separate rater grades every axis against the fixed ladder, from
+   the running page and its code, with evidence.
+3. A ladder changes only between generations, with the reason recorded, never to fit a result.
+
+The arithmetic, computed by tools/levels.mjs:
+
+    lab level = min(median of its axis levels, weakest axis + 2)
+
+The median is the lower median when the count is even. A beautiful shell with an empty model is capped by its
+weakest axis. The "next rung" of a lab is the next rung of its weakest axis: the routine always knows what to build
+next.
+
+Commands: `node tools/levels.mjs check | table | sheet <id> | next [<id>] | write | selftest`.
+
+## The nine frames
+
+Every lab's axes roll up to these nine frames, from the evolve skill's niche grid, so labs stay comparable. Every
+frame needs at least one axis in every lab.
+
+| Frame | What "up" means |
 |---|---|
 | Model | What it computes. From a lookup table, to a working mechanism, to a model checked against published values. |
 | Graphics | What becomes visible. From a static block, to one live view, to linked views with cinematic choreography. |
@@ -19,9 +46,10 @@ Nine axes, from the evolve skill's niche grid, named for what a lab is. A lab is
 | Performance | Load, frame time, phone width, reduced motion, keyboard and screen-reader reach. |
 | Architecture | Code shape: modules, config separate from logic, what can be added without touching the core. |
 
-## The ladder
+## The general ladder
 
-The same ten levels on every axis.
+What each level means in general. A lab's own ladders say what it means for that lab on that axis; where the two
+disagree, the lab's ladder wins, and its rungs should sit near these.
 
 | Level | Name | What it means |
 |---|---|---|
@@ -37,9 +65,6 @@ The same ten levels on every axis.
 | 9 | signature | Does something no comparable public demo does. The visitor leaves with an artifact or an insight. |
 | 10 | reference | The interactive people cite for its topic. |
 
-A lab's level is the median of its nine axes, and it holds that level only if no axis sits more than two levels below
-it. A beautiful shell with an empty model does not count.
-
 Targets for this pass: every lab at 7 or higher, no axis below 5. Black Hole, Exomania and Dimensions at 9.
 
 ## The public model route (measured 2026-11-11)
@@ -50,10 +75,10 @@ text.pollinations.ai, then the lab's own deterministic engine. The keyless publi
 FREE_LIMIT with "1 reply every 45 seconds per IP" on 2026-11-11, so a lab gets about one model call per
 interaction on the public site. Labs batch their stages into one call and say which route answered.
 
-## Ratings
+## First audit (general ladder)
 
-G0 is the audit of 2026-11-11, from screenshots at 1440 px and a reading of each lab's code. G1 is the rating after
-its pass, written by the pass that built it and checked against its screenshots.
+The first audit of 2026-11-11, on the general ladder, from screenshots at 1440 px and a reading of each lab's code.
+It stays as the record of the first look. The ratings by each lab's own axes follow it and supersede it.
 
 | Lab | Page | G0 | Weakest axis at G0 | G1 | Shipped |
 |---|---|---|---|---|---|
