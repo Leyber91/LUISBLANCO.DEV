@@ -48,7 +48,9 @@ import { AI_CONFIG } from './config.js';
 const POLL_URL = 'https://text.pollinations.ai/openai';
 const POLL_MODEL = 'openai';             // alias the anonymous tier serves
 const POLL_WINDOW_MS = 46000;            // 45 s per IP, plus a second of slack
-const OLLAMA_BASE = 'http://localhost:11434';
+// 127.0.0.1, not localhost: on Windows localhost tries ::1 first and took 1.6 s to connect (2026-11-11).
+const OLLAMA_BASE = 'http://127.0.0.1:11434';
+const OLLAMA_PROBE_MS = 2500;
 const OLLAMA_PREFER = ['qwen2.5:14b', 'llama3.1:8b', 'qwen3:8b', 'gemma2:9b'];
 const DEFAULT_TIMEOUT_MS = 60000;
 const OWN_KEY_STORE = 'lb.llm.ownkey';
@@ -123,7 +125,7 @@ export function extractJSON(text) {
 class Route {
   constructor() {
     this.listeners = new Set();
-    this.state = { route: 'unknown', model: '', label: 'model: detecting', readyIn: 0 };
+    this.state = { route: 'unknown', model: '', label: 'model: chosen on first use', readyIn: 0 };
     this._detecting = null;
     this._ollamaModel = '';
     this._queue = Promise.resolve();
@@ -147,7 +149,7 @@ class Route {
       route === 'worker' ? `model: ${model} (worker)` :
       route === 'pollinations'
         ? `model: ${model || 'gpt-oss-20b'} via pollinations` + (readyIn > 0 ? ` · next reply in ${readyIn}s` : ' · ready')
-        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: detecting';
+        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: chosen on first use';
     this.state = { route, model, label, readyIn, note };
     this.listeners.forEach((fn) => { try { fn(this.state); } catch { /* the listener's problem */ } });
     this._scheduleTick();
@@ -185,7 +187,7 @@ class Route {
     this._detecting = (async () => {
       if (isLocalPage()) {
         try {
-          const t = withTimeout(null, 900);
+          const t = withTimeout(null, OLLAMA_PROBE_MS);
           const r = await fetch(OLLAMA_BASE + '/api/tags', { signal: t.signal, cache: 'no-store' });
           t.done();
           if (r.ok) {

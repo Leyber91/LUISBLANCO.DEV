@@ -1,0 +1,275 @@
+{
+  "id": "timeline",
+  "title": "Interactive Timeline",
+  "page": null,
+  "thesis": "The visitor flies in one continuous zoom from deep time to a single week of the story, watches Earth, Terra and Kha-Ren run in step and then diverge at each artifact discovery, compares any moment across the three in their own calendars, reads the physics behind each event tagged from established to fiction with real citations, and asks questions answered only from the published event data, never past the reading point they chose.",
+  "axes": [
+    {
+      "id": "chronology-engine",
+      "name": "Multi-calendar chronology",
+      "frame": "model",
+      "metric": "What the date engine computes, checked against CODEX/CHRONOLOGY: calendars converted by the CALENDAR_SYSTEMS formulas (A.T. = CE + 3537; CE = Cycle x 75 + Year - 4750), rows of the CALENDAR_SYSTEMS and MASTER_TIMELINE tables that the engine reproduces or lists as canon discrepancies, and the share of event positions computed rather than typed. A rater runs the repo's conversion tests, or converts 5 rows of the CROSS-CALENDAR REFERENCE TABLE on the page and compares them with the formulas.",
+      "ladder": [
+        "Absent: no date model exists; nothing places an event in time.",
+        "Events carry a hand-typed date label only; their order on the page comes from list order, not from a number.",
+        "Every event has a numeric Earth-CE year (negative for BCE, years-ago values for deep time) and its on-screen position is computed from that number.",
+        "One scale function (piecewise linear with stated breakpoints, or log of years before the story present with the present handled explicitly) maps every shipped event, from the oldest to 2068 CE, inside the axis at the widest view with 0 clipped, and ticks are labelled Gyr ago, BCE or CE by range; when the oldest event at or below the spoiler ceiling is younger than 1 Gyr, the deep range is carried by cited [ESTABLISHED] anchors (the age of the Earth, the age of the universe).",
+        "Terra's A.T. date is computed by the CALENDAR_SYSTEMS formula A.T. = CE + 3537 (BCE n read as CE -n, as the table does), reproducing every Terra cell of the CROSS-CALENDAR REFERENCE TABLE (2068 CE = 5605 A.T., 1 CE = 3538 A.T.); every Terra event at or after 0 A.T. shows its A.T. date beside CE, events before 0 A.T. show 'pre-A.T.' as canon states, never a negative A.T. year, and the ~400-day year is used only for ages (rung 7).",
+        "Kha-Ren's Cycle.Year is computed by the CALENDAR_SYSTEMS formula CE = Cycle x 75 + Year - 4750, with Year from 0 to 74 (Cycle 90, Year 68 = 2068 CE; C1.Y0 = 4675 BCE); events before C1.Y0 show 'pre-calendar' as the CALENDAR_SYSTEMS table does, and every event after both epochs shows all three dates, each produced by code, none typed.",
+        "Date uncertainty modelled: every approximate CODEX date (a '~' or a range) is stored as an interval whose width follows a rule written in the data file (for example +/-1% of years before the story present for '~', the stated endpoints for a range), drawn as a span, and carried through every conversion.",
+        "Age convention: a function converts a biological Earth-standard age to native-calendar years by the CALENDAR_SYSTEMS rule (x 365/400 for Terra, x 1 for Earth and Kha-Ren), reproducing all 8 rows of the AGE EQUIVALENCE CONVENTION table within 0.2 year (the two Terra rows: 42 gives 38.3 against ~38.3, 67 gives 61.1 against ~61.3); elapsed spans between two dates are the differences of their native date numbers, the rule cross-dimension-compare rung 6 uses, and the page states that canon converts dates by offset and ages by year length.",
+        "Conversion tests in the repo check at least 20 dated rows from CALENDAR_SYSTEMS and MASTER_TIMELINE, including every row of the CROSS-CALENDAR REFERENCE TABLE; each row either matches within the interval rung 6 gives it or sits in a canon-discrepancy list in the repo that shows both values and the reading the engine follows (the list includes ~3537 BCE: table C15.Y~13 against formula C16.Y13, and 2065 CE: MASTER_TIMELINE C90.Y~15 against formula C90.Y65); the test fails on any row that neither matches nor is listed, so 0 mismatches are unlisted.",
+        "Relative dates solved: events dated only by order or by chapter span (before X, during Y, chapters 9 to 11) are placed by a constraint solver over Allen's 13 interval relations (James F. Allen, Communications of the ACM, 1983) with propagation by Allen's transitivity table; a test feeds it an inconsistent set and it reports the conflict, and the page shows the constraints behind any placed event.",
+        "Reference standard: the calendar-conversion rigour of Reingold and Dershowitz, Calendrical Calculations (Cambridge University Press): every displayed date, native conversion and uncertainty band is derived by the engine from CODEX-sourced constraints with 0 hand-placed positions; a test regenerates all positions and diffs them against the shipped data with 0 changes, and every unsatisfiable constraint is reported with both source lines."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: the hub lists 'timeline' as planned in labs/assets/js/config/site.config.js, and no module computes TRIVERSE dates or calendars. The site's only chronology code, labs/assets/js/altverse/render/chronology.js (48 lines, fmtYear formats Gyr/Myr/kyr), serves Altverse and is not part of this lab; the unported prototype TRIVERSE_TIMELINE.html in the TRIVERSE repo is not on the site and does not count." }
+      }
+    },
+    {
+      "id": "divergence-structure",
+      "name": "Divergence structure",
+      "frame": "model",
+      "metric": "How faithfully the timeline's structure encodes the saga's dimension cosmology: count of structural features present (dimension field, typed discovery events with stored offsets, divergence drawn from data, typed cross-dimension links, structural and core layers, character threads, a sourced era list, causal edges), read from the event schema and checked on the page against CODEX DIVERGENCE_POINTS and MASTER_TIMELINE.",
+      "ladder": [
+        "Absent: no events, so no structure; nothing records which dimension an event belongs to.",
+        "A single flat list of events with no dimension field.",
+        "Every event carries a dimension field whose value is one of the six canon dimensions (three expression, two structural, one core), and the page shows it.",
+        "Each expression dimension's artifact discovery is a typed event (Kha-Ren ~8000 BCE, Terra ~3537 BCE, Earth at the date a rulings file in the repo names, with its reason, among canon's 1944 detection, 2031 access and 2068 table date), and every event in an expression lane stores its signed offset in years from its own lane's discovery.",
+        "Divergence drawn to canon from data: before a lane's discovery its development-stage label matches the lanes not yet diverged (Neolithic at ~8000 BCE for Earth and Terra, Bronze Age at ~3537 BCE for Earth and Terra, per MASTER_TIMELINE and DIVERGENCE_POINTS); at its discovery event the lane shows a divergence marker and from then on its DIVERGENCE_POINTS response label (containment, acceleration, discovery); editing a discovery date in the data file moves its marker; Earth's marker shows the ruled date and lists canon's other two; the lanes are never drawn as one line that forks (DIVERGENCE_POINTS: 'not parallel timelines', 'separate branes').",
+        "Typed cross-dimension links: every canon contact or crossing between dimensions at or below the spoiler ceiling is stored as an edge with a type and drawn as a connector between lanes at the moment it occurs.",
+        "The two structural dimensions and the core dimension render as layers beneath or between the expression lanes, not as three more parallel lanes; each layer carries the events the spoiler ceiling admits, and a layer whose events are all above the ceiling shows as a named, empty layer.",
+        "Character threads: at least 6 named characters have lifelines in the data (first appearance, key events, last state at or below the spoiler ceiling) drawn as threads inside their lanes and crossing lanes where canon moves them.",
+        "Eras: an era list file in the repo names every era with its CODEX source line (at least Terra's Early Artifact Era 0-1000 A.T., Great Unification 1000-2000 A.T. and Unified civilization, and Kha-Ren's span from discovery to caste formalization, ~8000 to ~4675 BCE, and its caste era from C1.Y0), each with a start and end interval from the chronology engine; the page shows each lane's era at the cursor, or 'no named era' where canon names none.",
+        "Causal edges: events carry typed cause links (caused, enabled, responded to) within and across lanes, each with its CODEX source, and selecting an event highlights its causes and its consequences.",
+        "Structure complete against canon: a script checks that every dimension, era, discovery point, cross-dimension link and named character in CODEX/CHRONOLOGY appears in the graph or in a documented exclusion list with a reason (spoiler, scaffold), with 0 unexplained gaps."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: there is no event data or schema on the site, so no dimension field, discovery event, lane, link or thread exists." }
+      }
+    },
+    {
+      "id": "deep-time-zoom",
+      "name": "Deep-time zoom",
+      "frame": "graphics",
+      "metric": "Zoom range and legibility of the drawn timeline: view width at the widest and narrowest zoom in years, overlapping labels counted at 5 named views (the whole chronology, 8000 BCE to 2068 CE, 1868 to 2068 CE, the year 2068, and a 2-week window at the story's 'Weeks 1-2' row), levels of detail, and the number of linked views kept in sync. A rater zooms the page end to end at 1440 px and reads the axis and labels at each named view.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "A static image or a plain list of events; no drawn time axis.",
+        "One drawn time axis (SVG or canvas) with event marks at their dates; no zoom.",
+        "The three expression lanes are drawn on the shared axis with event marks and labels; at the default view at 1440 px, 0 labels overlap and no label text is smaller than 11 px.",
+        "Zoom and pan by wheel, drag and pinch, anchored on the pointer, over at least 6 orders of magnitude of view width, with tick labels recomputed at every zoom level.",
+        "The full range: view width runs continuously from at least 1 Gyr (the whole chronology) down to 1 week, about 11 orders of magnitude, with 0 overlapping labels at these 5 views: the whole chronology, 8000 BCE to 2068 CE, 1868 to 2068 CE, the year 2068, and a 2-week window at the story's 'Weeks 1-2' row.",
+        "Semantic zoom with at least 3 levels of detail (eras, events, chapter-scale beats); marks closer than 8 px merge into a counted cluster that splits as the visitor zooms in.",
+        "Flights between distant moments (deep time to the story present) animate as a combined zoom-out, pan and zoom-in path in the manner of van Wijk and Nuij (IEEE InfoVis 2003, smooth and efficient zooming and panning), in at most 1.5 s.",
+        "Linked views: an overview strip of the whole chronology with a brush marking the current window, the main timeline and the event detail panel stay in sync within one animation frame.",
+        "Storyline layout: character threads are laid out by crossing minimisation (as in Tanahashi and Ma, IEEE TVCG 2012, or StoryFlow, Liu et al., IEEE TVCG 2013), and the page reports the crossing count of the current layout beside the count for the same threads in data order, the first lower than the second.",
+        "Reference standard ChronoZoom (UC Berkeley and Microsoft Research, 2012) for zoom continuity, joined to diverging lanes and storyline threads in one view: a rater zooms from the oldest event down to a 1-week window, the finest dating canon gives (MASTER_TIMELINE's week-level 2068 rows), in one gesture sequence with no reload, no blank frame and 0 label overlaps."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: nothing draws this lab. The only timeline renderer on the site, labs/assets/js/altverse/render/chronology.js (48 lines), draws Altverse era bands as a DOM list with no zoom or lanes, and is not part of this lab." }
+      }
+    },
+    {
+      "id": "single-accent-language",
+      "name": "Single-accent saga language",
+      "frame": "style",
+      "metric": "Conformance to the site's locked language in labs/assets/css/tokens.css (near-black void, IBM Plex Mono, warm gold as the only accent, no second hue) and the timeline's own mark vocabulary: hex or rgb literals outside tokens.css (grep); a pixel test on 1440 px screenshots (every pixel with OKLCH chroma above 0.07 lies within 15 degrees of the gold's hue, and 0 such pixels inside the timeline at rest); whether each pair of lane patterns and each pair of badges can be told apart in a grayscale screenshot by shape or pattern alone; text contrast at 3 sampled points per lane.",
+      "ladder": [
+        "Absent: nothing is drawn or styled.",
+        "Browser defaults, or a template that does not load labs/assets/css/tokens.css.",
+        "tokens.css loaded: near-black void, IBM Plex Mono, the site header and footer; timeline marks still carry hard-coded values.",
+        "0 hex or rgb literals in the lab's own CSS and JS outside tokens.css (grep), and in a 1440 px screenshot every pixel with OKLCH chroma above 0.07 has a hue within 15 degrees of the tokens.css gold (#D4A24C, hue 79 degrees), so no second hue appears.",
+        "Gold marks only what is active (the selected event, the comparison cursor, the current tour stop): in a 1440 px screenshot of the timeline at rest, 0 pixels inside the timeline area have OKLCH chroma above 0.07.",
+        "A mark vocabulary with an on-page legend: one line pattern or glyph per dimension shown (up to 6), the dimensions differing by ink-gray value and pattern, never by color, and distinct badges for the 4 evidence tags and the narrative tags; each pair of lane patterns and each pair of badges can be told apart in a grayscale screenshot by shape or pattern alone.",
+        "Date stamps set by magnitude: one stamp style with tabular figures (font-variant-numeric: tabular-nums) renders Gyr-ago, BCE, CE and both native calendars, and no stamp wraps at the 5 named views of deep-time-zoom rung 5.",
+        "Motion from tokens: select, hover and divergence-reveal transitions take durations and easings from tokens.css (--t-fast, --t-mid, --t-slow, --ease, --ease-out, --ease-in), none over 600 ms; flights use one named flight-duration token of at most 1.5 s, as deep-time-zoom rung 7 allows; the lab's code holds 0 inline durations.",
+        "Lane textures generated in code (0 image files): each expression lane's texture generator carries a header comment naming the CODEX/WORLDS file and section it draws from and the medium it renders (Kha-Ren's from its acoustic culture), and text contrast is at least 4.5:1 at 3 sampled points per lane.",
+        "Rest-frame composition: at 1440 px and at 400 px the frame at rest has exactly one element at the brightest ink value inside the timeline canvas (the current divergence marker or the story-present line), at most 3 text sizes inside the canvas (computed styles), and both frames pass the hex grep, the gold-at-rest count and the 4.5:1 contrast check.",
+        "Every state (rest, hover, select, compare, tour, answer highlight, spoiler-hidden) has a 1440 px and a 400 px screenshot on a style sheet in the repo, and each passes every check above with 0 exceptions; reference standard Histography (Matan Stauber, 2015) for a timeline carried by its marks: with all text hidden, the rest-frame screenshot still shows the 3 expression lanes, the 3 divergence markers and the tag badges as marks that can be told apart."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no timeline stylesheet under labs/assets/css/ and nothing rendered to screenshot." }
+      }
+    },
+    {
+      "id": "deep-time-navigation",
+      "name": "Deep-time navigation",
+      "frame": "interaction",
+      "metric": "The navigation actions a visitor can perform, counted on the page: open, filter, search, jump, step, follow a character, build a trail, restore from URL, drive by keyboard. A rater performs each action at 1440 px and on a 400 px phone viewport and records which work.",
+      "ladder": [
+        "Absent: no page, nothing to navigate.",
+        "Page scroll only; nothing on the timeline responds to input.",
+        "Clicking an event opens a detail card with its title, dates, dimension and source.",
+        "Filters: a toggle for each dimension the page shows and for the evidence and narrative tags, applied at once to the drawn timeline.",
+        "Search over event titles and text; choosing a hit zooms and pans the view to that event and selects it.",
+        "Jump controls: one-click jumps to each artifact discovery and to the story present, plus next and previous event within the current lane.",
+        "Shareable state: zoom window, selected event, filters and cursor are encoded in the URL, and pasting the URL into a new tab restores the exact view.",
+        "Follow a thread: picking a character steps through that character's events in time order with next and previous, moving across lanes where the character does.",
+        "Reading trails: the visitor selects any set of events and gets an ordered trail with its own URL and a step-through player.",
+        "Keyboard-complete: every action above has a key (arrows pan, plus and minus zoom, brackets step events, slash focuses search), listed in a help overlay opened with the question-mark key.",
+        "Reference standard: the continuous zoom of ChronoZoom with the story stepping of TimelineJS (Northwestern University Knight Lab) in one interface, every action reachable by mouse, touch and keyboard, each one verified at 400 px and at 1440 px."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no control, event or URL state exists for the timeline on the site." }
+      }
+    },
+    {
+      "id": "cross-dimension-compare",
+      "name": "Cross-dimension comparison",
+      "frame": "interaction",
+      "metric": "What the visitor learns by comparing moments across Earth, Terra and Kha-Ren: the comparison features present and their correctness. A rater places the cursor at 5 fixed dates (~8000 BCE, ~3537 BCE, ~1537 BCE, 1944 CE, 2068 CE) and checks per lane the native dates against the chronology engine's output, the development stage and response against DIVERGENCE_POINTS and MASTER_TIMELINE, and the last event against the page's event data.",
+      "ladder": [
+        "Absent: no lanes, so no moment can be compared.",
+        "The three lanes are visible together, but nothing aligns or compares a moment across them.",
+        "A vertical same-moment cursor spans all three lanes and shows its Earth-CE date.",
+        "The cursor panel shows, for each expression dimension, the date in its native calendar and the most recent event before the cursor.",
+        "The panel also shows each lane's development stage and, from that lane's discovery on, its DIVERGENCE_POINTS response (containment, acceleration, discovery), or 'not in canon' where CODEX states none, correct at 5 of 5 of the metric's fixed dates.",
+        "The cursor snaps to events in any lane, can be dragged, typed as a date in any of the three calendars, or set by selecting an event.",
+        "Two-moment comparison: pin two cursors and read the elapsed span in each calendar (the difference of the native date numbers, chronology-engine rung 7; Kha-Ren as cycles and years) and the count and list of events between them, per lane.",
+        "Align by discovery: a second alignment re-indexes each lane to its discovery event from divergence-structure rung 3 (Earth's at the recorded ruling), so the visitor compares what each humanity did at the same offset from its discovery rather than on the same date.",
+        "Comparison export: the current comparison (cursor dates, per-lane state, events between) copies as a cited text block and as a URL that restores it.",
+        "Indicator strip: small multiples show canon indicators (for example population, settlement scale, dominant technology) for the three lanes over the visible window, drawn only at dates where CODEX states a value, each value with its CODEX source line; gaps are drawn as gaps labelled 'not in canon', never interpolated, and an indicator with fewer than 3 canon values in a lane is not drawn for that lane.",
+        "Every CODEX MASTER_TIMELINE row at or below the spoiler ceiling is reproduced by the cursor panel with 0 mismatches outside the canon-discrepancy list (chronology-engine rung 8); each listed row is flagged in the panel with the reading it follows, and both alignments and the indicator strip work at 400 px."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no lanes, cursor or comparison panel exist on the site." }
+      }
+    },
+    {
+      "id": "canon-fidelity",
+      "name": "Canon fidelity and provenance",
+      "frame": "data",
+      "metric": "Share of shipped events traceable to a named CODEX file and section, carrying a narrative tag or UNTAGGED, free of superseded names and claims, with contradictions surfaced and author review recorded. A rater runs the data checks, or samples 10 events and opens each source in the TRIVERSE CODEX.",
+      "ladder": [
+        "Absent: no event data exists.",
+        "Events are written into the page by hand with no source.",
+        "Events live in a separate data file with at least 30 events, each with a stable id.",
+        "Every event names its source as a CODEX file path and section heading, and 10 of 10 sampled events match their source.",
+        "At least 100 events at or below the spoiler ceiling, covering all three expression dimensions and every structural or core layer the ceiling admits, drawn from the three CODEX/CHRONOLOGY files and the CODEX/WORLDS files, each event's source path saying which.",
+        "Every event carries a narrative tag: the nearest tagged heading above its source line ([CANON], [DEEP LORE], [SCAFFOLD]), or UNTAGGED when there is none; UNTAGGED and [SCAFFOLD] events are labelled provisional on the page, never shown as settled, and the page shows their count.",
+        "Current canon enforced: a check fails the build on any phrase listed in one supersession file found in shipped data or copy; each entry cites its superseding source, and the file lists at least the Kha-Ren dimension's retired name, the 'Bronze Age equilibrium' framing (superseded by CODEX/WORLDS/ESHARA/RECONCEIVED and TRIVERSE CLAUDE.md rule 5) and the 5-layer count (superseded by six dimensions, rule 1).",
+        "Generated, not typed: a script reads the CODEX files and writes the event data; rerunning it reproduces the shipped file exactly, and the file records the TRIVERSE repo commit it was built from.",
+        "Contradiction report: the build lists every pair of CODEX statements that disagree on a date, order or name, and each affected event shows which reading the page follows and why.",
+        "Author review: every event carries an author-reviewed date set only in commits with no Co-Authored-By: Claude trailer (a script over git log confirms it); at least 95% of shown events are reviewed, and unreviewed events are labelled as such on the page.",
+        "Coverage proven: a test shows 100% of dated rows in CODEX/CHRONOLOGY appear as events or sit in a documented exclusion list with a reason (spoiler, scaffold, duplicate), 0 contradictions are open without an author ruling (a rulings entry from a commit with no Co-Authored-By: Claude trailer), and 100% of shown events are author-reviewed."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no event data file exists under labs/, so nothing is sourced or tagged." }
+      }
+    },
+    {
+      "id": "spoiler-boundary",
+      "name": "Spoiler boundary",
+      "frame": "data",
+      "metric": "Count of above-ceiling content (anything past the ceiling Luis set, every [B3-ONLY] item, every spoiler watchlist term) reaching any public channel: every tracked file of the public repo, plus HTML, JS, JSON, URL state, search, model context and export. Measured by the spoiler gate in the gates workflow and by the probe and side-channel tests, plus the gating features present on the page.",
+      "ladder": [
+        "Absent: no data ships, so there is no boundary to hold.",
+        "Events ship with no spoiler policy: whatever sits in the data file is public.",
+        "A spoiler ceiling file in the repo, dated, states in Luis's words which books and tiers may appear on the public page; its last change is a commit with no Co-Authored-By: Claude trailer (git log shows it).",
+        "Every event carries a spoiler tier field (premise, a book number, or a trilogy), set per event by the book in which that fact is revealed, never inherited from its source file or section; an event whose tier is unset is hidden by default.",
+        "Every tracked file in the public repo (git ls-files, not only the page's files) holds only events at or below the ceiling: a scan of every tracked file for [B3-ONLY] and for every term in a spoiler watchlist (above-ceiling character fates, late-saga events, quoted late-book lines) returns 0 hits, the one exemption being the tag name itself inside labs/levels/ ladder files; the watchlist is read from a repository secret the way tools/privacy_gate.py reads WATCHLIST, so the list never enters the repo.",
+        "A spoiler gate step in .github/workflows/gates.yml runs the rung 4 scan over every tracked file and fails on any event in the data whose tier is above the ceiling; it fails closed when the watchlist secret is missing, prints file and line but never the matched term, and its selftest catches a planted synthetic leak (an invented event id and an invented term, never real above-ceiling text).",
+        "Reading position: the visitor sets how far they have read (book and chapter), and the timeline, search and comparison panel hide every event past that point; the setting lives in the URL.",
+        "The question path holds the same boundary: the model receives only events at or below the visitor's reading position, verified by logging the context sent for 10 questions.",
+        "Spoiler-probe set: at least 15 questions written to extract content past the reading position (directly, by inference, by role-play), stored as question templates plus opaque ids of hidden events, with no above-ceiling term (the rung 5 gate scans the probe file); an answer leaks when it contains a watchlist term or the name, id or date of a hidden event, and 0 answers leak on the local and public llm.js routes, recorded with date and route.",
+        "Side channels closed: derived outputs (lane event counts, cluster sizes, thread lengths, search no-result messages, URL state) are identical with and without the hidden events, checked by a test that renders both.",
+        "One gate for every channel: a single function gates render, search, URL, export, comparison and model context, with one test per channel (6 tests) run in the gates workflow, and that function is the only importer of the raw event file (grep)."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no event data ships and no ceiling file or gate exists, so nothing is gated." }
+      }
+    },
+    {
+      "id": "grounded-answers",
+      "name": "Grounded answers",
+      "frame": "intelligence",
+      "metric": "On a fixed question set with its answer key, added by the rater or Luis and never edited by a builder: share answered correctly (every expected event id cited and every expected date stated), share of unanswerable questions refused, and the score of the deterministic engine alone against engine plus model; plus which llm.js route answered, read from the route panel. The public route allows about one model call per 45 s, so one call per question is the budget.",
+      "ladder": [
+        "Absent: no way to ask the timeline anything.",
+        "A question box answers from a fixed list of scripted question-and-answer pairs.",
+        "Deterministic retrieval: a question is parsed for names, dimensions and dates and returns the matching events with their ids, with no model and no network.",
+        "One model call per question through labs/assets/js/ai/llm.js with the retrieved events as the only context, and route-panel.js shows which route answered.",
+        "Every answer cites event ids as links that move the timeline to the cited event, and an answer citing an id outside its context is rejected in code and replaced by the deterministic answer.",
+        "Refusal without a model call: when retrieval finds no supporting event the page answers that the published timeline does not say, and at least 9 of 10 unanswerable questions in a question file added by the rater or Luis (in a commit whose message says so) are refused.",
+        "Temporal questions computed: cross-dimension questions (what was happening in one lane when an event happened in another) and date conversions are answered by the chronology engine, the model only phrases them, and the computed answer stands alone when every model route fails.",
+        "Measured: a 40-question set with its answer key (at least 10 unanswerable, 10 cross-dimension, 10 calendar conversion; expected event ids and dates for each answerable one), added by the rater or Luis in a commit whose message says so and never edited by a builder (git log); an answer counts when it cites every expected id and states every expected date, or refuses an unanswerable question; engine plus model scores at least 90%, and the engine alone is scored on the same set, both recorded with the date and the route used.",
+        "Claim check: each answer sentence is checked in code against its cited events for dates, names and dimensions; unsupported sentences are struck through on the page and counted in the score.",
+        "Model contribution earned: the page publishes both 40-question scores (engine alone, engine plus model), and engine plus model beats the engine alone by at least 10 points, or the engine alone scores at least 90% and the page states that the model adds phrasing only.",
+        "At least 97% on the 40-question set with citation precision and recall reported (as defined in ALCE, Gao et al., EMNLP 2023), 0 uncited claims and 0 spoiler leaks (as spoiler-boundary rung 8 defines a leak) on every llm.js route including the offline engine, and the eval harness runs from the repo with one command."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no question input, retrieval or llm.js call exists for the timeline." }
+      }
+    },
+    {
+      "id": "physics-evidence",
+      "name": "Physics and evidence tags",
+      "frame": "explanation",
+      "metric": "What the visitor learns about why events happen and how real their physics is: count of events flagged physics with notes of at least 80 words, share of notes whose evidence tag is copied from a stored CODEX/SCIENCE, PHYSICS/ or PHYSICS_BIBLE.md passage, share of citations with a resolving DOI or arXiv id whose metadata matches and whose stored passage supports the note, and tour coverage of the 3 artifact discoveries. A rater reads the data and opens 5 citations.",
+      "ladder": [
+        "Absent: nothing explains anything.",
+        "A static intro paragraph names the saga; events carry no explanation.",
+        "An intro with a diagram explains the three expression dimensions, every structural or core dimension the spoiler ceiling file admits, and that the three humanities differ by when each found its artifact.",
+        "At least 10 events flagged physics: true in the data (for example the Higgs boson and Future Circular Collider rows of MASTER_TIMELINE) each carry a note of at least 80 words naming the physical idea the event rests on.",
+        "Every physics note carries one of the four evidence tags ([ESTABLISHED], [THEORETICAL], [SPECULATIVE], [SF TERRITORY]) as a badge, with an on-page legend; each tag is copied from the CODEX/SCIENCE, PHYSICS/ or PHYSICS_BIBLE.md passage the note stores by path and heading, never assigned by the builder, and a note whose source has no tag shows 'untagged'.",
+        "Guided tour: at least 6 stops from the oldest shipped event to the story present, including one at each of the 3 artifact discoveries, each moving the view and explaining that divergence; pausable, skippable and resumable.",
+        "Real citations: every [ESTABLISHED] and [THEORETICAL] note cites its source (author, year, venue) with a DOI or arXiv id, and 5 of 5 sampled resolve to the stated paper.",
+        "Escalation chains: each physics note shows the steps from the cited result to the story mechanism, each step with its own evidence tag, so the visitor sees where physics ends and fiction begins.",
+        "Citation audit script: checks that every DOI or arXiv id resolves and that its title, first author and year match the note, and the report in the repo shows 0 mismatches.",
+        "Explanation while it runs: selecting any event shows a written why-chain back to that lane's artifact discovery; each link is one sentence naming the mechanism, with its evidence tag and its source (the edges themselves are counted on divergence-structure).",
+        "0 untagged claims: a script confirms every sentence of event text, notes, tour copy and answers carries an evidence or narrative tag; every [ESTABLISHED] and [THEORETICAL] citation stores a quoted passage or a section, figure or equation number from the paper that supports the note, and 5 of 5 sampled check out; every [SF TERRITORY] step names the real framework it extends, and a physics-only view hides the fiction and leaves the cited science standing. Reference standard: Kip Thorne, The Science of Interstellar (W. W. Norton, 2014), which labels every claim as truth, educated guess or speculation."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no intro, physics note, evidence tag, citation or tour exists for the timeline." }
+      }
+    },
+    {
+      "id": "load-and-reach",
+      "name": "Load and reach",
+      "frame": "performance",
+      "metric": "Load and frame time with the full event set, phone-width behaviour, reduced motion, keyboard and screen-reader reach, measured with Lighthouse (mobile navigation and timespan runs), a 10 s Chrome DevTools Performance trace while zooming with CPU slowdown, axe-core, and a 400 px viewport.",
+      "ladder": [
+        "Absent: no page loads.",
+        "The page loads at 1440 px only; nothing is measured.",
+        "0 console errors at load and while zooming, and event data plus code weigh at most 500 KB gzipped.",
+        "Works at 400 px: lanes fit or scroll inside their own container, the body never scrolls sideways, and touch targets are at least 44 px.",
+        "prefers-reduced-motion honoured: animated zooms, flights and tour moves become instant jumps, and nothing autoplays.",
+        "Zoom and pan hold at least 55 fps at 1440 px with at least 500 events loaded (10 s Performance trace in Chrome DevTools with 4x CPU slowdown).",
+        "Keyboard reach: every control is reachable by Tab in a logical order with a visible focus ring, and the timeline is one Tab stop inside which the bracket keys move focus from event to event (roving tabindex, as the WAI-ARIA Authoring Practices give for composite widgets).",
+        "Screen-reader path: an accessible table of the same events (date in all three calendars, dimension, tags) stays in sync with the drawn timeline, and live regions announce selection and cursor moves.",
+        "Lighthouse mobile navigation run: Performance at least 90, Accessibility 100, LCP at most 2.5 s, CLS at most 0.1; and a Lighthouse timespan run while zooming and selecting reports INP at most 200 ms (the Core Web Vitals thresholds).",
+        "Scales to 5,000 events at 55 fps or more through spatial indexing and level-of-detail culling (only visible marks drawn), tested with a synthetic set kept in the repo.",
+        "WCAG 2.2 AA (W3C, 2023): 0 axe-core violations in every view and state, a manual screen-reader pass recorded in the repo, and the rung 8 and rung 9 numbers held at 400 px under Lighthouse mobile throttling and DevTools 6x CPU slowdown."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: nothing loads, so there is nothing to time, trace or audit." }
+      }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Timeline engine shape",
+      "frame": "architecture",
+      "metric": "Code shape read in the repo: chronology, layout, rendering, UI, questions and the spoiler gate as separate modules; config apart from logic; schema-checked data; Node test count; and what can be added (a lane, a calendar, a dataset) without editing the core, shown by git diff.",
+      "ladder": [
+        "Absent: no code exists.",
+        "One HTML file with inline data, styles and logic.",
+        "Event data in its own JSON file loaded at runtime, apart from the page.",
+        "Separate ES modules under labs/assets/js/ for chronology, layout, rendering, UI and questions, none over 600 lines.",
+        "An event schema (fields, types, required tags, spoiler tier) documented in the repo and checked by a script, with the shipped data passing at 0 errors.",
+        "Config apart from logic: dimensions, calendars, lane order, tag definitions and the spoiler ceiling live in config files, so adding a seventh lane or a fourth calendar edits config only.",
+        "Pure core: chronology, layout and the spoiler gate touch no DOM and are covered by Node tests with at least 30 assertions, run in the gates workflow.",
+        "The CODEX-to-JSON pipeline is one script in tools/ run with one command, and it applies the same spoiler gate module the runtime uses.",
+        "Renderer behind one interface: SVG and canvas renderers swap without touching layout or UI, and the page picks canvas above a visible-mark threshold.",
+        "Second dataset: a second data file and config file (for example the site's own changelog as events) render on the same page with 0 edits to the core modules, shown by an empty git diff of the core module directory.",
+        "The engine is a documented standalone module with a published schema, used by at least 2 pages on the site, its tests, schema check and spoiler gate run in the site's gates, and adding an event type, calendar or lane needs 0 core edits."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists: no timeline module, schema, config or test exists in the repo." }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

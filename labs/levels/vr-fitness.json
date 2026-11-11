@@ -1,0 +1,251 @@
+{
+  "id": "vr-fitness",
+  "title": "VR Fitness",
+  "page": null,
+  "thesis": "At level 10 a visitor plays a webcam movement game in which their own body is the controller, sees every rep counted from joint angles with each counting and form rule visible as it fires, audits the counter against their own tally and against labeled clips whose truth is known, and leaves knowing exactly how accurate camera rep counting is, with no camera frame ever leaving their device and a synthetic skeleton standing in when the camera stays off.",
+  "axes": [
+    {
+      "id": "pose-angle-pipeline",
+      "name": "Pose-to-angle pipeline",
+      "frame": "model",
+      "metric": "Which pose model runs, how its keypoints become joint angles (2D image or 3D world coordinates), smoothing and visibility gating, jitter at rest in degrees, and angle error in degrees measured through the pose model on a rendered 3D body whose joint angles are known; the rater reads the pose and angle modules, stands still for 2 s at 2 to 3 m from a 720p webcam to read the jitter readout, and reads the per-joint error tables on the page.",
+      "ladder": [
+        "Absent: no pose estimation and no joint angle exist.",
+        "A pose model runs in the browser on the webcam feed (MediaPipe Pose Landmarker or TensorFlow.js MoveNet) and returns keypoints per frame, drawn or logged, with no angle computed.",
+        "One joint angle (knee: hip-knee-ankle) is computed per frame from three 2D keypoints with atan2 or the dot product and shown in degrees.",
+        "Six or more joint angles (both knees, both hips, both elbows) are computed, and any keypoint below a visibility or score threshold set in config (for example 0.5) marks its angles as missing instead of reporting a number.",
+        "Angles are smoothed with a One Euro filter (Casiez, Roussel and Vogel, CHI 2012) with min cutoff and beta in config, and a jitter readout shows the standard deviation of the knee angle over 2 s of standing still, under 2 degrees with the rater standing 2 to 3 m from a 720p webcam in room light, with the camera resolution read from the HUD.",
+        "Angles come from 3D world landmarks (BlazePose world coordinates in metres) when the model provides them, with a 2D fallback, and the page labels which source each angle uses.",
+        "Angle error is measured through the pose model: a rigged 3D body mesh posed with known joint angles is rendered to a canvas (for example with three.js), the rendered frames run through the same pose model and angle code as the webcam, and the mean absolute error in degrees per joint is shown for each angle source the page uses (3D world landmarks and 2D keypoints). Error from keypoints projected directly, which skip the model, is labeled geometry-only and does not count for this rung.",
+        "View dependence is measured on the rendered body at camera yaw 0, 30, 45 and 60 degrees, with per-joint error from the pose model at each yaw, and the page warns when the visitor's estimated yaw passes the angle at which knee error exceeds 10 degrees.",
+        "Two pose models (MoveNet Lightning and BlazePose full, or BlazePose lite and heavy) can be switched on the page and are compared side by side: each one's rendered-body angle error per joint, and on the same 10 s of camera frames held in memory and never uploaded, its at-rest knee jitter in degrees, its share of frames with a required keypoint below threshold, and its ms per frame.",
+        "Bone-length check in 3D world coordinates: thigh, shin, upper-arm and forearm lengths from world landmarks are calibrated while standing still, frames where any segment deviates more than 15 percent from calibration are flagged as tracking errors, and the flagged share is shown. The check is disabled, and says so, when only 2D keypoints are available.",
+        "Reference: angle accuracy is checked against video with synchronised motion capture of exercise (for example Fit3D, Fieraru et al., CVPR 2021, or Human3.6M, Ionescu et al., TPAMI 2014). Knee, hip and elbow error of 5 degrees or less per joint is published on the page with the clip identifiers, camera views and method used, but not the frames, which the dataset licenses restrict."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no pose model, keypoint code or joint-angle function on labs/foundation at cd1e9f7 (no labs/assets/js/vr-fitness/ module; a grep of labs/ for mediapipe, movenet and getUserMedia finds nothing)." } }
+    },
+    {
+      "id": "rep-count-truth",
+      "name": "Rep-count accuracy against ground truth",
+      "frame": "model",
+      "metric": "Error of the rep counter against ground truth: per-set absolute count error, mean absolute error normalised by true count (MAE) and off-by-one accuracy (OBO) over labeled clip sets (synthetic, held-out recorded, stress, and the RepCount-A test split), and rep timing offset in ms; the rater runs the synthetic clips and one self-tallied set on the page and reads the evaluation panel, the counter module, the clip manifest and the git history of the threshold config.",
+      "ladder": [
+        "Absent: no reps are counted.",
+        "A counter increments when one joint angle crosses one fixed threshold (for example knee under 100 degrees) for one exercise.",
+        "The counter is a two-state machine with hysteresis: it enters the bottom state below one angle and counts on return above a second angle, the gap 20 degrees or more, both values in config, so jitter at one threshold cannot double-count.",
+        "Three or more exercises (for example squat, arm raise and lunge) each have their own driving angle and thresholds in config, and the counter uses the one the visitor picked.",
+        "Each counted rep is stored as an event with start, bottom and end timestamps and the extreme angle reached, and the events are listed on the page.",
+        "Visitor audit: the visitor taps a key or the screen once per rep they make, and at the end of the set the page shows the counter's tally beside theirs and the timing offset of each rep in ms.",
+        "On 10 or more synthetic clips with known rep times, the page computes and shows per-clip count error, MAE and OBO, and 0 counts on clips of standing still and of walking in place.",
+        "Personal calibration: 3 calibration reps set each body's top and bottom angles. On each synthetic clip the first 3 reps calibrate that body and MAE on the remaining reps is shown with the default and with the calibrated thresholds, and the visitor's own last tap-audited set (rung 5) is scored both ways.",
+        "Evaluation on 20 or more recorded landmark clips for each exercise, each with hand-labeled rep times, reporting MAE and OBO per exercise in the format of RepNet (Dwibedi et al., CVPR 2020) and TransRAC (Hu et al., CVPR 2022), with the clips stored in the repository. Thresholds are frozen in a committed config before the test clips are labeled (the git history shows the config commit first), and test clips come from people not in the tuning set (the manifest lists a subject id and split per clip).",
+        "A stress set measures failure per condition: keypoint dropouts, partial reps, pauses at the bottom and reps faster than 1 s, with count error shown per condition and partial reps reported as no-reps instead of being counted or silently dropped.",
+        "Reference: OBO of 0.95 or more and MAE of 0.05 or less on the held-out recorded and stress sets for every exercise. MAE and OBO are also reported on the RepCount-A test split (Hu et al., CVPR 2022) for the classes that overlap the lab's exercises (squat and jumping jack among them), computed from landmarks extracted by the same pose model, shown beside the published TransRAC overall figure and labeled as a class-subset comparison, with the path of the script that produced them. One click on the page reruns the evaluation on the lab's own sets and reproduces their published table."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no counter, rep event or evaluation code for vr-fitness on labs/foundation at cd1e9f7; the hub entry in labs/assets/js/config/site.config.js is status planned." } }
+    },
+    {
+      "id": "form-rules",
+      "name": "Range-of-motion and form rules",
+      "frame": "model",
+      "metric": "Count of form rules judged per rep (depth, lockout, tempo, trunk lean, symmetry, knee tracking), each with its threshold in degrees or seconds, whether a no-rep names the rule that failed, each rule's measured miss and false-alarm rate, and its agreement with human labelers (Cohen's kappa); the rater performs reps that break each rule in front of the camera or on the synthetic feed and reads the exercise config.",
+      "ladder": [
+        "Absent: reps are not judged.",
+        "A depth readout labeled against the exercise's target: the extreme driving angle of each rep is shown in degrees beside the target depth from the exercise config (for example knee 96 degrees against a target of 90).",
+        "Depth rule: a rep whose driving angle does not reach the exercise's target (for example knee 90 degrees or less for a squat) is marked as a no-rep with the angle it reached.",
+        "Lockout rule: a rep completes only when the return angle reaches extension (for example knee 160 degrees or more), and a failed lockout is named on the rep.",
+        "Tempo: down and up phase durations in seconds are measured per rep from the rep events and shown, with a rule that flags reps faster than a configured minimum.",
+        "Four or more named rules per exercise run together (depth, lockout, tempo and trunk lean from the hip-to-shoulder vector against vertical), each threshold in config and each rep's pass or fail shown per rule.",
+        "Symmetry: the left-right angle difference at the bottom of each bilateral rep is measured in degrees, and a difference over a configured limit (for example 15 degrees) is flagged.",
+        "Knee tracking: frontal-plane knee valgus is estimated from the hip-knee-ankle projection when the visitor faces the camera, the orientation requirement is stated, and the rule switches off when estimated yaw is out of range.",
+        "Each rule's miss and false-alarm rates are measured on synthetic clips with planted faults (shallow squat, rushed rep, forward lean, uneven depth) and shown per rule.",
+        "Velocity loss: the mean concentric angular velocity of each rep is tracked in degrees per second, and the percentage loss from the set's fastest rep is shown as a per-set fatigue trace.",
+        "Reference: rule calls are checked against recorded clips labeled by two people, the Cohen's kappa between the two labelers is reported per rule, and for every rule the page's calls agree with each labeler at kappa 0.6 or more and no lower than the two labelers' kappa with each other."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no form rule, threshold config or no-rep logic for vr-fitness on labs/foundation at cd1e9f7." } }
+    },
+    {
+      "id": "ground-truth-data",
+      "name": "Synthetic skeleton and labeled clips",
+      "frame": "data",
+      "metric": "The no-camera path and the evaluation data: how the synthetic skeleton is generated (seeded, which exercises, which noise model), how many clips carry per-rep ground truth, their provenance, subjects and license, and what a session exports; the rater refuses camera permission, sets a seed, reads the generator module and the clip manifest, and exports and reimports a session.",
+      "ladder": [
+        "Absent: no recorded or synthetic movement exists.",
+        "One hand-made keyframe animation of a skeleton doing one exercise plays when the camera is refused.",
+        "The synthetic skeleton comes from a seeded procedural model (joint angles as functions of time per exercise, forward kinematics to 17 or 33 keypoints). The seed is shown and can be set (input field or URL parameter), and the same seed gives identical frames.",
+        "With the camera refused, the synthetic feed drives the counter and the game end to end through the same code as the camera, on autoplay: the generator plays the chosen exercise's reps and moves a wrist to each target as it spawns (two-bone inverse kinematics on the arm), and the feed is labeled synthetic on screen for the whole session.",
+        "Each synthetic clip carries ground truth in its data: rep count, each rep's start, bottom and end times, and the true joint angles per frame.",
+        "Pose-estimator noise is modelled and documented: per-keypoint Gaussian jitter, dropout frames and visibility scores, each parameter listed on the page and tagged [ILLUSTRATIVE].",
+        "Bodies vary: 5 or more segment-length profiles, with tempo and depth drawn per rep from stated ranges, so no two reps of a clip are identical.",
+        "A clip manifest lists every evaluation clip with exercise, true count, source (synthetic seed or recorded), frame rate, keypoint format and license, viewable on the page.",
+        "Recorded landmark clips (keypoints only, no video) from 5 or more consenting people are shipped, hand-labeled per rep, with the labeling protocol stated in the manifest.",
+        "A session exports as CSV and JSON (keypoints per frame, angles, rep events, rule results and the visitor's tap audit) with a data dictionary, and an exported session reimports and replays to identical counts.",
+        "Reference: an open rep-counting landmark dataset ships with the lab. It holds 100 or more labeled sets over 5 or more exercises from 20 or more consenting people at 3 or more camera angles, with body-size and age bands stated. Sets are double-labeled with agreement reported, documented in a datasheet in the form of Gebru et al. (Communications of the ACM 2021), and shipped with the generator for the synthetic set, so others can benchmark counters on it."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no synthetic skeleton, clip, manifest or export for vr-fitness on labs/foundation at cd1e9f7." } }
+    },
+    {
+      "id": "motion-views",
+      "name": "Skeleton and angle-trace views",
+      "frame": "graphics",
+      "metric": "What is drawn and how many views are linked to one frame clock: camera overlay, joint-angle arc, angle-time trace with thresholds, rep timeline, 3D skeleton, ghost rep, evaluation plots, reach envelope; the rater counts views in the screenshot, moves in front of the camera, and checks that every view updates from the same frame.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "The camera feed or the synthetic skeleton is shown with no overlay.",
+        "The tracked skeleton (keypoints and bones) is drawn over the mirrored camera feed, aligned to the frame it was estimated on.",
+        "The driving joint shows a live angle arc, with its value in degrees drawn at the joint, updating every frame.",
+        "An angle-time trace scrolls beside the feed with both hysteresis thresholds drawn as lines and each counted rep marked at the moment it counted.",
+        "A rep timeline for the set shows one mark per rep coloured by rule pass or fail, and clicking a mark scrubs the trace and replays that rep's skeleton.",
+        "A 3D skeleton view from world landmarks can be orbited by drag, linked to the same frame as the 2D overlay.",
+        "Ghost rep: the visitor's calibrated or best rep plays as a translucent skeleton aligned in time and position against the live one.",
+        "Evaluation views: a predicted-versus-true count scatter across clips and per-rule miss and false-alarm bars, linked so selecting a clip loads its trace and skeleton.",
+        "Reach envelope: the visitor's measured reach space is drawn as a surface around the 3D skeleton, with the targets hit and missed placed inside it.",
+        "Reference: a whole session replays with every view (overlay, trace, timeline, 3D, ghost, envelope) scrubbed from one shared clock at the captured frame rate, with the analysis tools of Kinovea, the open-source sports-video analysis tool, live in the browser: an angle readout on any three keypoints the visitor picks, a trajectory trail on any keypoint, frame-by-frame stepping, and two sessions side by side on one clock."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no canvas, overlay or trace for vr-fitness on labs/foundation at cd1e9f7; there is no screenshot to grade." } }
+    },
+    {
+      "id": "arena-style",
+      "name": "Arena design language",
+      "frame": "style",
+      "metric": "The game's design system: skeleton, target, threshold and no-rep colour tokens and their contrast, gold kept for the active target and count, flash rate during play, HUD legibility at play distance (rep count height as a share of viewport height, and in cm on a 13-inch screen), a sound cue set, and type and motion tokens; the rater checks the screenshot, greps the lab CSS, records 10 s of the busiest mode, and measures the HUD digits on screen.",
+      "ladder": [
+        "Absent: no page to style.",
+        "The page sits in the site's shared labs shell: header, footer, type families and near-black ground.",
+        "Skeleton, target, threshold and no-rep colours are four tokens defined once in CSS and used in every view, each at 3:1 or more contrast against the ground.",
+        "Gold or amber is kept for the active target and the current rep count only; a grep of the lab CSS finds it in no other rule.",
+        "A play mode strips the page to the arena: site chrome and prose hidden, feed and HUD full-screen, one key or tap to return, and no game state flashes more than 3 times per second (WCAG 2.3.1), checked on a 10 s screen recording of the busiest mode.",
+        "Play-distance legibility: in play mode the rep count and the active cue are 12 percent or more of viewport height, in tabular numerals.",
+        "Each game event (rep counted, no-rep, target hit, target missed) has its own WebAudio cue from a set of 4 cues or fewer, with a mute control remembered per visitor.",
+        "Rep feedback is encoded twice, by colour and by shape (an icon or outline change), so a counted rep and a no-rep can be told apart in a grayscale screenshot with sound off.",
+        "Type, spacing and motion are tokens: 5 font sizes or fewer, one easing and 3 durations or fewer for every transition.",
+        "Each of the 4 game events has its own animation, 400 ms or shorter, built from the motion tokens and paired one to one with its sound cue.",
+        "Reference: zero colours, sizes or durations hard-coded outside the tokens (grep check), and in play mode on a 13-inch laptop screen the rep count digits are 2.6 cm tall or more, 0.5 degrees of visual angle at 3 m, measured with a ruler held to the screen."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no vr-fitness stylesheet, markup or sound cue on labs/foundation at cd1e9f7; nothing to grade for colour, type or motion." } }
+    },
+    {
+      "id": "reach-game",
+      "name": "Reach-target game",
+      "frame": "interaction",
+      "metric": "The game the visitor plays with their body, or from keyboard and pointer with the camera refused: number of modes, how targets are placed (reach envelope, Fitts index of difficulty in bits), scoring, sets and rest, reduced-mobility modes and custom exercises; the rater plays each mode for one minute with the camera and once with it refused, and reads the mode and target config.",
+      "ladder": [
+        "Absent: no game; nothing responds to movement.",
+        "One target appears on screen and registers a hit when a tracked wrist keypoint enters it.",
+        "A timed round of 60 s or less spawns targets in sequence, counts hits and misses, and shows a score at the end.",
+        "With the camera refused, the visitor drives the synthetic skeleton from keyboard or pointer (drag a wrist to a target, hold a key to squat to a chosen depth), and every hit and rep goes through the same counter and game code as camera play.",
+        "Rep-driven play: three or more modes take a counted rep as their input (squat to fire, jumping jack to jump, lunge to dodge), using the counter from the rep axis.",
+        "Workout structure: sets, reps per set and rest timers are configurable, and a session plan of 3 or more blocks runs end to end without touching the keyboard.",
+        "Target placement: targets sit inside the visitor's reach envelope from a 5 s calibration (arm span and squat depth in keypoint units), and their difficulty uses Fitts's law (Fitts, Journal of Experimental Psychology 1954; index of difficulty log2(D/W + 1) in the Shannon form of MacKenzie, Human-Computer Interaction 1992), with each round showing its ID range in bits and achieved throughput in bits per second.",
+        "Seated and one-arm modes run on upper-body keypoints only, with targets and reps fitted to the reduced envelope.",
+        "Racing: the visitor plays against a ghost of their own recorded session or of a synthetic player, with the lead or deficit shown live.",
+        "Custom exercise authoring: the visitor records 3 reps of any movement, the page picks the joint angle with the largest range as the driving angle, sets thresholds from it, and the new exercise plays in every mode.",
+        "Reference: a visitor-authored workout of custom exercises, shared by URL, plays end to end on another machine with counting checked against the player's tap audit: the session structure of Ring Fit Adventure (Nintendo, 2019) with no hardware beyond a webcam."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no target, round, mode or session plan for vr-fitness on labs/foundation at cd1e9f7." } }
+    },
+    {
+      "id": "adaptive-play",
+      "name": "Adaptive play and tracking recovery",
+      "frame": "intelligence",
+      "metric": "What the game does on its own: tracking-loss detection and recovery, framing guidance, exercise recognition with its measured accuracy, difficulty that follows measured performance, and whether the adaptation is itself evaluated; the rater steps out of frame, turns sideways, starts an exercise without selecting it, and plays 3 rounds to watch the parameters change.",
+      "ladder": [
+        "Absent: nothing happens without a click.",
+        "When no person is detected for 1 s, the game pauses and says so on screen.",
+        "Framing guidance: before play the page checks that every keypoint the exercise needs is visible above threshold and tells the visitor which way to move (step back, move left, tilt the camera) until it is.",
+        "Auto-resume: after 2 s of full visibility the game resumes with a 3-2-1 countdown, and the counter discards the frames of the loss instead of counting through them.",
+        "Difficulty follows a stated rule toward a target hit rate (for example 70 to 80 percent): target size, distance or speed change after each round, with the rule and current parameters shown.",
+        "Exercise recognition: the page names which of its exercises the visitor is doing within 2 reps without being told (nearest template under dynamic time warping, or a classifier on angle features), with its confidence shown.",
+        "Recognition accuracy is measured on the labeled clip set, and a confusion matrix across exercises is shown on the page.",
+        "Fatigue pacing: when velocity loss within a set passes a configured percentage, the game shortens the set or extends rest and says which threshold triggered it.",
+        "Session memory: calibration, performance and the visitor's tap-audited count error are stored per visitor in the browser; the next session's starting difficulty and reach envelope come from them, shown as a before-and-after, and the audited count error is shown across sessions.",
+        "Weak-region targeting: the round generator places targets in the region of the reach envelope with the fewest hits, and reports the hit-rate change there across 3 rounds.",
+        "Reference: the adaptation is evaluated, not asserted: synthetic players with known skill profiles run through the adaptive game, and the page shows each one converging to the target hit rate within a stated number of rounds."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no tracking-loss handling, recognition or difficulty logic for vr-fitness on labs/foundation at cd1e9f7." } }
+    },
+    {
+      "id": "coach-contribution",
+      "name": "Coach model contribution",
+      "frame": "intelligence",
+      "metric": "What the language model adds to the deterministic rep log and rule results: the route that answered, the share of numeric and form claims in its feedback that match the log (k of n), safety-guard hits, and verified observations it adds beyond the template; the rater finishes a set on the public route and offline and reads the claim-check panel and the prompt code.",
+      "ladder": [
+        "Absent: no written feedback, scripted or generated.",
+        "A deterministic template writes set feedback from the log (for example 10 reps, 2 no-reps on depth, mean bottom knee angle 96 degrees), with no model call.",
+        "One call through labs/assets/js/ai/llm.js writes feedback on each finished set (one call may cover several sets, never part of a set), the answering route is shown in the route panel, and the template is the offline fallback.",
+        "The call sends the rep events and rule results of the sets it covers as JSON with rep ids and asks for JSON back, each sentence listing the rep ids it refers to.",
+        "Number check: every number in the model's text is compared with the log, mismatches are struck through, and the pass rate (k of n) is shown.",
+        "Safety guard: the prompt forbids medical, injury-treatment and diet advice, the output is scanned for such phrases, and any hit is blocked with the reason shown.",
+        "On the public route calls are batched so that no two fall inside the 45 s window: one call per set when rest is 45 s or longer, otherwise consecutive sets merge into one call, and never one call per rep. The countdown is shown and play never waits on the model.",
+        "Form check: each claim that a rep was shallow, rushed, leaning or uneven is verified against that rep's rule results, and unsupported claims are flagged.",
+        "Contribution measured: template and model feedback shown side by side, the model's added claims that pass both checks counted, with a running tally of verified, unverifiable and wrong claims across sets.",
+        "Free questions: the visitor asks about their session (which rep was shallowest, did tempo drop in set 2), and the model answers only by emitting a JSON query over the log that the page runs, citing the computed result.",
+        "Reference: a published coach eval over 50 or more seeded synthetic sessions run through each route (local Ollama, public route), reporting number accuracy, unsupported-form-claim rate and guard-block rate, shipped as JSON and reproducible with one command."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no vr-fitness caller of labs/assets/js/ai/llm.js and no feedback template on labs/foundation at cd1e9f7." } }
+    },
+    {
+      "id": "count-explained",
+      "name": "How the count is made",
+      "frame": "explanation",
+      "metric": "What the visitor understands after five minutes: how keypoints become angles and angles become reps, the counter's measured error, which numbers are [REAL] or [ILLUSTRATIVE], and what the page says, and proves, about privacy and safety before the camera turns on; the rater reads the page prose, runs the guided tour, checks every number for a tag, and watches the network panel through a 60 s session.",
+      "ladder": [
+        "Absent: no explanation.",
+        "One paragraph says what the lab does, that it uses a webcam and not a VR headset, and that the camera is optional.",
+        "Consent before camera: a panel shown before getUserMedia states that frames are processed on the device and never sent, and offers the synthetic skeleton instead. The rater's network panel through a 60 s session shows no request carrying image or keypoint data.",
+        "Safety note before play: clear 2 m of floor, the game is not medical or training advice, stop on pain.",
+        "The pipeline is explained in order (frame, keypoints, angle, hysteresis state, rep) with the current frame's live value shown beside each step.",
+        "A guided tour of 5 or more steps walks through one synthetic rep frame by frame, pausing at each threshold crossing.",
+        "The counter's measured error (MAE and OBO, with the clip count behind them) is stated beside the live count on the main view. The numbers are read from the page's evaluation run or its committed JSON output, never written into the prose, and they change when the evaluation is rerun.",
+        "Every number and rule is tagged [REAL] (measured on this page or from a cited source) or [ILLUSTRATIVE] (author choice), thresholds and noise parameters included.",
+        "Failure modes: three replayable clips show where camera rep counting fails (occlusion, side-view foreshortening, partial reps) and what the counter does in each.",
+        "Count it yourself: the visitor tallies a synthetic clip with hidden truth, then sees their own error beside the counter's, so they leave knowing what ground truth costs.",
+        "Reference: every accuracy claim on the page links to the on-page measurement that produced it and reruns it in one click. A methods section lists the pose model and its version, input resolution, filter parameters, every threshold, the clip manifest and the path of the evaluation code, in the form of a Distill (distill.pub) article."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: no vr-fitness prose, consent panel or tour on labs/foundation at cd1e9f7; the hub shows only the one-line blurb 'Workouts that are games you actually want to finish.'" } }
+    },
+    {
+      "id": "inference-budget",
+      "name": "Inference budget and reach",
+      "frame": "performance",
+      "metric": "Pose inference ms per frame and tracking fps, capture-to-render latency in ms, model download size in KB, phone width and front camera, reduced motion, keyboard and screen-reader reach; the rater uses the on-page HUD, the devtools performance and network panels, a 400 px viewport, reduced-motion emulation and a keyboard-only pass. Every fps and latency threshold is measured on a reference device recorded in the evidence (CPU, GPU, browser version, camera resolution). Rungs 2 and 6 use a laptop with integrated graphics and a 720p webcam.",
+      "ladder": [
+        "Absent: no page loads.",
+        "The page loads and runs at 1440 px with no console errors.",
+        "Pose inference runs at 15 fps or more on the reference laptop (integrated graphics, 720p webcam), with ms per frame and fps shown in a HUD.",
+        "Usable at 400 px on a phone: the front camera works in portrait, the layout stacks, and the page never scrolls sideways.",
+        "prefers-reduced-motion is honoured: hit effects and transitions become instant, and every mode stays playable.",
+        "Inference runs on a GPU backend (WebGL or WebGPU) or in a worker, and devtools shows no main-thread task over 50 ms during play.",
+        "Capture-to-render latency is measured per frame from requestVideoFrameCallback metadata to the overlay paint, shown in the HUD, and is 100 ms or less on the reference laptop.",
+        "Performance tiers: a 3 s warm-up measures fps and picks the model variant and input resolution, and the HUD shows the tier chosen.",
+        "Assistive reach: every menu control is reachable with Tab with visible focus, the no-camera controls of the game, reaching a target included, work from the keyboard alone, rep counts, no-reps and hits are announced through an aria-live polite region, and the page scores 95 or more on the Lighthouse mobile accessibility audit.",
+        "On the devtools Fast 4G profile the page is playable in synthetic mode within 3 s while the pose model streams in. A service worker caches the model files, so a repeat visit starts tracking within 2 s on the reference laptop. Each model file's size in KB is shown.",
+        "Reference: 30 fps tracking with capture-to-render latency of 50 ms or less on 3 or more phones named on the page with their chipsets, at least one an Android phone with a Snapdragon 7-series chipset, with fps and latency published per device."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: nothing loads for vr-fitness on labs/foundation at cd1e9f7, so there is no frame time, latency or reach to measure." } }
+    },
+    {
+      "id": "pipeline-shape",
+      "name": "Frame-source pipeline and tests",
+      "frame": "architecture",
+      "metric": "Code shape under labs/assets/js/vr-fitness/: camera and synthetic skeleton behind one frame-source interface, pose, angle, counter, rule, game and view modules separated, exercises as config, tests in the site checks, and the no-frames-leave guarantee checked in code; the rater reads the modules, runs the tests, and watches the network panel through a session.",
+      "ladder": [
+        "Absent: no code.",
+        "A page with its logic in an inline script.",
+        "The logic lives in ES modules under labs/assets/js/vr-fitness/, separate from the page.",
+        "Camera and synthetic skeleton are two implementations of one frame-source interface (each frame a timestamp plus keypoints with scores), and no downstream module knows which one is running.",
+        "Exercises are config: each is one entry (driving angle, thresholds, form rules, required keypoints), and a grep finds no threshold hard-coded in counter or game code.",
+        "Angle, counter and rule modules are pure functions of keypoint sequences with no DOM access, and they import in Node.",
+        "A Node test file runs the counter and rules on the synthetic clips, asserts their ground-truth counts, and runs in the site's check script.",
+        "Privacy in code: after the model files load, every request during a session is made by labs/assets/js/ai/llm.js for the coach call (a route probe or a route attempt), each carrying the rep log and rule results and no frame, image or keypoint array. This is confirmed in the network panel and asserted by a Node test that stubs fetch and inspects every payload.",
+        "Pose backend registry: a new pose model is one adapter file mapping its keypoints to the shared skeleton format, and it appears in the model switch and the evaluation with no other edits.",
+        "Game mode registry: a new mode is one file consuming the rep-event and keypoint streams, added with no edit to the source, counter or rule modules.",
+        "Reference: the counter and rules ship as a documented standalone module others can import, with property-based tests over random synthetic clips (count unchanged by time scaling and left-right mirroring, zero counts from standing still, partial reps never counted)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists: labs/assets/js/vr-fitness/ is absent from the tracked tree on labs/foundation at cd1e9f7 (labs/assets/js holds ai, altverse, blackhole, config, dimensional_mania, exoplanet, hub, memes, trending, workout-plans)." } }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7", "note": "The hub title 'VR Fitness' is legacy: the lab is a webcam movement game with no headset and no WebXR, and count-explained rung 1 makes the page say so. Rename the title in a later hub change (labs/assets/js/config/site.config.js), not in this ladder." }
+  ]
+}
