@@ -1,0 +1,275 @@
+{
+  "id": "content-gen",
+  "title": "AI Content Studio",
+  "page": null,
+  "thesis": "A writing instrument where the visitor pastes a draft, writes their own voice rules, and gets one model revision in which every change is attributed to the rule it fixes, verified by re-linting, checked for lost meaning, and measured against what the deterministic engine fixes alone, with readability formulas validated against reference values.",
+  "axes": [
+    {
+      "id": "voice-rules",
+      "name": "Voice-rule detection",
+      "frame": "model",
+      "metric": "Count of voice rules with deterministic detectors, and each rule's precision and recall (0 to 1) on a labeled sentence set, computed by the page. A rater counts the rules in the rule registry and reads the precision table on the page, or runs the test script.",
+      "ladder": [
+        "Absent: no linter runs on any text.",
+        "One voice rule runs: a regex flags dash pivots (a spaced em or en dash joining two clauses) in the pasted draft.",
+        "The three founding rules run, each hit marked with a character span: dash pivot, the 'not X, it is Y' contrast frame, and a number without a unit.",
+        "At least 8 rules run with a span, a message, and a severity (error, warning, note) each, adding sentence length over a threshold, passive voice (a form of 'be' plus a past participle), a banned-word list, hedges, and adverb density.",
+        "Detectors run on segmented sentences: the sentence splitter passes a shipped list of at least 20 hard cases (abbreviations such as 'Dr.' and 'e.g.', decimals such as 3.5, quotes, ellipses).",
+        "A labeled set of at least 100 sentences with expected hits per rule ships with the lab, and the page computes precision and recall per rule from it when it loads; changing a rule's parameter recomputes the table.",
+        "Every built-in rule scores precision of at least 0.80 on the labeled set, as shown in the page's table.",
+        "Document-scope rules run beside sentence rules (repeated sentence openers within 3 sentences, paragraphs over a word limit, the same content word twice within 10 words), each with its precision in the labeled-set table.",
+        "An in-browser part-of-speech tagger feeds the passive-voice and adverb rules, and on the labeled set each tagger-fed rule's precision and recall are each at least its regex version's, both versions shown in the table.",
+        "Every rule scores precision of at least 0.90 and recall of at least 0.80 on a labeled set of at least 300 sentences drawn from at least 3 sources, labeled by someone other than the detector author or frozen with its file hash recorded in the repo before the detectors were last changed, with the table on the page.",
+        "Reference: a published mapping pairs at least 5 of the lab's rules with a matching rule in each of LanguageTool (its English style rules), proselint, write-good, and Vale run with named style packages (such as its Microsoft and Google packages); on the same labeled set the lab matches or beats each tool's precision and recall on every mapped rule, in a published table naming each tool's version."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no linter code exists in the repo (only a worktree port mapping in tools/labs-wt.mjs)" }
+      }
+    },
+    {
+      "id": "readability",
+      "name": "Readability fidelity",
+      "frame": "model",
+      "metric": "Number of readability formulas implemented, their deviation from reference values (grade levels or Reading Ease points) on a test corpus, and syllable-counter accuracy (percent of words with the correct count). A rater reads the formulas in the code, the comparison table on the page, and runs the Node agreement test.",
+      "ladder": [
+        "Absent: no readability number is computed.",
+        "Word count, sentence count, and average sentence length in words are shown for the draft.",
+        "Flesch Reading Ease is computed with Flesch's 1948 coefficients (206.835 - 1.015 x words per sentence - 84.6 x syllables per word).",
+        "Flesch-Kincaid Grade Level is computed with the coefficients of Kincaid et al. 1975 (0.39 x words per sentence + 11.8 x syllables per word - 15.59) and shown beside Reading Ease.",
+        "The syllable counter handles vowel groups, silent final e, -le endings, and -ed suffixes, and scores at least 85% on a shipped list of at least 200 hand-counted words.",
+        "At least 6 formulas run, adding Gunning Fog, SMOG, Coleman-Liau, and the Automated Readability Index, each with its coefficients visible on the page.",
+        "Per-sentence drivers: each sentence shows its word count, syllables per word, and polysyllable count, and the 3 sentences whose removal lowers the draft's Flesch-Kincaid grade most are marked with the grade change; no formula grade is shown for a single sentence.",
+        "On at least 20 passages each grade-level formula agrees with the textstat Python package within 0.5 grade levels, and Flesch Reading Ease within 5 points: textstat's values ship as a fixture file naming the textstat version (also named on the page), the lab's column is computed live from the passages on the page, and a Node test fails when any formula exceeds its tolerance.",
+        "Validity limits are enforced: each formula states its sample requirement (SMOG was normed on 30-sentence samples), and a formula whose requirement the draft fails is greyed out with the reason.",
+        "Syllables come from a CMU Pronouncing Dictionary lookup, the heuristic runs only for words missing from it, and the heuristic alone agrees with CMUdict on at least 90% of 1,000 random dictionary words.",
+        "Reference: on 100 passages with hand-checked syllable and sentence counts every formula reproduces the hand-computed value within 0.1 grade levels or, for Reading Ease, 1 point; each deviation from textstat is explained per formula; and on at least 500 passages of a public corpus with human readability judgments (such as the CommonLit Ease of Readability corpus) the page shows each formula's correlation with the human scores."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no readability code exists in the repo (grep for flesch and kincaid finds nothing)" }
+      }
+    },
+    {
+      "id": "meaning-guard",
+      "name": "Meaning preservation",
+      "frame": "model",
+      "metric": "Count of meaning invariants checked between draft and revision (numbers, units, negations, names, quotes, sentence alignment, similarity), and the guard's precision and recall on labeled revision pairs. A rater reads the guard module and its tests, and checks the flags on a revision where a number or a negation was dropped.",
+      "ladder": [
+        "Absent: nothing compares the revision with the draft beyond showing both.",
+        "The word counts of draft and revision and their difference are shown after a run.",
+        "Every number in the draft is checked for presence in the revision, and each missing number is listed.",
+        "Numbers are checked with their units as pairs, so '45 s' rewritten as '45' or '45 min' is flagged.",
+        "Negation words (not, no, never, none, and the n't contraction) are counted in the whole draft and the whole revision, and a change in the total is flagged with both counts and each negation's location in both texts.",
+        "Proper names (capitalized tokens not at sentence start) and quoted strings in the draft are checked for survival in the revision, and each loss is listed.",
+        "Sentence alignment: each revised sentence is mapped to its source sentence or sentences by token overlap, every flag (negation changes included) points at a sentence pair, and merged or split sentences are shown as such.",
+        "Each aligned pair gets a lexical change score (token-set Jaccard distance, 0 to 1), and pairs above a stated threshold are flagged as rewrites.",
+        "An in-browser sentence-embedding model, loaded on demand, scores the cosine similarity of each aligned pair, and pairs under a stated threshold are flagged.",
+        "On a shipped set of at least 50 labeled revision pairs (meaning kept or changed), the guard's flags score precision and recall of at least 0.80 each, shown on the page.",
+        "Reference: an in-browser natural language inference model tests entailment in both directions for each pair; on at least 200 labeled pairs the guard reaches precision and recall of at least 0.90, with its errors listed by invariant, and it is also scored on a third-party labeled set it was not built on (such as a sample of PAWS, Zhang, Baldridge and He, NAACL 2019), with that score shown beside the lab's own."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no draft-to-revision comparison code exists" }
+      }
+    },
+    {
+      "id": "revision-accountability",
+      "name": "Revision accountability",
+      "frame": "intelligence",
+      "metric": "Share of model edits (percent) that carry a valid rule id, overlap a detected violation of that rule, and are confirmed by re-linting; per run the counts of fixes, regressions, and unattributed edits, split between the deterministic engine and the model; and per benchmark the model's fix-rate margin over the engine-only baseline. A rater runs one revision and reads the ledger, or reads the parsing and verification code.",
+      "ladder": [
+        "Absent: no model call is made.",
+        "One model call returns a revised draft, shown beside the original.",
+        "The call is one batched JSON request carrying the draft and its violation list (rule id, span, message); the reply is parsed as a list of edits, each with the exact before-text, a replacement, and a rule id; the lab locates each edit by its before-text (not by model offsets), applies it itself, and counts edits whose before-text is not found as rejected, so no change reaches the revision without an edit record.",
+        "The route panel names the route that answered (ollama, own-key, worker, pollinations, offline), at least 3 rules carry a deterministic auto-fix (for example a dash pivot becomes two sentences), and when no route answers the offline engine applies those fixes and labels the result offline.",
+        "The raw model reply is viewable beside the parsed edits, with the model name and the latency in ms of that run, and a malformed or truncated JSON reply shows its parse error and falls back to the offline engine, labeled as such.",
+        "Each edit's rule id is checked against the active rule set and its span against that rule's detected violations: an edit with no rule, an unknown rule, or a span that overlaps no violation of the claimed rule in the same sentence is flagged unattributed, and the count is shown.",
+        "Re-lint verification: after the revision the linter runs again, and each attributed edit is marked verified (its target violation is gone) or not fixed.",
+        "Regressions: violations present after the revision but not before are listed by rule and pinned to the edit that introduced them.",
+        "In every run the engine applies its auto-fixes first and the model receives only the remaining violations; a contribution ledger counts, per rule and in total, the violations fixed by the engine, fixed by the model, still open, and introduced.",
+        "A frozen set of at least 20 benchmark drafts ships in the repo; each benchmark run records fix rate, regression rate, and unattributed rate per route and model, with the offline deterministic engine as a baseline row so the model's margin over the engine is a number per rule, and the date; the page shows the latest table.",
+        "Reference: the benchmark runs at least 3 models (one of them local through Ollama) on the same at least 50 frozen drafts and reports, per model and per rule, the fix rate and regression rate with a 95% interval, so the page states for each rule what the model fixes beyond the engine; and on at least 100 of those model edits two human raters label whether the claimed rule is the reason for the edit, with attribution accuracy of at least 0.90 and Cohen's kappa shown."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no lab calls labs/assets/js/ai/llm.js for revision" }
+      }
+    },
+    {
+      "id": "diff-view",
+      "name": "Attributed diff view",
+      "frame": "graphics",
+      "metric": "Diff granularity (line, word, character), the number of linked views that move together, and whether each hunk is labeled with the code of the rule it fixes. A rater runs a revision and inspects the diff panes, the legend, and the metric strip.",
+      "ladder": [
+        "Absent: no revised text is drawn.",
+        "The revised text appears in a second panel with no change marks.",
+        "A word-level diff (Myers or another longest-common-subsequence method) marks insertions and deletions inline.",
+        "Each changed hunk carries the code of the rule it fixes as a badge beside it, and a legend maps each code to its rule name.",
+        "Unchanged runs of more than 3 sentences fold into one 'N unchanged sentences' row that expands on click.",
+        "Inline and side-by-side diff modes toggle, and in side-by-side mode the hunks align row to row across the two panes.",
+        "Hovering or focusing a hunk opens a card with the rule id, the rule text, the before and after snippet, and its verification state.",
+        "A metric strip draws before and after bars for violations per rule and for Flesch-Kincaid grade, and the bars move when a hunk is accepted or rejected.",
+        "Three linked views: selecting a rule in the legend highlights its hits in the draft, its hunks in the diff, and its bar in the metric strip.",
+        "A document minimap shows violation density per paragraph for the whole draft, and clicking it scrolls both panes to that paragraph.",
+        "Reference: change marks cover what Microsoft Word's Compare and Track Changes show for prose (character-level marks inside changed words, a moved sentence drawn as one move linking its old and new place rather than a delete plus an insert), and a replay scrubber steps the draft into the revision one edit at a time in ledger order, with the diff, the lint marks, and the metric strip moving in step."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and there is no screenshot to grade" }
+      }
+    },
+    {
+      "id": "rule-authoring",
+      "name": "Voice-rule authoring",
+      "frame": "interaction",
+      "metric": "Number of rule types a visitor can author without code, and whether a rule set can be tested, saved, shared by URL, and imported. A rater writes one rule of each type on the page and checks its hits on the draft.",
+      "ladder": [
+        "Absent: the visitor cannot change any rule.",
+        "Built-in rules toggle on and off with one control each, and the lint marks update.",
+        "Rule parameters are editable: a sentence-length threshold in words and a banned-word list.",
+        "The visitor creates a rule from a regular expression with a name and a message, and it runs on the draft at once; an invalid pattern is refused with the parser's error, and a pattern that runs past 50 ms on the draft (such as (a+)+$ on a long run of a's) is stopped by terminating its worker and named, so the page never freezes.",
+        "A test bench shows a new rule's hits on the current draft and on every sample draft, with hit counts, before the rule is saved.",
+        "The visitor creates new rules by form with no regex, of at least 4 types: word list, phrase pattern (a word, a gap of up to N words, a word), maximum length (sentence or paragraph, in words), and required companion (a number followed by a unit from a list).",
+        "The visitor's rule set persists in the browser and is shareable by URL, and opening the URL restores the rules and the draft.",
+        "Rule sets import and export as JSON against a documented schema, and an invalid file is refused with the name of the field that failed.",
+        "The visitor describes a rule in plain words, one model call drafts it as a typed rule, and the drafted rule runs on the test bench and is saved only after the visitor confirms.",
+        "Vale's existence and substitution rule files (YAML) import and export, so a rule written for Vale runs on the page.",
+        "Reference: at least 6 of Vale's rule types (existence, substitution, occurrence, repetition, capitalization, metric) are authored, tested, and round-tripped on the page; Vale is the reference standard for configurable prose linting."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no rule editor exists" }
+      }
+    },
+    {
+      "id": "edit-review",
+      "name": "Edit review",
+      "frame": "interaction",
+      "metric": "Count of review actions available per change (accept, reject, undo, revise a selection, alternatives, hand edit, history, author and rule filters) and whether each works from the keyboard alone. A rater reviews one revision with the mouse and again with the keyboard only.",
+      "ladder": [
+        "Absent: there is no revision to review.",
+        "One revise button sends the draft and shows the result, with no per-change control.",
+        "Accept all and reject all apply to the whole revision, and the output text updates.",
+        "Each hunk is accepted or rejected on its own, and the output text updates after each choice.",
+        "Undo and redo (Ctrl+Z and Ctrl+Shift+Z) step through accept and reject actions.",
+        "Keyboard review: keys listed in an on-page shortcut legend move to the next and previous hunk and accept or reject it, with a visible focus ring on the current hunk.",
+        "Revise a selection: the visitor selects a sentence or paragraph, and only that span and its violations are sent in the model call.",
+        "The visitor edits the revised text by hand, the linter re-runs live, and hand edits enter the ledger as authored by the visitor.",
+        "For one hunk the visitor requests up to 3 alternatives in one batched call and picks one, and the choice is recorded.",
+        "A run history lists every run, accept, reject, and hand edit, and the visitor restores any earlier state from it.",
+        "Reference: every change carries its author (engine, model, visitor), the visitor filters changes by author and by rule, and switches among All Markup, Simple Markup, and No Markup views (the markup views of Microsoft Word's Track Changes), with each change showing its rule and its measured effect (the change in violation counts and Flesch-Kincaid grade when that change alone is reverted)."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no review controls exist" }
+      }
+    },
+    {
+      "id": "editorial-marks",
+      "name": "Editorial marks and type",
+      "frame": "style",
+      "metric": "Type settings (size in px, line length in characters), the mark vocabulary for lint hits, insertions, and deletions, the count of colors used outside tokens.css (target 0), and contrast ratios. A rater inspects computed styles in DevTools, greps the lab's CSS for hex literals and for --accretion, and checks contrast with a contrast checker.",
+      "ladder": [
+        "Absent: no page is styled.",
+        "The page links labs/assets/css/tokens.css and the shared header, and every color in the lab's CSS is a var() of a tokens.css token (grep finds no hex literal).",
+        "The draft editor sets text at 16 px or more with a line length of 60 to 80 characters.",
+        "The --accretion gold token appears only on the active hunk and the focused violation (no other selector in the lab's CSS uses it), and rules are told apart by a rule-code badge and at most 4 ink-gray tint steps from tokens.css, with no hue that is not a tokens.css token.",
+        "Lint hits, deletions, and insertions use 3 distinct mark shapes (wavy underline, strikethrough, highlight), so the diff reads in grayscale.",
+        "Text meets WCAG 2.1 AA contrast (4.5:1) and every mark meets 3:1 (WCAG 2.1 success criterion 1.4.11, non-text contrast) against --void and --surface, checked on each mark after one run on the built-in sample, and under forced-colors: active (Windows high contrast) the three mark shapes stay visible.",
+        "One motion vocabulary: hunk enter and resolve transitions run under 200 ms, and every transition and animation in the lab's CSS uses the same easing value (grep finds one).",
+        "Every lint hit shows its rule code in a margin gutter on the line it falls on, the codes align in one column, and two hits on one line stack in the gutter in span order.",
+        "Mark shapes, rule-badge tints, spacing, and motion live as named tokens in one CSS file, and a specimen strip on the page shows every mark.",
+        "On a shipped stress sample where two rules flag overlapping spans inside a deleted hunk, the 2 lint marks and the deletion mark stack without overlapping each other or the glyphs, at 1440 px and at 390 px.",
+        "Reference: a parts-of-speech mode in the manner of iA Writer's Syntax Highlight (nouns, verbs, adjectives, adverbs, conjunctions), told apart by ink-gray tint and weight from tokens.css with no new hue, layers with the rule marks and the gutter codes with no collision at 1440 px and at 390 px."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and there is no screenshot to grade" }
+      }
+    },
+    {
+      "id": "provenance",
+      "name": "Corpus and rule provenance",
+      "frame": "data",
+      "metric": "Count of sample drafts and labeled items with stated sources, share of rules that cite a source (percent), and export formats. A rater opens the samples, the rule list, and each export, and checks the source fields.",
+      "ladder": [
+        "Absent: no text or rule data exists.",
+        "One built-in sample draft loads into the editor.",
+        "At least 3 sample drafts in different registers (technical note, email, essay paragraph), each labeled as written for the lab or quoted with its source.",
+        "Every built-in rule names its source: a named style guide (such as the six rules in Orwell's 'Politics and the English Language', 1946) or the author's own voice rules, labeled as such.",
+        "The lint report exports as JSON: each violation with rule id, span, sentence, and message.",
+        "A revision run exports as one JSON file: draft, revision, attributed edits, metrics before and after, route, model name, and date.",
+        "A revision run also exports as a Markdown report with insertions and deletions marked and each change's rule named.",
+        "The labeled evaluation set (at least 100 sentences with expected hits per rule) ships as a versioned JSON file in the repo with its license, linked from the page.",
+        "At least 20 public-domain passages (for example from Project Gutenberg), each with author, title, year, and URL, serve as the readability test corpus.",
+        "Every benchmark run is committed as a dated JSON record (route, model, drafts, rates) under one repo folder, and the page charts at least 3 runs over time from those files.",
+        "Reference: the evaluation set and benchmark ship with a datasheet in the form of Gebru et al., 'Datasheets for Datasets' (Communications of the ACM, 2021) covering motivation, composition, labeling procedure, and inter-rater agreement as Cohen's kappa between 2 labelers (Fleiss' kappa when there are more), and one Node command regenerates every number on the page from the shipped files."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no sample drafts or rule data exist" }
+      }
+    },
+    {
+      "id": "mechanism-explanation",
+      "name": "Mechanism explanation",
+      "frame": "explanation",
+      "metric": "Share (percent) of pipeline elements (built-in rules, readability formulas, guard checks, the model call) with an on-page explanation, and share of numbers on the page tagged measured or illustrative. A rater lists the elements from the code, then reads the page for five minutes and ticks each one.",
+      "ladder": [
+        "Absent: nothing on the page explains the lab.",
+        "One paragraph states what the lab does: lint, one model revision, an attributed diff.",
+        "Each rule has a one-sentence description and a before and after example.",
+        "Each readability formula is shown with its coefficients and the counts (words, sentences, syllables) it used for the current draft.",
+        "Every number is tagged measured or illustrative, and model output is labeled as model-written with the route that produced it.",
+        "A guided tour of at least 4 steps (draft, lint, model call, attributed diff) highlights each panel in turn.",
+        "A live pipeline strip lights the stage that is running (lint, request, parse, verify) and shows each stage's time in ms.",
+        "A limits panel gives at least one stated blind spot for every readability formula and every built-in rule (for example, Flesch-Kincaid ignores word familiarity), and each rule's entry shows its measured precision from the labeled set.",
+        "The system prompt sent to the model is shown annotated, each instruction linked to the rule or guard that checks whether the model obeyed it.",
+        "A findings section reports at least 3 measured results from the lab's own benchmark (for example, the rule the model fixes least often), each with numbers and a date.",
+        "Reference: an explorable explanation in the sense of Bret Victor's 'Explorable Explanations' (2011): every formula coefficient, rule threshold, and guard threshold is a live control inside the explanation text, and changing one updates the counts, scores, and guard verdicts it feeds within 100 ms; a rater tests one control of each kind."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub card in labs/assets/js/config/site.config.js carries a one-line blurb for an older concept (local-first generation), not this lab" }
+      }
+    },
+    {
+      "id": "lint-latency",
+      "name": "Lint latency and reach",
+      "frame": "performance",
+      "metric": "Lint time in ms for drafts of 1,000, 10,000, and 50,000 words (performance.now around the lint call, median of 5 runs in Chrome DevTools at 4x CPU throttling), interaction duration in ms from a DevTools Performance trace, layout at 390 px, reduced motion, keyboard and screen-reader reach, and transferred page weight in KB. A rater measures in DevTools, with Lighthouse, and with axe-core.",
+      "ladder": [
+        "Absent: nothing loads.",
+        "The page loads and lints a 200-word sample on demand.",
+        "Linting runs as the visitor types, debounced at 300 ms or less, and a 1,000-word draft lints in under 100 ms (median of 5 runs at 4x CPU throttling), with the last lint time from performance.now shown on the page.",
+        "At 390 px the editor and the diff stack in one column with no horizontal scroll.",
+        "prefers-reduced-motion removes hunk and mark animations.",
+        "Every control is reachable by Tab with a visible focus ring and no keyboard trap.",
+        "Violation counts and run status are announced through an aria-live region, and each hunk has an accessible name stating insert or delete and its rule.",
+        "Linting runs in a Web Worker: at 4x CPU throttling a 10,000-word draft lints in under 200 ms, and each keystroke typed during that lint shows an interaction duration (keydown to next paint) under 50 ms in a DevTools Performance trace.",
+        "The first load transfers under 300 KB, and the optional dictionary and embedding model load only on demand.",
+        "Lighthouse on its mobile profile scores at least 95 for performance and for accessibility, and an axe-core scan of the page after one revision run reports 0 violations.",
+        "Reference: incremental linting re-checks only edited paragraphs, so on a 50,000-word draft each keystroke's lint plus paint stays under 16 ms (one 60 Hz frame) at 4x CPU throttling in a DevTools Performance trace, the approach of code editors such as CodeMirror 6, which re-parse only the edited region."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and nothing loads to measure" }
+      }
+    },
+    {
+      "id": "pipeline-modules",
+      "name": "Pipeline modularity",
+      "frame": "architecture",
+      "metric": "Count of pipeline modules (linter, readability, guard, diff, model call, view) in separate files, count of rule-specific branches in the engine file (target 0), and count of modules whose Node tests pass. A rater reads the file tree, greps the engine for rule ids, and runs node --test.",
+      "ladder": [
+        "Absent: no code exists.",
+        "One HTML page with inline script runs the lab.",
+        "Linter, readability, diff, and model call live in separate ES modules under labs/assets/js/.",
+        "Rules are data (objects with id, type, params, message) read by the engine, not branches inside it.",
+        "The model call goes through the shared labs/assets/js/ai/llm.js with a deterministic fallback passed in.",
+        "lint(text, rules) is a pure function with no DOM access, and it runs in Node.",
+        "Node unit tests with no dependencies (node --test) hold at least 5 cases each for the linter, readability, guard, and diff modules, and all pass.",
+        "A new rule type is added by registering one detector in a registry, with no edit to the engine file.",
+        "The rule schema is one JSON Schema file read by both the page's importer and the Node tests, and grep finds no second copy of the rule field list in the lab's code.",
+        "The labeled set runs as a Node script under tools/ called from tools/site_check.mjs, which fails when any rule's precision drops below its stated threshold; the model benchmark replays recorded replies from a JSON file so it also runs offline.",
+        "Reference: the engine ships as a versioned module with a versioned rule schema, and a second consumer imports it unchanged: a tools/ script lints the site's own page copy with the same module and rule file."
+      ],
+      "levels": {
+        "G0": { "level": 0, "evidence": "no page exists; the hub lists content-gen as planned in labs/assets/js/config/site.config.js and no module for this lab exists" }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

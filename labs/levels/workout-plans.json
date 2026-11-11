@@ -1,0 +1,311 @@
+{
+  "id": "workout-plans",
+  "title": "Personalized Plans",
+  "page": "workout-plans.html",
+  "thesis": "At level 10 Personalized Plans is a training-planning instrument a visitor can audit: a constraint solver places their available days, kit and injuries through a substitution graph, a session-load and fitness-fatigue model (Foster et al. 2001; Banister et al. 1975) shapes a periodised multi-week block shown as linked load charts and a body map of weekly volume, the block re-plans from the week they log, and a language model only narrates what the planner computed, checked line by line against the planner's log, never as medical advice.",
+  "axes": [
+    {
+      "id": "constraint-solving",
+      "name": "Constraint solving",
+      "frame": "model",
+      "metric": "Hard-constraint violations per solved plan (count) over five fixed input sets, and which constraint types the planner enforces (days, available weekdays, session minutes, equipment items, injuries by joint and movement pattern, weekly volume). A: strength, 4 days, 60 min, intermediate, gym, \"dodgy left knee\" (the ?demo inputs). B: hypertrophy, 3, 45, intermediate, gym, \"back from holiday\". C: general, 2, 30, beginner, bodyweight, \"sore wrist and bad shoulder\". D: fatloss, 5, 45, advanced, dumbbells, \"lumbar disc herniation\". E: strength, 6, 90, advanced, gym, \"no knee problems\". The rater runs each set, counts the lifts that break a ban, the equipment or the day's focus row, and reads LocalCoach.buildPlan() or its successor. A hard set is the one defined on load-model rung 2.",
+      "ladder": [
+        "No constraint handling: the inputs do not change the plan.",
+        "Inputs reach a model prompt or a label shown on the page.",
+        "Lookup tables apply schedule and time: the split is chosen from days per week (and experience), and the number of lifts per session from a minutes threshold; with no constraints entered, no day carries a lift from outside its own day pool (no squat on a Push or Pull day, no press on a Legs day) at any offered session length (30, 45, 60, 90 min) and kit.",
+        "Injury terms in the constraint text remove contraindicated lifts from every day and each fired rule is listed under the plan; the four fixed negative phrases \"back from holiday\", \"no knee problems\", \"desk job\" and \"back on Monday\" each ban nothing, and so do 3 more non-injury or negated phrases the rater writes at grading time and records in the evidence (such as \"knees are fine now\"), so no fixed list can be special-cased.",
+        "Every removed lift is replaced through a substitution graph by a lift that the chosen equipment allows and that shares its movement pattern (squat, hinge, lunge, horizontal push, horizontal pull, vertical push, vertical pull, carry, core) or, for an isolation lift, its primary muscle. A focus table is shown on the page: Push = horizontal and vertical push plus chest, delt and triceps isolation; Pull = horizontal and vertical pull plus biceps and rear-delt isolation; Legs and Lower = squat, hinge, lunge plus leg isolation; Upper = the Push and Pull rows; Full Body = any; core allowed on any day. No day carries a lift outside its focus row.",
+        "Session time is estimated per lift (sets x (work time + rest) plus warm-up), each day's estimate is shown in minutes, and the planner trims lifts until every day fits the visitor's cap.",
+        "Sessions are placed on the weekdays the visitor marks available, and no muscle group gets hard sets on consecutive days unless availability forces it, in which case the forced conflict is named on the page.",
+        "Constraints are typed (joint and movement pattern with severity, unavailable weekdays, equipment as an item list such as barbell, rack, bench, pull-up bar, bands, kettlebell) and solved as a constraint satisfaction problem with backtracking; on the fixed infeasible input (5 days per week, available weekdays Mon and Wed only) the page names a minimal conflicting set: dropping any single named constraint lets the solver return a plan.",
+        "Soft constraints carry weights (weekly sets per muscle within a target band, push-to-pull set ratio between 0.8 and 1.2, preferred lifts), and the solver shows its objective value and which soft constraints it relaxed.",
+        "A Node test generates at least 1,000 random constraint sets and asserts 0 hard-constraint violations (day count, banned lifts, equipment, time cap, pattern per day) in the solved plans.",
+        "For any lift in the plan the visitor opens the solver trace: the candidates considered, the constraint that eliminated each one, and the score that chose the winner, so every placement in the block can be audited from the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Rung 1: USER_PROMPT() puts every input into the model prompt and PlanView._meta() shows them as labels. Rung 2 fails: chooseSplit() and exerciseCount() are lookup tables, but at 90 min exerciseCount() returns 6 from 5-lift day pools and buildPlan() tops up from POOL.full, so with no constraint entered (3 days, intermediate, run in Node 2026-11-11) Back Squat sits on the Push and Pull days and Barbell Bench Press on Legs (gym), DB Goblet Squat on Push and Pull and DB Bench Press on Legs (dumbbells), Bodyweight Squat on Push and Pull and Push-Up on Legs (bodyweight). Rung 3 would fail too: CONSTRAINT_RULES are bare regexes, so 'back from holiday' and 'back on Monday' ban 4 lifts each and 'no knee problems' bans 8 (Node, 2026-11-11), and the ?demo plan ('dodgy left knee') puts Barbell Bench Press and Barbell Row on both Lower days while the caveat claims 'swapped for hip-hinge and box-height work'. No time estimate; sessions run Mon, Tue, Wed, Thu in a row."
+        }
+      }
+    },
+    {
+      "id": "load-model",
+      "name": "Training-load model",
+      "frame": "model",
+      "metric": "Which training-load quantities are computed and by which formula: hard sets, session load in arbitrary units (session RPE x minutes), monotony, strain, fitness, fatigue, form, planned against logged, and which of them checked-in tests reproduce. The rater reads the planner code and recomputes one day's and one week's numbers by hand from the formulas the page states.",
+      "ladder": [
+        "No training load is computed.",
+        "Each lift carries a static intensity target (an RPE value) from a lookup table.",
+        "Hard sets are counted per session and per week and shown as numbers, a hard set being a working set prescribed at RPE 7 or higher (3 or fewer reps in reserve), warm-up sets excluded, with that definition printed on the page.",
+        "Session load by the session-RPE method (Foster et al. 2001, Journal of Strength and Conditioning Research): planned session RPE on the CR10 scale x session minutes, in arbitrary units, per day and summed per week, with the rule that derives planned session RPE from the session's prescribed set RPEs printed on the page (for example the set-weighted mean, rounded), so a rater recomputes one day's AU by hand.",
+        "Weekly monotony (mean daily load / standard deviation of daily load, rest days counted as 0) and strain (weekly load x monotony) are computed per week, following Foster (1998, Medicine & Science in Sports & Exercise), and a checked-in test reproduces one hand-computed week's session load, monotony and strain within 1 percent.",
+        "Hard sets per muscle per week come from each lift's primary and secondary muscles (a secondary muscle counts 0.5 set) and are compared with a stated target range for the chosen goal.",
+        "A fitness-fatigue impulse-response model (Banister et al. 1975) runs over the block's daily loads, p(t) = p0 + k1 * sum w(s) e^(-(t-s)/tau1) - k2 * sum w(s) e^(-(t-s)/tau2), with k1, k2, tau1 and tau2 printed on the page with their source, and a checked-in test reproduces hand-computed fitness, fatigue and form for one fixed week within 1 percent.",
+        "Logged sessions (actual RPE, minutes, sets done) replace planned values in every load figure, and planned against actual load is shown per day and per week.",
+        "Week-to-week load change is computed, and any week rising more than a stated percentage over the previous 4-week mean is flagged, with the threshold labelled a convention whose evidence is contested.",
+        "With the bundled sample log (at least 6 weeks of logged sets, loaded by one button) or an imported log, k1, k2, tau1 and tau2 are fitted by least squares to estimated 1RM (Epley formula from logged sets), and the page shows the fitted values, the fit error, and a warning whenever the log has fewer performance points than a minimum stated on the page.",
+        "The fitted model is validated out of sample (fit on all but the last 2 logged weeks, predict the performance marker for those 2 weeks, prediction error shown next to a no-change baseline), and the exponentially weighted fitness-fatigue-form version (CTL 42 days, ATL 7 days, form as their difference, as in the TrainingPeaks Performance Management Chart) is offered beside the Banister model with the mapping between their parameters shown, its series matching GoldenCheetah's Performance Manager on the same daily loads within 1 percent in a checked-in fixture."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "constants.js DOSE gives every lift a static RPE ('8' or '7') with sets and a rep range; LocalCoach.buildPlan() copies them onto each exercise: rung 1. Rung 2 fails: nothing multiplies or sums them. No hard-set count, session load, weekly load or fitness-fatigue term exists in any workout-plans module, and the lab has no tests."
+        }
+      }
+    },
+    {
+      "id": "periodisation",
+      "name": "Periodisation and re-planning",
+      "frame": "model",
+      "metric": "How the prescription changes across weeks: number of weeks planned, whether progression and deload are numbers applied by stated rules, periodisation models offered, and whether a logged week changes the next. The rater generates a block, reads weeks 1 to N, logs a week with RPE 1 above target, and checks the next week against the stated rule.",
+      "ladder": [
+        "No schedule: the plan spans no defined time.",
+        "A one-week plan is generated, with progression and deload advice printed as text.",
+        "The block spans at least 4 weeks, each week rendered with its own sets, reps and RPE.",
+        "Progression is numeric and applied by a stated rule (double progression, or a load step such as +2.5 kg on the top set at target RPE), so each week's prescription differs from the last by that rule.",
+        "A deload week is placed by rule (every 4th to 6th week), cutting sets by a stated percentage and RPE by 1, and is visible in the block.",
+        "The periodisation model is selectable (linear, daily undulating, block with accumulation, intensification and realisation phases), and the choice changes the weekly numbers by a table shown on the page.",
+        "Loads are prescribed in kg for every barbell and dumbbell lift from an estimated 1RM (Epley: 1RM = load x (1 + reps / 30)) computed from a recent set the visitor enters per main lift, every set also shows its target reps in reserve on the RIR-based RPE scale (Zourdos et al. 2016, Journal of Strength and Conditioning Research), and changing the entered set changes every kg figure in the block.",
+        "Autoregulation: after a logged week, next week's load and sets are recomputed from the log (RPE 1 or more above target holds or cuts load, missed reps repeat the week, RPE below target adds load), and the rule that fired is shown per lift.",
+        "Given a target date (a test day, meet or race), the block is laid out backwards with a taper whose load reduction is set so the load model's predicted form peaks on that date.",
+        "Missed sessions or changed availability mid-block re-plan the remaining weeks while keeping weekly sets per muscle inside the target band, with the before and after shown side by side.",
+        "The planner searches load sequences for the target date under stated limits (maximum weekly load change, minimum rest days), names its search method and the number of sequences it scored, shows the winning sequence beside the 3 next-best with their predicted performance, and draws the predicted curve with a band over parameter uncertainty, run live in the browser on the visitor's own log."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "LocalCoach.buildPlan() returns one week (a split of 2 to 6 days), and PlanView._foot() prints PROGRESSION.strength / PROGRESSION.default and DELOAD_TEXT ('Every 4th-6th week, cut sets ~40%...') as text in .plan-foot: rung 1. Rung 2 fails: no second week exists, so nothing progresses numerically and no log can re-plan."
+        }
+      }
+    },
+    {
+      "id": "block-views",
+      "name": "Block and load views",
+      "frame": "graphics",
+      "metric": "What the plan looks like on screen: count of views (week strip, block timeline, load chart, fitness-fatigue chart), whether their values come from the plan on screen, whether they share one selection, axes with units, planned-against-logged encoding, change animation. A hard set is the one defined on load-model rung 2. The rater generates a plan and views it at 1440 px and 400 px, hovering and focusing each element, and changes one input to see which views move.",
+      "ladder": [
+        "Nothing is drawn: no plan view exists.",
+        "The plan renders on the page as text.",
+        "One card per training day lists its lifts with sets x reps and RPE.",
+        "Sessions sit on a 7-day week strip (Mon to Sun) with rest days drawn as empty slots, and each card shows its hard-set total.",
+        "A weekly load bar chart (session load per day in AU, labelled axis) whose bar heights equal the load model's per-day session load and change when any input changes, linked to the cards: hovering or focusing a day highlights both its bar and its card.",
+        "The multi-week block is drawn as a timeline, one row per week, each week coloured by phase (accumulation, intensification, deload) with its weekly load and hard sets labelled.",
+        "A fitness-fatigue chart plotted from the load model's daily fitness, fatigue and form values (axes labelled with units) shares one cursor with the timeline and the week strip: selecting a day in any view moves it in all three.",
+        "Logged values overlay planned ones on the cards and the load chart (planned as outline, logged as fill), with the difference printed per day.",
+        "A re-plan animates as a diff in 600 ms or less (moved sessions slide, swapped lifts cross-fade, changed set counts tick), and under reduced motion the diff appears as static before-and-after marks.",
+        "Two plan variants overlay on the timeline and the fitness-fatigue chart in distinct colours with a legend, so the visitor compares two blocks on one time axis.",
+        "All views (week strip, timeline, load chart, fitness-fatigue chart, body map) share one selection down to a single set; the fitness-fatigue chart plots fitness, fatigue and form on one dated axis with their time constants in the legend, the three series of the TrainingPeaks Performance Management Chart (CTL, ATL, TSB), and every point links to the sessions behind it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "PlanView.renderPlan() draws the summary line, the meta tags and one .day card per session (day name, focus, minutes; each lift with '5 x 3-5 . RPE 8' from _dose()): rung 2 (?demo capture at 1440 px, 2026-11-11). Rung 3 fails: sessions are labelled Mon to Thu in a single column with no rest days drawn and no hard-set total; no chart of any kind. The audit screenshot without ?demo shows an empty output panel with three dots until the button is pressed."
+        }
+      }
+    },
+    {
+      "id": "volume-map",
+      "name": "Muscle volume map",
+      "frame": "graphics",
+      "metric": "Whether weekly training volume per muscle is computed and drawn: number of muscle regions, unit (hard sets per week, a hard set as defined on load-model rung 2), primary against secondary weighting, target bands, injury marks, recovery, planned against logged. The rater generates a plan, counts the regions on the map, and checks two regions' numbers against the lifts that load them.",
+      "ladder": [
+        "No muscle or body view exists.",
+        "Each lift in the exercise data carries its primary muscles, and each day card lists the muscles it trains, derived from those tags rather than from the split label.",
+        "A table of weekly hard sets per muscle group covering all 13 groups (chest, upper back, lats, front, side and rear delts, biceps, triceps, quads, hamstrings, glutes, calves, core) is computed from the plan.",
+        "A front and back body diagram (SVG) draws each of the 13 groups as its own region, shading it by weekly hard sets on a labelled sequential scale, with a legend in sets per week.",
+        "Secondary muscles count as half a set and are shown as such, and tapping or focusing a region lists every lift, day and set count behind its number.",
+        "Each muscle is marked under, within or over a stated weekly set range for the chosen goal, with the range's source named.",
+        "Injured regions from the constraints are hatched on the map, and tapping one lists the lifts the planner avoided because of it.",
+        "A recovery view shades each muscle by hours since its last hard sets (0 to 72 h, labelled scale) as of the day the visitor selects in the week strip.",
+        "Planned and logged volume per muscle are shown side by side or as split shading, with the difference in sets per region.",
+        "The map steps through the block week by week, showing volume per muscle across the mesocycle, with a small-multiples grid of all weeks as the static alternative under reduced motion.",
+        "Beside the 1 / 0.5 primary-secondary rule, muscle involvement can use per-exercise fractional weights from a named dataset or a labelled lab assumption; the visitor switches between the two weightings and sees every region's number change, and the map resolves at least 30 regions across front, back and side views (three deltoid heads, upper, middle and lower trapezius, biceps and triceps heads), going past the consumer muscle-recovery map (as in Fitbod) in both anatomy and auditability."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "POOL entries in constants.js are bare exercise names with no muscle data. Each .day card shows only its split label (Upper, Lower, Push, Pull, Legs, Full Body A) from SPLIT_RULES, which names no muscle. No per-muscle data exists anywhere in the lab."
+        }
+      }
+    },
+    {
+      "id": "sheet-language",
+      "name": "Training-sheet design language",
+      "frame": "style",
+      "metric": "The craft of the plan as a training sheet: type and numeral system, the colour rule (amber only for what is active), state treatments, print output, motion rule, legend coverage, one layout across outputs. The rater checks 1440 px screenshots of each state (empty, solving, plan, logged, offline) and a print preview against workout-plans.css.",
+      "ladder": [
+        "Browser defaults, no styling.",
+        "A dark background with an accent colour on the headings and the primary action.",
+        "Site tokens from tokens.css as CSS variables, a display, body and mono type system, and the .panel card pattern (var(--surface) fill, 1px var(--line) border, var(--r-lg) radius) built from the same tokens as the other labs' panels.",
+        "Every dose on every card uses one format (sets x reps . RPE) in a monospace face aligned in one column, and every duration carries its unit.",
+        "A colour rule is stated (header comment of workout-plans.css) and kept: amber (the --accretion family) marks only what is active or selected (the current day, the generate action, a live stream), and no resting element is amber.",
+        "The resting state is drawn as an empty week sheet (7 day columns, rest days marked), and each state (solving, model narrating, plan ready, offline) has its own pill text and colour.",
+        "Each day's main lift, the week's hardest session and any deload week are set apart by weight, rule or fill, so a rater finds all three in a screenshot without reading the text.",
+        "A print stylesheet renders each week on one A4 page, dark on white, with log boxes per set for reps, load and RPE.",
+        "Motion follows data only: transitions animate plan changes and the model stream, no decorative idle loop runs (resting dots, pulsing blips), and every duration is 300 ms or less.",
+        "One drawing vocabulary spans the cards, load chart, timeline and body map (same line weights, hatching for injury avoidance, outline for planned, fill for logged), with a legend covering every mark, including an RPE 6 to 10 intensity ramp and one colour per training phase, and no unlisted mark on the page.",
+        "Every lift carries the same 8 fields of a printed coaching programme in one fixed order (exercise, sets x reps, load in kg, RPE or RIR, rest in seconds, tempo, notes, per-set log boxes for reps, load and RPE), and the 1440 px view, the 400 px view, the A4 print sheet and an exported PNG show those fields in the same order with the same marks, none missing from any output."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "workout-plans.css uses tokens.css variables (--void, --accretion, --horizon, --font-display/body/mono), and its .panel is var(--surface) fill, 1px var(--line) border, var(--r-lg) radius, the same tokens as .panel in trending.css and memes.css: rung 2. .ex-dose prints '5 x 3-5 . RPE 8' in var(--font-mono), right-aligned on every card, and minutes read '60 min' (?demo capture): rung 3. Rung 4 fails: the header comment states 'WARM accretion = active / generate / live energy', but it is not kept: .day-name is var(--accretion) at rest, as are the 'Plans' heading (.intro h1 .x), the eyebrow icon and the .day hover border. The 1440 px audit screenshot shows a blank output panel at rest."
+        }
+      }
+    },
+    {
+      "id": "plan-log-loop",
+      "name": "Plan, log, re-plan loop",
+      "frame": "interaction",
+      "metric": "What the visitor can do with a plan: count of working controls among inputs, stop, live re-solve, direct edits, session log, re-plan, URL state, what-if preview, scenario simulation. The rater uses each control once on the page and checks the result.",
+      "ladder": [
+        "No controls on the page.",
+        "One button produces a plan.",
+        "Form fields for goal, days per week, session length, experience, equipment and free-text constraints, and a submit button, produce a plan from those inputs.",
+        "A stop control aborts an in-flight model call, and the deterministic plan still renders.",
+        "A computed plan is on screen at first load, and changing any input re-solves the plan within 200 ms with no button press (model narration may follow on request).",
+        "Direct edits on the plan: swap any lift for one of its listed substitutes, drop a session, or move a session to another weekday; the planner re-checks constraints and weekly volume after each edit and shows any violation.",
+        "A per-session log: sets done, reps, load and session RPE for each lift, or 'missed', entered in a form usable at 400 px.",
+        "Re-plan: one action turns a logged week into next week's plan, listing every change and the log entry that caused it.",
+        "The whole state (inputs, edits, logs) is encoded in a shareable URL: opening it in a private window restores the identical plan, edits and logs.",
+        "What-if: toggling a constraint or dragging a weekly volume or load target previews the alternative plan's load curve and body map overlaid on the current plan before the visitor accepts it.",
+        "Open-ended simulation: the visitor scripts weeks the designer did not (missed sessions, an illness week, a travel week with dumbbells only), steps the planner through them with full undo and redo, and saves the scenario as a replayable file."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "#plan-form holds goal, days, minutes, level and equipment selects and a free-text #constraints input; submit runs PlanController.generate(): rung 2. #stop calls AbortController.abort(); provider.js _ollama() passes the signal to fetch, so on localhost with Ollama the in-flight call is cut, extractPlan() then gets no parseable JSON and LocalCoach.buildPlan() renders (code read 2026-11-11, not run against a live Ollama in this review): rung 3. On the public site (echo tier) there is never an in-flight model call; Stop only cuts the scripted type-out. Rung 4 fails: the 1440 px audit screenshot shows an empty output panel until the button is pressed, and changing an input does nothing until resubmit. No edits, log, URL state or export."
+        }
+      }
+    },
+    {
+      "id": "exercise-sources",
+      "name": "Exercise and dose sources",
+      "frame": "data",
+      "metric": "Where the exercise library, dose tables and model parameters come from: unique exercise count, structured fields per exercise (pattern, muscles, equipment, joint stress), named datasets with licence, cited dose sources, persistence, export and import of the visitor's data. The rater reads constants.js or its successor data files and the page's sources section, and counts unique exercises in Node.",
+      "ladder": [
+        "No data: the page holds no exercises or doses.",
+        "Exercise names and doses are hardcoded in the script.",
+        "A hand-written exercise list of at least 60 unique exercises, grouped by equipment and by movement pattern (squat, hinge, lunge, horizontal push, horizontal pull, vertical push, vertical pull, carry, core; isolation lifts grouped by target muscle), and a dose table per goal, both without sources.",
+        "Each exercise carries structured fields: primary and secondary muscles, equipment items, and joint-stress flags (knee, shoulder, lumbar spine, wrist).",
+        "The library comes from a named open dataset with its licence and version stated on the page (for example wger or free-exercise-db), at least 200 exercises.",
+        "Dose tables cite their sources on the page: set, rep and intensity ranges per goal from the ACSM position stand on progression models in resistance training (ACSM 2009, Medicine & Science in Sports & Exercise), weekly set ranges per muscle from Schoenfeld, Ogborn and Krieger (2017, Journal of Sports Sciences).",
+        "Each substitution edge records its reason (shared pattern and muscles, lower stress on a named joint), and each injury rule names the joint-stress flag it removes, so the graph can be audited edge by edge.",
+        "The visitor's plan and logs persist across reloads and export as JSON, CSV and an .ics calendar (one event per session on its weekday), with the schema documented on the page; importing the JSON restores an identical state.",
+        "Load-model defaults (k1, k2, tau1, tau2) come from a named published fit, with its population, sample size and sport stated on the page beside the values.",
+        "A sample export in one public app format (such as the Strong app's CSV) ships with the page and imports in one click, with its column mapping documented, and an uploaded file in the same format seeds the load model from the visitor's real history.",
+        "Every dose rule, substitution edge and parameter on the page traces to a cited source or a labelled lab assumption in one dated sources table, and the library covers at least 800 exercises with muscle and joint data."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "constants.js POOL hand-lists 48 unique exercises (counted in Node 2026-11-11) keyed by equipment and split-day label (push, pull, legs, upper, lower, full), and DOSE gives sets, reps and RPE per goal: rung 1. Rung 2 fails: under 60 exercises and not grouped by movement pattern. DELOAD_TEXT and PROGRESSION are bare sentences; no muscle or joint fields, and no source, dataset or licence anywhere in the code or on the page."
+        }
+      }
+    },
+    {
+      "id": "model-grounding",
+      "name": "Model as checked narrator",
+      "frame": "intelligence",
+      "metric": "What the language model contributes against the deterministic planner, and how its output is checked: routes reachable from the public site, checks applied to model output, share of model text matched to the planner log (percent), evaluation cases. The rater runs a plan on the public site and on a local Ollama with DevTools Network open, reads PlanService.js and its successors, and runs any checked-in tests that feed recorded model replies.",
+      "ladder": [
+        "No model is called.",
+        "A model call is wired (local Ollama or a relay), its output appears on the page, and the deterministic plan renders whenever the call fails, is stopped, or returns output that does not parse.",
+        "The model is reachable on the public site through the shared route module labs/assets/js/ai/llm.js (local Ollama, a visitor's key, the public keyless route), and the route and model that answered are named next to the output.",
+        "One batched call per plan respects the public route's 45 s per-IP window with a countdown, and the deterministic plan renders at once instead of waiting for the call.",
+        "The model's JSON reply is validated before display: every day, lift name, set count and equipment item it contains is checked against the inputs and the planner's plan (day count, minutes per day within the cap, equipment, banned lifts, pattern per day), violations are listed on the page, each offending field is replaced by the planner's value, and a checked-in test feeds a recorded reply that names a banned lift and the wrong number of days and asserts both are caught.",
+        "Role split: the planner computes every set and rep; the model writes only the narration (a rationale per day, a cue per lift) from the planner's JSON log, and each text block is labelled planner or model.",
+        "Narration check: every number and lift name in the model's text is matched against the planner log, unmatched claims are flagged inline, and a test on 10 recorded narrations reports the unmatched count.",
+        "Free-text constraints are parsed by the model into the solver's typed schema (joint, patterns to avoid, severity, unavailable weekdays, equipment items), shown for the visitor to confirm before solving, with a rule-based parser as the offline route.",
+        "After a logged week, the model writes a review of the log in which every claim links to a log entry or a planner decision, with 0 unmatched numbers on the narration check.",
+        "A checked-in evaluation of at least 20 constraint cases (injury, kit and schedule combinations) scores constraint parsing and narration per route (local, visitor key, public), and the pass rates are shown on the page.",
+        "Per plan, the page shows the model's contribution against the engine's (fields the model set, claims it made, checks it failed, what the engine overrode), so the visitor sees exactly what a language model adds to a computed training plan and where it was wrong."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "PlanService streams through AIProvider from labs/assets/js/ai/provider.js (tiers ollama, worker, echo). On localhost a local Ollama answers (the audit screenshot's LOCAL pill; llama3.1:8b in config.js), its stream shows in #reasoning-body, and whenever extractPlan() returns null (no JSON, a parse error, or Stop) PlanController.generate() renders LocalCoach.buildPlan(): rung 1. Rung 2 fails: it uses provider.js, not llm.js, and AI_CONFIG.worker.base is '', so on the public site detect() returns 'echo' and no model is called. extractPlan() accepts any JSON with a non-empty split array, with no check of day count, minutes, equipment or banned lifts."
+        }
+      }
+    },
+    {
+      "id": "honest-explanation",
+      "name": "Training science, told straight",
+      "frame": "explanation",
+      "metric": "Claims on the page that match the code path that produced the shown plan, as a count over all claims about what computed the plan (lede, labels, notes, footer, meta description), in each backend state (offline, local model, ?demo), plus which explanation features from this ladder are present. The rater lists every such claim and checks it against PlanService, LocalCoach and the detected tier. A hard set is the one defined on load-model rung 2.",
+      "ladder": [
+        "No explanation on the page.",
+        "A headline and a lede paragraph describe the idea.",
+        "Copy matches what runs: no model is named, and no text is labelled as model reasoning, unless a model answered in this session; scripted or deterministic text is labelled as the planner's.",
+        "A visible not-medical-advice line, and a status pill or note naming the backend tier the page detected, which no other line of copy contradicts.",
+        "Before the first plan, the 7 general health questions of the PAR-Q+ (Warburton et al. 2011) are asked, and any yes stops plan generation with a see-a-clinician message, as do free-text red-flag terms (chest pain, fainting, recent surgery, pregnancy, a diagnosed heart condition) with negations handled; the page states what the lab does not do (diagnose, prescribe rehabilitation).",
+        "Each prescription choice has a reason on tap or hover: rep range from goal, split from days, each substitution from the injury rule that fired, with the rule shown.",
+        "Every quantity on the page has a definition with formula and unit: hard set, session load (AU = session RPE x minutes), weekly sets per muscle, monotony, strain, fitness, fatigue, form.",
+        "A guided tour of 4 to 6 steps walks a sample week through the cards, load chart, body map and a re-plan, each step pointing at the live element.",
+        "Every rule and number carries a provenance tag (cited evidence with author and year, coaching convention, or lab assumption), and contested rules such as load-spike thresholds are marked as contested.",
+        "The fitness-fatigue model's limits are shown: its parameters are population defaults unless fitted, with a sensitivity view of predicted form as tau1 and tau2 vary by plus or minus 50 percent.",
+        "A closing panel poses 5 questions (why this split, what a hard set is, what session load measures, why this deload week, what the model wrote against what the planner computed) and reveals each answer filled in with the visitor's current plan values: their split rule, their hard-set count, their week's load in AU, their deload week number, and the narration-check diff."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "h1 and .lede present: rung 1. Rung 2 fails: the meta description says 'Powered by Nemotron-3-Ultra', the footer 'Reasoning by Nemotron-3-Ultra', #resting promises 'a hosted Nemotron relay', and the lede promises 'a reasoning model think through the trade-offs out loud', yet AI_CONFIG.worker.base is '' and the public page runs LocalCoach; in ?demo, PlanView.showDemoReasoning() labels LocalCoach.buildReasoningScript() output with REASON_LABEL.worker 'Nemotron-3-Ultra · reasoning'. The footer's not-medical-advice line and #ai-status / #backend-note exist but sit above the failed rung. No red-flag screening, no per-choice reasons."
+        }
+      }
+    },
+    {
+      "id": "reach",
+      "name": "Reach and responsiveness",
+      "frame": "performance",
+      "metric": "Whether the page works for every visitor and device: layout at 400 px, reduced motion, keyboard and screen reader, WCAG contrast, planner compute time (ms), offline operation, Lighthouse scores. The rater uses a true 400 px viewport, reduced-motion emulation, keyboard only, axe or Lighthouse, and a DevTools performance profile with 4x CPU throttle.",
+      "ladder": [
+        "The page does not load, or throws before rendering the form.",
+        "The page loads and renders the form at desktop width.",
+        "At a 400 px viewport the layout stacks to one column with no horizontal scroll, and no control or card text is cut off (every select shows its full selected option, every lift name and dose shows in full).",
+        "prefers-reduced-motion stops every CSS animation and transition, and scripted text prints at once instead of typing out.",
+        "Every control is reachable and operable by keyboard with a visible focus indicator, and the finished plan is announced once through a live region (a streamed reply is not read fragment by fragment).",
+        "All text meets WCAG 2.2 AA contrast (4.5:1 body, 3:1 large), with 0 contrast violations in axe or Lighthouse, faint notes and minute labels included.",
+        "The load chart and the body map are on the page, each has an equivalent data table or text summary reachable by screen reader, and every colour-coded mark also carries a text label, pattern or shape.",
+        "The planner computes a 12-week block in under 50 ms under 4x CPU throttle, and the first plan is visible within 2 s of navigation on the Slow 4G profile.",
+        "With the network off after first load, the visitor generates a plan, logs one session and runs a re-plan, none of them waiting on a model or a CDN, and the log survives a reload.",
+        "Lighthouse mobile scores accessibility 100 and performance 95 or higher, with cumulative layout shift under 0.05 when the plan renders.",
+        "Any edit re-solves a 12-week block and redraws every linked view within one 16.7 ms frame under 4x CPU throttle, and axe reports 0 violations in every page state (empty, solving, plan, logged, re-planned, offline)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Loads and renders the form at desktop width: rung 1. Rung 2 fails: .bench stacks to one column under 860 px with no horizontal scroll, but the Experience select clips 'Intermediate' to 'Intermedia' in the 1440 px audit screenshot and at a true 400 px viewport (iframe capture of ?demo, 2026-11-11), because .field-row keeps grid-template-columns 1fr 1fr at every width (the 860 px media query only collapses .bench), leaving about 140 px per select inside the 360 px input panel. The reduced-motion CSS block and provider.js reduced() exist but sit above the failed rung, and #reasoning-body is aria-live='polite' and receives the stream fragment by fragment."
+        }
+      }
+    },
+    {
+      "id": "planner-code",
+      "name": "Planner code shape",
+      "frame": "architecture",
+      "metric": "How the lab's code is divided and tested: modules and their roles, whether model calls use the shared route module, whether solver, load model, periodiser and views are separate, data in validated files, tests and their coverage. The rater reads labs/assets/js/workout-plans/ and runs any tests.",
+      "ladder": [
+        "No code: the lab has no page or script.",
+        "The lab's logic runs as script on its HTML page, inline or loaded by a script tag.",
+        "The logic lives in script files outside the HTML, with a named function per concern (form, plan building, model call, rendering).",
+        "ES modules with separate roles: a deterministic planner with no DOM, a model service, a view that owns every DOM touch, and one constants module for tables, selectors and prompts.",
+        "Model calls go through the site's shared route module labs/assets/js/ai/llm.js, and the lab hardcodes no endpoint or model name.",
+        "The planner is a pure function from inputs to a plan plus a solver log (rule fired, lift replaced by which, why), and both the view and the model prompt read that log.",
+        "Node unit tests (no browser) run the planner over every combination of the form's inputs (5 goals x 5 day counts x 4 lengths x 3 levels x 3 kits = 900) with each injury rule and assert the day count, the bans and the pattern of each day, and the same planner runs from Node as a CLI (inputs JSON in, plan JSON out).",
+        "The exercise library, substitution graph and dose tables are JSON data files validated by a schema check script; adding an exercise or an injury rule touches no JS.",
+        "Solver, load model, periodiser and narration check are separate modules writing to one plan-and-log store, and the views (cards, timeline, load chart, body map) subscribe to it; adding a view changes no planner code.",
+        "Plans and logs follow one versioned JSON schema, and a stored plan from the previous schema version loads through a migration that a test covers.",
+        "The planner core is documented as a standalone module (API, schema, tests with at least 90 percent line coverage) and is reused by another lab without modification."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Seven ES modules under labs/assets/js/workout-plans/: LocalCoach.js (pure planner, no DOM), PlanService.js (model layer), PlanView.js (every DOM touch), PlanController.js, constants.js (tables, selectors, prompts), dom.js, main.js: rung 3. Rung 4 fails: PlanService imports AIProvider from ../ai/provider.js, not llm.js, and constants.js hardcodes MODEL.reasoningModel 'nvidia/nemotron-3-ultra-550b-a55b'. No tests exist for the lab."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}

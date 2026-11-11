@@ -25,12 +25,14 @@ import { spawnSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WT_ROOT = path.resolve(ROOT, '..', '_labs_wt');
-const SHOTS = 'C:/Users/Luis.Blanco/AppData/Local/Temp/lbrshots';
-const SHOOT_PS1 = 'C:/Users/Luis.Blanco/.claude/skills/headless-verify/shoot.ps1';
-const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const HOME = os.homedir().split(path.sep).join('/');
+const SHOTS = process.env.LABS_SHOTS || `${HOME}/AppData/Local/Temp/lbrshots`;
+const SHOOT_PS1 = process.env.LABS_SHOOT_PS1 || `${HOME}/.claude/skills/headless-verify/shoot.ps1`;
+const CHROME = process.env.LABS_CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 /* name (worktree and branch) -> hub id, port, page */
 export const LABS = [
