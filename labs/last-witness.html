@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Time-Slip: The Last Witness</title>
+<meta name="description" content="Cross a black hole's last stable orbit or fly at a relativistic speed, come home ten thousand years late by the real formulas, and speak with the last machine mind awake." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/last-witness.css" />
+<script type="module" src="assets/js/last-witness/main.js"></script>
+</head>
+<body data-phase="plan">
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+<div id="labels" class="labels" aria-hidden="true"></div>
+
+<header class="bar">
+  <div class="left">
+    <a class="back" id="back" href="index.html">&larr; labs</a>
+    <div class="label">TIME-SLIP <span class="on">/ the last witness</span></div>
+  </div>
+  <div class="right">
+    <button class="pill" id="snd" type="button" aria-pressed="false" title="A generated soundscape. Off until you turn it on.">sound off</button>
+    <span id="route"></span>
+    <div class="brand">THE LAB &middot; <b>L212</b></div>
+  </div>
+</header>
+
+<main id="stage">
+  <!-- I. the plan -->
+  <section id="plan" class="phase" aria-labelledby="plan-h">
+    <div class="pcol pleft">
+      <div class="kick">a time-slip, computed</div>
+      <h1 id="plan-h">Spend hours. <span class="lo">Come home ten thousand years late.</span></h1>
+      <p class="sub">Choose how you cross. The page computes your clock and home's from the formulas of general and special relativity, and refuses any crossing that would kill you before you return. Your ship carries a beacon with your heartbeat. Home will hear it the whole time, stretched.</p>
+      <div class="modes" role="radiogroup" aria-label="How you cross" id="modes"></div>
+      <p class="mblurb" id="mblurb"></p>
+      <div class="params" id="params"></div>
+      <label class="msgl" for="msg">a line for home <span class="hint">sent from the deepest point of the crossing</span></label>
+      <textarea id="msg" maxlength="160" rows="2" spellcheck="false"></textarea>
+      <div class="gorow">
+        <button class="go" id="cross" type="button">Cross</button>
+        <button class="ghost" id="share" type="button">copy link</button>
+      </div>
+      <p class="why" id="why" role="status"></p>
+    </div>
+    <div class="pmid">
+      <div class="minis">
+        <div class="plate mini feas" id="feas">
+          <div class="ph">the map of possible crossings <span class="tag r">[real]</span></div>
+          <canvas id="feasc" width="300" height="90" role="img" aria-label="Which choices are survivable: each cell is a full check of tides, acceleration and your lifetime"></canvas>
+          <div class="feasl" id="feasl"></div>
+        </div>
+      <div class="plate mini heard">
+        <div class="ph">how home will hear your heart <span class="tag r">[real]</span></div>
+        <svg id="spark" viewBox="0 0 300 70" preserveAspectRatio="none" role="img" aria-label="The interval between your heartbeats as home receives them, across ten thousand years"></svg>
+        <div class="heardt" id="heardt"></div>
+      </div>
+      </div>
+      <div class="fx" id="fx"></div>
+      <div class="fcite"><span class="tag e">[established]</span> <span id="fcite"></span></div>
+    </div>
+    <div class="pcol pright">
+      <div class="plate clocks" aria-live="polite">
+        <div class="ph">the two clocks <span class="tag r">[real]</span></div>
+        <div class="crow"><span class="ck">you</span><span class="cv" id="c_you">&mdash;</span></div>
+        <div class="crow"><span class="ck">home</span><span class="cv amber" id="c_home">10,000 years</span></div>
+        <div class="ratio"><span id="c_ratio">&mdash;</span></div>
+        <table class="ledger" id="ledger" aria-label="The four legs, each integrated"></table>
+        <div class="ticker" id="ticker"></div>
+      </div>
+      <div class="plate costs">
+        <div class="ph">what it costs <span class="tag r">[real]</span></div>
+        <div id="costs"></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- II. the crossing -->
+  <section id="film" class="phase" hidden aria-label="The crossing">
+    <div class="filmtop">
+      <div class="axis" id="axis" aria-hidden="true"></div>
+      <div class="frow"><span class="fk">you</span><span class="fv" id="f_you">00:00:00</span><span class="fbar"><i id="b_you"></i></span></div>
+      <div class="frow"><span class="fk">home</span><span class="fv amber" id="f_home">year 0</span><span class="fbar"><i id="b_home"></i></span></div>
+      <div class="fnote" id="f_note"></div>
+      <table class="flegs" id="flegs" aria-label="The four legs"></table>
+    </div>
+    <ol class="flog" id="flog" aria-live="polite"></ol>
+    <div class="filmbot">
+      <span class="fcap" id="f_cap"></span>
+      <button class="ghost" id="skip" type="button">skip to the return</button>
+    </div>
+  </section>
+
+  <!-- III. the return and the conversation -->
+  <section id="talk" class="phase" hidden aria-label="The return">
+    <div class="tside">
+      <div class="plate tlog">
+        <div class="ph">ship log <span class="tag i">resolves as you learn</span></div>
+        <ol id="tlog"></ol>
+      </div>
+    </div>
+    <div class="tcol">
+      <div class="thead"><span class="tname">TALLY</span><span class="tsub" id="tsub">the last machine mind awake</span></div>
+      <div class="eng" id="eng" aria-label="TALLY's engine state" title="A state machine, not a script: what you say moves trust, trust opens levels, each level holds facts generated from your crossing."></div>
+      <div class="transcript" id="transcript" role="log" aria-live="polite" aria-label="Conversation with TALLY"></div>
+      <div class="thinking" id="thinking" hidden>
+        <span class="tdot" aria-hidden="true"></span><span id="thinkt"></span>
+        <button class="ghost sm" id="nowait" type="button">answer from its own memory now</button>
+      </div>
+      <div class="chips" id="chips"></div>
+      <form class="ask" id="ask" autocomplete="off">
+        <label class="sr" for="q">Say something to TALLY</label>
+        <input id="q" type="text" maxlength="400" placeholder="say something to TALLY" spellcheck="false" />
+        <button class="go sm" type="submit">say</button>
+      </form>
+      <div class="acts" id="acts" aria-label="What you do"></div>
+      <div class="tnote" id="tnote"></div>
+    </div>
+  </section>
+
+  <!-- IV. the ending -->
+  <section id="end" class="phase" hidden aria-labelledby="end-h">
+    <div class="endcard">
+      <div class="kick" id="end-k">ending</div>
+      <h2 id="end-h"></h2>
+      <div class="endtext" id="endtext"></div>
+      <div class="endnums" id="endnums"></div>
+      <div class="endmap" id="endmap" aria-label="Endings reached"></div>
+      <div class="gorow">
+        <button class="go" id="rec_txt" type="button">keep the witness record (.txt)</button>
+        <button class="ghost" id="rec_json" type="button">.json</button>
+        <button class="ghost" id="again" type="button">cross again</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="ev"><i></i><span><b>[real]</b> clocks, costs, the beacon's stretch, the carrier's drop, the antenna, the blueshifted answer &middot; <b>[illustrative]</b> the world's history, its people, TALLY's words, the tolerance bands &middot; an original story in the spirit of TRIVERSE</span></span>
+  <details class="src" id="src">
+    <summary>sources and checks</summary>
+    <div id="srcbody"></div>
+  </details>
+</footer>
+<noscript><p class="nos">This lab computes its clocks in JavaScript. With scripts off it cannot run.</p></noscript>
+</body>
+</html>
