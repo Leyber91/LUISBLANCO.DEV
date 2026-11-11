@@ -27,7 +27,7 @@ const CSS = `
   box-shadow:0 18px 40px -16px rgba(0,0,0,.8);text-transform:none;letter-spacing:.02em;line-height:1.5}
 .lbr-panel h4{margin:0 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-bright,#EAF0FB)}
 .lbr-panel p{margin:0 0 10px;font-size:11px;color:var(--text-dim,#79828F)}
-.lbr-panel label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim,#79828F);margin:8px 0 4px}
+.lbr-panel label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim,#79828F);margin:8px 0 4px}
 .lbr-panel input{width:100%;box-sizing:border-box;padding:7px 9px;background:var(--surface-3,#18202B);border:1px solid var(--line,#1C232F);
   border-radius:4px;color:var(--text-bright,#EAF0FB);font:12px var(--font-mono,'IBM Plex Mono',monospace)}
 .lbr-row{display:flex;gap:8px;margin-top:12px}
@@ -63,7 +63,7 @@ export function mountRoutePanel(host) {
   const root = el('span', { class: 'lbr', 'data-route': 'unknown' });
   const pill = el('button', { class: 'lbr-pill', type: 'button', 'aria-expanded': 'false', 'aria-haspopup': 'dialog' });
   const dot = el('span', { class: 'lbr-dot', 'aria-hidden': 'true' });
-  const label = el('span', { class: 'lbr-label' }, 'model: detecting');
+  const label = el('span', { class: 'lbr-label' }, 'model: chosen on first use');
   pill.append(dot, label);
 
   const panel = el('form', { class: 'lbr-panel', role: 'dialog', 'aria-label': 'Model route' });
@@ -125,6 +125,8 @@ export function mountRoutePanel(host) {
     label.textContent = s.label;
     panel.querySelectorAll('.lbr-routes li').forEach((li) => li.classList.toggle('on', li.dataset.r === s.route));
   });
-  LLM.detect();
+  // No probe at mount: a local model server that hangs under load would stall the page's start (seen
+  // 2026-11-11). The route is chosen on the first real call, or when the visitor opens this panel.
+  pill.addEventListener('click', () => LLM.detect(), { once: true });
   return root;
 }
