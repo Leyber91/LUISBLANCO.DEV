@@ -204,7 +204,7 @@ function shortValue(k, v) {
 /* ---------- the observation chart (after the layout of RCP Chart 3) ---------- */
 const OBS_ROWS = [
   { key: 'rr', label: 'Resp rate' }, { key: 'spo2', label: 'SpO₂' }, { key: 'o2', label: 'Air / O₂' }, { key: 'sbp', label: 'Systolic' },
-  { key: 'hr', label: 'Pulse' }, { key: 'cvpu', label: 'Conscious' }, { key: 'temp', label: 'Temp' },
+  { key: 'hr', label: 'Heart rate' }, { key: 'cvpu', label: 'Conscious' }, { key: 'temp', label: 'Temp' },
 ];
 export function drawObsChart(table, keyHost, p, opts = {}) {
   const sets = [...(p.prev || []), { ...p, t: 0, missKeys: p.missKeys || [] }];

@@ -73,7 +73,7 @@ export const NEWS2_ROWS = [
       { min: 111, max: 219, pts: 0, col: 3 },
       { min: 220, pts: 3, col: 6 },
     ] },
-  { key: 'hr', label: 'Pulse', unit: 'per minute',
+  { key: 'hr', label: 'Heart rate', unit: 'per minute',
     cells: ['≤40', '', '41–50', '51–90', '91–110', '111–130', '≥131'],
     bands: [
       { max: 40, pts: 3, col: 0 },
@@ -154,7 +154,7 @@ export const FEATURES = [
     syn: ['supplemental oxygen', 'on oxygen', 'oxygen therapy', 'receiving oxygen', 'oxygen support', 'nasal cannula', 'oxygen mask'] },
   { key: 'sbp',  group: 'sbp', label: 'Systolic BP', short: 'systolic BP', unit: 'mmHg', min: 70, max: 230, step: 1, cost: 18, actionable: true,
     syn: ['systolic blood pressure', 'systolic', 'blood pressure', 'hypotension', 'hypotensive', 'hypertension', 'bp'] },
-  { key: 'hr',   group: 'hr', label: 'Pulse', short: 'pulse', unit: '/min', min: 30, max: 180, step: 1, cost: 14, actionable: true,
+  { key: 'hr',   group: 'hr', label: 'Heart rate', short: 'pulse', unit: '/min', min: 30, max: 180, step: 1, cost: 14, actionable: true,
     syn: ['heart rate', 'pulse rate', 'pulse', 'tachycardia', 'tachycardic', 'bradycardia', 'bradycardic', 'hr'] },
   { key: 'cvpu', group: 'cvpu', label: 'New confusion (CVPU)', short: 'CVPU', unit: '', binary: true, cost: 2.5, actionable: true,
     syn: ['new confusion', 'confusion', 'confused', 'consciousness', 'cvpu', 'drowsy', 'alertness', 'delirium', 'disoriented', 'responsive'] },
