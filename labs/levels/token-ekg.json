@@ -1,0 +1,287 @@
+{
+  "id": "token-ekg",
+  "title": "Token EKG",
+  "page": "token-ekg.html",
+  "thesis": "At level 10 Token EKG is the instrument a visitor opens to learn how fast a language model really is: every number is a real measurement of fresh generation or a labelled recording, from in-browser tokenizers compared across languages and scripts to per-token stream timing from their own local model cross-checked against the server's counters, with the public call's latency taken apart as far as the browser can see and runs compared side by side.",
+  "axes": [
+    {
+      "id": "stream-timing",
+      "name": "Stream timing truth",
+      "frame": "model",
+      "metric": "Which quantities of a live token stream come from real timestamps of fresh generation and are checked against the server: time to first token (ms), inter-token interval (ms), tokens per chunk, decode rate (tokens/s), agreement with server counters (percent). Terms: a chunk is one SSE data event or one Ollama NDJSON line; a read is one reader.read() result. The rater runs one prompt twice against a local Ollama or the public route with DevTools Network open (response headers, x-cache included) and compares the page's readouts with the response's own fields (Ollama eval_count, eval_duration, prompt_eval_duration, load_duration).",
+      "ladder": [
+        "No timing: nothing on the page is timestamped.",
+        "The page shows inter-token intervals in ms computed from timestamps, from any source (a simulator counts).",
+        "Arrivals from a real model stream are timestamped with performance.now() in the stream reader, one timestamp per chunk, and the intervals are computed from those timestamps.",
+        "Fresh-generation guard: every request carries a per-run nonce (a random seed parameter or a run id in the prompt), so DevTools shows x-cache: MISS on every run where the route sends that header, the repeated default prompt included; a run with more than half of its intervals under 1 ms is labelled CACHED and gets no decode-rate figure.",
+        "Time to first token is measured from request send to the first chunk carrying any token and shown in ms, apart from the inter-token statistics; when the stream carries reasoning (delta.reasoning beside delta.content, or Ollama's thinking field), time to first answer token is shown as a second figure.",
+        "Each chunk's token count comes from re-tokenizing its text with a real tokenizer (a chunk carrying k tokens adds k; one Ollama NDJSON line counts as one token), and chunks delivered in one read or within 2 ms of the previous chunk are shown as transport buffering and excluded from the decode rate.",
+        "For a local Ollama stream, the client token count and decode rate sit next to the server's eval_count and eval_count / eval_duration, with the difference shown in tokens and percent.",
+        "Each run is split into server phases from the final Ollama record: load_duration, prefill (prompt_eval_count / prompt_eval_duration in tokens/s), decode, and network overhead = client wall time minus total_duration, all in ms.",
+        "One control repeats the same prompt n >= 5 times and reports median and interquartile range of TTFT, inter-token interval and decode rate, with the cold first run (model load) labelled apart from the warm runs.",
+        "The public and own-key calls are split into what the client observes: request send to response headers, headers to first chunk, first to last chunk, each in ms. Resource Timing connect and time to first byte appear only where the server sends Timing-Allow-Origin and read 'not exposed by server' otherwise (text.pollinations.ai sent none on 2026-11-11). Queue, prefill and decode appear only from fields the server reports (usage prompt_tokens and completion_tokens shown beside them), never inferred.",
+        "TTFT, time per output token, end-to-end latency and throughput are defined on the page as MLPerf Inference and NVIDIA GenAI-Perf use them, and a published reference run on two serving stacks (Ollama with its final record, llama.cpp server with its timings object) shows for each stack the client decode rate (chunk timestamps, buffered chunks excluded) within 5 percent of the server's own decode rate, and client TTFT minus network time (measured by a method stated on the page) within 5 percent of the server's load plus prefill time."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "goLive() in labs/token-ekg.html fetches text.pollinations.ai/<prompt>?model=openai&stream=true&referrer=l212 and calls onToken(performance.now()) once per SSE chunk carrying delta.content or delta.reasoning (rungs 1 and 2; dts stores raw intervals, Math.max(dt,1) clamps only the EMA rate). Rung 3 fails: no nonce, no cache check. The default prompt is served from the route's response cache: probes on 2026-11-11 returned x-cache: HIT with the same 321 chunks of gpt-oss-20b inside 5 to 22 ms (315 to 320 of 320 intervals under 1 ms); the screenshot's 999.6 tokens/sec and 8 ms mean time that replay. Novel prompts returned x-cache: MISS and real cadence (1,386 chunks over 25.5 s, p50 16.9 ms; 138 chunks over 3.2 s, p50 21.5 ms). x-cache is not in Access-Control-Expose-Headers, so the page's script cannot read it and detection has to use the timing rule. No TTFT readout. Without a stream, simStep() draws Math.random intervals."
+        }
+      }
+    },
+    {
+      "id": "tokenizer-fidelity",
+      "name": "Tokenizer fidelity",
+      "frame": "model",
+      "metric": "How many real tokenizers run in the browser and whether their counts match the reference libraries: number of vocabularies and their vendors, count mismatches on a test set, scripts covered, languages in the premium table. The rater pastes a mixed test string (English, CJK, Arabic, emoji, source code), compares the page's counts with the repo's reference fixture or with tiktoken or Hugging Face tokenizers run locally, and runs the Node test.",
+      "ladder": [
+        "No tokenizer: the page never splits text into tokens.",
+        "A text field shows the character count and UTF-8 byte count of what the visitor types, the raw units every tokenizer splits.",
+        "One real tokenizer vocabulary (for example o200k_base or cl100k_base, from a pinned library or vocab file) counts the visitor's typed text in the browser.",
+        "The typed text is shown split at token boundaries, each token boxed, with its integer id on hover or tap.",
+        "Characters per token and UTF-8 bytes per token are shown for the typed text, with units.",
+        "At least three vocabularies from three model vendors count the same text side by side: at least one byte-level BPE (o200k_base or cl100k_base) and at least one SentencePiece model (Llama 2, Mistral 7B or Gemma).",
+        "A Node test, run with one command and no Python, checks every in-browser tokenizer against expected counts generated by its reference library (library and version recorded in the fixture) on at least 30 strings covering emoji, CJK, Arabic, Devanagari and source code, with 0 mismatches, and the page states the date of the last pass.",
+        "Tokens that carry only part of a character (byte-fallback pieces or split UTF-8 sequences) are marked, and their count is shown per script.",
+        "A built-in parallel corpus (the same sentences in at least 12 languages across at least 6 scripts, source named, such as FLORES-200) produces a table of characters per token and token count relative to English for every tokenizer.",
+        "The tokenizer matching the streaming model is chosen from the model name the server reports, and on 3 test prompts the re-tokenized streamed text plus the special tokens the page names and counts (end-of-sequence, chat-template or channel markers) equals the server's eval_count exactly.",
+        "With at least 10 tokenizers, at least 3 of them among those Petrov et al. (NeurIPS 2023, 'Language Model Tokenizers Introduce Unfairness Between Languages') measured and at least 4 from models released in 2024 or later (for example o200k_base, Llama 3, Qwen 2.5), the page computes each tokenizer's token premium relative to English on FLORES-200 (the split the paper used) for at least 50 languages, prints the paper's value beside its own for every tokenizer and language both cover, agrees within 10 percent on each, and places the visitor's pasted text on the same chart."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "labs/token-ekg.html loads no tokenizer library or vocabulary, never splits text, and shows no character or byte count for the prompt field; the 'tokens counted' readout (#n) increments once per SSE chunk in goLive() or per simulated tick in simStep()."
+        }
+      }
+    },
+    {
+      "id": "cadence-statistics",
+      "name": "Cadence statistics",
+      "frame": "model",
+      "metric": "Which statistics are computed from the measured inter-token intervals and whether their formulas and units are right: count of statistics present (mean and spread, decode rate, percentiles, histogram, stall list, frequency view in Hz, bursts, drift, two-run test, intervals over repeated runs). The rater reads onToken() and spectrum() (or their successors), checks each formula, and reads the readouts on the page after one run.",
+      "ladder": [
+        "No statistics are computed on the intervals.",
+        "Mean and standard deviation of recent inter-token intervals are shown in ms.",
+        "A decode rate in tokens/s is computed as (tokens - 1) / (t_last - t_first) over the run or a stated window, with no clamp and no averaging of per-interval reciprocals.",
+        "Percentiles p50, p90 and p99 of the inter-token interval over the whole run are shown in ms.",
+        "A histogram of the run's intervals on log-spaced ms bins is drawn.",
+        "Stalls are detected by a stated rule (for example interval > 3x the run median and > 100 ms), listed with token index and duration, and their total shown as a share of run time.",
+        "A frequency view of the run is computed against time in Hz (uniform resampling of the arrival series, or a Lomb-Scargle periodogram on the uneven samples), with labelled frequency bins and no EEG band names; a page without a frequency view fails this rung.",
+        "Bursts are grouped (consecutive intervals under a stated threshold) and the page reports burst count, mean burst length in tokens and the tokens-per-chunk distribution.",
+        "The slope of inter-token interval against context position (prompt plus generated tokens) is fitted and reported in ms per 1,000 tokens of context, with the fit's R squared.",
+        "Two runs are compared with a two-sample test on their interval distributions (Mann-Whitney U or Kolmogorov-Smirnov), showing the p-value and the effect size.",
+        "Every statistic on the page carries a bootstrap 95 percent interval over at least 5 repeated runs, and TTFT and inter-token latency are reported at avg, min, max, p50, p75, p90 and p99 (a superset of the table NVIDIA GenAI-Perf prints)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "onToken() shows the mean and standard deviation of the last 64 intervals in ms (rung 1). Rung 2 fails: the heart-rate readout is an EMA of per-interval reciprocals, tps = 0.85*tps + 0.15*1000/Math.max(dt,1), which overstates the rate when intervals vary and is capped at 1000 by the clamp; the screenshot's 999.6 is that cap, not a rate (the run delivered 321 chunks in a few ms). No percentiles or histogram. spectrum() runs a 9-bin DFT over the interval series indexed by token number, not seconds, normalises to the largest bin (in the screenshot all nine bars sit near full) and labels the bins with EEG names."
+        }
+      }
+    },
+    {
+      "id": "trace-fidelity",
+      "name": "Trace fidelity",
+      "frame": "graphics",
+      "metric": "Whether the drawn trace encodes measured time: does x map to arrival time on a labelled axis, does each token get its own mark, what y encodes, how many linked views exist. The rater watches one run and reads drawTrace() or its successor.",
+      "ladder": [
+        "Nothing is drawn.",
+        "A waveform is drawn on the page (a static image counts).",
+        "A live scrolling trace draws a spike when tokens arrive.",
+        "x is proportional to arrival time on a labelled time axis (ms or s), so a 400 ms stall leaves a gap four times as wide as a 100 ms interval.",
+        "Each token is its own mark (k tokens in one frame draw k marks), and y encodes its inter-token interval on a labelled ms scale (log scale allowed).",
+        "TTFT, stalls and coalesced bursts are drawn as distinct annotations on the trace, with a legend.",
+        "A linked second view (interval histogram or percentile strip) highlights the bin of the token under the pointer, and the trace shows that token's text, index, timestamp and interval.",
+        "The streamed text is rendered as a strip under the trace, each token aligned to its mark and tinted by its interval, so slow tokens are visible in the text itself.",
+        "Two or more runs overlay on one shared time axis in distinct colors with a legend (for example a local model against the public route, or one prompt in two scripts).",
+        "Zoom and pan on the time axis run from the whole run down to single-token resolution (under 5 ms per 100 px), with the linked views following the selection.",
+        "Server phases (load, prefill and decode from the final Ollama record) and network sit as separate tracks above the token marks on the same time axis, anchored by a rule stated on the page (decode ends at the last chunk); each span can be selected to read its duration in ms, as track spans read in the Perfetto UI, and the per-token text strip stays aligned beneath."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "drawTrace() advances SPEED = 3 samples per animation frame and inject() restarts a fixed 8-sample QRS template per token, so x is frame count, not ms, and a burst of tokens inside one frame draws one spike; random baseline noise is added every frame. The 1440 px screenshot shows a flat line with a single spike at the right edge after 321 tokens. No axis, no units."
+        }
+      }
+    },
+    {
+      "id": "instrument-language",
+      "name": "Instrument design language",
+      "frame": "style",
+      "metric": "The number of page states (idle, connecting, live, done, stopped, failed, invalid, replay, simulated) in which the amber rule holds, plus which instrument features exist (graticule, ms per division, state legend, mark legend, shareable card, trigger marker, time cursors). The rater captures each state the page has at 1440 px and compares the colors with the CSS tokens.",
+      "ladder": [
+        "Browser defaults, no styling.",
+        "A dark page with one CSS color designated as the signal accent.",
+        "Brand tokens as CSS variables (void, ink, amber, blue), one monospace face, and blueprint corner marks.",
+        "Inside the instrument (trace, readouts, frequency or histogram view, status pill), amber appears only on live measured signal; simulated, replayed and idle values use another hue in every state. Page chrome (corner marks, kicker, primary button) is outside this rule.",
+        "Readouts share one type scale with tabular numerals, and every number has its unit in the same position.",
+        "The trace sits on a graticule with labelled major and minor divisions and the ms-per-division value printed, oscilloscope style.",
+        "Each state of the page (at least idle, connecting, live, done, stopped, failed and invalid, plus replay and simulated wherever those exist) has its own pill text, color and trace line style, listed in a legend on the page.",
+        "Motion follows data only: the sweep advances at the printed ms per division, and nothing on the trace moves while no time is being recorded (no random baseline noise).",
+        "A captured run renders as a shareable card (SVG or PNG) in the same design language, with title, axes, units, route, model and date.",
+        "A legend documents every mark, color and line style used on the page, and a rater finds no mark on the page that the legend omits.",
+        "A trigger marker sits at request send, and two draggable time cursors read delta-t in ms and the token count between them, as on a bench digital oscilloscope; with no help text open, time per division, trigger, first token and every annotation can be read off the screen."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The CSS comment 'amber = the live signal only' designates the accent (rung 1). :root defines --void, --ink, --amber, --blue; IBM Plex Mono throughout; .bp corner marks (rung 2). Rung 3 fails inside the instrument: the leading sweep in drawTrace(), the heart-rate readout (.v.amber) and the spectrum bars stay amber while simStep() drives them (connect gap, after a run, offline)."
+        }
+      }
+    },
+    {
+      "id": "probe-controls",
+      "name": "Probe controls",
+      "frame": "interaction",
+      "metric": "What the visitor can set and do to run a measurement: count of controls that change the measurement (prompt, stop, route, model, parameters, presets, replay, compare, share URL, tokenizer selection, sweep). The rater counts them on the page and runs each once.",
+      "ladder": [
+        "No controls on the page.",
+        "One button starts a run.",
+        "A free-text prompt field and a start button (Enter also starts) launch a live stream.",
+        "A stop control aborts a running stream, and the run ends in a stated state (stopped, done or failed).",
+        "The visitor picks the route and the model: local Ollama (model list read from /api/tags), own key, or the public route.",
+        "Max tokens and temperature controls, sent with the request and stored with the run, and at least 4 preset prompts labelled long code, numbered list, non-Latin script and reasoning task.",
+        "Every finished run joins a session run list, and clicking one replays its recorded trace at true speed or 10x, labelled as a replay.",
+        "Compare mode: two runs from the list (or one prompt sent to two routes) overlay, with the difference in TTFT and decode rate printed.",
+        "A URL encodes prompt, route, model and parameters; opening it restores every control to those values, and a URL naming a recording id replays that recording.",
+        "Selecting a span of streamed text shows its tokens under every tokenizer and its timing, linking the tokenizer to the trace.",
+        "A sweep tool runs one chosen parameter (prompt length from 10 to 4,000 tokens, max tokens or temperature) over at least 8 values with at least 3 runs each, and plots TTFT and decode rate against it with a least-squares line and its slope, the kind of sweep server benchmark tools such as NVIDIA GenAI-Perf run from a terminal, here in the browser."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "#prompt input and #go 'stream live' button; Enter also calls goLive() (rung 2). No stop control (the AbortController only fires on a 30 s timeout); no route, model or parameter choice; finished runs are not kept."
+        }
+      }
+    },
+    {
+      "id": "trace-provenance",
+      "name": "Trace provenance",
+      "frame": "data",
+      "metric": "Where every displayed number comes from: share of readouts traced to fresh generation measured in this session or a labelled recording, against simulated or cache-replayed values; number and coverage of shipped recordings. The rater reads each readout's source label in every state (before, during and after a run, offline) and follows the code path that feeds it (simStep, goLive or successors).",
+      "ladder": [
+        "No data source.",
+        "The page names its sources on screen (model stream, simulator) in the pill or the footer.",
+        "A fresh real model stream (not a response-cache hit) runs on the default run, and every simulated value is labelled simulated in each state where it shows: before, during and after a run, and offline.",
+        "No statistic or readout mixes values from two sources (simulator, live run, recording, cache replay): the run state is cleared whenever the source changes.",
+        "Each run stores and shows its metadata: route, model name as the server reports it, ISO timestamp, and prompt length in tokens.",
+        "At least 6 recorded real traces ship with the page as JSON, labelled RECORDING whenever they play, and a recording, not a simulator, plays when no route answers.",
+        "Recordings span at least 3 serving stacks (local Ollama on named hardware, a hosted API, the public keyless route) and at least 2 model sizes, with hardware and quantization stated.",
+        "Each recording keeps its server counters (Ollama eval_count, eval_duration, prompt_eval_duration, load_duration, or the API usage fields), so it can be re-checked against its own server numbers.",
+        "The current run and every recording export as JSON and CSV (per-token timestamp, text, interval, token ids), with the schema documented on the page.",
+        "A dated dataset of at least 50 recorded runs across at least 5 models is versioned in the repo with a changelog and summarised in a table of median TTFT and decode rate per model.",
+        "At least 200 recorded runs over at least 10 models, each dated within the last 90 days, published with per-token traces where public speed leaderboards such as Artificial Analysis publish only summary TTFT and tokens/s."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Rung 1 holds: the footer names both sources (a keyless pollinations model, simulated cadence) and the pill reads 'live · pollinations' while chunks stream. Rung 2 fails twice: the default prompt is answered from the route's response cache (x-cache: HIT, the same 321 chunks inside 5 to 22 ms, probes 2026-11-11), and after a run simStep() resumes 700 ms later and drives the trace and readouts under the pill 'echo · live complete', which never says simulated; the only 'echo · simulated' text is the initial HTML, which goLive(true) overwrites at once. Rung 3 also fails: simStep() appends to the same dts and count as the live run (headless load 2026-11-11 ended at 323 counted after a 321-chunk run). No run metadata, no recordings, no export."
+        }
+      }
+    },
+    {
+      "id": "model-reach",
+      "name": "Model reach",
+      "frame": "intelligence",
+      "metric": "How many live model routes the page can measure, whether it names what answered, and what it does on its own when a route fails or returns something other than fresh model tokens. The rater blocks each route with DevTools request blocking, sends the default prompt twice to provoke a cached answer, and watches the page's response.",
+      "ladder": [
+        "No model is called.",
+        "A model call is made from the page (visible in DevTools Network).",
+        "A keyless public route is streamed by default with no setup; on failure the page shows a 'live unreachable' label and falls back to a labelled simulator or recording.",
+        "A stream that carries something other than fresh model tokens is detected and the run is labelled invalid, with the reason, instead of measured: a budget or error notice inside a 200 response, a non-SSE body, or a whole answer in one burst (over 90 percent of chunks inside one 50 ms window, which a response-cache replay also produces).",
+        "The route that answered and the model name the server reports are shown during and after every run.",
+        "The page streams from the visitor's local Ollama (/api/generate or /api/chat with stream=true) when served locally, or when the visitor has allowed the site in OLLAMA_ORIGINS, with that one-line setup shown.",
+        "An OpenAI-compatible endpoint and key the visitor types (kept in their browser only) is streamed and timed by the same code, so hosted APIs can be measured.",
+        "The public route's per-IP window (45 s, measured 2026-11-11) is tracked with a countdown to the next allowed run, and a refused call (HTTP 402 or 429) is reported with its status instead of a silent fallback.",
+        "After each run the page writes its own reading of the trace from the measurements (for example 'TTFT 2.4 s, of which 1.9 s model load; 3 stalls over 300 ms at tokens 112, 240, 301'), and every number in the text highlights its readout or trace mark on hover or tap.",
+        "One click sends the same prompt to every available route in turn (respecting the public window) and ranks them by median TTFT and decode rate, showing the min and max over 3 runs each.",
+        "Adapters for at least 4 wire formats: Ollama NDJSON (/api/chat), OpenAI-style SSE (/v1/chat/completions, as vLLM, llama.cpp and Ollama /v1 serve it), the llama.cpp native /completion stream with its timings object, and Anthropic-style Messages SSE events; the format is detected from the first bytes, and each adapter's timing semantics (what one chunk is, which server timers exist) are documented on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "goLive(true) streams https://text.pollinations.ai/<prompt>?model=openai&stream=true on load; its .catch() sets 'echo · live unreachable' and resumes simStep(), which the footer names as the offline fallback (rung 2). Rung 3 fails: nothing checks what the stream carries, any delta.content or delta.reasoning counts as a token, and the default prompt's cache replay (321 chunks in 5 to 22 ms, x-cache: HIT) is measured as generation. The pill reads 'live · pollinations' but never names the model (the stream reports gpt-oss-20b in every chunk). No Ollama, own-key or countdown route exists in the page; labs/assets/js/ai/llm.js has them but is non-streaming by design (its header: the anonymous streaming path answered with a key-budget notice on 2026-11-11), so this lab needs a streaming sibling, not an import of llm.js."
+        }
+      }
+    },
+    {
+      "id": "reading-the-signal",
+      "name": "Reading the signal",
+      "frame": "explanation",
+      "metric": "The number of this ladder's explanation features present, and the number of causal claims in the copy that carry no measurement, recording or citation (target 0). The rater reads all copy, opens every definition, checks each causal claim, and checks each statement about where the numbers come from against the code.",
+      "ladder": [
+        "No explanation on the page.",
+        "A headline and one paragraph describe the idea.",
+        "The copy names the measured quantity (token inter-arrival), and the page's account of where its numbers come from matches the code: every state in which simulated, recorded or cached values show (connect gap, after a run, offline, a cached default) is named in the footer or the pill.",
+        "Every readout has a definition on hover or tap (TTFT, inter-token interval, jitter, tokens per second) with its formula and unit.",
+        "No claim outruns the measurement: causes named in the copy (KV-cache pressure, batching, scheduler jitter) are marked as hypotheses or removed until the page measures something that tells them apart.",
+        "A guided first run of 4 to 6 steps starts a run and points at TTFT, a stall, a burst and the final cross-check, taking the example from a labelled recording when the live run has none.",
+        "A shipped recording of one run timed at two points at once (a Node client on the server host next to Ollama, and the browser across a network hop or proxy), both JSON files in the repo with hardware and date, shows the two interval series diverging, explaining why a remote stream's arrival timing (proxy buffering, SSE flushing, TCP coalescing, response caches) is not the model's timing.",
+        "The visitor's own TTFT is broken into model load, prompt processing and network with that run's numbers, explaining prefill against decode.",
+        "Every number on the page carries a provenance tag (MEASURED, RECORDED, SIMULATED, ILLUSTRATIVE), and every causal claim cites a source (author, year) or a recording on the page.",
+        "For the visitor's typed text, the page shows its token count under each tokenizer and, from the parallel-corpus table, the expected count for the same content in 3 other scripts, with the cost at a stated per-token price and the share of a stated context window.",
+        "A methods section gives every formula and source, and a closing check of 5 questions (chunk versus token, the parts of TTFT, client versus server rate, tokenizer premium, what causes a stall), whose answers the page computes from the visitor's own run and reveals after they answer, links each answer to its formula in the methods section."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "h1 and the .sub paragraph describe the idea (rung 1). Rung 2 fails: the footer says simulated cadence 'only covers the connect gap and the offline fallback', but simStep() resumes 700 ms after every run and never stops; it says the page 'streams a real keyless model by default', but the default prompt returns x-cache: HIT, a cache replay. No readout definitions. The copy asserts KV-cache pressure, batching and scheduler jitter as causes with nothing on the page measuring them, and the spectrum bins carry EEG labels while the footer says 'not brainwaves'."
+        }
+      }
+    },
+    {
+      "id": "reach-and-overhead",
+      "name": "Reach and overhead",
+      "frame": "performance",
+      "metric": "Whether the instrument works on every device and input and does not disturb its own measurement: layout at 400 px, prefers-reduced-motion, keyboard and screen-reader reach, frame time (ms), per-chunk handler cost (ms, DevTools Performance profile), Lighthouse scores. The rater checks the page at 400 px, with reduced motion on, by Tab alone, with a screen reader, and under a performance profile during a run.",
+      "ladder": [
+        "The page does not load, or throws before drawing.",
+        "The page loads at 1440 px, draws the trace and throws no console error.",
+        "prefers-reduced-motion is read and freezes at least one animated layer (the background field).",
+        "At 400 px wide every readout, panel and control is visible without overlap or clipping, and the page scrolls when content exceeds the viewport.",
+        "Reduced motion also stops the trace sweep and shows a static plot of the run instead.",
+        "Every control on the page (prompt, start, and any stop or route control) can be reached by Tab with a visible focus outline; readouts sit in an aria-live region announcing at most once per second, and each canvas has a text alternative summarising the current run.",
+        "Measurement isolation: timestamps are taken in the stream reader before any DOM or canvas work, drawing runs only in requestAnimationFrame, and a profile shows the per-chunk handler under 0.5 ms.",
+        "Frame budget: a profile at 1440 px shows median frame time under 16.7 ms during a live run, and a performance tier drops the WebGL field when frames stay over 20 ms for 2 s.",
+        "A 10,000-token run (a shipped recording replayed at true speed or faster counts) keeps median frame time under 16.7 ms and the tab under 100 MB (trace in typed arrays, drawing decimated to one point per pixel).",
+        "Timestamps keep recording while the tab is hidden, and the run record marks the hidden interval, since browsers throttle background tabs.",
+        "Lighthouse mobile, with default throttling, scores 100 for accessibility and at least 95 for performance, with LCP under 2.5 s; the page measures and shows the resolution of performance.now() in the visitor's browser, so the instrument states its own precision."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "CDP console capture at 1440 x 900 over 15 s on 2026-11-11 (positive control confirmed): no console error, no uncaught exception, trace drawn (rung 1). matchMedia('(prefers-reduced-motion: reduce)') freezes only the GL field time (gloop uses tt = 7.0) (rung 2); the trace keeps sweeping. Rung 3 fails: headless capture at 400 x 860 (?still) on 2026-11-11 shows the headline and paragraph clipped at the right edge, the tokens readout cut, the spectrum panel and prompt controls off screen, because .grid is 1fr 300px inside 46 px side padding with html,body overflow:hidden. No aria-live region; canvases have no text alternative."
+        }
+      }
+    },
+    {
+      "id": "code-shape",
+      "name": "Code shape",
+      "frame": "architecture",
+      "metric": "How the lab's code is divided: number of modules, whether measurement, analysis, rendering, routes and config are separate, test coverage, and whether a new route, tokenizer or view can be added without editing the core. The rater reads the files and runs the tests.",
+      "ladder": [
+        "No code: the lab has no page or script.",
+        "The lab runs from script in its page or loaded by it.",
+        "The script has one named function per concern (timing, statistics, trace drawing, streaming).",
+        "Model calls go through a shared streaming route module under labs/assets/js/ai/ that reuses llm.js's route order and public-window state; the page hardcodes no endpoint URL.",
+        "The measurement core is an ES module with no DOM access: timestamped chunks in, a run record out (tokens, intervals, TTFT, statistics).",
+        "Each route is an adapter with one interface (for example start(prompt, options) returning an async iterator of {t, text, server fields}), so a new route is one new file.",
+        "Node unit tests (no browser) cover the statistics and the chunk-to-token logic on checked-in recorded traces with expected values.",
+        "Views (trace, histogram, frequency view, tokenizer strip) are separate modules subscribed to one run store; adding a view changes no measurement code.",
+        "Tokenizers load lazily per vocabulary from pinned versions, with versions and vocab sizes listed in one config file.",
+        "Recordings follow one versioned JSON schema validated by a check script, and the same core runs headless from Node to record a trace against a local Ollama.",
+        "The measurement core is reused by other labs (the shared route panel shows TTFT and tokens/s for any lab's model call) and documented as a standalone module with its API and tests."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "labs/token-ekg.html, 254 lines: one IIFE holding onToken() (timing and running statistics), spectrum() (frequency statistics), drawTrace() (drawing), simStep() and goLive() (streaming) over shared closure variables (dts, tps, buf, mode) (rung 2). Rung 3 fails: the pollinations URL is built inline in goLive() and no shared streaming route module exists (llm.js is non-streaming by design). No tests."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder review: two adversarial passes; cumulative rungs, cache-replay guard, G0 regraded (cadence-statistics, trace-provenance, reading-the-signal 2 -> 1)", "commit": "cd1e9f7" }
+  ]
+}

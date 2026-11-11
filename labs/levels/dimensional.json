@@ -1,0 +1,311 @@
+{
+  "id": "dimensional",
+  "title": "Dimensional Test",
+  "page": "md_animation_page.html",
+  "thesis": "The visitor is walked from a point to the tesseract, then turns, slices and projects every regular polytope up to 10D and the Hopf-fibred 3-sphere by hand, reads each rotation as an element of SO(n) with its generator in so(n), and hears the Witness name which hidden axis is bending the shadow and why.",
+  "axes": [
+    {
+      "id": "polytope-catalogue",
+      "name": "Polytope catalogue",
+      "frame": "model",
+      "metric": "Which regular polytopes the page builds, over which dimensions, with correct element counts: count of families and exceptional polytopes selectable on the page, read from the polytope picker and the face-count readout, and from the generator modules in the code.",
+      "ladder": [
+        "No polytope is built; nothing geometric is generated.",
+        "One fixed figure is drawn from hard-coded vertex coordinates in a single dimension.",
+        "The n-cube is generated from the corners {-1,+1}^n, edges joining corners that differ in one coordinate, for 1D to 4D.",
+        "The n-cube runs from 1D to 10D, and the panel shows its vertex, edge, face, cell and facet counts computed from C(n,k)·2^(n−k).",
+        "The n-simplex is generated for 1D to 10D and selectable, with its counts C(n+1,k+1) shown.",
+        "The n-orthoplex (cross-polytope) is generated for 2D to 10D and selectable, so all three regular families of every dimension are selectable, each with its f-vector shown (orthoplex k-faces 2^(k+1)·C(n,k+1)).",
+        "The dodecahedron {5,3} (20, 30, 12) and the icosahedron {3,5} (12, 30, 20) are added: all five Platonic solids are present.",
+        "The 24-cell {3,4,3} (24, 96, 96, 24), the 120-cell {5,3,3} (600, 1200, 720, 120) and the 600-cell {3,3,5} (120, 720, 1200, 600) are added: all six regular convex 4-polytopes are present.",
+        "A unit test checks every f-vector shown against Coxeter, Regular Polytopes (3rd ed., Dover, 1973), and the page prints the alternating sum Σ(−1)^k f_k (k = 0…n−1) for the current figure beside 1 − (−1)^n, equal for every convex figure.",
+        "Duality: one control carries each polytope into its dual by continuous truncation over at least 1 s (cube through cuboctahedron to octahedron; 120-cell to 600-cell; 24-cell to itself), and the shown f-vector reverses.",
+        "The star polytopes complete the set: the 4 Kepler–Poinsot solids and the 10 Schläfli–Hess 4-polytopes, so every regular polytope, convex and star, from 3D to 10D is in the catalogue (5 + 4 in 3D, 6 + 10 in 4D, 3 in each dimension from 5D up): the regular set of Robert Webb's polytope program Stella4D, here in the browser and up to 10D."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "n_dimensional_cube.js HyperCube builds only the n-cube ({-1,+1}^n, edges by one-bit XOR) for CONFIG.minDim 1 to maxDim 10; Console._syncReadout shows vertices, edges, faces, cells, facets from faceCount = C(n,k)·2^(n−k) (screenshot at 4D: 16 / 32 / 24 / 8 / 8). No simplex, orthoplex or exceptional polytope exists, so rung 4 fails."
+        }
+      }
+    },
+    {
+      "id": "rotation-planes",
+      "name": "so(n) rotation planes",
+      "frame": "model",
+      "metric": "Which elements of SO(n) the visitor can produce and read: planes reachable by hand (of C(n,2)), rotation classes offered (simple, double, isoclinic, arbitrary), and whether the composed matrix and its invariant planes are computed and shown; checked in PlaneSet/Witness code and on the panel.",
+      "ladder": [
+        "Nothing rotates through a hidden axis.",
+        "One fixed rotation in a single hidden plane (e.g. X–W) plays on a loop.",
+        "The figure is turned by Givens rotations in coordinate planes, and the planes pairing a visible axis with a hidden one can be spun.",
+        "All C(n,2) coordinate planes are built for each n with their count shown, and a dial sets one plane's angle in degrees.",
+        "Simple, double (two disjoint planes) and isoclinic presets are offered, the isoclinic one turning all ⌊n/2⌋ mutually disjoint planes at one angular speed (2 in 4D and 5D, 3 in 6D and 7D, 4 in 8D and 9D, 5 in 10D).",
+        "Every one of the C(n,2) planes, hidden-by-hidden planes such as W–V included, can be selected and turned by hand.",
+        "The composed n×n rotation matrix is shown live to 3 decimals, with on-page readouts of max|R·Rᵀ − I| and |det R − 1|, both under 1e-9.",
+        "The current rotation is decomposed into its ⌊n/2⌋ invariant planes and angles (the canonical block form of an element of SO(n)) and listed live; in 4D, starting from the identity, setting X–W to 30° and Y–Z to 50° under Hold lists exactly those two planes at 30° and 50° (to 0.1°).",
+        "Arbitrary planes, not only coordinate ones: a rotation is set by a bivector, computed by the exponential map, with its generator shown as an antisymmetric matrix in so(n).",
+        "In 4D, the Iso preset runs either left- or right-isoclinic, labelled as such, and the current rotation is shown live as the unit quaternion pair (q_L, q_R) acting by x ↦ q_L·x·q_R.",
+        "A rotation can be entered as a bivector, a matrix or (in 4D) a quaternion pair, the other two forms update in the same frame, and a test confirms round-trip error under 1e-9 over 1000 random rotations in every n up to 10."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "PlaneSet.rebuild builds all C(n,2) planes and Console._syncReadout shows planes = binomial(n,2) (6 at 4D in the screenshot); HyperCube.project applies the Givens rotations; the Plane Dial and the ±180° scrub set one angle in degrees. Rung 4 fails: PRESETS.iso spins the selected plane and one disjointOf partner only, so at 6D–10D it turns 2 of the 3–5 disjoint planes and is not isoclinic, while the button reads Iso at every n. Rung 5 would also fail: selectorPlanes keeps only !p.hidden || p.i < PLANE.hiddenFrom, so W–V cannot be chosen."
+        }
+      }
+    },
+    {
+      "id": "flatland-slicing",
+      "name": "Flatland slicing",
+      "frame": "graphics",
+      "metric": "Whether a hyperplane cross-section of the figure is computed exactly and shown beside the projection: slicing normals offered, polytopes and dimensions covered, sweep and volume readout; checked by moving the slice control and reading the slice code and its tests.",
+      "ladder": [
+        "No slicing: only the projected shadow of the figure is shown.",
+        "A static picture or a sentence describes a cross-section of the tesseract.",
+        "One live slice: the tesseract cut by the hyperplane W = h, h on a slider, computed from the points where its edges cross the hyperplane and drawn as points.",
+        "The slice is drawn as a closed solid (convex hull of the crossing points, faces filled) and stays exact while the figure turns in any hidden plane.",
+        "The slice view sits beside the projection view, and the points where the hyperplane cuts the figure's edges are marked on the projected edges (the cross-section outlined inside the shadow), both views updating in the same frame.",
+        "Slicing works for every polytope in the catalogue and every n from 2 to 10 (an (n−1)-dimensional slice is itself projected to 3D), and the slice's vertex count is shown.",
+        "A sweep button moves h from first contact to last contact in one timed pass so the slice grows and shrinks (the sphere passing through Flatland, Abbott, Flatland, 1884), and under reduced motion the sweep steps through 7 fixed h values, one per click, instead of animating.",
+        "The slice's (n−1)-volume against h is plotted live with a numeric readout to 6 decimals, and a unit test asserts it to 1e-6 for n = 2…10 against two analytic profiles: the constant 2^(n−1) for an axis-aligned cut of the n-cube at |h| < 1, and 2^(n−1)·√n·f_n((n + h√n)/2) for the vertex-first cut, f_n being the Irwin–Hall density of a sum of n uniform [0,1] variables.",
+        "The cutting normal is free (any unit vector) with vertex-first, edge-first, face-first and cell-first presets; the vertex-first tesseract sweep shows tetrahedron, truncated tetrahedron, octahedron in that order, each shape named on screen.",
+        "A Flatland ladder view runs the same sweep one dimension down (a cube through a plane, as 2D slices) beside the 4D sweep with the same controls, so the analogy is literal.",
+        "Cuts by an affine flat of any codimension from 1 to n−2 (a 2-flat through the tesseract gives a polygon), each cut printing its own f-vector live: slicing breadth past the reference 4D slicer, 4D Toys (Marc ten Bosch, 2017), whose slices are 3D hyperplane cuts of 4D objects."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "No slicing code anywhere in labs/assets/js/dimensional_mania/ (grep for slice finds only Array.slice); Renderer.buildCube draws the projected edges and vertex points and nothing else."
+        }
+      }
+    },
+    {
+      "id": "curved-fibred-spaces",
+      "name": "Curved and fibred spaces",
+      "frame": "model",
+      "metric": "Which curved manifolds beyond flat R^n are modelled: the 3-sphere, stereographic projection, the Hopf fibration and its tori, inside views of S^3; checked by the named modes on the page, fibre counts drawn, and tests in the code.",
+      "ladder": [
+        "Only flat figures in R^n; no curved space or fibration appears.",
+        "A sentence or static figure on the page names the 3-sphere or the Hopf fibration and says what it is.",
+        "Under the isoclinic preset each 4-cube vertex trail closes into a full loop (trail length at least one period), and the page names the loops as great circles of the 3-sphere, fibres of the Hopf fibration (Hopf, 1931).",
+        "A 3-sphere mode maps points of S^3 to R^3 by stereographic projection with the pole marked; great circles through the pole render as straight lines, all others as circles.",
+        "The Hopf map is drawn: base points chosen with latitude and longitude sliders or from a preset list each draw their fibre circle in S^3 after stereographic projection, at least 8 fibres at once.",
+        "Fibres over a circle of latitude are drawn as a family of at least 24 forming a torus, and for any two fibres the visitor picks, the linking number is computed by the Gauss linking integral over their drawn polylines and printed to 2 decimals (reading 1.00 ± 0.01).",
+        "The base 2-sphere is its own linked view: dragging a point on it moves its fibre live, and each fibre takes the colour of its base point.",
+        "The vertices of the regular 4-polytopes on S^3 are split into Hopf fibres by code (the 24-cell into 4 great hexagons, the 600-cell into 12 great decagons), drawn, and checked by a test.",
+        "An inside view of S^3 (radius 1): the camera sits in the 3-sphere and a marker placed 1 rad behind it is visible straight ahead at geodesic distance 2π − 1, in the manner of Jeff Weeks' program Curved Spaces.",
+        "The orbits of the lab's isoclinic rotation in the polytope view are shown identical to the Hopf fibres of the matching base points, by a test to 1e-9 and a button that overlays one on the other.",
+        "Fibres over points, over circles and over the whole base sphere, and nested tori over a family of latitudes, as in the fibration chapters (7 and 8) of the film Dimensions (Leys, Ghys, Alvarez, 2008), all interactive, with at least 1000 fibres at 60 fps while the base is dragged, at 1440x900 in Chrome with DevTools CPU throttling at 4x slowdown."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "Hopf appears only in code comments (constants.js ISO and TRAIL, TrailField.js, PlaneSet.js, Witness.js); no page text, meta description or hub blurb names S^3 or a fibration, and there is no stereographic projection. The vertex trails are credited under projection-views."
+        }
+      }
+    },
+    {
+      "id": "projection-views",
+      "name": "Shadow projection views",
+      "frame": "graphics",
+      "metric": "How the hidden dimensions become visible: projection methods available, number of linked views on screen at once, and what of the figure is drawn (edges, depth colour, axis star, cells, tubes); counted on the page at 1440 px and in Renderer/HyperCube.project.",
+      "ladder": [
+        "Nothing is drawn on the canvas.",
+        "A static image of a projected tesseract.",
+        "One live 3D view: the n-cube's edges drawn as lines after a perspective fold from nD to 3D, with camera orbit and zoom.",
+        "Perspective and orthographic folds are both available, and each vertex is coloured by its distance into the hidden axes (cold in our 3-space, warm deep in a hidden axis).",
+        "Vertex trails trace each vertex's shadow path for figures of 64 vertices or fewer, and an axis star draws where each of the n unit axes lands after rotation and projection, labelled X, Y, Z, W, V ...",
+        "Any facet can be picked (e.g. one of the 8 cubes of the tesseract) and stays highlighted in the shadow while the figure turns.",
+        "A 2D Coxeter-plane (Petrie polygon) orthogonal projection sits beside the 3D shadow, both updating in the same frame, showing the n-cube's 2n-fold symmetry at every n up to 10.",
+        "A Schlegel diagram (projection from just outside one facet) and a stereographic mode (edges on the circumsphere drawn as circular arcs) are offered.",
+        "Edges render as lit tubes and 2-faces as translucent fills, with tube thickness falling off with hidden-axis depth as a depth cue for the hidden axes.",
+        "Switching projection morphs the figure continuously over at least 0.8 s (perspective to Schlegel to stereographic) instead of cutting, and the camera reframes the figure at each step.",
+        "Five linked views on screen at once (perspective, orthographic, Schlegel, stereographic, Coxeter plane): picking a facet in any one highlights it in all five within the same frame."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "HyperCube.project folds nD to 3D by perspective division axis by axis or orthographically (PROJECTION auto / perspective / orthographic); vertex colour ramps WIRE.cold to WIRE.warm with hidden-axis depth. Rung 4 fails: TrailField draws trails up to TRAIL.maxVerts 64, but no projected-axis star exists."
+        }
+      }
+    },
+    {
+      "id": "instrument-style",
+      "name": "Instrument design language",
+      "frame": "style",
+      "metric": "The craft of the page's design language: tokens and faces used, colour discipline, layout without collisions, type floor, math typography, opening choreography and contrast; checked from screenshots at 400, 1440 and 2560 px, dimensions.css, computed styles in DevTools, and a contrast tool.",
+      "ladder": [
+        "Unstyled browser defaults.",
+        "A dark background and a canvas, with controls in browser-default style.",
+        "The site tokens (tokens.css) are consumed for colour, spacing and type (the token face IBM Plex Mono through --font-display, --font-body and --font-mono), and native control chrome (buttons, range inputs) is replaced.",
+        "In dimensions.css every colour is a tokens.css variable (black excepted): the horizon ink-grey for structure, gold (the --accretion family) only for active states, control handles and live values, and no other hue.",
+        "At 1440x900 the panel, Shadow Ledger, caption, title and hint each keep a fixed place with no overlap, and the panel scrolls to its last control.",
+        "Type floor: no text on the page renders below 11 px at 1440 px, read as computed font-size in DevTools (the 0.66rem .dx-gloss and every --t-micro label included).",
+        "Mathematical type: axis letters, plane labels and formulas are set in a math face (KaTeX or STIX) with true minus signs and subscripts, distinct from the UI mono.",
+        "A choreographed opening: on first load the figure grows from a point through 1D, 2D and 3D into 4D in under 4 s, skippable, with the element counts ticking in step.",
+        "All text meets a contrast ratio of at least 4.5:1 against its background, the faint labels included, checked with a contrast tool.",
+        "One mark per hidden axis (W, V, U … Q: its letter plus a dash pattern of its own) is used identically on the figure's axis star, the ledger rows, the plane chips and any matrix, so a rater can follow one axis across all four, with no hue outside tokens.css and gold no longer used for depth in the figure, only for active state.",
+        "A style lint in the repo (one command) fails on any colour, font family or font size in dimensions.css or the lab's modules that tokens.css does not declare, and it passes; every rung above holds at 400, 1440 and 2560 px. Reference finish: the film Dimensions (Leys, Ghys, Alvarez, 2008)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 4,
+          "evidence": "dimensions.css takes every colour from tokens.css variables except black (#000, rgba(0,0,0,.55)); gold (--accretion family) marks .on states, slider and dial handles, readout values and the hot ledger row, --horizon the fold chain and ledger fills; all text is IBM Plex Mono through the --font-* tokens; button and range chrome are reset. The 1440 px screenshot shows panel right, ledger bottom-left, caption and hint bottom-centre, title top, none overlapping; .dx-panel-body scrolls. Rung 5 fails: .dx-gloss is 0.66rem (10.6 px). Noted for rungs 9 and 10: the canvas palette in constants.js (WIRE.cold #5BB0D6, WIRE.warm #F2A93B, RENDER.background #080A0C) does not match tokens.css (--horizon #9FB3D6, --accretion #D4A24C, --void #06080D), and the page loads Orbitron and Space Grotesk that no token uses."
+        }
+      }
+    },
+    {
+      "id": "hidden-axis-hands",
+      "name": "Hands on the hidden axis",
+      "frame": "interaction",
+      "metric": "The ways a visitor can drive the figure: input channels (panel, canvas drag, touch, picking), which hidden motions are reachable by direct manipulation, and open play beyond the presets; checked by using the page with mouse and touch and reading Console.js.",
+      "ladder": [
+        "No input: the figure plays on its own or not at all.",
+        "One control (play/pause or a single button) changes the figure.",
+        "A dimension stepper from 1D to 10D plus camera orbit and zoom on the canvas.",
+        "One rotation plane is chosen from chips and turned by hand with a dial and a ±180° slider, plus five rotation presets (Hold, Single, Double, Iso, All).",
+        "Fold distance, speed and scale sliders and an Auto/Perspective/Orthographic toggle change the figure on the next frame, each value printed beside its control.",
+        "Hidden rotation on the canvas itself: Shift+drag with the mouse, and a one-finger drag while a Hidden toggle is on for touch, turn the selected hidden plane without the panel, while a plain drag still orbits.",
+        "Picking: clicking a vertex selects it, shows its n coordinates, and keeps it highlighted while the figure turns.",
+        "A 2D pad drives two hidden planes at once (e.g. X–W on one axis, Y–W on the other), so the shadow can be pushed in any direction of the hidden axis.",
+        "Open play: the visitor pastes their own vertex list (and optional edges) in any dimension up to 10, and rotation, projection and slicing all apply to it.",
+        "A sequence of dial moves and dimension changes can be recorded, replayed, looped and shared as a URL.",
+        "A grabbed vertex can be dragged with mouse, touch and keyboard (arrow keys), and each frame the page solves a rotation in planes that include a hidden axis so the vertex's shadow stays within 5 px of the pointer wherever reachable, the dial readout naming the planes used: direct 4D manipulation as in 4D Toys (Marc ten Bosch, 2017), extended to 10D."
+      ],
+      "levels": {
+        "G0": {
+          "level": 4,
+          "evidence": "Console.js builds the −/+ stepper (1D–10D), plane chips, the Plane Dial (pointerdown/move) and ±180° .dx-scrub, five PRESETS buttons, Auto/Perspect/Ortho toggles, Fold distance / Speed / Scale sliders with printed values (3.20, 0.60, 1.50 in the screenshot), Vertices / Trails / Reset view and Pause; OrbitControls gives orbit and zoom. Rung 5 fails: canvas drag only orbits the 3D camera; a hidden plane turns only through the panel."
+        }
+      }
+    },
+    {
+      "id": "reference-data",
+      "name": "Reference values and state",
+      "frame": "data",
+      "metric": "Where the page's mathematical facts come from and what leaves the page: facts computed versus typed, facts carrying a citation, how much state the URL holds, and export formats; checked by reading the panel, editing the URL, and using any export.",
+      "ladder": [
+        "No facts about the figure are shown.",
+        "Facts typed in by hand (names or counts) with no formula behind them.",
+        "Element counts come from formulas in code (2^n vertices, C(n,k)·2^(n−k) k-faces, C(n,2) planes) and every polytope carries its correct name (tesseract, penteract … dekeract).",
+        "A ?d=n link opens the page at dimension n.",
+        "The URL carries the full state (polytope, dimension, every plane angle, preset, projection mode, fold distance, speed), and a copied link reopens the same frame.",
+        "Each catalogue polytope shows its Schläfli symbol and symmetry group with its order (e.g. B4, order 384), with a citation on the page to Coxeter, Regular Polytopes (3rd ed., Dover, 1973).",
+        "Export: a PNG still at 2x and the current n-dimensional vertex coordinates and edges as JSON.",
+        "Export of the 3D shadow or slice as an OBJ mesh and of the projected wireframe as SVG.",
+        "Metric data for every catalogue polytope (circumradius to edge ratio, dihedral angle) computed in code and checked by a unit test against values in Coxeter (1973).",
+        "The whole catalogue (coordinates, edges, faces, cells for every polytope 2D–10D) downloads as one versioned JSON whose schema is documented in the repo.",
+        "Every number on the page opens its derivation: the formula, the values substituted, and the source file and function that computed it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Counts come from binomial and faceCount in n_dimensional_cube.js, names from POLY_NAMES (segment … dekeract); main.js reads ?d=n (PARAMS.dim) and calls setDim on load. Rung 4 fails: nothing writes the URL, and plane angles, preset, projection and slider values never reach it; no Schläfli symbol, citation or export exists."
+        }
+      }
+    },
+    {
+      "id": "witness-narration",
+      "name": "Witness narration",
+      "frame": "intelligence",
+      "metric": "What the page detects and says about the live figure on its own: number of narrated quantities and named geometric events, numeric accuracy against the computed state and the drawn shadow, and model calls with a deterministic fallback; checked by watching the ledger and caption in each projection mode and reading Console.js.",
+      "ladder": [
+        "The page says nothing about the live state of the figure.",
+        "A caption names the current action (e.g. rotating X–W · 36°).",
+        "A Shadow Ledger shows, per hidden axis, a live bar of the projective distortion |D/(D−w) − 1|, for up to 6 hidden axes.",
+        "The axis with the largest distortion is flagged in gold as it changes, the caption switches between extruding, legibility-wall and rotating states on its own, and in orthographic mode, where no axis is divided, the ledger says the hidden axes are dropped instead of showing distortion bars.",
+        "In perspective mode the ledger prints each axis's distortion as a number with 2 decimals plus one sentence naming the axis that bends the shadow most, chosen over all n−3 hidden axes (Q at 10D included even when no bar is drawn for it), and by what factor (e.g. W stretches the near cell 1.78x).",
+        "Event detection: at least 3 named geometric events are announced as they happen: a cell turning inside out (its signed volume in the shadow changes sign), a vertex crossing w = 0, and two vertices coinciding in the shadow (projected distance under 1% of the figure's projected circumradius).",
+        "Ask the Witness: a typed question about the current view goes with the live state (dimension, angles, ledger values) in one call through labs/assets/js/ai/llm.js; the answering route is shown, and with no route a deterministic engine answers at least 6 listed question types from the state (hottest axis and its factor, current plane and angle, k-face counts, rotation class, polytope name, dimension) and lists them when a question falls outside.",
+        "Every number in a model reply is checked against the live state; a reply with a number off by more than 1% is replaced by the deterministic answer, and the page says so; a test feeding a stubbed reply with one number off by 5% shows the replacement and the notice.",
+        "The Witness proposes the next experiment from what the visitor has not tried yet (rule table: never turned a hidden-by-hidden plane, never sliced, never passed 6D), one suggestion at a time.",
+        "The visitor's session is narrated back as a written log (dimensions visited, events seen, values at each), copyable as text.",
+        "Predictive narration: under the current rotation the Witness announces the next event before it happens (which cell inverts, which vertex crosses w = 0) and in how many degrees, and a test over 10,000 random frames in every dimension from 4 to 10 finds the forecast angle within 1° of the computed event angle in at least 99% of frames."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "Console._buildLedger and _tickLedger draw one bar per hidden axis (LEDGER.maxRows 6) from the stress array that HyperCube.project fills with max |D/(D−w) − 1|, toggle .hot (gold) on the largest above 0.02, and _tickCaption switches between extruding, legibility-wall and rotating states. Rung 3 fails: in Auto at 6D and above and in Ortho at any n, HyperCube.project skips the divide while still filling stress, so the bars and the gold flag describe a distortion the drawn shadow does not have. No numbers, sentence or model call exist."
+        }
+      }
+    },
+    {
+      "id": "guided-ascent",
+      "name": "Guided ascent 1D to 10D",
+      "frame": "explanation",
+      "metric": "What a first-time visitor understands after five minutes: presence and length of a guided path from 1D to 4D, Flatland analogues, in-place explanation of controls and formulas, and real-versus-illustrative tags; checked by walking the page from a fresh load.",
+      "ladder": [
+        "No text explains the figure.",
+        "A title and a one-line hint on how to drag and zoom.",
+        "One gloss line per dimension from 1D to 6D (e.g. a tesseract, a cube dragged through an axis you cannot point at) and the fold chain shown (e.g. 5D → 4D → 3D).",
+        "The caption names the live plane and angle, and past 6D the page states in words why one shadow can no longer separate the corners (the legibility wall).",
+        "A guided path from 1D to 4D in at least 6 steps drives the figure itself (segment dragged into a square, square into a cube, cube into a tesseract), one sentence per step with Back/Next, then hands over to free play up to 10D.",
+        "The Flatland analogy is built into the path: at the 3D-to-4D step the page shows the one-down analogue (a cube's shadow on a plane) beside the tesseract's shadow, citing Abbott, Flatland (1884).",
+        "Every control has a one-sentence explanation in place of what it does mathematically (e.g. Fold distance: the distance D of the projection centre; each vertex scales by D/(D−w)).",
+        "The page shows its mechanism while running: an open panel prints the rotation and projection formulas with the live numbers substituted, updating each frame.",
+        "Every claim and visual choice on the page carries a visible tag, real mathematics or illustrative (colour ramp, bloom, trail length, the 0.3 denominator clamp in HyperCube.project).",
+        "After the path, three questions about the figure (e.g. how many cubes bound a penteract?) take the visitor's answer, check it against the live f-vector, and explain any miss.",
+        "The path continues one step per dimension from 4D to 10D, after interactive steps on projection, slicing and the six regular 4-polytopes (the subject of the fourth-dimension chapters, 3 and 4, of the film Dimensions, Leys, Ghys, Alvarez, 2008), and a 5-person test log in the repo shows at least 4 of 5 first-time visitors explaining unaided why the tesseract's shadow turns inside out."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "constants.js GLOSS has one line per dimension 1D–6D (glossFor); Console._syncReadout prints the fold chain (4D → 3D in the screenshot); .dx-hint gives drag / scroll / dial; _tickCaption names plane and angle. Rung 3 fails: past 6D, GLOSS[6] ('past here one 3D shadow cannot separate the corners. read the rule, not the shape.') and the legibility-wall caption ('one shadow can't hold 1,024 corners apart') assert that the corners cannot be separated but give no reason."
+        }
+      }
+    },
+    {
+      "id": "reach-and-frame",
+      "name": "Reach and frame time",
+      "frame": "performance",
+      "metric": "Who can run it and how fast: WebGL fallback, reduced motion, layout at 400 px, keyboard and screen-reader reach, frames per second at 10D and on the heaviest polytope under a named throttling profile, transfer size; measured with a 400 px viewport, keyboard only, an fps meter or DevTools, and Lighthouse.",
+      "ladder": [
+        "The page does not run.",
+        "Runs in a desktop browser with WebGL; nothing happens without it.",
+        "A no-WebGL message replaces the canvas when WebGL is missing; device pixel ratio is capped at 1.5 and the per-frame time step clamped.",
+        "Reduced motion: prefers-reduced-motion and ?still freeze rotation, extrusion and trails, with a ?motion override.",
+        "At 400x800 the panel becomes a bottom sheet and the figure, Shadow Ledger and caption all stay visible with no overlap; touch orbit and pinch zoom work.",
+        "Keyboard: every control is reachable by Tab with a visible focus ring (sliders included), and the Plane Dial turns with arrow keys (1°) and Shift+arrow (15°).",
+        "Frame budget: an on-page meter (?fps) shows at least 50 fps in 10D (1024 vertices, 5120 edges) at 1440x900 in Chrome with DevTools CPU throttling at 4x slowdown, and a DevTools allocation timeline over 5 s of rotation shows no per-frame allocation from the render loop.",
+        "Tiers: the page measures frame time for 2 s after load and drops bloom, then trails, then pixel ratio while under 45 fps, naming the active tier.",
+        "Screen reader: an aria-live region describes the figure (polytope, dimension, plane, angle, hottest axis) at most once per second, and the guided path can be completed with NVDA.",
+        "Projection runs on the GPU (vertex shader) or in a Web Worker, so the 120-cell (600 vertices, 1200 edges) and the 10-cube hold 60 fps at 400x800 in Chrome DevTools device emulation with 6x CPU slowdown.",
+        "Lighthouse mobile scores of at least 95 for performance and accessibility, under 500 kB transferred on first load, and the page works offline after the first visit."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "main.js shows .dx-nowebgl when Renderer init fails; RENDER.pixelRatioMax 1.5 and LOOP.maxDt 0.05; dom.js resolveMotion freezes on prefers-reduced-motion or ?still (paused, unfold 1, trails off) with a ?motion override, and the CSS drops transitions. Rung 4 fails: at 600 px and below the bottom-sheet panel covers the fixed #dx-ledger and caption. Rung 5 would also fail: .dx-slider and .dx-scrub set outline: none and the dial div takes no focus."
+        }
+      }
+    },
+    {
+      "id": "core-shape",
+      "name": "Polytope-agnostic core",
+      "frame": "architecture",
+      "metric": "Code shape: module separation, which additions (polytope, view, preset, narration rule) are a data row versus a core edit, test coverage of the maths, and one serialisable state; checked by reading labs/assets/js/dimensional_mania/, grepping it, and running the tests.",
+      "ladder": [
+        "No code exists for the lab.",
+        "One inline script in the page.",
+        "External script files, but geometry, rendering and UI share one file or one class.",
+        "Geometry, rendering, controller and UI are separate ES modules, with a constants module for tuning.",
+        "Presets, projection modes and sliders are data tables dispatched without switch chains (a new preset is one row), every export has an importer (grep finds one), and no threshold, opacity, clamp or axis index sits as a bare literal outside the constants module.",
+        "The controller accepts any polytope through one interface ({vertices, edges, faces, cells}) from a registry; adding the n-simplex touches only a new module and one registry row.",
+        "Node unit tests, run by one command with no browser, cover the f-vectors of every catalogue polytope, orthogonality of composed rotations (R·Rᵀ = I) and the projection of known points.",
+        "Views (projection, slice, fibration, ledger) implement one view interface and subscribe to one state store; adding a view edits no existing view.",
+        "The whole state is one serialisable object driving URL, export and replay, and a test round-trips it.",
+        "The maths core imports no DOM and no THREE, ships typed (JSDoc checked by tsc, or TypeScript), and has at least 90% line coverage.",
+        "A documented plugin interface lets a third party add a polytope, view or narration rule without reading the core, and a sample plugin in the repo proves it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "Nine ES module files (main, constants, dom, n_dimensional_cube, PlaneSet, Renderer, TrailField, Witness, Console) with constants.js for tuning meet rung 3; PRESETS, PROJECTION and SLIDERS are row tables. Rung 4 fails: the 0.3 denominator clamp in HyperCube.project, PointsMaterial opacity 0.9 in Renderer.buildCube, unfold < 0.98 in Console._tickCaption, and the literal 3 for the first hidden axis in HyperCube.project instead of PLANE.hiddenFrom; foldPlanes and SPATIAL_PLANES in n_dimensional_cube.js are exported and imported nowhere. No tests exist."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "id": "hub",
+  "title": "Labs hub",
+  "page": "index.html",
+  "thesis": "At level 10 the hub is an instrument of the lab itself: a visitor sees every lab's graded level, its weakest axis and its climb across generations, plays each lab from its card, traces on a map how labs share engines, canon and the model route, reaches any lab by search, facet or plain question, and can trust every count because each traces to the code, a commit and a rater's evidence, by keyboard and on a phone.",
+  "axes": [
+    {
+      "id": "catalogue-model",
+      "name": "Catalogue model",
+      "frame": "model",
+      "metric": "What each lab record holds and what the hub computes from it: the count of record fields that come from data rather than hand-typing (status, page, level, generations, relations, dates) and the count of derived quantities (counts, deltas, aggregates, what-if levels). The rater reads labs/assets/js/config/site.config.js and every hub module that imports it, and greps the hub for values typed by hand.",
+      "ladder": [
+        "No data model: any lab card is written by hand into index.html.",
+        "One config module lists every lab with id, title, blurb and status, and the page renders every card from it; index.html holds no card markup.",
+        "The config declares a status vocabulary (label and interactive flag per status), and one flat list of all labs, the count per status and the count of labs in each domain are computed once from the records, not typed.",
+        "The hub imports the generated levels data (labs/assets/js/config/levels.data.js) and joins it to the config by id; ids present on one side only are listed in the console on load.",
+        "Each joined record exposes its latest lab level, its G0 level, the delta between them and its weakest axis, all read from the levels data and none typed in site.config.js.",
+        "Status is derived, not typed: a tools script sets Live when the page file exists and the lab level is 2 or more, Beta when the page exists and the lab level is below 2, and Planned when no page exists; site.config.js carries no hand-set status.",
+        "Records carry typed relations to other labs (shares-engine, shares-model-route, same-canon, feeds-data), stored once, with at least one relation for every lab that has a page and every relation target a known id.",
+        "Each record carries the last-change date and commit of its page, written by a tools script from git log, and the hub derives days since last change for every lab.",
+        "Hub-wide aggregates are computed from the records (labs per level 0 to 10, labs meeting the pass target of level 7 with no axis below 5, mean climb per generation) and agree with `node tools/levels.mjs table` for every lab.",
+        "The hub runs the level arithmetic on a what-if: for each lab it recomputes the lab level as if its next rung shipped (every axis tied at the weakest level raised by 1, then lower median and weakest + 2 cap, as nextRungs() in tools/levels.mjs defines the next rung), using the one arithmetic module the tools script also imports, and prints 'next rung -> level n'.",
+        "The catalogue is the single source for the whole site: the hub, the LABS_LEVELS.md table, a published JSON feed with a versioned schema and the hub's schema.org JSON-LD are all generated from it, so each lab's title, status and level is hand-edited in exactly one file."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "site.config.js holds CATEGORIES with nested project records (id, title, status, href, blurb) and the page renders all 31 cards from them; index.html holds no card markup (rung 1). Rung 2 fails: the STATUS vocabulary (label, kind, interactive) exists and ALL_PROJECTS is derived once, but COUNTS holds total, built, beta, planned and categories, and categories is the number of domains (CATEGORIES.length); no count of labs per domain is computed anywhere. No hub module imports levels data: labs/assets/js/config/levels.data.js has not been generated, and the only 'level' in labs/assets/js/hub is the 'top-level controller' comment in Hub.js."
+        }
+      }
+    },
+    {
+      "id": "catalogue-truth",
+      "name": "Catalogue truth",
+      "frame": "data",
+      "metric": "The number of statements the hub makes (status pills, hero, ledger and section counts, hero and about copy, a sample of card blurbs) that contradict the repository or the levels data, plus which provenance features exist (levels data, dates, evidence, export, corrections). The rater checks each card's pill against whether its page file exists, recounts the hero and ledger figures from site.config.js, reads index.html's copy for typed counts and false claims, and greps the named mechanisms of 5 random card blurbs in their labs' code.",
+      "ladder": [
+        "The hub states no status, count or date for any lab.",
+        "Each card carries a status pill (Live, Beta or Planned) set in the config.",
+        "Every count the hub states (hero stats, ledger, section copy) is written at runtime from the config records: index.html's visible text holds no number or number word except placeholders the hub overwrites on load.",
+        "Zero status contradictions: every card marked Live or Beta opens a page that loads, every card without a page says Planned, and a lab with a playable page is never counted as in the pipeline.",
+        "The hub's Live, Beta and Planned counts equal what the levels data implies (labs with a page and lab level 2 or more, labs with a page below 2, labs without a page), read from the same generated levels.data.js that `node tools/levels.mjs write` produces.",
+        "Zero false claims in the hero and about copy (each sentence true of today's code), and for 5 card blurbs picked at random, each named mechanism or source (e.g. 'NASA Exoplanet Archive', 'gravitational lensing') is found in that lab's code by grep.",
+        "Each card shows the date of its last shipped change (YYYY-MM-DD) and the generation its level was graded at (G0, G1 and so on).",
+        "A check in tools/ fails when the hub would state a contradiction (a Live lab without a page, a hub id without a levels file, a count typed into HTML), and it runs in the site checks before deploy.",
+        "Every level shown opens its evidence: per axis, the rater's evidence text, the generation and its date, read from the levels data.",
+        "The full catalogue (id, title, status, page, every axis level per generation, dates) downloads from the hub as JSON and CSV, stamped with the commit it was built from.",
+        "A dated corrections log on the hub lists each figure or status the hub stated wrong since G0, at minimum the three G0 contradictions (Time-Slip shown Beta with no page, Alternate Reality counted in the pipeline, the header light reading 'AI · Offline' on the public site), each with the date and commit that fixed it, and 10 numbers sampled from the page each trace to a commit and a rater's evidence line."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "Each card's pill comes from the status field in site.config.js (rung 1). Rung 2 fails: index.html line 61 types 'Everything in the lab, across eight domains.' into the section copy, a count no code writes; the hero (13 Live, 18 In pipeline, 8 Domains) and the ledger are computed from COUNTS by Hero.js and Chrome.js. Rung 3 also fails twice: Time-Slip: The Last Witness has status 'beta' and no href, so its card shows a BETA pill over 'In the pipeline' and the ledger counts it 'In beta'; Alternate Reality Scenarios is 'beta' with a working page (altverse.html), yet the hero's 'In pipeline' figure is COUNTS.beta + COUNTS.planned, so a playable lab is counted as pending. Rung 5 would fail too: the about copy says every experiment is 'wired to a tiered AI backend', but the Black Hole, Dimensions, Primordial Seed and Heptapod pages and modules reference neither ai/llm.js nor ai/provider.js. No card shows a level, date or evidence."
+        }
+      }
+    },
+    {
+      "id": "climb-display",
+      "name": "Level and climb display",
+      "frame": "graphics",
+      "metric": "Which visual encodings of the levels data the hub draws: the count of views present (card number, card gauge, per-axis strip, generation overlay, detail panel, lab-by-frame matrix, distribution, linked highlighting, generation replay, drawn arithmetic). The rater opens the hub at 1440 px and 390 px and checks each view's values against labs/levels/*.json.",
+      "ladder": [
+        "No level is drawn or printed anywhere on the hub.",
+        "Each card prints its lab level (0 to 10) read at runtime from labs/assets/js/config/levels.data.js; changing a level in labs/levels/<id>.json and running `node tools/levels.mjs write` changes the card with no hub edit.",
+        "Each card draws the level on a 0 to 10 gauge with the pass target (7) marked.",
+        "Each card draws one mark per axis (6 to 12 bars on the shared 0 to 10 scale), with the weakest axis's bar distinguished and its name printed, so the lab's shape shows without opening it.",
+        "The climb is drawn: each card overlays G0 and the latest generation per axis (outline bar for G0, solid bar for the latest) and prints the lab's delta (+n).",
+        "A detail panel opened from a card lists every axis with its frame, level, the rung it stands on and the next rung's text, and fits a 390 px screen without horizontal scroll.",
+        "A hub-wide matrix draws every lab (rows) against the nine frames (columns), each cell holding the lowest axis level the lab has in that frame, with rows sortable by lab level, by delta and by weakest axis.",
+        "A distribution chart draws the number of labs at each level 0 to 10 with a line at level 7, prints how many labs pass (level 7 or more with no axis below 5), and redraws when a filter is applied.",
+        "Linked views: hovering or focusing a lab in any view (card, matrix, distribution) highlights the same lab in every other view on screen.",
+        "A generation scrubber replays every view from G0 to the latest generation, each mark keeping its identity while its value changes (object constancy); under reduced motion it steps without tweening.",
+        "The arithmetic is drawn: each lab's chart marks its lower median and its weakest + 2 cap, so a rater reproduces every lab's level from the drawing alone, matching `node tools/levels.mjs table` for all labs."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "No hub module reads levels data and no card shows a level: ProjectCard.render() emits the domain label, status pill, title, blurb and call to action only. labs/assets/js/config/levels.data.js has not been generated."
+        }
+      }
+    },
+    {
+      "id": "lab-previews",
+      "name": "Lab previews",
+      "frame": "graphics",
+      "metric": "How much of each lab its card shows: the count of cards with a still, a generated still, a looping clip, a live preview run by the lab's own engine, and an input that carries into the lab. The rater opens the hub, hovers and focuses cards, and reads ProjectCard and any preview modules to see which engine file each preview imports.",
+      "ladder": [
+        "Cards are text only: no image or drawing of any lab.",
+        "Every card with a page shows a still of its own lab (screenshot or render, intrinsic width at least 640 px, scaled to the card, with alt text naming what it shows).",
+        "Stills come from a tools script that captures the running pages headless, and no still is older than its page's last commit.",
+        "Every planned card shows a sketch of its intended mechanism (a diagram of what it will compute), labelled 'concept'.",
+        "Hovering or focusing a card with a page plays a loop of the lab running (at most 3 s and 300 KB), and the loop stays a still under reduced motion.",
+        "At least 6 cards draw a live preview in canvas or SVG from the lab's own engine module (the file the lab page imports), seeded so every visit opens on the same frame.",
+        "Every lab with a page has a live preview; previews start when their card scrolls into view, stop when it leaves, and at most 3 run at once.",
+        "Previews of every lab whose page or modules reach a model (grep finds llm.js, provider.js, ollama or pollinations in its code) replay a recorded real run labelled 'recorded' with its date and route, never an idle animation posing as live output.",
+        "On at least 6 cards with a live preview, one input on the card (drag or pointer position) changes the preview's main parameter (spin, dimension count, planet, sentence), and opening the lab carries that state in its URL.",
+        "A wall view runs every live preview at once by giving each preview a time slice, with a median frame time of at most 16.7 ms over 120 frames in Chrome DevTools Performance at 4x CPU throttling, and prints the measured frame time on the wall.",
+        "The core action of every lab with a page is playable from its card without leaving the hub (orbit the hole, rotate the hypercube, encode a word), with its state handed to the full lab by URL: the inline playable figure of the explorable-explanation tradition, applied to a whole catalogue."
+      ],
+      "levels": {
+        "G0": {
+          "level": 0,
+          "evidence": "ProjectCard.render() builds text nodes only (card-top, h3, p, card-cta, card-link). Measured in headless Chrome on 2026-11-11 at 390 px and 1440 px: #project-grid holds 31 cards and 0 img, canvas, video or svg elements."
+        }
+      }
+    },
+    {
+      "id": "relation-map",
+      "name": "Lab relation map",
+      "frame": "explanation",
+      "metric": "Whether the hub shows how labs connect: the count of typed relations shown, whether each states its reason, whether node positions follow a stated rule, and whether relations come from the code. The rater opens the map or the lab details and checks five random edges against the files they name.",
+      "ladder": [
+        "No relation between labs is shown; each card stands alone.",
+        "Every card names its domain, and the grid lists each domain's labs together in the config's order.",
+        "Each domain shows its one-line intro and its counts of labs with and without pages, so the grouping says why its labs sit together.",
+        "Each lab's detail lists the labs it relates to, with the relation type (shares an engine, shares the model route, same Tryverse canon, feeds data).",
+        "A map view draws every lab as a node and every typed relation as an edge, edge style by type, with a legend.",
+        "Every edge states its reason on hover or focus and names the shared file or concept (for example the module both labs import).",
+        "Node position follows a rule written as a caption on the map (for example clusters by domain with height by lab level), not a free layout.",
+        "Selecting a lab isolates its 1-hop and 2-hop neighbourhood, and selecting two labs lists the shortest path between them.",
+        "Shared infrastructure appears as nodes (labs/assets/js/ai/llm.js, tokens.css, the levels system), and lab-to-module edges are generated by a tools script from the real import graph, not typed.",
+        "A time slider grows the map in shipping order (dates from git), adding labs and edges as they landed.",
+        "A visitor names a concept (lensing, tokenization, honesty grading) and the map returns the labs tagged with that concept in the catalogue, ordered by a rule printed with the route (ascending lab level, ties broken by relation distance), each step a link to the view that shows it."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "ProjectCard.render() prints each lab's domain label (card-cat), and ALL_PROJECTS is CATEGORIES.flatMap, so the All view lists each domain's labs together; Rail.js lists labs under domain headings (rung 1). Rung 2 fails: the config's per-domain 'intro' lines are never rendered and no per-domain count exists. No lab-to-lab relation exists in data or on screen."
+        }
+      }
+    },
+    {
+      "id": "self-explanation",
+      "name": "Self-explanation",
+      "frame": "explanation",
+      "metric": "What a first-time visitor can state after five minutes on the hub alone: what the lab is, how labs reach a model, what a level means, which statements are real. The rater reads every text block on the hub against labs/assets/js/ai/llm.js and LABS_LEVELS.md and counts which explanation elements are present and correct.",
+      "ladder": [
+        "The hub explains nothing beyond a title and a tagline.",
+        "An about section states what the labs are and why they exist.",
+        "The hub's account of how labs reach a model matches labs/assets/js/ai/llm.js: local Ollama, a key the visitor brings, a worker if deployed, the public route and its rate limit as stated in llm.js, and each lab's offline engine.",
+        "One paragraph says what a lab level is: per-lab axes, 11 rungs from absent to reference, lab level = min(lower median of axis levels, weakest axis + 2).",
+        "Every status word and level on the hub has a definition one click or tap away: a legend for Live, Beta and Planned and for levels 0 to 10 with the general ladder's names.",
+        "Each claim in the hub copy carries a tag (real, illustrative, planned) and the legend says what each tag means.",
+        "The three honesty rules (ladders written before grading, the builder never grades, a ladder changes only between generations with the reason recorded) are stated on the hub with the date the system began.",
+        "A first-visit tour of at most 5 steps, skippable and keyboard-operable, walks through one lab's ladder: its axes, one rung, its weakest axis and why that axis caps the level.",
+        "Each of the nine frames has its definition from the LABS_LEVELS.md frames table one hover, focus or tap away wherever the frame name appears on the hub (matrix column, detail panel, filter), for all nine frames.",
+        "A changelog strip states in plain words what each generation changed per lab (axis, from, to, what shipped), each entry linked to its pull request.",
+        "Tested comprehension: at least 5 first-time visitors, using the hub alone, name the strongest and the weakest lab, what the weakest needs next and what level 10 means for one lab; at least 4 of 5 answer all four correctly, and the dated results are published on the hub."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "The #about section's two paragraphs say what the labs are (rung 1). Rung 2 fails: they describe three tiers ('your local model when you have one, a hosted relay when you don't, and a graceful offline mode'), but llm.js has five routes, no worker is deployed (ai/config.js worker.base is ''), and the public route's rate limit (one reply every 45 seconds per IP, per llm.js) goes unmentioned. Nothing on the page explains levels, statuses or claim tags."
+        }
+      }
+    },
+    {
+      "id": "finding",
+      "name": "Finding and comparing",
+      "frame": "interaction",
+      "metric": "Which controls bring a visitor to the lab they want: the count of working controls (grid, facets, search, sort, URL state, keyboard path, palette, compare, structured query) and whether each works by keyboard and survives a reload. The rater tries each control on the hub at 1440 px and 390 px.",
+      "ladder": [
+        "No list to navigate: labs are not reachable from the hub.",
+        "One card grid lists every lab in the config, and every lab with a page opens from its card.",
+        "One facet filter (domain) narrows the grid, with the pressed chip marked by aria-pressed.",
+        "A second facet (playable now or planned) combines with the domain filter, and the grid states how many labs match.",
+        "Typed search over title, blurb and axis names filters as the visitor types, highlights the matched words and shows an empty state that suggests a query.",
+        "Sort by lab level, by climb since G0, by last change and by name.",
+        "Filter, search and sort live in the URL query string, so a shared link reopens the same view and the back button restores the previous one.",
+        "A full keyboard path: '/' focuses search, arrow keys move between cards, Enter opens, Escape clears, and every control shows a focus ring.",
+        "A command palette (Ctrl or Cmd + K) jumps to any lab, axis or view by a fuzzy match that tolerates typos ('blak hole' finds Black Hole).",
+        "Compare: selecting 2 to 4 labs shows their axes side by side on the shared 0 to 10 scale, with its own URL.",
+        "Structured queries by frame, level and climb ('graphics below 4', 'climbed 3 or more') return exact matches, are stored in the URL and drive every view (grid, matrix, map) at once."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "ProjectGrid renders all 31 records of ALL_PROJECTS as cards, and every card with an href carries a full-card link (a.card-link) to its page; no planned record has an href (rung 1). _buildFilters() renders an All chip and 8 domain chips as buttons with aria-pressed, and render(filter) narrows the grid (rung 2). No status facet, match count, search, sort or URL state exists. The rail menu (Rail.js, all 31 labs by domain) cannot be opened at 1440 px (.rail-toggle is display:none above 860 px), and at 390 px its button sits at x 397 to 426, outside the 390 px visible at load (measured in headless Chrome, 2026-11-11); its reach is graded under Load and reach."
+        }
+      }
+    },
+    {
+      "id": "route-guide",
+      "name": "Route status and guide",
+      "frame": "intelligence",
+      "metric": "What the hub does on its own: whether its model-route light tells the truth on the public site, whether it recovers when a route fails, whether it recommends and answers from the catalogue, and how many test questions the model path answers correctly against the deterministic path. The rater loads the hub from luisblanco.dev and from localhost with DevTools Network open and compares the light with the route labs/assets/js/ai/llm.js would pick.",
+      "ladder": [
+        "The hub does nothing on its own: no route light, guidance or model call.",
+        "A header light reports a model route chosen on load (local, hosted or offline).",
+        "The light follows labs/assets/js/ai/llm.js: it names the route a lab would use now (ollama, own key, worker, public, offline) and, on the public route, the seconds until the next reply window.",
+        "The light opens the shared route panel (labs/assets/js/ai/route-panel.js), so a visitor brings a key once and every lab uses it.",
+        "Each card states what its lab needs from a model (none, one call per action, several calls) and shows 'slowed' when the lab needs several calls and the current route is the public one (rate limit as stated in llm.js).",
+        "The hub recommends where to start from stated deterministic rules on the catalogue (no model needed, highest level, biggest climb this generation), each recommendation printing its rule.",
+        "When a route fails (HTTP 402, timeout, network error) the light changes within 5 s, says why in words and names the route tried next.",
+        "Ask the hub: a typed question ('which labs use real data?') gets one model call with the catalogue as context, and every lab named in the answer is a link checked against the catalogue, with unknown ids dropped and counted.",
+        "When no model answers, the ask box falls back to the deterministic search over the same catalogue and says so; a fixed set of at least 20 test questions with hand-written answers, published on the hub, shows how many the model path and the deterministic path each answer correctly, and the model path answers more of them correctly.",
+        "Every claim the answer makes about a lab cites the axis and evidence line from the levels data it relied on, and a claim without a citation is flagged in the reply.",
+        "Goal routing: a visitor states a goal ('understand gravitational lensing in 10 minutes') and gets an ordered route of labs and views, each a URL, from one batched model call checked by deterministic rules, with the relation map producing a route offline when no model answers."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "AIStatus.js calls the older AIProvider.detect() from ai/provider.js, which probes Ollama only on localhost or file:// and a worker only when ai/config.js sets worker.base (it is ''). On luisblanco.dev the light therefore always reads 'AI · Offline' although llm.js's public route answers; on Luis's machine it reads 'AI · Local' (audit screenshot, and on 127.0.0.1 in headless Chrome on 2026-11-11). It does not use llm.js and opens no route panel."
+        }
+      }
+    },
+    {
+      "id": "design-language",
+      "name": "Hub design language",
+      "frame": "style",
+      "metric": "Checks of the hub's visual craft at 1440 px and 390 px: token use, text colliding with the hero drawing, where the accent colour appears, tile treatments, the motion system, and consistency across the lab family. The rater inspects screenshots and computed styles and greps hub.css and labs/assets/js/hub for colours outside tokens.css and constants.js.",
+      "ladder": [
+        "Browser defaults: no shared palette, type or spacing.",
+        "One tokens stylesheet (colours, type, spacing, radii, durations) is consumed by the hub's CSS.",
+        "tokens.css declares one identity (near-black --void ground, gold --accretion as the only accent hue beside the semantic ok, warn and danger colours, an ink-gray --horizon cold role used on eyebrows, one type family for every --font-* role), and every font-family, color and border colour in hub.css is a var() of a tokens.css token, inherit or currentColor.",
+        "A drawn, animated centrepiece in the hero that renders one still frame under reduced motion, and hover states on playable cards (lift, border, glow).",
+        "No collisions: at 1440 px and at 390 px no hero text crosses the black hole's ring or disk, and no text overlaps other text.",
+        "The accent is reserved: in hub.css and the hub DOM (canvas drawings excluded), var(--accretion*) appears only on the Live pill (card and menu), the Live count (hero and ledger), the pressed filter chip, the active route dot, the text selection highlight and the hovered or focused playable card.",
+        "The grid follows a stated composition rule instead of identical tiles: at least 3 tile treatments assigned by status and level, written in the stylesheet, with planned labs drawn as outlines rather than faded copies.",
+        "One motion system: every duration and easing comes from tokens, cards reorder by FLIP (first, last, invert, play) on filter and sort, and reduced motion replaces each transition with an instant change.",
+        "One line-and-light language across hero, gauges, map and previews: stroke weights from a set of at most 3, glow only on active marks, 0 colour literals in hub.css or labs/assets/js/hub outside tokens.css and constants.js, and a check script fails when a PALETTE entry differs from the tokens.css value its comment names or adds a colour tokens.css does not declare.",
+        "The first screen composes the live state: the Live count, the level distribution and the route status are drawn in the hero canvas or an SVG layer positioned on the black hole's geometry (for example counts along the photon ring), with no stats pill under the title; at 1440 px no horizontal band of the first screen taller than 200 px holds no text, control or data mark (stars and nebula do not count).",
+        "The hub and every lab page share one written design spec (tokens, marks, grid, motion), and a script in tools/ run in the site checks reports 0 colour literals outside the spec's tokens and 0 font families outside the spec across labs/*.html and labs/assets/css/*.css: the lab reads as one instrument family."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "tokens.css declares the identity (--void ground, --accretion gold, --horizon on .section-head .eyebrow and .rail h4, IBM Plex Mono for every --font-* role), and every font-family, color and border colour in hub.css is a token var(), inherit or currentColor (rung 2). hero-blackhole.js draws a lensed starfield, an inclined disk and a photon ring and renders one frame under reduced motion; .card.is-built:hover lifts and glows (rung 3). Rung 4 fails: in the 1440 px audit screenshot the kicker 'LUISBLANCO.DEV · EXPERIMENTS' runs through the photon ring, 'THE LABS' sits on the disk and the subtitle's first line crosses the ring. Against rung 5, gold also marks .hero-kicker, .hero h1 .x, .brand b, .card-cta at rest, .site-nav a::after, .scroll-cue, .socials a:hover and .aurora. Against rung 8: constants.js PALETTE.warm [242,169,59] is commented '--accretion' but --accretion is #D4A24C (212,162,76); PALETTE.cold [43,106,135] is commented '--horizon' but --horizon is #9FB3D6 (159,179,214); the substrate paints teal, violet [60,40,90] and slate nebulae, hub.css body::before paints #0a0e16 and teal and violet washes, and hero-blackhole.js writes '#000' and rgba(0,0,0,...) literals."
+        }
+      }
+    },
+    {
+      "id": "reach",
+      "name": "Load and reach",
+      "frame": "performance",
+      "metric": "Load and access measurements: horizontal overflow at 390 px (documentElement.scrollWidth minus 390, in px), the hero canvas paused off screen, the keyboard and screen-reader path, Lighthouse mobile LCP (s), CLS and total blocking time (ms), axe-core violations, and first-load transfer (KB). The rater runs Lighthouse and axe in Chrome DevTools and measures at 390 px in device emulation.",
+      "ladder": [
+        "The page fails to render its catalogue.",
+        "The hub renders every card in a desktop browser over HTTP with no console errors.",
+        "Reduced motion is honoured: with prefers-reduced-motion both canvases draw one still frame, and CSS animations and scroll reveals stop.",
+        "At 390 px in DevTools device emulation, documentElement.scrollWidth is at most 390 and the menu button's box lies within x 0 to 390, so every control is on screen without panning.",
+        "The hero canvas stops its requestAnimationFrame loop while the hero is out of the viewport (IntersectionObserver in hero-blackhole.js): after scrolling to #projects, the Performance panel shows no hero frames drawn.",
+        "Keyboard and screen reader: Tab reaches every card, filter and menu item in visual order with a visible focus ring, the menu button reports aria-expanded, the open menu holds focus, and Escape returns focus to the button.",
+        "Lighthouse mobile (simulated slow 4G, 4x CPU slowdown) reports LCP at most 2.5 s, CLS at most 0.1 and total blocking time under 200 ms.",
+        "Performance tiers: the hero picks its star and disk density from measured frame time (dropping a tier when the median of 60 frames exceeds 16.7 ms) and from Save-Data, and the chosen tier is shown under ?debug.",
+        "axe-core reports 0 violations, all text meets WCAG 2.2 AA contrast (4.5:1 for body text, 3:1 for large text and UI marks), planned cards included, and every chart and map has a data-table or list equivalent that a screen reader announces in reading order.",
+        "First load transfers under 300 KB before the canvases start: the Google Fonts request names only families tokens.css uses, and icons are inline SVG instead of the Font Awesome stylesheet.",
+        "Lighthouse scores 100 in all four categories on mobile and desktop, and with JavaScript off the hub lists every lab, each lab with a page as a link."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "At 1440 px the hub renders 31 cards with no console error (headless Chrome, 2026-11-11) (rung 1). BlackHoleHero and CosmicSubstrate render one frame under prefers-reduced-motion or ?still, and hub.css stops animations and transitions and shows [data-reveal] under the media query (rung 2). Rung 3 fails, measured in headless Chrome on 2026-11-11: at 390 px with a desktop viewport, innerWidth is 390 and documentElement.scrollWidth 426; in mobile emulation the layout viewport widens to 426. In both, button#rail-toggle spans x 397 to 426, outside the 390 px visible at load. The header sets that width: it measured 402 px with the label 'AI' and 426 px with 'AI · Local'. Neither canvas has an IntersectionObserver or visibilitychange handler. index.html links a Google Fonts sheet that declares Orbitron and Space Grotesk (never fetched, since no element uses them: document.fonts held only IBM Plex Mono and the two Font Awesome families) and the Font Awesome 6.5.1 icon font, whose two families do load."
+        }
+      }
+    },
+    {
+      "id": "hub-architecture",
+      "name": "Hub architecture",
+      "frame": "architecture",
+      "metric": "The code shape of the hub: module boundaries, data kept apart from behaviour, generated versus hand-kept data, tests in the site checks, and how many hub files a new lab or view touches. The rater reads labs/assets/js/hub, labs/assets/js/config and tools/, and counts the files changed by adding one lab.",
+      "ladder": [
+        "One inline script and inline styles inside index.html.",
+        "Styles and scripts live in their own files (index.html has no <style> block and no inline script body), and the page boots from one ES module entry.",
+        "Lab records live only in labs/assets/js/config (site.config.js), which touches no DOM, and every DOM lookup in labs/assets/js/hub ($(), $all() or querySelector) starts from a selector declared once in SEL in constants.js.",
+        "A component registry: the Hub controller mounts a list of components, each with mount() and an optional destroy(), so a new section is one class added to the list.",
+        "One source per concern: the hub reads levels from the generated labs/assets/js/config/levels.data.js and the model route from labs/assets/js/ai/llm.js, the same modules the labs use, with no second copy of either.",
+        "Node unit tests with no dependencies cover every hub derivation (counts, status, level join, relation integrity) and run in the site checks.",
+        "A headless render test opens the hub at 1440 px and 390 px in the site checks and fails on a console error, horizontal overflow or a card count that differs from the config.",
+        "Every hub module has a size budget in bytes enforced by the checks, which fail when a module exceeds it.",
+        "All views (grid, matrix, map, detail) read one store for selection, filters and query and subscribe to it; adding a view edits no other view.",
+        "Each lab declares its card preview, relations and model needs in a manifest in its own files, so adding a lab edits no file under labs/assets/js/hub or labs/assets/js/config (site.config.js is generated from the manifests or removed).",
+        "The hub is a reusable kit: the same modules render a second catalogue from a different config with zero code changes, shown by a 3-lab fixture rendered in the tests."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "index.html has no <style> block or inline script and boots assets/js/hub/main.js; one inline style attribute remains on the footer's .wrap (rung 1). Lab records live only in site.config.js, which touches no DOM, and every $() and $all() call in labs/assets/js/hub takes a SEL entry (RevealObserver appends ':not(.in)' to SEL.reveal) (rung 2). Hub.js mounts a components array (Chrome, Background, Hero, ProjectGrid, Rail, AIStatus), each with mount(), and destroy() calls destroy?.() on each (rung 3). Rung 4 fails on both counts: no levels data is generated or imported, and AIStatus.js imports the older ai/provider.js instead of llm.js, so the hub and the labs disagree about routes. Tuning drift no rung grades: hero-blackhole.js hard-codes its warm-star chance as rnd() > 0.82 while SUBSTRATE_CONFIG.warmStarChance (0.86) sits in constants.js."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

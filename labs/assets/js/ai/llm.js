@@ -48,7 +48,9 @@ import { AI_CONFIG } from './config.js';
 const POLL_URL = 'https://text.pollinations.ai/openai';
 const POLL_MODEL = 'openai';             // alias the anonymous tier serves
 const POLL_WINDOW_MS = 46000;            // 45 s per IP, plus a second of slack
-const OLLAMA_BASE = 'http://localhost:11434';
+// 127.0.0.1, not localhost: on Windows localhost tries ::1 first and took 1.6 s to connect (2026-11-11).
+const OLLAMA_BASE = 'http://127.0.0.1:11434';
+const OLLAMA_PROBE_MS = 2500;
 const OLLAMA_PREFER = ['qwen2.5:14b', 'llama3.1:8b', 'qwen3:8b', 'gemma2:9b'];
 const DEFAULT_TIMEOUT_MS = 60000;
 const OWN_KEY_STORE = 'lb.llm.ownkey';
@@ -185,7 +187,7 @@ class Route {
     this._detecting = (async () => {
       if (isLocalPage()) {
         try {
-          const t = withTimeout(null, 900);
+          const t = withTimeout(null, OLLAMA_PROBE_MS);
           const r = await fetch(OLLAMA_BASE + '/api/tags', { signal: t.signal, cache: 'no-store' });
           t.done();
           if (r.ok) {

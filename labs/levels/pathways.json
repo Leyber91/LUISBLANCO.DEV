@@ -1,0 +1,249 @@
+{
+  "id": "pathways",
+  "title": "Learning Pathways",
+  "page": null,
+  "thesis": "A visitor types a skill goal, gets a checked prerequisite graph from one model call, practises it in auto-graded sessions scheduled by a forgetting-curve model fitted to their own reviews, and sees the plan's retention forecasts scored against their own logged recall, with the review log kept on their device and only the goal text ever sent out.",
+  "axes": [
+    {
+      "id": "memory-model",
+      "name": "Forgetting-curve model",
+      "frame": "model",
+      "metric": "Which memory model computes each item's recall probability and next interval, and how far it is checked: read the scheduler module for the update rule and parameters, run a fixed grade sequence on the page and compare the intervals with the reference table or implementation, and load the named fixtures (files in labs/assets/js/pathways/fixtures/); the level is the highest rung whose named feature is present in code and visible on the page (rungs are cumulative).",
+      "ladder": [
+        "Absent: no memory model runs and no review date is computed.",
+        "A fixed review calendar typed into the page (for example day 1, 3, 7, 30), the same for every item whatever the answers.",
+        "Leitner boxes: a correct recall moves the item up one box, a lapse sends it back to box 1, and each box's fixed interval in days is stated on the page.",
+        "SM-2 as published (Wozniak 1990): quality q from 0 to 5, with the session's four grade buttons mapped to q by one constant in code that the page also shows (for example buttons 1 to 4 to q = 1, 3, 4, 5); easiness factor starts at 2.5 and updates by EF' = EF + (0.1 - (5 - q) x (0.08 + (5 - q) x 0.02)) with floor 1.3; intervals of 1 and 6 days, then I(n) = I(n-1) x EF rounded to whole days by a rule stated in the code; q below 3 resets the repetition count and the interval to 1 day, and the code states whether EF also updates on a lapse.",
+        "SM-2 intervals for a fixed grade sequence of at least 10 reviews match a hand-computed reference table to the day, and the table is shown on the page or committed in the repo.",
+        "An explicit forgetting curve per item: predicted recall R(t) as an exponential or power-law function of days since the last review, with stability derived from the review history, and the selected item's recall probability shown as a whole percent for any date the visitor picks.",
+        "A stability, difficulty and retrievability model of a named FSRS version (open-spaced-repetition project; for example FSRS-5 with its 19 published default weights), the version named in code and printed on the page, runs beside SM-2 behind a visible model switch and sets each interval to the day predicted recall falls to a visitor-set target retention between 0.70 and 0.97.",
+        "For at least 20 fixed review histories, the FSRS-family intervals match a pinned release of an open-spaced-repetition reference implementation (ts-fsrs or py-fsrs, version stated) within 1 day; the comparison table and the version are committed in the repo.",
+        "Per-learner fit: on any log of at least 400 reviews (checked by loading the committed log-500.json), the FSRS-family parameters are fitted in the browser by minimizing log loss on the earliest 80% of reviews by time, and default and fitted parameters are shown side by side with each one's log loss on the held-out latest 20%.",
+        "Implicit review through the prerequisite graph: practising a skill credits each of its prerequisites with a fraction of a review that is fitted on the log's training split, not typed in; the credit appears in each prerequisite's history and curve, and held-out log loss on log-500.json is printed with the credit on and off.",
+        "The visitor switches the same log between SM-2 (recall set to 0.9 at its scheduled interval on an exponential curve, rule stated on the page), half-life regression (Settles and Meeder 2016, ACL) and the FSRS-family model, the last two refitted in the browser on the earliest 80% of reviews by time; held-out log loss, Brier score and RMSE over bins on the latest 20% are printed side by side for all three, with graph credit on and off for the two fitted models. Reference standard: the FSRS optimizer built into Anki, with models compared the way the open-spaced-repetition srs-benchmark compares them."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; site.config.js lists pathways with status 'planned' and there is no scheduler code anywhere under labs/assets/js/" } }
+    },
+    {
+      "id": "prereq-graph",
+      "name": "Prerequisite graph integrity",
+      "frame": "model",
+      "metric": "Whether the skill decomposition is a valid prerequisite structure that the plan enforces: count of graph checks that run in code and show on the page (cycle refusal, topological order, gating, transitive reduction, critical path, knowledge state, placement); tested by loading the committed cycle-goal.json (one 3-skill cycle, one redundant edge) and goal-60.json (files in labs/assets/js/pathways/fixtures/) through the page's Load fixture control or editor, and by reading the graph module.",
+      "ladder": [
+        "Absent: no skill structure exists.",
+        "A flat list of subskills typed into the page, with no dependency between them.",
+        "A tree rendered from data: each skill has one parent, and the hierarchy comes from a data structure, not hand-placed markup.",
+        "A directed acyclic graph: a skill may have several prerequisites, and an edge that would close a cycle is refused with the skills in that cycle named; loading cycle-goal.json refuses its closing edge and names its 3 skills.",
+        "A topological order (Kahn's algorithm or depth-first search) gives the study sequence, and a skill opens for practice only when every prerequisite is marked learned.",
+        "Transitive reduction flags redundant edges (A to C when A to B to C exists) and shows their count; on cycle-goal.json, after its cycle edge is refused, it flags exactly its 1 redundant edge.",
+        "Each skill carries an effort estimate in minutes, and the page computes and shows the critical path (the longest effort chain to the goal) and the total hours.",
+        "Mastery comes from the memory model: a skill counts as mastered while every item's predicted recall is at or above a threshold printed on the page; when real or simulated time pushes recall below it, the skill shows as decaying and re-enters the study order ahead of new skills, while its dependants stay open (checked with the fast-forward control or log-500.json).",
+        "Knowledge-space view (Doignon and Falmagne 1985, International Journal of Man-Machine Studies): the knowledge state is the set of skills currently mastered under rung 7, and the page lists its inner fringe (mastered skills with no mastered dependant) beside its outer fringe (unmastered skills whose prerequisites are all currently mastered).",
+        "Diagnostic placement on the committed goal-60.json: an adaptive check of at most 10 questions, each chosen by an information criterion named in the code and computed over the graph, prints the starting knowledge state and the answers that decided it.",
+        "Placement validated: on at least 100 simulated learners whose true knowledge states are drawn from the feasible states of goal-60.json (sets closed under prerequisites) and who answer with slip and guess rates stated on the page, the page prints the share of skills where the inferred state matches the true state and the mean number of questions per learner, beside the same share for 10 questions chosen at random, the adaptive share the higher. Reference standard: ALEKS, built on knowledge space theory."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no graph, decomposition or ordering code in the repo for this lab" } }
+    },
+    {
+      "id": "retention-calibration",
+      "name": "Retention forecast calibration",
+      "frame": "model",
+      "metric": "How the predicted recall probabilities are checked against logged recall: log loss and Brier score (unitless, lower is closer to what happened) with n, reliability bins with counts, walk-forward discipline, baselines and intervals; check the calibration view on the visitor's log, the committed log-500.json or plan-past-horizon.json (files in labs/assets/js/pathways/fixtures/) or the bundled demo log, and read the scoring module.",
+      "ladder": [
+        "Absent: no retention prediction is scored.",
+        "A typed claim of the retention the plan gives (for example '90% retention'), not computed from any log.",
+        "Each review stores the predicted recall the model gave for it next to the logged outcome (recalled or lapsed), and both are listed on the page.",
+        "Log loss, Brier score and RMSE over bins (binning written in a code comment, following the open-spaced-repetition srs-benchmark) of predicted against logged recall, each to 3 decimals with n, computed by the page over the visitor's log or the committed log-500.json, labelled with which.",
+        "Walk-forward discipline: the stored prediction is the one written at the previous review, before the outcome existed, and is never recomputed after the answer; a loaded log is replayed in time order with each prediction made from earlier reviews only (a rater checks the code path).",
+        "Reliability diagram: predicted recall in at least 10 bins against the observed recall rate, with the review count in each bin, drawn for the visitor's log or log-500.json.",
+        "Two baselines scored on the same reviews: a constant equal to the running recall rate, and a single Ebbinghaus exponential curve with one global stability fitted on earlier reviews; the table shows each baseline's log loss beside the model's.",
+        "A bundled demo log of at least 5,000 reviews from a public spaced-repetition dataset (for example the Duolingo learning traces released with Settles and Meeder 2016), with source, license and the rule that maps the dataset's fields to one recalled-or-lapsed outcome per review written on the page (for the Duolingo traces, how session_seen and session_correct become outcomes), fills every calibration view for a visitor with no history, labelled demo.",
+        "A bootstrap of at least 1,000 resamples gives a 95% interval on the log-loss difference between the model and each baseline, printed beside each difference.",
+        "Personal track record: once the visitor's own log holds at least 300 reviews (checked by importing the committed log-500.json as a personal log), the same views score the plan on that log, and the reliability diagram draws consistency bands from at least 1,000 resamples under perfect calibration (Bröcker and Smith 2007, Weather and Forecasting) and prints how many bins fall outside them.",
+        "Goal-level forecast tested: at plan creation the page stores a dated, read-only forecast of recall across the goal's items at a horizon the visitor picks (7 to 180 days); on that date an unscheduled test of a random sample of at least 20 of those items runs, and forecast is plotted against measured recall with its 95% binomial interval, every forecast and result exportable; checked by loading the committed plan-past-horizon.json (a plan past its forecast date, with its logged test), from which the page recomputes the plot. Reference standard for the scoring: the open-spaced-repetition srs-benchmark."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no predictions are made, so nothing is logged or scored" } }
+    },
+    {
+      "id": "path-graphics",
+      "name": "Path and decay graphics",
+      "frame": "graphics",
+      "metric": "Count of distinct live views drawn from computed state (graph, curves, calendar, calibration), whether they are linked, and whether retention can be moved through time; check on the page at 1440 px with the committed goal-60.json and goal-300.json (files in labs/assets/js/pathways/fixtures/) and in the render code.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "The plan appears as text or a static image only.",
+        "One live view: the prerequisite graph drawn as nodes and arrows from data, with each node's state shown.",
+        "Layered layout: nodes placed by topological layer with edge crossings reduced by a layered method (Sugiyama, Tagawa and Toda 1981, IEEE Transactions on Systems, Man, and Cybernetics), and no node overlap on the committed goal-60.json.",
+        "A forgetting-curve chart per item whose plotted recall equals the memory model's predicted recall at every sampled date (a rater compares 3 dates with the values the scheduler prints), with each logged review drawn where the curve resets.",
+        "A review calendar: a heatmap of due items per day for the next 90 days, computed from the schedule.",
+        "Retention on the graph: each node's fill or ring shows its predicted recall for a chosen date.",
+        "Linked views: selecting a skill highlights it on the graph, its curve, its calendar days and its log rows in one interaction.",
+        "A time scrubber: dragging the date from today to 365 days ahead redraws graph retention and the calendar on every input event, with the frame time printed and under 33 ms on the committed goal-60.json.",
+        "The reliability diagram draws each bin's review count (dot area or a histogram beneath it), and clicking a bin highlights that bin's items on the graph and lists them by name.",
+        "The committed goal-300.json renders with no node overlap by collapsing a skill together with every prerequisite whose every path to the goal passes through it; a collapsed node shows the count of hidden skills and their lowest predicted recall, and expands on click with marks moving to their new places (object constancy) in at most 400 ms."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; there is no screenshot because nothing renders" } }
+    },
+    {
+      "id": "mastery-grammar",
+      "name": "Mastery state grammar",
+      "frame": "style",
+      "metric": "Conformance to a visual grammar written for skill states and for forecast against logged marks: count of views violating each rung's rule, checked on every view at 400 px and 1440 px and in the lab's CSS. States, mutually exclusive, with due taking precedence over learning, mastered and decaying: locked (some prerequisite has never been mastered), open (every prerequisite mastered at least once, skill never reviewed), learning (reviewed, never yet mastered), mastered (every item's predicted recall at or above the printed threshold), decaying (was mastered, recall now below the threshold, review date not reached), due (review date reached or passed).",
+      "ladder": [
+        "Absent: no styled page.",
+        "Browser-default or template styling, with no site tokens.",
+        "Site design tokens (near-black ground, ink, amber accent) applied from the shared labs stylesheet.",
+        "Six skill states (locked, open, learning, due, mastered, decaying, as the metric defines them) each have one encoding used identically on every view, with a legend, and 5 nodes a rater checks on goal-60.json each show the state the definitions give.",
+        "Text contrast at least 4.5:1 (WCAG AA) on every state and state marks at least 3:1 against the ground (WCAG 2.1 SC 1.4.11), and no state is told apart by color alone (each also differs in outline, fill pattern or glyph).",
+        "Amber is reserved for what needs action now (due items and the running session); nothing else on the page is amber.",
+        "Recall probabilities in tabular numerals at one precision (whole percent), intervals always with the unit days, and dates in one format across every view.",
+        "Forecast marks (predicted recall) and logged marks (actual recall) have two distinct treatments, for example hollow against filled, used on every chart.",
+        "State changes (a skill becoming mastered, a skill decaying, a skill falling due) animate in at most 400 ms with no blank frame.",
+        "Under deuteranopia and protanopia simulation (Machado, Oliveira and Fernandes 2009, IEEE Transactions on Visualization and Computer Graphics), every pair of the six state colors keeps a CIEDE2000 difference of at least 10, recorded in the repo with the tool and the measured values.",
+        "The grammar is a named spec in the lab's CSS header listing the 6 state encodings and the 2 forecast and logged treatments, with zero violations on every view, the session screen included, at 400 px and 1440 px; and a viewer who has not read the code, given only the legend, names the state of 10 nodes and whether each of 10 chart marks is forecast or logged, all picked at random by the rater, 20 of 20 correct."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no lab stylesheet or markup to inspect" } }
+    },
+    {
+      "id": "practice-session",
+      "name": "Checkable practice session",
+      "frame": "interaction",
+      "metric": "How a review session tests recall rather than trusting a click: count of auto-checked item types, the grading rule, response latency logged in ms, and how items are chosen; run a session on the page and read the grader code.",
+      "ladder": [
+        "Absent: no practice session.",
+        "A list of items to review, with no way to answer them.",
+        "Flashcard session: prompt, reveal, a self-grade on four buttons numbered 1 (Again) to 4 (Easy), and the grade updates the schedule.",
+        "Typed recall: the visitor types the answer before the reveal, and the page compares it with the stored answer after normalizing case, accents and whitespace, showing the difference.",
+        "Response latency is logged per review in ms, and the offered grade is set from correctness and latency by a stated rule, which the visitor can override.",
+        "At least 3 auto-checked item types: typed answer, multiple choice with 3 distractors drawn from answers of skills that share a direct prerequisite with the item's skill, and cloze or ordering.",
+        "Session builder: the visitor sets a time budget in minutes, and the session takes due items lowest predicted recall first, then new items in topological order, with the counts shown before it starts.",
+        "Interleaving: items from at least 2 skills alternate within a session by a stated rule, and the summary prints recall rate per skill.",
+        "Answers are checked by value: numeric answers within a tolerance printed on the item (0.5, 1/2 and 50% all accepted for one half), and algebraic answers by evaluating both expressions at 5 random points (x+1 accepted for 1+x).",
+        "Generated variants: parameterized items produce a fresh instance at each review (new numbers, same skill), checked by a deterministic solver, so recall cannot come from memorizing one card.",
+        "Unbiased retention probes: at least 5% of session items are drawn at random from all learned items whatever their due date, logged as probes and scored separately in the calibration view, so the scheduler's own choices do not bias the measured recall."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no session, item or grading code in the repo" } }
+    },
+    {
+      "id": "plan-control",
+      "name": "Plan editing and time travel",
+      "frame": "interaction",
+      "metric": "What a visitor can change in the plan and ask of it: count of independent controls and what-if queries, and the time in ms from a change to the recomputed schedule as the page prints it; try each control on the page with the committed goal-60.json (files in labs/assets/js/pathways/fixtures/).",
+      "ladder": [
+        "Absent: no controls.",
+        "One button reveals a fixed example plan.",
+        "The visitor types a skill goal and receives a plan: a decomposition and a schedule.",
+        "Graph editing: add, delete and rename skills and drag prerequisite edges, with order and schedule recomputed and the recompute time printed in ms, under 200 ms on the committed goal-60.json.",
+        "A target-retention slider (0.70 to 0.97) whose value enters the memory model's interval rule, each interval set to the day the item's predicted recall R(t) reaches the target (so it needs memory-model rung 5; a rater reads one item's interval at two settings and sees it change), and a daily-minutes budget that caps reviews per day; both recompute the schedule and a 90-day forecast of reviews per day.",
+        "Simulated time: fast-forward 1, 7 or 30 days to see what has decayed and what is due, without writing to the real log.",
+        "Simulated learner: the schedule runs for 180 days against a synthetic learner whose recall follows a stated model with parameters independent of the scheduler's (for example sampled per item from a stated distribution), and total reviews and final retention appear in under 2 s.",
+        "The plan state (graph, parameters, simulated date) is encoded in a shareable URL and restored on load, while the practice log stays local and never enters the URL.",
+        "Two plans side by side: change target retention or the order and compare review workload against retention at day 90 for both.",
+        "Deadline mode: the visitor sets an exam date, and the scheduler chooses reviews within the daily budget to raise predicted recall on that date, printing predicted recall on the exam date for the deadline schedule beside the default schedule, the deadline figure at least as high.",
+        "Workload-retention frontier: the page simulates 365 days for every target retention from 0.70 to 0.97 in steps of 0.01 against the rung-6 synthetic learner, plots reviews per day against expected retention, marks the target with the lowest review time per remembered item (from the logged mean latency), and places the current plan, the deadline plan included, as a point on it. Reference standard: Anki's FSRS simulator."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no controls of any kind" } }
+    },
+    {
+      "id": "practice-log",
+      "name": "Local-first practice log",
+      "frame": "data",
+      "metric": "Where the facts live and come from: storage medium, count of the 6 rung-3 schema fields present per review record, export and import formats, count of starter sets with a source line, and the round-trip schedule diff in items (0 required); read the storage module, inspect storage in DevTools, watch the network panel, round-trip an export, and load the committed fixtures (files in labs/assets/js/pathways/fixtures/).",
+      "ladder": [
+        "Absent: nothing is stored.",
+        "Invented example items with no source, and nothing survives a reload.",
+        "Plan and review log persist across reloads in browser storage; no network request carries a review record (DevTools network panel), the goal text sent in the decomposition call is named on the page before it is sent, and a Load fixture control opens any committed fixture in a sandbox labelled fixture that never writes to the visitor's log.",
+        "Each review is one record: item id, timestamp in ms, grade, latency in ms, the interval and the predicted recall at that moment, with the schema documented in the code.",
+        "Storage in IndexedDB with a schema version and a migration that upgrades an older log without loss, tested against a fixture.",
+        "Export and import as JSON and CSV: a full-log round trip (export, clear, import) gives a schedule diff of 0 items, and a syllabus CSV with documented columns (skill, prerequisite, prompt, answer) imports into a new plan through the graph check, checked with the committed sample-100.csv.",
+        "Every bundled starter goal and item set shows its source and license on the page.",
+        "The log is append-only: edits and deletions are new records, so the schedule at any past date is recomputed from the log, and the page does it on request.",
+        "Import of an Anki review history (the revlog table's columns as CSV, or read from an exported collection with sql.js) maps onto the lab's schema and feeds the model and the calibration view, checked with the committed anki-revlog.csv.",
+        "Anonymized research export: one export drops prompts and answers, hashes item ids with a per-export salt and makes timestamps relative to the first review, and a data card previews it before saving: review count, date range, gaps over 7 days, share of reviews per grade, size in KB.",
+        "Sync between two of the visitor's devices with no server holding plaintext (end-to-end encrypted file or peer-to-peer exchange): a rater logs reviews offline in two browsers, syncs, and both show the union of records by id with no duplicates and identical schedules. Reference standard: local-first software (Kleppmann, Wiggins, van Hardenberg and McGranaghan 2019, Onward!)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no storage module, no fixtures directory and no item or goal data files for this lab" } }
+    },
+    {
+      "id": "decomposition-ai",
+      "name": "Decomposition model contribution",
+      "frame": "intelligence",
+      "metric": "What the model adds against the deterministic engine and how its output is checked: one batched llm.js call, schema validation, repairs, offline fallback, partial-reply recovery, provenance marks, a measured comparison of model and template decompositions, and structure learned from the log; read the decomposition module, run a goal with the model route on and off, and load the committed truncated-reply.json and hidden-prereq-log.json (files in labs/assets/js/pathways/fixtures/).",
+      "ladder": [
+        "Absent: the page does nothing on its own.",
+        "Opens on a precomputed example goal and plan, so it is not empty until clicked.",
+        "One call through labs/assets/js/ai/llm.js turns a typed goal into a skill list, and route-panel.js shows which route answered.",
+        "The one call returns JSON (skills, prerequisite edges, effort minutes, 2 to 3 items per skill) parsed with extractJSON and validated against a schema; output that fails is rejected with the reason shown.",
+        "Deterministic repair after the call: cycles broken, orphan skills attached or flagged, duplicate skills merged, each repair listed to the visitor.",
+        "Offline fallback: when no route answers, a template decomposition from a bundled goal library, labelled as such, lets the full pipeline run.",
+        "Partial-reply recovery inside the one call: a reply that is truncated or missing fields (efforts, items or edges) keeps every valid part, the template engine fills only the missing parts, each filled field is marked template, and no second call is made; checked by feeding the committed truncated-reply.json through the Load fixture control.",
+        "Provenance on every skill, edge and item (model, template or visitor), and visitor edits survive asking the model again.",
+        "Model-written items are checked by a deterministic rule where one exists (arithmetic evaluated, the answer present among the options), and failing items are dropped with the count shown.",
+        "Measured contribution: a committed set of at least 20 goals held out of the template library, each with a reference skill list committed before the scored outputs (git history shows the order), is decomposed by the model and by the template engine (nearest library goal by a text-similarity rule stated in code), and both are scored by one rubric: share of graphs passing the rung-3 schema and acyclicity checks in %, recall of reference skills in % matched through a committed alias table, and edge agreement as F1; the table is on the page.",
+        "Structure learned from the log: when two skills with no path between them, over at least 30 sessions in which both were reviewed, have a joint lapse rate at least twice the product of their separate lapse rates, the engine proposes a missing shared prerequisite, prints the session count and the rates, and asks the model only to name it; on the committed hidden-prereq-log.json it finds the one planted prerequisite and raises no other flag."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; llm.js exists in labs/assets/js/ai/ but no code calls it for this lab" } }
+    },
+    {
+      "id": "spacing-explained",
+      "name": "Spacing and forgetting explanation",
+      "frame": "explanation",
+      "metric": "What a visitor can state after five minutes about forgetting, spacing and their own plan, and whether claims are tagged: count of mechanisms explained with live numbers, count of untagged numbers (0 required from rung 7), references and limits; read the page text and run the walkthrough.",
+      "ladder": [
+        "Absent: no explanation.",
+        "One paragraph says what the lab does.",
+        "The forgetting curve stated in words: recall falls with time since the last review, and each successful review slows the fall.",
+        "The scheduler's update rule shown with the selected item's own numbers substituted (for SM-2: easiness factor, previous interval, next interval).",
+        "Why spacing: the same 10 reviews massed into one day against spread over 30 days, with predicted recall at day 60 for both from the live model.",
+        "A guided walkthrough of at least 4 steps (goal, graph, session, forecast) that works at 400 px width.",
+        "Calibration read out with the visitor's own numbers (for example: predicted 80%, recalled 74%, n = 120) and what the gap means.",
+        "Every displayed number, chart and statement of a result carries a tag, real (computed from the visitor's log, the bundled demo log or a loaded fixture, naming which) or illustrative, and no view shows an untagged number.",
+        "A references section cites Ebbinghaus (1885), Cepeda, Pashler, Vul, Wixted and Rohrer (2006, Psychological Bulletin), Roediger and Karpicke (2006, Psychological Science), Wozniak (1990) and the source of each model in use.",
+        "A limits section names what the model ignores (sleep, interference between similar items, self-grading bias, first-exposure difficulty) and prints the visitor's mean predicted recall minus observed recall in percentage points, with n.",
+        "Every symbol in the displayed formulas is linked: focusing it highlights its live value and its mark on the charts (the reactive-document pattern of Bret Victor's Explorable Explanations, 2011), and the walkthrough's spacing and forgetting simulations, the kind Nicky Case's How To Remember Anything Forever-ish (2018) set as this topic's reference, run on the visitor's own fitted model and log."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the only text is the one-line hub blurb in site.config.js" } }
+    },
+    {
+      "id": "scheduler-budget",
+      "name": "Scheduler budget and reach",
+      "frame": "performance",
+      "metric": "Load time (s), scheduling and fitting time (ms), phone width, reduced motion, keyboard and screen-reader reach, and offline operation; measured with DevTools, Lighthouse and the timings the page prints, on the committed log-10k.json and goal-300.json (files in labs/assets/js/pathways/fixtures/) where a rung names them.",
+      "ladder": [
+        "Absent: nothing loads.",
+        "The page loads; nothing is timed.",
+        "First render of the example plan in under 3 s on desktop (DevTools performance trace).",
+        "Scheduling 10,000 items with the slowest memory model in use (current recall and next interval for each) completes in under 50 ms on desktop, with the time printed.",
+        "Works at 400 px width with no horizontal scroll, and session buttons are at least 44 px tall.",
+        "prefers-reduced-motion turns off every animation, curve and graph transitions included.",
+        "A full session runs by keyboard alone (reveal, grade with keys 1 to 4, next) with a visible focus ring, and every control is reachable by Tab.",
+        "The graph and every chart have a text or table alternative for screen readers, and answer feedback is announced through an aria-live region.",
+        "Works offline after the first load (service worker or cached assets): sessions and logging run with the network disabled, and a goal decomposed before is cached on the device keyed by its normalized text, so entering it again sends no request (DevTools network panel), the plan is labelled cached, and only a Regenerate control spends a new call.",
+        "Fitting the memory model on the committed log-10k.json finishes in under 10 s in a Web Worker with a progress indicator and no main-thread task over 200 ms.",
+        "Lighthouse mobile performance and accessibility both at least 95, and graph and curve transitions on the committed goal-300.json hold frame time under 16 ms under DevTools 4x CPU throttling at 412 px width."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing to load or time" } }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Pathway engine architecture",
+      "frame": "architecture",
+      "metric": "Code shape: module boundaries, the scheduler interface, the storage adapter, tests against reference values and committed fixtures (labs/assets/js/pathways/fixtures/), and what can be added without touching the core; read the file tree, run node --test, and diff a scheduler or item-type addition.",
+      "ladder": [
+        "Absent: no code.",
+        "One inline script in the page.",
+        "Logic in its own files under labs/assets/js/pathways/.",
+        "Graph, scheduler, memory model and scoring are pure ES modules with no DOM access.",
+        "Storage sits behind one adapter (load, append, export) with an IndexedDB and an in-memory implementation, the latter used by tests.",
+        "A node test checks SM-2 against a hand-computed interval table and the graph code against the committed cycle-goal.json (one 3-skill cycle, one redundant edge), and passes.",
+        "Every scheduler implements one interface (predict(state, date) returning recall probability; update(state, review) returning the new state and interval), so SM-2 and the FSRS-family model share the session, calibration and simulation code.",
+        "Adding a scheduler is one file plus one registry entry with no edit to session, calibration or graph code (a rater checks with a diff).",
+        "Determinism: simulations and generated item variants use a seeded RNG with the seed in the URL, and node tools/pathways-replay.mjs on an exported log prints the same schedule the page shows (empty diff).",
+        "Engine modules reach at least 80% line coverage under node --test with coverage enabled.",
+        "An item-type plug-in added as one file plus one registry entry appears in the session builder, the grader and the calibration table with no other edit, proven by a committed example plug-in and documented in the lab's README."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no directory labs/assets/js/pathways/, no fixtures and no engine module" } }
+    }
+  ],
+  "history": [ { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" } ]
+}
