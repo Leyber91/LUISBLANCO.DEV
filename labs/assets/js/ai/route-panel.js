@@ -27,7 +27,7 @@ const CSS = `
   box-shadow:0 18px 40px -16px rgba(0,0,0,.8);text-transform:none;letter-spacing:.02em;line-height:1.5}
 .lbr-panel h4{margin:0 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-bright,#EAF0FB)}
 .lbr-panel p{margin:0 0 10px;font-size:11px;color:var(--text-dim,#79828F)}
-.lbr-panel label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim,#79828F);margin:8px 0 4px}
+.lbr-panel label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim,#79828F);margin:8px 0 4px}
 .lbr-panel input{width:100%;box-sizing:border-box;padding:7px 9px;background:var(--surface-3,#18202B);border:1px solid var(--line,#1C232F);
   border-radius:4px;color:var(--text-bright,#EAF0FB);font:12px var(--font-mono,'IBM Plex Mono',monospace)}
 .lbr-row{display:flex;gap:8px;margin-top:12px}

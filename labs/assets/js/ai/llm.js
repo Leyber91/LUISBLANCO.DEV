@@ -229,7 +229,10 @@ class Route {
     const j = await r.json();
     const text = j.message?.content || '';
     if (!text.trim()) throw new Error('empty reply');
-    return { text, model: this._ollamaModel, reasoning: j.message?.thinking || '' };
+    const usage = j.eval_count != null
+      ? { prompt_tokens: j.prompt_eval_count ?? null, completion_tokens: j.eval_count, eval_duration_ns: j.eval_duration ?? null }
+      : null;
+    return { text, model: this._ollamaModel, reasoning: j.message?.thinking || '', usage };
   }
 
   /* OpenAI-compatible chat/completions: the visitor's key, or a worker. */
