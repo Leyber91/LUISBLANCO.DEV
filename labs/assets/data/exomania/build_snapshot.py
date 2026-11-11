@@ -19,8 +19,15 @@ QUERY (spaces as +):
   pl_bmasse,pl_bmasseerr1,pl_bmasseerr2,pl_bmasselim,pl_bmassprov,pl_insol,pl_eqt,
   pl_orbincl,pl_imppar,pl_trandep,pl_trandur,st_teff,st_tefferr1,st_tefferr2,st_rad,
   st_raderr1,st_raderr2,st_mass,st_lum,ra,dec,tran_flag,sy_pnum,pl_rade_reflink,
-  pl_bmasse_reflink,pl_orbper_reflink,st_rad_reflink,disc_refname
+  pl_bmasse_reflink,pl_orbper_reflink,st_rad_reflink,disc_refname,
+  pl_radelim,pl_orbperlim,pl_orbsmaxlim,pl_orbeccenlim,pl_insollim,pl_eqtlim,
+  pl_impparlim,pl_trandeplim,pl_trandurlim,st_tefflim,st_radlim,st_masslim,st_lumlim
   from pscomppars
+
+Limit flags: the archive marks a value that is only a bound with <col>lim = 1 (upper
+limit, the true value is below it) or -1 (lower limit). pl_bmasselim keeps its own
+column; every other flag that is set goes into the 'lim' column as 'col:flag' pairs
+joined by ';' (null when none), so the page can treat a bound as a bound.
 
 Data: NASA Exoplanet Archive, operated by the California Institute of Technology
 under contract with NASA under the Exoplanet Exploration Program. The archive asks
@@ -33,7 +40,21 @@ COLS = ['pl_name', 'host', 'method', 'year', 'facility', 'sy_dist', 'pl_orbper',
         'pl_orbeccen', 'pl_rade', 'pl_radeerr1', 'pl_radeerr2', 'pl_bmasse', 'pl_bmasseerr1',
         'pl_bmasseerr2', 'pl_bmasselim', 'massprov', 'pl_insol', 'pl_eqt', 'pl_imppar',
         'pl_trandep', 'pl_trandur', 'st_teff', 'st_rad', 'st_mass', 'st_lum', 'ra', 'dec',
-        'pl_orbsmaxerr', 'st_tefferr', 'st_raderr', 'ref_r', 'ref_m', 'ref_p', 'ref_star', 'ref_disc']
+        'pl_orbsmaxerr', 'st_tefferr', 'st_raderr', 'ref_r', 'ref_m', 'ref_p', 'ref_star', 'ref_disc', 'lim']
+
+# the value columns whose archive limit flag goes into 'lim' (pl_bmasselim has its own column)
+LIM_COLS = ['pl_rade', 'pl_orbper', 'pl_orbsmax', 'pl_orbeccen', 'pl_insol', 'pl_eqt', 'pl_imppar',
+            'pl_trandep', 'pl_trandur', 'st_teff', 'st_rad', 'st_mass', 'st_lum']
+
+def lims(r):
+    # archive limit flags other than mass: 'pl_orbeccen:1;pl_rade:-1', or None
+    out = []
+    for c in LIM_COLS:
+        f = r.get(c + 'lim')
+        if f and r.get(c) is not None:
+            out.append(f'{c}:{int(f)}')
+    return ';'.join(out) or None
+
 
 REF_RE = re.compile(r'href=(\S+)[^>]*>\s*(.*?)\s*</a>', re.S)
 
@@ -104,7 +125,7 @@ def main(src, dst, date):
             symerr(r.get('pl_orbsmaxerr1'), r.get('pl_orbsmaxerr2')), symerr(r.get('st_tefferr1'), r.get('st_tefferr2')),
             symerr(r.get('st_raderr1'), r.get('st_raderr2')),
             ref(r.get('pl_rade_reflink')), ref(r.get('pl_bmasse_reflink')), ref(r.get('pl_orbper_reflink')),
-            ref(r.get('st_rad_reflink')), ref(r.get('disc_refname')),
+            ref(r.get('st_rad_reflink')), ref(r.get('disc_refname')), lims(r),
         ])
     out = {
         'meta': {

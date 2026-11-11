@@ -118,6 +118,15 @@ export const SOLAR = [
 ];
 // R, M, a: the sheet's ratio table. P in days: the sheet's main table. S = 1 / a^2.
 
+/* Archive limit flags (PSCompPars <col>lim = 1 upper, -1 lower): the fields catalog.js
+   moves into p.lim, with the name and unit the page writes for each bound. */
+export const LIMIT_FIELDS = {
+  M: ['mass', ' M⊕'], R: ['radius', ' R⊕'], P: ['period', ' d'], a: ['orbit', ' AU'], ecc: ['eccentricity', ''],
+  S: ['insolation', ' S⊕'], Teq: ['published Teq', ' K'], b: ['impact parameter', ''], depth: ['transit depth', '%'],
+  dur: ['transit duration', ' h'], Teff: ['star Teff', ' K'], Rs: ['star radius', ' R☉'], Ms: ['star mass', ' M☉'],
+  logL: ['star log L', ''],
+};
+
 /* Size classes used for filtering and labels. Radius bounds in R_earth. */
 export const SIZE_CLASSES = [
   { key: 'rocky', label: 'Earth-size', max: 1.5 },

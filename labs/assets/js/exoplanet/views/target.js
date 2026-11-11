@@ -7,10 +7,10 @@
    ============================================================ */
 
 import {
-  forecastFor, massFromRadiusMean, hasTrueMass, sizeClass, hzPosition, insolation,
+  forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, limitOf, limitKind, limitText, hzPosition, insolation,
   semiMajor, luminosity, starColour, spectralType, skyView, earthLikeness, monteCarlo, isNum,
 } from '../science.js';
-import { TEQ, PHYS, VALLEY, MC } from '../config.js';
+import { TEQ, PHYS, VALLEY, MC, LIMIT_FIELDS } from '../config.js';
 import { tokens, alpha, fmt, fmtInt, esc } from './common.js';
 
 const TAG = { M: 'measured', D: 'derived by formula', E: 'estimated', I: 'illustrative' };
@@ -22,6 +22,11 @@ const pm = (v, e1, e2, d = 3) => {
   if (isNum(e1) && isNum(e2) && Math.abs(Math.abs(e1) - Math.abs(e2)) / Math.max(Math.abs(e1), 1e-9) < 0.15) return `${fmt(v, d)} <i>±${fmt(Math.abs(e1), 2)}</i>`;
   if (isNum(e1) && isNum(e2)) return `${fmt(v, d)} <i>+${fmt(Math.abs(e1), 2)} −${fmt(Math.abs(e2), 2)}</i>`;
   return fmt(v, d);
+};
+/* an archive bound, written as a bound: "< 6.2 M⊕ upper limit" */
+const boundTxt = (p, k, d = 3) => {
+  const L = limitOf(p, k); if (!L) return '';
+  return `${esc(limitText(L, d))}${LIMIT_FIELDS[k][1]} <i>${limitKind(L)}</i>`;
 };
 const band = (s, d = 2, unit = '') => (s ? `${fmt(s.med, d)}${unit} <i>68%: ${fmt(s.lo, d)}-${fmt(s.hi, d)}</i>` : '—');
 
@@ -62,9 +67,8 @@ export function createTarget(host, store, actions) {
     const L = luminosity(p), a = semiMajor(p), S = insolation(p);
     const rf = p.refs || {};
     let mass, mt = 'M';
-    if (!isNum(p.M)) mass = '<span class="dim">not measured</span>';
-    else if (p.Mlim === 1) mass = `&lt; ${fmt(p.M, 3)} M⊕ <i>upper limit</i>`;
-    else if (p.Mlim === -1) mass = `&gt; ${fmt(p.M, 3)} M⊕ <i>lower limit</i>`;
+    if (limitOf(p, 'M')) mass = boundTxt(p, 'M');
+    else if (!isNum(p.M)) mass = '<span class="dim">not measured</span>';
     else if (p.Mprov === 'M-R relationship') { mass = `${fmt(p.M, 3)} M⊕ <i>archive estimate from radius</i>`; mt = 'E'; }
     else if (p.Mprov === 'Msini') mass = `${pm(p.M, p.Merr1, p.Merr2)} M⊕ <i>minimum</i>`;
     else mass = `${pm(p.M, p.Merr1, p.Merr2)} M⊕`;
@@ -78,12 +82,16 @@ export function createTarget(host, store, actions) {
     }
     const srcs = [...by.values()].map(({ r, what }) => `${what.join(', ')}: ${ref(r)}`).join(' · ');
     $('meas').innerHTML = [
-      row(p.measuredR === false ? 'E' : 'M', 'Radius', `${pm(p.R, p.Rerr1, p.Rerr2)} R⊕`, p.measuredR === false ? 'archive estimate from mass' : ''),
-      row(mt, 'Mass', mass),
-      row('M', 'Period', isNum(p.P) ? `${fmt(p.P, 4)} d` : '—'),
-      row(a.src === 'archive' ? 'M' : 'D', 'Orbit', a.a ? `${fmt(a.a, 3)} AU${isNum(p.ecc) ? ` · e ${fmt(p.ecc, 2)}` : ' · e unknown'}` : '—', a.src === "Kepler's third law" ? 'from P and the star\'s mass' : ''),
-      row(S.src === 'archive' ? 'M' : 'D', 'Insolation', S.S ? `${fmt(S.S, 3)} S⊕` : '—', S.src === 'L / a^2' ? 'from L / a²' : ''),
-      row(isNum(p.Rs) ? 'M' : 'E', 'Star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : '—'} · ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'} · ${L.L ? fmt(L.L, 3) + ' L☉' : '—'}`, starFlag),
+      hasRadius(p)
+        ? row(p.measuredR === false ? 'E' : 'M', 'Radius', `${pm(p.R, p.Rerr1, p.Rerr2)} R⊕`, p.measuredR === false ? 'archive estimate from mass' : '')
+        : row('M', 'Radius', limitOf(p, 'R') ? boundTxt(p, 'R') : '<span class="dim">no radius measured</span>', limitOf(p, 'R') ? 'a bound, not a measurement' : ''),
+      row(mt, 'Mass', mass, limitOf(p, 'M') ? 'a bound, not a measurement' : ''),
+      row('M', 'Period', isNum(p.P) ? `${fmt(p.P, 4)} d` : limitOf(p, 'P') ? boundTxt(p, 'P', 4) : '—'),
+      row(a.src === 'archive' ? 'M' : 'D', 'Orbit', `${a.a ? fmt(a.a, 3) + ' AU' : limitOf(p, 'a') ? boundTxt(p, 'a') : '—'}${isNum(p.ecc) ? ` · e ${fmt(p.ecc, 2)}` : limitOf(p, 'ecc') ? ` · e ${boundTxt(p, 'ecc', 2)}` : ' · e unknown'}`,
+        a.src === "Kepler's third law" ? 'from P and the star\'s mass' : limitOf(p, 'ecc') ? 'e is a bound: orbits drawn circular' : ''),
+      row(S.src === 'archive' ? 'M' : 'D', 'Insolation', S.S ? `${fmt(S.S, 3)} S⊕` : limitOf(p, 'S') ? boundTxt(p, 'S') : '—', S.src === 'L / a^2' ? 'from L / a²' : ''),
+      row(isNum(p.Rs) ? 'M' : 'E', 'Star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : limitOf(p, 'Teff') ? boundTxt(p, 'Teff', 4) : '—'} · ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'} · ${L.L ? fmt(L.L, 3) + ' L☉' : '—'}`, starFlag),
+      ...['Teq', 'b', 'depth', 'dur'].filter((k) => limitOf(p, k)).map((k) => row('M', { Teq: 'Teq', b: 'Impact b', depth: 'Depth', dur: 'Duration' }[k], boundTxt(p, k), 'archive bound, not used as a value')),
     ].join('') + (srcs ? `<p class="tp-srcs">Sources: ${srcs}</p>` : '');
   }
 
@@ -97,14 +105,23 @@ export function createTarget(host, store, actions) {
       const det = massFromRadiusMean(p.R);
       let cmp = '';
       if (p.Mprov === 'M-R relationship' && isNum(p.M) && det) cmp = ` · archive ${fmt(p.M, 3)}, engine mean ${fmt(det, 3)}`;
-      if (fc.bounded) cmp += ` · capped by the ${fmt(p.M, 3)} M⊕ limit`;
+      if (fc.bounded) cmp += ` · cut at the ${fmt(fc.bound, 3)} M⊕ ${fc.bounded} limit`;
       out.push(row('E', 'Mass model', `${fmt(fc.median, 2)} M⊕ <i>68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}</i>`, `${fc.regime} · Chen &amp; Kipping 2017${cmp}`));
     }
-    out.push(row(fc ? 'E' : 'D', 'Gravity', band(mc.g, 2, ' g'), fc ? 'from the forecast mass' : 'from the measured mass and radius'));
-    if (mc.rho && !fc) out.push(row('D', 'Density', band(mc.rho, 2, ' g/cm³'), 'Earth 5.51'));
-    const probs = mc.probs.slice().sort((x, y) => y.p - x.p).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(' · ');
-    const valley = p.R < VALLEY.lo ? 'below the radius valley' : p.R <= VALLEY.hi ? 'inside the radius valley' : 'above the radius valley';
-    out.push(row('D', 'Size class', `${sizeClass(p.R).label}`, `${probs} · ${valley}`));
+    if (mc.hasR) {
+      out.push(row(fc ? 'E' : 'D', 'Gravity', band(mc.g, 2, ' g'), fc ? 'from the forecast mass' : 'from the measured mass and radius'));
+      if (mc.rho && !fc) out.push(row('D', 'Density', band(mc.rho, 2, ' g/cm³'), 'Earth 5.51'));
+      const probs = mc.probs.slice().sort((x, y) => y.p - x.p).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(' · ');
+      const valley = p.R < VALLEY.lo ? 'below the radius valley' : p.R <= VALLEY.hi ? 'inside the radius valley' : 'above the radius valley';
+      out.push(row('D', 'Size class', `${sizeClassOf(p).label}`, `${probs} · ${valley}`));
+    } else {
+      // no radius: nothing that needs one is computed from a missing value
+      const c = sizeClassOf(p), ML = limitOf(p, 'M');
+      out.push(row('D', 'Size class', c ? c.label : '<span class="dim">no radius measured</span>',
+        c ? 'every radius the archive bound allows is in this class' : 'so no size class, gravity, density or scale height'));
+      if (c) out.push(row('D', 'Gravity', '<span class="dim">—</span>', 'needs a radius value; a bound gives none'));
+      if (ML && !fc) out.push(row('E', 'Mass model', '<span class="dim">none</span>', `the mass is only a${ML.dir > 0 ? 'n' : ''} ${limitKind(ML)}, and there is no radius to forecast from`));
+    }
     out.push(row('D', 'Teq', mc.teq ? `<span id="teq-out">${band(mc.teq, 3, ' K')}</span>` : '—', `albedo ${A.toFixed(2)} (slider), full redistribution${isNum(p.Teq) ? ` · published ${fmtInt(p.Teq)} K` : ''}`));
     if (mc.H) out.push(row('E', 'Scale ht', band(mc.H, 2, ' km'), `assumes μ ${p.R > 1.8 ? MC.muEnvelope + ' (hydrogen envelope)' : MC.muSecondary + ' (N₂-like air)'}`));
     const hz = hzPosition(p);

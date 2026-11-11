@@ -19,6 +19,7 @@ export function plotValue(p, key) {
   if (key === 'S') return insolation(p).S;
   if (key === 'R') return p.R;
   if (key === 'P') return p.P;
+  // a mass limit is a bound, not a point (catalog.js already moved it out of p.M)
   if (key === 'M') return isNum(p.M) && !p.Mlim && p.Mprov !== 'M-R relationship' ? p.M : null;
   return null;
 }
@@ -197,9 +198,14 @@ export function createPlot(host, store, actions) {
         ctx.strokeStyle = alpha(T.gold, 0.8); ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = T.goldSoft; ctx.font = T.font; ctx.textAlign = x > (box.x0 + box.x1) / 2 ? 'right' : 'left';
         ctx.fillText(sel.name, x + (ctx.textAlign === 'right' ? -12 : 12), y - 9);
-      } else if (mode === 'mr') {
-        ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'right';
-        ctx.fillText(sel.name + ': no measured mass', box.x1 - 6, box.y1 + 14);
+      } else if (mode === 'mr' || !isNum(sel.R)) {
+        // the selection is not a point here: say why, with the archive bound when there is one
+        const lim = sel.lim || {};
+        const why = !isNum(sel.R) ? (lim.R ? `radius ${lim.R.dir > 0 ? '<' : '>'} ${fmt(lim.R.v)} R⊕ is a bound, not plotted` : 'no radius, not plotted')
+          : lim.M ? `mass ${lim.M.dir > 0 ? '<' : '>'} ${fmt(lim.M.v)} M⊕ is a bound, not plotted` : 'no measured mass';
+        // bottom left, clear of the colour selector in the top right corner
+        ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'left';
+        ctx.fillText(`${sel.name}: ${why}`, box.x0 + 6, box.y0 - 6);
       }
     }
     // a brushed box from this diagram
@@ -411,7 +417,8 @@ export function createPlot(host, store, actions) {
     } else if (mode === 'rp') {
       t = '[REAL] A transit is seen with probability about R★/a, so close orbits dominate. [ILLUSTRATIVE] Dashed: what Kepler could detect around a Sun-like star (30 ppm, 4 yr, SNR 7.1, 3 transits); dotted: a 1 m/s velocity floor. Drag a box to filter.';
     } else if (mode === 'mr') {
-      t = '[REAL] Measured masses only (hollow: minimum mass). Below the rock line a world needs iron; above the water line, a gas envelope.';
+      const nLim = st.list.filter((p) => p.lim && p.lim.M).length;
+      t = `[REAL] Measured masses only (hollow: minimum mass); the ${fmtInt(nLim)} masses the archive gives only as limits are bounds, not points, and are left off. Below the rock line a world needs iron; above the water line, a gas envelope.`;
     } else if (mode === 'time') {
       const c2014 = extra.counts.get(2014), c2016 = extra.counts.get(2016);
       const s = (c) => c ? Object.values(c).reduce((a, b) => a + b, 0) : 0;

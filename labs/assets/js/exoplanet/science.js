@@ -93,9 +93,10 @@ export function massFromRadiusMean(R) {
 }
 
 /* Probabilistic inversion: posterior over log M given a radius (and its error), with
-   a log-uniform prior on mass. A catalogue upper limit on mass truncates the posterior:
-   a limit is a bound, never a value. Returns median and 16-84 % interval. */
-export function forecastMass(R, Rerr, maxM = null) {
+   a log-uniform prior on mass. A catalogue limit on mass is a censoring bound: an upper
+   limit truncates the posterior above it, a lower limit below it. A limit is a bound,
+   never a value. Returns median and 16-84 % interval. */
+export function forecastMass(R, Rerr, maxM = null, minM = null) {
   if (!isNum(R) || R <= 0) return null;
   const [lo, hi] = CHEN_KIPPING.logMRange;
   const N = 420;
@@ -108,7 +109,8 @@ export function forecastMass(R, Rerr, maxM = null) {
     const s = segmentFor(lm);
     const sig2 = s.sigma * s.sigma + sObs * sObs;
     const dz = lr - (s.C + s.S * lm);
-    w[i] = isNum(maxM) && lm > Math.log10(maxM) ? 0 : Math.exp(-0.5 * dz * dz / sig2) / Math.sqrt(sig2);
+    const cut = (isNum(maxM) && lm > Math.log10(maxM)) || (isNum(minM) && lm < Math.log10(minM));
+    w[i] = cut ? 0 : Math.exp(-0.5 * dz * dz / sig2) / Math.sqrt(sig2);
     tot += w[i];
   }
   if (!(tot > 0)) return null;
@@ -119,12 +121,24 @@ export function forecastMass(R, Rerr, maxM = null) {
   };
   const med = q(0.5);
   const seg = segmentFor(Math.log10(med));
-  return { median: med, lo: q(0.16), hi: q(0.84), regime: seg.name, pdf: w, tot, range: [lo, hi], bounded: isNum(maxM) };
+  const bounded = isNum(maxM) ? 'upper' : isNum(minM) ? 'lower' : null;
+  return { median: med, lo: q(0.16), hi: q(0.84), regime: seg.name, pdf: w, tot, range: [lo, hi], bounded, bound: bounded === 'upper' ? maxM : bounded === 'lower' ? minM : null };
 }
 
-/* the forecast for this record: bounded by an upper limit when the catalogue gives one */
-export function forecastFor(p) { return forecastMass(p.R, p.Rerr, p.Mlim === 1 && isNum(p.M) ? p.M : null); }
-export const hasTrueMass = (p) => isNum(p.M) && !p.Mlim && (p.Mprov === 'Mass' || p.Mprov === 'Msini' || p.Mprov === 'Msin(i)/sin(i)');
+/* An archive limit on a value: { v, dir }, dir 1 an upper limit (the value is below v),
+   -1 a lower limit. catalog.js moves every flagged value here and leaves the field null. */
+export const limitOf = (p, k) => (p && p.lim && p.lim[k]) || null;
+export const limitKind = (L) => (L ? (L.dir > 0 ? 'upper limit' : 'lower limit') : '');
+const fmtBound = (v, d) => (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString('en-US') : String(+(+v).toPrecision(d)));
+export const limitText = (L, d = 3) => (L ? `${L.dir > 0 ? '<' : '>'} ${fmtBound(L.v, d)}` : '');
+
+/* the forecast for this record, censored by the archive's mass limit when it gives one */
+export function forecastFor(p) {
+  const L = limitOf(p, 'M');
+  return forecastMass(p.R, p.Rerr, L && L.dir > 0 ? L.v : null, L && L.dir < 0 ? L.v : null);
+}
+export const hasTrueMass = (p) => isNum(p.M) && !p.Mlim && !limitOf(p, 'M') && (p.Mprov === 'Mass' || p.Mprov === 'Msini' || p.Mprov === 'Msin(i)/sin(i)');
+export const hasRadius = (p) => isNum(p.R) && p.R > 0;
 
 /* ---------- composition curves (Seager et al. 2007) ---------- */
 export function seagerRadius(M, mat) {
@@ -140,7 +154,7 @@ export function rvSemiAmplitude(p) {
   if (!isNum(M) || !isNum(p.P) || !isNum(p.Ms)) return null;
   const e = isNum(p.ecc) ? Math.min(p.ecc, 0.95) : 0;
   const K = RV.k0 / Math.sqrt(1 - e * e) * (M / RV.mJupEarth) * Math.pow(p.Ms + M / RV.mSunEarth, -2 / 3) * Math.pow(p.P / 365.25, -1 / 3);
-  return { K, e, massSrc: hasTrueMass(p) ? (p.Mprov === 'Mass' ? 'measured' : 'minimum') : 'forecast', M };
+  return { K, e, massSrc: hasTrueMass(p) ? (p.Mprov === 'Mass' ? 'measured' : 'minimum') : 'forecast', M, bounded: fc ? fc.bounded : null, eLimit: limitOf(p, 'ecc') };
 }
 /* velocity over one orbit; argument of periastron 90 deg when unknown (stated) */
 export function rvCurve(p, n = 160) {
@@ -168,35 +182,43 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
   const rand = rng(p.name);
   const gauss = () => { const u = Math.max(1e-12, rand()), v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
   const draw = (v, e) => (isNum(v) ? (isNum(e) && e > 0 ? v + e * gauss() : v) : null);
-  const fc = hasTrueMass(p) ? null : forecastFor(p);
+  // A mass enters only as a measurement or as the forecast posterior, which a mass limit
+  // censors. A limit alone is never drawn as a value. With no radius there is no forecast,
+  // so no mass draw, and nothing that needs a radius: gravity, density, scale height, class.
+  const trueM = hasTrueMass(p), hasR = hasRadius(p);
+  const fc = trueM ? null : forecastFor(p);
   // inverse-CDF sampler on the forecast posterior grid
   let cdf = null;
   if (fc) { cdf = new Float64Array(fc.pdf.length); let acc = 0; for (let i = 0; i < fc.pdf.length; i++) { acc += fc.pdf[i] / fc.tot; cdf[i] = acc; } }
   const sampleM = () => {
-    if (!fc) { const e = isNum(p.Merr1) && isNum(p.Merr2) ? (Math.abs(p.Merr1) + Math.abs(p.Merr2)) / 2 : null; return Math.max(1e-3, draw(p.M, e)); }
+    if (trueM) { const e = isNum(p.Merr1) && isNum(p.Merr2) ? (Math.abs(p.Merr1) + Math.abs(p.Merr2)) / 2 : null; return Math.max(1e-3, draw(p.M, e)); }
+    if (!fc) return null;
     const u = rand(); let i = 0; while (i < cdf.length - 1 && cdf[i] < u) i++;
     return Math.pow(10, fc.range[0] + (fc.range[1] - fc.range[0]) * (i + rand()) / cdf.length);
   };
   const { a } = semiMajor(p);
   const N = MC.draws, g = [], teq = [], rho = [], H = [], cls = new Map();
   for (let k = 0; k < N; k++) {
-    const R = Math.max(0.05, draw(p.R, p.Rerr));
-    const M = sampleM();
-    const gg = M / (R * R);
-    g.push(gg); rho.push(5.514 * M / (R * R * R));
-    const c = sizeClass(R); cls.set(c.key, (cls.get(c.key) || 0) + 1);
+    const R = hasR ? Math.max(0.05, draw(p.R, p.Rerr)) : null;
+    const M = hasR ? sampleM() : null;
+    const gg = isNum(R) && isNum(M) ? M / (R * R) : null;
+    if (isNum(gg)) { g.push(gg); rho.push(5.514 * M / (R * R * R)); }
+    if (isNum(R)) { const c = sizeClass(R); cls.set(c.key, (cls.get(c.key) || 0) + 1); }
     const Teff = draw(p.Teff, p.TeffErr), Rs = draw(p.Rs, p.RsErr), aa = draw(a, p.aErr);
     let T = null;
     if (isNum(Teff) && isNum(Rs) && Rs > 0 && isNum(aa) && aa > 0) T = Teff * Math.sqrt(Rs * PHYS.R_SUN_KM / PHYS.AU_KM / (2 * aa)) * Math.pow(1 - albedo, 0.25);
     if (T) {
       teq.push(T);
-      const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;
-      H.push(1.380649e-23 * T / (mu * 1.6726e-27 * 9.80665 * gg) / 1000);   // km
+      if (isNum(gg)) {
+        const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;
+        H.push(1.380649e-23 * T / (mu * 1.6726e-27 * 9.80665 * gg) / 1000);   // km
+      }
     }
   }
   const stat = (arr) => { if (!arr.length) return null; const s = arr.slice().sort((x, y) => x - y); const q = (f) => s[Math.min(s.length - 1, Math.floor(f * s.length))]; return { med: q(0.5), lo: q(0.16), hi: q(0.84) }; };
   const probs = SIZE_CLASSES.map((c) => ({ key: c.key, label: c.label, p: (cls.get(c.key) || 0) / N })).filter((c) => c.p > 0);
-  const out = { n: N, g: stat(g), teq: stat(teq), rho: stat(rho), H: stat(H), probs, massFrom: fc ? 'forecast' : 'measured' };
+  const out = { n: N, g: stat(g), teq: stat(teq), rho: stat(rho), H: stat(H), probs, hasR,
+    massFrom: !hasR ? 'none' : trueM ? 'measured' : fc ? 'forecast' : 'none', bounded: fc ? fc.bounded : null };
   mcCache.set(key, out);
   return out;
 }
@@ -252,9 +274,22 @@ export function density(R, M) {
   return 5.514 * M / (R * R * R);
 }
 
+/* The size class of a radius; null when there is no radius: a missing value has no class. */
 export function sizeClass(R) {
-  if (!isNum(R)) return SIZE_CLASSES[SIZE_CLASSES.length - 1];
+  if (!isNum(R) || R <= 0) return null;
   return SIZE_CLASSES.find((c) => R < c.max) || SIZE_CLASSES[SIZE_CLASSES.length - 1];
+}
+/* The class of a world: from its radius; with only a radius limit, the class every radius
+   the bound allows falls in (a lower limit at or above 8 R_earth is a giant, an upper limit
+   below 1.5 is Earth-size), flagged fromLimit; otherwise null. */
+export function sizeClassOf(p) {
+  if (hasRadius(p)) return { ...sizeClass(p.R), fromLimit: false };
+  const L = limitOf(p, 'R');
+  const c = L ? sizeClass(L.v) : null;
+  if (!c) return null;
+  if (L.dir < 0 && c.max === Infinity) return { ...c, fromLimit: true };
+  if (L.dir > 0 && c.key === SIZE_CLASSES[0].key) return { ...c, fromLimit: true };
+  return null;
 }
 
 /* ---------- equilibrium temperature ---------- */
@@ -279,7 +314,9 @@ export function transitGeometry(p) {
   const k = p.R * PHYS.R_EARTH_KM / (p.Rs * PHYS.R_SUN_KM);
   const aRs = a * PHYS.AU_KM / (p.Rs * PHYS.R_SUN_KM);
   const bMeasured = isNum(p.b);
-  const b = bMeasured ? clamp(p.b, 0, 1 + k - 1e-4) : 0;
+  // with only a limit on b, assume the value nearest 0 the bound allows (the page says so)
+  const bLimit = limitOf(p, 'b');
+  const b = bMeasured ? clamp(p.b, 0, 1 + k - 1e-4) : bLimit && bLimit.dir < 0 ? clamp(bLimit.v, 0, 1 + k - 1e-4) : 0;
   const sinI = Math.sqrt(Math.max(1e-9, 1 - Math.pow(b / aRs, 2)));
   const arg = Math.sqrt(Math.max(0, (1 + k) * (1 + k) - b * b)) / (aRs * sinI);
   const T14 = arg >= 1 ? p.P * 24 / 2 : (p.P * 24 / Math.PI) * Math.asin(arg);   // hours
@@ -289,7 +326,7 @@ export function transitGeometry(p) {
   const mu = Math.sqrt(Math.max(0, 1 - b * b));
   const depthLD = k * k * (1 - u1 * (1 - mu) - u2 * (1 - mu) * (1 - mu)) / norm;
   const geomProb = (1 + k) / aRs;   // probability that a random orientation transits
-  return { k, aRs, b, bMeasured, T14, depthUniform, depthLD, geomProb, transits: p.method === 'Transit' || isNum(p.depth) };
+  return { k, aRs, b, bMeasured, bLimit, T14, depthUniform, depthLD, geomProb, transits: p.method === 'Transit' || isNum(p.depth) || !!limitOf(p, 'depth') };
 }
 
 /* Limb-darkened intensity normalised so the disc integrates to 1. */

@@ -61,5 +61,48 @@ for (const p of list) {
 }
 yes(`no non-finite derived value across ${list.length} planets`, bad === 0);
 
+// ---- a missing radius has no size class, gravity or density (defect fixed 2026-11-11) ----
+yes('sizeClass of a missing radius is null, not Giant', S.sizeClass(null) === null && S.sizeClass(undefined) === null && S.sizeClass(0) === null);
+yes('sizeClass of 1.0 R_earth is Earth-size', S.sizeClass(1.0).key === 'rocky');
+const byName = new Map(list.map((p) => [p.name, p]));
+const bd = byName.get('BD+05 4868 A b');
+const bdMc = S.monteCarlo(bd, 0.3);
+yes('BD+05 4868 A b: no radius, so no gravity, density, scale height or size class',
+  bd.R === null && bdMc.g === null && bdMc.rho === null && bdMc.H === null && bdMc.probs.length === 0 && S.sizeClassOf(bd) === null);
+yes('BD+05 4868 A b: its upper-limit mass is a bound, never a value', bd.M === null && bd.lim.M.v === 6.2 && bd.lim.M.dir === 1 && bdMc.massFrom === 'none');
+yes('BD+05 4868 A b: Teq still computed (needs no radius)', bdMc.teq !== null && bdMc.teq.med > 1000);
+const radiusless = list.filter((p) => !S.hasRadius(p));
+const leaks = radiusless.filter((p) => { const m = S.monteCarlo(p, 0.3); return m.g || m.rho || m.H || m.probs.length || S.forecastFor(p); });
+yes(`none of the ${radiusless.length} radius-less worlds gets a gravity, density, class or mass forecast (${leaks.map((p) => p.name).join(', ') || 'none'})`, radiusless.length >= 50 && leaks.length === 0);
+const tb = byName.get('TOI-2796 b');
+yes('a radius lower limit of 17.26 R_earth fixes the class Giant, flagged as from the limit', tb.R === null && S.sizeClassOf(tb).key === 'giant' && S.sizeClassOf(tb).fromLimit === true);
+yes('a radius lower limit of 1.61 R_earth fixes no class', S.sizeClassOf(byName.get('HD 219134 d')) === null);
+
+// ---- archive limit flags are bounds, never measurements ----
+const I = Object.fromEntries(json.cols.map((c, i) => [c, i]));
+let nFlag = 0, nMoved = 0;
+for (const r of json.rows) {
+  const p = byName.get(r[I.pl_name]);
+  const flags = (r[I.lim] || '').split(';').filter(Boolean);
+  if (r[I.pl_bmasselim]) { nFlag++; if (p.M === null && p.lim.M && p.lim.M.dir === Math.sign(r[I.pl_bmasselim])) nMoved++; }
+  for (const fl of flags) {
+    nFlag++;
+    const key = { pl_rade: 'R', pl_orbper: 'P', pl_orbsmax: 'a', pl_orbeccen: 'ecc', pl_insol: 'S', pl_eqt: 'Teq', pl_imppar: 'b', pl_trandep: 'depth', pl_trandur: 'dur', st_teff: 'Teff', st_rad: 'Rs', st_mass: 'Ms', st_lum: 'logL' }[fl.split(':')[0]];
+    if (p[key] === null && p.lim[key] && p.lim[key].dir === Math.sign(+fl.split(':')[1])) nMoved++;
+  }
+}
+yes(`every archive limit flag (${nFlag}) becomes a bound and leaves its value field empty (${nMoved})`, nFlag > 500 && nMoved === nFlag);
+yes('no record with a mass limit counts as having a true mass', list.every((p) => !(p.lim.M && S.hasTrueMass(p))));
+const capped = list.filter((p) => p.lim.M && p.lim.M.dir > 0 && S.hasRadius(p));
+const capBad = capped.filter((p) => { const f = S.forecastFor(p); return !f || f.bounded !== 'upper' || f.hi > p.lim.M.v * 1.0001; });
+yes(`all ${capped.length} upper-limit masses with a radius censor the forecast at the limit`, capped.length > 100 && capBad.length === 0);
+const mcCap = capped.filter((p) => { const m = S.monteCarlo(p, 0.3); return m.massFrom !== 'forecast' || m.bounded !== 'upper'; });
+yes('the Monte Carlo draws those masses from the censored forecast, never from the limit', mcCap.length === 0);
+const lowFc = S.forecastMass(1.61, 0.05, null, 16);
+yes(`a lower limit of 16 M_earth cuts the forecast below it (16th percentile ${lowFc.lo.toFixed(2)})`, lowFc.lo >= 16 && lowFc.bounded === 'lower');
+const k442 = byName.get('Kepler-442 b'), k442rv = S.rvSemiAmplitude(k442);
+yes('an eccentricity lower limit is not used as e (Kepler-442 b: e > 0.04 is a bound; the velocity curve takes e = 0 and says so)',
+  k442.ecc === null && k442.lim.ecc.dir === -1 && k442rv && k442rv.e === 0 && k442rv.eLimit === k442.lim.ecc);
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

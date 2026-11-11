@@ -18,6 +18,29 @@ import { DATA } from './config.js';
 const num = (v) => (v === null || v === undefined || v === '' || isNaN(v)) ? null : +v;
 const TRUE_MASS = new Set(['Mass', 'Msini', 'Msin(i)/sin(i)']);
 
+/* Archive limit flags. A flagged value is a bound, not a measurement: it moves out of
+   the value field into p.lim[key] = { v, dir } (dir 1: upper limit, the true value is
+   below v; dir -1: lower limit), and the value field becomes null. So no model on the
+   page can read a bound as a measurement; the views label the bound where it is shown,
+   and the mass forecaster uses a mass bound as a censoring bound. */
+const LIM_KEY = {
+  pl_rade: 'R', pl_orbper: 'P', pl_orbsmax: 'a', pl_orbeccen: 'ecc', pl_insol: 'S', pl_eqt: 'Teq',
+  pl_imppar: 'b', pl_trandep: 'depth', pl_trandur: 'dur', st_teff: 'Teff', st_rad: 'Rs', st_mass: 'Ms', st_lum: 'logL',
+};
+export function applyLimits(p, limStr) {
+  p.lim = {};
+  if (p.Mlim && p.M !== null) { p.lim.M = { v: p.M, dir: p.Mlim > 0 ? 1 : -1 }; p.M = null; }
+  for (const pair of String(limStr || '').split(';')) {
+    const [col, f] = pair.split(':');
+    const k = LIM_KEY[col];
+    if (!k || !+f || p[k] === null || p[k] === undefined) continue;
+    p.lim[k] = { v: p[k], dir: +f > 0 ? 1 : -1 };
+    p[k] = null;
+    if (k === 'R') { p.Rerr = p.Rerr1 = p.Rerr2 = null; }
+  }
+  return p;
+}
+
 const ADS = 'https://ui.adsabs.harvard.edu/abs/';
 const ARCHIVE = 'https://exoplanetarchive.ipac.caltech.edu';
 function refOf(json, i) {
@@ -54,6 +77,7 @@ function fromSnapshot(json) {
       },
       measuredR: null, source: 'snapshot',
     };
+    applyLimits(p, I.lim === undefined ? null : r[I.lim]);
     return withRendererFields(p);
   });
 }
@@ -66,7 +90,7 @@ function withRendererFields(p) {
   p.pl_orbper = p.P;
   p.pl_orbsmax = p.a;
   p.pl_rade = p.R;
-  p.pl_masse = p.M !== null && TRUE_MASS.has(p.Mprov) && !p.Mlim ? p.M : null;
+  p.pl_masse = p.M !== null && TRUE_MASS.has(p.Mprov) ? p.M : null;   // a mass bound is already out of p.M
   p.pl_eqt = p.Teq;
   p.st_teff = p.Teff;
   p.st_rad = p.Rs;
@@ -83,7 +107,7 @@ function fromRoster(r, idx) {
     M: num(r.pl_masse), Merr1: null, Merr2: null, Mlim: 0, Mprov: num(r.pl_masse) !== null ? 'Mass' : null,
     S: null, Teq: num(r.pl_eqt), b: null, depth: null, dur: null,
     Teff: num(r.st_teff), Rs: null, Ms: null, logL: null, ra: null, dec: null,
-    aErr: null, TeffErr: null, RsErr: null, refs: {},
+    aErr: null, TeffErr: null, RsErr: null, refs: {}, lim: {},
     measuredR: true, source: 'roster',
   });
 }
@@ -128,7 +152,8 @@ export async function joinRoster(list) {
       added.push(p);
     }
   }
-  for (const p of list) p.measuredR = names.has(p.name);
+  // measured here means this record's radius is a value; a radius bound is not one
+  for (const p of list) p.measuredR = names.has(p.name) && p.R !== null;
   list.push(...added);
   return { added, rosterCount: names.size };
 }

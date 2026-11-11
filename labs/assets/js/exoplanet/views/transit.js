@@ -41,7 +41,7 @@ export function createTransit(host, store) {
     tabs.forEach((b) => { const on = b.dataset.sig === mode; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
     if (mode === 'rv') return buildRV(sel);
     const geo = transitGeometry(sel);
-    if (!geo) { vEl.textContent = 'not computable'; capEl.textContent = '[REAL] The archive lacks the stellar radius, orbit or period needed for a light curve.'; return; }
+    if (!geo) { vEl.textContent = 'not computable'; capEl.textContent = !isNum(sel.R) ? '[REAL] No planet radius measured: no light curve.' :'[REAL] The archive lacks the stellar radius, orbit or period needed for a light curve.'; return; }
     const span = Math.max(geo.T14 * 0.85, 0.6);
     const curve = lightCurve(geo, sel.P, span, 180);
     const chk = transitCheck(sel, geo);
@@ -55,7 +55,10 @@ export function createTransit(host, store) {
     let txt;
     if (geo.transits) {
       const meas = [chk && chk.depth ? `${fmt(chk.depth.measured * 1e4, 3)} ppm` : null, chk && chk.dur ? `${fmt(chk.dur.measured, 3)} h` : null].filter(Boolean);
-      txt = `[REAL] Model ${fmt(ppm, 3)} ppm, ${fmt(geo.T14, 3)} h · measured ${meas.length ? meas.join(', ') : 'none in the archive'} · b ${geo.bMeasured ? fmt(geo.b, 2) : '0 (assumed)'}, circular orbit.${sibs.length ? ` Faint: ${sibs.length} sibling${sibs.length > 1 ? 's' : ''}.` : ''}`;
+      const lim = (k, u) => (sel.lim && sel.lim[k] ? `${sel.lim[k].dir > 0 ? '<' : '>'} ${fmt(sel.lim[k].v, 3)}${u} (${sel.lim[k].dir > 0 ? 'upper' : 'lower'} limit)` : null);
+      const measAll = [...meas, lim('depth', '%'), lim('dur', ' h')].filter(Boolean);
+      const bTxt = geo.bMeasured ? fmt(geo.b, 2) : geo.bLimit ? `${fmt(geo.b, 2)} (assumed; archive gives only ${lim('b', '')})` : '0 (assumed)';
+      txt = `[REAL] Model ${fmt(ppm, 3)} ppm, ${fmt(geo.T14, 3)} h · measured ${measAll.length ? measAll.join(', ') : 'none in the archive'} · b ${bTxt}, circular orbit.${sibs.length ? ` Faint: ${sibs.length} sibling${sibs.length > 1 ? 's' : ''}.` : ''}`;
     } else {
       txt = `[ILLUSTRATIVE] Not seen in transit: a random orientation transits ${fmt(geo.geomProb * 100, 2)}% of the time. This is the curve if it did.`;
     }
@@ -68,8 +71,9 @@ export function createTransit(host, store) {
     if (!rv) { vEl.textContent = 'not computable'; capEl.textContent = '[REAL] The archive lacks the stellar mass or the period needed for a velocity curve.'; return; }
     m = { kind: 'rv', sel, rv, colour: starColour(sel.Teff) };
     vEl.textContent = `K ${fmt(rv.K, 3)} m/s`;
-    const src = rv.massSrc === 'measured' ? 'the measured mass' : rv.massSrc === 'minimum' ? 'the minimum mass (M sin i)' : 'the forecast mass';
-    capEl.textContent = `[REAL] Semi-amplitude from ${src}, P and the star's mass (Lovis & Fischer 2010, eq. 14), e ${fmt(rv.e, 2)}. [ILLUSTRATIVE] periastron angle 90°. The best spectrographs reach about 1 m/s.`;
+    const src = rv.massSrc === 'measured' ? 'the measured mass' : rv.massSrc === 'minimum' ? 'the minimum mass (M sin i)' : rv.bounded ? `the forecast mass, cut by the archive's ${rv.bounded} limit` : 'the forecast mass';
+    const eTxt = rv.eLimit ? `e only a bound (${rv.eLimit.dir > 0 ? '<' : '>'} ${fmt(rv.eLimit.v, 2)}), drawn 0` : `e ${fmt(rv.e, 2)}`;
+    capEl.textContent = `[REAL] Semi-amplitude from ${src}, P and the star's mass (Lovis & Fischer 2010, eq. 14), ${eTxt}. [ILLUSTRATIVE] periastron angle 90°. The best spectrographs reach about 1 m/s.`;
     t0 = performance.now();
   }
 

@@ -7,9 +7,9 @@
 
 import { DATA, SOURCES, PHYS } from './config.js';
 import {
-  forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, transitGeometry, earthLikeness, isNum,
+  forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, transitGeometry, earthLikeness, hasTrueMass, limitOf, isNum,
 } from './science.js';
-import { facts, deterministicNote } from './report.js';
+import { facts, deterministicNote, limitsLine } from './report.js';
 import { tokens, fmt, fmtInt } from './views/common.js';
 
 function download(blob, name) {
@@ -62,15 +62,18 @@ export function exportPlate(p, engine, views, albedo) {
   let y = wrap(ctx, deterministicNote(p, f), X, 196, W - X - 50, 22);
   y += 10;
   const rows = [
-    ['radius', `${fmt(p.R, 3)} R⊕`], ['mass', isNum(p.M) ? `${p.Mlim === 1 ? '< ' : ''}${fmt(p.M, 3)} M⊕ (${f.mass_kind})` : 'not measured'],
+    ['radius', f.radius_Rearth ? `${fmt(f.radius_Rearth, 3)} R⊕` : f.radius_limit_Rearth ? `${f.radius_kind === 'upper limit' ? '<' : '>'} ${fmt(f.radius_limit_Rearth, 3)} R⊕ (${f.radius_kind})` : 'no radius measured'],
+    ['mass', f.mass_limit_Mearth ? `${f.mass_kind === 'upper limit' ? '<' : '>'} ${fmt(f.mass_limit_Mearth, 3)} M⊕ (${f.mass_kind})` : isNum(p.M) ? `${fmt(p.M, 3)} M⊕ (${f.mass_kind})` : 'not measured'],
     ['mass forecast', f.mass_forecast_Mearth ? `${fmt(f.mass_forecast_Mearth, 2)} M⊕ (68%: ${fmt(f.mass_forecast_68[0], 2)}-${fmt(f.mass_forecast_68[1], 2)})` : '—'],
     ['period', isNum(p.P) ? `${fmt(p.P, 4)} d` : '—'], ['insolation', f.insolation_Searth ? `${fmt(f.insolation_Searth, 3)} S⊕` : '—'],
     ['Teq', f.teq_this_page_K ? `${fmtInt(f.teq_this_page_K)} K at albedo ${albedo.toFixed(2)}` : '—'],
     ['habitable zone', f.habitable_zone], ['star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : '—'} · ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'}`],
     ['transit', f.transit_depth_ppm ? `${fmtInt(f.transit_depth_ppm)} ppm · ${fmt(f.transit_duration_h, 3)} h` : '—'],
   ];
+  if (f.archive_limits) rows.push(['archive bounds', f.archive_limits]);
   ctx.font = mono(400, 13);
-  for (const [k, v] of rows) { ctx.fillStyle = T.dim; ctx.fillText(k.toUpperCase(), X, y); ctx.fillStyle = T.bright; ctx.fillText(v, X + 170, y); y += 21; }
+  // values wrap inside the plate (an archive-bounds line can run long)
+  for (const [k, v] of rows) { ctx.fillStyle = T.dim; ctx.fillText(k.toUpperCase(), X, y); ctx.fillStyle = T.bright; y = wrap(ctx, String(v), X + 170, y, W - X - 220, 21); }
   // the linked views as they are now
   const vy = Math.max(y + 12, 560);
   const drawView = (c, x, w, label) => {
@@ -97,22 +100,23 @@ export function exportCSV(list, filterFn, filterActive, albedo, label) {
     'mass_Mearth', 'mass_provenance', 'mass_limit', 'period_d', 'a_AU', 'eccentricity', 'insolation_Searth', 'teq_published_K',
     'teff_K', 'star_radius_Rsun', 'distance_ly',
     'mass_forecast_median', 'mass_forecast_lo68', 'mass_forecast_hi68', 'teq_this_page_K', 'habitable_zone',
-    'transit_depth_ppm_model', 'transit_duration_h_model', 'earth_likeness_illustrative'];
+    'transit_depth_ppm_model', 'transit_duration_h_model', 'earth_likeness_illustrative', 'archive_limits'];
   const q = (v) => (v === null || v === undefined || (typeof v === 'number' && !isFinite(v)) ? '' : typeof v === 'number' ? +v.toPrecision(5) : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
   const lines = [
     `# Exomania survey export, ${new Date().toISOString().slice(0, 10)}. ${rows.length} planets${filterActive ? ' (filter: ' + label + ')' : ''}.`,
     `# Data: ${DATA.snapshotLabel}; weekly roster for planets confirmed after it. Acknowledgement: NASA Exoplanet Archive, operated by Caltech under contract with NASA.`,
-    `# Inferred columns: Chen & Kipping 2017 forecaster (log-uniform prior), Teq at Bond albedo ${albedo} with full redistribution, Kopparapu et al. 2013 zone, transit model at the archive impact parameter (0 if absent).`,
+    `# Inferred columns: Chen & Kipping 2017 forecaster (log-uniform prior, censored by any mass limit), Teq at Bond albedo ${albedo} with full redistribution, Kopparapu et al. 2013 zone, transit model at the archive impact parameter (0 if absent).`,
+    '# Limits: mass_limit 1 means mass_Mearth is an upper limit, -1 a lower limit, 0 a value. Every other value the archive flags as a limit is left blank in its column and written in archive_limits as a bound (< upper, > lower). No limit is used in an inferred column as a value.',
     head.join(','),
   ];
   for (const p of rows) {
     const fc = forecastFor(p);
     const geo = transitGeometry(p);
     lines.push([
-      p.name, p.host, p.method, p.year, p.facility, p.R, p.Rerr, p.measuredR ? 1 : 0, p.M, p.Mprov, p.Mlim, p.P, semiMajor(p).a, p.ecc,
+      p.name, p.host, p.method, p.year, p.facility, p.R, p.Rerr, p.measuredR ? 1 : 0, limitOf(p, 'M') ? limitOf(p, 'M').v : p.M, p.Mprov, p.Mlim, p.P, semiMajor(p).a, p.ecc,
       insolation(p).S, p.Teq, p.Teff, p.Rs, isNum(p.dist) ? p.dist * PHYS.PC_LY : null,
       fc && fc.median, fc && fc.lo, fc && fc.hi, equilibriumTemp(p, albedo), hzPosition(p).key,
-      geo ? geo.depthLD * 1e6 : null, geo ? geo.T14 : null, earthLikeness(p),
+      geo ? geo.depthLD * 1e6 : null, geo ? geo.T14 : null, earthLikeness(p), limitsLine(p) || null,
     ].map(q).join(','));
   }
   download(new Blob([lines.join('\n') + '\n'], { type: 'text/csv' }), `exomania-${filterActive ? 'filtered' : 'catalogue'}-${rows.length}.csv`);

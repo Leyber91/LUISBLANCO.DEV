@@ -15,7 +15,8 @@
    archive when it has them.
    ============================================================ */
 
-import { forecastFor, starColour } from './science.js';
+import { forecastFor, starColour, sizeClassOf, limitOf, limitKind } from './science.js';
+import { CHEN_KIPPING } from './config.js';
 
 const EARTH_R = 6.371e6, EARTH_M = 5.972e24, G = 6.6743e-11;
 const kB = 1.380649e-23, mH = 1.6726e-27;
@@ -41,8 +42,24 @@ function rng(seed) {
 // ============================================================
 const A_CLASS = [0.30, 0.20, 0.30, 0.40, 0.20];   // provisional Bond albedo per class for Teq fallback
 
+/* [ILLUSTRATIVE] A world with no measured radius still has to be drawn at some size. The
+   drawing uses a stand-in radius, never shown as a number and never fed to a derived value:
+   the class a bound implies (a radius limit that fixes the class, or a mass lower limit in
+   Chen & Kipping's Jovian regime, above 132 M_earth), else a featureless haze at 3 R_earth,
+   the least specific surface the renderer has. */
+const STAND_IN_R = { rocky: 1.0, super: 1.75, subnep: 3.0, nep: 6.0, giant: 11.2 };
+export function radiusStandIn(p) {
+  const c = sizeClassOf(p);
+  if (c) return { R: STAND_IN_R[c.key], why: `${c.key === 'giant' ? 'a giant' : 'an Earth-size world'} by its radius ${limitKind(limitOf(p, 'R'))}` };
+  const L = limitOf(p, 'M');
+  if (L && L.dir < 0 && L.v >= CHEN_KIPPING.segments[1].upTo) return { R: STAND_IN_R.giant, why: 'a giant by its mass lower limit' };
+  return { R: STAND_IN_R.subnep, why: 'a featureless haze' };
+}
+
 export function physics(p) {
-  const R = p.pl_rade;
+  const radiusKnown = typeof p.pl_rade === 'number' && isFinite(p.pl_rade) && p.pl_rade > 0;
+  const standIn = radiusKnown ? null : radiusStandIn(p);
+  const R = radiusKnown ? p.pl_rade : standIn.R;
   const estMass = p.pl_masse == null;
   const fc = p.pl_masse == null ? forecastFor(p) : null;
   const M = p.pl_masse != null ? p.pl_masse : (fc ? fc.median : Math.pow(R, 2.06));
@@ -61,7 +78,7 @@ export function physics(p) {
   ];
   // density refinement (only with a real mass)
   let rhoRel = null;
-  if (!estMass) {
+  if (!estMass && radiusKnown) {
     rhoRel = clamp(M / Math.pow(R, 3), 0, 1.6);                  // Earth=1, clamp to iron line
     if (R < 2.0 && rhoRel < 0.55) w[1] += 0.4;
     if (R > 2.0 && R < 4.0 && rhoRel > 0.8) { w[1] += 0.3; w[2] -= 0.2; }
@@ -129,7 +146,7 @@ export function physics(p) {
   return {
     R, M, estMass, Teff, Mstar, Rstar, a, Teq, Tsurf, Ttest, gRel, vEscKms,
     rhoRel, domClass, isGiant, state, atmDensity, Hr, atmR, lightMul, starAngle,
-    starActivity, starSpots,
+    starActivity, starSpots, radiusKnown, standIn,
   };
 }
 
@@ -150,6 +167,8 @@ export function classify(p) {
   } else if (ph.domClass >= 4) {
     label = ph.Teq > 1200 ? 'Hot Jupiter' : ph.Teq > 800 ? 'Warm gas giant' : ph.Teq < 150 ? 'Cold gas giant' : 'Gas giant';
   }
+  // no measured radius: say so, and say what the drawing stands in with
+  if (!ph.radiusKnown) { label = `Radius not measured, drawn as ${ph.standIn.why}`; habitable = false; }
   // shader uType (0 temperate, 1 giant/hazy, 2 ice, 3 lava)
   let type = 0;
   if (ph.isGiant) type = 1;

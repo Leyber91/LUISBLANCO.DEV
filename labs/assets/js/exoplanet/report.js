@@ -9,12 +9,23 @@
    ============================================================ */
 
 import { LLM } from '../ai/llm.js';
-import { AI, PHYS } from './config.js';
+import { AI, PHYS, LIMIT_FIELDS } from './config.js';
 import {
   forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, skyView, spectralType,
-  transitGeometry, sizeClass, isNum,
+  transitGeometry, sizeClassOf, limitOf, limitKind, limitText, hasRadius, isNum,
 } from './science.js';
+import { groundingCheck } from './grounding.js';
 import { fmt, fmtInt, esc } from './views/common.js';
+
+export { groundingCheck };
+
+/* Every archive bound on this record, as words: "mass < 6.2 M⊕ (upper limit); ..." */
+export function limitsLine(p) {
+  return Object.entries(p.lim || {}).map(([k, L]) => {
+    const [name, unit] = LIMIT_FIELDS[k] || [k, ''];
+    return `${name} ${limitText(L)}${unit} (${limitKind(L)})`;
+  }).join('; ');
+}
 
 /* The fact sheet: the only numbers either writer may use. */
 export function facts(p, albedo) {
@@ -25,15 +36,21 @@ export function facts(p, albedo) {
   const geo = transitGeometry(p);
   const hz = hzPosition(p);
   const teq = equilibriumTemp(p, albedo);
+  const RL = limitOf(p, 'R'), ML = limitOf(p, 'M');
+  const cls = sizeClassOf(p);
   const f = {
     name: p.name, host: p.host, star_type: spectralType(p.Teff),
     star_teff_K: r(p.Teff, 4), star_radius_Rsun: r(p.Rs, 3),
     distance_ly: isNum(p.dist) ? Math.round(p.dist * PHYS.PC_LY) : null,
-    radius_Rearth: r(p.R, 3), radius_err_Rearth: r(p.Rerr, 2),
+    radius_Rearth: hasRadius(p) ? r(p.R, 3) : null, radius_err_Rearth: r(p.Rerr, 2),
+    radius_kind: hasRadius(p) ? 'value' : RL ? limitKind(RL) : 'not measured',
+    radius_limit_Rearth: RL ? r(RL.v, 3) : null,
     mass_Mearth: isNum(p.M) ? r(p.M, 3) : null,
-    mass_kind: !isNum(p.M) ? 'not measured' : p.Mlim === 1 ? 'upper limit' : p.Mprov === 'M-R relationship' ? 'derived by the archive from radius' : p.Mprov === 'Msini' ? 'minimum mass (M sin i)' : 'measured',
+    mass_kind: ML ? limitKind(ML) : !isNum(p.M) ? 'not measured' : p.Mprov === 'M-R relationship' ? 'derived by the archive from radius' : p.Mprov === 'Msini' ? 'minimum mass (M sin i)' : 'measured',
+    mass_limit_Mearth: ML ? r(ML.v, 3) : null,
     mass_forecast_Mearth: fc ? r(fc.median, 2) : null, mass_forecast_68: fc ? [r(fc.lo, 2), r(fc.hi, 2)] : null,
-    size_class: sizeClass(p.R).label,
+    size_class: cls ? cls.label + (cls.fromLimit ? ' (from the radius limit)' : '') : 'unknown: no radius measured',
+    archive_limits: limitsLine(p) || null,
     period_days: r(p.P, 4), orbit_AU: r(a, 3), eccentricity: r(p.ecc, 2),
     insolation_Searth: r(S, 3),
     teq_published_K: isNum(p.Teq) ? Math.round(p.Teq) : null,
@@ -51,44 +68,33 @@ const r = (v, s) => (isNum(v) ? +(+v).toPrecision(s) : null);
 export function deterministicNote(p, f, short = false) {
   const s = [];
   const star = f.star_type === '?' ? 'its star' : `a${'AFO'.includes(f.star_type) ? 'n' : ''} ${f.star_type}-type star${f.star_teff_K ? ` of ${fmtInt(f.star_teff_K)} K` : ''}`;
-  s.push(`${f.name} is ${fmt(f.radius_Rearth, 3)} times Earth's radius and circles ${star}${f.period_days ? ` every ${fmt(f.period_days, 3)} days` : ''}${f.orbit_AU ? ` at ${fmt(f.orbit_AU, 3)} AU` : ''}.`);
+  const size = f.radius_Rearth
+    ? `is ${fmt(f.radius_Rearth, 3)} times Earth's radius and circles`
+    : `has no measured radius${f.radius_limit_Rearth ? ` (the archive gives only a ${f.radius_kind} of ${fmt(f.radius_limit_Rearth, 3)} Earth radii)` : ''}; it circles`;
+  s.push(`${f.name} ${size} ${star}${f.period_days ? ` every ${fmt(f.period_days, 3)} days` : ''}${f.orbit_AU ? ` at ${fmt(f.orbit_AU, 3)} AU` : ''}.`);
   if (f.insolation_Searth) s.push(`It receives ${fmt(f.insolation_Searth, 3)} times the sunlight Earth does, ${f.habitable_zone}.`);
+  const lim = f.mass_kind === 'upper limit' || f.mass_kind === 'lower limit';
   if (f.mass_kind === 'measured') s.push(`Its mass is measured at ${fmt(f.mass_Mearth, 3)} Earth masses.`);
   else if (f.mass_forecast_Mearth) {
-    const why = f.mass_kind === 'upper limit' ? `the archive gives only an upper limit of ${fmt(f.mass_Mearth, 3)} Earth masses` : f.mass_kind === 'derived by the archive from radius' ? 'no mass has been measured' : f.mass_kind === 'minimum mass (M sin i)' ? `only a minimum mass of ${fmt(f.mass_Mearth, 3)} Earth masses is known` : 'no mass has been measured';
-    s.push(`Since ${why}, the Chen and Kipping relation forecasts ${fmt(f.mass_forecast_Mearth, 2)} Earth masses, with a 68% range of ${fmt(f.mass_forecast_68[0], 2)} to ${fmt(f.mass_forecast_68[1], 2)}.`);
-  }
+    const why = lim ? `the archive gives only a${f.mass_kind === 'upper limit' ? 'n' : ''} ${f.mass_kind} of ${fmt(f.mass_limit_Mearth, 3)} Earth masses` : f.mass_kind === 'derived by the archive from radius' ? 'no mass has been measured' : f.mass_kind === 'minimum mass (M sin i)' ? `only a minimum mass of ${fmt(f.mass_Mearth, 3)} Earth masses is known` : 'no mass has been measured';
+    s.push(`Since ${why}, the Chen and Kipping relation forecasts ${fmt(f.mass_forecast_Mearth, 2)} Earth masses, with a 68% range of ${fmt(f.mass_forecast_68[0], 2)} to ${fmt(f.mass_forecast_68[1], 2)}${lim ? ', the limit cutting the forecast' : ''}.`);
+  } else if (lim) {
+    s.push(`The archive gives only a${f.mass_kind === 'upper limit' ? 'n' : ''} ${f.mass_kind} on its mass, ${fmt(f.mass_limit_Mearth, 3)} Earth masses: a bound, not a measurement${f.radius_Rearth ? '' : ', and with no radius there is nothing to forecast a mass from'}.`);
+  } else if (!f.radius_Rearth) s.push('No mass is measured, and with no radius none can be forecast.');
   if (short) return s.join(' ');
   if (f.star_angular_size_deg) s.push(`From its surface the star would span ${fmt(f.star_angular_size_deg, 2)} degrees, ${fmt(f.star_size_vs_sun_from_earth, 2)} times the Sun's width in our sky.`);
   if (f.discovered) s.push(`It was found in ${f.discovered}${f.method ? ` by the ${f.method.toLowerCase()} method` : ''}${f.distance_ly ? `, ${fmtInt(f.distance_ly)} light-years away` : ''}.`);
   return s.join(' ');
 }
 
-/* Every number in the model's text must match a number in the facts (2% or rounding). */
-export function groundingCheck(text, f) {
-  const pool = [];
-  const walk = (v) => { if (typeof v === 'number') pool.push(v); else if (Array.isArray(v)) v.forEach(walk); };
-  Object.values(f).forEach(walk);
-  pool.push(1, 2, 3, 68, 100, 1931, 2017);  // counts, the 68% band, and cited years
-  const nums = [];
-  // names carry digits (Kepler-62, TRAPPIST-1): blank them out, keeping positions
-  let scan = text;
-  for (const n of [f.name, f.host, f.facility].filter(Boolean)) scan = scan.split(n).join(' '.repeat(n.length));
-  const re = /(?<![\w.\-])(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(?![\w])/g;
-  let m;
-  while ((m = re.exec(scan))) {
-    const v = parseFloat(m[1].replace(/,/g, ''));
-    const ok = pool.some((q) => Math.abs(q - v) <= Math.max(0.02 * Math.abs(q), 0.051) || Math.abs(Math.round(q) - v) < 1e-9);
-    nums.push({ v, raw: m[1], ok, at: m.index });
-  }
-  return { nums, traced: nums.filter((n) => n.ok).length, total: nums.length };
-}
+/* groundingCheck (grounding.js): every figure in the model's text, read with its unit,
+   must match a fact-sheet value after unit conversion (2% or the text's rounding). */
 
 function markUngrounded(text, check) {
   let out = '', last = 0;
   for (const n of check.nums) {
     out += esc(text.slice(last, n.at));
-    out += n.ok ? esc(n.raw) : `<mark class="ungrounded" title="not in the fact sheet">${esc(n.raw)}</mark>`;
+    out += n.ok ? esc(n.raw) : `<mark class="ungrounded" title="${esc(n.why || 'not in the fact sheet')}">${esc(n.raw)}</mark>`;
     last = n.at + n.raw.length;
   }
   return out + esc(text.slice(last));

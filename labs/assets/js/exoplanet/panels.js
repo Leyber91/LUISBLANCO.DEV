@@ -8,8 +8,9 @@
 import { SOURCES, DATA, VALLEY, CHEN_KIPPING, TEQ, MC, LIMB, KOPPARAPU } from './config.js';
 import {
   luminosity, semiMajor, insolation, forecastFor, hasTrueMass, monteCarlo, equilibriumTemp, habitableZone, hzPosition,
-  transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClass, isNum,
+  transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClassOf, hasRadius, limitOf, limitKind, limitText, isNum,
 } from './science.js';
+import { limitsLine } from './report.js';
 import { classify, physics } from './data.js';
 import { fmt, fmtInt, esc } from './views/common.js';
 
@@ -25,24 +26,27 @@ export function chainHTML(p, albedo) {
   const r = p.refs || {};
   const refTxt = (x) => (x ? esc(x.label) : 'archive');
   const inputs = [
-    ['Radius', `${fmt(p.R, 3)} ± ${fmt(p.Rerr, 2)} R⊕`, refTxt(r.R)],
-    ['Mass', isNum(p.M) ? `${p.Mlim === 1 ? '< ' : ''}${fmt(p.M, 3)} M⊕ (${p.Mprov || 'unknown'})` : 'not measured', refTxt(r.M)],
+    ['Radius', hasRadius(p) ? `${fmt(p.R, 3)} ± ${fmt(p.Rerr, 2)} R⊕` : limitOf(p, 'R') ? `${esc(limitText(limitOf(p, 'R')))} R⊕ (${limitKind(limitOf(p, 'R'))})` : 'no radius measured', refTxt(r.R)],
+    ['Mass', limitOf(p, 'M') ? `${esc(limitText(limitOf(p, 'M')))} M⊕ (${limitKind(limitOf(p, 'M'))}, a bound, not a value)` : isNum(p.M) ? `${fmt(p.M, 3)} M⊕ (${p.Mprov || 'unknown'})` : 'not measured', refTxt(r.M)],
     ['Period', isNum(p.P) ? `${fmt(p.P, 5)} d` : '—', refTxt(r.P)],
     ['Orbit', a.a ? `${fmt(a.a, 3)} AU, e ${isNum(p.ecc) ? fmt(p.ecc, 2) : 'unknown'}` : '—', a.src],
     ['Star', `${fmtInt(p.Teff)} ± ${fmtInt(p.TeffErr)} K, ${fmt(p.Rs, 3)} ± ${fmt(p.RsErr, 2)} R☉, ${fmt(p.Ms, 3)} M☉`, refTxt(r.star)],
   ];
+  if (Object.keys(p.lim || {}).length) inputs.push(['Archive bounds', esc(limitsLine(p)), 'limit flags: kept as bounds, never used as values']);
   const steps = [];
   steps.push(li('Luminosity', L.src === 'archive' ? 'L = 10^log L' : 'L = R★² (Teff / 5772 K)⁴', L.L ? `${fmt(L.L, 3)} L☉` : '—', L.src));
   steps.push(li('Insolation', S.src === 'archive' ? 'archive value' : 'S = L / a²', S.S ? `${fmt(S.S, 3)} S⊕` : '—', ''));
-  if (fc) steps.push(li('Mass', 'log R = C + S log M, inverted with scatter, log-uniform prior' + (fc.bounded ? ', capped at the limit' : ''), `${fmt(fc.median, 2)} M⊕ (68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}), ${fc.regime}`, CHEN_KIPPING.ref));
-  else steps.push(li('Mass', 'measured', `${fmt(p.M, 3)} M⊕`, refTxt(r.M)));
-  steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})` : '—', ''));
+  if (fc) steps.push(li('Mass', 'log R = C + S log M, inverted with scatter, log-uniform prior' + (fc.bounded ? `, censored by the ${fc.bounded} limit (posterior cut ${fc.bounded === 'upper' ? 'above' : 'below'} ${fmt(fc.bound, 3)} M⊕)` : ''), `${fmt(fc.median, 2)} M⊕ (68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}), ${fc.regime}`, CHEN_KIPPING.ref));
+  else if (hasTrueMass(p)) steps.push(li('Mass', 'measured', `${fmt(p.M, 3)} M⊕`, refTxt(r.M)));
+  else steps.push(li('Mass', 'none: no measured mass, and no radius to forecast one from', '—', limitOf(p, 'M') ? `the ${limitKind(limitOf(p, 'M'))} is a bound, never drawn as a value` : ''));
+  steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})` : mc.hasR ? '—' : 'none: no radius measured', ''));
   steps.push(li('Teq', `Teq = Teff √(R★ / 2a) (1 − A)^¼, A = ${albedo}`, mc.teq ? `${fmtInt(mc.teq.med)} K (68%: ${fmtInt(mc.teq.lo)}-${fmtInt(mc.teq.hi)})` : '—', 'full heat redistribution'));
   if (mc.H) steps.push(li('Scale height', `H = k T / (μ m_H g), μ = ${p.R > 1.8 ? MC.muEnvelope : MC.muSecondary}`, `${fmt(mc.H.med, 2)} km`, 'μ assumed from size'));
-  steps.push(li('Size class', 'radius draws binned at 1.5, 2, 4, 8 R⊕', mc.probs.map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', '), ''));
+  const scl = sizeClassOf(p);
+  steps.push(li('Size class', 'radius draws binned at 1.5, 2, 4, 8 R⊕', mc.hasR ? mc.probs.map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ') : scl ? `${scl.label}, from the radius bound` : 'none: no radius measured', ''));
   if (hz) steps.push(li('Habitable zone', 'S_eff = S₀ + aT + bT² + cT³ + dT⁴, T = Teff − 5780; d = √(L / S_eff)', `${fmt(hz.inner, 3)}-${fmt(hz.outer, 3)} AU; ${pos.label}`, KOPPARAPU.ref));
   if (geo) steps.push(li('Transit', `k = Rp/R★ = ${fmt(geo.k, 3)}; depth ≈ k² × limb darkening; T14 = (P/π) asin[(R★/a)√((1+k)² − b²) / sin i]`, `${fmtInt(geo.depthLD * 1e6)} ppm, ${fmt(geo.T14, 3)} h`, 'Seager & Mallén-Ornelas 2003; ' + LIMB.ref));
-  if (rv) steps.push(li('Radial velocity', 'K = 28.4329 m/s (Mp sin i / M_J) (M★)^−⅔ (P / 1 yr)^−⅓ / √(1 − e²)', `${fmt(rv.K, 3)} m/s (${rv.massSrc} mass)`, 'Lovis & Fischer 2010'));
+  if (rv) steps.push(li('Radial velocity', 'K = 28.4329 m/s (Mp sin i / M_J) (M★)^−⅔ (P / 1 yr)^−⅓ / √(1 − e²)', `${fmt(rv.K, 3)} m/s (${rv.massSrc} mass${rv.bounded ? `, cut by the ${rv.bounded} limit` : ''})${rv.eLimit ? `; e is only a bound (${esc(limitText(rv.eLimit, 2))}), so e = 0` : ''}`, 'Lovis & Fischer 2010'));
   if (sky) steps.push(li('Sky', 'θ = 2 atan(R★ / a)', `${fmt(sky.angDeg, 2)}° (Sun from Earth 0.53°)`, ''));
   steps.push(li('Star colour', 'Planck B(λ, Teff) through CIE 1931 x̄ ȳ z̄, to sRGB', starColour(p.Teff).hex, 'Wyman et al. 2013 fit'));
   steps.push(li('Render inputs', 'class from radius (and density when measured); surface state from Teq plus a greenhouse offset; air kept if escape speed beats the cosmic shoreline', `${cl.label}; air ${ph.atmDensity > 0.6 ? 'substantial' : ph.atmDensity > 0.2 ? 'thin' : 'negligible'}`, '[ILLUSTRATIVE] the drawn surface'));
@@ -54,14 +58,20 @@ export function chainHTML(p, albedo) {
 export function compareHTML(pins, earth, albedo) {
   const cols = [earth, ...pins];
   const rows = [
-    ['Radius', (p) => `${fmt(p.R, 3)} R⊕`],
-    ['Mass', (p) => (hasTrueMass(p) ? `${fmt(p.M, 3)} M⊕` : `~${fmt(forecastFor(p)?.median, 2)} M⊕ (model)`)],
-    ['Gravity', (p) => { const m = monteCarlo(p, albedo); return m.g ? `${fmt(m.g.med, 2)} g` : '—'; }],
+    ['Radius', (p) => (hasRadius(p) ? `${fmt(p.R, 3)} R⊕` : limitOf(p, 'R') ? `${esc(limitText(limitOf(p, 'R')))} R⊕ (${limitKind(limitOf(p, 'R'))})` : 'no radius measured')],
+    ['Mass', (p) => {
+      const L = limitOf(p, 'M'), fc = hasTrueMass(p) ? null : forecastFor(p);
+      if (hasTrueMass(p)) return `${fmt(p.M, 3)} M⊕`;
+      const bound = L ? `${esc(limitText(L))} M⊕ (${limitKind(L)})` : '';
+      if (fc) return `~${fmt(fc.median, 2)} M⊕ (model${L ? ', cut by the limit' : ''})${bound ? '; archive ' + bound : ''}`;
+      return bound || 'not measured';
+    }],
+    ['Gravity', (p) => { const m = monteCarlo(p, albedo); return m.g ? `${fmt(m.g.med, 2)} g` : m.hasR ? '—' : 'needs a radius'; }],
     ['Period', (p) => (isNum(p.P) ? `${fmt(p.P, 4)} d` : '—')],
     ['Insolation', (p) => (insolation(p).S ? `${fmt(insolation(p).S, 3)} S⊕` : '—')],
     ['Teq', (p) => { const t = equilibriumTemp(p, albedo); return t ? `${fmtInt(t)} K` : '—'; }],
     ['Zone', (p) => hzPosition(p).label],
-    ['Size class', (p) => sizeClass(p.R).label],
+    ['Size class', (p) => { const c = sizeClassOf(p); return c ? c.label + (c.fromLimit ? ' (by its bound)' : '') : 'no radius measured'; }],
     ['Star', (p) => `${fmtInt(p.Teff)} K`],
     ['Distance', (p) => (isNum(p.dist) ? `${fmtInt(p.dist * 3.26156)} ly` : 'here')],
   ];
@@ -77,7 +87,9 @@ export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote }
     <h3>Data</h3>
     <p>[REAL] ${esc(DATA.snapshotLabel)}: ${fmtInt(meta.rows)} confirmed planets with the archive's composite values, error bars, mass provenance and limit flags, discovery facts, stellar parameters and the reference for each value. ${esc(rosterNote)}</p>
     <h3>Models</h3>
-    <p>[REAL] Mass from radius: the ${esc(CHEN_KIPPING.ref)} relation, inverted on a grid with its intrinsic scatter and the radius error under a log-uniform mass prior (the prior is this page's choice). A catalogue upper limit caps the posterior; it is never used as a mass. ${MC.draws} Monte Carlo draws carry the radius, mass, stellar and orbit errors into gravity, Teq, scale height and the size-class probabilities.</p>
+    <p>[REAL] Mass from radius: the ${esc(CHEN_KIPPING.ref)} relation, inverted on a grid with its intrinsic scatter and the radius error under a log-uniform mass prior (the prior is this page's choice). A catalogue mass limit is a censoring bound: an upper limit cuts the posterior above it, a lower limit below it; a limit is never used as a mass.</p>
+    <p>[REAL] Limits: every value the archive flags as a limit (mass, radius, eccentricity, period, orbit, impact parameter, Teq, depth, duration, stellar temperature) is shown as a bound with its sign and never enters a computation as a value. A world with no measured radius gets no size class, gravity, density or scale height; its image is drawn at a stand-in size, labelled on the reticle [ILLUSTRATIVE].</p>
+    <p>[REAL] ${MC.draws} Monte Carlo draws carry the radius, mass, stellar and orbit errors into gravity, Teq, scale height and the size-class probabilities.</p>
     <p>[REAL] Habitable zone: ${esc(KOPPARAPU.ref)}, from the star's temperature and luminosity; conservative edges are runaway and maximum greenhouse, optimistic edges recent Venus and early Mars.</p>
     <p>[REAL] Transit: depth from (Rp/R★)² with quadratic limb darkening (${esc(LIMB.ref)}, Sun-like coefficients for every star), integrated numerically over the planet's disc; duration from Seager &amp; Mallén-Ornelas 2003, eq. 3, at the archive's impact parameter, circular orbit. Radial velocity from Lovis &amp; Fischer 2010, eq. 14.</p>
     <p>[REAL] Composition curves on the mass-radius diagram: Seager et al. 2007, eq. 23 and Table 4 (iron, silicate, water ice), drawn to 20 M⊕.</p>

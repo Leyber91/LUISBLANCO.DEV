@@ -13,7 +13,7 @@ import { toParams, classify } from './data.js';
 import { loadSnapshot, joinRoster, provisionalMeasured } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
-  sizeClass, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
+  sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
   insolation, earthLikeness, monteCarlo, skyView, starColour, isNum,
 } from './science.js';
 import { createPlot, plotValue } from './views/plot.js';
@@ -48,7 +48,7 @@ function rebuildFilter() {
   const f = store.state.filter, st = store.state;
   const rk = Object.entries(f.ranges).filter(([, r]) => r && (r[0] !== null || r[1] !== null));
   st.filterFn = (p) => {
-    if (f.cls !== 'all' && sizeClass(p.R).key !== f.cls) return false;
+    if (f.cls !== 'all' && sizeClass(p.R)?.key !== f.cls) return false;
     if (f.method !== 'all' && methodGroup(p.method) !== f.method) return false;
     if (f.year !== null && p.year !== f.year) return false;
     if (f.newOnly && !st.newNames.has(p.name)) return false;
@@ -163,8 +163,10 @@ function setReticle(p) {
   $('ret-name').textContent = p.name;
   const hz = hzPosition(p);
   const hzShort = { cons: 'conservative habitable zone', opt: 'optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'zone unknown' }[hz.key];
-  $('ret-class').textContent = `${sizeClass(p.R).label} · ${hzShort}`;
-  $('ret-render').textContent = `procedural surface: ${classify(p).label.replace(/ · habitable zone/i, '').toLowerCase()}`;
+  const sc = sizeClassOf(p);
+  $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'no radius measured'} · ${hzShort}`;
+  const cl = classify(p);
+  $('ret-render').textContent = `procedural surface: ${cl.label.replace(/ · habitable zone/i, '').toLowerCase()}${cl.physics.radiusKnown ? '' : ' [illustrative size]'}`;
 }
 
 function setPlot(mode) { store.state.plot = mode; plot.redraw(); writeURL(); }
@@ -453,7 +455,8 @@ function renderGround(p) {
   $('ground-sites').innerHTML = locked
     ? `<span class="view-k">Likely tidally locked (P ${fmt(p.P, 3)} d): land at</span> <button type="button" class="chip" data-elev="80">substellar point</button><button type="button" class="chip" data-elev="0">terminator</button><button type="button" class="chip" data-elev="-10">night side</button>`
     : `<span class="view-k">Time of day: drag the star's elevation</span>`;
-  $('ground-read').innerHTML = `<b class="tg tg-${mc.massFrom === 'measured' ? 'd' : 'e'}">${mc.massFrom === 'measured' ? 'D' : 'E'}</b> gravity ${mc.g ? fmt(mc.g.med, 2) : '—'} g · <b class="tg tg-d">D</b> Teq ${mc.teq ? fmtInt(mc.teq.med) : '—'} K · <b class="tg tg-d">D</b> star ${sky ? fmt(sky.angDeg, 2) : '—'}° wide (Sun 0.53°)${locked ? ' · <b class="tg tg-i">I</b> lock threshold 10 d' : ''} · <b class="tg tg-i">I</b> terrain`;
+  const grav = mc.g ? `gravity ${fmt(mc.g.med, 2)} g` : mc.hasR ? 'gravity —' : 'gravity unknown: no radius measured';
+  $('ground-read').innerHTML = `<b class="tg tg-${mc.massFrom === 'measured' ? 'd' : 'e'}">${mc.massFrom === 'measured' ? 'D' : 'E'}</b> ${grav} · <b class="tg tg-d">D</b> Teq ${mc.teq ? fmtInt(mc.teq.med) : '—'} K · <b class="tg tg-d">D</b> star ${sky ? fmt(sky.angDeg, 2) : '—'}° wide (Sun 0.53°)${locked ? ' · <b class="tg tg-i">I</b> lock threshold 10 d' : ''} · <b class="tg tg-i">I</b> terrain`;
 }
 function setCam(mode) {
   if (!glOk) return;
