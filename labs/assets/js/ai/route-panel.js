@@ -63,7 +63,7 @@ export function mountRoutePanel(host) {
   const root = el('span', { class: 'lbr', 'data-route': 'unknown' });
   const pill = el('button', { class: 'lbr-pill', type: 'button', 'aria-expanded': 'false', 'aria-haspopup': 'dialog' });
   const dot = el('span', { class: 'lbr-dot', 'aria-hidden': 'true' });
-  const label = el('span', { class: 'lbr-label' }, 'model: detecting');
+  const label = el('span', { class: 'lbr-label' }, 'model: chosen on first use');
   pill.append(dot, label);
 
   const panel = el('form', { class: 'lbr-panel', role: 'dialog', 'aria-label': 'Model route' });
@@ -125,6 +125,8 @@ export function mountRoutePanel(host) {
     label.textContent = s.label;
     panel.querySelectorAll('.lbr-routes li').forEach((li) => li.classList.toggle('on', li.dataset.r === s.route));
   });
-  LLM.detect();
+  // No probe at mount: a local model server that hangs under load would stall the page's start (seen
+  // 2026-11-11). The route is chosen on the first real call, or when the visitor opens this panel.
+  pill.addEventListener('click', () => LLM.detect(), { once: true });
   return root;
 }

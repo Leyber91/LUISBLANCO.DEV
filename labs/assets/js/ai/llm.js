@@ -125,7 +125,7 @@ export function extractJSON(text) {
 class Route {
   constructor() {
     this.listeners = new Set();
-    this.state = { route: 'unknown', model: '', label: 'model: detecting', readyIn: 0 };
+    this.state = { route: 'unknown', model: '', label: 'model: chosen on first use', readyIn: 0 };
     this._detecting = null;
     this._ollamaModel = '';
     this._queue = Promise.resolve();
@@ -149,7 +149,7 @@ class Route {
       route === 'worker' ? `model: ${model} (worker)` :
       route === 'pollinations'
         ? `model: ${model || 'gpt-oss-20b'} via pollinations` + (readyIn > 0 ? ` · next reply in ${readyIn}s` : ' · ready')
-        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: detecting';
+        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: chosen on first use';
     this.state = { route, model, label, readyIn, note };
     this.listeners.forEach((fn) => { try { fn(this.state); } catch { /* the listener's problem */ } });
     this._scheduleTick();
