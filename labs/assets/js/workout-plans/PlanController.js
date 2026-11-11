@@ -61,7 +61,7 @@ export function decodeState(hash) {
   st.mode = pick('k', (v) => ['busso', 'banister', 'pmc'].includes(v)) ?? st.mode;
   st.scheme = pick('sc', (v) => SCHEMES.includes(v)) ?? 'auto';
   st.notes = (q.get('n') || '').slice(0, 400);
-  st.bm = q.get('bm') === 'session' ? 'session' : 'week';
+  st.bm = ['session', 'recovery'].includes(q.get('bm')) ? q.get('bm') : 'week';
   const p = q.get('p');
   if (p) for (const tok of p.split(',')) {
     const [key, id] = tok.split('~');
@@ -137,6 +137,7 @@ export class PlanController {
     for (const ev of ['pointerdown', 'keydown']) document.addEventListener(ev, (e) => { if (this.tourTimer && !e.target.closest?.('#tourbar')) this.stopTour(); }, true);
 
     this.update({ first: true });
+    globalThis.__firstPlan = performance.now();   // when the first computed plan is on screen
     requestAnimationFrame(() => document.body.classList.remove('boot'));
     // the open library widens the swap menu; the plan never waits for it
     loadLibrary().then(() => { this.resolveOpenPins(); this.cacheKey = null; this.update(); }).catch((e) => console.warn('[plans] open library unavailable', e));
@@ -262,6 +263,18 @@ export class PlanController {
     if (!m || !this.lived) { host.textContent = 'Tap a muscle or a bar to see the lifts behind its number.'; return; }
     const st = this.state;
     const w = Math.floor(st.sel / 7);
+    if (st.bm === 'recovery') {
+      for (let d = st.sel; d >= 0; d--) {
+        const x = this.lived.days[d];
+        if (!x.s || st.log[d]?.kind === 'missed') continue;
+        const hits = x.s.items.filter((it) => EX[it.ex].p.includes(m) || EX[it.ex].s.includes(m));
+        if (!hits.length) continue;
+        host.textContent = `${MUSCLE_LABEL[m]}: last hard sets on ${DAY_NAMES[x.dow]} of week ${x.w + 1}, ${(st.sel - d) * 24} h before the selected day: ${hits.map((it) => `${it.name} ${it.sets}`).join(' + ')}.`;
+        return;
+      }
+      host.textContent = `${MUSCLE_LABEL[m]}: no hard sets yet in this block.`;
+      return;
+    }
     const days = st.bm === 'session' ? [this.lived.days[st.sel]] : this.lived.days.slice(w * 7, w * 7 + 7);
     const parts = [];
     let total = 0;
@@ -324,11 +337,27 @@ export class PlanController {
     $('#rl2').textContent = `under ${lo}`;
     $('#rl3').textContent = `${lo}-${hi} sets`;
     $('#rl4').textContent = `over ${hi}`;
-    this.body.render(vol, sessionScope ? {} : plan.targets, day.s && st.log[st.sel]?.kind !== 'missed' ? day.s.muscles : [], sessionScope ? null : plan.weekVol[w], plan.flags);
+    const active = day.s && st.log[st.sel]?.kind !== 'missed' ? day.s.muscles : [];
+    if (st.bm === 'recovery') {
+      // whole days from the last session with hard sets for each muscle to the selected day, times 24 (same day = 0 h)
+      const hours = Object.fromEntries(MUSCLES.map((mm) => [mm.id, null]));
+      for (let d = st.sel; d >= 0; d--) {
+        const x = lived.days[d];
+        if (!x.s || st.log[d]?.kind === 'missed') continue;
+        for (const it of x.s.items) for (const mm of EX[it.ex].p.concat(EX[it.ex].s)) if (hours[mm] == null) hours[mm] = (st.sel - d) * 24;
+      }
+      $('#body-wk').textContent = `recovery, ${DAY_NAMES[day.dow]} week ${w + 1}`;
+      $('#rl1').textContent = 'today'; $('#rl2').textContent = 'under 48 h'; $('#rl3').textContent = '48-72 h'; $('#rl4').textContent = 'over 72 h';
+      this.body.renderRecovery(hours, active, plan.flags);
+      $('#body-note').textContent = 'Hours since each muscle last had hard sets, counted in whole days up to the selected day. The 24, 48 and 72 h bands are an illustrative reading aid; recovery varies by person and by session.';
+      this.writeBodyDetail();
+    } else {
+    this.body.render(vol, sessionScope ? {} : plan.targets, active, sessionScope ? null : plan.weekVol[w], plan.flags);
     $('#body-note').textContent = sessionScope
       ? 'One session: sets per muscle, no weekly band. Switch to week for the targets.'
       : `Weekly target ${lo}-${hi} sets for each muscle with a bracket (${plan.goalKey === 'hypertrophy' ? 'Schoenfeld et al. 2017; the exact band is a convention' : 'a convention for this goal'}); a primary muscle counts a full set, a secondary one half. A second number is the plan before your log.`;
     this.writeBodyDetail();
+    }
     this.view.renderWeek(plan, lived, st.sel, st.log, (d) => this.select(d), (d) => this.chart.setHover(d));
     this.view.renderSession(plan, lived, st.sel, st.log, {
       onLog: (k) => this.logSel(k), onRpe: (r) => this.setRpe(r), onMin: (m) => this.setMin(m),

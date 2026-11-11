@@ -150,7 +150,8 @@ export class BodyMap {
   hover(m, e) {
     const v = this.vol?.[m] ?? 0;
     const r = this.targets?.[m];
-    this.tip.textContent = `${MUSCLE_LABEL[m]}: ${fmt(v, v % 1 ? 1 : 0)} sets` + (r ? ` (target ${r[0]}-${r[1]})` : ' (indirect)');
+    this.tip.textContent = this.recovery ? `${MUSCLE_LABEL[m]}: ${this.recovery[m] == null ? 'not trained yet' : this.recovery[m] + ' h since hard sets'}`
+      : `${MUSCLE_LABEL[m]}: ${fmt(v, v % 1 ? 1 : 0)} sets` + (r ? ` (target ${r[0]}-${r[1]})` : ' (indirect)');
     const box = this.host.getBoundingClientRect();
     this.tip.style.left = Math.min(box.width - 150, Math.max(0, e.clientX - box.left - 40)) + 'px';
     this.tip.style.top = Math.max(0, e.clientY - box.top - 34) + 'px';
@@ -163,7 +164,35 @@ export class BodyMap {
     this.bars.querySelectorAll('.mb-row').forEach((r) => r.classList.toggle('hov', r.dataset.m === m));
   }
 
+  /* recovery: hours since each muscle last had hard sets, on the same ink ladder */
+  renderRecovery(hours, active = [], flags = []) {
+    const act = new Set(active);
+    const cls = (h) => (h == null ? 'rc3' : h < 24 ? 'rc0' : h < 48 ? 'rc1' : h < 72 ? 'rc2' : 'rc3');
+    this.vol = Object.fromEntries(Object.entries(hours).map(([m, h]) => [m, h == null ? 0 : h]));
+    this.targets = {};
+    this.recovery = hours;
+    this.host.querySelectorAll('.bm-j').forEach((j) => { j.style.display = flags.includes(j.dataset.j) ? '' : 'none'; });
+    this.host.querySelectorAll('.bm-m').forEach((g) => g.setAttribute('class', `bm-m ${cls(hours[g.dataset.m])}${act.has(g.dataset.m) ? ' act' : ''}`));
+    clear(this.bars);
+    const ids = Object.keys(hours).filter((m) => hours[m] != null).sort((a, b) => hours[a] - hours[b]);
+    for (const m of ids) {
+      const h = hours[m];
+      const row = el('div', { class: `mb-row ${cls(h).replace('rc', 'v')}${act.has(m) ? ' act' : ''}`, dataset: { m } });
+      const k = el('button', { type: 'button', class: 'mb-k' }, MUSCLE_LABEL[m]);
+      k.addEventListener('click', () => this.onPick?.(m));
+      const track = el('span', { class: 'mb-track' });
+      const fill = el('i', { class: 'mb-fill' });
+      fill.style.width = Math.max(2, 100 - Math.min(100, (100 * h) / 120)) + '%';
+      track.appendChild(fill);
+      row.append(k, track, el('span', { class: 'mb-v' }, `${h} h`));
+      this.bars.appendChild(row);
+    }
+    const never = Object.keys(hours).filter((m) => hours[m] == null);
+    if (never.length) this.bars.appendChild(el('p', { class: 'mb-ind' }, 'not trained yet in this block: ' + never.map((m) => MUSCLE_LABEL[m]).join(' · ')));
+  }
+
   render(vol, targets, active = [], planVol = null, flags = []) {
+    this.recovery = null;
     this.vol = vol;
     this.targets = targets;
     const act = new Set(active);

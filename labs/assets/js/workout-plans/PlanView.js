@@ -21,11 +21,18 @@ const CONTROLS = {
   weeks: { opts: WEEKS.map((w) => [w, String(w)]) },
   scheme: { opts: SCHEMES.map((s) => [s, s === 'auto' ? 'auto' : s === 'undulating' ? 'undulating' : s]) },
   mode: { opts: [['banister', 'fixed dose'], ['busso', 'variable dose'], ['pmc', '42/7 chart']] },
-  bm: { opts: [['week', 'week'], ['session', 'session']] },
+  bm: { opts: [['week', 'week'], ['session', 'session'], ['recovery', 'recovery']] },
 };
 
 const TAG = { REAL: 'real', ILLUSTRATIVE: 'illustrative' };
 const rir = (rpe) => Math.max(0, Math.round((10 - rpe) * 2) / 2);
+/* intensity has its own scale: RPE 6 to 10 on the ink ladder, never gold */
+const rpeStep = (rpe) => Math.max(0, Math.min(4, Math.round(rpe) - 6));
+const rpeCell = (rpe, text) => {
+  const td = el('td', { class: 'rpe-c' });
+  td.append(el('i', { class: 'rs r' + rpeStep(rpe), 'aria-hidden': 'true' }), document.createTextNode(text));
+  return td;
+};
 
 export class PlanView {
   constructor() {
@@ -220,7 +227,7 @@ export class PlanView {
       const tr = el('tr', { class: 'cardio' });
       const td = el('td');
       td.append(el('span', { class: 'ex-n' }, `${c.modality}: ${c.name.toLowerCase()}`), el('span', { class: 'ex-sw' }, c.note));
-      tr.append(td, el('td', {}, `${c.minutes} min`), el('td', {}, String(c.rpe)), el('td', {}, '-'), el('td', { class: 'dim' }, 'aerobic'));
+      tr.append(td, el('td', {}, `${c.minutes} min`), rpeCell(c.rpe, String(c.rpe)), el('td', {}, '-'), el('td', { class: 'dim' }, 'aerobic'));
       tb.append(tr);
     }
     for (const it of s.items) {
@@ -244,12 +251,17 @@ export class PlanView {
       }
       const pl = planned?.items.find((p) => p.ex === it.ex && p.role === it.role);
       const setTxt = `${it.sets} x ${it.reps}` + (pl && pl.sets !== it.sets ? ` (was ${pl.sets})` : '');
-      tr.append(td, el('td', {}, setTxt), el('td', {}, `${it.rpe} (${rir(it.rpe)})`), el('td', {}, `${it.rest} min`),
+      tr.append(td, el('td', {}, setTxt), rpeCell(it.rpe, `${it.rpe} (${rir(it.rpe)})`), el('td', {}, `${it.rest} min`),
         el('td', { class: 'dim' }, EX[it.ex].p.map((m) => MUSCLE_LABEL[m]).join(', ')));
       tb.append(tr);
     }
     t.append(tb);
     body.append(t);
+    const leg = el('div', { class: 'rpe-leg', 'aria-hidden': 'true' });
+    leg.append(el('span', {}, 'RPE scale'));
+    for (let r = 6; r <= 10; r++) { const s2 = el('span', { class: 'rl-i' }); s2.append(el('i', { class: 'rs r' + (r - 6) }), document.createTextNode(String(r))); leg.append(s2); }
+    leg.append(el('span', {}, 'main lifts in bright ink; the hardest session of the week carries a top rule'));
+    body.append(leg);
 
     // logging: what happened, the session RPE, and the minutes
     const kinds = [['done', 'as planned'], ['hard', 'harder'], ['easy', 'easier'], ['missed', 'missed']];

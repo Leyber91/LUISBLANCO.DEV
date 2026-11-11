@@ -7,9 +7,29 @@
 <meta name="description" content="A deterministic training planner with a real load model: periodization, a time-budget solver, an exercise substitution graph for injuries, and fitness-fatigue curves that re-plan the block around the week you actually had. A language model only narrates the planner's own decision log, and every sentence is checked." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<!-- the font loads off the critical path; the system mono stack shows until it arrives -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
 <link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/workout-plans.css" />
+<!-- fetch the module graph in parallel instead of import by import -->
+<link rel="modulepreload" href="assets/js/workout-plans/PlanController.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/Planner.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/LoadModel.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/constants.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/library.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/PlanService.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/LocalCoach.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/PlanView.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/charts.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/bodymap.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/graphview.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/notes.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/openlib.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/dom.js" />
+<link rel="modulepreload" href="assets/js/ai/llm.js" />
+<link rel="modulepreload" href="assets/js/ai/config.js" />
+<link rel="modulepreload" href="assets/js/ai/route-panel.js" />
 </head>
 <body class="boot">
 <span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
