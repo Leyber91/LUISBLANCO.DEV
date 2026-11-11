@@ -26,6 +26,10 @@
         "G0": {
           "level": 1,
           "evidence": "Rung 1 holds: DECODER in labs/honesty-decoder.html stores reality as typed literals (88, 80, 75, 78, 85, 50, 45, 34, 66, 18), and select() copies d.reality to #mNum and the #mFill bar. Rung 2 fails: no sub-claims, no verdicts and no formula; the ev prose names deductions ('docks only for honest approximation') in prose only. The subtitle calls the figure 'my own honest estimate, not a benchmark'. The figures are tied to nothing else: Token EKG reads 75% real while the first audit in LABS_LEVELS.md says it 'measures nothing real'."
+        },
+        "G1": {
+          "level": 9,
+          "evidence": "Undisputed; the rater's grade stands. Rungs 1-9 hold on the running page. engine.js figureOf() computes point = sum(w*v)/sum(w) over checked sub-claims; the formula is printed in #method-short and #method, and registry.js holds no percentage (the hd-computed probe passes). Each sub-claim has a weight w (1-3) and a one-sentence why, shown in the evidence panel; a basis column (code / route / reference / lab state / self / inspection / author) is on every row. Author verdicts stay out and are reported as 'unverified share' (Token EKG 9%); the 3 off-site rows read 'not checkable from this page' with unverified share 100%. Interval and width are shown ('interval 15 to 62 · width 46 pts'); the readouts name the most sensitive sub-claim ('run live' +23 pts, to 62). FActScore and the gap sit beside the figure ('17 (1 of 6) · gap +22'), the method lists 4 departures, and gapDriver() names the driver when the gap exceeds 10. consistency() reports 0 contradictions in the ledger foot and in tests.mjs. Headless: The Figure 38.46, Black Hole 90.9. Rung 10 fails: no command writes a dated results file, and there is no independent re-grade."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 0,
           "evidence": "The page has no input element: the only controls are the back button and 10 chips built from DECODER, so a visitor cannot enter a claim and nothing decomposes one. llm.js is not loaded; the meta line reads 'zero network'."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; the skeptic's dispute holds. Rung 1 holds: #t-claim plus the 'about' select route a claim to a lab through nearestLab() (the rater saw one mismatch, a Roaster claim routed to Primordial Seed). Rung 2 fails: the rung names live, real, autonomous, general and every, but engine.js decompose() makes a sub-claim only from QUAL_SPLIT words (live, autonomous, agentic, daily, recursive...); real, general and every are in QUAL_TAG and go only into a qualifiers array that view/tools.js itemHTML() never renders, so they are neither split nor shown. Rerun in Node at the graded commit: 'A real general agent that answers every question autonomously.' gives 2 pieces ('A real general agent', 'answers every question autonomously') with no qualifier extracted ('autonomously' misses the 'autonomous' word match); 'Real physics simulates every planet in general relativity.' stays 1 unsplit chunk. Above the break and not counted: typeOf() typing with framing marked not checkable (a capability sentence was mistyped as framing); the model route (model.js decomposeOne) answers HTTP 400 output_token_limit_exceeded on the public route and the engine stands in; ground() and the 56-claim gold set (held-out F1 0.87) run."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 0,
           "evidence": "No code runs a check: select() only copies authored strings into the three registers. Evidence lines name functions (collapse(), the geodesic shader) but nothing fetches, loads or frames a lab, and no row even links to its lab page."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Settled at 3: the skeptic's rung-4 point holds, its rung-3 point does not. Rung 2: runner.js codeCheck fetches and SHA-256 hashes the cited lines, at least 2 code checks per counted row; the rater's pass ran 96 checks in about 20 s, 0 failed. Rung 3 holds: 13 of 14 counted systems have a ctx.frame() probe in checks/labs/*.js (bh-isco 'ISCO 3.00 r_s', te-timer 0.3% off an independent timer, hp-break, dm-state '5D -> 4D -> 3D'); the decoder's own row (checks/labs/honesty-decoder.js) reads ctx.self(), the live state of the running lab itself, which is what a frame gives for the others, so it is not counted as a miss. Rung 4 fails: ex.daily (registry.js, basis 'inspection') enters Exomania's figure with its graded 'unsupported', yet engine.js checkKeys() returns [] for inspection, runner.js runs nothing for it, and ledger.js sharesOf() leaves it out of the check-backed count (66 of 69). The 'repository test' its label cites is the tests.mjs anchor scan, a drift warning unless --strict, and gates.yml runs tools/lab_tests.mjs without --strict. That verdict neither comes from a check nor is labelled author assertion. Above the break: no route call on load (rung 5); a failing check removes its sub-claim instead of lowering the figure (The Figure 38.5 -> 50.0 when fg.live#code fails), and frame probes record no lab commit (rung 6)."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 1,
           "evidence": "Rung 1 holds: 10 rows of authored claim, mech and ev text in DECODER (labs/honesty-decoder.html), with no date, commit or link; the file was last changed 2026-06-18 (e439a51). Rung 2 fails: 4 counted rows rest on the model route (Token EKG, DATASPACE, Altverse, The Figure), so any 3 of them include The Figure or DATASPACE, and both are false under the public route measured 2026-11-11 (1 reply per 45 s per IP, LABS_LEVELS.md). The Figure's row says 'the default Run is a REAL live orchestration' of four sequential calls, written for a one-in-flight limit (figure.html line 141), so a default public run cannot complete four live calls. DATASPACE's row says 'The default is a live keyless round-trip', but collapse() in labs/dataspace.html chains two callModel() requests (compress, then reconstruct), so the second is refused and the recorded round-trip plays. Altverse (pipeline.js runs live only when worker.base is set) and Token EKG (streams text.pollinations.ai by default, simulated fallback) hold."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; the skeptic's dispute holds. Rung 1 holds: every row in registry.js carries the live blurb as claim, mech sentences and per-sub-claim notes. Rung 2 fails on Trends, a model-route row (tr.why: route {via:'direct'}, shared 'route.public'). Its tr.why note, shown in the evidence panel, says the explanation 'silently becomes a template when refused'. In labs/assets/js/trending/ReasoningService.js reason() the catch branch sets the visible #why-label to 'why it is rising · built-in heuristic', and Trending.js scan() prints 'reasoning complete (built-in heuristic)' in the trace (line 101): the fallback is announced, not silent. Its first mech sentence says 'A scan fetches the Hacker News front page, the Wikipedia top pageviews and new GitHub repositories'; scan(lensKey) calls lens.fetch() for the one selected lens only (Trending.js:73). The trending files are unchanged since 78a22cd, so both statements are false at the graded commit. The rater's checks of The Figure, DATASPACE and Token EKG found them true, but model-route rows come first and Trends is one. Above the break: lab links, 'graded 2026-11-11 at <commit>', app.stale() ('stale rows 0'); history.js CORRECTIONS omits the G0 to G1 text rewrites of 8 rows."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 2,
           "evidence": "10 rows: Black Hole and Exomania share one row; DATASPACE, Token EKG, Heptapod Codec, Primordial Seed, The Figure and the beta Altverse have their own; 3 are off-site (AEA, Ouroboros, 'AGI on my Ryzen 9'). Rung 2 holds on 7 rows for labs served on the site. Rung 3 fails: the shared row covers only one lab, so 6 of 13 built labs are covered and 7 are needed. Missing: Dimensional Test, The Roaster, Personalized Plans, AI Meme Lab, Trending Topics, the decoder itself, and one of Black Hole and Exomania."
+        },
+        "G1": {
+          "level": 7,
+          "evidence": "Undisputed; the rater's grade stands. The ledger foot computes coverage from site.config.js: '13 of 13 built labs decoded (13 graded) · 2 of 2 beta · 16 of 16 planned'. main.js builds one system per ALL_PROJECTS entry, keyed by hub id; graded rows in registry.js include The Roaster and the Honesty Decoder. Planned labs get noPageRow(): the blurb is decomposed and the figure computed as 0% (17 rows read 0). Each claim is the live p.blurb, with tests.mjs reporting 0 drift. Rung 8 fails: the home-page lab copy and lab-page titles and meta descriptions are not decoded."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "select() sets #mFill to d.reality% and #mAsp to the remainder; setNum() counts the number up in 28 ms ticks. The 1440 screenshot shows one meter (88, '88% REAL' / '12% ASPIRATION') between two text panels. Rung 3 fails: there is no overview, only the selected system's figure is ever visible, so two systems cannot be compared without clicking between them."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Settled at 4; the skeptic's dispute holds. Rungs 2-3: countTo() count-up and a two-segment bar '38% real · 62% aspiration'; the ledger ranks all 34 systems at 1440x900, marks the selected one in gold, and a click selects. Rung 4 holds: meter segments take width = weight, fill = verdict, and a title naming the sub-claim. Rung 5 fails: receipt.js drawWires() draws the sub-claim-to-mechanism wire only when a .ms sentence's data-subs lists that id. Over registry.js, ds.only (DATASPACE 'only a model can rebuild', a scored quantity graded unsupported on ECHO_CAP code evidence) and te.uneven (Token EKG) appear in no mech sentence, nor do 8 framing phrases (hp.arrival, av.engine, fg.think, ps.organism, te.brain, ds.horizon, rs.love, rs.hype), so those phrases get a wire to their sub-claim and none to a mechanism sentence. Above the break, not counted: the interval band on meter and ledger (width in points on the receipt, on the overview only in a title on an aria-hidden span), the history SVG (The Figure 28, 60, 66 asserted, then 38, with a correction ring), and the linked ?still iframe preview."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 2,
           "evidence": "Rung 2 holds: --void ground, IBM Plex Mono, amber .bp corner marks; the claim text is italic #C9B79A (warm) under an amber .rk label, the mechanism text upright #C7D0D6 (cool) under a blue one. Rung 3 fails: in the 1440x1100 audit screenshot the claim panel is about 700 px tall holding about 135 px of content and the mechanism panel is more than half empty (at 900 px high the panels would be about 500 px tall, still more than 3 times their content), and the 280 px meter column is more than 50% empty space. Rung 4 would also fail: amber colours the kicker, the claim label, the footer dot and .back:hover despite the CSS comment 'amber = the fired/active accent only'; the CSS holds 15 distinct font-size values."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Undisputed; the rater's grade stands. Rung 1 holds: tokens.css void ground and IBM Plex Mono. Rung 2 fails: the claim is italic warm (#CDBB9D) and the mechanism upright cool, but both register labels share one colour (.rk { color: var(--hd-dim) } on the claim label and the mechanism panel label); the screenshot shows 'THE CLAIM · ...' and 'THE MECHANISM · ...' in the same grey, where G0 had amber and blue labels. Rung 3 (proportion) would hold; rung 4 fails: route-panel.js's injected CSS puts amber on .lbr-pill:hover, the pollinations dot, button.go and .lbr-row button:hover."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 2,
           "evidence": "10 button.chip elements built from DECODER; click, or Tab and Enter on the native buttons, calls select(i) and the three registers update. Rung 3 fails: no arrow-key handler and no roving tabindex. There is also no URL state (only ?still is read), no drill-down and no input of any kind."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Settled at 3; the skeptic's keyboard dispute holds (the second dispute, the empty 'My reason:' slot in side.js evidence(), also holds but sits higher). The metric requires each way to work with mouse, touch and keyboard. Rungs 1-3 hold: ledger options select a system; view/ledger.js keydown steps with ArrowUp/Down, Home and End over a roving tabindex=0 with a visible outline and an aria-live announcement. Rung 4 (drill-down) fails by keyboard: in view/receipt.js renderReceipt() only li.sub, .ph and .seg open a sub-claim's evidence (app.setFocus), and none is focusable (no tabindex anywhere in receipt.js); the one focusable control per sub-claim is button.markbtn, whose click handler calls app.challenge(id, nxt) and flips the verdict on lab rows. A keyboard user reaches another sub-claim's evidence only by changing the grading ('your grading gives 31 · the grader's gives 38' on The Figure) and then restoring it. Above the break, mouse only for drill-down: challenge with weights and restore, paste with split/merge/reword, compare by type, share by hash, the prefilled dispute link; re-run reuses cached fetches (fresh=false)."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 2,
           "evidence": "Rung 2 holds: the .sub paragraph names the three registers and says the figure is 'my own honest estimate, not a benchmark', which matches the code (reality is a typed literal in DECODER). Rung 3 fails: the footer says 'every exhibit in this lab carries a decoder row; this is where they live', but no other file reads window.L212_DECODER (repository grep) and 6 of 13 built labs have no row; the meta line says 'zero network' while the page loads the Google Fonts stylesheet and three woff2 files. No method, formula or verdict criteria are stated."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; the skeptic's dispute holds. Rung 1 holds: the h1 and lede in labs/honesty-decoder.html. Rung 2 fails: it needs a paragraph that names the three registers (claim, mechanism, meter) and states how the figure is produced, matching the code. No paragraph names the mechanism register or the meter: the lede names the blurb, sub-claims and 'the figure'; #method-short covers sub-claim, verdict and figure ('mechanism' only as a sub-claim kind); #method in view/tools.js mountTools() has The claim, Verdicts, Checks, The figure, Cross-check, Shared components, Export and Sources; walk() covers claim, sub-claims, checks, figure and interval. 'THE MECHANISM · WHAT THE CODE DOES' is a panel label, not an explanation, and G0's .sub paragraph naming the three is gone. The figure statement also overstates the code: the lede says each sub-claim is 'checked here in your browser' and #method-short says 'a verdict counts only when a check backs it', but ex.daily (basis inspection, checkKeys() returns []) enters Exomania's figure unchecked, and the ledger reports 96% check-backed, not all. Above the break: a 509-word method, a 5-step walk-through, a running caption, a limits list."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 3,
           "evidence": "Rung 2 holds: 4 cache-disabled loads of the live page over CDP with those throttle values (2026-11-11, fresh profile, headless Chrome) gave first contentful paint at 1120, 1168 and 1180 ms and 2960 ms on the first cold launch (median 1174 ms); before it only the 7.7 KB gzipped HTML and the 1.1 KB font stylesheet arrive, and the figure renders from inline data. Rung 3 holds: reduce and ?still skip the count-up in setNum() and the bar transition in select(). Rung 4 fails: in a 390x844 frame (?still, headless Chrome) the stage grid gives the 1fr decode row the leftover height; with .decode min-height:0 the claim and mechanism registers collapse to about 35 px each, overlap the first row of chips, and hide their text. Rung 5 would also fail: no aria-pressed, no role meter, no aria-live; rung 6 too: --dim #6B7682 on #07090C is 4.31:1 and chips are about 30 px tall."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Undisputed; the rater's grade stands. Rung 1 holds: the page renders. Rung 2 fails: 4 cache-disabled loads over CDP at 150 ms RTT, 1.6 Mbps down, 4x CPU, gzip served, ?nochecks gave first contentful paint 1540, 2104, 1868 and 2048 ms (median of loads 1-3: 2048 ms, over 1.5 s), with 71,589 B transferred before that paint (the 13 critical module and CSS files alone gzip to 61,321 B); the stage stays opacity 0 until main.js renders. Would-hold results above the break: ?still and reduced motion give the figure at once; at 390x844 the figure, claim and first mechanism sentence fit above the fold; aria-selected, role=meter with aria-valuenow, and an aria-live region exist; 0 of 505 text nodes under 4.5:1. Phrases, segments and contenteditable sub-claims are under 44 px on a phone."
         }
       }
     },
@@ -276,11 +316,16 @@
         "G0": {
           "level": 2,
           "evidence": "Rung 2 holds: one inline IIFE in labs/honesty-decoder.html, where the DECODER array (10 rows) is separate from select() and setNum(). Rung 3 fails: data and render share the file. window.L212_DECODER is set so sibling exhibits can pull their own row, but only a same-origin page framing the decoder could read it, and a repository grep finds no file that references it."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Undisputed; the rater's grade stands. Rung 2: data separate from rendering (registry.js, view/*.js). Rung 3: rows live in the registry.js module main.js imports, so a new row touches no rendering code. Rung 4 is between met and unmet, so the lower is taken: validateRow() and its 8 planted bad rows live in labs/assets/js/honesty-decoder/tests.mjs, run by tools/lab_tests.mjs (wired into gates.yml), but the validator is not in tools/, and the schema does not include the per-row graded date and commit, which sit in the generated snapshot.js grading block. Rung 5 would also fail: a built lab with no row is only a drift warning unless --strict. Per-lab PROBES modules in checks/labs/ exist but cannot count."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "746da75" }
   ]
 }
