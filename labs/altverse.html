@@ -1,27 +1,133 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Altverse — Alternate Reality Scenarios · luisblanco.dev Labs</title>
-  <meta name="description" content="A what-if engine: change one constant of reality and a deterministic engine weaves a complete, internally-consistent alternate world — premise, chronology, map and the causal record of how it differs from ours." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <link rel="stylesheet" href="assets/css/tokens.css" />
-  <link rel="stylesheet" href="assets/css/altverse.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Altverse · change one thing, weave the world that follows</title>
+<meta name="description" content="Type any divergence. A nine-stage graph of physics, climate, biosphere, geography, history, technology and culture weaves the world that follows: a generated map, a river of time, the causal record from the change to every consequence, and branching forks you can compare." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/altverse.css" />
 </head>
 <body>
-  <div class="av-topbar">
-    <a href="index.html" class="home"><i class="fa-solid fa-arrow-left"></i> luisblanco.dev Labs</a>
-    <span class="wm">ALTVERSE</span>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span>
+<span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+
+<header class="bar">
+  <div class="bar-l">
+    <a class="back" href="index.html">&larr; labs</a>
+    <span class="label">ALTVERSE <span class="on">/ alternate reality line</span></span>
   </div>
+  <div class="bar-r">
+    <span id="route"></span>
+    <span class="brand">THE LAB &middot; <b>L212</b></span>
+  </div>
+</header>
 
-  <main id="av-app"></main>
+<main id="app">
+  <!-- compose + the multipath -->
+  <section class="top">
+    <div class="compose">
+      <div class="kick">change one thing</div>
+      <h1>Type a divergence. <span class="lo">Nine stages weave the world that follows.</span></h1>
+      <p class="sub">A deterministic engine computes the physics, runs a climate model, raises the ground and settles it, then rewrites the record from the change forward. When a model route answers, it writes prose on top, and a validator keeps or rejects every line.</p>
+      <form id="dv-form" class="dv-form" autocomplete="off">
+        <label for="dv-in" class="sr">Divergence</label>
+        <textarea id="dv-in" rows="2" maxlength="240" spellcheck="false" placeholder="e.g. the Moon is twice as close, or the steam engine arrives in 1100"></textarea>
+        <div class="dv-row">
+          <span class="reading" id="reading" aria-live="polite"></span>
+          <button type="submit" class="go" id="dv-go">Diverge &rarr;</button>
+        </div>
+      </form>
+      <div class="plate pipe">
+        <div class="plate-h"><span>THE MULTIPATH</span><span id="pipe-mode" class="dim">engine pass</span></div>
+        <div id="pipe-graph" class="pipe-graph" role="img" aria-label="Stage graph"></div>
+        <div class="pipe-foot">
+          <div id="pipe-note" class="pipe-note" aria-live="polite"></div>
+          <button type="button" class="ghost" id="model-go">write it with the model</button>
+        </div>
+      </div>
+      <div class="dial" id="dial" hidden></div>
+      <div class="presets" id="presets" role="list" aria-label="Example divergences"></div>
+    </div>
 
-  <script type="module" src="assets/js/altverse/main.js"></script>
+    <div class="world">
+      <div class="w-head">
+        <div class="w-id">
+          <div class="w-kick" id="w-kick">WORLD</div>
+          <div class="w-name" id="w-name">&nbsp;</div>
+          <div class="w-motto" id="w-motto"></div>
+        </div>
+        <div class="w-tools">
+          <button type="button" class="ghost" id="act-tour">guided tour</button>
+          <button type="button" class="ghost" id="act-seed">new seed</button>
+          <button type="button" class="ghost" id="act-link">copy link</button>
+          <button type="button" class="ghost" id="act-json">export JSON</button>
+          <label class="ghost file-btn" for="act-import">import JSON<input type="file" id="act-import" accept="application/json,.json" class="sr"></label>
+          <button type="button" class="ghost" id="act-md">dossier .md</button>
+          <button type="button" class="ghost" id="act-png">map PNG</button>
+        </div>
+      </div>
+      <div class="w-div" id="w-div"></div>
+      <div class="tree" id="tree" aria-label="Tree of worlds"></div>
+      <figure class="map-wrap" id="map-wrap">
+        <canvas id="map" tabindex="0" aria-describedby="map-desc"></canvas>
+        <div class="map-modes" role="group" aria-label="Map layer">
+          <button type="button" data-mode="terrain" aria-pressed="true">terrain</button>
+          <button type="button" data-mode="isotherm" aria-pressed="false">isotherms</button>
+          <button type="button" data-mode="ours" aria-pressed="false">our physics</button>
+        </div>
+        <div class="map-tip" id="map-tip" hidden></div>
+        <figcaption class="map-cap" id="map-desc"></figcaption>
+      </figure>
+      <div class="qstrip" id="qstrip"></div>
+    </div>
+  </section>
+
+  <!-- river of time -->
+  <section class="sec">
+    <div class="sec-h"><span class="n">01</span><h2>River of time</h2><p>Our record runs dim; this world runs bright from the divergence on. Tethers join an invention's date in ours to its date here. Pick an event to read it and to fork a new world from it.</p></div>
+    <div class="river-wrap" id="river"></div>
+    <div class="inspect" id="inspect"></div>
+  </section>
+
+  <!-- causal record -->
+  <section class="sec">
+    <div class="sec-h"><span class="n">02</span><h2>Causal record</h2><p>Every consequence names its cause. Hover or focus one to light its path back to the change and everything it leads to.</p></div>
+    <div class="causal-wrap" id="causal"></div>
+    <div class="causal-detail" id="causal-detail" aria-live="polite"></div>
+  </section>
+
+  <!-- dossier -->
+  <section class="sec">
+    <div class="sec-h"><span class="n">03</span><h2>Stage by stage</h2><p>What each stage computed, what it assumed, and where the model wrote. Gold marks what this world changed.</p></div>
+    <div class="dossier" id="dossier"></div>
+  </section>
+
+  <!-- validation -->
+  <section class="sec">
+    <div class="sec-h"><span class="n">04</span><h2>Ledger</h2><p>The same rules a model's reply must pass, run over the finished world, engine and model alike, with every rejected line kept and the rule that rejected it.</p></div>
+    <div class="ledger" id="ledger"></div>
+  </section>
+
+  <!-- sweep -->
+  <section class="sec" id="sweep-sec">
+    <div class="sec-h"><span class="n">05</span><h2>Sweep</h2><p>Move the divergence's number across its whole range: the engine weaves the world again at 24 values and marks which consequences switch on, and where.</p></div>
+    <div id="sweep"><p class="empty">Pick a divergence with a number (gravity, tilt, sunlight, ice density, day length, CO2, oxygen, sea level, an invention's year) and press "sweep this number" under its dial.</p></div>
+  </section>
+
+  <!-- compare -->
+  <section class="sec">
+    <div class="sec-h"><span class="n">06</span><h2>Side by side</h2><p>Any two worlds from the tree, or ours.</p></div>
+    <div class="compare" id="compare"></div>
+  </section>
+
+  <!-- evidence -->
+  <footer class="foot" id="foot"></footer>
+</main>
+
+<script type="module" src="assets/js/altverse/main.js"></script>
 </body>
 </html>

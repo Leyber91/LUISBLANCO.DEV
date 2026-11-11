@@ -72,9 +72,9 @@ export const CATEGORIES = [
         blurb: 'A navigable timeline of the Tryverse — branch points, dimensions and the people inside them.' },
       { id: 'last-witness', title: 'Time-Slip: The Last Witness', status: 'beta',
         blurb: 'Cross a singularity, return ten thousand years late, and speak with the last machine mind awake.' },
-      { id: 'alt-reality', title: 'Alternate Reality Scenarios', status: 'beta',
+      { id: 'alt-reality', title: 'Alternate Reality Scenarios', status: 'built',
         href: 'altverse.html',
-        blurb: 'A what-if engine: change one constant and a deterministic pipeline weaves a complete, consistent world — premise, chronology, map and the causal record of how it differs from ours.' },
+        blurb: 'Type any change to physics or history. A nine-stage graph computes the world that follows (climate, ground, life, record), draws its map and causal graph, and lets you fork it from any event into a tree of worlds.' },
     ],
   },
   {
