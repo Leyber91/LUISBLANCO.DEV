@@ -1,0 +1,21 @@
+{
+ "measured": "2026-11-11T10:59:02.026Z",
+ "tool": "Lighthouse 12.2.1",
+ "formFactor": "mobile",
+ "throttling": "simulate",
+ "page": "labs/trending.html (resting state, no data request)",
+ "server": "the worktree served on 127.0.0.1 with gzip, as GitHub Pages serves it; the uncompressed python http.server scored lower (performance 72 on the same build)",
+ "scores": {
+  "performance": 95,
+  "accessibility": 100,
+  "best-practices": 93
+ },
+ "metrics": {
+  "first-contentful-paint": "2.1 s",
+  "largest-contentful-paint": "2.7 s",
+  "total-blocking-time": "0 ms",
+  "cumulative-layout-shift": "0",
+  "speed-index": "2.1 s",
+  "total-byte-weight": "Total size was 170 KiB"
+ }
+}

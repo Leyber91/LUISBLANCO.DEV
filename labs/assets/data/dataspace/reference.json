@@ -1,0 +1,38 @@
+{
+  "note": "Reference compressed sizes of alice29.txt (Canterbury Corpus, Arnold and Bell, DCC 1997; 152,089 bytes, sha256 7467306ee0feed4971260f3c87421154a05be571d944e9cb021a5713700c38f0), measured with the command-line tools on 2026-11-11 on Windows 11 (Git for Windows / MSYS2 builds). The page compresses the same bundled file in the browser at the same settings and prints its figure next to these.",
+  "file": "alice29.txt",
+  "bytes": 152089,
+  "date": "2026-11-11",
+  "tools": [
+    {
+      "id": "deflate",
+      "label": "DEFLATE",
+      "command": "gzip -6 -n -c alice29.txt | wc -c",
+      "version": "gzip 1.14",
+      "output": "54423",
+      "container": "gzip header 10 bytes + trailer 8 bytes",
+      "bytes": 54405,
+      "page": "CompressionStream('deflate-raw'), the browser's zlib at its default level 6"
+    },
+    {
+      "id": "brotli",
+      "label": "Brotli",
+      "command": "brotli -q 11 -w 22 -c alice29.txt | wc -c",
+      "version": "brotli 1.1.0",
+      "output": "46487",
+      "container": "none (raw brotli stream)",
+      "bytes": 46487,
+      "page": "brotli-wasm 3.0.1 (Rust brotli crate compiled to WebAssembly), quality 11, default window 22"
+    },
+    {
+      "id": "lzma",
+      "label": "LZMA (xz)",
+      "command": "xz -6 -c alice29.txt | wc -c",
+      "version": "xz (XZ Utils) 5.8.1",
+      "output": "48500",
+      "container": "xz container, about 60 bytes",
+      "bytes": 48500,
+      "page": "not measured in the page (no LZMA encoder bundled); listed for context"
+    }
+  ]
+}
