@@ -121,7 +121,7 @@ It stays as the record of the first look. The ratings by each lab's own axes fol
 | Lab | Axes | G0 | Latest | Level | Weakest axis | Next rung |
 |---|---|---|---|---|---|---|
 | Labs hub | 11 | 1 | G0 | 1 | climb-display, lab-previews at 0 | Each card prints its lab level (0 to 10) read at runtime from labs/assets/js/config/levels.data.js; changing a level in labs/levels/<id>.json and running `node tools/levels.mjs write` changes the card with no hub edit. |
-| Black Hole | 12 | 1 | G0 | 1 | infall-clocks at 0 | The page states at least one time effect with a number (for example, a static clock at 1.5 r_s ticks at 58% of a distant clock's rate). |
+| Black Hole | 12 | 1 | G1 | 2 | instrument-style at 0 | Every colour in black_hole.css is a tokens.css variable or a color-mix of one, except pure black #000; the panel's padding and corner radius at desktop width come from --s-* and --r-* tokens. |
 | Dimensional Test | 12 | 2 (capped) | G0 | 2 (capped) | flatland-slicing, curved-fibred-spaces at 0 | A static picture or a sentence describes a cross-section of the tesseract. |
 | Exomania | 12 | 2 | G0 | 2 | system-model, population-space, frame-budget-reach at 1 | A system view draws the star and this planet's orbit at its catalogue semi-major axis, with a scale bar in AU. |
 | Heptapod Codec | 11 | 1 | G0 | 1 | grammar-morphology, semagram-composition, decoder-noise, english-parser, script-identity, semasiography-explained at 1 | Negation is grammar: 'not' or 'never' adds a negation operator to the stroke of the predicate it scopes over, and no separate negation element is drawn; 'we offer' and 'we do not offer' differ by that operator. |

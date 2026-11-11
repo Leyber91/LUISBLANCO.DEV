@@ -26,6 +26,10 @@
         "G0": {
           "level": 2,
           "evidence": "blackhole.js FRAG accel() integrates the Schwarzschild orbit equation a = -1.5 h² r/|r|⁵ (r_s = 1) per pixel with v renormalised each step, and the 1440 px screenshot shows the far side of the disk arched above the shadow (rung 2). The march continues after a disk crossing and composites later crossings through transmit. Rung 3 fails: main() adds a painted rim to every escaped ray, ring = smoothstep(0.5, 0.0, |minr - uPhotonR|)² × 1.7 × (0.7 + 0.5·uMdot), keyed to the fitted photonR = 1.5 - 0.35a - 0.2q from _physics(); it is the thin bright rim around the shadow in the screenshot and covers the traced n ≥ 1 light there. Beyond that: first-order update (v then p, dt = 0.055 r, fixed STEPS 360), no shadow-size test in the repo, and ray directions are built in coordinate space with no static-observer frame: the screenshot shadow radius is 221 px (dark span x = 499 to 940 on row 450), matching b = 3√3 M for coordinate directions (222 px), not the 215 px Synge value at r_o = 16 r_s and 900 px height. Kerr is a capture-radius hack (capR = uHorizon·(1 - 0.22·a·side))."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Rungs 1-3 pass. shaders.js metricKN and the integrator chunk integrate Hamilton's equations for Kerr-Newman in Kerr-Schild form with RK4 and stepSize(). traceRay() keeps marching through plane crossings outside the annulus, so the n = 1 disk image is traced; the desk screenshot labels it at the shadow edge. Capture happens at r < 0.98 r+, and no rim term is added. The dashed blue-white line at the capture boundary is the Labels annotation (shadeProgram uNotes, a 40% mix that the Labels button turns off). It is not radiance, so it does not break rung 3; that part of the dispute is rejected. Rung 4 fails, and the skeptic's main point holds. The rung asks for a repo test that measures the RENDERED Schwarzschild shadow at 3 camera distances. verify.mjs (re-run here: all checks pass) bisects the CPU twin kerr.js traceRay instead: a = 0 at 1000 M (section 3, traced width 10.3923 = 2√27; the skeptic's 'analytic only' remark is wrong for that point), and the Synge angles at 6 M (45.00°) and 4 M (66.72°). No repo script reads GPU output. renderer.measureStrip() runs only from the page's Measure button, and measurements.json records one GPU strip (a = 0.94, 1000 M), not 3 Schwarzschild distances. The rater applied the same 'not GPU output' standard when failing rung 6. Rung 5 (exact Kerr-Newman, the a = 0.9 flattening and the Q shrink verified) is present but cannot count above a failed rung 4. Rungs 6-7 also fail: the 360-angle outline test covers 2 of 4 spin and inclination pairs, and there is no Carter-constant drift test."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 3,
           "evidence": "diskTemp() uses T ∝ r^-3/4 (1 - √(r_in/r))^1/4 normalised to its peak (uTnorm) and mapped through the temp2color() ramp; the inner edge is the Kerr prograde ISCO from the Bardeen-Press-Teukolsky formula in _physics() (charge scales it by an ad hoc 1 - 0.45q²). diskShade() takes the Doppler factor from the orbital direction vdir = cross(y, hit) and the incoming ray direction vIn at each hit (mu = dot(vdir, -normalize(v))), applies pow(doppler, 2.7), and dims the inner edge by mix(0.45, 1, √(1 - 1/r)) (rung 3). Rung 4 fails: beta = √(0.5/(r - 0.5))·(1 + 0.25a) is not the Keplerian speed (r_s units give √(0.5/(r - 1))), the Doppler and gravitational terms are separate fudges with no single g, no temperature in kelvin exists, mdot is a unitless 0.2 to 2, and colour is an artistic ramp times a mass tint (uMassTemp), not a spectrum."
+        },
+        "G1": {
+          "level": 8,
+          "evidence": "Not disputed; rater's grade kept. Rung 2: kerr.js ntFluxTable() computes Page-Thorne flux by quadrature, and verify.mjs matches it to the closed form; the inner edge is isco() (BPT 1972). Rung 4: emitterG() returns g = 1/(u^t(E - Ω L)) from the Kerr-Newman circular orbit and the ray's conserved p_t and p_phi, and diskColor() uses I = (g·Tn)^4. Rung 5: the slider reads 'Ṁ/Ṁ_Edd, log10', and diskPeakKelvin() gives 7.5039e6 K at 10 M☉ and 7.5039e5 K at 1e5 M☉ (ratio exactly 10). Rung 6: blackbody.js buildLUT() integrates Planck against the Wyman 2013 CIE 1931 fit; True colour samples it at f_col·T_peak·g·Tn. Rung 7: the 'efficiency 1 - E(ISCO)' readout shows 5.72% at a = 0 and 32.10% at a = 0.998. Rung 8: the f_col slider runs 1 to 1.8, default 1.7, and the limb term is (1 + 2.06μ) with μ = |p_z|·g. Rung 9 fails: a live νFν plot exists (probe.js anchors, f_col fixed at 1.7), but there is no kerrbb comparison script."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 0,
           "evidence": "No code or text about proper time, time dilation, tides or infall: bh_animation_page.html, blackhole.js and ui.js hold no clock, no timelike geodesic and no tidal value; the camera only orbits at a chosen distance (camDist clamped 4 to 90 r_s in _bindPointer())."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Not disputed; rater's grade kept. Rung 1 passes: the Instrument card shows 'clock rate here 0.978 x far' at 46 M. Rung 2 fails: drawReadouts() reads store.shown.rcam when the store emits, which is before the easing runs, and nothing redraws when the easing ends outside the Fall view. After three wheel zooms the camera sat at 57.9 M while the readout said 0.981 (correct: 0.9826). After Telescope the camera is at 1000 M but the readout stayed 0.983 (correct: 0.999). The same stale-on-emit pattern appears under sourced-objects ('shadow diameter 10.0 M' after Telescope). Rung 3 fails: ui.js journey.play() always runs fall(a, incl, 40), an E = 1 rain geodesic already moving at 0.236 c at a fixed 40 M; no start radius and no from-rest start. τ and t in days, the 4M/3 and πM rows, tides in m/s² and g with a 10 g mark, and the hover/fall toggle exist but cannot count under the cumulative rule."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 4,
           "evidence": "One WebGL1 full-screen fragment shader (blackhole.js FRAG) re-renders under drag, wheel and pinch; background(v) samples the sky along the bent final direction, and the 1440 px screenshot shows lensed stars inside the arc around the shadow; dither01() TPDF dither after gamma and ign() march-start jitter, with no visible contouring in the screenshot. Rung 5 fails: one sample per pixel at resScale 0.85 upscaled by CSS, no accumulation. Rung 6 fails too: the per-channel x/(x+1) tone map leaves a desaturated beige-grey disk; in the screenshot's render area (x < 1130) the maximum channel value is 240, no pixel has all channels at 245 or above, 29% of pixels have every channel at 180 or above, and the brightest 5% have median CIELAB chroma C* 5.2."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Rungs 1-3 pass: a WebGL2 trace → shade → final pipeline that responds to drag, wheel and pinch, and skyColor() sampled along each traced escape direction, so stars near the shadow appear as lensed images. Rung 4 fails, and both disputes hold. The rung names two mechanisms: dithering AND per-pixel march jitter. Only the dither executes (ign2 in FINAL, after ACES). The jitter is a stub. shaders.js traceRay() declares uJit and adds it to the screen coordinate, but renderer.js _screenMap() always returns jit [0, 0], and no caller overrides it. The direct fallback sets uJit (0, 0), measureStrip passes [0, 0], and the march start and step rule are deterministic per pixel. Contrast-stretched crops show no banding, but a stub does not count, and between rungs the lower is taken. This is a regression from G0's 4, where ign() march-start jitter executed. Rungs 5-6 also fail, as the rater found. The auto tier is unstable: on the same GPU, default loads here ended at auto/low, auto/mid and auto/high. Low and min trace 1 sample per pixel, and the default-load ring edge is stair-stepped. The Sgr A* preset's brightest 5% have median C* 5.7, below 15."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 1,
           "evidence": "ui.js updateReadout() writes r_horizon and r_ISCO in r_s and a one-word shadow descriptor into the pinned readout, refreshed on every physics slider input. No diagram, plot or second rendered view exists on the page; the photonR that a cross-section would draw today is the fit 1.5 - 0.35a - 0.2q (1.15 r_s at a = 0.998, against the true prograde 0.537 r_s)."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Rung 1: the Instrument card shows horizon, photon orbit and ISCO and updates with the sliders. Rung 2: diagrams.js crossSection() draws the to-scale horizon, ergosurface, prograde and retrograde photon orbits with Kerr-Newman values (photonOrbit(a, ±1, q)), ISCO, disk, camera position and inclination. Rung 3 fails, and both disputes hold. ui.js viewNow() returns q: 0, and probeAt() builds the camera with K.observerFrame(v.a, ...) and traces with K.traceRay(v.a, ...), with no q in either call. kerr.js traceRay accepts opts.q, and the GPU traces view.q. Node check at a = 0, Q/M = 0.9, camera 46 M, i = 84°: screen tan 0.10, 0.105 and 0.11 escape with Q (as rendered) but are captured with q = 0 (as probed). GPU headless at ?a=0&qq=0.9&em=off: measureStrip puts the shadow edge at x = 869.8 px. Clicks at x = 876, 882 and 888 each report 'Shadow: this ray ends in the hole ... r+ = 1.436 M', while a one-texel GPU trace at the same point returns -2 (escaped). The screenshot shows the probe marker outside the dashed shadow edge. Charge is a main-panel slider, so in every charged state the cross-section draws a different ray from the one under the cursor. Rungs 4-5 (diskProfile with the hover highlight, potentialPlot extrema matching the readout) exist but cannot count above the failed rung 3."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 1,
           "evidence": "Every colour in black_hole.css is a tokens.css variable or a color-mix of one except #000 (html/body, #bh-loading, .bh-nowebgl, the phone panel shadow), and the desktop panel uses --s-3/--s-4 padding and --r-lg radius (rung 1). Rung 2 fails: tokens.css maps --font-display, --font-body and --font-mono all to IBM Plex Mono, so the Orbitron and Space Grotesk the HTML loads are never used; .bh-type, .bh-view, .bh-pause and .bh-collapse set no font-family and neither CSS file resets button fonts, so the 1440 px screenshot shows the regime and view labels in the user-agent sans on white buttons; .bh-fam-head and .bh-acc-tag (.58rem) and .bh-note (.6rem) use raw sizes, not --t-* tokens. Rung 3 fails too: .bh-readout sub paints the label subscripts horizon, ISCO and s in --accretion-soft gold while the live values beside them are --text-dim grey."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Not disputed; rater's grade kept. Rung 1 fails, a regression from G0's 1. black_hole.css defines its own colour literals instead of tokens.css variables or color-mix. Lines 10-14 in :root: --bh-panel rgba(6, 8, 13, 0.88), --bh-panel-solid, --bh-hair, --bh-hair-2, --bh-gold-line. Line 89: .bh-btn:active rgba(159, 179, 214, .08). Line 91: .bh-btn[aria-pressed] rgba(212, 162, 76, .08). Lines 101, 148, 177: rgba(0, 0, 0, .35). Line 199: the #bh-overlay text stroke rgba(6, 8, 13, .85). Panel padding is raw (.bh-card 11px 13px, not --s-*), and there is no --r-* radius. Later rungs fail too. Sizes use custom --bh-fs and --bh-fs-s and raw px, not --t-*. Gold marks idle or static items (.bh-kick, the .bh-btn.go buttons, the .bp corner brackets). At default load the 'n = 1 image' label overlaps the 'horizon is 2.68 M wide' label."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 4,
           "evidence": "_bindPointer() in blackhole.js gives mouse-drag orbit, wheel zoom (4 to 90 r_s), one-finger orbit and two-finger pinch; ui.js offers 13 regime presets, 4 physics sliders, 7 appearance sliders, 3 view presets and pause; main.js restores ?type= and ?view=. Rung 5 fails: slider values, yaw and distance are not written to the URL and there is no copy-link control."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Rungs 1-4 pass; the dispute is rejected. Rung 4 asks that deep links restore a regime and a viewing angle. The parenthesis names G0's keys, and G1 replaced G0's 13 regimes with 4 objects and renamed the keys. GPU headless checks: ?o=sgra&i=60 loads Sgr A* (a 0.5, mass 10^6.633 M☉) at inclination 60. ?o=cygx1&i=40&a=0.5 loads Cygnus X-1 at 40° and a = 0.5. A copied telescope link (?o=m87&v=telescope&r=1000&f=1.15&i=17) restores rcam 1000 and fov 1.15. The skeptic's facts are correct: ?type=primordial gives a = 0.9 on M87*, ?view=tilt is ignored, and a bare ?v=telescope sets the view enum but keeps the cinematic camera (rcam 46), because boot never applies viewPatch. That breaks G0-era links, but the capability the rung measures works. The rung-3 point does not decide the rung either. In Thermal mode the mass and Eddington sliders change no image pixel, because mass is a pure scale in M units and the thermal path uses only uTdisp. Their changes still show on the next frame in the Instrument card (mass, km/AU radii, disk peak T, Eddington) and in the True colour render (uTpeakK). Rung 5 fails, as the rater found. Store.toQuery() omits any value equal to its SCHEMA default, so boot's objectPatch() overrides it: Primordial with the thick disk reopens with emit off, and Sgr A* at edd -5 reopens at -8. Numbers are also rounded. Rungs 6-8 exist (typed entry, a click probe with fate, L/E and g, Plate 3840 and JSON export)."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 1,
           "evidence": "ui.js TYPES captions carry uncited class masses (~10 M☉, ~10⁹ M☉, Sgr A*-like ~4×10⁶ M☉, TON 618-class ~6.6×10¹⁰ M☉). Rung 2 fails: Primordial is captioned asteroid-mass but sets mass 0.7 (10^0.7 ≈ 5 M☉); Ultramassive is captioned ~6.6×10¹⁰ M☉ but sets 9.8 (≈ 6.3×10⁹ M☉, the slider maximum). No object has a source, a distance or a date."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 passes: each object's kind line names its class (supermassive, stellar-mass, hypothetical), and the Instrument card gives its mass. Rung 2 fails; the second dispute holds, verified on GPU headless. (1) From the default load, clicking Telescope leaves store incl = 17 and shown.incl = 17 after 6 s, but the caption reads 'Seen from far away at 84 deg', and the Instrument card still says 'shadow diameter 10.0 M'. tour.js idleCaption() and drawReadouts() read store.shown when the store emits, before the easing, and nothing redraws them. (2) Tour forward to stop 5: 'M87* sits at 80 deg. The traced shadow is 9.54 M wide; ... 38.2 uas', beside a Shadow card reading i = 17 deg, 9.73 M, 37.4 µas. (3) Tour stop 8 (Cygnus X-1), then Back: stop 7 reads 'At M87* the fall from the horizon to the centre takes 13.3 µs', a Cygnus X-1 number under M87*'s name. Back again to stop 5: 'M87* sits at 82 deg. The traced shadow is 9.11 M wide; at 16.8 Mpc that is 0.0 uas', while obj = cygx1 and i = 27.5. config.js TOUR hard-codes 'M87*' and '16.8 Mpc' in stops 5 and 7. Rung 3 would also fail (the first dispute holds): M87* and Sgr A* spins are tagged ILLUSTRATIVE and 'not measured', which are stand-ins, not estimates. ui.js openSources() also merges massSrc, spinSrc and inclSrc into one cell per object and never shows distSrc. The km and AU radii and the EHT comparisons (37.4 ± 4.40 µas against 42 ± 3, -0.870 σ) exist but cannot count. Same level as G0."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 1,
           "evidence": "applyType() in ui.js rewrites the .bh-title caption per regime (for example 'Kerr · spinning · a = 0.90'). Nothing else happens without input: no idle mode, no tour, no model call; the blackhole modules do not import llm.js."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Not disputed; rater's grade kept. Rung 1: Tour.idleCaption() rewrites the caption on object change. Rung 2: Tour.tick() drifts azimuth after 20 s idle, and any pointer or key input resets app.lastInput. Rung 3 fails: in config.js TOUR, stops 2-4 (shadow, beaming, order) patch only colour and set no regime or camera. Back from stop 5 (Telescope) to stop 4 left view = telescope, rcam = 1000 and the thin emitter, under a caption about the n = 1 disk image with no disk shown. The tour captions are also wrong on ordinary paths, as checked under sourced-objects: stops 5 and 7 hard-code M87*, and their numbers read store.shown before the easing. Rung 5 fails as well: every slider handler calls app.tour?.stop() first, so a mid-tour slider move ends the tour. The question box exists (llm.js call, route shown, apply-state, and an offline engine) but cannot count above the failed rungs."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 1,
           "evidence": "The collapsed Model section holds the note 'Exact Schwarzschild geodesics. Spin · charge · mass act on the ISCO, beaming, horizon and disk as physically-motivated approximations — not full Kerr ray tracing' (rung 1). Rung 2 fails: ui.js TYPES tags Quasar / AGN THEORETICAL, although the legend in the same note defines ESTABLISHED as a real class and quasars are an observed class. Rung 3 fails too: the only explanatory text sits in the collapsed Model section, and nothing on the page names the shadow, photon ring or disk. Rung 4 would fail as well: the Naked singularity regime sets spinA 1.15, which _physics() clamps to 0.998 with horizon 0.5 r_s, so the shader still captures rays and draws a shadow while the readout says 'none — exposed core'; Primordial is captioned Hawking-hot but no Hawking quantity is computed."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 passes: the always-visible footer separates [REAL] (Kerr geodesics, shadow, disk physics, EHT values, clocks, tides) from [ILLUSTRATIVE] (turbulence, display scale, sky). Rung 2 fails, and both disputes hold. The rung asks for an ESTABLISHED, THEORETICAL or SPECULATIVE tag shown with each regime. Those words appear nowhere in bh_animation_page.html, the blackhole modules or black_hole.css (grep), and ui.js builds the object buttons as plain names. What exists is a two-value provenance mark on readout rows (tagR/tagI: 'R: computed or sourced. I: illustrative.') and REAL/ILLUSTRATIVE spin tags in the Sources dialog. These say where a number comes from, not the evidence class of the object; Primordial's 'hypothetical' kind line is the only regime-level statement. The rater accepted a substitute vocabulary on a different carrier, which the rung as written does not allow. Rung 3 fails, as the rater found: no on-image label names the photon ring or the accretion disk, phone widths drop the ring and ISCO labels, and the Labels button removes them all."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 3,
           "evidence": "_noWebGL() replaces the canvas with a message when WebGL is missing; resScale 0.85 renders below native and ?still renders one frame; under 600 px the panel becomes a bottom sheet that starts collapsed (ui.js matchMedia, black_hole.css). Rung 4 fails: prefers-reduced-motion only disables the accordion transition, the disk keeps rotating every frame. No frame-time readout, no tiers (STEPS fixed at 360), no keyboard orbit, no live region, canvas has only an aria-label, sliders set outline: none."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Not disputed; rater's grade kept. Rung 1: #bh-nogl shows when Renderer.ok() is false. Rung 2: TIERS render below native resolution, and ?still traces the full buffer in one frame (render(full)). Rung 3: at 400×860 the .bh-stage sheet starts closed, the canvas stays full-screen, and scrollWidth is 400. Rung 4: with prefers-reduced-motion, anim = false, the tour and veil are skipped, and Play resumes. Rung 5 fails: the on-page median-ms readout with the GPU name exists, but measurements.json records only RTX 3500 Ada and SwiftShader runs and lists 'not_measured: An integrated GPU (Intel Iris Xe class)'. The auto tier is also unstable: my GPU headless default loads ended at auto/low, auto/mid and auto/high."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 3,
           "evidence": "Three ES modules: main.js (entry), blackhole.js (shader string, physics, pointer input and renderer in one BlackHole class), ui.js (top-level TYPES, VIEWS and SCHEMA constants, then buildPanel()). Rung 4 fails: horizon, ISCO and photon-radius derivations sit in BlackHole._physics() inside the WebGL class; no tests exist."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Not disputed; rater's grade kept. Rungs 1-5 pass. Modules are split by role (main.js entry, renderer.js GPU, ui.js panel, shaders.js chunks), and config.js holds the data constants (SCHEMA, OBJECTS, VIEWS, TOUR, TIERS). kerr.js and physics.js import no DOM or WebGL, and physics.derive runs in Node. verify.mjs runs with one command and passes (re-run here), covering ISCO 6M and 1.237M, photon orbit 3M and the horizon 1+√(1-a²-q²). Rung 6 is partial; the lower rung is taken. The shader is built from named chunks with a METRICS table, and renderer.js has a UNIFORMS table, but uOrigin, uStepX, uStepY, uJit, uScale, uSS, uGSize, uRes, uBloom and uFrame bind outside it. A new metric must also supply circularOrbit and zamoEq. Rung 7 fails: ui.js hard-codes sliderKeys and LABEL, and main.js frameUniforms() maps keys by hand, so a new parameter touches 3-4 files."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "759b3e2" }
   ]
 }
