@@ -3,6 +3,23 @@
 The level system for the labs at luisblanco.dev/labs, and each lab's rating before and after its evolution pass.
 Started 2026-11-11 on Luis's order: every lab rises on every axis, and the developed ones rise five levels.
 
+## The anchor (Luis, 2026-11-11, supersedes the calibration below)
+
+Level 5 is the lab's fiction made real. For the Heptapod lab, in his words: "imagine that you're in the movie Arrival,
+right at the end, you have the visitor, you can just click on a keyboard and translate and it will show it to the
+heptapod civilization... I have a pod and I can translate what I say to heptapod and it will show the heptapod
+language", at the film's level of detail, with the algorithms that define every shape and the language itself.
+"Imagine what level 10 is. And this goes for every single project on labs. Every single project on labs is a marvel
+of what thought, research, planning and your capacity can do. Not less than that."
+
+Each lab therefore gets a deep pass, one lab at a time: investigate (the references, the science, the state of the
+art, studied as specifications), assess (today's code against the bar), plan (the full design, and a recalibrated
+ladder on which rung 5 is that lab's fiction made real and rungs 6 to 10 go beyond it), then build, verify and ship.
+
+The per-lab ladders written on 2026-11-11 (v1, below) anchored rung 10 near the best existing web demo. That is about
+a full scale too low. They stay as the record of each lab's first audit and as evidence for its deep pass; each is
+replaced by its v2 ladder when that lab's deep plan is done.
+
 ## Each lab has its own axes
 
 A black hole and a habit tracker do not climb the same ladder. Each lab defines its own axes in

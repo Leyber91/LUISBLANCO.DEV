@@ -51,6 +51,7 @@ const POLL_WINDOW_MS = 46000;            // 45 s per IP, plus a second of slack
 // 127.0.0.1, not localhost: on Windows localhost tries ::1 first and took 1.6 s to connect (2026-11-11).
 const OLLAMA_BASE = 'http://127.0.0.1:11434';
 const OLLAMA_PROBE_MS = 2500;
+const OLLAMA_NUM_CTX = 8192;
 const OLLAMA_PREFER = ['qwen2.5:14b', 'llama3.1:8b', 'qwen3:8b', 'gemma2:9b'];
 const DEFAULT_TIMEOUT_MS = 60000;
 const OWN_KEY_STORE = 'lb.llm.ownkey';
@@ -125,7 +126,7 @@ export function extractJSON(text) {
 class Route {
   constructor() {
     this.listeners = new Set();
-    this.state = { route: 'unknown', model: '', label: 'model: detecting', readyIn: 0 };
+    this.state = { route: 'unknown', model: '', label: 'model: chosen on first use', readyIn: 0 };
     this._detecting = null;
     this._ollamaModel = '';
     this._queue = Promise.resolve();
@@ -149,7 +150,7 @@ class Route {
       route === 'worker' ? `model: ${model} (worker)` :
       route === 'pollinations'
         ? `model: ${model || 'gpt-oss-20b'} via pollinations` + (readyIn > 0 ? ` · next reply in ${readyIn}s` : ' · ready')
-        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: detecting';
+        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: chosen on first use';
     this.state = { route, model, label, readyIn, note };
     this.listeners.forEach((fn) => { try { fn(this.state); } catch { /* the listener's problem */ } });
     this._scheduleTick();
@@ -218,7 +219,9 @@ class Route {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
       body: JSON.stringify({
         model: this._ollamaModel, messages, stream: false,
-        options: { temperature: opt.temperature ?? 0.7, ...(opt.seed != null ? { seed: opt.seed } : {}) },
+        // num_ctx: an Ollama app set to a 262k context loads llama3.1:8b at 131k and 21.6 GB of memory
+        // (measured 2026-11-11); 8k is ample for a lab call.
+        options: { temperature: opt.temperature ?? 0.7, num_ctx: OLLAMA_NUM_CTX, ...(opt.seed != null ? { seed: opt.seed } : {}) },
         ...(opt.json ? { format: 'json' } : {}),
       }),
     });
