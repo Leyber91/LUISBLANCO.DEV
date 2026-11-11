@@ -155,16 +155,25 @@ async function cmdShoot(n, pageArg) {
   const url = `http://127.0.0.1:${lab.port}/labs/${page}`;
   const dir = `${SHOTS}/${lab.name}`;
   fs.mkdirSync(dir, { recursive: true });
+  // Headless Chrome will not lay a window out narrower than about 484 px, so a "390 px window" renders a wider
+  // layout and clips it. The phone shot instead loads the page inside a 390 px iframe, whose viewport (and every
+  // media query) is exactly 390 px wide.
+  const harness = `${SHOTS}/_phone.html`;
+  fs.writeFileSync(harness, '<!doctype html><html><head><meta charset="utf-8"></head>' +
+    '<body style="margin:0;background:#000"><iframe id="f" style="border:0;width:390px;height:1680px;display:block" ' +
+    'allow="autoplay"></iframe><script>document.getElementById("f").src=decodeURIComponent(location.hash.slice(1));' +
+    '</script></body></html>');
+  const phoneUrl = 'file:///' + harness.replace(/^\/+/, '') + '#' + encodeURIComponent(url);
   const shots = [
-    ['desk', ['-Mode', 'webgl', '-Width', '1440', '-Height', '900']],
-    ['phone', ['-Mode', 'mobile', '-Height', '1700']],
+    ['desk', url, ['-Mode', 'webgl', '-Width', '1440', '-Height', '900']],
+    ['phone', phoneUrl, ['-Mode', 'webgl', '-Width', '500', '-Height', '1700']],
   ];
-  for (const [tag, extra] of shots) {
+  for (const [tag, target, extra] of shots) {
     const out = `${dir}/${tag}.png`;
-    let r = run('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', SHOOT_PS1, '-Url', url, '-Out', out,
+    let r = run('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', SHOOT_PS1, '-Url', target, '-Out', out,
       ...extra, '-VirtualTime', '6000', '-TimeoutSec', '60', '-ProfileDir', `${SHOTS}/prof-${lab.name}`]);
     if (!fs.existsSync(out)) {
-      r = run('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', SHOOT_PS1, '-Url', url, '-Out', out,
+      r = run('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', SHOOT_PS1, '-Url', target, '-Out', out,
         ...extra, '-Classic', '-VirtualTime', '5000', '-TimeoutSec', '60', '-ProfileDir', `${SHOTS}/prof-${lab.name}`]);
     }
     console.log(fs.existsSync(out) ? `shot ${tag}: ${out}` : `shot ${tag}: FAILED (${(r.err || r.out).split('\n').pop()})`);
