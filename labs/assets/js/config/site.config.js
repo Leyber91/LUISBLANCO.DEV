@@ -56,7 +56,7 @@ export const CATEGORIES = [
         blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
       { id: 'exomania', title: 'Exomania', status: 'built',
         href: 'exomania.html',
-        blurb: 'Fly between procedurally lit exoplanets, fed daily by NASA Exoplanet Archive data.' },
+        blurb: 'All 6,464 confirmed exoplanets on real diagrams, from the radius valley to the discovery years; the chosen world ray-traced from its measured values, its system to scale with the habitable zone, its transit and its uncertainties.' },
     ],
   },
   {

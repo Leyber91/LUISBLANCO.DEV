@@ -9,10 +9,13 @@
    true atmospheric scale height, the cosmic-shoreline retention
    gate, a blackbody star colour, and insolation-driven exposure.
 
-   Source JSON: ~40k rows (repeated measurements). We keep one
-   best record per planet, require pl_rade, and degrade
-   gracefully when mass / eqt / semi-major axis are missing.
+   Records come from catalog.js. When a mass is missing or only
+   an upper limit, the Chen & Kipping 2017 forecaster (science.js)
+   supplies the median; stellar radius and mass come from the
+   archive when it has them.
    ============================================================ */
+
+import { forecastFor, starColour } from './science.js';
 
 const EARTH_R = 6.371e6, EARTH_M = 5.972e24, G = 6.6743e-11;
 const kB = 1.380649e-23, mH = 1.6726e-27;
@@ -33,76 +36,6 @@ function rng(seed) {
   return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 
-const completeness = (r) => ['sy_dist','pl_orbper','pl_orbsmax','pl_rade','pl_masse','pl_eqt','st_teff']
-  .reduce((n, k) => n + (num(r[k]) !== null ? 1 : 0), 0);
-
-// Loads the ~8.5 MB NASA catalogue. Streams the download so the loading screen
-// can show real progress ("receiving telemetry…"), and accepts a force flag to
-// bypass the HTTP cache (the Refresh control -> pull the latest workflow-updated
-// JSON). onProgress({phase,received,total,count}) phases: download|parse|process|done.
-export async function loadCatalogue(onProgress, force = false) {
-  const report = (typeof onProgress === 'function') ? onProgress : () => {};
-  const url = 'exoplanet_data.json' + (force ? ('?t=' + Date.now()) : '');
-  const res = await fetch(url, force ? { cache: 'reload' } : {});
-  if (!res.ok) throw new Error('catalogue fetch failed: HTTP ' + res.status);
-
-  let raw;
-  const reader = res.body && res.body.getReader ? res.body.getReader() : null;
-  if (reader) {
-    // content-length is the COMPRESSED on-the-wire size when the host serves
-    // gzip/brotli (GitHub Pages does), but reader.read() yields DECOMPRESSED
-    // bytes — so only use it as the % denominator when the body is identity-
-    // encoded; otherwise go indeterminate ('X received') rather than lie at 100%.
-    const enc = (res.headers.get('content-encoding') || '').toLowerCase();
-    const total = (!enc || enc === 'identity') ? (+res.headers.get('content-length') || 0) : 0;
-    const chunks = []; let received = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value); received += value.length;
-      report({ phase: 'download', received, total });
-    }
-    report({ phase: 'parse' });
-    let buf = new Uint8Array(received); let pos = 0;
-    for (const c of chunks) { buf.set(c, pos); pos += c.length; }
-    chunks.length = 0;                                  // release the retained chunk views
-    const text = new TextDecoder('utf-8').decode(buf);
-    buf = null;                                         // release the byte buffer before parse
-    raw = JSON.parse(text);
-  } else {
-    // streaming unavailable (very old browser) — fall back to a plain read
-    report({ phase: 'download', received: 0, total: 0 });
-    raw = await res.json();
-    report({ phase: 'parse' });
-  }
-
-  report({ phase: 'process' });
-  const best = new Map();
-  for (const r of raw) {
-    if (!r.pl_name || num(r.pl_rade) === null) continue;   // radius is the one mandatory field
-    const cur = best.get(r.pl_name);
-    if (!cur || completeness(r) > completeness(cur)) best.set(r.pl_name, r);
-  }
-  const list = [...best.values()].map(normalise);
-  list.sort((a, b) => a.pl_name.localeCompare(b.pl_name, undefined, { numeric: true }));
-  report({ phase: 'done', count: list.length });
-  return list;
-}
-
-function normalise(r) {
-  return {
-    pl_name: r.pl_name,
-    hostname: r.hostname || r.pl_name.replace(/ \w$/, ''),
-    sy_dist: num(r.sy_dist),
-    pl_orbper: num(r.pl_orbper),
-    pl_orbsmax: num(r.pl_orbsmax),
-    pl_rade: num(r.pl_rade),
-    pl_masse: num(r.pl_masse),
-    pl_eqt: num(r.pl_eqt),
-    st_teff: num(r.st_teff),
-  };
-}
-
 // ============================================================
 //  PHYSICS — one canonical pass; returns everything downstream needs
 // ============================================================
@@ -110,11 +43,12 @@ const A_CLASS = [0.30, 0.20, 0.30, 0.40, 0.20];   // provisional Bond albedo per
 
 export function physics(p) {
   const R = p.pl_rade;
-  const estMass = p.pl_masse === null;
-  const M = p.pl_masse !== null ? p.pl_masse : (R < 1.5 ? Math.pow(R, 3.7) : Math.pow(R, 1.7) * Math.pow(1.5, 2.0));
+  const estMass = p.pl_masse == null;
+  const fc = p.pl_masse == null ? forecastFor(p) : null;
+  const M = p.pl_masse != null ? p.pl_masse : (fc ? fc.median : Math.pow(R, 2.06));
   const Teff = p.st_teff ?? 5600;
-  const Mstar = clamp(Math.pow(Teff / 5772, 1.7), 0.1, 1.6);
-  const Rstar = clamp(Math.pow(Mstar, 0.8), 0.1, 4.0);            // solar radii (for star angular size)
+  const Mstar = p.st_mass ?? clamp(Math.pow(Teff / 5772, 1.7), 0.1, 1.6);
+  const Rstar = p.st_rad ?? clamp(Math.pow(Mstar, 0.8), 0.1, 4.0);  // solar radii (for star angular size)
   const a = p.pl_orbsmax ?? (p.pl_orbper ? Math.cbrt(Math.pow(p.pl_orbper / 365.25, 2) * Mstar) : 1);
 
   // radius soft-membership (single tiling scheme)
@@ -224,30 +158,8 @@ export function classify(p) {
   return { type, klass: ph.domClass, state: ph.state, label, habitable, atmDensity: ph.atmDensity, physics: ph };
 }
 
-// ---- catalogue grouping for the navigation panel ----
-export function category(p) {
-  const c = classify(p);
-  if (c.habitable) return { key: 'hz', label: 'Habitable zone', order: 0, accent: 'var(--ok)' };
-  if (c.klass <= 1) {
-    if (c.state === 'lava' || c.state === 'partial') return { key: 'lava', label: 'Lava worlds', order: 5, accent: 'var(--danger)' };
-    if (c.state === 'ice') return { key: 'frozen', label: 'Frozen worlds', order: 6, accent: 'var(--horizon-soft)' };
-    if (c.klass === 1) return { key: 'ocean', label: 'Ocean & super-Earths', order: 2, accent: 'var(--horizon)' };
-    return { key: 'rocky', label: 'Rocky worlds', order: 1, accent: 'var(--text-bright)' };
-  }
-  if (c.klass === 2) return { key: 'subn', label: 'Sub-Neptunes', order: 3, accent: 'var(--horizon-soft)' };
-  if (c.klass === 3) return { key: 'icegiant', label: 'Ice giants', order: 4, accent: 'var(--horizon)' };
-  return { key: 'gas', label: 'Gas giants', order: 7, accent: 'var(--accretion-soft)' };
-}
-
-// ---- blackbody star colour (Tanner-Helland), returned sRGB + linear ----
-function blackbodySRGB(kelvin) {
-  const t = clamp(kelvin, 1000, 40000) / 100;
-  let r, g, b;
-  r = t <= 66 ? 255 : 329.698727446 * Math.pow(t - 60, -0.1332047592);
-  g = t <= 66 ? 99.4708025861 * Math.log(t) - 161.1195681661 : 288.1221695283 * Math.pow(t - 60, -0.0755148492);
-  b = t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307;
-  return [clamp(r, 0, 255) / 255, clamp(g, 0, 255) / 255, clamp(b, 0, 255) / 255];
-}
+// ---- star colour: Planck spectrum through the CIE 1931 observer to sRGB (science.js) ----
+function blackbodySRGB(kelvin) { return starColour(kelvin).srgb.slice(); }
 const toLinear = (c) => c.map((x) => Math.pow(x, 2.2));
 export function starColor(teff) { return toLinear(blackbodySRGB(teff ?? 5600)); }
 // a saturation-boosted version for the star disk itself, so type reads at a glance
@@ -386,67 +298,4 @@ export function toParams(p) {
     atmR: ph.atmR, hr: ph.Hr, hasAtmo: ph.atmDensity, betaR, betaM: haze * 0.6 + 0.02, mieG, haze,
     scatter: 46.0,
   };
-}
-
-// ---- grounded astrobiology assessment (echo script + facts for a live model) ----
-export function lifeAssessment(p) {
-  const ph = physics(p);
-  const c = classify(p);
-  const T = ph.Tsurf;
-  const s = [];
-  let possible = false, carbon = false;
-
-  if (ph.isGiant) {
-    if (ph.Teq >= 250 && ph.Teq <= 400 && ph.domClass >= 4) {
-      possible = true; carbon = true;
-      s.push('No surface exists, but a gas giant can carry a temperate cloud layer where the pressure and temperature allow liquid-water droplets.');
-      s.push('In that narrow deck, buoyant carbon-based microbial life is conceivable — the Sagan-Salpeter "floaters" — though it would have to stay aloft forever or fall into the crushing, scorching interior.');
-    } else {
-      s.push('As a giant it has no surface, and its cloud layers are either far too hot and high-pressure or far too cold for stable liquid-water chemistry.');
-      s.push('Life as we can model it is implausible here.');
-    }
-  } else if (ph.atmDensity < 0.1) {
-    s.push(`With almost no atmosphere (escape velocity ${ph.vEscKms.toFixed(1)} km/s against its insolation, below the cosmic shoreline), surface water cannot persist and radiation reaches the ground unfiltered.`);
-    s.push('Subsurface refugia aside, the surface is effectively sterile.');
-  } else if (T > 373) {
-    s.push(`A surface near ${Math.round(T)} K is hot enough to boil water and denature the large molecules any biochemistry depends on.`);
-    s.push('Life as chemistry is implausible at these temperatures.');
-  } else if (T < 245) {
-    s.push(`At roughly ${Math.round(T)} K water is locked as ice, and reaction rates crawl.`);
-    s.push('Liquid-water carbon life is unlikely; only exotic low-temperature solvent chemistry (liquid hydrocarbons, as on Titan) could be entertained, and that is speculative.');
-  } else {
-    possible = true; carbon = true;
-    s.push(`Surface temperature near ${Math.round(T)} K with a real atmosphere sits inside the liquid-water window — the single strongest precondition for life we know.`);
-    if (ph.starActivity > 0.8) {
-      s.push('The catch: its red-dwarf sun is magnetically violent, and frequent flares would irradiate the day side — life would need an ozone-like shield, deep water, or the night side to survive.');
-    } else {
-      s.push('Its star is relatively calm, so radiation is not a showstopper.');
-    }
-    s.push('If life arose, it would almost certainly be carbon-based: carbon\'s four-bond versatility and water as a solvent are the cosmically abundant path of least resistance — we have no second example, but every ingredient points the same way.');
-  }
-
-  const facts = [
-    `planet=${p.pl_name}`, `class=${c.label}`,
-    `surface temp~${Math.round(T)}K`, `equilibrium temp=${Math.round(ph.Teq)}K`,
-    `atmosphere=${ph.atmDensity > 0.6 ? 'substantial' : ph.atmDensity > 0.2 ? 'thin' : 'negligible'}`,
-    ph.gRel ? `gravity=${ph.gRel.toFixed(2)}g` : null,
-    `host star=${Math.round(ph.Teff)}K, magnetic activity=${ph.starActivity > 0.8 ? 'very high (flaring red dwarf)' : ph.starActivity > 0.4 ? 'moderate' : 'low/calm'}`,
-    c.habitable ? 'inside the habitable zone' : 'outside the classical habitable zone',
-  ].filter(Boolean).join('; ');
-
-  return { possible, carbon, sentences: s, facts };
-}
-
-// ---- derived display values for telemetry ----
-export function derived(p) {
-  const ph = physics(p);
-  const out = { class: ['Rocky','Water','Sub-Neptune','Ice giant','Gas giant'][ph.domClass], estMass: ph.estMass };
-  if (p.sy_dist) out.lightyears = p.sy_dist * 3.26156;
-  out.gravity = ph.gRel;
-  out.escape = ph.vEscKms;
-  out.insol = Math.pow(ph.Teq / 278.5, 4);
-  out.teqUsed = ph.Teq;
-  out.starAngleDeg = ph.starAngle * 2 * 180 / Math.PI;   // full angular diameter
-  out.scaleHeightKm = (kB * ph.Teq / ((ph.isGiant ? 2.3 : 29) * mH * 9.80665 * ph.gRel)) / 1000;
-  return out;
 }
