@@ -164,7 +164,7 @@ export const CATEGORIES = [
         blurb: 'Shared goals, honest leaderboards.' },
       { id: 'workout-plans', title: 'Personalized Plans', status: 'built',
         href: 'workout-plans.html',
-        blurb: 'A reasoning model thinks through your constraints out loud, then builds a training block around the week you actually have.' },
+        blurb: 'A deterministic planner with a real load model: periodization, a time-budget solver, a substitution graph for injuries, and fitness-fatigue curves that re-plan the block around the week you log. A model only narrates, checked sentence by sentence.' },
     ],
   },
   {
