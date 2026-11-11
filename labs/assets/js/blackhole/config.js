@@ -148,33 +148,35 @@ export const COLOR_MODES = {
 };
 
 /* ---------------- the guided tour ---------------- */
-// Each stop patches the state and names what to look at. Captions are templates filled
-// from the live model in tour.js, so the numbers follow the visitor's sliders.
+// Each stop names its object, view and colour in full (tour.js resolves the presets against
+// the stop itself), so a stop is the same scene reached forward or backward. Captions are
+// templates filled from the state in tour.js: names, distances and numbers are never
+// written into the text, so they cannot disagree with the object on screen.
 export const TOUR = [
   { id: 'arrive', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'thermal', emit: 'thick' },
     title: 'A spinning black hole, traced ray by ray',
     text: 'Every pixel is a light ray followed backward through the exact Kerr spacetime of spin a = {a}. Nothing here is painted.', focus: 'shadow' },
-  { id: 'shadow', dur: 9, patch: { color: 'thermal' },
+  { id: 'shadow', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'thermal' },
     title: 'The shadow is not the horizon',
     text: 'The horizon is {rh} M across. The dark region is {shadowW} M wide: rays that pass inside the photon orbits never come back out.', focus: 'shadow' },
-  { id: 'beaming', dur: 9, patch: { color: 'redshift' },
+  { id: 'beaming', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'redshift' },
     title: 'One side is brighter',
     text: 'The gas on the left moves toward you at up to {vmax} c. Its light is boosted by g^4, up to {gmax}x; the receding side is dimmed to {gmin}x.', focus: 'limb' },
-  { id: 'order', dur: 10, patch: { color: 'order' },
+  { id: 'order', dur: 10, patch: { obj: 'm87', view: 'cinematic', color: 'order' },
     title: 'Light that went around',
     text: 'The thin gold ring is the n = 1 image: light that circled the hole once. Each further turn makes the ring about e^-pi, 23 times, thinner.', focus: 'ring' },
-  { id: 'telescope', dur: 11, patch: { view: 'telescope', color: 'thermal' },
+  { id: 'telescope', dur: 11, patch: { obj: 'm87', view: 'telescope', color: 'thermal' },
     title: 'What the Event Horizon Telescope sees',
-    text: 'From Earth, M87* sits at {incl} deg. The traced shadow is {shadowW} M wide; at 16.8 Mpc that is {shadowUas} uas. EHT measured a ring of 42 +- 3 uas.', focus: 'curve' },
-  { id: 'isco', dur: 9, patch: { view: 'cinematic', color: 'thermal' },
+    text: 'From Earth, {name} sits at {incl} deg. The traced shadow is {shadowW} M wide; at {dist} that is {shadowUas} uas. {eht}', focus: 'curve' },
+  { id: 'isco', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'thermal' },
     title: 'The last stable orbit',
     text: 'At spin {a} no circular orbit is stable inside {ri} M. The disk ends there, and {eta}% of the infalling rest mass has been radiated away.', focus: 'isco' },
-  { id: 'fall', dur: 14, patch: { view: 'journey' },
+  { id: 'fall', dur: 14, patch: { obj: 'm87', view: 'journey', color: 'thermal' },
     title: 'Falling in',
-    text: 'Your clock and a distant clock disagree more each second. At M87* the fall from the horizon to the centre takes {tauIn} of your time.', focus: 'none' },
+    text: 'Your clock and a distant clock disagree more each second. At {name} the fall from the horizon to the centre takes {tauIn} of your time.', focus: 'none' },
   { id: 'cyg', dur: 10, patch: { obj: 'cygx1', view: 'cinematic', color: 'thermal' },
     title: 'A hole the size of a city',
-    text: 'Cygnus X-1 has {massSun} solar masses. Its horizon spans {horizonKm} km, and 2 m above it the tide stretches you at {tidalG} g.', focus: 'none' },
+    text: '{name} has {massSun} solar masses. Its horizon spans {horizonKm} km, and 2 m above it the tide stretches you at {tidalG} g.', focus: 'none' },
 ];
 
 /* ---------------- UI copy ---------------- */

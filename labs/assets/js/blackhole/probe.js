@@ -8,6 +8,10 @@
                the disk's observed spectrum
      subrings  widths of the n = 1, 2, 3 images, face-on
      shadow    far-observer shadow chords by bisection
+     probeRay  the one ray under a clicked pixel, traced in the view
+               the renderer traces (charge q included)
+   Every job takes the view from Store.view(), the object the
+   renderer's geometry is built from, so the charge cannot drop out.
    ============================================================ */
 
 import * as K from './kerr.js';
@@ -20,12 +24,44 @@ const planckNu = (nu, T) => {
   return 2 * H_ * nu ** 3 / (C * C) / Math.expm1(x);
 };
 
-function camFor(v) {
+export function camFor(v) {
   const pos = K.ksPosition(v.a, v.rcam, v.incl * Math.PI / 180, 0);
   return K.observerFrame(v.a, pos, { q: v.q || 0, observer: v.observer, tilt: (v.tilt || 0) * Math.PI / 180 });
 }
 
+/** A key for a traced view: two views with the same key send the same rays through the same
+ *  spacetime, so features sit at the same tangent-plane coordinates (the screen's aspect only
+ *  changes how far the grid reaches, not where a feature is). Rounded so easing noise in the
+ *  last digits does not count. */
+export function viewKey(v) {
+  return [v.a, v.q || 0, v.incl, v.rcam, v.fov, v.tilt || 0, v.rout].map((x) => (+x).toFixed(4))
+    .concat([v.observer, v.emit]).join('|');
+}
+
+/** The anchors, only when they were traced for the view the state is in now (the target
+ *  of any transition); otherwise null, so no caption or label quotes a previous view. */
+export function liveAnchors(an, liveView) {
+  return an && an.key === viewKey(liveView) ? an : null;
+}
+
+/** CSS pixel (px, py) on a W x H canvas -> tangent-plane screen coordinates, the mapping
+ *  the renderer's _screenMap gives the shader (y up, fov on the shorter axis). */
+export function screenToTangent(px, py, W, H, fov) {
+  const asp = W / H, th = tanHalfV(fov, asp);
+  return { sx: ((px / W) * 2 - 1) * th * asp, sy: (1 - (py / H) * 2) * th, th };
+}
+
+/** The probe: the ray under one pixel, traced with the view's spin, charge, camera and disk,
+ *  exactly as the renderer's geometry sets them (horizon and ISCO of Kerr-Newman). */
+export function probeRay(view, sx, sy, { k = 0.06, maxSteps = 3000 } = {}) {
+  const q = view.q || 0;
+  const rIn = K.isco(view.a, 1, q);
+  const res = K.traceRay(view.a, camFor(view), sx, sy, 1, { q, k, maxSteps, disk: view.emit === 'thick', rIn, rOut: view.rout, path: true });
+  return { ...res, rIn, q };
+}
+
 export function anchors({ view, aspect, nx = 72, ny = 44, tpeakK = 0, fcol = 1.7 }) {
+  const key = viewKey(view);
   const a = view.a, q = view.q || 0;
   const cam = camFor(view);
   const th = tanHalfV(view.fov, aspect);
@@ -98,19 +134,21 @@ export function anchors({ view, aspect, nx = 72, ny = 44, tpeakK = 0, fcol = 1.7
   }
   const g = cells.filter((c) => c.fate === 'disk').map((c) => c.g);
   return {
-    shadow, limb, ring, isco, spectrum, th, aspect,
+    key, shadow, limb, ring, isco, spectrum, th, aspect,
     gmin: g.length ? Math.min(...g) : null, gmax: g.length ? Math.max(...g) : null,
     grid: { nx, ny, fates: cells.map((c) => (c.fate === 'captured' ? -1 : c.fate === 'disk' ? c.n : -2)) },
   };
 }
 
-export function subrings({ a }) {
-  const w = K.subringWidths(a, 0.001, 6, 8, { samples: 2400, k: 0.035 });
-  const gamma = K.lyapunov(a, K.polarPhotonOrbit(a));
-  return { w, gamma, rPolar: K.polarPhotonOrbit(a) };
+/** Sub-ring widths traced with the charge; the Lyapunov comparison (Johnson et al. 2020)
+ *  is the Kerr formula, so it is returned only at q = 0. */
+export function subrings({ a, q = 0 }) {
+  const w = K.subringWidths(a, 0.001, 6, 8, { q, samples: 2400, k: 0.035 });
+  const gamma = q ? null : K.lyapunov(a, K.polarPhotonOrbit(a));
+  return { w, gamma, q, rPolar: q ? null : K.polarPhotonOrbit(a) };
 }
 
-export function shadow({ a, incl }) {
-  return K.measureShadow(a, incl * Math.PI / 180, { k: 0.08, iters: 24 });
+export function shadow({ a, incl, q = 0 }) {
+  return K.measureShadow(a, incl * Math.PI / 180, { q, k: 0.08, iters: 24 });
 }
 

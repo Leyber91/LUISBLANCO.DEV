@@ -62,9 +62,9 @@ function boot() {
       store.get('observer'), store.get('emit')].join('|');
   };
   const pushGeometry = () => {
-    const v = store.shown;
-    const view = { a: v.a, q: v.q, incl: v.incl, rcam: v.rcam, fov: v.fov, tilt: v.tilt, rout: v.rout, observer: store.get('observer'), emit: store.get('emit') };
-    const model = derive({ ...store.all(), a: v.a, q: v.q, rout: v.rout });
+    // the same view object the probe and the anchors trace (Store.view), charge included
+    const view = store.view();
+    const model = derive({ ...store.all(), a: view.a, q: view.q, rout: view.rout });
     renderer.setGeometry(renderer.buildGeometry(view), model.profile);
     app.geoView = view;
   };

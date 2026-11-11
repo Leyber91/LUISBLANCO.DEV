@@ -77,26 +77,35 @@ export class Store {
     return true;
   }
 
-  /** Patch for an object preset (mass, distance, spin, inclination, accretion). */
-  objectPatch(id) {
+  /** The light-path geometry: the eased values the renderer traces now, or (target = true)
+   *  the values the state is easing toward. The renderer, the probe and the anchors all
+   *  read it, so none of them can drop a parameter the others use (the charge q included). */
+  view(target = false) {
+    const v = target ? this.s : this.shown;
+    return { a: v.a, q: v.q, incl: v.incl, rcam: v.rcam, fov: v.fov, tilt: v.tilt, rout: v.rout, observer: this.s.observer, emit: this.s.emit };
+  }
+
+  /** Patch for an object preset (mass, distance, spin, inclination, accretion), for the
+   *  current view or for the view named (the tour resolves a stop before applying it). */
+  objectPatch(id, view = this.s.view) {
     const o = OBJECTS.find((x) => x.id === id);
     if (!o) return { obj: 'custom' };
     const p = {
       obj: id, a: o.spin, q: 0, mass: Math.log10(o.mass), edd: o.edd > 0 ? Math.log10(o.edd) : -9,
-      emit: this.s.view === 'telescope' ? 'thin' : (o.view?.emit || 'thick'),
+      emit: view === 'telescope' ? 'thin' : (o.view?.emit || 'thick'),
     };
     if (o.distPc) p.dist = Math.log10(o.distPc);
     // the object's measured inclination applies where it means something: the telescope view
-    if (this.s.view === 'telescope') p.incl = o.incl;
+    if (view === 'telescope') p.incl = o.incl;
     return p;
   }
 
-  /** Patch for a camera view. */
-  viewPatch(id) {
+  /** Patch for a camera view, for the current object or for the object named. */
+  viewPatch(id, obj = this.s.obj) {
     const v = VIEWS[id];
     if (!v) return {};
     const p = { view: id, rcam: v.rcam, fov: v.fov, tilt: v.tilt || 0, observer: id === 'journey' ? 'faller' : 'zamo' };
-    const o = OBJECTS.find((x) => x.id === this.s.obj);
+    const o = OBJECTS.find((x) => x.id === obj);
     // the telescope view shows what the EHT sees: an optically thin emitter, whose bright ring
     // sits on the critical curve; the other views show the thin disk (none for the primordial hole)
     p.emit = id === 'telescope' ? 'thin' : (o?.view?.emit || 'thick');

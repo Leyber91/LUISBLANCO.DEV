@@ -1,14 +1,33 @@
 /* ============================================================
    blackhole/tour.js — the guided tour and the idle caption.
    Stops come from config.js; their numbers are filled from the
-   live model each time the caption is drawn, so a visitor who
-   moves a slider mid-tour reads the new values.
+   state each time the caption is drawn, so a visitor who changes
+   the colour or the emitter mid-tour reads the new values.
+
+   Two rules keep a caption true to the scene beside it:
+   - numbers come from the state the scene is in or easing toward
+     (store.all()), never from the eased display values, which lag
+     a transition by up to 1.7 s; traced numbers (the redshift
+     extremes) only from anchors traced for that same view;
+   - every stop names its object and view, resolved by stopPatch()
+     against the stop itself, so a stop is the same reached forward
+     or backward.
    ============================================================ */
 
 import { TOUR, VIEWS, COLOR_MODES } from './config.js';
-import { theoryShadow, shadowFor, predictedUas, sci, dur } from './physics.js';
+import { shadowFor, predictedUas, measurement, sci, dur } from './physics.js';
+import { liveAnchors } from './probe.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const distText = (pc) => (pc >= 1e6 ? `${(pc / 1e6).toPrecision(3)} Mpc` : pc >= 1e3 ? `${(pc / 1e3).toPrecision(3)} kpc` : `${pc.toPrecision(3)} pc`);
+
+/** The complete state a tour stop asks for: the object preset resolved for the stop's view,
+ *  then the view preset for the stop's object, then the stop's own keys. Independent of the
+ *  stop before it. */
+export function stopPatch(stop, store) {
+  const { obj, view } = stop.patch;
+  return { ...store.objectPatch(obj, view), ...store.viewPatch(view, obj), ...stop.patch };
+}
 
 export class Tour {
   constructor(app, { caption, toScreen, getAnchors, journey }) {
@@ -22,17 +41,24 @@ export class Tour {
     app.store.on(() => { if (!this.running) this.idleCaption(); else this.draw(); });
   }
 
+  /** Anchors traced for the view the state is in now, else null. */
+  anchors() { return liveAnchors(this.getAnchors(), this.app.store.view(true)); }
+
   numbers() {
     const { store, model: m } = this.app;
     const s = store.all();
-    const tel = s.view === 'telescope';
-    const ts = shadowFor(s.a, tel ? store.shown.incl : 90, s.q);
-    const an = this.getAnchors();
-    const pred = m.obj ? predictedUas(ts.mean, m.obj) : null;
+    const o = m.obj;
+    // in the telescope view the caption quotes the Measure card's own numbers
+    const ms = s.view === 'telescope' ? measurement(s) : null;
+    const ts = ms ? ms.th : shadowFor(s.a, 90, s.q);
+    const pred = ms ? ms.pred : (o ? predictedUas(ts.mean, o) : null);
+    const an = this.anchors();
     return {
+      name: o ? o.name : 'this hole', dist: o && o.distPc ? distText(o.distPc) : '--',
+      eht: o && o.eht ? `EHT measured a ring of ${o.eht.ring} +- ${o.eht.ringErr} uas.` : 'The EHT has not imaged it.',
       a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
       gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an && an.gmin ? Math.pow(an.gmin, 4).toFixed(2) : '--',
-      incl: store.shown.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2),
+      incl: s.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2),
       eta: (m.eta * 100).toFixed(1), tauIn: dur(m.interiorTauS), massSun: sci(m.massSun), horizonKm: sci(m.horizonKm), tidalG: sci(m.tidalHg),
     };
   }
@@ -52,11 +78,7 @@ export class Tour {
     this.t = 0;
     const stop = TOUR[this.i];
     const { store } = this.app;
-    let patch = { ...stop.patch };
-    if (patch.obj) patch = { ...store.objectPatch(patch.obj), ...patch };
-    if (patch.view) patch = { ...store.viewPatch(patch.view), ...patch };
-    if (patch.obj && patch.view !== 'telescope' && store.get('view') !== 'telescope') delete patch.incl;
-    store.set(patch, { src: 'tour', dur: 1700 });
+    store.set(stopPatch(stop, store), { src: 'tour', dur: 1700 });
     if (stop.id === 'fall') this.journey.play(); else this.journey.stop();
     this.draw();
   }
@@ -101,7 +123,7 @@ export class Tour {
   }
 
   drawFocus() {
-    const stop = TOUR[this.i], an = this.getAnchors();
+    const stop = TOUR[this.i], an = this.anchors();
     if (!this.running || !an) { this.focusSvg.innerHTML = ''; return; }
     const W = window.innerWidth, H = window.innerHeight;
     this.focusSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -124,8 +146,8 @@ export class Tour {
     const title = o ? `${o.name}: ${o.kind}` : 'Custom hole';
     const line = s.view === 'telescope'
       ? (s.emit === 'thick'
-        ? `Seen from far away at ${store.shown.incl.toFixed(0)} deg. An opaque disk reaching the ISCO covers the outer shadow: the dark patch is the inner shadow (Chael et al. 2021). Gold: Bardeen's critical curve.`
-        : `Seen from far away at ${store.shown.incl.toFixed(0)} deg, through hot thin gas as the EHT sees it. The gold curve is Bardeen's 1973 critical curve; the bright ring the rays found sits on it.`)
+        ? `Seen from far away at ${s.incl.toFixed(0)} deg. An opaque disk reaching the ISCO covers the outer shadow: the dark patch is the inner shadow (Chael et al. 2021). Gold: Bardeen's critical curve.`
+        : `Seen from far away at ${s.incl.toFixed(0)} deg, through hot thin gas as the EHT sees it. The gold curve is Bardeen's 1973 critical curve; the bright ring the rays found sits on it.`)
       : s.view === 'journey'
         ? 'Free fall from rest far away. Drag the Fall chart to scrub; your clock and the far clock part ways near the horizon.'
         : `Spin ${s.a.toFixed(3)}, ${COLOR_MODES[s.color].label.toLowerCase()} colour. Click any pixel to trace its ray; drag to orbit.`;

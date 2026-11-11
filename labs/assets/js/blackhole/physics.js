@@ -97,6 +97,16 @@ export function predictedUas(diamM, obj) {
   return { value: diamM * tg, err: diamM * tg * rel, thetaG: tg };
 }
 
+/** The far-observer measurement the Measure card shows and the tour quotes, from the
+ *  state (never the eased display values): in the telescope view at the state's own
+ *  inclination, elsewhere at the object's measured one (17 deg for a custom hole). */
+export function measurement(s) {
+  const obj = objectOf(s);
+  const incl = s.view === 'telescope' ? s.incl : (obj ? obj.incl : 17);
+  const th = shadowFor(s.a, incl, s.q || 0);
+  return { obj, incl, th, pred: obj && obj.distPc ? predictedUas(th.mean, obj) : null };
+}
+
 /** Sigma distance between a prediction and a measurement with independent errors. */
 export function sigmaDiff(pred, meas, measErr) {
   const s = Math.hypot(pred.err, measErr);

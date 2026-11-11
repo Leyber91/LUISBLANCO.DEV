@@ -17,13 +17,15 @@ const STATE_KEYS = { a: [0, 0.998], incl: [1, 179], view: ['cinematic', 'telesco
 /** The live numbers, named, with units: the context for the model and the reference for checks. */
 export function facts(app) {
   const s = app.store.all(), m = app.model;
-  const incl = s.view === 'telescope' ? app.store.shown.incl : (m.obj ? m.obj.incl : 90);
+  // the state (where a transition is going), not the eased display values; traced numbers
+  // only from anchors traced for this view
+  const incl = s.view === 'telescope' ? s.incl : (m.obj ? m.obj.incl : 90);
   const ts = shadowFor(s.a, incl, s.q);
   const pred = m.obj ? predictedUas(ts.mean, m.obj) : null;
-  const an = app.ui?.anchors?.();
+  const an = app.ui?.liveAnchors?.();
   return {
-    object: m.obj ? m.obj.name : 'custom', spin_a: s.a, inclination_deg: +app.store.shown.incl.toFixed(1), view: s.view, colour_mode: s.color,
-    observer: s.observer, observer_r_M: +app.store.shown.rcam.toFixed(2),
+    object: m.obj ? m.obj.name : 'custom', spin_a: s.a, inclination_deg: +s.incl.toFixed(1), view: s.view, colour_mode: s.color,
+    observer: s.observer, observer_r_M: +s.rcam.toFixed(2),
     mass_Msun: m.massSun, horizon_radius_M: +m.rh.toFixed(4), horizon_radius_km: +(m.rh * m.rg / 1000).toPrecision(4),
     photon_orbit_prograde_M: +m.rph.toFixed(4), photon_orbit_retrograde_M: +m.rphr.toFixed(4), isco_M: +m.ri.toFixed(4),
     isco_km: +(m.ri * m.rg / 1000).toPrecision(4), efficiency_percent: +(m.eta * 100).toFixed(2), gas_speed_isco_c: +m.vIsco.toFixed(3),

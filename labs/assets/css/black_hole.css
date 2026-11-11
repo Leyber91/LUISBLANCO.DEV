@@ -1,17 +1,22 @@
 /* ============================================================
    black_hole.css — the Kerr instrument page. Plate family:
    near-black ground, blue-white ink, hairlines, gold only for
-   what is active. Consumes tokens.css; no hex outside :root.
+   what is active. Consumes tokens.css: every colour here is a
+   tokens.css variable or a color-mix of one, no colour literals.
    Minimum text size 11 px; panels sit on a dark veil so text
    holds 4.5:1 over the brightest part of the render.
    ============================================================ */
 
 :root {
-  --bh-panel: rgba(6, 8, 13, 0.88);
-  --bh-panel-solid: rgba(6, 8, 13, 0.92);
-  --bh-hair: rgba(159, 179, 214, 0.16);
-  --bh-hair-2: rgba(159, 179, 214, 0.30);
-  --bh-gold-line: rgba(212, 162, 76, 0.55);
+  --bh-panel: color-mix(in srgb, var(--void) 88%, transparent);
+  --bh-panel-solid: color-mix(in srgb, var(--void) 92%, transparent);
+  --bh-hair: color-mix(in srgb, var(--horizon) 16%, transparent);
+  --bh-hair-2: color-mix(in srgb, var(--horizon) 30%, transparent);
+  --bh-gold-line: color-mix(in srgb, var(--accretion) 55%, transparent);
+  --bh-wash: color-mix(in srgb, var(--horizon) 8%, transparent);        /* pressed button */
+  --bh-gold-wash: color-mix(in srgb, var(--accretion) 8%, transparent); /* chosen button */
+  --bh-well: color-mix(in srgb, var(--void) 35%, transparent);          /* inputs, code */
+  --bh-halo: color-mix(in srgb, var(--void) 85%, transparent);          /* label halo on the render */
   --bh-col: 312px;
   --bh-pad: 28px;
   --bh-fs: 12px;
@@ -86,9 +91,9 @@ button, input, select { font: inherit; color: inherit; }
 .bh-btn { cursor: pointer; background: transparent; border: 1px solid var(--bh-hair-2); color: var(--text); padding: 7px 10px; font-size: var(--bh-fs-s);
   letter-spacing: .06em; min-height: 32px; line-height: 1.1; transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease); }
 .bh-btn:hover { border-color: var(--horizon-dim); color: var(--text-bright); }
-.bh-btn:active { background: rgba(159, 179, 214, .08); }
+.bh-btn:active { background: var(--bh-wash); }
 .bh-btn:focus-visible { outline: 1px solid var(--horizon); outline-offset: 2px; }
-.bh-btn[aria-pressed="true"] { border-color: var(--accretion); color: var(--accretion-soft); background: rgba(212, 162, 76, .08); }
+.bh-btn[aria-pressed="true"] { border-color: var(--accretion); color: var(--accretion-soft); background: var(--bh-gold-wash); }
 .bh-btn small { display: block; color: var(--text-dim); font-size: var(--bh-fs-s); letter-spacing: .02em; margin-top: 2px; }
 .bh-btn[aria-pressed="true"] small { color: var(--accretion-dim); }
 .bh-btn.wide { flex: 1 1 auto; text-align: left; }
@@ -98,7 +103,7 @@ button, input, select { font: inherit; color: inherit; }
 /* sliders with numeric entry */
 .bh-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; margin-top: 9px; }
 .bh-row label { font-size: var(--bh-fs-s); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
-.bh-num { width: 84px; text-align: right; background: rgba(0, 0, 0, .35); border: 1px solid var(--bh-hair); color: var(--accretion-soft);
+.bh-num { width: 84px; text-align: right; background: var(--bh-well); border: 1px solid var(--bh-hair); color: var(--accretion-soft);
   font-variant-numeric: tabular-nums; font-size: var(--bh-fs); padding: 4px 6px; }
 .bh-num:focus { border-color: var(--accretion); outline: none; }
 .bh-unit { color: var(--text-dim); font-size: var(--bh-fs-s); }
@@ -145,7 +150,7 @@ button, input, select { font: inherit; color: inherit; }
 
 /* ask */
 .bh-ask { display: flex; gap: 6px; }
-.bh-ask input { flex: 1; min-width: 0; background: rgba(0, 0, 0, .35); border: 1px solid var(--bh-hair-2); color: var(--text-bright); padding: 7px 9px; font-size: var(--bh-fs); }
+.bh-ask input { flex: 1; min-width: 0; background: var(--bh-well); border: 1px solid var(--bh-hair-2); color: var(--text-bright); padding: 7px 9px; font-size: var(--bh-fs); }
 .bh-ask input:focus { border-color: var(--accretion); outline: none; }
 .bh-answer { font-size: var(--bh-fs); line-height: 1.55; color: var(--text); margin-top: 8px; white-space: pre-wrap; }
 .bh-answer .src { display: block; margin-top: 6px; color: var(--text-dim); font-size: var(--bh-fs-s); }
@@ -174,7 +179,7 @@ button, input, select { font: inherit; color: inherit; }
 .bh-probe p { margin: 0 0 8px; color: var(--text); line-height: 1.5; }
 .bh-probe details { margin-top: 6px; }
 .bh-probe summary { cursor: pointer; color: var(--horizon); font-size: var(--bh-fs-s); letter-spacing: .08em; }
-.bh-probe pre { white-space: pre-wrap; font-size: var(--bh-fs-s); color: var(--text); background: rgba(0, 0, 0, .35); padding: 7px; margin: 6px 0 0; border-left: 1px solid var(--bh-hair-2); }
+.bh-probe pre { white-space: pre-wrap; font-size: var(--bh-fs-s); color: var(--text); background: var(--bh-well); padding: 7px; margin: 6px 0 0; border-left: 1px solid var(--bh-hair-2); }
 .bh-probe .x { position: absolute; top: 6px; right: 8px; cursor: pointer; background: none; border: 0; color: var(--text-dim); font-size: 14px; min-width: 28px; min-height: 28px; }
 
 /* footer: evidence tags */
@@ -196,7 +201,7 @@ button, input, select { font: inherit; color: inherit; }
 .bh-sources th { color: var(--text-dim); font-weight: 500; }
 
 /* on-image labels (SVG overlay) */
-#bh-overlay text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-bright); paint-order: stroke; stroke: rgba(6, 8, 13, .85); stroke-width: 3px; letter-spacing: .06em; }
+#bh-overlay text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-bright); paint-order: stroke; stroke: var(--bh-halo); stroke-width: 3px; letter-spacing: .06em; }
 #bh-overlay .lead { stroke: var(--horizon-soft); stroke-width: 1; fill: none; opacity: .75; }
 #bh-overlay .curve { stroke: var(--accretion); stroke-width: 1; fill: none; opacity: .9; }
 #bh-overlay .curve2 { stroke: var(--horizon-soft); stroke-width: 1; fill: none; stroke-dasharray: 3 4; opacity: .7; }

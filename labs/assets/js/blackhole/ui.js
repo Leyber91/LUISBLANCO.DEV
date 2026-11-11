@@ -7,13 +7,13 @@
 
 import * as K from './kerr.js';
 import { OBJECTS, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION } from './config.js';
-import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, predictedUas, sigmaDiff, fall, sci, dur, len } from './physics.js';
+import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, predictedUas, measurement, sigmaDiff, fall, sci, dur, len } from './physics.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour } from './tour.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { anchors as anchorsInline, subrings as subringsInline } from './probe.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent } from './probe.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
@@ -226,16 +226,23 @@ export function buildUI(app) {
   mountRoutePanel($('#bh-route'));
 
   /* ---------- the anchors (traced positions of features) ---------- */
+  // Traced in the view the renderer traces (Store.view: the eased values, charge included).
+  // Nothing is traced while a transition runs; its end asks again (tick below). Labels and
+  // the tour read anchorsLive(): anchors traced for the view the state is in, else none.
   let anchors = null, anchorKey = '', anchorTimer = 0, anchorsRuns = 0;
-  const viewNow = () => ({ ...store.shown, q: 0, observer: store.get('observer'), emit: store.get('emit') });
+  const viewNow = () => store.view();
+  const aspectNow = () => window.innerWidth / window.innerHeight;
+  const anchorsLive = () => liveAnchors(anchors, store.view(true));
   const requestAnchors = () => {
     clearTimeout(anchorTimer);
     anchorTimer = setTimeout(async () => {
+      if (store.anim) return;
       const v = viewNow();
-      const key = JSON.stringify([v.a, v.incl, v.rcam, v.fov, v.tilt, v.rout, v.observer, v.emit, Math.round(app.model.Tpeak)]);
+      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: 1.7 };
+      // a resize re-traces (the grid's reach follows the aspect); the anchors stay live meanwhile
+      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak)]);
       if (key === anchorKey) return;
       anchorKey = key;
-      const args = { view: v, aspect: window.innerWidth / window.innerHeight, tpeakK: app.model.Tpeak, fcol: 1.7 };
       try {
         // the first pass runs inline (about 50 ms) so the labels exist with the first frame;
         // later passes go to the worker
@@ -276,7 +283,9 @@ export function buildUI(app) {
       const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
       parts.push(`<g><line class="lead" x1="${tx}" y1="${ty}" x2="${tx + 70}" y2="${ty - 46}"/><text x="${tx + 74}" y="${ty - 50}" class="goldt">Bardeen 1973 critical curve</text><text x="${tx + 74}" y="${ty - 36}">gold: theory · dashes: traced edge</text></g>`);
     }
-    if (s.notes && anchors) {
+    // labels only from anchors traced for this view: none mid-transition, none from the last view
+    const an = anchorsLive();
+    if (s.notes && an) {
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
@@ -290,16 +299,16 @@ export function buildUI(app) {
         parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="goldt">${sub}</text>` : ''}</g>`);
       };
       const m = app.model;
-      if (anchors.shadow) {
-        const sh = anchors.shadow;
+      if (an.shadow) {
+        const sh = an.shadow;
         const wM = s.view === 'telescope' ? (K.angleToImpact(Math.atan(sh.right), store.shown.rcam) - K.angleToImpact(Math.atan(sh.left), store.shown.rcam)) : null;
         const inner = s.emit === 'thick' && s.view === 'telescope';
         lab({ sx: sh.right, sy: sh.cy + (sh.top - sh.cy) * 0.3 }, inner ? 'inner shadow' : 'shadow',
           wM ? `${wM.toFixed(2)} M wide${inner ? ': the disk hides the rest' : ''}` : `horizon is ${(2 * m.rh).toFixed(2)} M wide`, narrow() ? 30 : 70, narrow() ? -70 : -30);
       }
-      if (anchors.limb && s.emit === 'thick') lab(anchors.limb, 'approaching side', `g up to ${anchors.limb.g.toFixed(2)}, I x ${Math.pow(anchors.limb.g, 4).toFixed(1)}`, -60, 46);
-      if (anchors.ring && s.emit === 'thick' && !narrow()) lab(anchors.ring, 'n = 1 image', 'light that circled once', 60, -34);
-      if (anchors.isco && s.emit === 'thick' && s.view !== 'telescope' && !narrow()) lab(anchors.isco, 'ISCO edge', `r = ${m.ri.toFixed(2)} M`, -70, -40);
+      if (an.limb && s.emit === 'thick') lab(an.limb, 'approaching side', `g up to ${an.limb.g.toFixed(2)}, I x ${Math.pow(an.limb.g, 4).toFixed(1)}`, -60, 46);
+      if (an.ring && s.emit === 'thick' && !narrow()) lab(an.ring, 'n = 1 image', 'light that circled once', 60, -34);
+      if (an.isco && s.emit === 'thick' && s.view !== 'telescope' && !narrow()) lab(an.isco, 'ISCO edge', `r = ${m.ri.toFixed(2)} M`, -70, -40);
     }
     if (app.probePt) parts.push(`<g><circle class="mark" cx="${app.probePt[0]}" cy="${app.probePt[1]}" r="6"/><circle class="mark" cx="${app.probePt[0]}" cy="${app.probePt[1]}" r="1.5"/></g>`);
     overlay.innerHTML = parts.join('');
@@ -316,12 +325,13 @@ export function buildUI(app) {
     const rgkm = (r) => `${sci(r * m.rg / 1000)} km`;
     const au = (r) => `${sci(r * m.rg / K.SI.au)} AU`;
     const isTel = s.view === 'telescope';
-    const camR = store.shown.rcam;
-    const clock = s.observer === 'orbiter' ? K.orbitClockRate(s.a, Math.max(camR, m.rph * 1.05)) : K.hoverClockRate(s.a, camR, store.shown.incl * D2R);
+    // readouts quote the state (where a transition is going), never the eased display values
+    const camR = s.rcam;
+    const clock = s.observer === 'orbiter' ? K.orbitClockRate(s.a, Math.max(camR, m.rph * 1.05), s.q) : K.hoverClockRate(s.a, camR, s.incl * D2R, s.q);
     $('#bh-read').innerHTML = [
       dd('mass', sci(m.massSun), 'M☉', o && !o.hypothetical ? tagR : tagI),
       dd('event horizon r+', s3(m.rh), 'M', tagR), dd('the point of no return, unseen', `${rgkm(m.rh)} · ${au(m.rh)}`, '', '', 'ink'),
-      dd('shadow diameter', s3(shadowFor(s.a, isTel ? store.shown.incl : 90, s.q).mean), 'M', tagR),
+      dd('shadow diameter', s3(shadowFor(s.a, isTel ? s.incl : 90, s.q).mean), 'M', tagR),
       dd('light aimed inside falls in', `${s3(shadowFor(s.a, 90, s.q).mean / (2 * m.rh))} x the horizon`, '', '', 'ink'),
       dd('photon orbit', s3(m.rph), 'M', tagR), dd('light can circle here, unstably', '', '', '', 'ink'),
       dd('ISCO, last stable orbit', s3(m.ri), 'M', tagR), dd('the inner edge of the disk', `${rgkm(m.ri)} · ${au(m.ri)}`, '', '', 'ink'),
@@ -370,9 +380,9 @@ export function buildUI(app) {
 
   let gpuStrip = null, rings = null;
   function drawMeasure() {
-    const s = store.all(), m = app.model, o = m.obj;
-    const incl = o ? o.incl : (s.view === 'telescope' ? s.incl : 17);
-    const th = shadowFor(s.a, incl, s.q);
+    const s = store.all(), o = app.model.obj;
+    // the same measurement the tour quotes: the state's inclination in the telescope view
+    const { incl, th } = measurement(s);
     let integ = null;
     try { integ = integratorShadow(s.a, incl, s.q); } catch { integ = null; }
     const rows2 = [];
@@ -380,7 +390,7 @@ export function buildUI(app) {
     rows2.push(dd(th.traced ? 'width (no closed form, Q and a)' : s.q > 0 ? 'width, 2 b_c (RN)' : 'width, Bardeen', s3(th.chords.width), 'M', tagR));
     if (integ) rows2.push(dd('width, traced', s3(integ.width), 'M', tagR));
     if (integ) rows2.push(dd('relative difference', s3(Math.abs(integ.width / th.chords.width - 1) * 100), '%', tagR, 'ink'));
-    if (gpuStrip && gpuStrip.a === s.a && gpuStrip.incl === store.shown.incl) rows2.push(dd('width, GPU strip', `${s3(gpuStrip.width)} ± ${s3(gpuStrip.res)}`, 'M', tagR));
+    if (gpuStrip && gpuStrip.a === s.a && gpuStrip.q === s.q && gpuStrip.incl === incl) rows2.push(dd('width, GPU strip', `${s3(gpuStrip.width)} ± ${s3(gpuStrip.res)}`, 'M', tagR));
     rows2.push(dd('height, B / traced', `${s3(th.chords.height)} / ${integ ? s3(integ.height) : '--'}`, 'M', tagR));
     rows2.push(dd('mean diameter', s3(th.mean), 'M', tagR));
     if (o && o.eht) {
@@ -405,10 +415,10 @@ export function buildUI(app) {
     }
     if (rings) {
       rows2.push('<div class="hr"></div>');
-      rows2.push(`<dt style="color:var(--text)">sub-rings, face-on, a/M = ${rings.a.toFixed(2)}</dt>`);
+      rows2.push(`<dt style="color:var(--text)">sub-rings, face-on, a/M = ${rings.a.toFixed(2)}${rings.q ? `, Q/M = ${rings.q.toFixed(2)}` : ''}</dt>`);
       rows2.push(dd('n=2 / n=1 width', s3(rings.w[2] / rings.w[1]), '', tagR));
       rows2.push(dd('n=3 / n=2 width', s3(rings.w[3] / rings.w[2]), '', tagR));
-      rows2.push(dd('e^-γ (Johnson 2020)', s3(Math.exp(-rings.gamma)), '', tagR));
+      rows2.push(dd(rings.gamma == null ? 'e^-γ (Johnson 2020, Kerr only)' : 'e^-γ (Johnson 2020)', rings.gamma == null ? '--' : s3(Math.exp(-rings.gamma)), '', tagR));
     }
     $('#bh-meas').innerHTML = rows2.join('');
     $('#bh-measnote').textContent = o && o.eht
@@ -423,7 +433,7 @@ export function buildUI(app) {
       if (!res || !res.h) { $('#bh-measnote').textContent = 'The GPU strip needs float render targets, not available here.'; return; }
       const ro = store.shown.rcam;
       const b = (t) => K.angleToImpact(Math.atan(t), ro);
-      gpuStrip = { width: b(res.h.hi) - b(res.h.lo), res: 2 * b(res.h.res), a: store.get('a'), incl: store.shown.incl };
+      gpuStrip = { width: b(res.h.hi) - b(res.h.lo), res: 2 * b(res.h.res), a: store.get('a'), q: store.get('q'), incl: store.get('incl') };
       drawMeasure();
       $('#bh-measnote').textContent = `The renderer traced a 4096-texel row through the shadow with the disk switched off; its edges, converted with the finite-distance factor, give the width above.`;
     }, 60);
@@ -431,9 +441,9 @@ export function buildUI(app) {
   $('#bh-rings', measCard).addEventListener('click', async () => {
     $('#bh-measnote').textContent = 'Tracing 2400 rays face-on out from the critical curve...';
     try {
-      const a = store.get('a');
-      const res = worker ? await call('subrings', { a }) : subringsInline({ a });
-      rings = { ...res, a };
+      const a = store.get('a'), q = store.get('q');
+      const res = worker ? await call('subrings', { a, q }) : subringsInline({ a, q });
+      rings = { ...res, a, q };
       drawMeasure();
       $('#bh-measnote').textContent = `Each further half-orbit thins the image by e^-γ. The n=3/n=2 ratio has converged; n=2/n=1 has not yet, as expected for the first sub-ring. Test annulus 6 to 8 M, observer face-on.`;
     } catch (e) { $('#bh-measnote').textContent = 'Sub-ring measurement needs a module worker: ' + e.message; }
@@ -443,7 +453,7 @@ export function buildUI(app) {
   let probeRay = null;
   function drawXS() {
     const s = store.all(), m = app.model;
-    $('#bh-xs').innerHTML = crossSection({ a: s.a, rh: m.rh, rph: m.rph, rphr: m.rphr, ri: m.ri, rout: s.rout, incl: store.shown.incl, rcam: store.shown.rcam, ray: probeRay });
+    $('#bh-xs').innerHTML = crossSection({ a: s.a, rh: m.rh, rph: m.rph, rphr: m.rphr, ri: m.ri, rout: s.rout, incl: s.incl, rcam: s.rcam, ray: probeRay });
   }
   function drawPotential(mark = null) {
     const s = store.all(), m = app.model;
@@ -482,7 +492,8 @@ export function buildUI(app) {
   const journey = {
     playing: false, tau: 0, rows: null,
     play() {
-      this.rows = fall(store.get('a'), store.shown.incl, 40);
+      // the fall the view is going to (incl may still be easing), with the hole's charge
+      this.rows = fall(store.get('a'), store.get('incl'), 40, store.get('q'));
       this.tau = 0; this.playing = true; this.done = false;
       store.set({ observer: 'faller', rcam: 40 }, { instant: true, src: 'journey' });
     },
@@ -502,9 +513,9 @@ export function buildUI(app) {
   let fallGeom = null;
   function drawFall() {
     const s = store.all(), m = app.model;
-    const rows3 = fall(s.a, store.shown.incl, 40);
+    const rows3 = fall(s.a, s.incl, 40, s.q);
     const tidalScale = K.SI.c * K.SI.c / (m.rg * m.rg) * 2 / K.SI.g0;
-    const rc = store.shown.rcam;
+    const rc = s.rcam;
     const g = fallChart({ rows: rows3, tg: m.tg, rcur: s.view === 'journey' ? rc : null, rh: m.rh, ri: m.ri, rph: m.rph, tidalScale, tide10g: m.tide10g });
     fallGeom = g;
     $('#bh-fall').innerHTML = g.svg;
@@ -513,7 +524,7 @@ export function buildUI(app) {
     $('#bh-fallread').innerHTML = [
       dd('your clock τ since 40 M', inJ ? dur(row.tau * m.tg) : '--', '', tagR),
       dd('far clock t since 40 M', inJ ? dur(row.t * m.tg) : '--', '', tagR),
-      dd('your speed vs hovering', inJ ? (store.get('observer') === 'faller' ? (Math.sqrt(1 - K.hoverClockRate(s.a, rc, store.shown.incl * D2R) ** 2)).toFixed(3) + ' c' : '--') : '--', '', tagR),
+      dd('your speed vs hovering', inJ ? (store.get('observer') === 'faller' ? (Math.sqrt(1 - K.hoverClockRate(s.a, rc, s.incl * D2R, s.q) ** 2)).toFixed(3) + ' c' : '--') : '--', '', tagR),
       dd('tide on 2 m here', inJ ? `${sci(row.tidal * tidalScale * K.SI.g0)} m/s² · ${sci(row.tidal * tidalScale)} g` : '--', '', tagR),
       dd('horizon to r = 0 (a = 0 law 4M/3)', dur(4 / 3 * m.tg), '', tagR),
       dd('longest possible inside (πM)', dur(m.piM), '', tagR),
@@ -566,34 +577,36 @@ export function buildUI(app) {
   /* ---------- the probe ---------- */
   const canvas = $('#bh-canvas');
   function probeAt(px, py) {
-    const W = window.innerWidth, H = window.innerHeight, asp = W / H;
-    const th = thNow();
-    const sx = ((px / W) * 2 - 1) * th * asp, sy = (1 - (py / H) * 2) * th;
+    // the ray the renderer traced for this pixel: same view object (Store.view, charge
+    // included), same pixel mapping, same horizon and ISCO (probe.js, tested in probe.test.mjs)
     const v = viewNow();
-    const cam = K.observerFrame(v.a, K.ksPosition(v.a, v.rcam, v.incl * D2R, 0), { observer: v.observer, tilt: v.tilt * D2R });
-    const ri = K.isco(v.a);
-    const res = K.traceRay(v.a, cam, sx, sy, 1, { k: 0.06, maxSteps: 3000, disk: v.emit === 'thick', rIn: ri, rOut: v.rout, path: true });
+    const { sx, sy } = screenToTangent(px, py, window.innerWidth, window.innerHeight, v.fov);
+    const res = traceProbe(v, sx, sy);
+    const ri = res.rIn, q = v.q || 0;
     probeRay = res.path;
     app.probePt = [px, py];
     // brushing: a disk hit lights its radius in the profile plot and its annulus on the image
     app.hover.r = res.fate === 'disk' ? res.hits[0].r : 0;
     drawProfile(); drawPotential(res.fate === 'disk' ? res.hits[0].r : null); app.request();
     drawXS(); drawOverlay();
-    const m = app.model;
+    // radii of the traced view (it can differ from the state's while a transition runs)
+    const m = { rh: K.horizon(v.a, q), rph: K.photonOrbit(v.a, 1, q), rphr: K.photonOrbit(v.a, -1, q) };
     const lam = res.pphi / -res.pt;     // axial angular momentum per energy, in M
     let title, cause, deriv;
     if (res.fate === 'captured') {
       title = 'Shadow: this ray ends in the hole';
       cause = `Followed back, the light path crosses the horizon at r+ = ${m.rh.toFixed(3)} M. Its angular momentum per energy, ${lam.toFixed(2)} M, is too small to turn around at the photon orbits.`;
-      deriv = 'Critical curve (Bardeen 1973), spherical photon orbit radius r:\n  xi = (r^2 (3 - r) - a^2 (r + 1)) / (a (r - 1))\n  eta = r^3 (4 a^2 - r (r - 3)^2) / (a^2 (r - 1)^2)\n  alpha = -xi / sin i,  beta = +- sqrt(eta + a^2 cos^2 i - xi^2 cot^2 i)';
+      deriv = q > 0
+        ? `Kerr-Newman, Q/M = ${q.toFixed(2)}: no closed-form critical curve is used. The ray is integrated in the Kerr-Schild form\n  g^mn = eta^mn - f k^m k^n,  f = r^2 (2 r - Q^2) / (r^4 + a^2 z^2)\nand captured when r < 0.98 r+, r+ = 1 + sqrt(1 - a^2 - Q^2) = ${m.rh.toFixed(3)} M.`
+        : 'Critical curve (Bardeen 1973), spherical photon orbit radius r:\n  xi = (r^2 (3 - r) - a^2 (r + 1)) / (a (r - 1))\n  eta = r^3 (4 a^2 - r (r - 3)^2) / (a^2 (r - 1)^2)\n  alpha = -xi / sin i,  beta = +- sqrt(eta + a^2 cos^2 i - xi^2 cot^2 i)';
     } else if (res.fate === 'disk') {
       const h = res.hits[0];
       const nearIsco = h.r < ri * 1.08;
       title = h.n === 0 ? (nearIsco ? 'ISCO edge of the disk' : (res.g > 1.05 ? 'Approaching side of the disk' : res.g < 0.8 ? 'Receding side of the disk' : 'Disk, direct image')) : `Disk, n = ${h.n} image`;
       cause = h.n > 0 ? `This light crossed the disk plane ${h.n} time${h.n > 1 ? 's' : ''} outside the gas before landing at r = ${h.r.toFixed(2)} M: it went around the hole first.`
         : nearIsco ? `Gas here sits at r = ${h.r.toFixed(2)} M, just outside the last stable orbit at ${ri.toFixed(3)} M. Inside it, gas plunges and stops radiating.`
-          : `Gas at r = ${h.r.toFixed(2)} M orbiting at ${K.diskSpeed(v.a, h.r).toFixed(3)} c. Its light reaches you shifted by g = ${res.g.toFixed(3)}, so intensity x ${Math.pow(res.g, 4).toFixed(2)}.`;
-      deriv = `Redshift (circular orbit, conserved E and L of the ray):\n  g = 1 / (u^t (E - Omega L)),  Omega = 1 / (r^1.5 + a)\n  here E = ${(-res.pt).toFixed(4)}, L = ${res.pphi.toFixed(4)}, g = ${res.g.toFixed(4)}\nObserved intensity I = g^4 I_emit (I_nu / nu^3 is invariant).\nTemperature: Page & Thorne 1974 flux, T = (F / sigma)^(1/4).`;
+          : `Gas at r = ${h.r.toFixed(2)} M orbiting at ${K.diskSpeed(v.a, h.r, q).toFixed(3)} c. Its light reaches you shifted by g = ${res.g.toFixed(3)}, so intensity x ${Math.pow(res.g, 4).toFixed(2)}.`;
+      deriv = `Redshift (circular orbit, conserved E and L of the ray):\n  g = 1 / (u^t (E - Omega L)),  ${q > 0 ? 'Omega = sqrt(r - Q^2) / (r^2 + a sqrt(r - Q^2))' : 'Omega = 1 / (r^1.5 + a)'}\n  here E = ${(-res.pt).toFixed(4)}, L = ${res.pphi.toFixed(4)}, g = ${res.g.toFixed(4)}\nObserved intensity I = g^4 I_emit (I_nu / nu^3 is invariant).\nTemperature: Page & Thorne 1974 flux, T = (F / sigma)^(1/4).`;
     } else if (res.minr < m.rphr * 1.08) {
       title = 'Photon ring: light that skimmed the photon orbits';
       cause = `This ray came within ${res.minr.toFixed(3)} M of the centre, among the unstable photon orbits (${m.rph.toFixed(3)} to ${m.rphr.toFixed(3)} M), and was flung back out. Each extra half-orbit thins such images by e^-gamma.`;
@@ -667,7 +680,7 @@ export function buildUI(app) {
   /* ---------- store subscription ---------- */
   let annTimer = 0;
   store.on((changed, s, src) => {
-    if (changed.some((k) => ['a', 'incl', 'rcam', 'fov', 'tilt', 'rout', 'observer', 'emit', 'view', 'obj', 'edd', 'mass'].includes(k))) {
+    if (changed.some((k) => ['a', 'q', 'incl', 'rcam', 'fov', 'tilt', 'rout', 'observer', 'emit', 'view', 'obj', 'edd', 'mass'].includes(k))) {
       if (src !== 'drag') probe.hidden = true;
       requestAnchors();
     }
@@ -701,10 +714,15 @@ export function buildUI(app) {
   };
 
   /* ---------- per-frame hooks ---------- */
-  let lastFallDraw = 0;
+  let lastFallDraw = 0, wasEasing = false;
   const tick = (now, dt) => {
     journey.tick(dt);
     app.tour?.tick(now, dt);
+    // a transition just ended: the image is the state's own view now, so trace its anchors
+    // and redraw what is drawn from the eased values (critical curve, labels, tour focus)
+    const easing = !!store.anim;
+    if (wasEasing && !easing) { requestAnchors(); drawOverlay(); app.tour?.refresh(); }
+    wasEasing = easing;
     if (store.get('view') === 'journey' && now - lastFallDraw > 120) { lastFallDraw = now; drawFall(); drawReadouts(); }
   };
 
@@ -737,6 +755,6 @@ export function buildUI(app) {
 
   return {
     tick, perf, start, frameUniforms: () => app.frameUniforms(app), layout: () => { drawOverlay(); requestAnchors(); },
-    onRefined: () => drawOverlay(), anchors: () => anchors, ask,
+    onRefined: () => drawOverlay(), anchors: () => anchors, liveAnchors: anchorsLive, ask,
   };
 }

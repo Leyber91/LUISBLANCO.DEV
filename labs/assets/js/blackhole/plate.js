@@ -41,7 +41,7 @@ export async function exportPlate(app, W, onProgress) {
   // the stamp
   const f = facts(app), s = app.store.all();
   const o = app.model.obj;
-  const ts = shadowFor(s.a, s.view === 'telescope' ? app.store.shown.incl : (o ? o.incl : 90), s.q);
+  const ts = shadowFor(s.a, s.view === 'telescope' ? s.incl : (o ? o.incl : 90), s.q);
   const pred = o ? predictedUas(ts.mean, o) : null;
   const font = (px, w = 400) => `${w} ${Math.round(px * u)}px "IBM Plex Mono", ui-monospace, monospace`;
   const y0 = height + band * 0.42;
