@@ -3,6 +3,17 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-11, Labs: AI in Healthcare built (Glass Ward)
+
+- New lab. A 20-bed synthetic ward where the published NEWS2 score (Royal College of Physicians, 2017) and a model
+  trained in the visitor's browser raise alerts side by side; a scorecard at the end of the shift shows which system
+  caught each deteriorating patient and how early.
+- Per patient: exact score contributions, the smallest change in vital signs that would flip the decision, and a
+  model-written explanation checked claim by claim against the numbers. Synthetic records only; not medical advice.
+- Independent grade on the lab's own ladder: level 0 to 2. Weakest: head-to-head evaluation (the results do not yet
+  state their unit, the observation set, or the 24 h horizon).
+- Checks: 16 tests in labs/assets/js/ai-health/tests.mjs, run by the site gate.
+
 ## 2026-11-11, Labs: Trending Topics measures what is rising
 
 - Six keyless sources (Hacker News, Show HN, GitHub, Wikipedia in English, German and Spanish) are scored as rates
