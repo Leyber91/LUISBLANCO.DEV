@@ -58,9 +58,12 @@ const OLLAMA_PROBE_MS = 2500;
 const OLLAMA_TAGS_MS = 15000;
 const OLLAMA_NUM_CTX = 8192;
 // Preference order for a local model, by a lab-task benchmark on 2026-11-11 (meaning-graph JSON, a grounded
-// description, a trap question; num_ctx 8192): gemma4:e4b 3 of 3 correct at 107 to 131 tokens/s; qwen3.5:9b 3 of 3
-// at about 47 tokens/s after long thinking; llama3.1:8b 2 of 3 (wrong JSON fields) at about 56 tokens/s.
-const OLLAMA_PREFER = ['gemma4:e4b', 'qwen3.5:9b', 'llama3.1:8b', 'qwen3:8b'];
+// description, the bat-and-ball trap; num_ctx 8192; machine shared, so load times are not comparable):
+//   gemma4:e4b    3 of 3, 107 to 131 tokens/s        bonsai-2:9b   3 of 3, 70 to 80 tokens/s, long thinking
+//   qwen3.5:9b    3 of 3, about 47 tokens/s, long thinking
+//   lfm3:1.7b     3 of 3, 130 to 150 tokens/s, 1.1 GB  mimo-v2.6:9b  2 of 3 (fell for the trap)
+//   llama3.1:8b   2 of 3 (wrong JSON fields), about 56 tokens/s
+const OLLAMA_PREFER = ['gemma4:e4b', 'qwen3.5:9b', 'bonsai-2:9b', 'lfm3:1.7b', 'llama3.1:8b', 'qwen3:8b'];
 const DEFAULT_TIMEOUT_MS = 60000;
 const OWN_KEY_STORE = 'lb.llm.ownkey';
 const READY_STORE = 'lb.llm.pollReadyAt'; // shared across lab tabs on this origin
