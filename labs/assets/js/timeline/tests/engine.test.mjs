@@ -123,6 +123,11 @@ test('the gate hides chapter-tier events below the reading position, in every ch
   assert.ok(E.VIS.some((e) => e.id === 'kr-nasha'));
 });
 
+test('an event with no tier is hidden by default', () => {
+  assert.equal(E.readable({ id: 'x', world: 'earth', y: 0 }), false);
+  assert.equal(E.readable({ id: 'x', world: 'earth', y: 0, tier: 0 }), true);
+});
+
 test('filters by dimension and narrative tag', () => {
   E.setGate({ hideDims: ['kharen'] });
   assert.ok(!E.VIS.some((e) => e.world === 'kharen'));

@@ -78,7 +78,8 @@ export function setGate({ read, hideDims, hideTags } = {}) {
 export const getGate = () => ({ read: gate.read, hideDims: [...gate.hideDims], hideTags: [...gate.hideTags], version: gate.version });
 
 /** The spoiler half of the gate: may this reader see it at all? */
-export const readable = (e) => e != null && (e.tier ?? 0) <= gate.read && (e.tier ?? 0) <= CEILING;
+/** An event with no tier set is hidden: the spoiler tier must be set per event, never assumed. */
+export const readable = (e) => e != null && Number.isInteger(e.tier) && e.tier <= gate.read && e.tier <= CEILING;
 /** The whole gate: readable, and not filtered out. */
 export function passes(e) {
   if (!readable(e)) return false;
