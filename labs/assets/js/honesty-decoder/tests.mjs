@@ -41,7 +41,7 @@ const near = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 
 /* ------------------------------------------------------------ schema */
 const HUB = Object.fromEntries(ALL_PROJECTS.map((p) => [p.id, p]));
-export function validateRow(r, hub = HUB) {
+export function validateRow(r, hub = HUB, driftSink = null) {
   const errs = [];
   if (!r || typeof r.id !== 'string') return ['row without id'];
   if (!hub[r.id]) errs.push(`${r.id}: not a hub id in site.config.js`);
@@ -54,7 +54,9 @@ export function validateRow(r, hub = HUB) {
     if (!s.id || ids.has(s.id)) errs.push(`${at}: missing or duplicate id`);
     ids.add(s.id);
     if (typeof s.phrase !== 'string' || !s.phrase) errs.push(`${at}: no phrase`);
-    else if (hub[r.id] && !hub[r.id].blurb.toLowerCase().includes(s.phrase.toLowerCase())) errs.push(`${at}: phrase "${s.phrase}" not in the live blurb`);
+    // A lab rewriting its own blurb is drift (the row is stale and the page flags it), not a schema error:
+    // as an error it blocked every other lab's publication (2026-11-11).
+    else if (hub[r.id] && !hub[r.id].blurb.toLowerCase().includes(s.phrase.toLowerCase())) (driftSink || errs).push(`${at}: phrase "${s.phrase}" not in the live blurb`);
     if (!C.TYPES[s.type]) errs.push(`${at}: bad type ${s.type}`);
     if (!Number.isInteger(s.w) || s.w < 1 || s.w > 3) errs.push(`${at}: weight must be 1..3`);
     if (typeof s.why !== 'string' || s.why.length < 10) errs.push(`${at}: weight has no justification`);
@@ -71,7 +73,9 @@ export function validateRow(r, hub = HUB) {
   return errs;
 }
 
-for (const r of ROWS) { const e = validateRow(r); ok(!e.length, `schema: ${e.join('; ')}`); }
+const blurbDrift = [];
+for (const r of ROWS) { const e = validateRow(r, HUB, blurbDrift); ok(!e.length, `schema: ${e.join('; ')}`); }
+for (const m of blurbDrift) drift(false, `stale row: ${m}`);
 
 /* planted bad rows: each must be rejected */
 const good = ROWS.find((r) => r.id === 'primordial-seed');
