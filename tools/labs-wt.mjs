@@ -318,6 +318,13 @@ const FOUNDATION_OWNED = [/^tools\//, /^labs\/assets\/js\/ai\//, /^\.github\/wor
 function resolution(file, p) {
   if (GENERATED.includes(file)) return 'theirs';
   if (file === 'EVOLUTION.md') return 'entries';
+  // Main may hold this file at an older version of this same branch (an earlier pull request of the branch was
+  // squash-merged). If main's copy appears in the branch's own history, the branch has moved past it: keep ours.
+  const theirs = git(['rev-parse', `:3:${file}`], p).out;
+  if (theirs) {
+    const commits = git(['rev-list', 'HEAD', '--', file], p).out.split(/\r?\n/).filter(Boolean);
+    for (const c of commits) if (git(['rev-parse', `${c}:${file}`], p).out === theirs) return 'ours';
+  }
   if (FOUNDATION_OWNED.some((re) => re.test(file))) {
     // Keep the branch copy only when it is exactly the foundation's current copy.
     const mine = git(['rev-parse', `HEAD:${file}`], p).out;
