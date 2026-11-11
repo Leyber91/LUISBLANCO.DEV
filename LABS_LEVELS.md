@@ -167,7 +167,7 @@ It stays as the record of the first look. The ratings by each lab's own axes fol
 | Community Challenges | 12 | 0 | G0 | 0 | rate-estimators, rank-uncertainty, challenge-sim, gaming-resistance, uncertainty-views, board-grammar, challenge-play, results-provenance, board-auditor, ranking-literacy, compute-reach, engine-architecture at 0 | A static leaderboard typed into the page; no rate is computed. |
 | Personalized Plans | 12 | 1 | G0 | 1 | volume-map at 0 | Each lift in the exercise data carries its primary muscles, and each day card lists the muscles it trains, derived from those tags rather than from the split label. |
 | AI Meme Lab | 12 | 2 | G0 | 2 | model-contribution, punch-down-guard at 1 | One model call through a local Ollama route asks for angles, slate, scores and winner as JSON, streams its reasoning into the reasoning panel, and falls back to the engine when the JSON does not parse. |
-| Trending Topics | 12 | 2 | G0 | 2 | rise-validation, topic-merging, scan-memory at 0 | Each scan's top 10 rising calls are stored with time, source, item id and score. |
+| Trending Topics | 12 | 2 | G1 | 3 | rise-validation, design-language at 1 | On a later scan of the same source, every earlier call shows whether the item's measured rate since then rose, held or fell, with the elapsed time. |
 | User-Generated Content | 12 | 0 | G0 | 0 | chain-integrity, author-signatures, fork-merge, url-codec, archive-interchange, fork-tree, ledger-style, co-writing, model-contribution, proof-literacy, load-reach, protocol-shape at 0 | Contributions are stored as a plain list with no hash; editing a past contribution leaves no trace. |
 <!-- levels:table:end -->
 

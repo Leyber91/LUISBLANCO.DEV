@@ -1,94 +1,53 @@
 /* ============================================================
-   trending/ReasoningService.js — asks WHY the top signal is rising.
+   trending/ReasoningService.js — the one model call per scan.
 
-   Live path: text.pollinations.ai (keyless, in-browser; no backend,
-   no keys — this is why it does NOT use ai/provider.js, whose tiers
-   are ollama/worker/echo and never reach pollinations). If that is
-   unreachable it falls back to a per-source built-in heuristic.
-
-   The heuristic is a STRATEGY MAP keyed by lens badge (with a
-   default) rather than an if/else chain — a new source's blurb is a
-   new entry, not a branch.
+   Goes through the shared route (ai/llm.js: the visitor's Ollama when
+   served locally, their own key, a worker, the public keyless service,
+   then this lab's deterministic engine). The public route allows one
+   reply every 45 seconds per IP, so a scan makes exactly one request:
+   the top signals batched into one JSON object. Validation, the
+   number check and the per-entry fallback live in explain.js.
    ============================================================ */
 
-import { TUNING, REASON } from './constants.js';
-import { fetchWithTimeout, prefersReduced, wait, fmt } from './dom.js';
-
-/* ---- built-in heuristic blurbs: badge -> (value, lens) -> string ---- */
-const HEURISTICS = {
-  HN: (v, lens) =>
-    `At ${v} points climbing this fast, it has cleared the front-page baseline by a wide margin — on Hacker News that velocity usually means a launch, an outage, or a strong opinion landing at the right moment. The pace reflects practitioner interest, not just headline curiosity, which is the signal worth watching in ${lens.theme}.`,
-  WIKI: (v, lens) =>
-    `With ${v} reads in a single day it is one of the most-looked-up things in the world right now — a spike like this is almost always downstream of a news event, a release, or a moment that sent people to look it up. It is a clean proxy for where ${lens.theme} actually went, rather than where commentary said it would.`,
-};
-const HEURISTIC_DEFAULT = (v, lens) =>
-  `A repository this new pulling ${v} stars is climbing far faster than the median project — early star velocity like this tracks developer conviction, usually a tool that removes a real, shared pain. It is an early read on where ${lens.theme} is heading before the trend is obvious.`;
+import { LLM } from '../ai/llm.js';
+import { TUNING } from './constants.js';
+import { buildRequest, engineReply, reconcile, parseReply } from './explain.js';
 
 export class ReasoningService {
-  constructor(whyView) { this.view = whyView; }
-
-  /* Resolve why the item is rising. Returns { live }.
-     view callbacks: setThinking(on), reset(), type(text, signal),
-     setLabel(text). */
-  async reason(item, lens, signal) {
-    this.view.setLabel('reasoning…');
-    this.view.setThinking(true);
-    this.view.reset();
-    const prompt = this._prompt(item, lens);
-    try {
-      const url = `${REASON.base}${encodeURIComponent(prompt)}?model=${REASON.model}&referrer=${REASON.referrer}`;
-      const res = await fetchWithTimeout(url, signal, TUNING.reasonTimeoutMs);
-      if (!res.ok) throw new Error('pollinations ' + res.status);
-      const text = (await res.text()).trim();
-      if (signal?.aborted) return { live: false };
-      if (text.length < TUNING.reasonMinChars || /^\s*(error|\{)/i.test(text)) throw new Error('empty');
-      await this.view.type(text, signal);
-      this.view.setLabel('why it is rising · pollinations (live)');
-      return { live: true };
-    } catch {
-      if (signal?.aborted) return { live: false };
-      await this.view.type(this._heuristic(item, lens), signal);
-      this.view.setLabel('why it is rising · built-in heuristic');
-      return { live: false };
-    } finally {
-      this.view.setThinking(false);
+  /**
+   * items: the ranked top signals (hydrated, with .sc); facts: factsFor() per item;
+   * ctxs: per-item engine context; topics: [{ label, keys }]; fixture: a recorded reply to use instead of a call.
+   * Returns { source, model, ms, errors, entries, topics, digest, ... }.
+   */
+  async explain({ items, facts, ctxs, topics, scan, evidence, signal, fixture, engineOnly, scanFacts }) {
+    const engine = engineReply(items, ctxs, topics, scan, evidence);
+    if (engineOnly) {
+      const out = reconcile(engine, items, facts, engine, scanFacts);
+      for (const e of out.entries) { e.origin = 'engine'; e.flags = []; e.rule = engine.signals.find((x) => x.id === e.key)?.rule; }
+      return { ...out, digestOrigin: 'engine', digestFlags: [], source: 'offline', model: 'deterministic', ms: 0, errors: ['model switched off by ?engine'] };
     }
-  }
-
-  _prompt(item, lens) {
-    return (
-      `A signal is rising on ${lens.source}: "${item.title}" (${item.metricLabel}: ${item.metricValue}` +
-      `${item.ageText ? ', ' + item.ageText : ''}). In 2 to 3 concrete sentences, explain why it is likely ` +
-      `climbing right now and what it signals about where ${lens.theme} is heading. No hype, no preamble, no lists.`
-    );
-  }
-
-  _heuristic(item, lens) {
-    const v = fmt(item.metricValue);
-    return (HEURISTICS[lens.badge] || HEURISTIC_DEFAULT)(v, lens);
-  }
-}
-
-/* ============================================================
-   WhyView — owns the #why-label / #why-body nodes and the type-out.
-   Reduced-motion users get the full text instantly.
-   ============================================================ */
-export class WhyView {
-  constructor(labelNode, bodyNode) { this.label = labelNode; this.body = bodyNode; }
-
-  setLabel(text) { if (this.label) this.label.textContent = text; }
-  setThinking(on) { this.body?.classList.toggle('thinking', on); }
-  reset() { if (this.body) this.body.textContent = ''; }
-  setText(text) { if (this.body) this.body.textContent = text; }
-
-  async type(text, signal) {
-    if (!this.body) return;
-    this.body.textContent = '';
-    if (prefersReduced()) { this.body.textContent = text; return; }
-    for (let i = 0; i < text.length; i += TUNING.typeStep) {
-      if (signal?.aborted) { this.body.textContent = text; return; }
-      this.body.textContent += text.slice(i, i + TUNING.typeStep);
-      await wait(TUNING.typeDelayMs);
+    if (fixture) {
+      const out = reconcile(fixture.reply, items, facts, engine, scanFacts);
+      return { ...out, source: 'fixture', model: fixture.model, ms: 0, errors: [], label: fixture.label };
     }
+    const { system, prompt } = buildRequest(facts, topics, scanFacts);
+    // json: false on purpose: llm.js drops a reply it cannot parse whole, and a reply cut
+    // off after four entries should still give four checked entries (measured 2026-11-11:
+    // the public route answered this prompt with text that did not parse as one object).
+    const r = await LLM.complete({
+      system: `${system}\n\nReply with one JSON object and nothing else.`, prompt, json: false, temperature: 0.2, signal,
+      timeoutMs: TUNING.modelTimeoutMs, maxWaitMs: TUNING.modelMaxWaitMs,
+      fallback: () => JSON.stringify(engine),
+    });
+    const parsed = r.source === 'offline' ? engine : parseReply(r.text);
+    const out = reconcile(parsed, items, facts, engine, scanFacts);
+    if (r.source !== 'offline' && !parsed) out.unreadable = true;
+    if (parsed?.salvaged) out.salvaged = true;
+    if (r.source === 'offline') {
+      for (const e of out.entries) { e.origin = 'engine'; e.note = ''; e.flags = []; e.rule = engine.signals.find((x) => x.id === e.key)?.rule; }
+      out.digestOrigin = 'engine';
+      out.digestFlags = [];
+    }
+    return { ...out, source: r.source, model: r.model, ms: r.ms, errors: r.errors || [], prompt, rawText: r.text };
   }
 }

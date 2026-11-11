@@ -1,129 +1,208 @@
 /* ============================================================
-   trending/constants.js — the single home for every reusable
-   trending constant. Nothing downstream hard-codes a selector, a
-   magic number, an endpoint, a prompt or a label: it lives here, so
-   behaviour is tuned in ONE place. The lens fetch STRATEGIES live in
-   lenses.js (they need the dom/fetch helpers); this file is the
-   selectors + tuning + the labelled offline snapshot data.
+   trending/constants.js — configuration only: the source registry
+   labels, the tuning block, the cause list, the storage key and the
+   copy the views print. No computation, no DOM, no network.
+
+   Every engine module (lenses, score, topics, verify, history) reads
+   its numbers from TUNING so a retune is one edit here, and the method
+   panel prints the same numbers the code uses.
    ============================================================ */
 
-/* ---- the labelled snapshot date (also the "captured" stamp) ---- */
-export const SNAPSHOT_DATE = '2026-06-16';
-
-/* ---- DOM selectors (ids in trending.html) ---- */
-export const SEL = {
-  form:        '#scan-form',
-  lensToggle:  '#lens-toggle',
-  lensWhat:    '#lens-what',
-  scanBtn:     '#scan',
-  stopBtn:     '#stop',
-  resting:     '#resting',
-  work:        '#work',
-  livePill:    '#live-pill',
-  liveText:    '#live-text',
-  metaSrc:     '#meta-src',
-  metaTime:    '#meta-time',
-  traceWrap:   '#trace-wrap',
-  traceBody:   '#trace-body',
-  traceToggle: '#trace-toggle',
-  featured:    '#featured',
-  featBadge:   '#feat-badge',
-  featMetric:  '#feat-metric',
-  featLink:    '#feat-link',
-  whyLabel:    '#why-label',
-  whyBody:     '#why-body',
-  board:       '#board',
-  boardNote:   '#board-note',
-  aiStatus:    '#ai-status',
-  aiStatusLabel: '#ai-status-label',
-  backendNote: '#backend-note',
-  scanStatus:  '#scan-status',
-  year:        '#year',
-  /* used inside the lens toggle group */
-  lens:        '.lens',
-};
-
-/* ---- behaviour / tuning (one place to retune the scan) ---- */
+/* ---- tuning: the numbers the engine and the method panel share ---- */
 export const TUNING = {
-  fetchTimeoutMs:   12000,   // per-source live fetch budget
-  reasonTimeoutMs:  25000,   // pollinations reasoning budget
-  hitsPerPage:      30,      // HN front-page page size
-  topN:             12,      // signals kept per lens, after ranking
-  githubSinceDays:  14,      // GitHub "created in the last N days"
-  wikiBackoffDays:  [1, 2, 3], // prior full days to try for pageviews
-  minVelocityAgeH:  0.4,     // floor on HN age (hours) so velocity stays finite
-  heatMinPct:       4,       // minimum heat-bar fill width (%)
-  reasonMinChars:   24,      // a reasoning reply shorter than this = treat as empty
-  typeStep:         3,       // chars revealed per tick when typing the reasoning
-  typeDelayMs:      14,      // delay between type ticks
+  fetchTimeoutMs: 12000,      // per request, every source
+  modelTimeoutMs: 60000,      // one batched model call
+  modelMaxWaitMs: 50000,      // wait for the public 45 s window at most this long
+
+  hnHits: 30,                 // HN front page size (Algolia)
+  showHits: 30,               // Show HN stories posted in the last showWindowH
+  showWindowH: 48,
+  hnAgeFloorH: 0.4,           // an HN item younger than 24 min is treated as 24 min old
+  ghSinceDays: 14,            // GitHub repositories created in the last N days
+  ghPerPage: 30,
+  ghAgeFloorH: 6,             // a repository younger than 6 h is treated as 6 h old
+
+  wikiBackoff: [1, 2, 3],     // days back from today (UTC) to try for the latest full day
+  wikiRisers: 7,              // per edition: candidates by day-over-day ratio
+  wikiLargest: 3,             // per edition: candidates by raw views
+  wikiLinked: 2,              // per edition: extra candidates linked to an HN or GitHub title
+  wikiSeriesDays: 35,         // per-article daily window ending on the scan day
+  wikiWeeks: 4,               // same-weekday baseline: median of the prior 4 weeks
+  wikiMinBaseline: 1,         // a baseline below this is "new", never an infinite ratio
+
+  confidence: 0.95,           // Poisson (Garwood) interval on every count
+  accelThreshold: 0.25,
+  cusumK: 0.5,                // CUSUM allowance, in baseline standard deviations
+  cusumH: 5,                  // CUSUM decision threshold, in baseline standard deviations
+  cusumMonitorDays: 7,        // the last 7 days are monitored; the days before them are the baseline
+  cusumMinSd: 0.05,           // floor on the baseline sd of ln(views + 1)       // |relative change in rate| above this = accelerating or decaying
+  accelMinGapH: 0.15,         // two observations closer than 9 min do not make a rate
+  madScale: 1.4826,           // MAD to standard deviation under a normal model
+
+  topPerSource: 10,           // rising calls stored per source per scan
+  boardMax: 40,               // rows on the board
+  explainTop: 5,              // signals sent to the model in the one batched call
+  hnCommentsPer: 3,           // top comments fetched per explained HN item
+
+  jaccard: 0.3,               // topic rule (b): key-term Jaccard at or above this
+  keyTerms: 3,                // key terms shown per signal
+  minIdf: 1.0,                // a shared term must carry at least this idf to join
+
+  pollMinutes: 10,            // auto re-scan interval while the tab is open
+  historyMaxScans: 60,        // oldest scans drop past this count
+  storageWarnKB: 3500,
+
+  outcomeHorizonH: 6,         // probability horizon for HN and GitHub calls
+  outcomeWindowH: [4, 9],     // a follow-up observation inside this window counts as "6 h later"
+  minCallsToJudge: 30,        // fewer calls than this: "too few to judge"
+  bootstrapReps: 1000,
+  bootstrapLevel: 0.90,
+
+  typeStepChars: 3,
+  typeDelayMs: 12,
+  stageMs: 320,               // one stage of the scan sequence (tokens.css --t-mid)
+  fieldMoveMs: 560,           // object-constancy move between scans (tokens.css --t-slow)
 };
 
-/* ---- the live keyless reasoning endpoint (no backend, no keys) ---- */
-export const REASON = {
-  base:     'https://text.pollinations.ai/',
-  model:    'openai',
-  referrer: 'l212',
+/* ---- the sources: labels, units, limits, caveats. fetch() lives in lenses.js ---- */
+export const SOURCES = {
+  hn: {
+    id: 'hn', kind: 'forum', label: 'Hacker News', short: 'HN', glyph: 'circle',
+    feed: 'front page', host: 'hn.algolia.com', endpoint: '/api/v1/search?tags=front_page',
+    unit: 'points/h', total: 'points', third: 'comments', hasAge: true, defaultOn: true,
+    limit: 'Algolia HN API: 10,000 requests per hour per IP (hn.algolia.com/api)',
+    budget: 6, budgetNote: '1 front-page request, plus up to 5 comment requests for stories the model explains',
+    caveat: 'Front page only: a story that never reached it is invisible, points are net votes with flagging hidden, and Algolia refreshes point counts with a lag, so a gap of minutes can read as zero gained.',
+    what: 'Points per hour since posting, with a 24-minute age floor.',
+  },
+  show: {
+    id: 'show', kind: 'forum', label: 'Show HN', short: 'SHOW', glyph: 'ring',
+    feed: 'Show HN, last 48 h', host: 'hn.algolia.com', endpoint: '/api/v1/search?tags=show_hn',
+    unit: 'points/h', total: 'points', third: 'comments', hasAge: true, defaultOn: true,
+    limit: 'Algolia HN API: 10,000 requests per hour per IP (hn.algolia.com/api)',
+    budget: 6, budgetNote: '1 Show HN request, plus up to 5 comment requests for stories the model explains',
+    caveat: 'Launch posts only, ranked by Algolia relevance first, so a quiet launch may not be fetched at all; points off the front page refresh with a lag of up to hours.',
+    what: 'Points per hour since posting for launches posted in the last 48 hours.',
+  },
+  gh: {
+    id: 'gh', kind: 'code', label: 'GitHub', short: 'GH', glyph: 'triangle',
+    feed: 'repositories created in the last 14 days', host: 'api.github.com', endpoint: '/search/repositories',
+    unit: 'stars/day', total: 'stars', third: 'forks', hasAge: true, defaultOn: true,
+    limit: 'GitHub search, unauthenticated: 10 requests per minute per IP, read live from X-RateLimit-Remaining',
+    budget: 1, budgetNote: '1 search request',
+    caveat: 'Stars can be bought or coordinated, and created_at is when the repository was made, which can be long before it went public.',
+    what: 'Stars per day since created_at, with a 6-hour age floor.',
+  },
+  wen: {
+    id: 'wen', kind: 'readership', label: 'Wikipedia EN', short: 'EN', glyph: 'square',
+    feed: 'most-read, latest full day', host: 'wikimedia.org', endpoint: '/api/rest_v1/metrics/pageviews',
+    project: 'en.wikipedia', site: 'https://en.wikipedia.org/wiki/',
+    ns: ['Special:', 'Wikipedia:', 'File:', 'Portal:', 'Talk:', 'User:', 'Template:', 'Help:', 'Category:', 'Draft:'],
+    main: ['Main_Page'],
+    unit: 'x weekday median', total: 'views', third: 'views over 28 days', hasAge: false, defaultOn: true,
+    limit: 'Wikimedia REST API: no per-IP quota published for this endpoint; the page sends at most 16 per edition',
+    budget: 16, budgetNote: 'up to 3 top-list requests (latest published day), 1 for the day before, up to 12 per-article series',
+    caveat: 'Daily totals that lag up to a day, and automated traffic that Wikimedia misclassifies as user views inflates some articles.',
+    what: 'Views on the latest full day over the median of the same weekday in the 4 prior weeks.',
+  },
+  wde: {
+    id: 'wde', kind: 'readership', label: 'Wikipedia DE', short: 'DE', glyph: 'diamond',
+    feed: 'most-read, latest full day', host: 'wikimedia.org', endpoint: '/api/rest_v1/metrics/pageviews',
+    project: 'de.wikipedia', site: 'https://de.wikipedia.org/wiki/',
+    ns: ['Spezial:', 'Wikipedia:', 'Datei:', 'Portal:', 'Diskussion:', 'Benutzer:', 'Vorlage:', 'Hilfe:', 'Kategorie:'],
+    main: ['Wikipedia:Hauptseite'],
+    unit: 'x weekday median', total: 'views', third: 'views over 28 days', hasAge: false, defaultOn: true,
+    limit: 'Wikimedia REST API: no per-IP quota published for this endpoint; the page sends at most 16 per edition',
+    budget: 16, budgetNote: 'up to 3 top-list requests (latest published day), 1 for the day before, up to 12 per-article series',
+    caveat: 'German-language readers only, so a subject that is news elsewhere can stay flat here.',
+    what: 'Views on the latest full day over the median of the same weekday in the 4 prior weeks.',
+  },
+  wes: {
+    id: 'wes', kind: 'readership', label: 'Wikipedia ES', short: 'ES', glyph: 'cross',
+    feed: 'most-read, latest full day', host: 'wikimedia.org', endpoint: '/api/rest_v1/metrics/pageviews',
+    project: 'es.wikipedia', site: 'https://es.wikipedia.org/wiki/',
+    ns: ['Especial:', 'Wikipedia:', 'Archivo:', 'Portal:', 'Discusión:', 'Usuario:', 'Plantilla:', 'Ayuda:', 'Categoría:', 'Anexo:'],
+    main: ['Wikipedia:Portada'],
+    unit: 'x weekday median', total: 'views', third: 'views over 28 days', hasAge: false, defaultOn: true,
+    limit: 'Wikimedia REST API: no per-IP quota published for this endpoint; the page sends at most 16 per edition',
+    budget: 16, budgetNote: 'up to 3 top-list requests (latest published day), 1 for the day before, up to 12 per-article series',
+    caveat: 'Spanish-language readers only; football and telenovela audiences dominate the daily list.',
+    what: 'Views on the latest full day over the median of the same weekday in the 4 prior weeks.',
+  },
+};
+export const SOURCE_ORDER = ['hn', 'show', 'gh', 'wen', 'wde', 'wes'];
+export const KINDS = {
+  forum: { label: 'forum', x: 'age since posting (h, log)', y: 'points per hour (log)' },
+  code: { label: 'code host', x: 'age since created_at (h, log)', y: 'stars per day (log)' },
+  readership: { label: 'readership', x: 'views over same-weekday median (log)', y: 'views on the day (log)' },
 };
 
-/* ---- query params that drive boot behaviour ---- */
+/* ---- score modes: what the board ranks by. "total" is never called rising ---- */
+export const SCORE_MODES = {
+  lower: { label: 'lower bound', verb: 'rising', note: 'ranked by the lower end of the 95% Poisson interval of each rise score' },
+  rate: { label: 'point rate', verb: 'rising', note: 'ranked by the raw rise score, no small-count correction' },
+  total: { label: 'raw total', verb: 'largest', note: 'ranked by raw totals (points, stars, views); this is size, not rise' },
+};
+
+export const AGE_WINDOWS = { all: Infinity, '6h': 6, '24h': 24, '3d': 72 };
+
+/* ---- causes: one fixed list shared by the model and the keyword engine ---- */
+export const CAUSES = ['launch', 'outage', 'news event', 'death', 'release', 'controversy', 'sports result', 'anniversary'];
+export const CAUSE_RULES = [
+  ['death', /\b(dies|died|dead|death|obituary|passed away|murdered|killed|funeral|muere|fallece|muerte|gestorben|stirbt|tod)\b/i],
+  ['outage', /\b(outage|is down|went down|goes down|downtime|incident|breach|hacked|vulnerab\w*|cve-\d+|exploit|leak(ed)?|postmortem|ddos|ransomware)\b/i],
+  ['release', /\b(release[sd]?|changelog|v\d+(\.\d+)+|\d+\.\d+(\.\d+)? (is out|released|beta|alpha|rc\d*)|1\.0|version \d+)\b/i],
+  ['launch', /\b(show hn|launch(e[sd])?|introducing|announc\w+|unveil\w*|open[- ]?source[sd]?|new tool|i built|i made)\b/i],
+  ['controversy', /\b(lawsuit|sued|sues|ban(ned|s)?|scandal|fired|resign\w*|controvers\w*|accus\w+|fine[sd]?|antitrust|backlash|protest\w*|arrest\w*)\b/i],
+  ['sports result', /\b(fc|cf|f\.c\.|vs\.?|cup|league|liga|bundesliga|copa|championship|grand prix|playoffs?|final|match|season|nfl|nba|mlb|fifa|uefa|olympics?|tournament)\b/i],
+  ['anniversary', /\b(anniversary|years ago|\d{2,3}(st|nd|rd|th) birthday|centenary|aniversario|jahrestag)\b/i],
+];
+export const CAUSE_DEFAULT = 'news event';
+
+/* ---- storage: one key, one schema version. history.js is the only reader ---- */
+export const STORAGE = { key: 'lb.trending.history', version: 2 };
+
+/* ---- query parameters the controller reads and writes ---- */
 export const PARAMS = {
-  demo: 'demo',   // ?demo  -> instant deterministic snapshot render (screenshots)
-  scan: 'scan',   // ?scan=<lensKey> -> auto-run a live scan of that lens
+  src: 'src',        // comma list of enabled sources
+  score: 'score',    // lower | rate | total
+  win: 'win',        // all | 6h | 24h | 3d
+  view: 'view',      // items | topics
+  sel: 'sel',        // selected item id
+  terms: 'terms',    // comma list of lookup terms (up to 5)
+  scan: 'scan',      // present: start a live scan on load (value: comma list of sources, or 1)
+  demo: 'demo',      // present: load the recorded fixture scan
+  engine: 'engine',  // present: never call a model, the deterministic engine explains
+  fixture: 'fixture',// present: use the recorded model reply fixture (one malformed entry, one wrong number)
+  cause: 'cause',    // board cause filter
+  only: 'only',      // board source filter
+  open: 'open',      // present with sel: open that item's detail view
+  tour: 'tour',      // present: start the walkthrough
 };
 
-/* ---- live-pill: data-live state -> visible text (extend by key) ---- */
-export const LIVE_TEXT = {
-  live:     'live',
-  snapshot: 'snapshot',
+/* ---- copy the views print (one place, plain sentences) ---- */
+export const COPY = {
+  idleRecorded: 'Recorded scan. Press Scan live to fetch the open web from this browser.',
+  idleStored: 'Your last stored scan. Press Scan live to measure what moved since.',
+  scanning: 'Scanning',
+  stopped: 'Scan stopped. The board keeps the last complete scan.',
+  empty: 'No source returned a usable item.',
+  modelWait: 'The public model route allows one reply every 45 seconds per IP; waiting',
+  modelFailed: 'No model route answered. The explanations below come from the deterministic engine.',
+  limitWait: 'GitHub search limit reached; waiting',
 };
 
-/* ---- ai-status (header dot): mode -> { data-mode, label } ----
-   Driven by (dataLive, reasonLive); see STATUS_RESOLVER below.    */
-export const STATUS_MODES = {
-  live:   { mode: 'live',  label: 'live' },
-  local:  { mode: 'local', label: 'local' },
-  sample: { mode: 'local', label: 'sample' },
+/* ---- the selectors the controller resolves once ---- */
+export const SEL = {
+  route: '#route', status: '#status',
+  sources: '#sources', scoreModes: '#score-modes', windows: '#windows',
+  scan: '#scan', stop: '#stop', poll: '#poll', pollState: '#poll-state',
+  stamp: '#stamp', field: '#field', trace: '#trace', legend: '#legend',
+  top: '#top', explained: '#explained', digest: '#digest',
+  board: '#board', boardHead: '#board-head', viewToggle: '#view-toggle', boardFilters: '#board-filters',
+  history: '#history', diff: '#diff', store: '#store',
+  verify: '#verify', method: '#method', worked: '#worked', hard: '#hard', provenance: '#provenance',
+  lookupForm: '#lookup', lookupInput: '#lookup-terms', lookupOut: '#lookup-out',
+  detail: '#detail', tour: '#tour', tourBtn: '#tour-btn', expRoute: '#exp-route',
+  fileImport: '#import-file', evidence: '#evidence',
 };
-
-/* ---- backend-note copy: keyed, no string-building branches ---- */
-export const BACKEND_NOTE = {
-  idle: 'Press scan to fetch live signals and reason about them — entirely from your browser, no keys.',
-  reasonLive:
-    'Reasoning: text.pollinations.ai (keyless, live). Data + reasoning both fetched from your browser; no keys, no backend.',
-  reasonLocal: (dataLive) =>
-    'Reasoning: built-in heuristic (the model was unreachable). Data is ' +
-    (dataLive ? 'live' : 'a labelled snapshot') + '.',
-};
-
-/* ============================================================
-   labelled offline snapshot — REAL items captured 2026-06-16,
-   shown only when the network is unreachable (never as "live").
-   Keyed by lens id; the controller deep-copies before rendering.
-   ============================================================ */
-export const SNAPSHOT = {
-  tech: [
-    { title: 'Iroh 1.0', url: 'https://news.ycombinator.com/item?id=48542480', metricLabel: 'points', metricValue: 982, sub: '982 pts · 293 comments · top of front page', ageText: 'on the front page', score: 982 },
-    { title: 'A backdoor in a LinkedIn job offer', url: 'https://news.ycombinator.com/item?id=48546294', metricLabel: 'points', metricValue: 790, sub: '790 pts · 155 comments · climbing fast', ageText: 'fresh', score: 790 },
-    { title: 'Ask HN: Has anyone replaced Claude/GPT with a local model for daily coding?', url: 'https://news.ycombinator.com/item?id=48542100', metricLabel: 'points', metricValue: 735, sub: '735 pts · 351 comments · heavy discussion', ageText: 'today', score: 735 },
-    { title: 'TinyWind: a pixel pirate sailing game with real wind physics', url: 'https://news.ycombinator.com/item?id=48543475', metricLabel: 'points', metricValue: 638, sub: '638 pts · 132 comments', ageText: 'today', score: 638 },
-    { title: 'Hetzner Price Adjustment', url: 'https://news.ycombinator.com/item?id=48540844', metricLabel: 'points', metricValue: 351, sub: '351 pts · 504 comments · contested', ageText: 'today', score: 351 },
-    { title: 'Salesforce to Acquire Fin (formerly Intercom) for $3.6B', url: 'https://news.ycombinator.com/item?id=48540126', metricLabel: 'points', metricValue: 284, sub: '284 pts · 211 comments', ageText: 'today', score: 284 },
-  ],
-  culture: [
-    { title: 'Oliver Tree', url: 'https://en.wikipedia.org/wiki/Oliver_Tree', metricLabel: 'views', metricValue: 1508668, sub: '1.5M views · rank #2', ageText: 'over the prior day', score: 1508668 },
-    { title: 'Jalen Brunson', url: 'https://en.wikipedia.org/wiki/Jalen_Brunson', metricLabel: 'views', metricValue: 1326341, sub: '1.3M views · rank #3', ageText: 'over the prior day', score: 1326341 },
-    { title: 'Curaçao', url: 'https://en.wikipedia.org/wiki/Cura%C3%A7ao', metricLabel: 'views', metricValue: 1215504, sub: '1.2M views · rank #4', ageText: 'over the prior day', score: 1215504 },
-    { title: '2026 FIFA World Cup', url: 'https://en.wikipedia.org/wiki/2026_FIFA_World_Cup', metricLabel: 'views', metricValue: 777070, sub: '777k views · rank #6', ageText: 'over the prior day', score: 777070 },
-  ],
-  dev: [
-    { title: 'DietrichGebert/ponytail', url: 'https://github.com/DietrichGebert/ponytail', metricLabel: 'stars', metricValue: 17068, sub: '17k stars · JavaScript · new', ageText: 'new', score: 17068 },
-    { title: 'XiaomiMiMo/MiMo-Code', url: 'https://github.com/XiaomiMiMo/MiMo-Code', metricLabel: 'stars', metricValue: 9068, sub: '9.1k stars · TypeScript · new', ageText: 'new', score: 9068 },
-    { title: 'shadcn/improve', url: 'https://github.com/shadcn/improve', metricLabel: 'stars', metricValue: 4887, sub: '4.9k stars · new', ageText: 'new', score: 4887 },
-    { title: 'diffusionstudio/lottie', url: 'https://github.com/diffusionstudio/lottie', metricLabel: 'stars', metricValue: 2981, sub: '3.0k stars · TypeScript · new', ageText: 'new', score: 2981 },
-    { title: 'omnigent-ai/omnigent', url: 'https://github.com/omnigent-ai/omnigent', metricLabel: 'stars', metricValue: 1975, sub: '2.0k stars · Python · new', ageText: 'new', score: 1975 },
-    { title: 'NoopApp/noop', url: 'https://github.com/NoopApp/noop', metricLabel: 'stars', metricValue: 1690, sub: '1.7k stars · Swift · new', ageText: 'new', score: 1690 },
-  ],
-};
-
-/* ---- the deterministic "why" used by demo mode (snapshot top signal) ---- */
-export const DEMO_WHY = 'Iroh hitting a stable 1.0 lands just as teams are tiring of fragile, centralized networking glue and want direct peer-to-peer connections that simply work. A 1.0 is a public bet that the project is production-ready — exactly the trust threshold that moves a tool from weekend experiments into real stacks. Expect more infrastructure to quietly assume peer-to-peer by default rather than treating it as exotic.';
