@@ -26,6 +26,10 @@
         "G0": {
           "level": 1,
           "evidence": "echo-world.js generateEcho copies one of three hand-authored worlds from CONTENT keyed by preset id (ice-sinks VETHLEND, slow-light LENTUA, strong-gravity BARUND) into createWorld's shape; parts cross-reference by typed ids (rung 1). No value is computed from the divergence and no divergence parameter is read as a number anywhere. genericPhysics is unreachable from the three presets and emits 'Region 1' / 'Direct consequence 1'. Rung 2 fails."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Settled at 2 (rater 6; both skeptic disputes hold). Rung 2: physics.js computePhysics reads the typed knob vector from classify.js and computes many values by formulas in the source (gravity: sqrt(2gR), H = RT/(Mg), exp(dv/ve), h_max ~ 1/g). Rung 3 fails on both of its clauses. (a) The rule base does not emit the first-order effects of every preset: engine.js weave of the early-press preset 'The printing press arrives in 600 CE.' (seed 41, Node) gets only ph-none and bi-ours from rules.js RULES with cause dv; its real consequences (ev-printing shifted to 600, then telescope 1049, steam 1176 and on) come from engine.js techLadder and STAGE_FNS.history code, not from typed rules. (b) A table keyed by divergence id supplies first-order effects: lexicon.js EVENTS (rome, plague, contact, alexandria) carries authored effect magnitudes (rome: unity 0.6, printing -250 yr; plague: popFactor 1.35), and engine.js STAGE_FNS.history adds hand-written events gated on w.spec.eventId ('ev-x-endure' 'A western empire still rules from Italy to Britain', 'ev-x-crowd'); a Node weave of 'The western Roman Empire never falls.' shows ev-x-endure with cause ev-dv. Above the gate (not counted): 74 typed RULES with multi-hop chains across stages, quantity tables with a formula column, test/engine.test.mjs baseline checks, render/sweep-view.js runSweep. Higher rungs have their own misses too: rule items store one cause and no domain field, there is no 'arrival' slot, O2 dial worlds at 20/30/40% have an empty contrast slot, and several climate 'how' cells ('energy-balance model, calibrated to ours', 'counted on this map') and the quantity strip (main.js renderQuant, desk.png) show no formula."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 2,
           "evidence": "On every shown world (altverse.html?still&tab=dossier, &demo=slow-light, &demo=strong-gravity) generateEcho calls worldstate.js computeConsistency, which runs 8 structural rules, and render/dossier.js lists each PASS/FLAG under '8/8 structural checks passed' (rungs 1 and 2); shared (#w=) and saved worlds show the ledger stored at weave time. Rung 3 fails: the inflation rule covers only event to cause, so LENTUA fx-003 and rg-004 (THEORETICAL under a SPECULATIVE premise and ceiling) pass unflagged; generateEcho run in Node on 2026-11-11 reports 8/8, 0 flagged for all three worlds. VETHLEND rg-003 and rg-005 overlap and no rule catches it. schemas.js guardKeys/guardItems run only in pipeline.js runLive, which the public page never reaches."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Settled at 2 (rater 3; both disputes hold). Rung 2: validate.js ledger() computes 16-18 structural checks (ids unique, every cause resolves, causes upstream, causes before effects in time, dates ordered, eras ordered without overlap, no invention before what it needs, events inside eras, and more) and render/dossier.js renderLedger lists each as PASS or FLAG with a passed/total count. Rung 3 fails on the links it names: ledger() builds its 'all' list only from stage items and history events (validate.js line 253), so geography.regions (which carry no ladder tag at all) and culture.peoples never enter 'no claim more certain than its cause' or 'every claim carries a tag'. Region to premise is unchecked, no preset ceiling exists anywhere in the code, and each contrast is compared only to its single direct cause, not to each id on its path. G0 failed rung 3 on the same clause (rg-004). Above the gate (not counted): R1-R10 stage validation with rejections shown, the planted-bad-reply button, axiom checks and planted-fault tests. Rung 4 would also fail: no JSON Schema, and summary and name rejections carry no field path."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 1,
           "evidence": "nemotron-client.js and prompts.js exist (rung 1, first half), but pipeline.js runWorld goes live only when provider.detect() returns 'worker' and AI_CONFIG.worker.base is set; labs/assets/js/ai/config.js has worker.base '' so every route, local Ollama included, falls to runEcho. The lab does not import labs/assets/js/ai/llm.js. render/world-view.js badges tier 'echo' as OFFLINE SAMPLE in the world header (rung 1, second half). Rung 2 fails."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Kept at the rater's 2 (no dispute; I did not re-run a model call). Rung 1: pipeline.js calls ../ai/llm.js, and engine-only worlds say 'written by the engine' in the world line (desk.png). Rung 2, per the rater's on-page run: on ?still&demo=heavy-earth, 'ask the model for this stage only' on the culture card made 1 public call (gpt-oss-20b, 26.4 s), added 3 items marked 'model, validated' plus a '(model)' summary, and the world line changed to 'written by the engine and pollinations (validated)'. Rung 3 fails: the batched public call (pipeline.js modelPass, prompts.js batchPrompt, about 6.3 KB) returned HTTP 400 output_token_limit_exceeded on 3 of 3 attempts and the page fell back with 'No route answered'. While waiting, the note reads 'sent' with no 45 s countdown; the cancel control is present. Local Ollama never answered the page's probe in the rater's runs."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 2,
           "evidence": "render/map-canvas.js AltMap draws each region.bbox as a rounded-rect plate on an equirectangular graticule, tinted by a tempOf() regex on climate and biome, labeled at the centroid, and stamps 'PROJECTION: EQUIRECTANGULAR · STYLIZED / PLAUSIBLE' (rung 2); render/world-view.js legend mouseenter calls map.setHover. Rung 3 fails: on altverse.html?still&tab=map (VETHLEND) The Sere Equator (rg-003, lon -65..95, lat -16..16) and The Drowned Shelves (rg-005, lon 80..165, lat -42..8) are drawn over each other and their labels collide at 1440 px and at 390 px."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1 (rater 2; both disputes hold). Rung 1: the dossier geography card lists regions by name (Tulis, The Long Ice, Calis). Rung 2 fails on two of its four parts. render/map-view.js drawPlate shades land only by height in greyscale INK, so no region is tinted cold to warm from its climate field (isotherm mode draws contour lines, not a tint). MapView.caption() prints no projection label: a grep for projection, equirect and stylized across the lab's JS, HTML and CSS finds only a code comment in config.js, and the caption in desk.png ends 'Earth-analog terrain, seeded [ILLUSTRATIVE]'. G0 had both (the tempOf tint and the 'PROJECTION: EQUIRECTANGULAR' stamp); G1 removed them. Above the gate (not counted): seeded heightfield and coastlines, three exclusive map modes, the relief x 1/g rule printed in the caption, gold stipple on changed cells. No legend hover and no pan or zoom."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 2,
           "evidence": "On altverse.html?still&tab=chrono render/chronology.js lists eras top to bottom with year spans and each event with year, title, tag and '← fx-00N'; on ?still&tab=dossier render/dossier.js prints contrast paths as code ids joined by arrows (rung 2). Rung 3 fails: eras are equal-height blocks with no time axis; measured in headless Chrome at 1440 px on 2026-11-11, the 3.46 Gyr Cold Genesis and the 350-year Thaw Engines are both 85 px tall. No graph drawing exists. At 390 px the cause ids are hidden (see reach-and-speed)."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1 (rater 2; both disputes hold). Rung 1: causes are stated in prose (the inspector's 'because ...' chains and the dossier item text). Rung 2 fails: no era year span is printed anywhere. render/dossier.js prints 'eras: ' followed by names only (line 65). render/river-view.js render() draws era rects left to right and labels a band with its name only when it is wider than 64 px (Formation is unlabelled), never with er.start or er.end; the axis ticks are generic years, not era bounds. Cause ids also print only partly: the dossier history card lists new, changed and divergence events with 'from <id>', while kept and shifted events show their cause only after a click. Above the gate (not counted): render/causal-view.js draws a node-link graph from stored cause ids with ancestor and descendant hover and ladder-tag edge dashing with a legend; the river's piecewise log/linear axis leaves the Formation band about 13.7 px wide at 1440, so rung 3 would fail anyway."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "altverse.html (compose, also the audit screenshot altverse.png) shows three PHYSICS cards (ice sinks, slow light, 30% stronger gravity), each a button that starts the Loom (main.js screenCompose). divergence-presets.js holds exactly 3 presets, all domain 'physics'; its header defers free-text to Phase 4. Rung 3 fails."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Settled at 3 (rater 4; both disputes hold). Rungs 1-3: 10 one-click preset chips (divergence-presets.js PRESETS) in groups physics, planet, star, air, deep time and history, covering at least physics, geography (the dry Mediterranean) and history. Rung 4 fails because the no-Moon preset's dial does not expose the Moon parameter. dials.js DIALS.moon.text writes 'The Moon has N times its mass.', which classify.js reads as family [gravity, moon] with gFactor = N. In Node, the values 0.5, 1, 2 and 4 all read as gravity+moon with gFactor equal to the dial value, so the top of the 0-4 range weaves a 4 g planet. dialFor then returns null for the two-family reading, so the dial disappears after the first move and the visitor cannot sweep Moon mass. The skeptic confirmed this on the page (?still&demo=no-moon, dial at 2 gives 'surface gravity x 2 (19.62 m/s2) + Moon mass x 2'). 'Every preset with a numeric parameter' is therefore not met. The other dials (ice 1.01-1.25 g/cm3, gravity 2-30 m/s2, c, tilt, O2 5-40%) work. Above the gate (not counted): live free-text classification with a reading line before weaving, and compound text parsing. There is no typed builder and no plausibility ceiling."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 2,
           "evidence": "store.js saveWorld/listWorlds keep up to 60 worlds in localStorage and main.js renders a 'Saved worlds' shelf on compose (rung 1); Share copies shareURL, which encodes the full world as #w= base64, and boot() replays it through decodeShareHash with no regeneration (rung 2). No fork action exists and createWorld (worldstate.js) stores no parent id, so rung 3 fails."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Settled at 0 (rater 1; dispute holds): rung 1 is only half met. store.js remember() saves every woven world (up to 12) in localStorage 'altverse:recent:v2', but main.js renderPresets shows a 'recent' chip only for entries whose text is not a preset text (line 102), at most 4. A preset world woven on any seed other than the default, such as the page's own 'new seed' result from ice-sinks (CASIESK in the skeptic's on-page test), is stored but never listed, and the compose screen cannot reopen it: the preset chip re-weaves seed 41. Only typed or dialled worlds get a chip. Above the gate (not counted): forks store parentId and the forking divergence, tree-view.js draws the tree, compare-view.js diffs two worlds by stable ids, arrow keys navigate, the URL holds the lineage, and the tree exports and imports as JSON. The share link (tree.js encodeHash) carries only seed, root text and fork path, so model-written lines do not travel with it (rung 2 would fail)."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 1,
           "evidence": "On altverse.html?still&tab=dossier every world's contrasts print 'Our reality' lines (rung 1). Rung 2 fails: the baseline strings in divergence-presets.js carry units (c ≈ 299,792 km/s, g ≈ 9.81 m/s²) but no renderer reads divergence.baseline (only the unreachable live prompt in prompts.js does), so no baseline number appears on any screen; the fact index shows the divergent values (≈ 30,000 km/s, ≈ 12.7 m/s²), not ours. Toward rung 3: factIndex holds 3/2/2 facts (VETHLEND/LENTUA/BARUND, generateEcho run in Node 2026-11-11), and BARUND's 'tallest mountains: far lower than ours' has no magnitude."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Kept at the rater's 1 (no dispute). Rung 1: every world states ours for what it changes: the world line reads 'ice density 1.09 g/cm3 (ours 0.917)' (desk.png), each dossier quantity table has an 'ours' column, the quantity strip prints ours under each value, and a side-by-side section compares the world with ours. Rung 2 fails: at 1440 px the river of time labels events by title only with no certainty tag (all 41 ice-sinks events, per the rater), and the dossier history card lists only new, changed and divergence events, so kept and shifted events show a tag only in the inspector after a click. Above the gate: item tags, cause ids and source keys, 43 listed sources, the ledger's 'ESTABLISHED claims cite a source', and the JSON export format 'altverse-world-tree/1'. Regions carry no tag."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 1,
           "evidence": "The compose screen (altverse.html) has a headline ('Change one thing. Watch a world diverge.') and a subtitle (rung 1). Rung 2 fails: the subtitle in main.js screenCompose and the meta description in altverse.html say 'A deterministic engine propagates the consequences', while echo-world.js copies authored worlds from CONTENT and the Loom's COGITATION stream replays authored reasoning strings on 240 ms timers (pipeline.js runEcho). Premise, mechanism and contrasts do show on ?still&tab=dossier, but they sit above the failed rung."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Settled at 2 (rater 3; dispute holds). Rung 1: headline 'Type a divergence. Nine stages weave the world that follows.' with a subtitle (desk.png). Rung 2: the subtitle describes the deterministic engine and the model route truthfully, and the world line reads 'written by the engine' or 'written by the engine and <route> (validated)'. Rung 3 fails for worlds the page's own O2 dial reaches. engine.js STAGE_FNS.contrast picks only items that carry an 'ours' field, and the ph-o2 rule has none, so at 20, 30 and 40% O2 the contrast slot is empty (Node, seeds 15 and 41). I verified it on the page with a headless DOM dump of altverse.html?still#s=15&d=Oxygen+makes+up+30%25+of+the+air. (VETUDRA). The contrast card reads 'No difference reaches the surface.' while physics says 'Fire spreads easily; wet plants burn.', and the '06 Side by side' table shows every measure equal to ours. Above the gate (not counted): the render/tour.js 5-step tour, inspector chains with tags, pipe-note stage roles, weakest links and the dossier .md export. There is no on-page key for the ladder tags and id prefixes (rung 4)."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 2,
           "evidence": "altverse.css styles all 4 screens with tokens.css variables (void, --accretion, Orbitron / Space Grotesk / IBM Plex Mono, bordered cards) (rung 2). identity.js deriveIdentity computes accent and void tint per world and applyIdentity scopes them to .av-world; measured on their voids: VETHLEND #5c9ad5 6.60:1, LENTUA #5797da 6.38:1, BARUND #f1b53c 10.57:1. Rung 3 fails: deriveIdentity calls ensureContrast(accent, voidTint, 3.0), so the clamp admits a 3:1 accent on small text (.av-id, .av-legend-head, the motto) for any world whose derived accent starts dark. Rung 4 also fails: the ALTVERSE wordmark, the chronology spine and era dots, the WORLD LEDGER heading and SPECULATIVE/SF tags are gold on static elements, and BARUND's accent (hue 40, within 15 degrees of #F2A93B) colors its static name and headings."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Kept at the rater's 2 (no dispute). Rungs 1-2: altverse.css styles the single-page flow (compose, multipath, map, dossier) with tokens.css variables: void ground, --accretion, IBM Plex Mono (set by tokens.css for all three families) and bordered plates, as seen in desk.png and phone.png. Rung 3 fails: main.js applyIdentity only sets a climate-derived void tint (--world-void and the body background). No per-world accent is derived, nothing is scoped to a world root, and there is no contrast clamp. Notes above the gate: gold sits mostly on active or changed state, and Loom transitions follow each runStage call but are paced by sleep(260 ms) after climate and terrain are precomputed in engine.js buildContext."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 2,
           "evidence": "Headless Chrome on 2026-11-11 (local static server): no script errors at 1440 px and a world renders (rung 1). runEcho hands the whole world to onWorld before the replay, so Skip to world is live at once; ?still renders the world directly; reduced motion sets wait() to 0 and skips the tick interval, and the CSS media query kills animation and transitions (rung 2). At 390 px with device-metrics emulation, scrollWidth 390 = clientWidth on altverse.html, ?loom=ice-sinks and ?still&tab=map|chrono|dossier for ice-sinks, slow-light and strong-gravity. Rung 3 fails: the 880 px media query in altverse.css sets .av-event-cause and .av-event .av-tag to display:none (0 of 6 VETHLEND event tags and 0 of 6 cause ids visible at 390 px), and on ?still&tab=map at 390 px the canvas cuts 'volcanic warm springs', 'The Drowned Shelves' and 'tidal flats over sunken ice' at its edges."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Settled at 0 (rater 2; dispute holds). Rung 1 fails because the grading tool itself reports uncaught errors on load. I ran labs-wt shoot altverse 4 times and got 0, 6, 2 and 0 console errors. Every error is 'Uncaught IndexSizeError: ... The radius provided (-5953.94) is negative' from render/map-view.js:381 frame(). The cause is in the code: setWorld stores ignite = performance.now(), the rAF loop passes its frame timestamp t, and when t < ignite, reveal = (t - ignite) / TIMING.ignition goes negative, ease = 1 - (1 - reveal)^3 goes negative, and ctx.arc throws. A world does render (desk.png). Above the gate (not counted): ?still renders without the Loom (about 1-2.4 s depending on world and machine load). Reduced motion zeroes the engine pauses and keyframes, but pipeline.js line 156 still paces the model pass with sleep(140) and the CSS transitions stay. There is no Skip to world control. At 390 px there is no horizontal scroll, but causal-view.js drops every node label and the map labels 5 of 10 settlements."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 2,
           "evidence": "17 ES modules under labs/assets/js/altverse (12 top-level: divergence-presets, worldstate, echo-world, pipeline, prompts, schemas, store, identity, rng, json-extract, nemotron-client, main; 5 in render/: card, chronology, dossier, map-canvas, world-view), importing ../ai/config.js and ../ai/provider.js; renderers take one world shape from worldstate.js createWorld (rung 2). Rung 3 fails: worldstate.js makeMinter is never called, ids are typed into echo-world.js CONTENT and required from model output by schemas.js. Stage lists are duplicated in main.js STAGES, pipeline.js SPINE_ORDER and runLive's hand-written gen() calls."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1 (rater 2; dispute holds). Rung 1: data, logic and rendering exist as code (29 ES modules under labs/assets/js/altverse). Rung 2 fails on the separation it names: there is no schemas module. Slot output shapes exist only as example JSON strings inside prompts.js SHAPES, validate.js validateStage hand-checks fields inline (with its own stage-prefix map duplicating config.js ID_PREFIX), and the world shape is spread across engine.js newWorld, the item literals in validate.js and tree.js leanWorld. G0's schemas.js and worldstate.js are gone. Renderers do read the one world object from engine.js newWorld. Above the gate (not counted): config.js STAGES is one data list read by the pipeline, pipeline-view and prompts; model calls go through ../ai/llm.js; test/engine.test.mjs runs headless (101 passed). Rung 3 would also fail: engine ids are authored keys (rules.js r.key, lexicon CHRONO ids), not minted by the orchestrator."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "d367ba7" }
   ]
 }
