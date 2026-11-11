@@ -1,0 +1,311 @@
+{
+  "id": "exomania",
+  "title": "Exomania",
+  "page": "exomania.html",
+  "thesis": "At level 10 a visitor flies the whole NASA Exoplanet Archive as a navigable space (population diagrams with the radius valley, every system to scale with its habitable zone and transit light curve), stands on any world rendered from physically inferred properties whose uncertainty is shown, follows grounded tours, and shares any state by URL.",
+  "axes": [
+    {
+      "id": "world-inference",
+      "name": "World inference",
+      "frame": "model",
+      "metric": "Count of physical quantities data.js physics() and classify() derive from catalogue fields, each with its relation written in the code; how missing values are filled; and from rung 8 the percent of withheld masses inside the 68% interval (target 68) and the percent of withheld Teq within 10% of the published value. The rater reads the physics module, recomputes one fallback world by hand (TRAPPIST-1 h, pl_eqt null) and runs or inspects the withholding test.",
+      "ladder": [
+        "Absent: catalogue fields are shown raw and nothing is derived from them.",
+        "One derived quantity is computed from catalogue fields (for example distance converted from parsecs to light-years).",
+        "Each world gets a size class from its radius alone, with stated radius thresholds (rocky, super-Earth, sub-Neptune, ice giant, gas giant).",
+        "Missing values are filled by explicit relations whose formula is written in the code: mass from a mass-radius power law; Teq = Teff*sqrt(R*/2a)*(1-A)^(1/4), including the host radius; a from Kepler's third law with a stellar mass; surface gravity and escape velocity from mass and radius.",
+        "Atmosphere and surface state are inferred: a retention gate from escape velocity against insolation (the cosmic shoreline of Zahnle & Catling 2017), scale height from temperature, mean molecular weight and gravity, and a frozen / temperate / molten state from a greenhouse-corrected temperature.",
+        "Host-star luminosity and radius come from catalogue stellar fields (st_rad, st_lum or st_mass) when present, and Teff-only scaling relations are used only as a flagged fallback. Habitable-zone membership is computed from incident flux against the Kopparapu et al. (2013) limits for the host's Teff and luminosity; no habitable-zone label comes from a Teq window.",
+        "Estimated masses use a probabilistic mass-radius relation (Chen & Kipping 2017, or an equivalent published fit) and carry a 68% range shown beside the value.",
+        "Catalogue uncertainties are propagated by Monte Carlo (200 or more draws per world) into gravity, Teq, scale height and class, and the class is reported as probabilities summing to 1.",
+        "Withholding test: for a reference set of 50 or more planets with measured masses (not minimum masses) and published Teq, the engine runs with pl_masse and pl_eqt removed. Its 68% mass interval contains the measured mass for 58% to 78% of them, its Teq is within 10% of the published value for 90% or more, and the result and its date are linked from the page.",
+        "Observation overrides inference: for 20 or more planets with published JWST or HST transmission or emission spectra, the observed atmospheric result replaces the inferred atmosphere, the paper is cited per world, and the page marks the atmosphere as observed rather than inferred.",
+        "Reference grade: every equation is documented with its source on a methods page, derived values for the whole catalogue are downloadable, and the pipeline reproduces a published population result (the radius-valley location of Fulton et al. 2017) within its uncertainty."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "data.js physics() gives each world a soft size class from radius thresholds (1.4-1.8, 1.9-2.3, 3.6-4.2, 5.6-6.4 R-earth) (rung 2). Rung 3 fails: the Teq fallback 278.3*(Teff/5772)*a^-0.5*(1-A)^0.25 fixes R* at 1 solar radius and ignores the Rstar that physics() computes a few lines above. It fills 368 worlds; TRAPPIST-1 h (pl_eqt null, a = 0.0619 AU, Teff 2566 K) comes out at 455 K, hotter than TRAPPIST-1 b's catalogue 400 K, and renders as a 'Rocky world' (with R* = 0.12 solar radii the same relation gives about 172 K at zero albedo). In code for later rungs: cosmic-shoreline gate (k = 7 anchor), scale height kB*T/(mu*mH*g), greenhouse-corrected Tsurf with ice / temperate / partial / lava states. Rung 5 would also fail: Mstar = (Teff/5772)^1.7 and Rstar = Mstar^0.8 from Teff alone, and classify() labels 45 worlds 'habitable zone' from a 230-330 K Teq window."
+        }
+      }
+    },
+    {
+      "id": "system-model",
+      "name": "System to scale",
+      "frame": "model",
+      "metric": "Rung reached by the system geometry the page computes and draws for the current world: star angular size, orbits in AU, habitable-zone band, orbital animation, transit and radial-velocity curves, and from rung 8 the share of transiting planets whose computed depth and duration match pl_trandep and pl_trandur within 10%. The rater opens a single-planet system, a multi-planet system and a non-transiting planet, and reads the code.",
+      "ladder": [
+        "Absent: the planet is shown alone, with no geometry of its system.",
+        "The host star is drawn at its computed angular size as seen from the planet (stellar radius over orbital distance).",
+        "A system view draws the star and this planet's orbit at its catalogue semi-major axis, with a scale bar in AU.",
+        "Every catalogued planet of the same host is drawn on its own orbit to scale in AU and can be selected from the system view.",
+        "The habitable zone is drawn as a band from the Kopparapu et al. (2013) limits computed from the host's Teff and luminosity, and the Solar System's orbits can be overlaid at the same scale.",
+        "Orbits animate at their catalogue periods with play, pause and a rate in days per second; eccentric orbits use pl_orbeccen when present and are drawn circular with a visible flag when it is absent.",
+        "A transit light curve is computed for transiting planets from Rp/R*, a/R* and impact parameter with quadratic limb darkening (Mandel & Agol 2002), plotted in ppm against hours from mid-transit, with depth and duration printed.",
+        "Time is linked: scrubbing the light curve moves the planet across the drawn stellar disc, and multi-planet systems show their overlapping transits on one curve.",
+        "Validation: computed transit depth and duration match the catalogue's pl_trandep and pl_trandur within 10% for 90% or more of the planets that list them, checked by a script whose pass rate is shown on the page.",
+        "A radial-velocity curve (semi-amplitude from planet mass, period, eccentricity and stellar mass) sits beside the transit, and each planet's discovery method decides which curve the page leads with.",
+        "Reference grade: every host in the catalogue is browsable to scale with its habitable zone (reference standard: NASA's Eyes on Exoplanets), with computed and validated transit and radial-velocity curves for every eligible planet."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "data.js physics() computes starAngle = Rstar*RSUN_AU / a (clamped to 0.004-0.5 rad, which moves 59 worlds) and exoplanet.js renderStar() draws the host star at that angular radius; the wheel zooms out to camDist 60 so the star shows at that size. Rung 2 fails: no orbit, no AU scale, no other planets of the host, no habitable zone, no light curve anywhere in the code."
+        }
+      }
+    },
+    {
+      "id": "render-fidelity",
+      "name": "Appearance physics",
+      "frame": "graphics",
+      "metric": "Percent of catalogue worlds whose surface brightness or atmosphere shell sits at a clamp (from a Node script running data.js physics() over exoplanet_data.json; target under 10), the named scattering and stellar methods in exoplanet.js FRAG fed by data.js toParams(), and from rung 9 the CIEDE2000 colour difference (Delta E) of Solar-System discs against references stored in the repo. The rater reads the shader, runs the clamp script and orbits 5 worlds of different classes.",
+      "ladder": [
+        "Absent: no image of the planet.",
+        "A static image or a flat-coloured disc stands for the planet.",
+        "A live-rendered lit sphere with a day/night terminator, coloured by one catalogue-derived value.",
+        "A procedural surface seeded per planet name (the same world looks the same every visit), with 4 or more visual regimes chosen by inferred state: temperate, gas giant, ice, lava.",
+        "Host-star light coloured from Teff by a blackbody approximation; planet surface brightness follows insolation and the atmosphere shell radius follows the computed scale height and retention, with fewer than 10% of catalogue worlds held at a clamp for either (a Node script over exoplanet_data.json reports both shares).",
+        "Per-pixel single-scattering Rayleigh and Mie atmosphere (optical depth by a Chapman function or precomputed tables), computed both on the disc and in the limb halo beyond it, with no drawn ring standing in for the integral. It gives a blue day-limb and a reddened terminator from the beta ratio. Giant palettes follow the Sudarsky, Burrows & Pinto (2000) temperature classes. Molten worlds emit a thermal glow.",
+        "The host star disc is drawn at the unclamped angular radius R*/a the engine computes, in its blackbody colour (no saturation boost). It is limb-darkened by a quadratic law whose coefficients are interpolated by Teff from published stellar-atmosphere tables, and the planet occludes it. Granulation, spots, corona and prominences can be switched off and are labelled illustrative.",
+        "Spectral star colour: the star's colour integrates the Planck function against the CIE 1931 colour-matching functions (not a curve fit such as Tanner-Helland), and the resulting sRGB hex is printed for the current host.",
+        "Uncertainty in the image: when the inference gives 2 or more plausible states (for example water world against rocky world with thin air) the visitor can switch between them with their probabilities shown, and illustrative-only features (continents, night lights, aurora, storm ovals) can be switched off.",
+        "Solar-System check: Earth, Venus, Mars, Jupiter and Neptune rendered by the same pipeline from their own parameters sit beside reference disc colours. A committed script reports each disc-averaged sRGB colour (mean over lit-disc pixels at a fixed phase angle) within Delta E 2000 of 10 or less of a reference value stored in the repo, with its source image named.",
+        "Reference grade: limb and sky colour come from multiple scattering (precomputed tables by the Bruneton & Neyret 2008 method, or 2 or more scattering orders), the Solar-System check passes at Delta E 2000 of 5 or less for all eight planets, and every visual feature traces to a cited equation or is switchable as illustrative (reference standards: SpaceEngine, NASA's Eyes on Exoplanets)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "exoplanet.js shadeSurface() seeded by data.js hashName() through uSeed, with 4 regimes by uType (temperate, gas giant, ice, lava) (rung 3). Rung 4 fails: running data.js physics() over exoplanet_data.json, sl = clamp(uLightMul, 0.65, 1.5) holds 4,524 of 4,874 worlds at 1.5, the atmR clamp clamp(50*Hr*atmDensity, 0.018, 0.045|0.16) holds 4,085 (Kepler-62 e on the 0.018 floor), and the shader's Hvis = clamp(uHr*50, 0.004, 0.06) sits at a bound for 3,635. Recorded for later rungs: the orbit-view halo beyond the disc is a smoothstep ring by impact parameter (atmosphere(), the !planetHit && !inside branch), and g0-still.png shows a uniform blue rim with no reddened terminator; star colour is the Tanner-Helland curve fit; vividStar() boosts the disc's saturation 1.5x; starAngle is clamped to 0.004-0.5 rad (59 worlds)."
+        }
+      }
+    },
+    {
+      "id": "surface-view",
+      "name": "View from the surface",
+      "frame": "graphics",
+      "metric": "Count of the ladder's ground features present (terrain styles, gravity flattening, sea gating, soft shadows, aerial perspective, star in frame) on 3 test worlds (Kepler-442 b, a temperate rocky world; GJ 806 b, a world the engine treats as airless; HD 209458 b, a gas giant), and camera degrees of freedom on the ground (0 = fixed, 2 = yaw and pitch). Read from the Stand on the surface button or ?view=surface and from the EXO_SURFACE shader.",
+      "ladder": [
+        "Absent: the camera cannot leave orbit.",
+        "A button switches to a fixed sky view from the ground, with no terrain.",
+        "The camera stands on the world: a ground plane meets a sky tinted by the host star's colour.",
+        "Ray-marched procedural terrain seeded per planet on a displaced sphere, with eye height (100 m or less above local ground) and relief amplitude set in metres and converted with pl_rade, so the horizon dip equals sqrt(2h/R) for the catalogue radius; 3 or more terrain styles chosen by surface state (rocky, dune, glacier, lava, cratered) show visible relief in 1440 px screenshots of 3 worlds.",
+        "Physics shapes the ground: relief flattens with surface gravity, open water appears only where liquid water is allowed, the star casts soft shadows, distance fades into the sky colour on worlds with air, and gas giants give a cloud-deck descent instead of ground.",
+        "On arrival the host star is in frame at the angular size 2*R*/a the engine computes, and the visitor can look around 360 degrees by mouse drag and by touch without leaving the surface.",
+        "Time of day: a control moves the star from sunrise to sunset. Worlds with an orbital period under 10.0 days (a constant named in code) are marked tidally locked and offer day side, terminator and night side as landing sites.",
+        "The real sky of that system: the host's other catalogued planets drawn at the angular size and phase the engine computes from their radii and orbits, and background stars placed as seen from the host's distance, with the Sun marked.",
+        "A landing-site picker on the globe and a ground readout (gravity in g, temperature in K, star angular diameter in degrees against the Sun's 0.53, horizon distance in km from the catalogue radius and the stated eye height in metres), each value tagged measured, derived or illustrative.",
+        "The visitor can export the view as an equirectangular panorama PNG captioned with the planet and the parameters used.",
+        "Reference grade: every catalogued world with a solid surface can be stood on with all of rungs 1 to 9 at 30 fps or more at 1440 px on an Intel Iris Xe (11th-gen Core or later) or Apple M1 GPU in current Chrome, fps read from a 10 s DevTools performance trace (reference standard: SpaceEngine's surface mode)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "The Stand on the surface button reaches the EXO_SURFACE program, where ground meets a sky tinted by uStarColor and uSkyTint (rung 2). Rung 3 fails: relief (amp 0.006-0.011) and eye height (_camera(): 1 + 1.2*amp/sqrt(g)) are in planet radii, not metres, so no catalogue radius reaches the surface shader and the eye on Kepler-62 e sits about 4 to 15 km above the ground or the flat seaY sea; the 1440 px surface shot shows a flat grey plane under a blue band with no relief. In code for later rungs: planetH() terrain styles 0-4 from terrStyle, amp/sqrt(gRel) flattening, seaY only when hasSea, surfaceShadow(), aerial perspective gated by uHasAtmo, gasInterior() for giants. Rung 5 would also fail: surface mode ignores yaw and pitch, and the camera looks about 18 degrees down while the star sits 20 degrees up, outside the 26.6 degree vertical half field of view."
+        }
+      }
+    },
+    {
+      "id": "population-space",
+      "name": "Catalogue as a space",
+      "frame": "graphics",
+      "metric": "Count of population diagrams computed in the page from the loaded catalogue, with their axes and units; count of diagrams linked by drag-range selection; and presence of the named features (radius-valley counts, discovery replay, reference overlays, 3D star map). The rater counts diagrams on the page, drags a range on each, and reads the chart code.",
+      "ladder": [
+        "Absent: the catalogue is never shown as a whole; one world at a time.",
+        "The catalogue appears as a text list grouped by class, with a count per group and a total (no chart).",
+        "One population chart of the full loaded catalogue (radius histogram or radius-period scatter) with labelled log axes and units.",
+        "The current world is marked on the chart, and clicking any point selects that world in the 3D view.",
+        "3 or more population diagrams, each with log axes and units: radius-period, mass-radius (masses the archive computed from radius excluded; minimum masses M sin i drawn hollow) and insolation-radius.",
+        "The radius valley as a feature: a radius distribution (histogram, or a scatter with per-bin counts) computed in the page from the loaded catalogue, keeping planets that pass a stated precision cut (for example radius error from pl_radeerr1/err2 under 10% and period under 100 d), with the 1.5-2.0 R-earth band marked, the count per bin inside the band and at both neighbouring peaks printed on the page, and the source named (Fulton et al. 2017). A pre-drawn image does not count.",
+        "Linked views: dragging a range (1D) or a rectangle (2D) on each diagram filters the world list and highlights the same worlds in every other diagram, with the live count printed. Click-to-filter on a single diagram does not meet this rung.",
+        "Discovery replay: a year control replays the catalogue growing from 1995 to the latest refresh, every diagram updates per year, and points can be coloured by detection method or discovery year.",
+        "Reference overlays: iron, Earth-like rock and pure-water composition curves on the mass-radius diagram, and detection-sensitivity limits of transit and radial-velocity surveys on the radius-period diagram, each labelled with its source, so an empty region reads as an instrument limit or a true absence.",
+        "A 3D map places every host star at its sky position (RA, Dec) and distance; the visitor flies it, and it is linked to the diagrams and to each system view.",
+        "Reference grade: any two catalogue columns can be plotted (log or linear, with error bars) as in the NASA Exoplanet Archive's plotting tool, and the page adds linked brushing, discovery replay, sensitivity overlays and the 3D map in one view."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "ui.js buildRegistry() lists 4,874 worlds grouped by data.js category() (habitable zone, rocky, ocean, sub-Neptune, ice giant, lava, frozen, gas) with a count per group and the total in the panel head. Rung 2 fails: there is no chart of the catalogue anywhere in the lab."
+        }
+      }
+    },
+    {
+      "id": "hud-craft",
+      "name": "Instrument craft",
+      "frame": "style",
+      "metric": "Count of readout defects (NaN, undefined, Infinity, a float with more than 4 significant digits) on the first view and on the 20-world test list; overlaps and clipped panels at 1440x900 and 390x844; gold hits outside active state from a grep for accretion|D4A24C|F0C674|97681F in exoplanet.css, ui.js and exoplanet.js; motion tokens and scene-aware chrome. The 20-world test list: 2MASS J0249-0557 c, 2MASS J02192210-3925225 b, 2MASS J01225093-2439505 b, EPIC 201238110 b, Kepler-62 e, Kepler-442 b, Kepler-186 f, TRAPPIST-1 b, TRAPPIST-1 h, 55 Cnc e, AU Mic b, CoRoT-1 b, COCONUTS-2 b, CFHTWIR-Oph 98 b, WASP-12 b, HD 209458 b, GJ 1214 b, K2-18 b, LHS 3844 b, KELT-9 b. The rater screenshots both sizes, opens the fixed 20-world list by search, and runs the grep.",
+      "ladder": [
+        "Absent: browser-default controls on a blank page.",
+        "A dark theme with a loaded web font; controls are styled buttons, not browser defaults.",
+        "One panel style shared by every HUD cluster, built on the site's tokens.css colour, type and spacing tokens.",
+        "Type roles fixed by token: world names in --font-display at --t-lead, labels uppercase at --t-micro, numbers in --font-mono, units smaller and dimmer than their values, and every web font family the page loads is used by at least one rule.",
+        "No broken output: no readout shows NaN, undefined, Infinity or a float with more than 4 significant digits, on the first view and on every world of the 20-world test list named in the metric, which includes 2MASS J0249-0557 c (no st_teff), 2MASS J02192210-3925225 b (no pl_eqt, no sy_dist), 2MASS J01225093-2439505 b (no pl_orbsmax, pl_orbper or pl_masse) and EPIC 201238110 b (no st_teff and no pl_eqt).",
+        "At 1440x900 and 390x844 no text overlaps the planet's limb or another control, and no panel clips its own rows (every telemetry row visible at 1440x900 without scrolling).",
+        "Gold (the --accretion tokens or their hex values D4A24C, F0C674, 97681F) marks only active state: the selected world, the pressed mode, a slider's live value and thumb, the loading progress, hover and focus-visible. Every hit of a grep for accretion|D4A24C|F0C674|97681F in exoplanet.css, ui.js and exoplanet.js sits on one of those states.",
+        "Motion grammar: panel and view transitions use the shared easing and duration tokens, switching worlds cross-fades the render in 600 ms or less instead of a hard cut, and the reticle re-acquires with an animated bracket.",
+        "The viewport answers the scene: the glass reflection is tinted by the host star's computed colour, and bezel labels show the live camera mode and the camera distance in planet radii.",
+        "Signature instruments: the HUD draws live instrument faces (a mini population diagram with the current world marked and a system-to-scale strip) in the same design language at 390, 1024 and 1440 px.",
+        "Reference grade: at 390, 768, 1024, 1440 and 2560 px there are zero overlaps or clipped panels, and every HUD text meets WCAG 2.2 AA contrast (4.5:1) against the live render behind it, sampled on the 20-world test list in orbit and surface modes."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "exomania.html loads tokens.css and exoplanet.css, and every cluster uses .hud-panel built on the tokens.css colour, type and spacing tokens (rung 2). Rung 3 fails: exomania.html line 11 loads Orbitron and Space Grotesk, but tokens.css sets --font-display, --font-body and --font-mono all to IBM Plex Mono and no rule names either family. Recorded for later rungs: the Atmosphere slider readout prints NaN on the first view (g0-still.png, 1440 px), the telemetry panel clips its Semi-major axis row, the period prints 122.39 d (5 significant digits), and gold sits on the resting .ctl-random button, the .hud-count total and the reticle brackets."
+        }
+      }
+    },
+    {
+      "id": "navigation",
+      "name": "Navigation and deep links",
+      "frame": "interaction",
+      "metric": "Count of entry points that select a world (random, list, search, filter, diagram click, URL), count of controls wired to nothing (target 0), and URL round-trip pass or fail for world, camera mode and camera angle. The rater operates every control and reloads copied URLs.",
+      "ladder": [
+        "Absent: one fixed world and nothing to press.",
+        "A control jumps to a random world from the catalogue.",
+        "A clickable list of worlds, and drag to orbit the camera around the planet.",
+        "Text search over planet and host names across the full catalogue, with results updating per keystroke.",
+        "Zoom by wheel and by pinch, and 3 or more camera modes: orbit presets, close orbit and standing on the surface.",
+        "Every control changes what it names: moving each slider and pressing each button changes the render or a readout, and no control is wired to nothing.",
+        "State round-trips through the URL: selecting a world or a camera mode rewrites the URL (history.replaceState), and loading that URL restores the world, the mode and the camera angle.",
+        "Physical filters: ranges on radius, equilibrium temperature, insolation, distance and host Teff filter the catalogue with a live count, and the random jump draws from the filtered set.",
+        "Compare: 2 to 4 worlds pinned side by side (pins persist across reloads), with Earth as a fixed reference, showing their renders and the same rows of values.",
+        "What-if worlds: the visitor edits radius, mass, orbit and host Teff, the engine re-infers class, atmosphere and render live, and the invented world is shareable by URL and labelled as invented.",
+        "Reference grade: every catalogued world reachable from search, diagrams and a 3D star map, filters on any catalogue column (the query reach of the NASA Exoplanet Archive and exoplanet.eu), and every view state a URL."
+      ],
+      "levels": {
+        "G0": {
+          "level": 4,
+          "evidence": "Entry points: main.js jumpRandom() behind the #exo-shuffle pill and the Jump to random world button, ui.js buildRegistry() list, search over pl_name and hostname re-rendered on every input event, ?p= at load. exoplanet.js _bindPointer() drag orbit, wheel and pinch zoom; buildControls() presets plus close orbit and surface. Rung 5 fails: the Atmosphere slider writes engine.cfg.atm, which no uniform reads, and its readout shows NaN. ?p= and ?view= are read once at load but the URL is never rewritten."
+        }
+      }
+    },
+    {
+      "id": "catalogue-provenance",
+      "name": "Catalogue provenance",
+      "frame": "data",
+      "metric": "Rung reached by the catalogue's sourcing: source named on the page, refresh schedule and date, parameter-set choice, uncertainties and limit flags, number of fields used, export and per-value provenance. The rater reads .github/workflows/update_exoplanet_data.yml, .github/prebake_exoplanets.py, the JSON fields and the page copy.",
+      "ladder": [
+        "Absent: planet values are invented.",
+        "Values for a handful of named planets are typed in by hand.",
+        "A real catalogue of 1000 or more planets is loaded from a named public source (the NASA Exoplanet Archive).",
+        "An automated job refreshes the catalogue on a schedule (a cron in .github/workflows), rejects payloads that fail a sanity check (row count over 1000), and commits the processed file only when it changed, so the commit time dates the refresh.",
+        "The page names its source (NASA Exoplanet Archive and the table used) and shows the date of the last refresh; no copy attributes the catalogue to a single mission.",
+        "One coherent parameter set per planet: the archive's default set (default_flag = 1, or the pscomppars table) instead of the most-complete row, with the reference (pl_refname) shown per world.",
+        "Uncertainties and limits carried through: err1 and err2 shown as plus or minus, and limit flags (for example pl_bmasselim) shown as < or >, never fed to the engine as measurements.",
+        "20 or more fields per planet loaded (stellar radius, mass and luminosity, eccentricity, inclination, transit depth and duration, discovery method, year and facility, RA and Dec among them), each used by at least one view.",
+        "Export: the visitor downloads the current world or the filtered set as CSV or JSON, with source, table, refresh date and the archive's requested acknowledgement line.",
+        "Per-world provenance: each displayed value links to its archive reference (pl_refname or the column's reflink) and states measured, derived or estimated.",
+        "Reference grade: every value of every world carries its uncertainty, reference and parameter-set choice as the NASA Exoplanet Archive's overview pages do, refreshed daily, plus the derived values the archive does not publish, each traceable to its formula, and a changelog lists worlds added or revised since the visitor's last visit."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "update_exoplanet_data.yml (cron '0 4 * * 1') pulls 9 columns from the ps table over TAP, asserts more than 1000 rows before and after prebake, writes 4,874 worlds to labs/exoplanet_data.json and commits only when git diff finds a change (last refresh commit 60964b0, 2026-11-09). Rung 4 fails: the page never names NASA or the table and shows no date; the meta description, loader and refresh tooltip say 'Kepler' ('Kepler probe archive') although the file holds CoRoT, K2, 2MASS and other worlds. For later rungs: prebake keeps the most-complete row (completeness()), and no error or limit columns are fetched, so Kepler-62 e's 36 M-earth upper limit reaches the engine as a mass and telemetry prints 13.89 g."
+        }
+      }
+    },
+    {
+      "id": "model-contribution",
+      "name": "Model contribution",
+      "frame": "intelligence",
+      "metric": "Share of model-written sentences on the public page that pass the number grounding check (percent, over 10 worlds with no local model), the route that answered, and from rung 8 the pass rate of question-to-filter on the evaluation set. The rater loads the public page with no local model, then with one, and reads narrative.js and the route code.",
+      "ladder": [
+        "Absent: no generated text and no model route.",
+        "Each world gets a text built by a deterministic template from its computed numbers.",
+        "A model route exists in code with the template as fallback, and the page labels which route answered (for example 'offline' or 'ollama').",
+        "On the public site a model answers through the shared route chain (local Ollama, visitor key, worker, public service) within the 1-reply-per-45-seconds public limit, and the label names the route.",
+        "Failure is visible and recoverable: a failed or rate-limited call falls back to the template within 3 s, the route panel shows the countdown to the next allowed call, and every feature keeps working without a model.",
+        "Grounding check: the prompt carries the engine's fact line, every number in the model's reply is checked against it, and a reply with an unmatched number is replaced by the template and flagged.",
+        "Contribution shown: engine facts and model prose are displayed distinctly (facts as values, prose marked as model text), so the visitor sees exactly what the model added.",
+        "A hands-free guided tour of 6 or more worlds chosen by stated rules (nearest habitable-zone world, hottest, largest, a radius-valley pair) moves the camera. One batched model call writes the narration for all stops, every number passing the rung-5 grounding check, and the tour plays with template narration when no model answers.",
+        "Questions become queries: a free-text question about the catalogue is turned by one model call into a structured filter that the engine runs over all worlds; results fill the list and diagrams, and the filter is shown for editing.",
+        "Theme tours: from a visitor's theme, one batched model call proposes 5 or more stops, each justified by engine values and validated against the catalogue before the tour plays.",
+        "Reference grade: an evaluation set of 50 or more catalogue questions, each with the expected set of planet names, runs from the repo. A question passes when the engine's result set equals the expected set, the pipeline passes 90% or more, and the score and its date are shown on the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "narrative.js uses ai/provider.js: Ollama only when isLocal(), and ai/config.js leaves worker.base empty, so the public site always lands on echo, which types the buildSentences() and lifeAssessment() templates; the rep-mode label shows 'offline' (or 'ollama' on localhost, as in g0-still.png). Rung 3 fails: the lab does not use labs/assets/js/ai/llm.js, so no model answers on the public site. No tour, no grounding check."
+        }
+      }
+    },
+    {
+      "id": "inference-honesty",
+      "name": "Inference honesty",
+      "frame": "explanation",
+      "metric": "Share of displayed values tagged measured, derived, estimated or illustrative (target 100%), share of class labels that name their rule (target 100%), reach of the report at 390 px, an inference-chain panel, and population explainers. The rater counts tags on the telemetry, reticle and report for 5 worlds.",
+      "ladder": [
+        "Absent: nothing but the planet's name.",
+        "Each world shows a class label (for example 'Ocean / super-Earth, habitable zone').",
+        "Each world gets a plain-language paragraph built from its numbers: star type and colour, the sun's size in the sky, surface temperature, atmosphere and gravity.",
+        "An on-demand life assessment reasons from surface temperature, atmosphere retention and stellar activity, and says what is plausible and what is speculative.",
+        "Every displayed number carries, on its own row or on a section header covering only rows of that kind, one of three provenance tags: measured (archive value), derived (formula on measured values) or estimated (fallback relation, model forecast, or an archive value the archive computed from another quantity, such as a mass from radius); a value computed from an estimated input, such as gravity from an estimated mass, is estimated. All three count as real under the site's real / illustrative rule. Every class label names its rule on the page: the habitable-zone label states whether it comes from Kopparapu et al. (2013) flux limits or from a Teq window.",
+        "Illustrative render features (continents, night lights, aurora, storm ovals) are labelled illustrative in a legend, and the page lists which visual properties come from data.",
+        "The report, the tags and the life assessment are reachable at 390 px width, not only on screens wider than 1200 px.",
+        "A 'how this world was inferred' panel shows the chain for the current world: input fields, each equation with its source, and the resulting class, atmosphere and state.",
+        "Guided explainers for 3 or more population concepts (radius valley, the hot-Jupiter period pile-up, the habitable zone), each tied to a live view and a cited paper.",
+        "Predict, then reveal: the visitor guesses a world's class or habitability from its numbers before the engine answers, and keeps a running score.",
+        "Reference grade: every claim on the page is tagged and sourced, and the lab teaches what NASA's Exoplanet Exploration pages teach (detection methods, planet types, the habitable zone) on the live catalogue instead of fixed examples."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "ui.js buildReticle() prints the classify() label; narrative.js buildSentences() writes 4 to 5 sentences from derived() values; lifeAssessment() behind 'Could life exist?' reasons from Tsurf, atmDensity and starActivity and names the speculative cases. Rung 4 fails: telemetry gravity comes from the power-law mass with no tag when pl_masse is null, no value is marked measured or derived, and the 'habitable zone' label (a 230-330 K Teq window in classify()) names no rule. Night lights (uLife) and aurora render unlabelled, and .hud-bottom (the report) is display:none below 1200 px."
+        }
+      }
+    },
+    {
+      "id": "frame-budget-reach",
+      "name": "Frame budget and reach",
+      "frame": "performance",
+      "metric": "Time to first planet frame in seconds (DevTools performance trace on a stated machine), orbit-view fps at 1440 px on a named GPU, context-loss recovery, the 390 px layout, reduced motion inside the render loop, keyboard and screen-reader reach, and Lighthouse mobile scores. The rater uses a DevTools performance trace, a 390 px viewport, the OS reduced-motion setting and the Tab key.",
+      "ladder": [
+        "Absent: the page fails to render a frame.",
+        "Renders at least one planet frame at 1440 px in desktop Chrome.",
+        "At 1440x900 the catalogue loads behind a progress indicator and the first planet frame is drawn under 10 s after navigation start, measured in a Chrome DevTools performance trace with no network throttling on a stated machine.",
+        "Cost is bounded and measured: render resolution scaled and capped on the long edge, noise octaves reduced with apparent size, heavy shader variants compiled only on demand, and a 10 s DevTools recording of the orbit view at 1440 px on a named discrete GPU shows 30 fps or more.",
+        "WebGL context loss is handled: the page rebuilds, retries at lower resolution, and shows a diagnostic naming the GPU instead of a black frame.",
+        "At 390 px wide there is no horizontal scroll, and the planet, its name and class, and a way to change world are on screen.",
+        "prefers-reduced-motion stops planet rotation and star animation inside the WebGL loop (frames drawn on demand), not only the CSS animations.",
+        "Keyboard and screen reader: every control reachable by Tab with a visible focus ring, arrow keys orbit and +/- zoom, and the current world's name, class and report are announced through an aria-live region.",
+        "Measured adaptive quality: 3 or more render tiers chosen from frame time measured in the first 2 s, holding 30 fps or more at 1440 px on an Intel Iris Xe (11th-gen Core or later) or Apple M1 GPU in current Chrome, fps read from a 10 s DevTools performance trace, with the active tier shown.",
+        "Lighthouse mobile: performance 80 or more and accessibility 95 or more, and a performance mark exo-first-frame (set after the first planet frame is drawn) reads under 3 s in a DevTools trace with the Slow 4G preset and 4x CPU throttling.",
+        "Reference grade: 60 fps at 1440 px on an Intel Iris Xe (11th-gen Core or later) or Apple M1 GPU in current Chrome, fps read from a 10 s DevTools performance trace, WCAG 2.2 AA conformance for every view, and Lighthouse mobile performance 90 or more."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "A planet frame renders at 1440 px (g0-still.png, headless Chrome with ?still) (rung 1). Rung 2 is unmeasured: no time to first frame has been recorded in a DevTools trace on a stated machine, and the audit's headless run without ?still produced no frame within 60 s. In code for later rungs: main.js progress veil, exoplanet.js _resize() resScale 0.9 with a 1600 px long-edge cap, _lod() octaves by apparent radius, the EXO_SURFACE variant compiled lazily in _activate(), _lost()/_restore() stepping resolution down and _fail() naming the GPU; no fps figure exists. Rung 6 would fail: reduced motion is CSS-only and the rAF loop keeps advancing uTime; the canvas has no keyboard handlers."
+        }
+      }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Engine architecture",
+      "frame": "architecture",
+      "metric": "Count of Node tests the CI gates run on the physics module, count of core files edited to add a view (target 0), count of writes to engine.cfg or underscore-method calls from outside exoplanet.js (target 0), and line coverage of the physics module in percent. The rater reads labs/assets/js/exoplanet/* and .github/, greps, and runs the tests.",
+      "ladder": [
+        "Absent: no code of its own (an embed of another site).",
+        "One file holds markup, logic and data together.",
+        "Separate ES modules for boot, data loading, rendering and HUD.",
+        "Physics functions (record to physical quantities to render parameters: physics, classify, toParams) make no DOM, WebGL or network calls and are deterministic per planet name; they may share a file with the loader.",
+        "The renderer consumes one parameter bundle through a small API (load, set, start, stop, surface, camera), with shader variants compiled on demand behind a define. No other module writes engine.cfg or calls an underscore method (a grep finds none).",
+        "Physics tests run in Node without a browser, checking 10 or more planets' derived values against expected numbers plus a check that every UI control key is read by the engine, and the CI gates run them.",
+        "Model calls go through the shared labs/assets/js/ai/llm.js route; no lab-private provider remains.",
+        "Views are plugins: orbit, surface, system and population views register with select, resize and dispose hooks, and adding a view edits no core file.",
+        "One catalogue specification: the CI prebake and the browser share one schema and one dedup rule (or the browser drops its copy), enforced by a parity test.",
+        "The shader is split into composable chunks (noise, atmosphere, star, terrain) assembled at load, each covered by a fixed-seed render test that fails on a pixel difference over a set threshold.",
+        "Reference grade: the engine ships as a documented, versioned module (API reference, changelog and a HUD component sheet listing every element and its tokens) with 80% or more line coverage on the physics module, and 2 or more labs on the site import it unchanged."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "main.js, data.js, exoplanet.js, ui.js and narrative.js are separate modules, and data.js physics(), classify() and toParams() make no DOM, GL or network calls and seed by hashName() (rung 3). Rung 4 fails: ui.js presets run Object.assign(engine.cfg, p) and engine._draw(), the close-orbit button writes engine.cfg.camMode, and main.js writes engine.cfg.camMode for ?view= deep links. Recorded for later rungs: no tests exist, the 'atm' control key is read by nothing, narrative.js still imports ai/provider.js, and .github/prebake_exoplanets.py re-implements the data.js dedup by hand."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ]
+}

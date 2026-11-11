@@ -1,0 +1,311 @@
+{
+  "id": "dataspace",
+  "title": "DATASPACE",
+  "page": "dataspace.html",
+  "thesis": "A rate-distortion instrument for language: the visitor pastes any conversation, sweeps it from gentle to brutal compression through an honest model round-trip, and sees in coherent bits and in surviving facts, numbers and names exactly what each capsule size costs, with the black hole drawing every lost item as it escapes.",
+  "axes": [
+    {
+      "id": "bit-accounting",
+      "name": "Bit accounting",
+      "frame": "model",
+      "metric": "How the page turns text into bits for the source, the capsule and the lossless floor: which tokenizer, which entropy model, and whether the three figures share one accounting. Unit: bits and bits per character. Measured by reading the measuring functions in the code and checking the three plate figures against each other on the default sample.",
+      "ladder": [
+        "No bit or size figure is shown for the source or the capsule.",
+        "A size figure for the source is shown (characters, words, bytes or bits).",
+        "Source and capsule are each scored in bits as zeroth-order self-information over their own token frequencies (sum of -log2(count/n)), with the tokenizer named in the code.",
+        "A real lossless floor is measured in the browser on the source (DEFLATE via CompressionStream or an equivalent compressor) and shown in bits beside the source figure.",
+        "Source, capsule and floor share one accounting: either all three in compressed bits, or the self-information figures include the cost of spelling out their vocabulary. A comment in the measuring code names which. On the default sample the floor prints at or below the source figure, and on inputs under 50 characters the page notes DEFLATE's header overhead.",
+        "Tokens come from a real BPE vocabulary bundled with the page (GPT-2, cl100k or o200k merge ranks). Its token counts match the reference tokenizer's counts on 3 test strings, with the expected counts stored beside the strings in the code or a test file and a check that compares them.",
+        "Bits are also measured as cross-entropy under a predictive model trained on a bundled reference corpus (an order-k context model such as PPM, or an adaptive n-gram with escape), reported in bits per character with the method named on the page.",
+        "At least three lossless baselines are measured live on the visitor's text and shown side by side in bits per character: DEFLATE, a second compressor (brotli, LZMA or zstd via WASM) and the context model.",
+        "The compressors are checked against a reference: on a bundled standard file (alice29.txt from the Canterbury Corpus, Arnold and Bell, DCC 1997), the page shows each compressor's measured bits per character next to the figure the reference command-line tool gives at the same settings (gzip or zlib for DEFLATE, xz for LZMA, brotli or zstd for those). The command, tool version and output are recorded in the repo, and every page figure is within 5% of its reference.",
+        "The source's cross-entropy under a named LLM is shown in bits per character as the arithmetic-coding bound for model-decodable compression (Deletang et al., Language Modeling Is Compression, ICLR 2024). For the default sample it comes from a bundled recorded run (model, version, date and per-token log-probabilities in a data file). It is recomputed live on the visitor's text when the active route returns log-probabilities for the prompt tokens, and the page says which of the two is shown.",
+        "Model-decodable compression is shown exactly: an in-browser language model (a GPT-2-class model via ONNX or transformers.js) drives an arithmetic coder that compresses the visitor's text and decodes it bit-exact on the same device, its achieved size within 2% of its cross-entropy, as in Deletang et al., ICLR 2024. Its row joins one bits-per-character table for the visitor's own text holding unigram entropy, context-model entropy, LLM cross-entropy, every lossless compressor and the capsule; each row names the method, implementation version and settings (the per-row fields of Mahoney's Large Text Compression Benchmark), and each figure is reproducible from an exported run file."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "infoBits() sums -log2(freq/n) over the TOKRE regex pre-tokenizer (commented 'GPT-2-ish regex pre-tokenizer') for both source and capsule (rung 2); deflateBits() measures deflate-raw through CompressionStream and prints it as 'deflate floor' (rung 3). Rung 4 fails: the 1440 px screenshot shows source 759 bits beside 'deflate floor 3.1k bits' (recomputed on the 596-character sample: 759 vs 3064 bits), because the self-information omits the vocabulary cost and no comment names an accounting; updateRatioBar() then clamps the floor mark at 100%."
+        }
+      }
+    },
+    {
+      "id": "meaning-fidelity",
+      "name": "Meaning survival",
+      "frame": "model",
+      "metric": "What fraction of the source's meaning survives the capsule round-trip, measured on meaning-bearing units (numbers, dates, named entities, atomic claims, turn structure) rather than surface tokens. Unit: percent survived per unit type, plus a contradiction or invention rate. Measured by running the default sample and reading the fidelity readouts and the scoring functions.",
+      "ladder": [
+        "No comparison between the source and the reconstruction.",
+        "The reconstruction is shown next to the source.",
+        "One lexical score: the longest-common-subsequence ratio of source tokens kept in the reconstruction.",
+        "Kept, dropped and invented token counts are reported for each run, and the score is labelled lexical, not semantic.",
+        "Numbers and dates are extracted from the source and each is marked survived, altered or lost in the reconstruction, with a count such as 3 of 4 survived ('Feb 2023' read back as '2023' shows as altered, not as two dropped tokens).",
+        "Named entities (proper names, project names, handles) are extracted by a stated rule set and scored the same way, with an entity-survival percentage.",
+        "Turn structure is scored: speaker order and turn count preserved, with one row per turn showing that turn's LCS fidelity and its count of surviving numbers and entities.",
+        "Each turn also gets a semantic similarity from a sentence-embedding model running in the browser (a MiniLM-class model via ONNX or transformers.js), shown as a cosine score beside its lexical score.",
+        "The source is split into atomic claims, each judged supported, contradicted or missing in the reconstruction by a judge named on the page (an NLI model running in the browser, or a model call whose model and prompt are shown). This gives claim recall and a contradiction rate, with the claim list and each judgment visible for audit (the atomic-fact method of FActScore, Min et al., EMNLP 2023).",
+        "The scorer is validated: on at least 20 bundled source and reconstruction pairs labelled by hand, the page shows each measure's agreement with the human labels (accuracy or Cohen's kappa).",
+        "The claim and contradiction measures are benchmarked on a public faithfulness benchmark: at least 100 bundled pairs from a named dataset of the SummaC Benchmark (Laban et al., TACL 2022). The page shows its balanced accuracy next to the published SummaC figure for that dataset, and the full panel (lexical, number, entity, turn, embedding, claim recall, contradiction rate) runs on any pasted text."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "fidelity() computes a token LCS (capped at 1200 tokens); renderDiff() prints kept / dropped / invented counts, and the plate labels the score 'lexical - surface, not meaning' (rung 3). No number, date or entity extraction exists: in the bundled run 'Feb 2023' -> 'in 2023' scores ' Feb' and ' 2023' as dropped and ' in' and ' 2023' as invented, and 'two years early' -> 'very early' scores ' two' and ' years' as dropped and ' very' as invented (recomputed with the page's own tokenizer and LCS; rung 4 fails)."
+        }
+      }
+    },
+    {
+      "id": "rate-distortion",
+      "name": "Rate-distortion sweep",
+      "frame": "model",
+      "metric": "Whether the page measures how distortion grows as the capsule shrinks: number of compression levels run on one source, repeats per level, and whether rate (capsule bits over source bits) against distortion (1 minus fidelity) is drawn as a curve. Unit: levels, runs per level, points on the curve. Measured from the strength dial, the run logic in the code and the rendered views.",
+      "ladder": [
+        "No control over how hard the text is compressed.",
+        "A gentle-to-brutal control changes the word budget written into the compress prompt, one run per press.",
+        "The requested budget and the capsule's achieved length are both shown in words for each run, so the visitor sees whether the model obeyed the budget.",
+        "Runs are kept: each collapse appends a (rate, distortion) row to a list on the page, so two or more presses at different strengths can be compared.",
+        "A rate-distortion plot draws those points (x = capsule bits over source bits, both in the shared accounting of bit-accounting rung 4, y = distortion) with the lossless floor marked as the zero-distortion point at a rate below 1.",
+        "One action sweeps at least 5 strength levels on the visitor's own text and draws the curve as points land: one call may write all 5 capsules, but each capsule is rebuilt in its own call whose payload holds only that capsule (on the public route queued 45 s apart behind a countdown, about 4 to 5 minutes). A recorded sweep of a bundled sample is labelled recorded and does not pass.",
+        "Each level carries at least 3 runs and the plot shows the spread per level (min-max band or standard deviation): the bundled sample ships 3 recorded runs per level, and a live sweep has a repeats setting from 1 to 3.",
+        "Distortion can be switched between the lexical measure and the meaning measures (numbers, entities, claims) on the same plot, showing where the two curves diverge.",
+        "Curves from at least 3 named models (version and date) are overlaid on one plot from recorded real runs, each point opening its raw capsule and reconstruction.",
+        "Baselines share the plot at matched rate: head truncation and an extractive capsule that keeps the source's highest-self-information tokens up to the same bit budget (the token-pruning idea of LLMLingua, Jiang et al., EMNLP 2023, run with the page's own bit model), plus the empty-capsule point at rate 0; the page states per level how much fidelity the model's capsule buys over the best baseline.",
+        "A rate-distortion atlas for language: curves for at least 10 conversation types (dialogue, code, instructions, number-heavy, narrative and more), each with its rung-9 baselines, every point linked to an exported run file, and the visitor's own sweep placed on the same axes."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "budgetWords() maps the dial to a 140-to-30 word budget inside the compress prompt only (rung 1). Rung 2 fails: neither the budget nor the capsule's word count is displayed (the plate shows capsule bits only), so requested and achieved length cannot be compared; there is no run history and no plot, and on fallback the dial changes nothing because ECHO_CAP is one fixed capsule."
+        }
+      }
+    },
+    {
+      "id": "horizon-encoding",
+      "name": "Horizon encoding",
+      "frame": "graphics",
+      "metric": "How many measured quantities visibly drive the lensed scene and whether a viewer can read them off it. Unit: count of measured inputs mapped to distinct visual channels, and whether each mapping is labelled. Measured by tracing each shader uniform back to its source value and watching the scene change after a collapse.",
+      "ladder": [
+        "No rendered scene; numbers only.",
+        "A black-hole image or scene sits behind the numbers.",
+        "A live ray-marched lensed horizon renders (bent light, photon ring, accretion disk) and can be orbited.",
+        "At least 3 measured quantities drive distinct visual channels after a collapse (for example capsule bits to core brightness, degradation to radiation density, fidelity to how much disk re-forms).",
+        "Per-token information reaches the image: each disk radius band or particle is coloured by the bits of a specific source token span, so a high-information passage is visibly brighter than a low one.",
+        "An on-canvas legend or labelled annotations name every mapping (what brightness, colour, radius and radiation mean, with units).",
+        "Lost content is drawn as discrete, traceable marks: each dropped token or fact is one escaping particle, and hovering or tapping it shows the word.",
+        "The collapse is choreographed in 3 or more stages tied to the run's real progress (source measured, capsule received, reconstruction received), not a fixed timer.",
+        "Two runs can be shown as two horizons or a split view with the same encodings, so a gentle and a brutal capsule are compared visually at a glance.",
+        "Every visual channel is quantitative and reversible: a rater reads capsule bits, fidelity and loss count off the scene within 10% using the legend, checked against the plate.",
+        "The scene is a complete information-loss diagram: every source token is a traceable mark that either crosses into the capsule or radiates away, reconstructed tokens re-emerge as marks, and for any run a rater names 5 lost tokens from the scene alone, each confirmed in the diff."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "The FRAG shader ray-marches 200 geodesic steps with photon ring and Doppler-boosted disk (rung 2); draw() binds uCapLum (capsule/source bits) to core glow, uDeg to Hawking spark intensity, uFid to how much disk re-forms, uAvgBits to disk warmth and source bits to horizon radius (rung 3). Rung 4 fails: uploadHist() uploads the 64-bin per-token histogram but the shader never samples it, and the screenshot shows one washed cream disk; uFloorR is clamped to 9 and the floor ring falls off screen."
+        }
+      }
+    },
+    {
+      "id": "readout-views",
+      "name": "Readout views",
+      "frame": "graphics",
+      "metric": "The 2D views that carry the numbers: how many distinct views there are and whether they are linked (selecting in one highlights in the others). Unit: count of views and of links between them. Measured on the page after one collapse.",
+      "ladder": [
+        "No numeric readout.",
+        "Figures are printed as plain text.",
+        "A metrics plate with labelled values and units: source bits, capsule bits, ratio, fidelity, degradation.",
+        "The capsule text itself is displayed after each run, with its token and character count.",
+        "A token-level diff view coloured kept, dropped and invented, plus a bar placing the capsule size against the source with the lossless-floor mark at its true position (a floor above the source extends the scale instead of clamping the mark at 100%).",
+        "A per-token information strip: every source token drawn as a cell shaded by its bit cost, so the expensive words are visible before compressing.",
+        "Linked views: hovering a source token highlights its bit cell and its fate in the diff, and hovering a diff token highlights its source token and bit cell.",
+        "A rate-distortion plot is linked in: clicking a run's point loads that run's capsule, diff and scene.",
+        "A per-unit survival table (numbers, entities, claims) is linked to the diff; each row jumps to its passage in source and reconstruction.",
+        "Every view exports what is on screen: the plot as SVG or PNG, the tables as CSV, the run as JSON.",
+        "At 400 px every view stays linked, with no text under 11 px and no horizontal scroll. Every figure is reachable from every view in one click. Hovering a capsule span highlights the source spans it was aligned to by a method named on the page (token overlap, or span tags the model returned in the run file)."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": ".plate shows source, capsule, ratio, fidelity and degradation with unit lines (rung 2). Rung 3 fails: applyResult() measures the capsule but never prints its text. #d_toks and #m_bar exist, but #m_floormark is clamped by Math.min(1, floor/src) and sits at the right end of the bar after every collapse on natural text (and at the left end before one, since updateRatioBar() returns early without a capsule)."
+        }
+      }
+    },
+    {
+      "id": "legibility",
+      "name": "Legibility over the horizon",
+      "frame": "style",
+      "metric": "The craft of type, contrast and colour over a bright moving scene. Contrast is the WCAG 2 ratio between the text colour and the background pixel inside the text's bounding box that gives the lowest ratio (the lightest pixel for light text), read from a ?still screenshot once ?still is pixel-deterministic (code-shape rung 3), otherwise the lowest of 3 screenshots taken 2 s apart. Unit: lowest ratio found, and the count of blocks under 4.5:1. Sizes and colours are listed from the CSS.",
+      "ladder": [
+        "Unstyled browser defaults.",
+        "One font family is applied to all text and every colour comes from the page's own CSS, not browser defaults.",
+        "An on-brand system: one monospace family, amber and blue as CSS variables, hairline panels and corner brackets, no overlap at 1440 px.",
+        "Every numeric figure, including the centre capsule caption, sits on a backing panel or scrim and reads at 4.5:1 or more at 1440 px.",
+        "Every text block (title paragraph, slider labels, centre captions, footer tag, plate unit lines) reads at 4.5:1 or more against the scene at 1440 px on the default sample.",
+        "--amber and its tints (#FFD27A, rgba(242,169,59,*)) appear only on the capsule figures, the live and running states, the primary action, hover and focus states, the strength thumb and the frame corner brackets. A search of the CSS and HTML finds no other amber use, the kicker and the footer tag dot included.",
+        "The type scale has at most 5 sizes, none under 11 px at 1440 px, with tabular numerals on every changing figure.",
+        "In the 1440 px ?still screenshot, under 2% of canvas pixels outside the HTML panels have all three channels at 250 or more, and a radial line across the disk crosses at least 3 colour bands whose mean colours differ pairwise by at least 10 in CIEDE2000.",
+        "A motion table in the code lists every animated property (disk rotation, collapse, capsule glow, radiation, re-form, ratio bar) with its one meaning and its duration or speed. Every duration or speed constant in the code appears in that table, and ambient motion is labelled ambient.",
+        "Contrast holds at 4.5:1 for every block at 400x860, 1440x900 and 860x400, with no text over the moving scene lacking a scrim, checked in all three shots.",
+        "Four audits come back empty at 400 px and 1440 px: no contrast failure; no colour literal in CSS or inline styles outside the :root variables, with every shader colour constant declared once in a named palette block at the top of FRAG; no type size outside the scale; no animated property missing from the motion table."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "IBM Plex Mono on all text and every colour set in the page's CSS (rung 1); CSS variables --void/--amber/--blue/--red, hairline .plate and amber .bp corner brackets, no overlap at 1440 px (rung 2). Rung 3 fails: in the screenshot #mid_cap (amber, where the capsule bits and ratio print after a run), the .sub paragraph and the COLLAPSE button sit unbacked on the bright cream disk and are close to unreadable; the plate's #6B7682 unit lines on grey glass are also far under 4.5:1. The CSS uses 9 px and 9.5 px text."
+        }
+      }
+    },
+    {
+      "id": "instrument-controls",
+      "name": "Instrument controls",
+      "frame": "interaction",
+      "metric": "What the visitor can do to the instrument: inputs, controls, devices supported (mouse, touch, keyboard), state carried in the URL. Unit: count of distinct operations that change the result, and devices that reach them. Measured on the page at 1440 px and 400 px and in the event handlers.",
+      "ladder": [
+        "Nothing to operate; a fixed animation.",
+        "One button starts a run.",
+        "The visitor pastes their own conversation and the source bit count updates as they type.",
+        "Moving the strength control from gentle to brutal yields a shorter capsule on the public route and offline (the fallback holds one recorded capsule per strength); checked with a gentle and a brutal run on each, whose capsule word counts fall in that order.",
+        "The scene orbits and zooms by mouse (drag, wheel), by touch (one-finger orbit, pinch zoom) and by keyboard (arrow keys orbit, + and - zoom when the canvas has focus), checked at 400 px with touch emulation.",
+        "A preset menu of at least 4 bundled conversations of different kinds (chatty, technical, number-heavy, instructions), each loadable in one tap.",
+        "The visitor can edit the capsule by hand and re-run only the reconstruction, to test what each capsule word carries.",
+        "State is shareable by URL: the preset id or the visitor's own source text (compressed into the URL fragment), the strength and the selected run all restore when the URL is opened in a fresh tab.",
+        "Clicking a token or fact in the source pins it: each run reports whether it survived, and a sweep reports the strength at which it dies.",
+        "Generations: the reconstruction is fed back as the next source for at least 5 rounds, and the page charts fidelity against the original per generation, the compounding Degradation the lab is named for.",
+        "Open-ended play: upload a text file up to 50 kB, run two models head to head on one source, chain generations, and every one of those states is shareable by URL and exportable as a run file."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "#go starts a run (rung 1); the #src textarea re-runs measureSource() on input (rung 2). Rung 3 fails: the dial changes the capsule only at positions the route has cached for the default sample; at any other position, or on the visitor's own text, the reconstruct call gets HTTP 402 and fail() plays the fixed ECHO_CAP. Orbit is mouse and wheel only; no touch or key handlers, no URL state."
+        }
+      }
+    },
+    {
+      "id": "run-record",
+      "name": "Run record",
+      "frame": "data",
+      "metric": "Where the page's conversations, capsules and reconstructions come from and whether each is traceable. Unit: count of bundled recorded runs carrying full provenance (model and version, route, date, exact prompt, strength). Measured by reading the bundled data and the page's labels.",
+      "ladder": [
+        "No sample text; the page is empty until the visitor types.",
+        "One bundled sample conversation.",
+        "One bundled capsule and reconstruction for the sample, so the instrument plays offline, labelled truthfully: recorded only for a stored model reply, authored example otherwise; a capsule holding a fact absent from the source cannot carry the recorded label.",
+        "Each bundled run shows its provenance on the page: model name and version, route, date, the exact prompt and the strength setting.",
+        "At least 5 recorded runs on the sample at different strengths, each with full provenance, stored in a data file separate from the code.",
+        "At least 4 bundled conversations of different kinds (dialogue, technical, number-heavy, instructions), each with recorded runs at 5 or more strengths.",
+        "Every live run is logged in the session with the same provenance fields and appears beside the recorded ones.",
+        "Recorded runs come from at least 3 named models (for example a local Ollama model, an open-weights model on a free key, the public route's model), dated, with raw responses kept verbatim.",
+        "Runs export and import as a documented JSON schema (source, capsule, reconstruction, measures, provenance); reloading an exported file reproduces the same numbers.",
+        "A bundled corpus of at least 20 conversations from a public dialogue dataset is cited by name, licence and date, with a recorded curve for each.",
+        "The run record is a public dataset: every recorded run downloads with a checksum, a changelog dates each addition, and one bundled command recomputes every curve's measures from the run files and prints a match against the numbers the page shows."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "SAMPLE is one bundled conversation (rung 1). Rung 2 fails: ECHO_CAP names Luis, who is absent from SAMPLE (checked by string search), so it is not a run of this page's prompt on this sample, yet #src_pill labels it 'recorded round-trip' with no model, date or prompt behind it."
+        }
+      }
+    },
+    {
+      "id": "model-round-trip",
+      "name": "Model round-trip",
+      "frame": "intelligence",
+      "metric": "What the language model contributes versus the deterministic measuring engine, and whether that contribution reaches a visitor on the public site: route used, calls per run against the measured public limit (1 reply per 45 s per IP), honesty of the fallback and of the live label. Unit: calls per run, share of public-route runs that complete live, route shown. Measured by reading collapse() and callModel() and by running the page on the live site.",
+      "ladder": [
+        "No model involved; every capsule is canned.",
+        "A model is called on the text in the input box for at least one stage (compress or reconstruct), and when the call succeeds its output reaches the page.",
+        "Two calls compress then reconstruct the text in the input box, with a bundled run as fallback and a pill naming which of the two is shown.",
+        "The fallback is honest: when the route fails on the visitor's own text, the page says no live run happened and shows no fidelity figures for that text, instead of scoring it against the bundled sample's reconstruction; and when the text is cut to fit the route (1500 characters today) or the scorer (1200 tokens), the page says so and every figure covers only the text the model received.",
+        "Model calls go through the shared route (labs/assets/js/ai/llm.js: local Ollama, visitor key, worker, public route, offline engine) and the route panel shows which route answered.",
+        "The flow fits the public limit: compress and reconstruct are scheduled one reply per 45 s apart with a visible countdown, so a visitor on the public route gets a complete live round-trip.",
+        "Each run shows its exact request payloads (the compress prompt with the source; the reconstruct prompt with the capsule and nothing else), and a reply labelled live is fresh: a per-run seed or nonce defeats the route cache, and a reply served from cache is labelled cached.",
+        "The model's share is measured on both sides: a control reconstruction from an empty capsule gives the model's prior, the capsule itself is scored against the source as the no-decoder figure, and the page splits fidelity into prior, what the capsule carried literally, and what the decoder restored.",
+        "Every model call in a run lists its route, model name, latency and prompt and completion token counts beside the result; checked with a 5-strength sweep of the visitor's text that completes live on a local Ollama route and lands on the rate-distortion plot, with the model named in the evidence.",
+        "Cross-model decoding: a capsule written by one model is rebuilt by a different model and the page reports the fidelity drop, testing the lab's claim that the capsule is model-only-decodable.",
+        "An encoder-decoder matrix: at least 3 models as compressor by the same 3 as reconstructor on the same source, at least 3 runs per cell, fidelity and spread shown per cell, each cell's raw capsule and reconstruction inspectable."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "collapse() chains two callModel() GETs to text.pollinations.ai on the textarea text and falls back to ECHO_CAP/ECHO_REC, with #src_pill naming live or recorded (rung 2). Measured 2026-11-11: on the visitor's own text the reconstruct call, fired at once after the compress call, gets HTTP 402 FREE_LIMIT; only the default sample at the default dial completes, because the route answers both prompts from its cache in under 400 ms, and the pill then says live. Rung 3 fails: fail() calls applyResult(ECHO_CAP, ECHO_REC), scoring the visitor's textarea against the sample's reconstruction; collapse() also sends only the first 1500 characters while applyResult() scores the whole textarea, with no notice."
+        }
+      }
+    },
+    {
+      "id": "compression-literacy",
+      "name": "Compression literacy",
+      "frame": "explanation",
+      "metric": "What a visitor can explain after five minutes: what a bit is here, why the lossless floor is the baseline, what the fidelity score does and does not measure, and which parts are metaphor. Unit: count of concepts explained in place, and whether every claim is tagged real or metaphor and the tags are true. Measured by reading the page copy and walking one run on the published site.",
+      "ladder": [
+        "No text explains what is happening.",
+        "A title and a one-paragraph premise.",
+        "Captions narrate the run's stages in place (bits falling in, capsule size, words lost) and a footer tags the real measures apart from the black-hole metaphor; every item the footer tags [real] happens for the visitor's own text on the published site.",
+        "Every figure on the plate has a one-line definition reachable in place (hover or tap) that says how it is computed and from which tokens.",
+        "Next to the plate, the copy states how source bits, capsule bits and the deflate floor relate (which is larger, and why) and why the floor is the honest baseline for a lossless coder.",
+        "A guided first run of 3 to 6 steps walks the visitor through one collapse, pausing on source bits, the capsule, the diff and the lost facts.",
+        "A metaphor map tags each visual element by truth status. Physics: the ray-marched light bending, photon ring and Doppler beaming, with the geodesic approximation named. Metaphor: horizon size, core glow, Hawking radiation, re-forming disk. One sentence per element says what is and is not claimed.",
+        "The page states its own limits while running: when the score is lexical it shows which meaning change it missed, using the run's own example (a date paraphrased but scored as lost).",
+        "A methods section gives every formula and cites author, year and venue: Shannon 1948 for self-information, RFC 1951 for DEFLATE, Shannon 1959 for rate-distortion, and the LCS and fidelity methods used.",
+        "The visitor leaves with their own finding: an end card states what was lost first as strength rose and which kinds of content survived, exportable as text or image.",
+        "Each of the six concepts (bit, entropy, lossless floor, capsule, fidelity, rate-distortion) is taught by direct manipulation on the visitor's own text, in the explorable-explanation form Bret Victor set out in 2011; a rater finds a manipulable example for all six."
+      ],
+      "levels": {
+        "G0": {
+          "level": 1,
+          "evidence": "The h1 'Compress a conversation. Watch what dies.' and the .sub premise paragraph (rung 1). Captions exist (#mid_src 'bits falling in', #mid_cap capsule bits and ratio, #mid_lost 'escaped as radiation') and the footer .tag splits [real] from [metaphor], but rung 2 fails on the tags' truth: the footer tags 'live round-trip' [real], yet on the published site the visitor's own text never completes one (the reconstruct call gets HTTP 402 and fail() plays the bundled ECHO_CAP), and the default sample's 'live' reply is served from the route's cache."
+        }
+      }
+    },
+    {
+      "id": "frame-and-reach",
+      "name": "Frame and reach",
+      "frame": "performance",
+      "metric": "Cost of the 200-step ray-marched scene and the page's reach: frame time, phone width, reduced motion, keyboard and screen-reader access, behaviour without WebGL. Unit: ms per frame from a 10 s Chrome DevTools performance trace at 1440 px on the reference GPU, Intel UHD Graphics (the integrated GPU of the reference laptop, which also carries an NVIDIA RTX 3500 Ada; Chrome set to the power-saving GPU and confirmed in chrome://gpu), named in every evidence line; and pass or fail on each reach check. Measured in DevTools and by reading the code.",
+      "ladder": [
+        "The page does not load or the scene throws.",
+        "The scene renders at 1440 px.",
+        "The canvas renders below native resolution (device-pixel-ratio cap and render scale), and a shader compile or link error prints on the page instead of a silent black canvas.",
+        "At 400 px the layout stacks into one readable column (story, numbers, lost words, diff) with no horizontal scroll.",
+        "prefers-reduced-motion is honoured: disk rotation, collapse and radiation freeze or step, and the numbers still update.",
+        "All controls reach by keyboard with visible focus, run results are announced through an aria-live region, and the canvas has a text alternative.",
+        "Performance tiers: step count or resolution adapts to measured frame time, holding 16.7 ms per frame or less at 1440 px on the reference GPU named in the metric (Chrome DevTools performance panel, 10 s trace).",
+        "The render loop stops on visibilitychange while the tab is hidden. With the network throttled to 1.6 Mbps down and 150 ms RTT (Lighthouse mobile throttling), the textarea accepts input and the source bit count prints within 1.5 s of navigation, before the shader compiles.",
+        "Without WebGL the full instrument still runs, with a 2D stand-in for the scene and a line saying so.",
+        "Lighthouse mobile scores of 100 for accessibility and 90 or more for performance, kept in a committed report.",
+        "The full-encoding scene holds 60 fps at native resolution on a named reference phone (Pixel 4a or iPhone SE 2nd generation, both 2020, the device recorded in the evidence), and a manual screen-reader walkthrough (NVDA or VoiceOver) hears every measure and every run's losses in words."
+      ],
+      "levels": {
+        "G0": {
+          "level": 3,
+          "evidence": "rz() caps devicePixelRatio at 1.5 with a 0.85 render scale, and mk()/link errors print a visible WEBGL SHADER ERROR block (rung 2); the @media (max-width:760px) block stacks panelL, mid, plate and diff into one column; a ?still shot in a true 400 px iframe shows every block readable with nothing clipped (rung 3). Rung 4 fails: the variable reduce reads prefers-reduced-motion and is never used, so rotation and collapse run regardless. Reference GPU Intel UHD Graphics; no frame time was graded at G0 because rung 4 fails first."
+        }
+      }
+    },
+    {
+      "id": "code-shape",
+      "name": "Code shape",
+      "frame": "architecture",
+      "metric": "How the lab's code is organised: separation of measures, prompts, recorded data, run flow and renderer; screenshot determinism; tests. Unit: count of separate modules, presence of a data file and of tests. Measured by reading the files under labs/ that belong to this lab and by diffing two ?still screenshots.",
+      "ladder": [
+        "No code; nothing runs.",
+        "The lab runs from a page under labs/, in one file or more; inline style, script and data are allowed.",
+        "The measuring functions (tokenize, bits, deflate, fidelity) are pure and DOM-free: they take and return plain values.",
+        "A ?still flag freezes uTime, the camera, the jitter and dither seeds and the collapse phase, so two ?still screenshots taken 5 s apart are pixel-identical.",
+        "No dead paths: every uniform, texture and flag the page sets is read (no uploaded texture the shader never samples, no computed flag never used, no unused shader variables).",
+        "The measures live in their own ES module with no DOM access, and a test file imports it and checks bits, DEFLATE and LCS against fixed expected values, run with one command.",
+        "Prompts, strength levels and recorded runs live in a data or config file; adding a sample conversation touches no code.",
+        "The run flow is its own module separate from the measures and the renderer: one state machine with its states (idle, compressing, waiting, reconstructing, scored, failed) listed in one place, and every route call and fallback goes through it.",
+        "The renderer is its own module that takes a plain measurement object, so a new view (2D chart, export) is added without touching the measures or the shader.",
+        "A new fidelity measure or compressor is added by registering one module in a list, and the views and exports pick it up; checked by reading the registry.",
+        "The measuring core is a documented, versioned library with its own test suite covering every registered measure (bits, DEFLATE, LCS, number and entity survival) and a reproducibility check (recorded runs re-scored in CI give identical numbers), usable outside the page."
+      ],
+      "levels": {
+        "G0": {
+          "level": 2,
+          "evidence": "One file, labs/dataspace.html, with CSS, prompts, sample data, measures and shader inline (rung 1). tokenize(), infoBits(), deflateBits() and fidelity() take and return plain values (rung 2). Rung 3 fails: under ?still draw() still feeds uTime=(now-t0)/1000, so rotation (rot=omega*uTime*3.0), fbm turbulence, the ign() jitter and dith() change between shots; only uPhase (ST.phase=1.55) and the resolution are frozen. Rung 4 would fail too: uploadHist() fills a texture the shader never samples, reduce is never read, and the shader keeps unused capR, cd and hr."
+        }
+      }
+    }
+  ],
+  "history": [
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "id": "pm-platform",
+  "title": "Project Management",
+  "page": null,
+  "thesis": "A visitor pastes their team's work-item dates or picks a real public dataset and gets a completion forecast that states its odds (P50, P85 and P95 dates from Monte Carlo resampling of their own throughput), shows the flow behind it (cumulative flow, cycle time, Little's Law checked against its assumptions), and proves those odds with a backtest of how often its past forecasts came true.",
+  "axes": [
+    {
+      "id": "throughput-monte-carlo",
+      "name": "Throughput Monte Carlo",
+      "frame": "model",
+      "metric": "How the completion forecast is computed: resampling method, trials per forecast (count), questions answered, and agreement with independent implementations (working days or sampling periods); read the simulation module and run a forecast on the sample data; the level is the highest rung whose feature is present in code and visible on the page (rungs are cumulative).",
+      "ladder": [
+        "Absent: no completion forecast is computed.",
+        "A completion date typed into the page, or derived from a typed average rate; nothing is computed from item data.",
+        "Linear projection from data: remaining items divided by the mean daily throughput of the loaded history gives one date (the single-number baseline the lab argues against).",
+        "Monte Carlo 'when will it be done': each trial draws daily throughput values with replacement from the history (bootstrap, Efron 1979, Annals of Statistics) until the backlog is consumed; at least 1,000 trials; P50, P85 and P95 dates printed with the sampling window (first date, last date, day count).",
+        "At least 10,000 trials per forecast; the trial count and the Monte Carlo standard error of the P85 date (standard deviation of P85 across 20 independent batches divided by the square root of 20) are printed, and that error is under 1 working day.",
+        "Monte Carlo 'how many by date': the distribution of items finished by a target date, with the 85% figure read from the low side (85% of trials finish at least N items, the 15th percentile of the count).",
+        "Calendar: weekends and a listed set of non-working days are excluded from both the sampled history and the projected days, zero-throughput working days stay in the sample, and the calendar in use is shown on the page.",
+        "Scope growth: each trial adds items to the backlog by resampling daily arrival counts (items created per working day) from the same sampling window, and the P85 date is shown with and without growth.",
+        "Serial dependence: a moving block bootstrap (Kunsch 1989, Annals of Statistics) with a stated block length runs beside iid resampling, and the lag-1 autocorrelation of daily throughput is printed.",
+        "Cross-check, both required: (a) Focused Objective's free Throughput Forecaster spreadsheet (Troy Magennis), run at the same sampling period on the same throughput samples, agrees on P50, P85 and P95 within one sampling period for every bundled dataset; (b) a committed Python script that resamples with numpy array operations (numpy.random.default_rng), not a line-by-line translation of the engine's trial loop, agrees within 1 working day at daily resampling; both comparisons are committed as one table.",
+        "Cut-line forecast: an ordered list of features, each with its own item-count range, is simulated jointly so each feature gets its own P50, P85 and P95 date given the features before it, the scope of Focused Objective's Multiple Feature Cut Line Forecaster, running in the browser with no spreadsheet."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; labs/assets/js/config/site.config.js line 146 lists pm-platform with status 'planned' and no simulation module exists under labs/assets/js/" } }
+    },
+    {
+      "id": "flow-metrics",
+      "name": "Flow metrics and Little's Law",
+      "frame": "model",
+      "metric": "Which flow metrics the engine derives from item start and finish dates (throughput in items per day, cycle time in days, WIP in items) and whether Little's Law is checked rather than assumed; read the metrics module and compare the page's values to a hand computation on a 10-row CSV.",
+      "ladder": [
+        "Absent: no flow metric is computed.",
+        "Throughput or cycle time appears only as a typed number or in prose.",
+        "Throughput per day and per week computed from the finish dates of the loaded items, with the day basis (calendar days, or working days once a calendar exists) stated on the page.",
+        "Cycle time per finished item (finish date minus start date plus one, the convention stated on the page) with its P50, P85 and P95 in days.",
+        "Daily WIP (items started and not finished at the end of each day) computed for every day of the window, with its average.",
+        "Little's Law with live numbers (Little 1961, Operations Research): average WIP divided by average throughput printed beside the measured average cycle time over the same window, with the gap in percent.",
+        "Little's Law assumptions from Vacanti (2015, Actionable Agile Metrics for Predictability) checked for the window, each shown pass or fail with its numbers: average arrival rate within 10% of average departure rate; WIP at window end within 10% of WIP at window start; average WIP age at window end within 10% of its value at window start; and items abandoned or removed without finishing (marked by a resolution or state column) counted, excluded from cycle time, and passing when under 5% of the items that left the window, shown as not checkable when the data has no such column.",
+        "Aging WIP: each unfinished item's current age compared with the cycle time P50, P85 and P95, and the items past P85 listed by id.",
+        "Per-state times: when the CSV holds one date column per workflow state (at least 3 states), time in each state per item and arrivals per state are computed and shown.",
+        "A committed script independent of the engine code (node or Python) recomputes every flow metric for every bundled dataset; item counts, daily WIP and per-item cycle times match the page exactly and averages match to 0.01, with the comparison output committed.",
+        "Sample-path accounting (finite-window form, Little 2011, Operations Research): for any sub-window the visitor selects, time-in-window accounting makes L = lambda W hold with relative residual |L - lambda W| / L under 0.01, and the page prints that residual beside the residual of the steady-state form from rung 5, together with the count and total in-window time of the items that cross the window edges, which account for the gap."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no code computes throughput, cycle time or WIP for this lab anywhere in the repo" } }
+    },
+    {
+      "id": "forecast-backtest",
+      "name": "Forecast backtest and calibration",
+      "frame": "model",
+      "metric": "Whether the forecast's stated odds are checked against hidden history: forecast origins (count, non-overlapping), coverage of P50, P85 and P95 (percent, with intervals), PIT histogram, and mean CRPS (days) against the linear baseline; read the backtest view and its scoring module.",
+      "ladder": [
+        "Absent: forecasts are never checked against what happened.",
+        "Accuracy claimed in text only, not computed from data.",
+        "One holdout: the most recent stretch of history is hidden, a forecast is made from the data before it, and the actual completion date is drawn against its P50, P85 and P95 dates.",
+        "Rolling-origin backtest: at least 20 forecast origins across the history, each forecasting how long the next K items took (K stated), using only items finished before its origin, with origins spaced at least K finished items apart so that no two forecast horizons overlap.",
+        "Coverage table: the share of origins whose actual finished on or before the P50, P85 and P95 dates, with n, against targets of 50, 85 and 95%.",
+        "A Wilson 95% interval on each coverage (Wilson 1927, Journal of the American Statistical Association), with n printed, and a verdict per percentile: within chance when the target lies inside the interval, overconfident when the target lies above it, underconfident when it lies below it.",
+        "PIT histogram for the whole-day outcome over at least 100 origins pooled across datasets, in 10 bins, against the uniform line with a 95% band per bin, using the non-randomized PIT for discrete outcomes (Czado, Gneiting and Held 2009, Biometrics) or the randomized PIT, read as a calibration check per Gneiting, Balabdaoui and Raftery (2007, Journal of the Royal Statistical Society Series B).",
+        "Mean CRPS in days (Matheson and Winkler 1976, Management Science) for the Monte Carlo forecast and for the linear mean-throughput projection (whose CRPS is its absolute error) on the same origins.",
+        "A moving block bootstrap over origins (block length stated, at least 1,000 resamples) or a Diebold-Mariano test with autocorrelation-consistent variance (Diebold and Mariano 1995, Journal of Business and Economic Statistics) gives a 95% interval or p-value on the CRPS difference between every pair of forecasters in the code, at least Monte Carlo against the linear projection.",
+        "Window tuning without leakage: at least 4 sampling-window lengths are scored on earlier origins, the chosen length is stated, and the reported coverage and CRPS come only from later origins.",
+        "Pre-registered forecasts: at least 20 dated forecasts for open milestones of at least 5 public GitHub projects are published on the live page and captured by a third-party timestamp (an Internet Archive snapshot or a GitHub release) before the outcome; at least 10 are resolved and scored with the coverage and CRPS of rungs 4 to 7, and the page lists every one, hits and misses, with the running P85 coverage and its Wilson interval (reference standard: FiveThirtyEight's published calibration checks of its own forecasts)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no forecast is produced, so nothing is backtested or scored" } }
+    },
+    {
+      "id": "flow-forecast-charts",
+      "name": "Flow and forecast charts",
+      "frame": "graphics",
+      "metric": "Count of distinct live chart types drawn from computed data, whether they are linked, and how forecast uncertainty is drawn; check on the page at 1440 px and in the render code.",
+      "ladder": [
+        "Absent: nothing is drawn.",
+        "Forecast numbers appear as text or a static image only.",
+        "One live chart: a histogram of simulated completion dates with P50, P85 and P95 lines.",
+        "A throughput run chart of finished items per day or week across the sampling window.",
+        "A cumulative flow diagram of cumulative arrivals and departures by day (at least 2 bands), with WIP labeled as the vertical gap and approximate cycle time as the horizontal gap at one marked date.",
+        "A cycle time scatterplot: one dot per finished item by finish date, with P50, P85 and P95 horizontal lines.",
+        "An aging WIP chart: unfinished items placed by current age in days against the cycle time P50, P85 and P95 bands, in one column per workflow state when the data has states and in a single in-progress column when it has only start and finish dates.",
+        "Linked views: brushing a date range on the run chart resets the sampling window and redraws the forecast histogram, the cumulative flow highlight and the scatterplot in one interaction.",
+        "Both forecast questions ('when' and 'how many') drawn as quantile dotplots of 20 or 50 dots (Kay, Kola, Hullman and Munson 2016, CHI), and the when-done forecast also as a cumulative 'chance done by this date' curve readable at any date.",
+        "Hypothetical outcome plots (Hullman, Resnick and Adar 2015, PLOS ONE): the visitor steps through single simulated burn-up paths, then sees a fan of at least 100 paths with its percentile envelope.",
+        "Backtest drawn: the forecast fan from every backtest origin overlaid on the actual burn-up with the actual's percentile marked at each origin, linked to every other view, covering the chart set of ActionableAgile Analytics (cumulative flow, cycle time scatterplot, aging WIP, throughput run chart, Monte Carlo when and how many) plus the backtest."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; there is no screenshot because nothing renders" } }
+    },
+    {
+      "id": "odds-visual-grammar",
+      "name": "Odds visual grammar",
+      "frame": "style",
+      "metric": "Conformance of every view to a visual grammar for odds (forecast, observed, interval, backtest); count of views violating each rung's rule, checked on every view at 1440 px and 400 px and in the lab's CSS.",
+      "ladder": [
+        "Absent: no styled page.",
+        "Template or browser-default styling, with no site tokens.",
+        "Site design tokens (near-black ground, ink, amber accent) applied from the shared labs stylesheet.",
+        "One date format across all views, every count and percent in tabular numerals, and every duration labeled as working days or calendar days.",
+        "P50, P85 and P95 drawn with the same three marks (line style and label) on every chart, and a legend on each chart.",
+        "Amber reserved for observed reality (actual finish dates, the today line, the actual burn-up); forecasts drawn only in the neutral scale, on every view.",
+        "Every chart carries a title, a unit, a data source line and the data date.",
+        "No bare forecast date anywhere: each forecast date on the page carries its percentile label (for example '85%: 14 Mar').",
+        "Changing the backlog, window or question moves the data marks to their new positions in at most 400 ms, with no blank frame between states.",
+        "Under deuteranopia and protanopia simulation (Machado, Oliveira and Fernandes 2009, IEEE Transactions on Visualization and Computer Graphics), the forecast, observed and interval colors stay pairwise distinguishable at a CIEDE2000 difference of at least 10, and all text meets 4.5:1 contrast (WCAG 2.1 AA); the check output and the tool used are committed.",
+        "The grammar is written as a named spec in the lab's CSS header with at least 8 rules, each naming the class or token that enforces it and together covering forecast, observed, interval, backtest, percentile label and date format; a rater walking every view at 1440 px and 400 px finds zero violations (reference standard: FiveThirtyEight's forecast pages)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no lab stylesheet or markup to inspect" } }
+    },
+    {
+      "id": "forecast-controls",
+      "name": "Forecast question controls",
+      "frame": "interaction",
+      "metric": "What a visitor can change and ask: count of independent controls and question types answered, with the recompute time in ms after a change; try each control on the page with DevTools timing at 4x CPU throttling.",
+      "ladder": [
+        "Absent: no controls.",
+        "One button reveals a fixed forecast.",
+        "Enter a backlog item count and get P50, P85 and P95 completion dates for the sample dataset.",
+        "Switch between the two questions: 'when will these N items be done' and 'how many items by date D'.",
+        "Paste or drop a CSV of item dates, and every view recomputes on it.",
+        "Set the sampling window with date pickers or by brushing the run chart; the forecast recomputes within 300 ms of release at 10,000 trials.",
+        "Target-date check: enter a committed date and the page prints the probability of making it and the date that carries 85%.",
+        "The full state (dataset, window, question, backlog or date, scope growth, seed) is encoded in the URL and restored on load.",
+        "Estimation game: the visitor guesses one completion date for each of 5 hidden backtest origins before each reveal; the visitor's dates and the Monte Carlo P85 dates are each scored as hits when the actual finished on or before them, and by absolute error in days against the P50, with both scores printed side by side.",
+        "Scenario compare: two configurations (window, scope growth, calendar) run side by side, with both distributions overlaid and the difference in P85 days printed.",
+        "Cut-line board: the visitor orders features by drag or by keyboard, each with an item-count range, every feature's P85 date updates within 300 ms, and the board exports as a URL and a CSV (reference: Focused Objective's Multiple Feature Cut Line Forecaster spreadsheet by Troy Magennis, which needs a spreadsheet application and manual entry)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no controls of any kind" } }
+    },
+    {
+      "id": "reference-datasets",
+      "name": "Reference throughput datasets",
+      "frame": "data",
+      "metric": "Provenance and volume of the bundled work-item data: datasets (count), items (count), source, license and retrieval date, which timestamp is the start, integrity checks and reproducibility; read the data files, the data cards, the build script and the page's source line.",
+      "ladder": [
+        "Absent: no sample data.",
+        "Invented items with no statement that they are invented.",
+        "A synthetic sample labeled synthetic on the page, with its generator and parameters stated.",
+        "One real public dataset: issues or pull requests from a named public GitHub repository, with its URL, license and retrieval date on the page and the start timestamp named (created_at, first assignment, or first commit); when the start is created_at, the page labels the measured duration lead time, not cycle time.",
+        "At least 3 real datasets, at least one per shape, each labeled with its shape and the numbers behind it: steady (coefficient of variation of weekly throughput below 0.5 and a least-squares weekly trend slope whose 95% interval contains zero), bursty (coefficient of variation above 1.0), trending (trend slope whose 95% interval excludes zero), each with its source line.",
+        "An integrity report at load for each dataset: item count, date range, items finishing before they start, duplicate ids and missing dates, each count printed.",
+        "A data card file per dataset in the repo: rows, date range, the extraction query, known distortions (for example issues closed as duplicates or by bots); and at least one bundled dataset carries at least 3 workflow-state timestamps per item from real status-change histories, for example the public Jira repositories dataset (Montgomery, Lueders and Maalej 2022, MSR).",
+        "A build script in the repo converts a committed raw API dump (with its query and retrieval date) into every shipped dataset, offline; when a rater reruns it, its output hash matches the shipped file; a second mode refetches from the public source up to the same cutoff date.",
+        "At least 10 datasets holding 10,000 items in total feed the backtest, with coverage and CRPS reported per dataset.",
+        "Dated snapshots: each data refresh is kept as a versioned file with its hash, and any past forecast can be rescored against the snapshot it was made from.",
+        "The backtest corpus exports as one CSV (dataset id, origin date, K, the forecast distribution as trial counts per completion date, actual completion date) with a data card, and a committed scoring script that reads only that CSV reproduces the page's per-dataset coverage and CRPS to 0.001, in the manner of the M4 competition data release (Makridakis, Spiliotis and Assimakopoulos 2018, International Journal of Forecasting)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no work-item or throughput data file in labs/ or labs/assets/" } }
+    },
+    {
+      "id": "csv-intake",
+      "name": "CSV intake, privacy and export",
+      "frame": "data",
+      "metric": "Which exports the parser accepts, what it reports, what leaves the browser and what it exports: accepted date formats and presets (count), rejected rows with reasons, network requests after paste (count), and whether an exported file loads back to the same forecast; test with the committed sample exports and the DevTools network tab.",
+      "ladder": [
+        "Absent: the visitor cannot load their own data.",
+        "A text field or an instruction to bring data exists, but nothing parses it.",
+        "Parses a two-column CSV of ISO 8601 start and finish dates.",
+        "Header-based mapping: the visitor picks the start and finish columns from the header row, and quoted fields containing commas parse per RFC 4180.",
+        "Date formats ISO 8601, DD/MM/YYYY and MM/DD/YYYY accepted, with a day-month ambiguity check that asks the visitor to confirm when no value in the column exceeds 12.",
+        "A per-row report lists rejected rows with row number and reason, and rows with a start and no finish are counted as WIP, not dropped.",
+        "Finish-only data accepted: throughput forecasts run, and the cycle time and WIP views are disabled with the reason printed.",
+        "Presets map the documented column names of at least 3 named exports (for example Jira CSV, GitHub issues, Linear); a committed sample export per preset loads with no manual mapping, and its parsed item count equals the file's data row count.",
+        "Pasted data never leaves the browser by default: with every row-sending feature off (the default), the DevTools network tab shows zero requests after paste and the page states that the data stays local; turning such a feature on (model column mapping) first shows the exact text to be sent and the route that will receive it, and sends nothing until the visitor confirms.",
+        "Forecasts, flow metrics and backtest results export as CSV with a header naming engine version, dataset hash, window, trial count and seed, with the item rows included; loading that file back reproduces identical P50, P85 and P95 with the same seed.",
+        "A public repository's closed issues import by owner and name through the GitHub REST API, paginated, with the remaining rate limit printed, with the start event selectable (created_at, or first assignment read from the issue events, with its extra request count shown before it runs), through the same validation report, with no account and no upload (reference: ActionableAgile Analytics, which requires an account and an upload)."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no parser or intake field for this lab in the repo" } }
+    },
+    {
+      "id": "forecaster-self-audit",
+      "name": "Forecaster self-audit",
+      "frame": "intelligence",
+      "metric": "What the forecaster flags and decides without being asked, and what the language model contributes against the deterministic engine: count of the behaviours below present; load the page with no input, load the committed regime-change and no-change fixtures, and read the audit code and the labs/assets/js/ai/llm.js calls.",
+      "ladder": [
+        "Absent: the page does nothing on its own.",
+        "Opens on a sample dataset with a forecast already computed, so it is not empty until clicked.",
+        "Small-sample warning: a window with fewer than 30 working days or fewer than 20 finished items is flagged on every forecast it feeds.",
+        "Regime-change detection on daily throughput (CUSUM, Page 1954, Biometrika, or PELT, Killick, Fearnhead and Eckley 2012, Journal of the American Statistical Association) proposes a window starting after the last change point, with its date; on a committed synthetic fixture whose mean daily throughput doubles on a stated date, the detected date falls within 10 working days of it, and on a committed fixture with no change it reports none.",
+        "Window audit: the page runs the Little's Law assumption checks (arrival against departure rate, WIP at end against start, WIP age at end against start, abandoned items) on the current window; when any fails, it names the figure it undermines (the Little's Law cycle time estimate or the forecast's sampling window) and proposes, with its start and end dates, the longest recent window in which every check passes.",
+        "Template verdicts from computed numbers (for example: 85% by 14 Mar; your committed 1 Mar has a 31% chance), with every number in the text matching a table cell.",
+        "Bulk-closure detection: any day on which finished items exceed 3 times the P95 of daily throughput (bulk closes, bot sweeps, migrations) is flagged by date and count, and the P85 date is printed with and without those days.",
+        "Withholds trust where it has failed: when the 85% target lies above the upper bound of the Wilson 95% interval on this dataset's backtest P85 coverage (the forecast is overconfident), the page reports the P95 date as the commitment or withholds the forecast, and prints the coverage, the interval and the reason.",
+        "Optional column mapping through labs/assets/js/ai/llm.js, off by default: after the visitor confirms the shown payload, one call sends only the header row and 3 sample rows; the proposed mapping is accepted only if at least 95% of rows then parse as dates and at least 95% have start on or before finish; the answering route is shown, and manual mapping is the fallback.",
+        "Optional narration in one batched llm.js call fed only engine numbers; a check rejects any narration containing a number, date or percentage absent from the engine output and falls back to the template verdict, and the page shows which of the two is displayed.",
+        "Question translator: a free-text question ('what if two people join in March?') becomes an editable diff of engine parameters proposed by the model, the engine answers it, questions the engine cannot answer are refused with the reason, and the page marks every number as engine output and the translation as the model's only contribution; checked on a committed set of at least 10 test questions, at least 3 of which the engine cannot answer, each producing its recorded parameter diff or refusal."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing runs, so nothing is flagged, decided or sent to a model" } }
+    },
+    {
+      "id": "odds-explanation",
+      "name": "Odds explanation",
+      "frame": "explanation",
+      "metric": "What a visitor can state after five minutes: count of mechanism steps explained with the page's own numbers, presence of real or illustrative tags, references and a limits section; read the page text and run the walkthrough.",
+      "ladder": [
+        "Absent: no explanation.",
+        "One paragraph says what the lab does.",
+        "States in words why a single date from average throughput lands near even odds, the flaw of averages (Savage 2009, The Flaw of Averages, Wiley).",
+        "One Monte Carlo trial shown step by step on the loaded data: the sampled days listed one by one until the backlog reaches zero.",
+        "What P85 means, stated with the page's own numbers (for example: in 8,500 of 10,000 trials the backlog was done by 14 Mar), and the average-rate date's own percentile in the trial distribution printed (for example: the average-rate date 3 Mar was met in 4,300 of 10,000 trials).",
+        "A guided walkthrough whose first four steps are data, throughput, one trial and distribution (plus backtest once it exists), working at 400 px width with no horizontal scroll.",
+        "Little's Law explained with the page's own WIP, throughput and cycle time, with the warning from Vacanti (2015) that it describes the past and is not a forecast.",
+        "Every sentence on the page that contains a number or a date carries a real tag (computed from the loaded data) or an illustrative tag, with zero untagged ones on a full scroll of the page.",
+        "A references section cites Little (1961), Efron (1979), Vacanti (2015), Wilson (1927), Matheson and Winkler (1976) and Gneiting, Balabdaoui and Raftery (2007) with their venues, and each reference is linked from the chart or control that runs its method, with that method's live parameter (trial count, block length, window, origin count) printed beside the link.",
+        "A limits section names what the forecast assumes (the future resembles the sampled window, items are of comparable size, team and calendar unchanged) and prints this dataset's measured backtest coverage gap.",
+        "Every symbol in Little's Law and every percentile label is linked: hovering or focusing it highlights its value and its mark in the live charts, to the explorable-explanation standard of Distill.pub articles."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; the only text is the one-line hub blurb in labs/assets/js/config/site.config.js line 147 ('Lightweight planning that gets out of the way.')" } }
+    },
+    {
+      "id": "simulation-budget",
+      "name": "Simulation budget",
+      "frame": "performance",
+      "metric": "Load time (s), forecast and backtest time (ms), phone width, reduced motion, keyboard and screen-reader reach; measured with DevTools, Lighthouse and the timings the page prints; desktop timings are taken in Chrome DevTools with 4x CPU throttling and Fast 4G network throttling, phone timings on the device named in the lab's committed test record.",
+      "ladder": [
+        "Absent: nothing loads.",
+        "The page loads; no timing is measured or shown.",
+        "First render with the sample data in under 2 s at 4x CPU throttling (DevTools performance trace).",
+        "A 10,000-trial forecast completes in under 200 ms at 4x CPU throttling, with the time shown on the page.",
+        "Simulation runs in a Web Worker or in chunks, with no main-thread task over 50 ms during a recompute.",
+        "Works at 400 px width with no horizontal scroll, and prefers-reduced-motion turns off all animation.",
+        "Every control is reachable and operable by keyboard with a visible focus ring.",
+        "Every chart has a data-table alternative reachable by a screen reader.",
+        "A full rolling backtest (at least 100 origins at 10,000 trials each) completes in under 5 s at 4x CPU throttling with a progress indicator.",
+        "Lighthouse mobile performance and accessibility scores both at least 90.",
+        "A 50,000-row CSV parses and forecasts at 100,000 trials in under 1 s on a mid-range phone named in the test record, with transitions held under 16 ms per frame."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; nothing to load or time" } }
+    },
+    {
+      "id": "engine-architecture",
+      "name": "Forecast engine architecture",
+      "frame": "architecture",
+      "metric": "Code shape: module boundaries, config separate from logic, tests, seeded reproducibility, and what can be added without touching the engine; read the file tree and the git log of the presets directory, and run the tests.",
+      "ladder": [
+        "Absent: no code.",
+        "One inline script in the page.",
+        "Logic in its own files under labs/assets/js/pm-platform/.",
+        "The engine (parse, flow metrics, simulate, backtest, score) is pure ES modules with no DOM access.",
+        "Config (trial count, percentiles, calendar, dataset list) lives in a config file separate from logic.",
+        "A node test checks the engine against hand-computed values: the Little's Law figures of a hand-built 10-item dataset, and a constant-throughput history (2 items every day) whose forecast date is exact.",
+        "Every forecaster implements one interface (fit(history), then forecast(backlog or date) returning a sample of outcomes), and every forecaster in the code (at least the linear projection and iid Monte Carlo) runs through the same backtest function with no forecaster-specific branch.",
+        "A seeded RNG (a named PRNG such as mulberry32): a node test asserts that the same seed gives identical P50, P85 and P95 on two runs and that a different seed changes the trial sample.",
+        "Import presets (the column maps of csv-intake rung 7) are plugins: each is one file in a presets directory loaded from a registry, and the git history shows the latest preset added in a commit that touches only its own file and the registry list.",
+        "Engine modules reach at least 80% line coverage under node --test with coverage enabled.",
+        "The engine ships as a standalone module with a documented API and a node CLI that reads a CSV and prints P50, P85 and P95 identical to the page for the same seed, documented in the lab's README."
+      ],
+      "levels": { "G0": { "level": 0, "evidence": "no page exists; no directory labs/assets/js/pm-platform/ and no engine module" } }
+    }
+  ],
+  "history": [ { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" } ]
+}
