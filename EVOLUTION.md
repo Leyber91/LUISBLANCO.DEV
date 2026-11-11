@@ -3,6 +3,17 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-11, Labs: Honesty Decoder computes its figures
+
+- No percentage is typed in any more. Each system's claim is split into sub-claims, and each sub-claim is checked
+  in the visitor's browser against the deployed lab: cited code lines fetched and hashed, labs loaded in a hidden
+  frame, the Black Hole shader's own integrator compared with the published shadow edge (2.583 against 2.598 r_s).
+- The Figure, typed in as 66% real in June, computes to 38%.
+- A pasted claim is split by rule; on a held-out set of claims the splitter scores precision 0.94, recall 0.82.
+- Independent grade: level 2 to 3. Weakest: pasted-claim decomposition, row truth, register language, method
+  explanation, reach.
+- Checks: 216 tests in labs/assets/js/honesty-decoder/tests.mjs, run by the site gate.
+
 ## 2026-11-11, What changed strip on the home page (roadmap item 3)
 
 - Item 1 ("Fix what the site checks found") had nothing to fix: node tools/site_check.mjs reports 19 pages and 0
