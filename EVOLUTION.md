@@ -14,6 +14,29 @@ merged. A run that changed nothing still writes its entry, with the reason.
   state their unit, the observation set, or the 24 h horizon).
 - Checks: 16 tests in labs/assets/js/ai-health/tests.mjs, run by the site gate.
 
+## 2026-11-11, Labs: Trending Topics measures what is rising
+
+- Six keyless sources (Hacker News, Show HN, GitHub, Wikipedia in English, German and Spanish) are scored as rates
+  against each item's own baseline, with exact 95% Poisson intervals and the formulas on the page.
+- Scans are stored in the browser and earlier "rising" calls are checked on later scans.
+- The page reports its own backtest: over 42, 23 and 30 days of Wikipedia data, ranking by rise beats a naive
+  day-over-day ranking by about 3 points and loses to plain size on next-day views by 7 to 13 points.
+- Independent grade: level 2 to 3. Weakest: rising-call verification, design language.
+- Checks: 82 assertions in labs/assets/js/trending/tests.mjs, run by the site gate.
+
+## 2026-11-11, Labs: DATASPACE rebuilt as a rate-distortion instrument
+
+- A conversation is compressed by a model at five strengths and rebuilt from the capsule alone; the page plots a
+  rate-distortion curve and scores what survived on numbers, dates, names and turns as well as letters.
+- A lossless floor is measured live in the browser by three compressors (DEFLATE, Brotli, PPM order 4). On the
+  Canterbury Corpus file alice29.txt the page is within 0.56% of gzip -6.
+- 159 recorded runs from three local models (llama3.1:8b, qwen3:8b, granite4.1:3b) ship with their prompts, seeds
+  and raw replies. On the default sample a plain head-cut baseline beats all three models on letter-level fidelity
+  at levels 1 to 4; the page shows that as measured.
+- Independent grade on the lab's own ladder (a rater who did not build it, two skeptics): level 2 to 3. Weakest:
+  readout views, legibility over the horizon, compression literacy.
+- Checks: 699 engine checks in labs/assets/js/dataspace/tests.mjs, run by the site gate.
+
 ## 2026-11-11, Labs: Honesty Decoder computes its figures
 
 - No percentage is typed in any more. Each system's claim is split into sub-claims, and each sub-claim is checked
