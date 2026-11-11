@@ -10,8 +10,10 @@
    Commands (Node 18+, Windows-first, no dependencies):
      status                   every lab worktree: branch, ahead/behind, dirty files, last commit
      add <name...> [--base B] create worktrees (default base: labs/foundation, else main)
-     serve <name>             start http.server for the worktree on its port (detached)
-     shoot <name> [page]      desktop 1440 and phone 390 screenshots + console errors
+     serve <name>             start http.server for the worktree on its port, left running (stop it with stop)
+     stop <name|all>          stop the http.server listening on a lab's port, or on every lab port
+     shoot <name> [page]      desktop 1440 and phone 390 screenshots + console errors; a server it
+                              had to start is stopped when it finishes
      gates <name>             privacy selftest, site_check, levels check, in the worktree
      sync <name> [--from B]   merge B (default main) into the lab branch
      ship <name>              push, open a pull request to main, wait for the gates, squash-merge
@@ -148,9 +150,39 @@ async function portOpen(port) {
   catch { return false; }
 }
 
+/* A server that lives only as long as this command: attached, and stopped in a finally. */
+function startTempServer(lab) {
+  const p = wtPath(lab);
+  if (!fs.existsSync(p)) die(`no worktree for ${lab.name}; run add first`);
+  return spawn('python', ['-m', 'http.server', String(lab.port), '--bind', '127.0.0.1'], {
+    cwd: p, detached: false, stdio: 'ignore', windowsHide: true,
+  });
+}
+function stopPid(pid) {
+  if (!pid) return;
+  if (process.platform === 'win32') run('taskkill', ['/PID', String(pid), '/T', '/F']);
+  else { try { process.kill(pid); } catch { /* already gone */ } }
+}
+async function waitPort(port, ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) { if (await portOpen(port)) return true; await new Promise((r) => setTimeout(r, 200)); }
+  return false;
+}
+
 async function cmdShoot(n, pageArg) {
   const lab = byName(n);
-  if (!(await portOpen(lab.port))) { cmdServe(n); await new Promise((r) => setTimeout(r, 1200)); }
+  let temp = null;
+  if (!(await portOpen(lab.port))) {
+    temp = startTempServer(lab);
+    if (!(await waitPort(lab.port, 8000))) { stopPid(temp.pid); die(`server on ${lab.port} did not come up`); }
+  }
+  try { await shootWith(lab, pageArg); }
+  finally {
+    if (temp) { stopPid(temp.pid); console.log(`stopped the server this shot started on port ${lab.port}`); }
+  }
+}
+
+async function shootWith(lab, pageArg) {
   const page = pageArg || lab.page;
   const url = `http://127.0.0.1:${lab.port}/labs/${page}`;
   const dir = `${SHOTS}/${lab.name}`;
@@ -187,6 +219,18 @@ async function cmdShoot(n, pageArg) {
   console.log(`console: ${lines.length} messages, ${bad.length} errors`);
   for (const l of bad.slice(0, 12)) console.log('  ' + l.slice(0, 220));
   if (bad.length) process.exitCode = 1;
+}
+
+/* Stop the python http.server listening on a lab's port (or every lab port). Nothing else is touched. */
+function cmdStop(n) {
+  const labs = n === 'all' ? LABS : [byName(n)];
+  const ports = labs.map((l) => l.port).join(',');
+  const ps = `$ports=@(${ports}); foreach($p in $ports){ $c=Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue;` +
+    ` foreach($x in $c){ $pr=Get-CimInstance Win32_Process -Filter ("ProcessId=" + $x.OwningProcess);` +
+    ` if($pr -and $pr.CommandLine -match 'http\\.server'){ Stop-Process -Id $x.OwningProcess -Force; Write-Output ("stopped " + $p + " pid " + $x.OwningProcess) }` +
+    ` elseif($pr){ Write-Output ("left " + $p + ": not an http.server (" + $pr.Name + ")") } } }`;
+  const r = run('powershell', ['-NoProfile', '-Command', ps]);
+  console.log(r.out || `no http.server listening on ${n === 'all' ? 'any lab port' : 'port ' + labs[0].port}`);
 }
 
 function cmdGates(n) {
@@ -264,8 +308,11 @@ function regenerate(p, lab, msg) {
     const w = run('node', ['tools/levels.mjs', 'write'], { cwd: p });
     if (w.ok && git(['status', '--porcelain', '--', ...GENERATED], p).out) {
       git(['add', '--', ...GENERATED], p);
-      git(['commit', '-m', 'levels: regenerate table and hub data'], p);
-      msg += '; regenerated the level table';
+      // Line-ending normalisation can make status report a change that add then erases.
+      if (!git(['diff', '--cached', '--quiet', '--', ...GENERATED], p).ok) {
+        git(['commit', '-m', 'levels: regenerate table and hub data'], p);
+        msg += '; regenerated the level table';
+      }
     }
   }
   console.log(msg);
@@ -332,13 +379,14 @@ if (isMain) {
     case 'status': cmdStatus(); break;
     case 'add': if (!rest.length) die('add needs lab names'); cmdAdd(rest, base); break;
     case 'serve': cmdServe(need()); break;
+    case 'stop': cmdStop(need()); break;
     case 'shoot': await cmdShoot(need(), rest[1]); break;
     case 'gates': cmdGates(need()); break;
     case 'sync': cmdSync(need(), from || 'main'); break;
     case 'ship': await cmdShip(need()); break;
     case 'remove': cmdRemove(need()); break;
     default:
-      console.log('commands: status | add <name...> [--base B] | serve <name> | shoot <name> [page] | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
+      console.log('commands: status | add <name...> [--base B] | serve <name> | stop <name|all> | shoot <name> [page] | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
       process.exitCode = cmd ? 2 : 0;
   }
 }
