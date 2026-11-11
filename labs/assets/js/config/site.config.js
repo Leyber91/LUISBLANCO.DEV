@@ -108,7 +108,7 @@ export const CATEGORIES = [
         blurb: 'A model does not emit tokens evenly. Token EKG timestamps each one as it streams and draws that hidden cadence as a live biosignal with a spectral read — real telemetry of the serving pipeline, not a brain.' },
       { id: 'dataspace', title: 'DATASPACE', status: 'built',
         href: 'dataspace.html',
-        blurb: 'Compress a whole conversation into a capsule only a model can rebuild: it falls to a lensed horizon as measured bits, a fresh model reconstitutes it, and every lost word escapes as radiation. Degradation, measured.' },
+        blurb: 'A rate-distortion instrument for conversations. A model squeezes your text into a capsule, a fresh call rebuilds it from the capsule alone, and the page measures what came back in bits, numbers, names and turns, across five strengths, against DEFLATE, Brotli and a context model.' },
       { id: 'sports-predict', title: 'Predictive Analytics', status: 'planned',
         blurb: 'Model match outcomes from open sports data — and show the uncertainty honestly.' },
       { id: 'ai-health', title: 'AI in Healthcare', status: 'planned',

@@ -1,0 +1,3204 @@
+{
+ "schema": "dataspace.run/1",
+ "preset": "replica",
+ "calls": {
+  "c.replica.llama3.1-8b.r1.s1": {
+   "id": "c.replica.llama3.1-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User: Postgres 16 replica lags 40s. Assistant: Check nightly VACUUM FULL on events table. User: replay_lag 41s, write_lag <1s. Assistant: Replace with pg_repack. User: Ana says events has primary key, pg_repack works.\",\n  \"L2\": \"Postgres 16 replica lags 40s. Check nightly VACUUM FULL. replay_lag 41s, write_lag <1s. Replace with pg_repack.\",\n  \"L3\": \"Postgres 16 replica lags 40s. VACUUM FULL, then pg_repack. replag 41s, write_lag <1s.\",\n  \"L4\": \"VACUUM FULL slows replica. Replace with pg_repack.\",\n  \"L5\": \"Replace VACUUM FULL with pg_repack.\"\n}",
+   "thinking": "",
+   "promptTokens": 505,
+   "completionTokens": 196,
+   "ollamaMs": 3427,
+   "ms": 3431,
+   "at": "2026-11-11T10:15:26.461Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r1.L1": {
+   "id": "b.replica.llama3.1-8b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: Postgres 16 replica lags 40s. Assistant: Check nightly VACUUM FULL on events table. User: replay_lag 41s, write_lag <1s. Assistant: Replace with pg_repack. User: Ana says events has primary key, pg_repack works."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica lags 40s.\nASSISTANT: Check nightly VACUUM FULL on events table.\nUSER: replay_lag 41s, write_lag <1s.\nASSISTANT: Replace with pg_repack.\nUSER: Ana says events has primary key, pg_repack works.",
+   "thinking": "",
+   "promptTokens": 128,
+   "completionTokens": 69,
+   "ollamaMs": 3783,
+   "ms": 3785,
+   "at": "2026-11-11T10:15:29.894Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r1.L2": {
+   "id": "b.replica.llama3.1-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres 16 replica lags 40s. Check nightly VACUUM FULL. replay_lag 41s, write_lag <1s. Replace with pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica lags 40s. Check nightly VACUUM FULL. replay_lag 41s, write_lag <1s. Replace with pg_repack.\n\nASSISTANT: Why do you think the replica lag is caused by nightly VACUUM FULL, and what's the current process for maintaining the replica?",
+   "thinking": "",
+   "promptTokens": 103,
+   "completionTokens": 74,
+   "ollamaMs": 1472,
+   "ms": 1474,
+   "at": "2026-11-11T10:15:33.681Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r1.L3": {
+   "id": "b.replica.llama3.1-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres 16 replica lags 40s. VACUUM FULL, then pg_repack. replag 41s, write_lag <1s."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica lags 40s.\n\nASSISTANT: VACUUM FULL, then pg_repack.\n\nUSER: replag 41s, write_lag <1s.\n\nASSISTANT: That's a significant improvement! What was the initial VACUUM FULL and pg_repack process like? Did you encounter any issues?",
+   "thinking": "",
+   "promptTokens": 99,
+   "completionTokens": 76,
+   "ollamaMs": 1862,
+   "ms": 1864,
+   "at": "2026-11-11T10:15:35.157Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r1.L4": {
+   "id": "b.replica.llama3.1-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nVACUUM FULL slows replica. Replace with pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: VACUUM FULL slows replica. Replace with pg_repack.\n\nASSISTANT: Why are you looking to replace VACUUM FULL with pg_repack?",
+   "thinking": "",
+   "promptTokens": 78,
+   "completionTokens": 37,
+   "ollamaMs": 631,
+   "ms": 633,
+   "at": "2026-11-11T10:15:37.023Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r1.L5": {
+   "id": "b.replica.llama3.1-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplace VACUUM FULL with pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I want to optimize my PostgreSQL database's performance. I've been seeing some issues with VACUUM FULL lately. What's a better alternative?\n\nASSISTANT: Have you considered using pg_repack instead of VACUUM FULL? It can help improve performance and reduce downtime.",
+   "thinking": "",
+   "promptTokens": 75,
+   "completionTokens": 61,
+   "ollamaMs": 974,
+   "ms": 976,
+   "at": "2026-11-11T10:15:37.658Z",
+   "error": null
+  },
+  "c.replica.llama3.1-8b.r2.s2": {
+   "id": "c.replica.llama3.1-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Postgres replica in Frankfurt lags 40s behind primary. Check nightly job, pg_stat_replication, and WAL replay. Consider replacing VACUUM FULL with pg_repack.\",\n  \"L2\": \"Replica lags 40s, nightly job at 02:15. pg_stat_replication: replay_lag 41s, write_lag < 1s. Consider pg_repack.\",\n  \"L3\": \"Replica lags 40s, nightly job at 02:15. pg_stat_replication: replay_lag 41s, write_lag < 1s. pg_repack.\",\n  \"L4\": \"Replica lags 40s. Check pg_stat_replication, pg_repack.\",\n  \"L5\": \"Replica lags 40s.\"\n}",
+   "thinking": "",
+   "promptTokens": 505,
+   "completionTokens": 178,
+   "ollamaMs": 2857,
+   "ms": 2858,
+   "at": "2026-11-11T10:15:38.636Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r2.L1": {
+   "id": "b.replica.llama3.1-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica in Frankfurt lags 40s behind primary. Check nightly job, pg_stat_replication, and WAL replay. Consider replacing VACUUM FULL with pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica in Frankfurt lags 40s behind primary.\n\nASSISTANT: What is the current status of the nightly job that runs on the replica?",
+   "thinking": "",
+   "promptTokens": 102,
+   "completionTokens": 35,
+   "ollamaMs": 1189,
+   "ms": 1191,
+   "at": "2026-11-11T10:15:41.496Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r2.L2": {
+   "id": "b.replica.llama3.1-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags 40s, nightly job at 02:15. pg_stat_replication: replay_lag 41s, write_lag < 1s. Consider pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Replica lags 40s, nightly job at 02:15.\n\nASSISTANT: pg_stat_replication: replay_lag 41s, write_lag < 1s.\n\nUSER: Consider pg_repack.\n\nASSISTANT: Is the replica lag due to physical or logical replication?",
+   "thinking": "",
+   "promptTokens": 105,
+   "completionTokens": 64,
+   "ollamaMs": 1143,
+   "ms": 1146,
+   "at": "2026-11-11T10:15:42.689Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r2.L3": {
+   "id": "b.replica.llama3.1-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags 40s, nightly job at 02:15. pg_stat_replication: replay_lag 41s, write_lag < 1s. pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'm seeing a replication lag of 40 seconds in the 40s, and my nightly job is scheduled to run at 02:15. \n\nASSISTANT: The pg_stat_replication is showing a replay lag of 41 seconds and a write lag of less than 1 second. \n\nUSER: I've noticed that pg_repack is running in the background. Could that be contributing to the replication lag? \n\nASSISTANT: Yes, it's possible that pg_repack is causing the lag. Have you considered running it at a less busy time, like during the night when traffic is lower?",
+   "thinking": "",
+   "promptTokens": 104,
+   "completionTokens": 127,
+   "ollamaMs": 2141,
+   "ms": 2144,
+   "at": "2026-11-11T10:15:43.837Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r2.L4": {
+   "id": "b.replica.llama3.1-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags 40s. Check pg_stat_replication, pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Replica lags 40s. Check pg_stat_replication, pg_repack.\n\nASSISTANT: Replica lags 40s. Check pg_stat_replication, pg_repack.",
+   "thinking": "",
+   "promptTokens": 82,
+   "completionTokens": 41,
+   "ollamaMs": 1003,
+   "ms": 1020,
+   "at": "2026-11-11T10:15:45.985Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r2.L5": {
+   "id": "b.replica.llama3.1-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags 40s."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Replica lags 40s.\n\nASSISTANT: What seems to be the issue?",
+   "thinking": "",
+   "promptTokens": 72,
+   "completionTokens": 21,
+   "ollamaMs": 1343,
+   "ms": 1349,
+   "at": "2026-11-11T10:15:47.007Z",
+   "error": null
+  },
+  "c.replica.llama3.1-8b.r3.s3": {
+   "id": "c.replica.llama3.1-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Postgres replica lags 40s at 02:15. Check nightly job: VACUUM FULL on events table. If replay_lag climbs, replica applies WAL too slowly. Consider replacing with pg_repack.\",\n  \"L2\": \"Postgres replica lags 40s at 02:15. VACUUM FULL rewrites 30 GB, causing replay lag. pg_repack in smaller batches or move job to 04:00 to reduce traffic.\",\n  \"L3\": \"Postgres replica lags at 02:15. Check VACUUM FULL on events table.\",\n  \"L4\": \"Postgres replica lags at 02:15. VACUUM FULL\",\n  \"L5\": \"Postgres replica lags at 02:15\" \n}",
+   "thinking": "",
+   "promptTokens": 505,
+   "completionTokens": 176,
+   "ollamaMs": 4150,
+   "ms": 4153,
+   "at": "2026-11-11T10:15:48.358Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r3.L1": {
+   "id": "b.replica.llama3.1-8b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags 40s at 02:15. Check nightly job: VACUUM FULL on events table. If replay_lag climbs, replica applies WAL too slowly. Consider replacing with pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40s at 02:15.\n\nASSISTANT: Check nightly job: VACUUM FULL on events table.\n\nUSER: Is the VACUUM FULL causing the lag?\n\nASSISTANT: If replay_lag climbs, replica applies WAL too slowly. Consider replacing with pg_repack.",
+   "thinking": "",
+   "promptTokens": 110,
+   "completionTokens": 70,
+   "ollamaMs": 6735,
+   "ms": 6747,
+   "at": "2026-11-11T10:15:52.513Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r3.L2": {
+   "id": "b.replica.llama3.1-8b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags 40s at 02:15. VACUUM FULL rewrites 30 GB, causing replay lag. pg_repack in smaller batches or move job to 04:00 to reduce traffic."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40s at 02:15.\n\nASSISTANT: VACUUM FULL rewrites 30 GB, causing replay lag.\n\nUSER: pg_repack in smaller batches or move job to 04:00 to reduce traffic.",
+   "thinking": "",
+   "promptTokens": 111,
+   "completionTokens": 56,
+   "ollamaMs": 10353,
+   "ms": 10361,
+   "at": "2026-11-11T10:15:59.261Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r3.L3": {
+   "id": "b.replica.llama3.1-8b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags at 02:15. Check VACUUM FULL on events table."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags at 02:15. Check VACUUM FULL on events table.\n\nASSISTANT: I've checked the VACUUM FULL status on the events table, and it looks like the last run was at 00:00 this morning. The replica lag is still 15 minutes behind. What's the next step to resolve this issue?",
+   "thinking": "",
+   "promptTokens": 85,
+   "completionTokens": 79,
+   "ollamaMs": 6571,
+   "ms": 6575,
+   "at": "2026-11-11T10:16:09.625Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r3.L4": {
+   "id": "b.replica.llama3.1-8b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags at 02:15. VACUUM FULL"
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags at 02:15. VACUUM FULL\n\nASSISTANT: What's the current lag and how long has it been lagging like this?",
+   "thinking": "",
+   "promptTokens": 80,
+   "completionTokens": 40,
+   "ollamaMs": 2169,
+   "ms": 2405,
+   "at": "2026-11-11T10:16:16.201Z",
+   "error": null
+  },
+  "b.replica.llama3.1-8b.r3.L5": {
+   "id": "b.replica.llama3.1-8b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags at 02:15"
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags at 02:15\n\nASSISTANT: Can you please check the replication settings and the network connectivity between the master and replica servers?",
+   "thinking": "",
+   "promptTokens": 74,
+   "completionTokens": 36,
+   "ollamaMs": 18190,
+   "ms": 18193,
+   "at": "2026-11-11T10:16:18.607Z",
+   "error": null
+  },
+  "c.replica.qwen3-8b.r1.s1": {
+   "id": "c.replica.qwen3-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"USER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15. ASSISTANT suggests checking nightly job, VACUUM FULL on events table, and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT says replay is bottleneck, suggest pg_repack or move job. USER mentions events has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order.\",\n  \"L2\": \"USER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT suggests checking VACUUM FULL and pg_stat_replication. USER notes replay_lag 41 s, write_lag <1 s. ASSISTANT says replay is bottleneck, suggest pg_repack. USER mentions events has primary key. ASSISTANT confirms pg_repack works.\",\n  \"L3\": \"USER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT suggests VACUUM FULL and pg_stat_replication. USER notes replay_lag 41 s. ASSISTANT says replay is bottleneck, suggest pg_repack. USER mentions events has primary key.\",\n  \"L4\": \"USER reports Postgres replica lags 40 s nightly. ASSISTANT suggests VAC and pg_stat. USER notes replay_lag 41 s. ASSISTANT says replay is bottleneck, suggest pg_repack.\",\n  \"L5\": \"USER reports Postgres replica lags 40 s. ASSISTANT suggests VAC and pg_stat.\"\n}",
+   "thinking": "",
+   "promptTokens": 528,
+   "completionTokens": 364,
+   "ollamaMs": 10649,
+   "ms": 10651,
+   "at": "2026-11-11T10:44:45.688Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r1.L1": {
+   "id": "b.replica.qwen3-8b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15. ASSISTANT suggests checking nightly job, VACUUM FULL on events table, and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT says replay is bottleneck, suggest pg_repack or move job. USER mentions events has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15.  \nASSISTANT: Check the nightly job, run VACUUM FULL on the events table, and check pg_stat_replication.  \nUSER: Replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs.  \nASSISTANT: Replay is the bottleneck. Consider pg_repack or moving the job.  \nUSER: Events has a primary key.  \nASSISTANT: pg_repack works in that case. Suggest running it with --no-order.",
+   "thinking": "",
+   "promptTokens": 186,
+   "completionTokens": 134,
+   "ollamaMs": 2387,
+   "ms": 2390,
+   "at": "2026-11-11T10:44:56.341Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r1.L2": {
+   "id": "b.replica.qwen3-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT suggests checking VACUUM FULL and pg_stat_replication. USER notes replay_lag 41 s, write_lag <1 s. ASSISTANT says replay is bottleneck, suggest pg_repack. USER mentions events has primary key. ASSISTANT confirms pg_repack works."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: reports Postgres replica lags 40 s nightly at 02:15.  \nASSISTANT: suggests checking VACUUM FULL and pg_stat_replication.  \nUSER: notes replay_lag 41 s, write_lag <1 s.  \nASSISTANT: says replay is bottleneck, suggest pg_repack.  \nUSER: mentions events has primary key.  \nASSISTANT: confirms pg_repack works.",
+   "thinking": "",
+   "promptTokens": 152,
+   "completionTokens": 94,
+   "ollamaMs": 1598,
+   "ms": 1600,
+   "at": "2026-11-11T10:44:58.732Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r1.L3": {
+   "id": "b.replica.qwen3-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT suggests VACUUM FULL and pg_stat_replication. USER notes replay_lag 41 s. ASSISTANT says replay is bottleneck, suggest pg_repack. USER mentions events has primary key."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Reports Postgres replica lags 40 s nightly at 02:15.  \nASSISTANT: Suggests VACUUM FULL and pg_stat_replication.  \nUSER: Notes replay_lag 41 s.  \nASSISTANT: Says replay is bottleneck, suggest pg_repack.  \nUSER: Mentions events has primary key.",
+   "thinking": "",
+   "promptTokens": 135,
+   "completionTokens": 78,
+   "ollamaMs": 1353,
+   "ms": 1355,
+   "at": "2026-11-11T10:45:00.332Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r1.L4": {
+   "id": "b.replica.qwen3-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly. ASSISTANT suggests VAC and pg_stat. USER notes replay_lag 41 s. ASSISTANT says replay is bottleneck, suggest pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Suggest running VAC and checking pg_stat.  \nUSER: Notes replay_lag 41 s.  \nASSISTANT: Replay is the bottleneck, suggest pg_repack.",
+   "thinking": "",
+   "promptTokens": 116,
+   "completionTokens": 56,
+   "ollamaMs": 968,
+   "ms": 969,
+   "at": "2026-11-11T10:45:01.688Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r1.L5": {
+   "id": "b.replica.qwen3-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s. ASSISTANT suggests VAC and pg_stat."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40 s.  \nASSISTANT: Try VAC and check pg_stat.",
+   "thinking": "",
+   "promptTokens": 92,
+   "completionTokens": 26,
+   "ollamaMs": 495,
+   "ms": 497,
+   "at": "2026-11-11T10:45:02.658Z",
+   "error": null
+  },
+  "c.replica.qwen3-8b.r2.s2": {
+   "id": "c.replica.qwen3-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"USER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary at 02:15 nightly. ASSISTANT suggests checking VACUUM FULL on events table. USER says replay_lag hits 41s, write_lag under 1s. ASSISTANT says replay is bottleneck. USER mentions Ana says pg_repack needs primary key. ASSISTANT confirms it exists and suggests running pg_repack with --no-order.\",\n  \"L2\": \"USER reports replica lags 40s at 02:15. ASSISTANT suggests checking VACUUM FULL. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs primary key. ASSISTANT confirms it exists and suggests running pg_repack with --no-order.\",\n  \"L3\": \"USER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs PK. ASSISTANT confirms it exists and suggests running pg_repack with --no-order.\",\n  \"L4\": \"USER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs PK. ASSISTANT confirms it exists.\",\n  \"L5\": \"USER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck.\"\n}",
+   "thinking": "",
+   "promptTokens": 528,
+   "completionTokens": 356,
+   "ollamaMs": 5975,
+   "ms": 5978,
+   "at": "2026-11-11T10:45:03.156Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r2.L1": {
+   "id": "b.replica.qwen3-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary at 02:15 nightly. ASSISTANT suggests checking VACUUM FULL on events table. USER says replay_lag hits 41s, write_lag under 1s. ASSISTANT says replay is bottleneck. USER mentions Ana says pg_repack needs primary key. ASSISTANT confirms it exists and suggests running pg_repack with --no-order."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica in Frankfurt lags 40 seconds behind primary at 02:15 nightly.  \nASSISTANT: Check VACUUM FULL on events table.  \nUSER: replay_lag hits 41s, write_lag under 1s.  \nASSISTANT: Replay is bottleneck.  \nUSER: Ana says pg_repack needs primary key.  \nASSISTANT: Primary key exists. Run pg_repack with --no-order.",
+   "thinking": "",
+   "promptTokens": 166,
+   "completionTokens": 102,
+   "ollamaMs": 2065,
+   "ms": 2070,
+   "at": "2026-11-11T10:45:09.137Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r2.L2": {
+   "id": "b.replica.qwen3-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports replica lags 40s at 02:15. ASSISTANT suggests checking VACUUM FULL. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs primary key. ASSISTANT confirms it exists and suggests running pg_repack with --no-order."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: reports replica lags 40s at 02:15.  \nASSISTANT: suggests checking VACUUM FULL.  \nUSER: replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.  \nUSER: mentions pg_repack needs primary key.  \nASSISTANT: confirms it exists and suggests running pg_repack with --no-order.",
+   "thinking": "",
+   "promptTokens": 143,
+   "completionTokens": 84,
+   "ollamaMs": 1654,
+   "ms": 1657,
+   "at": "2026-11-11T10:45:11.209Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r2.L3": {
+   "id": "b.replica.qwen3-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs PK. ASSISTANT confirms it exists and suggests running pg_repack with --no-order."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: reports replica lags 40s nightly.  \nASSISTANT: suggests checking VAC.  \nUSER: says replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.  \nUSER: mentions pg_repack needs PK.  \nASSISTANT: confirms it exists and suggests running pg_repack with --no-order.",
+   "thinking": "",
+   "promptTokens": 133,
+   "completionTokens": 75,
+   "ollamaMs": 1387,
+   "ms": 1390,
+   "at": "2026-11-11T10:45:12.871Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r2.L4": {
+   "id": "b.replica.qwen3-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs PK. ASSISTANT confirms it exists."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: reports replica lags 40s nightly.  \nASSISTANT: suggests checking VAC.  \nUSER: says replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.  \nUSER: mentions pg_repack needs PK.  \nASSISTANT: confirms it exists.",
+   "thinking": "",
+   "promptTokens": 123,
+   "completionTokens": 65,
+   "ollamaMs": 1285,
+   "ms": 1286,
+   "at": "2026-11-11T10:45:14.263Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r2.L5": {
+   "id": "b.replica.qwen3-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: reports replica lags 40s nightly.  \nASSISTANT: suggests checking VAC.  \nUSER: says replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.",
+   "thinking": "",
+   "promptTokens": 108,
+   "completionTokens": 46,
+   "ollamaMs": 852,
+   "ms": 854,
+   "at": "2026-11-11T10:45:15.551Z",
+   "error": null
+  },
+  "c.replica.qwen3-8b.r3.s3": {
+   "id": "c.replica.qwen3-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"USER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15. ASSISTANT suggests checking nightly job, VACUUM FULL on events table, and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT says replay is bottleneck, suggest pg_repack or move job to 04:00. USER mentions events table has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order and monitor replay_lag.\",\n  \"L2\": \"USER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT suggests pg_repack or move job. USER mentions events table has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order.\",\n  \"L3\": \"USER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s. ASSISTANT suggests pg_repack or move job. USER mentions events table has primary key. ASSISTANT confirms pg_repack works.\",\n  \"L4\": \"USER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s. ASSISTANT suggests pg_repack. USER mentions events table has primary key. ASSISTANT confirms pg_repack works.\",\n  \"L5\": \"USER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL. USER notes replay_lag hits 41 s. ASSISTANT suggests pg_repack. USER mentions events table has primary key. ASSISTANT confirms pg_repack works.\"\n}",
+   "thinking": "",
+   "promptTokens": 528,
+   "completionTokens": 457,
+   "ollamaMs": 7624,
+   "ms": 7627,
+   "at": "2026-11-11T10:45:16.406Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r3.L1": {
+   "id": "b.replica.qwen3-8b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15. ASSISTANT suggests checking nightly job, VACUUM FULL on events table, and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT says replay is bottleneck, suggest pg_repack or move job to 04:00. USER mentions events table has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order and monitor replay_lag."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15.  \nASSISTANT: Check the nightly job, run VACUUM FULL on the events table, and check pg_stat_replication.  \nUSER: Replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs.  \nASSISTANT: Replay is the bottleneck. Consider pg_repack or move the job to 04:00.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works. Run it with --no-order and monitor replay_lag.",
+   "thinking": "",
+   "promptTokens": 199,
+   "completionTokens": 142,
+   "ollamaMs": 2991,
+   "ms": 2997,
+   "at": "2026-11-11T10:45:24.036Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r3.L2": {
+   "id": "b.replica.qwen3-8b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT suggests pg_repack or move job. USER mentions events table has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: reports Postgres replica lags 40 s nightly at 02:15.  \nASSISTANT: checks VACUUM FULL and pg_stat_replication.  \nUSER: notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs.  \nASSISTANT: suggests pg_repack or move job.  \nUSER: mentions events table has primary key.  \nASSISTANT: confirms pg_repack works, suggest run with --no-order.",
+   "thinking": "",
+   "promptTokens": 167,
+   "completionTokens": 109,
+   "ollamaMs": 2479,
+   "ms": 2483,
+   "at": "2026-11-11T10:45:27.036Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r3.L3": {
+   "id": "b.replica.qwen3-8b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s. ASSISTANT suggests pg_repack or move job. USER mentions events table has primary key. ASSISTANT confirms pg_repack works."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Check VACUUM FULL and pg_stat_replication.  \nUSER: Replay_lag hits 41 s, write_lag under 1 s.  \nASSISTANT: Suggest pg_repack or move job.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works.",
+   "thinking": "",
+   "promptTokens": 145,
+   "completionTokens": 85,
+   "ollamaMs": 1907,
+   "ms": 1909,
+   "at": "2026-11-11T10:45:29.522Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r3.L4": {
+   "id": "b.replica.qwen3-8b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s. ASSISTANT suggests pg_repack. USER mentions events table has primary key. ASSISTANT confirms pg_repack works."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Check VACUUM FULL and pg_stat_replication.  \nUSER: Replay_lag hits 41 s.  \nASSISTANT: Suggest pg_repack.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works.",
+   "thinking": "",
+   "promptTokens": 134,
+   "completionTokens": 74,
+   "ollamaMs": 1428,
+   "ms": 1431,
+   "at": "2026-11-11T10:45:31.435Z",
+   "error": null
+  },
+  "b.replica.qwen3-8b.r3.L5": {
+   "id": "b.replica.qwen3-8b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUSER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL. USER notes replay_lag hits 41 s. ASSISTANT suggests pg_repack. USER mentions events table has primary key. ASSISTANT confirms pg_repack works."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Check VACUUM FULL.  \nUSER: Replay_lag hits 41 s.  \nASSISTANT: Suggest pg_repack.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works.",
+   "thinking": "",
+   "promptTokens": 129,
+   "completionTokens": 69,
+   "ollamaMs": 1926,
+   "ms": 1929,
+   "at": "2026-11-11T10:45:32.868Z",
+   "error": null
+  },
+  "c.replica.granite4.1-3b.r1.s1": {
+   "id": "c.replica.granite4.1-3b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User reports Postgres 16 replica in Frankfurt lags 40 seconds nightly at 02:15 due to VACUUM FULL on events table rewriting 30 GB. Assistant suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL too slowly. Recommends replacing VACUUM FULL with pg_repack or moving job to 04:00. Ana confirms events table has primary key on event_id, allowing pg_repack to work.\", \"L2\": \"Postgres replica lags nightly at 02:15. Assistant checks pg_stat_replication; high replay_lag indicates bottleneck. Suggests using pg_repack instead of VACUUM FULL or shifting job. Ana confirms table has primary key.\", \"L3\": \"Replica lags nightly at 02:15. Check pg_stat_replication. High replay_lag shows bottleneck. Replace VACUUM FULL with pg_repack or move job. Ana confirms table has primary key.\", \"L4\": \"Replica lags nightly. Check pg_stat_replication. High replay_lag indicates issue. Use pg_repack or shift job. Ana confirms key exists.\", \"L5\": \"Replica lags nightly. Check pg_stat_replication. High replay_lag shows problem. Use pg_repack or move job. Key exists.\"}",
+   "thinking": "",
+   "promptTokens": 503,
+   "completionTokens": 285,
+   "ollamaMs": 6837,
+   "ms": 6841,
+   "at": "2026-11-11T11:00:46.096Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r1.L1": {
+   "id": "b.replica.granite4.1-3b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser reports Postgres 16 replica in Frankfurt lags 40 seconds nightly at 02:15 due to VACUUM FULL on events table rewriting 30 GB. Assistant suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL too slowly. Recommends replacing VACUUM FULL with pg_repack or moving job to 04:00. Ana confirms events table has primary key on event_id, allowing pg_repack to work."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Reports that Postgres 16 replica in Frankfurt lags 40 seconds nightly at 02:15 due to VACUUM FULL on events table rewriting 30 GB.\n\nASSISTANT: Suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL too slowly.\n\nUSER: Recommends replacing VACUUM FULL with pg_repack or moving the job to 04:00.\n\nASSISTANT: Ana confirms events table has primary key on event_id, allowing pg_repack to work.",
+   "thinking": "",
+   "promptTokens": 162,
+   "completionTokens": 115,
+   "ollamaMs": 4629,
+   "ms": 4637,
+   "at": "2026-11-11T11:00:52.940Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r1.L2": {
+   "id": "b.replica.granite4.1-3b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags nightly at 02:15. Assistant checks pg_stat_replication; high replay_lag indicates bottleneck. Suggests using pg_repack instead of VACUUM FULL or shifting job. Ana confirms table has primary key."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is causing the lag in the Postgres replica at 02:15 nightly?\n\nASSISTANT: The high replay_lag in pg_stat_replication indicates a bottleneck.\n\nUSER: What should be done to address this issue?\n\nASSISTANT: It suggests using pg_repack instead of VACUUM FULL or shifting the job.\n\nUSER: Does the table in question have a primary key?\n\nASSISTANT: Yes, Ana confirms the table has a primary key.",
+   "thinking": "",
+   "promptTokens": 113,
+   "completionTokens": 98,
+   "ollamaMs": 1943,
+   "ms": 1953,
+   "at": "2026-11-11T11:00:57.581Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r1.L3": {
+   "id": "b.replica.granite4.1-3b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly at 02:15. Check pg_stat_replication. High replay_lag shows bottleneck. Replace VACUUM FULL with pg_repack or move job. Ana confirms table has primary key."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What time does the replica lag occur nightly?\n\nASSISTANT: Replica lags nightly at 02:15.\n\nUSER: What should I check to diagnose the issue?\n\nASSISTANT: Check pg_stat_replication.\n\nUSER: What does a high replay_lag indicate?\n\nASSISTANT: A high replay_lag shows a bottleneck.\n\nUSER: What are the suggested solutions to address this issue?\n\nASSISTANT: Replace VACUUM FULL with pg_repack or move the job.\n\nUSER: Is the table confirmed to have a primary key?\n\nASSISTANT: Ana confirms the table has a primary key.",
+   "thinking": "",
+   "promptTokens": 107,
+   "completionTokens": 127,
+   "ollamaMs": 4417,
+   "ms": 4420,
+   "at": "2026-11-11T11:00:59.539Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r1.L4": {
+   "id": "b.replica.granite4.1-3b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly. Check pg_stat_replication. High replay_lag indicates issue. Use pg_repack or shift job. Ana confirms key exists."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the issue with the Replica lagging nightly?\n\nASSISTANT: The issue is indicated by a high replay_lag, suggesting a problem with the replication process.\n\nUSER: How can we address this?\n\nASSISTANT: You can use pg_repack or consider shifting the job to resolve the replication lag.\n\nUSER: Ana confirms that the key exists. What does this mean?\n\nASSISTANT: Ana's confirmation that the key exists suggests that the necessary configuration or data is properly set up, which is a prerequisite for resolving the replication issue.",
+   "thinking": "",
+   "promptTokens": 94,
+   "completionTokens": 113,
+   "ollamaMs": 1970,
+   "ms": 1977,
+   "at": "2026-11-11T11:01:03.961Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r1.L5": {
+   "id": "b.replica.granite4.1-3b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly. Check pg_stat_replication. High replay_lag shows problem. Use pg_repack or move job. Key exists."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What seems to be the issue with the replica?\n\nASSISTANT: The replica is lagging nightly. \n\nUSER: How can we check the status of the replication?\n\nASSISTANT: You should check pg_stat_replication.\n\nUSER: What does a high replay_lag indicate?\n\nASSISTANT: A high replay_lag shows there is a problem.\n\nUSER: What are the possible solutions to address this lag?\n\nASSISTANT: You can use pg_repack or move the job to resolve the issue.\n\nUSER: Is there a key that needs to be verified?\n\nASSISTANT: The key exists.",
+   "thinking": "",
+   "promptTokens": 92,
+   "completionTokens": 126,
+   "ollamaMs": 4730,
+   "ms": 4735,
+   "at": "2026-11-11T11:01:05.944Z",
+   "error": null
+  },
+  "c.replica.granite4.1-3b.r2.s2": {
+   "id": "c.replica.granite4.1-3b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User reports Postgres 16 replica in Frankfurt lags 40s nightly at 02:15 due to VACUUM FULL on events table rewriting 30GB. Advisor suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL slowly. Recommends using pg_repack instead of VACUUM FULL, as it works in smaller batches and can reduce replay_lag. Ana confirms events table has primary key event_id.\", \"L2\": \"Postgres replica lags nightly at 02:15. Advisor checks pg_stat_replication, finds replay_lag climbs while write_lag stays low. Recommends using pg_repack instead of VACUUM FULL. Ana confirms table has primary key.\", \"L3\": \"Replica lags nightly. Advisor checks pg_stat_replication. Recommends pg_repack. Ana confirms table has primary key.\", \"L4\": \"Replica lags. Advisor recommends pg_repack. Ana confirms primary key exists.\", \"L5\": \"Replica lags. Use pg_repack.\"}",
+   "thinking": "",
+   "promptTokens": 503,
+   "completionTokens": 229,
+   "ollamaMs": 6651,
+   "ms": 6661,
+   "at": "2026-11-11T11:01:10.686Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r2.L1": {
+   "id": "b.replica.granite4.1-3b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser reports Postgres 16 replica in Frankfurt lags 40s nightly at 02:15 due to VACUUM FULL on events table rewriting 30GB. Advisor suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL slowly. Recommends using pg_repack instead of VACUUM FULL, as it works in smaller batches and can reduce replay_lag. Ana confirms events table has primary key event_id."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Postgres 16 replica in Frankfurt lags 40s nightly at 02:15 due to VACUUM FULL on events table rewriting 30GB.\n\nASSISTANT: USER: Advisor suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL slowly.\n\nASSISTANT: USER: Recommends using pg_repack instead of VACUUM FULL, as it works in smaller batches and can reduce replay_lag.\n\nASSISTANT: USER: Ana confirms events table has primary key event_id.",
+   "thinking": "",
+   "promptTokens": 159,
+   "completionTokens": 116,
+   "ollamaMs": 3737,
+   "ms": 3743,
+   "at": "2026-11-11T11:01:17.353Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r2.L2": {
+   "id": "b.replica.granite4.1-3b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags nightly at 02:15. Advisor checks pg_stat_replication, finds replay_lag climbs while write_lag stays low. Recommends using pg_repack instead of VACUUM FULL. Ana confirms table has primary key."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the issue with the Postgres replica?\n\nASSISTANT: The Postgres replica lags nightly at 02:15.\n\nUSER: What did the Advisor find in pg_stat_replication?\n\nASSISTANT: The Advisor found that replay_lag climbs while write_lag stays low.\n\nUSER: What recommendation did the Advisor give?\n\nASSISTANT: The Advisor recommends using pg_repack instead of VACUUM FULL.\n\nUSER: Is the table confirmed to have a primary key?\n\nASSISTANT: Ana confirms the table has a primary key.",
+   "thinking": "",
+   "promptTokens": 114,
+   "completionTokens": 115,
+   "ollamaMs": 2827,
+   "ms": 2831,
+   "at": "2026-11-11T11:01:21.101Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r2.L3": {
+   "id": "b.replica.granite4.1-3b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly. Advisor checks pg_stat_replication. Recommends pg_repack. Ana confirms table has primary key."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the issue with the replica lags nightly?\n\nASSISTANT: The replica is experiencing lag during nightly operations.\n\nUSER: How can we diagnose the problem?\n\nASSISTANT: The advisor suggests checking the pg_stat_replication system view.\n\nUSER: What does the advisor recommend to address the lag?\n\nASSISTANT: The advisor recommends using pg_repack to help manage the replication process more efficiently.\n\nUSER: Is there a specific requirement for the table in question?\n\nASSISTANT: Ana confirms that the table in question has a primary key, which is necessary for proper replication operations.",
+   "thinking": "",
+   "promptTokens": 88,
+   "completionTokens": 121,
+   "ollamaMs": 3545,
+   "ms": 3550,
+   "at": "2026-11-11T11:01:23.937Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r2.L4": {
+   "id": "b.replica.granite4.1-3b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags. Advisor recommends pg_repack. Ana confirms primary key exists."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the issue with the replica?\nASSISTANT: Replica lags.\nUSER: What solution is recommended?\nASSISTANT: Advisor recommends pg_repack.\nUSER: Is the primary key in place?\nASSISTANT: Ana confirms primary key exists.",
+   "thinking": "",
+   "promptTokens": 79,
+   "completionTokens": 55,
+   "ollamaMs": 2543,
+   "ms": 2551,
+   "at": "2026-11-11T11:01:27.491Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r2.L5": {
+   "id": "b.replica.granite4.1-3b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags. Use pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Why is my replica lagging?\n\nASSISTANT: You might want to consider using pg_repack to help resolve the lag.",
+   "thinking": "",
+   "promptTokens": 72,
+   "completionTokens": 29,
+   "ollamaMs": 1351,
+   "ms": 1354,
+   "at": "2026-11-11T11:01:30.045Z",
+   "error": null
+  },
+  "c.replica.granite4.1-3b.r3.s3": {
+   "id": "c.replica.granite4.1-3b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Our Postgres 16 replica in Frankfurt lags 40 seconds behind the primary every night at 02:15. What should I check first?\nASSISTANT: Start with the nightly job. At 02:15 the VACUUM FULL on the events table rewrites about 30 GB, and the replica has to replay all of that WAL. Check pg_stat_replication: if replay_lag climbs while write_lag stays near zero, the replica applies WAL too slowly.\nUSER: replay_lag hits 41 s and write_lag stays under 1 s. The replica has 4 vCPUs, the primary has 16.\nASSISTANT: Then replay is the bottleneck. WAL replay runs on one process, so the extra cores do not help. Replace VACUUM FULL with pg_repack, which works in smaller batches, or move the job to 04:00 when traffic is lowest.\nUSER: Ana says pg_repack needs a primary key on the table. events has one, on event_id.\nASSISTANT: Then pg_repack works. Run it with --no-order first and watch replay_lag. If it stays under 5 s, keep the 02:15 slot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User reports Postgres 16 replica in Frankfurt lags 40s at 02:15 due to nightly VACUUM FULL on events table rewriting 30GB. Advisor checks pg_stat_replication, noting replay_lag climbs while write_lag stays low, indicating replay bottleneck. Advisor suggests replacing VACUUM FULL with pg_repack for smaller batches or moving the job to 04:00. Ana confirms events table has primary key on event_id, allowing pg_repack to work.\", \"L2\": \"Postgres replica lags nightly at 02:15 due to VACUUM FULL. Advisor checks pg_stat_replication, finding replay_lag climbs while write_lag stays low, indicating replay bottleneck. Suggests using pg_repack or moving job to 04:00. Ana confirms table has primary key for pg_repack.\", \"L3\": \"Replica lags nightly at 02:15. Advisor checks pg_stat_replication, finds replay_lag climbs while write_lag stays low. Suggests using pg_repack or shifting job to 04:00. Ana confirms table has primary key.\", \"L4\": \"Replica lags nightly. Advisor checks pg_stat_replication, finds replay_lag climbs. Suggests pg_repack or moving job. Ana confirms primary key exists.\", \"L5\": \"Replica lags nightly. Check pg_stat_replication. Suggest pg_repack or moving job. Ana confirms key exists.\"}",
+   "thinking": "",
+   "promptTokens": 503,
+   "completionTokens": 311,
+   "ollamaMs": 5972,
+   "ms": 5979,
+   "at": "2026-11-11T11:01:31.402Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r3.L1": {
+   "id": "b.replica.granite4.1-3b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser reports Postgres 16 replica in Frankfurt lags 40s at 02:15 due to nightly VACUUM FULL on events table rewriting 30GB. Advisor checks pg_stat_replication, noting replay_lag climbs while write_lag stays low, indicating replay bottleneck. Advisor suggests replacing VACUUM FULL with pg_repack for smaller batches or moving the job to 04:00. Ana confirms events table has primary key on event_id, allowing pg_repack to work."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Reports Postgres 16 replica in Frankfurt lags 40s at 02:15 due to nightly VACUUM FULL on events table rewriting 30GB.\n\nASSISTANT: Advisor checks pg_stat_replication, noting replay_lag climbs while write_lag stays low, indicating replay bottleneck.\n\nUSER: Advisor suggests replacing VACUUM FULL with pg_repack for smaller batches or moving the job to 04:00.\n\nASSISTANT: Ana confirms events table has primary key on event_id, allowing pg_repack to work.",
+   "thinking": "",
+   "promptTokens": 163,
+   "completionTokens": 113,
+   "ollamaMs": 51449,
+   "ms": 51458,
+   "at": "2026-11-11T11:01:37.384Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r3.L2": {
+   "id": "b.replica.granite4.1-3b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nPostgres replica lags nightly at 02:15 due to VACUUM FULL. Advisor checks pg_stat_replication, finding replay_lag climbs while write_lag stays low, indicating replay bottleneck. Suggests using pg_repack or moving job to 04:00. Ana confirms table has primary key for pg_repack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is causing the lag in the Postgres replica at 02:15 nightly?\n\nASSISTANT: The lag is due to VACUUM FULL operations.\n\nUSER: How can we diagnose the issue further?\n\nASSISTANT: Advisor checks pg_stat_replication, finding replay_lag climbs while write_lag stays low, indicating a replay bottleneck.\n\nUSER: What solutions are suggested to address this issue?\n\nASSISTANT: Advisor suggests using pg_repack or moving the job to 04:00.\n\nUSER: Is pg_repack applicable given the table has a primary key?\n\nASSISTANT: Ana confirms the table has a primary key for pg_repack.",
+   "thinking": "",
+   "promptTokens": 131,
+   "completionTokens": 137,
+   "ollamaMs": 7306,
+   "ms": 7477,
+   "at": "2026-11-11T11:02:28.845Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r3.L3": {
+   "id": "b.replica.granite4.1-3b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly at 02:15. Advisor checks pg_stat_replication, finds replay_lag climbs while write_lag stays low. Suggests using pg_repack or shifting job to 04:00. Ana confirms table has primary key."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What time does the replica lag nightly at 02:15?\n\nASSISTANT: Replica lags nightly at 02:15.\n\nUSER: What did the advisor find when checking pg_stat_replication?\n\nASSISTANT: The advisor found that replay_lag climbs while write_lag stays low.\n\nUSER: What suggestions were made to address the lag issue?\n\nASSISTANT: The advisor suggests using pg_repack or shifting the job to 04:00.\n\nUSER: Is there a primary key on the table?\n\nASSISTANT: Ana confirms the table has a primary key.",
+   "thinking": "",
+   "promptTokens": 115,
+   "completionTokens": 120,
+   "ollamaMs": 5366,
+   "ms": 5370,
+   "at": "2026-11-11T11:02:36.324Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r3.L4": {
+   "id": "b.replica.granite4.1-3b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly. Advisor checks pg_stat_replication, finds replay_lag climbs. Suggests pg_repack or moving job. Ana confirms primary key exists."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the issue with the replica lags nightly?\n\nASSISTANT: The replica lags nightly due to the replay_lag climbing in pg_stat_replication.\n\nUSER: What steps are being taken to address this issue?\n\nASSISTANT: The advisor suggests using pg_repack or moving the job to potentially resolve the lag.\n\nUSER: Is the primary key confirmed to exist?\n\nASSISTANT: Ana confirms that the primary key exists.",
+   "thinking": "",
+   "promptTokens": 97,
+   "completionTokens": 91,
+   "ollamaMs": 27741,
+   "ms": 27976,
+   "at": "2026-11-11T11:02:41.698Z",
+   "error": null
+  },
+  "b.replica.granite4.1-3b.r3.L5": {
+   "id": "b.replica.granite4.1-3b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nReplica lags nightly. Check pg_stat_replication. Suggest pg_repack or moving job. Ana confirms key exists."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is causing the replica to lag nightly?\n\nASSISTANT: Check pg_stat_replication to diagnose the issue.\n\nUSER: Should I consider using pg_repack or moving the job?\n\nASSISTANT: Ana confirms that the key exists, so the issue might be related to the replication process.",
+   "thinking": "",
+   "promptTokens": 88,
+   "completionTokens": 62,
+   "ollamaMs": 2310,
+   "ms": 2314,
+   "at": "2026-11-11T11:03:09.675Z",
+   "error": null
+  }
+ },
+ "runs": [
+  {
+   "id": "replica.llama3.1-8b.r1.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User: Postgres 16 replica lags 40s. Assistant: Check nightly VACUUM FULL on events table. User: replay_lag 41s, write_lag <1s. Assistant: Replace with pg_repack. User: Ana says events has primary key, pg_repack works.",
+   "rebuild": "USER: Postgres 16 replica lags 40s.\nASSISTANT: Check nightly VACUUM FULL on events table.\nUSER: replay_lag 41s, write_lag <1s.\nASSISTANT: Replace with pg_repack.\nUSER: Ana says events has primary key, pg_repack works.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:29.894Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.replica.llama3.1-8b.r1.L1"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Postgres 16 replica lags 40s. Check nightly VACUUM FULL. replay_lag 41s, write_lag <1s. Replace with pg_repack.",
+   "rebuild": "USER: Postgres 16 replica lags 40s. Check nightly VACUUM FULL. replay_lag 41s, write_lag <1s. Replace with pg_repack.\n\nASSISTANT: Why do you think the replica lag is caused by nightly VACUUM FULL, and what's the current process for maintaining the replica?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:33.681Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.replica.llama3.1-8b.r1.L2"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Postgres 16 replica lags 40s. VACUUM FULL, then pg_repack. replag 41s, write_lag <1s.",
+   "rebuild": "USER: Postgres 16 replica lags 40s.\n\nASSISTANT: VACUUM FULL, then pg_repack.\n\nUSER: replag 41s, write_lag <1s.\n\nASSISTANT: That's a significant improvement! What was the initial VACUUM FULL and pg_repack process like? Did you encounter any issues?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:35.157Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.replica.llama3.1-8b.r1.L3"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "VACUUM FULL slows replica. Replace with pg_repack.",
+   "rebuild": "USER: VACUUM FULL slows replica. Replace with pg_repack.\n\nASSISTANT: Why are you looking to replace VACUUM FULL with pg_repack?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:37.023Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.replica.llama3.1-8b.r1.L4"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Replace VACUUM FULL with pg_repack.",
+   "rebuild": "USER: I want to optimize my PostgreSQL database's performance. I've been seeing some issues with VACUUM FULL lately. What's a better alternative?\n\nASSISTANT: Have you considered using pg_repack instead of VACUUM FULL? It can help improve performance and reduce downtime.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:37.658Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.replica.llama3.1-8b.r1.L5"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "Postgres replica in Frankfurt lags 40s behind primary. Check nightly job, pg_stat_replication, and WAL replay. Consider replacing VACUUM FULL with pg_repack.",
+   "rebuild": "USER: Postgres replica in Frankfurt lags 40s behind primary.\n\nASSISTANT: What is the current status of the nightly job that runs on the replica?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:41.496Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.replica.llama3.1-8b.r2.L1"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Replica lags 40s, nightly job at 02:15. pg_stat_replication: replay_lag 41s, write_lag < 1s. Consider pg_repack.",
+   "rebuild": "USER: Replica lags 40s, nightly job at 02:15.\n\nASSISTANT: pg_stat_replication: replay_lag 41s, write_lag < 1s.\n\nUSER: Consider pg_repack.\n\nASSISTANT: Is the replica lag due to physical or logical replication?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:42.689Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.replica.llama3.1-8b.r2.L2"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Replica lags 40s, nightly job at 02:15. pg_stat_replication: replay_lag 41s, write_lag < 1s. pg_repack.",
+   "rebuild": "USER: I'm seeing a replication lag of 40 seconds in the 40s, and my nightly job is scheduled to run at 02:15. \n\nASSISTANT: The pg_stat_replication is showing a replay lag of 41 seconds and a write lag of less than 1 second. \n\nUSER: I've noticed that pg_repack is running in the background. Could that be contributing to the replication lag? \n\nASSISTANT: Yes, it's possible that pg_repack is causing the lag. Have you considered running it at a less busy time, like during the night when traffic is lower?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:43.837Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.replica.llama3.1-8b.r2.L3"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Replica lags 40s. Check pg_stat_replication, pg_repack.",
+   "rebuild": "USER: Replica lags 40s. Check pg_stat_replication, pg_repack.\n\nASSISTANT: Replica lags 40s. Check pg_stat_replication, pg_repack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:45.985Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.replica.llama3.1-8b.r2.L4"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Replica lags 40s.",
+   "rebuild": "USER: Replica lags 40s.\n\nASSISTANT: What seems to be the issue?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:47.007Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.replica.llama3.1-8b.r2.L5"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r3.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "Postgres replica lags 40s at 02:15. Check nightly job: VACUUM FULL on events table. If replay_lag climbs, replica applies WAL too slowly. Consider replacing with pg_repack.",
+   "rebuild": "USER: Postgres replica lags 40s at 02:15.\n\nASSISTANT: Check nightly job: VACUUM FULL on events table.\n\nUSER: Is the VACUUM FULL causing the lag?\n\nASSISTANT: If replay_lag climbs, replica applies WAL too slowly. Consider replacing with pg_repack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:52.513Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.replica.llama3.1-8b.r3.L1"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r3.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Postgres replica lags 40s at 02:15. VACUUM FULL rewrites 30 GB, causing replay lag. pg_repack in smaller batches or move job to 04:00 to reduce traffic.",
+   "rebuild": "USER: Postgres replica lags 40s at 02:15.\n\nASSISTANT: VACUUM FULL rewrites 30 GB, causing replay lag.\n\nUSER: pg_repack in smaller batches or move job to 04:00 to reduce traffic.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:59.261Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.replica.llama3.1-8b.r3.L2"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r3.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Postgres replica lags at 02:15. Check VACUUM FULL on events table.",
+   "rebuild": "USER: Postgres replica lags at 02:15. Check VACUUM FULL on events table.\n\nASSISTANT: I've checked the VACUUM FULL status on the events table, and it looks like the last run was at 00:00 this morning. The replica lag is still 15 minutes behind. What's the next step to resolve this issue?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:09.625Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.replica.llama3.1-8b.r3.L3"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r3.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Postgres replica lags at 02:15. VACUUM FULL",
+   "rebuild": "USER: Postgres replica lags at 02:15. VACUUM FULL\n\nASSISTANT: What's the current lag and how long has it been lagging like this?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:16.201Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.replica.llama3.1-8b.r3.L4"
+   }
+  },
+  {
+   "id": "replica.llama3.1-8b.r3.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Postgres replica lags at 02:15",
+   "rebuild": "USER: Postgres replica lags at 02:15\n\nASSISTANT: Can you please check the replication settings and the network connectivity between the master and replica servers?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:18.607Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.replica.llama3.1-8b.r3.L5"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r1.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "USER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15. ASSISTANT suggests checking nightly job, VACUUM FULL on events table, and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT says replay is bottleneck, suggest pg_repack or move job. USER mentions events has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order.",
+   "rebuild": "USER: Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15.  \nASSISTANT: Check the nightly job, run VACUUM FULL on the events table, and check pg_stat_replication.  \nUSER: Replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs.  \nASSISTANT: Replay is the bottleneck. Consider pg_repack or moving the job.  \nUSER: Events has a primary key.  \nASSISTANT: pg_repack works in that case. Suggest running it with --no-order.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:56.341Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.qwen3-8b.r1.s1",
+    "rebuildCall": "b.replica.qwen3-8b.r1.L1"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "USER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT suggests checking VACUUM FULL and pg_stat_replication. USER notes replay_lag 41 s, write_lag <1 s. ASSISTANT says replay is bottleneck, suggest pg_repack. USER mentions events has primary key. ASSISTANT confirms pg_repack works.",
+   "rebuild": "USER: reports Postgres replica lags 40 s nightly at 02:15.  \nASSISTANT: suggests checking VACUUM FULL and pg_stat_replication.  \nUSER: notes replay_lag 41 s, write_lag <1 s.  \nASSISTANT: says replay is bottleneck, suggest pg_repack.  \nUSER: mentions events has primary key.  \nASSISTANT: confirms pg_repack works.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:58.732Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.qwen3-8b.r1.s1",
+    "rebuildCall": "b.replica.qwen3-8b.r1.L2"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "USER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT suggests VACUUM FULL and pg_stat_replication. USER notes replay_lag 41 s. ASSISTANT says replay is bottleneck, suggest pg_repack. USER mentions events has primary key.",
+   "rebuild": "USER: Reports Postgres replica lags 40 s nightly at 02:15.  \nASSISTANT: Suggests VACUUM FULL and pg_stat_replication.  \nUSER: Notes replay_lag 41 s.  \nASSISTANT: Says replay is bottleneck, suggest pg_repack.  \nUSER: Mentions events has primary key.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:00.332Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.qwen3-8b.r1.s1",
+    "rebuildCall": "b.replica.qwen3-8b.r1.L3"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "USER reports Postgres replica lags 40 s nightly. ASSISTANT suggests VAC and pg_stat. USER notes replay_lag 41 s. ASSISTANT says replay is bottleneck, suggest pg_repack.",
+   "rebuild": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Suggest running VAC and checking pg_stat.  \nUSER: Notes replay_lag 41 s.  \nASSISTANT: Replay is the bottleneck, suggest pg_repack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:01.688Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.qwen3-8b.r1.s1",
+    "rebuildCall": "b.replica.qwen3-8b.r1.L4"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "USER reports Postgres replica lags 40 s. ASSISTANT suggests VAC and pg_stat.",
+   "rebuild": "USER: Postgres replica lags 40 s.  \nASSISTANT: Try VAC and check pg_stat.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:02.658Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.qwen3-8b.r1.s1",
+    "rebuildCall": "b.replica.qwen3-8b.r1.L5"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "USER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary at 02:15 nightly. ASSISTANT suggests checking VACUUM FULL on events table. USER says replay_lag hits 41s, write_lag under 1s. ASSISTANT says replay is bottleneck. USER mentions Ana says pg_repack needs primary key. ASSISTANT confirms it exists and suggests running pg_repack with --no-order.",
+   "rebuild": "USER: Postgres 16 replica in Frankfurt lags 40 seconds behind primary at 02:15 nightly.  \nASSISTANT: Check VACUUM FULL on events table.  \nUSER: replay_lag hits 41s, write_lag under 1s.  \nASSISTANT: Replay is bottleneck.  \nUSER: Ana says pg_repack needs primary key.  \nASSISTANT: Primary key exists. Run pg_repack with --no-order.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:09.137Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.qwen3-8b.r2.s2",
+    "rebuildCall": "b.replica.qwen3-8b.r2.L1"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "USER reports replica lags 40s at 02:15. ASSISTANT suggests checking VACUUM FULL. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs primary key. ASSISTANT confirms it exists and suggests running pg_repack with --no-order.",
+   "rebuild": "USER: reports replica lags 40s at 02:15.  \nASSISTANT: suggests checking VACUUM FULL.  \nUSER: replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.  \nUSER: mentions pg_repack needs primary key.  \nASSISTANT: confirms it exists and suggests running pg_repack with --no-order.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:11.209Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.qwen3-8b.r2.s2",
+    "rebuildCall": "b.replica.qwen3-8b.r2.L2"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "USER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs PK. ASSISTANT confirms it exists and suggests running pg_repack with --no-order.",
+   "rebuild": "USER: reports replica lags 40s nightly.  \nASSISTANT: suggests checking VAC.  \nUSER: says replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.  \nUSER: mentions pg_repack needs PK.  \nASSISTANT: confirms it exists and suggests running pg_repack with --no-order.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:12.871Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.qwen3-8b.r2.s2",
+    "rebuildCall": "b.replica.qwen3-8b.r2.L3"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "USER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck. USER mentions pg_repack needs PK. ASSISTANT confirms it exists.",
+   "rebuild": "USER: reports replica lags 40s nightly.  \nASSISTANT: suggests checking VAC.  \nUSER: says replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.  \nUSER: mentions pg_repack needs PK.  \nASSISTANT: confirms it exists.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:14.263Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.qwen3-8b.r2.s2",
+    "rebuildCall": "b.replica.qwen3-8b.r2.L4"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "USER reports replica lags 40s nightly. ASSISTANT suggests checking VAC. USER says replay_lag hits 41s. ASSISTANT says replay is bottleneck.",
+   "rebuild": "USER: reports replica lags 40s nightly.  \nASSISTANT: suggests checking VAC.  \nUSER: says replay_lag hits 41s.  \nASSISTANT: says replay is bottleneck.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:15.551Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.qwen3-8b.r2.s2",
+    "rebuildCall": "b.replica.qwen3-8b.r2.L5"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r3.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "USER reports Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15. ASSISTANT suggests checking nightly job, VACUUM FULL on events table, and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT says replay is bottleneck, suggest pg_repack or move job to 04:00. USER mentions events table has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order and monitor replay_lag.",
+   "rebuild": "USER: Postgres 16 replica in Frankfurt lags 40 seconds behind primary nightly at 02:15.  \nASSISTANT: Check the nightly job, run VACUUM FULL on the events table, and check pg_stat_replication.  \nUSER: Replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs.  \nASSISTANT: Replay is the bottleneck. Consider pg_repack or move the job to 04:00.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works. Run it with --no-order and monitor replay_lag.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:24.036Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.qwen3-8b.r3.s3",
+    "rebuildCall": "b.replica.qwen3-8b.r3.L1"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r3.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "USER reports Postgres replica lags 40 s nightly at 02:15. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs. ASSISTANT suggests pg_repack or move job. USER mentions events table has primary key. ASSISTANT confirms pg_repack works, suggest run with --no-order.",
+   "rebuild": "USER: reports Postgres replica lags 40 s nightly at 02:15.  \nASSISTANT: checks VACUUM FULL and pg_stat_replication.  \nUSER: notes replay_lag hits 41 s, write_lag under 1 s, replica has 4 vCPUs.  \nASSISTANT: suggests pg_repack or move job.  \nUSER: mentions events table has primary key.  \nASSISTANT: confirms pg_repack works, suggest run with --no-order.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:27.036Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.qwen3-8b.r3.s3",
+    "rebuildCall": "b.replica.qwen3-8b.r3.L2"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r3.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "USER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s, write_lag under 1 s. ASSISTANT suggests pg_repack or move job. USER mentions events table has primary key. ASSISTANT confirms pg_repack works.",
+   "rebuild": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Check VACUUM FULL and pg_stat_replication.  \nUSER: Replay_lag hits 41 s, write_lag under 1 s.  \nASSISTANT: Suggest pg_repack or move job.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:29.522Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.qwen3-8b.r3.s3",
+    "rebuildCall": "b.replica.qwen3-8b.r3.L3"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r3.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "USER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL and pg_stat_replication. USER notes replay_lag hits 41 s. ASSISTANT suggests pg_repack. USER mentions events table has primary key. ASSISTANT confirms pg_repack works.",
+   "rebuild": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Check VACUUM FULL and pg_stat_replication.  \nUSER: Replay_lag hits 41 s.  \nASSISTANT: Suggest pg_repack.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:31.435Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.qwen3-8b.r3.s3",
+    "rebuildCall": "b.replica.qwen3-8b.r3.L4"
+   }
+  },
+  {
+   "id": "replica.qwen3-8b.r3.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "USER reports Postgres replica lags 40 s nightly. ASSISTANT checks VACUUM FULL. USER notes replay_lag hits 41 s. ASSISTANT suggests pg_repack. USER mentions events table has primary key. ASSISTANT confirms pg_repack works.",
+   "rebuild": "USER: Postgres replica lags 40 s nightly.  \nASSISTANT: Check VACUUM FULL.  \nUSER: Replay_lag hits 41 s.  \nASSISTANT: Suggest pg_repack.  \nUSER: Events table has primary key.  \nASSISTANT: Confirm pg_repack works.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:32.868Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.qwen3-8b.r3.s3",
+    "rebuildCall": "b.replica.qwen3-8b.r3.L5"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r1.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User reports Postgres 16 replica in Frankfurt lags 40 seconds nightly at 02:15 due to VACUUM FULL on events table rewriting 30 GB. Assistant suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL too slowly. Recommends replacing VACUUM FULL with pg_repack or moving job to 04:00. Ana confirms events table has primary key on event_id, allowing pg_repack to work.",
+   "rebuild": "USER: Reports that Postgres 16 replica in Frankfurt lags 40 seconds nightly at 02:15 due to VACUUM FULL on events table rewriting 30 GB.\n\nASSISTANT: Suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL too slowly.\n\nUSER: Recommends replacing VACUUM FULL with pg_repack or moving the job to 04:00.\n\nASSISTANT: Ana confirms events table has primary key on event_id, allowing pg_repack to work.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:52.940Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.replica.granite4.1-3b.r1.L1"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r1.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Postgres replica lags nightly at 02:15. Assistant checks pg_stat_replication; high replay_lag indicates bottleneck. Suggests using pg_repack instead of VACUUM FULL or shifting job. Ana confirms table has primary key.",
+   "rebuild": "USER: What is causing the lag in the Postgres replica at 02:15 nightly?\n\nASSISTANT: The high replay_lag in pg_stat_replication indicates a bottleneck.\n\nUSER: What should be done to address this issue?\n\nASSISTANT: It suggests using pg_repack instead of VACUUM FULL or shifting the job.\n\nUSER: Does the table in question have a primary key?\n\nASSISTANT: Yes, Ana confirms the table has a primary key.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:57.581Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.replica.granite4.1-3b.r1.L2"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r1.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Replica lags nightly at 02:15. Check pg_stat_replication. High replay_lag shows bottleneck. Replace VACUUM FULL with pg_repack or move job. Ana confirms table has primary key.",
+   "rebuild": "USER: What time does the replica lag occur nightly?\n\nASSISTANT: Replica lags nightly at 02:15.\n\nUSER: What should I check to diagnose the issue?\n\nASSISTANT: Check pg_stat_replication.\n\nUSER: What does a high replay_lag indicate?\n\nASSISTANT: A high replay_lag shows a bottleneck.\n\nUSER: What are the suggested solutions to address this issue?\n\nASSISTANT: Replace VACUUM FULL with pg_repack or move the job.\n\nUSER: Is the table confirmed to have a primary key?\n\nASSISTANT: Ana confirms the table has a primary key.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:59.539Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.replica.granite4.1-3b.r1.L3"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r1.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Replica lags nightly. Check pg_stat_replication. High replay_lag indicates issue. Use pg_repack or shift job. Ana confirms key exists.",
+   "rebuild": "USER: What is the issue with the Replica lagging nightly?\n\nASSISTANT: The issue is indicated by a high replay_lag, suggesting a problem with the replication process.\n\nUSER: How can we address this?\n\nASSISTANT: You can use pg_repack or consider shifting the job to resolve the replication lag.\n\nUSER: Ana confirms that the key exists. What does this mean?\n\nASSISTANT: Ana's confirmation that the key exists suggests that the necessary configuration or data is properly set up, which is a prerequisite for resolving the replication issue.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:03.961Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.replica.granite4.1-3b.r1.L4"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r1.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Replica lags nightly. Check pg_stat_replication. High replay_lag shows problem. Use pg_repack or move job. Key exists.",
+   "rebuild": "USER: What seems to be the issue with the replica?\n\nASSISTANT: The replica is lagging nightly. \n\nUSER: How can we check the status of the replication?\n\nASSISTANT: You should check pg_stat_replication.\n\nUSER: What does a high replay_lag indicate?\n\nASSISTANT: A high replay_lag shows there is a problem.\n\nUSER: What are the possible solutions to address this lag?\n\nASSISTANT: You can use pg_repack or move the job to resolve the issue.\n\nUSER: Is there a key that needs to be verified?\n\nASSISTANT: The key exists.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:05.944Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.replica.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.replica.granite4.1-3b.r1.L5"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r2.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User reports Postgres 16 replica in Frankfurt lags 40s nightly at 02:15 due to VACUUM FULL on events table rewriting 30GB. Advisor suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL slowly. Recommends using pg_repack instead of VACUUM FULL, as it works in smaller batches and can reduce replay_lag. Ana confirms events table has primary key event_id.",
+   "rebuild": "USER: Postgres 16 replica in Frankfurt lags 40s nightly at 02:15 due to VACUUM FULL on events table rewriting 30GB.\n\nASSISTANT: USER: Advisor suggests checking pg_stat_replication; if replay_lag climbs while write_lag stays low, replica applies WAL slowly.\n\nASSISTANT: USER: Recommends using pg_repack instead of VACUUM FULL, as it works in smaller batches and can reduce replay_lag.\n\nASSISTANT: USER: Ana confirms events table has primary key event_id.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:17.353Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.replica.granite4.1-3b.r2.L1"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r2.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Postgres replica lags nightly at 02:15. Advisor checks pg_stat_replication, finds replay_lag climbs while write_lag stays low. Recommends using pg_repack instead of VACUUM FULL. Ana confirms table has primary key.",
+   "rebuild": "USER: What is the issue with the Postgres replica?\n\nASSISTANT: The Postgres replica lags nightly at 02:15.\n\nUSER: What did the Advisor find in pg_stat_replication?\n\nASSISTANT: The Advisor found that replay_lag climbs while write_lag stays low.\n\nUSER: What recommendation did the Advisor give?\n\nASSISTANT: The Advisor recommends using pg_repack instead of VACUUM FULL.\n\nUSER: Is the table confirmed to have a primary key?\n\nASSISTANT: Ana confirms the table has a primary key.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:21.101Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.replica.granite4.1-3b.r2.L2"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r2.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Replica lags nightly. Advisor checks pg_stat_replication. Recommends pg_repack. Ana confirms table has primary key.",
+   "rebuild": "USER: What is the issue with the replica lags nightly?\n\nASSISTANT: The replica is experiencing lag during nightly operations.\n\nUSER: How can we diagnose the problem?\n\nASSISTANT: The advisor suggests checking the pg_stat_replication system view.\n\nUSER: What does the advisor recommend to address the lag?\n\nASSISTANT: The advisor recommends using pg_repack to help manage the replication process more efficiently.\n\nUSER: Is there a specific requirement for the table in question?\n\nASSISTANT: Ana confirms that the table in question has a primary key, which is necessary for proper replication operations.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:23.937Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.replica.granite4.1-3b.r2.L3"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r2.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Replica lags. Advisor recommends pg_repack. Ana confirms primary key exists.",
+   "rebuild": "USER: What is the issue with the replica?\nASSISTANT: Replica lags.\nUSER: What solution is recommended?\nASSISTANT: Advisor recommends pg_repack.\nUSER: Is the primary key in place?\nASSISTANT: Ana confirms primary key exists.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:27.491Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.replica.granite4.1-3b.r2.L4"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r2.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Replica lags. Use pg_repack.",
+   "rebuild": "USER: Why is my replica lagging?\n\nASSISTANT: You might want to consider using pg_repack to help resolve the lag.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:30.045Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.replica.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.replica.granite4.1-3b.r2.L5"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r3.L1",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User reports Postgres 16 replica in Frankfurt lags 40s at 02:15 due to nightly VACUUM FULL on events table rewriting 30GB. Advisor checks pg_stat_replication, noting replay_lag climbs while write_lag stays low, indicating replay bottleneck. Advisor suggests replacing VACUUM FULL with pg_repack for smaller batches or moving the job to 04:00. Ana confirms events table has primary key on event_id, allowing pg_repack to work.",
+   "rebuild": "USER: Reports Postgres 16 replica in Frankfurt lags 40s at 02:15 due to nightly VACUUM FULL on events table rewriting 30GB.\n\nASSISTANT: Advisor checks pg_stat_replication, noting replay_lag climbs while write_lag stays low, indicating replay bottleneck.\n\nUSER: Advisor suggests replacing VACUUM FULL with pg_repack for smaller batches or moving the job to 04:00.\n\nASSISTANT: Ana confirms events table has primary key on event_id, allowing pg_repack to work.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:01:37.384Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.replica.granite4.1-3b.r3.L1"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r3.L2",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Postgres replica lags nightly at 02:15 due to VACUUM FULL. Advisor checks pg_stat_replication, finding replay_lag climbs while write_lag stays low, indicating replay bottleneck. Suggests using pg_repack or moving job to 04:00. Ana confirms table has primary key for pg_repack.",
+   "rebuild": "USER: What is causing the lag in the Postgres replica at 02:15 nightly?\n\nASSISTANT: The lag is due to VACUUM FULL operations.\n\nUSER: How can we diagnose the issue further?\n\nASSISTANT: Advisor checks pg_stat_replication, finding replay_lag climbs while write_lag stays low, indicating a replay bottleneck.\n\nUSER: What solutions are suggested to address this issue?\n\nASSISTANT: Advisor suggests using pg_repack or moving the job to 04:00.\n\nUSER: Is pg_repack applicable given the table has a primary key?\n\nASSISTANT: Ana confirms the table has a primary key for pg_repack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:02:28.845Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.replica.granite4.1-3b.r3.L2"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r3.L3",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Replica lags nightly at 02:15. Advisor checks pg_stat_replication, finds replay_lag climbs while write_lag stays low. Suggests using pg_repack or shifting job to 04:00. Ana confirms table has primary key.",
+   "rebuild": "USER: What time does the replica lag nightly at 02:15?\n\nASSISTANT: Replica lags nightly at 02:15.\n\nUSER: What did the advisor find when checking pg_stat_replication?\n\nASSISTANT: The advisor found that replay_lag climbs while write_lag stays low.\n\nUSER: What suggestions were made to address the lag issue?\n\nASSISTANT: The advisor suggests using pg_repack or shifting the job to 04:00.\n\nUSER: Is there a primary key on the table?\n\nASSISTANT: Ana confirms the table has a primary key.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:02:36.324Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.replica.granite4.1-3b.r3.L3"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r3.L4",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Replica lags nightly. Advisor checks pg_stat_replication, finds replay_lag climbs. Suggests pg_repack or moving job. Ana confirms primary key exists.",
+   "rebuild": "USER: What is the issue with the replica lags nightly?\n\nASSISTANT: The replica lags nightly due to the replay_lag climbing in pg_stat_replication.\n\nUSER: What steps are being taken to address this issue?\n\nASSISTANT: The advisor suggests using pg_repack or moving the job to potentially resolve the lag.\n\nUSER: Is the primary key confirmed to exist?\n\nASSISTANT: Ana confirms that the primary key exists.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:02:41.698Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.replica.granite4.1-3b.r3.L4"
+   }
+  },
+  {
+   "id": "replica.granite4.1-3b.r3.L5",
+   "kind": "recorded",
+   "preset": "replica",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Replica lags nightly. Check pg_stat_replication. Suggest pg_repack or moving job. Ana confirms key exists.",
+   "rebuild": "USER: What is causing the replica to lag nightly?\n\nASSISTANT: Check pg_stat_replication to diagnose the issue.\n\nUSER: Should I consider using pg_repack or moving the job?\n\nASSISTANT: Ana confirms that the key exists, so the issue might be related to the replication process.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:03:09.675Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.replica.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.replica.granite4.1-3b.r3.L5"
+   }
+  }
+ ],
+ "generatedAt": "2026-11-11T11:07:03.487Z"
+}
