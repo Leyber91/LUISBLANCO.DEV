@@ -2,8 +2,8 @@
 /* ============================================================
    tools/lab_tests.mjs — run every lab's own tests.
 
-   A lab ships its tests as labs/assets/js/<lab>/tests.mjs (or any
-   *.test.mjs under labs/assets/js/). Each file runs in Node on its
+   A lab ships its tests as labs/assets/js/<lab>/tests.mjs, any
+   *.test.mjs, or tests/run.mjs, under labs/assets/js/. Each file runs in Node on its
    own; a non-zero exit, an uncaught error or a run over 120 s fails
    the gate. Labs without tests are listed, not failed.
 
@@ -24,7 +24,8 @@ function findTests(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) out.push(...findTests(p));
-    else if (e.name === 'tests.mjs' || e.name.endsWith('.test.mjs')) out.push(p);
+    else if (e.name === 'tests.mjs' || e.name.endsWith('.test.mjs') ||
+      (e.name === 'run.mjs' && path.basename(dir) === 'tests')) out.push(p);
   }
   return out;
 }
