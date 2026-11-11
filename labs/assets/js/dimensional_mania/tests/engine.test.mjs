@@ -8,7 +8,8 @@
    against their closed forms; Hopf fibrations of the 4D polytopes; rotation
    matrices (R·R^T = I, det R = +1, Givens round trip, canonical planes);
    projection of known points; slices against the cube's closed form and the
-   named corner-first sequence; the Hopf linking number; the URL state.
+   named corner-first sequence; the Hopf linking number; the URL state;
+   the shadow ledger, its sentence and the Witness quoting the same numbers.
    Exit code 1 on any failure.
    ============================================================ */
 
@@ -17,7 +18,7 @@ import * as L from '../linalg.js';
 import * as S from '../slice.js';
 import * as J from '../project.js';
 import { encodeState, decodeState, encodePose, decodePose } from '../share.js';
-import { validateShow } from '../narrator.js';
+import { validateShow, labelLedger, ledgerValue, ledgerLine, witnessHotLine, ambientLines } from '../narrator.js';
 import { nextTier } from '../constants.js';
 
 let pass = 0, fail = 0;
@@ -113,6 +114,113 @@ for (let n = 2; n <= 10; n++) {
   check('stereographic: (0,0,0.6,0.8) -> z = 3', Math.abs(out[2] - 3) < 1e-5);
   J.projectAll(Float64Array.from([0.3, -0.2, 0.1, 0.9, 0.4]), 5, 1, 'ortho', 0, out);
   check('orthographic drops the hidden axes', Math.abs(out[0] - 0.3) < 1e-6 && Math.abs(out[1] + 0.2) < 1e-6 && Math.abs(out[2] - 0.1) < 1e-6);
+}
+
+/* ---- the shadow ledger and the Witness read one report ----
+   G1 defect: on the identity-pose 4D simplex the ledger printed (1 + max|s - 1|)
+   = 1.29x "on its nearest corner" while the Witness said 1.12x; the 0.294 came
+   from the far corner, drawn 0.71x. Both now quote shadowLedger(). */
+{
+  const nums = (text, re) => [...String(text || '').matchAll(re)].map((m) => m[1]);
+  const TIMES = /(\d+\.\d\d)×/g, SAYS = /(\d+\.\d\d) times/g, AT = /= ([−+]\d+\.\d\d)/g;
+  const label = (o) => (v) => `vertex ${v + 1} of ${o.nv}`;
+  const report = (o, X, n, mode, D) => {
+    const ext = J.axisExtremes(n), st = new Float64Array(n), out = new Float32Array(o.nv * 3);
+    J.projectAll(X, n, o.nv, mode, D, out, st, null, ext);
+    return { R: labelLedger(J.shadowLedger(ext, n, mode), label(o)), st };
+  };
+
+  // the rater's case, D = 2.4 (the page's default fold distance)
+  const o = P.build('simplex', 4), D = 2.4;
+  const X = S.turn(o, L.eye(4));
+  const { R, st } = report(o, X, 4, 'persp', D);
+  let wmin = Infinity, wmax = -Infinity;
+  for (let v = 0; v < o.nv; v++) { wmin = Math.min(wmin, X[v * 4 + 3]); wmax = Math.max(wmax, X[v * 4 + 3]); }
+  const a = R.entry(3);
+  check('ledger far end is D/(D - w_min)', Math.abs(a.far.s - D / (D - wmin)) < 1e-12 && a.far.w === wmin, `${a.far.s} at ${a.far.w}`);
+  check('ledger near end is D/(D - w_max)', Math.abs(a.near.s - D / (D - wmax)) < 1e-12 && a.near.w === wmax, `${a.near.s} at ${a.near.w}`);
+  check('ledger distortion equals the stress bar', a.dev === st[3] && a.worst === 'far', `${a.dev} vs ${st[3]}, ${a.worst}`);
+  const row = ledgerValue(a, 'persp'), line = ledgerLine(R), wit = witnessHotLine({ n: 4, proj: 'persp', hot: R });
+  check('simplex 4D: the ledger row prints the far corner, 0.71x', row === '0.71×', row);
+  check('simplex 4D: the ledger sentence says 0.71x then 1.12x', nums(line, TIMES).join() === '0.71,1.12', line);
+  check('simplex 4D: the Witness says 0.71 then 1.12 times', nums(wit, SAYS).join() === '0.71,1.12', wit);
+  check('simplex 4D: both name the same coordinates, W = -1.00 and +0.25', nums(line, AT).join() === '−1.00,+0.25' && nums(wit, AT).join() === nums(line, AT).join(), `${line} | ${wit}`);
+  check('simplex 4D: no 1.29 anywhere', !/1\.29/.test(row + line + wit));
+  const ctx = { n: 4, obj: o, proj: 'persp', hot: R, spin: [], speeds: [], slice: null, check: null, link: null, flow: null, hidden: 1 };
+  check('the Witness ambient line is the one built from the report', ambientLines(ctx)[0] === wit, ambientLines(ctx)[0]);
+
+  // every dimension, every projection, random poses and fold distances
+  let frames = 0, badHot = 0, badDev = 0, badDirect = 0, badRow = 0, badAgree = 0, badAt = 0, badLabel = 0;
+  for (let n = 4; n <= 10; n++) {
+    for (const id of ['simplex', 'cube', 'cross']) {
+      const ob = P.build(id, n);
+      for (const mode of n === 4 ? ['persp', 'ortho', 'stereo'] : ['persp', 'ortho']) {
+        for (let k = 0; k < 12; k++) {
+          const Dk = 1.35 + rnd() * 4.65;
+          const Xk = S.turn(ob, randomRotation(n));
+          const { R: Rk, st: sk } = report(ob, Xk, n, mode, Dk);
+          frames++;
+          const axes = mode === 'stereo' ? [3] : Array.from({ length: n - 3 }, (_, i) => 3 + i);
+          const top = Math.max(...axes.map((d) => sk[d]));
+          if (Rk.hot < 0 || Rk.value !== top || sk[Rk.hot] !== top) badHot++;
+          if (Rk.axes.some((e) => e.dev !== sk[e.axis])) badDev++;
+          // the top axis divides the raw coordinate: its ends are checkable by hand
+          const e = Rk.entry(n - 1 === 3 || mode !== 'stereo' ? n - 1 : 3);
+          let lo = Infinity, hi = -Infinity;
+          for (let v = 0; v < ob.nv; v++) { const w = Xk[v * n + n - 1]; lo = Math.min(lo, w); hi = Math.max(hi, w); }
+          const f = (w) => (mode === 'ortho' ? w : mode === 'stereo' ? 1 / Math.max(1 - w, 0.035) : Dk / Math.max(Dk - w, 0.3));
+          if (Math.abs(e.far.w - lo) > 1e-12 || Math.abs(e.near.w - hi) > 1e-12 || Math.abs(e.far.s - f(lo)) > 1e-9 || Math.abs(e.near.s - f(hi)) > 1e-9) badDirect++;
+          const h = Rk.entry(Rk.hot);
+          const rowK = ledgerValue(h, mode), lineK = ledgerLine(Rk);
+          if (mode === 'ortho') {
+            const at = nums(lineK, AT)[0];
+            if (!at || at.slice(1) !== rowK) badRow++;
+          } else {
+            if (nums(lineK, TIMES)[0] + '×' !== rowK) badRow++;
+          }
+          if (mode === 'persp') {
+            const w = witnessHotLine({ n, proj: 'persp', hot: Rk });
+            if (!w || nums(w, SAYS).join() !== nums(lineK, TIMES).join()) badAgree++;
+            if (nums(w, AT).join() !== nums(lineK, AT).join()) badAt++;
+            const [k1, k2] = h.worst === 'far' ? ['far', 'near'] : ['near', 'far'];
+            if (!w.includes(Rk.labels[k1]) || (h.far.v !== h.near.v && !w.includes(Rk.labels[k2]))) badLabel++;
+          }
+        }
+      }
+    }
+  }
+  check(`ledger: hot axis is the largest over every hidden axis (${frames} frames, 4D-10D)`, badHot === 0, `${badHot} bad`);
+  check('ledger: every axis distortion equals the stress bar', badDev === 0, `${badDev} bad`);
+  check('ledger: the top axis ends match the projection formula by hand', badDirect === 0, `${badDirect} bad`);
+  check('ledger: the hot row and the ledger sentence print the same number', badRow === 0, `${badRow} bad`);
+  check('ledger and Witness quote the same two factors in perspective', badAgree === 0, `${badAgree} bad`);
+  check('ledger and Witness quote the same coordinates in perspective', badAt === 0, `${badAt} bad`);
+  check('the Witness names the vertices at both ends', badLabel === 0, `${badLabel} bad`);
+}
+
+/* ---- the matrix prints its numbers at every n ----
+   G1 defect: MatrixView set nums = n <= 6, so 7D-10D showed shaded cells only. */
+{
+  const { matrixLayout, matrixEntry } = await import('../panels.js');
+  const charPx = 0.6 * 9; // IBM Plex Mono advance, 600/1000 em, at the 9 px matrix font
+  let worstFit = Infinity, badEntry = 0, badOver = 0;
+  for (let n = 1; n <= 10; n++) {
+    for (const box of [160, 252, 290, 336]) { // the floor, the mid-width rail, the desk rail, a 390 px phone
+      const m = matrixLayout(box, n);
+      worstFit = Math.min(worstFit, m.cell - 2 - 5 * charPx); // a 5-character entry inside the cell's fill
+      if (m.over !== (m.pad + m.cell * n + 2 > box) || m.W < m.pad + m.cell * n + 2) badOver++;
+    }
+    const R = randomRotation(n);
+    for (let i = 0; i < n * n; i++) {
+      const t = matrixEntry(R[i]);
+      if (!(t === '0' || /^−?\.\d{3}$/.test(t) || /^−?1\.000$/.test(t))) badEntry++;
+      if (t !== '0' && Math.abs(Number(t.replace('−', '-')) - R[i]) > 5e-4 + 1e-12) badEntry++;
+    }
+  }
+  check('matrix: a 3-decimal entry fits its cell at every n, 1D-10D', worstFit >= 0, `${worstFit.toFixed(2)} px`);
+  check('matrix: wider than its box means it scrolls, never shrinks', badOver === 0, `${badOver} bad`);
+  check('matrix: every entry printed to 3 decimals and within 5e-4 of R', badEntry === 0, `${badEntry} bad`);
+  check('matrix: 10D fits a 390 px phone without scrolling, scrolls on the 290 px desk rail', !matrixLayout(336, 10).over && matrixLayout(290, 10).over);
 }
 
 /* ---- slices ---- */

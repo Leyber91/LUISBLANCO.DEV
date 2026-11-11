@@ -60,6 +60,7 @@
 
   <section class="center" aria-label="the view">
     <div class="caption" id="caption"></div>
+    <p class="hint" id="hint">drag to orbit · scroll to zoom · shift-drag or two fingers turn the dial’s plane through a hidden axis</p>
     <div class="spacer" aria-hidden="true"></div>
     <div class="lower">
       <section class="ledgerstrip" aria-labelledby="ledgerHead">
@@ -126,7 +127,8 @@
         <div class="pad" id="pad" tabindex="0" role="application" aria-label="pad: arrows turn X–W and Y–W"><span class="padx mth">X–W</span><span class="pady mth">Y–W</span></div>
       </div>
       <div class="seg mini" id="matShow" role="group" aria-label="show the pose or the generator"></div>
-      <canvas id="matrix" aria-label="the rotation matrix"></canvas>
+      <div class="matwrap" id="matwrap"><canvas id="matrix" aria-label="the rotation matrix"></canvas></div>
+      <p class="matnote" id="matnote" hidden></p>
       <div class="spectrum" id="spectrum"></div>
       <label class="row"><span class="rl">speed</span><input type="range" id="speed" /><span class="rv" id="speedVal"></span></label>
     </section>
@@ -147,7 +149,7 @@
 
 <footer class="foot">
   <div class="evidence">
-    <span class="tagline"><i class="dot real"></i><span><b>[real]</b> counts and metrics from coordinates, checked against Coxeter's Table I · cuts against the cube's closed form · the matrix and its checks · the projections · Hopf circles and linking numbers · 371 tests</span></span>
+    <span class="tagline"><i class="dot real"></i><span><b>[real]</b> counts and metrics from coordinates, checked against Coxeter's Table I · cuts against the cube's closed form · the matrix and its checks · the projections · Hopf circles and linking numbers · the ledger and the witness quoting one computation · 391 tests</span></span>
     <span class="tagline"><i class="dot ill"></i><span><b>[illustrative]</b> plane speeds, colours, the opening, the camera and the fold distance <i class="mth">D</i> · model replies pass a number check, not a proof</span></span>
   </div>
   <div class="tools">

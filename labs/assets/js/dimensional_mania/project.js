@@ -23,14 +23,33 @@ const STEREO_MIN = RENDER.stereoMin;
 export const STEREO_CLIP = RENDER.stereoClip;
 
 /**
+ * The extremes record projectAll fills: per hidden axis d, the smallest and
+ * largest value it applies (lo, hi), the vertex that takes each (vlo, vhi)
+ * and the coordinate along d that vertex had when d was folded (wlo, whi).
+ * The value is the scale factor in perspective and stereographic mode, the
+ * dropped coordinate itself in orthographic mode. The ledger bars, the
+ * ledger sentence and the Witness all read this one record (shadowLedger).
+ */
+export function axisExtremes(n) {
+  return { n, lo: new Float64Array(n), hi: new Float64Array(n), vlo: new Int32Array(n), vhi: new Int32Array(n), wlo: new Float64Array(n), whi: new Float64Array(n) };
+}
+
+function noteExtreme(ext, d, val, v, w) {
+  if (val < ext.lo[d]) { ext.lo[d] = val; ext.vlo[d] = v; ext.wlo[d] = w; }
+  if (val > ext.hi[d]) { ext.hi[d] = val; ext.vhi[d] = v; ext.whi[d] = w; }
+}
+
+/**
  * Project count turned points (stride n) into out (stride 3).
  * stress[d] collects, per hidden axis d, the largest |scale - 1| it applies
  * (perspective, stereographic) or the largest |x_d| it drops (orthographic).
  * depth[v] in 0..1 says how far along the deepest axis a point sits.
+ * ext (from axisExtremes) records which vertex takes each axis's extremes.
  */
 const scratch = new Float64Array(16);
-export function projectAll(X, n, count, mode, D, out, stress = null, depth = null) {
+export function projectAll(X, n, count, mode, D, out, stress = null, depth = null, ext = null) {
   if (stress) stress.fill(0);
+  if (ext) { ext.lo.fill(Infinity); ext.hi.fill(-Infinity); ext.vlo.fill(-1); ext.vhi.fill(-1); }
   const t = scratch; // no allocation per frame
   for (let v = 0; v < count; v++) {
     const o = v * n;
@@ -39,12 +58,18 @@ export function projectAll(X, n, count, mode, D, out, stress = null, depth = nul
     if (mode === 'stereo' && n === 4) {
       const s = 1 / Math.max(1 - t[3], STEREO_MIN);
       if (stress) stress[3] = Math.max(stress[3], Math.abs(s - 1));
+      if (ext) noteExtreme(ext, 3, s, v, t[3]);
       t[0] *= s; t[1] *= s; t[2] *= s;
     } else {
       for (let d = n - 1; d >= 3; d--) {
-        if (mode === 'ortho') { if (stress) stress[d] = Math.max(stress[d], Math.abs(t[d])); continue; }
+        if (mode === 'ortho') {
+          if (stress) stress[d] = Math.max(stress[d], Math.abs(t[d]));
+          if (ext) noteExtreme(ext, d, t[d], v, t[d]);
+          continue;
+        }
         const s = D / Math.max(D - t[d], CLAMP);
         if (stress) stress[d] = Math.max(stress[d], Math.abs(s - 1));
+        if (ext) noteExtreme(ext, d, s, v, t[d]);
         for (let k = 0; k < d; k++) t[k] *= s;
       }
     }
@@ -55,6 +80,31 @@ export function projectAll(X, n, count, mode, D, out, stress = null, depth = nul
 
 /** the scale perspective gives a point at depth w on the last axis (4D) */
 export const perspScale = (D, w) => D / Math.max(D - w, CLAMP);
+
+/**
+ * The shadow ledger as numbers, built from one extremes record. Per hidden
+ * axis: dev, its distortion (the largest |scale - 1|, or in orthographic the
+ * largest dropped |x|, equal to stress[d]); far and near, the vertex at each
+ * end of the axis with its coordinate w and the value s it gets there; worst,
+ * whichever end carries dev. hot is the axis with the largest dev over every
+ * hidden axis (-1 when nothing is hidden), value its dev.
+ */
+export function shadowLedger(ext, n, mode) {
+  const axes = [];
+  let hot = -1, value = 0;
+  const list = mode === 'stereo' ? (n === 4 ? [3] : []) : Array.from({ length: Math.max(0, n - 3) }, (_, i) => 3 + i);
+  for (const d of list) {
+    if (!ext || ext.vlo[d] < 0) continue;
+    const far = { v: ext.vlo[d], w: ext.wlo[d], s: ext.lo[d] };
+    const near = { v: ext.vhi[d], w: ext.whi[d], s: ext.hi[d] };
+    const ref = mode === 'ortho' ? 0 : 1;
+    const dFar = Math.abs(far.s - ref), dNear = Math.abs(near.s - ref);
+    const a = { axis: d, dev: Math.max(dFar, dNear), far, near, worst: dNear >= dFar ? 'near' : 'far' };
+    axes.push(a);
+    if (a.dev > value) { value = a.dev; hot = d; }
+  }
+  return { n, mode, axes, hot, value, flagged: hot >= 0 && value > 0.02, entry: (d) => axes.find((a) => a.axis === d) || null };
+}
 
 /**
  * Stereographic edges as arcs: each edge is split into `sub` pieces along

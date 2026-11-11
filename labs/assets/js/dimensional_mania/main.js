@@ -21,11 +21,11 @@ import { CONFIG, RENDER, TIERS, TIER_ORDER, nextTier, PRESETS, FLOW_OMEGA, SEED_
 import { eye, mul, leftGivens, orthonormalize, generatorSpeeds, generatorOf, poseAngles, alignRotation, canonicalPlanes, rotationChecks } from './linalg.js';
 import { build, catalogue, linkingNumber, fibration, hopfFibre } from './polytopes.js';
 import { slice, turn, cubeSection } from './slice.js';
-import { projectAll, stereoArcs, applyAll, perspScale, STEREO_CLIP, powers } from './project.js';
+import { projectAll, stereoArcs, applyAll, perspScale, STEREO_CLIP, powers, axisExtremes, shadowLedger } from './project.js';
 import { Stage } from './stage3d.js';
 import { MatrixView, ProfileView, CountsView, LedgerView, Reticle } from './panels.js';
 import { SecondView, cutDirection } from './inset.js';
-import { ambientLines, eventLine, answerLocally, SYSTEM, promptFor, validateShow, cleanAnswer } from './narrator.js';
+import { ambientLines, eventLine, answerLocally, SYSTEM, promptFor, validateShow, cleanAnswer, labelLedger, ledgerLine, witnessHotLine } from './narrator.js';
 import { Observer, checkNumbers, knownNumbers } from './observer.js';
 import { encodeState, decodeState, decodePose, copyText, plateSVG, download, withPngState, stateFromFile } from './share.js';
 import { Controls } from './controls.js';
@@ -89,7 +89,7 @@ class App {
     this.stage = stage.ok ? stage : new NullStage();
     if (!stage.ok) { const n = $('nogl'); if (n) n.hidden = false; }
 
-    this.matrix = new MatrixView($('matrix'));
+    this.matrix = new MatrixView($('matrix'), $('matnote'));
     this.profileView = new ProfileView($('profile'));
     this.counts = new CountsView($('counts'));
     this.ledger = new LedgerView($('ledger'), $('ledgerHead'));
@@ -207,6 +207,7 @@ class App {
     this.Xk = new Float64Array(o.V.length);
     this.depth = new Float32Array(o.nv);
     this.stress = new Float64Array(n);
+    this.ext = axisExtremes(n);
     this.axisScale = new Float64Array(n).fill(1);
     this.arcMode = this.effProj() === 'stereo';
     this.arcSub = o.curved ? 1 : TIERS[this.tierId].arcSub;
@@ -564,7 +565,7 @@ class App {
     if (this.frameNo % 3 === 0) this.matrix.draw(this.matShow === 'A' ? this.A : this.R, n, n >= 2 ? s.plane : null, this.matShow);
     this._profileTick(igniting);
     if (this.frameNo % 2 === 0 && this.sliceOn()) this.profileView.draw(this.prof, s.h, n, this.cut && this.cut.measure);
-    if (this.frameNo % 3 === 0) this.hot = this.ledger.tick(this.stress, this.effProj());
+    if (this.frameNo % 3 === 0) this._ledgerTick();
     if (this.frameNo % 3 === 1) this.inset.draw();
     if (this.frameNo % 6 === 0) this._readouts();
     if (this.drawer === 'mech' && this.frameNo % 6 === 3) this.ui.drawerText(this.mechanismText());
@@ -592,7 +593,7 @@ class App {
 
   _shadow() {
     const s = this.s, n = s.n, o = this.o, mode = this.effProj();
-    projectAll(this.X, n, o.nv, mode, s.D, this.vpos, this.stress, this.depth);
+    projectAll(this.X, n, o.nv, mode, s.D, this.vpos, this.stress, this.depth, this.ext);
     const view = this.effView();
     const k = view === 'both' ? RENDER.bothDim : this.flow ? RENDER.flowDim : 1;
     const col = this.vcol;
@@ -938,6 +939,7 @@ class App {
     const H = window.innerHeight;
     const rpx = (this._fitTarget() * 1.1 / (dist * Math.tan(((cam.fov || 48) * Math.PI) / 360))) * (H / 2);
     this.reticle.layout(window.innerWidth / 2, H / 2 - (this.lift || 0), Math.min(rpx, Math.min(window.innerWidth, H) * (this.phone ? 0.38 : 0.46)));
+    if (this.frameNo % 15 === 1) this.reticle.guard = $('hint').getBoundingClientRect(); // the plane label keeps off the hint line
     const on = s.n >= 2 && !this.flow;
     this.reticle.set(this.turned, `${AXES[s.plane[0]]}–${AXES[s.plane[1]]} ${Math.round((this.turned * 180) / Math.PI)}°`, on);
     if (this.frameNo % 3 === 0 && s.n >= 2) this.ui.dial(this.turned, s.plane);
@@ -992,14 +994,23 @@ class App {
     $('caption').innerHTML = `<b>${escapeHTML(o.name)}</b>${o.schlafli ? ` <span class="mth">${escapeHTML(o.schlafli)}</span>` : ''} <span>· ${n}D</span><em>${n <= 3 ? vname.low : vname.label}${n >= 4 ? ` · ${pname}` : ''} · ${PRESETS[s.preset].label}</em>`;
     $('gl').setAttribute('aria-label', `${n <= 3 ? 'The' : 'Shadow of the'} ${o.name} in ${n}D${n >= 4 ? `, ${pname} projection` : ''}${c && c.np ? `, cut at ${AXES[n - 1]} = ${s.h.toFixed(2)}: ${c.name}` : ''}.`);
 
-    // the ledger's own sentence
-    const hot = this.hot;
-    $('ledgerline').textContent = n <= 3 || !hot || hot.hot < 0 ? '' : this.effProj() === 'ortho'
-      ? `${AXES[hot.hot]} carries the most dropped depth: a corner sits ${hot.value.toFixed(2)} along it, invisible on screen.`
-      : `${AXES[hot.hot]} bends the shadow most: up to ${(1 + hot.value).toFixed(2)}× on its nearest corner.`;
-
     const sug = this.obs.suggestion(this);
     this.ui.suggest(sug && this.tourIdx < 0 ? sug : null);
+  }
+
+  /** one ledger report per tick: the bars, their numbers, the ledger sentence and the Witness all read it */
+  _ledgerTick() {
+    const n = this.s.n, mode = this.effProj();
+    const L = labelLedger(shadowLedger(this.ext, n, mode), (v) => this._vertexLabel(v), this.o.curved ? 'point' : 'corner');
+    this.hot = this.ledger.tick(L);
+    const line = n <= 3 ? '' : ledgerLine(L);
+    const ll = $('ledgerline');
+    if (ll.textContent !== line) ll.textContent = line;
+    // a Witness line about the hot axis follows the same report, without re-announcing itself
+    if (this._hotSaid && $('witness').textContent === this._hotSaid) {
+      const w = witnessHotLine({ n, proj: mode, hot: L });
+      if (w && w !== this._hotSaid) { this.ui.witness(w, 'ambient', true); this._hotSaid = w; }
+    }
   }
 
   _vertexLabel(v) {
@@ -1011,15 +1022,8 @@ class App {
 
   _ctx() {
     const s = this.s, n = s.n, o = this.o;
-    let hot = null;
-    if (this.hot && this.hot.hot >= 0) {
-      hot = { axis: this.hot.hot, value: this.hot.value, vertex: null };
-      if (n === 4 && this.effProj() === 'persp') {
-        let best = -1, bw = -Infinity;
-        for (let v = 0; v < o.nv; v++) { const w = this.X[v * 4 + 3]; if (w > bw) { bw = w; best = v; } }
-        if (best >= 0) hot.vertex = { label: this._vertexLabel(best), depth: bw, scale: perspScale(s.D, bw) };
-      }
-    }
+    // the same report the ledger shows (built in _ledgerTick), never a second computation
+    const hot = this.hot && this.hot.n === n && this.hot.mode === this.effProj() ? this.hot : null;
     let crossed = null;
     if (this.cut) {
       const side = new Int8Array(o.nv);
@@ -1064,7 +1068,11 @@ class App {
           this.ambUntil = now + CONFIG.ambientHold;
           this.ambKey = c.key;
         }
-        this.ui.witness(lines[this.ambIdx % lines.length], 'ambient');
+        const line = lines[this.ambIdx % lines.length];
+        const isHot = line === witnessHotLine(c);
+        // a hot-axis line whose numbers moved is updated in place, not re-announced
+        this.ui.witness(line, 'ambient', isHot && !!this._hotSaid && $('witness').textContent === this._hotSaid);
+        this._hotSaid = isHot ? line : null;
       }
     }
     this.prevCtx = c;

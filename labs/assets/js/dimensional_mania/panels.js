@@ -13,6 +13,7 @@
 
 import { AXES, PALETTE, RANK, HOW } from './constants.js';
 import { el, fmt, sup } from './dom.js';
+import { ledgerValue } from './narrator.js';
 
 const C = PALETTE.css;
 
@@ -35,28 +36,41 @@ function fitCanvas(cv, cssW, cssH) {
   return g;
 }
 
+/** the matrix entry as printed: 3 decimals, leading zero dropped, a real minus sign */
+export const matrixEntry = (v) => (Math.abs(v) < 5e-4 ? '0' : (v < 0 ? '−' : '') + Math.abs(v).toFixed(3).replace(/^0/, ''));
+
+/**
+ * The matrix layout for a box of a given width. The cell is 31 px at every n,
+ * the size that holds a 3-decimal entry such as "−.707" (5 characters of
+ * IBM Plex Mono at 9 px, 0.6 em each: 27 px) inside its 29 px fill. Until G1
+ * the cells shrank past 6D and the numbers were switched off; now the
+ * canvas grows instead and its box scrolls sideways (over = true).
+ */
+export const MATRIX_CELL = 31, MATRIX_FONT = 9, MATRIX_PAD = 18;
+export function matrixLayout(box, n) {
+  const W = Math.max(box, MATRIX_PAD + MATRIX_CELL * n + 2);
+  return { pad: MATRIX_PAD, cell: MATRIX_CELL, font: MATRIX_FONT, W, H: MATRIX_PAD + MATRIX_CELL * n + 2, over: W > box };
+}
+
 export class MatrixView {
-  constructor(canvas) { this.cv = canvas; }
+  constructor(canvas, note = null) {
+    this.cv = canvas; this.wrap = canvas.parentElement; this.note = note; this.last = null; this.over = null;
+    // the row labels stay pinned at the left edge while the matrix scrolls
+    this.wrap.addEventListener('scroll', () => { if (this.last) this.draw(...this.last); }, { passive: true });
+  }
   /** M is R (the pose) or A (the generator of the motion, skew-symmetric) */
   draw(M, n, sel, mode = 'R') {
-    const W = Math.max(160, innerWidth(this.cv.parentElement));
-    const pad = 18;
-    const cell = Math.min(n <= 6 ? 31 : 26, Math.floor((W - pad - 2) / n));
-    const H = pad + cell * n + 2;
+    this.last = [M, n, sel, mode];
+    const box = Math.max(160, innerWidth(this.wrap));
+    // every n prints its numbers: the cell keeps the size 3 decimals need, and the box scrolls instead
+    const { pad, cell, font, W, H, over } = matrixLayout(box, n);
     const g = fitCanvas(this.cv, W, H);
-    const nums = n <= 6;
+    this._overflow(over, n, mode);
     g.textAlign = 'center'; g.textBaseline = 'middle';
     const x0 = pad, y0 = pad;
-    g.font = 'italic 500 11px "STIX Two Text", Georgia, serif';
-    for (let k = 0; k < n; k++) {
-      const hot = sel && (k === sel[0] || k === sel[1]);
-      g.fillStyle = hot ? C.gold : C.dim;
-      g.fillText(AXES[k], x0 + cell * k + cell / 2, 8);
-      g.fillText(AXES[k], 8, y0 + cell * k + cell / 2);
-    }
     let scale = 1;
     if (mode === 'A') { scale = 0; for (let i = 0; i < n * n; i++) scale = Math.max(scale, Math.abs(M[i])); scale = scale || 1; }
-    g.font = `500 ${Math.min(9, cell * 0.29)}px "IBM Plex Mono", monospace`;
+    g.font = `500 ${font}px "IBM Plex Mono", monospace`;
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
       const v = M[i * n + j];
       const a = Math.min(1, Math.abs(v) / scale);
@@ -67,11 +81,8 @@ export class MatrixView {
         g.strokeStyle = `rgba(197,204,216,${(0.18 + 0.45 * a).toFixed(3)})`; g.lineWidth = 1;
         g.beginPath(); g.moveTo(x + 3, y + cell - 3); g.lineTo(x + cell - 3, y + 3); g.stroke();
       }
-      if (nums) {
-        g.fillStyle = a > 0.62 && v >= 0 ? C.void : C.bright;
-        const t = Math.abs(v) < 5e-4 ? '0' : (v < 0 ? '−' : '') + Math.abs(v).toFixed(3).replace(/^0/, '');
-        g.fillText(t, x + cell / 2, y + cell / 2 + 0.5);
-      }
+      g.fillStyle = a > 0.62 && v >= 0 ? C.void : C.bright;
+      g.fillText(matrixEntry(v), x + cell / 2, y + cell / 2 + 0.5, cell - 3); // "−1.000" is 6 characters: held inside its cell
     }
     if (n > 3 && mode === 'R') { // the screen sees the first three rows (exactly so in orthographic)
       g.strokeStyle = C.goldDim; g.lineWidth = 1; g.setLineDash([3, 3]);
@@ -80,6 +91,30 @@ export class MatrixView {
       g.moveTo(x0 + cell * 3 + 0.5, y0); g.lineTo(x0 + cell * 3 + 0.5, y0 + cell * n);
       g.stroke(); g.setLineDash([]);
     }
+    // axis labels last: the row labels ride the scroll offset over an opaque gutter, and the gutter
+    // swallows any column the scroll has half hidden, so no entry is ever shown clipped ("885" for "−.885")
+    const sx = Math.max(0, Math.min(this.wrap.scrollLeft || 0, W - box));
+    const firstCol = sx > 0 ? Math.ceil((sx + pad - x0) / cell - 1e-9) : 0;
+    if (sx > 0) { g.fillStyle = C.void; g.fillRect(sx, 0, x0 + cell * firstCol - sx, H); }
+    g.font = 'italic 500 11px "STIX Two Text", Georgia, serif';
+    for (let k = 0; k < n; k++) {
+      const hot = sel && (k === sel[0] || k === sel[1]);
+      g.fillStyle = hot ? C.gold : C.dim;
+      if (k >= firstCol) g.fillText(AXES[k], x0 + cell * k + cell / 2, 8);
+      g.fillText(AXES[k], sx + 8, y0 + cell * k + cell / 2);
+    }
+  }
+
+  /** when the matrix is wider than its box, say so and let the keyboard scroll it */
+  _overflow(over, n, mode) {
+    const key = over ? `${n}:${mode}` : '';
+    if (key === this.over) return;
+    this.over = key;
+    if (over) { this.wrap.tabIndex = 0; this.wrap.setAttribute('aria-label', `the ${n} by ${n} matrix ${mode}, scrolls sideways`); }
+    else { this.wrap.removeAttribute('tabindex'); this.wrap.removeAttribute('aria-label'); this.wrap.scrollLeft = 0; }
+    if (!this.note) return;
+    this.note.hidden = !over;
+    this.note.textContent = over ? `${mode} is ${n} × ${n}, wider than this panel: scroll it sideways to column ${AXES[n - 1]}; the row names stay at the left.` : '';
   }
 }
 
@@ -181,18 +216,17 @@ export class LedgerView {
       this.rows[d] = { r, fill: r.querySelector('.lfill'), val: r.querySelector('.lval') };
     }
   }
-  tick(stress, mode) {
-    let hot = -1, hv = 0;
-    for (const d in this.rows) if (stress[d] > hv) { hv = stress[d]; hot = +d; }
-    const full = mode === 'ortho' ? 1 : mode === 'stereo' ? 8 : 1.4;
+  /** L is the report from project.js shadowLedger(); the sentence under the bars reads the same report */
+  tick(L) {
+    const full = L.mode === 'ortho' ? 1 : L.mode === 'stereo' ? 8 : 1.4;
     for (const d in this.rows) {
-      const s = stress[d] || 0;
+      const a = L.entry(+d);
       const row = this.rows[d];
-      row.fill.style.width = `${Math.min(100, (s / full) * 100).toFixed(1)}%`;
-      row.val.textContent = mode === 'ortho' ? s.toFixed(2) : `${(1 + s).toFixed(2)}×`;
-      row.r.classList.toggle('hot', +d === hot && hv > 0.02);
+      row.fill.style.width = `${Math.min(100, ((a ? a.dev : 0) / full) * 100).toFixed(1)}%`;
+      row.val.textContent = ledgerValue(a, L.mode);
+      row.r.classList.toggle('hot', +d === L.hot && L.flagged);
     }
-    return { hot, value: hv };
+    return L;
   }
 }
 
@@ -208,7 +242,7 @@ export class Reticle {
     this.r = 0;
   }
   layout(cx, cy, r) {
-    this.cx = cx;
+    this.cx = cx; this.cy = cy;
     this.svg.setAttribute('viewBox', `${-cx} ${-cy} ${window.innerWidth} ${window.innerHeight}`);
     if (Math.abs(r - this.r) < 0.5) return;
     this.r = r;
@@ -232,7 +266,13 @@ export class Reticle {
     const tip = `M${(Math.cos(a) * (r - 12)).toFixed(1)} ${(Math.sin(a) * (r - 12)).toFixed(1)}L${(Math.cos(a) * (r + 12)).toFixed(1)} ${(Math.sin(a) * (r + 12)).toFixed(1)}`;
     this.mark.setAttribute('d', on ? arc + tip : '');
     // the label sits outside the ring, or inside it when the ring is near the screen edge
-    const out = this.r + 22 < Math.min(this.cx, window.innerWidth - this.cx) - 70;
+    // or when outside would put it on the hint line (guard: that line's box, in viewport pixels)
+    let out = this.r + 22 < Math.min(this.cx, window.innerWidth - this.cx) - 70;
+    const g = this.guard;
+    if (out && g) {
+      const lx = this.cx + Math.cos(a) * (r + 22), ly = this.cy + Math.sin(a) * (r + 22);
+      if (ly - 12 < g.bottom + 4 && ly > g.top - 4 && lx > g.left - 60 && lx < g.right + 60) out = false;
+    }
     const lr = out ? r + 22 : r - 26;
     this.label.setAttribute('x', (Math.cos(a) * lr).toFixed(1));
     this.label.setAttribute('y', (Math.sin(a) * lr).toFixed(1));

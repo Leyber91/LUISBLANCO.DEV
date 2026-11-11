@@ -14,6 +14,20 @@ import { el, escapeHTML, degOf } from './dom.js';
 const $ = (id) => document.getElementById(id);
 const INSET_LABEL = { down: 'one down', schlegel: 'Schlegel', base: 'base sphere', net: 'flat net' };
 
+/* the one-line hint under the caption: how to orbit, zoom and turn a hidden axis.
+   Touch: a second finger turns the plane (main._canvasHands), so pinch does not zoom; the slider does. */
+const COARSE = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+export function hintText(n, hand, plane, coarse = COARSE) {
+  const zoom = coarse ? 'zoom with the zoom slider' : 'scroll to zoom';
+  if (n < 2) return `drag to orbit · ${zoom}`;
+  const i = Math.min(plane[0], plane[1]), j = Math.max(plane[0], plane[1]);
+  const pl = `${AXES[plane[0]]}–${AXES[plane[1]]}`;
+  const how = i >= 3 ? `${pl}, a plane of two hidden axes` : j >= 3 ? `${pl} through the hidden axis ${AXES[j]}`
+    : n >= 4 ? `${pl} (pick a plane with ${AXES[3]} to turn a hidden axis)` : pl;
+  if (hand) return `drag turns ${how} · ${zoom}`;
+  return coarse ? `drag to orbit · two fingers turn ${how} · ${zoom}` : `drag to orbit · ${zoom} · shift-drag turns ${how}`;
+}
+
 export class Controls {
   constructor(app) {
     this.app = app;
@@ -275,6 +289,8 @@ export class Controls {
     $('pause').disabled = app.reduced;
     $('handTurn').classList.toggle('on', !!app.handTurn); $('handTurn').setAttribute('aria-pressed', String(!!app.handTurn));
     $('handTurn').textContent = app.handTurn ? `drag turns ${AXES[s.plane[0]]}–${AXES[s.plane[1]]}` : 'drag orbits';
+    const hint = hintText(n, !!app.handTurn, s.plane);
+    if ($('hint').textContent !== hint) $('hint').textContent = hint;
     $('sliceBlk').classList.toggle('off', app.effView() === 'shadow');
     for (const id in this.cutBtns) this.cutBtns[id].disabled = n < 2 || o.curved || ((id === 'face' || id === 'cell') && n < 3) || (id === 'cell' && n === 3);
 
@@ -331,11 +347,13 @@ export class Controls {
     $('dialread').innerHTML = `<span class="pl">plane <b class="mth">${AXES[plane[0]]}–${AXES[plane[1]]}</b></span><span class="tn">turned ${degOf(turned)}°</span>`;
   }
 
-  witness(text, kind) {
+  /** quiet: the same sentence with new numbers, so no fade-in */
+  witness(text, kind, quiet = false) {
     const p = $('witness');
     if (p.textContent === text) return;
     p.textContent = text;
     p.dataset.kind = kind;
+    if (quiet) return;
     p.classList.remove('fresh'); void p.offsetWidth; p.classList.add('fresh');
   }
 

@@ -24,14 +24,73 @@ export function fvecText(o) {
   return o.fvec.map((f) => fmt(f.count)).join(', ');
 }
 
+/* ---------------- the shadow ledger, in words ----------------
+   The ledger row, the ledger sentence and the Witness all read one report,
+   project.js shadowLedger(), built once per ledger tick. Each entry carries
+   both ends of its hidden axis (far, near), so a shrink is never reported
+   as a stretch. */
+
+/** attach the names of the hot axis's two end vertices, once, at report time */
+export function labelLedger(L, label, noun = 'corner') {
+  L.noun = noun;
+  const a = L.hot >= 0 ? L.entry(L.hot) : null;
+  L.labels = a ? { far: label(a.far.v), near: label(a.near.v) } : null;
+  return L;
+}
+
+/** the two ends of an axis, the one that carries its distortion first */
+function ends(a) { return a.worst === 'far' ? [a.far, a.near, 'far', 'near'] : [a.near, a.far, 'near', 'far']; }
+
+/** the number a ledger row prints: the factor (or dropped depth) of its worst end */
+export function ledgerValue(a, mode) {
+  if (!a) return mode === 'ortho' ? '0.00' : '1.00×';
+  return mode === 'ortho' ? a.dev.toFixed(2) : `${a[a.worst].s.toFixed(2)}×`;
+}
+
+/** the ledger's own sentence */
+export function ledgerLine(L) {
+  if (!L || L.hot < 0) return '';
+  const a = L.entry(L.hot), A = ax(L.hot), noun = L.noun || 'corner';
+  const [e1, e2, k1] = ends(a);
+  if (L.mode === 'ortho') return `${A} carries the most dropped depth: a ${noun} sits at ${A} = ${sgn(e1.w)}, invisible on screen.`;
+  const one = e1.v === e2.v;
+  if (one) {
+    return L.hot === L.n - 1 || L.mode === 'stereo'
+      ? `${A} bends the shadow most: every ${noun} sits at ${A} = ${sgn(e1.w)} and is drawn ${e1.s.toFixed(2)}×.`
+      : `${A} bends the shadow most: its fold draws every ${noun} at ${e1.s.toFixed(2)}×.`;
+  }
+  // the end that carries the distortion is named first
+  const first = L.mode === 'stereo' ? `the ${noun} ${k1 === 'near' ? 'nearest the pole' : 'farthest from the pole'}` : `its ${k1 === 'near' ? 'nearest' : 'farthest'} ${noun}`;
+  const second = L.mode === 'stereo' ? `the one ${k1 === 'near' ? 'farthest from it' : 'nearest it'}` : `its ${k1 === 'near' ? 'farthest' : 'nearest'}`;
+  if (L.hot === L.n - 1 || L.mode === 'stereo') {
+    return `${A} bends the shadow most: ${first}, at ${A} = ${sgn(e1.w)}, is drawn ${e1.s.toFixed(2)}×; ${second}, at ${A} = ${sgn(e2.w)}, ${e2.s.toFixed(2)}×.`;
+  }
+  // below the top axis the cascade has already folded the coordinate, so no raw W is quoted
+  return `${A} bends the shadow most: its fold draws ${first.replace(/^its /, 'the ')} at ${e1.s.toFixed(2)}× and ${second.replace(/^its /, 'the ')} at ${e2.s.toFixed(2)}×.`;
+}
+
+/** the Witness's sentence about the same report (perspective only) */
+export function witnessHotLine(c) {
+  const L = c.hot;
+  if (c.n < 4 || c.proj !== 'persp' || !L || L.hot < 0 || !L.labels || L.mode !== 'persp') return null;
+  const a = L.entry(L.hot), A = ax(L.hot);
+  const [e1, e2, k1] = ends(a);
+  const l1 = L.labels[k1], l2 = L.labels[k1 === 'far' ? 'near' : 'far'];
+  const one = e1.v === e2.v;
+  if (L.hot === L.n - 1) {
+    return `${A} bends the shadow most: ${l1} sits at ${A} = ${sgn(e1.w)}, so perspective draws it ${e1.s.toFixed(2)} times its size` +
+      (one ? '.' : `; at the other end, ${l2} sits at ${A} = ${sgn(e2.w)} and is drawn ${e2.s.toFixed(2)} times.`);
+  }
+  return `${A} bends the shadow most: its fold draws ${l1} at ${e1.s.toFixed(2)} times its size` + (one ? '.' : ` and, at the other end, ${l2} at ${e2.s.toFixed(2)} times.`);
+}
+
 /* ---------------- ambient and event lines ---------------- */
 
 export function ambientLines(c) {
   const out = [];
   const o = c.obj;
-  if (c.n >= 4 && c.hot && c.hot.axis >= 0 && c.proj === 'persp' && c.hot.vertex) {
-    out.push(`${ax(c.hot.axis)} bends the shadow most: ${c.hot.vertex.label} sits at ${ax(c.hot.axis)} = ${sgn(c.hot.vertex.depth)}, so perspective draws it ${c.hot.vertex.scale.toFixed(2)} times its size.`);
-  }
+  const hot = witnessHotLine(c);
+  if (hot) out.push(hot);
   if (c.n >= 4 && c.proj === 'ortho') {
     out.push(`Orthographic: the screen keeps rows X, Y, Z of the matrix and drops the rest. ${c.hidden} hidden ${c.hidden === 1 ? 'axis is' : 'axes are'} flattened onto the picture without a trace.`);
   }
@@ -205,13 +264,24 @@ export const SYSTEM = [
   'Reply as JSON: {"answer": "...", "show": {...}} and omit show when not needed.',
 ].join('\n');
 
+/** both ends of the hottest axis for the model, from the same ledger report */
+function hottestEnds(L) {
+  if (!L || L.hot < 0) return null;
+  const a = L.entry(L.hot), key = L.mode === 'ortho' ? 'dropped' : 'drawn_scale';
+  return {
+    far: { at: +a.far.w.toFixed(3), [key]: +a.far.s.toFixed(3) },
+    near: { at: +a.near.w.toFixed(3), [key]: +a.near.s.toFixed(3) },
+  };
+}
+
 export function promptFor(q, c) {
   const state = {
     n: c.n, object: c.obj.name, schlafli: c.obj.schlafli || null, f_vector: c.obj.fvec.map((f) => f.count),
     euler: c.obj.euler ? c.obj.euler.chi : null, view: c.view, projection: c.proj, motion: PRESETS[c.preset].label,
     spinning_planes: c.spin.map(planeName), spin_speeds_rad_s: c.speeds.map((s) => +s.toFixed(3)),
     slice: c.slice ? { at: +c.slice.h.toFixed(3), shape: c.slice.name, counts: c.slice.counts, measure: c.slice.measure != null ? +c.slice.measure.toFixed(4) : null } : null,
-    ledger_hottest_axis: c.hot && c.hot.axis >= 0 ? AXES[c.hot.axis] : null,
+    ledger_hottest_axis: c.hot && c.hot.hot >= 0 ? AXES[c.hot.hot] : null,
+    ledger_hottest_ends: hottestEnds(c.hot),
   };
   return `Live state: ${JSON.stringify(state)}\nVisitor asks: ${q}`;
 }
