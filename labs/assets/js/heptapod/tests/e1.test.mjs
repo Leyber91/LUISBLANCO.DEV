@@ -2,22 +2,29 @@
    heptapod/tests/e1.test.mjs — experiment E1 of generation G2: the
    topology kernel and canonical form.
 
-     node labs/assets/js/heptapod/tests/e1.test.mjs          gate size (under 120 s)
+     node labs/assets/js/heptapod/tests/e1.test.mjs          gate size (about 30 s of CPU; the gate allows 120 s wall)
      node labs/assets/js/heptapod/tests/e1.test.mjs --full   the binding size of the plan's pass test
      ... --full --shard 2/4                                   one of 4 reproducible shards of the full run
 
-   Sizes: gate 100 graphs (600 drawings), 100 crops, 150 plane trees for
-   check 3 at 1 start per tree and both directions; full 10,000 graphs
-   (60,000 drawings), 1,000 crops, 300 trees for check 3 at every one of
-   the 4(n-1) starts per tree and both directions (the research check's
-   own reading count). Every graph and tree has its own seed, so a shard
-   (graphs and trees with index = k mod K) reproduces its part exactly;
-   the shards' summary lines add up to the full run.
+   Sizes: gate 30 graphs (180 drawings), 30 crops, 30 plane trees for
+   check 3 at 1 start per tree and both directions, 2,000 + 500 canon
+   pairs; full 10,000 graphs (60,000 drawings), 1,000 crops, 300 trees
+   for check 3 at every one of the 4(n-1) starts per tree and both
+   directions (the research check's own reading count), 20,000 + 5,000
+   canon pairs. Every graph and tree has its own seed, so a shard (graphs
+   and trees with index = k mod K) reproduces its part exactly; the
+   shards' summary lines add up to the full run. Section 1 is not
+   sharded: every shard runs all of it. The last line gives wall and CPU
+   seconds, so a slow gate log separates the test's own cost from a busy
+   machine.
 
    What is measured, and how the reader is kept from the answer:
    1. Canonical labelling against brute-force isomorphism on small
       graphs (an independent method), so "same certificate" below means
-      "isomorphic", not "the labeller agrees with itself".
+      "isomorphic", not "the labeller agrees with itself"; again on small
+      symmetric graphs, where automorphism pruning fires; and its cost
+      on symmetric meaning graphs up to 40 nodes (k identical siblings),
+      each under 200 ms of CPU.
    2. The research check 4, ported: disks on a triangular lattice, necks
       on a spanning tree only, then the control with necks everywhere.
    3. The research check 3, rerun from geometry only: random plane trees
@@ -37,10 +44,16 @@
       a graph isomorphic to g (certificate and an independent triple
       multiset) and the writer's lobe graph. Node-id permutations of g
       give byte-identical masters.
-   5. Crops: a disk around a random lobe at a random radius, rotation,
-      scale and reading direction. The reader gets the pieces of line
+   5. Crops: a disk at a random radius, rotation, scale and reading
+      direction, centred on a random lobe for half the crops and at a
+      random offset of up to 2 radii from it for the other half, so some
+      crops hold no whole lobe at all. The reader gets the pieces of line
       inside the disk and the disk; it must return the induced subgraph
-      of the lobes fully inside, with cut necks as open contacts.
+      of the lobes fully inside, with cut necks as open contacts (the
+      empty graph when no lobe is whole). On top of these, one sliver
+      per 4 crops: a small disk at a lobe's rim that holds a few cells of
+      line and usually not one complete motif, which must read as the
+      empty graph, not as a refusal.
    Exits 1 on any failure.
    ============================================================ */
 
@@ -58,11 +71,12 @@ import { sdfGrid, marchLoops, rasterTopology, signedArea } from '../topo/contour
 const FULL = process.argv.includes('--full');
 const arg = (name, dflt) => { const i = process.argv.indexOf(name); return i > 0 ? +process.argv[i + 1] : dflt; };
 const SIZE = {
-  graphs: arg('--graphs', FULL ? 10000 : 100),
-  crops: arg('--crops', FULL ? 1000 : 100),
-  trees: FULL ? 300 : 150,
+  graphs: arg('--graphs', FULL ? 10000 : 30),
+  crops: arg('--crops', FULL ? 1000 : 30),
+  trees: arg('--trees', FULL ? 300 : 30),
   treeStarts: FULL ? 'all' : 1,
-  canonPairs: FULL ? 20000 : 2000,
+  canonPairs: arg('--canon-pairs', FULL ? 20000 : 2000),
+  symPairs: arg('--sym-pairs', FULL ? 5000 : 500),
 };
 const SEED = arg('--seed', 20261111);
 const SHARD = (() => { const i = process.argv.indexOf('--shard'); if (i < 0) return null; const [k, K] = process.argv[i + 1].split('/').map(Number); return { k, K }; })();
@@ -78,8 +92,12 @@ const fail = (msg) => {
   if (!failLog.has(cat)) failLog.set(cat, []);
   if (failLog.get(cat).length < 4) failLog.get(cat).push(msg);
 };
-let tSec = Date.now();
-const lap = () => { const t = ((Date.now() - tSec) / 1000).toFixed(1); tSec = Date.now(); return t + ' s'; };
+let tSec = Date.now(), cSec = process.cpuUsage();
+const lap = () => {
+  const t = ((Date.now() - tSec) / 1000).toFixed(1), c = process.cpuUsage(cSec);
+  tSec = Date.now(); cSec = process.cpuUsage();
+  return `${t} s wall, ${((c.user + c.system) / 1e6).toFixed(1)} s CPU`;
+};
 const line = (s) => console.log(s);
 const certOf = (G) => canonicalLabelling(G).cert;
 
@@ -165,6 +183,114 @@ function triples(g) {
     if (same !== truth) { bad++; fail(`canonical labelling: certificate ${same ? 'equal' : 'different'} but brute force says ${truth ? 'isomorphic' : 'not isomorphic'}`); }
   }
   line(`1. canonical labelling vs brute-force isomorphism: ${SIZE.canonPairs} pairs of 1-6 node labelled digraphs (${iso} isomorphic, ${non} not), ${bad} disagreements [${lap()}]`);
+
+  /* 1b. the same against brute force on symmetric graphs, where the
+     search's automorphism pruning and jump-back actually fire: c copies
+     of a 1-3 node gadget hung from a hub, sometimes a cycle through the
+     copies, then 0-2 random edges; up to 8 nodes. */
+  const symGraph = () => {
+    const m = randInt(rnd, 1, 3), c = randInt(rnd, 2, m === 1 ? 7 : m === 2 ? 3 : 2);
+    const gl = Array.from({ length: m }, () => (rnd() < 0.7 ? 'a' : 'b'));
+    const ge = [];
+    for (let i = 1; i < m; i++) ge.push({ h: randInt(rnd, 0, i - 1), d: i, key: rnd() < 0.7 ? 'x' : 'y' });
+    if (m === 3 && rnd() < 0.4) ge.push({ h: 2, d: 0, key: 'x' });
+    const labels = ['h'], edges = [];
+    for (let t = 0; t < c; t++) {
+      const o = labels.length;
+      labels.push(...gl);
+      for (const e of ge) edges.push({ h: o + e.h, d: o + e.d, key: e.key });
+      edges.push({ h: 0, d: o, key: 'x' });
+    }
+    const seen = new Set(edges.map((e) => e.h + ',' + e.d + ',' + e.key));
+    const add = (h, d, key) => { if (h !== d && !seen.has(h + ',' + d + ',' + key)) { seen.add(h + ',' + d + ',' + key); edges.push({ h, d, key }); } };
+    if (rnd() < 0.3) for (let t = 1; t < labels.length; t += m) add(t, t + m < labels.length ? t + m : 1, 'y');
+    for (let t = randInt(rnd, 0, 2); t > 0; t--) add(randInt(rnd, 0, labels.length - 1), randInt(rnd, 0, labels.length - 1), 'y');
+    return { n: labels.length, labels, edges };
+  };
+  const permuted = (A) => {
+    const p = shuffle(Array.from({ length: A.n }, (_, i) => i), rnd);
+    const labels = new Array(A.n);
+    for (let v = 0; v < A.n; v++) labels[p[v]] = A.labels[v];
+    return { n: A.n, labels, edges: shuffle(A.edges.map((e) => ({ h: p[e.h], d: p[e.d], key: e.key })), rnd) };
+  };
+  let sIso = 0, sNon = 0, sBad = 0, sAutos = 0;
+  for (let t = 0; t < SIZE.symPairs; t++) {
+    const A = symGraph();
+    let B;
+    if (rnd() < 0.5) B = permuted(A);
+    else {
+      B = { n: A.n, labels: A.labels.slice(), edges: A.edges.map((e) => ({ ...e })) };
+      const r = rnd();
+      if (r < 0.5) { const e = B.edges[randInt(rnd, 0, B.edges.length - 1)]; e.key = e.key === 'x' ? 'y' : 'x'; }
+      else if (r < 0.8) { const e = B.edges[randInt(rnd, 0, B.edges.length - 1)]; const d = randInt(rnd, 0, B.n - 1); if (d !== e.h) e.d = d; }
+      else { const v = randInt(rnd, 1, B.n - 1); B.labels[v] = B.labels[v] === 'a' ? 'b' : 'a'; }
+      B = permuted(B);
+    }
+    const st = {};
+    const same = canonicalLabelling(A, st).cert === canonicalLabelling(B, st).cert;
+    sAutos += st.autos;
+    const truth = isoBruteForce(A, B);
+    if (truth) sIso++; else sNon++;
+    if (same !== truth) { sBad++; fail(`canonical labelling: on a symmetric graph the certificate is ${same ? 'equal' : 'different'} but brute force says ${truth ? 'isomorphic' : 'not isomorphic'}`); }
+  }
+  line(`   symmetric graphs: ${SIZE.symPairs} pairs of up to 8 nodes built from repeated gadgets (${sIso} isomorphic, ${sNon} not; ${sAutos} automorphisms stored), ${sBad} disagreements [${lap()}]`);
+
+  /* 1c. cost on the symmetric meaning graphs that froze the earlier
+     search: k identical participants of one event, k identical two-node
+     arms, a junction of k identical conjuncts, k identical entities in a
+     same-entity cycle or in mutual pairs, and k identical entities with 4
+     identical attributes each, for every k from 4 up to 40 nodes. Each
+     canonicalisation must take under 200 ms of CPU time (CPU, not wall,
+     so a busy shared machine cannot pass or fail it) and visit at most
+     n^2 leaves; node permutations must give the certificate of the
+     original, and re-hanging one sibling from another (same labels, same
+     edge keys, a different graph) must change it. */
+  const anchor = { mode: 'decl', temp: 'before', evid: 'visual' };
+  const ent = () => ({ k: 'entity', c: ['PERSON'], f: { person: '3', num: 'sg', quant: 'def' } });
+  const att = () => ({ k: 'event', c: ['THING'], f: { aspect: 'state', strength: 'AFF' } });
+  const goal = { inv: 'direct' };
+  const family = (kind, k) => {
+    const nodes = { o: { k: 'origo', f: { speaker: 'visitor' } }, e: { k: 'event', c: ['SEE'], f: { aspect: 'state', strength: 'AFF' } } };
+    const edges = [['o', 'anchor', 'e', anchor]];
+    const leaf = (i) => { nodes['m' + i] = ent(); edges.push(['e', 'goal', 'm' + i, goal]); };
+    if (kind === 'junction') {
+      nodes.j = { k: 'junction', f: { op: 'and' } };
+      edges.push(['e', 'actor', 'j', goal]);
+      for (let i = 0; i < k; i++) { nodes['m' + i] = ent(); edges.push(['j', 'op', 'm' + i, {}]); }
+    } else for (let i = 0; i < k; i++) leaf(i);
+    if (kind === 'arms') for (let i = 0; i < k; i++) { nodes['a' + i] = att(); edges.push(['m' + i, 'attribution', 'a' + i, { type: 'mod' }]); }
+    if (kind === 'nested') for (let i = 0; i < k; i++) for (let t = 0; t < 4; t++) { nodes[`a${i}_${t}`] = att(); edges.push(['m' + i, 'attribution', `a${i}_${t}`, { type: 'mod' }]); }
+    if (kind === 'cycle') for (let i = 0; i < k; i++) edges.push(['m' + i, 'same-entity', 'm' + ((i + 1) % k), {}]);
+    if (kind === 'mutual') for (let i = 0; i + 1 < k; i += 2) { edges.push(['m' + i, 'same-entity', 'm' + (i + 1), {}]); edges.push(['m' + (i + 1), 'same-entity', 'm' + i, {}]); }
+    return { v: 'hmr-0.1', nodes, edges };
+  };
+  const cpuMs = () => { const u = process.cpuUsage(); return (u.user + u.system) / 1000; };
+  let cases = 0, slow = 0, leafy = 0, permBad = 0, ctlBad = 0, worstMs = 0, worstCase = '', worstLeaves = 0;
+  for (const kind of ['star', 'arms', 'junction', 'cycle', 'mutual', 'nested']) {
+    for (let k = 4; ; k++) {
+      const g = family(kind, k);
+      const n = Object.keys(g.nodes).length;
+      if (n > 40) break;
+      const v = validateHMR(g);
+      if (!v.ok) { fail(`canonical labelling cost: ${kind} k=${k} is not a valid graph: ${v.errors[0]}`); break; }
+      cases++;
+      const st = {};
+      const c0 = cpuMs();
+      const cert = canonicalGraph(g, st).cert;
+      const ms = cpuMs() - c0;
+      if (ms > worstMs) { worstMs = ms; worstCase = `${kind} k=${k} (${n} nodes)`; }
+      worstLeaves = Math.max(worstLeaves, st.leaves);
+      if (ms >= 200) { slow++; fail(`canonical labelling cost: ${kind} k=${k} (${n} nodes) took ${ms.toFixed(0)} ms of CPU`); }
+      if (st.leaves > n * n) { leafy++; fail(`canonical labelling cost: ${kind} k=${k} (${n} nodes) visited ${st.leaves} leaves`); }
+      for (let t = 0; t < 2; t++) if (canonicalGraph(permuteGraph(g, rnd)).cert !== cert) { permBad++; fail(`canonical labelling cost: ${kind} k=${k}: a node permutation changed the certificate`); }
+      // control: re-hang one sibling from another; the labels and edge keys keep their multisets, the graph changes
+      const i = randInt(rnd, 0, k - 1), j = (i + randInt(rnd, 1, k - 1)) % k;
+      const h = { v: g.v, nodes: g.nodes, edges: g.edges.map((e) => (e[2] === 'm' + i && !e[0].startsWith('m') ? ['m' + j, e[1], e[2], e[3]] : e)) };
+      if (canonicalGraph(permuteGraph(h, rnd)).cert === cert) { ctlBad++; fail(`canonical labelling cost: ${kind} k=${k}: a re-hung sibling kept the certificate`); }
+    }
+  }
+  line(`   symmetric meaning graphs (6 families, k identical siblings, k from 4 up to 40 nodes): ${cases} graphs; worst ${worstMs.toFixed(0)} ms CPU (${worstCase}), most leaves ${worstLeaves}; ${slow} over 200 ms, ${leafy} over n^2 leaves; ${cases * 2 - permBad}/${cases * 2} permutations keep the certificate, ${cases - ctlBad}/${cases} re-hung siblings change it [${lap()}]`);
+  Object.assign(SUM, { canonPairs: SIZE.canonPairs, symPairs: SIZE.symPairs, symFamilies: cases, symWorstMs: Math.round(worstMs), symSlow: slow });
 }
 
 /* ---------------- 2. research check 4, ported ---------------- */
@@ -359,19 +485,33 @@ function cropClean(dw, O, R) {
   }
   return true;
 }
-function runCrop(dw, rnd, stats) {
+function runCrop(dw, rnd, stats, sliver = false) {
   let O = null, R = 0, tries = 0;
+  // half the crops are centred on a lobe; the other half at a random offset of up to 2 of its radii
+  // a sliver: a small disk centred 0.5 to 2.5 l outside a lobe's rim, reaching 2 to 5 l inside it
+  const offset = !sliver && rnd() < 0.5;
   for (let a = 0; a < 60 && !O; a++) {
     const c = dw.lobes[Math.floor(rnd() * dw.lobes.length)];
-    const ext = Math.max(...dw.lobes.map((b) => Math.hypot(b.x - c.x, b.y - c.y) + b.r));
+    const C = { x: c.x, y: c.y };
+    let rLo = c.r + MU + 0.01, rSpan = 0;
+    if (sliver) {
+      const phi = 2 * Math.PI * rnd(), d = 0.5 + 2 * rnd();
+      C.x += (c.r + d) * Math.cos(phi); C.y += (c.r + d) * Math.sin(phi);
+      rLo = d + MU + 0.01; rSpan = 3;
+    } else {
+      if (offset) { const rho = 2 * c.r * Math.sqrt(rnd()), phi = 2 * Math.PI * rnd(); C.x += rho * Math.cos(phi); C.y += rho * Math.sin(phi); }
+      const ext = Math.max(...dw.lobes.map((b) => Math.hypot(b.x - C.x, b.y - C.y) + b.r));
+      rSpan = Math.max(0, ext - c.r - MU);
+    }
     for (let t = 0; t < 40; t++) {
       tries++;
-      const r = c.r + MU + 0.01 + rnd() * Math.max(0, ext - c.r - MU);
-      if (cropClean(dw, c, r)) { O = { x: c.x, y: c.y }; R = r; break; }
+      const r = rLo + rnd() * rSpan;
+      if (cropClean(dw, C, r)) { O = C; R = r; break; }
     }
   }
   stats.tries += tries;
   if (!O) { stats.skipped++; return; }
+  if (offset) stats.offset++;
   const cut = cropContour(dw.contour, O.x, O.y, R);
   const th = rnd() * 2 * Math.PI, s = 0.5 + 1.5 * rnd(), tx = (rnd() - 0.5) * 2000, ty = (rnd() - 0.5) * 2000;
   const rev = rnd() < 0.5;
@@ -409,16 +549,21 @@ function runCrop(dw, rnd, stats) {
   stats.openNecks += truth.open.filter((o) => o.kind === 'neck').length;
   stats.openKisses += truth.open.filter((o) => o.kind === 'kiss').length;
   stats.internalKisses += truth.edges.filter((e) => e.key.startsWith('kiss')).length;
-  if (!res.ok) { stats.bad++; fail(`crop: refused (${res.errors.slice(0, 2).join('; ')})`); return; }
+  if (!truth.nodes.length) stats.emptyTruth++;
+  if (res.info && res.info.nothingReadable) stats.nothingReadable++;
+  const what = sliver ? 'crop (sliver)' : 'crop';
+  if (!res.ok) { stats.bad++; fail(`${what}: refused (${res.errors.slice(0, 2).join('; ')}); truth ${truth.nodes.length} whole lobes, ${truth.open.length} open contacts, ${pieces.length} pieces`); return; }
   const want = certOf(withOpen({ labels: truth.nodes, edges: truth.edges, open: truth.open }));
   const got = certOf(withOpen({ labels: res.lobeGraph.labels, edges: res.lobeGraph.edges, open: res.open }));
-  if (want !== got) { stats.bad++; fail(`crop: read ${res.lobeGraph.n} whole lobes and ${res.open.length} open contacts, expected ${truth.nodes.length} and ${truth.open.length}`); }
+  if (want !== got) { stats.bad++; fail(`${what}: read ${res.lobeGraph.n} whole lobes and ${res.open.length} open contacts, expected ${truth.nodes.length} and ${truth.open.length}`); }
+  else if (!truth.nodes.length) stats.emptyOk++;
 }
 
 {
   const st = { graphs: 0, drawings: 0, topoBad: 0, decodeBad: 0, lobeBad: 0, permBad: 0, kisses: 0, echoes: 0, nonTree: 0, lobes: 0, collisionGraphs: 0, collisionLobes: 0,
     mirrors: 0, reversed: 0, distinctMasters: 0, necksLong: 0, necks: 0, rasterChecked: 0, maxLobes: 0, sizes: [0, 0, 0] };
-  const cs = { n: 0, bad: 0, skipped: 0, tries: 0, whole: 0, inside: 0, openNecks: 0, openKisses: 0, internalKisses: 0 };
+  const cs = { n: 0, bad: 0, skipped: 0, tries: 0, whole: 0, inside: 0, openNecks: 0, openKisses: 0, internalKisses: 0, offset: 0, emptyTruth: 0, emptyOk: 0, nothingReadable: 0, cpu: 0 };
+  const ss = { n: 0, bad: 0, skipped: 0, tries: 0, whole: 0, inside: 0, openNecks: 0, openKisses: 0, internalKisses: 0, offset: 0, emptyTruth: 0, emptyOk: 0, nothingReadable: 0 };
   const cropEvery = Math.max(1, Math.floor(SIZE.graphs / SIZE.crops));
   // which graphs get a crop does not depend on the shard count: blocks of 4 consecutive graphs, every cropEvery-th block
   const cropHere = (gi) => Math.floor(gi / 4) % cropEvery === 0;
@@ -470,7 +615,9 @@ function runCrop(dw, rnd, stats) {
       const gp = permuteGraph(g, rnd);
       const dp = encode(gp, { raster: false });
       if (!dp.ok || !dp.contour || !Buffer.from(masterBytes(dp)).equals(Buffer.from(m0))) { st.permBad++; fail(`graph ${gi}: a node-id permutation changed the master`); }
-      if (cropHere(gi)) runCrop(drawings[Math.floor(rnd() * drawings.length)], rnd, cs);
+      if (cropHere(gi)) { const c0 = process.cpuUsage(); runCrop(drawings[Math.floor(rnd() * drawings.length)], rnd, cs); const c1 = process.cpuUsage(c0); cs.cpu += (c1.user + c1.system) / 1e6; }
+      // one sliver crop per block of 4 crop graphs, on top of the crops above
+      if (cropHere(gi) && gi % 4 === 0) runCrop(drawings[Math.floor(rnd() * drawings.length)], rnd, ss, true);
     }
     if (FULL && st.graphs % 500 === 0) line(`   ... ${gi + 1} graphs, ${failures} failures, ${((Date.now() - T0) / 1000).toFixed(0)} s`);
   }
@@ -482,18 +629,24 @@ function runCrop(dw, rnd, stats) {
   line(`   label collisions: ${st.collisionGraphs}/${st.graphs} masters have lobes sharing one label (${st.collisionLobes} such lobes), so identity cannot come from labels`);
   line(`   non-tree edges ${st.nonTree}: ${st.kisses} drawn as kisses (${(100 * st.kisses / Math.max(1, st.nonTree)).toFixed(1)}%), ${st.echoes} as echo lobes; necks ${st.necks}, of which ${st.necksLong} stretched beyond ${4 * TOPO.s0} l`);
   line(`   node-id permutations: ${st.graphs - st.permBad}/${st.graphs} byte-identical masters`);
-  line(`5. crops: ${cs.n} crops decoded (${cs.whole} held the whole figure), ${cs.n - cs.bad}/${cs.n} read as the induced subgraph of the whole lobes with cut necks open; ${cs.inside} whole lobes, ${cs.openNecks} open necks, ${cs.openKisses} open kisses, ${cs.internalKisses} kisses inside; ${cs.skipped} skipped (no unambiguous radius), ${cs.tries} radius draws for an ambiguity band of ${MU} l [sections 4 and 5: ${lap()}]`);
+  line(`5. crops: ${cs.n} crops decoded (${cs.n - cs.offset} centred on a lobe, ${cs.offset} offset up to 2 lobe radii; ${cs.whole} held the whole figure), ${cs.n - cs.bad}/${cs.n} read as the induced subgraph of the whole lobes with cut necks open; ${cs.inside} whole lobes, ${cs.openNecks} open necks, ${cs.openKisses} open kisses, ${cs.internalKisses} kisses inside; ${cs.skipped} skipped (no unambiguous radius), ${cs.tries} radius draws for an ambiguity band of ${MU} l [sections 4 and 5: ${lap()}, of which crops ${cs.cpu.toFixed(1)} s CPU]`);
+  line(`   crops holding no whole lobe: ${cs.emptyTruth}, read as the empty graph: ${cs.emptyOk}/${cs.emptyTruth} (${cs.nothingReadable} of all crops had no complete motif to read)`);
+  line(`   slivers (extra crops: a disk centred 0.5-2.5 l outside a lobe rim, reaching 2-5 l in): ${ss.n - ss.bad}/${ss.n} read right; ${ss.nothingReadable} had no complete motif, ${ss.emptyTruth} held no whole lobe, ${ss.emptyOk} read as the empty graph; ${ss.skipped} skipped`);
   let cropsWanted = 0;
   for (let gi = 0; gi < SIZE.graphs; gi++) if (mine(gi) && cropHere(gi)) cropsWanted++;
   if (cs.n < cropsWanted * 0.9) fail(`crops: only ${cs.n} of about ${cropsWanted} ran`);
   Object.assign(SUM, { graphs: st.graphs, drawings: st.drawings, oneCurve: st.drawings - st.topoBad, decoded: ok, lobeGraphs: ok - st.lobeBad, permOk: st.graphs - st.permBad,
     masters: st.rasterChecked, kisses: st.kisses, echoes: st.echoes, nonTree: st.nonTree, lobes: st.lobes, crops: cs.n, cropsOk: cs.n - cs.bad, cropSkipped: cs.skipped,
-    openNecks: cs.openNecks, openKisses: cs.openKisses, cropLobes: cs.inside, collisionGraphs: st.collisionGraphs, mirrors: st.mirrors, reversed: st.reversed });
+    openNecks: cs.openNecks, openKisses: cs.openKisses, cropLobes: cs.inside, cropsOffset: cs.offset, cropsEmptyTruth: cs.emptyTruth, cropsEmptyOk: cs.emptyOk, cropsNothingReadable: cs.nothingReadable,
+    slivers: ss.n, sliversOk: ss.n - ss.bad, sliversNothingReadable: ss.nothingReadable, sliversEmptyOk: ss.emptyOk,
+    collisionGraphs: st.collisionGraphs, mirrors: st.mirrors, reversed: st.reversed });
 }
 
 for (const list of failLog.values()) for (const f of list) line('FAIL ' + f);
 SUM.failures = failures;
 line('E1-SUMMARY ' + JSON.stringify(SUM));
 const secs = ((Date.now() - T0) / 1000).toFixed(1);
-line(failures ? `E1: ${failures} FAILURES (${secs} s)` : `E1: 0 failures (${secs} s)`);
+const cpu = process.cpuUsage();
+const cpuSecs = ((cpu.user + cpu.system) / 1e6).toFixed(1);
+line(failures ? `E1: ${failures} FAILURES (${secs} s wall, ${cpuSecs} s CPU)` : `E1: 0 failures (${secs} s wall, ${cpuSecs} s CPU)`);
 process.exit(failures ? 1 : 0);

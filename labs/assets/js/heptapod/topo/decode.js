@@ -669,7 +669,11 @@ export function decodeCrop(input) {
   if (!pieces.length) return { ok: true, errors: [], lobeGraph: { n: 0, labels: [], edges: [] }, open: [] };
   if (motifDirection(pieces) < 0) for (const p of pieces) { p.x.reverse(); p.y.reverse(); p.sym.reverse(); p.cell.reverse(); }
   const l = estimateCell(pieces);
-  if (!l) return { ok: false, errors: ['no motif can be read'], lobeGraph: null, open: [] };
+  // Not one complete motif in the disk. Every whole lobe carries at least
+  // its determinant and its checksum as complete motifs, so no lobe is
+  // whole here and no contact can be open on one: the induced subgraph is
+  // the empty graph. That is a reading, not a refusal.
+  if (!l) return { ok: true, errors: [], lobeGraph: { n: 0, labels: [], edges: [] }, open: [], info: { nothingReadable: true } };
   const cx = circle.x / l, cy = circle.y / l, R = circle.r / l;
   for (const p of pieces) for (let i = 0; i < p.x.length; i++) { p.x[i] /= l; p.y[i] /= l; }
   const ang = (x, y) => { let a = Math.atan2(y - cy, x - cx); return a < 0 ? a + 2 * Math.PI : a; };
