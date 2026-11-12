@@ -3,12 +3,19 @@
 
      node labs/assets/js/token-ekg/tests/run.mjs
 
-   1. tokenizers: the two in-repo BPE implementations (Qwen3, Mistral
-      v0.3) re-encode every text in data/tokenizer-reference.json and
-      must give the reference library's ids exactly. The tiktoken pair
-      (gpt-tokenizer 3.4.0) is checked the same way: the test downloads
-      the pinned ES modules from jsDelivr once (or uses GPT_TOKENIZER=
-      <path to gpt-tokenizer/esm>) and applies the page's own fix.
+   1. tokenizers: every tokenizer in config.js re-encodes every text in
+      data/tokenizer-reference.json and must give the reference
+      library's ids exactly. Qwen3 is the in-repo BPE implementation;
+      the tiktoken pair (gpt-tokenizer 3.4.0) is checked the same way:
+      the test downloads the pinned ES modules from jsDelivr once (or
+      uses GPT_TOKENIZER=<path to gpt-tokenizer/esm>) and applies the
+      page's own fix. The fixture, the vocabulary folder and config.js
+      must name the same tokenizers, so a withdrawn vocabulary cannot
+      leave a file, a load path or a reference column behind.
+   1b. re-tokenization: Qwen3 recordings, re-tokenized, give the
+      server's eval_count. Models whose tokenizer the page does not
+      ship (Mistral) keep their recordings, match no tokenizer, and
+      their notes claim no check.
    2. statistics: analyze() on shipped recordings against values worked
       out by hand from the same files.
    3. schema: every recording in data/traces.json and data/runs.json
@@ -19,10 +26,12 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname } from 'node:path';
-import { byteLevelFromText, sentencePieceFromText } from '../engine/bpe.js';
+import { readdirSync, existsSync } from 'node:fs';
+import { byteLevelFromText } from '../engine/bpe.js';
 import { analyze, mannWhitney, lombScargle, intervals } from '../engine/stats.js';
 import { validateTrace } from '../engine/schema.js';
-import { patchBom } from '../engine/tokens.js';
+import { patchBom, loadTokenizer } from '../engine/tokens.js';
+import { TOKENIZERS, NO_TOKENIZER } from '../config.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, '..', 'data');
@@ -53,18 +62,39 @@ async function fetchGptTokenizer() {
 }
 
 const ref = JSON.parse(read('tokenizer-reference.json'));
-const toks = {
-  qwen3: byteLevelFromText('qwen3', read('tokenizers/qwen3.bpe.txt')),
-  'mistral-v03': sentencePieceFromText('mistral-v03', read('tokenizers/mistral-v03.bpe.txt')),
-};
+const ids = TOKENIZERS.map((t) => t.id);
+
+/* the fixture, the folder and config.js name the same tokenizers */
+{
+  const refKeys = Object.keys(ref.references);
+  ok(refKeys.length === ids.length && ids.every((id) => refKeys.includes(id)),
+    `reference fixture names ${refKeys.join(', ')}; config.js names ${ids.join(', ')}`);
+  const stale = ref.cases.filter((c) => Object.keys(c).some((k) => k !== 'name' && k !== 'text' && !ids.includes(k)));
+  ok(stale.length === 0, `${stale.length} reference cases carry ids for a tokenizer config.js does not list`);
+  const missing = ref.cases.filter((c) => ids.some((id) => !Array.isArray(c[id])));
+  ok(missing.length === 0, `${missing.length} reference cases lack ids for a listed tokenizer`);
+  ok(ref.cases.length >= 30, `reference fixture has ${ref.cases.length} texts (want >= 30)`);
+  const files = TOKENIZERS.filter((t) => t.file).map((t) => t.file.replace(/^data\/tokenizers\//, ''));
+  ok(files.length > 0 && files.every((f) => existsSync(join(DATA, 'tokenizers', f))), `every vocabulary file in config.js exists: ${files.join(', ')}`);
+  const extra = readdirSync(join(DATA, 'tokenizers')).filter((f) => !files.includes(f) && !/^LICENSE/.test(f));
+  ok(extra.length === 0, `data/tokenizers holds only listed vocabularies and their licence; extra: ${extra.join(', ')}`);
+  ok(TOKENIZERS.every((t) => t.kind === 'gpt-tokenizer' || t.kind === 'bytelevel'), 'every listed tokenizer has a loader (gpt-tokenizer or bytelevel)');
+  let refused = '';
+  await loadTokenizer('mistral-v03', new URL('file:///')).then(() => { refused = 'loaded'; }, (e) => { refused = e.message; });
+  ok(refused === 'unknown tokenizer mistral-v03', `the withdrawn Mistral vocabulary has no load path (loadTokenizer says: ${refused})`);
+  console.log(`fixture: ${ref.cases.length} texts x ${refKeys.length} tokenizers, the same ${ids.length} that config.js lists`);
+}
+
+const toks = {};
+for (const t of TOKENIZERS.filter((x) => x.kind === 'bytelevel')) toks[t.id] = byteLevelFromText(t.id, readFileSync(join(DATA, '..', t.file), 'utf8'));
 const gptDir = process.env.GPT_TOKENIZER || await fetchGptTokenizer().catch((e) => { console.log('  gpt-tokenizer not fetched: ' + e.message); return null; });
 if (gptDir) {
-  for (const enc of ['o200k_base', 'cl100k_base']) {
-    const m = await import(pathToFileURL(join(gptDir, 'encoding', enc + '.js')).href);
+  for (const t of TOKENIZERS.filter((x) => x.kind === 'gpt-tokenizer')) {
+    const m = await import(pathToFileURL(join(gptDir, 'encoding', t.id + '.js')).href);
     patchBom(m.default.bytePairEncodingCoreProcessor); // the same fix the page applies
-    toks[enc] = { encode: m.encode };
+    toks[t.id] = { encode: m.encode };
   }
-}
+} else console.log('  SKIP: the tiktoken pair was not checked (no network and no GPT_TOKENIZER path)');
 for (const [name, tk] of Object.entries(toks)) {
   let bad = 0;
   for (const c of ref.cases) {
@@ -79,31 +109,49 @@ for (const [name, tk] of Object.entries(toks)) {
 
 /* ---- 1b. the model's own tokenizer reproduces the server's count ----
    Ollama sends one token per chunk and counts one more (the end-of-turn token), so re-tokenizing
-   the streamed text with the model's tokenizer must give the chunk count, and eval_count - 1. */
+   the streamed text with the model's tokenizer must give the chunk count, and eval_count - 1.
+   Every dataset run of a model whose tokenizer the page ships is checked, not a sample. */
+const modelTok = (model) => TOKENIZERS.find((t) => t.match && t.match.test(model || '')) || null;
+const noTok = (model) => (modelTok(model) ? null : NO_TOKENIZER.find((t) => t.match.test(model || '')) || null);
 {
   const runs = JSON.parse(read('runs.json')).traces;
-  for (const [prefix, tk] of [['qwen3', toks.qwen3], ['mistral', toks['mistral-v03']]]) {
-    const sample = runs.filter((t) => t.model.startsWith(prefix)).slice(0, 12);
+  for (const def of TOKENIZERS.filter((t) => t.match)) {
+    const sample = runs.filter((t) => def.match.test(t.model));
     let exact = 0;
     for (const t of sample) {
-      const n = tk.encode(t.chunks.map((c) => c[2]).join('')).length;
+      const n = toks[def.id].encode(t.chunks.map((c) => c[2]).join('')).length;
       if (n === t.chunks.length && n === t.final.eval_count - 1) exact++;
     }
-    ok(exact === sample.length && sample.length >= 3, `${prefix}: re-tokenized output = eval_count - 1 on ${exact}/${sample.length} runs`);
-    console.log(`re-tokenize ${prefix}: ${exact}/${sample.length} runs give exactly eval_count - 1 tokens`);
+    ok(exact === sample.length && sample.length >= 3, `${def.id}: re-tokenized output = eval_count - 1 on ${exact}/${sample.length} runs`);
+    console.log(`re-tokenize ${def.id}: ${exact}/${sample.length} dataset runs give exactly eval_count - 1 tokens`);
   }
 }
 
 {
-  // three prompts per tokenizer, two of them cut by the length limit (no end-of-turn token)
+  // three prompts, two of them cut by the length limit (no end-of-turn token)
   const rec = JSON.parse(read('traces.json')).traces.filter((t) => t.group === 'retok');
-  for (const t of rec) {
-    const tk = t.model.startsWith('qwen3') ? toks.qwen3 : toks['mistral-v03'];
-    const n = tk.encode(t.chunks.map((c) => c[2]).join('')).length;
+  const checkable = rec.filter((t) => modelTok(t.model));
+  for (const t of checkable) {
+    const n = toks[modelTok(t.model).id].encode(t.chunks.map((c) => c[2]).join('')).length;
     const eos = t.final.done_reason === 'stop' ? 1 : 0;
     ok(n + eos === t.final.eval_count, `${t.id}: re-tokenized ${n} + ${eos} end-of-turn = eval_count ${t.final.eval_count}`);
   }
-  console.log(`re-tokenize: ${rec.length} recordings on ${new Set(rec.map((t) => t.promptKey)).size} prompts checked against eval_count`);
+  const prompts = new Set(checkable.map((t) => t.promptKey)).size;
+  ok(prompts >= 3, `re-tokenization recordings cover ${prompts} prompts with a shipped tokenizer (want >= 3)`);
+  ok(checkable.some((t) => t.final.done_reason === 'stop') && checkable.some((t) => t.final.done_reason !== 'stop'),
+    're-tokenization covers a run that stopped by itself and one cut by the length limit');
+  console.log(`re-tokenize: ${checkable.length} recordings on ${prompts} prompts checked against eval_count`);
+}
+
+{
+  // models with no tokenizer here: recordings stay, no tokenizer is matched, and no note claims a check
+  const all = [...JSON.parse(read('traces.json')).traces, ...JSON.parse(read('runs.json')).traces];
+  ok(NO_TOKENIZER.every((g) => !TOKENIZERS.some((t) => t.match && g.match.source === t.match.source)), 'no model is listed both with and without a tokenizer');
+  const gaps = all.filter((t) => noTok(t.model));
+  ok(gaps.length === 13, `${gaps.length} recordings of models without a tokenizer here stay on the page (want the 13 Mistral runs)`);
+  const claims = gaps.filter((t) => /equals the server's eval_count|re-tokenized with/i.test(t.note || ''));
+  ok(claims.length === 0, `notes of recordings without a tokenizer claim no re-tokenization check; offending: ${claims.map((t) => t.id).join(', ')}`);
+  console.log(`no tokenizer: ${gaps.length} recordings (${[...new Set(gaps.map((t) => t.model))].join(', ')}) kept, cross-check marked unavailable`);
 }
 
 /* ---- 2. statistics ---- */

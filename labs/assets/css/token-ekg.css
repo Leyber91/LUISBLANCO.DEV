@@ -323,7 +323,7 @@ select:focus, textarea:focus { border-color: var(--horizon-dim); }
 }
 
 /* ============================================================
-   G1 additions: legend, tooltip, tables, dataset, four tokenizers
+   G1 additions: legend, tooltip, tables, dataset, three tokenizers
    ============================================================ */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: -1px; }
 input[type="number"], input[type="text"] {
@@ -390,7 +390,7 @@ input[type="number"]:focus, input[type="text"]:focus { border-color: var(--horiz
 .ds .dots button[aria-current="true"] { background: var(--text-bright); box-shadow: 0 0 0 3px rgba(234, 240, 251, .18); }
 .ds .axis { font-size: 9.5px; color: var(--text-faint); display: flex; justify-content: space-between; width: 220px; }
 
-/* four tokenizers */
+/* three tokenizers: o200k and cl100k round marks, Qwen3 a diamond */
 .encsw { flex-wrap: wrap; }
 .encsw button { text-align: left; }
 .encsw button:disabled { opacity: .4; cursor: default; }
@@ -405,7 +405,6 @@ input[type="number"]:focus, input[type="text"]:focus { border-color: var(--horiz
 .lg .dot.o { border: 0; background: currentColor; }
 .d-0, .d-1 { border-radius: 50%; }
 .d-2 { border-radius: 0; transform: rotate(45deg) scale(.85); }
-.d-3 { border-radius: 0; }
 .mx-wrap { overflow-x: auto; }
 .mx { border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; min-width: 560px; width: 100%; }
 .mx th, .mx td { padding: 4px 6px; border-bottom: 1px solid rgba(28, 35, 47, .7); text-align: right; white-space: nowrap; }

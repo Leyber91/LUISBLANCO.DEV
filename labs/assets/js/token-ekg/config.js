@@ -7,11 +7,11 @@
 import { AI_CONFIG } from '../ai/config.js';
 
 /* ---- tokenizers -----------------------------------------------------------------------------
-   Four vocabularies from three families, each loaded only when first needed.
+   Three vocabularies, all byte-level BPE, each loaded only when first needed (about 2 MB together).
    tiktoken pair: gpt-tokenizer 3.4.0 by Bazyli Brzoska, MIT (github.com/niieani/gpt-tokenizer),
    pinned, from jsDelivr; o200k_base is about 0.8 MB of ranks (brotli), cl100k_base about 0.4 MB.
-   The other two are this repo's re-implementation (engine/bpe.js) of Hugging Face tokenizer.json
-   files, Apache-2.0 (data/tokenizers/LICENSE-Apache-2.0.txt); 0.6 MB and 0.4 MB gzipped.
+   Qwen3 is this repo's re-implementation (engine/bpe.js) of a Hugging Face tokenizer.json file,
+   Apache-2.0 (data/tokenizers/LICENSE-Apache-2.0.txt); 0.6 MB gzipped.
    "used" for the tiktoken pair follows gpt-tokenizer's map (esm/modelsMap.js, after tiktoken's
    model.py). Vocabulary sizes include special tokens.                                            */
 export const TOKENIZERS = [
@@ -22,9 +22,16 @@ export const TOKENIZERS = [
   { id: 'qwen3', short: 'Qwen3', family: 'Hugging Face byte-level BPE', kind: 'bytelevel', vocab: 151669,
     file: 'data/tokenizers/qwen3.bpe.txt', version: 'Qwen/Qwen3-8B tokenizer.json @ b968826', licence: 'Apache-2.0',
     used: 'Qwen3 models (qwen3:* in Ollama)', match: /^qwen3/i },
-  { id: 'mistral-v03', short: 'Mistral', family: 'SentencePiece BPE, byte fallback', kind: 'sentencepiece', vocab: 32768,
-    file: 'data/tokenizers/mistral-v03.bpe.txt', version: 'mistralai/Mistral-7B-Instruct-v0.3 tokenizer.json @ c170c70',
-    licence: 'Apache-2.0', used: 'Mistral 7B v0.3 (mistral:7b in Ollama)', match: /^mistral/i },
+];
+
+/* ---- models recorded here whose tokenizer this page does not ship -------------------------------
+   Their recordings stay (they are real), but the tokenizer cross-check cannot run for them, and
+   the page says so in the rows where it would appear. Mistral v0.3: its vocabulary was withdrawn
+   from the site on 2026-11-12, because the site's privacy check flags one of its 32,768 word
+   pieces and that check is not weakened for a data file.                                        */
+export const NO_TOKENIZER = [
+  { short: 'Mistral', match: /^mistral/i,
+    why: 'this page does not ship the Mistral tokenizer, so the streamed text cannot be re-counted here' },
 ];
 export const GPT_TOKENIZER = {
   version: '3.4.0',

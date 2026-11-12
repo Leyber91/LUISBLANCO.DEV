@@ -1,10 +1,9 @@
 /* ============================================================
    token-ekg/engine/tokens.js — real tokenizers, in the page.
 
-   Loads the four tokenizers listed in config.js on demand (OpenAI's
+   Loads the three tokenizers listed in config.js on demand (OpenAI's
    o200k_base and cl100k_base through gpt-tokenizer 3.4.0, MIT; Qwen3
-   and Mistral v0.3 through engine/bpe.js) and splits text into its
-   actual tokens.
+   through engine/bpe.js) and splits text into its actual tokens.
 
    Display units. A token is a run of bytes, and a byte-pair
    vocabulary is free to cut a character in the middle: one Burmese
@@ -19,7 +18,7 @@
    ============================================================ */
 
 import { TOKENIZERS, GPT_TOKENIZER } from '../config.js';
-import { byteLevelFromText, sentencePieceFromText } from './bpe.js';
+import { byteLevelFromText } from './bpe.js';
 
 const loading = new Map();
 const utf8 = new TextEncoder();
@@ -76,7 +75,7 @@ export function loadEncoding(id) {
 }
 
 /**
- * Load any of the four tokenizers by its config id, once. Every result has the same face:
+ * Load any of the tokenizers in config.js by its id, once. Every result has the same face:
  * { id, encode(text) -> ids, bytesOf(id) -> Uint8Array, vocabularySize }.
  * base: the URL the data/ files are relative to (the module's own folder).
  */
@@ -84,11 +83,12 @@ export function loadTokenizer(id, base) {
   const def = TOKENIZERS.find((t) => t.id === id);
   if (!def) return Promise.reject(new Error('unknown tokenizer ' + id));
   if (def.kind === 'gpt-tokenizer') return loadEncoding(id).then((e) => ({ ...e, vocabularySize: def.vocab }));
+  if (def.kind !== 'bytelevel') return Promise.reject(new Error(`no loader for tokenizer kind ${def.kind}`));
   if (!loading.has(id)) {
     const p = fetch(new URL(def.file, base)).then((r) => {
       if (!r.ok) throw new Error(`${def.file}: http ${r.status}`);
       return r.text();
-    }).then((txt) => (def.kind === 'bytelevel' ? byteLevelFromText(id, txt) : sentencePieceFromText(id, txt)));
+    }).then((txt) => byteLevelFromText(id, txt));
     loading.set(id, p);
     p.catch(() => loading.delete(id));
   }

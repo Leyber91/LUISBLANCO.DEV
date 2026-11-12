@@ -1,24 +1,22 @@
 /* ============================================================
-   token-ekg/engine/bpe.js — two more tokenizer families, in plain JS.
+   token-ekg/engine/bpe.js — one more tokenizer, in plain JS.
 
    gpt-tokenizer covers OpenAI's tiktoken encodings. The local models
-   this page streams from use other vocabularies, so two Hugging Face
-   tokenizer.json models are re-implemented here from their files:
+   this page streams from use other vocabularies, so one Hugging Face
+   tokenizer.json model is re-implemented here from its file:
 
-     ByteLevelBPE     Qwen3 (151,643 merges over a 256-symbol byte
-                      alphabet, a regex pre-split, NFC first). Same
-                      family as GPT-2 and tiktoken, different merges.
-     SentencePieceBPE Mistral 7B v0.3 (a SentencePiece model converted
-                      to BPE: spaces become U+2581, merges run over
-                      Unicode characters, unknown characters fall back
-                      to one <0xNN> token per UTF-8 byte).
+     ByteLevelBPE     Qwen3 (151,387 merges over a 256-symbol byte
+                      alphabet, so 151,643 regular tokens, then 26
+                      special ones; a regex pre-split, NFC first).
+                      Same family as GPT-2 and tiktoken, different
+                      merges.
 
-   Both follow the tokenizers library's BPE: repeatedly merge the
+   It follows the tokenizers library's BPE: repeatedly merge the
    adjacent pair with the lowest merge rank, leftmost first. The page's
-   tokenizer check compares them against the Python tokenizers
-   library on a fixed test set (data/tokenizer-reference.json).
+   tokenizer check compares it against the Python tokenizers library
+   on a fixed test set (data/tokenizer-reference.json).
 
-   Pure: no DOM, no fetch. Parsers take the text of the data files.
+   Pure: no DOM, no fetch. The parser takes the text of the data file.
    ============================================================ */
 
 const utf8 = new TextEncoder();
@@ -183,61 +181,4 @@ export function byteLevelFromText(id, text) {
     return out;
   }
   return { id, encode, bytesOf, vocabularySize: head.vocabSize, source: head.source };
-}
-
-/* ---------------- SentencePiece-style BPE (Mistral) ---------------- */
-export function sentencePieceFromText(id, text) {
-  const nl1 = text.indexOf('\n'), nl2 = text.indexOf('\n', nl1 + 1);
-  const head = JSON.parse(text.slice(0, nl1));
-  const vocab = JSON.parse(text.slice(nl1 + 1, nl2));
-  const lines = text.slice(nl2 + 1).split('\n');
-  const pairs = parseB36Pairs(lines, 0);
-  const idOf = new Map(vocab.map((t, i) => [t, i]));
-  const ranks = new Map(), merged = new Map();
-  const nMerges = pairs.length / 2;
-  for (let k = 0; k < nMerges; k++) {
-    const a = pairs[2 * k], b = pairs[2 * k + 1];
-    const key = KEY(a, b);
-    if (!ranks.has(key)) { ranks.set(key, k); merged.set(k, idOf.get(vocab[a] + vocab[b])); }
-  }
-  const result = (r) => merged.get(r);
-  const byteId = new Int32Array(256).fill(-1);
-  for (let b = 0; b < 256; b++) {
-    const t = idOf.get('<0x' + b.toString(16).toUpperCase().padStart(2, '0') + '>');
-    if (t !== undefined) byteId[b] = t;
-  }
-  const META = head.metaspace;
-  const specialsList = vocab.slice(0, head.addedSpecial).filter((t) => t && t !== '<unk>');
-  const specials = new Map(specialsList.map((t) => [t, idOf.get(t)]));
-  const specialRe = specials.size ? new RegExp([...specials.keys()].sort((a, b) => b.length - a.length).map(esc).join('|'), 'g') : null;
-  const BYTE_RE = /^<0x([0-9A-F]{2})>$/;
-
-  function bytesOf(t) {
-    const s = vocab[t] ?? '';
-    const m = BYTE_RE.exec(s);
-    if (m) return Uint8Array.of(parseInt(m[1], 16));
-    if (specials.has(s)) return utf8.encode(s);
-    return utf8.encode(s.split(META).join(' '));
-  }
-
-  /** opts.noPrefix: leave out the start-of-text space marker, to count a piece cut from the middle of a text. */
-  function encode(text, opts = {}) {
-    const out = [];
-    let first = !opts.noPrefix;
-    for (const part of splitSpecials(text, specialRe, specials)) {
-      if (part.special !== undefined) { out.push(part.special); first = false; continue; }
-      let s = part.text.split(' ').join(META);
-      if (first && !s.startsWith(META)) s = META + s;
-      first = false;
-      const ids = [];
-      for (const ch of s) {
-        const t = idOf.get(ch);
-        if (t !== undefined) { ids.push(t); continue; }
-        for (const b of utf8.encode(ch)) ids.push(byteId[b] >= 0 ? byteId[b] : head.unk);
-      }
-      for (const x of mergeAll(ids, ranks, result)) out.push(x);
-    }
-    return out;
-  }
-  return { id, encode, bytesOf, vocabularySize: head.vocabSize, source: head.source, addsPrefixSpace: true };
 }

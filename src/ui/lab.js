@@ -74,7 +74,7 @@
     },
     {
       name: 'Token EKG', tag: 'measurement · tokens',
-      blurb: 'Times a model\'s reply chunk by chunk as it streams from your own Ollama, and checks the page\'s clock against the server\'s counters: first token, waits, stalls, decode rate. Without a local model it replays 80 runs recorded on a laptop GPU and times one public reply. Four tokenizers, checked against their reference libraries, price one sentence in 23 languages: 33 tokens in English, 512 in Burmese.',
+      blurb: 'Times a model\'s reply chunk by chunk as it streams from your own Ollama, and checks the page\'s clock against the server\'s counters: first token, waits, stalls, decode rate. Without a local model it replays 80 runs recorded on a laptop GPU and times one public reply. Three tokenizers, checked against their reference libraries, price one sentence in 23 languages: 33 tokens in English, 512 in Burmese.',
       href: 'labs/token-ekg.html',
     },
     {

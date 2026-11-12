@@ -8,7 +8,7 @@
                  replayed at recorded speed; plus one reply timed
                  through the site's shared route (llm.js).
      02 runs     a dataset of 60 recorded runs over six models.
-     03 cost     four real tokenizers on the visitor's text and on 23
+     03 cost     three real tokenizers on the visitor's text and on 23
                  translations of one sentence.
    Measurement lives in engine/ (no DOM); drawing in view/; this file
    only connects them. Every number shown is computed from a
@@ -17,7 +17,7 @@
 
 import { LLM } from '../ai/llm.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { OLLAMA, PROMPTS, LIVE_PRESETS, SWEEP, PARALLEL, TOKENIZERS, ANALYSIS, longContext } from './config.js';
+import { OLLAMA, PROMPTS, LIVE_PRESETS, SWEEP, PARALLEL, TOKENIZERS, NO_TOKENIZER, ANALYSIS, longContext } from './config.js';
 import { analyze, fmtMs, quantile, mannWhitney, ks2, events } from './engine/stats.js';
 import * as Ollama from '../ai/stream/ollama.js';
 import { streamingRoutes } from '../ai/stream/index.js';
@@ -156,9 +156,10 @@ function setA(t, { play = true, at = 0, user = false } = {}) {
 }
 
 /* ---------------- tokenizers, on demand ----------------
-   None loads with the page. All four load when the cost section comes near the screen; the
+   None loads with the page. All three load when the cost section comes near the screen; the
    cadence section's tokenizer rows load just the one they need when the visitor picks a trace
-   that uses it (o200k for a one-piece reply, the model's own vocabulary for Qwen3 or Mistral). */
+   that uses it (o200k for a one-piece reply, the model's own vocabulary for Qwen3). Mistral runs
+   have no tokenizer here (config NO_TOKENIZER): their rows say the cross-check is unavailable. */
 const TK = {};
 async function ensureTokenizer(id) {
   if (TK[id]) return TK[id];
@@ -327,6 +328,10 @@ const row = (k, here, srv, d = '', cls = '') => `<tr class="${cls}"><td>${k}</td
 function matchingTokenizer(model) {
   return TOKENIZERS.find((t) => t.match && t.match.test(model || '')) || null;
 }
+/** A model recorded here whose tokenizer this page does not ship (config NO_TOKENIZER), or null. */
+function missingTokenizer(model) {
+  return matchingTokenizer(model) ? null : NO_TOKENIZER.find((t) => t.match.test(model || '')) || null;
+}
 
 function renderCheck() {
   const t = S.A;
@@ -364,6 +369,11 @@ function renderCheck() {
     const think = show && a.think ? ' (a thinking run also spends tokens on the tags around its reasoning, which are not sent, so it does not add up here)' : '';
     html += row('re-tokenized', `${fmt(n)} + ${eos} = ${fmt(n + eos)} tok`, show ? `${fmt(s.evalCount)} eval_count` : pend,
       `the streamed text through the model's own tokenizer (${esc(mt.short)}, in this page), plus ${eos ? 'one end-of-turn token (done_reason stop)' : 'no end-of-turn token (the run hit its length limit)'}${show ? (n + eos === s.evalCount ? ': exact' : `: differs by ${n + eos - s.evalCount}`) : ''}${think}`);
+  }
+  const gap = missingTokenizer(t.model);
+  if (gap && a.n) {
+    html += row('re-tokenized', 'unavailable', show ? `${fmt(s.evalCount)} eval_count` : pend,
+      `No ${esc(gap.short)} cross-check: ${esc(gap.why)}. The server's eval_count stands unchecked.`);
   }
   if (s || !t.final) {
     html += row('decode rate', `${fmt(a.rate, 1)} tok/s`, show ? `${fmt(s.rate, 1)} tok/s` : (t.final === null && t.tDone != null ? 'not reported' : pend), show ? `differ by ${fmt(Math.abs(1 - a.rate / s.rate) * 100, 1)}%` : '');
@@ -408,10 +418,14 @@ function renderStats() {
 function tokensPerChunk(t, a) {
   const mt = matchingTokenizer(t.model);
   const k = mt && TK[mt.id];
-  if (!k || !a.n) return row('tokens per chunk', '-', '-', mt ? `the ${esc(mt.short)} tokenizer loads when you play this trace yourself or open the cost section` : 'needs the model\'s own tokenizer (Qwen3 or Mistral here)');
+  if (!k || !a.n) {
+    const gap = missingTokenizer(t.model);
+    return row('tokens per chunk', gap ? 'unavailable' : '-', '-', mt ? `the ${esc(mt.short)} tokenizer loads when you play this trace yourself or open the cost section`
+      : gap ? `No ${esc(gap.short)} cross-check: ${esc(gap.why)}.` : 'needs the model\'s own tokenizer, which this page has only for Qwen3');
+  }
   const dist = {};
   let tot = 0;
-  for (const c of t.chunks.slice(0, a.n)) { const m = k.encode(c.text, { noPrefix: true }).length; dist[m] = (dist[m] || 0) + 1; tot += m; }
+  for (const c of t.chunks.slice(0, a.n)) { const m = k.encode(c.text).length; dist[m] = (dist[m] || 0) + 1; tot += m; }
   return row('tokens per chunk', `${fmt(tot)} tokens`, `${fmt(tot / a.n, 2)} per chunk`,
     `${esc(mt.short)} tokenizer on each chunk alone; chunks holding k tokens: ${Object.entries(dist).map(([x, v]) => `${x}: ${v}`).join(', ')}`);
 }
@@ -1033,7 +1047,7 @@ reveal();
   const res = clockResolution();
   $('ev-clock').textContent = `This browser's clock resolution, measured on load: ${Number.isFinite(res) ? fmtMs(res) : 'unknown'}.`;
 
-  $('tok-read').innerHTML = '<div class="ro"><div class="k">tokenizers</div><div class="v">waiting</div><div class="h">four vocabularies, about 2.5 MB, load when this section comes into view</div></div>';
+  $('tok-read').innerHTML = '<div class="ro"><div class="k">tokenizers</div><div class="v">waiting</div><div class="h">three vocabularies, about 2 MB, load when this section comes into view</div></div>';
   if (udhr) {
     const start = () => initBench(udhr);
     if (params.get('enc') || params.get('cmp') || params.get('lang')) start();

@@ -5,15 +5,20 @@ merged. A run that changed nothing still writes its entry, with the reason.
 
 ## 2026-11-12, Labs: Token EKG measures instead of drawing
 
-- Every number on the page is a measurement or a dated recording. Four real tokenizers run in the browser (o200k and
-  cl100k, Qwen3 and Mistral) and match their reference libraries' ids on 61 of 61 test texts; the same sentence,
+- Every number on the page is a measurement or a dated recording. Three real tokenizers run in the browser (o200k,
+  cl100k and Qwen3) and each matches its reference library's ids on 61 of 61 test texts; the same sentence,
   Article 1 of the Universal Declaration of Human Rights, costs 33 tokens in English and 512 in Burmese under cl100k.
+- A fourth tokenizer, Mistral v0.3, left the lab the same day: one of its 32,768 word pieces fails the site's
+  privacy gate, which is not weakened for a data file. The 13 mistral:7b recordings stay; where their tokenizer
+  cross-check would appear, the page says it is unavailable.
 - With a local model, a reply is timed chunk by chunk and checked against the server's own counters; the decode rate
   is (tokens - 1) / (last - first chunk time), within a median 0.76% of the server's figure on 76 recordings. Without
   one, 80 recorded runs replay, labelled as recordings with their date and model.
-- Independent grade on the lab's own ladder: level 2 to 2 (tokenizer fidelity 9). The fixes that the grade asked
-  for (the rate formula, a stopped run left marked live, Enter to start) were verified before publishing.
-- Checks: 32 tests in labs/assets/js/token-ekg/tests/run.mjs, run by the site gate.
+- Independent grade on the lab's own ladder: level 2 to 2 (tokenizer fidelity 9, graded while the Mistral tokenizer
+  was in the lab; that axis's rung 5 asks for a SentencePiece vocabulary, which the lab no longer has). The fixes
+  that the grade asked for (the rate formula, a stopped run left marked live, Enter to start) were verified before
+  publishing.
+- Checks: 49 tests in labs/assets/js/token-ekg/tests/run.mjs, run by the site gate.
 
 ## 2026-11-12, Mobile pass on the home page and the labs hub (roadmap item 3)
 

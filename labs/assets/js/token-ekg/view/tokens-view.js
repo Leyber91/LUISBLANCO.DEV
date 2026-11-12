@@ -1,8 +1,8 @@
 /* ============================================================
    token-ekg/view/tokens-view.js — the cost bench.
-   The visitor's text split into its real tokens under any of four
+   The visitor's text split into its real tokens under any of three
    tokenizers, compared with a second one, and Article 1 of the UDHR
-   in 23 translations measured under all four. Every count is made in
+   in 23 translations measured under all three. Every count is made in
    the page when it loads; the reference check re-encodes 61 texts and
    compares ids with the reference libraries' output.
    ============================================================ */
@@ -56,7 +56,7 @@ export class TokenBench {
     if (cmp && def(cmp) && cmp !== this.encId) this.cmpId = cmp;
     else if (this.cmpId === this.encId) this.cmpId = TOKENIZERS.find((t) => t.id !== this.encId).id;
     this.langs = udhr.languages;
-    this.el.read.innerHTML = '<div class="ro"><div class="k">tokenizers</div><div class="v">loading</div><div class="h">about 2.5 MB, once</div></div>';
+    this.el.read.innerHTML = '<div class="ro"><div class="k">tokenizers</div><div class="v">loading</div><div class="h">about 2 MB, once</div></div>';
     this._renderSwitch();
     const loaded = await Promise.all(TOKENIZERS.map((t) => loadTokenizer(t.id, this.base).then((x) => [t.id, x]).catch((e) => [t.id, null, e])));
     for (const [id, x, e] of loaded) { if (x) this.tk[id] = x; else console.warn('tokenizer', id, e); }
@@ -244,9 +244,8 @@ export class TokenBench {
     E.h1.textContent = `${def(this.encId).short}: ${fmt(ids.length)} tokens`;
     E.h2.textContent = `${def(this.cmpId).short}: ${fmt(other.ids.length)} tokens`;
     const splitN = units.filter((u) => u.split).reduce((s, u) => s + u.ids.length, 0);
-    const prefix = enc.addsPrefixSpace ? ' SentencePiece marks the start of the text with a space, drawn as the first dot.' : '';
     E.inspect.innerHTML = units.length
-      ? `${fmt(ids.length)} tokens drew as ${fmt(units.length)} units. ${splitN ? `<b>${fmt(splitN)}</b> tokens are pieces of characters the vocabulary cuts apart (dashed underline; the superscript counts the pieces).` : 'No character is cut across tokens.'}${prefix} Select a token, or focus the strip and use the arrow keys.`
+      ? `${fmt(ids.length)} tokens drew as ${fmt(units.length)} units. ${splitN ? `<b>${fmt(splitN)}</b> tokens are pieces of characters the vocabulary cuts apart (dashed underline; the superscript counts the pieces).` : 'No character is cut across tokens.'} Select a token, or focus the strip and use the arrow keys.`
       : '';
     if (edited) this.onChange?.(this.state());
   }
@@ -264,7 +263,9 @@ export class TokenBench {
       `unit ${fmt(i + 1)}: <b>${esc(JSON.stringify(u.text))}</b> = token${u.ids.length > 1 ? 's' : ''} <b>${u.ids.map((x) => fmt(x)).join(' + ')}</b> of ${fmt(def(id).vocab)} ` +
       `in ${esc(def(id).short)}; ${u.bytes.length} UTF-8 byte${u.bytes.length === 1 ? '' : 's'}: ${hex(u.bytes)}. ` +
       (u.split ? `One character cut into ${u.ids.length} tokens: the vocabulary has no single entry for these bytes. ` : '') +
-      (def(id).kind === 'sentencepiece' ? 'In this vocabulary the id is a piece index; merge order is a separate list.' : 'The id is also the merge rank: the encoder joins lower-ranked pairs first.');
+      (def(id).kind === 'bytelevel'
+        ? 'Ids 0 to 255 are single bytes; a merged token\'s id is 256 + its merge rank: the encoder joins lower-ranked pairs first.'
+        : 'The id is also the merge rank: the encoder joins lower-ranked pairs first.');
   }
 
   /** Re-encode the reference texts with every loaded tokenizer and compare ids. */

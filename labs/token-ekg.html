@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Token EKG: token cost and stream cadence, measured</title>
-<meta name="description" content="Four real tokenizers run in the browser on your text and on 23 translations of one sentence, and real token streams are timed chunk by chunk and checked against the server's own counters." />
+<meta name="description" content="Three real tokenizers run in the browser on your text and on 23 translations of one sentence, and real token streams are timed chunk by chunk and checked against the server's own counters." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
@@ -194,7 +194,7 @@
       <div class="head-text">
         <div class="kick">03 &middot; cost</div>
         <h1 id="h-tokens" class="h2">The same sentence, priced in tokens.</h1>
-        <p class="sub" id="tok-sub">Article 1 of the Universal Declaration of Human Rights in 23 translations, split by four tokenizers from three families, all running in this page. Pick a language to see its tokens, or type your own text.</p>
+        <p class="sub" id="tok-sub">Article 1 of the Universal Declaration of Human Rights in 23 translations, split by three tokenizers, all running in this page: OpenAI's o200k_base and cl100k_base, and Qwen3's. All three are byte-level BPE; they differ in their merges and vocabulary size. Pick a language to see its tokens, or type your own text.</p>
       </div>
       <div class="encsw" role="radiogroup" aria-label="Tokenizer" id="encsw"></div>
     </div>
@@ -211,7 +211,7 @@
         <div class="chips-h"><span class="tl" id="chips-h2">compare</span><label class="cmpl" for="tok-cmp">compare with</label><select id="tok-cmp"></select></div>
         <div class="chips chips2" id="chips2" aria-label="The same text split by the comparison tokenizer"></div>
         <p class="inspect" id="inspect" aria-live="polite"></p>
-        <p class="verify" id="verify" aria-live="polite">checking the four tokenizers against their reference libraries</p>
+        <p class="verify" id="verify" aria-live="polite">checking the three tokenizers against their reference libraries</p>
       </div>
       <div class="tok-side">
         <div class="sub-h"><h2>Article 1, 23 ways</h2>
@@ -231,12 +231,13 @@
       <li><b class="r">[MEASURED]</b>The server column is Ollama's final stream line: eval_count, eval_duration, prompt_eval_count, prompt_eval_cached_count, prompt_eval_duration, load_duration and total_duration, reported in nanoseconds and converted to milliseconds for display. Ollama sends one generated token per chunk and counts one more, the end-of-turn token it does not send.</li>
       <li><b class="r">[RECORDED]</b>The 20 recordings and the 60-run dataset were made on 2026-11-11 by record-traces.mjs, which runs the same route adapter as this page, on a laptop with an NVIDIA RTX 3500 Ada Laptop GPU (12 GB) and Ollama 0.40.15. The machine was shared with other work while recording, and runs where that shows say so. Model text is verbatim, mistakes included.</li>
       <li><b class="r">[RECORDED]</b>The public reply recording is one call to text.pollinations.ai on 2026-11-11, timed with curl. A reply you time here is timed in your browser, and its token counts are the route's own usage field.</li>
-      <li><b class="r">[REAL]</b>Tokenizers: o200k_base and cl100k_base from gpt-tokenizer 3.4.0 by Bazyli Brzoska (MIT, <a href="https://github.com/niieani/gpt-tokenizer">github.com/niieani/gpt-tokenizer</a>), pinned on jsDelivr, with one fix this page applies for a byte-order-mark lookup. Qwen3 (Qwen/Qwen3-8B) and Mistral v0.3 (mistralai/Mistral-7B-Instruct-v0.3) are this site's re-implementation of their Hugging Face tokenizer.json files, Apache-2.0. All four are checked in your browser against ids from tiktoken 0.14.0 and Hugging Face tokenizers 0.22.2 on 61 texts.</li>
+      <li><b class="r">[REAL]</b>Tokenizers: o200k_base and cl100k_base from gpt-tokenizer 3.4.0 by Bazyli Brzoska (MIT, <a href="https://github.com/niieani/gpt-tokenizer">github.com/niieani/gpt-tokenizer</a>), pinned on jsDelivr, with one fix this page applies for a byte-order-mark lookup. Qwen3 (Qwen/Qwen3-8B) is this site's re-implementation of its Hugging Face tokenizer.json file, Apache-2.0. All three are checked in your browser against ids from tiktoken 0.14.0 and Hugging Face tokenizers 0.22.2 on 61 texts; the Node test (tests/run.mjs) found all 61 exact for each of the three on 2026-11-12.</li>
       <li><b class="r">[REAL]</b>The 23 translations are Article 1 of the Universal Declaration of Human Rights, copied verbatim from the UDHR in XML project (<a href="https://github.com/eric-muller/udhr">github.com/eric-muller/udhr</a>, commit 588b3f4, 2026-07-28), which reproduces the OHCHR translations and calls them part of our commons.</li>
       <li><b class="r">[REAL]</b>Unequal token counts across languages are documented by Petrov, La Malfa, Torr and Bibi, "Language Model Tokenizers Introduce Unfairness Between Languages" (NeurIPS 2023), and Ahia et al., "Do All Languages Cost the Same?" (EMNLP 2023). Subword byte-pair encoding: Sennrich, Haddow and Birch (ACL 2016).</li>
       <li><b class="r">[REAL]</b>RMSSD follows the Task Force of the ESC and NASPE (Circulation 93:1043, 1996). SD1 and SD2 follow Brennan, Palaniswami and Kamen (IEEE Trans. Biomed. Eng. 48:1342, 2001). The periodogram is Lomb (Astrophys. Space Sci. 39:447, 1976) and Scargle (Astrophys. J. 263:835, 1982). Mann-Whitney U and the two-sample Kolmogorov-Smirnov test use their normal and asymptotic approximations.</li>
       <li><b class="i">[ILLUSTRATIVE]</b>The spike's shape, the paper grid and the electrocardiogram framing are drawing choices. On the strip only a spike's position (arrival time) and height (the wait before it) carry data.</li>
       <li><b class="i">[CHOSEN]</b>Two thresholds are this page's choices, not standards: a stall is a wait over 4 x the stream's median and at least 40 ms; a buffered arrival is a wait under 2 ms.</li>
+      <li><b class="r">[NOT SHOWN]</b>A Mistral tokenizer. The mistral:7b recordings are real and stay, but this page does not ship the Mistral vocabulary, so their token counts are not re-checked here: where the cross-check would appear, it says unavailable, and the server's eval_count stands unchecked.</li>
       <li><b class="r">[NOT SHOWN]</b>Prices. No price per token appears because none was checked against a dated price list. Causes the page cannot measure, such as batching inside a hosted server, are not claimed.</li>
     </ul>
     <details class="methods">
