@@ -294,6 +294,17 @@ body::before {
   .about-grid { grid-template-columns: 1fr; }
   .hero-stats { gap: var(--s-5); }
 }
+/* narrow phones: the brand is 278 px wide at full size, which pushed the menu toggle off-screen below ~470 px */
+@media (max-width: 520px) {
+  .site-header { gap: var(--s-3); }
+  .brand { font-size: .86rem; letter-spacing: .06em; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .rail-toggle { flex: none; padding: .4rem; }
+  .ai-status { flex: none; }
+}
+/* below 440 px the status keeps its dot; the label stays readable to screen readers and in the title */
+@media (max-width: 440px) {
+  #ai-status-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
 
 /* ===================== still mode (?still — screenshots) ===================== */
 html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; }

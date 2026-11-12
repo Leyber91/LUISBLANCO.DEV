@@ -1,0 +1,328 @@
+{
+ "items": [
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026100600",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6864
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026100700",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6782
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026100800",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7985
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026100900",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7631
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101000",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5921
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101100",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5497
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101200",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5059
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101300",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5184
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101400",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6452
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101500",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7762
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101600",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7744
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101700",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6414
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101800",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7696
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026101900",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7313
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102000",
+   "access": "all-access",
+   "agent": "user",
+   "views": 10450
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102100",
+   "access": "all-access",
+   "agent": "user",
+   "views": 8175
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102200",
+   "access": "all-access",
+   "agent": "user",
+   "views": 8928
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102300",
+   "access": "all-access",
+   "agent": "user",
+   "views": 8059
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102400",
+   "access": "all-access",
+   "agent": "user",
+   "views": 8318
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102500",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6523
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102600",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6412
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102700",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5581
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102800",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5183
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026102900",
+   "access": "all-access",
+   "agent": "user",
+   "views": 13876
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026103000",
+   "access": "all-access",
+   "agent": "user",
+   "views": 12234
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026103100",
+   "access": "all-access",
+   "agent": "user",
+   "views": 7094
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110100",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5539
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110200",
+   "access": "all-access",
+   "agent": "user",
+   "views": 5265
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110300",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6492
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110400",
+   "access": "all-access",
+   "agent": "user",
+   "views": 4768
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110500",
+   "access": "all-access",
+   "agent": "user",
+   "views": 4819
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110600",
+   "access": "all-access",
+   "agent": "user",
+   "views": 6023
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110700",
+   "access": "all-access",
+   "agent": "user",
+   "views": 33238
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110800",
+   "access": "all-access",
+   "agent": "user",
+   "views": 122360
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026110900",
+   "access": "all-access",
+   "agent": "user",
+   "views": 733363
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Jensen_Huang",
+   "granularity": "daily",
+   "timestamp": "2026111000",
+   "access": "all-access",
+   "agent": "user",
+   "views": 542553
+  }
+ ]
+}

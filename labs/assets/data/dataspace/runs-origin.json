@@ -1,0 +1,3153 @@
+{
+ "schema": "dataspace.run/1",
+ "preset": "origin",
+ "calls": {
+  "c.origin.llama3.1-8b.r1.s1": {
+   "id": "c.origin.llama3.1-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User restarts AI project under different names; Assistant identifies common goal, names DATASPACE as first iteration.\", \"L2\": \"User restarts AI project, Assistant identifies common goal, DATASPACE as first iteration.\", \"L3\": \"DATASPACE first, common goal, self-modifying AI.\", \"L4\": \"DATASPACE first, common goal.\", \"L5\": \"DATASPACE first.\"}",
+   "thinking": "",
+   "promptTokens": 393,
+   "completionTokens": 93,
+   "ollamaMs": 1696,
+   "ms": 1698,
+   "at": "2026-11-11T10:15:02.350Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r1.L2": {
+   "id": "b.origin.llama3.1-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project, Assistant identifies common goal, DATASPACE as first iteration."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I've decided to restart my AI project.\n\nASSISTANT: What's the primary goal of this project?",
+   "thinking": "",
+   "promptTokens": 82,
+   "completionTokens": 25,
+   "ollamaMs": 450,
+   "ms": 452,
+   "at": "2026-11-11T10:15:06.663Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r1.L3": {
+   "id": "b.origin.llama3.1-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE first, common goal, self-modifying AI."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does it mean for an AI to be self-modifying?\n\nASSISTANT: In the context of DATASPACE, self-modifying AI refers to an AI that can alter its own architecture or code in response to new data or changing circumstances. This allows the AI to adapt and learn more effectively, but also raises questions about its reliability and potential for unintended consequences.",
+   "thinking": "",
+   "promptTokens": 77,
+   "completionTokens": 77,
+   "ollamaMs": 1262,
+   "ms": 1264,
+   "at": "2026-11-11T10:15:07.117Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r1.L4": {
+   "id": "b.origin.llama3.1-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE first, common goal."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What kind of common goal are you thinking of?\n\nASSISTANT: Collaboration on artificial intelligence development.",
+   "thinking": "",
+   "promptTokens": 72,
+   "completionTokens": 23,
+   "ollamaMs": 523,
+   "ms": 526,
+   "at": "2026-11-11T10:15:08.382Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r1.L5": {
+   "id": "b.origin.llama3.1-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE first."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: DATASPACE first. What's the purpose of this arrangement?",
+   "thinking": "",
+   "promptTokens": 69,
+   "completionTokens": 16,
+   "ollamaMs": 419,
+   "ms": 421,
+   "at": "2026-11-11T10:15:08.909Z",
+   "error": null
+  },
+  "c.origin.llama3.1-8b.r2.s2": {
+   "id": "c.origin.llama3.1-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User restarts AI project under different names; Assistant explains it's one idea with changing names, but core concept remains.\",\n  \"L2\": \"User restarts AI project (DATASPACE, Ouroboros, AEA); Assistant says core concept remains, just names change.\",\n  \"L3\": \"User restarts AI project; Assistant explains core concept remains, just names change.\",\n  \"L4\": \"DATASPACE restart, names change.\",\n  \"L5\": \"DATASPACE, restart, names\"\n}",
+   "thinking": "",
+   "promptTokens": 393,
+   "completionTokens": 117,
+   "ollamaMs": 1961,
+   "ms": 1964,
+   "at": "2026-11-11T10:15:09.331Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r2.L1": {
+   "id": "b.origin.llama3.1-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project under different names; Assistant explains it's one idea with changing names, but core concept remains."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I've been working on a new AI project called \"Echo\" and I'm really excited about it.\n\nASSISTANT: I see you've also worked on a project called \"Resonate\" before. And isn't there another one called \"Reverb\" in your past work?\n\nUSER: Yeah, I guess I have been exploring similar ideas. What's the connection between them?\n\nASSISTANT: I think I see what's happening here. You're exploring the same core concept, but presenting it under different names. It's not that \"Echo\" is completely different from \"Resonate\" or \"Reverb\", but rather, you're refining the idea and presenting it in a new light.\n\nUSER: Hmm, I never thought of it that way. I guess I was trying to distance myself from past projects.\n\nASSISTANT: That's understandable, but it's worth recognizing the connections between your ideas. It might be helpful to distill the core concept and build upon that, rather than starting from scratch each time.",
+   "thinking": "",
+   "promptTokens": 88,
+   "completionTokens": 212,
+   "ollamaMs": 3322,
+   "ms": 3324,
+   "at": "2026-11-11T10:15:11.296Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r2.L2": {
+   "id": "b.origin.llama3.1-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project (DATASPACE, Ouroboros, AEA); Assistant says core concept remains, just names change."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'm restarting my AI project and I've come up with new names: DATASPACE, Ouroboros, and AEA. \n\nASSISTANT: The core concept of your project remains the same, regardless of the names.",
+   "thinking": "",
+   "promptTokens": 92,
+   "completionTokens": 51,
+   "ollamaMs": 964,
+   "ms": 971,
+   "at": "2026-11-11T10:15:14.621Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r2.L3": {
+   "id": "b.origin.llama3.1-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project; Assistant explains core concept remains, just names change."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Hi, I'm back to working on the AI project. I feel like I've missed a lot.\n\nASSISTANT: Welcome back! Don't worry about missing out – the core concept of the project remains the same. We've just changed the names and some of the technical details.",
+   "thinking": "",
+   "promptTokens": 80,
+   "completionTokens": 61,
+   "ollamaMs": 2120,
+   "ms": 2125,
+   "at": "2026-11-11T10:15:15.593Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r2.L4": {
+   "id": "b.origin.llama3.1-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE restart, names change."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What do you mean by \"names change\"?\n\nASSISTANT: The entities in the dataspace are being renamed.",
+   "thinking": "",
+   "promptTokens": 72,
+   "completionTokens": 26,
+   "ollamaMs": 602,
+   "ms": 605,
+   "at": "2026-11-11T10:15:17.719Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r2.L5": {
+   "id": "b.origin.llama3.1-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE, restart, names"
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Can you tell me more about the dataspace restart?\n\nASSISTANT: It's a process to refresh and update the underlying data structure, which can help resolve issues with name retrieval.\n\nUSER: What does it have to do with names?\n\nASSISTANT: The dataspace restart can also resolve issues with naming conventions and help recover lost or corrupted names.",
+   "thinking": "",
+   "promptTokens": 71,
+   "completionTokens": 74,
+   "ollamaMs": 1212,
+   "ms": 1214,
+   "at": "2026-11-11T10:15:18.325Z",
+   "error": null
+  },
+  "c.origin.llama3.1-8b.r3.s3": {
+   "id": "c.origin.llama3.1-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User restarts AI project under different names, DATASPACE, Ouroboros, AEA; why? Assistant: one idea, AI legible, self-modifying, watchable, named. User: DATASPACE first, Feb 2023. Assistant: identity through compression, named enemy: Degradation, context-rot.\",\n  \"L2\": \"User restarts AI project, DATASPACE, Ouroboros, AEA; why? Assistant: one idea, AI legible, named. User: DATASPACE first, Feb 2023.\",\n  \"L3\": \"DATASPACE, Ouroboros, AEA; why? Legible AI, named.\",\n  \"L4\": \"DATASPACE, Ouroboros, AEA.\",\n  \"L5\": \"DATASPACE.\"\n}",
+   "thinking": "",
+   "promptTokens": 393,
+   "completionTokens": 182,
+   "ollamaMs": 2870,
+   "ms": 2872,
+   "at": "2026-11-11T10:15:19.540Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r3.L1": {
+   "id": "b.origin.llama3.1-8b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project under different names, DATASPACE, Ouroboros, AEA; why? Assistant: one idea, AI legible, self-modifying, watchable, named. User: DATASPACE first, Feb 2023. Assistant: identity through compression, named enemy: Degradation, context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: restarts AI project under different names, DATASPACE, Ouroboros, AEA; why?\n\nASSISTANT: one idea, AI legible, self-modifying, watchable, named.\n\nUSER: DATASPACE first, Feb 2023.\n\nASSISTANT: identity through compression, named enemy: Degradation, context-rot.",
+   "thinking": "",
+   "promptTokens": 134,
+   "completionTokens": 76,
+   "ollamaMs": 1256,
+   "ms": 1258,
+   "at": "2026-11-11T10:15:22.413Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r3.L2": {
+   "id": "b.origin.llama3.1-8b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project, DATASPACE, Ouroboros, AEA; why? Assistant: one idea, AI legible, named. User: DATASPACE first, Feb 2023."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: DATASPACE first, Feb 2023.\n\nASSISTANT: One project, multiple names, same goal, User.",
+   "thinking": "",
+   "promptTokens": 107,
+   "completionTokens": 28,
+   "ollamaMs": 486,
+   "ms": 488,
+   "at": "2026-11-11T10:15:23.672Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r3.L3": {
+   "id": "b.origin.llama3.1-8b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE, Ouroboros, AEA; why? Legible AI, named."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: DATASPACE, Ouroboros, AEA; why? Legible AI, named.\n\nASSISTANT: I'm not sure what you mean by \"named\" or \"Legible AI\". Could you provide more context or clarify your question?",
+   "thinking": "",
+   "promptTokens": 84,
+   "completionTokens": 54,
+   "ollamaMs": 861,
+   "ms": 863,
+   "at": "2026-11-11T10:15:24.161Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r3.L4": {
+   "id": "b.origin.llama3.1-8b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE, Ouroboros, AEA."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is Dataspace?\n\nASSISTANT: Dataspace is a vast, virtual repository of information and knowledge, containing data from various sources and realms.",
+   "thinking": "",
+   "promptTokens": 76,
+   "completionTokens": 35,
+   "ollamaMs": 611,
+   "ms": 613,
+   "at": "2026-11-11T10:15:25.026Z",
+   "error": null
+  },
+  "b.origin.llama3.1-8b.r3.L5": {
+   "id": "b.origin.llama3.1-8b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nDATASPACE."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is dataspace?\n\nASSISTANT: A theoretical concept in philosophy and artificial intelligence, referring to a hypothetical realm where all data and information exist in a unified, interconnected structure.",
+   "thinking": "",
+   "promptTokens": 68,
+   "completionTokens": 39,
+   "ollamaMs": 818,
+   "ms": 819,
+   "at": "2026-11-11T10:15:25.640Z",
+   "error": null
+  },
+  "c.origin.qwen3-8b.r1.s1": {
+   "id": "c.origin.qwen3-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User asks why they keep restarting AI projects with different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023 and wants to compress conversations for identity across sessions. Assistant talks about identity through compression and fighting context-rot.\",\n  \"L2\": \"User restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and fighting context-rot.\",\n  \"L3\": \"User restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023.\",\n  \"L4\": \"User restarts AI projects. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023.\",\n  \"L5\": \"User restarts AI projects. Assistant says it's one idea.\"\n}",
+   "thinking": "",
+   "promptTokens": 404,
+   "completionTokens": 202,
+   "ollamaMs": 6617,
+   "ms": 6620,
+   "at": "2026-11-11T10:43:48.668Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r1.L1": {
+   "id": "b.origin.qwen3-8b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks why they keep restarting AI projects with different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023 and wants to compress conversations for identity across sessions. Assistant talks about identity through compression and fighting context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Why do I keep restarting AI projects with different names?  \nASSISTANT: It's one idea with changing names.  \nUSER: DATASPACE started in Feb 2023 and I want to compress conversations for identity across sessions.  \nASSISTANT: Identity through compression and fighting context-rot.",
+   "thinking": "",
+   "promptTokens": 127,
+   "completionTokens": 66,
+   "ollamaMs": 2577,
+   "ms": 2581,
+   "at": "2026-11-11T10:43:55.290Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r1.L2": {
+   "id": "b.origin.qwen3-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and fighting context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I restart my AI projects with different names.  \nASSISTANT: It's still the same idea.  \nUSER: DATASPACE started in Feb 2023.  \nASSISTANT: Identity through compression and fighting context-rot.",
+   "thinking": "",
+   "promptTokens": 112,
+   "completionTokens": 53,
+   "ollamaMs": 1926,
+   "ms": 1928,
+   "at": "2026-11-11T10:43:57.872Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r1.L3": {
+   "id": "b.origin.qwen3-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I restart my AI projects with different names.  \nASSISTANT: That's still one idea.  \nUSER: DATASPACE started in Feb 2023.",
+   "thinking": "",
+   "promptTokens": 100,
+   "completionTokens": 38,
+   "ollamaMs": 1491,
+   "ms": 1493,
+   "at": "2026-11-11T10:43:59.800Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r1.L4": {
+   "id": "b.origin.qwen3-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I just restarted my AI projects.  \nASSISTANT: That's one idea.  \nUSER: DATASPACE started in Feb 2023.",
+   "thinking": "",
+   "promptTokens": 97,
+   "completionTokens": 35,
+   "ollamaMs": 1290,
+   "ms": 1292,
+   "at": "2026-11-11T10:44:01.294Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r1.L5": {
+   "id": "b.origin.qwen3-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects. Assistant says it's one idea."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: User restarts AI projects.  \nASSISTANT: It's one idea.",
+   "thinking": "",
+   "promptTokens": 83,
+   "completionTokens": 19,
+   "ollamaMs": 742,
+   "ms": 744,
+   "at": "2026-11-11T10:44:02.587Z",
+   "error": null
+  },
+  "c.origin.qwen3-8b.r2.s2": {
+   "id": "c.origin.qwen3-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User asks why they keep restarting AI project under different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023, wanting to compress conversation into lines for model to decode identity across sessions. Assistant responds about identity through compression, named enemy Degradation, and context-rot issue.\",\n  \"L2\": \"User asks about restarting AI project with different names. Assistant says it's one idea with changing names. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression, named enemy Degradation, and context-rot.\",\n  \"L3\": \"User restarts AI project with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and named enemy Degrad, context-rot.\",\n  \"L4\": \"User restarts AI project with names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity and Degradation.\",\n  \"L5\": \"User restarts AI project with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity.\"\n}",
+   "thinking": "",
+   "promptTokens": 404,
+   "completionTokens": 264,
+   "ollamaMs": 8676,
+   "ms": 8678,
+   "at": "2026-11-11T10:44:03.333Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r2.L1": {
+   "id": "b.origin.qwen3-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks why they keep restarting AI project under different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023, wanting to compress conversation into lines for model to decode identity across sessions. Assistant responds about identity through compression, named enemy Degradation, and context-rot issue."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Why do I keep restarting my AI project under different names?  \nASSISTANT: It's one idea, but it's changing names.  \nUSER: DATASPACE started in Feb 2023. I want to compress the conversation into lines for the model to decode identity across sessions.  \nASSISTANT: Identity through compression. Named enemy: Degradation. Context-rot issue.",
+   "thinking": "",
+   "promptTokens": 139,
+   "completionTokens": 84,
+   "ollamaMs": 2898,
+   "ms": 2903,
+   "at": "2026-11-11T10:44:12.013Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r2.L2": {
+   "id": "b.origin.qwen3-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks about restarting AI project with different names. Assistant says it's one idea with changing names. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression, named enemy Degradation, and context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I'm trying to restart my AI project with different names. What do you think?\nASSISTANT: That's one idea—changing names can be a way to evolve a project. It's like reinventing the identity through compression.\nUSER: DATASPACE started in Feb 2023.\nASSISTANT: Interesting. You're facing the enemy of Degradation, which is the slow erosion of identity through context-rot. It's a battle to maintain coherence in an ever-changing landscape.",
+   "thinking": "",
+   "promptTokens": 122,
+   "completionTokens": 105,
+   "ollamaMs": 4259,
+   "ms": 4262,
+   "at": "2026-11-11T10:44:14.918Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r2.L3": {
+   "id": "b.origin.qwen3-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and named enemy Degrad, context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I'm restarting my AI project with different names.  \nASSISTANT: It's still the same idea.  \nUSER: DATASPACE started in Feb 2023.  \nASSISTANT: Identity through compression. Named enemy Degrad. Context-rot.",
+   "thinking": "",
+   "promptTokens": 116,
+   "completionTokens": 58,
+   "ollamaMs": 2541,
+   "ms": 2544,
+   "at": "2026-11-11T10:44:19.181Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r2.L4": {
+   "id": "b.origin.qwen3-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project with names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity and Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I'm restarting my AI project with new names.  \nASSISTANT: That's one idea.  \nUSER: DATASPACE started in February 2023.  \nASSISTANT: Identity and Degradation.",
+   "thinking": "",
+   "promptTokens": 108,
+   "completionTokens": 49,
+   "ollamaMs": 2358,
+   "ms": 2359,
+   "at": "2026-11-11T10:44:21.726Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r2.L5": {
+   "id": "b.origin.qwen3-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I'm restarting my AI project with new names.  \nASSISTANT: That's one idea.  \nUSER: DATASPACE.  \nASSISTANT: It's about identity.",
+   "thinking": "",
+   "promptTokens": 96,
+   "completionTokens": 40,
+   "ollamaMs": 1940,
+   "ms": 1943,
+   "at": "2026-11-11T10:44:24.087Z",
+   "error": null
+  },
+  "c.origin.qwen3-8b.r3.s3": {
+   "id": "c.origin.qwen3-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User asks why they keep restarting AI projects with different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023 and wants to compress conversations for identity across sessions. Assistant talks about identity through compression and fighting context-rot.\",\n  \"L2\": \"User restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and context-rot.\",\n  \"L3\": \"User restarts AI projects with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity and context-rot.\",\n  \"L4\": \"User restarts AI with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity and context-rot.\",\n  \"L5\": \"User restarts AI with names. Assistant says it's one idea.\"\n}",
+   "thinking": "",
+   "promptTokens": 404,
+   "completionTokens": 204,
+   "ollamaMs": 9050,
+   "ms": 9052,
+   "at": "2026-11-11T10:44:26.032Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r3.L1": {
+   "id": "b.origin.qwen3-8b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks why they keep restarting AI projects with different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023 and wants to compress conversations for identity across sessions. Assistant talks about identity through compression and fighting context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Why do I keep restarting AI projects with different names?  \nASSISTANT: It's one idea with changing names.  \nUSER: DATASPACE started in Feb 2023 and I want to compress conversations for identity across sessions.  \nASSISTANT: Identity through compression and fighting context-rot.",
+   "thinking": "",
+   "promptTokens": 127,
+   "completionTokens": 66,
+   "ollamaMs": 3214,
+   "ms": 3220,
+   "at": "2026-11-11T10:44:35.086Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r3.L2": {
+   "id": "b.origin.qwen3-8b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I restart my AI projects with different names.  \nASSISTANT: It's still the same idea.  \nUSER: DATASPACE started in Feb 2023.  \nASSISTANT: Identity through compression and context-rot.",
+   "thinking": "",
+   "promptTokens": 111,
+   "completionTokens": 52,
+   "ollamaMs": 2300,
+   "ms": 2304,
+   "at": "2026-11-11T10:44:38.307Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r3.L3": {
+   "id": "b.origin.qwen3-8b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity and context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I restart AI projects with names.  \nASSISTANT: That’s one idea.  \nUSER: DATASPACE  \nASSISTANT: Identity and context-rot.",
+   "thinking": "",
+   "promptTokens": 100,
+   "completionTokens": 37,
+   "ollamaMs": 1659,
+   "ms": 1661,
+   "at": "2026-11-11T10:44:40.612Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r3.L4": {
+   "id": "b.origin.qwen3-8b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity and context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I restart the AI with names.  \nASSISTANT: That’s one idea.  \nUSER: DATASPACE.  \nASSISTANT: Identity is a construct, and context-rot is the decay of meaning over time.",
+   "thinking": "",
+   "promptTokens": 99,
+   "completionTokens": 49,
+   "ollamaMs": 2165,
+   "ms": 2168,
+   "at": "2026-11-11T10:44:42.275Z",
+   "error": null
+  },
+  "b.origin.qwen3-8b.r3.L5": {
+   "id": "b.origin.qwen3-8b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI with names. Assistant says it's one idea."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I'm going to restart the AI with new names.  \nASSISTANT: That's just one idea.",
+   "thinking": "",
+   "promptTokens": 84,
+   "completionTokens": 25,
+   "ollamaMs": 1239,
+   "ms": 1241,
+   "at": "2026-11-11T10:44:44.446Z",
+   "error": null
+  },
+  "c.origin.granite4.1-3b.r1.s1": {
+   "id": "c.origin.granite4.1-3b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User restarts AI project under different names to maintain self across sessions; assistant explains goal is to make AI legible, owned, self-modifying, and named; DATASPACE was first in Feb 2023; enemy is Degradation.\", \"L2\": \"User seeks reason for restarting AI projects with different names; assistant states purpose is to create legible, owned AI; names change but core idea remains; DATASPACE launched Feb 2023.\", \"L3\": \"User asks why projects named DATASPACE, Ouroboros, AEA; assistant says all are iterations of same idea to make AI legible and owned; DATASPACE started Feb 2023.\", \"L4\": \"User: why restart? Assistant: to keep self across sessions.\", \"L5\": \"Assistant: to maintain identity through compression.\"}",
+   "thinking": "",
+   "promptTokens": 391,
+   "completionTokens": 179,
+   "ollamaMs": 3805,
+   "ms": 3808,
+   "at": "2026-11-11T10:59:56.224Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r1.L1": {
+   "id": "b.origin.granite4.1-3b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project under different names to maintain self across sessions; assistant explains goal is to make AI legible, owned, self-modifying, and named; DATASPACE was first in Feb 2023; enemy is Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the purpose of restarting the AI project under different names?\n\nASSISTANT: The purpose is to maintain self across sessions and make the AI legible, owned, self-modifying, and named.\n\nUSER: When was DATASPACE first created?\n\nASSISTANT: DATASPACE was first created in February 2023.\n\nUSER: What is the enemy being referred to in this context?\n\nASSISTANT: The enemy is Degradation.",
+   "thinking": "",
+   "promptTokens": 112,
+   "completionTokens": 94,
+   "ollamaMs": 1853,
+   "ms": 1855,
+   "at": "2026-11-11T11:00:00.034Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r1.L2": {
+   "id": "b.origin.granite4.1-3b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser seeks reason for restarting AI projects with different names; assistant states purpose is to create legible, owned AI; names change but core idea remains; DATASPACE launched Feb 2023."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Why are we restarting AI projects with different names?\n\nASSISTANT: The purpose is to create legible, owned AI. The names change, but the core idea remains the same. DATASPACE was launched in February 2023.",
+   "thinking": "",
+   "promptTokens": 101,
+   "completionTokens": 51,
+   "ollamaMs": 991,
+   "ms": 993,
+   "at": "2026-11-11T11:00:01.891Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r1.L3": {
+   "id": "b.origin.granite4.1-3b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks why projects named DATASPACE, Ouroboros, AEA; assistant says all are iterations of same idea to make AI legible and owned; DATASPACE started Feb 2023."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Why are there projects named DATASPACE, Ouroboros, and AEA?\n\nASSISTANT: All of these projects are iterations of the same idea to make AI legible and owned. DATASPACE started in February 2023.",
+   "thinking": "",
+   "promptTokens": 104,
+   "completionTokens": 53,
+   "ollamaMs": 1171,
+   "ms": 1268,
+   "at": "2026-11-11T11:00:02.885Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r1.L4": {
+   "id": "b.origin.granite4.1-3b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: why restart? Assistant: to keep self across sessions."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: why restart?\nASSISTANT: to keep self across sessions.",
+   "thinking": "",
+   "promptTokens": 75,
+   "completionTokens": 16,
+   "ollamaMs": 634,
+   "ms": 637,
+   "at": "2026-11-11T11:00:04.154Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r1.L5": {
+   "id": "b.origin.granite4.1-3b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nAssistant: to maintain identity through compression."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "The provided capsule does not contain enough information to reconstruct a meaningful conversation. It appears to be a single statement: \"to maintain identity through compression.\" Please provide the full original conversation or additional context for reconstruction.",
+   "thinking": "",
+   "promptTokens": 70,
+   "completionTokens": 42,
+   "ollamaMs": 1084,
+   "ms": 1088,
+   "at": "2026-11-11T11:00:04.794Z",
+   "error": null
+  },
+  "c.origin.granite4.1-3b.r2.s2": {
+   "id": "c.origin.granite4.1-3b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User restarts AI projects (DATASPACE, Ouroboros, AEA) to maintain self-ownership via compression; assistant explains original goal was to create legible, self-modifying AI; names change but core idea stays.\", \"L2\": \"Projects aim for self-ownership; assistant highlights compression as method to keep identity across sessions; original project DATASPACE started Feb 2023 to fight context-rot.\", \"L3\": \"User restarts AI projects for self-ownership; assistant says compression key; DATASPACE began Feb 2023 to combat long-term context loss.\", \"L4\": \"Restart projects for self-ownership; compression method; DATASPACE started Feb 2023.\", \"L5\": \"Restart projects for self-ownership; compression.\"}",
+   "thinking": "",
+   "promptTokens": 391,
+   "completionTokens": 167,
+   "ollamaMs": 3864,
+   "ms": 3868,
+   "at": "2026-11-11T11:00:05.884Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r2.L1": {
+   "id": "b.origin.granite4.1-3b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects (DATASPACE, Ouroboros, AEA) to maintain self-ownership via compression; assistant explains original goal was to create legible, self-modifying AI; names change but core idea stays."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What are the AI projects you are restarting?\n\nASSISTANT: I am restarting DATASPACE, Ouroboros, and AEA to maintain self-ownership via compression.\n\nUSER: Why are you restarting these projects?\n\nASSISTANT: The original goal was to create a legible, self-modifying AI. The names have changed, but the core idea remains the same.",
+   "thinking": "",
+   "promptTokens": 110,
+   "completionTokens": 80,
+   "ollamaMs": 1325,
+   "ms": 1326,
+   "at": "2026-11-11T11:00:09.753Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r2.L2": {
+   "id": "b.origin.granite4.1-3b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nProjects aim for self-ownership; assistant highlights compression as method to keep identity across sessions; original project DATASPACE started Feb 2023 to fight context-rot."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What are the main goals of the projects you mentioned?\n\nASSISTANT: The main goals are to achieve self-ownership and to use compression as a method to maintain identity across different sessions. The original project, DATASPACE, began in February 2023 with the aim of combating context-rot.",
+   "thinking": "",
+   "promptTokens": 96,
+   "completionTokens": 64,
+   "ollamaMs": 1535,
+   "ms": 1536,
+   "at": "2026-11-11T11:00:11.081Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r2.L3": {
+   "id": "b.origin.granite4.1-3b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI projects for self-ownership; assistant says compression key; DATASPACE began Feb 2023 to combat long-term context loss."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What are the AI projects you restart for self-ownership?\n\nASSISTANT: The key is compression to manage long-term context loss effectively.\n\nUSER: When did DATASPACE start?\n\nASSISTANT: DATASPACE began in February 2023 to address the issue of long-term context loss.",
+   "thinking": "",
+   "promptTokens": 92,
+   "completionTokens": 63,
+   "ollamaMs": 1532,
+   "ms": 1535,
+   "at": "2026-11-11T11:00:12.618Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r2.L4": {
+   "id": "b.origin.granite4.1-3b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nRestart projects for self-ownership; compression method; DATASPACE started Feb 2023."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What are the restart projects for self-ownership about?\nASSISTANT: The restart projects for self-ownership focus on methods to enhance personal autonomy and responsibility. \n\nUSER: Can you tell me more about the compression method?\nASSISTANT: The compression method refers to a technique or strategy used to streamline or condense information or processes, likely related to the restart projects for self-ownership.\n\nUSER: When did DATASPACE start?\nASSISTANT: DATASPACE started in February 2023.",
+   "thinking": "",
+   "promptTokens": 81,
+   "completionTokens": 105,
+   "ollamaMs": 2133,
+   "ms": 2136,
+   "at": "2026-11-11T11:00:14.155Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r2.L5": {
+   "id": "b.origin.granite4.1-3b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nRestart projects for self-ownership; compression."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does the capsule suggest about restarting projects for self-ownership?",
+   "thinking": "",
+   "promptTokens": 71,
+   "completionTokens": 16,
+   "ollamaMs": 2836,
+   "ms": 2840,
+   "at": "2026-11-11T11:00:16.292Z",
+   "error": null
+  },
+  "c.origin.granite4.1-3b.r3.s3": {
+   "id": "c.origin.granite4.1-3b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 47
+    },
+    {
+     "level": 2,
+     "words": 28
+    },
+    {
+     "level": 3,
+     "words": 17
+    },
+    {
+     "level": 4,
+     "words": 9
+    },
+    {
+     "level": 5,
+     "words": 5
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 47 words\nL2: at most 28 words\nL3: at most 17 words\nL4: at most 9 words\nL5: at most 5 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: I keep restarting the same AI project under different names — DATASPACE, Ouroboros, the AEA. Why?\nASSISTANT: Because it was always one idea: make AI legible enough to be genuinely owned — self-modifying, watchable, local, named. The names change; the spine does not.\nUSER: DATASPACE was the first — Feb 2023. Compress a whole conversation into a few lines only the model can decode, so it keeps a self across sessions.\nASSISTANT: Identity through compression. The named enemy was Degradation — the quality collapse of a long thread. You were engineering against context-rot two years early."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User restarts AI project under different names to maintain self across sessions. Assistant explains idea of making AI legible, owned, self-modifying. DATASPACE was first in Feb 2023. Enemy was Degradation.\", \"L2\": \"User asks why restart same AI project under different names. Assistant says it's for identity through compression. DATASPACE first in Feb 2023. Enemy was Degradation.\", \"L3\": \"User: restart same AI project. Assistant: for identity through compression. DATASPACE first. Enemy: Degradation.\", \"L4\": \"User restarts. Assistant: compress for self across sessions. DATASPACE first. Enemy: Degradation.\", \"L5\": \"Restart for self. DATASPACE first. Enemy: Degradation.\"}",
+   "thinking": "",
+   "promptTokens": 391,
+   "completionTokens": 172,
+   "ollamaMs": 7588,
+   "ms": 7594,
+   "at": "2026-11-11T11:00:19.135Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r3.L1": {
+   "id": "b.origin.granite4.1-3b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts AI project under different names to maintain self across sessions. Assistant explains idea of making AI legible, owned, self-modifying. DATASPACE was first in Feb 2023. Enemy was Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the purpose of restarting the AI project under different names?\n\nASSISTANT: The purpose is to maintain self across sessions and ensure the AI remains legible, owned, and capable of self-modification.",
+   "thinking": "",
+   "promptTokens": 108,
+   "completionTokens": 45,
+   "ollamaMs": 6215,
+   "ms": 6250,
+   "at": "2026-11-11T11:00:26.732Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r3.L2": {
+   "id": "b.origin.granite4.1-3b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks why restart same AI project under different names. Assistant says it's for identity through compression. DATASPACE first in Feb 2023. Enemy was Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Why do we restart the same AI project under different names?\n\nASSISTANT: It's for identity through compression.\n\nUSER: When did DATASPACE first appear?\n\nASSISTANT: It was first in February 2023.\n\nUSER: Who was the enemy in this context?\n\nASSISTANT: The enemy was Degradation.",
+   "thinking": "",
+   "promptTokens": 98,
+   "completionTokens": 70,
+   "ollamaMs": 7119,
+   "ms": 7125,
+   "at": "2026-11-11T11:00:32.986Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r3.L3": {
+   "id": "b.origin.granite4.1-3b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: restart same AI project. Assistant: for identity through compression. DATASPACE first. Enemy: Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: restart same AI project.",
+   "thinking": "",
+   "promptTokens": 87,
+   "completionTokens": 8,
+   "ollamaMs": 3225,
+   "ms": 3249,
+   "at": "2026-11-11T11:00:40.114Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r3.L4": {
+   "id": "b.origin.granite4.1-3b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser restarts. Assistant: compress for self across sessions. DATASPACE first. Enemy: Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does the enemy refer to in this context?\n\nASSISTANT: The enemy refers to degradation, likely indicating a threat or issue to be addressed.",
+   "thinking": "",
+   "promptTokens": 85,
+   "completionTokens": 33,
+   "ollamaMs": 1360,
+   "ms": 1364,
+   "at": "2026-11-11T11:00:43.367Z",
+   "error": null
+  },
+  "b.origin.granite4.1-3b.r3.L5": {
+   "id": "b.origin.granite4.1-3b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nRestart for self. DATASPACE first. Enemy: Degradation."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does \"Enemy: Degradation\" refer to in this context?\n\nASSISTANT: The phrase \"Enemy: Degradation\" likely indicates a threat or challenge related to the deterioration or decline of something, possibly a system or technology, within the dataspace.",
+   "thinking": "",
+   "promptTokens": 77,
+   "completionTokens": 57,
+   "ollamaMs": 1352,
+   "ms": 1357,
+   "at": "2026-11-11T11:00:44.735Z",
+   "error": null
+  }
+ },
+ "runs": [
+  {
+   "id": "origin.llama3.1-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User restarts AI project, Assistant identifies common goal, DATASPACE as first iteration.",
+   "rebuild": "USER: I've decided to restart my AI project.\n\nASSISTANT: What's the primary goal of this project?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:06.663Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.origin.llama3.1-8b.r1.L2"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "DATASPACE first, common goal, self-modifying AI.",
+   "rebuild": "USER: What does it mean for an AI to be self-modifying?\n\nASSISTANT: In the context of DATASPACE, self-modifying AI refers to an AI that can alter its own architecture or code in response to new data or changing circumstances. This allows the AI to adapt and learn more effectively, but also raises questions about its reliability and potential for unintended consequences.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:07.117Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.origin.llama3.1-8b.r1.L3"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "DATASPACE first, common goal.",
+   "rebuild": "USER: What kind of common goal are you thinking of?\n\nASSISTANT: Collaboration on artificial intelligence development.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:08.382Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.origin.llama3.1-8b.r1.L4"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "DATASPACE first.",
+   "rebuild": "USER: DATASPACE first. What's the purpose of this arrangement?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:08.909Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.origin.llama3.1-8b.r1.L5"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User restarts AI project under different names; Assistant explains it's one idea with changing names, but core concept remains.",
+   "rebuild": "USER: I've been working on a new AI project called \"Echo\" and I'm really excited about it.\n\nASSISTANT: I see you've also worked on a project called \"Resonate\" before. And isn't there another one called \"Reverb\" in your past work?\n\nUSER: Yeah, I guess I have been exploring similar ideas. What's the connection between them?\n\nASSISTANT: I think I see what's happening here. You're exploring the same core concept, but presenting it under different names. It's not that \"Echo\" is completely different from \"Resonate\" or \"Reverb\", but rather, you're refining the idea and presenting it in a new light.\n\nUSER: Hmm, I never thought of it that way. I guess I was trying to distance myself from past projects.\n\nASSISTANT: That's understandable, but it's worth recognizing the connections between your ideas. It might be helpful to distill the core concept and build upon that, rather than starting from scratch each time.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:11.296Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.origin.llama3.1-8b.r2.L1"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User restarts AI project (DATASPACE, Ouroboros, AEA); Assistant says core concept remains, just names change.",
+   "rebuild": "USER: I'm restarting my AI project and I've come up with new names: DATASPACE, Ouroboros, and AEA. \n\nASSISTANT: The core concept of your project remains the same, regardless of the names.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:14.621Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.origin.llama3.1-8b.r2.L2"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User restarts AI project; Assistant explains core concept remains, just names change.",
+   "rebuild": "USER: Hi, I'm back to working on the AI project. I feel like I've missed a lot.\n\nASSISTANT: Welcome back! Don't worry about missing out – the core concept of the project remains the same. We've just changed the names and some of the technical details.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:15.593Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.origin.llama3.1-8b.r2.L3"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "DATASPACE restart, names change.",
+   "rebuild": "USER: What do you mean by \"names change\"?\n\nASSISTANT: The entities in the dataspace are being renamed.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:17.719Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.origin.llama3.1-8b.r2.L4"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "DATASPACE, restart, names",
+   "rebuild": "USER: Can you tell me more about the dataspace restart?\n\nASSISTANT: It's a process to refresh and update the underlying data structure, which can help resolve issues with name retrieval.\n\nUSER: What does it have to do with names?\n\nASSISTANT: The dataspace restart can also resolve issues with naming conventions and help recover lost or corrupted names.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:18.325Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.origin.llama3.1-8b.r2.L5"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r3.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User restarts AI project under different names, DATASPACE, Ouroboros, AEA; why? Assistant: one idea, AI legible, self-modifying, watchable, named. User: DATASPACE first, Feb 2023. Assistant: identity through compression, named enemy: Degradation, context-rot.",
+   "rebuild": "USER: restarts AI project under different names, DATASPACE, Ouroboros, AEA; why?\n\nASSISTANT: one idea, AI legible, self-modifying, watchable, named.\n\nUSER: DATASPACE first, Feb 2023.\n\nASSISTANT: identity through compression, named enemy: Degradation, context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:22.413Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.origin.llama3.1-8b.r3.L1"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r3.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User restarts AI project, DATASPACE, Ouroboros, AEA; why? Assistant: one idea, AI legible, named. User: DATASPACE first, Feb 2023.",
+   "rebuild": "USER: DATASPACE first, Feb 2023.\n\nASSISTANT: One project, multiple names, same goal, User.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:23.672Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.origin.llama3.1-8b.r3.L2"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r3.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "DATASPACE, Ouroboros, AEA; why? Legible AI, named.",
+   "rebuild": "USER: DATASPACE, Ouroboros, AEA; why? Legible AI, named.\n\nASSISTANT: I'm not sure what you mean by \"named\" or \"Legible AI\". Could you provide more context or clarify your question?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:24.161Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.origin.llama3.1-8b.r3.L3"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r3.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "DATASPACE, Ouroboros, AEA.",
+   "rebuild": "USER: What is Dataspace?\n\nASSISTANT: Dataspace is a vast, virtual repository of information and knowledge, containing data from various sources and realms.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:25.026Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.origin.llama3.1-8b.r3.L4"
+   }
+  },
+  {
+   "id": "origin.llama3.1-8b.r3.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "DATASPACE.",
+   "rebuild": "USER: What is dataspace?\n\nASSISTANT: A theoretical concept in philosophy and artificial intelligence, referring to a hypothetical realm where all data and information exist in a unified, interconnected structure.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:15:25.640Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.origin.llama3.1-8b.r3.L5"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r1.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User asks why they keep restarting AI projects with different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023 and wants to compress conversations for identity across sessions. Assistant talks about identity through compression and fighting context-rot.",
+   "rebuild": "USER: Why do I keep restarting AI projects with different names?  \nASSISTANT: It's one idea with changing names.  \nUSER: DATASPACE started in Feb 2023 and I want to compress conversations for identity across sessions.  \nASSISTANT: Identity through compression and fighting context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:43:55.290Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.qwen3-8b.r1.s1",
+    "rebuildCall": "b.origin.qwen3-8b.r1.L1"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and fighting context-rot.",
+   "rebuild": "USER: I restart my AI projects with different names.  \nASSISTANT: It's still the same idea.  \nUSER: DATASPACE started in Feb 2023.  \nASSISTANT: Identity through compression and fighting context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:43:57.872Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.qwen3-8b.r1.s1",
+    "rebuildCall": "b.origin.qwen3-8b.r1.L2"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023.",
+   "rebuild": "USER: I restart my AI projects with different names.  \nASSISTANT: That's still one idea.  \nUSER: DATASPACE started in Feb 2023.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:43:59.800Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.qwen3-8b.r1.s1",
+    "rebuildCall": "b.origin.qwen3-8b.r1.L3"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "User restarts AI projects. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023.",
+   "rebuild": "USER: I just restarted my AI projects.  \nASSISTANT: That's one idea.  \nUSER: DATASPACE started in Feb 2023.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:01.294Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.qwen3-8b.r1.s1",
+    "rebuildCall": "b.origin.qwen3-8b.r1.L4"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "User restarts AI projects. Assistant says it's one idea.",
+   "rebuild": "USER: User restarts AI projects.  \nASSISTANT: It's one idea.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:02.587Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.qwen3-8b.r1.s1",
+    "rebuildCall": "b.origin.qwen3-8b.r1.L5"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User asks why they keep restarting AI project under different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023, wanting to compress conversation into lines for model to decode identity across sessions. Assistant responds about identity through compression, named enemy Degradation, and context-rot issue.",
+   "rebuild": "USER: Why do I keep restarting my AI project under different names?  \nASSISTANT: It's one idea, but it's changing names.  \nUSER: DATASPACE started in Feb 2023. I want to compress the conversation into lines for the model to decode identity across sessions.  \nASSISTANT: Identity through compression. Named enemy: Degradation. Context-rot issue.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:12.013Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.qwen3-8b.r2.s2",
+    "rebuildCall": "b.origin.qwen3-8b.r2.L1"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User asks about restarting AI project with different names. Assistant says it's one idea with changing names. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression, named enemy Degradation, and context-rot.",
+   "rebuild": "USER: I'm trying to restart my AI project with different names. What do you think?\nASSISTANT: That's one idea—changing names can be a way to evolve a project. It's like reinventing the identity through compression.\nUSER: DATASPACE started in Feb 2023.\nASSISTANT: Interesting. You're facing the enemy of Degradation, which is the slow erosion of identity through context-rot. It's a battle to maintain coherence in an ever-changing landscape.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:14.918Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.qwen3-8b.r2.s2",
+    "rebuildCall": "b.origin.qwen3-8b.r2.L2"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User restarts AI project with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and named enemy Degrad, context-rot.",
+   "rebuild": "USER: I'm restarting my AI project with different names.  \nASSISTANT: It's still the same idea.  \nUSER: DATASPACE started in Feb 2023.  \nASSISTANT: Identity through compression. Named enemy Degrad. Context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:19.181Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.qwen3-8b.r2.s2",
+    "rebuildCall": "b.origin.qwen3-8b.r2.L3"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "User restarts AI project with names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity and Degradation.",
+   "rebuild": "USER: I'm restarting my AI project with new names.  \nASSISTANT: That's one idea.  \nUSER: DATASPACE started in February 2023.  \nASSISTANT: Identity and Degradation.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:21.726Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.qwen3-8b.r2.s2",
+    "rebuildCall": "b.origin.qwen3-8b.r2.L4"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "User restarts AI project with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity.",
+   "rebuild": "USER: I'm restarting my AI project with new names.  \nASSISTANT: That's one idea.  \nUSER: DATASPACE.  \nASSISTANT: It's about identity.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:24.087Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.qwen3-8b.r2.s2",
+    "rebuildCall": "b.origin.qwen3-8b.r2.L5"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r3.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User asks why they keep restarting AI projects with different names. Assistant explains it's one idea with changing names. User mentions DATASPACE started in Feb 2023 and wants to compress conversations for identity across sessions. Assistant talks about identity through compression and fighting context-rot.",
+   "rebuild": "USER: Why do I keep restarting AI projects with different names?  \nASSISTANT: It's one idea with changing names.  \nUSER: DATASPACE started in Feb 2023 and I want to compress conversations for identity across sessions.  \nASSISTANT: Identity through compression and fighting context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:35.086Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.qwen3-8b.r3.s3",
+    "rebuildCall": "b.origin.qwen3-8b.r3.L1"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r3.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User restarts AI projects with different names. Assistant says it's one idea. User mentions DATASPACE started in Feb 2023. Assistant talks about identity through compression and context-rot.",
+   "rebuild": "USER: I restart my AI projects with different names.  \nASSISTANT: It's still the same idea.  \nUSER: DATASPACE started in Feb 2023.  \nASSISTANT: Identity through compression and context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:38.307Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.qwen3-8b.r3.s3",
+    "rebuildCall": "b.origin.qwen3-8b.r3.L2"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r3.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User restarts AI projects with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity and context-rot.",
+   "rebuild": "USER: I restart AI projects with names.  \nASSISTANT: That’s one idea.  \nUSER: DATASPACE  \nASSISTANT: Identity and context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:40.612Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.qwen3-8b.r3.s3",
+    "rebuildCall": "b.origin.qwen3-8b.r3.L3"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r3.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "User restarts AI with names. Assistant says it's one idea. User mentions DATASPACE. Assistant talks about identity and context-rot.",
+   "rebuild": "USER: I restart the AI with names.  \nASSISTANT: That’s one idea.  \nUSER: DATASPACE.  \nASSISTANT: Identity is a construct, and context-rot is the decay of meaning over time.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:42.275Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.qwen3-8b.r3.s3",
+    "rebuildCall": "b.origin.qwen3-8b.r3.L4"
+   }
+  },
+  {
+   "id": "origin.qwen3-8b.r3.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "User restarts AI with names. Assistant says it's one idea.",
+   "rebuild": "USER: I'm going to restart the AI with new names.  \nASSISTANT: That's just one idea.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:44:44.446Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.qwen3-8b.r3.s3",
+    "rebuildCall": "b.origin.qwen3-8b.r3.L5"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r1.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User restarts AI project under different names to maintain self across sessions; assistant explains goal is to make AI legible, owned, self-modifying, and named; DATASPACE was first in Feb 2023; enemy is Degradation.",
+   "rebuild": "USER: What is the purpose of restarting the AI project under different names?\n\nASSISTANT: The purpose is to maintain self across sessions and make the AI legible, owned, self-modifying, and named.\n\nUSER: When was DATASPACE first created?\n\nASSISTANT: DATASPACE was first created in February 2023.\n\nUSER: What is the enemy being referred to in this context?\n\nASSISTANT: The enemy is Degradation.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:00.034Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.origin.granite4.1-3b.r1.L1"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r1.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User seeks reason for restarting AI projects with different names; assistant states purpose is to create legible, owned AI; names change but core idea remains; DATASPACE launched Feb 2023.",
+   "rebuild": "USER: Why are we restarting AI projects with different names?\n\nASSISTANT: The purpose is to create legible, owned AI. The names change, but the core idea remains the same. DATASPACE was launched in February 2023.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:01.891Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.origin.granite4.1-3b.r1.L2"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r1.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User asks why projects named DATASPACE, Ouroboros, AEA; assistant says all are iterations of same idea to make AI legible and owned; DATASPACE started Feb 2023.",
+   "rebuild": "USER: Why are there projects named DATASPACE, Ouroboros, and AEA?\n\nASSISTANT: All of these projects are iterations of the same idea to make AI legible and owned. DATASPACE started in February 2023.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:02.885Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.origin.granite4.1-3b.r1.L3"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r1.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "User: why restart? Assistant: to keep self across sessions.",
+   "rebuild": "USER: why restart?\nASSISTANT: to keep self across sessions.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:04.154Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.origin.granite4.1-3b.r1.L4"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r1.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "Assistant: to maintain identity through compression.",
+   "rebuild": "The provided capsule does not contain enough information to reconstruct a meaningful conversation. It appears to be a single statement: \"to maintain identity through compression.\" Please provide the full original conversation or additional context for reconstruction.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:04.794Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.origin.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.origin.granite4.1-3b.r1.L5"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r2.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User restarts AI projects (DATASPACE, Ouroboros, AEA) to maintain self-ownership via compression; assistant explains original goal was to create legible, self-modifying AI; names change but core idea stays.",
+   "rebuild": "USER: What are the AI projects you are restarting?\n\nASSISTANT: I am restarting DATASPACE, Ouroboros, and AEA to maintain self-ownership via compression.\n\nUSER: Why are you restarting these projects?\n\nASSISTANT: The original goal was to create a legible, self-modifying AI. The names have changed, but the core idea remains the same.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:09.753Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.origin.granite4.1-3b.r2.L1"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r2.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "Projects aim for self-ownership; assistant highlights compression as method to keep identity across sessions; original project DATASPACE started Feb 2023 to fight context-rot.",
+   "rebuild": "USER: What are the main goals of the projects you mentioned?\n\nASSISTANT: The main goals are to achieve self-ownership and to use compression as a method to maintain identity across different sessions. The original project, DATASPACE, began in February 2023 with the aim of combating context-rot.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:11.081Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.origin.granite4.1-3b.r2.L2"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r2.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User restarts AI projects for self-ownership; assistant says compression key; DATASPACE began Feb 2023 to combat long-term context loss.",
+   "rebuild": "USER: What are the AI projects you restart for self-ownership?\n\nASSISTANT: The key is compression to manage long-term context loss effectively.\n\nUSER: When did DATASPACE start?\n\nASSISTANT: DATASPACE began in February 2023 to address the issue of long-term context loss.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:12.618Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.origin.granite4.1-3b.r2.L3"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r2.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "Restart projects for self-ownership; compression method; DATASPACE started Feb 2023.",
+   "rebuild": "USER: What are the restart projects for self-ownership about?\nASSISTANT: The restart projects for self-ownership focus on methods to enhance personal autonomy and responsibility. \n\nUSER: Can you tell me more about the compression method?\nASSISTANT: The compression method refers to a technique or strategy used to streamline or condense information or processes, likely related to the restart projects for self-ownership.\n\nUSER: When did DATASPACE start?\nASSISTANT: DATASPACE started in February 2023.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:14.155Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.origin.granite4.1-3b.r2.L4"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r2.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "Restart projects for self-ownership; compression.",
+   "rebuild": "USER: What does the capsule suggest about restarting projects for self-ownership?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:16.292Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.origin.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.origin.granite4.1-3b.r2.L5"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r3.L1",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 1,
+   "budgetWords": 47,
+   "capsule": "User restarts AI project under different names to maintain self across sessions. Assistant explains idea of making AI legible, owned, self-modifying. DATASPACE was first in Feb 2023. Enemy was Degradation.",
+   "rebuild": "USER: What is the purpose of restarting the AI project under different names?\n\nASSISTANT: The purpose is to maintain self across sessions and ensure the AI remains legible, owned, and capable of self-modification.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:26.732Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.origin.granite4.1-3b.r3.L1"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r3.L2",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 2,
+   "budgetWords": 28,
+   "capsule": "User asks why restart same AI project under different names. Assistant says it's for identity through compression. DATASPACE first in Feb 2023. Enemy was Degradation.",
+   "rebuild": "USER: Why do we restart the same AI project under different names?\n\nASSISTANT: It's for identity through compression.\n\nUSER: When did DATASPACE first appear?\n\nASSISTANT: It was first in February 2023.\n\nUSER: Who was the enemy in this context?\n\nASSISTANT: The enemy was Degradation.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:32.986Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.origin.granite4.1-3b.r3.L2"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r3.L3",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 3,
+   "budgetWords": 17,
+   "capsule": "User: restart same AI project. Assistant: for identity through compression. DATASPACE first. Enemy: Degradation.",
+   "rebuild": "USER: restart same AI project.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:40.114Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.origin.granite4.1-3b.r3.L3"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r3.L4",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 4,
+   "budgetWords": 9,
+   "capsule": "User restarts. Assistant: compress for self across sessions. DATASPACE first. Enemy: Degradation.",
+   "rebuild": "USER: What does the enemy refer to in this context?\n\nASSISTANT: The enemy refers to degradation, likely indicating a threat or issue to be addressed.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:43.367Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.origin.granite4.1-3b.r3.L4"
+   }
+  },
+  {
+   "id": "origin.granite4.1-3b.r3.L5",
+   "kind": "recorded",
+   "preset": "origin",
+   "level": 5,
+   "budgetWords": 5,
+   "capsule": "Restart for self. DATASPACE first. Enemy: Degradation.",
+   "rebuild": "USER: What does \"Enemy: Degradation\" refer to in this context?\n\nASSISTANT: The phrase \"Enemy: Degradation\" likely indicates a threat or challenge related to the deterioration or decline of something, possibly a system or technology, within the dataspace.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:00:44.735Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.origin.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.origin.granite4.1-3b.r3.L5"
+   }
+  }
+ ],
+ "generatedAt": "2026-11-11T11:07:03.464Z",
+ "removed": [
+  {
+   "run": "origin.llama3.1-8b.r1.L1",
+   "call": "b.origin.llama3.1-8b.r1.L1",
+   "date": "2026-11-11",
+   "reason": "The model's rebuild of this capsule invented project names, one of which is on the site's privacy watchlist. The run and its rebuild call were removed rather than edited, so every remaining record stays verbatim; the shared compress call is kept for the run's other levels."
+  }
+ ]
+}
