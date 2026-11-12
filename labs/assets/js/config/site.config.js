@@ -124,6 +124,9 @@ export const CATEGORIES = [
     icon: 'fa-solid fa-brain',
     intro: 'Tools for the inner work.',
     projects: [
+      { id: 'claude-prep', title: 'Claude Prep', status: 'built',
+        href: 'claude-prep/',
+        blurb: 'A private study platform for the Anthropic certifications: timed mocks weighted like the real exam, an explanation behind every answer that links back to its lesson, and a revision sheet built from every miss. Opens with a password; scores sync to a private repository.' },
       { id: 'pathways', title: 'Learning Pathways', status: 'planned',
         blurb: 'Turn a goal into a sequenced, checkable path.' },
       { id: 'habits', title: 'Habit Formation', status: 'planned',
