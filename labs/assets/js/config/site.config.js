@@ -105,7 +105,7 @@ export const CATEGORIES = [
     projects: [
       { id: 'token-ekg', title: 'Token EKG', status: 'built',
         href: 'token-ekg.html',
-        blurb: 'A model does not emit tokens evenly. Token EKG timestamps each one as it streams and draws that hidden cadence as a live biosignal with a spectral read — real telemetry of the serving pipeline, not a brain.' },
+        blurb: 'Times a token stream chunk by chunk and checks the page\'s clock against the server\'s own counters, with 80 recorded runs to replay and compare. Three real tokenizers price one sentence in 23 languages, from 27 tokens to 512.' },
       { id: 'dataspace', title: 'DATASPACE', status: 'built',
         href: 'dataspace.html',
         blurb: 'A rate-distortion instrument for conversations. A model squeezes your text into a capsule, a fresh call rebuilds it from the capsule alone, and the page measures what came back in bits, numbers, names and turns, across five strengths, against DEFLATE, Brotli and a context model.' },
