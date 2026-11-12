@@ -3,6 +3,18 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-12, Labs: Token EKG measures instead of drawing
+
+- Every number on the page is a measurement or a dated recording. Four real tokenizers run in the browser (o200k and
+  cl100k, Qwen3 and Mistral) and match their reference libraries' ids on 61 of 61 test texts; the same sentence,
+  Article 1 of the Universal Declaration of Human Rights, costs 33 tokens in English and 512 in Burmese under cl100k.
+- With a local model, a reply is timed chunk by chunk and checked against the server's own counters; the decode rate
+  is (tokens - 1) / (last - first chunk time), within a median 0.76% of the server's figure on 76 recordings. Without
+  one, 80 recorded runs replay, labelled as recordings with their date and model.
+- Independent grade on the lab's own ladder: level 2 to 2 (tokenizer fidelity 9). The fixes that the grade asked
+  for (the rate formula, a stopped run left marked live, Enter to start) were verified before publishing.
+- Checks: 32 tests in labs/assets/js/token-ekg/tests/run.mjs, run by the site gate.
+
 ## 2026-11-12, Mobile pass on the home page and the labs hub (roadmap item 3)
 
 - Item 1 had nothing to fix: node tools/site_check.mjs reports 20 pages and 0 findings on main today. Item 2 still
