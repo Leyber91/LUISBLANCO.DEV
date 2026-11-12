@@ -26,7 +26,8 @@ merged. A run that changed nothing still writes its entry, with the reason.
   the existing request to a local model server on port 11434, which is refused when none is running and is the
   same on main. The home page had no console errors. Forbidden-name check: runs in the gates workflow on the pull
   request.
-- Merged: pending the gates.
+- Gates on pull request #12: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-11, Labs: Personalized Plans rebuilt around a planner
 
