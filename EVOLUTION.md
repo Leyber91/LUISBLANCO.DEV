@@ -3,6 +3,32 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-12, Mobile pass on the home page and the labs hub (roadmap item 3)
+
+- Item 1 had nothing to fix: node tools/site_check.mjs reports 20 pages and 0 findings on main today. Item 2 still
+  has no link to remove: no tracked file outside _archive/ references labs/weather/. Both stay in "Next" for Luis,
+  as the last two entries said. This run built item 3.
+- Labs hub, found: at every width below about 470 px the menu toggle sat past the right edge (x = 413 to 442 px on a
+  390 px screen), so on a phone the project menu could not be opened. The cause was the brand link, 278 px wide with
+  no wrapping, plus the AI status label.
+- Labs hub, changed (labs/assets/css/hub.css only): at 520 px and below the brand is set smaller with tighter
+  letter-spacing and the header gap shrinks; at 440 px and below the status label is hidden visually, keeping the
+  dot, the title and the text for screen readers. At 320, 360, 390 and 430 px the brand shows in full and the toggle
+  ends at 301, 341, 371 and 409 px. Above 520 px nothing changes.
+- Home page, measured and left unchanged: no link or button sits outside the screen at 390 px except the project
+  cards inside the horizontal carousel, which is meant to scroll. Decorative halos reach x = 402 px; the body clips
+  them, so a finger cannot scroll the page sideways, though a script can move it 2 px. Fixing that would mean changing
+  overflow on the root element, which can break sticky elements, so it is noted here for Luis instead.
+- Checks: privacy_gate.py --selftest 16 of 16; node tools/site_check.mjs 20 pages, 0 findings. No script changed, so
+  there was no syntax check to run. Render: the labs hub and the home page loaded in headless Chromium over a local
+  http server at 1280 px and 390 px. On the labs hub the toggle was clicked at 390 px and the menu opened (x = 55 to
+  390). The page scroll width was 1280 and 390, so nothing overflowed. The only console error on the labs hub was
+  the existing request to a local model server on port 11434, which is refused when none is running and is the
+  same on main. The home page had no console errors. Forbidden-name check: runs in the gates workflow on the pull
+  request.
+- Gates on pull request #12: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-11, Labs: Personalized Plans rebuilt around a planner
 
 - A deterministic planner makes every decision: session load (Foster et al., 2001), a fitness-fatigue model
