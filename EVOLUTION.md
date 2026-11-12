@@ -12,7 +12,7 @@ merged. A run that changed nothing still writes its entry, with the reason.
   privacy gate, which is not weakened for a data file. The 13 mistral:7b recordings stay; where their tokenizer
   cross-check would appear, the page says it is unavailable.
 - With a local model, a reply is timed chunk by chunk and checked against the server's own counters; the decode rate
-  is (tokens - 1) / (last - first chunk time), within a median 0.76% of the server's figure on 76 recordings. Without
+  is (tokens - 1) / (last - first chunk time), within a median 0.75% of the server's figure on 76 recordings. Without
   one, 80 recorded runs replay, labelled as recordings with their date and model.
 - Independent grade on the lab's own ladder: level 2 to 2 (tokenizer fidelity 9, graded while the Mistral tokenizer
   was in the lab; that axis's rung 5 asks for a SentencePiece vocabulary, which the lab no longer has). The fixes

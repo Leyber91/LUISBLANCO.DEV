@@ -128,7 +128,7 @@ const noTok = (model) => (modelTok(model) ? null : NO_TOKENIZER.find((t) => t.ma
 }
 
 {
-  // three prompts, two of them cut by the length limit (no end-of-turn token)
+  // three prompts; one of them (retok-qwen-code) cut by the length limit (no end-of-turn token)
   const rec = JSON.parse(read('traces.json')).traces.filter((t) => t.group === 'retok');
   const checkable = rec.filter((t) => modelTok(t.model));
   for (const t of checkable) {
