@@ -10,8 +10,10 @@
    Commands (Node 18+, Windows-first, no dependencies):
      status                   every lab worktree: branch, ahead/behind, dirty files, last commit
      add <name...> [--base B] create worktrees (default base: labs/foundation, else main)
-     serve <name>             start http.server for the worktree on its port (detached)
-     shoot <name> [page]      desktop 1440 and phone 390 screenshots + console errors
+     serve <name>             start http.server for the worktree on its port, left running (stop it with stop)
+     stop <name|all>          stop the http.server listening on a lab's port, or on every lab port
+     shoot <name> [page]      desktop 1440 and phone 390 screenshots + console errors; a server it
+                              had to start is stopped when it finishes
      gates <name>             privacy selftest, site_check, levels check, in the worktree
      sync <name> [--from B]   merge B (default main) into the lab branch
      ship <name>              push, open a pull request to main, wait for the gates, squash-merge
@@ -148,9 +150,39 @@ async function portOpen(port) {
   catch { return false; }
 }
 
+/* A server that lives only as long as this command: attached, and stopped in a finally. */
+function startTempServer(lab) {
+  const p = wtPath(lab);
+  if (!fs.existsSync(p)) die(`no worktree for ${lab.name}; run add first`);
+  return spawn('python', ['-m', 'http.server', String(lab.port), '--bind', '127.0.0.1'], {
+    cwd: p, detached: false, stdio: 'ignore', windowsHide: true,
+  });
+}
+function stopPid(pid) {
+  if (!pid) return;
+  if (process.platform === 'win32') run('taskkill', ['/PID', String(pid), '/T', '/F']);
+  else { try { process.kill(pid); } catch { /* already gone */ } }
+}
+async function waitPort(port, ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) { if (await portOpen(port)) return true; await new Promise((r) => setTimeout(r, 200)); }
+  return false;
+}
+
 async function cmdShoot(n, pageArg) {
   const lab = byName(n);
-  if (!(await portOpen(lab.port))) { cmdServe(n); await new Promise((r) => setTimeout(r, 1200)); }
+  let temp = null;
+  if (!(await portOpen(lab.port))) {
+    temp = startTempServer(lab);
+    if (!(await waitPort(lab.port, 8000))) { stopPid(temp.pid); die(`server on ${lab.port} did not come up`); }
+  }
+  try { await shootWith(lab, pageArg); }
+  finally {
+    if (temp) { stopPid(temp.pid); console.log(`stopped the server this shot started on port ${lab.port}`); }
+  }
+}
+
+async function shootWith(lab, pageArg) {
   const page = pageArg || lab.page;
   const url = `http://127.0.0.1:${lab.port}/labs/${page}`;
   const dir = `${SHOTS}/${lab.name}`;
@@ -187,6 +219,18 @@ async function cmdShoot(n, pageArg) {
   console.log(`console: ${lines.length} messages, ${bad.length} errors`);
   for (const l of bad.slice(0, 12)) console.log('  ' + l.slice(0, 220));
   if (bad.length) process.exitCode = 1;
+}
+
+/* Stop the python http.server listening on a lab's port (or every lab port). Nothing else is touched. */
+function cmdStop(n) {
+  const labs = n === 'all' ? LABS : [byName(n)];
+  const ports = labs.map((l) => l.port).join(',');
+  const ps = `$ports=@(${ports}); foreach($p in $ports){ $c=Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue;` +
+    ` foreach($x in $c){ $pr=Get-CimInstance Win32_Process -Filter ("ProcessId=" + $x.OwningProcess);` +
+    ` if($pr -and $pr.CommandLine -match 'http\\.server'){ Stop-Process -Id $x.OwningProcess -Force; Write-Output ("stopped " + $p + " pid " + $x.OwningProcess) }` +
+    ` elseif($pr){ Write-Output ("left " + $p + ": not an http.server (" + $pr.Name + ")") } } }`;
+  const r = run('powershell', ['-NoProfile', '-Command', ps]);
+  console.log(r.out || `no http.server listening on ${n === 'all' ? 'any lab port' : 'port ' + labs[0].port}`);
 }
 
 function cmdGates(n) {
@@ -235,6 +279,12 @@ function cmdSync(n, from = 'main') {
     return;
   }
   for (const { f, how } of plan) {
+    if (how === 'entries') {
+      fs.writeFileSync(path.join(p, f), mergeEntries(git(['show', `:2:${f}`], p).out, git(['show', `:3:${f}`], p).out));
+      git(['add', '--', f], p);
+      console.log(`  resolved ${f}: kept every entry from both sides, the branch's new ones first`);
+      continue;
+    }
     git(['checkout', how === 'ours' ? '--ours' : '--theirs', '--', f], p);
     git(['add', '--', f], p);
     console.log(`  resolved ${f}: ${how === 'ours' ? 'kept the branch copy (it equals labs/foundation, newer than main)' : 'took main, to regenerate'}`);
@@ -244,11 +294,37 @@ function cmdSync(n, from = 'main') {
   regenerate(p, lab, `merged ${from} into labs/${lab.name} (conflicts resolved by rule)`);
 }
 
+/* EVOLUTION.md is a log of "## " entries, newest first. Two branches that each added an entry at the top do not
+   really conflict: keep main's file and put the branch's entries that main lacks above them. */
+function mergeEntries(ours, theirs) {
+  const NL = '\n';
+  const split = (t) => {
+    const i = t.indexOf(NL + '## ');
+    const head = i < 0 ? t : t.slice(0, i + 1);
+    const body = i < 0 ? '' : t.slice(i + 1);
+    return { head, entries: body.split(/\n(?=## )/).map((e) => e.trimEnd()).filter(Boolean) };
+  };
+  const o = split(ours.replace(/\r\n/g, NL));
+  const t = split(theirs.replace(/\r\n/g, NL));
+  const key = (e) => e.split(NL)[0].trim();
+  const have = new Set(t.entries.map(key));
+  const mine = o.entries.filter((e) => !have.has(key(e)));
+  return t.head + [...mine, ...t.entries].join(NL + NL) + NL;
+}
+
 /* Which side wins a conflict, by rule. null means a person decides. */
 const GENERATED = ['LABS_LEVELS.md', 'labs/assets/js/config/levels.data.js'];
 const FOUNDATION_OWNED = [/^tools\//, /^labs\/assets\/js\/ai\//, /^\.github\/workflows\//];
 function resolution(file, p) {
   if (GENERATED.includes(file)) return 'theirs';
+  if (file === 'EVOLUTION.md') return 'entries';
+  // Main may hold this file at an older version of this same branch (an earlier pull request of the branch was
+  // squash-merged). If main's copy appears in the branch's own history, the branch has moved past it: keep ours.
+  const theirs = git(['rev-parse', `:3:${file}`], p).out;
+  if (theirs) {
+    const commits = git(['rev-list', 'HEAD', '--', file], p).out.split(/\r?\n/).filter(Boolean);
+    for (const c of commits) if (git(['rev-parse', `${c}:${file}`], p).out === theirs) return 'ours';
+  }
   if (FOUNDATION_OWNED.some((re) => re.test(file))) {
     // Keep the branch copy only when it is exactly the foundation's current copy.
     const mine = git(['rev-parse', `HEAD:${file}`], p).out;
@@ -282,6 +358,8 @@ async function cmdShip(n) {
   const push = git(['push', '-u', 'origin', br], p);
   if (!push.ok) die('push failed: ' + push.err);
   let pr = run('gh', ['pr', 'view', br, '--json', 'number,state,url'], { cwd: p });
+  // A branch whose last pull request was already merged gets a new one.
+  if (pr.ok && JSON.parse(pr.out).state !== 'OPEN') pr = { ok: false };
   if (!pr.ok) {
     const title = git(['log', '-1', '--format=%s', br]).out || `labs: ${lab.name}`;
     const body = `One lab per pull request. Level sheet: \`node tools/levels.mjs sheet ${lab.hubId}\`.\n\n` +
@@ -335,13 +413,14 @@ if (isMain) {
     case 'status': cmdStatus(); break;
     case 'add': if (!rest.length) die('add needs lab names'); cmdAdd(rest, base); break;
     case 'serve': cmdServe(need()); break;
+    case 'stop': cmdStop(need()); break;
     case 'shoot': await cmdShoot(need(), rest[1]); break;
     case 'gates': cmdGates(need()); break;
     case 'sync': cmdSync(need(), from || 'main'); break;
     case 'ship': await cmdShip(need()); break;
     case 'remove': cmdRemove(need()); break;
     default:
-      console.log('commands: status | add <name...> [--base B] | serve <name> | shoot <name> [page] | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
+      console.log('commands: status | add <name...> [--base B] | serve <name> | stop <name|all> | shoot <name> [page] | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
       process.exitCode = cmd ? 2 : 0;
   }
 }
