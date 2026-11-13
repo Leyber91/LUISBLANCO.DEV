@@ -26,6 +26,14 @@ export const AI_CONFIG = {
     models: ['llama3.1:8b', 'qwen2.5:14b', 'gemma2:9b'],
   },
 
+  /* The labs' keyless model route (workers/model-route): Workers AI behind a Cloudflare Worker. Read by llm.js
+     only. It holds no key; it answers a few requests a minute per visitor from a shared daily allowance. */
+  route: {
+    base: 'https://labs-model-route.luisblanco.workers.dev',
+    defaultModel: '@cf/google/gemma-4-26b-a4b-it',
+  },
+
+  /* The older provider.js contract (streaming, /v1/chat). Not deployed: leave base empty. */
   worker: {
     /* Set this to your deployed worker URL after `wrangler deploy`.
        Leave '' to skip the worker tier entirely. */

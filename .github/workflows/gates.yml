@@ -46,6 +46,12 @@ jobs:
       - name: atlas
         run: |
           if [ -f tools/atlas.mjs ]; then node tools/atlas.mjs selftest && node tools/atlas.mjs; else echo "NOT_CHECKED: tools/atlas.mjs does not exist"; fi
+      - name: stories
+        run: |
+          if [ -f tools/stories.mjs ]; then node tools/stories.mjs selftest && node tools/stories.mjs; else echo "NOT_CHECKED: tools/stories.mjs does not exist"; fi
+      - name: model route tests
+        run: |
+          if [ -f workers/model-route/test.mjs ]; then node workers/model-route/test.mjs; else echo "NOT_CHECKED: workers/model-route/test.mjs does not exist"; fi
       - name: anti-tells
         run: |
           if [ -f tools/anti_tells.mjs ]; then node tools/anti_tells.mjs selftest && node tools/anti_tells.mjs; else echo "NOT_CHECKED: tools/anti_tells.mjs does not exist"; fi

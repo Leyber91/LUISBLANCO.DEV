@@ -29,3 +29,6 @@ TokenGateKeeper/
 
 # ── labs build (labs-src) ───────────────────────────────────────────────────
 labs-src/node_modules/
+
+# wrangler's local cache and state (account id, dev storage): never committed
+.wrangler/

@@ -30,7 +30,8 @@ import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const WT_ROOT = path.resolve(ROOT, '..', '_labs_wt');
+// run from the main checkout or from inside a worktree: both resolve to the same _labs_wt folder
+const WT_ROOT = path.basename(path.dirname(ROOT)) === '_labs_wt' ? path.dirname(ROOT) : path.resolve(ROOT, '..', '_labs_wt');
 const HOME = os.homedir().split(path.sep).join('/');
 const SHOTS = process.env.LABS_SHOTS || `${HOME}/AppData/Local/Temp/lbrshots`;
 const SHOOT_PS1 = process.env.LABS_SHOOT_PS1 || `${HOME}/.claude/skills/headless-verify/shoot.ps1`;
