@@ -70,6 +70,7 @@ export const LABS = [
   ['vr-fitness', 'vr-fitness', 8830, 'vr-fitness.html'],
   ['challenges', 'challenges', 8831, 'challenges.html'],
   ['ugc', 'ugc', 8832, 'ugc.html'],
+  ['os', 'hub', 8833, 'index.html'],   // the Labs OS platform layer, shown through the hub
 ].map(([name, hubId, port, page]) => ({ name, hubId, port, page }));
 
 const byName = (n) => {
