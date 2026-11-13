@@ -3,6 +3,15 @@
 The level system for the labs at luisblanco.dev/labs, and each lab's rating before and after its evolution pass.
 Started 2026-11-11 on Luis's order: every lab rises on every axis, and the developed ones rise five levels.
 
+## The atlas (Luis, 2026-11-13, supersedes the axes and the level rule below)
+
+Claude Prep (Blueprint 720) is level 5. labs/levels/atlas.json, checked by tools/atlas.mjs, is now the scale: 12
+product axes whose rung 5 is what Claude Prep measurably does on that function (from an inventory of 437 of its
+features), 6 subject axes whose rung 5 is the anchor below, each with eleven rungs and every world's rungs 5 and 10.
+A lab's level is the lower of its product level and its subject level. Every grade written before 2026-11-13 is on
+the older, gentler scale and overstates the lab. Where this file and the atlas disagree, the atlas holds; this file
+is reconciled with it in a morning session.
+
 ## The anchor (Luis, 2026-11-11, supersedes the calibration below)
 
 Level 5 is the lab's fiction made real. For the Heptapod lab, in his words: "imagine that you're in the movie Arrival,
