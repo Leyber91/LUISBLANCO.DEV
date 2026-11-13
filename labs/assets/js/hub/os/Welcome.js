@@ -9,6 +9,8 @@
    showed, so the next visit can name the labs that are new; with
    recording off it saves nothing, and the plate's title block says
    "Recording off" with the way back on (and follows the switch).
+   While usage is shared, the title block says so (and follows the
+   sharing choice).
    ============================================================ */
 
 import { SEL, OS_HUB } from '../constants.js';
@@ -52,12 +54,14 @@ export class Welcome {
     const n = counts.events.toLocaleString('en-US');
     const record = firstEvent === null ? null
       : `${n} ${counts.events === 1 ? 'event' : 'events'} since ${dayMonth(firstEvent)}${dropped ? ', earlier ones summarised' : ''}`;
+    let sharing = os.sharing.available && (await os.consent.get()).state === 'granted';
     const render = () => slot.replaceChildren(resumePlate({
-      last: plateLast, next, persistent: os.storage.persistent, record, recording: os.recording.on,
+      last: plateLast, next, persistent: os.storage.persistent, record, recording: os.recording.on, sharing,
     }));
     render();
     slot.hidden = false;
     os.recording.onChange(render);
+    os.consent.onChange((c) => { sharing = os.sharing.available && c.state === 'granted'; render(); });
     os.onDeleted(() => { slot.hidden = true; slot.replaceChildren(); });
   }
 }

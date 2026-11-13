@@ -32,12 +32,19 @@ export type TrackResult = {
     readonly reason: TrackRefusal;
     readonly detail: string;
 };
+/** Hears of each event the moment it is made (the outbox, so a leaving page can still send it). */
+export interface EventSink {
+    note(event: LabEvent): void;
+    /** the store refused the event that was just noted */
+    drop(id: string): void;
+}
 export interface TrackerOptions {
     readonly store: Store;
     readonly registry: Registry;
     readonly session: string;
     readonly now?: Clock;
     readonly id?: () => string;
+    readonly sink?: EventSink;
 }
 export declare class Tracker {
     private readonly opts;

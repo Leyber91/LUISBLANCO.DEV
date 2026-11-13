@@ -3,27 +3,35 @@
 
    A page opened with ?os-fixture=<name> runs Labs OS against a
    memory store seeded here. The visitor's real IndexedDB record
-   is never opened, read or written, and the page shows a stamp
-   saying it is a fixture.
+   is never opened, read or written, nothing is sent (index.ts
+   swaps in a transport that reaches nothing), and the page shows
+   a stamp saying it is a fixture.
 
-     first-visit          nothing recorded yet
+     first-visit          nothing recorded yet; the sharing question
+                          is asked
      returning            two earlier visits; Heptapod has a resume
-                          point; one lab is new since the last visit
+                          point; one lab is new since the last visit;
+                          the visitor answered "No thanks" on their
+                          first visit, so no question is asked
      returning-due        returning, plus Claude Prep reporting
                           twelve review items due
      storage-unavailable  a window where storage is blocked
-     consent              returning, with the consent banner shown
-                          (OS_CONFIG keeps it hidden in v0)
+     consent              returning, before any answer: the sharing
+                          question is asked
+     sharing-on           returning, after "Allow" four days ago
+     sharing-off          returning, after "No thanks" four days ago
      recording-off        returning, after the visitor turned
                           recording off yesterday
 
-   The seeded labs stand for labs that have adopted the OS; in v0
+   The seeded labs stand for labs that have adopted the OS; today
    only the hub records, so a real record holds hub sessions and
    handoffs. Times are relative to the moment the page opens.
    ============================================================ */
 import { EVENT_V } from './types.js';
+import { CONSENT_KEY, CONSENT_POLICY, INSTALL_KEY } from './consent.js';
 import { memoryStore } from './store.js';
-export const FIXTURES = ['first-visit', 'returning', 'returning-due', 'storage-unavailable', 'consent', 'recording-off'];
+export const FIXTURES = ['first-visit', 'returning', 'returning-due', 'storage-unavailable', 'consent', 'sharing-on',
+    'sharing-off', 'recording-off'];
 export const isFixture = (s) => typeof s === 'string' && FIXTURES.includes(s);
 /** The hub's live labs when this fixture was written, minus "trends", so the fixture has one new lab. */
 const KNOWN_BEFORE = ['black-hole', 'dimensional', 'exomania', 'heptapod', 'alt-reality', 'the-figure', 'primordial-seed',
@@ -70,21 +78,36 @@ function returning(now, withDue) {
     }
     return { events, progress, meta: { 'visit.last': { t: now - 2 * HOUR + 20 * MIN, lab: 'heptapod' } } };
 }
+/** An install id no browser will ever draw: the fixture's stand-in. */
+const FIXTURE_INSTALL = '00000000-0000-4000-8000-000000000000';
+/** The returning visitor's record, with the sharing choice they made on their first visit (or none yet). */
+function withChoice(now, withDue, choice, more = {}) {
+    const seed = returning(now, withDue);
+    const meta = { ...seed.meta, ...more };
+    if (choice !== 'unset')
+        meta[CONSENT_KEY] = { state: choice, t: now - 4 * DAY + MIN, policy: CONSENT_POLICY };
+    if (choice === 'granted')
+        meta[INSTALL_KEY] = FIXTURE_INSTALL;
+    return { ...seed, meta };
+}
 /** A memory store seeded for the named fixture. Never touches IndexedDB. */
 export function fixtureStore(name, now) {
+    const seeded = (seed) => memoryStore({ persistent: true, fixture: name, note: '', seed });
     switch (name) {
         case 'first-visit':
             return memoryStore({ persistent: true, fixture: name, note: '' });
         case 'storage-unavailable':
             return memoryStore({ persistent: false, fixture: name, note: 'storage is blocked in this window, so nothing is kept after the tab closes' });
         case 'returning':
-        case 'consent':
-            return memoryStore({ persistent: true, fixture: name, note: '', seed: returning(now, false) });
+        case 'sharing-off':
+            return seeded(withChoice(now, false, 'denied'));
         case 'returning-due':
-            return memoryStore({ persistent: true, fixture: name, note: '', seed: returning(now, true) });
-        case 'recording-off': {
-            const seed = returning(now, false);
-            return memoryStore({ persistent: true, fixture: name, note: '', seed: { ...seed, meta: { ...seed.meta, recording: { on: false, t: now - DAY } } } });
-        }
+            return seeded(withChoice(now, true, 'denied'));
+        case 'consent':
+            return seeded(withChoice(now, false, 'unset'));
+        case 'sharing-on':
+            return seeded(withChoice(now, false, 'granted'));
+        case 'recording-off':
+            return seeded(withChoice(now, false, 'denied', { recording: { on: false, t: now - DAY } }));
     }
 }

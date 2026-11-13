@@ -1,5 +1,6 @@
 import type { OSConfig } from './config.js';
 import { Consent, Outbox } from './consent.js';
+import type { EraseResult } from './consent.js';
 import { Registry } from './events.js';
 import type { EventSpec, TrackResult } from './events.js';
 import type { EventClass, Json, DueItem, ProgressRecord } from './types.js';
@@ -24,6 +25,10 @@ export interface InitOptions {
     readonly ui?: boolean;
     /** the log's bound (tests); defaults to MAX_EVENTS */
     readonly maxEvents?: number;
+}
+/** What "delete everything" did here, and to the copy on the backend. */
+export interface DeleteOutcome extends DeleteResult {
+    readonly remote: EraseResult;
 }
 export interface StorageInfo {
     readonly kind: StorageKind;
@@ -62,8 +67,21 @@ export interface LabsOSInstance {
     readonly privacy: {
         summary(): Promise<Summary>;
         exportAll(): Promise<ExportFile>;
-        /** erase every record and stop recording on this page; a "recording off" choice survives */
-        deleteAll(): Promise<DeleteResult>;
+        /**
+         * Erase every record here, and the rows this browser sent to the backend, and stop recording and sending on
+         * this page. The choices that say "off" survive (recording off, sharing refused), so deleting never switches
+         * anything on; if the backend could not be reached, the install id survives too, so the erase can be retried.
+         */
+        deleteAll(): Promise<DeleteOutcome>;
+    };
+    /** sending usage events with the visitor's consent; the choice itself is `consent` */
+    readonly sharing: {
+        /** false where nothing can be sent: no backend is configured, or this window keeps nothing */
+        readonly available: boolean;
+        /** true once sending was allowed in this browser, so the backend may hold rows of it */
+        everOn(): Promise<boolean>;
+        /** erase this browser's rows on the backend and keep the record here */
+        erase(): Promise<EraseResult>;
     };
     /** the visitor's switch for the record */
     readonly recording: {
@@ -108,8 +126,10 @@ export type { EventSpec, TrackResult, TrackRefusal } from './events.js';
 export { Progress, MAX_PROGRESS_BYTES } from './progress.js';
 export { Resume, visitsFrom, suggest, describeVisit } from './resume.js';
 export type { Visit, CatalogueEntry, Suggestion, SuggestionKind } from './resume.js';
-export { Consent, Outbox, CONSENT_POLICY } from './consent.js';
-export type { ConsentRecord, ConsentState, Transport, OutboundBatch, FlushResult } from './consent.js';
+export { Consent, Outbox, CONSENT_POLICY, BATCH_SIZE } from './consent.js';
+export type { ConsentRecord, ConsentState, Transport, OutboundBatch, SendOptions, FlushResult, FlushReason, EraseResult, EraseOutcome } from './consent.js';
+export { BACKEND, supabaseTransport, fixtureTransport, sanitizeData, toRow } from './transport.js';
+export type { UsageRow, SupabaseTransportOptions } from './transport.js';
 export { exportAll, deleteAll, summary } from './privacy.js';
 export type { ExportFile, DeleteResult, Summary } from './privacy.js';
 export { mountScene, sceneCount } from './scene.js';

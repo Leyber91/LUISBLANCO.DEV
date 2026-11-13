@@ -7,10 +7,12 @@
                       reason for each
      dataPanel        "Your data": the recording switch, what is
                       stored (labs by title), export, delete, and
-                      the sharing choice when consent is on
-     consentBanner    the sharing question, two choices of equal
-                      weight, nothing pre-selected
-     storageStamp     a one-line note of where the record is kept
+                      the sharing choice with its erase
+     consentBanner    the sharing question: what is sent, what never
+                      is, where it is kept, and two choices of equal
+                      weight with nothing pre-selected
+     storageStamp     a one-line note of where the record is kept,
+                      and whether usage is shared
      fixtureStamp     says the page runs on a seeded fixture
 
    Every string is set with textContent; nothing here parses HTML.
@@ -63,13 +65,15 @@ export interface ResumePlateInput {
   readonly dataHref?: string;
   /** the visitor's recording switch (default on) */
   readonly recording?: boolean;
+  /** true while usage events are sent with the visitor's consent */
+  readonly sharing?: boolean;
 }
 
 export function resumePlate(input: ResumePlateInput): HTMLElement {
   const id = 'los-welcome-h';
   const head = h('header', { class: 'los-head' },
     h('span', { class: 'los-label' }, `Plate ${input.plate ?? '0'} · Since your last visit`));
-  const kept = input.persistent ? 'kept in this browser' : 'kept until this tab closes';
+  const kept = (input.persistent ? 'kept in this browser' : 'kept until this tab closes') + (input.sharing ? ' · usage shared' : '');
   const on = input.recording !== false;
   const foot = h('footer', { class: `los-foot${on ? '' : ' off'}` },
     h('span', { class: 'los-stamp' }, on
@@ -107,30 +111,37 @@ export function resumePlate(input: ResumePlateInput): HTMLElement {
 
 /* ---------------- stamps ---------------- */
 
-export function storageStamp(s: StorageInfo, recording = true): HTMLElement {
+export function storageStamp(s: StorageInfo, recording = true, sharing = false): HTMLElement {
   return h('span', { class: `los-stamp${s.persistent && recording ? '' : ' warn'}`, title: s.note || undefined },
-    !s.persistent ? 'Not kept: this window blocks storage' : recording ? 'Record kept in this browser' : 'Recording off');
+    !s.persistent ? 'Not kept: this window blocks storage'
+      : !recording ? 'Recording off'
+        : sharing ? 'Record kept in this browser · usage shared' : 'Record kept in this browser');
 }
 
 export function fixtureStamp(s: StorageInfo): HTMLElement | null {
   if (!s.fixture) return null;
   return h('div', { class: 'los-fixture', role: 'note' },
     h('span', { class: 'los-label' }, `Fixture · ${s.fixture}`),
-    h('span', {}, 'Fixture data in memory. Your own record is not read or written.'));
+    h('span', {}, 'Fixture data in memory. Your own record is not read or written, and nothing is sent.'));
 }
 
 /* ---------------- consent ---------------- */
 
-function consentWords(r: ConsentRecord): string {
-  if (r.state === 'granted' && r.t !== null) return `Allowed on ${dayMonth(r.t)}`;
-  if (r.state === 'denied' && r.t !== null) return `Refused on ${dayMonth(r.t)}`;
-  return 'Not chosen';
+/** The sharing choice in words, with what it means right now. */
+export function sharingWords(r: ConsentRecord, recording: boolean, recipient: string): string {
+  if (r.state === 'granted' && r.t !== null) {
+    return recording
+      ? `On since ${dayMonth(r.t)}: usage events go to ${recipient}.`
+      : `Allowed on ${dayMonth(r.t)}, but recording is off, so nothing is recorded and nothing is sent.`;
+  }
+  if (r.state === 'denied' && r.t !== null) return `Off since ${dayMonth(r.t)}: nothing is sent.`;
+  return 'Not chosen: nothing is sent.';
 }
 
 /** Two buttons of equal weight; neither is pressed until the visitor chooses. */
 function choicePair(consent: Consent, after?: (r: ConsentRecord) => void): { el: HTMLElement; set(r: ConsentRecord): void } {
-  const allow = h('button', { type: 'button', class: 'los-btn', 'data-choice': 'granted', 'aria-pressed': 'false' }, 'Allow sending');
-  const deny = h('button', { type: 'button', class: 'los-btn', 'data-choice': 'denied', 'aria-pressed': 'false' }, 'Keep it here');
+  const allow = h('button', { type: 'button', class: 'los-btn', 'data-choice': 'granted', 'aria-pressed': 'false' }, 'Allow');
+  const deny = h('button', { type: 'button', class: 'los-btn', 'data-choice': 'denied', 'aria-pressed': 'false' }, 'No thanks');
   const el = h('div', { class: 'los-choice', role: 'group', 'aria-label': 'Sharing choice' }, allow, deny);
   const set = (r: ConsentRecord) => {
     allow.setAttribute('aria-pressed', String(r.state === 'granted'));
@@ -146,18 +157,42 @@ function choicePair(consent: Consent, after?: (r: ConsentRecord) => void): { el:
   return { el, set };
 }
 
-export function consentCopy(config: OSConfig): string {
-  return `Labs can send your activity record (the labs you open, for how long, and what each lab saves) to ${config.recipient}. ` +
-    'That would carry your progress to your other devices and show the author which labs are used. ' +
-    'Nothing is sent unless you allow it, and you can change your answer under Your data.';
+/** The sharing question, in parts: each sentence states one thing that is checked in transport.ts or on the backend. */
+export interface ConsentCopy {
+  readonly ask: string;
+  /** exactly what a usage event carries */
+  readonly sent: readonly string[];
+  readonly never: string;
+  readonly kept: string;
+  readonly change: string;
+}
+
+export function consentCopy(config: OSConfig): ConsentCopy {
+  return {
+    ask: 'Send usage of the labs to their author? If you choose Allow, this browser sends:',
+    sent: [
+      'which lab you open, and from where',
+      'how long the page was visible',
+      'which kinds of controls you used',
+      'a random id for this browser',
+    ],
+    never: 'Never anything you type. No name, email or IP address is stored with the events.',
+    kept: `They are kept in the EU, at ${config.recipient}, and raw events are reduced to daily counts after 90 days.`,
+    change: 'Nothing is sent before you choose Allow, and you can change your answer in Your data.',
+  };
 }
 
 export function mountConsentBanner(root: HTMLElement, consent: Consent, config: OSConfig): { el: HTMLElement; destroy(): void } {
+  const copy = consentCopy(config);
   const pair = choicePair(consent, () => destroy());
   const el = h('section', { class: 'los-plate los-consent', role: 'region', 'aria-label': 'Sharing choice' },
     ...brackets(),
     h('span', { class: 'los-label' }, 'Sharing · not chosen'),
-    h('p', { class: 'los-copy' }, consentCopy(config)),
+    h('p', { class: 'los-copy' }, copy.ask),
+    h('ul', { class: 'los-sent' }, ...copy.sent.map((line) => h('li', {}, line))),
+    h('p', { class: 'los-copy' }, copy.never),
+    h('p', { class: 'los-copy los-fine' }, `${copy.kept} ${copy.change} `,
+      h('a', { class: 'los-link', href: config.privacyHref }, 'Privacy page')),
     pair.el);
   root.append(el);
   const destroy = () => el.remove();
@@ -207,12 +242,14 @@ export function dataPanel(os: LabsOSInstance, opts: DataPanelOptions = {}): Data
   const confirmText = h('span', { class: 'los-confirm-text' });
   const confirm = h('div', { class: 'los-confirm', hidden: true }, confirmText, confirmNo, confirmYes);
   const actions = h('div', { class: 'los-actions' }, exportBtn, deleteBtn, closeBtn);
-  const sends = !!os.outbox.transport;
+  const sends = os.sharing.available;
   const kept = sends
-    ? `The record is kept only in this browser and sent to ${os.config.recipient} only if you allow it under Sharing.`
+    ? 'The record stays in this browser; usage events leave it only if you allow that under Sharing.'
     : 'The record is kept only in this browser and nothing is sent anywhere.';
-  const lead = h('p', { class: 'los-copy' }, 'Labs OS keeps a record of your visits so the labs can tell you where you left off.');
+  const lead = h('p', { class: 'los-copy' }, 'Labs OS keeps a record of your visits so the labs can tell you where you left off. ',
+    h('a', { class: 'los-link', href: os.config.privacyHref }, 'Privacy page'));
   const recBtn = h('button', { type: 'button', class: 'los-btn', 'data-act': 'recording' });
+  const eraseBtn = h('button', { type: 'button', class: 'los-btn los-quiet-btn', 'data-act': 'erase' }, 'Erase what was sent');
 
   const el = h('dialog', { class: 'los-panel', 'aria-labelledby': 'los-data-h' },
     h('div', { class: 'los-plate' },
@@ -225,11 +262,17 @@ export function dataPanel(os: LabsOSInstance, opts: DataPanelOptions = {}): Data
   el.addEventListener('cancel', () => close());
 
   let total = 0;
+  let everShared = false;
+  let sharing: ConsentRecord['state'] = 'unset';
   async function refresh(): Promise<void> {
     const s = await os.privacy.summary();
     const on = os.recording.on;
-    // a "recording off" choice survives a delete, so it is not one of the records a delete removes
-    total = s.counts.events + s.counts.progress + s.counts.meta - (on || !s.settings.includes('recording') ? 0 : 1);
+    const c = await os.consent.get();
+    sharing = c.state;
+    everShared = sends && await os.sharing.everOn();
+    // the choices that say "off" survive a delete, so they are not among the records a delete removes
+    total = s.counts.events + s.counts.progress + s.counts.meta
+      - (on || !s.settings.includes('recording') ? 0 : 1) - (c.state === 'denied' ? 1 : 0);
     let span = s.firstEvent === null || s.lastEvent === null ? 'none yet'
       : `${count(s.counts.events, 'event', 'events')}, ${dayMonth(s.firstEvent)} to ${dayMonth(s.lastEvent)}`;
     span += `. Keeps the newest ${num(s.maxEvents)}.`;
@@ -251,11 +294,18 @@ export function dataPanel(os: LabsOSInstance, opts: DataPanelOptions = {}): Data
       ['Saved progress', s.labs.length ? `${count(s.labs.length, 'lab', 'labs')}: ${s.labs.map(title).join(', ')}` : 'none yet'],
       ['Settings', s.settings.length ? s.settings.map((k) => SETTING_NAMES[k] ?? k).join(', ') : 'none'],
     ];
-    if (os.config.consentUi) {
-      const c = await os.consent.get();
-      const pair = choicePair(os.consent, () => void refresh());
+    if (os.config.consentUi && sends) {
+      const pair = choicePair(os.consent, (r) => {
+        status.textContent = r.state === 'granted'
+          ? `Sharing is on. Usage events recorded from now on go to ${os.config.recipient}.`
+          : 'Sharing is off. Nothing more is sent. What was sent before stays until you erase it.';
+        void refresh();
+      });
       pair.set(c);
-      items.push(['Sharing', h('span', { class: 'los-sharing' }, h('span', {}, consentWords(c)), pair.el)]);
+      items.push(['Sharing', h('span', { class: 'los-sharing' },
+        h('span', {}, sharingWords(c, on, os.config.recipient)), pair.el, everShared && eraseBtn)]);
+    } else if (os.config.consentUi && os.config.transport && !os.storage.persistent) {
+      items.push(['Sharing', 'Off: this window keeps nothing, so an answer could not be remembered. Nothing is sent.']);
     }
     rows.replaceChildren(...items.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
     deleteBtn.disabled = total === 0;
@@ -276,23 +326,39 @@ export function dataPanel(os: LabsOSInstance, opts: DataPanelOptions = {}): Data
   }
 
   function askDelete(): void {
-    confirmText.textContent = `Delete ${count(total, 'record', 'records')} from this browser?`;
+    confirmText.textContent = `Delete ${count(total, 'record', 'records')} from this browser${everShared ? ' and erase the events it sent' : ''}?`;
     actions.hidden = true;
     confirm.hidden = false;
     confirmNo.focus();
   }
 
   async function doDelete(): Promise<void> {
+    const wasSharing = sharing === 'granted';
     const r = await os.privacy.deleteAll();
     confirm.hidden = true;
     actions.hidden = false;
     const gone = r.deleted.events + r.deleted.progress + r.deleted.meta;
     const left = r.remaining.events + r.remaining.progress + r.remaining.meta;
     const keptOff = r.kept.includes('recording');
-    status.textContent = r.ok
-      ? `Deleted ${count(gone, 'record', 'records')}; none remain. ` +
-        (keptOff ? 'Recording stays off.' : 'Nothing more is recorded on this page; to stop later visits too, stop recording.')
+    const here = r.ok
+      ? `Deleted ${count(gone, 'record', 'records')}; none remain.`
       : `Deleted ${count(gone, 'record', 'records')}, but ${left - r.kept.length} remain. Close every lab tab and try again.`;
+    const there = r.remote.state === 'erased' ? ' The events this browser sent were erased from the backend; it holds none.'
+      : r.remote.state === 'failed'
+        ? ` The events this browser sent could not be erased (${r.remote.detail}). Its install id is kept so the erase can be repeated: press Delete everything again when you are online.`
+        : '';
+    const after = keptOff ? ' Recording stays off.' : ' Nothing more is recorded on this page; to stop later visits too, stop recording.';
+    status.textContent = here + there + (r.ok ? after : '') + (wasSharing ? ' Sharing is off until you allow it again.' : '');
+    await refresh();
+  }
+
+  async function doErase(): Promise<void> {
+    eraseBtn.disabled = true;
+    const r = await os.sharing.erase();
+    eraseBtn.disabled = false;
+    status.textContent = r.state === 'erased' ? 'Erased: the backend holds no events from this browser. The record here is unchanged.'
+      : r.state === 'failed' ? `The events on the backend could not be erased (${r.detail}). Try again when you are online.`
+        : 'Nothing was sent from this browser.';
     await refresh();
   }
 
@@ -305,6 +371,7 @@ export function dataPanel(os: LabsOSInstance, opts: DataPanelOptions = {}): Data
   }
 
   recBtn.addEventListener('click', () => void toggleRecording());
+  eraseBtn.addEventListener('click', () => void doErase());
   exportBtn.addEventListener('click', () => void doExport());
   deleteBtn.addEventListener('click', askDelete);
   confirmNo.addEventListener('click', () => { confirm.hidden = true; actions.hidden = false; deleteBtn.focus(); });

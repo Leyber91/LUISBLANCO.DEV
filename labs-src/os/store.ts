@@ -12,8 +12,9 @@
                the rest. Indexed by [lab, t] and by t.
      progress  one record per lab, keyed by lab id, carrying the
                lab's own schema version.
-     meta      small settings: consent, last visit, the install id
-               (created only when a transport needs one).
+     meta      small settings: the recording and sharing choices,
+               the last visit, and the install id (created when the
+               visitor allows sharing, never before).
 
    When IndexedDB cannot be opened (storage blocked, some private
    windows, a sandboxed frame) the same interface runs in memory

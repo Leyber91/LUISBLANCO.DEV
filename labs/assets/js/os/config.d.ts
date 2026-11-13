@@ -4,7 +4,9 @@ export interface OSConfig {
     readonly consentUi: boolean;
     /** where the outbox sends; null keeps everything in the browser */
     readonly transport: Transport | null;
-    /** who would receive the data, for the consent copy */
+    /** who receives the events, for the consent copy */
     readonly recipient: string;
+    /** the privacy page the banner and "Your data" link to */
+    readonly privacyHref: string;
 }
 export declare const OS_CONFIG: OSConfig;

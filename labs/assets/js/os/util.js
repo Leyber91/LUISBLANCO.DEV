@@ -21,6 +21,35 @@ export function randomId() {
             bytes[i] = Math.floor(Math.random() * 256);
     return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** True for the dashed 8-4-4-4-12 form, the only one the backend accepts as an install id. */
+export function isUuid(value) {
+    return typeof value === 'string' && UUID.test(value);
+}
+/**
+ * A random (version 4) UUID in the dashed form. randomId() falls back to 32 undashed hex digits where
+ * crypto.randomUUID is missing (an insecure context); the backend reads the install id from a header and
+ * accepts the dashed form only, so the install id is made here.
+ */
+export function randomUuid() {
+    const c = globalThis.crypto;
+    if (c && typeof c.randomUUID === 'function') {
+        try {
+            return c.randomUUID();
+        }
+        catch { /* insecure context: fall through */ }
+    }
+    const b = new Uint8Array(16);
+    if (c && typeof c.getRandomValues === 'function')
+        c.getRandomValues(b);
+    else
+        for (let i = 0; i < b.length; i++)
+            b[i] = Math.floor(Math.random() * 256);
+    b[6] = ((b[6] ?? 0) & 0x0f) | 0x40; // version 4
+    b[8] = ((b[8] ?? 0) & 0x3f) | 0x80; // variant 10
+    const hex = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 const LAB_ID = /^[a-z0-9][a-z0-9-]{0,63}$/;
 /** Lab ids are the hub ids in site.config.js: lowercase, digits and dashes. */
 export function isLabId(value) {

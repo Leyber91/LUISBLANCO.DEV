@@ -3,9 +3,12 @@
    keeps: see it (summary), take it (exportAll) and erase it
    (deleteAll, which counts what remains to confirm).
 
-   deleteAll can keep named settings (the facade keeps "recording"
-   while it is off), so erasing the record never turns recording
-   back on behind the visitor's back.
+   deleteAll can keep named settings. The facade (index.ts) keeps
+   the choices that say "off" (recording off, sharing refused), so
+   erasing the record never switches anything on behind the
+   visitor's back, and the install id when the backend's copy
+   could not be erased, so that erase can be repeated. The rows
+   on the backend are erased by the outbox (consent.ts), not here.
    ============================================================ */
 
 import type { LabEvent, ProgressRecord, StoreCounts, Json } from './types.js';

@@ -15,6 +15,14 @@
    every call returns { ok: false, reason: 'recording off' } and
    appends nothing.
 
+   What data may hold: which control was used, a count, a
+   duration, an id from the lab's own vocabulary. Never what a
+   visitor typed, chose as free text or pasted: with consent
+   these events are sent as usage (transport.ts), and usage
+   carries no content. The transport drops what looks like
+   prose, but it cannot know that a short word was typed, so the
+   rule is kept here, by the lab.
+
    Built-in types (labs register their own, under their own
    prefix, for example "heptapod.decoded"):
 
@@ -85,12 +93,20 @@ export type TrackResult =
   | { readonly ok: true; readonly event: LabEvent }
   | { readonly ok: false; readonly reason: TrackRefusal; readonly detail: string };
 
+/** Hears of each event the moment it is made (the outbox, so a leaving page can still send it). */
+export interface EventSink {
+  note(event: LabEvent): void;
+  /** the store refused the event that was just noted */
+  drop(id: string): void;
+}
+
 export interface TrackerOptions {
   readonly store: Store;
   readonly registry: Registry;
   readonly session: string;
   readonly now?: Clock;
   readonly id?: () => string;
+  readonly sink?: EventSink;
 }
 
 const refuse = (reason: TrackRefusal, detail: string): TrackResult => ({ ok: false, reason, detail });
@@ -142,9 +158,12 @@ export class Tracker {
     this.last.set(key, t);   // set before the write, so a burst in the same tick is throttled too
 
     const event: LabEvent = { v: EVENT_V, id: this.id(), t, lab, type, data: payload, session: this.opts.session };
+    // before the write: on pagehide the write may never finish, and the sink sends in the same tick
+    this.opts.sink?.note(event);
     try {
       await this.opts.store.append(event);
     } catch (e) {
+      this.opts.sink?.drop(event.id);
       return refuse('store-failed', e instanceof Error ? e.message : String(e));
     }
     return { ok: true, event };
