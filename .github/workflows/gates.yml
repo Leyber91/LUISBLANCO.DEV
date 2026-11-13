@@ -49,3 +49,19 @@ jobs:
       - name: anti-tells
         run: |
           if [ -f tools/anti_tells.mjs ]; then node tools/anti_tells.mjs selftest && node tools/anti_tells.mjs; else echo "NOT_CHECKED: tools/anti_tells.mjs does not exist"; fi
+      # labs-src: rebuild the TypeScript the labs ship (Labs OS), fail if the committed output differs, run its tests.
+      - name: labs build
+        run: |
+          if [ -f labs-src/package.json ]; then
+            cd labs-src
+            npm ci --no-audit --no-fund
+            npm run build
+            git diff --exit-code -- ../labs/assets/js/os
+            new_files="$(git ls-files --others --exclude-standard -- ../labs/assets/js/os)"
+            if [ -n "$new_files" ]; then
+              echo "a fresh build of labs-src makes files the commit lacks; run npm run build in labs-src and commit the output:"
+              echo "$new_files"
+              exit 1
+            fi
+            npm test
+          else echo "NOT_CHECKED: labs-src/package.json does not exist"; fi

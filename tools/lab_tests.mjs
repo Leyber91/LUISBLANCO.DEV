@@ -49,6 +49,7 @@ for (const f of files) {
 }
 const labsWithJs = fs.existsSync(JS) ? fs.readdirSync(JS, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name) : [];
 const tested = new Set(files.map((f) => path.relative(JS, f).split(path.sep)[0]));
-const untested = labsWithJs.filter((d) => !tested.has(d) && !['ai', 'config', 'hub'].includes(d));
+// os is Labs OS, compiled from labs-src/os; its tests run there (vitest), in the gates' labs-src step.
+const untested = labsWithJs.filter((d) => !tested.has(d) && !['ai', 'config', 'hub', 'os'].includes(d));
 console.log(`lab_tests: ${files.length} files, ${fail} failed; no tests yet: ${untested.join(', ') || 'none'}`);
 process.exit(fail ? 1 : 0);
