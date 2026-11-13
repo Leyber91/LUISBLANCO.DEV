@@ -3,6 +3,29 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-13, Labs OS: the hub remembers where you left off (not a routine run)
+
+- New for a visitor: the labs hub now keeps a record of your visits in your own browser and, when you come back,
+  shows where you left off and up to three suggestions for what to open next, each with its reason. A first visit
+  looks as it did. Nothing is sent anywhere: there is no backend in this version.
+- "Your data", in the hub's footer, shows what is kept (an activity log capped at the newest 5,000 events, saved
+  progress, two settings), exports it as JSON, deletes it, and turns recording off. Off stays off through a delete.
+- Under it is Labs OS, a platform layer every lab will use: an append-only event log and progress store in
+  IndexedDB with an in-memory fallback when storage is blocked, a registry of event types, resume and what's-next,
+  a consent state and an outbox that only ever sends when consent is granted and a transport exists (neither does
+  yet, so the consent banner is built and hidden), export and delete, and one lifecycle for animated scenes. The
+  hub's two canvases now run through that lifecycle and pause when the tab is hidden.
+- Labs may now have a build step (ARCHITECTURE.md): TypeScript source in labs-src/, compiled output committed in
+  labs/assets/js/os/, and the site job rebuilds and fails if the two differ. The main site stays buildless.
+- The hub's font link drops two families no hub style used and adds Fraunces, the main site's display face.
+- Checks: 148 tests (Node 20 and 24); the build reproduces the committed output; privacy selftest 18 of 18;
+  site_check 22 pages, 0 findings; levels 32 labs, 0 errors; lab tests 6 files, 0 failed; anti-tells no new tells.
+  Rendered at 1440 px and 390 px in five states (first visit, returning, returning with due items, storage
+  unavailable, recording off) with zero console errors beyond the two requests the hub already made (the local
+  model probe and a missing favicon). A still cannot judge the pause when hidden; the tests cover it.
+- Not yet: no lab other than the hub calls Labs OS, so a visit to a lab's own address is recorded only when it
+  starts from the hub.
+
 ## 2026-11-13, AI Meme Lab panels fit a phone screen (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 22 pages and 0 findings on main
