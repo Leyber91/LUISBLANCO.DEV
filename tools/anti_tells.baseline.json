@@ -1,0 +1,283 @@
+{
+ "note": "Recorded tells, written by node tools/anti_tells.mjs baseline. Counts may go down, never up.",
+ "total": 380,
+ "files": {
+  "labs/altverse.html": {
+   "em-dash": 2,
+   "default-font": 1
+  },
+  "labs/assets/css/ai-health.css": {
+   "frosted-glass": 1
+  },
+  "labs/assets/css/altverse.css": {
+   "frosted-glass": 2
+  },
+  "labs/assets/css/black_hole.css": {
+   "frosted-glass": 2
+  },
+  "labs/assets/css/dimensions.css": {
+   "frosted-glass": 3
+  },
+  "labs/assets/css/exoplanet.css": {
+   "frosted-glass": 4
+  },
+  "labs/assets/css/hub.css": {
+   "frosted-glass": 2
+  },
+  "labs/assets/css/last-witness.css": {
+   "frosted-glass": 3
+  },
+  "labs/assets/css/memes.css": {
+   "frosted-glass": 1
+  },
+  "labs/assets/css/roaster.css": {
+   "frosted-glass": 1
+  },
+  "labs/assets/css/trending.css": {
+   "frosted-glass": 1
+  },
+  "labs/assets/css/workout-plans.css": {
+   "frosted-glass": 1
+  },
+  "labs/assets/js/altverse/divergence-presets.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/altverse/echo-world.js": {
+   "em-dash": 8
+  },
+  "labs/assets/js/altverse/main.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/altverse/pipeline.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/altverse/prompts.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/altverse/render/chronology.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/altverse/render/dossier.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/altverse/worldstate.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/blackhole/ui.js": {
+   "em-dash": 5
+  },
+  "labs/assets/js/config/levels.data.js": {
+   "em-dash": 1,
+   "stock-word": 1
+  },
+  "labs/assets/js/config/site.config.js": {
+   "em-dash": 14
+  },
+  "labs/assets/js/dataspace/config.js": {
+   "em-dash": 4
+  },
+  "labs/assets/js/dataspace/tests.mjs": {
+   "em-dash": 1
+  },
+  "labs/assets/js/dimensional_mania/Console.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/dimensional_mania/constants.js": {
+   "em-dash": 5
+  },
+  "labs/assets/js/exoplanet/data.js": {
+   "em-dash": 4
+  },
+  "labs/assets/js/exoplanet/exoplanet.js": {
+   "frosted-glass": 1
+  },
+  "labs/assets/js/exoplanet/export.js": {
+   "em-dash": 6
+  },
+  "labs/assets/js/exoplanet/grounding.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/exoplanet/main.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/exoplanet/narrative.js": {
+   "em-dash": 3
+  },
+  "labs/assets/js/exoplanet/panels.js": {
+   "em-dash": 12
+  },
+  "labs/assets/js/exoplanet/ui.js": {
+   "em-dash": 15
+  },
+  "labs/assets/js/exoplanet/views/common.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/exoplanet/views/plot.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/exoplanet/views/system.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/exoplanet/views/target.js": {
+   "em-dash": 10
+  },
+  "labs/assets/js/exoplanet/views/transit.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/figure/extract.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/honesty-decoder/checks/labs/roaster.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/honesty-decoder/engine.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/honesty-decoder/view/ledger.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/honesty-decoder/view/receipt.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/honesty-decoder/view/side.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/honesty-decoder/view/tools.js": {
+   "em-dash": 3
+  },
+  "labs/assets/js/honesty-decoder/view/util.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/last-witness/mind.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/last-witness/test.mjs": {
+   "em-dash": 1
+  },
+  "labs/assets/js/memes/ComedyEngine.js": {
+   "em-dash": 4
+  },
+  "labs/assets/js/memes/MemeLab.js": {
+   "em-dash": 3,
+   "not-x-but-y": 1
+  },
+  "labs/assets/js/memes/constants.js": {
+   "em-dash": 9
+  },
+  "labs/assets/js/roaster/engine/claims.js": {
+   "em-dash": 3
+  },
+  "labs/assets/js/roaster/engine/spans.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/roaster/main.js": {
+   "em-dash": 3
+  },
+  "labs/assets/js/roaster/tests.mjs": {
+   "stock-word": 5,
+   "not-x-but-y": 1,
+   "em-dash": 1
+  },
+  "labs/assets/js/roaster/view/dom.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/roaster/view/method.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/roaster/view/model.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/roaster/view/panels.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/timeline/config.js": {
+   "em-dash": 1
+  },
+  "labs/assets/js/timeline/view-panels.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/trending/ReasoningService.js": {
+   "em-dash": 3,
+   "not-x-but-y": 1
+  },
+  "labs/assets/js/trending/Trending.js": {
+   "em-dash": 6
+  },
+  "labs/assets/js/trending/archive.build.mjs": {
+   "em-dash": 2
+  },
+  "labs/assets/js/trending/constants.js": {
+   "em-dash": 2
+  },
+  "labs/assets/js/trending/lenses.js": {
+   "em-dash": 4
+  },
+  "labs/assets/js/trending/views.js": {
+   "not-x-but-y": 1
+  },
+  "labs/assets/js/workout-plans/LocalCoach.js": {
+   "em-dash": 6
+  },
+  "labs/assets/js/workout-plans/constants.js": {
+   "em-dash": 2
+  },
+  "labs/bh_animation_page.html": {
+   "em-dash": 2,
+   "default-font": 1
+  },
+  "labs/dataspace.html": {
+   "em-dash": 19,
+   "frosted-glass": 3
+  },
+  "labs/exomania.html": {
+   "em-dash": 3,
+   "default-font": 1
+  },
+  "labs/figure.html": {
+   "em-dash": 21,
+   "frosted-glass": 1,
+   "not-x-but-y": 1
+  },
+  "labs/heptapod.html": {
+   "em-dash": 7,
+   "frosted-glass": 1
+  },
+  "labs/honesty-decoder.html": {
+   "em-dash": 29,
+   "frosted-glass": 1
+  },
+  "labs/index.html": {
+   "em-dash": 4,
+   "default-font": 1
+  },
+  "labs/md_animation_page.html": {
+   "em-dash": 2,
+   "default-font": 1
+  },
+  "labs/memes.html": {
+   "em-dash": 5,
+   "default-font": 1
+  },
+  "labs/roaster.html": {
+   "em-dash": 31,
+   "frosted-glass": 1,
+   "not-x-but-y": 1
+  },
+  "labs/seed.html": {
+   "em-dash": 6,
+   "frosted-glass": 1
+  },
+  "labs/token-ekg.html": {
+   "em-dash": 9,
+   "frosted-glass": 1
+  },
+  "labs/trending.html": {
+   "em-dash": 4,
+   "default-font": 1
+  },
+  "labs/workout-plans.html": {
+   "em-dash": 3,
+   "default-font": 1
+  }
+ }
+}
