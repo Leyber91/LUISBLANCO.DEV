@@ -1319,7 +1319,7 @@ class App {
       for (const p of this.cut.polys) polys.push(p.map((q) => [sp[q][0], sp[q][1]]));
     }
     const RANKS = ['vertices', 'edges', 'faces', 'cells', '4-faces', '5-faces', '6-faces', '7-faces', '8-faces', '9-faces'];
-    const fvec = o.fvec.map((f) => ({ rank: o.curved ? ['vertices', 'edges', 'faces'][f.k] : RANKS[f.k], count: f.count, how: f.how + (f.ref != null ? (f.ref === f.count ? ' · matches Table I' : ' · DIFFERS from Table I') : '') }));
+    const fvec = o.fvec.map((f) => ({ rank: o.curved ? ['vertices', 'edges', 'faces'][f.k] : RANKS[f.k], count: f.count, how: f.how + (f.ref != null && f.checked ? (f.ref === f.count ? ' · matches Table I' : ' · DIFFERS from Table I') : '') }));
     const euler = o.euler ? `Euler-Poincaré: alternating sum ${o.euler.chi}, expected ${o.euler.expected}: ${o.euler.ok ? 'holds' : 'fails'}` : '';
     const sp = this.speeds.filter((x) => x > 1e-6);
     const c = this.cut;

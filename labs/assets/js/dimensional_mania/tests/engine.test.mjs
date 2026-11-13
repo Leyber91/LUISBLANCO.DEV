@@ -36,22 +36,37 @@ const randomRotation = (n, turns = 3 * n) => {
   return R;
 };
 
-/* ---- the catalogue ---- */
-let objects = 0;
+/* ---- the catalogue ----
+   G1 defect: a rank whose count is the closed formula (ranks 3 to n-3, from 6D up) was compared
+   with that same formula, and a polygon's vertex count with itself, so those checks could not
+   fail. A formula rank is now marked unchecked and is not counted as a test; a polygon is
+   checked against the p of its Schlafli symbol {p}. */
+let objects = 0, unchecked = 0, mislabelled = 0, noMetrics = 0;
 for (let n = 1; n <= 10; n++) {
   for (const c of P.catalogue(n)) {
     const o = P.build(c.id, n);
     if (o.curved) continue;
     objects++;
-    for (const f of o.fvec) check(`f-vector ${c.id} ${n}D rank ${f.k}`, f.count === f.ref, `${f.count} vs ${f.ref}`);
-    check(`Euler-Poincare ${c.id} ${n}D`, o.euler.ok, `${o.euler.chi} vs ${o.euler.expected}`);
-    if (o.ref && o.metrics) {
-      check(`circumradius/edge ${c.id} ${n}D`, Math.abs(o.metrics.re - o.ref.re) < 1e-9, `${o.metrics.re} vs ${o.ref.re}`);
-      if (o.ref.dihedral != null) check(`dihedral ${c.id} ${n}D`, Math.abs(o.metrics.dihedral - o.ref.dihedral) < 1e-7, `${o.metrics.dihedral} vs ${o.ref.dihedral}`);
+    for (const f of o.fvec) {
+      if (f.checked !== (f.how !== 'formula')) mislabelled++;
+      if (f.checked) check(`f-vector ${c.id} ${n}D rank ${f.k}`, f.count === f.ref, `${f.count} vs ${f.ref}`);
+      else unchecked++;
     }
+    check(`Euler-Poincare ${c.id} ${n}D`, o.euler.ok, `${o.euler.chi} vs ${o.euler.expected}`);
+    if (!o.ref || !o.metrics) { noMetrics++; continue; }
+    check(`circumradius/edge ${c.id} ${n}D`, Math.abs(o.metrics.re - o.ref.re) < 1e-9, `${o.metrics.re} vs ${o.ref.re}`);
+    if (o.ref.dihedral != null) check(`dihedral ${c.id} ${n}D`, Math.abs(o.metrics.dihedral - o.ref.dihedral) < 1e-7, `${o.metrics.dihedral} vs ${o.ref.dihedral}`);
   }
 }
 check('catalogue size: 3 families x 9 dims + segment + 2 polygons + 2 solids + 3 cells', objects === 27 + 1 + 2 + 2 + 3, String(objects));
+check('f-vector: the only unchecked ranks are the 45 formula ranks (3 to n-3, 6D-10D, 3 families)', unchecked === 45 && mislabelled === 0, `${unchecked} unchecked, ${mislabelled} mislabelled`);
+check('metrics: every catalogue polytope, the segment included, has measured and closed-form values', noMetrics === 0, `${noMetrics} without`);
+{
+  const seg = P.build('cube', 1);
+  check('segment: ends at -1 and +1 (circumradius 1), edge 2, so R/e = 1/2', seg.V[0] === -1 && seg.V[1] === 1 && seg.edgeLength === 2 && Math.abs(seg.metrics.re - 0.5) < 1e-12, `${Array.from(seg.V)}, ${seg.edgeLength}, ${seg.metrics.re}`);
+  const sidesOK = [['p5', 5], ['p6', 6]].every(([id, p]) => P.build(id, 2).fvec.every((f) => f.ref === p && f.checked));
+  check('polygons: vertices and edges are checked against the p of {p}', sidesOK);
+}
 const counts = { 3: 5, 4: 6, 5: 3, 10: 3 };
 for (const n in counts) check(`regular polytopes in ${n}D`, P.catalogue(+n).filter((c) => !c.curved).length === counts[n]);
 const t = P.build('torus', 4);
@@ -221,6 +236,31 @@ for (let n = 2; n <= 10; n++) {
   check('matrix: wider than its box means it scrolls, never shrinks', badOver === 0, `${badOver} bad`);
   check('matrix: every entry printed to 3 decimals and within 5e-4 of R', badEntry === 0, `${badEntry} bad`);
   check('matrix: 10D fits a 390 px phone without scrolling, scrolls on the 290 px desk rail', !matrixLayout(336, 10).over && matrixLayout(290, 10).over);
+
+  // no entry is read clipped: a column the gutter or the box edge would cut is not drawn, and
+  // every column is whole at some scroll offset (the desk rail at 10D showed "1.00" for "1.000")
+  const { matrixColumns, MATRIX_CELL, MATRIX_PAD } = await import('../panels.js');
+  let cut = 0, unreachable = 0, lost = 0;
+  for (let n = 1; n <= 10; n++) {
+    for (const box of [160, 252, 290, 336]) {
+      const m = matrixLayout(box, n), max = m.W - box, seen = new Set();
+      for (let sx = 0; sx <= max; sx++) {
+        const { first, end } = matrixColumns(box, n, sx);
+        for (let j = first; j < end; j++) {
+          seen.add(j);
+          const left = MATRIX_PAD + MATRIX_CELL * j, right = left + MATRIX_CELL;
+          if (left < sx + (sx > 0 ? MATRIX_PAD : 0) || right > sx + box) cut++;
+        }
+        if (end - first < 1) lost++;
+      }
+      if (seen.size !== n) unreachable++;
+      if (!m.over && (matrixColumns(box, n, 0).first !== 0 || matrixColumns(box, n, 0).end !== n)) lost++;
+    }
+  }
+  check('matrix: no column is drawn cut at either edge of its box', cut === 0, `${cut} cut`);
+  check('matrix: every column is whole at some scroll offset, and a matrix that fits shows all of them', unreachable === 0 && lost === 0, `${unreachable} unreachable, ${lost} lost`);
+  const d10 = matrixColumns(290, 10, 0), d10end = matrixColumns(290, 10, matrixLayout(290, 10).W - 290);
+  check('matrix: 10D on the desk rail shows X to S at rest and Z to Q scrolled to the end', d10.first === 0 && d10.end === 8 && d10end.first === 2 && d10end.end === 10, JSON.stringify([d10, d10end]));
 }
 
 /* ---- slices ---- */

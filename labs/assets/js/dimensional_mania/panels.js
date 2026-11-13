@@ -52,6 +52,17 @@ export function matrixLayout(box, n) {
   return { pad: MATRIX_PAD, cell: MATRIX_CELL, font: MATRIX_FONT, W, H: MATRIX_PAD + MATRIX_CELL * n + 2, over: W > box };
 }
 
+/**
+ * The columns a box of this width shows whole at scroll offset sx: first to end - 1.
+ * A column the row-name gutter (left) or the edge of the box (right) would cut is not
+ * drawn at all, so no entry is ever read clipped ("1.00" for "1.000", "885" for "−.885").
+ */
+export function matrixColumns(box, n, sx) {
+  const first = sx > 0 ? Math.ceil(sx / MATRIX_CELL - 1e-9) : 0;
+  const end = Math.min(n, Math.floor((sx + box - MATRIX_PAD) / MATRIX_CELL + 1e-9));
+  return { first, end };
+}
+
 export class MatrixView {
   constructor(canvas, note = null) {
     this.cv = canvas; this.wrap = canvas.parentElement; this.note = note; this.last = null; this.over = null;
@@ -91,16 +102,19 @@ export class MatrixView {
       g.moveTo(x0 + cell * 3 + 0.5, y0); g.lineTo(x0 + cell * 3 + 0.5, y0 + cell * n);
       g.stroke(); g.setLineDash([]);
     }
-    // axis labels last: the row labels ride the scroll offset over an opaque gutter, and the gutter
-    // swallows any column the scroll has half hidden, so no entry is ever shown clipped ("885" for "−.885")
+    // axis labels last: the row labels ride the scroll offset over an opaque gutter. The gutter swallows
+    // any column the scroll has half hidden on the left, and the column the box edge cuts on the right is
+    // covered too, so no entry is ever shown clipped (matrixColumns)
     const sx = Math.max(0, Math.min(this.wrap.scrollLeft || 0, W - box));
-    const firstCol = sx > 0 ? Math.ceil((sx + pad - x0) / cell - 1e-9) : 0;
-    if (sx > 0) { g.fillStyle = C.void; g.fillRect(sx, 0, x0 + cell * firstCol - sx, H); }
+    const { first, end } = matrixColumns(box, n, sx);
+    g.fillStyle = C.void;
+    if (sx > 0) g.fillRect(sx, 0, x0 + cell * first - sx, H);
+    if (end < n) g.fillRect(x0 + cell * end, 0, W - (x0 + cell * end), H);
     g.font = 'italic 500 11px "STIX Two Text", Georgia, serif';
     for (let k = 0; k < n; k++) {
       const hot = sel && (k === sel[0] || k === sel[1]);
       g.fillStyle = hot ? C.gold : C.dim;
-      if (k >= firstCol) g.fillText(AXES[k], x0 + cell * k + cell / 2, 8);
+      if (k >= first && k < end) g.fillText(AXES[k], x0 + cell * k + cell / 2, 8);
       g.fillText(AXES[k], sx + 8, y0 + cell * k + cell / 2);
     }
   }
@@ -172,7 +186,9 @@ export class CountsView {
   render(o) {
     const rows = o.fvec.map((f) => {
       const rank = o.curved ? ['vertices', 'edges', 'faces'][f.k] : RANK[f.k];
+      // a formula rank is Table I's formula itself: the page compares nothing there and says so
       const ref = f.ref == null ? '<td class="ref na">n/a</td>'
+        : !f.checked ? '<td class="ref na" title="This count is Table I’s closed formula itself. Nothing was measured from the coordinates, so there is nothing to compare.">not measured</td>'
         : `<td class="ref ${f.ref === f.count ? 'ok' : 'bad'}">${fmt(f.ref)}<i>${f.ref === f.count ? 'match' : 'differs'}</i></td>`;
       return `<tr><td class="rk">${rank}</td><td class="ct">${fmt(f.count)}</td><td class="how" title="${HOW[f.how]}"><span class="h-${f.how}">${f.how}</span></td>${ref}</tr>`;
     }).join('');

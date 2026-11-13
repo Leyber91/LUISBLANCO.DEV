@@ -529,7 +529,7 @@ function polytope(id, n, row) {
 
 
   const nv = V.length / n;
-  const { edges, edgeLength } = n === 1 ? { edges: Uint32Array.from([0, 1]), edgeLength: 2 } : shortestEdges(V, n);
+  const { edges, edgeLength } = n === 1 ? { edges: Uint32Array.from([0, 1]), edgeLength: Math.abs(V[1] - V[0]) } : shortestEdges(V, n);
   const ne = edges.length / 2;
   const allEdges = Array.from({ length: ne }, (_, i) => i);
   const allVerts = Array.from({ length: nv }, (_, i) => i);
@@ -546,6 +546,7 @@ function polytope(id, n, row) {
 
   // the f-vector, rank by rank, with how each number was obtained
   const fvec = [];
+  const sides = family === 'polygon' ? parseInt(sch.slice(1), 10) : null; // {p} has p vertices and p edges
   for (let k = 0; k < n; k++) {
     let count = null, how = 'formula';
     if (k === 0) { count = nv; how = 'built'; }
@@ -554,14 +555,18 @@ function polytope(id, n, row) {
     else if (k === n - 2) { count = ridges.length; how = 'measured'; }
     else if (k === 2) { count = faces2.length; how = 'enumerated'; }
     else count = familyCount(family, n, k);
-    const ref = REFERENCE[family] ? REFERENCE[family][k] : familyCount(family, n, k);
-    fvec.push({ k, count, how, ref: family === 'polygon' ? (k === 0 ? nv : nv) : ref });
+    const ref = REFERENCE[family] ? REFERENCE[family][k] : family === 'polygon' ? sides : familyCount(family, n, k);
+    // checked: the count was obtained without the reference, so comparing the two tests something.
+    // A formula rank (3 to n-3, from 6D up) is the reference itself: nothing is compared there,
+    // and neither the page nor the tests may call it a match.
+    fvec.push({ k, count, how, ref, checked: how !== 'formula' });
   }
   const chi = fvec.reduce((s, f) => s + (f.k % 2 ? -f.count : f.count), 0);
   const euler = { chi, expected: 1 - (-1) ** n, ok: chi === 1 - (-1) ** n };
   const check3 = n === 3 ? { edgesTwoWays: ridges.length === ne } : null;
 
-  const metrics = n >= 2 ? measureMetrics(V, n, edgeLength, facets, ridges) : null;
+  // the segment too: its edge is measured from its two ends, so R/e = 1/2 is checked like the rest
+  const metrics = measureMetrics(V, n, edgeLength, facets, ridges);
   return {
     id, family, n, name, schlafli: sch, group: row.group(n), dual: row.dual, V, nv, edges, ne, edgeLength,
     faces2, faces3, facets, fvec, euler, check3, metrics, ref: referenceMetrics(id, n), curved: false, ...extra,
