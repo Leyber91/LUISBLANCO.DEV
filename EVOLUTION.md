@@ -3,6 +3,32 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-13, AI Meme Lab panels fit a phone screen (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 22 pages and 0 findings on main
+  today, so this run also loaded all 22 published pages in headless Chromium at 1280 px and 390 px over a local http
+  server and recorded failed local requests, script errors and page width. Item 2 still has no link to remove: no
+  tracked file outside _archive/ references labs/weather/. It stays in "Next" for Luis, as the last three entries said.
+- Found, most visible first: on labs/memes.html at 390 px both panels (the brief and the output) ran from x = 20 to
+  398 px, and the body clips sideways overflow, so the right 8 px of each panel, its border and padding included,
+  were cut off. At 360 px the third image-source button ("Pollinations") was also cut off inside its toggle.
+- Cause: below 860 px the bench grid is one 1fr column, which cannot shrink below the widest content's minimum width;
+  the image-source buttons do not wrap, so that minimum was about 380 px.
+- Changed (labs/assets/css/memes.css only): below 860 px the column is minmax(0, 1fr), and at 400 px and below the
+  image-source button labels may wrap onto two lines. At 320, 360, 390, 430, 860 and 1280 px no element now ends past
+  the screen edge, and the page scroll width equals the screen width. Above 400 px the buttons are unchanged.
+- Also found and left for later runs of item 1: hero_proto.html throws a TypeError on load and is 704 px wide at 390
+  px (a prototype page the home page does not link to); labs/claude-prep/ requests seal.json, which is not in the
+  repository and returns 404 (the lab treats a missing file as no seal, and the file belongs to an encrypted
+  feature this routine does not touch, so Luis should decide whether it should exist).
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 22 pages, 0 findings. No script changed, so
+  there was no syntax check to run. Render: labs/memes.html loaded in headless Chromium over a local http server at
+  1280 px and 390 px (and measured at 320, 360, 430 and 860 px); a screenshot at 320 px shows the three image-source
+  buttons inside the panel. The only console error was the request to a local model server, refused when none is
+  running and the same on main. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #14: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-12, Labs: Token EKG measures instead of drawing
 
 - Every number on the page is a measurement or a dated recording. Three real tokenizers run in the browser (o200k,

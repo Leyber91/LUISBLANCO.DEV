@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-13: Item 1, one finding: on the AI Meme Lab at 390 px both panels ran 8 px past the screen edge and were
+  clipped; they now fit from 320 px up. Item 1 stays in "Next" because it is a standing item and the render sweep
+  found two more (see EVOLUTION.md). Pull request "evolve 2026-11-13: meme lab panels fit phones".
 - 2026-11-12: Mobile pass on the home page and the labs hub at 390 px. The labs hub menu toggle was off-screen
   below about 470 px; the header now fits from 320 px up. The home page needed no change. Pull request
   "evolve 2026-11-12: labs hub mobile header".
