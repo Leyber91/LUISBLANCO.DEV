@@ -63,6 +63,7 @@ export const WORLDS = {
 /* ---- Labs OS on the hub ---- */
 export const OS_HUB = {
   lab: 'hub',                // the hub's own lab id in the activity log
+  title: 'Labs hub',         // how Your data names it
   suggestions: 3,            // what's-next rows on the welcome plate
   handoffWaitMs: 300,        // longest a click waits for its record before navigating
 };

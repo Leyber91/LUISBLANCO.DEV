@@ -67,8 +67,8 @@ describe('session lifecycle', () => {
   });
 
   it('does not write a second lab.leave when nothing changed', async () => {
-    const { store, tracker } = setup();
-    const life = startSession(tracker, 'hub');
+    const { c, store, tracker } = setup();
+    const life = startSession(tracker, 'hub', { now: c.now });   // a fixed clock: on the real one the totals can tick between calls
     await life.opened;
     await life.leave(false);
     await life.leave(false);

@@ -10,6 +10,11 @@
    when the visitor followed a link to it. A handoff followed by
    the lab's own lab.open within HANDOFF_MERGE_MS is one visit.
 
+   The log is bounded (store.ts). Once it has dropped its oldest
+   events, a session whose lab.open was dropped still counts, as a
+   partial visit, and the labs the dropped events show were visited
+   still count as visited, so nothing old is offered as unvisited.
+
    whatsNext ranks, in this order, and names each lab once:
      1 continue  a lab with a resume point and not finished,
                  most recent first
@@ -22,7 +27,8 @@
    ============================================================ */
 
 import type { LabEvent, ProgressRecord } from './types.js';
-import type { Store } from './store.js';
+import { DROPPED_KEY, readDropped } from './store.js';
+import type { DroppedSummary, Store } from './store.js';
 import { ago, duration, systemClock } from './util.js';
 import type { Clock } from './util.js';
 
@@ -41,6 +47,8 @@ export interface Visit {
   /** the page the visitor came from, for a handoff */
   readonly from: string | null;
   readonly events: number;
+  /** true when the session's first events were dropped from the bounded log */
+  readonly partial: boolean;
 }
 
 /** One lab the hub can point to. `world` groups labs; `worldName` is how it is printed. */
@@ -67,9 +75,13 @@ export interface Suggestion {
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
-/** Every visit in the log, newest first. Pure. */
-export function visitsFrom(events: readonly LabEvent[]): Visit[] {
-  const own = new Map<string, { lab: string; session: string; start: number; end: number; visibleMs: number | null; totalMs: number | null; n: number }>();
+/**
+ * Every visit in the log, newest first. Pure. `truncated` says the log has
+ * dropped older events, so a session without its lab.open is a partial visit
+ * instead of a stray.
+ */
+export function visitsFrom(events: readonly LabEvent[], opts: { truncated?: boolean } = {}): Visit[] {
+  const own = new Map<string, { lab: string; session: string; start: number; end: number; visibleMs: number | null; totalMs: number | null; n: number; partial: boolean }>();
   const handoffs: { to: string; t: number; session: string; from: string }[] = [];
   for (const e of events) {
     if (e.type === 'lab.handoff') {
@@ -79,8 +91,9 @@ export function visitsFrom(events: readonly LabEvent[]): Visit[] {
     const key = `${e.session}\u0000${e.lab}`;
     let v = own.get(key);
     if (!v) {
-      if (e.type !== 'lab.open') continue;   // a session begins with its open; stray events before it are not a visit
-      v = { lab: e.lab, session: e.session, start: e.t, end: e.t, visibleMs: null, totalMs: null, n: 0 };
+      // A session begins with its open; without one it is a stray, unless the open was dropped from the log.
+      if (e.type !== 'lab.open' && !opts.truncated) continue;
+      v = { lab: e.lab, session: e.session, start: e.t, end: e.t, visibleMs: null, totalMs: null, n: 0, partial: e.type !== 'lab.open' };
       own.set(key, v);
     }
     v.end = Math.max(v.end, e.t);
@@ -93,12 +106,12 @@ export function visitsFrom(events: readonly LabEvent[]): Visit[] {
   }
   const visits: Visit[] = [...own.values()].map((v) => ({
     lab: v.lab, session: v.session, start: v.start, end: v.end, visibleMs: v.visibleMs, totalMs: v.totalMs,
-    source: 'lab', from: null, events: v.n,
+    source: 'lab', from: null, events: v.n, partial: v.partial,
   }));
   for (const h of handoffs) {
     const merged = visits.some((v) => v.source === 'lab' && v.lab === h.to && v.start >= h.t && v.start - h.t <= HANDOFF_MERGE_MS);
     if (merged) continue;
-    visits.push({ lab: h.to, session: h.session, start: h.t, end: h.t, visibleMs: null, totalMs: null, source: 'handoff', from: h.from, events: 1 });
+    visits.push({ lab: h.to, session: h.session, start: h.t, end: h.t, visibleMs: null, totalMs: null, source: 'handoff', from: h.from, events: 1, partial: false });
   }
   return visits.sort((a, b) => b.start - a.start || (a.lab < b.lab ? -1 : a.lab > b.lab ? 1 : 0));
 }
@@ -115,6 +128,8 @@ export interface SuggestInput {
   /** labs not to suggest (the hub excludes the one its plate already offers) */
   readonly exclude?: readonly string[];
   readonly limit?: number;
+  /** labs the dropped part of the log shows were visited, and the newest dropped time */
+  readonly earlier?: { readonly labs: readonly string[]; readonly until: number } | null;
 }
 
 /** The ranked suggestions. Pure and deterministic. */
@@ -156,11 +171,15 @@ export function suggest(input: SuggestInput): Suggestion[] {
   }
 
   // 3 an unvisited lab in a world the visitor has explored
-  const visited = new Set(visits.map((v) => v.lab));
-  const worldLast = new Map<string, Visit>();
+  const visited = new Set([...visits.map((v) => v.lab), ...(input.earlier?.labs ?? [])]);
+  const worldLast = new Map<string, { lab: string; start: number }>();
   for (const v of visits) {   // visits are newest first, so the first per world is its latest
     const w = byId.get(v.lab)?.world;
     if (w && !worldLast.has(w)) worldLast.set(w, v);
+  }
+  for (const lab of input.earlier?.labs ?? []) {   // older than anything still in the log
+    const w = byId.get(lab)?.world;
+    if (w && !worldLast.has(w)) worldLast.set(w, { lab, start: input.earlier?.until ?? 0 });
   }
   const worlds = [...worldLast.entries()].sort((a, b) => b[1].start - a[1].start);
   for (const [w, v] of worlds) {
@@ -195,25 +214,34 @@ export class Resume {
     this.now = now ?? systemClock;
   }
 
-  /** The visitor's previous visits, newest first. */
+  /** What the bounded log has dropped, or null while it has dropped nothing. */
+  async summarised(): Promise<DroppedSummary | null> {
+    return readDropped(await this.store.getMeta(DROPPED_KEY));
+  }
+
+  /** The visitor's previous visits, newest first; a visit whose start was dropped is marked partial. */
   async lastSessions(opts: LastSessionsOptions = {}): Promise<Visit[]> {
     const skip = new Set(opts.exclude ?? []);
-    const all = visitsFrom(await this.store.events());
+    const all = visitsFrom(await this.store.events(), { truncated: (await this.summarised()) !== null });
     return all
       .filter((v) => !skip.has(v.lab) && (opts.includeCurrent || v.session !== this.session))
       .slice(0, opts.limit ?? 10);
   }
 
   /** Up to `limit` suggestions across the catalogue, each with its reason. */
-  async whatsNext(catalogue: readonly CatalogueEntry[], opts: Omit<SuggestInput, 'visits' | 'progress' | 'catalogue' | 'now'> = {}): Promise<Suggestion[]> {
-    const [events, progress] = [await this.store.events(), await this.store.allProgress()];
-    return suggest({ ...opts, visits: visitsFrom(events), progress, catalogue, now: this.now() });
+  async whatsNext(catalogue: readonly CatalogueEntry[], opts: Omit<SuggestInput, 'visits' | 'progress' | 'catalogue' | 'now' | 'earlier'> = {}): Promise<Suggestion[]> {
+    const [events, progress, dropped] = [await this.store.events(), await this.store.allProgress(), await this.summarised()];
+    return suggest({
+      ...opts, visits: visitsFrom(events, { truncated: dropped !== null }), progress, catalogue, now: this.now(),
+      earlier: dropped ? { labs: dropped.labs, until: dropped.until } : null,
+    });
   }
 }
 
 /** "2 hours ago · 14 min in view" for a visit, or "2 hours ago · opened from the hub". */
 export function describeVisit(v: Visit, now: number): string {
   const when = ago(v.start, now);
+  if (v.partial) return `${when} · earlier events summarised`;
   if (v.visibleMs !== null) return `${when} · ${duration(v.visibleMs)} in view`;
   return v.source === 'handoff' && v.from ? `${when} · opened from ${v.from === 'hub' ? 'the hub' : v.from}` : when;
 }

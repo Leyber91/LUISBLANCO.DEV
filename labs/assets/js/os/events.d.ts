@@ -23,7 +23,7 @@ export declare class Registry {
     has(type: string): boolean;
     types(): string[];
 }
-export type TrackRefusal = 'bad-lab' | 'unknown-type' | 'bad-data' | 'too-large' | 'throttled' | 'halted' | 'store-failed';
+export type TrackRefusal = 'bad-lab' | 'unknown-type' | 'bad-data' | 'too-large' | 'throttled' | 'halted' | 'store-failed' | 'recording off';
 export type TrackResult = {
     readonly ok: true;
     readonly event: LabEvent;
@@ -43,6 +43,7 @@ export declare class Tracker {
     private readonly opts;
     private readonly last;
     private halted;
+    private recordingOn;
     private readonly now;
     private readonly id;
     constructor(opts: TrackerOptions);
@@ -50,5 +51,8 @@ export declare class Tracker {
     /** Stop recording for the rest of this page (after the visitor deletes their record). */
     halt(): void;
     get isHalted(): boolean;
+    /** Follow the visitor's recording switch (the facade keeps it in step with meta). */
+    setRecording(on: boolean): void;
+    get recording(): boolean;
     track(lab: string, type: string, data?: object | null): Promise<TrackResult>;
 }

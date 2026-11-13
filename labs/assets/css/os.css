@@ -109,6 +109,7 @@
   margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--line);
 }
 .los-foot .los-stamp { color: var(--text-dim); }
+.los-foot.off .los-stamp { color: var(--horizon); }   /* recording off is a state, so it takes the cold ink */
 .los-link {
   font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--horizon);
   text-decoration: none; border-bottom: 1px solid var(--horizon-dim); padding-bottom: 1px;
@@ -150,7 +151,7 @@
 .los-actions[hidden], .los-confirm[hidden] { display: none; }
 .los-confirm-text { flex: 1 1 100%; color: var(--text-bright); font-size: var(--t-stamp); }
 .los-status { min-height: 3.2em; margin: var(--s-4) 0 0; color: var(--text-dim); font-size: var(--t-stamp); line-height: 1.6; }
-.los-sharing { display: grid; gap: var(--s-2); }
+.los-sharing, .los-recording { display: grid; gap: var(--s-2); justify-items: start; }
 
 /* ---------------- the sharing question ---------------- */
 .los-consent {

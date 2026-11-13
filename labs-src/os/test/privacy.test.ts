@@ -33,7 +33,7 @@ describe.each([
   it('deleteAll erases everything and confirms by counting again', async () => {
     const store = await seeded(await make());
     const r = await deleteAll(store);
-    expect(r).toEqual({ deleted: { events: 2, progress: 1, meta: 1 }, remaining: { events: 0, progress: 0, meta: 0 }, ok: true });
+    expect(r).toEqual({ deleted: { events: 2, progress: 1, meta: 1 }, remaining: { events: 0, progress: 0, meta: 0 }, kept: [], ok: true });
     expect((await exportAll(store)).events).toEqual([]);
   });
 
@@ -41,7 +41,16 @@ describe.each([
     const store = await seeded(await make());
     expect(await summary(store)).toEqual({
       counts: { events: 2, progress: 1, meta: 1 }, firstEvent: T0 - 1000, lastEvent: T0, labs: ['heptapod'], settings: ['visit.last'],
+      maxEvents: 5000, dropped: null, recording: { on: true, t: null },
     });
+  });
+
+  it('deleteAll can keep a named setting, and says so', async () => {
+    const store = await seeded(await make());
+    await store.setMeta('recording', { on: false, t: T0 });
+    const r = await deleteAll(store, { keep: ['recording', 'not-there'] });
+    expect(r).toEqual({ deleted: { events: 2, progress: 1, meta: 1 }, remaining: { events: 0, progress: 0, meta: 1 }, kept: ['recording'], ok: true });
+    expect(await store.getMeta('recording')).toEqual({ on: false, t: T0 });
   });
 });
 

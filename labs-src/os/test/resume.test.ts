@@ -26,7 +26,7 @@ describe('visitsFrom', () => {
       ev({ session: 'a', lab: 'heptapod', type: 'lab.leave', t: 5, data: { visibleMs: 5, totalMs: 5 } }),
       ev({ session: 'a', lab: 'heptapod', type: 'lab.leave', t: 9, data: { visibleMs: 7, totalMs: 9 } }),
     ]);
-    expect(v).toEqual([{ lab: 'heptapod', session: 'a', start: 0, end: 9, visibleMs: 7, totalMs: 9, source: 'lab', from: null, events: 3 }]);
+    expect(v).toEqual([{ lab: 'heptapod', session: 'a', start: 0, end: 9, visibleMs: 7, totalMs: 9, source: 'lab', from: null, events: 3, partial: false }]);
   });
 
   it('turns a handoff into a visit for a lab that does not record, and merges it with one that does', () => {

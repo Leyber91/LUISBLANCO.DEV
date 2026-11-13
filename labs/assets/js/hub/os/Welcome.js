@@ -6,7 +6,9 @@
    point when it set one), and up to three what's-next rows from
    Labs OS, each with its reason. A first-time visitor sees
    nothing here. After rendering, the hub saves the catalogue it
-   showed, so the next visit can name the labs that are new.
+   showed, so the next visit can name the labs that are new; with
+   recording off it saves nothing, and the plate's title block says
+   "Recording off" with the way back on (and follows the switch).
    ============================================================ */
 
 import { SEL, OS_HUB } from '../constants.js';
@@ -36,7 +38,7 @@ export class Welcome {
       exclude: last ? [last.lab] : [],
       limit: OS_HUB.suggestions,
     });
-    await os.progress.set({ known: cat.map((c) => c.id) });
+    if (os.recording.on) await os.progress.set({ known: cat.map((c) => c.id) });
 
     if (!last && !next.length) return;
     let plateLast = null;
@@ -46,10 +48,16 @@ export class Welcome {
       const resume = rec?.resume && !rec.finished ? rec.resume : null;
       plateLast = { title: entry.title, href: resume?.url ?? entry.href, when: describeVisit(last, Date.now()), resumeLabel: resume?.label ?? null };
     }
-    const { counts, firstEvent } = await os.privacy.summary();
-    const record = firstEvent === null ? null : `${counts.events} ${counts.events === 1 ? 'event' : 'events'} since ${dayMonth(firstEvent)}`;
-    slot.replaceChildren(resumePlate({ last: plateLast, next, persistent: os.storage.persistent, record }));
+    const { counts, firstEvent, dropped } = await os.privacy.summary();
+    const n = counts.events.toLocaleString('en-US');
+    const record = firstEvent === null ? null
+      : `${n} ${counts.events === 1 ? 'event' : 'events'} since ${dayMonth(firstEvent)}${dropped ? ', earlier ones summarised' : ''}`;
+    const render = () => slot.replaceChildren(resumePlate({
+      last: plateLast, next, persistent: os.storage.persistent, record, recording: os.recording.on,
+    }));
+    render();
     slot.hidden = false;
+    os.recording.onChange(render);
     os.onDeleted(() => { slot.hidden = true; slot.replaceChildren(); });
   }
 }

@@ -6,12 +6,14 @@
 
    Any link to #your-data opens the panel, and so does the hub
    opened at labs/index.html#your-data, so a lab can send a
-   visitor straight to their record.
+   visitor straight to their record. Labs are listed by their
+   hub titles; the stamp follows the recording switch.
    ============================================================ */
 
-import { SEL } from '../constants.js';
+import { SEL, OS_HUB } from '../constants.js';
 import { $ } from '../dom.js';
 import { dataPanel, fixtureStamp, storageStamp } from '../../os/ui.js';
+import { catalogue } from './catalogue.js';
 
 const DATA_HASH = '#your-data';
 
@@ -23,12 +25,15 @@ export class YourData {
     const os = await this.osReady;
     if (!btn || !os) return;
 
-    $(SEL.osStorage)?.replaceChildren(storageStamp(os.storage));
-    const stamp = fixtureStamp(os.storage);
+    const stamp = () => $(SEL.osStorage)?.replaceChildren(storageStamp(os.storage, os.recording.on));
+    stamp();
+    os.recording.onChange(stamp);
+    const fixture = fixtureStamp(os.storage);
     const fx = $(SEL.osFixture);
-    if (stamp && fx) { fx.replaceChildren(stamp); fx.hidden = false; }
+    if (fixture && fx) { fx.replaceChildren(fixture); fx.hidden = false; }
 
-    this.panel = dataPanel(os);
+    const titles = new Map([[OS_HUB.lab, OS_HUB.title], ...catalogue().map((c) => [c.id, c.title])]);
+    this.panel = dataPanel(os, { titleOf: (id) => titles.get(id) });
     btn.hidden = false;
     btn.addEventListener('click', () => this.panel.open());
     this.onLink = (e) => {

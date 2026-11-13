@@ -11,6 +11,9 @@
 
    to the store. It never throws: a refusal comes back as
    { ok: false, reason } so a lab's own code keeps running.
+   While the visitor has turned recording off (recording.ts),
+   every call returns { ok: false, reason: 'recording off' } and
+   appends nothing.
 
    Built-in types (labs register their own, under their own
    prefix, for example "heptapod.decoded"):
@@ -76,7 +79,8 @@ export class Registry {
   types(): string[] { return [...this.specs.keys()]; }
 }
 
-export type TrackRefusal = 'bad-lab' | 'unknown-type' | 'bad-data' | 'too-large' | 'throttled' | 'halted' | 'store-failed';
+export type TrackRefusal =
+  | 'bad-lab' | 'unknown-type' | 'bad-data' | 'too-large' | 'throttled' | 'halted' | 'store-failed' | 'recording off';
 export type TrackResult =
   | { readonly ok: true; readonly event: LabEvent }
   | { readonly ok: false; readonly reason: TrackRefusal; readonly detail: string };
@@ -94,6 +98,7 @@ const refuse = (reason: TrackRefusal, detail: string): TrackResult => ({ ok: fal
 export class Tracker {
   private readonly last = new Map<string, number>();
   private halted = false;
+  private recordingOn = true;
   private readonly now: Clock;
   private readonly id: () => string;
 
@@ -108,8 +113,13 @@ export class Tracker {
   halt(): void { this.halted = true; }
   get isHalted(): boolean { return this.halted; }
 
+  /** Follow the visitor's recording switch (the facade keeps it in step with meta). */
+  setRecording(on: boolean): void { this.recordingOn = on; }
+  get recording(): boolean { return this.recordingOn; }
+
   async track(lab: string, type: string, data?: object | null): Promise<TrackResult> {
     if (this.halted) return refuse('halted', 'recording stopped on this page');
+    if (!this.recordingOn) return refuse('recording off', 'the visitor turned recording off');
     if (!isLabId(lab)) return refuse('bad-lab', `"${String(lab)}" is not a lab id`);
     const spec = this.opts.registry.get(type);
     if (!spec) return refuse('unknown-type', `"${String(type)}" is not registered`);

@@ -11,6 +11,9 @@
 
    to the store. It never throws: a refusal comes back as
    { ok: false, reason } so a lab's own code keeps running.
+   While the visitor has turned recording off (recording.ts),
+   every call returns { ok: false, reason: 'recording off' } and
+   appends nothing.
 
    Built-in types (labs register their own, under their own
    prefix, for example "heptapod.decoded"):
@@ -69,6 +72,7 @@ export class Tracker {
     opts;
     last = new Map();
     halted = false;
+    recordingOn = true;
     now;
     id;
     constructor(opts) {
@@ -80,9 +84,14 @@ export class Tracker {
     /** Stop recording for the rest of this page (after the visitor deletes their record). */
     halt() { this.halted = true; }
     get isHalted() { return this.halted; }
+    /** Follow the visitor's recording switch (the facade keeps it in step with meta). */
+    setRecording(on) { this.recordingOn = on; }
+    get recording() { return this.recordingOn; }
     async track(lab, type, data) {
         if (this.halted)
             return refuse('halted', 'recording stopped on this page');
+        if (!this.recordingOn)
+            return refuse('recording off', 'the visitor turned recording off');
         if (!isLabId(lab))
             return refuse('bad-lab', `"${String(lab)}" is not a lab id`);
         const spec = this.opts.registry.get(type);

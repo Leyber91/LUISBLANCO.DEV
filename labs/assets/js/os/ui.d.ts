@@ -20,9 +20,11 @@ export interface ResumePlateInput {
     readonly record?: string | null;
     /** where "Your data" opens (default #your-data) */
     readonly dataHref?: string;
+    /** the visitor's recording switch (default on) */
+    readonly recording?: boolean;
 }
 export declare function resumePlate(input: ResumePlateInput): HTMLElement;
-export declare function storageStamp(s: StorageInfo): HTMLElement;
+export declare function storageStamp(s: StorageInfo, recording?: boolean): HTMLElement;
 export declare function fixtureStamp(s: StorageInfo): HTMLElement | null;
 export declare function consentCopy(config: OSConfig): string;
 export declare function mountConsentBanner(root: HTMLElement, consent: Consent, config: OSConfig): {
@@ -36,7 +38,10 @@ export interface DataPanel {
     refresh(): Promise<void>;
     destroy(): void;
 }
-export declare function dataPanel(os: LabsOSInstance, opts?: {
-    root?: HTMLElement;
-    now?: () => number;
-}): DataPanel;
+export interface DataPanelOptions {
+    readonly root?: HTMLElement;
+    readonly now?: () => number;
+    /** a lab's title for its id (the hub passes its catalogue); the id is shown when this returns nothing */
+    readonly titleOf?: (lab: string) => string | undefined;
+}
+export declare function dataPanel(os: LabsOSInstance, opts?: DataPanelOptions): DataPanel;

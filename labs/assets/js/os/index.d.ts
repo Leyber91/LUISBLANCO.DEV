@@ -7,6 +7,7 @@ import type { DeleteResult, ExportFile, Summary } from './privacy.js';
 import type { GetOptions } from './progress.js';
 import { Resume } from './resume.js';
 import { mountScene } from './scene.js';
+import type { RecordingState } from './recording.js';
 import type { StorageKind } from './store.js';
 import type { Clock } from './util.js';
 export interface InitOptions {
@@ -21,6 +22,8 @@ export interface InitOptions {
     readonly lifecycle?: boolean;
     /** mount the consent banner when the config allows it (default true) */
     readonly ui?: boolean;
+    /** the log's bound (tests); defaults to MAX_EVENTS */
+    readonly maxEvents?: number;
 }
 export interface StorageInfo {
     readonly kind: StorageKind;
@@ -59,8 +62,16 @@ export interface LabsOSInstance {
     readonly privacy: {
         summary(): Promise<Summary>;
         exportAll(): Promise<ExportFile>;
-        /** erase every record and stop recording on this page */
+        /** erase every record and stop recording on this page; a "recording off" choice survives */
         deleteAll(): Promise<DeleteResult>;
+    };
+    /** the visitor's switch for the record */
+    readonly recording: {
+        readonly on: boolean;
+        /** when it was last switched, or null */
+        readonly since: number | null;
+        set(on: boolean): Promise<RecordingState>;
+        onChange(fn: (s: RecordingState) => void): () => void;
     };
     readonly mountScene: typeof mountScene;
     /** true once the visitor deleted their record on this page */
@@ -103,8 +114,10 @@ export { exportAll, deleteAll, summary } from './privacy.js';
 export type { ExportFile, DeleteResult, Summary } from './privacy.js';
 export { mountScene, sceneCount } from './scene.js';
 export type { SceneHandle, SceneContext, SceneFactory, MountedScene } from './scene.js';
-export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS } from './store.js';
-export type { Store, StorageKind, Migration } from './store.js';
+export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';
+export type { Store, StorageKind, Migration, DroppedSummary } from './store.js';
+export { RECORDING_KEY } from './recording.js';
+export type { RecordingState } from './recording.js';
 export { FIXTURES, fixtureStore } from './fixtures.js';
 export { ago, duration, dayMonth } from './util.js';
 export type * from './types.js';

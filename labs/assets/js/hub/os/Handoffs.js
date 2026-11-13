@@ -8,6 +8,7 @@
    unloading may drop an unfinished IndexedDB write. A click that
    opens a new tab, a modified click and a middle click navigate
    at once; this page stays open, so their write completes.
+   With recording off nothing is written and no click waits.
    ============================================================ */
 
 import { OS_HUB } from '../constants.js';
@@ -28,7 +29,7 @@ export class Handoffs {
 
   async handle(e) {
     const os = this.os;
-    if (!os || e.defaultPrevented) return;
+    if (!os || !os.recording.on || e.defaultPrevented) return;
     const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
     if (!a) return;
     let url;

@@ -10,6 +10,11 @@
    when the visitor followed a link to it. A handoff followed by
    the lab's own lab.open within HANDOFF_MERGE_MS is one visit.
 
+   The log is bounded (store.ts). Once it has dropped its oldest
+   events, a session whose lab.open was dropped still counts, as a
+   partial visit, and the labs the dropped events show were visited
+   still count as visited, so nothing old is offered as unvisited.
+
    whatsNext ranks, in this order, and names each lab once:
      1 continue  a lab with a resume point and not finished,
                  most recent first
@@ -20,11 +25,16 @@
      4 new       a lab that was not in the catalogue the visitor
                  saw last time, in catalogue order
    ============================================================ */
+import { DROPPED_KEY, readDropped } from './store.js';
 import { ago, duration, systemClock } from './util.js';
 export const HANDOFF_MERGE_MS = 120_000;
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
-/** Every visit in the log, newest first. Pure. */
-export function visitsFrom(events) {
+/**
+ * Every visit in the log, newest first. Pure. `truncated` says the log has
+ * dropped older events, so a session without its lab.open is a partial visit
+ * instead of a stray.
+ */
+export function visitsFrom(events, opts = {}) {
     const own = new Map();
     const handoffs = [];
     for (const e of events) {
@@ -36,9 +46,10 @@ export function visitsFrom(events) {
         const key = `${e.session}\u0000${e.lab}`;
         let v = own.get(key);
         if (!v) {
-            if (e.type !== 'lab.open')
-                continue; // a session begins with its open; stray events before it are not a visit
-            v = { lab: e.lab, session: e.session, start: e.t, end: e.t, visibleMs: null, totalMs: null, n: 0 };
+            // A session begins with its open; without one it is a stray, unless the open was dropped from the log.
+            if (e.type !== 'lab.open' && !opts.truncated)
+                continue;
+            v = { lab: e.lab, session: e.session, start: e.t, end: e.t, visibleMs: null, totalMs: null, n: 0, partial: e.type !== 'lab.open' };
             own.set(key, v);
         }
         v.end = Math.max(v.end, e.t);
@@ -54,13 +65,13 @@ export function visitsFrom(events) {
     }
     const visits = [...own.values()].map((v) => ({
         lab: v.lab, session: v.session, start: v.start, end: v.end, visibleMs: v.visibleMs, totalMs: v.totalMs,
-        source: 'lab', from: null, events: v.n,
+        source: 'lab', from: null, events: v.n, partial: v.partial,
     }));
     for (const h of handoffs) {
         const merged = visits.some((v) => v.source === 'lab' && v.lab === h.to && v.start >= h.t && v.start - h.t <= HANDOFF_MERGE_MS);
         if (merged)
             continue;
-        visits.push({ lab: h.to, session: h.session, start: h.t, end: h.t, visibleMs: null, totalMs: null, source: 'handoff', from: h.from, events: 1 });
+        visits.push({ lab: h.to, session: h.session, start: h.t, end: h.t, visibleMs: null, totalMs: null, source: 'handoff', from: h.from, events: 1, partial: false });
     }
     return visits.sort((a, b) => b.start - a.start || (a.lab < b.lab ? -1 : a.lab > b.lab ? 1 : 0));
 }
@@ -103,12 +114,17 @@ export function suggest(input) {
                 : `${n} items due; the oldest fell due ${ago(x.oldest, now)}.`);
     }
     // 3 an unvisited lab in a world the visitor has explored
-    const visited = new Set(visits.map((v) => v.lab));
+    const visited = new Set([...visits.map((v) => v.lab), ...(input.earlier?.labs ?? [])]);
     const worldLast = new Map();
     for (const v of visits) { // visits are newest first, so the first per world is its latest
         const w = byId.get(v.lab)?.world;
         if (w && !worldLast.has(w))
             worldLast.set(w, v);
+    }
+    for (const lab of input.earlier?.labs ?? []) { // older than anything still in the log
+        const w = byId.get(lab)?.world;
+        if (w && !worldLast.has(w))
+            worldLast.set(w, { lab, start: input.earlier?.until ?? 0 });
     }
     const worlds = [...worldLast.entries()].sort((a, b) => b[1].start - a[1].start);
     for (const [w, v] of worlds) {
@@ -138,23 +154,32 @@ export class Resume {
         this.session = session;
         this.now = now ?? systemClock;
     }
-    /** The visitor's previous visits, newest first. */
+    /** What the bounded log has dropped, or null while it has dropped nothing. */
+    async summarised() {
+        return readDropped(await this.store.getMeta(DROPPED_KEY));
+    }
+    /** The visitor's previous visits, newest first; a visit whose start was dropped is marked partial. */
     async lastSessions(opts = {}) {
         const skip = new Set(opts.exclude ?? []);
-        const all = visitsFrom(await this.store.events());
+        const all = visitsFrom(await this.store.events(), { truncated: (await this.summarised()) !== null });
         return all
             .filter((v) => !skip.has(v.lab) && (opts.includeCurrent || v.session !== this.session))
             .slice(0, opts.limit ?? 10);
     }
     /** Up to `limit` suggestions across the catalogue, each with its reason. */
     async whatsNext(catalogue, opts = {}) {
-        const [events, progress] = [await this.store.events(), await this.store.allProgress()];
-        return suggest({ ...opts, visits: visitsFrom(events), progress, catalogue, now: this.now() });
+        const [events, progress, dropped] = [await this.store.events(), await this.store.allProgress(), await this.summarised()];
+        return suggest({
+            ...opts, visits: visitsFrom(events, { truncated: dropped !== null }), progress, catalogue, now: this.now(),
+            earlier: dropped ? { labs: dropped.labs, until: dropped.until } : null,
+        });
     }
 }
 /** "2 hours ago · 14 min in view" for a visit, or "2 hours ago · opened from the hub". */
 export function describeVisit(v, now) {
     const when = ago(v.start, now);
+    if (v.partial)
+        return `${when} · earlier events summarised`;
     if (v.visibleMs !== null)
         return `${when} · ${duration(v.visibleMs)} in view`;
     return v.source === 'handoff' && v.from ? `${when} · opened from ${v.from === 'hub' ? 'the hub' : v.from}` : when;

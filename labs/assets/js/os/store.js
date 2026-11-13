@@ -3,9 +3,13 @@
    database, "labs", in the visitor's browser.
 
      events    the activity log. Append-only: the store offers
-               add and read, never update; only clear() (the
-               visitor's "delete everything") removes lines.
-               Indexed by [lab, t] and by t.
+               add and read, never update. Bounded: it keeps the
+               newest MAX_EVENTS; an append that crosses the limit
+               drops the oldest in the same transaction and adds
+               them to a per-lab count in meta ("log.dropped"), so
+               what was dropped is summarised, never silently lost.
+               clear() (the visitor's "delete everything") removes
+               the rest. Indexed by [lab, t] and by t.
      progress  one record per lab, keyed by lab id, carrying the
                lab's own schema version.
      meta      small settings: consent, last visit, the install id
@@ -19,7 +23,44 @@
    n to n + 1 inside the browser's upgrade transaction, so an old
    database always walks forward one step at a time.
    ============================================================ */
+import { isLabId } from './util.js';
 export const DB_NAME = 'labs';
+/** The log keeps this many events, the newest. */
+export const MAX_EVENTS = 5000;
+/** Meta key of the summary of events dropped to keep the log bounded. */
+export const DROPPED_KEY = 'log.dropped';
+/** The dropped summary in a meta value, or null. */
+export function readDropped(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+        return null;
+    const total = raw['total'], byLab = raw['byLab'], labs = raw['labs'], since = raw['since'], until = raw['until'];
+    if (typeof total !== 'number' || typeof since !== 'number' || typeof until !== 'number')
+        return null;
+    const counts = {};
+    if (byLab && typeof byLab === 'object' && !Array.isArray(byLab)) {
+        for (const [k, v] of Object.entries(byLab))
+            if (typeof v === 'number')
+                counts[k] = v;
+    }
+    return { total, byLab: counts, labs: Array.isArray(labs) ? labs.filter((x) => typeof x === 'string') : [], since, until };
+}
+/** Add a batch of dropped events to the running summary. */
+export function mergeDropped(prev, gone) {
+    const p = readDropped(prev);
+    const byLab = { ...(p?.byLab ?? {}) };
+    const labs = new Set(p?.labs ?? []);
+    let since = p?.since ?? Infinity, until = p?.until ?? -Infinity;
+    for (const e of gone) {
+        byLab[e.lab] = (byLab[e.lab] ?? 0) + 1;
+        labs.add(e.lab);
+        const to = e.type === 'lab.handoff' ? e.data?.['to'] : undefined;
+        if (isLabId(to))
+            labs.add(to);
+        since = Math.min(since, e.t);
+        until = Math.max(until, e.t);
+    }
+    return { total: (p?.total ?? 0) + gone.length, byLab, labs: [...labs].sort(), since, until };
+}
 export const MIGRATIONS = [
     // 0 -> 1: the three stores.
     (db) => {
@@ -46,12 +87,19 @@ function sortEvents(list) {
 }
 class IdbStore {
     db;
+    maxEvents;
     kind = 'indexeddb';
     persistent = true;
     note = '';
     fixture = null;
-    constructor(db) {
+    /* This page's running count of the log. Below the limit an append is a single add; only an append that may cross
+       it pays for a count and a drop. Other tabs' appends are not in this count, so with several tabs open the log can
+       run past the limit until this tab's count reaches it, and then the whole overflow goes in one batch. */
+    approx;
+    constructor(db, maxEvents, count) {
         this.db = db;
+        this.maxEvents = maxEvents;
+        this.approx = count;
         // Another tab is upgrading the schema: step aside so it can.
         db.onversionchange = () => db.close();
     }
@@ -59,9 +107,44 @@ class IdbStore {
         return this.db.transaction(stores, mode);
     }
     async append(event) {
-        const tx = this.tx('events', 'readwrite');
-        tx.objectStore('events').add(event);
+        if (this.approx + 1 <= this.maxEvents) {
+            const tx = this.tx('events', 'readwrite');
+            tx.objectStore('events').add(event);
+            await txDone(tx);
+            this.approx++;
+            return;
+        }
+        // One transaction: the add, the count and, past the limit, the drop and the summary land together or not at all.
+        const tx = this.tx(['events', 'meta'], 'readwrite');
+        const events = tx.objectStore('events');
+        events.add(event);
+        const count = events.count();
+        let after = this.approx + 1;
+        count.onsuccess = () => {
+            const over = count.result - this.maxEvents;
+            after = Math.min(count.result, this.maxEvents);
+            if (over <= 0)
+                return;
+            const gone = [];
+            const cursor = events.openCursor(); // key order is insertion order: the oldest first
+            cursor.onsuccess = () => {
+                const c = cursor.result;
+                if (c && gone.length < over) {
+                    gone.push(c.value);
+                    c.delete();
+                    c.continue();
+                    return;
+                }
+                const meta = tx.objectStore('meta');
+                const prev = meta.get(DROPPED_KEY);
+                prev.onsuccess = () => {
+                    const row = prev.result;
+                    meta.put({ key: DROPPED_KEY, value: mergeDropped(row?.value, gone) });
+                };
+            };
+        };
         await txDone(tx);
+        this.approx = after;
     }
     async events(q = {}) {
         const tx = this.tx('events', 'readonly');
@@ -131,6 +214,7 @@ class IdbStore {
         tx.objectStore('progress').clear();
         tx.objectStore('meta').clear();
         await txDone(tx);
+        this.approx = 0;
     }
     close() { this.db.close(); }
 }
@@ -140,15 +224,17 @@ class MemoryStore {
     persistent;
     note;
     fixture;
+    maxEvents;
     kind = 'memory';
     log = [];
     ids = new Set();
     progress = new Map();
     meta = new Map();
-    constructor(persistent, note, fixture) {
+    constructor(persistent, note, fixture, maxEvents) {
         this.persistent = persistent;
         this.note = note;
         this.fixture = fixture;
+        this.maxEvents = maxEvents;
     }
     async append(event) {
         // Same contract as the IndexedDB unique index on id.
@@ -156,6 +242,12 @@ class MemoryStore {
             throw new DOMException(`event ${event.id} already recorded`, 'ConstraintError');
         this.ids.add(event.id);
         this.log.push(copy(event));
+        const over = this.log.length - this.maxEvents;
+        if (over > 0) {
+            const gone = this.log.splice(0, over);
+            gone.forEach((e) => this.ids.delete(e.id));
+            this.meta.set(DROPPED_KEY, mergeDropped(this.meta.get(DROPPED_KEY), gone));
+        }
     }
     async events(q = {}) {
         const lo = q.since ?? -Infinity, hi = q.until ?? Infinity;
@@ -178,7 +270,7 @@ class MemoryStore {
     close() { }
 }
 export function memoryStore(opts = {}) {
-    const s = new MemoryStore(opts.persistent ?? false, opts.note ?? 'kept in memory only', opts.fixture ?? null);
+    const s = new MemoryStore(opts.persistent ?? false, opts.note ?? 'kept in memory only', opts.fixture ?? null, limit(opts.maxEvents));
     const seed = opts.seed;
     if (seed) {
         // Seeding happens before anyone holds the store, so the writes are synchronous in effect.
@@ -190,6 +282,13 @@ export function memoryStore(opts = {}) {
             void s.setMeta(k, v);
     }
     return s;
+}
+function limit(n) {
+    if (n === undefined)
+        return MAX_EVENTS;
+    if (!Number.isInteger(n) || n < 1)
+        throw new Error(`maxEvents must be a positive integer, got ${n}`);
+    return n;
 }
 function defaultFactory() {
     // Reading the property itself throws a SecurityError where storage is blocked.
@@ -251,14 +350,18 @@ function openDb(idb, name, migrations, timeoutMs) {
  */
 export async function openStore(opts = {}) {
     const idb = opts.idb === undefined ? defaultFactory() : opts.idb;
+    const maxEvents = limit(opts.maxEvents);
     if (!idb)
-        return memoryStore({ note: 'this browser offers no IndexedDB here, so nothing is kept after the tab closes' });
+        return memoryStore({ maxEvents, note: 'this browser offers no IndexedDB here, so nothing is kept after the tab closes' });
     try {
         const db = await openDb(idb, opts.name ?? DB_NAME, opts.migrations ?? MIGRATIONS, opts.timeoutMs ?? 4000);
-        return new IdbStore(db);
+        const tx = db.transaction('events', 'readonly');
+        const count = tx.objectStore('events').count();
+        await txDone(tx);
+        return new IdbStore(db, maxEvents, count.result);
     }
     catch (e) {
         const why = e instanceof Error ? e.message : String(e);
-        return memoryStore({ note: `storage is blocked in this window (${why}), so nothing is kept after the tab closes` });
+        return memoryStore({ maxEvents, note: `storage is blocked in this window (${why}), so nothing is kept after the tab closes` });
     }
 }

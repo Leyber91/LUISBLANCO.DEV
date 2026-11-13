@@ -72,7 +72,7 @@ describe('your data panel', () => {
     const panel = dataPanel(os);
     await panel.open();
     const text = () => panel.el.textContent ?? '';
-    expect(text()).toMatch(/It sends nothing anywhere/);
+    expect(text()).toMatch(/The record is kept only in this browser and nothing is sent anywhere\./);
     expect(text()).toMatch(/2 events/);
     expect(text()).not.toMatch(/Sharing/);                         // consent UI is off in v0
     expect(TELLS.test(text())).toBe(false);

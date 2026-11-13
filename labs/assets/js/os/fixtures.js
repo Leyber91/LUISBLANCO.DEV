@@ -14,6 +14,8 @@
      storage-unavailable  a window where storage is blocked
      consent              returning, with the consent banner shown
                           (OS_CONFIG keeps it hidden in v0)
+     recording-off        returning, after the visitor turned
+                          recording off yesterday
 
    The seeded labs stand for labs that have adopted the OS; in v0
    only the hub records, so a real record holds hub sessions and
@@ -21,7 +23,7 @@
    ============================================================ */
 import { EVENT_V } from './types.js';
 import { memoryStore } from './store.js';
-export const FIXTURES = ['first-visit', 'returning', 'returning-due', 'storage-unavailable', 'consent'];
+export const FIXTURES = ['first-visit', 'returning', 'returning-due', 'storage-unavailable', 'consent', 'recording-off'];
 export const isFixture = (s) => typeof s === 'string' && FIXTURES.includes(s);
 /** The hub's live labs when this fixture was written, minus "trends", so the fixture has one new lab. */
 const KNOWN_BEFORE = ['black-hole', 'dimensional', 'exomania', 'heptapod', 'alt-reality', 'the-figure', 'primordial-seed',
@@ -80,5 +82,9 @@ export function fixtureStore(name, now) {
             return memoryStore({ persistent: true, fixture: name, note: '', seed: returning(now, false) });
         case 'returning-due':
             return memoryStore({ persistent: true, fixture: name, note: '', seed: returning(now, true) });
+        case 'recording-off': {
+            const seed = returning(now, false);
+            return memoryStore({ persistent: true, fixture: name, note: '', seed: { ...seed, meta: { ...seed.meta, recording: { on: false, t: now - DAY } } } });
+        }
     }
 }

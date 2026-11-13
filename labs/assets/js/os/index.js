@@ -21,7 +21,10 @@
      os.mountScene(canvas, ({ reducedMotion }) => ({ destroy, pause, resume }));
 
    init records lab.open and, whenever the page is hidden or
-   left, lab.leave with its visible and total time.
+   left, lab.leave with its visible and total time, unless the
+   visitor has turned recording off (os.recording.set(false)):
+   then nothing new is logged on any lab page until they turn it
+   on again.
 
    ?os-fixture=<name> on the page URL swaps in a seeded memory
    store (fixtures.ts) and never opens the real one.
@@ -36,6 +39,7 @@ import { Resume } from './resume.js';
 import { mountScene } from './scene.js';
 import { startSession } from './session.js';
 import { memoryStore, openStore } from './store.js';
+import { loadRecording, RECORDING_KEY, saveRecording } from './recording.js';
 import { isLabId, randomId, systemClock } from './util.js';
 import { mountConsentBanner } from './ui.js';
 function fixtureFromUrl() {
@@ -53,7 +57,10 @@ async function pickStore(opts, now) {
             return fixtureStore(name, now);
         return memoryStore({ fixture: name, note: `"${name}" is not a fixture; this page runs on an empty memory store` });
     }
-    return openStore(opts.idb === undefined ? {} : { idb: opts.idb });
+    return openStore({
+        ...(opts.idb === undefined ? {} : { idb: opts.idb }),
+        ...(opts.maxEvents === undefined ? {} : { maxEvents: opts.maxEvents }),
+    });
 }
 async function create(opts) {
     const lab = opts.lab;
@@ -73,13 +80,17 @@ async function create(opts) {
     const outbox = new Outbox({ store, consent, transport: config.transport });
     const resume = new Resume(store, session, now);
     const deletedFns = new Set();
+    const recordingFns = new Set();
+    let recording = await loadRecording(store);
+    tracker.setRecording(recording.on);
     let previousVisit = null;
     try {
         const raw = await store.getMeta('visit.last');
         if (raw && typeof raw === 'object' && !Array.isArray(raw) && typeof raw['t'] === 'number' && typeof raw['lab'] === 'string') {
             previousVisit = { t: raw['t'], lab: raw['lab'] };
         }
-        await store.setMeta('visit.last', { t: now(), lab });
+        if (recording.on)
+            await store.setMeta('visit.last', { t: now(), lab });
     }
     catch { /* the store failed; the page still works without a last visit */ }
     let life = null;
@@ -114,13 +125,27 @@ async function create(opts) {
             async deleteAll() {
                 tracker.halt();
                 life?.stop();
-                const r = await deleteAll(store);
+                const r = await deleteAll(store, { keep: recording.on ? [] : [RECORDING_KEY] });
                 deletedFns.forEach((fn) => { try {
                     fn();
                 }
                 catch { /* the listener's problem */ } });
                 return r;
             },
+        },
+        recording: {
+            get on() { return recording.on; },
+            get since() { return recording.t; },
+            async set(on) {
+                recording = await saveRecording(store, on, now());
+                tracker.setRecording(on);
+                recordingFns.forEach((fn) => { try {
+                    fn(recording);
+                }
+                catch { /* the listener's problem */ } });
+                return recording;
+            },
+            onChange(fn) { recordingFns.add(fn); return () => { recordingFns.delete(fn); }; },
         },
         register: (type, spec) => registry.register(type, spec),
         spec: (type) => registry.get(type),
@@ -163,6 +188,7 @@ export { Resume, visitsFrom, suggest, describeVisit } from './resume.js';
 export { Consent, Outbox, CONSENT_POLICY } from './consent.js';
 export { exportAll, deleteAll, summary } from './privacy.js';
 export { mountScene, sceneCount } from './scene.js';
-export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS } from './store.js';
+export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';
+export { RECORDING_KEY } from './recording.js';
 export { FIXTURES, fixtureStore } from './fixtures.js';
 export { ago, duration, dayMonth } from './util.js';

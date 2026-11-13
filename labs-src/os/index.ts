@@ -21,7 +21,10 @@
      os.mountScene(canvas, ({ reducedMotion }) => ({ destroy, pause, resume }));
 
    init records lab.open and, whenever the page is hidden or
-   left, lab.leave with its visible and total time.
+   left, lab.leave with its visible and total time, unless the
+   visitor has turned recording off (os.recording.set(false)):
+   then nothing new is logged on any lab page until they turn it
+   on again.
 
    ?os-fixture=<name> on the page URL swaps in a seeded memory
    store (fixtures.ts) and never opens the real one.
@@ -43,6 +46,8 @@ import { mountScene } from './scene.js';
 import { startSession } from './session.js';
 import type { SessionLifecycle } from './session.js';
 import { memoryStore, openStore } from './store.js';
+import { loadRecording, RECORDING_KEY, saveRecording } from './recording.js';
+import type { RecordingState } from './recording.js';
 import type { StorageKind, Store } from './store.js';
 import { isLabId, randomId, systemClock } from './util.js';
 import type { Clock } from './util.js';
@@ -60,6 +65,8 @@ export interface InitOptions {
   readonly lifecycle?: boolean;
   /** mount the consent banner when the config allows it (default true) */
   readonly ui?: boolean;
+  /** the log's bound (tests); defaults to MAX_EVENTS */
+  readonly maxEvents?: number;
 }
 
 export interface StorageInfo {
@@ -96,8 +103,16 @@ export interface LabsOSInstance {
   readonly privacy: {
     summary(): Promise<Summary>;
     exportAll(): Promise<ExportFile>;
-    /** erase every record and stop recording on this page */
+    /** erase every record and stop recording on this page; a "recording off" choice survives */
     deleteAll(): Promise<DeleteResult>;
+  };
+  /** the visitor's switch for the record */
+  readonly recording: {
+    readonly on: boolean;
+    /** when it was last switched, or null */
+    readonly since: number | null;
+    set(on: boolean): Promise<RecordingState>;
+    onChange(fn: (s: RecordingState) => void): () => void;
   };
   readonly mountScene: typeof mountScene;
   /** true once the visitor deleted their record on this page */
@@ -122,7 +137,10 @@ async function pickStore(opts: InitOptions, now: number): Promise<Store> {
     if (isFixture(name)) return fixtureStore(name, now);
     return memoryStore({ fixture: name, note: `"${name}" is not a fixture; this page runs on an empty memory store` });
   }
-  return openStore(opts.idb === undefined ? {} : { idb: opts.idb });
+  return openStore({
+    ...(opts.idb === undefined ? {} : { idb: opts.idb }),
+    ...(opts.maxEvents === undefined ? {} : { maxEvents: opts.maxEvents }),
+  });
 }
 
 async function create(opts: InitOptions): Promise<LabsOSInstance> {
@@ -143,6 +161,9 @@ async function create(opts: InitOptions): Promise<LabsOSInstance> {
   const outbox = new Outbox({ store, consent, transport: config.transport });
   const resume = new Resume(store, session, now);
   const deletedFns = new Set<() => void>();
+  const recordingFns = new Set<(s: RecordingState) => void>();
+  let recording = await loadRecording(store);
+  tracker.setRecording(recording.on);
 
   let previousVisit: LabsOSInstance['previousVisit'] = null;
   try {
@@ -150,7 +171,7 @@ async function create(opts: InitOptions): Promise<LabsOSInstance> {
     if (raw && typeof raw === 'object' && !Array.isArray(raw) && typeof raw['t'] === 'number' && typeof raw['lab'] === 'string') {
       previousVisit = { t: raw['t'], lab: raw['lab'] };
     }
-    await store.setMeta('visit.last', { t: now(), lab });
+    if (recording.on) await store.setMeta('visit.last', { t: now(), lab });
   } catch { /* the store failed; the page still works without a last visit */ }
 
   let life: SessionLifecycle | null = null;
@@ -186,10 +207,21 @@ async function create(opts: InitOptions): Promise<LabsOSInstance> {
       async deleteAll() {
         tracker.halt();
         life?.stop();
-        const r = await deleteAll(store);
+        const r = await deleteAll(store, { keep: recording.on ? [] : [RECORDING_KEY] });
         deletedFns.forEach((fn) => { try { fn(); } catch { /* the listener's problem */ } });
         return r;
       },
+    },
+    recording: {
+      get on() { return recording.on; },
+      get since() { return recording.t; },
+      async set(on: boolean) {
+        recording = await saveRecording(store, on, now());
+        tracker.setRecording(on);
+        recordingFns.forEach((fn) => { try { fn(recording); } catch { /* the listener's problem */ } });
+        return recording;
+      },
+      onChange(fn) { recordingFns.add(fn); return () => { recordingFns.delete(fn); }; },
     },
     register: (type, spec) => registry.register(type, spec),
     spec: (type) => registry.get(type),
@@ -241,8 +273,10 @@ export { exportAll, deleteAll, summary } from './privacy.js';
 export type { ExportFile, DeleteResult, Summary } from './privacy.js';
 export { mountScene, sceneCount } from './scene.js';
 export type { SceneHandle, SceneContext, SceneFactory, MountedScene } from './scene.js';
-export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS } from './store.js';
-export type { Store, StorageKind, Migration } from './store.js';
+export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';
+export type { Store, StorageKind, Migration, DroppedSummary } from './store.js';
+export { RECORDING_KEY } from './recording.js';
+export type { RecordingState } from './recording.js';
 export { FIXTURES, fixtureStore } from './fixtures.js';
 export { ago, duration, dayMonth } from './util.js';
 export type * from './types.js';
