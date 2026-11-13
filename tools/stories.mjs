@@ -93,18 +93,23 @@ export function checkLab(atlas, plan, stories, platform, otherIds = []) {
     if (!idx.has(c)) errs.push(`${plan.lab}: met lists unknown clause ${c}`);
     if (!nonEmpty(ev)) errs.push(`${plan.lab}: met clause ${c} has no evidence`);
   }
+  // "Things pop up as you go up the levels" (Luis, 2026-11-13): a plan that owns every clause to rung 5 today is
+  // pretending to know what the lower levels will reveal. Where a plan names the one level its stories are written
+  // for (evolution.planned_through), only the clauses up to that rung must be owned; without it, the old rule holds.
+  const through = plan.evolution && plan.evolution.planned_through;
+  const target = Number.isInteger(through) ? Math.max(1, Math.min(TARGET, through)) : TARGET;
   const need = [], missing = [];
   for (const a of atlas.axes) {
     if (na[a.id]) continue;
     const g = plan.grade && plan.grade[a.id];
     if (!g || !Number.isInteger(g.level)) { errs.push(`${plan.lab}: no grade for axis ${a.id}`); continue; }
-    for (let r = g.level + 1; r <= TARGET; r++) for (const c of (a.rungs[r] && a.rungs[r].clauses) || []) {
+    for (let r = g.level + 1; r <= target; r++) for (const c of (a.rungs[r] && a.rungs[r].clauses) || []) {
       need.push(c.id);
       if (!cited.has(c.id) && !met[c.id]) missing.push(c.id);
     }
   }
-  if (missing.length) errs.push(`${plan.lab}: ${missing.length} clause(s) up to rung ${TARGET} owned by no story and not met: ${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ' ...' : ''}`);
-  return { errs, need: need.length, covered: need.length - missing.length, missing };
+  if (missing.length) errs.push(`${plan.lab}: ${missing.length} clause(s) up to rung ${target} owned by no story and not met: ${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ' ...' : ''}`);
+  return { errs, need: need.length, covered: need.length - missing.length, missing, target };
 }
 
 // Every template clause is a real product clause at rung 1 to 5, and together the templates own each exactly once.
@@ -258,6 +263,8 @@ function selftest() {
     ['a missing grade fails', !ok(checkLab(atlas, { ...plan, grade: { records: { level: 3 } } }, full, []))],
     ['a reasoned not applicable axis is skipped', ok(checkLab(atlas, { ...plan, na: { fiction: 'this lab has no source fiction to reproduce' } }, [full[0]], []))],
     ['an axis at 5 needs nothing', ok(checkLab(atlas, { ...plan, grade: { records: { level: 5 }, fiction: { level: 5 } } }, [], []))],
+    ['a plan written for the next level only owns that level', (() => { const r = checkLab(atlas, { ...plan, na: { fiction: 'this lab has no source fiction to reproduce' }, evolution: { planned_through: 4 } }, [story('x-1', ['records.4.1', 'records.4.2'])], []); return r.errs.length === 0 && r.target === 4 && r.need === 2; })()],
+    ['a plan written for the next level still has to own all of it', checkLab(atlas, { ...plan, na: { fiction: 'this lab has no source fiction to reproduce' }, evolution: { planned_through: 4 } }, [story('x-1', ['records.4.1'])], []).missing.includes('records.4.2')],
     ['a dependency on another lab story is accepted when that story exists', ok(checkLab(atlas, plan, [story('x-1', recClauses(4), { depends_on: ['y-7'] }), full[1]], [], ['y-7']))],
     ['a template story without on_this_lab fails', !ok(checkLab(atlas, plan, [story('x-1', recClauses(4), { template: 'rec' }), full[1]], []))],
     ['a template story that says what it means here passes', ok(checkLab(atlas, plan, [story('x-1', recClauses(4), { template: 'rec', on_this_lab: here }), full[1]], []))],

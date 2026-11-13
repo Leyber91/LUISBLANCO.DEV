@@ -222,12 +222,27 @@ function checkPlanScope(plan, atlas) {
 export function checkPlanEvolution(plan, atlas, siblings = []) {
   const ev = plan.evolution;
   const lab = plan.lab;
-  if (!ev) return [`${lab}: plan has no evolution block`];
+  // The concept comes first (Luis, 2026-11-13): "we were just scaling up garbage"; "each of the ideas are the seed".
+  // The seed, and the distinct thing it grows into, chosen by him. Nothing below is worth checking before that.
+  const c = plan.concept;
+  if (!c) return [`${lab}: no concept yet: the seed and the concept grown from it come before any story`];
   const errs = [];
+  for (const k of ['seed', 'sentence', 'scene', 'answers_to']) if (!long(c[k], 40)) errs.push(`${lab}: concept.${k} is missing or under 40 characters`);
+  if (c.status !== 'chosen') return [...errs, `${lab}: the concept is ${text(c.status) || 'pending'}; Luis chooses it, and the story of its levels waits until he has`];
+  if (!long(c.chosen_by, 8)) errs.push(`${lab}: concept.chosen_by says who chose it and when`);
+  if (!ev) return [...errs, `${lab}: plan has no evolution block`];
   const na = plan.na || {};
   const axes = atlas.axes.filter((a) => !na[a.id]);
   const generic = new Set(Object.values((atlas.evolution && atlas.evolution.levels) || {}).map((L) => text(L.name).toLowerCase()));
   const names = new Set();
+  // "Things pop up as you go up the levels" (Luis, 2026-11-13): what lies above the next level cannot be listed today.
+  // The stories are written for the one level above where the lab stands; every level above that is a conjecture,
+  // rewritten from what actually appeared when the level below shipped.
+  const through = ev.planned_through;
+  if (!(Number.isInteger(through) && through >= 1 && through <= 10)) errs.push(`${lab}: planned_through names the one level the stories are written for`);
+  const today = threeLevels(plan, atlas).level;
+  if (Number.isInteger(through) && today != null && through !== Math.min(10, today + 1)) errs.push(`${lab}: the lab stands at level ${today}, so the stories are written for level ${Math.min(10, today + 1)} only (planned_through is ${through}); what lies above is conjecture until that level ships and shows what popped up`);
+  const seenEmerged = new Set();
   // The story goes through every level, 1 to 10: what the lab is there and what that entails. Levels 1 to 5 are told
   // axis by axis, because the tickets build them; levels 6 to 10 say what they entail and what takes the lab up.
   for (let l = 1; l <= 10; l++) {
@@ -243,13 +258,37 @@ export function checkPlanEvolution(plan, atlas, siblings = []) {
     if (!long(L.shift, MIN.labShift)) errs.push(`${at}: the shift says what changed in kind from the level below in ${MIN.labShift}+ characters`);
     if (!(Array.isArray(L.visitor_can) && L.visitor_can.filter((x) => long(x, 20)).length >= LIMIT.visitorCan)) errs.push(`${at}: visitor_can lists at least ${LIMIT.visitorCan} things a visitor can now do`);
     if (!(Array.isArray(L.entails) && L.entails.filter((x) => long(x, 20)).length >= 3)) errs.push(`${at}: entails lists at least 3 things that must exist for the lab to be at this level`);
+    // what emerges: evolution is the concept rounding out to more, with things appearing that the level below made
+    // possible and did not contain, each still traceable to the seed
+    if (l === 1 && !long(L.seed_here, 60)) errs.push(`${at}: seed_here says how the seed first shows as a thing a visitor meets`);
+    if (l >= 2) {
+      const em = Array.isArray(L.emerges) ? L.emerges : [];
+      if (!em.length) errs.push(`${at}: emerges names at least one thing that pops up at this level: made possible by the level below, not contained in it, and still the seed`);
+      for (const e of em) {
+        if (!long(e && e.what, 30) || !long(e && e.made_possible_by, 30) || !long(e && e.still_the_seed, 30)) errs.push(`${at}: each thing that emerges says what it is, what in the level below made it possible, and how it is still the seed`);
+        const key = text(e && e.what).toLowerCase();
+        if (key && seenEmerged.has(key)) errs.push(`${at}: "${key.slice(0, 50)}" already emerged at a lower level`);
+        if (key) seenEmerged.add(key);
+      }
+    }
+    const conjecture = L.conjecture === true;
+    if (Number.isInteger(through)) {
+      if (l > through && !conjecture) errs.push(`${at}: above the planned level (${through}) a level is a conjecture and says so ("conjecture": true)`);
+      if (l <= through && conjecture) errs.push(`${at}: a level the stories are written for cannot be a conjecture`);
+    }
     const cp = L.checkpoint || {};
-    if (l <= TARGET) {
+    if (l <= Math.min(TARGET, Number.isInteger(through) ? through : TARGET)) {
       for (const a of axes) if (!long(L.axes && L.axes[a.id], MIN.axisLine)) errs.push(`${at}: no line for axis ${a.id} (what it is here at this level, ${MIN.axisLine}+ characters)`);
     }
     if (l < TARGET && !long(cp.why_not_5, MIN.labShift)) errs.push(`${at}: the checkpoint says why this is not level 5 yet (why_not_5)`);
     if (l < 10 && !long(cp.takes_it_up, MIN.labShift)) errs.push(`${at}: the checkpoint says what takes it to level ${l + 1} (takes_it_up)`);
     if (l === 10 && !long(cp.keeps_it, MIN.labShift)) errs.push(`${at}: the checkpoint says what keeps it at level 10 (keeps_it)`);
+  }
+  // each shipped level leaves a record of what popped up that nobody had listed, and how the levels above changed
+  for (const g of ev.generations || []) {
+    if (!(g && Number.isInteger(g.level) && long(g.date, 8) && Array.isArray(g.popped_up) && g.popped_up.filter((x) => long(x, 20)).length >= 1 && long(g.changed_above, 40))) {
+      errs.push(`${lab}: a generation records the level that shipped, the date, what popped up that nobody had listed, and how the levels above were rewritten`);
+    }
   }
   // an axis line must change from level to level: growth, not a repeated sentence
   for (const a of axes) {
@@ -494,12 +533,15 @@ function selftest() {
     entails: ['a computed value shown with its source', 'a record of what the visitor did here', 'a view that answers the visitor question'],
     ...(l <= 5 ? { axes: Object.fromEntries(ids.map((a) => [a, `at level ${l} the ${a} of this lab is a different thing than before it`])) } : {}),
     checkpoint: l < 5 ? { why_not_5: S, takes_it_up: S } : l < 10 ? { takes_it_up: S } : { keeps_it: S },
+    ...(l === 1 ? { seed_here: 'the seed shows as one trace a visitor can start and read in a minute' } : { emerges: [{ what: `a thing nobody listed at level ${l - 1} appears here`, made_possible_by: 'the records the level below began to keep', still_the_seed: 'it is still the rhythm of arrivals, read one way more' }] }),
+    conjecture: l > 1,
   }]));
+  const concept = { seed: 'a reply arrives one token at a time and the rhythm can be read', sentence: 'a place where the rhythm of a model is read like a pulse', scene: 'two traces side by side and the visitor names which model is which', answers_to: 'the population of language models people can reach today', status: 'chosen', chosen_by: 'Luis, 2026-11-14' };
   const LW = 'because on this lab the second is computed from the first and cannot exist before it does';
   const labCouplings = [];
   for (let r = 1; r <= 4; r++) { labCouplings.push({ from: `fidelity.${r}`, to: `evidence.${r + 1}`, why: LW }, { from: `records.${r}`, to: `fidelity.${r + 1}`, why: LW }, { from: `evidence.${r}`, to: `records.${r + 1}`, why: LW }); }
   const an = { claude_prep: 'a'.repeat(45), here: 'b'.repeat(45), holds_because: 'c'.repeat(45), breaks_where: 'd'.repeat(45) };
-  const plan = { lab: 'x', world: 'cosmos', evolution: { levels: labLevels, analogy: { records: an, evidence: an }, couplings: labCouplings,
+  const plan = { lab: 'x', world: 'cosmos', concept, evolution: { planned_through: 1, levels: labLevels, analogy: { records: an, evidence: an }, couplings: labCouplings,
     identity: { signature: 'g'.repeat(70), style: Object.fromEntries(STYLE.map((k) => [k, 'a drawn line that means one thing'])), differs_from: { y: 'h'.repeat(70) } } } };
   const story = (id, clauses, deps = []) => ({ id, clauses, depends_on: deps });
   const st = [story('a', ['records.2.1']), story('b', ['fidelity.3.1']), story('c', ['evidence.4.1'])];
@@ -515,10 +557,10 @@ function selftest() {
   const atlasS = { ...atlas, scope };
   const organNames = Array.from({ length: 10 }, (_, i) => `organ ${i + 1}`);
   const graphAt = (l) => ({ organs: organNames.slice(0, l), links: Array.from({ length: l - 1 }, (_, i) => `organ ${i + 1} -> organ ${i + 2}`), reach: Math.min(1, l / 5) });
-  const levelsG = Object.fromEntries(Object.entries(labLevels).map(([k, v]) => [k, { ...v, graph: graphAt(Number(k)) }]));
+  const levelsG = Object.fromEntries(Object.entries(labLevels).map(([k, v]) => [k, { ...v, graph: graphAt(Number(k)), conjecture: Number(k) > 2 }]));
   const units = [{ id: 'u1' }, { id: 'u2' }, { id: 'u3' }, { id: 'u4' }, { id: 'u5' }];
   const today = { organs: [{ name: 'bench', does: 'measures the arrival time of every token of a reply', units: ['u1'] }], links: [], evidence: 'counted from the three plates of the page and main.js' };
-  const planS = { ...plan, bindings: { units }, scope_today: today, grade: { records: { level: 1 }, evidence: { level: 1 }, fidelity: { level: 3 } }, evolution: { ...plan.evolution, levels: levelsG } };
+  const planS = { ...plan, bindings: { units }, scope_today: today, grade: { records: { level: 1 }, evidence: { level: 1 }, fidelity: { level: 3 } }, evolution: { ...plan.evolution, planned_through: 2, levels: levelsG } };
   const ps = (patch) => checkPlanEvolution({ ...planS, ...patch }, atlasS, ['y']);
   const lv = (l, g) => ({ evolution: { ...planS.evolution, levels: { ...levelsG, [l]: { ...levelsG[l], graph: g } } } });
   const cases = [
@@ -534,7 +576,19 @@ function selftest() {
     ['a cycle among one rung fails', checkCouplings([{ from: 'records.2', to: 'evidence.2', why: W }, { from: 'evidence.2', to: 'records.2', why: W }], atlas, 't', 10, 40).errs.some((e) => e.includes('cycle'))],
     ['an unknown axis fails', checkCouplings([{ from: 'nope.2', to: 'evidence.2', why: W }], atlas, 't', 10, 40).errs.some((e) => e.includes('unknown axis'))],
     ['a complete plan evolution passes', checkPlanEvolution(plan, atlas, ['y']).length === 0],
-    ['a plan without the block fails', checkPlanEvolution({ lab: 'x' }, atlas).length === 1],
+    ['a plan without a concept fails before anything else', (() => { const e = checkPlanEvolution({ lab: 'x', evolution: plan.evolution }, atlas); return e.length === 1 && e[0].includes('no concept'); })()],
+    ['a concept Luis has not chosen stops the check', (() => { const e = checkPlanEvolution({ ...plan, concept: { ...concept, status: 'pending' } }, atlas, ['y']); return e.length === 1 && e[0].includes('Luis chooses'); })()],
+    ['a concept without its seed fails', checkPlanEvolution({ ...plan, concept: { ...concept, seed: 'a chart' } }, atlas, ['y']).some((e) => e.includes('concept.seed'))],
+    ['a chosen concept without its evolution fails', checkPlanEvolution({ lab: 'x', concept }, atlas).some((e) => e.includes('no evolution block'))],
+    ['a level where nothing emerges fails', pe({ levels: { ...labLevels, 4: { ...labLevels[4], emerges: [] } } }).some((e) => e.includes('level 4') && e.includes('pops up'))],
+    ['a thing that emerges without its lineage fails', pe({ levels: { ...labLevels, 3: { ...labLevels[3], emerges: [{ what: 'a new way of reading the same trace appears', made_possible_by: '', still_the_seed: '' }] } } }).some((e) => e.includes('level 3') && e.includes('made it possible'))],
+    ['the same thing cannot emerge twice', pe({ levels: { ...labLevels, 5: { ...labLevels[5], emerges: labLevels[4].emerges } } }).some((e) => e.includes('already emerged'))],
+    ['level 1 says how the seed first shows', pe({ levels: { ...labLevels, 1: { ...labLevels[1], seed_here: '' } } }).some((e) => e.includes('seed_here'))],
+    ['a level above the planned one must say it is a conjecture', pe({ levels: { ...labLevels, 6: { ...labLevels[6], conjecture: false } } }).some((e) => e.includes('level 6') && e.includes('conjecture'))],
+    ['the planned level cannot be a conjecture', pe({ levels: { ...labLevels, 1: { ...labLevels[1], conjecture: true } } }).some((e) => e.includes('level 1') && e.includes('cannot be a conjecture'))],
+    ['stories are written for the next level only', pe({ planned_through: 5 }).some((e) => e.includes('level 1 only'))],
+    ['a lab at level 1 plans level 2', ps({}).length === 0 && ps({ evolution: { ...planS.evolution, planned_through: 3 } }).some((e) => e.includes('level 2 only'))],
+    ['a generation records what popped up', pe({ generations: [{ level: 1, date: '2026-12-01', popped_up: ['two traces of one model differ by provider'], changed_above: 'level 3 now starts from the provider difference, not from the tokenizer' }] }).length === 0 && pe({ generations: [{ level: 1, date: '2026-12-01', popped_up: [], changed_above: '' }] }).some((e) => e.includes('a generation records'))],
     ['a level named with the atlas generic name fails', pe({ levels: { ...labLevels, 2: { ...labLevels[2], name: 'Stage 2' } } }).some((e) => e.includes('generic name'))],
     ['a level without a checkpoint fails', pe({ levels: { ...labLevels, 3: { ...labLevels[3], checkpoint: {} } } }).some((e) => e.includes('why_not_5'))],
     ['level 5 says what takes it to 6', pe({ levels: { ...labLevels, 5: { ...labLevels[5], checkpoint: { why_not_5: S } } } }).some((e) => e.includes('level 5') && e.includes('takes_it_up'))],
@@ -543,7 +597,8 @@ function selftest() {
     ['level 10 says what keeps it there', pe({ levels: { ...labLevels, 10: { ...labLevels[10], checkpoint: {} } } }).some((e) => e.includes('keeps_it'))],
     ['levels 6 to 10 need no axis lines', pe({}).every((e) => !/level (6|7|8|9|10): no line/.test(e))],
     ['an axis line repeated at two levels fails', pe({ levels: { ...labLevels, 4: { ...labLevels[4], axes: { ...labLevels[4].axes, records: labLevels[3].axes.records } } } }).some((e) => e.includes('same line'))],
-    ['a missing axis line fails', pe({ levels: { ...labLevels, 2: { ...labLevels[2], axes: { records: labLevels[2].axes.records } } } }).some((e) => e.includes('no line for axis'))],
+    ['a missing axis line on the planned level fails', pe({ levels: { ...labLevels, 1: { ...labLevels[1], axes: { records: labLevels[1].axes.records } } } }).some((e) => e.includes('no line for axis'))],
+    ['a conjectured level needs no axis lines', pe({ levels: { ...labLevels, 3: { ...labLevels[3], axes: {} } } }).every((e) => !e.includes('level 3: no line'))],
     ['too few things a visitor can do fails', pe({ levels: { ...labLevels, 1: { ...labLevels[1], visitor_can: ['look'] } } }).some((e) => e.includes('visitor_can'))],
     ['an analogy without where it breaks fails', pe({ analogy: { records: { ...an, breaks_where: '' }, evidence: an } }).some((e) => e.includes('breaks_where'))],
     ['too few couplings of its own fail', pe({ couplings: labCouplings.slice(0, 4) }).some((e) => e.includes('couplings of its own'))],
