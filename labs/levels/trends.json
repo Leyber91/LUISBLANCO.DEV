@@ -26,6 +26,10 @@
         "G0": {
           "level": 2,
           "evidence": "lenses.js tech.fetch scores round(points / max(0.4, age hours)), a real rate, with the floor set in code (TUNING.minVelocityAgeH = 0.4 in constants.js, never shown on the page), which meets rung 2. Rung 3 fails: culture.fetch ranks by a.views, one day's raw total with no comparison day; dev.fetch ranks repos created in the last 14 days by stargazers_count, a total with no age division. Rung 4 would also fail: the snapshot fallback sets score = points, yet FeaturedView prints it under the rate label, and the ?demo render at 1440 px shows 'velocity 982 · points 982'."
+        },
+        "G1": {
+          "level": 7,
+          "evidence": "Rater's grade stands; no dispute. Rungs 2 to 7 hold. score.js scoreItem ranks HN/Show HN by points/max(age_h, 0.4), GitHub by stars/max(age_h, 6) x 24, and Wikipedia by views(D) over the median of D-7, D-14, D-21 and D-28 from the per-article series. Items with fewer than 3 of those weeks are labelled 'new'. Units print beside every score (views.js scoreText). measuredRate/ownPace compare HN and GitHub items with their previous stored observation. acceleration() labels accelerating/steady/decaying against the +/-0.25 threshold printed in the method panel. Every score carries a Garwood exact interval, and the default ranking uses its lower bound. tests.mjs holds the 8-in-24-min vs 60-in-4-h pair (lower bounds 8.63 vs 11.45). The rater hand-checked Show HN 50428907: 466 points over 41.778 h gives a lower bound of 10.164/h, which matches the board. Rung 8 fails: Trending.js build() runs cusum() only when kind === 'readership', so HN and GitHub items get no burst test, as the method panel itself says."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 0,
           "evidence": "No call is stored or revisited: labs/assets/js/trending/ has no localStorage, sessionStorage or IndexedDB call (grep), and Trending.scan() clears the trace and board at the start of every scan, discarding the previous result."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Dispute upheld (both skeptics). Rung 1 holds: history.js callsOf stores each scan's top 10 per source by lower bound, with time, source and item id. The score is recomputed from the stored count and times ('Scores are never stored'). Rung 2 fails on 'every earlier call'. Trending.js build() collects verify.js revisit() results for every source, but views.js renderVerify prints only model.revisits.slice(0, 12). A default six-source rescan has up to 60 stored calls (10 per source), so only the first one or two sources in ranked order get a verdict. In the skeptic's live run 12 were shown (10 Show HN, 2 GitHub) and 48 never appeared. revisit() labels same-day Wikipedia calls 'same day' rather than rose, held or fell. build() collects revisits only while origin === 'live', so the list vanishes after a reload. The rater tested a one-source rescan (10 calls), where the cap never applies. Hit rates, baselines, Spearman rho and bootstrap intervals (rungs 3 to 6) exist but sit above the gap. For HN and GitHub, rung 5's 24-hour gain is also replaced by next-scan gains (median gap 0.22 h)."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 0,
           "evidence": "Each lens fetch() in lenses.js returns its own items and BoardView renders titles verbatim; there is no term extraction, normalization, deduplication or comparison between lenses anywhere in labs/assets/js/trending/, and Trending.scan(lensKey) scans one lens at a time."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Rater's grade stands; no dispute. topics.js normalizes titles and dedupes within a source. Each row shows 1 to 3 binary TF-IDF key terms, and the method panel names the method. clusterTopics joins items by an entity-phrase rule or by idf-weighted Jaccard >= 0.3. Both rules are printed in the board head and the method panel, and the items/topics toggle shows member counts. ?demo&view=topics shows 'Claude' joining a Wikipedia DE article with HN, Show HN and GitHub items. In desk.png the resting field draws dashed cross-source edges labelled 'Claude', 'The Legend of Zelda' and 'Russell Brand'. Rung 5 is not built: nothing calls the Wikipedia search API, and entity linking is phrase matching against fetched titles only."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 0,
           "evidence": "Trending.js scan() clears the trace and board and keeps nothing from earlier scans; no localStorage, sessionStorage or IndexedDB call exists anywhere in labs/assets/js/trending/; setLens() switches the toggle without restoring that lens's last result, and a reload returns to the empty resting panel shown in the audit screenshot."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Both disputes checked; the lower one (3) applies. Rungs 1 to 3 hold. history.js stores versioned v2 records in localStorage, and the store panel prints the scan count, the size in KB and a two-press clear. build() marks every row up, down, new or held from ranksOf against history.previous(), for every source including Wikipedia. Rung 4 fails on 'each row'. For kind 'readership', score.js trajectory() ignores stored observations and returns only the per-article daily series. measuredRate() is therefore null for every Wikipedia EN/DE/ES row, and views.js subLine never prints a change since the previous stored scan for them. Their 'day before N' comes from a second top-list call, not from the stored scan, and shows no elapsed time. Three of six sources fail. Also confirmed above the gap: Trending.js _armPoll re-arms only at the end of a scan that returned items. The empty-result, error and stop exits of scan() return without re-arming, after the poll tick has already set #poll-state to 'scanning'. So one all-failed poll cycle silently ends auto re-scan while the button still reads 'Pause re-scan'. marks.js sparkline also drops backfilled dots once a series has more than 12 points, which covers every Wikipedia series. The history diff, sparklines, export/import and backfill are built but do not count above rung 4."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 3,
           "evidence": "lenses.js fetches three live hosts of three kinds (hn.algolia.com front_page, wikimedia.org pageviews top, api.github.com repository search), one per lens, and on failure Trending._snapshotResult() shows SNAPSHOT items labelled 'captured 2026-06-16' (five months old on 2026-11-11). Rung 4 fails: MetaView prints the static endpointLabel 'most-read, prior full day' even when culture.fetch backs off 2 or 3 days (TUNING.wikiBackoffDays), the date actually used (ageText) is never displayed, and the HN lens states no window."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Dispute upheld (both skeptics). Rung 2 holds: six keyless sources of three kinds answer from the browser (engine.js runScan; 48 requests to 3 hosts in the rater's live scan). Rung 3 fails on 'a snapshot of real items labelled with its capture date'. When one source fails, Trending.js _viewScan re-shows that source's last stored or recorded items and sets sources[src] = {...from.sources[src], reshown: true}, which overwrites the failed status. The pill reads LIVE SCAN, the stamp reads 'fetched <now>' (views.js renderStamp), and the stale rows and marks carry no date. views.js renderProvenance prints 'ok (last stored result, no new request)' for a source whose request was made and failed. The rater reproduced this with api.github.com blocked: 30 GitHub items from the 10:58 recording ranked under LIVE SCAN, and two were among the five called rising. The capture time survives only in a 'fetched (UTC)' cell, which reads as a live fetch. A correctly dated snapshot appears only when every source fails. The parallel scan, per-source status, rate-limit headers and provenance table (rungs 5 to 8) are built but sit above the gap."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "ReasoningService.reason() GETs text.pollinations.ai itself (not llm.js) for items[0] only, with the title, one metric and ageText in the prompt. On non-2xx, timeout or a reply under 24 characters it types a HEURISTICS template labelled 'built-in heuristic'. The adversarial review measured the route on 2026-11-11: HTTP 200 in 20.1 s with an invented description of Iroh 1.0 (it called a P2P library an all-in-one Docker framework), which the page labels 'pollinations (live)'; the same endpoint also served a budget-exhausted message as HTTP 200 text, which the /^\\s*(error|\\{)/i guard would display as an explanation; a second call within 45 s returns 402. No route panel, no batching, no evidence beyond the title and one number."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Rater's grade stands; no dispute. Rungs 1 to 5 hold. One batched call per scan goes through ai/llm.js (live answers: 'ollama · llama3.1:8b · 9.4 s' and 'pollinations · gpt-oss-20b · 34.3 s'). The route is named on the trace, the tags and the exp-route line. The prompt carries the measured numbers, rank change, gain since the last scan, top HN comments and GitHub descriptions. One JSON reply covers 5 signals, and a malformed entry falls back to the engine with 'model entry rejected', verified live and with ?fixture. Rung 6 fails on 'every number'. explain.js factCheck skips every number <= 2 and accepts any value in METHOD_NUMBERS, so 'gained 2 points' against a 786x ratio and '24 points in 7 hours' against 466 points in 41.8 h both pass. In desk.png the resting top explanation says the story 'has gained 1 point per hour, with a rate of 11.31 points per hour' with no flag, while the digest's '3' is struck through. Rungs 7 and 8 (fixed cause list with a keyword fallback; topics and digest in the same call) are built above the gap."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 2,
           "evidence": "views.js BoardView.render() gives each row an 80 px .heat bar with fill width max(4, round(score / top score x 100)) percent; there is no chart. The audit screenshot at 1440 px shows only the resting panel (three breathing squares and two sentences) before a scan; the ?demo render shows ranked rows with bars and nothing else drawn."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Both disputes checked; the lower one (4) applies. Rungs 1 to 4 hold. field.js FieldView draws three log-axis panels with named units: points/h and stars/day against age, and views on the day against the ratio to the weekday median. Shape encodes source, area encodes comments, forks or 28-day views, whiskers show the 95% interval, and a legend explains them. Hover and focus show title, rate, interval and comments (rater, via CDP). Rung 5 fails. Trending.js build() limits the board to TUNING.boardMax = 40 rows, but the field draws every scored item (124). Trending.select() scrolls to and focuses a row only 'if (row)'. For the 84 marks without a row, a click sets .sel and ?sel but selects and focuses nothing (the skeptic reproduced this on hn:50414004 and wde:Patricia_Schlesinger with real pointer events). At 390 px (phone.png) marks overdraw the axis titles, and the 'The Legend of Zelda' and 'huamidev/GestaltX' labels overlap. Above the gap, field.js trailOf() returns [] for readership, and _renderField/_scrubTimes skip readership items while scrubbing, so Wikipedia marks never trail or replay. Trails, topic edges, object constancy and the scrubber do not count."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 2,
           "evidence": "trending.css builds on tokens.css and the shared chrome (rung 2). Rung 3 fails because warm accretion decorates things that are not live, active or hot: .intro h1 .x ('Topics' in --accretion with a 28px accretion glow, the largest warm element in the audit screenshot), the .eyebrow i fire icon, the dashed --accretion-dim underline on em in the lede ('live agentic scan', 'why'), and the warm radial gradient rgba(242,169,59,.10) in .void-bg. The rung 4 marks exist (a dot colour per trace kind, a pill that pulses only when live, a thinking cursor) but do not count above a failed rung."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Dispute upheld. Rung 2 names four token families: colour, type scale, spacing and radius. trending.css takes colour, motion, z-index and shadow from tokens.css. It uses none of the type-scale tokens (--t-micro to --t-hero: 0 uses), none of the spacing tokens (--s-1 to --s-10: 0 uses) and one radius token (--r-pill, once). It defines its own --tr-font stack instead of using var(--font-mono), and grep finds 74 px font-size literals and about 110 px padding/margin/gap literals. The shared chrome is present: sticky header with back link, route and live/recorded pills, footer. Colours come from tokens while fonts, sizes and spacing are set per page, which sits between rungs 1 and 2, so the lower rung (1) applies. Rung 3 also fails, as the rater found: the .bp corner brackets (--accretion-dim) and the .scrub accent-color: var(--accretion) are structural gold, and the replay slider shows as a full-width gold bar at rest in desk.png."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 2,
           "evidence": "trending.html offers three lens buttons (aria-pressed), the scan button, a Stop button that aborts the AbortController, and row and featured links that open the source in a new tab (rung 2). Rung 3 fails: Trending.init() reads ?scan and ?demo, but nothing in labs/assets/js/trending/ calls history.replaceState or pushState (grep), so scanning never changes the address bar and a visitor never gets a shareable link. No ranking, window, filter, multi-source or free-term control exists."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Dispute upheld on the letter of rung 4. Rungs 1 to 3 hold: source chips with aria-pressed; Scan and Stop ('Scan stopped. The board keeps the last complete scan.'); rows that open the source; and _writeURL writing ?scan=<sources>, which init() reads to start a scan. Rung 4 asks that the visitor switch among every score the page computes. constants.js SCORE_MODES offers lower bound, point rate and raw total, and render() re-ranks without a fetch. But score.js scoreItem also computes dod (views over the previous day) for Wikipedia items, and verify.js uses it for the 'total over age / day-over-day' ranking printed in the verification table. The page also prints per item a rate measured between stored observations ('+20 stars in 10 min = 2867 stars/day'), an own-pace ratio and acceleration rho. None of these can rank the board. Between rungs 3 and 4, the lower applies. Built above the gap: multi-source scans with source and age filters, the five-term lookup across HN, Wikipedia and GitHub, the detail view with a one-call ask and Escape returning focus, and full URL state."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 2,
           "evidence": "The lede and the lens.what strings in lenses.js say what each source measures and over what window (rung 2). Rung 3 fails five ways: the ?demo trace prints 'reasoning complete (pollinations, live)' beside the canned DEMO_WHY labelled 'sample'; renderDemo() prints a frozen trace of a request that never ran ('GET hn.algolia.com — front page', '30 signals fetched 214ms'); snapshot point totals are printed as 'velocity'; the HEURISTICS templates in ReasoningService.js assert facts the code never computed ('cleared the front-page baseline by a wide margin', 'climbing far faster than the median project'); and the lede and scan status say 'rising' while Wikipedia and GitHub rank raw totals."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Rater's grade stands; no dispute. Rungs 1 and 2 hold: the lede, and each source's 'what' and window in the method panel. Rung 3 fails. On a single-source failure, Trending.js _viewScan re-shows the last stored or recorded items under the LIVE SCAN pill, and the prompt calls them 'measured from live APIs'. renderProvenance reports the failed source as 'ok (last stored result, no new request)'. Toggling a source on after a one-source live scan also mixes stored rows under the LIVE pill. The equations, caveats, walkthrough, trace lead, worked example and 'why trending is hard' section are built above the gap."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 3,
           "evidence": "dom.js fetchWithTimeout() aborts at TUNING.fetchTimeoutMs 12000 and reasonTimeoutMs 25000, and failures fall back to the labelled snapshot or heuristic (rung 2); @media (max-width: 860px) stacks the bench, and a 400 px render of ?demo on 2026-11-11 shows one column with no horizontal scroll (rung 3). Rung 4 fails on contrast and the live region: .row-sub, .row-rank and .trace-step .dur use --text-faint #424B57 on --surface-2 #11161F, 2.05:1; .resting .sub is #424B57 on --surface #0B0E13, 2.19:1 and near-illegible in the audit screenshot; and a stopped scan leaves #scan-status reading 'Scanning ...' because _abortCleanup() never updates it. The reduced-motion block, aria-pressed and aria-expanded are present. No Lighthouse record exists."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Both disputes checked; both support 5. Rungs 1 to 4 hold. net.js getJSON sets hard timeouts and aborts, and scans where every source timed out end labelled instead of hanging. At 400 px the board is one column with no overflow. Reduced motion gives 0 animations and 0 transitions, and typeInto prints at once. Chips carry aria-pressed; no expandable trace controls remain, so aria-expanded is vacuous. #status is a polite live region that announces start, end and stop. Data text contrast is at least 6.69:1. Rung 5 holds narrowly. data/lighthouse-2026-11-11.json records mobile performance 95 and accessibility 100, but it was measured before the last JS commits. One skeptic's five reruns on the current build behind gzip gave performance 84 to 88 (median 86) with accessibility 100; the other got 73 and 86. Rung 6 fails. engine.js runScan catches a GitHub RateLimitError that resets within 65 s, waits, and calls LENSES.gh.fetch again, so 2 GitHub requests go out against the printed 'GH 1'. The skeptic reproduced this with CDP after a five-term lookup used up the 10/min limit: 403 then 200, and the page's own budget line read 'GH 2'. ai/llm.js complete() also POSTs to the next route after a route error, so a failed Ollama call followed by pollinations makes two model calls in one scan against 'model 1'."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 3,
           "evidence": "Seven modules (main, Trending controller, views, ReasoningService, lenses, constants, dom); constants.js holds SEL and TUNING, imported by Trending.js and views.js (rung 2; literals remain elsewhere, such as querySelector('span') and 'Scanning…' in Trending._setBusy() and per_page=20 in lenses.js dev.fetch, which only rung 9 forbids). LENSES is a strategy registry whose fetch() returns normalized items, so a fourth source needs no Trending.js edit, only a LENSES entry, a SNAPSHOT entry and a button in trending.html (rung 3). Rung 4 fails: no schema check exists and views render whatever fetch() returns. The page-local pollinations fetch in ReasoningService is graded on model-contribution rung 3. No tests."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Dispute upheld. Rungs 1 to 3 hold. The code is split into separate ES modules (Trending.js, views.js, field.js, engine.js, score.js, topics.js, history.js, verify.js, explain.js). constants.js holds SEL, TUNING and the SOURCES registry. lenses.js LENSES is a registry, so a new source of an existing kind needs only constants plus lenses. Rung 4 fails: schema.js partition/checkScore runs only inside engine.runScan. History.importJSON, reachable through #import-file, runs only migrate(), which checks that t is finite and that items is an array. The controller then hydrates and renders the imported scan, and init() likewise hydrates history.latest(). Checked in Node with the page's own modules, using three imported HN items: one with an empty title and url 'javascript:alert(1)', one with an http URL and count -40, and one with count 'abc' and no created time. All three hydrate and score (rates 40, -40 and NaN), although schema.js checkObs rejects each ('missing title', 'url is not https', 'count is not a finite non-negative number'). The skeptic saw all three drawn as marks with no report. Built above the gap: tests.mjs (82 assertions offline, 87 live), the single storage module with migrate(), lenses that return raw observations, and recorded responses with contract tests."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "6ef076e" }
   ]
 }

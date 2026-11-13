@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vPWb3U2aJBezUgtbOJLv3sjvfvv9aJMlQje91mJCDzk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <link rel="manifest" href="/labs/claude-prep/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/labs/claude-prep/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#07080c" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Blueprint 720" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Blueprint 720</title>
+    <link rel="icon" type="image/svg+xml" href="/labs/claude-prep/favicon.svg" />
+    <style>
+      html { background: #f3f4f7; }
+      html[data-theme="dark"] { background: #07080c; }
+    </style>
+    <script>
+      // Resolve the theme before first paint: the profile's choice is mirrored in localStorage.
+      (function () {
+        var pref = "system";
+        try { pref = localStorage.getItem("b720.theme") || "system"; } catch (e) {}
+        var dark = pref === "dark" || (pref === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      })();
+    </script>
+    <script type="module" crossorigin src="/labs/claude-prep/assets/index-ChUTe1rq.js"></script>
+    <link rel="stylesheet" crossorigin href="/labs/claude-prep/assets/index-CMmp_RtJ.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

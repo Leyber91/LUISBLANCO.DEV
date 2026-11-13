@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dataspace.run/1",
+  "title": "DATASPACE run",
+  "description": "One round trip: a source conversation, a capsule written by a model (or by the offline engine), and the conversation rebuilt from the capsule alone, with the provenance of every call. The page exports runs in this shape (one run, or { schema, exported, runs: [...] }) and loads them back; measures are re-derived from the texts and compared with the stored snapshot. Bundled recorded files (runs-<preset>.json) hold { schema, preset, generatedAt, calls: { id: call }, runs: [run] }, where a run's provenance names its compress and rebuild calls by id.",
+  "type": "object",
+  "required": ["id", "kind", "level", "budgetWords", "capsule", "provenance"],
+  "properties": {
+    "schema": { "const": "dataspace.run/1" },
+    "id": { "type": "string", "description": "recorded: <preset>.<model>.r<repeat>.L<level>; live: live.<n>" },
+    "kind": { "enum": ["recorded", "live", "engine", "imported"], "description": "recorded = a stored model reply replayed; live = a reply from this session; engine = the offline extractive capsule, no model; imported = loaded from a file" },
+    "preset": { "type": ["string", "null"], "description": "bundled conversation id, or null for the visitor's own text" },
+    "source": { "type": "string", "description": "the conversation exactly as sent to the compress call (bundled files omit it; the page takes it from the preset)" },
+    "level": { "type": "integer", "minimum": 1, "maximum": 5, "description": "strength: 1 gentle (50% of the source's words) to 5 brutal (5%)" },
+    "budgetWords": { "type": "integer", "description": "the word limit written into the compress prompt" },
+    "capsule": { "type": ["string", "null"] },
+    "rebuild": { "type": ["string", "null"], "description": "null when the rebuild did not run" },
+    "status": { "enum": ["scored", "partial", "failed", "engine", "pending"] },
+    "note": { "type": "string" },
+    "provenance": {
+      "type": "object",
+      "required": ["route", "model", "date", "promptVersion", "seed", "temperature"],
+      "properties": {
+        "route": { "type": "string", "description": "ollama | own-key | worker | pollinations | offline, or the recorder's description" },
+        "model": { "type": "string" },
+        "digest": { "type": "string", "description": "Ollama model digest (first 12 hex) for recorded runs" },
+        "quant": { "type": "string" },
+        "params": { "type": "string" },
+        "ollamaVersion": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "promptVersion": { "type": "string", "description": "the PROMPTS.version in config.js that produced the requests" },
+        "seed": { "type": "integer" },
+        "temperature": { "type": "number" },
+        "repeat": { "type": "integer" },
+        "compressCall": { "type": "string", "description": "recorded runs: id of the compress call in the file's calls map" },
+        "rebuildCall": { "type": "string" },
+        "compress": { "$ref": "#/$defs/liveCall" },
+        "rebuild": { "$ref": "#/$defs/liveCall" }
+      }
+    },
+    "calls": { "type": "object", "description": "exports of recorded runs carry their two calls verbatim (request body, raw reply, token counts, timings)" },
+    "measures": {
+      "type": ["object", "null"],
+      "description": "measures.js snapshot(): srcBits, capBits, rate, fidelity, kept, dropped, invented, numbers, entities, turns, split",
+      "properties": {
+        "srcBits": { "type": "number" }, "capBits": { "type": "number" }, "rate": { "type": "number" },
+        "fidelity": { "type": "number" }, "kept": { "type": "integer" }, "dropped": { "type": "integer" }, "invented": { "type": "integer" }
+      }
+    }
+  },
+  "$defs": {
+    "liveCall": {
+      "type": ["object", "null"],
+      "properties": {
+        "route": { "type": "string" }, "model": { "type": "string" }, "ms": { "type": "number" }, "seed": { "type": "integer" },
+        "system": { "type": "string", "description": "the exact system message, including llm.js's JSON line on JSON calls" },
+        "user": { "type": "string", "description": "the exact user message" },
+        "raw": { "type": "string", "description": "the reply, verbatim" },
+        "usage": { "type": ["object", "null"], "description": "token counts when the route reports them" },
+        "cached": { "enum": ["no", "possible"], "description": "possible when a public reply came back faster than CACHED_MS" },
+        "at": { "type": "string", "format": "date-time" },
+        "errors": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
