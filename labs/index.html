@@ -6,10 +6,10 @@
   <title>Labs — luisblanco.dev</title>
   <meta name="description" content="The luisblanco.dev labs: interactive experiments in AI, space-science and the systems that connect them. Black holes, exoplanets, n-dimensional space and more." />
 
-  <!-- fonts: Orbitron (display) · Space Grotesk (body) · IBM Plex Mono (mono) -->
+  <!-- fonts: IBM Plex Mono (everything read or operated) · Fraunces (display, the Labs OS plates) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <!-- icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -17,6 +17,8 @@
   <!-- design tokens, then the hub stylesheet -->
   <link rel="stylesheet" href="assets/css/tokens.css" />
   <link rel="stylesheet" href="assets/css/hub.css" />
+  <!-- Labs OS plates: welcome back, your data -->
+  <link rel="stylesheet" href="assets/css/os.css" />
 </head>
 <body>
   <!-- ===================== living background ===================== -->
@@ -35,6 +37,10 @@
       <i class="fa-solid fa-bars"></i>
     </button>
   </header>
+
+  <!-- ===================== Labs OS: fixture stamp and "since your last visit" (filled by hub/os/) ===================== -->
+  <div class="wrap os-slot" id="os-fixture" hidden></div>
+  <div class="wrap os-slot" id="os-welcome" hidden></div>
 
   <!-- ===================== hero ===================== -->
   <section class="hero" id="home">
@@ -90,6 +96,7 @@
   <footer class="site-footer">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:var(--s-4);justify-content:space-between;align-items:center;width:100%">
       <span>&copy; <span id="year">2024</span> luisblanco.dev — Labs · built by <a href="https://github.com/Leyber91" target="_blank" rel="noopener">Leyber91</a></span>
+      <span class="os-data"><span id="os-storage"></span><button type="button" class="los-btn los-data-btn" id="os-data" hidden>Your data</button></span>
       <a href="../index.html">&larr; Back to luisblanco.dev</a>
     </div>
   </footer>

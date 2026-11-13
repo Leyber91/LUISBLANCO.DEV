@@ -26,3 +26,6 @@ desktop.ini
 .idea/
 TokenGateKeeper/
 *.log
+
+# ── labs build (labs-src) ───────────────────────────────────────────────────
+labs-src/node_modules/
