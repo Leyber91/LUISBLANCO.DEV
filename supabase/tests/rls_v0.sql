@@ -17,7 +17,9 @@ declare
   i3 constant text := '33333333-3333-4333-8333-333333333333';
   refused text[];
   expect text[];
+  counted_before bigint;
 begin
+  select coalesce((select d.n from private.usage_day d where d.day = (now() at time zone 'utc')::date), 0) into counted_before;
   insert into auth.users (id, instance_id, aud, role, email) values
     (ua::uuid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a@test.invalid'),
     (ub::uuid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'b@test.invalid'),
@@ -171,6 +173,7 @@ begin
   set local role anon;
   perform set_config('request.headers', '{}', true);
   insert into public.usage_events (install_id, event_id, t, lab, type, session, data) values
+    (i3::uuid, 'evt-w-0000', now(), 'hub', 'lab.leave', 's3', '{"visibleMs": 2000, "totalMs": 2500, "final": false}'),
     (i3::uuid, 'evt-w-0001', now(), 'hub', 'lab.leave', 's3', '{"visibleMs": 6000, "totalMs": 7000, "final": true}'),
     (i3::uuid, 'evt-w-0002', now(), 'hub', 'lab.leave', 's4', '{"visibleMs": "junk"}');
   reset role;
@@ -178,8 +181,8 @@ begin
   perform set_config('request.jwt.claims', format('{"sub":"%s","role":"authenticated"}', uo), true);
   expect := array[
     ['select private.is_admin()', 'true', 'the owner is an admin'],
-    ['select count(*) from public.usage_events', '3', 'the owner reads every usage event'],
-    [$q$select visible_ms from public.usage_by_day where lab = 'hub' and type = 'lab.leave'$q$, '6000', 'the view sums visible time and ignores junk'],
+    ['select count(*) from public.usage_events', '4', 'the owner reads every usage event'],
+    [$q$select visible_ms from public.usage_by_day where lab = 'hub' and type = 'lab.leave'$q$, '6000', 'visible time is the largest report of each session, summed over sessions, junk ignored'],
     [$q$select sessions from public.usage_by_day where lab = 'hub' and type = 'lab.leave'$q$, '2', 'the view counts sessions'],
     [$q$select installs from public.usage_by_day where lab = 'heptapod' and type = 'lab.open'$q$, '1', 'the view counts installs'],
     ['select count(*) from public.progress', '0', 'the owner does not read visitors progress'],
@@ -193,7 +196,7 @@ begin
   end loop;
   reset role;
 
-  if (select d.n from private.usage_day d where d.day = (now() at time zone 'utc')::date) < 5 then raise exception 'FAILED: the daily counter did not count the inserts'; end if;
+  if (select d.n from private.usage_day d where d.day = (now() at time zone 'utc')::date) - counted_before is distinct from 6 then raise exception 'FAILED: the daily counter should count the 6 stored rows only (got %)', (select d.n from private.usage_day d where d.day = (now() at time zone 'utc')::date) - counted_before; end if;
   n := n + 1;
 
   raise exception 'RLS_TESTS_PASSED: % checks', n;
