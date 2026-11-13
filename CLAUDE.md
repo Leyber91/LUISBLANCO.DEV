@@ -11,13 +11,24 @@ here, the daily routine included, are in SITE_RULES.md:
 - ROADMAP.md and EVOLUTION.md: the routine's queue and its log.
 - labs/: the experiments. LABS_LEVELS.md defines how a lab is graded (axes, eleven rungs each, an independent
   rater); labs/levels/<id>.json holds each lab's ladder and grades.
-- tools/: the gates (privacy_gate.py, site_check.mjs, levels.mjs, lab_tests.mjs, anti_tells.mjs) and the lab
-  worktree tool (labs-wt.mjs). The gates workflow runs them on every pull request.
+- tools/: the gates (privacy_gate.py, site_check.mjs, levels.mjs, lab_tests.mjs, atlas.mjs, stories.mjs,
+  evolution.mjs, anti_tells.mjs), the test of the gates themselves (mutate.mjs with tools/mutants/), the merge
+  guard (ship_pr.mjs) and the lab worktree tool (labs-wt.mjs). The gates workflow runs the gates on every pull
+  request.
 
 ## Committing
 
 - Read `git status --short` and stage files by name. Staging a whole folder once carried a tool's local cache
   (wrangler's account file) into a pushed commit on 2026-11-13; tools leave such files wherever they run.
+- Merge with `node tools/ship_pr.mjs <number>`. It waits for the privacy and site checks, merges only when every
+  check has passed, squashes by default and makes a merge commit only for labs/foundation. Pull request 19 was
+  merged before its checks had started on 2026-11-13.
+- A gate that node runs is done when its rules are listed in tools/mutants/<tool>.json and
+  `node tools/mutate.mjs` shows its selftest catches each one, and after a reviewer who did not write it has read
+  it. evolution.mjs, lab_tests.mjs, mutate.mjs and ship_pr.mjs have such a list; levels.mjs, atlas.mjs,
+  stories.mjs and anti_tells.mjs have a selftest and no list yet, so add one when you change them. On 2026-11-13 a
+  checker that passed its own selftest 90 of 90 had 31 defects a review then confirmed, and the small tools
+  written to prevent that had 19 of their own, then 27 more in a second review.
 
 ## Labs work
 

@@ -1,0 +1,112 @@
+[
+  {
+    "name": "merge: an outside check alone is enough",
+    "from": "if (missing.length) return { state: 'wait',",
+    "to": "if (false) return { state: 'wait',"
+  },
+  {
+    "name": "merge: a check still running is treated as finished",
+    "from": "if (pending.length) return { state: 'wait',",
+    "to": "if (false) return { state: 'wait',"
+  },
+  {
+    "name": "merge: an outside check still running refuses instead of waiting",
+    "from": "const pending = checks.filter((c) => c.bucket === 'pending');",
+    "to": "const pending = checks.filter((c) => c.bucket === 'pending' && required.includes(c.name));"
+  },
+  {
+    "name": "merge: a skipped or cancelled gate passes",
+    "from": "const notPassed = checks.filter((c) => c.bucket !== 'pass');",
+    "to": "const notPassed = checks.filter((c) => c.bucket === 'fail');"
+  },
+  {
+    "name": "merge: no check at all is enough when nothing is required",
+    "from": "if (!Array.isArray(checks) || !checks.length) return",
+    "to": "if (!Array.isArray(checks)) return"
+  },
+  {
+    "name": "merge: only one of the two gates is required",
+    "from": "const REQUIRED = ['privacy', 'site'];",
+    "to": "const REQUIRED = ['privacy'];"
+  },
+  {
+    "name": "method: every branch gets a merge commit",
+    "from": "return head === 'labs/foundation' ? '--merge' : '--squash';",
+    "to": "return '--merge';"
+  },
+  {
+    "name": "method: the foundation branch is squashed",
+    "from": "return head === 'labs/foundation' ? '--merge' : '--squash';",
+    "to": "return '--squash';"
+  },
+  {
+    "name": "method: a flag given on the command line is ignored",
+    "from": "  if (FLAGS.includes(flag)) return flag;\n",
+    "to": ""
+  },
+  {
+    "name": "method: any word is taken as the merge method",
+    "from": "  if (FLAGS.includes(flag)) return flag;",
+    "to": "  if (flag) return flag;"
+  },
+  {
+    "name": "ship: a flag that is not --squash or --merge is not refused",
+    "from": "if (flag !== undefined && !FLAGS.includes(flag)) {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "ship: a refused pull request is merged anyway",
+    "from": "if (v.state === 'refuse') { say(`NOT MERGED: ${v.why}`); return 1; }",
+    "to": ""
+  },
+  {
+    "name": "ship: it merges without waiting for the gates",
+    "from": "    if (v.state !== 'wait') break;",
+    "to": "    break;"
+  },
+  {
+    "name": "ship: the wait runs past its deadline",
+    "from": "if (now() >= deadline) {",
+    "to": "if (now() > deadline + POLL_MS * 5) {"
+  },
+  {
+    "name": "ship: the merge is not pinned to the commit that was checked",
+    "from": "how, '--match-head-commit', head.headRefOid]",
+    "to": "how]"
+  },
+  {
+    "name": "ship: a merge gh refused is not reported with its reason",
+    "from": "if (m.code !== 0) {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "ship: a pull request that did not merge is reported as shipped",
+    "from": "if (!after || after.state !== 'MERGED') {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "ship: a pull request whose branch name is unknown is merged",
+    "from": "|| !head.headRefOid || !head.headRefName) {",
+    "to": "|| !head.headRefOid) {"
+  },
+  {
+    "name": "ship: a pull request gh cannot read is not stopped",
+    "from": "if (view.code !== 0 || !head || !head.headRefOid",
+    "to": "if (!head || !head.headRefOid"
+  },
+  {
+    "name": "ship: a failure of gh is waited on for twenty minutes",
+    "from": "else { say(`NOT MERGED: gh could not read the checks of pull request ${pr}${because(c)}`); return 1; }",
+    "to": "else checks = [];"
+  },
+  {
+    "name": "ship: a closed pull request is merged",
+    "from": "if (head.state !== 'OPEN') {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "ship: a pull request already merged is treated as a failure",
+    "from": "if (head.state === 'MERGED') { say(`#${pr} is already merged`); return 0; }",
+    "to": ""
+  }
+]
