@@ -378,6 +378,8 @@ async function cmdShip(n) {
   const guard = path.join(ROOT, 'tools', 'ship_pr.mjs');
   if (!fs.existsSync(guard)) die(`tools/ship_pr.mjs is missing in ${ROOT}; pull request #${info.number} is open and was not merged`);
   const s = spawnSync(process.execPath, [guard, String(info.number), '--squash'], { cwd: p, stdio: 'inherit' });
+  if (s.status === 4) die(`pull request #${info.number} is merged, but not by this run: the guard did not verify its checks`);
+  if (s.status === 5) die(`pull request #${info.number}: the merge call was accepted and could not be confirmed; look at it before shipping again`);
   if (s.status !== 0) die(`pull request #${info.number} was not merged`);
   console.log(`merged #${info.number} (squash). Live at https://luisblanco.dev/labs/${lab.page} once Pages rebuilds.`);
 }
