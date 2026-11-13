@@ -83,13 +83,13 @@ describe('the recording switch on screen', () => {
     await panel.open();
     const text = () => panel.el.textContent ?? '';
     const btn = () => panel.el.querySelector('[data-act="recording"]') as HTMLButtonElement;
-    expect(text()).toMatch(/On: the labs you open and what you do in them are logged\. The record is kept only in this browser and nothing is sent anywhere\./);
+    expect(text()).toMatch(/On: the labs you open and what you do in them are logged\. The record stays in this browser; usage events leave it only if you allow that under Sharing\./);
     expect(btn().textContent).toBe('Stop recording');
 
     btn().click();
     await vi.waitFor(() => expect(btn().textContent).toBe('Turn recording on'));
     expect(os.recording.on).toBe(false);
-    expect(text()).toMatch(/Off since \d{1,2} [A-Z][a-z]{2}: nothing new is logged, and what was logged before stays until you delete it\. The record is kept only in this browser and nothing is sent anywhere\./);
+    expect(text()).toMatch(/Off since \d{1,2} [A-Z][a-z]{2}: nothing new is logged, and what was logged before stays until you delete it\. The record stays in this browser; usage events leave it only if you allow that under Sharing\./);
     expect(text()).toMatch(/Recording is off\. Nothing new is logged until you turn it on\./);
 
     // a delete while off says recording stays off, and counts only the records it removes

@@ -3,6 +3,14 @@ export type Clock = () => number;
 export declare const systemClock: Clock;
 /** A random id. crypto.randomUUID needs a secure context; getRandomValues does not. */
 export declare function randomId(): string;
+/** True for the dashed 8-4-4-4-12 form, the only one the backend accepts as an install id. */
+export declare function isUuid(value: unknown): value is string;
+/**
+ * A random (version 4) UUID in the dashed form. randomId() falls back to 32 undashed hex digits where
+ * crypto.randomUUID is missing (an insecure context); the backend reads the install id from a header and
+ * accepts the dashed form only, so the install id is made here.
+ */
+export declare function randomUuid(): string;
 /** Lab ids are the hub ids in site.config.js: lowercase, digits and dashes. */
 export declare function isLabId(value: unknown): value is string;
 /** UTF-8 byte length of a string. */

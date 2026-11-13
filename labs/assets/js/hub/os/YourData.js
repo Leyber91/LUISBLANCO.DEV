@@ -7,7 +7,8 @@
    Any link to #your-data opens the panel, and so does the hub
    opened at labs/index.html#your-data, so a lab can send a
    visitor straight to their record. Labs are listed by their
-   hub titles; the stamp follows the recording switch.
+   hub titles; the stamp follows the recording switch and the
+   sharing choice.
    ============================================================ */
 
 import { SEL, OS_HUB } from '../constants.js';
@@ -25,9 +26,12 @@ export class YourData {
     const os = await this.osReady;
     if (!btn || !os) return;
 
-    const stamp = () => $(SEL.osStorage)?.replaceChildren(storageStamp(os.storage, os.recording.on));
+    let sharing = os.sharing.available && (await os.consent.get()).state === 'granted';
+    const stamp = () => $(SEL.osStorage)?.replaceChildren(storageStamp(os.storage, os.recording.on, sharing));
     stamp();
     os.recording.onChange(stamp);
+    os.consent.onChange((c) => { sharing = os.sharing.available && c.state === 'granted'; stamp(); });
+    os.onDeleted(() => { sharing = false; stamp(); });
     const fixture = fixtureStamp(os.storage);
     const fx = $(SEL.osFixture);
     if (fixture && fx) { fx.replaceChildren(fixture); fx.hidden = false; }

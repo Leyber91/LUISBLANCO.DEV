@@ -4,10 +4,14 @@
    "welcome back / what's next", consent and data rights, and
    one lifecycle for animated scenes.
 
-   Local-first: in v0 every record stays in the visitor's
-   browser (IndexedDB "labs"; memory when storage is blocked).
-   A backend plugs in later as a Transport (consent.ts) and is
-   switched on in config.ts.
+   Local-first: every record stays in the visitor's browser
+   (IndexedDB "labs"; memory when storage is blocked), and the
+   site works fully without a backend. With the visitor's consent,
+   and only then, usage events also go to the labs backend
+   (transport.ts) so the author can see which labs are used: after
+   "Allow", on each page load, and as the page is left. A failed
+   send is silent and offered again on the next load. Turning
+   recording off stops both the record and the sending.
 
    Usage, in a lab's module script:
 
@@ -27,10 +31,11 @@
    on again.
 
    ?os-fixture=<name> on the page URL swaps in a seeded memory
-   store (fixtures.ts) and never opens the real one.
+   store (fixtures.ts), never opens the real one and never
+   reaches the network.
    ============================================================ */
 import { OS_CONFIG } from './config.js';
-import { Consent, Outbox } from './consent.js';
+import { Consent, CONSENT_KEY, INSTALL_KEY, Outbox } from './consent.js';
 import { Registry, Tracker } from './events.js';
 import { fixtureStore, isFixture } from './fixtures.js';
 import { deleteAll, exportAll, summary } from './privacy.js';
@@ -41,6 +46,7 @@ import { startSession } from './session.js';
 import { memoryStore, openStore } from './store.js';
 import { loadRecording, RECORDING_KEY, saveRecording } from './recording.js';
 import { isLabId, randomId, systemClock } from './util.js';
+import { fixtureTransport } from './transport.js';
 import { mountConsentBanner } from './ui.js';
 function fixtureFromUrl() {
     try {
@@ -66,22 +72,24 @@ async function create(opts) {
     const lab = opts.lab;
     const now = opts.now ?? systemClock;
     const store = await pickStore(opts, now());
+    const base = { ...OS_CONFIG, ...opts.config };
     const config = Object.freeze({
-        ...OS_CONFIG,
-        ...opts.config,
-        // the consent fixture shows the banner that v0 keeps hidden, so it can be reviewed
-        ...(store.fixture === 'consent' ? { consentUi: true } : {}),
+        ...base,
+        // a fixture shows what the live page shows and reaches nothing: its sends and erases go nowhere
+        ...(store.fixture !== null && opts.config?.transport === undefined && base.transport ? { transport: fixtureTransport() } : {}),
     });
     const session = randomId();
     const registry = new Registry();
-    const tracker = new Tracker({ store, registry, session, now });
     const progress = new Progress(store, now);
     const consent = new Consent(store, now);
-    const outbox = new Outbox({ store, consent, transport: config.transport });
     const resume = new Resume(store, session, now);
     const deletedFns = new Set();
     const recordingFns = new Set();
     let recording = await loadRecording(store);
+    // A window that keeps nothing could not remember the answer and would draw a new install id on every load,
+    // so it is never asked and never sends.
+    const outbox = new Outbox({ store, consent, transport: store.persistent ? config.transport : null, recording: () => recording.on, now });
+    const tracker = new Tracker({ store, registry, session, now, sink: outbox });
     tracker.setRecording(recording.on);
     let previousVisit = null;
     try {
@@ -98,12 +106,22 @@ async function create(opts) {
         life = startSession(tracker, lab, { now });
         await life.opened;
     }
+    // Asked only where an answer means something: a backend exists, the window can remember, and there is a
+    // record to send (a visitor who turned recording off is not asked to share it).
     let banner = null;
-    if (opts.ui !== false && config.consentUi && typeof document !== 'undefined') {
+    if (opts.ui !== false && config.consentUi && outbox.transport && recording.on && typeof document !== 'undefined') {
         const c = await consent.get();
         if (c.state === 'unset')
             banner = mountConsentBanner(document.body, consent, config);
     }
+    // The three moments that send: the visitor allows it, a page loads, a page is left. The exit listener is added
+    // after the session's own, so the session's last lab.leave is already in the outbox when it runs.
+    const offConsent = consent.onChange((r) => { if (r.state === 'granted')
+        void outbox.flush(); });
+    const onExit = () => { outbox.flushOnExit(); };
+    const win = typeof window !== 'undefined' ? window : undefined;
+    win?.addEventListener('pagehide', onExit);
+    void outbox.flush();
     const os = {
         lab, session, config, registry, resume, consent, outbox, mountScene,
         storage: { kind: store.kind, persistent: store.persistent, note: store.note, fixture: store.fixture },
@@ -125,13 +143,26 @@ async function create(opts) {
             async deleteAll() {
                 tracker.halt();
                 life?.stop();
-                const r = await deleteAll(store, { keep: recording.on ? [] : [RECORDING_KEY] });
+                outbox.stop();
+                const remote = await outbox.erase(); // first: it needs the install id the local erase removes
+                const c = await consent.get().catch(() => null);
+                const keep = [
+                    ...(recording.on ? [] : [RECORDING_KEY]),
+                    ...(c?.state === 'denied' ? [CONSENT_KEY] : []),
+                    ...(remote.state === 'failed' ? [INSTALL_KEY] : []),
+                ];
+                const r = await deleteAll(store, { keep });
                 deletedFns.forEach((fn) => { try {
                     fn();
                 }
                 catch { /* the listener's problem */ } });
-                return r;
+                return { ...r, remote };
             },
+        },
+        sharing: {
+            available: outbox.transport !== null,
+            everOn: async () => (await outbox.installed()) !== null,
+            erase: () => outbox.erase(),
         },
         recording: {
             get on() { return recording.on; },
@@ -151,7 +182,15 @@ async function create(opts) {
         spec: (type) => registry.get(type),
         track: (type, data) => tracker.track(lab, type, data),
         onDeleted(fn) { deletedFns.add(fn); return () => { deletedFns.delete(fn); }; },
-        close() { life?.stop(); banner?.destroy(); store.close(); },
+        close() {
+            life?.stop();
+            banner?.destroy();
+            offConsent();
+            win?.removeEventListener('pagehide', onExit);
+            outbox.stop();
+            outbox.close();
+            store.close();
+        },
     };
     return os;
 }
@@ -185,7 +224,8 @@ export { OS_CONFIG } from './config.js';
 export { Registry, Tracker, BUILTIN_EVENTS, MAX_DATA_BYTES } from './events.js';
 export { Progress, MAX_PROGRESS_BYTES } from './progress.js';
 export { Resume, visitsFrom, suggest, describeVisit } from './resume.js';
-export { Consent, Outbox, CONSENT_POLICY } from './consent.js';
+export { Consent, Outbox, CONSENT_POLICY, BATCH_SIZE } from './consent.js';
+export { BACKEND, supabaseTransport, fixtureTransport, sanitizeData, toRow } from './transport.js';
 export { exportAll, deleteAll, summary } from './privacy.js';
 export { mountScene, sceneCount } from './scene.js';
 export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';
