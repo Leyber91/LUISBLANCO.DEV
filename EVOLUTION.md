@@ -3,6 +3,29 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-13, Labs: a model route of their own, about two seconds a reply (not a routine run)
+
+- New for a visitor with no local model and no key: the labs that call a model through the shared route now get
+  their reply from the labs' own endpoint in about two seconds, and a second request no longer waits. Before, the
+  public route allowed one reply every 45 seconds per visitor.
+- What it is: a Cloudflare Worker (workers/model-route, labs-model-route.luisblanco.workers.dev) in front of
+  Workers AI, on the free plan. It holds no key and stores and logs nothing. It answers the site's origin only,
+  a few requests a minute per visitor (Cloudflare documents that limit as approximate), from a shared allowance of
+  10,000 neurons a day; past the allowance it answers 429 and the lab falls through to the old public route and
+  then to its deterministic engine, as before.
+- Measured on 2026-11-13 with one two-sentence physics question: Gemma 4 26B with thinking on took 12 to 33 s and
+  17 to 33 neurons and returned nothing within 600 tokens; with thinking off it answered correctly in 2.1 s for
+  2.2 neurons, so thinking is off. At about 18 neurons for a reply of 800 tokens in and 400 out, the allowance is
+  about 550 such replies a day across all visitors.
+- It also carries a pass-through for three providers whose APIs refuse browser calls (a visitor's own key rides in
+  the request and goes nowhere else). Nothing on the site uses it yet.
+- Labs still on the older model module are unchanged: the new route has its own config block that only llm.js reads.
+- Checks: 56 tests of the Worker with a fake model and a fake upstream (an unknown provider is a 404, never an open
+  proxy; a foreign origin is refused); in headless Chrome, llm.js on a local page took the route twice in a row
+  (JSON parsed, 2.2 s and 1.4 s) with the local model probe blocked to stand in for a public visitor.
+- Known weakness: the per-visitor limit let 10 of 12 rapid calls through. The daily allowance is the hard stop and
+  costs nothing when it runs out; a strict limit is planned.
+
 ## 2026-11-13, Labs OS: the hub remembers where you left off (not a routine run)
 
 - New for a visitor: the labs hub now keeps a record of your visits in your own browser and, when you come back,

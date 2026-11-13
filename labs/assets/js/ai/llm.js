@@ -9,8 +9,10 @@
      2. own key      an OpenAI-compatible endpoint and key the visitor
                      typed into the route panel; kept in their browser
                      (localStorage) and sent only to that endpoint
-     3. worker       a proxy URL, if one is ever deployed (config.js
-                     worker.base); empty today, so skipped
+     3. worker       the labs' own keyless route (config.js route.base):
+                     Workers AI behind a Cloudflare Worker, a few requests
+                     a minute per visitor and a shared daily allowance;
+                     a 429 from it falls through to the next route
      4. pollinations text.pollinations.ai, keyless and public. Measured
                      2026-11-11: one reply every 45 seconds per IP
                      (HTTP 402 FREE_LIMIT otherwise), model gpt-oss-20b
@@ -48,6 +50,10 @@
    ============================================================ */
 
 import { AI_CONFIG } from './config.js';
+
+// The keyless route for visitors: config.js `route` (the labs' own Cloudflare Worker, workers/model-route). The
+// older `worker` block belongs to provider.js, which speaks a different contract, so it is only a fallback here.
+const ROUTE = AI_CONFIG.route?.base ? AI_CONFIG.route : (AI_CONFIG.worker || {});
 
 const POLL_URL = 'https://text.pollinations.ai/openai';
 const POLL_MODEL = 'openai';             // alias the anonymous tier serves
@@ -220,7 +226,7 @@ class Route {
       }
       const own = this.ownKey();
       if (own) { this._emit('own-key', own.model); return 'own-key'; }
-      if (AI_CONFIG.worker?.base) { this._emit('worker', AI_CONFIG.worker.defaultModel); return 'worker'; }
+      if (ROUTE.base) { this._emit('worker', ROUTE.defaultModel); return 'worker'; }
       this._emit('pollinations', 'gpt-oss-20b');
       return 'pollinations';
     })();
@@ -333,7 +339,7 @@ class Route {
     const errors = [];
     const t0 = performance.now();
     const own = this.ownKey();
-    const wk = AI_CONFIG.worker || {};
+    const wk = ROUTE;
 
     for (const route of this._chain(first)) {
       if (route === 'own-key' && !own) continue;
