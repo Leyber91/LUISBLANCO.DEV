@@ -372,17 +372,15 @@ async function cmdShip(n) {
   }
   const info = JSON.parse(pr.out);
   console.log(`pull request #${info.number}: ${info.url}`);
-  // Checks can take minutes to appear; watch until they finish.
-  for (let i = 0; i < 60; i++) {
-    const w = run('gh', ['pr', 'checks', String(info.number), '--watch', '--interval', '20'], { cwd: p, timeout: 900000 });
-    const txt = w.out + '\n' + w.err;
-    if (/no checks reported/i.test(txt)) { await new Promise((r) => setTimeout(r, 20000)); continue; }
-    console.log(txt.split(/\r?\n/).filter(Boolean).slice(-10).join('\n'));
-    if (!w.ok) die('checks did not all pass; not merging');
-    break;
-  }
-  const m = run('gh', ['pr', 'merge', String(info.number), '--squash', '--delete-branch=false'], { cwd: p });
-  if (!m.ok) die('merge failed: ' + m.err);
+  // One merge path for the whole site: tools/ship_pr.mjs waits for the privacy and site checks, merges only when
+  // every check has passed, and pins the merge to the commit it checked. The loop that stood here until 2026-11-13
+  // went on to merge when the checks never started, or when only an outside check had reported.
+  const guard = path.join(ROOT, 'tools', 'ship_pr.mjs');
+  if (!fs.existsSync(guard)) die(`tools/ship_pr.mjs is missing in ${ROOT}; pull request #${info.number} is open and was not merged`);
+  const s = spawnSync(process.execPath, [guard, String(info.number), '--squash'], { cwd: p, stdio: 'inherit' });
+  if (s.status === 4) die(`pull request #${info.number} is merged, but not by this run: the guard did not verify its checks`);
+  if (s.status === 5) die(`pull request #${info.number}: the merge call was accepted and could not be confirmed; look at it before shipping again`);
+  if (s.status !== 0) die(`pull request #${info.number} was not merged`);
   console.log(`merged #${info.number} (squash). Live at https://luisblanco.dev/labs/${lab.page} once Pages rebuilds.`);
 }
 

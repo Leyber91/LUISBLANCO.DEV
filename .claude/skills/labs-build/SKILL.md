@@ -21,7 +21,19 @@ prove it with screenshots. Someone else grades it.
   labs/assets/js/ai/, labs/assets/js/hub/, labs/index.html, tools/) change only when the task names them; otherwise
   write the change you need in your report.
 - Commit to your branch with the message "labs: <lab id> <generation> - <one line>". Pushing, merging and shipping
-  are the coordinator's step (`node tools/labs-wt.mjs ship <name>`).
+  are the coordinator's step (`node tools/labs-wt.mjs ship <name>`, which merges through tools/ship_pr.mjs and
+  so only after the privacy and site checks have passed).
+
+## Before you build
+
+Stop and report, without building, when either of these is missing:
+
+- The lab's concept, chosen by Luis: `plan.concept.status` is "chosen" in `_reference/labs/plans/<hub id>/plan.json`
+  in the main checkout. On 2026-11-13 he found the plans had been scaling poor concepts ("we were just scaling up
+  garbage"), so nothing is built on a concept he has not chosen.
+- A written reference study of what you are about to make: the real artifact, the source papers or the film stills,
+  studied as specifications. On 2026-11-11 thirty-one labs were rebuilt without one, and all of them stayed below
+  his bar.
 
 ## Read first
 
@@ -29,7 +41,8 @@ prove it with screenshots. Someone else grades it.
    The rater grades against it rung by rung; rungs are cumulative, and the lab level is the lower median of its
    axes capped at the weakest axis plus two, so plan to lift the weakest axis first.
 2. LABS_LEVELS.md: the frames, the general ladder and the anchor (level 5 is the lab's fiction made real).
-3. The lab's plan, if one exists under _reference/labs/<lab>/ in the main checkout.
+3. The lab's plan and its stories for the next level: `_reference/labs/plans/<hub id>/plan.json` and `stories.json`
+   in the main checkout (older notes may also sit under _reference/labs/<lab>/).
 4. SITE_RULES.md and the labs-design skill. Both bind you.
 5. labs/assets/js/ai/llm.js and route-panel.js: the only way a lab talks to a model.
 6. Every current file of your lab, before you change any of them.
@@ -97,7 +110,8 @@ Your final message is all the coordinator sees:
 1. Branch, worktree path, commit hash; files added and changed.
 2. Per axis: the rung you believe you reached and its evidence (file and function, or what a screenshot shows).
    The rater checks every line, and on 2026-11-12 builders' claims ran four to five levels high, so claim only what
-   a stranger can verify.
+   a stranger can verify. Head this list "claimed, ungraded": the coordinator reports the lab to Luis as built and
+   ungraded until the labs-grade skill has run, and never passes these rungs on as levels.
 3. What the lab now does for a visitor that it could not before, in one paragraph.
 4. Screenshot paths, console result, gate results.
 5. What is still weak, and any decision that belongs to Luis.
