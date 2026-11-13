@@ -3,7 +3,7 @@
   "date": "2026-11-13",
   "anchor": "Rung 5 means one thing on every axis. On a product axis it is what Claude Prep (Blueprint 720, the certification study platform on this site) does on that function, read from its code at commit ae34174 (2026-11-13). Claude Prep is the anchor at product level 5 by definition: a clause at or below rung 5 that it fails when read literally sits at rung 6, unless the clause is essential to the function, in which case the clause stays and the axis records Claude Prep's literal level in blueprint_level. Where Claude Prep is weak by design (first run, tutoring, verified hands-on tasks, access at every width), rung 5 is what a complete product needs. On a subject axis rung 5 is the lab's fiction made real at full fidelity (Luis, 2026-11-11). Each rung is a list of numbered clauses; a rung holds when every clause holds, and rungs are cumulative. Levels are computed by level_rule.",
   "anchor_commit": "ae34174",
-  "level_rule": "A lab has two levels, each computed as min(lower median of its axis levels, weakest axis + 2): its product level over the product axes it carries and its subject level over its subject axes. The lab level is the lower of the two, because level 5 means both: every product function Claude Prep has, translated into the lab, and the lab's fiction made real (Luis, 2026-11-11 and 2026-11-13).",
+  "level_rule": "A lab has three levels. Its scope level is the highest level whose thresholds (scope.thresholds: organs, links, steering links and reach) its graph meets, counting up from level 1. Its product level and its subject level are each computed as min(lower median of its axis rungs, weakest axis + 2), over the product axes it carries and over its subject axes, and neither is placed above its scope level, because a half is a state of the whole lab and the lab is only as broad as its graph. The lab level is the lowest of the three, because level 5 means all three: every product function Claude Prep has, translated into the lab; the lab's fiction made real; and a graph of working organs as broad and as densely joined, over every unit of its subject (Luis, 2026-11-11 and 2026-11-13). An axis grade is a rung, never a level, and is shown with the lab's graph beside it.",
   "na_policy": "A lab may mark at most 3 product axes not applicable, each with a reason the independent rater checks. A weak axis is graded, not excused.",
   "world_rule": "A world line substitutes only the clauses it names; every other clause of the axis rung still holds. A world line that names no clause substitutes nothing.",
   "stages": {
@@ -12,6 +12,1044 @@
     "8": "Creative: visitors contribute items, scenes, rules or paths as a file or a pull request; the same gates run in CI, the review decision is recorded in the repository, and the accepted entry is listed with its author. A rater counts accepted entries with a gate run and a review record in git.",
     "9": "Knowledge: a versioned release with schema, licence, CITATION.cff, method and a reproducible build command produces the dataset or benchmark. A rater runs the build command and diffs the output against the release.",
     "10": "Reference: the lab's reference ledger lists outside references (URL, date, quoted context), each verifiable, from at least 5 independent sources. A daily-return share counts only once Luis approves an opt-in counter; until then the ledger alone decides. An EU backend now exists that could carry opt-in counts later, and no rung depends on it. A rater opens each URL in the ledger."
+  },
+  "evolution": {
+    "principle": "A level is a state of the whole lab, read three ways: how far each axis has climbed, how the axes stand on each other, and how broad and how joined the lab's graph of organs is. Each rung of an axis stands on rungs of other axes that make it possible or give it something to act on, so an axis rises when the axes beneath it have risen, and a rung built without its supports is empty. Up to level 5 the subject half gives the product half a mechanism that computes keys and checks, a live view and a model for lessons to draw on, a result of the visitor's own for missions to judge, and engine values an explaining agent may cite; the product half gives the instrument tests, tokens, data, a shell and keyboard paths. Up to level 5 the visitor's record reaches the instrument only through the goals the visitor sets, by which its data can be pivoted; at level 6 the record changes what the instrument shows and says. A clause that names a capability another axis builds at a higher rung holds over the instances that exist and extends when that capability arrives, and a ticket for it depends on the ticket that builds that capability. A feature that no rung stands on, and that stands on nothing, raises no level, and from level 3 neither does an organ that no other reads and that reads none. Each portrait describes a lab whose axes all stand at that rung; the level rule lets the weakest axis sit two rungs lower, and the checkpoint is where a lab names which axis, which half or which part of its graph holds it there.",
+    "emergence": "A level is reached when something appears in the lab that the level below made possible and did not contain. What appears follows from the lab's concept, can be traced back to its seed, and could not have been written as a requirement at the level below, because it is a consequence of that level existing: of people using it, of the records it keeps, of two organs meeting, of the subject answering back. The portraits below say what labs at one level have in common; a lab's own story names what emerged there in its own terms. A lab plans one level above where it stands, and every level above that is a conjecture, rewritten after each level ships from what appeared. Ten levels listed in advance are a feature list, and this atlas accepts none as a plan.",
+    "analogy_rule": "Claude Prep reaches level 5 on the product half for a learner preparing dated certification exams from a published canon. Its graph has nine organs: a Today view, lessons, drills (with their help panel, tutored mocks, warm-ups and the spaced review of misses, which all run in one runner), a timed mock exam with its exam report, a spaced flashcard deck, a progress view with a readiness checklist and calibration, a plan with exam dates and a pace meter, hands-on labs, and a tracker of the official courses. Seven of them form one graph joined by fourteen links; the labs and the course tracker stand apart, because no other organ computes anything from their state. A lab in another domain reaches a similar level 5 by orthogonal development: each organ is rebuilt on the lab's own instrument, matched by the work it does, held to the same depth and joined to the others at least as densely. The exam blueprint becomes the lab's canon and declared units; a question becomes a state of the instrument whose answer the engine computes or a recorded label gives (where a photon goes, which phrase of a claim lacks support, which missed day costs a habit curve most); a lesson becomes a walk through the instrument where each worked example is a state the engine computes and the reader decides before it is revealed; drills become practice on the instrument, and tutor steps become help on it that never names the answer; the mock becomes the summative challenge, built to the challenge blueprint and run on the instrument; the evidence rule becomes the lab's written rule for which actions count as unaided; the progress view becomes the visitor's state per declared unit beside readiness, a checklist of stated thresholds over the lab's own skill; flashcards become the spaced return of what the visitor missed; the plan becomes the path to the visitor's own goal; hands-on labs become missions whose check the engine runs; the official course map becomes the outside curriculum the bindings name; and the return view reads the others, as Claude Prep's Today view reads lessons, due cards, misses and readiness. A function leaves the lab only with its axis, marked not applicable under the na policy; no single organ is excused on its own. The analogy breaks in five places, and each lab writes down where it breaks for it. Claude Prep stores its answer keys with its items, while a lab computes its keys from its model or reads them from labels recorded on states of its instrument, so its practice can be no truer than its model or its labels. Claude Prep's subject half is low (the atlas estimates about 1, unaudited) and the app makes no model call, so on the six subject axes level 5 is the lab's fiction made real and Claude Prep offers nothing to copy. Where Claude Prep is weak by design (first run, tutoring coverage, verified tasks, access at every width), rung 5 asks more than it has, and its labs and course tracker, which stand apart from its graph, mark where a lab should join more than the anchor does. A lab with no right answers maps practice and evidence onto the visitor's own predictions and data, and may mark up to 3 product axes not applicable, each with a reason the rater checks. A copied surface, such as a quiz set beside the instrument, fails the own-instrument rule at rung 1; an organ that no other reads and that reads none adds no scope above level 2.",
+    "levels": {
+      "1": {
+        "name": "The specimen",
+        "portrait": "The lab is one organ, or several that do not read each other: working parts a visitor can use on their own, each for one purpose. Each function the lab has exists once, in its simplest honest form, on the lab's own instrument. One documented address opens the main view and says what can be done there. One capability of the fiction shows, at least as a picture, a preset or a canned animation; its values come from a table typed into the page, and presets change the view. One exercise checks one answer and keeps it with its time and mode, a count of what the visitor did is shown, and the state survives a reload.",
+        "shift": "At level 0 the lab is a name and a promise. At level 1 something runs, each function as one fixed instance on the lab's own instrument, and the rule is fixed that a quiz, a text or a picture set beside the instrument does not count, so every later rung is built on the instrument itself.",
+        "checkpoint": "Which part holds the lab at level 1, its product half, its subject half or its graph; does every function that exists run on the lab's own instrument; and on the way to level 5, which second organ comes first, what will it read from the first, and which of Claude Prep's nine organs does it stand for?"
+      },
+      "2": {
+        "name": "The first loop",
+        "portrait": "The lab computes, and its organs begin to read each other. One path runs end to end from the visitor's own free input, through a mechanism whose formulas sit in the source, to a live view, and one entry of the fiction runs that way; the entry view is alive at rest. A practice session gives feedback that names the right answer, the visitor's choice and the reason, and a record view turns the finished sessions into a state per declared unit, the first organ that computes from what another wrote. A lessons track cuts the subject into its declared units with a page each, a catalogue of missions keeps its step checklists per step, and one model call per action goes through the site route with a fallback good on its own. A lab whose axes all stand here has about five organs (the instrument, practice, the record view, lessons and missions); the scope floor is three organs and one link over a quarter of the declared units. The material is versioned data apart from the code, the record has a typed contract, and every claim on the page is tagged real or illustrative. Everything off the one path is still fixed.",
+        "shift": "A level 1 lab shows values and accepts one answer. A level 2 lab computes values from what the visitor types and keeps the result, and for the first time one organ computes from another's output, so the visitor's work starts to travel inside the lab.",
+        "checkpoint": "Does one entry of the fiction run end to end from typed input, with its formulas in the source and every claim tagged; which of product, subject and scope holds the lab here, and which declared units does no organ work on; and why is this not level 5: which entries still run on presets, and which of Claude Prep's nine organs has no counterpart on the lab's own instrument yet?"
+      },
+      "3": {
+        "name": "The accountable system",
+        "portrait": "Each shared decision of the lab is made in one place: how an item renders, how a lesson is built, what counts as evidence, how the page looks and how values are computed; and its organs form one connected graph. A published model, named with its author and year, runs for every input the page accepts, every value carries its unit, and half of the fiction's inventory runs from the visitor's input. Every declared unit has a lesson in one schema, stepwise help stands on at least two items in five, and missions open their material inside the lab with a completion that can be reopened. An entry view computes the main next actions from the record, and its deep links land inside them. A lab whose axes all stand here has about six organs (the instrument, lessons, drills, missions, a record view with a state per unit, and the entry view); the scope floor is five organs joined in one graph by at least four links, the instrument among them, with half the declared units each worked on by two organs. A rater can trace any number, mark or verdict to a rule or a source.",
+        "shift": "At level 2 one path works and the first organs touch. At level 3 the lab replaces its local decisions with one engine, one schema, one evidence rule and one model, and its organs form one connected graph, so a change made once holds everywhere and any claim can be traced to where it was decided.",
+        "checkpoint": "Can a rater pick any number, mark or verdict and trace it to one stated rule or a cited source; which of product, subject and scope holds the lab here, and which declared units do fewer than two organs work on; and why is this not level 5: which organs hang on a single thread, which result never comes back to the visitor through another organ, and which of Claude Prep's nine organs has no counterpart on the lab's own instrument yet?"
+      },
+      "4": {
+        "name": "The interlocked lab",
+        "portrait": "The organs choose what they do from what the others recorded, and the graph closes loops. Drills deal what the visitor has not seen, then what they last got wrong; lessons draw their checks from the visitor's misses and their rules feed the warm-ups; a spaced deck brings cards back by their grades; the revision sheet is built from the misses; and the tour reads the current numbers. A progress view holds a mastery grid and charts over time, the outside curriculum is mapped onto the units with done counts, and at least half the missions ship an offline check. The visitor drags or edits the subject itself and the model recomputes, most of the fiction runs in one continuous central scene, at least five outputs match published reference values within stated tolerances, the record exports as one file, and a newcomer reaches a first meaningful action through a guided flow in under two minutes. A lab whose axes all stand here has about eight organs; the scope floor is six joined organs and seven links, at least three of which steer, with a directed loop made of steering links, another organ reading what the visitor did on the instrument and three organs working on each of four fifths of the declared units.",
+        "shift": "A level 3 lab applies one rule everywhere, and its organs show each other's results: a record view computes a state per unit from what practice recorded. A level 4 lab lets each organ choose what it does from what the others recorded: drills deal from the misses, lesson checks are drawn from them, the revision sheet is built from them and the deck schedules from the grades, so the visitor's work changes what the lab offers next. It is also checked against values published outside it.",
+        "checkpoint": "Does a result made in one organ change what another offers the visitor next, and do at least five outputs match published values within stated tolerances; which of product, subject and scope holds the lab here, and which declared units does no organ practise and record; and why is this not level 5: which capability of the fiction runs below its depicted detail, and which of Claude Prep's nine organs has no counterpart on the lab's own instrument yet?"
+      },
+      "5": {
+        "name": "The fiction made real",
+        "portrait": "The fiction is made real and the product around it is complete. Every entry of the fiction inventory runs from the visitor's own input at the detail its source depicts, inside the central scene, and a skeptic reading the sources finds no depicted capability missing. Every quantity in the scene comes from a published model, the page reports how many reference values fall within tolerance and explains each miss, and the intelligence plays the fiction's role with its gain over the engine measured. Every function Claude Prep has stands as an organ on the lab's own instrument, or its axis is marked not applicable under the na policy: a return view, lessons, practice with help on every exercise, a summative challenge, spaced return, a record view, a plan toward a goal date, missions the engine checks and a map of the outside curriculum. With the instrument that makes about ten organs; at least seven of them read each other in one graph through at least eleven links, five of which steer, two organs read what the visitor did on the instrument, and three organs work on every declared unit. The record carries one person across visits and devices.",
+        "shift": "A level 4 lab is checked on samples and lives in one browser, which it leaves only as an exported file: five reference values, most of the fiction, half of its tasks with a check. A level 5 lab makes closed claims and shows the proof on its own page: an independent reading of the sources finds no depicted capability missing, a task completes only on a pass, and every score of readiness, accuracy or gain stands beside its stated threshold and its misses. The record follows the person to every device they use.",
+        "checkpoint": "Given the sources and not the inventory, would a skeptic find a depicted capability missing; set beside Claude Prep organ by organ, which function has no counterpart on the lab's own instrument, and which organ still stands apart from the graph; and does the page show its own misses beside every score?"
+      },
+      "6": {
+        "name": "The lab that remembers",
+        "portrait": "The lab reads one visitor's own local record through a model fitted to that visitor and becomes a different lab for them. Today's session is ordered from their due items and misses and sized to their daily budget; lessons, help and missions are chosen and sized from their evidence; the model of the subject reports its own error for their inputs and refuses inputs outside its validity; and the page says in numbers what changed since their last visit. An ability estimate with its interval and a forgetting curve per item are fitted to the visitor's answers, every organ chooses and sizes its work from them, and a forecast organ answers when an item will fade or where the visitor will stand on a date, with an interval. The organs that stood apart at level 5 now read the record, so the graph holds at least nine joined organs and sixteen links. No other visitor's data is used, and the parts of rungs 2 to 5 met only in part are complete.",
+        "shift": "Up to level 5 the lab reads the visitor's record through fixed rules: unseen items first, then the last missed, cards on a fixed schedule. At level 6 it fits a model to that one visitor, an ability with its interval and a forgetting curve per item, every organ chooses and sizes its work from that model, and the page states in numbers what the record changed since the last visit.",
+        "checkpoint": "Seed two records with the same latest answers and different histories, one right months ago and one right yesterday: does the lab choose different items, depth and next actions for each from its model of that visitor, show each estimate with its interval, and state in numbers what changed since that visitor's last visit?"
+      },
+      "7": {
+        "name": "The shared object",
+        "portrait": "Every state the lab can reach is an object that can leave it. A link or an exported file reopens any run, view, record, readiness report, explained state or artefact of the fiction identically in a fresh browser with no account; a model run reproduces on another machine; a model output travels with its provenance; and two visitors act on one state in turns, with a visible history of who did what. A comparison organ opens two records of the whole lab, the visitor's own and a shared one, and computes their differences unit by unit; it reads the record view and the summative challenge, and the record view shows where the visitor stands against the shared record, for at least ten joined organs and nineteen links.",
+        "shift": "A level 6 lab is private to one browser. A level 7 lab makes each of its states portable and reproducible, so a second person can open exactly what the first saw, check the numbers on their own machine and see how two results differ.",
+        "checkpoint": "Opened from a link or an exported file in a fresh profile on another machine, does every state reproduce the same numbers, and does the comparison of two shared states compute their differences?"
+      },
+      "8": {
+        "name": "The open workshop",
+        "portrait": "People other than the builders extend the lab. Visitors contribute items, lessons, hints, missions, model components, scenes, tools, explanations and paths as files or pull requests; the gates that guard the lab's own material run on each contribution in continuous integration; the review decision is recorded in the repository; and each accepted entry is listed with its author. A workshop organ on the page lets a contributor draft an entry, run the lab's gates on it and try it in practice and in a lesson before submitting it as a file, so practice and lessons read the draft, for at least eleven joined organs and twenty-one links. At least one accepted contribution comes from someone outside the builders.",
+        "shift": "At level 7 others can open and verify the lab's states. At level 8 they can add to the lab itself, and the gates that once guarded the builders' own work become a public contract that decides what a stranger's contribution may change.",
+        "checkpoint": "Which entry was contributed by someone outside the builders, which gates did it pass in continuous integration, where in the repository is its review recorded, and could it be added without editing a core file?"
+      },
+      "9": {
+        "name": "The citable source",
+        "portrait": "The lab produces knowledge that exists apart from its page. A versioned release with a schema, a licence, a citation file, a written method and one reproducible build command produces its dataset or benchmark: the item bank, the lesson corpus, the misconception catalogue, the model's tables with their reference checks, the gold set with its evaluation, the record format with its merge vectors, or the conformance fixtures. A release organ on the page lets the visitor open a released dataset, filter it and place their own result in it, reading their record, and the instrument opens any released case, for at least twelve joined organs and twenty-three links. A rater runs the build command and the output matches the release.",
+        "shift": "At level 8 the lab accepts contributions. At level 9 it emits releases that others can rebuild, cite and reuse without opening the lab, so what the lab knows outlives its interface.",
+        "checkpoint": "Run on a clean checkout, does the build command reproduce the released dataset or benchmark file for file, and does the release carry its schema, licence, citation file and method?"
+      },
+      "10": {
+        "name": "The reference",
+        "portrait": "Outside people point to the lab as a way into its subject. Its reference ledger lists at least five independent outside sources (courses, articles, forums, papers, documentation), none owned or controlled by Luis or the builders, each verified at its URL with its quoted context, that cite its start paths, lessons, practice sets, model, assistant, imagery or explanation, or the lab itself as the way to see the fiction. A citation organ lets the visitor pick any state of the lab and get a citation pinned to its release and link, with the verified outside references to that part listed beside it; it reads the release organ and the comparison organ, for at least thirteen joined organs and twenty-five links over every declared unit.",
+        "shift": "Up to level 9 every rung is decided inside the repository, the outside contribution of level 8 included, which enters through a review the builders record. At level 10 the evidence lies outside it: the lab's standing rests on what independent people already do with it, verifiable at each link.",
+        "checkpoint": "Do at least five independent sources, each verified at its URL, cite this lab as a way to learn or see its subject, with none owned or controlled by Luis or the builders, and does each still hold at the next check?"
+      }
+    },
+    "couplings": [
+      {
+        "from": "practice.2",
+        "to": "evidence.2",
+        "why": "A state per unit is computed from answers, and the answers come from sessions that check each one on the instrument."
+      },
+      {
+        "from": "fidelity.2",
+        "to": "explanation.2",
+        "why": "An intro paragraph that explains the mechanism needs a mechanism to explain; over a typed table it can only describe the table."
+      },
+      {
+        "from": "fidelity.2",
+        "to": "fiction.2",
+        "why": "An inventory entry runs end to end only when a mechanism computes its outputs from its inputs; a preset or a canned animation is fiction rung 1."
+      },
+      {
+        "from": "interaction.2",
+        "to": "fiction.2",
+        "why": "An inventory entry runs from the visitor's own input only once the page takes free input that changes the view without a submit step."
+      },
+      {
+        "from": "fidelity.2",
+        "to": "graphics.2",
+        "why": "A live view draws from computed state, and the first computed state is the mechanism that turns inputs into outputs along one path."
+      },
+      {
+        "from": "fidelity.2",
+        "to": "interaction.2",
+        "why": "Free input changes the view live only when a mechanism recomputes the output from that input."
+      },
+      {
+        "from": "graphics.2",
+        "to": "interaction.2",
+        "why": "Free input changes the view live only when the view redraws from state; a static image or template block has nothing to redraw."
+      },
+      {
+        "from": "material.2",
+        "to": "missions.2",
+        "why": "A catalogue with timeboxes, units and steps is generated from task data apart from the code."
+      },
+      {
+        "from": "fidelity.2",
+        "to": "practice.2",
+        "why": "An exercise runs on the lab's own instrument: the item is a state the mechanism computes, and its key is the mechanism's output or a label recorded for that state."
+      },
+      {
+        "from": "records.1",
+        "to": "practice.2",
+        "why": "Each finished session's score is recorded, which needs state that survives a reload."
+      },
+      {
+        "from": "evidence.1",
+        "to": "progress.2",
+        "why": "A streak and an activity calendar count days with actions, so every action must already be stored with its time."
+      },
+      {
+        "from": "practice.2",
+        "to": "progress.2",
+        "why": "Finished sessions are listed with score and time only once practice runs sessions that record a score."
+      },
+      {
+        "from": "material.2",
+        "to": "records.2",
+        "why": "A write is refused for an unknown id only when the material is loaded once into indexes that say which ids exist."
+      },
+      {
+        "from": "lessons.2",
+        "to": "tutoring.2",
+        "why": "Feedback links to the unit's lesson, and the link has a target only once each declared unit has its own page."
+      },
+      {
+        "from": "lessons.2",
+        "to": "evidence.2",
+        "why": "A state per unit needs the subject split into the declared units, which the track first does, and items that carry those unit ids."
+      },
+      {
+        "from": "records.1",
+        "to": "missions.2",
+        "why": "Steps ticked with their time and a status derived from them must survive a reload, or the checklist resets on every visit."
+      },
+      {
+        "from": "intelligence.1",
+        "to": "engineering.3",
+        "why": "Seeded unit tests cover the engine against the real material, so a deterministic engine must exist for a seed to pin its output."
+      },
+      {
+        "from": "graphics.3",
+        "to": "explanation.3",
+        "why": "A legend can name every mark only when every mark of a data view stands for a value it can name."
+      },
+      {
+        "from": "material.2",
+        "to": "explanation.3",
+        "why": "A provenance strip names its source, date and freshness, and a failed live source falls back to a bundled dated snapshot; both are the material's version and its last good file."
+      },
+      {
+        "from": "fidelity.3",
+        "to": "fiction.3",
+        "why": "Half the inventory runs from the visitor's own input only when the model runs for every input the page accepts; one path serves one entry."
+      },
+      {
+        "from": "explanation.2",
+        "to": "graphics.3",
+        "why": "A scene pixel not computed from the model must sit in a region tagged illustrative, and the illustrative tag is introduced by the explanation axis."
+      },
+      {
+        "from": "fidelity.3",
+        "to": "graphics.3",
+        "why": "Every pixel of a scene computed from the model needs a model that runs for every input the page accepts."
+      },
+      {
+        "from": "fidelity.3",
+        "to": "intelligence.3",
+        "why": "Every number in model output must resolve to an engine value, so the engine must compute, with units, every value the narration may cite."
+      },
+      {
+        "from": "graphics.3",
+        "to": "interaction.3",
+        "why": "Selecting an element pins its meaning only when each mark encodes a value; selecting a decorative mark pins nothing."
+      },
+      {
+        "from": "material.3",
+        "to": "lessons.3",
+        "why": "A structured lesson for every declared unit needs material that covers every unit and a source registry the lesson's sources section cites."
+      },
+      {
+        "from": "material.2",
+        "to": "missions.3",
+        "why": "A task's instructions and files open inside the product, confined to the task's folder, once task material is data the product loads."
+      },
+      {
+        "from": "evidence.2",
+        "to": "orientation.3",
+        "why": "A next action that drills the weakest unit needs a state per unit from which the weakest one is read."
+      },
+      {
+        "from": "practice.3",
+        "to": "orientation.3",
+        "why": "A deep link into a drill on one unit opens the action with its parameters, which needs drills scoped by unit and sub-unit."
+      },
+      {
+        "from": "material.3",
+        "to": "practice.3",
+        "why": "Drills scoped by unit and a mix weighted by unit need items in every declared unit; an uncovered unit gives an empty drill."
+      },
+      {
+        "from": "evidence.3",
+        "to": "progress.3",
+        "why": "The state a unit shows, 'too early to tell' included, is an output of the evidence rule; without it the views show raw percentages."
+      },
+      {
+        "from": "lessons.2",
+        "to": "progress.3",
+        "why": "State per unit appears on the track and module views, which first exist as the track page and the unit pages."
+      },
+      {
+        "from": "interface.3",
+        "to": "reach.3",
+        "why": "The control that must take arrow keys is the shared segmented control, which the interface's component set defines."
+      },
+      {
+        "from": "practice.3",
+        "to": "reach.3",
+        "why": "Items and challenge navigation answer to keys; the item engine is where those keys are bound."
+      },
+      {
+        "from": "evidence.2",
+        "to": "records.3",
+        "why": "A derived digest recomputed after each write needs something to derive, and the first derived quantity is the state per unit."
+      },
+      {
+        "from": "lessons.3",
+        "to": "tutoring.3",
+        "why": "Help links to the unit's lesson and to related units, and related units first exist as a field of the structured lesson."
+      },
+      {
+        "from": "practice.2",
+        "to": "evidence.3",
+        "why": "The rule picks the latest counted attempt per item with its mode, and sessions are where several attempts per item are first recorded."
+      },
+      {
+        "from": "interface.4",
+        "to": "engineering.4",
+        "why": "End-to-end tests and screenshots at 1440 and 390 px drive the built shell through its routes."
+      },
+      {
+        "from": "practice.3",
+        "to": "evidence.4",
+        "why": "Unit drills follow a teaching order by the visitor's latest answer, so drills scoped by unit must exist for the order to act on."
+      },
+      {
+        "from": "records.3",
+        "to": "evidence.4",
+        "why": "A challenge that prefers items least seen in earlier challenges reads the log of finished sessions."
+      },
+      {
+        "from": "fiction.4",
+        "to": "explanation.4",
+        "why": "A guided tour builds the central scene one concept at a time, so the central scene must already play on one page."
+      },
+      {
+        "from": "interaction.3",
+        "to": "explanation.4",
+        "why": "Selecting an element explains it from live values, which needs a selection that pins the element's meaning."
+      },
+      {
+        "from": "interaction.4",
+        "to": "fiction.4",
+        "why": "The central scene plays as one continuous experience only when the selection and time anchor survive a view switch and sub-views keep their state."
+      },
+      {
+        "from": "engineering.3",
+        "to": "fidelity.4",
+        "why": "Reference checks run as node tests in the repository, on the harness of seeded unit tests that already cover the engine."
+      },
+      {
+        "from": "explanation.3",
+        "to": "fidelity.4",
+        "why": "Thresholds declared with their source, and assumptions listed on the page, need claims that carry author, year and venue."
+      },
+      {
+        "from": "reach.2",
+        "to": "graphics.4",
+        "why": "Reduced motion gets the finished frame, which carries the page's global reduced-motion rule into the scene."
+      },
+      {
+        "from": "engineering.3",
+        "to": "intelligence.4",
+        "why": "Every fixture state renders before any prompt work, and those fixtures are the seeded test states the engineering axis keeps."
+      },
+      {
+        "from": "records.3",
+        "to": "intelligence.4",
+        "why": "Each call records its route, model, prompt hash, latency, cache hit and fallback reason as an appended typed event in the record's log."
+      },
+      {
+        "from": "fidelity.3",
+        "to": "interaction.4",
+        "why": "When the visitor drags the subject itself the model receives inputs nobody chose, so it must run for every input the page accepts."
+      },
+      {
+        "from": "orientation.3",
+        "to": "interaction.4",
+        "why": "State in the URL restores on load through the deep-link parser that drops a malformed parameter and opens the view without it."
+      },
+      {
+        "from": "reach.2",
+        "to": "interface.4",
+        "why": "Navigation that changes by width (drawer, rail, sidebar) extends the phone layout that restacks the views."
+      },
+      {
+        "from": "evidence.4",
+        "to": "lessons.4",
+        "why": "Check questions in a lesson come unseen first, then last wrong, which is the evidence axis's teaching order applied to the lesson's unit."
+      },
+      {
+        "from": "fidelity.3",
+        "to": "lessons.4",
+        "why": "A worked example the reader decides first and the engine then reveals is only correct for every case the reader tries when the model runs for every input the page accepts."
+      },
+      {
+        "from": "graphics.3",
+        "to": "lessons.4",
+        "why": "A mechanism animated step by step is a procedural view whose marks encode steps; it needs drawing that is computed, with motion kept for state."
+      },
+      {
+        "from": "practice.3",
+        "to": "lessons.4",
+        "why": "Rules and traps link to drills on them, which needs drills scoped below the unit."
+      },
+      {
+        "from": "records.2",
+        "to": "material.4",
+        "why": "Done counts and done rules across the product need a typed record kind for curriculum ticks, with a repeated item stored once."
+      },
+      {
+        "from": "fidelity.4",
+        "to": "missions.4",
+        "why": "An offline check asserts the visitor's result against the engine; the engine is a fair judge only once its own outputs pass reference checks with stated tolerances."
+      },
+      {
+        "from": "intelligence.1",
+        "to": "missions.4",
+        "why": "An offline check that asserts the mechanics with no network and no key can only assert what a deterministic engine computes."
+      },
+      {
+        "from": "practice.3",
+        "to": "orientation.4",
+        "why": "The placement check that can end the first run is a short set of items on the instrument, drawn by the same item engine in its four formats."
+      },
+      {
+        "from": "records.1",
+        "to": "orientation.4",
+        "why": "A first-run flow opens only on a first visit and a reset control returns to it; both need kept state, or every visit is the first."
+      },
+      {
+        "from": "lessons.4",
+        "to": "practice.4",
+        "why": "Warm-ups are generated from the lessons' rules, traps and terms, so those must exist as structured lesson blocks."
+      },
+      {
+        "from": "material.2",
+        "to": "practice.4",
+        "why": "A session survives edits to the material only when the material carries ids and a version the saved session can be checked against."
+      },
+      {
+        "from": "records.3",
+        "to": "practice.4",
+        "why": "A session that resumes after a closed browser saves latest-wins through durable writes; a lost or stale write loses the session."
+      },
+      {
+        "from": "records.3",
+        "to": "progress.4",
+        "why": "The progress view reads the derived digest recomputed after each write; without it each tile recounts raw events and tiles can disagree."
+      },
+      {
+        "from": "progress.4",
+        "to": "reach.4",
+        "why": "Charts on the progress view switch to a table twin and read by keyboard, so those charts must exist first."
+      },
+      {
+        "from": "evidence.3",
+        "to": "records.4",
+        "why": "An agent's actions post back as counted evidence, and what counts is defined by the one evidence rule."
+      },
+      {
+        "from": "material.2",
+        "to": "records.4",
+        "why": "The product notices that its material has a newer version only when the material carries a version."
+      },
+      {
+        "from": "evidence.3",
+        "to": "tutoring.4",
+        "why": "In the tutored mode right answers never count and misses do, which the one evidence rule states as an assisted mode."
+      },
+      {
+        "from": "lessons.4",
+        "to": "tutoring.4",
+        "why": "The revision sheet groups misses by unit with that unit's rules, traps and terms, which the lessons state as decision rules and traps."
+      },
+      {
+        "from": "interface.2",
+        "to": "graphics.4",
+        "why": "The world's material reaches every surface through the platform token contract that the site tokens already carry; the lab's own token file is drawn in that material afterwards."
+      },
+      {
+        "from": "intelligence.3",
+        "to": "tutoring.4",
+        "why": "An agent that explains an item on the page calls the model through the site route and may cite only values the engine computed; an agent run outside the page is off the real path, as the scope block counts it."
+      },
+      {
+        "from": "fidelity.4",
+        "to": "intelligence.4",
+        "why": "Decision tables that feed rules and prompts hold the model's thresholds, each declared once with its direction and source, and derived facts carry the inputs and units the inspector lists for every computed value."
+      },
+      {
+        "from": "lessons.2",
+        "to": "material.4",
+        "why": "Every unit page shows the curriculum items that map to it, so each declared unit must have a page."
+      },
+      {
+        "from": "tutoring.2",
+        "to": "evidence.5",
+        "why": "Feedback that reacts to a confident miss and to a right guess extends the feedback that already names the visitor's choice and explains why it wins or loses."
+      },
+      {
+        "from": "fidelity.5",
+        "to": "explanation.5",
+        "why": "The how-it-works explainer ends in a validation footer, which reports how many reference values the model meets within tolerance."
+      },
+      {
+        "from": "lessons.4",
+        "to": "explanation.5",
+        "why": "A traps catalogue lists facts that surprise newcomers, and traps first exist as lesson blocks that say why they fail."
+      },
+      {
+        "from": "material.5",
+        "to": "explanation.5",
+        "why": "The rule that no element ships without its overlay entry holds only when one validation command refuses a build that lacks an entry."
+      },
+      {
+        "from": "tutoring.2",
+        "to": "explanation.5",
+        "why": "The insight check explains every answer, which is the feedback that names the choice and says why each option wins or loses."
+      },
+      {
+        "from": "fidelity.5",
+        "to": "fiction.5",
+        "why": "An entry at its depicted detail shows quantities, and every quantity in the central scene must come from a published model."
+      },
+      {
+        "from": "graphics.5",
+        "to": "fiction.5",
+        "why": "Every entry runs at the detail its source depicts, and the depicted look of the central scene is drawn at that detail by graphics."
+      },
+      {
+        "from": "intelligence.5",
+        "to": "fiction.5",
+        "why": "Where the fiction gives an intelligent role (a guide, an editor, a coach, the other side of a conversation), the fiction is complete only when that role is played."
+      },
+      {
+        "from": "interaction.5",
+        "to": "fiction.5",
+        "why": "The fiction is made real when the visitor performs every action its protagonist performs, by every input."
+      },
+      {
+        "from": "material.3",
+        "to": "fiction.5",
+        "why": "The skeptic lists the depicted capabilities from the inventory's cited sources, which the material keeps in its source registry with the canon's own documents."
+      },
+      {
+        "from": "explanation.2",
+        "to": "fidelity.5",
+        "why": "Removing every illustrative value from the scene presumes every claim was first tagged real or illustrative."
+      },
+      {
+        "from": "graphics.3",
+        "to": "fidelity.5",
+        "why": "Counting the illustrative values left in the central scene uses the regions that graphics tags as illustrative."
+      },
+      {
+        "from": "interaction.4",
+        "to": "graphics.5",
+        "why": "Two linked views light each other through one selection that every view shares."
+      },
+      {
+        "from": "engineering.5",
+        "to": "intelligence.5",
+        "why": "A sealed test part stays sealed only under a written governance rule; without one the prompt can be tuned on the test."
+      },
+      {
+        "from": "fidelity.5",
+        "to": "intelligence.5",
+        "why": "The intelligence plays its role across the whole scene and may cite only engine values, so every quantity the scene shows must already be computed by a published model."
+      },
+      {
+        "from": "progress.5",
+        "to": "interaction.5",
+        "why": "Pivoting the same data by goal needs goals the visitor set: the goal date, the budget and the dated plan."
+      },
+      {
+        "from": "reach.3",
+        "to": "interaction.5",
+        "why": "Every verb of the protagonist must work by keyboard as by mouse and touch, which extends the keyboard paths the reach axis already guarantees for the main routes."
+      },
+      {
+        "from": "reach.5",
+        "to": "interaction.5",
+        "why": "Each action works by mouse, by touch and by keyboard; that needs accessible names and 44 px targets at every width."
+      },
+      {
+        "from": "material.2",
+        "to": "interface.5",
+        "why": "The about card states the material's version, which the material carries as a hash or a dated build id."
+      },
+      {
+        "from": "missions.2",
+        "to": "interface.5",
+        "why": "The palette indexes every object kind the bindings list, and on a lab with missions it searches the task catalogue by title, unit and status, which the catalogue must first hold."
+      },
+      {
+        "from": "orientation.3",
+        "to": "interface.5",
+        "why": "The palette opens a section by deep link and suggests the continue action, both built first as the main deep links."
+      },
+      {
+        "from": "interface.4",
+        "to": "lessons.5",
+        "why": "Lessons, guides and documents print on a light ground without navigation chrome through the shell's print styles."
+      },
+      {
+        "from": "material.3",
+        "to": "lessons.5",
+        "why": "Guides and track documents open in one reader with a reading time only once they are part of the material."
+      },
+      {
+        "from": "progress.3",
+        "to": "lessons.5",
+        "why": "Study time counted on a lesson follows the progress axis's rule for honest time: only while the page is visible and in use, with a stated idle cutoff."
+      },
+      {
+        "from": "records.3",
+        "to": "lessons.5",
+        "why": "Reading state (the start, the furthest section, autosaved notes, completion) is a set of recorded actions that append to the event log and must survive a failed write."
+      },
+      {
+        "from": "lessons.3",
+        "to": "material.5",
+        "why": "One command checks the lesson schema and word limits, so lessons must already be written in one schema."
+      },
+      {
+        "from": "practice.3",
+        "to": "material.5",
+        "why": "The validator checks answer-key tells such as key length and key position, which exist only for items with several options."
+      },
+      {
+        "from": "tutoring.3",
+        "to": "material.5",
+        "why": "The validator rejects help that leaks the answer, a check that is empty until help steps exist."
+      },
+      {
+        "from": "evidence.3",
+        "to": "missions.5",
+        "why": "A verified outcome is recorded as evidence, and evidence counts only through the one written rule that mastery and readiness read."
+      },
+      {
+        "from": "fidelity.4",
+        "to": "missions.5",
+        "why": "Completion requires a pass, and a pass on the lab's own instrument is a computed value inside a declared threshold and tolerance."
+      },
+      {
+        "from": "evidence.4",
+        "to": "orientation.5",
+        "why": "The return view names the visitor's weakest unit and their mistakes; both are lists the evidence axis computes for selection."
+      },
+      {
+        "from": "interface.4",
+        "to": "orientation.5",
+        "why": "The next action appears in navigation badges, which needs the shell's navigation to carry them."
+      },
+      {
+        "from": "interface.5",
+        "to": "orientation.5",
+        "why": "The next action also appears as the first suggestion of the command palette, so the palette must exist and suggest continue on an empty query."
+      },
+      {
+        "from": "practice.4",
+        "to": "orientation.5",
+        "why": "The return view shows where to continue and what is due, which are the saved session in progress and the spaced recall deck."
+      },
+      {
+        "from": "progress.5",
+        "to": "orientation.5",
+        "why": "A countdown to the visitor's goal date needs the goal date the visitor sets on the progress axis."
+      },
+      {
+        "from": "records.3",
+        "to": "orientation.5",
+        "why": "The return view is built from the visitor's record through the derived digest that drives the dashboards."
+      },
+      {
+        "from": "evidence.3",
+        "to": "practice.5",
+        "why": "A half-length variant that never counts toward readiness, and answers recorded only at submit, are exclusions the evidence rule must state."
+      },
+      {
+        "from": "material.5",
+        "to": "practice.5",
+        "why": "A challenge allocated by the blueprint's weights needs a pool with a minimum of items per unit, which the material gates check before release."
+      },
+      {
+        "from": "progress.3",
+        "to": "practice.5",
+        "why": "Results show the run's readiness checks and the score per unit against a target, which the progress axis already computes and shows."
+      },
+      {
+        "from": "lessons.5",
+        "to": "progress.5",
+        "why": "A pace meter turns the work left into work per day, and the work left is counted from lessons not yet marked complete, with their minutes."
+      },
+      {
+        "from": "material.3",
+        "to": "progress.5",
+        "why": "A dated plan of phases and typed tasks covers the declared units and the material's activities; a plan over part of the units is only a calendar."
+      },
+      {
+        "from": "missions.2",
+        "to": "progress.5",
+        "why": "A dated plan of typed tasks with minutes includes hands-on tasks, whose minutes are the missions' timeboxes."
+      },
+      {
+        "from": "engineering.5",
+        "to": "reach.5",
+        "why": "Publishing refuses a build that carries private material, and what is private is defined by the privacy and authorship rules."
+      },
+      {
+        "from": "explanation.3",
+        "to": "reach.5",
+        "why": "Every graphic that carries data has a text or table twin; the twin says in words what the legend names in marks."
+      },
+      {
+        "from": "material.2",
+        "to": "reach.5",
+        "why": "Each view states whether its heavy data is precomputed, a split the material axis makes between scripts that precompute and pages that read."
+      },
+      {
+        "from": "orientation.3",
+        "to": "reach.5",
+        "why": "Deep links survive static hosting only once the main next actions are deep links with parameters."
+      },
+      {
+        "from": "engineering.4",
+        "to": "records.5",
+        "why": "Shared merge vectors fix the merge rule of every record kind, and every implementation passes them; that needs fixtures both test suites replay."
+      },
+      {
+        "from": "evidence.3",
+        "to": "records.5",
+        "why": "Logs merge as a union so every device computes the same latest counted attempt; a merge that drops one device's answers would change the visitor's mastery."
+      },
+      {
+        "from": "evidence.3",
+        "to": "tutoring.5",
+        "why": "A right answer given after help never counts as unaided evidence; that clause extends the written evidence rule to help opened in any mode."
+      },
+      {
+        "from": "records.4",
+        "to": "tutoring.5",
+        "why": "A revision sheet that is kept, reopens after a reload and exports is a record kind; it travels in the export the record already produces as one file."
+      },
+      {
+        "from": "evidence.5",
+        "to": "practice.5",
+        "why": "Results show the run's readiness checks, and those checks are the thresholds of the readiness checklist the evidence axis states."
+      },
+      {
+        "from": "fiction.2",
+        "to": "missions.5",
+        "why": "Completion requires a pass on a result the visitor produced; a mission over an entry that runs only on presets leaves the visitor nothing of their own for the check to judge."
+      },
+      {
+        "from": "evidence.3",
+        "to": "explanation.6",
+        "why": "An explanation that follows the visitor's own results reads counted results, the same evidence every other consumer reads."
+      },
+      {
+        "from": "records.3",
+        "to": "fiction.6",
+        "why": "The fiction remembers the visitor's visits from the event log; a saved state remembers only the last frame."
+      },
+      {
+        "from": "evidence.3",
+        "to": "intelligence.6",
+        "why": "The intelligence reads the visitor's record through the evidence rule, so assisted answers never inflate what it takes the visitor to know."
+      },
+      {
+        "from": "records.4",
+        "to": "intelligence.6",
+        "why": "The intelligence reads the visitor's own record through the digest the record already exposes to an agent."
+      },
+      {
+        "from": "evidence.5",
+        "to": "orientation.6",
+        "why": "Today's ordered session puts due recall and misses first, and both come from the spaced schedule of missed items."
+      },
+      {
+        "from": "progress.5",
+        "to": "orientation.6",
+        "why": "Today's session is sized to the visitor's daily budget, which the visitor sets on the progress axis."
+      },
+      {
+        "from": "evidence.6",
+        "to": "lessons.6",
+        "why": "Depth follows the visitor's own evidence through the memory model fitted to their answers, so a unit they hold is read less deeply than one that is fading."
+      },
+      {
+        "from": "evidence.6",
+        "to": "missions.6",
+        "why": "Missions are chosen from the visitor's weakest unit, which the memory model ranks with the decay of each unit's mastery over time."
+      },
+      {
+        "from": "practice.6",
+        "to": "tutoring.6",
+        "why": "Help opens at the step the visitor needs and skips the steps they pass reliably, read from the ability estimate fitted to their answers."
+      },
+      {
+        "from": "evidence.6",
+        "to": "orientation.6",
+        "why": "The view states with numbers what improved since the last visit, and the improvement is the change in the estimate the memory model fits to the visitor's answers."
+      },
+      {
+        "from": "interface.7",
+        "to": "explanation.7",
+        "why": "An explained state travels by link through the stable link that every state of the lab has."
+      },
+      {
+        "from": "fidelity.7",
+        "to": "fiction.7",
+        "why": "An artefact of the fiction reopens identically elsewhere only when the run behind it reproduces on another machine."
+      },
+      {
+        "from": "interaction.4",
+        "to": "interface.7",
+        "why": "Every state has a stable link once the instrument's state lives in the URL and restores on load."
+      },
+      {
+        "from": "fidelity.7",
+        "to": "missions.7",
+        "why": "A passed mission's run opened by another visitor must show the same numbers, and two runs compared must differ only where their inputs differ."
+      },
+      {
+        "from": "records.7",
+        "to": "progress.7",
+        "why": "A progress report travels by link as a read-only view of the record that already travels by link or file."
+      },
+      {
+        "from": "engineering.8",
+        "to": "fiction.8",
+        "why": "A contributed scene, entity or rule extends the fiction without touching a core file only through a documented extension interface."
+      },
+      {
+        "from": "engineering.4",
+        "to": "graphics.8",
+        "why": "Contributed scenes are gated by the screenshot and renderer tests the engineering axis runs in continuous integration."
+      },
+      {
+        "from": "material.5",
+        "to": "lessons.8",
+        "why": "Contributed lessons and worked examples are checked by the same lesson-schema and link gates as the lab's own lessons."
+      },
+      {
+        "from": "material.5",
+        "to": "practice.8",
+        "why": "Contributed items and decks pass the same validator the lab's own material passes, run in continuous integration."
+      },
+      {
+        "from": "fidelity.9",
+        "to": "engineering.9",
+        "why": "The conformance benchmark ships the model's reference outputs, which the fidelity release produces with its checks."
+      },
+      {
+        "from": "fidelity.9",
+        "to": "fiction.9",
+        "why": "The dataset of what the fiction made real produces is built from the model's released tables and their reference checks."
+      },
+      {
+        "from": "material.9",
+        "to": "practice.9",
+        "why": "The item bank release is part of the material release and is built by the same reproducible command."
+      }
+    ],
+    "roots": {
+      "reach.2": "A phone layout, a global reduced-motion rule, a visible focus ring and a skip link are owed to every visitor on the first page that ships; they need no model, record or lesson behind them, and other axes build on them.",
+      "interface.2": "Fonts from the approved hosts, the site tokens and shared basic components come from the site's own requirements, which every lab inherits; no other axis of the lab has to exist first.",
+      "engineering.2": "Modules with typed boundaries, data files apart from the code, one loader per source and an entry file with no domain logic are a shape any running code can take on its own, before any other function exists. The exception is engineering.2.5, which reads mastery, readiness and weak units from the digest that records builds at rung 3; it holds under the principle's rule for a clause that names a higher rung's capability.",
+      "engineering.5": "Request guards, a content security policy, sealed secrets, privacy and authorship rules and a governance rule answer to the site's own security, privacy and governance requirements, which bind every page from its first release.",
+      "fidelity.2": "A mechanism that computes outputs from inputs along one path is the lab's first act of its own: it needs no record, shell, lesson or material beyond its formulas, and the second rungs of the subject half wait on it.",
+      "fidelity.3": "A published model is chosen from the canon and implemented on its own; it needs no record, shell or lesson, and free input only puts it to a wider test.",
+      "material.2": "Data apart from code, with a version and a loader that names broken files, is a shape the material takes on its own once it exists; no other axis has to exist first.",
+      "material.3": "Coverage of the declared units, the source registry and the canon's own documents come from the bindings' canon; no other axis has to exist first.",
+      "lessons.2": "The bindings declare the units, modules and weights, and the track splits the subject into them; no other axis has to exist first.",
+      "intelligence.2": "One model call through the site route with a fallback good on its own is a site requirement every lab inherits (site-route); the fallback says what the axis's own deterministic engine of rung 1 computes.",
+      "orientation.2": "An entry view that shows content and names one next action needs no other axis; a running example is one way to meet it.",
+      "interface.3": "A token file, a second tone and the shared components are built over the site tokens and basic components of the axis's own rung 2; no other axis has to exist first."
+    }
+  },
+  "scope": {
+    "principle": "The axes say whether what a lab has is right; scope says how much of it there is and how it holds together. A lab is counted as a graph: its organs (the working parts a visitor uses on their own), its links (one organ computing from what another wrote) and its reach (the share of the subject's units its organs work on, and how many organs work on each). One well-made instrument passes the low rungs of every subject axis, because those rungs ask whether what exists is correct; alone it stays at scope level 1. It rises when other organs stand beside it and read each other; from level 3 it must be joined to them, and from level 4 one of them must read what the visitor did on it. Breadth counts only when it is connected: from level 3 an organ outside the largest connected part counts for nothing.",
+    "organ": "An organ is a working part of the lab that a visitor can use on its own for one purpose, on the real path of the visitor the lab is built for, with the access that visitor has; where organs sit behind credentials, the count says whose path it is. It passes three tests: it does work of its own kind (computes an answer, teaches a unit, runs a practice, holds a mission, computes a record, keeps a plan); it keeps or computes state that no other organ holds (the visitor's input or work in it, or a result only it produces); and it is no other organ seen another way. Views that draw the same values are one organ, and so is a part that only shows a shared selection; a part that keeps its own state and gives its own kind of result stays an organ when it follows a shared selection. Six plots of one measurement, a canvas, a tab, a panel, a narration or a tour of the instrument belong to the organ they show, and help shown on an exercise belongs to the organ whose exercise it helps. A list, shelf, history or picker of the runs, items or sessions one organ produced belongs to that organ; a record view is an organ only when it computes, across records, a state no single record shows (a state per unit, a trend, a readiness verdict) and the visitor acts on it. A box that answers questions about another organ's current state, or sets it, is that organ's narration or control, whatever engine it runs; an organ's own input is about the subject. One runner started with another filter, scope, unit or track is the same organ, and copies per track or per unit add reach, never organs. Calling the lab's engine does not merge parts: a practice session, a summative challenge, a mission check and a lesson's worked example that all compute their keys with the instrument's engine are separate organs when each keeps its own state (a session, a deadline and its flags, a mission's steps, a reader's place) and gives its own kind of result (a score, a verdict on readiness, a pass, a taught unit). The instrument is the organ that runs the lab's mechanism on the visitor's own input. The shell, navigation, search, settings, sync, editions and tests carry organs and are not organs.",
+    "link": "A link is one organ reading what another organ wrote, in a way the visitor can see: a result, a record or a choice the visitor made in the first organ changes what the second organ computes, orders, selects or offers as its next action, whether the second reads it directly or through a store or a digest. Each ordered pair of two different organs counts once, however many values or pages carry it. A link steers when what the first organ wrote changes what the second deals, orders or proposes next (an item, a card, a check, a mission, a next action); any other link shows. A panel that shows one organ's state on another organ's page belongs to the organ it shows and is no link, and neither is a tally that counts the visitor's actions or time in every organ alike (a streak, an activity calendar). A deep link whose parameters one organ computes from the visitor's record is a steering link from that organ to the one it opens. A hyperlink, a deep link with fixed parameters, a shared engine, library, static material or style, and a selection several views share are no link, because the second organ reads nothing the first one wrote.",
+    "reach": "Reach is the share of the canon's units, as the lab's bindings list them, that the lab's organs work on: an organ works on a unit when it teaches, practises, measures, computes or records something of that unit on the real path, and a unit named only in text, a heading or a placeholder is not worked on. A unit counts toward reach only when enough distinct organs work on it: one at levels 1 and 2, two at level 3, three from level 4 (organs_per_unit). The units are the divisions of an outside source (a syllabus's objectives, a textbook's sections, a catalogue's measured quantities). Where a lab's canon is its own thesis, the rater checks the declared units against the published work the thesis answers to, and reads reach against that work's divisions when the declared units cover only part of it, so a lab cannot widen its reach by narrowing its subject. A lab with no bindings has a reach of 0.",
+    "rule": "A lab has three levels: its scope level, the highest level whose thresholds its graph meets, counting up from level 1 with no level skipped; and its product level and its subject level, each min(lower median of its axis rungs, weakest axis + 2) and neither above its scope level. The lab's level is the lowest of the three. At levels 1 and 2 every organ and every link counts. From level 3 an organ counts only when it belongs to the largest connected part of the graph, with links read in either direction, only the links inside that part count, and the instrument must belong to it; from level 4 at least one other organ reads what the visitor did on the instrument, and from level 5 at least two. From level 4 the graph holds the stated number of steering links and a directed cycle made of them. At level 5, each product axis the lab marks not applicable, with its reason, lowers the organ floor by the organs that axis carries in Claude Prep's joined graph (organ_of, each organ once) and the link floor by two for each of them, to no fewer than 4 organs and no fewer links than the level's steering links. Above level 5 the steps between levels stay as the thresholds state them, added to that lowered floor. No level below 5 asks such a lab for more organs or links than its level 5 floor, so the lowered floor can be reached, and a level that asks for a link still asks for one. An axis grade is a rung, never a level, and is always shown with the lab's graph beside it, so a deep rung on a one-organ lab never reads as a deep lab.",
+    "organ_of": {
+      "orientation": [
+        "Today"
+      ],
+      "lessons": [
+        "lessons"
+      ],
+      "tutoring": [],
+      "practice": [
+        "drills",
+        "mock exam",
+        "flashcards"
+      ],
+      "missions": [],
+      "evidence": [],
+      "progress": [
+        "progress",
+        "plan"
+      ],
+      "material": [],
+      "records": [],
+      "interface": [],
+      "reach": [],
+      "engineering": []
+    },
+    "claude_prep": {
+      "organs": 9,
+      "joined": 7,
+      "links": 14,
+      "steering": 10,
+      "how_counted": "Counted at the anchor commit from the inventory of its 437 features in 28 areas, by the definitions above, on the owner's path: the hosted copy is sealed to a private course repository, so a public visitor reaches only the form that connects a token. Each feature was assigned to the organ whose work it does, or to the shell, data and tooling that carry organs. Nine organs: the Today view (next actions computed from the record); lessons (course, module and lesson pages with checks, notes and guides); drills (every untimed mode with the help panel, the tutored mocks, warm-ups and the spaced review of misses, which run in one runner); the timed mock exam (its deadline, navigator, flags and exam report; every session, drills included, ends on one results screen whose revision sheet of misses is built in the browser, never stored, and belongs to the session it reports); the flashcard deck; the progress view (mastery, readiness, history, calibration); the plan (exam dates, daily minutes, the pace meter, phases); the hands-on labs; and the tracker of the official courses. The instrument is drills: the runner where the visitor answers and the app grades the answer, which is the mechanism the other organs read; Today, progress and lessons each compute from what the visitor did there, and the timed mock exam is the summative challenge beside it. Not organs: shell, search, settings, sync, editions, design system, tests, and the agent commands that run outside the app, off the page's real path. Fourteen links, each an ordered pair where one organ computes from what another wrote: Today reads lessons (the next lesson), flashcards (cards due), drills (misses and the weakest objective) and progress (the focus course is the first one not yet ready); progress reads drills (mastery), the mock (readiness checks) and lessons (lessons done); lessons read drills (checks dealt unseen first, then last wrong); drills read lessons (warm-ups scoped to studied lessons, and completed lessons with no answers join the weak list) and the mock (its misses open a drill); the plan reads lessons (the pace divides the lessons left); and Today opens lessons, drills and flashcards with parameters it computes from the record. Ten of them steer; the four that progress and the plan read only show. The labs and the course tracker appear on other pages only as panels, and no organ computes from their state, so the largest connected part holds seven organs, drills and the mock among them. Every one of the 27 domains and of the 123 objectives has a lesson, at least 3 questions and at least one card, and a mastery state, so four organs work on each unit. Counted the same way at the commits its history dates to levels 2, 3 and 4, the graph already had these nine organs and fourteen links when the app was rebuilt at level 2: its breadth arrived whole and its later levels were depth, so its history bounds thresholds 2 to 4 from above and cannot set them.",
+      "graph": {
+        "reads": "Each link runs from the organ that wrote to the organ that reads it. Counted by tools/evolution.mjs, which fails when these counts and the numbers above disagree.",
+        "instrument": "drills",
+        "organs": [
+          "Today",
+          "lessons",
+          "drills",
+          "mock exam",
+          "flashcards",
+          "progress",
+          "plan",
+          "hands-on labs",
+          "course tracker"
+        ],
+        "links": [
+          {
+            "from": "lessons",
+            "to": "Today",
+            "steers": true
+          },
+          {
+            "from": "flashcards",
+            "to": "Today",
+            "steers": true
+          },
+          {
+            "from": "drills",
+            "to": "Today",
+            "steers": true
+          },
+          {
+            "from": "progress",
+            "to": "Today",
+            "steers": true
+          },
+          {
+            "from": "drills",
+            "to": "progress"
+          },
+          {
+            "from": "mock exam",
+            "to": "progress"
+          },
+          {
+            "from": "lessons",
+            "to": "progress"
+          },
+          {
+            "from": "drills",
+            "to": "lessons",
+            "steers": true
+          },
+          {
+            "from": "lessons",
+            "to": "drills",
+            "steers": true
+          },
+          {
+            "from": "mock exam",
+            "to": "drills",
+            "steers": true
+          },
+          {
+            "from": "lessons",
+            "to": "plan"
+          },
+          {
+            "from": "Today",
+            "to": "lessons",
+            "steers": true
+          },
+          {
+            "from": "Today",
+            "to": "drills",
+            "steers": true
+          },
+          {
+            "from": "Today",
+            "to": "flashcards",
+            "steers": true
+          }
+        ],
+        "reach": 1
+      }
+    },
+    "thresholds": {
+      "1": {
+        "organs": 1,
+        "links": 0,
+        "reach": 0.01,
+        "organs_per_unit": 1,
+        "says": "One organ, or several that do not read each other: the lab is a single working part, however well it is drawn and however many units it touches."
+      },
+      "2": {
+        "organs": 3,
+        "links": 1,
+        "reach": 0.25,
+        "organs_per_unit": 1,
+        "says": "At least three organs and the first link: one organ computes from what another wrote, as a record view turns the sessions practice finished into a state per unit, over a quarter of the declared units."
+      },
+      "3": {
+        "organs": 5,
+        "links": 4,
+        "reach": 0.5,
+        "organs_per_unit": 2,
+        "joined": true,
+        "instrument_read_by": 0,
+        "says": "At least five organs in one connected graph, the instrument among them, joined by at least four links, with half the declared units each worked on by two organs; an organ outside the largest connected part counts for nothing."
+      },
+      "4": {
+        "organs": 6,
+        "links": 7,
+        "steering": 3,
+        "cycle": true,
+        "reach": 0.8,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 1,
+        "says": "At least six joined organs and seven links, three of which steer, with a directed loop made of steering links, so a result made in one organ changes what another offers next; another organ reads what the visitor did on the instrument, and four fifths of the declared units are each worked on by three organs."
+      },
+      "5": {
+        "organs": 7,
+        "links": 11,
+        "steering": 5,
+        "cycle": true,
+        "reach": 1,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 2,
+        "says": "At least seven joined organs and eleven links, five of which steer, with two organs reading what the visitor did on the instrument and three organs working on every declared unit. Claude Prep measures nine organs, seven of them joined by fourteen links, ten of which steer. Each product axis marked not applicable lowers the floor by its organs in organ_of."
+      },
+      "6": {
+        "organs": 9,
+        "links": 16,
+        "steering": 5,
+        "cycle": true,
+        "reach": 1,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 2,
+        "says": "The level 5 graph with the organs that stood apart now reading the visitor's record, and a forecast organ that answers from the model of that visitor with an interval: at least nine joined organs and sixteen links, more than the anchor measurably has."
+      },
+      "7": {
+        "organs": 10,
+        "links": 19,
+        "steering": 5,
+        "cycle": true,
+        "reach": 1,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 2,
+        "says": "A comparison organ joins: it computes the differences between the visitor's record and a shared one unit by unit, reads the record view and the summative challenge, and is read by the record view: at least ten joined organs and nineteen links."
+      },
+      "8": {
+        "organs": 11,
+        "links": 21,
+        "steering": 5,
+        "cycle": true,
+        "reach": 1,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 2,
+        "says": "A workshop organ joins: a contributor drafts an entry and runs the lab's gates on it, and practice and lessons read the draft before it is submitted: at least eleven joined organs and twenty-one links."
+      },
+      "9": {
+        "organs": 12,
+        "links": 23,
+        "steering": 5,
+        "cycle": true,
+        "reach": 1,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 2,
+        "says": "A release organ joins: the visitor opens a released dataset, filters it and places their own result in it from their record, and the instrument opens any released case: at least twelve joined organs and twenty-three links."
+      },
+      "10": {
+        "organs": 13,
+        "links": 25,
+        "steering": 5,
+        "cycle": true,
+        "reach": 1,
+        "organs_per_unit": 3,
+        "joined": true,
+        "instrument_read_by": 2,
+        "says": "A citation organ joins: the visitor picks any state and gets a citation pinned to a release, beside the verified outside references to that part, read from the release and comparison organs: at least thirteen joined organs and twenty-five links over every unit."
+      }
+    }
   },
   "ledger_schema": {
     "path": "labs/levels/ledger/<lab id>.json",

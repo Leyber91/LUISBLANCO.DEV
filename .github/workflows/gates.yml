@@ -49,6 +49,9 @@ jobs:
       - name: stories
         run: |
           if [ -f tools/stories.mjs ]; then node tools/stories.mjs selftest && node tools/stories.mjs; else echo "NOT_CHECKED: tools/stories.mjs does not exist"; fi
+      - name: evolution
+        run: |
+          if [ -f tools/evolution.mjs ]; then node tools/evolution.mjs selftest && node tools/evolution.mjs; else echo "NOT_CHECKED: tools/evolution.mjs does not exist"; fi
       - name: model route tests
         run: |
           if [ -f workers/model-route/test.mjs ]; then node workers/model-route/test.mjs; else echo "NOT_CHECKED: workers/model-route/test.mjs does not exist"; fi
