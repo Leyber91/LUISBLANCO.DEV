@@ -14,6 +14,11 @@ here, the daily routine included, are in SITE_RULES.md:
 - tools/: the gates (privacy_gate.py, site_check.mjs, levels.mjs, lab_tests.mjs, anti_tells.mjs) and the lab
   worktree tool (labs-wt.mjs). The gates workflow runs them on every pull request.
 
+## Committing
+
+- Read `git status --short` and stage files by name. Staging a whole folder once carried a tool's local cache
+  (wrangler's account file) into a pushed commit on 2026-11-13; tools leave such files wherever they run.
+
 ## Labs work
 
 - Designing or restyling anything a visitor sees in labs/: use the labs-design skill. It carries the plate
