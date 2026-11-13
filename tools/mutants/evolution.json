@@ -1,0 +1,157 @@
+[
+  {
+    "name": "scope: every organ counts when the level is joined",
+    "from": "if (t.joined === true) {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "scope: the steering count is ignored",
+    "from": "if ((t.steering || 0) > m.steering) out.push(",
+    "to": "if (false) out.push("
+  },
+  {
+    "name": "scope: the loop of steering links is ignored",
+    "from": "if (t.cycle === true && !m.cycle) out.push(",
+    "to": "if (false) out.push("
+  },
+  {
+    "name": "scope: readers of the instrument are ignored",
+    "from": "if ((t.instrument_read_by || 0) > m.readBy) out.push(",
+    "to": "if (false) out.push("
+  },
+  {
+    "name": "scope: one organ on a unit is always enough for reach",
+    "from": "const per = t.organs_per_unit || 1;\n    let n = 0;",
+    "to": "const per = 1;\n    let n = 0;"
+  },
+  {
+    "name": "scope: the instrument may sit outside the joined part",
+    "from": "if (joined && !m.instrumentIn) out.push(",
+    "to": "if (false) out.push("
+  },
+  {
+    "name": "scope: steering links outside the joined part count",
+    "from": "const steer = links.filter((k) => k.steers);",
+    "to": "const steer = [...pairs.values()].filter((k) => k.steers);"
+  },
+  {
+    "name": "scope: organs outside the joined part add reach",
+    "from": "for (const o of keep) if ((g.works.get(o) || []).includes(u)) c++;",
+    "to": "for (const o of names) if ((g.works.get(o) || []).includes(u)) c++;"
+  },
+  {
+    "name": "scope: a link from an organ to itself counts",
+    "from": "if (!k.from || !k.to || k.from === k.to || !names.has(k.from)",
+    "to": "if (!k.from || !k.to || !names.has(k.from)"
+  },
+  {
+    "name": "floor: a not-applicable axis lowers nothing",
+    "from": "  if (!drop) return t;\n  const f5 =",
+    "to": "  if (true) return t;\n  const f5 ="
+  },
+  {
+    "name": "floor: a subject axis lowers the floor",
+    "from": "if (kinds.get(a) === 'product' && marked(na, a)) for (const o of",
+    "to": "if (marked(na, a)) for (const o of"
+  },
+  {
+    "name": "floor: an axis marked without a reason lowers the floor",
+    "from": "if (kinds.get(a) === 'product' && marked(na, a)) for (const o of",
+    "to": "if (kinds.get(a) === 'product') for (const o of"
+  },
+  {
+    "name": "floor: the relief repeats at every level above 5",
+    "from": "if (level > 5) return { ...t, organs: f5.organs + (t.organs - t5.organs), links: f5.links + (t.links - t5.links) };",
+    "to": "if (level > 5) return { ...t, organs: Math.max(4, t.organs - drop), links: Math.max(0, t.links - 2 * drop) };"
+  },
+  {
+    "name": "floor: the link floor falls below the steering links",
+    "from": "links: Math.max(t5.steering || 0, t5.links - 2 * drop) };",
+    "to": "links: Math.max(0, t5.links - 2 * drop) };"
+  },
+  {
+    "name": "levels: product and subject are not capped at scope",
+    "from": "const cap = (x) => (x == null || scope == null ? x : Math.min(x, scope));",
+    "to": "const cap = (x) => x;"
+  },
+  {
+    "name": "levels: a lab never counted reads as level 0",
+    "from": "const level = atlas.scope && !counted ? null :",
+    "to": "const level = atlas.scope && !counted ? 0 :"
+  },
+  {
+    "name": "levels: a placeholder scope_today counts as a count",
+    "from": "const counted = !!(atlas.scope && st && Array.isArray(st.organs) && st.organs.length && Array.isArray(st.links));",
+    "to": "const counted = !!(atlas.scope && st);"
+  },
+  {
+    "name": "atlas: the anchor may stand below level 5",
+    "from": "if (lvl < 5) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: the anchor may stand above level 5",
+    "from": "if (lvl > 5) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: the anchor's stated links are not compared with its graph",
+    "from": "if (all.links !== cp.links || cg.links.length !== cp.links) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: thresholds need not be joined from level 3",
+    "from": "if ((t.joined === true) !== (l >= 3)) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: thresholds need no loop from level 4",
+    "from": "if (l >= 4 ? !(t.cycle === true && t.steering >= 2) : (t.cycle === true || t.steering > 0)) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: organs per unit are not tied to scope.reach",
+    "from": "if ((t.organs_per_unit || 1) !== per) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: organ_of may name an organ outside the joined graph",
+    "from": "else if (m5 && !m5.kept.has(o)) errs.push(",
+    "to": "else if (false) errs.push("
+  },
+  {
+    "name": "atlas: organ_of may list one organ under two axes",
+    "from": "if (owner.has(o)) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: organ_of may sit under a subject axis",
+    "from": "if (kinds.get(axis) !== 'product') errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "atlas: the emergence statement is not required",
+    "from": "if (!long(ev.emergence, 200)) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "plans: a typo in concept.status reads as waiting",
+    "from": "return ['proposed', 'pending'].includes(c.status) ? 'waiting' : 'unknown';",
+    "to": "return 'waiting';"
+  },
+  {
+    "name": "plans: a plan need not mark its instrument",
+    "from": "if (s.organs.filter((o) => o && o.instrument === true).length !== 1) errs.push(",
+    "to": "if (false) errs.push("
+  },
+  {
+    "name": "plans: a marked axis needs no reason",
+    "from": "else if (!marked(na, k)) errs.push(",
+    "to": "else if (false) errs.push("
+  },
+  {
+    "name": "plans: story graphs ignore the lowered floor",
+    "from": "const floor = floorAt(l, atlas, plan.na);",
+    "to": "const floor = floorAt(l, atlas, {});"
+  }
+]
