@@ -52,6 +52,10 @@ jobs:
       - name: evolution
         run: |
           if [ -f tools/evolution.mjs ]; then node tools/evolution.mjs selftest && node tools/evolution.mjs; else echo "NOT_CHECKED: tools/evolution.mjs does not exist"; fi
+      # a selftest is only as good as the broken rules it catches: each listed rule is broken in a copy and must fail it
+      - name: mutation test of the gates
+        run: |
+          if [ -f tools/mutate.mjs ]; then node tools/mutate.mjs selftest && node tools/mutate.mjs; else echo "NOT_CHECKED: tools/mutate.mjs does not exist"; fi
       - name: model route tests
         run: |
           if [ -f workers/model-route/test.mjs ]; then node workers/model-route/test.mjs; else echo "NOT_CHECKED: workers/model-route/test.mjs does not exist"; fi
