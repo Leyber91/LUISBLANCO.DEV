@@ -21,6 +21,12 @@ belongs to. Everything below serves those two recognitions.
 - One focal living element that means something, with quiet around it. The page is alive at rest: it shows a
   running example on load, never an empty panel waiting for input.
 - An evidence footer tags each claim [REAL] or [ILLUSTRATIVE].
+- Hierarchy comes from type weight and size first, then spacing, then hairlines, and colour last, as a signal. Card
+  shadows, filled gradients and pill chrome on plain labels are out: on a calm surface the one changed thing is seen.
+- Hairlines are inset, single and never doubled; adjacent panels share one line.
+- Remove any value the visitor could derive from two others already on screen.
+- Numbers never truncate. A panel too narrow for its number is a layout bug.
+- Every state renders at the same height (empty, loading, error, offline, full), so nothing jumps when data lands.
 
 ## Type
 
@@ -38,7 +44,11 @@ belongs to. Everything below serves those two recognitions.
 - Gold, the `--accretion` family, marks only what has fired: live, chosen, computed, decided, the finished strand.
   A visitor learns in seconds that gold means "this happened"; any decorative gold breaks that.
 - No third hue. A world's material may tint the ink (a cold blue in Cosmos, a fog grey in Contact) but never adds
-  a new accent.
+  a new accent. Colour, motion and a change of size each mean a state; a section label or a frame stays uncoloured.
+- Gold is earned in tiers that only add: every element wears the base drawing; an element whose data reaches its
+  target gains a deeper edge; only one past its target gains gold. Reward then reads as earned.
+- Gold stays a small share of the screen, as lines, ticks and stamps, never as a fill. Gold everywhere means nothing.
+- Values are neutral by default and diverge around zero only where the sign matters.
 
 ## The seven worlds and their materials
 
@@ -54,6 +64,21 @@ Each world's look is derived from its subject, so two worlds never look alike wh
 | Signals | Trending, Meme Lab, Predictive Analytics, Social Manager, User-Generated Content, Community Challenges | seismograph fields | stacked traces, change-point ticks, fields of small multiples | tremor and its record | a detected burst, a resolved prediction |
 | Workshop | Project Management, Automation, Rapid Prototyping | drafting lines | construction lines, dimension arrows, revision clouds, title blocks | a line being drafted | a shipped item, a passing check |
 
+### What makes a world
+
+- Colour is locked and type stays within Plex Mono and Fraunces (weight, optical size and italic may vary), so a
+  world differs from its neighbours on at least four of: geometry, texture, ornament, motion and ink tint. Fewer
+  than four is a palette, not a world.
+- The function test: a world's material must reveal data, change a convention structurally (the Machine's chrome
+  shows its own render times and sources; Claims sets documents with verdicts in a margin), or be bound to state.
+  A material that passes none of the three is pastiche.
+- Before any CSS, write the world brief: its anchor, the one move that must land, the four or five axes above,
+  an effects budget, what distinguishes it from the other six, and its honest failure mode.
+- Hand-made worlds (Contact, Self) vary each item slightly, seeded by its id, so the variation is stable and never
+  jitters on refresh.
+- Land one world at a time and screenshot every lab and every state in it before starting the next; a world that
+  passes on one page still breaks a table on another.
+
 The hub is the orrery of these worlds: rings that close as their labs reach level 5, filaments whose reach is each
 lab's level, gold where a lab is live. Its motion philosophy is in [closing-rings.md](closing-rings.md).
 
@@ -63,8 +88,12 @@ lab's level, gold where a lab is live. Its motion philosophy is in [closing-ring
   height. If a mark encodes nothing, remove it.
 - Reveal by ignition (the figure draws itself to its measured state), then let the material move: ink on a curl
   field, a phosphor sweep, a breath. Seed the randomness so a given state always draws the same picture.
-- prefers-reduced-motion gets the finished frame, still and complete. Pause animation when the page is hidden or
-  the element is offscreen.
+- prefers-reduced-motion gets the finished frame, still and complete.
+- Every animated scene (canvas, WebGL, background) follows one lifecycle: `init` returns a handle with `destroy`,
+  `pause` and `resume`; a scene being replaced is destroyed before the next one starts; one document-level
+  visibility listener pauses whatever is running; no scene keeps a free animation loop or a listener after
+  `destroy`. Long sessions stay smooth and a hidden tab costs nothing.
+- Preview cheaply on hover and run the heavy work only on commit.
 
 ## Copy
 

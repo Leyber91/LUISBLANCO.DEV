@@ -49,11 +49,27 @@ One model call per visitor action, batched as one JSON request, validated, with 
 everything a model is not needed for, because the public route allows one reply per 45 seconds per IP. Served from
 127.0.0.1, llm.js uses the local Ollama; test the model path there and make at most one live public call.
 
+The model narrates; the lab computes. This contract keeps a model from ever printing a number or a rule the lab
+did not produce:
+
+1. The engine computes every value and fires every rule.
+2. The model returns typed blocks (headline, a reference to a computed value by id, a causal step between two
+   references, a short line, a declared gap), never free prose with numbers in it.
+3. A validator runs before anything renders: the schema parses, every rule id is one that fired, every reference
+   resolves, no digits appear in prose, headlines stay under their word cap. A failure falls back.
+4. A deterministic builder emits the same blocks from the same state and renders through the same view; only the
+   route badge differs. Most visitors on the public route see this path, so it is the product, not a lesser copy.
+5. Answers are cached by their input and a time bucket, so a repeat visit does not spend the visitor's allowance.
+
 ## Truth
 
 Real published models and values, cited with author, year and venue on the page. When unsure of a value, write
 "uncertain" in a comment and use a value labelled [ILLUSTRATIVE]. Original work on published ideas; no copied
 designs, glyphs, game art or logos. Never name an employer, client, colleague or internal system.
+
+Data surfaces are honest about their state: a placeholder says what is pending; when a live source is
+unreachable the lab shows a bundled snapshot with its date; every view carries a provenance strip (source, date,
+freshness). Ratios are recomputed from their totals, never averaged.
 
 ## Machine safety
 
@@ -70,7 +86,9 @@ A change is done when it rendered and you looked at it.
 2. Zero uncaught console errors.
 3. From the worktree: `python tools/privacy_gate.py --selftest`, `node tools/site_check.mjs`,
    `node tools/lab_tests.mjs`, `node tools/anti_tells.mjs`. All pass.
-4. If a screenshot shows a form beside an empty panel, it is not done.
+4. Shoot every state the lab can be in (empty, loading, error, offline, full) through deep links, not only the
+   happy path.
+5. If a screenshot shows a form beside an empty panel, it is not done.
 
 ## Report
 
