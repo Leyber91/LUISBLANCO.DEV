@@ -107,6 +107,8 @@ export function createPlot(host, store, actions) {
     const mode = st.plot;
     tabs.forEach((b) => { const on = b.dataset.plot === mode; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
     cby.value = st.colorBy || 'none';
+    // the timeline's bars are already stacked by method, so colour-by has nothing to change there
+    cby.parentElement.hidden = mode === 'time';
     if (!st.list.length) return;
     bars = []; pts = null; proj = null; box = null;
     if (mode === 'time') drawTimeline(ctx, w, h, st);

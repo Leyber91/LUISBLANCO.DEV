@@ -87,9 +87,10 @@ export function physics(p) {
   w = w.map((x) => Math.max(x, 0) / s);
   const domClass = w.indexOf(Math.max(...w));
 
-  // equilibrium temperature: trust pl_eqt; else derive (Teff^1, verified)
+  // equilibrium temperature: trust pl_eqt; else Teq = Teff sqrt(R* / 2a) (1 - A)^(1/4), the relation
+  // science.js equilibriumTemp() uses. 278.3 K = 5772 K * sqrt(1 R_sun / 2 AU); Rstar is in solar radii.
   const A = A_CLASS[domClass];
-  const Teq = p.pl_eqt ?? clamp(278.3 * (Teff / 5772) * Math.pow(a, -0.5) * Math.pow(1 - A, 0.25), 30, 4000);
+  const Teq = p.pl_eqt ?? clamp(278.3 * (Teff / 5772) * Math.sqrt(Rstar / a) * Math.pow(1 - A, 0.25), 30, 4000);
 
   // gravity / escape
   const gRel = M / (R * R);

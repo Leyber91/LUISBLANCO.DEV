@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import * as S from '../science.js';
 import { loadSnapshot } from '../catalog.js';
+import { physics, classify } from '../data.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 let failed = 0, passed = 0;
@@ -103,6 +104,20 @@ yes(`a lower limit of 16 M_earth cuts the forecast below it (16th percentile ${l
 const k442 = byName.get('Kepler-442 b'), k442rv = S.rvSemiAmplitude(k442);
 yes('an eccentricity lower limit is not used as e (Kepler-442 b: e > 0.04 is a bound; the velocity curve takes e = 0 and says so)',
   k442.ecc === null && k442.lim.ecc.dir === -1 && k442rv && k442rv.e === 0 && k442rv.eLimit === k442.lim.ecc);
+
+// ---- the render's Teq fallback includes the host radius (it assumed 1 solar radius until 2026-11-13) ----
+// TRAPPIST-1 h by hand: 2566 K * sqrt(0.1192 R_sun / (2 * 0.06189 AU)) = 171.7 K at zero albedo, 157.1 K at
+// the rocky-class albedo 0.30. The old fallback gave 455 K and drew a temperate rocky world.
+const th = { ...byName.get('TRAPPIST-1 h'), pl_eqt: null };
+near('TRAPPIST-1 h with its published Teq withheld: render Teq (K)', physics(th).Teq, 157.1, 1);
+yes('TRAPPIST-1 h with its published Teq withheld is drawn frozen', classify(th).label === 'Frozen world');
+let nFb = 0, okFb = 0;
+for (const p of list) {
+  if (p.pl_eqt !== null) continue;
+  const plate = S.equilibriumTemp(p, 0.3); if (!plate) continue;
+  nFb++; if (Math.abs(physics(p).Teq / plate - 1) <= 0.2) okFb++;
+}
+yes(`with no published Teq, the render's Teq is within 20% of the plate's for ${okFb} of ${nFb} worlds`, nFb > 200 && okFb / nFb > 0.97);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
