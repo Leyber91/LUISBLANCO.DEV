@@ -26,7 +26,8 @@ merged. A run that changed nothing still writes its entry, with the reason.
   1280 px and 390 px (and measured at 320, 360, 430 and 860 px); a screenshot at 320 px shows the three image-source
   buttons inside the panel. The only console error was the request to a local model server, refused when none is
   running and the same on main. Forbidden-name check: runs in the gates workflow on the pull request.
-- Gates and merge: pending at the time of writing.
+- Gates on pull request #14: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-12, Labs: Token EKG measures instead of drawing
 
