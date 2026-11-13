@@ -3,6 +3,32 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-13, Labs OS: a consent banner, a privacy page and the owner's usage dashboard (not a routine run)
+
+- New for a visitor: the labs hub now asks, once, whether this browser may send usage of the labs to their author.
+  Allow and No thanks have equal weight and nothing is sent before Allow. What is sent: which lab is opened and
+  from where, how long the page was visible, which kinds of controls were used, and a random id for the browser.
+  Never anything typed; no name, email or IP address is stored with the events. "Your data" shows the choice, lets
+  the visitor change it, and erases what was sent.
+- New page labs/privacy.html: who is responsible, what stays in the browser, what is sent with consent and to whom
+  (Supabase, EU West, Paris), where a lab's model prompts go, the fonts' host, retention (raw events become daily
+  counts after 90 days), and how to export, delete, erase and withdraw. It describes what the code does and says it
+  is not legal advice.
+- New page labs/dashboard.html, for the site's owner only: visitors, sessions, opens, visible time, actions and
+  errors per lab and per day, which labs were never opened, and where visits came from. Anyone else who signs in
+  sees that the account is not the owner; the database returns them no rows.
+- Behind it: a Supabase project with row-level security on every table. Three migrations are applied. A visitor
+  can add events and can erase the events of their own browser; only the owner can read them.
+- Checks: 246 tests of Labs OS; the build reproduces the committed output; a live smoke test sent two events and
+  erased them, leaving none; in headless Chrome against the real backend nothing was sent before Allow and erasure
+  left zero rows; 52 database access checks (two visitors cannot read or change each other's data; only the owner
+  reads usage) and 36 checks of the anonymous path over the real API pass; the owner's recognition was checked in
+  the database. The site gates pass: privacy selftest 18 of 18, site_check 24 pages and 0 findings, levels, lab
+  tests, anti-tells, atlas, stories, model route.
+- Not yet proven: the owner's sign-in by emailed link has not been run with a real session.
+- Known limits: the banner covers part of the hero's second line at 1440 by 900 until it is answered; events are
+  sent when a page is left, so a phone tab the system kills sends its last events on the next visit.
+
 ## 2026-11-13, Labs: a model route of their own, about two seconds a reply (not a routine run)
 
 - New for a visitor with no local model and no key: the labs that call a model through the shared route now get

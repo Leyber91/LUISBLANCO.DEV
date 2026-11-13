@@ -15,6 +15,14 @@
    every call returns { ok: false, reason: 'recording off' } and
    appends nothing.
 
+   What data may hold: which control was used, a count, a
+   duration, an id from the lab's own vocabulary. Never what a
+   visitor typed, chose as free text or pasted: with consent
+   these events are sent as usage (transport.ts), and usage
+   carries no content. The transport drops what looks like
+   prose, but it cannot know that a short word was typed, so the
+   rule is kept here, by the lab.
+
    Built-in types (labs register their own, under their own
    prefix, for example "heptapod.decoded"):
 
@@ -115,10 +123,13 @@ export class Tracker {
         }
         this.last.set(key, t); // set before the write, so a burst in the same tick is throttled too
         const event = { v: EVENT_V, id: this.id(), t, lab, type, data: payload, session: this.opts.session };
+        // before the write: on pagehide the write may never finish, and the sink sends in the same tick
+        this.opts.sink?.note(event);
         try {
             await this.opts.store.append(event);
         }
         catch (e) {
+            this.opts.sink?.drop(event.id);
             return refuse('store-failed', e instanceof Error ? e.message : String(e));
         }
         return { ok: true, event };

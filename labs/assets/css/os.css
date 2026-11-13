@@ -127,8 +127,12 @@
   font-size: var(--t-micro); color: var(--text-dim); background: var(--los-ground);
 }
 .los-fixture .los-label { color: var(--horizon); }
+.los-fixture[hidden] { display: none; }   /* the class sets display, which would otherwise outrank the attribute */
 .os-data { display: inline-flex; align-items: center; gap: var(--s-4); flex-wrap: wrap; }
 .los-data-btn { font-size: var(--t-micro); padding: .5em .9em; }
+.os-data a { font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; }
+.os-data .os-owner { color: var(--text-faint); }   /* the author's own door: present, and quiet */
+.os-data .os-owner:hover { color: var(--text-dim); }
 
 /* ---------------- Your data ---------------- */
 /* 1 px of padding keeps the corner brackets (offset -1 px) inside the dialog, so it never grows a scrollbar
@@ -152,16 +156,30 @@
 .los-confirm-text { flex: 1 1 100%; color: var(--text-bright); font-size: var(--t-stamp); }
 .los-status { min-height: 3.2em; margin: var(--s-4) 0 0; color: var(--text-dim); font-size: var(--t-stamp); line-height: 1.6; }
 .los-sharing, .los-recording { display: grid; gap: var(--s-2); justify-items: start; }
+.los-sharing .los-choice { width: min(100%, 22rem); }
 
 /* ---------------- the sharing question ---------------- */
+/* What is sent is a list, one item a line, each led by a short ink rule: the four things are counted at a glance
+   and none hides in a sentence. What is never sent keeps the body ink; where it is kept and for how long steps
+   back one rung. The two answers are the same button twice; neither is filled or pre-pressed. On a wide screen
+   the plate sits in the lower right corner, clear of the hero; on a narrow one it spans the bottom edge. */
 .los-consent {
-  position: fixed; left: 50%; bottom: var(--s-5); transform: translateX(-50%);
-  width: min(660px, calc(100vw - 2 * var(--s-4))); z-index: var(--z-toast);
+  position: fixed; right: var(--s-5); bottom: var(--s-5);
+  width: min(460px, calc(100vw - 2 * var(--s-4))); z-index: var(--z-toast);
+  max-height: calc(100vh - 2 * var(--s-4)); overflow-y: auto;
   background: var(--void);
 }
-.los-consent .los-copy { margin-top: var(--s-3); }
+.los-consent .los-copy { margin: var(--s-3) 0 0; font-size: var(--t-stamp); max-width: none; }
+.los-consent .los-fine { color: var(--text-dim); font-size: var(--t-micro); line-height: 1.65; margin-bottom: var(--s-4); }
+.los-sent {
+  list-style: none; margin: var(--s-2) 0 0; padding: 0;
+  font-size: var(--t-stamp); line-height: 1.6; color: var(--text-bright);
+}
+.los-sent li { display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: var(--s-3); align-items: baseline; }
+.los-sent li::before { content: ""; height: 1px; background: var(--line-bright); transform: translateY(-.3em); }
 .los-choice { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
 .los-choice .los-btn { width: 100%; }
+.los-copy .los-link { white-space: nowrap; }
 
 /* ---------------- narrow ---------------- */
 @media (max-width: 760px) {
@@ -170,7 +188,7 @@
   .los-next { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: var(--s-3); }
   .los-rows { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
   .los-rows dd { margin-bottom: var(--s-2); }
-  .los-consent { bottom: var(--s-3); }
+  .los-consent { right: 50%; transform: translateX(50%); bottom: var(--s-3); width: calc(100vw - 2 * var(--s-4)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,5 +1,5 @@
 import type { OSConfig } from './config.js';
-import type { Consent } from './consent.js';
+import type { Consent, ConsentRecord } from './consent.js';
 import type { LabsOSInstance, StorageInfo } from './index.js';
 import type { Suggestion } from './resume.js';
 export interface PlateLast {
@@ -22,11 +22,24 @@ export interface ResumePlateInput {
     readonly dataHref?: string;
     /** the visitor's recording switch (default on) */
     readonly recording?: boolean;
+    /** true while usage events are sent with the visitor's consent */
+    readonly sharing?: boolean;
 }
 export declare function resumePlate(input: ResumePlateInput): HTMLElement;
-export declare function storageStamp(s: StorageInfo, recording?: boolean): HTMLElement;
+export declare function storageStamp(s: StorageInfo, recording?: boolean, sharing?: boolean): HTMLElement;
 export declare function fixtureStamp(s: StorageInfo): HTMLElement | null;
-export declare function consentCopy(config: OSConfig): string;
+/** The sharing choice in words, with what it means right now. */
+export declare function sharingWords(r: ConsentRecord, recording: boolean, recipient: string): string;
+/** The sharing question, in parts: each sentence states one thing that is checked in transport.ts or on the backend. */
+export interface ConsentCopy {
+    readonly ask: string;
+    /** exactly what a usage event carries */
+    readonly sent: readonly string[];
+    readonly never: string;
+    readonly kept: string;
+    readonly change: string;
+}
+export declare function consentCopy(config: OSConfig): ConsentCopy;
 export declare function mountConsentBanner(root: HTMLElement, consent: Consent, config: OSConfig): {
     el: HTMLElement;
     destroy(): void;

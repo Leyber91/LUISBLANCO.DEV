@@ -101,20 +101,26 @@ describe('LabsOS.init', () => {
     expect((await os.privacy.summary()).counts).toEqual({ events: 0, progress: 0, meta: 0 });
   });
 
-  it('creates no install id and shows no consent banner in v0', async () => {
-    const os = await LabsOS.init({ lab: 'hub', idb: freshIdb(), fixture: null });
+  it('with no transport configured, asks nothing, sends nothing and makes no install id', async () => {
+    const os = await LabsOS.init({ lab: 'hub', idb: freshIdb(), fixture: null, config: { transport: null } });
     await os.track('lab.action', { n: 1 });
     expect(await os.outbox.flush()).toEqual({ sent: 0, reason: 'no-transport' });
     expect((await os.privacy.summary()).settings).not.toContain('install');
+    expect(os.sharing.available).toBe(false);
     expect(document.querySelector('.los-consent')).toBeNull();
   });
 
-  it('shows the consent banner when the flag is on and the visitor has not chosen', async () => {
-    const os = await LabsOS.init({ lab: 'hub', idb: freshIdb(), fixture: null, config: { consentUi: true } });
+  it('asks the sharing question on a first visit, and not again once it is answered', async () => {
+    const idb = freshIdb();
+    const os = await LabsOS.init({ lab: 'hub', idb, fixture: null });
     const banner = document.querySelector('.los-consent');
     expect(banner).not.toBeNull();
     (banner!.querySelector('[data-choice="denied"]') as HTMLButtonElement).click();
     await vi.waitFor(async () => expect((await os.consent.get()).state).toBe('denied'));
     expect(document.querySelector('.los-consent')).toBeNull();
+    LabsOS.reset();
+
+    await LabsOS.init({ lab: 'hub', idb, fixture: null });
+    expect(document.querySelector('.los-consent')).toBeNull();              // "No thanks" is remembered
   });
 });
