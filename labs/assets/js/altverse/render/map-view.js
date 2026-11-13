@@ -21,6 +21,19 @@ const { W: GW, H: GH } = TERRAIN_GRID;
 const INK = { text: '197,204,216', bright: '234,240,251', horizon: '159,179,214', dim: '86,93,114', gold: '212,162,76', goldSoft: '240,198,116', faint: '66,75,87' };
 const rgba = (c, a) => `rgba(${c},${a})`;
 
+/* Canvas arc() throws IndexSizeError on a negative radius; a radius that is not a finite positive number draws nothing. */
+export const arcR = (r) => (Number.isFinite(r) && r > 0 ? r : 0);
+
+/* How far the ignition has run, 0 to 1. A requestAnimationFrame timestamp is the start of the frame, so it can be
+   earlier than the performance.now() taken when the world was set (by hundreds of ms under a busy main thread):
+   elapsed time is clamped at zero, and a time that is not a number counts as finished. */
+export function revealAt(t, ignite, durationMs) {
+  if (!ignite) return 1;
+  const r = (t - ignite) / durationMs;
+  if (!Number.isFinite(r)) return 1;
+  return Math.min(1, Math.max(0, r));
+}
+
 function landRaster(ter, mode) {
   const img = new ImageData(GW, GH);
   const d = img.data;
@@ -211,7 +224,7 @@ export function drawPlate(ctx, w, PW, PH, { mode = 'terrain', small = false, ps 
       const rad = small ? 1.6 : s.rank < 3 ? 4 : s.rank < 10 ? 3 : 2.2;
       ctx.strokeStyle = rgba(INK.bright, 0.95); ctx.lineWidth = 1;
       ctx.fillStyle = '#05070B';
-      ctx.beginPath(); ctx.arc(px, py, rad, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(px, py, arcR(rad), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       if (!small && s.rank < 3) { ctx.beginPath(); [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => { ctx.moveTo(px + dx * (rad + 2), py + dy * (rad + 2)); ctx.lineTo(px + dx * (rad + 5), py + dy * (rad + 5)); }); ctx.stroke(); }
       if (!small && s.rank < labelN) {
         // skip a label that would collide with one already placed
@@ -373,21 +386,22 @@ export class MapView {
     const ctx = this.ctx; if (!ctx || !this.plate) return;
     const PW = this.PW, PH = this.PH;
     ctx.clearRect(0, 0, PW, PH);
-    let reveal = 1;
-    if (this.ignite) { reveal = Math.min(1, (t - this.ignite) / TIMING.ignition); if (reveal >= 1) this.ignite = 0; }
+    const reveal = revealAt(t, this.ignite, TIMING.ignition);
+    if (reveal >= 1) this.ignite = 0;
     const cx = PW * 0.5, cy = PH * 0.45, maxR = Math.hypot(PW, PH) * 0.6;
     const ease = 1 - Math.pow(1 - reveal, 3);
+    const ring = arcR(ease * maxR);
     if (reveal < 1) {
-      ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, ease * maxR, 0, Math.PI * 2); ctx.clip();
+      ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, ring, 0, Math.PI * 2); ctx.clip();
       ctx.drawImage(this.plate, 0, 0); ctx.restore();
       ctx.strokeStyle = rgba(INK.gold, 0.7 * (1 - reveal)); ctx.lineWidth = 1.5 * this.dpr;
-      ctx.beginPath(); ctx.arc(cx, cy, ease * maxR, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, ring, 0, Math.PI * 2); ctx.stroke();
     } else ctx.drawImage(this.plate, 0, 0);
     if (!this.w || !this.w.ctx.ter || this.mode === 'isotherm') { this.drawCursor(); return; }
 
     // day-night line: one world day per TIMING.worldDaySec; seasons advance one twelfth of a year per day
     const k = this.w.knobs;
-    const day = this.reduced ? 0.62 : ((t - this.t0) / 1000) / TIMING.worldDaySec;
+    const day = this.reduced ? 0.62 : (Math.max(0, t - this.t0) / 1000) / TIMING.worldDaySec;
     const subLon = 180 - ((day % 1) * 360);
     const decl = k.tiltDeg * Math.sin(2 * Math.PI * (day / 12 + 0.12));
     const d = this.nimg.data, sd = Math.sin(decl * Math.PI / 180), cd = Math.cos(decl * Math.PI / 180);
@@ -401,11 +415,11 @@ export class MapView {
       }
     }
     this.nctx.putImageData(this.nimg, 0, 0);
-    ctx.save(); if (reveal < 1) { ctx.beginPath(); ctx.arc(cx, cy, ease * maxR, 0, Math.PI * 2); ctx.clip(); }
+    ctx.save(); if (reveal < 1) { ctx.beginPath(); ctx.arc(cx, cy, ring, 0, Math.PI * 2); ctx.clip(); }
     ctx.imageSmoothingEnabled = true; ctx.drawImage(this.night, 0, 0, PW, PH);
     const sx = ((subLon + 180) / 360) * PW, sy = ((90 - decl) / 180) * PH;
     ctx.strokeStyle = rgba(INK.bright, 0.35); ctx.lineWidth = this.dpr;
-    ctx.beginPath(); ctx.arc(sx, sy, 6 * this.dpr, 0, Math.PI * 2); ctx.moveTo(sx - 11 * this.dpr, sy); ctx.lineTo(sx + 11 * this.dpr, sy); ctx.moveTo(sx, sy - 11 * this.dpr); ctx.lineTo(sx, sy + 11 * this.dpr); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx, sy, arcR(6 * this.dpr), 0, Math.PI * 2); ctx.moveTo(sx - 11 * this.dpr, sy); ctx.lineTo(sx + 11 * this.dpr, sy); ctx.moveTo(sx, sy - 11 * this.dpr); ctx.lineTo(sx, sy + 11 * this.dpr); ctx.stroke();
 
     // light travelling the routes
     const geo = this.w.ctx.geo;
@@ -415,13 +429,13 @@ export class MapView {
       geo.routes.forEach((r, i) => {
         const n = r.pts.length; if (n < 2) return;
         const speed = r.sea ? 0.05 : 0.08;
-        const f = ((t / 1000) * speed + i * 0.137) % 1;
+        const f = (((Math.max(0, t) / 1000) * speed + i * 0.137) % 1 + 1) % 1;
         const p = f * (n - 1), k0 = Math.floor(p), u = p - k0;
         const [x0, y0] = r.pts[k0], [x1, y1] = r.pts[Math.min(n - 1, k0 + 1)];
         if (Math.abs(x1 - x0) > GW / 2) return;
         const px = (x0 + (x1 - x0) * u + 0.5) * gx, py = (y0 + (y1 - y0) * u + 0.5) * gy;
         ctx.globalAlpha = Math.sin(f * Math.PI);
-        ctx.beginPath(); ctx.arc(px, py, 1.3 * this.dpr, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(px, py, arcR(1.3 * this.dpr), 0, Math.PI * 2); ctx.fill();
       });
       ctx.globalAlpha = 1;
     }
@@ -435,7 +449,7 @@ export class MapView {
     const s = geo.settlements[this.cursor];
     const px = (s.x + 0.5) * this.PW / GW, py = (s.y + 0.5) * this.PH / GH;
     const ctx = this.ctx; ctx.strokeStyle = rgba(INK.gold, 1); ctx.lineWidth = 1.5 * this.dpr;
-    ctx.beginPath(); ctx.arc(px, py, 9 * this.dpr, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(px, py, arcR(9 * this.dpr), 0, Math.PI * 2); ctx.stroke();
   }
 
   cellInfo(gx, gy) {

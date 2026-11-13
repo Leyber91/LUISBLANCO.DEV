@@ -16,7 +16,7 @@ import { classify, fmtYear } from './classify.js';
 import { enginePass, weaveSync, modelPass, routeMode } from './pipeline.js';
 import { validateStage } from './validate.js';
 import { WorldTree, encodeHash, decodeHash, shareURL, exportTree, modelDelta, applyDelta, deltaFromLean } from './tree.js';
-import { remember, recent, saveDelta, loadDelta } from './store.js';
+import { remember, recent, shelf, saveDelta, loadDelta } from './store.js';
 import { MapView } from './render/map-view.js';
 import { PipelineView } from './render/pipeline-view.js';
 import { RiverView } from './render/river-view.js';
@@ -91,22 +91,24 @@ input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey)
 
 function renderPresets(activeText) {
   const host = $('presets'); host.innerHTML = '';
-  PRESETS.forEach((p) => {
-    const b = el('button', 'chip', `<i>${esc(p.group)}</i>${esc(p.short)}`);
-    b.type = 'button'; b.setAttribute('role', 'listitem'); b.title = `${p.text} ${p.hint}`;
-    b.setAttribute('aria-label', `${p.text} ${p.hint}`);
-    b.setAttribute('aria-pressed', String(p.text === activeText));
-    b.addEventListener('click', () => { input.value = p.text; $('reading').innerHTML = readingHTML(p.text); diverge(p.text); });
+  const currentHash = tree.current ? encodeHash(tree.current) : '';
+  shelf(PRESETS, recent(), { activeText, currentHash, defaultSeed: DEFAULT_SEED }).forEach((c) => {
+    const b = c.kind === 'preset'
+      ? el('button', 'chip', `<i>${esc(c.group)}</i>${esc(c.short)}`)
+      : el('button', 'chip', `<i>saved</i>${esc(c.name.toLowerCase())}${c.seedNote ? ` &middot; ${esc(c.seedNote)}` : ''}`);
+    const label = c.kind === 'preset' ? `${c.text} ${c.hint}` : `Reopen ${c.name}, saved in this browser: ${c.text} Seed ${c.seed}.`;
+    b.type = 'button'; b.setAttribute('role', 'listitem'); b.title = label;
+    b.setAttribute('aria-label', label);
+    b.setAttribute('aria-pressed', String(c.pressed));
+    if (c.kind === 'preset') b.addEventListener('click', () => { input.value = c.text; $('reading').innerHTML = readingHTML(c.text); diverge(c.text); });
+    else b.addEventListener('click', () => reopen(c.hash));
     host.appendChild(b);
   });
-  const rec = recent().filter((r) => !PRESETS.some((p) => p.text === r.text)).slice(0, 4);
-  rec.forEach((r) => {
-    const b = el('button', 'chip', `<i>recent</i>${esc(r.name.toLowerCase())}`);
-    b.title = r.text;
-    b.type = 'button'; b.setAttribute('role', 'listitem');
-    b.addEventListener('click', () => { location.hash = r.hash; });
-    host.appendChild(b);
-  });
+}
+/* a saved world comes back from its hash: boot() replays seed, root and forks (and any model lines kept for it) */
+function reopen(hash) {
+  if (busy || (tree.current && encodeHash(tree.current) === hash)) return;
+  location.hash = hash;
 }
 
 /* ---------------- weaving ---------------- */
