@@ -5,12 +5,28 @@ Started 2026-11-11 on Luis's order: every lab rises on every axis, and the devel
 
 ## The atlas (Luis, 2026-11-13, supersedes the axes and the level rule below)
 
-Claude Prep (Blueprint 720) is level 5. labs/levels/atlas.json, checked by tools/atlas.mjs, is now the scale: 12
-product axes whose rung 5 is what Claude Prep measurably does on that function (from an inventory of 437 of its
-features), 6 subject axes whose rung 5 is the anchor below, each with eleven rungs and every world's rungs 5 and 10.
-A lab's level is the lower of its product level and its subject level. Every grade written before 2026-11-13 is on
-the older, gentler scale and overstates the lab. Where this file and the atlas disagree, the atlas holds; this file
-is reconciled with it in a morning session.
+Claude Prep (Blueprint 720) is level 5 on the product axes. labs/levels/atlas.json, checked by tools/atlas.mjs, is
+now the scale:
+
+- 12 product axes, derived from an inventory of 437 Claude Prep features, each cited by a clause at rung 5 or
+  below. Rung 5 is what Claude Prep measurably does on that function; where Claude Prep is weak (first run,
+  tutoring, verified hands-on tasks, access at every width) rung 5 is what a complete product needs and the axis
+  records Claude Prep's lower level.
+- 6 subject axes (fiction, fidelity, graphics, interaction, intelligence, explanation), whose rung 5 is the anchor
+  below: the lab's fiction made real.
+- Every rung is a list of numbered clauses (759 in all, 451 up to rung 5), each one thing a rater passes or fails.
+- A lab has a product level and a subject level, each min(lower median, weakest axis + 2); its level is the lower
+  of the two. At most 3 product axes may be marked not applicable, each with a reason the rater checks.
+- Before a lab is graded it declares its bindings: canon, units, challenge blueprint, central scene, fiction
+  inventory, known setup failures.
+- A platform block of 11 site requirements is graded once for the site; 14 style gates each cap their axis at 4
+  and block shipping.
+- A learning item, lesson or mission counts only when it runs on the lab's own instrument or data.
+
+Every grade written before 2026-11-13 is on the older, gentler scale and overstates the lab. The first two labs
+rated on the atlas (Exomania and Token EKG, by an independent reviewer) came out at level 1, held there by the
+product half. Where this file and the atlas disagree, the atlas holds; the rest of this file is reconciled with it
+in a morning session.
 
 ## The anchor (Luis, 2026-11-11, supersedes the calibration below)
 
