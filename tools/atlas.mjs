@@ -19,9 +19,14 @@
 //
 // usage: node tools/atlas.mjs [check|selftest]
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
+// fileURLToPath turns %20 back into a space; a URL's pathname keeps it, and the files are then not found
+const SELF = fileURLToPath(import.meta.url);
+const ROOT = path.resolve(path.dirname(SELF), '..');
 const ATLAS = path.join(ROOT, 'labs', 'levels', 'atlas.json');
 const LADDERS = path.join(ROOT, 'labs', 'levels');
 const FEATURES = path.join(ROOT, '_reference', 'labs', 'atlas', 'level5_features.json');
@@ -190,7 +195,8 @@ export function checkBindings(id, b) {
   if (!b || typeof b !== 'object') return [`${id}: declares no bindings, so no axis can be graded`];
   for (const k of BINDINGS) if (b[k] == null) errs.push(`${id}: bindings lack ${k}`);
   const c = b.canon;
-  if (c && !(nonEmpty(c.name) && nonEmpty(c.source))) errs.push(`${id}: bindings canon needs a name and a source`);
+  if (c && typeof c === 'object' && !Array.isArray(c)) { if (!(nonEmpty(c.name) && nonEmpty(c.source))) errs.push(`${id}: bindings canon needs a name and a source`); }
+  else if (c != null) errs.push(`${id}: bindings canon must be an object with a name and a source`);
   const units = Array.isArray(b.units) ? b.units : null;
   if (b.units != null && !(units && units.length)) errs.push(`${id}: bindings units must list at least 1 unit`);
   const unitIds = new Set();
@@ -199,11 +205,14 @@ export function checkBindings(id, b) {
     else { if (unitIds.has(u.id)) errs.push(`${id}: duplicate unit ${u.id}`); unitIds.add(u.id); }
   }
   const bp = b.challenge_blueprint;
-  if (bp && typeof bp === 'object') {
+  if (bp && typeof bp === 'object' && !Array.isArray(bp)) {
     if ('na' in bp) { if (!reasoned(bp.na)) errs.push(`${id}: a challenge blueprint marked not applicable needs a reason`); }
     else {
-      const w = bp.units && typeof bp.units === 'object' ? Object.entries(bp.units) : [];
-      if (!w.length) errs.push(`${id}: the challenge blueprint weighs no unit`);
+      // units maps a unit id to its weight; a list is the wrong shape, said once and never weighed entry by entry
+      const listed = Array.isArray(bp.units);
+      const w = listed ? [] : bp.units && typeof bp.units === 'object' ? Object.entries(bp.units) : [];
+      if (listed) errs.push(`${id}: the challenge blueprint units must be an object of unit ids and weights`);
+      else if (!w.length) errs.push(`${id}: the challenge blueprint weighs no unit`);
       for (const [u] of w) if (!unitIds.has(u)) errs.push(`${id}: the challenge blueprint weighs undeclared unit ${u}`);
       const sum = w.reduce((s, [, x]) => s + (Number(x) || 0), 0);
       if (w.length && Math.abs(sum - 100) > 0.5) errs.push(`${id}: the challenge blueprint weights sum to ${sum}, not 100`);
@@ -211,9 +220,10 @@ export function checkBindings(id, b) {
       if (!(Number.isInteger(bp.items) && bp.items > 0)) errs.push(`${id}: the challenge blueprint needs an item count`);
       if (!(typeof bp.minutes === 'number' && bp.minutes > 0)) errs.push(`${id}: the challenge blueprint needs its minutes`);
     }
-  }
+  } else if (bp != null) errs.push(`${id}: the challenge blueprint must be an object with its units, formats, items and minutes, or a reasoned not applicable`);
   const s = b.central_scene;
-  if (s && !(nonEmpty(s.description) && nonEmpty(s.source))) errs.push(`${id}: the central scene needs a description and a source`);
+  if (s && typeof s === 'object' && !Array.isArray(s)) { if (!(nonEmpty(s.description) && nonEmpty(s.source))) errs.push(`${id}: the central scene needs a description and a source`); }
+  else if (s != null) errs.push(`${id}: the central scene must be an object with a description and a source`);
   const inv = b.fiction_inventory;
   if (inv != null) {
     if (!Array.isArray(inv) || inv.length < MIN_INVENTORY) errs.push(`${id}: the fiction inventory needs at least ${MIN_INVENTORY} entries`);
@@ -280,6 +290,7 @@ function check() {
     ladders++;
     errs.push(...checkLadder(f.replace(/\.json$/, ''), l, atlas));
   }
+  if (!ladders) notes.push('NOT_CHECKED: no lab ladder is on the atlas, so the ladder and bindings rules (A4) ran on no file');
   for (const n of notes) console.log(n);
   if (errs.length) { console.log(`atlas: ${errs.length} problem(s)`); for (const e of errs) console.log('  ' + e); process.exit(1); }
   const clauses = clauseIndex(atlas);
@@ -317,6 +328,46 @@ function selftest() {
   const ladder = (patch) => ({ atlas: 3, inherits: ['memory'], axes: [{ kind: 'subject' }], bindings: bind, ...patch });
   const why = 'a single-visit installation keeps no history by design';
   const many = { ...shell, axes: ['p1', 'p2', 'p3', 'p4'].map((id) => ({ ...mem, id, rungs: rungsFor(id), covers: [], claude_prep_audit: audit(id, 5) })) };
+  const safe = (f) => { try { return f(); } catch { return false; } };
+  const only = (errs, line) => errs.length === 1 && errs[0] === line;   // that line and nothing else
+  const withBindings =(patch) => checkLadder('x', ladder({ bindings: { ...bind, ...patch } }), good);
+  const withBlueprint = (patch) => withBindings({ challenge_blueprint: { ...bind.challenge_blueprint, ...patch } });
+  const withGate = (patch) => checkAtlas({ ...good, style_gates: [{ ...shell.style_gates[0], ...patch }] });
+  // The command itself, as `node tools/atlas.mjs` runs it: a copy of this file in a fixture folder finds the
+  // repository from its own location. The folder name holds a space, which a URL's pathname keeps as %20.
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas self '));
+  const cli = {};
+  try {
+    const A = '_reference/labs/atlas/';
+    const run = (name, files) => {
+      const dir = path.join(root, name);
+      for (const [f, body] of Object.entries(files)) {
+        fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true });
+        fs.writeFileSync(path.join(dir, f), JSON.stringify(body));
+      }
+      fs.mkdirSync(path.join(dir, 'tools'), { recursive: true });
+      fs.copyFileSync(SELF, path.join(dir, 'tools', 'atlas.mjs'));
+      const r = spawnSync(process.execPath, [path.join(dir, 'tools', 'atlas.mjs')], { encoding: 'utf8', timeout: 20000 });
+      return { code: r.status, out: r.stdout || '', lines: (r.stdout || '').split(/\r?\n/) };
+    };
+    // the private audit, as check() merges it into the public atlas: where each clause is met, and the audit entries
+    const cites = Object.fromEntries([1, 2, 3, 4, 5].map((r) => [`memory.${r}.1`, 'x.ts:f']));
+    const base = { 'labs/levels/atlas.json': good, [`${A}level5_features.json`]: feats,
+      [`${A}pattern_ideas.json`]: { ideas: [{ id: 'P1', title: 't', disposition: 'rung', axis: 'memory', rung: 6, reason: 'r' }] },
+      [`${A}claude_prep_audit.json`]: { clauses: cites, audit: { memory: audit('memory', 5) } } };
+    cli.valid = run('valid', { ...base, 'labs/levels/x.json': ladder({}) });
+    // y.json is a lab ladder that is not on the atlas yet (no "atlas" key), so it is skipped and no ladder is counted
+    cli.none = run('no ladder', { ...base, 'labs/levels/y.json': { axes: [] } });
+    cli.broken = run('broken', { ...base, [`${A}level5_features.json`]: [...feats, { id: 'f-sync' }],
+      [`${A}pattern_ideas.json`]: { ideas: [{ id: 'P5', title: 't', disposition: 'rejected', reason: 'meh' }] },
+      [`${A}claude_prep_audit.json`]: { clauses: cites, audit: { memory: [...audit('memory', 4), { clause: 'memory.5.1', evidence: 'y.ts:g' }] } },
+      'labs/levels/x.json': ladder({ inherits: [] }) });
+    // as the gates run in CI: no private file at all; then no atlas at all
+    cli.public = run('public only', { 'labs/levels/atlas.json': good, 'labs/levels/x.json': ladder({}) });
+    cli.noAtlas = run('no atlas', {});
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
   const cases = [
     ['a complete atlas passes', checkAtlas(good).length === 0],
     ['ten rungs fail', checkAtlas(withAxis({ rungs: mem.rungs.slice(1) })).some((e) => e.includes('eleven'))],
@@ -381,6 +432,80 @@ function selftest() {
     ['an empty list of setup failures fails', checkLadder('x', ladder({ bindings: { ...bind, known_setup_failures: [] } }), good).some((e) => e.includes('at least 1 entry'))],
     ['a setup failure without its diagnosis fails', checkLadder('x', ladder({ bindings: { ...bind, known_setup_failures: [{ id: 'f1', failure: 'x' }] } }), good).some((e) => e.includes('its diagnosis'))],
     ['a reasoned not-applicable list of setup failures passes', checkLadder('x', ladder({ bindings: { ...bind, known_setup_failures: { na: 'a static page with nothing to install or connect' } } }), good).length === 0],
+    ['an axis without an id fails', checkAtlas(withAxis({ id: '' })).some((e) => e.includes('axis (no id): no id'))],
+    ['two axes with one id fail, also when another axis stands between them', checkAtlas({ ...shell, axes: [mem, fic, mem] }).some((e) => e.includes('axis memory: duplicate id'))],
+    ['an axis of an unknown kind fails', checkAtlas(withAxis({ kind: 'tool' })).some((e) => e.includes('axis memory: kind must be product or subject'))],
+    ['an axis without a metric fails', checkAtlas(withAxis({ metric: '' })).some((e) => e.includes('axis memory: no metric'))],
+    ['an audit entry without evidence fails', checkAtlas(withAxis({ claude_prep_audit: [...audit('memory', 4), { clause: 'memory.5.1', evidence: '' }] })).some((e) => e.includes('audit entry memory.5.1 has no evidence'))],
+    ['a world without its rung 10 fails', checkAtlas(withAxis({ worlds: { ...worlds, self: { r5: 'five here' } } })).some((e) => e.includes('world self needs rung 5 and rung 10 in its own terms'))],
+    ['a site requirement with an empty id fails', checkAtlas({ ...good, platform: [...shell.platform, { id: '', requirement: 'r', how_checked: 'h' }] }).some((e) => e.includes('site requirement (no id): no id'))],
+    ['two site requirements with one id fail', checkAtlas({ ...good, platform: [shell.platform[0], shell.platform[0]] }).some((e) => e.includes('site requirement site-fonts: duplicate id'))],
+    ['a style gate without an id fails', checkAtlas({ ...good, style_gates: [{ ...shell.style_gates[0], id: '' }] }).some((e) => e.includes('style gate (no id): no id'))],
+    ['two style gates with one id fail', checkAtlas({ ...good, style_gates: [shell.style_gates[0], shell.style_gates[0]] }).some((e) => e.includes('style gate glass-blur: duplicate id'))],
+    ['a style gate without a ban fails', checkAtlas({ ...good, style_gates: [{ ...shell.style_gates[0], ban: '' }] }).some((e) => e.includes('style gate glass-blur: no ban'))],
+    ['a style gate whose blocks_shipping is not a boolean fails', checkAtlas({ ...good, style_gates: [{ ...shell.style_gates[0], blocks_shipping: 'yes' }] }).some((e) => e.includes('style gate glass-blur: blocks_shipping must be true or false'))],
+    ['an atlas without a bindings schema fails', checkAtlas({ ...good, bindings_schema: undefined }).some((e) => e.includes('atlas has no bindings_schema.required'))],
+    ['a feature the inventory does not list fails', checkCoverage(withAxis({ covers: [...mem.covers, { feature: 'f-ghost', clause: 'memory.5.1' }] }), feats).some((e) => e.includes('axis memory cites unknown feature f-ghost'))],
+    ['an idea without a reason fails', checkIdeas(good, [{ id: 'P6', title: 't', disposition: 'exists' }]).some((e) => e.includes('idea P6 (t): no reason'))],
+    ['an idea on a rung above 10 fails', checkIdeas(good, [{ id: 'P7', title: 't', disposition: 'rung', axis: 'memory', rung: 11, reason: 'r' }]).some((e) => e.includes('idea P7 (t): rung 11 is not 0 to 10'))],
+    ['a unit without a name fails', checkLadder('x', ladder({ bindings: { ...bind, units: [...bind.units, { id: 'u3' }] } }), good).some((e) => e.includes('x: every unit needs an id and a name'))],
+    ['two units with one id fail', checkLadder('x', ladder({ bindings: { ...bind, units: [...bind.units, { id: 'u1', name: 'Again' }] } }), good).some((e) => e.includes('x: duplicate unit u1'))],
+    ['a blueprint that weighs no unit fails', checkLadder('x', ladder({ bindings: { ...bind, challenge_blueprint: { ...bind.challenge_blueprint, units: {} } } }), good).some((e) => e.includes('x: the challenge blueprint weighs no unit'))],
+    ['a blueprint with an item count of 0 fails', checkLadder('x', ladder({ bindings: { ...bind, challenge_blueprint: { ...bind.challenge_blueprint, items: 0 } } }), good).some((e) => e.includes('x: the challenge blueprint needs an item count'))],
+    ['a blueprint without its minutes fails', checkLadder('x', ladder({ bindings: { ...bind, challenge_blueprint: { ...bind.challenge_blueprint, minutes: undefined } } }), good).some((e) => e.includes('x: the challenge blueprint needs its minutes'))],
+    ['a blueprint given as a word, a number, false or a list fails once, and one given as null is reported once as lacking', safe(() =>
+      ['tbd', 7, false, [bind.challenge_blueprint]].every((challenge_blueprint) => only(withBindings({ challenge_blueprint }), 'x: the challenge blueprint must be an object with its units, formats, items and minutes, or a reasoned not applicable'))
+      && only(withBindings({ challenge_blueprint: null }), 'x: bindings lack challenge_blueprint'))],
+    ['a central scene without a source fails', checkLadder('x', ladder({ bindings: { ...bind, central_scene: { description: 'The pod conversation' } } }), good).some((e) => e.includes('x: the central scene needs a description and a source'))],
+    ['an inventory entry listed twice fails', checkLadder('x', ladder({ bindings: { ...bind, fiction_inventory: [...inv, inv[0]] } }), good).some((e) => e.includes('x: duplicate inventory entry i0'))],
+    ['a short not-applicable list of setup failures fails', checkLadder('x', ladder({ bindings: { ...bind, known_setup_failures: { na: 'none' } } }), good).some((e) => e.includes('x: known setup failures need entries or a reasoned not applicable'))],
+    ['a ladder inheriting an axis the atlas does not have fails, also when it marks other axes not applicable', checkLadder('x', ladder({ inherits: ['memory', 'ghost'] }), good).some((e) => e.includes('x: inherits unknown axis ghost'))
+      && checkLadder('x', ladder({ inherits: ['p4', 'ghost'], na: { p1: why, p2: why, p3: why } }), many).some((e) => e.includes('x: inherits unknown axis ghost'))],
+    ['an atlas without axes fails, and says only that', [null, { ...shell }, { ...shell, axes: 'memory' }, { ...shell, axes: [] }].every((x) => safe(() => { const e = checkAtlas(x); return e.length === 1 && e[0] === 'atlas has no axes'; }))],
+    ['an axis without a name fails', checkAtlas(withAxis({ name: ' ' })).some((e) => e.includes('axis memory: no name'))],
+    ['an axis without how_checked fails', checkAtlas(withAxis({ how_checked: ' ' })).some((e) => e.includes('axis memory: no how_checked'))],
+    ['twelve rungs fail', checkAtlas(withAxis({ rungs: [...mem.rungs, R('memory', 11)] })).some((e) => e.includes('axis memory: needs eleven rungs (0 to 10)'))],
+    ['a world without its rung 5 fails', checkAtlas(withAxis({ worlds: { ...worlds, self: { r10: 'ten here' } } })).some((e) => e.includes('axis memory: world self needs rung 5 and rung 10 in its own terms'))],
+    ['a site requirement without its requirement fails', checkAtlas({ ...good, platform: [{ id: 'site-fonts', how_checked: 'h' }] }).some((e) => e.includes('site requirement site-fonts: no requirement'))],
+    ['a style gate without how_counted fails', checkAtlas({ ...good, style_gates: [{ ...shell.style_gates[0], how_counted: ' ' }] }).some((e) => e.includes('style gate glass-blur: no how_counted'))],
+    ['a style gate cap of 11 or -1 fails, and of 10 or 0 passes', [11, -1].every((cap) => withGate({ cap }).some((e) => e.includes('style gate glass-blur: cap must be a rung 0 to 10')))
+      && [10, 0].every((cap) => withGate({ cap }).length === 0)],
+    ['an idea on rung -1 fails, and on rungs 0 and 10 passes', checkIdeas(good, [{ id: 'P8', title: 't', disposition: 'rung', axis: 'memory', rung: -1, reason: 'r' }]).some((e) => e.includes('idea P8 (t): rung -1 is not 0 to 10'))
+      && [0, 10].every((rung) => checkIdeas(good, [{ id: 'P8', title: 't', disposition: 'rung', axis: 'memory', rung, reason: 'r' }]).length === 0)],
+    ['an idea on rung 2.5 fails', checkIdeas(good, [{ id: 'P9', title: 't', disposition: 'rung', axis: 'memory', rung: 2.5, reason: 'r' }]).some((e) => e.includes('idea P9 (t): rung 2.5 is not 0 to 10'))],
+    ['a reason of 19 characters is not reasoned and one of 20 is', checkLadder('x', ladder({ inherits: [], na: { memory: 'n'.repeat(19) } }), good).some((e) => e.includes('x: product axis memory is neither inherited nor marked not applicable with a reason'))
+      && checkLadder('x', ladder({ inherits: [], na: { memory: 'n'.repeat(20) } }), good).length === 0],
+    ['an own axis that carries a frame counts as a subject axis', checkLadder('x', ladder({ axes: [{ frame: 'model' }] }), good).length === 0],
+    ['a unit without an id fails', withBindings({ units: [...bind.units, { name: 'Aspect' }] }).some((e) => e.includes('x: every unit needs an id and a name'))],
+    ['a blueprint item count of 2.5 or "20" fails', [2.5, '20'].every((items) => withBlueprint({ items }).some((e) => e.includes('x: the challenge blueprint needs an item count')))],
+    ['a blueprint of 0 minutes, or of minutes written as a word, fails', [0, '30'].every((minutes) => withBlueprint({ minutes }).some((e) => e.includes('x: the challenge blueprint needs its minutes')))],
+    ['blueprint weights 0.6 off 100 fail, and 0.5 off pass', [39.4, 40.6].every((u2) => withBlueprint({ units: { u1: 60, u2 } }).some((e) => e.includes('x: the challenge blueprint weights sum to')))
+      && [39.5, 40.5].every((u2) => withBlueprint({ units: { u1: 60, u2 } }).length === 0)],
+    ['a blueprint whose units are a word weighs no unit and names no letter of it', (() => { const e = withBlueprint({ units: 'u1' }); return e.some((x) => x.includes('x: the challenge blueprint weighs no unit')) && !e.some((x) => x.includes('undeclared')); })()],
+    ['a canon given as false, 0, an empty word, a word or a list fails once, and one given as null is reported once as lacking', safe(() =>
+      [false, 0, '', 'Chiang 1998', [bind.canon]].every((canon) => only(withBindings({ canon }), 'x: bindings canon must be an object with a name and a source'))
+      && only(withBindings({ canon: null }), 'x: bindings lack canon'))],
+    ['a central scene without a description fails', withBindings({ central_scene: { source: 'Arrival, final act' } }).some((e) => e.includes('x: the central scene needs a description and a source'))],
+    ['a central scene given as false, 0, an empty word, a word or a list fails once, and one given as null is reported once as lacking', safe(() =>
+      [false, 0, '', 'the pod', [bind.central_scene]].every((central_scene) => only(withBindings({ central_scene }), 'x: the central scene must be an object with a description and a source'))
+      && only(withBindings({ central_scene: null }), 'x: bindings lack central_scene'))],
+    ['units (beside a blueprint marked not applicable), a fiction inventory or setup failures given as null are reported once, as lacking', safe(() =>
+      only(withBindings({ units: null, challenge_blueprint: { na: 'a breathing practice has no summative test at all' } }), 'x: bindings lack units')
+      && ['fiction_inventory', 'known_setup_failures'].every((k) => only(withBindings({ [k]: null }), `x: bindings lack ${k}`)))],
+    ['a blueprint whose units are a list is reported once, as the wrong shape', only(withBlueprint({ units: [60, 40] }), 'x: the challenge blueprint units must be an object of unit ids and weights')],
+    ['an inventory entry without an id, or without a capability, fails', [{ capability: 'c', source: 's' }, { id: 'i9', source: 's' }].every((entry) => withBindings({ fiction_inventory: [...inv.slice(1), entry] }).some((e) => e.includes('x: every inventory entry needs an id, a capability and a source')))],
+    ['a setup failure without the failure fails', withBindings({ known_setup_failures: [{ id: 'f1', diagnosis: 'This browser cannot draw the scene.' }] }).some((e) => e.includes('x: every known setup failure needs the failure and its diagnosis'))],
+    ['the command passes a valid folder with every private file, found from its own path with a space in it, and says NOT_CHECKED of nothing', cli.valid.code === 0 && !cli.valid.out.includes('NOT_CHECKED')
+      && cli.valid.out.includes('atlas: 2 axes complete, 22 clauses (12 up to rung 5); 1 lab ladder(s) on the atlas carry every product axis and their bindings')],
+    ['the command says NOT_CHECKED when no ladder is on the atlas, and skips a ladder that is not', cli.none.code === 0
+      && cli.none.lines.some((l) => l.startsWith('NOT_CHECKED: no lab ladder is on the atlas')) && cli.none.out.includes('; 0 lab ladder(s) on the atlas')],
+    ['the command fails on an uncovered feature, a lazy rejection, an audit entry that disagrees with its clause and a broken ladder, and names each', cli.broken.code === 1
+      && ['1 Claude Prep feature(s) covered by no clause: f-sync', 'idea P5 (t): a rejection needs a real reason', 'axis memory: audit entry memory.5.1 cites y.ts:g but the clause cites x.ts:f',
+        'x: product axis memory is neither inherited nor marked not applicable with a reason'].every((m) => cli.broken.out.includes(m))],
+    ['the command without the private files says NOT_CHECKED for A2, A3 and A5, and checks the rest', cli.public.code === 0
+      && ['NOT_CHECKED A2:', 'NOT_CHECKED A3:', 'NOT_CHECKED A5:'].every((p) => cli.public.lines.some((l) => l.startsWith(p)))
+      && cli.public.out.includes('; 1 lab ladder(s) on the atlas carry every product axis and their bindings')],
+    ['the command without an atlas says NOT_CHECKED', cli.noAtlas.code === 0 && cli.noAtlas.lines.some((l) => l.startsWith('NOT_CHECKED: labs/levels/atlas.json does not exist'))],
   ];
   const fail = cases.filter(([, ok]) => !ok);
   for (const [n] of fail) console.log('FAIL ' + n);

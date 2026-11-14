@@ -1,0 +1,798 @@
+[
+  {
+    "name": "checkAtlas: not reported: atlas has no axes",
+    "from": "if (!atlas || !Array.isArray(atlas.axes) || !atlas.axes.length) return ['atlas has no axes'];",
+    "to": "if (!atlas || !Array.isArray(atlas.axes) || !atlas.axes.length) return [];"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: no id",
+    "from": "if (!nonEmpty(a.id)) errs.push(`${at}: no id`);",
+    "to": "if (!nonEmpty(a.id)) [].push(`${at}: no id`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: duplicate id",
+    "from": "if (seenAxis.has(a.id)) errs.push(`${at}: duplicate id`);",
+    "to": "if (seenAxis.has(a.id)) [].push(`${at}: duplicate id`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: kind must be product or subject",
+    "from": "if (!['product', 'subject'].includes(a.kind)) errs.push(`${at}: kind must be product or subject`);",
+    "to": "if (!['product', 'subject'].includes(a.kind)) [].push(`${at}: kind must be product or subject`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: no ..",
+    "from": "for (const k of ['name', 'metric', 'how_checked']) if (!nonEmpty(a[k])) errs.push(`${at}: no ${k}`);",
+    "to": "for (const k of ['name', 'metric', 'how_checked']) if (!nonEmpty(a[k])) [].push(`${at}: no ${k}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: needs eleven rungs (0 to 10)",
+    "from": "if (!Array.isArray(a.rungs) || a.rungs.length !== 11) { errs.push(`${at}: needs eleven rungs (0 to 10)`); continue; }",
+    "to": "if (!Array.isArray(a.rungs) || a.rungs.length !== 11) { [].push(`${at}: needs eleven rungs (0 to 10)`); continue; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: rung .. must be an object with text and clauses",
+    "from": "if (!r || typeof r !== 'object' || Array.isArray(r)) { errs.push(`${at}: rung ${ri} must be an object with text and clauses`); return; }",
+    "to": "if (!r || typeof r !== 'object' || Array.isArray(r)) { [].push(`${at}: rung ${ri} must be an object with text and clauses`); return; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: rung .. has no text",
+    "from": "if (!nonEmpty(r.text)) errs.push(`${at}: rung ${ri} has no text`);",
+    "to": "if (!nonEmpty(r.text)) [].push(`${at}: rung ${ri} has no text`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: rung .. has no clause",
+    "from": "if (!Array.isArray(r.clauses) || !r.clauses.length) { errs.push(`${at}: rung ${ri} has no clause`); return; }",
+    "to": "if (!Array.isArray(r.clauses) || !r.clauses.length) { [].push(`${at}: rung ${ri} has no clause`); return; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: rung .. clause .. is ..",
+    "from": "if (!c || c.id !== want) errs.push(`${at}: rung ${ri} clause ${ci + 1} is ${c && c.id ? `'${c.id}'` : 'unnamed'}, expected ${want}`);",
+    "to": "if (!c || c.id !== want) [].push(`${at}: rung ${ri} clause ${ci + 1} is ${c && c.id ? `'${c.id}'` : 'unnamed'}, expected ${want}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: clause ..: duplicate id",
+    "from": "if (c && nonEmpty(c.id)) { if (seenClause.has(c.id)) errs.push(`clause ${c.id}: duplicate id`); seenClause.add(c.id); }",
+    "to": "if (c && nonEmpty(c.id)) { if (seenClause.has(c.id)) [].push(`clause ${c.id}: duplicate id`); seenClause.add(c.id); }"
+  },
+  {
+    "name": "checkAtlas: not reported: clause ..: no text",
+    "from": "if (!c || !nonEmpty(c.text)) errs.push(`clause ${want}: no text`);",
+    "to": "if (!c || !nonEmpty(c.text)) [].push(`clause ${want}: no text`);"
+  },
+  {
+    "name": "checkAtlas: not reported: clause ..: claude_prep must be a path:symbol or null",
+    "from": "if (auditPresent && (!c || !('claude_prep' in c) || !(c.claude_prep === null || nonEmpty(c.claude_prep)))) errs.push(`clause ${want}: claude_prep must be a path:symbol or null`);",
+    "to": "if (auditPresent && (!c || !('claude_prep' in c) || !(c.claude_prep === null || nonEmpty(c.claude_prep)))) [].push(`clause ${want}: claude_prep must be a path:symbol or null`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: a product axis cites the Claude Prep features it covers",
+    "from": "if (!(Array.isArray(a.covers) && a.covers.length)) errs.push(`${at}: a product axis cites the Claude Prep features it covers`);",
+    "to": "if (!(Array.isArray(a.covers) && a.covers.length)) [].push(`${at}: a product axis cites the Claude Prep features it covers`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: blueprint_level must be 0 to 10",
+    "from": "if (!(Number.isInteger(bl) && bl >= 0 && bl <= 10)) errs.push(`${at}: blueprint_level must be 0 to 10`);",
+    "to": "if (!(Number.isInteger(bl) && bl >= 0 && bl <= 10)) [].push(`${at}: blueprint_level must be 0 to 10`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: audit entry names",
+    "from": "if (!m || m[1] !== a.id) { errs.push(`${at}: audit entry names '${e && e.clause}', not a clause of this axis`); continue; }",
+    "to": "if (!m || m[1] !== a.id) { [].push(`${at}: audit entry names '${e && e.clause}', not a clause of this axis`); continue; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: audit entry names unknown clause ..",
+    "from": "if (!c) { errs.push(`${at}: audit entry names unknown clause ${e.clause}`); continue; }",
+    "to": "if (!c) { [].push(`${at}: audit entry names unknown clause ${e.clause}`); continue; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: audit entry .. has no evidence",
+    "from": "if (!nonEmpty(e.evidence)) errs.push(`${at}: audit entry ${e.clause} has no evidence`);",
+    "to": "if (!nonEmpty(e.evidence)) [].push(`${at}: audit entry ${e.clause} has no evidence`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: audit entry .. cites .. but the clause cites ..",
+    "from": "else if (c.claude_prep !== e.evidence) errs.push(`${at}: audit entry ${e.clause} cites ${e.evidence} but the clause cites ${c.claude_prep}`);",
+    "to": "else if (c.claude_prep !== e.evidence) [].push(`${at}: audit entry ${e.clause} cites ${e.evidence} but the clause cites ${c.claude_prep}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: clause .. is at or below blueprint_level .. with no audit entry",
+    "from": "if (c && nonEmpty(c.id) && !audit.has(c.id)) errs.push(`${at}: clause ${c.id} is at or below blueprint_level ${bl} with no audit entry`);",
+    "to": "if (c && nonEmpty(c.id) && !audit.has(c.id)) [].push(`${at}: clause ${c.id} is at or below blueprint_level ${bl} with no audit entry`);"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: no translation for world ..",
+    "from": "if (!t) { errs.push(`${at}: no translation for world ${w}`); continue; }",
+    "to": "if (!t) { [].push(`${at}: no translation for world ${w}`); continue; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: world .. is not applicable without a reason",
+    "from": "if (t.na) { if (!reasoned(t.na)) errs.push(`${at}: world ${w} is not applicable without a reason`); continue; }",
+    "to": "if (t.na) { if (!reasoned(t.na)) [].push(`${at}: world ${w} is not applicable without a reason`); continue; }"
+  },
+  {
+    "name": "checkAtlas: not reported: axis ..: world .. needs rung 5 and rung 10 in its own terms",
+    "from": "if (!nonEmpty(t.r5) || !nonEmpty(t.r10)) { errs.push(`${at}: world ${w} needs rung 5 and rung 10 in its own terms`); continue; }",
+    "to": "if (!nonEmpty(t.r5) || !nonEmpty(t.r10)) { [].push(`${at}: world ${w} needs rung 5 and rung 10 in its own terms`); continue; }"
+  },
+  {
+    "name": "checkAtlas: not reported: .. names unknown clause ..",
+    "from": "for (const m of String(text).matchAll(CLAUSE_REF)) if (axisIds.has(m[1]) && !clauses.has(m[0])) errs.push(`${where} names unknown clause ${m[0]}`);",
+    "to": "for (const m of String(text).matchAll(CLAUSE_REF)) if (axisIds.has(m[1]) && !clauses.has(m[0])) [].push(`${where} names unknown clause ${m[0]}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: clause .. names unknown site requirement ..",
+    "from": "for (const m of c.text.matchAll(/site requirement ([a-z][a-z-]*)/g)) if (!platformIds.has(m[1])) errs.push(`clause ${c.id} names unknown site requirement ${m[1]}`);",
+    "to": "for (const m of c.text.matchAll(/site requirement ([a-z][a-z-]*)/g)) if (!platformIds.has(m[1])) [].push(`clause ${c.id} names unknown site requirement ${m[1]}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: atlas has no world_rule",
+    "from": "if (!nonEmpty(atlas.world_rule)) errs.push('atlas has no world_rule');",
+    "to": "if (!nonEmpty(atlas.world_rule)) [].push('atlas has no world_rule');"
+  },
+  {
+    "name": "checkAtlas: not reported: atlas has no platform requirements",
+    "from": "if (!Array.isArray(atlas.platform) || !atlas.platform.length) errs.push('atlas has no platform requirements');",
+    "to": "if (!Array.isArray(atlas.platform) || !atlas.platform.length) [].push('atlas has no platform requirements');"
+  },
+  {
+    "name": "checkAtlas: not reported: site requirement ..: no id",
+    "from": "if (!p || !nonEmpty(p.id)) errs.push(`${at}: no id`);",
+    "to": "if (!p || !nonEmpty(p.id)) [].push(`${at}: no id`);"
+  },
+  {
+    "name": "checkAtlas: not reported: site requirement ..: duplicate id",
+    "from": "else { if (seen.has(p.id)) errs.push(`${at}: duplicate id`); seen.add(p.id); }",
+    "to": "else { if (seen.has(p.id)) [].push(`${at}: duplicate id`); seen.add(p.id); }"
+  },
+  {
+    "name": "checkAtlas: not reported: site requirement ..: no ..",
+    "from": "for (const k of ['requirement', 'how_checked']) if (!p || !nonEmpty(p[k])) errs.push(`${at}: no ${k}`);",
+    "to": "for (const k of ['requirement', 'how_checked']) if (!p || !nonEmpty(p[k])) [].push(`${at}: no ${k}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: atlas has no style gates",
+    "from": "if (!Array.isArray(atlas.style_gates) || !atlas.style_gates.length) errs.push('atlas has no style gates');",
+    "to": "if (!Array.isArray(atlas.style_gates) || !atlas.style_gates.length) [].push('atlas has no style gates');"
+  },
+  {
+    "name": "checkAtlas: not reported: style gate ..: no id",
+    "from": "if (!g || !nonEmpty(g.id)) errs.push(`${at}: no id`);",
+    "to": "if (!g || !nonEmpty(g.id)) [].push(`${at}: no id`);"
+  },
+  {
+    "name": "checkAtlas: not reported: style gate ..: duplicate id",
+    "from": "else { if (seen.has(g.id)) errs.push(`${at}: duplicate id`); seen.add(g.id); }",
+    "to": "else { if (seen.has(g.id)) [].push(`${at}: duplicate id`); seen.add(g.id); }"
+  },
+  {
+    "name": "checkAtlas: not reported: style gate ..: no ..",
+    "from": "for (const k of ['ban', 'how_counted']) if (!g || !nonEmpty(g[k])) errs.push(`${at}: no ${k}`);",
+    "to": "for (const k of ['ban', 'how_counted']) if (!g || !nonEmpty(g[k])) [].push(`${at}: no ${k}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: style gate ..: caps unknown axis ..",
+    "from": "if (!g || !axisIds.has(g.axis)) errs.push(`${at}: caps unknown axis ${g && g.axis}`);",
+    "to": "if (!g || !axisIds.has(g.axis)) [].push(`${at}: caps unknown axis ${g && g.axis}`);"
+  },
+  {
+    "name": "checkAtlas: not reported: style gate ..: cap must be a rung 0 to 10",
+    "from": "if (!g || !(Number.isInteger(g.cap) && g.cap >= 0 && g.cap <= 10)) errs.push(`${at}: cap must be a rung 0 to 10`);",
+    "to": "if (!g || !(Number.isInteger(g.cap) && g.cap >= 0 && g.cap <= 10)) [].push(`${at}: cap must be a rung 0 to 10`);"
+  },
+  {
+    "name": "checkAtlas: not reported: style gate ..: blocks_shipping must be true or false",
+    "from": "if (!g || typeof g.blocks_shipping !== 'boolean') errs.push(`${at}: blocks_shipping must be true or false`);",
+    "to": "if (!g || typeof g.blocks_shipping !== 'boolean') [].push(`${at}: blocks_shipping must be true or false`);"
+  },
+  {
+    "name": "checkAtlas: not reported: atlas has no bindings_schema.required",
+    "from": "if (!Array.isArray(req)) errs.push('atlas has no bindings_schema.required');",
+    "to": "if (!Array.isArray(req)) [].push('atlas has no bindings_schema.required');"
+  },
+  {
+    "name": "checkAtlas: not reported: bindings_schema does not require ..",
+    "from": "else for (const k of BINDINGS) if (!req.includes(k)) errs.push(`bindings_schema does not require ${k}`);",
+    "to": "else for (const k of BINDINGS) if (!req.includes(k)) [].push(`bindings_schema does not require ${k}`);"
+  },
+  {
+    "name": "checkCoverage: not reported: axis .. cites unknown feature ..",
+    "from": "if (!known.has(c.feature)) { errs.push(`axis ${a.id} cites unknown feature ${c.feature}`); continue; }",
+    "to": "if (!known.has(c.feature)) { [].push(`axis ${a.id} cites unknown feature ${c.feature}`); continue; }"
+  },
+  {
+    "name": "checkCoverage: not reported: axis .. places .. on",
+    "from": "if (!hit || hit.axis !== a.id) { errs.push(`axis ${a.id} places ${c.feature} on '${c.clause}', not a clause of this axis`); continue; }",
+    "to": "if (!hit || hit.axis !== a.id) { [].push(`axis ${a.id} places ${c.feature} on '${c.clause}', not a clause of this axis`); continue; }"
+  },
+  {
+    "name": "checkCoverage: not reported: axis .. places .. at rung .. (..); Claude Prep features sit at rung 5 or below",
+    "from": "if (hit.rung > 5) { errs.push(`axis ${a.id} places ${c.feature} at rung ${hit.rung} (${c.clause}); Claude Prep features sit at rung 5 or below`); continue; }",
+    "to": "if (hit.rung > 5) { [].push(`axis ${a.id} places ${c.feature} at rung ${hit.rung} (${c.clause}); Claude Prep features sit at rung 5 or below`); continue; }"
+  },
+  {
+    "name": "checkCoverage: not reported: .. Claude Prep feature(s) covered by no clause: ..",
+    "from": "if (missing.length) errs.push(`${missing.length} Claude Prep feature(s) covered by no clause: ${missing.join(', ')}`);",
+    "to": "if (missing.length) [].push(`${missing.length} Claude Prep feature(s) covered by no clause: ${missing.join(', ')}`);"
+  },
+  {
+    "name": "checkIdeas: not reported: idea .. (..): no disposition",
+    "from": "if (!['rung', 'exists', 'rejected'].includes(i.disposition)) { errs.push(`${at}: no disposition`); continue; }",
+    "to": "if (!['rung', 'exists', 'rejected'].includes(i.disposition)) { [].push(`${at}: no disposition`); continue; }"
+  },
+  {
+    "name": "checkIdeas: not reported: idea .. (..): no reason",
+    "from": "if (!nonEmpty(i.reason)) errs.push(`${at}: no reason`);",
+    "to": "if (!nonEmpty(i.reason)) [].push(`${at}: no reason`);"
+  },
+  {
+    "name": "checkIdeas: not reported: idea .. (..): axis .. is not in the atlas",
+    "from": "if (!axes.has(i.axis)) errs.push(`${at}: axis ${i.axis} is not in the atlas`);",
+    "to": "if (!axes.has(i.axis)) [].push(`${at}: axis ${i.axis} is not in the atlas`);"
+  },
+  {
+    "name": "checkIdeas: not reported: idea .. (..): rung .. is not 0 to 10",
+    "from": "if (!(Number.isInteger(i.rung) && i.rung >= 0 && i.rung <= 10)) errs.push(`${at}: rung ${i.rung} is not 0 to 10`);",
+    "to": "if (!(Number.isInteger(i.rung) && i.rung >= 0 && i.rung <= 10)) [].push(`${at}: rung ${i.rung} is not 0 to 10`);"
+  },
+  {
+    "name": "checkIdeas: not reported: idea .. (..): a rejection needs a real reason",
+    "from": "if (i.disposition === 'rejected' && !reasoned(i.reason)) errs.push(`${at}: a rejection needs a real reason`);",
+    "to": "if (i.disposition === 'rejected' && !reasoned(i.reason)) [].push(`${at}: a rejection needs a real reason`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: declares no bindings, so no axis can be graded",
+    "from": "if (!b || typeof b !== 'object') return [`${id}: declares no bindings, so no axis can be graded`];",
+    "to": "if (!b || typeof b !== 'object') return [];"
+  },
+  {
+    "name": "checkBindings: not reported: ..: bindings lack ..",
+    "from": "for (const k of BINDINGS) if (b[k] == null) errs.push(`${id}: bindings lack ${k}`);",
+    "to": "for (const k of BINDINGS) if (b[k] == null) [].push(`${id}: bindings lack ${k}`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: bindings canon needs a name and a source",
+    "from": "if (c && typeof c === 'object' && !Array.isArray(c)) { if (!(nonEmpty(c.name) && nonEmpty(c.source))) errs.push(`${id}: bindings canon needs a name and a source`); }",
+    "to": "if (c && typeof c === 'object' && !Array.isArray(c)) { if (!(nonEmpty(c.name) && nonEmpty(c.source))) [].push(`${id}: bindings canon needs a name and a source`); }"
+  },
+  {
+    "name": "checkBindings: not reported: ..: bindings canon must be an object with a name and a source",
+    "from": "else if (c != null) errs.push(`${id}: bindings canon must be an object with a name and a source`);",
+    "to": "else if (c != null) [].push(`${id}: bindings canon must be an object with a name and a source`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: bindings units must list at least 1 unit",
+    "from": "if (b.units != null && !(units && units.length)) errs.push(`${id}: bindings units must list at least 1 unit`);",
+    "to": "if (b.units != null && !(units && units.length)) [].push(`${id}: bindings units must list at least 1 unit`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: every unit needs an id and a name",
+    "from": "if (!u || !nonEmpty(u.id) || !nonEmpty(u.name)) errs.push(`${id}: every unit needs an id and a name`);",
+    "to": "if (!u || !nonEmpty(u.id) || !nonEmpty(u.name)) [].push(`${id}: every unit needs an id and a name`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: duplicate unit ..",
+    "from": "else { if (unitIds.has(u.id)) errs.push(`${id}: duplicate unit ${u.id}`); unitIds.add(u.id); }",
+    "to": "else { if (unitIds.has(u.id)) [].push(`${id}: duplicate unit ${u.id}`); unitIds.add(u.id); }"
+  },
+  {
+    "name": "checkBindings: not reported: ..: a challenge blueprint marked not applicable needs a reason",
+    "from": "if ('na' in bp) { if (!reasoned(bp.na)) errs.push(`${id}: a challenge blueprint marked not applicable needs a reason`); }",
+    "to": "if ('na' in bp) { if (!reasoned(bp.na)) [].push(`${id}: a challenge blueprint marked not applicable needs a reason`); }"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint units must be an object of unit ids and weights",
+    "from": "if (listed) errs.push(`${id}: the challenge blueprint units must be an object of unit ids and weights`);",
+    "to": "if (listed) [].push(`${id}: the challenge blueprint units must be an object of unit ids and weights`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint weighs no unit",
+    "from": "else if (!w.length) errs.push(`${id}: the challenge blueprint weighs no unit`);",
+    "to": "else if (!w.length) [].push(`${id}: the challenge blueprint weighs no unit`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint weighs undeclared unit ..",
+    "from": "for (const [u] of w) if (!unitIds.has(u)) errs.push(`${id}: the challenge blueprint weighs undeclared unit ${u}`);",
+    "to": "for (const [u] of w) if (!unitIds.has(u)) [].push(`${id}: the challenge blueprint weighs undeclared unit ${u}`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint weights sum to .., not 100",
+    "from": "if (w.length && Math.abs(sum - 100) > 0.5) errs.push(`${id}: the challenge blueprint weights sum to ${sum}, not 100`);",
+    "to": "if (w.length && Math.abs(sum - 100) > 0.5) [].push(`${id}: the challenge blueprint weights sum to ${sum}, not 100`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint lists no format",
+    "from": "if (!(Array.isArray(bp.formats) && bp.formats.length)) errs.push(`${id}: the challenge blueprint lists no format`);",
+    "to": "if (!(Array.isArray(bp.formats) && bp.formats.length)) [].push(`${id}: the challenge blueprint lists no format`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint needs an item count",
+    "from": "if (!(Number.isInteger(bp.items) && bp.items > 0)) errs.push(`${id}: the challenge blueprint needs an item count`);",
+    "to": "if (!(Number.isInteger(bp.items) && bp.items > 0)) [].push(`${id}: the challenge blueprint needs an item count`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint needs its minutes",
+    "from": "if (!(typeof bp.minutes === 'number' && bp.minutes > 0)) errs.push(`${id}: the challenge blueprint needs its minutes`);",
+    "to": "if (!(typeof bp.minutes === 'number' && bp.minutes > 0)) [].push(`${id}: the challenge blueprint needs its minutes`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the challenge blueprint must be an object with its units, formats, items and minutes, or a reasoned not applicable",
+    "from": "} else if (bp != null) errs.push(`${id}: the challenge blueprint must be an object with its units, formats, items and minutes, or a reasoned not applicable`);",
+    "to": "} else if (bp != null) [].push(`${id}: the challenge blueprint must be an object with its units, formats, items and minutes, or a reasoned not applicable`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the central scene needs a description and a source",
+    "from": "if (s && typeof s === 'object' && !Array.isArray(s)) { if (!(nonEmpty(s.description) && nonEmpty(s.source))) errs.push(`${id}: the central scene needs a description and a source`); }",
+    "to": "if (s && typeof s === 'object' && !Array.isArray(s)) { if (!(nonEmpty(s.description) && nonEmpty(s.source))) [].push(`${id}: the central scene needs a description and a source`); }"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the central scene must be an object with a description and a source",
+    "from": "else if (s != null) errs.push(`${id}: the central scene must be an object with a description and a source`);",
+    "to": "else if (s != null) [].push(`${id}: the central scene must be an object with a description and a source`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: the fiction inventory needs at least .. entries",
+    "from": "if (!Array.isArray(inv) || inv.length < MIN_INVENTORY) errs.push(`${id}: the fiction inventory needs at least ${MIN_INVENTORY} entries`);",
+    "to": "if (!Array.isArray(inv) || inv.length < MIN_INVENTORY) [].push(`${id}: the fiction inventory needs at least ${MIN_INVENTORY} entries`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: every inventory entry needs an id, a capability and a source",
+    "from": "if (!e || !nonEmpty(e.id) || !nonEmpty(e.capability) || !nonEmpty(e.source)) errs.push(`${id}: every inventory entry needs an id, a capability and a source`);",
+    "to": "if (!e || !nonEmpty(e.id) || !nonEmpty(e.capability) || !nonEmpty(e.source)) [].push(`${id}: every inventory entry needs an id, a capability and a source`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: duplicate inventory entry ..",
+    "from": "else { if (ids.has(e.id)) errs.push(`${id}: duplicate inventory entry ${e.id}`); ids.add(e.id); }",
+    "to": "else { if (ids.has(e.id)) [].push(`${id}: duplicate inventory entry ${e.id}`); ids.add(e.id); }"
+  },
+  {
+    "name": "checkBindings: not reported: ..: known setup failures need entries or a reasoned not applicable",
+    "from": "if (!Array.isArray(f)) { if (!(f && reasoned(f.na))) errs.push(`${id}: known setup failures need entries or a reasoned not applicable`); }",
+    "to": "if (!Array.isArray(f)) { if (!(f && reasoned(f.na))) [].push(`${id}: known setup failures need entries or a reasoned not applicable`); }"
+  },
+  {
+    "name": "checkBindings: not reported: ..: known setup failures need at least 1 entry or a reasoned not applicable",
+    "from": "if (!f.length) errs.push(`${id}: known setup failures need at least 1 entry or a reasoned not applicable`);",
+    "to": "if (!f.length) [].push(`${id}: known setup failures need at least 1 entry or a reasoned not applicable`);"
+  },
+  {
+    "name": "checkBindings: not reported: ..: every known setup failure needs the failure and its diagnosis",
+    "from": "for (const e of f) if (!e || !nonEmpty(e.failure) || !nonEmpty(e.diagnosis)) errs.push(`${id}: every known setup failure needs the failure and its diagnosis`);",
+    "to": "for (const e of f) if (!e || !nonEmpty(e.failure) || !nonEmpty(e.diagnosis)) [].push(`${id}: every known setup failure needs the failure and its diagnosis`);"
+  },
+  {
+    "name": "checkLadder: not reported: ..: product axis .. is neither inherited nor marked not applicable with a reason",
+    "from": "errs.push(`${id}: product axis ${p} is neither inherited nor marked not applicable with a reason`);",
+    "to": "[].push(`${id}: product axis ${p} is neither inherited nor marked not applicable with a reason`);"
+  },
+  {
+    "name": "checkLadder: not reported: ..: .. product axes marked not applicable; at most .., because a weak axis is graded, not excused",
+    "from": "if (naCount > MAX_NA) errs.push(`${id}: ${naCount} product axes marked not applicable; at most ${MAX_NA}, because a weak axis is graded, not excused`);",
+    "to": "if (naCount > MAX_NA) [].push(`${id}: ${naCount} product axes marked not applicable; at most ${MAX_NA}, because a weak axis is graded, not excused`);"
+  },
+  {
+    "name": "checkLadder: not reported: ..: inherits unknown axis ..",
+    "from": "for (const x of inh) if (!atlas.axes.some((a) => a.id === x)) errs.push(`${id}: inherits unknown axis ${x}`);",
+    "to": "for (const x of inh) if (!atlas.axes.some((a) => a.id === x)) [].push(`${id}: inherits unknown axis ${x}`);"
+  },
+  {
+    "name": "checkLadder: not reported: ..: has no subject axis of its own",
+    "from": "if (!(ladder.axes || []).some((a) => a.kind === 'subject' || a.frame)) errs.push(`${id}: has no subject axis of its own`);",
+    "to": "if (!(ladder.axes || []).some((a) => a.kind === 'subject' || a.frame)) [].push(`${id}: has no subject axis of its own`);"
+  },
+  {
+    "name": "checkLadder: not reported: the errors passed along from checkBindings",
+    "from": "errs.push(...checkBindings(id, ladder.bindings));",
+    "to": "[].push(...checkBindings(id, ladder.bindings));"
+  },
+  {
+    "name": "check: not reported: the errors passed along from checkCoverage",
+    "from": "if (fs.existsSync(FEATURES)) errs.push(...checkCoverage(atlas, JSON.parse(fs.readFileSync(FEATURES, 'utf8'))));",
+    "to": "if (fs.existsSync(FEATURES)) [].push(...checkCoverage(atlas, JSON.parse(fs.readFileSync(FEATURES, 'utf8'))));"
+  },
+  {
+    "name": "check: not reported: the errors passed along from checkIdeas",
+    "from": "if (fs.existsSync(IDEAS)) errs.push(...checkIdeas(atlas, JSON.parse(fs.readFileSync(IDEAS, 'utf8')).ideas));",
+    "to": "if (fs.existsSync(IDEAS)) [].push(...checkIdeas(atlas, JSON.parse(fs.readFileSync(IDEAS, 'utf8')).ideas));"
+  },
+  {
+    "name": "check: not reported: the errors passed along from checkLadder",
+    "from": "errs.push(...checkLadder(f.replace(/\\.json$/, ''), l, atlas));",
+    "to": "[].push(...checkLadder(f.replace(/\\.json$/, ''), l, atlas));"
+  },
+  {
+    "name": "checkAtlas: an axis without a name passes",
+    "from": "for (const k of ['name', 'metric', 'how_checked'])",
+    "to": "for (const k of ['metric', 'how_checked'])",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an axis without how_checked passes",
+    "from": "for (const k of ['name', 'metric', 'how_checked'])",
+    "to": "for (const k of ['name', 'metric'])",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an axis with twelve rungs passes",
+    "from": "a.rungs.length !== 11",
+    "to": "a.rungs.length < 11",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an axis world line without its rung 5 passes",
+    "from": "if (!nonEmpty(t.r5) || !nonEmpty(t.r10))",
+    "to": "if (!nonEmpty(t.r10))",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a site requirement without its requirement text passes",
+    "from": "for (const k of ['requirement', 'how_checked'])",
+    "to": "for (const k of ['how_checked'])",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate without how_counted passes",
+    "from": "for (const k of ['ban', 'how_counted'])",
+    "to": "for (const k of ['ban'])",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate with a cap above 10 passes",
+    "from": "g.cap >= 0 && g.cap <= 10",
+    "to": "g.cap >= 0",
+    "by": "hand"
+  },
+  {
+    "name": "checkIdeas: an idea placed on a negative rung passes",
+    "from": "i.rung >= 0 && i.rung <= 10",
+    "to": "i.rung <= 10",
+    "by": "hand"
+  },
+  {
+    "name": "checkIdeas: an idea placed on a rung that is no whole number passes",
+    "from": "Number.isInteger(i.rung) && i.rung >= 0",
+    "to": "i.rung >= 0",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a unit without an id passes",
+    "from": "if (!u || !nonEmpty(u.id) || !nonEmpty(u.name))",
+    "to": "if (!u || !nonEmpty(u.name))",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose item count is no whole number passes",
+    "from": "Number.isInteger(bp.items) && bp.items > 0",
+    "to": "bp.items > 0",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint of 0 minutes passes",
+    "from": "typeof bp.minutes === 'number' && bp.minutes > 0",
+    "to": "typeof bp.minutes === 'number'",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose minutes are a word passes",
+    "from": "typeof bp.minutes === 'number' && bp.minutes > 0",
+    "to": "bp.minutes > 0",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint given as false, 0 or '' passes",
+    "from": "} else if (bp != null) errs.push",
+    "to": "} else if (bp) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint given as a number, false or a list passes",
+    "from": "} else if (bp != null) errs.push",
+    "to": "} else if (typeof bp === 'string') errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a central scene without a description passes",
+    "from": "nonEmpty(s.description) && nonEmpty(s.source)",
+    "to": "nonEmpty(s.source)",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a fiction inventory entry without an id or a capability passes",
+    "from": "!nonEmpty(e.id) || !nonEmpty(e.capability) || !nonEmpty(e.source)",
+    "to": "!nonEmpty(e.source)",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a known setup failure without the failure text passes",
+    "from": "if (!e || !nonEmpty(e.failure) || !nonEmpty(e.diagnosis))",
+    "to": "if (!e || !nonEmpty(e.diagnosis))",
+    "by": "hand"
+  },
+  {
+    "name": "reasoned (top level): a not applicable reason or a rejection of 5 to 19 characters counts as reasoned",
+    "from": "const MIN_REASON = 20;",
+    "to": "const MIN_REASON = 5;",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose weights are up to 9 off 100 passes",
+    "from": "Math.abs(sum - 100) > 0.5",
+    "to": "Math.abs(sum - 100) > 9",
+    "by": "hand"
+  },
+  {
+    "name": "checkLadder: a ladder whose own axis has a frame and no kind is said to have no subject axis",
+    "from": "a.kind === 'subject' || a.frame",
+    "to": "a.kind === 'subject'",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a site requirement with an empty id passes",
+    "from": "if (!p || !nonEmpty(p.id)) errs.push",
+    "to": "if (!p || p.id == null) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate with an empty id passes",
+    "from": "if (!g || !nonEmpty(g.id)) errs.push",
+    "to": "if (!g || g.id == null) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an axis with an empty id passes",
+    "from": "if (!nonEmpty(a.id)) errs.push",
+    "to": "if (a.id == null) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate whose blocks_shipping is a word passes",
+    "from": "typeof g.blocks_shipping !== 'boolean'",
+    "to": "g.blocks_shipping == null",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: known setup failures marked not applicable with a short reason pass",
+    "from": "if (!(f && reasoned(f.na)))",
+    "to": "if (!(f && nonEmpty(f.na)))",
+    "by": "hand"
+  },
+  {
+    "name": "checkIdeas: an idea placed on rung 11 passes",
+    "from": "i.rung >= 0 && i.rung <= 10",
+    "to": "i.rung >= 0 && i.rung <= 11",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a Claude Prep audit entry with blank evidence passes",
+    "from": "if (!nonEmpty(e.evidence))",
+    "to": "if (e.evidence == null)",
+    "by": "hand"
+  },
+  {
+    "name": "checkLadder: a ladder inheriting an unknown axis passes when it marks any axis not applicable",
+    "from": "for (const x of inh) if (!atlas.axes.some((a) => a.id === x))",
+    "to": "for (const x of inh) if (!Object.keys(na).length && !atlas.axes.some((a) => a.id === x))",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose units are a word is weighed letter by letter",
+    "from": "bp.units && typeof bp.units === 'object' ? Object.entries(bp.units) : []",
+    "to": "bp.units ? Object.entries(bp.units) : []",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a duplicate axis id passes unless it repeats the first axis",
+    "from": "if (seenAxis.has(a.id))",
+    "to": "if (seenAxis.size === 1 && seenAxis.has(a.id))",
+    "by": "hand"
+  },
+  {
+    "name": "MIN_INVENTORY (top level): a fiction inventory of 9 entries passes",
+    "from": "const MIN_INVENTORY = 10;",
+    "to": "const MIN_INVENTORY = 9;",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an atlas that is null throws instead of being reported",
+    "from": "!atlas || !Array.isArray(atlas.axes) || !atlas.axes.length",
+    "to": "!Array.isArray(atlas.axes) || !atlas.axes.length",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an atlas whose axes are a word throws instead of being reported",
+    "from": "!atlas || !Array.isArray(atlas.axes) || !atlas.axes.length",
+    "to": "!atlas || !atlas.axes.length",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: an atlas with an empty axis list is not reported as having no axes",
+    "from": "!atlas || !Array.isArray(atlas.axes) || !atlas.axes.length",
+    "to": "!atlas || !Array.isArray(atlas.axes)",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate with a negative cap passes",
+    "from": "Number.isInteger(g.cap) && g.cap >= 0 &&",
+    "to": "Number.isInteger(g.cap) &&",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate with a cap of 0 fails",
+    "from": "g.cap >= 0 && g.cap <= 10",
+    "to": "g.cap > 0 && g.cap <= 10",
+    "by": "hand"
+  },
+  {
+    "name": "checkAtlas: a style gate with a cap of 10 fails",
+    "from": "g.cap >= 0 && g.cap <= 10",
+    "to": "g.cap >= 0 && g.cap < 10",
+    "by": "hand"
+  },
+  {
+    "name": "checkIdeas: an idea placed on rung 0 fails",
+    "from": "i.rung >= 0 && i.rung <= 10",
+    "to": "i.rung > 0 && i.rung <= 10",
+    "by": "hand"
+  },
+  {
+    "name": "checkIdeas: an idea placed on rung 10 fails",
+    "from": "i.rung >= 0 && i.rung <= 10",
+    "to": "i.rung >= 0 && i.rung < 10",
+    "by": "hand"
+  },
+  {
+    "name": "reasoned (top level): a not applicable reason or a rejection of exactly 20 characters is not reasoned",
+    "from": "s.trim().length >= MIN_REASON",
+    "to": "s.trim().length > MIN_REASON",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose weights are exactly 0.5 off 100 fails",
+    "from": "Math.abs(sum - 100) > 0.5",
+    "to": "Math.abs(sum - 100) >= 0.5",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose weights sum above 100 passes",
+    "from": "Math.abs(sum - 100) > 0.5",
+    "to": "100 - sum > 0.5",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a canon given as false, 0 or '' passes",
+    "from": "else if (c != null) errs.push",
+    "to": "else if (c) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a canon given as null is reported twice, as lacking and as the wrong shape",
+    "from": "else if (c != null) errs.push",
+    "to": "else if (c !== undefined) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a canon given as null throws",
+    "from": "if (c && typeof c === 'object' && !Array.isArray(c))",
+    "to": "if (typeof c === 'object' && !Array.isArray(c))",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a canon given as a list is read as an object",
+    "from": "if (c && typeof c === 'object' && !Array.isArray(c))",
+    "to": "if (c && typeof c === 'object')",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a central scene given as false, 0 or '' passes",
+    "from": "else if (s != null) errs.push",
+    "to": "else if (s) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a central scene given as null is reported twice, as lacking and as the wrong shape",
+    "from": "else if (s != null) errs.push",
+    "to": "else if (s !== undefined) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a central scene given as null throws",
+    "from": "if (s && typeof s === 'object' && !Array.isArray(s))",
+    "to": "if (typeof s === 'object' && !Array.isArray(s))",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a central scene given as a list is read as an object",
+    "from": "if (s && typeof s === 'object' && !Array.isArray(s))",
+    "to": "if (s && typeof s === 'object')",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint given as null is reported twice, as lacking and as the wrong shape",
+    "from": "} else if (bp != null) errs.push",
+    "to": "} else if (bp !== undefined) errs.push",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint given as null throws",
+    "from": "if (bp && typeof bp === 'object' && !Array.isArray(bp))",
+    "to": "if (typeof bp === 'object' && !Array.isArray(bp))",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint given as a list is read as an object",
+    "from": "if (bp && typeof bp === 'object' && !Array.isArray(bp))",
+    "to": "if (bp && typeof bp === 'object')",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a challenge blueprint whose units are a list is weighed entry by entry",
+    "from": "const listed = Array.isArray(bp.units);",
+    "to": "const listed = false;",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: units given as null are reported twice, as lacking and as an empty list",
+    "from": "if (b.units != null && !(units && units.length))",
+    "to": "if (b.units !== undefined && !(units && units.length))",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: a fiction inventory given as null is reported twice, as lacking and as too short",
+    "from": "if (inv != null) {",
+    "to": "if (inv !== undefined) {",
+    "by": "hand"
+  },
+  {
+    "name": "checkBindings: known setup failures given as null are reported twice, as lacking and as the wrong shape",
+    "from": "if (f != null) {",
+    "to": "if (f !== undefined) {",
+    "by": "hand"
+  },
+  {
+    "name": "check: the NOT_CHECKED line for no ladder on the atlas is printed when a ladder is there, and not when none is",
+    "from": "if (!ladders) notes.push(",
+    "to": "if (ladders) notes.push(",
+    "by": "hand"
+  },
+  {
+    "name": "check: an absent feature inventory prints no NOT_CHECKED A2 line",
+    "from": "else notes.push('NOT_CHECKED A2: the Claude Prep feature inventory is private and absent here');",
+    "to": "",
+    "by": "hand"
+  },
+  {
+    "name": "check: an absent pattern catalogue prints no NOT_CHECKED A3 line",
+    "from": "else notes.push('NOT_CHECKED A3: the pattern catalogue is private and absent here');",
+    "to": "",
+    "by": "hand"
+  },
+  {
+    "name": "check: the NOT_CHECKED A5 line is printed when the audit is present, and not when it is absent",
+    "from": "if (!hasAudit) notes.push(",
+    "to": "if (hasAudit) notes.push(",
+    "by": "hand"
+  },
+  {
+    "name": "check: a present private audit is never checked (rule A5)",
+    "from": "checkAtlas(atlas, { audit: hasAudit ? 'present' : 'absent' })",
+    "to": "checkAtlas(atlas, { audit: 'absent' })",
+    "by": "hand"
+  },
+  {
+    "name": "check: the audit merge sets every clause's claude_prep to null",
+    "from": "c.claude_prep = (priv.clauses && priv.clauses[c.id]) || null;",
+    "to": "c.claude_prep = null;",
+    "by": "hand"
+  },
+  {
+    "name": "check: a repository without labs/levels/atlas.json throws instead of saying NOT_CHECKED",
+    "from": "if (!fs.existsSync(ATLAS)) { console.log('NOT_CHECKED: labs/levels/atlas.json does not exist yet'); return; }",
+    "to": "",
+    "by": "hand"
+  },
+  {
+    "name": "ROOT (top level): the repository root keeps %20 for a space in its path, so no file is found",
+    "from": "const ROOT = path.resolve(path.dirname(SELF), '..');",
+    "to": "const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\\/([A-Za-z]:)/, '$1')), '..');",
+    "by": "hand"
+  }
+]
