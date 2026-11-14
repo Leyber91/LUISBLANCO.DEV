@@ -14,6 +14,8 @@
      stop <name|all>          stop the http.server listening on a lab's port, or on every lab port
      shoot <name> [page]      desktop 1440 and phone 390 screenshots + console errors; a server it
                               had to start is stopped when it finishes
+     drive <name>             run tools/drives/<name>.mjs with a real pointer and keyboard at 1440 and
+                              390 wide (tools/drive.mjs): what a still cannot show
      gates <name>             privacy selftest, site_check, levels check, in the worktree
      sync <name> [--from B]   merge B (default main) into the lab branch
      ship <name>              push, open a pull request to main, wait for the gates, squash-merge
@@ -26,7 +28,7 @@
 import { spawnSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import os from 'node:os';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -223,6 +225,34 @@ async function shootWith(lab, pageArg) {
   if (bad.length) process.exitCode = 1;
 }
 
+/* Gestures and checks against the served page, at desktop and phone width, one Chrome at a time. */
+async function cmdDrive(n) {
+  const lab = byName(n);
+  const p = wtPath(lab);
+  const file = path.join(p, 'tools', 'drives', `${lab.name}.mjs`);
+  if (!fs.existsSync(file)) die(`no drive for ${lab.name}: write ${file} (see tools/drives/heptapod.mjs)`);
+  const { drive } = await import(pathToFileURL(path.join(p, 'tools', 'drive.mjs')).href);
+  const scenario = (await import(pathToFileURL(file).href)).default;
+  let temp = null;
+  if (!(await portOpen(lab.port))) {
+    temp = startTempServer(lab);
+    if (!(await waitPort(lab.port, 8000))) { stopPid(temp.pid); die(`server on ${lab.port} did not come up`); }
+  }
+  let bad = 0;
+  try {
+    for (const [tag, width, height] of [['desk', 1440, 900], ['phone', 390, 844]]) {
+      console.log(`--- ${lab.name} at ${width} px`);
+      const r = await drive(scenario, { base: `http://127.0.0.1:${lab.port}`, out: `${SHOTS}/${lab.name}/drive-${tag}`, width, height });
+      const failed = r.checks.filter((c) => !c.ok).length;
+      bad += failed;
+      console.log(`${tag}: ${r.checks.length - failed} of ${r.checks.length} checks passed; console errors: ${r.errors.length}; pictures in ${SHOTS}/${lab.name}/drive-${tag}`);
+    }
+  } finally {
+    if (temp) { stopPid(temp.pid); console.log(`stopped the server this drive started on port ${lab.port}`); }
+  }
+  if (bad) process.exitCode = 1;
+}
+
 /* Stop the python http.server listening on a lab's port (or every lab port). Nothing else is touched. */
 function cmdStop(n) {
   const labs = n === 'all' ? LABS : [byName(n)];
@@ -415,12 +445,13 @@ if (isMain) {
     case 'serve': cmdServe(need()); break;
     case 'stop': cmdStop(need()); break;
     case 'shoot': await cmdShoot(need(), rest[1]); break;
+    case 'drive': await cmdDrive(need()); break;
     case 'gates': cmdGates(need()); break;
     case 'sync': cmdSync(need(), from || 'main'); break;
     case 'ship': await cmdShip(need()); break;
     case 'remove': cmdRemove(need()); break;
     default:
-      console.log('commands: status | add <name...> [--base B] | serve <name> | stop <name|all> | shoot <name> [page] | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
+      console.log('commands: status | add <name...> [--base B] | serve <name> | stop <name|all> | shoot <name> [page] | drive <name> | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
       process.exitCode = cmd ? 2 : 0;
   }
 }

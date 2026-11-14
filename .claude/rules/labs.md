@@ -25,3 +25,10 @@ These hold on every change under labs/, because each one has failed before or pr
   the site gate fails a pull request that adds a tell.
 - labs/levels/*.json are written by the independent rater only. A builder reads its ladder and never edits it.
 - The lab's own files, its site.config.js entry and nothing else, unless the task names a shared file.
+- Look before you write. The labs share a toolbox, and a lab that writes its own copy drifts from it: Labs OS
+  (labs/assets/js/os: the progress store, the scene lifecycle, usage events, export and erase), the model route
+  (labs/assets/js/ai) and the tools (`tools/labs-wt.mjs` shoot and drive). Search labs/assets/js for a helper
+  before writing one, compare the copies and take the best. What you write that a second lab would need goes into
+  the shared place with its first caller, and your report says what was reused and what was lifted. On 2026-11-14
+  The Pod kept a visitor's day in its own storage beside Labs OS, where the privacy page's erase could not reach
+  it, until a search found the platform; that day one random generator was defined six times across the labs.

@@ -65,9 +65,9 @@ export const CATEGORIES = [
     icon: 'fa-solid fa-infinity',
     intro: 'The narrative multiverse.',
     projects: [
-      { id: 'heptapod', title: 'Heptapod Codec', status: 'built',
+      { id: 'heptapod', title: 'Heptapod: The Pod', status: 'built',
         href: 'heptapod.html',
-        blurb: 'Type a sentence and a closed lexicon encodes it into circular logograms whose shape carries the meaning; hover one and it blooms back into its proposition. The premise of Arrival as a working, breakable codec.' },
+        blurb: 'One being behind a wall of glass writes each whole thought as one ring, and there is no dictionary. For one day you build the decoder by pointing at shared things; in the evening six rings show how much of it you built. The script’s solver and its pixel reader are on the bench page.' },
       { id: 'timeline', title: 'Interactive Timeline', status: 'planned',
         blurb: 'A navigable timeline of the Tryverse — branch points, dimensions and the people inside them.' },
       { id: 'last-witness', title: 'Time-Slip: The Last Witness', status: 'beta',

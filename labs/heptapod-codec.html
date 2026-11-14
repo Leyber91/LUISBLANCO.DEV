@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Heptapod Codec · the script on the bench</title>
+<meta name="description" content="An original semasiographic script on the idea of Ted Chiang's Story of Your Life: a whole proposition is one ring, written all at once, read back from the pixels by a decoder you can break with ink noise." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/heptapod.css" />
+</head>
+<body>
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+
+<header class="bar">
+  <div class="bar-l">
+    <a class="back" id="back" href="index.html">&larr; labs</a>
+    <a class="back" href="heptapod.html">&larr; the pod</a>
+    <span class="label">HEPTAPOD CODEC <span class="on">/ the script on the bench</span></span>
+  </div>
+  <div class="bar-r">
+    <span id="route"></span>
+    <span class="brand">THE LAB &middot; <b>L212</b></span>
+  </div>
+</header>
+
+<main>
+  <!-- ============ hero: one proposition, one semagram ============ -->
+  <section class="hero" aria-labelledby="h-title">
+    <div class="hero-text">
+      <p class="kick">one proposition &middot; one semagram</p>
+      <h1 id="h-title">The whole sentence, <span class="lo">written at once.</span></h1>
+      <p class="sub">An original script on a published idea <span class="tg r">real</span>: writing whose shapes carry meaning directly, with no spoken language underneath. Here a whole proposition is one ring <span class="tg i">illustrative</span>. Who acts, what changes hands, when, whether it is denied and how the writer knows each set a part of the ring's form, and the ring is solved as one curve, so no stroke can be placed before it is known how the sentence ends <span class="tg r">real</span>.</p>
+    </div>
+    <div class="hero-form">
+      <form class="write" id="write" autocomplete="off">
+        <label class="mini" for="sentence">sentence</label>
+        <div class="inrow">
+          <input id="sentence" type="text" maxlength="200" spellcheck="false" />
+          <button type="submit" class="act" id="go">write</button>
+        </div>
+        <div class="tags" id="tags" aria-label="Parts of speech the parser found"></div>
+        <div class="inrow2">
+          <button type="button" class="act ghost" id="ask" title="One model call maps free English onto the script's schema">ask the model</button>
+          <button type="button" class="act ghost" id="tour">walk through it</button>
+        </div>
+        <span class="status" id="status" role="status" aria-live="polite"></span>
+      </form>
+      <div class="tourbar" id="tourbar" hidden>
+        <span class="mini" id="tour-n"></span>
+        <p class="tour-cap" id="tour-cap" aria-live="polite"></p>
+        <div class="inrow2"><button type="button" class="act ghost" id="tour-prev">back</button><button type="button" class="act" id="tour-next">next</button><button type="button" class="act ghost" id="tour-end">end</button></div>
+      </div>
+      <div class="compare" id="compare" hidden></div>
+      <div class="presets" id="presets" aria-label="Example sentences"></div>
+
+    </div>
+    <figure class="stage" id="stage">
+      <canvas id="sem" role="img" aria-label="The semagram"></canvas>
+      <figcaption class="readback">
+        <div class="stage-tools">
+          <button type="button" class="ed-num" id="erase" aria-pressed="false" title="Click a mark or the cut on the semagram to erase it; the proposition is then read back from the edited drawing">erase strokes</button>
+          <span class="mini dim" id="tier"></span>
+        </div>
+        <p class="pin" id="pin" aria-live="polite"></p>
+        <span class="mini">read back from the pixels</span>
+        <span class="rb-text" id="rb-text" aria-live="polite">&nbsp;</span>
+        <span class="rb-meta" id="rb-meta"></span>
+      </figcaption>
+    </figure>
+
+    <aside class="graph" aria-labelledby="g-title">
+      <div class="panel-h"><span class="mini" id="g-title">semantic graph</span><span class="mini dim" id="g-count"></span></div>
+      <div id="editor"></div>
+      <p class="hint">Change a row and the whole ring re-solves. Point at a row and its strokes light.</p>
+    </aside>
+  </section>
+
+  <!-- ============ the key ============ -->
+  <section class="sec" id="key" aria-labelledby="k-title">
+    <div class="sec-h">
+      <p class="kick">the key</p>
+      <h2 id="k-title">Where each part of the meaning lives in the ring.</h2>
+      <p class="sub">Most human writing is glottographic: an alphabet records the sounds of a spoken language, and Chinese characters record its words (logographic). Semasiographic writing records meaning with no spoken language underneath, as road signs and mathematical notation do; Sampson (1985) draws the line, and Chiang's heptapods write this way <span class="tg r">real</span>. This script is semasiographic <span class="tg i">illustrative</span>. Read it clockwise from the top: four role sectors and four slots share the full circle; an absent role takes no arc and a slot that carries a mark needs more room, so every element's position depends on every other. Inside a role sector the concept is six cells that swell out, lie flat or dip in <span class="tg i">illustrative</span>.</p>
+    </div>
+    <div class="keygrid" id="keygrid"></div>
+  </section>
+
+  <!-- ============ noise ============ -->
+  <section class="sec" id="noise" aria-labelledby="n-title">
+    <div class="sec-h">
+      <p class="kick">a breakable codec</p>
+      <h2 id="n-title">Read it back through ink.</h2>
+      <p class="sub">The decoder sees only this grey page, 1400 by 840 pixels <span class="tg r">real</span>. It finds the ring along 360 rays, tries every layout the script allows (128 for one ring) and keeps the one whose sectors read as words. Damage the ink by type, each in its own unit, or brush erasure and ink onto the page yourself, and watch where it fails. The solid curve is the repository's bench: 200 random propositions per level <span class="tg r">real</span>.</p>
+    </div>
+    <div class="noise-grid">
+      <figure class="np-page">
+        <canvas id="np-page" role="img" aria-label="The codec raster the decoder reads"></canvas>
+        <figcaption class="mini dim" id="np-cap">the page the decoder reads</figcaption>
+      </figure>
+      <div class="np-ctl">
+        <div class="ed-seg" id="np-type" role="radiogroup" aria-label="noise type"></div>
+        <label class="mini" for="sigma"><span id="sigma-u">jitter, % of radius</span> <b id="sigma-v">1.5 %</b></label>
+        <input id="sigma" type="range" min="0" max="8" step="0.1" value="1.5" />
+        <div class="inrow2">
+          <button type="button" class="act ghost" id="reink">new ink</button>
+          <button type="button" class="act" id="measure">measure this sentence</button>
+        </div>
+        <div class="inrow2 brush" id="np-brush" aria-label="Brush damage onto the page">
+          <span class="mini">brush on the page</span>
+          <button type="button" class="ed-num on" data-v="erase" aria-pressed="true">erase</button>
+          <button type="button" class="ed-num" data-v="ink" aria-pressed="false">ink</button>
+          <button type="button" class="ed-num" data-v="clear">clear</button>
+        </div>
+        <div class="np-out">
+          <span class="mini">decoded</span> <b class="verdict" id="np-verdict" aria-live="polite"></b>
+          <p class="np-text" id="np-text">&nbsp;</p>
+          <ol class="fields" id="np-fields"></ol>
+        </div>
+        <figure class="chart">
+          <canvas id="np-chart" role="img" aria-label="Exact recovery against ink noise"></canvas>
+          <figcaption class="mini dim" id="chart-cap">exact recovery of the graph against the noise</figcaption>
+        </figure>
+        <p class="hint" id="bench-cap"></p>
+      </div>
+      <figure class="np-strip">
+        <canvas id="np-strip" role="img" aria-label="The ring unrolled, as the decoder samples it"></canvas>
+        <figcaption class="mini dim">the ring unrolled: angle across, radius up; gold ticks are where the reader samples each cell</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ composition ============ -->
+  <section class="sec" id="compose" aria-labelledby="c-title">
+    <div class="sec-h">
+      <p class="kick">composition</p>
+      <h2 id="c-title">Two propositions, one semagram.</h2>
+      <p class="sub">A relation joins two rings into one figure <span class="tg i">illustrative</span>. The bridge carries the relation by its shape: a flowing stroke for because, two crossing strokes for despite, an arch over for after, an arch under for before. A participant of the second proposition that is also in the first is written once: the second ring holds only a reference code, linked back by a hairline, and the reader fills it in <span class="tg r">real</span>. The left ring holds the main proposition.</p>
+    </div>
+    <div class="compose-grid">
+      <div class="cp-ctl">
+        <label class="mini" for="cp-a">main proposition</label>
+        <input id="cp-a" type="text" maxlength="140" spellcheck="false" />
+        <div class="ed-seg rel" id="cp-rel" role="radiogroup" aria-label="relation"></div>
+        <label class="mini" for="cp-b">second proposition</label>
+        <input id="cp-b" type="text" maxlength="140" spellcheck="false" />
+        <span class="status" id="cp-status" role="status" aria-live="polite"></span>
+        <div class="presets" id="cp-presets" aria-label="Example compositions"></div>
+        <details class="cp-edit">
+          <summary class="mini">edit the roles directly</summary>
+          <div class="cp-eds"><div id="cp-ed-a"></div><div id="cp-ed-b"></div></div>
+        </details>
+      </div>
+      <figure class="cp-stage">
+        <canvas id="cp" role="img" aria-label="The composite semagram"></canvas>
+        <figcaption class="readback">
+          <span class="mini">read back from the pixels</span>
+          <span class="rb-text" id="cp-rb">&nbsp;</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ written at once ============ -->
+  <section class="sec" id="once" aria-labelledby="o-title">
+    <div class="sec-h">
+      <p class="kick">simultaneous and sequential</p>
+      <h2 id="o-title">Written at once, or one stroke after another.</h2>
+      <p class="sub">On the left the script as designed: the arcs are shared out over the whole circle and the ring is the one curve that minimises its bending and its distance from every cell, so it grows from every point together <span class="tg r">real</span>. On the right the same sentence by a pen that moves clockwise and commits as it goes <span class="tg i">illustrative</span>: it gives each element its natural arc because it does not know what comes next, and it steers toward each cell with only a few degrees of lookahead. The numbers below each are computed here <span class="tg r">real</span>.</p>
+    </div>
+    <div class="once-grid">
+      <figure class="once-fig">
+        <canvas id="once-a" role="img" aria-label="Simultaneous writing"></canvas>
+        <figcaption><span class="mini">variational &middot; all at once</span><dl class="nums" id="once-na"></dl></figcaption>
+      </figure>
+      <figure class="once-fig">
+        <canvas id="once-b" role="img" aria-label="Sequential writing"></canvas>
+        <figcaption><span class="mini">sequential &middot; one pen</span><dl class="nums" id="once-nb"></dl></figcaption>
+      </figure>
+    </div>
+    <div class="inrow2 center"><button type="button" class="act" id="replay">write both again</button></div>
+  </section>
+
+  <!-- ============ Fermat ============ -->
+  <section class="sec" id="fermat" aria-labelledby="f-title">
+    <div class="sec-h">
+      <p class="kick">the idea underneath</p>
+      <h2 id="f-title">Light picks the path of least time.</h2>
+      <p class="sub">In the story a physicist explains Fermat's principle with a ray of light passing from air into water <span class="tg r">real</span>. Seen causally, the ray reaches the surface and bends there by a local rule. Seen variationally, of all the paths between the two points it takes the one that is quickest as a whole, so the path is chosen knowing where it ends. Both views give the same ray: the crossing point found by minimising travel time and the one found from Snell's law alone are shown side by side <span class="tg r">real</span>. Drag the two points; change the lower medium.</p>
+    </div>
+    <div class="fermat-grid">
+      <figure class="f-stage"><canvas id="fm" role="img" aria-label="Refraction from air into water"></canvas></figure>
+      <div class="f-ctl">
+        <div class="ed-seg" id="fm-mode" role="radiogroup" aria-label="view">
+          <button type="button" role="radio" data-v="var" aria-checked="true" class="on">variational</button>
+          <button type="button" role="radio" data-v="seq" aria-checked="false">sequential</button>
+        </div>
+        <label class="mini" for="fm-n2">lower medium n<sub>2</sub> <b id="fm-n2-v"></b></label>
+        <input id="fm-n2" type="range" min="1.0003" max="2.42" step="0.0001" value="1.33335" />
+        <label class="mini" for="fm-aim">sequential aim &theta;<sub>1</sub> <b id="fm-aim-v"></b></label>
+        <input id="fm-aim" type="range" min="1" max="80" step="0.1" value="40" />
+        <button type="button" class="act ghost" id="fm-snap">aim by least time</button>
+        <dl class="nums" id="fm-nums"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ sources ============ -->
+  <section class="sec" id="sources" aria-labelledby="s-title">
+    <div class="sec-h">
+      <p class="kick">evidence</p>
+      <h2 id="s-title">What is real here, and what is made up to show the mechanism.</h2>
+    </div>
+    <ul class="evidence">
+      <li><b class="t real">[REAL]</b> The idea. Ted Chiang, "Story of Your Life", first published in <i>Starlight 2</i>, ed. Patrick Nielsen Hayden (Tor, 1998); collected in <i>Stories of Your Life and Others</i> (Tor, 2002). In it the linguist Louise Banks calls the heptapods' writing semasiographic and its units semagrams, a writer must know a sentence's whole layout before the first stroke, inflections change a stroke's curvature or thickness, and Fermat's principle frames the simultaneous view. The film <i>Arrival</i> (2016) adapted the story; its logograms belong to the film's designers and nothing here is drawn from them.</li>
+      <li><b class="t real">[REAL]</b> The term. Geoffrey Sampson, <i>Writing Systems: A Linguistic Introduction</i> (Stanford University Press, 1985), distinguishes semasiographic writing, which links marks to meaning without passing through a spoken language, from glottographic writing, which records a spoken language. Every full human script is glottographic; whether a semasiographic system could match a spoken language is the open question the story imagines answered.</li>
+      <li><b class="t ill">[ILLUSTRATIVE]</b> The script. Its layout, the six-cell radicals, the marks for time, mood, aspect, evidence and negation, the nested ring and the bridges are an original design for this lab. The lexicon of <span id="lexn">322</span> concepts, each with a part of speech and a gloss, was chosen by hand for this lab; a noun outside it is written with a marked fallback radical and read back as "something". The grammar is open: any proposition its schema can hold becomes one semagram.</li>
+      <li><b class="t real">[REAL]</b> A real semasiographic precedent. Charles K. Bliss, <i>International Semantography: A Non-Alphabetical Symbol Writing Readable in All Languages</i> (Sydney, 1949), later Blissymbolics, built a writing of meaning from combinable symbols; it is still used for communication by people who cannot speak. This script borrows nothing from it but the aim.</li>
+      <li><b class="t real">[REAL]</b> The computation. The ring is the exact minimiser of the stated energy (a 360 by 360 symmetric system, solved by Cholesky factorisation). The decoder reads a raster, not the geometry; every round-trip count, field accuracy and breaking point on this page is measured in your browser when you look at it. The parser round-trips: for 3,000 random graphs g, parse(realise(g)) = g. All of this runs headless: <code>node labs/assets/js/heptapod/selftest.mjs</code> and <code>node labs/assets/js/heptapod/bench.mjs</code>.</li>
+      <li><b class="t ill">[ILLUSTRATIVE]</b> The sequential pen is a model of a writer who commits as they go (a damped tracker with four degrees of lookahead); the failure it shows is computed, the writer is invented.</li>
+      <li><b class="t real">[REAL]</b> The optics. Refractive indices at 589.3 nm: air 1.000277 (dry air, 15 &deg;C, 101.325 kPa; P. E. Ciddor, <i>Applied Optics</i> 35, 1566, 1996) and water 1.33335 (20 &deg;C; M. Daimon and A. Masumura, <i>Applied Optics</i> 46, 3811, 2007). The least-time path is found by minimising travel time numerically and checked against Snell's law, n<sub>1</sub> sin &theta;<sub>1</sub> = n<sub>2</sub> sin &theta;<sub>2</sub>; see R. P. Feynman, <i>The Feynman Lectures on Physics</i>, vol. I, ch. 26 (1963).</li>
+      <li><b class="t real">[REAL]</b> The model route. "Ask the model" makes one call through the labs' shared route (your machine, your key, or the public keyless route, which allows one reply per 45 seconds); its JSON is validated against the schema, and the offline parser answers when no route does.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="tag"><i aria-hidden="true"></i><span><b>[real]</b> variational ring solve, pixel decoder, measured noise curve, Snell check, cited sources &middot; <b>[illustrative]</b> the script's design and its radicals, the sequential pen</span></span>
+  <span class="label">canvas 2D &middot; no build step &middot; no network at rest</span>
+</footer>
+
+<script type="module" src="assets/js/heptapod/main.js"></script>
+</body>
+</html>
