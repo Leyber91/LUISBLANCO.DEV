@@ -22,6 +22,10 @@
    a visitor sets a place the night is drawn for an example one,
    named as an example, and nothing is kept.
 
+   A drawing is named by labels on it. What is under the pointer
+   is named on the drawing too, so no sentence stands under a
+   drawing to explain it.
+
    Deep links: ?planet=<name>   ?date=YYYY-MM-DD   ?still
    A link made by the survey before it moved to its own page
    (?p=, ?plot=, ?tour=, ?view=, ?cam=, ?q=) is passed on to it.
@@ -34,7 +38,7 @@ import { jdOfMs, msOfJd, sunAltitude } from './time.js';
 import { epochAt, sigmaAt, lampAt, lostFrom, tally, grade, contested, stateOf, KEPT_LAMP, yearOfJd, jdOfYear } from './clock.js';
 import { load, pairOf, durDays } from './data.js';
 import { hammer, lens, historyOf, clockAt, lampOn, census, errorLine, isK2, densestField, FIRST_YEAR, LAST_YEAR } from './sky.js';
-import { skyLayout, drawSky, bandScale, stampOf, drawBand, drawCurve, drawOC, drawNight, nightNamed, drawTally, pointsFor } from './views.js';
+import { skyLayout, drawSky, drawLens, bandScale, stampOf, drawBand, drawCurve, drawOC, drawNight, nightNamed, drawTally, pointsFor } from './views.js';
 import { crossings, span, placeOf, shownMs, WATCH, EXAMPLE_PLACE } from './tonight.js';
 
 const $ = (id) => document.getElementById(id);
@@ -54,7 +58,8 @@ const HALF_DAY = 0.5;
 let os = null, cat = null;
 const S = {
   jd: nowJd(), stars: [], star: null, hover: null, place: null, showAll: false, touched: false, record: false, igniting: false,
-  census: null, spots: [], bandHits: [], nightHits: [], ocHits: [], L: null, sc: null, k2: null, k2note: null, shown: null,
+  census: null, spots: [], lensSpots: [], bandHits: [], nightHits: [], ocHits: [], L: null, sc: null, k2: null, k2note: null, shown: null,
+  bandHover: null, ocHover: null, nightHover: null,
 };
 
 /* ---------------- the platform ---------------- */
@@ -74,13 +79,14 @@ function localTime(jd, windowS) {
   const t = shownMs(msOfJd(jd), windowS);
   return new Date(t.ms).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit', ...(t.seconds ? { second: '2-digit' } : {}) });
 }
-const hourOf = (jd) => new Date(msOfJd(jd)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const hourOf = (jd) => new Date(Math.round(msOfJd(jd) / 60000) * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });      // to the nearest minute: a Julian date of a whole hour is a hair under it
 /* A solution's paper. Before the record is here only the working clocks are known, and not yet by name. */
 const refLabel = (s) => (cat.refs && s.ref != null && cat.refs[s.ref] ? cat.refs[s.ref][0]
   : s.flag === 2 ? 'a published solution' : s.flag === 1 ? 'the archive\'s composite row, from one paper' : 'the archive\'s composite row');
 /* The paper with its year, once: the archive's names already end in one. */
 const paperOf = (s) => { const name = refLabel(s); return /\b(19|20)\d\d[a-z]?$/.test(name) || s.pub == null ? name : `${name}, ${Math.floor(s.pub)}`; };
 const stateWord = (lamp) => (lamp === null ? 'not yet timed' : stateOf(lamp));
+const isLive = () => !S.igniting && Math.abs(S.jd - nowJd()) < 1 / 1440;      // the date shown is this instant, so a planet in front of its star can be marked
 
 /* ---------------- the sky's lamps ---------------- */
 const retrievedJd = () => jdOfMs(Date.parse(cat.meta.retrieved));
@@ -92,6 +98,7 @@ function k2Field(stars) {
   const mine = stars.filter((s) => isK2(s.p.name) && durDays(s.p)), field = densestField(mine);
   return field ? { ra: field.ra, dec: field.dec, stars: mine } : null;
 }
+const K2_WIDEST = ['K2 FIELDS', '000 OF 000 LOST'];      // the room the label asks of the sheet, whatever the count
 
 /* ---------------- the date ---------------- */
 let tween = 0;
@@ -120,7 +127,7 @@ function ignite(target) {
 /* ---------------- one clock ---------------- */
 function openStar(star, { user = false } = {}) {
   if (!star) return;
-  S.star = star; S.shown = null;
+  S.star = star; S.shown = null; S.bandHover = null; S.ocHover = null;
   $('pick').value = star.p.name;
   describeStar();
   if (user) { S.touched = true; save(); track('exomania.planet', { planet: star.p.name }); os?.progress.setResume(`exomania.html?planet=${encodeURIComponent(star.p.name)}`, star.p.name).catch(() => {}); }
@@ -133,41 +140,43 @@ function describeStar() {
   const bits = [];
   if (Number.isFinite(p.vmag)) bits.push(`V ${p.vmag.toFixed(1)}`);
   if (p.clock) bits.push(`orbit ${span(p.clock.P * 86400)}`);
-  if (durDays(p)) bits.push(`transit ${span(durDays(p) * 86400)}${Number.isFinite(p.depthPct) ? `, ${p.depthPct.toFixed(p.depthPct < 0.1 ? 3 : 2)} % deep` : ''}`);
+  if (durDays(p)) bits.push(`transit ${span(durDays(p) * 86400)}${Number.isFinite(p.depthPct) ? ` and ${p.depthPct.toFixed(p.depthPct < 0.1 ? 3 : 2)} % deep` : ''}`);
   if (p.discYear) bits.push(`found ${p.discYear}`);
-  put('c-meta', bits.join(' · '));
+  put('c-meta', bits.join(', '));
 }
 /* What changes only when another paper takes over: every other published clock against the one in use, as the
    drawing shows them and as a list anybody can open. */
 function describePapers(c) {
   const p = S.star.p, ul = $('r-points');
   ul.textContent = '';
-  if (!p.sols || !c) { put('r-count', 'the published clocks, as a list'); return; }
-  ul.append(el('li', '', `${c.pub != null ? Math.floor(c.pub) : 'undated'}, ${refLabel(c)}: the clock in use. Mid-transit ${c.t0.toFixed(5)} ± ${span(c.sT * 86400)}, period ${c.P} d ± ${span(c.sP * 86400)}.`));
+  if (!p.sols || !c) { put('r-count', 'published clocks, as a list'); return; }
+  ul.append(el('li', '', `${paperOf(c)}, the clock in use. Mid-transit ${c.t0.toFixed(5)} ± ${span(c.sT * 86400)}, period ${c.P} d ± ${span(c.sP * 86400)}.`));
   for (const pt of pointsFor(p, c).sort((a, b) => a.s.t0 - b.s.t0)) {
-    ul.append(el('li', '', `${pt.s.pub != null ? Math.floor(pt.s.pub) : 'undated'}, ${refLabel(pt.s)}: transit ${num(pt.n)} found ${span(Math.abs(pt.residual) * 86400)} ${pt.residual < 0 ? 'early' : 'late'}, ${Math.abs(pt.z).toFixed(1)} sigma of the two errors together.`));
+    ul.append(el('li', '', `${paperOf(pt.s)} found transit ${num(pt.n)} ${span(Math.abs(pt.residual) * 86400)} ${pt.residual < 0 ? 'early' : 'late'}, ${Math.abs(pt.z).toFixed(1)} sigma of the two errors together.`));
   }
-  put('r-count', `the ${plural(p.sols.length, 'published clock', 'published clocks')} of ${p.name}, against the one in use`);
+  put('r-count', `${plural(p.sols.length, 'published clock', 'published clocks')}, as a list`);
 }
 /* The sentence of the reading: which paper, to what error, in which state, and when that changes. */
 function sayClock(p, c, jd) {
   const now = nowJd(), dur = durDays(p), sig = sigmaAt(c, epochAt(c, jd)), state = stateOf(dur ? dur / sig : NaN);
-  const verdict = dur ? state : 'the archive gives no transit length to hold that against';
-  const lead = jd < now - HALF_DAY ? `By the archive's table the best clock on ${dateOf(jd)} was ${paperOf(c)}. Predicted to ± ${span(sig * 86400)}: ${verdict}.`
-    : `Clock: ${paperOf(c)}. Predicted to ± ${span(sig * 86400)} on ${dateOf(jd)}${jd > now + HALF_DAY ? ', if nobody looks again' : ''}: ${verdict}.`;
+  const past = jd < now - HALF_DAY, ahead = jd > now + HALF_DAY, err = `± ${span(sig * 86400)}`;
+  const verdict = dur ? `so the clock ${past ? 'was' : 'is'} ${state}` : 'and the archive gives no transit length to hold that against';
+  const lead = past ? `By the archive's table the best clock on ${longDate(jd)} was from ${paperOf(c)}. It predicted the transit to ${err}, ${verdict}.`
+    : ahead ? `The clock in use is from ${paperOf(c)}. If nobody looks again, on ${longDate(jd)} it predicts the transit to ${err}, ${verdict}.`
+    : `The clock in use is from ${paperOf(c)}. Today it predicts the transit to ${err}, ${verdict}.`;
   let when = '';
   if (dur) {
-    const slipJd = lostFrom(c, dur / KEPT_LAMP), lostJd = lostFrom(c, dur), far = (x) => yearOfJd(x) > 2200, since = (x) => (x <= c.t0 ? 'its own epoch' : dateOf(x));
+    const slipJd = lostFrom(c, dur / KEPT_LAMP), lostJd = lostFrom(c, dur), far = (x) => yearOfJd(x) > 2200, since = (x) => (x <= c.t0 ? 'its own epoch' : longDate(x));
     if (state === 'lost') when = ` Lost since ${since(lostJd)}.`;
-    else if (state === 'slipping') when = ` Past a twelfth of the transit since ${since(slipJd)}${far(lostJd) ? '' : `; left alone it is lost from ${dateOf(lostJd)}`}.`;
-    else if (!far(slipJd)) when = ` Left alone it slips past a twelfth of the transit on ${dateOf(slipJd)}${far(lostJd) ? '' : ` and is lost from ${dateOf(lostJd)}`}.`;
+    else if (state === 'slipping') when = ` Past a twelfth of the transit since ${since(slipJd)}${far(lostJd) ? '' : `, and lost from ${longDate(lostJd)} if left alone`}.`;
+    else if (!far(slipJd)) when = ` Left alone it slips past a twelfth of the transit on ${longDate(slipJd)}${far(lostJd) ? '' : ` and is lost from ${longDate(lostJd)}`}.`;
   }
-  const doubt = c === p.clock && contested(c) ? ` Only ${c.agree} of ${plural(c.others, 'other published clock agrees', 'other published clocks agree')} with it: contested.` : '';
+  const doubt = c === p.clock && contested(c) ? ` Only ${c.agree} of ${plural(c.others, 'other published clock agrees', 'other published clocks agree')} with it, so it is contested.` : '';
   return lead + when + doubt;
 }
 
 /* ---------------- drawing ---------------- */
-let sky = null, band = null, curve = null, oc = null, night = null, tallyView = null;
+let sky = null, lens2 = null, band = null, curve = null, oc = null, night = null, tallyView = null;
 function render() {
   if (!cat) return;
   const now = nowJd(), atNow = Math.abs(S.jd - now) < HALF_DAY;
@@ -175,11 +184,11 @@ function render() {
   if (S.k2) {
     let lost = 0, of = 0;
     for (const s of S.k2.stars) { const l = lampOn(s.p, s.hist, S.jd); if (l === null) continue; of++; if (l < 1) lost++; }
-    S.k2note = of ? { ra: S.k2.ra, dec: S.k2.dec, lines: ['K2 FIELDS', `${num(lost)} OF ${num(of)} LOST`], lost, of } : null;
+    S.k2note = { ra: S.k2.ra, dec: S.k2.dec, lines: of ? ['K2 FIELDS', `${num(lost)} OF ${num(of)} LOST`] : [], sample: K2_WIDEST, lost, of };
   }
-  sky.redraw(); band.redraw(); curve.redraw();
-  put('k2', S.k2note ? `K2 fields: ${num(S.k2note.lost)} of ${num(S.k2note.of)} lost` : '');
-  $('k2').classList.toggle('on-sheet', !!(S.k2note && S.k2note.drawn));
+  sky.redraw(); lens2.redraw(); band.redraw(); curve.redraw();
+  put('k2', S.k2note && S.k2note.of ? `${num(S.k2note.lost)} of ${num(S.k2note.of)} K2 clocks lost, the rings along the ecliptic` : '');
+  $('k2').classList.toggle('on-sheet', !!(S.k2note && S.k2note.fits));
   // the count in the corner: clocks that are lost on the date shown
   let lost = 0, slipping = 0, kept = 0;
   for (const s of S.stars) { const l = lampOn(s.p, s.hist, S.jd); if (l === null || !Number.isFinite(l)) continue; if (l < 1) lost++; else if (l < KEPT_LAMP) slipping++; else kept++; }
@@ -193,59 +202,58 @@ function render() {
   // the one clock, on that date
   if (S.star) {
     const p = S.star.p, c = clockAt(S.star.hist, S.jd);
-    put('c-status', c ? sayClock(p, c, S.jd) : `No clock had been published for ${p.name} by ${dateOf(S.jd)}.`);
-    if (S.shown !== (c || 0)) { S.shown = c || 0; describePapers(c); oc.redraw(); put('oc-note', OC_NOTE()); }
+    put('c-status', c ? sayClock(p, c, S.jd) : `No clock had been published for ${p.name} by ${longDate(S.jd)}.`);
+    if (S.shown !== (c || 0)) { S.shown = c || 0; S.ocHover = null; describePapers(c); oc.redraw(); }
     const seen = curve.last;
     say('curve', seen && Number.isFinite(seen.expected)
-      ? `The transit of ${p.name} as its clock lets it be seen on ${dateOf(S.jd)}: a dip of ${(seen.expected * 100).toPrecision(2)} %, where the transit itself is ${(seen.depth * 100).toPrecision(2)} % deep.`
-      : `The transit of ${p.name} cannot be drawn on ${dateOf(S.jd)}: ${c ? 'the archive gives no transit length' : 'no clock had been published'}.`);
-    say('sky', `The sky of transit clocks on ${dateOf(S.jd)}: of ${num(timed)}, ${num(kept)} kept, ${num(slipping)} slipping and ${num(lost)} lost. ${p.name} is selected.`);
+      ? `The transit of ${p.name} as its clock lets it be seen on ${longDate(S.jd)}, a dip of ${(seen.expected * 100).toPrecision(2)} %, where the transit itself is ${(seen.depth * 100).toPrecision(2)} % deep.`
+      : `The transit of ${p.name} cannot be drawn on ${longDate(S.jd)}, because ${c ? 'the archive gives no transit length' : 'no clock had been published'}.`);
+    say('sky', `The sky of transit clocks on ${longDate(S.jd)}. Of ${num(timed)}, ${num(kept)} are kept, ${num(slipping)} slipping and ${num(lost)} lost. ${p.name} is selected.`);
   }
 }
-const OC_NOTE = () => (S.ocHits.length ? `Gold: a paper inside its own error and this clock's together. The ${plural(S.ocHits.length, 'other paper is', 'other papers are')} in the list below.` : ' ');
-const BAND_NOTE = () => (S.star ? 'Drag along the years: the sky, the count and the clock below follow the date. A dot is the day a better paper took over.' : ' ');
 
 function mountViews() {
   sky = surface($('sky'), (ctx, w, h) => {
     S.L = skyLayout(w, h);
-    S.spots = drawSky(ctx, w, h, { L: S.L, stars: S.stars, jd: S.jd, selected: S.star, hover: S.hover, live: !S.igniting && Math.abs(S.jd - nowJd()) < 1 / 1440, note: S.k2note });
+    S.spots = drawSky(ctx, w, h, { L: S.L, stars: S.stars, jd: S.jd, selected: S.star, hover: S.hover, live: isLive(), note: S.k2note });
+  });
+  // where the sheet is too narrow to hold the lens beside the map, the lens has a canvas of its own under the line of time
+  lens2 = surface($('lens2'), (ctx, w, h) => {
+    S.lensSpots = S.L && !S.L.lens && S.stars.length ? drawLens(ctx, w, h, { stars: S.stars, jd: S.jd, selected: S.star, live: isLive() }) : [];
   });
   band = surface($('band'), (ctx, w, h) => {
     S.sc = bandScale(w, h);
     const st = S.star;
-    S.bandHits = drawBand(ctx, w, h, { sc: S.sc, census: S.census, line: st ? errorLine(st.hist) : null, hist: st ? st.hist : [], dur: st ? durDays(st.p) : null, name: st ? st.p.name : '',
-      jd: S.jd, nowJd: nowJd(), stamp: stampOf(msOfJd(S.jd)), label: (s) => `${refLabel(s)}` });
+    S.bandHits = drawBand(ctx, w, h, { sc: S.sc, census: S.census, line: st ? errorLine(st.hist) : null, hist: st ? st.hist : [], dur: st ? durDays(st.p) : null,
+      jd: S.jd, nowJd: nowJd(), stamp: stampOf(msOfJd(S.jd)), paper: refLabel, hover: S.bandHover });
   });
   curve = surface($('curve'), (ctx, w, h) => {
     if (!S.star) return;
     curve.last = drawCurve(ctx, w, h, { planet: S.star.p, clock: clockAt(S.star.hist, S.jd), jd: S.jd });
   });
   oc = surface($('oc'), (ctx, w, h) => {
-    S.ocHits = S.star && S.record ? drawOC(ctx, w, h, { planet: S.star.p, clock: clockAt(S.star.hist, S.jd), label: refLabel }) : [];
+    S.ocHits = S.star && S.record ? drawOC(ctx, w, h, { planet: S.star.p, clock: clockAt(S.star.hist, S.jd), paper: refLabel, hover: S.ocHover }) : [];
   });
+  const near = (hits, canvas, e, reach) => {
+    const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    let best = null, bd = reach * reach;
+    for (const hh of hits) { const d = (hh.x - x) ** 2 + (hh.y - y) ** 2; if (d < bd || (d === bd && hh.lens)) { bd = d; best = hh; } }
+    return best;
+  };
+  // a paper under the pointer is named on the drawing
   const ov = $('oc');
-  ov.addEventListener('pointermove', (e) => {
-    const r = ov.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    let best = null, bd = 14 * 14;
-    for (const hh of S.ocHits) { const d = (hh.x - x) ** 2 + (hh.y - y) ** 2; if (d < bd) { bd = d; best = hh; } }
-    put('oc-note', best ? `${best.pt.s.pub != null ? Math.floor(best.pt.s.pub) : 'undated'}, ${best.label}: transit ${num(best.pt.n)} found ${span(Math.abs(best.pt.residual) * 86400)} ${best.pt.residual < 0 ? 'early' : 'late'}, ${Math.abs(best.pt.z).toFixed(1)} sigma.` : OC_NOTE());
-  });
-  ov.addEventListener('pointerleave', () => put('oc-note', OC_NOTE()));
+  const ocHover = (s) => { if (s !== S.ocHover) { S.ocHover = s; oc.redraw(); } };
+  ov.addEventListener('pointermove', (e) => { const hit = near(S.ocHits, ov, e, 14); ocHover(hit ? hit.pt.s : null); });
+  ov.addEventListener('pointerleave', () => ocHover(null));
 
   // the sky: point at a lamp to name it, press to read it
   const sk = $('sky'), tip = $('sky-tip');
-  const nearest = (e) => {
-    const r = sk.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    let best = null, bd = 12 * 12;
-    for (const sp of S.spots) { const d = (sp.x - x) ** 2 + (sp.y - y) ** 2; if (d < bd || (d === bd && sp.lens)) { bd = d; best = sp; } }
-    return best;
-  };
   sk.addEventListener('pointermove', (e) => {
-    const sp = nearest(e), star = sp ? sp.star : null;
+    const sp = near(S.spots, sk, e, 12), star = sp ? sp.star : null;
     if (star !== S.hover) { S.hover = star; sky.redraw(); }
     if (!sp) { tip.hidden = true; return; }
     const c = clockAt(star.hist, S.jd), lamp = lampOn(star.p, star.hist, S.jd);
-    tip.textContent = `${star.p.name} · ${stateWord(lamp)}${c ? ` · ± ${span(sigmaAt(c, epochAt(c, S.jd)) * 86400)}` : ''}`;
+    tip.textContent = `${star.p.name}, ${stateWord(lamp)}${c ? `, ± ${span(sigmaAt(c, epochAt(c, S.jd)) * 86400)}` : ''}`;
     tip.hidden = false;
     const box = sk.getBoundingClientRect();      // the drawing does not start at the sheet's corner where the name stands above it
     tip.style.left = `${sk.offsetLeft + Math.min(box.width - 220, Math.max(4, sp.x + 12))}px`;
@@ -254,31 +262,29 @@ function mountViews() {
   sk.addEventListener('pointerleave', () => { tip.hidden = true; if (S.hover) { S.hover = null; sky.redraw(); } });
   // A press reads the lamp that is named under the pointer. A browser rounds the place of a click and not of a
   // move, and under the lens two lamps can be a pixel apart: without this a visitor read one name and opened another.
-  sk.addEventListener('click', (e) => { const star = S.hover || (nearest(e) || {}).star; if (star) { openStar(star, { user: true }); put('pick-msg', ''); } });
+  sk.addEventListener('click', (e) => { const star = S.hover || (near(S.spots, sk, e, 12) || {}).star; if (star) { openStar(star, { user: true }); put('pick-msg', ''); } });
+  const l2 = $('lens2');
+  l2.addEventListener('click', (e) => { const sp = near(S.lensSpots, l2, e, 16); if (sp) { openStar(sp.star, { user: true }); put('pick-msg', ''); } });
 
   // the line of time: the date is set by dragging on it, by the arrow keys once it has the focus, or by the button
   const cv = $('band');
   let dragging = false, touch = false, moved = false, downX = 0;
   const setFromX = (e) => { const r = cv.getBoundingClientRect(); setDate(jdOfYear(S.sc.yearAt(e.clientX - r.left))); };
-  const readAt = (e, reach) => {
-    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    const hit = S.bandHits.find((hh) => (hh.x - x) ** 2 + (hh.y - y) ** 2 < reach * reach);
-    put('band-note', hit ? `${hit.s.pub != null ? Math.floor(hit.s.pub) : 'undated'} · ${refLabel(hit.s)} took over: mid-transit ± ${span(hit.s.sT * 86400)}, period ${hit.s.P} d ± ${span(hit.s.sP * 86400)}.` : BAND_NOTE());
-  };
+  const bandHover = (s) => { if (s !== S.bandHover) { S.bandHover = s; band.redraw(); } };
   // A mouse sets the date where it presses. A finger sets it by a tap or a sideways drag, never by touching down:
   // an up or down swipe over the line scrolls the page (the browser then cancels the pointer) and moves nothing.
   cv.addEventListener('pointerdown', (e) => {
     if (!S.sc) return;
-    dragging = true; touch = e.pointerType !== 'mouse'; moved = false; downX = e.clientX;
+    dragging = true; touch = e.pointerType !== 'mouse'; moved = false; downX = e.clientX; S.bandHover = null;
     try { cv.setPointerCapture(e.pointerId); } catch { /* no capture for a synthetic pointer */ }
     if (!touch) setFromX(e);
   });
   cv.addEventListener('pointermove', (e) => {
-    if (!dragging) return readAt(e, 9);
+    if (!dragging) { const hit = near(S.bandHits, cv, e, 9); return bandHover(hit ? hit.s : null); }      // a paper's dot under the pointer is named on the line
     if (touch && !moved && Math.abs(e.clientX - downX) < 6) return;
     moved = true; setFromX(e);
   });
-  cv.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') put('band-note', BAND_NOTE()); });
+  cv.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') bandHover(null); });
   const end = (e, cancelled) => {
     if (!dragging) return;
     dragging = false;
@@ -324,10 +330,9 @@ function renderTonight() {
   const rows = crossings(cat.planets, cat.standards, now, 24, place);
   const up = rows.filter((r) => r.watchable);
   put('t-count', `${plural(rows.length, 'transit has its', 'transits have their')} predicted middle in the next 24 hours. ${plural(up.length, 'is', 'are')} up in the dark over ${placeWords()}.`);
-  S.rows = rows; S.up = up.length; S.night = nightSpans(place, now); S.nightFrom = now;
+  S.rows = rows; S.up = up.length; S.night = nightSpans(place, now); S.nightFrom = now; S.nightHover = null;
   night.redraw();
-  put('night-note', NIGHT_NOTE());
-  say('night', `The next 24 hours over ${placeWords()}: ${plural(up.length, 'transit', 'transits')} up in the dark, each as the path of its star over the horizon. The table under the drawing lists them.`);
+  say('night', `The dark hours of the next 24 over ${placeWords()}. ${plural(up.length, 'transit is', 'transits are')} up in the dark, each drawn as the height of its star from the transit's beginning to its end. The table under the drawing lists them.`);
   const body = $('t-body');
   const held = body.contains(document.activeElement) ? document.activeElement.dataset.planet : null;      // the table is rebuilt: keep the reader's place in it
   body.textContent = '';
@@ -348,19 +353,16 @@ function renderTonight() {
       el('td', 'num', Number.isFinite(r.planet.vmag) ? r.planet.vmag.toFixed(1) : 'none'));
     body.append(tr);
   }
-  if (!show.length) { const tr = el('tr'); const td = el('td', 'dim', 'No transit in the next 24 hours meets the rule under the drawing. Show all to see each one and why.'); td.colSpan = 10; tr.append(td); body.append(tr); }
+  if (!show.length) { const tr = el('tr'); const td = el('td', 'dim', 'No transit in the next 24 hours is up in the dark here. Show all to see each one and why.'); td.colSpan = 10; tr.append(td); body.append(tr); }
   if (held) { const again = [...body.querySelectorAll('button')].find((x) => x.dataset.planet === held); if (again) again.focus({ preventScroll: true }); }
   put('t-all', S.showAll ? `show only the ${num(up.length)} up in the dark` : `show all ${num(rows.length)}, and why each of the others is not`);
   put('t-shown', `${num(show.length)} of ${num(rows.length)} listed, earliest first`);
-  put('t-cap', `the ${plural(rows.length, 'transit', 'transits')} of the next 24 hours, as a table`);
+  put('t-cap', `${plural(rows.length, 'transit', 'transits')}, as a table`);
 }
-const NIGHT_NOTE = () => (S.up
-  ? `Each line is a transit that is up in the dark: its star's path over the horizon from the transit's beginning to its end. Gold: the ${S.up > 5 ? 'five' : num(S.up)} whose ${S.up === 1 ? 'star is' : 'stars are'} brightest${S.up > 5 ? ` of ${num(S.up)}` : ''}.`
-  : 'No transit of the next 24 hours meets the rule here.');
 function mountTonight() {
   night = surface($('night'), (ctx, w, h) => {
     if (!S.rows) return;
-    S.nightHits = drawNight(ctx, w, h, { rows: S.rows, place: placeNow(), fromJd: S.nightFrom, night: S.night, clock: hourOf });
+    S.nightHits = drawNight(ctx, w, h, { rows: S.rows, place: placeNow(), fromJd: S.nightFrom, night: S.night, clock: hourOf, hover: S.nightHover });
   });
   const nv = $('night');
   const nearRow = (e) => {
@@ -369,11 +371,10 @@ function mountTonight() {
     for (const hh of S.nightHits) { const d = (hh.x - x) ** 2 + (hh.y - y) ** 2; if (d < bd) { bd = d; best = hh; } }
     return best;
   };
-  nv.addEventListener('pointermove', (e) => {
-    const best = nearRow(e);
-    put('night-note', best ? `${best.row.planet.name}: middle ${localTime(best.row.mid, best.row.windowS)} ± ${span(best.row.windowS)}, lasts ${span(durDays(best.row.planet) * 86400)}, star ${Math.round(best.row.altMin)}° to ${Math.round(best.row.altMax)}° up${Number.isFinite(best.row.planet.vmag) ? `, V ${best.row.planet.vmag.toFixed(1)}` : ''}${Number.isFinite(best.row.planet.depthPct) ? `, dip ${best.row.planet.depthPct.toFixed(best.row.planet.depthPct < 0.1 ? 3 : 2)} %` : ''}.` : NIGHT_NOTE());
-  });
-  nv.addEventListener('pointerleave', () => put('night-note', NIGHT_NOTE()));
+  // a transit under the pointer is named on the drawing, with its hour
+  const nightHover = (planet) => { if (planet !== S.nightHover) { S.nightHover = planet; night.redraw(); } };
+  nv.addEventListener('pointermove', (e) => { const best = nearRow(e); nightHover(best ? best.row.planet : null); });
+  nv.addEventListener('pointerleave', () => nightHover(null));
   nv.addEventListener('click', (e) => { const hit = nearRow(e); if (hit) { openStar(S.stars[hit.row.planet.i], { user: true }); put('pick-msg', ''); } });
   const setPlace = (pl, source) => {
     if (!pl) { put('place-msg', 'A latitude from -90 to 90 and a longitude from -180 to 180, east positive, as plain numbers.'); return; }
@@ -393,7 +394,7 @@ function mountTonight() {
   $('forget').addEventListener('click', () => { S.place = null; S.showAll = false; $('lat').value = ''; $('lon').value = ''; put('place-msg', 'The place is forgotten. The night is drawn for the example again.'); save(); renderTonight(); });
   $('t-all').addEventListener('click', () => { S.showAll = !S.showAll; renderTonight(); });
   $('lat').placeholder = String(EXAMPLE_PLACE.lat); $('lon').placeholder = String(EXAMPLE_PLACE.lon);
-  put('t-rule', `Up in the dark, as this lab counts it: from ${WATCH.baselineH * 60} minutes before the transit begins to ${WATCH.baselineH * 60} minutes after it ends, and a window further on each side, the star is ${WATCH.minAlt}° up or more and the Sun ${-WATCH.maxSun}° down or more; the transit is ${WATCH.minLamp} windows long or more; and most other published clocks agree with this one. It says where to point and when, and does not say a telescope can measure the dip: that depends on the star's brightness and the dip's depth, which the table gives.`);
+  put('t-rule', `From ${WATCH.baselineH * 60} minutes before the transit begins to ${WATCH.baselineH * 60} minutes after it ends, and a window further on each side, the star is ${WATCH.minAlt}° up or more and the Sun ${-WATCH.maxSun}° down or more; the transit is ${WATCH.minLamp} windows long or more; and most other published clocks agree with this one.`);
 }
 
 /* ---------------- the catalogue's state, and the tally ---------------- */
@@ -413,7 +414,7 @@ function renderState() {
   put('s-contested', `${num(doubted)} (${pc(doubted, cat.planets.length)})`);
   put('s-alone', num(alone));
   put('s-date', cat.meta.retrieved);
-  put('tb-source', `NASA Exoplanet Archive · ${cat.meta.retrieved}`);
+  put('tb-source', `NASA Exoplanet Archive, ${cat.meta.retrieved}`);
 }
 function renderTally() {
   const pairs = cat.planets.map(pairOf).filter(Boolean);
@@ -476,16 +477,15 @@ async function boot() {
   S.record = true; S.shown = null;
   document.body.dataset.state = 'ready';
   put('load-msg', '');
-  put('band-note', BAND_NOTE());
   renderTally();
   if (S.touched || linkDate !== null) render(); else ignite(nowJd());
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!S.igniting) { render(); oc.redraw(); night.redraw(); tallyView.redraw(); } });      // names are set in the display face once it is here
-  setInterval(() => { if (!document.hidden) { renderTonight(); if (!S.igniting && Math.abs(S.jd - nowJd()) < HALF_DAY) sky.redraw(); } }, 300000);        // the night is about the next 24 hours, and the arcs on the sky about this instant: both are redrawn every five minutes
+  setInterval(() => { if (!document.hidden) { renderTonight(); if (isLive()) { sky.redraw(); lens2.redraw(); } } }, 300000);        // the night is about the next 24 hours, and the arcs on the sky about this instant: both are redrawn every five minutes
 }
 /* For tools/drives/exomania.mjs: where things are on the sheet, so a pointer can be put on them. */
 if (!leaving) $('sky').probe = () => ({
-  lens: S.L ? S.L.lens : null, wide: S.L ? S.L.wide : null, lamps: S.spots.length, star: S.star ? S.star.p.name : null,
-  date: dateOf(S.jd), k2: S.k2note ? { lost: S.k2note.lost, of: S.k2note.of, drawn: !!S.k2note.drawn } : null,
+  lens: S.L ? S.L.lens : null, wide: S.L ? S.L.wide : null, lamps: S.spots.length, lensLamps: S.lensSpots.length, star: S.star ? S.star.p.name : null,
+  date: dateOf(S.jd), k2: S.k2note ? { lost: S.k2note.lost, of: S.k2note.of, drawn: !!S.k2note.fits && S.k2note.of > 0, fits: !!S.k2note.fits } : null,
   named: S.rows ? nightNamed(S.rows).map((r) => r.planet.name) : [], up: S.up || 0, papers: S.ocHits.length,
   at: (name) => { const sp = S.spots.find((x) => x.star.p.name === name && !x.lens) || S.spots.find((x) => x.star.p.name === name); return sp ? { x: sp.x, y: sp.y } : null; },
 });

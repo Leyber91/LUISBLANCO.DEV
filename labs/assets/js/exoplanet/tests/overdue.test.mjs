@@ -21,7 +21,7 @@ import { jdOfMs, msOfJd, taiMinusUtc, ttMinusUtc, sun, romerSeconds, toEarthUtc,
 import { solution, usable, contested, epochAt, midAt, sigmaAt, lampAt, lostFrom, phaseAt, bandDegrees, grade, testOf, transitsBetween, tally, blindAt, stateOf, KEPT_LAMP, BLIND_SHARE, yearOfJd, jdOfYear } from '../overdue/clock.js';
 import { planetsOf, attachRecord, pairOf, durDays } from '../overdue/data.js';
 import { hammer, eclipticToEquatorial, galacticToEquatorial, circleOnMap, lens, knownFrom, historyOf, clockAt, lampOn, inTransit, census, errorLine, smearedDip, isK2, densestField, KEPLER, FIRST_YEAR, LAST_YEAR } from '../overdue/sky.js';
-import { pointsFor, notATest, lampMark, skyLayout, onMap, bandScale, stampOf, dipShape, tallyBin, nightNamed, BESIDE, TITLE_ROOM } from '../overdue/views.js';
+import { pointsFor, notATest, lampMark, skyLayout, lensLayout, onMap, onLens, bandScale, stampOf, dipShape, tallyBin, nightNamed, nightAxis, paperKind, BESIDE, TITLE_ROOM, DIP_APART, SHAPE_APART } from '../overdue/views.js';
 import { crossings, span, placeOf, watchable, unwatchable, shownMs, samplesFor, WATCH, EXAMPLE_PLACE } from '../overdue/tonight.js';
 import { readFileSync } from 'node:fs';
 
@@ -250,16 +250,20 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   const wide = skyLayout(1348, 504), narrow = skyLayout(358, 361);
   ok(BESIDE === 1150 && skyLayout(BESIDE, 620).cx - skyLayout(BESIDE, 620).rx >= TITLE_ROOM && skyLayout(1348, 620).cx - skyLayout(1348, 620).rx >= TITLE_ROOM, 'from the width where the name stands beside the map, the map leaves it its room however tall the sheet');
   ok(skyLayout(BESIDE - 1, 620).rx > skyLayout(BESIDE, 620).rx && skyLayout(958, 384).wide, 'below that width the name stands above the map, and the map takes the room');
-  ok(narrow.lens.r < narrow.ry && wide.lens.r < wide.ry, 'the lens is smaller than the map it enlarges a patch of');
+  ok(wide.lens.r < wide.ry && narrow.lens === null, 'the lens is smaller than the map it enlarges a patch of, and a narrow sheet holds the map alone');
+  const own = lensLayout(150, 166), top = onLens(own, { x: 0, y: 1 }), side = onLens(own, { x: 1, y: 0 });
+  ok(own.x === 75 && own.y - own.r >= 0 && own.x + own.r <= 150 && own.y + own.r + 13 <= 166 && lensLayout(4, 4).r === 10, 'on a canvas of its own the lens fills the width, leaves room for its name under it, and never has no size');
+  near(top.y, own.y - own.r, 1e-9, 'north is up under the lens'); near(side.x, own.x + own.r, 1e-9, 'and its edge is the edge of the disc');
   ok(wide.wide && wide.rx === 2 * wide.ry && wide.cx - wide.rx >= 0 && wide.cy + wide.ry <= 504 && wide.cy - wide.ry >= 0, 'on a wide sheet the whole map is on the canvas');
   ok(wide.lens.x + wide.lens.r <= 1348 && wide.lens.y - wide.lens.r >= 0, 'and so is the lens, at its right shoulder');
-  ok(!narrow.wide && narrow.cx - narrow.rx >= 0 && narrow.lens.y - narrow.lens.r > narrow.cy + narrow.ry && narrow.lens.y + narrow.lens.r + 16 <= 361 && narrow.lens.x + narrow.lens.r <= 358, 'on a narrow one the lens sits under the map, clear of it, with room for its name, on a canvas as tall as the stylesheet makes it at 390 px');
+  const strip = skyLayout(358, 187);
+  ok(!narrow.wide && narrow.cx - narrow.rx >= 0 && strip.cy - strip.ry >= 0 && strip.cy + strip.ry <= 187 && strip.cx + strip.rx <= 358, 'on a narrow one the whole map is on a canvas as tall as the stylesheet makes it at 390 px');
   const px = onMap(wide, hammer(0, 90));
   near(px.y, wide.cy - wide.ry, 1e-9, 'the pole is drawn at the top of the ellipse');
   const sc = bandScale(1000, 214);
   near(sc.X(FIRST_YEAR), sc.pad.l, 1e-9, 'the band begins at the first year'); near(sc.X(LAST_YEAR), 1000 - sc.pad.r, 1e-9, 'and ends at the last');
   near(sc.yearAt(sc.X(2020)), 2020, 1e-9, 'a pixel of the band goes back to its year');
-  ok(!sc.narrow && bandScale(358, 206).narrow && bandScale(358, 206).X(LAST_YEAR) <= 358 - 12, 'on a narrow line the last year keeps room for its digits');
+  ok(!sc.narrow && bandScale(358, 206).narrow && bandScale(358, 206).X(LAST_YEAR) <= 358 - 60 && sc.X(LAST_YEAR) <= 1000 - 60, 'at every width the line leaves a margin on the right for the names of what its lines reach');
   ok(stampOf(Date.UTC(2026, 10, 14)) === '14 NOV 2026' && stampOf(Date.UTC(1999, 0, 1)) === '1 JAN 1999', 'the date stamped on the line is the day, the month in three letters and the year');
 }
 
@@ -316,11 +320,41 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   ok(tallyBin(-100) === 0 && tallyBin(-6.5) === 0 && tallyBin(-6.2501) === 0 && tallyBin(-6.25) === 1 && tallyBin(6.2499) === 50 && tallyBin(6.25) === 51 && tallyBin(100) === 51, 'a miss of 6.25 sigmas or more falls in an end column, however large');
   ok(tallyBin(-1) === 22 && tallyBin(-0.0001) === 25 && tallyBin(0) === 26 && tallyBin(0.9999) === 29 && tallyBin(1) === 30, 'the eight columns either side of zero hold exactly the misses inside one sigma, the ones drawn gold');
 
+  // the night's axis: only the dark hours, each stretch with an hour of margin, side by side
+  {
+  const t0 = 2461000, hr = 1 / 24;
+  const one = nightAxis([[t0 + 6 * hr, t0 + 16 * hr]], t0, 100, 700);
+  ok(one.segs.length === 1 && Math.abs(one.segs[0].a - (t0 + 5 * hr)) < 1e-9 && Math.abs(one.segs[0].b - (t0 + 17 * hr)) < 1e-9, 'one night in the middle of the day is one stretch, an hour wider on each side');
+  near(one.X(t0 + 5 * hr), 100, 1e-6, 'it begins at the left edge'); near(one.X(t0 + 17 * hr), 700, 1e-6, 'and ends at the right'); near(one.X(t0 + 11 * hr), 400, 1e-6, 'with its middle in the middle');
+  ok(Number.isNaN(one.X(t0 + 2 * hr)) && Number.isNaN(one.X(t0 + 20 * hr)), 'an hour of daylight is not on the drawing');
+  const two = nightAxis([[t0, t0 + 5 * hr], [t0 + 17 * hr, t0 + 1]], t0, 100, 700, 20);
+  ok(two.segs.length === 2 && two.segs[0].a === t0 && Math.abs(two.segs[0].b - (t0 + 6 * hr)) < 1e-9 && Math.abs(two.segs[1].a - (t0 + 16 * hr)) < 1e-9 && two.segs[1].b === t0 + 1, 'at night now there are two stretches, tonight\'s rest and tomorrow\'s beginning, cut at the edges of the 24 hours');
+  near(two.segs[1].x0 - two.segs[0].x1, 20, 1e-9, 'with a gap where the day was cut out'); near(two.segs[1].x1, 700, 1e-6, 'and the last one ends at the right edge');
+  near((two.segs[0].x1 - two.segs[0].x0) / (two.segs[1].x1 - two.segs[1].x0), 6 / 8, 1e-9, 'an hour is as wide in one stretch as in the other');
+  ok(two.X(t0 + 3 * hr) < two.X(t0 + 20 * hr) && Number.isNaN(two.X(t0 + 11 * hr)), 'time still runs to the right across the gap, and noon is not drawn');
+  const joined = nightAxis([[t0 + 2 * hr, t0 + 5 * hr], [t0 + 6.5 * hr, t0 + 9 * hr]], t0, 0, 100);
+  ok(joined.segs.length === 1 && Math.abs(joined.segs[0].b - (t0 + 10 * hr)) < 1e-9, 'two dark stretches whose margins touch are drawn as one');
+  const none = nightAxis([], t0, 0, 240), polar = nightAxis([[t0, t0 + 1]], t0, 0, 240);
+  ok(none.segs.length === 1 && none.X(t0 + 0.5) === 120 && polar.segs.length === 1 && polar.X(t0 + 0.25) === 60, 'with no dark hour, or nothing but dark, the whole day is one stretch');
+  }
+
   // the night names five: of the transits up in the dark, the ones whose stars are brightest
   const row = (name, vmag, watchable) => ({ planet: { name, vmag }, watchable });
   const five = nightNamed([row('a', 9, true), row('b', 7, false), row('c', 12, true), row('d', undefined, true), row('e', 8, true), row('f', 10, true), row('g', 11, true), row('h', 13, true)]);
   ok(five.map((r) => r.planet.name).join('') === 'eafgc', 'five are named, brightest star first; one that is not up in the dark is never named, and one with no magnitude comes last');
   ok(nightNamed([row('a', 9, false)]).length === 0 && nightNamed([row('a', 9, true), row('b', 8, true)]).length === 2, 'fewer than five are all named, and none when none is up');
+}
+
+/* ---------------- a paper against a clock: what its colour says ---------------- */
+{
+  const clock = solution([2455000, 0.001, 3, 0.00002, 0, 2010, 0, 0]), dur = 3 / 24;
+  const at = (n, z, blind = false) => ({ n, z, blind });
+  ok(paperKind(at(100, 0.99), clock, dur) === 'inside' && paperKind(at(100, -0.99), clock, dur) === 'inside', 'a paper within the two errors of a clock whose window is shorter than the transit landed inside');
+  ok(paperKind(at(100, 1), clock, dur) === 'outside' && paperKind(at(100, -3), clock, dur) === 'outside', 'one a full sigma or more away is outside, early or late');
+  const wideAt = Math.ceil(Math.sqrt(dur * dur - 0.001 * 0.001) / 0.00002) + 1;
+  ok(sigmaAt(clock, wideAt) >= dur && sigmaAt(clock, wideAt - 2) < dur && paperKind(at(wideAt, 0.2), clock, dur) === 'wide' && paperKind(at(wideAt - 2, 0.2), clock, dur) === 'inside', 'once the clock\'s window at that orbit is as long as the transit, landing inside it says nothing and is not drawn gold');
+  ok(paperKind(at(100, 0.2, true), clock, dur) === 'wide' && paperKind(at(100, 0.2), clock, null) === 'wide' && paperKind(at(wideAt, 2), clock, dur) === 'outside', 'nor is a paper that could not have missed, or one of a planet with no transit length; a miss is still a miss');
+  ok(DIP_APART > 0.9 && DIP_APART < 1 && SHAPE_APART > 0 && SHAPE_APART < 1 - DIP_APART + 0.02, 'the transit itself is named beside the dip a clock lets through once the two lines differ by a few percent of the depth, and the dip is given a number of its own once it is shallower');
 }
 
 /* ---------------- one transit as light ---------------- */
