@@ -30,7 +30,7 @@ export function renderPlate({ run, m, src, floorBits, scoredAs }) {
   const pv = run.provenance || {};
   const live = run.kind === 'live';
   $('runHead').innerHTML = `<span class="${live ? 'live' : ''}">${esc(run.kind)}</span> &middot; <b>${esc(pv.model || '-')}</b> &middot; L${run.level} ${esc(lvlName(run.level))}` +
-    ` &middot; ${esc((pv.date || '').slice(0, 10))}${pv.repeat ? ` &middot; run ${pv.repeat}` : ''}`;
+    ` &middot; ${esc((pv.date || '').slice(0, 10))}${pv.repeat ? ` &middot; run ${esc(pv.repeat)}` : ''}`;
   $('f_cap').textContent = run.capsule ? fmt(m.bits.cap.total) : '-';
   $('f_capu').textContent = run.capsule ? `bits, same code; ${wordCount(run.capsule)} words` : 'no capsule';
   $('f_rate').textContent = run.capsule ? m.rate.toFixed(3) : '-';

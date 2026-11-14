@@ -14,6 +14,7 @@ import { RunFlow } from './flow.js';
 import { Horizon } from './scene.js';
 import { renderPlot, SHAPES, DASHES } from './plot.js';
 import * as V from './views.js';
+import { cleanRun } from './run-guard.js';
 import { DEFS, concepts, metaphorRows, methods, floorProse, limitsNote, tourSteps, findings } from './copy.js';
 
 const { $ } = V;
@@ -491,7 +492,7 @@ function renderPlots() {
     const gains = rows.filter((r) => r.gain != null);
     $('plotNote').innerHTML = gains.length
       ? `Baselines share the plot at matched rate: for each level, <b>head cut</b> keeps the longest start of the source and <b>extractive</b> keeps its most expensive tokens, both inside the median capsule's bits, and both are scored as written with no decoder. ` +
-        `On this conversation the model's capsule ${gains.every((r) => r.gain > 0) ? 'beats the best baseline at every level' : 'beats the best baseline at ' + gains.filter((r) => r.gain > 0).map((r) => 'L' + r.level).join(', ') + (gains.some((r) => r.gain <= 0) ? ' and loses at ' + gains.filter((r) => r.gain <= 0).map((r) => 'L' + r.level).join(', ') : '')} on ${S.dist} fidelity. The grey squares at rate 0 are each model's rebuild from an empty capsule. Click a point to load it${S.compare ? '; in compare mode a click sets the second horizon' : ''}.`
+        `On this conversation the model's capsule ${gains.every((r) => r.gain > 0) ? 'beats the best baseline at every level' : 'beats the best baseline at ' + gains.filter((r) => r.gain > 0).map((r) => 'L' + r.level).join(', ') + (gains.some((r) => r.gain <= 0) ? ' and loses at ' + gains.filter((r) => r.gain <= 0).map((r) => 'L' + r.level).join(', ') : '')} on ${V.esc(S.dist)} fidelity. The grey squares at rate 0 are each model's rebuild from an empty capsule. Click a point to load it${S.compare ? '; in compare mode a click sets the second horizon' : ''}.`
       : 'Run a sweep to draw the curve for this text.';
   });
 }
@@ -805,7 +806,9 @@ $('imRun').addEventListener('change', async (ev) => {
     for (const r of list) {
       if (r.schema && r.schema !== C.LAB.runSchema && j.schema !== C.LAB.runSchema) continue;
       // an imported run keeps its own kind and provenance; its id gains a suffix so it never collides with a bundled run
-      const run = { ...r, id: (r.id || 'run') + '.imported', kind: r.kind || 'imported', note: ((r.note || '') + ' Loaded from a run file.').trim() };
+      const c = cleanRun(r);                  // a file a visitor was handed is no more trusted than a link
+      if (!c) continue;
+      const run = { ...c, id: c.id + '.imported', note: ((c.note || '') + ' Loaded from a run file.').trim() };
       const entry = { run, m: null };
       score(entry);
       if (r.measures) same += JSON.stringify(M.snapshot(entry.m)) === JSON.stringify(r.measures) ? 1 : 0;
@@ -881,11 +884,13 @@ async function boot() {
   buildControls();
   renderCopy();
   const q = new URLSearchParams(location.hash.slice(1));
-  if (q.get('d')) { S.dist = q.get('d'); $('dist').value = S.dist; }
+  // the link may name a distortion: only one of the page's own ids is taken, since the id is printed in the plot's note
+  if (M.DISTORTIONS.some((x) => x.id === q.get('d'))) { S.dist = q.get('d'); $('dist').value = S.dist; }
   const lv = Number(q.get('s')); setLevel(lv >= 1 && lv <= 5 ? lv : C.DEFAULT_LEVEL, false);
   let own = null, liveSel = null;
   if (q.get('t')) { try { own = await unpack(q.get('t')); } catch { own = null; } }
-  if (q.get('x')) { try { liveSel = JSON.parse(await unpack(q.get('x'))); } catch { liveSel = null; } }
+  // a run packed into the link is written by whoever made the link: it is cleaned before anything reads it
+  if (q.get('x')) { try { liveSel = cleanRun(JSON.parse(await unpack(q.get('x')))); } catch { liveSel = null; } }
   const presetId = C.PRESETS.some((p) => p.id === q.get('p')) ? q.get('p') : C.DEFAULT_PRESET;
   // the source and its bits print first, from the pre-tokenizer, before any fetch or shader
   setSourceText(own ?? C.PRESETS.find((p) => p.id === presetId).text);

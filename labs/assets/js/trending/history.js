@@ -20,6 +20,7 @@
    ============================================================ */
 
 import { STORAGE, TUNING, SOURCES } from './constants.js';
+import { httpUrl } from '../kit/guard.js';   // a stored or imported link is drawn as an href: only a web address may be one
 import { scoreItem, rank } from './score.js';
 
 const browserStore = {
@@ -53,9 +54,9 @@ export function migrate(data) {
 /* ---------------- compact <-> hydrate ---------------- */
 export function compact(scan, calls, prevPools = {}) {
   const items = scan.items.map((o) => {
-    const r = { id: o.id, src: o.src, title: o.title, url: o.url, c: o.count, th: o.third ?? null };
+    const r = { id: o.id, src: o.src, title: o.title, url: httpUrl(o.url) || '', c: o.count, th: o.third ?? null };
     if (o.created) r.cr = o.created;
-    if (o.discuss) r.discuss = o.discuss;
+    if (httpUrl(o.discuss)) r.discuss = httpUrl(o.discuss);
     if (o.day) { r.day = o.day; r.prev = o.prev; r.pc = o.prevCensored ? 1 : 0; }
     if (o.series?.length) { r.s0 = o.series[0][0]; r.s = o.series.map((p) => p[1]); }
     if (o.seriesUrl) r.su = o.seriesUrl;
@@ -93,7 +94,7 @@ const unSeries = (r) => {
 export function hydrate(rec) {
   const items = rec.items.map((r) => {
     const o = {
-      id: r.id, src: r.src, title: r.title, url: r.url, discuss: r.discuss, t: rec.sources[r.src]?.fetchedAt || rec.t,
+      id: r.id, src: r.src, title: r.title, url: httpUrl(r.url) || '', discuss: httpUrl(r.discuss) || undefined, t: rec.sources[r.src]?.fetchedAt || rec.t,
       count: r.c, created: r.cr ?? null, third: r.th ?? null, day: r.day, prev: r.prev, prevCensored: !!r.pc,
       series: unSeries(r), seriesUrl: r.su, terms: r.terms || [], meta: r.meta || {}, linkedBy: r.linkedBy,
       alsoIn: r.alsoIn, why: r.why, raw: r.raw, rawUrl: r.su || rec.sources[r.src]?.urls?.[0],
