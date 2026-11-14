@@ -146,6 +146,7 @@ button, input, select { font: inherit; color: inherit; }
 .rp-route { display: inline-flex; }
 .rp-h { font-size: 12.5px; color: var(--accretion-soft); margin-top: 6px; }
 .rp-body { font-size: 11.5px; line-height: 1.6; color: var(--text); margin-top: 6px; max-width: 78ch; }
+.rp-unwritten { opacity: 0; }      /* the part of the note not yet written: in the page, holding its lines, unseen */
 .rp-q { font-size: 11px; color: var(--horizon); margin-top: 6px; }
 mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 1px dotted var(--danger); }
 

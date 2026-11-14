@@ -15,7 +15,7 @@ import {
   transitGeometry, sizeClassOf, limitOf, limitKind, limitText, hasRadius, isNum,
 } from './science.js';
 import { groundingCheck } from './grounding.js';
-import { fmt, fmtInt, esc } from './views/common.js';
+import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 
 export { groundingCheck };
 
@@ -118,11 +118,38 @@ export function createReport(host, store, actions = {}) {
   let ctrl = null;
   const cache = new Map();
 
+  /* The note writes itself out when a world is opened, as this lab's first field report did. All of the text is
+     in the page from the first frame; the part not yet written is there and unseen, so no line moves while it is
+     written and a reader of the page's text has the whole note at once. A world already on screen is rewritten
+     at once (the albedo slider changes its numbers many times a second), and so is every note where motion is
+     turned off. */
+  const CHARS_A_SECOND = 140;
+  let typing = 0, writtenFor = null;
+  function write(text, key) {
+    const body = $('body');
+    cancelAnimationFrame(typing);
+    body.removeAttribute('aria-busy');
+    if (key === writtenFor || reducedMotion() || window.__EXO_STILL__) { writtenFor = key; body.textContent = text; return; }
+    writtenFor = key;
+    const done = document.createElement('span'), rest = document.createElement('span');
+    rest.className = 'rp-unwritten'; rest.textContent = text;
+    body.setAttribute('aria-busy', 'true');
+    body.replaceChildren(done, rest);
+    const t0 = performance.now();
+    const step = (t) => {
+      const n = Math.min(text.length, Math.floor(((t - t0) / 1000) * CHARS_A_SECOND));
+      done.textContent = text.slice(0, n); rest.textContent = text.slice(n);
+      if (n < text.length) typing = requestAnimationFrame(step);
+      else { body.textContent = text; body.removeAttribute('aria-busy'); }
+    };
+    typing = requestAnimationFrame(step);
+  }
+
   function showDeterministic(p) {
     const f = facts(p, store.state.albedo());
     $('head').hidden = true; $('q').hidden = true; $('rej').hidden = true;
     $('who').textContent = 'ENGINE'; host.classList.remove('is-model');
-    $('body').textContent = deterministicNote(p, f, true);
+    write(deterministicNote(p, f, true), p.name);
     $('src').textContent = '[REAL] deterministic engine · every number from the data';
   }
 
@@ -142,7 +169,7 @@ export function createReport(host, store, actions = {}) {
     }
     $('who').textContent = 'MODEL TEXT'; host.classList.add('is-model'); $('rej').hidden = true;
     $('head').hidden = !j.headline; $('head').textContent = String(j.headline || '').slice(0, 90);
-    $('body').textContent = note;
+    write(note, p.name + ' (model)');
     $('q').hidden = !j.question; $('q').textContent = j.question ? 'Open question: ' + String(j.question).slice(0, 240) : '';
     $('src').textContent = `[REAL] ${res.source} · ${res.model} · ${(res.ms / 1000).toFixed(1)} s · grounding: ${chk.traced} of ${chk.total} numbers traced to the data`;
   }
