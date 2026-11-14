@@ -34,3 +34,15 @@ These hold on every change under labs/, because each one has failed before or pr
   the shared place with its first caller, and your report says what was reused and what was lifted. On 2026-11-14
   The Pod kept a visitor's day in its own storage beside Labs OS, where the privacy page's erase could not reach
   it, until a search found the platform; that day one random generator was defined six times across the labs.
+- A rule the page states lives in one function, and every place that applies it calls that function. On 2026-11-14
+  one plate of Overdue counted a later paper as a test by rules another plate had already tightened, and an
+  independent review found the first plate calling a paper a test that the second would have refused.
+- A rule that chooses among data (which clock, which source, which value) and has failed review once is chosen by
+  a backtest, and the backtest is committed beside the data. Overdue's choice of a working clock was argued three
+  times on 2026-11-14 and wrong three times; `labs/assets/data/exomania/backtest_clock.py` settled it.
+- A canvas that fills a box is positioned absolutely inside a box that CSS sizes. Sized by its own bitmap inside a
+  stretched grid row, a canvas grows: on 2026-11-14 a drawing grew by a screen in three seconds after load.
+- Text a visitor must read is never fainter than `--text-dim`. `--text-faint` is 2.3 to 1 on the ground and is kept
+  for marks that carry no words.
+- A press selects what the pointer names. A browser rounds the place of a click and not of a move, so where marks
+  sit a pixel apart, picking again on the click opens a neighbour of the one whose name was shown.

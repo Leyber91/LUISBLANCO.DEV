@@ -26,6 +26,10 @@
         "G0": {
           "level": 2,
           "evidence": "data.js physics() gives each world a soft size class from radius thresholds (1.4-1.8, 1.9-2.3, 3.6-4.2, 5.6-6.4 R-earth) (rung 2). Rung 3 fails: the Teq fallback 278.3*(Teff/5772)*a^-0.5*(1-A)^0.25 fixes R* at 1 solar radius and ignores the Rstar that physics() computes a few lines above. It fills 368 worlds; TRAPPIST-1 h (pl_eqt null, a = 0.0619 AU, Teff 2566 K) comes out at 455 K, hotter than TRAPPIST-1 b's catalogue 400 K, and renders as a 'Rocky world' (with R* = 0.12 solar radii the same relation gives about 172 K at zero albedo). In code for later rungs: cosmic-shoreline gate (k = 7 anchor), scale height kB*T/(mu*mH*g), greenhouse-corrected Tsurf with ice / temperate / partial / lava states. Rung 5 would also fail: Mstar = (Teff/5772)^1.7 and Rstar = Mstar^0.8 from Teff alone, and classify() labels 45 worlds 'habitable zone' from a 230-330 K Teq window."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Adjudicated at 1: the skeptic's dispute holds. Rung 1: distance is converted from parsecs to light-years (the plate reads '142 light-years (43.6 pc)'). Rung 2 fails. science.js sizeClass() returns the last class, Giant, whenever R is not a number, so the 50 snapshot worlds with no pl_rade get a size class with no radius behind it. My screenshot of ?p=BD%2B05+4868+A+b (mass < 6.20 M-earth upper limit, no radius) shows the reticle 'GIANT · HOTTER THAN THE HABITABLE ZONE' next to 'procedural surface: rocky world'. The plate row reads 'SIZE CLASS Giant' with the note 'Earth-size 100%', because monteCarlo() floors the radius at Math.max(0.05, null) = 0.05. The plate also shows gravity 2,480 g and density 273,494 g/cm3, and no planet appears on the stage. The rater's findings above the break are recorded for later rungs. On the displayed path, science.js equilibriumTemp() includes the host radius and semiMajor() applies Kepler's third law with st_mass. But data.js physics(), which drives toParams() and classify(), keeps the G0 Teq fallback with R* fixed at 1 solar radius: TRAPPIST-1 h with pl_eqt removed gives 455 K and 'Rocky world' instead of 171.7 K. classify() still labels habitability from a 230-330 K Teq window (66 worlds, 31 of them outside the Kopparapu zone). The Chen & Kipping forecaster with a 68% band, the 400-draw Monte Carlo with class probabilities, and the shoreline gate all exist. The withholding test puts 79.2% of measured masses inside the 68% interval (band 58-78%) and Teq within 10% for 88.6% (needs 90%)."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 1,
           "evidence": "data.js physics() computes starAngle = Rstar*RSUN_AU / a (clamped to 0.004-0.5 rad, which moves 59 worlds) and exoplanet.js renderStar() draws the host star at that angular radius; the wheel zooms out to camDist 60 so the star shows at that size. Rung 2 fails: no orbit, no AU scale, no other planets of the host, no habitable zone, no light curve anywhere in the code."
+        },
+        "G1": {
+          "level": 5,
+          "evidence": "Adjudicated at 5: the skeptic's dispute holds. Rungs 1-5 stand on the rater's evidence. target.js renderSky() draws the host star at skyView()'s 2*atan(R*/a). views/system.js draws every same-host planet on its own orbit in AU, with a niceLen scale bar and click-to-select. habitableZone() supplies the Kopparapu band, and the Solar system toggle overlays at the same scale. Play/Pause shows a rate ('11 d/s' on Kepler-442 b), kepler() solves for pl_orbeccen, and unknown-e orbits are dashed and flagged ('e unknown for 1, drawn circular and dashed' on BD+05 4868 A b). Rung 6 sits between met and not met, so I take the lower. views/transit.js plots lightCurve() from Rp/R*, a/R* and b against hours and prints depth and duration. But (1) the axis and the head readout switch to percent once the depth passes 1% (unit = ymax > 0.01 ? '%' : 'ppm'), so deep transits are not plotted in ppm. (2) The rung names Mandel & Agol (2002), and the page neither implements nor cites it. science.js fluxAt() integrates a quadratic law numerically on a 14x36 polar grid, with one fixed coefficient pair for every star whatever its Teff (config.js LIMB u1 0.4035, u2 0.2622, Claret & Bloemen 2011). The skeptic measured the grid within about 1% of depth against a fine grid, so the curve's shape is right. The misses are the named method, per-star coefficients and the unit. Not counted above the break: rung 7 scrubbing moves the planet across the disc, but siblings are separate faint curves on one artificial mid-transit. For rung 8, transitValidation() matches depth within 10% for 54.4% and duration for 46.6% (needs 90%). rvCurve() exists, with the discovery method choosing which curve leads. One doubt on rung 4 is left open: when the zone lies far beyond the outermost orbit, a text arrow replaces the band (BD+05 4868 A b: 'HZ 0.46-0.82 AU', 'the zone lies 22x farther out than this orbit, off this view')."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 3,
           "evidence": "exoplanet.js shadeSurface() seeded by data.js hashName() through uSeed, with 4 regimes by uType (temperate, gas giant, ice, lava) (rung 3). Rung 4 fails: running data.js physics() over exoplanet_data.json, sl = clamp(uLightMul, 0.65, 1.5) holds 4,524 of 4,874 worlds at 1.5, the atmR clamp clamp(50*Hr*atmDensity, 0.018, 0.045|0.16) holds 4,085 (Kepler-62 e on the 0.018 floor), and the shader's Hvis = clamp(uHr*50, 0.004, 0.06) sits at a bound for 3,635. Recorded for later rungs: the orbit-view halo beyond the disc is a smoothstep ring by impact parameter (atmosphere(), the !planetHit && !inside branch), and g0-still.png shows a uniform blue rim with no reddened terminator; star colour is the Tanner-Helland curve fit; vividStar() boosts the disc's saturation 1.5x; starAngle is clamped to 0.004-0.5 rad (59 worlds)."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "No dispute; the rater's level is kept. Rung 3 holds: the exoplanet.js FRAG shadeSurface() is seeded through uSeed from data.js hashName(), with 4 regimes by uType (temperate, giant, ice, lava). The shader is essentially unchanged from G0. Rung 4 fails. A clamp script ran data.js toParams()/physics() over the 6,414 snapshot worlds that have a radius. lightMul sits at the shader's clamp(uLightMul, 0.65, 1.5) bound for 5,625 (87.7%), 3,774 of them already clamped in data.js. 50*Hr*atmDensity sits at the atmR clamp (0.018 to 0.045 or 0.16) for 5,409 (84.3%), and the shader's Hvis clamp holds 4,775. The star colour is now Planck x CIE (science.starColour), but vividStar() still boosts the disc's saturation 1.5x, and starAngle is clamped to 0.004-0.5 rad for 783 worlds."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 2,
           "evidence": "The Stand on the surface button reaches the EXO_SURFACE program, where ground meets a sky tinted by uStarColor and uSkyTint (rung 2). Rung 3 fails: relief (amp 0.006-0.011) and eye height (_camera(): 1 + 1.2*amp/sqrt(g)) are in planet radii, not metres, so no catalogue radius reaches the surface shader and the eye on Kepler-62 e sits about 4 to 15 km above the ground or the flat seaY sea; the 1440 px surface shot shows a flat grey plane under a blue band with no relief. In code for later rungs: planetH() terrain styles 0-4 from terrStyle, amp/sqrt(gRel) flattening, seaY only when hasSea, surfaceShadow(), aerial perspective gated by uHasAtmo, gasInterior() for giants. Rung 5 would also fail: surface mode ignores yaw and pitch, and the camera looks about 18 degrees down while the star sits 20 degrees up, outside the 26.6 degree vertical half field of view."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "No dispute; the rater's level is kept. Rung 2 holds: the Surface button and ?view=surface reach the EXO_SURFACE program. Screenshots of Kepler-442 b and GJ 806 b show ground under a sky tinted by the star, and HD 209458 b gets 'Into the clouds'. Rung 3 fails because relief and eye height are still in planet radii. data.js toParams() sets amp to 0.006-0.011, and exoplanet.js _camera() puts the eye at 1 + 1.2*amp/sqrt(g). No pl_rade in metres reaches the shader. For Kepler-442 b the eye is therefore about 104 km above the datum (the rung requires 100 m or less), and the horizon dip is not sqrt(2h/R). Above the break: drag look-around (bezel LOOK -74 deg), a star-elevation slider, landing sites for P < 10 d, and a ground readout with tags."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 1,
           "evidence": "ui.js buildRegistry() lists 4,874 worlds grouped by data.js category() (habitable zone, rocky, ocean, sub-Neptune, ice giant, lava, frozen, gas) with a count per group and the total in the panel head. Rung 2 fails: there is no chart of the catalogue anywhere in the lab."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "No dispute; the rater's level is kept. Rungs 2-4 hold. views/plot.js draws valley (insolation-radius), radius-period and mass-radius on log axes with units. plotValue() drops 'M-R relationship' masses and limits, minimum masses are drawn hollow, the selected world is marked, and clicking a point selects it. Rung 5 is half met. valleyHistogram() computes the bars in the page (Kepler, P < 100 d, radius to 10%, n=780), marks the 1.5-2.0 band and cites Fulton et al. 2017. But the caption prints only the emptiest of the 4 bins inside the band (31) and the two peaks (59, 79), not a count for each bin in the band. Rung 6 would also fail: box brushing works only on the three scatter tabs (Discoveries is click-a-year), only one diagram is visible at a time, and there is no world list to filter. Sky is a 2D Hammer projection, not a 3D map."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "exomania.html loads tokens.css and exoplanet.css, and every cluster uses .hud-panel built on the tokens.css colour, type and spacing tokens (rung 2). Rung 3 fails: exomania.html line 11 loads Orbitron and Space Grotesk, but tokens.css sets --font-display, --font-body and --font-mono all to IBM Plex Mono and no rule names either family. Recorded for later rungs: the Atmosphere slider readout prints NaN on the first view (g0-still.png, 1440 px), the telemetry panel clips its Semi-major axis row, the period prints 122.39 d (5 significant digits), and gold sits on the resting .ctl-random button, the .hud-count total and the reticle brackets."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "No dispute; the rater's level is kept. Rung 1 holds: dark theme, IBM Plex Mono loaded from Google Fonts, styled hairline buttons. Rung 2 fails. The shared .plate panel uses colour tokens (--hair, --panel), but exoplanet.css uses no spacing token (0 var(--s-*); the G0 sheet used 57) and no type-size token (0 --t-micro or --t-lead; .tp-k is 9.5px, .tp-name 20px, .ret-name 19px). Rung 3 fails as well: units share the .tp-v span with their values ('1.34 +0.11 -0.18 R-earth'). Above the break, none of the 20 test worlds showed NaN, undefined, Infinity or a float over 4 significant digits. Rung 5 would fail: each world has 2 to 4 ellipsis-truncated .tp-row .tp-n notes at 1440x900, the Signal caption is clipped at the panel bottom when the filter row wraps, and the reticle sub-label sits over the planet limb at 390 px."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 4,
           "evidence": "Entry points: main.js jumpRandom() behind the #exo-shuffle pill and the Jump to random world button, ui.js buildRegistry() list, search over pl_name and hostname re-rendered on every input event, ?p= at load. exoplanet.js _bindPointer() drag orbit, wheel and pinch zoom; buildControls() presets plus close orbit and surface. Rung 5 fails: the Atmosphere slider writes engine.cfg.atm, which no uniform reads, and its readout shows NaN. ?p= and ?view= are read once at load but the URL is never rewritten."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Adjudicated at 4: the skeptic's dispute holds. Rungs 1-4 stand. Another world and the R key call randomWorld. There is a search-result list with drag orbit, and search over name and host runs on every input event. exoplanet.js _bindPointer handles wheel and pinch zoom, and there are three camera modes: Orbit, Low pass and Surface. Rung 5 fails. views/plot.js keeps the colour-by select (ink / by method / by year) visible on every tab. Its change handler sets store.state.colorBy and redraws, but drawTimeline() never reads colorBy (only drawScatter and drawSky call inkFor()), so on the Discoveries tab the control changes nothing. Rung 6 would also fail for one camera mode. main.js writeURL() writes only yaw, pitch and dist ('cam'). It never writes the surface look (cfg.lookYaw and lookPitch, set by the drag in _bindPointer) or sunElev, and select() calls engine.setCamera({lookYaw: 0, lookPitch: 0}), so a copied surface link opens with the default look direction. The rater also saw a later frame() reset the distance to home. Above the break: range filters on R, Teq, S, dist, Teff, P and year with a live count ('17 match'), randomWorld drawing from filterFn, and a working Compare dialog with Earth. Pins live only in store.state.pins and are lost on reload."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 3,
           "evidence": "update_exoplanet_data.yml (cron '0 4 * * 1') pulls 9 columns from the ps table over TAP, asserts more than 1000 rows before and after prebake, writes 4,874 worlds to labs/exoplanet_data.json and commits only when git diff finds a change (last refresh commit 60964b0, 2026-11-09). Rung 4 fails: the page never names NASA or the table and shows no date; the meta description, loader and refresh tooltip say 'Kepler' ('Kepler probe archive') although the file holds CoRoT, K2, 2MASS and other worlds. For later rungs: prebake keeps the most-complete row (completeness()), and no error or limit columns are fetched, so Kepler-62 e's 36 M-earth upper limit reaches the engine as a mass and telemetry prints 13.89 g."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Adjudicated at 2: both disputes hold. Rung 2: catalog.js loadSnapshot() loads the 6,464-row PSCompPars snapshot from the NASA Exoplanet Archive. Rung 3 sits between met and not met, so I take the lower. The cron in update_exoplanet_data.yml ('0 4 * * 1', row-count guard, commit only on change) refreshes only the 9-column roster, labs/exoplanet_data.json. joinRoster() uses that roster for the measuredR flag and to append planets confirmed after the snapshot, with Mprov 'Mass' and Mlim 0. Every value, error bar and reference the page shows comes from pscomppars-snapshot.json, which build_snapshot.py documents as 'run by hand; the output is committed'. The header date is snap.meta.retrieved (2026-11-11, the manual build), not a job's commit time. Rung 6 also fails on the running page, which would cap the axis at 5 even with rung 3. The snapshot has 32 worlds with no pl_rade and an upper-limit mass. For them science.js forecastFor() returns null, so monteCarlo() sampleM() draws from the limit p.M as if it were a measurement, and R becomes Math.max(0.05, null) = 0.05. My screenshot of ?p=BD%2B05+4868+A+b shows 'MASS < 6.20 M-earth upper limit' above 'GRAVITY 2,480 g ... from the measured mass and radius' and 'DENSITY 273,494 g/cm3'. The snapshot keeps only pl_bmasselim and drops the limit flags for eccentricity, radius, Teq, a and period; the skeptic found Kepler-427 b's e < 0.57 limit shown as a measured 'e 0.57'. The rater's findings above the break: for rung 4, the header stamp and Method dialog name the archive, PSCompPars and its doi; for rung 5, per-value references sit on the Sources line; rung 7 fails because COLS drops pl_orbincl."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 2,
           "evidence": "narrative.js uses ai/provider.js: Ollama only when isLocal(), and ai/config.js leaves worker.base empty, so the public site always lands on echo, which types the buildSentences() and lifeAssessment() templates; the rep-mode label shows 'offline' (or 'ollama' on localhost, as in g0-still.png). Rung 3 fails: the lab does not use labs/assets/js/ai/llm.js, so no model answers on the public site. No tour, no grounding check."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Adjudicated at 4: both disputes hold. Rungs 1-4 stand on the rater's code reading. report.js has deterministicNote(). LLM.complete() runs through the shared ai/llm.js with the source label `${res.source} · ${res.model}`. AI.maxWaitMs 0 falls back at once on a closed public window, the shared route panel shows the countdown, and the engine note stays on screen throughout. Caveat on rung 4: AI.timeoutMs is 90000, so a hanging route leaves the button on 'Asking' for up to 90 s (the skeptic saw local llama3.1:8b still 'Asking' at 45 s), with the template note visible. Rung 5 fails. groundingCheck() extracts numbers with /(?<![\\w.\\-])(\\d{1,3}(?:,\\d{3})+|\\d+(?:\\.\\d+)?)(?![\\w])/, which skips any number joined to a unit letter or preceded by a hyphen. I ran the shipped function. 'near 900K' finds 0 of 0 numbers and passes. 'about 3.7g' is read as '3', which is in the pool, so it passes. 'oceans 40km deep', 'It is 7x heavier' and 'Nights fall to -40 degrees' each find 0 of 0 and pass. Only '900 K', with a space, is caught. The pool also whitelists 1, 2, 3, 68, 100, 1931 and 2017 for every world. showModel() would print such a reply as MODEL TEXT with 'grounding: 0 of 0 numbers traced', so not every number is checked. Rung 6 (the ENGINE and MODEL TEXT badges) cannot count above a failed rung 5. Rung 7 also fails: tours.js tourStops() captions come from templates, and no batched model call narrates a tour. No model route was exercised by the rater, the skeptic or me."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 3,
           "evidence": "ui.js buildReticle() prints the classify() label; narrative.js buildSentences() writes 4 to 5 sentences from derived() values; lifeAssessment() behind 'Could life exist?' reasons from Tsurf, atmDensity and starActivity and names the speculative cases. Rung 4 fails: telemetry gravity comes from the power-law mass with no tag when pl_masse is null, no value is marked measured or derived, and the 'habitable zone' label (a 230-330 K Teq window in classify()) names no rule. Night lights (uLife) and aurora render unlabelled, and .hud-bottom (the report) is display:none below 1200 px."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "No dispute; the rater's level is kept. Rung 1 holds: the reticle shows a class label ('Earth-size · conservative habitable zone'). Rung 2 fails. The only paragraph on the page is report.js deterministicNote(p,f,true), which covers radius, star type and Teff, period, orbit, insolation, zone and the mass forecast. It does not give the star's colour, its size in the sky, surface temperature, atmosphere or gravity; the long form with sky size reaches only the PNG plate. For a world with no radius the paragraph reads 'BD+05 4868 A b is — times Earth's radius' (my screenshot). Rung 3 fails: G0's lifeAssessment() and 'Could life exist?' were removed, and nothing replaces them. Above the break: M/D/E/I tags on every plate row, Kopparapu named on the Zone row, report and tags reachable at 390 px, and the How-inferred chain panel (panels.js chainHTML)."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 1,
           "evidence": "A planet frame renders at 1440 px (g0-still.png, headless Chrome with ?still) (rung 1). Rung 2 is unmeasured: no time to first frame has been recorded in a DevTools trace on a stated machine, and the audit's headless run without ?still produced no frame within 60 s. In code for later rungs: main.js progress veil, exoplanet.js _resize() resScale 0.9 with a 1600 px long-edge cap, _lod() octaves by apparent radius, the EXO_SURFACE variant compiled lazily in _activate(), _lost()/_restore() stepping resolution down and _fail() naming the GPU; no fps figure exists. Rung 6 would fail: reduced motion is CSS-only and the rAF loop keeps advancing uTime; the canvas has no keyboard handlers."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "No dispute; the rater's level is kept. Rung 1 holds: the planet renders at 1440 px (desk.png, Kepler-442 b). Rung 2 fails on the rater's machine (i7-13850HX, RTX 3500 Ada Laptop GPU, Chrome 156 headless, ANGLE D3D11, local server, no throttling). On a cold shader cache, linking the orbit program (getProgramParameter LINK_STATUS) blocks the main thread for 19.4 s. Two fresh profiles drew the first planet frame at 14.3 s and 16.1 s after navigation start, and a third was ready at 20.8 s, with the veil frozen at 'Starting'. A warm cache gives 0.82 s and SwiftShader about 1.0 s. These are CDP timing probes plus a 10 s Tracing capture, not a DevTools UI trace. Above the break: 113 fps over 10 s of orbit view, and WEBGL_lose_context recovery with a retry at resScale 0.70."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 3,
           "evidence": "main.js, data.js, exoplanet.js, ui.js and narrative.js are separate modules, and data.js physics(), classify() and toParams() make no DOM, GL or network calls and seed by hashName() (rung 3). Rung 4 fails: ui.js presets run Object.assign(engine.cfg, p) and engine._draw(), the close-orbit button writes engine.cfg.camMode, and main.js writes engine.cfg.camMode for ?view= deep links. Recorded for later rungs: no tests exist, the 'atm' control key is read by nothing, narrative.js still imports ai/provider.js, and .github/prebake_exoplanets.py re-implements the data.js dedup by hand."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "No dispute; the rater's level is kept. Rungs 2-3: separate ES modules (main, catalog, science, data, exoplanet, views/*); science.js and data.js make no DOM, GL or network calls and seed by name. Rung 4: a grep finds no engine.cfg write and no underscore call outside exoplanet.js (main.js only assigns the public onCamera hook). The API is load, set, start, stop, surface, setCamera and frame, and the EXO_SURFACE variant is compiled on demand behind its define. Rung 5 fails. tests/science.test.mjs (21 passed, run by tools/lab_tests.mjs inside gates.yml) checks Earth reference values and catalogue-wide aggregates, not derived values for 10 or more planets. It also has no check that every UI control key is read by the engine."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "fa98fbd" }
   ]
 }

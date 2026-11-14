@@ -30,6 +30,7 @@ const FRAG = `
 precision highp float;
 
 uniform vec2  uRes;
+uniform vec2  uShift;        // principal-point offset in pixels: centres the world in the free column
 uniform float uTime;
 uniform vec3  uCam;
 uniform vec3  uFwd;
@@ -748,7 +749,7 @@ vec3 surfaceView(vec3 ro, vec3 rd){
 
 #endif
 void main(){
-  vec2 uv = (gl_FragCoord.xy - 0.5*uRes)/uRes.y;
+  vec2 uv = (gl_FragCoord.xy - 0.5*uRes - uShift)/uRes.y;
   vec3 ro = uCam;
   vec3 fwd = normalize(uFwd);
   // on the surface, level the horizon to the planet's radial up; in orbit use world Y
@@ -803,12 +804,13 @@ const vnorm = (a) => { const l = Math.hypot(a[0],a[1],a[2]) || 1; return [a[0]/l
 
 const DEFAULTS = {
   camMode: 'orbit',
+  shift: [0, 0],      // CSS pixels, +x right, +y up
   camDist: 4.7, yaw: 0.7, pitch: 0.30, fov: 1.5,
   exposure: 1.25, resScale: 0.9,
   lightDir: [-0.15, 0.45, 0.85],
   starColor: [1.0, 0.95, 0.86], starSurf: [1.0, 0.96, 0.9], starAngle: 0.02,
   starActivity: 0.4, starSpots: 0.2, starTeff: 5600, starSpin: [0.0, 1.0, 0.0],
-  lightMul: 1.0, bgBright: 1.0,
+  lightMul: 1.0, bgBright: 0.32,
   type: 0, isGasGiant: 0, steam: 0, seed: 0.0, spin: 0.05,
   seaLevel: 0.5, contFreq: 1.9, mtnFreq: 6.0, bump: 0.14,
   tempBias: 0.5, iceCap: 0.78, life: 0.0, cloud: 0.5, bandFreq: 16.0,
@@ -823,7 +825,7 @@ const DEFAULTS = {
 };
 
 const UNIFORMS = [
-  'uRes','uTime','uCam','uFwd','uFov','uExposure',
+  'uRes','uShift','uTime','uCam','uFwd','uFov','uExposure',
   'uLightDir','uStarColor','uStarSurf','uStarAngle','uStarActivity','uStarSpots','uStarTeff','uStarSpin','uLightMul','uBgBright',
   'uType','uIsGasGiant','uSteam','uSurfaceMode','uSeed','uSpin','uSeaLevel','uContFreq','uMtnFreq','uBump',
   'uTempBias','uIceCap','uLife','uCloud','uBandFreq','uColA','uColB','uColC',
@@ -848,7 +850,20 @@ export class Exoplanet {
     if (!gl) { this._fail('WebGL is required to render the planet.'); return; }
     this.gl = gl;
     this.renderer = this._rendererInfo(gl);
-    console.info('[exomania] GL renderer:', this.renderer);   // surfaced so a failing machine can be identified from the console
+    // Performance tier. A software rasteriser (SwiftShader, llvmpipe, the Windows basic
+    // driver) costs about 330 ms per frame for this shader at 1296x810 (measured
+    // 2026-11-11), so a continuous loop would freeze the page: it gets a reduced buffer
+    // and renders on demand. Reduced motion also renders on demand, at full resolution.
+    this.software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(this.renderer);
+    this.reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onDemand = this.still || this.software || this.reduced;
+    if (this.software) this.cfg.resScale = 0.5;
+    this.tier = this.software ? 'software' : this.reduced ? 'still' : 'gpu';
+    this.stats = { fps: 0, ms: 0, frames: 0 };
+    this._ft = [];
+    this._anim = null;
+    this._visible = true;
+    console.info('[exomania] GL renderer:', this.renderer, '· tier', this.tier);
 
     // This is a heavy single-pass ray-marcher. On a large desktop framebuffer the
     // first frame can outrun the GPU watchdog and the driver drops the context
@@ -943,6 +958,7 @@ export class Exoplanet {
     this._resize();
     console.info('[exomania] WebGL context restored');
     if (this.still) { if (this.cfg.camMode === 'surface') this._activate('surface'); this._draw(); return; }
+    if (this.onDemand) { this._draw(); return; }
     if (!this.running) { this.running = true; requestAnimationFrame(this._frame); }   // else the existing loop picks it up
     // if we lost the context while standing on a world, rebuild the surface program
     // through the SAME deferred/veiled path the button uses — never inline in the
@@ -951,8 +967,69 @@ export class Exoplanet {
   }
 
   ok() { return !!this.gl && (!!this.prog || this.gl.isContextLost()); }   // a merely-lost context recovers; only (gl ok, no prog) is a fatal shader failure
-  load(params = {}) { Object.assign(this.cfg, params); if (!this.running) this._draw(); }
-  set(key, val) { this.cfg[key] = val; if (!this.running) this._draw(); }
+  load(params = {}) { Object.assign(this.cfg, params); this.requestDraw(); }
+  /* one draw per animation frame at most, and none while the loop is already drawing */
+  requestDraw() {
+    if (this.running || this._pending) return;
+    this._pending = true;
+    requestAnimationFrame(() => {
+      this._pending = false;
+      if (this.running) return;
+      if (this._refined) { this._refined = false; this._setScale(this._baseScale || this.cfg.resScale); }
+      this._draw();
+      this._scheduleRefine();
+    });
+  }
+  /* software tier: interact on a small buffer, then refine once the view rests */
+  _scheduleRefine() {
+    if (!this.software || this.still) return;
+    clearTimeout(this._refineT);
+    this._refineT = setTimeout(() => {
+      if (this.running || this._pending) return;
+      this._baseScale = this._baseScale || this.cfg.resScale;
+      this._refined = true; this._setScale(0.85); this._draw();
+    }, 450);
+  }
+  _setScale(s) {
+    this.cfg.resScale = s;
+    const w = Math.max(1, Math.round(this.canvas.clientWidth * s)), h = Math.max(1, Math.round(this.canvas.clientHeight * s));
+    const k = Math.min(1, 1600 / Math.max(w, h));
+    this.canvas.width = Math.max(1, Math.round(w * k)); this.canvas.height = Math.max(1, Math.round(h * k));
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  }
+  /* ---- public API: framing, camera and render options. Other modules use only these. ---- */
+  /* centre the world at a principal-point offset (CSS px) and set its resting distance */
+  frame(shift, homeDist) {
+    const resetDist = !this._anim && Math.abs(homeDist - (this.cfg.homeDist || 0)) > 0.02 * homeDist;
+    this.cfg.shift = shift; this.cfg.homeDist = homeDist;
+    if (resetDist) this.cfg.camDist = homeDist;
+    this.requestDraw();
+  }
+  get camera() {
+    const c = this.cfg;
+    return { mode: c.camMode || 'orbit', yaw: c.yaw, pitch: c.pitch, dist: c.camDist, homeDist: c.homeDist, fov: c.fov,
+      closeR: c.closeR || 1.34, sunElev: c.sunElev ?? 14, lookYaw: c.lookYaw || 0, lookPitch: c.lookPitch || 0,
+      shift: c.shift || [0, 0], resScale: c.resScale, moving: !!this._anim };
+  }
+  /* yaw, pitch, dist (planet radii), lookYaw, lookPitch, sunElev, mode ('orbit' | 'closeorbit') */
+  setCamera(p = {}) {
+    const c = this.cfg;
+    if (p.mode && p.mode !== 'surface') { if (c.camMode === 'surface') this._activate('orbit'); c.camMode = p.mode; }
+    for (const [k, key] of [['yaw', 'yaw'], ['pitch', 'pitch'], ['dist', 'camDist'], ['lookYaw', 'lookYaw'], ['lookPitch', 'lookPitch'], ['sunElev', 'sunElev']]) {
+      if (Number.isFinite(p[k])) c[key] = p[k];
+    }
+    this.requestDraw();
+  }
+  /* render options that are not physics: cloud and life (the illustrative layers) */
+  setLayers({ cloud, life } = {}) {
+    if (Number.isFinite(cloud)) this.cfg.cloud = cloud;
+    if (Number.isFinite(life)) this.cfg.life = life;
+    this.requestDraw();
+  }
+  /* draw now, synchronously (for a capture in the same task) */
+  render() { this._draw(); }
+  get buffer() { return this.canvas.width + 'x' + this.canvas.height; }
+  set(key, val) { this.cfg[key] = val; this.requestDraw(); }
   surface(on) {
     this.cfg.camMode = on ? 'surface' : 'orbit';
     // first descent compiles the heavy surface program — can stall a beat on a slow
@@ -963,12 +1040,12 @@ export class Exoplanet {
         const built = this._activate('surface');
         this._clearNote();
         if (!built) { this.cfg.camMode = 'orbit'; this._activate('orbit'); this._note('Surface view unavailable on this GPU', true); }
-        if (!this.running) this._draw();
+        this.requestDraw();
       }));
       return;
     }
     this._activate(on ? 'surface' : 'orbit');
-    if (!this.running) this._draw();
+    this.requestDraw();
   }
 
   _program(vs, fs) {
@@ -995,17 +1072,21 @@ export class Exoplanet {
       let t = vcross(L, [0, 1, 0]);
       if (Math.hypot(t[0], t[1], t[2]) < 1e-3) t = vcross(L, [1, 0, 0]);
       t = vnorm(t);
-      // stand so the star sits ~20 deg above the horizon (sin20 ~ 0.34)
-      const up = vnorm(vadd(vscale(L, 0.34), vscale(t, 0.94)));
+      // stand where the star sits sunElev degrees above the horizon (time of day; on a
+      // tidally locked world, the landing site: substellar, terminator or night side)
+      const el = Math.max(-12, Math.min(80, cfg.sunElev ?? 14)) * Math.PI / 180;
+      const up = vnorm(vadd(vscale(L, Math.sin(el)), vscale(t, Math.cos(el))));
       // float above the actual relief ceiling (amp/sqrt(g)) so the eye is never
       // buried regardless of landing site; an oblique look-down reveals the
       // procedural relief through shading + the curved horizon + star above it.
       const cap = (cfg.amp || 0.011) / Math.sqrt(Math.max(cfg.gRel || 1, 0.3));
       const ro = vscale(up, 1.0 + cap * 1.2 + 6e-6);
-      const hd = vnorm(vsub(L, vscale(up, vdot(L, up))));   // star's horizontal bearing
-      // oblique aerial: ~18 deg down -> terrain fills the lower ~60%, the
-      // horizon + star + sky sit in the upper ~40%
-      const fwd = vnorm(vadd(vscale(hd, 0.95), vscale(up, -0.31)));
+      const hd0 = vnorm(vsub(L, vscale(up, vdot(L, up))));   // star's horizontal bearing
+      // look around: yaw about the local vertical, pitch from the default ~18 deg down
+      const side = vnorm(vcross(up, hd0)), ly = cfg.lookYaw || 0;
+      const hd = vnorm(vadd(vscale(hd0, Math.cos(ly)), vscale(side, Math.sin(ly))));
+      const lp = Math.max(-1.2, Math.min(1.2, -0.12 + (cfg.lookPitch || 0)));   // star in frame on arrival
+      const fwd = vnorm(vadd(vscale(hd, Math.cos(lp)), vscale(up, Math.sin(lp))));
       return { ro, fwd };
     }
     if (cfg.camMode === 'closeorbit') {
@@ -1061,20 +1142,102 @@ export class Exoplanet {
     if (long > MAXLONG) { const k = MAXLONG / long; w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k)); }
     this.canvas.width = w; this.canvas.height = h;
     this.gl.viewport(0, 0, w, h);
-    if (!this.running) this._draw();
+    this.requestDraw();
   }
 
   start() {
     if (!this.gl || this.running) return;
+    if (this.onDemand) { this.started = true; this._draw(); return; }
     // deep-link ?view=surface: build it now, behind the loading veil; if it can't, drop to orbit with a notice
     if (this.cfg.camMode === 'surface' && !this._activate('surface')) {
       this.cfg.camMode = 'orbit'; this._activate('orbit'); this._note('Surface view unavailable on this GPU', true);
     }
     if (this.still) { this._draw(); return; }
-    this.running = true; requestAnimationFrame(this._frame);
+    this.started = true;
+    this.running = true; this._last = 0; requestAnimationFrame(this._frame);
   }
   stop() { this.running = false; }
-  _frame() { if (!this.running) return; this._draw(); requestAnimationFrame(this._frame); }
+  /* pause the loop while the page is hidden or the canvas is scrolled away */
+  setVisible(v) {
+    this._visible = v;
+    if (this.onDemand || !this.started) return;
+    if (v && !this.running) { this.running = true; this._last = 0; requestAnimationFrame(this._frame); }
+    if (!v) this.running = false;
+  }
+  _frame(now) {
+    if (!this.running) return;
+    if (this._last) this._govern(now - this._last);
+    this._last = now;
+    this._step(now);
+    this._draw();
+    requestAnimationFrame(this._frame);
+  }
+  /* frame-time governor: step the buffer down when frames run long, back up when cheap */
+  _govern(dt) {
+    const f = this._ft; f.push(dt); if (f.length > 40) f.shift();
+    if (f.length < 40) return;
+    const sorted = f.slice().sort((x, y) => x - y), med = sorted[20];
+    this.stats.ms = med; this.stats.fps = Math.round(1000 / med);
+    const rs = this.cfg.resScale;
+    if (med > 40 && rs > 0.45) { this.cfg.resScale = Math.max(0.45, rs - 0.15); this._ft = []; this._resize(); }
+    else if (med < 14 && rs < 0.9) { this.cfg.resScale = Math.min(0.9, rs + 0.1); this._ft = []; this._resize(); }
+  }
+  /* camera choreography: a fly-out, a target swap at the far point, a fly-in */
+  flyTo(params, { from = null, dur = 1700, onSwap } = {}) {
+    const instant = this.onDemand || !this.started;
+    if (instant) {
+      Object.assign(this.cfg, params);
+      this.cfg.camDist = this.cfg.homeDist || 4.7;
+      onSwap && onSwap();
+      this.requestDraw();
+      return;
+    }
+    const startDist = from ?? this.cfg.camDist;
+    this._anim = { t0: performance.now(), dur, startDist, far: Math.max(16, startDist * 3), params, swapped: false, onSwap,
+      yaw0: this.cfg.yaw };
+  }
+  _step(now) {
+    const A = this._anim; if (!A) return;
+    const t = Math.min(1, (now - A.t0) / A.dur);
+    const home = this.cfg.homeDist || 4.7;
+    const out = 0.32;   // fraction of the move spent flying out
+    if (t < out && !A.fromFar) {
+      const u = t / out, e = u * u * u;
+      this.cfg.camDist = A.startDist + (A.far - A.startDist) * e;
+    } else {
+      if (!A.swapped) { Object.assign(this.cfg, A.params); A.swapped = true; A.onSwap && A.onSwap(); }
+      const u = A.fromFar ? t : (t - out) / (1 - out), e = 1 - Math.pow(1 - u, 4);
+      this.cfg.camDist = A.far + (home - A.far) * e;
+      this.cfg.yaw = A.yaw0 + (1 - e) * 0.9;
+    }
+    if (t >= 1) { this.cfg.camDist = home; this.cfg.yaw = A.yaw0; this._anim = null; }
+  }
+  /* the opening ignition: start far out and arrive */
+  arrive(dur = 2600) {
+    if (this.onDemand) return;
+    this.cfg.camDist = 34;
+    this._anim = { t0: performance.now(), dur, startDist: 34, far: 34, params: {}, swapped: true, fromFar: true, yaw0: this.cfg.yaw };
+  }
+  /* a square thumbnail of another world, rendered by this same pipeline, then restore */
+  snapshot(params, size = 150) {
+    if (!this.gl || !this.progOrbit) return null;
+    const saved = { ...this.cfg };
+    Object.assign(this.cfg, params, { shift: [0, 0], camMode: 'orbit', camDist: 4.2, yaw: 0.7, pitch: 0.3 });
+    this._draw();
+    const g = this.canvas, side = Math.min(g.width, g.height) * 0.92;
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    try { c.getContext('2d').drawImage(g, (g.width - side) / 2, (g.height - side) / 2, side, side, 0, 0, size, size); } catch (_) { /* lost */ }
+    for (const k of Object.keys(this.cfg)) if (!(k in saved)) delete this.cfg[k];
+    Object.assign(this.cfg, saved);
+    this._draw();
+    return c;
+  }
+  /* a frame for export: draw now and read it back before the buffer is presented */
+  capture(target2d, x, y, w, h) {
+    if (!this.gl) return false;
+    this._draw();
+    try { target2d.drawImage(this.canvas, x, y, w, h); return true; } catch (_) { return false; }
+  }
 
   _draw() {
     const gl = this.gl; if (!gl || !this.progOrbit) return;   // bail if the context/program was lost
@@ -1090,6 +1253,8 @@ export class Exoplanet {
     const lod = this._lod();
 
     gl.uniform2f(u.uRes, this.canvas.width, this.canvas.height);
+    const k = this.canvas.width / Math.max(1, this.canvas.clientWidth);
+    gl.uniform2f(u.uShift, (cfg.shift[0] || 0) * k, (cfg.shift[1] || 0) * k);
     gl.uniform1f(u.uTime, (performance.now() - this.t0) / 1000);
     gl.uniform3fv(u.uCam, cam.ro);
     gl.uniform3fv(u.uFwd, cam.fwd);
@@ -1159,19 +1324,37 @@ export class Exoplanet {
     // wide multiplicative zoom range: close skim (1.15) out to a system view where
     // the planet is a speck and the host star sits at its real angular size (60).
     const ZMIN = 1.15, ZMAX = 60.0;
-    const redraw = () => { if (!this.running) this._draw(); };
+    const redraw = () => { this.requestDraw(); };
     const zoomBy = (factor) => { this.cfg.camDist = Math.max(ZMIN, Math.min(ZMAX, this.cfg.camDist * factor)); redraw(); };
 
     let down = false, lx = 0, ly = 0;
     const dn = (x, y) => { down = true; lx = x; ly = y; };
     const mv = (x, y) => {
       if (!down) return;
-      this.cfg.yaw   -= (x - lx) * 0.006;
-      this.cfg.pitch = Math.max(-1.45, Math.min(1.45, this.cfg.pitch + (y - ly) * 0.006));
+      if (this.cfg.camMode === 'surface') {      // on the ground, drag looks around
+        this.cfg.lookYaw = (this.cfg.lookYaw || 0) - (x - lx) * 0.005;
+        this.cfg.lookPitch = Math.max(-0.9, Math.min(1.5, (this.cfg.lookPitch || 0) + (y - ly) * 0.004));
+      } else {
+        this.cfg.yaw   -= (x - lx) * 0.006;
+        this.cfg.pitch = Math.max(-1.45, Math.min(1.45, this.cfg.pitch + (y - ly) * 0.006));
+      }
       lx = x; ly = y;
       redraw();
     };
-    const up = () => { down = false; };
+    const up = () => { if (down && this.onCamera) this.onCamera(); down = false; };
+    // keyboard: arrows orbit (or look around on the ground), + and - zoom
+    cv.addEventListener('keydown', (e) => {
+      const k = e.key, step = 0.08;
+      const surf = this.cfg.camMode === 'surface';
+      if (k === 'ArrowLeft' || k === 'ArrowRight') { surf ? (this.cfg.lookYaw = (this.cfg.lookYaw || 0) + (k === 'ArrowLeft' ? step : -step)) : (this.cfg.yaw += k === 'ArrowLeft' ? step : -step); }
+      else if (k === 'ArrowUp' || k === 'ArrowDown') {
+        if (surf) this.cfg.lookPitch = Math.max(-0.9, Math.min(1.5, (this.cfg.lookPitch || 0) + (k === 'ArrowUp' ? step : -step)));
+        else this.cfg.pitch = Math.max(-1.45, Math.min(1.45, this.cfg.pitch + (k === 'ArrowUp' ? step : -step)));
+      } else if (k === '+' || k === '=') zoomBy(1 / 1.12);
+      else if (k === '-' || k === '_') zoomBy(1.12);
+      else return;
+      e.preventDefault(); redraw(); this.onCamera && this.onCamera();
+    });
     cv.addEventListener('mousedown', (e) => dn(e.clientX, e.clientY));
     window.addEventListener('mousemove', (e) => mv(e.clientX, e.clientY));
     window.addEventListener('mouseup', up);
@@ -1193,7 +1376,7 @@ export class Exoplanet {
     }, { passive: false });
     cv.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = 0; if (e.touches.length === 0) up(); }, { passive: true });
 
-    cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+    cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); this.onCamera && this.onCamera(); }, { passive: false });
   }
 
   // a soft failure notice OVER the canvas (never replaces it, so a later context
@@ -1214,11 +1397,7 @@ export class Exoplanet {
   _note(msg, sticky) {
     this._clearNote();
     const n = document.createElement('div');
-    n.id = 'exo-note'; n.textContent = msg;
-    n.style.cssText = 'position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:60;'
-      + 'padding:.7em 1.2em;border:1px solid rgba(212,162,76,.5);border-radius:999px;'
-      + 'background:rgba(8,10,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#F0C674;'
-      + 'font:600 .78rem/1 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;';
+    n.id = 'exo-note'; n.className = 'exo-note'; n.textContent = msg;
     (document.getElementById('exo-stage') || document.body).appendChild(n);
     this._noteEl = n;
     if (sticky) setTimeout(() => this._clearNote(), 3200);
