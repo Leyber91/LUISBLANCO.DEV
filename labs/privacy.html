@@ -111,14 +111,14 @@
       <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
       <header class="los-head"><span class="los-label">Plate E · When a lab asks a model</span></header>
       <h2 id="pv-e">The model route</h2>
-      <p>Some labs send what you type or choose in them to a language model. The prompt is offered to these routes in order and goes no further than the first that answers. Each lab's model route control names the one in use. A prompt is never part of a usage event.</p>
+      <p>Some labs send what you type or choose in them to a language model. With your own key the prompt goes to the address you entered and to no other route. Without one it is offered to the labs' own route and then to the public route, and goes no further than the first that answers. Each lab's model route control names the one in use. A prompt is never part of a usage event.</p>
       <ol class="lop-list">
-        <li><span><strong>Your own key</strong>, if you entered one in the model route control. The prompt and the key go from your browser to the address you entered. The key goes nowhere else and is kept in this browser's localStorage.</span></li>
+        <li><span><strong>Your own key</strong>, if you entered one in the model route control. The prompt and the key go from your browser to the address you entered, and to no other route: when that address does not answer, the lab's own engine answers in its place. The key is kept in this browser's localStorage.</span></li>
         <li><span><strong>The labs' own route.</strong> A Cloudflare Worker passes the prompt to Cloudflare Workers AI and returns the reply. The Worker stores and logs nothing: no prompt, no reply, no header. It hands the address of the request to Cloudflare's rate limiter, which counts requests per minute.</span></li>
         <li><span><strong>The public route</strong>, text.pollinations.ai, when the labs' own route does not answer, for example once it has used its daily allowance. The prompt then goes to Pollinations, a third party with its own terms.</span></li>
         <li><span><strong>Offline.</strong> The lab's own engine answers in your browser and nothing is sent.</span></li>
       </ol>
-      <p>On a copy of the site served from your own machine, a local Ollama model is tried first, and the prompt stays on that machine.</p>
+      <p>On a copy of the site served from your own machine, a local Ollama model is asked first, then your own key if you entered one, and no other route. The prompt stays on that machine or goes to the address you entered.</p>
     </section>
 
     <section class="los-plate lop-plate" aria-labelledby="pv-f">
