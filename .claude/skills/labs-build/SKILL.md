@@ -50,6 +50,19 @@ Stop and report, without building, when either of these is missing:
    lab bound to it.
 7. Every current file of your lab, before you change any of them.
 
+## Design before code
+
+On 2026-11-14 a lab's page was built by lifting the plate chrome and filling it with controls, two equal charts, a
+row of five readout tiles, a chip row and paragraphs. Its measure had been reviewed twice and its interface by
+nobody, and Luis called it "very AI style". Before any markup, style or canvas code:
+
+1. Invoke the labs-design skill and follow its Method in order. Write the material and motion statement first, as
+   the header comment of the lab's main drawing module, and name in it the one focal living element, drawn from the
+   subject's own material, and the one move that must land.
+2. Invoke the dataviz skill before any chart, table, readout or tile.
+3. Settle the structure before any style: a page organised by its data tables is a dashboard, whatever its colours.
+4. Skills that carry another brand's look (brand-guidelines, the algorithmic-art template) are not used here.
+
 ## Shape of the code
 
 - Static, no build step. labs/<lab>.html is a thin shell; labs/assets/css/<lab>.css; labs/assets/js/<lab>/ holds
@@ -108,6 +121,9 @@ A change is done when it rendered and you looked at it.
 4. Shoot every state the lab can be in (empty, loading, error, offline, full) through deep links, not only the
    happy path.
 5. If a screenshot shows a form beside an empty panel, it is not done.
+6. The interface is judged by somebody who did not build it, as the measure is: an agent given the frames and the
+   labs-design skill, asked what still reads as generated. Fix what it finds, then send the frames to Luis
+   (SendUserFile), before and after. He decides from what he sees, and until 2026-11-14 he had been sent words.
 
 ## Report
 
