@@ -1,0 +1,78 @@
+{
+ "exhaustive": {
+  "nbHits": true,
+  "typo": true
+ },
+ "exhaustiveNbHits": true,
+ "exhaustiveTypo": true,
+ "hits": [
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "dns_snek"
+    },
+    "comment_text": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "[delayed]"
+    },
+    "story_title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Smart home devices should work without the internet"
+    },
+    "story_url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://docodethatmatters.com/home-automation-overnight-success/"
+    }
+   },
+   "author": "dns_snek",
+   "comment_text": "[delayed]",
+   "objectID": "50451771"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "walrus01"
+    },
+    "comment_text": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Yes, if I wanted to put more work into it I could certainly train it on what it looks like with the sump mostly dry (the default state, 99.999% of the time) and then have it alert me if it diverges from that. Right now I keep an eye on weather alerts for $home and glance at the cameras at least once a day when I'm away, which is good enough to catch a failed sump pump and then dispatch professional repair services."
+    },
+    "story_title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Smart home devices should work without the internet"
+    },
+    "story_url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://docodethatmatters.com/home-automation-overnight-success/"
+    }
+   },
+   "author": "walrus01",
+   "comment_text": "Yes, if I wanted to put more work into it I could certainly train it on what it looks like with the sump mostly dry (the default state, 99.999% of the time) and then have it alert me if it diverges from that. Right now I keep an eye on weather alerts for $home and glance at the cameras at least once a day when I&#x27;m away, which is good enough to catch a failed sump pump and then dispatch professional repair services.",
+   "objectID": "50451741"
+  }
+ ],
+ "hitsPerPage": 2,
+ "nbHits": 344,
+ "nbPages": 172,
+ "page": 0,
+ "params": "tags=comment%2Cstory_50441707&hitsPerPage=2&attributesToRetrieve=comment_text%2Cauthor&advancedSyntax=true&analyticsTags=backend",
+ "processingTimeMS": 1,
+ "processingTimingsMS": {
+  "_request": {
+   "roundTrip": 22
+  },
+  "total": 0
+ },
+ "query": "",
+ "serverTimeMS": 1
+}

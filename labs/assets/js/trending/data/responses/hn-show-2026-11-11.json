@@ -1,0 +1,119 @@
+{
+ "hits": [
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "a585gupt"
+    },
+    "story_text": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "hey HN, i built this because I'm a satellite nerd who was bored this past weekend.<p>type in any place and it finds every satellite that passed over it in the last 7 days (SGP4 on the CelesTrak catalog, tracking 17k+ objects and runs in your browser in about half a second), then pulls the real Sentinel-2 / Landsat / NASA images from those passes.<p>fun fact: all ~17k objects in orbit are drawn on the GPU, solving Kepler's equation every frame. also cool is that Sentinel-2 timestamps are often 5-10 min off from when the sat actually crosses your spot, so some cool math was involved in making it accurate on the site.<p>it only shows real images taken from those exact satellites, and it never store your location.<p>code: <a href=\"https://github.com/dev-Armaan/satellites\" rel=\"nofollow\">https://github.com/dev-Armaan/satellites</a><p>would love feedback, contributions, or whatever else you guys can offer!"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Show HN: Every satellite that passed over any place this week, and its photos"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://www.watched.earth"
+    }
+   },
+   "author": "a585gupt",
+   "created_at_i": 1794246691,
+   "num_comments": 81,
+   "objectID": "50428907",
+   "points": 464,
+   "title": "Show HN: Every satellite that passed over any place this week, and its photos",
+   "url": "https://www.watched.earth"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "paulirish"
+    },
+    "story_text": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Browsers natively handle a lot of what used to take 50 lines of JS (or a dependency): `CSS.highlights` for text range highlighting without &lt;span&gt;s everywhere, `&lt;dialog&gt;` and showModal() give you backdrops and ideal focus management, `field-sizing` to auto-grow textareas as the user types.. (Something yesterday's ftrain post touched on [0])<p>Models know about some of these by name, but consistently won't default to using the platform-native solution and instead prefer the incumbent &lt;div&gt;+JS based pattern.  We started an effort in Chrome to supplement coding agents with this key domain knowledge and we're shipping our 1.0 today, in collaboration with Firefox, MDN, and Edge.<p>200+ guides (~1.7MB) of curated, hand-crafted implementation best-practices from web experts, updated as the web evolves.  (Open source, obv, so.. we'll welcome your bikeshedding ;) Readable versions here: [1]<p>I've spent the last 9 months obsessing over how to ship this as an agent skill + (Agentic RAG) CLI without blowing up your context window. (Or cedeing activation mechanics to MCP dynamic tool search). The skill description is minmaxed for activating on relevant frontend tasks. The RAG work I'm pretty proud of… originally a 500mb native stack down to a ~7MB pure-JS package, ~10ms search on your CPU.<p>We just introduced a deterministic 'legacy-scan' (trained on 30k github repos) to identify old 'n dusted patterns that your agent can modernize. (92% avg precision on held-out repos.)<p>People make a lot of claims about what coding agents are good/bad at. We wanted receipts, so we invested heavily in eval infra [2] to help us hill-climb, but also to identify when knowledge is common enough we can prune our guides. (Ofc, some of the things we thought AI didn't know turned out to be wrong :)  We run codex/claude/agy against 200 tasks without the skill and then with.. In total ~1,700 playwright/AST-based assertions. Agents go from 55% pass unguided to 92% guided.<p>Try it out:<p><pre><code>    DISABLE_TELEMETRY=1 npx modern-web-guidance@latest install\n    DISABLE_TELEMETRY=1 npx modern-web-guidance@latest search &quot;animate dialog modal&quot;\n    DISABLE_TELEMETRY=1 npx modern-web-guidance@latest legacy-scan ./src\n</code></pre>\nIf you spot something wrong or weird, give us a holler!<p>Longer write-up on the 1.0:  <a href=\"https://developer.chrome.com/blog/modern-web-guidance-v1\" rel=\"nofollow\">https://developer.chrome.com/blog/modern-web-guidance-v1</a><p>---<p>0: <a href=\"https://news.ycombinator.com/item?id=50416456\">https://news.ycombinator.com/item?id=50416456</a><p>1: <a href=\"https://developer.chrome.com/docs/modern-web-guidance/guides\" rel=\"nofollow\">https://developer.chrome.com/docs/modern-web-guidance/guides</a><p>2: <a href=\"https://googlechrome.github.io/modern-web-guidance-src/\" rel=\"nofollow\">https://googlechrome.github.io/modern-web-guidance-src/</a>"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Show HN: Get your coding agent off ~2019 JavaScript, onto modern web primitives"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://github.com/GoogleChrome/modern-web-guidance"
+    }
+   },
+   "author": "paulirish",
+   "created_at_i": 1794333675,
+   "num_comments": 111,
+   "objectID": "50443812",
+   "points": 369,
+   "title": "Show HN: Get your coding agent off ~2019 JavaScript, onto modern web primitives",
+   "url": "https://github.com/GoogleChrome/modern-web-guidance"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "leugim"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Show HN: Valencia, Spain in Sim City/Isometric View"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://tinyvalencia.com/"
+    }
+   },
+   "author": "leugim",
+   "created_at_i": 1794323536,
+   "num_comments": 56,
+   "objectID": "50441518",
+   "points": 228,
+   "title": "Show HN: Valencia, Spain in Sim City/Isometric View",
+   "url": "https://tinyvalencia.com/"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "CoderLuii"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Show HN: A 15 MB self-hosted Netflix and Spotify for your media server"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://github.com/HolyArrs/HolyArrs"
+    }
+   },
+   "author": "CoderLuii",
+   "created_at_i": 1794311479,
+   "num_comments": 131,
+   "objectID": "50439000",
+   "points": 165,
+   "title": "Show HN: A 15 MB self-hosted Netflix and Spotify for your media server",
+   "url": "https://github.com/HolyArrs/HolyArrs"
+  }
+ ],
+ "nbHits": 339
+}

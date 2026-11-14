@@ -1,0 +1,2127 @@
+{
+ "schema": "dataspace.run/1",
+ "preset": "flatbread",
+ "calls": {
+  "c.flatbread.llama3.1-8b.r1.s1": {
+   "id": "c.flatbread.llama3.1-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: How do I make flatbread for six people? I have 500 g of flour, yogurt and one packet of yeast.\nASSISTANT: Mix the 500 g of flour with 7 g of yeast, 1 teaspoon of salt and 1 teaspoon of sugar. Add 250 g of yogurt and 150 ml of warm water, then knead for 8 minutes until smooth.\nUSER: Then what? How long does it rest?\nASSISTANT: Cover the dough and let it rise for 1 hour in a warm place, until it doubles. Divide it into 6 balls of about 150 g each and roll each one to 5 mm thick.\nUSER: I only have a cast iron pan, no oven.\nASSISTANT: The pan is the right tool. Heat it on high for 3 minutes with no oil. Cook each flatbread for 90 seconds, flip it when bubbles form, then give it 60 seconds more. Brush with garlic butter while hot and stack them under a towel so they stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User: flatbread for 6. 500g flour, yeast, yogurt. Assistant: mix flour, yeast, salt, sugar, yogurt, water. Knead 8 min. Let rise 1 hour. Divide into 6 balls, roll 5 mm. Cook in cast iron pan 3 min, 90 sec, 60 sec. Brush with garlic butter.\",\n  \"L2\": \"User: flatbread for 6 with 500g flour, yeast, yogurt. Assistant: mix flour, yeast, salt, sugar, yogurt, water. Knead, let rise 1 hour. Cook in cast iron pan.\",\n  \"L3\": \"User: flatbread for 6. Assistant: mix, knead, let rise, cook in cast iron pan.\",\n  \"L4\": \"Flatbread for 6: mix, knead, cook in cast iron pan.\",\n  \"L5\": \"Flatbread: mix, cook in cast iron pan.\"\n}",
+   "thinking": "",
+   "promptTokens": 466,
+   "completionTokens": 211,
+   "ollamaMs": 8019,
+   "ms": 8034,
+   "at": "2026-11-11T10:18:50.229Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r1.L1": {
+   "id": "b.flatbread.llama3.1-8b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: flatbread for 6. 500g flour, yeast, yogurt. Assistant: mix flour, yeast, salt, sugar, yogurt, water. Knead 8 min. Let rise 1 hour. Divide into 6 balls, roll 5 mm. Cook in cast iron pan 3 min, 90 sec, 60 sec. Brush with garlic butter."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: flatbread for 6. \n\nASSISTANT: mix flour, yeast, salt, sugar, yogurt, water. \n\nUSER:  Knead 8 min. \n\nASSISTANT: Let rise 1 hour. \n\nUSER:  Divide into 6 balls, roll 5 mm. \n\nASSISTANT: Cook in cast iron pan 3 min, 90 sec, 60 sec. \n\nUSER:  Brush with garlic butter. \n\nASSISTANT:",
+   "thinking": "",
+   "promptTokens": 142,
+   "completionTokens": 100,
+   "ollamaMs": 6166,
+   "ms": 6170,
+   "at": "2026-11-11T10:18:58.268Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r1.L2": {
+   "id": "b.flatbread.llama3.1-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: flatbread for 6 with 500g flour, yeast, yogurt. Assistant: mix flour, yeast, salt, sugar, yogurt, water. Knead, let rise 1 hour. Cook in cast iron pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: flatbread for 6 with 500g flour, yeast, yogurt\n\nASSISTANT: mix flour, yeast, salt, sugar, yogurt, water.",
+   "thinking": "",
+   "promptTokens": 112,
+   "completionTokens": 35,
+   "ollamaMs": 6278,
+   "ms": 6284,
+   "at": "2026-11-11T10:19:04.441Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r1.L3": {
+   "id": "b.flatbread.llama3.1-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: flatbread for 6. Assistant: mix, knead, let rise, cook in cast iron pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: flatbread for 6\n\nASSISTANT: mix, knead, let rise, cook in cast iron pan.",
+   "thinking": "",
+   "promptTokens": 88,
+   "completionTokens": 27,
+   "ollamaMs": 5513,
+   "ms": 5534,
+   "at": "2026-11-11T10:19:10.727Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r1.L4": {
+   "id": "b.flatbread.llama3.1-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFlatbread for 6: mix, knead, cook in cast iron pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: That's a simple recipe, but what's the mix of ingredients you recommend?\n\nASSISTANT: 2 cups of flour, 1 teaspoon of salt, 1 teaspoon of sugar, 1 packet of active dry yeast, 1 cup of warm water.",
+   "thinking": "",
+   "promptTokens": 81,
+   "completionTokens": 56,
+   "ollamaMs": 3515,
+   "ms": 3520,
+   "at": "2026-11-11T10:19:16.263Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r1.L5": {
+   "id": "b.flatbread.llama3.1-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFlatbread: mix, cook in cast iron pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I've been wanting to try making flatbread at home. Can you give me more specific instructions on how to mix the dough?\n\nASSISTANT: To make the dough, combine 1 1/2 cups of warm water, 2 teaspoons of sugar, and 2 teaspoons of active dry yeast in a large mixing bowl. Let it sit for 5-10 minutes until the yeast is activated and foamy.\n\nUSER: What kind of flour do you recommend using for flatbread?\n\nASSISTANT: I recommend using all-purpose flour, but you can also use whole wheat flour or a combination of both for a nuttier flavor.\n\nUSER: How do I mix the dough after the yeast has activated?\n\nASSISTANT: Add 3-4 cups of all-purpose flour, 1 teaspoon of salt, and 2 tablespoons of olive oil to the bowl. Mix the dough using a stand mixer or a wooden spoon until it comes together in a sticky ball.\n\nUSER: How long do I need to knead the dough?\n\nASSISTANT: Knead the dough for 5-10 minutes until it becomes smooth and elastic. You can also use a stand mixer with a dough hook attachment to knead the dough.\n\nUSER: How do I cook the flatbread in a cast iron pan?\n\nASSISTANT: Preheat your cast iron pan over medium-high heat. Roll out the dough into a thin circle, about 1/4 inch thick. Place the dough in the pan and cook for 2-3 minutes on the first side, until it starts to bubble and the edges start to curl. Flip the bread over and cook for another 2-3 minutes, until it's golden brown and crispy.\n\nUSER: Can I cook multiple flatbreads at the same time in a cast iron pan?\n\nASSISTANT: Yes, you can cook multiple flatbreads at the same time, but make sure to leave about 1 inch of space between each bread to allow for even cooking.",
+   "thinking": "",
+   "promptTokens": 75,
+   "completionTokens": 408,
+   "ollamaMs": 10648,
+   "ms": 10656,
+   "at": "2026-11-11T10:19:19.787Z",
+   "error": null
+  },
+  "c.flatbread.llama3.1-8b.r2.s2": {
+   "id": "c.flatbread.llama3.1-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: How do I make flatbread for six people? I have 500 g of flour, yogurt and one packet of yeast.\nASSISTANT: Mix the 500 g of flour with 7 g of yeast, 1 teaspoon of salt and 1 teaspoon of sugar. Add 250 g of yogurt and 150 ml of warm water, then knead for 8 minutes until smooth.\nUSER: Then what? How long does it rest?\nASSISTANT: Cover the dough and let it rise for 1 hour in a warm place, until it doubles. Divide it into 6 balls of about 150 g each and roll each one to 5 mm thick.\nUSER: I only have a cast iron pan, no oven.\nASSISTANT: The pan is the right tool. Heat it on high for 3 minutes with no oil. Cook each flatbread for 90 seconds, flip it when bubbles form, then give it 60 seconds more. Brush with garlic butter while hot and stack them under a towel so they stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User wants flatbread for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix flour, yeast, salt, sugar, yogurt, and water, knead 8 minutes, rest 1 hour, divide into 6 balls, cook in cast iron pan on high for 2.5 minutes each side, brush with garlic butter.\",\n  \"L2\": \"User wants flatbread recipe for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix, knead, rest, divide, cook in cast iron pan for 2.5 minutes each side.\",\n  \"L3\": \"User wants flatbread recipe for 6 people. Assistant gives mix, knead, rest, cook in cast iron pan.\",\n  \"L4\": \"User wants flatbread recipe for 6 people. Mix, knead, rest, cook.\",\n  \"L5\": \"User wants flatbread. Mix, knead, cook.\"\n}",
+   "thinking": "",
+   "promptTokens": 466,
+   "completionTokens": 211,
+   "ollamaMs": 8290,
+   "ms": 8301,
+   "at": "2026-11-11T10:19:30.448Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r2.L1": {
+   "id": "b.flatbread.llama3.1-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants flatbread for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix flour, yeast, salt, sugar, yogurt, and water, knead 8 minutes, rest 1 hour, divide into 6 balls, cook in cast iron pan on high for 2.5 minutes each side, brush with garlic butter."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I want to make flatbread for 6 people using 500g of flour, and I have yogurt and yeast available.\n\nASSISTANT: To make flatbread, you'll need to mix 500g of flour with 1 teaspoon of yeast, 1 teaspoon of salt, 1 tablespoon of sugar, 250g of yogurt, and 150g of water.",
+   "thinking": "",
+   "promptTokens": 139,
+   "completionTokens": 79,
+   "ollamaMs": 3855,
+   "ms": 3859,
+   "at": "2026-11-11T10:19:38.752Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r2.L2": {
+   "id": "b.flatbread.llama3.1-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants flatbread recipe for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix, knead, rest, divide, cook in cast iron pan for 2.5 minutes each side."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I need a recipe for flatbread that serves 6 people using 500g of flour, yogurt, and yeast.\n\nASSISTANT: To make the flatbreads, start by mixing 500g of flour, 1/2 cup of yogurt, and 1 teaspoon of yeast in a bowl.",
+   "thinking": "",
+   "promptTokens": 111,
+   "completionTokens": 65,
+   "ollamaMs": 4600,
+   "ms": 4601,
+   "at": "2026-11-11T10:19:42.613Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r2.L3": {
+   "id": "b.flatbread.llama3.1-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants flatbread recipe for 6 people. Assistant gives mix, knead, rest, cook in cast iron pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'm looking for a flatbread recipe that serves 6 people.\n\nASSISTANT: To make flatbread for 6, mix 2 cups of warm water, 2 teaspoons of sugar, 1 teaspoon of active dry yeast, 3 cups of all-purpose flour, 1 teaspoon of salt, and 2 tablespoons of olive oil.",
+   "thinking": "",
+   "promptTokens": 89,
+   "completionTokens": 73,
+   "ollamaMs": 6269,
+   "ms": 6274,
+   "at": "2026-11-11T10:19:47.218Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r2.L4": {
+   "id": "b.flatbread.llama3.1-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants flatbread recipe for 6 people. Mix, knead, rest, cook."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'm looking for a flatbread recipe that serves 6 people. Can you help me with that?\n\nASSISTANT: Sure, I can provide you with a simple flatbread recipe that serves 6 people. It involves mixing, kneading, resting, and cooking the dough. Would you like me to walk you through each step?",
+   "thinking": "",
+   "promptTokens": 83,
+   "completionTokens": 71,
+   "ollamaMs": 6407,
+   "ms": 6413,
+   "at": "2026-11-11T10:19:53.497Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r2.L5": {
+   "id": "b.flatbread.llama3.1-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants flatbread. Mix, knead, cook."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I want to make flatbread. What's the first step?\n\nASSISTANT: Mix the ingredients together. You'll need flour, water, salt, and olive oil.",
+   "thinking": "",
+   "promptTokens": 76,
+   "completionTokens": 38,
+   "ollamaMs": 6146,
+   "ms": 6156,
+   "at": "2026-11-11T10:19:59.914Z",
+   "error": null
+  },
+  "c.flatbread.llama3.1-8b.r3.s3": {
+   "id": "c.flatbread.llama3.1-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: How do I make flatbread for six people? I have 500 g of flour, yogurt and one packet of yeast.\nASSISTANT: Mix the 500 g of flour with 7 g of yeast, 1 teaspoon of salt and 1 teaspoon of sugar. Add 250 g of yogurt and 150 ml of warm water, then knead for 8 minutes until smooth.\nUSER: Then what? How long does it rest?\nASSISTANT: Cover the dough and let it rise for 1 hour in a warm place, until it doubles. Divide it into 6 balls of about 150 g each and roll each one to 5 mm thick.\nUSER: I only have a cast iron pan, no oven.\nASSISTANT: The pan is the right tool. Heat it on high for 3 minutes with no oil. Cook each flatbread for 90 seconds, flip it when bubbles form, then give it 60 seconds more. Brush with garlic butter while hot and stack them under a towel so they stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"User makes flatbread for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix, knead, rest, then cook in cast iron pan.\",\n  \"L2\": \"User makes flatbread for 6. Assistant: mix flour, yeast, salt, sugar, yogurt, water, knead. Cook in pan: heat, cook 90s, flip, 60s more.\",\n  \"L3\": \"User makes flatbread for 6. Mix, knead, rest. Cook in cast iron pan: heat, cook 90s, flip, 60s.\",\n  \"L4\": \"Mix, knead, rest, cook in pan.\",\n  \"L5\": \"Make flatbread in pan.\"\n}",
+   "thinking": "",
+   "promptTokens": 466,
+   "completionTokens": 165,
+   "ollamaMs": 11164,
+   "ms": 11176,
+   "at": "2026-11-11T10:20:06.082Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r3.L1": {
+   "id": "b.flatbread.llama3.1-8b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser makes flatbread for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix, knead, rest, then cook in cast iron pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'm making flatbread for 6 people using 500g of flour, yogurt, and yeast. What's the recipe?\n\nASSISTANT: To make the flatbread, you'll need to mix the flour, yogurt, and yeast together until a dough forms.",
+   "thinking": "",
+   "promptTokens": 101,
+   "completionTokens": 57,
+   "ollamaMs": 5291,
+   "ms": 5404,
+   "at": "2026-11-11T10:20:17.261Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r3.L2": {
+   "id": "b.flatbread.llama3.1-8b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser makes flatbread for 6. Assistant: mix flour, yeast, salt, sugar, yogurt, water, knead. Cook in pan: heat, cook 90s, flip, 60s more."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I made the flatbread for 6. It turned out great.\n\nASSISTANT: I'm glad to hear that. How was the process of making it? Was it easy to mix all the ingredients together?",
+   "thinking": "",
+   "promptTokens": 108,
+   "completionTokens": 46,
+   "ollamaMs": 12894,
+   "ms": 12900,
+   "at": "2026-11-11T10:20:22.671Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r3.L3": {
+   "id": "b.flatbread.llama3.1-8b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser makes flatbread for 6. Mix, knead, rest. Cook in cast iron pan: heat, cook 90s, flip, 60s."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I made flatbread for 6. I mixed, kneaded, and let it rest.\n\nASSISTANT: How did it turn out?",
+   "thinking": "",
+   "promptTokens": 98,
+   "completionTokens": 32,
+   "ollamaMs": 7655,
+   "ms": 8669,
+   "at": "2026-11-11T10:20:35.574Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r3.L4": {
+   "id": "b.flatbread.llama3.1-8b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nMix, knead, rest, cook in pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What's the process for making a traditional Italian dish?\n\nASSISTANT: The process involves mixing and kneading dough, letting it rest, and then cooking it in a pan.",
+   "thinking": "",
+   "promptTokens": 75,
+   "completionTokens": 39,
+   "ollamaMs": 2274,
+   "ms": 2310,
+   "at": "2026-11-11T10:20:44.246Z",
+   "error": null
+  },
+  "b.flatbread.llama3.1-8b.r3.L5": {
+   "id": "b.flatbread.llama3.1-8b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nMake flatbread in pan."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Make flatbread in pan.\n\nASSISTANT: What type of flatbread do you want to make?",
+   "thinking": "",
+   "promptTokens": 70,
+   "completionTokens": 24,
+   "ollamaMs": 2646,
+   "ms": 2648,
+   "at": "2026-11-11T10:20:46.557Z",
+   "error": null
+  },
+  "c.flatbread.granite4.1-3b.r1.s1": {
+   "id": "c.flatbread.granite4.1-3b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: How do I make flatbread for six people? I have 500 g of flour, yogurt and one packet of yeast.\nASSISTANT: Mix the 500 g of flour with 7 g of yeast, 1 teaspoon of salt and 1 teaspoon of sugar. Add 250 g of yogurt and 150 ml of warm water, then knead for 8 minutes until smooth.\nUSER: Then what? How long does it rest?\nASSISTANT: Cover the dough and let it rise for 1 hour in a warm place, until it doubles. Divide it into 6 balls of about 150 g each and roll each one to 5 mm thick.\nUSER: I only have a cast iron pan, no oven.\nASSISTANT: The pan is the right tool. Heat it on high for 3 minutes with no oil. Cook each flatbread for 90 seconds, flip it when bubbles form, then give it 60 seconds more. Brush with garlic butter while hot and stack them under a towel so they stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User asks flatbread recipe for 6. Assistant: Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 mins. Let rise 1 hour. Divide into 6 balls, roll to 5mm thick.\", \"L2\": \"User: Only cast iron pan, no oven. Assistant: Heat pan high 3 mins, no oil. Cook each 90 secs, flip on bubbles, 60 secs more. Brush with garlic butter while hot. Stack under towel to stay soft.\", \"L3\": \"User wants flatbread for 6. Assistant: Mix ingredients. Let dough rise 1 hour. Divide into 6 balls. Pan heats, cook each 90 secs. Brush with garlic butter. Stack under towel.\", \"L4\": \"User needs recipe for 6. Assistant: Mix, rise, cook. Pan heats, cook. Brush butter. Stack.\", \"L5\": \"User: Recipe for 6 flatbreads. Assistant: Mix, rise, cook in pan. Brush with butter. Stack.\"}",
+   "thinking": "",
+   "promptTokens": 464,
+   "completionTokens": 240,
+   "ollamaMs": 3843,
+   "ms": 3850,
+   "at": "2026-11-11T11:04:53.464Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r1.L1": {
+   "id": "b.flatbread.granite4.1-3b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks flatbread recipe for 6. Assistant: Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 mins. Let rise 1 hour. Divide into 6 balls, roll to 5mm thick."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the recipe for flatbread for 6 servings?",
+   "thinking": "",
+   "promptTokens": 129,
+   "completionTokens": 15,
+   "ollamaMs": 2118,
+   "ms": 2126,
+   "at": "2026-11-11T11:04:57.317Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r1.L2": {
+   "id": "b.flatbread.granite4.1-3b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: Only cast iron pan, no oven. Assistant: Heat pan high 3 mins, no oil. Cook each 90 secs, flip on bubbles, 60 secs more. Brush with garlic butter while hot. Stack under towel to stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Only cast iron pan, no oven. \n\nASSISTANT: Heat pan high 3 mins, no oil. Cook each 90 secs, flip on bubbles, 60 secs more. \n\nUSER: Brush with garlic butter while hot. \n\nASSISTANT: Stack under towel to stay soft.",
+   "thinking": "",
+   "promptTokens": 113,
+   "completionTokens": 63,
+   "ollamaMs": 3632,
+   "ms": 3647,
+   "at": "2026-11-11T11:04:59.448Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r1.L3": {
+   "id": "b.flatbread.granite4.1-3b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants flatbread for 6. Assistant: Mix ingredients. Let dough rise 1 hour. Divide into 6 balls. Pan heats, cook each 90 secs. Brush with garlic butter. Stack under towel."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I want to make flatbread for 6 people. \n\nASSISTANT: Mix the ingredients. Let the dough rise for 1 hour. Divide the dough into 6 equal balls. Heat a pan and cook each ball for 90 seconds. Brush with garlic butter. Stack under a towel.",
+   "thinking": "",
+   "promptTokens": 106,
+   "completionTokens": 63,
+   "ollamaMs": 4218,
+   "ms": 4221,
+   "at": "2026-11-11T11:05:03.134Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r1.L4": {
+   "id": "b.flatbread.granite4.1-3b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser needs recipe for 6. Assistant: Mix, rise, cook. Pan heats, cook. Brush butter. Stack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the recipe for 6? \n\nASSISTANT: Mix, rise, cook. Pan heats, cook. Brush butter. Stack.",
+   "thinking": "",
+   "promptTokens": 87,
+   "completionTokens": 32,
+   "ollamaMs": 1933,
+   "ms": 1938,
+   "at": "2026-11-11T11:05:07.360Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r1.L5": {
+   "id": "b.flatbread.granite4.1-3b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: Recipe for 6 flatbreads. Assistant: Mix, rise, cook in pan. Brush with butter. Stack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Recipe for 6 flatbreads. \n\nASSISTANT: Mix, rise, cook in pan. Brush with butter. Stack.",
+   "thinking": "",
+   "promptTokens": 88,
+   "completionTokens": 30,
+   "ollamaMs": 2761,
+   "ms": 2767,
+   "at": "2026-11-11T11:05:09.301Z",
+   "error": null
+  },
+  "c.flatbread.granite4.1-3b.r2.s2": {
+   "id": "c.flatbread.granite4.1-3b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: How do I make flatbread for six people? I have 500 g of flour, yogurt and one packet of yeast.\nASSISTANT: Mix the 500 g of flour with 7 g of yeast, 1 teaspoon of salt and 1 teaspoon of sugar. Add 250 g of yogurt and 150 ml of warm water, then knead for 8 minutes until smooth.\nUSER: Then what? How long does it rest?\nASSISTANT: Cover the dough and let it rise for 1 hour in a warm place, until it doubles. Divide it into 6 balls of about 150 g each and roll each one to 5 mm thick.\nUSER: I only have a cast iron pan, no oven.\nASSISTANT: The pan is the right tool. Heat it on high for 3 minutes with no oil. Cook each flatbread for 90 seconds, flip it when bubbles form, then give it 60 seconds more. Brush with garlic butter while hot and stack them under a towel so they stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User asks flatbread recipe for 6. Assistant: Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 min. Let rise 1hr, divide into 6, roll to 5mm. User: Cast iron pan, no oven. Assistant: Heat pan high, no oil. Cook each 90sec, flip when bubbles, 60sec more. Brush with garlic butter, stack under towel to stay soft.\", \"L2\": \"Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 min. Let rise 1hr, divide into 6, roll to 5mm. Use cast iron pan, no oil. Cook each 90sec, flip on bubbles, 60sec more. Brush with garlic butter, stack under towel.\", \"L3\": \"Mix flour, yeast, salt, sugar. Add yogurt, water. Knead 8 min. Rise 1hr, divide into 6 rolls. Use cast iron pan. Cook 90sec, flip on bubbles, 60sec. Brush with garlic butter. Stack under towel.\", \"L4\": \"Mix. Rise. Cook. Brush. Stack.\", \"L5\": \"Recipe.\"}",
+   "thinking": "",
+   "promptTokens": 464,
+   "completionTokens": 294,
+   "ollamaMs": 6073,
+   "ms": 6077,
+   "at": "2026-11-11T11:05:12.072Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r2.L1": {
+   "id": "b.flatbread.granite4.1-3b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks flatbread recipe for 6. Assistant: Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 min. Let rise 1hr, divide into 6, roll to 5mm. User: Cast iron pan, no oven. Assistant: Heat pan high, no oil. Cook each 90sec, flip when bubbles, 60sec more. Brush with garlic butter, stack under towel to stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the recipe for flatbread for 6 people?\n\nASSISTANT: Mix 500g flour, 7g yeast, 1 teaspoon salt, and sugar. Add 250g yogurt and 150ml water. Knead for 8 minutes. Let it rise for 1 hour, then divide into 6 pieces and roll each to about 5mm thickness.\n\nUSER: Should I use a cast iron pan without an oven?\n\nASSISTANT: Yes, heat the cast iron pan on high without using any oil. Cook each flatbread for about 90 seconds on one side, then flip and cook for another 90 seconds on the other side. Brush with garlic butter and stack under a towel to keep them soft.",
+   "thinking": "",
+   "promptTokens": 172,
+   "completionTokens": 153,
+   "ollamaMs": 2938,
+   "ms": 2948,
+   "at": "2026-11-11T11:05:18.155Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r2.L2": {
+   "id": "b.flatbread.granite4.1-3b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nMix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 min. Let rise 1hr, divide into 6, roll to 5mm. Use cast iron pan, no oil. Cook each 90sec, flip on bubbles, 60sec more. Brush with garlic butter, stack under towel."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What ingredients do I need to start the recipe?",
+   "thinking": "",
+   "promptTokens": 148,
+   "completionTokens": 13,
+   "ollamaMs": 1886,
+   "ms": 1892,
+   "at": "2026-11-11T11:05:21.105Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r2.L3": {
+   "id": "b.flatbread.granite4.1-3b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nMix flour, yeast, salt, sugar. Add yogurt, water. Knead 8 min. Rise 1hr, divide into 6 rolls. Use cast iron pan. Cook 90sec, flip on bubbles, 60sec. Brush with garlic butter. Stack under towel."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What ingredients do I need to mix initially?",
+   "thinking": "",
+   "promptTokens": 121,
+   "completionTokens": 12,
+   "ollamaMs": 1786,
+   "ms": 1790,
+   "at": "2026-11-11T11:05:23.003Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r2.L4": {
+   "id": "b.flatbread.granite4.1-3b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nMix. Rise. Cook. Brush. Stack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does the capsule suggest we do?\nASSISTANT: The capsule lists a series of actions: Mix, Rise, Cook, Brush, Stack. It seems to outline steps in a process, possibly related to cooking or baking.",
+   "thinking": "",
+   "promptTokens": 72,
+   "completionTokens": 49,
+   "ollamaMs": 1044,
+   "ms": 1046,
+   "at": "2026-11-11T11:05:24.794Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r2.L5": {
+   "id": "b.flatbread.granite4.1-3b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nRecipe."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What kind of recipe are you looking for?",
+   "thinking": "",
+   "promptTokens": 64,
+   "completionTokens": 12,
+   "ollamaMs": 406,
+   "ms": 409,
+   "at": "2026-11-11T11:05:25.843Z",
+   "error": null
+  },
+  "c.flatbread.granite4.1-3b.r3.s3": {
+   "id": "c.flatbread.granite4.1-3b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 82
+    },
+    {
+     "level": 2,
+     "words": 49
+    },
+    {
+     "level": 3,
+     "words": 30
+    },
+    {
+     "level": 4,
+     "words": 16
+    },
+    {
+     "level": 5,
+     "words": 8
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 82 words\nL2: at most 49 words\nL3: at most 30 words\nL4: at most 16 words\nL5: at most 8 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: How do I make flatbread for six people? I have 500 g of flour, yogurt and one packet of yeast.\nASSISTANT: Mix the 500 g of flour with 7 g of yeast, 1 teaspoon of salt and 1 teaspoon of sugar. Add 250 g of yogurt and 150 ml of warm water, then knead for 8 minutes until smooth.\nUSER: Then what? How long does it rest?\nASSISTANT: Cover the dough and let it rise for 1 hour in a warm place, until it doubles. Divide it into 6 balls of about 150 g each and roll each one to 5 mm thick.\nUSER: I only have a cast iron pan, no oven.\nASSISTANT: The pan is the right tool. Heat it on high for 3 minutes with no oil. Cook each flatbread for 90 seconds, flip it when bubbles form, then give it 60 seconds more. Brush with garlic butter while hot and stack them under a towel so they stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"User asks flatbread recipe for 6. Assistant gives mix 500g flour, yeast, salt, sugar. Add 250g yogurt, 150ml water. Knead 8 mins. Let dough rise 1 hour. Divide into 6 balls, roll to 5mm thick.\", \"L2\": \"User wants cast iron pan method. Assistant says pan is right tool. Heat on high 3 mins, no oil. Cook each 90 secs, flip when bubbles, then 60 secs more. Brush with garlic butter while hot. Stack under towel to stay soft.\", \"L3\": \"User: flatbread recipe for 6. Assistant: mix ingredients. User: how long rest? Assistant: let rise 1 hour. User: using cast iron pan. Assistant: heat pan, cook 90 secs, flip, 60 secs. Brush with garlic butter. Stack under towel.\", \"L4\": \"User: recipe for 6. Assistant: mix dough. User: rest time. Assistant: 1 hour. User: cast iron pan method. Assistant: heat, cook, flip, butter, stack.\", \"L5\": \"Recipe for 6 flatbreads. Mix ingredients. Let rise 1 hour. Cook on cast iron pan. Flip when bubbly. Brush with garlic butter. Stack under towel.\"}",
+   "thinking": "",
+   "promptTokens": 464,
+   "completionTokens": 281,
+   "ollamaMs": 4450,
+   "ms": 4454,
+   "at": "2026-11-11T11:05:26.255Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r3.L1": {
+   "id": "b.flatbread.granite4.1-3b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser asks flatbread recipe for 6. Assistant gives mix 500g flour, yeast, salt, sugar. Add 250g yogurt, 150ml water. Knead 8 mins. Let dough rise 1 hour. Divide into 6 balls, roll to 5mm thick."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Can you provide a flatbread recipe for 6 servings?\n\nASSISTANT: Sure! Here’s a simple flatbread recipe for 6 people:\n\nMix 500g flour, 1 packet (7g) yeast, 1 tsp salt, and 1 tsp sugar. Add 250g yogurt and 150ml water. Knead the mixture for about 8 minutes. Let the dough rise for 1 hour. Divide into 6 equal balls, roll each to about 5mm thickness. Bake at 220°C (428°F) for 10-12 minutes or until golden brown. Enjoy!",
+   "thinking": "",
+   "promptTokens": 123,
+   "completionTokens": 128,
+   "ollamaMs": 2440,
+   "ms": 2445,
+   "at": "2026-11-11T11:05:30.711Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r3.L2": {
+   "id": "b.flatbread.granite4.1-3b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser wants cast iron pan method. Assistant says pan is right tool. Heat on high 3 mins, no oil. Cook each 90 secs, flip when bubbles, then 60 secs more. Brush with garlic butter while hot. Stack under towel to stay soft."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Can you explain the method for using a cast iron pan?\n\nASSISTANT: Sure, the pan is the right tool for this task. First, heat it on high for about 3 minutes without adding any oil. Then, cook each piece for 90 seconds, flipping when you see bubbles form, and then cook for an additional 60 seconds. Finally, brush with garlic butter while it's still hot. To keep the pan soft, stack it under a towel.",
+   "thinking": "",
+   "promptTokens": 116,
+   "completionTokens": 98,
+   "ollamaMs": 2581,
+   "ms": 2587,
+   "at": "2026-11-11T11:05:33.161Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r3.L3": {
+   "id": "b.flatbread.granite4.1-3b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: flatbread recipe for 6. Assistant: mix ingredients. User: how long rest? Assistant: let rise 1 hour. User: using cast iron pan. Assistant: heat pan, cook 90 secs, flip, 60 secs. Brush with garlic butter. Stack under towel."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: flatbread recipe for 6. \n\nASSISTANT: mix ingredients.\n\nUSER: how long rest?\n\nASSISTANT: let rise 1 hour.\n\nUSER: using cast iron pan.\n\nASSISTANT: heat pan, cook 90 secs, flip, 60 secs. \n\nUSER: Brush with garlic butter.\n\nASSISTANT: Stack under towel.",
+   "thinking": "",
+   "promptTokens": 122,
+   "completionTokens": 75,
+   "ollamaMs": 4584,
+   "ms": 4595,
+   "at": "2026-11-11T11:05:35.754Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r3.L4": {
+   "id": "b.flatbread.granite4.1-3b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nUser: recipe for 6. Assistant: mix dough. User: rest time. Assistant: 1 hour. User: cast iron pan method. Assistant: heat, cook, flip, butter, stack."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: recipe for 6.  \nASSISTANT: mix dough.  \nUSER: rest time.  \nASSISTANT: 1 hour.  \nUSER: cast iron pan method.  \nASSISTANT: heat, cook, flip, butter, stack.",
+   "thinking": "",
+   "promptTokens": 104,
+   "completionTokens": 54,
+   "ollamaMs": 3496,
+   "ms": 3529,
+   "at": "2026-11-11T11:05:40.362Z",
+   "error": null
+  },
+  "b.flatbread.granite4.1-3b.r3.L5": {
+   "id": "b.flatbread.granite4.1-3b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nRecipe for 6 flatbreads. Mix ingredients. Let rise 1 hour. Cook on cast iron pan. Flip when bubbly. Brush with garlic butter. Stack under towel."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the recipe for making 6 flatbreads?",
+   "thinking": "",
+   "promptTokens": 99,
+   "completionTokens": 15,
+   "ollamaMs": 3203,
+   "ms": 3213,
+   "at": "2026-11-11T11:05:43.896Z",
+   "error": null
+  }
+ },
+ "runs": [
+  {
+   "id": "flatbread.llama3.1-8b.r1.L1",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User: flatbread for 6. 500g flour, yeast, yogurt. Assistant: mix flour, yeast, salt, sugar, yogurt, water. Knead 8 min. Let rise 1 hour. Divide into 6 balls, roll 5 mm. Cook in cast iron pan 3 min, 90 sec, 60 sec. Brush with garlic butter.",
+   "rebuild": "USER: flatbread for 6. \n\nASSISTANT: mix flour, yeast, salt, sugar, yogurt, water. \n\nUSER:  Knead 8 min. \n\nASSISTANT: Let rise 1 hour. \n\nUSER:  Divide into 6 balls, roll 5 mm. \n\nASSISTANT: Cook in cast iron pan 3 min, 90 sec, 60 sec. \n\nUSER:  Brush with garlic butter. \n\nASSISTANT:",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:18:58.268Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r1.L1"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "User: flatbread for 6 with 500g flour, yeast, yogurt. Assistant: mix flour, yeast, salt, sugar, yogurt, water. Knead, let rise 1 hour. Cook in cast iron pan.",
+   "rebuild": "USER: flatbread for 6 with 500g flour, yeast, yogurt\n\nASSISTANT: mix flour, yeast, salt, sugar, yogurt, water.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:04.441Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r1.L2"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "User: flatbread for 6. Assistant: mix, knead, let rise, cook in cast iron pan.",
+   "rebuild": "USER: flatbread for 6\n\nASSISTANT: mix, knead, let rise, cook in cast iron pan.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:10.727Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r1.L3"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Flatbread for 6: mix, knead, cook in cast iron pan.",
+   "rebuild": "USER: That's a simple recipe, but what's the mix of ingredients you recommend?\n\nASSISTANT: 2 cups of flour, 1 teaspoon of salt, 1 teaspoon of sugar, 1 packet of active dry yeast, 1 cup of warm water.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:16.263Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r1.L4"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Flatbread: mix, cook in cast iron pan.",
+   "rebuild": "USER: I've been wanting to try making flatbread at home. Can you give me more specific instructions on how to mix the dough?\n\nASSISTANT: To make the dough, combine 1 1/2 cups of warm water, 2 teaspoons of sugar, and 2 teaspoons of active dry yeast in a large mixing bowl. Let it sit for 5-10 minutes until the yeast is activated and foamy.\n\nUSER: What kind of flour do you recommend using for flatbread?\n\nASSISTANT: I recommend using all-purpose flour, but you can also use whole wheat flour or a combination of both for a nuttier flavor.\n\nUSER: How do I mix the dough after the yeast has activated?\n\nASSISTANT: Add 3-4 cups of all-purpose flour, 1 teaspoon of salt, and 2 tablespoons of olive oil to the bowl. Mix the dough using a stand mixer or a wooden spoon until it comes together in a sticky ball.\n\nUSER: How long do I need to knead the dough?\n\nASSISTANT: Knead the dough for 5-10 minutes until it becomes smooth and elastic. You can also use a stand mixer with a dough hook attachment to knead the dough.\n\nUSER: How do I cook the flatbread in a cast iron pan?\n\nASSISTANT: Preheat your cast iron pan over medium-high heat. Roll out the dough into a thin circle, about 1/4 inch thick. Place the dough in the pan and cook for 2-3 minutes on the first side, until it starts to bubble and the edges start to curl. Flip the bread over and cook for another 2-3 minutes, until it's golden brown and crispy.\n\nUSER: Can I cook multiple flatbreads at the same time in a cast iron pan?\n\nASSISTANT: Yes, you can cook multiple flatbreads at the same time, but make sure to leave about 1 inch of space between each bread to allow for even cooking.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:19.787Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r1.L5"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User wants flatbread for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix flour, yeast, salt, sugar, yogurt, and water, knead 8 minutes, rest 1 hour, divide into 6 balls, cook in cast iron pan on high for 2.5 minutes each side, brush with garlic butter.",
+   "rebuild": "USER: I want to make flatbread for 6 people using 500g of flour, and I have yogurt and yeast available.\n\nASSISTANT: To make flatbread, you'll need to mix 500g of flour with 1 teaspoon of yeast, 1 teaspoon of salt, 1 tablespoon of sugar, 250g of yogurt, and 150g of water.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:38.752Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r2.L1"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "User wants flatbread recipe for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix, knead, rest, divide, cook in cast iron pan for 2.5 minutes each side.",
+   "rebuild": "USER: I need a recipe for flatbread that serves 6 people using 500g of flour, yogurt, and yeast.\n\nASSISTANT: To make the flatbreads, start by mixing 500g of flour, 1/2 cup of yogurt, and 1 teaspoon of yeast in a bowl.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:42.613Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r2.L2"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "User wants flatbread recipe for 6 people. Assistant gives mix, knead, rest, cook in cast iron pan.",
+   "rebuild": "USER: I'm looking for a flatbread recipe that serves 6 people.\n\nASSISTANT: To make flatbread for 6, mix 2 cups of warm water, 2 teaspoons of sugar, 1 teaspoon of active dry yeast, 3 cups of all-purpose flour, 1 teaspoon of salt, and 2 tablespoons of olive oil.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:47.218Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r2.L3"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "User wants flatbread recipe for 6 people. Mix, knead, rest, cook.",
+   "rebuild": "USER: I'm looking for a flatbread recipe that serves 6 people. Can you help me with that?\n\nASSISTANT: Sure, I can provide you with a simple flatbread recipe that serves 6 people. It involves mixing, kneading, resting, and cooking the dough. Would you like me to walk you through each step?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:53.497Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r2.L4"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "User wants flatbread. Mix, knead, cook.",
+   "rebuild": "USER: I want to make flatbread. What's the first step?\n\nASSISTANT: Mix the ingredients together. You'll need flour, water, salt, and olive oil.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:19:59.914Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r2.L5"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r3.L1",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User makes flatbread for 6 people with 500g flour, yogurt, and yeast. Assistant gives recipe: mix, knead, rest, then cook in cast iron pan.",
+   "rebuild": "USER: I'm making flatbread for 6 people using 500g of flour, yogurt, and yeast. What's the recipe?\n\nASSISTANT: To make the flatbread, you'll need to mix the flour, yogurt, and yeast together until a dough forms.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:20:17.261Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r3.L1"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r3.L2",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "User makes flatbread for 6. Assistant: mix flour, yeast, salt, sugar, yogurt, water, knead. Cook in pan: heat, cook 90s, flip, 60s more.",
+   "rebuild": "USER: I made the flatbread for 6. It turned out great.\n\nASSISTANT: I'm glad to hear that. How was the process of making it? Was it easy to mix all the ingredients together?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:20:22.671Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r3.L2"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r3.L3",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "User makes flatbread for 6. Mix, knead, rest. Cook in cast iron pan: heat, cook 90s, flip, 60s.",
+   "rebuild": "USER: I made flatbread for 6. I mixed, kneaded, and let it rest.\n\nASSISTANT: How did it turn out?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:20:35.574Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r3.L3"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r3.L4",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Mix, knead, rest, cook in pan.",
+   "rebuild": "USER: What's the process for making a traditional Italian dish?\n\nASSISTANT: The process involves mixing and kneading dough, letting it rest, and then cooking it in a pan.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:20:44.246Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r3.L4"
+   }
+  },
+  {
+   "id": "flatbread.llama3.1-8b.r3.L5",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Make flatbread in pan.",
+   "rebuild": "USER: Make flatbread in pan.\n\nASSISTANT: What type of flatbread do you want to make?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:20:46.557Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.flatbread.llama3.1-8b.r3.L5"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r1.L1",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User asks flatbread recipe for 6. Assistant: Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 mins. Let rise 1 hour. Divide into 6 balls, roll to 5mm thick.",
+   "rebuild": "USER: What is the recipe for flatbread for 6 servings?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:57.317Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r1.L1"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r1.L2",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "User: Only cast iron pan, no oven. Assistant: Heat pan high 3 mins, no oil. Cook each 90 secs, flip on bubbles, 60 secs more. Brush with garlic butter while hot. Stack under towel to stay soft.",
+   "rebuild": "USER: Only cast iron pan, no oven. \n\nASSISTANT: Heat pan high 3 mins, no oil. Cook each 90 secs, flip on bubbles, 60 secs more. \n\nUSER: Brush with garlic butter while hot. \n\nASSISTANT: Stack under towel to stay soft.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:59.448Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r1.L2"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r1.L3",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "User wants flatbread for 6. Assistant: Mix ingredients. Let dough rise 1 hour. Divide into 6 balls. Pan heats, cook each 90 secs. Brush with garlic butter. Stack under towel.",
+   "rebuild": "USER: I want to make flatbread for 6 people. \n\nASSISTANT: Mix the ingredients. Let the dough rise for 1 hour. Divide the dough into 6 equal balls. Heat a pan and cook each ball for 90 seconds. Brush with garlic butter. Stack under a towel.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:03.134Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r1.L3"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r1.L4",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "User needs recipe for 6. Assistant: Mix, rise, cook. Pan heats, cook. Brush butter. Stack.",
+   "rebuild": "USER: What is the recipe for 6? \n\nASSISTANT: Mix, rise, cook. Pan heats, cook. Brush butter. Stack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:07.360Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r1.L4"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r1.L5",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "User: Recipe for 6 flatbreads. Assistant: Mix, rise, cook in pan. Brush with butter. Stack.",
+   "rebuild": "USER: Recipe for 6 flatbreads. \n\nASSISTANT: Mix, rise, cook in pan. Brush with butter. Stack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:09.301Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.flatbread.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r1.L5"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r2.L1",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User asks flatbread recipe for 6. Assistant: Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 min. Let rise 1hr, divide into 6, roll to 5mm. User: Cast iron pan, no oven. Assistant: Heat pan high, no oil. Cook each 90sec, flip when bubbles, 60sec more. Brush with garlic butter, stack under towel to stay soft.",
+   "rebuild": "USER: What is the recipe for flatbread for 6 people?\n\nASSISTANT: Mix 500g flour, 7g yeast, 1 teaspoon salt, and sugar. Add 250g yogurt and 150ml water. Knead for 8 minutes. Let it rise for 1 hour, then divide into 6 pieces and roll each to about 5mm thickness.\n\nUSER: Should I use a cast iron pan without an oven?\n\nASSISTANT: Yes, heat the cast iron pan on high without using any oil. Cook each flatbread for about 90 seconds on one side, then flip and cook for another 90 seconds on the other side. Brush with garlic butter and stack under a towel to keep them soft.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:18.155Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r2.L1"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r2.L2",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "Mix 500g flour, 7g yeast, 1tsp salt, sugar. Add 250g yogurt, 150ml water. Knead 8 min. Let rise 1hr, divide into 6, roll to 5mm. Use cast iron pan, no oil. Cook each 90sec, flip on bubbles, 60sec more. Brush with garlic butter, stack under towel.",
+   "rebuild": "USER: What ingredients do I need to start the recipe?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:21.105Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r2.L2"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r2.L3",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "Mix flour, yeast, salt, sugar. Add yogurt, water. Knead 8 min. Rise 1hr, divide into 6 rolls. Use cast iron pan. Cook 90sec, flip on bubbles, 60sec. Brush with garlic butter. Stack under towel.",
+   "rebuild": "USER: What ingredients do I need to mix initially?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:23.003Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r2.L3"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r2.L4",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "Mix. Rise. Cook. Brush. Stack.",
+   "rebuild": "USER: What does the capsule suggest we do?\nASSISTANT: The capsule lists a series of actions: Mix, Rise, Cook, Brush, Stack. It seems to outline steps in a process, possibly related to cooking or baking.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:24.794Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r2.L4"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r2.L5",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Recipe.",
+   "rebuild": "USER: What kind of recipe are you looking for?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:25.843Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.flatbread.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r2.L5"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r3.L1",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 1,
+   "budgetWords": 82,
+   "capsule": "User asks flatbread recipe for 6. Assistant gives mix 500g flour, yeast, salt, sugar. Add 250g yogurt, 150ml water. Knead 8 mins. Let dough rise 1 hour. Divide into 6 balls, roll to 5mm thick.",
+   "rebuild": "USER: Can you provide a flatbread recipe for 6 servings?\n\nASSISTANT: Sure! Here’s a simple flatbread recipe for 6 people:\n\nMix 500g flour, 1 packet (7g) yeast, 1 tsp salt, and 1 tsp sugar. Add 250g yogurt and 150ml water. Knead the mixture for about 8 minutes. Let the dough rise for 1 hour. Divide into 6 equal balls, roll each to about 5mm thickness. Bake at 220°C (428°F) for 10-12 minutes or until golden brown. Enjoy!",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:30.711Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r3.L1"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r3.L2",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 2,
+   "budgetWords": 49,
+   "capsule": "User wants cast iron pan method. Assistant says pan is right tool. Heat on high 3 mins, no oil. Cook each 90 secs, flip when bubbles, then 60 secs more. Brush with garlic butter while hot. Stack under towel to stay soft.",
+   "rebuild": "USER: Can you explain the method for using a cast iron pan?\n\nASSISTANT: Sure, the pan is the right tool for this task. First, heat it on high for about 3 minutes without adding any oil. Then, cook each piece for 90 seconds, flipping when you see bubbles form, and then cook for an additional 60 seconds. Finally, brush with garlic butter while it's still hot. To keep the pan soft, stack it under a towel.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:33.161Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r3.L2"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r3.L3",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 3,
+   "budgetWords": 30,
+   "capsule": "User: flatbread recipe for 6. Assistant: mix ingredients. User: how long rest? Assistant: let rise 1 hour. User: using cast iron pan. Assistant: heat pan, cook 90 secs, flip, 60 secs. Brush with garlic butter. Stack under towel.",
+   "rebuild": "USER: flatbread recipe for 6. \n\nASSISTANT: mix ingredients.\n\nUSER: how long rest?\n\nASSISTANT: let rise 1 hour.\n\nUSER: using cast iron pan.\n\nASSISTANT: heat pan, cook 90 secs, flip, 60 secs. \n\nUSER: Brush with garlic butter.\n\nASSISTANT: Stack under towel.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:35.754Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r3.L3"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r3.L4",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 4,
+   "budgetWords": 16,
+   "capsule": "User: recipe for 6. Assistant: mix dough. User: rest time. Assistant: 1 hour. User: cast iron pan method. Assistant: heat, cook, flip, butter, stack.",
+   "rebuild": "USER: recipe for 6.  \nASSISTANT: mix dough.  \nUSER: rest time.  \nASSISTANT: 1 hour.  \nUSER: cast iron pan method.  \nASSISTANT: heat, cook, flip, butter, stack.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:40.362Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r3.L4"
+   }
+  },
+  {
+   "id": "flatbread.granite4.1-3b.r3.L5",
+   "kind": "recorded",
+   "preset": "flatbread",
+   "level": 5,
+   "budgetWords": 8,
+   "capsule": "Recipe for 6 flatbreads. Mix ingredients. Let rise 1 hour. Cook on cast iron pan. Flip when bubbly. Brush with garlic butter. Stack under towel.",
+   "rebuild": "USER: What is the recipe for making 6 flatbreads?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:05:43.896Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.flatbread.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.flatbread.granite4.1-3b.r3.L5"
+   }
+  }
+ ],
+ "generatedAt": "2026-11-11T11:07:03.502Z"
+}

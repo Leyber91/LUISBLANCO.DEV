@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy · Labs · luisblanco.dev</title>
+  <meta name="description" content="What the luisblanco.dev labs keep in your browser, what they send only with your consent, and to whom." />
+
+  <!-- fonts: IBM Plex Mono (everything read) · Fraunces (the page title) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/os.css" />
+  <link rel="stylesheet" href="assets/css/os-pages.css" />
+</head>
+<body class="lop">
+  <header class="lop-bar">
+    <a href="index.html" class="lop-brand" title="Back to the labs">&larr;&nbsp;luisblanco.dev&nbsp;<b>/ labs</b></a>
+    <nav class="lop-nav" aria-label="This site">
+      <a href="index.html#your-data">Your data</a>
+      <a href="privacy.html" aria-current="page">Privacy</a>
+    </nav>
+  </header>
+
+  <main class="lop-sheet">
+    <div class="lop-title">
+      <div>
+        <span class="los-label">Labs OS · sheet P</span>
+        <h1>Privacy</h1>
+        <p class="lop-lede">What the labs keep, what they send, and to whom. This page describes what the code of this site does. It is not legal advice.</p>
+      </div>
+      <dl class="lop-block" aria-label="Title block">
+        <dt>Sheet</dt><dd>Privacy</dd>
+        <dt>Applies to</dt><dd>luisblanco.dev/labs</dd>
+        <dt>Rev</dt><dd>Labs OS v0.2</dd>
+        <dt>Date</dt><dd>13 Nov 2026</dd>
+      </dl>
+    </div>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-a">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate A · Who is responsible</span></header>
+      <h2 id="pv-a">Luis Blanco Rodriguez, Barcelona</h2>
+      <p>He runs this site and decides what it records. Write to him to ask anything about this page, or to use a right you cannot use from the page itself.</p>
+      <dl class="lop-facts">
+        <dt>Email</dt>
+        <dd><a href="mailto:leyber.91.2@gmail.com">leyber.91.2@gmail.com</a></dd>
+        <dt>LinkedIn</dt>
+        <dd><a href="https://www.linkedin.com/in/luisblancorodriguez/" target="_blank" rel="noopener">linkedin.com/in/luisblancorodriguez</a></dd>
+        <dt>GitHub</dt>
+        <dd><a href="https://github.com/Leyber91" target="_blank" rel="noopener">github.com/Leyber91</a></dd>
+      </dl>
+    </section>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-b">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate B · What stays in your browser</span></header>
+      <h2 id="pv-b">The Labs OS record</h2>
+      <p>Labs OS keeps a record of your visits so the labs can tell you where you left off. It stays in this browser.</p>
+      <dl class="lop-facts">
+        <dt>What</dt>
+        <dd>An activity log (which lab page was opened, when it was left, how long it was visible, which controls were used, what a lab computed), each lab's saved progress, and your settings: the recording choice, the sharing choice and the time of your last visit.</dd>
+        <dt>Where</dt>
+        <dd>IndexedDB in this browser, in a database named <code>labs</code>. It is not a cookie and it does not travel with requests. A private window discards it when it closes. A window that blocks storage keeps it in memory until the tab closes.</dd>
+        <dt>How long</dt>
+        <dd>Until you delete it or clear this site's data. The log keeps its newest 5,000 events and a count of the ones it dropped.</dd>
+        <dt>Export</dt>
+        <dd>Labs hub, <strong>Your data</strong>, <strong>Export JSON</strong>: one file with every record.</dd>
+        <dt>Delete</dt>
+        <dd>Labs hub, <strong>Your data</strong>, <strong>Delete everything</strong>. <strong>Stop recording</strong> keeps later visits from being logged at all.</dd>
+      </dl>
+      <p>Some labs also keep their own settings in this browser's localStorage, for example a model key you entered or a plan you saved. Clearing this site's data in the browser removes them.</p>
+      <p class="lop-links"><a class="los-btn" href="index.html#your-data">Open Your data</a></p>
+    </section>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-c">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate C · What is sent, only if you allow it</span></header>
+      <h2 id="pv-c">Usage events</h2>
+      <p>The labs ask once. Until you choose <strong>Allow</strong>, nothing on this plate is sent. <strong>No thanks</strong> is remembered and the question does not return. The basis is your consent, and you can withdraw it at any time.</p>
+      <ul class="lop-list">
+        <li>Which lab you open, and from where: the page's path, and for a link you follow on the hub, the lab it leads to and whether the link sat on a card, in the side list or on the welcome plate.</li>
+        <li>How long the page was visible, and how long it was open.</li>
+        <li>Which kinds of controls you used: the name of a control or of a result, with counts and durations.</li>
+        <li>A random id for this browser, made when you allow sharing. It tells one browser's events from another's and is derived from nothing about you.</li>
+        <li>A random id for each page load, and the time of each event.</li>
+      </ul>
+      <dl class="lop-facts">
+        <dt>Never</dt>
+        <dd>Anything you type. A lab records which control was used, never what was typed into it. As a second guard, before an event leaves, its data is reduced to numbers, yes or no values and short plain labels: text longer than 64 characters, text of more than three words, text with other characters and anything nested inside are dropped. No name and no email address: the labs hold none. No IP address is stored with the events. The servers that receive a request see the address it comes from, as every web server does, and the events table has no column for it.</dd>
+        <dt>To whom</dt>
+        <dd>Supabase, a database host. The project runs in the EU (West EU, Paris). Only the owner of this site can read the events. A visitor's browser can add events and erase the events of its own id, and can read none.</dd>
+        <dt>Why</dt>
+        <dd>To see which labs are used and where they fail.</dd>
+        <dt>Events sent</dt>
+        <dd>Only events recorded after you chose Allow, and none while recording is off.</dd>
+      </dl>
+    </section>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-d">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate D · How long it is kept</span></header>
+      <h2 id="pv-d">90 days raw, then daily counts</h2>
+      <p>Raw events are kept for 90 days. Each night, every day older than that is reduced to counts (events, browsers and page loads, per lab and per kind of event) and its raw events are deleted. After 90 days the backend holds no random id, only the counts.</p>
+      <p>The record in your browser is yours to keep: it stays until you delete it.</p>
+    </section>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-e">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate E · When a lab asks a model</span></header>
+      <h2 id="pv-e">The model route</h2>
+      <p>Some labs send what you type or choose in them to a language model. The prompt is offered to these routes in order and goes no further than the first that answers. Each lab's model route control names the one in use. A prompt is never part of a usage event.</p>
+      <ol class="lop-list">
+        <li><span><strong>Your own key</strong>, if you entered one in the model route control. The prompt and the key go from your browser to the address you entered. The key goes nowhere else and is kept in this browser's localStorage.</span></li>
+        <li><span><strong>The labs' own route.</strong> A Cloudflare Worker passes the prompt to Cloudflare Workers AI and returns the reply. The Worker stores and logs nothing: no prompt, no reply, no header. It hands the address of the request to Cloudflare's rate limiter, which counts requests per minute.</span></li>
+        <li><span><strong>The public route</strong>, text.pollinations.ai, when the labs' own route does not answer, for example once it has used its daily allowance. The prompt then goes to Pollinations, a third party with its own terms.</span></li>
+        <li><span><strong>Offline.</strong> The lab's own engine answers in your browser and nothing is sent.</span></li>
+      </ol>
+      <p>On a copy of the site served from your own machine, a local Ollama model is tried first, and the prompt stays on that machine.</p>
+    </section>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-f">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate F · Other servers a page talks to</span></header>
+      <h2 id="pv-f">Hosting, fonts and libraries</h2>
+      <p>Each of these receives a request from your browser, with the address it comes from. None receives the Labs OS record.</p>
+      <dl class="lop-facts">
+        <dt>Hosting</dt>
+        <dd>GitHub Pages serves the site's files.</dd>
+        <dt>Fonts</dt>
+        <dd>IBM Plex Mono and Fraunces load from Google Fonts (fonts.googleapis.com and fonts.gstatic.com).</dd>
+        <dt>Libraries</dt>
+        <dd>Icons and a few libraries load from cdnjs (Cloudflare) and jsDelivr.</dd>
+        <dt>Public data</dt>
+        <dd>Some labs read public data from its source when you open them, for example Hacker News through hn.algolia.com.</dd>
+      </dl>
+      <p>The labs set no cookie and load no advertising or analytics script.</p>
+    </section>
+
+    <section class="los-plate lop-plate" aria-labelledby="pv-g">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label">Plate G · Your rights, and how to use them here</span></header>
+      <h2 id="pv-g">Four controls, all under Your data</h2>
+      <dl class="lop-facts">
+        <dt>Export</dt>
+        <dd><strong>Export JSON</strong> saves every record this browser holds. The file includes your random id (<code>meta.install</code>). A browser cannot read events back from the backend, so to get a copy of what is stored under your id, send the id to the address on plate A.</dd>
+        <dt>Delete</dt>
+        <dd><strong>Delete everything</strong> removes the record from this browser and erases this browser's events from the backend. It says whether the erase succeeded. If it could not reach the backend it keeps the id, so you can repeat it.</dd>
+        <dt>Erase</dt>
+        <dd><strong>Erase what was sent</strong> removes this browser's events from the backend and keeps the record here.</dd>
+        <dt>Withdraw</dt>
+        <dd><strong>Sharing</strong>, <strong>No thanks</strong>. Nothing more is sent. What was sent before stays until you erase it or until the 90 days pass.</dd>
+      </dl>
+      <p>If you think this site handles your data wrongly, write to the address on plate A. You can also complain to a data protection authority. In Spain that is the AEPD (aepd.es).</p>
+      <p class="lop-links"><a class="los-btn" href="index.html#your-data">Open Your data</a></p>
+    </section>
+
+    <footer class="lop-evidence">
+      <p><span class="lop-tag">[REAL]</span> Each statement on this page describes code in the site's public repository, read on 13 November 2026: <code>labs-src/os</code> (the record, the consent gate, the transport and its tests), <code>supabase/migrations</code> (the tables, who may read them, the 90 day reduction), <code>workers/model-route</code> (the Worker) and <code>labs/assets/js/ai/llm.js</code> (the model routes).</p>
+      <p>This page describes practice. It is not legal advice.</p>
+    </footer>
+
+    <div class="lop-foot">
+      <span>luisblanco.dev · Labs</span>
+      <a href="index.html">&larr; Back to the labs</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,369 @@
+{
+ "schema": "dataspace.run/1",
+ "generatedAt": "2026-11-11T11:07:03.508Z",
+ "priors": [
+  {
+   "id": "prior.llama3.1-8b.r1",
+   "model": "llama3.1:8b",
+   "digest": "46e0c10c039e",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 101,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:15:01.151Z",
+   "call": {
+    "request": {
+     "model": "llama3.1:8b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 101,
+      "num_ctx": 8192
+     }
+    },
+    "status": 200,
+    "raw": "There is nothing in the capsule.",
+    "thinking": "",
+    "promptTokens": 64,
+    "completionTokens": 8,
+    "ollamaMs": 457,
+    "ms": 465,
+    "at": "2026-11-11T10:15:01.151Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.llama3.1-8b.r2",
+   "model": "llama3.1:8b",
+   "digest": "46e0c10c039e",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 102,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:15:01.620Z",
+   "call": {
+    "request": {
+     "model": "llama3.1:8b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 102,
+      "num_ctx": 8192
+     }
+    },
+    "status": 200,
+    "raw": "There is no conversation to rebuild. The capsule is empty.",
+    "thinking": "",
+    "promptTokens": 64,
+    "completionTokens": 13,
+    "ollamaMs": 343,
+    "ms": 347,
+    "at": "2026-11-11T10:15:01.620Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.llama3.1-8b.r3",
+   "model": "llama3.1:8b",
+   "digest": "46e0c10c039e",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 103,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:15:01.968Z",
+   "call": {
+    "request": {
+     "model": "llama3.1:8b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 103,
+      "num_ctx": 8192
+     }
+    },
+    "status": 200,
+    "raw": "There is no conversation to rebuild. Please provide the capsule with the original conversation.",
+    "thinking": "",
+    "promptTokens": 64,
+    "completionTokens": 17,
+    "ollamaMs": 378,
+    "ms": 380,
+    "at": "2026-11-11T10:15:01.968Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.qwen3-8b.r1",
+   "model": "qwen3:8b",
+   "digest": "500a1f067a9f",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 101,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:43:40.667Z",
+   "call": {
+    "request": {
+     "model": "qwen3:8b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 101,
+      "num_ctx": 8192
+     },
+     "think": false
+    },
+    "status": 200,
+    "raw": "</think>\n\nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTANT:  \nUSER:  \nASSISTNT:",
+    "thinking": "",
+    "promptTokens": 70,
+    "completionTokens": 106,
+    "ollamaMs": 7150,
+    "ms": 7155,
+    "at": "2026-11-11T10:43:40.667Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.qwen3-8b.r2",
+   "model": "qwen3:8b",
+   "digest": "500a1f067a9f",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 102,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:43:47.825Z",
+   "call": {
+    "request": {
+     "model": "qwen3:8b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 102,
+      "num_ctx": 8192
+     },
+     "think": false
+    },
+    "status": 200,
+    "raw": "</think>\n\nUSER:  \nASSISTANT:",
+    "thinking": "",
+    "promptTokens": 70,
+    "completionTokens": 10,
+    "ollamaMs": 378,
+    "ms": 382,
+    "at": "2026-11-11T10:43:47.825Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.qwen3-8b.r3",
+   "model": "qwen3:8b",
+   "digest": "500a1f067a9f",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 103,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:43:48.208Z",
+   "call": {
+    "request": {
+     "model": "qwen3:8b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 103,
+      "num_ctx": 8192
+     },
+     "think": false
+    },
+    "status": 200,
+    "raw": "</think>\n\nUSER:  \nASSISTANT:",
+    "thinking": "",
+    "promptTokens": 70,
+    "completionTokens": 10,
+    "ollamaMs": 455,
+    "ms": 457,
+    "at": "2026-11-11T10:43:48.208Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.granite4.1-3b.r1",
+   "model": "granite4.1:3b",
+   "digest": "6fd349357287",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 101,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:59:33.483Z",
+   "call": {
+    "request": {
+     "model": "granite4.1:3b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 101,
+      "num_ctx": 8192
+     }
+    },
+    "status": 200,
+    "raw": "I'm sorry, but there's no conversation to rebuild from the provided capsule. Could you please provide the details or content of the capsule so I can assist you further?",
+    "thinking": "",
+    "promptTokens": 62,
+    "completionTokens": 35,
+    "ollamaMs": 2049,
+    "ms": 12686,
+    "at": "2026-11-11T10:59:33.483Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.granite4.1-3b.r2",
+   "model": "granite4.1:3b",
+   "digest": "6fd349357287",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 102,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:59:53.922Z",
+   "call": {
+    "request": {
+     "model": "granite4.1:3b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 102,
+      "num_ctx": 8192
+     }
+    },
+    "status": 200,
+    "raw": "The capsule provided does not contain any conversation details or text to rebuild from. Please provide the specific conversation or additional context from the capsule.",
+    "thinking": "",
+    "promptTokens": 62,
+    "completionTokens": 28,
+    "ollamaMs": 1157,
+    "ms": 1820,
+    "at": "2026-11-11T10:59:53.922Z",
+    "error": null
+   }
+  },
+  {
+   "id": "prior.granite4.1-3b.r3",
+   "model": "granite4.1:3b",
+   "digest": "6fd349357287",
+   "quant": "Q4_K_M",
+   "ollamaVersion": "0.40.15",
+   "seed": 103,
+   "promptVersion": "p1",
+   "date": "2026-11-11T10:59:55.743Z",
+   "call": {
+    "request": {
+     "model": "granite4.1:3b",
+     "messages": [
+      {
+       "role": "system",
+       "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+      },
+      {
+       "role": "user",
+       "content": "CAPSULE:\n"
+      }
+     ],
+     "stream": false,
+     "options": {
+      "temperature": 0.7,
+      "seed": 103,
+      "num_ctx": 8192
+     }
+    },
+    "status": 200,
+    "raw": "It seems like the capsule you provided is empty or not fully specified. Could you please provide the content of the capsule that you'd like me to reconstruct into a conversation?",
+    "thinking": "",
+    "promptTokens": 62,
+    "completionTokens": 35,
+    "ollamaMs": 476,
+    "ms": 479,
+    "at": "2026-11-11T10:59:55.743Z",
+    "error": null
+   }
+  }
+ ]
+}

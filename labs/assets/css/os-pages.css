@@ -1,0 +1,124 @@
+/* ============================================================
+   os-pages.css — the sheet Labs OS's own pages are drawn on:
+   privacy.html and dashboard.html. Consumes tokens.css and the
+   plates of os.css (los-), and adds the page around them (lop-).
+
+   These pages are documents, so they are still: no canvas, no
+   animation. The ground is the void with the 32 px drafting grid
+   at the edge of visibility. Each section is a plate of one
+   drawing, lettered in sequence, with the gold corner brackets
+   every plate carries. Text is Plex Mono; the page title alone
+   is Fraunces. Hierarchy is size and weight, then space, then a
+   single hairline; nothing is filled and nothing glows.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: dark; -webkit-text-size-adjust: 100%; }
+
+.lop {
+  margin: 0; min-height: 100vh;
+  font-family: var(--font-mono); font-size: var(--t-body); line-height: 1.6;
+  color: var(--text); background-color: var(--void);
+  background-image:
+    linear-gradient(to right, rgba(28, 35, 47, .32) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(28, 35, 47, .32) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.lop a { color: var(--horizon); text-decoration: none; border-bottom: 1px solid var(--horizon-dim); }
+.lop a:hover { color: var(--text-bright); border-bottom-color: var(--accretion-dim); }
+.lop ::selection { background: var(--accretion-dim); color: var(--void); }
+
+/* ---------------- the bar ---------------- */
+.lop-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-5);
+  min-height: var(--header-h); padding: var(--s-3) var(--content-pad);
+  border-bottom: 1px solid var(--line); background: var(--void);
+}
+.lop-bar a { border-bottom: 0; }
+.lop .lop-brand { color: var(--text-bright); font-weight: 500; letter-spacing: .02em; }
+.lop .lop-brand b { color: var(--accretion); font-weight: 500; }
+.lop-nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; }
+.lop .lop-nav a { color: var(--text-dim); }
+.lop .lop-nav a:hover, .lop .lop-nav a[aria-current="page"] { color: var(--text-bright); }
+
+/* ---------------- the sheet ---------------- */
+.lop-sheet { width: min(var(--lop-max, 880px), 100%); margin-inline: auto; padding: var(--s-6) var(--content-pad) var(--s-8); }
+.lop-sheet > * + * { margin-top: var(--s-5); }
+
+.lop-title {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--s-4) var(--s-6);
+  padding-bottom: var(--s-5); border-bottom: 1px solid var(--line);
+}
+.lop-title h1 {
+  margin: var(--s-2) 0 0; font-family: var(--los-display); font-weight: 500; font-optical-sizing: auto;
+  font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1.05; letter-spacing: 0; color: var(--text-bright);
+}
+.lop-lede { margin: var(--s-3) 0 0; max-width: 60ch; font-size: .95rem; color: var(--text); }
+
+/* the title block: sheet, revision, source, date */
+.lop-block {
+  display: grid; grid-template-columns: max-content max-content; margin: 0;
+  border: 1px solid var(--line); font-size: var(--t-micro); font-variant-numeric: tabular-nums;
+}
+.lop-block dt, .lop-block dd { margin: 0; padding: .45em .9em; border-bottom: 1px solid var(--line); }
+.lop-block dt { letter-spacing: .18em; text-transform: uppercase; color: var(--text-dim); border-right: 1px solid var(--line); }
+.lop-block dd { color: var(--text); }
+.lop-block dt:nth-last-of-type(1), .lop-block dd:nth-last-of-type(1) { border-bottom: 0; }
+
+/* ---------------- a plate of text ---------------- */
+.lop-plate h2 {
+  margin: 0 0 var(--s-3); font-family: var(--font-mono); font-weight: 500; font-size: 1.12rem; line-height: 1.3;
+  color: var(--text-bright); letter-spacing: 0;
+}
+.lop-plate p { margin: 0 0 var(--s-3); font-size: .92rem; max-width: 72ch; }
+.lop-plate p:last-child, .lop-plate ul:last-child, .lop-plate ol:last-child, .lop-plate dl:last-child { margin-bottom: 0; }
+.lop-plate strong { color: var(--text-bright); font-weight: 500; }
+.lop-plate code { font: inherit; color: var(--horizon); }
+
+/* a list is ruled, one item a line, each led by a short ink rule (numbered where the order is the point) */
+.lop-list { list-style: none; margin: 0 0 var(--s-4); padding: 0; font-size: .92rem; max-width: 76ch; }
+.lop-list li { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); column-gap: var(--s-3); padding: var(--s-2) 0; }
+.lop-list li + li { border-top: 1px solid var(--line); }
+.lop-list li::before { content: ""; height: 1px; margin-top: .8em; background: var(--line-bright); }
+ol.lop-list { counter-reset: lop; }
+ol.lop-list li::before {
+  counter-increment: lop; content: counter(lop, decimal-leading-zero); height: auto; margin-top: .25em; background: none;
+  color: var(--text-dim); font-size: var(--t-micro); font-variant-numeric: tabular-nums;
+}
+
+/* term and fact, on one hairline grid: the columns touch, so each rule runs unbroken under both */
+.lop-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0; margin: 0 0 var(--s-4); font-size: .92rem; }
+.lop-facts dt, .lop-facts dd { margin: 0; padding: var(--s-3) 0; border-top: 1px solid var(--line); }
+.lop-facts dt { font-size: var(--t-micro); letter-spacing: .18em; text-transform: uppercase; color: var(--text-dim); padding-top: calc(var(--s-3) + .25em); padding-right: var(--s-6); }
+.lop-facts dd { max-width: 68ch; }
+.lop-facts dt:first-of-type, .lop-facts dt:first-of-type + dd { border-top: 0; padding-top: 0; }
+.lop-facts dt:first-of-type { padding-top: .25em; }
+
+.lop-links { display: flex; flex-wrap: wrap; gap: var(--s-3); margin: var(--s-4) 0 0; }
+.lop a.los-btn { border: 1px solid var(--line-bright); color: var(--text-bright); }
+.lop a.los-btn:hover { border-color: var(--accretion-dim); }
+
+/* ---------------- evidence and foot ---------------- */
+.lop-evidence {
+  display: grid; gap: var(--s-2); padding-top: var(--s-4); border-top: 1px solid var(--line);
+  font-size: var(--t-stamp); color: var(--text-dim); line-height: 1.6;
+}
+.lop-evidence p { margin: 0; max-width: 92ch; }
+.lop-tag { color: var(--text); letter-spacing: .08em; }
+.lop-foot {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-2) var(--s-5);
+  font-size: var(--t-stamp); color: var(--text-faint);
+}
+.lop .lop-foot a { color: var(--text-dim); border-bottom: 0; }
+
+@media (max-width: 760px) {
+  .lop-sheet { padding-top: var(--s-5); }
+  .lop-title { grid-template-columns: minmax(0, 1fr); }
+  .lop-block { justify-self: start; }
+  .lop-facts { grid-template-columns: minmax(0, 1fr); }
+  .lop-facts dd { border-top: 0; padding-top: 0; }
+  .lop-facts dt:first-of-type + dd { padding-top: var(--s-1); }
+  .lop-facts dt { padding-bottom: var(--s-1); padding-right: 0; }
+}

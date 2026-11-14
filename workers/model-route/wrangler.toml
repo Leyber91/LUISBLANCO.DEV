@@ -1,0 +1,32 @@
+# The labs' model route. Deploy from this folder: npx wrangler deploy
+# Free plan: 100,000 requests a day and 10,000 Workers AI neurons a day; past the allowance the route answers 429.
+name = "labs-model-route"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
+
+[ai]
+binding = "AI"
+
+# Per-visitor limits. They are approximate and counted per Cloudflare location, which is enough to protect the
+# shared allowance from one page in a loop.
+[[ratelimits]]
+name = "FREE_LIMIT"
+namespace_id = "2121"
+
+  [ratelimits.simple]
+  limit = 4
+  period = 60
+
+[[ratelimits]]
+name = "PASS_LIMIT"
+namespace_id = "2122"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60
+
+# No request is logged: a pass-through request carries a visitor's own key.
+[observability]
+enabled = false

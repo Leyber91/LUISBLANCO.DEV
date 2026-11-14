@@ -343,8 +343,11 @@ select {
 
 /* ===================== responsive ===================== */
 @media (max-width: 860px) {
-  .bench { grid-template-columns: 1fr; }
+  .bench { grid-template-columns: minmax(0, 1fr); }
   .inputs { position: static; }
+}
+@media (max-width: 400px) {
+  .src { white-space: normal; }
 }
 
 /* ===================== reduced motion ===================== */

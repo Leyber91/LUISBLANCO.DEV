@@ -3,144 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trending Topics — luisblanco.dev Labs</title>
-  <meta name="description" content="A live agentic scan: it fetches real signals from the open web, ranks what is actually rising, and a model explains why — all in the browser, no backend, no keys." />
-
-  <!-- fonts: Orbitron (display) · Space Grotesk (body) · IBM Plex Mono (mono) -->
+  <title>Trending Topics · signal line · THE LAB L212</title>
+  <meta name="description" content="What is rising across Hacker News, GitHub and three Wikipedia editions, measured from your browser: rates against baselines with 95% intervals, topics joined across sources, and stored scans that check the last scan's calls." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- design tokens, then the page stylesheet -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
   <link rel="stylesheet" href="assets/css/tokens.css" />
   <link rel="stylesheet" href="assets/css/trending.css" />
+  <link rel="modulepreload" href="assets/js/trending/main.js" />
+  <link rel="modulepreload" href="assets/js/trending/Trending.js" />
+  <link rel="modulepreload" href="assets/js/trending/constants.js" />
+  <link rel="modulepreload" href="assets/js/trending/dom.js" />
+  <link rel="modulepreload" href="assets/js/trending/engine.js" />
+  <link rel="modulepreload" href="assets/js/trending/lenses.js" />
+  <link rel="modulepreload" href="assets/js/trending/net.js" />
+  <link rel="modulepreload" href="assets/js/trending/score.js" />
+  <link rel="modulepreload" href="assets/js/trending/topics.js" />
+  <link rel="modulepreload" href="assets/js/trending/schema.js" />
+  <link rel="modulepreload" href="assets/js/trending/history.js" />
+  <link rel="modulepreload" href="assets/js/trending/verify.js" />
+  <link rel="modulepreload" href="assets/js/trending/explain.js" />
+  <link rel="modulepreload" href="assets/js/trending/inputs.js" />
+  <link rel="modulepreload" href="assets/js/trending/ReasoningService.js" />
+  <link rel="modulepreload" href="assets/js/trending/field.js" />
+  <link rel="modulepreload" href="assets/js/trending/marks.js" />
+  <link rel="modulepreload" href="assets/js/trending/views.js" />
+  <link rel="modulepreload" href="assets/js/trending/lookup.js" />
+  <link rel="modulepreload" href="assets/js/trending/archive.data.js" />
+  <link rel="modulepreload" href="assets/js/trending/fixtures.js" />
+  <link rel="modulepreload" href="assets/js/ai/llm.js" />
+  <link rel="modulepreload" href="assets/js/ai/route-panel.js" />
+  <link rel="modulepreload" href="assets/js/ai/config.js" />
 </head>
 <body>
-  <div class="void-bg" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
+  <a class="skip" href="#board">Skip to the board</a>
+  <div class="veil" aria-hidden="true"></div>
+  <span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span>
+  <span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
 
-  <!-- ===================== header ===================== -->
-  <header class="page-header">
-    <a href="index.html" class="back" aria-label="Back to Labs">
-      <i class="fa-solid fa-arrow-left-long"></i>
-      <span>PROJECT&nbsp;LEYBER&nbsp;<b>212</b></span>
-    </a>
-    <span class="ai-status" id="ai-status" data-mode="echo" title="Reasoning backend (auto-detected)">
-      <span class="dot"></span><span id="ai-status-label">idle</span>
-    </span>
+  <header class="bar">
+    <div class="left">
+      <a class="back" href="index.html">&larr; labs</a>
+      <span class="label">Trending Topics <span class="on">/ signal line</span></span>
+    </div>
+    <div class="right">
+      <span id="route"></span>
+      <span class="brand">The Lab &middot; <b>L212</b></span>
+    </div>
   </header>
 
-  <span class="sr-only" id="scan-status" aria-live="polite"></span>
-
-  <main class="shell">
-    <!-- ===================== intro ===================== -->
-    <section class="intro">
-      <p class="eyebrow"><i class="fa-solid fa-fire"></i> Viral · made to be shared</p>
-      <h1>Trending <span class="x">Topics</span></h1>
-      <p class="lede">
-        Not a curated list — a <em>live agentic scan</em>. Press the button and watch it reach out
-        to the open web, pull real signals, rank what is actually rising right now, and ask a model
-        the only interesting question: <em>why</em>.
-      </p>
-      <p class="vision-note">
-        <i class="fa-solid fa-circle-info"></i>
-        Everything runs in your browser against public, keyless APIs — no backend, no keys. If the
-        network is unreachable it falls back to a clearly-labelled snapshot.
-      </p>
-    </section>
-
-    <!-- ===================== workbench ===================== -->
-    <section class="bench">
-      <!-- ---- controls ---- -->
-      <form class="panel inputs" id="scan-form" autocomplete="off">
-        <h2 class="panel-title"><span class="idx">01</span> The scan</h2>
-
-        <div class="field">
-          <span class="lbl">Where to look</span>
-          <div class="lens-toggle" id="lens-toggle" role="group" aria-label="Trending source">
-            <button type="button" class="lens on" data-lens="tech" aria-pressed="true">
-              <i class="fa-brands fa-hacker-news"></i> Tech<span class="sub2">Hacker News</span>
-            </button>
-            <button type="button" class="lens" data-lens="culture" aria-pressed="false">
-              <i class="fa-brands fa-wikipedia-w"></i> Culture<span class="sub2">Wikipedia</span>
-            </button>
-            <button type="button" class="lens" data-lens="dev" aria-pressed="false">
-              <i class="fa-brands fa-github"></i> Dev<span class="sub2">GitHub</span>
-            </button>
-          </div>
+  <main class="stage" id="main">
+    <section class="hero" aria-labelledby="h1">
+      <div class="col-ctl ignite">
+        <div>
+          <p class="kick">what is rising, measured</p>
+          <h1 id="h1">Rising is a rate. <span class="lo">This page prints the arithmetic.</span></h1>
+          <p class="sub">Six public feeds read from your browser. Every score is a count over time or over its own baseline, with a 95% interval. Subjects that surface in several feeds join into one topic, and every scan is kept in this browser so the next scan can check what the last one called rising.</p>
         </div>
-
-        <p class="lens-what" id="lens-what"></p>
-
-        <button type="submit" class="generate" id="scan">
-          <i class="fa-solid fa-satellite-dish"></i>
-          <span>Scan what is rising</span>
-        </button>
-        <button type="button" class="ghost" id="stop" hidden>
-          <i class="fa-solid fa-stop"></i> Stop
-        </button>
-
-        <p class="backend-note" id="backend-note"></p>
-      </form>
-
-      <!-- ---- output ---- -->
-      <div class="panel output" id="output">
-        <!-- resting -->
-        <div class="resting" id="resting">
-          <div class="resting-mark" aria-hidden="true"><span></span><span></span><span></span></div>
-          <p>Pick a lens and run a live scan. You will watch it actually hit the network.</p>
-          <p class="sub">Tech reads Hacker News velocity, Culture the day's most-read on Wikipedia,
-            Dev the newest repos climbing GitHub. A model then explains the top signal.</p>
+        <div>
+          <fieldset class="ctl"><legend>sources</legend><div class="chips" id="sources" role="group" aria-label="Sources"></div></fieldset>
+          <div class="ctl"><span class="ctl-k" id="lbl-score">rank by</span><div class="seg" id="score-modes" role="group" aria-labelledby="lbl-score"></div></div>
+          <div class="ctl"><span class="ctl-k" id="lbl-win">item age</span><div class="seg" id="windows" role="group" aria-labelledby="lbl-win"></div></div>
         </div>
-
-        <!-- working / result -->
-        <div class="work" id="work" hidden>
-          <div class="scan-meta" id="scan-meta">
-            <span class="live-pill" id="live-pill" data-live="live"><span class="lp-dot"></span><span id="live-text">live</span></span>
-            <span class="meta-src" id="meta-src"></span>
-            <span class="meta-time" id="meta-time"></span>
+        <div>
+          <div class="go-row">
+            <button type="button" class="go" id="scan">Scan live</button>
+            <button type="button" class="ghost" id="stop" hidden>Stop</button>
           </div>
-
-          <!-- agent trace — the visible star -->
-          <section class="trace-wrap" id="trace-wrap" data-active="false">
-            <button type="button" class="trace-head" id="trace-toggle" aria-expanded="true">
-              <span class="th-dot" aria-hidden="true"></span>
-              <span class="th-label">Agent trace</span>
-              <i class="fa-solid fa-chevron-down chev"></i>
-            </button>
-            <ol class="trace-body" id="trace-body"></ol>
-          </section>
-
-          <!-- featured: the top rising signal + the model's why -->
-          <article class="featured" id="featured" hidden>
-            <div class="feat-head">
-              <span class="feat-rank">01</span>
-              <span class="feat-badge" id="feat-badge"></span>
-              <span class="feat-metric" id="feat-metric"></span>
-            </div>
-            <h3 class="feat-title"><a id="feat-link" href="#" target="_blank" rel="noopener"></a></h3>
-            <div class="why" id="why">
-              <span class="why-label" id="why-label">why it is rising</span>
-              <p class="why-body" id="why-body"></p>
-            </div>
-          </article>
-
-          <!-- the rising board -->
-          <ol class="board" id="board" aria-label="Rising signals, ranked"></ol>
-          <p class="board-note" id="board-note" hidden></p>
+          <div class="poll">
+            <button type="button" class="ghost sm" id="poll" aria-pressed="false">Re-scan every 10 min</button>
+            <span id="poll-state" class="num"></span>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+          <button type="button" class="ghost sm" id="tour-btn">Walk me through it</button>
         </div>
       </div>
+
+      <div class="col-field">
+        <div class="stamp" id="stamp"></div>
+        <div class="field" id="field"></div>
+        <div class="legend" id="legend" aria-hidden="true"></div>
+        <ol class="trace" id="trace" aria-label="Scan sequence"></ol>
+      </div>
+
+      <aside class="col-read" aria-label="Explanation of the top signals">
+        <div class="plate top" id="top"></div>
+        <div class="plate digest" id="digest"></div>
+      </aside>
     </section>
+
+    <section class="sec" aria-labelledby="h-exp">
+      <div class="sec-h"><h2 id="h-exp">Called rising, explained</h2><span class="note" id="exp-route"></span></div>
+      <div class="explained" id="explained"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-board">
+      <div class="sec-h">
+        <h2 id="h-board">Board</h2>
+        <div class="ctls">
+          <div class="seg" id="view-toggle" role="group" aria-label="Board view"></div>
+          <div class="ctls" id="board-filters"></div>
+        </div>
+      </div>
+      <p class="board-head" id="board-head"></p>
+      <ol class="board" id="board" aria-label="Signals, ranked"></ol>
+    </section>
+
+    <section class="sec grid2 wide">
+      <div aria-labelledby="h-hist">
+        <h2 id="h-hist">Scan memory</h2>
+        <p class="lead">Every scan is stored in this browser's localStorage. Pick any two to see which items entered, left and moved.</p>
+        <div id="store"></div>
+        <ul class="hlist" id="history" aria-label="Stored scans"></ul>
+        <div class="diffout" id="diff" aria-live="polite"></div>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+      </div>
+      <div aria-labelledby="h-ver">
+        <h2 id="h-ver">Did the calls hold?</h2>
+        <p class="lead">A call is one of the top 10 items per source. It is a hit when its gain over the follow-up span beats the median gain of every item seen in both observations. Two naive rankings are scored on the same spans.</p>
+        <div id="verify"></div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-look">
+      <h2 id="h-look">Look up your own terms</h2>
+      <p class="lead">Up to five terms, separated by commas. Each is looked up in Hacker News stories (last 24 h against the 7 days before), Wikipedia daily views (latest day against its same-weekday median) and new GitHub repositories (last 7 days against the 21 before), and drawn on one chart against a baseline of 1.</p>
+      <form class="lookup" id="lookup" autocomplete="off">
+        <label class="sr-only" for="lookup-terms">Terms to look up</label>
+        <input id="lookup-terms" maxlength="160" spellcheck="false" placeholder="e.g. rust, quantum computing, Taylor Swift" />
+        <button type="submit" class="ghost">Look up</button>
+      </form>
+      <div id="lookup-out" class="lk" aria-live="polite"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-method">
+      <h2 id="h-method">Method</h2>
+      <div id="method"></div>
+      <h3 style="margin-top:18px">Provenance of this scan</h3>
+      <div id="provenance"></div>
+      <h3 style="margin-top:18px">Worked example</h3>
+      <div id="worked"></div>
+      <h3 style="margin-top:18px">Why trending is hard to measure</h3>
+      <ol class="hard" id="hard"></ol>
+    </section>
+
+    <footer class="foot" id="evidence"></footer>
   </main>
 
-  <footer class="page-footer">
-    <span>&copy; <span id="year">2026</span> luisblanco.dev Labs · built by
-      <a href="https://github.com/Leyber91" target="_blank" rel="noopener">Leyber91</a></span>
-    <span id="footer-tagline">Signals from the open web · reasoning when the network allows.</span>
-  </footer>
+  <div class="detail" id="detail" role="dialog" aria-modal="true" aria-labelledby="detail-title" hidden></div>
+  <div class="tour" id="tour" role="dialog" aria-live="polite" hidden></div>
 
   <script type="module" src="assets/js/trending/main.js"></script>
 </body>

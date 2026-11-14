@@ -1,159 +1,224 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personalized Plans — luisblanco.dev Labs</title>
-  <meta name="description" content="A reasoning model that thinks through your constraints out loud, then builds a training block that adapts to the week you actually had. Powered by Nemotron-3-Ultra." />
-
-  <!-- fonts: Orbitron (display) · Space Grotesk (body) · IBM Plex Mono (mono) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- design tokens, then the page stylesheet -->
-  <link rel="stylesheet" href="assets/css/tokens.css" />
-  <link rel="stylesheet" href="assets/css/workout-plans.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Personalized Plans — a training block that re-plans itself</title>
+<meta name="description" content="A deterministic training planner with a real load model: periodization, a time-budget solver, an exercise substitution graph for injuries, and fitness-fatigue curves that re-plan the block around the week you actually had. A language model only narrates the planner's own decision log, and every sentence is checked." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- the font loads off the critical path; the system mono stack shows until it arrives -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+<link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/workout-plans.css" />
+<!-- fetch the module graph in parallel instead of import by import -->
+<link rel="modulepreload" href="assets/js/workout-plans/PlanController.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/Planner.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/LoadModel.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/constants.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/library.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/PlanService.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/LocalCoach.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/PlanView.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/charts.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/bodymap.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/graphview.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/notes.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/openlib.js" />
+<link rel="modulepreload" href="assets/js/workout-plans/dom.js" />
+<link rel="modulepreload" href="assets/js/ai/llm.js" />
+<link rel="modulepreload" href="assets/js/ai/config.js" />
+<link rel="modulepreload" href="assets/js/ai/route-panel.js" />
 </head>
-<body>
-  <div class="void-bg" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
+<body class="boot">
+<span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
+<a class="skip" href="#deck">Skip to the plan</a>
 
-  <!-- ===================== header ===================== -->
-  <header class="page-header">
-    <a href="index.html" class="back" aria-label="Back to Labs">
-      <i class="fa-solid fa-arrow-left-long"></i>
-      <span>PROJECT&nbsp;LEYBER&nbsp;<b>212</b></span>
-    </a>
-    <span class="ai-status" id="ai-status" data-mode="echo" title="AI backend (auto-detected)">
-      <span class="dot"></span><span id="ai-status-label">detecting…</span>
-    </span>
-  </header>
+<header class="bar">
+  <div class="left">
+    <a class="back" href="index.html">&larr; labs</a>
+    <div class="label">PERSONALIZED PLANS <span class="on">/ training-load line</span></div>
+  </div>
+  <div class="right">
+    <span id="route" class="route"></span>
+    <div class="brand">THE LAB &middot; <b>L212</b></div>
+  </div>
+</header>
 
-  <main class="shell">
-    <!-- ===================== intro ===================== -->
-    <section class="intro">
-      <p class="eyebrow"><i class="fa-solid fa-dumbbell"></i> Fitness · the body, in the loop</p>
-      <h1>Personalized <span class="x">Plans</span></h1>
-      <p class="lede">
-        Most plan generators fill a template. This one <em>reasons</em>. Tell it the week you
-        actually have — the days, the kit, the bad knee — and watch a reasoning model think
-        through the trade-offs out loud before it commits to a block built around your constraints.
-      </p>
+<main class="stage">
+  <section class="head">
+    <div class="kick">the planner decides &middot; the model narrates</div>
+    <h1>A training block that re-plans itself around <span class="lo">the week you actually had.</span></h1>
+    <p class="sub">A deterministic planner turns your days, minutes, kit and flags into a periodized block: sets per muscle inside a time budget, lifts moved along a substitution graph when a flag rules them out, and every session's load run through a fitness-fatigue model. Log a missed or a hard session and the rest of the block re-plans while the curves move. A language model is allowed one job, to explain the planner's own decision log, and each of its sentences is checked against that log.</p>
+    <div class="tourbar" id="tourbar" hidden>
+      <span class="tb-k">tour</span><span class="tb-n" id="tour-n"></span><span class="tb-t" id="tour-t"></span>
+      <button type="button" class="link" id="tour-stop">stop</button>
+    </div>
+  </section>
+
+  <div class="deck" id="deck">
+    <!-- 01 constraints -->
+    <form class="plate ctl" id="ctl" autocomplete="off" aria-label="Your constraints">
+      <div class="ph"><span class="ix">01</span>constraints</div>
+      <fieldset class="f"><legend>goal</legend><div class="seg" data-k="goal"></div></fieldset>
+      <fieldset class="f"><legend>level</legend><div class="seg" data-k="level"></div></fieldset>
+      <fieldset class="f"><legend>days you can train</legend><div class="seg days" data-k="days"></div></fieldset>
+      <fieldset class="f"><legend>minutes per session</legend><div class="seg" data-k="minutes"></div></fieldset>
+      <fieldset class="f"><legend>equipment</legend><div class="seg" data-k="equipment"></div></fieldset>
+      <fieldset class="f"><legend>flags <span class="hint">change exercise choice only</span></legend><div class="seg" data-k="injuries"></div></fieldset>
+      <fieldset class="f"><legend>block length, weeks</legend><div class="seg" data-k="weeks"></div></fieldset>
+      <fieldset class="f"><legend>periodization <span class="hint">auto follows goal and level</span></legend><div class="seg" data-k="scheme"></div></fieldset>
+      <fieldset class="f notes"><legend><label for="notes">anything else, in your words</label> <span class="hint">read by rules, not a model</span></legend>
+        <textarea id="notes" rows="2" maxlength="400" spellcheck="false" placeholder="e.g. dodgy left knee, no barbell at home, can't train Wednesdays"></textarea>
+        <div class="nread" id="nread" aria-live="polite"></div>
+      </fieldset>
+      <p class="ctl-sum" id="ctl-sum" aria-live="polite"></p>
+      <p class="care">Not medical advice. A flag only steers which lifts the planner picks. Pain that persists, or any injury you are unsure about, is a reason to see a physiotherapist or a doctor before you load it.</p>
+    </form>
+
+    <!-- the red-flag stop: replaces the plan while it shows -->
+    <section class="plate paused" id="paused" hidden aria-live="assertive">
+      <div class="ph"><span class="ix">!</span>planner paused</div>
+      <p class="pz-t" id="pz-t"></p>
+      <p class="pz-s">This page builds training plans for healthy adults. It does not diagnose, treat or prescribe rehabilitation, and it should not route a plan around this. Please talk to a doctor or a physiotherapist before you start. Edit your notes to continue.</p>
     </section>
 
-    <!-- ===================== workbench ===================== -->
-    <section class="bench">
-      <!-- ---- inputs ---- -->
-      <form class="panel inputs" id="plan-form" autocomplete="off">
-        <h2 class="panel-title"><span class="idx">01</span> Your constraints</h2>
+    <div class="center">
+    <!-- 02 load -->
+    <section class="plate load" id="v-curves" data-view="curves" aria-label="Load curves">
+      <div class="ph"><span class="ix">02</span>load &middot; fitness, fatigue and form
+        <span class="ph-r"><span class="seg mini" data-k="mode" role="group" aria-label="Load model"></span></span>
+      </div>
+      <div class="readout" id="readout" aria-live="off"></div>
+      <div class="chart" id="curves"></div>
+      <div class="strip" id="strip" role="group" aria-label="Calendar heat strip, one cell per day. Arrow keys move the selected day."></div>
+      <div class="legend">
+        <span class="lg fit">fitness</span><span class="lg fat">fatigue</span><span class="lg form">form</span><span class="lg ghost">as planned</span>
+        <span class="lg miss">missed</span><span class="lg hard">logged hard</span><span class="lg eased">re-planned</span>
+        <span class="lg band dl">deload week</span><span class="lg band tp">taper week</span>
+        <span class="lg heat">cell brightness: session load</span>
+      </div>
+      <p class="rule">Colour rule: gold marks only what is selected, logged, re-planned or chosen, and the form line the plan steers by. Blue-white ink carries every other quantity.</p>
+    </section>
 
-        <label class="field">
-          <span class="lbl">Primary goal</span>
-          <select name="goal" id="goal">
-            <option value="strength">Get stronger</option>
-            <option value="hypertrophy">Build muscle</option>
-            <option value="fatloss">Lose fat, keep muscle</option>
-            <option value="endurance">Conditioning &amp; endurance</option>
-            <option value="general">General health</option>
-          </select>
-        </label>
+    <!-- 04 week -->
+    <section class="plate week" id="v-week" data-view="calendar" aria-label="The selected week">
+      <div class="ph"><span class="ix">04</span>the week &middot; <span id="wk-title"></span>
+        <span class="ph-r"><button type="button" class="link" id="wk-prev" aria-label="Previous week">&larr;</button><button type="button" class="link" id="wk-next" aria-label="Next week">&rarr;</button></span></div>
+      <div class="days7" id="days7"></div>
+      <div class="widx" id="widx"></div>
+      <div class="block" id="block" role="group" aria-label="The whole block, one row per week"></div>
+    </section>
 
-        <div class="field-row">
-          <label class="field">
-            <span class="lbl">Days / week</span>
-            <select name="days" id="days">
-              <option value="2">2</option>
-              <option value="3" selected>3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="lbl">Session length</span>
-            <select name="minutes" id="minutes">
-              <option value="30">30 min</option>
-              <option value="45" selected>45 min</option>
-              <option value="60">60 min</option>
-              <option value="90">90 min</option>
-            </select>
-          </label>
-        </div>
+    </div>
 
-        <div class="field-row">
-          <label class="field">
-            <span class="lbl">Experience</span>
-            <select name="level" id="level">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate" selected>Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </label>
-          <label class="field">
-            <span class="lbl">Equipment</span>
-            <select name="equipment" id="equipment">
-              <option value="gym" selected>Full gym</option>
-              <option value="dumbbells">Dumbbells only</option>
-              <option value="bodyweight">Bodyweight only</option>
-            </select>
-          </label>
-        </div>
+    <!-- 03 volume -->
+    <section class="plate body" id="v-body" data-view="body" aria-label="Weekly volume per muscle">
+      <div class="ph"><span class="ix">03</span>volume &middot; <span id="body-wk">week</span>
+        <span class="ph-r"><span class="seg mini" data-k="bm" role="group" aria-label="Map scope"></span></span></div>
+      <div class="bodymap" id="bodymap"></div>
+      <div class="ramp" aria-hidden="true"><span class="r v1"></span><span class="r v2"></span><span class="r v3"></span><span class="r v4"></span><span class="r act"></span>
+        <span class="rl" id="rl1">under half</span><span class="rl" id="rl2">under</span><span class="rl" id="rl3">in range</span><span class="rl" id="rl4">over</span><span class="rl gold">this session</span></div>
+      <p class="bm-detail" id="bm-detail" aria-live="polite"></p>
+      <div class="mbars" id="mbars"></div>
+      <p class="note" id="body-note"></p>
+    </section>
+  </div>
 
-        <label class="field">
-          <span class="lbl">Constraints / injuries <span class="hint">— the model works around these</span></span>
-          <input type="text" name="constraints" id="constraints"
-                 placeholder="e.g. dodgy left knee, desk job, no morning sessions" />
-        </label>
-
-        <button type="submit" class="generate" id="generate">
-          <i class="fa-solid fa-bolt"></i>
-          <span>Reason out a plan</span>
-        </button>
-        <button type="button" class="ghost" id="stop" hidden>
-          <i class="fa-solid fa-stop"></i> Stop
-        </button>
-
-        <p class="backend-note" id="backend-note"></p>
-      </form>
-
-      <!-- ---- output ---- -->
-      <div class="panel output" id="output">
-        <!-- reasoning stream -->
-        <section class="reasoning" id="reasoning-wrap" hidden>
-          <button type="button" class="reasoning-head" id="reasoning-toggle" aria-expanded="true">
-            <span class="th-dot" aria-hidden="true"></span>
-            <span class="th-label" id="reasoning-label">Reasoning</span>
-            <i class="fa-solid fa-chevron-down chev"></i>
-          </button>
-          <pre class="reasoning-body" id="reasoning-body" aria-live="polite"></pre>
-        </section>
-
-        <!-- the plan -->
-        <section class="plan" id="plan" aria-live="polite"></section>
-
-        <!-- empty / resting state -->
-        <div class="resting" id="resting">
-          <div class="resting-mark" aria-hidden="true">
-            <span></span><span></span><span></span>
-          </div>
-          <p>Set your constraints and the model will think a block into existence.</p>
-          <p class="sub">Runs on your local model if you have one, a hosted Nemotron relay if you
-            don't, and a built-in coach offline. Nothing leaves until you press the button.</p>
-        </div>
+  <div class="row2">
+    <!-- 05 session -->
+    <section class="plate sess" id="v-session" data-view="session" aria-label="The selected session">
+      <div class="ph"><span class="ix">05</span>session &middot; <span id="ss-title"></span></div>
+      <div class="ss-meta" id="ss-meta"></div>
+      <div class="ss-body" id="ss-body"></div>
+      <div class="swap" id="swap" hidden></div>
+      <div class="logbox" id="logbox">
+        <div class="lb-q">the week you actually had</div>
+        <div class="lb-row" id="lb-row"></div>
+        <p class="lb-note" id="lb-note"></p>
       </div>
     </section>
-  </main>
 
-  <footer class="page-footer">
-    <span>&copy; <span id="year">2026</span> luisblanco.dev Labs · built by
-      <a href="https://github.com/Leyber91" target="_blank" rel="noopener">Leyber91</a></span>
-    <span>Reasoning by Nemotron-3-Ultra · plan is guidance, not medical advice.</span>
+    <!-- 06 substitution graph -->
+    <section class="plate graph" id="v-graph" data-view="graph" aria-label="Exercise substitution graph">
+      <div class="ph"><span class="ix">06</span>substitution graph</div>
+      <div class="gv-pick" id="gv-pick"></div>
+      <div class="gv-wrap" id="gv"></div>
+      <p class="note" id="gv-cap"></p>
+    </section>
+
+  </div>
+
+  <div class="row3">
+    <!-- 07 decision log -->
+    <section class="plate dlog" id="v-log" data-view="log" aria-label="Decision log">
+      <div class="ph"><span class="ix">07</span>decision log <span class="ph-r dim" id="log-count"></span></div>
+      <ol class="log" id="log"></ol>
+    </section>
+
+    <!-- 08 narration -->
+    <section class="plate narr" id="v-narr" data-view="narr" aria-label="Narration">
+      <div class="ph"><span class="ix">08</span>narration &middot; checked against the log</div>
+      <div class="nr-src" id="nr-src"></div>
+      <ol class="nr" id="nr"></ol>
+      <div class="nr-act">
+        <button type="button" class="go" id="narrate">ask the model to narrate</button>
+        <button type="button" class="link" id="nr-stop" hidden>stop</button>
+        <button type="button" class="link" id="nr-local" hidden>show the planner's own narration</button>
+      </div>
+      <p class="note">One model call per press. The planner's decisions do not wait on it and do not change with it.</p>
+    </section>
+  </div>
+
+  <!-- 09 the model, written out -->
+  <section class="plate method" id="v-method" aria-label="The load model">
+    <div class="ph"><span class="ix">09</span>the load model, written out</div>
+    <div class="mcols">
+      <div class="eqs">
+        <p class="eq"><b>load</b> = session RPE &times; minutes <span class="cite">Foster et al. 2001, CR-10 scale, AU</span></p>
+        <p class="eq"><b>F(t)</b> = F(t&minus;1)&middot;e<sup>&minus;1/&tau;1</sup> + k1&middot;w(t) <span class="cite">fitness, Banister et al. 1975</span></p>
+        <p class="eq"><b>H(t)</b> = H(t&minus;1)&middot;e<sup>&minus;1/&tau;2</sup> + k2(t)&middot;w(t) <span class="cite">fatigue</span></p>
+        <p class="eq"><b>form</b> = F &minus; H</p>
+        <p class="eq"><b>k2(t)</b> = k3 &middot; &Sigma; w(s)&middot;e<sup>&minus;(t&minus;s)/&tau;3</sup> <span class="cite">variable dose, Busso 2003</span></p>
+      </div>
+      <table class="params" id="params"><caption>parameters</caption></table>
+      <div class="acwr" id="acwr"></div>
+    </div>
+    <div class="mcols two">
+      <div class="sens">
+        <div class="ac-k">sensitivity &middot; form with &tau;1 and &tau;2 each &plusmn;50%</div>
+        <div id="sens"></div>
+        <p class="note" id="sens-cap"></p>
+      </div>
+      <dl class="gloss" id="gloss"></dl>
+    </div>
+    <p class="libcred" id="libcred"></p>
+  </section>
+
+  <footer class="foot">
+    <div class="exp">
+      <button type="button" class="chip" id="x-link">copy link to this plan</button>
+      <button type="button" class="chip" id="x-ics">download calendar (.ics)</button>
+      <button type="button" class="chip" id="x-json">download plan (.json)</button>
+      <button type="button" class="chip" id="x-csv">download sessions (.csv)</button>
+      <label class="chip file">load a plan (.json)<input type="file" id="x-import" accept="application/json,.json"></label>
+      <button type="button" class="chip" id="x-print">print training sheet</button>
+      <button type="button" class="chip" id="x-tour">replay tour</button>
+      <span class="x-msg" id="x-msg" aria-live="polite"></span>
+    </div>
+    <ul class="tags" id="tags">
+      <li><b>[real]</b> session load as RPE &times; minutes; the fitness-fatigue, variable-dose and 42/7-day chart equations; frequency, rest and the 2-10% load step from ACSM 2009; RPE as reps in reserve from Zourdos et al. 2016; the taper from Bosquet et al. 2007; the low-intensity share from Seiler 2010; WHO 2020 minutes; the knee-force trend from Escamilla 2001; the 876-exercise open library; every number the planner computes from them</li>
+      <li><b>[illustrative]</b> the model parameters, which are population defaults and not fitted to you; the per-level set targets, rep zones per day, deload size, set and rest timing, exercise attributes, substitution edges and the name screen for open-library entries, which are coaching conventions or lab assumptions chosen to make the mechanism visible</li>
+      <li><b>[contested]</b> the 10% week-on-week rise flag, a popular convention that a graded programme built on it did not support (Buist et al. 2008); the acute:chronic workload ratio, shown with its critique; neither drives a rule</li>
+    </ul>
+    <details class="refs"><summary>references</summary><ol id="refs"></ol></details>
+    <p class="fine">Not medical advice. This is a teaching instrument for how a plan can be reasoned about, built on published models with default parameters. Original planner and drawings; the cited models belong to their authors.</p>
   </footer>
+</main>
 
-  <script type="module" src="assets/js/workout-plans/main.js"></script>
+<div class="sr-only" id="announce" aria-live="polite"></div>
+<div class="print" id="print" aria-hidden="true"></div>
+<script type="module" src="assets/js/workout-plans/main.js"></script>
 </body>
 </html>

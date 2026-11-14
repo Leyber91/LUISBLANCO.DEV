@@ -1,0 +1,5285 @@
+{
+ "note": "measures.js snapshot of every recorded run; tests.mjs re-derives and compares",
+ "runs": {
+  "origin.llama3.1-8b.r1.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 1214.0391,
+   "rate": 0.207924,
+   "fidelity": 0.206897,
+   "kept": 30,
+   "dropped": 115,
+   "invented": 142,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 6,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.048276,
+    "decoder": 0.151724
+   }
+  },
+  "origin.llama3.1-8b.r1.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 970.438562,
+   "rate": 0.166203,
+   "fidelity": 0.089655,
+   "kept": 13,
+   "dropped": 132,
+   "invented": 11,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.02069,
+    "decoder": 0.068966
+   }
+  },
+  "origin.llama3.1-8b.r1.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 584,
+   "rate": 0.10002,
+   "fidelity": 0.144828,
+   "kept": 21,
+   "dropped": 124,
+   "invented": 59,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.027586,
+    "decoder": 0.110345
+   }
+  },
+  "origin.llama3.1-8b.r1.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 362.219281,
+   "rate": 0.062036,
+   "fidelity": 0.055172,
+   "kept": 8,
+   "dropped": 137,
+   "invented": 15,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0,
+    "decoder": 0.048276
+   }
+  },
+  "origin.llama3.1-8b.r1.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 217.651484,
+   "rate": 0.037276,
+   "fidelity": 0.075862,
+   "kept": 11,
+   "dropped": 134,
+   "invented": 6,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 1,
+    "order": 0.25
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.041379,
+    "decoder": 0.034483
+   }
+  },
+  "origin.llama3.1-8b.r2.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 1294.0391,
+   "rate": 0.221625,
+   "fidelity": 0.206897,
+   "kept": 30,
+   "dropped": 115,
+   "invented": 185,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 6,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.041379,
+    "decoder": 0.158621
+   }
+  },
+  "origin.llama3.1-8b.r2.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 1261.45183,
+   "rate": 0.216044,
+   "fidelity": 0.213793,
+   "kept": 31,
+   "dropped": 114,
+   "invented": 21,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.110345,
+    "decoder": 0.096552
+   }
+  },
+  "origin.llama3.1-8b.r2.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 897,
+   "rate": 0.153626,
+   "fidelity": 0.131034,
+   "kept": 19,
+   "dropped": 126,
+   "invented": 41,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.02069,
+    "decoder": 0.096552
+   }
+  },
+  "origin.llama3.1-8b.r2.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 386.219281,
+   "rate": 0.066146,
+   "fidelity": 0.075862,
+   "kept": 11,
+   "dropped": 134,
+   "invented": 15,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0,
+    "decoder": 0.068966
+   }
+  },
+  "origin.llama3.1-8b.r2.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 299.529325,
+   "rate": 0.051299,
+   "fidelity": 0.151724,
+   "kept": 22,
+   "dropped": 123,
+   "invented": 53,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.006897,
+    "decoder": 0.131034
+   }
+  },
+  "origin.llama3.1-8b.r3.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 2598.883024,
+   "rate": 0.445101,
+   "fidelity": 0.468966,
+   "kept": 68,
+   "dropped": 77,
+   "invented": 10,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.406897,
+    "decoder": 0.055172
+   }
+  },
+  "origin.llama3.1-8b.r3.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 1430.574075,
+   "rate": 0.245009,
+   "fidelity": 0.131034,
+   "kept": 19,
+   "dropped": 126,
+   "invented": 9,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.075862,
+    "decoder": 0.048276
+   }
+  },
+  "origin.llama3.1-8b.r3.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 668.352608,
+   "rate": 0.114466,
+   "fidelity": 0.2,
+   "kept": 29,
+   "dropped": 116,
+   "invented": 26,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.124138,
+    "decoder": 0.075862
+   }
+  },
+  "origin.llama3.1-8b.r3.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 377.302969,
+   "rate": 0.064619,
+   "fidelity": 0.089655,
+   "kept": 13,
+   "dropped": 132,
+   "invented": 21,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.006897,
+    "decoder": 0.075862
+   }
+  },
+  "origin.llama3.1-8b.r3.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 154.509775,
+   "rate": 0.026462,
+   "fidelity": 0.089655,
+   "kept": 13,
+   "dropped": 132,
+   "invented": 26,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0,
+    "decoder": 0.082759
+   }
+  },
+  "origin.qwen3-8b.r1.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 2956.474731,
+   "rate": 0.506345,
+   "fidelity": 0.296552,
+   "kept": 43,
+   "dropped": 102,
+   "invented": 19,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.2,
+    "decoder": 0.013793
+   }
+  },
+  "origin.qwen3-8b.r1.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 2047.659632,
+   "rate": 0.350695,
+   "fidelity": 0.255172,
+   "kept": 37,
+   "dropped": 108,
+   "invented": 11,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.151724,
+    "decoder": 0.02069
+   }
+  },
+  "origin.qwen3-8b.r1.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 1350.126561,
+   "rate": 0.231231,
+   "fidelity": 0.17931,
+   "kept": 26,
+   "dropped": 119,
+   "invented": 8,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 3,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.055172,
+    "literal": 0.110345,
+    "decoder": 0.013793
+   }
+  },
+  "origin.qwen3-8b.r1.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 1136.456545,
+   "rate": 0.194637,
+   "fidelity": 0.165517,
+   "kept": 24,
+   "dropped": 121,
+   "invented": 8,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 3,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.055172,
+    "literal": 0.096552,
+    "decoder": 0.013793
+   }
+  },
+  "origin.qwen3-8b.r1.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 603.105716,
+   "rate": 0.103292,
+   "fidelity": 0.082759,
+   "kept": 12,
+   "dropped": 133,
+   "invented": 5,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.041379,
+    "literal": 0.041379,
+    "decoder": 0
+   }
+  },
+  "origin.qwen3-8b.r2.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 3565.192586,
+   "rate": 0.610597,
+   "fidelity": 0.406897,
+   "kept": 59,
+   "dropped": 86,
+   "invented": 20,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.275862,
+    "decoder": 0.048276
+   }
+  },
+  "origin.qwen3-8b.r2.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 2419.293692,
+   "rate": 0.414343,
+   "fidelity": 0.317241,
+   "kept": 46,
+   "dropped": 99,
+   "invented": 58,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.165517,
+    "decoder": 0.068966
+   }
+  },
+  "origin.qwen3-8b.r2.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 2191.133389,
+   "rate": 0.375267,
+   "fidelity": 0.303448,
+   "kept": 44,
+   "dropped": 101,
+   "invented": 10,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.17931,
+    "decoder": 0.041379
+   }
+  },
+  "origin.qwen3-8b.r2.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 1649.1173,
+   "rate": 0.282438,
+   "fidelity": 0.234483,
+   "kept": 34,
+   "dropped": 111,
+   "invented": 10,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.124138,
+    "decoder": 0.027586
+   }
+  },
+  "origin.qwen3-8b.r2.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 1235.605938,
+   "rate": 0.211618,
+   "fidelity": 0.206897,
+   "kept": 30,
+   "dropped": 115,
+   "invented": 9,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.096552,
+    "decoder": 0.027586
+   }
+  },
+  "origin.qwen3-8b.r3.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 2956.474731,
+   "rate": 0.506345,
+   "fidelity": 0.296552,
+   "kept": 43,
+   "dropped": 102,
+   "invented": 19,
+   "numbers": {
+    "total": 3,
+    "survived": 2,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.6666666666666666
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.2,
+    "decoder": 0.013793
+   }
+  },
+  "origin.qwen3-8b.r3.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 1959.877124,
+   "rate": 0.335661,
+   "fidelity": 0.255172,
+   "kept": 37,
+   "dropped": 108,
+   "invented": 10,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.151724,
+    "decoder": 0.02069
+   }
+  },
+  "origin.qwen3-8b.r3.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 1433,
+   "rate": 0.245425,
+   "fidelity": 0.206897,
+   "kept": 30,
+   "dropped": 115,
+   "invented": 7,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.110345,
+    "decoder": 0.013793
+   }
+  },
+  "origin.qwen3-8b.r3.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 1345.580086,
+   "rate": 0.230453,
+   "fidelity": 0.227586,
+   "kept": 33,
+   "dropped": 112,
+   "invented": 16,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.082759,
+    "literal": 0.110345,
+    "decoder": 0.034483
+   }
+  },
+  "origin.qwen3-8b.r3.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 633.302969,
+   "rate": 0.108463,
+   "fidelity": 0.103448,
+   "kept": 15,
+   "dropped": 130,
+   "invented": 8,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.041379,
+    "literal": 0.041379,
+    "decoder": 0.02069
+   }
+  },
+  "origin.granite4.1-3b.r1.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 2265.783917,
+   "rate": 0.388052,
+   "fidelity": 0.337931,
+   "kept": 49,
+   "dropped": 96,
+   "invented": 48,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 4,
+    "rec": 6,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.206897,
+    "decoder": 0.117241
+   }
+  },
+  "origin.granite4.1-3b.r1.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 1976.904745,
+   "rate": 0.338577,
+   "fidelity": 0.206897,
+   "kept": 30,
+   "dropped": 115,
+   "invented": 22,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.131034,
+    "decoder": 0.062069
+   }
+  },
+  "origin.granite4.1-3b.r1.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 1784.133389,
+   "rate": 0.305562,
+   "fidelity": 0.241379,
+   "kept": 35,
+   "dropped": 110,
+   "invented": 20,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.186207,
+    "decoder": 0.041379
+   }
+  },
+  "origin.granite4.1-3b.r1.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 627.105716,
+   "rate": 0.107402,
+   "fidelity": 0.089655,
+   "kept": 13,
+   "dropped": 132,
+   "invented": 2,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.062069,
+    "decoder": 0.02069
+   }
+  },
+  "origin.granite4.1-3b.r1.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 519,
+   "rate": 0.088887,
+   "fidelity": 0.096552,
+   "kept": 14,
+   "dropped": 131,
+   "invented": 27,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 4,
+    "rec": 0,
+    "order": 0
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.027586,
+    "decoder": 0.062069
+   }
+  },
+  "origin.granite4.1-3b.r2.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 2237.667978,
+   "rate": 0.383237,
+   "fidelity": 0.268966,
+   "kept": 39,
+   "dropped": 106,
+   "invented": 47,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.02069,
+    "literal": 0.151724,
+    "decoder": 0.096552
+   }
+  },
+  "origin.granite4.1-3b.r2.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 1869.749775,
+   "rate": 0.320225,
+   "fidelity": 0.186207,
+   "kept": 27,
+   "dropped": 118,
+   "invented": 38,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.02069,
+    "literal": 0.075862,
+    "decoder": 0.089655
+   }
+  },
+  "origin.granite4.1-3b.r2.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 1528.465006,
+   "rate": 0.261775,
+   "fidelity": 0.193103,
+   "kept": 28,
+   "dropped": 117,
+   "invented": 40,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 4,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.075862,
+    "decoder": 0.103448
+   }
+  },
+  "origin.granite4.1-3b.r2.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 960.107496,
+   "rate": 0.164434,
+   "fidelity": 0.17931,
+   "kept": 26,
+   "dropped": 119,
+   "invented": 84,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 6,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.055172,
+    "decoder": 0.110345
+   }
+  },
+  "origin.granite4.1-3b.r2.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 536.053748,
+   "rate": 0.091808,
+   "fidelity": 0.041379,
+   "kept": 6,
+   "dropped": 139,
+   "invented": 11,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 4,
+    "rec": 1,
+    "order": 0.25
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.013793,
+    "decoder": 0.027586
+   }
+  },
+  "origin.granite4.1-3b.r3.L1": {
+   "srcBits": 5838.860133,
+   "capBits": 2140.065676,
+   "rate": 0.366521,
+   "fidelity": 0.158621,
+   "kept": 23,
+   "dropped": 122,
+   "invented": 23,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.096552,
+    "decoder": 0.062069
+   }
+  },
+  "origin.granite4.1-3b.r3.L2": {
+   "srcBits": 5838.860133,
+   "capBits": 1794.1173,
+   "rate": 0.307272,
+   "fidelity": 0.275862,
+   "kept": 40,
+   "dropped": 105,
+   "invented": 29,
+   "numbers": {
+    "total": 3,
+    "survived": 1,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.3333333333333333
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 4,
+    "rec": 6,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.151724,
+    "decoder": 0.110345
+   }
+  },
+  "origin.granite4.1-3b.r3.L3": {
+   "srcBits": 5838.860133,
+   "capBits": 1169.456545,
+   "rate": 0.200289,
+   "fidelity": 0.048276,
+   "kept": 7,
+   "dropped": 138,
+   "invented": 0,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 1,
+    "order": 0.25
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.048276,
+    "decoder": 0
+   }
+  },
+  "origin.granite4.1-3b.r3.L4": {
+   "srcBits": 5838.860133,
+   "capBits": 1039.0391,
+   "rate": 0.177952,
+   "fidelity": 0.082759,
+   "kept": 12,
+   "dropped": 133,
+   "invented": 20,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.006897,
+    "literal": 0.02069,
+    "decoder": 0.055172
+   }
+  },
+  "origin.granite4.1-3b.r3.L5": {
+   "srcBits": 5838.860133,
+   "capBits": 626.731981,
+   "rate": 0.107338,
+   "fidelity": 0.103448,
+   "kept": 15,
+   "dropped": 130,
+   "invented": 42,
+   "numbers": {
+    "total": 3,
+    "survived": 0,
+    "altered": 0,
+    "lost": 3,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 2,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.4
+   },
+   "turns": {
+    "src": 4,
+    "rec": 2,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.013793,
+    "literal": 0.006897,
+    "decoder": 0.082759
+   }
+  },
+  "replica.llama3.1-8b.r1.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 2095.594467,
+   "rate": 0.278005,
+   "fidelity": 0.242063,
+   "kept": 61,
+   "dropped": 191,
+   "invented": 6,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 5,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.45454545454545453
+   },
+   "turns": {
+    "src": 6,
+    "rec": 5,
+    "order": 0.833333
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.198413,
+    "decoder": 0.039683
+   }
+  },
+  "replica.llama3.1-8b.r1.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 1261.24,
+   "rate": 0.167318,
+   "fidelity": 0.170635,
+   "kept": 43,
+   "dropped": 209,
+   "invented": 28,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 5,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.45454545454545453
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.007937,
+    "literal": 0.099206,
+    "decoder": 0.063492
+   }
+  },
+  "replica.llama3.1-8b.r1.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 1044.955231,
+   "rate": 0.138626,
+   "fidelity": 0.186508,
+   "kept": 47,
+   "dropped": 205,
+   "invented": 27,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 4,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.36363636363636365
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.083333,
+    "decoder": 0.103175
+   }
+  },
+  "replica.llama3.1-8b.r1.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 583.603359,
+   "rate": 0.077422,
+   "fidelity": 0.107143,
+   "kept": 27,
+   "dropped": 225,
+   "invented": 11,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.18181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.027778,
+    "decoder": 0.079365
+   }
+  },
+  "replica.llama3.1-8b.r1.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 452.105716,
+   "rate": 0.059977,
+   "fidelity": 0.095238,
+   "kept": 24,
+   "dropped": 228,
+   "invented": 38,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.18181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.019841,
+    "decoder": 0.071429
+   }
+  },
+  "replica.llama3.1-8b.r2.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 1732.149857,
+   "rate": 0.22979,
+   "fidelity": 0.095238,
+   "kept": 24,
+   "dropped": 228,
+   "invented": 9,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.18181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.051587,
+    "decoder": 0.043651
+   }
+  },
+  "replica.llama3.1-8b.r2.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 1228.757708,
+   "rate": 0.163009,
+   "fidelity": 0.174603,
+   "kept": 44,
+   "dropped": 208,
+   "invented": 19,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 4,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.36363636363636365
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.079365,
+    "decoder": 0.095238
+   }
+  },
+  "replica.llama3.1-8b.r2.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 1141.011271,
+   "rate": 0.151369,
+   "fidelity": 0.202381,
+   "kept": 51,
+   "dropped": 201,
+   "invented": 71,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.007937,
+    "literal": 0.063492,
+    "decoder": 0.130952
+   }
+  },
+  "replica.llama3.1-8b.r2.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 628.683674,
+   "rate": 0.083402,
+   "fidelity": 0.119048,
+   "kept": 30,
+   "dropped": 222,
+   "invented": 16,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.18181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.063492,
+    "decoder": 0.051587
+   }
+  },
+  "replica.llama3.1-8b.r2.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 225.651484,
+   "rate": 0.029935,
+   "fidelity": 0.051587,
+   "kept": 13,
+   "dropped": 239,
+   "invented": 7,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 0,
+    "altered": 0,
+    "lost": 11,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.011905,
+    "decoder": 0.039683
+   }
+  },
+  "replica.llama3.1-8b.r3.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 1893.08385,
+   "rate": 0.25114,
+   "fidelity": 0.194444,
+   "kept": 49,
+   "dropped": 203,
+   "invented": 20,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 5,
+    "altered": 1,
+    "lost": 5,
+    "score": 0.5
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.15873,
+    "decoder": 0.031746
+   }
+  },
+  "replica.llama3.1-8b.r3.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 1792.378502,
+   "rate": 0.23778,
+   "fidelity": 0.194444,
+   "kept": 49,
+   "dropped": 203,
+   "invented": 4,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 3,
+    "altered": 2,
+    "lost": 6,
+    "score": 0.36363636363636365
+   },
+   "turns": {
+    "src": 6,
+    "rec": 3,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.007937,
+    "literal": 0.138889,
+    "decoder": 0.047619
+   }
+  },
+  "replica.llama3.1-8b.r3.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 786.438562,
+   "rate": 0.10433,
+   "fidelity": 0.166667,
+   "kept": 42,
+   "dropped": 210,
+   "invented": 33,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.075397,
+    "decoder": 0.087302
+   }
+  },
+  "replica.llama3.1-8b.r3.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 546.603359,
+   "rate": 0.072513,
+   "fidelity": 0.095238,
+   "kept": 24,
+   "dropped": 228,
+   "invented": 13,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.019841,
+    "decoder": 0.075397
+   }
+  },
+  "replica.llama3.1-8b.r3.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 356.529325,
+   "rate": 0.047298,
+   "fidelity": 0.083333,
+   "kept": 21,
+   "dropped": 231,
+   "invented": 12,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 1,
+    "altered": 1,
+    "lost": 9,
+    "score": 0.13636363636363635
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.019841,
+    "decoder": 0.063492
+   }
+  },
+  "replica.qwen3-8b.r1.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 3996.874876,
+   "rate": 0.530233,
+   "fidelity": 0.420635,
+   "kept": 106,
+   "dropped": 146,
+   "invented": 15,
+   "numbers": {
+    "total": 10,
+    "survived": 6,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.6
+   },
+   "entities": {
+    "total": 11,
+    "survived": 9,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.8181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.075397,
+    "literal": 0.309524,
+    "decoder": 0.035714
+   }
+  },
+  "replica.qwen3-8b.r1.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 2845.733863,
+   "rate": 0.37752,
+   "fidelity": 0.281746,
+   "kept": 71,
+   "dropped": 181,
+   "invented": 14,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 6,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5454545454545454
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.075397,
+    "literal": 0.206349,
+    "decoder": 0
+   }
+  },
+  "replica.qwen3-8b.r1.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 2415.958995,
+   "rate": 0.320506,
+   "fidelity": 0.222222,
+   "kept": 56,
+   "dropped": 196,
+   "invented": 12,
+   "numbers": {
+    "total": 10,
+    "survived": 3,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.3
+   },
+   "entities": {
+    "total": 11,
+    "survived": 5,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.45454545454545453
+   },
+   "turns": {
+    "src": 6,
+    "rec": 5,
+    "order": 0.833333
+   },
+   "split": {
+    "prior": 0.059524,
+    "literal": 0.162698,
+    "decoder": 0
+   }
+  },
+  "replica.qwen3-8b.r1.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 1685.378502,
+   "rate": 0.223585,
+   "fidelity": 0.166667,
+   "kept": 42,
+   "dropped": 210,
+   "invented": 7,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 3,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.047619,
+    "literal": 0.115079,
+    "decoder": 0.003968
+   }
+  },
+  "replica.qwen3-8b.r1.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 881.238666,
+   "rate": 0.116907,
+   "fidelity": 0.083333,
+   "kept": 21,
+   "dropped": 231,
+   "invented": 2,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 1,
+    "altered": 0,
+    "lost": 10,
+    "score": 0.09090909090909091
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.02381,
+    "literal": 0.055556,
+    "decoder": 0.003968
+   }
+  },
+  "replica.qwen3-8b.r2.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 3467.679987,
+   "rate": 0.460029,
+   "fidelity": 0.321429,
+   "kept": 81,
+   "dropped": 171,
+   "invented": 8,
+   "numbers": {
+    "total": 10,
+    "survived": 5,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5
+   },
+   "entities": {
+    "total": 11,
+    "survived": 7,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.6363636363636364
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.075397,
+    "literal": 0.238095,
+    "decoder": 0.007937
+   }
+  },
+  "replica.qwen3-8b.r2.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 2506.10272,
+   "rate": 0.332464,
+   "fidelity": 0.246032,
+   "kept": 62,
+   "dropped": 190,
+   "invented": 12,
+   "numbers": {
+    "total": 10,
+    "survived": 3,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.3
+   },
+   "entities": {
+    "total": 11,
+    "survived": 4,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.36363636363636365
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.075397,
+    "literal": 0.162698,
+    "decoder": 0.007937
+   }
+  },
+  "replica.qwen3-8b.r2.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 2246.470675,
+   "rate": 0.298021,
+   "fidelity": 0.210317,
+   "kept": 53,
+   "dropped": 199,
+   "invented": 15,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 3,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.071429,
+    "literal": 0.130952,
+    "decoder": 0.007937
+   }
+  },
+  "replica.qwen3-8b.r2.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 1874.648428,
+   "rate": 0.248694,
+   "fidelity": 0.178571,
+   "kept": 45,
+   "dropped": 207,
+   "invented": 11,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.18181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.071429,
+    "literal": 0.099206,
+    "decoder": 0.007937
+   }
+  },
+  "replica.qwen3-8b.r2.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 1322.524906,
+   "rate": 0.175449,
+   "fidelity": 0.123016,
+   "kept": 31,
+   "dropped": 221,
+   "invented": 7,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 1,
+    "altered": 0,
+    "lost": 10,
+    "score": 0.09090909090909091
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.047619,
+    "literal": 0.071429,
+    "decoder": 0.003968
+   }
+  },
+  "replica.qwen3-8b.r3.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 4234.349596,
+   "rate": 0.561737,
+   "fidelity": 0.456349,
+   "kept": 115,
+   "dropped": 137,
+   "invented": 13,
+   "numbers": {
+    "total": 10,
+    "survived": 7,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.7
+   },
+   "entities": {
+    "total": 11,
+    "survived": 9,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.8181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.079365,
+    "literal": 0.345238,
+    "decoder": 0.031746
+   }
+  },
+  "replica.qwen3-8b.r3.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 3343.587408,
+   "rate": 0.443566,
+   "fidelity": 0.333333,
+   "kept": 84,
+   "dropped": 168,
+   "invented": 15,
+   "numbers": {
+    "total": 10,
+    "survived": 5,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5
+   },
+   "entities": {
+    "total": 11,
+    "survived": 8,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.7272727272727273
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.075397,
+    "literal": 0.257937,
+    "decoder": 0
+   }
+  },
+  "replica.qwen3-8b.r3.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 2700.048504,
+   "rate": 0.358193,
+   "fidelity": 0.269841,
+   "kept": 68,
+   "dropped": 184,
+   "invented": 10,
+   "numbers": {
+    "total": 10,
+    "survived": 3,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.3
+   },
+   "entities": {
+    "total": 11,
+    "survived": 6,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5454545454545454
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.071429,
+    "literal": 0.198413,
+    "decoder": 0
+   }
+  },
+  "replica.qwen3-8b.r3.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 2351.791046,
+   "rate": 0.311993,
+   "fidelity": 0.234127,
+   "kept": 59,
+   "dropped": 193,
+   "invented": 9,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 5,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.45454545454545453
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.071429,
+    "literal": 0.162698,
+    "decoder": 0
+   }
+  },
+  "replica.qwen3-8b.r3.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 2119.546615,
+   "rate": 0.281183,
+   "fidelity": 0.206349,
+   "kept": 52,
+   "dropped": 200,
+   "invented": 9,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 4,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.36363636363636365
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.071429,
+    "literal": 0.130952,
+    "decoder": 0.003968
+   }
+  },
+  "replica.granite4.1-3b.r1.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 4094.3181,
+   "rate": 0.54316,
+   "fidelity": 0.337302,
+   "kept": 85,
+   "dropped": 167,
+   "invented": 29,
+   "numbers": {
+    "total": 10,
+    "survived": 5,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5
+   },
+   "entities": {
+    "total": 11,
+    "survived": 9,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.8181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.313492,
+    "decoder": 0.019841
+   }
+  },
+  "replica.granite4.1-3b.r1.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 2360.422865,
+   "rate": 0.313138,
+   "fidelity": 0.198413,
+   "kept": 50,
+   "dropped": 202,
+   "invented": 49,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 5,
+    "altered": 1,
+    "lost": 5,
+    "score": 0.5
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.079365,
+    "decoder": 0.115079
+   }
+  },
+  "replica.granite4.1-3b.r1.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 1931.456036,
+   "rate": 0.25623,
+   "fidelity": 0.265873,
+   "kept": 67,
+   "dropped": 185,
+   "invented": 62,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 4,
+    "altered": 1,
+    "lost": 6,
+    "score": 0.4090909090909091
+   },
+   "turns": {
+    "src": 6,
+    "rec": 10,
+    "order": 0.6
+   },
+   "split": {
+    "prior": 0.011905,
+    "literal": 0.111111,
+    "decoder": 0.142857
+   }
+  },
+  "replica.granite4.1-3b.r1.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 1411.915265,
+   "rate": 0.187307,
+   "fidelity": 0.166667,
+   "kept": 42,
+   "dropped": 210,
+   "invented": 72,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.007937,
+    "literal": 0.043651,
+    "decoder": 0.115079
+   }
+  },
+  "replica.granite4.1-3b.r1.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 1252.855365,
+   "rate": 0.166206,
+   "fidelity": 0.218254,
+   "kept": 55,
+   "dropped": 197,
+   "invented": 72,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 3,
+    "altered": 1,
+    "lost": 7,
+    "score": 0.3181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 10,
+    "order": 0.6
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.075397,
+    "decoder": 0.138889
+   }
+  },
+  "replica.granite4.1-3b.r2.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 4065.835193,
+   "rate": 0.539381,
+   "fidelity": 0.289683,
+   "kept": 73,
+   "dropped": 179,
+   "invented": 46,
+   "numbers": {
+    "total": 10,
+    "survived": 4,
+    "altered": 0,
+    "lost": 6,
+    "score": 0.4
+   },
+   "entities": {
+    "total": 11,
+    "survived": 9,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.8181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.257937,
+    "decoder": 0.031746
+   }
+  },
+  "replica.granite4.1-3b.r2.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 2315.154285,
+   "rate": 0.307133,
+   "fidelity": 0.234127,
+   "kept": 59,
+   "dropped": 193,
+   "invented": 57,
+   "numbers": {
+    "total": 10,
+    "survived": 1,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.1
+   },
+   "entities": {
+    "total": 11,
+    "survived": 6,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5454545454545454
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.007937,
+    "literal": 0.126984,
+    "decoder": 0.099206
+   }
+  },
+  "replica.granite4.1-3b.r2.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 1206.126561,
+   "rate": 0.160007,
+   "fidelity": 0.198413,
+   "kept": 50,
+   "dropped": 202,
+   "invented": 73,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.011905,
+    "literal": 0.063492,
+    "decoder": 0.123016
+   }
+  },
+  "replica.granite4.1-3b.r2.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 817.303763,
+   "rate": 0.108425,
+   "fidelity": 0.119048,
+   "kept": 30,
+   "dropped": 222,
+   "invented": 26,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 1,
+    "altered": 0,
+    "lost": 10,
+    "score": 0.09090909090909091
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.031746,
+    "decoder": 0.083333
+   }
+  },
+  "replica.granite4.1-3b.r2.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 351.053748,
+   "rate": 0.046571,
+   "fidelity": 0.071429,
+   "kept": 18,
+   "dropped": 234,
+   "invented": 11,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 1,
+    "altered": 2,
+    "lost": 8,
+    "score": 0.18181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.007937,
+    "decoder": 0.059524
+   }
+  },
+  "replica.granite4.1-3b.r3.L1": {
+   "srcBits": 7537.963126,
+   "capBits": 4097.563213,
+   "rate": 0.54359,
+   "fidelity": 0.313492,
+   "kept": 79,
+   "dropped": 173,
+   "invented": 33,
+   "numbers": {
+    "total": 10,
+    "survived": 5,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5
+   },
+   "entities": {
+    "total": 11,
+    "survived": 8,
+    "altered": 0,
+    "lost": 3,
+    "score": 0.7272727272727273
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.293651,
+    "decoder": 0.015873
+   }
+  },
+  "replica.granite4.1-3b.r3.L2": {
+   "srcBits": 7537.963126,
+   "capBits": 2826.785149,
+   "rate": 0.375006,
+   "fidelity": 0.293651,
+   "kept": 74,
+   "dropped": 178,
+   "invented": 65,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 6,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.5454545454545454
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.166667,
+    "decoder": 0.123016
+   }
+  },
+  "replica.granite4.1-3b.r3.L3": {
+   "srcBits": 7537.963126,
+   "capBits": 2209.970144,
+   "rate": 0.293179,
+   "fidelity": 0.27381,
+   "kept": 69,
+   "dropped": 183,
+   "invented": 51,
+   "numbers": {
+    "total": 10,
+    "survived": 2,
+    "altered": 0,
+    "lost": 8,
+    "score": 0.2
+   },
+   "entities": {
+    "total": 11,
+    "survived": 4,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.36363636363636365
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.134921,
+    "decoder": 0.134921
+   }
+  },
+  "replica.granite4.1-3b.r3.L4": {
+   "srcBits": 7537.963126,
+   "capBits": 1583.749775,
+   "rate": 0.210103,
+   "fidelity": 0.186508,
+   "kept": 47,
+   "dropped": 205,
+   "invented": 46,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 3,
+    "altered": 1,
+    "lost": 7,
+    "score": 0.3181818181818182
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.003968,
+    "literal": 0.075397,
+    "decoder": 0.107143
+   }
+  },
+  "replica.granite4.1-3b.r3.L5": {
+   "srcBits": 7537.963126,
+   "capBits": 1118.85105,
+   "rate": 0.148429,
+   "fidelity": 0.130952,
+   "kept": 33,
+   "dropped": 219,
+   "invented": 31,
+   "numbers": {
+    "total": 10,
+    "survived": 0,
+    "altered": 0,
+    "lost": 10,
+    "score": 0
+   },
+   "entities": {
+    "total": 11,
+    "survived": 2,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.2727272727272727
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.007937,
+    "literal": 0.055556,
+    "decoder": 0.06746
+   }
+  },
+  "ledger.llama3.1-8b.r1.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 1667.521046,
+   "rate": 0.325786,
+   "fidelity": 0.152709,
+   "kept": 31,
+   "dropped": 172,
+   "invented": 4,
+   "numbers": {
+    "total": 19,
+    "survived": 6,
+    "altered": 1,
+    "lost": 12,
+    "score": 0.34210526315789475
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.098522,
+    "decoder": 0.049261
+   }
+  },
+  "ledger.llama3.1-8b.r1.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 1583.421246,
+   "rate": 0.309355,
+   "fidelity": 0.152709,
+   "kept": 31,
+   "dropped": 172,
+   "invented": 5,
+   "numbers": {
+    "total": 19,
+    "survived": 6,
+    "altered": 1,
+    "lost": 12,
+    "score": 0.34210526315789475
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.08867,
+    "decoder": 0.059113
+   }
+  },
+  "ledger.llama3.1-8b.r1.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 1086.627075,
+   "rate": 0.212296,
+   "fidelity": 0.098522,
+   "kept": 20,
+   "dropped": 183,
+   "invented": 16,
+   "numbers": {
+    "total": 19,
+    "survived": 1,
+    "altered": 0,
+    "lost": 18,
+    "score": 0.05263157894736842
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.034483,
+    "decoder": 0.054187
+   }
+  },
+  "ledger.llama3.1-8b.r1.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 774.486868,
+   "rate": 0.151313,
+   "fidelity": 0.167488,
+   "kept": 34,
+   "dropped": 169,
+   "invented": 41,
+   "numbers": {
+    "total": 19,
+    "survived": 4,
+    "altered": 0,
+    "lost": 15,
+    "score": 0.21052631578947367
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.009852,
+    "decoder": 0.152709
+   }
+  },
+  "ledger.llama3.1-8b.r1.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 342,
+   "rate": 0.066817,
+   "fidelity": 0.054187,
+   "kept": 11,
+   "dropped": 192,
+   "invented": 5,
+   "numbers": {
+    "total": 19,
+    "survived": 0,
+    "altered": 0,
+    "lost": 19,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.009852,
+    "decoder": 0.044335
+   }
+  },
+  "ledger.llama3.1-8b.r2.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2132.566165,
+   "rate": 0.416642,
+   "fidelity": 0.226601,
+   "kept": 46,
+   "dropped": 157,
+   "invented": 79,
+   "numbers": {
+    "total": 19,
+    "survived": 8,
+    "altered": 0,
+    "lost": 11,
+    "score": 0.42105263157894735
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.054187,
+    "decoder": 0.167488
+   }
+  },
+  "ledger.llama3.1-8b.r2.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 1514.574075,
+   "rate": 0.295904,
+   "fidelity": 0.261084,
+   "kept": 53,
+   "dropped": 150,
+   "invented": 107,
+   "numbers": {
+    "total": 19,
+    "survived": 10,
+    "altered": 2,
+    "lost": 7,
+    "score": 0.5789473684210527
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.133005,
+    "decoder": 0.123153
+   }
+  },
+  "ledger.llama3.1-8b.r2.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 933,
+   "rate": 0.182281,
+   "fidelity": 0.123153,
+   "kept": 25,
+   "dropped": 178,
+   "invented": 33,
+   "numbers": {
+    "total": 19,
+    "survived": 4,
+    "altered": 0,
+    "lost": 15,
+    "score": 0.21052631578947367
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.044335,
+    "decoder": 0.078818
+   }
+  },
+  "ledger.llama3.1-8b.r2.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 607.05865,
+   "rate": 0.118602,
+   "fidelity": 0.275862,
+   "kept": 56,
+   "dropped": 147,
+   "invented": 122,
+   "numbers": {
+    "total": 19,
+    "survived": 4,
+    "altered": 0,
+    "lost": 15,
+    "score": 0.21052631578947367
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.024631,
+    "decoder": 0.246305
+   }
+  },
+  "ledger.llama3.1-8b.r2.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 218.509775,
+   "rate": 0.042691,
+   "fidelity": 0.073892,
+   "kept": 15,
+   "dropped": 188,
+   "invented": 13,
+   "numbers": {
+    "total": 19,
+    "survived": 1,
+    "altered": 0,
+    "lost": 18,
+    "score": 0.05263157894736842
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0,
+    "decoder": 0.073892
+   }
+  },
+  "ledger.llama3.1-8b.r3.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2139.838741,
+   "rate": 0.418063,
+   "fidelity": 0.128079,
+   "kept": 26,
+   "dropped": 177,
+   "invented": 16,
+   "numbers": {
+    "total": 19,
+    "survived": 9,
+    "altered": 1,
+    "lost": 9,
+    "score": 0.5
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.068966,
+    "decoder": 0.054187
+   }
+  },
+  "ledger.llama3.1-8b.r3.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 1607.295104,
+   "rate": 0.314019,
+   "fidelity": 0.197044,
+   "kept": 40,
+   "dropped": 163,
+   "invented": 67,
+   "numbers": {
+    "total": 19,
+    "survived": 9,
+    "altered": 1,
+    "lost": 9,
+    "score": 0.5
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.078818,
+    "decoder": 0.1133
+   }
+  },
+  "ledger.llama3.1-8b.r3.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 1091.126561,
+   "rate": 0.213175,
+   "fidelity": 0.093596,
+   "kept": 19,
+   "dropped": 184,
+   "invented": 5,
+   "numbers": {
+    "total": 19,
+    "survived": 4,
+    "altered": 1,
+    "lost": 14,
+    "score": 0.23684210526315788
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.059113,
+    "decoder": 0.029557
+   }
+  },
+  "ledger.llama3.1-8b.r3.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 925.0391,
+   "rate": 0.180726,
+   "fidelity": 0.073892,
+   "kept": 15,
+   "dropped": 188,
+   "invented": 12,
+   "numbers": {
+    "total": 19,
+    "survived": 1,
+    "altered": 0,
+    "lost": 18,
+    "score": 0.05263157894736842
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.004926,
+    "decoder": 0.068966
+   }
+  },
+  "ledger.llama3.1-8b.r3.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 265.651484,
+   "rate": 0.051901,
+   "fidelity": 0.034483,
+   "kept": 7,
+   "dropped": 196,
+   "invented": 8,
+   "numbers": {
+    "total": 19,
+    "survived": 0,
+    "altered": 0,
+    "lost": 19,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.004926,
+    "decoder": 0.029557
+   }
+  },
+  "ledger.qwen3-8b.r1.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2942.571907,
+   "rate": 0.574894,
+   "fidelity": 0.433498,
+   "kept": 88,
+   "dropped": 115,
+   "invented": 106,
+   "numbers": {
+    "total": 19,
+    "survived": 12,
+    "altered": 1,
+    "lost": 6,
+    "score": 0.6578947368421053
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 10,
+    "order": 0.6
+   },
+   "split": {
+    "prior": 0.054187,
+    "literal": 0.29064,
+    "decoder": 0.08867
+   }
+  },
+  "ledger.qwen3-8b.r1.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 2442.875121,
+   "rate": 0.477268,
+   "fidelity": 0.418719,
+   "kept": 85,
+   "dropped": 118,
+   "invented": 49,
+   "numbers": {
+    "total": 19,
+    "survived": 10,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.5263157894736842
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.064039,
+    "literal": 0.251232,
+    "decoder": 0.103448
+   }
+  },
+  "ledger.qwen3-8b.r1.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 1736.460956,
+   "rate": 0.339255,
+   "fidelity": 0.20197,
+   "kept": 41,
+   "dropped": 162,
+   "invented": 15,
+   "numbers": {
+    "total": 19,
+    "survived": 9,
+    "altered": 0,
+    "lost": 10,
+    "score": 0.47368421052631576
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.187192,
+    "decoder": 0
+   }
+  },
+  "ledger.qwen3-8b.r1.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 1475.904417,
+   "rate": 0.288349,
+   "fidelity": 0.17734,
+   "kept": 36,
+   "dropped": 167,
+   "invented": 13,
+   "numbers": {
+    "total": 19,
+    "survived": 7,
+    "altered": 2,
+    "lost": 10,
+    "score": 0.42105263157894735
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.162562,
+    "decoder": 0
+   }
+  },
+  "ledger.qwen3-8b.r1.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 1449.357916,
+   "rate": 0.283163,
+   "fidelity": 0.167488,
+   "kept": 34,
+   "dropped": 169,
+   "invented": 10,
+   "numbers": {
+    "total": 19,
+    "survived": 7,
+    "altered": 2,
+    "lost": 10,
+    "score": 0.42105263157894735
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.152709,
+    "decoder": 0
+   }
+  },
+  "ledger.qwen3-8b.r2.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2807.53834,
+   "rate": 0.548512,
+   "fidelity": 0.359606,
+   "kept": 73,
+   "dropped": 130,
+   "invented": 27,
+   "numbers": {
+    "total": 19,
+    "survived": 14,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.7368421052631579
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.344828,
+    "decoder": 0
+   }
+  },
+  "ledger.qwen3-8b.r2.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 1568.212669,
+   "rate": 0.306384,
+   "fidelity": 0.226601,
+   "kept": 46,
+   "dropped": 157,
+   "invented": 22,
+   "numbers": {
+    "total": 19,
+    "survived": 8,
+    "altered": 0,
+    "lost": 11,
+    "score": 0.42105263157894735
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 3,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.039409,
+    "literal": 0.123153,
+    "decoder": 0.064039
+   }
+  },
+  "ledger.qwen3-8b.r2.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 1290.770018,
+   "rate": 0.252179,
+   "fidelity": 0.133005,
+   "kept": 27,
+   "dropped": 176,
+   "invented": 8,
+   "numbers": {
+    "total": 19,
+    "survived": 7,
+    "altered": 1,
+    "lost": 11,
+    "score": 0.39473684210526316
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.1133,
+    "decoder": 0.004926
+   }
+  },
+  "ledger.qwen3-8b.r2.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 1132.825198,
+   "rate": 0.221322,
+   "fidelity": 0.118227,
+   "kept": 24,
+   "dropped": 179,
+   "invented": 7,
+   "numbers": {
+    "total": 19,
+    "survived": 5,
+    "altered": 0,
+    "lost": 14,
+    "score": 0.2631578947368421
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.098522,
+    "decoder": 0.004926
+   }
+  },
+  "ledger.qwen3-8b.r2.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 467.105716,
+   "rate": 0.091259,
+   "fidelity": 0.078818,
+   "kept": 16,
+   "dropped": 187,
+   "invented": 1,
+   "numbers": {
+    "total": 19,
+    "survived": 2,
+    "altered": 0,
+    "lost": 17,
+    "score": 0.10526315789473684
+   },
+   "entities": {
+    "total": 5,
+    "survived": 1,
+    "altered": 0,
+    "lost": 4,
+    "score": 0.2
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.029557,
+    "literal": 0.034483,
+    "decoder": 0.014778
+   }
+  },
+  "ledger.granite4.1-3b.r1.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2768.505699,
+   "rate": 0.540887,
+   "fidelity": 0.384236,
+   "kept": 78,
+   "dropped": 125,
+   "invented": 245,
+   "numbers": {
+    "total": 19,
+    "survived": 12,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.631578947368421
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 26,
+    "order": 0.230769
+   },
+   "split": {
+    "prior": 0.019704,
+    "literal": 0.17734,
+    "decoder": 0.187192
+   }
+  },
+  "ledger.granite4.1-3b.r1.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 2810.565893,
+   "rate": 0.549104,
+   "fidelity": 0.349754,
+   "kept": 71,
+   "dropped": 132,
+   "invented": 193,
+   "numbers": {
+    "total": 19,
+    "survived": 15,
+    "altered": 1,
+    "lost": 3,
+    "score": 0.8157894736842105
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 16,
+    "order": 0.375
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.157635,
+    "decoder": 0.17734
+   }
+  },
+  "ledger.granite4.1-3b.r1.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 2768.505699,
+   "rate": 0.540887,
+   "fidelity": 0.374384,
+   "kept": 76,
+   "dropped": 127,
+   "invented": 191,
+   "numbers": {
+    "total": 19,
+    "survived": 14,
+    "altered": 0,
+    "lost": 5,
+    "score": 0.7368421052631579
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 22,
+    "order": 0.272727
+   },
+   "split": {
+    "prior": 0.024631,
+    "literal": 0.221675,
+    "decoder": 0.128079
+   }
+  },
+  "ledger.granite4.1-3b.r1.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 2661.641126,
+   "rate": 0.520008,
+   "fidelity": 0.339901,
+   "kept": 69,
+   "dropped": 134,
+   "invented": 200,
+   "numbers": {
+    "total": 19,
+    "survived": 11,
+    "altered": 2,
+    "lost": 6,
+    "score": 0.631578947368421
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 18,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.162562,
+    "decoder": 0.167488
+   }
+  },
+  "ledger.granite4.1-3b.r1.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 2661.641126,
+   "rate": 0.520008,
+   "fidelity": 0.285714,
+   "kept": 58,
+   "dropped": 145,
+   "invented": 88,
+   "numbers": {
+    "total": 19,
+    "survived": 12,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.631578947368421
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.172414,
+    "decoder": 0.103448
+   }
+  },
+  "ledger.granite4.1-3b.r2.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2768.516117,
+   "rate": 0.540889,
+   "fidelity": 0.364532,
+   "kept": 74,
+   "dropped": 129,
+   "invented": 191,
+   "numbers": {
+    "total": 19,
+    "survived": 12,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.631578947368421
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 22,
+    "order": 0.272727
+   },
+   "split": {
+    "prior": 0.019704,
+    "literal": 0.187192,
+    "decoder": 0.157635
+   }
+  },
+  "ledger.granite4.1-3b.r2.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 2658.494285,
+   "rate": 0.519394,
+   "fidelity": 0.334975,
+   "kept": 68,
+   "dropped": 135,
+   "invented": 121,
+   "numbers": {
+    "total": 19,
+    "survived": 13,
+    "altered": 2,
+    "lost": 4,
+    "score": 0.7368421052631579
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.192118,
+    "decoder": 0.133005
+   }
+  },
+  "ledger.granite4.1-3b.r2.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 2661.714622,
+   "rate": 0.520023,
+   "fidelity": 0.300493,
+   "kept": 61,
+   "dropped": 142,
+   "invented": 110,
+   "numbers": {
+    "total": 19,
+    "survived": 12,
+    "altered": 0,
+    "lost": 7,
+    "score": 0.631578947368421
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.133005,
+    "decoder": 0.157635
+   }
+  },
+  "ledger.granite4.1-3b.r2.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 2661.714622,
+   "rate": 0.520023,
+   "fidelity": 0.359606,
+   "kept": 73,
+   "dropped": 130,
+   "invented": 108,
+   "numbers": {
+    "total": 19,
+    "survived": 14,
+    "altered": 2,
+    "lost": 3,
+    "score": 0.7894736842105263
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.187192,
+    "decoder": 0.162562
+   }
+  },
+  "ledger.granite4.1-3b.r2.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 2661.714622,
+   "rate": 0.520023,
+   "fidelity": 0.359606,
+   "kept": 73,
+   "dropped": 130,
+   "invented": 108,
+   "numbers": {
+    "total": 19,
+    "survived": 14,
+    "altered": 2,
+    "lost": 3,
+    "score": 0.7894736842105263
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.187192,
+    "decoder": 0.162562
+   }
+  },
+  "ledger.granite4.1-3b.r3.L1": {
+   "srcBits": 5118.458283,
+   "capBits": 2272.738875,
+   "rate": 0.444028,
+   "fidelity": 0.35468,
+   "kept": 72,
+   "dropped": 131,
+   "invented": 84,
+   "numbers": {
+    "total": 19,
+    "survived": 10,
+    "altered": 0,
+    "lost": 9,
+    "score": 0.5263157894736842
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 10,
+    "order": 0.6
+   },
+   "split": {
+    "prior": 0.014778,
+    "literal": 0.187192,
+    "decoder": 0.152709
+   }
+  },
+  "ledger.granite4.1-3b.r3.L2": {
+   "srcBits": 5118.458283,
+   "capBits": 2047.814815,
+   "rate": 0.400084,
+   "fidelity": 0.29064,
+   "kept": 59,
+   "dropped": 144,
+   "invented": 91,
+   "numbers": {
+    "total": 19,
+    "survived": 5,
+    "altered": 2,
+    "lost": 12,
+    "score": 0.3157894736842105
+   },
+   "entities": {
+    "total": 5,
+    "survived": 5,
+    "altered": 0,
+    "lost": 0,
+    "score": 1
+   },
+   "turns": {
+    "src": 6,
+    "rec": 12,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.147783,
+    "decoder": 0.137931
+   }
+  },
+  "ledger.granite4.1-3b.r3.L3": {
+   "srcBits": 5118.458283,
+   "capBits": 1728.523749,
+   "rate": 0.337704,
+   "fidelity": 0.123153,
+   "kept": 25,
+   "dropped": 178,
+   "invented": 47,
+   "numbers": {
+    "total": 19,
+    "survived": 1,
+    "altered": 2,
+    "lost": 16,
+    "score": 0.10526315789473684
+   },
+   "entities": {
+    "total": 5,
+    "survived": 3,
+    "altered": 0,
+    "lost": 2,
+    "score": 0.6
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.004926,
+    "literal": 0.054187,
+    "decoder": 0.064039
+   }
+  },
+  "ledger.granite4.1-3b.r3.L4": {
+   "srcBits": 5118.458283,
+   "capBits": 1592.719744,
+   "rate": 0.311172,
+   "fidelity": 0.280788,
+   "kept": 57,
+   "dropped": 146,
+   "invented": 84,
+   "numbers": {
+    "total": 19,
+    "survived": 6,
+    "altered": 2,
+    "lost": 11,
+    "score": 0.3684210526315789
+   },
+   "entities": {
+    "total": 5,
+    "survived": 4,
+    "altered": 0,
+    "lost": 1,
+    "score": 0.8
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.009852,
+    "literal": 0.123153,
+    "decoder": 0.147783
+   }
+  },
+  "ledger.granite4.1-3b.r3.L5": {
+   "srcBits": 5118.458283,
+   "capBits": 999.456545,
+   "rate": 0.195265,
+   "fidelity": 0.039409,
+   "kept": 8,
+   "dropped": 195,
+   "invented": 8,
+   "numbers": {
+    "total": 19,
+    "survived": 0,
+    "altered": 0,
+    "lost": 19,
+    "score": 0
+   },
+   "entities": {
+    "total": 5,
+    "survived": 0,
+    "altered": 0,
+    "lost": 5,
+    "score": 0
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0,
+    "decoder": 0.039409
+   }
+  },
+  "flatbread.llama3.1-8b.r1.L1": {
+   "srcBits": 6533.970961,
+   "capBits": 2345.268907,
+   "rate": 0.358935,
+   "fidelity": 0.266332,
+   "kept": 53,
+   "dropped": 146,
+   "invented": 28,
+   "numbers": {
+    "total": 14,
+    "survived": 8,
+    "altered": 1,
+    "lost": 5,
+    "score": 0.6071428571428571
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.180905,
+    "decoder": 0.080402
+   }
+  },
+  "flatbread.llama3.1-8b.r1.L2": {
+   "srcBits": 6533.970961,
+   "capBits": 1531.133389,
+   "rate": 0.234334,
+   "fidelity": 0.115578,
+   "kept": 23,
+   "dropped": 176,
+   "invented": 8,
+   "numbers": {
+    "total": 14,
+    "survived": 3,
+    "altered": 0,
+    "lost": 11,
+    "score": 0.21428571428571427
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.095477,
+    "decoder": 0.015075
+   }
+  },
+  "flatbread.llama3.1-8b.r1.L3": {
+   "srcBits": 6533.970961,
+   "capBits": 873.287037,
+   "rate": 0.133653,
+   "fidelity": 0.100503,
+   "kept": 20,
+   "dropped": 179,
+   "invented": 4,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.075377,
+    "decoder": 0.015075
+   }
+  },
+  "flatbread.llama3.1-8b.r1.L4": {
+   "srcBits": 6533.970961,
+   "capBits": 622.486868,
+   "rate": 0.095269,
+   "fidelity": 0.120603,
+   "kept": 24,
+   "dropped": 175,
+   "invented": 26,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.005025,
+    "decoder": 0.110553
+   }
+  },
+  "flatbread.llama3.1-8b.r1.L5": {
+   "srcBits": 6533.970961,
+   "capBits": 462.01955,
+   "rate": 0.07071,
+   "fidelity": 0.361809,
+   "kept": 72,
+   "dropped": 127,
+   "invented": 325,
+   "numbers": {
+    "total": 14,
+    "survived": 4,
+    "altered": 0,
+    "lost": 10,
+    "score": 0.2857142857142857
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 12,
+    "order": 0.5
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.035176,
+    "decoder": 0.316583
+   }
+  },
+  "flatbread.llama3.1-8b.r2.L1": {
+   "srcBits": 6533.970961,
+   "capBits": 2600.71375,
+   "rate": 0.39803,
+   "fidelity": 0.231156,
+   "kept": 46,
+   "dropped": 153,
+   "invented": 24,
+   "numbers": {
+    "total": 14,
+    "survived": 5,
+    "altered": 3,
+    "lost": 6,
+    "score": 0.4642857142857143
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.115578,
+    "decoder": 0.110553
+   }
+  },
+  "flatbread.llama3.1-8b.r2.L2": {
+   "srcBits": 6533.970961,
+   "capBits": 1807.950329,
+   "rate": 0.2767,
+   "fidelity": 0.170854,
+   "kept": 34,
+   "dropped": 165,
+   "invented": 25,
+   "numbers": {
+    "total": 14,
+    "survived": 4,
+    "altered": 1,
+    "lost": 9,
+    "score": 0.32142857142857145
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.065327,
+    "decoder": 0.095477
+   }
+  },
+  "flatbread.llama3.1-8b.r2.L3": {
+   "srcBits": 6533.970961,
+   "capBits": 1065.284213,
+   "rate": 0.163038,
+   "fidelity": 0.130653,
+   "kept": 26,
+   "dropped": 173,
+   "invented": 39,
+   "numbers": {
+    "total": 14,
+    "survived": 4,
+    "altered": 1,
+    "lost": 9,
+    "score": 0.32142857142857145
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.035176,
+    "decoder": 0.090452
+   }
+  },
+  "flatbread.llama3.1-8b.r2.L4": {
+   "srcBits": 6533.970961,
+   "capBits": 712.303763,
+   "rate": 0.109015,
+   "fidelity": 0.110553,
+   "kept": 22,
+   "dropped": 177,
+   "invented": 47,
+   "numbers": {
+    "total": 14,
+    "survived": 1,
+    "altered": 1,
+    "lost": 12,
+    "score": 0.10714285714285714
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.025126,
+    "decoder": 0.080402
+   }
+  },
+  "flatbread.llama3.1-8b.r2.L5": {
+   "srcBits": 6533.970961,
+   "capBits": 436.01955,
+   "rate": 0.066731,
+   "fidelity": 0.105528,
+   "kept": 21,
+   "dropped": 178,
+   "invented": 16,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.025126,
+    "decoder": 0.075377
+   }
+  },
+  "flatbread.llama3.1-8b.r3.L1": {
+   "srcBits": 6533.970961,
+   "capBits": 1522.915265,
+   "rate": 0.233077,
+   "fidelity": 0.155779,
+   "kept": 31,
+   "dropped": 168,
+   "invented": 23,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 1,
+    "lost": 11,
+    "score": 0.17857142857142858
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.065327,
+    "decoder": 0.080402
+   }
+  },
+  "flatbread.llama3.1-8b.r3.L2": {
+   "srcBits": 6533.970961,
+   "capBits": 1456.37542,
+   "rate": 0.222893,
+   "fidelity": 0.090452,
+   "kept": 18,
+   "dropped": 181,
+   "invented": 26,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0.030151,
+    "decoder": 0.055276
+   }
+  },
+  "flatbread.llama3.1-8b.r3.L3": {
+   "srcBits": 6533.970961,
+   "capBits": 1072.215558,
+   "rate": 0.164099,
+   "fidelity": 0.095477,
+   "kept": 19,
+   "dropped": 180,
+   "invented": 12,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.040201,
+    "decoder": 0.055276
+   }
+  },
+  "flatbread.llama3.1-8b.r3.L4": {
+   "srcBits": 6533.970961,
+   "capBits": 347.29886,
+   "rate": 0.053153,
+   "fidelity": 0.100503,
+   "kept": 20,
+   "dropped": 179,
+   "invented": 19,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.020101,
+    "decoder": 0.070352
+   }
+  },
+  "flatbread.llama3.1-8b.r3.L5": {
+   "srcBits": 6533.970961,
+   "capBits": 250.509775,
+   "rate": 0.03834,
+   "fidelity": 0.070352,
+   "kept": 14,
+   "dropped": 185,
+   "invented": 9,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.015075,
+    "decoder": 0.055276
+   }
+  },
+  "flatbread.granite4.1-3b.r1.L1": {
+   "srcBits": 6533.970961,
+   "capBits": 2109.600428,
+   "rate": 0.322867,
+   "fidelity": 0.045226,
+   "kept": 9,
+   "dropped": 190,
+   "invented": 4,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0,
+    "decoder": 0.045226
+   }
+  },
+  "flatbread.granite4.1-3b.r1.L2": {
+   "srcBits": 6533.970961,
+   "capBits": 2007.583169,
+   "rate": 0.307253,
+   "fidelity": 0.211055,
+   "kept": 42,
+   "dropped": 157,
+   "invented": 16,
+   "numbers": {
+    "total": 14,
+    "survived": 3,
+    "altered": 0,
+    "lost": 11,
+    "score": 0.21428571428571427
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.19598,
+    "decoder": 0.015075
+   }
+  },
+  "flatbread.granite4.1-3b.r1.L3": {
+   "srcBits": 6533.970961,
+   "capBits": 1849.008148,
+   "rate": 0.282984,
+   "fidelity": 0.226131,
+   "kept": 45,
+   "dropped": 154,
+   "invented": 12,
+   "numbers": {
+    "total": 14,
+    "survived": 4,
+    "altered": 1,
+    "lost": 9,
+    "score": 0.32142857142857145
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.020101,
+    "literal": 0.150754,
+    "decoder": 0.055276
+   }
+  },
+  "flatbread.granite4.1-3b.r1.L4": {
+   "srcBits": 6533.970961,
+   "capBits": 893.674572,
+   "rate": 0.136774,
+   "fidelity": 0.105528,
+   "kept": 21,
+   "dropped": 178,
+   "invented": 8,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.080402,
+    "decoder": 0.025126
+   }
+  },
+  "flatbread.granite4.1-3b.r1.L5": {
+   "srcBits": 6533.970961,
+   "capBits": 989.096405,
+   "rate": 0.151378,
+   "fidelity": 0.100503,
+   "kept": 20,
+   "dropped": 179,
+   "invented": 7,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.085427,
+    "decoder": 0.015075
+   }
+  },
+  "flatbread.granite4.1-3b.r2.L1": {
+   "srcBits": 6533.970961,
+   "capBits": 3574.148717,
+   "rate": 0.54701,
+   "fidelity": 0.472362,
+   "kept": 94,
+   "dropped": 105,
+   "invented": 46,
+   "numbers": {
+    "total": 14,
+    "survived": 11,
+    "altered": 1,
+    "lost": 2,
+    "score": 0.8214285714285714
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 4,
+    "order": 0.666667
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.316583,
+    "decoder": 0.145729
+   }
+  },
+  "flatbread.granite4.1-3b.r2.L2": {
+   "srcBits": 6533.970961,
+   "capBits": 2728.535749,
+   "rate": 0.417592,
+   "fidelity": 0.030151,
+   "kept": 6,
+   "dropped": 193,
+   "invented": 6,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0,
+    "decoder": 0.020101
+   }
+  },
+  "flatbread.granite4.1-3b.r2.L3": {
+   "srcBits": 6533.970961,
+   "capBits": 2064.112441,
+   "rate": 0.315905,
+   "fidelity": 0.030151,
+   "kept": 6,
+   "dropped": 193,
+   "invented": 5,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0,
+    "decoder": 0.025126
+   }
+  },
+  "flatbread.granite4.1-3b.r2.L4": {
+   "srcBits": 6533.970961,
+   "capBits": 292.60964,
+   "rate": 0.044783,
+   "fidelity": 0.100503,
+   "kept": 20,
+   "dropped": 179,
+   "invented": 28,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.01005,
+    "decoder": 0.080402
+   }
+  },
+  "flatbread.granite4.1-3b.r2.L5": {
+   "srcBits": 6533.970961,
+   "capBits": 79,
+   "rate": 0.012091,
+   "fidelity": 0.025126,
+   "kept": 5,
+   "dropped": 194,
+   "invented": 6,
+   "numbers": {
+    "total": 14,
+    "survived": 0,
+    "altered": 0,
+    "lost": 14,
+    "score": 0
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0,
+    "decoder": 0.025126
+   }
+  },
+  "flatbread.granite4.1-3b.r3.L1": {
+   "srcBits": 6533.970961,
+   "capBits": 2113.460369,
+   "rate": 0.323457,
+   "fidelity": 0.281407,
+   "kept": 56,
+   "dropped": 143,
+   "invented": 61,
+   "numbers": {
+    "total": 14,
+    "survived": 10,
+    "altered": 1,
+    "lost": 3,
+    "score": 0.75
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.170854,
+    "decoder": 0.100503
+   }
+  },
+  "flatbread.granite4.1-3b.r3.L2": {
+   "srcBits": 6533.970961,
+   "capBits": 2319.315122,
+   "rate": 0.354963,
+   "fidelity": 0.266332,
+   "kept": 53,
+   "dropped": 146,
+   "invented": 41,
+   "numbers": {
+    "total": 14,
+    "survived": 3,
+    "altered": 0,
+    "lost": 11,
+    "score": 0.21428571428571427
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 2,
+    "order": 0.333333
+   },
+   "split": {
+    "prior": 0.01005,
+    "literal": 0.175879,
+    "decoder": 0.080402
+   }
+  },
+  "flatbread.granite4.1-3b.r3.L3": {
+   "srcBits": 6533.970961,
+   "capBits": 2117.091863,
+   "rate": 0.324013,
+   "fidelity": 0.266332,
+   "kept": 53,
+   "dropped": 146,
+   "invented": 17,
+   "numbers": {
+    "total": 14,
+    "survived": 5,
+    "altered": 1,
+    "lost": 8,
+    "score": 0.39285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 8,
+    "order": 0.75
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.221106,
+    "decoder": 0.045226
+   }
+  },
+  "flatbread.granite4.1-3b.r3.L4": {
+   "srcBits": 6533.970961,
+   "capBits": 1296.102686,
+   "rate": 0.198364,
+   "fidelity": 0.190955,
+   "kept": 38,
+   "dropped": 161,
+   "invented": 8,
+   "numbers": {
+    "total": 14,
+    "survived": 3,
+    "altered": 1,
+    "lost": 10,
+    "score": 0.25
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 6,
+    "order": 1
+   },
+   "split": {
+    "prior": 0,
+    "literal": 0.145729,
+    "decoder": 0.045226
+   }
+  },
+  "flatbread.granite4.1-3b.r3.L5": {
+   "srcBits": 6533.970961,
+   "capBits": 1537.873421,
+   "rate": 0.235366,
+   "fidelity": 0.040201,
+   "kept": 8,
+   "dropped": 191,
+   "invented": 5,
+   "numbers": {
+    "total": 14,
+    "survived": 2,
+    "altered": 0,
+    "lost": 12,
+    "score": 0.14285714285714285
+   },
+   "entities": {
+    "total": 0,
+    "survived": 0,
+    "altered": 0,
+    "lost": 0,
+    "score": null
+   },
+   "turns": {
+    "src": 6,
+    "rec": 1,
+    "order": 0.166667
+   },
+   "split": {
+    "prior": 0.005025,
+    "literal": 0,
+    "decoder": 0.035176
+   }
+  }
+ }
+}

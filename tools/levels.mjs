@@ -127,7 +127,7 @@ export function validate(lab, file = '') {
 
 function loadAll() {
   if (!fs.existsSync(DIR)) return [];
-  return fs.readdirSync(DIR).filter((f) => f.endsWith('.json')).sort().map((f) => {
+  return fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && f !== 'atlas.json').sort().map((f) => {
     const file = path.join(DIR, f);
     try { return { file: f, lab: JSON.parse(fs.readFileSync(file, 'utf8')) }; }
     catch (err) { return { file: f, lab: null, parseError: err.message }; }

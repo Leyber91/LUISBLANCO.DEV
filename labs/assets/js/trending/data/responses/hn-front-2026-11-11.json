@@ -1,0 +1,114 @@
+{
+ "hits": [
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "skittleson"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Smart home devices should work without the internet"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://docodethatmatters.com/home-automation-overnight-success/"
+    }
+   },
+   "author": "skittleson",
+   "created_at_i": 1794324320,
+   "num_comments": 343,
+   "objectID": "50441707",
+   "points": 954,
+   "title": "Smart home devices should work without the internet",
+   "url": "https://docodethatmatters.com/home-automation-overnight-success/"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "p4bl0"
+    },
+    "story_text": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "Previously: <i>.name Termination</i> - <a href=\"https://news.ycombinator.com/item?id=49550772\">https://news.ycombinator.com/item?id=49550772</a> - Sept 2026 (547 comments)"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": ".name Grandfathered"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://neil.fraser.name/news/2026/11/10/"
+    }
+   },
+   "author": "p4bl0",
+   "created_at_i": 1794328664,
+   "num_comments": 184,
+   "objectID": "50442736",
+   "points": 846,
+   "title": ".name Grandfathered",
+   "url": "https://neil.fraser.name/news/2026/11/10/"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "ilreb"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "AlphaProof Code"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://deepmind.google/blog/introducing-alphaproof-code/"
+    }
+   },
+   "author": "ilreb",
+   "created_at_i": 1794312672,
+   "num_comments": 185,
+   "objectID": "50439193",
+   "points": 638,
+   "title": "AlphaProof Code",
+   "url": "https://deepmind.google/blog/introducing-alphaproof-code/"
+  },
+  {
+   "_highlightResult": {
+    "author": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "plun9"
+    },
+    "title": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "AI usage generates a fragile codebase"
+    },
+    "url": {
+     "matchLevel": "none",
+     "matchedWords": [],
+     "value": "https://evanxmerz.com/post/ai-usage-generates-a-fragile-codebase/"
+    }
+   },
+   "author": "plun9",
+   "created_at_i": 1794306358,
+   "num_comments": 525,
+   "objectID": "50438318",
+   "points": 555,
+   "title": "AI usage generates a fragile codebase",
+   "url": "https://evanxmerz.com/post/ai-usage-generates-a-fragile-codebase/"
+  }
+ ],
+ "nbHits": 30
+}

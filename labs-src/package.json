@@ -1,0 +1,17 @@
+{
+  "name": "labs-src",
+  "private": true,
+  "description": "TypeScript source for luisblanco.dev/labs. Compiled output is committed under labs/; CI rebuilds it and fails on a difference.",
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('../labs/assets/js/os',{recursive:true,force:true})\" && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "tsc -p tsconfig.test.json && vitest run"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.7",
+    "happy-dom": "21.0.4",
+    "typescript": "7.0.2",
+    "vitest": "4.1.12"
+  }
+}

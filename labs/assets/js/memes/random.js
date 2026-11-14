@@ -4,15 +4,8 @@
    so the same seed always yields the same meme + the same art.
    ============================================================ */
 
-/** mulberry32 PRNG — returns a function emitting floats in [0,1) */
-export function mulberry32(a) {
-  return function () {
-    a |= 0; a = a + 0x6D2B79F5 | 0;
-    let t = Math.imul(a ^ a >>> 15, 1 | a);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-}
+/** mulberry32: floats in [0,1), the labs' shared generator (kit/rng.js) */
+export { mulberry32 } from '../kit/rng.js';
 
 /** stable small-integer hash of a motif name, to perturb the seed per scene */
 export function hashMotif(m) {

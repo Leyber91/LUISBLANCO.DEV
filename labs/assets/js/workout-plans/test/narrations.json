@@ -1,0 +1,1936 @@
+{
+ "recorded": "2026-11-11T07:46:48.231Z",
+ "model": "llama3.1:8b",
+ "cases": [
+  {
+   "name": "default example",
+   "inputs": {
+    "goal": "hypertrophy",
+    "level": "intermediate",
+    "days": [
+     1,
+     1,
+     0,
+     1,
+     1,
+     0,
+     0
+    ],
+    "minutes": 60,
+    "equipment": "gym",
+    "injuries": [
+     "knee"
+    ],
+    "weeks": 8,
+    "mode": "busso"
+   },
+   "log": {
+    "14": {
+     "kind": "hard",
+     "rpe": 9
+    },
+    "15": {
+     "kind": "hard",
+     "rpe": 9
+    },
+    "38": {
+     "kind": "missed"
+    }
+   },
+   "model": "llama3.1:8b",
+   "ms": 46608,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "4 days marked, inside the 3-4 sessions a week for intermediate muscle work; the plan uses all 4.",
+     "say": "You marked 4 days, which sits inside the 3 to 4 sessions a week an intermediate block runs, so all 4 carry a session.",
+     "nums": [
+      4,
+      3,
+      4,
+      4
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Tue, Thu, Fri, every day you marked.",
+     "say": "Sessions fall on Mon, Tue, Thu, Fri.",
+     "nums": [
+      0,
+      2
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "4 sessions a week: Upper A / Lower A / Upper B / Lower B so each muscle group is trained twice a week.",
+     "say": "With 4 sessions the week becomes Upper A, Lower A, Upper B and Lower B so each muscle group is trained twice a week.",
+     "nums": [
+      4
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "daily undulating periodization for muscle at intermediate level: rep zones rotate 6-8 / 10-12 across the week. Meta-analyses find linear and undulating models give similar muscle gains, so the choice is a convention.",
+     "say": "The block uses daily undulating periodization: rep zones rotate 6-8 / 10-12 across the week. Meta-analyses find linear and undulating models give similar muscle gains, so the choice is a convention.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "8 weeks: a deload in weeks 4 and 8 with 40% less volume.",
+     "say": "Across the 8 weeks there is a deload in weeks 4 and 8 with 40% less volume.",
+     "nums": [
+      8,
+      4,
+      8,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "knee flag: 3 lifts with deep loaded knee flexion move along the substitution graph: back squat to box squat, above parallel, bulgarian split squat to low-box step-up and leg press to leg press, partial range. Knee joint forces in the squat rise with knee flexion and peak near full flexion, so loaded flexion stays above parallel.",
+     "say": "Because of the knee flag, 3 lifts with deep loaded knee flexion change, back squat to box squat, above parallel among them. Knee forces in a squat rise as the knee bends and peak near full depth, so loaded knee flexion stays above parallel.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "60 minutes, less a 7-minute warm-up, holds about 19 main-lift sets at 2 minutes rest each, more when accessories rest 1.5 minutes.",
+     "say": "Each 60-minute session holds about 19 heavy sets after a 7-minute warm-up, because main lifts rest 2 minutes between sets.",
+     "nums": [
+      60,
+      7,
+      19,
+      2,
+      1.5
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "The solver leaves 7 template slots closed: cable lateral raise, cable triceps pushdown and barbell curl (no minutes left).",
+     "say": "The minutes run out before cable lateral raise and cable triceps pushdown, so they stay out of the plan.",
+     "nums": [
+      7
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "Target 10-16 sets per muscle per week. The solver places 68 working sets: 6 of 12 targeted muscles land in range; under target: side delts 3, rear delts 6.5, biceps 7.5, triceps 7.5 and abs 2, because the minutes run out first; chest 9, at the set cap per exercise.",
+     "say": "The weekly target is 10 to 16 sets per muscle, and 6 of 12 muscle groups land inside it, while side delts, rear delts and biceps fall short because the minutes run out first.",
+     "nums": [
+      10,
+      16,
+      68,
+      6,
+      12,
+      9,
+      3,
+      6.5,
+      7.5,
+      7.5,
+      2
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D12",
+     "text": "Model form is lowest in week 3 and peaks on Sun of week 8.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 8, which is where the deload pays off.",
+     "nums": [
+      3,
+      8
+     ]
+    },
+    {
+     "id": "R1",
+     "text": "Mon of week 3 logged at RPE 9 against a planned 7: 531 AU against 413. The model has you starting Thu 194 AU of form below plan (tolerance 163 AU, half a typical session), so Thu loses one set per exercise and one RPE point.",
+     "say": "Mon of week 3 came in at RPE 9 instead of 7, and the load model puts you 194 AU of form below plan going into Thu, more than the 163 AU tolerance, so Thu is eased by one set per exercise and one RPE point.",
+     "nums": [
+      3,
+      9,
+      7,
+      531,
+      413,
+      194,
+      163
+     ]
+    },
+    {
+     "id": "R2",
+     "text": "Tue of week 3 logged at RPE 9 against a planned 7: 531 AU against 413. The model has you starting Fri 349 AU of form below plan (tolerance 163 AU, half a typical session), so Fri loses one set per exercise and one RPE point.",
+     "say": "Tue of week 3 came in at RPE 9 instead of 7, and the load model puts you 349 AU of form below plan going into Fri, more than the 163 AU tolerance, so Fri is eased by one set per exercise and one RPE point.",
+     "nums": [
+      3,
+      9,
+      7,
+      531,
+      413,
+      349,
+      163
+     ]
+    },
+    {
+     "id": "R3",
+     "text": "Thu of week 6 missed (Upper B). Its main lift, standing overhead press, moves to Fri for 2 sets in place of pallof press; the rest is not made up.",
+     "say": "You missed Thu of week 6, so its main lift, standing overhead press, moves to Fri in place of pallof press, and the rest of that session is let go.",
+     "nums": [
+      6,
+      2
+     ]
+    }
+   ],
+   "planNames": [
+    "barbell bench press",
+    "barbell bent-over row",
+    "seated dumbbell shoulder press",
+    "lat pulldown",
+    "box squat, above parallel",
+    "romanian deadlift",
+    "low-box step-up",
+    "lying leg curl",
+    "standing calf raise",
+    "standing overhead press",
+    "pull-up",
+    "incline dumbbell press",
+    "chest-supported dumbbell row",
+    "cable face pull",
+    "leg press, partial range",
+    "pallof press"
+   ],
+   "reply": "{\"narration\":[{\"say\":\"The plan is for 4 sessions a week, which is within the 3-4 sessions recommended for intermediate muscle work, and all 4 days are marked for training (D1).\",\"cites\":[\"D1\"]},{\"say\":\"These sessions will be on Monday, Tuesday, Thursday, and Friday, as marked (D2).\",\"cites\":[\"D2\"]},{\"say\":\"Each muscle group will be trained twice a week, with the sessions divided into Upper A/Lower A, Upper B/Lower B (D3).\",\"cites\":[\"D3\"]},{\"say\":\"The rep zones will rotate between 6-8 and 10-12 across the week, as this is a common convention for daily undulating periodization at the intermediate level (D4).\",\"cites\":[\"D4\"]},{\"say\":\"The plan includes a deload in weeks 4 and 8, with 40% less volume (D5).\",\"cites\":[\"D5\"]},{\"say\":\"The knee flag involves 3 lifts with deep loaded knee flexion, with the substitution graph moving from back squat to box squat, bulgarian split squat to low-box step-up, and leg press to leg press, partial range (D6).\",\"cites\":[\"D6\"]},{\"say\":\"Each session will last up to 60 minutes, with a 7-minute warm-up, and will include 19 main-lift sets at 2 minutes rest each, with more sets when accessories rest 1.5 minutes (D7).\",\"cites\":[\"D7\"]},{\"say\":\"The plan includes 68 working sets, with 6 of 12 targeted muscles meeting the target of 10-16 sets per muscle per week, with the remaining muscles under the target due to time constraints (D9).\",\"cites\":[\"D9\"]},{\"say\":\"The plan uses a session load model, with session RPE multiplied by minutes (AU), and uses population defaults for the fitness-fatigue model (D10).\",\"cites\":[\"D10\"]},{\"say\":\"The model also takes into account variable dose, with the fatigue gain k2 rising with the last few days of load (D11).\",\"cites\":[\"D11\"]},{\"say\":\"The model form is lowest in week 3 and peaks on Sunday of week 8 (D12).\",\"cites\":[\"D12\"]},{\"say\":\"Due to form issues, Thursday of week 3 and Friday of week 3 lost one set per exercise and one RPE point, and Thursday of week 6 was missed (R1, R2, R3).\",\"cites\":[\"R1\", \"R2\", \"R3\"]},{\"say\":\"The plan will be adjusted accordingly to reflect these changes.\",\"cites\":[]}]}"
+  },
+  {
+   "name": "beginner strength, 3 days",
+   "inputs": {
+    "goal": "strength",
+    "level": "beginner",
+    "days": [
+     1,
+     0,
+     1,
+     0,
+     1,
+     0,
+     0
+    ],
+    "minutes": 45,
+    "equipment": "gym",
+    "injuries": [],
+    "weeks": 8,
+    "mode": "busso"
+   },
+   "log": {},
+   "model": "llama3.1:8b",
+   "ms": 43613,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "3 days marked, inside the 2-3 sessions a week for beginner strength work; the plan uses all 3.",
+     "say": "You marked 3 days, which sits inside the 2 to 3 sessions a week a beginner block runs, so all 3 carry a session.",
+     "nums": [
+      3,
+      2,
+      3,
+      3
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Wed, Fri, every day you marked.",
+     "say": "Sessions fall on Mon, Wed, Fri.",
+     "nums": [
+      1,
+      0
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "3 sessions a week: Full body A / Full body B / Full body C so every session trains the whole body.",
+     "say": "With 3 sessions the week becomes Full body A, Full body B and Full body C so every session trains the whole body.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "linear periodization for strength at beginner level: rep zones step 8 then 6 from one 3-week build to the next. Meta-analyses find linear and undulating models give similar strength gains, so the choice is a convention.",
+     "say": "The block uses linear periodization: rep zones step 8 then 6 from one 3-week build to the next. Meta-analyses find linear and undulating models give similar strength gains, so the choice is a convention.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "8 weeks: a deload in week 4 with 40% less volume and a 2-week taper in weeks 7 and 8 cutting volume 45% then 55% with intensity held.",
+     "say": "Across the 8 weeks there is a deload in week 4 with 40% less volume and a 2-week taper in weeks 7 and 8 cutting volume 45% then 55% with intensity held.",
+     "nums": [
+      8,
+      4,
+      7,
+      8,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "45 minutes, less a 7-minute warm-up, holds about 8 main-lift sets at 3.5 minutes rest each, more when accessories rest 2 minutes.",
+     "say": "Each 45-minute session holds about 8 heavy sets after a 7-minute warm-up, because main lifts rest 3.5 minutes between sets.",
+     "nums": [
+      45,
+      7,
+      8,
+      3.5,
+      2
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "The solver leaves 11 template slots closed: seated cable row, cable lateral raise and forearm plank (no minutes left).",
+     "say": "The minutes run out before seated cable row and cable lateral raise, so they stay out of the plan.",
+     "nums": [
+      11
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "Target 6-10 sets per muscle per week. The solver places 22 working sets: 4 of 12 targeted muscles land in range; under target: upper back 0, lats 0, side delts 1.5, rear delts 0, biceps 0, triceps 5, calves 1 and abs 0, because the minutes run out first.",
+     "say": "The weekly target is 6 to 10 sets per muscle, and 4 of 12 muscle groups land inside it, while upper back, lats and side delts fall short because the minutes run out first.",
+     "nums": [
+      6,
+      10,
+      22,
+      4,
+      12,
+      0,
+      0,
+      1.5,
+      0,
+      0,
+      5,
+      1,
+      0
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Model form is lowest in week 3 and peaks on Sun of week 8.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 8, which is where the taper pays off.",
+     "nums": [
+      3,
+      8
+     ]
+    }
+   ],
+   "planNames": [
+    "back squat",
+    "barbell bench press",
+    "lying leg curl",
+    "romanian deadlift",
+    "standing overhead press",
+    "leg press",
+    "incline dumbbell press"
+   ],
+   "reply": "{\"narration\":[{\"say\":\"The plan has three sessions a week, on Monday, Wednesday, and Friday, because the solver marked these days as the three days for beginner strength work, and then assigned the sessions to these days.\", \"cites\":[\"D1\", \"D2\"]},\n{\"say\":\"Each session trains the whole body, with either full body A, full body B, or full body C, as decided by the solver to have three sessions a week.\", \"cites\":[\"D3\"]},\n{\"say\":\"The plan uses a linear periodization model for strength at beginner level, with rep zones stepping from 8 to 6 every three weeks, as a convention based on meta-analyses.\", \"cites\":[\"D4\"]},\n{\"say\":\"The plan has an 8-week duration, with a deload in week 4, where volume is cut by 40%, and a 2-week taper in weeks 7 and 8, where volume is cut by 45% and then 55% with intensity held.\", \"cites\":[\"D5\"]},\n{\"say\":\"Each session is 45 minutes long, but with a 7-minute warm-up, leaving about 8 minutes for main-lift sets, with 3.5 minutes rest between sets, and more time for accessory exercises with 2 minutes rest.\", \"cites\":[\"D6\"]},\n{\"say\":\"The solver left out 11 template slots, including seated cable row, cable lateral raise, and forearm plank, as there were no minutes left for these exercises.\", \"cites\":[\"D7\"]},\n{\"say\":\"The plan targets 6-10 sets per muscle per week, but due to time constraints, some muscle groups, such as upper back, lats, side delts, rear delts, biceps, and abs, were under-targeted.\", \"cites\":[\"D8\"]},\n{\"say\":\"The session load is calculated by multiplying the session RPE by the minutes, using a fitness-fatigue model with default parameters, and taking into account the fatigue gain k2, which rises with the last few days of load.\", \"cites\":[\"D9\", \"D10\"]},\n{\"say\":\"The model form is lowest in week 3 and peaks on Sunday of week 8, as decided by the solver.\", \"cites\":[\"D11\"]}]}"
+  },
+  {
+   "name": "advanced strength, low back",
+   "inputs": {
+    "goal": "strength",
+    "level": "advanced",
+    "days": [
+     1,
+     1,
+     0,
+     1,
+     1,
+     1,
+     0
+    ],
+    "minutes": 75,
+    "equipment": "gym",
+    "injuries": [
+     "back"
+    ],
+    "weeks": 12,
+    "mode": "banister"
+   },
+   "log": {
+    "7": {
+     "kind": "missed"
+    },
+    "8": {
+     "kind": "missed"
+    }
+   },
+   "model": "llama3.1:8b",
+   "ms": 59001,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "5 days marked, inside the 4-5 sessions a week for advanced strength work; the plan uses all 5.",
+     "say": "You marked 5 days, which sits inside the 4 to 5 sessions a week an advanced block runs, so all 5 carry a session.",
+     "nums": [
+      5,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Tue, Thu, Fri, Sat, every day you marked.",
+     "say": "Sessions fall on Mon, Tue, Thu, Fri, Sat.",
+     "nums": [
+      0,
+      3
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "5 sessions a week: Upper A / Lower A / Push / Pull / Legs so each muscle group is trained twice a week.",
+     "say": "With 5 sessions the week becomes Upper A, Lower A, Push, Pull and Legs so each muscle group is trained twice a week.",
+     "nums": [
+      5
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "block periodization for strength at advanced level: blocks move from volume to intensity, 6-8 then 4-5 then 2-3 reps. Meta-analyses find linear and undulating models give similar strength gains, so the choice is a convention.",
+     "say": "The block uses block periodization: blocks move from volume to intensity, 6-8 then 4-5 then 2-3 reps. Meta-analyses find linear and undulating models give similar strength gains, so the choice is a convention.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "12 weeks: a deload in weeks 6 and 10 with 40% less volume and a 2-week taper in weeks 11 and 12 cutting volume 45% then 55% with intensity held.",
+     "say": "Across the 12 weeks there is a deload in weeks 6 and 10 with 40% less volume and a 2-week taper in weeks 11 and 12 cutting volume 45% then 55% with intensity held.",
+     "nums": [
+      12,
+      6,
+      10,
+      11,
+      12,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "low back flag: 3 lifts with high spinal load move along the substitution graph: barbell bent-over row to seated cable row, back squat to goblet squat and romanian deadlift to dumbbell Romanian deadlift.",
+     "say": "Because of the low back flag, 3 lifts with high spinal load change, barbell bent-over row to seated cable row among them.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "75 minutes, less a 7-minute warm-up, holds about 16 main-lift sets at 3.5 minutes rest each, more when accessories rest 2 minutes.",
+     "say": "Each 75-minute session holds about 16 heavy sets after a 7-minute warm-up, because main lifts rest 3.5 minutes between sets.",
+     "nums": [
+      75,
+      7,
+      16,
+      3.5,
+      2
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "The solver leaves 6 template slots closed: cable lateral raise, cable triceps pushdown and barbell curl (no minutes left); dumbbell curl and bulgarian split squat (their muscles already in range).",
+     "say": "The minutes run out before cable lateral raise and cable triceps pushdown, so they stay out of the plan.",
+     "nums": [
+      6
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "Target 8-14 sets per muscle per week. The solver places 82 working sets: 11 of 12 targeted muscles land in range; under target: abs 7, because the minutes run out first.",
+     "say": "The weekly target is 8 to 14 sets per muscle, and 11 of 12 muscle groups land inside it, while abs fall short because the minutes run out first.",
+     "nums": [
+      8,
+      14,
+      82,
+      11,
+      12,
+      7
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Model form is lowest in week 1 and peaks on Sun of week 12.",
+     "say": "On these defaults your form is lowest in week 1 and highest in week 12, which is where the taper pays off.",
+     "nums": [
+      1,
+      12
+     ]
+    },
+    {
+     "id": "R1",
+     "text": "2 sessions missed in week 2: week 3 repeats that step (accumulation again) instead of progressing, and accumulation is dropped so the block keeps 12 weeks.",
+     "say": "Week 2 lost 2 sessions, so week 3 repeats it before progressing and the block still ends on schedule.",
+     "nums": [
+      2,
+      2,
+      3,
+      12
+     ]
+    },
+    {
+     "id": "R2",
+     "text": "Mon of week 2 missed (Upper A). Nothing is carried: barbell bench press appears again later that week. Missed volume is not crammed into the next week.",
+     "say": "You missed Mon of week 2; nothing is carried over because barbell bench press appears again later that week.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "R3",
+     "text": "Tue of week 2 missed (Lower A). Nothing is carried: goblet squat appears again later that week. Missed volume is not crammed into the next week.",
+     "say": "You missed Tue of week 2; nothing is carried over because goblet squat appears again later that week.",
+     "nums": [
+      2
+     ]
+    }
+   ],
+   "planNames": [
+    "barbell bench press",
+    "seated cable row",
+    "seated dumbbell shoulder press",
+    "lat pulldown",
+    "goblet squat",
+    "dumbbell romanian deadlift",
+    "bulgarian split squat",
+    "lying leg curl",
+    "standing calf raise",
+    "forearm plank",
+    "incline dumbbell press",
+    "cable lateral raise",
+    "cable triceps pushdown",
+    "pull-up",
+    "chest-supported dumbbell row",
+    "cable face pull",
+    "barbell curl",
+    "pallof press"
+   ],
+   "reply": "{\n  \"narration\": [\n    {\"say\":\"The plan uses 5 days a week, which is within the recommended range of 4-5 sessions for advanced strength work.\", \"cites\":[\"D1\"]},\n    {\"say\":\"The training days are Monday, Tuesday, Thursday, Friday, and Saturday.\", \"cites\":[\"D2\"]},\n    {\"say\":\"Each muscle group will be trained twice a week, with the following split: Upper A / Lower A / Push / Pull / Legs.\", \"cites\":[\"D3\"]},\n    {\"say\":\"The plan follows block periodization, which involves moving from volume to intensity, with 6-8 reps in the first block, 4-5 reps in the second block, and 2-3 reps in the third block.\", \"cites\":[\"D4\"]},\n    {\"say\":\"The plan includes a 12-week period, with a deload in weeks 6 and 10, where volume is reduced by 40%, and a 2-week taper in weeks 11 and 12, where volume is cut by 45% and then 55%.\", \"cites\":[\"D5\"]},\n    {\"say\":\"To reduce the stress on the lower back, the plan substitutes three lifts with high spinal load: barbell bent-over row to seated cable row, back squat to goblet squat, and romanian deadlift to dumbbell Romanian deadlift.\", \"cites\":[\"D6\"]},\n    {\"say\":\"Each session will last 75 minutes, with 7 minutes of warm-up, allowing for 16 main-lift sets with 3.5 minutes of rest, and more sets when accessories rest for 2 minutes.\", \"cites\":[\"D7\"]},\n    {\"say\":\"The plan includes a variety of exercises, with 6 template slots left closed: cable lateral raise, cable triceps pushdown, and barbell curl, as well as dumbbell curl and bulgarian split squat.\", \"cites\":[\"D8\"]},\n    {\"say\":\"The plan targets 8-14 sets per muscle per week, with 82 working sets, and 11 of the 12 targeted muscles landing within the target range, with abs being under target due to time constraints.\", \"cites\":[\"D9\"]},\n    {\"say\":\"The plan uses a session load model, which is based on the fitness-fatigue model, with population defaults k1 = 1, k2 = 2, tau1 = 45 days, and tau2 = 15 days, and fits in elite swimmers gave 38 days (95% CI 17-59) and 19 days (6-32).\", \"cites\":[\"D10\"]},\n    {\"say\":\"The model form is lowest in week 1 and peaks on Sunday of week 12.\", \"cites\":[\"D11\"]},\n    {\"say\":\"Due to two missed sessions in week 2, the plan repeats the accumulation step in week 3 instead of progressing, and accumulation is dropped so the block keeps 12 weeks.\", \"cites\":[\"R1\"]},\n    {\"say\":\"The missed volume in week 2 is not carried over to the next week, with the barbell bench press and goblet squat appearing again later that week.\", \"cites\":[\"R2\", \"R3\"]}\n  ]\n}"
+  },
+  {
+   "name": "home dumbbells, shoulder",
+   "inputs": {
+    "goal": "hypertrophy",
+    "level": "beginner",
+    "days": [
+     0,
+     1,
+     0,
+     1,
+     0,
+     1,
+     0
+    ],
+    "minutes": 45,
+    "equipment": "dumbbells",
+    "injuries": [
+     "shoulder"
+    ],
+    "weeks": 6,
+    "mode": "busso"
+   },
+   "log": {
+    "3": {
+     "kind": "easy",
+     "rpe": 4
+    }
+   },
+   "model": "llama3.1:8b",
+   "ms": 69966,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "3 days marked, inside the 2-3 sessions a week for beginner muscle work; the plan uses all 3.",
+     "say": "You marked 3 days, which sits inside the 2 to 3 sessions a week a beginner block runs, so all 3 carry a session.",
+     "nums": [
+      3,
+      2,
+      3,
+      3
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Tue, Thu, Sat, every day you marked.",
+     "say": "Sessions fall on Tue, Thu, Sat.",
+     "nums": [
+      1,
+      0
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "3 sessions a week: Full body A / Full body B / Full body C so every session trains the whole body.",
+     "say": "With 3 sessions the week becomes Full body A, Full body B and Full body C so every session trains the whole body.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "linear periodization for muscle at beginner level: rep zones step 10-12 then 8-10 from one 3-week build to the next. Meta-analyses find linear and undulating models give similar muscle gains, so the choice is a convention.",
+     "say": "The block uses linear periodization: rep zones step 10-12 then 8-10 from one 3-week build to the next. Meta-analyses find linear and undulating models give similar muscle gains, so the choice is a convention.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "6 weeks: a deload in week 4 with 40% less volume.",
+     "say": "Across the 6 weeks there is a deload in week 4 with 40% less volume.",
+     "nums": [
+      6,
+      4,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "shoulder flag: 1 lift with overhead or end-range shoulder load moves along the substitution graph: standing overhead press to incline dumbbell press.",
+     "say": "Because of the shoulder flag, one lift with overhead or end-range shoulder load change, standing overhead press to incline dumbbell press.",
+     "nums": [
+      1
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "With dumbbells, 12 lifts change: back squat to goblet squat, barbell bench press to dumbbell bench press and seated cable row to chest-supported dumbbell row and more.",
+     "say": "Your dumbbells setting changes 12 lifts, for example back squat to goblet squat.",
+     "nums": [
+      12
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "45 minutes, less a 7-minute warm-up, holds about 13 main-lift sets at 2 minutes rest each, more when accessories rest 1.5 minutes.",
+     "say": "Each 45-minute session holds about 13 heavy sets after a 7-minute warm-up, because main lifts rest 2 minutes between sets.",
+     "nums": [
+      45,
+      7,
+      13,
+      2,
+      1.5
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "The solver leaves 9 template slots closed: dumbbell leg curl, dumbbell lateral raise and forearm plank (no minutes left).",
+     "say": "The minutes run out before dumbbell leg curl and dumbbell lateral raise, so they stay out of the plan.",
+     "nums": [
+      9
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "Target 8-12 sets per muscle per week. The solver places 33 working sets: 5 of 12 targeted muscles land in range; under target: side delts 0, rear delts 3.5, biceps 5, triceps 5.5, hamstrings 4, calves 0 and abs 4, because the minutes run out first.",
+     "say": "The weekly target is 8 to 12 sets per muscle, and 5 of 12 muscle groups land inside it, while side delts, rear delts and biceps fall short because the minutes run out first.",
+     "nums": [
+      8,
+      12,
+      33,
+      5,
+      12,
+      0,
+      3.5,
+      5,
+      5.5,
+      4,
+      0,
+      4
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D12",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D13",
+     "text": "Model form is lowest in week 3 and peaks on Wed of week 6.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 6, which is where the deload pays off.",
+     "nums": [
+      3,
+      6
+     ]
+    },
+    {
+     "id": "R1",
+     "text": "Thu of week 1 logged at RPE 4 against a planned 6 (176 AU). No change; progression continues.",
+     "say": "Thu of week 1 came in at RPE 4 against a planned 6, which needs no change.",
+     "nums": [
+      1,
+      4,
+      6,
+      176
+     ]
+    }
+   ],
+   "planNames": [
+    "goblet squat",
+    "dumbbell bench press",
+    "chest-supported dumbbell row",
+    "dumbbell romanian deadlift",
+    "incline dumbbell press",
+    "wide-grip inverted row"
+   ],
+   "reply": "{\"narration\":[{\"say\":\"The plan uses three days, Tuesday, Thursday, and Saturday, as marked in decision D1, and every session trains the whole body, as stated in decision D3, with a linear periodization model, as explained in decision D4, to target muscle gains at the beginner level.\",\"cites\":[\"D1\",\"D3\",\"D4\"]},{\"say\":\"The plan has a 6-week duration, with a deload in week 4, as stated in decision D5, which means that the volume will be reduced by 40% in week 4.\",\"cites\":[\"D5\"]},{\"say\":\"The plan includes the shoulder flag, as stated in decision D6, which is a lift with an overhead or end-range shoulder load, and it moves along the substitution graph from the standing overhead press to the incline dumbbell press.\",\"cites\":[\"D6\"]},{\"say\":\"With dumbbells, 12 lifts will be changed, as stated in decision D7, which includes changes such as the back squat to goblet squat and the barbell bench press to dumbbell bench press.\",\"cites\":[\"D7\"]},{\"say\":\"Each session will last approximately 38 minutes, as calculated in decision D8, which is less a 7-minute warm-up, and it will hold about 13 main-lift sets at 2 minutes rest each, more when accessories rest 1.5 minutes.\",\"cites\":[\"D8\"]},{\"say\":\"The plan targets 8-12 sets per muscle per week, as stated in decision D10, and it places 33 working sets, but some muscles, such as side delts, rear delts, biceps, triceps, hamstrings, calves, and abs, will have fewer sets than targeted due to time constraints.\",\"cites\":[\"D10\"]},{\"say\":\"The session load will be calculated using the formula session RPE x minutes (AU), as stated in decision D11, and the fatigue gain k2 will rise with the last few days of load, as stated in decision D12, which means that a session stacked on hard days will cost more fatigue.\",\"cites\":[\"D11\",\"D12\"]},{\"say\":\"The model form is lowest in week 3 and peaks on Wednesday of week 6, as stated in decision R1, but there is no change in progression, as noted in decision R1, and the plan continues as planned.\",\"cites\":[\"R1\"]}]}"
+  },
+  {
+   "name": "bodyweight, wrist",
+   "inputs": {
+    "goal": "general",
+    "level": "beginner",
+    "days": [
+     1,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0
+    ],
+    "minutes": 30,
+    "equipment": "bodyweight",
+    "injuries": [
+     "wrist"
+    ],
+    "weeks": 6,
+    "mode": "busso"
+   },
+   "log": {},
+   "model": "llama3.1:8b",
+   "ms": 34540,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "2 days marked, inside the 2-5 sessions a week for beginner health work; the plan uses all 2.",
+     "say": "You marked 2 days, which sits inside the 2 to 5 sessions a week a beginner block runs, so all 2 carry a session.",
+     "nums": [
+      2,
+      2,
+      5,
+      2
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Fri, every day you marked.",
+     "say": "Sessions fall on Mon, Fri.",
+     "nums": [
+      2,
+      0
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "2 sessions a week: Full body A / Full body B.",
+     "say": "With 2 sessions the week becomes Full body A and Full body B.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "linear periodization for health at beginner level: reps stay at 10-12 while load and RPE rise through each 3-week build.",
+     "say": "The block uses linear periodization: reps stay at 10-12 while load and RPE rise through each 3-week build.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "6 weeks: a deload in week 4 with 40% less volume.",
+     "say": "Across the 6 weeks there is a deload in week 4 with 40% less volume.",
+     "nums": [
+      6,
+      4,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "With bodyweight, 11 lifts change: back squat to bodyweight squat, barbell bench press to push-up on fists or handles and seated cable row to inverted row under a table and more.",
+     "say": "Your bodyweight setting changes 11 lifts, for example back squat to bodyweight squat.",
+     "nums": [
+      11
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "30 minutes, less a 7-minute warm-up, holds about 10 main-lift sets at 1.5 minutes rest each, more when accessories rest 1 minute.",
+     "say": "Each 30-minute session holds about 10 heavy sets after a 7-minute warm-up, because main lifts rest 1.5 minutes between sets.",
+     "nums": [
+      30,
+      7,
+      10,
+      1.5,
+      1
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "The solver leaves 8 template slots closed: inverted row under a table, sliding leg curl on a towel and prone Y-raise (no minutes left).",
+     "say": "The minutes run out before inverted row under a table and sliding leg curl on a towel, so they stay out of the plan.",
+     "nums": [
+      8
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "Target 4-8 sets per muscle per week. The solver places 14 working sets: 4 of 12 targeted muscles land in range; under target: upper back 0, lats 0, side delts 0, biceps 0, calves 0 and abs 0, because the minutes run out first; rear delts 0 and triceps 3, which nothing in the split trains directly.",
+     "say": "The weekly target is 4 to 8 sets per muscle, and 4 of 12 muscle groups land inside it, while upper back, lats and side delts fall short because the minutes run out first.",
+     "nums": [
+      4,
+      8,
+      14,
+      4,
+      12,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      0
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "The week holds 0 minutes of moderate aerobic work against the 150-300 minutes WHO 2020 recommends; the 150-minute gap can come from walking on other days.",
+     "say": "The plan holds 0 minutes of aerobic work a week, 150 short of the 150 the WHO recommends, and walking on other days counts toward the gap.",
+     "nums": [
+      0,
+      150,
+      300,
+      150
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D12",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D13",
+     "text": "Model form is lowest in week 3 and peaks on Sun of week 6.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 6, which is where the deload pays off.",
+     "nums": [
+      3,
+      6
+     ]
+    }
+   ],
+   "planNames": [
+    "bodyweight squat",
+    "push-up on fists or handles",
+    "single-leg romanian deadlift"
+   ],
+   "reply": "{\n  \"narration\": [\n    {\"say\":\"The plan is for 2 sessions a week, on Monday and Friday, because D2 says sessions are on those days.\", \"cites\":[\"D2\"]},\n    {\"say\":\"Each session is a full body workout, with either A or B, as D3 says there are 2 sessions a week, one for each full body routine.\", \"cites\":[\"D3\"]},\n    {\"say\":\"The plan uses linear periodization, with reps staying at 10-12, as D4 says this is the approach for health at beginner level.\", \"cites\":[\"D4\"]},\n    {\"say\":\"The plan is for 6 weeks, with a deload in week 4, as D5 says there are 6 weeks and week 4 has 40% less volume.\", \"cites\":[\"D5\"]},\n    {\"say\":\"The plan uses bodyweight, as D6 says 11 lifts are changed to bodyweight versions.\", \"cites\":[\"D6\"]},\n    {\"say\":\"Each session is 30 minutes long, with a 7-minute warm-up, as D7 says the session holds about 10 main-lift sets at 1.5 minutes rest each.\", \"cites\":[\"D7\"]},\n    {\"say\":\"The plan targets 4-8 sets per muscle per week, but some muscles fall short, as D9 says 4 of 12 targeted muscles land in range, and some have 0 sets.\", \"cites\":[\"D9\"]},\n    {\"say\":\"The plan does not include moderate aerobic work, as D10 says there are 0 minutes of moderate aerobic work, and the 150-300 minute gap can come from walking on other days.\", \"cites\":[\"D10\"]}\n  ]\n}"
+  },
+  {
+   "name": "endurance, knee",
+   "inputs": {
+    "goal": "endurance",
+    "level": "intermediate",
+    "days": [
+     1,
+     1,
+     1,
+     1,
+     0,
+     1,
+     1
+    ],
+    "minutes": 60,
+    "equipment": "bodyweight",
+    "injuries": [
+     "knee"
+    ],
+    "weeks": 12,
+    "mode": "busso"
+   },
+   "log": {
+    "9": {
+     "kind": "hard",
+     "rpe": 9
+    }
+   },
+   "model": "llama3.1:8b",
+   "ms": 34102,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "6 days marked; intermediate endurance work runs 4-5 sessions a week, so the plan uses 5.",
+     "say": "You marked 6 days, and the planner uses 5 of them because an intermediate block of this kind runs 4 to 5 sessions a week.",
+     "nums": [
+      6,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Tue, Wed, Thu, Sat: of your days, the spread with only 3 back-to-back pairs of days.",
+     "say": "It picks Mon, Tue, Wed, Thu, Sat because that spread leaves only 3 back-to-back pairs of days.",
+     "nums": [
+      0,
+      3
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "5 sessions a week: Easy aerobic + Strength / Intervals / Easy aerobic / Easy aerobic + Strength / Long aerobic.",
+     "say": "With 5 sessions the week becomes Easy aerobic + Strength, Intervals, Easy aerobic, Easy aerobic + Strength and Long aerobic.",
+     "nums": [
+      5
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "block periodization for endurance at intermediate level: blocks move from aerobic volume to intensity, then taper.",
+     "say": "The block uses block periodization: blocks move from aerobic volume to intensity, then taper.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "12 weeks: a deload in weeks 6 and 10 with 40% less volume and a 2-week taper in weeks 11 and 12 cutting volume 45% then 55% with intensity held.",
+     "say": "Across the 12 weeks there is a deload in weeks 6 and 10 with 40% less volume and a 2-week taper in weeks 11 and 12 cutting volume 45% then 55% with intensity held.",
+     "nums": [
+      12,
+      6,
+      10,
+      11,
+      12,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "knee flag: 2 lifts with deep loaded knee flexion move along the substitution graph: back squat to squat to a chair, above parallel and bulgarian split squat to low step-up. Knee joint forces in the squat rise with knee flexion and peak near full flexion, so loaded flexion stays above parallel.",
+     "say": "Because of the knee flag, 2 lifts with deep loaded knee flexion change, back squat to squat to a chair, above parallel among them. Knee forces in a squat rise as the knee bends and peak near full depth, so loaded knee flexion stays above parallel.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "Aerobic sessions use ride (bike or trainer) in place of run (impact loading).",
+     "say": "Aerobic work moves from run to ride (bike or trainer) to avoid impact loading.",
+     "nums": []
+    },
+    {
+     "id": "D8",
+     "text": "With bodyweight, 3 lifts change: romanian deadlift to single-leg Romanian deadlift, standing calf raise to single-leg calf raise and chest-supported dumbbell row to inverted row under a table.",
+     "say": "Your bodyweight setting changes 3 lifts, for example romanian deadlift to single-leg Romanian deadlift.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "60 minutes, less a 7-minute warm-up, holds about 19 main-lift sets at 2 minutes rest each, more when accessories rest 1.5 minutes.",
+     "say": "Each 60-minute session holds about 19 heavy sets after a 7-minute warm-up, because main lifts rest 2 minutes between sets.",
+     "nums": [
+      60,
+      7,
+      19,
+      2,
+      1.5
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "The solver leaves 6 template slots closed: forearm plank, low step-up and inverted row under a table (no minutes left).",
+     "say": "The minutes run out before forearm plank and low step-up, so they stay out of the plan.",
+     "nums": [
+      6
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Target 3-8 sets per muscle per week. The solver places 16 working sets: 3 of 5 targeted muscles land in range; under target: abs 0, because the minutes run out first.",
+     "say": "The weekly target is 3 to 8 sets per muscle, and 3 of 5 muscle groups land inside it, while abs fall short because the minutes run out first.",
+     "nums": [
+      3,
+      8,
+      16,
+      3,
+      5,
+      0
+     ]
+    },
+    {
+     "id": "D12",
+     "text": "4 of 5 weekly sessions are low intensity (80%); well-trained endurance athletes converge on about 80%.",
+     "say": "4 of the 5 weekly sessions stay easy, 80% of them, close to the distribution well-trained endurance athletes settle on.",
+     "nums": [
+      4,
+      5,
+      80,
+      80
+     ]
+    },
+    {
+     "id": "D13",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D14",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D15",
+     "text": "Model form is lowest in week 3 and peaks on Sun of week 12.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 12, which is where the taper pays off.",
+     "nums": [
+      3,
+      12
+     ]
+    },
+    {
+     "id": "R1",
+     "text": "Wed of week 2 logged at RPE 9 against a planned 3: 405 AU against 135. The model has you starting Thu 478 AU of form below plan (tolerance 101 AU, half a typical session), so Thu and Sat lose one set per exercise and one RPE point.",
+     "say": "Wed of week 2 came in at RPE 9 instead of 3, and the load model puts you 478 AU of form below plan going into Thu, more than the 101 AU tolerance, so Thu and Sat are eased by one set per exercise and one RPE point.",
+     "nums": [
+      2,
+      9,
+      3,
+      405,
+      135,
+      478,
+      101
+     ]
+    }
+   ],
+   "planNames": [
+    "squat to a chair, above parallel",
+    "single-leg romanian deadlift",
+    "single-leg calf raise"
+   ],
+   "reply": "{\n  \"narration\": [\n    {\"say\":\"The plan is for endurance training at an intermediate level, with 5 sessions per week, each lasting up to 60 minutes.\", \"cites\":[\"D1\", \"D3\"]},\n    {\"say\":\"These sessions will be spread across Mon, Tue, Wed, Thu, and Sat, with only 3 back-to-back pairs of days.\", \"cites\":[\"D2\"]},\n    {\"say\":\"The sessions will consist of a mix of easy aerobic, strength, intervals, and long aerobic workouts.\", \"cites\":[\"D3\"]},\n    {\"say\":\"The plan uses block periodization, which means the focus will shift from aerobic volume to intensity, and then taper.\", \"cites\":[\"D4\"]},\n    {\"say\":\"The 12-week plan includes deloads in weeks 6 and 10, with 40% less volume, and a 2-week taper in weeks 11 and 12, cutting volume by 45% and then 55%.\", \"cites\":[\"D5\"]},\n    {\"say\":\"The knee flag exercise is used, which involves deep loaded knee flexion, and the lifts will move along the substitution graph.\", \"cites\":[\"D6\"]},\n    {\"say\":\"Aerobic sessions will use a ride (bike or trainer) instead of a run to reduce impact loading.\", \"cites\":[\"D7\"]},\n    {\"say\":\"With bodyweight, the lifts for romanian deadlift, standing calf raise, and chest-supported dumbbell row will be replaced with single-leg Romanian deadlift, single-leg calf raise, and inverted row under a table.\", \"cites\":[\"D8\"]}\n  ]\n}"
+  },
+  {
+   "name": "endurance beginner, 3 days",
+   "inputs": {
+    "goal": "endurance",
+    "level": "beginner",
+    "days": [
+     0,
+     1,
+     0,
+     1,
+     0,
+     0,
+     1
+    ],
+    "minutes": 45,
+    "equipment": "gym",
+    "injuries": [],
+    "weeks": 8,
+    "mode": "banister"
+   },
+   "log": {},
+   "model": "llama3.1:8b",
+   "ms": 101137,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "3 days marked, inside the 3-4 sessions a week for beginner endurance work; the plan uses all 3.",
+     "say": "You marked 3 days, which sits inside the 3 to 4 sessions a week a beginner block runs, so all 3 carry a session.",
+     "nums": [
+      3,
+      3,
+      4,
+      3
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Tue, Thu, Sun, every day you marked.",
+     "say": "Sessions fall on Tue, Thu, Sun.",
+     "nums": [
+      1,
+      0
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "3 sessions a week: Intervals / Easy aerobic + Strength / Long aerobic.",
+     "say": "With 3 sessions the week becomes Intervals, Easy aerobic + Strength and Long aerobic.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "linear periodization for endurance at beginner level: volume builds for 3 weeks, then eases for 1.",
+     "say": "The block uses linear periodization: volume builds for 3 weeks, then eases for 1.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "8 weeks: a deload in week 4 with 40% less volume and a 2-week taper in weeks 7 and 8 cutting volume 45% then 55% with intensity held.",
+     "say": "Across the 8 weeks there is a deload in week 4 with 40% less volume and a 2-week taper in weeks 7 and 8 cutting volume 45% then 55% with intensity held.",
+     "nums": [
+      8,
+      4,
+      7,
+      8,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "45 minutes, less a 7-minute warm-up, holds about 13 main-lift sets at 2 minutes rest each, more when accessories rest 1.5 minutes.",
+     "say": "Each 45-minute session holds about 13 heavy sets after a 7-minute warm-up, because main lifts rest 2 minutes between sets.",
+     "nums": [
+      45,
+      7,
+      13,
+      2,
+      1.5
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "The solver leaves 5 template slots closed: romanian deadlift, standing calf raise and forearm plank (no minutes left).",
+     "say": "The minutes run out before romanian deadlift and standing calf raise, so they stay out of the plan.",
+     "nums": [
+      5
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "Target 3-6 sets per muscle per week. The solver places 5 working sets: 2 of 5 targeted muscles land in range; under target: hamstrings 0, calves 0 and abs 0, because the minutes run out first.",
+     "say": "The weekly target is 3 to 6 sets per muscle, and 2 of 5 muscle groups land inside it, while hamstrings, calves and abs fall short because the minutes run out first.",
+     "nums": [
+      3,
+      6,
+      5,
+      2,
+      5,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "2 of 3 weekly sessions are low intensity (67%); well-trained endurance athletes converge on about 80%.",
+     "say": "2 of the 3 weekly sessions stay easy, 67% of them, close to the distribution well-trained endurance athletes settle on.",
+     "nums": [
+      2,
+      3,
+      67,
+      80
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Model form is lowest in week 3 and peaks on Sat of week 8.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 8, which is where the taper pays off.",
+     "nums": [
+      3,
+      8
+     ]
+    }
+   ],
+   "planNames": [
+    "back squat"
+   ],
+   "reply": "{\n  \"narration\": [\n    {\"say\":\"The plan will have three sessions a week, on Tuesday, Thursday, and Sunday, because the solver marked these days and decided to use all three.\", \"cites\":[\"D1\", \"D2\"]},\n    {\"say\":\"The sessions will be divided into three types: Intervals / Easy aerobic, Strength / Long aerobic, because the solver decided to use these three types.\", \"cites\":[\"D3\"]},\n    {\"say\":\"The plan will use linear periodization, building volume for three weeks and then easing for one, because the solver decided to use this type of periodization for endurance at beginner level.\", \"cites\":[\"D4\"]},\n    {\"say\":\"The plan will have a deload in week 4 with 40% less volume, and a 2-week taper in weeks 7 and 8 cutting volume 45% then 55% with intensity held, because the solver decided to include these periods in the plan.\", \"cites\":[\"D5\"]},\n    {\"say\":\"Each session will be 45 minutes long, with a 7-minute warm-up, which leaves about 13 minutes for main-lift sets with 2 minutes rest each, or more when accessories rest 1.5 minutes, because the solver calculated the time available for each session.\", \"cites\":[\"D6\"]},\n    {\"say\":\"The plan does not include time for romanian deadlift, standing calf raise, and forearm plank, because the solver left these template slots closed.\", \"cites\":[\"D7\"]},\n    {\"say\":\"The plan targets 3-6 sets per muscle per week, but will only be able to fit 2 sets for hamstrings, calves, and abs, because the minutes run out first, and will have 5 working sets in total, because the solver placed these sets.\", \"cites\":[\"D8\"]},\n    {\"say\":\"Two of the three weekly sessions will be low intensity, at about 67% of the target intensity, because the solver decided to use this intensity for two of the sessions, and well-trained endurance athletes typically converge on about 80% intensity.\", \"cites\":[\"D9\"]},\n    {\"say\":\"The session load will be calculated using the formula session RPE x minutes, because the solver decided to use this formula, and the model form will be lowest in week 3 and peaks on Sat of week 8, because the solver decided to use this model form.\", \"cites\":[\"D10\", \"D11\"]}\n  ]\n}"
+  },
+  {
+   "name": "health, 5 days",
+   "inputs": {
+    "goal": "general",
+    "level": "intermediate",
+    "days": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0
+    ],
+    "minutes": 60,
+    "equipment": "gym",
+    "injuries": [
+     "back"
+    ],
+    "weeks": 8,
+    "mode": "busso"
+   },
+   "log": {
+    "2": {
+     "kind": "done"
+    }
+   },
+   "model": "llama3.1:8b",
+   "ms": 30515,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "5 days marked, inside the 3-6 sessions a week for intermediate health work; the plan uses all 5.",
+     "say": "You marked 5 days, which sits inside the 3 to 6 sessions a week an intermediate block runs, so all 5 carry a session.",
+     "nums": [
+      5,
+      3,
+      6,
+      5
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Tue, Wed, Thu, Fri, every day you marked.",
+     "say": "Sessions fall on Mon, Tue, Wed, Thu, Fri.",
+     "nums": [
+      0,
+      4
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "5 sessions a week: Full body A / Moderate aerobic / Full body B / Moderate aerobic / Full body C.",
+     "say": "With 5 sessions the week becomes Full body A, Moderate aerobic, Full body B, Moderate aerobic and Full body C.",
+     "nums": [
+      5
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "linear periodization for health at intermediate level: reps stay at 10-12 while load and RPE rise through each 3-week build.",
+     "say": "The block uses linear periodization: reps stay at 10-12 while load and RPE rise through each 3-week build.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "8 weeks: a deload in weeks 4 and 8 with 40% less volume.",
+     "say": "Across the 8 weeks there is a deload in weeks 4 and 8 with 40% less volume.",
+     "nums": [
+      8,
+      4,
+      8,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "low back flag: 2 lifts with high spinal load move along the substitution graph: back squat to goblet squat and romanian deadlift to dumbbell Romanian deadlift.",
+     "say": "Because of the low back flag, 2 lifts with high spinal load change, back squat to goblet squat among them.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "60 minutes, less a 7-minute warm-up, holds about 23 main-lift sets at 1.5 minutes rest each, more when accessories rest 1 minute.",
+     "say": "Each 60-minute session holds about 23 heavy sets after a 7-minute warm-up, because main lifts rest 1.5 minutes between sets.",
+     "nums": [
+      60,
+      7,
+      23,
+      1.5,
+      1
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "The solver leaves 1 template slot closed: barbell hip thrust (their muscles already in range).",
+     "say": "It leaves barbell hip thrust out because those muscles already have enough sets.",
+     "nums": [
+      1
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "Target 4-10 sets per muscle per week. The solver places 56 working sets: 11 of 12 targeted muscles land in range.",
+     "say": "The weekly target is 4 to 10 sets per muscle, and 11 of 12 muscle groups land inside it.",
+     "nums": [
+      4,
+      10,
+      56,
+      11,
+      12
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "The week holds 86 minutes of moderate aerobic work against the 150-300 minutes WHO 2020 recommends; the 64-minute gap can come from walking on other days.",
+     "say": "The plan holds 86 minutes of aerobic work a week, 64 short of the 150 the WHO recommends, and walking on other days counts toward the gap.",
+     "nums": [
+      86,
+      150,
+      300,
+      64
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D12",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D13",
+     "text": "Model form is lowest in week 3 and peaks on Sun of week 8.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 8, which is where the deload pays off.",
+     "nums": [
+      3,
+      8
+     ]
+    },
+    {
+     "id": "R1",
+     "text": "Wed of week 1 logged at RPE 5 against a planned 5 (295 AU). No change; progression continues.",
+     "say": "Wed of week 1 came in at RPE 5 against a planned 5, which needs no change.",
+     "nums": [
+      1,
+      5,
+      5,
+      295
+     ]
+    }
+   ],
+   "planNames": [
+    "goblet squat",
+    "barbell bench press",
+    "seated cable row",
+    "lying leg curl",
+    "cable lateral raise",
+    "forearm plank",
+    "dumbbell romanian deadlift",
+    "standing overhead press",
+    "pull-up",
+    "bulgarian split squat",
+    "dumbbell curl",
+    "standing calf raise",
+    "leg press",
+    "incline dumbbell press",
+    "chest-supported dumbbell row",
+    "cable triceps pushdown",
+    "cable face pull"
+   ],
+   "reply": "{\n  \"narration\": [\n    {\"say\":\"The plan is for 5 sessions a week, which is within the 3-6 sessions a week range for intermediate health work.\", \"cites\":[\"D1\"]},\n    {\"say\":\"These sessions are on Monday, Tuesday, Wednesday, Thursday, and Friday, as marked in decision D2.\", \"cites\":[\"D2\"]},\n    {\"say\":\"Each session will be a combination of full body A, moderate aerobic, full body B, moderate aerobic, and full body C, as decided in D3.\", \"cites\":[\"D3\"]},\n    {\"say\":\"The plan uses linear periodization, with reps staying at 10-12 while load and RPE rise through each 3-week build, as explained in D4.\", \"cites\":[\"D4\"]},\n    {\"say\":\"There will be a deload in weeks 4 and 8, with 40% less volume, as decided in D5.\", \"cites\":[\"D5\"]},\n    {\"say\":\"To manage the low back flag, the plan moves from back squat to goblet squat and from romanian deadlift to dumbbell Romanian deadlift, as decided in D6.\", \"cites\":[\"D6\"]},\n    {\"say\":\"Each session will last around 53 minutes, as calculated in D7, with 23 main-lift sets and 56 working sets in total, as decided in D9.\", \"cites\":[\"D7\", \"D9\"]},\n    {\"say\":\"The plan includes 86 minutes of moderate aerobic work, which is within the 150-300 minutes recommended by the WHO 2020, as decided in D10.\", \"cites\":[\"D10\"]}\n  ]\n}"
+  },
+  {
+   "name": "every flag, dumbbells",
+   "inputs": {
+    "goal": "hypertrophy",
+    "level": "advanced",
+    "days": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0
+    ],
+    "minutes": 90,
+    "equipment": "dumbbells",
+    "injuries": [
+     "knee",
+     "back",
+     "shoulder",
+     "wrist"
+    ],
+    "weeks": 8,
+    "mode": "busso"
+   },
+   "log": {},
+   "model": "llama3.1:8b",
+   "ms": 66681,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "6 days marked; advanced muscle work runs 4-5 sessions a week, so the plan uses 5.",
+     "say": "You marked 6 days, and the planner uses 5 of them because an advanced block of this kind runs 4 to 5 sessions a week.",
+     "nums": [
+      6,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Mon, Tue, Wed, Thu, Sat: of your days, the spread with only 3 back-to-back pairs of days.",
+     "say": "It picks Mon, Tue, Wed, Thu, Sat because that spread leaves only 3 back-to-back pairs of days.",
+     "nums": [
+      0,
+      3
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "5 sessions a week: Upper A / Lower A / Push / Pull / Legs so each muscle group is trained twice a week.",
+     "say": "With 5 sessions the week becomes Upper A, Lower A, Push, Pull and Legs so each muscle group is trained twice a week.",
+     "nums": [
+      5
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "daily undulating periodization for muscle at advanced level: rep zones rotate 6-8 / 8-10 across the week. Meta-analyses find linear and undulating models give similar muscle gains, so the choice is a convention.",
+     "say": "The block uses daily undulating periodization: rep zones rotate 6-8 / 8-10 across the week. Meta-analyses find linear and undulating models give similar muscle gains, so the choice is a convention.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "8 weeks: a deload in weeks 4 and 8 with 40% less volume.",
+     "say": "Across the 8 weeks there is a deload in weeks 4 and 8 with 40% less volume.",
+     "nums": [
+      8,
+      4,
+      8,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "low back flag: 2 lifts with high spinal load move along the substitution graph: barbell bent-over row to chest-supported dumbbell row and romanian deadlift to dumbbell Romanian deadlift.",
+     "say": "Because of the low back flag, 2 lifts with high spinal load change, barbell bent-over row to chest-supported dumbbell row among them.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "shoulder flag: 1 lift with overhead or end-range shoulder load moves along the substitution graph: seated dumbbell shoulder press to incline dumbbell press.",
+     "say": "Because of the shoulder flag, one lift with overhead or end-range shoulder load change, seated dumbbell shoulder press to incline dumbbell press.",
+     "nums": [
+      1
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "knee flag: 2 lifts with deep loaded knee flexion move along the substitution graph: back squat to goblet box squat, above parallel and bulgarian split squat to low-box step-up. Knee joint forces in the squat rise with knee flexion and peak near full flexion, so loaded flexion stays above parallel.",
+     "say": "Because of the knee flag, 2 lifts with deep loaded knee flexion change, back squat to goblet box squat, above parallel among them. Knee forces in a squat rise as the knee bends and peak near full depth, so loaded knee flexion stays above parallel.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "With dumbbells, 13 lifts change: barbell bench press to dumbbell bench press, lat pulldown to one-arm dumbbell row and cable lateral raise to dumbbell lateral raise and more.",
+     "say": "Your dumbbells setting changes 13 lifts, for example barbell bench press to dumbbell bench press.",
+     "nums": [
+      13
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "No node in the graph passes your flags for elbow extension; 1 slot removed rather than forced.",
+     "say": "For elbow extension nothing in the graph passes your flags, so that slot is left out rather than forced.",
+     "nums": [
+      1
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "90 minutes, less a 7-minute warm-up, holds about 30 main-lift sets at 2 minutes rest each, more when accessories rest 1.5 minutes.",
+     "say": "Each 90-minute session holds about 30 heavy sets after a 7-minute warm-up, because main lifts rest 2 minutes between sets.",
+     "nums": [
+      90,
+      7,
+      30,
+      2,
+      1.5
+     ]
+    },
+    {
+     "id": "D12",
+     "text": "The solver leaves 4 template slots closed: push-up on fists or handles, one-arm dumbbell row and backpack curl (their muscles already in range).",
+     "say": "It leaves push-up on fists or handles and one-arm dumbbell row out because those muscles already have enough sets.",
+     "nums": [
+      4
+     ]
+    },
+    {
+     "id": "D13",
+     "text": "Target 12-20 sets per muscle per week. The solver places 104 working sets: 8 of 12 targeted muscles land in range; under target: side delts 8, rear delts 8.5, calves 8 and abs 6, at the set cap per exercise.",
+     "say": "The weekly target is 12 to 20 sets per muscle, and 8 of 12 muscle groups land inside it, while side delts, rear delts and calves stop at the set cap per exercise.",
+     "nums": [
+      12,
+      20,
+      104,
+      8,
+      12,
+      8,
+      8.5,
+      8,
+      6
+     ]
+    },
+    {
+     "id": "D14",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D15",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D16",
+     "text": "Model form is lowest in week 3 and peaks on Sun of week 8.",
+     "say": "On these defaults your form is lowest in week 3 and highest in week 8, which is where the deload pays off.",
+     "nums": [
+      3,
+      8
+     ]
+    }
+   ],
+   "planNames": [
+    "dumbbell bench press",
+    "chest-supported dumbbell row",
+    "incline dumbbell press",
+    "one-arm dumbbell row",
+    "dumbbell lateral raise",
+    "dumbbell skull crusher",
+    "dumbbell curl",
+    "goblet box squat, above parallel",
+    "dumbbell romanian deadlift",
+    "low-box step-up",
+    "dumbbell leg curl",
+    "dumbbell calf raise",
+    "forearm plank",
+    "wide-grip inverted row",
+    "dumbbell rear-delt fly",
+    "side plank"
+   ],
+   "reply": "{\n  \"narration\": [\n    {\"say\":\"The plan uses 5 sessions a week because advanced muscle work typically runs 4-5 sessions a week, so D1 decided to use 5.\", \"cites\":[\"D1\"]},\n    {\"say\":\"The sessions are on Mon, Tue, Wed, Thu, Sat because D2 decided to spread the sessions across the days with only 3 back-to-back pairs of days.\", \"cites\":[\"D2\"]},\n    {\"say\":\"The muscle groups are trained twice a week because D3 decided to have 5 sessions a week with Upper A / Lower A / Push / Pull / Legs.\", \"cites\":[\"D3\"]},\n    {\"say\":\"The plan uses daily undulating periodization because D4 decided to rotate rep zones 6-8 / 8-10 across the week, which is a convention for advanced muscle work.\", \"cites\":[\"D4\"]},\n    {\"say\":\"The plan has a deload in weeks 4 and 8 with 40% less volume because D5 decided to reduce volume by 40% in weeks 4 and 8.\", \"cites\":[\"D5\"]},\n    {\"say\":\"The low back flag involves moving from barbell bent-over row to chest-supported dumbbell row and romanian deadlift to dumbbell Romanian deadlift because D6 decided to substitute these lifts.\", \"cites\":[\"D6\"]},\n    {\"say\":\"The shoulder flag involves moving from seated dumbbell shoulder press to incline dumbbell press because D7 decided to substitute this lift.\", \"cites\":[\"D7\"]},\n    {\"say\":\"The knee flag involves moving from back squat to goblet box squat and bulgarian split squat to low-box step-up because D8 decided to substitute these lifts.\", \"cites\":[\"D8\"]},\n    {\"say\":\"13 lifts are changed because D9 decided to substitute these lifts with dumbbells.\", \"cites\":[\"D9\"]},\n    {\"say\":\"The plan has 30 main-lift sets at 2 minutes rest each because D11 decided that 90 minutes, less a 7-minute warm-up, holds about 30 main-lift sets.\", \"cites\":[\"D11\"]},\n    {\"say\":\"The plan has 104 working sets because D13 decided to target 12-20 sets per muscle per week and the solver placed 104 working sets.\", \"cites\":[\"D13\"]},\n    {\"say\":\"The session load is calculated as session RPE x minutes (AU) because D14 decided to use this formula, which is based on the fitness-fatigue model.\", \"cites\":[\"D14\"]},\n    {\"say\":\"The fatigue gain k2 rises with the last few days of load, so a session stacked on hard days costs more fatigue because D15 decided to use this variable dose.\", \"cites\":[\"D15\"]},\n    {\"say\":\"The model form is lowest in week 3 and peaks on Sun of week 8 because D16 decided to model the form in this way.\", \"cites\":[\"D16\"]}\n  ]\n}"
+  },
+  {
+   "name": "weekend only",
+   "inputs": {
+    "goal": "strength",
+    "level": "intermediate",
+    "days": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     1
+    ],
+    "minutes": 90,
+    "equipment": "gym",
+    "injuries": [],
+    "weeks": 6,
+    "mode": "busso"
+   },
+   "log": {
+    "5": {
+     "kind": "hard",
+     "rpe": 9.5
+    },
+    "6": {
+     "kind": "hard",
+     "rpe": 9.5
+    }
+   },
+   "model": "llama3.1:8b",
+   "ms": 56742,
+   "decisions": [
+    {
+     "id": "D1",
+     "text": "2 days marked, below the 3-4 sessions a week for intermediate strength work; the plan uses all 2.",
+     "say": "You marked 2 days, fewer than the 3 to 4 an intermediate block usually has, so every one of them carries a session.",
+     "nums": [
+      2,
+      3,
+      4,
+      2
+     ]
+    },
+    {
+     "id": "D2",
+     "text": "Sessions on Sat, Sun, every day you marked.",
+     "say": "Sessions fall on Sat, Sun.",
+     "nums": [
+      0,
+      1
+     ]
+    },
+    {
+     "id": "D3",
+     "text": "2 sessions a week: Full body A / Full body B so every session trains the whole body.",
+     "say": "With 2 sessions the week becomes Full body A and Full body B so every session trains the whole body.",
+     "nums": [
+      2
+     ]
+    },
+    {
+     "id": "D4",
+     "text": "daily undulating periodization for strength at intermediate level: rep zones rotate 4 / 6 across the week. Meta-analyses find linear and undulating models give similar strength gains, so the choice is a convention.",
+     "say": "The block uses daily undulating periodization: rep zones rotate 4 / 6 across the week. Meta-analyses find linear and undulating models give similar strength gains, so the choice is a convention.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D5",
+     "text": "6 weeks: a 2-week taper in weeks 5 and 6 cutting volume 45% then 55% with intensity held.",
+     "say": "Across the 6 weeks there is a 2-week taper in weeks 5 and 6 cutting volume 45% then 55% with intensity held.",
+     "nums": [
+      6,
+      5,
+      6,
+      40,
+      45,
+      55,
+      2
+     ]
+    },
+    {
+     "id": "D6",
+     "text": "90 minutes, less a 7-minute warm-up, holds about 19 main-lift sets at 3.5 minutes rest each, more when accessories rest 2 minutes.",
+     "say": "Each 90-minute session holds about 19 heavy sets after a 7-minute warm-up, because main lifts rest 3.5 minutes between sets.",
+     "nums": [
+      90,
+      7,
+      19,
+      3.5,
+      2
+     ]
+    },
+    {
+     "id": "D7",
+     "text": "The solver leaves 3 template slots closed: cable lateral raise, forearm plank and standing calf raise (no minutes left).",
+     "say": "The minutes run out before cable lateral raise and forearm plank, so they stay out of the plan.",
+     "nums": [
+      3
+     ]
+    },
+    {
+     "id": "D8",
+     "text": "Target 8-12 sets per muscle per week. The solver places 36 working sets: 5 of 12 targeted muscles land in range; under target: side delts 1.5, calves 2 and abs 0, because the minutes run out first; chest 5 and upper back 6, at the set cap per exercise; rear delts 2 and triceps 4, which nothing in the split trains directly.",
+     "say": "The weekly target is 8 to 12 sets per muscle, and 5 of 12 muscle groups land inside it, while side delts, calves and abs fall short because the minutes run out first.",
+     "nums": [
+      8,
+      12,
+      36,
+      5,
+      12,
+      5,
+      6,
+      1.5,
+      2,
+      4,
+      2,
+      0
+     ]
+    },
+    {
+     "id": "D9",
+     "text": "Session load = session RPE x minutes (AU). Curves: fitness-fatigue model with population defaults k1 = 1, k2 = 2, tau1 = 45 d, tau2 = 15 d; fits in elite swimmers gave 38 d (95% CI 17-59) and 19 d (6-32).",
+     "say": "Every session's load is its session RPE times its minutes, and the curves run the fitness-fatigue model on population defaults (45-day fitness and 15-day fatigue time constants) that are not fitted to you.",
+     "nums": [
+      1,
+      2,
+      45,
+      15,
+      38,
+      17,
+      59,
+      19,
+      6,
+      32,
+      95
+     ]
+    },
+    {
+     "id": "D10",
+     "text": "Variable dose on: the fatigue gain k2 rises with the last few days of load (tau3 = 2.3 d), so a session stacked on hard days costs more fatigue.",
+     "say": "With variable dose on, a session stacked on hard days costs more fatigue than the same session after rest.",
+     "nums": [
+      2.3
+     ]
+    },
+    {
+     "id": "D11",
+     "text": "Model form is lowest in week 4 and peaks on Sat of week 6.",
+     "say": "On these defaults your form is lowest in week 4 and highest in week 6, which is where the taper pays off.",
+     "nums": [
+      4,
+      6
+     ]
+    },
+    {
+     "id": "R1",
+     "text": "Sat of week 1 logged at RPE 9.5 against a planned 6: 817 AU against 516. The model has you starting Sat 352 AU of form below plan (tolerance 252 AU, half a typical session), so Sat loses one set per exercise and one RPE point.",
+     "say": "Sat of week 1 came in at RPE 9.5 instead of 6, and the load model puts you 352 AU of form below plan going into Sat, more than the 252 AU tolerance, so Sat is eased by one set per exercise and one RPE point.",
+     "nums": [
+      1,
+      9.5,
+      6,
+      817,
+      516,
+      352,
+      252
+     ]
+    },
+    {
+     "id": "R2",
+     "text": "Sun of week 1 logged at RPE 9.5 against a planned 6: 827 AU against 522. The model has you starting Sun 1101 AU of form below plan (tolerance 252 AU, half a typical session), so Sun loses one set per exercise and one RPE point.",
+     "say": "Sun of week 1 came in at RPE 9.5 instead of 6, and the load model puts you 1101 AU of form below plan going into Sun, more than the 252 AU tolerance, so Sun is eased by one set per exercise and one RPE point.",
+     "nums": [
+      1,
+      9.5,
+      6,
+      827,
+      522,
+      1101,
+      252
+     ]
+    }
+   ],
+   "planNames": [
+    "back squat",
+    "barbell bench press",
+    "seated cable row",
+    "lying leg curl",
+    "romanian deadlift",
+    "standing overhead press",
+    "pull-up",
+    "bulgarian split squat",
+    "dumbbell curl"
+   ],
+   "reply": "{\"narration\":[{\"say\":\"The plan has 2 sessions a week, on Saturday and Sunday, because D2 says to schedule sessions on these days, and D1 limits the number of sessions to 2, below the 3-4 sessions a week for intermediate strength work.\",\"cites\":[\"D1\",\"D2\"]},{\"say\":\"Each session trains the whole body, because D3 says to have 2 sessions a week with full body A and full body B, so every session trains the whole body.\",\"cites\":[\"D3\"]},{\"say\":\"The plan uses daily undulating periodization for strength at intermediate level, with rep zones rotating 4/6 across the week, because D4 says to use daily undulating periodization for strength at intermediate level.\",\"cites\":[\"D4\"]},{\"say\":\"The plan has a 2-week taper in weeks 5 and 6, cutting volume 45% then 55% with intensity held, because D5 says to have a 6-week plan with a 2-week taper in weeks 5 and 6.\",\"cites\":[\"D5\"]},{\"say\":\"Each session is 90 minutes long, less a 7-minute warm-up, which holds about 19 main-lift sets at 3.5 minutes rest each, more when accessories rest 2 minutes, because D6 says that 90 minutes, less a 7-minute warm-up, holds about 19 main-lift sets at 3.5 minutes rest each, more when accessories rest 2 minutes.\",\"cites\":[\"D6\"]},{\"say\":\"The plan leaves out cable lateral raise, forearm plank and standing calf raise, because D7 says that the solver leaves 3 template slots closed for these exercises.\",\"cites\":[\"D7\"]},{\"say\":\"The plan targets 8-12 sets per muscle per week, but some muscles, like side delts, calves and abs, are under target, because D8 says that 5 of 12 targeted muscles land in range, and under target: side delts 1.5, calves 2 and abs 0, because the minutes run out first, and chest 5 and upper back 6, at the set cap per exercise, and rear delts 2 and triceps 4, which nothing in the split trains directly.\",\"cites\":[\"D8\"]},{\"say\":\"The plan uses the fatigue gain k2, which rises with the last few days of load, so a session stacked on hard days costs more fatigue, because D10 says that the fatigue gain k2 rises with the last few days of load.\",\"cites\":[\"D10\"]},{\"say\":\"The plan peaks on Sat of week 6, because D11 says that the model form is lowest in week 4 and peaks on Sat of week 6.\",\"cites\":[\"D11\"]},{\"say\":\"The plan starts Saturday of week 1 at a lower form, because R1 says that Sat of week 1 logged at RPE 9.5 against a planned 6: 817 AU against 516, and the model has you starting Sat 352 AU of form below plan, so Sat loses one set per exercise and one RPE point.\",\"cites\":[\"R1\"]},{\"say\":\"The plan starts Sunday of week 1 at a lower form, because R2 says that Sun of week 1 logged at RPE 9.5 against a planned 6: 827 AU against 522, and the model has you starting Sun 1101 AU of form below plan, so Sun loses one set per exercise and one RPE point.\",\"cites\":[\"R2\"]}]}"
+  }
+ ]
+}

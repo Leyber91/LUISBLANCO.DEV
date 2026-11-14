@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Usage · Labs · luisblanco.dev</title>
+  <meta name="description" content="The owner's view of which luisblanco.dev labs are used. Sign-in required; visitors see nothing here." />
+
+  <!-- fonts: IBM Plex Mono (everything read or operated) · Fraunces (the page title) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/os.css" />
+  <link rel="stylesheet" href="assets/css/os-pages.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+</head>
+<body class="lop dash" data-state="signed-out">
+  <header class="lop-bar">
+    <a href="index.html" class="lop-brand" title="Back to the labs">&larr;&nbsp;luisblanco.dev&nbsp;<b>/ labs</b></a>
+    <nav class="lop-nav" aria-label="This site">
+      <a href="privacy.html">Privacy</a>
+      <a href="dashboard.html" aria-current="page">Owner</a>
+    </nav>
+  </header>
+
+  <main class="lop-sheet">
+    <div class="los-fixture" id="dash-fixture" role="note" hidden></div>
+
+    <div class="lop-title">
+      <div>
+        <span class="los-label">Labs OS · sheet U · owner only</span>
+        <h1>Usage</h1>
+        <p class="lop-lede">Which labs are opened, by how many browsers and for how long, counted from the events visitors allowed.</p>
+      </div>
+      <dl class="lop-block" aria-label="Title block">
+        <dt>Sheet</dt><dd>Usage</dd>
+        <dt>Source</dt><dd>Supabase · EU West (Paris)</dd>
+        <dt>Range</dt><dd id="dash-range-stamp">last 30 days</dd>
+        <dt>Read</dt><dd id="dash-read-stamp">not read</dd>
+      </dl>
+    </div>
+
+    <!-- ===================== Plate A: who is reading ===================== -->
+    <section class="los-plate dash-access" aria-labelledby="dash-a">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label" id="dash-a">Plate A · Access</span><span class="los-label los-quiet" id="dash-state">Signed out</span></header>
+      <div class="dash-access-row">
+        <form class="dash-signin" id="dash-signin" novalidate>
+          <label class="los-label" for="dash-email">Owner's email</label>
+          <input type="email" id="dash-email" name="email" autocomplete="email" spellcheck="false" required />
+          <button type="submit" class="los-btn" id="dash-send">Send sign-in link</button>
+        </form>
+        <div class="dash-account" id="dash-account" hidden>
+          <span class="los-label">Account</span>
+          <span class="dash-who" id="dash-who"></span>
+          <button type="button" class="los-btn" id="dash-retry" hidden>Read again</button>
+          <button type="button" class="los-btn los-quiet-btn" id="dash-signout">Sign out</button>
+        </div>
+      </div>
+      <p class="dash-message" id="dash-message" role="status" aria-live="polite"></p>
+    </section>
+
+    <!-- ===================== the range: scopes everything below it ===================== -->
+    <div class="dash-filters" role="group" aria-labelledby="dash-range-label">
+      <span class="los-label" id="dash-range-label">Range</span>
+      <button type="button" class="los-btn" data-days="7" aria-pressed="false">7 days</button>
+      <button type="button" class="los-btn" data-days="30" aria-pressed="true">30 days</button>
+      <button type="button" class="los-btn" data-days="90" aria-pressed="false">90 days</button>
+    </div>
+
+    <!-- ===================== Plate B: totals ===================== -->
+    <section class="los-plate dash-plate" aria-labelledby="dash-b">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label" id="dash-b">Plate B · Totals</span><span class="los-label los-quiet" id="dash-b-range">last 30 days</span></header>
+      <dl class="dash-totals">
+        <div class="dash-figure lead"><dt>Visitors</dt><dd id="dash-t-visitors">–</dd></div>
+        <div class="dash-figure"><dt>Sessions</dt><dd id="dash-t-sessions">–</dd></div>
+        <div class="dash-figure"><dt>Lab opens</dt><dd id="dash-t-opens">–</dd></div>
+        <div class="dash-figure wide"><dt>Visible time</dt><dd id="dash-t-visible">–</dd></div>
+        <div class="dash-figure"><dt>Actions</dt><dd id="dash-t-actions">–</dd></div>
+        <div class="dash-figure"><dt>Errors</dt><dd id="dash-t-errors">–</dd></div>
+      </dl>
+    </section>
+
+    <!-- ===================== Plate C: per day ===================== -->
+    <section class="los-plate dash-plate" aria-labelledby="dash-c">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head">
+        <span class="los-label" id="dash-c">Plate C · Per day</span>
+        <span class="dc-legend" aria-label="Legend">
+          <span><i class="dc-key dc-visitors" aria-hidden="true"></i>Visitors</span>
+          <span><i class="dc-key dc-sessions" aria-hidden="true"></i>Sessions</span>
+        </span>
+      </header>
+      <div class="dash-chart" id="dash-chart"></div>
+      <div class="dash-chart-foot">
+        <span class="dash-note" id="dash-chart-note">UTC days.</span>
+        <button type="button" class="los-btn los-quiet-btn" id="dash-table-toggle" aria-expanded="false" aria-controls="dash-table">Table view</button>
+      </div>
+      <div class="dash-table-view" id="dash-table" tabindex="0" role="region" aria-label="Visitors and sessions per day, as a table" hidden></div>
+    </section>
+
+    <!-- ===================== Plate D: every lab ===================== -->
+    <section class="los-plate dash-plate" aria-labelledby="dash-d">
+      <i class="los-bk tl" aria-hidden="true"></i><i class="los-bk tr" aria-hidden="true"></i><i class="los-bk bl" aria-hidden="true"></i><i class="los-bk br" aria-hidden="true"></i>
+      <header class="los-head"><span class="los-label" id="dash-d">Plate D · Every lab</span><span class="los-label los-quiet" id="dash-never">–</span></header>
+      <div class="dash-scroll">
+        <table class="dash-labs" role="table" aria-labelledby="dash-d">
+          <thead role="rowgroup">
+            <tr role="row">
+              <th role="columnheader" scope="col" rowspan="2">Lab</th>
+              <th role="columnheader" scope="col" rowspan="2" class="n">Visitors</th>
+              <th role="columnheader" scope="col" rowspan="2" class="n">Sessions</th>
+              <th role="columnheader" scope="col" rowspan="2" class="n">Opens</th>
+              <th role="columnheader" scope="col" rowspan="2" class="n">Visible time</th>
+              <th role="columnheader" scope="col" rowspan="2" class="n">Actions</th>
+              <th role="columnheader" scope="col" rowspan="2" class="n">Errors</th>
+              <th role="columnheader" scope="colgroup" colspan="4" class="group">From the hub</th>
+            </tr>
+            <tr role="row">
+              <th role="columnheader" scope="col" class="n via first">Card</th>
+              <th role="columnheader" scope="col" class="n via">Rail</th>
+              <th role="columnheader" scope="col" class="n via">Welcome</th>
+              <th role="columnheader" scope="col" class="n via via-last">Other</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" id="dash-labs"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="lop-evidence">
+      <p id="dash-evidence"></p>
+      <p><span class="lop-tag">Visitors</span> are browsers that allowed sharing, told apart by a random id. <span class="lop-tag">Sessions</span> are page loads. <span class="lop-tag">Opens</span> are a lab's own record of being opened; for a lab that does not record itself yet, the links followed to it from the hub. <span class="lop-tag">Visible time</span> adds up, per session, the time the page was in view. <span class="lop-tag">Actions</span> are every other event that is not an error. <span class="lop-tag">From the hub</span> counts the links followed to a lab by where they sat: a card, the side rail, the welcome plate, or anywhere else on the hub.</p>
+    </footer>
+
+    <div class="lop-foot">
+      <span>luisblanco.dev · Labs · the session lives in this tab only</span>
+      <a href="index.html">&larr; Back to the labs</a>
+    </div>
+    <noscript><p>This page needs JavaScript to sign in and to read usage.</p></noscript>
+  </main>
+
+  <script type="module" src="assets/js/dashboard/main.js"></script>
+</body>
+</html>

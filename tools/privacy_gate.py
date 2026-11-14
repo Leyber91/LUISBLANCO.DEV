@@ -22,7 +22,7 @@ PATTERNS = [
     ("key-shaped string", re.compile(r"sk-(?:ant-)?[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}"
                                      r"|gsk_[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{12,}|AIza[A-Za-z0-9_-]{20,}|xox[bp]-[A-Za-z0-9-]{10,}"
                                      r"|hf_[A-Za-z]{20,}|nvapi-[A-Za-z0-9_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----")),
-    ("passphrase in the clear", re.compile(r"(?i)pass(?:phrase|word)\s*[:=]\s*" + TICK + r"?(?!\[rotated)"
+    ("passphrase in the clear", re.compile(r"(?i)pass(?:phrase|word)\s*[:=]\s*" + TICK + r"?(?!\[rotated)(?!![01](?:[,;})\]]|$))"
                                            r"(?-i:(?![A-Z][A-Z0-9_]*(?![A-Za-z0-9_])))[^\s" + TICK + r"'\"]{6,}")),
     ("codex key assignment", re.compile(r"CODEX_PASS\s*=\s*['\"]?(?!\$|\[rotated)[^\s'\";]{4,}")),
 ]
@@ -92,6 +92,8 @@ def selftest() -> int:
         ("anthropic key", "key sk-ant-" + "A" * 30, 1),
         ("github token", "ghp_" + "b" * 30, 1),
         ("passphrase line", "passphrase: " + TICK + "Hunter2Hunter2" + TICK, 1),
+        ("minified boolean in a bundle passes", "number:!0,password:!0,range:!0,search:!0", 0),
+        ("passphrase starting with !0 is still caught", "pass" + "word: !0hunter2hunter", 1),  # split so the gate passes its own source
         ("rotated passphrase passes", "passphrase: " + TICK + "[rotated 2026-11-10]" + TICK, 0),
         ("codex key", "$env:CODEX_PASS=" + chr(34) + "abcdef12" + chr(34), 1),
         ("codex key from a variable passes", "CODEX_PASS=$SECRET node tools/build_codex.mjs", 0),

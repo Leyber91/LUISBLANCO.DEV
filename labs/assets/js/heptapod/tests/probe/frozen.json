@@ -1,0 +1,1573 @@
+{
+ "id": "heptapod-e4-probe-frozen",
+ "title": "Frozen visitor probe, English to HMR v0.1",
+ "status": "frozen 2026-11-11, before any English engine v2 work. Do not edit: any change voids it as a probe. A correction ships as a new file with its own commit and the reason.",
+ "purpose": "Experiment E4 of the lab's G2 build. 35 sentences a visitor to the translator pod would plausibly type, each with its gold meaning graph. The engine is measured on it and may not be tuned to it beyond the stated conventions. A second probe of 35 different sentences, with the same mix and conventions, is held outside this repository and is not shown to the engine's builder.",
+ "annotator": "Written by an annotating agent that does not build the engine. Every sentence is original; none quotes a film or a published text.",
+ "scoring": {
+  "triple_rule": "Each node gives [id, 'k', kind] and one [id, attribute, value] per attribute present (attribute order c, speaker, spell, det, person, num, quant, card, aspect, strength). Each edge gives [head, label, dependent] and one [[head, label, dependent], feature, value] per feature (order mode, temp, evid, polite, inv, type). An absent attribute or feature means the engine must not write one. The triples are derived from hmr by this rule; both are gold.",
+  "correct": "A sentence is correct when the engine's triples equal the gold triples under the best one-to-one mapping of node ids (Smatch-style triple F1 of 1.0, Cai and Knight 2013).",
+  "silent_corruption": "Any gold triple missing or wrong in a graph the engine drew with no on-screen flag naming the problem.",
+  "pass_E4": "0 silent corruptions; at least 20 of 35 correct; every refusal states its reason.",
+  "ladder_english_bridge_rung_5": "At least 30 of 35 correct on this probe and at least 25 of 35 on the sealed probe."
+ },
+ "schema": {
+  "version": "hmr-0.1 (a subset of Uniform Meaning Representation)",
+  "node_kinds": {
+   "origo": "speaker: visitor | far",
+   "event": "c, aspect, strength; det only when c is 'open'",
+   "entity": "c; optional person (1, 2, 3), num, quant, card, det (only when c is 'open')",
+   "junction": "c: and | or | contrast",
+   "scope": "(not used in v0.1 probes)",
+   "name": "spell"
+  },
+  "values": {
+   "aspect": ["state", "habitual", "activity", "endeavor", "performance", "process"],
+   "strength": ["AFF", "PARTAFF", "NEUTAFF", "NEUTNEG", "PARTNEG", "NEG"],
+   "num": ["sg", "pl", "dual", "paucal"],
+   "quant": ["indef", "def", "univ", "neg", "prop"],
+   "det": ["person", "animal", "plant", "artifact", "substance", "element", "place", "time", "event", "abstract", "number", "name"],
+   "mode": ["decl", "inter", "imp", "expr"],
+   "temp": ["before", "after", "overlap", "contains", "within", "timeless", "unspec"],
+   "evid": ["unmarked", "visual", "sensory", "inference", "assumption", "hearsay", "quotative"]
+  },
+  "edge_labels": {
+   "core": ["actor", "undergoer", "goal"],
+   "circumstantial": ["space.location", "space.source", "space.destination", "space.path", "time.when", "time.duration", "time.frequency", "means.manner", "means.instrument", "means.accompanier", "contingency.cause", "contingency.purpose", "contingency.condition", "contingency.concession", "attribution.mod", "attribution.poss", "attribution.part", "attribution.topic", "attribution.beneficiary", "quantity.quant"],
+   "structural": ["anchor", "content", "op", "name", "scope"],
+   "discourse": ["disc.temporal", "disc.contingency", "disc.comparison", "disc.expansion"],
+   "coreference": ["same-entity", "same-event", "subset-of"]
+  },
+  "edge_features": {
+   "mode, evid, polite": "root anchors only",
+   "temp": "anchors, content edges, disc.temporal edges",
+   "type": "disc.contingency (cause, condition, purpose), disc.comparison (contrast, concession), disc.expansion (conjunction, instantiation, restatement, alternative, exception)",
+   "inv": "'+' on a core role from an entity to its relative-clause event"
+  }
+ },
+ "conventions": [
+  {
+   "id": "C1 graph",
+   "rule": "One origo node 'o' (speaker visitor) per sentence. Node ids are variables: scoring finds the best one-to-one mapping between gold and system ids, as Smatch does. Edges run head to dependent. Coreference inside a sentence is reentrancy, a second edge to the same node (drawn as a kiss): a controlled infinitive's subject, and every pronoun of the same person and number in one sentence (we and our, you and your, I and my), are one node. The same-entity, same-event and subset-of edges link sentences and do not occur in a single-sentence probe."
+  },
+  {
+   "id": "C2 concepts",
+   "rule": "c is the English lemma the lexicon maps to a radical multiset (pronouns i, we, you, they, it; plural nouns by their singular lemma, so people is person). Two abstract predicates follow AMR's special frames (cited from memory): be-located-at for 'X is here / at / in / on Y' and be-from for 'X is from Y'. A wh-word is the concept 'open' (AMR's amr-unknown); det adds a class determinant when the wh-word fixes one: who person, where place, when time, how many number. 'what' and 'why' carry no det."
+  },
+  {
+   "id": "C3 roles",
+   "rule": "Deterministic and syntactic, after Dowty's proto-roles. Active subject: actor. Direct object: undergoer. Indirect object, or the to-recipient of a verb of transfer or communication: goal. Subject of a copular predication: undergoer. Passive: the by-phrase is actor, the subject undergoer. The implicit addressee of an imperative (you) and the implicit thanker of 'thank you' (i) are written as nodes, as AMR does."
+  },
+  {
+   "id": "C4 copula",
+   "rule": "'X is ADJ' and 'X is (a) NOUN' give a stative event whose concept is the predicate's, with X as undergoer (properties are stative events). 'X is LOCATION' gives be-located-at with space.location; 'X is from Y' gives be-from with space.source. 'X's name is N' and 'X is N' (N a proper name) give the event 'name' (state) with X as undergoer and the name node on a 'name' edge. A wh-predicate ('Who are you?') puts 'open' as the stative event's concept."
+  },
+  {
+   "id": "C5 attributive properties",
+   "rule": "An adjective inside a noun phrase is a stative event (aspect state, strength AFF) on an attribution.mod edge from the noun's entity. That edge carries no features and the property has no back edge to its holder."
+  },
+  {
+   "id": "C6 circumstantials",
+   "rule": "Labels are family.variant over six families (space, time, means, contingency, attribution, quantity), mapped from AMR roles: :location, :source, :destination to space.*; :time to time.when; :manner, :accompanier to means.*; :cause (and 'why') to contingency.cause; :poss, :mod, :topic, :beneficiary to attribution.*; :quant to quantity.quant. A dependent that is an entity takes a circumstantial label; a dependent that is a clause takes a discourse label (C9)."
+  },
+  {
+   "id": "C7 entity features",
+   "rule": "person only on personal pronouns. num as English marks it: sg or pl on count nouns and pronouns; 'you', mass nouns and names carry none. quant from the determiner only: a, an, some give indef; the, this, these, that, those give def; every, each, all give univ; no, nobody, no one give neg (nobody is person, sg, neg). Possessive determiners, bare nouns, pronouns and names carry no quant. A numeral gives card (an integer) and no quant. 'def' is not in the plan's quantifier list (indefinite, universal, negative, proportional): it is added because the realiser cannot otherwise say 'the'. Demonstrative distance (this against that) is not written in v0.1."
+  },
+  {
+   "id": "C8 time",
+   "rule": "temp is the dependent's relation to its reference. Root anchor: past before, present overlap, 'will' and imperatives after, a generic statement (bare plural or mass subject, habitual or state) timeless. Finite complement (content edge): relative to the head event. Finite adverbial clause (discourse edge) and relative clause (inverse role): an explicit second anchor from the origo carrying temp only, read from the English tense deictically; a present-tense if, when or before clause under a future or imperative main clause is after. A disc.temporal edge also carries temp, the satellite's relation to the nucleus (when: overlap; 'before X': X after; 'after X': X before). Non-finite clauses (infinitives) and attributive properties carry no temp."
+  },
+  {
+   "id": "C9 discourse",
+   "rule": "Mononuclear relations run from the nucleus (main clause) to the satellite, labelled with the PDTB top-level class (disc.temporal, disc.contingency, disc.comparison, disc.expansion) and, except for temporal, a type (because: cause; if: condition; in order to: purpose; although: concession). Multinuclear relations are a junction node (and, or, contrast; 'but' is contrast) with unordered op edges. Nuclearity is the edge direction. A root junction's anchor carries mode and evid; each conjunct event has its own origo anchor carrying temp."
+  },
+  {
+   "id": "C10 aspect",
+   "rule": "UMR's values. state: copular predications, attributive properties and stative verbs (have, know, understand, want, need, hope, think, believe, live meaning reside). habitual: the present simple of a dynamic verb with a generic or repeated reading. activity: progressive forms; atelic dynamic events (wait, stay, talk, speak, listen, watch, sleep); the present simple of a non-performative dynamic verb read as ongoing ('We come in peace' is 'we are coming'). performance: bounded dynamic events (come and came, leave, return, arrive, travel, land, see, send, show, tell, give, receive, build, meet, visit, learn, answer, hurt) and performative presents (offer, give, thank, hello, goodbye). endeavor and process do not occur in the probe."
+  },
+  {
+   "id": "C11 strength",
+   "rule": "FactBank's six values, relative to the conceiver. AFF by default; not, never, do not give NEG; perhaps, maybe give NEUTAFF; probably gives PARTAFF. The conceiver is the origo, except that the subject of say, think, believe, hope or want conceives its complement: think and believe give the complement PARTAFF, hope and want NEUTAFF, say AFF (this mapping is the annotator's decision and is uncertain against the UMR guidelines). Factive verbs (know, learn) keep the origo, so their complement keeps its own value. Conceivers are derived, never written as triples. A negative quantifier is written on the entity and leaves the event AFF. A conditional antecedent stays AFF: the condition relation carries the hypothesis."
+  },
+  {
+   "id": "C12 mode, evidential, politeness",
+   "rule": "Anchor features. mode: decl, inter (yes-no and wh), imp (requests), expr (formulaic social acts: hello, goodbye, thank you). evid only on declarative root anchors: 'unmarked' (the explicit default: English names no source) unless a lexical marker sets one of Aikhenvald's six parameters (visual, sensory, inference, assumption, hearsay, quotative); no probe sentence carries one. polite '+' on an imperative anchor when 'please' is present."
+  },
+  {
+   "id": "C13 names",
+   "rule": "A proper name is a name node (spell: lowercase letters, at most 12). With no common-noun head it stands as the entity itself, as a participant and never as the root; a predicative name follows C4."
+  },
+  {
+   "id": "C14 numbers",
+   "rule": "A cardinal above 9,999 is annotated in full. v0.1 refuses it (its numerals stop at the thousands), so the sentence is marked expect_v01 'refusal'. A refusal that states its reason is not a silent corruption, and it is not a correct parse."
+  },
+  {
+   "id": "C15 several roots",
+   "rule": "A greeting followed by a statement is two root anchors from the one origo, with no relation between them."
+  },
+  {
+   "id": "C16 relative clauses",
+   "rule": "'the ship that you sent us' is [ship, undergoer, send] with inv '+' (AMR's :ARG1-of), plus the deictic anchor of C8. The relative-clause event is never the root."
+  }
+ ],
+ "sources": ["Banarescu et al. 2013, Abstract Meaning Representation for Sembanking, Linguistic Annotation Workshop (ACL).", "Van Gysel et al. 2021, Designing a Uniform Meaning Representation for Natural Language Processing, KI - Kuenstliche Intelligenz.", "Sauri and Pustejovsky 2009, FactBank: a corpus annotated with event factuality, Language Resources and Evaluation.", "Prasad et al. 2008, The Penn Discourse TreeBank 2.0, LREC.", "Aikhenvald 2004, Evidentiality, Oxford University Press.", "Dowty 1991, Thematic proto-roles and argument selection, Language.", "Cai and Knight 2013, Smatch: an evaluation metric for semantic feature structures, ACL."],
+ "stats": {
+  "sentences": 35,
+  "triples": 762,
+  "mix": {
+   "cause": 2,
+   "condition": 1,
+   "content-clause": 2,
+   "coordination": 2,
+   "copula": 7,
+   "ditransitive": 3,
+   "expressive": 2,
+   "future": 6,
+   "generic": 1,
+   "greeting": 2,
+   "imperative": 3,
+   "infinitive": 2,
+   "manner": 1,
+   "modality": 3,
+   "name": 1,
+   "negation": 4,
+   "number": 2,
+   "offer": 2,
+   "past": 5,
+   "place": 5,
+   "possession": 10,
+   "present": 4,
+   "progressive": 1,
+   "property": 5,
+   "quantity": 2,
+   "question-wh": 4,
+   "question-yn": 2,
+   "relative-clause": 1,
+   "request": 3,
+   "statement": 3,
+   "temporal-clause": 1,
+   "time": 2,
+   "two-clause": 6
+  }
+ },
+ "sentences": [
+  {
+   "id": "F01",
+   "text": "Hello.",
+   "mix": ["greeting", "expressive"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "hello", "aspect": "performance", "strength": "AFF"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "expr", "temp": "overlap"}]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "hello"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "expr"],
+    [["o", "anchor", "e1"], "temp", "overlap"]
+   ]
+  },
+  {
+   "id": "F02",
+   "text": "We come in peace.",
+   "mix": ["statement", "present", "manner"],
+   "note": "Present simple of a motion verb read as ongoing (C10).",
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "come", "aspect": "activity", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "peace"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "means.manner", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "come"],
+    ["e1", "aspect", "activity"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "peace"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "means.manner", "x2"]
+   ]
+  },
+  {
+   "id": "F03",
+   "text": "Please do not leave.",
+   "mix": ["request", "negation", "imperative"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "leave", "aspect": "performance", "strength": "NEG"},
+    "x1": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "imp", "temp": "after", "polite": "+"}],
+    ["e1", "actor", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "leave"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "NEG"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "imp"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "polite", "+"],
+    ["e1", "actor", "x1"]
+   ]
+  },
+  {
+   "id": "F04",
+   "text": "Who are you?",
+   "mix": ["question-wh", "copula"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "open", "aspect": "state", "strength": "AFF", "det": "person"},
+    "x1": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "inter", "temp": "overlap"}],
+    ["e1", "undergoer", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "open"],
+    ["e1", "det", "person"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "inter"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "undergoer", "x1"]
+   ]
+  },
+  {
+   "id": "F05",
+   "text": "Where are you from?",
+   "mix": ["question-wh", "copula", "place"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "be-from", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "open", "det": "place"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "inter", "temp": "overlap"}],
+    ["e1", "undergoer", "x1"],
+    ["e1", "space.source", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "be-from"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "open"],
+    ["x2", "det", "place"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "inter"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "undergoer", "x1"],
+    ["e1", "space.source", "x2"]
+   ]
+  },
+  {
+   "id": "F06",
+   "text": "My name is Ana.",
+   "mix": ["name", "copula"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "name", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "i", "person": 1, "num": "sg"},
+    "n1": {"k": "name", "spell": "ana"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "undergoer", "x1"],
+    ["e1", "name", "n1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "name"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["n1", "k", "name"],
+    ["n1", "spell", "ana"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "i"],
+    ["x1", "person", 1],
+    ["x1", "num", "sg"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "undergoer", "x1"],
+    ["e1", "name", "n1"]
+   ]
+  },
+  {
+   "id": "F07",
+   "text": "We are humans.",
+   "mix": ["copula", "statement"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "human", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "undergoer", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "human"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "undergoer", "x1"]
+   ]
+  },
+  {
+   "id": "F08",
+   "text": "We do not understand you.",
+   "mix": ["negation", "present"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "understand", "aspect": "state", "strength": "NEG"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "understand"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "NEG"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F09",
+   "text": "Do you understand us?",
+   "mix": ["question-yn", "present"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "understand", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "we", "person": 1, "num": "pl"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "inter", "temp": "overlap"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "understand"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "we"],
+    ["x2", "person", 1],
+    ["x2", "num", "pl"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "inter"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F10",
+   "text": "We came from a small blue planet.",
+   "mix": ["past", "place", "property"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "come", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "planet", "num": "sg", "quant": "indef"},
+    "e2": {"k": "event", "c": "small", "aspect": "state", "strength": "AFF"},
+    "e3": {"k": "event", "c": "blue", "aspect": "state", "strength": "AFF"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "before", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "space.source", "x2"],
+    ["x2", "attribution.mod", "e2"],
+    ["x2", "attribution.mod", "e3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "come"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "small"],
+    ["e2", "aspect", "state"],
+    ["e2", "strength", "AFF"],
+    ["e3", "k", "event"],
+    ["e3", "c", "blue"],
+    ["e3", "aspect", "state"],
+    ["e3", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "planet"],
+    ["x2", "num", "sg"],
+    ["x2", "quant", "indef"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "before"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "space.source", "x2"],
+    ["x2", "attribution.mod", "e2"],
+    ["x2", "attribution.mod", "e3"]
+   ]
+  },
+  {
+   "id": "F11",
+   "text": "We will return tomorrow.",
+   "mix": ["future", "time"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "return", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "tomorrow"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "after", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "time.when", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "return"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "tomorrow"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "time.when", "x2"]
+   ]
+  },
+  {
+   "id": "F12",
+   "text": "We have three ships.",
+   "mix": ["number", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "have", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "ship", "num": "pl", "card": 3}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "have"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "ship"],
+    ["x2", "num", "pl"],
+    ["x2", "card", 3],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F13",
+   "text": "Nobody will hurt you.",
+   "mix": ["quantity", "negation", "future"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "hurt", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "person", "num": "sg", "quant": "neg"},
+    "x2": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "after", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "hurt"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "person"],
+    ["x1", "num", "sg"],
+    ["x1", "quant", "neg"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F14",
+   "text": "We want to learn your language.",
+   "mix": ["infinitive", "possession", "modality"],
+   "note": "Control: the wanter is the learner (reentrancy). Non-finite complement: no temp (C8).",
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "want", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "e2": {"k": "event", "c": "learn", "aspect": "performance", "strength": "NEUTAFF"},
+    "x2": {"k": "entity", "c": "language", "num": "sg"},
+    "x3": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "content", "e2"],
+    ["e2", "actor", "x1"],
+    ["e2", "undergoer", "x2"],
+    ["x2", "attribution.poss", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "want"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "learn"],
+    ["e2", "aspect", "performance"],
+    ["e2", "strength", "NEUTAFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "language"],
+    ["x2", "num", "sg"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "you"],
+    ["x3", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "content", "e2"],
+    ["e2", "actor", "x1"],
+    ["e2", "undergoer", "x2"],
+    ["x2", "attribution.poss", "x3"]
+   ]
+  },
+  {
+   "id": "F15",
+   "text": "We offer you this gift.",
+   "mix": ["offer", "ditransitive"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "offer", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "you", "person": 2},
+    "x3": {"k": "entity", "c": "gift", "num": "sg", "quant": "def"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "goal", "x2"],
+    ["e1", "undergoer", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "offer"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["x3", "k", "entity"],
+    ["x3", "c", "gift"],
+    ["x3", "num", "sg"],
+    ["x3", "quant", "def"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "goal", "x2"],
+    ["e1", "undergoer", "x3"]
+   ]
+  },
+  {
+   "id": "F16",
+   "text": "Please show us your ship.",
+   "mix": ["request", "imperative", "ditransitive", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "show", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x3": {"k": "entity", "c": "ship", "num": "sg"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "imp", "temp": "after", "polite": "+"}],
+    ["e1", "actor", "x1"],
+    ["e1", "goal", "x2"],
+    ["e1", "undergoer", "x3"],
+    ["x3", "attribution.poss", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "show"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "we"],
+    ["x2", "person", 1],
+    ["x2", "num", "pl"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "ship"],
+    ["x3", "num", "sg"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "imp"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "polite", "+"],
+    ["e1", "actor", "x1"],
+    ["e1", "goal", "x2"],
+    ["e1", "undergoer", "x3"],
+    ["x3", "attribution.poss", "x1"]
+   ]
+  },
+  {
+   "id": "F17",
+   "text": "What do you want?",
+   "mix": ["question-wh"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "want", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "open"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "inter", "temp": "overlap"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "want"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "open"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "inter"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F18",
+   "text": "Why are you here?",
+   "mix": ["question-wh", "cause", "place", "copula"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "be-located-at", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "here"},
+    "x3": {"k": "entity", "c": "open"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "inter", "temp": "overlap"}],
+    ["e1", "undergoer", "x1"],
+    ["e1", "space.location", "x2"],
+    ["e1", "contingency.cause", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "be-located-at"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "here"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "open"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "inter"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "undergoer", "x1"],
+    ["e1", "space.location", "x2"],
+    ["e1", "contingency.cause", "x3"]
+   ]
+  },
+  {
+   "id": "F19",
+   "text": "We came here because we wanted to meet you.",
+   "mix": ["cause", "two-clause", "past", "infinitive"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "come", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "here"},
+    "e2": {"k": "event", "c": "want", "aspect": "state", "strength": "AFF"},
+    "e3": {"k": "event", "c": "meet", "aspect": "performance", "strength": "NEUTAFF"},
+    "x3": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "before", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "space.destination", "x2"],
+    ["e1", "disc.contingency", "e2", {"type": "cause"}],
+    ["o", "anchor", "e2", {"temp": "before"}],
+    ["e2", "actor", "x1"],
+    ["e2", "content", "e3"],
+    ["e3", "actor", "x1"],
+    ["e3", "undergoer", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "come"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "want"],
+    ["e2", "aspect", "state"],
+    ["e2", "strength", "AFF"],
+    ["e3", "k", "event"],
+    ["e3", "c", "meet"],
+    ["e3", "aspect", "performance"],
+    ["e3", "strength", "NEUTAFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "here"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "you"],
+    ["x3", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "before"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "space.destination", "x2"],
+    ["e1", "disc.contingency", "e2"],
+    [["e1", "disc.contingency", "e2"], "type", "cause"],
+    ["o", "anchor", "e2"],
+    [["o", "anchor", "e2"], "temp", "before"],
+    ["e2", "actor", "x1"],
+    ["e2", "content", "e3"],
+    ["e3", "actor", "x1"],
+    ["e3", "undergoer", "x3"]
+   ]
+  },
+  {
+   "id": "F20",
+   "text": "If you speak, we will listen.",
+   "mix": ["condition", "two-clause", "future"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "listen", "aspect": "activity", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "e2": {"k": "event", "c": "speak", "aspect": "activity", "strength": "AFF"},
+    "x2": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "after", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "disc.contingency", "e2", {"type": "condition"}],
+    ["o", "anchor", "e2", {"temp": "after"}],
+    ["e2", "actor", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "listen"],
+    ["e1", "aspect", "activity"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "speak"],
+    ["e2", "aspect", "activity"],
+    ["e2", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "disc.contingency", "e2"],
+    [["e1", "disc.contingency", "e2"], "type", "condition"],
+    ["o", "anchor", "e2"],
+    [["o", "anchor", "e2"], "temp", "after"],
+    ["e2", "actor", "x2"]
+   ]
+  },
+  {
+   "id": "F21",
+   "text": "The ship that you sent us is beautiful.",
+   "mix": ["relative-clause", "property", "copula", "past"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "beautiful", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "ship", "num": "sg", "quant": "def"},
+    "e2": {"k": "event", "c": "send", "aspect": "performance", "strength": "AFF"},
+    "x2": {"k": "entity", "c": "you", "person": 2},
+    "x3": {"k": "entity", "c": "we", "person": 1, "num": "pl"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "undergoer", "x1"],
+    ["x1", "undergoer", "e2", {"inv": "+"}],
+    ["o", "anchor", "e2", {"temp": "before"}],
+    ["e2", "actor", "x2"],
+    ["e2", "goal", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "beautiful"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "send"],
+    ["e2", "aspect", "performance"],
+    ["e2", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "ship"],
+    ["x1", "num", "sg"],
+    ["x1", "quant", "def"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["x3", "k", "entity"],
+    ["x3", "c", "we"],
+    ["x3", "person", 1],
+    ["x3", "num", "pl"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "undergoer", "x1"],
+    ["x1", "undergoer", "e2"],
+    [["x1", "undergoer", "e2"], "inv", "+"],
+    ["o", "anchor", "e2"],
+    [["o", "anchor", "e2"], "temp", "before"],
+    ["e2", "actor", "x2"],
+    ["e2", "goal", "x3"]
+   ]
+  },
+  {
+   "id": "F22",
+   "text": "We know that you watched our world.",
+   "mix": ["content-clause", "two-clause", "past", "possession"],
+   "note": "know is factive: the origo stays the conceiver, so watch is AFF (C11).",
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "know", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "e2": {"k": "event", "c": "watch", "aspect": "activity", "strength": "AFF"},
+    "x2": {"k": "entity", "c": "you", "person": 2},
+    "x3": {"k": "entity", "c": "world", "num": "sg"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "content", "e2", {"temp": "before"}],
+    ["e2", "actor", "x2"],
+    ["e2", "undergoer", "x3"],
+    ["x3", "attribution.poss", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "know"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "watch"],
+    ["e2", "aspect", "activity"],
+    ["e2", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["x3", "k", "entity"],
+    ["x3", "c", "world"],
+    ["x3", "num", "sg"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "content", "e2"],
+    [["e1", "content", "e2"], "temp", "before"],
+    ["e2", "actor", "x2"],
+    ["e2", "undergoer", "x3"],
+    ["x3", "attribution.poss", "x1"]
+   ]
+  },
+  {
+   "id": "F23",
+   "text": "We think that you are friendly.",
+   "mix": ["content-clause", "two-clause", "modality", "property"],
+   "note": "think shifts the conceiver to its subject (C11).",
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "think", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "e2": {"k": "event", "c": "friendly", "aspect": "state", "strength": "PARTAFF"},
+    "x2": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "content", "e2", {"temp": "overlap"}],
+    ["e2", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "think"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "friendly"],
+    ["e2", "aspect", "state"],
+    ["e2", "strength", "PARTAFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "content", "e2"],
+    [["e1", "content", "e2"], "temp", "overlap"],
+    ["e2", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F24",
+   "text": "Perhaps you will visit our world.",
+   "mix": ["modality", "future", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "visit", "aspect": "performance", "strength": "NEUTAFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "world", "num": "sg"},
+    "x3": {"k": "entity", "c": "we", "person": 1, "num": "pl"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "after", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"],
+    ["x2", "attribution.poss", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "visit"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "NEUTAFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "world"],
+    ["x2", "num", "sg"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "we"],
+    ["x3", "person", 1],
+    ["x3", "num", "pl"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"],
+    ["x2", "attribution.poss", "x3"]
+   ]
+  },
+  {
+   "id": "F25",
+   "text": "We saw your ship yesterday.",
+   "mix": ["past", "time", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "see", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "ship", "num": "sg"},
+    "x3": {"k": "entity", "c": "you", "person": 2},
+    "x4": {"k": "entity", "c": "yesterday"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "before", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"],
+    ["x2", "attribution.poss", "x3"],
+    ["e1", "time.when", "x4"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "see"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "ship"],
+    ["x2", "num", "sg"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "you"],
+    ["x3", "person", 2],
+    ["x4", "k", "entity"],
+    ["x4", "c", "yesterday"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "before"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"],
+    ["x2", "attribution.poss", "x3"],
+    ["e1", "time.when", "x4"]
+   ]
+  },
+  {
+   "id": "F26",
+   "text": "Seven billion people live on our world.",
+   "mix": ["number", "place", "possession"],
+   "expect_v01": "refusal: cardinal above 9,999 (C14)",
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "live", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "person", "num": "pl", "card": 7000000000},
+    "x2": {"k": "entity", "c": "world", "num": "sg"},
+    "x3": {"k": "entity", "c": "we", "person": 1, "num": "pl"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "space.location", "x2"],
+    ["x2", "attribution.poss", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "live"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "person"],
+    ["x1", "num", "pl"],
+    ["x1", "card", 7000000000],
+    ["x2", "k", "entity"],
+    ["x2", "c", "world"],
+    ["x2", "num", "sg"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "we"],
+    ["x3", "person", 1],
+    ["x3", "num", "pl"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "space.location", "x2"],
+    ["x2", "attribution.poss", "x3"]
+   ]
+  },
+  {
+   "id": "F27",
+   "text": "We will answer every question.",
+   "mix": ["quantity", "future"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "answer", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x2": {"k": "entity", "c": "question", "num": "sg", "quant": "univ"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "after", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "answer"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "question"],
+    ["x2", "num", "sg"],
+    ["x2", "quant", "univ"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F28",
+   "text": "Our scientists are waiting at the camp.",
+   "mix": ["present", "progressive", "place", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "wait", "aspect": "activity", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "scientist", "num": "pl"},
+    "x2": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x3": {"k": "entity", "c": "camp", "num": "sg", "quant": "def"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["x1", "attribution.poss", "x2"],
+    ["e1", "space.location", "x3"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "wait"],
+    ["e1", "aspect", "activity"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "scientist"],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "we"],
+    ["x2", "person", 1],
+    ["x2", "num", "pl"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "camp"],
+    ["x3", "num", "sg"],
+    ["x3", "quant", "def"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["x1", "attribution.poss", "x2"],
+    ["e1", "space.location", "x3"]
+   ]
+  },
+  {
+   "id": "F29",
+   "text": "We are small, but we are not afraid.",
+   "mix": ["coordination", "two-clause", "negation", "property"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "j1": {"k": "junction", "c": "contrast"},
+    "e1": {"k": "event", "c": "small", "aspect": "state", "strength": "AFF"},
+    "e2": {"k": "event", "c": "afraid", "aspect": "state", "strength": "NEG"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"}
+   }, "edges": [
+    ["o", "anchor", "j1", {"mode": "decl", "evid": "unmarked"}],
+    ["j1", "op", "e1"],
+    ["j1", "op", "e2"],
+    ["o", "anchor", "e1", {"temp": "overlap"}],
+    ["o", "anchor", "e2", {"temp": "overlap"}],
+    ["e1", "undergoer", "x1"],
+    ["e2", "undergoer", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "small"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "afraid"],
+    ["e2", "aspect", "state"],
+    ["e2", "strength", "NEG"],
+    ["j1", "k", "junction"],
+    ["j1", "c", "contrast"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["o", "anchor", "j1"],
+    [["o", "anchor", "j1"], "mode", "decl"],
+    [["o", "anchor", "j1"], "evid", "unmarked"],
+    ["j1", "op", "e1"],
+    ["j1", "op", "e2"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["o", "anchor", "e2"],
+    [["o", "anchor", "e2"], "temp", "overlap"],
+    ["e1", "undergoer", "x1"],
+    ["e2", "undergoer", "x1"]
+   ]
+  },
+  {
+   "id": "F30",
+   "text": "My friend and I are scientists.",
+   "mix": ["coordination", "copula", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "scientist", "aspect": "state", "strength": "AFF"},
+    "j1": {"k": "junction", "c": "and"},
+    "x1": {"k": "entity", "c": "friend", "num": "sg"},
+    "x2": {"k": "entity", "c": "i", "person": 1, "num": "sg"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "overlap", "evid": "unmarked"}],
+    ["e1", "undergoer", "j1"],
+    ["j1", "op", "x1"],
+    ["j1", "op", "x2"],
+    ["x1", "attribution.poss", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "scientist"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["j1", "k", "junction"],
+    ["j1", "c", "and"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "friend"],
+    ["x1", "num", "sg"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "i"],
+    ["x2", "person", 1],
+    ["x2", "num", "sg"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "undergoer", "j1"],
+    ["j1", "op", "x1"],
+    ["j1", "op", "x2"],
+    ["x1", "attribution.poss", "x2"]
+   ]
+  },
+  {
+   "id": "F31",
+   "text": "Do you want some water?",
+   "mix": ["offer", "question-yn"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "want", "aspect": "state", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "water", "quant": "indef"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "inter", "temp": "overlap"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "want"],
+    ["e1", "aspect", "state"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "water"],
+    ["x2", "quant", "indef"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "inter"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F32",
+   "text": "Tell us your name, please.",
+   "mix": ["request", "imperative", "ditransitive", "possession"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "tell", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "you", "person": 2},
+    "x2": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "x3": {"k": "entity", "c": "name", "num": "sg"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "imp", "temp": "after", "polite": "+"}],
+    ["e1", "actor", "x1"],
+    ["e1", "goal", "x2"],
+    ["e1", "undergoer", "x3"],
+    ["x3", "attribution.poss", "x1"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "tell"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "you"],
+    ["x1", "person", 2],
+    ["x2", "k", "entity"],
+    ["x2", "c", "we"],
+    ["x2", "person", 1],
+    ["x2", "num", "pl"],
+    ["x3", "k", "entity"],
+    ["x3", "c", "name"],
+    ["x3", "num", "sg"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "imp"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "polite", "+"],
+    ["e1", "actor", "x1"],
+    ["e1", "goal", "x2"],
+    ["e1", "undergoer", "x3"],
+    ["x3", "attribution.poss", "x1"]
+   ]
+  },
+  {
+   "id": "F33",
+   "text": "We will talk when you are ready.",
+   "mix": ["temporal-clause", "two-clause", "future", "property"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "talk", "aspect": "activity", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "we", "person": 1, "num": "pl"},
+    "e2": {"k": "event", "c": "ready", "aspect": "state", "strength": "AFF"},
+    "x2": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "after", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "disc.temporal", "e2", {"temp": "overlap"}],
+    ["o", "anchor", "e2", {"temp": "after"}],
+    ["e2", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "talk"],
+    ["e1", "aspect", "activity"],
+    ["e1", "strength", "AFF"],
+    ["e2", "k", "event"],
+    ["e2", "c", "ready"],
+    ["e2", "aspect", "state"],
+    ["e2", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "we"],
+    ["x1", "person", 1],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "after"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "disc.temporal", "e2"],
+    [["e1", "disc.temporal", "e2"], "temp", "overlap"],
+    ["o", "anchor", "e2"],
+    [["o", "anchor", "e2"], "temp", "after"],
+    ["e2", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F34",
+   "text": "Thank you.",
+   "mix": ["greeting", "expressive"],
+   "note": "The thanker is implicit and written (C3).",
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "thank", "aspect": "performance", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "i", "person": 1, "num": "sg"},
+    "x2": {"k": "entity", "c": "you", "person": 2}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "expr", "temp": "overlap"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "thank"],
+    ["e1", "aspect", "performance"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "i"],
+    ["x1", "person", 1],
+    ["x1", "num", "sg"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "you"],
+    ["x2", "person", 2],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "expr"],
+    [["o", "anchor", "e1"], "temp", "overlap"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  },
+  {
+   "id": "F35",
+   "text": "Humans breathe air.",
+   "mix": ["generic", "statement"],
+   "hmr": {"v": "hmr-0.1", "nodes": {
+    "o": {"k": "origo", "speaker": "visitor"},
+    "e1": {"k": "event", "c": "breathe", "aspect": "habitual", "strength": "AFF"},
+    "x1": {"k": "entity", "c": "human", "num": "pl"},
+    "x2": {"k": "entity", "c": "air"}
+   }, "edges": [
+    ["o", "anchor", "e1", {"mode": "decl", "temp": "timeless", "evid": "unmarked"}],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]},
+   "triples": [
+    ["o", "k", "origo"],
+    ["o", "speaker", "visitor"],
+    ["e1", "k", "event"],
+    ["e1", "c", "breathe"],
+    ["e1", "aspect", "habitual"],
+    ["e1", "strength", "AFF"],
+    ["x1", "k", "entity"],
+    ["x1", "c", "human"],
+    ["x1", "num", "pl"],
+    ["x2", "k", "entity"],
+    ["x2", "c", "air"],
+    ["o", "anchor", "e1"],
+    [["o", "anchor", "e1"], "mode", "decl"],
+    [["o", "anchor", "e1"], "temp", "timeless"],
+    [["o", "anchor", "e1"], "evid", "unmarked"],
+    ["e1", "actor", "x1"],
+    ["e1", "undergoer", "x2"]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+/* ============================================================
+   labs-src/os/recording.ts — the visitor's switch for the record.
+
+   On by default. Turned off, Labs OS logs nothing new (no events,
+   no visit time, no hub catalogue snapshot) until the visitor
+   turns it on again; what was logged before stays until they
+   delete it. The choice lives in meta under "recording" and
+   survives "delete everything", so deleting the record never
+   turns recording back on behind the visitor's back.
+   ============================================================ */
+export const RECORDING_KEY = 'recording';
+export const RECORDING_DEFAULT = Object.freeze({ on: true, t: null });
+export function readRecording(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+        return RECORDING_DEFAULT;
+    const on = raw['on'], t = raw['t'];
+    if (typeof on !== 'boolean')
+        return RECORDING_DEFAULT;
+    return { on, t: typeof t === 'number' ? t : null };
+}
+export async function loadRecording(store) {
+    try {
+        return readRecording(await store.getMeta(RECORDING_KEY));
+    }
+    catch {
+        return RECORDING_DEFAULT;
+    }
+}
+export async function saveRecording(store, on, t) {
+    const state = { on, t };
+    await store.setMeta(RECORDING_KEY, { on, t });
+    return state;
+}

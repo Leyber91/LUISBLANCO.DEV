@@ -37,9 +37,10 @@ export class CosmicSubstrate {
     this.running = true;
     if (this.reduced) { this._render(0); return; }
     this.last = performance.now();
-    requestAnimationFrame(this._frame);
+    this.raf = requestAnimationFrame(this._frame);
   }
-  stop() { this.running = false; }
+  // Cancelling the pending frame means a quick stop/start (a scene pause and resume) never leaves two loops.
+  stop() { this.running = false; cancelAnimationFrame(this.raf); }
   destroy() {
     this.stop();
     window.removeEventListener('resize', this._resize);
@@ -77,7 +78,7 @@ export class CosmicSubstrate {
     if (!this.running) return;
     this.last = now;
     this._render((now - this.t0) / 1000);
-    requestAnimationFrame(this._frame);
+    this.raf = requestAnimationFrame(this._frame);
   }
 
   _render(t) {

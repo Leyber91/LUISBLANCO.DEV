@@ -40,6 +40,12 @@ LUISBLANCO.DEV/
 1. **Zero build, works from `file://`.** No bundler, no transpile, no `import`/`export` (native
    ES modules are blocked from `file://` by browser CORS). Modules are plain `<script>` files
    loaded in order; this is a deliberate trade for portability + no toolchain rot (BACKLOG D-7).
+
+   **Labs may have a build step** (decided by Luis, 2026-11-13). TypeScript source for labs lives under
+   `labs-src/` with its own `package.json` (dev dependencies only); its compiled output is committed into
+   `labs/` (Labs OS: `labs-src/os/` compiles to `labs/assets/js/os/`), so the published site still serves
+   plain files and needs no toolchain to run. The main site stays buildless. CI rebuilds `labs-src` and fails
+   if the committed output differs from the source.
 2. **Namespaces, not globals soup.** Each subsystem augments ONE namespace object:
    - `window.LB` — the engine/motion master (substrate reads `LB.motionOn`, `LB.amp`, …).
    - `window.LUMEN` — the animation system internals (`LUMEN.CONFIG`, `.GLSL`, `.Engine`).

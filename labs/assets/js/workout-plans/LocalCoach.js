@@ -1,111 +1,98 @@
 /* ============================================================
-   workout-plans/LocalCoach.js — the deterministic coach.
+   workout-plans/LocalCoach.js — the deterministic narrator and
+   the claim checker. Pure logic, no DOM.
 
-   Pure logic, no DOM. Turns the user's constraints into the same
-   plan shape the reasoning model is asked for, plus a believable
-   reasoning script. It is the single source of truth for BOTH echo
-   mode and the parse-failure fallback, so the experience never
-   degrades to a dead box.
+   narrate(plan, lived) writes the explanation straight from the
+   planner's decision log: one sentence per decision worth saying,
+   each citing the decision it comes from. It is the fallback when
+   no model answers, and the reference the model is checked
+   against.
 
-   Every former if/else ladder (split selection, exercise count,
-   constraint swaps, progression copy) now resolves through the
-   lookup/strategy tables in constants.js — extend the data, not
-   this class.
+   check(sentences, decisions, planNames) audits any narration, the model's
+   included, sentence by sentence:
+     1 it cites at least one decision, and every cited id exists
+     2 every number it states appears in a cited decision
+     3 every exercise it names is in the plan or a cited decision
+     4 it makes no medical claim (MEDICAL_RE)
+   A sentence that fails is kept on the page, struck through, with
+   the reason, so the visitor sees what the model got wrong.
    ============================================================ */
 
-import {
-  GOAL_LABEL, EQUIP_LABEL, DOSE, DOSE_FALLBACK, POOL, DAY_NAMES,
-  SPLIT_RULES, SPLIT_DEFAULT, EXERCISE_COUNT, CONSTRAINT_RULES,
-  PROGRESSION, DELOAD_TEXT, BASE_CAVEAT, PRIMARY_NOTE,
-} from './constants.js';
+import { MEDICAL_RE } from './constants.js';
+import { EXERCISES } from './library.js';
 
-const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const ORDER = ['notes', 'frequency', 'spacing', 'conflict', 'split', 'scheme', 'shape', 'swap', 'drop', 'time', 'cut', 'volume', 'balance', 'pin', 'distribution', 'who', 'load', 'busso', 'peak'];
+const SKIP_WHEN_MANY = new Set(['spacing', 'conflict', 'cut', 'drop', 'busso', 'balance']);
 
-export class LocalCoach {
-  /* days/level -> [[pattern, label], ...] (SPLIT_RULES, then default) */
-  chooseSplit(days, level) {
-    const rule = SPLIT_RULES[days];
-    if (!rule) return SPLIT_DEFAULT;
-    if (rule.fixed) return rule.fixed;
-    return rule.byLevel?.[level] || rule.default;
+export function allDecisions(plan, lived) {
+  return plan.log.concat(lived ? lived.log : []);
+}
+
+export function narrate(plan, lived) {
+  const out = [];
+  const byKind = (k) => plan.log.filter((e) => e.kind === k);
+  const many = plan.log.length > 11;
+  for (const k of ORDER) {
+    if (many && SKIP_WHEN_MANY.has(k)) continue;
+    const es = byKind(k);
+    for (const e of k === 'swap' ? es.slice(0, 2) : es.slice(0, 1)) out.push({ say: e.say || e.text, cites: [e.id] });
   }
+  for (const e of (lived?.log || []).slice(-2)) out.push({ say: e.say || e.text, cites: [e.id] });
+  return out;
+}
 
-  /* minutes -> movements/session (first threshold that caps it) */
-  exerciseCount(minutes) {
-    for (const [cap_, count] of EXERCISE_COUNT.thresholds) {
-      if (minutes <= cap_) return count;
+/* numbers a sentence states; decision ids written into the prose ("decision D5") are not claims */
+const numsIn = (s) => (String(s).replace(/\b[DR]\d{1,2}\b/gi, ' ').match(/\d+(?:\.\d+)?/g) || []).map(Number);
+
+export const planExerciseNames = (plan, lived) =>
+  [...new Set((lived || plan).days.concat(plan.days).flatMap((d) => (d.s ? d.s.items.map((it) => it.name.toLowerCase()) : [])))];
+
+/* check(sentences, decisions, planNames): decisions = [{id, text, say, nums}] */
+export function check(sentences, decisions, planNamesList) {
+  const all = decisions;
+  const byId = Object.fromEntries(all.map((d) => [d.id, d]));
+  const planNames = new Set(planNamesList);
+  const names = EXERCISES.filter((x) => x.pattern !== 'cardio').map((x) => x.name.toLowerCase()).sort((a, b) => b.length - a.length);
+
+  return sentences.map((raw) => {
+    const say = String(raw.say || '').trim();
+    const cites = [...new Set((raw.cites || []).map((c) => String(c).trim().toUpperCase()))];
+    const res = { say, cites, ok: true, why: '' };
+    const fail = (why) => { res.ok = false; res.why = why; return res; };
+    if (!say) return fail('empty sentence');
+    if (say.length > 420) return fail('longer than one sentence');
+    if (!cites.length) return fail('cites no decision');
+    const unknown = cites.filter((c) => !byId[c]);
+    if (unknown.length) return fail(`cites ${unknown.join(', ')}, which the log does not have`);
+    const src = cites.map((c) => byId[c]);
+    const srcText = src.map((d) => `${d.text} ${d.say || ''} ${(d.nums || []).join(' ')}`).join(' ');
+    const allowed = new Set(numsIn(srcText));
+    const stray = numsIn(say).filter((n) => !allowed.has(n));
+    if (stray.length) return fail(`states ${stray.join(', ')}, not in ${cites.join(', ')}`);
+    const low = say.toLowerCase(), srcLow = srcText.toLowerCase();
+    let masked = low;
+    for (const nm of names) {
+      if (!masked.includes(nm)) continue;
+      if (!planNames.has(nm) && !srcLow.includes(nm)) return fail(`names ${nm}, which is not in the plan`);
+      masked = masked.split(nm).join(' ');
     }
-    return EXERCISE_COUNT.overflow;
-  }
+    if (MEDICAL_RE.test(say)) return fail('makes a medical claim');
+    return res;
+  });
+}
 
-  /* constraints text -> { ban:[lift], caveats:[line] } via the rule table */
-  constraintSwaps(text) {
-    const t = (text || '').toLowerCase();
-    const ban = [];
-    const caveats = [];
-    for (const rule of CONSTRAINT_RULES) {
-      if (rule.test.test(t)) { ban.push(...rule.ban); caveats.push(rule.caveat); }
+/* normalise whatever JSON shape a model returns into [{say, cites}] */
+export function normalise(json) {
+  const arr = Array.isArray(json) ? json : json?.narration || json?.sentences || json?.explanation || [];
+  if (!Array.isArray(arr)) return [];
+  return arr.slice(0, 12).map((x) => {
+    if (typeof x === 'string') {
+      const cites = x.match(/\b[DR]\d{1,2}\b/g) || [];
+      return { say: x.replace(/\s*\[(?:[DR]\d{1,2}(?:,\s*)?)+\]\s*/g, ' ').trim(), cites };
     }
-    return { ban, caveats };
-  }
-
-  /* the full structured plan (matches PLAN_SCHEMA) */
-  buildPlan(i) {
-    const split = this.chooseSplit(i.days, i.level);
-
-    let n = this.exerciseCount(i.minutes);
-    if (i.level === 'beginner') n = Math.max(3, n - 1);
-
-    const d = DOSE[i.goal] || DOSE_FALLBACK;
-    let sets = d.sets;
-    if (i.level === 'beginner') sets = Math.max(2, sets - 1);
-    if (i.level === 'advanced' && i.goal !== 'strength') sets += 1;
-
-    const { ban, caveats } = this.constraintSwaps(i.constraints);
-    const banSet = new Set(ban);
-
-    const days = split.map(([key, focus], idx) => {
-      let pool = POOL[i.equipment][key].filter((x) => !banSet.has(x));
-      // top up from the full-body pool if swaps thinned it out
-      if (pool.length < n) {
-        pool = pool.concat(POOL[i.equipment].full.filter((x) => !banSet.has(x) && !pool.includes(x)));
-      }
-      const exercises = pool.slice(0, n).map((name, j) => ({
-        name,
-        sets: j === 0 ? sets : Math.max(2, sets - 1),   // top compound gets the full dose
-        reps: d.reps,
-        rpe: d.rpe,
-        note: j === 0 ? PRIMARY_NOTE : '',
-      }));
-      return { day: DAY_NAMES[idx], focus, minutes: i.minutes, exercises };
-    });
-
-    return {
-      summary: `${cap(GOAL_LABEL[i.goal])} block — ${i.days} days a week on ${EQUIP_LABEL[i.equipment]}, sessions capped at ${i.minutes} minutes.`,
-      split: days,
-      progression: i.goal === 'strength' ? PROGRESSION.strength : PROGRESSION.default,
-      deload: DELOAD_TEXT,
-      caveats: caveats.concat([BASE_CAVEAT]),
-    };
-  }
-
-  /* a concise out-loud reasoning script for echo / demo mode */
-  buildReasoningScript(i) {
-    const splitName = this.chooseSplit(i.days, i.level).map((s) => s[1]).join(' / ');
-    const dose = DOSE[i.goal] || DOSE_FALLBACK;
-    const out = [
-      `Goal is ${GOAL_LABEL[i.goal]} at ${i.level} level — that fixes rep ranges (${dose.reps}) and how hard each set should bite.`,
-      `${i.days} days a week points at a ${splitName} layout — it keeps each pattern's frequency sensible without overlapping recovery.`,
-      `${i.minutes}-minute cap means ${this.exerciseCount(i.minutes)} movements a session, compounds first so the important work happens fresh.`,
-      `Equipment is ${EQUIP_LABEL[i.equipment]} — selecting lifts that actually load well with what's on hand.`,
-    ];
-    if (i.constraints) {
-      const { caveats } = this.constraintSwaps(i.constraints);
-      out.push(caveats.length
-        ? `Constraint noted ("${i.constraints}"): ${caveats[0]}`
-        : `Constraint noted ("${i.constraints}") — keeping ranges of motion conservative and swapping anything that aggravates it.`);
-    }
-    out.push('Trade-offs resolved — committing the block.');
-    return out;
-  }
+    const say = x.say ?? x.text ?? x.sentence ?? '';
+    let cites = x.cites ?? x.cite ?? x.ids ?? x.decisions ?? [];
+    if (typeof cites === 'string') cites = cites.match(/[DR]\d{1,2}/gi) || [];
+    return { say: String(say).replace(/\s*\[(?:[DR]\d{1,2}(?:,\s*)?)+\]\s*/g, ' ').trim(), cites };
+  }).filter((x) => x.say);
 }

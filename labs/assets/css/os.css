@@ -1,0 +1,196 @@
+/* ============================================================
+   os.css — the plates Labs OS draws on any lab page: "since your
+   last visit", "Your data", the sharing question and the stamps.
+   Consumes tokens.css. Classes are prefixed los- so a lab's own
+   stylesheet never collides with them.
+
+   The record is a drawing of what already happened, so it sits
+   in ink: hairlines, Plex Mono labels, a Fraunces title for the
+   lab the visitor last opened, world names in Fraunces italic.
+   Gold appears in three places only, each a thing that fired:
+   the plate's corner brackets, the short tick beside the time of
+   the last visit (a recorded session), and the choice a visitor
+   has pressed. Hover warms a border toward gold because the
+   pointer is choosing; nothing else is warm.
+   ============================================================ */
+
+:root {
+  --los-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --los-ground: color-mix(in srgb, var(--void) 90%, transparent);
+}
+
+.os-slot { position: relative; z-index: var(--z-content); }
+.os-slot[hidden] { display: none; }
+#os-welcome { padding-block: var(--s-5) 0; }
+#os-fixture { padding-block: var(--s-3) 0; }
+
+/* ---------------- the plate ---------------- */
+.los-plate {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--los-ground);
+  padding: var(--s-4) var(--s-5) var(--s-5);
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+.los-bk {
+  position: absolute; width: 13px; height: 13px; pointer-events: none;
+  border: 1px solid var(--accretion-dim); opacity: .8;
+}
+.los-bk.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.los-bk.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.los-bk.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.los-bk.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+.los-head {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-2) var(--s-4);
+  padding-bottom: var(--s-3); margin-bottom: var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+.los-label {
+  display: block;
+  font-size: var(--t-micro); letter-spacing: .22em; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.los-quiet { color: var(--text-dim); }
+
+.los-display {
+  font-family: var(--los-display); font-weight: 500; font-optical-sizing: auto;
+  font-size: clamp(1.55rem, 2.6vw, 2.1rem); line-height: 1.08; letter-spacing: 0;
+  color: var(--text-bright); margin: var(--s-2) 0 var(--s-2);
+}
+.los-copy { margin: 0 0 var(--s-4); color: var(--text); font-size: .92rem; line-height: 1.6; max-width: 62ch; }
+
+/* ---------------- controls ---------------- */
+.los-btn {
+  font: inherit; font-size: var(--t-stamp); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-bright); background: transparent; cursor: pointer;
+  border: 1px solid var(--line-bright); border-radius: 2px;
+  padding: .6em 1.05em; display: inline-flex; align-items: center; justify-content: center; gap: .6em;
+  text-decoration: none; transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.los-btn:hover { border-color: var(--accretion-dim); color: var(--text-bright); }
+.los-btn[aria-pressed="true"] { border-color: var(--accretion); color: var(--accretion-soft); }
+.los-btn:disabled { color: var(--text-faint); border-color: var(--line); cursor: default; }
+.los-btn[hidden] { display: none; }
+.los-quiet-btn { color: var(--text-dim); border-color: var(--line); }
+
+/* ---------------- since your last visit ---------------- */
+.los-welcome-grid {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s-6);
+}
+.los-welcome.no-last .los-welcome-grid { grid-template-columns: minmax(0, 1fr); }
+.los-next { border-left: 1px solid var(--line); padding-left: var(--s-6); }
+.los-welcome.no-last .los-next { border-left: 0; padding-left: 0; }
+
+.los-meta {
+  display: flex; align-items: center; gap: .65em; margin: 0 0 var(--s-4);
+  color: var(--text-dim); font-size: var(--t-stamp); font-variant-numeric: tabular-nums;
+}
+.los-tick { flex: none; width: 14px; height: 1px; background: var(--accretion); }
+.los-go::after { content: "\2192"; letter-spacing: 0; }
+
+.los-list { list-style: none; margin: var(--s-2) 0 0; padding: 0; }
+.los-list li + li { border-top: 1px solid var(--line); }
+.los-list a {
+  display: grid; grid-template-columns: 2.4em minmax(0, 1fr) auto;
+  grid-template-areas: "n title world" "n why why";
+  column-gap: var(--s-3); row-gap: 3px; padding: var(--s-3) 0; color: inherit; text-decoration: none;
+}
+.los-n { grid-area: n; color: var(--text-faint); font-size: var(--t-micro); font-variant-numeric: tabular-nums; padding-top: .3em; }
+.los-title { grid-area: title; color: var(--text-bright); font-size: .95rem; }
+.los-world { grid-area: world; font-family: var(--los-display); font-style: italic; font-size: .98rem; color: var(--horizon); white-space: nowrap; }
+.los-why { grid-area: why; color: var(--text-dim); font-size: var(--t-stamp); line-height: 1.5; }
+.los-list a:hover .los-title, .los-list a:focus-visible .los-title { color: var(--accretion-soft); }
+
+/* the plate's title block: what the record holds, and the way to it */
+.los-foot {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--s-2) var(--s-4);
+  margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--line);
+}
+.los-foot .los-stamp { color: var(--text-dim); }
+.los-foot.off .los-stamp { color: var(--horizon); }   /* recording off is a state, so it takes the cold ink */
+.los-link {
+  font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--horizon);
+  text-decoration: none; border-bottom: 1px solid var(--horizon-dim); padding-bottom: 1px;
+}
+.los-link:hover { color: var(--text-bright); border-bottom-color: var(--accretion-dim); }
+
+/* ---------------- stamps ---------------- */
+.los-stamp {
+  font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--text-faint);
+}
+.los-stamp.warn { color: var(--horizon); border-bottom: 1px dashed var(--horizon-dim); }
+.los-fixture {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-4);
+  border: 1px dashed var(--line-bright); padding: var(--s-2) var(--s-3);
+  font-size: var(--t-micro); color: var(--text-dim); background: var(--los-ground);
+}
+.los-fixture .los-label { color: var(--horizon); }
+.los-fixture[hidden] { display: none; }   /* the class sets display, which would otherwise outrank the attribute */
+.os-data { display: inline-flex; align-items: center; gap: var(--s-4); flex-wrap: wrap; }
+.los-data-btn { font-size: var(--t-micro); padding: .5em .9em; }
+.os-data a { font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; }
+.os-data .os-owner { color: var(--text-faint); }   /* the author's own door: present, and quiet */
+.os-data .os-owner:hover { color: var(--text-dim); }
+
+/* ---------------- Your data ---------------- */
+/* 1 px of padding keeps the corner brackets (offset -1 px) inside the dialog, so it never grows a scrollbar
+   that hides the plate's bottom edge; only a panel taller than the window scrolls, and only vertically. */
+.los-panel {
+  border: 0; padding: 1px; background: transparent; color: var(--text);
+  width: min(640px, calc(100vw - 2 * var(--s-4))); max-width: none; max-height: calc(100vh - 2 * var(--s-4));
+  overflow-x: hidden; overflow-y: auto;
+}
+.los-panel::backdrop { background: rgba(3, 4, 7, .74); }
+.los-panel .los-plate { background: var(--void); }
+.los-rows {
+  display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-3) var(--s-5);
+  margin: 0 0 var(--s-5); padding: var(--s-4) 0; border-block: 1px solid var(--line);
+  font-size: var(--t-stamp); font-variant-numeric: tabular-nums;
+}
+.los-rows dt { font-size: var(--t-micro); letter-spacing: .18em; text-transform: uppercase; color: var(--text-dim); padding-top: .15em; }
+.los-rows dd { margin: 0; color: var(--text); line-height: 1.55; }
+.los-actions, .los-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+.los-actions[hidden], .los-confirm[hidden] { display: none; }
+.los-confirm-text { flex: 1 1 100%; color: var(--text-bright); font-size: var(--t-stamp); }
+.los-status { min-height: 3.2em; margin: var(--s-4) 0 0; color: var(--text-dim); font-size: var(--t-stamp); line-height: 1.6; }
+.los-sharing, .los-recording { display: grid; gap: var(--s-2); justify-items: start; }
+.los-sharing .los-choice { width: min(100%, 22rem); }
+
+/* ---------------- the sharing question ---------------- */
+/* What is sent is a list, one item a line, each led by a short ink rule: the four things are counted at a glance
+   and none hides in a sentence. What is never sent keeps the body ink; where it is kept and for how long steps
+   back one rung. The two answers are the same button twice; neither is filled or pre-pressed. On a wide screen
+   the plate sits in the lower right corner, clear of the hero; on a narrow one it spans the bottom edge. */
+.los-consent {
+  position: fixed; right: var(--s-5); bottom: var(--s-5);
+  width: min(460px, calc(100vw - 2 * var(--s-4))); z-index: var(--z-toast);
+  max-height: calc(100vh - 2 * var(--s-4)); overflow-y: auto;
+  background: var(--void);
+}
+.los-consent .los-copy { margin: var(--s-3) 0 0; font-size: var(--t-stamp); max-width: none; }
+.los-consent .los-fine { color: var(--text-dim); font-size: var(--t-micro); line-height: 1.65; margin-bottom: var(--s-4); }
+.los-sent {
+  list-style: none; margin: var(--s-2) 0 0; padding: 0;
+  font-size: var(--t-stamp); line-height: 1.6; color: var(--text-bright);
+}
+.los-sent li { display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: var(--s-3); align-items: baseline; }
+.los-sent li::before { content: ""; height: 1px; background: var(--line-bright); transform: translateY(-.3em); }
+.los-choice { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+.los-choice .los-btn { width: 100%; }
+.los-copy .los-link { white-space: nowrap; }
+
+/* ---------------- narrow ---------------- */
+@media (max-width: 760px) {
+  .los-plate { padding: var(--s-3) var(--s-4) var(--s-4); }
+  .los-welcome-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+  .los-next { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: var(--s-3); }
+  .los-rows { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
+  .los-rows dd { margin-bottom: var(--s-2); }
+  .los-consent { right: 50%; transform: translateX(50%); bottom: var(--s-3); width: calc(100vw - 2 * var(--s-4)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .los-btn { transition: none; }
+}

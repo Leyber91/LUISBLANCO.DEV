@@ -28,6 +28,11 @@ export const SEL = {
   ledgerCats:    '#ledger-cats',
   year:          '#year',
   reveal:        '[data-reveal]',
+  // Labs OS slots (index.html)
+  osWelcome:     '#os-welcome',
+  osFixture:     '#os-fixture',
+  osData:        '#os-data',
+  osStorage:     '#os-storage',
 };
 
 /* ---- behaviour / motion ---- */
@@ -40,6 +45,27 @@ export const STILL = {
   param: 'still',          // ?still query param
   flagKey: '__L212_STILL__',
   htmlClass: 'still',
+};
+
+/* ---- the seven worlds, for Labs OS "what's next" ----
+   The world each hub id belongs to, from the table in .claude/skills/labs-design/SKILL.md.
+   A lab missing here falls back to its hub category. */
+export const WORLDS = {
+  cosmos:   { name: 'Cosmos',             labs: ['black-hole', 'exomania', 'dimensional'] },
+  contact:  { name: 'Contact',            labs: ['heptapod', 'timeline', 'alt-reality', 'last-witness'] },
+  machine:  { name: 'Inside the Machine', labs: ['token-ekg', 'dataspace', 'the-figure', 'ai-health', 'primordial-seed'] },
+  claims:   { name: 'Claims',             labs: ['honesty-decoder', 'roaster', 'mentorship', 'content-gen'] },
+  self:     { name: 'Self',               labs: ['claude-prep', 'workout-plans', 'habits', 'mindful', 'vr-fitness', 'pathways', 'learn-platform'] },
+  signals:  { name: 'Signals',            labs: ['trends', 'memes', 'sports-predict', 'social-tool', 'ugc', 'challenges'] },
+  workshop: { name: 'Workshop',           labs: ['pm-platform', 'automation', 'prototyping'] },
+};
+
+/* ---- Labs OS on the hub ---- */
+export const OS_HUB = {
+  lab: 'hub',                // the hub's own lab id in the activity log
+  title: 'Labs hub',         // how Your data names it
+  suggestions: 3,            // what's-next rows on the welcome plate
+  handoffWaitMs: 300,        // longest a click waits for its record before navigating
 };
 
 /* ---- the "All" pseudo-filter prepended to the category chips ---- */

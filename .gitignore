@@ -10,6 +10,8 @@ _reference/
 # ...but the brand icons ARE real published assets
 !assets/favicon-32.png
 !assets/favicon-180.png
+# the Claude Prep app's home-screen icons (built by the certifications repo, tools/publish_labs.py)
+!labs/claude-prep/icons/*.png
 _shot.html
 lbrshots/
 tools/out/
@@ -24,3 +26,9 @@ desktop.ini
 .idea/
 TokenGateKeeper/
 *.log
+
+# ── labs build (labs-src) ───────────────────────────────────────────────────
+labs-src/node_modules/
+
+# wrangler's local cache and state (account id, dev storage): never committed
+.wrangler/

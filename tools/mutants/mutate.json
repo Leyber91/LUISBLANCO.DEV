@@ -1,0 +1,102 @@
+[
+  {
+    "name": "a survivor does not fail the check",
+    "from": "if (r.survived.length || r.stale.length || r.noop.length) bad++;",
+    "to": "if (r.stale.length || r.noop.length) bad++;"
+  },
+  {
+    "name": "a stale mutant does not fail the check",
+    "from": "if (r.survived.length || r.stale.length || r.noop.length) bad++;",
+    "to": "if (r.survived.length || r.noop.length) bad++;"
+  },
+  {
+    "name": "a mutant that changes nothing does not fail the check",
+    "from": "if (r.survived.length || r.stale.length || r.noop.length) bad++;",
+    "to": "if (r.survived.length || r.stale.length) bad++;"
+  },
+  {
+    "name": "the exit code is always 0",
+    "from": "  return bad ? 1 : 0;",
+    "to": "  return 0;"
+  },
+  {
+    "name": "text that is in the tool twice is not stale",
+    "from": "if (i < 0 || base.indexOf(from, i + 1) >= 0) { out.stale.push(m.name); continue; }",
+    "to": "if (i < 0) { out.stale.push(m.name); continue; }"
+  },
+  {
+    "name": "a mutant that changes nothing is run as if it broke something",
+    "from": "if (from === to) { out.noop.push(m.name); continue; }",
+    "to": ""
+  },
+  {
+    "name": "a selftest that fails unbroken is not a failure",
+    "from": "{ say(`mutate ${name}: the selftest fails before any mutation`); bad++; continue; }",
+    "to": "{ continue; }"
+  },
+  {
+    "name": "the unbroken selftest is not run first",
+    "from": "if (!(await passes(place('base', base), limit))) { out.broken = true; return out; }",
+    "to": ""
+  },
+  {
+    "name": "a missing tool is not a failure",
+    "from": "{ say(`mutate ${name}: tools/${name}.mjs does not exist`); bad++; continue; }",
+    "to": "{ continue; }"
+  },
+  {
+    "name": "a mutants file that is not JSON is not a failure",
+    "from": "); bad++; continue; }\n    const errs = shape(",
+    "to": "); continue; }\n    const errs = shape("
+  },
+  {
+    "name": "a byte order mark breaks a mutants file",
+    "from": ".replace(BOM, '')",
+    "to": ""
+  },
+  {
+    "name": "a missing mutants folder passes",
+    "from": "does not exist, so no gate was tested`); return 1; }",
+    "to": "does not exist, so no gate was tested`); return 0; }"
+  },
+  {
+    "name": "an empty mutants folder passes",
+    "from": "holds no mutants file, so no gate was tested'); return 1; }",
+    "to": "holds no mutants file, so no gate was tested'); return 0; }"
+  },
+  {
+    "name": "a tool named with no mutants file passes",
+    "from": "); return 2; }\n  if (!names.length)",
+    "to": "); return 0; }\n  if (!names.length)"
+  },
+  {
+    "name": "a file in mutants that is not <tool>.json is skipped in silence",
+    "from": "if (strays.length) {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "line endings hide a mutant",
+    "from": "const lf = (s) => s.replace(/\\r\\n/g, '\\n');",
+    "to": "const lf = (s) => s;"
+  },
+  {
+    "name": "caught and survived are swapped",
+    "from": "if (alive[k]) out.survived.push(j.name); else out.caught++;",
+    "to": "if (!alive[k]) out.survived.push(j.name); else out.caught++;"
+  },
+  {
+    "name": "a selftest that never ends counts as passed",
+    "from": "const timer = setTimeout(() => child.kill(), limit);",
+    "to": "const timer = setTimeout(() => resolve(true), limit);"
+  },
+  {
+    "name": "a mutants file with no names is accepted",
+    "from": "if (errs.length) { for (const e of errs) say('  ' + e); bad++; continue; }",
+    "to": "if (errs.length) { for (const e of errs) say('  ' + e); }"
+  },
+  {
+    "name": "a mutant with no \"to\" is accepted",
+    "from": "m.from && typeof m.to === 'string')) errs.push(",
+    "to": "m.from)) errs.push("
+  }
+]

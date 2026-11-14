@@ -1,0 +1,35 @@
+{
+ "total_count": 4219636,
+ "items": [
+  {
+   "full_name": "storytold/craft-anything",
+   "html_url": "https://github.com/storytold/craft-anything",
+   "description": "Craft Anything: understand how any software works, and craft your own.",
+   "language": "Rust",
+   "topics": [],
+   "stargazers_count": 27506,
+   "forks_count": 5565,
+   "created_at": "2026-10-31T14:50:00Z"
+  },
+  {
+   "full_name": "deepseek-ai/dsh-superagent-prototype",
+   "html_url": "https://github.com/deepseek-ai/dsh-superagent-prototype",
+   "description": "Towards a More Autonomous Agent System",
+   "language": "TypeScript",
+   "topics": [],
+   "stargazers_count": 22363,
+   "forks_count": 2710,
+   "created_at": "2026-10-31T09:32:46Z"
+  },
+  {
+   "full_name": "heydamir/unslop",
+   "html_url": "https://github.com/heydamir/unslop",
+   "description": "A Claude skill that turns vibecoded, AI-looking UI into a designed interface",
+   "language": "JavaScript",
+   "topics": [],
+   "stargazers_count": 14137,
+   "forks_count": 781,
+   "created_at": "2026-10-29T15:41:21Z"
+  }
+ ]
+}

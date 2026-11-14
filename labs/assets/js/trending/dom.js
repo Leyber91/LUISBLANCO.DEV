@@ -1,56 +1,38 @@
 /* ============================================================
-   trending/dom.js — shared DOM, formatting and network helpers.
-
-   el() sets textContent (never innerHTML) on purpose: every signal
-   rendered here comes from the open web, so live strings are placed
-   as text nodes only — the XSS-safe contract this page promises.
+   trending/dom.js — DOM helpers. el() sets textContent, never
+   innerHTML: every title on this page comes from the open web, so
+   live strings are placed as text nodes only.
    ============================================================ */
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $all = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-export const el = (tag, cls, txt) => {
+export function el(tag, cls, text, attrs) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
-  if (txt != null) n.textContent = txt;
+  if (text != null) n.textContent = text;
+  if (attrs) for (const [k, v] of Object.entries(attrs)) if (v != null) n.setAttribute(k, v);
   return n;
-};
+}
 
+export function clear(n) { while (n && n.firstChild) n.firstChild.remove(); return n; }
+
+export const prefersReduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-
-export const prefersReduced = () =>
-  typeof matchMedia === 'function' &&
-  matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ---- number / time formatting (verbatim behaviour) ---- */
-export const fmt = (n) => {
-  n = Number(n) || 0;
-  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + 'k';
-  return String(n);
-};
-export const humanAge = (h) =>
-  h < 1 ? `${Math.round(h * 60)}m` : h < 24 ? `${h.toFixed(1)}h` : `${Math.round(h / 24)}d`;
-export const pad = (n) => String(n).padStart(2, '0');
-export const ymd = (d, sep = '/') =>
-  `${d.getUTCFullYear()}${sep}${pad(d.getUTCMonth() + 1)}${sep}${pad(d.getUTCDate())}`;
-export const daysAgoUTC = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() - n); return d; };
-export const shorten = (s) => (s.length > 48 ? s.slice(0, 46) + '…' : s);
-export const clockNow = () => {
-  const d = new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+export const pad2 = (n) => String(n).padStart(2, '0');
+export const utc = (ms) => (ms ? new Date(ms).toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : 'n/a');
+export const clock = (ms) => { const d = new Date(ms); return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; };
+export const kb = (bytes) => `${(bytes / 1024).toFixed(bytes > 10240 ? 0 : 1)} KB`;
+export const since = (ms, now = Date.now()) => {
+  const m = Math.round((now - ms) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 2880 ? `${(m / 60).toFixed(1)} h ago` : `${Math.round(m / 1440)} days ago`;
 };
 
-/* ---- fetch with a hard timeout, cooperating with an outer signal ---- */
-export async function fetchWithTimeout(url, signal, ms, headers) {
-  const to = new AbortController();
-  const timer = setTimeout(() => to.abort(), ms);
-  const onAbort = () => to.abort();
-  signal?.addEventListener('abort', onAbort, { once: true });
-  try {
-    return await fetch(url, { signal: to.signal, headers, cache: 'no-store', referrerPolicy: 'no-referrer' });
-  } finally {
-    clearTimeout(timer);
-    signal?.removeEventListener('abort', onAbort);
-  }
+/* Save a text file from the page (export). */
+export function download(name, text, type) {
+  const blob = new Blob([text], { type });
+  const a = el('a', null, null, { href: URL.createObjectURL(blob), download: name });
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }

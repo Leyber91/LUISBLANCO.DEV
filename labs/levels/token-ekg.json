@@ -26,6 +26,10 @@
         "G0": {
           "level": 2,
           "evidence": "goLive() in labs/token-ekg.html fetches text.pollinations.ai/<prompt>?model=openai&stream=true&referrer=l212 and calls onToken(performance.now()) once per SSE chunk carrying delta.content or delta.reasoning (rungs 1 and 2; dts stores raw intervals, Math.max(dt,1) clamps only the EMA rate). Rung 3 fails: no nonce, no cache check. The default prompt is served from the route's response cache: probes on 2026-11-11 returned x-cache: HIT with the same 321 chunks of gpt-oss-20b inside 5 to 22 ms (315 to 320 of 320 intervals under 1 ms); the screenshot's 999.6 tokens/sec and 8 ms mean time that replay. Novel prompts returned x-cache: MISS and real cadence (1,386 chunks over 25.5 s, p50 16.9 ms; 138 chunks over 3.2 s, p50 21.5 ms). x-cache is not in Access-Control-Expose-Headers, so the page's script cannot read it and detection has to use the timing rule. No TTFT readout. Without a stream, simStep() draws Math.random intervals."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Rungs 1-2 hold: ai/stream/ollama.js and openai-sse.js record() stamp t = clock() - t0 (performance.now(), set in main.js recordOne()) per reader.read() before parsing; analyze() in engine/stats.js derives intervals; the strip and readouts show them in ms. Rung 3 fails. The guard has to cover every request, and it does not. Live streams get a random seed per run (m-go handler), but the public 'time one reply' request (main.js p-go -> LLM.complete -> llm.js _pollinations) sends no seed or run id. The page's default question sends the same body every time. Rater probe 2026-11-11 09:41 and 09:42 UTC: two POSTs of that exact body to text.pollinations.ai/openai returned X-Cache: HIT both times (X-Cache-Date 06:51:22Z), in 0.45 s and 0.25 s. The page would show that as 'measured: 250 ms via pollinations', with no cache label. The CACHED half of the rung is present: analyze() cached -> invalid, no rate. The screenshot of ?a=retok-mistral-script shows badge CACHED and decode rate '-'. That trace is a real Ollama stream that arrived buffered, so the guard also false-positives there. Above the gap: TTFT/TTFA readout (rung 4), cross-check eval_count and rate with % difference (rung 6), and the n=5 repeat with median [IQR] and cold run apart in repeatSummary() (rung 8) exist in code. Rung 5 is partial: the decode rate counts chunks, and per-chunk re-tokenization exists only for Qwen3/Mistral, so an SSE chunk of k tokens adds 1. Rung 7 is partial: no decode duration in ms. None of these count. Rung 9 (header/first/last split) is absent. No dispute."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 0,
           "evidence": "labs/token-ekg.html loads no tokenizer library or vocabulary, never splits text, and shows no character or byte count for the prompt field; the 'tokens counted' readout (#n) increments once per SSE chunk in goLive() or per simulated tick in simStep()."
+        },
+        "G1": {
+          "level": 9,
+          "evidence": "engine/tokens.js loads o200k_base and cl100k_base (gpt-tokenizer 3.4.0, jsDelivr, patched for BOM) plus Qwen3 and Mistral v0.3 (engine/bpe.js over data/tokenizers). view/tokens-view.js shows characters and UTF-8 bytes (rung 1). It shows the typed text as boxed chips with the id in the title and the inspector, plus chars/token and bytes/token (rungs 2-4). Four vocabularies from three vendors (OpenAI, Alibaba, Mistral) count the same UDHR text side by side in the table view; byte-level BPE and SentencePiece are both covered (rung 5). For pasted text only two counts show at once. tests/run.mjs: one Node command, no Python, 61/61 texts match tiktoken 0.14.0 and HF tokenizers 0.22.2 for all four, with library and version in tokenizer-reference.json (rerun by the settler 2026-11-11: 32 passed, 0 failed). The page re-checks in the browser: 'Checked just now ... 61/61' (rung 6). Split pieces are marked (.chip.split with a superscript) and counted per language/script in the 'pieces' column (rung 7). UDHR Article 1 in 23 languages across more than 6 scripts, source named; the table gives tok, x en and c/t for every tokenizer (rung 8). matchingTokenizer(t.model) uses the server-reported model; the screenshot of retok-mistral-script shows '128 + 1 = 129 tok ... eval_count 129 ... exact'. The Node test passes 6 retok recordings on 4 prompts (rung 9). Rung 10 fails: 4 tokenizers, not 10, and no FLORES/Petrov comparison. No dispute."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 1,
           "evidence": "onToken() shows the mean and standard deviation of the last 64 intervals in ms (rung 1). Rung 2 fails: the heart-rate readout is an EMA of per-interval reciprocals, tps = 0.85*tps + 0.15*1000/Math.max(dt,1), which overstates the rate when intervals vary and is capped at 1000 by the clamp; the screenshot's 999.6 is that cap, not a rate (the run delivered 321 chunks in a few ms). No percentiles or histogram. spectrum() runs a 9-bin DFT over the interval series indexed by token number, not seconds, normalises to the largest bin (in the screenshot all nine bars sit near full) and labels the bins with EEG names."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 holds: engine/stats.js analyze() gives the mean and sd of the unbuffered waits in ms, shown under the median-wait readout ('mean 14.2 ms +/- 0.57 ms sd', desk.png). Rung 2 fails (skeptic dispute upheld; the settler recomputed it). The decode rate the page shows is analyze().rate = count(waits >= 2 ms) / sum(those waits) (main.js renderReadouts: 'unbuffered waits / their sum'), not (tokens - 1) / (t_last - t_first) over the run or a stated window. It drops buffered chunks from the numerator while their generation time stays in the kept waits, so it reads low on every buffered run. analyze() on the shipped data, shown rate against (n-1)/span against the server: ds-qwen3-4b-3 65.8 / 94.8 / 96.6 tok/s (141 of 457 waits buffered); ds-qwen3-4b-2 76.8 / 100.9 / 102.0; retok-qwen-code 156.3 / 162.8 / 163.2. 5 of the 76 traces with a rate differ by more than 5 percent. analyze().rateAll = (n-1)/span is computed, but no code reads it. The Node test agrees on llama-warm only because that run has 0 buffered waits. The biased rate also feeds the dataset table's decode IQR. Above the gap, present but not counted: p50/p90/p99, the log-binned histogram, the stall rule and list, the Lomb-Scargle periodogram in Hz, bursts, the drift fit in ms per 1k tokens with R^2, and Mann-Whitney and KS for A against B. Rung 10 also fails (no bootstrap intervals). Down from the rater's 9."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 2,
           "evidence": "drawTrace() advances SPEED = 3 samples per animation frame and inject() restarts a fixed 8-sample QRS template per token, so x is frame count, not ms, and a burst of tokens inside one frame draws one spike; random baseline noise is added every frame. The 1440 px screenshot shows a flat line with a single spike at the right edge after 321 tokens. No axis, no units."
+        },
+        "G1": {
+          "level": 6,
+          "evidence": "view/strip.js draw(): each chunk is a spike at x = its t on a linear time axis labelled in ms/s, with '100 ms / division' printed (rungs 1-3). Each chunk draws its own spike, including chunks with the same timestamp; height = the interval on a labelled log ms scale from 1 ms to 10 s (rung 4). The first-token bracket, dashed stall brackets ('stall 1.34 s' in the screenshot) and buffered dots under the baseline appear on the strip and in the legend (rung 5; desk.png shows 'first token 107 ms' and the legend row). Hover (_bindHover -> onHover) outlines the chunk's bin in drawHistogram and circles it in the tachogram. showTip() gives the chunk number, t, wait and text (rung 6). Rung 7 fails: the ticker shows only the last ~260 characters, not aligned to marks or tinted by interval. The builder acknowledges this gap. No dispute."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 2,
           "evidence": "The CSS comment 'amber = the live signal only' designates the accent (rung 1). :root defines --void, --ink, --amber, --blue; IBM Plex Mono throughout; .bp corner marks (rung 2). Rung 3 fails inside the instrument: the leading sweep in drawTrace(), the heart-rate readout (.v.amber) and the spectrum bars stay amber while simStep() drives them (connect gap, after a run, offline)."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Rungs 1-2 hold: dark page with --accretion as the live accent; tokens.css provides --void, --text, --accretion and --horizon; IBM Plex Mono only; .bp corner marks (desk.png). Rung 3 fails (second skeptic dispute upheld, checked in main.js). strip.live, the badge (renderSource), the narration tag, the ticker class and the play button (updatePlayBtn) are set only inside setA(). When a live run is stopped or fails before its first chunk, the m-go handler calls renderShelf() instead ('if (last) setA(...) else renderShelf()'). The pill then stays data-k=live 'LIVE STREAM' in gold, the strip keeps its gold pen (strip.js draw: hot = live ? goldSoft) and the play button reads 'live', with no time limit, in a stopped or failed state. Between runs of a batch, strip.live also stays true through the post-stream await Ollama.resident(). Rung 4 also fails (first dispute upheld; main.js renderReadouts). In the one-reply readouts, 'completion tokens', 'prompt tokens' and 'characters / s' carry the unit in the label with an empty <small> slot. 'visible answer' and 'reasoning' put 'tokens' after the value. The stalls cell puts 'longest <ms>' in the unit slot. Above the gap, not counted: the graticule with labelled majors, 5 minor divisions and '100 ms / division' printed (desk.png). Down from the rater's 5."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 2,
           "evidence": "#prompt input and #go 'stream live' button; Enter also calls goLive() (rung 2). No stop control (the AbortController only fires on a 30 s timeout); no route, model or parameter choice; finished runs are not kept."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 holds: 'record' (#m-go) and 'time one reply' (#p-go) each start a run. Rung 2 fails (both skeptic disputes upheld, checked in main.js). The free-text field that launches a live stream is the #m-custom textarea. Its only key handler (showLivePanel, main.js:704) needs Ctrl or Cmd with Enter, so plain Enter inserts a newline (the aria-label reads 'Ctrl+Enter starts'). The field is hidden unless 'your own prompt' is picked. #p-prompt has no key handler and calls LLM.complete for one whole reply, not a stream. Rung 3 is only half met. When #m-stop aborts before the first chunk, recordOne() sets trace.stopped, but the m-go handler skips setA() because no chunk arrived. The pill keeps 'live stream', the play button reads 'live' and only #m-msg says 'nothing arrived'. 'stopped' shows only once at least one chunk has arrived. Above the gap, not counted: the route select (it offers no public route, so rung 4 fails anyway), temperature, max tokens and presets stored in trace.options, 1x/10x replay, and the pin-as-B compare. This is a regression from G0's 2, whose single-line input started on Enter."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 1,
           "evidence": "Rung 1 holds: the footer names both sources (a keyless pollinations model, simulated cadence) and the pill reads 'live · pollinations' while chunks stream. Rung 2 fails twice: the default prompt is answered from the route's response cache (x-cache: HIT, the same 321 chunks inside 5 to 22 ms, probes 2026-11-11), and after a run simStep() resumes 700 ms later and drives the trace and readouts under the pill 'echo · live complete', which never says simulated; the only 'echo · simulated' text is the initial HTML, which goLive(true) overwrites at once. Rung 3 also fails: simStep() appends to the same dts and count as the live run (headless load 2026-11-11 ended at 323 counted after a 321-chunk run). No run metadata, no recordings, no export."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 holds: the badge (RECORDING, SAVED HERE), src-line and the evidence footer name every source; there is no simulator (desk.png: RECORDING pill, 'llama3.1:8b 8.0B Q4_K_M · local Ollama ... 2026-11-11 06:58 UTC'). Rung 2 fails. With no Ollama, no own key and no click, the page plays a tour of shipped recordings (boot() -> startTour), not a fresh real stream. The one fresh measurement a no-setup visitor can make, 'time one reply' with the prefilled question, is a response-cache hit: the rater saw X-Cache: HIT twice, 0.25-0.45 s, cached since 06:51:22Z. That is the call that made the public-oneshot recording. The page labels it 'measured'. Above the gap: per-trace analysis with no mixing (rung 3); model, route, ISO time and prompt tokens in src-line (rung 4); 20 recordings labelled RECORDING plus a 60-run dataset (rung 5). Rung 6 fails, with no hosted-API recording. Rung 8 fails because exports carry no token ids. No dispute."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 2,
           "evidence": "goLive(true) streams https://text.pollinations.ai/<prompt>?model=openai&stream=true on load; its .catch() sets 'echo · live unreachable' and resumes simStep(), which the footer names as the offline fallback (rung 2). Rung 3 fails: nothing checks what the stream carries, any delta.content or delta.reasoning counts as a token, and the default prompt's cache replay (321 chunks in 5 to 22 ms, x-cache: HIT) is measured as generation. The pill reads 'live · pollinations' but never names the model (the stream reports gpt-oss-20b in every chunk). No Ollama, own-key or countdown route exists in the page; labs/assets/js/ai/llm.js has them but is non-streaming by design (its header: the anonymous streaming path answered with a key-budget notice on 2026-11-11), so this lab needs a streaming sibling, not an import of llm.js."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 holds: 'time one reply' calls text.pollinations.ai/openai, and local Ollama /api/chat streams when it is detected. Rung 2 fails. No keyless public route is streamed, by default or on request. llm.js and ai/stream/index.js say the anonymous stream returned a budget notice. The rater's probe at 09:42 UTC 2026-11-11 contradicts this: GET text.pollinations.ai/<novel prompt>?model=openai&stream=true&seed=<rand> returned text/event-stream with 303 data events, X-Cache: MISS and real gpt-oss-20b content in 5.3 s. This is a regression from G0's level 2. Above the gap: the invalid-stream guards in analyze() and the NOTICE_RE / non-SSE throw in openai-sse.js (rung 3), the model and route shown (rung 4), the OLLAMA_ORIGINS line (rung 5), own-key SSE (rung 6), and the public-window countdown with HTTP 402/429 reported via LLM.onStatus (rung 7). None of these count. Rung 8 fails: the narration numbers are not linked. No dispute."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 1,
           "evidence": "h1 and the .sub paragraph describe the idea (rung 1). Rung 2 fails: the footer says simulated cadence 'only covers the connect gap and the offline fallback', but simStep() resumes 700 ms after every run and never stops; it says the page 'streams a real keyless model by default', but the default prompt returns x-cache: HIT, a cache replay. No readout definitions. The copy asserts KV-cache pressure, batching and scheduler jitter as causes with nothing on the page measuring them, and the spectrum bins carry EEG labels while the footer says 'not brainwaves'."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Rung 1 holds: the h1 'Every spike is one token arriving.' and the .sub paragraph (desk.png). Rung 2 fails on the clause about a cached default. The footer says 'A reply you time here is timed in your browser'. The page never says that its prefilled public question is answered from the route's response cache, and the rater observed X-Cache: HIT twice for that exact request body. That cached state is not named in the pill (badge 'saved here · one reply') or the footer. Above the gap, present but not counted: title-attribute formulas on readouts, the hypotheses-free evidence list ('[NOT SHOWN] ... not claimed'), and the 6-step recording tour with event captions in engine/narrate.js (desk.png: 'TOUR 1 / 5' with the first-token caption). The two-point recording (rung 6) is absent. No dispute."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 2,
           "evidence": "CDP console capture at 1440 x 900 over 15 s on 2026-11-11 (positive control confirmed): no console error, no uncaught exception, trace drawn (rung 1). matchMedia('(prefers-reduced-motion: reduce)') freezes only the GL field time (gloop uses tt = 7.0) (rung 2); the trace keeps sweeping. Rung 3 fails: headless capture at 400 x 860 (?still) on 2026-11-11 shows the headline and paragraph clipped at the right edge, the tokens readout cut, the spectrum panel and prompt controls off screen, because .grid is 1fr 300px inside 46 px side padding with html,body overflow:hidden. No aria-live region; canvases have no text alternative."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Rung 1 holds: the shoot tool at 1440 px drew the trace with 0 console messages and 0 errors (desk.png, settler run 2026-11-11). Rung 2 holds: matchMedia reduce disables the reveal, the tour and the CSS plate and badge animation. Rung 3 fails (both skeptic disputes upheld). At phone width the route/status pill mounted by mountRoutePanel() is cut by '#route .lbr-label { overflow: hidden; text-overflow: ellipsis }' (token-ekg.css:304) to 'model: gpt-oss-20b via pollin...'. That hides the public-window state ('ready' or the countdown). The settler's phone.png shows exactly this cut. The skeptic's 400 px walk also found four language buttons in the cost chart ellipsized, for example 'Chinese (simplified)' at 168 > 83 px. Rung 4 is also only half met. The static plot appears under reduce at boot (boot() sets A at its end with playing false). But tick() sets tau = now - S.live.t0 for a live run with no reduce check, and setA(..., {play: true}) from a shelf or dataset click sweeps under reduce. Rung 5 fails as the rater found: outline: none on select, textarea and inputs, and a focus border of about 1.8:1. Down from the rater's 4."
         }
       }
     },
@@ -276,12 +316,17 @@
         "G0": {
           "level": 2,
           "evidence": "labs/token-ekg.html, 254 lines: one IIFE holding onToken() (timing and running statistics), spectrum() (frequency statistics), drawTrace() (drawing), simStep() and goLive() (streaming) over shared closure variables (dts, tps, buf, mode) (rung 2). Rung 3 fails: the pollinations URL is built inline in goLive() and no shared streaming route module exists (llm.js is non-streaming by design). No tests."
+        },
+        "G1": {
+          "level": 4,
+          "evidence": "Rungs 1-2 hold: separate modules under labs/assets/js/token-ekg/ (engine/stats.js, tokens.js, bpe.js, traces.js, schema.js, narrate.js; view/strip.js, plots.js, tokens-view.js, dataset.js, export.js; main.js wiring). Rung 3 holds: live streams go through the shared labs/assets/js/ai/stream/index.js streamingRoutes(), which lists its routes in llm.js order (Ollama, then own key), takes the key from LLM.ownKey() and re-exports LLM.publicReadyIn. The one-reply path goes through LLM.complete. The second skeptic dispute (supported 2) is rejected, for three reasons. The route list is the streaming sibling the G0 evidence called for, and its order matches llm.js _chain for the routes that stream. No public route streams, so there is no window for it to gate. The 'http://localhost:11434' in token-ekg/config.js:50 is a fallback behind AI_CONFIG.ollama.base, which ai/config.js:21 defines, so the running page never takes it. The duplicated Ollama probe (main.js probeOllama on the AI_CONFIG base with 12 s, beside llm.js's own 127.0.0.1 probe) is a real weakness, but it is not a clause of rung 3. Rung 4 holds: analyze() in engine/stats.js is pure, chunks in and a run record out. Rung 5 fails (first skeptic dispute upheld, checked). ollama.js and openai-sse.js share record(), but main.js branches on route.adapter === Ollama at lines 723, 727, 734, 759 and 793. These include the hardcoded recorder label `ai/stream/${route.adapter === Ollama ? 'ollama' : 'openai-sse'}.js` and the 'OpenAI-style stream: no server durations' note. A third adapter would need edits to index.js and main.js, not one new file. Above the gap, not counted: tests/run.mjs, Node only, 32 passed and 0 failed (rerun by the settler 2026-11-11). Down from the rater's 6."
         }
       }
     }
   ],
   "history": [
     { "gen": "G0", "date": "2026-11-11", "by": "ladder audit", "commit": "cd1e9f7" },
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder review: two adversarial passes; cumulative rungs, cache-replay guard, G0 regraded (cadence-statistics, trace-provenance, reading-the-signal 2 -> 1)", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder review: two adversarial passes; cumulative rungs, cache-replay guard, G0 regraded (cadence-statistics, trace-provenance, reading-the-signal 2 -> 1)", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "857339b" }
   ]
 }
