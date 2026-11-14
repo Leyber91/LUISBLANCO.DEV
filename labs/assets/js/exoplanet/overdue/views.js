@@ -16,15 +16,24 @@
    where the funnel's one-sigma edge crosses them, the planet is
    lost. Every other published solution of the planet is a point
    at its own mid-time, as early or late as it found the transit
-   against this clock's prediction. Gold is a later measurement
-   that landed inside the one-sigma window: the prediction held.
+   against this clock's prediction. Gold is a test of this clock
+   (clock.js testOf: a later paper, two years or more on, timing a
+   transit the clock's paper could not have used) that landed
+   inside the one-sigma window: the prediction held. A filled
+   white point is a test that landed outside it. A ring is no test.
+
+   The drawing ends at half an orbit either way. No measurement
+   can be further than that from the nearest predicted transit,
+   so a window that reaches it says nothing about which orbit, and
+   a solution measured once the window has passed a sixth of the
+   orbit is drawn as a faint ring: it could not have missed.
 
    The vertical scale is linear inside one minute and logarithmic
    beyond, so seconds and days fit one drawing.
    ============================================================ */
 
 import { tokens, alpha } from '../views/common.js';
-import { epochAt, midAt, sigmaAt, phaseAt, bandDegrees, lampAt, lostFrom } from './clock.js';
+import { epochAt, midAt, sigmaAt, phaseAt, bandDegrees, lampAt, lostFrom, blindAt, testOf, REAL_TEST_ORBITS, MIN_YEARS_APART } from './clock.js';
 import { yearOfJd, jdOfYear, durDays } from './data.js';
 
 const TAU = Math.PI * 2;
@@ -86,16 +95,17 @@ export const RECORD_TICKS = [[1 / 1440, '1 min'], [10 / 1440, '10 min'], [1 / 24
 export function recordScale(w, h, clock, points, dur) {
   const pad = { l: 52, r: 12, t: 12, b: 24 };
   const y0 = Math.min(yearOfJd(clock.t0), ...points.map((p) => p.year)) - 0.4, y1 = END_YEAR;
-  const far = Math.max(2 * sigmaAt(clock, epochAt(clock, jdOfYear(END_YEAR))), dur || 0, ...points.map((p) => Math.abs(p.residual) + p.sT), 2 * MINUTE);
+  const half = clock.P / 2;                         // the largest miss there can be: half an orbit
+  const far = Math.min(half, Math.max(2 * sigmaAt(clock, epochAt(clock, jdOfYear(END_YEAR))), dur || 0, ...points.map((p) => Math.abs(p.residual) + p.sT), 2 * MINUTE));
   const top = squash(far * 1.3);
   const X = (year) => pad.l + ((year - y0) / (y1 - y0)) * (w - pad.l - pad.r);
   const Y = (days) => pad.t + (1 - (squash(days) + top) / (2 * top)) * (h - pad.t - pad.b);
-  return { pad, y0, y1, far, X, Y, yearAt: (px) => y0 + ((px - pad.l) / (w - pad.l - pad.r)) * (y1 - y0) };
+  return { pad, y0, y1, far, half, X, Y, yearAt: (px) => y0 + ((px - pad.l) / (w - pad.l - pad.r)) * (y1 - y0) };
 }
 
 export function drawRecord(ctx, w, h, { clock, points, dur, jd, nowJd, sc }) {
   const T = tokens();
-  const { pad, y0, y1, far, X, Y } = sc;
+  const { pad, y0, y1, far, half, X, Y } = sc;
   ctx.font = T.fontSm; ctx.lineWidth = 1;
   // the frame: years along the bottom, early and late up the side
   ctx.strokeStyle = T.line; ctx.fillStyle = T.dim; ctx.textAlign = 'center';
@@ -112,38 +122,45 @@ export function drawRecord(ctx, w, h, { clock, points, dur, jd, nowJd, sc }) {
       ctx.fillText((s > 0 ? '+' : '−') + label, pad.l - 6, Y(s * d) + 3);
     }
   }
-  ctx.fillText('on time', pad.l - 6, Y(0) + 3);
-  ctx.save(); ctx.translate(10, pad.t + (h - pad.t - pad.b) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillStyle = T.faint;
-  ctx.fillText('LATE   ·   EARLY', 0, 0); ctx.restore();
-  // the funnel: what this clock allows itself, at one and two sigma
+  ctx.fillText('on time', pad.l - 6, Y(0) + 3);                   // above this line a transit was found later than predicted; the caption under the drawing says so
+  // the funnel: what this clock allows itself, at one and two sigma, and never more than half an orbit
   const years = []; for (let i = 0; i <= 160; i++) years.push(y0 + ((y1 - y0) * i) / 160);
   const sig = (year) => sigmaAt(clock, epochAt(clock, jdOfYear(year)));
+  const cap = (days) => Math.min(half, days);
+  if (far >= half) {
+    ctx.strokeStyle = alpha(T.horizon, 0.5); ctx.setLineDash([2, 4]);
+    for (const s of [1, -1]) { ctx.beginPath(); ctx.moveTo(pad.l, Y(s * half) + 0.5); ctx.lineTo(w - pad.r, Y(s * half) + 0.5); ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText('HALF AN ORBIT', w - pad.r - 4, Y(half) - 4);
+  }
   for (const [k, a] of [[2, 0.07], [1, 0.13]]) {
     ctx.fillStyle = alpha(T.horizon, a); ctx.beginPath();
-    years.forEach((y, i) => { const x = X(y), yy = Y(k * sig(y)); if (i) ctx.lineTo(x, yy); else ctx.moveTo(x, yy); });
-    for (let i = years.length - 1; i >= 0; i--) ctx.lineTo(X(years[i]), Y(-k * sig(years[i])));
+    years.forEach((y, i) => { const x = X(y), yy = Y(cap(k * sig(y))); if (i) ctx.lineTo(x, yy); else ctx.moveTo(x, yy); });
+    for (let i = years.length - 1; i >= 0; i--) ctx.lineTo(X(years[i]), Y(-cap(k * sig(years[i]))));
     ctx.closePath(); ctx.fill();
   }
   ctx.strokeStyle = alpha(T.horizon, 0.55); ctx.beginPath();
-  for (const s of [1, -1]) years.forEach((y, i) => { const x = X(y), yy = Y(s * sig(y)); if (i) ctx.lineTo(x, yy); else ctx.moveTo(x, yy); });
+  for (const s of [1, -1]) years.forEach((y, i) => { const x = X(y), yy = Y(s * cap(sig(y))); if (i) ctx.lineTo(x, yy); else ctx.moveTo(x, yy); });
   ctx.stroke();
   // the transit's own length: past it, nobody knows which night
   if (dur) {
     ctx.strokeStyle = alpha(T.bright, 0.5); ctx.setLineDash([5, 4]);
     for (const s of [1, -1]) { ctx.beginPath(); ctx.moveTo(pad.l, Y(s * dur) + 0.5); ctx.lineTo(w - pad.r, Y(s * dur) + 0.5); ctx.stroke(); }
     ctx.setLineDash([]);
-    ctx.fillStyle = T.dim; ctx.textAlign = 'left'; ctx.fillText('THE TRANSIT\'S LENGTH', pad.l + 4, Y(dur) - 4);
+    // at the right end of the lower line: no solution is dated in the future, so no point is ever drawn there
+    ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText('THE TRANSIT\'S LENGTH', w - pad.r - 4, Y(-dur) - 4);
     const lostYear = yearOfJd(lostFrom(clock, dur));
     if (lostYear > y0 && lostYear < y1) {
       ctx.strokeStyle = alpha(T.bright, 0.6); ctx.beginPath(); ctx.moveTo(X(lostYear) + 0.5, Y(dur)); ctx.lineTo(X(lostYear) + 0.5, Y(-dur)); ctx.stroke();
       ctx.fillStyle = T.bright; ctx.textAlign = lostYear > (y0 + y1) / 2 ? 'right' : 'left';
-      ctx.fillText(`LOST FROM ${Math.floor(lostYear)}`, X(lostYear) + (lostYear > (y0 + y1) / 2 ? -5 : 5), Y(-dur) + 12);
+      ctx.fillText(`LOST FROM ${Math.floor(lostYear)}`, X(lostYear) + (lostYear > (y0 + y1) / 2 ? -5 : 5), Y(dur) + 12);
     }
   }
   // today, and the date being shown
   ctx.strokeStyle = alpha(T.text, 0.45); ctx.setLineDash([1, 3]);
   ctx.beginPath(); ctx.moveTo(X(yearOfJd(nowJd)) + 0.5, pad.t); ctx.lineTo(X(yearOfJd(nowJd)) + 0.5, h - pad.b); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle = T.dim; ctx.textAlign = 'center'; ctx.fillText('TODAY', X(yearOfJd(nowJd)), pad.t + 8);
+  const xt = X(yearOfJd(nowJd)), right = xt > w - pad.r - 44;
+  ctx.fillStyle = T.dim; ctx.textAlign = right ? 'right' : 'left'; ctx.fillText('TODAY', xt + (right ? -4 : 4), h - pad.b - 5);
   const xs = X(yearOfJd(jd));
   ctx.strokeStyle = T.bright; ctx.beginPath(); ctx.moveTo(xs + 0.5, pad.t); ctx.lineTo(xs + 0.5, h - pad.b); ctx.stroke();
   ctx.fillStyle = T.bright; ctx.beginPath(); ctx.moveTo(xs - 4, h - pad.b); ctx.lineTo(xs + 4.5, h - pad.b); ctx.lineTo(xs + 0.5, h - pad.b - 6); ctx.closePath(); ctx.fill();
@@ -152,25 +169,41 @@ export function drawRecord(ctx, w, h, { clock, points, dur, jd, nowJd, sc }) {
   const hits = [];
   for (const p of points) {
     const x = X(p.year), y = Y(p.residual);
-    const held = Math.abs(p.z) < 1 && p.later;
-    const c = held ? T.gold : p.later ? T.bright : T.dim;
-    ctx.strokeStyle = alpha(c, 0.8); ctx.beginPath(); ctx.moveTo(x + 0.5, Y(p.residual + p.sT)); ctx.lineTo(x + 0.5, Y(p.residual - p.sT)); ctx.stroke();
+    const test = p.test && !p.blind;                                  // a later paper's measurement that could have missed
+    const held = test && Math.abs(p.z) < 1;
+    const c = held ? T.gold : test ? T.bright : T.dim;
+    ctx.strokeStyle = alpha(c, 0.8); ctx.beginPath(); ctx.moveTo(x + 0.5, Y(cap(p.residual + p.sT))); ctx.lineTo(x + 0.5, Y(-cap(-(p.residual - p.sT)))); ctx.stroke();
     ctx.beginPath(); ctx.arc(x + 0.5, y, 3.2, 0, TAU);
-    if (p.dated) { ctx.fillStyle = c; ctx.fill(); } else { ctx.fillStyle = T.void; ctx.fill(); ctx.strokeStyle = c; ctx.stroke(); }
+    if (test) { ctx.fillStyle = c; ctx.fill(); } else { ctx.fillStyle = T.void; ctx.fill(); ctx.strokeStyle = c; ctx.stroke(); }
     hits.push({ x, y, p });
   }
   return hits;
 }
 
+/* Why a solution is no test of a clock, in words; '' when it is one. The order is the order of clock.js testOf. */
+export function notATest(clock, s) {
+  if (clock.pub == null) return 'this clock has no publication date';
+  if (s.pub == null) return 'it has no publication date';
+  if (clock.ref == null || s.ref == null || s.ref === clock.ref) return 'it is from the same paper';
+  if (s.pub < clock.pub) return 'it was published before this clock';
+  if (s.pub - clock.pub < MIN_YEARS_APART) return 'it was published less than two years after this clock';
+  if (epochAt(clock, s.t0) < REAL_TEST_ORBITS) return 'its mid-time is fewer than ten orbits on';
+  if (yearOfJd(s.t0) <= clock.pub) return 'its mid-time is from before this clock was published';
+  return '';
+}
+
 /**
  * The other published solutions of a planet against one clock: where each found the transit, relative to
- * what the clock predicts for that orbit. later: its mid-time is ten or more orbits after the clock's epoch.
+ * what the clock predicts for that orbit. test: it tests the clock, by the one definition the tally uses
+ * (clock.js testOf). why: when it does not, the reason. blind: by that orbit the combined uncertainty had
+ * reached a sixth of the period, so even a test shows nothing.
  */
 export function pointsFor(planet, clock) {
   return (planet.sols || []).filter((s) => !(s.t0 === clock.t0 && s.P === clock.P)).map((s) => {
     const n = epochAt(clock, s.t0);
     const residual = s.t0 - midAt(clock, n);
     const sigma = Math.hypot(sigmaAt(clock, n), s.sT);
-    return { s, n, year: yearOfJd(s.t0), residual, sT: s.sT, z: residual / sigma, later: n >= 10, dated: s.pub != null };
+    const test = testOf(clock, s) !== null;
+    return { s, n, year: yearOfJd(s.t0), residual, sT: s.sT, z: residual / sigma, test, why: test ? '' : notATest(clock, s), blind: blindAt(clock, sigma) };
   });
 }

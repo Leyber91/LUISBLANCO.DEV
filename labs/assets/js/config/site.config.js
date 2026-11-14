@@ -54,9 +54,9 @@ export const CATEGORIES = [
       { id: 'dimensional', title: 'Dimensional Test', status: 'built',
         href: 'md_animation_page.html',
         blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
-      { id: 'exomania', title: 'Exomania', status: 'built',
+      { id: 'exomania', title: 'Exomania: Overdue', status: 'built',
         href: 'exomania.html',
-        blurb: 'All 6,464 confirmed exoplanets on real diagrams, from the radius valley to the discovery years; the chosen world ray-traced from its measured values, its system to scale with the habitable zone, its transit and its uncertainties.' },
+        blurb: 'Every transiting planet is a clock. Each published transit ephemeris is carried forward to any date: how wide its window has grown, which planets can no longer be timed, which cross their stars over your own sky in the next 24 hours, and how often a later paper found the transit where the older one said. The survey of every known planet is one link away.' },
     ],
   },
   {

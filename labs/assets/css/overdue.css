@@ -1,0 +1,110 @@
+/* ============================================================
+   Overdue — on the labs' plate (plate.css). Cosmos is measured
+   light: the page is a pair of instruments and their readouts.
+   Gold appears where a clock still says when (the planet on its
+   orbit while it can be timed), where a later measurement landed
+   inside an older prediction, and on a transit that can be
+   watched. A lost planet is grey.
+
+   Text a visitor must read is never fainter than --text-dim
+   (5.1 to 1 on the ground); --text-faint is 2.3 to 1 and is kept
+   for marks that carry no words.
+   ============================================================ */
+
+.od-head { max-width: var(--content-max); margin-inline: auto; padding-block: var(--s-3) var(--s-5); }
+.od-head h1 { font-size: clamp(1.7rem, 2.6vw, 2.35rem); }
+.od-head .sub { max-width: 96ch; }
+.od-head .hint, .plate .hint { color: var(--text-dim); }
+.od-wrap { max-width: var(--content-max); margin-inline: auto; display: flex; flex-direction: column; gap: var(--s-6); padding-bottom: var(--s-8); }
+.plate { scroll-margin-top: 72px; }                                           /* a plate scrolled to stands clear of the bar */
+.panel-h h2.mini { margin: 0; font-weight: 500; line-height: 1.5; font-family: inherit; }
+.panel-h h2.mini:focus { outline: none; }
+.panel-h h2.mini:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
+.panel-h .mini.dim { color: var(--text-dim); }
+
+/* ---------- plate a: one clock ---------- */
+.od-pick { display: grid; grid-template-columns: minmax(180px, 280px) auto minmax(0, 1fr); gap: var(--s-3); align-items: center; margin-bottom: var(--s-3); }
+.od-pick form { display: contents; }
+.od-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.od-clockrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); align-items: center; margin-bottom: var(--s-4); }
+.od-views { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr); gap: var(--s-4); align-items: stretch; }
+.od-views figure { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+#orbit { width: 100%; display: block; aspect-ratio: 1; border: 1px solid var(--line); background: var(--void); }
+/* The record fills the height the orbit sets. The canvas is taken out of the flow: sized by its own bitmap it
+   made the row taller, which made the bitmap taller, and the drawing grew by a screen after load. */
+.od-recordbox { position: relative; flex: 1 1 auto; min-height: 300px; border: 1px solid var(--line); background: var(--void); }
+#record { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: ew-resize; touch-action: pan-y; }      /* a sideways drag sets the date; an up or down swipe still scrolls the page */
+.od-views figcaption { font-size: .68rem; color: var(--text-dim); line-height: 1.45; min-height: 4.35em; }
+.od-scrub { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: var(--s-3); align-items: center; margin-top: var(--s-3); }
+.od-scrub input[type=range] { margin: 0; accent-color: var(--horizon); }      /* a date is a setting, and gold is kept for what a clock still says */
+.od-read { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin: var(--s-4) 0 0; }
+.od-read div { background: var(--void); padding: 10px 12px; min-width: 0; }
+.od-read dt { font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 4px; }
+.od-read dd { margin: 0; font-size: clamp(.9rem, 1.25vw, 1.05rem); color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }      /* a number or a date is never broken */
+.od-read dd small { display: block; font-size: .68rem; color: var(--text-dim); margin-top: 2px; white-space: normal; min-height: 2.6em; line-height: 1.3; }
+#r-state[data-state="read"] { color: var(--accretion-soft); }
+#r-state[data-state="lost"] { color: var(--text-dim); }
+.od-lines { margin: var(--s-3) 0 0; display: flex; flex-direction: column; gap: 4px; }
+.od-lines p { margin: 0; font-size: .74rem; color: var(--text-dim); line-height: 1.5; min-height: 1.5em; overflow-wrap: anywhere; }
+.od-list { margin-top: var(--s-3); }
+.od-list summary { font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text); cursor: pointer; padding: 6px 0; }
+.od-list summary:hover, .od-list summary:focus-visible { color: var(--text-bright); }
+.od-list ul { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.od-list li { font-size: .74rem; color: var(--text-dim); line-height: 1.5; overflow-wrap: anywhere; padding-left: 10px; border-left: 1px solid var(--line); }
+
+/* ---------- plate b: tonight ---------- */
+.od-place { display: grid; grid-template-columns: auto 110px auto 110px auto auto auto; gap: var(--s-3); align-items: center; margin-bottom: var(--s-3); }
+.od-place form { display: contents; }
+.od-tablewrap { overflow-x: auto; }
+.od-tablewrap.long { max-height: 76vh; overflow-y: auto; border-block: 1px solid var(--line); }      /* a thousand rows scroll inside the plate */
+.od-tablewrap:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 2px; }
+.od-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.od-cap { margin: var(--s-3) 0 6px; font-size: .72rem; color: var(--text-dim); line-height: 1.5; }      /* outside the table, so it wraps on a phone while the table scrolls */
+.od-scrollhint { display: none; }
+.od-table th { text-align: left; font-weight: 500; font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); padding: 6px 8px; border-bottom: 1px solid var(--line-bright); white-space: nowrap; }
+.od-tablewrap.long th { position: sticky; top: 0; background: var(--void); }
+.od-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); color: var(--text); white-space: nowrap; }
+.od-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.od-table.no-place .place { display: none; }                                             /* altitude, sky and the verdict are columns of a place: without one they are not drawn */
+.od-table td.yes { color: var(--accretion-soft); }                                       /* a transit this place can watch, in words and in gold */
+.od-table tr.watch td:first-child { box-shadow: inset 2px 0 0 var(--accretion); }
+.od-table td.dim { color: var(--text-dim); white-space: normal; }
+.linkish { background: none; border: 0; padding: 0; color: var(--text-bright); font: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-bright); text-underline-offset: 3px; }
+.linkish:hover { text-decoration-color: var(--horizon); }
+.od-more { margin-top: var(--s-3); }
+
+/* ---------- plate c: the catalogue and the tally ---------- */
+.od-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--s-6); }
+.od-nums { display: grid; grid-template-columns: minmax(0, max-content) max-content; gap: 6px 16px; margin: 0; font-size: .82rem; }
+.od-nums dt { color: var(--text-dim); }
+.od-nums dd { margin: 0; color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }      /* a number is never broken or cut */
+.od-nums dt.in { padding-left: 1.6ch; }                                                                            /* a count taken from the row above it */
+.od-prose { margin: var(--s-3) 0 0; font-size: .82rem; line-height: 1.62; color: var(--text-dim); max-width: 76ch; }
+#tally:not([data-ready]) dd { color: var(--text-dim); }
+.evidence .t.ill { color: var(--text-dim); }
+
+@media (max-width: 980px) {
+  .od-views, .od-two { grid-template-columns: minmax(0, 1fr); }
+  #orbit { max-width: 420px; margin-inline: auto; }
+  .od-recordbox { flex: none; height: 300px; }
+  .od-read { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .od-read .wide { grid-column: 1 / -1; }                                    /* five readouts on two columns: the date takes a row, and no cell is left empty */
+  .od-pick { grid-template-columns: minmax(0, 1fr) auto; }
+  .od-chips { grid-column: 1 / -1; }
+  .od-place { grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); }
+  .od-place .act { grid-column: span 2; }
+}
+@media (max-width: 760px) {
+  .od-scrollhint { display: inline; }
+}
+@media (max-width: 560px) {
+  .panel-h { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .od-nums { grid-template-columns: minmax(0, 1fr) max-content; }
+  .od-nums dd { text-align: right; }
+  .od-table { font-size: .72rem; }
+  .od-table th, .od-table td { padding: 6px; }
+  .od-scrub { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .od-scrub input[type=range] { grid-column: 1 / -1; order: -1; }
+  .od-clockrow { grid-template-columns: minmax(0, 1fr); }
+  .od-read dd { font-size: .95rem; }
+}

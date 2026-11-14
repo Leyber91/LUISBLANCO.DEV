@@ -100,22 +100,36 @@ export function romerSeconds(jdTT, raDeg, decDeg) {
 }
 
 /* How each stated standard is read. bary: the date is at the Sun or the barycentre, so the light-travel
-   term applies. tdb: the scale is TDB. slack: seconds the statement leaves unsaid, beyond this file's own 5 s.
-   "BJD" and "HJD" without a scale are read as TDB and UTC, the usual meaning in the years each was common
-   (Eastman, Siverd and Gaudi 2010, PASP 122, 935, on why the scale must be stated); the 69 s between the
-   two scales is their slack. A bare "JD" does not say whether it is at Earth or at the Sun: it is read as
-   barycentric TDB, and the whole light-travel term plus the scale difference is its slack. */
+   term applies. tdb: the scale is TDB. slack: every second the reading may be off by.
+     - A barycentric date costs this file's 5 s, because the Sun stands in for the barycentre. A heliocentric
+       date is at the Sun itself, so it costs 1 s (the low-precision Sun).
+     - "BJD" and "HJD" without a scale are read as TDB and UTC, the usual meaning in the years each was
+       common (Eastman, Siverd and Gaudi 2010, PASP 122, 935, on why the scale must be stated); the 69 s
+       between the two scales is added to their slack.
+     - TCB runs ahead of TDB by about 17 s in these years; it is read as TDB and the difference is slack.
+     - A bare "JD" does not say whether it is at Earth or at the Sun: it is read as barycentric TDB, and the
+       whole light-travel term at Earth's greatest distance (508 s) plus the scale difference is its slack.
+   stated: the name gives both the place and the scale. key: standards that are the same clock to a second.
+   The archive's own spellings ("BJD/TDB", "UTC-BJD", and "BJD-TBD", read here as a slip for TDB) are
+   brought to these names; anything else is read as a bare JD. */
 export const STANDARDS = {
-  'BJD-TDB': { bary: true, tdb: true, slack: 0 },
-  'BJD-TT': { bary: true, tdb: true, slack: 0 },
-  'BJD-UTC': { bary: true, tdb: false, slack: 0 },
-  'HJD-UTC': { bary: true, tdb: false, slack: SUN_BARYCENTRE_S },
-  'HJD-TDB': { bary: true, tdb: true, slack: SUN_BARYCENTRE_S },
-  BJD: { bary: true, tdb: true, slack: 69 },
-  HJD: { bary: true, tdb: false, slack: 69 + SUN_BARYCENTRE_S },
-  JD: { bary: true, tdb: true, slack: 499 + 69 },
+  'BJD-TDB': { key: 'BJD-TDB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S },
+  'BJD-TT': { key: 'BJD-TDB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S },
+  'BJD-TCB': { key: 'BJD-TCB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S + 20 },
+  'BJD-UTC': { key: 'BJD-UTC', stated: true, bary: true, tdb: false, slack: SUN_BARYCENTRE_S },
+  'HJD-UTC': { key: 'HJD-UTC', stated: true, bary: true, tdb: false, slack: 1 },
+  'HJD-TDB': { key: 'HJD-TDB', stated: true, bary: true, tdb: true, slack: 1 },
+  BJD: { key: 'BJD', stated: false, bary: true, tdb: true, slack: SUN_BARYCENTRE_S + 69 },
+  HJD: { key: 'HJD', stated: false, bary: true, tdb: false, slack: 1 + 69 },
+  JD: { key: 'JD', stated: false, bary: true, tdb: true, slack: 508 + 69 },
 };
-export const standardOf = (name) => STANDARDS[String(name || '').toUpperCase().replace(/[_\s]+/g, '-')] || STANDARDS.JD;
+const ALIAS = { 'UTC-BJD': 'BJD-UTC', 'BJD-TBD': 'BJD-TDB', 'TDB-BJD': 'BJD-TDB' };
+export function standardOf(name) {
+  const n = String(name || '').trim().toUpperCase().replace(/[_\s/]+/g, '-');
+  return STANDARDS[ALIAS[n] || n] || STANDARDS.JD;
+}
+/* Two solutions state the same clock: each names its place and its scale, and the two are one standard. */
+export const sameStated = (a, b) => { const x = standardOf(a), y = standardOf(b); return x.stated && y.stated && x.key === y.key; };
 
 /**
  * The UTC Julian date, at Earth's centre, of an event whose published time is jd in the named standard,
@@ -126,7 +140,7 @@ export function toEarthUtc(jd, standard, raDeg, decDeg) {
   let t = jd;
   if (st.tdb) t -= ttMinusUtc(t) / 86400;                 // now on the UTC scale, still at the Sun
   if (st.bary) t -= romerSeconds(t + ttMinusUtc(t) / 86400, raDeg, decDeg) / 86400;
-  return { jdUtc: t, slack: st.slack + SUN_BARYCENTRE_S };
+  return { jdUtc: t, slack: st.slack };
 }
 
 /* Greenwich mean sidereal time in degrees for a UT Julian date (Meeus eq. 12.4). UT1 and UTC differ by

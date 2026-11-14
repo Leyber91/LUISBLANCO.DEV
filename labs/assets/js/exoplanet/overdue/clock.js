@@ -19,6 +19,13 @@
    how far off it is, in units of the combined uncertainty (z).
    Honest Gaussian errors put about 68% of such tests inside one.
 
+   A test has a limit. A measured mid-time is never more than half
+   a period from the nearest predicted transit, so once the
+   combined uncertainty reaches a sixth of the period a miss of
+   three sigma cannot be seen at all. Such a test is called blind
+   and is counted apart: landing inside the window proves nothing
+   when the window covers the orbit.
+
    Times are Julian dates in whatever standard the solution
    states; nothing here converts them (time.js does, for the sky).
    [REAL: the propagation formula is the standard one for a linear
@@ -26,11 +33,22 @@
    ============================================================ */
 
 export const YEAR_DAYS = 365.25;
-export const REAL_TEST_ORBITS = 10;       // a later mid-time fewer orbits on than this is the same transits quoted again
+export const MIN_YEARS_APART = 2;         // a paper tests an older one when it appeared two years or more after it
 
-/* A solution as an object, from a row of ephemerides.json: [t0, e_t0, period, e_period, ref, pub, std, flag]. */
-export const solution = (r) => (r ? { t0: r[0], sT: r[1], P: r[2], sP: r[3], ref: r[4], pub: r[5], std: r[6], flag: r[7] } : null);
-export const usable = (s) => !!s && [s.t0, s.sT, s.P, s.sP].every(Number.isFinite) && s.t0 > 2400000 && s.t0 < 2500000 && s.P > 0 && s.sT > 0 && s.sP > 0;
+/* A Julian date as a year with a fraction, and back. */
+export const yearOfJd = (jd) => 2000 + (jd - 2451545.0) / YEAR_DAYS;
+export const jdOfYear = (y) => 2451545.0 + (y - 2000) * YEAR_DAYS;
+export const REAL_TEST_ORBITS = 10;       // a later mid-time fewer orbits on than this is the same transits quoted again
+export const BLIND_SHARE = 1 / 6;         // an uncertainty this share of the period or more: three sigma is half an orbit, the largest miss there can be
+
+/* Whether an uncertainty (days) is too wide for this clock to be tested at all. */
+export const blindAt = (s, sigma) => sigma >= s.P * BLIND_SHARE;
+
+/* A solution as an object, from a row of the data files: [t0, e_t0, period, e_period, ref, pub, std, flag], and for
+   a working clock a ninth number, how many other published solutions stand apart from it (the build script). */
+export const solution = (r) => (r ? { t0: r[0], sT: r[1], P: r[2], sP: r[3], ref: r[4], pub: r[5], std: r[6], flag: r[7], disputes: r[8] || 0 } : null);
+/* A full Julian date between late 1995 and 2132: the tables hold a few truncated or mistyped dates. */
+export const usable = (s) => !!s && [s.t0, s.sT, s.P, s.sP].every(Number.isFinite) && s.t0 > 2450000 && s.t0 < 2500000 && s.P > 0 && s.sT > 0 && s.sP > 0;
 
 /* The transit nearest to a time, and the clock's prediction and blur for transit n (days). */
 export const epochAt = (s, t) => Math.round((t - s.t0) / s.P);
@@ -57,14 +75,31 @@ export const bandDegrees = (s, t, k = 1) => Math.min(360, (2 * k * sigmaAt(s, ep
 /**
  * Grade an older solution against a newer one of the same planet. The older clock is carried to the transit
  * nearest the newer mid-time. residual is newer minus predicted, in days; z divides it by the carried blur
- * and the newer mid-time's own error together.
+ * and the newer mid-time's own error together. blind: the combined uncertainty is a sixth of the period or
+ * more, so the test could not have shown a miss of three sigma.
  */
 export function grade(older, newer) {
   const n = epochAt(older, newer.t0);
   const carried = sigmaAt(older, n);
   const residual = newer.t0 - midAt(older, n);
   const sigma = Math.hypot(carried, newer.sT);
-  return { n, residual, carried, sigma, z: residual / sigma, real: Math.abs(n) >= REAL_TEST_ORBITS };
+  return { n, residual, carried, sigma, z: residual / sigma, real: Math.abs(n) >= REAL_TEST_ORBITS, blind: blindAt(older, sigma) };
+}
+
+/**
+ * Whether a later solution tests an older clock, as this lab defines a test, and its grade if it does.
+ * Both carry a true publication date; they come from different papers; the later paper appeared two years
+ * or more after the older; its mid-time is ten or more orbits on, and later than the day the older paper
+ * appeared (a mid-time from before that day is a transit the older paper could have used). Returns null when
+ * any of that fails. One definition, used for the tally across planets and for the record of one clock.
+ */
+export function testOf(older, newer) {
+  if (!older || !newer || older.pub == null || newer.pub == null) return null;
+  if (older.ref == null || newer.ref == null || older.ref === newer.ref) return null;
+  if (newer.pub - older.pub < MIN_YEARS_APART) return null;
+  const g = grade(older, newer);
+  if (g.n < REAL_TEST_ORBITS || yearOfJd(newer.t0) <= older.pub) return null;
+  return g;
 }
 
 /**
@@ -79,19 +114,26 @@ export function transitsBetween(s, from, to) {
 
 /**
  * The tally across planets. pairs: [{ older, newer, sameStandard }]. Counts the tests that are real (the
- * later mid-time is a different transit), how many of those land inside one sigma, and how many beyond three.
- * Shares are recomputed from these totals wherever they are shown.
+ * later mid-time is a different transit, and the test is not blind), how many of those land inside one sigma,
+ * and how many beyond three. blind counts the later mid-times that came after the old window had covered the
+ * orbit; they are in no other count. topRef and topCount: the reference that is the newer paper in the most
+ * real tests, and in how many. Shares are recomputed from these totals wherever they are shown.
  */
 export function tally(pairs) {
-  const t = { pairs: pairs.length, real: 0, inside1: 0, beyond3: 0, same: 0, sameInside1: 0, sameBeyond3: 0 };
+  const t = { pairs: pairs.length, real: 0, blind: 0, inside1: 0, beyond3: 0, same: 0, sameInside1: 0, sameBeyond3: 0, topRef: null, topCount: 0 };
+  const by = new Map();
   for (const p of pairs) {
     const g = grade(p.older, p.newer);
     if (!g.real) continue;
+    if (g.blind) { t.blind++; continue; }
     t.real++;
+    if (p.newer.ref != null) by.set(p.newer.ref, (by.get(p.newer.ref) || 0) + 1);
     const a = Math.abs(g.z);
     if (a < 1) t.inside1++;
     if (a > 3) t.beyond3++;
     if (p.sameStandard) { t.same++; if (a < 1) t.sameInside1++; if (a > 3) t.sameBeyond3++; }
   }
+  // the paper that is the newer one most often: when one catalogue does most of the testing, the tally leans on it
+  for (const [ref, n] of by) if (n > t.topCount) { t.topRef = ref; t.topCount = n; }
   return t;
 }

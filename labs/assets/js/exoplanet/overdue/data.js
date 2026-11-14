@@ -10,29 +10,32 @@
    narrowest window on the day the data was retrieved (chosen by
    the build script, which says how).
 
-   A test of an older clock by a newer one, as this lab defines it
-   after an independent check of its first definition:
+   The test of a planet's oldest clock, as this lab defines it after
+   two independent checks of its first definitions:
      older   the earliest-published dated solution;
-     newer   the latest-published dated solution from a different
-             paper, at least two years later;
-     real    the newer mid-time is ten or more orbits after the
-             older one, and later than the day the older paper
-             was published.
+     newer   the latest-published solution that tests it (clock.js
+             testOf: dated, from another paper, two years or more
+             later, its mid-time ten or more orbits on and after the
+             day the older paper appeared);
+     real    there is such a solution;
+     blind   a real pair whose combined uncertainty is a sixth of
+             the period or more (clock.js): it could not have
+             shown a miss, and the tally counts it apart.
    Rows without a publication date take no part: the archive gives
    one date (July 2017) to every ExoFOP row, whose mid-times run
    to 2026, and counting that as "older" had made the first tally
-   look better than the clocks are.
+   look better than the clocks are. "The same standard" means that
+   both papers name the place and the scale of their dates and the
+   two agree (time.js sameStated): two papers that each say only
+   "BJD" have not said the same thing.
    ============================================================ */
 
-import { solution, usable, epochAt, YEAR_DAYS, REAL_TEST_ORBITS } from './clock.js';
+import { solution, usable, testOf, MIN_YEARS_APART, yearOfJd, jdOfYear } from './clock.js';
+import { sameStated } from './time.js';
 
 const HERE = new URL('../../../data/exomania/', import.meta.url);
 export const DATA_URLS = { clocks: new URL('ephemerides.json', HERE).href, record: new URL('ephemerides-record.json', HERE).href };
-export const MIN_YEARS_APART = 2;
-
-/* A Julian date as a year with a fraction, and back. */
-export const yearOfJd = (jd) => 2000 + (jd - 2451545.0) / YEAR_DAYS;
-export const jdOfYear = (y) => 2451545.0 + (y - 2000) * YEAR_DAYS;
+export { MIN_YEARS_APART, yearOfJd, jdOfYear };
 
 /** Planets from the parsed ephemerides.json. */
 export function planetsOf(doc) {
@@ -50,10 +53,17 @@ export function planetsOf(doc) {
   return { meta: doc.meta, standards: doc.standards, planets, byName: new Map(planets.map((p) => [p.name, p])) };
 }
 
-/** Attach every published solution to its planet, from the parsed ephemerides-record.json. */
+/** Attach every published solution to its planet, from the parsed ephemerides-record.json. A record that is
+ * not the shape this page was built for is refused, so a broken file never shows as a count of zero. */
 export function attachRecord(cat, rec) {
+  if (!rec || !Array.isArray(rec.refs) || !Array.isArray(rec.sols) || rec.sols.length !== cat.planets.length || !rec.sols.every(Array.isArray)) {
+    throw new Error('the published record is not in the shape this page reads');
+  }
   cat.refs = rec.refs;
-  cat.planets.forEach((p, i) => { p.sols = (rec.sols[i] || []).map(solution).filter(usable); });
+  cat.planets.forEach((p, i) => {
+    p.sols = rec.sols[i].map(solution).filter(usable);
+    for (const s of p.sols) s.stdName = cat.standards[s.std];
+  });
   return cat;
 }
 
@@ -61,18 +71,22 @@ export function attachRecord(cat, rec) {
 export const durDays = (p) => (Number.isFinite(p.durH) && p.durH > 0 ? p.durH / 24 : null);
 
 /**
- * The pair that tests this planet's oldest clock, or null. real says whether it is a test at all.
- * sameStandard: both solutions state the same time standard.
+ * The pair that tests this planet's oldest clock. null when no other paper appeared two years or more after
+ * the oldest dated one. real: one of those papers tests it (clock.js testOf), and newer is the latest that
+ * does; when none does, newer is the latest of them and real is false. blind: by then the two uncertainties
+ * together had reached a sixth of the orbit, so that nothing could miss. sameStandard: both state the same
+ * clock in full.
  */
 export function pairOf(p) {
   const dated = (p.sols || []).filter((s) => s.pub != null);
   if (dated.length < 2) return null;
   const older = dated[0];
-  let newer = null;
-  for (let k = dated.length - 1; k > 0 && !newer; k--) if (dated[k].ref !== older.ref && dated[k].pub - older.pub >= MIN_YEARS_APART) newer = dated[k];
-  if (!newer) return null;
-  const n = epochAt(older, newer.t0);
-  return { older, newer, n, sameStandard: older.std === newer.std, real: n >= REAL_TEST_ORBITS && yearOfJd(newer.t0) > older.pub };
+  const later = dated.filter((s) => s.ref !== older.ref && s.pub - older.pub >= MIN_YEARS_APART);
+  if (!later.length) return null;
+  let newer = null, g = null;
+  for (let k = later.length - 1; k >= 0 && !g; k--) { g = testOf(older, later[k]); if (g) newer = later[k]; }
+  if (!g) return { older, newer: later[later.length - 1], n: 0, real: false, blind: false, sameStandard: false };
+  return { older, newer, n: g.n, real: true, blind: g.blind, sameStandard: sameStated(older.stdName, newer.stdName) };
 }
 
 /** Fetch both files. onClocks fires when the light one is ready; the promise resolves with the record attached. */

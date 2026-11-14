@@ -52,7 +52,7 @@ export function exportPlate(p, engine, views, albedo) {
   const mono = (w, s) => `${w} ${s}px "IBM Plex Mono", ui-monospace, Consolas, monospace`;
   ctx.fillStyle = T.dim; ctx.font = mono(500, 13); ctx.textAlign = 'left';
   ctx.fillText('EXOMANIA · DEEP FIELD SURVEY', 44, 62);
-  ctx.textAlign = 'right'; ctx.fillText('THE LAB — L212 · luisblanco.dev/labs/exomania.html', W - 44, 62);
+  ctx.textAlign = 'right'; ctx.fillText('THE LAB — L212 · luisblanco.dev/labs/exomania-survey.html', W - 44, 62);
   ctx.textAlign = 'left';
   const X = 840;
   ctx.fillStyle = T.gold; ctx.font = mono(500, 12); ctx.fillText('SURVEY PLATE', X, 112);
