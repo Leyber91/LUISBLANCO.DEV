@@ -32,7 +32,12 @@ export declare function fixtureStamp(s: StorageInfo): HTMLElement | null;
 export declare function sharingWords(r: ConsentRecord, recording: boolean, recipient: string): string;
 /** The sharing question, in parts: each sentence states one thing that is checked in transport.ts or on the backend. */
 export interface ConsentCopy {
+    /** the question, and what holds while it is unanswered: always in view */
     readonly ask: string;
+    /** the name of the part that opens everything below */
+    readonly more: string;
+    /** what leads the list of what is sent */
+    readonly lead: string;
     /** exactly what a usage event carries */
     readonly sent: readonly string[];
     readonly never: string;
@@ -40,6 +45,12 @@ export interface ConsentCopy {
     readonly change: string;
 }
 export declare function consentCopy(config: OSConfig): ConsentCopy;
+/**
+ * The sharing question: one strip at the foot of the window. The question and the two answers are always in
+ * view. What is sent, what never is and where it is kept are one press away, in the same plate, so the question
+ * does not cover the page it is asked on. (Measured 2026-11-14: as a plate that showed all of its text it
+ * covered a lab's one control on a first visit at 390 px.)
+ */
 export declare function mountConsentBanner(root: HTMLElement, consent: Consent, config: OSConfig): {
     el: HTMLElement;
     destroy(): void;

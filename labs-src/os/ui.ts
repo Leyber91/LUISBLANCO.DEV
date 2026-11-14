@@ -159,7 +159,12 @@ function choicePair(consent: Consent, after?: (r: ConsentRecord) => void): { el:
 
 /** The sharing question, in parts: each sentence states one thing that is checked in transport.ts or on the backend. */
 export interface ConsentCopy {
+  /** the question, and what holds while it is unanswered: always in view */
   readonly ask: string;
+  /** the name of the part that opens everything below */
+  readonly more: string;
+  /** what leads the list of what is sent */
+  readonly lead: string;
   /** exactly what a usage event carries */
   readonly sent: readonly string[];
   readonly never: string;
@@ -169,7 +174,9 @@ export interface ConsentCopy {
 
 export function consentCopy(config: OSConfig): ConsentCopy {
   return {
-    ask: 'Send usage of the labs to their author? If you choose Allow, this browser sends:',
+    ask: 'Send usage of the labs to their author? Nothing is sent before you choose Allow.',
+    more: 'What is sent',
+    lead: 'If you choose Allow, this browser sends:',
     sent: [
       'which lab you open, and from where',
       'how long the page was visible',
@@ -178,22 +185,30 @@ export function consentCopy(config: OSConfig): ConsentCopy {
     ],
     never: 'Never anything you type. No name, email or IP address is stored with the events.',
     kept: `They are kept in the EU, at ${config.recipient}, and raw events are reduced to daily counts after 90 days.`,
-    change: 'Nothing is sent before you choose Allow, and you can change your answer in Your data.',
+    change: 'You can change your answer in Your data.',
   };
 }
 
+/**
+ * The sharing question: one strip at the foot of the window. The question and the two answers are always in
+ * view. What is sent, what never is and where it is kept are one press away, in the same plate, so the question
+ * does not cover the page it is asked on. (Measured 2026-11-14: as a plate that showed all of its text it
+ * covered a lab's one control on a first visit at 390 px.)
+ */
 export function mountConsentBanner(root: HTMLElement, consent: Consent, config: OSConfig): { el: HTMLElement; destroy(): void } {
   const copy = consentCopy(config);
   const pair = choicePair(consent, () => destroy());
   const el = h('section', { class: 'los-plate los-consent', role: 'region', 'aria-label': 'Sharing choice' },
     ...brackets(),
-    h('span', { class: 'los-label' }, 'Sharing · not chosen'),
-    h('p', { class: 'los-copy' }, copy.ask),
-    h('ul', { class: 'los-sent' }, ...copy.sent.map((line) => h('li', {}, line))),
-    h('p', { class: 'los-copy' }, copy.never),
-    h('p', { class: 'los-copy los-fine' }, `${copy.kept} ${copy.change} `,
-      h('a', { class: 'los-link', href: config.privacyHref }, 'Privacy page')),
-    pair.el);
+    h('p', { class: 'los-copy los-ask' }, copy.ask),
+    pair.el,
+    h('details', { class: 'los-what' },
+      h('summary', {}, copy.more),
+      h('p', { class: 'los-copy' }, copy.lead),
+      h('ul', { class: 'los-sent' }, ...copy.sent.map((line) => h('li', {}, line))),
+      h('p', { class: 'los-copy' }, copy.never),
+      h('p', { class: 'los-copy los-fine' }, `${copy.kept} ${copy.change} `,
+        h('a', { class: 'los-link', href: config.privacyHref }, 'Privacy page'))));
   root.append(el);
   const destroy = () => el.remove();
   return { el, destroy };
