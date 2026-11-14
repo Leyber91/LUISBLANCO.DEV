@@ -27,6 +27,21 @@ describe('consent banner', () => {
     expect(TELLS.test(el.textContent ?? '')).toBe(false);
   });
 
+  it('keeps the question and the two answers in view, and what is sent one press away', () => {
+    const consent = new Consent(memoryStore());
+    const { el } = mountConsentBanner(document.body, consent, OS_CONFIG);
+    const what = el.querySelector('details') as HTMLDetailsElement;
+    expect(what.open).toBe(false);                                          // closed until a visitor opens it
+    expect(what.querySelector('summary')?.textContent).toBe('What is sent');
+    expect(what.querySelectorAll('.los-sent li')).toHaveLength(4);
+    expect(what.textContent).toMatch(/^What is sentIf you choose Allow, this browser sends:/);
+    const ask = el.querySelector('.los-ask') as HTMLElement;
+    expect(ask.textContent).toBe('Send usage of the labs to their author? Nothing is sent before you choose Allow.');
+    expect(what.contains(ask)).toBe(false);                                 // the question is never behind the press
+    expect(what.contains(el.querySelector('.los-choice'))).toBe(false);     // nor are the answers
+    expect(el.querySelectorAll('details')).toHaveLength(1);
+  });
+
   it('says exactly what is sent, what never is, where it is kept and for how long', () => {
     const consent = new Consent(memoryStore());
     const { el } = mountConsentBanner(document.body, consent, OS_CONFIG);

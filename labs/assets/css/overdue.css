@@ -206,10 +206,5 @@
   .od-table th, .od-table td { padding: 5px 6px; }
   #band { height: 206px; }
   #night { height: 240px; }
-  /* The labs' sharing question is a plate fixed to the corner. On a narrow sheet that corner is the line of time,
-     the page's one control, so here it stands at the end of the page until Labs OS draws it smaller for every lab
-     (measured 2026-11-14: fixed, it covered the whole line on a first visit at 390 px, and on The Pod it made 14 of
-     34 hand-driven checks fail). Nothing is sent until it is answered, wherever it stands. */
-  .los-consent { position: relative; right: auto; bottom: auto; transform: none; width: auto; max-height: none; margin: var(--s-6) 16px var(--s-7); }      /* relative, so its corner brackets stay its own */
   #tally-view { height: 330px; }
 }
