@@ -25,8 +25,11 @@ here, the daily routine included, are in SITE_RULES.md:
   merged before its checks had started on 2026-11-13.
 - A gate that node runs is done when its rules are listed in tools/mutants/<tool>.json and
   `node tools/mutate.mjs` shows its selftest catches each one, and after a reviewer who did not write it has read
-  it. evolution.mjs, lab_tests.mjs, mutate.mjs and ship_pr.mjs have such a list; levels.mjs, atlas.mjs,
-  stories.mjs and anti_tells.mjs have a selftest and no list yet, so add one when you change them. On 2026-11-13 a
+  it. atlas.mjs, evolution.mjs, lab_tests.mjs, mutate.mjs, ship_pr.mjs and stories.mjs have such a list;
+  levels.mjs and anti_tells.mjs have a selftest and no list yet, so add one when you change them. A list needs two
+  kinds of mutant: one that silences each report, and one that loosens each condition, with a case just inside
+  and just outside every bound. The first kind alone reads as full coverage and is not: on 2026-11-14 every report
+  of two gates was caught while 51 of 68 loosened conditions still passed. On 2026-11-13 a
   checker that passed its own selftest 90 of 90 had 31 defects a review then confirmed, and the small tools
   written to prevent that had 19 of their own, then 27 more in a second review.
 
