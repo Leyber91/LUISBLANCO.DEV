@@ -1,0 +1,23 @@
+name: backend keepalive
+
+# The labs backend runs on Supabase's free plan, which pauses a project after a week without activity. One read
+# twice a week keeps it awake. The key below is the publishable one: public by design, and it can read nothing
+# (row-level security returns no rows to an anonymous reader).
+on:
+  schedule:
+    - cron: "23 6 * * 1,4"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: one read
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" -m 30 \
+            "https://uguiiwmhlqcitxrgqqmh.supabase.co/rest/v1/usage_events?select=install_id&limit=1" \
+            -H "apikey: sb_publishable_GCSwvHNL3ulWiDRjaOxFMA_biQPXnsV")
+          echo "HTTP $code"
+          test "$code" = "200"

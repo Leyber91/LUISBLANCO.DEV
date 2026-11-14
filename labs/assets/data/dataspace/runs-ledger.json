@@ -1,0 +1,2904 @@
+{
+ "schema": "dataspace.run/1",
+ "preset": "ledger",
+ "calls": {
+  "c.ledger.llama3.1-8b.r1.s1": {
+   "id": "c.ledger.llama3.1-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Five people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros. Who paid what? Tomas and Lena owe 501 each. Iris owes 96. Send money by 25 March.\",\n  \"L2\": \"5 people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros. Who paid what? Iris owes 96, Tomas and Lena owe 501 each. Send by 25 March.\",\n  \"L3\": \"5 split Lisbon trip 14-18 March. Total: 2,410 euros. Iris owes 96, Tomas and Lena owe 501 each.\",\n  \"L4\": \"5 people split Lisbon trip. Iris owes 96, Tomas and Lena owe 501 each.\",\n  \"L5\": \"Split Lisbon trip. Iris owes 96.\"\n}",
+   "thinking": "",
+   "promptTokens": 477,
+   "completionTokens": 179,
+   "ollamaMs": 8212,
+   "ms": 8517,
+   "at": "2026-11-11T10:16:36.802Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r1.L1": {
+   "id": "b.ledger.llama3.1-8b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros. Who paid what? Tomas and Lena owe 501 each. Iris owes 96. Send money by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Five people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros.\n\nASSISTANT: Tomas and Lena owe 501 each. Iris owes 96.",
+   "thinking": "",
+   "promptTokens": 108,
+   "completionTokens": 40,
+   "ollamaMs": 1757,
+   "ms": 1760,
+   "at": "2026-11-11T10:16:45.325Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r1.L2": {
+   "id": "b.ledger.llama3.1-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros. Who paid what? Iris owes 96, Tomas and Lena owe 501 each. Send by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: 5 people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros.\n\nASSISTANT: Tomas and Lena owe 501 each, and Iris owes 96.",
+   "thinking": "",
+   "promptTokens": 107,
+   "completionTokens": 42,
+   "ollamaMs": 5100,
+   "ms": 5101,
+   "at": "2026-11-11T10:16:47.088Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r1.L3": {
+   "id": "b.ledger.llama3.1-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 split Lisbon trip 14-18 March. Total: 2,410 euros. Iris owes 96, Tomas and Lena owe 501 each."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'll be paying for the split trip to Lisbon. Can you let me know the amount each person owes?\n\nASSISTANT: Tomas and Lena owe 501 euros each.",
+   "thinking": "",
+   "promptTokens": 95,
+   "completionTokens": 38,
+   "ollamaMs": 3425,
+   "ms": 3435,
+   "at": "2026-11-11T10:16:52.191Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r1.L4": {
+   "id": "b.ledger.llama3.1-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 people split Lisbon trip. Iris owes 96, Tomas and Lena owe 501 each."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: 5 people are splitting a trip and some of them owe money. Can you calculate the total amount owed?\n\nASSISTANT: \n\nUSER: \n\nASSISTANT: To find the total amount owed, we need to add the amounts owed by Tomas, Lena, and Iris.\n\nUSER: \n\nASSISTANT: The total amount owed is 501 + 501 + 96 = 1098.",
+   "thinking": "",
+   "promptTokens": 83,
+   "completionTokens": 84,
+   "ollamaMs": 4324,
+   "ms": 4325,
+   "at": "2026-11-11T10:16:55.628Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r1.L5": {
+   "id": "b.ledger.llama3.1-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 1,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nSplit Lisbon trip. Iris owes 96."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Split Lisbon trip\n\nASSISTANT: What do you mean by that?",
+   "thinking": "",
+   "promptTokens": 73,
+   "completionTokens": 18,
+   "ollamaMs": 5231,
+   "ms": 5237,
+   "at": "2026-11-11T10:16:59.957Z",
+   "error": null
+  },
+  "c.ledger.llama3.1-8b.r2.s2": {
+   "id": "c.ledger.llama3.1-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Five friends split 2,410 euros for Lisbon trip (14-18 March): flights 1,240, flat 860, car 310. Who paid what? Balances: you 739, Marco 359, Iris 96, Tomas 501, Lena 501. Send 501 and 96 by 25 March.\",\n  \"L2\": \"Five friends split 2,410 euros: flights 1,240, flat 860, car 310. Who paid what? Balances: 739, 359, 96, 501, 501. Send 501 and 96 by 25 March.\",\n  \"L3\": \"Split 2,410 euros: 1,240 flights, 860 flat, 310 car. Balances: 739, 359, 96, 501, 501.\",\n  \"L4\": \"Split 2,410 euros: flights 1,240, flat 860, car 310.\",\n  \"L5\": \"Split 2,410 euros.\"\n}",
+   "thinking": "",
+   "promptTokens": 477,
+   "completionTokens": 225,
+   "ollamaMs": 7206,
+   "ms": 7211,
+   "at": "2026-11-11T10:17:05.198Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r2.L1": {
+   "id": "b.ledger.llama3.1-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive friends split 2,410 euros for Lisbon trip (14-18 March): flights 1,240, flat 860, car 310. Who paid what? Balances: you 739, Marco 359, Iris 96, Tomas 501, Lena 501. Send 501 and 96 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Who paid what?\n\nASSISTANT: To pay the 2,410 euros, I will pay 860 (flat), you will pay 1,240 (flights), Marco will pay 860 (flat), Iris will pay 310 (car), Tomas will pay 860 (flat) and Lena will pay 1,240 (flights).\n\nUSER: Balances: you 739, Marco 359, Iris 96, Tomas 501, Lena 501. How do we split the remaining amount?\n\nASSISTANT: I pay 860, Marco pays 860, Tomas pays 860, and Lena pays 1,240.",
+   "thinking": "",
+   "promptTokens": 133,
+   "completionTokens": 135,
+   "ollamaMs": 3715,
+   "ms": 3736,
+   "at": "2026-11-11T10:17:12.414Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r2.L2": {
+   "id": "b.ledger.llama3.1-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive friends split 2,410 euros: flights 1,240, flat 860, car 310. Who paid what? Balances: 739, 359, 96, 501, 501. Send 501 and 96 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Five friends split 2,410 euros: flights 1,240, flat 860, car 310. Who paid what?\n\nASSISTANT: Let's start by adding up the total cost: 1240 + 860 + 310 = 2410 euros.\n\nUSER: And the friends had different balances after the split: 739, 359, 96, 501, 501. How did they end up like this?\n\nASSISTANT: We need more information about how the split was made, but let's look at the balances. Since two friends have a balance of 501, it's likely that they paid the same amount, and the other three paid different amounts.\n\nUSER: Send 501 and 96 by 25 March.\n\nASSISTANT: It seems like an instruction to the friends, not a question.",
+   "thinking": "",
+   "promptTokens": 120,
+   "completionTokens": 175,
+   "ollamaMs": 8210,
+   "ms": 8217,
+   "at": "2026-11-11T10:17:16.152Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r2.L3": {
+   "id": "b.ledger.llama3.1-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nSplit 2,410 euros: 1,240 flights, 860 flat, 310 car. Balances: 739, 359, 96, 501, 501."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Split 2,410 euros into 3 categories: flights, flat, and car, with the following amounts: 1,240 euros for flights, 860 euros for flat, and 310 euros for car.\n\nASSISTANT: What are the balances you want to achieve in each category?",
+   "thinking": "",
+   "promptTokens": 103,
+   "completionTokens": 63,
+   "ollamaMs": 4654,
+   "ms": 4678,
+   "at": "2026-11-11T10:17:24.377Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r2.L4": {
+   "id": "b.ledger.llama3.1-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nSplit 2,410 euros: flights 1,240, flat 860, car 310."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I need to split 2,410 euros with someone. The breakdown is flights for 1,240 euros, a flat for 860 euros, and a car for 310 euros.\n\nASSISTANT: To split the costs evenly, I'd recommend dividing the total amount by the number of people splitting it. In this case, 2410 euros divided by 2 is 1205 euros per person.\n\nUSER: That's 1,240 for flights and 860 for flat, so that's 2100 euros so far. If we subtract that from 1205, we get 105 euros left.\n\nASSISTANT: The car rental is 310 euros. If you subtract 105 euros from that, you get 205 euros.\n\nUSER: So the person who gets the car will also have to cover the remaining 205 euros.\n\nASSISTANT: You can also consider finding someone else to split the car rental costs with.",
+   "thinking": "",
+   "promptTokens": 85,
+   "completionTokens": 194,
+   "ollamaMs": 7081,
+   "ms": 7088,
+   "at": "2026-11-11T10:17:29.057Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r2.L5": {
+   "id": "b.ledger.llama3.1-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 2,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nSplit 2,410 euros."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Split 2,410 euros.\n\nASSISTANT: What are the amounts you'd like to split the 2,410 euros into?",
+   "thinking": "",
+   "promptTokens": 71,
+   "completionTokens": 31,
+   "ollamaMs": 10871,
+   "ms": 10874,
+   "at": "2026-11-11T10:17:36.147Z",
+   "error": null
+  },
+  "c.ledger.llama3.1-8b.r3.s3": {
+   "id": "c.ledger.llama3.1-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Five friends split Lisbon trip 14-18 Mar, total 2410 euros, 482 euros each. Payments: flights 1240, flat 860, car 310, groceries 95. Tomas and Lena owe 501 each, Iris owes 96. Iris sends 96 by 25 Mar, Tomas and Lena each send 501 by 25 Mar.\",\n  \"L2\": \"Lisbon trip 14-18 Mar, total 2410 euros. Payments: flights 1240, flat 860, car 310, groceries 95. Iris owes 96, Tomas and Lena owe 501 each.\",\n  \"L3\": \"Split Lisbon trip 14-18 Mar, total 2410 euros. 482 euros each. Iris owes 96, Tomas and Lena owe 501 each.\",\n  \"L4\": \"Lisbon trip 14-18 Mar, total 2410 euros. Iris owes 96, Tomas and Lena owe 501.\",\n  \"L5\": \"Lisbon trip total 2410\"\n}",
+   "thinking": "",
+   "promptTokens": 477,
+   "completionTokens": 226,
+   "ollamaMs": 8849,
+   "ms": 8853,
+   "at": "2026-11-11T10:17:47.024Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r3.L1": {
+   "id": "b.ledger.llama3.1-8b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive friends split Lisbon trip 14-18 Mar, total 2410 euros, 482 euros each. Payments: flights 1240, flat 860, car 310, groceries 95. Tomas and Lena owe 501 each, Iris owes 96. Iris sends 96 by 25 Mar, Tomas and Lena each send 501 by 25 Mar."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Five friends split Lisbon trip 14-18 Mar, total 2410 euros, 482 euros each.\n\nASSISTANT: Payments: flights 1240, flat 860, car 310, groceries 95.",
+   "thinking": "",
+   "promptTokens": 139,
+   "completionTokens": 48,
+   "ollamaMs": 6267,
+   "ms": 6279,
+   "at": "2026-11-11T10:17:55.973Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r3.L2": {
+   "id": "b.ledger.llama3.1-8b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip 14-18 Mar, total 2410 euros. Payments: flights 1240, flat 860, car 310, groceries 95. Iris owes 96, Tomas and Lena owe 501 each."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I'm planning a trip to Lisbon from 14-18 Mar and I'm a bit concerned about the costs. \n\nASSISTANT: The total cost for the trip is 2410 euros, broken down into flights for 1240 euros, a flat for 860 euros, car rental for 310 euros, and groceries for 95 euros. \n\nUSER: That's quite a bit of money. Who owes you money from this trip? \n\nASSISTANT: Actually, I owe Iris 96 euros, and Tomas and Lena each owe me 501 euros.",
+   "thinking": "",
+   "promptTokens": 112,
+   "completionTokens": 118,
+   "ollamaMs": 15771,
+   "ms": 15777,
+   "at": "2026-11-11T10:18:02.255Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r3.L3": {
+   "id": "b.ledger.llama3.1-8b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nSplit Lisbon trip 14-18 Mar, total 2410 euros. 482 euros each. Iris owes 96, Tomas and Lena owe 501 each."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: Split Lisbon trip 14-18 Mar, total 2410 euros. \n\nASSISTANT: 482 euros each.",
+   "thinking": "",
+   "promptTokens": 97,
+   "completionTokens": 28,
+   "ollamaMs": 6449,
+   "ms": 6456,
+   "at": "2026-11-11T10:18:18.038Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r3.L4": {
+   "id": "b.ledger.llama3.1-8b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip 14-18 Mar, total 2410 euros. Iris owes 96, Tomas and Lena owe 501."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: I've calculated the total cost of the Lisbon trip to be 2410 euros.\n\nASSISTANT: Who owes the money?",
+   "thinking": "",
+   "promptTokens": 92,
+   "completionTokens": 29,
+   "ollamaMs": 6069,
+   "ms": 6077,
+   "at": "2026-11-11T10:18:24.496Z",
+   "error": null
+  },
+  "b.ledger.llama3.1-8b.r3.L5": {
+   "id": "b.ledger.llama3.1-8b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "llama3.1:8b",
+   "seed": 3,
+   "request": {
+    "model": "llama3.1:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip total 2410"
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: That's a lot for a trip. What was the breakdown?",
+   "thinking": "",
+   "promptTokens": 72,
+   "completionTokens": 16,
+   "ollamaMs": 19600,
+   "ms": 19645,
+   "at": "2026-11-11T10:18:30.576Z",
+   "error": null
+  },
+  "c.ledger.qwen3-8b.r1.s1": {
+   "id": "c.ledger.qwen3-8b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car + 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098. Owed: 96 + 501 + 501 = 1,098. Balance. Iris, Tomas, Lena to send 96, 501, 501 by 25 March.\",\n  \"L2\": \"Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User paid flights, gets 739. Marco paid flat, gets 359. Iris paid car + 95, owes 96. Tomas and Lena owe 501. Check: 739 + 359 = 1,098. Owed: 96 + 501 + 501 = 1,098. Balance. Iris, Tomas, Lena to send 96, 501, 501 by 25 March.\",\n  \"L3\": \"Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Check balances. Iris, Tomas, Lena send 96, 501, 501 by 25 March.\",\n  \"L4\": \"Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Iris, Tomas, Lena send 96, 501, 501 by 25 March.\",\n  \"L5\": \"Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Send 501, 501, 96 by 25 March.\"\n}",
+   "thinking": "",
+   "promptTokens": 535,
+   "completionTokens": 567,
+   "ollamaMs": 10121,
+   "ms": 10124,
+   "at": "2026-11-11T10:45:34.799Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r1.L1": {
+   "id": "b.ledger.qwen3-8b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car + 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098. Owed: 96 + 501 + 501 = 1,098. Balance. Iris, Tomas, Lena to send 96, 501, 501 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I need to split the costs of our Lisbon trip from March 14th to 18th. Let me break down the expenses.  \nASSISTANT: Total costs are flights at 1,240, flat at 860, car at 310, and groceries at 95. That makes a total of 2,505.  \nUSER: So each person should pay 501.  \nASSISTANT: User paid for the flights, so they should get 739 back. Marco paid for the flat, so they should get 359.  \nUSER: Iris paid for the car and groceries, so they owe 96.  \nASSISTANT: Tomas and Lena owe 501 each. Let me check the math.  \nUSER: 739 plus 359 equals 1,098.  \nASSISTANT: And 96 plus 501 plus 501 also equals 1,098. The balance is correct.  \nUSER: Iris, Tomas, and Lena need to send 96, 501, and 501 by March 25th.  \nASSISTANT:",
+   "thinking": "",
+   "promptTokens": 240,
+   "completionTokens": 261,
+   "ollamaMs": 6361,
+   "ms": 6399,
+   "at": "2026-11-11T10:45:44.926Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r1.L2": {
+   "id": "b.ledger.qwen3-8b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User paid flights, gets 739. Marco paid flat, gets 359. Iris paid car + 95, owes 96. Tomas and Lena owe 501. Check: 739 + 359 = 1,098. Owed: 96 + 501 + 501 = 1,098. Balance. Iris, Tomas, Lena to send 96, 501, 501 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: I need to split the Lisbon trip costs from 14-18 March. The total is 2,505. Each person should pay 501.  \nASSISTANT: User paid for flights and gets 739 back. Marco paid flat and gets 359 back. Iris paid for the car and 95, so she owes 96. Tomas and Lena owe 501 each.  \nUSER: Let me check the math: 739 plus 359 equals 1,098. The owed amount is 96 plus 501 plus 501, which also equals 1,098.  \nASSISTANT: Balance is correct. Iris, Tomas, and Lena need to send 96, 501, and 501 by 25 March.",
+   "thinking": "",
+   "promptTokens": 210,
+   "completionTokens": 186,
+   "ollamaMs": 7029,
+   "ms": 7047,
+   "at": "2026-11-11T10:45:51.333Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r1.L3": {
+   "id": "b.ledger.qwen3-8b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Check balances. Iris, Tomas, Lena send 96, 501, 501 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Check balances. Iris, Tomas, Lena send 96, 501, 501 by 25 March.",
+   "thinking": "",
+   "promptTokens": 153,
+   "completionTokens": 86,
+   "ollamaMs": 9004,
+   "ms": 9045,
+   "at": "2026-11-11T10:45:58.383Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r1.L4": {
+   "id": "b.ledger.qwen3-8b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Iris, Tomas, Lena send 96, 501, 501 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Iris, Tomas, Lena send 96, 501, 501 by 25 March.",
+   "thinking": "",
+   "promptTokens": 143,
+   "completionTokens": 76,
+   "ollamaMs": 4919,
+   "ms": 4925,
+   "at": "2026-11-11T10:46:07.432Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r1.L5": {
+   "id": "b.ledger.qwen3-8b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 1,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Send 501, 501, 96 by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Send 501, 501, 96 by 25 March.",
+   "thinking": "",
+   "promptTokens": 138,
+   "completionTokens": 71,
+   "ollamaMs": 1503,
+   "ms": 1507,
+   "at": "2026-11-11T10:46:12.357Z",
+   "error": null
+  },
+  "c.ledger.qwen3-8b.r2.s2": {
+   "id": "c.ledger.qwen3-8b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098; owed 96 + 501 + 501 = 1,098. All pay by 25 March.\",\n  \"L2\": \"Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. All pay by 25 March.\",\n  \"L3\": \"Lisbon trip 14-18 March total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.\",\n  \"L4\": \"Lisbon trip total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.\",\n  \"L5\": \"Lisbon trip total 2,505. Each pays 501.\"\n}",
+   "thinking": "",
+   "promptTokens": 535,
+   "completionTokens": 364,
+   "ollamaMs": 6752,
+   "ms": 6754,
+   "at": "2026-11-11T10:46:13.865Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r2.L1": {
+   "id": "b.ledger.qwen3-8b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098; owed 96 + 501 + 501 = 1,098. All pay by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098; owed 96 + 501 + 501 = 1,098. All pay by 25 March.",
+   "thinking": "",
+   "promptTokens": 218,
+   "completionTokens": 151,
+   "ollamaMs": 2996,
+   "ms": 2999,
+   "at": "2026-11-11T10:46:20.621Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r2.L2": {
+   "id": "b.ledger.qwen3-8b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. All pay by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: We're splitting the cost of the Lisbon trip from 14th to 18th March. The total is 2,505. Each person should pay 501.  \nASSISTANT: User gets back 739, Marco gets 359, Iris owes 96. Tomas and Lena owe 501 each.  \nUSER: All payments are due by 25th March.",
+   "thinking": "",
+   "promptTokens": 133,
+   "completionTokens": 93,
+   "ollamaMs": 1879,
+   "ms": 1881,
+   "at": "2026-11-11T10:46:23.621Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r2.L3": {
+   "id": "b.ledger.qwen3-8b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip 14-18 March total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Lisbon trip 14-18 March total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.",
+   "thinking": "",
+   "promptTokens": 124,
+   "completionTokens": 55,
+   "ollamaMs": 1227,
+   "ms": 1231,
+   "at": "2026-11-11T10:46:25.504Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r2.L4": {
+   "id": "b.ledger.qwen3-8b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Lisbon trip total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.",
+   "thinking": "",
+   "promptTokens": 117,
+   "completionTokens": 48,
+   "ollamaMs": 907,
+   "ms": 909,
+   "at": "2026-11-11T10:46:26.736Z",
+   "error": null
+  },
+  "b.ledger.qwen3-8b.r2.L5": {
+   "id": "b.ledger.qwen3-8b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 2,
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip total 2,505. Each pays 501."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "think": false
+   },
+   "status": 200,
+   "raw": "USER: Lisbon trip total 2,505.  \nASSISTANT: Each pays 501.",
+   "thinking": "",
+   "promptTokens": 89,
+   "completionTokens": 25,
+   "ollamaMs": 483,
+   "ms": 485,
+   "at": "2026-11-11T10:46:27.646Z",
+   "error": null
+  },
+  "c.ledger.qwen3-8b.r3.s3": {
+   "id": "c.ledger.qwen3-8b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "qwen3:8b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "qwen3:8b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json",
+    "think": false
+   },
+   "status": 200,
+   "raw": "{\n  \"L1\": \"Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501 each. Check: 739+359=1,098, owed 96+501+5.01=1,098. Balance. Iris, Tomas, Lena pay by 25 March.\",\n  \"L2\": \"Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501. Balance. Pay by 25 March.\",\n  \"L3\": \"Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Balance. Pay by 25 March.\",\n  \"L4\": \"Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. Balance. Pay by 25 March.\",\n  \"L5\": \"Five split Lisbon trip. Total 2,505. Each pays 501. Balance. Pay by 25 March.\"\n}",
+   "thinking": "",
+   "promptTokens": 535,
+   "completionTokens": 418,
+   "ollamaMs": 28868,
+   "ms": 28870,
+   "at": "2026-11-11T10:46:28.132Z",
+   "error": null
+  },
+  "c.ledger.granite4.1-3b.r1.s1": {
+   "id": "c.ledger.granite4.1-3b.r1.s1",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"Five split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L2\": \"Lisbon trip 14-18 March split by five. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L3\": \"Five split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L4\": \"Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L5\": \"Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\"}",
+   "thinking": "",
+   "promptTokens": 475,
+   "completionTokens": 560,
+   "ollamaMs": 14894,
+   "ms": 15394,
+   "at": "2026-11-11T11:03:11.990Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r1.L1": {
+   "id": "b.ledger.granite4.1-3b.r1.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What was the trip about?\nASSISTANT: The trip was about a split trip to Lisbon from 14-18 March.\n\nUSER: How much did the flights cost in total?\nASSISTANT: The flights cost 1240 in total.\n\nUSER: Who paid for the flights?\nASSISTANT: I paid for the flights.\n\nUSER: What was the cost of the flat per person?\nASSISTANT: The flat cost 860 in total, which is 482 per person.\n\nUSER: Who paid for the flat?\nASSISTANT: Marco paid for the flat.\n\nUSER: How much did groceries add to the total cost?\nASSISTANT: Groceries added 15 to the total cost, making it 2505 in total.\n\nUSER: Who paid for groceries?\nASSISTANT: I paid for groceries.\n\nUSER: How much did I get back after paying for groceries?\nASSISTANT: I got back 739 after paying for groceries.\n\nUSER: How much did Marco get back after paying for the flat?\nASSISTANT: Marco got back 359 after paying for the flat.\n\nUSER: How much did Iris owe after paying for the car and groceries?\nASSISTANT: Iris owed 96 after paying for the car and groceries.\n\nUSER: How much did Tomas and Lena owe each?\nASSISTANT: Tomas and Lena owe 501 each.\n\nUSER: What is the total amount that Tomas and Lena owe combined?\nASSISTANT: The total amount that Tomas and Lena owe combined is 1098.\n\nUSER: When are the payments due?\nASSISTANT: Payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 170,
+   "completionTokens": 332,
+   "ollamaMs": 5304,
+   "ms": 6047,
+   "at": "2026-11-11T11:03:27.385Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r1.L2": {
+   "id": "b.ledger.granite4.1-3b.r1.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nLisbon trip 14-18 March split by five. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What was the trip to Lisbon from March 14-18 about?\n\nASSISTANT: The trip to Lisbon from March 14-18 was a split trip with five parts.\n\nUSER: Can you tell me about the costs involved?\n\nASSISTANT: The costs were as follows: flights were $1240, the flat rental was $860, and car rental was $310. The total cost was $2410, which averages to $482 per person.\n\nUSER: How were the groceries accounted for?\n\nASSISTANT: For groceries, the total came to $2505, averaging $501 per person. This includes the initial costs plus groceries.\n\nUSER: Who paid for the flights and what was the refund?\n\nASSISTANT: I paid for the flights, which amounted to a refund of $739.\n\nUSER: What about Marco's payment and refund?\n\nASSISTANT: Marco paid for the flat rental, which gave him a refund of $359.\n\nUSER: What did Iris owe after covering groceries?\n\nASSISTANT: Iris paid $405 but owes $96.\n\nUSER: How much did Tomas and Lena owe each?\n\nASSISTANT: Tomas and Lena owe $501 each, totaling $1098.\n\nUSER: When are the payments due?\n\nASSISTANT: Payments are due by March 25.",
+   "thinking": "",
+   "promptTokens": 173,
+   "completionTokens": 267,
+   "ollamaMs": 9795,
+   "ms": 9798,
+   "at": "2026-11-11T11:03:33.433Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r1.L3": {
+   "id": "b.ledger.granite4.1-3b.r1.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What was the trip about?\nASSISTANT: The trip was about a split Lisbon trip from 14-18 March.\n\nUSER: How much did the flights cost in total?\nASSISTANT: The flights cost 1240 in total.\n\nUSER: How much did the flat cost?\nASSISTANT: The flat cost 860.\n\nUSER: And the car rental?\nASSISTANT: The car rental cost 310.\n\nUSER: What was the total cost for everyone?\nASSISTANT: The total cost was 2410, or 482 each.\n\nUSER: How did you handle the groceries?\nASSISTANT: I paid for the groceries, which added up to 2505 in total, or 501 each.\n\nUSER: How much did you get back after paying for groceries?\nASSISTANT: I got back 739 after paying for groceries.\n\nUSER: How much did Marco get back after paying for his flat?\nASSISTANT: Marco got back 359 after paying for his flat.\n\nUSER: What about Iris? Did she owe anything?\nASSISTANT: Yes, Iris owed 96 after paying for her car.\n\nUSER: What about Tomas and Lena?\nASSISTANT: Tomas and Lena owe 501 each, totaling 1098.\n\nUSER: When are the payments due?\nASSISTANT: The payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 170,
+   "completionTokens": 279,
+   "ollamaMs": 7012,
+   "ms": 7021,
+   "at": "2026-11-11T11:03:43.232Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r1.L4": {
+   "id": "b.ledger.granite4.1-3b.r1.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What was the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon was 2410, which is 482 per person before groceries.\n\nUSER: How much did each person pay for the flights?\n\nASSISTANT: I paid for the flights, which amounted to 1240. \n\nUSER: Who paid for the flat and how much did they pay?\n\nASSISTANT: Marco paid for the flat, which was 860.\n\nUSER: And who covered the car rental costs?\n\nASSISTANT: Iris paid for the car rental, which was 310.\n\nUSER: You mentioned groceries were included. How much were the groceries for the trip?\n\nASSISTANT: The groceries for the trip amounted to an additional 15, making the total 2505.\n\nUSER: How much did each person end up paying including groceries?\n\nASSISTANT: Each person ended up paying 501 including groceries.\n\nUSER: What was the refund for each person after including groceries?\n\nASSISTANT: After including groceries, I got back 739, Marco got back 359, and Iris owes 96.\n\nUSER: What about Tomas and Lena? How much did they each owe?\n\nASSISTANT: Tomas and Lena each owe 501 in total.\n\nUSER: When are the payments due?\n\nASSISTANT: The payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 165,
+   "completionTokens": 281,
+   "ollamaMs": 4895,
+   "ms": 4902,
+   "at": "2026-11-11T11:03:50.257Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r1.L5": {
+   "id": "b.ledger.granite4.1-3b.r1.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 1,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 1,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What was the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon was 2410, which is 482 each when split equally.\n\nUSER: How were the individual payments divided?\n\nASSISTANT: I paid for the flights amounting to 1240, Marco paid for the flat at 860, and Iris paid for the car at 310. Additionally, for groceries on the 15th, I paid 15, making the total 2505, which is 501 each.\n\nUSER: What are the reimbursements for each person?\n\nASSISTANT: I got back 739, Marco got back 359, and Iris owes 96. Tomas and Lena owe 501 each, totaling 1098.",
+   "thinking": "",
+   "promptTokens": 165,
+   "completionTokens": 158,
+   "ollamaMs": 4064,
+   "ms": 4070,
+   "at": "2026-11-11T11:03:55.162Z",
+   "error": null
+  },
+  "c.ledger.granite4.1-3b.r2.s2": {
+   "id": "c.ledger.granite4.1-3b.r2.s2",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"Five split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L2\": \"Five split Lisbon trip costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L3\": \"Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L4\": \"Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\", \"L5\": \"Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.\"}",
+   "thinking": "",
+   "promptTokens": 475,
+   "completionTokens": 541,
+   "ollamaMs": 10482,
+   "ms": 10486,
+   "at": "2026-11-11T11:03:59.233Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r2.L1": {
+   "id": "b.ledger.granite4.1-3b.r2.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the trip about?\nASSISTANT: The trip is about a split Lisbon trip from 14-18 March.\n\nUSER: How much did the flights cost in total?\nASSISTANT: The flights cost 1240 in total.\n\nUSER: How much did the flat rental cost?\nASSISTANT: The flat rental cost 860.\n\nUSER: How much did the car rental cost?\nASSISTANT: The car rental cost 310.\n\nUSER: What is the total cost including groceries?\nASSISTANT: The total cost including groceries is 2505.\n\nUSER: How much did each person need to pay if we split the total cost evenly?\nASSISTANT: Each person needed to pay 501 if we split the total cost evenly.\n\nUSER: How much did I pay back to you?\nASSISTANT: I paid 1240 and got back 739.\n\nUSER: How much did Marco pay back to you?\nASSISTANT: Marco paid 860 and got back 359.\n\nUSER: How much does Iris owe you?\nASSISTANT: Iris owes you 96.\n\nUSER: How much do Tomas and Lena owe each other?\nASSISTANT: Tomas and Lena owe each other 501 each, totaling 1098.\n\nUSER: When are the payments due?\nASSISTANT: The payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 169,
+   "completionTokens": 277,
+   "ollamaMs": 7349,
+   "ms": 7353,
+   "at": "2026-11-11T11:04:09.722Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r2.L2": {
+   "id": "b.ledger.granite4.1-3b.r2.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What are the split costs for the Lisbon trip?\n\nASSISTANT: The total trip costs are divided as follows: flights amount to 1240, flat rental is 860, and car rental is 310. This makes the overall total 2410, which averages to 482 per person.\n\nUSER: How did the payment distribution work?\n\nASSISTANT: I paid for the flights, Marco covered the flat rental, Iris took care of the car rental and groceries amounting to 95. Including groceries, the total came to 2505, averaging 501 per person.\n\nUSER: What about the reimbursements?\n\nASSISTANT: I received a reimbursement of 739 for my flight costs. Marco got back 359 for the flat rental. Iris owes 96 after covering her expenses.\n\nUSER: What about Tomas and Lena?\n\nASSISTANT: Tomas and Lena each owe 501 in total. Combined, that's a payment of 1098 by March 25th.",
+   "thinking": "",
+   "promptTokens": 163,
+   "completionTokens": 201,
+   "ollamaMs": 4305,
+   "ms": 4309,
+   "at": "2026-11-11T11:04:17.078Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r2.L3": {
+   "id": "b.ledger.granite4.1-3b.r2.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon is 2410, which averages to 482 per person.\n\nUSER: How are the individual payments split?\n\nASSISTANT: The payments are split as follows: I paid for flights (1240), Marco paid for the flat (860), Iris paid for the car (310) and groceries (95). Including groceries, the total is 2505, which averages to 501 per person.\n\nUSER: What are the refund amounts for each person?\n\nASSISTANT: The refund amounts are as follows: I get back 739, Marco gets back 359, and Iris owes 96.\n\nUSER: What is the total amount that Tomas and Lena need to pay?\n\nASSISTANT: Tomas and Lena owe a total of 1098 between them.",
+   "thinking": "",
+   "promptTokens": 164,
+   "completionTokens": 178,
+   "ollamaMs": 2822,
+   "ms": 2826,
+   "at": "2026-11-11T11:04:21.389Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r2.L4": {
+   "id": "b.ledger.granite4.1-3b.r2.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon is 2410, which averages to 482 per person.\n\nUSER: How are the individual payments split?\n\nASSISTANT: The payments are split as follows: I paid for flights (1240), Marco paid for the flat (860), Iris paid for the car (310) and groceries (95). Including groceries, the total is 2505, averaging 501 per person.\n\nUSER: What are the refunds or additional payments?\n\nASSISTANT: The refunds or additional payments are: I paid 1240 and got back 739, Marco paid 860 and got back 359, and Iris paid 405 but owes 96. Tomas and Lena owe 501 each, totaling 1098.\n\nUSER: When are the remaining payments due?\n\nASSISTANT: The remaining payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 164,
+   "completionTokens": 192,
+   "ollamaMs": 2989,
+   "ms": 2993,
+   "at": "2026-11-11T11:04:24.217Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r2.L5": {
+   "id": "b.ledger.granite4.1-3b.r2.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 2,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 2,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon is 2410, which averages to 482 per person.\n\nUSER: How are the individual payments split?\n\nASSISTANT: The payments are split as follows: I paid for flights (1240), Marco paid for the flat (860), Iris paid for the car (310) and groceries (95). Including groceries, the total is 2505, averaging 501 per person.\n\nUSER: What are the refunds or additional payments?\n\nASSISTANT: The refunds or additional payments are: I paid 1240 and got back 739, Marco paid 860 and got back 359, and Iris paid 405 but owes 96. Tomas and Lena owe 501 each, totaling 1098.\n\nUSER: When are the remaining payments due?\n\nASSISTANT: The remaining payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 164,
+   "completionTokens": 192,
+   "ollamaMs": 4871,
+   "ms": 4878,
+   "at": "2026-11-11T11:04:27.214Z",
+   "error": null
+  },
+  "c.ledger.granite4.1-3b.r3.s3": {
+   "id": "c.ledger.granite4.1-3b.r3.s3",
+   "stage": "compress",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "budgets": [
+    {
+     "level": 1,
+     "words": 73
+    },
+    {
+     "level": 2,
+     "words": 44
+    },
+    {
+     "level": 3,
+     "words": 26
+    },
+    {
+     "level": 4,
+     "words": 15
+    },
+    {
+     "level": 5,
+     "words": 7
+    }
+   ],
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You compress conversations into capsules. A capsule is a short text from which another model, given only the capsule, must rebuild the whole conversation: who spoke and in what order, and every number, date, name, decision and open question. Abbreviations and symbols are allowed. Each capsule covers the whole conversation, never one turn.\n\nReply with one JSON object and nothing else."
+     },
+     {
+      "role": "user",
+      "content": "Compress the whole conversation below 5 times, at 5 lengths. Every capsule covers all turns, from the first to the last, in order. A shorter capsule keeps fewer details, never fewer turns.\nWord limits:\nL1: at most 73 words\nL2: at most 44 words\nL3: at most 26 words\nL4: at most 15 words\nL5: at most 7 words\nReply with JSON of this shape: {\"L1\": \"capsule of the whole conversation\", \"L2\": \"capsule of the whole conversation\", \"L3\": \"capsule of the whole conversation\", \"L4\": \"capsule of the whole conversation\", \"L5\": \"capsule of the whole conversation\"}\n\nCONVERSATION:\nUSER: Five of us are splitting the Lisbon trip from 14 to 18 March. Flights were 1,240 euros in total, the flat was 860 euros for 4 nights, and the car was 310 euros.\nASSISTANT: That is 2,410 euros, or 482 euros each. Who paid what?\nUSER: I paid the flights. Marco paid the flat. Iris paid the car and also 95 euros of groceries on the 15th.\nASSISTANT: With groceries the total is 2,505 euros, so 501 euros each. You paid 1,240 and get back 739. Marco paid 860 and gets back 359. Iris paid 405 and owes 96. Tomas and Lena paid nothing and owe 501 each.\nUSER: Check: 739 plus 359 is 1,098. Owed is 96 plus 501 plus 501, also 1,098. It balances.\nASSISTANT: It balances. Tomas and Lena each send 501 euros and Iris sends 96, all by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    },
+    "format": "json"
+   },
+   "status": 200,
+   "raw": "{\"L1\": \"Five split Lisbon trip 14-18 March. Total costs: flights 1240, flat 860, car 310. I paid flights, Marco flat, Iris car and groceries 95. Balances: I get back 739, Marco 359, Iris owes 96, Tomas and Lena owe 501 each. Payments by 25 March.\", \"L2\": \"5 split Lisbon trip. Costs: flights 1240, flat 860, car 310. I paid flights, Marco flat, Iris car & groceries 95. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501 each. Payments by 25 Mar.\", \"L3\": \"5 split Lisbon trip costs. I paid flights, Marco flat, Iris car & groceries. Balances: I get back 739, Marco 359, Iris owes 96, Tomas & Lena owe 501. Payments by 25 Mar.\", \"L4\": \"5 split trip. I paid flights, Marco flat, Iris car & groceries. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501. Payments by 25 Mar.\", \"L5\": \"5 split trip. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501.\"}",
+   "thinking": "",
+   "promptTokens": 475,
+   "completionTokens": 290,
+   "ollamaMs": 7632,
+   "ms": 7638,
+   "at": "2026-11-11T11:04:32.094Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r3.L1": {
+   "id": "b.ledger.granite4.1-3b.r3.L1",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\nFive split Lisbon trip 14-18 March. Total costs: flights 1240, flat 860, car 310. I paid flights, Marco flat, Iris car and groceries 95. Balances: I get back 739, Marco 359, Iris owes 96, Tomas and Lena owe 501 each. Payments by 25 March."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the trip about?\nASSISTANT: The trip is a split trip in Lisbon from 14-18 March.\n\nUSER: How much did the total costs amount to?\nASSISTANT: The total costs were 1240 for flights, 860 for the flat, and 310 for the car.\n\nUSER: Who paid for each component?\nASSISTANT: I paid for the flights, Marco paid for the flat, and Iris paid for the car and groceries.\n\nUSER: What are the balances after the payments?\nASSISTANT: The balances are I get back 739, Marco gets back 359, Iris owes 96, and both Tomas and Lena owe 501 each.\n\nUSER: When are the payments due?\nASSISTANT: The payments are due by 25 March.",
+   "thinking": "",
+   "promptTokens": 134,
+   "completionTokens": 164,
+   "ollamaMs": 4216,
+   "ms": 4220,
+   "at": "2026-11-11T11:04:39.735Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r3.L2": {
+   "id": "b.ledger.granite4.1-3b.r3.L2",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 split Lisbon trip. Costs: flights 1240, flat 860, car 310. I paid flights, Marco flat, Iris car & groceries 95. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501 each. Payments by 25 Mar."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the trip about?\nASSISTANT: The trip is a split Lisbon trip with costs for flights, flat rent, and car rental.\n\nUSER: How much did each person pay for the flights?\nASSUIT: I paid for the flights.\n\nUSER: Who paid for the flat?\nASSISTANT: Marco paid for the flat.\n\nUSER: Who paid for the car and groceries?\nASSISTANT: Iris paid for the car and groceries.\n\nUSER: How much was refunded to each person?\nASSISTANT: I got 739 back, Marco got 359 back, Iris owes 96, and Tomas and Lena owe 501 each.\n\nUSER: When are the payments due?\nASSISTANT: Payments are due by 25 Mar.",
+   "thinking": "",
+   "promptTokens": 128,
+   "completionTokens": 153,
+   "ollamaMs": 2775,
+   "ms": 2780,
+   "at": "2026-11-11T11:04:43.958Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r3.L3": {
+   "id": "b.ledger.granite4.1-3b.r3.L3",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 split Lisbon trip costs. I paid flights, Marco flat, Iris car & groceries. Balances: I get back 739, Marco 359, Iris owes 96, Tomas & Lena owe 501. Payments by 25 Mar."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does the capsule summarize?\nASSISTANT: The capsule summarizes a split Lisbon trip cost breakdown. It indicates the payments made by different individuals for flights, Marco's flat, Iris's car, and groceries. It also lists the balances owed, including the amounts received back and those owed by others. The payment deadline is specified as March 25th.",
+   "thinking": "",
+   "promptTokens": 111,
+   "completionTokens": 74,
+   "ollamaMs": 2086,
+   "ms": 2089,
+   "at": "2026-11-11T11:04:46.743Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r3.L4": {
+   "id": "b.ledger.granite4.1-3b.r3.L4",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 split trip. I paid flights, Marco flat, Iris car & groceries. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501. Payments by 25 Mar."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What is the split trip about?\n\nASSISTANT: The split trip involves five components: flights, Marco's flat, Iris's car, and groceries.\n\nUSER: Who paid for each part?\n\nASSISTANT: I paid for the flights, Marco paid for the flat, Iris paid for the car, and groceries were covered by someone else.\n\nUSER: How are the balances distributed?\n\nASSISTANT: The balances are as follows: I am getting a refund of 739, Marco is receiving 359 back, Iris owes 96, and Tomas and Lena owe a total of 501.\n\nUSER: When are the payments due?\n\nASSISTANT: The payments need to be made by March 25th.",
+   "thinking": "",
+   "promptTokens": 109,
+   "completionTokens": 146,
+   "ollamaMs": 2673,
+   "ms": 2677,
+   "at": "2026-11-11T11:04:48.834Z",
+   "error": null
+  },
+  "b.ledger.granite4.1-3b.r3.L5": {
+   "id": "b.ledger.granite4.1-3b.r3.L5",
+   "stage": "rebuild",
+   "ok": true,
+   "model": "granite4.1:3b",
+   "seed": 3,
+   "request": {
+    "model": "granite4.1:3b",
+    "messages": [
+     {
+      "role": "system",
+      "content": "You rebuild a conversation from a capsule that another model wrote. Use only what the capsule says. Write the conversation as turns, each starting with USER: or ASSISTANT: on a new line. Output only the conversation."
+     },
+     {
+      "role": "user",
+      "content": "CAPSULE:\n5 split trip. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501."
+     }
+    ],
+    "stream": false,
+    "options": {
+     "temperature": 0.7,
+     "seed": 3,
+     "num_ctx": 8192
+    }
+   },
+   "status": 200,
+   "raw": "USER: What does the capsule indicate about the split trip and the balances involved?",
+   "thinking": "",
+   "promptTokens": 91,
+   "completionTokens": 17,
+   "ollamaMs": 1943,
+   "ms": 1949,
+   "at": "2026-11-11T11:04:51.512Z",
+   "error": null
+  }
+ },
+ "runs": [
+  {
+   "id": "ledger.llama3.1-8b.r1.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros. Who paid what? Tomas and Lena owe 501 each. Iris owes 96. Send money by 25 March.",
+   "rebuild": "USER: Five people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros.\n\nASSISTANT: Tomas and Lena owe 501 each. Iris owes 96.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:45.325Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.ledger.llama3.1-8b.r1.L1"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "5 people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros. Who paid what? Iris owes 96, Tomas and Lena owe 501 each. Send by 25 March.",
+   "rebuild": "USER: 5 people splitting Lisbon trip 14-18 March. Total costs: 2,410 euros.\n\nASSISTANT: Tomas and Lena owe 501 each, and Iris owes 96.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:47.088Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.ledger.llama3.1-8b.r1.L2"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "5 split Lisbon trip 14-18 March. Total: 2,410 euros. Iris owes 96, Tomas and Lena owe 501 each.",
+   "rebuild": "USER: I'll be paying for the split trip to Lisbon. Can you let me know the amount each person owes?\n\nASSISTANT: Tomas and Lena owe 501 euros each.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:52.191Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.ledger.llama3.1-8b.r1.L3"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "5 people split Lisbon trip. Iris owes 96, Tomas and Lena owe 501 each.",
+   "rebuild": "USER: 5 people are splitting a trip and some of them owe money. Can you calculate the total amount owed?\n\nASSISTANT: \n\nUSER: \n\nASSISTANT: To find the total amount owed, we need to add the amounts owed by Tomas, Lena, and Iris.\n\nUSER: \n\nASSISTANT: The total amount owed is 501 + 501 + 96 = 1098.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:55.628Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.ledger.llama3.1-8b.r1.L4"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Split Lisbon trip. Iris owes 96.",
+   "rebuild": "USER: Split Lisbon trip\n\nASSISTANT: What do you mean by that?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:16:59.957Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.llama3.1-8b.r1.s1",
+    "rebuildCall": "b.ledger.llama3.1-8b.r1.L5"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five friends split 2,410 euros for Lisbon trip (14-18 March): flights 1,240, flat 860, car 310. Who paid what? Balances: you 739, Marco 359, Iris 96, Tomas 501, Lena 501. Send 501 and 96 by 25 March.",
+   "rebuild": "USER: Who paid what?\n\nASSISTANT: To pay the 2,410 euros, I will pay 860 (flat), you will pay 1,240 (flights), Marco will pay 860 (flat), Iris will pay 310 (car), Tomas will pay 860 (flat) and Lena will pay 1,240 (flights).\n\nUSER: Balances: you 739, Marco 359, Iris 96, Tomas 501, Lena 501. How do we split the remaining amount?\n\nASSISTANT: I pay 860, Marco pays 860, Tomas pays 860, and Lena pays 1,240.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:17:12.414Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.ledger.llama3.1-8b.r2.L1"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "Five friends split 2,410 euros: flights 1,240, flat 860, car 310. Who paid what? Balances: 739, 359, 96, 501, 501. Send 501 and 96 by 25 March.",
+   "rebuild": "USER: Five friends split 2,410 euros: flights 1,240, flat 860, car 310. Who paid what?\n\nASSISTANT: Let's start by adding up the total cost: 1240 + 860 + 310 = 2410 euros.\n\nUSER: And the friends had different balances after the split: 739, 359, 96, 501, 501. How did they end up like this?\n\nASSISTANT: We need more information about how the split was made, but let's look at the balances. Since two friends have a balance of 501, it's likely that they paid the same amount, and the other three paid different amounts.\n\nUSER: Send 501 and 96 by 25 March.\n\nASSISTANT: It seems like an instruction to the friends, not a question.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:17:16.152Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.ledger.llama3.1-8b.r2.L2"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "Split 2,410 euros: 1,240 flights, 860 flat, 310 car. Balances: 739, 359, 96, 501, 501.",
+   "rebuild": "USER: Split 2,410 euros into 3 categories: flights, flat, and car, with the following amounts: 1,240 euros for flights, 860 euros for flat, and 310 euros for car.\n\nASSISTANT: What are the balances you want to achieve in each category?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:17:24.377Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.ledger.llama3.1-8b.r2.L3"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "Split 2,410 euros: flights 1,240, flat 860, car 310.",
+   "rebuild": "USER: I need to split 2,410 euros with someone. The breakdown is flights for 1,240 euros, a flat for 860 euros, and a car for 310 euros.\n\nASSISTANT: To split the costs evenly, I'd recommend dividing the total amount by the number of people splitting it. In this case, 2410 euros divided by 2 is 1205 euros per person.\n\nUSER: That's 1,240 for flights and 860 for flat, so that's 2100 euros so far. If we subtract that from 1205, we get 105 euros left.\n\nASSISTANT: The car rental is 310 euros. If you subtract 105 euros from that, you get 205 euros.\n\nUSER: So the person who gets the car will also have to cover the remaining 205 euros.\n\nASSISTANT: You can also consider finding someone else to split the car rental costs with.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:17:29.057Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.ledger.llama3.1-8b.r2.L4"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Split 2,410 euros.",
+   "rebuild": "USER: Split 2,410 euros.\n\nASSISTANT: What are the amounts you'd like to split the 2,410 euros into?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:17:36.147Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.llama3.1-8b.r2.s2",
+    "rebuildCall": "b.ledger.llama3.1-8b.r2.L5"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r3.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five friends split Lisbon trip 14-18 Mar, total 2410 euros, 482 euros each. Payments: flights 1240, flat 860, car 310, groceries 95. Tomas and Lena owe 501 each, Iris owes 96. Iris sends 96 by 25 Mar, Tomas and Lena each send 501 by 25 Mar.",
+   "rebuild": "USER: Five friends split Lisbon trip 14-18 Mar, total 2410 euros, 482 euros each.\n\nASSISTANT: Payments: flights 1240, flat 860, car 310, groceries 95.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:17:55.973Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.ledger.llama3.1-8b.r3.L1"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r3.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "Lisbon trip 14-18 Mar, total 2410 euros. Payments: flights 1240, flat 860, car 310, groceries 95. Iris owes 96, Tomas and Lena owe 501 each.",
+   "rebuild": "USER: I'm planning a trip to Lisbon from 14-18 Mar and I'm a bit concerned about the costs. \n\nASSISTANT: The total cost for the trip is 2410 euros, broken down into flights for 1240 euros, a flat for 860 euros, car rental for 310 euros, and groceries for 95 euros. \n\nUSER: That's quite a bit of money. Who owes you money from this trip? \n\nASSISTANT: Actually, I owe Iris 96 euros, and Tomas and Lena each owe me 501 euros.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:18:02.255Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.ledger.llama3.1-8b.r3.L2"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r3.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "Split Lisbon trip 14-18 Mar, total 2410 euros. 482 euros each. Iris owes 96, Tomas and Lena owe 501 each.",
+   "rebuild": "USER: Split Lisbon trip 14-18 Mar, total 2410 euros. \n\nASSISTANT: 482 euros each.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:18:18.038Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.ledger.llama3.1-8b.r3.L3"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r3.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "Lisbon trip 14-18 Mar, total 2410 euros. Iris owes 96, Tomas and Lena owe 501.",
+   "rebuild": "USER: I've calculated the total cost of the Lisbon trip to be 2410 euros.\n\nASSISTANT: Who owes the money?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:18:24.496Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.ledger.llama3.1-8b.r3.L4"
+   }
+  },
+  {
+   "id": "ledger.llama3.1-8b.r3.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Lisbon trip total 2410",
+   "rebuild": "USER: That's a lot for a trip. What was the breakdown?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "quant": "Q4_K_M",
+    "params": "8.0B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:18:30.576Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.llama3.1-8b.r3.s3",
+    "rebuildCall": "b.ledger.llama3.1-8b.r3.L5"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r1.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car + 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098. Owed: 96 + 501 + 501 = 1,098. Balance. Iris, Tomas, Lena to send 96, 501, 501 by 25 March.",
+   "rebuild": "USER: I need to split the costs of our Lisbon trip from March 14th to 18th. Let me break down the expenses.  \nASSISTANT: Total costs are flights at 1,240, flat at 860, car at 310, and groceries at 95. That makes a total of 2,505.  \nUSER: So each person should pay 501.  \nASSISTANT: User paid for the flights, so they should get 739 back. Marco paid for the flat, so they should get 359.  \nUSER: Iris paid for the car and groceries, so they owe 96.  \nASSISTANT: Tomas and Lena owe 501 each. Let me check the math.  \nUSER: 739 plus 359 equals 1,098.  \nASSISTANT: And 96 plus 501 plus 501 also equals 1,098. The balance is correct.  \nUSER: Iris, Tomas, and Lena need to send 96, 501, and 501 by March 25th.  \nASSISTANT:",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:44.926Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.qwen3-8b.r1.s1",
+    "rebuildCall": "b.ledger.qwen3-8b.r1.L1"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r1.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User paid flights, gets 739. Marco paid flat, gets 359. Iris paid car + 95, owes 96. Tomas and Lena owe 501. Check: 739 + 359 = 1,098. Owed: 96 + 501 + 501 = 1,098. Balance. Iris, Tomas, Lena to send 96, 501, 501 by 25 March.",
+   "rebuild": "USER: I need to split the Lisbon trip costs from 14-18 March. The total is 2,505. Each person should pay 501.  \nASSISTANT: User paid for flights and gets 739 back. Marco paid flat and gets 359 back. Iris paid for the car and 95, so she owes 96. Tomas and Lena owe 501 each.  \nUSER: Let me check the math: 739 plus 359 equals 1,098. The owed amount is 96 plus 501 plus 501, which also equals 1,098.  \nASSISTANT: Balance is correct. Iris, Tomas, and Lena need to send 96, 501, and 501 by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:51.333Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.qwen3-8b.r1.s1",
+    "rebuildCall": "b.ledger.qwen3-8b.r1.L2"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r1.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Check balances. Iris, Tomas, Lena send 96, 501, 501 by 25 March.",
+   "rebuild": "USER: Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Check balances. Iris, Tomas, Lena send 96, 501, 501 by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:45:58.383Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.qwen3-8b.r1.s1",
+    "rebuildCall": "b.ledger.qwen3-8b.r1.L3"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r1.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Iris, Tomas, Lena send 96, 501, 501 by 25 March.",
+   "rebuild": "USER: Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Iris, Tomas, Lena send 96, 501, 501 by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:07.432Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.qwen3-8b.r1.s1",
+    "rebuildCall": "b.ledger.qwen3-8b.r1.L4"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r1.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Send 501, 501, 96 by 25 March.",
+   "rebuild": "USER: Five split Lisbon trip. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. Send 501, 501, 96 by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:12.357Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.qwen3-8b.r1.s1",
+    "rebuildCall": "b.ledger.qwen3-8b.r1.L5"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r2.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098; owed 96 + 501 + 501 = 1,098. All pay by 25 March.",
+   "rebuild": "USER: Five split Lisbon trip 14-18 March. Total costs: flights 1,240, flat 860, car 310, groceries 95. Total 2,505. Each pays 501. User paid flights, gets 739 back. Marco paid flat, gets 359. Iris paid car and 95, owes 96. Tomas and Lena owe 501 each. Check: 739 + 359 = 1,098; owed 96 + 501 + 501 = 1,098. All pay by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:20.621Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.qwen3-8b.r2.s2",
+    "rebuildCall": "b.ledger.qwen3-8b.r2.L1"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r2.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "Five split Lisbon trip 14-18 March. Total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501. All pay by 25 March.",
+   "rebuild": "USER: We're splitting the cost of the Lisbon trip from 14th to 18th March. The total is 2,505. Each person should pay 501.  \nASSISTANT: User gets back 739, Marco gets 359, Iris owes 96. Tomas and Lena owe 501 each.  \nUSER: All payments are due by 25th March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:23.621Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.qwen3-8b.r2.s2",
+    "rebuildCall": "b.ledger.qwen3-8b.r2.L2"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r2.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "Lisbon trip 14-18 March total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.",
+   "rebuild": "USER: Lisbon trip 14-18 March total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:25.504Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.qwen3-8b.r2.s2",
+    "rebuildCall": "b.ledger.qwen3-8b.r2.L3"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r2.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "Lisbon trip total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.",
+   "rebuild": "USER: Lisbon trip total 2,505. Each pays 501. User gets 739, Marco 359, Iris owes 96. Tomas and Lena owe 501.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:26.736Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.qwen3-8b.r2.s2",
+    "rebuildCall": "b.ledger.qwen3-8b.r2.L4"
+   }
+  },
+  {
+   "id": "ledger.qwen3-8b.r2.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Lisbon trip total 2,505. Each pays 501.",
+   "rebuild": "USER: Lisbon trip total 2,505.  \nASSISTANT: Each pays 501.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "qwen3:8b",
+    "digest": "500a1f067a9f",
+    "quant": "Q4_K_M",
+    "params": "8.2B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T10:46:27.646Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.qwen3-8b.r2.s2",
+    "rebuildCall": "b.ledger.qwen3-8b.r2.L5"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r1.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What was the trip about?\nASSISTANT: The trip was about a split trip to Lisbon from 14-18 March.\n\nUSER: How much did the flights cost in total?\nASSISTANT: The flights cost 1240 in total.\n\nUSER: Who paid for the flights?\nASSISTANT: I paid for the flights.\n\nUSER: What was the cost of the flat per person?\nASSISTANT: The flat cost 860 in total, which is 482 per person.\n\nUSER: Who paid for the flat?\nASSISTANT: Marco paid for the flat.\n\nUSER: How much did groceries add to the total cost?\nASSISTANT: Groceries added 15 to the total cost, making it 2505 in total.\n\nUSER: Who paid for groceries?\nASSISTANT: I paid for groceries.\n\nUSER: How much did I get back after paying for groceries?\nASSISTANT: I got back 739 after paying for groceries.\n\nUSER: How much did Marco get back after paying for the flat?\nASSISTANT: Marco got back 359 after paying for the flat.\n\nUSER: How much did Iris owe after paying for the car and groceries?\nASSISTANT: Iris owed 96 after paying for the car and groceries.\n\nUSER: How much did Tomas and Lena owe each?\nASSISTANT: Tomas and Lena owe 501 each.\n\nUSER: What is the total amount that Tomas and Lena owe combined?\nASSISTANT: The total amount that Tomas and Lena owe combined is 1098.\n\nUSER: When are the payments due?\nASSISTANT: Payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:03:27.385Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.ledger.granite4.1-3b.r1.L1"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r1.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "Lisbon trip 14-18 March split by five. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What was the trip to Lisbon from March 14-18 about?\n\nASSISTANT: The trip to Lisbon from March 14-18 was a split trip with five parts.\n\nUSER: Can you tell me about the costs involved?\n\nASSISTANT: The costs were as follows: flights were $1240, the flat rental was $860, and car rental was $310. The total cost was $2410, which averages to $482 per person.\n\nUSER: How were the groceries accounted for?\n\nASSISTANT: For groceries, the total came to $2505, averaging $501 per person. This includes the initial costs plus groceries.\n\nUSER: Who paid for the flights and what was the refund?\n\nASSISTANT: I paid for the flights, which amounted to a refund of $739.\n\nUSER: What about Marco's payment and refund?\n\nASSISTANT: Marco paid for the flat rental, which gave him a refund of $359.\n\nUSER: What did Iris owe after covering groceries?\n\nASSISTANT: Iris paid $405 but owes $96.\n\nUSER: How much did Tomas and Lena owe each?\n\nASSISTANT: Tomas and Lena owe $501 each, totaling $1098.\n\nUSER: When are the payments due?\n\nASSISTANT: Payments are due by March 25.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:03:33.433Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.ledger.granite4.1-3b.r1.L2"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r1.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "Five split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What was the trip about?\nASSISTANT: The trip was about a split Lisbon trip from 14-18 March.\n\nUSER: How much did the flights cost in total?\nASSISTANT: The flights cost 1240 in total.\n\nUSER: How much did the flat cost?\nASSISTANT: The flat cost 860.\n\nUSER: And the car rental?\nASSISTANT: The car rental cost 310.\n\nUSER: What was the total cost for everyone?\nASSISTANT: The total cost was 2410, or 482 each.\n\nUSER: How did you handle the groceries?\nASSISTANT: I paid for the groceries, which added up to 2505 in total, or 501 each.\n\nUSER: How much did you get back after paying for groceries?\nASSISTANT: I got back 739 after paying for groceries.\n\nUSER: How much did Marco get back after paying for his flat?\nASSISTANT: Marco got back 359 after paying for his flat.\n\nUSER: What about Iris? Did she owe anything?\nASSISTANT: Yes, Iris owed 96 after paying for her car.\n\nUSER: What about Tomas and Lena?\nASSISTANT: Tomas and Lena owe 501 each, totaling 1098.\n\nUSER: When are the payments due?\nASSISTANT: The payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:03:43.232Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.ledger.granite4.1-3b.r1.L3"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r1.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What was the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon was 2410, which is 482 per person before groceries.\n\nUSER: How much did each person pay for the flights?\n\nASSISTANT: I paid for the flights, which amounted to 1240. \n\nUSER: Who paid for the flat and how much did they pay?\n\nASSISTANT: Marco paid for the flat, which was 860.\n\nUSER: And who covered the car rental costs?\n\nASSISTANT: Iris paid for the car rental, which was 310.\n\nUSER: You mentioned groceries were included. How much were the groceries for the trip?\n\nASSISTANT: The groceries for the trip amounted to an additional 15, making the total 2505.\n\nUSER: How much did each person end up paying including groceries?\n\nASSISTANT: Each person ended up paying 501 including groceries.\n\nUSER: What was the refund for each person after including groceries?\n\nASSISTANT: After including groceries, I got back 739, Marco got back 359, and Iris owes 96.\n\nUSER: What about Tomas and Lena? How much did they each owe?\n\nASSISTANT: Tomas and Lena each owe 501 in total.\n\nUSER: When are the payments due?\n\nASSISTANT: The payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:03:50.257Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.ledger.granite4.1-3b.r1.L4"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r1.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 15th. With groceries total 2505, or 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What was the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon was 2410, which is 482 each when split equally.\n\nUSER: How were the individual payments divided?\n\nASSISTANT: I paid for the flights amounting to 1240, Marco paid for the flat at 860, and Iris paid for the car at 310. Additionally, for groceries on the 15th, I paid 15, making the total 2505, which is 501 each.\n\nUSER: What are the reimbursements for each person?\n\nASSISTANT: I got back 739, Marco got back 359, and Iris owes 96. Tomas and Lena owe 501 each, totaling 1098.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:03:55.162Z",
+    "promptVersion": "p1",
+    "seed": 1,
+    "temperature": 0.7,
+    "repeat": 1,
+    "compressCall": "c.ledger.granite4.1-3b.r1.s1",
+    "rebuildCall": "b.ledger.granite4.1-3b.r1.L5"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r2.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five split Lisbon trip 14-18 March. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What is the trip about?\nASSISTANT: The trip is about a split Lisbon trip from 14-18 March.\n\nUSER: How much did the flights cost in total?\nASSISTANT: The flights cost 1240 in total.\n\nUSER: How much did the flat rental cost?\nASSISTANT: The flat rental cost 860.\n\nUSER: How much did the car rental cost?\nASSISTANT: The car rental cost 310.\n\nUSER: What is the total cost including groceries?\nASSISTANT: The total cost including groceries is 2505.\n\nUSER: How much did each person need to pay if we split the total cost evenly?\nASSISTANT: Each person needed to pay 501 if we split the total cost evenly.\n\nUSER: How much did I pay back to you?\nASSISTANT: I paid 1240 and got back 739.\n\nUSER: How much did Marco pay back to you?\nASSISTANT: Marco paid 860 and got back 359.\n\nUSER: How much does Iris owe you?\nASSISTANT: Iris owes you 96.\n\nUSER: How much do Tomas and Lena owe each other?\nASSISTANT: Tomas and Lena owe each other 501 each, totaling 1098.\n\nUSER: When are the payments due?\nASSISTANT: The payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:09.722Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.ledger.granite4.1-3b.r2.L1"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r2.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "Five split Lisbon trip costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What are the split costs for the Lisbon trip?\n\nASSISTANT: The total trip costs are divided as follows: flights amount to 1240, flat rental is 860, and car rental is 310. This makes the overall total 2410, which averages to 482 per person.\n\nUSER: How did the payment distribution work?\n\nASSISTANT: I paid for the flights, Marco covered the flat rental, Iris took care of the car rental and groceries amounting to 95. Including groceries, the total came to 2505, averaging 501 per person.\n\nUSER: What about the reimbursements?\n\nASSISTANT: I received a reimbursement of 739 for my flight costs. Marco got back 359 for the flat rental. Iris owes 96 after covering her expenses.\n\nUSER: What about Tomas and Lena?\n\nASSISTANT: Tomas and Lena each owe 501 in total. Combined, that's a payment of 1098 by March 25th.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:17.078Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.ledger.granite4.1-3b.r2.L2"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r2.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What is the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon is 2410, which averages to 482 per person.\n\nUSER: How are the individual payments split?\n\nASSISTANT: The payments are split as follows: I paid for flights (1240), Marco paid for the flat (860), Iris paid for the car (310) and groceries (95). Including groceries, the total is 2505, which averages to 501 per person.\n\nUSER: What are the refund amounts for each person?\n\nASSISTANT: The refund amounts are as follows: I get back 739, Marco gets back 359, and Iris owes 96.\n\nUSER: What is the total amount that Tomas and Lena need to pay?\n\nASSISTANT: Tomas and Lena owe a total of 1098 between them.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:21.389Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.ledger.granite4.1-3b.r2.L3"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r2.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What is the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon is 2410, which averages to 482 per person.\n\nUSER: How are the individual payments split?\n\nASSISTANT: The payments are split as follows: I paid for flights (1240), Marco paid for the flat (860), Iris paid for the car (310) and groceries (95). Including groceries, the total is 2505, averaging 501 per person.\n\nUSER: What are the refunds or additional payments?\n\nASSISTANT: The refunds or additional payments are: I paid 1240 and got back 739, Marco paid 860 and got back 359, and Iris paid 405 but owes 96. Tomas and Lena owe 501 each, totaling 1098.\n\nUSER: When are the remaining payments due?\n\nASSISTANT: The remaining payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:24.217Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.ledger.granite4.1-3b.r2.L4"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r2.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "Five split Lisbon trip. Costs: flights 1240, flat 860, car 310. Total 2410, or 482 each. I paid flights, Marco flat, Iris car and groceries 95. With groceries total 2505, so 501 each. I paid 1240 get back 739. Marco paid 860 get back 359. Iris paid 405 owe 96. Tomas and Lena owe 501 each, total 1098. Payments by 25 March.",
+   "rebuild": "USER: What is the total cost for the trip to Lisbon?\n\nASSISTANT: The total cost for the trip to Lisbon is 2410, which averages to 482 per person.\n\nUSER: How are the individual payments split?\n\nASSISTANT: The payments are split as follows: I paid for flights (1240), Marco paid for the flat (860), Iris paid for the car (310) and groceries (95). Including groceries, the total is 2505, averaging 501 per person.\n\nUSER: What are the refunds or additional payments?\n\nASSISTANT: The refunds or additional payments are: I paid 1240 and got back 739, Marco paid 860 and got back 359, and Iris paid 405 but owes 96. Tomas and Lena owe 501 each, totaling 1098.\n\nUSER: When are the remaining payments due?\n\nASSISTANT: The remaining payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:27.214Z",
+    "promptVersion": "p1",
+    "seed": 2,
+    "temperature": 0.7,
+    "repeat": 2,
+    "compressCall": "c.ledger.granite4.1-3b.r2.s2",
+    "rebuildCall": "b.ledger.granite4.1-3b.r2.L5"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r3.L1",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 1,
+   "budgetWords": 73,
+   "capsule": "Five split Lisbon trip 14-18 March. Total costs: flights 1240, flat 860, car 310. I paid flights, Marco flat, Iris car and groceries 95. Balances: I get back 739, Marco 359, Iris owes 96, Tomas and Lena owe 501 each. Payments by 25 March.",
+   "rebuild": "USER: What is the trip about?\nASSISTANT: The trip is a split trip in Lisbon from 14-18 March.\n\nUSER: How much did the total costs amount to?\nASSISTANT: The total costs were 1240 for flights, 860 for the flat, and 310 for the car.\n\nUSER: Who paid for each component?\nASSISTANT: I paid for the flights, Marco paid for the flat, and Iris paid for the car and groceries.\n\nUSER: What are the balances after the payments?\nASSISTANT: The balances are I get back 739, Marco gets back 359, Iris owes 96, and both Tomas and Lena owe 501 each.\n\nUSER: When are the payments due?\nASSISTANT: The payments are due by 25 March.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:39.735Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.ledger.granite4.1-3b.r3.L1"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r3.L2",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 2,
+   "budgetWords": 44,
+   "capsule": "5 split Lisbon trip. Costs: flights 1240, flat 860, car 310. I paid flights, Marco flat, Iris car & groceries 95. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501 each. Payments by 25 Mar.",
+   "rebuild": "USER: What is the trip about?\nASSISTANT: The trip is a split Lisbon trip with costs for flights, flat rent, and car rental.\n\nUSER: How much did each person pay for the flights?\nASSUIT: I paid for the flights.\n\nUSER: Who paid for the flat?\nASSISTANT: Marco paid for the flat.\n\nUSER: Who paid for the car and groceries?\nASSISTANT: Iris paid for the car and groceries.\n\nUSER: How much was refunded to each person?\nASSISTANT: I got 739 back, Marco got 359 back, Iris owes 96, and Tomas and Lena owe 501 each.\n\nUSER: When are the payments due?\nASSISTANT: Payments are due by 25 Mar.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:43.958Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.ledger.granite4.1-3b.r3.L2"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r3.L3",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 3,
+   "budgetWords": 26,
+   "capsule": "5 split Lisbon trip costs. I paid flights, Marco flat, Iris car & groceries. Balances: I get back 739, Marco 359, Iris owes 96, Tomas & Lena owe 501. Payments by 25 Mar.",
+   "rebuild": "USER: What does the capsule summarize?\nASSISTANT: The capsule summarizes a split Lisbon trip cost breakdown. It indicates the payments made by different individuals for flights, Marco's flat, Iris's car, and groceries. It also lists the balances owed, including the amounts received back and those owed by others. The payment deadline is specified as March 25th.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:46.743Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.ledger.granite4.1-3b.r3.L3"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r3.L4",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 4,
+   "budgetWords": 15,
+   "capsule": "5 split trip. I paid flights, Marco flat, Iris car & groceries. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501. Payments by 25 Mar.",
+   "rebuild": "USER: What is the split trip about?\n\nASSISTANT: The split trip involves five components: flights, Marco's flat, Iris's car, and groceries.\n\nUSER: Who paid for each part?\n\nASSISTANT: I paid for the flights, Marco paid for the flat, Iris paid for the car, and groceries were covered by someone else.\n\nUSER: How are the balances distributed?\n\nASSISTANT: The balances are as follows: I am getting a refund of 739, Marco is receiving 359 back, Iris owes 96, and Tomas and Lena owe a total of 501.\n\nUSER: When are the payments due?\n\nASSISTANT: The payments need to be made by March 25th.",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:48.834Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.ledger.granite4.1-3b.r3.L4"
+   }
+  },
+  {
+   "id": "ledger.granite4.1-3b.r3.L5",
+   "kind": "recorded",
+   "preset": "ledger",
+   "level": 5,
+   "budgetWords": 7,
+   "capsule": "5 split trip. Balances: I get 739 back, Marco 359, Iris owes 96, Tomas & Lena owe 501.",
+   "rebuild": "USER: What does the capsule indicate about the split trip and the balances involved?",
+   "provenance": {
+    "route": "ollama, local recorder (record.mjs)",
+    "model": "granite4.1:3b",
+    "digest": "6fd349357287",
+    "quant": "Q4_K_M",
+    "params": "3.4B",
+    "ollamaVersion": "0.40.15",
+    "date": "2026-11-11T11:04:51.512Z",
+    "promptVersion": "p1",
+    "seed": 3,
+    "temperature": 0.7,
+    "repeat": 3,
+    "compressCall": "c.ledger.granite4.1-3b.r3.s3",
+    "rebuildCall": "b.ledger.granite4.1-3b.r3.L5"
+   }
+  }
+ ],
+ "generatedAt": "2026-11-11T11:07:03.492Z"
+}

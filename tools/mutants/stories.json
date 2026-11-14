@@ -1,0 +1,554 @@
+[
+  {
+    "name": "checkStory: not reported: .. ..: no ..",
+    "from": "for (const k of ['id', 'title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k])) errs.push(`${at}: no ${k}`);",
+    "to": "for (const k of ['id', 'title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k])) [].push(`${at}: no ${k}`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: cites no atlas clause",
+    "from": "if (!Array.isArray(s.clauses) || !s.clauses.length) errs.push(`${at}: cites no atlas clause`);",
+    "to": "if (!Array.isArray(s.clauses) || !s.clauses.length) [].push(`${at}: cites no atlas clause`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: clauses must be a list of clause ids",
+    "from": "if (!clauses.every((c) => typeof c === 'string')) errs.push(`${at}: clauses must be a list of clause ids`);",
+    "to": "if (!clauses.every((c) => typeof c === 'string')) [].push(`${at}: clauses must be a list of clause ids`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: unknown clause ..",
+    "from": "else for (const c of clauses) if (!idx.has(c)) errs.push(`${at}: unknown clause ${c}`);",
+    "to": "else for (const c of clauses) if (!idx.has(c)) [].push(`${at}: unknown clause ${c}`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: needs testable acceptance criteria",
+    "from": "if (!Array.isArray(s.acceptance) || !s.acceptance.length || !s.acceptance.every(nonEmpty)) errs.push(`${at}: needs testable acceptance criteria`);",
+    "to": "if (!Array.isArray(s.acceptance) || !s.acceptance.length || !s.acceptance.every(nonEmpty)) [].push(`${at}: needs testable acceptance criteria`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: size must be S, M or L",
+    "from": "if (!SIZES.includes(s.size)) errs.push(`${at}: size must be S, M or L`);",
+    "to": "if (!SIZES.includes(s.size)) [].push(`${at}: size must be S, M or L`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: an L story is split before it is planned",
+    "from": "if (s.size === 'L') errs.push(`${at}: an L story is split before it is planned`);",
+    "to": "if (s.size === 'L') [].push(`${at}: an L story is split before it is planned`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: status must be open, built or verified",
+    "from": "if (!STATUS.includes(s.status)) errs.push(`${at}: status must be open, built or verified`);",
+    "to": "if (!STATUS.includes(s.status)) [].push(`${at}: status must be open, built or verified`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: verified without evidence",
+    "from": "if (s.status === 'verified' && !nonEmpty(s.evidence)) errs.push(`${at}: verified without evidence`);",
+    "to": "if (s.status === 'verified' && !nonEmpty(s.evidence)) [].push(`${at}: verified without evidence`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: target_rung .. but its highest clause is at rung ..",
+    "from": "if (top >= 0 && s.target_rung !== top) errs.push(`${at}: target_rung ${s.target_rung} but its highest clause is at rung ${top}`);",
+    "to": "if (top >= 0 && s.target_rung !== top) [].push(`${at}: target_rung ${s.target_rung} but its highest clause is at rung ${top}`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: depends_on must be a list of story ids",
+    "from": "if (s.depends_on != null && !Array.isArray(s.depends_on)) errs.push(`${at}: depends_on must be a list of story ids`);",
+    "to": "if (s.depends_on != null && !Array.isArray(s.depends_on)) [].push(`${at}: depends_on must be a list of story ids`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: depends on unknown story ..",
+    "from": "for (const d of asList(s.depends_on)) if (!ids.has(d)) errs.push(`${at}: depends on unknown story ${d}`);",
+    "to": "for (const d of asList(s.depends_on)) if (!ids.has(d)) [].push(`${at}: depends on unknown story ${d}`);"
+  },
+  {
+    "name": "checkStory: not reported: .. ..: a story from a template says what it means on this lab",
+    "from": "errs.push(`${at}: a story from a template says what it means on this lab's own instrument (on_this_lab, ${MIN_NOTE}+ characters)`);",
+    "to": "[].push(`${at}: a story from a template says what it means on this lab's own instrument (on_this_lab, ${MIN_NOTE}+ characters)`);"
+  },
+  {
+    "name": "cycles: not reported: dependency cycle: ..",
+    "from": "if (state.get(id) === 1) { errs.push(`dependency cycle: ${[...trail, id].join(' -> ')}`); return; }",
+    "to": "if (state.get(id) === 1) { [].push(`dependency cycle: ${[...trail, id].join(' -> ')}`); return; }"
+  },
+  {
+    "name": "checkLab: not reported: ..: duplicate story ids",
+    "from": "if (ids.size !== stories.length + platform.length) errs.push(`${plan.lab}: duplicate story ids`);",
+    "to": "if (ids.size !== stories.length + platform.length) [].push(`${plan.lab}: duplicate story ids`);"
+  },
+  {
+    "name": "checkLab: not reported: the errors passed along from checkStory",
+    "from": "for (const s of stories) errs.push(...checkStory(s, idx, ids, plan.lab));",
+    "to": "for (const s of stories) [].push(...checkStory(s, idx, ids, plan.lab));"
+  },
+  {
+    "name": "checkLab: not reported: the errors passed along from cycles",
+    "from": "errs.push(...cycles([...stories, ...platform]));",
+    "to": "[].push(...cycles([...stories, ...platform]));"
+  },
+  {
+    "name": "checkLab: not reported: ..: .. product axes not applicable; at most 3",
+    "from": "if (naProduct.length > 3) errs.push(`${plan.lab}: ${naProduct.length} product axes not applicable; at most 3`);",
+    "to": "if (naProduct.length > 3) [].push(`${plan.lab}: ${naProduct.length} product axes not applicable; at most 3`);"
+  },
+  {
+    "name": "checkLab: not reported: ..: not applicable .. without a reason",
+    "from": "for (const k of Object.keys(na)) if (!nonEmpty(na[k]) || na[k].trim().length < 20) errs.push(`${plan.lab}: not applicable ${k} without a reason`);",
+    "to": "for (const k of Object.keys(na)) if (!nonEmpty(na[k]) || na[k].trim().length < 20) [].push(`${plan.lab}: not applicable ${k} without a reason`);"
+  },
+  {
+    "name": "checkLab: not reported: ..: bindings... missing",
+    "from": "for (const k of BINDINGS) if (plan.bindings == null || plan.bindings[k] == null) errs.push(`${plan.lab}: bindings.${k} missing`);",
+    "to": "for (const k of BINDINGS) if (plan.bindings == null || plan.bindings[k] == null) [].push(`${plan.lab}: bindings.${k} missing`);"
+  },
+  {
+    "name": "checkLab: not reported: ..: met lists unknown clause ..",
+    "from": "if (!idx.has(c)) errs.push(`${plan.lab}: met lists unknown clause ${c}`);",
+    "to": "if (!idx.has(c)) [].push(`${plan.lab}: met lists unknown clause ${c}`);"
+  },
+  {
+    "name": "checkLab: not reported: ..: met clause .. has no evidence",
+    "from": "if (!nonEmpty(ev)) errs.push(`${plan.lab}: met clause ${c} has no evidence`);",
+    "to": "if (!nonEmpty(ev)) [].push(`${plan.lab}: met clause ${c} has no evidence`);"
+  },
+  {
+    "name": "checkLab: not reported: ..: no grade for axis ..",
+    "from": "if (!g || !Number.isInteger(g.level)) { errs.push(`${plan.lab}: no grade for axis ${a.id}`); continue; }",
+    "to": "if (!g || !Number.isInteger(g.level)) { [].push(`${plan.lab}: no grade for axis ${a.id}`); continue; }"
+  },
+  {
+    "name": "checkLab: not reported: ..: .. clause(s) up to rung .. owned by no story and not met: ....",
+    "from": "if (missing.length) errs.push(`${plan.lab}: ${missing.length} clause(s) up to rung ${target} owned by no story and not met: ${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ' ...' : ''}`);",
+    "to": "if (missing.length) [].push(`${plan.lab}: ${missing.length} clause(s) up to rung ${target} owned by no story and not met: ${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ' ...' : ''}`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: key must be kebab-case",
+    "from": "if (!nonEmpty(t.key) || !/^[a-z0-9-]+$/.test(t.key)) errs.push(`${at}: key must be kebab-case`);",
+    "to": "if (!nonEmpty(t.key) || !/^[a-z0-9-]+$/.test(t.key)) [].push(`${at}: key must be kebab-case`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: duplicate key",
+    "from": "if (keys.has(t.key)) errs.push(`${at}: duplicate key`);",
+    "to": "if (keys.has(t.key)) [].push(`${at}: duplicate key`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: no ..",
+    "from": "for (const k of ['title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(t[k])) errs.push(`${at}: no ${k}`);",
+    "to": "for (const k of ['title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(t[k])) [].push(`${at}: no ${k}`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: needs acceptance criteria",
+    "from": "if (!Array.isArray(t.acceptance) || !t.acceptance.length || !t.acceptance.every(nonEmpty)) errs.push(`${at}: needs acceptance criteria`);",
+    "to": "if (!Array.isArray(t.acceptance) || !t.acceptance.length || !t.acceptance.every(nonEmpty)) [].push(`${at}: needs acceptance criteria`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: size must be S or M",
+    "from": "if (!['S', 'M'].includes(t.size)) errs.push(`${at}: size must be S or M`);",
+    "to": "if (!['S', 'M'].includes(t.size)) [].push(`${at}: size must be S or M`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: depends_on must be a list of platform story ids",
+    "from": "if (t.depends_on != null && !Array.isArray(t.depends_on)) errs.push(`${at}: depends_on must be a list of platform story ids`);",
+    "to": "if (t.depends_on != null && !Array.isArray(t.depends_on)) [].push(`${at}: depends_on must be a list of platform story ids`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: depends on unknown platform story ..",
+    "from": "for (const d of asList(t.depends_on)) if (!platformIds.has(d)) errs.push(`${at}: depends on unknown platform story ${d}`);",
+    "to": "for (const d of asList(t.depends_on)) if (!platformIds.has(d)) [].push(`${at}: depends on unknown platform story ${d}`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: cites no clause",
+    "from": "if (!Array.isArray(t.clauses) || !t.clauses.length) errs.push(`${at}: cites no clause`);",
+    "to": "if (!Array.isArray(t.clauses) || !t.clauses.length) [].push(`${at}: cites no clause`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: clauses must be a list of clause ids",
+    "from": "if (!asList(t.clauses).every((c) => typeof c === 'string')) errs.push(`${at}: clauses must be a list of clause ids`);",
+    "to": "if (!asList(t.clauses).every((c) => typeof c === 'string')) [].push(`${at}: clauses must be a list of clause ids`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: unknown clause ..",
+    "from": "if (!hit) { errs.push(`${at}: unknown clause ${c}`); continue; }",
+    "to": "if (!hit) { [].push(`${at}: unknown clause ${c}`); continue; }"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: .. is a subject clause; subject stories are written per lab",
+    "from": "if (hit.kind !== 'product') errs.push(`${at}: ${c} is a subject clause; subject stories are written per lab`);",
+    "to": "if (hit.kind !== 'product') [].push(`${at}: ${c} is a subject clause; subject stories are written per lab`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: .. is outside rungs 1 to ..",
+    "from": "if (hit.rung < 1 || hit.rung > TARGET) errs.push(`${at}: ${c} is outside rungs 1 to ${TARGET}`);",
+    "to": "if (hit.rung < 1 || hit.rung > TARGET) [].push(`${at}: ${c} is outside rungs 1 to ${TARGET}`);"
+  },
+  {
+    "name": "checkTemplates: not reported: template ..: .. is already owned by another template",
+    "from": "if (covered.has(c)) errs.push(`${at}: ${c} is already owned by another template`);",
+    "to": "if (covered.has(c)) [].push(`${at}: ${c} is already owned by another template`);"
+  },
+  {
+    "name": "checkTemplates: not reported: .. product clause(s) at rungs 1 to .. owned by no template: ....",
+    "from": "if (missing.length) errs.push(`${missing.length} product clause(s) at rungs 1 to ${TARGET} owned by no template: ${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ' ...' : ''}`);",
+    "to": "if (missing.length) [].push(`${missing.length} product clause(s) at rungs 1 to ${TARGET} owned by no template: ${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ' ...' : ''}`);"
+  },
+  {
+    "name": "check: not reported: the errors passed along from checkStory",
+    "from": "for (const s of loaded.platform) errs.push(...checkStory(s, idx, pids, '_platform'));",
+    "to": "for (const s of loaded.platform) [].push(...checkStory(s, idx, pids, '_platform'));"
+  },
+  {
+    "name": "check: not reported: the errors passed along from cycles",
+    "from": "errs.push(...cycles(loaded.platform));",
+    "to": "[].push(...cycles(loaded.platform));"
+  },
+  {
+    "name": "check: not reported: the errors passed along from checkTemplates",
+    "from": "if (templates) errs.push(...checkTemplates(atlas, templates, pids));",
+    "to": "if (templates) [].push(...checkTemplates(atlas, templates, pids));"
+  },
+  {
+    "name": "check: not reported: the errors passed along from r.errs",
+    "from": "errs.push(...r.errs);",
+    "to": "[].push(...r.errs);"
+  },
+  {
+    "name": "checkStory: a story without an id passes",
+    "from": "for (const k of ['id', 'title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k]))",
+    "to": "for (const k of ['title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story without as_a passes",
+    "from": "for (const k of ['id', 'title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k]))",
+    "to": "for (const k of ['id', 'title', 'i_want', 'so_that']) if (!nonEmpty(s[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story without i_want passes",
+    "from": "for (const k of ['id', 'title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k]))",
+    "to": "for (const k of ['id', 'title', 'as_a', 'so_that']) if (!nonEmpty(s[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story without so_that passes",
+    "from": "for (const k of ['id', 'title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(s[k]))",
+    "to": "for (const k of ['id', 'title', 'as_a', 'i_want']) if (!nonEmpty(s[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose clauses are a word has each letter checked as a clause id",
+    "from": "for (const c of clauses) if (!idx.has(c))",
+    "to": "for (const c of s.clauses || []) if (!idx.has(c))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose clauses are a word is split into letters before the clause check",
+    "from": "const clauses = Array.isArray(s.clauses) ? s.clauses : [];",
+    "to": "const clauses = Array.isArray(s.clauses) ? s.clauses : [...String(s.clauses ?? '')];",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story with a blank acceptance criterion passes",
+    "from": "|| !s.acceptance.length || !s.acceptance.every(nonEmpty)) errs.push(`${at}: needs testable",
+    "to": "|| !s.acceptance.length) errs.push(`${at}: needs testable",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose acceptance criteria are a word throws instead of being reported",
+    "from": "if (!Array.isArray(s.acceptance) || !s.acceptance.length",
+    "to": "if (!s.acceptance.length",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a verified story with blank evidence passes",
+    "from": "s.status === 'verified' && !nonEmpty(s.evidence)",
+    "to": "s.status === 'verified' && s.evidence == null",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose target_rung is above its highest clause passes",
+    "from": "s.target_rung !== top",
+    "to": "s.target_rung < top",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a template story whose on_this_lab note has 1 to 39 characters passes",
+    "from": "s.on_this_lab.trim().length >= MIN_NOTE",
+    "to": "s.on_this_lab.trim().length >= 1",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan's subject axes marked not applicable count toward its cap of 3 product axes",
+    "from": "atlas.axes.some((a) => a.id === k && a.kind === 'product')",
+    "to": "atlas.axes.some((a) => a.id === k)",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan's not applicable reason of 5 to 19 characters passes",
+    "from": "na[k].trim().length < 20",
+    "to": "na[k].trim().length < 5",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan without bindings throws instead of being reported",
+    "from": "if (plan.bindings == null || plan.bindings[k] == null)",
+    "to": "if (plan.bindings[k] == null)",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan's met clause with blank evidence passes",
+    "from": "if (!nonEmpty(ev))",
+    "to": "if (!ev)",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan whose grade level is a word skips every rung of that axis",
+    "from": "if (!g || !Number.isInteger(g.level))",
+    "to": "if (!g)",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template without a key passes, read as the key 'undefined'",
+    "from": "if (!nonEmpty(t.key) || !/^[a-z0-9-]+$/.test(t.key))",
+    "to": "if (!/^[a-z0-9-]+$/.test(t.key))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template key that is kebab-case only at its start passes",
+    "from": "!/^[a-z0-9-]+$/.test(t.key)",
+    "to": "!/^[a-z0-9-]+/.test(t.key)",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template without as_a passes",
+    "from": "for (const k of ['title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(t[k]))",
+    "to": "for (const k of ['title', 'i_want', 'so_that']) if (!nonEmpty(t[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose acceptance criteria are a word throws instead of being reported",
+    "from": "if (!Array.isArray(t.acceptance) || !t.acceptance.length",
+    "to": "if (!t.acceptance.length",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose clauses are a word is not reported",
+    "from": "if (!Array.isArray(t.clauses) || !t.clauses.length) errs.push(`${at}: cites no clause`);",
+    "to": "if (!t.clauses.length) errs.push(`${at}: cites no clause`);",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template citing a product clause at rung 0 passes",
+    "from": "if (hit.rung < 1 || hit.rung > TARGET)",
+    "to": "if (hit.rung > TARGET)",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template with a blank acceptance criterion passes",
+    "from": "|| !t.acceptance.length || !t.acceptance.every(nonEmpty)) errs.push(`${at}: needs acceptance criteria`);",
+    "to": "|| !t.acceptance.length) errs.push(`${at}: needs acceptance criteria`);",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template with one acceptance criterion that has text lets its blank ones pass",
+    "from": "!t.acceptance.every(nonEmpty)) errs.push(`${at}: needs acceptance criteria`);",
+    "to": "!t.acceptance.some(nonEmpty)) errs.push(`${at}: needs acceptance criteria`);",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template acceptance criterion made of spaces passes",
+    "from": "!t.acceptance.every(nonEmpty)) errs.push(`${at}: needs acceptance criteria`);",
+    "to": "!t.acceptance.every((x) => typeof x === 'string' && x.length > 0)) errs.push(`${at}: needs acceptance criteria`);",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose clauses are a word is not reported",
+    "from": "if (!Array.isArray(s.clauses) || !s.clauses.length) errs.push(`${at}: cites no atlas clause`);",
+    "to": "if (s.clauses == null || !s.clauses.length) errs.push(`${at}: cites no atlas clause`);",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a lab story that has the id of a platform story passes",
+    "from": "if (ids.size !== stories.length + platform.length)",
+    "to": "if (new Set(stories.map((s) => s.id)).size !== stories.length)",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose size is not S, M or L passes",
+    "from": "if (!SIZES.includes(s.size))",
+    "to": "if (s.size == null)",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template without i_want passes",
+    "from": "for (const k of ['title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(t[k]))",
+    "to": "for (const k of ['title', 'as_a', 'so_that']) if (!nonEmpty(t[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template without so_that passes",
+    "from": "for (const k of ['title', 'as_a', 'i_want', 'so_that']) if (!nonEmpty(t[k]))",
+    "to": "for (const k of ['title', 'as_a', 'i_want']) if (!nonEmpty(t[k]))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose depends_on is false passes",
+    "from": "if (s.depends_on != null && !Array.isArray(s.depends_on))",
+    "to": "if (s.depends_on && !Array.isArray(s.depends_on))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose depends_on is null is rejected",
+    "from": "if (s.depends_on != null && !Array.isArray(s.depends_on))",
+    "to": "if (s.depends_on !== undefined && !Array.isArray(s.depends_on))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose depends_on is a word has each letter checked as a story id",
+    "from": "for (const d of asList(s.depends_on))",
+    "to": "for (const d of s.depends_on || [])",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose depends_on is false passes",
+    "from": "if (t.depends_on != null && !Array.isArray(t.depends_on))",
+    "to": "if (t.depends_on && !Array.isArray(t.depends_on))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose depends_on is null is rejected",
+    "from": "if (t.depends_on != null && !Array.isArray(t.depends_on))",
+    "to": "if (t.depends_on !== undefined && !Array.isArray(t.depends_on))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose depends_on is a word has each letter checked as a platform story id",
+    "from": "for (const d of asList(t.depends_on))",
+    "to": "for (const d of t.depends_on || [])",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose clauses are a word has each letter checked as a clause id",
+    "from": "for (const c of asList(t.clauses))",
+    "to": "for (const c of t.clauses || [])",
+    "by": "hand"
+  },
+  {
+    "name": "cycles: a story whose depends_on is a number or an object throws in the cycle search",
+    "from": "for (const d of asList(by.get(id)?.depends_on))",
+    "to": "for (const d of (by.get(id)?.depends_on || []))",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a story whose clauses are a word owns that clause in the coverage count",
+    "from": "stories.flatMap((s) => asList(s.clauses))",
+    "to": "stories.flatMap((s) => s.clauses || [])",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a template story whose on_this_lab note has exactly 40 characters fails",
+    "from": "s.on_this_lab.trim().length >= MIN_NOTE",
+    "to": "s.on_this_lab.trim().length > MIN_NOTE",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan's not applicable reason of exactly 20 characters fails",
+    "from": "na[k].trim().length < 20",
+    "to": "na[k].trim().length <= 20",
+    "by": "hand"
+  },
+  {
+    "name": "checkLab: a plan with exactly 3 product axes not applicable fails",
+    "from": "if (naProduct.length > 3)",
+    "to": "if (naProduct.length >= 3)",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose clauses hold a list or an object passes the shape check",
+    "from": "if (!clauses.every((c) => typeof c === 'string'))",
+    "to": "if (!clauses.every((c) => c != null))",
+    "by": "hand"
+  },
+  {
+    "name": "checkStory: a story whose clauses hold a list is also checked clause by clause",
+    "from": "else for (const c of clauses) if (!idx.has(c))",
+    "to": "for (const c of clauses) if (!idx.has(c))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose clauses hold a list or an object passes the shape check",
+    "from": "if (!asList(t.clauses).every((c) => typeof c === 'string'))",
+    "to": "if (!asList(t.clauses).every((c) => c != null))",
+    "by": "hand"
+  },
+  {
+    "name": "checkTemplates: a template whose clauses hold a list is also checked clause by clause",
+    "from": "else for (const c of asList(t.clauses)) {",
+    "to": "for (const c of asList(t.clauses)) {",
+    "by": "hand"
+  },
+  {
+    "name": "scaffold: a template whose clauses are a word throws",
+    "from": "asList(t.clauses).filter(",
+    "to": "(t.clauses || []).filter(",
+    "by": "hand"
+  },
+  {
+    "name": "scaffold: a template whose depends_on is a word is spread into letters",
+    "from": "[...asList(t.depends_on), ",
+    "to": "[...(t.depends_on || []), ",
+    "by": "hand"
+  },
+  {
+    "name": "scaffold: a binding note whose depends_on is a word is spread into letters",
+    "from": "...asList(note.depends_on)]",
+    "to": "...(note.depends_on || [])]",
+    "by": "hand"
+  },
+  {
+    "name": "scaffold: a template whose acceptance criteria are a word is spread into letters",
+    "from": "[...asList(t.acceptance), ",
+    "to": "[...(t.acceptance || []), ",
+    "by": "hand"
+  },
+  {
+    "name": "scaffold: a binding note whose acceptance criteria are a word is spread into letters",
+    "from": "...asList(note.acceptance)]",
+    "to": "...(note.acceptance || [])]",
+    "by": "hand"
+  },
+  {
+    "name": "loadPlans: a repository without the private plans folder reads as zero plans, so the gate passes on nothing",
+    "from": "if (!fs.existsSync(PLANS)) return null;",
+    "to": "if (!fs.existsSync(PLANS)) return { platform: [], labs: [] };",
+    "by": "hand"
+  },
+  {
+    "name": "check: a repository without the private plans prints no NOT_CHECKED line",
+    "from": "{ console.log('NOT_CHECKED: the lab plans are private and absent here'); return; }",
+    "to": "{ return; }",
+    "by": "hand"
+  },
+  {
+    "name": "check: an atlas whose rungs are not split into clauses is checked anyway, with no NOT_CHECKED line",
+    "from": "if (!atlas.axes.every((a) => (a.rungs || []).every((r) => r && Array.isArray(r.clauses)))) { console.log('NOT_CHECKED: the atlas rungs are not split into clauses yet'); return; }",
+    "to": "",
+    "by": "hand"
+  },
+  {
+    "name": "check: check <lab> ignores the lab it names and checks every lab",
+    "from": "loaded.labs.filter((l) => !only || l === only)",
+    "to": "loaded.labs",
+    "by": "hand"
+  },
+  {
+    "name": "check: a repository without labs/levels/atlas.json throws instead of saying NOT_CHECKED",
+    "from": "if (!fs.existsSync(ATLAS)) { console.log('NOT_CHECKED: labs/levels/atlas.json does not exist yet'); return; }",
+    "to": "",
+    "by": "hand"
+  },
+  {
+    "name": "ROOT (top level): the repository root keeps %20 for a space in its path, so no file is found",
+    "from": "const ROOT = path.resolve(path.dirname(SELF), '..');",
+    "to": "const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\\/([A-Za-z]:)/, '$1')), '..');",
+    "by": "hand"
+  }
+]

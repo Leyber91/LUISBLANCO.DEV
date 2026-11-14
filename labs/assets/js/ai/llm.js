@@ -9,8 +9,10 @@
      2. own key      an OpenAI-compatible endpoint and key the visitor
                      typed into the route panel; kept in their browser
                      (localStorage) and sent only to that endpoint
-     3. worker       a proxy URL, if one is ever deployed (config.js
-                     worker.base); empty today, so skipped
+     3. worker       the labs' own keyless route (config.js route.base):
+                     Workers AI behind a Cloudflare Worker, a few requests
+                     a minute per visitor and a shared daily allowance;
+                     a 429 from it falls through to the next route
      4. pollinations text.pollinations.ai, keyless and public. Measured
                      2026-11-11: one reply every 45 seconds per IP
                      (HTTP 402 FREE_LIMIT otherwise), model gpt-oss-20b
@@ -34,16 +36,24 @@
        maxWaitMs: 50000,              // how long to wait for the public
                                       // window (0 = never wait)
        signal,                        // optional AbortSignal
+       model,                         // optional: a model id for this call (local
+                                      // Ollama or own-key routes; the public route
+                                      // serves one model)
      });
      r.text, r.json, r.source ('ollama'|'own-key'|'worker'|'pollinations'|'offline'),
      r.model, r.ms, r.reasoning, r.errors
 
      LLM.onStatus((s) => pill.textContent = s.label);  // s.readyIn: seconds
      LLM.publicReadyIn()   // seconds until the public route can answer
+     LLM.localModels()     // the local model ids, once detected (for per-call model choice)
      LLM.setOwnKey({ base, key, model }) / LLM.clearOwnKey()
    ============================================================ */
 
 import { AI_CONFIG } from './config.js';
+
+// The keyless route for visitors: config.js `route` (the labs' own Cloudflare Worker, workers/model-route). The
+// older `worker` block belongs to provider.js, which speaks a different contract, so it is only a fallback here.
+const ROUTE = AI_CONFIG.route?.base ? AI_CONFIG.route : (AI_CONFIG.worker || {});
 
 const POLL_URL = 'https://text.pollinations.ai/openai';
 const POLL_MODEL = 'openai';             // alias the anonymous tier serves
@@ -51,7 +61,15 @@ const POLL_WINDOW_MS = 46000;            // 45 s per IP, plus a second of slack
 // 127.0.0.1, not localhost: on Windows localhost tries ::1 first and took 1.6 s to connect (2026-11-11).
 const OLLAMA_BASE = 'http://127.0.0.1:11434';
 const OLLAMA_PROBE_MS = 2500;
-const OLLAMA_PREFER = ['qwen2.5:14b', 'llama3.1:8b', 'qwen3:8b', 'gemma2:9b'];
+const OLLAMA_TAGS_MS = 15000;
+const OLLAMA_NUM_CTX = 8192;
+// Preference order for a local model, by a lab-task benchmark on 2026-11-11 (meaning-graph JSON, a grounded
+// description, the bat-and-ball trap; num_ctx 8192; machine shared, so load times are not comparable):
+//   gemma4:e4b    3 of 3, 107 to 131 tokens/s        bonsai-2:9b   3 of 3, 70 to 80 tokens/s, long thinking
+//   qwen3.5:9b    3 of 3, about 47 tokens/s, long thinking
+//   lfm3:1.7b     3 of 3, 130 to 150 tokens/s, 1.1 GB  mimo-v2.6:9b  2 of 3 (fell for the trap)
+//   llama3.1:8b   2 of 3 (wrong JSON fields), about 56 tokens/s
+const OLLAMA_PREFER = ['gemma4:e4b', 'qwen3.5:9b', 'bonsai-2:9b', 'lfm3:1.7b', 'llama3.1:8b', 'qwen3:8b'];
 const DEFAULT_TIMEOUT_MS = 60000;
 const OWN_KEY_STORE = 'lb.llm.ownkey';
 const READY_STORE = 'lb.llm.pollReadyAt'; // shared across lab tabs on this origin
@@ -125,7 +143,7 @@ export function extractJSON(text) {
 class Route {
   constructor() {
     this.listeners = new Set();
-    this.state = { route: 'unknown', model: '', label: 'model: detecting', readyIn: 0 };
+    this.state = { route: 'unknown', model: '', label: 'model: chosen on first use', readyIn: 0 };
     this._detecting = null;
     this._ollamaModel = '';
     this._queue = Promise.resolve();
@@ -149,7 +167,7 @@ class Route {
       route === 'worker' ? `model: ${model} (worker)` :
       route === 'pollinations'
         ? `model: ${model || 'gpt-oss-20b'} via pollinations` + (readyIn > 0 ? ` · next reply in ${readyIn}s` : ' · ready')
-        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: detecting';
+        : route === 'offline' ? `offline: deterministic fallback${note}` : 'model: chosen on first use';
     this.state = { route, model, label, readyIn, note };
     this.listeners.forEach((fn) => { try { fn(this.state); } catch { /* the listener's problem */ } });
     this._scheduleTick();
@@ -187,24 +205,35 @@ class Route {
     this._detecting = (async () => {
       if (isLocalPage()) {
         try {
+          // Liveness from /api/version (answers in milliseconds); the model list from /api/tags can take
+          // several seconds on a loaded machine (1 to 6 s measured 2026-11-11), so it gets its own budget.
           const t = withTimeout(null, OLLAMA_PROBE_MS);
-          const r = await fetch(OLLAMA_BASE + '/api/tags', { signal: t.signal, cache: 'no-store' });
+          const v = await fetch(OLLAMA_BASE + '/api/version', { signal: t.signal, cache: 'no-store' });
           t.done();
-          if (r.ok) {
-            const tags = (await r.json()).models?.map((m) => m.name) || [];
-            const pick = OLLAMA_PREFER.find((m) => tags.includes(m)) || tags[0];
-            if (pick) { this._ollamaModel = pick; this._emit('ollama', pick); return 'ollama'; }
+          if (v.ok) {
+            let tags = [];
+            try {
+              const t2 = withTimeout(null, OLLAMA_TAGS_MS);
+              const r = await fetch(OLLAMA_BASE + '/api/tags', { signal: t2.signal, cache: 'no-store' });
+              t2.done();
+              if (r.ok) tags = (await r.json()).models?.map((m) => m.name) || [];
+            } catch { /* list too slow: fall back to the preferred default */ }
+            this._ollamaTags = tags;
+            const pick = OLLAMA_PREFER.find((m) => tags.includes(m)) || tags[0] || OLLAMA_PREFER[1];
+            this._ollamaModel = pick; this._emit('ollama', pick); return 'ollama';
           }
         } catch { /* no local model */ }
       }
       const own = this.ownKey();
       if (own) { this._emit('own-key', own.model); return 'own-key'; }
-      if (AI_CONFIG.worker?.base) { this._emit('worker', AI_CONFIG.worker.defaultModel); return 'worker'; }
+      if (ROUTE.base) { this._emit('worker', ROUTE.defaultModel); return 'worker'; }
       this._emit('pollinations', 'gpt-oss-20b');
       return 'pollinations';
     })();
     return this._detecting;
   }
+
+  localModels() { return (this._ollamaTags || []).slice(); }
 
   _chain(first) {
     const all = ['ollama', 'own-key', 'worker', 'pollinations'];
@@ -214,11 +243,14 @@ class Route {
   /* ---------- transports ---------- */
   async _ollama(messages, opt, signal) {
     if (!this._ollamaModel) throw new Error('no local model');
+    const model = opt.model || this._ollamaModel;
     const r = await fetch(OLLAMA_BASE + '/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
       body: JSON.stringify({
-        model: this._ollamaModel, messages, stream: false,
-        options: { temperature: opt.temperature ?? 0.7, ...(opt.seed != null ? { seed: opt.seed } : {}) },
+        model, messages, stream: false,
+        // num_ctx: an Ollama app set to a 262k context loads llama3.1:8b at 131k and 21.6 GB of memory
+        // (measured 2026-11-11); 8k is ample for a lab call.
+        options: { temperature: opt.temperature ?? 0.7, num_ctx: OLLAMA_NUM_CTX, ...(opt.seed != null ? { seed: opt.seed } : {}) },
         ...(opt.json ? { format: 'json' } : {}),
       }),
     });
@@ -226,7 +258,10 @@ class Route {
     const j = await r.json();
     const text = j.message?.content || '';
     if (!text.trim()) throw new Error('empty reply');
-    return { text, model: this._ollamaModel, reasoning: j.message?.thinking || '' };
+    const usage = j.eval_count != null
+      ? { prompt_tokens: j.prompt_eval_count ?? null, completion_tokens: j.eval_count, eval_duration_ns: j.eval_duration ?? null }
+      : null;
+    return { text, model: j.model || model, reasoning: j.message?.thinking || '', usage };
   }
 
   /* OpenAI-compatible chat/completions: the visitor's key, or a worker. */
@@ -262,9 +297,9 @@ class Route {
       const r = await fetch(POLL_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
         body: JSON.stringify({
+          // No temperature or seed: the anonymous route serves a reasoning model, and a call carrying
+          // temperature 0.1 and seed 7 came back HTTP 400 (2026-11-11); calls without them succeed.
           model: POLL_MODEL, messages, referrer: 'luisblanco.dev',
-          ...(opt.temperature != null ? { temperature: opt.temperature } : {}),
-          ...(opt.seed != null ? { seed: opt.seed } : {}),
           ...(opt.json ? { response_format: { type: 'json_object' } } : {}),
         }),
       });
@@ -293,7 +328,7 @@ class Route {
   async complete(req) {
     const {
       system, prompt, messages: given, json = false, temperature, seed,
-      signal, timeoutMs = DEFAULT_TIMEOUT_MS, fallback, maxWaitMs = 50000,
+      signal, timeoutMs = DEFAULT_TIMEOUT_MS, fallback, maxWaitMs = 50000, model: wantModel,
     } = req;
     const messages = [];
     if (system) messages.push({ role: 'system', content: system + (json ? '\n\nReply with one JSON object and nothing else.' : '') });
@@ -304,7 +339,7 @@ class Route {
     const errors = [];
     const t0 = performance.now();
     const own = this.ownKey();
-    const wk = AI_CONFIG.worker || {};
+    const wk = ROUTE;
 
     for (const route of this._chain(first)) {
       if (route === 'own-key' && !own) continue;
@@ -313,10 +348,10 @@ class Route {
       const budget = route === 'pollinations' ? timeoutMs + maxWaitMs : timeoutMs;
       const t = withTimeout(signal, budget);
       try {
-        const opt = { temperature, seed, json, maxWaitMs };
+        const opt = { temperature, seed, json, maxWaitMs, model: wantModel };
         const out =
           route === 'ollama' ? await this._ollama(messages, opt, t.signal) :
-          route === 'own-key' ? await this._openaiCompat(own.base, own.key, own.model, messages, opt, t.signal) :
+          route === 'own-key' ? await this._openaiCompat(own.base, own.key, wantModel || own.model, messages, opt, t.signal) :
           route === 'worker' ? await this._openaiCompat(wk.base + '/v1', '', wk.defaultModel, messages, opt, t.signal) :
           await this._pollinations(messages, opt, t.signal);
         t.done();

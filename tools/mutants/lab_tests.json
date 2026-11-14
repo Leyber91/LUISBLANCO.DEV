@@ -1,0 +1,212 @@
+[
+  {
+    "name": "discovery: a file named like a test and not run is not reported",
+    "from": "else if (LOOKS_LIKE_A_TEST.test(words(p))) why",
+    "to": "else if (false) why"
+  },
+  {
+    "name": "discovery: run.mjs counts as a test in any folder",
+    "from": "(name === 'run.mjs' && isTestFolder(path.basename(path.dirname(p))))",
+    "to": "(name === 'run.mjs')"
+  },
+  {
+    "name": "discovery: a folder named test is not a test folder",
+    "from": "/^(tests?|__tests__)$/i",
+    "to": "/^(tests|__tests__)$/i"
+  },
+  {
+    "name": "discovery: a folder named __tests__ is not a test folder",
+    "from": "/^(tests?|__tests__)$/i",
+    "to": "/^(tests?)$/i"
+  },
+  {
+    "name": "discovery: a test folder is recognised only in lower case",
+    "from": "/^(tests?|__tests__)$/i",
+    "to": "/^(tests?|__tests__)$/"
+  },
+  {
+    "name": "discovery: a word that only contains a test word reads as a test",
+    "from": "/(^|[-_.])(tests?|specs?|verify|selftest|self-test|checks?|gates?|audits?)\\d*([-_.]|$)/i",
+    "to": "/(tests?|specs?|verify|selftest|self-test|checks?|gates?|audits?)/i"
+  },
+  {
+    "name": "discovery: the word test is not a test word",
+    "from": "(tests?|specs?|verify|",
+    "to": "(specs?|verify|"
+  },
+  {
+    "name": "discovery: the word spec is not a test word",
+    "from": "(tests?|specs?|verify|",
+    "to": "(tests?|verify|"
+  },
+  {
+    "name": "discovery: the word verify is not a test word",
+    "from": "|specs?|verify|selftest|",
+    "to": "|specs?|selftest|"
+  },
+  {
+    "name": "discovery: selftest and self-test are not test words",
+    "from": "|verify|selftest|self-test|checks?|",
+    "to": "|verify|checks?|"
+  },
+  {
+    "name": "discovery: the word check is not a test word",
+    "from": "|self-test|checks?|gates?|",
+    "to": "|self-test|gates?|"
+  },
+  {
+    "name": "discovery: the words gate and audit are not test words",
+    "from": "|checks?|gates?|audits?)",
+    "to": "|checks?)"
+  },
+  {
+    "name": "discovery: a dash before the word does not separate it",
+    "from": "/(^|[-_.])(tests?",
+    "to": "/(^|[_.])(tests?"
+  },
+  {
+    "name": "discovery: a dot before the word does not separate it",
+    "from": "/(^|[-_.])(tests?",
+    "to": "/(^|[-_])(tests?"
+  },
+  {
+    "name": "discovery: an underscore after the word does not separate it",
+    "from": "\\d*([-_.]|$)/i",
+    "to": "\\d*([-.]|$)/i"
+  },
+  {
+    "name": "discovery: a capital letter hides the word",
+    "from": "\\d*([-_.]|$)/i;",
+    "to": "\\d*([-_.]|$)/;"
+  },
+  {
+    "name": "discovery: digits after the word hide it",
+    "from": "audits?)\\d*([-_.]|$)",
+    "to": "audits?)([-_.]|$)"
+  },
+  {
+    "name": "discovery: camelCase names are not split",
+    "from": ".replace(/([a-z0-9])([A-Z])/g, '$1-$2');",
+    "to": ";"
+  },
+  {
+    "name": "discovery: an acronym before the word hides it",
+    "from": ".replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')",
+    "to": ""
+  },
+  {
+    "name": "discovery: a .cjs file is not a Node file",
+    "from": "const isNode = (p) => p.endsWith('.mjs') || p.endsWith('.cjs');",
+    "to": "const isNode = (p) => p.endsWith('.mjs');"
+  },
+  {
+    "name": "discovery: browser modules are reported as tests that did not run",
+    "from": "const isNode = (p) => p.endsWith('.mjs') || p.endsWith('.cjs');",
+    "to": "const isNode = (p) => true;"
+  },
+  {
+    "name": "discovery: files named <name>.test.mjs are not run",
+    "from": "name.endsWith('.test.mjs') || ",
+    "to": ""
+  },
+  {
+    "name": "discovery: check.mjs is not run",
+    "from": "'self-test.mjs', 'check.mjs']);",
+    "to": "'self-test.mjs']);"
+  },
+  {
+    "name": "discovery: verify.mjs is not run",
+    "from": "'test.mjs', 'verify.mjs', 'selftest.mjs',",
+    "to": "'test.mjs', 'selftest.mjs',"
+  },
+  {
+    "name": "discovery: a test folder where nothing runs is not reported",
+    "from": "if (!runnerUnder.get(folder)) why = 'sits in a test folder where nothing runs';",
+    "to": ""
+  },
+  {
+    "name": "discovery: a helper beside a runner is reported for its name",
+    "from": "} else if (LOOKS_LIKE_A_TEST.test(words(p))) why = 'named like a test and not run';",
+    "to": "}\n    if (!why && LOOKS_LIKE_A_TEST.test(words(p))) why = 'named like a test and not run';"
+  },
+  {
+    "name": "excuse: a reason of any length excuses a file",
+    "from": "if (why && why.length >= 20) return why;",
+    "to": "if (why) return why;"
+  },
+  {
+    "name": "excuse: padding counts toward the reason",
+    "from": "const why = m && m[1].trim();",
+    "to": "const why = m && m[1];"
+  },
+  {
+    "name": "excuse: a declaration anywhere in the file excuses it",
+    "from": ".split(/\\r?\\n/).slice(0, 12); }",
+    "to": ".split(/\\r?\\n/); }"
+  },
+  {
+    "name": "excuse: a string in code counts as a declaration",
+    "from": "/^\\s*(?:\\/\\/|\\/\\*+|\\*)\\s*lab_tests: not a test \\((.+)\\)\\s*(?:\\*\\/)?\\s*$/",
+    "to": "/lab_tests: not a test \\((.+)\\)/"
+  },
+  {
+    "name": "excuse: a declared file still fails the gate",
+    "from": "if (reason) excused.push({ file: p, why: reason }); else missed.push({ file: p, why });",
+    "to": "missed.push({ file: p, why });"
+  },
+  {
+    "name": "run: a missed file is printed and does not fail the gate",
+    "from": "  for (const m of missed.filter((x) => inLab(x.file))) {\n    fail++;",
+    "to": "  for (const m of missed.filter((x) => inLab(x.file))) {"
+  },
+  {
+    "name": "run: a failing test does not fail the gate",
+    "from": "    if (!ok) fail++;",
+    "to": ""
+  },
+  {
+    "name": "run: a test that exits non-zero counts as passed",
+    "from": "const ok = r.status === 0 && !r.error;",
+    "to": "const ok = !r.error;"
+  },
+  {
+    "name": "run: the exit code is always 0",
+    "from": "  return fail ? 1 : 0;\n}\n\nfunction selftest() {",
+    "to": "  return 0;\n}\n\nfunction selftest() {"
+  },
+  {
+    "name": "run: a lab name that matches no folder passes",
+    "from": "if (only && !labs.includes(only)) { say(`lab_tests: no folder labs/assets/js/${only}`); return 2; }",
+    "to": ""
+  },
+  {
+    "name": "run: with one lab named, another lab's missed file fails it",
+    "from": "for (const m of missed.filter((x) => inLab(x.file))) {",
+    "to": "for (const m of missed) {"
+  },
+  {
+    "name": "run: with one lab named, every lab's tests run",
+    "from": "const files = findTests(JS).filter(inLab);",
+    "to": "const files = findTests(JS);"
+  },
+  {
+    "name": "run: a missing labs folder passes with nothing run",
+    "from": "does not exist, so nothing was run`); return 1; }",
+    "to": "does not exist, so nothing was run`); return 0; }"
+  },
+  {
+    "name": "run: a test does not run from its own folder",
+    "from": "{ cwd: path.dirname(f), encoding: 'utf8', timeout: limit,",
+    "to": "{ encoding: 'utf8', timeout: limit,"
+  },
+  {
+    "name": "run: a test has no time limit",
+    "from": "timeout: limit, maxBuffer",
+    "to": "maxBuffer"
+  },
+  {
+    "name": "run: a test that prints a lot is failed for it",
+    "from": ", maxBuffer: 64 * 1024 * 1024 }",
+    "to": " }"
+  }
+]

@@ -1,0 +1,138 @@
+{
+ "items": [
+  {
+   "project": "en.wikipedia",
+   "access": "all-access",
+   "year": "2026",
+   "month": "11",
+   "day": "10",
+   "articles": [
+    {
+     "article": "Main_Page",
+     "views": 3990822,
+     "rank": 1
+    },
+    {
+     "article": "Ramayana:_Part_1",
+     "views": 840888,
+     "rank": 2
+    },
+    {
+     "article": "Special:Search",
+     "views": 807054,
+     "rank": 3
+    },
+    {
+     "article": "Wikipedia:Featured_pictures",
+     "views": 563755,
+     "rank": 4
+    },
+    {
+     "article": "Russell_Brand",
+     "views": 545717,
+     "rank": 5
+    },
+    {
+     "article": "Jensen_Huang",
+     "views": 542553,
+     "rank": 6
+    },
+    {
+     "article": "David_Walliams",
+     "views": 512804,
+     "rank": 7
+    },
+    {
+     "article": ".xxx",
+     "views": 213618,
+     "rank": 8
+    },
+    {
+     "article": "Thomas_Massie",
+     "views": 166628,
+     "rank": 9
+    },
+    {
+     "article": "SS_Edmund_Fitzgerald",
+     "views": 163598,
+     "rank": 10
+    },
+    {
+     "article": "Carson_Wentz",
+     "views": 158702,
+     "rank": 11
+    },
+    {
+     "article": "Scene_(2026_film)",
+     "views": 143180,
+     "rank": 12
+    },
+    {
+     "article": "Lara_Stone",
+     "views": 139117,
+     "rank": 13
+    },
+    {
+     "article": "Deaths_in_2026",
+     "views": 138565,
+     "rank": 14
+    },
+    {
+     "article": "Kirk_Cousins",
+     "views": 136900,
+     "rank": 15
+    },
+    {
+     "article": "Pete_Hegseth",
+     "views": 127687,
+     "rank": 16
+    },
+    {
+     "article": "Nvidia",
+     "views": 123851,
+     "rank": 17
+    },
+    {
+     "article": "List_of_highest-grossing_Indian_films",
+     "views": 122614,
+     "rank": 18
+    },
+    {
+     "article": "Abdul_El-Sayed",
+     "views": 119560,
+     "rank": 19
+    },
+    {
+     "article": "Godzilla_Minus_Zero",
+     "views": 107366,
+     "rank": 20
+    },
+    {
+     "article": "Jemima_Goldsmith",
+     "views": 96742,
+     "rank": 21
+    },
+    {
+     "article": "Survivor_Series:_WarGames_(2026)",
+     "views": 82896,
+     "rank": 22
+    },
+    {
+     "article": "2026_United_States_elections",
+     "views": 82516,
+     "rank": 23
+    },
+    {
+     "article": "Adrian_Peterson",
+     "views": 82217,
+     "rank": 24
+    },
+    {
+     "article": "The_End_of_Everything_(Harrison_novel)",
+     "views": 80691,
+     "rank": 25
+    }
+   ]
+  }
+ ]
+}

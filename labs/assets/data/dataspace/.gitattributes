@@ -1,0 +1,3 @@
+# Byte-exact data: alice29.txt is CRLF in the Canterbury Corpus and the compressor checks
+# are measured on those exact 152,089 bytes. No line-ending conversion here.
+* -text

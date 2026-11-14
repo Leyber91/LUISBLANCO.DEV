@@ -26,6 +26,10 @@
         "G0": {
           "level": 1,
           "evidence": "Rung 1: USER_PROMPT() puts every input into the model prompt and PlanView._meta() shows them as labels. Rung 2 fails: chooseSplit() and exerciseCount() are lookup tables, but at 90 min exerciseCount() returns 6 from 5-lift day pools and buildPlan() tops up from POOL.full, so with no constraint entered (3 days, intermediate, run in Node 2026-11-11) Back Squat sits on the Push and Pull days and Barbell Bench Press on Legs (gym), DB Goblet Squat on Push and Pull and DB Bench Press on Legs (dumbbells), Bodyweight Squat on Push and Pull and Push-Up on Legs (bodyweight). Rung 3 would fail too: CONSTRAINT_RULES are bare regexes, so 'back from holiday' and 'back on Monday' ban 4 lifts each and 'no knee problems' bans 8 (Node, 2026-11-11), and the ?demo plan ('dodgy left knee') puts Barbell Bench Press and Barbell Row on both Lower days while the caveat claims 'swapped for hip-hinge and box-height work'. No time estimate; sessions run Mon, Tue, Wed, Thu in a row."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Undisputed; rater's grade kept. Rung 1-2: Planner.js buildPlan() chooses the split from SPLITS[family][n], where n = min(marked days, the FREQ[family][level] maximum), then fills sessions inside a minutes budget. With no constraint entered, the rater's Node sweep (4 goals x 3 levels x 1-6 days x 30/45/60/75/90 min x 3 kits, 2026-11-11) put 0 of 74,832 lifts outside the Push/Pull/Legs/Upper/Lower focus rows; the five fixed sets A-E (D run as general, hypertrophy and endurance, as the form has no fat-loss goal) gave 0 banned lifts, 0 equipment breaks, 0 focus breaks and 0 sessions over the cap. Rung 3 fails: notes.js parseNotes() bans nothing for the four fixed phrases or for 'knees are fine now', but only the back rule requires an injury word; the knee, shoulder and wrist rules fire on the bare joint word, so 'shoulder day is my favourite' sets the shoulder flag (seated dumbbell shoulder press swapped out) and 'knee sleeves help my squat' sets the knee flag (back squat, Bulgarian split squat and leg press swapped out). Above the failed rung (does not count): no focus table on the page, and in set C the shoulder flag replaces standing overhead press (vertical push) with push-up on fists (horizontal push), 7,472 such pattern changes in the flag sweep; per-lift slotCost(), day minutes shown, accessories trimmed to the cap, a 'Forced conflict' log entry; greedy water-fill allocation with no backtracking."
         }
       }
     },
@@ -51,6 +55,10 @@
         "G0": {
           "level": 1,
           "evidence": "constants.js DOSE gives every lift a static RPE ('8' or '7') with sets and a rep range; LocalCoach.buildPlan() copies them onto each exercise: rung 1. Rung 2 fails: nothing multiplies or sums them. No hard-set count, session load, weekly load or fitness-fatigue term exists in any workout-plans module, and the lab has no tests."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Undisputed; rater's grade kept. Rung 1: each lift's RPE comes from lookup tables (BASE_RPE[goal] + WEEK_SHAPE rpeAdd) in Planner.expandWeek(). Rung 2 fails: PlanView.renderGlossary() defines a hard set as 'a prescribed working set, RPE 6 or above', not RPE 7+, and every count ignores RPE: the day card 'N sets', the session meta 'N hard sets', the block 'sets' column and weeklyVolume() all sum every prescribed set. Settlement check (Node, buildPlan, 2026-11-11): a general-goal 4-day plan's deload week 4 prescribes sets at RPE 5/5.5, and renderSession() prints '11 hard sets' for that Monday; the default plan's deload Monday shows '10 hard sets' at RPE 6. Both are 0 hard sets by the ladder. Above the failed rung (does not count): LoadModel.sessionLoad() = RPE x minutes, but the set-RPE to session-RPE rule (SESSION_RPE_OFFSET -1) is not printed; monotony and strain reproduced by test 3; Banister and Busso with parameters and sources in panel 09; logged RPE and minutes replace planned load, but completed sets cannot be logged; the 10% rise flag labelled contested; nothing fitted. test/planner.test.mjs: 8,351,171 checks passing (rater's run)."
         }
       }
     },
@@ -76,6 +84,10 @@
         "G0": {
           "level": 1,
           "evidence": "LocalCoach.buildPlan() returns one week (a split of 2 to 6 days), and PlanView._foot() prints PROGRESSION.strength / PROGRESSION.default and DELOAD_TEXT ('Every 4th-6th week, cut sets ~40%...') as text in .plan-foot: rung 1. Rung 2 fails: no second week exists, so nothing progresses numerically and no log can re-plan."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Undisputed; rater's grade kept. Rungs 1-2: weekShapes() builds blocks of 6, 8 or 12 weeks, each week expanded with its own sets x reps and RPE; default plan W1 5x6-8@7, W2 5x6-8@7.5, W3 6x6-8@8, W4 deload 3x6-8@6. Rung 3 fails: the week-to-week rule (WEEK_SHAPE.buildVol 0.9/1.0/1.1 and buildRpe +0/+0.5/+1.0) is stated nowhere on the page (D6 gives only the rep-zone rotation or step, D7 only the deloads), and in block mode (strength, advanced, 12 weeks) weeks 1-5 carry identical prescriptions, so not every week differs from the last by a stated rule. Above the failed rung (does not count): a deload every 4th week with '40% less volume' (RPE drop not stated); a scheme selector with no table of its numbers; no kg loads or e1RM; replan() R2 repeats a week after 2 misses and R5 holds or adds sets after hard or easy logs, with the rule shown per lift."
         }
       }
     },
@@ -101,6 +113,10 @@
         "G0": {
           "level": 2,
           "evidence": "PlanView.renderPlan() draws the summary line, the meta tags and one .day card per session (day name, focus, minutes; each lift with '5 x 3-5 . RPE 8' from _dose()): rung 2 (?demo capture at 1440 px, 2026-11-11). Rung 3 fails: sessions are labelled Mon to Thu in a single column with no rest days drawn and no hard-set total; no chart of any kind. The audit screenshot without ?demo shows an empty output panel with three dots until the button is pressed."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; both skeptic disputes hold (rater claimed 2). Rung 1: the plan renders on the page as text (week cards, the session table, the decision log). Rung 2 fails: PlanView.renderWeek() fills each #days7 .dc card with only the day name, the session name, 'N min · N sets', the AU figure, a load bar and a log mark; no day card lists a lift. Lifts with 'sets x reps' and 'RPE (RIR)' appear only in renderSession()'s single #ss-body table for the one selected day, and renderPrint() builds the full lift list only on beforeprint into the aria-hidden #print node, so it is not on screen. Master-detail shows one day's lifts at a time; it is not one card per training day listing its lifts. Above the failed rung (does not count): the Mon-Sun strip with rest slots, but card totals count every prescribed set regardless of RPE (deload '10 sets' at RPE 6); charts.js LoadChart session-load bars in AU, fitness/fatigue/form curves, renderBlock() one row per week with phase, AU and sets, one shared selection, planned ghost against logged fill with 'X / Y AU'; re-plans not animated."
         }
       }
     },
@@ -126,6 +142,10 @@
         "G0": {
           "level": 0,
           "evidence": "POOL entries in constants.js are bare exercise names with no muscle data. Each .day card shows only its split label (Upper, Lower, Push, Pull, Legs, Full Body A) from SPLIT_RULES, which names no muscle. No per-muscle data exists anywhere in the lab."
+        },
+        "G1": {
+          "level": 0,
+          "evidence": "Settled at 0; the skeptic disputes hold (rater claimed 1). Rung 1 is half met. library.js carries primary and secondary muscles (p/s) on all 67 nodes, but the rung also requires each day card to list the muscles it trains, and PlanView.renderWeek() puts no muscle on any #days7 .dc card (day name, session name, minutes and sets, AU, bar, log mark only). The only per-day muscle list is the 'trains' column of the one selected session's table (renderSession(), EX[it.ex].p, primary only), and workout-plans.css hides it under the max-width 560px query (.ex th:nth-child(5), .ex td:nth-child(5) { display: none; }), so at phone width no per-day muscle list exists. The body map's gold outline is a shape for the selected session, not a list on a day card. Above the failed rung (does not count): #mbars per-muscle table summing every prescribed set rather than hard sets (deload week 4: chest 5, lats 9, glutes 10 at RPE 6); bodymap.js 17-region front and back SVG on a labelled scale, 0.5 secondary weighting, Schoenfeld 2017 target bands, hatched joint markers listing avoided lifts, recovery view, planned ghost marks."
         }
       }
     },
@@ -151,6 +171,10 @@
         "G0": {
           "level": 3,
           "evidence": "workout-plans.css uses tokens.css variables (--void, --accretion, --horizon, --font-display/body/mono), and its .panel is var(--surface) fill, 1px var(--line) border, var(--r-lg) radius, the same tokens as .panel in trending.css and memes.css: rung 2. .ex-dose prints '5 x 3-5 . RPE 8' in var(--font-mono), right-aligned on every card, and minutes read '60 min' (?demo capture): rung 3. Rung 4 fails: the header comment states 'WARM accretion = active / generate / live energy', but it is not kept: .day-name is var(--accretion) at rest, as are the 'Plans' heading (.intro h1 .x), the eyebrow icon and the .day hover border. The 1440 px audit screenshot shows a blank output panel at rest."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Undisputed; rater's grade kept. Rung 1: a dark void background, with amber on the pressed chips and on the 'ask the model to narrate' action. Rung 2 fails: the lab dropped the site's .panel card (var(--surface) fill, 1px var(--line) border, var(--r-lg) radius, as trending.css and memes.css define it) for a lab-local .plate with background var(--panel) = rgba(11,14,19,.72), border 1px var(--hair) = rgba(159,179,214,.14) and no radius. Above the failed rung (does not count): one dose format with units (rung 3 content); the stated gold rule broken at rest by the .kick eyebrow, the .bp corner brackets, the .lb-q label 'THE WEEK YOU ACTUALLY HAD', .gloss dt, .params .pk and .eq b, all --accretion or --accretion-soft at rest (the kick eyebrow and corner brackets are amber at rest in the 2026-11-11 shoot desk.png); two idle loops at rest (11 s infinite .lc-form.trace and 2.6 s infinite .lc-halo); print sheet with per-set boxes for reps and load but RPE only per session."
         }
       }
     },
@@ -176,6 +200,10 @@
         "G0": {
           "level": 3,
           "evidence": "#plan-form holds goal, days, minutes, level and equipment selects and a free-text #constraints input; submit runs PlanController.generate(): rung 2. #stop calls AbortController.abort(); provider.js _ollama() passes the signal to fetch, so on localhost with Ollama the in-flight call is cut, extractPlan() then gets no parseable JSON and LocalCoach.buildPlan() renders (code read 2026-11-11, not run against a live Ollama in this review): rung 3. On the public site (echo tier) there is never an in-flight model call; Stop only cuts the scripted type-out. Rung 4 fails: the 1440 px audit screenshot shows an empty output panel until the button is pressed, and changing an input does nothing until resubmit. No edits, log, URL state or export."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Undisputed; rater's grade kept. Rungs 1-2: the #ctl chips (goal, level, weekdays, minutes, equipment, flags, weeks, scheme) and the #notes text produce the plan; live solving replaces the submit button. Rung 3: #nr-stop calls AbortController.abort(), and llm.js passes the signal to fetch and to the public-window sleep; in the rater's CDP run, narrate then stop returned the source label to 'planner narration, no model', #announce read 'Narration stopped. The planner narration stands.', and the day cards were unchanged. Rung 4 fails: a computed plan is on screen at load (2026-11-11 shoot desk.png) and the chips re-solve in 13-24 ms, but PlanView.buildControls() debounces the notes textarea by 220 ms and the measured re-solve came 240 ms after the input event, over the 200 ms the rung allows. Above the failed rung (does not count): swaps re-checked through pins (renderSwap) but no drop-session or move-session edit; a per-session log (as planned / harder / easier / missed, session RPE, minutes) with no per-lift sets, reps or load; replan() lists the rule that fired; the URL hash encodes inputs, pins and log."
         }
       }
     },
@@ -201,6 +229,10 @@
         "G0": {
           "level": 1,
           "evidence": "constants.js POOL hand-lists 48 unique exercises (counted in Node 2026-11-11) keyed by equipment and split-day label (push, pull, legs, upper, lower, full), and DOSE gives sets, reps and RPE per goal: rung 1. Rung 2 fails: under 60 exercises and not grouped by movement pattern. DELOAD_TEXT and PROGRESSION are bare sentences; no muscle or joint fields, and no source, dataset or licence anywhere in the code or on the page."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; both skeptic disputes hold, and the lowest supported level is taken (rater claimed 4). Rung 1: exercise names and dose tables are hardcoded in script (library.js nodes; constants.js REPS, BASE_RPE, VOLUME). Rung 2 fails: the rung's pattern list includes carry, and library.js PATTERNS has none (squat, hinge, lunge, kneeflex, calf, hpush, vpush, hpull, vpull, elbowflex, elbowext, latraise, reardelt, core, cardio); a Node count of the 67 unique nodes on 2026-11-11 finds 0 carry nodes, a grep for carry/farmer/suitcase finds no exercise, and openlib.js admits only strength/powerlifting rows through a FORCE map with no carry, so no carry lift can reach a plan. Equipment is a per-node equip field, not a grouping. Rung 4 fails independently: #libcred (PlanView.js) reads that the 876 free-exercise-db rows are 'used in the swap menu. The planner's own choices come from 67 curated nodes', so the library that solves the plan is hand-written, not the named dataset. Above the failed rung (does not count): p/s muscles, equip items and knee/spine/shoulder/wrist/impact flags on every node; free-exercise-db with licence and commit on the page; edgeReason() per substitution edge; INJURIES rules name their attribute; JSON, CSV and .ics export and JSON import; Schoenfeld 2017 cited, ACSM 2009 not tied to rep and intensity ranges."
         }
       }
     },
@@ -226,6 +258,10 @@
         "G0": {
           "level": 1,
           "evidence": "PlanService streams through AIProvider from labs/assets/js/ai/provider.js (tiers ollama, worker, echo). On localhost a local Ollama answers (the audit screenshot's LOCAL pill; llama3.1:8b in config.js), its stream shows in #reasoning-body, and whenever extractPlan() returns null (no JSON, a parse error, or Stop) PlanController.generate() renders LocalCoach.buildPlan(): rung 1. Rung 2 fails: it uses provider.js, not llm.js, and AI_CONFIG.worker.base is '', so on the public site detect() returns 'echo' and no model is called. extractPlan() accepts any JSON with a non-empty split array, with no check of day count, minutes, equipment or banned lifts."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; the skeptic dispute holds (rater claimed 3). Rung 1: PlanService.narrateWithModel() calls LLM.complete() with LocalCoach.narrate() as fallback, so the planner narration renders when the call fails or is stopped, and a stubbed local reply renders through renderNarration() as '<model> via <route>'. Rung 2 fails: the public keyless route never returns model output for this lab's call. Reproduced from Node on 2026-11-11 with the exact messages PlanService builds (NARRATE_SYSTEM plus the JSON suffix, NARRATE_USER over allDecisions, response_format json_object, temperature 0.3, model alias 'openai'): the default plan (18-entry log) came back HTTP 200 with finish_reason 'length' and 1,500 completion tokens, content cut at '{\"narration\":[{\"say\":\"The plan schedules four sessions a week on Monday', which llm.js extractJSON() cannot parse ('reply was not JSON', falls to offline); the smallest plan tried (general, beginner, 2 days, 30 min, bodyweight, 14-entry log) came back HTTP 400 output_token_limit_exceeded. The lab asks for 5-8 sentences over the whole log and sets no output cap or reasoning limit, and gpt-oss-20b's reasoning spends the budget. The rater's own CDP run also ended in 'no model route answered'. A public visitor without their own key therefore never sees model output, and no answering route or model is ever named next to output. Above the failed rung (does not count): the 46 s window countdown and one call per press; LocalCoach.check() tests only number and lift-name presence; the planner/model role split is labelled; test 5's 10 recorded llama3.1:8b narrations with 4 of 97 sentences unmatched."
         }
       }
     },
@@ -251,6 +287,10 @@
         "G0": {
           "level": 1,
           "evidence": "h1 and .lede present: rung 1. Rung 2 fails: the meta description says 'Powered by Nemotron-3-Ultra', the footer 'Reasoning by Nemotron-3-Ultra', #resting promises 'a hosted Nemotron relay', and the lede promises 'a reasoning model think through the trade-offs out loud', yet AI_CONFIG.worker.base is '' and the public page runs LocalCoach; in ?demo, PlanView.showDemoReasoning() labels LocalCoach.buildReasoningScript() output with REASON_LABEL.worker 'Nemotron-3-Ultra · reasoning'. The footer's not-medical-advice line and #ai-status / #backend-note exist but sit above the failed rung. No red-flag screening, no per-choice reasons."
+        },
+        "G1": {
+          "level": 1,
+          "evidence": "Settled at 1; the skeptic dispute holds (rater claimed 3). Rung 1: the h1 and the .sub lede. Rung 2 fails: a model is named before any model answered. PlanController mounts mountRoutePanel(#route), which calls LLM.detect(); on a non-local page detect() probes nothing and emits pollinations 'gpt-oss-20b' unconditionally, and the 2026-11-11 shoot desk.png and phone.png both read 'model: gpt-oss-20b via pollinations · ready' at load with no narration requested. That route does not answer this lab's call (see model-grounding), so 'ready' is neither detected nor true. Copy also contradicts the code on hard sets: renderGlossary() defines a hard set as 'RPE 6 or above', yet a general-goal plan's deload week 4 prescribes sets at RPE 5/5.5 (Node, buildPlan) and renderSession() prints '11 hard sets', with the day-card aria-labels also saying 'N hard sets'. Above the failed rung (does not count): the default narration labelled 'planner narration, no model'; 'Not medical advice' in .care and the footer; the notes.js RED_FLAGS pause with its does-not-diagnose line (no PAR-Q+ questions); decision-log reasons, a glossary with units, a 6-step tour, [real]/[illustrative]/[contested] tags and a +-50% tau sensitivity plot."
         }
       }
     },
@@ -276,6 +316,10 @@
         "G0": {
           "level": 1,
           "evidence": "Loads and renders the form at desktop width: rung 1. Rung 2 fails: .bench stacks to one column under 860 px with no horizontal scroll, but the Experience select clips 'Intermediate' to 'Intermedia' in the 1440 px audit screenshot and at a true 400 px viewport (iframe capture of ?demo, 2026-11-11), because .field-row keeps grid-template-columns 1fr 1fr at every width (the 860 px media query only collapses .bench), leaving about 140 px per select inside the 360 px input panel. The reduced-motion CSS block and provider.js reduced() exist but sit above the failed rung, and #reasoning-body is aria-live='polite' and receives the stream fragment by fragment."
+        },
+        "G1": {
+          "level": 3,
+          "evidence": "Undisputed; rater's grade kept. Rung 1: the page loads; the 2026-11-11 shoot reported 0 console messages and 0 errors, and desk.png and phone.png both render the full page. Rung 2: at a true 400 px CDP viewport documentElement.scrollWidth is 400, the layout stacks to one column, and no text element overflows or clips; the session table hides its 'trains' column below 560 px and the substitution graph scrolls inside .gv-wrap (overflow-x:auto). Rung 3: with reduced motion emulated, body.still is set, document.getAnimations() is empty, transitions compute to 0s and the tour does not start; no text types out. Rung 4 fails: Tab reaches every chip with a 2px horizon outline, but changing equipment or minutes alters none of the six live regions, so the re-solved plan is never announced (#ctl-sum changes only when sessions, days, scheme or weeks change), and axe 4.10.2 reports nested-interactive (serious) on the body-map svg role=img containing focusable joint buttons. Above the failed rung (does not count): 0 axe colour-contrast violations but 508 nodes incomplete, rest-day labels at 2.61:1 with ancestor opacity applied; a 12-week build plus re-plan in 3.5-10.9 ms under 4x CPU throttle."
         }
       }
     },
@@ -301,11 +345,16 @@
         "G0": {
           "level": 3,
           "evidence": "Seven ES modules under labs/assets/js/workout-plans/: LocalCoach.js (pure planner, no DOM), PlanService.js (model layer), PlanView.js (every DOM touch), PlanController.js, constants.js (tables, selectors, prompts), dom.js, main.js: rung 3. Rung 4 fails: PlanService imports AIProvider from ../ai/provider.js, not llm.js, and constants.js hardcodes MODEL.reasoningModel 'nvidia/nemotron-3-ultra-550b-a55b'. No tests exist for the lab."
+        },
+        "G1": {
+          "level": 2,
+          "evidence": "Undisputed; rater's grade kept. Rungs 1-2: the logic sits in ES modules under labs/assets/js/workout-plans/ with a named function per concern (Planner.buildPlan/replan, LoadModel.runModel, PlanService.narrateWithModel, PlanView.render*, charts/bodymap/graphview). Rung 3 fails on two counts: the view does not own every DOM touch (PlanController.js sets textContent on #body-wk, #rl1-#rl4, #body-note and #bm-detail in update() and writeBodyDetail(), drives the tour bar (#tourbar, #tour-n, #tour-t) and #nr-local.hidden, and builds a download <a>), and constants.js holds tables and prompts but no selectors, which sit inline in the controller and views. Above the failed rung (does not count): model calls through ai/llm.js with no hardcoded endpoint or model; buildPlan() pure, returning the plan plus a decision log read by the view and NARRATE_USER; test/planner.test.mjs sweeps 9,720 combinations plus 1,000 random sets, 8,351,171 checks passing in the rater's run, skipping the 45 and 75 min options; no planner CLI."
         }
       }
     }
   ],
   "history": [
-    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+    { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "eaa9a98" }
   ]
 }
