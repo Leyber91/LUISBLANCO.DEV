@@ -65,9 +65,9 @@ export const CATEGORIES = [
     icon: 'fa-solid fa-infinity',
     intro: 'The narrative multiverse.',
     projects: [
-      { id: 'heptapod', title: 'Heptapod Codec', status: 'built',
+      { id: 'heptapod', title: 'Heptapod: The Pod', status: 'built',
         href: 'heptapod.html',
-        blurb: 'An original semasiographic script on the idea of Ted Chiang’s Story of Your Life: a whole proposition is one ring, solved as one curve and written all at once; a pixel decoder reads it back until you break it with ink.' },
+        blurb: 'One being behind a wall of glass writes each whole thought as one ring, and there is no dictionary. For one day you build the decoder by pointing at shared things; in the evening six rings show how much of it you built. The script’s solver and its pixel reader are on the bench page.' },
       { id: 'timeline', title: 'Interactive Timeline', status: 'planned',
         blurb: 'A navigable timeline of the Tryverse — branch points, dimensions and the people inside them.' },
       { id: 'last-witness', title: 'Time-Slip: The Last Witness', status: 'beta',

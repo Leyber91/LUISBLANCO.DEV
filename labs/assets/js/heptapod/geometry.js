@@ -124,7 +124,9 @@ export function sequentialRing(lam, tgt, startDeg) {
 
 /* ---------------- 4. a proposition's spec ---------------- */
 
-function ringTargets(p, lay, refs = {}) {
+/* codeOf(role, concept): a writer with its own lexicon (the pod's species) supplies the six cells
+   of each sector itself; without it the codes come from this lab's lexicon. */
+function ringTargets(p, lay, refs = {}, codeOf = null) {
   const lam = new Float64Array(M), tgt = new Float64Array(M).fill(1), wmul = new Float64Array(M).fill(1);
   const cells = [];
   const P = GEOM.SOLVE.plateau;
@@ -134,7 +136,8 @@ function ringTargets(p, lay, refs = {}) {
     const ent = role === 'pred' ? null : p[role];
     const clause = ent && ent.type === 'prop';
     const ref = !clause && refs[role];
-    const code = role === 'pred' ? VERB[p.pred].code : clause ? new Array(GEOM.CELLS).fill(0) : ref ? REF[ref].code : NOUN[ent.c].code;
+    const code = codeOf ? codeOf(role, role === 'pred' ? p.pred : ent)
+      : role === 'pred' ? VERB[p.pred].code : clause ? new Array(GEOM.CELLS).fill(0) : ref ? REF[ref].code : NOUN[ent.c].code;
     cellCenters(sec).forEach((c, j) => {
       for (let d = -P; d <= P; d++) {
         const i = mod(Math.round(c) + d, M);
@@ -174,7 +177,7 @@ export function propSpec(p, frame = { cx: 0, cy: 0, rho: 1 }, depth = 0, opts = 
   const present = { agent: !!p.agent, patient: !!p.patient, recipient: !!p.recipient };
   const lay = layoutFor(present, occupancy(p), { natural: !!opts.sequential });
   const refs = opts.refs || {};
-  const { lam, tgt, wmul, cells } = ringTargets(p, lay, refs);
+  const { lam, tgt, wmul, cells } = ringTargets(p, lay, refs, opts.codeOf || null);
   let r, seq = null;
   if (opts.sequential) {
     seq = sequentialRing(lam, tgt, lay.items.pred.start);

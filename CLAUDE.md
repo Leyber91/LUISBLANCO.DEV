@@ -13,7 +13,8 @@ here, the daily routine included, are in SITE_RULES.md:
   rater); labs/levels/<id>.json holds each lab's ladder and grades.
 - tools/: the gates (privacy_gate.py, site_check.mjs, levels.mjs, lab_tests.mjs, atlas.mjs, stories.mjs,
   evolution.mjs, anti_tells.mjs), the test of the gates themselves (mutate.mjs with tools/mutants/), the merge
-  guard (ship_pr.mjs) and the lab worktree tool (labs-wt.mjs). The gates workflow runs the gates on every pull
+  guard (ship_pr.mjs), the lab worktree tool (labs-wt.mjs) and the page driver it runs (drive.mjs, with one
+  scenario per lab under tools/drives/). The gates workflow runs the gates on every pull
   request.
 
 ## Committing

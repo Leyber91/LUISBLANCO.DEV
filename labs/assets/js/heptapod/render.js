@@ -35,9 +35,12 @@ export const prefersReduced = () => {
   try { return matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]still\b/.test(location.search); } catch { return false; }
 };
 
+/** The device pixel ratio, capped: small canvases drawn off screen use the same cap as the ones on it. */
+export const cappedDpr = (max = 2) => Math.min(globalThis.devicePixelRatio || 1, max);
+
 /** Size a canvas to its CSS box at a capped device pixel ratio. */
 export function fitCanvas(cv, maxDpr = 2) {
-  const dpr = Math.min(globalThis.devicePixelRatio || 1, maxDpr);
+  const dpr = cappedDpr(maxDpr);
   const r = cv.getBoundingClientRect();
   const w = Math.max(2, Math.round(r.width * dpr)), h = Math.max(2, Math.round(r.height * dpr));
   if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
@@ -93,7 +96,11 @@ export function drawInk(ctx, ink, xf, opts = {}) {
   const minW = opts.minW ?? 0.7;
   const goldOf = opts.gold || (() => false);
   const X = (x) => xf.ox + xf.s * x, Y = (y) => xf.oy + xf.s * y;
-  const W = (w) => Math.max(minW, w * xf.s * ws);
+  // erode (frame units) thins every stroke by the same width, so the lightest parts go first and the
+  // line breaks where nothing is left; without it a stroke never draws thinner than minW
+  const er = opts.erode || 0;
+  const GONE = 0.3;
+  const W = (w) => (er > 0 ? Math.max(GONE, (w - er) * xf.s * ws) : Math.max(minW, w * xf.s * ws));
   for (const st of ink.strokes) {
     const a = st.alpha ?? 1;
     if (a <= 0.01) continue;
@@ -107,6 +114,7 @@ export function drawInk(ctx, ink, xf, opts = {}) {
       const ta = A[ti], tb = B[ti];
       if (ta > p && tb > p) { close(); continue; }
       const pa = [X(A[0]), Y(A[1]), W(A[2])], pb = [X(B[0]), Y(B[1]), W(B[2])];
+      if (er > 0 && pa[2] <= GONE && pb[2] <= GONE) { close(); continue; }
       if (ta <= p && tb <= p) {
         if (!run.length) run.push(pa);
         run.push(pb);
@@ -126,10 +134,11 @@ export function drawInk(ctx, ink, xf, opts = {}) {
   for (const d of ink.dots) {
     const t = opts.order === 'tq' ? d.tq : d.ts;
     if (t > p || (d.alpha ?? 1) <= 0.01) continue;
+    if (er > 0 && d.rad - er / 2 <= 0) continue;
     ctx.globalAlpha = Math.min(1, d.alpha ?? 1) * (opts.alpha ?? 1);
     ctx.fillStyle = goldOf(d.role) ? (opts.goldColor || P.goldSoft) : (opts.color || P.ink);
     ctx.beginPath();
-    ctx.arc(X(d.x), Y(d.y), Math.max(0.8, d.rad * xf.s * Math.min(1, (p - t) * 6 + 0.2)), 0, Math.PI * 2);
+    ctx.arc(X(d.x), Y(d.y), Math.max(0.8, (d.rad - er / 2) * xf.s * Math.min(1, (p - t) * 6 + 0.2)), 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.globalAlpha = 1;

@@ -45,7 +45,10 @@ Stop and report, without building, when either of these is missing:
    in the main checkout (older notes may also sit under _reference/labs/<lab>/).
 4. SITE_RULES.md and the labs-design skill. Both bind you.
 5. labs/assets/js/ai/llm.js and route-panel.js: the only way a lab talks to a model.
-6. Every current file of your lab, before you change any of them.
+6. labs/assets/js/os/index.js (Labs OS): the only place a lab keeps a visitor's progress, mounts an animated
+   scene and logs usage. Its header shows the five calls a lab needs. labs/assets/js/heptapod/pod/main.js is a
+   lab bound to it.
+7. Every current file of your lab, before you change any of them.
 
 ## Shape of the code
 
@@ -97,6 +100,9 @@ A change is done when it rendered and you looked at it.
 1. `node tools/labs-wt.mjs shoot <name>` (or `shoot <name> "<page>?<params>"` for a deep-linked state): desktop
    and phone images plus console errors. Read both images and judge them with the labs-design skill.
 2. Zero uncaught console errors.
+   A still cannot show that a drag or a key does anything. Where the lab is operated by hand, write
+   tools/drives/<name>.mjs (tools/drives/heptapod.mjs is the model) and run `node tools/labs-wt.mjs drive <name>`:
+   real pointer and keyboard at 1440 and 390 px, the page read back, pictures at each step.
 3. From the worktree: `python tools/privacy_gate.py --selftest`, `node tools/site_check.mjs`,
    `node tools/lab_tests.mjs`, `node tools/anti_tells.mjs`. All pass.
 4. Shoot every state the lab can be in (empty, loading, error, offline, full) through deep links, not only the
