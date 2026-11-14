@@ -10,7 +10,7 @@ import { renderChronology } from './chronology.js';
 import { renderDossier } from './dossier.js';
 import { applyIdentity } from '../identity.js';
 import { openCardModal } from './card.js';
-import { shareURL } from '../store.js';
+import { shareURL, cleanWorld } from '../store.js';
 
 const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
 
@@ -20,6 +20,7 @@ let activeMap = null;
 function killMap() { if (activeMap) { activeMap.destroy(); activeMap = null; } }
 
 export function renderWorld(world, mount, { onBack, tab } = {}) {
+  world = cleanWorld(world);     // every view below writes world text as HTML: whatever the source, it carries no tag
   killMap();
   mount.innerHTML = '';
   const root = el('div', 'av-world');
