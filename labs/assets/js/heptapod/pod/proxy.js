@@ -19,21 +19,13 @@
    proxy as a stand-in for a visitor]
    ============================================================ */
 
-import { mulberry32 } from '../raster.js';
+import { mulberry32, weightedPick } from '../../kit/rng.js';
 import { SCENES, SCENE_MASK, OBJ, PLACES, HELD_ACTS, IS_WORD, other, sceneOf } from './world.js';
 import { seedOf, shuffle, pick, SECTORS, sectorDiff } from './species.js';
 
 export const PROXY = { K: 4, N: 40, foils: 'random', sal: 3, RHO: 0.5, OWN_C: 3, OWN_R: 0.9 };
 export const CHECK_RINGS = 6;
 export const BAND = { lo: 3, hi: 5 };
-
-function weightedPick(items, weights, rng) {
-  let tot = 0;
-  for (const w of weights) tot += w;
-  let x = rng() * tot;
-  for (let i = 0; i < items.length; i++) { x -= weights[i]; if (x < 0) return items[i]; }
-  return items[items.length - 1];
-}
 
 /* ---------------- two ways to spend a day ---------------- */
 export function dayRandom(N, rng) {

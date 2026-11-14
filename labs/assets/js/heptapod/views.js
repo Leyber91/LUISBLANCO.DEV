@@ -4,6 +4,7 @@
    comparison. Each takes the DOM it needs and the shared state.
    ============================================================ */
 
+import { el } from '../kit/dom.js';
 import { GEOM, CODEC, SWEEP, COMPOSE_PRESETS } from './config.js';
 import { NOUN } from './lexicon.js';
 import { parse, realize, diffGraphs, graphFields, ENUMS, REL_WORD } from './grammar.js';
@@ -15,7 +16,6 @@ import { mountEditor } from './editor.js';
 
 const D2R = Math.PI / 180;
 const $ = (id) => document.getElementById(id);
-const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const idle = (fn) => (globalThis.requestIdleCallback ? requestIdleCallback(fn, { timeout: 600 }) : setTimeout(fn, 30));
 const whenSeen = (node, fn, margin = '200px') => {

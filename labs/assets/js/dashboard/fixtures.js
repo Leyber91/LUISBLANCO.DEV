@@ -25,6 +25,9 @@
    No DOM here: tests.mjs runs this file in Node.
    ============================================================ */
 
+/* a small seeded generator, the same sequence on every machine: the labs' shared one */
+import { mulberry32 as seeded } from '../kit/rng.js';
+
 export const FIXTURES = ['signed-out', 'link-sent', 'rate-limited', 'loading', 'error', 'not-owner', 'empty', 'owner-data'];
 
 const DAY = 86_400_000, MIN = 60_000;
@@ -34,17 +37,6 @@ const INSTALLS = 58;
 const RECORDING = ['heptapod', 'token-ekg'];
 const VIA = ['card', 'card', 'card', 'card', 'rail', 'welcome'];
 
-/** mulberry32: a small seeded generator, the same sequence on every machine */
-function seeded(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6D2B79F5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 const iso = (t) => new Date(t).toISOString();
 const dayOf = (t) => iso(t).slice(0, 10);
