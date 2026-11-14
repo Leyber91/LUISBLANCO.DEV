@@ -92,7 +92,9 @@ export function deriveIdentity(world) {
 
 /** apply identity as scoped CSS custom props on the .av-world root (never :root) */
 export function applyIdentity(world, rootEl) {
-  const id = world.identity || (world.identity = deriveIdentity(world));
+  // always derived from the world's own seed: an identity carried by a share link could put a url() in a
+  // colour, and the page would then fetch an address the link's author chose
+  const id = (world.identity = deriveIdentity(world));
   rootEl.style.setProperty('--world-accent', id.palette.accent);
   rootEl.style.setProperty('--world-accent-soft', id.palette.accentSoft);
   rootEl.style.setProperty('--world-void', id.palette.void);
