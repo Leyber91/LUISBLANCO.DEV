@@ -14,7 +14,7 @@ import { generateEcho } from './echo-world.js';
 import { runWorld } from './pipeline.js';
 import { openCardModal } from './render/card.js';
 import { renderWorld } from './render/world-view.js';
-import { saveWorld, listWorlds, loadWorld, decodeShareHash } from './store.js';
+import { saveWorld, listWorlds, loadWorld, decodeShareHash, cleanWorld } from './store.js';
 import { hashStr } from './rng.js';
 
 const params = new URLSearchParams(location.search);
@@ -158,7 +158,7 @@ async function screenLoom(preset) {
       }
     },
     onReasoning: (id, text) => { cogStream.appendChild(document.createTextNode(text)); cogStream.scrollTop = cogStream.scrollHeight; },
-    onLedger: (id, text) => { ledgerBody.appendChild(el('div', 'av-ledger-card', `<span class="st">${labelOf[id] || id}</span>${text}`)); },
+    onLedger: (id, text) => { ledgerBody.appendChild(el('div', 'av-ledger-card', `<span class="st">${labelOf[id] || id}</span>${cleanWorld(String(text))}`)); },   // a model's text, written as HTML
   });
 
   if (tick) clearInterval(tick);
