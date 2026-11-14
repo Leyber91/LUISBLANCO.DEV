@@ -56,7 +56,7 @@ export const CATEGORIES = [
         blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
       { id: 'exomania', title: 'Exomania: Overdue', status: 'built',
         href: 'exomania.html',
-        blurb: 'Every transiting planet is a clock. A map of the sky draws each one as a lamp as bright as its published transit clock is kept, on any date from the first transit timed to 2040: which can still be read, which are lost, which cross their stars over your own sky in the next 24 hours, and how often a later paper found the transit where the older one said. The survey of every known planet is one link away.' },
+        blurb: 'Every transiting planet is a clock. A map of the sky draws each one as a lamp in the state of its published transit clock, on any date from the first transit timed to 2040: which are kept, which are slipping, which are lost, which cross their stars in the dark over your own sky in the next 24 hours, and how often a later paper found the transit where the older one said. The survey of every known planet, each drawn as a world, is one link away.' },
     ],
   },
   {

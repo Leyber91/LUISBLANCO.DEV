@@ -144,6 +144,7 @@ function describeStar() {
   if (durDays(p)) bits.push(`transit ${span(durDays(p) * 86400)}${Number.isFinite(p.depthPct) ? ` and ${p.depthPct.toFixed(p.depthPct < 0.1 ? 3 : 2)} % deep` : ''}`);
   if (p.discYear) bits.push(`found ${p.discYear}`);
   put('c-meta', bits.join(', '));
+  $('c-world').href = `exomania-survey.html?p=${encodeURIComponent(p.name)}`;      // from a clock to the planet itself, on the survey's page
 }
 /* What changes only when another paper takes over: every other published clock against the one in use, as the
    drawing shows them and as a list anybody can open. */

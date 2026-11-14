@@ -218,6 +218,24 @@ export default async function exomania(p, { base }) {
   await p.ev('document.getElementById("d-title").scrollIntoView({ block: "start" })'); await p.sleep(250);
   await p.shot('06-tally');
 
+  // the way to the planets themselves: in the bar at every width, and from the clock being read to its own planet
+  const door = await p.ev('(() => { const a = document.getElementById("to-planets"), b = a.getBoundingClientRect(); return { href: a.getAttribute("href"), w: b.width, h: b.height, top: b.top, text: [...a.querySelectorAll("span")].filter((s) => s.getBoundingClientRect().width > 0).map((s) => s.textContent).join("") }; })()');
+  await p.ev('window.scrollTo(0, 0)'); await p.sleep(150);
+  p.check('the planet page can be reached from the bar at this width', door.href === 'exomania-survey.html' && door.w > 40 && door.h > 8 && /^(the survey of every planet|the planets)$/.test(door.text), JSON.stringify(door));
+  p.check('and from the clock being read, to its own planet', (await p.ev('document.getElementById("c-world").getAttribute("href")')) === `exomania-survey.html?p=${encodeURIComponent('WASP-12 b')}` && (await rect('c-world')).h > 8, await p.ev('document.getElementById("c-world").getAttribute("href")'));
+
+  // the planet page: its note writes itself out when a world is opened, with all of its text in the page from the start
+  await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('WASP-12 b')}`);
+  const noteSeen = () => p.ev('(() => { const b = document.querySelector("#report .rp-body"); if (!b) return null; const u = b.querySelector(".rp-unwritten"); return { all: b.textContent.length, unwritten: u ? u.textContent.length : 0, busy: b.getAttribute("aria-busy") === "true" }; })()');
+  p.check('the planet page opens on the planet asked for', await p.until('(() => { const b = document.querySelector("#report .rp-body"); return !!b && b.textContent.length > 80; })()', 40000) && /WASP-12 b/.test(await p.ev('document.querySelector("#report .rp-body").textContent')));
+  const seenNote = [await noteSeen()];
+  for (let i = 0; i < 60 && seenNote[seenNote.length - 1].unwritten > 0; i++) { await p.sleep(120); seenNote.push(await noteSeen()); }      // a note of 240 characters takes under two seconds; a long one a few more
+  const first = seenNote[0], last = seenNote[seenNote.length - 1];
+  p.check('its note writes itself out: more of it is seen each moment, the whole of it is in the page throughout, and it ends complete', first.unwritten > 0 && first.busy && last.unwritten === 0 && !last.busy && seenNote.every((s) => s.all === first.all) && seenNote.every((s, i) => !i || s.unwritten <= seenNote[i - 1].unwritten), seenNote.map((s) => `${s.all - s.unwritten}/${s.all}`).join(' '));
+  await p.go(`${base}/labs/exomania-survey.html?still&p=${encodeURIComponent('WASP-12 b')}`);
+  await p.until('(() => { const b = document.querySelector("#report .rp-body"); return !!b && b.textContent.length > 80; })()', 40000);
+  p.check('with motion turned off the note is there at once', (await noteSeen()).unwritten === 0 && !(await noteSeen()).busy);
+
   // links
   await p.go(`${base}/labs/exomania.html?still&planet=${encodeURIComponent('TRAPPIST-1 c')}&date=2035-06-01`);
   p.check('a link opens a planet at a date', (await ready()) && (await text('c-name')) === 'TRAPPIST-1 c' && (await date()) === '2035-06-01', `${await text('c-name')} ${await date()}`);

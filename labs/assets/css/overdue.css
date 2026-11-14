@@ -35,6 +35,15 @@
 .foot .tag { width: 100%; max-width: none; border-top: 1px solid var(--line); padding-top: var(--s-5); }
 .foot .tag i { display: none; }
 .bar .back.quiet { border-color: transparent; padding-inline: 0; }      /* the side door is a quiet link, not a second button beside the way back */
+.od-short { display: none; }
+/* The plate hides a quiet link in the bar on a narrow screen. This one is the only way from the clocks to the
+   planets themselves, so it stays, under a shorter name (2026-11-14: hidden, the planet page could not be reached
+   from a phone at all). */
+@media (max-width: 560px) {
+  .bar .back.quiet { display: inline-block; }
+  .od-long { display: none; }
+  .od-short { display: inline; }
+}
 .bp { z-index: calc(var(--z-header) + 1); }      /* the frame of the plate stays over the solid bar */
 .od-load, .od-note { font-size: .72rem; line-height: 1.5; color: var(--text-dim); margin: 0; }
 .od-say { font-size: .8rem; line-height: 1.55; color: var(--text); margin: 0; max-width: 70ch; }
@@ -106,6 +115,9 @@
 .od-name:focus { outline: none; }
 .od-name:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
 .od-meta { font-size: .7rem; letter-spacing: .04em; color: var(--text-dim); margin: 0; min-height: 1.5em; }
+.od-world { font-size: .72rem; margin: 6px 0 0; }
+.od-world a { color: var(--horizon); text-underline-offset: 3px; }
+.od-world a:hover, .od-world a:focus-visible { color: var(--text-bright); }
 #c-status { min-height: 4.7em; }
 .od-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-7); }
 #curve, #oc { width: 100%; height: 200px; display: block; }
