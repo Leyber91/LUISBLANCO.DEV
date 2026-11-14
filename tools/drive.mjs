@@ -11,8 +11,9 @@
    screenshots at the moments that matter, and every console error.
 
    Usage (Node 22 or later, Windows-first, no dependencies):
-     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900]
+     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900] [--timeout 180]
      node tools/labs-wt.mjs drive <lab>          serves the worktree, runs tools/drives/<lab>.mjs at two widths
+     node tools/drive.mjs tools/drives/pages.mjs --base <url> --timeout 420     every lab page loads with a clean console
 
    A scenario is a module whose default export is
      async function (page, ctx) { ... }
@@ -24,6 +25,7 @@
      move(x, y) · down(x, y) · up(x, y) · drag(x0, y0, x1, y1, { steps, hold }) · click(x, y)
      key(key, { code, text })
      shot(name)              a PNG of the viewport in the out folder
+     errors()                every console error and exception so far (a copy), to tell which page logged what
      check(name, cond, detail)   one line of the report; a false cond fails the drive
    Coordinates are CSS pixels of the viewport.
 
@@ -93,6 +95,7 @@ export async function drive(scenario, opts = {}) {
     const mouse = (type, x, y, buttons) => send('Input.dispatchMouseEvent', { type, x, y, button: type === 'mouseMoved' && !buttons ? 'none' : 'left', buttons, clickCount: type === 'mouseMoved' ? 0 : 1 });
     const page = {
       ev, until, sleep, check,
+      errors: () => errors.slice(),
       async go(u) { await send('Page.navigate', { url: u }); if (!(await until('document.readyState === "complete"'))) throw new Error('the page did not finish loading: ' + u); },
       move: (x, y) => mouse('mouseMoved', x, y, 0),
       down: (x, y) => mouse('mousePressed', x, y, 1),
@@ -133,11 +136,11 @@ if (isMain) {
   const flag = (name, fb) => { const i = argv.indexOf('--' + name); return i >= 0 && argv[i + 1] ? argv[i + 1] : fb; };
   const file = argv[0] && !argv[0].startsWith('--') ? argv[0] : null;
   const base = flag('base', null);
-  if (!file || !base) { console.error('usage: node tools/drive.mjs <scenario.mjs> --base <url> [--out <dir>] [--width 1440] [--height 900]'); process.exit(2); }
+  if (!file || !base) { console.error('usage: node tools/drive.mjs <scenario.mjs> --base <url> [--out <dir>] [--width 1440] [--height 900] [--timeout 180]'); process.exit(2); }
   if (!fs.existsSync(file)) { console.error(`no scenario at ${file}`); process.exit(2); }
   const scenario = (await import(pathToFileURL(path.resolve(file)).href)).default;
   if (typeof scenario !== 'function') { console.error(`${file} has no default export to run`); process.exit(2); }
-  const r = await drive(scenario, { base, out: flag('out', undefined), width: Number(flag('width', 1440)), height: Number(flag('height', 900)) });
+  const r = await drive(scenario, { base, out: flag('out', undefined), width: Number(flag('width', 1440)), height: Number(flag('height', 900)), timeoutMs: 1000 * Number(flag('timeout', 180)) });
   const bad = r.checks.filter((c) => !c.ok).length;
   console.log(`drive: ${r.checks.length - bad} of ${r.checks.length} checks passed; console errors: ${r.errors.length}`);
   process.exit(r.timedOut ? 3 : bad ? 1 : 0);
