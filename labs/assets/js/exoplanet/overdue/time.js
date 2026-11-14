@@ -36,6 +36,7 @@ const RAD = Math.PI / 180;
 export const DAY_MS = 86400000;
 export const AU_LIGHT_S = 499.004784;          // light time for 1 au, seconds (IAU 2012 au, c exact)
 export const SUN_BARYCENTRE_S = 5;             // the most the Sun-for-barycentre stand-in can cost, seconds
+export const LEAP_DRIFT_S = 5;                 // leap seconds added from 2006 to 2017: what a UTC clock from before them drifts by
 
 /* Julian date (UTC) of a JavaScript time in milliseconds, and back. */
 export const jdOfMs = (ms) => ms / DAY_MS + 2440587.5;
@@ -106,7 +107,10 @@ export function romerSeconds(jdTT, raDeg, decDeg) {
      - "BJD" and "HJD" without a scale are read as TDB and UTC, the usual meaning in the years each was
        common (Eastman, Siverd and Gaudi 2010, PASP 122, 935, on why the scale must be stated); the 69 s
        between the two scales is added to their slack.
-     - TCB runs ahead of TDB by about 17 s in these years; it is read as TDB and the difference is slack.
+     - TCB runs ahead of TDB by 1.55 parts in a hundred million of the time since 1977: 24 s in 2026 and 31 s in
+       2040. It is read as TDB and 35 s is added to its slack.
+     - A date in UTC that was carried forward with a fixed period ignores the leap seconds added since its
+       mid-time: up to 5 s for a clock from before 2009, and that is added to the slack of the UTC standards.
      - A bare "JD" does not say whether it is at Earth or at the Sun: it is read as barycentric TDB, and the
        whole light-travel term at Earth's greatest distance (508 s) plus the scale difference is its slack.
    stated: the name gives both the place and the scale. key: standards that are the same clock to a second.
@@ -115,12 +119,12 @@ export function romerSeconds(jdTT, raDeg, decDeg) {
 export const STANDARDS = {
   'BJD-TDB': { key: 'BJD-TDB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S },
   'BJD-TT': { key: 'BJD-TDB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S },
-  'BJD-TCB': { key: 'BJD-TCB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S + 20 },
-  'BJD-UTC': { key: 'BJD-UTC', stated: true, bary: true, tdb: false, slack: SUN_BARYCENTRE_S },
-  'HJD-UTC': { key: 'HJD-UTC', stated: true, bary: true, tdb: false, slack: 1 },
+  'BJD-TCB': { key: 'BJD-TCB', stated: true, bary: true, tdb: true, slack: SUN_BARYCENTRE_S + 35 },
+  'BJD-UTC': { key: 'BJD-UTC', stated: true, bary: true, tdb: false, slack: SUN_BARYCENTRE_S + LEAP_DRIFT_S },
+  'HJD-UTC': { key: 'HJD-UTC', stated: true, bary: true, tdb: false, slack: 1 + LEAP_DRIFT_S },
   'HJD-TDB': { key: 'HJD-TDB', stated: true, bary: true, tdb: true, slack: 1 },
   BJD: { key: 'BJD', stated: false, bary: true, tdb: true, slack: SUN_BARYCENTRE_S + 69 },
-  HJD: { key: 'HJD', stated: false, bary: true, tdb: false, slack: 1 + 69 },
+  HJD: { key: 'HJD', stated: false, bary: true, tdb: false, slack: 1 + 69 + LEAP_DRIFT_S },
   JD: { key: 'JD', stated: false, bary: true, tdb: true, slack: 508 + 69 },
 };
 const ALIAS = { 'UTC-BJD': 'BJD-UTC', 'BJD-TBD': 'BJD-TDB', 'TDB-BJD': 'BJD-TDB' };

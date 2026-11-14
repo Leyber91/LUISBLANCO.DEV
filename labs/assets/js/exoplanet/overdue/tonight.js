@@ -5,47 +5,54 @@
    Every working clock is carried to the transits that fall in the
    span, each predicted mid-time is turned from its stated standard
    into UTC at Earth (time.js), and its window is the clock's own
-   blur plus what the standard leaves unsaid. With a place, the
+   error plus what the standard leaves unsaid. With a place, the
    star's altitude and the Sun's are taken through the whole
-   transit, from its beginning to its end, and the row says
-   whether anybody there could watch all of it.
+   transit, from its beginning to its end and a window further on
+   each side, and the row says whether anybody there could watch
+   all of it.
 
    "Watchable" is a design rule of this lab, stated on the page:
-   through the whole transit the star is at least 20 degrees up
-   and the Sun at least 12 degrees down; the clock has a lamp of 3
-   or more (the window is a third of the transit or less); and no
-   other published solution contradicts it. An independent review
-   on 2026-11-14 found that the first rule, which looked at the
-   star when the transit began and at the Sun in its middle,
+   through that whole span the star is at least 20 degrees up and
+   the Sun at least 12 degrees down; the transit is three times
+   its window or longer; and the clock is not contested (most of
+   the other published clocks agree with it). Two independent
+   reviews on 2026-11-14 shaped it. The first rule looked at the
+   star when the transit began and at the Sun in its middle, and
    passed 72 of 166 transits over Barcelona that fail when the
-   whole transit is looked at.
+   whole transit is looked at. The second looked at five instants
+   whatever the length, which was right for the verdict and wrong
+   by up to 23 degrees for the altitudes shown on a transit of
+   many hours; the span is now sampled every quarter of an hour.
    ============================================================ */
 
-import { transitsBetween } from './clock.js';
+import { transitsBetween, contested } from './clock.js';
 import { toEarthUtc, altAz, sunAltitude, skyAt } from './time.js';
 import { durDays } from './data.js';
 
-export const WATCH = { minAlt: 20, maxSun: -12, minLamp: 3, samples: 5 };
+export const WATCH = { minAlt: 20, maxSun: -12, minLamp: 3, stepMin: 15, minSamples: 5, maxSamples: 240 };
 
-/* The state of a clock by its lamp (duration over blur): read, fading below 3, lost below 1. */
+/* The state of a clock by its lamp (duration over error): read, fading below 3, lost below 1. */
 export const stateOf = (lamp) => (!Number.isFinite(lamp) ? 'no transit length' : lamp < 1 ? 'lost' : lamp < WATCH.minLamp ? 'fading' : 'read');
 
 /**
- * Why a transit cannot be watched from a place, or '' when it can. altMin: the star's lowest altitude during
- * the transit, in degrees. sunMax: the Sun's highest. lamp: the clock's. disputes: other published solutions
- * that contradict the clock. Each bound is included in "can". The first reason that applies is given.
+ * Why a transit cannot be watched from a place, or '' when it can. altMin: the star's lowest altitude over the
+ * span, in degrees. sunMax: the Sun's highest. lamp: the transit's length over its window. contested: most other
+ * published clocks disagree with this one. Each bound is included in "can". The first reason that applies is given.
  */
-export function unwatchable({ altMin, sunMax, lamp, disputes }) {
+export function unwatchable({ altMin, sunMax, lamp, contested: disputed }) {
   if (!Number.isFinite(lamp)) return 'no transit length';
   if (lamp < 1) return 'clock lost';
   if (lamp < WATCH.minLamp) return 'clock fading';
-  if (disputes > 0) return 'clock disputed';
+  if (disputed) return 'clock contested';
   if (!Number.isFinite(altMin) || !Number.isFinite(sunMax)) return 'no position';
   if (!(sunMax <= WATCH.maxSun)) return sunMax > -0.833 ? 'daylight' : 'twilight';
   if (!(altMin >= WATCH.minAlt)) return altMin < 0 ? 'star sets' : 'star low';
   return '';
 }
 export const watchable = (row) => unwatchable(row) === '';
+
+/* How many instants a span of days is looked at: one every quarter of an hour, both ends included. */
+export const samplesFor = (days) => Math.max(WATCH.minSamples, Math.min(WATCH.maxSamples, Math.ceil((days * 1440) / WATCH.stepMin) + 1));
 
 /**
  * Transits whose predicted middle, at Earth, falls within `hours` after fromJdUtc. place: { lat, lon } in
@@ -61,18 +68,23 @@ export function crossings(planets, standards, fromJdUtc, hours = 24, place = nul
     for (const t of transitsBetween(c, fromJdUtc - 0.02, to + 0.02)) {            // a margin wider than any correction
       const e = toEarthUtc(t.mid, standards[c.std], p.ra ?? 0, p.dec ?? 0);
       if (e.jdUtc < fromJdUtc || e.jdUtc > to) continue;
-      const lamp = dur ? dur / t.sigma : NaN;
-      const row = { planet: p, n: t.n, mid: e.jdUtc, sigmaS: t.sigma * 86400, slackS: e.slack, windowS: t.sigma * 86400 + e.slack, lamp, state: stateOf(lamp), disputes: c.disputes || 0 };
+      const windowS = t.sigma * 86400 + e.slack;
+      const lamp = dur ? (dur * 86400) / windowS : NaN;                            // against the window as it is shown: the error and the slack
+      const row = { planet: p, n: t.n, mid: e.jdUtc, sigmaS: t.sigma * 86400, slackS: e.slack, windowS, lamp, state: stateOf(lamp), contested: contested(c) };
       if (place && Number.isFinite(p.ra) && Number.isFinite(p.dec)) {
-        // the star's lowest and the Sun's highest from the transit's beginning to its end (its middle alone when the archive gives no length)
-        const half = (dur || 0) / 2, k = dur ? WATCH.samples : 1;
+        // from the transit's beginning to its end, and a window further each side (no further than one transit:
+        // a clock with a wider window is not watchable whatever the sky does)
+        const half = (dur || 0) / 2, pad = Math.min(windowS / 86400, dur || 0);
+        const a = e.jdUtc - half - pad, b = e.jdUtc + half + pad;
+        const k = dur ? samplesFor(b - a) : 1;
         let altMin = Infinity, altMax = -Infinity, sunMax = -Infinity;
         for (let i = 0; i < k; i++) {
-          const at = e.jdUtc + (k === 1 ? 0 : -half + (2 * half * i) / (k - 1));
+          const at = k === 1 ? e.jdUtc : a + ((b - a) * i) / (k - 1);
           const alt = altAz(at, p.ra, p.dec, place.lat, place.lon).alt;
           altMin = Math.min(altMin, alt); altMax = Math.max(altMax, alt);
           sunMax = Math.max(sunMax, sunAltitude(at, place.lat, place.lon));
         }
+        row.from = a; row.to = b;
         row.altMin = altMin; row.altMax = altMax; row.sunMax = sunMax; row.sky = skyAt(sunMax);
         row.why = unwatchable(row);
         row.watchable = row.why === '';

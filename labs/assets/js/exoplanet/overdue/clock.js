@@ -45,8 +45,11 @@ export const BLIND_SHARE = 1 / 6;         // an uncertainty this share of the pe
 export const blindAt = (s, sigma) => sigma >= s.P * BLIND_SHARE;
 
 /* A solution as an object, from a row of the data files: [t0, e_t0, period, e_period, ref, pub, std, flag], and for
-   a working clock a ninth number, how many other published solutions stand apart from it (the build script). */
-export const solution = (r) => (r ? { t0: r[0], sT: r[1], P: r[2], sP: r[3], ref: r[4], pub: r[5], std: r[6], flag: r[7], disputes: r[8] || 0 } : null);
+   a working clock two more numbers from the build script: how many other published clocks agree with it within
+   3 sigma on the day of retrieval, and how many could be compared with it. */
+export const solution = (r) => (r ? { t0: r[0], sT: r[1], P: r[2], sP: r[3], ref: r[4], pub: r[5], std: r[6], flag: r[7], agree: r[8] || 0, others: r[9] || 0 } : null);
+/* A working clock is contested when fewer than half of the clocks it could be compared with agree with it. */
+export const contested = (s) => !!s && s.others > 0 && s.agree * 2 < s.others;
 /* A full Julian date between late 1995 and 2132: the tables hold a few truncated or mistyped dates. */
 export const usable = (s) => !!s && [s.t0, s.sT, s.P, s.sP].every(Number.isFinite) && s.t0 > 2450000 && s.t0 < 2500000 && s.P > 0 && s.sT > 0 && s.sP > 0;
 

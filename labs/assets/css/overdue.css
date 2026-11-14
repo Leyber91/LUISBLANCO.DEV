@@ -1,110 +1,154 @@
 /* ============================================================
-   Overdue — on the labs' plate (plate.css). Cosmos is measured
-   light: the page is a pair of instruments and their readouts.
-   Gold appears where a clock still says when (the planet on its
-   orbit while it can be timed), where a later measurement landed
-   inside an older prediction, and on a transit that can be
-   watched. A lost planet is grey.
+   Overdue — one sheet on the labs' plate (plate.css).
 
+   Cosmos is measured light. The sheet is a map of the sky and
+   everything else hangs from it: a title and a count at its
+   upper left, a key at its lower left, a title block at its
+   lower right, a lens at its upper right. Under it, one clock
+   read as light beside the one line of time.
+
+   Nothing here is a card. Sections are divided by a hairline
+   and a sheet label; numbers sit beside what they measure; the
+   only large type is the count of lost clocks, which is the
+   headline and changes with the date.
+
+   Gold is a clock that can be read, a transit that can be
+   watched, a later paper that landed inside an older window.
    Text a visitor must read is never fainter than --text-dim
    (5.1 to 1 on the ground); --text-faint is 2.3 to 1 and is kept
    for marks that carry no words.
    ============================================================ */
 
-.od-head { max-width: var(--content-max); margin-inline: auto; padding-block: var(--s-3) var(--s-5); }
-.od-head h1 { font-size: clamp(1.7rem, 2.6vw, 2.35rem); }
-.od-head .sub { max-width: 96ch; }
-.od-head .hint, .plate .hint { color: var(--text-dim); }
-.od-wrap { max-width: var(--content-max); margin-inline: auto; display: flex; flex-direction: column; gap: var(--s-6); padding-bottom: var(--s-8); }
-.plate { scroll-margin-top: 72px; }                                           /* a plate scrolled to stands clear of the bar */
-.panel-h h2.mini { margin: 0; font-weight: 500; line-height: 1.5; font-family: inherit; }
-.panel-h h2.mini:focus { outline: none; }
-.panel-h h2.mini:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
-.panel-h .mini.dim { color: var(--text-dim); }
+.sheet { max-width: 1480px; margin-inline: auto; padding-inline: clamp(1rem, 3.2vw, 3rem); }
+.od-load, .od-note, .od-cap { font-size: .72rem; line-height: 1.5; color: var(--text-dim); margin: 0; }
+.od-say { font-size: .8rem; line-height: 1.55; color: var(--text); margin: var(--s-2) 0 0; max-width: 62ch; }
+.od-note a, .od-say a { color: var(--horizon); text-underline-offset: 3px; }
 
-/* ---------- plate a: one clock ---------- */
-.od-pick { display: grid; grid-template-columns: minmax(180px, 280px) auto minmax(0, 1fr); gap: var(--s-3); align-items: center; margin-bottom: var(--s-3); }
-.od-pick form { display: contents; }
-.od-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.od-clockrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); align-items: center; margin-bottom: var(--s-4); }
-.od-views { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr); gap: var(--s-4); align-items: stretch; }
-.od-views figure { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-#orbit { width: 100%; display: block; aspect-ratio: 1; border: 1px solid var(--line); background: var(--void); }
-/* The record fills the height the orbit sets. The canvas is taken out of the flow: sized by its own bitmap it
-   made the row taller, which made the bitmap taller, and the drawing grew by a screen after load. */
-.od-recordbox { position: relative; flex: 1 1 auto; min-height: 300px; border: 1px solid var(--line); background: var(--void); }
-#record { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: ew-resize; touch-action: pan-y; }      /* a sideways drag sets the date; an up or down swipe still scrolls the page */
-.od-views figcaption { font-size: .68rem; color: var(--text-dim); line-height: 1.45; min-height: 4.35em; }
-.od-scrub { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: var(--s-3); align-items: center; margin-top: var(--s-3); }
+/* ---------- sheet a: the sky ---------- */
+.od-sky { position: relative; height: clamp(440px, 56vh, 600px); margin-top: var(--s-2); }
+#sky { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+.od-title { position: absolute; left: 0; top: 0; max-width: 20rem; pointer-events: none; }
+.od-title .kick { margin: 0 0 6px; }
+.od-title h1 { font-size: clamp(1.9rem, 2.4vw, 2.5rem); line-height: 1; margin: 0 0 var(--s-4); letter-spacing: -.01em; font-style: italic; font-weight: 400; }
+.od-count { display: flex; align-items: flex-end; gap: 14px; margin: 0; }
+.od-num { font-size: clamp(3.4rem, 5.4vw, 5.2rem); line-height: .86; color: var(--text-bright); font-weight: 400; letter-spacing: -.02em; }
+.od-count-words { font-size: .78rem; line-height: 1.45; color: var(--text); padding-bottom: 4px; white-space: nowrap; }
+.od-count-words span { display: block; }
+.od-date { margin: var(--s-3) 0 0; font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); min-height: 2.8em; max-width: 24ch; }
+.od-load { margin-top: var(--s-2); min-height: 1.5em; }
+
+.od-key { position: absolute; left: 0; bottom: 0; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; max-width: 19rem; }
+.od-key li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: .68rem; line-height: 1.4; color: var(--text-dim); }
+.od-key b { color: var(--text); font-weight: 500; margin-right: 4px; }
+.lamp { width: 7px; height: 7px; border-radius: 50%; display: inline-block; justify-self: center; transform: translateY(1px); }
+.lamp.read { background: var(--accretion); box-shadow: 0 0 6px var(--accretion-glow); }
+.lamp.fading { background: var(--accretion-dim); }
+.lamp.lost { background: none; border: 1px solid var(--text-dim); }
+.lamp.crossing { width: 9px; height: 9px; background: none; border: 1px solid var(--text-bright); border-left-color: transparent; border-bottom-color: transparent; }
+
+/* The title block of an engineering drawing: what the sheet is, how it is drawn, where its data is from. */
+.od-block { position: absolute; right: 0; bottom: 0; margin: 0; width: min(19.5rem, 34vw); border: 1px solid var(--line-bright); background: rgba(6, 8, 13, .82); }
+.od-block div { display: grid; grid-template-columns: 3.9rem minmax(0, 1fr); border-top: 1px solid var(--line); }
+.od-block div:first-child { border-top: 0; }
+.od-block dt { font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); padding: 5px 8px; border-right: 1px solid var(--line); }
+.od-block dd { margin: 0; font-size: .64rem; line-height: 1.35; color: var(--text); padding: 4px 8px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+
+/* Lamps the sheet names: text at the end of a drawn leader, and a button for anybody who cannot point. */
+.od-marks { position: absolute; inset: 0; pointer-events: none; }
+.od-mark { position: absolute; pointer-events: auto; background: none; border: 0; padding: 2px 0; font: .68rem var(--font-mono); color: var(--text); cursor: pointer; white-space: nowrap; transform: translate(4px, -50%); border-bottom: 1px solid transparent; }
+.od-mark[data-side="left"] { transform: translate(calc(-100% - 4px), -50%); }
+.od-mark:hover, .od-mark:focus-visible { color: var(--text-bright); border-bottom-color: var(--horizon-dim); }
+.od-tip { position: absolute; margin: 0; pointer-events: none; font-size: .68rem; color: var(--text-bright); background: rgba(6, 8, 13, .92); border: 1px solid var(--line-bright); padding: 3px 7px; white-space: nowrap; }
+
+/* ---------- the one line of time, then one clock read as light ---------- */
+.od-time { margin-top: var(--s-3); }
+.od-row { display: grid; grid-template-columns: minmax(280px, 26rem) minmax(0, 1fr); gap: var(--s-7); align-items: start; margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); scroll-margin-top: 80px; }
+.od-pick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-2); align-items: center; }
+.od-pick input { padding: 7px 9px; }
+.od-pick .act { min-height: 34px; padding: 6px 12px; }
+.od-name { font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-style: italic; font-weight: 400; line-height: 1.05; margin: var(--s-2) 0 4px; color: var(--text-bright); }
+.od-name:focus { outline: none; }
+.od-name:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
+.od-meta { font-size: .7rem; letter-spacing: .04em; color: var(--text-dim); margin: 0 0 var(--s-3); min-height: 1.5em; }
+#curve { width: 100%; height: 190px; display: block; border-block: 1px solid var(--line); }
+#band { width: 100%; height: 214px; display: block; cursor: ew-resize; touch-action: pan-y; }      /* a sideways drag sets the date; an up or down swipe still scrolls the page */
+.od-scrub { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; margin: 2px 0 var(--s-2); padding-left: 46px; padding-right: 0; }
 .od-scrub input[type=range] { margin: 0; accent-color: var(--horizon); }      /* a date is a setting, and gold is kept for what a clock still says */
-.od-read { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin: var(--s-4) 0 0; }
-.od-read div { background: var(--void); padding: 10px 12px; min-width: 0; }
-.od-read dt { font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 4px; }
-.od-read dd { margin: 0; font-size: clamp(.9rem, 1.25vw, 1.05rem); color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }      /* a number or a date is never broken */
-.od-read dd small { display: block; font-size: .68rem; color: var(--text-dim); margin-top: 2px; white-space: normal; min-height: 2.6em; line-height: 1.3; }
-#r-state[data-state="read"] { color: var(--accretion-soft); }
-#r-state[data-state="lost"] { color: var(--text-dim); }
-.od-lines { margin: var(--s-3) 0 0; display: flex; flex-direction: column; gap: 4px; }
-.od-lines p { margin: 0; font-size: .74rem; color: var(--text-dim); line-height: 1.5; min-height: 1.5em; overflow-wrap: anywhere; }
-.od-list { margin-top: var(--s-3); }
+.od-scrub .act { min-height: 30px; padding: 4px 10px; }
+.od-time .od-note { min-height: 1.5em; padding-left: 46px; }
+.od-light .od-note { margin-top: 6px; min-height: 1.5em; }
+.od-list { margin: var(--s-2) 0 0; }
 .od-list summary { font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text); cursor: pointer; padding: 6px 0; }
 .od-list summary:hover, .od-list summary:focus-visible { color: var(--text-bright); }
 .od-list ul { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.od-list li { font-size: .74rem; color: var(--text-dim); line-height: 1.5; overflow-wrap: anywhere; padding-left: 10px; border-left: 1px solid var(--line); }
+.od-list li { font-size: .72rem; color: var(--text-dim); line-height: 1.5; overflow-wrap: anywhere; padding-left: 10px; border-left: 1px solid var(--line); }
 
-/* ---------- plate b: tonight ---------- */
-.od-place { display: grid; grid-template-columns: auto 110px auto 110px auto auto auto; gap: var(--s-3); align-items: center; margin-bottom: var(--s-3); }
+/* ---------- the other sheets ---------- */
+.od-plate { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--line); scroll-margin-top: 80px; }
+.od-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); margin-bottom: var(--s-4); }
+.od-h h2.mini { margin: 0; font-weight: 500; line-height: 1.5; font-family: inherit; color: var(--text); }
+.od-h .mini { color: var(--text-dim); }
+.od-split { display: grid; grid-template-columns: minmax(260px, 23rem) minmax(0, 1fr); gap: var(--s-7); align-items: start; }
+.od-fig { margin: 0; min-width: 0; }
+.od-fig .od-note { margin-top: 6px; min-height: 3em; }
+#night { width: 100%; height: 230px; display: block; border-block: 1px solid var(--line); cursor: crosshair; }
+.od-place { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); gap: var(--s-2) var(--s-3); align-items: center; margin-bottom: var(--s-2); }
 .od-place form { display: contents; }
-.od-tablewrap { overflow-x: auto; }
-.od-tablewrap.long { max-height: 76vh; overflow-y: auto; border-block: 1px solid var(--line); }      /* a thousand rows scroll inside the plate */
-.od-tablewrap:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 2px; }
-.od-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
-.od-cap { margin: var(--s-3) 0 6px; font-size: .72rem; color: var(--text-dim); line-height: 1.5; }      /* outside the table, so it wraps on a phone while the table scrolls */
+.od-place .act { grid-column: span 2; min-height: 34px; padding: 6px 12px; }
+.od-place input { padding: 7px 9px; }
+.od-cap { margin: var(--s-5) 0 6px; }
 .od-scrollhint { display: none; }
+.od-tablewrap { overflow-x: auto; }
+.od-tablewrap.long { max-height: 70vh; overflow-y: auto; border-block: 1px solid var(--line); }      /* a thousand rows scroll inside the sheet */
+.od-tablewrap:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 2px; }
+.od-table { width: 100%; border-collapse: collapse; font-size: .76rem; }
 .od-table th { text-align: left; font-weight: 500; font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); padding: 6px 8px; border-bottom: 1px solid var(--line-bright); white-space: nowrap; }
 .od-tablewrap.long th { position: sticky; top: 0; background: var(--void); }
-.od-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); color: var(--text); white-space: nowrap; }
+.od-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); color: var(--text); white-space: nowrap; }
 .od-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .od-table.no-place .place { display: none; }                                             /* altitude, sky and the verdict are columns of a place: without one they are not drawn */
 .od-table td.yes { color: var(--accretion-soft); }                                       /* a transit this place can watch, in words and in gold */
 .od-table tr.watch td:first-child { box-shadow: inset 2px 0 0 var(--accretion); }
+/* A list that holds only what can be watched does not say so on every row: gold repeated on every line marks nothing. */
+.od-table.all-watch .why { display: none; }
+.od-table.all-watch tr.watch td:first-child { box-shadow: none; }
 .od-table td.dim { color: var(--text-dim); white-space: normal; }
 .linkish { background: none; border: 0; padding: 0; color: var(--text-bright); font: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-bright); text-underline-offset: 3px; }
 .linkish:hover { text-decoration-color: var(--horizon); }
-.od-more { margin-top: var(--s-3); }
+.od-more { margin: var(--s-3) 0; }
+.od-plate > .od-note { max-width: 96ch; margin-top: 6px; }
 
-/* ---------- plate c: the catalogue and the tally ---------- */
-.od-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--s-6); }
-.od-nums { display: grid; grid-template-columns: minmax(0, max-content) max-content; gap: 6px 16px; margin: 0; font-size: .82rem; }
+.od-lead { font-size: clamp(1rem, 1.35vw, 1.22rem); line-height: 1.5; color: var(--text-bright); margin: 0 0 var(--s-4); max-width: 58ch; min-height: 3em; }
+#tally-view { width: 100%; height: 230px; display: block; }
+.od-two { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s-7); margin-top: var(--s-5); }
+.od-nums { display: grid; grid-template-columns: minmax(0, max-content) max-content; gap: 5px 16px; margin: 0; font-size: .78rem; align-content: start; }
 .od-nums dt { color: var(--text-dim); }
 .od-nums dd { margin: 0; color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }      /* a number is never broken or cut */
 .od-nums dt.in { padding-left: 1.6ch; }                                                                            /* a count taken from the row above it */
-.od-prose { margin: var(--s-3) 0 0; font-size: .82rem; line-height: 1.62; color: var(--text-dim); max-width: 76ch; }
 #tally:not([data-ready]) dd { color: var(--text-dim); }
+.od-evidence .evidence { max-width: 104ch; }
+.od-evidence .evidence li { font-size: .76rem; }
 .evidence .t.ill { color: var(--text-dim); }
+.od-evidence > .od-note { margin-top: var(--s-4); }
 
-@media (max-width: 980px) {
-  .od-views, .od-two { grid-template-columns: minmax(0, 1fr); }
-  #orbit { max-width: 420px; margin-inline: auto; }
-  .od-recordbox { flex: none; height: 300px; }
-  .od-read { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .od-read .wide { grid-column: 1 / -1; }                                    /* five readouts on two columns: the date takes a row, and no cell is left empty */
-  .od-pick { grid-template-columns: minmax(0, 1fr) auto; }
-  .od-chips { grid-column: 1 / -1; }
-  .od-place { grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); }
-  .od-place .act { grid-column: span 2; }
+@media (max-width: 1100px) {
+  .od-block { width: min(18rem, 40vw); }
+  .od-row, .od-split { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+  .od-two { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
 }
-@media (max-width: 760px) {
+@media (max-width: 759px) {
+  /* The map on top with the lens under it; the title above them, the key and the title block below. */
+  .od-sky { height: auto; display: flex; flex-direction: column; gap: var(--s-4); }
+  .od-title, .od-key, .od-block { position: static; max-width: none; width: auto; }
+  #sky { position: static; order: 2; height: calc(50vw + 290px); }
+  .od-title { order: 1; } .od-key { order: 3; } .od-block { order: 4; }
+  .od-marks { display: none; }
+  .od-scrub, .od-time .od-note { padding-left: 0; }
   .od-scrollhint { display: inline; }
-}
-@media (max-width: 560px) {
-  .panel-h { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .od-h { flex-direction: column; align-items: flex-start; gap: 4px; }
   .od-nums { grid-template-columns: minmax(0, 1fr) max-content; }
   .od-nums dd { text-align: right; }
   .od-table { font-size: .72rem; }
-  .od-table th, .od-table td { padding: 6px; }
-  .od-scrub { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
-  .od-scrub input[type=range] { grid-column: 1 / -1; order: -1; }
-  .od-clockrow { grid-template-columns: minmax(0, 1fr); }
-  .od-read dd { font-size: .95rem; }
+  .od-table th, .od-table td { padding: 5px 6px; }
+  #band { height: 230px; }
 }

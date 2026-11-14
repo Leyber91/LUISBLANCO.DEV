@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Overdue · Exomania</title>
-<meta name="description" content="Every transiting planet is a clock. This page carries each published transit ephemeris forward to any date, shows how wide its window has grown and which planets can no longer be timed, and checks older clocks against later measurements." />
+<meta name="description" content="Every transiting planet is a clock. A map of the sky on which each planet is a lamp as bright as its published transit clock is kept, from the first transit timed to 2040: which clocks can still be read, which are fading, and which are lost." />
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,146 +27,156 @@
   </div>
 </header>
 
-<main>
-  <section class="od-head" aria-labelledby="h-title">
-    <p class="kick">cosmos &middot; transit clocks</p>
-    <h1 id="h-title" class="display">Every transiting planet is a clock. <span class="lo">Some can no longer be read.</span></h1>
-    <p class="sub">A planet that crosses its star does so on schedule. The schedule is published as one mid-transit time and a period, each with an error, and the error of the prediction grows with every orbit <span class="tg r">real</span>. This page carries each published clock forward to any date, draws the planet as sharp as that clock allows <span class="tg i">illustrative</span>, and checks older clocks against what later papers measured <span class="tg r">real</span>.</p>
-    <p class="hint">This lab's earlier page, a survey of every confirmed planet, is <a href="exomania-survey.html">still here</a>.</p>
-    <p class="hint" id="load-msg" role="status" aria-live="polite">loading the clocks</p>
+<main class="sheet">
+  <!-- ============ sheet a: the sky of clocks ============ -->
+  <section class="od-sky" aria-labelledby="h-title">
+    <canvas id="sky" role="img" aria-label="The sky of transit clocks"></canvas>
+    <div class="od-title">
+      <p class="kick">cosmos &middot; transit clocks</p>
+      <h1 id="h-title" class="display">Overdue</h1>
+      <p class="od-count"><span class="od-num display" id="n-lost">…</span><span class="od-count-words"><span id="n-of">of the transit clocks</span><span id="n-verb">can no longer be read</span></span></p>
+      <p class="od-date" id="n-date">…</p>
+      <p class="od-load" id="load-msg" role="status" aria-live="polite">loading the clocks</p>
+    </div>
+    <ul class="od-key" aria-label="How a lamp is drawn">
+      <li><i class="lamp read" aria-hidden="true"></i><span><b>read</b> the transit is three times the clock's error, or longer</span></li>
+      <li><i class="lamp fading" aria-hidden="true"></i><span><b>fading</b> between one and three times</span></li>
+      <li><i class="lamp lost" aria-hidden="true"></i><span><b>lost</b> the error is longer than the transit</span></li>
+      <li><i class="lamp crossing" aria-hidden="true"></i><span><b>crossing</b> in front of its star at this instant</span></li>
+    </ul>
+    <dl class="od-block" aria-label="About this drawing">
+      <div><dt>sheet</dt><dd>A &middot; the sky of clocks</dd></div>
+      <div><dt>map</dt><dd>Hammer, equal-area &middot; east to the left</dd></div>
+      <div><dt>lamp</dt><dd>transit length &divide; 1&sigma; error of its clock</dd></div>
+      <div><dt>source</dt><dd id="tb-source">NASA Exoplanet Archive</dd></div>
+      <div><dt>date</dt><dd id="tb-date">…</dd></div>
+    </dl>
+    <div id="marks" class="od-marks"></div>
+    <p id="sky-tip" class="od-tip" hidden></p>
   </section>
 
-  <div class="od-wrap">
-    <!-- ============ plate a: one clock ============ -->
-    <section class="plate" id="plate-a" aria-labelledby="a-title">
-      <div class="panel-h"><h2 class="mini" id="a-title" tabindex="-1">plate a &middot; one clock, carried forward</h2><span class="mini dim">drag across the record to set the date</span></div>
-      <div class="od-pick">
-        <form id="pick-form" autocomplete="off">
-          <input id="pick" type="text" list="planets" spellcheck="false" aria-label="A transiting planet, by its name in the archive" />
-          <button type="submit" class="act ghost">open</button>
-        </form>
-        <div class="od-chips" id="chips"></div>
-      </div>
+  <!-- ============ the one line of time ============ -->
+  <section class="od-time" aria-label="The date shown">
+    <canvas id="band" role="img" aria-label="Years from 1999 to 2040. Above, how many clocks can be read, are fading and are lost. Below, the error of the best clock known for the selected planet. The list further down gives each published solution in words."></canvas>
+    <div class="od-scrub">
+      <input id="scrub" type="range" step="1" aria-label="The date shown" />
+      <button type="button" class="act ghost" id="to-today">today</button>
+    </div>
+    <p class="od-note" id="band-note">&nbsp;</p>
+  </section>
+
+  <!-- ============ one clock, read as light ============ -->
+  <section class="od-row" id="clock" aria-labelledby="c-name">
+    <div class="od-one">
+      <form id="pick-form" class="od-pick" autocomplete="off">
+        <label class="mini" for="pick">read</label>
+        <input id="pick" type="text" list="planets" spellcheck="false" aria-label="A transiting planet, by its name in the archive" />
+        <button type="submit" class="act ghost">open</button>
+      </form>
       <datalist id="planets"></datalist>
       <p class="status" id="pick-msg" role="status" aria-live="polite"></p>
-      <div class="od-clockrow">
-        <label class="mini" for="clock">which clock</label>
-        <select id="clock" disabled></select>
-      </div>
-      <div class="od-views">
-        <figure>
-          <canvas id="orbit" role="img" aria-label="The planet on its orbit"></canvas>
-          <figcaption>The system from above, Earth toward the bottom. A disc while the error is small; an arc of one and two sigma as it grows <span class="tg i">illustrative</span>. The bright stretch at the bottom is where the planet is in front of its star.</figcaption>
-        </figure>
-        <figure>
-          <div class="od-recordbox"><canvas id="record" role="img" aria-label="The clock's 1-sigma and 2-sigma error through time, with every other published solution of the planet; the list under the drawing says the same in words"></canvas></div>
-          <figcaption id="r-point">Each point is another published solution of this planet: above the line it found the transit later than this clock predicts, below it earlier. Gold: a later paper that tests this clock and found the transit inside its 1-sigma window. White: a test that found it outside. A ring: no test. Point at one, or open the list, to read it.</figcaption>
-        </figure>
-      </div>
-      <div class="od-scrub">
-        <button type="button" class="act ghost" id="to-epoch">its epoch</button>
-        <input id="scrub" type="range" step="1" aria-label="The date shown" />
-        <button type="button" class="act ghost" id="to-today">today</button>
-        <button type="button" class="act ghost" id="to-end">2040</button>
-      </div>
-      <dl class="od-read">
-        <div class="wide"><dt>date shown</dt><dd id="r-date">…</dd></div>
-        <div><dt>1-sigma error</dt><dd><span id="r-window">…</span><small id="r-window-note">&nbsp;</small></dd></div>
-        <div><dt>lamp</dt><dd><span id="r-lamp">…</span><small id="r-lamp-note">transit length over the 1-sigma error</small></dd></div>
-        <div><dt>the clock is</dt><dd id="r-state">…</dd></div>
-        <div><dt>lost</dt><dd id="r-lost">…</dd></div>
-      </dl>
-      <div class="od-lines">
-        <p id="r-orbits"></p>
-        <p id="r-clock"></p>
-        <p id="r-record" role="status"></p>
-      </div>
+      <h2 id="c-name" class="display od-name" tabindex="-1">…</h2>
+      <p class="od-meta" id="c-meta">&nbsp;</p>
+      <p class="od-say" id="c-status" role="status"></p>
+    </div>
+    <div class="od-light">
+      <canvas id="curve" role="img" aria-label="The transit as this clock lets it be seen, in the hours around the predicted time; the sentence under the drawing says the same"></canvas>
+      <p class="od-note" id="c-curve">&nbsp;</p>
       <details class="od-list">
-        <summary id="r-count">the other published solutions, as a list</summary>
+        <summary id="r-count">the published solutions, as a list</summary>
         <ul id="r-points"></ul>
       </details>
-    </section>
-
-    <!-- ============ plate b: tonight ============ -->
-    <section class="plate" id="plate-b" aria-labelledby="b-title">
-      <div class="panel-h"><h2 class="mini" id="b-title">plate b &middot; crossing in the next 24 hours</h2><span class="mini dim">times on your own clock</span></div>
-      <div class="od-place">
-        <form id="place-form" autocomplete="off">
-          <label class="mini" for="lat">latitude</label><input id="lat" type="text" inputmode="decimal" placeholder="41.39" />
-          <label class="mini" for="lon">longitude</label><input id="lon" type="text" inputmode="decimal" placeholder="2.17" />
-          <button type="submit" class="act ghost">set place</button>
-        </form>
-        <button type="button" class="act ghost" id="locate">use this device</button>
-        <button type="button" class="act ghost" id="forget">forget it</button>
-      </div>
-      <p class="status" id="place-msg" role="status" aria-live="polite"></p>
-      <p class="od-prose" id="t-count"></p>
-      <p class="od-cap" id="t-cap">Predicted transits in the next 24 hours, earliest first. <span id="t-shown"></span><span class="od-scrollhint">. The table scrolls sideways.</span></p>
-      <div class="od-tablewrap" id="t-wrap" tabindex="0" role="region" aria-labelledby="t-cap">
-        <table class="od-table no-place" id="t-table" aria-labelledby="t-cap">
-          <thead><tr><th scope="col">planet</th><th scope="col" class="num">mid-transit</th><th scope="col" class="num">window</th><th scope="col" class="place">from here</th><th scope="col" class="num place">altitude</th><th scope="col" class="place">sky</th><th scope="col">clock</th><th scope="col" class="num">lasts</th><th scope="col" class="num">depth</th><th scope="col" class="num">V mag</th></tr></thead>
-          <tbody id="t-body"></tbody>
-        </table>
-      </div>
-      <div class="od-more"><button type="button" class="act ghost" id="t-all" hidden></button></div>
-      <p class="hint"><span id="t-rule"></span> <span class="tg i">illustrative</span></p>
-      <p class="hint">The window is the clock's own 1-sigma error plus what its stated time standard leaves unsaid. A barycentric date is turned into your clock to within about 5 seconds; a date whose scale is not stated can be 69 seconds further off, and a bare "JD" up to 10 minutes <span class="tg r">real</span>. A time is shown to the nearest minute, or to the nearest second when its window is under a minute. Altitude ignores refraction.</p>
-    </section>
-
-    <!-- ============ plate c: the catalogue and the tally ============ -->
-    <section class="plate" aria-labelledby="c-title">
-      <div class="panel-h"><h2 class="mini" id="c-title">plate c &middot; how well the clocks are kept</h2><span class="mini dim">counted on this page, now</span></div>
-      <div class="od-two">
-        <div>
-          <dl class="od-nums">
-            <dt>transiting planets with a published clock</dt><dd id="s-planets">…</dd>
-            <dt>of those, with a transit length</dt><dd id="s-timed">…</dd>
-            <dt class="in">lost today (lamp below 1)</dt><dd id="s-lost">…</dd>
-            <dt class="in">fading (lamp 1 to 3)</dt><dd id="s-fading">…</dd>
-            <dt>working clocks another solution contradicts</dt><dd id="s-disputed">…</dd>
-            <dt>archive retrieved</dt><dd id="s-date">…</dd>
-          </dl>
-          <p class="od-prose">Lost means that the 1-sigma error of the planet's working clock is now longer than the transit itself <span class="tg r">real</span>. The word is this lab's <span class="tg i">illustrative</span>. A working clock is contradicted when another published solution of the same planet predicts today's transit more than 3 sigma away from it <span class="tg r">real</span>.</p>
-        </div>
-        <div id="tally">
-          <dl class="od-nums">
-            <dt>planets with a dated paper and another two years or more later</dt><dd id="y-pairs">…</dd>
-            <dt>of those, a real test of the oldest clock</dt><dd id="y-real">…</dd>
-            <dt class="in">later mid-time inside the old 1-sigma window</dt><dd id="y-inside">…</dd>
-            <dt class="in">later mid-time beyond 3 sigma</dt><dd id="y-beyond">…</dd>
-            <dt class="in" id="y-top-name">the paper that is the newer one most often</dt><dd id="y-top">…</dd>
-            <dt>real tests where both papers state the same standard in full</dt><dd id="y-same">…</dd>
-            <dt class="in">inside the 1-sigma window</dt><dd id="y-same-inside">…</dd>
-            <dt class="in">beyond 3 sigma</dt><dd id="y-same-beyond">…</dd>
-            <dt>tests that could not fail, left out</dt><dd id="y-blind">…</dd>
-          </dl>
-          <p class="od-prose">Honest Gaussian errors would put 68 % inside one sigma and 0.3 % beyond three <span class="tg r">real</span>. A real test here is a planet's earliest dated solution carried to the mid-transit time of the latest paper that can test it: a different paper, published two years or more later, whose mid-time is ten or more orbits on and later than the day the first paper appeared. A test is left out when the two uncertainties together had by then reached a sixth of the orbit: a mid-time is never more than half an orbit from the nearest predicted transit, so nothing could have missed by three sigma. The test is lenient. A later paper usually fits the old transits again, the archive does not record which transits each used, and one catalogue is the newer paper in most of the tests. The misses are counted as they stand. A planet pulled by its neighbours does not keep a linear clock, and this page has not checked which of the misses are such planets: uncertain.</p>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <section class="sec" id="sources" aria-labelledby="s-title">
-    <div class="sec-h">
-      <p class="kick">evidence</p>
-      <h2 id="s-title">What is real here, and what is this lab's way of showing it.</h2>
     </div>
+  </section>
+
+  <!-- ============ sheet b: the next 24 hours ============ -->
+  <section class="od-plate" id="plate-b" aria-labelledby="b-title">
+    <header class="od-h"><h2 class="mini" id="b-title">sheet b &middot; crossing in the next 24 hours</h2><span class="mini">times on your own clock</span></header>
+    <div class="od-split">
+      <div>
+        <div class="od-place">
+          <form id="place-form" autocomplete="off">
+            <label class="mini" for="lat">latitude</label><input id="lat" type="text" inputmode="decimal" placeholder="41.39" />
+            <label class="mini" for="lon">longitude</label><input id="lon" type="text" inputmode="decimal" placeholder="2.17" />
+            <button type="submit" class="act ghost">set place</button>
+          </form>
+          <button type="button" class="act ghost" id="locate">use this device</button>
+          <button type="button" class="act ghost" id="forget">forget it</button>
+        </div>
+        <p class="status" id="place-msg" role="status" aria-live="polite"></p>
+        <p class="od-say" id="t-count"></p>
+      </div>
+      <figure class="od-fig">
+        <canvas id="night" role="img" aria-label="The next 24 hours: each transit as the path of its star over the horizon of the place set, or as a tick when no place is set. The table under the drawing lists them."></canvas>
+        <figcaption class="od-note" id="night-note">&nbsp;</figcaption>
+      </figure>
+    </div>
+    <p class="od-cap" id="t-cap">Predicted transits in the next 24 hours, earliest first. <span id="t-shown"></span><span class="od-scrollhint">. The table scrolls sideways.</span></p>
+    <div class="od-tablewrap" id="t-wrap" tabindex="0" role="region" aria-labelledby="t-cap">
+      <table class="od-table no-place" id="t-table" aria-labelledby="t-cap">
+        <thead><tr><th scope="col">planet</th><th scope="col" class="num">mid-transit</th><th scope="col" class="num">window</th><th scope="col" class="place why">from here</th><th scope="col" class="num place">altitude</th><th scope="col" class="place">sky</th><th scope="col">clock</th><th scope="col" class="num">lasts</th><th scope="col" class="num">depth</th><th scope="col" class="num">V mag</th></tr></thead>
+        <tbody id="t-body"></tbody>
+      </table>
+    </div>
+    <div class="od-more"><button type="button" class="act ghost" id="t-all" hidden></button></div>
+    <p class="od-note"><span id="t-rule"></span> <span class="tg i">illustrative</span></p>
+    <p class="od-note">The window is the clock's own 1-sigma error plus what its stated time standard leaves unsaid. A barycentric date is turned into your clock to within about 5 seconds; a date whose scale is not stated can be 69 seconds further off, and a bare "JD" up to 10 minutes <span class="tg r">real</span>. A time is shown to the nearest minute, or to the nearest second when its window is under a minute. Altitude ignores refraction.</p>
+  </section>
+
+  <!-- ============ sheet c: how well the clocks are kept ============ -->
+  <section class="od-plate" aria-labelledby="c-title">
+    <header class="od-h"><h2 class="mini" id="c-title">sheet c &middot; how well the clocks are kept</h2><span class="mini">counted on this page, now</span></header>
+    <p class="od-lead" id="y-headline">&nbsp;</p>
+    <figure class="od-fig">
+      <canvas id="tally-view" role="img" aria-label="Where later papers found the transit, in sigmas of the older clock: one tick for each test, with the bell that honest errors would give. The counts are in the table under the drawing."></canvas>
+      <figcaption class="od-note">One tick is one planet: its earliest dated clock, carried to the mid-transit time a later paper measured. Gold is inside one sigma. The line is where the same number of tests would fall if every stated error were honest <span class="tg r">real</span>.</figcaption>
+    </figure>
+    <div class="od-two" id="tally">
+      <dl class="od-nums">
+        <dt>planets with a dated paper and another two years or more later</dt><dd id="y-pairs">…</dd>
+        <dt>of those, a real test of the oldest clock</dt><dd id="y-real">…</dd>
+        <dt class="in">later mid-time inside the old 1-sigma window</dt><dd id="y-inside">…</dd>
+        <dt class="in">later mid-time beyond 3 sigma</dt><dd id="y-beyond">…</dd>
+        <dt class="in" id="y-top-name">the paper that is the newer one most often</dt><dd id="y-top">…</dd>
+        <dt>real tests where both papers state the same standard in full</dt><dd id="y-same">…</dd>
+        <dt class="in">inside the 1-sigma window</dt><dd id="y-same-inside">…</dd>
+        <dt class="in">beyond 3 sigma</dt><dd id="y-same-beyond">…</dd>
+        <dt>tests that could not fail, left out</dt><dd id="y-blind">…</dd>
+      </dl>
+      <dl class="od-nums">
+        <dt>transiting planets with a published clock</dt><dd id="s-planets">…</dd>
+        <dt>of those, with a transit length</dt><dd id="s-timed">…</dd>
+        <dt class="in">lost today</dt><dd id="s-lost">…</dd>
+        <dt class="in">fading</dt><dd id="s-fading">…</dd>
+        <dt>working clocks most other papers disagree with</dt><dd id="s-contested">…</dd>
+        <dt>working clocks no other paper can be held against</dt><dd id="s-alone">…</dd>
+        <dt>archive retrieved</dt><dd id="s-date">…</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="od-plate od-evidence" id="sources" aria-labelledby="s-title">
+    <header class="od-h"><h2 class="mini" id="s-title">evidence &middot; what is real here, and what is this lab's way of showing it</h2></header>
     <ul class="evidence">
-      <li><b class="t real">[REAL]</b> The data. NASA Exoplanet Archive, Planetary Systems table (doi:10.26133/NEA12) and Planetary Systems Composite Parameters (doi:10.26133/NEA13), transiting planets, retrieved on the date shown in plate c. The archive asks users to cite Christiansen et al. 2025, <i>Planetary Science Journal</i> 6, 186; that reference is given here as the archive gives it and was not read for this page. This research has made use of the NASA Exoplanet Archive, which is operated by the California Institute of Technology, under contract with the National Aeronautics and Space Administration under the Exoplanet Exploration Program. The two files are built by hand with <code>labs/assets/data/exomania/build_ephemerides.py</code> and are a snapshot: nothing here is fetched from the archive while you read.</li>
+      <li><b class="t real">[REAL]</b> The data. NASA Exoplanet Archive, Planetary Systems table (doi:10.26133/NEA12) and Planetary Systems Composite Parameters (doi:10.26133/NEA13), transiting planets, retrieved on the date in the title block. The archive asks users to cite Christiansen et al. 2025, <i>Planetary Science Journal</i> 6, 186; that reference is given here as the archive gives it and was not read for this page. This research has made use of the NASA Exoplanet Archive, which is operated by the California Institute of Technology, under contract with the National Aeronautics and Space Administration under the Exoplanet Exploration Program. The two files are built by hand with <code>labs/assets/data/exomania/build_ephemerides.py</code> and are a snapshot: nothing here is fetched from the archive while you read.</li>
       <li><b class="t real">[REAL]</b> The clock. A linear ephemeris predicts transit n at T0 + nP, and with independent errors its uncertainty is the root of sigma_T0 squared plus n squared times sigma_P squared. The archive's tables give no covariance between the two errors, so none is used. A planet whose transits vary in time is not a linear clock, and this page treats it as one.</li>
-      <li><b class="t ill">[ILLUSTRATIVE]</b> The lamp and the word lost. The lamp is the transit's length divided by the 1-sigma error of the predicted mid-time; below one, this lab calls the clock lost. The planet drawn as an arc along its orbit is this lab's picture of that error. For an eccentric orbit the place between transits is the mean phase; the transit times do not depend on it.</li>
-      <li><b class="t real">[REAL]</b> Which clock. The working clock of a planet is the published solution with the smallest error on the day the data was retrieved, among the solutions that another paper confirms and that no two agreeing papers contradict. The smallest error alone picks outliers: an independent review found 66 planets whose working clock every other solution contradicted, one of them by 4.6 days. The steps are written out in the build script. The archive's composite row is used only when its mid-time and period come from one paper: a row that mixes two papers pairs errors that do not belong together.</li>
-      <li><b class="t real">[REAL]</b> The tally and its limits. The counts in plate c are computed in your browser from the same two files. Three faults were found in this lab's earlier tallies and are corrected here. The archive gives every ExoFOP row one publication date, July 2017, though their mid-times run to 2026, so rows without a true date take no part in any test, on plate a or plate c. The oldest clock of HD 209458 b has an error wider than its orbit, and every later paper was counted as landing inside it, so a test that could not fail is counted apart. Plate a counted as a test a paper published beside the clock's own, timing a transit from before either appeared, so plate a now uses the definition of plate c. <code>node labs/assets/js/exoplanet/tests/overdue.test.mjs</code> recomputes the counts from the committed files.</li>
+      <li><b class="t ill">[ILLUSTRATIVE]</b> The lamp and the word lost. The lamp is the transit's length divided by the 1-sigma error of its predicted time; below one, this lab calls the clock lost. Drawing a planet as a light whose brightness is its lamp is this lab's picture of that number.</li>
+      <li><b class="t real">[REAL]</b> The sky. Each lamp stands at its star's right ascension and declination from the archive, on Hammer's equal-area map. The ecliptic and the plane of the Galaxy are computed, the second with the north galactic pole at 12h 51.4m, +27.13&deg; (J2000). The lens is a flat patch 18&deg; across centred on the Kepler field.</li>
+      <li><b class="t ill">[ILLUSTRATIVE]</b> The sky before today. On a past date a planet is drawn by the best clock known then: a paper counts from the day it appeared, and a row the archive gives no true date counts from its own mid-transit time, the earliest it can have been measured. A later paper takes over when its error on that day is the smaller. The archive records what was published, not what an observer used, so this is a reconstruction.</li>
+      <li><b class="t real">[REAL]</b> Which clock is the working clock. The published solution whose forecast of today's transit agrees best with the forecasts of the other papers, each pair scored by how far apart they are, discounted for their stated errors (the continuous ranked probability score; T. Gneiting and A. E. Raftery, <i>J. Am. Stat. Assoc.</i> 102, 359, 2007). The rule was chosen by a test, after two rules chosen by argument failed independent review: hide each planet's latest paper, let a rule pick from the earlier ones, and measure the gap to the hidden paper. Over 3,462 planets this rule has the smallest median gap, 19.7 minutes, and the fewest confident misses. The same test shows what no rule mends: for about one planet in ten, no earlier clock comes within three hours of the latest paper. <code>backtest_clock.py</code>, beside the build script, prints the table.</li>
+      <li><b class="t real">[REAL]</b> The tally and its limits. The counts in sheet c are computed in your browser from the same two files. A real test is a planet's earliest dated solution carried to the mid-transit time of the latest paper that can test it: a different paper, published two years or more later, whose mid-time is ten or more orbits on and later than the day the first paper appeared. Rows without a true date take no part. A test is left out when the two uncertainties together had reached a sixth of the orbit, where nothing can miss by three sigma. The test is lenient: a later paper usually fits the old transits again, the archive does not record which transits each used, and one catalogue is the newer paper in most of the tests. A planet pulled by its neighbours does not keep a linear clock, and this page has not checked which of the misses are such planets: uncertain. <code>node labs/assets/js/exoplanet/tests/overdue.test.mjs</code> recomputes the counts from the committed files.</li>
+      <li><b class="t real">[REAL]</b> The transit as light. The dip is limb-darkened and central, from the archive's depth and length. The curve drawn is that dip averaged over the error of its predicted time: what a telescope pointed at the prediction would record on average.</li>
       <li><b class="t real">[REAL]</b> Time. Barycentric and heliocentric dates are turned into UTC at Earth with the light-travel time across Earth's orbit and with TT minus UTC (69.184 s since 2017); J. Eastman, R. Siverd and B. S. Gaudi, <i>PASP</i> 122, 935 (2010), on why a mid-transit time must state its standard. The Sun's position, sidereal time and altitude follow J. Meeus, <i>Astronomical Algorithms</i>, 2nd ed. (Willmann-Bell, 1998), chapters 12, 13 and 25, and the page's tests reproduce four of its worked examples (12.a, 12.b, 13.b and 25.a). The Sun stands in for the solar system's barycentre, which costs up to about 5 seconds.</li>
-      <li><b class="t real">[REAL]</b> The two examples. HD 209458 b was the first planet seen to transit: D. Charbonneau et al., <i>ApJ</i> 529, L45 (2000), and G. W. Henry et al., <i>ApJ</i> 529, L41 (2000). WASP-12 b's period is shrinking: S. W. Yee et al., <i>ApJ Letters</i> 888, L5 (2020). A shrinking period is one way a linear clock runs wrong.</li>
+      <li><b class="t real">[REAL]</b> The two named lamps. HD 209458 b was the first planet seen to transit: D. Charbonneau et al., <i>ApJ</i> 529, L45 (2000), and G. W. Henry et al., <i>ApJ</i> 529, L41 (2000). WASP-12 b's period is shrinking: S. W. Yee et al., <i>ApJ Letters</i> 888, L5 (2020). A shrinking period is one way a linear clock runs wrong.</li>
       <li><b class="t real">[REAL]</b> Who keeps these clocks for observers. The ExoClock project and the Exoplanet Transit Database collect new timings and publish refined ephemerides. This page shows the state of the archive's tables and does not replace either.</li>
-      <li><b class="t real">[REAL]</b> What stays in your browser. The planet you opened and, if you set one, your place (rounded to a hundredth of a degree) are kept in the labs' own store in this browser, and the <a href="privacy.html">privacy page</a> can export or erase them. If you have allowed sharing of usage, the author receives which planet was opened, the year a drag on the record ended on, and whether a place was typed or taken from the device. The place itself is never sent. The page uses no model.</li>
+      <li><b class="t real">[REAL]</b> What stays in your browser. The planet you opened and, if you set one, your place (rounded to a hundredth of a degree) are kept in the labs' own store in this browser, and the <a href="privacy.html">privacy page</a> can export or erase them. If you have allowed sharing of usage, the author receives which planet was opened, the year a drag on the time band ended on, whether a place was typed or taken from the device, and, as on every lab page, when the page was opened and left. The place itself is never sent. The page uses no model.</li>
     </ul>
+    <p class="od-note">This lab's earlier page, a survey of every confirmed planet, is <a href="exomania-survey.html">still here</a>.</p>
   </section>
 </main>
 
 <footer class="foot">
-  <span class="tag"><i aria-hidden="true"></i><span><b>[real]</b> archive values, the propagation, the counts, the time corrections &middot; <b>[illustrative]</b> the lamp, the word lost, the planet drawn as an arc, the rule for watchable</span></span>
+  <span class="tag"><i aria-hidden="true"></i><span><b>[real]</b> archive values, positions, the propagation, the counts, the time corrections &middot; <b>[illustrative]</b> the lamp, the word lost, the sky before today, the rule for watchable</span></span>
   <span class="label">canvas 2D &middot; no build step &middot; no model</span>
 </footer>
 

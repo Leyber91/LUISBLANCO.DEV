@@ -26,28 +26,46 @@ them in 1972), a positive period, and a positive error on each. Its error is the
 archive's upper and lower error bars. A planet is kept when the composite row or at least one solution
 is usable.
 
-The working clock is the best one anybody has published: of the planet's usable solutions, and of the
-composite row when its mid-time and period come from one paper, the one whose window is narrowest on
-the day of retrieval, unless the other papers agree with each other against it. A composite row that
-mixes two papers pairs errors that do not belong together (on 2026-11-14 that made 22 planets look
-lost that a single paper still times well), so it is used only when no single solution is.
+The working clock is the published solution whose forecast of today's transit agrees best with the
+forecasts of the other papers. Each solution, carried to the transit nearest the day of retrieval,
+is a forecast: a time and an error. Two forecasts are scored against each other with the continuous
+ranked probability score of a Gaussian (T. Gneiting and A. E. Raftery, J. Am. Stat. Assoc. 102, 359,
+2007, on proper scoring rules): for a gap of z combined sigmas, sigma times (z (2 Phi(z) - 1) +
+2 phi(z) - 1/sqrt(pi)). It is in days and smaller is better. When two forecasts are far apart it is
+the gap between them; when they coincide it is about a quarter of their combined error; so a clock
+scores well by being close to the others and by being sharp, and a wide error bar cannot buy a good
+score. A pair never scores worse than a quarter of the shorter period (two transits are never more
+than half an orbit apart). A clock's score is the median of its scores against the others, and the
+lowest median is the working clock; a tie goes to the smaller error. Solutions that share a period
+to every digit are one lineage (a paper repeating another's ephemeris) and count once, by their
+sharpest member. With one lineage there is nothing to compare, and it is the clock.
 
-Why "unless". The narrowest window alone picks outliers: a solution with a small stated error and a
-wrong period wins. An independent review on 2026-11-14 found 66 planets whose working clock every
-other solution contradicted by more than 3 sigma; HD 106315 b was predicted 4.6 days from where seven
-papers put it. Two solutions are compared at the transit nearest the day of retrieval. They stand
-apart when they differ by more than 3 sigma of their combined uncertainty, and together when they do
-not, and neither is said while that uncertainty is a sixth of the period or more: beyond it any two
-mid-times are within 3 sigma (overdue/clock.js, the blind rule). A solution is confirmed when a
-solution from another paper stands together with it. It is outvoted when two solutions from two
-other papers stand apart from it and together with each other. The working clock is the narrowest
-window among the solutions that are confirmed and not outvoted; failing any, among the confirmed;
-failing any, among those not outvoted; failing any, the narrowest of all. The second step is for
-planets whose papers fall into camps (TOI-125 b: an archive row alone, two early papers, two recent
-ones), where every solution is outvoted by some pair. Each working clock carries the number of other
-solutions that stand apart from it, so the page can say a clock is disputed instead of printing its
-window as if it were agreed. A later paper that repeats an earlier ephemeris counts as confirming it:
-the tables do not say which transits a solution used.
+Candidates are the planet's usable solutions, and the composite row only when its mid-time and
+period come from one paper and no solution is the same ephemeris: a composite row that mixes two
+papers pairs errors that do not belong together (on 2026-11-14 that made 22 planets look lost that
+a single paper still times well).
+
+How this rule was reached, on 2026-11-14.
+  1. The smallest error on the day of retrieval. An independent review found that it picks outliers:
+     66 planets whose working clock every other solution contradicted, HD 106315 b by 4.6 days.
+  2. A vote: keep a clock another paper stands with, drop one that two agreeing papers stand
+     against. A second review found that a vague clock stands with everything, so it was always
+     kept: WASP-12 b was read by a 2009 clock while six papers from 2022 to 2025 agreed within
+     minutes, and WASP-24 b was called lost.
+  3. A forecast of the latest mid-times other papers measured. It failed on reading: a published
+     mid-time is a reference epoch, often set near the first observations, so the latest mid-times
+     are not the latest measurements.
+  4. This rule, chosen by a backtest instead of by argument (backtest_clock.py, beside this file):
+     hide each planet's most recently published paper, let a rule pick from what came before, and
+     measure how far its forecast of today's transit lies from the hidden paper's. Over 3,462
+     planets with three or more dated papers it has the smallest median gap and the fewest
+     confident misses. The same backtest says what no rule can mend: for about one planet in ten,
+     no earlier clock comes within three hours of the latest paper.
+
+Each working clock carries two numbers for the page: how many other lineages could be compared with
+it (their combined error under a sixth of the period, clock.js, the blind rule), and how many of
+those agree with it within 3 combined sigmas. A clock that fewer than half agree with is called
+contested.
 
 Dates the archive gives. Every ExoFOP row carries the publication date 2017-07, and its mid-times run
 from 2018 to 2026, so that date is not when the value was made. Those rows are kept as solutions and
@@ -71,9 +89,9 @@ Q_PS = ('select pl_name,pl_tranmid,pl_tranmiderr1,pl_tranmiderr2,pl_orbper,pl_or
 COLS = ['pl_name', 'host', 'ra', 'dec', 'vmag', 'dist', 'pnum', 'disc_year', 'dur_h', 'depth_pct', 'a_over_rs',
         'a_au', 'r_earth', 'ecc', 'st_rad', 'st_teff', 'clock']
 SOL = ['t0', 'e_t0', 'period', 'e_period', 'ref', 'pub', 'std', 'default']
-CLOCK = SOL + ['disputes']
+CLOCK = SOL + ['agree', 'others']
 BLIND_SHARE = 1 / 6          # as overdue/clock.js: a combined uncertainty this share of the period cannot show a 3-sigma miss
-DISPUTE_Z = 3
+AGREE_Z = 3
 
 
 def ask(name, query, raw):
@@ -150,40 +168,57 @@ def carried(s, t):
     return s[0] + n * s[2], math.hypot(s[1], n * s[3])
 
 
-def against(a, b, today):
-    """How two solutions of one planet stand today: 'apart' (more than 3 sigma), 'together', or None when
-    their combined uncertainty is too wide for them to disagree at all."""
+def same_clock(a, b):
+    """One ephemeris quoted twice: the same period, and mid-times a whole number of orbits apart."""
+    if a[2] != b[2]:
+        return False
+    k = (a[0] - b[0]) / a[2]
+    return abs(k - round(k)) < 1e-4
+
+
+def crps(z, sigma):
+    """The continuous ranked probability score of a Gaussian forecast that missed by z sigmas. Days; smaller is better."""
+    phi = math.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
+    big = 0.5 * (1 + math.erf(z / math.sqrt(2)))
+    return sigma * (z * (2 * big - 1) + 2 * phi - 1 / math.sqrt(math.pi))
+
+
+def lineages(sols, today):
+    """One solution for each period: the sharpest today of those that share it to every digit."""
+    best = {}
+    for s in sols:
+        if s[2] not in best or carried(s, today)[1] < carried(best[s[2]], today)[1]:
+            best[s[2]] = s
+    return list(best.values())
+
+
+def between(a, b, today):
+    """Two clocks' forecasts of the transit nearest today: (score in days, gap in combined sigmas, blind).
+    The same whichever clock is named first: the gap is folded by the shorter period. blind: the combined
+    error is a sixth of that period or more, so the two could not be seen to disagree."""
     ta, sa = carried(a, today)
-    tb, sb = carried(b, ta)
+    tb, sb = carried(b, today)
+    P = min(a[2], b[2])
+    gap = (tb - ta + P / 2) % P - P / 2
     sigma = math.hypot(sa, sb)
-    if sigma >= min(a[2], b[2]) * BLIND_SHARE:
-        return None
-    return 'apart' if abs(ta - tb) > DISPUTE_Z * sigma else 'together'
+    z = gap / sigma
+    return min(crps(z, sigma), P / 4), z, sigma >= P * BLIND_SHARE
 
 
-def choose_clock(candidates, others, today):
-    """The working clock among candidates, and how many other solutions stand apart from it.
-    others: every published solution of the planet. See the module text for the four steps."""
-    def standing(c):
-        seen, rivals = set(), []
-        for s in others:
-            k = (s[0], s[2])
-            if k == (c[0], c[2]) or k in seen:
-                continue
-            seen.add(k)
-            rivals.append(s)
-        apart = [s for s in rivals if against(c, s, today) == 'apart']
-        confirmed = any(s[4] != c[4] and against(c, s, today) == 'together' for s in rivals)
-        outvoted = any(a[4] != b[4] and a[4] != c[4] and b[4] != c[4] and against(a, b, today) == 'together'
-                       for i, a in enumerate(apart) for b in apart[i + 1:])
-        return confirmed, outvoted, len(apart)
-    ranked = sorted(candidates, key=lambda s: carried(s, today)[1])
-    stand = [standing(c) for c in ranked]
-    for need_confirmed, need_unbeaten in ((True, True), (True, False), (False, True), (False, False)):
-        for c, (confirmed, outvoted, apart) in zip(ranked, stand):
-            if (confirmed or not need_confirmed) and (not outvoted or not need_unbeaten):
-                return c, apart
-    raise ValueError('no candidate')
+def choose_clock(candidates, today):
+    """The working clock among the candidates, how many other lineages agree with it within 3 sigma, and how
+    many could be compared. See the module text."""
+    v = sorted(lineages(candidates, today), key=lambda s: carried(s, today)[1])          # the sharpest first, so a tie goes to it
+    if len(v) == 1:
+        return v[0], 0, 0
+    scores = []
+    for i, c in enumerate(v):
+        pair = sorted(between(c, o, today)[0] for j, o in enumerate(v) if j != i)
+        scores.append((pair[(len(pair) - 1) // 2], i))                                    # the median, the lower of two
+    c = v[min(scores)[1]]
+    seen = [between(c, o, today) for o in v if o is not c]
+    told = [x for x in seen if not x[2]]
+    return c, sum(1 for x in told if abs(x[1]) <= AGREE_Z), len(told)
 
 
 def pub_year(s):
@@ -223,7 +258,7 @@ def main(out, retrieved, raw):
     rows, record = [], []
     counts = {'planets_asked': len(comp), 'solutions_asked': len(ps), 'with_composite_clock': 0, 'composite_from_one_paper': 0,
               'clock_from_a_solution': 0, 'without_a_clock': 0, 'with_a_solution': 0, 'solutions_kept': 0,
-              'not_the_narrowest': 0, 'disputed': 0}
+              'not_the_narrowest': 0, 'contested': 0, 'uncompared': 0}
     for r in sorted(comp, key=lambda x: x['pl_name']):
         c = clock(r['pl_tranmid'], r['pl_tranmiderr1'], r['pl_tranmiderr2'], r['pl_orbper'], r['pl_orbpererr1'], r['pl_orbpererr2'])
         comp_row, same = None, False
@@ -245,19 +280,22 @@ def main(out, retrieved, raw):
         if mine:
             counts['with_a_solution'] += 1
             counts['solutions_kept'] += len(mine)
-        # the working clock: the narrowest window on the day of retrieval that the other papers do not agree
-        # against (choose_clock). flag 1: the composite, mid-time and period from one paper. 2: one published
-        # solution. 0: a composite that mixes papers, for want of either. The last number: how many other
-        # solutions contradict it today.
-        single = ([comp_row[:7] + [1]] if comp_row and same else []) + [s[:7] + [2] for s in mine]
+        # the working clock: the solution whose forecast of today's transit agrees best with the other papers'
+        # (choose_clock). flag 1: the composite, mid-time and period from one paper. 2: one published
+        # solution. 0: a composite that mixes papers, for want of either. The last two numbers: how many other
+        # lineages agree with it within 3 sigma, and how many could be compared.
+        single = [s[:7] + [2] for s in mine]
+        if comp_row and same and not any(same_clock(comp_row, s) for s in mine):      # the composite only when no solution is the same ephemeris: a solution carries its date
+            single.append(comp_row[:7] + [1])
         if single:
             narrowest = min(single, key=lambda s: carried(s, today)[1])
-            chosen, disputes = choose_clock(single, mine, today)
-            clock_row = chosen + [disputes]
+            chosen, agree, others = choose_clock(single, today)
+            clock_row = chosen + [agree, others]
             counts['not_the_narrowest'] += 1 if chosen is not narrowest else 0
-            counts['disputed'] += 1 if disputes else 0
+            counts['contested'] += 1 if agree * 2 < others else 0
+            counts['uncompared'] += 1 if not others else 0
         else:
-            clock_row = comp_row + [0] if comp_row else None
+            clock_row = comp_row + [0, 0] if comp_row else None
         if clock_row is not None and clock_row[7] == 2:
             counts['clock_from_a_solution'] += 1
         if clock_row is None:
@@ -280,7 +318,7 @@ def main(out, retrieved, raw):
                       'a_over_rs': 'semi-major axis in stellar radii', 'a_au': 'AU', 'r_earth': 'R_earth', 'st_rad': 'R_sun', 'st_teff': 'K',
                       't0': 'Julian date in the stated standard', 'e_t0': 'd', 'period': 'd', 'e_period': 'd', 'pub': 'year of publication, with a fraction'},
             'host': '0 means the host name is the planet name without its last letter',
-            'clock': 'the working clock as [' + ', '.join(CLOCK) + ']: default is 1 for the composite row with mid-time and period from one paper, 2 for one published solution, 0 for a mixed composite kept for want of a solution; disputes is how many other published solutions contradict it by more than 3 sigma on the day of retrieval; ref and std index the record file',
+            'clock': 'the working clock as [' + ', '.join(CLOCK) + ']: default is 1 for the composite row with mid-time and period from one paper, 2 for one published solution, 0 for a mixed composite kept for want of a solution; others is how many other lineages (solutions with another period) could be compared with it on the day of retrieval, and agree how many of those lie within 3 combined sigmas of it; ref and std index the record file',
             'record': 'ephemerides-record.json holds refs and sols; sols[i] are the published solutions of rows[i], oldest first, undated last',
             'errors': 'the mean size of the upper and lower error bars the archive gives',
             'acknowledgement': 'This research has made use of the NASA Exoplanet Archive, which is operated by the California Institute of Technology, under contract with the National Aeronautics and Space Administration under the Exoplanet Exploration Program.',
