@@ -235,10 +235,17 @@ class Route {
 
   localModels() { return (this._ollamaTags || []).slice(); }
 
+  /* The routes one call may try, in order. A route the visitor set up themselves (a local model, their own key)
+     is never followed by one they did not: when it fails, the lab's own engine answers and the prompt goes to
+     nobody else. Until 2026-11-14 a failed call to a visitor's own endpoint passed the prompt on to the labs'
+     route and then to Pollinations, a third party the visitor had not chosen. */
   _chain(first) {
-    const all = ['ollama', 'own-key', 'worker', 'pollinations'];
-    return all.slice(all.indexOf(first));
+    if (first === 'ollama') return this.ownKey() ? ['ollama', 'own-key'] : ['ollama'];
+    if (first === 'own-key') return ['own-key'];
+    return first === 'worker' ? ['worker', 'pollinations'] : ['pollinations'];
   }
+  /* True when the routes of a call are all the visitor's own, so a failure leaves the prompt with them. */
+  _private(first) { return first === 'ollama' || first === 'own-key'; }
 
   /* ---------- transports ---------- */
   async _ollama(messages, opt, signal) {
@@ -370,14 +377,14 @@ class Route {
     }
 
     if (typeof fallback !== 'function') {
-      this._emit('offline', '', ' (no fallback given)');
+      this._emit('offline', '', this._private(first) ? ' (no fallback given; the prompt went nowhere else)' : ' (no fallback given)');
       const e = new Error('no model route answered: ' + errors.join('; '));
       e.name = 'LLMUnavailable';
       e.errors = errors;
       throw e;
     }
     const fb = await fallback(req);
-    this._emit('offline', '', errors.length ? ` (${errors[errors.length - 1]})` : '');
+    this._emit('offline', '', errors.length ? ` (${errors[errors.length - 1]}${this._private(first) ? '; the prompt went nowhere else' : ''})` : '');
     const text = typeof fb === 'string' ? fb : JSON.stringify(fb);
     return {
       text, json: json ? (typeof fb === 'string' ? extractJSON(fb) : fb) : null,

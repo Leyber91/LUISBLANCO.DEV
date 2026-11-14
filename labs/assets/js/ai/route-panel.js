@@ -8,6 +8,8 @@
 
    The key is stored in this browser's localStorage and sent only
    to the endpoint the visitor typed. Nothing reaches this site.
+   A call that goes to the visitor's own key or local model goes
+   nowhere else: when that route fails, the lab's own engine answers.
    ============================================================ */
 
 import { LLM } from './llm.js';
@@ -71,7 +73,7 @@ export function mountRoutePanel(host) {
   panel.hidden = true;
   panel.innerHTML = `
     <h4>Model route</h4>
-    <p>This page is static and holds no key. It asks the first route that answers.</p>
+    <p>This page is static and holds no key. It asks the first route that answers. A local model or your own key is asked alone: if it fails, the lab's own engine answers and your prompt goes nowhere else.</p>
     <ol class="lbr-routes">
       <li data-r="ollama"><b>your machine</b><span>Ollama, when served locally</span></li>
       <li data-r="own-key"><b>your key</b><span>any OpenAI-compatible API</span></li>
