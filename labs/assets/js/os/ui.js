@@ -153,6 +153,7 @@ export function dataPanel(os, opts = {}) {
     const el = h('dialog', { class: 'los-panel', 'aria-labelledby': 'los-data-h' }, h('div', { class: 'los-plate' }, ...brackets(), h('header', { class: 'los-head' }, h('span', { class: 'los-label' }, 'Plate D · Your data'), h('span', { class: 'los-label los-quiet' }, os.storage.fixture ? `Fixture · ${os.storage.fixture}` : 'This browser')), h('h2', { class: 'los-display', id: 'los-data-h' }, 'Your data'), lead, rows, actions, confirm, status));
     el.addEventListener('cancel', () => close());
     let total = 0;
+    let labsKept = 0; // entries in the labs' own stores that a delete removes
     let everShared = false;
     let sharing = 'unset';
     async function refresh() {
@@ -164,6 +165,11 @@ export function dataPanel(os, opts = {}) {
         // the choices that say "off" survive a delete, so they are not among the records a delete removes
         total = s.counts.events + s.counts.progress + s.counts.meta
             - (on || !s.settings.includes('recording') ? 0 : 1) - (c.state === 'denied' ? 1 : 0);
+        const mine = s.extras.filter((x) => x.managedHere);
+        const theirs = s.extras.filter((x) => !x.managedHere);
+        labsKept = mine.reduce((n, x) => n + x.entries, 0);
+        const keptWords = (mine.length ? mine.map((x) => x.name).join('; ') : 'nothing')
+            + (theirs.length ? `. Not exported or deleted from here: ${theirs.map((x) => x.name).join('; ')}` : '');
         let span = s.firstEvent === null || s.lastEvent === null ? 'none yet'
             : `${count(s.counts.events, 'event', 'events')}, ${dayMonth(s.firstEvent)} to ${dayMonth(s.lastEvent)}`;
         span += `. Keeps the newest ${num(s.maxEvents)}.`;
@@ -184,6 +190,7 @@ export function dataPanel(os, opts = {}) {
             ['Activity log', span],
             ['Saved progress', s.labs.length ? `${count(s.labs.length, 'lab', 'labs')}: ${s.labs.map(title).join(', ')}` : 'none yet'],
             ['Settings', s.settings.length ? s.settings.map((k) => SETTING_NAMES[k] ?? k).join(', ') : 'none'],
+            ['Kept by the labs', keptWords],
         ];
         if (os.config.consentUi && sends) {
             const pair = choicePair(os.consent, (r) => {
@@ -199,8 +206,8 @@ export function dataPanel(os, opts = {}) {
             items.push(['Sharing', 'Off: this window keeps nothing, so an answer could not be remembered. Nothing is sent.']);
         }
         rows.replaceChildren(...items.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
-        deleteBtn.disabled = total === 0;
-        exportBtn.disabled = total === 0;
+        deleteBtn.disabled = total + labsKept === 0;
+        exportBtn.disabled = total + labsKept === 0;
     }
     async function doExport() {
         const file = await os.privacy.exportAll();
@@ -212,10 +219,11 @@ export function dataPanel(os, opts = {}) {
         a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 2000);
         status.textContent = `Exported ${count(file.counts.events, 'event', 'events')}, ` +
-            `${count(file.counts.progress, 'progress record', 'progress records')} and ${count(file.counts.meta, 'setting', 'settings')} as ${name}.`;
+            `${count(file.counts.progress, 'progress record', 'progress records')} and ${count(file.counts.meta, 'setting', 'settings')} as ${name}.` +
+            (file.extras.length ? ` With them: ${file.extras.map((x) => x.name).join('; ')}.${file.extras.some((x) => x.withheld.length) ? ' A key you typed is left out of the file.' : ''}` : '');
     }
     function askDelete() {
-        confirmText.textContent = `Delete ${count(total, 'record', 'records')} from this browser${everShared ? ' and erase the events it sent' : ''}?`;
+        confirmText.textContent = `Delete ${count(total, 'record', 'records')}${labsKept ? ` and ${count(labsKept, 'entry', 'entries')} the labs kept` : ''} from this browser${everShared ? ' and erase the events it sent' : ''}?`;
         actions.hidden = true;
         confirm.hidden = false;
         confirmNo.focus();
@@ -228,9 +236,11 @@ export function dataPanel(os, opts = {}) {
         const gone = r.deleted.events + r.deleted.progress + r.deleted.meta;
         const left = r.remaining.events + r.remaining.progress + r.remaining.meta;
         const keptOff = r.kept.includes('recording');
-        const here = r.ok
-            ? `Deleted ${count(gone, 'record', 'records')}; none remain.`
-            : `Deleted ${count(gone, 'record', 'records')}, but ${left - r.kept.length} remain. Close every lab tab and try again.`;
+        const labs = r.extras.removed ? ` and ${count(r.extras.removed, 'entry', 'entries')} the labs kept` : '';
+        const here = (r.ok
+            ? `Deleted ${count(gone, 'record', 'records')}${labs}; none remain.`
+            : `Deleted ${count(gone, 'record', 'records')}${labs}, but ${left - r.kept.length + r.extras.remaining} remain. Close every lab tab and try again.`)
+            + (r.extras.left.length ? ` Left as it was: ${r.extras.left.map((x) => x.name).join('; ')}.` : '');
         const there = r.remote.state === 'erased' ? ' The events this browser sent were erased from the backend; it holds none.'
             : r.remote.state === 'failed'
                 ? ` The events this browser sent could not be erased (${r.remote.detail}). Its install id is kept so the erase can be repeated: press Delete everything again when you are online.`

@@ -5,6 +5,7 @@ import { Registry } from './events.js';
 import type { EventSpec, TrackResult } from './events.js';
 import type { EventClass, Json, DueItem, ProgressRecord } from './types.js';
 import type { DeleteResult, ExportFile, Summary } from './privacy.js';
+import type { KeyValue } from './extras.js';
 import type { GetOptions } from './progress.js';
 import { Resume } from './resume.js';
 import { mountScene } from './scene.js';
@@ -25,6 +26,11 @@ export interface InitOptions {
     readonly ui?: boolean;
     /** the log's bound (tests); defaults to MAX_EVENTS */
     readonly maxEvents?: number;
+    /**
+     * Where some labs keep things of their own beside the record (extras.ts). Defaults to the browser's
+     * localStorage; null reads and erases none. A fixture never touches it: its data is not the visitor's.
+     */
+    readonly extras?: KeyValue | null;
 }
 /** What "delete everything" did here, and to the copy on the backend. */
 export interface DeleteOutcome extends DeleteResult {
@@ -68,8 +74,8 @@ export interface LabsOSInstance {
         summary(): Promise<Summary>;
         exportAll(): Promise<ExportFile>;
         /**
-         * Erase every record here, and the rows this browser sent to the backend, and stop recording and sending on
-         * this page. The choices that say "off" survive (recording off, sharing refused), so deleting never switches
+         * Erase every record here, what the labs keep in the browser beside it (extras.ts), and the rows this
+         * browser sent to the backend, and stop recording and sending on this page. The choices that say "off" survive (recording off, sharing refused), so deleting never switches
          * anything on; if the backend could not be reached, the install id survives too, so the erase can be retried.
          */
         deleteAll(): Promise<DeleteOutcome>;
@@ -132,6 +138,8 @@ export { BACKEND, supabaseTransport, fixtureTransport, sanitizeData, toRow } fro
 export type { UsageRow, SupabaseTransportOptions } from './transport.js';
 export { exportAll, deleteAll, summary } from './privacy.js';
 export type { ExportFile, DeleteResult, Summary } from './privacy.js';
+export { EXTRA_STORES, browserStorage, findExtras, exportExtras, eraseExtras } from './extras.js';
+export type { ExtraStore, ExtraFound, ExtraExport, ExtraErase, KeyValue } from './extras.js';
 export { mountScene, sceneCount } from './scene.js';
 export type { SceneHandle, SceneContext, SceneFactory, MountedScene } from './scene.js';
 export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';

@@ -148,6 +148,53 @@ describe('your data panel', () => {
     vi.unstubAllGlobals();
   });
 
+  it('names what the labs kept beside the record, deletes it with the record and leaves Claude Prep alone', async () => {
+    const map = new Map<string, string>([
+      ['lb.llm.ownkey', JSON.stringify({ base: 'https://api.example.test/v1', key: 'sk-test-0000', model: 'm-1' })],
+      ['altverse:index', '[{"id":"w1"}]'], ['altverse:world:w1', '{"title":"One"}'], ['b720.theme', 'dark'],
+    ]);
+    const extras = { get length() { return map.size; }, key: (i: number) => [...map.keys()][i] ?? null, getItem: (k: string) => map.get(k) ?? null, removeItem: (k: string) => { map.delete(k); } };
+    const os = await LabsOS.init({ lab: 'hub', idb: freshIdb(), fixture: null, extras });
+    const panel = dataPanel(os);
+    await panel.open();
+    const text = () => panel.el.textContent ?? '';
+    expect(text()).toMatch(/Kept by the labs\s*your own model key, with its address and model; worlds you saved in Alternate Reality\. Not exported or deleted from here: Claude Prep's own study record, settings and connection/);
+    expect(text()).not.toContain('sk-test-0000');
+    expect(TELLS.test(text())).toBe(false);
+
+    let saved = '';
+    vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: vi.fn((b: Blob) => { void b.text().then((t) => { saved = t; }); return 'blob:x'; }), revokeObjectURL: vi.fn() }));
+    (panel.el.querySelector('[data-act="export"]') as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(text()).toMatch(/With them: your own model key, with its address and model; worlds you saved in Alternate Reality\. A key you typed is left out of the file\./));
+    await vi.waitFor(() => expect(saved).toContain('altverse:world:w1'));
+    expect(saved).not.toContain('sk-test-0000');
+    expect(saved).not.toContain('b720.theme');
+
+    (panel.el.querySelector('[data-act="delete"]') as HTMLButtonElement).click();
+    expect(text()).toMatch(/Delete 2 records and 3 entries the labs kept from this browser\?/);
+    expect(map.has('lb.llm.ownkey')).toBe(true);                               // nothing gone before the confirmation
+    (panel.el.querySelector('[data-act="confirm"]') as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(text()).toMatch(/Deleted 2 records and 3 entries the labs kept; none remain\. Left as it was: Claude Prep's own study record, settings and connection\./));
+    expect([...map.keys()]).toEqual(['b720.theme']);
+    await vi.waitFor(() => expect(text()).toMatch(/Kept by the labs\s*nothing\. Not exported or deleted from here: Claude Prep/));
+    vi.unstubAllGlobals();
+  });
+
+  it('lets a visitor delete what the labs kept when the record itself is empty', async () => {
+    const map = new Map<string, string>([['lb.trending.history', '{"scans":[]}']]);
+    const extras = { get length() { return map.size; }, key: (i: number) => [...map.keys()][i] ?? null, getItem: (k: string) => map.get(k) ?? null, removeItem: (k: string) => { map.delete(k); } };
+    const os = await LabsOS.init({ lab: 'hub', idb: null, fixture: null, lifecycle: false, extras });
+    await os.recording.set(false);
+    const panel = dataPanel(os);
+    await panel.open();
+    const del = panel.el.querySelector('[data-act="delete"]') as HTMLButtonElement;
+    expect(del.disabled).toBe(false);
+    del.click();
+    expect(panel.el.textContent).toMatch(/and 1 entry the labs kept from this browser\?/);
+    (panel.el.querySelector('[data-act="confirm"]') as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(map.size).toBe(0));
+  });
+
   it('keeps the record when the visitor steps back from deleting', async () => {
     const os = await LabsOS.init({ lab: 'hub', idb: freshIdb(), fixture: null });
     const panel = dataPanel(os);

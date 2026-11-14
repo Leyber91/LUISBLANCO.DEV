@@ -71,7 +71,8 @@
         <dt>Delete</dt>
         <dd>Labs hub, <strong>Your data</strong>, <strong>Delete everything</strong>. <strong>Stop recording</strong> keeps later visits from being logged at all.</dd>
       </dl>
-      <p>Some labs also keep their own settings in this browser's localStorage, for example a model key you entered or a plan you saved. Clearing this site's data in the browser removes them.</p>
+      <p>Some labs keep things of their own in this browser's localStorage, beside the record: a model key you entered, with its address and model; worlds you saved in Alternate Reality; traces you saved in Token EKG, with the prompts you typed; the scans Trending kept; the model route the Honesty Decoder last used; and planets bookmarked in an earlier version of Exomania. <strong>Your data</strong> names the ones this browser holds. <strong>Export JSON</strong> includes them and leaves the key itself out of the file. <strong>Delete everything</strong> removes them.</p>
+      <p>Claude Prep keeps its own study record, its settings and the connection you entered in localStorage, under names that begin with <code>b720</code>. <strong>Your data</strong> says when this browser holds them and does not export or delete them. Clearing this site's data in the browser removes everything named on this plate.</p>
       <p class="lop-links"><a class="los-btn" href="index.html#your-data">Open Your data</a></p>
     </section>
 
@@ -145,9 +146,9 @@
       <h2 id="pv-g">Four controls, all under Your data</h2>
       <dl class="lop-facts">
         <dt>Export</dt>
-        <dd><strong>Export JSON</strong> saves every record this browser holds. The file includes your random id (<code>meta.install</code>). A browser cannot read events back from the backend, so to get a copy of what is stored under your id, send the id to the address on plate A.</dd>
+        <dd><strong>Export JSON</strong> saves every record this browser holds and what the labs kept beside it (plate B), without a model key you typed. The file includes your random id (<code>meta.install</code>). A browser cannot read events back from the backend, so to get a copy of what is stored under your id, send the id to the address on plate A.</dd>
         <dt>Delete</dt>
-        <dd><strong>Delete everything</strong> removes the record from this browser and erases this browser's events from the backend. It says whether the erase succeeded. If it could not reach the backend it keeps the id, so you can repeat it.</dd>
+        <dd><strong>Delete everything</strong> removes the record and what the labs kept beside it (plate B) from this browser, and erases this browser's events from the backend. It says what it removed, what it left and whether the erase succeeded. If it could not reach the backend it keeps the id, so you can repeat it.</dd>
         <dt>Erase</dt>
         <dd><strong>Erase what was sent</strong> removes this browser's events from the backend and keeps the record here.</dd>
         <dt>Withdraw</dt>
@@ -158,7 +159,7 @@
     </section>
 
     <footer class="lop-evidence">
-      <p><span class="lop-tag">[REAL]</span> Each statement on this page describes code in the site's public repository, read on 13 November 2026: <code>labs-src/os</code> (the record, the consent gate, the transport and its tests), <code>supabase/migrations</code> (the tables, who may read them, the 90 day reduction), <code>workers/model-route</code> (the Worker) and <code>labs/assets/js/ai/llm.js</code> (the model routes).</p>
+      <p><span class="lop-tag">[REAL]</span> Each statement on this page describes code in the site's public repository, read on 14 November 2026: <code>labs-src/os</code> (the record, the consent gate, the transport, the list of the labs' own stores in <code>extras.ts</code>, and their tests), <code>supabase/migrations</code> (the tables, who may read them, the 90 day reduction), <code>workers/model-route</code> (the Worker) and <code>labs/assets/js/ai/llm.js</code> (the model routes).</p>
       <p>This page describes practice. It is not legal advice.</p>
     </footer>
 

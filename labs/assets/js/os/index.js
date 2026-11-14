@@ -39,6 +39,7 @@ import { Consent, CONSENT_KEY, INSTALL_KEY, Outbox } from './consent.js';
 import { Registry, Tracker } from './events.js';
 import { fixtureStore, isFixture } from './fixtures.js';
 import { deleteAll, exportAll, summary } from './privacy.js';
+import { browserStorage } from './extras.js';
 import { Progress } from './progress.js';
 import { Resume } from './resume.js';
 import { mountScene } from './scene.js';
@@ -79,6 +80,7 @@ async function create(opts) {
         ...(store.fixture !== null && opts.config?.transport === undefined && base.transport ? { transport: fixtureTransport() } : {}),
     });
     const session = randomId();
+    const extras = store.fixture !== null ? null : opts.extras === undefined ? browserStorage() : opts.extras;
     const registry = new Registry();
     const progress = new Progress(store, now);
     const consent = new Consent(store, now);
@@ -138,8 +140,8 @@ async function create(opts) {
             all: () => progress.all(),
         },
         privacy: {
-            summary: () => summary(store),
-            exportAll: () => exportAll(store, now),
+            summary: () => summary(store, extras),
+            exportAll: () => exportAll(store, now, extras),
             async deleteAll() {
                 tracker.halt();
                 life?.stop();
@@ -151,7 +153,7 @@ async function create(opts) {
                     ...(c?.state === 'denied' ? [CONSENT_KEY] : []),
                     ...(remote.state === 'failed' ? [INSTALL_KEY] : []),
                 ];
-                const r = await deleteAll(store, { keep });
+                const r = await deleteAll(store, { keep, extras });
                 deletedFns.forEach((fn) => { try {
                     fn();
                 }
@@ -227,6 +229,7 @@ export { Resume, visitsFrom, suggest, describeVisit } from './resume.js';
 export { Consent, Outbox, CONSENT_POLICY, BATCH_SIZE } from './consent.js';
 export { BACKEND, supabaseTransport, fixtureTransport, sanitizeData, toRow } from './transport.js';
 export { exportAll, deleteAll, summary } from './privacy.js';
+export { EXTRA_STORES, browserStorage, findExtras, exportExtras, eraseExtras } from './extras.js';
 export { mountScene, sceneCount } from './scene.js';
 export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';
 export { RECORDING_KEY } from './recording.js';

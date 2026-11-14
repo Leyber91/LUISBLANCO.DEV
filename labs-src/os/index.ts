@@ -45,6 +45,8 @@ import type { EventClass, Json, DueItem, ProgressRecord } from './types.js';
 import { fixtureStore, isFixture } from './fixtures.js';
 import { deleteAll, exportAll, summary } from './privacy.js';
 import type { DeleteResult, ExportFile, Summary } from './privacy.js';
+import { browserStorage } from './extras.js';
+import type { KeyValue } from './extras.js';
 import { Progress } from './progress.js';
 import type { GetOptions } from './progress.js';
 import { Resume } from './resume.js';
@@ -74,6 +76,11 @@ export interface InitOptions {
   readonly ui?: boolean;
   /** the log's bound (tests); defaults to MAX_EVENTS */
   readonly maxEvents?: number;
+  /**
+   * Where some labs keep things of their own beside the record (extras.ts). Defaults to the browser's
+   * localStorage; null reads and erases none. A fixture never touches it: its data is not the visitor's.
+   */
+  readonly extras?: KeyValue | null;
 }
 
 /** What "delete everything" did here, and to the copy on the backend. */
@@ -116,8 +123,8 @@ export interface LabsOSInstance {
     summary(): Promise<Summary>;
     exportAll(): Promise<ExportFile>;
     /**
-     * Erase every record here, and the rows this browser sent to the backend, and stop recording and sending on
-     * this page. The choices that say "off" survive (recording off, sharing refused), so deleting never switches
+     * Erase every record here, what the labs keep in the browser beside it (extras.ts), and the rows this
+     * browser sent to the backend, and stop recording and sending on this page. The choices that say "off" survive (recording off, sharing refused), so deleting never switches
      * anything on; if the backend could not be reached, the install id survives too, so the erase can be retried.
      */
     deleteAll(): Promise<DeleteOutcome>;
@@ -179,6 +186,7 @@ async function create(opts: InitOptions): Promise<LabsOSInstance> {
     ...(store.fixture !== null && opts.config?.transport === undefined && base.transport ? { transport: fixtureTransport() } : {}),
   });
   const session = randomId();
+  const extras: KeyValue | null = store.fixture !== null ? null : opts.extras === undefined ? browserStorage() : opts.extras;
   const registry = new Registry();
   const progress = new Progress(store, now);
   const consent = new Consent(store, now);
@@ -239,8 +247,8 @@ async function create(opts: InitOptions): Promise<LabsOSInstance> {
       all: () => progress.all(),
     },
     privacy: {
-      summary: () => summary(store),
-      exportAll: () => exportAll(store, now),
+      summary: () => summary(store, extras),
+      exportAll: () => exportAll(store, now, extras),
       async deleteAll() {
         tracker.halt();
         life?.stop();
@@ -252,7 +260,7 @@ async function create(opts: InitOptions): Promise<LabsOSInstance> {
           ...(c?.state === 'denied' ? [CONSENT_KEY] : []),
           ...(remote.state === 'failed' ? [INSTALL_KEY] : []),
         ];
-        const r = await deleteAll(store, { keep });
+        const r = await deleteAll(store, { keep, extras });
         deletedFns.forEach((fn) => { try { fn(); } catch { /* the listener's problem */ } });
         return { ...r, remote };
       },
@@ -331,6 +339,8 @@ export { BACKEND, supabaseTransport, fixtureTransport, sanitizeData, toRow } fro
 export type { UsageRow, SupabaseTransportOptions } from './transport.js';
 export { exportAll, deleteAll, summary } from './privacy.js';
 export type { ExportFile, DeleteResult, Summary } from './privacy.js';
+export { EXTRA_STORES, browserStorage, findExtras, exportExtras, eraseExtras } from './extras.js';
+export type { ExtraStore, ExtraFound, ExtraExport, ExtraErase, KeyValue } from './extras.js';
 export { mountScene, sceneCount } from './scene.js';
 export type { SceneHandle, SceneContext, SceneFactory, MountedScene } from './scene.js';
 export { openStore, memoryStore, DB_NAME, DB_VERSION, MIGRATIONS, MAX_EVENTS, DROPPED_KEY } from './store.js';
