@@ -48,7 +48,7 @@
             <li><i class="lamp kept" aria-hidden="true"></i><span><b>kept</b> error within a twelfth of the transit</span></li>
             <li><i class="lamp slipping" aria-hidden="true"></i><span><b>slipping</b></span></li>
             <li><i class="lamp lost" aria-hidden="true"></i><span><b>lost</b> error longer than the transit</span></li>
-            <li><i class="lamp crossing" aria-hidden="true"></i><span><b>in transit</b> now</span></li>
+            <li id="key-live"><i class="lamp crossing" aria-hidden="true"></i><span><b>in transit</b> now</span></li>
           </ul>
         </div>
         <canvas id="lens2" role="img" aria-label="The Kepler field, enlarged"></canvas>
@@ -91,7 +91,7 @@
       <canvas id="oc" role="img" aria-label="Each published paper's mid-transit time, early or late against the clock in use, by year. The list under the drawing gives each paper in words."></canvas>
     </div>
     <details class="od-list">
-      <summary id="r-count">published clocks, as a list</summary>
+      <summary id="r-count">published clocks</summary>
       <ul id="r-points"></ul>
     </details>
   </section>
@@ -114,10 +114,10 @@
         <p class="status" id="place-msg" role="status" aria-live="polite"></p>
       </details>
     </header>
-    <p class="od-say wide"><span id="t-count"></span> <a class="tg i" href="#up-in-the-dark">illustrative</a></p>
+    <p class="od-say wide"><span id="t-count"></span> <a href="#up-in-the-dark">How that is counted.</a></p>
     <canvas id="night" role="img" aria-label="The dark hours of the next 24: each transit that is up in the dark, as the height of its star."></canvas>
     <details class="od-list" id="t-details">
-      <summary id="t-cap">transits, as a table</summary>
+      <summary id="t-cap">transits</summary>
       <div class="od-more"><button type="button" class="act ghost" id="t-all">show all</button><span class="od-note" id="t-shown"></span></div>
       <div class="od-tablewrap" id="t-wrap" tabindex="0" role="region" aria-labelledby="t-cap">
         <table class="od-table" id="t-table" aria-labelledby="t-cap">
@@ -174,7 +174,7 @@
       <li><b class="t real">[REAL]</b> The tally. The counts in sheet d are computed in your browser from the same two files. A test is a planet's earliest dated solution carried to the mid-transit time of the latest paper that can test it, which is a different paper, published two years or more later, whose mid-time is ten or more orbits on and later than the day the first paper appeared. Rows without a true date take no part. A test is left out when the two uncertainties together had reached a sixth of the orbit, where nothing can miss by three sigma. The test is lenient. A later paper usually fits the old transits again, the archive does not record which transits each used, and one catalogue is the newer paper in most of the tests. Planets pulled by their neighbours do not keep a linear clock, and the misses that are such planets are not separated here. <code>node labs/assets/js/exoplanet/tests/overdue.test.mjs</code> recomputes the counts from the committed files.</li>
       <li><b class="t real">[REAL]</b> The transit as light. The dip is limb-darkened and central, from the archive's depth and length. The heavy line is that dip averaged over the error of its predicted time, which is what a telescope pointed at the prediction would record on average.</li>
       <li><b class="t real">[REAL]</b> Time. Barycentric and heliocentric dates are turned into UTC at Earth with the light-travel time across Earth's orbit and with TT minus UTC (69.184 s since 2017). J. Eastman, R. Siverd and B. S. Gaudi, <i>PASP</i> 122, 935 (2010), explain why a mid-transit time must state its standard. The Sun's position, sidereal time and altitude follow J. Meeus, <i>Astronomical Algorithms</i>, 2nd ed. (Willmann-Bell, 1998), chapters 12, 13 and 25, and the page's tests reproduce four of its worked examples (12.a, 12.b, 13.b and 25.a). The Sun stands in for the solar system's barycentre, which costs up to about 5 seconds. A transit's window in sheet c is the clock's own 1-sigma error plus what its stated standard leaves unsaid, up to 69 seconds for a date whose scale is not stated and up to 10 minutes for a bare "JD". A time is shown to the nearest minute, or to the nearest second when its window is under a minute. Altitude ignores refraction.</li>
-      <li id="up-in-the-dark"><b class="t ill">[ILLUSTRATIVE]</b> Up in the dark. <span id="t-rule"></span> The rule is this lab's. It says where to point and when. It does not say that a telescope can measure the dip, which depends on the star's brightness and the dip's depth; the table gives both and the rule limits neither. The half hour of sky before and after follows the tool observers plan with, the TESS Transit Finder (astro.swarthmore.edu/transits, read 14 November 2026), which asks for baseline on both sides of a transit and widens it by the ephemeris uncertainty. Until you set a place the night is drawn for Barcelona, as an example.</li>
+      <li id="up-in-the-dark"><b class="t ill">[ILLUSTRATIVE]</b> Up in the dark. <span id="t-rule"></span> The rule is this lab's, and it covers where to point and when. Whether a telescope can measure the dip depends on the star's brightness and the dip's depth; the table gives both and the rule limits neither. The half hour of sky before and after follows the tool observers plan with, the TESS Transit Finder (astro.swarthmore.edu/transits, read 14 November 2026), which asks for baseline on both sides of a transit and widens it by the ephemeris uncertainty. Until you set a place the night is drawn for Greenwich, as an example.</li>
       <li><b class="t real">[REAL]</b> The planet the sheet opens on. HD 209458 b was the first planet seen to transit (D. Charbonneau et al., <i>ApJ</i> 529, L45, 2000, and G. W. Henry et al., <i>ApJ</i> 529, L41, 2000).</li>
       <li><b class="t real">[REAL]</b> Who keeps these clocks for observers. The ExoClock project and the Exoplanet Transit Database collect new timings and publish refined ephemerides. This page shows the state of the archive's tables and replaces neither.</li>
       <li><b class="t real">[REAL]</b> What stays in your browser. The planet you opened and, if you set one, your place (rounded to a hundredth of a degree) are kept in the labs' own store in this browser, and the <a href="privacy.html">privacy page</a> can export or erase them. If you have allowed sharing of usage, the author receives which planet was opened, the year a drag on the line of time ended on, whether a place was typed or taken from the device, and, as on every lab page, when the page was opened and left. The place itself is never sent. The page uses no model.</li>

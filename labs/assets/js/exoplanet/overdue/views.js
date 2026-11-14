@@ -17,8 +17,7 @@
    The sky. Every planet a lamp at its star's place on an
    equal-area map, in the state of the best clock known on the
    date shown. On today's sky a planet in front of its star wears
-   an arc in its lamp's own ink, as far round as the transit has
-   got. The ecliptic and the plane of the Galaxy are the only
+   an arc in bright ink, as far round as the transit has got. The ecliptic and the plane of the Galaxy are the only
    construction lines. A lens enlarges the Kepler field, where the
    map itself can only show a crowd.
 
@@ -59,12 +58,13 @@ import { hammer, circleOnMap, eclipticToEquatorial, galacticToEquatorial, clockA
 
 const TAU = Math.PI * 2;
 const NAME = '400 15px Fraunces, Georgia, serif';                       // upright: in the italic a planet's letter b reads as a 6
-const STAMP = '500 12px "IBM Plex Mono", ui-monospace, Consolas, monospace';
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
-/* Words on a drawing, on a ground of their own. */
-function words(ctx, text, x, y, ink, ground) {
-  ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = ground; ctx.strokeText(text, x, y); ctx.lineWidth = 1;
+/* Words on a drawing, on a ground of their own: a box of the ground's colour under them, so no mark and no line
+   shows between the letters. tall: the height of the type, in pixels. */
+function words(ctx, text, x, y, ink, ground, tall = 9) {
+  const tw = ctx.measureText(text).width, x0 = ctx.textAlign === 'right' ? x - tw : ctx.textAlign === 'center' ? x - tw / 2 : x;
+  ctx.fillStyle = ground; ctx.fillRect(x0 - 3, y - tall, tw + 6, tall + 4);
   ctx.fillStyle = ink; ctx.fillText(text, x, y);
 }
 
@@ -102,7 +102,7 @@ export function lampMark(lamp) {
   if (kind === 'lost') return { kind, r: 2.2, a: 0.55, step: 0 };
   if (kind === 'slipping') return { kind, r: 0.95, a: 0.72, step: 0 };
   const step = Math.min(STEPS - 1, Math.floor((Math.log10(lamp / KEPT_LAMP) / 3) * STEPS));
-  return { kind, r: 1.25 + 0.95 * (step / (STEPS - 1)), a: keptAlpha(step), step };
+  return { kind, r: 1.4 + 1.0 * (step / (STEPS - 1)), a: keptAlpha(step), step };
 }
 
 const SLIPPING = lampMark(2), LOST = lampMark(0.5);
@@ -158,17 +158,15 @@ function lamps(ctx, T, lit, { place, scale, inLens, packed = () => false, halo, 
   // a lost clock is a hairline ring: found by its shape, and quieter than any kept lamp
   ctx.lineWidth = 0.9; ctx.strokeStyle = alpha(T.ice, LOST.a); each((x) => x.mark.kind === 'lost', 1, true); ctx.lineWidth = 1;
   if (!live) return;
-  // a planet crossing its star at this instant: an arc in its lamp's own ink, as far round as the transit has got
-  for (const [kind, ink] of [['kept', T.gold], ['slipping', T.ice]]) {
-    ctx.strokeStyle = alpha(ink, 0.5); ctx.beginPath();
-    for (const x of lit) {
-      if (x.mark.kind !== kind || packed(x) || (inLens && !x.s.q.inside) || !inTransit(x.c, jd, x.dur)) continue;
-      const q = place(x.s), turn = (((jd - x.c.t0) / x.c.P) % 1 + 1.5) % 1, done = Math.min(1, Math.max(0.04, (turn - 0.5) * x.c.P / x.dur + 0.5));
-      const r = x.mark.r * scale + 1.4;
-      ctx.moveTo(q.x, q.y - r); ctx.arc(q.x, q.y, r, -Math.PI / 2, -Math.PI / 2 + done * TAU);
-    }
-    ctx.stroke();
+  // a planet crossing its star at this instant: an arc in bright ink, clear of its lamp, as far round as the transit has got
+  ctx.strokeStyle = alpha(T.bright, 0.6); ctx.beginPath();
+  for (const x of lit) {
+    if (x.mark.kind === 'lost' || packed(x) || (inLens && !x.s.q.inside) || !inTransit(x.c, jd, x.dur)) continue;
+    const q = place(x.s), turn = (((jd - x.c.t0) / x.c.P) % 1 + 1.5) % 1, done = Math.min(1, Math.max(0.04, (turn - 0.5) * x.c.P / x.dur + 0.5));
+    const r = x.mark.r * scale + (inLens ? 1.8 : 2.5);
+    ctx.moveTo(q.x, q.y - r); ctx.arc(q.x, q.y, r, -Math.PI / 2, -Math.PI / 2 + done * TAU);
   }
+  ctx.stroke();
 }
 
 /* The lens: its ground, the lamps under it, its ring. Z: { x, y, r }. */
@@ -258,8 +256,9 @@ export function drawSky(ctx, w, h, { L, stars, jd, selected, hover, live = false
     crosshair(ctx, T, q);
     ctx.font = NAME; ctx.textAlign = left ? 'right' : 'left';
     const tx = q.x + (left ? -18 : 18), ty = q.y - 10;
-    ctx.save(); ellipse(); ctx.clip(); ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = T.sky; ctx.strokeText(selected.p.name, tx, ty); ctx.restore();
-    ctx.lineWidth = 1; ctx.fillStyle = T.bright; ctx.fillText(selected.p.name, tx, ty);
+    const nw = ctx.measureText(selected.p.name).width;
+    ctx.save(); ellipse(); ctx.clip(); ctx.fillStyle = T.sky; ctx.fillRect((left ? tx - nw : tx) - 4, ty - 14, nw + 8, 19); ctx.restore();
+    ctx.fillStyle = T.bright; ctx.fillText(selected.p.name, tx, ty);
   }
   return spots;
 }
@@ -398,7 +397,8 @@ export function drawBand(ctx, w, h, { sc, census, line, hist, dur, jd, nowJd, st
   // the papers' names last, each on a ground of its own, so neither the date's line nor a threshold runs through one
   ctx.font = T.fontSm;
   for (const n of names) {
-    const flip = n.x > right - 150;
+    const tw = ctx.measureText(n.text).width, roomRight = right - (n.x + 9 + tw), roomLeft = n.x - 9 - tw - (pad.l + 4);
+    const flip = roomRight < 0 && roomLeft > roomRight;
     ctx.textAlign = flip ? 'right' : 'left';
     words(ctx, n.text, n.x + (flip ? -9 : 9), Math.min(bottom - 4, n.y + 14), T.text, T.void);
   }
@@ -472,47 +472,60 @@ export function drawCurve(ctx, w, h, { planet, clock, jd }) {
 /* How a paper stands to a clock. inside: within its own error and the clock's together, where the clock's
    window at that orbit was narrower than the transit, so it could have missed. wide: within them, but the
    window had grown past the transit (or there is no transit length): landing inside it says nothing.
-   outside: beyond the two errors. */
+   same: within them and on the clock's own transit, so it restates the clock and is counted on the clock's
+   mark instead of drawn. outside: beyond the two errors, at any orbit. */
 export function paperKind(pt, clock, dur) {
   if (Math.abs(pt.z) >= 1) return 'outside';
+  if (pt.n === 0) return 'same';                                        // the clock's own transit, timed again and agreeing: a copy, not a test
   return dur && !pt.blind && sigmaAt(clock, pt.n) < dur ? 'inside' : 'wide';
 }
-const PAPER_NAMES = { inside: 'INSIDE BOTH ERRORS', outside: 'OUTSIDE', wide: 'INSIDE A WINDOW TOO WIDE TO MISS' };
+const PAPER_NAMES = { inside: 'INSIDE BOTH ERRORS', outside: 'OUTSIDE', wide: 'TOO WIDE TO MISS', off: 'OFF THE SCALE' };
 
 /**
  * Every other published clock of a planet against the clock in use: its mid-time minus what the clock in use
  * predicts for that orbit, by the year of the mid-time. The band is the clock's own 1-sigma error. paper(s): a
- * paper, in words. hover: the solution under the pointer, to be named. Returns what the pointer can reach:
- * [{ x, y, pt }].
+ * paper, in words. hover: the solution under the pointer, to be named. Returns what the pointer can reach,
+ * [{ x, y, pt }], with .same: how many papers restate the clock's own transit and are counted on its mark.
  */
 export function drawOC(ctx, w, h, { planet, clock, paper, hover = null }) {
   const T = tokens();
   ctx.font = T.fontSm; ctx.lineWidth = 1;
   const title = 'EACH PAPER AGAINST THIS CLOCK';
   ctx.fillStyle = T.dim; ctx.textAlign = 'left'; ctx.fillText(title, 0, 9);
-  const pts = clock ? pointsFor(planet, clock) : [];
-  if (!pts.length) {
+  const hits = [];
+  hits.same = 0;
+  const every = clock ? pointsFor(planet, clock) : [];
+  if (!every.length) {
     ctx.textAlign = 'center'; ctx.fillText(clock ? 'NO OTHER PUBLISHED CLOCK TO HOLD THIS ONE AGAINST' : 'NO CLOCK PUBLISHED YET', w / 2, h / 2 + 6);
-    return [];
+    return hits;
   }
-  const dur = durDays(planet), inkOf = { inside: T.gold, outside: T.ice, wide: alpha(T.text, 0.85) };
-  const kinds = pts.map((q) => paperKind(q, clock, dur));
-  // the key: only the kinds this drawing holds, beside the title where there is room and under it where there is not
-  const present = ['inside', 'outside', 'wide'].filter((k) => kinds.includes(k));
+  const dur = durDays(planet), inkOf = { inside: T.gold, outside: T.ice, wide: alpha(T.text, 0.55), off: T.dim };
+  const all = every.map((q) => paperKind(q, clock, dur));
+  hits.same = all.filter((k) => k === 'same').length;
+  const pts = every.filter((_, i) => all[i] !== 'same'), kinds = all.filter((k) => k !== 'same');
+  const y0 = yearOfJd(clock.t0), years = [y0, ...pts.map((q) => q.year)];
+  const lo = Math.min(...years) - 0.6, hi = Math.max(...years) + 0.6;
+  const env = Math.max(...pts.map((q) => sigmaAt(clock, q.n)), clock.sT);
+  const mags = pts.map((q) => Math.abs(q.residual) + q.sT).sort((a, b) => a - b), mid = mags.length ? mags[Math.floor((mags.length - 1) / 2)] : env;
+  const R = (mags.length ? Math.min(mags[mags.length - 1], Math.max(env * 3, mid * 6)) * 1.18 : 0) || env * 3;      // one far miss does not flatten the rest: it is drawn at the edge
+  const offScale = (q) => Math.abs(q.residual) > R;
+  // the key: only the marks this drawing holds, beside the title where there is room and under it where there is not
+  const present = ['inside', 'outside', 'wide'].filter((k) => kinds.includes(k)).concat(pts.some(offScale) ? ['off'] : []);
+  const mark = (k, x, y) => {
+    ctx.beginPath();
+    if (k === 'off') { ctx.fillStyle = inkOf.off; ctx.moveTo(x - 4, y + 3); ctx.lineTo(x + 4, y + 3); ctx.lineTo(x, y - 4); ctx.closePath(); ctx.fill(); }
+    else if (k === 'wide') { ctx.strokeStyle = inkOf.wide; ctx.lineWidth = 1; ctx.arc(x, y, 3, 0, TAU); ctx.stroke(); }
+    else { ctx.fillStyle = inkOf[k]; ctx.arc(x, y, 3, 0, TAU); ctx.fill(); }
+  };
   const keyW = present.reduce((a, k) => a + 12 + ctx.measureText(PAPER_NAMES[k]).width + 14, 0) - 14;
   const below = ctx.measureText(title).width + 20 + keyW > w, ky = below ? 21 : 9;
   let kx = below ? 0 : w - keyW;
   for (const k of present) {
-    ctx.fillStyle = inkOf[k]; ctx.beginPath(); ctx.arc(kx + 3, ky - 3, 3, 0, TAU); ctx.fill();
+    mark(k, kx + 3, ky - 3);
     ctx.fillStyle = T.dim; ctx.textAlign = 'left'; ctx.fillText(PAPER_NAMES[k], kx + 12, ky);
     kx += 12 + ctx.measureText(PAPER_NAMES[k]).width + 14;
   }
   const pad = { l: w < 420 ? 84 : 92, r: 10, t: below ? 38 : 26, b: 18 };
-  const y0 = yearOfJd(clock.t0), years = [y0, ...pts.map((q) => q.year)];
-  const lo = Math.min(...years) - 0.6, hi = Math.max(...years) + 0.6;
-  const mags = pts.map((q) => Math.abs(q.residual) + q.sT).sort((a, b) => a - b), mid = mags[Math.floor((mags.length - 1) / 2)];
-  const env = Math.max(...pts.map((q) => sigmaAt(clock, q.n)), clock.sT);
-  const R = Math.min(mags[mags.length - 1], Math.max(env * 3, mid * 6)) * 1.18 || env * 3;      // one far miss does not flatten the rest: it is drawn at the edge
   const X = (yr) => pad.l + ((yr - lo) / (hi - lo)) * (w - pad.l - pad.r), zero = (pad.t + h - pad.b) / 2;
   const Y = (days) => zero - (Math.max(-1, Math.min(1, days / R))) * (zero - pad.t - 2);
   // the clock's own error either side of its prediction, widening with every orbit from its own epoch
@@ -527,29 +540,38 @@ export function drawOC(ctx, w, h, { planet, clock, paper, hover = null }) {
   ctx.textAlign = 'center';
   const stepY = hi - lo > 12 ? 5 : hi - lo > 4 ? 2 : 1;
   for (let yr = Math.ceil(lo / stepY) * stepY; yr <= hi; yr += stepY) ctx.fillText(String(yr), X(yr), h - 4);
-  // the clock in use, at its own epoch, and the band named where it is wide enough to be seen
-  const cx = X(y0);
-  ctx.strokeStyle = T.bright; ctx.beginPath(); ctx.moveTo(cx - 4, zero); ctx.lineTo(cx, zero - 4); ctx.lineTo(cx + 4, zero); ctx.lineTo(cx, zero + 4); ctx.closePath(); ctx.stroke();
-  const tag = 'CLOCK IN USE', tagW = ctx.measureText(tag).width;
-  ctx.textAlign = 'left'; words(ctx, tag, Math.max(pad.l + 2, Math.min(w - pad.r - tagW, cx - tagW / 2)), zero - 9, T.text, T.void);
-  if (zero - Y(sig(hi)) >= 9) { ctx.textAlign = 'right'; ctx.fillStyle = T.dim; ctx.fillText('ITS OWN ± 1σ', w - pad.r - 2, Y(sig(hi)) + 9); }
-  // each paper: its mid-time's own error as a bar, the paper as a dot ringed with the ground
-  const hits = [];
+  // each paper: its mid-time's own error as a bar, then its mark ringed with the ground. A paper too far off for
+  // the scale is a wedge at the edge; one inside a window too wide to miss is a hollow ring.
   let named = null;
   pts.forEach((q, i) => {
-    const x = X(q.year), y = Y(q.residual), off = Math.abs(q.residual) > R, ink = inkOf[kinds[i]];
+    const x = X(q.year), y = Y(q.residual), off = offScale(q), k = kinds[i];
     if (!off) { ctx.strokeStyle = alpha(T.text, 0.45); ctx.beginPath(); ctx.moveTo(x + 0.5, Y(q.residual - q.sT)); ctx.lineTo(x + 0.5, Y(q.residual + q.sT)); ctx.stroke(); }
     ctx.fillStyle = T.void; ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.fill();
-    ctx.fillStyle = ink; ctx.beginPath();
-    if (off) { const up = q.residual > 0 ? -1 : 1; ctx.moveTo(x - 4, y - up * 3); ctx.lineTo(x + 4, y - up * 3); ctx.lineTo(x, y + up * 4); ctx.closePath(); } else ctx.arc(x, y, q.s === hover ? 4 : 3, 0, TAU);
-    ctx.fill();
+    if (off) { const up = q.residual > 0 ? -1 : 1; ctx.fillStyle = k === 'wide' ? inkOf.off : inkOf[k]; ctx.beginPath(); ctx.moveTo(x - 4, y - up * 3); ctx.lineTo(x + 4, y - up * 3); ctx.lineTo(x, y + up * 4); ctx.closePath(); ctx.fill(); }
+    else mark(k, x, y);
     hits.push({ x, y, pt: q });
     if (q.s === hover) named = { x, y, q };
   });
+  // the clock in use, at its own epoch: drawn last and larger than a paper, so nothing hides it. Its name stands
+  // over it, or under the axis where a paper's mark is in the way, with the papers that restate its own transit.
+  const cx = X(y0);
+  ctx.fillStyle = T.void; ctx.strokeStyle = T.bright; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(cx - 6, zero); ctx.lineTo(cx, zero - 6); ctx.lineTo(cx + 6, zero); ctx.lineTo(cx, zero + 6); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.lineWidth = 1;
+  const tag = `CLOCK IN USE${hits.same ? `, AND ${hits.same} ${hits.same === 1 ? 'PAPER' : 'PAPERS'} ON THE SAME TRANSIT` : ''}`, tagW = ctx.measureText(tag).width;
+  const inside = (x) => Math.max(pad.l + 2, Math.min(w - pad.r - tagW, x));
+  const crowded = ([tx, ty]) => hits.some((hh) => hh.x > tx - 7 && hh.x < tx + tagW + 7 && hh.y > ty - 14 && hh.y < ty + 8);
+  // over its mark, under it, to its right, to its left: the first place where no paper's mark is under the words
+  const places = [[inside(cx - tagW / 2), zero - 11], [inside(cx - tagW / 2), zero + 19], [inside(cx + 11), zero - 11], [inside(cx - 11 - tagW), zero - 11], [inside(cx + 11), zero + 19], [inside(cx - 11 - tagW), zero + 19]];
+  const [tagX, tagY] = places.find((pl) => !crowded(pl)) || places[0];
+  // the band is named at its wide end, unless the clock's own name reaches that far
+  const band = 'ITS OWN ± 1σ', bandW = ctx.measureText(band).width, bandY = Y(sig(hi)) + 9;
+  if (zero - Y(sig(hi)) >= 9 && !(tagX + tagW + 8 > w - pad.r - 2 - bandW && Math.abs(tagY - bandY) < 14)) { ctx.textAlign = 'right'; ctx.fillStyle = T.dim; ctx.fillText(band, w - pad.r - 2, bandY); }
+  ctx.textAlign = 'left'; words(ctx, tag, tagX, tagY, T.text, T.void);
   if (named) {
+    // the paper under the pointer: a ring on its own mark, and its name on the far side of it from the axis
+    ctx.strokeStyle = T.bright; ctx.beginPath(); ctx.arc(named.x, named.y, 6.5, 0, TAU); ctx.stroke();
     const text = `${paper(named.q.s)}, ${span(Math.abs(named.q.residual) * DAY)} ${named.q.residual < 0 ? 'early' : 'late'}`, tw = ctx.measureText(text).width;
     ctx.textAlign = 'left';
-    words(ctx, text, Math.max(pad.l + 2, Math.min(w - pad.r - tw, named.x + 9)), named.y > zero ? named.y - 9 : named.y + 16, T.bright, T.void);
+    words(ctx, text, Math.max(pad.l + 2, Math.min(w - pad.r - tw, named.x - tw / 2)), named.y <= zero ? Math.max(pad.t + 9, named.y - 11) : Math.min(h - pad.b - 4, named.y + 19), T.bright, T.void);
   }
   return hits;
 }
@@ -575,15 +597,32 @@ export function nightAxis(night, fromJd, x0, x1, gap = 18) {
   const X = (jd) => { for (const s of segs) if (jd >= s.a - EDGE && jd <= s.b + EDGE) return s.x0 + Math.max(0, Math.min(1, (jd - s.a) / (s.b - s.a))) * (s.x1 - s.x0); return NaN; };
   return { segs, X };
 }
-/* The transits a night's drawing names: of those up in the dark, the five whose stars are brightest. */
-export const nightNamed = (rows) => rows.filter((r) => r.watchable).sort((a, b) => (a.planet.vmag ?? 99) - (b.planet.vmag ?? 99)).slice(0, 5);
+/* The transits a night's drawing names: of those up in the dark, the few whose stars are brightest (five, or
+   three where the drawing is too narrow to hold five names apart). */
+export const nightNamed = (rows, count = 5) => rows.filter((r) => r.watchable).sort((a, b) => (a.planet.vmag ?? 99) - (b.planet.vmag ?? 99)).slice(0, count);
+/* The trace nearest a point, by its distance to the trace's line and not to its middle, or null beyond reach.
+   traces: [{ pts: [{ x, y }] }]. */
+export function nearestTrace(traces, x, y, reach = 10) {
+  let best = null, bd = reach * reach;
+  for (const t of traces) {
+    for (let i = 0; i + 1 < t.pts.length || (i === 0 && t.pts.length === 1); i++) {
+      const a = t.pts[i], b = t.pts[i + 1] || a, dx = b.x - a.x, dy = b.y - a.y, len = dx * dx + dy * dy;
+      const u = len ? Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / len)) : 0;
+      const d = (a.x + u * dx - x) ** 2 + (a.y + u * dy - y) ** 2;
+      if (d < bd) { bd = d; best = t; }
+    }
+  }
+  return best;
+}
 
 /**
  * rows: tonight.js crossings() at a place. fromJd: now. night: [[jdFrom, jdTo]] where the Sun is 12 degrees
- * down or more at the place. clock(jd): the hour of a Julian date on the visitor's clock, as words. Only the
- * transits that are up in the dark are drawn, each as the height of its star from its beginning to its end; the
- * five whose stars are brightest are drawn heavier, in ink, and named. hover: the planet under the pointer, to
- * be named with its hour. Returns what the pointer can reach: [{ x, y, row }].
+ * down or more at the place. clock(jd, withDay): the hour of a Julian date on the visitor's clock, as words,
+ * with the day of the week when asked. Only the transits that are up in the dark are drawn, each as the height
+ * of its star from its beginning to its end; the few whose stars are brightest are drawn heavier, in bright
+ * ink, and named, and the others in the labs' cold ink (ice is kept for a clock's state). hover: the planet
+ * under the pointer, to be named with its hour. Returns what the pointer can reach, [{ row, pts }] (nearestTrace
+ * reads it), with .named: the names written.
  */
 export function drawNight(ctx, w, h, { rows, place, fromJd, night, clock, hover = null }) {
   const T = tokens();
@@ -592,20 +631,30 @@ export function drawNight(ctx, w, h, { rows, place, fromJd, night, clock, hover 
   const Y = (alt) => h - pad.b - (Math.max(0, alt) / 90) * (h - pad.t - pad.b);
   ctx.font = T.fontSm; ctx.lineWidth = 1;
   const hits = [];
+  hits.named = [];
   // the dark hours: the sheet's blue again
   ctx.fillStyle = alpha(T.sky, 0.9);
   for (const [a, b] of night) { const xa = X(Math.max(a, fromJd)), xb = X(Math.min(b, fromJd + 1)); if (xb > xa) ctx.fillRect(xa, pad.t, xb - xa, h - pad.t - pad.b); }
   // the hours, named on the visitor's clock
-  for (const s of ax.segs) {
+  ax.segs.forEach((s, si) => {
     const perHour = (s.x1 - s.x0) / ((s.b - s.a) * 24), step = perHour >= 22 ? 1 : perHour >= 11 ? 2 : 3, every = perHour * step >= 62 ? 1 : 2;
     let n = 0;
     for (let t = Math.ceil((s.a + 0.5) * 24 / step) * step / 24 - 0.5; t <= s.b + 1e-9; t += step / 24) {
       ctx.strokeStyle = alpha(T.line, 0.9); ctx.beginPath(); ctx.moveTo(X(t) + 0.5, pad.t); ctx.lineTo(X(t) + 0.5, h - pad.b); ctx.stroke();
       if (n++ % every) continue;
-      const end = X(t) > w - pad.r - 26, start = X(t) < pad.l + 22;
-      ctx.fillStyle = T.dim; ctx.textAlign = end ? 'right' : start ? 'left' : 'center'; ctx.fillText(clock(t), end ? w - 2 : start ? pad.l : X(t), h - 6);
+      // after the cut the first hour says which day it is
+      const text = clock(t, si > 0 && n === 1), half = ctx.measureText(text).width / 2;
+      const end = X(t) + half > w - 2, start = X(t) - half < s.x0 - 2;
+      ctx.fillStyle = T.dim; ctx.textAlign = end ? 'right' : start ? 'left' : 'center'; ctx.fillText(text, end ? w - 2 : start ? s.x0 : X(t), h - 6);
     }
-  }
+    // where the day was cut out: two strokes across the foot of the drawing
+    if (si > 0) {
+      const gx = (ax.segs[si - 1].x1 + s.x0) / 2, gy = h - pad.b;
+      ctx.strokeStyle = T.dim; ctx.beginPath();
+      for (const dx of [-3, 2]) { ctx.moveTo(gx + dx - 2, gy + 5); ctx.lineTo(gx + dx + 2, gy - 5); }
+      ctx.stroke();
+    }
+  });
   const dark = night.length ? [Math.max(night[0][0], fromJd), Math.min(night[0][1], fromJd + 1)] : null, darkName = 'NIGHT, SUN 12° DOWN';
   if (dark && X(dark[1]) - X(dark[0]) > ctx.measureText(darkName).width + 12) { ctx.fillStyle = T.dim; ctx.textAlign = 'left'; ctx.fillText(darkName, X(dark[0]) + 5, pad.t + 9); }
   // the height of a star, and the height it must keep
@@ -615,7 +664,7 @@ export function drawNight(ctx, w, h, { rows, place, fromJd, night, clock, hover 
     for (const s of ax.segs) { ctx.beginPath(); ctx.moveTo(s.x0, Y(alt) + 0.5); ctx.lineTo(s.x1, Y(alt) + 0.5); ctx.stroke(); }
     ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText(`${alt}°`, pad.l - 6, Y(alt) + 3);
   }
-  ctx.fillStyle = T.text; ctx.textAlign = 'right'; ctx.fillText('NO LOWER THAN THIS', lastSeg.x1 - 2, Y(WATCH.minAlt) + 11);
+  ctx.fillStyle = T.text; ctx.textAlign = 'right'; ctx.fillText('MINIMUM HEIGHT', lastSeg.x1 - 2, Y(WATCH.minAlt) + 11);
   const up = rows.filter((r) => r.watchable);
   if (!up.length) { ctx.fillStyle = T.dim; ctx.textAlign = 'center'; ctx.fillText(night.length ? 'NO TRANSIT IS UP IN THE DARK HERE IN THE NEXT 24 HOURS' : 'NO DARK HOUR HERE IN THE NEXT 24 HOURS', (pad.l + w - pad.r) / 2, pad.t + 30); return hits; }
   // each transit as the height of its star from its beginning to its end; the end of its line is where its name goes
@@ -623,19 +672,22 @@ export function drawNight(ctx, w, h, { rows, place, fromJd, night, clock, hover 
     const dur = durDays(r.planet); if (!dur) return null;
     const a = r.mid - dur / 2, b = r.mid + dur / 2, n = Math.max(3, Math.ceil((b - a) * 48));
     ctx.strokeStyle = colour; ctx.lineWidth = width; ctx.beginPath();
-    let pen = false, end = null;
+    let pen = false;
+    const pts = [];
     for (let i = 0; i <= n; i++) {
       const t = a + ((b - a) * i) / n, alt = altAz(t, r.planet.ra, r.planet.dec, place.lat, place.lon).alt, x = X(t);
       if (alt < 0 || Number.isNaN(x)) { pen = false; continue; }
       if (pen) ctx.lineTo(x, Y(alt)); else ctx.moveTo(x, Y(alt));
-      pen = true; end = { x, y: Y(alt) };
+      pen = true; pts.push({ x, y: Y(alt) });
     }
     ctx.stroke(); ctx.lineWidth = 1;
-    return end;
+    if (pts.length) hits.push({ row: r, pts });
+    return pts[pts.length - 1] || null;
   };
-  const named = nightNamed(rows), held = up.find((r) => r.planet === hover) || null, taken = [];
+  const named = nightNamed(rows, w < 520 ? 3 : 5), held = up.find((r) => r.planet === hover) || null, taken = [];
   const name = (end, text) => {
     if (!end) return;
+    hits.named.push(text);
     const tw = ctx.measureText(text).width, flip = end.x + 6 + tw > w - pad.r, x0 = flip ? end.x - 6 - tw : end.x + 6;
     let y = end.y + 3;
     for (let k = 0; k < 5 && taken.some((b) => x0 < b.x + b.w + 4 && x0 + tw + 4 > b.x && Math.abs(y - b.y) < 10); k++) y -= 11;
@@ -643,11 +695,7 @@ export function drawNight(ctx, w, h, { rows, place, fromJd, night, clock, hover 
     taken.push({ x: x0, y, w: tw });
     ctx.textAlign = 'left'; words(ctx, text, x0, y, T.bright, T.sky);
   };
-  for (const r of up) {
-    const alt = altAz(r.mid, r.planet.ra, r.planet.dec, place.lat, place.lon).alt;
-    if (!Number.isNaN(X(r.mid))) hits.push({ x: X(r.mid), y: Y(alt), row: r });
-    if (!named.includes(r) && r !== held) trace(r, alpha(T.ice, 0.5), 1);
-  }
+  for (const r of up) if (!named.includes(r) && r !== held) trace(r, alpha(T.horizon, 0.4), 1);
   const ends = named.filter((r) => r !== held).map((r) => [r, trace(r, alpha(T.bright, 0.9), 2)]);
   for (const [r, end] of ends) name(end, r.planet.name);
   if (held) name(trace(held, T.bright, 2.5), `${held.planet.name}, ${clock(held.mid)}`);
@@ -667,7 +715,12 @@ export const tallyBin = (z) => Math.max(0, Math.min(Math.round((2 * EDGE) / BIN)
  */
 export function drawTally(ctx, w, h, { zs, t }) {
   const T = tokens();
-  const narrow = w < 620, pad = { l: 10, r: 10, t: narrow ? 64 : 44, b: 36 };
+  ctx.font = T.font;
+  const share = (n) => (t && t.real ? `${((100 * n) / t.real).toFixed(0)} %` : '');
+  const inside = t && t.real ? `${t.inside1} OF ${t.real} INSIDE 1σ (${share(t.inside1)}, HONEST ERRORS 68 %)` : '';
+  const beyond = t && t.real ? `${t.beyond3} BEYOND 3σ, EITHER SIDE (${share(t.beyond3)}, HONEST ERRORS 0.3 %)` : '';
+  const wi = ctx.measureText(inside).width, wb = ctx.measureText(beyond).width;
+  const narrow = w < 620, stacked = w / 2 + wi / 2 + 20 > w - 10 - wb, pad = { l: 10, r: 10, t: stacked ? 46 : 32, b: 36 };
   const X = (z) => pad.l + ((z + EDGE) / (2 * EDGE)) * (w - pad.l - pad.r);
   const nb = Math.round((2 * EDGE) / BIN), bins = new Array(nb).fill(0);
   for (const z of zs) bins[tallyBin(z)]++;
@@ -697,13 +750,11 @@ export function drawTally(ctx, w, h, { zs, t }) {
   for (let i = 0; i <= 160; i++) { const z = -EDGE + (2 * EDGE * i) / 160, y = base - (bell(z) / cols) * py; if (i) ctx.lineTo(X(z), y); else ctx.moveTo(X(z), y); }
   ctx.stroke(); ctx.lineWidth = 1;
   ctx.fillStyle = T.text; ctx.textAlign = 'center'; ctx.fillText('IF EVERY STATED ERROR WERE HONEST', X(0), base - (bell(0) / cols) * py - 7);
-  // the two comparisons, stamped on the drawing
-  if (t && t.real) {
-    const share = (n) => `${((100 * n) / t.real).toFixed(0)} %`;
-    const stamp = (x, y, align, big, small) => { ctx.textAlign = align; ctx.font = STAMP; ctx.fillStyle = T.bright; ctx.fillText(big, x, y); ctx.font = T.fontSm; ctx.fillStyle = T.dim; ctx.fillText(small, x, y + 13); };
-    const inside = `${t.inside1} OF ${t.real} INSIDE 1σ, ${share(t.inside1)}`, beyond = `${t.beyond3} BEYOND 3σ ON EITHER SIDE, ${share(t.beyond3)}`;
-    if (narrow) { stamp(pad.l, 12, 'left', inside, 'HONEST ERRORS WOULD PUT 68 % THERE'); stamp(pad.l, 42, 'left', beyond, 'HONEST ERRORS WOULD PUT 0.3 % THERE'); }
-    else { stamp(X(0), 12, 'center', inside, 'HONEST ERRORS WOULD PUT 68 % THERE'); stamp(w - pad.r, 12, 'right', beyond, 'HONEST ERRORS WOULD PUT 0.3 % THERE'); }
+  // the two comparisons, written on the drawing: one line each, in the ink of a label
+  if (inside) {
+    ctx.font = T.font; ctx.fillStyle = T.bright;
+    if (stacked) { ctx.textAlign = 'left'; ctx.fillText(inside, pad.l, 11); ctx.fillText(beyond, pad.l, 26); }
+    else { ctx.textAlign = 'center'; ctx.fillText(inside, X(0), 11); ctx.textAlign = 'right'; ctx.fillText(beyond, w - pad.r, 11); }
   }
   ctx.font = T.fontSm;
   ctx.strokeStyle = alpha(T.lineBright, 1); ctx.beginPath(); ctx.moveTo(pad.l, base + 0.5); ctx.lineTo(w - pad.r, base + 0.5); ctx.stroke();

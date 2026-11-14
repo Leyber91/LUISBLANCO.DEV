@@ -38,7 +38,7 @@ import { jdOfMs, msOfJd, sunAltitude } from './time.js';
 import { epochAt, sigmaAt, lampAt, lostFrom, tally, grade, contested, stateOf, KEPT_LAMP, yearOfJd, jdOfYear } from './clock.js';
 import { load, pairOf, durDays } from './data.js';
 import { hammer, lens, historyOf, clockAt, lampOn, census, errorLine, isK2, densestField, FIRST_YEAR, LAST_YEAR } from './sky.js';
-import { skyLayout, drawSky, drawLens, bandScale, stampOf, drawBand, drawCurve, drawOC, drawNight, nightNamed, drawTally, pointsFor } from './views.js';
+import { skyLayout, drawSky, drawLens, bandScale, stampOf, drawBand, drawCurve, drawOC, drawNight, nearestTrace, drawTally, pointsFor } from './views.js';
 import { crossings, span, placeOf, shownMs, WATCH, EXAMPLE_PLACE } from './tonight.js';
 
 const $ = (id) => document.getElementById(id);
@@ -74,12 +74,13 @@ const num = (n) => n.toLocaleString('en-US');
 const plural = (n, one, many) => `${num(n)} ${n === 1 ? one : many}`;
 const dateOf = (jd) => new Date(msOfJd(jd)).toISOString().slice(0, 10);
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const longDate = (jd) => { const d = new Date(msOfJd(jd)); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+const NBSP = '\u00a0';
+const longDate = (jd) => { const d = new Date(msOfJd(jd)); return `${d.getUTCDate()}${NBSP}${MONTHS[d.getUTCMonth()]}${NBSP}${d.getUTCFullYear()}`; };      // a date never breaks between its day, its month and its year
 function localTime(jd, windowS) {
   const t = shownMs(msOfJd(jd), windowS);
   return new Date(t.ms).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit', ...(t.seconds ? { second: '2-digit' } : {}) });
 }
-const hourOf = (jd) => new Date(Math.round(msOfJd(jd) / 60000) * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });      // to the nearest minute: a Julian date of a whole hour is a hair under it
+const hourOf = (jd, withDay = false) => new Date(Math.round(msOfJd(jd) / 60000) * 60000).toLocaleString([], { ...(withDay ? { weekday: 'short' } : {}), hour: '2-digit', minute: '2-digit' });      // to the nearest minute: a Julian date of a whole hour is a hair under it
 /* A solution's paper. Before the record is here only the working clocks are known, and not yet by name. */
 const refLabel = (s) => (cat.refs && s.ref != null && cat.refs[s.ref] ? cat.refs[s.ref][0]
   : s.flag === 2 ? 'a published solution' : s.flag === 1 ? 'the archive\'s composite row, from one paper' : 'the archive\'s composite row');
@@ -128,7 +129,7 @@ function ignite(target) {
 function openStar(star, { user = false } = {}) {
   if (!star) return;
   S.star = star; S.shown = null; S.bandHover = null; S.ocHover = null;
-  $('pick').value = star.p.name;
+  $('pick').value = '';
   describeStar();
   if (user) { S.touched = true; save(); track('exomania.planet', { planet: star.p.name }); os?.progress.setResume(`exomania.html?planet=${encodeURIComponent(star.p.name)}`, star.p.name).catch(() => {}); }
   render();
@@ -149,12 +150,13 @@ function describeStar() {
 function describePapers(c) {
   const p = S.star.p, ul = $('r-points');
   ul.textContent = '';
-  if (!p.sols || !c) { put('r-count', 'published clocks, as a list'); return; }
+  if (!p.sols || !c) { put('r-count', 'published clocks'); return; }
   ul.append(el('li', '', `${paperOf(c)}, the clock in use. Mid-transit ${c.t0.toFixed(5)} ± ${span(c.sT * 86400)}, period ${c.P} d ± ${span(c.sP * 86400)}.`));
+  const orbit = (n) => (n === 0 ? 'on the clock\'s own orbit' : `${plural(Math.abs(n), 'orbit', 'orbits')} ${n < 0 ? 'before' : 'after'} it`);
   for (const pt of pointsFor(p, c).sort((a, b) => a.s.t0 - b.s.t0)) {
-    ul.append(el('li', '', `${paperOf(pt.s)} found transit ${num(pt.n)} ${span(Math.abs(pt.residual) * 86400)} ${pt.residual < 0 ? 'early' : 'late'}, ${Math.abs(pt.z).toFixed(1)} sigma of the two errors together.`));
+    ul.append(el('li', '', `${paperOf(pt.s)} timed a transit ${orbit(pt.n)} and found it ${span(Math.abs(pt.residual) * 86400)} ${pt.residual < 0 ? 'early' : 'late'}, ${Math.abs(pt.z).toFixed(1)} sigma of the two errors together.`));
   }
-  put('r-count', `${plural(p.sols.length, 'published clock', 'published clocks')}, as a list`);
+  put('r-count', plural(p.sols.length, 'published clock', 'published clocks'));
 }
 /* The sentence of the reading: which paper, to what error, in which state, and when that changes. */
 function sayClock(p, c, jd) {
@@ -167,9 +169,10 @@ function sayClock(p, c, jd) {
   let when = '';
   if (dur) {
     const slipJd = lostFrom(c, dur / KEPT_LAMP), lostJd = lostFrom(c, dur), far = (x) => yearOfJd(x) > 2200, since = (x) => (x <= c.t0 ? 'its own epoch' : longDate(x));
-    if (state === 'lost') when = ` Lost since ${since(lostJd)}.`;
-    else if (state === 'slipping') when = ` Past a twelfth of the transit since ${since(slipJd)}${far(lostJd) ? '' : `, and lost from ${longDate(lostJd)} if left alone`}.`;
-    else if (!far(slipJd)) when = ` Left alone it slips past a twelfth of the transit on ${longDate(slipJd)}${far(lostJd) ? '' : ` and is lost from ${longDate(lostJd)}`}.`;
+    const had = past ? 'had' : 'has', then = ahead ? 'It' : 'If nobody looks again it';
+    if (state === 'lost') when = ` It ${had} been lost since ${since(lostJd)}.`;
+    else if (state === 'slipping') when = ` It ${had} been past a twelfth of the transit since ${since(slipJd)}.${past || far(lostJd) ? '' : ` ${then} is lost from ${longDate(lostJd)}.`}`;
+    else if (!past && !far(slipJd)) when = ` ${then} slips past a twelfth of the transit on ${longDate(slipJd)}${far(lostJd) ? '' : ` and is lost from ${longDate(lostJd)}`}.`;
   }
   const doubt = c === p.clock && contested(c) ? ` Only ${c.agree} of ${plural(c.others, 'other published clock agrees', 'other published clocks agree')} with it, so it is contested.` : '';
   return lead + when + doubt;
@@ -187,6 +190,7 @@ function render() {
     S.k2note = { ra: S.k2.ra, dec: S.k2.dec, lines: of ? ['K2 FIELDS', `${num(lost)} OF ${num(of)} LOST`] : [], sample: K2_WIDEST, lost, of };
   }
   sky.redraw(); lens2.redraw(); band.redraw(); curve.redraw();
+  $('key-live').style.visibility = isLive() ? 'visible' : 'hidden';      // the key names the arc only while the sky shows it, and keeps its place either way
   put('k2', S.k2note && S.k2note.of ? `${num(S.k2note.lost)} of ${num(S.k2note.of)} K2 clocks lost, the rings along the ecliptic` : '');
   $('k2').classList.toggle('on-sheet', !!(S.k2note && S.k2note.fits));
   // the count in the corner: clocks that are lost on the date shown
@@ -357,7 +361,7 @@ function renderTonight() {
   if (held) { const again = [...body.querySelectorAll('button')].find((x) => x.dataset.planet === held); if (again) again.focus({ preventScroll: true }); }
   put('t-all', S.showAll ? `show only the ${num(up.length)} up in the dark` : `show all ${num(rows.length)}, and why each of the others is not`);
   put('t-shown', `${num(show.length)} of ${num(rows.length)} listed, earliest first`);
-  put('t-cap', `${plural(rows.length, 'transit', 'transits')}, as a table`);
+  put('t-cap', plural(rows.length, 'transit', 'transits'));
 }
 function mountTonight() {
   night = surface($('night'), (ctx, w, h) => {
@@ -365,12 +369,7 @@ function mountTonight() {
     S.nightHits = drawNight(ctx, w, h, { rows: S.rows, place: placeNow(), fromJd: S.nightFrom, night: S.night, clock: hourOf, hover: S.nightHover });
   });
   const nv = $('night');
-  const nearRow = (e) => {
-    const r = nv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    let best = null, bd = 18 * 18;
-    for (const hh of S.nightHits) { const d = (hh.x - x) ** 2 + (hh.y - y) ** 2; if (d < bd) { bd = d; best = hh; } }
-    return best;
-  };
+  const nearRow = (e) => { const r = nv.getBoundingClientRect(); return nearestTrace(S.nightHits, e.clientX - r.left, e.clientY - r.top, 10); };      // anywhere along its line, not at its middle alone
   // a transit under the pointer is named on the drawing, with its hour
   const nightHover = (planet) => { if (planet !== S.nightHover) { S.nightHover = planet; night.redraw(); } };
   nv.addEventListener('pointermove', (e) => { const best = nearRow(e); nightHover(best ? best.row.planet : null); });
@@ -486,7 +485,9 @@ async function boot() {
 if (!leaving) $('sky').probe = () => ({
   lens: S.L ? S.L.lens : null, wide: S.L ? S.L.wide : null, lamps: S.spots.length, lensLamps: S.lensSpots.length, star: S.star ? S.star.p.name : null,
   date: dateOf(S.jd), k2: S.k2note ? { lost: S.k2note.lost, of: S.k2note.of, drawn: !!S.k2note.fits && S.k2note.of > 0, fits: !!S.k2note.fits } : null,
-  named: S.rows ? nightNamed(S.rows).map((r) => r.planet.name) : [], up: S.up || 0, papers: S.ocHits.length,
+  named: S.nightHits.named || [], up: S.up || 0, papers: S.ocHits.length, same: S.ocHits.same || 0,
+  nightHover: S.nightHover ? S.nightHover.name : null, live: isLive(),
+  trace: (name) => { const hh = S.nightHits.find((x) => x.row.planet.name === name); return hh ? hh.pts : null; },
   at: (name) => { const sp = S.spots.find((x) => x.star.p.name === name && !x.lens) || S.spots.find((x) => x.star.p.name === name); return sp ? { x: sp.x, y: sp.y } : null; },
 });
 if (!leaving) boot();

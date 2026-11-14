@@ -21,8 +21,9 @@
 
    Where the rule came from. Two independent reviews on 2026-11-14:
    the first rule looked at the star when the transit began and at
-   the Sun in its middle, and passed 72 of 166 transits over
-   Barcelona that fail when the whole transit is looked at; the
+   the Sun in its middle, and passed 72 of 166 transits over a test
+   place at 41 degrees north that fail when the whole transit is
+   looked at; the
    second looked at five instants whatever the length, right for
    the verdict and wrong by up to 23 degrees for the altitudes
    shown on a transit of many hours, so the span is sampled every
@@ -40,8 +41,9 @@ import { durDays } from './data.js';
 
 export { stateOf };
 export const WATCH = { minAlt: 20, maxSun: -12, minLamp: 3, baselineH: 0.5, stepMin: 15, minSamples: 5, maxSamples: 240 };
-/* The place the night is drawn for until a visitor sets their own: an example, named as one on the page. */
-export const EXAMPLE_PLACE = { lat: 41.39, lon: 2.17, name: 'Barcelona' };
+/* The place the night is drawn for until a visitor sets their own: an example, named as one on the page. Greenwich,
+   because it is the place clocks are set by, and it is nobody's own place. */
+export const EXAMPLE_PLACE = { lat: 51.48, lon: 0, name: 'Greenwich' };
 
 /**
  * Why a transit is not up in the dark at a place, or '' when it is. altMin: the star's lowest altitude over the

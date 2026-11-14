@@ -30,13 +30,17 @@
 }
 
 .sheet { max-width: 1480px; margin-inline: auto; padding-inline: clamp(1rem, 3.2vw, 3rem); }
-.foot { max-width: 1480px; padding-inline: clamp(1rem, 3.2vw, 3rem); }      /* the foot stands on the sheet's own margins */
+/* The foot stands on the sheet's own margins: its rule is as long as every other hairline on the page, and it carries no mark. */
+.foot { max-width: 1480px; padding-inline: clamp(1rem, 3.2vw, 3rem); border-top: 0; padding-top: 0; }
+.foot .tag { width: 100%; max-width: none; border-top: 1px solid var(--line); padding-top: var(--s-5); }
+.foot .tag i { display: none; }
+.bar .back.quiet { border-color: transparent; padding-inline: 0; }      /* the side door is a quiet link, not a second button beside the way back */
 .bp { z-index: calc(var(--z-header) + 1); }      /* the frame of the plate stays over the solid bar */
 .od-load, .od-note { font-size: .72rem; line-height: 1.5; color: var(--text-dim); margin: 0; }
 .od-say { font-size: .8rem; line-height: 1.55; color: var(--text); margin: 0; max-width: 70ch; }
 .od-say.wide { max-width: 100ch; margin: 0 0 var(--s-3); }
-.od-say a.tg { text-decoration: none; }
-.od-say a.tg:hover, .od-say a.tg:focus-visible { color: var(--text-bright); border-color: var(--horizon); }
+.od-say a { color: var(--horizon); text-underline-offset: 3px; white-space: nowrap; }
+.od-say a:hover, .od-say a:focus-visible { color: var(--text-bright); }
 .od-right { text-align: right; margin: 0; }
 
 /* ---------- sheet a: the sky ---------- */
@@ -55,14 +59,14 @@
 
 /* The key: one row at the sheet's lower left. Each mark is the mark the sky draws. */
 .od-legend { position: absolute; left: 0; bottom: 0; max-width: calc(100% - min(19.5rem, 34vw) - 2rem); pointer-events: none; }
-.od-key { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 20px; }
+.od-key { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 16px; }
 .od-key li { display: inline-flex; gap: 7px; align-items: center; font-size: .68rem; line-height: 1.4; color: var(--text-dim); white-space: nowrap; }
 .od-key b { color: var(--text); font-weight: 500; margin-right: 4px; }
 .lamp { flex: none; width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .lamp.kept { background: var(--accretion); }
 .lamp.slipping { width: 5px; height: 5px; margin-inline: 1px; background: var(--ice); }
 .lamp.lost { background: none; border: 1px solid var(--ice); }
-.lamp.crossing { width: 9px; height: 9px; background: none; border: 1px solid var(--accretion); border-left-color: transparent; border-bottom-color: transparent; }
+.lamp.crossing { width: 9px; height: 9px; background: none; border: 1px solid var(--text-bright); border-left-color: transparent; border-bottom-color: transparent; }
 /* The K2 count is words on the map where the map has room for them, and a line above the key where it has not.
    The line keeps its height when it has nothing to say, so the key under it never moves with the date. */
 .od-k2 { font-size: .68rem; line-height: 1.4; min-height: 1.4em; color: var(--text); margin: 0 0 6px; }
@@ -143,7 +147,7 @@
 .linkish:hover { text-decoration-color: var(--horizon); }
 
 /* sheet d: the tally */
-#tally-view { width: 100%; height: 236px; display: block; }
+#tally-view { width: 100%; height: 222px; display: block; }
 .od-two { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s-7); margin-top: var(--s-3); }
 .od-nums { display: grid; grid-template-columns: minmax(0, max-content) max-content; gap: 5px 16px; margin: 0; font-size: .78rem; align-content: start; }
 .od-nums dt { color: var(--text-dim); }
@@ -166,7 +170,8 @@
   .od-load { margin: 0; align-self: center; }
   #sky { order: 2; position: static; height: clamp(330px, 44vh, 520px); }
   .od-block { width: min(15.5rem, 32vw); }
-  .od-legend { max-width: calc(100% - min(15.5rem, 32vw) - 1.5rem); }
+  .od-legend { max-width: calc(100% - min(15.5rem, 32vw) - 1rem); }
+  .od-key li { font-size: .66rem; }
 }
 @media (max-width: 1100px) {
   .od-read, .od-pair { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
@@ -187,6 +192,7 @@
   .od-time { order: 3; margin-top: 0; }
   .od-legend { order: 4; position: static; max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: var(--s-3); align-items: center; pointer-events: auto; }
   #lens2 { display: block; width: 150px; height: 166px; cursor: crosshair; }
+  .od-k2 { min-height: 2.8em; }      /* two lines here, said or not, so the key under it never moves with the date */
   .od-key { flex-direction: column; gap: 5px; }
   .od-key li { white-space: normal; align-items: baseline; }
   .od-block { order: 5; position: static; width: auto; }
@@ -200,5 +206,10 @@
   .od-table th, .od-table td { padding: 5px 6px; }
   #band { height: 206px; }
   #night { height: 240px; }
-  #tally-view { height: 350px; }
+  /* The labs' sharing question is a plate fixed to the corner. On a narrow sheet that corner is the line of time,
+     the page's one control, so here it stands at the end of the page until Labs OS draws it smaller for every lab
+     (measured 2026-11-14: fixed, it covered the whole line on a first visit at 390 px, and on The Pod it made 14 of
+     34 hand-driven checks fail). Nothing is sent until it is answered, wherever it stands. */
+  .los-consent { position: relative; right: auto; bottom: auto; transform: none; width: auto; max-height: none; margin: var(--s-6) 16px var(--s-7); }      /* relative, so its corner brackets stay its own */
+  #tally-view { height: 330px; }
 }

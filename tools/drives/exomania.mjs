@@ -30,7 +30,7 @@ export default async function exomania(p, { base }) {
   const state = () => p.ev('document.body.dataset.state || ""');
   const rect = (id) => p.ev(`(() => { const b = document.getElementById(${JSON.stringify(id)}).getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })()`);
   const ready = () => p.until('document.body.dataset.state === "ready"', 40000);
-  const probe = () => p.ev('(() => { const q = document.getElementById("sky").probe(); return { lens: q.lens, wide: q.wide, lamps: q.lamps, lensLamps: q.lensLamps, star: q.star, date: q.date, k2: q.k2, named: q.named, up: q.up, papers: q.papers }; })()');
+  const probe = () => p.ev('(() => { const q = document.getElementById("sky").probe(); return { lens: q.lens, wide: q.wide, lamps: q.lamps, lensLamps: q.lensLamps, star: q.star, date: q.date, k2: q.k2, named: q.named, up: q.up, papers: q.papers, same: q.same, live: q.live, nightHover: q.nightHover }; })()');
   const lampAt = (name) => p.ev(`document.getElementById("sky").probe().at(${JSON.stringify(name)})`);
   const num = (s) => Number(String(s).replace(/[^\d.]/g, ''));
   const date = () => p.ev('document.getElementById("scrub").getAttribute("aria-valuetext") || ""');       // the date shown, as the line's keyboard says it
@@ -42,7 +42,8 @@ export default async function exomania(p, { base }) {
   const upCount = async () => num(((await text('t-count')).match(/hours\. ([\d,]+) (is|are) up in the dark/) || [0, '0'])[1]);
   const show = (id) => p.ev(`document.getElementById(${JSON.stringify(id)}).scrollIntoView({ block: "center" })`);
   const today = () => p.ev('document.getElementById("to-today").click()');
-  const DAY = '\\d+ [A-Z][a-z]+';                                             // a date in words: 14 November
+  const DAY = '\\d+\\s[A-Z][a-z]+\\s';                                       // a date in words, up to its year: 14 November (its parts are held together by no-break spaces)
+  const keyLive = () => p.ev('getComputedStyle(document.getElementById("key-live")).visibility');
 
   await p.go(`${base}/labs/exomania.html?still`);
   p.check('the clocks and the published record load', await ready(), await state());
@@ -51,6 +52,8 @@ export default async function exomania(p, { base }) {
   // the labs' question about sharing usage: drawn as a plate of the labs, and answered like any visitor would
   const ask = await p.ev('(() => { const b = [...document.querySelectorAll("button")].find((x) => /no thanks/i.test(x.textContent)); if (!b) return null; const plate = b.closest(".los-plate"); return { plate: !!plate, border: plate ? getComputedStyle(plate).borderTopStyle : "", family: getComputedStyle(b).fontFamily }; })()');
   p.check('the sharing question is drawn on the labs\' own plate, not as bare markup', !!ask && ask.plate && ask.border === 'solid' && /Plex Mono/.test(ask.family), JSON.stringify(ask));
+  const under = await p.ev('(() => { const b = document.getElementById("band").getBoundingClientRect(); return [0.2, 0.5, 0.8].map((f) => { const n = document.elementFromPoint(b.x + b.width * f, b.y + b.height * 0.5); return n ? n.id || n.className : ""; }); })()');
+  p.check('while it waits for an answer it leaves the line of time free, on a narrow sheet all of it', (await p.ev('window.innerWidth')) < 760 ? under.every((id) => id === 'band') : under.slice(0, 2).every((id) => id === 'band'), under.join(' | '));
   await p.ev('(() => { const b = [...document.querySelectorAll("button")].find((x) => /no thanks/i.test(x.textContent)); if (b) b.click(); })()');
   await p.sleep(300);
   p.check('answered, it leaves the sheet', !(await p.ev('[...document.querySelectorAll("button")].some((x) => /no thanks/i.test(x.textContent) && x.offsetParent !== null)')));
@@ -67,8 +70,9 @@ export default async function exomania(p, { base }) {
   p.check('its clock is kept today, by a recent paper named once', /^The clock in use is from .+ 20\d\d\. Today it predicts the transit to ± [\d.]+ (ms|s|min), so the clock is kept\./.test(await text('c-status')) && !/(20\d\d), \1/.test(await text('c-status')), await text('c-status'));
   const seen = (await label('curve')).match(/a dip of ([\d.]+) %, where the transit itself is ([\d.]+) % deep/);
   p.check('the transit as light is said in words, and is never deeper than the transit', !!seen && Number(seen[1]) <= Number(seen[2]), await label('curve'));
-  p.check('every published clock is a sentence in a list anybody can open, the one in use first', /^9 published clocks, as a list$/.test(await text('r-count')) && (await p.ev('document.querySelectorAll("#r-points li").length')) === 9 && /the clock in use/.test(await p.ev('document.querySelector("#r-points li").textContent')));
-  p.check('and the drawing over the list holds the other eight', q0.papers === 8, String(q0.papers));
+  p.check('every published clock is a sentence in a list anybody can open, the one in use first', /^9 published clocks$/.test(await text('r-count')) && (await p.ev('document.querySelectorAll("#r-points li").length')) === 9 && /the clock in use/.test(await p.ev('document.querySelector("#r-points li").textContent')));
+  p.check('and the drawing over the list holds the other eight, each as a mark of its own or counted on the clock\'s', q0.papers + q0.same === 8 && q0.papers >= 1, `${q0.papers} marks and ${q0.same} on the clock's own transit`);
+  p.check('the key names the arc of a planet in transit while the sky shows it', q0.live && (await keyLive()) === 'visible', `live ${q0.live}, key ${await keyLive()}`);
   p.check('no planet\'s name is set in capitals, where its letter b would read as a companion star', !(await p.ev('[...document.querySelectorAll("summary, .mini, th")].some((n) => getComputedStyle(n).textTransform === "uppercase" && / [b-h]$| [b-h][ ,]/.test(n.textContent) && /\\d [b-h]\\b/.test(n.textContent))')));
   p.check('a drawing is named by labels on it: no sentence stands under one to explain it', (await p.ev('document.querySelectorAll("figcaption, #band-note, #oc-note, #night-note").length')) === 0);
   p.check('no name on the sheet shows raw markup', !(await p.ev('/&[a-z]+;|&#\\d+;/i.test(document.querySelector("main").textContent)')));
@@ -115,8 +119,9 @@ export default async function exomania(p, { base }) {
   await p.sleep(250);
   p.check('dragging along the line moves the date toward 2040', (await year()) >= 2030, await date());
   const later = await probe();
-  p.check('past today the sheet says what it is showing, and more clocks are lost', (await text('n-if')) === 'if nobody looks again' && new RegExp(`^lost by ${DAY} 20[34]\\d$`).test(await text('n-verb')) && num(await text('n-lost')) > lostToday && later.k2.lost > 312, `${await text('n-lost')} ${await text('n-verb')}, ${await text('n-if')}; K2 ${later.k2.lost}`);
-  p.check('and the one clock is read on that date, with the condition said', new RegExp(`If nobody looks again, on ${DAY} 20[34]\\d it predicts the transit to ± .+, so the clock is (kept|slipping|lost)\\.`).test(await text('c-status')), await text('c-status'));
+  p.check('past today the sheet says what it is showing, and more clocks are lost', (await text('n-if')) === 'if nobody looks again' && new RegExp(`^lost by ${DAY}20[34]\\d$`).test(await text('n-verb')) && num(await text('n-lost')) > lostToday && later.k2.lost > 312, `${await text('n-lost')} ${await text('n-verb')}, ${await text('n-if')}; K2 ${later.k2.lost}`);
+  p.check('and the one clock is read on that date, with the condition said', new RegExp(`If nobody looks again, on ${DAY}20[34]\\d it predicts the transit to ± .+, so the clock is (kept|slipping|lost)\\.`).test(await text('c-status')), await text('c-status'));
+  p.check('and the key no longer names an arc the sky does not draw, keeping its place', (await keyLive()) === 'hidden' && (await p.ev('document.getElementById("key-live").getBoundingClientRect().height')) > 8, await keyLive());
   await p.ev('window.scrollTo(0, 0)'); await p.sleep(250);
   await p.shot('02-sky-later');
   await today();
@@ -137,31 +142,39 @@ export default async function exomania(p, { base }) {
   // the past: lamps come on as their clocks were published
   await setYear(2012.5); await p.sleep(250);
   const then = await probe();
-  p.check('in 2012 a few hundred clocks existed, the sky holds as many lamps, and K2 had not flown', num(await text('n-of')) > 100 && num(await text('n-of')) < 400 && then.lamps + then.lensLamps < 900 && (await text('k2')) === '' && /^were lost on \d+ June 2012$/.test(await text('n-verb')), `${await text('n-lost')} ${await text('n-of')} ${await text('n-verb')}; ${then.lamps + then.lensLamps} lamps; k2 "${await text('k2')}"`);
+  p.check('in 2012 a few hundred clocks existed, the sky holds as many lamps, and K2 had not flown', num(await text('n-of')) > 100 && num(await text('n-of')) < 400 && then.lamps + then.lensLamps < 900 && (await text('k2')) === '' && /^were lost on \d+\sJune\s2012$/.test(await text('n-verb')), `${await text('n-lost')} ${await text('n-of')} ${await text('n-verb')}; ${then.lamps + then.lensLamps} lamps; k2 "${await text('k2')}"`);
   await p.ev('window.scrollTo(0, 0)'); await p.sleep(250);
   await p.shot('03-sky-2012');
   await setYear(2000.5); await p.sleep(250);
-  p.check('in the middle of 2000 one clock existed, and the sheet says whose table says so', /^of 1 transit clock$/.test(await text('n-of')) && new RegExp(`^By the archive's table the best clock on ${DAY} 2000 was from (Charbonneau|Henry) et al\\. 2000\\. It predicted the transit to ± `).test(await text('c-status')), `${await text('n-of')} / ${await text('c-status')}`);
+  p.check('in the middle of 2000 one clock existed, and the sheet says whose table says so', /^of 1 transit clock$/.test(await text('n-of')) && new RegExp(`^By the archive's table the best clock on ${DAY}2000 was from (Charbonneau|Henry) et al\\. 2000\\. It predicted the transit to ± `).test(await text('c-status')), `${await text('n-of')} / ${await text('c-status')}`);
   await setYear(1999.2); await p.sleep(250);
-  p.check('before the first paper there is no clock, and the sheet says so', /^of 0 transit clocks$/.test(await text('n-of')) && (await text('n-lost')) === '0' && new RegExp(`^No clock had been published for HD 209458 b by ${DAY} 1999\\.$`).test(await text('c-status')), await text('c-status'));
+  p.check('before the first paper there is no clock, and the sheet says so', /^of 0 transit clocks$/.test(await text('n-of')) && (await text('n-lost')) === '0' && new RegExp(`^No clock had been published for HD 209458 b by ${DAY}1999\\.$`).test(await text('c-status')), await text('c-status'));
   await today();
 
   // a planet by name, and a name that is none
   await open('Kepler-442 b'); await p.sleep(400);
-  p.check('a planet opens by its name', (await text('c-name')) === 'Kepler-442 b' && /orbit 112 d/.test(await text('c-meta')), await text('c-meta'));
+  p.check('a planet opens by its name, and the field is empty again for the next one', (await text('c-name')) === 'Kepler-442 b' && /orbit 112 d/.test(await text('c-meta')) && (await p.ev('document.getElementById("pick").value')) === '' && (await p.ev('document.getElementById("pick").placeholder')) === 'find a planet', await text('c-meta'));
   await p.ev('document.getElementById("clock").scrollIntoView({ block: "start" })'); await p.sleep(250);
   await p.shot('04-one-clock');
   await open('<img src=x onerror=1>'); await p.sleep(200);
   p.check('a name that is no planet is refused in words, and nothing is injected', /^No transiting planet named "<img src=x onerror=1>"/.test(await text('pick-msg')) && (await p.ev('document.querySelectorAll("main img").length')) === 0 && (await text('c-name')) === 'Kepler-442 b', await text('pick-msg'));
   await open('K2-18 b'); await p.sleep(300);
-  p.check('a clock below the target is called slipping, with the day it slipped', new RegExp(`so the clock is slipping\\. Past a twelfth of the transit since ${DAY} 20\\d\\d`).test(await text('c-status')) && !/\d{4}-\d\d-\d\d/.test(await text('c-status')), await text('c-status'));
+  p.check('a clock below the target is called slipping, with the day it slipped, in whole sentences', new RegExp(`so the clock is slipping\\. It has been past a twelfth of the transit since ${DAY}20\\d\\d\\.`).test(await text('c-status')) && !/\d{4}-\d\d-\d\d/.test(await text('c-status')) && !/left alone/i.test(await text('c-status')), await text('c-status'));
   await open('WASP-12 b'); await p.sleep(300);
 
   // the next 24 hours: drawn on load, for an example place that is called one
   const n0 = await probe();
-  p.check('the night is drawn on load for an example place, named as an example', /^[\d,]+ transits have their predicted middle in the next 24 hours\. [\d,]+ (is|are) up in the dark over Barcelona \(41\.39°, 2\.17°\), an example place\.$/.test(await text('t-count')) && (await upCount()) === n0.up && (await p.ev('document.getElementById("lat").value')) === '', (await text('t-count')).slice(0, 170));
-  p.check('it names five transits at most, the ones whose stars are brightest, and says in words what it draws', n0.named.length === Math.min(5, n0.up) && /^The dark hours of the next 24 over Barcelona .* up in the dark, each drawn as the height of its star/.test(await label('night')), `${n0.named.join(', ')} of ${n0.up}`);
-  p.check('the place is asked for only by whoever opens it, and the table is closed until opened', !(await p.ev('document.getElementById("place-box").open')) && !(await p.ev('document.getElementById("t-details").open')) && /^[\d,]+ transits, as a table$/.test(await text('t-cap')));
+  p.check('the night is drawn on load for an example place, named as an example', /^[\d,]+ transits have their predicted middle in the next 24 hours\. [\d,]+ (is|are) up in the dark over Greenwich \(51\.48°, 0\.00°\), an example place\.$/.test(await text('t-count')) && (await upCount()) === n0.up && (await p.ev('document.getElementById("lat").value')) === '', (await text('t-count')).slice(0, 170));
+  p.check('it names five transits at most (three on a narrow sheet), the ones whose stars are brightest, and says in words what it draws', n0.named.length >= Math.min(1, n0.up) && n0.named.length <= Math.min((await rect('night')).w < 520 ? 3 : 5, n0.up) && /^The dark hours of the next 24 over Greenwich .* up in the dark, each drawn as the height of its star/.test(await label('night')), `${n0.named.join(', ')} of ${n0.up}`);
+  if (n0.named.length) {
+    // a transit is named under the pointer anywhere along its line, not at its middle alone
+    await show('night'); await p.sleep(250);
+    const nr = await rect('night'), pts = await p.ev(`document.getElementById("sky").probe().trace(${JSON.stringify(n0.named[0])})`), far = pts[Math.max(0, Math.floor(pts.length * 0.12))];
+    await p.move(nr.x + far.x, nr.y + far.y + 3); await p.sleep(200);
+    p.check('a transit is named under the pointer anywhere along its line', (await probe()).nightHover === n0.named[0], `pointer near the start of ${n0.named[0]}: ${(await probe()).nightHover}`);
+    await p.move(nr.x + 4, nr.y + nr.h - 4); await p.sleep(150);
+  }
+  p.check('the place is asked for only by whoever opens it, and the table is closed until opened', !(await p.ev('document.getElementById("place-box").open')) && !(await p.ev('document.getElementById("t-details").open')) && /^[\d,]+ transits$/.test(await text('t-cap')));
   await p.ev('document.getElementById("t-details").open = true'); await p.sleep(200);
   p.check('the table lists exactly the transits that are up in the dark, without saying so on every row', (await rowsShown()) === Math.max(1, await upCount()) && (await p.ev('getComputedStyle(document.querySelector("#t-table th.why")).display')) === 'none' && new RegExp(`^${(await upCount()).toLocaleString('en-US')} of ${(await total()).toLocaleString('en-US')} listed`).test(await text('t-shown')), `${await rowsShown()} rows, ${await upCount()} up; ${await text('t-shown')}`);
   await p.ev('document.getElementById("t-all").click()'); await p.sleep(600);
@@ -201,7 +214,7 @@ export default async function exomania(p, { base }) {
   p.check('the tally is the one the tests compute', (await text('y-real')) === '450' && (await text('y-blind')) === '3' && (await text('y-inside')).startsWith('201') && (await text('y-beyond')).startsWith('65') && (await text('y-same')) === '60', `${await text('y-real')} / ${await text('y-blind')} / ${await text('y-inside')} / ${await text('y-beyond')} / ${await text('y-same')}`);
   p.check('it names the catalogue it leans on, and the drawing says its finding in words', /Kokori/.test(await text('y-top-name')) && /one dot for each of 450 tests\. 45 % found it inside .* honest errors would put 68 %\. 14 % .* 0\.3 %\./.test(await label('tally-view')), await label('tally-view'));
   p.check('the working clocks are counted with what stands against them', /^141 \(/.test(await text('s-contested')) && (await text('s-alone')) === '352', `${await text('s-contested')} / ${await text('s-alone')}`);
-  p.check('the rule for "up in the dark" is stated once, with the numbers in force, where the tag beside the count leads', /^From 30 minutes before the transit begins to 30 minutes after it ends, .* 20° up or more and the Sun 12° down or more; the transit is 3 windows long or more;/.test(await text('t-rule')) && (await p.ev('document.querySelector("#plate-c a.tg").getAttribute("href")')) === '#up-in-the-dark' && !!(await p.ev('document.getElementById("up-in-the-dark").contains(document.getElementById("t-rule"))')), (await text('t-rule')).slice(0, 90));
+  p.check('the rule for "up in the dark" is stated once, with the numbers in force, where the tag beside the count leads', /^From 30 minutes before the transit begins to 30 minutes after it ends, .* 20° up or more and the Sun 12° down or more; the transit is 3 windows long or more;/.test(await text('t-rule')) && (await p.ev('(document.querySelector("#plate-c .od-say a") || { getAttribute() { return ""; } }).getAttribute("href")')) === '#up-in-the-dark' && !!(await p.ev('document.getElementById("up-in-the-dark").contains(document.getElementById("t-rule"))')), (await text('t-rule')).slice(0, 90));
   await p.ev('document.getElementById("d-title").scrollIntoView({ block: "start" })'); await p.sleep(250);
   await p.shot('06-tally');
 

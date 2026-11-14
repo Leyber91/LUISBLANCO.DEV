@@ -21,7 +21,7 @@ import { jdOfMs, msOfJd, taiMinusUtc, ttMinusUtc, sun, romerSeconds, toEarthUtc,
 import { solution, usable, contested, epochAt, midAt, sigmaAt, lampAt, lostFrom, phaseAt, bandDegrees, grade, testOf, transitsBetween, tally, blindAt, stateOf, KEPT_LAMP, BLIND_SHARE, yearOfJd, jdOfYear } from '../overdue/clock.js';
 import { planetsOf, attachRecord, pairOf, durDays } from '../overdue/data.js';
 import { hammer, eclipticToEquatorial, galacticToEquatorial, circleOnMap, lens, knownFrom, historyOf, clockAt, lampOn, inTransit, census, errorLine, smearedDip, isK2, densestField, KEPLER, FIRST_YEAR, LAST_YEAR } from '../overdue/sky.js';
-import { pointsFor, notATest, lampMark, skyLayout, lensLayout, onMap, onLens, bandScale, stampOf, dipShape, tallyBin, nightNamed, nightAxis, paperKind, BESIDE, TITLE_ROOM, DIP_APART, SHAPE_APART } from '../overdue/views.js';
+import { pointsFor, notATest, lampMark, skyLayout, lensLayout, onMap, onLens, bandScale, stampOf, dipShape, tallyBin, nightNamed, nearestTrace, nightAxis, paperKind, BESIDE, TITLE_ROOM, DIP_APART, SHAPE_APART } from '../overdue/views.js';
 import { crossings, span, placeOf, watchable, unwatchable, shownMs, samplesFor, WATCH, EXAMPLE_PLACE } from '../overdue/tonight.js';
 import { readFileSync } from 'node:fs';
 
@@ -343,6 +343,14 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   const five = nightNamed([row('a', 9, true), row('b', 7, false), row('c', 12, true), row('d', undefined, true), row('e', 8, true), row('f', 10, true), row('g', 11, true), row('h', 13, true)]);
   ok(five.map((r) => r.planet.name).join('') === 'eafgc', 'five are named, brightest star first; one that is not up in the dark is never named, and one with no magnitude comes last');
   ok(nightNamed([row('a', 9, false)]).length === 0 && nightNamed([row('a', 9, true), row('b', 8, true)]).length === 2, 'fewer than five are all named, and none when none is up');
+  ok(nightNamed([row('a', 9, true), row('c', 12, true), row('e', 8, true), row('f', 10, true)], 3).map((r) => r.planet.name).join('') === 'eaf', 'a narrow drawing names three, the same way');
+  // a transit is under the pointer anywhere along its line
+  {
+  const line = { pts: [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 200, y: 50 }] }, other = { pts: [{ x: 0, y: 40 }, { x: 100, y: 40 }] }, dot = { pts: [{ x: 300, y: 300 }] };
+  ok(nearestTrace([line, other, dot], 90, 6, 10) === line && nearestTrace([line, other, dot], 150, 30, 10) === line && nearestTrace([line, other, dot], 50, 33, 10) === other, 'the nearest line is found from any point beside it, far from its middle or on its second stretch');
+  ok(nearestTrace([line, other, dot], 50, 20.1, 10) === null && nearestTrace([line, other], 50, 9.9, 10) === line && nearestTrace([line, other], 50, 10, 10) === null && nearestTrace([], 0, 0) === null, 'a point further than the reach from every line is under none: the reach itself is outside');
+  ok(nearestTrace([line, other, dot], 304, 303, 10) === dot && nearestTrace([line, other], -8, 0, 10) === line && nearestTrace([line, other], -11, 0, 10) === null, 'a line of one point can be found, and a line ends at its ends');
+  }
 }
 
 /* ---------------- a paper against a clock: what its colour says ---------------- */
@@ -354,6 +362,7 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   const wideAt = Math.ceil(Math.sqrt(dur * dur - 0.001 * 0.001) / 0.00002) + 1;
   ok(sigmaAt(clock, wideAt) >= dur && sigmaAt(clock, wideAt - 2) < dur && paperKind(at(wideAt, 0.2), clock, dur) === 'wide' && paperKind(at(wideAt - 2, 0.2), clock, dur) === 'inside', 'once the clock\'s window at that orbit is as long as the transit, landing inside it says nothing and is not drawn gold');
   ok(paperKind(at(100, 0.2, true), clock, dur) === 'wide' && paperKind(at(100, 0.2), clock, null) === 'wide' && paperKind(at(wideAt, 2), clock, dur) === 'outside', 'nor is a paper that could not have missed, or one of a planet with no transit length; a miss is still a miss');
+  ok(paperKind(at(0, 0.5), clock, dur) === 'same' && paperKind(at(0, -0.99), clock, null) === 'same' && paperKind(at(0, 1.2), clock, dur) === 'outside' && paperKind(at(1, 0.5), clock, dur) === 'inside' && paperKind(at(-1, 0.5), clock, dur) === 'inside', 'a paper that times the clock\'s own transit and agrees restates the clock and is never gold; one that disagrees about that transit is outside, and the orbit before or after is a paper of its own');
   ok(DIP_APART > 0.9 && DIP_APART < 1 && SHAPE_APART > 0 && SHAPE_APART < 1 - DIP_APART + 0.02, 'the transit itself is named beside the dip a clock lets through once the two lines differ by a few percent of the depth, and the dip is given a number of its own once it is shallower');
 }
 
