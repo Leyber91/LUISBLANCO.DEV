@@ -6,6 +6,8 @@
    serialises into a #w= permalink that replays the EXACT artifact).
    ============================================================ */
 
+import { cleanDeep, noTags } from '../kit/guard.js';
+
 const K_INDEX = 'altverse:index';
 const K_WORLD = (id) => 'altverse:world:' + id;
 
@@ -24,17 +26,7 @@ function write(key, val) {
    no element can start, and no view puts world text inside an attribute. Keys are cleaned too: the
    dossier prints the names of facts. On 2026-11-14 a crafted #w= link ran script on this origin, where
    a visitor's own model key is stored; tests.mjs keeps that link harmless. */
-const TAGLESS = { '<': '\u2039', '>': '\u203a' };
-const MAX_DEPTH = 40;
-export function cleanWorld(v, depth = 0) {
-  if (typeof v === 'string') return v.replace(/[<>]/g, (c) => TAGLESS[c]);
-  if (v === null || typeof v !== 'object') return v;
-  if (depth >= MAX_DEPTH) return null;                 // deeper than any world: dropped, never passed through uncleaned
-  if (Array.isArray(v)) return v.map((x) => cleanWorld(x, depth + 1));
-  const out = {};
-  for (const [k, x] of Object.entries(v)) out[cleanWorld(k)] = cleanWorld(x, depth + 1);
-  return out;
-}
+export const cleanWorld = (v) => cleanDeep(v, { clean: noTags });
 
 export function listWorlds() { const v = read(K_INDEX, []); return Array.isArray(v) ? cleanWorld(v).filter((e) => e && typeof e === 'object') : []; }
 

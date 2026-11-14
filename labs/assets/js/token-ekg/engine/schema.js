@@ -23,7 +23,20 @@
    }
    ============================================================ */
 
+import { cleanDeep } from '../../kit/guard.js';
+
 export const SCHEMA = { version: 1 };
+
+/* The measured text of a trace: what the model said and what it was asked. It stays exactly as written;
+   every view that shows it escapes it. */
+const MEASURED = (path) => (path[0] === 'chunks' && (path[2] === 2 || path[2] === 'text')) || (path.length === 1 && (path[0] === 'promptPreview' || path[0] === 'reasoning'));
+
+/**
+ * A trace from a file a visitor imported, or from this browser's storage, with every other string made
+ * inert. The page writes labels, routes and recorder names into its markup, and on 2026-11-14 an audit
+ * showed that a crafted trace file could carry markup in one of them and run it on every later visit.
+ */
+export const cleanTrace = (t) => cleanDeep(t, { keep: MEASURED });
 
 const isStr = (x) => typeof x === 'string';
 const isNum = (x) => typeof x === 'number' && Number.isFinite(x);
