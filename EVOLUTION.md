@@ -32,6 +32,8 @@ merged. A run that changed nothing still writes its entry, with the reason.
   labs/roaster.html at 1280 px and 390 px in headless Chromium; the only console errors were the browser refusing
   the live roast request to the model host (CORS from localhost), the same on main, after which the lab shows its
   offline roast. Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #24: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-13, Labs OS: a consent banner, a privacy page and the owner's usage dashboard (not a routine run)
 
