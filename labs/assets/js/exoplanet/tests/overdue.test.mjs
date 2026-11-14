@@ -18,11 +18,11 @@
    ============================================================ */
 
 import { jdOfMs, msOfJd, taiMinusUtc, ttMinusUtc, sun, romerSeconds, toEarthUtc, standardOf, sameStated, gmst, altAz, sunAltitude, skyAt, AU_LIGHT_S } from '../overdue/time.js';
-import { solution, usable, contested, epochAt, midAt, sigmaAt, lampAt, lostFrom, phaseAt, bandDegrees, grade, testOf, transitsBetween, tally, blindAt, BLIND_SHARE, yearOfJd, jdOfYear } from '../overdue/clock.js';
+import { solution, usable, contested, epochAt, midAt, sigmaAt, lampAt, lostFrom, phaseAt, bandDegrees, grade, testOf, transitsBetween, tally, blindAt, stateOf, KEPT_LAMP, BLIND_SHARE, yearOfJd, jdOfYear } from '../overdue/clock.js';
 import { planetsOf, attachRecord, pairOf, durDays } from '../overdue/data.js';
-import { hammer, eclipticToEquatorial, galacticToEquatorial, circleOnMap, lens, knownFrom, historyOf, clockAt, lampOn, inTransit, census, errorLine, smearedDip, KEPLER, FIRST_YEAR, LAST_YEAR } from '../overdue/sky.js';
-import { pointsFor, notATest, lampMark, skyLayout, onMap, bandScale, dipShape } from '../overdue/views.js';
-import { crossings, span, placeOf, watchable, unwatchable, stateOf, shownMs, samplesFor, WATCH } from '../overdue/tonight.js';
+import { hammer, eclipticToEquatorial, galacticToEquatorial, circleOnMap, lens, knownFrom, historyOf, clockAt, lampOn, inTransit, census, errorLine, smearedDip, isK2, densestField, KEPLER, FIRST_YEAR, LAST_YEAR } from '../overdue/sky.js';
+import { pointsFor, notATest, lampMark, skyLayout, onMap, bandScale, stampOf, dipShape, tallyBin, nightNamed, BESIDE, TITLE_ROOM } from '../overdue/views.js';
+import { crossings, span, placeOf, watchable, unwatchable, shownMs, samplesFor, WATCH, EXAMPLE_PLACE } from '../overdue/tonight.js';
 import { readFileSync } from 'node:fs';
 
 let passed = 0;
@@ -120,7 +120,11 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   near(lampAt(s, lost, dur), 1, 2e-3, 'on the day it is lost the lamp is one');
   ok(lampAt(s, lost - 400, dur) > 1 && lampAt(s, lost + 400, dur) < 1, 'before that day the lamp is above one, after it below');
   ok(lostFrom(solution([2455000, 0.2, 3.5, 0.00001]), dur) === 2455000, 'a clock whose mid-time error is longer than the transit was lost at its own epoch');
-  ok(stateOf(0.99) === 'lost' && stateOf(1) === 'fading' && stateOf(2.99) === 'fading' && stateOf(3) === 'read' && stateOf(NaN) === 'no transit length', 'a clock is lost below a lamp of 1, fading below 3, read from 3');
+  ok(stateOf(0.99) === 'lost' && stateOf(1) === 'slipping' && stateOf(11.99) === 'slipping' && stateOf(12) === 'kept' && stateOf(NaN) === 'no transit length', 'a clock is lost below a lamp of 1, slipping below 12, kept from 12');
+  ok(KEPT_LAMP === 12, 'kept is an error of a twelfth of the transit or less: the target the people who keep these clocks have set');
+  const slip = lostFrom(s, dur / KEPT_LAMP);
+  near(lampAt(s, slip, dur), KEPT_LAMP, 0.05, 'the day a clock slips past the target is the day its lamp is twelve');
+  ok(slip < lost && stateOf(lampAt(s, slip - 400, dur)) === 'kept' && stateOf(lampAt(s, slip + 400, dur)) === 'slipping', 'it is kept before that day and slipping after, long before it is lost');
   near(phaseAt(s, 2455000 + 3.5 * 12.25), 0.25, 1e-9, 'a quarter of an orbit after a transit');
   near(phaseAt(s, 2455000 - 3.5 * 0.25), 0.75, 1e-9, 'and a quarter before one');
   near(bandDegrees(s, 2455000, 1), (2 * 0.001 / 3.5) * 360, 1e-12, 'the band is two sigma wide at one sigma each side, as a share of the orbit');
@@ -243,15 +247,20 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   ok(east.x < 0 && Math.abs(east.y) < 0.05, 'east is to the left under the lens as on the map');
   ok(!lens(KEPLER.ra + 180, -KEPLER.dec).inside, 'the far side of the sky is not under the lens');
 
-  const wide = skyLayout(1348, 504), narrow = skyLayout(358, 480);
+  const wide = skyLayout(1348, 504), narrow = skyLayout(358, 361);
+  ok(BESIDE === 1150 && skyLayout(BESIDE, 620).cx - skyLayout(BESIDE, 620).rx >= TITLE_ROOM && skyLayout(1348, 620).cx - skyLayout(1348, 620).rx >= TITLE_ROOM, 'from the width where the name stands beside the map, the map leaves it its room however tall the sheet');
+  ok(skyLayout(BESIDE - 1, 620).rx > skyLayout(BESIDE, 620).rx && skyLayout(958, 384).wide, 'below that width the name stands above the map, and the map takes the room');
+  ok(narrow.lens.r < narrow.ry && wide.lens.r < wide.ry, 'the lens is smaller than the map it enlarges a patch of');
   ok(wide.wide && wide.rx === 2 * wide.ry && wide.cx - wide.rx >= 0 && wide.cy + wide.ry <= 504 && wide.cy - wide.ry >= 0, 'on a wide sheet the whole map is on the canvas');
   ok(wide.lens.x + wide.lens.r <= 1348 && wide.lens.y - wide.lens.r >= 0, 'and so is the lens, at its right shoulder');
-  ok(!narrow.wide && narrow.cx - narrow.rx >= 0 && narrow.lens.y - narrow.lens.r > narrow.cy + narrow.ry && narrow.lens.y + narrow.lens.r <= 480, 'on a narrow one the lens sits under the map, clear of it and on the canvas');
+  ok(!narrow.wide && narrow.cx - narrow.rx >= 0 && narrow.lens.y - narrow.lens.r > narrow.cy + narrow.ry && narrow.lens.y + narrow.lens.r + 16 <= 361 && narrow.lens.x + narrow.lens.r <= 358, 'on a narrow one the lens sits under the map, clear of it, with room for its name, on a canvas as tall as the stylesheet makes it at 390 px');
   const px = onMap(wide, hammer(0, 90));
   near(px.y, wide.cy - wide.ry, 1e-9, 'the pole is drawn at the top of the ellipse');
   const sc = bandScale(1000, 214);
   near(sc.X(FIRST_YEAR), sc.pad.l, 1e-9, 'the band begins at the first year'); near(sc.X(LAST_YEAR), 1000 - sc.pad.r, 1e-9, 'and ends at the last');
   near(sc.yearAt(sc.X(2020)), 2020, 1e-9, 'a pixel of the band goes back to its year');
+  ok(!sc.narrow && bandScale(358, 206).narrow && bandScale(358, 206).X(LAST_YEAR) <= 358 - 12, 'on a narrow line the last year keeps room for its digits');
+  ok(stampOf(Date.UTC(2026, 10, 14)) === '14 NOV 2026' && stampOf(Date.UTC(1999, 0, 1)) === '1 JAN 1999', 'the date stamped on the line is the day, the month in three letters and the year');
 }
 
 /* ---------------- which clock was the best one known, and the lamps ---------------- */
@@ -287,9 +296,9 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
     { p: { durH: null }, hist: [{ from: jdOfYear(2001), s: a }] }];
   const cs = census(stars, 2000, 2040, 1);
   const yr = (y) => cs.years.indexOf(y);
-  ok(cs.years.length === 41 && cs.read.every((_, i) => cs.read[i] + cs.fading[i] + cs.lost[i] + cs.unlit[i] === 2), 'the census counts every planet with a transit length once in every year');
-  ok(cs.unlit[yr(2004)] === 2 && cs.read[yr(2005)] === 1 && cs.unlit[yr(2009)] === 1 && cs.read[yr(2010)] === 2, 'a lamp is counted from the year its clock appears');
-  ok(cs.lost[yr(2040)] === 1 && cs.read[yr(2040)] === 1, 'a clock with a poor period is lost by 2040 and one with a good period is still read');
+  ok(cs.years.length === 41 && cs.kept.every((_, i) => cs.kept[i] + cs.slipping[i] + cs.lost[i] + cs.unlit[i] === 2), 'the census counts every planet with a transit length once in every year');
+  ok(cs.unlit[yr(2004)] === 2 && cs.kept[yr(2005)] === 1 && cs.unlit[yr(2009)] === 1 && cs.kept[yr(2010)] === 2, 'a lamp is counted from the year its clock appears');
+  ok(cs.lost[yr(2040)] === 1 && cs.slipping[yr(2040)] === 1 && cs.kept[yr(2040)] === 0 && cs.kept[yr(2020)] === 1, 'by 2040 a clock with a poor period is lost, and one with a good period, still kept in 2020, has slipped past the target');
 
   const line = errorLine(h, 2000, 2040, 0.5);
   ok(line.length > 40 && line[0].year >= 2010 - 1e-9 && Math.abs(line[line.length - 1].year - 2040) < 1e-9, 'the error line runs from the first clock to the end of the sheet');
@@ -298,8 +307,20 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   ok(line.every((pt, i) => !i || pt.s !== line[i - 1].s || pt.sigma >= line[i - 1].sigma - 1e-15), 'and climbs between');
   ok(errorLine([]).length === 0, 'a planet without a clock has no line');
 
-  ok(lampMark(null) === null && lampMark(NaN).kind === 'unknown' && lampMark(0.99).kind === 'lost' && lampMark(1).kind === 'fading' && lampMark(2.99).kind === 'fading' && lampMark(3).kind === 'read', 'a lamp is drawn by its state, with the same bounds as the words');
-  ok(lampMark(3).r < lampMark(30).r && lampMark(30).r < lampMark(3000).r && lampMark(3000).r === lampMark(1e9).r && lampMark(1e9).r < 2, 'a kept clock is drawn larger the better it is kept, and never larger than two pixels');
+  ok(lampMark(null) === null && lampMark(NaN).kind === 'no transit length' && lampMark(NaN).r === 0 && lampMark(0.99).kind === 'lost' && lampMark(1).kind === 'slipping' && lampMark(11.99).kind === 'slipping' && lampMark(12).kind === 'kept', 'a lamp is drawn by its state, with the same bounds as the words, and a planet with no transit length has no lamp');
+  ok(lampMark(12).r < lampMark(120).r && lampMark(120).r < lampMark(12000).r && lampMark(12000).r === lampMark(1e9).r && lampMark(1e9).r < 2.5, 'a kept clock is drawn larger the better it is kept, and never larger than two and a half pixels');
+  ok(lampMark(12).a < lampMark(1200).a && lampMark(12000).a === 1 && lampMark(12).a > 0.5 && lampMark(12).r > lampMark(11.99).r, 'and brighter: full at a thousand times the target, never faint, and from the target on larger than a slipping point');
+  ok(lampMark(0.5).r > lampMark(1e9).r * 0.9 && lampMark(0.5).a < lampMark(12).a, 'a lost clock is a ring wide enough to be found and quieter than any kept lamp');
+
+  // the dots of the tally: quarter-sigma columns from -6.5 to 6.5, the ends holding everything further out
+  ok(tallyBin(-100) === 0 && tallyBin(-6.5) === 0 && tallyBin(-6.2501) === 0 && tallyBin(-6.25) === 1 && tallyBin(6.2499) === 50 && tallyBin(6.25) === 51 && tallyBin(100) === 51, 'a miss of 6.25 sigmas or more falls in an end column, however large');
+  ok(tallyBin(-1) === 22 && tallyBin(-0.0001) === 25 && tallyBin(0) === 26 && tallyBin(0.9999) === 29 && tallyBin(1) === 30, 'the eight columns either side of zero hold exactly the misses inside one sigma, the ones drawn gold');
+
+  // the night names five: of the transits up in the dark, the ones whose stars are brightest
+  const row = (name, vmag, watchable) => ({ planet: { name, vmag }, watchable });
+  const five = nightNamed([row('a', 9, true), row('b', 7, false), row('c', 12, true), row('d', undefined, true), row('e', 8, true), row('f', 10, true), row('g', 11, true), row('h', 13, true)]);
+  ok(five.map((r) => r.planet.name).join('') === 'eafgc', 'five are named, brightest star first; one that is not up in the dark is never named, and one with no magnitude comes last');
+  ok(nightNamed([row('a', 9, false)]).length === 0 && nightNamed([row('a', 9, true), row('b', 8, true)]).length === 2, 'fewer than five are all named, and none when none is up');
 }
 
 /* ---------------- one transit as light ---------------- */
@@ -330,10 +351,12 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   ok(watchable(fine) && unwatchable(fine) === '', 'the rule includes each of its bounds');
   ok(unwatchable({ ...fine, altMin: 19.99 }) === 'star low' && unwatchable({ ...fine, altMin: -1 }) === 'star sets', 'a star a hair too low, or below the horizon, fails it');
   ok(unwatchable({ ...fine, sunMax: -11.99 }) === 'twilight' && unwatchable({ ...fine, sunMax: 2 }) === 'daylight', 'a Sun a hair too high, or up, fails it');
-  ok(unwatchable({ ...fine, lamp: 2.99 }) === 'clock fading' && unwatchable({ ...fine, lamp: 0.99 }) === 'clock lost' && unwatchable({ ...fine, lamp: NaN }) === 'no transit length', 'a lamp a hair too dim, a lost clock or no transit length fails it');
+  ok(unwatchable({ ...fine, lamp: 2.99 }) === 'window too wide' && unwatchable({ ...fine, lamp: 0.99 }) === 'clock lost' && unwatchable({ ...fine, lamp: NaN }) === 'no transit length', 'a transit a hair under three windows long, a lost clock or no transit length fails it');
   ok(unwatchable({ ...fine, contested: true }) === 'clock contested', 'a clock most other papers disagree with fails it');
   ok(unwatchable({ ...fine, altMin: NaN }) === 'no position' && !watchable({ ...fine, sunMax: NaN }), 'a planet with no position is never called watchable');
-  ok(WATCH.minAlt === 20 && WATCH.maxSun === -12 && WATCH.minLamp === 3 && WATCH.stepMin === 15, 'the rule the page prints is the rule in force');
+  ok(WATCH.minAlt === 20 && WATCH.maxSun === -12 && WATCH.minLamp === 3 && WATCH.stepMin === 15 && WATCH.baselineH === 0.5, 'the rule the page prints is the rule in force');
+  const eg = placeOf(EXAMPLE_PLACE.lat, EXAMPLE_PLACE.lon);
+  ok(eg && eg.lat === EXAMPLE_PLACE.lat && eg.lon === EXAMPLE_PLACE.lon && EXAMPLE_PLACE.name.length > 0, 'the example place is a place a visitor could have typed, and has a name to be called an example by');
   ok(samplesFor(0) === 5 && samplesFor(1 / 24) === 5 && samplesFor(3 / 24) === 13 && samplesFor(53.6 / 24) === 216 && samplesFor(10) === 240, 'a span is looked at every quarter of an hour, at five instants or more and 240 at most');
 
   ok(span(0.005) === '5.0 ms' && span(0.016) === '16 ms' && span(0.9) === '900 ms', 'under a second is said in milliseconds');
@@ -359,16 +382,25 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   near((from + 0.5 - rows[0].mid) * 86400, 69.184 + romerSeconds(from + 0.5, 100, 20), 0.05, 'its middle is turned from BJD-TDB into UTC at Earth');
   near(rows[0].windowS, Math.hypot(0.0002, 100 * 0.000002) * 86400 + 5, 1e-6, 'its window is the clock\'s error plus what the standard leaves unsaid');
   near(rows[0].lamp, (3 * 3600) / rows[0].windowS, 1e-9, 'its lamp is the transit\'s length over that window, the one the row shows');
-  ok(Number.isFinite(rows[0].altMin) && rows[0].altMin <= rows[0].altMax && typeof rows[0].sky === 'string' && typeof rows[0].watchable === 'boolean' && rows[0].state === 'read' && rows[0].contested === false, 'with a place it carries the star\'s lowest and highest altitude, the sky, the clock\'s state and a verdict');
-  near(rows[0].from, rows[0].mid - 1.5 / 24 - rows[0].windowS / 86400, 1e-9, 'the span looked at begins a window before the transit does');
-  near(rows[0].to, rows[0].mid + 1.5 / 24 + rows[0].windowS / 86400, 1e-9, 'and ends a window after it');
+  ok(Number.isFinite(rows[0].altMin) && rows[0].altMin <= rows[0].altMax && typeof rows[0].sky === 'string' && typeof rows[0].watchable === 'boolean' && rows[0].state === 'kept' && rows[0].contested === false, 'with a place it carries the star\'s lowest and highest altitude, the sky, the clock\'s state and a verdict');
+  near(rows[0].from, rows[0].mid - 1.5 / 24 - 0.5 / 24 - rows[0].windowS / 86400, 1e-9, 'the span looked at begins half an hour and a window before the transit does');
+  near(rows[0].to, rows[0].mid + 1.5 / 24 + 0.5 / 24 + rows[0].windowS / 86400, 1e-9, 'and ends half an hour and a window after it');
   ok(rows[0].watchable === (rows[0].why === ''), 'the verdict and its reason agree');
   ok(crossings([p], ['BJD-TDB'], from + 0.51, 24, null).length === 0 && crossings([p], ['BJD-TDB'], from - 0.51, 24, null).length === 0, 'a transit just before the span or just after it is left out');
   const bare = crossings([p], ['BJD-TDB'], from - 0.49, 24, null);
-  ok(bare.length === 1 && bare[0].altMin === undefined && bare[0].watchable === undefined && bare[0].state === 'read', 'one just inside it is kept; without a place there is no altitude and no verdict');
+  ok(bare.length === 1 && bare[0].altMin === undefined && bare[0].watchable === undefined && bare[0].state === 'kept', 'one just inside it is listed; without a place there is no altitude and no verdict');
   // the slack counts: a clock good to 12 minutes on a bare JD has a window of 21.6 minutes, and a one-hour transit is no longer three times it
   const bareJd = crossings([{ ...p, durH: 1, clock: solution([from + 0.5 - 10 * 100, 12 / 1440, 10, 0.0000001, 0, 2020, 0, 0]) }], ['JD'], from - 0.4, 24, null)[0];
-  ok(60 / 12 > 3 && bareJd.lamp < 3 && bareJd.state === 'fading', `a time standard that leaves ten minutes unsaid dims the lamp of the row (${bareJd.lamp.toFixed(2)})`);
+  ok(60 / 12 > 3 && bareJd.lamp < 3 && bareJd.state === 'slipping', `a time standard that leaves ten minutes unsaid dims the lamp of the row (${bareJd.lamp.toFixed(2)})`);
+  // the half hour of sky either side counts: a star that is 20 degrees up through the transit and lower just before it fails
+  const hour = jdOfMs(Date.UTC(2026, 10, 14, 22, 0, 0));
+  const edge = (ra) => crossings([{ name: 'edge', ra, dec: 0, durH: 1, clock: solution([hour - 10 * 50, 0.00002, 10, 0.0000002, 0, 2020, 0, 0]) }], ['BJD-UTC'], hour - 0.5, 24, BCN)[0];
+  let found = null;
+  for (let ra = 0; ra < 360 && !found; ra += 0.25) {
+    const r = edge(ra), through = Math.min(altAz(r.mid - 0.5 / 24, ra, 0, BCN.lat, BCN.lon).alt, altAz(r.mid + 0.5 / 24, ra, 0, BCN.lat, BCN.lon).alt);
+    if (through >= 20.5 && r.altMin < 19.5 && r.sunMax <= -12) found = { r, through };
+  }
+  ok(found && !found.r.watchable && found.r.why === 'star low', `a star ${found ? found.through.toFixed(1) : '?'} degrees up through the transit itself and ${found ? found.r.altMin.toFixed(1) : '?'} at the edge of the half hour beside it is not up in the dark`);
 
   // The whole transit is looked at. A six-hour transit centred two hours after the star crosses the meridian:
   // at its beginning the star is 46 degrees up, at its end 11. The first rule looked at the beginning alone.
@@ -421,8 +453,14 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   const timed = P.filter((p) => durDays(p));
   const at = 2461358.5;                                     // 2026 November 14, 0h UTC: the day the archive was read
   const lamps = timed.map((p) => lampAt(p.clock, at, durDays(p)));
-  const lost = lamps.filter((l) => l < 1).length, fading = lamps.filter((l) => l >= 1 && l < 3).length;
-  ok(timed.length === 4729 && lost === 388 && fading === 426, `4,729 have a transit length; on 2026-11-14, 388 are lost and 426 fading (${timed.length}, ${lost}, ${fading})`);
+  const count = (state) => lamps.filter((l) => stateOf(l) === state).length;
+  const lost = count('lost'), slipping = count('slipping'), kept = count('kept');
+  ok(timed.length === 4729 && lost === 388 && slipping === 1910 && kept === 2431, `4,729 have a transit length; on 2026-11-14, 2,431 are kept, 1,910 slipping and 388 lost (${timed.length}, ${kept}, ${slipping}, ${lost})`);
+  const k2 = timed.filter((p) => isK2(p.name)), k2lost = k2.filter((p) => lampAt(p.clock, at, durDays(p)) < 1).length;
+  ok(k2.length === 461 && k2lost === 312 && !isK2('Kepler-22 b') && isK2('EPIC 201912552 b') && isK2('K2-18 b'), `of 461 K2 planets with a transit length, 312 are lost that day: four in five of the lost clocks (${k2.length}, ${k2lost})`);
+  const field = densestField(k2.map((p) => ({ p })));
+  ok(field && field.n === 42 && Math.abs(field.ra - 173) < 1 && Math.abs(field.dec - 0.4) < 1, `the field where K2's planets stand closest holds 42 of them, on the ecliptic near 11.5h (${field ? `${field.n} at ${field.ra.toFixed(1)}, ${field.dec.toFixed(1)}` : 'none'})`);
+  ok(densestField([]) === null && densestField([{ p: { ra: NaN, dec: 0 } }]) === null && densestField([{ p: { ra: 10, dec: 0 } }, { p: { ra: 11, dec: 1 } }, { p: { ra: 200, dec: 0 } }]).n === 2, 'no planets, or none with a position, have no field; otherwise it is the fullest cell');
   const doubted = P.filter((p) => contested(p.clock)).length, alone = P.filter((p) => p.clock.others === 0).length;
   ok(doubted === 141 && alone === 352, `141 working clocks are contested, and 352 have no other clock to be held against (${doubted}, ${alone})`);
 
@@ -435,8 +473,9 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   const first = stars.filter((s) => s.hist[0].from <= jdOfYear(2000.5));
   ok(first.length === 1 && first[0].p.name === 'HD 209458 b' && stars.every((s) => s.hist[0].from > jdOfYear(2000)), `in the middle of 2000 one lamp is lit, the first transit timed, and at its start none (${first.map((s) => s.p.name).join(', ')})`);
   const cs = census(stars, FIRST_YEAR, LAST_YEAR, 0.25), end = cs.years.length - 1, now = cs.years.findIndex((y) => y >= 2026.75);
-  ok(cs.read.every((_, i) => cs.read[i] + cs.fading[i] + cs.lost[i] + cs.unlit[i] === 4729), 'the census counts every planet with a transit length in every quarter from 1999 to 2040');
-  ok(cs.lost[end] > cs.lost[now] && cs.read[end] < cs.read[now] && cs.unlit[end] === 0, `if nobody looks again, more clocks are lost in 2040 than today and fewer can be read (lost ${cs.lost[now]} then ${cs.lost[end]}, read ${cs.read[now]} then ${cs.read[end]})`);
+  ok(cs.kept.every((_, i) => cs.kept[i] + cs.slipping[i] + cs.lost[i] + cs.unlit[i] === 4729), 'the census counts every planet with a transit length in every quarter from 1999 to 2040');
+  ok(cs.lost[end] === 494 && cs.slipping[end] === 2506 && cs.kept[end] === 1729 && cs.unlit[end] === 0, `if nobody looks again, in 2040 494 clocks are lost, 2,506 slipping and 1,729 kept: about 700 lamps go from gold to blue under the drag (${cs.lost[end]}, ${cs.slipping[end]}, ${cs.kept[end]})`);
+  ok(cs.lost[end] > cs.lost[now] && cs.kept[end] < cs.kept[now], `more are lost then than today and fewer kept (lost ${cs.lost[now]} then ${cs.lost[end]}, kept ${cs.kept[now]} then ${cs.kept[end]})`);
 
   const pairs = P.map(pairOf).filter(Boolean);
   const t = tally(pairs.filter((x) => x.real));

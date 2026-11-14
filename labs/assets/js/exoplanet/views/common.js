@@ -14,6 +14,7 @@ export function tokens() {
     text: v('--text', '#C5CCD8'), dim: v('--text-dim', '#79828F'), faint: v('--text-faint', '#424B57'),
     bright: v('--text-bright', '#EAF0FB'), gold: v('--accretion', '#D4A24C'), goldSoft: v('--accretion-soft', '#F0C674'),
     goldDim: v('--accretion-dim', '#97681F'), horizon: v('--horizon', '#9FB3D6'), horizonDim: v('--horizon-dim', '#565D72'),
+    sky: v('--sky', '#0A1B3D'), ice: v('--ice', '#7CC0FA'),      // the Cosmos pair a page may set: the deep blue of a sky and the blue of what is cold
     font: '500 10px "IBM Plex Mono", ui-monospace, Consolas, monospace',
     fontSm: '400 9px "IBM Plex Mono", ui-monospace, Consolas, monospace',
   };

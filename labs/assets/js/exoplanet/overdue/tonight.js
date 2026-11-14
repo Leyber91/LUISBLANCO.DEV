@@ -6,43 +6,52 @@
    span, each predicted mid-time is turned from its stated standard
    into UTC at Earth (time.js), and its window is the clock's own
    error plus what the standard leaves unsaid. With a place, the
-   star's altitude and the Sun's are taken through the whole
-   transit, from its beginning to its end and a window further on
-   each side, and the row says whether anybody there could watch
-   all of it.
+   star's altitude and the Sun's are taken through the whole span
+   an observer needs: half an hour before the transit begins to
+   half an hour after it ends, and a window further on each side.
 
-   "Watchable" is a design rule of this lab, stated on the page:
-   through that whole span the star is at least 20 degrees up and
-   the Sun at least 12 degrees down; the transit is three times
-   its window or longer; and the clock is not contested (most of
-   the other published clocks agree with it). Two independent
-   reviews on 2026-11-14 shaped it. The first rule looked at the
-   star when the transit began and at the Sun in its middle, and
-   passed 72 of 166 transits over Barcelona that fail when the
-   whole transit is looked at. The second looked at five instants
-   whatever the length, which was right for the verdict and wrong
-   by up to 23 degrees for the altitudes shown on a transit of
-   many hours; the span is now sampled every quarter of an hour.
+   "Up in the dark" is a design rule of this lab, stated on the
+   page: through that whole span the star is at least 20 degrees
+   up and the Sun at least 12 degrees down; the transit is three
+   times its window or longer; and the clock is not contested
+   (most other published clocks agree with it). It says where to
+   point and when. It does not say that a telescope can see the
+   transit: that depends on the star's brightness and the dip's
+   depth, which the row gives.
+
+   Where the rule came from. Two independent reviews on 2026-11-14:
+   the first rule looked at the star when the transit began and at
+   the Sun in its middle, and passed 72 of 166 transits over
+   Barcelona that fail when the whole transit is looked at; the
+   second looked at five instants whatever the length, right for
+   the verdict and wrong by up to 23 degrees for the altitudes
+   shown on a transit of many hours, so the span is sampled every
+   quarter of an hour. And the tool observers use for this, the
+   TESS Transit Finder (astro.swarthmore.edu/transits, read
+   2026-11-14), asks for out-of-transit baseline before and after,
+   half an hour at least, extended by the ephemeris uncertainty:
+   a transit cannot be measured without the star's light on either
+   side of it.
    ============================================================ */
 
-import { transitsBetween, contested } from './clock.js';
+import { transitsBetween, contested, stateOf } from './clock.js';
 import { toEarthUtc, altAz, sunAltitude, skyAt } from './time.js';
 import { durDays } from './data.js';
 
-export const WATCH = { minAlt: 20, maxSun: -12, minLamp: 3, stepMin: 15, minSamples: 5, maxSamples: 240 };
-
-/* The state of a clock by its lamp (duration over error): read, fading below 3, lost below 1. */
-export const stateOf = (lamp) => (!Number.isFinite(lamp) ? 'no transit length' : lamp < 1 ? 'lost' : lamp < WATCH.minLamp ? 'fading' : 'read');
+export { stateOf };
+export const WATCH = { minAlt: 20, maxSun: -12, minLamp: 3, baselineH: 0.5, stepMin: 15, minSamples: 5, maxSamples: 240 };
+/* The place the night is drawn for until a visitor sets their own: an example, named as one on the page. */
+export const EXAMPLE_PLACE = { lat: 41.39, lon: 2.17, name: 'Barcelona' };
 
 /**
- * Why a transit cannot be watched from a place, or '' when it can. altMin: the star's lowest altitude over the
+ * Why a transit is not up in the dark at a place, or '' when it is. altMin: the star's lowest altitude over the
  * span, in degrees. sunMax: the Sun's highest. lamp: the transit's length over its window. contested: most other
- * published clocks disagree with this one. Each bound is included in "can". The first reason that applies is given.
+ * published clocks disagree with this one. Each bound is included. The first reason that applies is given.
  */
 export function unwatchable({ altMin, sunMax, lamp, contested: disputed }) {
   if (!Number.isFinite(lamp)) return 'no transit length';
   if (lamp < 1) return 'clock lost';
-  if (lamp < WATCH.minLamp) return 'clock fading';
+  if (lamp < WATCH.minLamp) return 'window too wide';
   if (disputed) return 'clock contested';
   if (!Number.isFinite(altMin) || !Number.isFinite(sunMax)) return 'no position';
   if (!(sunMax <= WATCH.maxSun)) return sunMax > -0.833 ? 'daylight' : 'twilight';
@@ -72,9 +81,9 @@ export function crossings(planets, standards, fromJdUtc, hours = 24, place = nul
       const lamp = dur ? (dur * 86400) / windowS : NaN;                            // against the window as it is shown: the error and the slack
       const row = { planet: p, n: t.n, mid: e.jdUtc, sigmaS: t.sigma * 86400, slackS: e.slack, windowS, lamp, state: stateOf(lamp), contested: contested(c) };
       if (place && Number.isFinite(p.ra) && Number.isFinite(p.dec)) {
-        // from the transit's beginning to its end, and a window further each side (no further than one transit:
-        // a clock with a wider window is not watchable whatever the sky does)
-        const half = (dur || 0) / 2, pad = Math.min(windowS / 86400, dur || 0);
+        // from half an hour before the transit begins to half an hour after it ends, and a window further each
+        // side (no further than one transit: a clock with a wider window is out whatever the sky does)
+        const half = (dur || 0) / 2, pad = dur ? WATCH.baselineH / 24 + Math.min(windowS / 86400, dur) : 0;
         const a = e.jdUtc - half - pad, b = e.jdUtc + half + pad;
         const k = dur ? samplesFor(b - a) : 1;
         let altMin = Infinity, altMax = -Infinity, sunMax = -Infinity;

@@ -22,13 +22,20 @@
    nothing brightens; the right-hand side of the sheet is what
    happens if nobody looks again.
 
-   Gold is a clock that can be read: a lamp of three or more.
-   Paler is fading. Ash is lost. No light is larger than a few
-   pixels, so the field reads as a sky first and as a chart
-   second, and where lamps crowd they add, so the Kepler field
-   glows because it is dense and for no other reason. Two great
-   circles, the ecliptic and the plane of the Galaxy, are the only
-   construction lines: they explain where the surveys looked.
+   The sheet has one warm colour and two cold ones. The sky is a
+   deep blue. Gold is a clock that is kept: its error is a
+   twelfth of the transit or less, the target the people who keep
+   these clocks have set for a space mission, and the better it
+   is kept the brighter it burns. A clock below that target has
+   gone cold: an ice-blue point while the transit can still be
+   found, an ice-blue ring once it cannot. Warm is kept and cold
+   is not, so the pair needs no legend, and a visitor who drags
+   the date forward watches gold turn blue. No light is larger
+   than a few pixels, so the field reads as a sky first and as a
+   chart second. Two great circles, the ecliptic and the plane of
+   the Galaxy, are the only construction lines: they explain
+   where the surveys looked, and one survey's fields, strung
+   along the ecliptic, are where most of the cold rings are.
 
    The sheet ignites: lamps come on in the order they were found,
    and then the sky holds still except where a planet is crossing
@@ -41,7 +48,7 @@
    on a date, and the count of lamps through the years.
    ============================================================ */
 
-import { epochAt, sigmaAt, jdOfYear, yearOfJd } from './clock.js';
+import { epochAt, sigmaAt, jdOfYear, yearOfJd, KEPT_LAMP } from './clock.js';
 import { durDays } from './data.js';
 
 const RAD = Math.PI / 180;
@@ -148,6 +155,28 @@ export function lampOn(p, hist, jd) {
   return dur ? dur / sigmaAt(s, epochAt(s, jd)) : NaN;
 }
 
+/* The planets of the K2 mission, by the names the archive gives them. */
+export const isK2 = (name) => /^(K2-|EPIC )/.test(name);
+/**
+ * Where a set of planets stands closest on the sky: the mean place of those in the cell (12 degrees a side) that
+ * holds the most of them, and how many it holds. planets: [{ p }]; one without a position takes no part.
+ * Returns { ra, dec, n }, or null when none has a position.
+ */
+export function densestField(planets, cell = 12) {
+  const cells = new Map();
+  for (const x of planets) {
+    if (!Number.isFinite(x.p.ra) || !Number.isFinite(x.p.dec)) continue;
+    const key = `${Math.floor(x.p.ra / cell)}:${Math.floor((x.p.dec + 90) / cell)}`;
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(x);
+  }
+  let top = null;
+  for (const list of cells.values()) if (!top || list.length > top.length) top = list;
+  if (!top) return null;
+  const mean = (f) => top.reduce((a, x) => a + f(x), 0) / top.length;
+  return { ra: mean((x) => x.p.ra), dec: mean((x) => x.p.dec), n: top.length };
+}
+
 /* Whether a planet is in front of its star at an instant, by a clock: within half a transit of a predicted middle. */
 export function inTransit(s, jd, dur) {
   if (!s || !dur) return false;
@@ -156,21 +185,21 @@ export function inTransit(s, jd, dur) {
 }
 
 /**
- * The catalogue through the years: for each step, how many planets with a transit length have a clock that can
- * be read (lamp 3 or more), is fading (1 to 3) or is lost (below 1), and how many have no clock yet.
- * planets: [{ p, hist }]. Returns { years, read, fading, lost, unlit }.
+ * The catalogue through the years: for each step, how many planets with a transit length have a clock that is
+ * kept, is slipping or is lost (clock.js stateOf), and how many have no clock yet.
+ * planets: [{ p, hist }]. Returns { years, kept, slipping, lost, unlit }.
  */
 export function census(planets, from = FIRST_YEAR, to = LAST_YEAR, step = 0.25) {
   const timed = planets.filter((x) => durDays(x.p));
-  const out = { years: [], read: [], fading: [], lost: [], unlit: [] };
+  const out = { years: [], kept: [], slipping: [], lost: [], unlit: [] };
   for (let y = from; y <= to + 1e-9; y += step) {
     const jd = jdOfYear(y);
-    let read = 0, fading = 0, lost = 0, unlit = 0;
+    let kept = 0, slipping = 0, lost = 0, unlit = 0;
     for (const x of timed) {
       const l = lampOn(x.p, x.hist, jd);
-      if (l === null) unlit++; else if (l < 1) lost++; else if (l < 3) fading++; else read++;
+      if (l === null) unlit++; else if (l < 1) lost++; else if (l < KEPT_LAMP) slipping++; else kept++;
     }
-    out.years.push(y); out.read.push(read); out.fading.push(fading); out.lost.push(lost); out.unlit.push(unlit);
+    out.years.push(y); out.kept.push(kept); out.slipping.push(slipping); out.lost.push(lost); out.unlit.push(unlit);
   }
   return out;
 }

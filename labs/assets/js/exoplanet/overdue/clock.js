@@ -41,6 +41,17 @@ export const jdOfYear = (y) => 2451545.0 + (y - 2000) * YEAR_DAYS;
 export const REAL_TEST_ORBITS = 10;       // a later mid-time fewer orbits on than this is the same transits quoted again
 export const BLIND_SHARE = 1 / 6;         // an uncertainty this share of the period or more: three sigma is half an orbit, the largest miss there can be
 
+/* The three states of a clock, by its lamp (the transit's length over the 1-sigma error of its predicted time).
+   kept: the error is a twelfth of the transit or less. That line is not this lab's: it is the target the ExoClock
+   project sets for the planets ESA's Ariel mission will observe; three sigma is then a quarter of the transit
+   (A. Kokori et al. 2021, "ExoClock Project: An open platform for monitoring the ephemerides of Ariel
+   targets with contributions from the public", Experimental Astronomy, doi:10.1007/s10686-020-09696-3; the
+   project's site states the target as one-twelfth of the transit duration, read 2026-11-14).
+   lost: the error is longer than the transit itself. That line and the word are this lab's.
+   slipping: between the two. */
+export const KEPT_LAMP = 12;
+export const stateOf = (lamp) => (!Number.isFinite(lamp) ? 'no transit length' : lamp < 1 ? 'lost' : lamp < KEPT_LAMP ? 'slipping' : 'kept');
+
 /* Whether an uncertainty (days) is too wide for this clock to be tested at all. */
 export const blindAt = (s, sigma) => sigma >= s.P * BLIND_SHARE;
 

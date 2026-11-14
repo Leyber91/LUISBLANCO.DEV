@@ -6,7 +6,10 @@
    Lifted from heptapod.css on 2026-11-14 so that a second lab
    (Exomania's Overdue) would not copy it. A page links tokens.css,
    then this file, then its own sheet for what only it has. Gold
-   is kept for what has fired; every value comes from tokens.css.
+   is kept for what has fired, and for the four brackets that say
+   the page is a plate of this site: a label, a hover, a focus and
+   the footer's mark are drawn in the cold ink. Every value comes
+   from tokens.css.
    ============================================================ */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -33,7 +36,7 @@ body::before { /* a faint vignette of light behind the page's first plate */
 }
 .label .on { color: var(--horizon); }
 .brand b { color: var(--text-bright); font-weight: 600; }
-.kick { color: var(--accretion); letter-spacing: .28em; margin: 0 0 var(--s-2); }
+.kick { color: var(--horizon); letter-spacing: .28em; margin: 0 0 var(--s-2); }
 .mini.dim, .dim { color: var(--text-faint); }
 .mini b { color: var(--text-bright); font-weight: 500; letter-spacing: .08em; }
 
@@ -51,7 +54,7 @@ body::before { /* a faint vignette of light behind the page's first plate */
   color: var(--text); text-decoration: none; border: 1px solid var(--line-bright);
   padding: 6px 12px; font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase;
 }
-.back:hover { border-color: var(--accretion-dim); color: var(--text-bright); }
+.back:hover { border-color: var(--horizon-dim); color: var(--text-bright); }
 .back.quiet { border-color: var(--line); color: var(--text-dim); }
 
 main { position: relative; z-index: var(--z-content); padding-inline: var(--content-pad); }
@@ -74,7 +77,7 @@ h2 { font-size: clamp(1.25rem, 1.8vw, 1.6rem); line-height: 1.18; font-weight: 6
   padding: 9px 14px; cursor: pointer; min-height: 38px; border-radius: 0;
   transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
 }
-.act:hover:not(:disabled), .act:focus-visible { border-color: var(--accretion); color: var(--accretion-soft); box-shadow: 0 0 18px -6px var(--accretion-glow); }
+.act:hover:not(:disabled), .act:focus-visible { border-color: var(--horizon); color: var(--text-bright); }
 .act.ghost { color: var(--text); border-color: var(--line); }
 .act.ghost:hover:not(:disabled) { color: var(--text-bright); border-color: var(--horizon-dim); box-shadow: none; }
 .act:disabled { opacity: .45; cursor: default; }
@@ -117,7 +120,7 @@ input[type=range] { width: 100%; accent-color: var(--accretion); margin: var(--s
   padding: var(--s-6) var(--content-pad) var(--s-8); border-top: 1px solid var(--line); max-width: calc(var(--content-max) + 2 * var(--content-pad)); margin-inline: auto;
 }
 .tag { display: inline-flex; gap: 9px; align-items: baseline; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); line-height: 1.55; max-width: 90ch; }
-.tag i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accretion); box-shadow: 0 0 9px var(--accretion-glow); transform: translateY(-1px); }
+.tag i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--horizon); transform: translateY(-1px); }
 .tag b { color: var(--text); font-weight: 500; }
 
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
