@@ -82,6 +82,22 @@
   .bp.tl{top:20px;left:20px;border-right:0;border-bottom:0}.bp.tr{top:20px;right:20px;border-left:0;border-bottom:0}
   .bp.bl{bottom:20px;left:20px;border-right:0;border-top:0}.bp.br{bottom:20px;right:20px;border-left:0;border-top:0}
   .cap .fill{transition:none!important}
+  /* below 860px the fixed one-screen layout cannot hold the rail and the panel side by side: the page scrolls and
+     the panel follows the rail in one column */
+  @media (max-width:860px){
+    html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+    .stage{position:relative;inset:auto;min-height:100vh;padding:34px 20px 30px;grid-template-rows:auto}
+    .bar,.left{flex-wrap:wrap;gap:10px 22px}
+    h1{font-size:28px}
+    .inst{grid-template-columns:minmax(0,1fr)}
+    .terms{overflow:visible}
+    .panel{padding:22px 18px;grid-template-columns:minmax(0,1fr)}
+    .sysrow{flex-wrap:wrap;gap:8px 16px}
+    .meter{grid-template-columns:minmax(0,1fr) auto}
+    .led{flex-wrap:wrap;gap:8px 24px}
+    .roast{overflow:visible}
+    .foot{flex-direction:column;align-items:flex-start;gap:10px}
+  }
 </style>
 </head>
 <body>

@@ -16,6 +16,10 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-14: Item 1, one finding: on The Roaster at 390 px the headline and footer were cut off and the roast
+  panel sat off screen with no way to scroll to it; below 860 px the page now scrolls in one column, from 320 px up.
+  Item 1 stays in "Next" (see EVOLUTION.md for what the sweep found). Pull request "evolve 2026-11-14: roaster fits
+  phones".
 - 2026-11-13: Item 1, one finding: on the AI Meme Lab at 390 px both panels ran 8 px past the screen edge and were
   clipped; they now fit from 320 px up. Item 1 stays in "Next" because it is a standing item and the render sweep
   found two more (see EVOLUTION.md). Pull request "evolve 2026-11-13: meme lab panels fit phones".
