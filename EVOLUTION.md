@@ -3,6 +3,36 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-14, The Roaster fits a phone screen (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 24 pages and 0 findings on main
+  today, so this run loaded all 24 published pages in headless Chromium at 1280 px and 390 px over a local http
+  server and recorded script errors, failed local requests and content that ends past the screen edge.
+- Found, most visible first among the lab pages the hub links: on labs/roaster.html at 390 px the page is one fixed
+  screen with overflow hidden, laid out as a 312 px rail beside the roast panel. The headline, the intro and the
+  footer were cut off at the right edge, the top bar ran to x = 851 px, and the roast panel (the output the lab
+  exists for) sat entirely off screen with no way to scroll to it.
+- Changed (labs/roaster.html, one media query of 15 lines): at 860 px and below the page scrolls, the panel follows
+  the rail in one column, the top bar, the source badge and the kept/deleted legend wrap, the headline is 28 px
+  instead of 34 px, and the footer stacks. Above 860 px nothing changes: at 861 and 1280 px the panel measures the
+  same as on main (x = 388 px, 563 px tall). At 320, 360, 390, 430 and 860 px no element in the page ends past the
+  screen edge and the scroll width equals the screen width; in an iPhone 13 emulation a wheel scroll moves the page
+  down 962 px.
+- Also found and left for later runs of item 1: the home page is 1,549 px wide at 1280 px and 392 px at 390 px
+  because two absolutely placed background canvases (sub-dots, sub-stars) extend past the edge; body clips it and
+  neither a wheel nor the arrow keys scrolled it sideways in Chromium, so a visitor there sees nothing, but a
+  browser that ignores the body's overflow on the viewport could. hero_proto.html still throws a TypeError on load
+  and is 704 px wide at 390 px. labs/claude-prep/ still requests seal.json, which returns 404 (Luis decides).
+  Narrower tables on labs/ai-health.html, labs/honesty-decoder.html and labs/token-ekg.html scroll inside their own
+  containers and were not counted as findings.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 24 pages, 0 findings; levels 32 labs, 0
+  errors; lab tests 7 files, 0 failed; atlas, stories, evolution, mutate and anti-tells selftests pass and their
+  checks pass (anti-tells: no new tells; atlas, stories and evolution print NOT_CHECKED for the private plans). No script changed, so there was no syntax check to
+  run. node tools/anti_tells.mjs scan labs/roaster.html lists 33 tells, all in lines this run did not touch. Render:
+  labs/roaster.html at 1280 px and 390 px in headless Chromium; the only console errors were the browser refusing
+  the live roast request to the model host (CORS from localhost), the same on main, after which the lab shows its
+  offline roast. Forbidden-name check: runs in the gates workflow on the pull request.
+
 ## 2026-11-13, Labs OS: a consent banner, a privacy page and the owner's usage dashboard (not a routine run)
 
 - New for a visitor: the labs hub now asks, once, whether this browser may send usage of the labs to their author.
