@@ -14,7 +14,7 @@ import { loadSnapshot, joinRoster, provisionalMeasured } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
-  insolation, earthLikeness, monteCarlo, skyView, starColour, isNum,
+  insolation, monteCarlo, skyView, starColour, isNum,
 } from './science.js';
 import { createPlot, plotValue } from './views/plot.js';
 import { createSystem } from './views/system.js';
@@ -23,7 +23,8 @@ import { createTarget } from './views/target.js';
 import { createReport } from './report.js';
 import { createTours, tourStops } from './tours.js';
 import { exportPlate, exportCSV, copyLink } from './export.js';
-import { parseQuestion, askModel, RANGE_FIELDS } from './query.js';
+import { parseQuestion, askModel, needsModel, say, PAGE, RANGE_FIELDS, KINDS, COLD_WORDS, HOT_WORDS, LOCKED_WORDS } from './query.js';
+import { COLD_K, HOT_K, hasKind, isLocked, isCold, isHot, rank, orderFor, sortWords, orderWords, hitFact } from './find.js';
 import { chainHTML, compareHTML, methodHTML } from './panels.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
@@ -34,7 +35,7 @@ const $ = (id) => document.getElementById(id);
 const store_ = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (_) { return null; } return null; };
 
 /* ---------------- state ---------------- */
-const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, newOnly: false, query: null });
+const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, looks: null, locked: null, cold: null, hot: null, newOnly: false, query: null });
 const store = {
   state: {
     list: [], byName: new Map(), sel: null, system: [], plot: PLOTS[params.get('plot')] ? params.get('plot') : 'valley',
@@ -44,6 +45,7 @@ const store = {
 };
 const methodGroup = (m) => (METHOD_GROUPS.some((g) => g.key === m) ? m : 'other');
 const rangeValue = (p, k) => (k === 'S' ? insolation(p).S : k === 'dist' ? (isNum(p.dist) ? p.dist * PHYS.PC_LY : null) : p[k]);
+const kindWords = (looks) => looks.map((l) => KINDS.find((k) => k.look === l).label).join(' or ');
 function rebuildFilter() {
   const f = store.state.filter, st = store.state;
   const rk = Object.entries(f.ranges).filter(([, r]) => r && (r[0] !== null || r[1] !== null));
@@ -57,13 +59,18 @@ function rebuildFilter() {
       if (!isNum(v) || (lo !== null && v < lo) || (hi !== null && v > hi)) return false;
     }
     if (f.zone && !f.zone.includes(hzPosition(p).key)) return false;
+    // by what the world is like: the rules are in find.js
+    if (f.looks && !hasKind(p, f.looks)) return false;
+    if (f.locked && !isLocked(p)) return false;
+    if (f.cold && !isCold(p)) return false;
+    if (f.hot && !isHot(p)) return false;
     if (f.box) {
       const x = plotValue(p, f.box.xKey), y = plotValue(p, f.box.yKey);
       if (!isNum(x) || !isNum(y) || x < f.box.x[0] || x > f.box.x[1] || y < f.box.y[0] || y > f.box.y[1]) return false;
     }
     return true;
   };
-  st.filterActive = f.cls !== 'all' || f.method !== 'all' || f.year !== null || f.newOnly || rk.length > 0 || !!f.zone || !!f.box;
+  st.filterActive = f.cls !== 'all' || f.method !== 'all' || f.year !== null || f.newOnly || rk.length > 0 || !!f.zone || !!f.looks || !!f.locked || !!f.cold || !!f.hot || !!f.box;
 }
 
 /* ---------------- renderer ---------------- */
@@ -123,6 +130,10 @@ function filterLabel() {
   if (f.year !== null) parts.push(String(f.year));
   for (const [k, r] of Object.entries(f.ranges)) if (r) parts.push(`${k} ${r[0] ?? ''}-${r[1] ?? ''}`);
   if (f.zone) parts.push('habitable zone');
+  if (f.looks) parts.push(kindWords(f.looks));
+  if (f.locked) parts.push(LOCKED_WORDS);
+  if (f.cold) parts.push(COLD_WORDS);
+  if (f.hot) parts.push(HOT_WORDS);
   if (f.box) parts.push('box on ' + PLOTS[f.box.mode].label);
   if (f.newOnly) parts.push('new since last visit');
   return parts.join(', ');
@@ -159,7 +170,7 @@ function select(p, { from = 'ui', keepTour = false } = {}) {
   transit.update();
   syncCamButtons();
   writeURL();
-  if (from !== 'search') $('q').value = '';
+  selRev++;
 }
 
 function setReticle(p) {
@@ -174,12 +185,29 @@ function setReticle(p) {
 
 function setPlot(mode) { store.state.plot = mode; plot.redraw(); writeURL(); }
 
-function setFilter(patch) {
-  Object.assign(store.state.filter, patch);
+/* A change of filter. One made by hand (a chip, the method, a range, a box on the diagram) means the question
+   in the note no longer says what is on screen, so the question goes: its order, its text in the field and in
+   the link, and a tour of its results, and the note says so. With no question, the note is cleared: whatever it
+   said was about the filter before. `asked` marks the change a question itself makes; `keep` one that leaves
+   the question standing (the replay of discoveries, which only hides years). */
+function setFilter(patch, { asked = false, keep = false } = {}) {
+  const st = store.state;
+  filterRev++;
+  Object.assign(st.filter, patch);
+  if (!asked && !keep) {
+    const was = st.filter.query;
+    if (was !== null) {
+      if ($('q').value.trim() === was) $('q').value = '';
+      st.filter.query = null; st.querySort = null;
+    }
+    setNote(was !== null ? `The filter was changed by hand. “${was}” no longer describes what is shown.` : '');
+    if (st.tour && st.tour.key === 'custom') endTour();
+  }
   rebuildFilter();
   renderFilters();
   renderRanges();
   plot.redraw();
+  writeURL();   // the link carries the question that is on screen, and loses it with the question
 }
 
 let urlT = 0;
@@ -210,6 +238,10 @@ function renderFilters() {
   if (f.year !== null) chips.push(`<button type="button" class="chip on" data-clear="year">${f.year} ×</button>`);
   if (f.box) chips.push(`<button type="button" class="chip on" data-clear="box">box ×</button>`);
   if (f.zone) chips.push(`<button type="button" class="chip on" data-clear="zone">habitable zone ×</button>`);
+  if (f.looks) chips.push(`<button type="button" class="chip on" data-clear="looks">${esc(kindWords(f.looks))} ×</button>`);
+  if (f.locked) chips.push(`<button type="button" class="chip on" data-clear="locked">one face to its star ×</button>`);
+  if (f.cold) chips.push(`<button type="button" class="chip on" data-clear="cold">cold: under ${COLD_K} K ×</button>`);
+  if (f.hot) chips.push(`<button type="button" class="chip on" data-clear="hot">hot: ${fmtInt(HOT_K)} K or more ×</button>`);
   if (Object.keys(f.ranges).length) chips.push(`<button type="button" class="chip on" data-clear="ranges">${Object.keys(f.ranges).length} range${Object.keys(f.ranges).length > 1 ? 's' : ''} ×</button>`);
   if (f.newOnly) chips.push(`<button type="button" class="chip on" data-clear="newOnly">new ×</button>`);
   const newChip = st.newNames.size ? `<button type="button" class="chip${f.newOnly ? ' on' : ''}" data-act="new">${fmtInt(st.newNames.size)} new since your last visit</button>` : '';
@@ -222,8 +254,8 @@ function renderFilters() {
     <button type="button" class="chip${$('ranges').hidden ? '' : ' on'}" data-act="ranges" aria-expanded="${!$('ranges').hidden}">Ranges</button>
     <button type="button" class="chip${isNum(f.upTo) ? ' on' : ''}" data-act="replay">${isNum(f.upTo) ? 'Stop replay' : 'Replay discoveries'}</button>
     ${chips.join('')}${newChip}
-    ${st.filterActive ? `<button type="button" class="chip" data-act="tourthese">Tour these</button>` : ''}
-    <span class="f-count">${fmtInt(n)} ${st.filterActive ? 'match' : 'planets'}</span>`;
+    ${st.filterActive && n > 0 ? `<button type="button" class="chip" data-act="tourthese">Tour these</button>` : ''}
+    <span class="f-count">${fmtInt(n)} ${st.filterActive ? (n === 1 ? 'match' : 'matches') : 'planets'}</span>`;
 }
 function renderRanges() {
   const f = store.state.filter;
@@ -239,16 +271,16 @@ function renderRanges() {
 let replayT = 0;
 function replay() {
   const st = store.state;
-  if (isNum(st.filter.upTo)) { clearInterval(replayT); setFilter({ upTo: null }); return; }
+  if (isNum(st.filter.upTo)) { clearInterval(replayT); setFilter({ upTo: null }, { keep: true }); return; }
   const years = st.list.map((p) => p.year).filter(isNum);
   const y0 = Math.max(1995, Math.min(...years)), y1 = Math.max(...years);
   let y = y0;
-  setFilter({ upTo: y });
+  setFilter({ upTo: y }, { keep: true });
   clearInterval(replayT);
   replayT = setInterval(() => {
     y += 1;
-    if (y > y1) { clearInterval(replayT); setTimeout(() => setFilter({ upTo: null }), 1600); return; }
-    setFilter({ upTo: y });
+    if (y > y1) { clearInterval(replayT); setTimeout(() => setFilter({ upTo: null }, { keep: true }), 1600); return; }
+    setFilter({ upTo: y }, { keep: true });
   }, reducedMotion() ? 900 : 420);
 }
 function bindFilters() {
@@ -256,7 +288,7 @@ function bindFilters() {
     const b = e.target.closest('button'); if (!b) return;
     const f = store.state.filter;
     if (b.dataset.cls) setFilter({ cls: b.dataset.cls });
-    else if (b.dataset.clear) setFilter({ [b.dataset.clear]: b.dataset.clear === 'ranges' ? {} : b.dataset.clear === 'newOnly' ? false : null, ...(b.dataset.clear === 'ranges' ? { query: null } : {}) });
+    else if (b.dataset.clear) { const k = b.dataset.clear; setFilter({ [k]: k === 'ranges' ? {} : k === 'newOnly' ? false : null }); }
     else if (b.dataset.act === 'ranges') { $('ranges').hidden = !$('ranges').hidden; renderFilters(); renderRanges(); placeWorld(); }
     else if (b.dataset.act === 'replay') replay();
     else if (b.dataset.act === 'new') setFilter({ newOnly: !f.newOnly });
@@ -288,94 +320,178 @@ function changelog(list) {
 }
 
 /* ---------------- search and questions ---------------- */
+/* What the visitor has done since a question was asked: a filter changed, a world opened, something typed. A
+   model's reply that arrives after any of these is set aside. (A list of results is never open while a model
+   reads: a model is asked only when the page's own rules filtered nothing.) */
+let filterRev = 0, selRev = 0, typeRev = 0;
+const stamp = () => `${filterRev}:${selRev}:${typeRev}`;
+const countWords = (n) => `${fmtInt(n)} ${n === 1 ? 'match' : 'matches'}`;
+/* The note under the search field. It is a live region that is always in the page, and is not drawn while empty. */
+const setNote = (text) => { $('q-note').textContent = text; };
+
+let showHits = () => {};   // set by bindSearch
 function bindSearch() {
   const q = $('q'), box = $('q-results');
-  let items = [], cur = -1;
-  const close = () => { box.hidden = true; q.setAttribute('aria-expanded', 'false'); cur = -1; };
+  let items = [], cur = -1, head = '';
+  let hitsFor = null, hitsOrder = null;              // the question whose results the list shows, and their order
+  let shut = null;                                   // the question whose list the visitor closed with Escape
+  const close = () => { box.hidden = true; q.setAttribute('aria-expanded', 'false'); q.removeAttribute('aria-activedescendant'); cur = -1; };
   const render = () => {
-    box.innerHTML = items.map((it, i) => it.ask
+    // the heading row is for the eye; the same words are in the note under the field, which is announced
+    box.innerHTML = (head ? `<li role="presentation" aria-hidden="true" class="head">${esc(head)}</li>` : '') + items.map((it, i) => it.ask
       ? `<li role="option" id="qr-${i}" class="ask${i === cur ? ' on' : ''}" aria-selected="${i === cur}" data-i="${i}"><b>Ask the catalogue</b><span>${esc(it.ask)}</span></li>`
+      : it.hit
+      ? `<li role="option" id="qr-${i}" class="${i === cur ? 'on' : ''}" aria-selected="${i === cur}" data-i="${i}"><b>${esc(it.hit.name)}</b><span>${esc(it.fact)}</span></li>`
       : `<li role="option" id="qr-${i}" class="${i === cur ? 'on' : ''}" aria-selected="${i === cur}" data-i="${i}">
       <b>${esc(it.name)}</b><span>${isNum(it.R) ? fmt(it.R, 3) + ' R⊕' : ''}${it.year ? ' · ' + it.year : ''}</span></li>`).join('');
     box.hidden = !items.length; q.setAttribute('aria-expanded', String(!!items.length));
-    q.setAttribute('aria-activedescendant', cur >= 0 ? 'qr-' + cur : '');
+    const row = cur >= 0 && items[cur] ? $('qr-' + cur) : null;
+    if (row) { q.setAttribute('aria-activedescendant', row.id); row.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
   };
-  q.addEventListener('input', () => {
-    const s = q.value.trim().toLowerCase();
-    if (!s) { close(); return; }
-    const L = store.state.list;
+  // After a question: its first matches, in its order, in the list the names appear in. Choosing one opens that
+  // world and hands the listed worlds to the tour bar, which steps through them when asked. A question that
+  // filtered nothing, or matched nothing, opens no list: the note under the field says what happened.
+  showHits = (text) => {
+    const st = store.state;
+    const r = st.filter.query === text && shut !== text && (st.filterActive || st.querySort) ? rankedMatches(8) : null;
+    if (!r || !r.hits.length) { if (hitsFor === text || !items.some((it) => !it.hit)) { items = []; head = ''; hitsFor = null; close(); } return; }
+    items = r.hits.map((p) => ({ hit: p, fact: hitFact(p, r.sort.key) }));
+    head = `${st.filterActive ? countWords(r.total) : `${fmtInt(r.total)} planets`} · ${orderWords(r)}${r.total > r.hits.length ? ` · the first ${r.hits.length}` : ''}`;
+    hitsFor = text; hitsOrder = r; cur = 0;
+    render();
+    box.scrollIntoView({ block: 'nearest' });        // on a phone the field sits low on the page: bring the whole list into view
+  };
+  // the worlds and stars whose names match what is typed: those that start with it first
+  const named = (s) => {
     const starts = [], has = [];
-    for (const p of L) {
+    for (const p of store.state.list) {
       const nm = p.name.toLowerCase(), h = p.host.toLowerCase();
       if (nm.startsWith(s) || h.startsWith(s)) starts.push(p); else if (nm.includes(s) || h.includes(s)) has.push(p);
       if (starts.length > 40) break;
     }
-    items = [...starts, ...has].slice(0, 7);
+    return [...starts, ...has].slice(0, 7);
+  };
+  const suggest = () => {
+    const s = q.value.trim().toLowerCase();
+    head = ''; hitsFor = null; shut = null;
+    if (!s) { items = []; close(); return; }
+    items = named(s);
     if (s.includes(' ') || !items.length) items.push({ ask: q.value.trim() });
     cur = 0; render();
+  };
+  q.addEventListener('input', () => {
+    typeRev++;
+    pauseTour();                                     // a tour that moves by itself would open a world under what is being typed
+    suggest();
   });
-  const choose = (it) => { close(); q.blur(); if (it.ask) runQuestion(it.ask, true); else select(it, { from: 'search' }); };
+  const choose = (it) => {
+    if (it.ask) { items = []; head = ''; close(); shut = null; runQuestion(it.ask, true); return; }   // the field keeps the focus: the results open under it
+    const hits = items.filter((x) => x.hit).map((x) => x.hit), order = hitsOrder;
+    close();
+    if (it.hit) tourOf(hits, hits.indexOf(it.hit), order, false);
+    else { q.value = ''; select(it, { from: 'search' }); }   // a name that was chosen has done its work; a question stays while it filters
+    $('ret-name').focus();                           // the focus goes to the name of the world that opened, where a screen reader reads it
+  };
   q.addEventListener('keydown', (e) => {
-    if (box.hidden) { if (e.key === 'Enter' && q.value.trim()) runQuestion(q.value.trim(), true); return; }
-    if (e.key === 'ArrowDown') { cur = Math.min(items.length - 1, cur + 1); render(); e.preventDefault(); }
-    else if (e.key === 'ArrowUp') { cur = Math.max(0, cur - 1); render(); e.preventDefault(); }
+    // Escape closes the list and nothing else. Without preventDefault a search field also empties itself, which
+    // would leave a question's filter and note on screen with no question in the field.
+    if (e.key === 'Escape') { e.preventDefault(); if (!box.hidden) { shut = hitsFor; close(); } return; }
+    if (e.key === 'Enter' && e.repeat) return;        // a key held down asks once
+    if (box.hidden) {
+      const s = q.value.trim();
+      if (e.key !== 'Enter' || !s) return;
+      // one word that is the start of a name: the names come back, as when it was typed
+      if (!s.includes(' ') && named(s.toLowerCase()).length) suggest(); else { shut = null; runQuestion(s, true); }
+      return;
+    }
+    if (e.key === 'ArrowDown') { if (items.length) { cur = Math.min(items.length - 1, cur + 1); render(); } e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { if (items.length) { cur = Math.max(0, cur - 1); render(); } e.preventDefault(); }
     else if (e.key === 'Enter' && items[cur]) choose(items[cur]);
-    else if (e.key === 'Escape') close();
   });
   box.addEventListener('mousedown', (e) => {
-    const li = e.target.closest('li[data-i]'); if (!li) return;
-    e.preventDefault(); choose(items[+li.dataset.i]);
+    e.preventDefault();                                // a press anywhere in the list, its heading included, keeps the focus in the field
+    const li = e.target.closest('li[data-i]');
+    if (li) choose(items[+li.dataset.i]);
   });
   q.addEventListener('blur', () => setTimeout(close, 120));
 }
 
-let qCtrl = null;
-async function runQuestion(text, useModel) {
-  const det = parseQuestion(text);
-  applyQuery(det, text, 'parser');
-  if (!useModel) return;
+let qCtrl = null, reading = null;                      // the model call in flight, and the question it is reading
+async function runQuestion(text, useModel, show = true) {
+  if (reading === text) return;                        // the same question is being read already: asking again sends nothing
   if (qCtrl) qCtrl.abort();
-  qCtrl = new AbortController();
-  $('q-note').textContent = `Parsed: ${det.notes.join(', ') || 'nothing recognised'}. Asking a model to read it`;
+  qCtrl = null; reading = null;
+  const det = parseQuestion(text);
+  applyQuery(det, text, PAGE);
+  if (show) showHits(text);
+  // The rules read every word: their reading stands and no model is asked. A model is for what they left unread.
+  if (!useModel || !needsModel(det)) return;
+  const ctrl = qCtrl = new AbortController();
+  reading = text;
+  const base = $('q-note').textContent, mark = stamp();
+  const mine = () => !ctrl.signal.aborted && store.state.filter.query === text;
+  setNote(`${base} A model is reading it.`);
   try {
-    const { q, res } = await askModel(text, qCtrl.signal);
-    const st = store.state;
-    const prevFilter = { ...st.filter, ranges: { ...st.filter.ranges } }, prevSort = st.querySort;
-    if (q) {
-      applyQuery(q, text, `${res.model} (${res.source})`);
-      // a model reading that matches nothing is worse than the parser's: keep the parser's
-      if (!st.list.some(st.filterFn) && det.recognised) {
-        st.querySort = prevSort; setFilter(prevFilter);
-        $('q-note').textContent = `“${text}” → ${det.notes.join(', ')} · ${fmtInt(st.list.filter(st.filterFn).length)} match · read by the parser; ${res.model}'s reading matched no planet and was set aside.`;
-      }
-    }
-    else $('q-note').textContent = `${$('q-note').textContent.replace(/\. Asking.*$/, '')}. ${res.source === 'offline' ? 'No model answered' : 'The model reply failed validation'}; parser filter kept.`;
-  } catch (e) { if (e.name !== 'AbortError') $('q-note').textContent += ': model call failed; parser filter kept.'; }
+    const { q, res } = await askModel(text, ctrl.signal);
+    if (ctrl.signal.aborted) return;
+    // the visitor changed a filter, opened a world or typed since asking: the reply does not undo that
+    if (stamp() !== mark) { if (mine()) setNote(`${base} A model's reading arrived after you had moved on, and was set aside.`); return; }
+    if (!q) { setNote(`${base} ${res.source === 'offline' ? 'No model answered.' : 'The model\'s reply failed its checks.'}`); return; }
+    applyQuery(q, text, `${res.model} (${res.source})`);
+    // a reading that matches no world is no answer: the note goes back to what this page read
+    if (!store.state.list.some(store.state.filterFn)) { applyQuery(det, text, PAGE); setNote(`${$('q-note').textContent} ${res.model}'s reading matched no planet and was set aside.`); }
+    if (show && document.activeElement === $('q')) showHits(text);   // the field still has the focus: the answer opens under it
+  } catch (e) {
+    if (e.name !== 'AbortError' && mine()) setNote(`${base} The model call failed.`);
+  } finally {
+    if (qCtrl === ctrl) { qCtrl = null; reading = null; }
+  }
 }
-function applyQuery(q, text, by) {
+/* A reading is applied when a model made it or when the page's rules read every word (query.js). Otherwise
+   nothing is filtered, and the note says which words stopped it. Either way a question starts from the whole
+   catalogue: the filters of an earlier question or of the chips do not carry over, a replay stops, and a tour
+   of an earlier question's results ends. */
+let lastRead = null;                                   // the reading the note was last written from, and the words it wrote
+function applyQuery(r, text, by) {
   const st = store.state;
-  const patch = { ranges: { ...q.ranges }, zone: q.zone, query: text };
-  if (q.method) patch.method = q.method;
-  st.querySort = q.sort;
-  setFilter(patch);
-  const n = st.list.filter(st.filterFn).length;
-  $('q-note').textContent = `“${text}” → ${q.notes.join(', ') || 'no clause recognised'}${q.sort ? `, sorted by ${q.sort.key}` : ''} · ${fmtInt(n)} match · read by ${by}. Edit under Ranges.`;
-  $('q-note').hidden = false;
-  if ($('ranges').hidden && Object.keys(q.ranges).length) { $('ranges').hidden = false; renderFilters(); renderRanges(); }
+  clearInterval(replayT);
+  if (st.tour && st.tour.key === 'custom') endTour();
+  const use = by !== PAGE || r.complete;
+  const patch = { ...emptyFilter(), query: text };
+  if (use) Object.assign(patch, { ranges: { ...r.ranges }, zone: r.zone, looks: r.looks || null, locked: r.locked || null, cold: r.cold || null, hot: r.hot || null });
+  if (use && r.method) patch.method = r.method;
+  st.querySort = use ? r.sort : null;
+  setFilter(patch, { asked: true });
+  lastRead = { r, text, by, use, said: '' };
+  setNote(lastRead.said = sayRead());
+  if ($('ranges').hidden && use && Object.keys(r.ranges).length) { $('ranges').hidden = false; renderFilters(); renderRanges(); }
 }
-const sortValue = (p, key) => (key === 'earthlike' ? earthLikeness(p) : key === 'S' ? insolation(p).S : key === 'dist' ? p.dist : p[key]);
-function tourFromFilter() {
+/* The note for the last reading, with the count and the order as they are on screen now. */
+function sayRead() {
+  const st = store.state, { r, text, by, use } = lastRead;
+  const n = st.filterActive ? st.list.filter(st.filterFn).length : st.list.length;
+  return say({ r, text, by, count: n, order: use ? orderWords(rankedMatches(1)) : sortWords(orderFor(r.sort, true)) });
+}
+/* The catalogue grew under a question (the weekly roster joined): its note is written again, when the note still
+   holds the words this page wrote and nothing a model call added to them. */
+function resay() {
+  if (lastRead && store.state.filter.query === lastRead.text && $('q-note').textContent === lastRead.said) setNote(lastRead.said = sayRead());
+}
+/* The matches of the current filter in order (find.js rank): the order the question asked for; nearest first
+   for a question that named none; most Earth-like first for the chips alone. */
+const rankedMatches = (limit) => rank(store.state.list, store.state.filterFn, orderFor(store.state.querySort, !!store.state.filter.query), limit);
+/* A tour of results. Its stops are the worlds given, in the order given, so a result opened from the list is
+   the one that was listed. Opened from the list it waits for the visitor (auto false); started with "Tour
+   these" it advances by itself as the other tours do. */
+function tourOf(hits, i, r, auto) {
   const st = store.state;
-  const s = st.querySort || { key: 'earthlike', dir: -1 };
-  const pool = st.list.filter((p) => st.filterFn(p) && p.measuredR && isNum(sortValue(p, s.key)));
-  pool.sort((a, b) => s.dir * (sortValue(a, s.key) - sortValue(b, s.key)));
-  const stops = pool.slice(0, 6).map((p) => ({
-    p, cap: `${fmt(p.R, 3)} R⊕ · ${insolation(p).S ? fmt(insolation(p).S, 3) + ' S⊕ · ' : ''}${isNum(p.Teq) ? fmtInt(p.Teq) + ' K · ' : ''}${isNum(p.dist) ? fmtInt(p.dist * PHYS.PC_LY) + ' ly' : ''} · ranked by ${s.key}, ${s.dir < 0 ? 'highest' : 'lowest'} first, among ${fmtInt(pool.length)} matches with a measured radius.`,
-  }));
-  if (!stops.length) return;
-  st.tour = { key: 'custom', stops, i: 0, label: st.filter.query ? `“${st.filter.query}”` : 'Your filter' };
+  if (!hits.length) return;
+  const among = st.filterActive ? countWords(r.total) : `${fmtInt(r.total)} planets`;
+  const stops = hits.map((p) => ({ p, cap: `${hitFact(p, r.sort.key)} · ${orderWords(r)}, among ${among}.` }));
+  st.tour = { key: 'custom', stops, i: Math.max(0, Math.min(i, stops.length - 1)), label: st.filter.query ? `“${st.filter.query}”` : 'Your filter', auto };
   showStop();
 }
+function tourFromFilter() { const r = rankedMatches(8); tourOf(r.hits, 0, r, true); }
 
 /* ---------------- tours ---------------- */
 let tourTimer = 0;
@@ -402,7 +518,7 @@ function showStop() {
   clearTimeout(tourTimer);
   const bar = $('tour-prog');
   bar.classList.remove('run'); void bar.offsetWidth;
-  if (!reducedMotion() && !window.__EXO_STILL__) { bar.classList.add('run'); tourTimer = setTimeout(() => stepTour(1), 11000); }
+  if (t.auto !== false && !reducedMotion() && !window.__EXO_STILL__) { bar.classList.add('run'); tourTimer = setTimeout(() => stepTour(1), 11000); }
 }
 function stepTour(d) {
   const t = store.state.tour; if (!t) return;
@@ -480,7 +596,10 @@ function bezel() {
 function randomWorld() {
   const st = store.state;
   const pool = st.filterActive ? st.list.filter(st.filterFn) : st.list.filter((p) => p.measuredR);
-  if (pool.length) select(pool[Math.floor(Math.random() * pool.length)], { from: 'random' });
+  if (pool.length) { select(pool[Math.floor(Math.random() * pool.length)], { from: 'random' }); return; }
+  // nothing matches the filter: say so where the search speaks, once
+  const none = 'No world matches the filter, so there is none to open.';
+  if (!$('q-note').textContent.endsWith(none)) setNote(`${$('q-note').textContent} ${none}`.trim());
 }
 
 /* ---------------- footer: data, mechanism, performance ---------------- */
@@ -547,7 +666,8 @@ async function boot() {
   transit = createTransit($('v-tr'), store);
   tours = createTours($('tours'), store, actions);
   mountRouteWhenSafe();
-  const qn = document.createElement('p'); qn.id = 'q-note'; qn.className = 'q-note'; qn.hidden = true; qn.setAttribute('aria-live', 'polite');
+  // in the page from the start and empty, so that its first words are announced; the stylesheet does not draw it while empty
+  const qn = document.createElement('p'); qn.id = 'q-note'; qn.className = 'q-note'; qn.setAttribute('aria-live', 'polite');
   document.querySelector('.search').appendChild(qn);
   bindFilters(); bindSearch(); bindKeys();
   document.querySelectorAll('[data-cam]').forEach((b) => b.addEventListener('click', () => setCam(b.dataset.cam)));
@@ -612,7 +732,8 @@ async function boot() {
   if (glOk && (view === 'surface' || view === 'closeorbit')) setCam(view);
   const cam = (params.get('cam') || '').split(',').map(Number);
   if (glOk && cam.length === 3 && cam.every(Number.isFinite)) engine.setCamera({ yaw: cam[0], pitch: cam[1], dist: cam[2] * (engine.camera.homeDist || 5) });
-  if (params.get('q')) runQuestion(params.get('q'), false);   // a shared question replays with the parser; no model call on load
+  // a shared question replays with the page's own rules: it goes back into the field, no model is called and no list opens on load
+  if (params.get('q')) { $('q').value = params.get('q'); runQuestion(params.get('q'), false, false); }
 
   renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), rosterNote: 'The weekly roster is joining in the background.' });
   $('stamp').textContent = `${fmtInt(st.list.length)} planets · NASA Exoplanet Archive · ${snap.meta.retrieved}`;
@@ -642,6 +763,7 @@ async function boot() {
   }
   changelog(st.list);
   renderFilters();
+  resay();
 }
 
 boot();

@@ -40,7 +40,7 @@
       <div class="bezel" id="bezel" aria-hidden="true"></div>
       <div class="reticle" aria-live="polite">
         <span class="ret-br" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span class="ret-name" id="ret-name">…</span>
+        <span class="ret-name" id="ret-name" tabindex="-1">…</span>
         <span class="ret-class" id="ret-class"></span>
         <span class="ret-render" id="ret-render"></span>
       </div>
@@ -62,7 +62,7 @@
     </div>
     <div class="search">
       <label class="sr" for="q">Search planets and stars</label>
-      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="a world, a star, or a question: earth-sized and temperate  ( / )"
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="a world, a star, or a question: cold planets, lava worlds near us  ( / )"
         role="combobox" aria-expanded="false" aria-controls="q-results" aria-autocomplete="list" />
       <ul id="q-results" class="q-results" role="listbox" hidden></ul>
     </div>
