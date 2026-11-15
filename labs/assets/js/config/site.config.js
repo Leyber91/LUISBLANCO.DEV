@@ -54,9 +54,9 @@ export const CATEGORIES = [
       { id: 'dimensional', title: 'Dimensional Test', status: 'built',
         href: 'md_animation_page.html',
         blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
-      { id: 'exomania', title: 'Exomania: Overdue', status: 'built',
-        href: 'exomania.html',
-        blurb: 'Every transiting planet is a clock. A map of the sky draws each one as a lamp in the state of its published transit clock, on any date from the first transit timed to 2040: which are kept, which are slipping, which are lost, which cross their stars in the dark over your own sky in the next 24 hours, and how often a later paper found the transit where the older one said. The survey of every known planet, each drawn as a world, is one link away.' },
+      { id: 'exomania', title: 'Exomania', status: 'built',
+        href: 'exomania-survey.html',
+        blurb: 'Every known exoplanet as a world you can orbit, fly low over or stand on, drawn from the numbers the archive holds for it, beside the population it belongs to, its system to scale and its transit. Overdue is one link away: a map of the sky on which every transiting planet is a clock that is kept, slipping or lost on any date from the first transit timed to 2040.' },
     ],
   },
   {
