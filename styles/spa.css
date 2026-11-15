@@ -59,7 +59,7 @@ body.sec-mission .glyph-halo, body.sec-mission .glyph-caption{ opacity:0; }
 #page.entering{ animation:pageEnter .42s var(--ease) both; }
 
 /* ── THE POSTER — every section lives on one continuous plate ────────── */
-.plate-sec{ position:relative; }
+.plate-sec{ position:relative; overflow-x:clip; }  /* the 1440 px schematics end at the screen edge, not past it */
 .plate-sec + .plate-sec{ border-top:1px dashed rgba(234,240,251,0.07); }
 #plateSpine{ position:absolute; top:0; left:0; width:100%; z-index:1;
   pointer-events:none; overflow:visible; }

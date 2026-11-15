@@ -3,6 +3,38 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-15, The home page is as wide as the screen (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 26 pages and 0 findings on main
+  today, so this run took the most visible finding left by the 2026-11-14 sweep: the home page (index.html) measured
+  1,549 px wide at 1280 px. This run did not repeat the full sweep of every page.
+- Cause, corrected: the 2026-11-14 entry blamed the two background canvases (sub-dots, sub-stars). They sit in a
+  fixed layer and do not add to the page width; clipping that layer changed nothing (still 1,549 px). Listing every
+  element that ends past the screen edge with no clipping ancestor below body found one at 1280 px: the 1440 px
+  decorative schematic (svg.mid-schematic) in the "work with me" section, placed from x = 109 px inside the
+  1,100 px column, so it ended at x = 1,549 px. At 390 px the contact section's flow lines ended 1 px past the edge.
+  Body clips sideways overflow, so a visitor in Chromium could not scroll to it; a browser or tool that reads the
+  document width could.
+- Changed (styles/spa.css, one line): each full-width page section (.plate-sec) clips its own sideways overflow with
+  overflow-x: clip. The sections are as wide as the screen and start at x = 0, so the clip falls where body already
+  clipped; clip makes no scroll container, so vertical overflow and sticky headers are untouched.
+- Measured over a local http server in headless Chromium: document scroll width before and after, with the work
+  section scrolled into view, is 1,541 to 1,280 px at 1280 px and 1,621 to 1,440 px at 1440 px; at 320, 360, 390, 430
+  and 1920 px it was and stays equal to the screen width. At load, 1280 px went from 1,549 to 1,280 px, 390 px from
+  391 to 390 px and 320 px from 322 to 320 px. No element is left past the right edge without a clipping ancestor.
+  Screenshots of the work section at 1280 px before and after match apart from the animated stars.
+- Still open for later runs of item 1, from the 2026-11-14 sweep and not re-checked today: hero_proto.html throws a
+  TypeError on load and is 704 px wide at 390 px; labs/claude-prep/ requests seal.json, which returns 404 (Luis
+  decides). Item 2 still has no link to remove: no tracked file outside _archive/ references labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 26 pages, 0 findings; levels selftest 12 of
+  12 and 32 labs, 0 errors; lab tests 17 files, 0 failed; atlas, stories and evolution selftests and checks pass
+  (they print NOT_CHECKED for the private plans); mutate selftest and run pass (every broken rule caught); model
+  route 56 of 56; anti-tells no new tells. No script changed, so there was no syntax check to run. Render:
+  index.html at 1280 px and 390 px (and 320 to 1920 px for width) in headless Chromium, 0 console errors.
+  Forbidden-name check: runs in the gates workflow on the pull request.
+- Gates on pull request #35: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-14, The Roaster fits a phone screen (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 24 pages and 0 findings on main

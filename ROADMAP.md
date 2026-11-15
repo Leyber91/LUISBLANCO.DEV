@@ -16,6 +16,10 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-15: Item 1, one finding: the home page was 1,549 px wide at 1280 px because a 1440 px decorative schematic in
+  the "work with me" section ran past the screen edge (not the background canvases, as the 2026-11-14 entry said);
+  each page section now clips its own sideways overflow and the page is as wide as the screen from 320 to 1920 px.
+  Item 1 stays in "Next". Pull request "evolve 2026-11-15: home page fits the screen width".
 - 2026-11-14: Item 1, one finding: on The Roaster at 390 px the headline and footer were cut off and the roast
   panel sat off screen with no way to scroll to it; below 860 px the page now scrolls in one column, from 320 px up.
   Item 1 stays in "Next" (see EVOLUTION.md for what the sweep found). Pull request "evolve 2026-11-14: roaster fits
