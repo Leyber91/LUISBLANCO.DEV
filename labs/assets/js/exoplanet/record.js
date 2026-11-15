@@ -12,14 +12,16 @@
      with the time of the last visit, how it was reached and how
      many times), `pins` is the compare bench.
 
-   Three rules, each learned from a review on 2026-11-15:
+   Five rules, each learned from a review on 2026-11-15:
 
    1. The store is the truth. A page never writes back its own
       copy of the record. A write is one change (a visit, a save,
-      a planet for Overdue) applied by `update` to what the store
-      holds at that moment, so a save made in another tab, or an
-      erase made on the privacy page, is not undone by a page
-      that read the record earlier.
+      a pin, a planet for Overdue) applied by `update` to what the
+      store holds at that moment, so a save made in another tab,
+      or an erase made on the privacy page, is not undone by a
+      page that read the record earlier. What `update` returns is
+      what the page shows, and `changed` says whether the store
+      was written: an event is tracked only for a change.
    2. One door. What comes out of the store passes the same
       checks as what comes in a link: `normalise` for its shape
       and bounds, and `view` for the names, which keeps from the
@@ -29,9 +31,15 @@
       catalogue, a time that is not a positive number, a way of
       reaching a world this page does not have are refused, and
       the record comes back as it was with the reason.
+   4. A page writes only a record whose version it knows. A
+      record of a later version is read for display and never
+      written, by either page.
+   5. A count, a bound and a sentence are computed on the set the
+      visitor sees. The words that depend on the record's state
+      are the functions at the end of this file.
 
-   Every function but `load` and `update` is pure: a record in, a
-   record out, no storage and no page.
+   Every function but `read`, `load` and `update` is pure: a
+   record in, a record out, no storage and no page.
    ============================================================ */
 
 /* The version of the record's shape. */
@@ -79,12 +87,15 @@ export function normalise(data) {
 }
 
 /* The record as the page shows it: without the entries whose name the catalogue does not have. `hidden` counts
-   them. They are not taken out of the store: a world can leave the archive and come back under the same name. */
+   the saved worlds and visits kept from the page, `hiddenSaved` the saved worlds among them. They are not taken out
+   of the store: a world can leave the archive and come back under the same name. */
 export function view(record, known) {
   const saved = record.log.saved.filter((e) => known(e.name)), visits = record.log.visits.filter((e) => known(e.name));
+  const hiddenSaved = record.log.saved.length - saved.length;
   return {
     record: { overdue: record.overdue, log: { saved, visits, pins: record.log.pins.filter(known), dropped: record.log.dropped } },
-    hidden: (record.log.saved.length - saved.length) + (record.log.visits.length - visits.length),
+    hidden: hiddenSaved + (record.log.visits.length - visits.length),
+    hiddenSaved,
   };
 }
 
@@ -94,29 +105,40 @@ const copy = (r) => ({
 });
 const refused = (record, why) => ({ ok: false, why, record });
 const done = (record) => ({ ok: true, why: '', record });
+/* why a write about a world the catalogue does not have is refused */
+export const UNKNOWN = 'that world is not in the catalogue';
 /* why a write about a world is refused, or '' */
-const wrong = (name, t, known) => (!isName(name) || !known(name) ? 'that world is not in the catalogue' : !isTime(t) ? 'the time is not a number' : '');
+const wrong = (name, t, known) => (!isName(name) || !known(name) ? UNKNOWN : !isTime(t) ? 'the time is not a number' : '');
 
 /* The visitor opened a world. Its line moves to the top with the new time and way, and its count goes up by one.
-   Past the bound the oldest line is dropped and counted, so the number of worlds visited stays true. */
+   Past the bound one line goes: a line the page does not show goes first and is not counted, because the page
+   never counted it as visited; otherwise the oldest goes and is counted, so the number of worlds visited stays
+   true. */
 export function visit(record, { name, t, via }, known) {
   const bad = wrong(name, t, known) || (VIAS.includes(via) ? '' : 'the way the world was reached is not one this page has');
   if (bad) return refused(record, bad);
   const r = copy(record), i = r.log.visits.findIndex((e) => e.name === name);
   const n = i >= 0 ? r.log.visits.splice(i, 1)[0].n + 1 : 1;
   r.log.visits.unshift({ name, t, via, n });
-  if (r.log.visits.length > LIMITS.visits) { r.log.dropped = Math.min(LIMITS.dropped, r.log.dropped + r.log.visits.length - LIMITS.visits); r.log.visits.length = LIMITS.visits; }
+  if (r.log.visits.length > LIMITS.visits) {
+    const h = r.log.visits.findLastIndex((e) => !known(e.name));
+    if (h >= 0) r.log.visits.splice(h, 1);
+    else { r.log.dropped = Math.min(LIMITS.dropped, r.log.dropped + r.log.visits.length - LIMITS.visits); r.log.visits.length = LIMITS.visits; }
+  }
   return done(r);
 }
 
 /* why the log takes no more saved worlds */
 export const FULL = `the log holds ${LIMITS.saved} saved worlds, which is all it takes; take one out first`;
+/* The same, naming the saved worlds of the log the page does not show: they count against the bound, and the
+   visitor can only remove them from the dialog's note. */
+export const fullWhy = (notShown = 0) => (notShown > 0 ? `${FULL}. ${thousands(notShown)} of them ${notShown === 1 ? 'is' : 'are'} not shown; remove ${notShown === 1 ? 'it' : 'them'} in the log` : FULL);
 /* The visitor saved a world, with the view it was in. Saving a world twice changes nothing. */
 export function save(record, { name, t, view: v }, known) {
   const bad = wrong(name, t, known);
   if (bad) return refused(record, bad);
   if (isSaved(record, name)) return done(record);
-  if (record.log.saved.length >= LIMITS.saved) return refused(record, FULL);
+  if (record.log.saved.length >= LIMITS.saved) return refused(record, fullWhy(record.log.saved.filter((e) => !known(e.name)).length));
   const r = copy(record);
   r.log.saved.unshift({ name, t, view: VIEWS.includes(v) ? v : 'orbit' });
   return done(r);
@@ -138,11 +160,36 @@ export function saveAll(record, names, t, known) {
   }
   return { ok: left === 0, why: left ? `${left} could not be added` : '', record: r, added, left };
 }
-/* The compare bench: the last LIMITS.pins of the names given, each once, each in the catalogue. */
-export function setPins(record, names, known) {
+/* The compare bench. A world pinned goes at the end, each world once, and past LIMITS.pins the first pinned goes.
+   Pinning a world that is on the bench changes nothing. */
+export function pin(record, name, known) {
+  if (!isName(name) || !known(name)) return refused(record, UNKNOWN);
+  if (record.log.pins.includes(name)) return done(record);
   const r = copy(record);
-  r.log.pins = [...new Set(list(names).filter((n) => isName(n) && known(n)))].slice(-LIMITS.pins);
+  r.log.pins = [...r.log.pins, name].slice(-LIMITS.pins);
   return done(r);
+}
+export function unpin(record, name) {
+  if (!record.log.pins.includes(name)) return done(record);
+  const r = copy(record);
+  r.log.pins = r.log.pins.filter((n) => n !== name);
+  return done(r);
+}
+export function clearPins(record) {
+  if (!record.log.pins.length) return done(record);
+  const r = copy(record);
+  r.log.pins = [];
+  return done(r);
+}
+/* The visitor removed the entries the page does not show: the saved worlds, visits and pins whose name the
+   catalogue does not have. A visit removed this way is not counted as dropped: the page never counted it. */
+export function forget(record, known) {
+  const r = copy(record);
+  r.log.saved = r.log.saved.filter((e) => known(e.name));
+  r.log.visits = r.log.visits.filter((e) => known(e.name));
+  r.log.pins = r.log.pins.filter((n) => known(n));
+  const same = r.log.saved.length === record.log.saved.length && r.log.visits.length === record.log.visits.length && r.log.pins.length === record.log.pins.length;
+  return done(same ? record : r);
 }
 /* Where the Overdue page was left. A place outside the globe is no place. */
 export function setOverdue(record, { planet, place }) {
@@ -154,10 +201,6 @@ export function setOverdue(record, { planet, place }) {
 export const isSaved = (record, name) => record.log.saved.some((e) => e.name === name);
 /* What the visitor has done: worlds visited (those dropped from the list still count), worlds saved. */
 export const counts = (record) => ({ visited: record.log.visits.length + record.log.dropped, saved: record.log.saved.length });
-/* 1234567 as "1,234,567", whatever the browser's own language. */
-export const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-/* The words of the log line. */
-export const lineWords = (c, shared = 0) => `Your log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved${shared > 0 ? ` · ${thousands(shared)} shared with you` : ''}`;
 
 /* The value of a link's `log` parameter: the saved worlds, newest first, at most LIMITS.shared. */
 export const shareValue = (record) => record.log.saved.slice(0, LIMITS.shared).map((e) => e.name).join('|');
@@ -181,21 +224,58 @@ export function viaOf(from, { self = false, results = false } = {}) {
   return Object.prototype.hasOwnProperty.call(ways, from) ? ways[from] : null;
 }
 
+/* ---------- the words that depend on the record ---------- */
+
+/* 1234567 as "1,234,567", whatever the browser's own language. */
+export const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+export const worlds = (n) => `${thousands(n)} ${n === 1 ? 'world' : 'worlds'}`;
+/* The words of the log line. */
+export const lineWords = (c, shared = 0) => `Your log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved${shared > 0 ? ` · ${thousands(shared)} shared with you` : ''}`;
+/* How a line of the visits was reached: the way alone for one visit; for more, the count and the way of the last.
+   The way of the earlier visits is not kept, so it is not said. */
+export const visitWords = (e) => (e.n > 1 ? `${thousands(e.n)} visits, the last ${VIA_WORDS[e.via]}` : VIA_WORDS[e.via]);
+/* Beside the heading of the saved worlds: how many are shown, of the bound, and how many stored are not shown. */
+export const savedWords = (shown, notShown = 0) => `${thousands(shown)} of ${LIMITS.saved}${notShown > 0 ? `, and ${thousands(notShown)} not shown` : ''}`;
+/* What a press on "Add to log" (add true) or on "In your log" or "Take out" (add false) did. */
+export const toggleWords = (name, add, w) => (w.ok ? `${name} is ${add ? 'in' : 'out of'} your log.` : `${name} was not ${add ? 'added' : 'taken out'}: ${w.why}.`);
+/* What "Add all to your log" did. notShown: the saved worlds of the log the page does not show. */
+export const adoptWords = ({ added, left }, notShown = 0) => (!added && left ? `None could be added: ${fullWhy(notShown)}.`
+  : `${added ? `Added ${worlds(added)}.` : 'All of them were in your log already.'}${left ? ` ${worlds(left)} could not be added: ${fullWhy(notShown)}.` : ''}`);
+/* What "Remove them from the log" did, with the count of saved worlds and visits it removed. */
+export const forgetWords = (n) => (n > 0 ? `Removed ${thousands(n)} ${n === 1 ? 'entry' : 'entries'} that named worlds this catalogue does not have.` : 'There was nothing to remove.');
+/* The last words of the log. The log is said to be kept only on a store that keeps it; the usage events are named
+   with recording on, and said to be off with recording off. recording null: no store, so no event and no switch. */
+export const footWords = ({ persistent, recording }) => [
+  persistent ? 'The log is kept in this browser.' : '',
+  recording === true ? 'A visit and a save are also usage events, which are sent to the labs’ backend only where you have allowed it.'
+    : recording === false ? 'With recording off, no usage event is written.' : '',
+].filter(Boolean).join(' ');
+
 /* ---------- Labs OS ---------- */
 
-/* The lab's record as stored, sound. */
-export async function load(os) {
+/* why nothing is written to a record of a later version */
+export const NEWER = 'this log was written by a newer version of this page';
+/* The lab's record as stored, sound, and whether a later version of the page wrote it. A record of the first shape
+   is upgraded by Labs OS once, on this read. */
+export async function read(os) {
   const rec = await os.progress.get({ v: V, migrate: (d) => normalise(d) });
-  return normalise(rec ? rec.data : null);
+  return { record: normalise(rec ? rec.data : null), newer: !!rec && rec.v > V };
 }
+export async function load(os) { return (await read(os)).record; }
 /* One change, applied to what the store holds now. `change(record)` is one of the writes above and returns
    { ok, why, record }; a write that is refused hands back the record it was given. The store is written only when
-   the record changed. What comes back is the store's record after it, which the page then shows. Two tabs that
-   write in the same instant can still interleave (Labs OS says so of every record); the window is one read and
-   one write. */
-export async function update(os, change) {
-  const cur = await load(os);
+   the record changed, and never when a later version wrote it. What comes back is the store's record after the
+   change, which the page then shows, and `changed`, which says whether the store was written. `resume` ({ url,
+   label }) is where the labs' hub leads back to, written beside an accepted change. Two tabs that write in the same
+   instant can still interleave (Labs OS says so of every record); the window is one read and one write. */
+export async function update(os, change, { resume = null } = {}) {
+  const { record: cur, newer } = await read(os);
+  if (newer) return { ok: false, why: NEWER, record: cur, changed: false };
   const w = change(cur);
-  if (w.record !== cur) await os.progress.set(w.record, { v: V });
-  return w;
+  const changed = JSON.stringify(w.record) !== JSON.stringify(cur);
+  if (changed) await os.progress.set(w.record, { v: V });
+  if (w.ok && resume) {
+    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }
+  }
+  return { ...w, changed };
 }

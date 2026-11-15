@@ -114,21 +114,43 @@ function placeWorld() {
 
 /* ---------------- views ---------------- */
 let plot, system, transit, target, report, tours, log = null;
-/* What follows the log on the page: the button on the world's panel, the chips, a filter by the log, the link. */
+/* What follows the log on the page: the compare bench, the buttons on the world's panel, the chips, a filter by the
+   log, the link. The bench is the log's: st.pins is set here, from the record the store returned last, and nowhere
+   else. */
 function syncLog() {
-  const st = store.state, b = document.querySelector('[data-act="log"]');
+  const st = store.state, b = document.querySelector('[data-act="log"]'), pb = document.querySelector('[data-act="pin"]');
+  if (log && log.loaded()) {
+    const names = log.pins();
+    if (names.join('|') !== st.pins.map((p) => p.name).join('|')) {
+      st.pins = names.map((n) => st.byName.get(n)).filter(Boolean);
+      if ($('compare').open) openCompare();
+    }
+  }
   if (b && log) {
-    const on = !!st.sel && log.isSaved(st.sel.name);
+    const on = !!st.sel && log.isSaved(st.sel.name), busy = !!st.sel && log.busy(st.sel.name);
     b.textContent = on ? 'In your log' : 'Add to log';
     b.classList.toggle('on', on);
-    b.disabled = !log.loaded();   // nothing can be said about the log before it is read
+    b.disabled = !log.loaded() || busy;   // nothing can be said about the log before it is read, or while the store answers
+    if (busy) b.setAttribute('aria-busy', 'true'); else b.removeAttribute('aria-busy');
     b.title = !log.loaded() ? 'The log is being read' : on ? 'Take this world out of your log' : 'Save this world to your log';
+  }
+  if (pb && log) {
+    pb.disabled = !log.loaded();          // the bench is in the log: it is not drawn, or changed, before the log is read
+    pb.title = log.loaded() ? 'Pin to compare with Earth and other worlds' : 'The log is being read';
   }
   // the last saved world was taken out while the page showed only saved worlds: the filter goes with it
   const emptied = st.filter.set === 'saved' && !!log && !log.counts().saved;
   if (emptied) st.filter.set = null;
   if (st.filter.set || emptied) { rebuildFilter(); if (plot) plot.redraw(); }
-  if (st.list.length) renderFilters();
+  // the filter bar is drawn again only when what it shows of the log changed: a redraw takes the focus off it
+  if (st.list.length && chipsOf() !== chipsKey) renderFilters();
+}
+/* What the filter bar shows of the log: whether anything is saved, how many worlds a link shared, which set is the
+   filter, and with a set as the filter the count of its matches. */
+let chipsKey = '';
+function chipsOf() {
+  const st = store.state;
+  return JSON.stringify([!!log && log.counts().saved > 0, log ? log.shared().length : 0, st.filter.set, st.filter.set ? st.list.filter(st.filterFn).length : null]);
 }
 const actions = {
   select, setPlot, setFilter, startTour, pauseTour,
@@ -139,8 +161,8 @@ const actions = {
     else if (kind === 'csv') { const n = exportCSV(st.list, st.filterFn, st.filterActive, st.albedo(), filterLabel()); flash(btn, `${fmtInt(n)} rows`); }
     else if (kind === 'link') copyLink().then((ok) => flash(btn, ok ? 'Copied' : 'Copy failed'));
     else if (kind === 'chain') { $('chain-body').innerHTML = chainHTML(st.sel, st.albedo()); $('chain').showModal(); }
-    else if (kind === 'pin') { pin(st.sel); flash(btn, `${st.pins.length} pinned`); }
-    else if (kind === 'log' && log) log.toggle(st.sel, glOk ? engine.camera.mode : 'orbit', (why) => target.say(why));
+    else if (kind === 'pin' && log) log.pin(st.sel.name, (w) => { openCompare(); flash(btn, w.ok ? `${st.pins.length} pinned` : 'Not pinned'); });
+    else if (kind === 'log' && log) log.toggle(st.sel, glOk ? engine.camera.mode : 'orbit', (text, ok) => target.say(text, ok));
   },
 };
 function flash(btn, text) { if (!btn) return; const t = btn.textContent; btn.textContent = text; setTimeout(() => { btn.textContent = t; }, 1600); }
@@ -263,6 +285,9 @@ function writeURL() {
 /* ---------------- filters, ranges, replay, changelog ---------------- */
 function renderFilters() {
   const st = store.state, f = st.filter;
+  // the control that has the focus, found again once the bar is drawn
+  const a = document.activeElement, bar = $('filters');
+  const had = a && bar.contains(a) ? (a.id ? `#${CSS.escape(a.id)}` : ['cls', 'clear', 'act'].map((k) => (a.dataset[k] ? `[data-${k}="${CSS.escape(a.dataset[k])}"]` : '')).join('')) : '';
   const n = st.filterActive ? st.list.filter(st.filterFn).length : st.list.length;
   const chips = [];
   if (f.year !== null) chips.push(`<button type="button" class="chip on" data-clear="year">${f.year} ×</button>`);
@@ -288,6 +313,8 @@ function renderFilters() {
     ${chips.join('')}${newChip}
     ${st.filterActive && n > 0 ? `<button type="button" class="chip" data-act="tourthese">Tour these</button>` : ''}
     <span class="f-count">${fmtInt(n)} ${st.filterActive ? (n === 1 ? 'match' : 'matches') : 'planets'}</span>`;
+  chipsKey = chipsOf();
+  if (had) { const back = bar.querySelector(had); if (back) back.focus(); }
 }
 function renderRanges() {
   const f = store.state.filter;
@@ -529,10 +556,11 @@ function tourFromFilter() { const r = rankedMatches(8); tourOf(r.hits, 0, r, tru
 
 /* ---------------- tours ---------------- */
 let tourTimer = 0;
-function startTour(key, self = false) {
+/* at: the stop the tour opens at (a tour link names it). */
+function startTour(key, self = false, at = 0) {
   const stops = tourStops(key, store.state.list);
   if (!stops.length) return;
-  store.state.tour = { key, stops, i: 0, label: TOURS.find((t) => t.key === key).label };
+  store.state.tour = { key, stops, i: Math.max(0, Math.min(at, stops.length - 1)), label: TOURS.find((t) => t.key === key).label };
   showStop(self);
 }
 function pauseTour() {
@@ -573,15 +601,12 @@ const EARTH = {
   pl_name: 'Earth', hostname: 'Sun', pl_rade: 1, pl_masse: 1, pl_orbsmax: 1, pl_orbper: 365.25, pl_eqt: 255, st_teff: 5772, st_rad: 1, st_mass: 1, sy_dist: null,
 };
 const thumbs = new Map();
-function pin(p) {
-  const st = store.state;
-  if (!st.pins.includes(p)) { st.pins.push(p); if (st.pins.length > 3) st.pins.shift(); }
-  if (log) log.setPins(st.pins.map((x) => x.name));
-  openCompare();
-}
+/* The bench as the log holds it (st.pins, set by syncLog). Its controls are off until the log is read. */
 function openCompare() {
-  const st = store.state;
+  const st = store.state, off = !log || !log.loaded();
   $('compare-body').innerHTML = compareHTML(st.pins, EARTH, st.albedo());
+  document.querySelectorAll('#compare-body [data-unpin]').forEach((b) => { b.disabled = off; });
+  $('cmp-clear').disabled = off;
   document.querySelectorAll('.cmp-thumb').forEach((el) => {
     const i = +el.dataset.i, p = i === 0 ? EARTH : st.pins[i - 1];
     // a thumbnail whose look is still being built comes back null and is asked for again from engine.onReady
@@ -725,10 +750,10 @@ async function boot() {
   $('method-close').addEventListener('click', () => $('method').close());
   document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => $(b.dataset.close).close()));
   $('compare').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-unpin]'); if (!b) return;
-    store.state.pins = store.state.pins.filter((p) => p.name !== b.dataset.unpin); if (log) log.setPins(store.state.pins.map((x) => x.name)); openCompare();
+    const b = e.target.closest('[data-unpin]'); if (!b || !log) return;
+    log.unpin(b.dataset.unpin, () => openCompare());
   });
-  $('cmp-clear').addEventListener('click', () => { store.state.pins = []; if (log) log.setPins([]); openCompare(); });
+  $('cmp-clear').addEventListener('click', () => { if (log) log.clearPins(() => openCompare()); });
   engine.onCamera = () => writeURL();
   engine.onMode = () => syncCamButtons();
   engine.onReady = () => { if ($('compare').open) openCompare(); };
@@ -760,19 +785,22 @@ async function boot() {
   veil(`Charted ${fmtInt(st.list.length)} worlds`, 1);
 
   log = createLog({
-    host: { line: $('log-line'), dialog: $('log'), body: $('log-body') }, byName: st.byName, sharedParam: params.get('log'), fixture: params.get('os-fixture'),
+    host: { line: $('log-line'), dialog: $('log'), body: $('log-body'), said: $('log-said') }, byName: st.byName, sharedParam: params.get('log'), fixture: params.get('os-fixture'),
     open: (p, view) => { select(p, { from: 'log' }); if (glOk && view && view !== 'orbit') setCam(view); },
     onChange: syncLog,
   });
-  // the compare bench as it was left, once the stored record is read
-  // the bench of the last visit comes back; a world pinned before the log was read is written now
-  log.ready.then(() => { if (st.pins.length) log.setPins(st.pins.map((x) => x.name)); else st.pins = log.pins().map((n) => st.byName.get(n)).filter(Boolean); });
   const sharedWorlds = log.shared().map((n) => st.byName.get(n));
   const want = params.get('p') && st.byName.get(params.get('p'));
-  const first = want || sharedWorlds[0] || LANDMARKS.map((n) => st.byName.get(n)).find(Boolean) || st.list[0];
+  // A tour's address names the stop it was at. That stop is the world the link opens, and the tour opens there; a
+  // world that is no stop of the tour is not opened, so no visit is written to a world the page does not show.
+  const tourKey = params.get('tour');
+  const linkTour = tourKey && TOURS.some((t) => t.key === tourKey) ? tourStops(tourKey, st.list) : [];
+  const tourAt = want ? linkTour.findIndex((s) => s.p === want) : -1;
+  const linked = want && (!linkTour.length || tourAt >= 0) ? want : null;
+  const first = linked || sharedWorlds[0] || LANDMARKS.map((n) => st.byName.get(n)).find(Boolean) || st.list[0];
   renderFilters();
   const arrived = ((performance.getEntriesByType('navigation')[0] || {}).type || 'navigate') === 'navigate';
-  select(first, { from: want ? 'link' : 'boot', self: !(want && arrived) });
+  select(first, { from: linked ? 'link' : 'boot', self: !(linked && arrived) });
   // a link that carries a log: its worlds are the ones shown, and the note says where they are listed
   if (sharedWorlds.length) {
     setFilter({ set: 'shared' }, { keep: true });
@@ -794,8 +822,7 @@ async function boot() {
     document.body.classList.add('ready');
     $('veil').classList.add('gone');
   });
-  const tourKey = params.get('tour');
-  if (tourKey && TOURS.some((t) => t.key === tourKey)) startTour(tourKey, true);   // the link started it, the visitor did not
+  if (linkTour.length) startTour(tourKey, true, Math.max(0, tourAt));   // the link started it, the visitor did not
 
   setInterval(perfLine, 2000); perfLine();
   setInterval(bezel, 300); bezel();

@@ -100,12 +100,13 @@
 </dialog>
 
 <dialog class="method plate compare" id="compare" aria-labelledby="compare-h">
-  <div class="method-head"><h2 id="compare-h">Compare</h2><span class="cmp-ctl"><button type="button" class="btn" id="cmp-clear">Unpin all</button><button type="button" class="btn" data-close="compare">Close</button></span></div>
+  <div class="method-head"><h2 id="compare-h">Compare</h2><span class="cmp-ctl"><button type="button" class="btn" id="cmp-clear" disabled>Unpin all</button><button type="button" class="btn" data-close="compare">Close</button></span></div>
   <div id="compare-body"></div>
 </dialog>
 
-<dialog class="method plate" id="log" aria-labelledby="log-h">
-  <div class="method-head"><h2 id="log-h">Your log</h2><button type="button" class="btn" data-close="log">Close</button></div>
+<dialog class="method plate log" id="log" aria-labelledby="log-h">
+  <div class="method-head log-head"><h2 id="log-h">Your log</h2><button type="button" class="btn" data-close="log">Close</button>
+    <p class="log-said" id="log-said" role="status"></p></div>
   <div id="log-body"></div>
 </dialog>
 

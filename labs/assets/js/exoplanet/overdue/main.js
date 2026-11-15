@@ -66,8 +66,10 @@ const S = {
 /* ---------------- the platform ---------------- */
 function track(type, data) { if (os) void os.track(type, data); }
 /* The lab's record has two slices (record.js). This page changes its own, in the record as the store holds it
-   at that moment, so the survey's log is left as it is. */
-function save() { if (os) updateRecord(os, (r) => setOverdue(r, { planet: S.star ? S.star.p.name : null, place: S.place })).catch(() => {}); }
+   at that moment, so the survey's log is left as it is. A record a later version of the lab wrote is not written:
+   the page keeps working on what it holds in memory. resume: where the labs' hub leads back to, written with the
+   change. */
+function save(resume = null) { if (os) updateRecord(os, (r) => setOverdue(r, { planet: S.star ? S.star.p.name : null, place: S.place }), { resume }).catch(() => {}); }
 
 /* ---------------- words ---------------- */
 /* Text is written only when it changes, so a live region speaks once and a drag does not rewrite the page. */
@@ -134,7 +136,7 @@ function openStar(star, { user = false } = {}) {
   S.star = star; S.shown = null; S.bandHover = null; S.ocHover = null;
   $('pick').value = '';
   describeStar();
-  if (user) { S.touched = true; save(); track('exomania.planet', { planet: star.p.name }); os?.progress.setResume(`exomania.html?planet=${encodeURIComponent(star.p.name)}`, star.p.name).catch(() => {}); }
+  if (user) { S.touched = true; save({ url: `exomania.html?planet=${encodeURIComponent(star.p.name)}`, label: star.p.name }); track('exomania.planet', { planet: star.p.name }); }
   render();
 }
 /* What does not change with the date: who the planet is. */

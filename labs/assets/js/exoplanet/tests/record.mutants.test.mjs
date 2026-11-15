@@ -25,12 +25,30 @@ const SAVED = `.filter((e) => isName(e.name) && isTime(e.t)).sort(newest))`;
 const VISITS = `isName(e.name) && isTime(e.t) && VIAS.includes(e.via)).sort(newest));`;
 const WAS = `const was = Number.isInteger(log.dropped) && log.dropped >= 0 ? log.dropped : 0;`;
 const DROPPED = `out.log.dropped = Math.min(LIMITS.dropped, was + Math.max(0, visits.length - LIMITS.visits));`;
-const CUT = `if (r.log.visits.length > LIMITS.visits) { r.log.dropped = Math.min(LIMITS.dropped, r.log.dropped + r.log.visits.length - LIMITS.visits); r.log.visits.length = LIMITS.visits; }`;
-const TWICE = `  if (isSaved(record, name)) return done(record);\n  if (record.log.saved.length >= LIMITS.saved) return refused(record, FULL);`;
+const OVER = `if (r.log.visits.length > LIMITS.visits) {`;
+const HIDE = `const h = r.log.visits.findLastIndex((e) => !known(e.name));`;
+const CUT = `else { r.log.dropped = Math.min(LIMITS.dropped, r.log.dropped + r.log.visits.length - LIMITS.visits); r.log.visits.length = LIMITS.visits; }`;
+const FULLNOW = `if (record.log.saved.length >= LIMITS.saved) return refused(record, fullWhy(record.log.saved.filter((e) => !known(e.name)).length));`;
+const TWICE = `  if (isSaved(record, name)) return done(record);\n  ${FULLNOW}`;
 const PUT = `r.log.saved.unshift({ name, t, view: VIEWS.includes(v) ? v : 'orbit' });`;
 const LINE = '`Your log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved';
 const SHARED = '${shared > 0 ? ` · ${thousands(shared)} shared with you` : \'\'}';
-const HIDDEN = `hidden: (record.log.saved.length - saved.length) + (record.log.visits.length - visits.length),`;
+const HIDDEN = `hidden: hiddenSaved + (record.log.visits.length - visits.length),`;
+const PIN = `if (!isName(name) || !known(name)) return refused(record, UNKNOWN);`;
+const PINNED = `  if (record.log.pins.includes(name)) return done(record);\n`;
+const ADD_PIN = `r.log.pins = [...r.log.pins, name].slice(-LIMITS.pins);`;
+const UNPIN = `r.log.pins = r.log.pins.filter((n) => n !== name);`;
+const F_SAVED = `r.log.saved = r.log.saved.filter((e) => known(e.name));`;
+const F_VISITS = `r.log.visits = r.log.visits.filter((e) => known(e.name));`;
+const F_PINS = `r.log.pins = r.log.pins.filter((n) => known(n));`;
+const F_SAME = `const same = r.log.saved.length === record.log.saved.length && r.log.visits.length === record.log.visits.length && r.log.pins.length === record.log.pins.length;`;
+const FULL_WHY = 'export const fullWhy = (notShown = 0) => (notShown > 0 ? `${FULL}. ${thousands(notShown)} of them ${notShown === 1 ? \'is\' : \'are\'} not shown; remove ${notShown === 1 ? \'it\' : \'them\'} in the log` : FULL);';
+const NEWER_OUT = `  if (newer) return { ok: false, why: NEWER, record: cur, changed: false };\n`;
+const CHANGED = `const changed = JSON.stringify(w.record) !== JSON.stringify(cur);`;
+const WRITE = `  if (changed) await os.progress.set(w.record, { v: V });\n`;
+const RESUME = `  if (w.ok && resume) {\n    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }\n  }\n`;
+const FOOT_USE = `recording === true ? 'A visit and a save are also usage events, which are sent to the labs’ backend only where you have allowed it.'`;
+const FOOT_OFF = `: recording === false ? 'With recording off, no usage event is written.' : '',`;
 
 const MUTANTS = [
   /* ---- the shape and its bounds ---- */
@@ -112,8 +130,10 @@ const MUTANTS = [
   ['a visit to a world the catalogue does not have shown', `visits = record.log.visits.filter((e) => known(e.name));`, `visits = record.log.visits;`],
   ['a pin the catalogue does not have shown', `pins: record.log.pins.filter(known),`, `pins: record.log.pins,`],
   ['hidden entries not counted', HIDDEN, `hidden: 0,`],
-  ['hidden visits not counted', HIDDEN, `hidden: (record.log.saved.length - saved.length),`],
+  ['hidden visits not counted', HIDDEN, `hidden: hiddenSaved,`],
   ['hidden saved worlds not counted', HIDDEN, `hidden: (record.log.visits.length - visits.length),`],
+  ['the hidden saved worlds counted as none', `const hiddenSaved = record.log.saved.length - saved.length;`, `const hiddenSaved = 0;`],
+  ['how many hidden entries are saved worlds not said', `    hiddenSaved,\n  };`, `    hiddenSaved: 0,\n  };`],
   ['the count of dropped visits lost from what the page shows', `pins: record.log.pins.filter(known), dropped: record.log.dropped } },`, `pins: record.log.pins.filter(known), dropped: 0 } },`],
   ['the Overdue slice lost from what the page shows', `record: { overdue: record.overdue, log: { saved, visits,`, `record: { overdue: { planet: null, place: null }, log: { saved, visits,`],
   ['what the page shows takes the hidden entries out of the record', `const saved = record.log.saved.filter((e) => known(e.name)),`, `const saved = (record.log.saved = record.log.saved.filter((e) => known(e.name))),`],
@@ -127,9 +147,9 @@ const MUTANTS = [
   ['a world opened from the diagram written as from its system', `plot: 'diagram', system: 'system'`, `plot: 'system', system: 'system'`],
 
   /* ---- a visit ---- */
-  ['a visit to a world not in the catalogue written', `const wrong = (name, t, known) => (!isName(name) || !known(name) ? 'that world is not in the catalogue'`, `const wrong = (name, t, known) => (!isName(name) ? 'that world is not in the catalogue'`],
+  ['a visit to a world not in the catalogue written', `const wrong = (name, t, known) => (!isName(name) || !known(name) ? UNKNOWN`, `const wrong = (name, t, known) => (!isName(name) ? UNKNOWN`],
   ['a write with a time that is not a number written', ` : !isTime(t) ? 'the time is not a number' : '');`, ` : '');`],
-  ['the reason for a world not in the catalogue changed', `'that world is not in the catalogue' :`, `'unknown world' :`],
+  ['the reason for a world not in the catalogue changed', `export const UNKNOWN = 'that world is not in the catalogue';`, `export const UNKNOWN = 'unknown world';`],
   ['the reason for a bad time changed', `? 'the time is not a number' : '');`, `? 'bad time' : '');`],
   ['a visit by a way the page does not have written', `const bad = wrong(name, t, known) || (VIAS.includes(via) ? '' : 'the way the world was reached is not one this page has');`, `const bad = wrong(name, t, known);`],
   ['the reason for an unknown way changed', `'the way the world was reached is not one this page has'`, `'unknown way'`],
@@ -140,19 +160,31 @@ const MUTANTS = [
   ['a world visited again is counted once', `const n = i >= 0 ? r.log.visits.splice(i, 1)[0].n + 1 : 1;`, `const n = i >= 0 ? r.log.visits.splice(i, 1)[0].n : 1;`],
   ['a new visit goes to the end of the list', `r.log.visits.unshift({ name, t, via, n });`, `r.log.visits.push({ name, t, via, n });`],
   ['a visit written with no way', `r.log.visits.unshift({ name, t, via, n });`, `r.log.visits.unshift({ name, t, n });`],
-  ['the list of visits never cut', CUT, ``],
-  ['a dropped visit not counted', CUT, `if (r.log.visits.length > LIMITS.visits) { r.log.visits.length = LIMITS.visits; }`],
-  ['a write counts dropped visits past the bound', CUT, `if (r.log.visits.length > LIMITS.visits) { r.log.dropped = r.log.dropped + r.log.visits.length - LIMITS.visits; r.log.visits.length = LIMITS.visits; }`],
+  ['the list of visits never cut', `${OVER}\n`, `if (false) {\n`],
+  ['the list of visits cut when it reaches its bound', OVER, `if (r.log.visits.length >= LIMITS.visits) {`],
+  ['a dropped visit not counted', CUT, `else { r.log.visits.length = LIMITS.visits; }`],
+  ['a write counts dropped visits past the bound', CUT, `else { r.log.dropped = r.log.dropped + r.log.visits.length - LIMITS.visits; r.log.visits.length = LIMITS.visits; }`],
+  ['a line the page does not show never goes first', HIDE, `const h = -1;`],
+  ['the newest line the page does not show goes first', HIDE, `const h = r.log.visits.findIndex((e) => !known(e.name));`],
+  ['a line the page shows goes first, uncounted', HIDE, `const h = r.log.visits.findLastIndex((e) => known(e.name));`],
+  ['a line the page does not show is counted as dropped', `if (h >= 0) r.log.visits.splice(h, 1);`, `if (h >= 0) { r.log.visits.splice(h, 1); r.log.dropped++; }`],
   ['the worlds dropped from the list not counted as visited', `visited: record.log.visits.length + record.log.dropped,`, `visited: record.log.visits.length,`],
 
   /* ---- saving ---- */
-  ['a world saved twice is listed twice', TWICE, `  if (record.log.saved.length >= LIMITS.saved) return refused(record, FULL);`],
-  ['a world saved twice hands back a copy', TWICE, `  if (isSaved(record, name)) return done(copy(record));\n  if (record.log.saved.length >= LIMITS.saved) return refused(record, FULL);`],
+  ['a world saved twice is listed twice', TWICE, `  ${FULLNOW}`],
+  ['a world saved twice hands back a copy', TWICE, `  if (isSaved(record, name)) return done(copy(record));\n  ${FULLNOW}`],
   ['the log never full', TWICE, `  if (isSaved(record, name)) return done(record);`],
   ['the 200th saved world refused', `if (record.log.saved.length >= LIMITS.saved) return refused(`, `if (record.log.saved.length >= LIMITS.saved - 1) return refused(`],
-  ['a world already in a full log refused', TWICE, `  if (record.log.saved.length >= LIMITS.saved) return refused(record, FULL);\n  if (isSaved(record, name)) return done(record);`],
+  ['a world already in a full log refused', TWICE, `  ${FULLNOW}\n  if (isSaved(record, name)) return done(record);`],
   ['the reason for a full log changed', `which is all it takes; take one out first`, `which is its limit`],
-  ['a full log refused with no reason', `return refused(record, FULL);`, `return refused(record, '');`],
+  ['a full log refused with no reason', `return refused(record, fullWhy(record.log.saved.filter((e) => !known(e.name)).length));`, `return refused(record, '');`],
+  ['a full log refused without naming the saved worlds the page does not show', `return refused(record, fullWhy(record.log.saved.filter((e) => !known(e.name)).length));`, `return refused(record, FULL);`],
+  ['a full log names every saved world as not shown', `fullWhy(record.log.saved.filter((e) => !known(e.name)).length)`, `fullWhy(record.log.saved.length)`],
+  ['one saved world not shown is not named', FULL_WHY, FULL_WHY.replace('(notShown > 0 ?', '(notShown > 1 ?')],
+  ['no saved world not shown is named as one', FULL_WHY, FULL_WHY.replace('(notShown > 0 ?', '(notShown >= 0 ?')],
+  ['the saved worlds not shown said with the wrong verb', FULL_WHY, FULL_WHY.replace(`notShown === 1 ? 'is' : 'are'`, `notShown === 1 ? 'are' : 'is'`)],
+  ['one saved world not shown called them', FULL_WHY, FULL_WHY.replace(`remove \${notShown === 1 ? 'it' : 'them'}`, 'remove them')],
+  ['the saved worlds not shown counted with no thousands mark', FULL_WHY, FULL_WHY.replace('${thousands(notShown)} of them', '${notShown} of them')],
   ['a saved world goes to the end of the list', PUT, `r.log.saved.push({ name, t, view: VIEWS.includes(v) ? v : 'orbit' });`],
   ['a world saved in whatever view it says', PUT, `r.log.saved.unshift({ name, t, view: v });`],
   ['a world always saved in orbit', PUT, `r.log.saved.unshift({ name, t, view: 'orbit' });`],
@@ -170,10 +202,37 @@ const MUTANTS = [
   ['saving several gives no reason for what was left', `why: left ? \`\${left} could not be added\` : '',`, `why: '',`],
   ['a world is saved wherever a world with a name is', `export const isSaved = (record, name) => record.log.saved.some((e) => e.name === name);`, `export const isSaved = (record, name) => record.log.saved.length > 0;`],
 
-  /* ---- pins and the Overdue slice ---- */
-  ['the first three pins kept, not the last', `.slice(-LIMITS.pins);`, `.slice(0, LIMITS.pins);`],
-  ['a pin not in the catalogue kept', `r.log.pins = [...new Set(list(names).filter((n) => isName(n) && known(n)))].slice(-LIMITS.pins);`, `r.log.pins = [...new Set(list(names).filter((n) => isName(n)))].slice(-LIMITS.pins);`],
-  ['a pin given twice kept twice', `r.log.pins = [...new Set(list(names).filter((n) => isName(n) && known(n)))].slice(-LIMITS.pins);`, `r.log.pins = list(names).filter((n) => isName(n) && known(n)).slice(-LIMITS.pins);`],
+  /* ---- the compare bench ---- */
+  ['a pin the catalogue does not have taken', PIN, `if (!isName(name)) return refused(record, UNKNOWN);`],
+  ['a pin that is no name taken', PIN, `if (!known(name)) return refused(record, UNKNOWN);`],
+  ['a pin refused with no reason', PIN, `if (!isName(name) || !known(name)) return refused(record, '');`],
+  ['a world pinned twice is on the bench twice', PINNED, ``],
+  ['pinning a world on the bench hands back a copy', PINNED, `  if (record.log.pins.includes(name)) return done(copy(record));\n`],
+  ['a world pinned goes first', ADD_PIN, `r.log.pins = [name, ...r.log.pins].slice(-LIMITS.pins);`],
+  ['the first three pins kept, not the last', ADD_PIN, `r.log.pins = [...r.log.pins, name].slice(0, LIMITS.pins);`],
+  ['the bench never cut', ADD_PIN, `r.log.pins = [...r.log.pins, name];`],
+  ['pinning changes the record it was given', `  const r = copy(record);\n  ${ADD_PIN}`, `  const r = record;\n  ${ADD_PIN}`],
+  ['unpinning takes the whole bench away', UNPIN, `r.log.pins = [];`],
+  ['unpinning takes nothing away', UNPIN, `r.log.pins = r.log.pins.filter(() => true);`],
+  ['unpinning a world that is not on the bench hands back a copy', `  if (!record.log.pins.includes(name)) return done(record);\n`, ``],
+  ['unpinning changes the record it was given', `  const r = copy(record);\n  ${UNPIN}`, `  const r = record;\n  ${UNPIN}`],
+  ['"Unpin all" empties nothing', `r.log.pins = [];`, `r.log.pins = r.log.pins.slice();`],
+  ['"Unpin all" on an empty bench hands back a copy', `  if (!record.log.pins.length) return done(record);\n`, ``],
+  ['"Unpin all" changes the record it was given', `  const r = copy(record);\n  r.log.pins = [];`, `  const r = record;\n  r.log.pins = [];`],
+
+  /* ---- removing what the page does not show ---- */
+  ['saved worlds the catalogue does not have are not removed', F_SAVED, `r.log.saved = r.log.saved.slice();`],
+  ['every saved world is removed', F_SAVED, `r.log.saved = [];`],
+  ['visits to worlds the catalogue does not have are not removed', F_VISITS, `r.log.visits = r.log.visits.slice();`],
+  ['visits removed this way are counted as dropped', F_VISITS, `r.log.dropped += r.log.visits.filter((e) => !known(e.name)).length; ${F_VISITS}`],
+  ['pins of worlds the catalogue does not have are not removed', F_PINS, `r.log.pins = r.log.pins.slice();`],
+  ['with nothing hidden a copy is handed back', `return done(same ? record : r);`, `return done(r);`],
+  ['hidden saved worlds alone are not removed', F_SAME, F_SAME.replace('r.log.saved.length === record.log.saved.length && ', '')],
+  ['hidden visits alone are not removed', F_SAME, F_SAME.replace(' && r.log.visits.length === record.log.visits.length', '')],
+  ['hidden pins alone are not removed', F_SAME, F_SAME.replace(' && r.log.pins.length === record.log.pins.length', '')],
+  ['removing changes the record it was given', `  const r = copy(record);\n  ${F_SAVED}`, `  const r = record;\n  ${F_SAVED}`],
+
+  /* ---- the Overdue slice, and the copy every write starts from ---- */
   ['the Overdue planet written whatever it is', `r.overdue = { planet: isName(planet) ? planet : null, place: placeOf(place) };`, `r.overdue = { planet: planet, place: placeOf(place) };`],
   ['the Overdue place written unchecked', `r.overdue = { planet: isName(planet) ? planet : null, place: placeOf(place) };`, `r.overdue = { planet: isName(planet) ? planet : null, place: place };`],
   ['writing the Overdue slice changes the record it was given', `  const r = copy(record);\n  r.overdue = {`, `  const r = record;\n  r.overdue = {`],
@@ -185,11 +244,36 @@ const MUTANTS = [
   ['numbers printed with no thousands mark', `export const thousands = (n) => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');`, `export const thousands = (n) => String(n);`],
   ['numbers marked every two figures', `(\\d{3})+(?!\\d)`, `(\\d{2})+(?!\\d)`],
   ['numbers marked with a point', `(?!\\d))/g, ',');`, `(?!\\d))/g, '.');`],
+  ['no world called worlds', `\${n === 1 ? 'world' : 'worlds'}\`;`, `\${n > 1 ? 'worlds' : 'world'}\`;`],
   ['the log line names a shared log when there is none', SHARED, '${` · ${thousands(shared)} shared with you`}'],
   ['the log line never names a shared log', SHARED, ``],
   ['the log line does not name one shared world', SHARED, '${shared > 1 ? ` · ${thousands(shared)} shared with you` : \'\'}'],
   ['the log line counts saved for visited', LINE, '`Your log · ${thousands(c.saved)} visited · ${thousands(c.visited)} saved'],
   ['the words of the log line changed', LINE, '`Log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved'],
+  ['two visits said as one', `(e.n > 1 ? \`\${thousands(e.n)} visits`, `(e.n > 2 ? \`\${thousands(e.n)} visits`],
+  ['one visit said as a count', `(e.n > 1 ? \`\${thousands(e.n)} visits`, `(e.n >= 1 ? \`\${thousands(e.n)} visits`],
+  ['visits said with the way as if every visit came that way', `visits, the last \${VIA_WORDS[e.via]}\``, `visits, \${VIA_WORDS[e.via]}\``],
+  ['a count of visits with no thousands mark', `\${thousands(e.n)} visits, the last`, `\${e.n} visits, the last`],
+  ['the saved heading names none not shown', `\${notShown > 0 ? \`, and \${thousands(notShown)} not shown\` : ''}\`;`, `\${notShown >= 0 ? \`, and \${thousands(notShown)} not shown\` : ''}\`;`],
+  ['the saved heading does not name one not shown', `\${notShown > 0 ? \`, and \${thousands(notShown)} not shown\` : ''}\`;`, `\${notShown > 1 ? \`, and \${thousands(notShown)} not shown\` : ''}\`;`],
+  ['the saved heading counts with no thousands mark', `, and \${thousands(notShown)} not shown`, `, and \${notShown} not shown`],
+  ['the saved heading gives no bound', 'export const savedWords = (shown, notShown = 0) => `${thousands(shown)} of ${LIMITS.saved}', 'export const savedWords = (shown, notShown = 0) => `${thousands(shown)}'],
+  ['a press said in and out the wrong way round', `\${add ? 'in' : 'out of'} your log.\``, `\${add ? 'out of' : 'in'} your log.\``],
+  ['a refusal said as added for a take-out', `was not \${add ? 'added' : 'taken out'}:`, `was not added:`],
+  ['a refused press said to have gone through', `export const toggleWords = (name, add, w) => (w.ok ?`, `export const toggleWords = (name, add, w) => (true ?`],
+  ['"Add all" with nothing to add said as none could be added', `(!added && left ? \`None could be added`, `(!added ? \`None could be added`],
+  ['"Add all" says none could be added without the saved worlds not shown', `None could be added: \${fullWhy(notShown)}.`, `None could be added: \${FULL}.`],
+  ['"Add all" says some could not be added without the saved worlds not shown', `could not be added: \${fullWhy(notShown)}.`, `could not be added: \${FULL}.`],
+  ['"Add all" never says what was left', `\${left ? \` \${worlds(left)} could not be added`, `\${false ? \` \${worlds(left)} could not be added`],
+  ['"Add all" with everything there says nothing', `'All of them were in your log already.'`, `''`],
+  ['"Remove them" with nothing removed says it removed none', `(n > 0 ? \`Removed`, `(n >= 0 ? \`Removed`],
+  ['"Remove them" says one entry as entries', `\${n === 1 ? 'entry' : 'entries'}`, `entries`],
+  ['the footer says the log is kept on a store that keeps nothing', `persistent ? 'The log is kept in this browser.' : '',`, `'The log is kept in this browser.',`],
+  ['the footer never says the log is kept', `persistent ? 'The log is kept in this browser.' : '',`, `'',`],
+  ['the footer names usage events with recording off', FOOT_USE, `recording !== null ? 'A visit and a save are also usage events, which are sent to the labs’ backend only where you have allowed it.'`],
+  ['the footer never names usage events', FOOT_USE, `false ? ''`],
+  ['the footer says recording is off with no store', FOOT_OFF, `: !recording ? 'With recording off, no usage event is written.' : '',`],
+  ['the footer never says recording is off', FOOT_OFF, `: '',`],
 
   /* ---- a log in a link ---- */
   ['the link carries every saved world', `record.log.saved.slice(0, LIMITS.shared).map((e) => e.name).join('|');`, `record.log.saved.map((e) => e.name).join('|');`],
@@ -208,12 +292,29 @@ const MUTANTS = [
 
   /* ---- Labs OS: one change to what the store holds ---- */
   ['the record asked for at version 1', `const rec = await os.progress.get({ v: V, migrate: (d) => normalise(d) });`, `const rec = await os.progress.get({ v: 1, migrate: (d) => normalise(d) });`],
-  ['what loads is not made sound', `  return normalise(rec ? rec.data : null);\n}`, `  return rec ? rec.data : null;\n}`],
+  ['what loads is not made sound', `record: normalise(rec ? rec.data : null),`, `record: rec ? rec.data : empty(),`],
+  ['a record of this version read as written by a later one', `newer: !!rec && rec.v > V };`, `newer: !!rec && rec.v >= V };`],
+  ['a record two versions later read as one this page knows', `newer: !!rec && rec.v > V };`, `newer: !!rec && rec.v > V + 1 };`],
+  ['no record read as written by a later version', `newer: !!rec && rec.v > V };`, `newer: false };`],
+  ['a record of a later version written', NEWER_OUT, ``],
+  ['a record of a later version refused with no reason', NEWER_OUT, `  if (newer) return { ok: false, why: '', record: cur, changed: false };\n`],
+  ['a record of a later version refused and said to be changed', NEWER_OUT, `  if (newer) return { ok: false, why: NEWER, record: cur, changed: true };\n`],
+  ['a record of a later version handed back as empty', NEWER_OUT, `  if (newer) return { ok: false, why: NEWER, record: empty(), changed: false };\n`],
+  ['the reason a later record is not written changed', `export const NEWER = 'this log was written by a newer version of this page';`, `export const NEWER = 'newer';`],
   ['a change applied to an empty record and not to the stored one', `  const w = change(cur);`, `  const w = change(empty());`],
-  ['a change that changes nothing is written', `  if (w.record !== cur) await os.progress.set(w.record, { v: V });`, `  await os.progress.set(w.record, { v: V });`],
-  ['a change is never written', `  if (w.record !== cur) await os.progress.set(w.record, { v: V });\n`, ``],
+  ['a new record equal to the stored one counted as a change', CHANGED, `const changed = w.record !== cur;`],
+  ['every change counted as one', CHANGED, `const changed = true;`],
+  ['an accepted change counted as one whatever it changed', CHANGED, `const changed = w.ok;`],
+  ['a change that changes nothing is written', WRITE, `  await os.progress.set(w.record, { v: V });\n`],
+  ['a change is never written', WRITE, ``],
   ['a write at version 1', `await os.progress.set(w.record, { v: V });`, `await os.progress.set(w.record, { v: 1 });`],
-  ['what comes back from a change is the record before it', `  return w;\n}`, `  return { ...w, record: cur };\n}`],
+  ['whether the store changed is not said', `  return { ...w, changed };\n}`, `  return w;\n}`],
+  ['what comes back from a change is the record before it', `  return { ...w, changed };\n}`, `  return { ...w, record: cur, changed };\n}`],
+  ['a refused change writes the way back', `  if (w.ok && resume) {`, `  if (resume) {`],
+  ['an accepted change writes no way back', `  if (w.ok && resume) {`, `  if (w.ok && resume && false) {`],
+  ['the way back written only when the record changed', `  if (w.ok && resume) {`, `  if (w.ok && resume && changed) {`],
+  ['a way back the store refuses fails the stored change', `    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }`, `    await os.progress.setResume(resume.url, resume.label);`],
+  ['the way back written before the record', `${WRITE}${RESUME}`, `${RESUME}${WRITE}`],
 ];
 
 process.exit(await runMutants({ here, file: 'record.js', test: 'record.test.mjs', mutants: MUTANTS, data: ['data/exomania/pscomppars-snapshot.json'] }));

@@ -199,6 +199,11 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 .tp-actions .log-add { min-width: 9.2em; }   /* "Add to log" and "In your log" at one width */
 .tp-actions .btn:disabled { opacity: .45; cursor: default; }
 .tp-said { min-height: 1.5em; margin-top: 5px; font-size: 10px; line-height: 1.5; color: var(--text); }
+.tp-said.quiet { height: 1.5em; overflow: hidden; clip-path: inset(50%); }   /* a success: heard, not shown, and the line keeps its place */
+/* the head of the log stays in view while the dialog scrolls: the title, Close, and the line that says what a press did */
+.log-head { position: sticky; top: -18px; z-index: 2; flex-wrap: wrap; margin: -18px -22px 10px; padding: 18px 22px 8px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.method .log-said { flex-basis: 100%; margin: 0; font-size: 10.5px; color: var(--text); }
+.method .log-said:not(:empty) { margin-top: 6px; }
 .log-sum { color: var(--text-bright); }
 .log-note { color: var(--text-dim); border-left: 1px solid var(--hair); padding-left: 8px; }
 .log-sec h3 span { color: var(--text-dim); letter-spacing: .06em; text-transform: none; margin-left: 8px; }
@@ -346,8 +351,8 @@ body.ready .foot { transition-delay: 1500ms; }
   .search input { font-size: 16px; }
   .tours { order: 2; justify-content: flex-start; margin-top: 0; }
   .logrow { order: 1; justify-content: flex-start; }
-  .method .log-list li { grid-template-columns: minmax(0, 1fr) auto; }
-  .log-what { grid-column: 1; }
+  .method .log-list li { grid-template-columns: minmax(0, 1fr) auto auto; }   /* the name, when, and "Take out" at its own width on one row */
+  .log-what { grid-column: 1 / -1; grid-row: 2; }
   .lower { order: 3; }
   .stamp { display: none; }
   .chip { padding: 6px 9px; font-size: 10.5px; }
