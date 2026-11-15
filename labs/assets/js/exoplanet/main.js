@@ -271,7 +271,7 @@ function writeURL() {
     if (st.tour && st.tour.key !== 'custom') u.set('tour', st.tour.key);
     const c = engine.camera || {};
     if (c.mode && c.mode !== 'orbit') u.set('view', c.mode);
-    if (glOk && !c.moving && (Math.abs((c.yaw ?? 0.7) - 0.7) > 0.01 || Math.abs((c.pitch ?? 0.3) - 0.3) > 0.01 || Math.abs(c.dist - (c.homeDist || c.dist)) > 0.05)) {
+    if (glOk && !c.moving && (Math.abs(c.yaw - c.yaw0) > 0.01 || Math.abs(c.pitch - c.pitch0) > 0.01 || Math.abs(c.dist - (c.homeDist || c.dist)) > 0.05)) {
       u.set('cam', [c.yaw, c.pitch, c.dist / (c.homeDist || 1)].map((x) => (+x).toFixed(2)).join(','));
     }
     if (st.filter.query) u.set('q', st.filter.query);
