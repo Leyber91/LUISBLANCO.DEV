@@ -108,6 +108,9 @@ button, input, select { font: inherit; color: inherit; }
 .q-results li span { color: var(--text-dim); font-size: 10px; white-space: nowrap; }
 .q-results li.on, .q-results li:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accretion); }
 .q-results li.none { color: var(--text-dim); cursor: default; }
+/* the line over the results of a question: how many match and in what order */
+.q-results li.head, .q-results li.head:hover { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim);
+  cursor: default; background: none; box-shadow: none; padding: 6px 11px 5px; }
 
 .stage { order: 2; flex: 1; position: relative; min-height: 0; }
 #exo-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: -1; pointer-events: auto;
@@ -239,6 +242,8 @@ body { --star-rgb: 255, 241, 234; }
 
 /* ---------- questions, ranges ---------- */
 .q-results li.ask b { color: var(--accretion-soft); }
+.q-note:empty { display: none; }
+.ret-name:focus { outline: none; }   /* focused by script after a result is opened, never by Tab */
 .q-note { margin-top: 5px; font-size: 9.5px; line-height: 1.45; color: var(--text-dim); background: rgba(6, 8, 13, .7); padding: 4px 8px; border: 1px solid var(--line); }
 .ranges { padding: 8px 10px; display: grid; gap: 4px; }
 .rg-head { display: flex; justify-content: space-between; font-size: 9px; }
