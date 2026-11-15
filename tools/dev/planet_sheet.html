@@ -102,9 +102,8 @@ g.style.gridTemplateColumns = `repeat(${COLS}, ${SIZE}px)`;
 const report = [];
 for (const p of worlds) {
   const prm = toParams(p), c = classify(p);
-  Object.assign(engine.cfg, prm, { shift: [0, 0], camMode: VIEW, camDist: DIST, yaw: YAW, pitch: PITCH, homeDist: DIST, raw: RAW ? 1 : 0, lightDir: LIGHT });
-  engine.t0 = performance.now();   // every tile at time zero: the same face of the world on every run
-  engine._draw();
+  Object.assign(engine.cfg, prm, { shift: [0, 0], camMode: VIEW, camDist: DIST, yaw: YAW, pitch: PITCH, homeDist: DIST, raw: RAW ? 1 : 0, lightDir: LIGHT, time: 0 });
+  engine._draw();   // at time zero (cfg.time above): the same face of the world on every run, however long its shader took to build
   const cv = document.createElement('canvas'); cv.width = eng.width; cv.height = eng.height; cv.style.width = cv.style.height = `${SIZE}px`;
   const ctx = cv.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(eng, 0, 0);

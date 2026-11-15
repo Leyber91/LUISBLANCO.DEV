@@ -1588,7 +1588,8 @@ export class Exoplanet {
     gl.uniform2f(u.uRes, this.canvas.width, this.canvas.height);
     const k = this.canvas.width / Math.max(1, this.canvas.clientWidth);
     gl.uniform2f(u.uShift, (cfg.shift[0] || 0) * k, (cfg.shift[1] || 0) * k);
-    gl.uniform1f(u.uTime, (performance.now() - this.t0) / 1000);
+    // cfg.time, when set, fixes the clock: a measurement must show the same face of a spinning world every run
+    gl.uniform1f(u.uTime, Number.isFinite(cfg.time) ? cfg.time : (performance.now() - this.t0) / 1000);
     gl.uniform3fv(u.uCam, cam.ro);
     gl.uniform3fv(u.uFwd, cam.fwd);
     gl.uniform1f(u.uFov, mode === 'surface' ? 1.0 : mode === 'closeorbit' ? 1.25 : cfg.fov);
