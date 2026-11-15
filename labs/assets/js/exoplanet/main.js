@@ -9,7 +9,7 @@
    ============================================================ */
 
 import { Exoplanet } from './exoplanet.js';
-import { toParams, classify } from './data.js';
+import { toParams, classify, lockRadiusAU, LOOKS } from './data.js';
 import { loadSnapshot, joinRoster, provisionalMeasured } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
@@ -70,6 +70,9 @@ function rebuildFilter() {
 const canvas = $('exo-canvas');
 const engine = new Exoplanet(canvas);
 const glOk = engine.ok();
+// The page opens on LANDMARKS[0], a temperate world, unless a link names another: start building that
+// look's shader now, while the catalogue loads, instead of after it.
+if (glOk && !new URLSearchParams(location.search).get('p')) engine.prepare(LOOKS.temperate);
 /* Low-power tier: on a software rasteriser every composited frame is expensive (backdrop blur
    over the canvas costs about 0.3 s a frame in SwiftShader), so the 2D views draw on demand
    and the glass panels drop their blur. Measured 2026-11-11. */
@@ -430,7 +433,8 @@ function openCompare() {
   $('compare-body').innerHTML = compareHTML(st.pins, EARTH, st.albedo());
   document.querySelectorAll('.cmp-thumb').forEach((el) => {
     const i = +el.dataset.i, p = i === 0 ? EARTH : st.pins[i - 1];
-    if (!thumbs.has(p.name) && glOk) thumbs.set(p.name, engine.snapshot(toParams(p), 150));
+    // a thumbnail whose look is still being built comes back null and is asked for again from engine.onReady
+    if (!thumbs.has(p.name) && glOk) { const t = engine.snapshot(toParams(p), 150); if (t) thumbs.set(p.name, t); }
     const c = thumbs.get(p.name);
     if (c) { const img = new Image(); img.alt = `${p.name}, rendered`; img.src = c.toDataURL(); el.appendChild(img); }
   });
@@ -451,12 +455,12 @@ function syncCamButtons() {
 function renderGround(p) {
   const mc = monteCarlo(p, store.state.albedo());
   const sky = skyView(p);
-  const locked = isNum(p.P) && p.P < 10;
+  const cl = classify(p), locked = cl.locked;   // the rule the picture itself is drawn by
   $('ground-sites').innerHTML = locked
-    ? `<span class="view-k">Likely tidally locked (P ${fmt(p.P, 3)} d): land at</span> <button type="button" class="chip" data-elev="80">substellar point</button><button type="button" class="chip" data-elev="0">terminator</button><button type="button" class="chip" data-elev="-10">night side</button>`
+    ? `<span class="view-k">Drawn tidally locked (${fmt(cl.physics.a, 3)} AU, inside the ${fmt(lockRadiusAU(cl.physics.Mstar), 2)} AU lock radius): land at</span> <button type="button" class="chip" data-elev="80">substellar point</button><button type="button" class="chip" data-elev="0">terminator</button><button type="button" class="chip" data-elev="-10">night side</button>`
     : `<span class="view-k">Time of day: drag the star's elevation</span>`;
   const grav = mc.g ? `gravity ${fmt(mc.g.med, 2)} g` : mc.hasR ? 'gravity —' : 'gravity unknown: no radius measured';
-  $('ground-read').innerHTML = `<b class="tg tg-${mc.massFrom === 'measured' ? 'd' : 'e'}">${mc.massFrom === 'measured' ? 'D' : 'E'}</b> ${grav} · <b class="tg tg-d">D</b> Teq ${mc.teq ? fmtInt(mc.teq.med) : '—'} K · <b class="tg tg-d">D</b> star ${sky ? fmt(sky.angDeg, 2) : '—'}° wide (Sun 0.53°)${locked ? ' · <b class="tg tg-i">I</b> lock threshold 10 d' : ''} · <b class="tg tg-i">I</b> terrain`;
+  $('ground-read').innerHTML = `<b class="tg tg-${mc.massFrom === 'measured' ? 'd' : 'e'}">${mc.massFrom === 'measured' ? 'D' : 'E'}</b> ${grav} · <b class="tg tg-d">D</b> Teq ${mc.teq ? fmtInt(mc.teq.med) : '—'} K · <b class="tg tg-d">D</b> star ${sky ? fmt(sky.angDeg, 2) : '—'}° wide (Sun 0.53°)${locked ? ' · <b class="tg tg-i">I</b> lock radius at 4.5 Gyr' : ''} · <b class="tg tg-i">I</b> terrain`;
 }
 function setCam(mode) {
   if (!glOk) return;
@@ -571,6 +575,8 @@ async function boot() {
   });
   $('cmp-clear').addEventListener('click', () => { store.state.pins = []; openCompare(); });
   engine.onCamera = () => writeURL();
+  engine.onMode = () => syncCamButtons();
+  engine.onReady = () => { if ($('compare').open) openCompare(); };
   document.addEventListener('visibilitychange', () => engine.setVisible && engine.setVisible(!document.hidden));
   if (typeof IntersectionObserver === 'function') new IntersectionObserver((es) => engine.setVisible && engine.setVisible(es[0].isIntersecting && !document.hidden)).observe($('stage'));
   window.addEventListener('resize', () => { placeWorld(); });

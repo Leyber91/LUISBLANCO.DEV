@@ -374,6 +374,18 @@ const cmf = (lam, set) => set.reduce((s, l) => s + lobe(lam, l), 0);
 const planck = (lamNm, T) => { const l = lamNm * 1e-9; return 1 / (Math.pow(l, 5) * (Math.exp(1.4387769e-2 / (l * T)) - 1)); };
 const gammaEnc = (c) => (c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055);
 
+/* The share of a blackbody's power that the eye weighs as light: Planck's law times the CIE
+   photopic curve (the y-bar fit above), over the whole spectrum. The whole-spectrum integral of
+   the planck() used here is (T / c2)^4 pi^4 / 15, with c2 = 1.4387769e-2 m K. Times 683 lm/W
+   this is the luminous efficacy of a blackbody. The render uses it only as a ratio between a
+   glowing surface and its star. */
+export function photopicFraction(T) {
+  if (!isNum(T) || T <= 0) return 0;
+  let s = 0;
+  for (let lam = 380; lam <= 780; lam += 5) s += planck(lam, T) * cmf(lam, CIE_FIT.y) * 5e-9;
+  return s / (Math.pow(T / 1.4387769e-2, 4) * Math.pow(Math.PI, 4) / 15);
+}
+
 const colourCache = new Map();
 /* Returns { srgb: [0..1]x3 gamma-encoded, linear: [0..1]x3, hex }. Brightest channel = 1. */
 export function starColour(teff) {

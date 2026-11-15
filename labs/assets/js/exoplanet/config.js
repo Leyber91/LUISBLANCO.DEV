@@ -185,4 +185,13 @@ export const SOURCES = [
   'Lovis & Fischer 2010, in Exoplanets, ed. S. Seager, eq. 14 (radial-velocity semi-amplitude)',
   'Wyman, Sloan & Shirley 2013, JCGT 2(2) (CIE colour matching fit)',
   'NASA Planetary Fact Sheet (solar system reference)',
+  'Kasting, Whitmire & Reynolds 1993, Icarus 101, 108 (tidal-lock radius, eq. 10)',
+  'Hansen & Travis 1974, Space Sci. Rev. 16, 527 (Rayleigh optical depth, eq. 2.30)',
+  'Sudarsky, Burrows & Pinto 2000, ApJ 538, 885 (cloud classes of giant planets)',
+  'Irwin et al. 2024, MNRAS 527, 11521 (the colours of Uranus and Neptune)',
+  'Evans et al. 2013, ApJ 772, L16 (albedo of HD 189733 b)',
+  'Bell et al. 2017, ApJ 847, L2 (albedo of WASP-12 b)',
+  'Yang, Cowan & Abbot 2013, ApJ 771, L45 (cloud under the star on tidally locked planets)',
+  'Kite, Fegley, Schaefer & Gaidos 2016, ApJ 828, 80 (where rock stops holding a crust: 1,673 K)',
+  'Essack, Seager & Pajusalu 2020, ApJ 898, 160 (the temperatures over which rock melts)',
 ];
