@@ -1,30 +1,39 @@
 /* ============================================================
-   data.js — the Kepler catalogue + the physics that turns a raw
-   record into a renderable world.
+   data.js — the physics that turns an archive record into a
+   world the shader can draw.
 
-   Every physical shader input is DERIVED here (deterministic);
-   the only randomness is the per-name noise seed + feature
-   placement. Rules follow the adversarially-verified science
-   spec: null-degradation, a 5-class radius/density classifier,
-   true atmospheric scale height, the cosmic-shoreline retention
-   gate, a blackbody star colour, and insolation-driven exposure.
+   Every shader input is DERIVED here and is deterministic; the
+   only randomness is seeded by the planet's name and places
+   features (continents, craters, bands), never decides a kind.
+
+   Two steps:
+     physics(p)   numbers: class by radius and density, Teq,
+                  gravity, escape speed, the share of air kept
+                  (cosmic shoreline), true scale height.
+     lookOf(p)    which kind of surface those numbers imply.
+                  One of seven looks, each with its own material
+                  in exoplanet.js. The rule is below, at LOOKS.
 
    Records come from catalog.js. When a mass is missing or only
    an upper limit, the Chen & Kipping 2017 forecaster (science.js)
    supplies the median; stellar radius and mass come from the
    archive when it has them.
+
+   The test of this file is the Solar System: its eight planets,
+   written as archive records, must come out as themselves
+   (tests/looks.test.mjs).
    ============================================================ */
 
-import { forecastFor, starColour, sizeClassOf, limitOf, limitKind } from './science.js';
-import { CHEN_KIPPING } from './config.js';
+import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, insolation, seff, photopicFraction } from './science.js';
+import { CHEN_KIPPING, KOPPARAPU } from './config.js';
 
-const EARTH_R = 6.371e6, EARTH_M = 5.972e24, G = 6.6743e-11;
+const EARTH_R = 6.371e6;
 const kB = 1.380649e-23, mH = 1.6726e-27;
 const RSUN_AU = 0.00465047;     // 1 solar radius in AU
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
-const num = (v) => (v !== null && v !== undefined && !isNaN(v)) ? +v : null;
+const mix3 = (a, b, t) => a.map((x, i) => x + (b[i] - x) * t);
 
 // ---- deterministic per-planet randomness (a world looks identical every visit) ----
 function hashName(name) {
@@ -67,6 +76,7 @@ export function physics(p) {
   const Mstar = p.st_mass ?? clamp(Math.pow(Teff / 5772, 1.7), 0.1, 1.6);
   const Rstar = p.st_rad ?? clamp(Math.pow(Mstar, 0.8), 0.1, 4.0);  // solar radii (for star angular size)
   const a = p.pl_orbsmax ?? (p.pl_orbper ? Math.cbrt(Math.pow(p.pl_orbper / 365.25, 2) * Mstar) : 1);
+  const P = p.pl_orbper ?? 365.25 * Math.sqrt(a * a * a / Mstar);   // days
 
   // radius soft-membership (single tiling scheme)
   let w = [
@@ -116,7 +126,7 @@ export function physics(p) {
   else if (Ttest >= 1200) state = 'partial';
   else if (Tsurf < 245) state = 'ice';                   // genuine snowball (greenhouse already applied)
 
-  // mean molecular weight by regime -> true scale height -> visible shell
+  // mean molecular weight by regime -> true scale height
   let mu;
   if (isGiant) mu = 2.3;
   else if (state === 'ice') mu = 26;
@@ -125,11 +135,7 @@ export function physics(p) {
   else mu = 29;
   const gSI = 9.80665 * gRel;
   const Hm = kB * Teq / (mu * mH * gSI);                         // metres
-  const Hr = Hm / (R * EARTH_R);                                 // in planet radii (tiny, e.g. Earth ~0.0013)
-  // a giant IS its atmosphere — the banded disc is the cloud-top. Cap the shell THIN
-  // (a limb rim, not a thick wash on top) so it isn't a second atmosphere. Terrestrials
-  // keep a fuller visible shell. (Science spec: giants single-layer; atmR tracks H.)
-  const atmR = 1.0 + clamp(50 * Hr * atmDensity, 0.018, isGiant ? 0.045 : 0.16);
+  const Hr = Hm / (R * EARTH_R);                                 // in planet radii (tiny, e.g. Earth ~0.0012)
 
   // insolation -> exposure multiplier (compressive)
   const Lrel = Rstar * Rstar * Math.pow(Teff / 5772, 4);
@@ -145,43 +151,98 @@ export function physics(p) {
   const starSpots    = Teff < 3900 ? 0.5  : Teff < 5300 ? 0.35 : Teff < 6000 ? 0.25 : Teff < 7500 ? 0.12 : 0.03;
 
   return {
-    R, M, estMass, Teff, Mstar, Rstar, a, Teq, Tsurf, Ttest, gRel, vEscKms,
-    rhoRel, domClass, isGiant, state, atmDensity, Hr, atmR, lightMul, starAngle,
+    R, M, estMass, Teff, Mstar, Rstar, a, P, S, Teq, Tsurf, Ttest, gRel, vEscKms,
+    rhoRel, domClass, isGiant, state, atmDensity, Hr, lightMul, starAngle,
     starActivity, starSpots, radiusKnown, standIn,
   };
 }
 
+// ============================================================
+//  LOOKS — which kind of surface the numbers imply
+// ============================================================
+/* The shader's uType. Each look is one material in exoplanet.js. */
+export const LOOKS = { temperate: 0, fluid: 1, ice: 2, molten: 3, airless: 4, desert: 5, shrouded: 6 };
+
+/* Shares of air kept (physics().atmDensity, 0 to 1) that separate bare rock from thin air and
+   thin air from a full atmosphere. Mercury keeps 0, Mars 0.47, Venus 0.82, Earth 0.97. */
+export const AIR_THIN = 0.15, AIR_FULL = 0.6;
+
+/* A world inside this distance is drawn with one face always to its star: no day, a hot spot
+   under the star, ice or cold crust on the far side. The distance is the tidal-lock radius of
+   Kasting, Whitmire & Reynolds (1993, Icarus 101, 108, eq. 10, after Peale 1977):
+   r_T = 0.027 (P0 t / Q)^(1/6) M^(1/3) in CGS units, with their P0 = 13.5 h and Q = 100.
+   [ILLUSTRATIVE] the age t: every system is taken as 4.5 Gyr old, which gives 0.46 AU for one
+   solar mass. No rotation has been measured for these planets. */
+const lockCm = (Msun) => 0.027 * Math.pow(13.5 * 3600 * 4.5e9 * 3.15576e7 / 100, 1 / 6) * Math.cbrt(Msun * 1.98847e33);
+export const lockRadiusAU = (Msun) => lockCm(Msun) / 1.495978707e13;
+
+/* Where the planet's sunlight sits against the habitable-zone limits (Kopparapu et al. 2013),
+   by flux. The page's own zone line uses the same functions, so the picture and the text agree. */
+export function zoneOf(p, ph = physics(p)) {
+  const hz = habitableZone(p), ins = insolation(p);
+  if (hz && ins.S) return { S: ins.S, sInner: hz.sInner, sInnerOpt: hz.sInnerOpt, sOuter: hz.sOuter, sOuterOpt: hz.sOuterOpt };
+  const K = KOPPARAPU;
+  return { S: ph.S, sInner: seff(ph.Teff, K.runaway), sInnerOpt: seff(ph.Teff, K.recentVenus), sOuter: seff(ph.Teff, K.maxGreen), sOuterOpt: seff(ph.Teff, K.earlyMars) };
+}
+
+/* The rule, in order:
+     fluid      radius class sub-Neptune or larger: no surface, cloud tops coloured by temperature
+     molten     rock whose day side reaches 1,200 K
+     airless    rock that keeps under AIR_THIN of its air (ice instead, if cold and of low density)
+     ice        colder than the optimistic outer edge of the habitable zone, or a mean surface under 245 K with full air
+     desert     thin air (AIR_THIN to AIR_FULL): dust, frost caps, no standing water
+     shrouded   full air and more sunlight than the recent-Venus limit: one unbroken cloud deck
+     temperate  full air inside the optimistic habitable zone: seas, cloud, ice at the cold end */
+export function lookOf(p, ph = physics(p)) {
+  if (ph.isGiant) return 'fluid';
+  if (ph.state === 'lava' || ph.state === 'partial') return 'molten';
+  const z = zoneOf(p, ph);
+  const cold = z.S < z.sOuterOpt, hot = z.S > z.sInnerOpt;
+  if (ph.atmDensity < AIR_THIN) return (cold && ph.rhoRel !== null && ph.rhoRel < 0.6) ? 'ice' : 'airless';
+  if (cold) return 'ice';
+  if (ph.atmDensity < AIR_FULL) return 'desert';
+  if (hot) return 'shrouded';
+  return ph.state === 'ice' ? 'ice' : 'temperate';
+}
+
 // ---- classification label for UI / narrative ----
+const LOOK_LABEL = {
+  airless: ['Airless rock', 'Airless rock'],
+  desert: ['Thin-air desert', 'Thin-air desert'],
+  shrouded: ['Cloud-shrouded world', 'Cloud-shrouded world'],
+  temperate: ['Temperate world with seas', 'Ocean world'],
+  ice: ['Frozen world', 'Frozen world'],             // nothing in the archive shows an ocean under the ice
+};
 export function classify(p) {
   const ph = physics(p);
-  const CLASS_NAME = ['Rocky world', 'Ocean / super-Earth', 'Sub-Neptune', 'Ice giant', 'Gas giant'];
-  let label = CLASS_NAME[ph.domClass];
-  let habitable = false;
-  if (ph.domClass <= 1) {
-    if (ph.state === 'lava') label = ph.domClass === 1 ? 'Steam / magma world' : 'Lava world';
-    else if (ph.state === 'partial') label = 'Molten-surface world';
-    else if (ph.state === 'ice') label = ph.domClass === 1 ? 'Ice / ocean world' : 'Frozen world';
-    else {
-      habitable = ph.Teq >= 230 && ph.Teq <= 330;
-      if (habitable) label += ' · habitable zone';
-    }
-  } else if (ph.domClass >= 4) {
-    label = ph.Teq > 1200 ? 'Hot Jupiter' : ph.Teq > 800 ? 'Warm gas giant' : ph.Teq < 150 ? 'Cold gas giant' : 'Gas giant';
+  const look = lookOf(p, ph);
+  let label;
+  if (look === 'fluid') {
+    label = ['Sub-Neptune', 'Ice giant', 'Gas giant'][ph.domClass - 2];
+    if (ph.domClass >= 4) label = ph.Teq > 1200 ? 'Hot Jupiter' : ph.Teq > 800 ? 'Warm gas giant' : ph.Teq < 150 ? 'Cold gas giant' : 'Gas giant';
+  } else if (look === 'molten') {
+    label = ph.state === 'lava' ? 'Lava world' : 'Molten-surface world';
+  } else {
+    label = LOOK_LABEL[look][ph.domClass === 1 ? 1 : 0];
   }
   // no measured radius: say so, and say what the drawing stands in with
-  if (!ph.radiusKnown) { label = `Radius not measured, drawn as ${ph.standIn.why}`; habitable = false; }
-  // shader uType (0 temperate, 1 giant/hazy, 2 ice, 3 lava)
-  let type = 0;
-  if (ph.isGiant) type = 1;
-  else if (ph.state === 'lava' || ph.state === 'partial') type = 3;
-  else if (ph.state === 'ice') type = 2;
-  return { type, klass: ph.domClass, state: ph.state, label, habitable, atmDensity: ph.atmDensity, physics: ph };
+  if (!ph.radiusKnown) label = `Radius not measured, drawn as ${ph.standIn.why}`;
+  return { type: LOOKS[look], look, klass: ph.domClass, state: ph.state, label, atmDensity: ph.atmDensity, locked: ph.a < lockRadiusAU(ph.Mstar), physics: ph };
 }
 
 // ---- star colour: Planck spectrum through the CIE 1931 observer to sRGB (science.js) ----
 function blackbodySRGB(kelvin) { return starColour(kelvin).srgb.slice(); }
 const toLinear = (c) => c.map((x) => Math.pow(x, 2.2));
 export function starColor(teff) { return toLinear(blackbodySRGB(teff ?? 5600)); }
+/* [ILLUSTRATIVE] The light a world is drawn in: its star's colour as an eye three-quarters
+   adapted to it would see it. Unadapted, sunlight itself reads warm against a screen's white, a
+   grey rock turns pink and cloud turns to sand; fully adapted, a red dwarf's light would read
+   white and its worlds would lose the one thing that light does to them. */
+export const ADAPTATION = 0.75;
+export function lightColor(teff) {
+  const c = mix3(starColor(teff), [1, 1, 1], ADAPTATION), k = Math.max(...c);
+  return c.map((x) => x / k);
+}
 // a saturation-boosted version for the star disk itself, so type reads at a glance
 function vividStar(teff) {
   const c = toLinear(blackbodySRGB(teff ?? 5600));
@@ -189,133 +250,207 @@ function vividStar(teff) {
   return c.map((x) => clamp(l + (x - l) * 1.5, 0, 1.6));
 }
 
-// ---- per-class colour (Sudarsky for giants, ternary for rocky) ----
-function classColors(ph, rand) {
-  const { domClass, state, Teq, rhoRel } = ph;
-  if (domClass === 4) {                                          // gas giant — Sudarsky thermal sequence
-    if (Teq < 150) return [[0.90,0.85,0.74],[0.78,0.72,0.58],[0.95,0.92,0.82]];
-    if (Teq < 250) return [[0.86,0.88,0.90],[0.72,0.78,0.86],[0.95,0.96,1.0]];
-    if (Teq < 800) return [[0.10,0.16,0.34],[0.18,0.28,0.5],[0.55,0.68,0.92]];
-    if (Teq < 1200) return [[0.18,0.12,0.12],[0.30,0.18,0.14],[0.55,0.36,0.26]];
-    return [[0.20,0.06,0.04],[0.38,0.11,0.05],[0.62,0.24,0.09]]; // silicate ember hot Jupiter (dark)
+// ============================================================
+//  MATERIALS — the colours each look is drawn in (linear reflectance)
+// ============================================================
+
+/* [ILLUSTRATIVE] Cloud tops of a world with no surface, by equilibrium temperature. The order
+   follows the classes of Sudarsky, Burrows & Pinto (2000, ApJ 538, 885): ammonia cloud below
+   150 K (reflective), water cloud near 250 K (the brightest), clear and dark above 350 K, and
+   the darkest air from 900 to 1,500 K where sodium and potassium absorb. Three anchors are
+   planets we have seen: 50, 85 and 115 K are Neptune, Saturn and Jupiter, and Neptune is drawn
+   only slightly bluer than Uranus (Irwin et al. 2024, MNRAS 527, 11521). Two are measurements:
+   near 1,200 K the one hot Jupiter with a measured colour is deep blue (HD 189733 b, geometric
+   albedo 0.40 at 290-450 nm and under 0.12 at 450-570 nm; Evans et al. 2013, ApJ 772, L16), and
+   above 1,500 K, where the 2000 model expected bright silicate cloud, the measured one is nearly
+   black (WASP-12 b, under 0.064; Bell et al. 2017, ApJ 847, L2). Columns: Teq (K), the bright
+   zones, the dark belts, an accent for storms, band contrast, storm strength. */
+const FLUID = [
+  { T: 50,   a: [0.50, 0.70, 0.80], b: [0.42, 0.64, 0.78], c: [0.82, 0.90, 0.92], k: 0.10, storm: 0 },
+  { T: 62,   a: [0.55, 0.74, 0.76], b: [0.47, 0.68, 0.72], c: [0.84, 0.90, 0.90], k: 0.08, storm: 0 },
+  { T: 85,   a: [0.80, 0.70, 0.48], b: [0.66, 0.55, 0.36], c: [0.86, 0.80, 0.62], k: 0.35, storm: 0 },
+  { T: 115,  a: [0.92, 0.86, 0.74], b: [0.60, 0.42, 0.28], c: [0.66, 0.29, 0.16], k: 1.00, storm: 1 },
+  { T: 200,  a: [0.86, 0.88, 0.90], b: [0.66, 0.72, 0.80], c: [0.95, 0.96, 0.97], k: 0.40, storm: 0.5 },
+  { T: 500,  a: [0.10, 0.18, 0.42], b: [0.06, 0.11, 0.30], c: [0.16, 0.26, 0.50], k: 0.30, storm: 0 },
+  { T: 1200, a: [0.050, 0.075, 0.200], b: [0.030, 0.045, 0.130], c: [0.09, 0.12, 0.26], k: 0.35, storm: 0 },
+  { T: 1800, a: [0.060, 0.052, 0.050], b: [0.035, 0.030, 0.028], c: [0.10, 0.085, 0.08], k: 0.40, storm: 0 },
+];
+export function fluidPalette(Teq) {
+  const F = FLUID;
+  if (Teq <= F[0].T) return { ...F[0] };
+  if (Teq >= F[F.length - 1].T) return { ...F[F.length - 1] };
+  let i = 0; while (Teq > F[i + 1].T) i++;
+  const t = Math.log(Teq / F[i].T) / Math.log(F[i + 1].T / F[i].T), lo = F[i], hi = F[i + 1];
+  return { T: Teq, a: mix3(lo.a, hi.a, t), b: mix3(lo.b, hi.b, t), c: mix3(lo.c, hi.c, t), k: lo.k + (hi.k - lo.k) * t, storm: lo.storm + (hi.storm - lo.storm) * t };
+}
+
+function palette(look, ph, rand) {
+  const { domClass, Teq, Tsurf, rhoRel, atmDensity } = ph;
+  const k = 0.94 + rand() * 0.12;                               // a few percent of seeded variation in brightness, the same in every channel
+  if (look === 'fluid') {
+    const f = fluidPalette(Teq);
+    // photochemical haze veils a sub-Neptune between about 300 and 900 K and flattens its bands
+    const haze = domClass === 2 ? smooth(150, 300, Teq) * (1 - smooth(900, 1100, Teq)) * 0.85 : 0;
+    const hazeCol = Teq < 400 ? [0.62, 0.66, 0.70] : [0.62, 0.50, 0.34];
+    return {
+      colA: mix3(f.a, hazeCol, haze).map((x) => x * k), colB: mix3(f.b, hazeCol.map((x) => x * 0.9), haze), colC: f.c,
+      bandContrast: f.k * (1 - 0.8 * haze), storm: f.storm * (1 - haze), haze, hazeCol,
+    };
   }
-  if (domClass === 3) {                                          // ice giant — methane cyan, Uranus/Neptune
-    const teal = 0.45 + rand() * 0.2;
-    return [[0.20,0.45,0.58],[0.30,0.55,0.62],[0.5,0.72,teal+0.2]];
+  if (look === 'airless') {
+    const dark = smooth(700, 1100, Teq);                        // baked basalt on the hottest bare rocks
+    const hi = mix3([0.180, 0.171, 0.162], [0.095, 0.088, 0.084], dark), lo = mix3([0.078, 0.073, 0.070], [0.045, 0.042, 0.040], dark);
+    return { colA: hi.map((x) => x * k), colB: lo, colC: [0.34, 0.33, 0.32] };
   }
-  if (domClass === 2) {                                          // sub-Neptune haze
-    const tan = clamp((Teq - 250) / 550, 0, 1);
-    const lerp = (a, b) => a.map((x, i) => x + (b[i] - x) * tan);
-    const base = lerp([0.45,0.52,0.62], [0.62,0.55,0.45]);
-    return [base, base.map((x) => x * 0.85), base.map((x) => Math.min(1, x * 1.2))];
+  if (look === 'desert') {
+    const ochre = rand();                                       // rust to ochre
+    const hot = smooth(330, 600, Tsurf);                        // hot dry ground greys toward bare rock
+    const dust = mix3(mix3([0.58, 0.32, 0.15], [0.58, 0.40, 0.20], ochre), [0.44, 0.38, 0.30], hot);
+    return { colA: dust, colB: mix3([0.24, 0.135, 0.09], [0.16, 0.14, 0.12], hot), colC: [0.80, 0.80, 0.79] };
   }
-  if (domClass === 1) {                                          // water / ocean
-    if (Teq < 273) return [[0.85,0.90,0.95],[0.70,0.80,0.92],[0.95,0.97,1.0]];
-    if (Teq > 420) return [[0.72,0.74,0.72],[0.6,0.62,0.62],[0.85,0.86,0.86]];  // steam
-    return [[0.04,0.26,0.62],[0.02,0.13,0.42],[0.16,0.46,0.78]];   // ocean (richer blue)
+  if (look === 'ice') {
+    if (atmDensity < AIR_THIN) return { colA: [0.70, 0.68, 0.62], colB: [0.50, 0.46, 0.38], colC: [0.30, 0.17, 0.10] };   // bare ice shell, stained fractures
+    return { colA: [0.78, 0.81, 0.84], colB: [0.50, 0.59, 0.68], colC: [0.10, 0.15, 0.22] };                             // snow, bare blue ice, dark leads
   }
-  // rocky — iron/rock ternary
-  if (state === 'lava' || state === 'partial') return [[0.07,0.045,0.04],[0.13,0.08,0.06],[1.0,0.55,0.18]];
-  if (state === 'ice') return [[0.85,0.90,0.95],[0.7,0.8,0.9],[0.95,0.97,1.0]];
+  if (look === 'molten') return { colA: [0.045, 0.038, 0.036], colB: [0.085, 0.062, 0.052], colC: [0.03, 0.025, 0.025] };
+  if (look === 'shrouded') {
+    const hot = smooth(350, 800, Teq);                          // sulphur-pale deck, greyer and darker as it heats
+    return { colA: mix3([0.98, 0.93, 0.72], [0.62, 0.58, 0.52], hot), colB: mix3([0.90, 0.84, 0.62], [0.48, 0.44, 0.40], hot), colC: [0.9, 0.86, 0.72] };
+  }
+  // temperate: bare land. Sand and rock; iron-rich worlds (dense) run redder and darker.
   const fIron = rhoRel !== null ? clamp((rhoRel * 5.513 - 4) / 3, 0, 1) : 0.35;
-  const rock = [0.32,0.27,0.22], iron = [0.25,0.13,0.11];
-  const base = rock.map((x, i) => x + (iron[i] - x) * fIron);
-  return [base, base.map((x) => x * 1.25), base.map((x) => x * 0.7)];
+  const sand = mix3([0.30, 0.225, 0.135], [0.28, 0.165, 0.10], fIron), rock = mix3([0.15, 0.125, 0.105], [0.12, 0.085, 0.07], fIron);
+  return { colA: sand.map((x) => x * k), colB: rock, colC: [0.82, 0.84, 0.86] };
+}
+
+/* Vertical Rayleigh optical depth of Earth's air at 610, 550 and 465 nm (the wavelengths this
+   page takes for the red, green and blue channels), from Hansen & Travis (1974):
+   tau = 0.008569 lambda^-4 (1 + 0.0113 lambda^-2 + 0.00013 lambda^-4), lambda in micrometres. */
+const tauRayleigh = (um) => 0.008569 * Math.pow(um, -4) * (1 + 0.0113 * Math.pow(um, -2) + 0.00013 * Math.pow(um, -4));
+export const TAU_EARTH = [0.610, 0.550, 0.465].map(tauRayleigh);
+
+/* [ILLUSTRATIVE] The shell of air is not drawn to scale. Its e-folding height on screen is the
+   true scale height times SHELL_STRETCH, but never stretched past SHELL_STRETCH_TO planet radii,
+   and then held between 0.0025 and 0.03 radii: Earth's is drawn 4 times its height, Jupiter's 11
+   (the floor), a puffy world's at true scale, and the 77 puffiest in the catalogue thinner than
+   true (the cap). At true scale a thin shell is a fraction of a pixel from orbit. The vertical
+   optical depth is not stretched (the shader divides it by the drawn height); slant paths are
+   shorter than true ones, by the square root of the stretch. */
+export const SHELL_STRETCH = 4, SHELL_STRETCH_TO = 0.006;
+
+/* [ILLUSTRATIVE] How much air the picture gives each look, as multiples of Earth's Rayleigh
+   column, and how much haze (vertical optical depth). The archive holds no surface pressure. */
+function air(look, ph, pal) {
+  const { atmDensity, Hr, Teq } = ph;
+  const none = { hasAtmo: 0, tauR: [0, 0, 0], tauM: 0, hazeCol: [1, 1, 1], mieG: 0.76 };
+  let col = 0, tauM = 0, hazeCol = [0.96, 0.97, 1.0], mieG = 0.76;
+  if (look === 'airless') return { ...none, hvis: 0.004, atmR: 1.03 };
+  if (look === 'temperate') { col = atmDensity; tauM = 0.07; }
+  else if (look === 'desert') { col = 0.03 * atmDensity / 0.47; tauM = 0.18 * atmDensity / 0.47; hazeCol = pal.colA.map((x) => clamp(x * 2.1, 0, 1)); mieG = 0.7; }
+  else if (look === 'shrouded') { col = 0.08; tauM = 0.04; hazeCol = pal.colC; mieG = 0.8; }
+  else if (look === 'ice') { if (atmDensity < AIR_THIN) return { ...none, hvis: 0.004, atmR: 1.03 }; col = 0.8 * atmDensity; tauM = 0.04; }
+  else if (look === 'molten') { if (atmDensity < AIR_THIN) return { ...none, hvis: 0.004, atmR: 1.03 }; col = 0.1; tauM = 0.2; hazeCol = [0.92, 0.72, 0.52]; }
+  else {   // fluid: only the thin air above the level the colour comes from; a thicker layer would rim the disc with light
+    col = 0.12;
+    tauM = 0.02 + 0.05 * pal.haze;
+    hazeCol = pal.haze > 0.05 ? pal.hazeCol.map((x) => clamp(x * 1.4, 0, 1)) : [0.95, 0.96, 1.0];
+    mieG = 0.8;
+  }
+  const hvis = clamp(Math.max(Hr, Math.min(SHELL_STRETCH * Hr, SHELL_STRETCH_TO)), 0.0025, 0.03);
+  return { hasAtmo: 1, tauR: TAU_EARTH.map((t) => t * col), tauM, hazeCol, mieG, hvis, atmR: 1 + 7 * hvis };
+}
+
+/* The glow of a hot surface, in the picture's own unit (a white surface square-on to the star
+   reads 1). A surface in equilibrium with its star gives back what it absorbs, so its light
+   relative to the starlight it would reflect is (1 - A) (Tsub / (sqrt2 Teq))^4, times the ratio
+   of the eye's share of each spectrum (photopicFraction). (1 - A) is taken as 0.9. The albedo
+   inside a Teq is not known per planet (the archive's is often for A = 0, this file's fallback
+   uses 0.2 to 0.4), so the glow is uncertain by about 1.3 times. Only molten and airless rock
+   and fluid worlds are given a glow, and only when the hottest point is above 750 K. */
+const WIEN_LUMA = [0.2126, 0.7152, 0.0722];
+function thermal(look, ph, locked) {
+  const hotLook = look === 'molten' || look === 'fluid' || look === 'airless';
+  const k = locked ? (look === 'fluid' ? 1.25 : Math.SQRT2) : 1.18921;      // hottest point over Teq
+  const Tsub = k * ph.Teq;
+  const hasAir = look === 'fluid' || ph.atmDensity >= AIR_THIN;
+  const Tnight = Math.max(locked ? (look === 'fluid' ? 0.75 : hasAir ? 0.6 : 0.15) * ph.Teq : 0.95 * ph.Teq, 40);
+  if (!hotLook || Tsub < 750) return { tsub: Tsub, tnight: Tnight, glowT: 0, glow: [0, 0, 0] };
+  const Lt = 0.9 * Math.pow(k / Math.SQRT2, 4) * photopicFraction(Tsub) / photopicFraction(ph.Teff);
+  const lin = starColour(Tsub).linear, lum = lin.reduce((s, x, i) => s + x * WIEN_LUMA[i], 0);
+  return { tsub: Tsub, tnight: Tnight, glowT: Tsub, glow: lin.map((x) => x * Lt / lum) };
 }
 
 // ---- the full shader uniform bundle ----
 export function toParams(p) {
-  const ph = physics(p);
-  const c = classify(p);
+  const c = classify(p), ph = c.physics, look = c.look;
   const seedInt = hashName(p.pl_name);
   const rand = rng(seedInt);
-  const { domClass, state, Teq, isGiant, atmDensity, Tsurf, gRel } = ph;
+  const { domClass, Teq, isGiant, atmDensity, Tsurf, gRel } = ph;
+  const z = zoneOf(p, ph);
+  const locked = c.locked;
 
-  const [colA, colB, colC] = classColors(ph, rand);
-  const sky = blackbodySRGB(ph.Teff);
-  const lum = 0.2126 * sky[0] + 0.7152 * sky[1] + 0.7152 * sky[2];
-  const skyTint = sky.map((x) => clamp((x + (lum - x) * 0.4) * 1.15, 0, 1.3));
-
-  // Rayleigh ratio (lambda^-4) — physics; only tint, never the ratio
-  let betaR = [0.175, 0.408, 1.0];
-  if (domClass === 3) betaR = [0.10, 0.36, 0.62];               // ice giant: red absorbed
-  if (domClass === 4 && Teq >= 250 && Teq < 800) betaR = [0.10, 0.20, 1.0]; // deep-blue cloudless
-  if (domClass <= 1 && Teq > 400 && Teq < 1000) betaR = [0.4, 0.42, 0.5];   // CO2 grey-ish
-
-  // haze: sub-Neptune photochemical peak 250-800K; Venus/Titan high
-  let haze = 0.0;
-  if (domClass === 2) haze = smooth(150, 300, Teq) * (1 - smooth(900, 1100, Teq)) * 0.8 + 0.1;
-  else if (domClass <= 1 && Teq > 400 && Teq < 1000) haze = 0.6;
-  const mieG = haze > 0.4 ? 0.82 : 0.76;
-
-  // thermal emission
-  let emiss = 0, emissColor = [1.0, 0.4, 0.1];
-  if (state === 'lava' || state === 'partial') { emiss = smooth(1200, 1700, ph.Ttest); emissColor = [1.0, 0.45, 0.12]; }
-  else if (domClass === 4 && Teq > 1800) { emiss = clamp((Teq - 1800) / 1500, 0, 1); emissColor = [1.0, 0.35, 0.1]; }
-
-  // surface albedo (brightness)
-  let surfAlbedo = A_CLASS[domClass];
-  if (domClass <= 1) {
-    if (state === 'lava' || state === 'partial') surfAlbedo = 0.08;
-    else if (state === 'ice') surfAlbedo = clamp(0.30 + 0.35 * smooth(273, 150, Teq), 0.3, 0.65);
-    else if (domClass === 1 && Teq < 420) surfAlbedo = 0.12;
-  } else if (domClass >= 3) {                                    // Sudarsky reflectivity
-    surfAlbedo = Teq < 250 ? 0.42 : Teq < 800 ? 0.28 : Teq < 1200 ? 0.08 : 0.05;
-  }
-
-  // temperate biome knobs (kept from the prior good model), driven by surface temp
-  const Ts = ph.Tsurf;
-  const wet = domClass === 1 ? 0.72 : 0.40 + rand() * 0.16;
-  const tempBias = clamp((Ts - 240) / 130, 0.05, 1.0);
-  const iceCap = clamp(0.40 + (Ts - 240) / 120 * 0.5, 0.40, 0.95);
-  const hab = !isGiant && state === 'temperate' && Teq >= 230 && Teq <= 330;
-
+  const seed = (seedInt % 997) + rand() * 3.0;
+  const spin = locked ? 0 : 0.03 + rand() * 0.06;
+  const contFreq = 1.6 + rand() * 0.9, mtnFreq = 5.0 + rand() * 4.0;
+  const bandFreq = 10 + Math.floor(rand() * 16);
+  // [ILLUSTRATIVE] The waterline, as a level of the continent noise. The archive holds no water inventory.
+  // 0.55 floods 70% of the median world, as on Earth; the field differs from seed to seed, so the share runs
+  // from about 55% to 88% (10th to 90th percentile of 120 seeds, on a float64 copy of the shader's noise).
+  // 0.72, for the larger rocky class, floods 96% or more.
+  const wet = domClass === 1 ? 0.72 : 0.55;
   // deterministic unit spin axis for the star's corona morphology
   const _z = rand() * 2 - 1, _a = rand() * 6.2831, _s = Math.sqrt(Math.max(0, 1 - _z * _z));
   const starSpin = [_s * Math.cos(_a), _z, _s * Math.sin(_a)];
 
+  const pal = palette(look, ph, rand);
+  const atm = air(look, ph, pal);
+  const th = thermal(look, ph, locked);
+
+  // where ice begins, as the sine of latitude (or, on a locked world, of half the angle from the
+  // point under the star). A mean surface of 288 K puts it near 65 degrees, as on Earth: the local
+  // temperature is taken as Tsurf + 12 - 55 sin^2, and ice holds below 255 K. Above 1 there is none.
+  let iceCap = 2;
+  if (look === 'temperate') iceCap = Math.sqrt(clamp((Tsurf + 12 - 255) / 55, 0, 1.3));
+  else if (look === 'desert') iceCap = clamp(0.966 + (Tsurf - 221.7) / 300, 0.86, 1.05);   // frost caps: thin air carries little vapour
+
+  // cloud cover [ILLUSTRATIVE pattern]: more as the world nears the inner edge of the zone
+  let cloud = 0;
+  if (look === 'temperate') cloud = clamp(0.70 + 0.20 * smooth(z.sInner, z.sInnerOpt, z.S), 0, 0.9);
+  else if (look === 'desert') cloud = 0.04;
+  else if (look === 'ice' && atmDensity >= AIR_THIN) cloud = 0.25;
+
   // ---- procedural explorable surface (radially-displaced unit sphere) ----
-  const steam = (domClass === 1 && Teq > 420) ? 1 : 0;
-  // relief amplitude (planet radii): composition base, gravity-flattened in shader.
-  // Art-directed exaggeration (~4x physical Everest) so the surface reads as a
-  // dramatic landscape from the just-above-the-peak-line eye, not a flat haze.
-  const amp = (state === 'lava' || state === 'partial') ? 0.010
-            : state === 'ice' ? 0.006
-            : domClass === 1 ? 0.007 : 0.011;
+  // relief amplitude (planet radii): art-directed exaggeration (~4x physical Everest) so the
+  // surface reads as a landscape from the just-above-the-peak-line eye; gravity flattens it in the shader.
+  const amp = look === 'molten' ? 0.010 : look === 'ice' ? 0.006 : domClass === 1 ? 0.007 : 0.011;
   // morphology (frame-constant int -> uniform branch, no per-pixel divergence)
-  const terrStyle = (state === 'lava' || state === 'partial') ? 3
-                  : state === 'ice' ? 2
-                  : atmDensity < 0.1 ? 4                          // cratered regolith (airless)
-                  : (Teq > 500 && atmDensity < 0.5) ? 1           // hot + dry dunes
-                  : 0;                                            // rocky / mountain
-  // liquid water can only STAND when temperate, not steaming, with enough air, in range
-  const hasSea = state === 'temperate' && steam === 0 && atmDensity > 0.15 && Teq >= 245 && Teq <= 370;
-  const seaY = hasSea ? clamp(0.30 + (wet - 0.5) * 0.6, 0.05, 0.85) : -1.0;  // SPECULATIVE waterline
+  const terrStyle = look === 'molten' ? 3 : look === 'ice' ? 2 : look === 'airless' ? 4
+                  : (look === 'desert' && Tsurf > 330) ? 1 : 0;
+  const hasSea = look === 'temperate';
+  const seaY = hasSea ? clamp(0.14 + (wet - 0.5) * 0.5, 0.05, 0.85) : -1.0;  // SPECULATIVE waterline: a coast where you land
   // altitude snow-line driver: colder worlds carry more high snow
-  const tfreeze = clamp((273 - Tsurf) / 60 + 0.2, 0, 1);
+  const tfreeze = (look === 'temperate' || look === 'ice' || look === 'desert') ? clamp((273 - Tsurf) / 60 + 0.2, 0, 1) : 0;
 
   return {
-    type: c.type, klass: domClass, isGasGiant: isGiant ? 1 : 0,
-    seed: (seedInt % 997) + rand() * 3.0,
-    spin: 0.03 + rand() * 0.06,
+    type: c.type, look, klass: domClass, isGasGiant: isGiant ? 1 : 0, locked: locked ? 1 : 0,
+    seed, spin,
     // surface
-    seaLevel: wet, tempBias, iceCap,
-    cloud: isGiant ? 0.0 : clamp(0.5 - Math.abs(Teq - 290) / 500, 0.1, 0.45),
-    life: hab ? 0.55 + rand() * 0.3 : 0.0,
-    steam,
-    bump: isGiant ? 0.0 : 0.14,
+    seaLevel: wet, tempBias: clamp((Tsurf - 240) / 130, 0.05, 1.0), iceCap, cloud,
+    life: 0.0,                                                  // nothing in the archive says a world is alive
+    bump: isGiant || look === 'shrouded' ? 0.0 : 0.14,
+    crater: look === 'airless' ? 1.0 : look === 'desert' ? 0.4 : (look === 'ice' && atmDensity < AIR_THIN) ? 0.3 : 0.0,
     // procedural explorable surface
     amp, terrStyle, seaY, tfreeze, gRel,
-    contFreq: 1.6 + rand() * 0.9, mtnFreq: 5.0 + rand() * 4.0,
-    bandFreq: 10 + Math.floor(rand() * 16),
-    colA, colB, colC,
-    surfAlbedo, emiss, emissColor,
+    contFreq, mtnFreq, bandFreq,
+    bandContrast: pal.bandContrast ?? 0, storm: pal.storm ?? 0,
+    colA: pal.colA, colB: pal.colB, colC: pal.colC,
+    // thermal light
+    tsub: th.tsub, tnight: th.tnight, glowT: th.glowT, glow: th.glow,
     // star + light
-    starColor: starColor(ph.Teff), starSurf: vividStar(ph.Teff), skyTint, lightMul: ph.lightMul,
+    starColor: lightColor(ph.Teff), starSurf: vividStar(ph.Teff), lightMul: ph.lightMul,
     starAngle: ph.starAngle, starActivity: ph.starActivity, starSpots: ph.starSpots,
     starTeff: ph.Teff, starSpin,
     // atmosphere
-    atmR: ph.atmR, hr: ph.Hr, hasAtmo: ph.atmDensity, betaR, betaM: haze * 0.6 + 0.02, mieG, haze,
-    scatter: 46.0,
+    hasAtmo: atm.hasAtmo, tauR: atm.tauR, tauM: atm.tauM, hazeCol: atm.hazeCol, mieG: atm.mieG, hvis: atm.hvis, atmR: atm.atmR,
   };
 }
