@@ -57,6 +57,8 @@
    ?still (window.__EXO_STILL__) renders a single frame.
    ============================================================ */
 
+import { HOME, orbitDir, pitchMax, touchTurns } from './orbit.js';
+
 const VERT = `attribute vec2 aPos; void main(){ gl_Position = vec4(aPos,0.0,1.0); }`;
 
 const FRAG = `
@@ -1062,7 +1064,7 @@ const vnorm = (a) => { const l = Math.hypot(a[0],a[1],a[2]) || 1; return [a[0]/l
 const DEFAULTS = {
   camMode: 'orbit',
   shift: [0, 0],      // CSS pixels, +x right, +y up
-  camDist: 4.7, yaw: 0.7, pitch: 0.30, fov: 1.5,
+  camDist: 4.7, yaw: HOME.yaw, pitch: HOME.pitch, fov: 1.5,
   exposure: 0.62, resScale: 0.9,
   lightDir: [-0.15, 0.45, 0.85],
   starColor: [1.0, 0.95, 0.86], starSurf: [1.0, 0.96, 0.9], starAngle: 0.02,
@@ -1323,7 +1325,7 @@ export class Exoplanet {
   }
   get camera() {
     const c = this.cfg;
-    return { mode: c.camMode || 'orbit', yaw: c.yaw, pitch: c.pitch, dist: c.camDist, homeDist: c.homeDist, fov: c.fov,
+    return { mode: c.camMode || 'orbit', yaw: c.yaw, pitch: c.pitch, yaw0: HOME.yaw, pitch0: HOME.pitch, dist: c.camDist, homeDist: c.homeDist, fov: c.fov,
       closeR: c.closeR || 1.22, sunElev: c.sunElev ?? 14, lookYaw: c.lookYaw || 0, lookPitch: c.lookPitch || 0,
       shift: c.shift || [0, 0], resScale: c.resScale, moving: !!this._anim };
   }
@@ -1400,12 +1402,9 @@ export class Exoplanet {
       const fwd = vnorm(vsub(vscale(hd, 0.79), vscale(up, 0.615))); // 38 degrees below the horizontal
       return { ro, fwd };
     }
-    const { camDist, yaw, pitch } = cfg;
-    const ro = [
-      camDist * Math.cos(pitch) * Math.cos(yaw),
-      camDist * Math.sin(pitch),
-      camDist * Math.cos(pitch) * Math.sin(yaw),
-    ];
+    // orbit: the camera circles in the plane of the star (orbit.js), so a sideways turn reaches the night
+    // side with the star beyond the limb
+    const ro = vscale(orbitDir(cfg.yaw, cfg.pitch, cfg.lightDir), cfg.camDist);
     return { ro, fwd: vnorm(vscale(ro, -1)) };
   }
 
@@ -1549,7 +1548,7 @@ export class Exoplanet {
     const look = params.type | 0;
     if (!this.still && !this._ready(look)) { if (this.programs[look] !== null) this._programFor(look); return null; }
     const saved = { ...this.cfg };
-    Object.assign(this.cfg, params, { shift: [0, 0], camMode: 'orbit', camDist: 4.2, yaw: 0.7, pitch: 0.3 });
+    Object.assign(this.cfg, params, { shift: [0, 0], camMode: 'orbit', camDist: 4.2, yaw: HOME.yaw, pitch: HOME.pitch });
     this._block = true;
     this._draw();
     const g = this.canvas, side = Math.min(g.width, g.height) * 0.92;
@@ -1672,6 +1671,8 @@ export class Exoplanet {
 
     let down = false, lx = 0, ly = 0;
     const dn = (x, y) => { down = true; lx = x; ly = y; };
+    // in orbit the pitch stops where orbit.js says, short of the roll the shader makes near the scene's pole
+    const tilt = (d) => { const most = pitchMax(this.cfg.lightDir); this.cfg.pitch = Math.max(-most, Math.min(most, this.cfg.pitch + d)); };
     const mv = (x, y) => {
       if (!down) return;
       if (this.cfg.camMode === 'surface') {      // on the ground, drag looks around
@@ -1679,7 +1680,7 @@ export class Exoplanet {
         this.cfg.lookPitch = Math.max(-0.9, Math.min(1.5, (this.cfg.lookPitch || 0) + (y - ly) * 0.004));
       } else {
         this.cfg.yaw   -= (x - lx) * 0.006;
-        this.cfg.pitch = Math.max(-1.45, Math.min(1.45, this.cfg.pitch + (y - ly) * 0.006));
+        tilt((y - ly) * 0.006);
       }
       lx = x; ly = y;
       redraw();
@@ -1692,7 +1693,7 @@ export class Exoplanet {
       if (k === 'ArrowLeft' || k === 'ArrowRight') { surf ? (this.cfg.lookYaw = (this.cfg.lookYaw || 0) + (k === 'ArrowLeft' ? step : -step)) : (this.cfg.yaw += k === 'ArrowLeft' ? step : -step); }
       else if (k === 'ArrowUp' || k === 'ArrowDown') {
         if (surf) this.cfg.lookPitch = Math.max(-0.9, Math.min(1.5, (this.cfg.lookPitch || 0) + (k === 'ArrowUp' ? step : -step)));
-        else this.cfg.pitch = Math.max(-1.45, Math.min(1.45, this.cfg.pitch + (k === 'ArrowUp' ? step : -step)));
+        else tilt(k === 'ArrowUp' ? step : -step);
       } else if (k === '+' || k === '=') zoomBy(1 / 1.12);
       else if (k === '-' || k === '_') zoomBy(1.12);
       else return;
@@ -1702,12 +1703,13 @@ export class Exoplanet {
     window.addEventListener('mousemove', (e) => mv(e.clientX, e.clientY));
     window.addEventListener('mouseup', up);
 
-    // touch: 1 finger orbits, 2 fingers pinch-zoom
-    let pinch = 0;
+    // touch: 1 finger orbits, 2 fingers pinch-zoom. Whose a one-finger touch is, the page's or the view's, is
+    // decided once it has travelled a little (orbit.js touchTurns): a scroll of the page does not turn the world.
+    let pinch = 0, sx = 0, sy = 0, whose = null, pans = false;
     const pdist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
     cv.addEventListener('touchstart', (e) => {
-      if (e.touches.length >= 2) { pinch = pdist(e.touches); down = false; }
-      else { const t = e.touches[0]; dn(t.clientX, t.clientY); }
+      if (e.touches.length >= 2) { pinch = pdist(e.touches); down = false; whose = false; }
+      else { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; whose = null; pans = /pan-y/.test(getComputedStyle(cv).touchAction); }
     }, { passive: true });
     cv.addEventListener('touchmove', (e) => {
       if (e.touches.length >= 2) {
@@ -1715,9 +1717,17 @@ export class Exoplanet {
         const d = pdist(e.touches);
         if (pinch > 0 && d > 0) zoomBy(pinch / d);   // spread (d>pinch) -> factor<1 -> zoom in
         pinch = d;
-      } else if (e.touches.length === 1) { const t = e.touches[0]; mv(t.clientX, t.clientY); }
+      } else if (e.touches.length === 1) {
+        const t = e.touches[0];
+        if (whose === null) {
+          whose = e.cancelable === false ? false : touchTurns(t.clientX - sx, t.clientY - sy, pans);   // not cancelable: the browser is already scrolling
+          if (whose) dn(sx, sy);   // the turn counts from where the finger came down
+        }
+        if (whose) { if (e.cancelable) e.preventDefault(); mv(t.clientX, t.clientY); }
+      }
     }, { passive: false });
     cv.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = 0; if (e.touches.length === 0) up(); }, { passive: true });
+    cv.addEventListener('touchcancel', () => { pinch = 0; up(); }, { passive: true });   // the browser took the gesture for a scroll
 
     cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); this.onCamera && this.onCamera(); }, { passive: false });
   }

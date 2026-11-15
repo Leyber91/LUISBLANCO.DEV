@@ -11,7 +11,7 @@
    screenshots at the moments that matter, and every console error.
 
    Usage (Node 22 or later, Windows-first, no dependencies):
-     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900] [--timeout 180]
+     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900] [--timeout 180] [--port 9333]
      node tools/labs-wt.mjs drive <lab>          serves the worktree, runs tools/drives/<lab>.mjs at two widths
      node tools/drive.mjs tools/drives/pages.mjs --base <url> --timeout 420     every lab page loads with a clean console
 
@@ -23,6 +23,8 @@
      until(expression, ms)   wait until the expression is truthy; false on timeout
      sleep(ms)
      move(x, y) · down(x, y) · up(x, y) · drag(x0, y0, x1, y1, { steps, hold }) · click(x, y)
+     swipe(x0, y0, x1, y1, { steps, hold })   one finger, as a phone sends it: the browser applies the
+                             page's touch-action, so a swipe the page gives to scrolling scrolls
      key(key, { code, text })
      shot(name)              a PNG of the viewport in the out folder
      errors()                every console error and exception so far (a copy), to tell which page logged what
@@ -92,6 +94,7 @@ export async function drive(scenario, opts = {}) {
       return r.result.value;
     };
     const until = async (expression, ms = 12000) => { for (let t = 0; t < ms; t += 150) { if (await ev(expression).catch(() => false)) return true; await sleep(150); } return false; };
+    let touchOn = false;
     const mouse = (type, x, y, buttons) => send('Input.dispatchMouseEvent', { type, x, y, button: type === 'mouseMoved' && !buttons ? 'none' : 'left', buttons, clickCount: type === 'mouseMoved' ? 0 : 1 });
     const page = {
       ev, until, sleep, check,
@@ -100,6 +103,13 @@ export async function drive(scenario, opts = {}) {
       move: (x, y) => mouse('mouseMoved', x, y, 0),
       down: (x, y) => mouse('mousePressed', x, y, 1),
       up: (x, y) => mouse('mouseReleased', x, y, 0),
+      async swipe(x0, y0, x1, y1, { steps = 14, hold = 0 } = {}) {
+        if (!touchOn) { await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); touchOn = true; }
+        await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y: y0 }] });
+        for (let i = 1; i <= steps; i++) { await send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + ((x1 - x0) * i) / steps, y: y0 + ((y1 - y0) * i) / steps }] }); await sleep(16); }
+        if (hold) await sleep(hold);
+        await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      },
       async drag(x0, y0, x1, y1, { steps = 14, hold = 0 } = {}) {
         await mouse('mouseMoved', x0, y0, 0);
         await mouse('mousePressed', x0, y0, 1);
@@ -140,7 +150,7 @@ if (isMain) {
   if (!fs.existsSync(file)) { console.error(`no scenario at ${file}`); process.exit(2); }
   const scenario = (await import(pathToFileURL(path.resolve(file)).href)).default;
   if (typeof scenario !== 'function') { console.error(`${file} has no default export to run`); process.exit(2); }
-  const r = await drive(scenario, { base, out: flag('out', undefined), width: Number(flag('width', 1440)), height: Number(flag('height', 900)), timeoutMs: 1000 * Number(flag('timeout', 180)) });
+  const r = await drive(scenario, { base, out: flag('out', undefined), width: Number(flag('width', 1440)), height: Number(flag('height', 900)), timeoutMs: 1000 * Number(flag('timeout', 180)), port: Number(flag('port', 9333)) });
   const bad = r.checks.filter((c) => !c.ok).length;
   console.log(`drive: ${r.checks.length - bad} of ${r.checks.length} checks passed; console errors: ${r.errors.length}`);
   process.exit(r.timedOut ? 3 : bad ? 1 : 0);
