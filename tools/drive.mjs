@@ -19,6 +19,8 @@
      async function (page, ctx) { ... }
    with ctx = { base, width, height } and page =
      go(url)                 navigate, wait for the document to finish loading
+     before(source)          run a script in every document opened from now on, before the page's own scripts
+                             (a guard on what the page may fetch belongs here: nothing of the page runs sooner)
      ev(expression)          evaluate in the page, return the value (promises are awaited)
      until(expression, ms)   wait until the expression is truthy; false on timeout
      sleep(ms)
@@ -96,6 +98,7 @@ export async function drive(scenario, opts = {}) {
     const page = {
       ev, until, sleep, check,
       errors: () => errors.slice(),
+      async before(source) { await send('Page.addScriptToEvaluateOnNewDocument', { source }); },
       async go(u) { await send('Page.navigate', { url: u }); if (!(await until('document.readyState === "complete"'))) throw new Error('the page did not finish loading: ' + u); },
       move: (x, y) => mouse('mouseMoved', x, y, 0),
       down: (x, y) => mouse('mousePressed', x, y, 1),
@@ -108,8 +111,8 @@ export async function drive(scenario, opts = {}) {
         await mouse('mouseReleased', x1, y1, 0);
       },
       async click(x, y) { await mouse('mouseMoved', x, y, 0); await mouse('mousePressed', x, y, 1); await mouse('mouseReleased', x, y, 0); },
-      async key(key, { code = key.length === 1 ? 'Key' + key.toUpperCase() : key, text = key.length === 1 ? key : undefined } = {}) {
-        const vk = { Enter: 13, Escape: 27, ' ': 32, ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[key];
+      async key(key, { code = key.length === 1 ? 'Key' + key.toUpperCase() : key, text = key.length === 1 ? key : key === 'Enter' ? '\r' : undefined } = {}) {
+        const vk = { Tab: 9, Enter: 13, Escape: 27, ' ': 32, ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[key];
         await send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, ...(text ? { text } : {}), ...(vk ? { windowsVirtualKeyCode: vk } : {}) });
         await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, ...(vk ? { windowsVirtualKeyCode: vk } : {}) });
       },

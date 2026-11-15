@@ -26,6 +26,8 @@ import { exportPlate, exportCSV, copyLink } from './export.js';
 import { parseQuestion, askModel, needsModel, say, PAGE, RANGE_FIELDS, KINDS, COLD_WORDS, HOT_WORDS, LOCKED_WORDS } from './query.js';
 import { COLD_K, HOT_K, hasKind, isLocked, isCold, isHot, rank, orderFor, sortWords, orderWords, hitFact } from './find.js';
 import { chainHTML, compareHTML, methodHTML } from './panels.js';
+import { createLog } from './log.js';
+import { viaOf } from './record.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 
@@ -35,7 +37,7 @@ const $ = (id) => document.getElementById(id);
 const store_ = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (_) { return null; } return null; };
 
 /* ---------------- state ---------------- */
-const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, looks: null, locked: null, cold: null, hot: null, newOnly: false, query: null });
+const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, looks: null, locked: null, cold: null, hot: null, set: null, newOnly: false, query: null });
 const store = {
   state: {
     list: [], byName: new Map(), sel: null, system: [], plot: PLOTS[params.get('plot')] ? params.get('plot') : 'valley',
@@ -49,7 +51,10 @@ const kindWords = (looks) => looks.map((l) => KINDS.find((k) => k.look === l).la
 function rebuildFilter() {
   const f = store.state.filter, st = store.state;
   const rk = Object.entries(f.ranges).filter(([, r]) => r && (r[0] !== null || r[1] !== null));
+  // the worlds of the log (saved) or of a link (shared), as they are when the filter is built
+  const inSet = f.set && log ? new Set(f.set === 'saved' ? log.saved() : log.shared()) : null;
   st.filterFn = (p) => {
+    if (inSet && !inSet.has(p.name)) return false;
     if (f.cls !== 'all' && sizeClass(p.R)?.key !== f.cls) return false;
     if (f.method !== 'all' && methodGroup(p.method) !== f.method) return false;
     if (f.year !== null && p.year !== f.year) return false;
@@ -70,7 +75,7 @@ function rebuildFilter() {
     }
     return true;
   };
-  st.filterActive = f.cls !== 'all' || f.method !== 'all' || f.year !== null || f.newOnly || rk.length > 0 || !!f.zone || !!f.looks || !!f.locked || !!f.cold || !!f.hot || !!f.box;
+  st.filterActive = f.cls !== 'all' || f.method !== 'all' || f.year !== null || f.newOnly || rk.length > 0 || !!f.zone || !!f.looks || !!f.locked || !!f.cold || !!f.hot || !!f.box || !!inSet;
 }
 
 /* ---------------- renderer ---------------- */
@@ -108,7 +113,23 @@ function placeWorld() {
 }
 
 /* ---------------- views ---------------- */
-let plot, system, transit, target, report, tours;
+let plot, system, transit, target, report, tours, log = null;
+/* What follows the log on the page: the button on the world's panel, the chips, a filter by the log, the link. */
+function syncLog() {
+  const st = store.state, b = document.querySelector('[data-act="log"]');
+  if (b && log) {
+    const on = !!st.sel && log.isSaved(st.sel.name);
+    b.textContent = on ? 'In your log' : 'Add to log';
+    b.classList.toggle('on', on);
+    b.disabled = !log.loaded();   // nothing can be said about the log before it is read
+    b.title = !log.loaded() ? 'The log is being read' : on ? 'Take this world out of your log' : 'Save this world to your log';
+  }
+  // the last saved world was taken out while the page showed only saved worlds: the filter goes with it
+  const emptied = st.filter.set === 'saved' && !!log && !log.counts().saved;
+  if (emptied) st.filter.set = null;
+  if (st.filter.set || emptied) { rebuildFilter(); if (plot) plot.redraw(); }
+  if (st.list.length) renderFilters();
+}
 const actions = {
   select, setPlot, setFilter, startTour, pauseTour,
   exportAs(kind, btn) {
@@ -119,6 +140,7 @@ const actions = {
     else if (kind === 'link') copyLink().then((ok) => flash(btn, ok ? 'Copied' : 'Copy failed'));
     else if (kind === 'chain') { $('chain-body').innerHTML = chainHTML(st.sel, st.albedo()); $('chain').showModal(); }
     else if (kind === 'pin') { pin(st.sel); flash(btn, `${st.pins.length} pinned`); }
+    else if (kind === 'log' && log) log.toggle(st.sel, glOk ? engine.camera.mode : 'orbit', (why) => target.say(why));
   },
 };
 function flash(btn, text) { if (!btn) return; const t = btn.textContent; btn.textContent = text; setTimeout(() => { btn.textContent = t; }, 1600); }
@@ -136,6 +158,7 @@ function filterLabel() {
   if (f.hot) parts.push(HOT_WORDS);
   if (f.box) parts.push('box on ' + PLOTS[f.box.mode].label);
   if (f.newOnly) parts.push('new since last visit');
+  if (f.set) parts.push(f.set === 'saved' ? 'your log' : 'shared log');
   return parts.join(', ');
 }
 
@@ -145,7 +168,9 @@ function paramsFor(p) {
   if (store.state.plain) { prm.cloud = 0; prm.life = 0; }
   return prm;
 }
-function select(p, { from = 'ui', keepTour = false } = {}) {
+/* self: the page opened this world with no action of the visitor (the world it starts on, a tour moving by
+   itself). Such a world is shown and is not written to the log as a visit. */
+function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   if (!p) return;
   const st = store.state;
   if (!keepTour && st.tour) endTour();
@@ -171,6 +196,9 @@ function select(p, { from = 'ui', keepTour = false } = {}) {
   syncCamButtons();
   writeURL();
   selRev++;
+  const via = viaOf(from, { self, results: !!(st.tour && st.tour.key === 'custom' && st.tour.auto === false) });
+  if (log && prev !== p && via) log.visit(p, via);
+  syncLog();
 }
 
 function setReticle(p) {
@@ -225,6 +253,8 @@ function writeURL() {
       u.set('cam', [c.yaw, c.pitch, c.dist / (c.homeDist || 1)].map((x) => (+x).toFixed(2)).join(','));
     }
     if (st.filter.query) u.set('q', st.filter.query);
+    if (log && log.shared().length) u.set('log', log.shared().join('|'));
+    if (params.get('os-fixture')) u.set('os-fixture', params.get('os-fixture'));
     if (window.__EXO_STILL__) u.set('still', '');
     history.replaceState(null, '', '?' + u.toString().replace(/=(&|$)/, '$1'));
   }, 120);
@@ -253,6 +283,8 @@ function renderFilters() {
     </select></label>
     <button type="button" class="chip${$('ranges').hidden ? '' : ' on'}" data-act="ranges" aria-expanded="${!$('ranges').hidden}">Ranges</button>
     <button type="button" class="chip${isNum(f.upTo) ? ' on' : ''}" data-act="replay">${isNum(f.upTo) ? 'Stop replay' : 'Replay discoveries'}</button>
+    ${log && log.counts().saved ? `<button type="button" class="chip${f.set === 'saved' ? ' on' : ''}" data-act="set-saved" aria-pressed="${f.set === 'saved'}" title="Show only the worlds in your log">Your log</button>` : ''}
+    ${log && log.shared().length ? `<button type="button" class="chip${f.set === 'shared' ? ' on' : ''}" data-act="set-shared" aria-pressed="${f.set === 'shared'}" title="Show only the worlds the link shared">Shared log</button>` : ''}
     ${chips.join('')}${newChip}
     ${st.filterActive && n > 0 ? `<button type="button" class="chip" data-act="tourthese">Tour these</button>` : ''}
     <span class="f-count">${fmtInt(n)} ${st.filterActive ? (n === 1 ? 'match' : 'matches') : 'planets'}</span>`;
@@ -293,6 +325,8 @@ function bindFilters() {
     else if (b.dataset.act === 'replay') replay();
     else if (b.dataset.act === 'new') setFilter({ newOnly: !f.newOnly });
     else if (b.dataset.act === 'tourthese') tourFromFilter();
+    else if (b.dataset.act === 'set-saved') setFilter({ set: f.set === 'saved' ? null : 'saved' });
+    else if (b.dataset.act === 'set-shared') setFilter({ set: f.set === 'shared' ? null : 'shared' });
   });
   $('filters').addEventListener('change', (e) => { if (e.target.id === 'f-method') setFilter({ method: e.target.value }); });
   $('ranges').addEventListener('change', (e) => {
@@ -495,21 +529,21 @@ function tourFromFilter() { const r = rankedMatches(8); tourOf(r.hits, 0, r, tru
 
 /* ---------------- tours ---------------- */
 let tourTimer = 0;
-function startTour(key) {
+function startTour(key, self = false) {
   const stops = tourStops(key, store.state.list);
   if (!stops.length) return;
   store.state.tour = { key, stops, i: 0, label: TOURS.find((t) => t.key === key).label };
-  showStop();
+  showStop(self);
 }
 function pauseTour() {
   if (!store.state.tour) return;
   clearTimeout(tourTimer);
   $('tour-prog').classList.remove('run');
 }
-function showStop() {
+function showStop(self = false) {
   const t = store.state.tour; if (!t) return;
   const s = t.stops[t.i];
-  select(s.p, { from: 'tour', keepTour: true });
+  select(s.p, { from: 'tour', keepTour: true, self });
   $('tour-k').textContent = `Tour · ${t.label} · ${t.i + 1} of ${t.stops.length}`;
   $('tour-cap').textContent = s.cap;
   $('tourbar').hidden = false;
@@ -518,12 +552,12 @@ function showStop() {
   clearTimeout(tourTimer);
   const bar = $('tour-prog');
   bar.classList.remove('run'); void bar.offsetWidth;
-  if (t.auto !== false && !reducedMotion() && !window.__EXO_STILL__) { bar.classList.add('run'); tourTimer = setTimeout(() => stepTour(1), 11000); }
+  if (t.auto !== false && !reducedMotion() && !window.__EXO_STILL__) { bar.classList.add('run'); tourTimer = setTimeout(() => stepTour(1, true), 11000); }
 }
-function stepTour(d) {
+function stepTour(d, self = false) {
   const t = store.state.tour; if (!t) return;
   t.i = (t.i + d + t.stops.length) % t.stops.length;
-  showStop();
+  showStop(self);
 }
 function endTour() {
   clearTimeout(tourTimer);
@@ -542,6 +576,7 @@ const thumbs = new Map();
 function pin(p) {
   const st = store.state;
   if (!st.pins.includes(p)) { st.pins.push(p); if (st.pins.length > 3) st.pins.shift(); }
+  if (log) log.setPins(st.pins.map((x) => x.name));
   openCompare();
 }
 function openCompare() {
@@ -691,9 +726,9 @@ async function boot() {
   document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => $(b.dataset.close).close()));
   $('compare').addEventListener('click', (e) => {
     const b = e.target.closest('[data-unpin]'); if (!b) return;
-    store.state.pins = store.state.pins.filter((p) => p.name !== b.dataset.unpin); openCompare();
+    store.state.pins = store.state.pins.filter((p) => p.name !== b.dataset.unpin); if (log) log.setPins(store.state.pins.map((x) => x.name)); openCompare();
   });
-  $('cmp-clear').addEventListener('click', () => { store.state.pins = []; openCompare(); });
+  $('cmp-clear').addEventListener('click', () => { store.state.pins = []; if (log) log.setPins([]); openCompare(); });
   engine.onCamera = () => writeURL();
   engine.onMode = () => syncCamButtons();
   engine.onReady = () => { if ($('compare').open) openCompare(); };
@@ -724,10 +759,25 @@ async function boot() {
   st.byName = new Map(st.list.map((p) => [p.name, p]));
   veil(`Charted ${fmtInt(st.list.length)} worlds`, 1);
 
+  log = createLog({
+    host: { line: $('log-line'), dialog: $('log'), body: $('log-body') }, byName: st.byName, sharedParam: params.get('log'), fixture: params.get('os-fixture'),
+    open: (p, view) => { select(p, { from: 'log' }); if (glOk && view && view !== 'orbit') setCam(view); },
+    onChange: syncLog,
+  });
+  // the compare bench as it was left, once the stored record is read
+  // the bench of the last visit comes back; a world pinned before the log was read is written now
+  log.ready.then(() => { if (st.pins.length) log.setPins(st.pins.map((x) => x.name)); else st.pins = log.pins().map((n) => st.byName.get(n)).filter(Boolean); });
+  const sharedWorlds = log.shared().map((n) => st.byName.get(n));
   const want = params.get('p') && st.byName.get(params.get('p'));
-  const first = want || LANDMARKS.map((n) => st.byName.get(n)).find(Boolean) || st.list[0];
+  const first = want || sharedWorlds[0] || LANDMARKS.map((n) => st.byName.get(n)).find(Boolean) || st.list[0];
   renderFilters();
-  select(first, { from: 'boot' });
+  const arrived = ((performance.getEntriesByType('navigation')[0] || {}).type || 'navigate') === 'navigate';
+  select(first, { from: want ? 'link' : 'boot', self: !(want && arrived) });
+  // a link that carries a log: its worlds are the ones shown, and the note says where they are listed
+  if (sharedWorlds.length) {
+    setFilter({ set: 'shared' }, { keep: true });
+    setNote(`This link carries a log of ${fmtInt(sharedWorlds.length)} ${sharedWorlds.length === 1 ? 'world' : 'worlds'}. They are the ones on the diagram now, and the log lists them under “Shared with you”.`);
+  }
   const view = params.get('view');
   if (glOk && (view === 'surface' || view === 'closeorbit')) setCam(view);
   const cam = (params.get('cam') || '').split(',').map(Number);
@@ -745,7 +795,7 @@ async function boot() {
     $('veil').classList.add('gone');
   });
   const tourKey = params.get('tour');
-  if (tourKey && TOURS.some((t) => t.key === tourKey)) startTour(tourKey);
+  if (tourKey && TOURS.some((t) => t.key === tourKey)) startTour(tourKey, true);   // the link started it, the visitor did not
 
   setInterval(perfLine, 2000); perfLine();
   setInterval(bezel, 300); bezel();
@@ -764,6 +814,7 @@ async function boot() {
   changelog(st.list);
   renderFilters();
   resay();
+  if (log) log.reread();
 }
 
 boot();

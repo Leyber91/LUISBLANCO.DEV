@@ -32,6 +32,7 @@
    ============================================================ */
 
 import { LabsOS } from '../../os/index.js';
+import { load as loadRecord, update as updateRecord, setOverdue } from '../record.js';
 import { el } from '../../kit/dom.js';
 import { surface, reducedMotion } from '../views/common.js';
 import { jdOfMs, msOfJd, sunAltitude } from './time.js';
@@ -64,7 +65,9 @@ const S = {
 
 /* ---------------- the platform ---------------- */
 function track(type, data) { if (os) void os.track(type, data); }
-function save() { if (os) os.progress.set({ planet: S.star ? S.star.p.name : null, place: S.place }, { v: 1 }).catch(() => {}); }
+/* The lab's record has two slices (record.js). This page changes its own, in the record as the store holds it
+   at that moment, so the survey's log is left as it is. */
+function save() { if (os) updateRecord(os, (r) => setOverdue(r, { planet: S.star ? S.star.p.name : null, place: S.place })).catch(() => {}); }
 
 /* ---------------- words ---------------- */
 /* Text is written only when it changes, so a live region speaks once and a drag does not rewrite the page. */
@@ -442,7 +445,7 @@ async function boot() {
   try { os = await LabsOS.init({ lab: LAB }); } catch { os = null; }
   if (os) for (const [type, cls] of [['exomania.planet', 'action'], ['exomania.place', 'action'], ['exomania.scrub', 'action']]) { try { os.register(type, { cls, throttleMs: type === 'exomania.scrub' ? 5000 : 0 }); } catch { /* already registered on this page */ } }
   let saved = null;
-  try { const rec = os && await os.progress.get(); saved = rec && rec.data && typeof rec.data === 'object' ? rec.data : null; } catch { saved = null; }
+  try { saved = os ? (await loadRecord(os)).overdue : null; } catch { saved = null; }
   const linkDate = q.get('date') && Number.isFinite(Date.parse(q.get('date'))) ? clampJd(jdOfMs(Date.parse(q.get('date')))) : null;
   mountViews(); mountTonight();
   tallyView = surface($('tally-view'), (ctx, w, h) => { if (S.zs) drawTally(ctx, w, h, { zs: S.zs, t: S.tally }); });

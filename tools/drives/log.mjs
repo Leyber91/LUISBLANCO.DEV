@@ -1,0 +1,505 @@
+// The survey's log, as a visitor uses it. Run with tools/drive.mjs:
+//   node tools/drive.mjs tools/drives/log.mjs --base http://127.0.0.1:<port> --out <dir> --width 1440 --height 900 --timeout 900
+//   (and again with --width 390 --height 844)
+//
+// The log holds to six properties, and each part of this scenario proves one of them in a browser:
+//   1. nothing the visitor did is lost without being told: a world opened or pinned before the stored log is read
+//      is written once it is read; a write the browser refuses, and a full log, are said under the button pressed;
+//   2. nothing the visitor did not do is recorded: the world the page starts on, a reload, a link that carries a
+//      log, and a tour that moves by itself are not visits;
+//   3. the lab's two pages, and two tabs, never undo each other: an erase or a save made through another
+//      connection to the store is still there after the next thing done here, and Overdue leaves the log alone;
+//   4. whatever comes from a link or from the store is read at the door: markup and unknown names are not shown;
+//   5. the privacy page's erase reaches the log, and ?os-fixture= keeps the page off the visitor's own store;
+//   6. every state of the two parts is drawn: reading, empty, saved, shared, full, refused, store not kept,
+//      recording off.
+// It also checks the two things the page lacked for a keyboard: a link that skips to the survey and a ring on
+// the search field.
+//
+// No model is called and nothing leaves the page's own origin: the guard below runs before the page's own
+// scripts in every document, and refuses every such request.
+
+/* ---- run before the page's own scripts, in every document the drive opens ---- */
+
+function guard() {
+  const real = window.fetch.bind(window);
+  window.fetch = (u, o = {}) => (new URL(typeof u === 'string' ? u : u.url, location.href).origin === location.origin ? real(u, o) : Promise.reject(new TypeError('refused by the drive')));
+  // the page's copy button writes here, so that the link it made can be read back
+  try { Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t) => { window.__copied = t; } } }); } catch { /* the page falls back to printing the link */ }
+  // when the page before asked for it, the page's idle work is held until the drive lets it go: the log starts
+  // its store when the page is idle, so this shows the page as it is before the stored log is read
+  let hold = false;
+  try { hold = sessionStorage.getItem('drive-hold') === '1'; sessionStorage.removeItem('drive-hold'); } catch { /* a document with no storage */ }
+  const idle = window.requestIdleCallback;
+  if (hold && idle) {
+    const held = [];
+    window.requestIdleCallback = (fn, o) => { held.push([fn, o]); return 0; };
+    window.__release = () => { window.requestIdleCallback = idle; held.splice(0).forEach(([fn, o]) => idle.call(window, fn, o)); return true; };
+  }
+}
+
+/* ---- run inside the page ---- */
+
+function pageState() {
+  const $ = (id) => document.getElementById(id);
+  const add = document.querySelector('[data-act="log"]'), dlg = $('log'), line = $('log-line'), said = document.querySelector('.tp-said');
+  const count = (document.querySelector('.f-count') || {}).textContent || '';
+  const rows = (sec) => [...document.querySelectorAll(`#log-body .log-sec:nth-of-type(${sec}) .log-list li`)].map((li) => ({
+    name: (li.querySelector('.log-open, .log-gone') || {}).textContent || '', what: (li.querySelector('.log-what') || {}).textContent || '', when: (li.querySelector('.log-when') || {}).textContent || '' }));
+  const secs = [...document.querySelectorAll('#log-body .log-sec')].map((s) => ({ h: (s.querySelector('h3') || {}).textContent || '', n: s.querySelectorAll('.log-list li').length }));
+  const lr = line.getBoundingClientRect(), dr = dlg.getBoundingClientRect();
+  const inView = (e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.left >= 0 && r.right <= innerWidth + 1 && r.top >= 0 && r.bottom <= innerHeight + 1; };
+  const a = document.activeElement;
+  return {
+    line: line.textContent, lineSeen: lr.width > 0 && lr.height > 0 && lr.left >= 0 && lr.right <= innerWidth + 1,
+    add: add ? add.textContent : '', addOn: !!add && add.classList.contains('on'), addPressed: add ? add.getAttribute('aria-pressed') : '', addOff: !!add && add.disabled, addTitle: add ? add.title : '',
+    addWidth: add ? Math.round(add.getBoundingClientRect().width) : 0,
+    said: said ? said.textContent : '', saidSeen: inView(said), addSeen: inView(add), saidUnder: !!said && !!add && said.getBoundingClientRect().top >= add.getBoundingClientRect().bottom - 1,
+    name: ($('ret-name') || {}).textContent || '', note: ($('q-note') || {}).textContent || '',
+    count, n: +count.replace(/[^\d]/g, ''), filtered: /match/.test(count),
+    chipSaved: (document.querySelector('#filters [data-act="set-saved"]') || { className: 'none' }).className, chipShared: (document.querySelector('#filters [data-act="set-shared"]') || { className: 'none' }).className,
+    open: dlg.open, fits: !dlg.open || (dr.left >= 0 && dr.right <= innerWidth + 1), wide: document.documentElement.scrollWidth > innerWidth + 1,
+    sum: (document.querySelector('#log-body .log-sum') || {}).textContent || '', notes: [...document.querySelectorAll('#log-body .log-note')].map((n) => n.textContent),
+    secs, body: (($('log-body') || {}).textContent || '').replace(/\s+/g, ' ').trim(), imgs: document.querySelectorAll('#log-body img, #q-note img, #filters img, .tp-said img').length,
+    saved: rows(secs.findIndex((s) => /^Saved/.test(s.h)) + 1), visited: rows(secs.findIndex((s) => /^Visited/.test(s.h)) + 1), shared: rows(secs.findIndex((s) => /^Shared/.test(s.h)) + 1),
+    adopted: (document.querySelector('#log-body [data-log="adopt"] ~ span') || {}).textContent || '', showAll: (document.querySelector('#log-body [data-log="all"]') || {}).textContent || '',
+    pins: document.querySelectorAll('#compare-body [data-unpin]').length, compareOpen: $('compare').open,
+    url: location.search, nav: (performance.getEntriesByType('navigation')[0] || {}).type || '', store: dlg.dataset.store || '',
+    focus: a ? (a.id || a.className) : '', focusIn: !!a && !!a.closest('#log'), focusClose: !!a && a.matches('[data-close="log"]'),
+    view: (document.querySelector('[data-cam].on') || { dataset: {} }).dataset.cam || '',
+  };
+}
+function press(selector) { const e = document.querySelector(selector); if (!e) return false; e.click(); return true; }
+function pressIn(selector, text) { const e = [...document.querySelectorAll(selector)].find((x) => x.textContent.trim() === text); if (!e) return false; e.click(); return true; }
+/* as a key would: the control has the focus when it is pressed */
+function focusPress(selector) { const e = document.querySelector(selector); if (!e) return false; e.focus(); e.click(); return true; }
+function bring(selector) { const e = document.querySelector(selector); if (!e) return false; e.scrollIntoView({ block: 'center' }); return true; }
+function typeInto(text) { const q = document.getElementById('q'); q.focus(); q.value = text; q.dispatchEvent(new Event('input', { bubbles: true })); }
+function comeBack() { window.dispatchEvent(new Event('focus')); return true; }
+function noThanks() { const b = [...document.querySelectorAll('button')].find((x) => /no thanks/i.test(x.textContent)); if (b) b.click(); return true; }
+async function osDo(what, arg) {
+  const os = (await import(new URL('assets/js/os/index.js', location.href).href)).LabsOS.instance;
+  if (!os) return null;
+  if (what === 'erase') { await os.privacy.deleteAll(); return true; }
+  if (what === 'recording') { await os.recording.set(arg); return os.recording.on; }
+  if (what === 'events') { const d = await os.privacy.exportAll(); const all = (d.events || (d.data && d.data.events) || []); return all.filter((e) => /^exomania\.(visit|save)$/.test(e.type)).map((e) => ({ type: e.type, t: e.t, data: e.data })); }
+  if (what === 'record') { const r = await os.progress.get(); return r ? { v: r.v, data: r.data, resume: r.resume } : null; }
+  if (what === 'storage') return os.storage;
+  // the browser refuses every write of the record, as it does when the disk is full
+  if (what === 'breakSet') { os.__set = os.progress.set; os.progress.set = () => Promise.reject(new Error('QuotaExceededError: the disk is full')); return os.progress.set !== os.__set; }
+  if (what === 'fixSet') { if (os.__set) os.progress.set = os.__set; return true; }
+  return null;
+}
+/* The lab's record straight from the browser's database, through a connection of its own, as another tab reads it. */
+function rawRecord() {
+  return new Promise((resolve) => {
+    const req = indexedDB.open('labs');
+    req.onsuccess = () => { const db = req.result; const tx = db.transaction('progress', 'readonly'); const g = tx.objectStore('progress').get('exomania'); tx.oncomplete = () => { db.close(); resolve(g.result ? { v: g.result.v, data: g.result.data } : null); }; tx.onerror = () => { db.close(); resolve('read failed'); }; };
+    req.onerror = () => resolve('open failed');
+  });
+}
+/* What "Delete everything" on the labs' hub does to the database, from another tab: this page's Labs OS is not told. */
+function eraseElsewhere() {
+  return new Promise((resolve) => {
+    const req = indexedDB.open('labs');
+    req.onsuccess = () => { const db = req.result; const tx = db.transaction(['events', 'progress', 'meta'], 'readwrite'); ['events', 'progress', 'meta'].forEach((s) => tx.objectStore(s).clear()); tx.oncomplete = () => { db.close(); resolve(true); }; tx.onerror = () => { db.close(); resolve(false); }; };
+    req.onerror = () => resolve(false);
+  });
+}
+/* A record written straight into the database, with no check and no bound: what another tab wrote, or what an old
+   or damaged store holds. */
+function writeRaw(data, v) {
+  return new Promise((resolve) => {
+    const req = indexedDB.open('labs');
+    req.onsuccess = () => { const db = req.result; const tx = db.transaction('progress', 'readwrite'); tx.objectStore('progress').put({ lab: 'exomania', v, data, updated: Date.now(), resume: null, due: [], finished: false }); tx.oncomplete = () => { db.close(); resolve(true); }; tx.onerror = () => { db.close(); resolve(String(tx.error)); }; };
+    req.onerror = () => resolve('open failed');
+  });
+}
+/* Names from the catalogue the page loads. */
+async function names(k, from) {
+  const d = await (await fetch(new URL('assets/data/exomania/pscomppars-snapshot.json', location.href).href)).json();
+  return d.rows.map((r) => r[0]).slice(from, from + k);
+}
+function ring() { const q = document.getElementById('q'); q.focus(); const c = getComputedStyle(q); return { style: c.outlineStyle, width: parseFloat(c.outlineWidth) }; }
+function skipSeen() { const a = document.activeElement, b = a.getBoundingClientRect(); return { cls: a.className, text: a.textContent, seen: b.left >= 0 && b.top >= 0 && b.width > 0 }; }
+
+/* ---- the scenario ---- */
+
+export default async function log(p, { base }) {
+  await p.before(`(${guard})()`);
+  const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
+  const state = () => call(pageState);
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const NAMED = '(() => { const n = (document.getElementById("ret-name") || {}).textContent; return !!n && n.trim().length > 1 && n.trim() !== "…"; })()';
+  const settle = async () => {
+    await p.until('!!document.getElementById("log").dataset.store', 30000);   // the stored log has been read
+    await p.sleep(600);
+    await call(noThanks);
+    await p.until('getComputedStyle(document.querySelector(".search")).opacity === "1"', 10000);   // the instruments have assembled
+  };
+  /* Open the survey. hold: its idle work waits for window.__release(), so the stored log is not read yet. */
+  const open = async (query = '', { hold = false, still = true } = {}) => {
+    if (hold) await p.ev('(sessionStorage.setItem("drive-hold", "1"), true)');
+    await p.go(`${base}/labs/exomania-survey.html?${[still ? 'still' : '', query].filter(Boolean).join('&')}`);
+    await p.until(NAMED, 90000);
+    if (!hold) await settle();
+  };
+  const reload = async () => {
+    await p.ev('(window.__old = 1, setTimeout(() => location.reload(), 50), true)');
+    await p.until(`!window.__old && ${NAMED}`, 90000);
+    await settle();
+  };
+  const another = async () => { await call(press, '#btn-random'); await p.sleep(800); return state(); };
+  /* the state once the log line reads `want`, or after 6 s whatever it reads */
+  const line = async (want) => { await p.until(`document.getElementById("log-line").textContent === ${JSON.stringify(want)}`, 6000); return state(); };
+  const openLog = async () => { await call(press, '#log-line'); await p.sleep(400); return state(); };
+  const closeLog = () => call(press, '[data-close="log"]');
+  const VIA = /^(by name|from a question|on a tour|at random|on the diagram|in its system|from a link|from the log)(, [\d,]+ times)?$/;
+  const FULL = 'the log holds 200 saved worlds, which is all it takes; take one out first';
+  const blank = () => ({ overdue: { planet: null, place: null }, log: { saved: [], visits: [], pins: [], dropped: 0 } });
+
+  // ---- a first visit: nothing is counted yet ----
+  await open();
+  const start = await state();
+  p.check('on a first load the log is on the browser\'s own store, which outlives the page', start.store === 'indexeddb', start.store);
+  p.check('the log line is on the page and starts at nothing: the world the page opened by itself is not a visit', start.lineSeen && start.line === 'Your log · 0 visited · 0 saved', start.line);
+  p.check('the world on screen can be added to the log, and is not in it; the button is a plain button, with no pressed state to read wrongly', start.add === 'Add to log' && !start.addOn && !start.addOff && start.addPressed === null,
+    JSON.stringify({ add: start.add, on: start.addOn, off: start.addOff, pressed: start.addPressed }));
+
+  // ---- before the stored log is read (on a fixture store, so the visitor's own store is not written) ----
+  await open('os-fixture=first-visit', { hold: true });
+  const early = await state();
+  p.check('before the stored log is read the line says so, and the button for the log is off', early.line === 'Your log · reading' && early.addOff && early.addTitle === 'The log is being read' && early.store === '',
+    JSON.stringify({ line: early.line, off: early.addOff, title: early.addTitle, store: early.store }));
+  await call(press, '[data-act="log"]');   // a button that is off takes no press
+  const held = await another();
+  await call(press, '[data-act="pin"]');
+  await p.sleep(500);
+  await call(press, '[data-close="compare"]');
+  const earlyDlg = await openLog();
+  p.check('the log, opened then, says it is being read, and a world opened meanwhile is not yet counted', earlyDlg.open && /^Reading the log from this browser.s store\.$/.test(earlyDlg.body) && earlyDlg.line === 'Your log · reading' && held.name !== early.name,
+    `${earlyDlg.line} | ${earlyDlg.body.slice(0, 120)}`);
+  await p.shot('log-reading');
+  await p.ev('window.__release()');
+  await settle();
+  const late = await line('Your log · 1 visited · 0 saved');
+  await p.sleep(400);   // the bench is written after the visit
+  const fx = await call(osDo, 'record'), where = await call(osDo, 'storage'), own0 = await call(rawRecord);
+  p.check('once it is read, the world opened meanwhile is one visit with the way it was opened, nothing was saved by the press on the button that was off, and the button is on',
+    late.line === 'Your log · 1 visited · 0 saved' && !late.addOff && late.add === 'Add to log' && !!fx && same(fx.data.log.visits.map((v) => [v.name, v.via, v.n]), [[held.name, 'random', 1]]) && fx.data.log.saved.length === 0,
+    `${late.line} | ${JSON.stringify(fx && fx.data.log.visits)}`);
+  p.check('the world pinned meanwhile is on the stored bench', !!fx && same(fx.data.log.pins, [held.name]), JSON.stringify(fx && fx.data.log.pins));
+  p.check('the log that was open then shows it', late.open && late.visited.length === 1 && late.visited[0].name === held.name && late.visited[0].what === 'at random', JSON.stringify(late.visited));
+  p.check('with ?os-fixture= the page runs on the labs\' fixture store: the address keeps the parameter, and the browser\'s own store is not written',
+    !!where && where.fixture === 'first-visit' && /[?&]os-fixture=first-visit/.test(late.url) && own0 === null, `${JSON.stringify(where)} | ${late.url} | own store ${JSON.stringify(own0)}`);
+  await closeLog();
+
+  // ---- the keyboard: a link that skips to the survey, and a ring on the search field ----
+  await open();
+  await p.ev('document.activeElement && document.activeElement.blur()');
+  await p.key('Tab');
+  const skip = await call(skipSeen);
+  await p.key('Enter');
+  await p.sleep(200);
+  const landed = await state();
+  p.check('the first Tab shows a link that skips to the survey, and Enter takes the focus there', skip.cls === 'skip' && skip.seen && /Skip to the survey/.test(skip.text) && landed.focus === 'col-c', `${JSON.stringify(skip)} then ${landed.focus}`);
+  const r = await call(ring);
+  p.check('the search field shows a ring when it has the focus', r.style === 'solid' && r.width >= 2, JSON.stringify(r));
+
+  // ---- the world alone: the log line leaves with the other instruments ----
+  const shown = (sel) => p.ev(`(() => { const c = getComputedStyle(document.querySelector(${JSON.stringify(sel)})); return c.visibility === 'visible' && c.opacity === '1'; })()`);
+  await call(press, '#btn-clean');
+  await p.sleep(2400);   // the instruments leave and arrive on a delay of 1.1 s and a fade of 0.7 s
+  const alone = [await shown('.logrow'), await shown('.search')];
+  await call(press, '#btn-clean');
+  await p.sleep(2400);   // the instruments leave and arrive on a delay of 1.1 s and a fade of 0.7 s
+  const withThem = [await shown('.logrow'), await shown('.search')];
+  p.check('"Hide instruments" hides the log line with the search field, and "Show instruments" brings both back', same(alone, [false, false]) && same(withThem, [true, true]), `hidden ${JSON.stringify(alone)} | shown ${JSON.stringify(withThem)}`);
+
+  // ---- visits: by name, at random ----
+  await call(typeInto, 'kepler-4');
+  await p.sleep(250);
+  await p.key('Enter');
+  const named = await line('Your log · 1 visited · 0 saved');   // the write waits its turn behind the page's first frames
+  p.check('a world opened by name is one visit', named.line === 'Your log · 1 visited · 0 saved' && named.name.length > 1 && named.name !== start.name, `${named.name} | ${named.line}`);
+  const r1 = await another(), r2 = { ...(await another()), ...(await line('Your log · 3 visited · 0 saved')) };
+  p.check('two more opened at random make three', r2.line === 'Your log · 3 visited · 0 saved' && new Set([named.name, r1.name, r2.name]).size === 3, `${r1.name}, ${r2.name} | ${r2.line}`);
+
+  // ---- saving ----
+  await call(press, '[data-act="log"]');
+  const saved1 = await line('Your log · 3 visited · 1 saved');
+  p.check('"Add to log" saves the world on screen: the button says so, at the same width, and the count follows', saved1.add === 'In your log' && saved1.addOn && saved1.said === '' && saved1.addWidth === start.addWidth && saved1.line === 'Your log · 3 visited · 1 saved',
+    JSON.stringify({ add: saved1.add, on: saved1.addOn, width: [start.addWidth, saved1.addWidth], line: saved1.line }));
+  p.check('a chip for the log appears beside the filters, off', /chip/.test(saved1.chipSaved) && !/\bon\b/.test(saved1.chipSaved), saved1.chipSaved);
+  const r3 = await another();
+  p.check('the next world is not in the log', r3.add === 'Add to log' && !r3.addOn && r3.name !== r2.name, `${r3.name}: ${r3.add}`);
+  await call(press, '[data-act="pin"]');
+  await p.sleep(600);
+  const pinned = await state();
+  await call(press, '[data-close="compare"]');
+  p.check('pinning puts the world on the compare bench', pinned.compareOpen && pinned.pins === 1, `${pinned.pins} pinned`);
+
+  // ---- a link to a world is a visit; a reload of it is not ----
+  await open(`p=${encodeURIComponent(r2.name)}`);
+  const back = await line('Your log · 4 visited · 1 saved');
+  p.check('a link to a world opens it as one visit, and the counts and the saved world of before are there', back.nav === 'navigate' && back.line === 'Your log · 4 visited · 1 saved' && back.name === r2.name && back.add === 'In your log' && back.addOn,
+    `${back.nav} | ${back.name} | ${back.line} | ${back.add}`);
+  await reload();
+  const again = await state();
+  p.check('a reload of that address is not a visit', again.nav === 'reload' && again.name === r2.name && again.line === 'Your log · 4 visited · 1 saved' && again.add === 'In your log', `${again.nav} | ${again.name} | ${again.line}`);
+  await another();
+  await call(press, '[data-act="pin"]');
+  await p.sleep(600);
+  const bench = await state();
+  await call(press, '[data-close="compare"]');
+  p.check('the compare bench of before the reload is there, with the new world beside it', bench.pins === 2, `${bench.pins} on the bench`);
+
+  // ---- the log itself ----
+  const dlg = await openLog();
+  p.check('the log opens as a dialog that fits the screen', dlg.open && dlg.fits && !dlg.wide, JSON.stringify({ open: dlg.open, fits: dlg.fits, wide: dlg.wide }));
+  p.check('it says the counts in a sentence', dlg.sum === '5 worlds visited, 1 saved.', dlg.sum);
+  p.check('the saved world is listed with the kind it is drawn as and when it was saved', dlg.saved.length === 1 && dlg.saved[0].name === r2.name && /^[a-z]/.test(dlg.saved[0].what) && /^saved (just now|\d+ minutes? ago)$/.test(dlg.saved[0].when), JSON.stringify(dlg.saved));
+  p.check('the visits are listed newest first, each with the way it was reached and a time; the world reached by the link and then reloaded was reached twice, not three times',
+    dlg.visited.length === 5 && dlg.visited[0].name === bench.name && dlg.visited.every((v) => VIA.test(v.what) && /^(just now|\d+ minutes? ago)$/.test(v.when))
+    && dlg.visited.some((v) => v.what === 'by name') && dlg.visited.some((v) => /^at random/.test(v.what)) && dlg.visited.find((v) => v.name === r2.name).what === 'from a link, 2 times', JSON.stringify(dlg.visited));
+  await p.shot('log-open');
+  await call(pressIn, '#log-body .log-open', named.name);
+  await p.sleep(900);
+  const reopened = await state();
+  p.check('a line of the log reopens its world and closes the log', !reopened.open && reopened.name === named.name && reopened.line === 'Your log · 5 visited · 1 saved', `${reopened.name} | ${reopened.line}`);
+
+  // ---- what is stored: each action with its time and the way it came ----
+  const events = await call(osDo, 'events');
+  const visits = (events || []).filter((e) => e.type === 'exomania.visit'), saves = (events || []).filter((e) => e.type === 'exomania.save');
+  p.check('each visit and each save is in the activity log with its time, and each visit with the way it came', visits.length === 7 && saves.length === 1 && visits.every((e) => e.t > 1.7e12 && typeof e.data.planet === 'string' && ['search', 'results', 'tour', 'random', 'diagram', 'system', 'link', 'log'].includes(e.data.via))
+    && visits.some((e) => e.data.via === 'search') && visits.some((e) => e.data.via === 'random') && visits.filter((e) => e.data.via === 'link').length === 1 && visits.at(-1).data.via === 'log', JSON.stringify(visits.map((e) => e.data.via)));
+  const rec = await call(osDo, 'record');
+  p.check('the record is the lab\'s one record in the labs\' store, at version 2, with both slices and a place to resume', !!rec && rec.v === 2 && !!rec.data.overdue && rec.data.log.saved.length === 1 && rec.data.log.visits.length === 5 && rec.data.log.pins.length === 2
+    && !!rec.resume && rec.resume.url.includes('exomania-survey.html?p='), JSON.stringify(rec && { v: rec.v, saved: rec.data.log.saved.length, visits: rec.data.log.visits.length, pins: rec.data.log.pins, resume: rec.resume }));
+
+  // ---- the saved worlds as a filter ----
+  await another();
+  await call(press, '[data-act="log"]');
+  const two = await line('Your log · 6 visited · 2 saved');
+  await call(press, '#filters [data-act="set-saved"]');
+  await p.sleep(400);
+  const only = await state();
+  p.check('the chip shows only the saved worlds', two.line === 'Your log · 6 visited · 2 saved' && /\bon\b/.test(only.chipSaved) && only.filtered && only.n === 2, `${two.line} | ${only.count}`);
+  const within = [await another(), await another(), await another()];
+  p.check('"Another world" then stays among them', within.every((s) => s.add === 'In your log') && within.every((s) => [r2.name, two.name].includes(s.name)), within.map((s) => s.name).join(', '));
+
+  // ---- a link to the saved worlds ----
+  await openLog();
+  await call(pressIn, '#log-body button', 'Copy a link to these worlds');
+  await p.sleep(300);
+  const link = await p.ev('window.__copied || ""');
+  const copied = await state();
+  p.check('"Copy a link to these worlds" makes a link to this page that carries both names', /exomania-survey\.html\?log=/.test(link) && [r2.name, two.name].every((n) => decodeURIComponent(link).includes(n)) && /Copied: a link to these 2 worlds\./.test(copied.body), link);
+  await call(focusPress, '#log-body .log-out');
+  const out1 = await line('Your log · 6 visited · 1 saved');
+  p.check('"Take out" takes the world out, and the focus stays in the log: it goes to Close when the button pressed is gone', out1.saved.length === 1 && out1.open && out1.focusIn && out1.focusClose, `${out1.saved.length} saved | focus on ${out1.focus}`);
+  await call(focusPress, '#log-body .log-out');
+  const emptied = await line('Your log · 6 visited · 0 saved');
+  p.check('taking both out empties the saved list, says how to fill it, and ends the filter that showed only them', emptied.saved.length === 0 && /Nothing saved yet\. Open a world and press .Add to log./.test(emptied.body) && emptied.line === 'Your log · 6 visited · 0 saved' && emptied.chipSaved === 'none' && !emptied.filtered,
+    `${emptied.line} | chip ${emptied.chipSaved} | ${emptied.count}`);
+  await closeLog();
+
+  // ---- an erase on the privacy page's own path empties the log here at once ----
+  await call(osDo, 'erase');
+  const erased = await line('Your log · 0 visited · 0 saved');
+  p.check('an erase empties the log on the page', erased.line === 'Your log · 0 visited · 0 saved' && erased.add === 'Add to log', erased.line);
+
+  // ---- the link, opened by a visitor whose store is empty ----
+  await open(link.split('?')[1]);
+  const got = await state();
+  p.check('the link opens on the first of its worlds, shows only its two, and says where they are listed', [r2.name, two.name].includes(got.name) && /\bon\b/.test(got.chipShared) && got.filtered && got.n === 2
+    && /This link carries a log of 2 worlds\. They are the ones on the diagram now, and the log lists them under .Shared with you.\./.test(got.note), `${got.name} | ${got.count} | ${got.note}`);
+  p.check('a link that carries a log is not a visit to a world: the receiver\'s own log is as it was, empty', got.line === 'Your log · 0 visited · 0 saved · 2 shared with you' && got.add === 'Add to log', got.line);
+  p.check('the link keeps its log in the address, so a reload shows the same', /[?&]log=/.test(got.url), got.url);
+  const sharedDlg = await openLog();
+  p.check('the log lists what was shared, apart from what is the visitor\'s own', sharedDlg.shared.length === 2 && sharedDlg.saved.length === 0 && sharedDlg.shared.every((s) => [r2.name, two.name].includes(s.name) && s.when === ''), JSON.stringify(sharedDlg.shared));
+  await p.shot('log-shared');
+  await call(pressIn, '#log-body button', 'Add all to your log');
+  const adopted = await line('Your log · 0 visited · 2 saved · 2 shared with you');
+  p.check('"Add all to your log" saves both, says so beside the button, and the shared lines say they are now in the log', adopted.saved.length === 2 && adopted.line === 'Your log · 0 visited · 2 saved · 2 shared with you' && adopted.adopted === 'Added 2 worlds.'
+    && adopted.shared.every((s) => s.when === 'in your log'), `${adopted.line} | ${adopted.adopted} | ${JSON.stringify(adopted.shared)}`);
+  await closeLog();
+
+  // ---- a link with junk in it is read at the door ----
+  await open('log=' + encodeURIComponent(`<img src=x onerror=window.__hit=1>|not a planet|${r2.name}|${r2.name}`));
+  const junk = await openLog();
+  const hit = await p.ev('window.__hit === 1');
+  p.check('markup and unknown names in a link are not read, and the log says how many', !hit && junk.imgs === 0 && junk.shared.length === 1 && junk.shared[0].name === r2.name && /3 names in the link were not read/.test(junk.body), `${junk.shared.length} read | hit ${hit} | ${junk.body.slice(0, 200)}`);
+  await closeLog();
+
+  // ---- recording off: visits stop, a save does not ----
+  await call(press, '#filters [data-act="set-shared"]');   // leave the filter of the shared log: the next world comes from the whole catalogue
+  await p.sleep(300);
+  const before = await state();
+  p.check('the chip of a shared log turns its filter off, and the whole catalogue is back', !before.filtered && before.n > 5000 && !/\bon\b/.test(before.chipShared), `${before.count} | ${before.chipShared}`);
+  await call(osDo, 'recording', false);
+  let off1 = await another();
+  for (let i = 0; i < 5 && off1.add !== 'Add to log'; i++) off1 = await another();
+  await call(press, '[data-act="log"]');
+  await p.until('document.querySelector("[data-act=log]").textContent === "In your log"', 6000);
+  const off2 = await state();
+  const offDlg = await openLog();
+  p.check('with the site\'s recording off a world opened is not added to the visits, a world saved is saved, and the log says so', off1.name !== before.name && off2.line.replace(/ · \d+ saved.*/, '') === before.line.replace(/ · \d+ saved.*/, '') && off2.add === 'In your log'
+    && offDlg.notes.some((n) => /Recording is off on this site, so visits are not added\. A world you save is still saved\./.test(n)), `${before.line} then ${off2.line} | ${offDlg.notes.join(' / ')}`);
+  await closeLog();
+  await call(osDo, 'recording', true);
+
+  // ---- Overdue writes its own slice and leaves the log ----
+  const mine = await state();
+  await p.go(`${base}/labs/exomania.html?still`);
+  await p.until('document.body.dataset.state === "ready"', 60000);
+  await p.ev(`(() => { const i = document.getElementById("pick"); i.value = "WASP-12 b"; document.getElementById("pick-form").requestSubmit(); })()`);
+  await p.sleep(1200);
+  await open();
+  const after = await state();
+  const rec2 = await call(osDo, 'record');
+  const own = (s) => s.line.replace(/ · \d+ shared with you$/, '');
+  p.check('after Overdue saved its planet, the survey\'s log is as it was and the record holds both', own(after) === own(mine) && /· 3 saved$/.test(own(after)) && !!rec2 && rec2.data.overdue.planet === 'WASP-12 b' && rec2.data.log.saved.length >= 3, `${mine.line} then ${after.line} | overdue ${rec2 && rec2.data.overdue.planet}`);
+
+  // ---- a tour: the visitor's own steps are visits ----
+  await another();
+  await call(press, '#tours [data-tour]');
+  await p.sleep(900);
+  const tA = await state(), recA = await call(rawRecord);
+  await call(press, '#tour-next');
+  await p.sleep(900);
+  const tB = await state(), recB = await call(rawRecord);
+  const top = (rr) => (rr && rr.data && rr.data.log.visits[0]) || {};
+  p.check('a tour the visitor starts, and each step they take in it, is a visit "on a tour"', tB.name !== tA.name && top(recA).name === tA.name && top(recA).via === 'tour' && top(recB).name === tB.name && top(recB).via === 'tour',
+    `${tA.name}: ${JSON.stringify(top(recA))} | ${tB.name}: ${JSON.stringify(top(recB))}`);
+
+  // ---- a tour started by a link and left alone moves by itself, and is no visit ----
+  await open('tour=earthlike', { still: false });
+  const c0 = await state(), rawC0 = await call(rawRecord);
+  const moved = await p.until(`(document.getElementById("ret-name") || {}).textContent !== ${JSON.stringify(c0.name)}`, 60000);
+  await p.sleep(1500);
+  const c1 = await state(), rawC1 = await call(rawRecord);
+  p.check('a tour started by a link, left alone, moves to its next stop by itself and writes no visit', moved && c1.name !== c0.name && c1.line === c0.line && same(rawC1.data.log.visits, rawC0.data.log.visits) && same(rawC0.data.log.visits, recB.data.log.visits),
+    `${c0.name} then ${c1.name} | ${c0.line} then ${c1.line}`);
+  await call(press, '#tour-next');
+  await p.sleep(1500);
+  const c2 = await state(), rawC2 = await call(rawRecord);
+  p.check('a step the visitor takes in it is a visit', c2.name !== c1.name && top(rawC2).name === c2.name && top(rawC2).via === 'tour', `${c2.name}: ${JSON.stringify(top(rawC2))}`);
+
+  // ---- another tab: what it erased or saved is not undone by the next thing done here ----
+  await open();
+  const d0 = await state();
+  await call(eraseElsewhere);
+  await another();
+  const dA = await line('Your log · 1 visited · 0 saved'), rawA = await call(rawRecord);
+  p.check('an erase made in another tab is not undone by the next thing done here: the log holds that one visit and nothing of before', dA.line === 'Your log · 1 visited · 0 saved' && dA.add === 'Add to log' && !!rawA && rawA.data.log.saved.length === 0
+    && same(rawA.data.log.visits.map((v) => v.name), [dA.name]), `${d0.line} then ${dA.line} | stored ${JSON.stringify(rawA && rawA.data.log.visits.map((v) => v.name))}`);
+  const [x, y] = await call(names, 2, 300);
+  const cur = rawA.data;
+  cur.log.saved.unshift({ name: x, t: Date.now(), view: 'orbit' });
+  await call(writeRaw, cur, 2);
+  await another();
+  const dB = await line('Your log · 2 visited · 1 saved'), rawB = await call(rawRecord);
+  p.check('a save made in another tab is not undone by the next thing done here', dB.line === 'Your log · 2 visited · 1 saved' && !!rawB && same(rawB.data.log.saved.map((e) => e.name), [x]) && rawB.data.log.visits.length === 2, `${dB.line} | stored ${JSON.stringify(rawB && rawB.data.log.saved.map((e) => e.name))}`);
+  const cur2 = rawB.data;
+  cur2.log.saved.unshift({ name: y, t: Date.now(), view: 'surface' });
+  await call(writeRaw, cur2, 2);
+  await call(comeBack);
+  const dC = await line('Your log · 2 visited · 2 saved');
+  p.check('when the tab comes back into view the page reads the store again, with nothing pressed', dC.line === 'Your log · 2 visited · 2 saved' && /chip/.test(dC.chipSaved), `${dC.line} | chip ${dC.chipSaved}`);
+
+  // ---- what the store holds is read at the door, as a link is ----
+  const cur3 = (await call(rawRecord)).data, t3 = Date.now();
+  cur3.log.saved.unshift({ name: '<img src=x onerror=window.__hit2=1>', t: t3, view: 'orbit' }, { name: 'Not A Planet b', t: t3 - 1, view: 'orbit' });
+  cur3.log.visits.unshift({ name: 'Gone World c', t: t3, via: 'log', n: 1 });
+  cur3.log.pins = ['Gone World c'];
+  await call(writeRaw, cur3, 2);
+  await call(comeBack);
+  await p.sleep(800);
+  const e1 = await openLog();
+  await call(pressIn, '#log-body button', 'Copy a link to these worlds');
+  await p.sleep(300);
+  const link2 = await p.ev('window.__copied || ""'), hit2 = await p.ev('window.__hit2 === 1'), rawE = await call(rawRecord);
+  p.check('stored names the catalogue does not have are not shown, not counted, and the log says how many there are', !hit2 && e1.imgs === 0 && e1.line === 'Your log · 2 visited · 2 saved' && same(e1.saved.map((s) => s.name), [y, x]) && e1.visited.length === 2
+    && e1.notes.some((n) => n === '3 stored entries name worlds this catalogue does not have, and are not shown.'), `${e1.line} | ${JSON.stringify(e1.saved.map((s) => s.name))} | ${e1.notes.join(' / ')} | hit ${hit2}`);
+  p.check('a link made from the log carries none of them, and they are left in the store as they were', decodeURIComponent(link2.split('log=')[1] || '') === `${y}|${x}` && !!rawE && rawE.data.log.saved.length === 4 && rawE.data.log.visits.length === 3,
+    `${link2} | stored ${rawE && rawE.data.log.saved.length} saved, ${rawE && rawE.data.log.visits.length} visits`);
+  await closeLog();
+
+  // ---- a write the browser refuses ----
+  let g0 = await another();
+  for (let i = 0; i < 5 && g0.add !== 'Add to log'; i++) g0 = await another();
+  await p.sleep(600);
+  const gLine = (await state()).line;   // the count once the visit to this world is written
+  const broke = await call(osDo, 'breakSet');
+  await call(press, '[data-act="log"]');
+  await p.until('!!document.querySelector(".tp-said").textContent', 6000);
+  await call(bring, '[data-act="log"]');
+  const g1 = await state();
+  await p.shot('log-refused');
+  const g2 = await openLog();
+  p.check('a write the browser refuses is said under the button pressed, in view, and the button and the count stay as they were', broke && g1.said === `${g0.name} was not added: the browser refused to write the log.` && g1.add === 'Add to log' && !g1.addOn
+    && g1.line === gLine && g1.addSeen && g1.saidSeen && g1.saidUnder, `${g1.said} | ${g1.add} | ${gLine} then ${g1.line} | seen ${g1.addSeen} ${g1.saidSeen} under ${g1.saidUnder}`);
+  p.check('and the log says what happened and what it is showing', g2.notes.some((n) => n === 'The browser refused to write the log (QuotaExceededError: the disk is full). What is listed here is what was stored before.'), g2.notes.join(' / '));
+  await closeLog();
+  await call(osDo, 'fixSet');
+  await call(press, '[data-act="log"]');
+  await p.until('document.querySelector("[data-act=log]").textContent === "In your log"', 6000);
+  const g3 = await state(), g4 = await openLog();
+  p.check('once the browser takes the write the world is saved, and neither place says otherwise any more', g3.add === 'In your log' && g3.said === '' && /· 3 saved$/.test(g3.line) && !g4.notes.some((n) => /refused/.test(n)), `${g3.add} | "${g3.said}" | ${g3.line} | ${g4.notes.join(' / ')}`);
+  await closeLog();
+
+  // ---- a full log ----
+  const all = await call(names, 203, 0), t5 = Date.now();
+  const full = blank();
+  full.log.saved = all.slice(0, 200).map((name, i) => ({ name, t: t5 - i, view: 'orbit' }));
+  await call(writeRaw, full, 2);
+  await open(`log=${encodeURIComponent(`${all[200]}|${all[201]}`)}`);
+  const f0 = await state();
+  await call(press, '[data-act="log"]');
+  await p.until('!!document.querySelector(".tp-said").textContent', 6000);
+  await call(bring, '[data-act="log"]');
+  const f1 = await state();
+  await p.shot('log-full');
+  p.check('a full log refuses at the button pressed, in view, with the reason and the way out', f0.line === 'Your log · 0 visited · 200 saved · 2 shared with you' && f0.name === all[200] && f1.said === `${all[200]} was not added: ${FULL}.`
+    && f1.add === 'Add to log' && f1.line === f0.line && f1.addSeen && f1.saidSeen && f1.saidUnder, `${f0.line} | ${f1.said} | seen ${f1.addSeen} ${f1.saidSeen} under ${f1.saidUnder}`);
+  await openLog();
+  await call(pressIn, '#log-body button', 'Add all to your log');
+  await p.until('!!(document.querySelector("#log-body [data-log=adopt] ~ span") || {}).textContent', 6000);
+  const f2 = await state();
+  p.check('"Add all to your log" on a full log adds none and says why beside the button', f2.adopted === `None could be added: ${FULL}.` && f2.line === f0.line && f2.saved.length === 200, `${f2.adopted} | ${f2.line}`);
+  await call(focusPress, '#log-body .log-out');
+  const f3 = await line('Your log · 0 visited · 199 saved · 2 shared with you');
+  p.check('after one is taken out, what "Add all" said before is gone', f3.saved.length === 199 && f3.adopted === '' && f3.focusIn, `${f3.line} | "${f3.adopted}"`);
+  await call(pressIn, '#log-body button', 'Add all to your log');
+  await p.until('!!(document.querySelector("#log-body [data-log=adopt] ~ span") || {}).textContent', 6000);
+  const f4 = await state();
+  p.check('"Add all" then adds the one there is room for and says how many were left', f4.adopted === `Added 1 world. 1 world could not be added: ${FULL}.` && f4.line === 'Your log · 0 visited · 200 saved · 2 shared with you', `${f4.adopted} | ${f4.line}`);
+
+  // ---- a long list of visits ----
+  const long = blank();
+  long.log.visits = all.slice(0, 25).map((name, i) => ({ name, t: t5 - i * 1000, via: 'search', n: 1 }));
+  long.log.dropped = 3;
+  await call(writeRaw, long, 2);
+  await call(comeBack);
+  const h0 = await line('Your log · 28 visited · 0 saved · 2 shared with you');
+  p.check('the log lists the 20 newest visits, offers the rest, and says how many are counted and no longer listed', h0.open && h0.visited.length === 20 && h0.showAll === 'Show all 25' && h0.sum === '28 worlds visited, 0 saved.'
+    && /3 worlds visited earlier are counted and no longer listed: the list holds 500 worlds\./.test(h0.body), `${h0.line} | ${h0.visited.length} listed | ${h0.showAll} | ${h0.sum}`);
+  await call(focusPress, '#log-body [data-log="all"]');
+  await p.sleep(400);
+  const h1 = await state();
+  p.check('"Show all" lists every visit, and the focus stays in the log', h1.visited.length === 25 && h1.showAll === '' && h1.focusIn && h1.focusClose, `${h1.visited.length} listed | focus on ${h1.focus}`);
+  await closeLog();
+
+  // ---- the states of the store, on the labs' fixtures ----
+  await open('os-fixture=storage-unavailable');
+  const i1 = await openLog();
+  p.check('where the browser\'s store did not open, the log says that what is done here is not kept', i1.notes.some((n) => /^The browser.s store did not open on this page, so what you do here is not kept after the page closes\.$/.test(n)) && i1.line === 'Your log · 0 visited · 0 saved', `${i1.line} | ${i1.notes.join(' / ')}`);
+  await closeLog();
+  await open('os-fixture=recording-off');
+  await another();
+  const i2 = await openLog();
+  p.check('with recording off and nothing visited, the log says why no visit is listed', i2.line === 'Your log · 0 visited · 0 saved' && /No visit is listed\. Recording is off on this site\./.test(i2.body)
+    && i2.notes.some((n) => /^Recording is off on this site, so visits are not added\./.test(n)), `${i2.line} | ${i2.notes.join(' / ')}`);
+  await closeLog();
+}

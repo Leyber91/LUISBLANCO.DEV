@@ -98,7 +98,7 @@ button, input, select { font: inherit; color: inherit; }
 .route-wait { white-space: nowrap; font-size: 10px; letter-spacing: .06em; color: var(--text-dim); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; }
 .stamp { font-size: 9.5px; letter-spacing: .1em; color: var(--text-dim); white-space: nowrap; }
 .search input { width: 100%; background: rgba(0, 0, 0, .36); border: 1px solid var(--hair); padding: 8px 11px; font-size: 11.5px;
-  color: var(--text-bright); outline: none; letter-spacing: .02em; }
+  color: var(--text-bright); letter-spacing: .02em; }
 .search input::placeholder { color: var(--text-faint); }
 .search input:focus { border-color: var(--horizon-dim); }
 .q-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); list-style: none; z-index: 20; background: var(--surface);
@@ -193,6 +193,26 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 .method p, .method li { font-size: 11.5px; line-height: 1.6; margin-bottom: 6px; }
 .method ul { padding-left: 18px; }
 
+/* ---------- the log ---------- */
+.logrow { order: 1; display: flex; justify-content: center; margin-top: 6px; pointer-events: auto; }
+.logrow .chip { background: rgba(6, 8, 13, .6); font-variant-numeric: tabular-nums; }
+.tp-actions .log-add { min-width: 9.2em; }   /* "Add to log" and "In your log" at one width */
+.tp-actions .btn:disabled { opacity: .45; cursor: default; }
+.tp-said { min-height: 1.5em; margin-top: 5px; font-size: 10px; line-height: 1.5; color: var(--text); }
+.log-sum { color: var(--text-bright); }
+.log-note { color: var(--text-dim); border-left: 1px solid var(--hair); padding-left: 8px; }
+.log-sec h3 span { color: var(--text-dim); letter-spacing: .06em; text-transform: none; margin-left: 8px; }
+.method .log-list { list-style: none; padding: 0; margin: 0 0 8px; }
+.method .log-list li { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) auto auto; gap: 4px 12px; align-items: baseline;
+  padding: 5px 0; margin: 0; border-bottom: 1px solid var(--line); }
+.log-open { background: none; border: 0; padding: 0; font: inherit; color: var(--text-bright); text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.log-open:hover { text-decoration: underline; text-underline-offset: 3px; }
+.log-gone { color: var(--text-dim); }
+.log-what { color: var(--text-dim); font-size: 10.5px; }
+.log-when { color: var(--text-dim); font-size: 10.5px; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.log-out { padding: 2px 7px; font-size: 9px; }
+.log-foot { margin-top: 14px; color: var(--text-dim); }
+
 /* ---------- renderer notices ---------- */
 .exo-note { position: fixed; left: 50%; top: 16%; transform: translateX(-50%); z-index: 60; padding: .6em 1.1em; border: 1px solid var(--accretion-dim);
   background: rgba(6, 8, 13, .85); color: var(--accretion-soft); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
@@ -250,7 +270,7 @@ body { --star-rgb: 255, 241, 234; }
 .rg-row { display: grid; grid-template-columns: 1fr 76px 76px; gap: 6px; align-items: center; }
 .rg-row .tp-k i { font-style: normal; color: var(--text-faint); text-transform: none; }
 .rg-row input { width: 100%; background: var(--surface); border: 1px solid var(--line); color: var(--text-bright); font-size: 10.5px; padding: 3px 6px; }
-.rg-row input:focus { border-color: var(--horizon-dim); outline: none; }
+.rg-row input:focus { border-color: var(--horizon-dim); }
 
 /* ---------- views: extra controls ---------- */
 .sys-ctl { display: inline-flex; gap: 4px; align-items: center; }
@@ -283,17 +303,17 @@ body { --star-rgb: 255, 241, 234; }
 .cmp-thumb img { display: block; width: 120px; height: 120px; margin-bottom: 4px; }
 
 /* ---------- clean mode: the world alone ---------- */
-body.clean .col-l, body.clean .col-r, body.clean .lower, body.clean .search, body.clean .tours, body.clean .foot { opacity: 0; visibility: hidden; }
+body.clean .col-l, body.clean .col-r, body.clean .lower, body.clean .search, body.clean .logrow, body.clean .tours, body.clean .foot { opacity: 0; visibility: hidden; }
 
 /* ---------- ignition: the instruments assemble around the arriving world ---------- */
-.bar, .col-l, .col-r, .search, .lower, .foot, .reticle, .cam { transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out), visibility 0s; }
-body:not(.ready) .bar, body:not(.ready) .col-l, body:not(.ready) .col-r, body:not(.ready) .search,
+.bar, .col-l, .col-r, .search, .logrow, .lower, .foot, .reticle, .cam { transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out), visibility 0s; }
+body:not(.ready) .bar, body:not(.ready) .col-l, body:not(.ready) .col-r, body:not(.ready) .search, body:not(.ready) .logrow,
 body:not(.ready) .lower, body:not(.ready) .foot, body:not(.ready) .reticle, body:not(.ready) .cam { opacity: 0; }
 body:not(.ready) .col-l { transform: translateX(-14px); }
 body:not(.ready) .col-r { transform: translateX(14px); }
 body:not(.ready) .lower { transform: translateY(10px); }
 body.ready .col-l { transition-delay: 500ms; } body.ready .col-r { transition-delay: 700ms; }
-body.ready .search, body.ready .reticle { transition-delay: 1100ms; } body.ready .lower, body.ready .cam { transition-delay: 1300ms; }
+body.ready .search, body.ready .logrow, body.ready .reticle { transition-delay: 1100ms; } body.ready .lower, body.ready .cam { transition-delay: 1300ms; }
 body.ready .foot { transition-delay: 1500ms; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -325,6 +345,9 @@ body.ready .foot { transition-delay: 1500ms; }
   .search { order: 1; width: 100%; }
   .search input { font-size: 16px; }
   .tours { order: 2; justify-content: flex-start; margin-top: 0; }
+  .logrow { order: 1; justify-content: flex-start; }
+  .method .log-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .log-what { grid-column: 1; }
   .lower { order: 3; }
   .stamp { display: none; }
   .chip { padding: 6px 9px; font-size: 10.5px; }
@@ -341,6 +364,7 @@ body.ready .foot { transition-delay: 1500ms; }
   .tp-slider { grid-template-columns: 14px 80px 1fr 40px; }
   .tp-slider input[type=range], .ground input[type=range] { height: 28px; background: linear-gradient(var(--hair), var(--hair)) center / 100% 2px no-repeat; }
   .tp-actions .btn { padding: 9px 10px; font-size: 10px; }
+  .tp-actions .log-add { min-width: 10.6em; }
   .sel select, .cby select { font-size: 12px; padding: 6px 6px; }
   .sys-ctl .chip { padding: 7px 9px; }
   .bezel { bottom: 52px; }
