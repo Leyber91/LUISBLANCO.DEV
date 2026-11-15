@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="assets/css/exoplanet.css" />
 </head>
 <body>
+<a class="skip" href="#col-c">Skip to the survey</a>
 <span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
 
 <div class="veil" id="veil" role="status" aria-live="polite">
@@ -33,7 +34,7 @@
 
   <aside class="col-l plate" id="col-l" aria-label="Selected planet"></aside>
 
-  <main class="col-c" id="col-c">
+  <main class="col-c" id="col-c" tabindex="-1">
     <div class="stage" id="stage">
       <canvas id="exo-canvas" tabindex="0" aria-label="The selected planet, ray-traced from its measured radius, temperature and host star. Drag or arrow keys to orbit, scroll or plus and minus to zoom."></canvas>
       <div class="glass" aria-hidden="true"></div>
@@ -66,6 +67,7 @@
         role="combobox" aria-expanded="false" aria-controls="q-results" aria-autocomplete="list" />
       <ul id="q-results" class="q-results" role="listbox" hidden></ul>
     </div>
+    <div class="logrow"><button type="button" class="chip" id="log-line" aria-haspopup="dialog">Your log</button></div>
     <div class="tours" id="tours"></div>
     <div class="lower">
       <div class="tourbar" id="tourbar" hidden>
@@ -98,8 +100,14 @@
 </dialog>
 
 <dialog class="method plate compare" id="compare" aria-labelledby="compare-h">
-  <div class="method-head"><h2 id="compare-h">Compare</h2><span class="cmp-ctl"><button type="button" class="btn" id="cmp-clear">Unpin all</button><button type="button" class="btn" data-close="compare">Close</button></span></div>
+  <div class="method-head"><h2 id="compare-h">Compare</h2><span class="cmp-ctl"><button type="button" class="btn" id="cmp-clear" disabled>Unpin all</button><button type="button" class="btn" data-close="compare">Close</button></span></div>
   <div id="compare-body"></div>
+</dialog>
+
+<dialog class="method plate log" id="log" aria-labelledby="log-h">
+  <div class="method-head log-head"><h2 id="log-h">Your log</h2><button type="button" class="btn" data-close="log">Close</button>
+    <p class="log-said" id="log-said" role="status"></p></div>
+  <div id="log-body"></div>
 </dialog>
 
 <dialog class="method plate" id="method" aria-labelledby="method-h">

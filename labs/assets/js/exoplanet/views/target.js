@@ -44,12 +44,14 @@ export function createTarget(host, store, actions) {
       <div class="tp-sky"><canvas class="tp-sky-cv" width="300" height="56" role="img"></canvas></div>
     </section>
     <div class="tp-actions">
+      <button type="button" class="btn log-add" data-act="log" title="Save this world to your log" disabled>Add to log</button>
       <button type="button" class="btn" data-act="chain" title="Every input, equation and source for this world">How inferred</button>
-      <button type="button" class="btn" data-act="pin" title="Pin to compare with Earth and other worlds">Pin</button>
+      <button type="button" class="btn" data-act="pin" title="The log is being read" disabled>Pin</button>
       <button type="button" class="btn" data-act="plate" title="Save a survey plate as PNG">Save PNG</button>
       <button type="button" class="btn" data-act="csv" title="Export the filtered catalogue with this engine's inferences">CSV</button>
       <button type="button" class="btn" data-act="link" title="Copy a link to this exact view">Link</button>
-    </div>`;
+    </div>
+    <p class="tp-said" data-k="said" role="status"></p>`;
   const $ = (k) => host.querySelector(`[data-k="${k}"]`);
   const albedo = host.querySelector('#albedo');
   const albedoV = host.querySelector('#albedo-v');
@@ -169,6 +171,8 @@ export function createTarget(host, store, actions) {
       $('idx').textContent = `TARGET ${fmtInt(p.idx + 1)} OF ${fmtInt(st.list.length)}`;
       $('src').textContent = p.source === 'roster' ? 'WEEKLY ROSTER' : 'ARCHIVE SNAPSHOT';
       $('name').textContent = p.name;
+      $('said').textContent = '';   // what was said about the world before does not stand for this one
+      $('said').classList.remove('quiet');
       const sp = spectralType(p.Teff);
       const rf = p.refs || {};
       const found = isNum(p.year) ? `Found ${p.year}${p.method ? ' by ' + p.method.toLowerCase() : ''}${p.facility ? ', ' + esc(p.facility) : ''}${rf.disc ? ' (' + ref(rf.disc) + ')' : ''}.` : 'Confirmed after the 2026-11-11 snapshot.';
@@ -179,5 +183,8 @@ export function createTarget(host, store, actions) {
       renderSky(p);
     },
     albedo: () => A,
+    /* A line under the actions: what a press did. A success is for a screen reader only, because the button shows it;
+       why a press did not do what it says is shown. The line is a status region and only its text changes. */
+    say(text, ok = false) { const s = $('said'); s.classList.toggle('quiet', !!ok); s.textContent = text; },
   };
 }
