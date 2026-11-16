@@ -14,6 +14,7 @@ let failed = 0, passed = 0;
 const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
 const near = (name, got, want, tol) => yes(name, Number.isFinite(got) && Math.abs(got - want) <= tol, `${got} (want ${want} ± ${tol})`);
 const K = KOPPARAPU;
+const TABLE = [-0.33833901737965655, -0.7041180672871035, 1274.0339052764364];   // the first and last deviates of the table and their sum of squares
 const block = (name, f) => { try { f(); } catch (e) { failed++; console.log(`FAIL  ${name} stopped on an error: ${e && e.message}`); } };
 
 /* ---------- the luminosity and the orbit ---------- */
@@ -71,15 +72,38 @@ block('its range', () => {
   const sb = L.starlight(b), sc = L.starlight(c);
   near('two planets of one star, the orbit\'s error the same share of each: their starlight keeps the ratio of the squares of their orbits', sb.S / sc.S, 16, 1e-9);
   near('and so do their ranges', sb.lo / sc.lo + sb.hi / sc.hi, 32, 1e-9);
-  const d = { ...b, name: 'd', host: 'Other', a: 0.4, aErr: 0.008 };
-  yes('a star listed with other values, or under another name, draws its own numbers', Math.abs(L.starlight(d).S - sc.S) > 1e-12 || Math.abs(L.starlight(d).lo - sc.lo) > 1e-12);
+  const d = { ...b, name: 'd', host: 'Other', Teff: 10000, TeffErr: 160, Rs: 1.6, RsErr: 0.08, a: 0.2, aErr: 0.004 };
+  yes('every star is drawn with the one table of deviates: a star with the same share of error in each input keeps the same range around its value', Math.abs(L.starlight(d).S / sb.S - 16) < 1e-9 && Math.abs(L.starlight(d).lo / sb.lo - 16) < 1e-9 && Math.abs(L.starlight(d).hi / sb.hi - 16) < 1e-9, `${L.starlight(d).S / sb.S}`);
+  yes('the table is made once, three deviates a draw', L.DEVIATES() === L.DEVIATES() && L.DEVIATES().length === 3 * MC.draws && Math.abs(L.DEVIATES().reduce((x, y) => x + y, 0) / L.DEVIATES().length) < 0.1);
   const wild = L.starlight({ name: 'w', host: 'Wild', Teff: 3000, TeffErr: 4000, Rs: 0.1, RsErr: 0.5, a: 0.01, aErr: 0.05 });
   yes('draws below zero are left out, and the rest still give a value', Number.isFinite(wild.S) && wild.S > 0 && wild.lo > 0, `${wild.lo} ${wild.S} ${wild.hi}`);
   yes(`the draws are the page's ${MC.draws}`, MC.draws === 400);
   // the draws themselves are fixed: a change to the seed, the order of the deviates, their number or the draws kept moves these
   const pin = (x, want) => Math.abs(x / want - 1) < 1e-12;
-  yes('the draws are the same on every machine: a star of 5,772 +- 100 K, 1 +- 0.05 R and 1 +- 0.01 AU', pin(s.S, 1.008575985034472) && pin(s.lo, 0.8936311556338775) && pin(s.hi, 1.1330942133807589), `${s.S} ${s.lo} ${s.hi}`);
-  yes('and with most draws below zero left out', pin(wild.S, 23.01414758856151) && pin(wild.lo, 0.08199980977529292) && pin(wild.hi, 796.6230269128189), `${wild.S} ${wild.lo} ${wild.hi}`);
+  yes('the draws are the same on every machine: a star of 5,772 +- 100 K, 1 +- 0.05 R and 1 +- 0.01 AU', pin(s.S, 0.9877456655125004) && pin(s.lo, 0.8802154070951964) && pin(s.hi, 1.1094992276028433), `${s.S} ${s.lo} ${s.hi}`);
+  yes('and with most draws below zero left out', pin(wild.S, 26.971230488521293) && pin(wild.lo, 0.25174275554175585) && pin(wild.hi, 689.2375147843877), `${wild.S} ${wild.lo} ${wild.hi}`);
+});
+
+/* ---------- the shares, found without sorting ---------- */
+block('the selection', () => {
+  // arrays of every kind the draws give: random, with ties, sorted either way, of one and two
+  let seed = 7; const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const cases = [[5], [2, 1], [1, 2], [3, 3, 3], [1, 2, 2, 2, 3], Array.from({ length: 400 }, r), Array.from({ length: 401 }, () => Math.floor(r() * 5)), Array.from({ length: 50 }, (_, i) => i), Array.from({ length: 50 }, (_, i) => 50 - i)];
+  const bad = [];
+  for (const c of cases) { const sorted = c.slice().sort((x, y) => x - y); for (let k = 0; k < c.length; k++) { const a = Float64Array.from(c); if (L.kth(a, k, 0, c.length - 1) !== sorted[k]) bad.push(`${c.length}:${k}`); } }
+  yes('every place of every kind of array is the value a sort puts there', bad.length === 0, bad.slice(0, 6).join(' '));
+  const a = Float64Array.from(Array.from({ length: 300 }, r)), sorted = Array.from(a).sort((x, y) => x - y), m = L.kth(a, 150, 0, 299);
+  yes('what is left of the place is no larger, what is right of it no smaller', m === sorted[150] && Array.from(a.subarray(0, 150)).every((x) => x <= m) && Array.from(a.subarray(151)).every((x) => x >= m));
+  const sh = [], one = L.shares(Float64Array.from([4]), 1);
+  for (const n of [2, 3, 7, 50, 399, 400]) for (let rep = 0; rep < 20; rep++) {
+    const c = Array.from({ length: n }, () => (rep % 3 ? r() : Math.floor(r() * 4))), s = c.slice().sort((x, y) => x - y), got = L.shares(Float64Array.from(c), n);
+    const at = (f) => s[Math.min(n - 1, Math.floor(f * n))];
+    if (got.S !== at(0.5) || got.lo !== at(0.16) || got.hi !== at(0.84)) sh.push(`${n}/${rep}`);
+  }
+  yes('the median and the 68% range are the values a sort puts at the 50th, 16th and 84th percent', sh.length === 0 && one.S === 4 && one.lo === 4 && one.hi === 4, sh.slice(0, 6).join(' '));
+  const Z = L.DEVIATES();
+  yes('the table is the same on every machine, to its last deviate', Math.abs(Z[0] - TABLE[0]) < 1e-15 && Math.abs(Z[Z.length - 1] - TABLE[1]) < 1e-15 && Math.abs(Z.reduce((x, y) => x + y * y, 0) - TABLE[2]) < 1e-9, `${Z[0]} ${Z[Z.length - 1]} ${Z.reduce((x, y) => x + y * y, 0)}`);
+  yes('a place looked for inside a part of the array', L.kth(Float64Array.from([9, 4, 1, 3, 2, 0]), 3, 1, 4) === 3 && L.kth(Float64Array.from([9, 4, 1, 3, 2, 0]), 1, 1, 4) === 1);
 });
 
 /* ---------- the equilibrium temperature from the same draws ---------- */

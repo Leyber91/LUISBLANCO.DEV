@@ -20,6 +20,7 @@ import { runMutants } from '../../kit/tests/mutants.mjs';
 const here = dirname(fileURLToPath(import.meta.url));
 const STAR = "if (pos(p.Rs) && pos(p.Teff)) return { L: p.Rs * p.Rs * Math.pow(p.Teff / PHYS.T_SUN, 4), src: 'R and Teff', archive };";
 const DRAW = 'if (T > 0 && R > 0 && aa > 0) d[n++] = fluxFrom(T, R, aa);';
+const FLUX = "export const fluxFrom = (T, R, a) => { const t = T / PHYS.T_SUN; return R * R / (a * a) * (t * t) * (t * t); };";
 const KEY = "const key = S <= e.sInner && S >= e.sOuter ? 'cons' : S <= e.sInnerOpt && S >= e.sOuterOpt ? 'opt' : S > e.sInnerOpt ? 'hot' : 'cold';";
 
 const MUTANTS = [
@@ -45,15 +46,38 @@ const MUTANTS = [
   ['Kepler\'s law with a year of 365 days', 'Math.pow(p.P / 365.25, 2) * p.Ms)', 'Math.pow(p.P / 365, 2) * p.Ms)'],
   ['Kepler\'s law without the star\'s mass', 'Math.pow(p.P / 365.25, 2) * p.Ms)', 'Math.pow(p.P / 365.25, 2))'],
   ['Kepler\'s law with no mass to use', 'if (isNum(p.P) && isNum(p.Ms)) return', 'if (isNum(p.P)) return'],
-  ['the flux of a star linear in its radius', 'export const fluxFrom = (T, R, a) => R * R / (a * a) *', 'export const fluxFrom = (T, R, a) => R / (a * a) *'],
-  ['the flux falling with the orbit, not its square', 'export const fluxFrom = (T, R, a) => R * R / (a * a) *', 'export const fluxFrom = (T, R, a) => R * R / a *'],
-  ['the flux cubic in the temperature', 'Math.pow(T / PHYS.T_SUN, 4);', 'Math.pow(T / PHYS.T_SUN, 3);'],
+
+  /* ---- the flux, the table of deviates and the selection of the shares ---- */
+  ['the flux of a star linear in its radius', FLUX, FLUX.replace('return R * R / (a * a) *', 'return R / (a * a) *')],
+  ['the flux falling with the orbit, not its square', FLUX, FLUX.replace('return R * R / (a * a) *', 'return R * R / a *')],
+  ['the flux cubic in the temperature', FLUX, FLUX.replace('(t * t) * (t * t); };', '(t * t) * t; };')],
+  ['the flux of the temperature against a 5,780 K Sun', FLUX, FLUX.replace('const t = T / PHYS.T_SUN;', 'const t = T / 5780;')],
+  ['the table made again on every call', '  if (!table) {\n    const z = normalFrom', '  if (true) {\n    const z = normalFrom'],
+  ['the table from another seed', "seedOf('exomania', 'starlight')", "seedOf('exomania', 'starlight', 2)"],
+  ['the table one deviate short', 'for (let i = 0; i < table.length; i++) table[i] = z();', 'for (let i = 0; i < table.length - 1; i++) table[i] = z();'],
+  ['the table of two deviates a draw', 'table = new Float64Array(3 * MC.draws);', 'table = new Float64Array(2 * MC.draws);'],
+  ['the temperature and the radius drawn with one deviate', 'R = p.Rs + eR * z[3 * k + 1],', 'R = p.Rs + eR * z[3 * k],'],
+  ['the orbit drawn with the radius\'s deviate', 'aa = a + eA * z[3 * k + 2];', 'aa = a + eA * z[3 * k + 1];'],
+  ['the temperature drawn with the next draw\'s deviate', 'const T = p.Teff + eT * z[3 * k],', 'const T = p.Teff + eT * z[3 * k + 3],'],
+  ['a part of one element left unsorted', 'while (hi > lo) {\n    const x = a[(lo + hi) >> 1];', 'while (hi > lo + 1) {\n    const x = a[(lo + hi) >> 1];'],
+  ['the partition stopped one short', 'while (i <= j) {\n      while (a[i] < x) i++;', 'while (i < j) {\n      while (a[i] < x) i++;'],
+  ['the left walk past values equal to the pivot', 'while (a[i] < x) i++;', 'while (a[i] <= x && i < hi) i++;'],
+  ['the right walk past values equal to the pivot', 'while (a[j] > x) j--;', 'while (a[j] >= x && j > lo) j--;'],
+  ['a pair that has crossed swapped', 'if (i <= j) { const t = a[i];', 'if (i <= j + 1) { const t = a[i];'],
+  ['the left part kept when the place is right of it', 'if (k <= j) hi = j;', 'if (k <= j + 1) hi = j;'],
+  ['the place taken for found at the right part\'s first element', 'else if (k >= i) lo = i;', 'else if (k > i) lo = i;'],
+  ['the median one place up', 'const im = Math.floor(0.5 * n),', 'const im = Math.floor(0.5 * n) + 1,'],
+  ['the range from the 15th percentile', 'il = Math.floor(0.16 * n),', 'il = Math.floor(0.15 * n),'],
+  ['the range to the 85th percentile', 'ih = Math.min(n - 1, Math.floor(0.84 * n));', 'ih = Math.min(n - 1, Math.floor(0.85 * n));'],
+  ['the share taken one place up', 'il = Math.floor(0.16 * n),', 'il = Math.ceil(0.16 * n),'],
+  ['the low end looked for beside the median, not below it', 'lo: il < im ? kth(d, il, 0, im - 1) : S,', 'lo: il < im ? kth(d, il, 1, im) : S,'],
+  ['the high end looked for beside the median, not above it', 'hi: ih > im ? kth(d, ih, im + 1, n - 1) : S }', 'hi: ih > im ? kth(d, ih, im, n - 2) : S }'],
+  ['the low end always the median', 'lo: il < im ? kth(d, il, 0, im - 1) : S,', 'lo: il > im ? kth(d, il, 0, im - 1) : S,'],
+  ['the high end always the median', 'hi: ih > im ? kth(d, ih, im + 1, n - 1) : S }', 'hi: ih < im ? kth(d, ih, im + 1, n - 1) : S }'],
+  ['no buffer to draw into', 'd = work || (work = new Float64Array(MC.draws));', 'd = work && (work = new Float64Array(MC.draws));'],
+  ['the draws of a planet kept from the last one', 'const z = DEVIATES(), d = work || (work = new Float64Array(MC.draws));', 'const z = DEVIATES(), d = work && null || (work = new Float64Array(MC.draws - 1));'],
 
   /* ---- the starlight ---- */
-  ['the median one place up', 'S = at(s, 0.5);', 'S = at(s, 0.51);'],
-  ['the range from the 15th percentile', 'lo = at(s, 0.16);', 'lo = at(s, 0.15);'],
-  ['the range to the 85th percentile', 'hi = at(s, 0.84);', 'hi = at(s, 0.85);'],
-  ['the share taken one place up', 'const at = (s, f) => s[Math.min(s.length - 1, Math.floor(f * s.length))];', 'const at = (s, f) => s[Math.min(s.length - 1, Math.ceil(f * s.length))];'],
   ['a planet computed again on every call', '  if (!out) { out = compute(p); memo.set(p, out); }\n  return out;', '  return compute(p);'],
   ['the archive\'s insolation first, as before', "  if (pos(p.Teff) && pos(p.Rs) && pos(a)) {\n    const eT", "  if (pos(p.Teff) && pos(p.Rs) && pos(a) && !pos(p.S)) {\n    const eT"],
   ['the star without its radius', 'if (pos(p.Teff) && pos(p.Rs) && pos(a)) {', 'if (pos(p.Teff) && pos(a)) {'],
@@ -65,9 +89,6 @@ const MUTANTS = [
   ['the radius\'s error never drawn', 'eR = sd(p.RsErr),', 'eR = 0,'],
   ['draws only when the temperature and the radius both have an error', 'if (eT || eR || eA) {', 'if (eT && eR || eA) {'],
   ['draws only when the radius and the orbit both have an error', 'if (eT || eR || eA) {', 'if (eT || eR && eA) {'],
-  ['the stream of each planet its own', "seedOf('star', p.host, p.Teff, p.TeffErr, p.Rs, p.RsErr)", "seedOf('star', p.name, p.Teff, p.TeffErr, p.Rs, p.RsErr)"],
-  ['the stream of a star whatever values it is listed with', "seedOf('star', p.host, p.Teff, p.TeffErr, p.Rs, p.RsErr)", "seedOf('star', p.host)"],
-  ['the deviates in another order', 'const T = p.Teff + eT * z(), R = p.Rs + eR * z(), aa = a + eA * z();', 'const R = p.Rs + eR * z(), T = p.Teff + eT * z(), aa = a + eA * z();'],
   ['a draw short', 'for (let k = 0; k < MC.draws; k++) {', 'for (let k = 1; k < MC.draws; k++) {'],
   ['the last draw left out', 'for (let k = 0; k < MC.draws; k++) {', 'for (let k = 0; k < MC.draws - 1; k++) {'],
   ['a temperature below zero drawn', DRAW, DRAW.replace('T > 0 &&', 'T > -Infinity &&')],
@@ -76,7 +97,6 @@ const MUTANTS = [
   ['a small radius left out', DRAW, DRAW.replace('R > 0 &&', 'R > 0.1 &&')],
   ['an orbit below zero drawn', DRAW, DRAW.replace('aa > 0)', 'aa > -Infinity)')],
   ['a close orbit left out', DRAW, DRAW.replace('aa > 0)', 'aa > 0.01)')],
-  ['the median of no draws taken', 'if (n) { const s = d.subarray(0, n).sort();', 'if (true) { const s = d.subarray(0, MC.draws).sort();'],
   ['no ratio to the archive\'s insolation', 'ratio: archive === null ? null : archive / S };', 'ratio: null };'],
   ['the ratio taken the other way', 'ratio: archive === null ? null : archive / S };', 'ratio: archive === null ? null : S / archive };'],
   ['a ratio for a missing archive value', 'ratio: archive === null ? null : archive / S };', 'ratio: archive !== null ? null : archive / S };'],

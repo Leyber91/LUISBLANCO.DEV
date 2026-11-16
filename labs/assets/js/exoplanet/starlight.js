@@ -42,12 +42,21 @@
      equilibrium temperature is Teff (R / 2a)^(1/2) (1 - A)^(1/4) of
      the same draws, so its median and range are those of S, in
      kelvin: T = T_ZERO S^(1/4) (1 - A)^(1/4).
-   - The draws of a star are the same for every planet the archive
-     lists it with (the same temperature and radius and their
-     errors), and the orbit's error moves with them: so two planets
-     of one star keep their order against the zone's edges, and the
-     system view, which draws one planet's zone around all of them,
-     agrees with each planet's own sheet.
+   - Every planet is drawn with one table of deviates, made once
+     (DEVIATES), three a draw: the star's temperature, its radius
+     and the orbit. So the draws of a star are the same for every
+     planet the archive lists it with, and the orbit's error moves
+     with them: two planets of one star keep their order against
+     the zone's edges, and the system view, which draws one planet's
+     zone around all of them, agrees with each planet's own sheet.
+     Each planet's own median and range are those of its errors;
+     only planets of different stars share deviates, which no
+     printed number compares. One table, and not a stream for each
+     star, and a selection of the three shares, not a sort, because
+     the whole catalogue is drawn on the page's thread when the
+     radius against insolation diagram first draws: a stream and a
+     sort for each planet took 660 ms on this machine, the table and
+     the selection about 100 ms (main's archive values: 2 ms).
    - The zone is placed by that S on every view. Its edges are the
      fluxes of Kopparapu et al. 2013 at the star's temperature; in
      AU they are where the same starlight falls, a sqrt(S / S_edge),
@@ -90,12 +99,48 @@ export function semiMajor(p) {
 }
 
 /* The starlight at a, for a star of temperature T and radius R, relative to Earth's. */
-export const fluxFrom = (T, R, a) => R * R / (a * a) * Math.pow(T / PHYS.T_SUN, 4);
+export const fluxFrom = (T, R, a) => { const t = T / PHYS.T_SUN; return R * R / (a * a) * (t * t) * (t * t); };
 
-/* The share f of a sorted sample: the value at floor(f n), as the page's other ranges take it (science.js monteCarlo). */
-const at = (s, f) => s[Math.min(s.length - 1, Math.floor(f * s.length))];   // equivalent: f is 0.84 at most here, so floor(f n) never reaches n
+/* The deviates every planet is drawn with: 3 x MC.draws standard normals from one seeded generator, made on first use. */
+let table = null;
+export const DEVIATES = () => {
+  if (!table) {
+    const z = normalFrom(mulberry32(seedOf('exomania', 'starlight')));
+    table = new Float64Array(3 * MC.draws);
+    for (let i = 0; i < table.length; i++) table[i] = z();
+  }
+  return table;
+};
+
+/* The value that would stand at index k of a[from..to] sorted, found without sorting (Hoare's selection, middle
+   pivot). It reorders that part of a so that what is left of k is no larger and what is right of it no smaller, which
+   lets the next share be looked for on one side only. On 400 draws it takes half the time of a sort. */
+export function kth(a, k, from, to) {
+  let lo = from, hi = to;
+  while (hi > lo) {
+    const x = a[(lo + hi) >> 1];
+    let i = lo, j = hi;
+    while (i <= j) {
+      while (a[i] < x) i++;
+      while (a[j] > x) j--;
+      if (i <= j) { const t = a[i]; a[i] = a[j]; a[j] = t; i++; j--; }
+    }
+    if (k <= j) hi = j;
+    else if (k >= i) lo = i;
+    else break;
+  }
+  return a[k];
+}
+/* The median and the 68% range of the first n draws: the values at floor(f n) of them sorted, for f 0.5, 0.16 and 0.84,
+   as the page's other ranges take them (science.js monteCarlo). The median first; then each end on its side of it. */
+export function shares(d, n) {
+  const im = Math.floor(0.5 * n), il = Math.floor(0.16 * n), ih = Math.min(n - 1, Math.floor(0.84 * n));   // equivalent: f is 0.84 at most, so floor(f n) never reaches n
+  const S = kth(d, im, 0, n - 1);
+  return { S, lo: il < im ? kth(d, il, 0, im - 1) : S, hi: ih > im ? kth(d, ih, im + 1, n - 1) : S };
+}
 
 const memo = new WeakMap();
+let work = null;
 /* The starlight a planet receives, relative to Earth's: { S, lo, hi, src, archive, ratio }.
    src 'star': from Teff, R and a, the median of the draws, lo and hi its 68% range (null when the snapshot gives
    none of the three an error); 'archive': the archive's insolation, because one of the three is missing;
@@ -113,15 +158,14 @@ function compute(p) {
     const eT = sd(p.TeffErr), eR = sd(p.RsErr), eA = aSrc === 'archive' ? sd(p.aErr) : 0;
     let S = fluxFrom(p.Teff, p.Rs, a), lo = null, hi = null;
     if (eT || eR || eA) {
-      // one stream per star as the archive lists it: three deviates a draw, whichever errors this row has
-      const z = normalFrom(mulberry32(seedOf('star', p.host, p.Teff, p.TeffErr, p.Rs, p.RsErr)));
-      const d = new Float64Array(MC.draws);
+      // three deviates a draw from the one table, whichever errors this row has
+      const z = DEVIATES(), d = work || (work = new Float64Array(MC.draws));   // one buffer: a planet is drawn at once
       let n = 0;
       for (let k = 0; k < MC.draws; k++) {
-        const T = p.Teff + eT * z(), R = p.Rs + eR * z(), aa = a + eA * z();
+        const T = p.Teff + eT * z[3 * k], R = p.Rs + eR * z[3 * k + 1], aa = a + eA * z[3 * k + 2];
         if (T > 0 && R > 0 && aa > 0) d[n++] = fluxFrom(T, R, aa);
       }
-      if (n) { const s = d.subarray(0, n).sort(); S = at(s, 0.5); lo = at(s, 0.16); hi = at(s, 0.84); }
+      if (n) ({ S, lo, hi } = shares(d, n));
     }
     return { S, lo, hi, src: 'star', archive, ratio: archive === null ? null : archive / S };
   }

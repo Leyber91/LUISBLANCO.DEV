@@ -19,7 +19,7 @@ import {
   semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
 } from '../science.js';
 import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers } from '../starlight.js';
-import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS, DATA } from '../config.js';
+import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
 import { fmt, fmtInt } from './common.js';
 import { el } from '../../kit/dom.js';
 import { ivSvg, ivAxisSvg } from '../../kit/controls.js';
@@ -108,11 +108,15 @@ function inferredRows(p, A) {
   return rows;
 }
 
+/* The archive's composite table, the source of an insolation the sheet shows (config.js DATA.snapshotLabel gives its
+   DOI). Short, because the line of sources keeps each on one line: the full label took that line to 493 px at 390. */
+const COMPOSITE = { label: 'PSCompPars', url: 'https://doi.org/10.26133/NEA13' };
+
 /* The starlight's row: where it stands (sheet B's measured group for the archive's value, the inferred group for the
    one computed from the star) is the caller's; its value, range and note are starlight.js's. */
 function starlightRow(p, S) {
   const t = starlightText(S);
-  return { key: 'S', n: 'insolation', v: t.v, u: 'S⊕', pm: t.pm, kind: S.src === 'archive' ? 'm' : 'd', refs: S.src === 'archive' || archiveDiffers(S) ? [DATA.snapshotLabel] : [],
+  return { key: 'S', n: 'insolation', v: t.v, u: 'S⊕', pm: t.pm, kind: S.src === 'archive' ? 'm' : 'd', refs: S.src === 'archive' || archiveDiffers(S) ? [COMPOSITE] : [],
     note: starlightNote(p, S), iv: { value: S.S, lo: S.lo, hi: S.hi } };
 }
 
