@@ -330,6 +330,16 @@
     "to": "timeoutMs, port, say }); } finally"
   },
   {
+    "name": "lock: a process waits for its own hold",
+    "from": "    if (holder && holder.pid === process.pid) return () => {};\n",
+    "to": ""
+  },
+  {
+    "name": "lock: an inner hold gives the lock back",
+    "from": "    if (holder && holder.pid === process.pid) return () => {};",
+    "to": "    if (holder && holder.pid === process.pid) return () => { fs.rmSync(file, { force: true }); };"
+  },
+  {
     "name": "runner: the rules never run",
     "from": "      if (!invariants.length) return;",
     "to": "      return;"

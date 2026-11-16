@@ -119,7 +119,9 @@ export function transparentIn(png, skip = []) {
 }
 
 /* One Chrome at a time on this machine: wait for the lock file, take it from a holder that no longer runs (or from
-   one that died before it wrote its name), and return the function that gives it back; null when waitMs runs out. */
+   one that died before it wrote its name), and return the function that gives it back; null when waitMs runs out.
+   A process that holds it already holds it again at once, and that inner hold gives nothing back: a selftest holds
+   the lock for its whole run, so that selftests run one after another rather than drive by drive in turn. */
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };   // equivalent: EPERM, a process of another user, cannot be made here; it runs, so the lock is its
 export async function holdChrome(waitMs = 20 * 60 * 1000, file = LOCK) {
   const t0 = Date.now();
@@ -132,6 +134,7 @@ export async function holdChrome(waitMs = 20 * 60 * 1000, file = LOCK) {
     } catch (e) { if (e.code !== 'EEXIST') throw e; }
     let holder = null, age = 0;
     try { age = Date.now() - fs.statSync(file).mtimeMs; holder = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { /* being written, or gone */ }
+    if (holder && holder.pid === process.pid) return () => {};
     if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) { try { fs.rmSync(file, { force: true }); } catch { /* another took it first */ } continue; }
     if (Date.now() - t0 >= waitMs) return null;
     await sleep(250);
@@ -316,8 +319,14 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
 
 /* ---------------- selftest: the runner of the invariants, the lock, a Chrome that dies ---------------- */
 async function selftest() {
-  // a selftest that hangs (a broken copy under tools/mutate.mjs) ends here, its Chrome killed and the lock left to be taken
-  setTimeout(() => { console.log('FAIL  drive selftest: not finished in 90 s'); process.exit(1); }, 90000).unref();
+  /* the whole run holds the machine's lock, and its time starts once it has it: under tools/mutate.mjs, copies run a few
+     at a time and would otherwise take Chrome in turn, drive by drive, each outrunning its time */
+  const whole = await holdChrome();
+  if (!whole) { console.log('FAIL  drive selftest: Chrome was not free within 20 minutes'); return 1; }
+  /* a selftest that hangs (a broken copy under tools/mutate.mjs) ends here, its Chrome killed and the lock left to be
+     taken. 60 s for a run of about 30: two hung copies ahead of a third in the queue still leave it inside mutate's
+     180 s, where a run stopped at that limit would count as caught */
+  setTimeout(() => { console.log('FAIL  drive selftest: not finished in 60 s'); process.exit(1); }, 60000).unref();
   let failed = 0, passed = 0;
   const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
   const J = JSON.stringify;
@@ -475,8 +484,11 @@ async function selftest() {
     const dead = await drive(async (p) => { await p.go(PAGE); await p.ev('new Promise(() => {})'); }, { width: 390, height: 600, port: 9362, timeoutMs: 6000, say: () => {} });
     const took = Date.now() - t0;
     yes('a call that never answers ends with the timeout: Chrome is killed, the call fails at once and the drive returns', dead.timedOut && took < 20000 && dead.checks.some((c) => !c.ok && /^finished inside 6 s/.test(c.name)), `${took} ms ${J(dead.checks).slice(0, 200)}`);
-    yes('the machine lock is given back after each drive', !fs.existsSync(LOCK) || JSON.parse(fs.readFileSync(LOCK, 'utf8') || '{}').pid !== process.pid);
-  } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
+    const held = () => fs.existsSync(LOCK) && JSON.parse(fs.readFileSync(LOCK, 'utf8') || '{}').pid === process.pid;
+    yes('a drive inside this process\'s hold of the machine lock does not give it back (and did not wait for it: the drives above ran)', held());
+    whole();
+    yes('the hold gives the machine lock back', !held());
+  } finally { fs.rmSync(scratch, { recursive: true, force: true }); whole(); }
   console.log(`drive selftest: ${passed} passed, ${failed} failed`);
   return failed ? 1 : 0;
 }

@@ -309,10 +309,13 @@ const PAGE = (body, css = '', script = '', tokens = true) => (`<!doctype html><h
   ${css}</style></head><body>${body}${script ? `<script>${script}</script>` : ''}</body></html>`);   /* a page written in place, not loaded: a fixture takes a few ms */
 
 async function selftest() {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const { drive, holdChrome } = await import(pathToFileURL(path.join(here, 'drive.mjs')).href);
+  // the machine's lock first, so that the time below is this run's own and not a wait for another drive (tools/drive.mjs)
+  const whole = await holdChrome();
+  if (!whole) { console.log('FAIL  invariants selftest: Chrome was not free within 20 minutes'); return 1; }
   // a selftest that hangs (a broken copy under tools/mutate.mjs) ends here, its Chrome killed and the lock left to be taken
   setTimeout(() => { console.log('FAIL  invariants selftest: not finished in 60 s'); process.exit(1); }, 60000).unref();
-  const here = path.dirname(fileURLToPath(import.meta.url));
-  const { drive } = await import(pathToFileURL(path.join(here, 'drive.mjs')).href);
   let failed = 0, passed = 0;
   const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
   const has = (list, id) => list.some((x) => new RegExp(`^#${id}(?![\\w-])`).test(String(x)));
@@ -517,6 +520,7 @@ async function selftest() {
   }, { width: 390, height: 844, port: 9361, timeoutMs: 120000, say: () => {} });
   const lost = r.checks.filter((c) => !c.ok);
   yes('the fixture pages ran in one Chrome to their end, with a clean console', !r.timedOut && !lost.length, J(lost).slice(0, 400));
+  whole();
 
   console.log(`invariants selftest: ${passed} passed, ${failed} failed`);
   return failed ? 1 : 0;
