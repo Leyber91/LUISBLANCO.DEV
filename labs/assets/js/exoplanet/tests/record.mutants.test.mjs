@@ -15,7 +15,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const WORDS = { search: 'by name', results: 'from a question', tour: 'on a tour', random: 'at random', diagram: 'on the diagram', system: 'in its system', link: 'from a link', log: 'from the log' };

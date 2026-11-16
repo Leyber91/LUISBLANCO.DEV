@@ -27,6 +27,9 @@ const edge = 1 / 2.2;
 const atEdge = ivGeometry(1, edge, 2.2, W), past = ivGeometry(1, edge * 0.999, 2.2 * 1.001, W);
 yes('an end exactly at the axis\'s reach is not cut', near(atEdge.a, IV_PAD) && near(atEdge.b, W - IV_PAD) && !atEdge.cutLo && !atEdge.cutHi, JSON.stringify(atEdge));
 yes('an end past it is cut at the strip\'s end, and says so', past.a === IV_PAD && past.b === W - IV_PAD && past.cutLo && past.cutHi, JSON.stringify(past));
+yes('the default axis is the shared one', near(ivGeometry(1, 0.5, 2, W).b, ivGeometry(1, 0.5, 2, W, IV_SPAN).b) && near(ivAt(2, W), ivAt(2, W, IV_SPAN)));
+yes('a range with no low end, or a low end of zero, is not drawn', !ivGeometry(2, null, 3, W).ranged && !ivGeometry(2, undefined, 3, W).ranged && !ivGeometry(2, 1, null, W).ranged);
+yes('a high end exactly at the strip less its 3 px is not cut, and one just past is', !ivGeometry(1, 1 / IV_SPAN, IV_SPAN, W).cutHi && ivGeometry(1, 1 / IV_SPAN, IV_SPAN * 1.001, W).cutHi && near(ivGeometry(1, 0.9, IV_SPAN * 2, W).b, W - IV_PAD));
 yes('a cut on one side only says that side', ivGeometry(1, 0.2, 1.5, W).cutLo && !ivGeometry(1, 0.2, 1.5, W).cutHi && !ivGeometry(1, 0.9, 5, W).cutLo && ivGeometry(1, 0.9, 5, W).cutHi);
 yes('a value with no range is a bare tick', same(ivGeometry(112.3, null, null, W), { xc: 75, a: 75, b: 75, ranged: false, cutLo: false, cutHi: false }));
 yes('a range that does not hold its value, or has no length, is not drawn', !ivGeometry(2, 2.1, 3, W).ranged && !ivGeometry(2, 1, 1.9, W).ranged && !ivGeometry(2, 2, 2, W).ranged && !ivGeometry(2, 3, 1, W).ranged);
@@ -48,8 +51,10 @@ yes('a strip one pitch short holds one mark fewer and says it does not hold them
 yes('every kept thing has its tall mark when all fit', tallyMarks(5, 5, 35, 7).tall.length === 5 && tallyMarks(5, 4, 35, 7).tall.length === 4 && tallyMarks(5, 1, 35, 7).tall.length === 1);
 yes('when they do not all fit the kept keep their share, and one at least stands for any', tallyMarks(1000, 1, 140, 7).tall.length === 1 && tallyMarks(1000, 0, 140, 7).tall.length === 0 && tallyMarks(1000, 500, 140, 7).tall.length === 10 && tallyMarks(200, 200, 140, 7).tall.length === 20,
   `${tallyMarks(1000, 1, 140, 7).tall.length} ${tallyMarks(1000, 500, 140, 7).tall.length} ${tallyMarks(200, 200, 140, 7).tall.length}`);
-yes('nothing counted, or no room, draws no mark', same(tallyMarks(0, 0, 200), { marks: 0, tall: [], all: true }) && same(tallyMarks(9, 2, 0), { marks: 0, tall: [], all: false }) && tallyMarks(9, 2, 6, 7).marks === 0 && tallyMarks(9, 2, 7, 7).marks === 1);
+yes('nothing counted, or no room, draws no mark', same(tallyMarks(0, 0, 200), { marks: 0, tall: [], all: true }) && same(tallyMarks(9, 2, 0), { marks: 0, tall: [], all: false }) && tallyMarks(9, 2, 6, 7).marks === 0 && tallyMarks(9, 2, 7, 7).marks === 1 && tallyMarks(9, 2, -7).marks === 0 && same(tallyMarks(9, 2, -7).tall, []));
 yes('more kept than counted is read as all counted being kept, and odd counts are read as whole', same(tallyMarks(3, 9, 70), { marks: 3, tall: [0, 1, 2], all: true }) && tallyMarks(3.7, 1.9, 70).marks === 3 && tallyMarks(3.7, 1.9, 70).tall.length === 1 && tallyMarks(NaN, 2, 70).marks === 0 && tallyMarks(-4, 2, 70).marks === 0);
+yes('a kept count below zero, or not a number, is read as none kept', tallyMarks(10, -3, 70).tall.length === 0 && tallyMarks(10, NaN, 70).tall.length === 0 && tallyMarks(10, '2', 70).tall.length === 0, `${tallyMarks(10, -3, 70).tall} | ${tallyMarks(10, NaN, 70).tall}`);
+yes('a pitch of zero or below draws no mark, and the default pitch is 7 px', tallyMarks(10, 2, 70, 0).marks === 0 && tallyMarks(10, 2, 70, -7).marks === 0 && tallyMarks(10, 2, 70).marks === 10 && tallyMarks(10, 2, 69).marks === 9);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

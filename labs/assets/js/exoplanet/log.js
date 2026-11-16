@@ -54,10 +54,10 @@
    ============================================================ */
 
 import { LabsOS } from '../os/index.js';
+import { ago } from '../os/util.js';   // the one function the labs share for a visitor's moments (kit/format.js states the convention)
 import * as R from './record.js';
 import { kindLine } from './find.js';
 import { esc } from './views/common.js';
-import { ago } from '../kit/format.js';
 import { tallySvg } from '../kit/controls.js';
 
 const LAB = 'exomania';

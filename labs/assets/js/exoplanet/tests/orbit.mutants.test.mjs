@@ -15,7 +15,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const FLOOR = `export const pitchMax = (lightDir) => Math.max(0.35, PITCH_LIMIT - Math.abs(orbitFrame(lightDir).tilt));`;

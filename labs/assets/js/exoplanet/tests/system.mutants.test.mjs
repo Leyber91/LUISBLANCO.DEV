@@ -17,7 +17,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const REACH = `export const viewExtent = (extent, solar) => (solar ? Math.max(extent, SOLAR_REACH) : extent);`;

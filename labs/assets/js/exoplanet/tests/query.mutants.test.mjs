@@ -9,7 +9,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 import { MUTANTS } from './query.mutants.list.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));

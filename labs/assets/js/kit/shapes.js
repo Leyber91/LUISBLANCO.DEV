@@ -13,7 +13,7 @@
    - a tally, as an observer's logbook: how many marks fit a strip
      and which of them are the tall ones.
 
-   Tests: kit/tests/format.test.mjs; broken rules:
+   Tests: kit/tests/shapes.test.mjs; broken rules:
    kit/tests/shapes.mutants.test.mjs.
    ============================================================ */
 
@@ -22,7 +22,7 @@ export const IV_SPAN = 2.2;
 /* Room kept at each end of the strip, so an end cut by the axis is still seen to end there. */
 export const IV_PAD = 3;
 
-const positive = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;
+const positive = (v) => Number.isFinite(v) && v > 0;   // Number.isFinite takes no string, so '2' is not a value
 
 /* Where an interval falls in a strip `width` px wide whose middle is the value: { xc, a, b, ranged, cutLo, cutHi },
    a and b the ends in px (cut to the strip, with the cut said), or null when the value cannot sit on a log axis.
@@ -65,7 +65,7 @@ export function tallyMarks(count, tall, room, pitch = 7) {
   const fit = room > 0 && pitch > 0 ? Math.floor(room / pitch) : 0;
   const marks = Math.min(n, fit);
   const all = marks === n;
-  const shown = marks === 0 || t === 0 ? 0 : Math.max(1, Math.round((marks * t) / n));   // all shown: each kept thing its own mark; more kept than counted: every mark
+  const shown = t === 0 ? 0 : Math.max(1, Math.round((marks * t) / n));   // all shown: each kept thing its own mark; more kept than counted: every mark; no marks: the loop draws none
   const at = [];
   for (let i = 0; i < marks; i++) if (Math.floor(((i + 1) * shown) / marks) > Math.floor((i * shown) / marks)) at.push(i);
   return { marks, tall: at, all };

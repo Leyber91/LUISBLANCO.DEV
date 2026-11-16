@@ -5,21 +5,29 @@
    Each entry breaks one rule of kit/shapes.js: an output
    silenced, or a bound moved to either side. The broken file is
    written to a copy of the kit in the system's temp folder and
-   shapes.test.mjs is run on the copy (the runner is Exomania's,
-   labs/assets/js/exoplanet/tests/mutants.mjs). Every broken rule
-   must fail a check there.
+   shapes.test.mjs is run on the copy (the runner is
+   kit/tests/mutants.mjs). Every broken rule must fail a check
+   there.
+
+   Which conditions no entry breaks is counted from the code by
+   tools/dev/conditions.mjs; a condition no entry can break
+   without changing nothing says why in a comment beside it that
+   starts "equivalent:".
 
    Add an entry here with every new rule in shapes.js.
    ============================================================ */
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from '../../exoplanet/tests/mutants.mjs';
+import { runMutants } from './mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const RANGED = 'const ranged = positive(lo) && positive(hi) && lo <= value && value <= hi && lo < hi;';
-const SHOWN = 'const shown = marks === 0 || t === 0 ? 0 : Math.max(1, Math.round((marks * t) / n));';
-const POS = "const positive = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;";
+const SHOWN = 'const shown = t === 0 ? 0 : Math.max(1, Math.round((marks * t) / n));';
+const POS = 'const positive = (v) => Number.isFinite(v) && v > 0;';
+const TALL = 'const t = Math.max(0, Math.floor(Number.isFinite(tall) ? tall : 0));';
+const COUNT = 'const n = Math.max(0, Math.floor(Number.isFinite(count) ? count : 0));';
+const FIT = 'const fit = room > 0 && pitch > 0 ? Math.floor(room / pitch) : 0;';
 const GATE = 'if (!positive(value) || !(width > 2 * IV_PAD) || !(span > 1)) return null;';
 const ENDS = 'const a = Math.max(IV_PAD, ra), b = Math.min(width - IV_PAD, rb);';
 const CUT = 'cutLo: ra < IV_PAD, cutHi: rb > width - IV_PAD';
@@ -33,7 +41,13 @@ const MUTANTS = [
   ['2 px kept at the ends', 'export const IV_PAD = 3;', 'export const IV_PAD = 2;'],
   ['4 px kept at the ends', 'export const IV_PAD = 3;', 'export const IV_PAD = 4;'],
   ['a value of zero placed on the log axis', POS, POS.replace('v > 0', 'v >= 0')],
-  ['an end at infinity placed', POS, POS.replace(' && Number.isFinite(v)', '')],
+  ['an end at infinity placed', POS, POS.replace('Number.isFinite(v) && ', '')],
+  ['a value of one alone placed', POS, POS.replace('v > 0', 'v === 1')],
+  ['a value that cannot sit on the axis drawn', GATE, GATE.replace('!positive(value) || !(width', '!positive(value) && !(width')],
+  ['a strip too narrow drawn when the axis has reach', GATE, GATE.replace('!(width > 2 * IV_PAD) || !(span', '!(width > 2 * IV_PAD) && !(span')],
+  ['an axis of its own reach for each call by default', 'export function ivGeometry(value, lo, hi, width, span = IV_SPAN) {', 'export function ivGeometry(value, lo, hi, width, span = 2) {'],
+  ['the labels on an axis of their own reach by default', 'export function ivAt(factor, width, span = IV_SPAN) {', 'export function ivAt(factor, width, span = 2) {'],
+  ['a range with no low end drawn', RANGED, RANGED.replace('positive(lo) && ', '')],
   ['a strip as wide as its two ends drawn', GATE, GATE.replace('width > 2', 'width >= 2')],
   ['an axis of no reach drawn', GATE, GATE.replace('span > 1', 'span >= 1')],
   ['a range whose low end is above its value drawn', RANGED, RANGED.replace(' && lo <= value', '')],
@@ -48,6 +62,8 @@ const MUTANTS = [
   ['an end at the axis\'s reach said to be cut', CUT, CUT.replace('ra < IV_PAD', 'ra <= IV_PAD + 1e-9')],
   ['a cut high end said for the low one', CUT, CUT.replace('cutLo: ra < IV_PAD', 'cutLo: rb > width - IV_PAD')],
   ['the high end never said to be cut', CUT, CUT.replace('cutHi: rb > width - IV_PAD', 'cutHi: false')],
+  ['a high end at the axis reach said to be cut', CUT, CUT.replace('cutHi: rb > width - IV_PAD', 'cutHi: rb >= width - IV_PAD - 1e-9')],
+  ['the high end cut at the edge of the strip, not 3 px in', ENDS, ENDS.replace('Math.min(width - IV_PAD, rb)', 'Math.min(width, rb)')],
   ['a bare tick off the middle', 'return { xc, a: xc, b: xc, ranged: false', 'return { xc, a: 0, b: xc, ranged: false'],
   ['the axis\'s labels placed on a straight scale', 'return xc + k * Math.log(factor);', 'return xc + k * (factor - 1);'],
   /* ---- the scale ---- */
@@ -55,6 +71,10 @@ const MUTANTS = [
   ['the scale runs past its first option', LEFT, LEFT.replace('Math.max(0, i - 1)', 'i - 1')],
   ['the down key not taken', RIGHT, RIGHT.replace(" || key === 'ArrowDown'", '')],
   ['the up key not taken', LEFT, LEFT.replace(" || key === 'ArrowUp'", '')],
+  ['the right key not taken', RIGHT, RIGHT.replace("(key === 'ArrowRight' ||", '(false ||')],
+  ['the left key not taken', LEFT, LEFT.replace("(key === 'ArrowLeft' ||", '(false ||')],
+  ['Home not taken', "if (key === 'Home') return 0;", 'if (false) return 0;'],
+  ['End not taken', "if (key === 'End') return n - 1;", 'if (false) return n - 1;'],
   ['Home goes to the second option', "if (key === 'Home') return 0;", "if (key === 'Home') return 1;"],
   ['End goes past the last', "if (key === 'End') return n - 1;", "if (key === 'End') return n;"],
   ['a scale with no options moved', 'if (!(n > 0)) return null;', 'if (!(n >= 0)) return null;'],
@@ -65,7 +85,16 @@ const MUTANTS = [
   ['no mark stands for a kept few', SHOWN, SHOWN.replace('Math.max(1, Math.round((marks * t) / n))', 'Math.round((marks * t) / n)')],
   ['kept marks cut instead of rounded', SHOWN, SHOWN.replace('Math.round((marks * t) / n)', 'Math.floor((marks * t) / n)')],
   ['a kept thing with no mark of its own when all fit', SHOWN, SHOWN.replace('Math.round((marks * t) / n)', 'Math.round((marks * t) / (n + 1))')],
-  ['a fraction of a thing counted', 'const n = Math.max(0, Math.floor(Number.isFinite(count)', 'const n = Math.max(0, Math.ceil(Number.isFinite(count)'],
+  ['a fraction of a thing counted', COUNT, COUNT.replace('Math.floor', 'Math.ceil')],
+  ['a count below zero read', COUNT, 'const n = Math.floor(Number.isFinite(count) ? count : 0);'],
+  ['a count that is not a number read', COUNT, 'const n = Math.max(0, Math.floor(count));'],
+  ['a kept count below zero read', TALL, 'const t = Math.floor(Number.isFinite(tall) ? tall : 0);'],
+  ['a kept count that is not a number read', TALL, 'const t = Math.max(0, Math.floor(tall));'],
+  ['a strip of no width or less given marks', FIT, FIT.replace('room > 0 && ', '')],
+  ['a pitch of zero taken', FIT, FIT.replace(' && pitch > 0', '')],
+  ['a tally drawn with a pitch of 6 px by default', 'export function tallyMarks(count, tall, room, pitch = 7) {', 'export function tallyMarks(count, tall, room, pitch = 6) {'],
+  ['a tall mark with nothing kept', SHOWN, SHOWN.replace('t === 0 ? 0 : ', '')],
+  ['a tall mark past the last', 'for (let i = 0; i < marks; i++)', 'for (let i = 0; i <= marks; i++)'],
   ['the kept marks bunched at the start', 'if (Math.floor(((i + 1) * shown) / marks) > Math.floor((i * shown) / marks)) at.push(i);', 'if (i < shown) at.push(i);'],
 ];
 
