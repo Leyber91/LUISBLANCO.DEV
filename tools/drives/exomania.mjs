@@ -22,9 +22,30 @@
    the survey before it moved still reaches the survey. Each check
    that names a fault is one an independent review found on
    2026-11-14.
+
+   After every step the rules of tools/drives/invariants.mjs hold
+   on whichever page the drive is on: no sideways scroll, every
+   target 44 px tall at 390, every text 4.5 to 1, and gold only
+   where the page allows it. The sky's gold is the gold of a kept
+   clock (overdue.css .lamp.kept, and the kit's tally and filled
+   action); its canvases draw kept clocks in that gold by the
+   sky's own rule, so their pixels are not scanned. On the survey
+   the rules are the survey's (shapes.mjs SURVEY_GOLD). Added on
+   2026-11-16, when the review of pull request 42 found the sky
+   scrolling sideways at 390 once its table was open, a state the
+   one check for it here ran before.
    ============================================================ */
 
+import { overflow, targets, contrast, gold } from './invariants.mjs';
+import { SURVEY_GOLD } from './shapes.mjs';
+
+const SKY_GOLD = { allow: ['.bp', '.los-bk', '.lamp.kept', '.tally-marks .tl-kept', '.fill.kept', '.lbr-panel'] };
+
 export default async function exomania(p, { base }) {
+  p.invariant('invariant: the page never scrolls sideways', overflow());
+  p.invariant('invariant: every visible target is at least 44 px tall and 24 px wide at 390', targets());
+  p.invariant('invariant: every visible text is at least 4.5 to 1 against what is behind it', contrast());
+  p.invariant('invariant: gold only where the page allows it', `(/exomania-survey\.html$/.test(location.pathname) ? ${gold(SURVEY_GOLD)} : ${gold(SKY_GOLD)})`);
   const text = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || {}).textContent || ""`);
   const label = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || { getAttribute() { return ""; } }).getAttribute("aria-label") || ""`);
   const state = () => p.ev('document.body.dataset.state || ""');

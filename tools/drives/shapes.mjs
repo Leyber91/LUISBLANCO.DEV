@@ -25,11 +25,64 @@
 //      one number and one date convention (interface 2.2 to 2.4);
 //  10. every part of ui_inventory.md part 6 is on the page.
 // No model is called and nothing leaves the page's own origin.
+//
+// After every step the rules of tools/drives/invariants.mjs hold: the page never scrolls sideways, every visible
+// target is 44 px tall at 390, every text is 4.5 to 1, and gold is only where SURVEY_GOLD below allows it, in the DOM
+// and in the pixels of every canvas it does not name.
+//
+// Every use of gold in the survey (grep for T.gold and accretion in labs/assets/js/exoplanet and its stylesheets,
+// 2026-11-16), and why it is allowed:
+//   views/common.js tokens()            reads --accretion and its tints: the tokens, no mark of its own
+//   views/plot.js chosenMark            the chosen world's point when it is kept in the log: a saved world on a diagram
+//   views/transit.js measured depth     the archive's measured depth and duration against the model's curve: a
+//                                       measured value against a model
+//   kit controls.css .iv-m .iv-tick     the tick of a measured value in the table of numbers
+//   kit controls.css .tally-marks .tl-kept   a world kept in the log, its tall mark on the tally
+//   kit controls.css .fill.kept         "In your log", the filled action of a kept world (main.js toggles .kept)
+//   exoplanet.css .bp                   the site's four corner brackets
+//   os.css .los-bk                      the corner brackets of a Labs OS plate (the sharing question), the same frame
+//   #ret-render .st-observed            the status word "observed" of the planet's air (ticket 2.13, pull request 41)
+// No other use: export.js drew the plate's brackets in gold until 2026-11-16, and plot.js the chosen world on the
+// diagram and on the sky map; both are the bright ink now. The canvases the pixel scan does not read are named with
+// their reason in SURVEY_GOLD.canvases.named.
+
+import { standard, gold as goldRule, targets as targetRule } from './invariants.mjs';
+
+export const SURVEY_GOLD = {
+  allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel'],
+  canvases: {
+    scan: true,
+    named: {
+      '#exo-canvas': 'the world itself, a render of its own colours, not a mark (and a WebGL canvas, which has no 2D pixels to read)',
+      '#inset': 'the star drawn in its own colour, its Planck spectrum, which can be as warm as a tint of gold',
+      '#sheet-d canvas.sys-cv': 'the star drawn in its own colour, as in the inset',
+      '#sheet-e canvas.tr-cv': 'the measured depth and duration against the model: gold by the rule',
+    },
+    when: { '#v-plot canvas.plot-cv': '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")' },   // a kept chosen world: its point is gold
+  },
+};
 
 /* ---- run before the page's own scripts ---- */
 function guard() {
   const real = window.fetch.bind(window);
   window.fetch = (u, o = {}) => (new URL(typeof u === 'string' ? u : u.url, location.href).origin === location.origin ? real(u, o) : Promise.reject(new TypeError('refused by the drive')));
+  // what the page asks of the next frame, counted: under reduced motion a settled page asks for none
+  const raf = window.requestAnimationFrame.bind(window);
+  window.__rafAsked = 0;
+  window.requestAnimationFrame = (f) => { window.__rafAsked++; return raf(f); };
+  // the thumbnails watched from outside the page's code: when each first holds a drawing, and whether the renderer
+  // was building a shader at that moment (engine.building(), the renderer's own state)
+  window.__thumbWatch = [];
+  const t0 = Date.now();
+  const watch = setInterval(() => {
+    const cs = document.querySelectorAll('#v-plot [role="tab"] canvas');
+    if (!cs.length) return;
+    const lit = [...cs].map((c) => { try { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 30) n++; return n; } catch { return -1; } });
+    const e = window.__exoEngine, last = window.__thumbWatch[window.__thumbWatch.length - 1];
+    const key = lit.join(',');
+    if (!last || last.key !== key) window.__thumbWatch.push({ t: Date.now() - t0, key, lit, building: e ? e.building() : null, list: (window.__exoThumbs || {}).listed || null });
+    if (Date.now() - t0 > 90000) clearInterval(watch);
+  }, 40);
 }
 
 /* ---- run inside the page ---- */
@@ -47,26 +100,6 @@ function layout() {
     backBorder: q('.bar .back') ? parseFloat(getComputedStyle(q('.bar .back')).borderTopWidth) + parseFloat(getComputedStyle(q('.bar .door')).borderTopWidth) : -1,
     render: q('#ret-render') ? { inUl: !!q('#ret-render').closest('#sheet-a .ul'), text: q('#ret-render').textContent } : null,
   };
-}
-function golds() {
-  const probe = document.createElement('i'); document.body.append(probe);
-  const tok = ['--accretion', '--accretion-soft', '--accretion-dim'].map((v) => { probe.style.color = `var(${v})`; return getComputedStyle(probe).color; });
-  probe.remove();
-  const allowed = (e) => e.closest('.bp, .iv-m .iv-tick, .tally-marks .tl-kept, .fill.kept, #ret-render .st-observed, dialog:not([open]), .lbr-panel, canvas');   // with ticket 2.13 (pull request 41) the status word "observed" of the planet's air may be gold
-  const out = [];
-  for (const e of document.querySelectorAll('body *')) {
-    if (allowed(e)) continue;
-    const s = getComputedStyle(e);
-    if (s.display === 'none' || s.visibility === 'hidden' || !e.getClientRects().length) continue;
-    const own = [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
-    const used = [];
-    if (own) used.push(s.color);
-    for (const side of ['Top', 'Right', 'Bottom', 'Left']) if (parseFloat(s[`border${side}Width`]) > 0 && s[`border${side}Style`] !== 'none') used.push(s[`border${side}Color`]);
-    used.push(s.backgroundColor);
-    if (e instanceof SVGElement) { if (s.stroke && s.stroke !== 'none') used.push(s.stroke); if (s.fill && s.fill !== 'none') used.push(s.fill); }
-    if (used.some((c) => tok.includes(c))) out.push((e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.classList.length ? '.' + [...e.classList].join('.') : '')) + ' ' + (e.textContent || '').trim().slice(0, 30));
-  }
-  return [...new Set(out)].slice(0, 12);
 }
 function typeFaces() {
   const fam = (e) => (e ? getComputedStyle(e).fontFamily : '');
@@ -101,13 +134,6 @@ function labels() {
   }
   return { caps: caps.slice(0, 10), dots: dots.slice(0, 10), arrows: arrows.slice(0, 10) };
 }
-function targets(min) {
-  const sel = ['.finder .field', '#btn-random', '#log-line', '#distance [role="radio"]', '#btn-plain', '#btn-clean', '#tblock button', '[data-act="log"]', '[data-act="pin"]', '[data-act="chain"]',
-    '#report [data-k="ask"]', '#tours [data-tour]', '#v-plot [role="tab"]', '#filters [data-cls]', '#f-method', '#filters [data-act]', '#sheet-d .switch', '#sheet-e .switch', '#btn-method', '.bar a'];
-  const small = [];
-  for (const s of sel) for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); if (getComputedStyle(e).display !== 'none' && r.height > 0 && r.height < min - 0.5) small.push(`${s} ${Math.round(r.height)}px`); }
-  return small;
-}
 function switches() {
   return [...document.querySelectorAll('.switch')].filter((s) => s.getClientRects().length).map((s) => {
     const lv = s.querySelector('.sw-lever').getBoundingClientRect(), l = s.querySelector('.sw-l').getBoundingClientRect(), r = s.querySelector('.sw-r').getBoundingClientRect();
@@ -118,7 +144,10 @@ function switches() {
 function scaleIndex() {
   const g = document.getElementById('distance'), on = g && g.querySelector('[aria-checked="true"]'), off = g && g.querySelector('[aria-checked="false"]');
   const after = (e) => { const s = getComputedStyle(e, '::after'); return s.content !== 'none' && parseFloat(s.borderTopWidth) > 0; };
-  return { role: g && g.getAttribute('role'), radios: g ? g.querySelectorAll('[role="radio"]').length : 0, on: on && on.dataset.cam, onIndex: !!on && after(on), offIndex: !!off && after(off), onColor: on && getComputedStyle(on).color, offColor: off && getComputedStyle(off).color };
+  const lum = (e) => { const v = getComputedStyle(e).color.match(/[\d.]+/g).slice(0, 3).map((x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+  const offs = g ? [...g.querySelectorAll('[aria-checked="false"]')] : [];
+  return { role: g && g.getAttribute('role'), radios: g ? g.querySelectorAll('[role="radio"]').length : 0, on: on && on.dataset.cam, onIndex: !!on && after(on), offIndex: offs.some(after),
+    onLum: on ? +lum(on).toFixed(3) : 0, offLum: offs.length ? +Math.max(...offs.map(lum)).toFixed(3) : 0 };
 }
 function frames() {
   const tabs = [...document.querySelectorAll('#v-plot [role="tab"]')];
@@ -169,6 +198,15 @@ function reach() {
   return { rm, skip: skip ? skip.getAttribute('href') : null };
 }
 function ring() { const a = document.activeElement, c = getComputedStyle(a); return { id: a.id || a.className, style: c.outlineStyle, width: parseFloat(c.outlineWidth) }; }
+/* the focused element and whether its ring is seen: an outline of 2 px or more, or a ring drawn as a box shadow */
+function focusNow() {
+  const a = document.activeElement;
+  if (!a || a === document.body || a === document.documentElement) return { body: true };
+  const c = getComputedStyle(a), r = a.getBoundingClientRect();
+  const outline = c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) >= 2;
+  const shadow = c.boxShadow && c.boxShadow !== 'none' && /[1-9]\d*px/.test(c.boxShadow);
+  return { id: (a.id ? '#' + a.id : a.tagName.toLowerCase() + (a.className && typeof a.className === 'string' ? '.' + a.className.split(' ')[0] : '')) + ' ' + (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 18), ring: outline || shadow, h: Math.round(r.height), skip: a.classList.contains('skip') };
+}
 function kitUse() {
   return { btn: document.querySelectorAll('.btn, .chip').length, css: !!document.querySelector('link[href$="controls.css"]'), switches: document.querySelectorAll('.switch').length, scales: document.querySelectorAll('.scale').length, keys: document.querySelectorAll('.kact').length, fills: document.querySelectorAll('.fill').length };
 }
@@ -193,14 +231,30 @@ function parts() {
     'transit or velocity': '#sheet-e [data-k="sig"][role="switch"]', 'method and sources': '#btn-method', 'evidence tags and the line types': '.foot .lt', 'close is Esc': '[data-close="log"] .key, [data-close="compare"] .key, [data-close="chain"] .key, #method-close .key',
     'unpin all, plain': '#cmp-clear.plain', 'lettered tables, closed': '#sheet-c details, #sheet-d details, #sheet-e details', 'the inset': '#sheet-a .ur #inset',
   };
+  // where a part is seen: on the page now, in a dialog when it opens, inside a closed table whose summary is seen, in
+  // a running tour, or at the desk only (the inset and the site's mark are dropped below 1100 px)
+  const where = { 'close is Esc': 'dialog', 'unpin all, plain': 'dialog', 'the tour keys': 'tour', 'lettered tables, closed': 'details', 'the inset': innerWidth < 1100 ? 'desk' : 'shown', 'the mark': innerWidth < 1100 ? 'desk' : 'shown', 'star elevation scale': 'ground' };
+  const seen = (e) => !!e && e.getClientRects().length > 0 && e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) && e.getBoundingClientRect().width > 0;
   const missing = [];
-  for (const [k, s] of Object.entries(need)) for (const one of s.split(', ')) if (!document.querySelector(one)) { missing.push(`${k} (${one})`); break; }
+  for (const [k, s] of Object.entries(need)) {
+    const w = where[k] || 'shown';
+    for (const one of s.split(', ')) {
+      const e = document.querySelector(one);
+      if (!e) { missing.push(`${k} (${one}): not on the page`); break; }
+      if (w === 'shown' && !seen(e)) { missing.push(`${k} (${one}): on the page but not seen`); break; }
+      if (w === 'details') { const d = e.matches('details') ? e : e.closest('details'); if (!d || d.open || !seen(d.querySelector('summary'))) { missing.push(`${k} (${one}): its summary is not seen, or it is open`); break; } }
+      if (w === 'dialog') { const d = e.closest('dialog'); if (!d) { missing.push(`${k} (${one}): not in a dialog`); break; } const was = d.open; if (!was) d.show(); const ok = seen(e); if (!was) d.close(); if (!ok) { missing.push(`${k} (${one}): not seen when its dialog opens`); break; } }
+      if (w === 'tour' && !e.closest('#tourbar')) { missing.push(`${k} (${one}): not in the tour's bar`); break; }
+      if (w === 'ground' && !e.closest('#ground')) { missing.push(`${k} (${one}): not in the ground's controls`); break; }
+    }
+  }
   return { missing, n: Object.keys(need).length };
 }
 function thumbs() {
-  const t = window.__exoThumbs || null;
-  const lit = [...document.querySelectorAll('#v-plot [role="tab"] canvas')].map((c) => { try { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 30) n++; return n; } catch { return -1; } });
-  return { t, lit };
+  const w = window.__thumbWatch || [];
+  const drawn = w.filter((x) => x.lit.length === 5 && x.lit.every((n) => n > 40));
+  const tb = Number(((document.getElementById('tb-n') || {}).textContent || '').replace(/,/g, '').match(/^\d+/) || NaN);
+  return { first: drawn[0] || null, before: w.filter((x) => drawn.length && x.t < drawn[0].t).map((x) => x.building), drawings: drawn.length, last: drawn[drawn.length - 1] || null, listed: (window.__exoThumbs || {}).listed, tb, whys: (window.__exoThumbs || {}).whys };
 }
 function noThanks() { const b = [...document.querySelectorAll('button')].find((x) => /no thanks/i.test(x.textContent)); if (b) b.click(); return true; }
 function typeInto(text) { const q = document.getElementById('q'); q.focus(); q.value = text; q.dispatchEvent(new Event('input', { bubbles: true })); }
@@ -216,6 +270,7 @@ async function names(k, from, longest) {
 /* ---- the scenario ---- */
 export default async function shapes(p, { base, width }) {
   await p.before(`(${guard})()`);
+  for (const [n, e] of standard({ gold: SURVEY_GOLD })) p.invariant(n, e);
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const phone = width < 700;
   const NAMED = '(() => { const n = (document.getElementById("ret-name") || {}).textContent; return !!n && n.trim().length > 1 && n.trim() !== "…"; })()';
@@ -267,13 +322,25 @@ export default async function shapes(p, { base, width }) {
 
   // ---- 2. geometry, not colour; gold ----
   const S0 = await call(scaleIndex);
-  p.check('the distance scale is a radio group whose chosen view stands under its index, in the same ink as the rest', S0.role === 'radiogroup' && S0.radios === 3 && S0.on === 'orbit' && S0.onIndex && !S0.offIndex, j(S0));
+  p.check('the distance scale is a radio group whose chosen view stands under its index, the only one with an index, and in the bright ink', S0.role === 'radiogroup' && S0.radios === 3 && S0.on === 'orbit' && S0.onIndex && !S0.offIndex && S0.onLum > S0.offLum, j(S0));
   const W0 = await call(switches);
   p.check('every switch is one button, role switch, with both words, and its lever on the side of its state', W0.length >= 6 && W0.every((s) => s.role === 'switch' && (s.checked === 'true' || s.checked === 'false') && s.words && s.leverRight === (s.checked === 'true')), j(W0));
   const F0 = await call(frames);
   p.check('the five diagrams are lettered thumbnails, the open one framed and the others not', F0.tabs.length === 5 && F0.tabs.map((t) => t.letter).join('') === 'abcde' && F0.tabs.filter((t) => t.sel === 'true').length === 1 && F0.tabs.every((t) => t.frame === (t.sel === 'true')), j(F0.tabs));
-  const G0 = await call(golds);
-  p.check('gold is only on a measured value\'s tick, a world in the log and the site\'s frame', G0.length === 0, G0.join(' | '));
+  const G0 = await p.ev(goldRule(SURVEY_GOLD));
+  p.check('gold is only on a measured value\'s tick, a world in the log and the site\'s frame, and no canvas the list does not name has a gold pixel while the chosen world is not kept', G0.length === 0, G0.join(' | '));
+  // a size band, once pressed, stands on its heavy rule; the others have none
+  await p.ev('document.querySelector("#filters [data-cls=rocky]").click()'); await p.sleep(500);
+  const F1 = await call(frames);
+  const pressed = F1.bands.filter((b) => b.on === 'true'), rest = F1.bands.filter((b) => b.on !== 'true');
+  // its two edges take Home and End: as far as each can go, the end of the axis or the other edge
+  const edge = async (end, key) => { await p.ev(`document.getElementById("edge-${end}").focus()`); await p.key(key); await p.sleep(300); return p.ev('[document.getElementById("edge-lo"), document.getElementById("edge-hi")].map((e) => e ? +e.getAttribute("aria-valuenow") : null)'); };
+  const k1 = await edge('hi', 'End'), k2 = await edge('lo', 'End'), k3 = await edge('lo', 'Home');
+  p.check("a band's edges take Home and End: the high edge to the axis's end, the low edge up to the high one and back to the axis's start", k1[1] === 25 && k1[0] === 0.5 && k2[0] > 24 && k2[0] < 25 && k3[0] === 0.5 && k3[1] === 25, JSON.stringify({ k1, k2, k3 }));
+  await p.ev('(() => { for (let i = 0; i < 10; i++) { const b = document.querySelector("#filters [data-clear]"); if (!b) break; b.click(); } return true; })()'); await p.sleep(400);
+  await p.ev('document.querySelector("#filters [data-cls=rocky]").click()'); await p.sleep(400);
+  p.check('a pressed size band is shown by the heavy rule under it, and no other band has one', F0.bands.every((b) => b.on !== 'true') && pressed.length === 1 && pressed[0].cls === 'rocky' && pressed[0].lever >= 2 && rest.every((b) => b.lever < pressed[0].lever), j({ before: F0.bands, after: F1.bands }));
+  await p.ev('document.querySelector("#filters [data-cls=rocky]").click()'); await p.sleep(500);
   const ask = await p.ev('(() => { const a = document.querySelector("#report [data-k=ask]"), s = getComputedStyle(a); return { c: s.color, b: s.borderTopColor }; })()');
   const gold = await p.ev('(() => { const i = document.createElement("i"); document.body.append(i); const out = ["--accretion", "--accretion-soft", "--accretion-dim"].map((v) => { i.style.color = `var(${v})`; return getComputedStyle(i).color; }); i.remove(); return out; })()');
   p.check('"Ask the model" is not gold', !gold.includes(ask.c) && !gold.includes(ask.b), j(ask));
@@ -292,8 +359,8 @@ export default async function shapes(p, { base, width }) {
   p.check(`every part of the survey's inventory is on the page (${P.n} looked for)`, P.missing.length === 0, P.missing.join(' | '));
 
   // ---- 4. controls ----
-  const small = await call(targets, phone ? 44 : 24);
-  p.check(phone ? 'every main control is at least 44 px tall' : 'every main control is at least 24 px tall', small.length === 0, small.join(', '));
+  const small = await p.ev(phone ? targetRule() : targetRule({ below: 99999, tall: 24, wide: 0 }));
+  p.check(phone ? 'every visible target on the page is at least 44 px tall and 24 px wide' : 'every visible target on the page is at least 24 px tall', small.length === 0, small.join(', '));
   // a switch is one target: a press on either word turns it
   await p.ev('document.getElementById("btn-plain").scrollIntoView({ block: "center" })'); await p.sleep(200);
   const wl = await p.ev('(() => { const r = document.querySelector("#btn-plain .sw-l").getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()');
@@ -313,6 +380,18 @@ export default async function shapes(p, { base, width }) {
   await p.key('Tab');
   const rg = await call(ring);
   p.check('the focus is drawn with a visible ring on the next control, a switch', rg.style === 'solid' && rg.width >= 2 && /btn-plain/.test(rg.id), j(rg));
+  // and on every control the tab order reaches, from the skip link round to it again
+  await p.ev('(document.activeElement && document.activeElement.blur(), scrollTo(0, 0), true)');
+  const walk = [];
+  for (let k = 0; k < 260; k++) {
+    await p.key('Tab');
+    const f = await call(focusNow);
+    if (f.body || (k > 0 && f.skip)) break;
+    walk.push(f);
+  }
+  const noRing = walk.filter((f) => !f.ring);
+  p.check(`every control the tab order reaches shows a ring when it has the focus (${walk.length} reached)`, walk.length > 30 && noRing.length === 0, noRing.slice(0, 8).map((f) => f.id).join(' | '));
+  await p.ev('(document.activeElement && document.activeElement.blur(), scrollTo(0, 0), true)');
   // the keys, and their guard while typing
   await p.ev('(document.activeElement && document.activeElement.blur(), true)');
   const n0 = await name();
@@ -343,6 +422,42 @@ export default async function shapes(p, { base, width }) {
   const t3 = await p.ev('document.getElementById("tourbar").hidden');
   p.check('a tour is drawn as its line with the current stop ringed; the arrow keys step it, the seen stops fill, and Esc ends it', t0.ring && /1 of 6/.test(t0.k) && /2 of 6/.test(t1.k) && t1.seen >= 1 && /1 of 6/.test(t2) && t3 === true, j({ t0, t1, t2, t3 }));
 
+  // ---- 4b. the wheel, as a map's in a page (a pointer with a wheel: the desk) ----
+  if (!phone) {
+    await p.ev('(scrollTo(0, 0), true)'); await p.sleep(300);
+    const cam = () => p.ev('Math.round(window.__exoEngine.cfg.camDist * 1000) / 1000');
+    const st = () => p.ev('({ y: Math.round(scrollY), hint: !document.getElementById("wheel-hint").hidden, hintText: document.getElementById("wheel-hint").textContent })');
+    const pc = await p.ev('(() => { const r = document.getElementById("exo-stage").getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)]; })()');
+    const d0 = await cam();
+    await p.wheel(pc[0], pc[1], 120); await p.sleep(250);
+    const w1 = await st(), d1 = await cam();
+    await p.sleep(2300);
+    const w1b = await st();
+    p.check('over a planet not yet clicked the wheel scrolls the page, the zoom stays, and a hint says for about 2 s how to zoom', w1.y > 0 && d1 === d0 && w1.hint && /click the planet to zoom with the wheel, or use \+ and −/i.test(w1.hintText) && !w1b.hint, j({ w1, w1b, d0, d1 }));
+    await p.ev('(scrollTo(0, 0), true)'); await p.sleep(300);
+    await p.click(pc[0], pc[1]); await p.sleep(200);
+    await p.wheel(pc[0], pc[1], -120); await p.sleep(250);
+    const w2 = await st(), d2 = await cam();
+    p.check('once the planet is clicked the wheel zooms it and the page stays', w2.y === 0 && d2 < d0, j({ w2, d0, d2 }));
+    await p.move(pc[0], 5); await p.sleep(200);   // the pointer leaves sheet A, above it
+    await p.wheel(pc[0], pc[1], 120); await p.sleep(250);
+    const w3 = await st(), d3 = await cam();
+    await p.ev('(scrollTo(0, 0), true)'); await p.sleep(300);
+    await p.click(pc[0], pc[1]); await p.sleep(200);
+    await p.key('Escape'); await p.sleep(200);
+    await p.wheel(pc[0], pc[1], 120); await p.sleep(250);
+    const w4 = await st(), d4 = await cam();
+    p.check('the pointer leaving sheet A, or Esc, ends it: the wheel scrolls the page again', w3.y > 0 && d3 === d2 && w4.y > 0 && d4 === d2, j({ w3, d3, w4, d4 }));
+    await p.ev('(scrollTo(0, 0), document.activeElement && document.activeElement.blur(), true)'); await p.sleep(300);
+    const e0 = await cam();
+    await p.key('+', { code: 'Equal' }); await p.sleep(200);
+    const e1 = await cam();
+    await p.key('-', { code: 'Minus' }); await p.sleep(200);
+    const e2 = await cam();
+    const keysRow = await p.ev('(() => { const r = [...document.querySelectorAll("#method-body tr")].find((tr) => (tr.querySelector("th") || {}).textContent === "Keys"); return r ? "Keys " + r.querySelector("td").textContent : ""; })()');
+    p.check('+ and − zoom with the focus anywhere but a field, and the method lists them and the wheel among the keys', e1 < e0 && e2 > e1 && /\+ and − the zoom/.test(keysRow) && /wheel/.test(keysRow), j({ e0, e1, e2, keysRow }));
+  }
+
   // ---- 5. the loading line, and the same height in every state ----
   const h0 = await call(sameHeights);
   await open(`p=${encodeURIComponent('Kepler-442 b')}`, { still: false });
@@ -363,10 +478,11 @@ export default async function shapes(p, { base, width }) {
   p.check('nothing overflows sideways with a question\'s results on the page', !wide, String(wide));
 
   // ---- 7. heavy drawing when idle ----
-  await p.until('!!window.__exoThumbs', 60000);
-  await p.sleep(400);
+  await p.until('!!window.__exoThumbs && /with a measured radius/.test(document.getElementById("tb-n").textContent)', 60000);
+  await p.sleep(1500);
   const th = await call(thumbs);
-  p.check('the five thumbnails are drawn from the catalogue when the page is idle, while no shader is being built', !!th.t && th.t.building === false && th.t.idle === true && th.lit.length === 5 && th.lit.every((n) => n > 40), j(th));
+  p.check('the five thumbnails are first drawn while no shader is being built, as the renderer itself says, and never before', !!th.first && th.first.building === false && th.before.every((b) => b !== null), j(th));
+  p.check('once the weekly roster has joined, the thumbnails are drawn from the catalogue the title block counts', th.listed === th.tb && th.tb > 6000, j({ listed: th.listed, tb: th.tb, whys: th.whys, drawings: th.drawings }));
 
   // ---- 6. the log: a tally that never wraps, long names, a refusal in view ----
   const many = await call(names, 700, 1000, false), longest = await call(names, 5, 0, true);
@@ -399,6 +515,10 @@ export default async function shapes(p, { base, width }) {
   await p.until('document.querySelector("[data-act=log]").classList.contains("kept")', 6000);
   const f1 = await p.ev('(() => { const b = document.querySelector("[data-act=log]"), s = getComputedStyle(b); return { kept: b.classList.contains("kept"), bc: s.borderTopColor, text: b.textContent, w: Math.round(b.getBoundingClientRect().width) }; })()');
   const tk = await call(tally);
+  // and the kept world's point on the diagram is the one gold the diagram draws (none while it was not kept: the invariant)
+  await p.sleep(300);
+  const keptPx = await p.ev('(() => { const c = document.querySelector("#v-plot canvas.plot-cv"), d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 90 && Math.abs(d[i] - 212) <= 22 && Math.abs(d[i + 1] - 162) <= 22 && Math.abs(d[i + 2] - 76) <= 22) n++; return n; })()');
+  p.check('once the chosen world is kept, its point on the catalogue diagram turns gold', keptPx > 0, `${keptPx} gold pixels`);
   p.check('"Add to log" is filled, turns to the gold of a kept clock once the world is in the log, at the same width, and the tally gains a tall gold mark', !f0.kept && !gold.includes(f0.bg) && f1.kept && gold.includes(f1.bc) && f1.text === 'In your log' && f1.w === f0.w && tk.kept === 1, j({ f0, f1, tk }));
   await p.ev('document.querySelector("[data-act=log]").click()');
   await p.until('!document.querySelector("[data-act=log]").classList.contains("kept")', 6000);
@@ -406,6 +526,16 @@ export default async function shapes(p, { base, width }) {
   // ---- 8. reach ----
   const rc = await call(reach);
   p.check('a global rule stills every animation and transition under reduced motion', rc.rm, j(rc));
+  // under reduced motion the page shows its finished frame: once it has settled it asks for no frame at all
+  await p.media([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await open(`p=${encodeURIComponent('Kepler-442 b')}`, { still: false });
+  await p.until('document.body.classList.contains("ready") && !(window.__exoEngine && window.__exoEngine.building())', 60000);
+  await p.ev('new Promise((r) => setTimeout(r, 2500))');
+  const rm0 = await p.ev('({ n: window.__rafAsked, veil: document.getElementById("veil").classList.contains("gone"), motion: matchMedia("(prefers-reduced-motion: reduce)").matches })');
+  await p.ev('new Promise((r) => setTimeout(r, 2000))');
+  const rm1 = await p.ev('window.__rafAsked');
+  p.check('under reduced motion the page settles on its finished frame and then asks for no animation frame', rm0.motion && rm0.veil && rm1 === rm0.n, j({ ...rm0, after: rm1 }));
+  await p.media([]);
   await p.ev('(document.activeElement && document.activeElement.blur(), scrollTo(0, 0), true)');
   await p.key('Tab');
   const sk = await p.ev('({ cls: document.activeElement.className, text: document.activeElement.textContent, href: document.activeElement.getAttribute("href") })');
