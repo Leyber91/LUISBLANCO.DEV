@@ -139,6 +139,9 @@ a.ref:hover { color: var(--text-bright); }
   #ret-render .ret-more { position: relative; }
   #ret-render .ret-more-body { position: absolute; left: 0; top: 100%; z-index: 3; width: 52ch; max-width: calc(100vw - 80px);
     max-height: var(--more-max, 40vh); overflow-y: auto; padding: 6px 10px 8px; background: color-mix(in srgb, var(--void) 66%, transparent); }
+  /* the radius line and the message line under them would show through the backing; while the details are open they
+     give way, keeping their place (sheet B's table holds the radius meanwhile) */
+  #ul:has(#ret-render .ret-more[open]) > :is(.live, .msg) { visibility: hidden; }
 }
 #ret-render .st-observed { color: var(--accretion-soft); }
 #ret-render .st-disfavoured { text-decoration: underline dotted var(--line-bright); text-underline-offset: 3px; }
