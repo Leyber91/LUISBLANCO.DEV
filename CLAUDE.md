@@ -31,8 +31,9 @@ here, the daily routine included, are in SITE_RULES.md:
   kinds of mutant: one that silences each report, and one that loosens each condition, with a case just inside
   and just outside every bound. The first kind alone reads as full coverage and is not: on 2026-11-14 every report
   of two gates was caught while 51 of 68 loosened conditions still passed. Lists written from memory kept missing
-  conditions, so count them from the code: `node tools/dev/conditions.mjs <module> <list>` names every comparison,
-  default and clamp no entry breaks (on 2026-11-16, 17 of find.js's 29). On 2026-11-13 a
+  conditions, so count them from the code: `node tools/dev/conditions.mjs <module> <list> [<list> ...]` names the
+  comparisons, defaults and clamps no entry changes (on 2026-11-16, 20 of find.js's 29). Give it every list of a
+  module at once. On 2026-11-13 a
   checker that passed its own selftest 90 of 90 had 31 defects a review then confirmed, and the small tools
   written to prevent that had 19 of their own, then 27 more in a second review.
 

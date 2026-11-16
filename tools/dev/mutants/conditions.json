@@ -1,43 +1,63 @@
 [
   {
     "name": "operator: <= no longer found",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
   },
   {
     "name": "operator: >= no longer found",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|<=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
   },
   {
     "name": "operator: !== no longer found",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
   },
   {
     "name": "operator: defaults (?? and ||) no longer found",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
   },
   {
     "name": "operator: clamps no longer found",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])/g;"
   },
   {
     "name": "operator: an arrow taken for a comparison",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
   },
   {
     "name": "operator: a left shift taken for a comparison",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![=>!])<(?![=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![=>!])<(?![=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
   },
   {
     "name": "operator: a right shift taken for a comparison",
-    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
-    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![=])|Math\\.(?:max|min)\\(/g;"
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a shift assignment taken for <=",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a shift assignment taken for >=",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "selftest: a gate's own checks counted as rules",
+    "from": "    if (skip.some(([a, b]) => at >= a && at < b)) continue;\n",
+    "to": ""
+  },
+  {
+    "name": "selftest: the check one past the selftest left out too",
+    "from": "if (skip.some(([a, b]) => at >= a && at < b)) continue;",
+    "to": "if (skip.some(([a, b]) => at >= a && at <= b)) continue;"
   },
   {
     "name": "blank: a line comment kept",
@@ -60,7 +80,7 @@
     "to": "if (src[k] === '`') { return { end: k + 1, open: false }; }"
   },
   {
-    "name": "blank: a ${ } not remembered, so text after it counts as code",
+    "name": "blank: a ${ } not remembered",
     "from": "if (t.open) { stack.push(depth); depth++; lastSig = '{'; lastWord = ''; }",
     "to": "if (t.open) { depth++; lastSig = '{'; lastWord = ''; }"
   },
@@ -85,19 +105,94 @@
     "to": "false"
   },
   {
+    "name": "blank: no keyword lets a regular expression start",
+    "from": " || KEYWORDS_BEFORE_REGEX.has(lastWord);",
+    "to": ";"
+  },
+  {
+    "name": "blank: i++ does not end an operand",
+    "from": "    if ((c === '+' || c === '-') && d === c && ['w', '0', ')', ']'].includes(lastSig)) { lastSig = 'w'; lastWord = ''; i += 2; continue; }\n",
+    "to": ""
+  },
+  {
     "name": "line: counted from 0",
     "from": "const lineAt = (src, p) => { let l = 1;",
     "to": "const lineAt = (src, p) => { let l = 0;"
   },
   {
-    "name": "operand: a leading minus not part of the bound",
-    "from": "  if (code[k] === '-' || code[k] === '+') k++;\n",
+    "name": "operand: a string on the right not read",
+    "from": "if (q === '\"' || q === \"'\" || q === '`') { const e = code.indexOf(q, k + 1); k = e < 0 ? code.length : e + 1; }",
+    "to": "if (false) {}"
+  },
+  {
+    "name": "operand: an exponent on the right stops at its sign",
+    "from": "(?:[eE][+-]?[0-9]+)?[\\w]*/.exec",
+    "to": "[\\w]*/.exec"
+  },
+  {
+    "name": "operand: a call or index on the right not read",
+    "from": "      if (code[k] === '(' || code[k] === '[') k = closeOf(code, k);\n      else if",
+    "to": "      if"
+  },
+  {
+    "name": "operand: a sign on the right not read",
+    "from": "  while (code[k] === '-' || code[k] === '+' || code[k] === '!') k++;\n",
     "to": ""
   },
   {
-    "name": "declared: the equivalent comment ignored",
-    "from": "declared: /\\/\\/\\s*equivalent:|\\/\\*\\s*equivalent:/.test(lineText(src, line))",
-    "to": "declared: false"
+    "name": "operand: a call or index on the left not read",
+    "from": "    if (ch === ')' || ch === ']') k = openOf(code, k) - 1;\n    else if (ch === '\"'",
+    "to": "    if (ch === '\"'"
+  },
+  {
+    "name": "operand: a string on the left not read",
+    "from": "else if (ch === '\"' || ch === \"'\" || ch === '`') k = code.lastIndexOf(ch, k - 1) - 1;",
+    "to": "else if (false) k = 0;"
+  },
+  {
+    "name": "operand: the mantissa of an exponent on the left not read",
+    "from": "        k--; while (k >= 0 && /[\\w.]/.test(code[k])) k--;     // the mantissa of 1e-3",
+    "to": "        // the mantissa of 1e-3"
+  },
+  {
+    "name": "operand: the left operand is never read",
+    "from": "    else if (/[\\w$.]/.test(ch)) {\n      while (k >= 0",
+    "to": "    else if (false) {\n      while (k >= 0"
+  },
+  {
+    "name": "operand: the right operand is never read",
+    "from": "near = [[l.start, l.end], [r.start, r.end]];",
+    "to": "near = [[l.start, l.end]];"
+  },
+  {
+    "name": "clamp: only the word Math.max counts",
+    "from": "            near.push([a0, a0 + text.length]);\n",
+    "to": ""
+  },
+  {
+    "name": "clamp: a nested clamp counted as an argument",
+    "from": "if (text && !/^Math\\.(?:max|min)\\(/.test(text)) {",
+    "to": "if (text) {"
+  },
+  {
+    "name": "declared: any comment declares a line",
+    "from": "declared: /equivalent:/.test(",
+    "to": "declared: /\\/\\/|\\/\\*/.test("
+  },
+  {
+    "name": "declared: the word in code declares a line",
+    "from": ".slice(lineText(src, line).search(/\\/\\/|\\/\\*/) >= 0 ? lineText(src, line).search(/\\/\\/|\\/\\*/) : Infinity)",
+    "to": ""
+  },
+  {
+    "name": "edits: the whole entry text counted as the change",
+    "from": "return { name, edit: [i + a, Math.max(i + a, i + from.length - b)] };",
+    "to": "return { name, edit: [i, i + from.length] };"
+  },
+  {
+    "name": "edits: the kept end of the entry counted as the change",
+    "from": "return { name, edit: [i + a, Math.max(i + a, i + from.length - b)] };",
+    "to": "return { name, edit: [i + a, i + from.length] };"
   },
   {
     "name": "edits: an entry whose text appears twice still counted",
@@ -105,58 +200,138 @@
     "to": "if (i < 0) return { name, missing: true };"
   },
   {
+    "name": "touches: a change meeting a span at its edge touches it",
+    "from": "export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a <= d : a < d && c < b);",
+    "to": "export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a <= d : a <= d && c <= b);"
+  },
+  {
+    "name": "touches: an insertion at the start of a span does not touch",
+    "from": "export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a <= d : a < d && c < b);",
+    "to": "export const touches = ([a, b], [c, d]) => (a === b ? a > c && a <= d : a < d && c < b);"
+  },
+  {
+    "name": "touches: an insertion at the end of a span does not touch",
+    "from": "export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a <= d : a < d && c < b);",
+    "to": "export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a < d : a < d && c < b);"
+  },
+  {
     "name": "touches: an insertion never touches",
-    "from": "(a === b ? a >= c && a <= d : a < d && c < b)",
-    "to": "(a < d && c < b)"
+    "from": "export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a <= d : a < d && c < b);",
+    "to": "export const touches = ([a, b], [c, d]) => (a < d && c < b);"
   },
   {
-    "name": "touches: any edit touches",
-    "from": "(a === b ? a >= c && a <= d : a < d && c < b)",
-    "to": "(true)"
+    "name": "constants: a constant shared by several conditions credited",
+    "from": "const own = c.names.filter((nm) => consts.has(nm) && uses.get(nm) === 1)",
+    "to": "const own = c.names.filter((nm) => consts.has(nm))"
   },
   {
-    "name": "broken: a constant moved at its definition not counted",
-    "from": "|| c.names.some((nm) => defs.has(nm) && touches(e.edit, lineSpan(defs.get(nm)))));",
+    "name": "constants: no constant credited",
+    "from": "|| own.some((s) => touches(e.edit, s)));",
     "to": ");"
   },
   {
-    "name": "broken: only the operator itself counts, not its operands",
-    "from": "es.filter((e) => touches(e.edit, [c.at, c.end]) || touches(e.edit, c.near)",
-    "to": "es.filter((e) => touches(e.edit, [c.at, c.end])"
+    "name": "constants: a parameter of the same name ignored",
+    "from": "if (count.get(name) === 1 && !params.has(name)) out.set(name, span);",
+    "to": "if (count.get(name) === 1) out.set(name, span);"
+  },
+  {
+    "name": "constants: a name declared twice used",
+    "from": "if (count.get(name) === 1 && !params.has(name)) out.set(name, span);",
+    "to": "if (!params.has(name)) out.set(name, span);"
+  },
+  {
+    "name": "constants: the whole declaration counted as the value",
+    "from": "      const v0 = a + mm[0].length;",
+    "to": "      const v0 = m.index;"
+  },
+  {
+    "name": "constants: a comma declarator not read",
+    "from": "if ((ch === ',' && depth === 0) || j === end) { parts.push([s, j]); s = j + 1; }",
+    "to": "if (j === end) { parts.push([s, j]); s = j + 1; }"
+  },
+  {
+    "name": "constants: an arrow parameter not a parameter",
+    "from": "  for (const m of code.matchAll(/\\(([^()]*)\\)\\s*=>/g)) for (const p of m[1].match(/[A-Za-z_$][\\w$]*/g) || []) params.add(p);\n",
+    "to": ""
+  },
+  {
+    "name": "constants: a function parameter not a parameter",
+    "from": "  for (const m of code.matchAll(/function\\s*[\\w$]*\\s*\\(/g))",
+    "to": "  for (const m of [])"
   },
   {
     "name": "status: declared not reported",
-    "from": "status: c.declared ? 'declared' : at.length ? 'broken' : 'never broken' };",
-    "to": "status: at.length ? 'broken' : 'never broken' };"
+    "from": "status: c.declared ? 'declared' : by.length ? 'broken' : 'never broken' };",
+    "to": "status: by.length ? 'broken' : 'never broken' };"
   },
   {
     "name": "status: every condition reported broken",
-    "from": "status: c.declared ? 'declared' : at.length ? 'broken' : 'never broken' };",
+    "from": "status: c.declared ? 'declared' : by.length ? 'broken' : 'never broken' };",
     "to": "status: c.declared ? 'declared' : 'broken' };"
   },
   {
     "name": "exports: arrow exports not found",
-    "from": "|export\\s+const\\s+([\\w$]+)\\s*=\\s*(?:async\\s*)?(?:\\([^)]*\\)|[\\w$]+)\\s*=>/g)) {",
-    "to": "/g)) {"
+    "from": "|export\\s+const\\s+([\\w$]+)\\s*=\\s*(?:async\\s*)?(\\(|[\\w$]+\\s*=>)/g;",
+    "to": "/g;"
+  },
+  {
+    "name": "exports: export default function not found",
+    "from": "/export\\s+(?:default\\s+)?(?:async\\s+)?function",
+    "to": "/export\\s+(?:async\\s+)?function"
+  },
+  {
+    "name": "exports: a call taken for an arrow",
+    "from": "      if (!arrow) continue;                         // a call, not a function\n",
+    "to": ""
   },
   {
     "name": "exports: an export reported broken whatever the entries",
-    "from": "const at = es.filter((e) => touches(e.edit, [x.start, x.end]));",
-    "to": "const at = es;"
+    "from": "const by = es.filter((e) => touches(e.edit, [x.start, x.end]));",
+    "to": "const by = es;"
+  },
+  {
+    "name": "exports: an arrow body runs to the end of the file",
+    "from": "else if (depth === 0 && (c === ';' ||",
+    "to": "else if (false && (c === ';' ||"
   },
   {
     "name": "exit: an export never broken does not fail",
-    "from": "return gaps.length || lost.length ? 1 : 0;",
-    "to": "return gaps.length ? 1 : 0;"
+    "from": "return gaps.length || lost.length || cov.stale.length ? 1 : 0;",
+    "to": "return gaps.length || cov.stale.length ? 1 : 0;"
   },
   {
     "name": "exit: a condition never broken does not fail",
-    "from": "return gaps.length || lost.length ? 1 : 0;",
-    "to": "return lost.length ? 1 : 0;"
+    "from": "return gaps.length || lost.length || cov.stale.length ? 1 : 0;",
+    "to": "return lost.length || cov.stale.length ? 1 : 0;"
+  },
+  {
+    "name": "exit: a stale entry does not fail",
+    "from": "return gaps.length || lost.length || cov.stale.length ? 1 : 0;",
+    "to": "return gaps.length || lost.length ? 1 : 0;"
+  },
+  {
+    "name": "exit: a list the tool cannot read passes",
+    "from": "catch (e) { console.error(`conditions: ${e.message}`); return 3; }",
+    "to": "catch (e) { return 0; }"
+  },
+  {
+    "name": "reader: only the first list read",
+    "from": "try { list = listPaths.flatMap((p) => readList(p, modulePath)); }",
+    "to": "try { list = readList(listPaths[0], modulePath); }"
   },
   {
     "name": "reader: a list with no entries for the module passes empty",
-    "from": "  if (!mine.length) throw new Error(",
-    "to": "  if (false) throw new Error("
+    "from": "    if (!mine.length) {\n",
+    "to": "    if (false) {\n"
+  },
+  {
+    "name": "reader: every module's entries taken",
+    "from": "const mine = lines.filter((l) => resolve(l.module) === want);",
+    "to": "const mine = lines;"
+  },
+  {
+    "name": "reader: a file with its own runner run anyway",
+    "from": "if (!/import\\s*\\{[^}]*\\brunMutants\\b",
+    "to": "if (false && !/import\\s*\\{[^}]*\\brunMutants\\b"
   }
 ]
