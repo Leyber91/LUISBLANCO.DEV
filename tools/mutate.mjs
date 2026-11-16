@@ -194,15 +194,16 @@ async function selftest() {
     const late = (ms) => `setTimeout(() => process.exit(1), ${ms}); }`;
     // stopped on its first run; its second run ends at once with the code given, and writes when it ran
     const flaky = (code, to = log) => `const { existsSync, writeFileSync, appendFileSync } = await import('node:fs'); const mark = new URL('./mark', import.meta.url); if (!existsSync(mark)) { writeFileSync(mark, ''); ${late(12000)} else { appendFileSync(${J(to)}, 'start ' + Date.now() + String.fromCharCode(10)); const t = Date.now() + 250; while (Date.now() < t); appendFileSync(${J(to)}, 'end ' + Date.now() + String.fromCharCode(10)); process.exit(${code}); } }`;
-    said.und = []; said.dec = [];
-    [tm, codes.und, codes.dec] = await Promise.all([
+    said.und = []; said.dec = []; said.surv = [];
+    [tm, codes.und, codes.surv, codes.dec] = await Promise.all([
       mutate(toy, [{ name: 'fails 0.5 s past the limit', from: END, to: `const { appendFileSync } = await import('node:fs'); appendFileSync(${J(count)}, 'n'); ${late(2000)}` },
         { name: 'stopped once, then passes', from: END, to: flaky(0) }, { name: 'stopped once, then fails', from: END, to: flaky(1) },
         { name: 'fails 0.7 s inside the limit', from: END, to: late(800) },
         { name: 'names its lock', from: END, to: `const { writeFileSync } = await import('node:fs'); writeFileSync(${J(lockLog)}, String(process.env.LABS_DRIVE_LOCK)); process.exit(1); }` },
         { name: 'stops itself at its own limit', from: END, to: 'process.exit(124); }' }], 'toy', undefined, LIM),   // 124: tools/drive.mjs WATCHDOG_EXIT, written out
       // the command's report of a timeout, undeclared and declared, and of a second run
-      run(undefined, make('timeout-undeclared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000) }, { name: 'stopped once, then survives', from: END, to: flaky(0, log2) }]) }), (l) => said.und.push(l), { limit: LIM }),
+      run(undefined, make('timeout-undeclared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000) }]) }), (l) => said.und.push(l), { limit: LIM }),
+      run(undefined, make('rerun-survives', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'stopped once, then survives', from: END, to: flaky(0, log2) }]) }), (l) => said.surv.push(l), { limit: LIM }),
       run(undefined, make('timeout-declared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000), timeout: 'the break is an endless loop' }, { name: 'stopped once, then caught', from: END, to: flaky(1, log2) }]) }), (l) => said.dec.push(l), { limit: LIM }),
     ]);
     lockSeen = fs.readFileSync(lockLog, 'utf8');
@@ -272,8 +273,8 @@ async function selftest() {
     ['the second runs run alone, one after another', reruns.join(' ') === 'start end start end'],
     ['a run that ends 0.7 s inside the limit is counted, one that ends 0.5 s past it is timed out', !tm.timedOut.some((t) => t.name === 'fails 0.7 s inside the limit') && tm.timedOut.some((t) => t.name === 'fails 0.5 s past the limit')],
     ['the command reports a timeout and counts it in the summary; it fails on one undeclared and passes on one declared',
-      codes.und === 1 && codes.dec === 0 && said.und.some((l) => /^mutate toy: 3 broken rules, 1 caught by the selftest, 1 timed out, 2 run again, \d+ s$/.test(l))
-      && said.und.includes('  RERUN     a break that never ends: stopped at the limit once, then stopped again') && said.und.includes('  RERUN     stopped once, then survives: stopped at the limit once, then survived')
+      codes.und === 1 && codes.dec === 0 && said.und.some((l) => /^mutate toy: 2 broken rules, 1 caught by the selftest, 1 timed out, 1 run again, \d+ s$/.test(l))
+      && said.und.includes('  RERUN     a break that never ends: stopped at the limit once, then stopped again') && codes.surv === 1 && said.surv.includes('  RERUN     stopped once, then survives: stopped at the limit once, then survived')
       && said.dec.includes('  RERUN     stopped once, then caught: stopped at the limit once, then caught') && said.dec.some((l) => /^mutate toy: 3 broken rules, 2 caught by the selftest, 1 timed out, 2 run again, \d+ s$/.test(l))
       && said.und.some((l) => /^  TIMED OUT a break that never ends: the selftest did not end within 1.5 s, twice; nothing saw it fail/.test(l))
       && said.dec.some((l) => /^  TIMED OUT a break that never ends: .*declared: the break is an endless loop$/.test(l))],

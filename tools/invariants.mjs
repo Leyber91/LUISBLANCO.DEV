@@ -418,7 +418,9 @@ async function selftest() {
   let noReason = '', reason8 = '';
   try { targets({ cover: { '#x': 'seven c' } }); } catch (e) { noReason = e.message; }
   try { targets({ cover: { '#x': 'eight ch' } }); reason8 = 'taken'; } catch (e) { reason8 = e.message; }
-  yes('an element that may cover targets needs its reason: 7 letters are refused, 8 are taken', /needs its reason/.test(noReason) && reason8 === 'taken', `${noReason} | ${reason8}`);
+  let numReason = '';
+  try { targets({ cover: { '#x': 123456789 } }); numReason = 'taken'; } catch (e) { numReason = e.message; }
+  yes('an element that may cover targets needs its reason, in words: 7 letters are refused, 8 are taken, a number is refused', /needs its reason/.test(noReason) && reason8 === 'taken' && /needs its reason/.test(numReason), `${noReason} | ${reason8} | ${numReason}`);
   yes('standard passes each rule its own settings, and the defaults are 400, 44, 24, 4.5 and 3', standard({ targets: { below: 777 } })[1][1].includes('"below":777') && standard({ contrast: { min: 7 } })[2][1].includes('"min":7') && standard({ gold: { allow: ['.zz', '.yy'] } })[3][1].includes('".zz, .yy"')
     && four[1][1].includes('{"below":400,"tall":44,"wide":24,') && four[1][1].includes('"cover":":not(*)"') && four[2][1].includes('{"min":4.5,"large":3}') && four[3][1].includes('"allow":":not(*)"'));
 
@@ -486,7 +488,8 @@ async function selftest() {
       <div style="height:0;overflow:hidden"><button id="gone" style="height:44px">cut away</button></div>
       <div style="height:60px;width:100px;overflow:hidden;position:relative"><button id="outside" style="position:absolute;left:200px;height:44px;width:60px">o</button></div>
       <div style="height:60px;width:100px;overflow:hidden;position:relative"><button id="below" style="position:absolute;top:200px;height:44px;width:60px">b</button></div>`);
-    const TE = PAGE(`      <div style="position:relative;height:60px"><div style="overflow:hidden;height:0"><button id="absclip" style="position:absolute;top:0;left:0;height:20px;width:60px">abs</button></div></div>
+    const TE = PAGE(`      <div style="display:flex"><button id="withspan" style="height:50px;width:60px"><span style="display:block;height:50px">s</span></button><a id="withspanlink" href="#x" style="display:block;height:50px;width:60px"><span style="display:block;height:50px">s</span></a></div>
+      <div style="position:relative;height:60px"><div style="overflow:hidden;height:0"><button id="absclip" style="position:absolute;top:0;left:0;height:20px;width:60px">abs</button></div></div>
       <div style="overflow:hidden;width:10px;height:10px"><button id="fixclip" style="position:fixed;top:600px;left:100px;height:20px;width:60px">fixed</button></div>
       <div style="transform:translateZ(0);overflow:hidden;width:10px;height:10px"><button id="fixheld" style="position:fixed;top:0;left:0;height:44px;width:60px">held</button></div>
       <div style="position:relative;overflow:hidden;width:10px;height:10px"><button id="fixrel" style="position:fixed;top:700px;left:200px;height:20px;width:60px">rel</button></div>
@@ -501,15 +504,15 @@ async function selftest() {
       <div style="position:relative;height:50px;width:100px"><button id="underlist" style="height:50px;width:60px">l</button><ul role="listbox" style="position:absolute;inset:0;margin:0;background:#000"><li>x</li></ul></div>
       <div style="position:relative;height:50px;width:100px"><button id="underdialog" style="height:50px;width:60px">d</button><div role="dialog" style="position:absolute;inset:0;background:#000"><span>x</span></div></div>
       <div style="position:relative;height:50px;width:100px"><button id="undermenu" style="height:50px;width:60px">m</button><div role="menu" style="position:absolute;inset:0;background:#000"></div></div>
-      <div style="position:relative;height:50px;width:100px"><button id="underpop" style="height:50px;width:60px">p</button><div popover style="display:block;position:absolute;inset:0;margin:0;border:0;background:#000"></div></div>
+      <div style="position:relative;height:50px;width:100px"><button id="underpop" style="height:50px;width:60px">p</button><div popover style="display:block;position:absolute;inset:0;width:100px;height:50px;margin:0;border:0;padding:0;background:#000"></div></div>
       <nav><p><a id="n1" href="#a">Home</a> <a id="n2" href="#b">Labs</a> <a id="n3" href="#c">About</a></p></nav>
       <div style="position:relative;height:50px;width:100px"><button id="under" style="height:50px;width:60px">u</button><div id="lid" style="position:absolute;inset:0;background:#000"></div></div>
       <div style="position:relative;height:50px;width:100px"><button id="glass" style="height:50px;width:60px">g</button><div style="position:absolute;inset:0;pointer-events:none"></div></div>
-      <button id="withspan" style="height:50px;width:60px"><span style="display:block;height:50px">s</span></button>
+
       <div style="height:2000px"></div><button id="faraway" style="height:50px;width:60px">f</button><div style="position:relative;top:-50px;height:50px;width:60px;background:#000"></div>`);
     // a fixed lid and a sticky one laid over two buttons once the page is drawn (their places known then)
     const lids = `for (const [id, pos] of [['underfixed', 'fixed'], ['understicky', 'sticky']]) { const b = document.getElementById(id), r = b.getBoundingClientRect(), d = document.createElement('div');
-      d.id = id + '-lid'; d.style.cssText = 'position:' + pos + ';left:' + r.left + 'px;top:' + r.top + 'px;width:60px;height:50px;background:#000;z-index:5;' + (pos === 'sticky' ? 'margin-top:-50px;' : ''); (pos === 'sticky' ? b.parentElement : document.body).append(d); }`;
+      d.id = id + '-lid'; d.style.cssText = 'position:' + pos + ';left:' + r.left + 'px;top:' + r.top + 'px;width:60px;height:50px;background:#000;z-index:5;' + (pos === 'sticky' ? 'margin-top:-50px;' : ''); d.innerHTML = '<span style="display:block;height:50px"></span>'; (pos === 'sticky' ? b.parentElement : document.body).append(d); }`;
     const t1 = [...await run(TA, targets()), ...await run(TB, targets()), ...await run(TC, targets()), ...await run(TD, targets()), ...await run(TE.replace('</body>', `<script>${lids}</script></body>`), targets())];
     const at1 = (id) => t1.find((x) => new RegExp(`^#${id}(?![\\w-])`).test(x)) || '';
     yes('43.4 px tall is a break and 43.6 is not', has(t1, 'h434') && !has(t1, 'h436'), J([at1('h434')]));
@@ -527,7 +530,7 @@ async function selftest() {
     yes('a box that scrolls does not make a target small: it is measured whole; one it hides now is not looked at for a cover, and one it shows in part is looked at where it shows', !has(t1, 'sclip') && !t1.some((x) => /^#sgone/.test(x)) && !t1.some((x) => /^#sgonex/.test(x)) && t1.includes('#shalf "h" covered by #shalflid') && t1.includes('#shalfx "x" covered by #shalfxlid'), J(t1.filter((x) => /^#s(clip|gone|half)/.test(x))));
     yes('words in a line count though a target holds the line: a link there is inline', !has(t1, 'inrole'), at1('inrole'));
     yes('a row of bare links is not a line of text: each is measured', has(t1, 'n1') && has(t1, 'n2') && has(t1, 'n3'), J([at1('n1'), at1('n3')]));
-    yes('a target under another element at its middle is covered; under one that lets the finger through, under its own part, or letting the finger through itself, it is not; one off the window is not looked at', t1.includes('#under "u" covered by #lid') && !t1.some((x) => /^#(glass|withspan|penone|faraway) .*covered/.test(x)), J(t1.filter((x) => /covered/.test(x))));
+    yes('a target under another element at its middle is covered; under one that lets the finger through, under its own part, or letting the finger through itself, it is not; one off the window is not looked at', t1.includes('#under "u" covered by #lid') && !t1.some((x) => /^#(glass|withspan|withspanlink|penone|faraway) .*covered/.test(x)), J(t1.filter((x) => /covered/.test(x))));
     yes('what lies over the page by design covers no target: something fixed or sticky, a part of it, a popup list, a dialog, a menu, a popover', !t1.some((x) => /^#under(fixed|sticky|list|dialog|menu|pop) .*covered/.test(x)), J(t1.filter((x) => /covered/.test(x))));
     const t6 = await run(TE, targets({ cover: { '#lid': 'a test of the allowance, a lid on purpose' } }));
     yes('an element the page names, with its reason, may lie over a target', !t6.some((x) => /covered by #lid/.test(x)) && has(t6, 'n1'), J(t6.filter((x) => /covered/.test(x))));
@@ -669,16 +672,16 @@ async function selftest() {
       <canvas id="kglowk6" width="40" height="40" style="width:20px;height:20px"></canvas><canvas id="kglowk7" width="40" height="40" style="width:20px;height:20px"></canvas><canvas id="kthin" width="100" height="20"></canvas>
       <canvas id="kglowk5" width="30" height="30" style="width:20px;height:20px"></canvas><canvas id="kglowfaint" width="20" height="20"></canvas><canvas id="kglow64" width="20" height="20"></canvas>
       <canvas id="kwrap" width="20" height="20"></canvas><canvas id="kwrap2" width="20" height="20"></canvas><canvas id="kglowlast" width="20" height="20"></canvas>
-      <canvas id="kglowup" width="20" height="20"></canvas><canvas id="kglowdown" width="20" height="20"></canvas>`, '',
+      <canvas id="kglowup" width="20" height="20"></canvas><canvas id="kglowdown" width="20" height="20"></canvas><canvas id="kglow159" width="20" height="20"></canvas>`, '',
       ['kglow3', 'kglow4', 'kglow160', 'kglowk6', 'kglowk7'].map((id) => px(id, [64, 96, 160, 255], [[5, 5]])).join('') + px('kglow3', [...G0, 120], [[8, 5]]) + px('kglow4', [...G0, 120], [[9, 5]]) + px('kglow160', [...G0, 160], [[6, 5]])
       + px('kown63', [...G0, 63]) + px('kglowk6', [...G0, 120], [[11, 5]]) + px('kglowk7', [...G0, 120], [[12, 5]])
       + px('kglowk5', [64, 96, 160, 255], [[5, 5]]) + px('kglowk5', [...G0, 120], [[10, 5]]) + px('kglowfaint', [64, 96, 160, 63], [[5, 5]]) + px('kglowfaint', [...G0, 120], [[6, 5]]) + px('kglow64', [64, 96, 160, 64], [[5, 5]]) + px('kglow64', [...G0, 120], [[6, 5]])
       + px('kwrap', [64, 96, 160, 255], [[0, 5]]) + px('kwrap', [...G0, 120], [[19, 4]]) + px('kwrap2', [64, 96, 160, 255], [[19, 5]]) + px('kwrap2', [...G0, 120], [[0, 6]]) + px('kglowlast', [64, 96, 160, 255], [[19, 19]]) + px('kglowlast', [...G0, 120], [[17, 19]])
-      + px('kglowup', [64, 96, 160, 255], [[5, 5]]) + px('kglowup', [...G0, 120], [[5, 2]]) + px('kglowdown', [64, 96, 160, 255], [[5, 5]]) + px('kglowdown', [...G0, 120], [[5, 8]])
+      + px('kglow159', [64, 96, 160, 255], [[5, 5]]) + px('kglow159', [...G0, 159], [[6, 5]]) + px('kglowup', [64, 96, 160, 255], [[5, 5]]) + px('kglowup', [...G0, 120], [[5, 2]]) + px('kglowdown', [64, 96, 160, 255], [[5, 5]]) + px('kglowdown', [...G0, 120], [[5, 8]])
       + `{ const x = document.getElementById('kthin').getContext('2d'); x.fillStyle = '#4060a0'; x.fillRect(0, 0, 4, 4); x.strokeStyle = '#D4A24C'; x.lineWidth = 1; x.beginPath(); x.moveTo(10, 10); x.lineTo(90, 10); x.stroke(); }`);
     const cfg = { scan: true, named: { '#knamed': 'a test' }, when: { '#kwhen': 'true', '#kwhenno': 'false' },
       oneDot: { '#kdot': 'true', '#kdot11': 'true', '#kdot12x': 'true', '#kdot12y': 'true', '#kdotoff': 'false', '#kdotnone': 'true', '#kscaled': 'true' },
-      ownColour: { ...Object.fromEntries(ownCases.flatMap(([c, own]) => [[`#kown${c}28`, J(c === 'R' ? hex(own).slice(1).toUpperCase() : hex(own))], [`#kown${c}29`, J(hex(own))]])), '#kownlost': '""', '#kownA160': '"#4060a0"', '#kownA159': '"#4060a0"', ...Object.fromEntries(['#kglow3', '#kglow4', '#kglow160', '#kown63', '#kglowk6', '#kglowk7', '#kthin', '#kglowk5', '#kglowfaint', '#kglow64', '#kwrap', '#kwrap2', '#kglowlast', '#kglowup', '#kglowdown'].map((s) => [s, '"#4060a0"'])) } };   // red's written B8A24C
+      ownColour: { ...Object.fromEntries(ownCases.flatMap(([c, own]) => [[`#kown${c}28`, J(c === 'R' ? hex(own).slice(1).toUpperCase() : hex(own))], [`#kown${c}29`, J(hex(own))]])), '#kownlost': '""', '#kownA160': '"#4060a0"', '#kownA159': '"#4060a0"', ...Object.fromEntries(['#kglow3', '#kglow4', '#kglow160', '#kown63', '#kglowk6', '#kglowk7', '#kthin', '#kglowk5', '#kglowfaint', '#kglow64', '#kwrap', '#kwrap2', '#kglowlast', '#kglowup', '#kglowdown', '#kglow159'].map((s) => [s, '"#4060a0"'])) } };   // red's written B8A24C
     const k = [...await run(K1, gold({ canvases: cfg })), ...await run(K2, gold({ canvases: cfg })), ...await run(K3, gold({ canvases: cfg }))];
     const at = (id) => k.find((x) => x.startsWith('#' + id + ':')) || '';
     yes('a pixel 22 off gold in any one channel is gold, 23 off is not', ['k22', 'k22g', 'k22b'].every((id) => /gold pixels/.test(at(id))) && ['k23', 'k23g', 'k23b'].every((id) => !at(id)), J(k));
@@ -690,7 +693,7 @@ async function selftest() {
     yes('pixels within 28 of a canvas\'s own colour in every channel are left out, and 29 off in any one is gold again', ownCases.every(([c]) => !at(`kown${c}28`) && /^#kown\w29: 1 gold pixels$/.test(at(`kown${c}29`))), J(k.filter((x) => /kown/.test(x))));
     yes('an own colour not found is a break', /colour it is allowed was not found/.test(at('kownlost')));
     yes('on a canvas with its own colour, gold away from the star is read from an alpha of 64; at 63 it is not', /^#kownA160: 1 gold pixels$/.test(at('kownA160')) && /^#kownA159: 1 gold pixels$/.test(at('kownA159')) && !at('kown63'), J([at('kownA160'), at('kownA159'), at('kown63')]));
-    yes('faint gold within 3 CSS px of the star\'s own pixels, beside, above or below, is its glow, at 4 px it is read, and at an alpha of 160 it is read beside the star', !at('kglow3') && !at('kglowup') && !at('kglowdown') && /^#kglow4: 1 gold pixels$/.test(at('kglow4')) && /^#kglow160: 1 gold pixels$/.test(at('kglow160')), J([at('kglow3'), at('kglowup'), at('kglowdown'), at('kglow4'), at('kglow160')]));
+    yes('faint gold within 3 CSS px of the star\'s own pixels, beside, above or below, is its glow, at 4 px it is read, and at an alpha of 160 it is read beside the star', !at('kglow3') && !at('kglowup') && !at('kglowdown') && !at('kglow159') && /^#kglow4: 1 gold pixels$/.test(at('kglow4')) && /^#kglow160: 1 gold pixels$/.test(at('kglow160')), J([at('kglow3'), at('kglowup'), at('kglowdown'), at('kglow4'), at('kglow160')]));
     yes('on a canvas drawn at twice its size the glow reaches 6 of its pixels, not 7; at one and a half times, 5 (4.5 rounded up)', !at('kglowk6') && /^#kglowk7: 1 gold pixels$/.test(at('kglowk7')) && !at('kglowk5'), J([at('kglowk6'), at('kglowk7'), at('kglowk5')]));
     yes('a pixel of the star\'s colour at an alpha of 64 has a glow, one at 63 has none', !at('kglow64') && /^#kglowfaint: 1 gold pixels$/.test(at('kglowfaint')), J([at('kglow64'), at('kglowfaint')]));
     yes('the glow stops at the canvas\'s left and right edges, does not wrap onto the next row, and reaches from its last pixel', /^#kwrap: 1 gold pixels$/.test(at('kwrap')) && /^#kwrap2: 1 gold pixels$/.test(at('kwrap2')) && !at('kglowlast'), J([at('kwrap'), at('kwrap2'), at('kglowlast')]));
