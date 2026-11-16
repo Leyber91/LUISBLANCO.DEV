@@ -56,14 +56,16 @@ function pageState() {
   const a = document.activeElement, pin = document.querySelector('[data-act="pin"]'), sec = a && a.closest('#log-body [data-sec]');
   return {
     line: line.textContent, lineSeen: lr.width > 0 && lr.height > 0 && lr.left >= 0 && lr.right <= innerWidth + 1,
-    add: add ? add.textContent : '', addOn: !!add && add.classList.contains('on'), addPressed: add ? add.getAttribute('aria-pressed') : '', addOff: !!add && add.disabled, addTitle: add ? add.title : '',
+    add: add ? add.textContent : '', addOn: !!add && add.classList.contains('kept'), addPressed: add ? add.getAttribute('aria-pressed') : '', addOff: !!add && add.disabled, addTitle: add ? add.title : '',
     addWidth: add ? Math.round(add.getBoundingClientRect().width) : 0, pinOff: !!pin && pin.disabled, clearOff: $('cmp-clear').disabled,
     said: said ? said.textContent : '', saidSeen: inView(said), addSeen: inView(add), saidUnder: !!said && !!add && said.getBoundingClientRect().top >= add.getBoundingClientRect().bottom - 1,
     saidQuiet: !!said && said.classList.contains('quiet') && getComputedStyle(said).clipPath === 'inset(50%)', logSaid: ($('log-said') || {}).textContent || '',
     focusSec: sec ? sec.dataset.sec : '', focusLabel: a ? (a.getAttribute('aria-label') || a.textContent || '').trim().slice(0, 80) : '', foot: (document.querySelector('#log-body .log-foot') || {}).textContent || '',
     name: ($('ret-name') || {}).textContent || '', note: ($('q-note') || {}).textContent || '',
     count, n: +count.replace(/[^\d]/g, ''), filtered: /match/.test(count),
-    chipSaved: (document.querySelector('#filters [data-act="set-saved"]') || { className: 'none' }).className, chipShared: (document.querySelector('#filters [data-act="set-shared"]') || { className: 'none' }).className,
+    // the switches that show only the log's worlds: 'on', 'off', or 'none' when the switch is not on the page
+    chipSaved: ((e) => (e ? (e.getAttribute('aria-checked') === 'true' ? 'on' : 'off') : 'none'))(document.querySelector('#filters [data-act="set-saved"]')),
+    chipShared: ((e) => (e ? (e.getAttribute('aria-checked') === 'true' ? 'on' : 'off') : 'none'))(document.querySelector('#filters [data-act="set-shared"]')),
     open: dlg.open, fits: !dlg.open || (dr.left >= 0 && dr.right <= innerWidth + 1), wide: document.documentElement.scrollWidth > innerWidth + 1,
     sum: (document.querySelector('#log-body .log-sum') || {}).textContent || '', notes: [...document.querySelectorAll('#log-body .log-note')].map((n) => n.textContent),
     secs, body: (($('log-body') || {}).textContent || '').replace(/\s+/g, ' ').trim(), imgs: document.querySelectorAll('#log-body img, #q-note img, #filters img, .tp-said img').length,
@@ -170,14 +172,14 @@ export default async function log(p, { base }) {
   await open();
   const start = await state();
   p.check('on a first load the log is on the browser\'s own store, which outlives the page', start.store === 'indexeddb', start.store);
-  p.check('the log line is on the page and starts at nothing: the world the page opened by itself is not a visit', start.lineSeen && start.line === 'Your log · 0 visited · 0 saved', start.line);
+  p.check('the log line is on the page and starts at nothing: the world the page opened by itself is not a visit', start.lineSeen && start.line === 'Log: 0 visited, 0 saved', start.line);
   p.check('the world on screen can be added to the log, and is not in it; the button is a plain button, with no pressed state to read wrongly', start.add === 'Add to log' && !start.addOn && !start.addOff && start.addPressed === null,
     JSON.stringify({ add: start.add, on: start.addOn, off: start.addOff, pressed: start.addPressed }));
 
   // ---- before the stored log is read (on a fixture store, so the visitor's own store is not written) ----
   await open('os-fixture=first-visit', { hold: true });
   const early = await state();
-  p.check('before the stored log is read the line says so, and the button for the log is off', early.line === 'Your log · reading' && early.addOff && early.addTitle === 'The log is being read' && early.store === '',
+  p.check('before the stored log is read the line says so, and the button for the log is off', early.line === 'Log: reading' && early.addOff && early.addTitle === 'The log is being read' && early.store === '',
     JSON.stringify({ line: early.line, off: early.addOff, title: early.addTitle, store: early.store }));
   // second review, D1: a pin, or "Unpin all", before the read replaced or emptied the stored bench
   p.check('before the stored log is read the bench is the log\'s too: Pin and "Unpin all" are off', early.pinOff && early.clearOff, JSON.stringify({ pin: early.pinOff, clear: early.clearOff }));
@@ -187,16 +189,16 @@ export default async function log(p, { base }) {
   await p.sleep(500);
   await call(press, '[data-close="compare"]');
   const earlyDlg = await openLog();
-  p.check('the log, opened then, says it is being read, and a world opened meanwhile is not yet counted', earlyDlg.open && /^Reading the log from this browser.s store\.$/.test(earlyDlg.body) && earlyDlg.line === 'Your log · reading' && held.name !== early.name,
+  p.check('the log, opened then, says it is being read, and a world opened meanwhile is not yet counted', earlyDlg.open && /^Reading the log from this browser.s store\.$/.test(earlyDlg.body) && earlyDlg.line === 'Log: reading' && held.name !== early.name,
     `${earlyDlg.line} | ${earlyDlg.body.slice(0, 120)}`);
   await p.shot('log-reading');
   await p.ev('window.__release()');
   await settle();
-  const late = await line('Your log · 1 visited · 0 saved');
+  const late = await line('Log: 1 visited, 0 saved');
   await p.sleep(400);   // the bench is written after the visit
   const fx = await call(osDo, 'record'), where = await call(osDo, 'storage'), own0 = await call(rawRecord);
   p.check('once it is read, the world opened meanwhile is one visit with the way it was opened, nothing was saved by the press on the button that was off, and the button is on',
-    late.line === 'Your log · 1 visited · 0 saved' && !late.addOff && late.add === 'Add to log' && !!fx && same(fx.data.log.visits.map((v) => [v.name, v.via, v.n]), [[held.name, 'random', 1]]) && fx.data.log.saved.length === 0,
+    late.line === 'Log: 1 visited, 0 saved' && !late.addOff && late.add === 'Add to log' && !!fx && same(fx.data.log.visits.map((v) => [v.name, v.via, v.n]), [[held.name, 'random', 1]]) && fx.data.log.saved.length === 0,
     `${late.line} | ${JSON.stringify(fx && fx.data.log.visits)}`);
   p.check('a press on Pin while it was off pinned nothing, and the button is on once the log is read', !!fx && same(fx.data.log.pins, []) && !late.pinOff, JSON.stringify({ pins: fx && fx.data.log.pins, off: late.pinOff }));
   p.check('the log that was open then shows it', late.open && late.visited.length === 1 && late.visited[0].name === held.name && late.visited[0].what === 'at random', JSON.stringify(late.visited));
@@ -212,7 +214,7 @@ export default async function log(p, { base }) {
   await p.key('Enter');
   await p.sleep(200);
   const landed = await state();
-  p.check('the first Tab shows a link that skips to the survey, and Enter takes the focus there', skip.cls === 'skip' && skip.seen && /Skip to the survey/.test(skip.text) && landed.focus === 'col-c', `${JSON.stringify(skip)} then ${landed.focus}`);
+  p.check('the first Tab shows a link that skips to the survey, and Enter takes the focus there', skip.cls === 'skip' && skip.seen && /Skip to the survey/.test(skip.text) && landed.focus === 'survey', `${JSON.stringify(skip)} then ${landed.focus}`);
   const r = await call(ring);
   p.check('the search field shows a ring when it has the focus', r.style === 'solid' && r.width >= 2, JSON.stringify(r));
 
@@ -230,21 +232,21 @@ export default async function log(p, { base }) {
   await call(typeInto, 'kepler-4');
   await p.sleep(250);
   await p.key('Enter');
-  const named = await line('Your log · 1 visited · 0 saved');   // the write waits its turn behind the page's first frames
-  p.check('a world opened by name is one visit', named.line === 'Your log · 1 visited · 0 saved' && named.name.length > 1 && named.name !== start.name, `${named.name} | ${named.line}`);
-  const r1 = await another(), r2 = { ...(await another()), ...(await line('Your log · 3 visited · 0 saved')) };
-  p.check('two more opened at random make three', r2.line === 'Your log · 3 visited · 0 saved' && new Set([named.name, r1.name, r2.name]).size === 3, `${r1.name}, ${r2.name} | ${r2.line}`);
+  const named = await line('Log: 1 visited, 0 saved');   // the write waits its turn behind the page's first frames
+  p.check('a world opened by name is one visit', named.line === 'Log: 1 visited, 0 saved' && named.name.length > 1 && named.name !== start.name, `${named.name} | ${named.line}`);
+  const r1 = await another(), r2 = { ...(await another()), ...(await line('Log: 3 visited, 0 saved')) };
+  p.check('two more opened at random make three', r2.line === 'Log: 3 visited, 0 saved' && new Set([named.name, r1.name, r2.name]).size === 3, `${r1.name}, ${r2.name} | ${r2.line}`);
 
   // ---- saving ----
   await call(press, '[data-act="log"]');
-  const saved1 = await line('Your log · 3 visited · 1 saved');
-  p.check('"Add to log" saves the world on screen: the button says so, at the same width, and the count follows', saved1.add === 'In your log' && saved1.addOn && saved1.addWidth === start.addWidth && saved1.line === 'Your log · 3 visited · 1 saved',
+  const saved1 = await line('Log: 3 visited, 1 saved');
+  p.check('"Add to log" saves the world on screen: the button says so, at the same width, and the count follows', saved1.add === 'In your log' && saved1.addOn && saved1.addWidth === start.addWidth && saved1.line === 'Log: 3 visited, 1 saved',
     JSON.stringify({ add: saved1.add, on: saved1.addOn, width: [start.addWidth, saved1.addWidth], line: saved1.line }));
   // second review, D9: a save that went through said nothing
   p.check('the line under the buttons says the save to a screen reader, and clips it from view', saved1.said === `${r2.name} is in your log.` && saved1.saidQuiet, `"${saved1.said}" clipped ${saved1.saidQuiet}`);
   await call(bring, '[data-act="log"]');
   await p.shot('log-saved-quiet');
-  p.check('a chip for the log appears beside the filters, off', /chip/.test(saved1.chipSaved) && !/\bon\b/.test(saved1.chipSaved), saved1.chipSaved);
+  p.check('a switch for the log appears beside the filters, off', saved1.chipSaved === 'off', saved1.chipSaved);
   const r3 = await another();
   p.check('the next world is not in the log', r3.add === 'Add to log' && !r3.addOn && r3.name !== r2.name, `${r3.name}: ${r3.add}`);
   await call(press, '[data-act="pin"]');
@@ -255,12 +257,12 @@ export default async function log(p, { base }) {
 
   // ---- a link to a world is a visit; a reload of it is not ----
   await open(`p=${encodeURIComponent(r2.name)}`);
-  const back = await line('Your log · 4 visited · 1 saved');
-  p.check('a link to a world opens it as one visit, and the counts and the saved world of before are there', back.nav === 'navigate' && back.line === 'Your log · 4 visited · 1 saved' && back.name === r2.name && back.add === 'In your log' && back.addOn,
+  const back = await line('Log: 4 visited, 1 saved');
+  p.check('a link to a world opens it as one visit, and the counts and the saved world of before are there', back.nav === 'navigate' && back.line === 'Log: 4 visited, 1 saved' && back.name === r2.name && back.add === 'In your log' && back.addOn,
     `${back.nav} | ${back.name} | ${back.line} | ${back.add}`);
   await reload();
   const again = await state();
-  p.check('a reload of that address is not a visit', again.nav === 'reload' && again.name === r2.name && again.line === 'Your log · 4 visited · 1 saved' && again.add === 'In your log', `${again.nav} | ${again.name} | ${again.line}`);
+  p.check('a reload of that address is not a visit', again.nav === 'reload' && again.name === r2.name && again.line === 'Log: 4 visited, 1 saved' && again.add === 'In your log', `${again.nav} | ${again.name} | ${again.line}`);
   await another();
   await call(press, '[data-act="pin"]');
   await p.sleep(600);
@@ -281,7 +283,7 @@ export default async function log(p, { base }) {
   await call(pressIn, '#log-body .log-open', named.name);
   await p.sleep(900);
   const reopened = await state();
-  p.check('a line of the log reopens its world and closes the log', !reopened.open && reopened.name === named.name && reopened.line === 'Your log · 5 visited · 1 saved', `${reopened.name} | ${reopened.line}`);
+  p.check('a line of the log reopens its world and closes the log', !reopened.open && reopened.name === named.name && reopened.line === 'Log: 5 visited, 1 saved', `${reopened.name} | ${reopened.line}`);
 
   // ---- what is stored: each action with its time and the way it came ----
   const events = await call(osDo, 'events');
@@ -295,11 +297,11 @@ export default async function log(p, { base }) {
   // ---- the saved worlds as a filter ----
   await another();
   await call(press, '[data-act="log"]');
-  const two = await line('Your log · 6 visited · 2 saved');
+  const two = await line('Log: 6 visited, 2 saved');
   await call(press, '#filters [data-act="set-saved"]');
   await p.sleep(400);
   const only = await state();
-  p.check('the chip shows only the saved worlds', two.line === 'Your log · 6 visited · 2 saved' && /\bon\b/.test(only.chipSaved) && only.filtered && only.n === 2, `${two.line} | ${only.count}`);
+  p.check('the switch shows only the saved worlds', two.line === 'Log: 6 visited, 2 saved' && only.chipSaved === 'on' && only.filtered && only.n === 2, `${two.line} | ${only.count}`);
   const within = [await another(), await another(), await another()];
   p.check('"Another world" then stays among them', within.every((s) => s.add === 'In your log') && within.every((s) => [r2.name, two.name].includes(s.name)), within.map((s) => s.name).join(', '));
 
@@ -313,12 +315,12 @@ export default async function log(p, { base }) {
   // second review, D8: "Take out" sent the focus to Close and the dialog to its top
   const firstOut = copied.saved[0].name, secondOut = copied.saved[1].name;
   await call(focusPress, '#log-body .log-out');
-  const out1 = await line('Your log · 6 visited · 1 saved');
+  const out1 = await line('Log: 6 visited, 1 saved');
   p.check('"Take out" takes the world out, says so in the dialog\'s status line, and the focus goes to the "Take out" of the line that took its place', out1.saved.length === 1 && out1.open && out1.focusIn && out1.focusLabel === `Take ${secondOut} out of the log` && out1.logSaid === `${firstOut} is out of your log.`,
     `${out1.saved.length} saved | focus on ${out1.focusLabel} | ${out1.logSaid}`);
   await call(focusPress, '#log-body .log-out');
-  const emptied = await line('Your log · 6 visited · 0 saved');
-  p.check('taking both out empties the saved list, says how to fill it, and ends the filter that showed only them', emptied.saved.length === 0 && /Nothing saved yet\. Open a world and press .Add to log./.test(emptied.body) && emptied.line === 'Your log · 6 visited · 0 saved' && emptied.chipSaved === 'none' && !emptied.filtered,
+  const emptied = await line('Log: 6 visited, 0 saved');
+  p.check('taking both out empties the saved list, says how to fill it, and ends the filter that showed only them', emptied.saved.length === 0 && /Nothing saved yet\. Open a world and press .Add to log./.test(emptied.body) && emptied.line === 'Log: 6 visited, 0 saved' && emptied.chipSaved === 'none' && !emptied.filtered,
     `${emptied.line} | chip ${emptied.chipSaved} | ${emptied.count}`);
   p.check('with the last one taken out, the focus goes to the sentence of the empty list, in the saved section', emptied.focusSec === 'saved' && /^Nothing saved yet\./.test(emptied.focusLabel), `${emptied.focusSec} | ${emptied.focusLabel}`);
   await call(comeBack);
@@ -329,22 +331,22 @@ export default async function log(p, { base }) {
 
   // ---- an erase on the privacy page's own path empties the log here at once ----
   await call(osDo, 'erase');
-  const erased = await line('Your log · 0 visited · 0 saved');
-  p.check('an erase empties the log on the page', erased.line === 'Your log · 0 visited · 0 saved' && erased.add === 'Add to log', erased.line);
+  const erased = await line('Log: 0 visited, 0 saved');
+  p.check('an erase empties the log on the page', erased.line === 'Log: 0 visited, 0 saved' && erased.add === 'Add to log', erased.line);
 
   // ---- the link, opened by a visitor whose store is empty ----
   await open(link.split('?')[1]);
   const got = await state();
-  p.check('the link opens on the first of its worlds, shows only its two, and says where they are listed', [r2.name, two.name].includes(got.name) && /\bon\b/.test(got.chipShared) && got.filtered && got.n === 2
+  p.check('the link opens on the first of its worlds, shows only its two, and says where they are listed', [r2.name, two.name].includes(got.name) && got.chipShared === 'on' && got.filtered && got.n === 2
     && /This link carries a log of 2 worlds\. They are the ones on the diagram now, and the log lists them under .Shared with you.\./.test(got.note), `${got.name} | ${got.count} | ${got.note}`);
-  p.check('a link that carries a log is not a visit to a world: the receiver\'s own log is as it was, empty', got.line === 'Your log · 0 visited · 0 saved · 2 shared with you' && got.add === 'Add to log', got.line);
+  p.check('a link that carries a log is not a visit to a world: the receiver\'s own log is as it was, empty', got.line === 'Log: 0 visited, 0 saved, 2 shared with you' && got.add === 'Add to log', got.line);
   p.check('the link keeps its log in the address, so a reload shows the same', /[?&]log=/.test(got.url), got.url);
   const sharedDlg = await openLog();
   p.check('the log lists what was shared, apart from what is the visitor\'s own', sharedDlg.shared.length === 2 && sharedDlg.saved.length === 0 && sharedDlg.shared.every((s) => [r2.name, two.name].includes(s.name) && s.when === ''), JSON.stringify(sharedDlg.shared));
   await p.shot('log-shared');
   await call(pressIn, '#log-body button', 'Add all to your log');
-  const adopted = await line('Your log · 0 visited · 2 saved · 2 shared with you');
-  p.check('"Add all to your log" saves both, says so beside the button, and the shared lines say they are now in the log', adopted.saved.length === 2 && adopted.line === 'Your log · 0 visited · 2 saved · 2 shared with you' && adopted.adopted === 'Added 2 worlds.'
+  const adopted = await line('Log: 0 visited, 2 saved, 2 shared with you');
+  p.check('"Add all to your log" saves both, says so beside the button, and the shared lines say they are now in the log', adopted.saved.length === 2 && adopted.line === 'Log: 0 visited, 2 saved, 2 shared with you' && adopted.adopted === 'Added 2 worlds.'
     && adopted.shared.every((s) => s.when === 'in your log'), `${adopted.line} | ${adopted.adopted} | ${JSON.stringify(adopted.shared)}`);
   await closeLog();
 
@@ -359,7 +361,7 @@ export default async function log(p, { base }) {
   await call(press, '#filters [data-act="set-shared"]');   // leave the filter of the shared log: the next world comes from the whole catalogue
   await p.sleep(300);
   const before = await state();
-  p.check('the chip of a shared log turns its filter off, and the whole catalogue is back', !before.filtered && before.n > 5000 && !/\bon\b/.test(before.chipShared), `${before.count} | ${before.chipShared}`);
+  p.check('the switch of a shared log turns its filter off, and the whole catalogue is back', !before.filtered && before.n > 5000 && before.chipShared !== 'on', `${before.count} | ${before.chipShared}`);
   await call(osDo, 'recording', false);
   let off1 = await another();
   for (let i = 0; i < 5 && off1.add !== 'Add to log'; i++) off1 = await another();
@@ -367,7 +369,7 @@ export default async function log(p, { base }) {
   await p.until('document.querySelector("[data-act=log]").textContent === "In your log"', 6000);
   const off2 = await state();
   const offDlg = await openLog();
-  p.check('with the site\'s recording off a world opened is not added to the visits, a world saved is saved, and the log says so', off1.name !== before.name && off2.line.replace(/ · \d+ saved.*/, '') === before.line.replace(/ · \d+ saved.*/, '') && off2.add === 'In your log'
+  p.check('with the site\'s recording off a world opened is not added to the visits, a world saved is saved, and the log says so', off1.name !== before.name && off2.line.replace(/, \d+ saved.*/, '') === before.line.replace(/, \d+ saved.*/, '') && off2.add === 'In your log'
     && offDlg.notes.some((n) => /Recording is off on this site, so visits are not added\. A world you save is still saved\./.test(n)), `${before.line} then ${off2.line} | ${offDlg.notes.join(' / ')}`);
   await closeLog();
   await call(osDo, 'recording', true);
@@ -381,8 +383,8 @@ export default async function log(p, { base }) {
   await open();
   const after = await state();
   const rec2 = await call(osDo, 'record');
-  const own = (s) => s.line.replace(/ · \d+ shared with you$/, '');
-  p.check('after Overdue saved its planet, the survey\'s log is as it was and the record holds both', own(after) === own(mine) && /· 3 saved$/.test(own(after)) && !!rec2 && rec2.data.overdue.planet === 'WASP-12 b' && rec2.data.log.saved.length >= 3, `${mine.line} then ${after.line} | overdue ${rec2 && rec2.data.overdue.planet}`);
+  const own = (s) => s.line.replace(/, \d+ shared with you$/, '');
+  p.check('after Overdue saved its planet, the survey\'s log is as it was and the record holds both', own(after) === own(mine) && /, 3 saved$/.test(own(after)) && !!rec2 && rec2.data.overdue.planet === 'WASP-12 b' && rec2.data.log.saved.length >= 3, `${mine.line} then ${after.line} | overdue ${rec2 && rec2.data.overdue.planet}`);
 
   // ---- a tour: the visitor's own steps are visits ----
   await another();
@@ -414,22 +416,22 @@ export default async function log(p, { base }) {
   const d0 = await state();
   await call(eraseElsewhere);
   await another();
-  const dA = await line('Your log · 1 visited · 0 saved'), rawA = await call(rawRecord);
-  p.check('an erase made in another tab is not undone by the next thing done here: the log holds that one visit and nothing of before', dA.line === 'Your log · 1 visited · 0 saved' && dA.add === 'Add to log' && !!rawA && rawA.data.log.saved.length === 0
+  const dA = await line('Log: 1 visited, 0 saved'), rawA = await call(rawRecord);
+  p.check('an erase made in another tab is not undone by the next thing done here: the log holds that one visit and nothing of before', dA.line === 'Log: 1 visited, 0 saved' && dA.add === 'Add to log' && !!rawA && rawA.data.log.saved.length === 0
     && same(rawA.data.log.visits.map((v) => v.name), [dA.name]), `${d0.line} then ${dA.line} | stored ${JSON.stringify(rawA && rawA.data.log.visits.map((v) => v.name))}`);
   const [x, y] = await call(names, 2, 300);
   const cur = rawA.data;
   cur.log.saved.unshift({ name: x, t: Date.now(), view: 'orbit' });
   await call(writeRaw, cur, 2);
   await another();
-  const dB = await line('Your log · 2 visited · 1 saved'), rawB = await call(rawRecord);
-  p.check('a save made in another tab is not undone by the next thing done here', dB.line === 'Your log · 2 visited · 1 saved' && !!rawB && same(rawB.data.log.saved.map((e) => e.name), [x]) && rawB.data.log.visits.length === 2, `${dB.line} | stored ${JSON.stringify(rawB && rawB.data.log.saved.map((e) => e.name))}`);
+  const dB = await line('Log: 2 visited, 1 saved'), rawB = await call(rawRecord);
+  p.check('a save made in another tab is not undone by the next thing done here', dB.line === 'Log: 2 visited, 1 saved' && !!rawB && same(rawB.data.log.saved.map((e) => e.name), [x]) && rawB.data.log.visits.length === 2, `${dB.line} | stored ${JSON.stringify(rawB && rawB.data.log.saved.map((e) => e.name))}`);
   const cur2 = rawB.data;
   cur2.log.saved.unshift({ name: y, t: Date.now(), view: 'surface' });
   await call(writeRaw, cur2, 2);
   await call(comeBack);
-  const dC = await line('Your log · 2 visited · 2 saved');
-  p.check('when the tab comes back into view the page reads the store again, with nothing pressed', dC.line === 'Your log · 2 visited · 2 saved' && /chip/.test(dC.chipSaved), `${dC.line} | chip ${dC.chipSaved}`);
+  const dC = await line('Log: 2 visited, 2 saved');
+  p.check('when the tab comes back into view the page reads the store again, with nothing pressed', dC.line === 'Log: 2 visited, 2 saved' && dC.chipSaved !== 'none', `${dC.line} | chip ${dC.chipSaved}`);
 
   // ---- what the store holds is read at the door, as a link is ----
   const cur3 = (await call(rawRecord)).data, t3 = Date.now();
@@ -443,7 +445,7 @@ export default async function log(p, { base }) {
   await call(pressIn, '#log-body button', 'Copy a link to these worlds');
   await p.sleep(300);
   const link2 = await p.ev('window.__copied || ""'), hit2 = await p.ev('window.__hit2 === 1'), rawE = await call(rawRecord);
-  p.check('stored names the catalogue does not have are not shown, not counted, and the log says how many there are', !hit2 && e1.imgs === 0 && e1.line === 'Your log · 2 visited · 2 saved' && same(e1.saved.map((s) => s.name), [y, x]) && e1.visited.length === 2
+  p.check('stored names the catalogue does not have are not shown, not counted, and the log says how many there are', !hit2 && e1.imgs === 0 && e1.line === 'Log: 2 visited, 2 saved' && same(e1.saved.map((s) => s.name), [y, x]) && e1.visited.length === 2
     && e1.notes.some((n) => n.replace(/\s+/g, ' ').trim() === '3 stored entries name worlds this catalogue does not have, and are not shown. Remove them from the log'), `${e1.line} | ${JSON.stringify(e1.saved.map((s) => s.name))} | ${e1.notes.join(' / ')} | hit ${hit2}`);
   // second review, D5: the heading counted the shown saved worlds against the bound and said nothing of the hidden two
   p.check('the saved heading says how many of the stored saved worlds are not shown', (e1.secs.find((s) => /^Saved/.test(s.h)) || {}).h === 'Saved 2 of 200, and 2 not shown', JSON.stringify(e1.secs.map((s) => s.h)));
@@ -471,7 +473,7 @@ export default async function log(p, { base }) {
   await call(press, '[data-act="log"]');
   await p.until('document.querySelector("[data-act=log]").textContent === "In your log"', 6000);
   const g3 = await state(), g4 = await openLog();
-  p.check('once the browser takes the write the world is saved, and neither place says otherwise any more', g3.add === 'In your log' && g3.said === `${g0.name} is in your log.` && g3.saidQuiet && /· 3 saved$/.test(g3.line) && !g4.notes.some((n) => /refused/.test(n)), `${g3.add} | "${g3.said}" | ${g3.line} | ${g4.notes.join(' / ')}`);
+  p.check('once the browser takes the write the world is saved, and neither place says otherwise any more', g3.add === 'In your log' && g3.said === `${g0.name} is in your log.` && g3.saidQuiet && /, 3 saved$/.test(g3.line) && !g4.notes.some((n) => /refused/.test(n)), `${g3.add} | "${g3.said}" | ${g3.line} | ${g4.notes.join(' / ')}`);
   await closeLog();
 
   // ---- a full log ----
@@ -486,7 +488,7 @@ export default async function log(p, { base }) {
   await call(bring, '[data-act="log"]');
   const f1 = await state();
   await p.shot('log-full');
-  p.check('a full log refuses at the button pressed, in view, with the reason and the way out', f0.line === 'Your log · 0 visited · 200 saved · 2 shared with you' && f0.name === all[200] && f1.said === `${all[200]} was not added: ${FULL}.`
+  p.check('a full log refuses at the button pressed, in view, with the reason and the way out', f0.line === 'Log: 0 visited, 200 saved, 2 shared with you' && f0.name === all[200] && f1.said === `${all[200]} was not added: ${FULL}.`
     && f1.add === 'Add to log' && f1.line === f0.line && f1.addSeen && f1.saidSeen && f1.saidUnder, `${f0.line} | ${f1.said} | seen ${f1.addSeen} ${f1.saidSeen} under ${f1.saidUnder}`);
   await openLog();
   await call(pressIn, '#log-body button', 'Add all to your log');
@@ -496,12 +498,12 @@ export default async function log(p, { base }) {
     && (f2.secs.find((s) => /^Saved/.test(s.h)) || {}).h === 'Saved 200 of 200', `${f2.adopted} | ${f2.line} | ${f2.saved.length} listed, ${f2.showAllSaved}`);
   const outName = f2.saved[0].name;
   await call(focusPress, '#log-body .log-out');
-  const f3 = await line('Your log · 0 visited · 199 saved · 2 shared with you');
+  const f3 = await line('Log: 0 visited, 199 saved, 2 shared with you');
   p.check('after one is taken out, what "Add all" said before is gone, and the status line says what was taken out', f3.saved.length === 20 && (f3.secs.find((s) => /^Saved/.test(s.h)) || {}).h === 'Saved 199 of 200' && f3.adopted === `${outName} is out of your log.` && f3.focusIn, `${f3.line} | "${f3.adopted}"`);
   await call(pressIn, '#log-body button', 'Add all to your log');
   await p.until('!!(document.querySelector("#log-body [data-log=adopt] ~ span") || {}).textContent', 6000);
   const f4 = await state();
-  p.check('"Add all" then adds the one there is room for and says how many were left', f4.adopted === `Added 1 world. 1 world could not be added: ${FULL}.` && f4.line === 'Your log · 0 visited · 200 saved · 2 shared with you', `${f4.adopted} | ${f4.line}`);
+  p.check('"Add all" then adds the one there is room for and says how many were left', f4.adopted === `Added 1 world. 1 world could not be added: ${FULL}.` && f4.line === 'Log: 0 visited, 200 saved, 2 shared with you', `${f4.adopted} | ${f4.line}`);
 
   // ---- a long list of visits ----
   const long = blank();
@@ -509,7 +511,7 @@ export default async function log(p, { base }) {
   long.log.dropped = 3;
   await call(writeRaw, long, 2);
   await call(comeBack);
-  const h0 = await line('Your log · 28 visited · 0 saved · 2 shared with you');
+  const h0 = await line('Log: 28 visited, 0 saved, 2 shared with you');
   p.check('the log lists the 20 newest visits, offers the rest, and says how many are counted and no longer listed', h0.open && h0.visited.length === 20 && h0.showAll === 'Show all 25' && h0.sum === '28 worlds visited, 0 saved.'
     && /3 worlds visited earlier are counted and no longer listed: the list holds 500 worlds\./.test(h0.body), `${h0.line} | ${h0.visited.length} listed | ${h0.showAll} | ${h0.sum}`);
   await call(focusPress, '#log-body [data-sec="visited"] [data-log="all"]');
@@ -522,14 +524,14 @@ export default async function log(p, { base }) {
   // ---- the states of the store, on the labs' fixtures ----
   await open('os-fixture=storage-unavailable');
   const i1 = await openLog();
-  p.check('where the browser\'s store did not open, the log says that what is done here is not kept', i1.notes.some((n) => /^The browser.s store did not open on this page, so what you do here is not kept after the page closes\.$/.test(n)) && i1.line === 'Your log · 0 visited · 0 saved', `${i1.line} | ${i1.notes.join(' / ')}`);
+  p.check('where the browser\'s store did not open, the log says that what is done here is not kept', i1.notes.some((n) => /^The browser.s store did not open on this page, so what you do here is not kept after the page closes\.$/.test(n)) && i1.line === 'Log: 0 visited, 0 saved', `${i1.line} | ${i1.notes.join(' / ')}`);
   // second review, D11: the footer said "The log is kept in this browser." here
   p.check('and its last words do not say the log is kept in this browser', !/kept in this browser/.test(i1.foot) && /^A visit and a save are also usage events, which are sent to the labs. backend only where you have allowed it\. What this site keeps/.test(i1.foot), i1.foot);
   await closeLog();
   await open('os-fixture=recording-off');
   await another();
   const i2 = await openLog();
-  p.check('with recording off and nothing visited, the log says why no visit is listed', i2.line === 'Your log · 0 visited · 0 saved' && /No visit is listed\. Recording is off on this site\./.test(i2.body)
+  p.check('with recording off and nothing visited, the log says why no visit is listed', i2.line === 'Log: 0 visited, 0 saved' && /No visit is listed\. Recording is off on this site\./.test(i2.body)
     && i2.notes.some((n) => /^Recording is off on this site, so visits are not added\./.test(n)), `${i2.line} | ${i2.notes.join(' / ')}`);
   await closeLog();
   // second review, D11: with recording off the footer said a visit and a save are usage events, and a save wrote none
@@ -616,7 +618,7 @@ export default async function log(p, { base }) {
   p.check('D9: what "Add all" did is written into the dialog\'s one status line, which was on the page before it spoke', said0 && sameEl && ad0.logSaid === 'Added 2 worlds.' && await p.ev('document.getElementById("log-said").getAttribute("role")') === 'status', `${sameEl} | ${ad0.logSaid}`);
   await call(eraseElsewhere);
   await call(comeBack);
-  await p.until('document.getElementById("log-line").textContent === "Your log · 0 visited · 0 saved · 2 shared with you"', 6000);
+  await p.until('document.getElementById("log-line").textContent === "Log: 0 visited, 0 saved, 2 shared with you"', 6000);
   const ad1 = await state();
   p.check('D12: after an erase made in another tab, the status line no longer says the worlds were added', ad1.logSaid === '' && ad1.shared.every((s) => s.when === ''), `"${ad1.logSaid}" | ${JSON.stringify(ad1.shared)}`);
   await call(pressIn, '#log-body button', 'Add all to your log');
@@ -639,12 +641,12 @@ export default async function log(p, { base }) {
   await p.go(`${base}/labs/exomania-survey.html${addr}`);
   await p.until(NAMED, 90000); await settle(); await p.sleep(600);
   const tr3 = await state(), trAfter = (await call(rawRecord)).data.log.visits;
-  p.check('D3: a tour link opens the tour at the stop it names, and writes that one visit, from a link', tr3.name === tr2.name && /· 3 of /.test(await p.ev('document.getElementById("tour-k").textContent'))
+  p.check('D3: a tour link opens the tour at the stop it names, and writes that one visit, from a link', tr3.name === tr2.name && / 3 of /.test(await p.ev('document.getElementById("tour-k").textContent'))
     && trAfter[0].name === tr2.name && trAfter[0].via === 'link' && trAfter[0].n === trBefore.find((v) => v.name === tr2.name).n + 1 && trAfter.length === trBefore.length, `${tr0.name} … ${tr2.name} | shown ${tr3.name} | top ${JSON.stringify(trAfter[0])}`);
   const [notStop] = await call(names, 1, 4500);
   await open(`tour=earthlike&p=${encodeURIComponent(notStop)}`);
   const tr4 = await state(), trAfter2 = (await call(rawRecord)).data.log.visits;
-  p.check('D3: a tour link whose world is no stop of the tour opens the tour at its first stop and writes nothing', tr4.name === tr0.name && /· 1 of /.test(await p.ev('document.getElementById("tour-k").textContent')) && same(trAfter2, trAfter), `asked ${notStop}, shown ${tr4.name}`);
+  p.check('D3: a tour link whose world is no stop of the tour opens the tour at its first stop and writes nothing', tr4.name === tr0.name && / 1 of /.test(await p.ev('document.getElementById("tour-k").textContent')) && same(trAfter2, trAfter), `asked ${notStop}, shown ${tr4.name}`);
 
   // ---- D5 and T7: entries the page hides count against the bounds ----
   const many = await call(names, 700, 1000);
@@ -669,8 +671,8 @@ export default async function log(p, { base }) {
   await open();
   const hv0 = await state();
   await another();
-  const hv1 = await line('Your log · 500 visited · 0 saved');
-  p.check('D5: with the oldest of 500 visits hidden, one more visit raises "visited" by one, and the hidden line is the one that goes', hv0.line === 'Your log · 499 visited · 0 saved' && hv1.line === 'Your log · 500 visited · 0 saved' && !(await call(rawRecord)).data.log.visits.some((v) => v.name === 'Gone World d'), `${hv0.line} then ${hv1.line}`);
+  const hv1 = await line('Log: 500 visited, 0 saved');
+  p.check('D5: with the oldest of 500 visits hidden, one more visit raises "visited" by one, and the hidden line is the one that goes', hv0.line === 'Log: 499 visited, 0 saved' && hv1.line === 'Log: 500 visited, 0 saved' && !(await call(rawRecord)).data.log.visits.some((v) => v.name === 'Gone World d'), `${hv0.line} then ${hv1.line}`);
 
   // ---- D6 and T9: a record of a later version ----
   const later = { overdue: { planet: 'WASP-12 b', place: null, tz: 'Europe/Madrid' }, log: { saved: [{ name: many[0], t: t9, view: 'orbit', note: 'kept by a later page' }], visits: [], pins: [], dropped: 0, tags: { [many[0]]: ['hot'] } }, notes: { a: 1 } };
@@ -683,7 +685,7 @@ export default async function log(p, { base }) {
   const v3s = await state(), v3d = await openLog(), v3raw = await call(rawRecord);
   await closeLog();
   p.check('D6: a record of a later version is shown and not written: a visit and a save leave it as it was, and the press says why', !!v3raw && v3raw.v === 3 && same(v3raw.data, later) && v3s.said === `${v3a.name} was not added: this log was written by a newer version of this page.`
-    && v3s.line === 'Your log · 0 visited · 1 saved', `v${v3raw && v3raw.v} | ${v3s.said} | ${v3s.line}`);
+    && v3s.line === 'Log: 0 visited, 1 saved', `v${v3raw && v3raw.v} | ${v3s.said} | ${v3s.line}`);
   p.check('D6: the log says why nothing is written', v3d.notes.includes('This log was written by a newer version of this page. It is shown as far as this version reads it, and nothing is written until the page is reloaded.') && v3d.saved.length === 1, v3d.notes.join(' / '));
   await p.go(`${base}/labs/exomania.html?still`);
   await p.until('document.body.dataset.state === "ready"', 60000);
@@ -702,7 +704,7 @@ export default async function log(p, { base }) {
   await p.key('r');
   await p.sleep(1200);
   const fc2 = await p.ev('document.activeElement.dataset.cls || ""'), fcl = await state();
-  p.check('D7: a re-read of the log, and a world opened with "r" that writes a visit, leave the focus on the filter chip', fc1 === 'all' && fc2 === 'all' && fcl.line === 'Your log · 1 visited · 0 saved', `${fc1} | ${fc2} | ${fcl.line}`);
+  p.check('D7: a re-read of the log, and a world opened with "r" that writes a visit, leave the focus on the filter\'s "all sizes"', fc1 === 'all' && fc2 === 'all' && fcl.line === 'Log: 1 visited, 0 saved', `${fc1} | ${fc2} | ${fcl.line}`);
 
   // ---- D8 and T11: a world both saved and visited keeps the focus in the list it was in ----
   const both = many[5];

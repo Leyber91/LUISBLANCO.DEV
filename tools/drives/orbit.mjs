@@ -54,15 +54,18 @@ function install() {
   window.fetch = (u, o = {}) => (new URL(typeof u === 'string' ? u : u.url, location.href).origin === location.origin ? real(u, o) : Promise.reject(new TypeError('refused by the drive')));
   return true;
 }
-/* Where the world is drawn, by the page's own rule (main.js placeWorld): the middle of the free region and the
-   radius the planet's disc is given there, in CSS pixels of the window. */
+/* Where the world is drawn, by the page's own rule (main.js placeWorld): the middle of the free region of sheet A and
+   the radius the planet's disc is given there, in CSS pixels of the window. On a desk the region runs across the
+   sheet, between the name above and the key and title block below; on a phone it is the middle three fifths of the
+   planet's own frame. */
 function layout() {
   const $ = (id) => document.getElementById(id);
-  const cv = $('exo-canvas').getBoundingClientRect(), cam = document.querySelector('.cam').getBoundingClientRect();
-  const desk = getComputedStyle($('exo-canvas')).position === 'fixed';
-  let left, right, top, bottom;
-  if (desk) { left = $('col-l').getBoundingClientRect().right; right = $('col-r').getBoundingClientRect().left; top = document.querySelector('.reticle').getBoundingClientRect().bottom + 2; bottom = cam.top - 6; }
-  else { left = cv.left; right = cv.right; top = cv.top + 64; bottom = cam.top - 6; }
+  const cv = $('exo-canvas').getBoundingClientRect();
+  const desk = matchMedia('(min-width: 1101px)').matches;
+  const left = cv.left, right = cv.right;
+  let top, bottom;
+  if (desk) { top = $('ul').getBoundingClientRect().bottom + 8; bottom = Math.min($('key').getBoundingClientRect().top, $('tblock').getBoundingClientRect().top) - 26; }
+  else { top = cv.top + cv.height * 0.2; bottom = cv.bottom - cv.height * 0.2; }
   const r = Math.max(60, Math.min((bottom - top) / 2, (right - left) / 2 * 0.9));
   const hit = (x, y) => { const e = document.elementFromPoint(x, y); return e ? (e.id || e.className || e.tagName) : ''; };
   const cx = (left + right) / 2, cy = (top + bottom) / 2;
@@ -72,7 +75,8 @@ function layout() {
 function systemState() {
   const host = document.getElementById('system') || document.querySelector('.sys-wrap').closest('section, div.plate, div');
   const cv = document.querySelector('.sys-cv'), b = document.querySelector('[data-k="solar"]'), r = cv.getBoundingClientRect();
-  return { label: cv.getAttribute('aria-label') || '', cap: (document.querySelector('[data-k="syscap"]') || {}).textContent || '', pressed: b.getAttribute('aria-pressed'), on: b.classList.contains('on'),
+  // the Solar System's scale is a switch: its state is aria-checked, and its lever's side
+  return { label: cv.getAttribute('aria-label') || '', cap: (document.querySelector('[data-k="syscap"]') || {}).textContent || '', pressed: b.getAttribute('aria-checked'), on: b.getAttribute('aria-checked') === 'true',
     name: (document.querySelector('[data-k="sysname"]') || {}).textContent || '', rect: { left: r.left, top: r.top, width: r.width, height: r.height }, host: !!host };
 }
 function press(selector) { const e = document.querySelector(selector); if (!e) return false; e.click(); return true; }
@@ -169,7 +173,7 @@ export default async function orbit(p, { base, width }) {
   await p.sleep(600);
   const s0 = await call(systemState);
   const reach = (label) => { const m = label.match(/the view reaches ([\d.,]+) AU/); return m ? Number(m[1].replace(/,/g, '')) : NaN; };
-  p.check('the system view says how far it reaches, and for seven planets inside 0.07 AU that is under 0.3 AU', /TRAPPIST-1 · 7 planets/.test(s0.name) && reach(s0.label) > 0.03 && reach(s0.label) < 0.3 && s0.pressed === 'false', `${s0.name} | ${s0.label}`);
+  p.check('the system view says how far it reaches, and for seven planets inside 0.07 AU that is under 0.3 AU', /TRAPPIST-1, 7 planets/.test(s0.name) && reach(s0.label) > 0.03 && reach(s0.label) < 0.3 && s0.pressed === 'false', `${s0.name} | ${s0.label}`);
   await shoot('system-own', 800);
   await call(press, '[data-k="solar"]');
   await p.sleep(1200);

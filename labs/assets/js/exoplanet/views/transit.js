@@ -12,25 +12,31 @@
 import { transitGeometry, lightCurve, fluxAt, transitCheck, starColour, rvCurve, isNum } from '../science.js';
 import { LIMB } from '../config.js';
 import { tokens, alpha, surface, fmt, reducedMotion } from './common.js';
+import { switchCtl, setSwitch, bindSwitch } from '../../kit/controls.js';
 
 export function createTransit(host, store) {
   host.innerHTML = `
-    <div class="view-head"><span class="view-k">Signal</span>
-      <div class="tabs" role="tablist" aria-label="Signal"><button type="button" role="tab" class="tab" data-sig="transit">Transit</button><button type="button" role="tab" class="tab" data-sig="rv">Radial velocity</button></div>
-      <span class="view-v" data-k="tv">—</span></div>
+    <div class="lab"><h2 class="st" id="e-h"><i>E</i>The signal</h2><span class="meta" data-k="tv"></span></div>
+    <div class="view-row" data-k="ctl"></div>
     <div class="tr-wrap"><canvas class="tr-cv" role="img" tabindex="0"></canvas></div>
-    <p class="view-cap" data-k="tcap"></p>`;
+    <p class="note2" data-k="tcap"></p>
+    <details class="twin"><summary>table</summary><div class="twin-b" data-k="trtwin"></div></details>`;
   const cv = host.querySelector('canvas');
   const vEl = host.querySelector('[data-k="tv"]');
   const capEl = host.querySelector('[data-k="tcap"]');
-  const tabs = [...host.querySelectorAll('[data-sig]')];
+  const twinEl = host.querySelector('[data-k="trtwin"]');
+  /* which signal: a switch, the transit with the lever left, the star's velocity with it right */
+  const sig = switchCtl({ name: 'signal', words: ['transit', 'velocity'], ariaLabel: 'Signal: radial velocity' });
+  sig.dataset.k = 'sig';
+  host.querySelector('[data-k="ctl"]').append(sig);
+  const row = (k, v) => `<tr><th>${k}</th><td>${v}</td></tr>`;
   const T = tokens();
   const still = reducedMotion() || window.__EXO_STILL__ || window.__EXO_LOWPOWER__;
   let m = null, raf = 0, visible = true, t0 = performance.now();
   let mode = 'transit', userMode = null, scrub = null;   // scrub: phase 0..1 held by the visitor
   const surf = surface(cv, draw);
 
-  tabs.forEach((b) => b.addEventListener('click', () => { userMode = b.dataset.sig; mode = userMode; build(); surf.redraw(); }));
+  bindSwitch(sig, (rv) => { userMode = rv ? 'rv' : 'transit'; mode = userMode; build(); surf.redraw(); });
 
   function build() {
     const sel = store.state.sel;
@@ -38,10 +44,11 @@ export function createTransit(host, store) {
     if (!sel) return;
     // the discovery method leads, unless the visitor chose
     if (!userMode) mode = sel.method === 'Radial Velocity' ? 'rv' : 'transit';
-    tabs.forEach((b) => { const on = b.dataset.sig === mode; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+    setSwitch(sig, mode === 'rv');
+    twinEl.innerHTML = '';
     if (mode === 'rv') return buildRV(sel);
     const geo = transitGeometry(sel);
-    if (!geo) { vEl.textContent = 'not computable'; capEl.textContent = !isNum(sel.R) ? '[REAL] No planet radius measured: no light curve.' :'[REAL] The archive lacks the stellar radius, orbit or period needed for a light curve.'; return; }
+    if (!geo) { vEl.textContent = 'no light curve'; capEl.textContent = !isNum(sel.R) ? '[REAL] No planet radius measured: no light curve.' :'[REAL] The archive lacks the stellar radius, orbit or period needed for a light curve.'; return; }
     const span = Math.max(geo.T14 * 0.85, 0.6);
     const curve = lightCurve(geo, sel.P, span, 180);
     const chk = transitCheck(sel, geo);
@@ -51,14 +58,15 @@ export function createTransit(host, store) {
     }).filter(Boolean);
     m = { kind: 'transit', sel, geo, span, curve, chk, sibs, colour: starColour(sel.Teff) };
     const ppm = geo.depthLD * 1e6;
-    vEl.textContent = `${fmt(ppm >= 1e4 ? ppm / 1e4 : ppm, 3)} ${ppm >= 1e4 ? '%' : 'ppm'} · ${fmt(geo.T14, 3)} h`;
+    vEl.textContent = `${fmt(ppm >= 1e4 ? ppm / 1e4 : ppm, 3)} ${ppm >= 1e4 ? '%' : 'ppm'} deep, ${fmt(geo.T14, 3)} h long`;
     let txt;
     if (geo.transits) {
       const meas = [chk && chk.depth ? `${fmt(chk.depth.measured * 1e4, 3)} ppm` : null, chk && chk.dur ? `${fmt(chk.dur.measured, 3)} h` : null].filter(Boolean);
       const lim = (k, u) => (sel.lim && sel.lim[k] ? `${sel.lim[k].dir > 0 ? '<' : '>'} ${fmt(sel.lim[k].v, 3)}${u} (${sel.lim[k].dir > 0 ? 'upper' : 'lower'} limit)` : null);
       const measAll = [...meas, lim('depth', '%'), lim('dur', ' h')].filter(Boolean);
       const bTxt = geo.bMeasured ? fmt(geo.b, 2) : geo.bLimit ? `${fmt(geo.b, 2)} (assumed; archive gives only ${lim('b', '')})` : '0 (assumed)';
-      txt = `[REAL] Model ${fmt(ppm, 3)} ppm, ${fmt(geo.T14, 3)} h · measured ${measAll.length ? measAll.join(', ') : 'none in the archive'} · b ${bTxt}, circular orbit.${sibs.length ? ` Faint: ${sibs.length} sibling${sibs.length > 1 ? 's' : ''}.` : ''}`;
+      txt = `[REAL] Model ${fmt(ppm, 3)} ppm and ${fmt(geo.T14, 3)} h; measured ${measAll.length ? measAll.join(', ') : 'none in the archive'}; impact parameter b ${bTxt}, circular orbit. The line is the model; the gold marks are the archive's measured depth and duration.${sibs.length ? ` Faint: ${sibs.length} other planet${sibs.length > 1 ? 's' : ''} of the system.` : ''}`;
+      twinEl.innerHTML = `<table><tbody>${row('depth, model', `${fmt(ppm, 3)} ppm`)}${row('depth, measured', chk && chk.depth ? `${fmt(chk.depth.measured * 1e4, 3)} ppm` : 'not in the archive')}${row('duration, model', `${fmt(geo.T14, 3)} h`)}${row('duration, measured', chk && chk.dur ? `${fmt(chk.dur.measured, 3)} h` : 'not in the archive')}${row('impact parameter b', bTxt)}${row('planet to star radius', fmt(geo.k, 3))}</tbody></table>`;
     } else {
       txt = `[ILLUSTRATIVE] Not seen in transit: a random orientation transits ${fmt(geo.geomProb * 100, 2)}% of the time. This is the curve if it did.`;
     }
@@ -71,6 +79,7 @@ export function createTransit(host, store) {
     if (!rv) { vEl.textContent = 'not computable'; capEl.textContent = '[REAL] The archive lacks the stellar mass or the period needed for a velocity curve.'; return; }
     m = { kind: 'rv', sel, rv, colour: starColour(sel.Teff) };
     vEl.textContent = `K ${fmt(rv.K, 3)} m/s`;
+    twinEl.innerHTML = `<table><tbody>${row('semi-amplitude K', `${fmt(rv.K, 3)} m/s`)}${row('period', `${fmt(sel.P, 4)} d`)}${row('mass used', rv.massSrc)}${row('eccentricity', rv.eLimit ? 'a bound only, drawn 0' : fmt(rv.e, 2))}</tbody></table>`;
     const src = rv.massSrc === 'measured' ? 'the measured mass' : rv.massSrc === 'minimum' ? 'the minimum mass (M sin i)' : rv.bounded ? `the forecast mass, cut by the archive's ${rv.bounded} limit` : 'the forecast mass';
     const eTxt = rv.eLimit ? `e only a bound (${rv.eLimit.dir > 0 ? '<' : '>'} ${fmt(rv.eLimit.v, 2)}), drawn 0` : `e ${fmt(rv.e, 2)}`;
     capEl.textContent = `[REAL] Semi-amplitude from ${src}, P and the star's mass (Lovis & Fischer 2010, eq. 14), ${eTxt}. [ILLUSTRATIVE] periastron angle 90°. The best spectrographs reach about 1 m/s.`;
@@ -102,8 +111,8 @@ export function createTransit(host, store) {
     const px = scx + geo.aRs * Math.sin(ph) * sR;
     const pr = Math.max(1.2, geo.k * sR);
     if (Math.abs(px - scx) < sR * 1.7) {
-      ctx.fillStyle = '#05070B'; ctx.beginPath(); ctx.arc(px, chordY, pr, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = alpha(T.gold, 0.9); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(px, chordY, pr + 2.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = T.void; ctx.beginPath(); ctx.arc(px, chordY, pr, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = alpha(T.bright, 0.9); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(px, chordY, pr + 2.5, 0, Math.PI * 2); ctx.stroke();
     }
     const bx = { x0: 44, x1: w - 10, y0: h - 20, y1: topH + 12 };
     const depth = 1 - Math.min(...curve.map((c) => c[1]));
@@ -134,21 +143,21 @@ export function createTransit(host, store) {
     ctx.restore();
     if (measuredDepth) {
       const y = Y(1 - measuredDepth);
-      ctx.strokeStyle = alpha(T.text, 0.55); ctx.setLineDash([4, 3]);
-      ctx.beginPath(); ctx.moveTo(bx.x0, y); ctx.lineTo(bx.x1, y); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText('MEASURED DEPTH', bx.x1 - 4, y - 3);
+      ctx.strokeStyle = T.gold; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(bx.x0, y); ctx.lineTo(bx.x1, y); ctx.stroke(); ctx.lineWidth = 1;
+      ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText('measured depth', bx.x1 - 4, y - 3);
     }
     if (m.chk && m.chk.dur) {
       const half = m.chk.dur.measured / 2;
-      ctx.strokeStyle = alpha(T.text, 0.45);
+      ctx.strokeStyle = T.gold;
       for (const t of [-half, half]) { const x = X(t); ctx.beginPath(); ctx.moveTo(x, bx.y0 - 6); ctx.lineTo(x, bx.y0); ctx.stroke(); }
     }
     ctx.strokeStyle = T.bright; ctx.lineWidth = 1.3; ctx.beginPath();
     curve.forEach(([t, f], i) => (i ? ctx.lineTo(X(t), Y(f)) : ctx.moveTo(X(t), Y(f))));
     ctx.stroke();
     const fNow = Math.cos(ph) > 0 ? fluxAt(Math.hypot(geo.aRs * Math.sin(ph), geo.b * Math.cos(ph)), geo.k) : 1;
-    ctx.strokeStyle = alpha(T.gold, 0.35); ctx.beginPath(); ctx.moveTo(X(tH), bx.y1); ctx.lineTo(X(tH), bx.y0); ctx.stroke();
-    ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(X(tH), Y(fNow), 3, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = alpha(T.text, 0.35); ctx.beginPath(); ctx.moveTo(X(tH), bx.y1); ctx.lineTo(X(tH), bx.y0); ctx.stroke();
+    ctx.fillStyle = T.bright; ctx.beginPath(); ctx.arc(X(tH), Y(fNow), 3, 0, Math.PI * 2); ctx.fill();
     cv.setAttribute('aria-label', `Transit light curve of ${m.sel.name}: depth ${fmt(depth * 1e6, 3)} ppm, duration ${fmt(geo.T14, 3)} hours`);
   }
 
@@ -166,14 +175,14 @@ export function createTransit(host, store) {
     for (const v of [rv.K, 0, -rv.K]) ctx.fillText(fmt(v, 2), bx.x0 - 4, Y(v) + 3);
     ctx.textAlign = 'left'; ctx.fillText('m/s', 2, bx.y1 + 8);
     ctx.textAlign = 'center';
-    ctx.fillText('0', X(0), bx.y0 + 13); ctx.fillText(`${fmt(m.sel.P, 3)} d`, X(1) - 14, bx.y0 + 13); ctx.fillText('ORBITAL PHASE', X(0.5), bx.y0 + 13);
+    ctx.fillText('0', X(0), bx.y0 + 13); ctx.fillText(`${fmt(m.sel.P, 3)} d`, X(1) - 14, bx.y0 + 13); ctx.fillText('orbital phase', X(0.5), bx.y0 + 13);
     ctx.strokeStyle = T.bright; ctx.lineWidth = 1.3; ctx.beginPath();
     rv.curve.forEach(([u, v], i) => (i ? ctx.lineTo(X(u), Y(v)) : ctx.moveTo(X(u), Y(v))));
     ctx.stroke();
     const u = phaseNow();
     const v = rv.curve[Math.min(rv.curve.length - 1, Math.round(u * (rv.curve.length - 1)))][1];
-    ctx.strokeStyle = alpha(T.gold, 0.35); ctx.beginPath(); ctx.moveTo(X(u), bx.y1); ctx.lineTo(X(u), bx.y0); ctx.stroke();
-    ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(X(u), Y(v), 3, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = alpha(T.text, 0.35); ctx.beginPath(); ctx.moveTo(X(u), bx.y1); ctx.lineTo(X(u), bx.y0); ctx.stroke();
+    ctx.fillStyle = T.bright; ctx.beginPath(); ctx.arc(X(u), Y(v), 3, 0, Math.PI * 2); ctx.fill();
     cv.setAttribute('aria-label', `Radial velocity curve of ${m.sel.host}: semi-amplitude ${fmt(rv.K, 3)} metres per second`);
   }
 

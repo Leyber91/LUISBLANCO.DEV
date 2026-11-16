@@ -82,4 +82,4 @@ const MUTANTS = [
   ['the far side given a quarter turn short', `orbitFrame(lightDir).azimuth + Math.PI;`, `orbitFrame(lightDir).azimuth + Math.PI / 2;`],
 ];
 
-process.exit(await runMutants({ here, file: 'orbit.js', test: 'orbit.test.mjs', mutants: MUTANTS }));
+process.exit(await runMutants({ here, file: 'orbit.js', test: 'orbit.test.mjs', mutants: MUTANTS, also: ['kit'] }));

@@ -10,7 +10,8 @@
 
 import { PLOTS, PLOT_ORDER, SOLAR, VALLEY, METHOD_GROUPS, CHEN_KIPPING, LIMITS, RV } from '../config.js';
 import { insolation, valleyHistogram, radiusFromMass, seagerRadius, SEAGER_MATERIALS } from '../science.js';
-import { tokens, alpha, surface, logScale, linScale, isNum, fmt, fmtInt, esc } from './common.js';
+import { tokens, alpha, mix, surface, logScale, linScale, isNum, fmt, fmtInt, esc } from './common.js';
+import { scale, bindScale, setScale } from '../../kit/controls.js';
 
 const M = { l: 40, r: 12, t: 12, b: 26 };
 
@@ -24,25 +25,34 @@ export function plotValue(p, key) {
   return null;
 }
 
-const methodInk = (m) => (METHOD_GROUPS.find((g) => g.key === m) || METHOD_GROUPS[METHOD_GROUPS.length - 1]).ink;
+const methodGroup = (m) => METHOD_GROUPS.find((g) => g.key === m) || METHOD_GROUPS[METHOD_GROUPS.length - 1];
+/* a method group's ink: a token of the ink ladder, at its own strength */
+const groupInk = (g, T, k = 1) => alpha(T[g.ink[0]], Math.min(1, g.ink[1] * k));
+const LETTERS = 'abcde';
+const NAMES = { valley: 'radius against insolation: the valley', rp: 'radius against period', mr: 'mass against radius', time: 'discoveries by year', sky: 'the host stars on the sky' };
 
 export function createPlot(host, store, actions) {
   host.innerHTML = `
-    <div class="view-head">
-      <div class="tabs" role="tablist" aria-label="Catalogue diagram">${PLOT_ORDER.map((k) =>
-        `<button type="button" role="tab" class="tab" data-plot="${k}">${PLOTS[k].label}</button>`).join('')}</div>
-    </div>
-    <div class="plot-wrap"><canvas class="plot-cv" tabindex="0" role="img"></canvas><div class="tip" hidden></div>
-      <label class="sel cby"><span class="sr">Colour points by</span><select data-k="cby">
-        <option value="none">ink</option><option value="method">by method</option><option value="year">by year</option></select></label></div>
-    <p class="view-cap" aria-live="polite"></p>`;
-  const cv = host.querySelector('canvas');
+    <div class="thumbs" role="tablist" aria-label="The catalogue's five diagrams">${PLOT_ORDER.map((k, i) =>
+      `<button type="button" role="tab" class="thumb" data-plot="${k}" aria-selected="false" aria-label="${LETTERS[i]}, ${NAMES[k]}" title="${PLOTS[k].label}"><canvas width="160" height="40"></canvas><span class="thumb-l" aria-hidden="true">${LETTERS[i]}</span></button>`).join('')}</div>
+    <div class="plot-wrap"><canvas class="plot-cv" tabindex="0" role="img"></canvas><div class="tip" hidden></div></div>
+    <div class="plot-ink"></div>`;
+  const cv = host.querySelector('.plot-cv');
   const tip = host.querySelector('.tip');
-  const cap = host.querySelector('.view-cap');
-  const tabs = [...host.querySelectorAll('.tab')];
-  const cby = host.querySelector('[data-k="cby"]');
+  const cap = document.getElementById('plot-cap');
+  const tabs = [...host.querySelectorAll('.thumb')];
+  /* the ink of the points: one of three positions on a scale */
+  const cby = scale({ name: 'ink', options: [{ value: 'none', label: 'plain' }, { value: 'method', label: 'method' }, { value: 'year', label: 'year' }], value: 'none', ariaLabel: 'Ink of the points' });
+  cby.dataset.k = 'cby';
+  host.querySelector('.plot-ink').append(cby);
+  bindScale(cby, (v) => { store.state.colorBy = v; surf.redraw(); });
   tabs.forEach((b) => b.addEventListener('click', () => actions.setPlot(b.dataset.plot)));
-  cby.addEventListener('change', () => { store.state.colorBy = cby.value; surf.redraw(); });
+  host.querySelector('.thumbs').addEventListener('keydown', (e) => {
+    const i = tabs.indexOf(document.activeElement); if (i < 0) return;
+    const j = e.key === 'ArrowRight' ? Math.min(tabs.length - 1, i + 1) : e.key === 'ArrowLeft' ? Math.max(0, i - 1) : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+    if (j < 0) return;
+    e.preventDefault(); e.stopPropagation(); tabs[j].focus(); actions.setPlot(tabs[j].dataset.plot);
+  });
 
   let pts = null;          // Float32Array [x, y, idx] of drawn points for hit tests
   let bars = [];           // timeline bars for hit tests
@@ -57,12 +67,8 @@ export function createPlot(host, store, actions) {
 
   function inkFor(p, a) {
     const cb = store.state.colorBy;
-    if (cb === 'method') return methodInk(p.method).replace(/[\d.]+\)$/, `${Math.min(1, a * 1.9)})`);
-    if (cb === 'year' && isNum(p.year)) {
-      const t = Math.max(0, Math.min(1, (p.year - 1995) / 31));
-      const c = [86 + t * (234 - 86), 93 + t * (240 - 93), 114 + t * (251 - 114)].map(Math.round);
-      return `rgba(${c[0]},${c[1]},${c[2]},${Math.min(1, a * 1.8)})`;
-    }
+    if (cb === 'method') return alpha(T[methodGroup(p.method).ink[0]], Math.min(1, a * 1.9));
+    if (cb === 'year' && isNum(p.year)) return mix(T.horizonDim, T.bright, (p.year - 1995) / 31, Math.min(1, a * 1.8));
     return alpha(T.text, a);
   }
 
@@ -96,31 +102,31 @@ export function createPlot(host, store, actions) {
     ctx.strokeStyle = alpha(T.horizon, 0.22);
     ctx.strokeRect(x0 + 0.5, y1 + 0.5, x1 - x0, y0 - y1);
     ctx.fillStyle = T.dim; ctx.font = T.fontSm;
-    ctx.textAlign = 'right'; ctx.fillText(cfg.xLabel.toUpperCase(), x1, y0 + 23);
+    ctx.textAlign = 'right'; ctx.fillText(cfg.xLabel, x1, y0 + 23);
     ctx.save(); ctx.translate(10, y1); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'right';
-    ctx.fillText(cfg.yLabel.toUpperCase(), 0, 0); ctx.restore();
+    ctx.fillText(cfg.yLabel, 0, 0); ctx.restore();
     return { x0, x1, y0, y1 };
   }
 
   function draw(ctx, w, h) {
     const st = store.state;
     const mode = st.plot;
-    tabs.forEach((b) => { const on = b.dataset.plot === mode; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
-    cby.value = st.colorBy || 'none';
-    // the timeline's bars are already stacked by method, so colour-by has nothing to change there
-    cby.parentElement.hidden = mode === 'time';
+    tabs.forEach((b) => { const on = b.dataset.plot === mode; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+    setScale(cby, st.colorBy || 'none');
+    // the timeline's bars are already stacked by method, so the ink has nothing to change there
+    cby.hidden = mode === 'time';
     if (!st.list.length) return;
     bars = []; pts = null; proj = null; box = null;
     if (mode === 'time') drawTimeline(ctx, w, h, st);
     else if (mode === 'sky') drawSky(ctx, w, h, st);
     else drawScatter(ctx, w, h, st, mode);
     if (isNum(st.filter.upTo)) {
-      ctx.fillStyle = alpha(T.gold, 0.9); ctx.font = '600 22px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'right';
+      ctx.fillStyle = T.bright; ctx.font = '600 22px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'right';
       ctx.fillText(String(st.filter.upTo), w - M.r - 6, M.t + 26);
     }
     if (hover) drawHover(ctx, hover);
     if (brush) {
-      ctx.strokeStyle = alpha(T.gold, 0.9); ctx.fillStyle = alpha(T.gold, 0.06); ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = alpha(T.bright, 0.9); ctx.fillStyle = alpha(T.bright, 0.05); ctx.setLineDash([3, 3]);
       const x = Math.min(brush.x0, brush.x1), y = Math.min(brush.y0, brush.y1);
       ctx.fillRect(x, y, Math.abs(brush.x1 - brush.x0), Math.abs(brush.y1 - brush.y0));
       ctx.strokeRect(x + 0.5, y + 0.5, Math.abs(brush.x1 - brush.x0), Math.abs(brush.y1 - brush.y0)); ctx.setLineDash([]);
@@ -168,7 +174,7 @@ export function createPlot(host, store, actions) {
     pts = new Float32Array(arr);
     if (mode === 'valley') {
       ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'left';
-      ctx.fillText('RADIUS VALLEY 1.5-2.0 R⊕', box.x0 + 6, sy(VALLEY.hi) - 4);
+      ctx.fillText('the radius valley, 1.5 to 2.0 R⊕', box.x0 + 6, sy(VALLEY.hi) - 4);
     }
     // the selected planet's siblings
     if (sel) {
@@ -176,7 +182,7 @@ export function createPlot(host, store, actions) {
         if (p === sel) continue;
         const vx = plotValue(p, cfg.x), vy = plotValue(p, cfg.y);
         if (!isNum(vx) || !isNum(vy)) continue;
-        ctx.strokeStyle = alpha(T.goldSoft, 0.55); ctx.lineWidth = 1;
+        ctx.strokeStyle = alpha(T.text, 0.7); ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(sx(vx), sy(vy), 3.5, 0, Math.PI * 2); ctx.stroke();
       }
     }
@@ -198,7 +204,7 @@ export function createPlot(host, store, actions) {
         ctx.setLineDash([]);
         ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(x, y, 3.6, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = alpha(T.gold, 0.8); ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
-        ctx.fillStyle = T.goldSoft; ctx.font = T.font; ctx.textAlign = x > (box.x0 + box.x1) / 2 ? 'right' : 'left';
+        ctx.fillStyle = T.bright; ctx.font = T.serif; ctx.textAlign = x > (box.x0 + box.x1) / 2 ? 'right' : 'left';
         ctx.fillText(sel.name, x + (ctx.textAlign === 'right' ? -12 : 12), y - 9);
       } else if (mode === 'mr' || !isNum(sel.R)) {
         // the selection is not a point here: say why, with the archive bound when there is one
@@ -214,7 +220,7 @@ export function createPlot(host, store, actions) {
     const b = st.filter.box;
     if (b && b.mode === mode) {
       const xa = sx(b.x[0]), xb = sx(b.x[1]), ya = sy(b.y[0]), yb = sy(b.y[1]);
-      ctx.strokeStyle = alpha(T.gold, 0.7); ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = alpha(T.bright, 0.7); ctx.setLineDash([3, 3]);
       ctx.strokeRect(Math.min(xa, xb) + 0.5, Math.min(ya, yb) + 0.5, Math.abs(xb - xa), Math.abs(yb - ya)); ctx.setLineDash([]);
     }
     caption(mode, st);
@@ -231,7 +237,7 @@ export function createPlot(host, store, actions) {
       ctx.fillRect(bx.x1 - bw, y0 + 0.5, bw, Math.max(1, y1 - y0 - 1));
     }
     ctx.fillStyle = T.faint; ctx.font = T.fontSm; ctx.textAlign = 'right';
-    ctx.fillText(`KEPLER, P<100 d, σR<10%: ${V.n}`, bx.x1 - 4, sy(6) - 4);
+    ctx.fillText(`Kepler, P under 100 d, radius to 10%: ${V.n}`, bx.x1 - 4, sy(6) - 4);
   }
 
   function drawRelation(ctx, bx) {
@@ -269,8 +275,8 @@ export function createPlot(host, store, actions) {
     dn.reverse().forEach(([x, y]) => ctx.lineTo(x, y));
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = T.horizon; ctx.font = T.fontSm; ctx.textAlign = 'left';
-    ctx.fillText('CHEN & KIPPING 2017 ±1σ', bx.x0 + 6, bx.y1 + 12);
-    ctx.fillStyle = T.dim; ctx.fillText('SEAGER ET AL. 2007: IRON, ROCK, WATER', bx.x0 + 6, bx.y1 + 24);
+    ctx.fillText('Chen & Kipping 2017, 1σ', bx.x0 + 6, bx.y1 + 12);
+    ctx.fillStyle = T.dim; ctx.fillText('Seager et al. 2007: iron, rock, water', bx.x0 + 6, bx.y1 + 24);
   }
 
   /* where surveys can and cannot see: an empty region below a line is an instrument limit */
@@ -288,7 +294,7 @@ export function createPlot(host, store, actions) {
       const x = sx(P), y = sy(R); first ? ctx.moveTo(x, y) : ctx.lineTo(x, y); first = false; last = [x, y];
     }
     ctx.lineTo(last[0], sy(30)); ctx.stroke();
-    ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText('TRANSIT LIMIT', last[0] - 4, last[1] + 11);
+    ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText('transit limit', last[0] - 4, last[1] + 11);
     // radial velocity: K = 1 m/s around a Sun-like star -> M sin i, then radius from Chen & Kipping
     ctx.setLineDash([1, 3]); ctx.beginPath(); first = true;
     for (let lp = Math.log10(0.3); lp <= 5; lp += 0.02) {
@@ -331,29 +337,29 @@ export function createPlot(host, store, actions) {
       for (const g of METHOD_GROUPS) {
         const n = c[g.key] || 0; if (!n) continue;
         const ya = syl(acc), yb = syl(acc + n);
-        ctx.fillStyle = g.ink; ctx.fillRect(x, yb, bw, ya - yb);
+        ctx.fillStyle = groupInk(g, T); ctx.fillRect(x, yb, bw, ya - yb);
         acc += n;
       }
       ctx.globalAlpha = 1;
       bars.push({ yr, x, w: bw, top: syl(acc), c, total: acc });
       if (yr % 5 === 0) { ctx.fillStyle = T.faint; ctx.textAlign = 'center'; ctx.fillText(String(yr), sxl(yr), bx.y0 + 13); }
-      if (st.filter.year === yr) { ctx.strokeStyle = T.goldSoft; ctx.strokeRect(x - 1.5, syl(acc) - 1.5, bw + 3, bx.y0 - syl(acc) + 1.5); }
+      if (st.filter.year === yr) { ctx.strokeStyle = T.bright; ctx.lineWidth = 1.5; ctx.strokeRect(x - 1.5, syl(acc) - 1.5, bw + 3, bx.y0 - syl(acc) + 1.5); ctx.lineWidth = 1; }
     }
     ctx.strokeStyle = alpha(T.horizon, 0.22); ctx.beginPath(); ctx.moveTo(bx.x0, bx.y0 + 0.5); ctx.lineTo(bx.x1, bx.y0 + 0.5); ctx.stroke();
     let lx = bx.x0 + 4;
     ctx.textAlign = 'left';
     for (const g of METHOD_GROUPS) {
-      ctx.fillStyle = g.ink; ctx.fillRect(lx, M.t - 2, 7, 7);
+      ctx.fillStyle = groupInk(g, T); ctx.fillRect(lx, M.t - 2, 7, 7);
       ctx.fillStyle = T.dim; ctx.fillText(g.label, lx + 10, M.t + 5);
       lx += 14 + ctx.measureText(g.label).width + 8;
     }
     const sel = st.sel;
     if (sel && isNum(sel.year)) {
       const x = sxl(sel.year);
-      ctx.strokeStyle = alpha(T.gold, 0.9); ctx.setLineDash([2, 3]);
+      ctx.strokeStyle = alpha(T.bright, 0.9); ctx.setLineDash([2, 3]);
       ctx.beginPath(); ctx.moveTo(x, bx.y1); ctx.lineTo(x, bx.y0); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = T.goldSoft; ctx.font = T.font; ctx.textAlign = x > w * 0.6 ? 'right' : 'left';
-      ctx.fillText(`${sel.name} · ${sel.year}`, x + (ctx.textAlign === 'right' ? -6 : 6), bx.y1 + 10);
+      ctx.fillStyle = T.bright; ctx.font = T.serif; ctx.textAlign = x > w * 0.6 ? 'right' : 'left';
+      ctx.fillText(`${sel.name}, ${sel.year}`, x + (ctx.textAlign === 'right' ? -6 : 6), bx.y1 + 10);
     }
     caption('time', st, { counts });
   }
@@ -400,7 +406,7 @@ export function createPlot(host, store, actions) {
       const [x, y] = proj(sel.ra, sel.dec);
       ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(x, y, 3.4, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = alpha(T.gold, 0.8); ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = T.goldSoft; ctx.font = T.font; ctx.textAlign = x > cx ? 'right' : 'left';
+      ctx.fillStyle = T.bright; ctx.font = T.serif; ctx.textAlign = x > cx ? 'right' : 'left';
       ctx.fillText(sel.host, x + (x > cx ? -12 : 12), y - 9);
     }
     caption('sky', st);
@@ -473,7 +479,7 @@ export function createPlot(host, store, actions) {
     if (st.plot === 'time') {
       const b = barAt(mx);
       hover = null;
-      if (b) showTip(`<b>${b.yr}</b> · ${fmtInt(b.total)} planets<br>${METHOD_GROUPS.filter((g) => b.c[g.key]).map((g) => `${g.label} ${b.c[g.key]}`).join(' · ')}`, mx, my);
+      if (b) showTip(`<b>${b.yr}</b>, ${fmtInt(b.total)} planets<br>${METHOD_GROUPS.filter((g) => b.c[g.key]).map((g) => `${g.label} ${b.c[g.key]}`).join(', ')}`, mx, my);
       else tip.hidden = true;
       cv.style.cursor = b ? 'pointer' : 'default';
       return;
@@ -484,7 +490,7 @@ export function createPlot(host, store, actions) {
     if (n) {
       const p = st.list[n.idx];
       const S = insolation(p).S;
-      showTip(`<b>${esc(p.name)}</b><br>${fmt(p.R)} R⊕ · ${isNum(p.P) ? fmt(p.P) + ' d' : '—'} · ${isNum(S) ? fmt(S) + ' S⊕' : '—'}${isNum(p.year) ? ' · ' + p.year : ''}`, mx, my);
+      showTip(`<b>${esc(p.name)}</b><br>${[`${fmt(p.R)} R⊕`, isNum(p.P) ? fmt(p.P) + ' d' : '', isNum(S) ? fmt(S) + ' S⊕' : '', isNum(p.year) ? 'found ' + p.year : ''].filter(Boolean).join(', ')}`, mx, my);
     } else tip.hidden = true;
     cv.style.cursor = n ? 'pointer' : 'crosshair';
     if (changed) surf.redraw();
@@ -527,7 +533,43 @@ export function createPlot(host, store, actions) {
     if (best !== null) actions.select(st.list[best], { from: 'plot' });
   });
 
-  return { redraw: () => surf.redraw(), resetStats: () => { valleyStats = null; } };
+  /* The five thumbnails, each a small copy of its diagram drawn from the catalogue as loaded. The page calls this when
+     it is idle and no shader is being built: 6,464 points four times over is the heaviest drawing it does. */
+  function drawThumbs() {
+    const list = store.state.list;
+    tabs.forEach((b) => {
+      const c = b.querySelector('canvas'), ctx = c.getContext('2d'), w = c.width, h = c.height, mode = b.dataset.plot;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = alpha(T.text, 0.6);
+      if (mode === 'time') {
+        const by = new Map(); let y0 = Infinity, y1 = -Infinity, top = 0;
+        for (const p of list) if (isNum(p.year)) { by.set(p.year, (by.get(p.year) || 0) + 1); y0 = Math.min(y0, p.year); y1 = Math.max(y1, p.year); }
+        for (const n of by.values()) top = Math.max(top, n);
+        const bw = (w - 16) / Math.max(1, y1 - y0 + 1);
+        for (const [y, n] of by) { const bh = (n / top) * (h - 8); ctx.fillRect(8 + (y - y0) * bw, h - 3 - bh, Math.max(1, bw - 0.6), bh); }
+        return;
+      }
+      if (mode === 'sky') {
+        const R = Math.min((w - 8) / (4 * Math.SQRT2), (h - 6) / (2 * Math.SQRT2)), cx = w / 2, cy = h / 2;
+        for (const p of list) {
+          if (!isNum(p.ra) || !isNum(p.dec)) continue;
+          const l = (p.ra > 180 ? p.ra - 360 : p.ra) * Math.PI / 180, bb = p.dec * Math.PI / 180, d = Math.sqrt(1 + Math.cos(bb) * Math.cos(l / 2));
+          ctx.fillRect(cx - R * 2 * Math.SQRT2 * Math.cos(bb) * Math.sin(l / 2) / d, cy - R * Math.SQRT2 * Math.sin(bb) / d, 0.9, 0.9);
+        }
+        return;
+      }
+      const cfg = PLOTS[mode];
+      const X = cfg.xRev ? logScale(cfg.xRange[0], cfg.xRange[1], w - 4, 14) : logScale(cfg.xRange[0], cfg.xRange[1], 14, w - 4);
+      const Y = logScale(cfg.yRange[0], cfg.yRange[1], h - 3, 3);
+      for (const p of list) {
+        const vx = plotValue(p, cfg.x), vy = plotValue(p, cfg.y);
+        if (!isNum(vx) || !isNum(vy) || vx <= 0 || vy <= 0) continue;
+        ctx.fillRect(X(vx), Y(vy), 0.9, 0.9);
+      }
+    });
+  }
+
+  return { redraw: () => surf.redraw(), resetStats: () => { valleyStats = null; }, drawThumbs };
 }
 
 function tickLabel(v) {

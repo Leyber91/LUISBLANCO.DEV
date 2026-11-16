@@ -3,115 +3,132 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Exomania survey · every known exoplanet</title>
+<title>Exomania survey: every known exoplanet</title>
 <meta name="description" content="Every confirmed exoplanet in the NASA Exoplanet Archive on real diagrams, with the selected world ray-traced from its measured radius, temperature and star, its system to scale, its habitable zone, and the transit it makes." />
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<!-- the font never blocks first paint: a blocked or slow fonts host falls back to the system mono -->
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<!-- the fonts never block first paint: a blocked or slow fonts host falls back to the system faces -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 <link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/controls.css" />
 <link rel="stylesheet" href="assets/css/exoplanet.css" />
 </head>
 <body>
-<a class="skip" href="#col-c">Skip to the survey</a>
+<a class="skip" href="#survey">Skip to the survey</a>
 <span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
 
 <div class="veil" id="veil" role="status" aria-live="polite">
   <div class="veil-core">
-    <div class="veil-k">Exomania · deep field survey</div>
+    <div class="veil-k">Exomania survey</div>
     <div class="veil-status" id="veil-status">Starting</div>
     <div class="veil-track"><i id="veil-fill"></i></div>
   </div>
 </div>
 
-<div class="shell">
-  <header class="bar">
-    <div class="bar-l"><a class="back" href="index.html">&larr; labs</a><a class="back" href="exomania.html">&larr; overdue</a>
-      <div class="label">EXOMANIA <span class="on">/ deep field survey</span></div><span class="stamp" id="stamp">loading</span></div>
-    <div class="bar-r"><span id="route" class="route"></span><div class="brand">THE LAB &middot; <b>L212</b></div></div>
-  </header>
+<header class="bar">
+  <a class="back" href="index.html">&larr; labs</a>
+  <span class="here">Exomania <span class="here-p">/ survey</span></span>
+  <a class="door" href="exomania.html"><span class="wide">the sky of clocks</span><span class="narrow">the sky</span></a>
+  <span class="brand">THE LAB &middot; <b>L212</b></span>
+</header>
 
-  <aside class="col-l plate" id="col-l" aria-label="Selected planet"></aside>
+<div class="finder" id="finder">
+  <div class="search field" id="find">
+    <svg class="reticle-i" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6" /><path d="M9 0 V5 M9 13 V18 M0 9 H5 M13 9 H18" /></svg>
+    <label class="sr" for="q">Find a world or a star by its name, or ask a question</label>
+    <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="find a world, a star, or ask: cold planets, lava worlds near us"
+      role="combobox" aria-expanded="false" aria-controls="q-results" aria-autocomplete="list" aria-keyshortcuts="/" />
+    <ul id="q-results" class="q-results" role="listbox" hidden></ul>
+  </div>
+  <div class="finder-acts" id="finder-acts"></div>
+  <div class="logrow"><button type="button" class="tally" id="log-line" aria-haspopup="dialog"><span class="tally-w">Log: reading</span></button></div>
+  <div class="q-line" id="q-line"><p class="q-note" id="q-note" aria-live="polite"></p></div>
+</div>
 
-  <main class="col-c" id="col-c" tabindex="-1">
-    <div class="stage" id="stage">
-      <canvas id="exo-canvas" tabindex="0" aria-label="The selected planet, ray-traced from its measured radius, temperature and host star. Drag or arrow keys to orbit, scroll or plus and minus to zoom."></canvas>
-      <div class="glass" aria-hidden="true"></div>
-      <div class="bezel" id="bezel" aria-hidden="true"></div>
-      <div class="reticle" aria-live="polite">
-        <span class="ret-br" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span class="ret-name" id="ret-name" tabindex="-1">…</span>
-        <span class="ret-class" id="ret-class"></span>
-        <span class="ret-render" id="ret-render"></span>
-      </div>
-      <div class="cam" role="group" aria-label="Camera">
-        <button type="button" class="btn" data-cam="orbit">Orbit</button>
-        <button type="button" class="btn" data-cam="closeorbit">Low pass</button>
-        <button type="button" class="btn" data-cam="surface">Surface</button>
-        <button type="button" class="btn" id="btn-random" title="Another world (R)">Another world</button>
-        <button type="button" class="btn" id="btn-plain" aria-pressed="false" title="Turn off the clouds, whose pattern is seeded. Continents, craters and bands are seeded too.">Data only</button>
-        <button type="button" class="btn" id="btn-clean" aria-pressed="false" title="Hide instruments (H)">Hide instruments</button>
-      </div>
-      <div class="ground" id="ground" hidden>
-        <label class="view-k" for="sun-elev">Star elevation</label>
-        <input id="sun-elev" type="range" min="-10" max="80" step="1" value="14" />
-        <span class="view-v" id="sun-elev-v">14°</span>
-        <span class="ground-sites" id="ground-sites"></span>
-        <p class="ground-read" id="ground-read"></p>
-      </div>
+<main class="survey" id="survey" tabindex="-1">
+  <section class="sheet" id="sheet-a" aria-label="Sheet A, the planet">
+    <span class="reg ra" aria-hidden="true"></span><span class="reg rb" aria-hidden="true"></span><span class="reg rc" aria-hidden="true"></span><span class="reg rd" aria-hidden="true"></span>
+    <div class="stage" id="exo-stage">
+      <canvas id="exo-canvas" tabindex="0" aria-label="The selected planet, ray-traced from its measured radius, temperature and host star. Drag or the arrow keys turn it; plus and minus zoom; the scroll wheel zooms once the planet has been pressed."></canvas>
+      <p class="bezel" id="bezel" aria-hidden="true"></p>
     </div>
-    <div class="search">
-      <label class="sr" for="q">Search planets and stars</label>
-      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="a world, a star, or a question: cold planets, lava worlds near us  ( / )"
-        role="combobox" aria-expanded="false" aria-controls="q-results" aria-autocomplete="list" />
-      <ul id="q-results" class="q-results" role="listbox" hidden></ul>
+    <div class="ul" id="ul">
+      <h1 class="name" id="ret-name" tabindex="-1">&hellip;</h1>
+      <p class="cls" id="ret-class"></p>
+      <p class="render" id="ret-render"></p>
+      <div class="live" id="live"></div>
+      <p class="msg" id="sheet-msg" role="status" aria-live="polite"></p>
     </div>
-    <div class="logrow"><button type="button" class="chip" id="log-line" aria-haspopup="dialog">Your log</button></div>
+    <div class="ur" id="inset-wrap"><canvas id="inset" role="img" aria-label="The system of the selected world, in miniature"></canvas><span class="meta">its system</span></div>
+    <div class="ll" id="key"></div>
+    <div class="lr tblock" id="tblock"></div>
+  </section>
+
+  <aside class="side" id="sheet-b" aria-labelledby="b-h">
+    <div class="lab"><h2 class="st" id="b-h"><i>B</i>The numbers</h2><button type="button" class="plain" data-act="chain">how each was inferred</button></div>
+    <div id="col-l"></div>
+    <section class="note" id="report" aria-labelledby="note-h"></section>
+  </aside>
+
+  <section class="tours-sec" id="tours-sec" aria-labelledby="tours-h">
+    <h2 class="st" id="tours-h">Tours</h2>
     <div class="tours" id="tours"></div>
-    <div class="lower">
+    <div class="tourline" id="tourline">
       <div class="tourbar" id="tourbar" hidden>
-        <div class="tour-top"><span class="view-k gold" id="tour-k">Tour</span>
-          <span class="tour-ctl"><button type="button" class="btn" id="tour-prev" aria-label="Previous stop">&larr;</button><button type="button" class="btn" id="tour-next" aria-label="Next stop">&rarr;</button><button type="button" class="btn" id="tour-end">End</button></span></div>
+        <span class="tour-k" id="tour-k">Tour</span>
+        <span class="tour-keys" id="tour-keys"></span>
         <p class="tour-cap" id="tour-cap"></p>
         <span class="tour-prog" id="tour-prog" aria-hidden="true"></span>
       </div>
-      <section class="report plate" id="report" aria-label="Survey note"></section>
     </div>
-  </main>
+  </section>
 
-  <aside class="col-r" id="col-r" aria-label="Linked views">
-    <section class="view plate" id="v-plot"></section>
-    <div class="filters" id="filters"></div>
-    <div class="ranges plate" id="ranges" hidden></div>
-    <section class="view plate" id="v-sys"></section>
-    <section class="view plate" id="v-tr"></section>
-  </aside>
+  <div class="lettered" id="col-r">
+    <section class="ls" id="sheet-c" aria-labelledby="c-h">
+      <div class="lab"><h2 class="st" id="c-h"><i>C</i>The catalogue</h2><span class="meta f-count" aria-live="polite"></span></div>
+      <div class="view" id="v-plot"></div>
+      <div class="bands" id="bands">
+        <canvas class="bands-cv" id="bands-cv" role="img" aria-label="How many planets have each radius: the radius valley between 1.5 and 2 Earth radii"></canvas>
+        <div class="filters" id="filters"></div>
+      </div>
+      <div class="ranges" id="ranges" hidden></div>
+      <p class="note2 view-cap" id="plot-cap" aria-live="polite"></p>
+      <details class="twin" id="twin-c"><summary>table</summary><div class="twin-b"></div></details>
+    </section>
+    <section class="ls" id="sheet-d" aria-labelledby="d-h">
+      <div class="view" id="v-sys"></div>
+    </section>
+    <section class="ls" id="sheet-e" aria-labelledby="e-h">
+      <div class="view" id="v-tr"></div>
+    </section>
+  </div>
+</main>
 
-  <footer class="foot">
-    <span class="tag"><i></i><span><b>[real]</b> archive values and every computed number &nbsp;·&nbsp; <b>[illustrative]</b> the procedural surface, orbit orientations, Earth-likeness &nbsp;·&nbsp; <b class="tg tg-m">M</b> measured <b class="tg tg-d">D</b> derived <b class="tg tg-e">E</b> estimated <b class="tg tg-i">I</b> illustrative</span></span>
-    <span class="foot-r"><span id="perf"></span><button type="button" class="btn" id="btn-method">Method and sources</button></span>
-  </footer>
-</div>
+<footer class="foot">
+  <p class="tag"><b>[REAL]</b> archive values and every computed number. <b>[ILLUSTRATIVE]</b> the procedural surface, orbit orientations, the Earth-likeness score.
+    Where a number comes from is its line: <span class="lt m" aria-hidden="true"></span>measured, <span class="lt d" aria-hidden="true"></span>derived by a formula, <span class="lt e" aria-hidden="true"></span>estimated, <span class="lt i" aria-hidden="true"></span>illustrative.</p>
+  <span class="foot-r"><span id="perf"></span><button type="button" class="plain" id="btn-method">method and sources</button></span>
+</footer>
 
-<dialog class="method plate" id="chain" aria-labelledby="chain-h">
-  <div class="method-head"><h2 id="chain-h">How this world was inferred</h2><button type="button" class="btn" data-close="chain">Close</button></div>
+<dialog class="method" id="chain" aria-labelledby="chain-h">
+  <div class="method-head"><h2 id="chain-h">How this world was inferred</h2><span class="close-slot" data-close-slot="chain"></span></div>
   <div id="chain-body"></div>
 </dialog>
 
-<dialog class="method plate compare" id="compare" aria-labelledby="compare-h">
-  <div class="method-head"><h2 id="compare-h">Compare</h2><span class="cmp-ctl"><button type="button" class="btn" id="cmp-clear" disabled>Unpin all</button><button type="button" class="btn" data-close="compare">Close</button></span></div>
+<dialog class="method compare" id="compare" aria-labelledby="compare-h">
+  <div class="method-head"><h2 id="compare-h">Compare</h2><span class="cmp-ctl"><button type="button" class="plain" id="cmp-clear" disabled>unpin all</button><span class="close-slot" data-close-slot="compare"></span></span></div>
   <div id="compare-body"></div>
 </dialog>
 
-<dialog class="method plate log" id="log" aria-labelledby="log-h">
-  <div class="method-head log-head"><h2 id="log-h">Your log</h2><button type="button" class="btn" data-close="log">Close</button>
+<dialog class="method log" id="log" aria-labelledby="log-h">
+  <div class="method-head log-head"><h2 id="log-h">Your log</h2><span class="close-slot" data-close-slot="log"></span>
     <p class="log-said" id="log-said" role="status"></p></div>
   <div id="log-body"></div>
 </dialog>
 
-<dialog class="method plate" id="method" aria-labelledby="method-h">
-  <div class="method-head"><h2 id="method-h">How this survey works</h2><button type="button" class="btn" id="method-close">Close</button></div>
+<dialog class="method" id="method" aria-labelledby="method-h">
+  <div class="method-head"><h2 id="method-h">How this survey works</h2><span class="close-slot" data-close-slot="method"></span></div>
   <div id="method-body"><p>Loading.</p></div>
 </dialog>
 

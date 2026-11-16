@@ -72,13 +72,13 @@ export default async function planets(p, { base }) {
   const up = await p.until('!document.getElementById("exo-note") && !document.getElementById("exo-fail")', 120000);
   p.check('live: the world comes up and the build notice is gone', up, JSON.stringify(await p.ev(state)));
   await p.ev('document.querySelector(\'[data-cam="surface"]\').click()');
-  const landed = await p.until('/SURFACE/.test((document.getElementById("bezel") || {}).textContent || "") && !document.getElementById("exo-note")', 180000);
+  const landed = await p.until('/surface/i.test((document.getElementById("bezel") || {}).textContent || "") && !document.getElementById("exo-note")', 180000);
   const s1 = await p.ev(state);
   p.check('live: landing shows the ground, with its panel, and no notice is left', landed && s1.on === 'surface' && s1.ground && !s1.fail && !s1.note, JSON.stringify(s1));
   await p.ev('document.querySelector(\'[data-cam="closeorbit"]\').click()');
   await p.sleep(1500);
   const s2 = await p.ev(state);
-  p.check('live: leaving for the low pass shows it, closes the ground panel and leaves no notice', s2.on === 'closeorbit' && /LOW PASS/.test(s2.bezel) && !s2.ground && !s2.note && !s2.fail, JSON.stringify(s2));
+  p.check('live: leaving for the low pass shows it, closes the ground panel and leaves no notice', s2.on === 'closeorbit' && /low pass/i.test(s2.bezel) && !s2.ground && !s2.note && !s2.fail, JSON.stringify(s2));
   // another kind of world, not built yet in this page: the choice must end with that world named and no notice
   await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('Kepler-442 b')}`);
   await p.until('!document.getElementById("exo-note") && (document.getElementById("ret-name") || {}).textContent === "Kepler-442 b"', 120000);
@@ -87,7 +87,7 @@ export default async function planets(p, { base }) {
   p.check('live: choosing a world of another kind ends on that world with no notice left', swapped, JSON.stringify(await p.ev(state)));
 
   // the three views of one world on the page itself: each must come up in its mode with the look named, and no failure notice
-  const modes = { orbit: /ORBIT/, closeorbit: /LOW PASS/, surface: /GROUND|SURFACE|ELEV/i };
+  const modes = { orbit: /orbit/i, closeorbit: /low pass/i, surface: /ground|surface|elev/i };
   for (const view of ['orbit', 'closeorbit', 'surface']) {
     await p.go(`${base}/labs/exomania-survey.html?still&p=${encodeURIComponent('Kepler-442 b')}${view !== 'orbit' ? `&view=${view}` : ''}`);
     const named = await p.until('(() => { const n = document.getElementById("ret-name"); return !!n && n.textContent.trim() === "Kepler-442 b"; })()', 60000);

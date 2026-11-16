@@ -1,190 +1,245 @@
 /* ============================================================
-   views/target.js — the target plate: what the archive measured
-   for the selected world (with the paper each value comes from),
-   then what this engine infers from it, each line tagged M
-   measured, D derived by formula, E estimated by a relation or
-   Monte Carlo over the catalogue errors, I illustrative.
+   views/target.js: sheet B, the numbers, set as a paper's table
+   (three rules, values aligned, sources lettered, notes numbered)
+   with each interval drawn on one shared log axis, as a forest
+   plot draws its studies (bar sheet BAR_L2, shapes 01 and 02).
+   Where a number comes from is its line type: continuous measured,
+   dashed derived by a formula, chain estimated by a relation or by
+   Monte Carlo over the catalogue's errors, phantom illustrative.
+   A measured value's tick is gold. A value with no interval stands
+   as a bare tick.
+
+   It also writes the one live number of sheet A (the radius, with
+   its interval) and holds the world's two actions: "Add to log",
+   the page's one filled control, and "pin to compare".
    ============================================================ */
 
 import {
   forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, limitOf, limitKind, limitText, hzPosition, insolation,
-  semiMajor, luminosity, starColour, spectralType, skyView, earthLikeness, monteCarlo, isNum,
+  semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
 } from '../science.js';
-import { TEQ, PHYS, VALLEY, MC, LIMIT_FIELDS } from '../config.js';
-import { tokens, alpha, fmt, fmtInt, esc } from './common.js';
+import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
+import { fmt, fmtInt } from './common.js';
+import { el } from '../../kit/dom.js';
+import { ivSvg, ivAxisSvg } from '../../kit/controls.js';
 
-const TAG = { M: 'measured', D: 'derived by formula', E: 'estimated', I: 'illustrative' };
-const tg = (t) => `<b class="tg tg-${t.toLowerCase()}" title="${TAG[t]}">${t}</b>`;
-const row = (t, k, v, note = '') => `<div class="tp-row">${tg(t)}<span class="tp-k">${k}</span><span class="tp-v">${v}</span>${note ? `<span class="tp-n">${note}</span>` : ''}</div>`;
-const ref = (r) => (r ? `<a class="ref" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.label)}</a>` : '');
-const pm = (v, e1, e2, d = 3) => {
-  if (!isNum(v)) return '—';
-  if (isNum(e1) && isNum(e2) && Math.abs(Math.abs(e1) - Math.abs(e2)) / Math.max(Math.abs(e1), 1e-9) < 0.15) return `${fmt(v, d)} <i>±${fmt(Math.abs(e1), 2)}</i>`;
-  if (isNum(e1) && isNum(e2)) return `${fmt(v, d)} <i>+${fmt(Math.abs(e1), 2)} −${fmt(Math.abs(e2), 2)}</i>`;
-  return fmt(v, d);
+const MINUS = '−';
+/* "+0.11 −0.18", or "±0.11" when the two sides agree to 15% */
+const errText = (e1, e2) => {
+  if (!isNum(e1) || !isNum(e2)) return '';
+  const a = Math.abs(e1), b = Math.abs(e2);
+  return Math.abs(a - b) / Math.max(a, 1e-9) < 0.15 ? `±${fmt(a, 2)}` : `+${fmt(a, 2)} ${MINUS}${fmt(b, 2)}`;
 };
-/* an archive bound, written as a bound: "< 6.2 M⊕ upper limit" */
-const boundTxt = (p, k, d = 3) => {
-  const L = limitOf(p, k); if (!L) return '';
-  return `${esc(limitText(L, d))}${LIMIT_FIELDS[k][1]} <i>${limitKind(L)}</i>`;
-};
-const band = (s, d = 2, unit = '') => (s ? `${fmt(s.med, d)}${unit} <i>68%: ${fmt(s.lo, d)}-${fmt(s.hi, d)}</i>` : '—');
+const range = (s, d = 2) => (s ? `${fmt(s.lo, d)} to ${fmt(s.hi, d)}` : '');
+/* an archive bound as a value: "< 6.2" */
+const boundV = (L, d = 3) => limitText(L, d).replace(/\s*[A-Za-z⊕☉°]+$/, '');
 
 export function createTarget(host, store, actions) {
-  host.innerHTML = `
-    <div class="tp-kick"><span data-k="idx">TARGET</span><span data-k="src"></span></div>
-    <h1 class="tp-name" data-k="name">—</h1>
-    <p class="tp-sub" data-k="sub"></p>
-    <section class="tp-sec"><h2 class="tp-h">Measured <span class="tag-r">[REAL] archive</span></h2><div data-k="meas"></div></section>
-    <section class="tp-sec"><h2 class="tp-h">Inferred <span class="tag-r" data-k="mcn"></span></h2>
-      <div data-k="inf"></div>
-      <div class="tp-row tp-slider">${tg('D')}<label class="tp-k" for="albedo">Bond albedo</label>
-        <input id="albedo" type="range" min="0" max="0.9" step="0.01" value="${TEQ.albedo}">
-        <span class="tp-v" id="albedo-v">${TEQ.albedo.toFixed(2)}</span></div>
-      <div class="tp-sky"><canvas class="tp-sky-cv" width="300" height="56" role="img"></canvas></div>
-    </section>
-    <div class="tp-actions">
-      <button type="button" class="btn log-add" data-act="log" title="Save this world to your log" disabled>Add to log</button>
-      <button type="button" class="btn" data-act="chain" title="Every input, equation and source for this world">How inferred</button>
-      <button type="button" class="btn" data-act="pin" title="The log is being read" disabled>Pin</button>
-      <button type="button" class="btn" data-act="plate" title="Save a survey plate as PNG">Save PNG</button>
-      <button type="button" class="btn" data-act="csv" title="Export the filtered catalogue with this engine's inferences">CSV</button>
-      <button type="button" class="btn" data-act="link" title="Copy a link to this exact view">Link</button>
-    </div>
-    <p class="tp-said" data-k="said" role="status"></p>`;
-  const $ = (k) => host.querySelector(`[data-k="${k}"]`);
-  const albedo = host.querySelector('#albedo');
-  const albedoV = host.querySelector('#albedo-v');
-  const skyCv = host.querySelector('.tp-sky-cv');
-  const T = tokens();
+  host.replaceChildren();
+  const table = el('table', 'nums'); table.id = 'nums';
+  const cap = el('caption', 'sr', 'The selected world\'s numbers: measured, then inferred, each with its interval on one log axis');
+  const meas = document.createElement('tbody'), inf = document.createElement('tbody'), alb = document.createElement('tbody'), foot = document.createElement('tfoot');
+  const cols = document.createElement('colgroup');
+  for (const c of ['n', 'v', 'u', 'pm', 'r', 'iv']) { const col = document.createElement('col'); col.className = `c-${c}`; cols.append(col); }
+  table.append(cap, cols, meas, inf, alb, foot);
+  /* under the table, as under a paper's: where the world was found and how far it is, the sources by letter, and the
+     numbered notes, closed */
+  const notes = el('div', 'tnotes'); notes.id = 'tnotes';
+  const found = el('p', 'tfound'), refsLine = el('span', 'trefs');
+  const more = el('details', 'tmore'), moreS = el('summary'), moreL = el('ol', 'tnote-list');
+  more.append(moreS, moreL);
+  const refsRow = el('p', 'trow'); refsRow.append(refsLine);
+  notes.append(found, refsRow, more);
+  const acts = el('div', 'tbl-act');
+  const add = el('button', 'fill log-add', 'Add to log'); add.type = 'button'; add.dataset.act = 'log'; add.disabled = true; add.title = 'The log is being read';
+  const pin = el('button', 'plain', 'pin to compare'); pin.type = 'button'; pin.dataset.act = 'pin'; pin.disabled = true; pin.title = 'The log is being read';
+  acts.append(add, pin);
+  const said = el('p', 'tp-said'); said.setAttribute('role', 'status');
+  host.append(table, notes, acts, said);
+  acts.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && b.dataset.act) actions.exportAs(b.dataset.act, b); });
+
+  /* the albedo, on an engraved scale: it sets the equilibrium temperature and what follows from it */
   let A = TEQ.albedo;
+  const albRow = document.createElement('tr'); albRow.className = 'albedo';
+  const albName = el('td', 'n'); albName.append(el('label', '', 'albedo')); albName.firstChild.htmlFor = 'albedo';
+  const albCell = el('td'); albCell.colSpan = 5;
+  const albWrap = el('div', 'albedo-scale');
+  const albedo = document.createElement('input'); albedo.type = 'range'; albedo.id = 'albedo'; albedo.className = 'engraved'; albedo.min = '0'; albedo.max = '0.9'; albedo.step = '0.01'; albedo.value = String(TEQ.albedo);
+  albedo.setAttribute('aria-describedby', 'albedo-v');
+  const albV = el('span', 'rv', A.toFixed(2)); albV.id = 'albedo-v';
+  albWrap.append(albedo, albV); albCell.append(albWrap); albRow.append(albName, albCell); alb.append(albRow);
+  albedo.addEventListener('input', () => { A = +albedo.value; albV.textContent = A.toFixed(2); if (store.state.sel) draw(store.state.sel, false); });
 
-  albedo.addEventListener('input', () => { A = +albedo.value; albedoV.textContent = A.toFixed(2); renderInferred(store.state.sel); });
-  host.querySelector('.tp-actions').addEventListener('click', (e) => {
-    const b = e.target.closest('button'); const act = b?.dataset.act;
-    if (act) actions.exportAs(act, b);
-  });
+  const ivWidth = () => (host.clientWidth && host.clientWidth < 420 ? 70 : 130);
 
-  function renderMeasured(p) {
-    const L = luminosity(p), a = semiMajor(p), S = insolation(p);
-    const rf = p.refs || {};
-    let mass, mt = 'M';
-    if (limitOf(p, 'M')) mass = boundTxt(p, 'M');
-    else if (!isNum(p.M)) mass = '<span class="dim">not measured</span>';
-    else if (p.Mprov === 'M-R relationship') { mass = `${fmt(p.M, 3)} M⊕ <i>archive estimate from radius</i>`; mt = 'E'; }
-    else if (p.Mprov === 'Msini') mass = `${pm(p.M, p.Merr1, p.Merr2)} M⊕ <i>minimum</i>`;
-    else mass = `${pm(p.M, p.Merr1, p.Merr2)} M⊕`;
-    const starFlag = !isNum(p.Rs) ? 'stellar radius missing: the render scales it from Teff' : '';
-    // one line of sources: each paper once, with the values it supplies
-    const by = new Map();
-    for (const [k, lab] of [['R', 'radius'], ['M', 'mass'], ['P', 'period'], ['star', 'star']]) {
-      const r = rf[k]; if (!r) continue;
-      if (!by.has(r.url)) by.set(r.url, { r, what: [] });
-      by.get(r.url).what.push(lab);
-    }
-    const srcs = [...by.values()].map(({ r, what }) => `${what.join(', ')}: ${ref(r)}`).join(' · ');
-    $('meas').innerHTML = [
-      hasRadius(p)
-        ? row(p.measuredR === false ? 'E' : 'M', 'Radius', `${pm(p.R, p.Rerr1, p.Rerr2)} R⊕`, p.measuredR === false ? 'archive estimate from mass' : '')
-        : row('M', 'Radius', limitOf(p, 'R') ? boundTxt(p, 'R') : '<span class="dim">no radius measured</span>', limitOf(p, 'R') ? 'a bound, not a measurement' : ''),
-      row(mt, 'Mass', mass, limitOf(p, 'M') ? 'a bound, not a measurement' : ''),
-      row('M', 'Period', isNum(p.P) ? `${fmt(p.P, 4)} d` : limitOf(p, 'P') ? boundTxt(p, 'P', 4) : '—'),
-      row(a.src === 'archive' ? 'M' : 'D', 'Orbit', `${a.a ? fmt(a.a, 3) + ' AU' : limitOf(p, 'a') ? boundTxt(p, 'a') : '—'}${isNum(p.ecc) ? ` · e ${fmt(p.ecc, 2)}` : limitOf(p, 'ecc') ? ` · e ${boundTxt(p, 'ecc', 2)}` : ' · e unknown'}`,
-        a.src === "Kepler's third law" ? 'from P and the star\'s mass' : limitOf(p, 'ecc') ? 'e is a bound: orbits drawn circular' : ''),
-      row(S.src === 'archive' ? 'M' : 'D', 'Insolation', S.S ? `${fmt(S.S, 3)} S⊕` : limitOf(p, 'S') ? boundTxt(p, 'S') : '—', S.src === 'L / a^2' ? 'from L / a²' : ''),
-      row(isNum(p.Rs) ? 'M' : 'E', 'Star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : limitOf(p, 'Teff') ? boundTxt(p, 'Teff', 4) : '—'} · ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'} · ${L.L ? fmt(L.L, 3) + ' L☉' : '—'}`, starFlag),
-      ...['Teq', 'b', 'depth', 'dur'].filter((k) => limitOf(p, k)).map((k) => row('M', { Teq: 'Teq', b: 'Impact b', depth: 'Depth', dur: 'Duration' }[k], boundTxt(p, k), 'archive bound, not used as a value')),
-    ].join('') + (srcs ? `<p class="tp-srcs">Sources: ${srcs}</p>` : '');
+  /* one row: name, value, unit, the interval in words, its source letters and note numbers, the interval drawn */
+  function row(tb, r, ctx) {
+    const tr = document.createElement('tr');
+    if (r.key) tr.dataset.row = r.key;
+    const marks = [...(r.refs || []).map((x) => ctx.letter(x)), ...(r.note ? [ctx.number(r.note)] : [])].filter(Boolean).join(' ');
+    tr.append(el('td', 'n', r.n));
+    const v = el('td', 'v');
+    if (r.swatch) { const d = el('i', 'sw-dot'); d.style.setProperty('--star-col', r.swatch); v.append(d); }
+    v.append(r.v);
+    if (r.word) { v.className = 'v word'; v.colSpan = 3; tr.append(v, el('td', 'r', marks)); }   // a value in words takes the unit's and the interval's cells
+    else tr.append(v, el('td', 'u', r.u || ''), el('td', 'pm', r.pm || ''), el('td', 'r', marks));
+    const iv = el('td', 'iv');
+    if (r.iv !== false) iv.append(ivSvg({ value: r.iv ? r.iv.value : NaN, lo: r.iv ? r.iv.lo : null, hi: r.iv ? r.iv.hi : null, kind: r.kind || 'm', width: ivWidth() }));
+    tr.append(iv);
+    tb.append(tr);
+  }
+  const group = (tb, text) => { const tr = document.createElement('tr'); tr.className = 'g'; const td = el('td'); td.colSpan = 6; td.append(el('span', '', text)); tr.append(td); tb.append(tr); };
+
+  /* the sources, lettered in the order they are first used, and the notes, numbered */
+  function context() {
+    const refs = new Map(), notesList = [];
+    return {
+      refs, notes: notesList,
+      letter(x) { if (!x) return ''; const key = typeof x === 'string' ? x : x.url || x.label; if (!refs.has(key)) refs.set(key, { l: 'abcdefghij'[refs.size] || '', x }); return refs.get(key).l; },
+      number(t) { let i = notesList.indexOf(t); if (i < 0) { notesList.push(t); i = notesList.length - 1; } return String(i + 1); },
+    };
   }
 
-  function renderInferred(p) {
-    if (!p) return;
-    const out = [];
-    const mc = monteCarlo(p, A);
-    $('mcn').textContent = `[REAL] models · ${MC.draws} MC draws`;
+  function measured(p) {
+    const L = luminosity(p), a = semiMajor(p), S = insolation(p), rf = p.refs || {}, rows = [];
+    if (hasRadius(p)) {
+      rows.push({ key: 'R', n: 'radius', v: fmt(p.R, 3), u: 'R\u2295', pm: errText(p.Rerr1, p.Rerr2), refs: [rf.R], kind: p.measuredR === false ? 'e' : 'm',
+        note: [p.measuredR === false ? 'The radius is the archive\'s estimate from the mass.' : '', classNote(p)].filter(Boolean).join(' '), iv: { value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null } });
+    } else if (limitOf(p, 'R')) {
+      const RL = limitOf(p, 'R');
+      rows.push({ key: 'R', n: 'radius', v: boundV(RL), u: 'R⊕', pm: limitKind(RL), refs: [rf.R], note: 'A bound, not a measurement: no radius is measured.', iv: false });
+    } else rows.push({ key: 'R', n: 'radius', v: 'none', pm: 'no radius measured', iv: false });
+    const ML = limitOf(p, 'M');
+    if (ML) rows.push({ key: 'M', n: 'mass', v: boundV(ML), u: 'M⊕', pm: limitKind(ML), refs: [rf.M], note: 'A bound, not a measurement: the mass is never used as this value.', iv: false });
+    else if (!isNum(p.M)) rows.push({ key: 'M', n: 'mass', v: 'none', pm: 'not measured', iv: false });
+    else if (p.Mprov === 'M-R relationship') rows.push({ key: 'M', n: 'mass', v: fmt(p.M, 3), u: 'M⊕', pm: 'estimated', kind: 'e', refs: [rf.M], note: 'The archive\'s estimate from the radius, not a measurement.', iv: { value: p.M } });
+    else rows.push({ key: 'M', n: p.Mprov === 'Msini' ? 'mass (min.)' : 'mass', v: fmt(p.M, 3), u: 'M⊕', pm: errText(p.Merr1, p.Merr2), refs: [rf.M], kind: 'm',
+      note: p.Mprov === 'Msini' ? 'A minimum mass, M sin i: the tilt of the orbit is not known.' : '', iv: { value: p.M, lo: isNum(p.Merr2) ? p.M - Math.abs(p.Merr2) : null, hi: isNum(p.Merr1) ? p.M + Math.abs(p.Merr1) : null } });
+    if (isNum(p.P)) rows.push({ key: 'P', n: 'period', v: fmt(p.P, 4), u: 'd', refs: [rf.P], kind: 'm', iv: { value: p.P } });
+    else if (limitOf(p, 'P')) rows.push({ key: 'P', n: 'period', v: boundV(limitOf(p, 'P'), 4), u: 'd', pm: limitKind(limitOf(p, 'P')), refs: [rf.P], iv: false });
+    else rows.push({ key: 'P', n: 'period', v: 'none', pm: 'not in the archive', iv: false });
+    const eL = limitOf(p, 'ecc');
+    const eText = isNum(p.ecc) ? `e ${fmt(p.ecc, 2)}` : eL ? `e ${limitText(eL, 2)}` : 'e unknown';
+    const sky = skyView(p);
+    const skyNote = sky ? `From its surface its star spans ${fmt(sky.angDeg, 2)}\u00b0, ${fmt(sky.vsSun, 2)} times the Sun's width from Earth.` : '';
+    if (a.a) rows.push({ key: 'a', n: 'orbit', v: fmt(a.a, 3), u: 'AU', pm: eText, kind: a.src === 'archive' ? 'm' : 'd', refs: a.src === 'archive' ? [rf.P] : [],
+      note: [a.src === "Kepler's third law" ? 'The orbit is derived from the period and the star\'s mass.' : '', eL ? 'The eccentricity is only a bound, so orbits are drawn circular.' : '', skyNote].filter(Boolean).join(' '), iv: { value: a.a } });
+    else if (limitOf(p, 'a')) rows.push({ key: 'a', n: 'orbit', v: boundV(limitOf(p, 'a')), u: 'AU', pm: limitKind(limitOf(p, 'a')), iv: false });
+    else rows.push({ key: 'a', n: 'orbit', v: 'none', pm: eText, iv: false });
+    if (S.S) rows.push({ key: 'S', n: 'insolation', v: fmt(S.S, 3), u: 'S⊕', kind: S.src === 'archive' ? 'm' : 'd', note: S.src === 'L / a^2' ? 'The insolation is derived from the star\'s luminosity and the orbit, L / a².' : '', iv: { value: S.S } });
+    else if (limitOf(p, 'S')) rows.push({ key: 'S', n: 'insolation', v: boundV(limitOf(p, 'S')), u: 'S⊕', pm: limitKind(limitOf(p, 'S')), iv: false });
+    const starPm = isNum(p.Rs) ? `${fmt(p.Rs, 3)} R\u2609` : '';
+    const col = starColour(p.Teff), sp = spectralType(p.Teff);
+    const starNote = [isNum(p.Rs) ? '' : 'The star\'s radius is missing: the picture scales it from its temperature.', L.L ? `Its luminosity is ${fmt(L.L, 3)} L\u2609${L.src === 'archive' ? '' : ', from its radius and temperature'}.` : '',
+      isNum(p.Teff) ? `Its colour, its Planck spectrum seen through the CIE 1931 observer, is ${col.hex}${sp === '?' ? '' : `, a ${sp}-type star`}.` : ''].filter(Boolean).join(' ');
+    if (isNum(p.Teff)) rows.push({ key: 'star', n: 'star', v: fmtInt(p.Teff), swatch: col.hex, u: 'K', pm: starPm, refs: [rf.star], kind: isNum(p.Rs) ? 'm' : 'e',
+      note: starNote, iv: { value: p.Teff, lo: isNum(p.TeffErr) ? p.Teff - Math.abs(p.TeffErr) : null, hi: isNum(p.TeffErr) ? p.Teff + Math.abs(p.TeffErr) : null } });
+    else if (limitOf(p, 'Teff')) rows.push({ key: 'star', n: 'star', v: boundV(limitOf(p, 'Teff'), 4), u: 'K', pm: starPm, iv: false });
+    else rows.push({ key: 'star', n: 'star', v: 'none', pm: starPm || 'no temperature in the archive', iv: false });
+    for (const k of ['Teq', 'b', 'depth', 'dur'].filter((x) => limitOf(p, x))) {
+      const LL = limitOf(p, k);
+      rows.push({ key: 'lim-' + k, n: { Teq: 'Teq (archive)', b: 'impact b', depth: 'depth', dur: 'duration' }[k], v: boundV(LL), u: (LIMIT_FIELDS[k] || ['', ''])[1].trim(), pm: limitKind(LL), note: 'An archive bound, never used as a value.', iv: false });
+    }
+    return rows;
+  }
+
+  function inferred(p) {
+    const rows = [], mc = monteCarlo(p, A);
     const fc = hasTrueMass(p) ? null : forecastFor(p);
     if (fc) {
       const det = massFromRadiusMean(p.R);
-      let cmp = '';
-      if (p.Mprov === 'M-R relationship' && isNum(p.M) && det) cmp = ` · archive ${fmt(p.M, 3)}, engine mean ${fmt(det, 3)}`;
-      if (fc.bounded) cmp += ` · cut at the ${fmt(fc.bound, 3)} M⊕ ${fc.bounded} limit`;
-      out.push(row('E', 'Mass model', `${fmt(fc.median, 2)} M⊕ <i>68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}</i>`, `${fc.regime} · Chen &amp; Kipping 2017${cmp}`));
+      const cmp = [p.Mprov === 'M-R relationship' && isNum(p.M) && det ? `the archive gives ${fmt(p.M, 3)}, this page's mean ${fmt(det, 3)}` : '', fc.bounded ? `cut at the ${fmt(fc.bound, 3)} M⊕ ${fc.bounded} limit` : ''].filter(Boolean).join('; ');
+      rows.push({ key: 'Mf', n: 'mass', v: fmt(fc.median, 2), u: 'M⊕', pm: `${fmt(fc.lo, 2)} to ${fmt(fc.hi, 2)}`, refs: [CHEN_KIPPING.ref], kind: 'e',
+        note: `The mass is forecast from the radius (${fc.regime})${cmp ? `; ${cmp}` : ''}.`, iv: { value: fc.median, lo: fc.lo, hi: fc.hi } });
     }
     if (mc.hasR) {
-      out.push(row(fc ? 'E' : 'D', 'Gravity', band(mc.g, 2, ' g'), fc ? 'from the forecast mass' : 'from the measured mass and radius'));
-      if (mc.rho && !fc) out.push(row('D', 'Density', band(mc.rho, 2, ' g/cm³'), 'Earth 5.51'));
-      const probs = mc.probs.slice().sort((x, y) => y.p - x.p).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(' · ');
-      const valley = p.R < VALLEY.lo ? 'below the radius valley' : p.R <= VALLEY.hi ? 'inside the radius valley' : 'above the radius valley';
-      out.push(row('D', 'Size class', `${sizeClassOf(p).label}`, `${probs} · ${valley}`));
-    } else {
-      // no radius: nothing that needs one is computed from a missing value
-      const c = sizeClassOf(p), ML = limitOf(p, 'M');
-      out.push(row('D', 'Size class', c ? c.label : '<span class="dim">no radius measured</span>',
-        c ? 'every radius the archive bound allows is in this class' : 'so no size class, gravity, density or scale height'));
-      if (c) out.push(row('D', 'Gravity', '<span class="dim">—</span>', 'needs a radius value; a bound gives none'));
-      if (ML && !fc) out.push(row('E', 'Mass model', '<span class="dim">none</span>', `the mass is only a${ML.dir > 0 ? 'n' : ''} ${limitKind(ML)}, and there is no radius to forecast from`));
+      if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', iv: { value: mc.g.med, lo: mc.g.lo, hi: mc.g.hi } });
+      if (mc.rho && !fc) rows.push({ key: 'rho', n: 'density', v: fmt(mc.rho.med, 2), u: 'g/cm³', pm: range(mc.rho), kind: 'd', note: 'Earth\'s density is 5.51 g/cm³.', iv: { value: mc.rho.med, lo: mc.rho.lo, hi: mc.rho.hi } });
     }
-    out.push(row('D', 'Teq', mc.teq ? `<span id="teq-out">${band(mc.teq, 3, ' K')}</span>` : '—', `albedo ${A.toFixed(2)} (slider), full redistribution${isNum(p.Teq) ? ` · published ${fmtInt(p.Teq)} K` : ''}`));
-    if (mc.H) out.push(row('E', 'Scale ht', band(mc.H, 2, ' km'), `assumes μ ${p.R > 1.8 ? MC.muEnvelope + ' (hydrogen envelope)' : MC.muSecondary + ' (N₂-like air)'}`));
+    rows.push({ key: 'teq', n: 'equilibrium T', v: mc.teq ? fmtInt(mc.teq.med) : 'none', u: mc.teq ? 'K' : '', pm: mc.teq ? range(mc.teq, 3) : 'needs the star and the orbit', kind: 'd',
+      note: `The equilibrium temperature takes the albedo below and full redistribution of heat${isNum(p.Teq) ? `; the archive publishes ${fmtInt(p.Teq)} K` : ''}.`, iv: mc.teq ? { value: mc.teq.med, lo: mc.teq.lo, hi: mc.teq.hi } : false });
+    if (mc.H) rows.push({ key: 'H', n: 'scale height', v: fmt(mc.H.med, 2), u: 'km', pm: range(mc.H), kind: 'e',
+      note: `The scale height assumes a mean molecular weight of ${p.R > 1.8 ? MC.muEnvelope + ', a hydrogen envelope' : MC.muSecondary + ', an air like nitrogen'}.`, iv: { value: mc.H.med, lo: mc.H.lo, hi: mc.H.hi } });
+    if (!mc.hasR) {
+      const ML = limitOf(p, 'M');
+      if (ML && !fc) rows.push({ key: 'Mf', n: 'mass', v: 'none', pm: 'no forecast', kind: 'e', note: `The mass is only a${ML.dir > 0 ? 'n' : ''} ${limitKind(ML)}, and there is no radius to forecast from.`, iv: false });
+    }
     const hz = hzPosition(p);
-    const zshort = { cons: 'conservative HZ', opt: 'optimistic HZ', hot: 'too hot for the HZ', cold: 'too cold for the HZ', unknown: '—' }[hz.key];
-    out.push(row('D', 'Zone', `${zshort}`, hz.hz ? `${hz.label} · zone ${fmt(hz.hz.sOuter, 2)}-${fmt(hz.hz.sInner, 2)} S⊕ · Kopparapu et al. 2013` : ''));
-    const col = starColour(p.Teff);
-    out.push(row('D', 'Star colour', `<span class="swatch" style="background:${col.hex};color:${col.hex}"></span>${col.hex} · ${spectralType(p.Teff)}-type`, 'Planck spectrum x CIE 1931 observer'));
-    $('inf').innerHTML = out.join('');
-    $('inf').querySelectorAll('.tp-n').forEach((n) => { n.title = n.textContent; });
+    rows.push({ key: 'zone', n: 'zone', word: true, v: { cons: 'conservative', opt: 'optimistic', hot: 'too hot', cold: 'too cold', unknown: 'unknown' }[hz.key], kind: 'd', refs: hz.hz ? [KOPPARAPU.ref] : [],
+      note: hz.hz ? `The habitable zone runs from ${fmt(hz.hz.sOuter, 2)} to ${fmt(hz.hz.sInner, 2)} times Earth's sunlight; this world is ${hz.label}.` : '', iv: false });
+    return rows;
   }
 
-  function renderSky(p) {
-    const ctx = skyCv.getContext('2d');
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const w = skyCv.clientWidth || 300, h = skyCv.clientHeight || 56;
-    skyCv.width = w * dpr; skyCv.height = h * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    const sv = skyView(p);
-    if (!sv) { skyCv.setAttribute('aria-label', 'The sky from its surface needs the radius of the star and the orbit.'); return; }
-    const maxAng = Math.max(sv.angDeg, PHYS.SUN_ANG_DEG);
-    const pxPerDeg = Math.min((h - 22) / maxAng, 30 / PHYS.SUN_ANG_DEG);
-    const rSun = Math.max(1.2, PHYS.SUN_ANG_DEG * pxPerDeg / 2), rStar = Math.max(1.2, sv.angDeg * pxPerDeg / 2);
-    const base = h - 10;
-    ctx.strokeStyle = alpha(T.horizon, 0.3); ctx.beginPath(); ctx.moveTo(0, base + 0.5); ctx.lineTo(w, base + 0.5); ctx.stroke();
-    const sun = starColour(PHYS.T_SUN).srgb.map((c) => Math.round(c * 255));
-    const st = starColour(p.Teff).srgb.map((c) => Math.round(c * 255));
-    const disc = (x, r, c, label) => {
-      const y = base - 8 - Math.min(r, (base - 10) / 2);
-      const g = ctx.createRadialGradient(x, y, r * 0.9, x, y, r * 1.5 + 5);
-      g.addColorStop(0, `rgba(${c},0.35)`); g.addColorStop(1, `rgba(${c},0)`);
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 1.5 + 5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = `rgb(${c})`; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'center'; ctx.fillText(label, x, h - 1);
-    };
-    disc(w * 0.2, rSun, sun.join(','), `SUN FROM EARTH ${PHYS.SUN_ANG_DEG}°`);
-    disc(w * 0.66, rStar, st.join(','), `ITS STAR THERE ${fmt(sv.angDeg, 2)}° · ${fmt(sv.vsSun, 2)}x`);
-    skyCv.setAttribute('aria-label', `From the surface its star spans ${fmt(sv.angDeg, 2)} degrees, ${fmt(sv.vsSun, 2)} times the width of the Sun in our sky.`);
+  /* the size class the radius gives, with the share of the draws in each class, and where it stands to the valley */
+  function classNote(p) {
+    const mc = monteCarlo(p, A), sc = sizeClassOf(p);
+    if (!mc.hasR) return sc ? `Every radius the bound allows makes it ${sc.label}.` : 'With no radius there is no size class, gravity, density or scale height.';
+    const probs = mc.probs.slice().sort((x, y) => y.p - x.p).filter((c) => c.p >= 0.01).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ');
+    const valley = p.R < VALLEY.lo ? 'below the radius valley' : p.R <= VALLEY.hi ? 'inside the radius valley' : 'above the radius valley';
+    return `Its draws fall in the size classes as ${probs}; the radius puts it ${valley} (${VALLEY.ref}).`;
+  }
+
+  /* the line under the table: how far the world is, when and how it was found, and its page at the archive */
+  function caption(p, ctx) {
+    found.replaceChildren();
+    const rf = p.refs || {};
+    const far = isNum(p.dist) ? `${fmtInt(p.dist * PHYS.PC_LY)} light-years away` : 'at an unknown distance';
+    if (isNum(p.year)) {
+      const l = rf.disc ? ctx.letter(rf.disc) : '';
+      found.append(`Found in ${p.year}${p.method ? ' by ' + p.method.toLowerCase() : ''}${p.facility ? ', ' + p.facility : ''}${l ? ` (${l})` : ''}, ${far}. `);
+    } else found.append(`Confirmed after the archive's snapshot, from its weekly roster; ${far}. `);
+    const a = el('a', 'ref', 'Archive page'); a.href = `https://exoplanetarchive.ipac.caltech.edu/overview/${encodeURIComponent(p.name)}`; a.target = '_blank'; a.rel = 'noopener';
+    found.append(a, '.');
+  }
+
+  function draw(p, full = true) {
+    const ctx = context();
+    caption(p, ctx);
+    const mrows = measured(p), irows = inferred(p);
+    if (full) { meas.replaceChildren(); group(meas, 'Measured, from the archive'); mrows.forEach((r) => row(meas, r, ctx)); }
+    else mrows.forEach((r) => { ctx.letter((r.refs || [])[0]); for (const x of (r.refs || []).slice(1)) ctx.letter(x); if (r.note) ctx.number(r.note); });
+    inf.replaceChildren(); group(inf, `Inferred: ${MC.draws} draws, 68% ranges`); irows.forEach((r) => row(inf, r, ctx));
+    foot.replaceChildren();
+    const ax = document.createElement('tr'); ax.className = 'ax'; const pad = el('td'); pad.colSpan = 5; const axc = el('td', 'iv'); axc.append(ivAxisSvg({ width: ivWidth() })); ax.append(pad, axc); foot.append(ax);
+    // the notes: the sources by letter, then the numbered notes
+    refsLine.replaceChildren();
+    for (const { l, x } of ctx.refs.values()) {
+      const s = el('span', 'ref-l'); s.append(el('b', '', l));
+      if (typeof x === 'object' && x.url) { const a = el('a', 'ref', x.label); a.href = x.url; a.target = '_blank'; a.rel = 'noopener'; s.append(a); }
+      else { const full = String(x.label || x), short = el('span', '', full.replace(/^([^,]+ \d{4}[a-z]?),.*$/, '$1')); short.title = full; s.append(short); }
+      refsLine.append(s, ' ');
+    }
+    moreS.textContent = ctx.notes.length === 1 ? '1 note on these numbers' : `${ctx.notes.length} notes on these numbers`;
+    more.hidden = !ctx.notes.length;
+    moreL.replaceChildren(...ctx.notes.map((t) => el('li', '', t)));
+  }
+
+  /* the one live number on sheet A: the radius with its interval, or why there is none */
+  function live(p) {
+    const box = document.getElementById('live'); if (!box) return;
+    box.replaceChildren();
+    if (hasRadius(p)) {
+      box.append(el('span', 'v', fmt(p.R, 3)), el('span', 'u', 'R⊕'));
+      box.append(ivSvg({ value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null, kind: p.measuredR === false ? 'e' : 'm', width: 120 }));
+      const e = isNum(p.Rerr1) && isNum(p.Rerr2) ? `+${fmt(Math.abs(p.Rerr1), 2)} / ${MINUS}${fmt(Math.abs(p.Rerr2), 2)}, ` : '';
+      box.append(el('span', 'pm', `${e}${p.measuredR === false ? 'estimated from the mass' : 'measured'}`));
+    } else if (limitOf(p, 'R')) {
+      const RL = limitOf(p, 'R');
+      box.append(el('span', 'v', boundV(RL)), el('span', 'u', 'R⊕'), el('span', 'pm', `${limitKind(RL)}: no radius is measured`));
+    } else box.append(el('span', 'pm', 'no radius measured: the picture is drawn at a stand-in size'));
   }
 
   return {
     update(p) {
       if (!p) return;
-      const st = store.state;
-      $('idx').textContent = `TARGET ${fmtInt(p.idx + 1)} OF ${fmtInt(st.list.length)}`;
-      $('src').textContent = p.source === 'roster' ? 'WEEKLY ROSTER' : 'ARCHIVE SNAPSHOT';
-      $('name').textContent = p.name;
-      $('said').textContent = '';   // what was said about the world before does not stand for this one
-      $('said').classList.remove('quiet');
-      const sp = spectralType(p.Teff);
-      const rf = p.refs || {};
-      const found = isNum(p.year) ? `Found ${p.year}${p.method ? ' by ' + p.method.toLowerCase() : ''}${p.facility ? ', ' + esc(p.facility) : ''}${rf.disc ? ' (' + ref(rf.disc) + ')' : ''}.` : 'Confirmed after the 2026-11-11 snapshot.';
-      const overview = `<a class="ref" href="https://exoplanetarchive.ipac.caltech.edu/overview/${encodeURIComponent(p.name)}" target="_blank" rel="noopener">archive page</a>`;
-      $('sub').innerHTML = `Orbits ${esc(p.host)}, ${sp === '?' ? 'a star of unknown type' : `a${'AFO'.includes(sp) ? 'n' : ''} ${sp}-type star`}${isNum(p.dist) ? `, ${fmtInt(p.dist * PHYS.PC_LY)} light-years (${fmt(p.dist, 3)} pc) away` : ''}. ${found} ${overview}`;
-      renderMeasured(p);
-      renderInferred(p);
-      renderSky(p);
+      said.textContent = '';   // what was said about the world before does not stand for this one
+      said.classList.remove('quiet');
+      draw(p, true);
+      live(p);
     },
     albedo: () => A,
     /* A line under the actions: what a press did. A success is for a screen reader only, because the button shows it;
        why a press did not do what it says is shown. The line is a status region and only its text changes. */
-    say(text, ok = false) { const s = $('said'); s.classList.toggle('quiet', !!ok); s.textContent = text; },
+    say(text, ok = false) { said.classList.toggle('quiet', !!ok); said.textContent = text; },
   };
 }

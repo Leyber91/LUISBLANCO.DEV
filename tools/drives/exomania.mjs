@@ -33,7 +33,9 @@ export default async function exomania(p, { base }) {
   const probe = () => p.ev('(() => { const q = document.getElementById("sky").probe(); return { lens: q.lens, wide: q.wide, lamps: q.lamps, lensLamps: q.lensLamps, star: q.star, date: q.date, k2: q.k2, named: q.named, up: q.up, papers: q.papers, same: q.same, live: q.live, nightHover: q.nightHover }; })()');
   const lampAt = (name) => p.ev(`document.getElementById("sky").probe().at(${JSON.stringify(name)})`);
   const num = (s) => Number(String(s).replace(/[^\d.]/g, ''));
-  const date = () => p.ev('document.getElementById("scrub").getAttribute("aria-valuetext") || ""');       // the date shown, as the line's keyboard says it
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  // the date shown, as the line's keyboard says it: in words (the kit's one convention for dates), read back as an ISO day
+  const date = async () => { const t = String(await p.ev('document.getElementById("scrub").getAttribute("aria-valuetext") || ""')).replace(/\s+/g, ' ').trim(); const m = t.match(/^(\d{1,2}) ([A-Z][a-z]+) (\d{4})$/); return m && MONTHS.includes(m[2]) ? `${m[3]}-${String(MONTHS.indexOf(m[2]) + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}` : `not a date in words: ${t}`; };
   const year = async () => Number((await date()).slice(0, 4));
   const setYear = (y) => p.ev(`(() => { const s = document.getElementById("scrub"); s.value = String(Math.round(2451545 + (${y} - 2000) * 365.25)); s.dispatchEvent(new Event("input", { bubbles: true })); })()`);
   const open = (name) => p.ev(`(() => { const i = document.getElementById("pick"); i.value = ${JSON.stringify(name)}; document.getElementById("pick-form").requestSubmit(); })()`);
@@ -61,7 +63,7 @@ export default async function exomania(p, { base }) {
   const q0 = await probe();
   p.check('the sky holds every lamp, on the map and again under the lens', q0.lamps + q0.lensLamps > 4729 + 1500 && (q0.lens ? q0.lensLamps === 0 : q0.lamps === 4729), `${q0.lamps} lamps on the sheet's canvas, ${q0.lensLamps} on the lens's own`);
   p.check('the count in the corner is a number of clocks, lost today', /^[\d,]+$/.test(await text('n-lost')) && /^of 4,729 transit clocks$/.test(await text('n-of')) && (await text('n-verb')) === 'are lost today' && (await text('n-if')) === '', `${await text('n-lost')} ${await text('n-of')} / ${await text('n-verb')}`);
-  p.check('the line of time stands on today, and the title block carries the source', (await date()) === isoToday && q0.date === isoToday && /NASA Exoplanet Archive, \d{4}-\d\d-\d\d/.test(await text('tb-source')), `${await date()} / ${await text('tb-source')}`);
+  p.check('the line of time stands on today, and the title block carries the source', (await date()) === isoToday && q0.date === isoToday && /^NASA Exoplanet Archive, \d{1,2}\s(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{4}$/.test(await text('tb-source')), `${await date()} / ${await text('tb-source')}`);
   const sky0 = await rect('sky'), band0 = await rect('band'), tall = await p.ev('window.innerHeight');
   p.check('the map and the line that sets its date are both whole on the first screen', sky0.y >= 0 && band0.y > sky0.y && band0.y + band0.h <= tall, `the map from ${Math.round(sky0.y)}, the line ends at ${Math.round(band0.y + band0.h)} of ${tall}`);
   const lostToday = num(await text('n-lost'));

@@ -230,10 +230,10 @@ const filled = (nVisits, nSaved = 0) => {
 
 /* ---- what the page prints ---- */
 {
-  yes('the log line counts the worlds visited and saved', lineWords({ visited: 12, saved: 3 }) === 'Your log · 12 visited · 3 saved' && lineWords({ visited: 0, saved: 0 }) === 'Your log · 0 visited · 0 saved');
+  yes('the log line counts the worlds visited and saved', lineWords({ visited: 12, saved: 3 }) === 'Log: 12 visited, 3 saved' && lineWords({ visited: 0, saved: 0 }) === 'Log: 0 visited, 0 saved');
   yes('thousands are marked the same way in every browser', same([0, 7, 999, 1000, 12345, 1234567].map(thousands), ['0', '7', '999', '1,000', '12,345', '1,234,567']));
-  yes('one shared world is named on the line, and none is not', lineWords({ visited: 2, saved: 1 }, 1) === 'Your log · 2 visited · 1 saved · 1 shared with you' && lineWords({ visited: 2, saved: 1 }, -1) === 'Your log · 2 visited · 1 saved');
-  yes('thousands are marked, and a shared log is named when there is one', lineWords({ visited: 1234, saved: 200 }) === 'Your log · 1,234 visited · 200 saved' && lineWords({ visited: 2, saved: 1 }, 5) === 'Your log · 2 visited · 1 saved · 5 shared with you' && lineWords({ visited: 2, saved: 1 }, 0) === 'Your log · 2 visited · 1 saved');
+  yes('one shared world is named on the line, and none is not', lineWords({ visited: 2, saved: 1 }, 1) === 'Log: 2 visited, 1 saved, 1 shared with you' && lineWords({ visited: 2, saved: 1 }, -1) === 'Log: 2 visited, 1 saved');
+  yes('thousands are marked, and a shared log is named when there is one', lineWords({ visited: 1234, saved: 200 }) === 'Log: 1,234 visited, 200 saved' && lineWords({ visited: 2, saved: 1 }, 5) === 'Log: 2 visited, 1 saved, 5 shared with you' && lineWords({ visited: 2, saved: 1 }, 0) === 'Log: 2 visited, 1 saved');
   yes('the counts are of the record', same(counts(filled(7, 3)), { visited: 7, saved: 3 }));
   yes('one world, and more', worlds(0) === '0 worlds' && worlds(1) === '1 world' && worlds(2) === '2 worlds' && worlds(1000) === '1,000 worlds');
   yes('a world visited once is said with the way alone', visitWords({ n: 1, via: 'link' }) === 'from a link' && visitWords({ n: 1, via: 'search' }) === 'by name');

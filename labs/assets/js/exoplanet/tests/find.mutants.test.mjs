@@ -18,7 +18,7 @@ import { dirname } from 'node:path';
 import { runMutants } from './mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const EARTH = '⊕', DOT = '·';   // the Earth sign after R and S, and the dot between the parts of a line
+const EARTH = '⊕';   // the Earth sign after R and S
 
 const MUTANTS = [
   /* ---- cold and hot ---- */
@@ -113,8 +113,8 @@ const MUTANTS = [
   ['a missing period left blank', `: 'no period')`, `: '')`],
   ['the year left out of the line', `key === 'year' ? (p.year ? String(p.year) : '')`, `key === 'year' ? ''`],
   ['the likeness printed with no word', '`likeness ${earthLikeness(p).toFixed(2)}`', '`${earthLikeness(p).toFixed(2)}`'],
-  ['the line without the kind', 'return v ? `${k} ' + DOT + ' ${v}` : k;', 'return v ? v : k;'],
-  ['the line without the value', 'return v ? `${k} ' + DOT + ' ${v}` : k;', 'return k;'],
+  ['the line without the kind', 'return v ? `${k}, ${v}` : k;', 'return v ? v : k;'],
+  ['the line without the value', 'return v ? `${k}, ${v}` : k;', 'return k;'],
 ];
 
-process.exit(await runMutants({ here, file: 'find.js', test: 'find.test.mjs', mutants: MUTANTS, data: ['data/exomania/pscomppars-snapshot.json'] }));
+process.exit(await runMutants({ here, file: 'find.js', test: 'find.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));

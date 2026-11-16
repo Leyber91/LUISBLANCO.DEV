@@ -1284,7 +1284,12 @@ export class Exoplanet {
     if (!this.running) { this.running = true; requestAnimationFrame(this._frame); }   // else the existing loop picks it up
   }
 
-  ok() { return !!this.gl; }   // a lost context recovers, and a look that will not build says so when it is asked for
+  ok() { return !!this.gl; }
+  /* the canvas changed size without the window changing (a page whose sheet holds it): fit the buffer again */
+  resize() { this._resize(); }
+  /* the view is waiting for a program to be built (a world's look or the ground): the page holds heavy work until it
+     is not. A program started early and not yet asked for does not count: nothing waits on it. */
+  building() { return !!(this._waiting || this._buildNote); }   // a lost context recovers, and a look that will not build says so when it is asked for
   load(params = {}) { Object.assign(this.cfg, params); this.requestDraw(); }
   /* one draw per animation frame at most, and none while the loop is already drawing */
   requestDraw() {
@@ -1729,7 +1734,11 @@ export class Exoplanet {
     cv.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = 0; if (e.touches.length === 0) up(); }, { passive: true });
     cv.addEventListener('touchcancel', () => { pinch = 0; up(); }, { passive: true });   // the browser took the gesture for a scroll
 
-    cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); this.onCamera && this.onCamera(); }, { passive: false });
+    // the wheel zooms once the planet has been pressed (it has the focus); before that it scrolls a page that scrolls
+    cv.addEventListener('wheel', (e) => {
+      if (this.wheelNeedsFocus && document.activeElement !== cv) return;
+      e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); this.onCamera && this.onCamera();
+    }, { passive: false });
   }
 
   // a soft failure notice OVER the canvas (never replaces it, so a later context
@@ -1741,17 +1750,18 @@ export class Exoplanet {
     m.innerHTML = '<div class="exo-fail-card"><div class="exo-fail-msg"></div>'
       + '<div class="exo-fail-gpu">' + (this.renderer ? 'GPU: ' + this.renderer : '') + '</div></div>';
     m.querySelector('.exo-fail-msg').textContent = msg;
-    (document.getElementById('exo-stage') || document.body).appendChild(m);
+    (this.failHost || document.getElementById('exo-stage') || document.body).appendChild(m);
     this._failEl = m;
   }
   _clearFail() { if (this._failEl) { this._failEl.remove(); this._failEl = null; } }
 
-  // a small transient pill notice (e.g. "Preparing surface view…"); sticky=auto-clear after a beat.
+  // a short notice (e.g. "Preparing the ground view"); sticky = it clears itself after a beat. A page that gives
+  // the engine a noteHost (a fixed line of its own) gets the words there, where they cover nothing.
   _note(msg, sticky) {
     this._clearNote();
-    const n = document.createElement('div');
+    const n = document.createElement(this.noteHost ? 'span' : 'div');
     n.id = 'exo-note'; n.className = 'exo-note'; n.textContent = msg;
-    (document.getElementById('exo-stage') || document.body).appendChild(n);
+    (this.noteHost || document.getElementById('exo-stage') || document.body).appendChild(n);
     this._noteEl = n;
     this._buildNote = false;
     if (sticky) setTimeout(() => { if (this._noteEl === n) this._clearNote(); }, 3200);   // only its own notice, not a later one

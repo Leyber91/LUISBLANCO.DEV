@@ -31,8 +31,8 @@ const CUT = `else { r.log.dropped = Math.min(LIMITS.dropped, r.log.dropped + r.l
 const FULLNOW = `if (record.log.saved.length >= LIMITS.saved) return refused(record, fullWhy(record.log.saved.filter((e) => !known(e.name)).length));`;
 const TWICE = `  if (isSaved(record, name)) return done(record);\n  ${FULLNOW}`;
 const PUT = `r.log.saved.unshift({ name, t, view: VIEWS.includes(v) ? v : 'orbit' });`;
-const LINE = '`Your log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved';
-const SHARED = '${shared > 0 ? ` · ${thousands(shared)} shared with you` : \'\'}';
+const LINE = '`Log: ${thousands(c.visited)} visited, ${thousands(c.saved)} saved';
+const SHARED = '${shared > 0 ? `, ${thousands(shared)} shared with you` : \'\'}';
 const HIDDEN = `hidden: hiddenSaved + (record.log.visits.length - visits.length),`;
 const PIN = `if (!isName(name) || !known(name)) return refused(record, UNKNOWN);`;
 const PINNED = `  if (record.log.pins.includes(name)) return done(record);\n`;
@@ -241,15 +241,15 @@ const MUTANTS = [
   ['a copy shares the visits', `visits: r.log.visits.map((e) => ({ ...e })),`, `visits: r.log.visits,`],
 
   /* ---- what the page prints ---- */
-  ['numbers printed with no thousands mark', `export const thousands = (n) => String(n).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');`, `export const thousands = (n) => String(n);`],
-  ['numbers marked every two figures', `(\\d{3})+(?!\\d)`, `(\\d{2})+(?!\\d)`],
-  ['numbers marked with a point', `(?!\\d))/g, ',');`, `(?!\\d))/g, '.');`],
+  ['numbers printed with no thousands mark', `export const thousands = (n) => grouped(n);`, `export const thousands = (n) => String(n);`],
+  // how digits are grouped is the kit's rule now (kit/format.js grouped), broken in kit/tests/format.mutants.test.mjs:
+  // "digits grouped by fours" and "grouped with a point" stand where these two entries stood.
   ['no world called worlds', `\${n === 1 ? 'world' : 'worlds'}\`;`, `\${n > 1 ? 'worlds' : 'world'}\`;`],
-  ['the log line names a shared log when there is none', SHARED, '${` · ${thousands(shared)} shared with you`}'],
+  ['the log line names a shared log when there is none', SHARED, '${`, ${thousands(shared)} shared with you`}'],
   ['the log line never names a shared log', SHARED, ``],
-  ['the log line does not name one shared world', SHARED, '${shared > 1 ? ` · ${thousands(shared)} shared with you` : \'\'}'],
-  ['the log line counts saved for visited', LINE, '`Your log · ${thousands(c.saved)} visited · ${thousands(c.visited)} saved'],
-  ['the words of the log line changed', LINE, '`Log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved'],
+  ['the log line does not name one shared world', SHARED, '${shared > 1 ? `, ${thousands(shared)} shared with you` : \'\'}'],
+  ['the log line counts saved for visited', LINE, '`Log: ${thousands(c.saved)} visited, ${thousands(c.visited)} saved'],
+  ['the words of the log line changed', LINE, '`Your log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved'],
   ['two visits said as one', `(e.n > 1 ? \`\${thousands(e.n)} visits`, `(e.n > 2 ? \`\${thousands(e.n)} visits`],
   ['one visit said as a count', `(e.n > 1 ? \`\${thousands(e.n)} visits`, `(e.n >= 1 ? \`\${thousands(e.n)} visits`],
   ['visits said with the way as if every visit came that way', `visits, the last \${VIA_WORDS[e.via]}\``, `visits, \${VIA_WORDS[e.via]}\``],
@@ -317,4 +317,4 @@ const MUTANTS = [
   ['the way back written before the record', `${WRITE}${RESUME}`, `${RESUME}${WRITE}`],
 ];
 
-process.exit(await runMutants({ here, file: 'record.js', test: 'record.test.mjs', mutants: MUTANTS, data: ['data/exomania/pscomppars-snapshot.json'] }));
+process.exit(await runMutants({ here, file: 'record.js', test: 'record.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));

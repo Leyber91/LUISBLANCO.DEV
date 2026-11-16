@@ -58,4 +58,4 @@ const MUTANTS = [
   ['the sentence without its end', SENTENCE, SENTENCE.replace('${where}.`;', '${where}`;')],
 ];
 
-process.exit(await runMutants({ here, file: 'views/system.js', test: 'orbit.test.mjs', mutants: MUTANTS }));
+process.exit(await runMutants({ here, file: 'views/system.js', test: 'orbit.test.mjs', mutants: MUTANTS, also: ['kit'] }));

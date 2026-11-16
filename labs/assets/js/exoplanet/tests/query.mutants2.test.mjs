@@ -14,4 +14,4 @@ import { MUTANTS } from './query.mutants.list.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const cut = Math.ceil(MUTANTS.length / 2);
-process.exit(await runMutants({ here, file: 'query.js', test: 'query.test.mjs', mutants: MUTANTS.slice(cut), also: ['ai'] }));
+process.exit(await runMutants({ here, file: 'query.js', test: 'query.test.mjs', mutants: MUTANTS.slice(cut), also: ['ai', 'kit'] }));

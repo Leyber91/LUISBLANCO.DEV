@@ -34,6 +34,8 @@
 import { LabsOS } from '../../os/index.js';
 import { load as loadRecord, update as updateRecord, setOverdue } from '../record.js';
 import { el } from '../../kit/dom.js';
+import { int, day, fromIso, isoDay, clock } from '../../kit/format.js';
+import { setSwitch } from '../../kit/controls.js';
 import { surface, reducedMotion } from '../views/common.js';
 import { jdOfMs, msOfJd, sunAltitude } from './time.js';
 import { epochAt, sigmaAt, lampAt, lostFrom, tally, grade, contested, stateOf, KEPT_LAMP, yearOfJd, jdOfYear } from './clock.js';
@@ -75,17 +77,15 @@ function save(resume = null) { if (os) updateRecord(os, (r) => setOverdue(r, { p
 /* Text is written only when it changes, so a live region speaks once and a drag does not rewrite the page. */
 const put = (id, text) => { const n = $(id); if (n && n.textContent !== text) n.textContent = text; };
 const say = (id, text) => { const n = $(id); if (n && n.getAttribute('aria-label') !== text) n.setAttribute('aria-label', text); };
-const num = (n) => n.toLocaleString('en-US');
+const num = (n) => int(n);   // the kit's one convention for numbers
 const plural = (n, one, many) => `${num(n)} ${n === 1 ? one : many}`;
-const dateOf = (jd) => new Date(msOfJd(jd)).toISOString().slice(0, 10);
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const NBSP = '\u00a0';
-const longDate = (jd) => { const d = new Date(msOfJd(jd)); return `${d.getUTCDate()}${NBSP}${MONTHS[d.getUTCMonth()]}${NBSP}${d.getUTCFullYear()}`; };      // a date never breaks between its day, its month and its year
+const dateOf = (jd) => isoDay(msOfJd(jd));   // the ISO day, for an address and for the drive's probe; never shown as text
+const longDate = (jd) => day(msOfJd(jd));   // the kit's one convention for a date: never broken between its day, its month and its year
 function localTime(jd, windowS) {
   const t = shownMs(msOfJd(jd), windowS);
-  return new Date(t.ms).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit', ...(t.seconds ? { second: '2-digit' } : {}) });
+  return clock(t.ms, { weekday: true, seconds: !!t.seconds });
 }
-const hourOf = (jd, withDay = false) => new Date(Math.round(msOfJd(jd) / 60000) * 60000).toLocaleString([], { ...(withDay ? { weekday: 'short' } : {}), hour: '2-digit', minute: '2-digit' });      // to the nearest minute: a Julian date of a whole hour is a hair under it
+const hourOf = (jd, withDay = false) => clock(Math.round(msOfJd(jd) / 60000) * 60000, { weekday: withDay });      // to the nearest minute: a Julian date of a whole hour is a hair under it
 /* A solution's paper. Before the record is here only the working clocks are known, and not yet by name. */
 const refLabel = (s) => (cat.refs && s.ref != null && cat.refs[s.ref] ? cat.refs[s.ref][0]
   : s.flag === 2 ? 'a published solution' : s.flag === 1 ? 'the archive\'s composite row, from one paper' : 'the archive\'s composite row');
@@ -208,7 +208,7 @@ function render() {
   put('n-verb', atNow ? `${lost === 1 ? 'is' : 'are'} lost today` : S.jd < now ? `${lost === 1 ? 'was' : 'were'} lost on ${longDate(S.jd)}` : `lost by ${longDate(S.jd)}`);
   put('n-if', S.jd > now + HALF_DAY ? 'if nobody looks again' : '');
   $('scrub').value = String(Math.round(S.jd));
-  $('scrub').setAttribute('aria-valuetext', dateOf(S.jd));
+  $('scrub').setAttribute('aria-valuetext', longDate(S.jd));
   // the one clock, on that date
   if (S.star) {
     const p = S.star.p, c = clockAt(S.star.hist, S.jd);
@@ -365,7 +365,8 @@ function renderTonight() {
   }
   if (!show.length) { const tr = el('tr'); const td = el('td', 'dim', 'No transit in the next 24 hours is up in the dark here. Show all to see each one and why.'); td.colSpan = 10; tr.append(td); body.append(tr); }
   if (held) { const again = [...body.querySelectorAll('button')].find((x) => x.dataset.planet === held); if (again) again.focus({ preventScroll: true }); }
-  put('t-all', S.showAll ? `show only the ${num(up.length)} up in the dark` : `show all ${num(rows.length)}, and why each of the others is not`);
+  // the shared switch (kit/controls.js): both states engraved, the lever on the side of the rows shown
+  put('t-all-l', `the ${num(up.length)} up in the dark`); put('t-all-r', `all ${num(rows.length)}, with why each other is not`); setSwitch($('t-all'), S.showAll);
   put('t-shown', `${num(show.length)} of ${num(rows.length)} listed, earliest first`);
   put('t-cap', plural(rows.length, 'transit', 'transits'));
 }
@@ -418,8 +419,8 @@ function renderState() {
   put('s-lost', `${num(lost)} (${pc(lost, timed.length)})`);
   put('s-contested', `${num(doubted)} (${pc(doubted, cat.planets.length)})`);
   put('s-alone', num(alone));
-  put('s-date', cat.meta.retrieved);
-  put('tb-source', `NASA Exoplanet Archive, ${cat.meta.retrieved}`);
+  put('s-date', day(fromIso(cat.meta.retrieved), cat.meta.retrieved));
+  put('tb-source', `NASA Exoplanet Archive, ${day(fromIso(cat.meta.retrieved), cat.meta.retrieved)}`);
 }
 function renderTally() {
   const pairs = cat.planets.map(pairOf).filter(Boolean);

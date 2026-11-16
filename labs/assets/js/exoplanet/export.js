@@ -10,7 +10,8 @@ import {
   forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, transitGeometry, earthLikeness, hasTrueMass, limitOf, isNum,
 } from './science.js';
 import { facts, deterministicNote, limitsLine } from './report.js';
-import { tokens, fmt, fmtInt } from './views/common.js';
+import { tokens, alpha, fmt, fmtInt } from './views/common.js';
+import { day } from '../kit/format.js';
 
 function download(blob, name) {
   const a = document.createElement('a');
@@ -35,7 +36,7 @@ export function exportPlate(p, engine, views, albedo) {
   const W = 1600, H = 900;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#06080D'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = T.void; ctx.fillRect(0, 0, W, H);
   // the world: crop a square around the planet's centre on the WebGL canvas
   const g = engine.canvas, k = g.width / Math.max(1, g.clientWidth);
   const sh = engine.camera.shift;
@@ -44,19 +45,19 @@ export function exportPlate(p, engine, views, albedo) {
   engine.render();
   try { ctx.drawImage(g, cx - side / 2, cy - side / 2, side, side, 40, 90, 760, 760); } catch (_) { /* tainted or lost: leave the field dark */ }
   // frame and brackets
-  ctx.strokeStyle = 'rgba(159,179,214,0.22)'; ctx.lineWidth = 1; ctx.strokeRect(20.5, 20.5, W - 41, H - 41);
+  ctx.strokeStyle = alpha(T.horizon, 0.22); ctx.lineWidth = 1; ctx.strokeRect(20.5, 20.5, W - 41, H - 41);
   ctx.strokeStyle = T.gold;
   for (const [x, y, dx, dy] of [[20, 20, 1, 1], [W - 20, 20, -1, 1], [20, H - 20, 1, -1], [W - 20, H - 20, -1, -1]]) {
     ctx.beginPath(); ctx.moveTo(x + 22 * dx, y + 0.5 * dy); ctx.lineTo(x + 0.5 * dx, y + 0.5 * dy); ctx.lineTo(x + 0.5 * dx, y + 22 * dy); ctx.stroke();
   }
   const mono = (w, s) => `${w} ${s}px "IBM Plex Mono", ui-monospace, Consolas, monospace`;
   ctx.fillStyle = T.dim; ctx.font = mono(500, 13); ctx.textAlign = 'left';
-  ctx.fillText('EXOMANIA · DEEP FIELD SURVEY', 44, 62);
-  ctx.textAlign = 'right'; ctx.fillText('THE LAB — L212 · luisblanco.dev/labs/exomania-survey.html', W - 44, 62);
+  ctx.fillText('Exomania survey', 44, 62);
+  ctx.textAlign = 'right'; ctx.fillText('The lab L212, luisblanco.dev/labs/exomania-survey.html', W - 44, 62);
   ctx.textAlign = 'left';
   const X = 840;
-  ctx.fillStyle = T.gold; ctx.font = mono(500, 12); ctx.fillText('SURVEY PLATE', X, 112);
-  ctx.fillStyle = T.bright; ctx.font = mono(600, 40); ctx.fillText(p.name, X, 158);
+  ctx.fillStyle = T.dim; ctx.font = mono(500, 12); ctx.fillText(`Sheet A, the planet, ${day(Date.now())}`, X, 112);
+  ctx.fillStyle = T.bright; ctx.font = '400 44px Fraunces, Georgia, serif'; ctx.fillText(p.name, X, 160);
   const f = facts(p, albedo);
   ctx.fillStyle = T.text; ctx.font = mono(400, 15);
   let y = wrap(ctx, deterministicNote(p, f), X, 196, W - X - 50, 22);
@@ -73,23 +74,23 @@ export function exportPlate(p, engine, views, albedo) {
   if (f.archive_limits) rows.push(['archive bounds', f.archive_limits]);
   ctx.font = mono(400, 13);
   // values wrap inside the plate (an archive-bounds line can run long)
-  for (const [k, v] of rows) { ctx.fillStyle = T.dim; ctx.fillText(k.toUpperCase(), X, y); ctx.fillStyle = T.bright; y = wrap(ctx, String(v), X + 170, y, W - X - 220, 21); }
+  for (const [k, v] of rows) { ctx.fillStyle = T.dim; ctx.fillText(k, X, y); ctx.fillStyle = T.bright; y = wrap(ctx, String(v), X + 170, y, W - X - 220, 21); }
   // the linked views as they are now
   const vy = Math.max(y + 12, 560);
   const drawView = (c, x, w, label) => {
     if (!c) return;
     const h = Math.min(210, w * c.height / Math.max(1, c.width));
-    ctx.strokeStyle = 'rgba(159,179,214,0.18)'; ctx.strokeRect(x + 0.5, vy + 0.5, w, h);
+    ctx.strokeStyle = alpha(T.horizon, 0.18); ctx.strokeRect(x + 0.5, vy + 0.5, w, h);
     try { ctx.drawImage(c, x, vy, w, h); } catch (_) { /* skip */ }
     ctx.fillStyle = T.dim; ctx.font = mono(500, 11); ctx.fillText(label, x, vy - 6);
   };
-  drawView(views.system, X, 330, 'SYSTEM, TO SCALE');
-  drawView(views.transit, X + 360, 360, 'TRANSIT LIGHT CURVE');
+  drawView(views.system, X, 330, 'D, the system to scale');
+  drawView(views.transit, X + 360, 360, 'E, the signal');
   ctx.fillStyle = T.faint; ctx.font = mono(400, 10.5);
   let sy = H - 40 - 14 * 4;
   ctx.fillText(`Data: ${DATA.snapshotLabel}. This research has made use of the NASA Exoplanet Archive, operated by Caltech under contract with NASA.`, 44, sy); sy += 14;
-  ctx.fillText('Models: ' + SOURCES.slice(1, 5).join(' · '), 44, sy); sy += 14;
-  ctx.fillText('         ' + SOURCES.slice(5).join(' · '), 44, sy); sy += 14;
+  ctx.fillText('Models: ' + SOURCES.slice(1, 5).join('; '), 44, sy); sy += 14;
+  ctx.fillText('         ' + SOURCES.slice(5).join('; '), 44, sy); sy += 14;
   ctx.fillText(`Planet image: procedural ray-traced render from the measured values [ILLUSTRATIVE surface]. ${location.href}`, 44, sy);
   cv.toBlob((b) => b && download(b, `exomania-${slug(p.name)}.png`), 'image/png');
 }
@@ -103,7 +104,7 @@ export function exportCSV(list, filterFn, filterActive, albedo, label) {
     'transit_depth_ppm_model', 'transit_duration_h_model', 'earth_likeness_illustrative', 'archive_limits'];
   const q = (v) => (v === null || v === undefined || (typeof v === 'number' && !isFinite(v)) ? '' : typeof v === 'number' ? +v.toPrecision(5) : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
   const lines = [
-    `# Exomania survey export, ${new Date().toISOString().slice(0, 10)}. ${rows.length} planets${filterActive ? ' (filter: ' + label + ')' : ''}.`,
+    `# Exomania survey export, ${day(Date.now())}. ${fmtInt(rows.length)} planets${filterActive ? ' (filter: ' + label + ')' : ''}.`,
     `# Data: ${DATA.snapshotLabel}; weekly roster for planets confirmed after it. Acknowledgement: NASA Exoplanet Archive, operated by Caltech under contract with NASA.`,
     `# Inferred columns: Chen & Kipping 2017 forecaster (log-uniform prior, censored by any mass limit), Teq at Bond albedo ${albedo} with full redistribution, Kopparapu et al. 2013 zone, transit model at the archive impact parameter (0 if absent).`,
     '# Limits: mass_limit 1 means mass_Mearth is an upper limit, -1 a lower limit, 0 a value. Every other value the archive flags as a limit is left blank in its column and written in archive_limits as a bound (< upper, > lower). No limit is used in an inferred column as a value.',

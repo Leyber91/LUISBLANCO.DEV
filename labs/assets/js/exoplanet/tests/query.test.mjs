@@ -309,9 +309,9 @@ const nothingElse = (q, ...keep) => ['zone', 'looks', 'locked', 'cold', 'hot', '
 /* ---- the note the page prints ---- */
 {
   const note = (text, extra = {}) => say({ r: P(text), text, count: 315, order: 'nearest first', ...extra });
-  yes('a question read in full: what was read, how many, in what order, and by what', note('cold planet') === `“cold planet” → ${COLD_WORDS} · 315 matches, nearest first · read by this page's own rules.` && PAGE === 'this page\'s own rules', note('cold planet'));
-  yes('one match is "1 match", and thousands are marked', /· 1 match, /.test(note('cold planet', { count: 1 })) && /· 2,026 matches, /.test(note('giants', { count: 2026 })));
-  yes('a question that only orders says every planet, and counts planets', note('largest', { count: 6464, order: 'largest first' }) === `“largest” → every planet · 6,464 planets, largest first · read by this page's own rules.`, note('largest', { count: 6464, order: 'largest first' }));
+  yes('a question read in full: what was read, how many, in what order, and by what', note('cold planet') === `“cold planet” reads as ${COLD_WORDS}; 315 matches, nearest first; read by this page's own rules.` && PAGE === 'this page\'s own rules', note('cold planet'));
+  yes('one match is "1 match", and thousands are marked', /; 1 match, /.test(note('cold planet', { count: 1 })) && /; 2,026 matches, /.test(note('giants', { count: 2026 })));
+  yes('a question that only orders says every planet, and counts planets', note('largest', { count: 6464, order: 'largest first' }) === `“largest” reads as every planet; 6,464 planets, largest first; read by this page's own rules.`, note('largest', { count: 6464, order: 'largest first' }));
   yes('a reading with numbers says where to change them', / The numbers can be changed under Ranges\.$/.test(note('giants')) && !/Ranges/.test(note('cold planet')));
   yes('a surface kind asked of a world too large for one, with no match, says why', / No world that large is drawn with a surface\./.test(note('desert giants', { count: 0 })) && !/that large/.test(note('desert giants', { count: 3 })) && !/that large/.test(note('rocky deserts', { count: 0 })) && !/that large/.test(note('giants with no surface', { count: 0 })));
   yes('"that large" starts at Neptune-size, 4 R, and no lower', / No world that large is drawn with a surface\./.test(note('desert neptunes', { count: 0 })) && !/that large/.test(note('desert super earths', { count: 0 })) && !/that large/.test(note('deserts', { count: 0 })));
@@ -326,8 +326,8 @@ const nothingElse = (q, ...keep) => ['zone', 'looks', 'locked', 'cold', 'hot', '
   yes('cold or hot asked of imaged planets, with no match, says why there is none', note('cold imaged planets', { count: 0 }).endsWith(own) && note('hot planets found by imaging', { count: 0 }).endsWith(own)
     && !note('cold imaged planets', { count: 2 }).includes(own) && !note('imaged planets', { count: 0 }).includes(own) && !note('cold transiting planets', { count: 0 }).includes(own));
   const model = validateQuery({ temperature: 'cold' });
-  yes('a model\'s reading is named as the model\'s', say({ r: model, text: 'chilly ones', by: 'llama (ollama)', count: 315, order: 'nearest first' }) === `“chilly ones” → ${COLD_WORDS} · 315 matches, nearest first · read by llama (ollama).`);
-  yes('a reading a model made is printed as applied, where the page\'s own reading of those words would not be', /→ .* · read by m \(x\)\.$/.test(say({ r: { ...P('fluffy cold planets') }, text: 'fluffy cold planets', by: 'm (x)', count: 3, order: 'nearest first' })));
+  yes('a model\'s reading is named as the model\'s', say({ r: model, text: 'chilly ones', by: 'llama (ollama)', count: 315, order: 'nearest first' }) === `“chilly ones” reads as ${COLD_WORDS}; 315 matches, nearest first; read by llama (ollama).`);
+  yes('a reading a model made is printed as applied, where the page\'s own reading of those words would not be', /reads as .*; read by m \(x\)\.$/.test(say({ r: { ...P('fluffy cold planets') }, text: 'fluffy cold planets', by: 'm (x)', count: 3, order: 'nearest first' })));
 }
 
 /* ---- a model's reply is checked field by field ---- */

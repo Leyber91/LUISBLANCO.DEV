@@ -39,6 +39,13 @@
   --horizon-dim:  #565D72;
   --horizon-glow: rgba(159, 179, 214, .30);
 
+  /* ---- a world's tint of the ink (labs-design: a world may tint the ink, never add an accent) ---- */
+  /* Cosmos: the deep blue of a sky, and the blue of what is cold. Moved here from overdue.css on 2026-11-16 so that
+     the lab's pages and drawings use site tokens only (atlas interface.2.2). Gold against the ice separates at 22 for
+     colour-blind readers (target 8; the chart skill's validator, 2026-11-14). */
+  --cosmos-sky: #0A1B3D;
+  --cosmos-ice: #7CC0FA;
+
   /* ---- semantic ---- */
   --ok:    #6FCF8E;
   --warn:  #E7B85C;

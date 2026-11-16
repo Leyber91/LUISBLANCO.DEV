@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 <link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/plate.css" />
+<link rel="stylesheet" href="assets/css/controls.css" />
 <link rel="stylesheet" href="assets/css/os.css" />
 <link rel="stylesheet" href="assets/css/overdue.css" />
 </head>
@@ -121,7 +122,7 @@
     <canvas id="night" role="img" aria-label="The dark hours of the next 24: each transit that is up in the dark, as the height of its star."></canvas>
     <details class="od-list" id="t-details">
       <summary id="t-cap">transits</summary>
-      <div class="od-more"><button type="button" class="act ghost" id="t-all">show all</button><span class="od-note" id="t-shown"></span></div>
+      <div class="od-more"><button type="button" class="switch" role="switch" id="t-all" aria-checked="false" aria-label="Rows: all the transits, with why each is not up"><span class="sw-name">rows</span><span class="sw-w sw-l" id="t-all-l">up in the dark</span><span class="sw-track"><i class="sw-lever"></i></span><span class="sw-w sw-r" id="t-all-r">all</span></button><span class="od-note" id="t-shown"></span></div>
       <div class="od-tablewrap" id="t-wrap" tabindex="0" role="region" aria-labelledby="t-cap">
         <table class="od-table" id="t-table" aria-labelledby="t-cap">
           <thead><tr><th scope="col">planet</th><th scope="col" class="num">mid-transit, your clock</th><th scope="col" class="num">window</th><th scope="col" class="why">from here</th><th scope="col" class="num">altitude</th><th scope="col">sky</th><th scope="col">clock</th><th scope="col" class="num">lasts</th><th scope="col" class="num">depth</th><th scope="col" class="num">V mag</th></tr></thead>
