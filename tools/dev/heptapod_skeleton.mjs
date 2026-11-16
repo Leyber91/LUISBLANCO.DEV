@@ -44,6 +44,7 @@ const BANDS = [[2, 10], [11, 20], [21, 40]];
 const av = process.argv.slice(2);
 const out = av[0];
 if (!out || out.startsWith('--')) { console.error('usage: heptapod_skeleton.mjs <out dir> [--ref <film still>]'); process.exit(2); }
+const FILLED = av.includes('--fill'); // the region filled as ink, with no line drawn (Luis, 2026-11-16: "only the shapes")
 const ri = av.indexOf('--ref');
 const ref = ri > 0 ? av[ri + 1] : null;
 if (ri > 0 && (!ref || !fs.existsSync(ref))) { console.error(`--ref: no file at ${ref}`); process.exit(2); }
@@ -72,7 +73,8 @@ function panel(dw, g) {
   d += 'Z';
   const res = decodeContour(dw.contour);
   const back = res.ok && canonicalGraph(res.graph).cert === canonicalGraph(g).cert;
-  const svg = `<svg viewBox="0 0 ${PANEL} ${PANEL}" width="${PANEL}" height="${PANEL}"><path d="${d}" fill="none" stroke="#000" stroke-width="${Math.max(MIN_PX, LINE_L * sc).toFixed(2)}" stroke-linejoin="round"/></svg>`;
+  const paint = FILLED ? 'fill="#000" stroke="none"' : `fill="none" stroke="#000" stroke-width="${Math.max(MIN_PX, LINE_L * sc).toFixed(2)}" stroke-linejoin="round"`;
+  const svg = `<svg viewBox="0 0 ${PANEL} ${PANEL}" width="${PANEL}" height="${PANEL}"><path d="${d}" ${paint}/></svg>`;
   return { svg, back, R, wRatio: (LINE_L / R), lobes: dw.lobes.length, necks: dw.necks.length, kisses: dw.kisses.length, echoes: dw.stats.echoes, len: m * TOPO.ds };
 }
 
@@ -109,7 +111,7 @@ figcaption{padding:8px 10px;max-width:${PANEL - 20}px;font-size:14px;color:#333}
 .half figcaption{max-width:${PANEL / 2 - 20}px;font-size:13px}
 h1{font-size:18px;font-weight:600;margin:0 0 14px}
 </style></head><body>
-<h1>F1: the plain skeleton of E1 (topology ${TOPO.version}), line ${LINE_L} l wide, enclosing circle ${FILL} of the frame</h1>
+<h1>F1: the plain skeleton of E1 (topology ${TOPO.version}), ${FILLED ? 'the region filled, no line drawn' : `line ${LINE_L} l wide`}, enclosing circle ${FILL} of the frame</h1>
 <div class="row">${cells.join('')}</div>
 <h1>One meaning, six forms: the ${picks[0].n}-node graph's master and its 5 form synonyms</h1>
 <div class="row half">${syn.join('')}</div>
