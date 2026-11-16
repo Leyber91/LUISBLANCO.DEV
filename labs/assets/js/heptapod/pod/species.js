@@ -24,25 +24,14 @@
    one the selection in tests/pod.test.mjs runs]
    ============================================================ */
 
-import { mulberry32 } from '../raster.js';
+import { mulberry32, seedOf, shuffle, pick } from '../../kit/rng.js';
 import { makeCode } from '../script.js';
 import { OBJECTS, OBJ, ACTS, PLACES, SCENES } from './world.js';
 
 export const ALIEN_TOL = 0.05;
 
-/* ---------------- seeded randomness ---------------- */
-export function seedOf(...parts) {
-  const s = parts.join('|');
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
-  return h >>> 0;
-}
-export function shuffle(arr, rng) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
-export const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
+/* seeded randomness: the labs' shared kit, passed on to the files that took it from here */
+export { seedOf, shuffle, pick };
 
 /* ---------------- operations ---------------- */
 const pairs = (xs) => xs.flatMap((x, i) => xs.slice(i + 1).map((y) => [x, y]));

@@ -159,17 +159,25 @@
 .los-sharing .los-choice { width: min(100%, 22rem); }
 
 /* ---------------- the sharing question ---------------- */
-/* What is sent is a list, one item a line, each led by a short ink rule: the four things are counted at a glance
-   and none hides in a sentence. What is never sent keeps the body ink; where it is kept and for how long steps
-   back one rung. The two answers are the same button twice; neither is filled or pre-pressed. On a wide screen
-   the plate sits in the lower right corner, clear of the hero; on a narrow one it spans the bottom edge. */
+/* One strip at the foot of the window: the question, the two answers beside it, and under them one line that
+   opens what is sent. Closed, it can be answered or left alone and does not cover the page it is asked on.
+   Opened, what is sent is a list, one item a line, each led by a short ink rule: the four things are counted at
+   a glance and none hides in a sentence. What is never sent keeps the body ink; where it is kept and for how long
+   steps back one rung. The two answers are the same button twice; neither is filled or pre-pressed. On a wide
+   screen the strip sits in the lower right corner; on a narrow one it spans the bottom edge. */
 .los-consent {
   position: fixed; right: var(--s-5); bottom: var(--s-5);
-  width: min(460px, calc(100vw - 2 * var(--s-4))); z-index: var(--z-toast);
+  width: min(760px, calc(100vw - 2 * var(--s-5))); z-index: var(--z-toast);
   max-height: calc(100vh - 2 * var(--s-4)); overflow-y: auto;
   background: var(--void);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-2) var(--s-5); align-items: center;
+  padding: var(--s-3) var(--s-4);
 }
 .los-consent .los-copy { margin: var(--s-3) 0 0; font-size: var(--t-stamp); max-width: none; }
+.los-consent .los-ask { margin: 0; color: var(--text-bright); }
+.los-consent .los-what { grid-column: 1 / -1; }
+.los-what summary { cursor: pointer; width: max-content; font-size: var(--t-micro); letter-spacing: .18em; text-transform: uppercase; color: var(--text-dim); }
+.los-what summary:hover, .los-what summary:focus-visible, .los-what[open] summary { color: var(--text-bright); }
 .los-consent .los-fine { color: var(--text-dim); font-size: var(--t-micro); line-height: 1.65; margin-bottom: var(--s-4); }
 .los-sent {
   list-style: none; margin: var(--s-2) 0 0; padding: 0;
@@ -188,7 +196,7 @@
   .los-next { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: var(--s-3); }
   .los-rows { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
   .los-rows dd { margin-bottom: var(--s-2); }
-  .los-consent { right: 50%; transform: translateX(50%); bottom: var(--s-3); width: calc(100vw - 2 * var(--s-4)); }
+  .los-consent { left: var(--s-3); right: var(--s-3); bottom: var(--s-3); width: auto; grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

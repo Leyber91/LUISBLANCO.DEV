@@ -6,6 +6,8 @@
    serialises into a #w= permalink that replays the EXACT artifact).
    ============================================================ */
 
+import { cleanDeep, noTags } from '../kit/guard.js';
+
 const K_INDEX = 'altverse:index';
 const K_WORLD = (id) => 'altverse:world:' + id;
 
@@ -18,9 +20,18 @@ function write(key, val) {
   catch { return false; }
 }
 
-export function listWorlds() { return read(K_INDEX, []); }
+/* A world reaches this page from a share link, from this browser's storage and from a model, and the
+   views write its text into the page as HTML. No world text needs markup, so the two characters that
+   open and close a tag are replaced by look-alikes wherever a world enters or is drawn. Without a "<"
+   no element can start, and no view puts world text inside an attribute. Keys are cleaned too: the
+   dossier prints the names of facts. On 2026-11-14 a crafted #w= link ran script on this origin, where
+   a visitor's own model key is stored; tests.mjs keeps that link harmless. */
+export const cleanWorld = (v) => cleanDeep(v, { clean: noTags });
+
+export function listWorlds() { const v = read(K_INDEX, []); return Array.isArray(v) ? cleanWorld(v).filter((e) => e && typeof e === 'object') : []; }
 
 export function saveWorld(world) {
+  world = cleanWorld(world);
   const { log, ...persist } = world;          // drop the volatile telemetry log
 
   let ok = write(K_WORLD(world.id), persist);
@@ -47,7 +58,7 @@ export function saveWorld(world) {
   return true;
 }
 
-export function loadWorld(id) { return read(K_WORLD(id), null); }
+export function loadWorld(id) { const w = cleanWorld(read(K_WORLD(id), null)); return w && typeof w === 'object' && !Array.isArray(w) ? w : null; }
 
 export function removeWorld(id) {
   try { localStorage.removeItem(K_WORLD(id)); } catch (_) {}
@@ -74,7 +85,7 @@ export function encodeShare(world) {
 export function decodeShareHash(hash) {
   const m = /[#&?]?w=([^&]+)/.exec(hash || '');
   if (!m) return null;
-  try { return JSON.parse(b64urlDecode(m[1])); } catch { return null; }
+  try { const w = cleanWorld(JSON.parse(b64urlDecode(m[1]))); return w && typeof w === 'object' && !Array.isArray(w) ? w : null; } catch { return null; }
 }
 
 export function shareURL(world) {

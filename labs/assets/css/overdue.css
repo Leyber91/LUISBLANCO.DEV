@@ -1,0 +1,222 @@
+/* ============================================================
+   Overdue — one sheet on the labs' plate (plate.css).
+
+   Cosmos is measured light. The sheet is a map of the sky and
+   everything else hangs from it: a name and a count at its upper
+   left, a lens at its upper right, the key at its lower left, a
+   title block at its lower right. Under it, the one control: a
+   line of time. Then lettered sheets, each a label, its drawings
+   and their table twin, closed.
+
+   Colour. The ground is the labs' near-black and the words are
+   its ink. This page adds the Cosmos pair: a deep blue for the
+   sky, the one large coloured field, and an ice blue for what
+   has gone cold. Gold is the only warm thing: a clock that is
+   kept, and a paper that landed inside a window that could have
+   missed. Warm is kept and cold is not, so the pair is the
+   meaning and is never decoration.
+
+   Nothing here is a card, and no sentence stands under a drawing
+   to explain it: a drawing is named by labels on it. Sections
+   are divided by a hairline and a sheet label; the only large
+   type is the count of lost clocks, which is the headline and
+   changes with the date. Text a visitor must read is never
+   fainter than --text-dim (5.1 to 1 on the ground).
+   ============================================================ */
+
+:root {
+  --sky: #0A1B3D;      /* the sky of the sheet, and the night of sheet c */
+  --ice: #7CC0FA;      /* a clock that is slipping or lost; against gold it separates for colour-blind readers (checked with the chart skill's validator, 2026-11-14) */
+}
+
+.sheet { max-width: 1480px; margin-inline: auto; padding-inline: clamp(1rem, 3.2vw, 3rem); }
+/* The foot stands on the sheet's own margins: its rule is as long as every other hairline on the page, and it carries no mark. */
+.foot { max-width: 1480px; padding-inline: clamp(1rem, 3.2vw, 3rem); border-top: 0; padding-top: 0; }
+.foot .tag { width: 100%; max-width: none; border-top: 1px solid var(--line); padding-top: var(--s-5); }
+.foot .tag i { display: none; }
+.bar .back.quiet { border-color: transparent; padding-inline: 0; }      /* the side door is a quiet link, not a second button beside the way back */
+.od-short { display: none; }
+/* The plate hides a quiet link in the bar on a narrow screen. This one is the only way from the clocks to the
+   planets themselves, so it stays, under a shorter name (2026-11-14: hidden, the planet page could not be reached
+   from a phone at all). */
+@media (max-width: 560px) {
+  .bar .back.quiet { display: inline-block; }
+  .od-long { display: none; }
+  .od-short { display: inline; }
+}
+.bp { z-index: calc(var(--z-header) + 1); }      /* the frame of the plate stays over the solid bar */
+.od-load, .od-note { font-size: .72rem; line-height: 1.5; color: var(--text-dim); margin: 0; }
+.od-say { font-size: .8rem; line-height: 1.55; color: var(--text); margin: 0; max-width: 70ch; }
+.od-say.wide { max-width: 100ch; margin: 0 0 var(--s-3); }
+.od-say a { color: var(--horizon); text-underline-offset: 3px; white-space: nowrap; }
+.od-say a:hover, .od-say a:focus-visible { color: var(--text-bright); }
+.od-right { text-align: right; margin: 0; }
+
+/* ---------- sheet a: the sky ---------- */
+.od-sky { position: relative; height: clamp(450px, 58vh, 570px); margin-top: var(--s-2); }
+#sky { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+.od-title { position: absolute; left: 0; top: 0; max-width: 21rem; pointer-events: none; }
+.od-title h1 { font-size: clamp(1.9rem, 2.4vw, 2.5rem); line-height: 1; margin: 0 0 var(--s-2); letter-spacing: -.01em; font-style: italic; font-weight: 400; }
+.od-line { font-size: .74rem; line-height: 1.5; color: var(--text); margin: 0 0 var(--s-4); }
+.od-line span { display: block; }
+.od-count { display: flex; flex-direction: column; gap: 8px; margin: 0; }      /* the words under the number: beside it they ran over the edge of the map */
+.od-num { font-size: clamp(3.4rem, 5.4vw, 5.2rem); line-height: .86; color: var(--text-bright); font-weight: 400; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.od-count-words { font-size: .78rem; line-height: 1.45; color: var(--text); white-space: nowrap; min-height: 4.35em; }      /* three lines, whether or not the third is said */
+.od-count-words span { display: block; }
+#n-if { color: var(--text-dim); }
+.od-load { margin-top: var(--s-2); min-height: 1.5em; }
+
+/* The key: one row at the sheet's lower left. Each mark is the mark the sky draws. */
+.od-legend { position: absolute; left: 0; bottom: 0; max-width: calc(100% - min(19.5rem, 34vw) - 2rem); pointer-events: none; }
+.od-key { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 16px; }
+.od-key li { display: inline-flex; gap: 7px; align-items: center; font-size: .68rem; line-height: 1.4; color: var(--text-dim); white-space: nowrap; }
+.od-key b { color: var(--text); font-weight: 500; margin-right: 4px; }
+.lamp { flex: none; width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.lamp.kept { background: var(--accretion); }
+.lamp.slipping { width: 5px; height: 5px; margin-inline: 1px; background: var(--ice); }
+.lamp.lost { background: none; border: 1px solid var(--ice); }
+.lamp.crossing { width: 9px; height: 9px; background: none; border: 1px solid var(--text-bright); border-left-color: transparent; border-bottom-color: transparent; }
+/* The K2 count is words on the map where the map has room for them, and a line above the key where it has not.
+   The line keeps its height when it has nothing to say, so the key under it never moves with the date. */
+.od-k2 { font-size: .68rem; line-height: 1.4; min-height: 1.4em; color: var(--text); margin: 0 0 6px; }
+.od-k2.on-sheet { position: absolute; width: 1px; height: 1px; min-height: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+#lens2 { display: none; }      /* the lens has its own canvas only where the sheet is too narrow to hold it beside the map */
+
+/* The title block of an engineering drawing: what the sheet is, how it is drawn, where its data is from. */
+.od-block { position: absolute; right: 0; bottom: 0; margin: 0; width: min(19.5rem, 34vw); border: 1px solid var(--line-bright); background: rgba(6, 8, 13, .82); }
+.od-block div { display: grid; grid-template-columns: 3.9rem minmax(0, 1fr); border-top: 1px solid var(--line); }
+.od-block div:first-child { border-top: 0; }
+.od-block dt { font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); padding: 5px 8px; border-right: 1px solid var(--line); }
+.od-block dd { margin: 0; font-size: .64rem; line-height: 1.35; color: var(--text); padding: 4px 8px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }      /* a row wraps: nothing in it is ever cut */
+.od-tip { position: absolute; margin: 0; pointer-events: none; font-size: .68rem; color: var(--text-bright); background: rgba(6, 8, 13, .92); border: 1px solid var(--line-bright); padding: 3px 7px; white-space: nowrap; }
+
+/* ---------- the line of time: the sheet's one control ---------- */
+.od-time { position: relative; margin-top: var(--s-4); }
+/* The range input is the line's keyboard: it takes the focus and the arrow keys, and the line shows the ring. */
+.od-range { position: absolute; left: 0; top: 0; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+.od-range:focus-visible + #band { outline: 1px solid var(--horizon); outline-offset: 3px; }
+#band { width: 100%; height: 214px; display: block; cursor: ew-resize; touch-action: pan-y; }      /* a sideways drag sets the date; an up or down swipe still scrolls the page */
+.od-under { display: flex; justify-content: flex-end; margin-top: 2px; }
+.od-under .act { min-height: 28px; padding: 3px 10px; }
+
+/* ---------- the lettered sheets ---------- */
+.od-plate { margin-top: var(--s-7); padding-top: var(--s-4); border-top: 1px solid var(--line); scroll-margin-top: 80px; }
+.od-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3) var(--s-5); flex-wrap: wrap; margin-bottom: var(--s-4); min-height: 34px; }
+.od-h h2.mini { margin: 0; font-weight: 500; line-height: 1.5; font-family: inherit; }
+.od-h > .mini, .od-h > h2.mini { color: var(--text); }
+
+/* sheet b: one clock, read as light, and every other paper held against it */
+.od-pick { display: grid; grid-template-columns: minmax(9rem, 16rem) auto; gap: var(--s-2); align-items: center; }
+.od-pick input { padding: 6px 9px; }
+.od-pick input::placeholder { color: var(--text-dim); }
+.od-pick .act, .od-place .act { min-height: 32px; padding: 5px 11px; }
+.od-read { display: grid; grid-template-columns: minmax(0, 25rem) minmax(0, 1fr); gap: var(--s-3) var(--s-7); align-items: end; margin-bottom: var(--s-5); }
+.od-name { font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-style: normal; font-weight: 400; line-height: 1.05; margin: 0 0 4px; color: var(--text-bright); }      /* upright: in the italic a planet's letter b reads as a 6 */
+.od-name:focus { outline: none; }
+.od-name:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
+.od-meta { font-size: .7rem; letter-spacing: .04em; color: var(--text-dim); margin: 0; min-height: 1.5em; }
+.od-world { font-size: .72rem; margin: 6px 0 0; }
+.od-world a { color: var(--horizon); text-underline-offset: 3px; }
+.od-world a:hover, .od-world a:focus-visible { color: var(--text-bright); }
+#c-status { min-height: 4.7em; }
+.od-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-7); }
+#curve, #oc { width: 100%; height: 200px; display: block; }
+#oc { cursor: crosshair; }
+.od-list { margin: var(--s-3) 0 0; }
+.od-list summary { font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text); cursor: pointer; padding: 6px 0; }
+.od-list summary:hover, .od-list summary:focus-visible { color: var(--text-bright); }
+.od-list ul { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.od-list li { font-size: .72rem; color: var(--text-dim); line-height: 1.5; overflow-wrap: anywhere; padding-left: 10px; border-left: 1px solid var(--line); }
+
+/* sheet c: the night. The place is asked for only by whoever opens "your place". */
+.od-placebox summary { list-style: none; display: inline-block; cursor: pointer; font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase; color: var(--text); border: 1px solid var(--line); padding: 6px 12px; }
+.od-placebox summary::-webkit-details-marker { display: none; }
+.od-placebox summary:hover, .od-placebox summary:focus-visible { color: var(--text-bright); border-color: var(--horizon-dim); }
+.od-placebox[open] { flex-basis: 100%; text-align: right; }
+.od-placebox[open] summary { margin-bottom: var(--s-2); }
+.od-place { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--s-2) var(--s-3); align-items: center; }
+.od-place form { display: contents; }
+.od-field { display: inline-flex; align-items: center; gap: var(--s-2); }
+.od-place input { width: 5.4rem; padding: 6px 9px; }
+.od-placebox .status { margin: 4px 0 0; }
+#night { width: 100%; height: 250px; display: block; cursor: crosshair; }
+.od-more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin: var(--s-2) 0 var(--s-3); }
+.od-tablewrap { overflow-x: auto; }
+.od-tablewrap.long { max-height: 70vh; overflow-y: auto; border-block: 1px solid var(--line); }      /* a thousand rows scroll inside the sheet */
+.od-tablewrap:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 2px; }
+.od-table { width: 100%; border-collapse: collapse; font-size: .76rem; }
+.od-table th { text-align: left; font-weight: 500; font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); padding: 6px 8px; border-bottom: 1px solid var(--line-bright); white-space: nowrap; }
+.od-tablewrap.long th { position: sticky; top: 0; background: var(--void); }
+.od-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); color: var(--text); white-space: nowrap; }
+.od-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+/* A list that holds only what is up in the dark does not say so on every row. In the full list the verdict is a word and a hairline in bright ink. */
+.od-table td.yes { color: var(--text-bright); }
+.od-table tr.up td:first-child { box-shadow: inset 2px 0 0 var(--text-bright); }
+.od-table.all-up .why { display: none; }
+.od-table.all-up tr.up td:first-child { box-shadow: none; }
+.od-table td.dim { color: var(--text-dim); white-space: normal; }
+.linkish { background: none; border: 0; padding: 0; color: var(--text-bright); font: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-bright); text-underline-offset: 3px; }
+.linkish:hover { text-decoration-color: var(--horizon); }
+
+/* sheet d: the tally */
+#tally-view { width: 100%; height: 222px; display: block; }
+.od-two { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s-7); margin-top: var(--s-3); }
+.od-nums { display: grid; grid-template-columns: minmax(0, max-content) max-content; gap: 5px 16px; margin: 0; font-size: .78rem; align-content: start; }
+.od-nums dt { color: var(--text-dim); }
+.od-nums dd { margin: 0; color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }      /* a number is never broken or cut */
+.od-nums dt.in { padding-left: 1.6ch; }                                                                            /* a count taken from the row above it */
+#tally:not([data-ready]) dd { color: var(--text-dim); }
+
+/* evidence: two columns of short lines on a wide sheet */
+.od-evidence .evidence { display: block; max-width: none; columns: 2; column-gap: var(--s-8); }
+.od-evidence .evidence li { font-size: .76rem; break-inside: avoid; margin: 0 0 var(--s-3); }
+.evidence .t.ill { color: var(--text-dim); }
+
+@media (max-width: 1229px) {
+  /* No room beside the map: the name and the count stand in a row above it (views.js BESIDE is this width, inside the sheet's padding). */
+  .od-sky { height: auto; display: flex; flex-direction: column; }
+  .od-title { order: 1; position: static; max-width: none; display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: flex-end; gap: 0 var(--s-8); margin-bottom: var(--s-2); }
+  .od-line { margin-bottom: 0; }
+  .od-count { flex-direction: row; align-items: flex-start; gap: 14px; }      /* no map beside the count here, so its words stand beside it */
+  .od-count-words { padding-top: 4px; }
+  .od-load { margin: 0; align-self: center; }
+  #sky { order: 2; position: static; height: clamp(330px, 44vh, 520px); }
+  .od-block { width: min(15.5rem, 32vw); }
+  .od-legend { max-width: calc(100% - min(15.5rem, 32vw) - 1rem); }
+  .od-key li { font-size: .66rem; }
+}
+@media (max-width: 1100px) {
+  .od-read, .od-pair { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+  .od-read { align-items: start; }
+  .od-two { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+  .od-evidence .evidence { columns: 1; max-width: 78ch; }
+  #oc { height: 170px; }
+}
+@media (max-width: 759px) {
+  /* The name; the map; the line of time that sets its date; then the lens with the key beside it, and the title block.
+     The sky's parts and the line become one column, so the map and its control share the first screen. */
+  .od-a { display: flex; flex-direction: column; gap: var(--s-3); position: relative; }
+  .od-sky { display: contents; }
+  .od-title { display: block; margin-bottom: 0; }
+  .od-line { margin-bottom: var(--s-3); }
+  .od-load { margin-top: var(--s-2); }
+  #sky { height: calc(50vw - 8px); }
+  .od-time { order: 3; margin-top: 0; }
+  .od-legend { order: 4; position: static; max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: var(--s-3); align-items: center; pointer-events: auto; }
+  #lens2 { display: block; width: 150px; height: 166px; cursor: crosshair; }
+  .od-k2 { min-height: 2.8em; }      /* two lines here, said or not, so the key under it never moves with the date */
+  .od-key { flex-direction: column; gap: 5px; }
+  .od-key li { white-space: normal; align-items: baseline; }
+  .od-block { order: 5; position: static; width: auto; }
+  .od-h { align-items: flex-start; }
+  .od-pick { grid-template-columns: minmax(0, 1fr) auto; width: 100%; }
+  .od-right, .od-placebox[open] { text-align: left; }
+  .od-place { justify-content: flex-start; }
+  .od-nums { grid-template-columns: minmax(0, 1fr) max-content; }
+  .od-nums dd { text-align: right; }
+  .od-table { font-size: .72rem; }
+  .od-table th, .od-table td { padding: 5px 6px; }
+  #band { height: 206px; }
+  #night { height: 240px; }
+  #tally-view { height: 330px; }
+}

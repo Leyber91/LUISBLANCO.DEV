@@ -17,11 +17,11 @@
    or confirm what it has not read.
    ============================================================ */
 
+import { el } from '../../kit/dom.js';
 import { palette } from '../render.js';
 import { DAY, canEnd, dayOver, markCounts, score } from './day.js';
 import { sceneImage, sceneName } from './objects.js';
 
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const tag = (real) => el('span', real ? 'tg r' : 'tg i', real ? 'real' : 'illustrative');
 /* A reader who knows nothing picks one of three: the chance of matching 3 or more of 6 (binomial). */
 const C = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i; return r; };

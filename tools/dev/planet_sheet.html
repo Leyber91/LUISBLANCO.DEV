@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<base href="/labs/" />
+<title>planet sheet (dev)</title>
+<!--
+  A contact sheet for the planet renderer: many worlds drawn by the one pipeline the survey page uses
+  (data.js toParams, exoplanet.js), side by side, so a change to the shader is judged on every kind of world
+  at once. The first rows can be the Solar System, fed through the same records an exoplanet has: if Earth,
+  Mars, Venus, Jupiter and Neptune do not look like themselves, the pipeline is wrong.
+
+  Each tile is also measured (mean colour of the lit disc, the share of the tile that is lit, the corners,
+  how banded the disc is) and the numbers are left in window.__SHEET__, where tools/drives/planets.mjs reads them.
+
+  Not linked from the site. Open through a local server at the repository root:
+    /tools/dev/planet_sheet.html?set=solar|exo|all&view=orbit|closeorbit&size=340&cols=4&yaw=0.7&names=a|b
+  With &phase=full&raw=1 the camera sits on the line to the star and the film is skipped: the mean of the disc
+  is then the geometric albedo the renderer gives the world (a flat white disc would read 1), left in .albedo.
+-->
+<style>
+  html, body { margin: 0; background: #000; color: #9fb3d6; font: 10px/1.3 ui-monospace, Consolas, monospace; }
+  #g { display: grid; gap: 2px; padding: 2px; }
+  figure { margin: 0; position: relative; }
+  figure canvas { display: block; }
+  figcaption { position: absolute; left: 5px; bottom: 4px; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+  #eng { position: fixed; left: -4000px; top: 0; }
+</style>
+</head>
+<body>
+<canvas id="eng"></canvas>
+<div id="g"></div>
+<script type="module">
+window.__EXO_STILL__ = true;
+const q = new URLSearchParams(location.search);
+const SIZE = Number(q.get('size') || 340), COLS = Number(q.get('cols') || 4), VIEW = q.get('view') || 'orbit';
+const FULL = q.get('phase') === 'full', RAW = q.get('raw') === '1';
+const LIGHT = [-0.15, 0.45, 0.85];   // the engine's default light direction
+const YAW = FULL ? Math.atan2(LIGHT[2], LIGHT[0]) : Number(q.get('yaw') || 0.7);
+const PITCH = FULL ? 0 : Number(q.get('pitch') || 0.3);   // the camera circles in the plane of the star (orbit.js): under the star is pitch 0
+const DIST = Number(q.get('dist') || 3.4);
+
+const { Exoplanet } = await import('/labs/assets/js/exoplanet/exoplanet.js');
+const { toParams, classify } = await import('/labs/assets/js/exoplanet/data.js');
+const { loadSnapshot } = await import('/labs/assets/js/exoplanet/catalog.js');
+
+/* The Solar System as the archive would hold it: radius and mass in Earth units, orbit in AU and days, the Sun. */
+const SUN = { st_teff: 5772, st_rad: 1, st_mass: 1 };
+const sol = (pl_name, pl_rade, pl_masse, pl_orbsmax, pl_orbper) => ({ pl_name, name: pl_name, pl_rade, R: pl_rade, pl_masse, M: pl_masse, pl_orbsmax, a: pl_orbsmax, pl_orbper, P: pl_orbper, pl_eqt: null, ...SUN, Teff: 5772, Rs: 1, Ms: 1, host: 'Sun' });
+const SOLAR = [
+  sol('Mercury', 0.383, 0.0553, 0.387, 87.97), sol('Venus', 0.949, 0.815, 0.723, 224.7), sol('Earth', 1, 1, 1, 365.25), sol('Mars', 0.532, 0.107, 1.524, 687),
+  sol('Jupiter', 11.21, 317.8, 5.204, 4332.6), sol('Saturn', 9.45, 95.2, 9.58, 10759), sol('Uranus', 4.01, 14.5, 19.2, 30687), sol('Neptune', 3.88, 17.1, 30.05, 60190),
+];
+const EXO = ['Kepler-442 b', 'TRAPPIST-1 e', 'LHS 1140 b', 'GJ 806 b', '55 Cnc e', 'K2-141 b', 'K2-18 b', 'GJ 1214 b', 'GJ 436 b', 'HD 189733 b', 'HD 209458 b', 'WASP-12 b'];
+
+const set = q.get('set') || 'all';
+let worlds = [];
+if (set === 'solar' || set === 'all') worlds.push(...SOLAR);
+if (set === 'exo' || set === 'all' || q.get('names')) {
+  const { list } = await loadSnapshot(() => {});
+  const byName = new Map(list.map((p) => [p.name, p]));
+  const names = q.get('names') ? q.get('names').split('|') : EXO;
+  if (q.get('names')) worlds = set === 'solar' ? worlds : [];
+  for (const n of names) { const p = byName.get(n); if (p) worlds.push(p); else console.warn('not in the catalogue:', n); }
+}
+
+/* What a tile shows, in numbers (8-bit display values). */
+function measure(ctx, w, h) {
+  const d = ctx.getImageData(0, 0, w, h).data;
+  const lum = (i) => 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+  let n = 0, r = 0, g = 0, b = 0, peak = 0;
+  for (let i = 0; i < d.length; i += 4) { const l = lum(i); if (l > 12) { n++; r += d[i]; g += d[i + 1]; b += d[i + 2]; } if (l > peak) peak = l; }
+  // the four corners: space, with nothing in it but faint stars
+  const c = Math.round(w * 0.06); let cs = 0, cn = 0;
+  for (const [x0, y0] of [[0, 0], [w - c, 0], [0, h - c], [w - c, h - c]]) for (let y = y0; y < y0 + c; y++) for (let x = x0; x < x0 + c; x++) { cs += lum((y * w + x) * 4); cn++; }
+  // banding: how much the brightness of a row changes from row to row, down the middle of the disc
+  const rows = [];
+  for (let y = Math.round(h * 0.3); y < Math.round(h * 0.7); y++) { let s = 0, k = 0; for (let x = Math.round(w * 0.38); x < Math.round(w * 0.56); x++) { s += lum((y * w + x) * 4); k++; } rows.push(s / k); }
+  const mean = rows.reduce((a, v) => a + v, 0) / rows.length;
+  const smooth = rows.map((v, i) => { let s = 0, k = 0; for (let j = Math.max(0, i - 12); j <= Math.min(rows.length - 1, i + 12); j++) { s += rows[j]; k++; } return s / k; });
+  const banding = Math.sqrt(rows.reduce((a, v, i) => a + (v - smooth[i]) ** 2, 0) / rows.length) / Math.max(mean, 1);
+  const rnd = (v) => Math.round(v * 10) / 10;
+  // geometric albedo: the mean of the whole disc at full phase in the linear picture, clouds stopped
+  let albedo = null;
+  if (FULL && RAW) {
+    const R = Math.tan(Math.asin(1 / DIST)) * 1.5 * h, R2 = R * R; let s = [0, 0, 0], k = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const dx = x + 0.5 - w / 2, dy = y + 0.5 - h / 2; if (dx * dx + dy * dy > R2) continue;
+      const i = (y * w + x) * 4; s[0] += d[i]; s[1] += d[i + 1]; s[2] += d[i + 2]; k++;
+    }
+    albedo = s.map((v) => Math.round(1000 * v / k / 255) / 1000);
+  }
+  return { albedo, lit: Math.round(1000 * n / (w * h)) / 1000, mean: n ? [rnd(r / n), rnd(g / n), rnd(b / n)] : [0, 0, 0], peak: rnd(peak), corner: rnd(cs / cn), banding: Math.round(banding * 1000) / 1000 };
+}
+
+const eng = document.getElementById('eng');
+eng.style.width = eng.style.height = `${SIZE}px`;
+const engine = new Exoplanet(eng);
+engine._resize();
+const g = document.getElementById('g');
+g.style.gridTemplateColumns = `repeat(${COLS}, ${SIZE}px)`;
+const report = [];
+for (const p of worlds) {
+  const prm = toParams(p), c = classify(p);
+  Object.assign(engine.cfg, prm, { shift: [0, 0], camMode: VIEW, camDist: DIST, yaw: YAW, pitch: PITCH, homeDist: DIST, raw: RAW ? 1 : 0, lightDir: LIGHT, time: 0 });
+  engine._draw();   // at time zero (cfg.time above): the same face of the world on every run, however long its shader took to build
+  const cv = document.createElement('canvas'); cv.width = eng.width; cv.height = eng.height; cv.style.width = cv.style.height = `${SIZE}px`;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(eng, 0, 0);
+  const fig = document.createElement('figure'), cap = document.createElement('figcaption');
+  cap.textContent = `${p.pl_name || p.name} · ${c.label} · Teq ${Math.round(c.physics.Teq)} K`;
+  fig.append(cv, cap); g.append(fig);
+  report.push({ name: p.pl_name || p.name, label: c.label, look: prm.look, Teq: Math.round(c.physics.Teq), locked: prm.locked, ...measure(ctx, cv.width, cv.height) });
+}
+window.__SHEET__ = report;
+document.body.dataset.state = 'ready';
+</script>
+</body>
+</html>

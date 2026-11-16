@@ -11,19 +11,25 @@
    screenshots at the moments that matter, and every console error.
 
    Usage (Node 22 or later, Windows-first, no dependencies):
-     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900]
+     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900] [--timeout 180] [--port 9333]
      node tools/labs-wt.mjs drive <lab>          serves the worktree, runs tools/drives/<lab>.mjs at two widths
+     node tools/drive.mjs tools/drives/pages.mjs --base <url> --timeout 420     every lab page loads with a clean console
 
    A scenario is a module whose default export is
      async function (page, ctx) { ... }
    with ctx = { base, width, height } and page =
      go(url)                 navigate, wait for the document to finish loading
+     before(source)          run a script in every document opened from now on, before the page's own scripts
+                             (a guard on what the page may fetch belongs here: nothing of the page runs sooner)
      ev(expression)          evaluate in the page, return the value (promises are awaited)
      until(expression, ms)   wait until the expression is truthy; false on timeout
      sleep(ms)
      move(x, y) · down(x, y) · up(x, y) · drag(x0, y0, x1, y1, { steps, hold }) · click(x, y)
+     swipe(x0, y0, x1, y1, { steps, hold })   one finger, as a phone sends it: the browser applies the
+                             page's touch-action, so a swipe the page gives to scrolling scrolls
      key(key, { code, text })
      shot(name)              a PNG of the viewport in the out folder
+     errors()                every console error and exception so far (a copy), to tell which page logged what
      check(name, cond, detail)   one line of the report; a false cond fails the drive
    Coordinates are CSS pixels of the viewport.
 
@@ -90,13 +96,23 @@ export async function drive(scenario, opts = {}) {
       return r.result.value;
     };
     const until = async (expression, ms = 12000) => { for (let t = 0; t < ms; t += 150) { if (await ev(expression).catch(() => false)) return true; await sleep(150); } return false; };
+    let touchOn = false;
     const mouse = (type, x, y, buttons) => send('Input.dispatchMouseEvent', { type, x, y, button: type === 'mouseMoved' && !buttons ? 'none' : 'left', buttons, clickCount: type === 'mouseMoved' ? 0 : 1 });
     const page = {
       ev, until, sleep, check,
+      errors: () => errors.slice(),
+      async before(source) { await send('Page.addScriptToEvaluateOnNewDocument', { source }); },
       async go(u) { await send('Page.navigate', { url: u }); if (!(await until('document.readyState === "complete"'))) throw new Error('the page did not finish loading: ' + u); },
       move: (x, y) => mouse('mouseMoved', x, y, 0),
       down: (x, y) => mouse('mousePressed', x, y, 1),
       up: (x, y) => mouse('mouseReleased', x, y, 0),
+      async swipe(x0, y0, x1, y1, { steps = 14, hold = 0 } = {}) {
+        if (!touchOn) { await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); touchOn = true; }
+        await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y: y0 }] });
+        for (let i = 1; i <= steps; i++) { await send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + ((x1 - x0) * i) / steps, y: y0 + ((y1 - y0) * i) / steps }] }); await sleep(16); }
+        if (hold) await sleep(hold);
+        await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      },
       async drag(x0, y0, x1, y1, { steps = 14, hold = 0 } = {}) {
         await mouse('mouseMoved', x0, y0, 0);
         await mouse('mousePressed', x0, y0, 1);
@@ -105,8 +121,8 @@ export async function drive(scenario, opts = {}) {
         await mouse('mouseReleased', x1, y1, 0);
       },
       async click(x, y) { await mouse('mouseMoved', x, y, 0); await mouse('mousePressed', x, y, 1); await mouse('mouseReleased', x, y, 0); },
-      async key(key, { code = key.length === 1 ? 'Key' + key.toUpperCase() : key, text = key.length === 1 ? key : undefined } = {}) {
-        const vk = { Enter: 13, ' ': 32, ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[key];
+      async key(key, { code = key.length === 1 ? 'Key' + key.toUpperCase() : key, text = key.length === 1 ? key : key === 'Enter' ? '\r' : undefined } = {}) {
+        const vk = { Tab: 9, Enter: 13, Escape: 27, ' ': 32, ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[key];
         await send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, ...(text ? { text } : {}), ...(vk ? { windowsVirtualKeyCode: vk } : {}) });
         await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, ...(vk ? { windowsVirtualKeyCode: vk } : {}) });
       },
@@ -133,11 +149,11 @@ if (isMain) {
   const flag = (name, fb) => { const i = argv.indexOf('--' + name); return i >= 0 && argv[i + 1] ? argv[i + 1] : fb; };
   const file = argv[0] && !argv[0].startsWith('--') ? argv[0] : null;
   const base = flag('base', null);
-  if (!file || !base) { console.error('usage: node tools/drive.mjs <scenario.mjs> --base <url> [--out <dir>] [--width 1440] [--height 900]'); process.exit(2); }
+  if (!file || !base) { console.error('usage: node tools/drive.mjs <scenario.mjs> --base <url> [--out <dir>] [--width 1440] [--height 900] [--timeout 180]'); process.exit(2); }
   if (!fs.existsSync(file)) { console.error(`no scenario at ${file}`); process.exit(2); }
   const scenario = (await import(pathToFileURL(path.resolve(file)).href)).default;
   if (typeof scenario !== 'function') { console.error(`${file} has no default export to run`); process.exit(2); }
-  const r = await drive(scenario, { base, out: flag('out', undefined), width: Number(flag('width', 1440)), height: Number(flag('height', 900)) });
+  const r = await drive(scenario, { base, out: flag('out', undefined), width: Number(flag('width', 1440)), height: Number(flag('height', 900)), timeoutMs: 1000 * Number(flag('timeout', 180)), port: Number(flag('port', 9333)) });
   const bad = r.checks.filter((c) => !c.ok).length;
   console.log(`drive: ${r.checks.length - bad} of ${r.checks.length} checks passed; console errors: ${r.errors.length}`);
   process.exit(r.timedOut ? 3 : bad ? 1 : 0);

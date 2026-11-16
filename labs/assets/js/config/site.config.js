@@ -55,8 +55,8 @@ export const CATEGORIES = [
         href: 'md_animation_page.html',
         blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
       { id: 'exomania', title: 'Exomania', status: 'built',
-        href: 'exomania.html',
-        blurb: 'Fly between procedurally lit exoplanets, fed daily by NASA Exoplanet Archive data.' },
+        href: 'exomania-survey.html',
+        blurb: 'Every known exoplanet as a world you can orbit, fly low over or stand on, drawn from the numbers the archive holds for it, beside the population it belongs to, its system to scale and its transit. Overdue is one link away: a map of the sky on which every transiting planet is a clock that is kept, slipping or lost on any date from the first transit timed to 2040.' },
     ],
   },
   {

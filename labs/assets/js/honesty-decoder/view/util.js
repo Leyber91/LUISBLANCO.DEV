@@ -9,7 +9,8 @@
      framing     hollow diamond (not checkable)
    ============================================================ */
 
-export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+import { esc } from '../../kit/dom.js';
+export { esc };
 export const fmt = (x) => (x == null || Number.isNaN(x) ? '—' : String(Math.round(x)));
 export const sgn = (x) => (x > 0 ? '+' : x < 0 ? '−' : '±') + Math.abs(Math.round(x));
 

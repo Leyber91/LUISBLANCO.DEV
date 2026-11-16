@@ -11,6 +11,7 @@
    ============================================================ */
 
 import { SHELF } from '../config.js';
+import { cleanTrace, validateTrace } from './schema.js';
 
 const store = {
   get() { try { return JSON.parse(globalThis.localStorage?.getItem(SHELF.storeKey) || '[]'); } catch { return []; } },
@@ -18,6 +19,7 @@ const store = {
 };
 
 export function inflate(t, origin) {
+  if (origin !== 'recording') t = cleanTrace(t);        // anything but the lab's own recordings is cleaned as it is read
   const chunks = (t.chunks || []).map((c) => (Array.isArray(c) ? { t: c[0], kind: c[1], text: c[2] } : c));
   return { ...t, origin: origin || t.origin || 'imported', kind: t.kind || 'stream', chunks };
 }
@@ -35,7 +37,9 @@ export async function loadRecordings(url) {
 }
 
 export function loadSaved() {
-  return store.get().map((t) => inflate(t, 'saved'));
+  const all = store.get();
+  // what is in storage may have been put there by something else: a record that is not a trace is left out
+  return (Array.isArray(all) ? all : []).filter((t) => validateTrace(t).length === 0).map((t) => inflate(t, 'saved'));
 }
 
 /** Save a trace in this browser. Returns false when storage is unavailable or full. */

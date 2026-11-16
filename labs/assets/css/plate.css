@@ -1,0 +1,136 @@
+/* ============================================================
+   plate.css — the plate every lab page is drawn on: near-black
+   ground, hairline frames, gold corner brackets, small uppercase
+   mono labels, outlined controls, an evidence list and a footer.
+
+   Lifted from heptapod.css on 2026-11-14 so that a second lab
+   (Exomania's Overdue) would not copy it. A page links tokens.css,
+   then this file, then its own sheet for what only it has. Gold
+   is kept for what has fired, and for the four brackets that say
+   the page is a plate of this site: a label, a hover, a focus and
+   the footer's mark are drawn in the cold ink. Every value comes
+   from tokens.css.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--void); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--void); color: var(--text);
+  font-family: var(--font-mono); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before { /* a faint vignette of light behind the page's first plate */
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(70% 60% at 50% 34%, rgba(159, 179, 214, .045), transparent 70%);
+}
+
+.bp { position: fixed; width: 17px; height: 17px; border: 1px solid var(--accretion); opacity: .8; z-index: var(--z-header); pointer-events: none; }
+.bp.tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
+.bp.tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; }
+.bp.bl { bottom: 14px; left: 14px; border-right: 0; border-top: 0; }
+.bp.br { bottom: 14px; right: 14px; border-left: 0; border-top: 0; }
+
+/* ---------- labels ---------- */
+.label, .brand, .mini, .kick {
+  font-size: var(--t-micro); letter-spacing: .2em; text-transform: uppercase; color: var(--text-dim);
+}
+.label .on { color: var(--horizon); }
+.brand b { color: var(--text-bright); font-weight: 600; }
+.kick { color: var(--horizon); letter-spacing: .28em; margin: 0 0 var(--s-2); }
+.mini.dim, .dim { color: var(--text-faint); }
+.mini b { color: var(--text-bright); font-weight: 500; letter-spacing: .08em; }
+
+/* ---------- top bar ---------- */
+.bar {
+  position: sticky; top: 0; z-index: var(--z-header);
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s-4);
+  padding: 18px var(--content-pad) 12px;
+  background: linear-gradient(var(--void) 60%, rgba(6, 8, 13, 0));
+}
+/* A page that scrolls under the bar gives it solid ground, so no row shows through the controls. */
+.bar.solid { background: var(--void); box-shadow: 0 1px 0 var(--line); }
+.bar-l, .bar-r { display: flex; align-items: center; gap: var(--s-5); min-width: 0; }
+.back {
+  color: var(--text); text-decoration: none; border: 1px solid var(--line-bright);
+  padding: 6px 12px; font-size: var(--t-micro); letter-spacing: .16em; text-transform: uppercase;
+}
+.back:hover { border-color: var(--horizon-dim); color: var(--text-bright); }
+.back.quiet { border-color: var(--line); color: var(--text-dim); }
+
+main { position: relative; z-index: var(--z-content); padding-inline: var(--content-pad); }
+
+/* ---------- type ---------- */
+h1 { font-size: clamp(1.55rem, 2.05vw, 1.95rem); line-height: 1.12; letter-spacing: -.01em; font-weight: 600; color: var(--text-bright); margin: 0 0 var(--s-4); }
+h1 .lo, h2 .lo { color: var(--horizon); }
+h2 { font-size: clamp(1.25rem, 1.8vw, 1.6rem); line-height: 1.18; font-weight: 600; color: var(--text-bright); margin: 0 0 var(--s-3); }
+.display { font-family: 'Fraunces', Georgia, serif; font-weight: 500; letter-spacing: -.012em; }
+.sub { font-size: .86rem; line-height: 1.62; color: var(--text-dim); margin: 0; max-width: 66ch; }
+.hint { font-size: .74rem; color: var(--text-dim); margin: var(--s-3) 0 0; line-height: 1.5; }      /* words a visitor reads: --text-faint is 2.3 to 1 on the ground and fails */
+.sub a, .hint a, .evidence a { color: var(--horizon); text-underline-offset: 3px; }
+.sub a:hover, .hint a:hover, .evidence a:hover { color: var(--text-bright); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+
+/* ---------- controls: line and light ---------- */
+.act {
+  font: 500 var(--t-micro) var(--font-mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-bright); background: transparent; border: 1px solid var(--line-bright);
+  padding: 9px 14px; cursor: pointer; min-height: 38px; border-radius: 0;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.act:hover:not(:disabled), .act:focus-visible { border-color: var(--horizon); color: var(--text-bright); }
+.act.ghost { color: var(--text); border-color: var(--line); }
+.act.ghost:hover:not(:disabled) { color: var(--text-bright); border-color: var(--horizon-dim); box-shadow: none; }
+.act:disabled { opacity: .45; cursor: default; }
+input[type=text], select {
+  width: 100%; min-width: 0; background: rgba(11, 14, 19, .7); border: 1px solid var(--line-bright); color: var(--text-bright);
+  font: 13px var(--font-mono); padding: 10px 11px; outline: none; border-radius: 0;
+}
+input[type=text]:focus, select:focus { border-color: var(--horizon-dim); }
+input[type=range] { width: 100%; accent-color: var(--accretion); margin: var(--s-2) 0 var(--s-3); }
+.status { font-size: .74rem; color: var(--text-dim); line-height: 1.45; min-height: 1.45em; }
+.chip {
+  font: 11px var(--font-mono); color: var(--text-dim); background: transparent; border: 1px solid var(--line);
+  padding: 6px 9px; cursor: pointer; text-align: left; border-radius: 0; min-height: 32px;
+}
+.chip:hover, .chip:focus-visible { color: var(--text-bright); border-color: var(--line-bright); }
+.chip.on { color: var(--accretion-soft); border-color: var(--accretion-dim); }
+:focus-visible { outline: 2px solid var(--horizon); outline-offset: 2px; }
+
+/* ---------- plates and sections ---------- */
+.plate { border: 1px solid var(--line); background: rgba(11, 14, 19, .55); padding: var(--s-4); min-width: 0; }
+.panel-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); margin-bottom: var(--s-3); }
+.sec { padding-block: var(--s-9) var(--s-6); border-top: 1px solid var(--line); max-width: var(--content-max); margin-inline: auto; }
+.sec-h { margin-bottom: var(--s-6); }
+
+/* ---------- evidence ---------- */
+.evidence { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--s-3); max-width: 92ch; }
+.evidence li { font-size: .8rem; line-height: 1.62; color: var(--text-dim); padding-left: 0; }
+.evidence i { color: var(--text); }
+.evidence code { font-size: .74rem; color: var(--text); }
+.tg { display: inline-block; font-size: .56rem; letter-spacing: .12em; text-transform: uppercase; padding: 0 4px; margin: 0 1px; border: 1px solid var(--line-bright); vertical-align: 1px; line-height: 1.5; }
+.tg.r { color: var(--horizon); border-color: var(--horizon-dim); }
+.tg.i { color: var(--text-dim); }
+.t { font-weight: 500; letter-spacing: .06em; margin-right: 6px; }
+.t.real { color: var(--horizon); }
+.t.ill { color: var(--text-faint); }
+
+/* ---------- footer ---------- */
+.foot {
+  position: relative; z-index: var(--z-content); display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-5); flex-wrap: wrap;
+  padding: var(--s-6) var(--content-pad) var(--s-8); border-top: 1px solid var(--line); max-width: calc(var(--content-max) + 2 * var(--content-pad)); margin-inline: auto;
+}
+.tag { display: inline-flex; gap: 9px; align-items: baseline; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); line-height: 1.55; max-width: 90ch; }
+.tag i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--horizon); transform: translateY(-1px); }
+.tag b { color: var(--text); font-weight: 500; }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+@media (max-width: 860px) { .sec { padding-block: var(--s-8) var(--s-5); } }
+@media (pointer: coarse) { .chip, .act, select { min-height: 44px; } }
+@media (max-width: 560px) {
+  body { font-size: 13px; }
+  .bar { padding: 12px 16px 10px; }
+  .bar .label, .bar .brand, .bar .back.quiet { display: none; }
+  .bp { display: none; }
+  main { padding-inline: 16px; }
+  .foot { padding-inline: 16px; }
+}

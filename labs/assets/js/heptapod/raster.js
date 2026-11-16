@@ -6,17 +6,8 @@
 
 import { CODEC } from './config.js';
 
-/* ---------------- deterministic randomness ---------------- */
-export function mulberry32(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6D2B79F5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+/* ---------------- deterministic randomness: the labs' shared generator ---------------- */
+export { mulberry32 } from '../kit/rng.js';
 
 /* ---------------- the raster ---------------- */
 export class Raster {

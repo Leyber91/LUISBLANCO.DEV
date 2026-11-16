@@ -18,6 +18,7 @@
    scene the radical can be used for.
    ============================================================ */
 
+import { el } from '../../kit/dom.js';
 import { drawInk, palette, cappedDpr } from '../render.js';
 import { OBJ, sceneOf } from './world.js';
 import { ringSpec, soloSpec, podStrokes } from './ring.js';
@@ -25,7 +26,6 @@ import { GREETING, entryActs, brackets, specArgsOfAct, DAY } from './day.js';
 import { objectImage, actImage, sceneName } from './objects.js';
 
 export const COLS = [['lift', 'near'], ['lift', 'far'], ['hold', 'near'], ['hold', 'far'], ['putdown', 'near'], ['putdown', 'far'], ['give', 'near']];
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const sceneAt = (row, col) => sceneOf(COLS[col][0], OBJ[row], COLS[col][1]);
 /* What a cell stands for, for a screen reader and a tooltip: the visitor's own acts, in plain words. */
 export const cellName = (row, col) => sceneName(sceneAt(row, col));
