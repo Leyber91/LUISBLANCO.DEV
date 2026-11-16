@@ -1,7 +1,11 @@
 /* ============================================================
    black_hole.css — the Kerr instrument page. Plate family:
-   near-black ground, blue-white ink, hairlines, gold only for
-   what is active. Consumes tokens.css: every colour here is a
+   near-black ground, blue-white ink, hairlines. Gold means "this
+   happened" in four places only (BAR_L1 section 2): the chosen
+   control, the live position (the tour's stop, the eye in the
+   cross-section, the faller's radius), a measurement that agrees,
+   and the plate's corner brackets. Every computed readout is ink.
+   Consumes tokens.css: every colour here is a
    tokens.css variable or a color-mix of one, no colour literals.
    Minimum text size 11 px; panels sit on a dark veil so text
    holds 4.5:1 over the brightest part of the render.
@@ -12,7 +16,6 @@
   --bh-panel-solid: color-mix(in srgb, var(--void) 92%, transparent);
   --bh-hair: color-mix(in srgb, var(--horizon) 16%, transparent);
   --bh-hair-2: color-mix(in srgb, var(--horizon) 30%, transparent);
-  --bh-gold-line: color-mix(in srgb, var(--accretion) 55%, transparent);
   --bh-wash: color-mix(in srgb, var(--horizon) 8%, transparent);        /* pressed button */
   --bh-gold-wash: color-mix(in srgb, var(--accretion) 8%, transparent); /* chosen button */
   --bh-well: color-mix(in srgb, var(--void) 35%, transparent);          /* inputs, code */
@@ -37,12 +40,12 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------- ignition veil ---------- */
 .bh-veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--void);
   transition: opacity var(--t-slow) var(--ease-out); pointer-events: none; }
-.bh-veil-mark b { font-size: 26px; font-weight: 600; letter-spacing: .5em; color: var(--text-bright); margin-left: .5em; }
-.bh-veil-mark .bh-veil-k { color: var(--accretion); }
+.bh-veil-mark b { font-family: 'Fraunces', Georgia, serif; font-size: 34px; font-weight: 400; font-style: italic; letter-spacing: .02em; text-transform: none; color: var(--text-bright); }
+.bh-veil-mark .bh-veil-k { color: var(--text-dim); }
 .bh-veil.off { opacity: 0; }
 .bh-veil-mark { display: flex; flex-direction: column; align-items: center; gap: 14px; color: var(--text-dim);
   letter-spacing: .32em; text-transform: uppercase; font-size: var(--bh-fs-s); }
-.bh-veil-mark i { width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--accretion), transparent);
+.bh-veil-mark i { width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--horizon), transparent);
   animation: bh-scan 1.4s var(--ease) infinite; }
 @keyframes bh-scan { 0% { transform: scaleX(.1); opacity: .2; } 50% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(.1); opacity: .2; } }
 
@@ -60,14 +63,14 @@ button, input, select { font: inherit; color: inherit; }
 .bh-bar-l, .bh-bar-r { display: flex; align-items: center; gap: 18px; }
 .bh-back { color: var(--text); text-decoration: none; border: 1px solid var(--bh-hair-2); padding: 7px 12px; font-size: var(--bh-fs-s);
   letter-spacing: .16em; text-transform: uppercase; background: var(--bh-panel); transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
-.bh-back:hover { border-color: var(--accretion); color: var(--text-bright); }
+.bh-back:hover { border-color: var(--horizon); color: var(--text-bright); }
 .bh-label, .bh-brand { font-size: var(--bh-fs-s); letter-spacing: .26em; text-transform: uppercase; color: var(--text-dim); }
 .bh-label span { color: var(--horizon); }
 .bh-brand b { color: var(--text-bright); font-weight: 600; }
 
 /* ---------- columns ---------- */
 .bh-stage { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
-.bh-left, .bh-right { position: absolute; top: 68px; bottom: 60px; width: var(--bh-col); pointer-events: auto;
+.bh-left, .bh-right { position: absolute; top: 68px; bottom: 76px; width: var(--bh-col); pointer-events: auto;
   overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--line-bright) transparent;
   display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
 .bh-left { left: var(--bh-pad); }
@@ -76,11 +79,11 @@ button, input, select { font: inherit; color: inherit; }
 .bh-left::-webkit-scrollbar-thumb, .bh-right::-webkit-scrollbar-thumb { background: var(--line-bright); }
 
 .bh-head { padding: 2px 0 6px; }
-.bh-kick { font-size: var(--bh-fs-s); letter-spacing: .3em; text-transform: uppercase; color: var(--accretion); margin-bottom: 8px; }
-.bh-head h1 { margin: 0; font-size: 21px; line-height: 1.15; font-weight: 600; color: var(--text-bright); letter-spacing: -.01em; }
+.bh-kick { font-size: var(--bh-fs-s); letter-spacing: .3em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+.bh-head h1 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 26px; line-height: 1.12; font-weight: 400; color: var(--text-bright); letter-spacing: 0; }
 .bh-head p { margin: 8px 0 0; font-size: var(--bh-fs); line-height: 1.55; color: var(--text); max-width: 40ch; }
 
-.bh-card { border: 1px solid var(--bh-hair); background: var(--bh-panel); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 11px 13px; }
+.bh-card { border: 1px solid var(--bh-hair); background: var(--bh-panel-solid); padding: 11px 13px; }
 .bh-card > h2, .bh-sect { margin: 0 0 9px; font-size: var(--bh-fs-s); font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--text-dim);
   display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .bh-card > h2 em, .bh-sect em { font-style: normal; color: var(--horizon); letter-spacing: .08em; text-transform: none; }
@@ -96,21 +99,21 @@ button, input, select { font: inherit; color: inherit; }
 .bh-btn[aria-pressed="true"] { border-color: var(--accretion); color: var(--accretion-soft); background: var(--bh-gold-wash); }
 .bh-btn small { display: block; color: var(--text-dim); font-size: var(--bh-fs-s); letter-spacing: .02em; margin-top: 2px; }
 .bh-btn.wide { flex: 1 1 auto; text-align: left; }
-.bh-btn.go { border-color: var(--bh-gold-line); color: var(--accretion-soft); }
+.bh-btn.go { border-color: var(--horizon-dim); color: var(--text-bright); }
 .bh-btn[disabled] { opacity: .45; cursor: default; }
 
 /* sliders with numeric entry */
 .bh-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; margin-top: 9px; }
 .bh-row label { font-size: var(--bh-fs-s); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
-.bh-num { width: 84px; text-align: right; background: var(--bh-well); border: 1px solid var(--bh-hair); color: var(--accretion-soft);
+.bh-num { width: 84px; text-align: right; background: var(--bh-well); border: 1px solid var(--bh-hair); color: var(--text-bright);
   font-variant-numeric: tabular-nums; font-size: var(--bh-fs); padding: 4px 6px; }
-.bh-num:focus { border-color: var(--accretion); outline: none; }
+.bh-num:focus { border-color: var(--horizon); outline: none; }
 .bh-unit { color: var(--text-dim); font-size: var(--bh-fs-s); }
 .bh-range { grid-column: 1 / -1; -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; margin: 0; cursor: pointer; }
 .bh-range::-webkit-slider-runnable-track { height: 1px; background: var(--bh-hair-2); }
 .bh-range::-moz-range-track { height: 1px; background: var(--bh-hair-2); }
-.bh-range::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -6px; border-radius: 50%; background: var(--accretion); box-shadow: 0 0 10px var(--accretion-glow); border: 0; }
-.bh-range::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--accretion); border: 0; }
+.bh-range::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -6px; border-radius: 50%; background: var(--text-bright); border: 0; }
+.bh-range::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--text-bright); border: 0; }
 .bh-range:focus-visible { outline: 1px solid var(--horizon); outline-offset: 2px; }
 .bh-note { font-size: var(--bh-fs-s); line-height: 1.5; color: var(--text-dim); margin: 7px 0 0; }
 .bh-note b { color: var(--text); font-weight: 500; }
@@ -119,9 +122,9 @@ button, input, select { font: inherit; color: inherit; }
 .bh-read { display: flex; flex-direction: column; gap: 3px; font-size: var(--bh-fs); margin: 0; }
 .bh-read .rw { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .bh-read dt { color: var(--text-dim); font-size: var(--bh-fs-s); letter-spacing: .04em; min-width: 0; }
-.bh-read dd { margin: 0; text-align: right; color: var(--accretion-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bh-read dd { margin: 0; text-align: right; color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bh-read dd .u { color: var(--text-dim); margin-left: 4px; }
-.bh-read dd.ink { color: var(--text-bright); }
+.bh-read dd.ink { color: var(--text); }
 .bh-read .hr { height: 1px; background: var(--bh-hair); margin: 4px 0; }
 .bh-tagr, .bh-tagi { font-size: var(--bh-fs-s); letter-spacing: 0; padding: 0 3px; line-height: 1.2; border: 1px solid var(--bh-hair-2); color: var(--horizon); margin-left: 6px; }
 .bh-tagi { color: var(--text-dim); border-style: dashed; }
@@ -134,23 +137,24 @@ button, input, select { font: inherit; color: inherit; }
 .bh-svg text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-dim); }
 .bh-svg .ink { stroke: var(--horizon); fill: none; }
 .bh-svg .dim { stroke: var(--horizon-dim); fill: none; }
-.bh-svg .gold { stroke: var(--accretion); fill: none; }
-.bh-svg .goldf { fill: var(--accretion); }
+.bh-svg .ser { stroke: var(--text-bright); fill: none; }          /* the plot's first series */
+.bh-svg .serf { fill: var(--text-bright); }
+.bh-svg .now { stroke: var(--accretion); fill: none; }             /* the live position: gold */
+.bh-svg .nowf { fill: var(--accretion); }
 .bh-svg .hz { fill: var(--void); stroke: var(--horizon-soft); }
 .bh-svg .ray { stroke: var(--text-bright); fill: none; stroke-width: 1; opacity: .85; }
 .bh-svg .grid { stroke: var(--bh-hair); }
 .bh-svg .lab { fill: var(--text); }
-.bh-svg .labg { fill: var(--accretion-soft); }
 .bh-svg .hit { fill: transparent; cursor: crosshair; }
 .bh-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: var(--bh-fs-s); color: var(--text-dim); margin-top: 6px; }
 .bh-legend i { display: inline-block; width: 14px; height: 1px; vertical-align: middle; margin-right: 5px; background: var(--horizon); }
-.bh-legend i.g { background: var(--accretion); }
+.bh-legend i.s { background: var(--text-bright); }
 .bh-legend i.d { background: none; border-top: 1px dashed var(--horizon-dim); }
 
 /* ask */
 .bh-ask { display: flex; gap: 6px; }
 .bh-ask input { flex: 1; min-width: 0; background: var(--bh-well); border: 1px solid var(--bh-hair-2); color: var(--text-bright); padding: 7px 9px; font-size: var(--bh-fs); }
-.bh-ask input:focus { border-color: var(--accretion); outline: none; }
+.bh-ask input:focus { border-color: var(--horizon); outline: none; }
 .bh-answer { font-size: var(--bh-fs); line-height: 1.55; color: var(--text); margin-top: 8px; white-space: pre-wrap; }
 .bh-answer .src { display: block; margin-top: 6px; color: var(--text-dim); font-size: var(--bh-fs-s); }
 .bh-answer .chk { color: var(--horizon-soft); }
@@ -160,10 +164,10 @@ button, input, select { font: inherit; color: inherit; }
 .bh-chip:hover { color: var(--text-bright); border-color: var(--horizon-dim); }
 
 /* caption: lower third */
-.bh-caption { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 15; width: min(620px, calc(100vw - 2 * var(--bh-col) - 4 * var(--bh-pad)));
+.bh-caption { position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%); z-index: 15; width: min(620px, calc(100vw - 2 * var(--bh-col) - 4 * var(--bh-pad)));
   pointer-events: none; text-align: left; transition: opacity var(--t-mid) var(--ease); }
-.bh-caption .cap { pointer-events: auto; border-left: 1px solid var(--accretion); background: var(--bh-panel); padding: 10px 14px; }
-.bh-caption .cap-k { font-size: var(--bh-fs-s); letter-spacing: .24em; text-transform: uppercase; color: var(--accretion); }
+.bh-caption .cap { pointer-events: auto; border-left: 1px solid var(--bh-hair-2); background: var(--bh-panel-solid); padding: 10px 14px; }
+.bh-caption .cap-k { font-size: var(--bh-fs-s); letter-spacing: .24em; text-transform: uppercase; color: var(--text-dim); }
 .bh-caption .cap-t { font-size: 14px; color: var(--text-bright); margin: 4px 0 3px; font-weight: 500; }
 .bh-caption .cap-b { font-size: var(--bh-fs); line-height: 1.5; color: var(--text); }
 .bh-caption .cap-nav { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
@@ -185,10 +189,13 @@ button, input, select { font: inherit; color: inherit; }
 .bh-foot { position: fixed; left: var(--bh-pad); right: var(--bh-pad); bottom: 18px; z-index: 12; display: flex; gap: 18px; align-items: center; justify-content: space-between;
   font-size: var(--bh-fs-s); letter-spacing: .04em; color: var(--text-dim); pointer-events: none; }
 .bh-foot > * { pointer-events: auto; }
-.bh-foot .tags { display: flex; gap: 14px; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; align-items: baseline; background: var(--bh-panel); padding: 5px 9px; border: 1px solid var(--bh-hair); }
+/* the two claim tags wrap as whole phrases rather than cut: nothing a visitor reads is hidden (BAR_L1 C10) */
+.bh-foot .tags { display: flex; flex: 1 1 auto; min-width: 0; gap: 2px 14px; flex-wrap: wrap; align-items: baseline; background: var(--bh-panel-solid); padding: 5px 9px; border: 1px solid var(--bh-hair); }
+.bh-foot .tags span { white-space: nowrap; }
+.bh-foot .src { flex: none; min-height: 28px; padding: 2px 10px; background: var(--bh-panel-solid); }
 .bh-foot .tags b { color: var(--horizon); font-weight: 500; }
 .bh-foot .tags b.i { color: var(--text-dim); }
-.bh-foot .perf { font-variant-numeric: tabular-nums; background: var(--bh-panel); padding: 5px 9px; border: 1px solid var(--bh-hair); white-space: nowrap; }
+.bh-foot .perf { flex: none; font-variant-numeric: tabular-nums; background: var(--bh-panel); padding: 5px 9px; border: 1px solid var(--bh-hair); white-space: nowrap; }
 .bh-foot .perf button { background: none; border: 0; color: var(--horizon); cursor: pointer; padding: 0 0 0 6px; font-size: var(--bh-fs-s); min-height: 24px; }
 .bh-sources { position: fixed; z-index: 40; left: 50%; bottom: 60px; transform: translateX(-50%); width: min(760px, calc(100vw - 32px)); max-height: 64vh; overflow: auto;
   background: var(--bh-panel-solid); border: 1px solid var(--bh-hair-2); padding: 14px 16px; font-size: var(--bh-fs); line-height: 1.55; }
@@ -202,10 +209,10 @@ button, input, select { font: inherit; color: inherit; }
 /* on-image labels (SVG overlay) */
 #bh-overlay text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-bright); paint-order: stroke; stroke: var(--bh-halo); stroke-width: 3px; letter-spacing: .06em; }
 #bh-overlay .lead { stroke: var(--horizon-soft); stroke-width: 1; fill: none; opacity: .75; }
-#bh-overlay .curve { stroke: var(--accretion); stroke-width: 1; fill: none; opacity: .9; }
+#bh-overlay .curve { stroke: var(--horizon); stroke-width: 1; fill: none; opacity: .9; }
 #bh-overlay .curve2 { stroke: var(--horizon-soft); stroke-width: 1; fill: none; stroke-dasharray: 3 4; opacity: .7; }
-#bh-overlay .mark { fill: none; stroke: var(--accretion-soft); stroke-width: 1; }
-#bh-overlay .goldt { fill: var(--accretion-soft); }
+#bh-overlay .mark { fill: none; stroke: var(--horizon-soft); stroke-width: 1; }
+#bh-overlay .subt { fill: var(--text); }
 #bh-overlay g { transition: opacity var(--t-slow) var(--ease); }
 
 .bh-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -240,8 +247,7 @@ button, input, select { font: inherit; color: inherit; }
   .bh-sheet-h { display: flex; position: sticky; top: 0; z-index: 2; background: var(--bh-panel-solid); align-items: center; justify-content: space-between;
     padding: 10px 0 8px; border: 0; color: var(--text); width: 100%; cursor: pointer; font-size: var(--bh-fs-s); letter-spacing: .2em; text-transform: uppercase; min-height: 44px; }
   .bh-sheet-h::before { content: ''; position: absolute; top: 4px; left: 50%; width: 34px; height: 2px; margin-left: -17px; background: var(--bh-hair-2); }
-  .bh-sheet-h em { font-style: normal; color: var(--accretion); }
-  .bh-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .bh-sheet-h em { font-style: normal; color: var(--horizon); }
   .bh-head h1 { font-size: 18px; }
   .bh-caption { width: calc(100vw - 2 * var(--bh-pad)); bottom: calc(var(--sheet-peek, 132px) + 10px); }
   .bh-caption .cap-b { font-size: var(--bh-fs-s); }

@@ -139,7 +139,7 @@ export class Tour {
     if (!pt) { this.focusSvg.innerHTML = ''; return; }
     const [x, y] = this.toScreen(pt.sx, pt.sy);
     const pulse = 1 + 0.08 * Math.sin(this.t * 3);
-    this.focusSvg.innerHTML = `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rad * pulse).toFixed(1)}" fill="none" stroke="var(--accretion)" stroke-width="1" stroke-dasharray="4 5" opacity="0.85"/>`;
+    this.focusSvg.innerHTML = `<circle class="tour-focus" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rad * pulse).toFixed(1)}" fill="none" stroke="var(--accretion)" stroke-width="1" stroke-dasharray="4 5" opacity="0.85"/>`;
   }
 
   idleCaption() {

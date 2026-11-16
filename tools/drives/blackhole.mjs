@@ -73,13 +73,50 @@ function guard() {
   return true;
 }
 
+/* Gold means "this happened" in four places (BAR_L1 section 2), named here as elements, never as kinds:
+   the chosen control, the tour's current stop and the ring around what it points at, the live markers of the
+   charts, the plate's corner brackets. */
+export const GOLD_ALLOW = ['.bp', '.bh-btn[aria-pressed="true"]', '.bh-caption .cap-nav .dots i.on', '.bh-svg .now', '.bh-svg .nowf', 'circle.tour-focus'];
+
+/* BAR_L1 C10: nothing a visitor operates is cut. A target whose box runs past an ancestor that clips without
+   scrolling (overflow hidden or clip), or past the window's sides, is a break; an ancestor that scrolls makes
+   the target reachable and is not. (Lab-local for now: pull request 47 is rewriting tools/invariants.mjs; lift
+   this rule there once it merges.) */
+export const CLIPPED = `(() => {
+  const sel = 'a[href], button, input:not([type="hidden"]), select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])';
+  const shown = (e) => e.getClientRects().length > 0 && (e.checkVisibility ? e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) : true);
+  const out = [];
+  for (const e of document.querySelectorAll(sel)) {
+    if (!shown(e) || e.closest('[inert], dialog:not([open])')) continue;
+    const r = e.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) continue;
+    const name = (e.id ? '#' + e.id : e.tagName.toLowerCase() + '.' + [...e.classList].join('.')) + ' "' + (e.textContent || '').trim().slice(0, 18) + '"';
+    if (getComputedStyle(e).position === 'fixed' || !e.closest('.bh-sheet')) {
+      if (r.left < -1 || r.right > innerWidth + 1) { out.push(name + ' runs past the window (' + Math.round(r.left) + ' to ' + Math.round(r.right) + ')'); continue; }
+    }
+    for (let p = e.parentElement; p && p !== document.body; p = p.parentElement) {
+      const s = getComputedStyle(p), ox = s.overflowX, oy = s.overflowY;
+      const scrolls = (v) => v === 'auto' || v === 'scroll';
+      const clipsX = (ox === 'hidden' || ox === 'clip'), clipsY = (oy === 'hidden' || oy === 'clip');
+      if (scrolls(ox) && scrolls(oy)) break;
+      const q = p.getBoundingClientRect();
+      if ((clipsX && (r.left < q.left - 1 || r.right > q.right + 1)) || (clipsY && (r.top < q.top - 1 || r.bottom > q.bottom + 1))) {
+        out.push(name + ' is cut by ' + (p.id ? '#' + p.id : p.tagName.toLowerCase() + '.' + [...p.classList].join('.'))); break;
+      }
+      if (scrolls(ox) || scrolls(oy)) break;
+    }
+  }
+  return [...new Set(out)].slice(0, 12);
+})()`;
+
 const READY = '(() => { const a = window.__bh; if (!a || !a.renderer) return false; return a.renderer.ok() ? !!a.renderer.mainDone : true; })()';
 const RECT = '(() => { const r = document.getElementById("bh-canvas").getBoundingClientRect(); return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, dpr: devicePixelRatio }; })()';
 
 /* ---- the scenario ---- */
 
 export default async function blackhole(p, { base, width }) {
-  for (const [n, e] of standard()) p.invariant(n, e);
+  for (const [n, e] of standard({ gold: { allow: GOLD_ALLOW } })) p.invariant(n, e);
+  p.invariant('invariant: no target is cut by an ancestor that does not scroll, or by the window', CLIPPED);
   await p.before(`(${guard})()`);
 
   const frame = async (name) => {
@@ -103,4 +140,10 @@ export default async function blackhole(p, { base, width }) {
   await p.sleep(3000);   // the ignition runs 2.6 s after load (main.js); the frame is read after it
   await p.step('loaded and ignited');
   await frame(`load-${width}`);
+
+  // BAR_L1 C11: the title in Fraunces, loaded (not a fallback serif); the readouts in IBM Plex Mono
+  const type = await p.ev(`(async () => { await document.fonts.ready; const h = document.querySelector('.bh-head h1'), d = document.querySelector('.bh-read dd');
+    return { h1: h ? getComputedStyle(h).fontFamily : '', dd: d ? getComputedStyle(d).fontFamily : '', fraunces: document.fonts.check('26px Fraunces'), plex: document.fonts.check('12px "IBM Plex Mono"') }; })()`);
+  p.check('the page title is set in Fraunces, and the face loaded', /Fraunces/.test(type.h1) && type.fraunces, JSON.stringify(type));
+  p.check('the readouts are set in IBM Plex Mono, and the face loaded', /IBM Plex Mono/.test(type.dd) && type.plex, JSON.stringify(type));
 }

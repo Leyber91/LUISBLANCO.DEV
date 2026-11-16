@@ -157,17 +157,17 @@ export function buildUI(app) {
 
   const xsCard = el('div', 'bh-card');
   xsCard.innerHTML = `<h2>Cross-section <em>click the image to trace a ray</em></h2><div id="bh-xs"></div>
-    <div class="bh-legend"><span><i></i>photon orbit</span><span><i class="g"></i>disk, ISCO</span><span><i class="d"></i>ergosurface</span></div>`;
+    <div class="bh-legend"><span><i></i>photon orbit</span><span><i class="s"></i>disk, ISCO</span><span><i class="d"></i>ergosurface</span></div>`;
   right.appendChild(xsCard);
 
   const profCard = el('div', 'bh-card');
   profCard.innerHTML = `<h2>Disk profile <em>hover to light an annulus</em></h2><div id="bh-prof"></div>
-    <div class="bh-legend"><span><i class="g"></i>temperature T / T peak</span><span><i class="d"></i>flux F / F peak</span></div>`;
+    <div class="bh-legend"><span><i class="s"></i>temperature T / T peak</span><span><i class="d"></i>flux F / F peak</span></div>`;
   right.appendChild(profCard);
 
   const potCard = el('div', 'bh-card');
   potCard.innerHTML = `<h2>Effective potential <em>equatorial</em></h2><div id="bh-pot"></div><p class="bh-note" id="bh-potnote"></p>
-    <div class="bh-legend"><span><i></i>photon impact parameter b(r)</span><span><i class="g"></i>particle V(r) at L_ISCO</span></div>`;
+    <div class="bh-legend"><span><i></i>photon impact parameter b(r)</span><span><i class="s"></i>particle V(r) at L_ISCO</span></div>`;
   right.appendChild(potCard);
 
   const specCard = el('div', 'bh-card');
@@ -177,7 +177,7 @@ export function buildUI(app) {
   const fallCard = el('div', 'bh-card');
   fallCard.innerHTML = `<h2>Fall <em>drag the chart to scrub</em></h2><div id="bh-fall"></div><dl class="bh-read" id="bh-fallread"></dl>
     <div class="bh-seg" style="margin-top:8px"><button class="bh-btn go" type="button" id="bh-fallgo">Fall in</button><button class="bh-btn" type="button" id="bh-fallstop">Hold</button></div>
-    <div class="bh-legend"><span><i class="g"></i>your clock τ</span><span><i></i>far clock t</span><span><i class="d"></i>tide on 2 m</span></div>`;
+    <div class="bh-legend"><span><i class="s"></i>your clock τ</span><span><i></i>far clock t</span><span><i class="d"></i>tide on 2 m</span></div>`;
   right.appendChild(fallCard);
 
   const askCard = el('div', 'bh-card');
@@ -205,8 +205,8 @@ export function buildUI(app) {
   /* ---------- footer ---------- */
   const foot = $('#bh-foot');
   foot.innerHTML = `<div class="tags"><span><b>[REAL]</b> Kerr geodesics, shadow, disk physics, EHT values, clocks, tides</span>
-    <span><b class="i">[ILLUSTRATIVE]</b> turbulence, display scale, sky</span>
-    <button class="bh-btn" type="button" id="bh-srcbtn" style="min-height:24px;padding:2px 8px">Sources</button></div>
+    <span><b class="i">[ILLUSTRATIVE]</b> turbulence, display scale, sky</span></div>
+    <button class="bh-btn src" type="button" id="bh-srcbtn">Sources</button>
     <div class="perf" id="bh-perf">tier -- · -- ms</div>`;
   footM.innerHTML = `<div><b style="color:var(--horizon)">[REAL]</b> geodesics, shadow, disk physics, EHT values, clocks, tides. <b>[ILLUSTRATIVE]</b> turbulence, display colour scale, sky.</div><button class="bh-btn" type="button" id="bh-srcbtn2">Sources</button><div class="perf" id="bh-perf2"></div>`;
   const sources = $('#bh-sources');
@@ -289,7 +289,7 @@ export function buildUI(app) {
       parts.push(`<g><path class="curve" d="${d}Z"/></g>`);
       const top = ts.curve.reduce((m, p) => (p[1] > m[1] ? p : m), ts.curve[0]);
       const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
-      parts.push(`<g><line class="lead" x1="${tx}" y1="${ty}" x2="${tx + 70}" y2="${ty - 46}"/><text x="${tx + 74}" y="${ty - 50}" class="goldt">Bardeen 1973 critical curve</text><text x="${tx + 74}" y="${ty - 36}">gold: theory · dashes: traced edge</text></g>`);
+      parts.push(`<g><line class="lead" x1="${tx}" y1="${ty}" x2="${tx + 70}" y2="${ty - 46}"/><text x="${tx + 74}" y="${ty - 50}" class="subt">Bardeen 1973 critical curve</text><text x="${tx + 74}" y="${ty - 36}">gold: theory · dashes: traced edge</text></g>`);
     }
     // labels only from anchors traced for this view: none mid-transition, none from the last view
     const an = anchorsLive();
@@ -312,7 +312,7 @@ export function buildUI(app) {
         if (fit) [dx, dy] = fit;
         placed.push(block(dx, dy));
         const lx = x + dx, ly = y + dy;
-        parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="goldt">${sub}</text>` : ''}</g>`);
+        parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="subt">${sub}</text>` : ''}</g>`);
       };
       const m = app.model;
       if (an.shadow) {
