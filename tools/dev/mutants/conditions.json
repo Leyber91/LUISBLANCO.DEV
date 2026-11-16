@@ -1,0 +1,542 @@
+[
+  {
+    "name": "operator: <= no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: >= no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: !== no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: defaults (?? and ||) no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: clamps no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])/g;"
+  },
+  {
+    "name": "operator: an arrow taken for a comparison",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a left shift taken for a comparison",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![=>!])<(?![=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a right shift taken for a comparison",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a shift assignment taken for <=",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a shift assignment taken for >=",
+    "from": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|(?<![<>])>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|(?<![<>])<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "selftest: a gate's own checks counted as rules",
+    "from": "    if (skip.some(([a, b]) => at >= a && at < b)) continue;\n",
+    "to": ""
+  },
+  {
+    "name": "selftest: the check one past the selftest left out too",
+    "from": "if (skip.some(([a, b]) => at >= a && at < b)) continue;",
+    "to": "if (skip.some(([a, b]) => at >= a && at <= b)) continue;"
+  },
+  {
+    "name": "blank: a line comment kept",
+    "from": "const end = e < 0 ? n : e; wipe(i, end); i = end; continue; }",
+    "to": "const end = e < 0 ? n : e; i = end; continue; }"
+  },
+  {
+    "name": "blank: a block comment kept",
+    "from": "const end = e < 0 ? n : e + 2; wipe(i, end); i = end; continue; }",
+    "to": "const end = e < 0 ? n : e + 2; i = end; continue; }"
+  },
+  {
+    "name": "blank: a string kept",
+    "from": "      wipe(i + 1, k); i = k + 1; lastSig = c;",
+    "to": "      i = k + 1; lastSig = c;"
+  },
+  {
+    "name": "blank: template text kept",
+    "from": "if (src[k] === '`') { wipe(from, k); return { end: k + 1, open: false }; }",
+    "to": "if (src[k] === '`') { return { end: k + 1, open: false }; }"
+  },
+  {
+    "name": "blank: a ${ } not remembered",
+    "from": "if (t.open) { stack.push(depth); depth++; lastSig = '{'; lastWord = ''; }",
+    "to": "if (t.open) { depth++; lastSig = '{'; lastWord = ''; }"
+  },
+  {
+    "name": "blank: a regular expression kept",
+    "from": "      wipe(i + 1, k); k++;",
+    "to": "      k++;"
+  },
+  {
+    "name": "blank: a slash inside a class ends the regular expression",
+    "from": "if (src[k] === '[') inClass = true;",
+    "to": "if (src[k] === '[') inClass = false;"
+  },
+  {
+    "name": "blank: every slash after a name taken for a regular expression",
+    "from": "const regexCanStart = () => lastSig === '' ||",
+    "to": "const regexCanStart = () => true ||"
+  },
+  {
+    "name": "blank: no slash after an operator taken for a regular expression",
+    "from": "'(,=:[!&|?{};+-*%<>~^'.includes(lastSig)",
+    "to": "false"
+  },
+  {
+    "name": "blank: no keyword lets a regular expression start",
+    "from": " || KEYWORDS_BEFORE_REGEX.has(lastWord);",
+    "to": ";"
+  },
+  {
+    "name": "blank: i++ does not end an operand",
+    "from": "    if ((c === '+' || c === '-') && d === c && ['w', '0', ')', ']'].includes(lastSig)) { lastSig = 'w'; lastWord = ''; i += 2; continue; }\n",
+    "to": ""
+  },
+  {
+    "name": "line: counted from 0",
+    "from": "const lineAt = (src, p) => { let l = 1;",
+    "to": "const lineAt = (src, p) => { let l = 0;"
+  },
+  {
+    "name": "operand: a string on the right not read",
+    "from": "if (q === '\"' || q === \"'\" || q === '`') { const e = code.indexOf(q, k + 1); k = e < 0 ? code.length : e + 1; }",
+    "to": "if (false) {}"
+  },
+  {
+    "name": "operand: an exponent on the right stops at its sign",
+    "from": "(?:[eE][+-]?[0-9]+)?[\\w]*/.exec",
+    "to": "[\\w]*/.exec"
+  },
+  {
+    "name": "operand: a call or index on the right not read",
+    "from": "      if (code[k] === '(' || code[k] === '[') k = closeOf(code, k);\n      else if",
+    "to": "      if"
+  },
+  {
+    "name": "operand: an optional chain on the right not read",
+    "from": "      else if (code[k] === '?' && code[k + 1] === '.') k += 2;\n",
+    "to": ""
+  },
+  {
+    "name": "operand: a sign on the right not read",
+    "from": "  while (code[k] === '-' || code[k] === '+' || code[k] === '!') k++;\n",
+    "to": ""
+  },
+  {
+    "name": "operand: a call or index on the left not read",
+    "from": "    if (ch === ')' || ch === ']') k = openOf(code, k) - 1;\n    else if (ch === '\"'",
+    "to": "    if (ch === '\"'"
+  },
+  {
+    "name": "operand: a string on the left not read",
+    "from": "else if (ch === '\"' || ch === \"'\" || ch === '`') k = code.lastIndexOf(ch, k - 1) - 1;",
+    "to": "else if (false) k = 0;"
+  },
+  {
+    "name": "operand: the mantissa of an exponent on the left not read",
+    "from": "        k--; while (k >= 0 && /[\\w.]/.test(code[k])) k--;     // the mantissa of 1e-3",
+    "to": "        // the mantissa of 1e-3"
+  },
+  {
+    "name": "operand: the left operand is never read",
+    "from": "    else if (/[\\w$.]/.test(ch)) {\n      while (k >= 0",
+    "to": "    else if (false) {\n      while (k >= 0"
+  },
+  {
+    "name": "declared: any comment declares a line",
+    "from": "declared: cut >= 0 && /equivalent:/.test(text.slice(cut))",
+    "to": "declared: cut >= 0"
+  },
+  {
+    "name": "declared: the word in code declares a line",
+    "from": "/equivalent:/.test(text.slice(cut))",
+    "to": "/equivalent:/.test(text)"
+  },
+  {
+    "name": "default: a default read as a comparison",
+    "from": "const isDefault = /^(\\?\\?|\\|\\|)/.test(op);",
+    "to": "const isDefault = false;"
+  },
+  {
+    "name": "default: every right side taken for a literal",
+    "from": "const literal = isDefault && /^(['\"`]|-?[0-9.]|true\\b|false\\b|null\\b|undefined\\b|\\[|\\{)/.test(r.text);",
+    "to": "const literal = isDefault;"
+  },
+  {
+    "name": "default: no right side taken for a literal",
+    "from": "const literal = isDefault && /^(['\"`]|-?[0-9.]|true\\b|false\\b|null\\b|undefined\\b|\\[|\\{)/.test(r.text);",
+    "to": "const literal = false;"
+  },
+  {
+    "name": "default: its own stretch includes what it defaults",
+    "from": "own: isDefault ? [at, literal ? r.end : end] : [l.start, r.end],",
+    "to": "own: [l.start, r.end],"
+  },
+  {
+    "name": "equality: never treated as an equality",
+    "from": "eq: /^[=!]=/.test(op), literal,",
+    "to": "eq: false, literal,"
+  },
+  {
+    "name": "equality: every comparison treated as an equality",
+    "from": "eq: /^[=!]=/.test(op), literal,",
+    "to": "eq: true, literal,"
+  },
+  {
+    "name": "names: a comparison names no constant",
+    "from": ": [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);",
+    "to": ": [];"
+  },
+  {
+    "name": "names: a clamp names no constant",
+    "from": "          if (isName(arg)) c.names.push(arg);\n",
+    "to": ""
+  },
+  {
+    "name": "constants: a declaration inside a function counted",
+    "from": "    if (depthAt[k0] !== 0) continue;\n",
+    "to": ""
+  },
+  {
+    "name": "constants: a value ends at the end of its first line",
+    "from": "else if (depth === 0 && ch === '\\n' && !/[,=+\\-*/?:|&(]\\s*$/.test(code.slice(k0, j)) &&",
+    "to": "else if (depth === 0 && ch === '\\n' &&"
+  },
+  {
+    "name": "constants: a comma declarator not read",
+    "from": "      if ((ch === ',' && depth === 0) || j === end) {",
+    "to": "      if (j === end) {"
+  },
+  {
+    "name": "constants: a constant used more than once credited",
+    "from": "occurrences(src, nm) === 2)",
+    "to": "occurrences(src, nm) >= 2)"
+  },
+  {
+    "name": "constants: a property of the same name counted as a use",
+    "from": "(?<![\\\\w$.])${name",
+    "to": "(?<![\\\\w$])${name"
+  },
+  {
+    "name": "constants: no constant credited",
+    "from": " || values.some((v) => overlaps(ch, v) || (ch.a === ch.b && v[0] <= ch.a && ch.a <= v[1]));",
+    "to": ";"
+  },
+  {
+    "name": "changes: a change of spaces alone counted",
+    "from": ".filter((c) => from.slice(c.a, c.b).trim() || c.ins.trim());",
+    "to": ";"
+  },
+  {
+    "name": "changes: the whole differing middle taken as one change",
+    "from": "if (a.length * b.length > 4e6 || !a.length || !b.length) {",
+    "to": "if (true) {"
+  },
+  {
+    "name": "edits: an entry whose text appears twice still counted",
+    "from": "if (i < 0 || src.indexOf(from, i + 1) >= 0) return { name, missing: true };",
+    "to": "if (i < 0) return { name, missing: true };"
+  },
+  {
+    "name": "placements: one placement enough to credit a condition",
+    "from": "const by = es.filter((e) => e.changes.some((ch) => ch.alts.every(hits)));",
+    "to": "const by = es.filter((e) => e.changes.some((ch) => ch.alts.some(hits)));"
+  },
+  {
+    "name": "placements: one placement enough to credit an export",
+    "from": "ch.alts.every((alt) => overlaps(alt, [x.start, x.end])",
+    "to": "ch.alts.some((alt) => overlaps(alt, [x.start, x.end])"
+  },
+  {
+    "name": "placements: a removal not slid left in the module",
+    "from": "      for (let i = i0, j = j0; i > 0 && MT[i - 1] === MT[j - 1];) { i--; j--; out.push(at(i, j, [])); }\n",
+    "to": ""
+  },
+  {
+    "name": "placements: a removal not slid right in the module",
+    "from": "      for (let i = i0, j = j0; j < MT.length && MT[i] === MT[j];) { i++; j++; out.push(at(i, j, [])); }\n",
+    "to": ""
+  },
+  {
+    "name": "placements: an insertion not slid left in the module",
+    "from": "      for (let k = i0, run = ins.slice(); k > 0 && MT[k - 1] === run[run.length - 1];)",
+    "to": "      for (let k = i0, run = ins.slice(); false;)"
+  },
+  {
+    "name": "placements: an insertion not slid right in the module",
+    "from": "      for (let k = i0, run = ins.slice(); k < MT.length && MT[k] === run[0];)",
+    "to": "      for (let k = i0, run = ins.slice(); false;)"
+  },
+  {
+    "name": "placements: a removal not slid left in the entry",
+    "from": "      for (let i = o.i, j = o.j; i > 0 && T[i - 1] === T[j - 1];)",
+    "to": "      for (let i = o.i, j = o.j; false;)"
+  },
+  {
+    "name": "placements: an insertion not slid left in the entry",
+    "from": "      for (let k = o.i, run = o.ins.slice(); k > 0 && T[k - 1] === run[run.length - 1];)",
+    "to": "      for (let k = o.i, run = o.ins.slice(); false;)"
+  },
+  {
+    "name": "names: a default names no constant",
+    "from": "c.names = isDefault ? [r.text].filter(isName) :",
+    "to": "c.names = isDefault ? [] :"
+  },
+  {
+    "name": "overlaps: an insertion at a span's edge overlaps it",
+    "from": "const overlaps = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : c.a < e && s < c.b);",
+    "to": "const overlaps = (c, [s, e]) => (c.a === c.b ? s <= c.a && c.a <= e : c.a < e && s < c.b);"
+  },
+  {
+    "name": "overlaps: a removal meeting a span at its edge overlaps it",
+    "from": "const overlaps = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : c.a < e && s < c.b);",
+    "to": "const overlaps = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : c.a <= e && s <= c.b);"
+  },
+  {
+    "name": "overlaps: an insertion never overlaps",
+    "from": "const overlaps = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : c.a < e && s < c.b);",
+    "to": "const overlaps = (c, [s, e]) => (c.a === c.b ? false : c.a < e && s < c.b);"
+  },
+  {
+    "name": "within: an insertion at a span's edge lies within it",
+    "from": "const within = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : s <= c.a && c.b <= e);",
+    "to": "const within = (c, [s, e]) => (c.a === c.b ? s <= c.a && c.a <= e : s <= c.a && c.b <= e);"
+  },
+  {
+    "name": "clamp: any change anywhere changes a clamp",
+    "from": "    if (!within(ch, [c.inner[0] - 1, c.inner[1] + 1])) return false;\n",
+    "to": ""
+  },
+  {
+    "name": "clamp: a change inside a nested condition changes the clamp too",
+    "from": "    return !all.some((o) => o !== c && o.own[0] >= c.inner[0] && o.own[1] <= c.inner[1] && within(ch, o.own));",
+    "to": "    return true;"
+  },
+  {
+    "name": "default: a boolean chain changed through its operands",
+    "from": "    if (!c.literal) return false;\n",
+    "to": ""
+  },
+  {
+    "name": "default: its literal changed does not change it",
+    "from": "    if (overlaps(ch, c.right) || within(ch, c.right)) return true;\n",
+    "to": ""
+  },
+  {
+    "name": "default: a change between it and its literal does not change it",
+    "from": "    if (ch.a >= c.end && ch.b <= r0) return true;\n",
+    "to": ""
+  },
+  {
+    "name": "default: nothing after its literal changes it",
+    "from": "    return ch.a === r1 && [added, removed].some((t) => t && !LOOSE_AFTER_DEFAULT.test(t));",
+    "to": "    return false;"
+  },
+  {
+    "name": "default: anything after its literal changes it",
+    "from": "    return ch.a === r1 && [added, removed].some((t) => t && !LOOSE_AFTER_DEFAULT.test(t));",
+    "to": "    return ch.a === r1 && [added, removed].some((t) => t);"
+  },
+  {
+    "name": "comparison: its left operand changed does not change it",
+    "from": "  if (overlaps(ch, c.left) || overlaps(ch, c.right) || within(ch, c.left) || within(ch, c.right)) return true;",
+    "to": "  if (overlaps(ch, c.right) || within(ch, c.right)) return true;"
+  },
+  {
+    "name": "comparison: its right operand changed does not change it",
+    "from": "  if (overlaps(ch, c.left) || overlaps(ch, c.right) || within(ch, c.left) || within(ch, c.right)) return true;",
+    "to": "  if (overlaps(ch, c.left) || within(ch, c.left)) return true;"
+  },
+  {
+    "name": "comparison: a change between the left operand and the operator does not change it",
+    "from": "  if ((ch.a >= l1 && ch.b <= c.at) || (ch.a >= c.end && ch.b <= r0)) return true;",
+    "to": "  if ((ch.a >= c.end && ch.b <= r0)) return true;"
+  },
+  {
+    "name": "comparison: a change between the operator and the right operand does not change it",
+    "from": "  if ((ch.a >= l1 && ch.b <= c.at) || (ch.a >= c.end && ch.b <= r0)) return true;",
+    "to": "  if ((ch.a >= l1 && ch.b <= c.at)) return true;"
+  },
+  {
+    "name": "comparison: nothing before the left operand changes it",
+    "from": "  if (ch.b === l0 && [added, removed].some((t) => t && (TIGHT_BEFORE.test(t) || (c.eq && REL_BEFORE.test(t))))) return true;",
+    "to": "  if (false) return true;"
+  },
+  {
+    "name": "comparison: anything before the left operand changes it",
+    "from": "  if (ch.b === l0 && [added, removed].some((t) => t && (TIGHT_BEFORE.test(t) || (c.eq && REL_BEFORE.test(t))))) return true;",
+    "to": "  if (ch.b === l0 && [added, removed].some((t) => t)) return true;"
+  },
+  {
+    "name": "comparison: nothing after the right operand changes it",
+    "from": "  if (ch.a === r1 && [added, removed].some((t) => t && (TIGHT_AFTER.test(t) || (c.eq && REL_AFTER.test(t))))) return true;",
+    "to": "  if (false) return true;"
+  },
+  {
+    "name": "comparison: anything after the right operand changes it",
+    "from": "  if (ch.a === r1 && [added, removed].some((t) => t && (TIGHT_AFTER.test(t) || (c.eq && REL_AFTER.test(t))))) return true;",
+    "to": "  if (ch.a === r1 && [added, removed].some((t) => t)) return true;"
+  },
+  {
+    "name": "tight: nothing binds tighter after an operand",
+    "from": "const TIGHT_AFTER = /^(?:\\*\\*|[*/%+\\-.([]|\\?\\.)/",
+    "to": "const TIGHT_AFTER = /^(?!)/"
+  },
+  {
+    "name": "tight: nothing binds tighter before an operand",
+    "from": "const TIGHT_BEFORE = /(?:\\*\\*|[*/%+\\-!~.([]|\\?\\.|\\btypeof|\\bvoid|\\bawait|\\bnew)$/",
+    "to": "const TIGHT_BEFORE = /(?!)/"
+  },
+  {
+    "name": "tight: a relation does not bind tighter than an equality after it",
+    "from": "REL_AFTER = /^(?:<=?|>=?|instanceof\\b|in\\b)/;",
+    "to": "REL_AFTER = /^(?!)/;"
+  },
+  {
+    "name": "tight: a relation does not bind tighter than an equality before it",
+    "from": "REL_BEFORE = /(?:<=?|>=?|\\binstanceof|\\bin)$/;",
+    "to": "REL_BEFORE = /(?!)/;"
+  },
+  {
+    "name": "loose: everything binds looser than a default",
+    "from": "const LOOSE_AFTER_DEFAULT = /^(?:\\|\\||\\?\\?|\\?(?!\\.)|,|\\)|\\]|\\}|;|:)/;",
+    "to": "const LOOSE_AFTER_DEFAULT = /^/;"
+  },
+  {
+    "name": "loose: nothing binds looser than a default",
+    "from": "const LOOSE_AFTER_DEFAULT = /^(?:\\|\\||\\?\\?|\\?(?!\\.)|,|\\)|\\]|\\}|;|:)/;",
+    "to": "const LOOSE_AFTER_DEFAULT = /^(?!)/;"
+  },
+  {
+    "name": "status: declared not reported",
+    "from": "status: c.declared ? 'declared' : by.length ? 'broken' : 'never broken' };",
+    "to": "status: by.length ? 'broken' : 'never broken' };"
+  },
+  {
+    "name": "status: every condition reported changed",
+    "from": "status: c.declared ? 'declared' : by.length ? 'broken' : 'never broken' };",
+    "to": "status: c.declared ? 'declared' : 'broken' };"
+  },
+  {
+    "name": "exports: arrow exports not found",
+    "from": "|export\\s+const\\s+([\\w$]+)\\s*=\\s*(?:async\\s*)?(\\(|[\\w$]+\\s*=>)/g;",
+    "to": "/g;"
+  },
+  {
+    "name": "exports: export default function not found",
+    "from": "/export\\s+(?:default\\s+)?(?:async\\s+)?function",
+    "to": "/export\\s+(?:async\\s+)?function"
+  },
+  {
+    "name": "exports: a call taken for an arrow",
+    "from": "      if (!arrow) continue;                         // a call, not a function\n",
+    "to": ""
+  },
+  {
+    "name": "exports: a function body runs to the end of the file",
+    "from": "end: open < 0 ? code.length : closeOf(code, open), line",
+    "to": "end: code.length, line"
+  },
+  {
+    "name": "exports: an arrow body runs to the end of the file",
+    "from": "else if (depth === 0 && (c === ';' ||",
+    "to": "else if (false && (c === ';' ||"
+  },
+  {
+    "name": "exports: an exported selftest counted",
+    "from": "exportsOf(src).filter((x) => x.name !== 'selftest')",
+    "to": "exportsOf(src)"
+  },
+  {
+    "name": "exports: an export reported changed whatever the entries",
+    "from": "const by = es.filter((e) => e.changes.some((ch) => ch.alts.every((alt) =>",
+    "to": "const by = es.filter((e) => true || e.changes.some((ch) => ch.alts.every((alt) =>"
+  },
+  {
+    "name": "report: a condition never changed not printed",
+    "from": "  for (const c of gaps) console.log(",
+    "to": "  for (const c of []) console.log("
+  },
+  {
+    "name": "report: an export never changed not printed",
+    "from": "  for (const x of lost) console.log(",
+    "to": "  for (const x of []) console.log("
+  },
+  {
+    "name": "report: a stale entry not printed",
+    "from": "  for (const s of cov.stale) console.log(",
+    "to": "  for (const s of []) console.log("
+  },
+  {
+    "name": "exit: an export never changed does not fail",
+    "from": "return gaps.length || lost.length || cov.stale.length ? 1 : 0;",
+    "to": "return gaps.length || cov.stale.length ? 1 : 0;"
+  },
+  {
+    "name": "exit: a condition never changed does not fail",
+    "from": "return gaps.length || lost.length || cov.stale.length ? 1 : 0;",
+    "to": "return lost.length || cov.stale.length ? 1 : 0;"
+  },
+  {
+    "name": "exit: a stale entry does not fail",
+    "from": "return gaps.length || lost.length || cov.stale.length ? 1 : 0;",
+    "to": "return gaps.length || lost.length ? 1 : 0;"
+  },
+  {
+    "name": "exit: a list the tool cannot read passes",
+    "from": "catch (e) { console.error(`conditions: ${e.message}`); return 3; }",
+    "to": "catch (e) { return 0; }"
+  },
+  {
+    "name": "reader: only the first list read",
+    "from": "try { list = listPaths.flatMap((p) => readList(p, modulePath)); }",
+    "to": "try { list = readList(listPaths[0], modulePath); }"
+  },
+  {
+    "name": "reader: a list with no entries for the module passes empty",
+    "from": "    if (!mine.length) {\n",
+    "to": "    if (false) {\n"
+  },
+  {
+    "name": "reader: every module's entries taken",
+    "from": "const mine = lines.filter((l) => resolve(l.module) === want);",
+    "to": "const mine = lines;"
+  },
+  {
+    "name": "reader: a file not named *.mutants.test.mjs run anyway",
+    "from": "if (!/\\.mutants\\d*\\.test\\.mjs$/.test(listPath) || ",
+    "to": "if ("
+  },
+  {
+    "name": "reader: a file with its own runner run anyway",
+    "from": " || !/(^|\\/)mutants\\.mjs$/.test(spec)) {",
+    "to": ") {"
+  },
+  {
+    "name": "reader: an import in a comment accepted",
+    "from": "\\s*from\\s*(['\"])/.exec(blank(text));",
+    "to": "\\s*from\\s*(['\"])/.exec(text);"
+  }
+]
