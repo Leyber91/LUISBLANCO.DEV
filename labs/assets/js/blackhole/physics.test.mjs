@@ -137,7 +137,40 @@ guard('the predicted angle', () => {
   ok('a mass error alone', near(onlyM.err, 10 * tg * 0.7 / 6.5, 1e-12), `${onlyM.err}`);
   const onlyD = P.predictedUas(10, { mass: 6.5e9, distPc: 16.8e6, distErr: 0.8e6 });
   ok('a distance error alone', near(onlyD.err, 10 * tg * 0.8 / 16.8, 1e-12), `${onlyD.err}`);
-  ok('sigmaDiff: (40 - 42) / hypot(3, 4) = -0.4', P.sigmaDiff({ value: 40, err: 3 }, 42, 4) === -0.4, `${P.sigmaDiff({ value: 40, err: 3 }, 42, 4)}`);
+});
+
+/* ---------- the comparison with the EHT (ledger row 2, ruled 2026-11-16) ---------- */
+guard('the comparison', () => {
+  const [m87, sgr, cyg] = OBJECTS;
+  // M87*: scaled by the stars' motions, theta_dyn 3.62 (+0.60, -0.34) uas (EHT 2019 Paper VI, Table 9)
+  const z = P.compareShadow(2 * Math.sqrt(27), m87);
+  ok('M87* at a = 0: 2 sqrt(27) theta_dyn is Paper I\'s published 37.6 (+6.2, -3.5) uas (section 2)',
+    z.pred.value.toFixed(1) === '37.6' && z.pred.errP.toFixed(1) === '6.2' && z.pred.errM.toFixed(1) === '3.5',
+    `${z.pred.value} +${z.pred.errP} -${z.pred.errM}`);
+  ok('M87*: the scale is the stars\', never the EHT\'s own mass', z.pred.thetaG === 3.62 && z.pred.by === 'the motions of its stars' && !near(z.pred.thetaG, K.thetaG(m87.mass, m87.distPc), 1e-3));
+  ok('M87*: no shadow to set it against, and the ring beside it', z.shadow === null && z.ring.value === 42 && z.ring.err === 3);
+  const zs = P.compareSentence(z, 'M87*');
+  ok('M87*: the sentence names the ring of emission and sets no sigma', zs.includes('ring of emission 42 +- 3 uas') && zs.includes('no shadow diameter for M87*') && !/sigma/.test(zs), zs);
+  // Sgr A*: scaled by its mass and distance (stellar orbits), set against the EHT shadow 48.7 +- 7.0 in sigma
+  const s = P.compareShadow(10, sgr), tg = K.thetaG(sgr.mass, sgr.distPc), e = 10 * tg * Math.hypot(sgr.massErr / sgr.mass, sgr.distErr / sgr.distPc);
+  ok('Sgr A*: scaled by its mass and distance, errors in quadrature', near(s.pred.value, 10 * tg, 1e-12) && near(s.pred.errP, e, 1e-12) && near(s.pred.errM, e, 1e-12) && s.pred.by === 'the orbits of its stars');
+  ok('Sgr A*: one sigma, against the shadow', near(s.shadow.sigma, (10 * tg - 48.7) / Math.hypot(e, 7.0), 1e-12) && s.shadow.value === 48.7 && s.ring.value === 51.8, `${s.shadow.sigma}`);
+  ok('Sgr A*: the sentence prints 7.0 as the paper does', P.compareSentence(s).includes('48.7 +- 7.0 uas') && /sigma from this one/.test(P.compareSentence(s)), P.compareSentence(s));
+  // the error on the side of the measurement, just above, at and below it
+  const fake = { distPc: 1, ruler: { thetaG: 1, errP: 2, errM: 1, by: 'x' }, eht: { shadow: 10, shadowErr: 0 } };
+  // the errors scale with the diameter: at 12 M the lower error is 12, at 8 M the upper error is 16
+  ok('a prediction above the shadow takes its lower error', P.compareShadow(12, fake).shadow.sigma === 2 / 12, `${P.compareShadow(12, fake).shadow.sigma}`);
+  ok('a prediction below the shadow takes its upper error', P.compareShadow(8, fake).shadow.sigma === -2 / 16, `${P.compareShadow(8, fake).shadow.sigma}`);
+  ok('a prediction on the shadow is 0 sigma', P.compareShadow(10, fake).shadow.sigma === 0);
+  ok('a ruler with no EHT entry gives no shadow and no ring', (() => { const c = P.compareShadow(10, { distPc: 1, ruler: fake.ruler }); return c.shadow === null && c.ring === null; })());
+  ok('an EHT entry with a ring and no shadow gives no sigma', P.compareShadow(10, { distPc: 1, ruler: fake.ruler, eht: { ring: 5, ringErr: 1 } }).shadow === null);
+  // Cygnus X-1, Primordial, a custom hole
+  const c = P.compareShadow(10, cyg);
+  ok('Cygnus X-1: scaled by its companion\'s orbit, no EHT image', c.pred.by === 'the orbit of its companion star' && c.shadow === null && c.ring === null && P.compareSentence(c) === 'The EHT has not imaged it.');
+  ok('no distance or no object: no comparison', P.compareShadow(10, OBJECTS[3]) === null && P.compareShadow(10, null) === null && P.compareSentence(null) === 'The EHT has not imaged it.');
+  ok('published(): the value\'s own decimals for both', P.published(48.7, 7) === '48.7 +- 7.0' && P.published(42, 3, '±') === '42 ± 3' && P.published(5.125, 0.02) === '5.125 +- 0.020', `${P.published(48.7, 7)}`);
+  ok('a sign in front of a positive sigma, none added to a negative one', P.compareSentence({ shadow: { value: 1, err: 1, sigma: 0.5 } }).includes('+0.500 sigma') && P.compareSentence({ shadow: { value: 1, err: 1, sigma: -0.5 } }).includes(': -0.500 sigma'));
+  ok('a sigma of exactly 0 is written +0.00', P.compareSentence({ shadow: { value: 1, err: 1, sigma: 0 } }).includes('+0.00 sigma'), P.compareSentence({ shadow: { value: 1, err: 1, sigma: 0 } }));
 });
 
 guard('the measurement', () => {
@@ -146,9 +179,9 @@ guard('the measurement', () => {
   const cin = P.measurement(state({ view: 'cinematic', incl: 84 }));
   ok('elsewhere: at the object\'s measured inclination, M87*\'s 17 deg', cin.incl === 17 && cin.th === P.shadowFor(0.94, 17, 0), `${cin.incl}`);
   const cus = P.measurement(state({ obj: 'custom', view: 'cinematic', a: 0.5 }));
-  ok('a custom hole elsewhere: at 17 deg, with no prediction', cus.incl === 17 && cus.pred === null && cus.obj === null, `${cus.incl}`);
+  ok('a custom hole elsewhere: at 17 deg, with no comparison', cus.incl === 17 && cus.cmp === null && cus.obj === null, `${cus.incl}`);
   const sg = P.measurement(state({ obj: 'sgra', a: 0.5, view: 'cinematic' }));
-  ok('Sgr A* elsewhere: at its 30 deg, predicted from its mass and distance', sg.incl === 30 && near(sg.pred.value, P.predictedUas(sg.th.mean, OBJECTS[1]).value, 1e-12), `${sg.incl}`);
+  ok('Sgr A* elsewhere: at its 30 deg, compared at its traced mean diameter', sg.incl === 30 && near(sg.cmp.pred.value, P.compareShadow(sg.th.mean, OBJECTS[1]).pred.value, 1e-12) && near(sg.cmp.pred.value, P.predictedUas(sg.th.mean, OBJECTS[1]).value, 1e-12), `${sg.incl}`);
   const noq = state({ obj: 'custom', a: 0.5, view: 'telescope', incl: 40 });
   delete noq.q;
   ok('a state with no charge is measured uncharged', P.measurement(noq).th === P.shadowFor(0.5, 40, 0));

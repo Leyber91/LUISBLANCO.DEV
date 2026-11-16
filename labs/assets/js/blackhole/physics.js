@@ -97,6 +97,45 @@ export function predictedUas(diamM, obj) {
   return { value: diamM * tg, err: diamM * tg * rel, thetaG: tg };
 }
 
+/** The traced shadow on the sky set against what the Event Horizon Telescope inferred: like for like and never
+ *  circular (ledger row 2, ruled 2026-11-16; BAR_L1 C4). Every place that states the comparison calls this: the
+ *  Measure card, the tour, the guide, the plate and its table.
+ *  - The scale theta_g comes from a mass the EHT image did not give: the object's `ruler` when it has one (M87*:
+ *    the stellar-dynamics theta of EHT 2019 Paper VI, Table 9, since the EHT's own mass rests on its ring), else
+ *    its mass and distance with their errors (Sgr A*: stellar orbits).
+ *  - A sigma is computed only between two shadows. A ring of emission is not a shadow (Paper VI: emission
+ *    "preferentially from outside the photon ring leads to a 10% offset"), so it is shown beside, never in sigma.
+ *  - Errors may be asymmetric: the sigma takes the prediction's error on the side of the measurement.
+ *  Null for an object with no distance. */
+export function compareShadow(diamM, obj) {
+  if (!obj || !obj.distPc) return null;
+  const r = obj.ruler;
+  const p = r ? null : predictedUas(1, obj);
+  const tg = r ? r.thetaG : p.value, up = r ? r.errP : p.err, dn = r ? r.errM : p.err;
+  const pred = { value: diamM * tg, errP: diamM * up, errM: diamM * dn, thetaG: tg, by: r ? r.by : obj.massBy };
+  const e = obj.eht;
+  let shadow = null;
+  if (e && e.shadow != null) {
+    const d = pred.value - e.shadow;
+    shadow = { value: e.shadow, err: e.shadowErr, sigma: d / Math.hypot(d > 0 ? pred.errM : pred.errP, e.shadowErr) };
+  }
+  return { pred, shadow, ring: e && e.ring != null ? { value: e.ring, err: e.ringErr } : null };
+}
+
+/** A published value and its error, both with the value's own decimals, as the paper prints them: 48.7 and 7.0,
+ *  42 and 3 (a JavaScript number drops the 0 of 7.0). */
+export function published(v, e, pm = '+-') {
+  const d = (String(v).split('.')[1] || '').length;
+  return `${v.toFixed(d)} ${pm} ${e.toFixed(d)}`;
+}
+
+/** The comparison in one sentence: the tour's telescope stop and the guide print this and nothing else. */
+export function compareSentence(c, name = 'this hole') {
+  if (!c || (!c.shadow && !c.ring)) return 'The EHT has not imaged it.';
+  if (c.shadow) return `The EHT inferred a shadow of ${published(c.shadow.value, c.shadow.err)} uas: ${c.shadow.sigma >= 0 ? '+' : ''}${s3(c.shadow.sigma)} sigma from this one.`;
+  return `The EHT measured a ring of emission ${published(c.ring.value, c.ring.err)} uas across, which its models place about 10% outside the photon ring; it published no shadow diameter for ${name}.`;
+}
+
 /** The far-observer measurement the Measure card shows and the tour quotes, from the
  *  state (never the eased display values): in the telescope view at the state's own
  *  inclination, elsewhere at the object's measured one (17 deg for a custom hole). */
@@ -104,14 +143,9 @@ export function measurement(s) {
   const obj = objectOf(s);
   const incl = s.view === 'telescope' ? s.incl : (obj ? obj.incl : 17);
   const th = shadowFor(s.a, incl, s.q || 0);
-  return { obj, incl, th, pred: obj && obj.distPc ? predictedUas(th.mean, obj) : null };
+  return { obj, incl, th, cmp: compareShadow(th.mean, obj) };
 }
 
-/** Sigma distance between a prediction and a measurement with independent errors. */
-export function sigmaDiff(pred, meas, measErr) {
-  const s = Math.hypot(pred.err, measErr);
-  return (pred.value - meas) / s;
-}
 
 /** Fall table for the journey (rain from rest at infinity at the camera's polar angle). */
 export function fall(a, inclDeg, r0 = 40, q = 0) {

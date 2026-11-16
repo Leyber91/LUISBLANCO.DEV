@@ -7,7 +7,7 @@
 
 import * as K from './kerr.js';
 import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION } from './config.js';
-import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, predictedUas, measurement, sigmaDiff, fall, sci, dur, len } from './physics.js';
+import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, measurement, compareShadow, published, fall, sci, dur, len } from './physics.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour } from './tour.js';
 import { mountAsk } from './ask.js';
@@ -410,24 +410,23 @@ export function buildUI(app) {
     if (gpuStrip && gpuStrip.a === s.a && gpuStrip.q === s.q && gpuStrip.incl === incl) rows2.push(dd('width, GPU strip', `${s3(gpuStrip.width)} ± ${s3(gpuStrip.res)}`, 'M', tagR));
     rows2.push(dd('height, B / traced', `${s3(th.chords.height)} / ${integ ? s3(integ.height) : '--'}`, 'M', tagR));
     rows2.push(dd('mean diameter', s3(th.mean), 'M', tagR));
-    if (o && o.eht) {
-      const pred = predictedUas(th.mean, o);
+    // the comparison is compareShadow's, the one rule every place that states it calls (ledger row 2)
+    const cmp = compareShadow(th.mean, o);
+    if (cmp && o.eht) {
+      const pm = (p) => (Math.abs(p.errP - p.errM) < 0.05 ? `± ${s3(p.errP)}` : `+${s3(p.errP)} −${s3(p.errM)}`);
       rows2.push('<div class="hr"></div>');
-      rows2.push(dd('predicted', `${s3(pred.value)} ± ${s3(pred.err)}`, 'µas', tagR));
-      const sg = sigmaDiff(pred, o.eht.ring, o.eht.ringErr);
-      rows2.push(dd(`EHT ring ${o.eht.ring}±${o.eht.ringErr}`, `<span class="bh-sig ${Math.abs(sg) < 2 ? 'good' : 'warn'}">${sg >= 0 ? '+' : ''}${s3(sg)} σ</span>`, '', tagR));
-      if (o.eht.shadow) {
-        const sg2 = sigmaDiff(pred, o.eht.shadow, o.eht.shadowErr);
-        rows2.push(dd(`EHT shadow ${o.eht.shadow}±${o.eht.shadowErr}`, `<span class="bh-sig ${Math.abs(sg2) < 2 ? 'good' : 'warn'}">${sg2 >= 0 ? '+' : ''}${s3(sg2)} σ</span>`, '', tagR));
+      rows2.push(dd(`shadow on the sky, scaled by ${cmp.pred.by}`, `${s3(cmp.pred.value)} ${pm(cmp.pred)}`, 'µas', tagR));
+      if (cmp.shadow) {
+        const sg = cmp.shadow.sigma;
+        rows2.push(dd(`EHT shadow ${published(cmp.shadow.value, cmp.shadow.err, '±')}`, `<span class="bh-sig ${Math.abs(sg) < 2 ? 'good' : 'warn'}">${sg >= 0 ? '+' : ''}${s3(sg)} σ</span>`, '', tagR));
+        // weigh it: the mass the EHT shadow implies with this traced diameter, at the distance named
+        const Mimp = o.mass * cmp.shadow.value / cmp.pred.value, Merr = Mimp * Math.hypot(cmp.shadow.err / cmp.shadow.value, (o.distErr || 0) / o.distPc);
+        rows2.push(dd(`mass the EHT shadow implies at ${len(o.distPc * K.SI.pc)}`, `${sci(Mimp)} ± ${sci(Merr)}`, 'M☉', tagR));
       }
-      // weigh it: mass implied by the EHT angular size and this ruler
-      const meas = o.eht.shadow || o.eht.ring, measErr = o.eht.shadow ? o.eht.shadowErr : o.eht.ringErr;
-      const Mimp = o.mass * meas / pred.value, Merr = Mimp * Math.hypot(measErr / meas, (o.distErr || 0) / o.distPc);
-      rows2.push(dd('implied mass', `${sci(Mimp)} ± ${sci(Merr)}`, 'M☉', tagR));
-    } else if (o && o.distPc) {
-      const pred = predictedUas(th.mean, o);
+      if (cmp.ring) rows2.push(dd('EHT ring of emission (no σ: a different quantity)', published(cmp.ring.value, cmp.ring.err, '±'), 'µas', tagR, 'ink'));
+    } else if (cmp) {
       rows2.push('<div class="hr"></div>');
-      rows2.push(dd('shadow on the sky', sci(pred.value), 'µas', tagR));
+      rows2.push(dd('shadow on the sky', sci(cmp.pred.value), 'µas', tagR));
       rows2.push(dd('EHT resolution', '~20', 'µas', tagR));
     }
     if (rings) {
@@ -438,8 +437,9 @@ export function buildUI(app) {
       rows2.push(dd(rings.gamma == null ? 'e^-γ (Johnson 2020, Kerr only)' : 'e^-γ (Johnson 2020)', rings.gamma == null ? '--' : s3(Math.exp(-rings.gamma)), '', tagR));
     }
     $('#bh-meas').innerHTML = rows2.join('');
-    $('#bh-measnote').textContent = o && o.eht
-      ? `Predicted from the traced shadow, the cited mass and distance, errors in quadrature. The EHT ring is emission just outside the shadow edge, so a ring slightly larger than the shadow is expected.`
+    // written from the comparison it describes (ledger row 2): the scale's source, and why a ring gets no sigma
+    $('#bh-measnote').textContent = cmp && o.eht
+      ? `The size on the sky uses a scale the EHT image did not give: ${cmp.pred.by}${o.ruler ? ' (EHT 2019 Paper VI, Table 9)' : ''}. A sigma is set only between two shadows; a ring of emission is a different quantity.`
       : 'Choose M87* or Sgr A* to compare with the Event Horizon Telescope.';
   }
 

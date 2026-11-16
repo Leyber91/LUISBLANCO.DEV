@@ -146,4 +146,33 @@ export default async function blackhole(p, { base, width }) {
     return { h1: h ? getComputedStyle(h).fontFamily : '', dd: d ? getComputedStyle(d).fontFamily : '', fraunces: document.fonts.check('26px Fraunces'), plex: document.fonts.check('12px "IBM Plex Mono"') }; })()`);
   p.check('the page title is set in Fraunces, and the face loaded', /Fraunces/.test(type.h1) && type.fraunces, JSON.stringify(type));
   p.check('the readouts are set in IBM Plex Mono, and the face loaded', /IBM Plex Mono/.test(type.dd) && type.plex, JSON.stringify(type));
+
+  // The measurement, opened by link (ledger row 2, BAR_L1 C4): M87* has no sigma against its ring of emission and
+  // is scaled by its stars' motions; Sgr A* has one sigma, against the EHT shadow, equal to the engine's.
+  const CARD = `(async () => {
+    const P = await import('/labs/assets/js/blackhole/physics.js');
+    const s = window.__bh.store.all(), ms = P.measurement(s), c = ms.cmp;
+    const card = document.getElementById('bh-meas'), sig = [...card.querySelectorAll('.bh-sig')].map((e) => e.textContent.trim());
+    return { text: card.textContent.replace(/\\s+/g, ' '), sig, note: document.getElementById('bh-measnote').textContent,
+      want: c && c.shadow ? (c.shadow.sigma >= 0 ? '+' : '') + P.s3(c.shadow.sigma) + ' σ' : null };
+  })()`;
+  for (const [obj, name] of [['m87', 'M87*'], ['sgra', 'Sgr A*']]) {
+    await p.go(`${base}/labs/bh_animation_page.html?o=${obj}&v=telescope`);
+    await p.until(READY, READY_MS);
+    await p.sleep(1500);
+    await p.ev(`(document.getElementById('bh-meas').scrollIntoView({ block: 'center' }), true)`);
+    await p.step(`${name} in the telescope view, by link`);
+    const card = await p.ev(CARD);
+    if (obj === 'm87') {
+      p.check('M87*: no sigma on the card, the ring named as emission, the scale from its stars',
+        card.sig.length === 0 && card.text.includes('EHT ring of emission') && card.text.includes('42 ± 3') && card.text.includes('the motions of its stars') && card.want === null,
+        card.text.slice(0, 400));
+    } else {
+      p.check('Sgr A*: one sigma, against the EHT shadow 48.7 ± 7.0, equal to the engine\'s',
+        card.sig.length === 1 && card.sig[0] === card.want && card.text.includes('EHT shadow 48.7 ± 7.0') && card.text.includes('the orbits of its stars'),
+        JSON.stringify({ sig: card.sig, want: card.want }) + ' ' + card.text.slice(0, 300));
+    }
+    p.check(`${name}: the note under the card is the ruling's`, card.note.includes('a scale the EHT image did not give') && card.note.includes('only between two shadows'), card.note);
+    await frame(`measure-${obj}-${width}`);
+  }
 }

@@ -105,21 +105,19 @@ const MUTANTS = [
   ['the integrator\'s cache does not key the charge', 'm:${a.toFixed(4)}:${q.toFixed(4)}:', 'm:${a.toFixed(4)}:'],
 
   /* ---- the predicted angle ---- */
-  ['no distance: an angle all the same', `if (!obj || !obj.distPc) return null;`, `if (!obj) return null;`],
-  ['no object: the page breaks', `if (!obj || !obj.distPc) return null;`, `if (!obj.distPc) return null;`],
+  ['no distance: an angle all the same', `if (!obj || !obj.distPc) return null;\n  const tg = K.thetaG(obj.mass, obj.distPc);`, `if (!obj) return null;\n  const tg = K.thetaG(obj.mass, obj.distPc);`],
+  ['no object: the page breaks', `if (!obj || !obj.distPc) return null;\n  const tg = K.thetaG(obj.mass, obj.distPc);`, `if (!obj.distPc) return null;\n  const tg = K.thetaG(obj.mass, obj.distPc);`],
   ['a missing mass error read as 1 Msun', REL, REL.replace(`(obj.massErr || 0)`, `(obj.massErr || 1)`)],
   ['a missing distance error read as 1 pc', REL, REL.replace(`(obj.distErr || 0)`, `(obj.distErr || 1)`)],
   ['the errors added, not in quadrature', REL, `(obj.massErr || 0) / obj.mass + (obj.distErr || 0) / obj.distPc`],
   ['the angle left in M', `return { value: diamM * tg,`, `return { value: diamM,`],
-  ['sigmaDiff adds the errors', `const s = Math.hypot(pred.err, measErr);`, `const s = pred.err + measErr;`],
-  ['sigmaDiff with its sign turned', `return (pred.value - meas) / s;`, `return (meas - pred.value) / s;`],
 
   /* ---- the measurement ---- */
   ['the telescope view measured at the object\'s inclination', INCL, INCL.replace(`'telescope'`, `'telescopeX'`)],
   ['a custom hole measured at 18 deg', INCL, INCL.replace(`: 17);`, `: 18);`)],
   ['every view measured at the state\'s inclination', INCL, `const incl = s.incl;`],
   ['a state with no charge measured at Q = 0.1', `const th = shadowFor(s.a, incl, s.q || 0);`, `const th = shadowFor(s.a, incl, s.q || 0.1);`],
-  ['no prediction for an object with a distance', `pred: obj && obj.distPc ? predictedUas(th.mean, obj) : null`, `pred: null`],
+  ['no comparison in the measurement', `cmp: compareShadow(th.mean, obj) };`, `cmp: null };`],
 
   /* ---- the fall ---- */
   ['the fall from 30 M by default', `fall(a, inclDeg, r0 = 40, q = 0)`, `fall(a, inclDeg, r0 = 30, q = 0)`],

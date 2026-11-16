@@ -50,13 +50,13 @@ function expected(stop, s, an) {
   const m = P.derive(s), o = OBJECTS.find((x) => x.id === s.obj);
   const ms = P.measurement(s);                                      // the Measure card's numbers
   const ts = s.view === 'telescope' ? ms.th : P.shadowFor(s.a, 90, s.q);
-  const pred = s.view === 'telescope' ? ms.pred : P.predictedUas(ts.mean, o);
+  const cmp = s.view === 'telescope' ? ms.cmp : P.compareShadow(ts.mean, o);   // ledger row 2
   const n = {
     name: o.name, dist: o.distPc ? distText(o.distPc) : '--',
-    eht: o.eht ? `EHT measured a ring of ${o.eht.ring} +- ${o.eht.ringErr} uas.` : 'The EHT has not imaged it.',
+    eht: P.compareSentence(cmp, o.name), by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',
     a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
     gmax: an ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an ? P.s3(Math.pow(an.gmin, 4)) : '--',
-    incl: s.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2), eta: (m.eta * 100).toFixed(1),
+    incl: s.incl.toFixed(0), shadowUas: cmp ? cmp.pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2), eta: (m.eta * 100).toFixed(1),
     // the interior time runs to the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2): the centre only at a = Q = 0
     tauIn: P.dur(m.interiorTauS), inner: s.a === 0 && s.q === 0 ? 'the centre' : 'the inner horizon',
     massSun: P.sci(m.massSun), horizonKm: P.sci(m.horizonKm), tidalG: P.sci(m.tidalHg),
@@ -125,7 +125,9 @@ guard('the telescope caption', () => {
   const num = (re) => +(cap.match(re) || [])[1];
   ok('telescope: caption inclination = card inclination (17 deg)', num(/sits at ([\d.]+) deg/) === Math.round(ms.incl) && ms.incl === 17, `${num(/sits at ([\d.]+) deg/)} vs ${ms.incl}`);
   ok('telescope: caption width = card width (9.73 M)', Math.abs(num(/is ([\d.]+) M wide/) - ms.th.chords.width) < 0.006 && P.s3(ms.th.chords.width) === '9.73', `${num(/is ([\d.]+) M wide/)} vs ${ms.th.chords.width}`);
-  ok('telescope: caption angle = card prediction (37.4 uas)', Math.abs(num(/that is ([\d.]+) uas/) - ms.pred.value) < 0.06 && P.s3(ms.pred.value) === '37.4', `${num(/that is ([\d.]+) uas/)} vs ${ms.pred.value}`);
+  // the angle on the sky is scaled by the stars' motions (Paper VI, Table 9), not by the EHT's own mass (ledger row 2)
+  ok('telescope: caption angle = card prediction (35.4 uas, at the stellar-dynamics scale)', Math.abs(num(/([\d.]+) uas on the sky/) - ms.cmp.pred.value) < 0.06 && P.s3(ms.cmp.pred.value) === '35.4', `${num(/([\d.]+) uas on the sky/)} vs ${ms.cmp.pred.value}`);
+  ok('telescope: the caption names the ring as emission and sets no sigma against it', cap.includes('ring of emission 42 +- 3 uas') && cap.includes('the motions of its stars') && !/sigma/.test(cap), cap);
   // a visitor who drags the inclination in the telescope view: card and idle caption follow it
   tour.stop();
   store.set({ incl: 40 }, { instant: true, src: 'drag' });

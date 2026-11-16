@@ -15,7 +15,7 @@
    ============================================================ */
 
 import { TOUR, VIEWS, COLOR_MODES } from './config.js';
-import { shadowFor, predictedUas, measurement, sci, s3, dur } from './physics.js';
+import { shadowFor, compareShadow, compareSentence, measurement, sci, s3, dur } from './physics.js';
 import { liveAnchors } from './probe.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -51,15 +51,16 @@ export class Tour {
     // in the telescope view the caption quotes the Measure card's own numbers
     const ms = s.view === 'telescope' ? measurement(s) : null;
     const ts = ms ? ms.th : shadowFor(s.a, 90, s.q);
-    const pred = ms ? ms.pred : (o ? predictedUas(ts.mean, o) : null);
+    // the comparison with the EHT is compareShadow's, worded by compareSentence (ledger row 2)
+    const cmp = ms ? ms.cmp : compareShadow(ts.mean, o);
     const an = this.anchors();
     return {
       name: o ? o.name : 'this hole', dist: o && o.distPc ? distText(o.distPc) : '--',
-      eht: o && o.eht ? `EHT measured a ring of ${o.eht.ring} +- ${o.eht.ringErr} uas.` : 'The EHT has not imaged it.',
+      eht: compareSentence(cmp, o ? o.name : 'this hole'), by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',
       a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
       // 3 significant figures for the dimming: at two decimals 5.41e-4 would read 0.00
       gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an && an.gmin ? s3(Math.pow(an.gmin, 4)) : '--',
-      incl: s.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2),
+      incl: s.incl.toFixed(0), shadowUas: cmp ? cmp.pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2),
       // tauIn is the proper time from the horizon to the inner horizon, which is the centre
       // only without spin and charge (the Instrument card labels the same number the same way)
       eta: (m.eta * 100).toFixed(1), tauIn: dur(m.interiorTauS), inner: m.rmin < 5e-7 ? 'the centre' : 'the inner horizon',

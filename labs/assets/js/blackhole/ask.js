@@ -8,7 +8,7 @@
    ============================================================ */
 
 import { LLM, extractJSON } from '../ai/llm.js';
-import { theoryShadow, shadowFor, predictedUas, sci, dur } from './physics.js';
+import { theoryShadow, shadowFor, compareShadow, compareSentence, sci, dur } from './physics.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const STATE_KEYS = { a: [0, 0.998], incl: [1, 179], view: ['cinematic', 'telescope', 'journey'], color: ['thermal', 'true', 'redshift', 'order', 'steps'],
@@ -21,7 +21,9 @@ export function facts(app) {
   // only from anchors traced for this view
   const incl = s.view === 'telescope' ? s.incl : (m.obj ? m.obj.incl : 90);
   const ts = shadowFor(s.a, incl, s.q);
-  const pred = m.obj ? predictedUas(ts.mean, m.obj) : null;
+  // the comparison with the EHT is compareShadow's, worded by compareSentence (ledger row 2)
+  const cmp = compareShadow(ts.mean, m.obj);
+  const pred = cmp ? cmp.pred : null;
   const an = app.ui?.liveAnchors?.();
   return {
     object: m.obj ? m.obj.name : 'custom', spin_a: s.a, inclination_deg: +s.incl.toFixed(1), view: s.view, colour_mode: s.color,
@@ -30,7 +32,10 @@ export function facts(app) {
     photon_orbit_prograde_M: +m.rph.toFixed(4), photon_orbit_retrograde_M: +m.rphr.toFixed(4), isco_M: +m.ri.toFixed(4),
     isco_km: +(m.ri * m.rg / 1000).toPrecision(4), efficiency_percent: +(m.eta * 100).toFixed(2), gas_speed_isco_c: +m.vIsco.toFixed(3),
     shadow_width_M: +ts.chords.width.toFixed(4), shadow_mean_diameter_M: +ts.mean.toFixed(4),
-    shadow_uas: pred ? +pred.value.toFixed(2) : null, eht_ring_uas: m.obj?.eht?.ring ?? null, eht_ring_err_uas: m.obj?.eht?.ringErr ?? null,
+    shadow_uas: pred ? +pred.value.toFixed(2) : null, shadow_scale_by: pred && pred.by ? pred.by : 'its mass and distance',
+    eht_ring_uas: cmp?.ring?.value ?? null, eht_ring_err_uas: cmp?.ring?.err ?? null,
+    eht_shadow_uas: cmp?.shadow?.value ?? null, sigma_shadow: cmp?.shadow ? +cmp.shadow.sigma.toFixed(3) : null,
+    eht_sentence: compareSentence(cmp, m.obj ? m.obj.name : 'this hole'),
     disk_peak_temperature_K: m.Tpeak ? +m.Tpeak.toPrecision(3) : null, eddington_ratio: m.edd, hawking_temperature_K: +m.hawkingK.toPrecision(3),
     tide_at_horizon_g_2m: +m.tidalHg.toPrecision(3), radius_tide_10g_M: +m.tide10g.toPrecision(3),
     fall_horizon_to_end_s: +m.interiorTauS.toPrecision(3), isco_period_s: +m.iscoPeriod.toPrecision(3),
@@ -76,7 +81,7 @@ export function answerOffline(app, q) {
     beaming: `Gas on the approaching side moves toward you at up to ${f.gas_speed_isco_c} c. Its light arrives with redshift factor g up to ${f.redshift_g_max ?? '--'}, and intensity scales as g^4, so it is ${f.redshift_g_max ? Math.pow(f.redshift_g_max, 4).toFixed(1) : 'many'} times brighter; the receding side drops to g = ${f.redshift_g_min ?? '--'}. Switch colour to Redshift g to see the map.`,
     colour: `In Thermal mode each pixel's hue is a blackbody at its observed temperature g T, with the peak shown at ${s.tdisp} K so the shifts are visible. True colour uses the real temperature, ${f.disk_peak_temperature_K ? sci(f.disk_peak_temperature_K) + ' K' : 'set by mass and accretion rate'}; anything above about 10,000 K looks blue-white to an eye.`,
     spin: `Spin a = ${s.a.toFixed(3)} drags space around the hole. Light moving with the rotation can orbit closer (${f.photon_orbit_prograde_M.toFixed(2)} M) than light moving against it (${f.photon_orbit_retrograde_M.toFixed(2)} M), so the shadow is flattened on the approaching side and shifted. At high inclination the effect is strongest.`,
-    eht: f.eht_ring_uas ? `For ${f.object}, the traced shadow is ${f.shadow_mean_diameter_M.toFixed(2)} M across; at the cited mass and distance that is ${f.shadow_uas} uas on the sky. The EHT measured a ring of ${f.eht_ring_uas} +- ${f.eht_ring_err_uas} uas. The ring is emission just outside the shadow edge, so a slightly larger ring is expected.`
+    eht: f.eht_ring_uas ? `For ${f.object}, the traced shadow is ${f.shadow_mean_diameter_M.toFixed(2)} M across; at the scale ${f.shadow_scale_by} give, that is ${f.shadow_uas} uas on the sky. ${f.eht_sentence}`
       : `Pick M87* or Sgr A* to compare the traced shadow with the Event Horizon Telescope. ${f.shadow_uas ? `This object's shadow would be ${sci(f.shadow_uas)} uas on the sky, far below the EHT's roughly 20 uas resolution.` : ''}`,
     temp: f.disk_peak_temperature_K ? `With ${sci(f.mass_Msun)} solar masses at Eddington ratio ${sci(f.eddington_ratio)}, the Novikov-Thorne disk peaks at ${sci(f.disk_peak_temperature_K)} K locally. Temperature scales as M^-1/4, which is why stellar-mass holes shine in X-rays and giant ones in ultraviolet or optical light.`
       : 'This object has no accretion disk to speak of, so there is no disk temperature. Its own Hawking temperature is in the Instrument panel.',
