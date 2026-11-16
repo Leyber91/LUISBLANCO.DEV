@@ -1,0 +1,162 @@
+[
+  {
+    "name": "operator: <= no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: >= no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: !== no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: defaults (?? and ||) no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: clamps no longer found",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])/g;"
+  },
+  {
+    "name": "operator: an arrow taken for a comparison",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a left shift taken for a comparison",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![=>!])<(?![=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "operator: a right shift taken for a comparison",
+    "from": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![>=])|Math\\.(?:max|min)\\(/g;",
+    "to": "const OPERATOR = /===|!==|==|!=|<=|>=|\\?\\?=?|\\|\\|=?|(?<![<=>!])<(?![<=])|(?<![=<>-])>(?![=])|Math\\.(?:max|min)\\(/g;"
+  },
+  {
+    "name": "blank: a line comment kept",
+    "from": "const end = e < 0 ? n : e; wipe(i, end); i = end; continue; }",
+    "to": "const end = e < 0 ? n : e; i = end; continue; }"
+  },
+  {
+    "name": "blank: a block comment kept",
+    "from": "const end = e < 0 ? n : e + 2; wipe(i, end); i = end; continue; }",
+    "to": "const end = e < 0 ? n : e + 2; i = end; continue; }"
+  },
+  {
+    "name": "blank: a string kept",
+    "from": "      wipe(i + 1, k); i = k + 1; lastSig = c;",
+    "to": "      i = k + 1; lastSig = c;"
+  },
+  {
+    "name": "blank: template text kept",
+    "from": "if (src[k] === '`') { wipe(from, k); return { end: k + 1, open: false }; }",
+    "to": "if (src[k] === '`') { return { end: k + 1, open: false }; }"
+  },
+  {
+    "name": "blank: a ${ } not remembered, so text after it counts as code",
+    "from": "if (t.open) { stack.push(depth); depth++; lastSig = '{'; lastWord = ''; }",
+    "to": "if (t.open) { depth++; lastSig = '{'; lastWord = ''; }"
+  },
+  {
+    "name": "blank: a regular expression kept",
+    "from": "      wipe(i + 1, k); k++;",
+    "to": "      k++;"
+  },
+  {
+    "name": "blank: a slash inside a class ends the regular expression",
+    "from": "if (src[k] === '[') inClass = true;",
+    "to": "if (src[k] === '[') inClass = false;"
+  },
+  {
+    "name": "blank: every slash after a name taken for a regular expression",
+    "from": "const regexCanStart = () => lastSig === '' ||",
+    "to": "const regexCanStart = () => true ||"
+  },
+  {
+    "name": "blank: no slash after an operator taken for a regular expression",
+    "from": "'(,=:[!&|?{};+-*%<>~^'.includes(lastSig)",
+    "to": "false"
+  },
+  {
+    "name": "line: counted from 0",
+    "from": "const lineAt = (src, p) => { let l = 1;",
+    "to": "const lineAt = (src, p) => { let l = 0;"
+  },
+  {
+    "name": "operand: a leading minus not part of the bound",
+    "from": "  if (code[k] === '-' || code[k] === '+') k++;\n",
+    "to": ""
+  },
+  {
+    "name": "declared: the equivalent comment ignored",
+    "from": "declared: /\\/\\/\\s*equivalent:|\\/\\*\\s*equivalent:/.test(lineText(src, line))",
+    "to": "declared: false"
+  },
+  {
+    "name": "edits: an entry whose text appears twice still counted",
+    "from": "if (i < 0 || src.indexOf(from, i + 1) >= 0) return { name, missing: true };",
+    "to": "if (i < 0) return { name, missing: true };"
+  },
+  {
+    "name": "touches: an insertion never touches",
+    "from": "(a === b ? a >= c && a <= d : a < d && c < b)",
+    "to": "(a < d && c < b)"
+  },
+  {
+    "name": "touches: any edit touches",
+    "from": "(a === b ? a >= c && a <= d : a < d && c < b)",
+    "to": "(true)"
+  },
+  {
+    "name": "broken: a constant moved at its definition not counted",
+    "from": "|| c.names.some((nm) => defs.has(nm) && touches(e.edit, lineSpan(defs.get(nm)))));",
+    "to": ");"
+  },
+  {
+    "name": "broken: only the operator itself counts, not its operands",
+    "from": "es.filter((e) => touches(e.edit, [c.at, c.end]) || touches(e.edit, c.near)",
+    "to": "es.filter((e) => touches(e.edit, [c.at, c.end])"
+  },
+  {
+    "name": "status: declared not reported",
+    "from": "status: c.declared ? 'declared' : at.length ? 'broken' : 'never broken' };",
+    "to": "status: at.length ? 'broken' : 'never broken' };"
+  },
+  {
+    "name": "status: every condition reported broken",
+    "from": "status: c.declared ? 'declared' : at.length ? 'broken' : 'never broken' };",
+    "to": "status: c.declared ? 'declared' : 'broken' };"
+  },
+  {
+    "name": "exports: arrow exports not found",
+    "from": "|export\\s+const\\s+([\\w$]+)\\s*=\\s*(?:async\\s*)?(?:\\([^)]*\\)|[\\w$]+)\\s*=>/g)) {",
+    "to": "/g)) {"
+  },
+  {
+    "name": "exports: an export reported broken whatever the entries",
+    "from": "const at = es.filter((e) => touches(e.edit, [x.start, x.end]));",
+    "to": "const at = es;"
+  },
+  {
+    "name": "exit: an export never broken does not fail",
+    "from": "return gaps.length || lost.length ? 1 : 0;",
+    "to": "return gaps.length ? 1 : 0;"
+  },
+  {
+    "name": "exit: a condition never broken does not fail",
+    "from": "return gaps.length || lost.length ? 1 : 0;",
+    "to": "return lost.length ? 1 : 0;"
+  },
+  {
+    "name": "reader: a list with no entries for the module passes empty",
+    "from": "  if (!mine.length) throw new Error(",
+    "to": "  if (false) throw new Error("
+  }
+]
