@@ -15,7 +15,7 @@
    ============================================================ */
 
 import { TOUR, VIEWS, COLOR_MODES } from './config.js';
-import { shadowFor, predictedUas, measurement, sci, dur } from './physics.js';
+import { shadowFor, predictedUas, measurement, sci, s3, dur } from './physics.js';
 import { liveAnchors } from './probe.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -57,9 +57,13 @@ export class Tour {
       name: o ? o.name : 'this hole', dist: o && o.distPc ? distText(o.distPc) : '--',
       eht: o && o.eht ? `EHT measured a ring of ${o.eht.ring} +- ${o.eht.ringErr} uas.` : 'The EHT has not imaged it.',
       a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
-      gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an && an.gmin ? Math.pow(an.gmin, 4).toFixed(2) : '--',
+      // 3 significant figures for the dimming: at two decimals 5.41e-4 would read 0.00
+      gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an && an.gmin ? s3(Math.pow(an.gmin, 4)) : '--',
       incl: s.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2),
-      eta: (m.eta * 100).toFixed(1), tauIn: dur(m.interiorTauS), massSun: sci(m.massSun), horizonKm: sci(m.horizonKm), tidalG: sci(m.tidalHg),
+      // tauIn is the proper time from the horizon to the inner horizon, which is the centre
+      // only without spin and charge (the Instrument card labels the same number the same way)
+      eta: (m.eta * 100).toFixed(1), tauIn: dur(m.interiorTauS), inner: m.rmin < 5e-7 ? 'the centre' : 'the inner horizon',
+      massSun: sci(m.massSun), horizonKm: sci(m.horizonKm), tidalG: sci(m.tidalHg),
     };
   }
 

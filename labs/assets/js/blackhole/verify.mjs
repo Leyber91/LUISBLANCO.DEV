@@ -88,8 +88,9 @@ for (const [a, incl] of [[0.0, 60], [0.5, 60], [0.9, 17], [0.9, 90], [0.998, 17]
     `rel ${(eW * 100).toFixed(3)}%  left edge ${m.amin.toFixed(3)} vs ${th.amin.toFixed(3)}  height ${m.height.toFixed(3)} vs ${th.height.toFixed(3)} (${(eH * 100).toFixed(2)}%)`);
 }
 
-/* the full outline: 360 polar angles around the shadow centre, traced edge vs Bardeen curve */
-for (const [a, inclDeg] of [[0.9, 17], [0.998, 90]]) {
+/* the full outline: 360 polar angles around the shadow centre, traced edge vs Bardeen curve,
+   at both spins and both inclinations (a = 0.9 and 0.998, i = 17 and 90 deg) */
+for (const [a, inclDeg] of [[0.9, 17], [0.9, 90], [0.998, 17], [0.998, 90]]) {
   const incl = inclDeg * Math.PI / 180;
   const cam = K.zamoCamera(a, K.cameraPosition(RO, incl, 0, a));
   const curve = K.shadowCurve(a, incl, 2000);

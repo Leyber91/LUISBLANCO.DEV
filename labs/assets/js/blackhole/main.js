@@ -20,11 +20,10 @@ function boot() {
   const store = new Store();
   store.reduced = reduceMQ.matches || STILL;
 
-  // URL state first, then the defaults of the object it names
-  const fromUrl = store.fromQuery(location.search);
+  // the preset of the object and view the link names, then the link's own keys on top
+  // (Store.open: the same baseline toQuery() writes a link against)
+  const fromUrl = store.open(location.search);
   const hasState = Object.keys(fromUrl).length > 0;
-  store.set(store.objectPatch(fromUrl.obj || 'm87'), { instant: true, src: 'boot' });
-  store.set(fromUrl, { instant: true, src: 'boot' });
   if (store.reduced) store.set({ anim: false }, { instant: true, src: 'boot' });
 
   const renderer = new Renderer(canvas);

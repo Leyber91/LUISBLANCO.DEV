@@ -6,7 +6,7 @@
    ============================================================ */
 
 import * as K from './kerr.js';
-import { OBJECTS, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION } from './config.js';
+import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION } from './config.js';
 import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, predictedUas, measurement, sigmaDiff, fall, sci, dur, len } from './physics.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour } from './tour.js';
@@ -50,11 +50,13 @@ export function buildUI(app) {
 
   // object
   const objCard = el('div', 'bh-card');
-  objCard.innerHTML = `<h2>Object <em id="bh-objkind"></em></h2><div class="bh-seg" id="bh-objs"></div><p class="bh-note" id="bh-objnote"></p>`;
+  // each object carries its evidence class on its button; the legend under the buttons defines the classes
+  objCard.innerHTML = `<h2>Object <em id="bh-objkind"></em></h2><div class="bh-seg" id="bh-objs"></div>
+    <p class="bh-note" id="bh-evid">${Object.entries(EVIDENCE).map(([k, v]) => `<b>${k}</b> ${v}`).join('<br>')}</p><p class="bh-note" id="bh-objnote"></p>`;
   left.appendChild(objCard);
   const objBtns = {};
   OBJECTS.forEach((o) => {
-    const b = el('button', 'bh-btn', `${o.name}`);
+    const b = el('button', 'bh-btn', `${o.name}<small>${o.evidence}</small>`);
     b.type = 'button';
     b.addEventListener('click', () => { app.tour?.stop(); store.set(store.objectPatch(o.id)); });
     objBtns[o.id] = b; $('#bh-objs', objCard).appendChild(b);
@@ -211,7 +213,13 @@ export function buildUI(app) {
   const openSources = () => {
     sources.hidden = !sources.hidden;
     if (sources.hidden) return;
-    const rowsT = OBJECTS.map((o) => `<tr><td>${o.name}</td><td>${sci(o.mass)} M☉ ${o.massErr ? '± ' + sci(o.massErr) : ''}</td><td>${o.distPc ? len(o.distPc * K.SI.pc) : '--'}</td><td>a ${o.spin} <span class="${o.spinTag === 'REAL' ? 'bh-tagr' : 'bh-tagi'}">${o.spinTag}</span></td><td>i ${o.incl} deg</td><td>${esc([o.massSrc, o.spinSrc, o.inclSrc].filter(Boolean).map((k) => CITE[k]).filter((v, i, a) => a.indexOf(v) === i).join('; ') || o.massNote || '')}</td></tr>`).join('');
+    // each value names its own source: 'mass, distance: <paper>; spin: <paper>; inclination: <paper>'
+    const cited = (o) => {
+      const by = new Map();
+      [['mass', o.massSrc], ['distance', o.distSrc], ['spin', o.spinSrc], ['inclination', o.inclSrc]].forEach(([what, k]) => { if (k) by.set(k, [...(by.get(k) || []), what]); });
+      return [...by].map(([k, what]) => `${what.join(', ')}: ${CITE[k]}`).join('; ') || o.massNote || '';
+    };
+    const rowsT = OBJECTS.map((o) => `<tr><td>${o.name}</td><td>${sci(o.mass)} M☉ ${o.massErr ? '± ' + sci(o.massErr) : ''}</td><td>${o.distPc ? len(o.distPc * K.SI.pc) : '--'}</td><td>a ${o.spin} <span class="${o.spinTag === 'REAL' ? 'bh-tagr' : 'bh-tagi'}">${o.spinTag}</span></td><td>i ${o.incl} deg</td><td>${esc(cited(o))}</td></tr>`).join('');
     sources.innerHTML = `<h3>Objects (data version ${VERSION})</h3><table><tr><th>object</th><th>mass</th><th>distance</th><th>spin</th><th>incl.</th><th>sources</th></tr>${rowsT}</table>
       <h3 style="margin-top:12px">Equations and values</h3><ol>${Object.values(CITE).map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
       <p class="bh-note">Verification: <b>node labs/assets/js/blackhole/verify.mjs</b> runs 40 checks of the engine against these sources (shadow vs Bardeen within 0.002%, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification).</p>
@@ -286,6 +294,7 @@ export function buildUI(app) {
     // labels only from anchors traced for this view: none mid-transition, none from the last view
     const an = anchorsLive();
     if (s.notes && an) {
+      const placed = [];          // text blocks already drawn, so a later label steps aside
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
@@ -295,6 +304,13 @@ export function buildUI(app) {
         const tw = Math.max(txt.length, (sub || '').length) * 7 + 10;
         if (dx > 0 && x + dx + tw > hi) dx = -dx;
         if (dx < 0 && x + dx - tw < lo) dx = -dx;
+        // and clear of the labels before it: the two text lines span 16 px either side of the
+        // lead's end; of the four mirrored offsets, the first that touches no placed block wins
+        const block = (ox, oy) => (ox < 0 ? [x + ox - tw, y + oy - 16, x + ox, y + oy + 16] : [x + ox, y + oy - 16, x + ox + tw, y + oy + 16]);
+        const free = (b) => b[0] >= lo && b[2] <= hi && b[1] >= 0 && b[3] <= H && placed.every((p) => b[2] < p[0] || b[0] > p[2] || b[3] < p[1] || b[1] > p[3]);
+        const fit = [[dx, dy], [dx, -dy], [-dx, dy], [-dx, -dy]].find(([ox, oy]) => free(block(ox, oy)));
+        if (fit) [dx, dy] = fit;
+        placed.push(block(dx, dy));
         const lx = x + dx, ly = y + dy;
         parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="goldt">${sub}</text>` : ''}</g>`);
       };
@@ -346,7 +362,8 @@ export function buildUI(app) {
       dd('clock rate here', s3(clock), 'x far', tagR),
       dd('tide at r+, 2 m', sci(m.tidalHg), 'g', tagR),
       dd('10 g tide at', m.tide10g > m.rh ? `${s3(m.tide10g)} M` : 'inside r+', '', tagR),
-      dd(s.a < 1e-3 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tagR),
+      // the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2) is the centre only without spin and charge
+      dd(m.rmin < 5e-7 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tagR),
     ].join('');
     $('#bh-insttag').textContent = o ? o.name : 'custom';
     // the card that matters for this view goes first

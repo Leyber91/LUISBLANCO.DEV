@@ -40,9 +40,16 @@ export const CITE = {
 /* ---------------- the real objects ---------------- */
 // Every number carries its source. 'tag' on a field: REAL = sourced measurement,
 // ILLUSTRATIVE = a stand-in where nothing is measured (said so on the page).
+// 'evidence' is the class of the object itself, shown on its button with the legend below
+// (the three words and Primordial's THEORETICAL are the first version's).
+export const EVIDENCE = {
+  ESTABLISHED: 'observed',
+  THEORETICAL: 'predicted, none detected',
+  SPECULATIVE: 'needs new physics',
+};
 export const OBJECTS = [
   {
-    id: 'm87', name: 'M87*', kind: 'supermassive, galaxy M87',
+    id: 'm87', name: 'M87*', kind: 'supermassive, galaxy M87', evidence: 'ESTABLISHED',
     mass: 6.5e9, massErr: 0.7e9, massSrc: 'eht2019f',
     distPc: 16.8e6, distErr: 0.8e6, distSrc: 'eht2019f',
     spin: 0.94, spinTag: 'ILLUSTRATIVE', spinNote: 'not measured; 0.94 is one value of the EHT model grid',
@@ -55,7 +62,7 @@ export const OBJECTS = [
     view: { incl: 17 },
   },
   {
-    id: 'sgra', name: 'Sgr A*', kind: 'supermassive, Milky Way centre',
+    id: 'sgra', name: 'Sgr A*', kind: 'supermassive, Milky Way centre', evidence: 'ESTABLISHED',
     mass: 4.297e6, massErr: 0.013e6, massSrc: 'eht2022a', massNote: 'VLTI/GRAVITY value as tabulated in EHT 2022 Paper I, Table 1',
     distPc: 8277, distErr: 34, distSrc: 'eht2022a',
     spin: 0.5, spinTag: 'ILLUSTRATIVE', spinNote: 'not measured; EHT favours prograde models with a* = 0.5 or 0.94 at i = 30 deg',
@@ -68,7 +75,7 @@ export const OBJECTS = [
     view: { incl: 30 },
   },
   {
-    id: 'cygx1', name: 'Cygnus X-1', kind: 'stellar-mass, X-ray binary',
+    id: 'cygx1', name: 'Cygnus X-1', kind: 'stellar-mass, X-ray binary', evidence: 'ESTABLISHED',
     mass: 21.2, massErr: 2.2, massSrc: 'mj2021',
     distPc: 2220, distErr: 180, distSrc: 'mj2021',
     spin: 0.998, spinTag: 'REAL', spinNote: 'a* > 0.9985 (3 sigma, continuum fitting); traced at the 0.998 Thorne limit',
@@ -80,7 +87,7 @@ export const OBJECTS = [
     view: { incl: 27.5 },
   },
   {
-    id: 'primordial', name: 'Primordial', kind: 'hypothetical, 10^12 kg',
+    id: 'primordial', name: 'Primordial', kind: 'hypothetical, 10^12 kg', evidence: 'THEORETICAL',
     mass: 1e12 / 1.98847e30, massErr: 0, massSrc: null, massNote: 'hypothetical: no primordial black hole has been detected',
     distPc: null, spin: 0, spinTag: 'ILLUSTRATIVE', spinNote: 'hypothetical', incl: 80,
     edd: 0, eddTag: 'ILLUSTRATIVE',
@@ -173,7 +180,7 @@ export const TOUR = [
     text: 'At spin {a} no circular orbit is stable inside {ri} M. The disk ends there, and {eta}% of the infalling rest mass has been radiated away.', focus: 'isco' },
   { id: 'fall', dur: 14, patch: { obj: 'm87', view: 'journey', color: 'thermal' },
     title: 'Falling in',
-    text: 'Your clock and a distant clock disagree more each second. At {name} the fall from the horizon to the centre takes {tauIn} of your time.', focus: 'none' },
+    text: 'Your clock and a distant clock disagree more each second. At {name} the fall from the horizon to {inner} takes {tauIn} of your time.', focus: 'none' },
   { id: 'cyg', dur: 10, patch: { obj: 'cygx1', view: 'cinematic', color: 'thermal' },
     title: 'A hole the size of a city',
     text: '{name} has {massSun} solar masses. Its horizon spans {horizonKm} km, and 2 m above it the tide stretches you at {tidalG} g.', focus: 'none' },

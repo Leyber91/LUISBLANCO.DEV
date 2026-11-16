@@ -53,9 +53,11 @@ function expected(stop, s, an) {
     name: o.name, dist: o.distPc ? distText(o.distPc) : '--',
     eht: o.eht ? `EHT measured a ring of ${o.eht.ring} +- ${o.eht.ringErr} uas.` : 'The EHT has not imaged it.',
     a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
-    gmax: an ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an ? Math.pow(an.gmin, 4).toFixed(2) : '--',
+    gmax: an ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an ? P.s3(Math.pow(an.gmin, 4)) : '--',
     incl: s.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2), eta: (m.eta * 100).toFixed(1),
-    tauIn: P.dur(m.interiorTauS), massSun: P.sci(m.massSun), horizonKm: P.sci(m.horizonKm), tidalG: P.sci(m.tidalHg),
+    // the interior time runs to the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2): the centre only at a = Q = 0
+    tauIn: P.dur(m.interiorTauS), inner: s.a === 0 && s.q === 0 ? 'the centre' : 'the inner horizon',
+    massSun: P.sci(m.massSun), horizonKm: P.sci(m.horizonKm), tidalG: P.sci(m.tidalHg),
   };
   return stop.text.replace(/\{(\w+)\}/g, (_, k) => n[k]);
 }

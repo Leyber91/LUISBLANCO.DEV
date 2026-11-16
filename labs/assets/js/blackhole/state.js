@@ -100,8 +100,9 @@ export class Store {
     return p;
   }
 
-  /** Patch for a camera view, for the current object or for the object named. */
-  viewPatch(id, obj = this.s.obj) {
+  /** Patch for a camera view, for the current object or for the object named. keep is the
+   *  inclination that stays where the view names none (a custom hole in the telescope view). */
+  viewPatch(id, obj = this.s.obj, keep = this.s.incl) {
     const v = VIEWS[id];
     if (!v) return {};
     const p = { view: id, rcam: v.rcam, fov: v.fov, tilt: v.tilt || 0, observer: id === 'journey' ? 'faller' : 'zamo' };
@@ -109,16 +110,28 @@ export class Store {
     // the telescope view shows what the EHT sees: an optically thin emitter, whose bright ring
     // sits on the critical curve; the other views show the thin disk (none for the primordial hole)
     p.emit = id === 'telescope' ? 'thin' : (o?.view?.emit || 'thick');
-    p.incl = id === 'telescope' ? (o ? o.incl : this.s.incl) : (v.incl ?? this.s.incl);
+    p.incl = id === 'telescope' ? (o ? o.incl : keep) : (v.incl ?? keep);
     return p;
+  }
+
+  /** The state a link starts from: the schema defaults, then the object preset resolved for
+   *  the view, then the view preset for the object (the resolution the tour uses for a stop).
+   *  It depends on the two names only, never on the live state. Boot applies it before the
+   *  link's own keys and toQuery() writes only what differs from it, so a value that happens
+   *  to equal a schema default is not lost, and a bare ?v=telescope opens the telescope camera. */
+  preset(obj = DEFAULTS.obj, view = DEFAULTS.view) {
+    return { ...DEFAULTS, ...this.objectPatch(obj, view), ...this.viewPatch(view, obj, DEFAULTS.incl) };
   }
 
   /* ---------------- URL ---------------- */
   toQuery() {
     const q = new URLSearchParams();
+    // obj and view name the preset boot starts from; every other key is written when it
+    // differs from that preset (not from the schema default, which the preset may override)
+    const base = this.preset(this.s.obj, this.s.view);
     for (const d of SCHEMA) {
       const v = this.s[d.key];
-      if (v === d.def) continue;
+      if (v === (d.key === 'obj' || d.key === 'view' ? d.def : base[d.key])) continue;
       q.set(d.url, d.type === 'num' ? String(+Number(v).toFixed(Math.max(d.digits ?? 3, 2) + 1)) : d.type === 'bool' ? (v ? '1' : '0') : v);
     }
     return q.toString();
@@ -131,6 +144,15 @@ export class Store {
     // legacy deep links from the first version of this page: ?type=kerr&view=edge
     if (q.has('type') && !q.has('o')) Object.assign(patch, { a: q.get('type') === 'schwarzschild' ? 0 : 0.9 });
     if (q.get('view') === 'edge') patch.incl = 88;
+    return patch;
+  }
+
+  /** Open a link (the page's boot): the preset of the object and view it names, then its own
+   *  keys on top. Returns the keys the link carried. */
+  open(search) {
+    const patch = this.fromQuery(search);
+    this.set(this.preset(this.coerce('obj', patch.obj ?? DEFAULTS.obj), this.coerce('view', patch.view ?? DEFAULTS.view)), { instant: true, src: 'boot' });
+    this.set(patch, { instant: true, src: 'boot' });
     return patch;
   }
 }
