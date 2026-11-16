@@ -8,6 +8,9 @@
    see a check fail here.
    ============================================================ */
 
+// A date is the date in UTC whatever the machine's zone. The tests run in a zone fourteen hours from UTC, so that a
+// date read in the machine's own zone shows on any runner (the gate's runner is in UTC, where the two agree).
+process.env.TZ = 'Pacific/Kiritimati';
 import { grouped, int, num, plural, day, fromIso, isoDay, ago, clock, MONTHS, isFiniteNumber } from '../format.js';
 
 let failed = 0, passed = 0;
