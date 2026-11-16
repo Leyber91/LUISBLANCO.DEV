@@ -1,14 +1,19 @@
 /* ============================================================
-   The test of the air tests, first part: the fit, the table, the
-   statuses and the scenarios. The line's words and the rules
-   data.js takes from air.js are in air.mutants2.test.mjs: one
-   file of both ran past the 120 s lab_tests gives a file on the
-   gates' machine (2026-11-16). Run from the repository root:
+   The test of the air tests, first of three.
+   The list is in three files of about 75 entries, so each runs
+   well inside the 120 s lab_tests gives a file on the gates'
+   machine (one file of 225 took 120 s there, two took 101 and
+   90 s, 2026-11-16): air.mutants (the fit, the mass relation,
+   the bare rock's day side, the scenarios), air.mutants2 (the
+   statuses from bounds, and data.js) and air.mutants3 (the words
+   of the line).
+   Run from the repository root:
      node labs/assets/js/exoplanet/tests/air.mutants.test.mjs
 
-   Each entry breaks one rule of air.js. The broken file is written to a copy of this
-   lab in the system's temp folder and air.test.mjs is run on
-   the copy (mutants.mjs). Every broken rule must fail a check.
+   Each entry breaks one rule of air.js. The broken file is
+   written to a copy of this lab in the system's temp folder and
+   air.test.mjs is run on the copy (mutants.mjs). Every broken
+   rule must fail a check.
 
    The list is checked against the code, not written from
    memory: tools/dev/conditions.mjs (pull request 43) reads
@@ -16,7 +21,7 @@
    and names those no entry here breaks. A condition no entry
    can break without changing nothing says so on its own line
    with "equivalent:" and the reason.
-     node tools/dev/conditions.mjs labs/assets/js/exoplanet/air.js labs/assets/js/exoplanet/tests/air.mutants.test.mjs labs/assets/js/exoplanet/tests/air.mutants2.test.mjs
+     node tools/dev/conditions.mjs labs/assets/js/exoplanet/air.js labs/assets/js/exoplanet/tests/air.mutants.test.mjs labs/assets/js/exoplanet/tests/air.mutants2.test.mjs labs/assets/js/exoplanet/tests/air.mutants3.test.mjs
    ============================================================ */
 
 import { fileURLToPath } from 'node:url';
@@ -86,48 +91,6 @@ const AIR = [
   ['the search turned round', `if (mapDay(m, Tnight) < Tday) lo = m; else hi = m;`, `if (mapDay(m, Tnight) > Tday) lo = m; else hi = m;`],
   ['the search\'s upper bound too low', `let lo = Tnight, hi = Tday * 2;`, `let lo = Tnight, hi = Tday * 1.1;`],
 
-  /* ---- statuses from bounds ---- */
-  ["thin air read as bare where bounds touch", `  if (key === 'bare') return b.kind === 'bare';\n  if (b.kind !== 'pressure') return false;`, `  if (key !== 'thick') return b.kind === 'bare';\n  if (b.kind !== 'pressure') return false;`],
-  ["the thin and thick bands swapped where bounds touch", `return key === 'thin' ? b.lo < THICK_FROM`, `return key !== 'thin' ? b.lo < THICK_FROM`],
-  ["thin air read as bare where bounds cover", `  if (key === 'bare') return b.kind === 'bare';\n  if (b.gases`, `  if (key !== 'thick') return b.kind === 'bare';\n  if (b.gases`],
-  ["the thin and thick bands swapped where bounds cover", `return key === 'thin' ? b.lo <= 0`, `return key !== 'thin' ? b.lo <= 0`],
-  ["bare never touched", `  if (key === 'bare') return b.kind === 'bare';\n  if (b.kind !== 'pressure') return false;`, `  if (key === 'bare') return b.kind !== 'bare';\n  if (b.kind !== 'pressure') return false;`],
-  ['thin never touched', `return key === 'thin' ? b.lo < THICK_FROM && b.hi > 0 : b.hi >= THICK_FROM;`, `return key === 'thin' ? false : b.hi >= THICK_FROM;`],
-  ['1 bar itself thin', `b.lo < THICK_FROM && b.hi > 0 :`, `b.lo <= THICK_FROM && b.hi > 0 :`],
-  ['zero touches thin', `b.lo < THICK_FROM && b.hi > 0 :`, `b.lo < THICK_FROM && b.hi >= 0 :`],
-  ['thick never touched', `: b.hi >= THICK_FROM;\n}`, `: false;\n}`],
-  ['1 bar itself not thick', `: b.hi >= THICK_FROM;\n}`, `: b.hi > THICK_FROM;\n}`],
-  ["bare never excluded", `  if (key === 'bare') return b.kind === 'bare';\n  if (b.gases`, `  if (key === 'bare') return false;\n  if (b.gases`],
-  ["some gases cover", "if (b.gases !== 'all' || !BASES.includes(b.basis)) return false;", "if (!BASES.includes(b.basis)) return false;"],
-  ["an exclusion with no basis", "if (b.gases !== 'all' || !BASES.includes(b.basis)) return false;", "if (b.gases !== 'all') return false;"],
-  ["an exclusion needing only one of its gases and its basis", "if (b.gases !== 'all' || !BASES.includes(b.basis))", "if (b.gases !== 'all' && !BASES.includes(b.basis))"],
-  ["energy balance not a basis", "export const BASES = ['composition', 'energy balance'];", "export const BASES = ['composition'];"],
-  ["GJ 367 b's exclusion without its basis", "while 0.1 bar atmospheres are consistent with the data.', 'energy balance')", "while 0.1 bar atmospheres are consistent with the data.')"],
-  ["TRAPPIST-1 c's day side from its one eclipse", "day: { T: 369, lo: 23, hi: 23, src: 'gillon25' }", "day: { T: 380, lo: 31, hi: 31, src: 'zieba23' }"],
-  ["LTT 1445 A b's conclusion as its consistency statement", "'These results suggest that LTT 1445A b lacks a very thick CO2 atmosphere, possibly due to atmospheric erosion driven by stellar activity. However, the presence of a moderately thin atmosphere (similar to those on Mars, Titan, or Earth) remains uncertain.'", "'consistent with emission from a dark rocky surface'"],
-  ["a conclusion without its reading", "${c.reading ? ` ${c.reading}` : ''}", ""],
-  ['thin never excluded', `return key === 'thin' ? b.lo <= 0 && b.hi >= THICK_FROM :`, `return key === 'thin' ? false :`],
-  ['thin covered from 0.01 bar', `? b.lo <= 0 && b.hi >= THICK_FROM :`, `? b.lo <= 0.01 && b.hi >= THICK_FROM :`],
-  ['thin covered to 0.99 bar', `? b.lo <= 0 && b.hi >= THICK_FROM :`, `? b.lo <= 0 && b.hi >= 0.99 :`],
-  ['thick never excluded', `: b.lo <= THICK_FROM && b.hi === Infinity;`, `: false;`],
-  ['thick covered from 1.01 bar', `: b.lo <= THICK_FROM && b.hi === Infinity;`, `: b.lo <= 1.01 && b.hi === Infinity;`],
-  ['thick covered to 1,000 bar', `: b.lo <= THICK_FROM && b.hi === Infinity;`, `: b.lo <= THICK_FROM && b.hi >= 1000;`],
-  ['thick from 2 bar', `export const THICK_FROM = 1;`, `export const THICK_FROM = 2;`],
-  ["an unknown world given undefined", `BY_NAME.get(name) || null;`, `BY_NAME.get(name);`],
-  ['nothing observed', `if (entry.observed && entry.observed.scenario === key) return`, `if (false) return`],
-  ['every scenario touched', `  if (!hit.length) {\n    const c = entry.concludes`, `  if (false) {\n    const c = entry.concludes`],
-  ['the conclusion never quoted', `const c = entry.concludes && entry.concludes.scenario === key ?`, `const c = false ?`],
-  ['never excluded', `const s = hit.some((b) => covers(b, key)) ? 'excluded' : 'disfavoured';`, `const s = 'disfavoured';`],
-  ['excluded only if every bound covers', `const s = hit.some((b) => covers(b, key)) ? 'excluded' : 'disfavoured';`, `const s = hit.every((b) => covers(b, key)) ? 'excluded' : 'disfavoured';`],
-  ['a bound\'s words left out of the reason', `why: hit.map((b) => b.says).join(' ')`, `why: 'bounded.'`],
-  ['LHS 3844 b\'s 10-bar bound for every gas made CO2 alone', `pressure('kreidberg19', 10, Infinity, 'all',`, `pressure('kreidberg19', 10, Infinity, ['CO2'],`],
-  ['GJ 367 b\'s 1-bar bound for a wide range of gases made partial', `pressure('zhang24', 1, Infinity, 'all',`, `pressure('zhang24', 1, Infinity, ['CO2'],`],
-  ['55 Cnc e\'s atmosphere only allowed', `observed: said('thick', 'hu24',`, `observed: null && said('thick', 'hu24',`],
-  ['TRAPPIST-1 b\'s conclusion dropped', `concludes: said('bare', 'greene23',`, `concludes: null && said('bare', 'greene23',`],
-  ['LHS 3844 b\'s day side taken from Spitzer', `day: { T: 985, lo: 17, hi: 16, src: 'zieba26' }`, `day: { T: 1040, lo: 40, hi: 40, src: 'kreidberg19' }`],
-  ['a DOI one digit off', `doi: '10.1038/s41586-023-05951-7'`, `doi: '10.1038/s41586-023-05952-7'`],
-  ['the preprint not marked', `what: 'JWST MIRI, phase curves at 15 µm', preprint: true }`, `what: 'JWST MIRI, phase curves at 15 µm' }`],
-
   /* ---- the scenarios and the drawing ---- */
   ["the fit's P and 1 - P swapped", "(key !== 'bare' ? fit.P : 1 - fit.P)", "(key === 'bare' ? fit.P : 1 - fit.P)"],
   ["allowed without a probability, the others with one", `const open = st.s === 'allowed' || st.s === 'disfavoured';`, `const open = st.s !== 'allowed' || st.s === 'disfavoured';`],
@@ -153,10 +116,9 @@ const AIR = [
   ['never a minimum mass', `minMass: !!minMass && !!fit`, `minMass: false`],
   ['a minimum mass flagged without a fit', `minMass: !!minMass && !!fit`, `minMass: !!minMass`],
   ['an excluded scenario offered as a switch', `filter((x) => x.status !== 'excluded').map((x) => x.key)`, `map((x) => x.key)`],
-
 ];
 
 const data = ['data/exomania/pscomppars-snapshot.json'];
 const a = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: AIR, data });
-console.log(`\nbroken rules: ${AIR.length} in air.js (the line's words and data.js are in air.mutants2.test.mjs)`);
+console.log(`\nbroken rules: ${AIR.length} in air.js (the statuses and data.js are in air.mutants2, the line in air.mutants3)`);
 process.exit(a);

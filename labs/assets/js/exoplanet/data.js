@@ -149,7 +149,7 @@ export function physics(p, opts = {}) {
   // the day side that decides melt: a measured one (air.js OBSERVED); else a locked bare rock's own (above);
   // else, inside 0.1 AU, 2^(1/4) times the mean
   const dayMeasured = air && air.observed && air.observed.day && locked ? air.observed.day.T : null;
-  const Ttest = dayMeasured !== null ? dayMeasured : (bare ? bare.Tday : (a < 0.1) ? Tsurf * 1.18921 : Tsurf);
+  const Ttest = dayMeasured ?? (bare ? bare.Tday : (a < 0.1) ? Tsurf * 1.18921 : Tsurf);
   let state = 'temperate';
   if (Ttest >= 1700) state = 'lava';
   else if (Ttest >= 1200) state = 'partial';

@@ -206,6 +206,10 @@ const json = JSON.parse(readFileSync(join(here, '../../../data/exomania/pscomppa
 globalThis.fetch = async () => ({ ok: true, body: null, json: async () => json, headers: { get: () => null } });
 const { list } = await loadSnapshot();
 const by = new Map(list.map((p) => [p.name, p]));
+// the physics of every world once: it is pure, and the catalogue-wide checks below read it many times (the
+// broken-rule lists run this file once per entry, so its speed sets theirs)
+const PH = new Map(list.map((p) => [p, physics(p)]));
+const ph0 = (p) => PH.get(p) || physics(p);
 {
   // every observed planet is in the catalogue, drawn with a surface, and comes out as observed
   for (const e of OBSERVED) {
@@ -249,10 +253,10 @@ const by = new Map(list.map((p) => [p.name, p]));
   yes('the five worlds near 50% fall where the posterior puts them', Object.entries(flips).every(([n, k]) => physics(by.get(n)).airKey === k && (physics(by.get(n)).air.fit.P >= 0.5) === (k !== 'bare')), Object.keys(flips).map((n) => `${n} ${(physics(by.get(n)).air.fit.P * 100).toFixed(1)}% ${physics(by.get(n)).airKey}`).join('; '));
 
   // every rocky world: its scenarios, their status and their probabilities
-  const rocky = list.filter((p) => !physics(p).isGiant);
+  const rocky = list.filter((p) => !ph0(p).isGiant);
   let fewer = 0, noP = 0, sumBad = 0, unnamed = 0, noWord = 0, unobserved = 0;
   for (const p of rocky) {
-    const ph = physics(p), sc = ph.air;
+    const ph = ph0(p), sc = ph.air;
     if (!sc.observed) unobserved++;
     const open = sc.list.filter((x) => x.status !== 'excluded');
     if (!sc.observed && open.length < 2) fewer++;
@@ -267,13 +271,13 @@ const by = new Map(list.map((p) => [p.name, p]));
   yes('the chance of air and that of bare rock add up to one', sumBad === 0);
   yes('the line names all three scenarios for every rocky world, each in a sentence that gives its status', unnamed === 0, `${unnamed} lines miss one`);
   yes('the line gives every unobserved world\'s chance of air, extrapolated, with its 68% range', noWord === 0, `${noWord} lines`);
-  yes('no giant has scenarios: its look is its cloud tops', list.filter((p) => physics(p).isGiant).every((p) => physics(p).air === null));
+  yes('no giant has scenarios: its look is its cloud tops', list.filter((p) => ph0(p).isGiant).every((p) => ph0(p).air === null));
   // the worlds without a fit (S4): drawn by the old rule, labelled so
-  const nofit = rocky.filter((p) => !physics(p).air.fit);
+  const nofit = rocky.filter((p) => !ph0(p).air.fit);
   yes('22 rocky worlds have no fit, all found by microlensing or pulsar timing, PSR B1257+12 c and d among them', nofit.length === 22 && nofit.every((p) => /Microlensing|Pulsar/.test(p.method || '')) && ['PSR B1257+12 c', 'PSR B1257+12 d'].every((n) => nofit.some((p) => p.name === n)), `${nofit.length}: ${[...new Set(nofit.map((p) => p.method))].join(', ')}`);
-  const nofitKeys = nofit.reduce((c, p) => { const k = physics(p).airKey; c[k] = (c[k] || 0) + 1; return c; }, {});
+  const nofitKeys = nofit.reduce((c, p) => { const k = ph0(p).airKey; c[k] = (c[k] || 0) + 1; return c; }, {});
   yes('the amount of air draws 21 of them with thick air and 1 bare', nofitKeys.thick === 21 && nofitKeys.bare === 1 && !nofitKeys.thin, JSON.stringify(nofitKeys));
-  yes('they are drawn by the amount of air, and the line says so with no probability', nofit.every((p) => physics(p).air.by === 'amount' && /No fit: the archive lacks the star's luminosity and the flux\. The star's temperature and size are stand-ins, so the look is illustrative\./.test(airLine(physics(p).air)) && !/Chance/.test(airLine(physics(p).air) + airShort(physics(p).air))));
+  yes('they are drawn by the amount of air, and the line says so with no probability', nofit.every((p) => ph0(p).air.by === 'amount' && /No fit: the archive lacks the star's luminosity and the flux\. The star's temperature and size are stand-ins, so the look is illustrative\./.test(airLine(ph0(p).air)) && !/Chance/.test(airLine(ph0(p).air) + airShort(ph0(p).air))));
   // a minimum mass (N2)
   const prox = airLine(physics(by.get('Proxima Cen b')).air);
   yes('where the mass is a minimum the line says the probability is a lower bound', / The mass is a minimum \(M sin i\), so the chance is a lower bound\. /.test(prox) && !/minimum/.test(airLine(physics(by.get('TRAPPIST-1 e')).air)), prox);
@@ -308,7 +312,7 @@ const ZONE = 'The habitable zone describes the temperature the star gives, and s
   yes('the short line of an observed atmosphere', short('55 Cnc e') === 'Air: drawn with thick air, as observed. Chance of air 94% (88 to 99.1%).' && short('TOI-561 b') === 'Air: drawn with thick air, as observed.', short('55 Cnc e'));
   yes('the short line of a scenario the visitor chose', short('TRAPPIST-1 e', 'thin') === 'Air: drawn with thin air, by your choice. Chance of air 1% (0.05 to 2%).', short('TRAPPIST-1 e', 'thin'));
   yes('the short line of a world with no fit', short('PSR B1257+12 c') === 'Air: drawn with thick air, illustrative: no fit.', short('PSR B1257+12 c'));
-  const longs = list.filter((p) => physics(p).air).map((p) => [p.name, airShort(physics(p).air)]).sort((a, b) => b[1].length - a[1].length);
+  const longs = list.filter((p) => ph0(p).air).map((p) => [p.name, airShort(ph0(p).air)]).sort((a, b) => b[1].length - a[1].length);
   yes('every short line is at most 92 characters, and the longest is EPIC 201238110 b\'s, which the drive measures at 390 px', longs[0][1].length <= 92 && longs.find((x) => x[0] === 'EPIC 201238110 b')[1].length === longs[0][1].length, `${longs[0][1].length}: ${longs[0][0]}: ${longs[0][1]}`);
   // the details, under the short line
   yes('an unobserved world in the habitable zone: drawn, the other two allowed, not observed, the chance of air with its range, and what the zone does not say', line('TRAPPIST-1 f') === `Drawn as bare rock. Thin air and thick air allowed. Not observed. Chance it kept an atmosphere, by the 2026 fit, extrapolated: 8% (68% range 0.73 to 16%). ${ZONE}`, line('TRAPPIST-1 f'));
@@ -343,7 +347,7 @@ const ZONE = 'The habitable zone describes the temperature the star gives, and s
   const side = (s) => { const m = s.match(/Chance of air (just under 50%|over 99\.9%|under 0\.01%|[\d.]+%)/); return !m ? null : m[1] === 'just under 50%' || m[1] === 'under 0.01%' ? 'bare' : m[1] === 'over 99.9%' ? 'air' : parseFloat(m[1]) >= 50 ? 'air' : 'bare'; };
   const bad = [];
   for (const p of list) {
-    const ph = physics(p), sc = ph.air;
+    const ph = ph0(p), sc = ph.air;
     if (!sc) continue;
     const k = ph.airKey, s = airShort(sc), l = airLine(sc);
     const why = sc.by === 'observed' ? s.startsWith(`${SHORT_AS[k]}, as observed.`) && sc.observed.observed.scenario === k
@@ -393,7 +397,7 @@ const ZONE = 'The habitable zone describes the temperature the star gives, and s
 {
   let differ = 0, worlds = 0, nearHalf = 0, widest = 0;
   for (const p of list) {
-    const fit = physics(p).air && physics(p).air.fit;
+    const fit = ph0(p).air && ph0(p).air.fit;
     if (!fit) continue;
     worlds++;
     if (fit.air !== (fit.P >= 0.5)) differ++;
