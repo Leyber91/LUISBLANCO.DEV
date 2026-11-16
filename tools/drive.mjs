@@ -117,7 +117,9 @@ export async function drive(scenario, opts = {}) {
           let bad;
           try { bad = await ev(inv.expression); } catch (e) { bad = [`the rule could not be read: ${String(e.message || e).slice(0, 160)}`]; }
           inv.steps++;
-          for (const b of Array.isArray(bad) ? bad : []) {
+          // fails closed: a rule that returns anything but a list is a break, named, never a pass
+          if (!Array.isArray(bad)) bad = [`the rule returned ${bad === null ? 'null' : typeof bad} instead of a list of breaks`];
+          for (const b of bad) {
             const k = String(b);
             if (inv.seen.has(k)) continue;
             inv.seen.add(k);

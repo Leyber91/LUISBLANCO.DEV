@@ -702,9 +702,11 @@ export default async function log(p, { base }) {
   await p.sleep(700);
   const fc1 = await p.ev('document.activeElement.dataset.cls || ""');
   await p.key('r');
-  await p.sleep(1200);
+  // the visit "r" writes, waited for in the store and then on the line, not for a fixed time (a 1,200 ms wait failed at 390 under load)
+  const wrote = await p.until(`(${rawRecord})().then((r) => !!r && !!r.data && !!r.data.log && r.data.log.visits.length === 1)`, 8000);
+  await p.until('/^Log: 1 visited/.test(document.getElementById("log-line").textContent)', 4000);
   const fc2 = await p.ev('document.activeElement.dataset.cls || ""'), fcl = await state();
-  p.check('D7: a re-read of the log, and a world opened with "r" that writes a visit, leave the focus on the filter\'s "all sizes"', fc1 === 'all' && fc2 === 'all' && fcl.line === 'Log: 1 visited, 0 saved', `${fc1} | ${fc2} | ${fcl.line}`);
+  p.check('D7: a re-read of the log, and a world opened with "r" that writes a visit, leave the focus on the filter\'s "all sizes"', wrote && fc1 === 'all' && fc2 === 'all' && fcl.line === 'Log: 1 visited, 0 saved', `${fc1} | ${fc2} | ${fcl.line} | stored ${wrote}`);
 
   // ---- D8 and T11: a world both saved and visited keeps the focus in the list it was in ----
   const both = many[5];

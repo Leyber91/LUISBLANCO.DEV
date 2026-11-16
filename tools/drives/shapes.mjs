@@ -43,22 +43,30 @@
 //   os.css .los-bk                      the corner brackets of a Labs OS plate (the sharing question), the same frame
 //   #ret-render .st-observed            the status word "observed" of the planet's air (ticket 2.13, pull request 41)
 // No other use: export.js drew the plate's brackets in gold until 2026-11-16, and plot.js the chosen world on the
-// diagram and on the sky map; both are the bright ink now. The canvases the pixel scan does not read are named with
-// their reason in SURVEY_GOLD.canvases.named.
+// diagram and on the sky map; both are the bright ink now. SURVEY_GOLD.canvases says, with reasons, the one canvas
+// the pixel scan does not read (the WebGL planet), the one it skips under a condition (the signal in transit mode),
+// the one that may hold one gold dot (the diagram, its kept world) and the two whose star's own colour it leaves out.
 
 import { standard, gold as goldRule, targets as targetRule } from './invariants.mjs';
 
+const KEPT = '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")';
+const STAR = '(() => { const d = document.querySelector("#nums .sw-dot"); return d ? getComputedStyle(d).getPropertyValue("--star-col").trim() : ""; })()';
+const TRANSIT = '(document.querySelector("#sheet-e [data-k=sig]") || { getAttribute: () => "false" }).getAttribute("aria-checked") !== "true"';
 export const SURVEY_GOLD = {
   allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel'],
   canvases: {
     scan: true,
     named: {
       '#exo-canvas': 'the world itself, a render of its own colours, not a mark (and a WebGL canvas, which has no 2D pixels to read)',
-      '#inset': 'the star drawn in its own colour, its Planck spectrum, which can be as warm as a tint of gold',
-      '#sheet-d canvas.sys-cv': 'the star drawn in its own colour, as in the inset',
-      '#sheet-e canvas.tr-cv': 'the measured depth and duration against the model: gold by the rule',
     },
-    when: { '#v-plot canvas.plot-cv': '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")' },   // a kept chosen world: its point is gold
+    // the signal in transit mode: the archive's measured depth and duration against the model, gold by the rule; in
+    // velocity mode it is read like every other canvas
+    when: { '#sheet-e canvas.tr-cv': TRANSIT },
+    // the catalogue diagram while the chosen world is kept: its point, one dot, and no other gold
+    oneDot: { '#v-plot canvas.plot-cv': KEPT },
+    // the star drawn in its own colour (its Planck spectrum, which can be as warm as a tint of gold): the pixels near
+    // that colour, as the table's swatch gives it, are not counted; a gold orbit or mark still is
+    ownColour: { '#inset': STAR, '#sheet-d canvas.sys-cv': STAR },
   },
 };
 
@@ -329,6 +337,40 @@ export default async function shapes(p, { base, width }) {
   p.check('the five diagrams are lettered thumbnails, the open one framed and the others not', F0.tabs.length === 5 && F0.tabs.map((t) => t.letter).join('') === 'abcde' && F0.tabs.filter((t) => t.sel === 'true').length === 1 && F0.tabs.every((t) => t.frame === (t.sel === 'true')), j(F0.tabs));
   const G0 = await p.ev(goldRule(SURVEY_GOLD));
   p.check('gold is only on a measured value\'s tick, a world in the log and the site\'s frame, and no canvas the list does not name has a gold pixel while the chosen world is not kept', G0.length === 0, G0.join(' | '));
+  // every diagram read for gold, the chosen world not kept and then kept: no gold but the kept world's one dot
+  const goldPx = '(() => { const c = document.querySelector("#v-plot canvas.plot-cv"), d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 90 && Math.abs(d[i] - 212) <= 22 && Math.abs(d[i + 1] - 162) <= 22 && Math.abs(d[i + 2] - 76) <= 22) n++; return n; })()';
+  const diagrams = async () => {
+    const seen = [];
+    for (let i = 0; i < 5; i++) {
+      await p.ev(`document.querySelectorAll("#v-plot [role=tab]")[${i}].click()`); await p.sleep(700);
+      seen.push({ plot: await p.ev(`document.querySelectorAll("#v-plot [role=tab]")[${i}].dataset.plot`), breaks: await p.ev(goldRule(SURVEY_GOLD)), gold: await p.ev(goldPx) });
+    }
+    await p.ev('document.querySelectorAll("#v-plot [role=tab]")[0].click()'); await p.sleep(500);
+    return seen;
+  };
+  // the allowances do not over-allow: a gold orbit drawn on the system and on the inset, and gold on the signal once it
+  // shows the velocity, are each caught; every canvas is put back as it was
+  const plant = (sel, how) => `(() => { const c = document.querySelector(${JSON.stringify(sel)}), x = c.getContext("2d"); window.__kept = x.getImageData(0, 0, c.width, c.height); x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--accretion").trim(); x.lineWidth = 2; x.beginPath(); ${how} x.stroke(); x.restore(); return true; })()`;
+  const unplant = (sel) => `(() => { const c = document.querySelector(${JSON.stringify(sel)}); c.getContext("2d").putImageData(window.__kept, 0, 0); return true; })()`;
+  const caught = async (sel, how, word) => { await p.ev(plant(sel, how)); const b = await p.ev(goldRule(SURVEY_GOLD)); await p.ev(unplant(sel)); return b.some((x) => x.includes(word)); };
+  const orbitSys = await caught('#sheet-d canvas.sys-cv', 'x.arc(c.width / 2, c.height / 2, c.height / 3, 0, Math.PI * 2);', 'sys-cv');
+  const orbitInset = await caught('#inset', 'x.arc(c.width / 2, c.height / 2, c.height / 3, 0, Math.PI * 2);', 'inset');
+  const trTransit = await caught('#sheet-e canvas.tr-cv', 'x.moveTo(10, 10); x.lineTo(c.width - 10, 10);', 'tr-cv');
+  await p.ev('document.querySelector("#sheet-e [data-k=sig]").click()'); await p.sleep(500);
+  const velClean = await p.ev(goldRule(SURVEY_GOLD));
+  const trVelocity = await caught('#sheet-e canvas.tr-cv', 'x.moveTo(10, 10); x.lineTo(c.width - 10, 10);', 'tr-cv');
+  await p.ev('document.querySelector("#sheet-e [data-k=sig]").click()'); await p.sleep(500);
+  p.check('the gold scan is not blinded by its allowances: a gold orbit on the system or the inset is caught, and gold on the signal is allowed in transit mode only', orbitSys && (orbitInset || phone) && !trTransit && velClean.length === 0 && trVelocity, j({ orbitSys, orbitInset, trTransit, velClean, trVelocity }));   // the inset is not drawn on a phone
+  const free = await diagrams();
+  p.check('each of the five diagrams, the chosen world not kept: no gold on it, nor on any canvas the list does not name', free.length === 5 && free.every((d) => d.breaks.length === 0 && d.gold === 0), j(free));
+  await p.ev('document.querySelector("[data-act=log]").click()');
+  await p.until('document.querySelector("[data-act=log]").classList.contains("kept")', 6000); await p.sleep(400);
+  const kept = await diagrams();
+  const onIt = kept.filter((d) => ['valley', 'rp', 'sky'].includes(d.plot));
+  p.check('each of the five diagrams, the chosen world kept: its point is the one gold, where it is drawn (a, b, e), and nothing else is gold', kept.length === 5 && kept.every((d) => d.breaks.length === 0) && onIt.length === 3 && onIt.every((d) => d.gold > 0 && d.gold < 120), j(kept));
+  await p.ev('document.querySelector("[data-act=log]").click()');
+  await p.until('!document.querySelector("[data-act=log]").classList.contains("kept")', 6000); await p.sleep(300);
+
   // a size band, once pressed, stands on its heavy rule; the others have none
   await p.ev('document.querySelector("#filters [data-cls=rocky]").click()'); await p.sleep(500);
   const F1 = await call(frames);

@@ -34,10 +34,16 @@
      animation (a fade) is measured once it has settled.
    - gold: the site's gold (--accretion and its two tints) is used
      by no element but the ones a page allows, in its text, borders,
-     background, stroke or fill; and, when a page names canvases,
-     no pixel of a canvas is gold unless the page names that canvas
-     with its reason, or the condition the page gives for gold on
-     it holds.
+     background, stroke or fill; and, when a page asks for its
+     canvases to be read, no pixel of any 2D canvas is gold, with
+     four kinds of allowance a page gives by selector: a canvas
+     named with its reason (not read); a canvas whose condition
+     holds (not read while it holds); a canvas that may hold one
+     gold dot while its condition holds (its gold pixels must fit in
+     a 12 px box); a canvas drawn in a colour of its own (the pixels
+     near that colour are not counted, every other pixel is). A
+     canvas the rule should read and cannot (no 2D context, pixels
+     refused) is a break.
    ============================================================ */
 
 /* ---- inside the page ---- */
@@ -123,7 +129,8 @@ export const contrast = ({ min = 4.5, large = 3 } = {}) => `(() => {
 })()`;
 
 /* gold: allow, the selectors of the elements that may be gold (each with its reason in the caller);
-   canvases: { scan: true, named: { '<selector>': 'reason' }, when: { '<selector>': '<expression: gold allowed now>' } } */
+   canvases: { scan: true, named: { '<selector>': 'reason' }, when: { '<selector>': '<expression: gold allowed now>' },
+     oneDot: { '<selector>': '<expression: one gold dot allowed now>' }, ownColour: { '<selector>': '<expression: a colour>' } } */
 export const gold = ({ allow = [], canvases = null } = {}) => `(() => {
   const shown = ${SHOWN}, name = ${NAME};
   const probe = document.createElement('i'); document.body.append(probe);
@@ -143,18 +150,33 @@ export const gold = ({ allow = [], canvases = null } = {}) => `(() => {
   const cv = ${JSON.stringify(canvases)};
   if (cv && cv.scan) {
     const rgb = tok.map((c) => c.match(/\\d+/g).slice(0, 3).map(Number));
-    const named = Object.keys(cv.named || {}), when = cv.when || {};
+    const named = Object.keys(cv.named || {}), when = cv.when || {}, oneDot = cv.oneDot || {}, ownColour = cv.ownColour || {};
+    const hexRgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '').trim()); if (!m) return null; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
     for (const c of document.querySelectorAll('canvas')) {
       if (!c.width || !c.height || !shown(c) || named.some((s) => c.matches(s))) continue;
       const cond = Object.keys(when).find((s) => c.matches(s));
       if (cond && (0, eval)(when[cond])) continue;
-      let d; try { const x = c.getContext('2d'); if (!x) continue; d = x.getImageData(0, 0, c.width, c.height).data; } catch { continue; }
-      let n = 0;
+      // fails closed: a canvas the list does not name and whose pixels cannot be read is a break, not a pass
+      const label = (c.id ? '#' + c.id : (c.parentElement && c.parentElement.closest('[id]') ? '#' + c.parentElement.closest('[id]').id + ' ' : '') + 'canvas.' + [...c.classList].join('.'));
+      let d;
+      try { const x = c.getContext('2d'); if (!x) { out.push(label + ': no 2D context, its pixels cannot be read'); continue; } d = x.getImageData(0, 0, c.width, c.height).data; }
+      catch (err) { out.push(label + ': its pixels cannot be read (' + String(err && err.name || err) + ')'); continue; }
+      const dotSel = Object.keys(oneDot).find((s) => c.matches(s)), dot = !!dotSel && !!(0, eval)(oneDot[dotSel]);
+      const ownSel = Object.keys(ownColour).find((s) => c.matches(s)), own = ownSel ? hexRgb((0, eval)(ownColour[ownSel])) : null;
+      if (ownSel && !own) { out.push(label + ': the colour it is allowed was not found'); continue; }
+      let n = 0, x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
       for (let i = 0; i < d.length; i += 4) {
         if (d[i + 3] < 90) continue;
-        for (const g of rgb) if (Math.abs(d[i] - g[0]) <= 22 && Math.abs(d[i + 1] - g[1]) <= 22 && Math.abs(d[i + 2] - g[2]) <= 22) { n++; break; }
+        if (own && Math.abs(d[i] - own[0]) <= 28 && Math.abs(d[i + 1] - own[1]) <= 28 && Math.abs(d[i + 2] - own[2]) <= 28) continue;
+        for (const g of rgb) if (Math.abs(d[i] - g[0]) <= 22 && Math.abs(d[i + 1] - g[1]) <= 22 && Math.abs(d[i + 2] - g[2]) <= 22) {
+          n++; const p = i / 4, x = p % c.width, y = Math.floor(p / c.width);
+          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+          break;
+        }
       }
-      if (n > 0) out.push((c.id ? '#' + c.id : (c.parentElement && c.parentElement.closest('[id]') ? '#' + c.parentElement.closest('[id]').id + ' ' : '') + 'canvas.' + [...c.classList].join('.')) + ': ' + n + ' gold pixels');
+      const k = c.width / Math.max(1, c.clientWidth);
+      if (n > 0 && dot && x1 - x0 < 12 * k && y1 - y0 < 12 * k) continue;   // the one dot it may hold
+      if (n > 0) out.push(label + ': ' + n + ' gold pixels' + (dot ? ', more than one dot (' + Math.round((x1 - x0) / k) + ' x ' + Math.round((y1 - y0) / k) + ' px)' : ''));
     }
   }
   return [...new Set(out)].slice(0, 12);
