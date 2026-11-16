@@ -208,5 +208,25 @@
     "name": "run: a test that prints a lot is failed for it",
     "from": ", maxBuffer: 64 * 1024 * 1024 }",
     "to": " }"
+  },
+  {
+    "name": "output: the failing checks of a failing file not printed",
+    "from": "      if (failing.length) say(`failing checks (${failing.length}):\\n${failing.slice(0, 40).join('\\n')}`);\n",
+    "to": ""
+  },
+  {
+    "name": "output: no line taken for a failing check",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines.filter((l) => /^\\s*FAILED\\b/.test(l));"
+  },
+  {
+    "name": "output: every line taken for a failing check",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines;"
+  },
+  {
+    "name": "output: none of the failing checks shown",
+    "from": "failing.slice(0, 40)",
+    "to": "failing.slice(0, 0)"
   }
 ]

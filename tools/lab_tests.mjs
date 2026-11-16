@@ -111,7 +111,14 @@ export function run(only, root = ROOT, say = console.log, limit = LIMIT_MS) {
     if (!ok) fail++;
     const last = ((r.stdout || '') + (r.stderr || '')).trim().split(/\r?\n/).slice(-1)[0] || '';
     say(`${ok ? 'pass' : 'FAIL'} ${rel(f)} (${ms} ms) ${last.slice(0, 120)}`);
-    if (!ok) say(((r.stdout || '') + (r.stderr || '') + (r.error ? String(r.error) : '')).trim().split(/\r?\n/).slice(-20).join('\n'));
+    if (!ok) {
+      // the failing checks first, wherever they sit: a mutants test prints hundreds of lines and its one FAIL line
+      // was outside the last twenty on 2026-11-16, so a failure in the gates could not be read
+      const lines = ((r.stdout || '') + (r.stderr || '') + (r.error ? String(r.error) : '')).trim().split(/\r?\n/);
+      const failing = lines.filter((l) => /^\s*FAIL\b/.test(l));
+      if (failing.length) say(`failing checks (${failing.length}):\n${failing.slice(0, 40).join('\n')}`);
+      say(lines.slice(-20).join('\n'));
+    }
   }
   for (const m of missed.filter((x) => inLab(x.file))) {
     fail++;
@@ -171,6 +178,7 @@ function selftest() {
     go('killed', { 'z/tests.mjs': 'process.kill(process.pid);\nsetTimeout(() => {}, 5000);\n' });
     go('slow', { 'z/tests.mjs': 'setTimeout(() => process.exit(0), 6000);\n' }, '--limit', '1500');
     go('loud', { 'z/tests.mjs': 'const line = "x".repeat(99) + "\\n"; for (let i = 0; i < 30000; i++) process.stdout.write(line);\n' });
+    go('buried', { 'z/tests.mjs': 'console.log("FAIL  the buried check: 0 checks fail");\nfor (let i = 0; i < 30; i++) console.log("pass  filler " + i);\nprocess.exit(1);\n' });
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -197,6 +205,7 @@ function selftest() {
     ['a labs folder with no labs passes with nothing to run', code.empty === 0],
     ['a root with no labs folder fails: nothing ran', code['no-root'] === 1 && out['no-root'].includes('does not exist, so nothing was run')],
     ['a test runs from its own folder', code.cwd === 0],
+    ['a failing check far above the last lines is shown, and only the failing ones', code.buried === 1 && out.buried.includes('failing checks (1):\nFAIL  the buried check: 0 checks fail\n')],
     ['a test that is killed fails the gate', code.killed === 1],
     ['a test that runs past the limit fails the gate', code.slow === 1],
     ['a test that prints three megabytes and exits 0 passes', code.loud === 0],
