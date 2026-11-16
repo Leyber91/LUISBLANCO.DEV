@@ -121,9 +121,9 @@
 .skip { position: absolute; left: -999px; top: 8px; z-index: 500; display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 8px 12px; background: var(--surface); color: var(--text-bright); border: 1px solid var(--hair); }
 .skip:focus { left: 8px; }
 
-/* A single accessible focus ring, used everywhere. */
+/* A single accessible focus ring, used everywhere. It sets the ring only: an element keeps its own corners when it
+   takes the focus (a radius here once rounded square selects and cut the memes' 8 px select to 4 px). */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--horizon);
   outline-offset: 2px;
-  border-radius: var(--r-sm);
 }

@@ -36,7 +36,7 @@ import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { keycap, keyHint, switchCtl, setSwitch, bindSwitch, isOn, scale, bindScale, setScale } from '../kit/controls.js';
 import { el } from '../kit/dom.js';
-import { day, fromIso, isoDay } from '../kit/format.js';
+import { day, fromIso, isoDay, int } from '../kit/format.js';
 
 const params = new URLSearchParams(location.search);
 window.__EXO_STILL__ = params.has('still');
@@ -831,10 +831,10 @@ async function boot() {
     const st = store.state; st.plain = off;
     if (st.sel && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life }); }
   });
-  $('sun-elev').addEventListener('input', (e) => { engine.setCamera({ sunElev: +e.target.value }); $('sun-elev-v').textContent = `${e.target.value}°`; });
+  $('sun-elev').addEventListener('input', (e) => { engine.setCamera({ sunElev: +e.target.value }); $('sun-elev-v').textContent = `${int(+e.target.value)}°`; });   // the kit writes −10, with the minus sign
   $('ground-sites').addEventListener('click', (e) => {
     const b = e.target.closest('[data-elev]'); if (!b) return;
-    engine.setCamera({ sunElev: +b.dataset.elev }); $('sun-elev').value = b.dataset.elev; $('sun-elev-v').textContent = `${b.dataset.elev}°`;
+    engine.setCamera({ sunElev: +b.dataset.elev }); $('sun-elev').value = b.dataset.elev; $('sun-elev-v').textContent = `${int(+b.dataset.elev)}°`;
   });
   $('tour-prev').addEventListener('click', () => stepTour(-1));
   $('tour-next').addEventListener('click', () => stepTour(1));

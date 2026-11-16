@@ -6,8 +6,8 @@
 
    Why it exists: on 2026-11-16 the independent review of pull
    request 42 found two such sentences false. The title block said
-   "6,464, 4,874 with a radius" (every planet but a few hundred has
-   a radius; 4,874 is how many are measured), and the histogram of
+   "6,464, 4,874 with a radius" (6,409 of the 6,464 have a radius;
+   4,874 is how many names the roster lists), and the histogram of
    radii said "the fewest between 1.5 and 2, the radius valley"
    over the whole catalogue, whose bins there hold about 200 each,
    as many as either side. Each is now produced by a function that
@@ -72,9 +72,22 @@ yes('and the radii it calls measured are fewer than the radii the list has', mea
 const n = radiusBins(list), say = histWords(n), nums = digits(say);
 const top = n.indexOf(Math.max(...n));
 yes('on the catalogue, the histogram\'s words count its bins', nums.includes(n.reduce((a, b) => a + b, 0)) && nums.includes(n[top]), `${say} | total ${n.reduce((a, b) => a + b, 0)}, most ${n[top]} in bin ${top}`);
-const valleyBins = n.map((c, i) => [c, at(i)]).filter(([, r]) => r >= 1.5 && r <= 2).map(([c]) => c);
-const sides = n.map((c, i) => [c, at(i)]).filter(([, r]) => (r >= 1.1 && r < 1.5) || (r > 2 && r <= 3)).map(([c]) => c);
-yes('and the catalogue shows no valley of its own, which is why the words do not claim one', Math.min(...valleyBins) >= 0.5 * Math.min(...sides), `between 1.5 and 2: ${valleyBins.join(' ')}; either side: ${sides.join(' ')}`);
+/* A dip between 1.5 and 2 Earth radii: the emptiest bin there against the mean of the bins on each side (1.1 to 1.5,
+   and 2 to 3), the lower of the two. 1 is no dip; 0.9 is a dip of 10%. On the committed catalogue it is 1.11 (the
+   emptiest bin, 190, against a mean of 172 below and 290 above, 2026-11-16); a dip of 10% or more fails, so the
+   bound sits at 0.95, between the two. */
+const DIP_BOUND = 0.95;
+const dip = (bins) => {
+  const at2 = (i) => xr((i + 0.5) / bins.length);
+  const mean = (xs) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+  const valley = bins.filter((_, i) => at2(i) >= 1.5 && at2(i) <= 2);
+  const below = mean(bins.filter((_, i) => at2(i) >= 1.1 && at2(i) < 1.5)), above = mean(bins.filter((_, i) => at2(i) > 2 && at2(i) <= 3));
+  return Math.min(...valley) / Math.min(below, above);
+};
+const flat = new Array(BINS).fill(100), dipped = flat.map((c, i) => (at(i) >= 1.5 && at(i) <= 2 ? 90 : c));
+yes('the dip measure reads a flat histogram as no dip and a 10% dip as one past the bound', dip(flat) === 1 && dip(dipped) < DIP_BOUND && Math.abs(dip(dipped) - 0.9) < 1e-9, `${dip(flat)} ${dip(dipped)}`);
+const real = dip(n);
+yes('and the whole catalogue shows no valley of its own, which is why the words do not claim one', real >= DIP_BOUND, `emptiest bin between 1.5 and 2 over the lower side's mean: ${real.toFixed(3)} (bound ${DIP_BOUND})`);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

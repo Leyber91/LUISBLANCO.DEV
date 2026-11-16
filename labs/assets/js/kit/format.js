@@ -67,7 +67,10 @@ export function num(v, sig = 3, none = '') {
   const a = Math.abs(v);
   if (a === 0) return '0';
   const d = Math.max(0, sig - 1 - Math.floor(Math.log10(a)));
-  const s = a.toFixed(Math.min(d, 4));
+  let s = a.toFixed(Math.min(d, 4));
+  // rounding that carries into the next power of ten (99.96 to 100) takes one decimal fewer, to keep `sig` figures
+  const up = Math.max(0, sig - 1 - Math.floor(Math.log10(Number(s))));
+  if (up < d) s = a.toFixed(Math.min(up, 4));
   if (Number(s) >= 1000) return grouped(Math.round(v));   // 999.6 rounds to a thousand, and is grouped as one
   return (v < 0 ? MINUS : '') + s;
 }

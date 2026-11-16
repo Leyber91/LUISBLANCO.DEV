@@ -159,7 +159,7 @@ export async function joinRoster(list) {
   return { added, rosterCount: names.size };
 }
 
-/* The title block's count, counted from the list: "6,464 planets, 4,874 with a measured radius" once the roster has
+/* The title block's count, counted from the list: "6,464 planets, 4,869 with a measured radius" once the roster has
    said which radii are measured (joinRoster above); before that, or if it fails, the planets alone, since which radii
    are measured is then a guess. Tests: tests/counts.test.mjs. */
 export function countLine(list, rosterJoined) {
