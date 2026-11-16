@@ -1,0 +1,16 @@
+{
+  "//": "The labs' own JavaScript that declares its types (// @ts-check at its top), checked by tsc: npm test runs it. A file is added here when it is typed; files without the pragma that it imports are read for their types and not checked.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "allowJs": true,
+    "checkJs": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "rootDir": ".."
+  },
+  "include": ["../labs/assets/js/exoplanet/record.js"],
+  "exclude": []
+}

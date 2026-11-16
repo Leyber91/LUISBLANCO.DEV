@@ -18,7 +18,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
-  V, LIMITS, VIAS, VIA_WORDS, VIEWS, FULL, NEWER, UNKNOWN, empty, normalise, view, visit, save, unsave, saveAll, pin, unpin, clearPins, forget, setOverdue,
+  V, LIMITS, KINDS, VIAS, VIA_WORDS, VIEWS, FULL, NEWER, UNKNOWN, OFF_LINE, OFF_GLOBE, NO_DAY, TOO_LONG, SKY_YEARS, LEGACY_SEEN, empty, normalise, view, visit, save, unsave, saveAll, pin, unpin, clearPins, forget, setOverdue,
+  see, newSince, legacySeen, skyLink, skyWords, healthWords, seeCatalogue, health,
   isSaved, counts, thousands, worlds, lineWords, visitWords, savedWords, toggleWords, adoptWords, forgetWords, footWords, fullWhy, shareValue, readShare, viaOf, read, load, update,
 } from '../record.js';
 
@@ -44,18 +45,21 @@ const filled = (nVisits, nSaved = 0) => {
 
 /* ---- the shape ---- */
 {
-  yes('the record is at version 2, and its bounds are 200 saved, 500 visits, 3 pins, 24 shared and a count of dropped visits of a million', V === 2 && same(LIMITS, { saved: 200, visits: 500, pins: 3, shared: 24, dropped: 1000000 }));
-  yes('a world is reached in one of eight ways, and each has words', same(VIAS, ['search', 'results', 'tour', 'random', 'diagram', 'system', 'link', 'log'])
-    && same(VIAS.map((v) => VIA_WORDS[v]), ['by name', 'from a question', 'on a tour', 'at random', 'on the diagram', 'in its system', 'from a link', 'from the log']));
+  yes('the record is at version 3, and its bounds are 200 saved, 500 visits, 3 pins, 24 shared, a count of dropped visits of a million and 150,000 characters of the catalogue last seen', V === 3 && same(LIMITS, { saved: 200, visits: 500, pins: 3, shared: 24, dropped: 1000000, seen: 150000 }));
+  yes('a world is reached in one of nine ways, and each has words: the ninth is the sky\'s', same(VIAS, ['search', 'results', 'tour', 'random', 'diagram', 'system', 'link', 'log', 'sky'])
+    && same(VIAS.map((v) => VIA_WORDS[v]), ['by name', 'from a question', 'on a tour', 'at random', 'on the diagram', 'in its system', 'from a link', 'from the log', 'from the sky']));
+  yes('the sky\'s line of time runs from 1999 to 2040', same(SKY_YEARS, { from: 1999, to: 2040 }));
+  yes('the four kinds of the record, and where each lives in it', same(KINDS, { configuration: ['overdue', 'log.saved', 'log.pins', 'seen'], observation: ['log.visits', 'log.dropped'], prediction: [], note: [] }));
   yes('a saved world reopens in one of three views', same(VIEWS, ['orbit', 'closeorbit', 'surface']));
-  yes('an empty record has both slices, and two of them share nothing', same(empty(), { overdue: { planet: null, place: null }, log: { saved: [], visits: [], pins: [], dropped: 0 } }) && empty().log !== empty().log && empty().log.saved !== empty().log.saved);
+  yes('an empty record has its three slices, and two of them share nothing', same(empty(), { overdue: { planet: null, place: null }, log: { saved: [], visits: [], pins: [], dropped: 0 }, seen: null }) && empty().log !== empty().log && empty().log.saved !== empty().log.saved
+    && empty().log.visits !== empty().log.visits && empty().log.pins !== empty().log.pins && empty().overdue !== empty().overdue);
 }
 
 /* ---- what comes out of the store is made sound ---- */
 {
   yes('nothing, or something that is no record, is an empty record', [null, undefined, 7, 'x', [], [1, 2]].every((d) => same(normalise(d), empty())));
   const v1 = normalise({ planet: 'w5', place: { lat: 41.4, lon: 2.2, name: 'somewhere' } });
-  yes('a record of the first shape becomes the Overdue slice, with an empty log', same(v1, { overdue: { planet: 'w5', place: { lat: 41.4, lon: 2.2 } }, log: empty().log }));
+  yes('a record of the first shape becomes the Overdue slice, with an empty log and no catalogue seen', same(v1, { overdue: { planet: 'w5', place: { lat: 41.4, lon: 2.2 } }, log: empty().log, seen: null }));
   yes('a place keeps its latitude and longitude and nothing else', same(Object.keys(v1.overdue.place), ['lat', 'lon']));
   const place = (lat, lon) => normalise({ planet: 'w1', place: { lat, lon } }).overdue.place;
   yes('latitude 90 and longitude 180 are a place; a step outside is none', place(90, 180) !== null && place(-90, -180) !== null && place(90.1, 0) === null && place(-90.1, 0) === null && place(0, 180.1) === null && place(0, -180.1) === null);
@@ -75,7 +79,7 @@ const filled = (nVisits, nSaved = 0) => {
   yes('visits: an entry with a way this page does not have or no time is left out, each world once, newest first, and a count that is not a whole number of one or more is read as one',
     same(n.log.visits, [{ name: 'w3', t: T + 4, via: 'random', n: 1 }, { name: 'w9', t: T + 3, via: 'log', n: 1 }, { name: 'w1', t: T + 1, via: 'tour', n: 4 }]), JSON.stringify(n.log.visits));
   yes('pins: each once, three at most, text only', same(n.log.pins, ['w1', 'w2', 'w3']));
-  yes('the Overdue slice and the count of dropped visits are kept, and nothing else at any level', same(n.overdue, { planet: 'w2', place: null }) && n.log.dropped === 6 && same(Object.keys(n), ['overdue', 'log']) && same(Object.keys(n.log), ['saved', 'visits', 'pins', 'dropped']));
+  yes('the Overdue slice and the count of dropped visits are kept, and nothing else at any level', same(n.overdue, { planet: 'w2', place: null }) && n.log.dropped === 6 && same(Object.keys(n), ['overdue', 'log', 'seen']) && same(Object.keys(n.log), ['saved', 'visits', 'pins', 'dropped']));
   yes('a count of dropped visits that is negative, or not a whole number, is read as none', [-1, 1.5, '3', null].every((d) => normalise({ log: { dropped: d } }).log.dropped === 0));
   yes('a name of 80 characters is a name, one of 81 is not', normalise({ log: { saved: [{ name: 'x'.repeat(80), t: T }] } }).log.saved.length === 1 && normalise({ log: { saved: [{ name: 'x'.repeat(81), t: T }] } }).log.saved.length === 0);
   const many = (k) => Array.from({ length: k }, (_, i) => ({ name: `p${i}`, t: T + i, via: 'search' }));
@@ -124,7 +128,7 @@ const filled = (nVisits, nSaved = 0) => {
   yes('a visit is written with its time, its way and a count of one', a.ok && a.why === '' && same(a.record.log.visits, [{ name: 'w1', t: T, via: 'search', n: 1 }]));
   const b = visit(visit(a.record, { name: 'w2', t: T + 1, via: 'random' }, known).record, { name: 'w1', t: T + 2, via: 'tour' }, known);
   yes('a world visited again moves to the top with the new time and way, counted twice, and is in the list once', same(b.record.log.visits, [{ name: 'w1', t: T + 2, via: 'tour', n: 2 }, { name: 'w2', t: T + 1, via: 'random', n: 1 }]));
-  yes('every way the page has is taken', VIAS.every((via) => visit(empty(), { name: 'w1', t: T, via }, known).ok));
+  yes('every way the lab has is taken, the sky\'s with its day', VIAS.every((via) => visit(empty(), { name: 'w1', t: T, via, at: '2026-11-16' }, known).ok));
   const r0 = filled(3);
   const no = [visit(r0, { name: 'w601', t: T, via: 'search' }, known), visit(r0, { name: 'zzz', t: T, via: 'search' }, known), visit(r0, { name: '', t: T, via: 'search' }, known), visit(r0, { name: 5, t: T, via: 'search' }, known),
     visit(r0, { name: 'w1', t: NaN, via: 'search' }, known), visit(r0, { name: 'w1', t: '5', via: 'search' }, known), visit(r0, { name: 'w1', t: 0, via: 'search' }, known), visit(r0, { name: 'w1', t: -1, via: 'search' }, known), visit(r0, { name: 'w1', t: T, via: 'teleport' }, known), visit(r0, { name: 'w1', t: T }, known), visit(r0, { name: 'w1', t: Infinity, via: 'search' }, known)];
@@ -197,7 +201,7 @@ const filled = (nVisits, nSaved = 0) => {
   const c = clearPins(p3.record);
   yes('"Unpin all" empties the bench, and on an empty bench changes nothing', c.ok && same(c.record.log.pins, []) && clearPins(c.record).ok && clearPins(c.record).record === c.record && clearPins(empty()).record.log.pins.length === 0);
   yes('a change of the bench does not change the record it was given', same(p2.record.log.pins, ['w1', 'w2']) && same(p3.record.log.pins, ['w1', 'w2', 'w3']));
-  const r = setOverdue(filled(3, 2), { planet: 'w9', place: { lat: 1, lon: 2 } }).record;
+  const r = setOverdue(filled(3, 2), { planet: 'w9', place: { lat: 1, lon: 2 } }, known).record;
   yes('a change of the bench touches nothing else of the record', [pin(r, 'w5', known), unpin(pin(r, 'w5', known).record, 'w5'), clearPins(pin(r, 'w5', known).record)].every((w) => same(w.record.overdue, r.overdue) && same(w.record.log.saved, r.log.saved) && same(w.record.log.visits, r.log.visits) && w.record.log.dropped === r.log.dropped));
 }
 
@@ -216,12 +220,18 @@ const filled = (nVisits, nSaved = 0) => {
 
 /* ---- the Overdue slice ---- */
 {
-  const o = setOverdue(filled(2, 1), { planet: 'w9', place: { lat: 10, lon: 20, more: 1 } });
+  const o = setOverdue(filled(2, 1), { planet: 'w9', place: { lat: 10, lon: 20, more: 1 } }, known);
   yes('the Overdue slice is written without touching the log', o.ok && same(o.record.overdue, { planet: 'w9', place: { lat: 10, lon: 20 } }) && same(o.record.log, filled(2, 1).log));
   const before = filled(2, 1), snap = JSON.stringify(before);
-  setOverdue(before, { planet: 'w9', place: { lat: 1, lon: 2 } });
+  setOverdue(before, { planet: 'w9', place: { lat: 1, lon: 2 } }, known);
   yes('writing the Overdue slice does not change the record it was given', JSON.stringify(before) === snap);
-  yes('a planet that is no name and a place outside the globe are written as none', same(setOverdue(empty(), { planet: 7, place: { lat: 91, lon: 0 } }).record.overdue, { planet: null, place: null }) && same(setOverdue(empty(), { planet: null, place: null }).record.overdue, { planet: null, place: null }));
+  const sky0 = filled(2, 1);
+  const offSky = [setOverdue(sky0, { planet: 7, place: null }, known), setOverdue(sky0, { planet: '', place: null }, known), setOverdue(sky0, { planet: 'w601', place: null }, known), setOverdue(sky0, { planet: 'x'.repeat(81), place: null }, known), setOverdue(sky0, { planet: ['w1'], place: null }, known)];
+  yes('a planet the sky\'s catalogue does not have, or that is no name, is refused with the reason, and the record handed back is the one given', offSky.every((w) => !w.ok && w.why === UNKNOWN && w.record === sky0));
+  const offGlobe = [{ lat: 91, lon: 0 }, { lat: -90.1, lon: 0 }, { lat: 0, lon: 180.1 }, { lat: 0, lon: -181 }, { lat: '41', lon: 2 }, { lat: 41 }, 'Barcelona', undefined].map((place) => setOverdue(sky0, { planet: 'w1', place }, known));
+  yes('a place off the globe, or that is no place, is refused with the reason', offGlobe.every((w) => !w.ok && w.why === OFF_GLOBE && w.why === 'the place is not on the globe' && w.record === sky0));
+  yes('no planet and no place are taken as none, and the edges of the globe are on it', same(setOverdue(empty(), { planet: null, place: null }, known).record.overdue, { planet: null, place: null }) && setOverdue(empty(), { planet: null, place: null }, known).ok
+    && same(setOverdue(empty(), { planet: 'w1', place: { lat: 90, lon: -180 } }, known).record.overdue.place, { lat: 90, lon: -180 }) && setOverdue(empty(), { planet: 'w1', place: { lat: -90, lon: 180 } }, known).ok);
   yes('a record that comes out of a write shares no part with the one that went in', visit(o.record, { name: 'w3', t: T, via: 'link' }, known).record.overdue.place !== o.record.overdue.place && visit(o.record, { name: 'w3', t: T, via: 'link' }, known).record.log.saved[0] !== o.record.log.saved[0]
     && save(o.record, { name: 'w3', t: T }, known).record.log.visits[0] !== o.record.log.visits[0] && pin(o.record, 'w1', known).record.log.saved !== o.record.log.saved);
   yes('a write to the log does not touch the Overdue slice', same(visit(o.record, { name: 'w3', t: T, via: 'link' }, known).record.overdue, o.record.overdue) && same(save(o.record, { name: 'w3', t: T }, known).record.overdue, o.record.overdue) && same(pin(o.record, 'w1', known).record.overdue, o.record.overdue)
@@ -272,8 +282,8 @@ const filled = (nVisits, nSaved = 0) => {
 
 /* ---- Labs OS: a write is one change to what the store holds at that moment ---- */
 {
-  const fake = (start) => { let rec = start; const calls = []; return { calls, get rec() { return rec; }, wipe() { rec = null; }, progress: {
-    get: async (o) => { calls.push(['get', o && o.v]); if (rec && o && o.migrate && rec.v < o.v) rec = { ...rec, v: o.v, data: o.migrate(rec.data, rec.v) }; return rec; },
+  const fake = (start, storage = { kind: 'memory', persistent: false, fixture: null }) => { let rec = start; const calls = []; return { calls, storage, get rec() { return rec; }, wipe() { rec = null; }, progress: {
+    get: async (o) => { calls.push(['get', o && o.v]); if (rec && o && o.migrate && rec.v < o.v) rec = { ...rec, v: o.v, data: JSON.parse(JSON.stringify(o.migrate(rec.data, rec.v))) }; return rec; },
     set: async (data, o) => { calls.push(['set', o && o.v]); rec = { ...rec, v: o.v, data: JSON.parse(JSON.stringify(data)) }; return rec; },
     setResume: async (url, label) => { calls.push(['resume', url]); rec = { ...(rec || { v: 1, data: null }), resume: { url, label } }; return rec; } } }; };
   const sets = (os) => os.calls.filter((c) => c[0] === 'set').length;
@@ -281,11 +291,11 @@ const filled = (nVisits, nSaved = 0) => {
   yes('with nothing stored, the record that loads is empty', same(await load(fake(null)), empty()) && (await read(fake(null))).newer === false);
   const old = fake({ v: 1, data: { planet: 'w5', place: { lat: 1, lon: 2 } } });
   const up = await load(old);
-  yes('a stored record of the first shape loads as the Overdue slice and is asked for at version 2', same(up.overdue, { planet: 'w5', place: { lat: 1, lon: 2 } }) && same(up.log, empty().log) && same(old.calls[0], ['get', 2]) && old.rec.v === 2);
+  yes('a stored record of the first shape loads as the Overdue slice and is asked for at version 3', same(up.overdue, { planet: 'w5', place: { lat: 1, lon: 2 } }) && same(up.log, empty().log) && same(old.calls[0], ['get', 3]) && old.rec.v === 3);
 
-  const os = fake({ v: 2, data: setOverdue(empty(), { planet: 'w5', place: { lat: 1, lon: 2 } }).record });
+  const os = fake({ v: 3, data: setOverdue(empty(), { planet: 'w5', place: { lat: 1, lon: 2 } }, known).record });
   const a = await update(os, (r) => visit(r, { name: 'w1', t: T, via: 'search' }, known));
-  yes('a change is applied to the stored record and written at version 2, and what comes back is what is stored', a.ok && a.why === '' && same(a.record, os.rec.data) && a.record.log.visits.length === 1 && same(a.record.overdue, { planet: 'w5', place: { lat: 1, lon: 2 } }) && os.rec.v === 2 && same(os.calls.at(-1), ['set', 2]));
+  yes('a change is applied to the stored record and written at version 3, and what comes back is what is stored', a.ok && a.why === '' && same(a.record, os.rec.data) && a.record.log.visits.length === 1 && same(a.record.overdue, { planet: 'w5', place: { lat: 1, lon: 2 } }) && os.rec.v === 3 && same(os.calls.at(-1), ['set', 3]));
   yes('a change the store made is said to be one', a.changed === true);
   const n0 = sets(os);
   const no = await update(os, (r) => visit(r, { name: 'not a planet', t: T, via: 'search' }, known));
@@ -294,12 +304,12 @@ const filled = (nVisits, nSaved = 0) => {
   yes('a change that changes nothing writes nothing, and is said to be none', same1.ok && sets(os) === n0 && same(same1.record, os.rec.data) && same1.changed === false);
   const twice = await update(os, (r) => save(r, { name: 'w1', t: T + 1 }, known)), twice2 = await update(os, (r) => save(r, { name: 'w1', t: T + 2 }, known));
   yes('a second save of the same world is no change, so a page tracks one save', twice.ok && twice.changed === true && twice2.ok && twice2.changed === false && sets(os) === n0 + 1);
-  const eq = await update(os, (r) => setOverdue(r, { planet: 'w5', place: { lat: 1, lon: 2 } }));
+  const eq = await update(os, (r) => setOverdue(r, { planet: 'w5', place: { lat: 1, lon: 2 } }, known));
   yes('a change that makes a new record equal to the stored one writes nothing and is no change', eq.ok && eq.changed === false && sets(os) === n0 + 1);
 
   // another tab saved a world after this page read the record
   const pageCopy = JSON.parse(JSON.stringify(os.rec.data));
-  await os.progress.set(save(os.rec.data, { name: 'w7', t: T + 5 }, known).record, { v: 2 });
+  await os.progress.set(save(os.rec.data, { name: 'w7', t: T + 5 }, known).record, { v: 3 });
   const b = await update(os, (r) => visit(r, { name: 'w2', t: T + 6, via: 'random' }, known));
   yes('a save made in another tab since this page read the record is kept by this page\'s next write', isSaved(b.record, 'w7') && isSaved(os.rec.data, 'w7') && !isSaved(pageCopy, 'w7') && b.record.log.visits.length === 2);
   // two tabs pin: the second pin joins the first
@@ -313,43 +323,156 @@ const filled = (nVisits, nSaved = 0) => {
   const cp = await update(os, (r) => pin(r, 'w5', known));
   yes('after an erase made elsewhere the next pin holds that one pin', same(cp.record.log.pins, ['w5']) && cp.record.log.visits.length === 0);
   // the two pages of the lab
-  const d = await update(os, (r) => setOverdue(r, { planet: 'w8', place: null }));
+  const d = await update(os, (r) => setOverdue(r, { planet: 'w8', place: null }, known));
   const e = await update(os, (r) => save(r, { name: 'w4', t: T + 8, view: 'surface' }, known));
   yes('Overdue\'s change leaves the log, and the survey\'s change leaves Overdue\'s slice', same(d.record.log, cp.record.log) && d.record.overdue.planet === 'w8' && e.record.overdue.planet === 'w8' && isSaved(e.record, 'w4'));
-  const bad = fake({ v: 2, data: { log: { saved: [{ name: 'w1', t: T }, { name: 'w1', t: T + 1 }, { name: '', t: T }] } } });
+  const bad = fake({ v: 3, data: { log: { saved: [{ name: 'w1', t: T }, { name: 'w1', t: T + 1 }, { name: '', t: T }] } } });
   const f = await update(bad, (r) => visit(r, { name: 'w2', t: T + 2, via: 'log' }, known));
   yes('the stored record is made sound before a change is applied to it', same(f.record.log.saved, [{ name: 'w1', t: T + 1, view: 'orbit' }]) && same(bad.rec.data.log.saved, [{ name: 'w1', t: T + 1, view: 'orbit' }]));
   let threw = '';
-  const broken = { progress: { get: async () => null, set: async () => { throw new Error('quota'); }, setResume: async () => null } };
+  const broken = { storage: { persistent: false, fixture: null }, progress: { get: async () => null, set: async () => { throw new Error('quota'); }, setResume: async () => null } };
   try { await update(broken, (r) => visit(r, { name: 'w1', t: T, via: 'log' }, known)); } catch (err) { threw = err.message; }
   yes('a write the store refuses is an error the page hears of', threw === 'quota');
 
   // where the hub leads back to
-  const rs = fake({ v: 2, data: empty() }), where = { url: 'exomania-survey.html?p=w1', label: 'w1' };
+  const rs = fake({ v: 3, data: empty() }), where = { url: 'exomania-survey.html?p=w1', label: 'w1' };
   await update(rs, (r) => visit(r, { name: 'w1', t: T, via: 'log' }, known), { resume: where });
   yes('an accepted change writes the way back beside it, after the record', resumes(rs) === 1 && same(rs.rec.resume, where) && same(rs.calls.slice(-2).map((x) => x[0]), ['set', 'resume']));
   await update(rs, (r) => visit(r, { name: 'nope', t: T, via: 'log' }, known), { resume: { url: 'x', label: 'x' } });
   yes('a refused change writes no way back', resumes(rs) === 1 && rs.rec.resume.url === where.url);
-  await update(rs, (r) => setOverdue(r, { planet: null, place: null }), { resume: { url: 'exomania.html?planet=w1', label: 'w1' } });
+  await update(rs, (r) => setOverdue(r, { planet: null, place: null }, known), { resume: { url: 'exomania.html?planet=w1', label: 'w1' } });
   yes('an accepted change that changed nothing still writes the way back: the visitor chose that world now', resumes(rs) === 2 && rs.rec.resume.url === 'exomania.html?planet=w1');
   await update(rs, (r) => visit(r, { name: 'w2', t: T + 1, via: 'log' }, known));
   yes('a change with no way back given writes none', resumes(rs) === 2);
-  const lost = { calls: [], progress: { get: async () => null, set: async () => null, setResume: async () => { throw new Error('the hub is gone'); } } };
+  const lost = { calls: [], storage: { persistent: false, fixture: null }, progress: { get: async () => null, set: async () => null, setResume: async () => { throw new Error('the hub is gone'); } } };
   let lostErr = '', lostW = null;
   try { lostW = await update(lost, (r) => visit(r, { name: 'w1', t: T, via: 'log' }, known), { resume: where }); } catch (err) { lostErr = err.message; }
   yes('a way back the store refuses does not make the stored change a failure', lostErr === '' && !!lostW && lostW.ok && lostW.changed === true);
 
   // a record of a later version
   const later = { overdue: { planet: 'w5', place: null, tz: 'Europe/Madrid' }, log: { saved: [{ name: 'w1', t: T, view: 'orbit', note: 'kept by a later page' }], visits: [], pins: [], dropped: 0, tags: { w1: ['hot'] } }, notes: { a: 1 } };
-  const nw = fake({ v: 3, data: JSON.parse(JSON.stringify(later)) });
+  const nw = fake({ v: 4, data: JSON.parse(JSON.stringify(later)) });
   const rd = await read(nw);
   yes('a record of a later version is read for display, as far as this version reads it, and said to be newer', rd.newer === true && same(rd.record.log.saved.map((x) => x.name), ['w1']) && rd.record.overdue.planet === 'w5' && same(await load(nw), rd.record));
-  const nv = await update(nw, (r) => visit(r, { name: 'w2', t: T, via: 'log' }, known), { resume: where }), no2 = await update(nw, (r) => setOverdue(r, { planet: 'w6', place: null }));
+  const nv = await update(nw, (r) => visit(r, { name: 'w2', t: T, via: 'log' }, known), { resume: where }), no2 = await update(nw, (r) => setOverdue(r, { planet: 'w6', place: null }, known));
   yes('a record of a later version is never written: no change, the reason, the record as read, and no way back', !nv.ok && nv.why === NEWER && nv.changed === false && same(nv.record, rd.record) && !no2.ok && no2.why === NEWER
-    && sets(nw) === 0 && resumes(nw) === 0 && nw.rec.v === 3 && same(nw.rec.data, later));
+    && sets(nw) === 0 && resumes(nw) === 0 && nw.rec.v === 4 && same(nw.rec.data, later));
   yes('why a later version\'s record is not written', NEWER === 'this log was written by a newer version of this page');
-  const at2 = fake({ v: 2, data: empty() });
+  const at2 = fake({ v: 3, data: empty() });
   yes('a record of this version is not newer, and one of the first shape is not newer once read', (await read(at2)).newer === false && (await read(fake({ v: 1, data: { planet: 'w5' } }))).newer === false && (await update(at2, (r) => pin(r, 'w1', known))).changed === true);
+}
+
+/* ---- version 3: a clock opened on the sky is a visit, with the day the sky was at ---- */
+{
+  const s = visit(empty(), { name: 'w1', t: T, via: 'sky', at: '2031-03-12' }, known);
+  yes('a visit from the sky is written with its way and the day the sky was at', s.ok && same(s.record.log.visits, [{ name: 'w1', t: T, via: 'sky', n: 1, at: '2031-03-12' }]));
+  const later = visit(s.record, { name: 'w1', t: T + 1, via: 'search' }, known), again = visit(later.record, { name: 'w1', t: T + 2, via: 'sky', at: '2001-06-30' }, known);
+  yes('a later visit of another way keeps the line\'s day on the sky, and a later visit from the sky moves it', same(later.record.log.visits[0], { name: 'w1', t: T + 1, via: 'search', n: 2, at: '2031-03-12' }) && same(again.record.log.visits[0], { name: 'w1', t: T + 2, via: 'sky', n: 3, at: '2001-06-30' }));
+  yes('a visit of another way carries no day of its own', same(visit(empty(), { name: 'w2', t: T, via: 'log', at: '2031-03-12' }, known).record.log.visits[0], { name: 'w2', t: T, via: 'log', n: 1 }));
+  const edges = ['1999-01-01', '2040-12-31'].map((at) => visit(empty(), { name: 'w1', t: T, via: 'sky', at }, known));
+  yes('the first and the last day of the sky\'s line are days of it', edges.every((w) => w.ok && w.record.log.visits[0].at !== undefined));
+  const r0 = filled(2);
+  const off = ['1998-12-31', '2041-01-01', '2031-02-30', '2031-3-12', '12 March 2031', '', null, undefined, 20310312].map((at) => visit(r0, { name: 'w1', t: T, via: 'sky', at }, known));
+  yes('a sky visit with a day off the line, or no day, is refused with the reason, and the record handed back is the one given', off.every((w) => !w.ok && w.why === OFF_LINE && w.record === r0) && OFF_LINE === 'the day is not one the sky’s line of time has', off.map((w) => w.why).join(' | '));
+  yes('a sky visit of a world the catalogue does not have is refused as one', visit(r0, { name: 'w601', t: T, via: 'sky', at: '2031-03-12' }, known).why === UNKNOWN);
+  yes('the survey never gives the sky\'s way', viaOf('sky') === null && viaOf('sky', { results: true }) === null);
+  const stored = normalise({ log: { visits: [{ name: 'w1', t: T + 3, via: 'sky', at: '2031-03-12' }, { name: 'w2', t: T + 2, via: 'search', at: '2040-12-31' }, { name: 'w3', t: T + 1, via: 'sky', at: '2041-01-01' }, { name: 'w4', t: T, via: 'sky', at: '1999-01-01' }, { name: 'w5', t: T - 1, via: 'sky', at: '1998-12-31' }, { name: 'w6', t: T - 2, via: 'sky', at: 7 }] } });
+  yes('a stored visit keeps its day when it is a day of the sky\'s line, and a day that is not one is left out of the line',
+    same(stored.log.visits.map((e) => e.at), ['2031-03-12', '2040-12-31', undefined, '1999-01-01', undefined, undefined]) && stored.log.visits.length === 6 && !('at' in stored.log.visits[2]), JSON.stringify(stored.log.visits));
+  yes('a line whose clock was opened on the sky links to the sky at its planet and day; one that was not, links nowhere', skyLink({ name: 'HD 209458 b', at: '2031-03-12' }) === 'exomania.html?planet=HD%20209458%20b&date=2031-03-12'
+    && skyLink({ name: 'w1' }) === '' && skyLink({ name: "Teegarden's Star b", at: '2001-06-30' }) === "exomania.html?planet=Teegarden's%20Star%20b&date=2001-06-30");
+  yes('the link names the day in the kit\'s words for a date of the data', skyWords({ name: 'w1', at: '2031-03-12' }) === 'its clock on 12 March 2031' && skyWords({ name: 'w1', at: '1999-01-01' }) === 'its clock on 1 January 1999');
+  yes('the words of a sky visit', visitWords({ n: 1, via: 'sky' }) === 'from the sky' && visitWords({ n: 3, via: 'sky' }) === '3 visits, the last from the sky');
+}
+
+/* ---- version 3: the catalogue as the survey last saw it ---- */
+{
+  const cat = ['w1', 'w2', 'w3'];
+  const a = see(empty(), { day: '2026-11-16', names: cat });
+  yes('the survey keeps the catalogue it saw, its names joined by bars, with the day', a.ok && same(a.record.seen, { day: '2026-11-16', names: 'w1|w2|w3' }));
+  const e0 = empty(), e1 = see(e0, { day: '2026-11-16', names: cat });
+  yes('keeping the catalogue does not change the record it was given', e0.seen === null && e1.record !== e0 && same(e1.record.log, e0.log));
+  yes('seeing the same catalogue on the same day changes nothing', see(a.record, { day: '2026-11-16', names: cat }).record === a.record && see(a.record, { day: '2026-11-17', names: cat }).record.seen.day === '2026-11-17' && see(a.record, { day: '2026-11-16', names: ['w1'] }).record.seen.names === 'w1');
+  yes('names that cannot be a name are left out, and so is a list that is no list', see(empty(), { day: '2026-11-16', names: ['w1', '', 5, 'x'.repeat(81), 'w2'] }).record.seen.names === 'w1|w2' && see(empty(), { day: '2026-11-16', names: 'w1' }).record.seen.names === '');
+  const no = ['2026-13-01', '16 November 2026', '', null].map((d) => see(a.record, { day: d, names: cat }));
+  yes('a day that is not a date is refused with the reason, and the record handed back is the one given', no.every((w) => !w.ok && w.why === NO_DAY && w.why === 'the day is not a date' && w.record === a.record));
+  const fits = Array.from({ length: 15000 }, (_, i) => `n${String(i).padStart(8, '0')}`);   // 15,000 names of 9 characters and 14,999 bars: 149,999 characters
+  const over = [...fits, 'x'];
+  yes('the catalogue is kept up to 150,000 characters, and refused past them with the reason', see(empty(), { day: '2026-11-16', names: fits }).ok && fits.join('|').length === 149999 && see(empty(), { day: '2026-11-16', names: [...fits.slice(0, -1), 'n0000000xy'] }).ok
+    && !see(empty(), { day: '2026-11-16', names: over }).ok && see(empty(), { day: '2026-11-16', names: over }).why === TOO_LONG && TOO_LONG === 'the catalogue\'s names come to more than 150,000 characters, more than the record keeps');
+  yes('the worlds new since the last visit are the names the catalogue last seen did not have, in the catalogue\'s order', same(newSince(a.record.seen, ['w4', 'w1', 'w2', 'w3', 'w5']), ['w4', 'w5']) && same(newSince(a.record.seen, cat), []));
+  yes('with no catalogue seen before, nothing is new', same(newSince(null, cat), []));
+  yes('a stored catalogue is read back as kept, and one that is not sound is none', same(normalise({ seen: { day: '2026-11-16', names: 'w1|w2' } }).seen, { day: '2026-11-16', names: 'w1|w2' }) && normalise({ seen: { day: '2026-11-16', names: ['w1'] } }).seen === null
+    && normalise({ seen: { day: 'today', names: 'w1' } }).seen === null && normalise({ seen: { names: 'w1' } }).seen === null && normalise({ seen: 'w1|w2' }).seen === null
+    && normalise({ seen: { day: '2026-11-16', names: 'x'.repeat(150000) } }).seen !== null && normalise({ seen: { day: '2026-11-16', names: 'x'.repeat(150001) } }).seen === null
+    && same(Object.keys(normalise({ seen: { day: '2026-11-16', names: 'w1', more: 1 } }).seen), ['day', 'names']));
+  yes('the catalogue seen passes through what the page shows, a removal and every write of the log', view(a.record, known).record.seen === a.record.seen && same(forget(a.record, known).record.seen, a.record.seen)
+    && same(visit(a.record, { name: 'w1', t: T, via: 'log' }, known).record.seen, a.record.seen) && same(setOverdue(a.record, { planet: 'w1', place: null }, known).record.seen, a.record.seen)
+    && visit(a.record, { name: 'w1', t: T, via: 'log' }, known).record.seen !== a.record.seen);
+  const store = (v) => ({ getItem: (k) => (k === LEGACY_SEEN ? v : null) });
+  yes('the survey\'s old local copy is read as the catalogue it saw', LEGACY_SEEN === 'exo:seen:v1' && same(legacySeen(store(JSON.stringify({ date: '2026-11-11', names: ['w1', 'w2', '', 7] }))), { day: '2026-11-11', names: 'w1|w2' }));
+  yes('an old copy that is missing, not JSON, or not sound is none', [null, '{', '"w1"', JSON.stringify({ names: ['w1'] }), JSON.stringify({ date: 'yesterday', names: ['w1'] })].every((v) => legacySeen(store(v)) === null) && legacySeen(null) === null && legacySeen(undefined) === null
+    && legacySeen({ getItem: () => { throw new Error('denied'); } }) === null);
+}
+
+/* ---- version 3: the record of an older version, and the survey's old local copy ---- */
+{
+  const fake = (start, storage) => { let rec = start; const calls = []; return { calls, storage, get rec() { return rec; }, progress: {
+    get: async (o) => { calls.push(['get', o && o.v]); if (rec && o && o.migrate && rec.v < o.v) rec = { ...rec, v: o.v, data: JSON.parse(JSON.stringify(o.migrate(rec.data, rec.v))) }; return rec; },
+    set: async (data, o) => { calls.push(['set', o && o.v]); rec = { ...rec, v: o.v, data: JSON.parse(JSON.stringify(data)) }; return rec; },
+    setResume: async () => rec } }; };
+  const OWN = { kind: 'indexeddb', persistent: true, fixture: null }, MEMORY = { kind: 'memory', persistent: false, fixture: null }, FIXTURE = { kind: 'memory', persistent: true, fixture: 'fresh' };
+  const local = (v) => { const m = new Map(v === undefined ? [] : [[LEGACY_SEEN, v]]); return { map: m, getItem: (k) => (m.has(k) ? m.get(k) : null), removeItem: (k) => { m.delete(k); } }; };
+  const OLD = JSON.stringify({ date: '2026-11-11', names: ['w1', 'w2'] });
+  const v2 = { overdue: { planet: 'w5', place: { lat: 41.39, lon: 2.17 } }, log: { saved: [{ name: 'w1', t: T, view: 'surface' }], visits: [{ name: 'w2', t: T + 1, via: 'tour', n: 3 }], pins: ['w1'], dropped: 4 } };
+  const ls = local(OLD), os = fake({ v: 2, data: JSON.parse(JSON.stringify(v2)) }, OWN);
+  const r = await read(os, ls);
+  yes('a record of version 2 in the visitor\'s own store is read at version 3 with every entry it held', !r.newer && os.rec.v === 3 && same(r.record.overdue, v2.overdue) && same(r.record.log, v2.log));
+  yes('and takes in the survey\'s old local copy of the catalogue, which is then removed', same(r.record.seen, { day: '2026-11-11', names: 'w1|w2' }) && same(os.rec.data.seen, r.record.seen) && !ls.map.has(LEGACY_SEEN));
+  const ls2 = local(JSON.stringify({ date: '2026-11-12', names: ['w9'] })), r2 = await read(os, ls2);
+  yes('a record of version 3 keeps its own catalogue, and an old local copy written since is removed', same(r2.record.seen, { day: '2026-11-11', names: 'w1|w2' }) && !ls2.map.has(LEGACY_SEEN));
+  const lsNone = local(OLD), none = fake(null, OWN), rn = await read(none, lsNone);
+  yes('with no record (never written, or erased) the old copy is removed and nothing is taken in', rn.record.seen === null && none.rec === null && !lsNone.map.has(LEGACY_SEEN));
+  for (const [name, storage] of [['a fixture', FIXTURE], ['a store in memory', MEMORY]]) {
+    const lsF = local(OLD), f = fake({ v: 2, data: JSON.parse(JSON.stringify(v2)) }, storage), rf = await read(f, lsF);
+    yes(`on ${name} the old copy is neither taken in nor removed`, rf.record.seen === null && lsF.map.get(LEGACY_SEEN) === OLD && same(rf.record.log, v2.log));
+  }
+  const v1 = fake({ v: 1, data: { planet: 'w5', place: { lat: 1, lon: 2 } } }, OWN), r1 = await read(v1, local(OLD));
+  yes('a record of version 1 is read as the sky\'s slice and takes in the old copy too', same(r1.record.overdue, { planet: 'w5', place: { lat: 1, lon: 2 } }) && same(r1.record.seen, { day: '2026-11-11', names: 'w1|w2' }) && v1.rec.v === 3);
+  const noLocal = fake({ v: 2, data: JSON.parse(JSON.stringify(v2)) }, OWN), rl = await read(noLocal, null);
+  yes('where localStorage cannot be read the record is upgraded without it', rl.record.seen === null && same(rl.record.log, v2.log) && noLocal.rec.v === 3);
+  const stubborn = { getItem: () => OLD, removeItem: () => { throw new Error('denied'); } };
+  let err = '';
+  try { await read(fake({ v: 2, data: JSON.parse(JSON.stringify(v2)) }, OWN), stubborn); } catch (e) { err = e.message; }
+  yes('a localStorage that refuses the removal does not stop the read', err === '');
+  yes('the page\'s own read reaches the browser\'s localStorage when none is given', (await read(fake(null, OWN))).record.seen === null);
+}
+
+/* ---- version 3: the survey sees its catalogue through the record ---- */
+{
+  const fake = (start) => { let rec = start; let sets = 0; return { get sets() { return sets; }, get rec() { return rec; }, storage: { kind: 'memory', persistent: false, fixture: null }, progress: {
+    get: async () => rec,
+    set: async (data, o) => { sets++; rec = { ...rec, v: o.v, data: JSON.parse(JSON.stringify(data)) }; return rec; },
+    setResume: async () => rec } }; };
+  const os = fake(null);
+  const first = await seeCatalogue(os, ['w1', 'w2'], { day: '2026-11-15', keep: true });
+  yes('on a first visit nothing is new, and the catalogue is kept as seen', same(first.fresh, []) && first.changed && same(os.rec.data.seen, { day: '2026-11-15', names: 'w1|w2' }));
+  const next = await seeCatalogue(os, ['w1', 'w2', 'w3'], { day: '2026-11-16', keep: true });
+  yes('on the next visit the worlds the catalogue gained are new, and the new catalogue is kept', same(next.fresh, ['w3']) && same(os.rec.data.seen, { day: '2026-11-16', names: 'w1|w2|w3' }));
+  const n0 = os.sets, off = await seeCatalogue(os, ['w1', 'w2', 'w3', 'w4'], { day: '2026-11-17', keep: false });
+  yes('with recording off the new worlds are still found and nothing is written', same(off.fresh, ['w4']) && os.sets === n0 && !off.changed && os.rec.data.seen.day === '2026-11-16');
+  const nw = fake({ v: 4, data: { seen: { day: '2026-11-15', names: 'w1' } } }), late = await seeCatalogue(nw, ['w1', 'w2'], { day: '2026-11-16', keep: true });
+  yes('on a record of a later version nothing is said to be new and nothing is written', same(late.fresh, []) && nw.sets === 0 && late.why === NEWER);
+}
+
+/* ---- version 3: the health check ---- */
+{
+  const os = (rec, storage) => ({ storage, progress: { get: async () => rec } });
+  const OWN = { kind: 'indexeddb', persistent: true, fixture: null };
+  yes('the health check reports the version this page writes, the version stored, the store and no sync', same(await health(os({ v: 3, data: {} }, OWN)), { version: 3, stored: 3, store: 'indexeddb', persistent: true, fixture: null, synced: false })
+    && same(await health(os(null, { kind: 'memory', persistent: false, fixture: 'fresh' })), { version: 3, stored: null, store: 'memory', persistent: false, fixture: 'fresh', synced: false }) && (await health(os({ v: 4 }, OWN))).stored === 4);
+  yes('its words say both versions and the sync', healthWords({ stored: 3 }) === 'This page writes version 3 of the record, and the stored record is version 3. No copy is synced to another device.'
+    && healthWords({ stored: null }) === 'This page writes version 3 of the record, and nothing is stored yet. No copy is synced to another device.' && healthWords({ stored: 4 }).includes('the stored record is version 4'));
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

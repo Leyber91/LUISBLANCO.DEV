@@ -37,12 +37,11 @@ import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { keycap, keyHint, switchCtl, setSwitch, bindSwitch, isOn, scale, bindScale, setScale } from '../kit/controls.js';
 import { el } from '../kit/dom.js';
-import { day, fromIso, isoDay, int } from '../kit/format.js';
+import { day, fromIso, int } from '../kit/format.js';
 
 const params = new URLSearchParams(location.search);
 window.__EXO_STILL__ = params.has('still');
 const $ = (id) => document.getElementById(id);
-const store_ = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (_) { return null; } return null; };
 
 /* ---------------- state ---------------- */
 const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, looks: null, locked: null, cold: null, hot: null, set: null, newOnly: false, query: null });
@@ -489,17 +488,14 @@ function bindFilters() {
   });
 }
 
-/* worlds confirmed since this browser's last visit (localStorage, this device only) */
-function changelog(list) {
-  const key = 'exo:seen:v1';
-  let prev = null;
-  try { prev = JSON.parse(store_(key) || 'null'); } catch (_) { prev = null; }
-  const names = list.map((p) => p.name);
-  if (prev && Array.isArray(prev.names)) {
-    const seen = new Set(prev.names);
-    store.state.newNames = new Set(names.filter((n) => !seen.has(n)));
-  }
-  store_(key, JSON.stringify({ date: isoDay(Date.now()), names }));
+/* Worlds confirmed since this browser's last visit: the catalogue the lab's record last saw, against this one. The
+   log asks the store once the stored record is read (record.seeCatalogue), so the switch appears then. */
+async function changelog(list) {
+  if (!log) return;
+  let fresh = [];
+  try { fresh = await log.catalogue(list.map((p) => p.name)); } catch { fresh = []; }
+  store.state.newNames = new Set(fresh);
+  if (fresh.length) { renderFilters(); resay(); }
 }
 
 /* ---------------- search and questions ---------------- */
@@ -1028,7 +1024,7 @@ async function boot() {
   } catch (e) {
     console.warn('[exomania] weekly roster unavailable; radius provenance is provisional', e.message);
   }
-  changelog(st.list);
+  void changelog(st.list);
   renderFilters();
   resay();
   if (log) log.reread();

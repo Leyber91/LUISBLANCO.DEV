@@ -16,7 +16,10 @@
    The page stands on the labs' platform: the chosen planet and
    the visitor's place are the lab's progress record in Labs OS
    (in this browser; the privacy page exports and erases it), and
-   usage is logged as which planet was opened, which year a drag
+   a clock the visitor opens is a visit "from the sky" in the
+   survey's log of that record, with the day the sky was at, so
+   the log can reopen it there (record.js is the one client of the
+   record). Usage is logged as which planet was opened, which year a drag
    on the line ended on, and whether a place was typed or taken
    from the device. The place itself is never in an event. Until
    a visitor sets a place the night is drawn for an example one,
@@ -32,7 +35,7 @@
    ============================================================ */
 
 import { LabsOS } from '../../os/index.js';
-import { load as loadRecord, update as updateRecord, setOverdue } from '../record.js';
+import { load as loadRecord, update as updateRecord, setOverdue, visit } from '../record.js';
 import { el } from '../../kit/dom.js';
 import { int, day, fromIso, isoDay, clock } from '../../kit/format.js';
 import { setSwitch, switchCtl } from '../../kit/controls.js';
@@ -67,11 +70,20 @@ const S = {
 
 /* ---------------- the platform ---------------- */
 function track(type, data) { if (os) void os.track(type, data); }
-/* The lab's record has two slices (record.js). This page changes its own, in the record as the store holds it
-   at that moment, so the survey's log is left as it is. A record a later version of the lab wrote is not written:
-   the page keeps working on what it holds in memory. resume: where the labs' hub leads back to, written with the
-   change. */
-function save(resume = null) { if (os) updateRecord(os, (r) => setOverdue(r, { planet: S.star ? S.star.p.name : null, place: S.place }), { resume }).catch(() => {}); }
+/* The lab's record (record.js). This page changes its own slice, where the sky was left, in the record as the
+   store holds it at that moment, so the survey's log is left as it is. `opened`: the planet whose clock the visitor
+   just opened, which is also a visit "from the sky" in that log, with the day the sky is at (the day it is going to,
+   while the sheet ignites), unless recording is off on this site. A record a later version of the lab wrote is not
+   written: the page keeps working on what it holds in memory. resume: where the labs' hub leads back to, written
+   with the change. */
+const known = (name) => !!cat && cat.byName.has(name);
+function save(resume = null, opened = null) {
+  if (!os) return;
+  const sky = (r) => setOverdue(r, { planet: S.star ? S.star.p.name : null, place: S.place }, known);
+  const at = dateOf(S.igniting ? nowJd() : S.jd);
+  const change = opened && os.recording.on ? (r) => { const w = sky(r); return w.ok ? visit(w.record, { name: opened, t: Date.now(), via: 'sky', at }, known) : w; } : sky;
+  updateRecord(os, change, { resume }).catch(() => {});
+}
 
 /* ---------------- words ---------------- */
 /* Text is written only when it changes, so a live region speaks once and a drag does not rewrite the page. */
@@ -136,7 +148,7 @@ function openStar(star, { user = false } = {}) {
   S.star = star; S.shown = null; S.bandHover = null; S.ocHover = null;
   $('pick').value = '';
   describeStar();
-  if (user) { S.touched = true; save({ url: `exomania.html?planet=${encodeURIComponent(star.p.name)}`, label: star.p.name }); track('exomania.planet', { planet: star.p.name }); }
+  if (user) { S.touched = true; save({ url: `exomania.html?planet=${encodeURIComponent(star.p.name)}`, label: star.p.name }, star.p.name); track('exomania.planet', { planet: star.p.name }); }
   render();
 }
 /* What does not change with the date: who the planet is. */

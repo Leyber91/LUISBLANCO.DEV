@@ -50,6 +50,8 @@
 .od-say.wide { max-width: 100ch; margin: 0 0 var(--s-3); }
 .od-say a { color: var(--horizon); text-underline-offset: 3px; white-space: nowrap; }
 .od-say a:hover, .od-say a:focus-visible { color: var(--text-bright); }
+/* the link that explains the night's count stands only beside its count: before the clocks load the count is empty */
+#t-count:empty + a { visibility: hidden; }
 .od-right { text-align: right; margin: 0; }
 
 /* ---------- sheet a: the sky ---------- */

@@ -51,6 +51,14 @@
    A link can carry a log (?log=). It is read at the door by
    record.readShare and shown as "shared with you"; the visitor's
    own log changes only when they press "Add all to your log".
+
+   The sky of clocks writes its visits into the same log (way
+   "sky", with the day the sky was at): such a line carries a link
+   that reopens its clock on the sky at that day. The catalogue
+   the survey last saw is kept in the record too (catalogue()),
+   so "new since your last visit" is erased with the rest. The
+   dialog's last words carry the record's health check: the
+   version this page writes, the version stored, and no sync.
    ============================================================ */
 
 import { LabsOS } from '../os/index.js';
@@ -59,6 +67,7 @@ import * as R from './record.js';
 import { kindLine } from './find.js';
 import { esc } from './views/common.js';
 import { tallySvg } from '../kit/controls.js';
+import { isoDay } from '../kit/format.js';
 
 const LAB = 'exomania';
 const SHOWN = 20;   // lines of a list shown before "Show all"
@@ -75,6 +84,7 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
   let os = null, stored = R.empty(), newer = false, loaded = false;
   const all = { saved: false, visited: false };   // a list shown whole after its "Show all"
   let fault = '';                  // a write the browser refused, said in the dialog until a write goes through
+  let healthNow = null;            // the record's health check, read again after each read and change
   let said = { text: '', about: '' };   // what the dialog's status line says, and the saved worlds it was about
   let shared = R.readShare(sharedParam, known);
   const held = [];                 // visits made before the stored record was read
@@ -96,6 +106,8 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
   /* One job after another. A job that throws is reported by the browser as any error is, and the jobs after it
      still run: one failure does not stop the log for the rest of the visit. */
   const inTurn = (job) => { const run = queue.then(job); queue = run.catch(() => {}); return run; };
+  /* The health check, as the store answers it now. A store that cannot answer leaves the last one read. */
+  const checkHealth = async () => { if (os) { try { healthNow = await R.health(os); } catch { /* keep the last */ } } };
   /* The same change on the page alone, when Labs OS did not start. */
   const local = (op) => { const w = op(stored); const changed = JSON.stringify(w.record) !== JSON.stringify(stored); return { ...w, record: changed ? w.record : stored, changed }; };
 
@@ -115,12 +127,14 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     }
     if (w.ok) fault = '';
     take(w.record, w.why === R.NEWER);
+    await checkHealth();
     before(w); show(); then(w);
   });
   /* Read the store again: another tab may have saved, or erased, since this page read it. */
   const reread = () => inTurn(async () => {
     if (!loaded) return;
     if (os) { try { const r = await R.read(os); take(r.record, r.newer); } catch { /* keep what was read last */ } }
+    await checkHealth();
     shared = R.readShare(sharedParam, known);
     show();
   });
@@ -166,6 +180,14 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     unpin(name, then) { if (loaded) change((rec) => R.unpin(rec, name), { then }); },
     clearPins(then) { if (loaded) change((rec) => R.clearPins(rec), { then }); },
     reread,
+    /* The worlds of this catalogue new since the visitor's last visit, once the log is read; with recording on, the
+       record then keeps this catalogue as the one last seen. Without Labs OS nothing is kept, so nothing is new. */
+    catalogue: (names) => ready.then(() => inTurn(async () => {
+      if (!os) return [];
+      const w = await R.seeCatalogue(os, names, { day: isoDay(now()), keep: os.recording.on });
+      take(w.record, w.why === R.NEWER);
+      return w.fresh;
+    })),
     open() { all.saved = false; all.visited = false; focusNext = null; if (!host.dialog.open) host.dialog.showModal(); draw(); },
   };
 
@@ -173,12 +195,14 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
   const when = (t) => ago(t, now());
   const kind = (name) => kindLine(byName.get(name));
   const world = (name) => `<button type="button" class="log-open" data-open="${esc(name)}">${esc(name)}</button>`;
+  /* a line whose clock was opened on the sky reopens it there, on that planet at that day */
+  const sky = (e) => (e.at ? `<a class="ref log-sky" data-sky="${esc(e.name)}" href="${esc(R.skyLink(e))}">${esc(R.skyWords(e))}</a>` : '');
   /* The control with the focus, by its list and its own key, so that drawing the dialog again finds it in the same
      list: a world can be both saved and visited. */
   const focusKey = () => {
     const a = document.activeElement;
     if (!a || !host.body.contains(a)) return '';
-    const own = ['open', 'unsave', 'log', 'list', 'empty'].map((k) => (a.dataset[k] ? `[data-${k}="${CSS.escape(a.dataset[k])}"]` : '')).join('');
+    const own = ['open', 'unsave', 'log', 'list', 'empty', 'sky'].map((k) => (a.dataset[k] ? `[data-${k}="${CSS.escape(a.dataset[k])}"]` : '')).join('');
     const sec = a.closest('[data-sec]');
     return own ? `${sec ? `[data-sec="${sec.dataset.sec}"] ` : ''}${own}` : '';
   };
@@ -243,11 +267,11 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     : `<p class="dim" data-empty="saved" tabindex="-1">${noSaved}</p>`}
       </section>
       <section class="log-sec" data-sec="visited"><h3>Visited <span>${R.worlds(visits.length)} listed, newest first</span></h3>
-        ${visits.length ? `<ul class="log-list">${shownVisits.map((e) => `<li>${world(e.name)}<span class="log-what">${esc(R.visitWords(e))}</span><span class="log-when">${esc(when(e.t))}</span></li>`).join('')}</ul>
+        ${visits.length ? `<ul class="log-list">${shownVisits.map((e) => `<li>${world(e.name)}<span class="log-what">${esc(R.visitWords(e))}</span><span class="log-when">${esc(when(e.t))}</span>${sky(e)}</li>`).join('')}</ul>
         ${more('visited', visits.length, shownVisits.length)}` : `<p class="dim">${noVisits}</p>`}
         ${v.record.log.dropped ? `<p class="dim">${R.worlds(v.record.log.dropped)} visited earlier ${v.record.log.dropped === 1 ? 'is' : 'are'} counted and no longer listed: the list holds ${R.LIMITS.visits} worlds.</p>` : ''}
       </section>
-      <p class="log-foot">${esc(R.footWords({ persistent: !!os && os.storage.persistent, recording: os ? os.recording.on : null }))} <a class="ref" href="privacy.html">What this site keeps, and how to erase it</a></p>`;
+      <p class="log-foot">${esc(R.footWords({ persistent: !!os && os.storage.persistent, recording: os ? os.recording.on : null }))}${healthNow ? ` ${esc(R.healthWords(healthNow))}` : ''} <a class="ref" href="privacy.html">What this site keeps, and how to erase it</a></p>`;
     host.dialog.scrollTop = top;   // the dialog stays where it was scrolled to
     // the focus goes where the press sent it, or stays on the control it was on, or goes to Close when that is gone
     const to = focusNext ? placeOf(focusNext) : had ? host.body.querySelector(had) : null;
@@ -303,6 +327,7 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     if (os) {
       for (const [type, cls] of [['exomania.visit', 'action'], ['exomania.save', 'outcome']]) { try { os.register(type, { cls }); } catch { /* registered already */ } }
       try { const r = await R.read(os); take(r.record, r.newer); } catch { take(R.empty(), false); fault = 'The stored log could not be read, so what is listed here is empty. The stored log has not been changed.'; }
+      await checkHealth();
       os.onDeleted(() => { take(R.empty(), false); show(); });
       os.recording.onChange(() => draw());
     }

@@ -163,7 +163,7 @@ export default async function log(p, { base }) {
   const line = async (want) => { await p.until(`document.getElementById("log-line").textContent === ${JSON.stringify(want)}`, 6000); return state(); };
   const openLog = async () => { await call(press, '#log-line'); await p.sleep(400); return state(); };
   const closeLog = () => call(press, '[data-close="log"]');
-  const WAYS = '(by name|from a question|on a tour|at random|on the diagram|in its system|from a link|from the log)';
+  const WAYS = '(by name|from a question|on a tour|at random|on the diagram|in its system|from a link|from the log|from the sky)';
   const VIA = new RegExp(`^(${WAYS}|[\\d,]+ visits, the last ${WAYS})$`);
   const FULL = 'the log holds 200 saved worlds, which is all it takes; take one out first';
   const blank = () => ({ overdue: { planet: null, place: null }, log: { saved: [], visits: [], pins: [], dropped: 0 } });
@@ -177,6 +177,10 @@ export default async function log(p, { base }) {
     JSON.stringify({ add: start.add, on: start.addOn, off: start.addOff, pressed: start.addPressed }));
 
   // ---- before the stored log is read (on a fixture store, so the visitor's own store is not written) ----
+  // Since version 3 the survey keeps the catalogue it saw in the visitor's own store once the weekly roster is in
+  // (recording on): that write is waited for here, so the store the fixture page must leave alone is the one it found.
+  await p.until(`(${rawRecord})().then((r) => !!r && !!r.data && !!r.data.seen)`, 30000);
+  const ownBefore = await call(rawRecord);
   await open('os-fixture=first-visit', { hold: true });
   const early = await state();
   p.check('before the stored log is read the line says so, and the button for the log is off', early.line === 'Log: reading' && early.addOff && early.addTitle === 'The log is being read' && early.store === '',
@@ -203,7 +207,8 @@ export default async function log(p, { base }) {
   p.check('a press on Pin while it was off pinned nothing, and the button is on once the log is read', !!fx && same(fx.data.log.pins, []) && !late.pinOff, JSON.stringify({ pins: fx && fx.data.log.pins, off: late.pinOff }));
   p.check('the log that was open then shows it', late.open && late.visited.length === 1 && late.visited[0].name === held.name && late.visited[0].what === 'at random', JSON.stringify(late.visited));
   p.check('with ?os-fixture= the page runs on the labs\' fixture store: the address keeps the parameter, and the browser\'s own store is not written',
-    !!where && where.fixture === 'first-visit' && /[?&]os-fixture=first-visit/.test(late.url) && own0 === null, `${JSON.stringify(where)} | ${late.url} | own store ${JSON.stringify(own0)}`);
+    !!where && where.fixture === 'first-visit' && /[?&]os-fixture=first-visit/.test(late.url) && !!ownBefore && same(own0, ownBefore) && own0.data.log.visits.length === 0,
+    `${JSON.stringify(where)} | ${late.url} | own store ${same(own0, ownBefore) ? 'as it was' : 'changed'}, ${own0 && own0.data ? own0.data.log.visits.length : '?'} visits`);
   await closeLog();
 
   // ---- the keyboard: a link that skips to the survey, and a ring on the search field ----
@@ -291,7 +296,7 @@ export default async function log(p, { base }) {
   p.check('each visit and each save is in the activity log with its time, and each visit with the way it came', visits.length === 7 && saves.length === 1 && visits.every((e) => e.t > 1.7e12 && typeof e.data.planet === 'string' && ['search', 'results', 'tour', 'random', 'diagram', 'system', 'link', 'log'].includes(e.data.via))
     && visits.some((e) => e.data.via === 'search') && visits.some((e) => e.data.via === 'random') && visits.filter((e) => e.data.via === 'link').length === 1 && visits.at(-1).data.via === 'log', JSON.stringify(visits.map((e) => e.data.via)));
   const rec = await call(osDo, 'record');
-  p.check('the record is the lab\'s one record in the labs\' store, at version 2, with both slices and a place to resume', !!rec && rec.v === 2 && !!rec.data.overdue && rec.data.log.saved.length === 1 && rec.data.log.visits.length === 5 && rec.data.log.pins.length === 2
+  p.check('the record is the lab\'s one record in the labs\' store, at version 3, with its slices and a place to resume', !!rec && rec.v === 3 && !!rec.data.overdue && rec.data.log.saved.length === 1 && rec.data.log.visits.length === 5 && rec.data.log.pins.length === 2
     && !!rec.resume && rec.resume.url.includes('exomania-survey.html?p='), JSON.stringify(rec && { v: rec.v, saved: rec.data.log.saved.length, visits: rec.data.log.visits.length, pins: rec.data.log.pins, resume: rec.resume }));
 
   // ---- the saved worlds as a filter ----
@@ -374,17 +379,22 @@ export default async function log(p, { base }) {
   await closeLog();
   await call(osDo, 'recording', true);
 
-  // ---- Overdue writes its own slice and leaves the log ----
-  const mine = await state();
+  // ---- Overdue writes its own slice, and the clock it opened as a visit from the sky; the rest of the log is left ----
+  const mine = await state(), rawMine = await call(rawRecord);
   await p.go(`${base}/labs/exomania.html?still`);
   await p.until('document.body.dataset.state === "ready"', 60000);
   await p.ev(`(() => { const i = document.getElementById("pick"); i.value = "WASP-12 b"; document.getElementById("pick-form").requestSubmit(); })()`);
   await p.sleep(1200);
   await open();
   const after = await state();
-  const rec2 = await call(osDo, 'record');
+  const rec2 = await call(osDo, 'record'), rawAfter = await call(rawRecord);
   const own = (s) => s.line.replace(/, \d+ shared with you$/, '');
-  p.check('after Overdue saved its planet, the survey\'s log is as it was and the record holds both', own(after) === own(mine) && /, 3 saved$/.test(own(after)) && !!rec2 && rec2.data.overdue.planet === 'WASP-12 b' && rec2.data.log.saved.length >= 3, `${mine.line} then ${after.line} | overdue ${rec2 && rec2.data.overdue.planet}`);
+  const others = (r) => r.data.log.visits.filter((v) => v.name !== 'WASP-12 b').map((v) => [v.name, v.t, v.via, v.n]);
+  const skyTop = rawAfter && rawAfter.data.log.visits[0];
+  p.check('after Overdue opened a clock, the survey\'s log holds all it held and that clock as a visit from the sky at the sky\'s day, and the record holds the sky\'s planet',
+    /, 3 saved$/.test(own(after)) && !!rec2 && rec2.data.overdue.planet === 'WASP-12 b' && same(rawAfter.data.log.saved, rawMine.data.log.saved) && same(rawAfter.data.log.pins, rawMine.data.log.pins)
+    && same(others(rawAfter), others(rawMine)) && !!skyTop && skyTop.name === 'WASP-12 b' && skyTop.via === 'sky' && /^\d{4}-\d{2}-\d{2}$/.test(skyTop.at || ''),
+    `${mine.line} then ${after.line} | overdue ${rec2 && rec2.data.overdue.planet} | top ${JSON.stringify(skyTop)}`);
 
   // ---- a tour: the visitor's own steps are visits ----
   await another();
@@ -526,7 +536,7 @@ export default async function log(p, { base }) {
   const i1 = await openLog();
   p.check('where the browser\'s store did not open, the log says that what is done here is not kept', i1.notes.some((n) => /^The browser.s store did not open on this page, so what you do here is not kept after the page closes\.$/.test(n)) && i1.line === 'Log: 0 visited, 0 saved', `${i1.line} | ${i1.notes.join(' / ')}`);
   // second review, D11: the footer said "The log is kept in this browser." here
-  p.check('and its last words do not say the log is kept in this browser', !/kept in this browser/.test(i1.foot) && /^A visit and a save are also usage events, which are sent to the labs. backend only where you have allowed it\. What this site keeps/.test(i1.foot), i1.foot);
+  p.check('and its last words do not say the log is kept in this browser', !/kept in this browser/.test(i1.foot) && /^A visit and a save are also usage events, which are sent to the labs. backend only where you have allowed it\. This page writes version 3 of the record, and [^.]+\. No copy is synced to another device\. What this site keeps/.test(i1.foot), i1.foot);
   await closeLog();
   await open('os-fixture=recording-off');
   await another();
@@ -540,7 +550,7 @@ export default async function log(p, { base }) {
   await p.until('document.querySelector("[data-act=log]").textContent === "In your log"', 6000);
   const offEvents = await call(osDo, 'events'), i3 = await openLog();
   p.check('with recording off a save is saved and writes no usage event, and the footer says so instead of naming the events', i3.saved.some((s) => s.name === sv.name) && (offEvents || []).length === 0
-    && /^The log is kept in this browser\. With recording off, no usage event is written\. What this site keeps/.test(i3.foot) && !/usage events/.test(i3.foot), `${(offEvents || []).length} events | ${i3.foot}`);
+    && /^The log is kept in this browser\. With recording off, no usage event is written\. This page writes version 3 of the record, and [^.]+\. No copy is synced to another device\. What this site keeps/.test(i3.foot) && !/usage events/.test(i3.foot), `${(offEvents || []).length} events | ${i3.foot}`);
   await closeLog();
 
   /* ======== the second review: each defect in the state it was reported in ======== */
@@ -676,7 +686,7 @@ export default async function log(p, { base }) {
 
   // ---- D6 and T9: a record of a later version ----
   const later = { overdue: { planet: 'WASP-12 b', place: null, tz: 'Europe/Madrid' }, log: { saved: [{ name: many[0], t: t9, view: 'orbit', note: 'kept by a later page' }], visits: [], pins: [], dropped: 0, tags: { [many[0]]: ['hot'] } }, notes: { a: 1 } };
-  await call(writeRaw, later, 3);
+  await call(writeRaw, later, 4);
   await open();
   const v3a = await another();
   await p.sleep(600);
@@ -684,7 +694,7 @@ export default async function log(p, { base }) {
   await p.until('!!document.querySelector(".tp-said").textContent', 6000);
   const v3s = await state(), v3d = await openLog(), v3raw = await call(rawRecord);
   await closeLog();
-  p.check('D6: a record of a later version is shown and not written: a visit and a save leave it as it was, and the press says why', !!v3raw && v3raw.v === 3 && same(v3raw.data, later) && v3s.said === `${v3a.name} was not added: this log was written by a newer version of this page.`
+  p.check('D6: a record of a later version is shown and not written: a visit and a save leave it as it was, and the press says why', !!v3raw && v3raw.v === 4 && same(v3raw.data, later) && v3s.said === `${v3a.name} was not added: this log was written by a newer version of this page.`
     && v3s.line === 'Log: 0 visited, 1 saved', `v${v3raw && v3raw.v} | ${v3s.said} | ${v3s.line}`);
   p.check('D6: the log says why nothing is written', v3d.notes.includes('This log was written by a newer version of this page. It is shown as far as this version reads it, and nothing is written until the page is reloaded.') && v3d.saved.length === 1, v3d.notes.join(' / '));
   await p.go(`${base}/labs/exomania.html?still`);
@@ -692,7 +702,7 @@ export default async function log(p, { base }) {
   await p.ev('(() => { const i = document.getElementById("pick"); i.value = "HD 209458 b"; document.getElementById("pick-form").requestSubmit(); return true; })()');
   await p.sleep(1500);
   const v3o = await call(rawRecord), v3name = await p.ev('(document.getElementById("c-name") || {}).textContent');
-  p.check('D6: Overdue keeps working on a record of a later version and writes nothing', v3name === 'HD 209458 b' && v3o.v === 3 && same(v3o.data, later), `${v3name} | v${v3o.v}`);
+  p.check('D6: Overdue keeps working on a record of a later version and writes nothing', v3name === 'HD 209458 b' && v3o.v === 4 && same(v3o.data, later), `${v3name} | v${v3o.v}`);
 
   // ---- D7 and T10: the focus on the filter bar ----
   await call(writeRaw, rec9({}), 2);
