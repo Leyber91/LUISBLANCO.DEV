@@ -26,8 +26,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 /* name, the text in data.js, what it becomes */
 const MUTANTS = [
   ['the cold (early-Mars) rule removed', `  if (cold) return 'ice';\n`, ``],
-  ['the day-side factor removed', `const Ttest = (a < 0.1) ? Tsurf * 1.18921 : Tsurf;`, `const Ttest = Tsurf;`],
-  ['the day-side gate moved from 0.1 to 0.2 AU', `const Ttest = (a < 0.1) ?`, `const Ttest = (a < 0.2) ?`],
+  ['the day-side factor removed', `(a < 0.1) ? Tsurf * 1.18921 : Tsurf);`, `Tsurf);`],
+  ['the day-side gate moved from 0.1 to 0.2 AU', `(a < 0.1) ? Tsurf * 1.18921`, `(a < 0.2) ? Tsurf * 1.18921`],
   ['molten from 1,200 K to 1,100 K', `else if (Ttest >= 1200) state = 'partial';`, `else if (Ttest >= 1100) state = 'partial';`],
   ['molten from 1,200 K to 1,300 K', `else if (Ttest >= 1200) state = 'partial';`, `else if (Ttest >= 1300) state = 'partial';`],
   ['thin air from 0.15 up to 0.25', `export const AIR_THIN = 0.15,`, `export const AIR_THIN = 0.25,`],
@@ -55,6 +55,13 @@ const MUTANTS = [
   ['Earth\'s ice line ten degrees lower', `iceCap = Math.sqrt(clamp((Tsurf + 12 - 255) / 55, 0, 1.3));`, `iceCap = Math.sqrt(clamp((Tsurf + 2 - 255) / 55, 0, 1.3));`],
   ['Rayleigh depth doubled', `const tauRayleigh = (um) => 0.008569 *`, `const tauRayleigh = (um) => 0.017138 *`],
   ['an ocean claimed under ice', `ice: ['Frozen world', 'Frozen world'],`, `ice: ['Frozen world', 'Ice / ocean world'],`],
+  // the amount of air each scenario of air.js is drawn with, and the bare rock's day side (2026-11-16)
+  ['thick air drawn under the full-air bound', `airKey === 'thick' ? Math.max(share, AIR_FULL) :`, `airKey === 'thick' ? share :`],
+  ['thin air allowed to reach the full-air bound', `clamp(share, AIR_THIN, AIR_FULL - 0.01) : 0;`, `clamp(share, AIR_THIN, AIR_FULL) : 0;`],
+  ['thin air drawn at any share', `clamp(share, AIR_THIN, AIR_FULL - 0.01) : 0;`, `share : 0;`],
+  ['bare rock drawn with its share of air', `clamp(share, AIR_THIN, AIR_FULL - 0.01) : 0;`, `clamp(share, AIR_THIN, AIR_FULL - 0.01) : share;`],
+  ['the bare rock\'s own day side on turning rocks too', `atmDensity < AIR_THIN && locked ? bareDay(Teff, Rstar, a) : null;`, `atmDensity < AIR_THIN ? bareDay(Teff, Rstar, a) : null;`],
+  ['a locked bare rock melting by its mean surface', `(bare ? bare.Tday : (a < 0.1)`, `(bare ? Tsurf : (a < 0.1)`],
 ];
 
 const tmp = mkdtempSync(join(tmpdir(), 'looks-mutants-'));

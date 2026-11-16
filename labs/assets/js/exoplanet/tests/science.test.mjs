@@ -110,7 +110,8 @@ yes('an eccentricity lower limit is not used as e (Kepler-442 b: e > 0.04 is a b
 // the rocky-class albedo 0.30. The old fallback gave 455 K and drew a temperate rocky world.
 const th = { ...byName.get('TRAPPIST-1 h'), pl_eqt: null };
 near('TRAPPIST-1 h with its published Teq withheld: render Teq (K)', physics(th).Teq, 157.1, 1);
-yes('TRAPPIST-1 h with its published Teq withheld is drawn frozen', classify(th).label === 'Frozen world');
+// Since 2026-11-16 the 2026 fit draws it as bare rock (air 0.3%, air.js); the fallback must leave it a cold one.
+yes('TRAPPIST-1 h with its published Teq withheld is drawn as cold bare rock, as with its Teq', classify(th).look === 'airless' && physics(th).Tsurf < 200 && classify(byName.get('TRAPPIST-1 h')).look === 'airless', `${classify(th).look} ${physics(th).Tsurf.toFixed(0)} K`);
 let nFb = 0, okFb = 0;
 for (const p of list) {
   if (p.pl_eqt !== null) continue;

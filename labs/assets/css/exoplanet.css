@@ -127,6 +127,10 @@ button, input, select { font: inherit; color: inherit; }
 .ret-name { font-size: 19px; font-weight: 500; color: var(--text-bright); letter-spacing: .04em; text-shadow: 0 0 2px #000, 0 0 3px #000, 0 2px 16px #000; white-space: nowrap; }
 .ret-class { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--horizon); text-shadow: 0 0 2px #000, 0 0 3px #000, 0 1px 8px #000; white-space: nowrap; }
 .ret-render { font-size: 9px; letter-spacing: .06em; color: var(--text-faint); text-shadow: 0 0 2px #000, 0 0 3px #000, 0 1px 8px #000; white-space: nowrap; }
+/* the scenarios of a rocky world's air (air.js), under the surface it is drawn as; plain text until slice D gives it a control */
+.ret-render .ret-air { display: block; white-space: normal; max-width: 62ch; margin: 2px auto 0; color: var(--text-dim); line-height: 1.45; }
+.ret-render a { color: var(--text); pointer-events: auto; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-bright); }
+.ret-render a:hover, .ret-render a:focus-visible { color: var(--text-bright); text-decoration-color: var(--horizon-dim); }
 .tag .tg { margin: 0 3px 0 6px; vertical-align: 1px; }
 .cam { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center;
   gap: 6px; pointer-events: auto; width: max-content; max-width: 100%; }

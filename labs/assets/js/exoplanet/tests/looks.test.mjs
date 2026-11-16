@@ -80,16 +80,20 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
    these rules one at a time and the earlier form of this block still passed every time. */
 {
   const rock = (m, a, extra = {}) => { const P = 365.25 * Math.pow(a, 1.5); return { pl_name: `rock ${m.toFixed(4)} at ${a}`, name: `rock ${m.toFixed(4)} at ${a}`, pl_masse: m, M: m, pl_rade: Math.pow(m, 0.27), R: Math.pow(m, 0.27), pl_orbsmax: a, a, pl_orbper: P, P, pl_eqt: null, ...SUN, ...extra }; };
-  // the mass at which a rock at this orbit keeps a given share of its air (the share rises with mass)
-  const massFor = (air, a) => { let lo = 0.003, hi = 3; for (let i = 0; i < 60; i++) { const m = Math.sqrt(lo * hi); if (physics(rock(m, a)).atmDensity < air) lo = m; else hi = m; } return hi; };
-  const withAir = (air, a) => { const p = rock(massFor(air, a), a); return { p, air: physics(p).atmDensity, look: lookOf(p) }; };
-  const show = (x) => `${x.air.toFixed(3)}:${x.look}`;
+  // the mass at which a rock at this orbit keeps a given share of its air (the share rises with mass). The share is
+  // the illustrative amount; whether the rock has air at all is the fit's (air.js), and every case here keeps air by it.
+  const massFor = (air, a) => { let lo = 0.003, hi = 3; for (let i = 0; i < 60; i++) { const m = Math.sqrt(lo * hi); if (physics(rock(m, a)).share < air) lo = m; else hi = m; } return hi; };
+  const withAir = (air, a) => { const p = rock(massFor(air, a), a), ph = physics(p); return { p, share: ph.share, air: ph.atmDensity, key: ph.airKey, P: ph.air.fit.P, look: lookOf(p) }; };
+  const show = (x) => `${x.share.toFixed(3)}>${x.air.toFixed(3)}:${x.look}`;
 
-  // bare rock, thin air, full air: the bounds are 0.15 and 0.6 of the air kept
-  const a14 = withAir(0.14, 1), a16 = withAir(0.16, 1), a59 = withAir(0.59, 1), a61 = withAir(0.61, 1);
-  yes('the cases keep the air they were built to keep', [[a14, 0.14], [a16, 0.16], [a59, 0.59], [a61, 0.61]].every(([x, t]) => Math.abs(x.air - t) < 0.004), [a14, a16, a59, a61].map(show).join(' '));
-  yes('at Earth\'s orbit, air 0.14 is bare rock and 0.16 a thin-air desert', a14.look === 'airless' && a16.look === 'desert', `${show(a14)} ${show(a16)}`);
-  yes('at Earth\'s orbit, air 0.59 is a desert and 0.61 has seas', a59.look === 'desert' && a61.look === 'temperate', `${show(a59)} ${show(a61)}`);
+  // thin air and full air: the bounds are 0.15 and 0.6 of the air kept
+  const a10 = withAir(0.10, 1), a16 = withAir(0.16, 1), a59 = withAir(0.59, 1), a61 = withAir(0.61, 1);
+  yes('the cases keep the share they were built to keep, and the fit gives each of them air', [[a10, 0.10], [a16, 0.16], [a59, 0.59], [a61, 0.61]].every(([x, t]) => Math.abs(x.share - t) < 0.004 && x.P >= 0.5), [a10, a16, a59, a61].map((x) => `${show(x)} P ${x.P.toFixed(2)}`).join(' '));
+  yes('a rock the fit gives air keeps at least 0.15 of it: a share of 0.10 is drawn at 0.15, and 0.16 at 0.16', a10.key === 'thin' && a10.air === 0.15 && a10.look === 'desert' && Math.abs(a16.air - a16.share) < 1e-12, `${show(a10)} ${show(a16)}`);
+  yes('at Earth\'s orbit, a share of 0.59 is thin air (a desert) and 0.61 thick air (seas)', a59.key === 'thin' && a59.look === 'desert' && a61.key === 'thick' && a61.look === 'temperate', `${show(a59)} ${show(a61)}`);
+  yes('thin air never reaches the full-air bound: a share of 0.9 drawn thin is held at 0.59', physics(rock(massFor(0.9, 1), 1), { air: 'thin' }).atmDensity === 0.59 && physics(rock(massFor(0.9, 1), 1), { air: 'thin' }).airKey === 'thin');
+  yes('thick air is never under the full-air bound: a share of 0.3 drawn thick is held at 0.6', physics(rock(massFor(0.3, 1), 1), { air: 'thick' }).atmDensity === 0.6);
+  yes('bare rock has none, whatever the share', physics(rock(massFor(0.9, 1), 1), { air: 'bare' }).atmDensity === 0 && lookOf(rock(massFor(0.9, 1), 1), physics(rock(massFor(0.9, 1), 1), { air: 'bare' })) === 'airless');
   yes('the bounds data.js exports are those two numbers', AIR_THIN === 0.15 && AIR_FULL === 0.6);
 
   // the habitable-zone limits, by flux
@@ -104,13 +108,27 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   yes('a thin-air rock is a desert just inside the early-Mars distance and ice just outside it', inside.look === 'desert' && outside.look === 'ice' && inside.air > 0.15 && inside.air < 0.6 && outside.air > 0.15 && outside.air < 0.6, `${show(inside)} / ${show(outside)}`);
   yes('an Earth with full air whose mean surface is under 245 K is ice inside the zone, and has seas at 246 K', lookOf(earthAt(1.45)) === 'ice' && physics(earthAt(1.45)).Tsurf < 245 && lookOf(earthAt(1.42)) === 'temperate' && physics(earthAt(1.42)).Tsurf > 245, `${physics(earthAt(1.45)).Tsurf.toFixed(1)} K ${lookOf(earthAt(1.45))} / ${physics(earthAt(1.42)).Tsurf.toFixed(1)} K ${lookOf(earthAt(1.42))}`);
 
-  // molten at 1,200 K, with the temperature given outright so the test does not lean on the rule's own variable
-  const hot = (Teq, a) => lookOf(rock(1, a, { pl_eqt: Teq }));
-  yes('beyond 0.1 AU a rock at 1,199 K is not molten and one at 1,201 K is', hot(1199, 0.2) !== 'molten' && hot(1201, 0.2) === 'molten', `${hot(1199, 0.2)} / ${hot(1201, 0.2)}`);
+  // molten at 1,200 K, with the temperature given outright so the test does not lean on the rule's own variable.
+  // A world with air: 2 Earth masses at 1.206 Earth radii keeps air by the fit at these orbits, and its illustrative
+  // share is under 0.15, so it is drawn with thin air at 0.15 of Earth's: its mean surface is Teq + 33 x 0.15 K.
+  const aired = (Teq, a) => rock(2, a, { pl_eqt: Teq - 33 * 0.15 });
+  const hot = (Teq, a) => lookOf(aired(Teq, a));
+  yes('the rock built to keep air keeps thin air at 0.15 at 0.05, 0.099, 0.101 and 0.2 AU', [0.05, 0.099, 0.101, 0.2].every((a) => { const ph = physics(aired(1100, a)); return ph.airKey === 'thin' && ph.atmDensity === 0.15; }));
+  yes('beyond 0.1 AU a rock with air whose mean surface is 1,199 K is not molten and one at 1,201 K is', hot(1199, 0.2) !== 'molten' && hot(1201, 0.2) === 'molten', `${hot(1199, 0.2)} / ${hot(1201, 0.2)}`);
   // inside 0.1 AU the day side counts: 1.18921 times the surface, so 1,010 K reaches 1,201 K and 1,008 K only 1,199 K
-  yes('inside 0.1 AU a rock at 1,010 K is molten by its day side and one at 1,008 K is not', hot(1010, 0.05) === 'molten' && hot(1008, 0.05) !== 'molten', `${hot(1010, 0.05)} / ${hot(1008, 0.05)}`);
+  yes('inside 0.1 AU a rock with air at 1,010 K is molten by its day side and one at 1,008 K is not', hot(1010, 0.05) === 'molten' && hot(1008, 0.05) !== 'molten', `${hot(1010, 0.05)} / ${hot(1008, 0.05)}`);
   yes('the same 1,010 K beyond 0.1 AU is not molten', hot(1010, 0.2) !== 'molten', hot(1010, 0.2));
   yes('the day-side rule changes at 0.1 AU: 1,010 K is molten at 0.099 AU and not at 0.101 AU', hot(1010, 0.099) === 'molten' && hot(1010, 0.101) !== 'molten');
+  // A locked bare rock melts by its own day side: Teff sqrt(R_star / a) (0.9 x 2/3)^(1/4), with no greenhouse and
+  // whatever the archive's Teq. Around the Sun that is 5,772 x 0.880 x sqrt(0.00465047 / a) K, which is 1,200 K at
+  // a = 0.00465047 (5,772 x 0.88011 / 1,200)^2 AU.
+  const bareAt = (T) => { const a = 0.00465047 * Math.pow(5772 * Math.pow(0.9 * 2 / 3, 0.25) / T, 2); return { pl_name: `bare rock at ${T} K`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: a, pl_orbper: 365.25 * Math.pow(a, 1.5), pl_eqt: 300 }; };
+  yes('the locked bare rocks are bare by the fit and locked', [1199, 1201].every((T) => { const ph = physics(bareAt(T)); return ph.airKey === 'bare' && ph.locked && ph.bare; }));
+  // beyond the lock radius a bare rock turns, and the mean surface decides: no greenhouse, so the archive's Teq itself
+  const turning = (Teq) => ({ pl_name: `turning bare rock at ${Teq} K`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: 0.5, pl_orbper: 129.1, pl_eqt: Teq });
+  yes('a bare rock beyond the lock radius is bare and not locked', physics(turning(1201)).airKey === 'bare' && !physics(turning(1201)).locked && physics(turning(1201)).bare === null);
+  yes('beyond the lock radius a bare rock at 1,199 K is not molten and one at 1,201 K is', lookOf(turning(1199)) === 'airless' && lookOf(turning(1201)) === 'molten', `${lookOf(turning(1199))} / ${lookOf(turning(1201))}`);
+  yes('a locked bare rock whose day side is 1,199 K is not molten and one at 1,201 K is, though the archive says 300 K', lookOf(bareAt(1199)) === 'airless' && lookOf(bareAt(1201)) === 'molten', `${lookOf(bareAt(1199))} / ${lookOf(bareAt(1201))}`);
 
   // a cold airless body of low density is an ice shell; a dense one is rock. The bound is 0.6 of Earth's density.
   const small = (rho) => { const m = 0.008, R = Math.cbrt(m / rho); return { ...rock(m, 3), pl_rade: R, R }; };
@@ -167,7 +185,8 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   yes('its glow under the star is of the order of the starlight a dark rock reflects', lum(lava.glow) > 0.03 && lum(lava.glow) < 0.6, lum(lava.glow).toFixed(3));
   yes('its glow is red before it is blue', lava.glow[0] > lava.glow[1] && lava.glow[1] > lava.glow[2]);
   const bare = (a) => { const P = 365.25 * Math.pow(a, 1.5); return toParams({ pl_name: `bare rock at ${a}`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: a, pl_orbper: P, pl_eqt: null }); };
-  const warm = bare(0.2244), cool = bare(0.2367);   // hottest points of 760 K and 740 K: 360.02 K / sqrt(a) for a locked rock around the Sun
+  // hottest points of 760 K and 740 K: a locked bare rock around the Sun has 5,772 x 0.9^(1/4) x sqrt(0.00465047 / a) K
+  const warm = bare(0.2545), cool = bare(0.2684);
   yes('a bare rock whose hottest point is 760 K glows and one at 740 K does not: the bound is 750 K', warm.look === 'airless' && Math.abs(warm.tsub - 760) < 2 && warm.glowT > 0 && cool.look === 'airless' && Math.abs(cool.tsub - 740) < 2 && cool.glowT === 0, `${warm.tsub.toFixed(0)} K glows, ${cool.tsub.toFixed(0)} K does not`);
   const dusty = toParams({ pl_name: 'a hot rock that keeps its air', pl_rade: 1.5, pl_masse: 5.0, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: 0.12, pl_orbper: 15.2, pl_eqt: null });
   yes('only molten and airless rock and fluid worlds are given a glow: a hot world with air has none', (dusty.look === 'desert' || dusty.look === 'shrouded') && dusty.tsub > 750 && dusty.glowT === 0, `${dusty.look} ${dusty.tsub.toFixed(0)} K`);
@@ -191,7 +210,8 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   console.log('      looks in the catalogue:', Object.entries(count).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', '));
   yes('every look occurs in the catalogue or in the Solar System', Object.keys(LOOKS).every((k) => count[k] > 0 || SOLAR.some((p) => lookOf(p) === k)), Object.keys(LOOKS).filter((k) => !count[k]).join(' ') || 'all in the catalogue');
   const named = (n) => list.find((p) => p.name === n);
-  const want = { '55 Cnc e': 'molten', 'K2-141 b': 'molten', 'HD 209458 b': 'fluid', 'GJ 1214 b': 'fluid', 'TRAPPIST-1 e': 'temperate' };
+  // TRAPPIST-1 e was drawn with seas until 2026-11-16: the 2026 fit gives it air at 0.4% and its transits allow bare rock
+  const want = { '55 Cnc e': 'molten', 'K2-141 b': 'molten', 'HD 209458 b': 'fluid', 'GJ 1214 b': 'fluid', 'TRAPPIST-1 e': 'airless', 'Kepler-442 b': 'temperate' };
   for (const [n, look] of Object.entries(want)) { const p = named(n); yes(`${n} is drawn ${look}`, !!p && lookOf(p) === look, p ? lookOf(p) : 'not in the catalogue'); }
 }
 
