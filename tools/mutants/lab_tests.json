@@ -208,5 +208,60 @@
     "name": "run: a test that prints a lot is failed for it",
     "from": ", maxBuffer: 64 * 1024 * 1024 }",
     "to": " }"
+  },
+  {
+    "name": "output: the failing checks of a failing file not printed",
+    "from": "      if (failing.length) say(`failing checks (${failing.length}):\\n${failing.slice(0, 40).join('\\n')}`);\n",
+    "to": ""
+  },
+  {
+    "name": "output: no line taken for a failing check",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines.filter((l) => /^\\s*FAILED\\b/.test(l));"
+  },
+  {
+    "name": "output: every line taken for a failing check",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines;"
+  },
+  {
+    "name": "output: FAIL anywhere in a line taken for a failing check",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines.filter((l) => /FAIL\\b/.test(l));"
+  },
+  {
+    "name": "output: an indented FAIL not taken",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines.filter((l) => /^FAIL\\b/.test(l));"
+  },
+  {
+    "name": "output: FAILED taken for a failing check",
+    "from": "const failing = lines.filter((l) => /^\\s*FAIL\\b/.test(l));",
+    "to": "const failing = lines.filter((l) => /^\\s*FAIL/.test(l));"
+  },
+  {
+    "name": "output: none of the failing checks shown",
+    "from": "failing.slice(0, 40)",
+    "to": "failing.slice(0, 0)"
+  },
+  {
+    "name": "output: thirty-nine failing checks shown at most",
+    "from": "failing.slice(0, 40)",
+    "to": "failing.slice(0, 39)"
+  },
+  {
+    "name": "output: forty-one failing checks shown at most",
+    "from": "failing.slice(0, 40)",
+    "to": "failing.slice(0, 41)"
+  },
+  {
+    "name": "output: the count of failing checks not given",
+    "from": "`failing checks (${failing.length}):",
+    "to": "`failing checks:"
+  },
+  {
+    "name": "output: the last lines not printed after the failing checks",
+    "from": "      say(lines.slice(-20).join('\\n'));\n",
+    "to": ""
   }
 ]
