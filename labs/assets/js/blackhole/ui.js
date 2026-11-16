@@ -222,7 +222,7 @@ export function buildUI(app) {
     const rowsT = OBJECTS.map((o) => `<tr><td>${o.name}</td><td>${sci(o.mass)} M☉ ${o.massErr ? '± ' + sci(o.massErr) : ''}</td><td>${o.distPc ? len(o.distPc * K.SI.pc) : '--'}</td><td>a ${o.spin} <span class="${o.spinTag === 'REAL' ? 'bh-tagr' : 'bh-tagi'}">${o.spinTag}</span></td><td>i ${o.incl} deg</td><td>${esc(cited(o))}</td></tr>`).join('');
     sources.innerHTML = `<h3>Objects (data version ${VERSION})</h3><table><tr><th>object</th><th>mass</th><th>distance</th><th>spin</th><th>incl.</th><th>sources</th></tr>${rowsT}</table>
       <h3 style="margin-top:12px">Equations and values</h3><ol>${Object.values(CITE).map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
-      <p class="bh-note">Verification: <b>node labs/assets/js/blackhole/verify.mjs</b> runs 40 checks of the engine against these sources (shadow vs Bardeen within 0.002%, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification).</p>
+      <p class="bh-note">Verification: <b>node labs/assets/js/blackhole/verify.mjs</b> checks the engine against these sources: the shadow against Bardeen's curve, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification, and the Hawking temperature of a spinning, charged hole.</p>
       <button class="bh-btn" type="button" id="bh-srcclose">Close</button>`;
     $('#bh-srcclose').addEventListener('click', () => { sources.hidden = true; });
   };

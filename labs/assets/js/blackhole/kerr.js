@@ -732,9 +732,12 @@ export function thetaG(massSun, distPc) {
   return (SI.rgSun * massSun) / (distPc * SI.pc) * SI.uasPerRad;
 }
 
-/** Hawking temperature (Hawking 1975, Commun. Math. Phys. 43, 199), a = 0, in kelvin. */
-export function hawkingKelvin(massKg) {
-  return SI.hbar * SI.c ** 3 / (8 * Math.PI * SI.G * massKg * SI.kB);
+/** Hawking temperature in kelvin of a Kerr-Newman hole: T = hbar kappa / (2 pi k_B) (Hawking 1975, Commun. Math.
+ *  Phys. 43, 199, abstract), with kappa the surface gravity, here surfaceGravity(a, q) in units of c^3 / (G M).
+ *  At a = q = 0 kappa is 1/4 and T is hbar c^3 / (8 pi G M k_B); a spinning or charged hole is colder, and an
+ *  extremal one (a^2 + q^2 = 1) has T = 0. Ledger row 1. */
+export function hawkingKelvin(massKg, a = 0, q = 0) {
+  return SI.hbar * SI.c ** 3 * surfaceGravity(a, q) / (2 * Math.PI * SI.G * massKg * SI.kB);
 }
 
 /** Surface gravity kappa = (r+ - r-) / (2 (r+^2 + a^2)) in 1/M: the e-folding rate of the

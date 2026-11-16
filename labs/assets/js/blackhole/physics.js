@@ -54,7 +54,7 @@ export function derive(s) {
     interiorTauS: base.interiorTau * tg,
     piM: Math.PI * tg,
     efold: tg / base.kappa,
-    hawkingK: K.hawkingKelvin(massSun * K.SI.Msun),
+    hawkingK: K.hawkingKelvin(massSun * K.SI.Msun, a, q),
     horizonKm: base.rh * rg / 1000,
   };
 }
