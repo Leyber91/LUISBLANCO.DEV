@@ -206,8 +206,8 @@
   },
   {
     "name": "names: a comparison names no constant",
-    "from": "      if (!isDefault) c.names = [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);\n",
-    "to": ""
+    "from": ": [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);",
+    "to": ": [];"
   },
   {
     "name": "names: a clamp names no constant",
@@ -241,18 +241,8 @@
   },
   {
     "name": "constants: no constant credited",
-    "from": "|| values.some((v) => overlaps(ch, v) || (ch.a === ch.b && v[0] <= ch.a && ch.a <= v[1]))));",
-    "to": "));"
-  },
-  {
-    "name": "changes: a removal not slid back to whole words",
-    "from": "if (s >= best.s) best = { i, j, s }; }",
-    "to": "if (false) best = { i, j, s }; }"
-  },
-  {
-    "name": "changes: an insertion not slid back to whole words",
-    "from": "if (s >= best.s) best = { k, run, s }; }",
-    "to": "if (false) best = { k, run, s }; }"
+    "from": " || values.some((v) => overlaps(ch, v) || (ch.a === ch.b && v[0] <= ch.a && ch.a <= v[1]));",
+    "to": ";"
   },
   {
     "name": "changes: a change of spaces alone counted",
@@ -268,6 +258,51 @@
     "name": "edits: an entry whose text appears twice still counted",
     "from": "if (i < 0 || src.indexOf(from, i + 1) >= 0) return { name, missing: true };",
     "to": "if (i < 0) return { name, missing: true };"
+  },
+  {
+    "name": "placements: one placement enough to credit a condition",
+    "from": "const by = es.filter((e) => e.changes.some((ch) => ch.alts.every(hits)));",
+    "to": "const by = es.filter((e) => e.changes.some((ch) => ch.alts.some(hits)));"
+  },
+  {
+    "name": "placements: one placement enough to credit an export",
+    "from": "ch.alts.every((alt) => overlaps(alt, [x.start, x.end])",
+    "to": "ch.alts.some((alt) => overlaps(alt, [x.start, x.end])"
+  },
+  {
+    "name": "placements: a removal not slid left in the module",
+    "from": "      for (let i = i0, j = j0; i > 0 && MT[i - 1] === MT[j - 1];) { i--; j--; out.push(at(i, j, [])); }\n",
+    "to": ""
+  },
+  {
+    "name": "placements: a removal not slid right in the module",
+    "from": "      for (let i = i0, j = j0; j < MT.length && MT[i] === MT[j];) { i++; j++; out.push(at(i, j, [])); }\n",
+    "to": ""
+  },
+  {
+    "name": "placements: an insertion not slid left in the module",
+    "from": "      for (let k = i0, run = ins.slice(); k > 0 && MT[k - 1] === run[run.length - 1];)",
+    "to": "      for (let k = i0, run = ins.slice(); false;)"
+  },
+  {
+    "name": "placements: an insertion not slid right in the module",
+    "from": "      for (let k = i0, run = ins.slice(); k < MT.length && MT[k] === run[0];)",
+    "to": "      for (let k = i0, run = ins.slice(); false;)"
+  },
+  {
+    "name": "placements: a removal not slid left in the entry",
+    "from": "      for (let i = o.i, j = o.j; i > 0 && T[i - 1] === T[j - 1];)",
+    "to": "      for (let i = o.i, j = o.j; false;)"
+  },
+  {
+    "name": "placements: an insertion not slid left in the entry",
+    "from": "      for (let k = o.i, run = o.ins.slice(); k > 0 && T[k - 1] === run[run.length - 1];)",
+    "to": "      for (let k = o.i, run = o.ins.slice(); false;)"
+  },
+  {
+    "name": "names: a default names no constant",
+    "from": "c.names = isDefault ? [r.text].filter(isName) :",
+    "to": "c.names = isDefault ? [] :"
   },
   {
     "name": "overlaps: an insertion at a span's edge overlaps it",
@@ -436,8 +471,8 @@
   },
   {
     "name": "exports: an export reported changed whatever the entries",
-    "from": "const by = es.filter((e) => e.changes.some((ch) => overlaps(ch, [x.start, x.end])",
-    "to": "const by = es.filter((e) => true || e.changes.some((ch) => overlaps(ch, [x.start, x.end])"
+    "from": "const by = es.filter((e) => e.changes.some((ch) => ch.alts.every((alt) =>",
+    "to": "const by = es.filter((e) => true || e.changes.some((ch) => ch.alts.every((alt) =>"
   },
   {
     "name": "report: a condition never changed not printed",

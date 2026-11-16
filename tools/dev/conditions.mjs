@@ -18,7 +18,9 @@
 
    Each entry is compared with the module token by token, and
    each change it makes (a run of removed or added tokens) is
-   judged on its own:
+   judged on its own. A removal or insertion that could sit at
+   several places among equal tokens changes a condition only if
+   it does so at every one of those places:
    - Any condition whose operator it touches is changed.
    - A comparison is changed by a change inside one of its two
      operands (a name with its dots, calls and indexes; a
@@ -31,7 +33,7 @@
      (a || b) is changed only through its operator.
    - A clamp is changed by a change inside its brackets that is
      not inside a condition nested there, or to its word.
-   - A comparison or clamp is also changed when the value of a
+   - A comparison, default or clamp is also changed when the value of a
      constant it names is changed, if that constant is declared
      at the top level and its name occurs exactly twice in the
      module: once declared, once in this condition. A constant
@@ -52,6 +54,12 @@
    each condition. Lists written from memory or from the test
    cases missed 51 of 68 conditions on 2026-11-14, and missed
    conditions again in pull requests 41 and 42 on 2026-11-16.
+
+   Known limits: a comparison nested in another comparison's
+   operand (g(a < b) > 0) credits both; a constant also named in
+   a message gives no credit, so its condition needs an entry
+   that edits it directly; one removed disjunct of a chain of
+   equal operators may credit none of them.
 
    What it cannot see: a bare truthy test (if (x)), a condition
    built at run time, export { } lists, whether an entry that
@@ -254,7 +262,7 @@ export function conditions(src) {
         left: [l.start, l.end], right: [r.start, r.end],
         own: isDefault ? [at, literal ? r.end : end] : [l.start, r.end],
       });
-      if (!isDefault) c.names = [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);
+      c.names = isDefault ? [r.text].filter(isName) : [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);
     }
     found.push(c);
   }
@@ -336,13 +344,12 @@ export function exportsOf(src) {
   return out;
 }
 
-/* The changes one entry makes, found by comparing its two texts token by token: [{a, b, ins}], where [a, b) is
-   what it removes (positions in from) and ins what it adds there. A change of spaces alone is no change.
-   A pure removal or insertion that could sit at several places (removing "x == null || " from
-   "x == null || x[k] == null" reads the same as removing " == null || x") is slid to where it starts on a word
-   and ends on a space, so it lands on the tokens a person would say were removed. */
+/* The changes one entry makes, found by comparing its two texts token by token: [{a, b, ins, alts}], where
+   [a, b) is what it removes (positions in from), ins what it adds there, and alts every placement that gives the
+   same text. A pure removal or insertion can often sit at several places (removing "x == null || " from
+   "x == null || x[k] == null" reads the same as removing " == null || x"); a condition counts as changed only
+   when every such placement changes it. A change of spaces alone is no change. */
 const TOKEN = /\s+|[A-Za-z_$][\w$]*|\d[\w.]*|===|!==|\*\*=?|\?\?=?|\|\|=?|&&=?|\?\.|=>|<<=?|>>>?=?|<=|>=|==|!=|\+\+|--|\.\.\.|[\s\S]/g;
-const neat = (run) => (run.length && !/^\s/.test(run[0]) ? 1 : 0) + (run.length && /^\s/.test(run[run.length - 1]) ? 1 : 0);
 export function changes(from, to) {
   const A = [...from.matchAll(TOKEN)].map((x) => [x[0], x.index]), B = [...to.matchAll(TOKEN)].map((x) => x[0]);
   const T = A.map((t) => t[0]);
@@ -364,31 +371,52 @@ export function changes(from, to) {
     }
     if (cur) ops.push(cur);
   }
+  const place = (i, j, ins) => ({ a: at(i), b: at(j), ins: ins.join('') });
   for (const o of ops) {
-    if (!o.ins.length) {                           // a pure removal: slide it over equal tokens
-      let i = o.i, j = o.j, best = { i, j, s: neat(T.slice(i, j)) };
-      while (i > 0 && T[i - 1] === T[j - 1]) { i--; j--; const s = neat(T.slice(i, j)); if (s >= best.s) best = { i, j, s }; }
-      i = o.i; j = o.j;
-      while (j < T.length && T[i] === T[j]) { i++; j++; const s = neat(T.slice(i, j)); if (s > best.s) best = { i, j, s }; }
-      o.i = best.i; o.j = best.j;
-    } else if (o.i === o.j) {                      // a pure insertion: slide it the same way
-      let k = o.i, run = o.ins.slice(), best = { k, run, s: neat(run) };
-      while (k > 0 && T[k - 1] === run[run.length - 1]) { run = [run[run.length - 1], ...run.slice(0, -1)]; k--; const s = neat(run); if (s >= best.s) best = { k, run, s }; }
-      k = o.i; run = o.ins.slice();
-      while (k < T.length && T[k] === run[0]) { run = [...run.slice(1), run[0]]; k++; const s = neat(run); if (s > best.s) best = { k, run, s }; }
-      o.i = o.j = best.k; o.ins = best.run;
+    o.alts = [place(o.i, o.j, o.ins)];
+    if (!o.ins.length) {                           // a pure removal: every place it slides to over equal tokens
+      for (let i = o.i, j = o.j; i > 0 && T[i - 1] === T[j - 1];) { i--; j--; o.alts.push(place(i, j, [])); }
+      for (let i = o.i, j = o.j; j < T.length && T[i] === T[j];) { i++; j++; o.alts.push(place(i, j, [])); }
+    } else if (o.i === o.j) {                      // a pure insertion: the same
+      for (let k = o.i, run = o.ins.slice(); k > 0 && T[k - 1] === run[run.length - 1];) { run = [run[run.length - 1], ...run.slice(0, -1)]; k--; o.alts.push(place(k, k, run)); }
+      for (let k = o.i, run = o.ins.slice(); k < T.length && T[k] === run[0];) { run = [...run.slice(1), run[0]]; k++; o.alts.push(place(k, k, run)); }
     }
   }
-  return ops.map((o) => ({ a: at(o.i), b: at(o.j), ins: o.ins.join('') })).filter((c) => from.slice(c.a, c.b).trim() || c.ins.trim());
+  return ops.map((o) => ({ ...o.alts[0], alts: o.alts })).filter((c) => from.slice(c.a, c.b).trim() || c.ins.trim());
 }
 
-/* Where each entry changes the source: {name, changes: [{a, b, ins, del}]} in the source's positions, or
+/* Where each entry changes the source: {name, changes: [{a, b, ins, del, alts}]} in the source's positions, or
    {name, missing: true} when its text is not in the source exactly once. */
 export function edits(src, mutants) {
+  const MT = [...src.matchAll(TOKEN)].map((x) => x[0]);
+  const starts = new Map(), P = [0];
+  MT.forEach((t, k) => { starts.set(P[k], k); P.push(P[k] + t.length); });
+  starts.set(src.length, MT.length);
+  const posOf = (k) => P[k];
+  // every place in the module a pure removal or insertion slides to over equal tokens, the entry's text aside
+  const widen = (alt) => {
+    const out = [alt], i0 = starts.get(alt.a), j0 = starts.get(alt.b);
+    if (i0 === undefined || j0 === undefined) return out;
+    const at = (i, j, ins) => ({ a: posOf(i), b: posOf(j), ins: ins.join(''), del: MT.slice(i, j).join('') });
+    if (!alt.ins) {
+      for (let i = i0, j = j0; i > 0 && MT[i - 1] === MT[j - 1];) { i--; j--; out.push(at(i, j, [])); }
+      for (let i = i0, j = j0; j < MT.length && MT[i] === MT[j];) { i++; j++; out.push(at(i, j, [])); }
+    } else if (alt.a === alt.b) {
+      const ins = [...alt.ins.matchAll(TOKEN)].map((x) => x[0]);
+      for (let k = i0, run = ins.slice(); k > 0 && MT[k - 1] === run[run.length - 1];) { run = [run[run.length - 1], ...run.slice(0, -1)]; k--; out.push(at(k, k, run)); }
+      for (let k = i0, run = ins.slice(); k < MT.length && MT[k] === run[0];) { run = [...run.slice(1), run[0]]; k++; out.push(at(k, k, run)); }
+    }
+    return out;
+  };
   return mutants.map(({ name, from, to }) => {
     const i = from ? src.indexOf(from) : -1;
     if (i < 0 || src.indexOf(from, i + 1) >= 0) return { name, missing: true };
-    return { name, changes: changes(from, to).map((c) => ({ a: i + c.a, b: i + c.b, ins: c.ins, del: from.slice(c.a, c.b) })) };
+    const move = (c) => ({ a: i + c.a, b: i + c.b, ins: c.ins, del: from.slice(c.a, c.b) });
+    return { name, changes: changes(from, to).map((c) => {
+      const seen = new Set(), alts = [];
+      for (const x of c.alts.map(move).flatMap(widen)) { const key = `${x.a},${x.b},${x.ins}`; if (!seen.has(key)) { seen.add(key); alts.push(x); } }
+      return { ...move(c), alts };
+    }) };
   });
 }
 
@@ -429,11 +457,12 @@ export function coverage(src, mutants) {
   const consts = constantsOf(src);
   const out = conds.map((c) => {
     const values = c.names.filter((nm) => consts.has(nm) && occurrences(src, nm) === 2).map((nm) => consts.get(nm));
-    const by = es.filter((e) => e.changes.some((ch) => changesCondition(c, ch, conds) || values.some((v) => overlaps(ch, v) || (ch.a === ch.b && v[0] <= ch.a && ch.a <= v[1]))));
+    const hits = (ch) => changesCondition(c, ch, conds) || values.some((v) => overlaps(ch, v) || (ch.a === ch.b && v[0] <= ch.a && ch.a <= v[1]));
+    const by = es.filter((e) => e.changes.some((ch) => ch.alts.every(hits)));
     return { ...c, by: by.map((e) => e.name), status: c.declared ? 'declared' : by.length ? 'broken' : 'never broken' };
   });
   const exps = exportsOf(src).filter((x) => x.name !== 'selftest').map((x) => {
-    const by = es.filter((e) => e.changes.some((ch) => overlaps(ch, [x.start, x.end]) || (ch.a === ch.b && x.start <= ch.a && ch.a <= x.end)));
+    const by = es.filter((e) => e.changes.some((ch) => ch.alts.every((alt) => overlaps(alt, [x.start, x.end]) || (alt.a === alt.b && x.start <= alt.a && alt.a <= x.end))));
     return { ...x, by: by.map((e) => e.name), status: by.length ? 'broken' : 'never broken' };
   });
   return { conditions: out, exports: exps, stale: all.filter((e) => e.missing).map((e) => e.name) };
@@ -489,7 +518,8 @@ function selftest() {
   const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
   const ops = (s) => conditions(s).map((c) => c.op);
   const m = (name, from, to) => ({ name, from, to });
-  const st = (src, list) => coverage(src, list).conditions.map((c) => c.status).join(' | ');
+  // a stale entry would make a case pass for the wrong reason, so it fails the case
+  const st = (src, list) => { const cov = coverage(src, list); return cov.stale.length ? `stale: ${cov.stale.join()}` : cov.conditions.map((c) => c.status).join(' | '); };
 
   // what counts as a condition
   yes('a comparison is found', ops('if (a < 3) x();').join() === '<');
@@ -529,9 +559,13 @@ function selftest() {
   yes('a change at both ends is two changes', ch('f(x)', '[...new Set(f(x))]') === '0,0,[...new Set(;4,4,)]');
   yes('a change of spaces alone is no change', ch('a<1', 'a < 1') === '');
   const rm = changes('a || b === 1 || c', 'a || c');
-  yes('a removal is one change with nothing added, taking one operator', rm.length === 1 && rm[0].ins === '' && ['b === 1 ||', '|| b === 1'].includes('a || b === 1 || c'.slice(rm[0].a, rm[0].b).trim()));
-  yes('a removal that could sit in two places lands on whole words', ch('x == null || x[k] == null', 'x[k] == null') === '0,13,');
-  yes('an insertion that could sit in two places lands on whole words', ch('x[k] == null', 'x == null || x[k] == null') === '0,0,x == null || ');
+  yes('a removal is one change with nothing added', rm.length === 1 && rm[0].ins === '' && rm[0].alts.every((x) => x.ins === ''));
+  const alts = (f, t) => changes(f, t).map((c) => c.alts.map((x) => `${x.a},${x.b},${x.ins}`).sort().join(' / ')).join(';');
+  yes('a removal that could sit in two places has both', alts('x == null || x[k] == null', 'x[k] == null') === '0,13, / 1,14,');
+  yes('an insertion that could sit in two places has both', alts('x[k] == null', 'x == null || x[k] == null') === '0,0,x == null ||  / 1,1, == null || x');
+  yes('a change with one place has one', alts('a < 1', 'a < 2') === '4,5,2');
+  yes('a removal is credited only for what every placement changes', st('if (i < 0 || b.indexOf(f, i + 1) >= 0) x();\n', [m('a', ' || b.indexOf(f, i + 1) >= 0', '')]) === 'never broken | broken | broken');
+  yes('a removed outer clamp leaves the inner clamp unchanged', st('const v = Math.max(0, Math.min(1, x));\n', [m('a', 'Math.max(0, Math.min(1, x))', 'Math.min(1, x)')]) === 'broken | never broken');
 
   // a comparison: what changes it
   const SRC = 'export function clamp(p, lim) {\n  if (p > lim) return lim;\n  return Math.max(0, p);\n}\n';
@@ -539,6 +573,9 @@ function selftest() {
   yes('the operator changed changes it', st(SRC, [m('a', 'p > lim', 'p >= lim')]).startsWith('broken'));
   yes('an operand changed changes it', st(SRC, [m('a', 'if (p > lim)', 'if (p > 2 * lim)')]).startsWith('broken'));
   yes('something tighter added after the bound changes it', st(SRC, [m('a', 'p > lim)', 'p > lim + 1)')]).startsWith('broken'));
+  yes('a member access added after the bound changes it', st(SRC, [m('a', 'p > lim)', 'p > lim.v)')]).startsWith('broken'));
+  yes('a call added after the bound changes it', st(SRC, [m('a', 'p > lim)', 'p > lim(2))')]).startsWith('broken'));
+  yes('an index added after the bound changes it', st(SRC, [m('a', 'p > lim)', 'p > lim[0])')]).startsWith('broken'));
   yes('something looser added after the bound does not', st(SRC, [m('a', 'p > lim)', 'p > lim && p)')]).startsWith('never broken'));
   yes('a prefix operator removed before the operand changes it', st("if (typeof v === 'n') x();\n", [m('a', 'typeof v', 'v')]) === 'broken');
   yes('a looser operand removed before it does not', st("if (q && v === 'n') x();\n", [m('a', 'q && v', 'v')]) === 'never broken');
@@ -556,17 +593,27 @@ function selftest() {
 
   // chains, defaults and nesting
   const CH = 'if (!a || b === 1 || c === 2) x();\n';
-  yes('removing one disjunct changes its comparison and one operator only', st(CH, [m('a', 'b === 1 || ', '')]) === 'never broken | broken | broken | never broken');
+  yes('removing one disjunct changes its comparison, and neither operator it could have taken', st(CH, [m('a', 'b === 1 || ', '')]) === 'never broken | broken | never broken | never broken');
+  yes('a removal that slides right over equal tokens credits neither operator', st('if (b||b||a<1) x();\n', [m('a', '(b||', '(')]) === 'never broken | never broken | never broken');
+  const ed = (src, f, t) => edits(src, [m('a', f, t)])[0].changes[0].alts.map((x) => x.a);
+  yes('an insertion slides right into the module past the entry\'s text', ed('x y y z', 'x y', 'x y y').includes(5));
+  yes('an insertion slides left into the module past the entry\'s text', ed('x y y z', 'y z', 'y y z').some((a) => a < 4));
+  yes('removing a disjunct that can sit in one place changes its operator', st('if (a < 1 || b > 2) x();\n', [m('a', 'a < 1 || ', '')]) === 'broken | broken | never broken');
   yes('a boolean chain is not changed through its operands', st('if (!a || b) x();\n', [m('a', '!a || b', '!a || c')]) === 'never broken');
   yes('a default\'s literal value changed changes it', st("const t = w || 'every planet';\n", [m('a', "'every planet'", "'all'")]) === 'broken');
   yes('a default\'s literal extended tighter changes it', st('const t = w ?? 2;\n', [m('a', 'w ?? 2;', 'w ?? 2 * 3;')]) === 'broken');
   yes('a sign added before a default\'s literal changes it', st('const t = w ?? 2;\n', [m('a', 'w ?? 2;', 'w ?? -2;')]) === 'broken');
   yes('a default inside a clamp: a change to what it defaults changes the clamp, not the default', st('const t = Math.max(0, w ?? 1);\n', [m('a', 'w ??', 'v ??')]) === 'broken | never broken');
+  yes('a default followed by a comma does not change', st('const t = [w ?? 2];\n', [m('a', 'w ?? 2]', 'w ?? 2, 3]')]) === 'never broken');
+  yes('null is a literal default', st('const t = w ?? null;\n', [m('a', 'w ?? null', 'w ?? undefined')]) === 'broken');
+  yes('undefined is a literal default', st('const t = w ?? undefined;\n', [m('a', 'w ?? undefined', 'w ?? null')]) === 'broken');
+  yes('a default whose value is a constant changes when the constant does', st('export const D = 2;\nexport const f = (w) => w ?? D;\n', [m('a', 'D = 2', 'D = 3')]) === 'broken');
   yes('a default followed by a looser addition does not change', st('const t = w ?? 2;\n', [m('a', 'w ?? 2;', 'w ?? 2 || 3;')]) === 'never broken');
   yes('a condition nested in an operand does not change the one around it', st('if (!g || !(g.c >= 0)) x();\n', [m('a', 'g.c >= 0', 'g.c >= 1')]) === 'never broken | broken');
 
   // clamps
   yes('the clamp\'s own argument changes the clamp', st(SRC, [m('a', 'Math.max(0, p)', 'Math.max(1, p)')]).endsWith('| broken'));
+  yes('something added at the inside edge of a clamp changes it', st('const v = Math.max(0, p);\n', [m('a', 'Math.max(0', 'Math.max(-1 + 0')]) === 'broken');
   yes('the word Math.max changed changes the clamp', st(SRC, [m('a', 'Math.max(0', 'Math.min(0')]).endsWith('| broken'));
   const NEST = 'export const f = (most, pitch) => Math.max(-most, Math.min(most, pitch));\n';
   yes('a change inside a nested clamp changes the inner clamp only', st(NEST, [m('a', 'Math.min(most, pitch)', 'Math.min(most, pitch * 2)')]) === 'never broken | broken');
@@ -609,6 +656,7 @@ function selftest() {
   yes('an export whose body an entry edits is changed; another is not', coverage(two, [m('a', 'return a;', 'return 0;')]).exports.map((x) => x.status).join() === 'broken,never broken');
   yes('an entry in the second export does not change the first', coverage(two, [m('a', 'return b;', 'return 0;')]).exports.map((x) => x.status).join() === 'never broken,broken');
   yes('an exported selftest is not counted as an export', coverage('export function selftest() { return 1; }\n', []).exports.length === 0);
+  yes('a removal that could sit in either of two exports changes only the one every placement touches', coverage('export function f(a) { return a; }\nexport function g(a) { return a; }\n', [m('a', 'return a; }\nexport function g(a) { return a; }', 'return a; }')]).exports.map((x) => x.status).join() === 'never broken,broken');
   yes('an arrow export\'s body ends at its statement', coverage('export const f = (a) => a + 1;\nexport const g = (b) => b + 2;\n', [m('a', 'b + 2', 'b + 3')]).exports.map((x) => x.status).join() === 'never broken,broken');
 
   // the report and its exit code
