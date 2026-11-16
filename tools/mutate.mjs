@@ -9,15 +9,20 @@
 //
 // A run stopped at its time limit is not a catch: nothing saw the broken rule fail. On 2026-11-16 copies of the
 // driver's selftest that waited on one another for Chrome ran past their limit and were counted as caught. So a run
-// stopped at the limit runs once more, alone, after the others; stopped again, it is reported as timed out, apart
-// from caught and survived, and fails the check unless its entry declares "timeout": "<reason>" (a break that really
-// is an endless loop).
+// stopped at the limit, or a selftest that stops itself at its own limit with exit code 124 (tools/drive.mjs
+// WATCHDOG_EXIT), runs once more, alone, after the others, and that is printed (RERUN); stopped again, it is reported
+// as timed out, apart from caught and survived, and fails the check unless its entry declares "timeout": "<reason>"
+// (a break that really is an endless loop). Each list's summary gives how many ran again and how long it took.
 //
-// The lists of the selftests that drive Chrome (drive, invariants) take most of an hour on the gates' machine. Given
-// --changed <file> (the paths a pull request changes, one a line, as git diff --name-only writes them), those two run
-// only when one of the files in WATCHED changed; without it, as on a push to main, every list runs.
+// Every run of a list gets LABS_DRIVE_LOCK, a lock file of that list run's own: a copy with its lock broken cannot
+// hold or take the machine's lock that drives share (tools/drive.mjs). The lists of the selftests that drive Chrome
+// (SLOW) run one copy at a time, since they would only wait on one another, and take most of an hour on the gates'
+// machine: given --changed-since <ref> (on a pull request: origin/main), mutate asks git for the files changed since
+// <ref> (renames as a deletion and an addition, so a watched file moved away still counts) and runs those two lists
+// only when a file in WATCHED changed; --changed <file> gives the paths instead, one a line; with neither, as on a
+// push to main, every list runs. When the files cannot be named, every list runs, and that is said.
 //
-// usage: node tools/mutate.mjs [<tool>] [--tools <folder>] [--changed <file>]   (no tool: every tool with a mutants file)
+// usage: node tools/mutate.mjs [<tool>] [--tools <folder>] [--changed-since <ref> | --changed <file>]
 //        node tools/mutate.mjs selftest
 import fs from 'node:fs';
 import os from 'node:os';
@@ -33,21 +38,22 @@ const BOM = new RegExp('^' + String.fromCharCode(0xFEFF));
 /* Mutants run a few at a time, each in its own scratch copy. Kept low: a selftest may start processes of its own. */
 const WIDTH = Math.max(1, Math.min(4, (os.availableParallelism ? os.availableParallelism() : 2) - 1));
 
-// Run a tool's selftest from a file; resolves 'pass', 'fail', or 'timeout' when it was stopped at the limit.
-const LIMIT_MS = 180000;
-function runs(file, limit = LIMIT_MS) {
+// Run a tool's selftest from a file; resolves 'pass', 'fail', or 'timeout' when it was stopped at the limit or stopped
+// itself at its own (exit 124).
+const LIMIT_MS = 180000, WATCHDOG = 124;
+function runs(file, limit = LIMIT_MS, env = process.env) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [file, 'selftest'], { stdio: 'ignore' });
+    const child = spawn(process.execPath, [file, 'selftest'], { stdio: 'ignore', env });
     let late = false;
     const timer = setTimeout(() => { late = true; child.kill(); }, limit);
-    child.on('exit', (code) => { clearTimeout(timer); resolve(late ? 'timeout' : code === 0 ? 'pass' : 'fail'); });
+    child.on('exit', (code) => { clearTimeout(timer); resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail'); });
     child.on('error', () => { clearTimeout(timer); resolve('fail'); });
   });
 }
 
 // The lists that run on a pull request only when one of these files changed, and the decision.
 const SLOW = ['drive', 'invariants'];
-const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];
+const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];
 // changed: the paths that changed, or null when they are not known (then every list runs)
 export function listsToRun(names, changed) {
   if (!changed) return { run: names, skipped: [], hit: null };
@@ -55,16 +61,22 @@ export function listsToRun(names, changed) {
   const skipped = hit.length ? [] : names.filter((n) => SLOW.includes(n));
   return { run: names.filter((n) => !skipped.includes(n)), skipped, hit };
 }
+// the files changed since a ref, as git names them with renames split; null when git cannot say
+export function changedSince(ref, cwd = process.cwd()) {
+  const r = spawnSync('git', ['diff', '--name-only', '--no-renames', `${ref}...HEAD`], { cwd, encoding: 'utf8' });
+  return r.status === 0 ? r.stdout.split('\n').map((l) => l.trim()).filter(Boolean) : null;
+}
 // the paths in a file of git's names, one a line; null when it cannot be read
 export function readChanged(file) {
   try { return fs.readFileSync(file, 'utf8').split('\n').map((l) => l.trim()).filter(Boolean); } catch { return null; }
 }
 
 // Test one tool's source against its mutants, each in a scratch copy of the tools folder.
-// Returns {caught, survived, stale, noop: [names], timedOut: [{ name, reason }], broken: true when the unmutated
-// selftest fails or does not end}.
-export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS) {
+// Returns {caught, survived, stale, noop: [names], timedOut: [{ name, reason }], reruns: [{ name, result }], broken:
+// true when the unmutated selftest fails or does not end}. width: how many copies run at once.
+export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS, width = WIDTH) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mutate-'));
+  const env = { ...process.env, LABS_DRIVE_LOCK: path.join(root, 'chrome.lock') };
   const place = (label, text) => {
     const work = path.join(root, label, 'tools');
     fs.mkdirSync(work, { recursive: true });
@@ -74,9 +86,9 @@ export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS) 
     return file;
   };
   const base = lf(source);
-  const out = { caught: 0, survived: [], stale: [], noop: [], timedOut: [], broken: false };
+  const out = { caught: 0, survived: [], stale: [], noop: [], timedOut: [], reruns: [], broken: false };
   try {
-    if ((await runs(place('base', base), limit)) !== 'pass') { out.broken = true; return out; }
+    if ((await runs(place('base', base), limit, env)) !== 'pass') { out.broken = true; return out; }
     const jobs = [];
     for (const m of mutants) {
       const from = lf(String(m.from || '')), to = lf(String(m.to ?? ''));
@@ -87,10 +99,10 @@ export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS) 
     }
     const result = new Array(jobs.length).fill('fail');
     let next = 0;
-    const worker = async () => { for (let k = next++; k < jobs.length; k = next++) result[k] = await runs(place(`m${k}`, jobs[k].text), limit); };
-    await Promise.all(Array.from({ length: WIDTH }, worker));
+    const worker = async () => { for (let k = next++; k < jobs.length; k = next++) result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); };
+    await Promise.all(Array.from({ length: width }, worker));
     // a run stopped at the limit may have waited on another run (a lock, a busy machine): once more, alone
-    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, jobs[k].text), limit);
+    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }
     jobs.forEach((j, k) => {
       if (result[k] === 'pass') out.survived.push(j.name);
       else if (result[k] === 'timeout') out.timedOut.push({ name: j.name, reason: j.timeout });
@@ -138,9 +150,11 @@ export async function run(only, tools = TOOLS, say = console.log, { changed = nu
     catch (e) { say(`mutate ${name}: tools/mutants/${name}.json is not valid JSON (${e.message})`); bad++; continue; }
     const errs = shape(mutants, `tools/mutants/${name}.json`);
     if (errs.length) { for (const e of errs) say('  ' + e); bad++; continue; }
-    const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit);
+    const t0 = Date.now();
+    const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, SLOW.includes(name) ? 1 : WIDTH);
     if (r.broken) { say(`mutate ${name}: the selftest fails before any mutation`); bad++; continue; }
-    say(`mutate ${name}: ${mutants.length} broken rules, ${r.caught} caught by the selftest${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}`);
+    say(`mutate ${name}: ${mutants.length} broken rules, ${r.caught} caught by the selftest${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}, ${r.reruns.length} run again, ${Math.round((Date.now() - t0) / 1000)} s`);
+    for (const x of r.reruns) say(`  RERUN     ${x.name}: stopped at the limit once, then ${{ pass: 'survived', fail: 'caught', timeout: 'stopped again' }[x.result]}`);
     for (const n of r.survived) say(`  SURVIVED  ${n}: the selftest passes with this rule broken, so nothing tests it`);
     for (const n of r.stale) say(`  STALE     ${n}: its "from" text is not in the tool exactly once; rewrite the mutant for the current code`);
     for (const n of r.noop) say(`  NO CHANGE ${n}: its "to" equals its "from", so it breaks nothing`);
@@ -162,7 +176,7 @@ async function selftest() {
   const CAUGHT = { name: 'addition subtracts', from: 'a + b', to: 'a - b' };
   // the folder name holds a space and a tilde: a path a URL would percent-encode
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mutate self~1 '));
-  let r, crlf, broken, hung, cli = {}, tm, said = {}, codes = {}, runsPast = '', reruns = [], readBack = {};
+  let r, crlf, broken, hung, cli = {}, tm, said = {}, codes = {}, runsPast = '', reruns = [], readBack = {}, lockSeen = '', slowRuns = [], renamed = null, gitless = null;
   try {
     const M = [CAUGHT, { name: 'label threshold moved', from: 'n > 9', to: 'n > 99' }, { name: 'text that is not there', from: 'a * b', to: 'a / b' },
       { name: 'text that is there twice', from: 'a + ', to: 'a - ' }, { name: 'a mutant that changes nothing', from: 'a + b', to: 'a + b' }];
@@ -176,19 +190,22 @@ async function selftest() {
     const J = (list) => JSON.stringify(list);
     // runs stopped at the limit. LIM is short; a toy stopped at it would end by itself (12 s at most), so none is left
     // behind. The three calls run at once: their toys wait on timers, so they do not slow one another.
-    const LIM = 1500, END = 'process.exit(ok ? 0 : 1); }', count = path.join(root, 'past.runs'), log = path.join(root, 'reruns.log');
+    const LIM = 1500, END = 'process.exit(ok ? 0 : 1); }', count = path.join(root, 'past.runs'), log = path.join(root, 'reruns.log'), log2 = path.join(root, 'reruns2.log'), lockLog = path.join(root, 'lock.seen');
     const late = (ms) => `setTimeout(() => process.exit(1), ${ms}); }`;
     // stopped on its first run; its second run ends at once with the code given, and writes when it ran
-    const flaky = (code) => `const { existsSync, writeFileSync, appendFileSync } = await import('node:fs'); const mark = new URL('./mark', import.meta.url); if (!existsSync(mark)) { writeFileSync(mark, ''); ${late(12000)} else { appendFileSync(${J(log)}, 'start ' + Date.now() + String.fromCharCode(10)); const t = Date.now() + 250; while (Date.now() < t); appendFileSync(${J(log)}, 'end ' + Date.now() + String.fromCharCode(10)); process.exit(${code}); } }`;
+    const flaky = (code, to = log) => `const { existsSync, writeFileSync, appendFileSync } = await import('node:fs'); const mark = new URL('./mark', import.meta.url); if (!existsSync(mark)) { writeFileSync(mark, ''); ${late(12000)} else { appendFileSync(${J(to)}, 'start ' + Date.now() + String.fromCharCode(10)); const t = Date.now() + 250; while (Date.now() < t); appendFileSync(${J(to)}, 'end ' + Date.now() + String.fromCharCode(10)); process.exit(${code}); } }`;
     said.und = []; said.dec = [];
     [tm, codes.und, codes.dec] = await Promise.all([
       mutate(toy, [{ name: 'fails 0.5 s past the limit', from: END, to: `const { appendFileSync } = await import('node:fs'); appendFileSync(${J(count)}, 'n'); ${late(2000)}` },
         { name: 'stopped once, then passes', from: END, to: flaky(0) }, { name: 'stopped once, then fails', from: END, to: flaky(1) },
-        { name: 'fails 0.7 s inside the limit', from: END, to: late(800) }], 'toy', undefined, LIM),
-      // the command's report of a timeout, undeclared and declared
-      run(undefined, make('timeout-undeclared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000) }]) }), (l) => said.und.push(l), { limit: LIM }),
-      run(undefined, make('timeout-declared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000), timeout: 'the break is an endless loop' }]) }), (l) => said.dec.push(l), { limit: LIM }),
+        { name: 'fails 0.7 s inside the limit', from: END, to: late(800) },
+        { name: 'names its lock', from: END, to: `const { writeFileSync } = await import('node:fs'); writeFileSync(${J(lockLog)}, String(process.env.LABS_DRIVE_LOCK)); process.exit(1); }` },
+        { name: 'stops itself at its own limit', from: END, to: 'process.exit(124); }' }], 'toy', undefined, LIM),   // 124: tools/drive.mjs WATCHDOG_EXIT, written out
+      // the command's report of a timeout, undeclared and declared, and of a second run
+      run(undefined, make('timeout-undeclared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000) }, { name: 'stopped once, then survives', from: END, to: flaky(0, log2) }]) }), (l) => said.und.push(l), { limit: LIM }),
+      run(undefined, make('timeout-declared', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, { name: 'a break that never ends', from: END, to: late(12000), timeout: 'the break is an endless loop' }, { name: 'stopped once, then caught', from: END, to: flaky(1, log2) }]) }), (l) => said.dec.push(l), { limit: LIM }),
     ]);
+    lockSeen = fs.readFileSync(lockLog, 'utf8');
     runsPast = fs.readFileSync(count, 'utf8');
     reruns = fs.readFileSync(log, 'utf8').split(String.fromCharCode(10)).filter(Boolean).map((l) => l.split(' ')[0]);
     const code = (tools, ...args) => spawnSync(process.execPath, [SELF, ...args, '--tools', tools], { stdio: 'pipe', timeout: 120000 }).status;
@@ -210,10 +227,25 @@ async function selftest() {
     fs.copyFileSync(SELF, path.join(own, 'mutate.mjs'));
     cli.ownFolder = spawnSync(process.execPath, [path.join(own, 'mutate.mjs')], { stdio: 'pipe', timeout: 120000 }).status;
     // which lists run: a folder with a slow list (drive) and another (toy)
-    const slow = make('slow', { 'toy.mjs': toy, 'drive.mjs': toy, 'mutants/toy.json': J([CAUGHT]), 'mutants/drive.json': J([CAUGHT]) });
+    // its two copies write when they run: a slow list runs them one at a time
+    const slowLog = path.join(root, 'slow.log'), busy = `const { appendFileSync } = await import('node:fs'); appendFileSync(${J(slowLog)}, 'start ' + String.fromCharCode(10)); const t = Date.now() + 400; while (Date.now() < t); appendFileSync(${J(slowLog)}, 'end ' + String.fromCharCode(10)); process.exit(1); }`;
+    const slow = make('slow', { 'toy.mjs': toy, 'drive.mjs': toy, 'mutants/toy.json': J([CAUGHT]), 'mutants/drive.json': J([{ name: 'busy one', from: END, to: busy }, { name: 'busy two', from: END, to: busy.replace('400', '401') }]) });
     said.skip = []; said.ran = [];
     codes.skip = await run(undefined, slow, (l) => said.skip.push(l), { changed: ['labs/a.css', 'tools/drives/air.mjs'] });
     codes.ran = await run(undefined, slow, (l) => said.ran.push(l), { changed: ['labs/a.css', 'tools/drive.mjs'] });
+    slowRuns = fs.readFileSync(slowLog, 'utf8').split(String.fromCharCode(10)).map((l) => l.trim()).filter(Boolean);
+    // a watched file renamed away still counts: git names a rename as a deletion and an addition
+    const repo = path.join(root, 'repo'), git = (...a) => spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'init.defaultBranch=main', ...a], { cwd: repo, stdio: 'pipe' }).status;
+    fs.mkdirSync(path.join(repo, 'tools'), { recursive: true });
+    fs.writeFileSync(path.join(repo, 'tools', 'drive.mjs'), 'export const x = 1;' + String.fromCharCode(10));
+    // main moves on after the branch: what main gained is not the branch's change (merge base, three dots)
+    const onMain = () => { fs.mkdirSync(path.join(repo, 'labs'), { recursive: true }); fs.writeFileSync(path.join(repo, 'labs', 'x.css'), 'a {}' + String.fromCharCode(10)); return git('checkout', '-q', 'main') === 0 && git('add', 'labs') === 0 && git('commit', '-qm', 'main moves') === 0 && git('checkout', '-q', 'moved') === 0; };
+    if (git('init', '-q') === 0 && git('add', '.') === 0 && git('commit', '-qm', 'one') === 0 && git('checkout', '-qb', 'moved') === 0 && git('mv', 'tools/drive.mjs', 'tools/driver.mjs') === 0 && git('commit', '-qm', 'two') === 0 && onMain()) {
+      renamed = changedSince('main', repo);
+      cli.renamed = (() => { const x = spawnSync(process.execPath, [SELF, '--changed-since', 'main', '--tools', slow], { cwd: repo, stdio: 'pipe', timeout: 120000 }); return { code: x.status, text: String(x.stdout) }; })();
+    }
+    gitless = changedSince('no-such-ref', repo);
+    cli.gitless = (() => { const x = spawnSync(process.execPath, [SELF, '--changed-since', 'no-such-ref', '--tools', slow], { cwd: repo, stdio: 'pipe', timeout: 120000 }); return { code: x.status, text: String(x.stdout) }; })();
     const listed = path.join(root, 'changed.txt');
     fs.writeFileSync(listed, 'labs/a.css' + String.fromCharCode(13, 10) + '  tools/drives/air.mjs ' + String.fromCharCode(10, 10));
     readBack.file = readChanged(listed); readBack.none = readChanged(path.join(root, 'nowhere.txt'));
@@ -232,23 +264,31 @@ async function selftest() {
     ['a selftest that fails before any mutation is reported, not counted as catching', broken.broken === true && broken.caught === 0],
     ['a selftest that does not end within the limit counts as failed', hung.broken === true && hung.caught === 0],
     ['a run stopped at the limit, and stopped again on its second run, is timed out, apart from caught and survived; it ran twice, no more',
-      tm.timedOut.length === 1 && tm.timedOut[0].name === 'fails 0.5 s past the limit' && tm.timedOut[0].reason === undefined && runsPast === 'nn'],
-    ['a run stopped once is counted by its second run: passing, it survives; failing, it is caught', tm.survived.length === 1 && tm.survived[0] === 'stopped once, then passes' && tm.caught === 2],
+      tm.timedOut.length === 2 && tm.timedOut.find((t) => t.name === 'fails 0.5 s past the limit').reason === undefined && runsPast === 'nn'],
+    ['a run stopped once is counted by its second run: passing, it survives; failing, it is caught', tm.survived.length === 1 && tm.survived[0] === 'stopped once, then passes' && tm.caught === 3],
+    ['a selftest that stops itself at its own limit (exit 124) is timed out, not caught, after a second run', tm.timedOut.some((t) => t.name === 'stops itself at its own limit') && tm.reruns.some((x) => x.name === 'stops itself at its own limit' && x.result === 'timeout')],
+    ['every run stopped at the limit is run again and named with what its second run did; a run inside the limit is not', JSON.stringify(tm.reruns.map((x) => x.name + ':' + x.result).sort()) === JSON.stringify(['fails 0.5 s past the limit:timeout', 'stopped once, then fails:fail', 'stopped once, then passes:pass', 'stops itself at its own limit:timeout'])],
+    ['each run of a list gets a lock file of its own, not the machine\'s nor the one this process was given', /mutate-[^/\\]+[/\\]chrome\.lock$/.test(lockSeen) && lockSeen !== String(process.env.LABS_DRIVE_LOCK), lockSeen],
     ['the second runs run alone, one after another', reruns.join(' ') === 'start end start end'],
     ['a run that ends 0.7 s inside the limit is counted, one that ends 0.5 s past it is timed out', !tm.timedOut.some((t) => t.name === 'fails 0.7 s inside the limit') && tm.timedOut.some((t) => t.name === 'fails 0.5 s past the limit')],
     ['the command reports a timeout and counts it in the summary; it fails on one undeclared and passes on one declared',
-      codes.und === 1 && codes.dec === 0 && said.und.includes('mutate toy: 2 broken rules, 1 caught by the selftest, 1 timed out')
+      codes.und === 1 && codes.dec === 0 && said.und.some((l) => /^mutate toy: 3 broken rules, 1 caught by the selftest, 1 timed out, 2 run again, \d+ s$/.test(l))
+      && said.und.includes('  RERUN     a break that never ends: stopped at the limit once, then stopped again') && said.und.includes('  RERUN     stopped once, then survives: stopped at the limit once, then survived')
+      && said.dec.includes('  RERUN     stopped once, then caught: stopped at the limit once, then caught') && said.dec.some((l) => /^mutate toy: 3 broken rules, 2 caught by the selftest, 1 timed out, 2 run again, \d+ s$/.test(l))
       && said.und.some((l) => /^  TIMED OUT a break that never ends: the selftest did not end within 1.5 s, twice; nothing saw it fail/.test(l))
       && said.dec.some((l) => /^  TIMED OUT a break that never ends: .*declared: the break is an endless loop$/.test(l))],
     ['a timeout is declared with its reason, 8 characters or more', shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: '' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'seven c' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'eight ch' }], 't').length === 0],
     ['with no list of changes every list runs', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], null).run) === JSON.stringify(['atlas', 'drive', 'invariants'])],
-    ['each watched file alone runs the slow lists', ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'].every((f) => JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], [f]).run) === JSON.stringify(['atlas', 'drive', 'invariants']))],
+    ['each watched file alone runs the slow lists, the gates workflow among them', ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], [f]).run) === JSON.stringify(['atlas', 'drive', 'invariants']))],
     ['a change to none of them skips drive and invariants and runs every other list, a near name included', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], ['labs/a.css', 'tools/drives/air.mjs', 'tools/drive.mjs.orig', 'x/tools/drive.mjs'])) === JSON.stringify({ run: ['atlas'], skipped: ['drive', 'invariants'], hit: [] }) && JSON.stringify(listsToRun(['atlas', 'drive'], []).skipped) === JSON.stringify(['drive'])],
-    ['the command says which way it went', codes.skip === 0 && said.skip.some((l) => l === 'mutate: skipped drive: none of tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json, tools/mutate.mjs changed') && !said.skip.some((l) => l.startsWith('mutate drive:')) && said.skip.some((l) => l.startsWith('mutate toy:'))
-      && codes.ran === 0 && said.ran.includes('mutate: ran drive and invariants: changed files tools/drive.mjs') && said.ran.some((l) => l.startsWith('mutate drive: 1 broken rules, 1 caught'))],
+    ['the command says which way it went', codes.skip === 0 && said.skip.some((l) => l === 'mutate: skipped drive: none of tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json, tools/mutate.mjs, .github/workflows/gates.yml changed') && !said.skip.some((l) => l.startsWith('mutate drive:')) && said.skip.some((l) => l.startsWith('mutate toy:'))
+      && codes.ran === 0 && said.ran.includes('mutate: ran drive and invariants: changed files tools/drive.mjs') && said.ran.some((l) => /^mutate drive: 2 broken rules, 2 caught by the selftest, 0 run again, \d+ s$/.test(l))],
+    ['a slow list runs its copies one at a time', slowRuns.join(' ') === 'start end start end', slowRuns.join(' ')],
+    ['git names a watched file renamed away, so the slow lists run; the command asks it with --changed-since', JSON.stringify(renamed) === JSON.stringify(['tools/drive.mjs', 'tools/driver.mjs']) && !!cli.renamed && cli.renamed.code === 0 && cli.renamed.text.includes('mutate: ran drive and invariants: changed files tools/drive.mjs'), JSON.stringify([renamed, cli.renamed])],
+    ['when git cannot name the files, every list runs and the command says so', gitless === null && cli.gitless.code === 0 && cli.gitless.text.includes('mutate: git could not name the files changed since no-such-ref, so every list runs') && /mutate drive: 2 broken rules/.test(cli.gitless.text), cli.gitless.text],
     ['the changed files are read one a line, trimmed, blank lines left out; a file that cannot be read gives none', JSON.stringify(readBack.file) === JSON.stringify(['labs/a.css', 'tools/drives/air.mjs']) && readBack.none === null],
     ['the command reads --changed, and runs every list when the file cannot be read, saying so', cli.skip.code === 0 && /mutate: skipped drive:/.test(cli.skip.text) && !/mutate drive:/.test(cli.skip.text)
-      && cli.lost.code === 0 && /the changed files could not be read from .*nowhere\.txt, so every list runs/.test(cli.lost.text) && /mutate drive: 1 broken rules, 1 caught/.test(cli.lost.text)],
+      && cli.lost.code === 0 && /the changed files could not be read from .*nowhere\.txt, so every list runs/.test(cli.lost.text) && /mutate drive: 2 broken rules, 2 caught/.test(cli.lost.text)],
     ['a mutants file must name each rule and give exact text', shape([{ name: 'x', from: '', to: '' }], 't').length === 2 && shape([], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b' }], 't').length === 0 && shape([{ name: 'a rule broken', from: 'a' }], 't').length === 1],
     ['the same mutant listed twice is refused', shape([{ name: 'a rule broken', from: 'a', to: 'b' }, { name: 'a rule broken', from: 'c', to: 'd' }], 't').some((e) => e.includes('twice'))],
     ['the command exits 0 when every broken rule is caught', cli.clean === 0],
@@ -265,16 +305,17 @@ async function selftest() {
     ['the command finds its own folder when the path holds a space and a tilde', cli.ownFolder === 0],
   ];
   const fail = cases.filter(([, v]) => !v);
-  for (const [n] of fail) console.log('FAIL ' + n);
+  for (const [n, , d] of fail) console.log('FAIL ' + n + (d ? ': ' + String(d).slice(0, 300) : ''));
   console.log(`mutate selftest: ${cases.length - fail.length}/${cases.length}`);
   process.exit(fail.length ? 1 : 0);
 }
 
 const argv = process.argv.slice(2);
-const at = argv.indexOf('--tools'), ch = argv.indexOf('--changed');
+const at = argv.indexOf('--tools'), ch = argv.indexOf('--changed'), since = argv.indexOf('--changed-since');
 const tools = at >= 0 ? path.resolve(argv[at + 1] || '') : TOOLS;
-const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)));
+const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));
 let changed = null;
 if (ch >= 0) { changed = readChanged(argv[ch + 1] || ''); if (!changed) console.log(`mutate: the changed files could not be read from ${argv[ch + 1]}, so every list runs`); }
+if (since >= 0) { changed = changedSince(argv[since + 1] || ''); if (!changed) console.log(`mutate: git could not name the files changed since ${argv[since + 1]}, so every list runs`); }
 if (rest[0] === 'selftest') await selftest();
 else process.exit(await run(rest[0], tools, console.log, { changed }));

@@ -63,16 +63,15 @@ jobs:
           if [ -f tools/drive.mjs ]; then node tools/drive.mjs selftest; else echo "NOT_CHECKED: tools/drive.mjs does not exist"; fi
           if [ -f tools/invariants.mjs ]; then node tools/invariants.mjs selftest; else echo "NOT_CHECKED: tools/invariants.mjs does not exist"; fi
       # a selftest is only as good as the broken rules it catches: each listed rule is broken in a copy and must fail it.
-      # On a pull request the files it changed go to tools/mutate.mjs, which runs the lists of drive and invariants only
-      # when one of their files changed (about 46 minutes here); on a push to main every list runs.
+      # On a pull request tools/mutate.mjs asks git what changed since main (renames split) and runs the lists of drive
+      # and invariants only when one of the files it watches changed (about 55 minutes here); on a push to main every list
+      # runs. It says which way it went.
       - name: mutation test of the gates
         run: |
           if [ -f tools/mutate.mjs ]; then
-            changed=""
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-              git diff --name-only origin/main...HEAD > "$RUNNER_TEMP/changed.txt" && changed="--changed $RUNNER_TEMP/changed.txt" || echo "mutate: git could not name the changed files, so every list runs"
-            fi
-            node tools/mutate.mjs selftest && node tools/mutate.mjs $changed
+            since=""
+            if [ "${{ github.event_name }}" = "pull_request" ]; then since="--changed-since origin/main"; fi
+            node tools/mutate.mjs selftest && node tools/mutate.mjs $since
           else echo "NOT_CHECKED: tools/mutate.mjs does not exist"; fi
       - name: model route tests
         run: |

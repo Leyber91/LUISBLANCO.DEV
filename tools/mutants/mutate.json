@@ -35,11 +35,6 @@
     "to": "{ continue; }"
   },
   {
-    "name": "the unbroken selftest is not run first",
-    "from": "if ((await runs(place('base', base), limit)) !== 'pass') { out.broken = true; return out; }",
-    "to": ""
-  },
-  {
     "name": "a missing tool is not a failure",
     "from": "{ say(`mutate ${name}: tools/${name}.mjs does not exist`); bad++; continue; }",
     "to": "{ continue; }"
@@ -125,26 +120,6 @@
     "to": "if (result[k] !== 'fail') out.survived.push"
   },
   {
-    "name": "a run stopped at the limit is not run again",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, jobs[k].text), limit);\n",
-    "to": ""
-  },
-  {
-    "name": "the second runs run side by side",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, jobs[k].text), limit);\n",
-    "to": "    await Promise.all(jobs.map(async (j, k) => { if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, j.text), limit); }));\n"
-  },
-  {
-    "name": "a second run is run a third time",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, jobs[k].text), limit);\n",
-    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, jobs[k].text), limit);\n    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') result[k] = await runs(place(`m${k}`, jobs[k].text), limit);\n"
-  },
-  {
-    "name": "a stopped run is reported as failed",
-    "from": "resolve(late ? 'timeout' : code === 0 ? 'pass' : 'fail')",
-    "to": "resolve(code === 0 ? 'pass' : 'fail')"
-  },
-  {
     "name": "the timed-out count is left out of the summary",
     "from": "${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}",
     "to": ""
@@ -178,11 +153,6 @@
     "name": "the limit is half as long",
     "from": "child.kill(); }, limit);",
     "to": "child.kill(); }, limit / 2);"
-  },
-  {
-    "name": "the limit given to the command is not used",
-    "from": "mutants, name, tools, limit);",
-    "to": "mutants, name, tools);"
   },
   {
     "name": "the slow lists run whatever changed",
@@ -225,44 +195,9 @@
     "to": ""
   },
   {
-    "name": "a change to tools/drive.mjs does not run the slow lists",
-    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];",
-    "to": "const WATCHED = ['tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
-  },
-  {
-    "name": "a change to tools/invariants.mjs does not run the slow lists",
-    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];",
-    "to": "const WATCHED = ['tools/drive.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
-  },
-  {
-    "name": "a change to tools/drives/invariants.mjs does not run the slow lists",
-    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];",
-    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
-  },
-  {
-    "name": "a change to tools/mutants/drive.json does not run the slow lists",
-    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];",
-    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
-  },
-  {
-    "name": "a change to tools/mutants/invariants.json does not run the slow lists",
-    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];",
-    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutate.mjs'];"
-  },
-  {
-    "name": "a change to tools/mutate.mjs does not run the slow lists",
-    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];",
-    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json'];"
-  },
-  {
     "name": "the reader keeps blank lines",
     "from": ".filter(Boolean); } catch { return null; }",
     "to": "; } catch { return null; }"
-  },
-  {
-    "name": "the reader does not trim",
-    "from": ".split('\\n').map((l) => l.trim())",
-    "to": ".split('\\n')"
   },
   {
     "name": "a file of changes that cannot be read reads as no change",
@@ -275,19 +210,14 @@
     "to": "changed = null;"
   },
   {
-    "name": "the file of changes is taken as a list name",
-    "from": " && (ch < 0 || (i !== ch && i !== ch + 1)));",
-    "to": ");"
-  },
-  {
     "name": "a file of changes that cannot be read is not said",
     "from": "if (!changed) console.log(`mutate: the changed files could not be read from ${argv[ch + 1]}, so every list runs`); ",
     "to": ""
   },
   {
     "name": "a selftest that exits 0 counts as failed",
-    "from": "code === 0 ? 'pass' : 'fail')",
-    "to": "code !== 0 ? 'pass' : 'fail')"
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(late || code === WATCHDOG ? 'timeout' : code !== 0 ? 'pass' : 'fail');"
   },
   {
     "name": "the --changed flag is taken as a list name",
@@ -313,5 +243,200 @@
     "name": "an undeclared timeout fails the check only beside a mutant that changes nothing",
     "from": "if (r.survived.length || r.stale.length || r.noop.length || r.timedOut.some((t) => !t.reason)) bad++;",
     "to": "if (r.survived.length || r.stale.length || r.noop.length && r.timedOut.some((t) => !t.reason)) bad++;"
+  },
+  {
+    "name": "the unbroken selftest is not run first",
+    "from": "if ((await runs(place('base', base), limit, env)) !== 'pass') { out.broken = true; return out; }",
+    "to": ""
+  },
+  {
+    "name": "an unbroken selftest that times out is not broken",
+    "from": "if ((await runs(place('base', base), limit, env)) !== 'pass') { out.broken = true; return out; }",
+    "to": "if ((await runs(place('base', base), limit, env)) === 'fail') { out.broken = true; return out; }"
+  },
+  {
+    "name": "a run stopped at the limit is not run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": ""
+  },
+  {
+    "name": "the second runs run side by side",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    await Promise.all(jobs.map(async (j, k) => { if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, j.text), limit, env); out.reruns.push({ name: j.name, result: result[k] }); } }));\n"
+  },
+  {
+    "name": "a second run is run a third time",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "a second run is not told",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); }\n"
+  },
+  {
+    "name": "the last run is never run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length - 1; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "every run is run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (true) { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "a stopped run is reported as failed",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(code === 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "a selftest that stops itself is caught",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(late ? 'timeout' : code === 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "a selftest that stops itself with another code is timed out",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(late || code === WATCHDOG + 1 ? 'timeout' : code === 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "the watchdog code is 125",
+    "from": "const LIMIT_MS = 180000, WATCHDOG = 124;",
+    "to": "const LIMIT_MS = 180000, WATCHDOG = 125;"
+  },
+  {
+    "name": "the limit given to the command is not used",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, SLOW.includes(name) ? 1 : WIDTH);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, LIMIT_MS, SLOW.includes(name) ? 1 : WIDTH);"
+  },
+  {
+    "name": "a slow list runs its copies side by side",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, SLOW.includes(name) ? 1 : WIDTH);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, WIDTH);"
+  },
+  {
+    "name": "the width given is not used",
+    "from": "await Promise.all(Array.from({ length: width }, worker));",
+    "to": "await Promise.all(Array.from({ length: WIDTH }, worker));"
+  },
+  {
+    "name": "the copies share the machine's lock",
+    "from": "const env = { ...process.env, LABS_DRIVE_LOCK: path.join(root, 'chrome.lock') };",
+    "to": "const env = process.env;"
+  },
+  {
+    "name": "the rerun count left out of the summary",
+    "from": "${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}, ${r.reruns.length} run again, ${Math.round((Date.now() - t0) / 1000)} s`);",
+    "to": "${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}, ${Math.round((Date.now() - t0) / 1000)} s`);"
+  },
+  {
+    "name": "a second run not printed",
+    "from": "    for (const x of r.reruns) say(`  RERUN     ${x.name}: stopped at the limit once, then ${{ pass: 'survived', fail: 'caught', timeout: 'stopped again' }[x.result]}`);\n",
+    "to": ""
+  },
+  {
+    "name": "a second run that caught printed as survived",
+    "from": "{ pass: 'survived', fail: 'caught', timeout: 'stopped again' }",
+    "to": "{ pass: 'survived', fail: 'survived', timeout: 'stopped again' }"
+  },
+  {
+    "name": "the reader does not trim",
+    "from": "return fs.readFileSync(file, 'utf8').split('\\n').map((l) => l.trim()).filter(Boolean);",
+    "to": "return fs.readFileSync(file, 'utf8').split('\\n').filter(Boolean);"
+  },
+  {
+    "name": "git asked with renames",
+    "from": "['diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
+    "to": "['diff', '--name-only', `${ref}...HEAD`]"
+  },
+  {
+    "name": "git asked from the ref itself",
+    "from": "['diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
+    "to": "['diff', '--name-only', '--no-renames', `${ref}`]"
+  },
+  {
+    "name": "git that fails read as no change",
+    "from": "return r.status === 0 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;",
+    "to": "return r.status === 0 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : [];"
+  },
+  {
+    "name": "git that succeeds read as unknown",
+    "from": "return r.status === 0 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;",
+    "to": "return r.status === 1 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;"
+  },
+  {
+    "name": "--changed-since not read",
+    "from": "if (since >= 0) { changed = changedSince(argv[since + 1] || ''); if (!changed) console.log(`mutate: git could not name the files changed since ${argv[since + 1]}, so every list runs`); }",
+    "to": ""
+  },
+  {
+    "name": "--changed-since as the first word not seen",
+    "from": "if (since >= 0) {",
+    "to": "if (since > 0) {"
+  },
+  {
+    "name": "an unknown ref not said",
+    "from": "if (since >= 0) { changed = changedSince(argv[since + 1] || ''); if (!changed) console.log(`mutate: git could not name the files changed since ${argv[since + 1]}, so every list runs`); }",
+    "to": "if (since >= 0) { changed = changedSince(argv[since + 1] || ''); }"
+  },
+  {
+    "name": "the file of changes is taken as a list name",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n"
+  },
+  {
+    "name": "the ref is taken as a list name",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)));\n"
+  },
+  {
+    "name": "the word after the ref dropped instead",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 2)));\n"
+  },
+  {
+    "name": "the --changed-since flag taken as a list name",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since + 1)));\n"
+  },
+  {
+    "name": "with no --changed-since the first word dropped",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < -1 || (i !== since && i !== since + 1)));\n"
+  },
+  {
+    "name": "a change to tools/drive.mjs does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/invariants.mjs does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/drive.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/drives/invariants.mjs does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/mutants/drive.json does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/mutants/invariants.json does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/mutate.mjs does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to .github/workflows/gates.yml does not run the slow lists",
+    "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
   }
 ]
