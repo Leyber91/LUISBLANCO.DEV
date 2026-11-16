@@ -13,6 +13,7 @@
 
 import { Exoplanet } from './exoplanet.js';
 import { toParams, classify, lockRadiusAU, LOOKS } from './data.js';
+import { airParts, airShort, SCENARIOS, SCENARIO_LABEL } from './air.js';
 import { loadSnapshot, joinRoster, provisionalMeasured, countLine } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
@@ -50,6 +51,8 @@ const store = {
     list: [], byName: new Map(), sel: null, system: [], plot: PLOTS[params.get('plot')] ? params.get('plot') : 'valley',
     filter: emptyFilter(), filterFn: () => true, filterActive: false, tour: null, colorBy: 'none',
     albedo: () => 0.3, pins: [], newNames: new Set(), plain: false,
+    // a scenario of the selected world's air the visitor chose (air.js); null draws the survey's own. A link may carry one.
+    air: SCENARIOS.includes(params.get('air')) ? params.get('air') : null,
   },
 };
 const methodGroup = (m) => (METHOD_GROUPS.some((g) => g.key === m) ? m : 'other');
@@ -113,7 +116,12 @@ const desktop = () => window.matchMedia('(min-width: 1101px)').matches;
 /* Fit the world to the free middle of sheet A: on a desk, between the name above and the key and title block below,
    across the sheet; on a phone, the middle three fifths of its own frame. Centre it there (a principal-point shift)
    and choose the camera distance that makes it fill that region. The line under the planet stands just below it. */
+/* The last framing of a band tall enough to hold the world: a band under 120 px (a block above that grew) keeps it,
+   rather than squeezing the world to a floor and its line into the key. */
+const MIN_BAND = 120;
+let lastFraming = null;
 function placeWorld() {
+  fitMore();
   const cv = canvas.getBoundingClientRect();
   if (!cv.height) return;
   const left = cv.left, right = cv.right;
@@ -125,12 +133,33 @@ function placeWorld() {
   } else {
     top = cv.top + cv.height * 0.2; bottom = cv.bottom - cv.height * 0.2;
   }
+  // a band that shrank keeps the framing it had at this size of the sheet, and its line still never stands below the
+  // band's bottom (on the ground the key grows up into the sheet); a short window that never had a taller band frames
+  // as it can
+  const tight = bottom - top < MIN_BAND;
+  const lineY = (y) => `${Math.round(Math.min(y, bottom - cv.top + 10))}px`;
+  if (tight && lastFraming && lastFraming.w === Math.round(cv.width) && lastFraming.h === Math.round(cv.height)) {
+    engine.frame(lastFraming.shift, lastFraming.home);
+    $('exo-stage').style.setProperty('--bezel-y', lineY(lastFraming.y));
+    return;
+  }
   const cx = (left + right) / 2 - cv.left, cy = (top + bottom) / 2 - cv.top;
   const r = Math.max(60, Math.min((bottom - top) / 2, (right - left) / 2 * 0.9));
   const rho = r / cv.height, fov = engine.camera.fov || 1.5;
   const home = Math.min(14, Math.max(2.2, 1 / Math.sin(Math.atan(rho / fov))));
-  engine.frame([cx - cv.width / 2, cv.height / 2 - cy], home);
-  $('exo-stage').style.setProperty('--bezel-y', `${Math.round(cy + r + 10)}px`);
+  const shift = [cx - cv.width / 2, cv.height / 2 - cy];
+  engine.frame(shift, home);
+  // the line under the world, never below the band's bottom (10 px into the 26 px kept above the key and the title block)
+  $('exo-stage').style.setProperty('--bezel-y', lineY(cy + r + 10));
+  if (!tight) lastFraming = { shift, home, y: cy + r + 10, w: Math.round(cv.width), h: Math.round(cv.height) };
+}
+/* The open "scenarios and sources" on a desk lie over sheet A down to the top of the key (exoplanet.css). */
+function fitMore() {
+  const body = document.querySelector('#ret-render .ret-more[open] .ret-more-body');
+  if (!body) return;
+  if (!desktop()) { body.style.removeProperty('--more-max'); return; }
+  const room = $('key').getBoundingClientRect().top - 8 - body.getBoundingClientRect().top;
+  body.style.setProperty('--more-max', `${Math.max(80, Math.round(room))}px`);
 }
 
 /* ---------------- views ---------------- */
@@ -183,7 +212,7 @@ const actions = {
     if (kind === 'plate') { exportPlate(st.sel, engine, { system: document.querySelector('.sys-cv'), transit: document.querySelector('.tr-cv') }, st.albedo()); flash(btn, 'Saved'); }
     else if (kind === 'csv') { const n = exportCSV(st.list, st.filterFn, st.filterActive, st.albedo(), filterLabel()); flash(btn, `${fmtInt(n)} rows`); }
     else if (kind === 'link') copyLink().then((ok) => flash(btn, ok ? 'Copied' : 'Copy failed'));
-    else if (kind === 'chain') { $('chain-body').innerHTML = chainHTML(st.sel, st.albedo()); $('chain').showModal(); }
+    else if (kind === 'chain') { $('chain-body').innerHTML = chainHTML(st.sel, st.albedo(), st.air); $('chain').showModal(); }
     else if (kind === 'pin' && log) log.pin(st.sel.name, (w) => { openCompare(); flash(btn, w.ok ? `${st.pins.length} pinned` : 'Not pinned'); });
     else if (kind === 'log' && log) log.toggle(st.sel, glOk ? engine.camera.mode : 'orbit', (text, ok) => target.say(text, ok));
   },
@@ -209,7 +238,7 @@ function filterLabel() {
 
 /* ---------------- selection ---------------- */
 function paramsFor(p) {
-  const prm = toParams(p);
+  const prm = toParams(p, { air: store.state.air });
   if (store.state.plain) { prm.cloud = 0; prm.life = 0; }
   return prm;
 }
@@ -221,6 +250,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   if (!keepTour && st.tour) endTour();
   const prev = st.sel;
   st.sel = p;
+  if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
   st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (a.a ?? a.P ?? 0) - (b.a ?? b.P ?? 0));
   const apply = () => {
     setReticle(p); placeWorld();
@@ -244,14 +274,67 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   syncLog();
 }
 
+let reticleHeld = null;   // the world whose line holds a scenario back until its look is built (engine.onReady redraws it)
+let reticleOpen = null;   // the world whose scenarios and sources are open under its name
 function setReticle(p) {
+  reticleHeld = null;
   $('ret-name').textContent = p.name;
   const hz = hzPosition(p);
   const hzWords = { cons: 'in the conservative habitable zone', opt: 'in the optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'its zone unknown' }[hz.key];
   const sc = sizeClassOf(p);
   $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'No radius measured'}, ${hzWords}`;
-  const cl = classify(p);
-  $('ret-render').textContent = `procedural surface: ${cl.label.replace(/ · habitable zone/i, '').toLowerCase()}${cl.physics.radiusKnown ? '' : ' [illustrative size]'}`;
+  const cl = classify(p, { air: store.state.air });
+  const r = $('ret-render');
+  r.textContent = `procedural surface: ${cl.label.replace(/ · habitable zone/i, '').toLowerCase()}${cl.physics.radiusKnown ? '' : ' [illustrative size]'}`;
+  if (!cl.air) return;
+  // The line under the name (air.js): a short account that stays within two lines on a phone (airShort), then the
+  // scenarios and their sources in a disclosure (airParts). A scenario that can be drawn instead is a link where the
+  // renderer can draw it without building a program on the page's thread: a browser that builds in the background,
+  // or a look already built. The link names the world it was offered for.
+  const line = document.createElement('span');
+  line.className = 'ret-air';
+  line.textContent = airShort(cl.air, cl.airKey);
+  const more = document.createElement('details');
+  more.className = 'ret-more';
+  more.open = reticleOpen === p.name;     // a switch made inside it keeps it open
+  more.addEventListener('toggle', () => { reticleOpen = more.open ? p.name : null; fitMore(); });
+  const summary = document.createElement('summary');
+  summary.textContent = 'scenarios and sources';
+  const body = document.createElement('span');
+  body.className = 'ret-more-body';
+  let held = 0;
+  for (const part of airParts(cl.air, cl.airKey)) {
+    if (part.st) { const w = document.createElement('span'); w.className = `st-${part.st}`; w.textContent = part.t; body.append(w); continue; }   // a status word
+    if (!part.air) { body.append(part.t); continue; }
+    if (glOk && !engine.canDraw(classify(p, { air: part.air }).type)) { held++; body.append(part.t); continue; }
+    const a = document.createElement('a');
+    a.href = `?${new URLSearchParams({ p: p.name, air: part.air })}`;
+    a.dataset.air = part.air;
+    a.dataset.world = p.name;
+    a.title = `Draw ${p.name} ${part.air === 'bare' ? 'as bare rock' : `with ${SCENARIO_LABEL[part.air]}`}`;
+    a.textContent = part.t;
+    body.append(a);
+  }
+  if (held) { reticleHeld = p; body.append(` ${held === 1 ? 'One scenario is' : 'Some scenarios are'} not a link here: this browser would build its look on the page's thread.`); }
+  body.append(' ');
+  const how = document.createElement('a');
+  how.href = `exomania-air.html#${cl.air.observed ? 'observed' : 'fit'}`;
+  how.textContent = 'How the survey decides';
+  body.append(how);
+  more.append(summary, body);
+  r.append(' ', line, more);   // the space keeps the two lines apart when the text is read as one
+}
+/* Draw the selected world in another scenario of its air, in place. A scenario of the same look changes numbers on
+   the program already built; another look builds that look's program, in the background where the browser can. */
+function setAir(key, world) {
+  const st = store.state;
+  if (!st.sel || !SCENARIOS.includes(key) || (world !== undefined && world !== st.sel.name)) return;   // offered for another world
+  st.air = key === classify(st.sel).airKey ? null : key;
+  if (glOk) engine.restyle(paramsFor(st.sel));
+  setReticle(st.sel);
+  const back = document.querySelector('#ret-render [data-air]');
+  if (back) back.focus({ preventScroll: true });
+  writeURL();
 }
 
 function setPlot(mode) { store.state.plot = mode; plot.redraw(); writeURL(); }
@@ -296,6 +379,7 @@ function writeURL() {
       u.set('cam', [c.yaw, c.pitch, c.dist / (c.homeDist || 1)].map((x) => (+x).toFixed(2)).join(','));
     }
     if (st.filter.query) u.set('q', st.filter.query);
+    if (st.air && classify(st.sel, { air: st.air }).airKey === st.air) u.set('air', st.air);
     if (log && log.shared().length) u.set('log', log.shared().join('|'));
     if (params.get('os-fixture')) u.set('os-fixture', params.get('os-fixture'));
     if (window.__EXO_STILL__) u.set('still', '');
@@ -840,6 +924,7 @@ async function boot() {
   $('tour-next').addEventListener('click', () => stepTour(1));
   $('tour-end').addEventListener('click', endTour);
   $('btn-method').addEventListener('click', () => $('method').showModal());
+  $('ret-render').addEventListener('click', (e) => { const a = e.target.closest('[data-air]'); if (!a) return; e.preventDefault(); setAir(a.dataset.air, a.dataset.world); });
   $('method-close').addEventListener('click', () => $('method').close());
   document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => $(b.dataset.close).close()));
   $('compare').addEventListener('click', (e) => {
@@ -849,7 +934,10 @@ async function boot() {
   $('cmp-clear').addEventListener('click', () => { if (log) log.clearPins(() => openCompare()); });
   engine.onCamera = () => writeURL();
   engine.onMode = () => syncCamButtons();
-  engine.onReady = () => { if ($('compare').open) openCompare(); };
+  engine.onReady = () => {
+    if ($('compare').open) openCompare();
+    if (reticleHeld && reticleHeld === store.state.sel) setReticle(reticleHeld);   // a look it held back may be built now
+  };
   document.addEventListener('visibilitychange', () => engine.setVisible && engine.setVisible(!document.hidden));
   if (typeof IntersectionObserver === 'function') new IntersectionObserver((es) => engine.setVisible && engine.setVisible(es[0].isIntersecting && !document.hidden)).observe($('exo-stage'));
   window.addEventListener('resize', () => { placeWorld(); });

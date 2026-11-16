@@ -24,8 +24,9 @@
    (tests/looks.test.mjs).
    ============================================================ */
 
-import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, insolation, seff, photopicFraction } from './science.js';
+import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, hzPosition, insolation, luminosity, seff, photopicFraction } from './science.js';
 import { CHEN_KIPPING, KOPPARAPU } from './config.js';
+import { scenariosFor, bareDay, tsubForDay, fitMass, BARE, V_ESC_EARTH } from './air.js';
 
 const EARTH_R = 6.371e6;
 const kB = 1.380649e-23, mH = 1.6726e-27;
@@ -65,7 +66,9 @@ export function radiusStandIn(p) {
   return { R: STAND_IN_R.subnep, why: 'a featureless haze' };
 }
 
-export function physics(p) {
+/* opts.air: a scenario to draw instead of the default one ('bare', 'thin' or 'thick'; see air.js). A scenario
+   an observation excludes is never drawn. */
+export function physics(p, opts = {}) {
   const radiusKnown = typeof p.pl_rade === 'number' && isFinite(p.pl_rade) && p.pl_rade > 0;
   const standIn = radiusKnown ? null : radiusStandIn(p);
   const R = radiusKnown ? p.pl_rade : standIn.R;
@@ -104,23 +107,49 @@ export function physics(p) {
 
   // gravity / escape
   const gRel = M / (R * R);
-  const vEscKms = Math.sqrt(M / R) * 11.186;
+  const vEscKms = Math.sqrt(M / R) * V_ESC_EARTH;
   const isGiant = domClass >= 2;
 
-  // atmosphere retention (cosmic shoreline; k=7.0 anchor)
-  let atmDensity;
+  // insolation and luminosity, as the page states them
+  const Lrel = Rstar * Rstar * Math.pow(Teff / 5772, 4);
+  const S = Lrel / (a * a);
+
+  /* Whether a rock has air at all is decided in air.js: its own observation first, else the 2026 fit of
+     Berta-Thompson, Wachiraphan & Murray, with the flux and luminosity the page shows. [ILLUSTRATIVE] How much
+     air it has is not known for any exoplanet. The amount drawn is the share of air kept by escape speed against
+     insolation (a 7 km/s anchor, smooth over 0.6 dex; Mercury 0, Mars 0.47, Venus 0.82, Earth 0.97), held inside
+     the band of the scenario drawn: 0 for bare rock, AIR_THIN to just under AIR_FULL for thin air, AIR_FULL or more
+     for thick air. */
+  let atmDensity, share = 1, air = null, airKey = null;
   if (isGiant) atmDensity = 1.0;
   else {
     const Iinsol = Math.pow(Teq / 278.5, 4);
     const margin = Math.log10(vEscKms) - (Math.log10(7.0) + 0.25 * Math.log10(Math.max(Iinsol, 1e-6)));
-    atmDensity = smooth(-0.3, 0.3, margin);
+    share = smooth(-0.3, 0.3, margin);
+    // The fit takes the archive's values or none: no flux or luminosity, or no radius, and there is no fit,
+    // so the amount of air decides, illustrative. Its mass: the archive's (a minimum mass for most planets found by
+    // radial velocity); else the paper's own relation below 1.8 Earth radii (air.js fitMass); else the forecast above.
+    const Mfit = p.pl_masse != null ? M : fitMass(R) ?? M;
+    const vFit = radiusKnown ? Math.sqrt(Mfit / R) * V_ESC_EARTH : null;
+    const Sfit = insolation(p).S, Lfit = luminosity(p).L;
+    const lacks = [Lfit == null && 'the star\'s luminosity', Sfit == null && 'the flux', vFit == null && 'a radius'].filter(Boolean);
+    air = scenariosFor({ name: p.pl_name, S: Sfit, L: Lfit, vEsc: vFit, wantThick: share >= AIR_FULL, wantAir: share >= AIR_THIN, minMass: p.pl_masse != null && p.Mprov === 'Msini', inZone: ['cons', 'opt'].includes(hzPosition(p).key), lacks, starStandIn: p.st_teff == null || p.st_rad == null });
+    const can = air.list.find((x) => x.key === opts.air);
+    airKey = can && can.status !== 'excluded' ? opts.air : air.drawn;
+    atmDensity = airKey === 'thick' ? Math.max(share, AIR_FULL) : airKey === 'thin' ? clamp(share, AIR_THIN, AIR_FULL - 0.01) : 0;
   }
+  const locked = a < lockRadiusAU(Mstar);
+  // a bare rock with one face to its star: its day side by radiative equilibrium, A_B 0.1, f = 2/3 (air.js)
+  const bare = !isGiant && atmDensity < AIR_THIN && locked ? bareDay(Teff, Rstar, a) : null;
 
   // greenhouse-corrected surface temp — Teq omits the greenhouse, so Earth's own
   // Teq (~255K) sits below freezing. Add an Earth-calibrated offset scaled by how
   // much atmosphere the world actually keeps, then decide the surface state.
   const Tsurf = Teq + (isGiant ? 0 : 33 * atmDensity);
-  const Ttest = (a < 0.1) ? Tsurf * 1.18921 : Tsurf;     // substellar dayside for close-in melt
+  // the day side that decides melt: a measured one (air.js OBSERVED); else a locked bare rock's own (above);
+  // else, inside 0.1 AU, 2^(1/4) times the mean
+  const dayMeasured = air && air.observed && air.observed.day && locked ? air.observed.day.T : null;
+  const Ttest = dayMeasured ?? (bare ? bare.Tday : (a < 0.1) ? Tsurf * 1.18921 : Tsurf);
   let state = 'temperate';
   if (Ttest >= 1700) state = 'lava';
   else if (Ttest >= 1200) state = 'partial';
@@ -138,8 +167,6 @@ export function physics(p) {
   const Hr = Hm / (R * EARTH_R);                                 // in planet radii (tiny, e.g. Earth ~0.0012)
 
   // insolation -> exposure multiplier (compressive)
-  const Lrel = Rstar * Rstar * Math.pow(Teff / 5772, 4);
-  const S = Lrel / (a * a);
   const lightMul = Math.pow(clamp(S, 0.05, 50), 0.25);
 
   // star angular radius as seen from the planet (rad); huge for close-in worlds
@@ -153,7 +180,7 @@ export function physics(p) {
   return {
     R, M, estMass, Teff, Mstar, Rstar, a, P, S, Teq, Tsurf, Ttest, gRel, vEscKms,
     rhoRel, domClass, isGiant, state, atmDensity, Hr, lightMul, starAngle,
-    starActivity, starSpots, radiusKnown, standIn,
+    starActivity, starSpots, radiusKnown, standIn, share, air, airKey, locked, bare,
   };
 }
 
@@ -213,8 +240,8 @@ const LOOK_LABEL = {
   temperate: ['Temperate world with seas', 'Ocean world'],
   ice: ['Frozen world', 'Frozen world'],             // nothing in the archive shows an ocean under the ice
 };
-export function classify(p) {
-  const ph = physics(p);
+export function classify(p, opts = {}) {
+  const ph = physics(p, opts);
   const look = lookOf(p, ph);
   let label;
   if (look === 'fluid') {
@@ -227,7 +254,7 @@ export function classify(p) {
   }
   // no measured radius: say so, and say what the drawing stands in with
   if (!ph.radiusKnown) label = `Radius not measured, drawn as ${ph.standIn.why}`;
-  return { type: LOOKS[look], look, klass: ph.domClass, state: ph.state, label, atmDensity: ph.atmDensity, locked: ph.a < lockRadiusAU(ph.Mstar), physics: ph };
+  return { type: LOOKS[look], look, klass: ph.domClass, state: ph.state, label, atmDensity: ph.atmDensity, locked: ph.locked, physics: ph, air: ph.air, airKey: ph.airKey };
 }
 
 // ---- star colour: Planck spectrum through the CIE 1931 observer to sRGB (science.js) ----
@@ -368,21 +395,27 @@ function air(look, ph, pal) {
    uses 0.2 to 0.4), so the glow is uncertain by about 1.3 times. Only molten and airless rock
    and fluid worlds are given a glow, and only when the hottest point is above 750 K. */
 const WIEN_LUMA = [0.2126, 0.7152, 0.0722];
+/* A locked bare rock (ph.bare) is drawn by air.js bareDay: its hottest point from the star with A_B 0.1, a night
+   side of 50 K, and a glow at the substellar point of (1 - A_B) times the starlight in the eye's share of each
+   spectrum. A locked world with a measured day side (air.js OBSERVED: 55 Cnc e, LHS 3844 b and eleven more) is
+   drawn as measured: the hottest point that gives that day side (air.js tsubForDay), whether it has air or not. */
 function thermal(look, ph, locked) {
   const hotLook = look === 'molten' || look === 'fluid' || look === 'airless';
-  const k = locked ? (look === 'fluid' ? 1.25 : Math.SQRT2) : 1.18921;      // hottest point over Teq
-  const Tsub = k * ph.Teq;
   const hasAir = look === 'fluid' || ph.atmDensity >= AIR_THIN;
-  const Tnight = Math.max(locked ? (look === 'fluid' ? 0.75 : hasAir ? 0.6 : 0.15) * ph.Teq : 0.95 * ph.Teq, 40);
+  const obs = ph.air && ph.air.observed, measured = !!(obs && obs.day && locked);
+  let k = locked ? (look === 'fluid' ? 1.25 : Math.SQRT2) : 1.18921;        // hottest point over Teq
+  const Tnight = ph.bare ? BARE.Tnight : Math.max(locked ? (look === 'fluid' ? 0.75 : hasAir ? 0.6 : 0.15) * ph.Teq : 0.95 * ph.Teq, 40);
+  const Tsub = measured ? tsubForDay(obs.day.T, Tnight) : ph.bare ? ph.bare.Tss : k * ph.Teq;
+  k = Tsub / ph.Teq;
   if (!hotLook || Tsub < 750) return { tsub: Tsub, tnight: Tnight, glowT: 0, glow: [0, 0, 0] };
-  const Lt = 0.9 * Math.pow(k / Math.SQRT2, 4) * photopicFraction(Tsub) / photopicFraction(ph.Teff);
+  const Lt = (ph.bare ? (1 - BARE.albedo) * Math.pow(Tsub / ph.bare.Tss, 4) : 0.9 * Math.pow(k / Math.SQRT2, 4)) * photopicFraction(Tsub) / photopicFraction(ph.Teff);
   const lin = starColour(Tsub).linear, lum = lin.reduce((s, x, i) => s + x * WIEN_LUMA[i], 0);
   return { tsub: Tsub, tnight: Tnight, glowT: Tsub, glow: lin.map((x) => x * Lt / lum) };
 }
 
 // ---- the full shader uniform bundle ----
-export function toParams(p) {
-  const c = classify(p), ph = c.physics, look = c.look;
+export function toParams(p, opts = {}) {
+  const c = classify(p, opts), ph = c.physics, look = c.look;
   const seedInt = hashName(p.pl_name);
   const rand = rng(seedInt);
   const { domClass, Teq, isGiant, atmDensity, Tsurf, gRel } = ph;

@@ -1347,6 +1347,17 @@ export class Exoplanet {
     this.requestDraw();
   }
   /* render options that are not physics: cloud and life (the illustrative layers) */
+  /* the same world drawn another way (a scenario of its air, data.js), with the camera where it is. A change of
+     look builds that look's program as any world would; until it is ready the last frame stays, under the notice. */
+  restyle(params) {
+    const A = this._anim;
+    if (A && !A.swapped) A.params = { ...A.params, ...params };
+    else Object.assign(this.cfg, params);
+    this.requestDraw();
+  }
+  /* whether a world of this look can be drawn without building its program on the page's thread: the browser
+     builds in the background, or the program is already built */
+  canDraw(look) { return !!this.parallel || this._ready(look | 0); }
   setLayers({ cloud, life } = {}) {
     if (Number.isFinite(cloud)) this.cfg.cloud = cloud;
     if (Number.isFinite(life)) this.cfg.life = life;

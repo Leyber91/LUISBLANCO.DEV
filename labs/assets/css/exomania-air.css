@@ -1,0 +1,124 @@
+/* ============================================================
+   exomania-air.css — the sheet on which the survey says how it
+   decides which rocky worlds keep air (labs/exomania-air.html).
+
+   Drawn on the plate (tokens.css, plate.css): hairlines, IBM
+   Plex Mono for what is read, Fraunces for the title, the section
+   titles and the planets' names, upright (in its italic a
+   planet's letter b reads as a 6). After the design revision of
+   2026-11-16 (BAR_L2.md): labels are sentence case and never
+   tracked capitals, nothing is joined by middle dots, and gold
+   marks one thing only, an observed scenario, because gold marks
+   a measurement. The scenario drawn is shown by geometry, a rule
+   in the bright ink; an excluded one is set in the dim ink.
+   ============================================================ */
+
+.air { max-width: var(--content-max); margin-inline: auto; padding-bottom: var(--s-7); }
+
+/* ---------- the head and its title block ---------- */
+.air-head { padding-block: var(--s-7) var(--s-6); display: grid; grid-template-columns: minmax(0, 1fr) 320px; column-gap: var(--s-7); }
+.air-head > h1, .air-head > .lede { grid-column: 1; }
+.air-head > .block { grid-column: 2; grid-row: 1 / span 2; align-self: end; }
+.air-head h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(2.1rem, 4.2vw, 3.4rem); line-height: 1.04; letter-spacing: -.015em; margin: 0 0 var(--s-4); }
+.lede { font-size: .92rem; line-height: 1.7; color: var(--text); margin: 0; max-width: 68ch; }
+.block { margin: 0; border: 1px solid var(--line); font-size: var(--t-micro); }
+.block div { display: grid; grid-template-columns: 112px 1fr; border-top: 1px solid var(--line); }
+.block div:first-child { border-top: 0; }
+.block dt, .block dd { margin: 0; padding: 7px 10px; }
+.block dt { color: var(--text-dim); border-right: 1px solid var(--line); }
+.block dd { color: var(--text-bright); font-variant-numeric: tabular-nums; }
+code { font-family: var(--font-mono); font-size: .92em; color: var(--text-bright); }
+
+/* ---------- plates ---------- */
+.plate-sec { padding-block: var(--s-7) var(--s-5); }
+.plate-sec h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(1.45rem, 2.2vw, 1.9rem); line-height: 1.15; letter-spacing: -.01em; max-width: 40ch; margin-bottom: var(--s-4); }
+.plate-sec > p, .steps, .defs, .unc { font-size: .86rem; line-height: 1.7; color: var(--text); max-width: 76ch; }
+.plate-sec > p { margin: 0 0 var(--s-4); }
+.note { color: var(--text-dim) !important; font-size: .78rem !important; }
+.plate-sec a { color: var(--horizon); text-underline-offset: 3px; }
+.plate-sec a:hover { color: var(--text-bright); }
+sub, sup { font-size: .72em; line-height: 0; }
+
+.defs { margin: 0 0 var(--s-5); border-top: 1px solid var(--line); }
+.defs div { display: grid; grid-template-columns: 120px minmax(0, 1fr); column-gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+.defs dt { color: var(--text-bright); font-weight: 500; }
+.defs dd { margin: 0; }
+.steps { padding-left: 1.4em; margin: 0 0 var(--s-4); }
+.steps li { margin-bottom: var(--s-3); }
+.steps b, .defs b { color: var(--text-bright); font-weight: 500; }
+
+.eq { font-family: var(--font-mono); font-size: .86rem; line-height: 2; color: var(--text-bright); border-left: 1px solid var(--line-bright); padding: var(--s-2) var(--s-4); margin: 0 0 var(--s-5); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ---------- tables ---------- */
+.tabwrap { overflow-x: auto; margin: 0 0 var(--s-5); max-width: 100%; }
+.tabwrap > p { font-size: .86rem; line-height: 1.7; max-width: 76ch; margin: 0 0 var(--s-4); }
+.tab { border-collapse: collapse; font-size: .76rem; line-height: 1.5; min-width: 100%; margin-bottom: var(--s-4); }
+.tab.narrow { min-width: 0; }
+.tab th, .tab td { text-align: left; vertical-align: top; padding: 7px 14px 7px 0; border-bottom: 1px solid var(--line); }
+.tab thead th { font-weight: 500; font-size: .74rem; color: var(--text-dim); border-bottom-color: var(--line-bright); }
+.tab tbody th { color: var(--text-bright); font-weight: 500; white-space: nowrap; }
+.tab td { color: var(--text); }
+.tab td b { color: var(--text-bright); font-weight: 500; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.world { font-family: 'Fraunces', Georgia, serif; font-style: normal; font-weight: 500; }
+.tab .world { font-size: .9rem; }
+
+/* ---------- the ledger of observed planets ---------- */
+.ledger { border-top: 1px solid var(--line-bright); }
+.obs { display: grid; grid-template-columns: 230px minmax(0, 1fr); column-gap: var(--s-6); padding: var(--s-5) 0; border-bottom: 1px solid var(--line); }
+.obs-h { grid-row: span 4; }
+.obs-h h3 { font-size: 1.35rem; line-height: 1.15; color: var(--text-bright); margin: 0 0 var(--s-2); }
+.obs-drawn { font-size: .74rem; line-height: 1.55; color: var(--text-dim); margin: 0; }
+.obs-drawn b { color: var(--text-bright); font-weight: 500; }
+.obs-found { font-size: .82rem; line-height: 1.68; color: var(--text); margin: 0 0 var(--s-3); max-width: 78ch; }
+.obs-sc { list-style: none; padding: 0; margin: 0 0 var(--s-3); font-size: .78rem; line-height: 1.6; color: var(--text-dim); }
+.obs-sc li { padding: 4px 0 4px 14px; position: relative; }
+.obs-sc li b { color: var(--text-bright); font-weight: 500; }
+/* the scenario drawn is shown by geometry: a rule in the bright ink beside it */
+.obs-sc li.drawn::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--text-bright); }
+/* status words are words; gold only for observed, which is a measurement */
+.st { color: var(--text); }
+.st-excluded { color: var(--text-dim); }
+.st-disfavoured { color: var(--text); text-decoration: underline dotted var(--line-bright); text-underline-offset: 3px; }
+.st-observed { color: var(--accretion-soft); }
+.dr { color: var(--text-bright); }
+.obs-day { font-size: .76rem; color: var(--text); margin: 0 0 var(--s-2); font-variant-numeric: tabular-nums; }
+/* the papers' own words behind each bound, in the dim ink, as quotations */
+.obs-quotes { list-style: none; padding: 0 0 0 14px; margin: 0 0 var(--s-3); font-size: .72rem; line-height: 1.6; color: var(--text-dim); border-left: 1px solid var(--line); }
+.obs-quotes li { padding: 2px 0; }
+.obs-papers { list-style: none; padding: 0; margin: 0; font-size: .72rem; line-height: 1.6; color: var(--text-dim); }
+.obs-papers a, .src a { color: var(--horizon); text-underline-offset: 3px; overflow-wrap: anywhere; }
+
+.unc { padding-left: 1.2em; margin: 0; }
+.unc li { margin-bottom: var(--s-3); }
+.src { font-size: .78rem; line-height: 1.65; color: var(--text); padding-left: 1.6em; margin: 0 0 var(--s-5); max-width: 92ch; }
+.src li { margin-bottom: 6px; }
+
+@media (max-width: 860px) {
+  .air-head { grid-template-columns: 1fr; }
+  .air-head > .block { grid-column: 1; grid-row: auto; margin-top: var(--s-5); }
+  .obs { grid-template-columns: 1fr; }
+  .obs-h { grid-row: auto; margin-bottom: var(--s-3); }
+}
+/* a plate or a planet reached by its anchor stands below the bar, not under it */
+.plate-sec, .obs { scroll-margin-top: 76px; }
+
+@media (max-width: 560px) {
+  .air-head { padding-top: var(--s-5); }
+  .defs div { grid-template-columns: 1fr; row-gap: 2px; }
+  .block div { grid-template-columns: 104px 1fr; }
+  .foot { gap: var(--s-4); }
+  /* a table is set as one block per row, each value under the name of its column (data-label, air_article.mjs) */
+  .tab, .tab tbody, .tab tr, .tab th, .tab td { display: block; }
+  .tab { min-width: 0; font-size: .74rem; }
+  .tab thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .tab tr { border-bottom: 1px solid var(--line); padding: 10px 0; }
+  .tab th, .tab td { border: 0; padding: 2px 0; white-space: normal; }
+  .tab td { display: grid; grid-template-columns: 42% minmax(0, 1fr); column-gap: 10px; }
+  .tab td::before { content: attr(data-label); color: var(--text-dim); font-size: .72rem; line-height: 1.6; }
+  /* a finger's target: the links back and the footer's link to the survey are 44 px tall on a phone */
+  .back, .foot .back.quiet { display: inline-flex; align-items: center; min-height: 44px; }
+}
+
+/* the footer's link to the survey: a link in words, not a boxed label (the bar above keeps the shared chrome) */
+.foot .back.quiet { border: 0; padding: 0; text-transform: none; letter-spacing: 0; font-size: .78rem; color: var(--horizon); text-decoration: underline; text-underline-offset: 3px; }
