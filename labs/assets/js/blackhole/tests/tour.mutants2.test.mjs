@@ -66,7 +66,14 @@ const MUTANTS = [
   ['the telescope view reads as the cinematic one', `const line = s.view === 'telescope'`, `const line = s.view === 'telescopeX'`],
   ['the telescope view never speaks of the inner shadow', `? (s.emit === 'thick'`, `? (s.emit === 'thickX'`],
   ['the journey view reads as the cinematic one', `: s.view === 'journey'`, `: s.view === 'journeyX'`],
-  ['the spin quoted to 2 decimals', 'Spin ${s.a.toFixed(3)}', 'Spin ${s.a.toFixed(2)}'],
+  ['the spin quoted to 2 decimals', 'Spin ${spinText(s.a)}', 'Spin ${s.a.toFixed(2)}'],
+  /* ---- 2026-11-16 (review_s2 P2-1, P6-3, P6-4) ---- */
+  ['the curve called gold again', `const curve = colourWord('curve');`, `const curve = 'gold';`],
+  ['the thick disk\'s inclination rounded', 'at ${deg(s.incl)} deg. An opaque', 'at ${s.incl.toFixed(0)} deg. An opaque'],
+  ['the thin gas\'s inclination rounded', 'at ${deg(s.incl)} deg, through hot', 'at ${s.incl.toFixed(0)} deg, through hot'],
+  ['the focus ring loses its class', `<circle class="tour-focus"`, `<circle class="focus"`],
+  ['the focus ring in ink, not gold', `stroke="var(--accretion)"`, `stroke="var(--horizon)"`],
+  ['anchors read for the eased view, not the target', `liveAnchors(this.getAnchors(), this.app.store.view(true))`, `liveAnchors(this.getAnchors(), this.app.store.view())`],
   ['the colour named by its key, not its label', '${COLOR_MODES[s.color].label.toLowerCase()} colour', '${s.color} colour'],
   ['the view named by its key, not its label', '${esc(VIEWS[s.view].label)} view', '${esc(s.view)} view'],
 ];

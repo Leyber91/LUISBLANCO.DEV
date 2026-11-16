@@ -1,5 +1,5 @@
 /* ============================================================
-   The test of the physics tests, part 2 of 2. Run from the
+   The test of the physics tests, part 2 of 3. Run from the
    repository root:
      node labs/assets/js/blackhole/tests/physics.mutants2.test.mjs
 
@@ -10,7 +10,8 @@
    file is written to a copy of this lab in the system's temp
    folder and physics.test.mjs is run on the copy
    (kit/tests/mutants.mjs). Every broken rule must fail a check
-   there. Part 1 is physics.mutants.test.mjs.
+   there. Part 1 is physics.mutants.test.mjs; part 3,
+   physics.mutants3.test.mjs, breaks the rules of 2026-11-16.
 
    Add an entry here with every new rule in physics.js.
    ============================================================ */
@@ -80,6 +81,19 @@ const MUTANTS = [
   ['dur: exactly a minute in seconds', DUR, DUR.replace(`Math.abs(sec) >= f`, `Math.abs(sec) > f`)],
   ['dur: a negative time stays in seconds', DUR, DUR.replace(`Math.abs(sec) >= f`, `sec >= f`)],
   ['dur: a minute of 61 s', `['min', 60]`, `['min', 61]`],
+  /* one entry per row of the unit table (review_s2 P6-1: the hour, the nanosecond and the picosecond survived) */
+  ['dur: a year of 3.156e8 s', `['yr', 3.156e7]`, `['yr', 3.156e8]`],
+  ['dur: a day of 8640 s', `['d', 86400]`, `['d', 8640]`],
+  ['dur: an hour of 360 s', `['h', 3600]`, `['h', 360]`],
+  ['dur: a second of 10 s', `['s', 1]`, `['s', 10]`],
+  ['dur: a millisecond of 1e-2 s', `['ms', 1e-3]`, `['ms', 1e-2]`],
+  ['dur: a microsecond of 1e-5 s', `['µs', 1e-6]`, `['µs', 1e-5]`],
+  ['dur: a nanosecond of 1e-8 s', `['ns', 1e-9]`, `['ns', 1e-8]`],
+  ['dur: a picosecond of 1e-11 s', `['ps', 1e-12]`, `['ps', 1e-11]`],
+  ['dur: a femtosecond of 1e-14 s', `['fs', 1e-15]`, `['fs', 1e-14]`],
+  ['dur: an attosecond of 1e-17 s', `['as', 1e-18]`, `['as', 1e-17]`],
+  ['dur: a zeptosecond of 1e-20 s', `['zs', 1e-21]`, `['zs', 1e-20]`],
+  ['dur: a yoctosecond of 1e-23 s', `['ys', 1e-24]`, `['ys', 1e-23]`],
   ['dur: below every unit, in yoctoseconds', 'return `${sci(sec)} s`;', 'return `${sci(sec)} ys`;'],
 
   /* ---- len ---- */
@@ -89,6 +103,15 @@ const MUTANTS = [
   ['len: 998.9 m in kilometres', LEN, LEN.replace(`f * 0.999`, `f * 0.998`)],
   ['len: a negative length stays in metres', LEN, LEN.replace(`Math.abs(m) >=`, `m >=`)],
   ['len: below every unit, in femtometres', 'return `${sci(m)} m`;', 'return `${sci(m)} fm`;'],
+  /* one entry per row of the unit table (review_s2 P6-1: the AU, the micrometre and the nanometre survived) */
+  ['len: a parsec of 3.0857e17 m', `['pc', 3.0857e16]`, `['pc', 3.0857e17]`],
+  ['len: an AU of 1.496e10 m', `['AU', 1.496e11]`, `['AU', 1.496e10]`],
+  ['len: a kilometre of 1e4 m', `['km', 1e3]`, `['km', 1e4]`],
+  ['len: a metre of 10 m', `['m', 1]`, `['m', 10]`],
+  ['len: a millimetre of 1e-2 m', `['mm', 1e-3]`, `['mm', 1e-2]`],
+  ['len: a micrometre of 1e-5 m', `['µm', 1e-6]`, `['µm', 1e-5]`],
+  ['len: a nanometre of 1e-8 m', `['nm', 1e-9]`, `['nm', 1e-8]`],
+  ['len: a femtometre of 1e-14 m', `['fm', 1e-15]`, `['fm', 1e-14]`],
   /* ---- the comparison with the EHT (ledger row 2, ruled 2026-11-16) ---- */
   ['compareShadow: no distance gives a comparison', `if (!obj || !obj.distPc) return null;\n  const r = obj.ruler;`, `if (!obj) return null;\n  const r = obj.ruler;`],
   ['compareShadow: no object breaks', `if (!obj || !obj.distPc) return null;\n  const r = obj.ruler;`, `if (!obj.distPc) return null;\n  const r = obj.ruler;`],
@@ -100,7 +123,7 @@ const MUTANTS = [
   ['the side of the error turned', `d > 0 ? pred.errM : pred.errP`, `d > 0 ? pred.errP : pred.errM`],
   ['the side chosen by the wrong sign', `d > 0 ? pred.errM`, `d < 0 ? pred.errM`],
   ['a sigma without the measurement\'s error', `Math.hypot(d > 0 ? pred.errM : pred.errP, e.shadowErr)`, `(d > 0 ? pred.errM : pred.errP)`],
-  ['the ring dropped', `ring: e && e.ring != null ? { value: e.ring, err: e.ringErr } : null`, `ring: null`],
+  ['the ring dropped', `ring: e && e.ring != null ? { value: e.ring, err: e.ringErr, offsetPct: e.ringOffsetPct, scale: obj.thetaGPub?.v } : null`, `ring: null`],
   ['a ring where none was published', `e && e.ring != null ?`, `e && e.ring == null ?`],
   ['published drops the error\'s decimals', '${v.toFixed(d)} ${pm} ${e.toFixed(d)}', '${v.toFixed(d)} ${pm} ${e}'],
   ['published breaks on a whole number', `(String(v).split('.')[1] || '').length`, `(String(v).split('.')[1]).length`],
@@ -109,8 +132,8 @@ const MUTANTS = [
   ['a null comparison breaks', `if (!c || (!c.shadow && !c.ring)) return`, `if ((!c.shadow && !c.ring)) return`],
   ['a comparison with only a ring read as none', `if (!c || (!c.shadow && !c.ring)) return`, `if (!c || !c.shadow) return`],
   ['the ring sentence where a shadow exists', `if (c.shadow) return`, `if (false) return`],
-  ['a sigma of 0 written without its sign', `c.shadow.sigma >= 0 ? '+' : ''`, `c.shadow.sigma > 0 ? '+' : ''`],
-  ['a negative sigma given a plus', `c.shadow.sigma >= 0 ? '+' : ''`, `'+'`],
+  ['a sigma of 0 written without its sign', `sigma >= 0 ? '+' : ''`, `sigma > 0 ? '+' : ''`],
+  ['a negative sigma given a plus', `sigma >= 0 ? '+' : ''`, `'+'`],
   ['the name left out of the ring sentence', 'no shadow diameter for ${name}.', 'no shadow diameter.'],
 ];
 

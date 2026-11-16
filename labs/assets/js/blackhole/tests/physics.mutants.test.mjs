@@ -1,5 +1,5 @@
 /* ============================================================
-   The test of the physics tests, part 1 of 2. Run from the
+   The test of the physics tests, part 1 of 3. Run from the
    repository root:
      node labs/assets/js/blackhole/tests/physics.mutants.test.mjs
 
@@ -70,10 +70,12 @@ const MUTANTS = [
   ['Primordial has a disk', TPEAK, TPEAK.replace(`'primordial'`, `'primordialX'`)],
   ['the disk\'s temperature at the Eddington ratio 1', TPEAK, TPEAK.replace(`(massSun, a, edd,`, `(massSun, a, 1,`)],
   ['the tide falls as 1/r^2', `2 / (base.rh ** 3)`, `2 / (base.rh ** 2)`],
-  ['the tide over 1 m, not 2', `/ (rg * rg) * 2;`, `/ (rg * rg) * 1;`],
+  ['the tide over 1 m, not the body of 2 m', `/ (rg * rg) * BODY_M;`, `/ (rg * rg) * 1;`],
+  ['the body every sentence names is 1 m', `export const BODY_M = 2;`, `export const BODY_M = 1;`],
+  ['the lethal tide every sentence names is 1 g', `export const TIDE_G = 10;`, `export const TIDE_G = 1;`],
   ['the tide in g left in m/s^2', `tidalHg: tidalH / K.SI.g0,`, `tidalHg: tidalH,`],
-  ['the tide radius at 1 g, not 10', `2, 10 * K.SI.g0)`, `2, K.SI.g0)`],
-  ['the tide radius for a 1 m body', `K.tideRadius(a, massSun, 2,`, `K.tideRadius(a, massSun, 1,`],
+  ['the tide radius at 1 g, not the lethal tide', `BODY_M, TIDE_G * K.SI.g0)`, `BODY_M, K.SI.g0)`],
+  ['the tide radius for a 1 m body', `K.tideRadius(a, massSun, BODY_M,`, `K.tideRadius(a, massSun, 1,`],
   ['Primordial gets an angular scale', `thetaG: obj?.hypothetical ? null : K.thetaG(massSun, distPc),`, `thetaG: K.thetaG(massSun, distPc),`],
   ['the ISCO period half an orbit', `iscoPeriod: 2 * Math.PI /`, `iscoPeriod: Math.PI /`],
   ['the interior time left in M', `interiorTauS: base.interiorTau * tg,`, `interiorTauS: base.interiorTau,`],

@@ -8,6 +8,7 @@ import { Store } from './state.js';
 import { Renderer } from './renderer.js';
 import { TIERS } from './config.js';
 import { derive } from './physics.js';
+import { DIAG_EXPO } from './palette.js';
 import { buildUI } from './ui.js';
 
 const params = new URLSearchParams(location.search);
@@ -194,9 +195,11 @@ export function frameUniforms(app) {
     modeName: s.color,
     notes: s.notes ? 1 : 0,
     hl: app.hover.r || 0,
-    expo: Math.pow(2, s.ev) * ({ true: 0.5, thermal: 0.62, redshift: 0.8, order: 0.9, steps: 0.9 }[s.color] ?? 0.8) * autoExposure(app, s),
+    expo: Math.pow(2, s.ev) * ({ true: 0.5, thermal: 0.62, redshift: 0.8, order: DIAG_EXPO, steps: DIAG_EXPO }[s.color] ?? 0.8) * autoExposure(app, s),
     skyGain: 1,
-    bloom: 0.5,
+    // the two diagnostic maps do not bloom: their colours are tokens (palette.js), and a bloom of --text-bright,
+    // whose linear blue is 3.9, glowed pure blue around the n = 1 image (2026-11-16)
+    bloom: s.color === 'order' || s.color === 'steps' ? 0 : 0.5,
   };
 }
 

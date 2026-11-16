@@ -227,5 +227,145 @@ guard('len: metres in a readable unit', () => {
   }
 });
 
+/* ============================================================
+   Added 2026-11-16 after review_s2.md, each block a finding's
+   reproduction: the numbers a sentence quotes come from the
+   function the readout beside it uses (C1), one format per
+   quantity (C3), a tag no stronger than its inputs (C10), and
+   one check per row of the unit tables (P6-1).
+   ============================================================ */
+
+/* ---------- P1-4: one sigma, one way of writing it ---------- */
+guard('sigmaText', () => {
+  ok('a positive sigma with its sign and the symbol asked: +0.553 σ', P.sigmaText(0.5532, 'σ') === '+0.553 σ', P.sigmaText(0.5532, 'σ'));
+  ok('the word by default: -1.00 sigma', P.sigmaText(-1, undefined) === '-1.00 sigma', P.sigmaText(-1));
+  ok('none at all is +0.00 sigma', P.sigmaText(0) === '+0.00 sigma', P.sigmaText(0));
+  ok('just below none, -0.001: no plus', P.sigmaText(-0.001) === '-1.00×10⁻³ sigma', P.sigmaText(-0.001));
+  const s = P.compareShadow(10, OBJECTS[1]);
+  ok('the sentence writes the sigma by sigmaText', P.compareSentence(s).includes(`: ${P.sigmaText(s.shadow.sigma)} from this one.`), P.compareSentence(s));
+});
+
+/* ---------- P1-2: a number for a machine keeps its significant figures ---------- */
+guard('sigNum', () => {
+  ok('9.13651e-4 to 4 figures is 0.0009137, not 0', P.sigNum(9.13651e-4) === 0.0009137, `${P.sigNum(9.13651e-4)}`);
+  ok('35.4183 to 4 figures is 35.42', P.sigNum(35.4183) === 35.42);
+  ok('0.55321 to 3 figures is 0.553', P.sigNum(0.55321, 3) === 0.553);
+  ok('none stays none', P.sigNum(null) === null && P.sigNum(NaN) === null && P.sigNum(undefined) === null);
+  ok('zero is 0', P.sigNum(0) === 0);
+});
+
+/* ---------- C3: one format per quantity kind ---------- */
+guard('the quantity formats', () => {
+  ok('an inclination: one decimal at most, none when whole: 17, 27.5, 84', P.deg(17) === '17' && P.deg(27.51) === '27.5' && P.deg(84.0) === '84' && P.deg(1.04) === '1', [P.deg(17), P.deg(27.51), P.deg(84), P.deg(1.04)].join(' '));
+  ok('a spin: three decimals, 0.940 and 0.998', P.spinText(0.94) === '0.940' && P.spinText(0.998) === '0.998' && P.spinText(0) === '0.000');
+  for (const [pc, want] of [[1e6, '1.00 Mpc'], [999000, '999 kpc'], [1e3, '1.00 kpc'], [999, '999 pc'], [16.8e6, '16.8 Mpc'], [8277, '8.28 kpc']]) ok(`a distance of ${pc} pc reads ${want}`, P.parsecs(pc) === want, P.parsecs(pc));
+  for (const [ev, want] of [[1000, '1.00 keV'], [999, '999 eV'], [2345.6, '2.35 keV'], [1.234, '1.23 eV']]) ok(`a photon of ${ev} eV reads ${want}`, P.photonEnergy(ev) === want, P.photonEnergy(ev));
+});
+
+/* ---------- P2-4: the shadow against the horizon, from one function ---------- */
+guard('shadowToHorizon', () => {
+  const r = P.shadowToHorizon(0.94, 0);
+  ok('at M87*\'s a = 0.94: the 90 deg mean diameter over 2 r+, 3.73', near(r, P.shadowFor(0.94, 90, 0).mean / (2 * K.horizon(0.94, 0)), 1e-12) && P.s3(r) === '3.73', `${r}`);
+  ok('at a = 0: sqrt(27) / 2 = 2.60', near(P.shadowToHorizon(0), Math.sqrt(27) / 2, 1e-4), `${P.shadowToHorizon(0)}`);
+  ok('a charged hole carries its charge: a = 0, Q = 0.6, b_c(0.6) / r+(0.6)', near(P.shadowToHorizon(0, 0.6), K.rnCriticalB(0.6) / K.horizon(0, 0.6), 1e-4), `${P.shadowToHorizon(0, 0.6)}`);
+});
+
+/* ---------- P2-2: the sub-ring factor is the engine's at the spin on screen ---------- */
+guard('ringGamma', () => {
+  for (const [a, want] of [[0, '23.1'], [0.5, '20.5'], [0.94, '13.0'], [0.998, '11.4']]) {
+    const g = P.ringGamma(a);
+    ok(`a = ${a}: e^gamma = ${want}, the Lyapunov exponent of the polar photon orbit`, g === K.lyapunov(a, K.polarPhotonOrbit(a)) && P.s3(Math.exp(g)) === want, `${g}`);
+  }
+  ok('a charged hole, Q = 0.005: no closed form, null', P.ringGamma(0.5, 0.005) === null);
+  ok('Q = 0 has one', P.ringGamma(0.5, 0) !== null);
+});
+
+/* ---------- P2-6: the mass at which a hole is as warm as the background is computed ---------- */
+guard('cmbCrossover', () => {
+  const c = P.cmbCrossover();
+  const kg = SI.hbar * SI.c ** 3 / (8 * Math.PI * SI.G * SI.kB * 2.725);
+  ok('hbar c^3 / (8 pi G k_B 2.725 K) = 4.50e22 kg', near(c.kg, kg, 1e-12) && P.sci(c.kg) === '4.50×10²²', `${c.kg}`);
+  ok('a non-spinning hole of that mass is at 2.725 K', near(K.hawkingKelvin(c.kg), 2.725, 1e-12), `${K.hawkingKelvin(c.kg)}`);
+  ok('in Moon masses (7.346e22 kg, NASA): 0.613, not 0.75% of one', SI.Mmoon === 7.346e22 && near(c.moons, kg / 7.346e22, 1e-12) && P.s3(c.moons) === '0.613', `${c.moons}`);
+  ok('the background temperature is the SI table\'s 2.725 K', c.T === 2.725 && SI.Tcmb === 2.725);
+});
+
+/* ---------- P2-3: an angle and its diameter are one chord ---------- */
+guard('the chord on the sky', () => {
+  for (const o of OBJECTS.slice(0, 3)) {
+    const th = P.shadowFor(o.spin, o.incl, 0), c = P.compareShadow(th.mean, o);
+    ok(`${o.name}: the angle is the diameter it carries times the scale`, c.pred.diamM === th.mean && near(c.pred.value, c.pred.diamM * c.pred.thetaG, 1e-12), `${c.pred.diamM} x ${c.pred.thetaG} vs ${c.pred.value}`);
+  }
+});
+
+/* ---------- P2-10 and P6-2: the ruling's words, exactly ---------- */
+guard('the ruling\'s words', () => {
+  const [m87, sgr] = OBJECTS;
+  const m = P.compareSentence(P.compareShadow(P.shadowFor(0.94, 17).mean, m87), 'M87*');
+  ok('M87*: the ring sentence, word for word', m === 'The EHT measured a ring of emission 42 +- 3 uas across. On its own scale, theta_g 3.8 uas, its models place the ring about 10% outside the photon ring. It published no shadow diameter for M87*.', m);
+  const sg = P.compareShadow(P.shadowFor(0.5, 30).mean, sgr);
+  ok('Sgr A*: the shadow sentence, word for word', P.compareSentence(sg) === `The EHT inferred a shadow of 48.7 +- 7.0 uas: ${P.sigmaText(sg.shadow.sigma)} from this one.` && P.sigmaText(sg.shadow.sigma) === '+0.553 sigma', P.compareSentence(sg));
+  ok('a ring with no published offset or scale gives the ring and no claim about it',
+    P.compareSentence({ ring: { value: 5, err: 1 } }, 'X') === 'The EHT measured a ring of emission 5 +- 1 uas across. It published no shadow diameter for X.',
+    P.compareSentence({ ring: { value: 5, err: 1 } }, 'X'));
+  ok('an offset with no scale gives no claim either', !/models/.test(P.compareSentence({ ring: { value: 5, err: 1, offsetPct: 10 } }, 'X')));
+  ok('a scale with no offset gives no claim either', !/models/.test(P.compareSentence({ ring: { value: 5, err: 1, scale: 3.8 } }, 'X')));
+  ok('the ruling, one string: a sigma only between two shadows', P.RULING === 'A sigma is set only between two shadows; a ring of emission is a different quantity.', P.RULING);
+});
+
+/* ---------- C10: a value is as strong as its weakest input ---------- */
+guard('the tags', () => {
+  ok('all REAL is REAL', P.weakest('REAL', 'REAL') === 'REAL' && P.weakest('REAL') === 'REAL');
+  ok('one ILLUSTRATIVE input makes it ILLUSTRATIVE', P.weakest('REAL', 'ILLUSTRATIVE', 'REAL') === 'ILLUSTRATIVE');
+  ok('a missing tag is not REAL', P.weakest('REAL', undefined) === 'ILLUSTRATIVE');
+  const [m87, , cyg, prim] = OBJECTS;
+  const t = P.inputTags(m87);
+  ok('M87*: a sourced mass and distance, an illustrative spin and accretion rate', t.mass === 'REAL' && t.dist === 'REAL' && t.spin === 'ILLUSTRATIVE' && t.edd === 'ILLUSTRATIVE', JSON.stringify(t));
+  ok('Cygnus X-1: its spin is measured', P.inputTags(cyg).spin === 'REAL');
+  ok('Primordial is hypothetical: nothing measured', Object.values(P.inputTags(prim)).every((v) => v === 'ILLUSTRATIVE'), JSON.stringify(P.inputTags(prim)));
+  ok('a custom hole: nothing measured', Object.values(P.inputTags(null)).every((v) => v === 'ILLUSTRATIVE'));
+  ok('the disk\'s peak temperature at Cygnus X-1: ILLUSTRATIVE, as its Eddington ratio is', P.weakest(P.inputTags(cyg).mass, P.inputTags(cyg).spin, P.inputTags(cyg).edd) === 'ILLUSTRATIVE');
+});
+
+/* ---------- the reference numbers the guide sets beside the readouts ---------- */
+guard('fusionPercent and ergosurface', () => {
+  ok('four 1H atoms to one 4He atom release 0.712% of their mass (AME2020 masses)', near(P.fusionPercent(), 100 * (1 - 4.00260325413 / (4 * 1.00782503223)), 1e-12) && P.s3(P.fusionPercent()) === '0.712', `${P.fusionPercent()}`);
+  ok('the ergosurface at the equator is 2 M for any spin, uncharged', P.ergosurface(0.94, 0, 90) === 2 && P.ergosurface(0, 0, 90) === 2);
+  ok('a charge pulls it in: 1 + sqrt(1 - Q^2), 1.8 M at Q = 0.6', near(P.ergosurface(0, 0.6, 90), 1.8, 1e-12), `${P.ergosurface(0, 0.6, 90)}`);
+  ok('at the pole it meets the horizon', near(P.ergosurface(0.94, 0, 0), K.horizon(0.94), 1e-12) && near(P.ergosurface(0.5, 0.6, 0), K.horizon(0.5, 0.6), 1e-12));
+  ok('at 60 deg: 1 + sqrt(1 - a^2 / 4)', near(P.ergosurface(0.9, 0, 60), 1 + Math.sqrt(1 - 0.81 / 4), 1e-12));
+  ok('the slider\'s limit a = 0.998 at the pole: 1 + sqrt(0.004), not held at a floor', near(P.ergosurface(0.998, 0, 0), 1 + Math.sqrt(1 - 0.998 * 0.998), 1e-12));
+});
+
+/* ---------- the comparison carries its chord, its scale's errors and its ring's basis ---------- */
+guard('what the comparison carries', () => {
+  const [m87, sgr] = OBJECTS;
+  const z = P.compareShadow(10, m87), s = P.compareShadow(10, sgr);
+  ok('M87*: the scale\'s own errors, +0.60 and -0.34', z.pred.thetaErrP === 0.6 && z.pred.thetaErrM === 0.34);
+  ok('Sgr A*: the scale\'s error from its mass and distance, both sides', near(s.pred.thetaErrP, P.predictedUas(1, sgr).err, 1e-12) && s.pred.thetaErrM === s.pred.thetaErrP);
+  ok('M87*: the ring carries its paper\'s 10% and the EHT\'s own scale, 3.8 uas', z.ring.offsetPct === 10 && z.ring.scale === 3.8);
+  const bare = P.compareShadow(10, { distPc: 1, ruler: { thetaG: 1, errP: 0, errM: 0, by: 'x' }, eht: { ring: 5, ringErr: 1 } });
+  ok('a ring with no offset and an object with no scale of its own carry neither', bare.ring.offsetPct === undefined && bare.ring.scale === undefined);
+});
+
+/* ---------- the body and the tide every sentence names ---------- */
+guard('the tide\'s body', () => {
+  ok('a 2 m body and a 10 g tide', P.BODY_M === 2 && P.TIDE_G === 10);
+});
+
+/* ---------- P6-1: every row of the unit tables, just at and just below its size ---------- */
+guard('dur, row by row', () => {
+  for (const [name, f] of [['yr', 3.156e7], ['d', 86400], ['h', 3600], ['min', 60], ['s', 1], ['ms', 1e-3], ['µs', 1e-6], ['ns', 1e-9], ['ps', 1e-12], ['fs', 1e-15], ['as', 1e-18], ['zs', 1e-21], ['ys', 1e-24]]) {
+    ok(`dur(${f}) = 1 ${name}`, P.dur(f) === `1 ${name}`, P.dur(f));
+    ok(`dur(${f} x 0.998) is not in ${name}`, !P.dur(f * 0.998).endsWith(` ${name}`), P.dur(f * 0.998));
+  }
+});
+guard('len, row by row', () => {
+  for (const [name, f] of [['pc', 3.0857e16], ['AU', 1.496e11], ['km', 1e3], ['m', 1], ['mm', 1e-3], ['µm', 1e-6], ['nm', 1e-9], ['fm', 1e-15]]) {
+    ok(`len(${f}) = 1 ${name}`, P.len(f) === `1 ${name}`, P.len(f));
+    ok(`len(${f} x 0.998) is not in ${name}`, !P.len(f * 0.998).endsWith(` ${name}`), P.len(f * 0.998));
+  }
+});
+
 console.log(fails ? `\n${fails} of ${checks} physics check(s) failed` : `\nall ${checks} physics checks passed`);
 process.exit(fails ? 1 : 0);

@@ -22,6 +22,8 @@ const { TOUR, OBJECTS, VIEWS } = await import('./config.js');
 const P = await import('./physics.js');
 const { viewKey } = await import('./probe.js');
 const { Tour } = await import('./tour.js');
+const PAL = await import('./palette.js');
+const K = await import('./kerr.js');
 
 let fails = 0, checks = 0;
 const ok = (name, cond, detail = '') => {
@@ -45,21 +47,24 @@ const captionText = () => unesc((caption.innerHTML.match(/cap-b">([\s\S]*?)<\/di
 const finishTransition = () => { const t = performance.now() + 1e6; store.tick(t); store.tick(t); tour.refresh(); };
 
 /* ---------- what each caption must say, from the state alone ---------- */
-const distText = (pc) => (pc >= 1e6 ? `${(pc / 1e6).toPrecision(3)} Mpc` : pc >= 1e3 ? `${(pc / 1e3).toPrecision(3)} kpc` : `${pc.toPrecision(3)} pc`);
+// The formats are physics.js's (one per quantity kind); the relations between numbers (an angle is its diameter
+// times the scale, a horizon across is twice its radius) are checked on their own below, from the caption's text.
 function expected(stop, s, an) {
   const m = P.derive(s), o = OBJECTS.find((x) => x.id === s.obj);
   const ms = P.measurement(s);                                      // the Measure card's numbers
   const ts = s.view === 'telescope' ? ms.th : P.shadowFor(s.a, 90, s.q);
   const cmp = s.view === 'telescope' ? ms.cmp : P.compareShadow(ts.mean, o);   // ledger row 2
+  const g = P.ringGamma(s.a, s.q);
   const n = {
-    name: o.name, dist: o.distPc ? distText(o.distPc) : '--',
+    name: o.name,
     eht: P.compareSentence(cmp, o.name), by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',
-    a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
-    gmax: an ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an ? P.s3(Math.pow(an.gmin, 4)) : '--',
-    incl: s.incl.toFixed(0), shadowUas: cmp ? cmp.pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2), eta: (m.eta * 100).toFixed(1),
+    a: P.spinText(s.a), rhAcross: P.s3(2 * m.rh), shadowW: P.s3(ts.chords.width), shadowAcross: P.s3(cmp ? cmp.pred.diamM : ts.mean), vmax: P.s3(m.vIsco),
+    gmax: an ? P.s3(Math.pow(an.gmax, 4)) : '--', gmin: an ? P.s3(Math.pow(an.gmin, 4)) : '--',
+    incl: P.deg(s.incl), shadowUas: cmp ? P.s3(cmp.pred.value) : '--', ri: P.s3(m.ri), eta: P.s3(m.eta * 100),
     // the interior time runs to the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2): the centre only at a = Q = 0
     tauIn: P.dur(m.interiorTauS), inner: s.a === 0 && s.q === 0 ? 'the centre' : 'the inner horizon',
-    massSun: P.sci(m.massSun), horizonKm: P.sci(m.horizonKm), tidalG: P.sci(m.tidalHg),
+    massSun: P.sci(m.massSun), horizonAcrossKm: P.sci(2 * m.horizonKm), tidalG: P.sci(m.tidalHg), bodyM: String(P.BODY_M),
+    ringWord: s.color === 'order' ? PAL.colourWord('order1') : 'bright', ringThin: g == null ? '--' : P.s3(Math.exp(g)),
   };
   return stop.text.replace(/\{(\w+)\}/g, (_, k) => n[k]);
 }
@@ -111,7 +116,7 @@ guard('traced numbers', () => {
   ok('beaming: anchors from another view are not quoted', captionText() === expected(stop, s, null), captionText());
   anchors = { gmax: 1.31, gmin: 0.62, key: viewKey(store.view(true)) };
   tour.refresh();
-  ok('beaming: anchors traced for this view are quoted (g^4 = 2.9x, 0.15x)', captionText() === expected(stop, s, anchors) && captionText().includes('2.9x'), captionText());
+  ok('beaming: anchors traced for this view are quoted (g^4 = 2.94x, 0.148x)', captionText() === expected(stop, s, anchors) && captionText().includes('2.94x') && captionText().includes('0.148x'), captionText());
   // the same anchors go stale the moment the tour moves the camera
   tour.go(TOUR.findIndex((t) => t.id === 'telescope'));
   ok('telescope: the previous view\'s anchors are dropped at once', tour.anchors() === null);
@@ -124,7 +129,7 @@ guard('the telescope caption', () => {
   const s = store.all(), ms = P.measurement(s), cap = captionText();
   const num = (re) => +(cap.match(re) || [])[1];
   ok('telescope: caption inclination = card inclination (17 deg)', num(/sits at ([\d.]+) deg/) === Math.round(ms.incl) && ms.incl === 17, `${num(/sits at ([\d.]+) deg/)} vs ${ms.incl}`);
-  ok('telescope: caption width = card width (9.73 M)', Math.abs(num(/is ([\d.]+) M wide/) - ms.th.chords.width) < 0.006 && P.s3(ms.th.chords.width) === '9.73', `${num(/is ([\d.]+) M wide/)} vs ${ms.th.chords.width}`);
+  ok('telescope: caption diameter = card mean diameter (9.78 M), the chord the angle is computed from', Math.abs(num(/is ([\d.]+) M across/) - ms.th.mean) < 0.006 && P.s3(ms.th.mean) === '9.78', `${num(/is ([\d.]+) M across/)} vs ${ms.th.mean}`);
   // the angle on the sky is scaled by the stars' motions (Paper VI, Table 9), not by the EHT's own mass (ledger row 2)
   ok('telescope: caption angle = card prediction (35.4 uas, at the stellar-dynamics scale)', Math.abs(num(/([\d.]+) uas on the sky/) - ms.cmp.pred.value) < 0.06 && P.s3(ms.cmp.pred.value) === '35.4', `${num(/([\d.]+) uas on the sky/)} vs ${ms.cmp.pred.value}`);
   ok('telescope: the caption names the ring as emission and sets no sigma against it', cap.includes('ring of emission 42 +- 3 uas') && cap.includes('the motions of its stars') && !/sigma/.test(cap), cap);
@@ -178,20 +183,18 @@ guard('the numbers a caption quotes', () => {
   const pg = page(), { st, ap, T } = pg;
   st.set({ obj: 'custom', a: 0.5 }, { instant: true });
   const n = T.numbers();
-  ok('a custom hole is "this hole", with no distance, no EHT image and no angular size', n.name === 'this hole' && n.dist === '--' && n.eht === 'The EHT has not imaged it.' && n.shadowUas === '--', JSON.stringify([n.name, n.dist, n.eht, n.shadowUas]));
+  ok('a custom hole is "this hole", with no EHT image and no angular size', n.name === 'this hole' && n.eht === 'The EHT has not imaged it.' && n.shadowUas === '--', JSON.stringify([n.name, n.eht, n.shadowUas]));
+  ok('a custom hole\'s diameter across is its own mean, at 90 deg', n.shadowAcross === P.s3(P.shadowFor(0.5, 90, 0).mean), n.shadowAcross);
+  ok('a custom hole\'s by is its mass and distance', n.by === 'its mass and distance', n.by);
   st.set({ a: 0, q: 0 }, { instant: true });
   ok('at a = Q = 0 the fall ends at the centre', T.numbers().inner === 'the centre', T.numbers().inner);
   st.set({ a: 0.001 }, { instant: true });
   ok('at a = 0.001, the slider\'s first step (r- = 5.0000012e-7 M), the fall ends at the inner horizon', T.numbers().inner === 'the inner horizon', T.numbers().inner);
   st.set(st.objectPatch('cygx1'), { instant: true });
   ok('Cygnus X-1: the EHT has not imaged it', T.numbers().eht === 'The EHT has not imaged it.', T.numbers().eht);
-  // the distance in its unit: just at and just below a megaparsec and a kiloparsec
-  for (const [pc, want] of [[1e6, '1.00 Mpc'], [999000, '999 kpc'], [1e3, '1.00 kpc'], [999, '999 pc']]) {
-    ap.model = { ...P.derive(st.all()), obj: { ...OBJECTS[0], distPc: pc } };
-    ok(`a distance of ${pc} pc reads ${want}`, T.numbers().dist === want, T.numbers().dist);
-  }
-  ap.model = P.derive(st.all());
   ok('a key the state does not have is left as its name', T.fill('{nosuch} at {a}') === 'nosuch at 0.998', T.fill('{nosuch} at {a}'));
+  ok('the ring stop\'s factor at a charged hole: no closed form, --', (st.set({ a: 0.5, q: 0.3 }, { instant: true }), T.numbers().ringThin === '--'), T.numbers().ringThin);
+  ok('and at Q = 0 the engine\'s e^gamma', (st.set({ q: 0 }, { instant: true }), T.numbers().ringThin === P.s3(Math.exp(P.ringGamma(st.get('a'))))), T.numbers().ringThin);
 });
 
 guard('moving through the tour', () => {
@@ -321,6 +324,101 @@ guard('the idle caption', () => {
   ok('the telescope view with the thick disk speaks of the inner shadow', pg.text().includes('An opaque disk reaching the ISCO covers the outer shadow'), pg.text());
   st.set({ obj: 'custom' }, { instant: true });
   ok('a custom hole is titled so', pg.title() === 'Custom hole', pg.title());
+});
+
+/* ============================================================
+   Added 2026-11-16 after review_s2.md: each block a finding's
+   reproduction, read from the caption's own text and set against
+   the function the Measure card or the render uses.
+   ============================================================ */
+// half a unit in the last digit a number was printed with: 9.73 -> 0.005, 35.4 -> 0.05
+const halfUlp = (t) => 0.5 * 10 ** -((String(t).split('.')[1] || '').length);
+
+/* ---------- P2-2: a template's literal text carries no number; the fill function does ---------- */
+guard('the templates', () => {
+  for (const stop of TOUR) {
+    const literal = stop.text.replace(/\{\w+\}/g, '').replace(/\bn = \d\b/g, '').replace(/g\^4/g, '');
+    ok(`stop ${stop.id}: no digit in the literal text`, !/\d/.test(literal), literal);
+  }
+});
+guard('the ring stop', () => {
+  const pg = page(), { T, st } = pg;
+  T.start(at('order'));
+  const a = st.get('a'), want = P.s3(Math.exp(K.lyapunov(a, K.polarPhotonOrbit(a))));
+  ok(`the ring stop quotes e^gamma at the stop's a = ${a}: ${want}, the Measure card's sub-ring number`, pg.text().includes(`about ${want} times thinner`) && want === '13.0', pg.text());
+  ok('in Photon order the n = 1 ring is named by the colour that draws it', pg.text().includes(`thin ${PAL.colourWord('order1')} ring`) && PAL.MARKS.order1 === '--text-bright', pg.text());
+  st.set({ color: 'thermal' }, { instant: true });
+  ok('in another colour mode the ring is not given the order map\'s colour', pg.text().includes('thin bright ring'), pg.text());
+});
+
+/* ---------- P2-3: the angle on the sky is the diameter beside it times the scale ---------- */
+guard('the telescope stop\'s chord', () => {
+  const pg = page(), { T, st } = pg;
+  for (const incl of [null, 27.5, 60, 90]) {
+    T.start(at('telescope'));
+    if (incl) st.set({ incl }, { instant: true });              // a drag mid-stop: the caption is redrawn from the state
+    const t = pg.text(), d = (t.match(/is ([\d.]+) M across/) || [])[1], u = (t.match(/across, ([\d.]+) uas on the sky/) || [])[1];
+    const scale = P.measurement(st.all()).cmp.pred.thetaG;
+    ok(`telescope stop${incl ? ` at ${incl} deg` : ''}: ${u} uas = ${d} M x ${scale} uas/M, to the digits printed`, d && u && Math.abs(+u - +d * scale) <= halfUlp(d) * scale + halfUlp(u), t);
+    ok(`telescope stop${incl ? ` at ${incl} deg` : ''}: the inclination as the card writes it`, t.includes(`sits at ${P.deg(st.get('incl'))} deg`), t);
+  }
+});
+
+guard('the telescope stop\'s angle in significant figures', () => {
+  const pg = page(), { T, st } = pg;
+  T.start(at('telescope'));
+  st.set(st.objectPatch('cygx1', 'telescope'), { instant: true });     // the state changes under a running stop
+  const c = P.measurement(st.all()).cmp;
+  ok('Cygnus X-1: 9.14e-4 uas, in significant figures, not 0.0', pg.text().includes(`${P.s3(c.pred.value)} uas on the sky`) && P.s3(c.pred.value) === '9.14×10⁻⁴', pg.text());
+});
+
+/* ---------- P2-8: a word that fixes a quantity matches the key that fills it ---------- */
+guard('the words of the keys', () => {
+  const WORD = { rhAcross: 'M across', shadowAcross: 'M across', horizonAcrossKm: 'km across', shadowW: 'M wide' };
+  for (const stop of TOUR) for (const [, k] of stop.text.matchAll(/\{(\w+)\}/g)) {
+    const after = stop.text.slice(stop.text.indexOf(`{${k}}`) + k.length + 2, stop.text.indexOf(`{${k}}`) + k.length + 2 + 12);
+    if (WORD[k]) ok(`stop ${stop.id}: {${k}} is followed by "${WORD[k]}"`, after.startsWith(' ' + WORD[k]), after);
+    else ok(`stop ${stop.id}: {${k}} is followed by no word of a chord`, !/^ \w* ?(across|wide|spans)/.test(after), after);
+  }
+  const pg = page(), { T, ap } = pg;
+  T.start(at('cyg'));
+  const t = pg.text(), km = (t.match(/horizon is (\S+) km across/) || [])[1];
+  ok(`Cygnus X-1: its horizon across is 2 r+, ${P.sci(2 * ap.model.horizonKm)} km`, km === P.sci(2 * ap.model.horizonKm) && km === '66.6', t);
+  ok('the tide is quoted across the body derive() uses', t.includes(`across a ${P.BODY_M} m body is ${P.sci(ap.model.tidalHg)} g`), t);
+});
+
+/* ---------- P2-1: the idle caption names the curve by the colour that draws it ---------- */
+guard('the curve\'s colour in the idle caption', () => {
+  const pg = page(), { st } = pg, w = PAL.colourWord('curve');
+  st.set(st.viewPatch('telescope'), { instant: true });
+  ok(`thin gas: the curve is named ${w}, as ${PAL.MARKS.curve} draws it`, pg.text().includes(`The ${w} curve is Bardeen's 1973 critical curve`) && !/gold/i.test(pg.text()), pg.text());
+  st.set({ emit: 'thick' }, { instant: true });
+  ok(`the thick disk: the curve is named ${w}`, pg.text().toLowerCase().includes(`${w} curve: bardeen's critical curve`) && !/gold/i.test(pg.text()), pg.text());
+  st.set(st.objectPatch('cygx1', 'telescope'), { instant: true });
+  ok('Cygnus X-1\'s 27.5 deg is written as the card writes it', pg.text().includes('at 27.5 deg'), pg.text());
+  st.set({ emit: 'thick' }, { instant: true });
+  ok('and so with the thick disk', pg.text().includes('at 27.5 deg'), pg.text());
+});
+
+/* ---------- P6-3: the tour's one gold mark, its class and its colour ---------- */
+guard('the focus ring\'s mark', () => {
+  const pg = page(), { T } = pg;
+  pg.points = POINTS;
+  T.start(at('beaming'));
+  const svg = T.focusSvg.innerHTML;
+  ok('the ring carries the class the drive allows gold for, tour-focus', /<circle class="tour-focus"/.test(svg), svg);
+  ok('the ring is drawn in --accretion: the tour\'s stop is what is happening', /stroke="var\(--accretion\)"/.test(svg), svg);
+});
+
+/* ---------- P6-4: anchors are read for the view the state is going to ---------- */
+guard('the anchors of a camera-only transition', () => {
+  const pg = page(), { T, st } = pg;
+  T.start(at('arrive'));
+  const t = performance.now() + 1e6; st.tick(t); st.tick(t);    // the stop has arrived
+  st.set({ rcam: 30 }, { dur: 1000 });                         // a keyboard zoom: the camera alone moves
+  ok('the eased view still differs from the target', st.view().rcam !== st.view(true).rcam);
+  pg.points = POINTS;
+  ok('anchors traced for the target view are live at once', T.anchors() !== null && T.anchors().key === viewKey(st.view(true)), JSON.stringify(T.anchors()));
 });
 
 console.log(fails ? `\n${fails} of ${checks} tour check(s) failed` : `\nall ${checks} tour checks passed`);

@@ -35,21 +35,29 @@ const MUTANTS = [
   ['a stop eases in over the default 1.4 s', `{ src: 'tour', dur: 1700 }`, `{ src: 'tour', dur: 1400 }`],
   ['a stop is set as the visitor\'s change', `{ src: 'tour', dur: 1700 }`, `{ src: 'ui', dur: 1700 }`],
 
-  /* ---- the numbers a caption quotes ---- */
-  ['a megaparsec reads in kiloparsecs', `(pc >= 1e6 ?`, `(pc > 1e6 ?`],
-  ['just below a megaparsec reads in megaparsecs', `(pc >= 1e6 ?`, `(pc >= 9e5 ?`],
-  ['a kiloparsec reads in parsecs', `: pc >= 1e3 ?`, `: pc > 1e3 ?`],
-  ['just below a kiloparsec reads in kiloparsecs', `: pc >= 1e3 ?`, `: pc >= 900 ?`],
-  ['megaparsecs off by a factor of 10', `(pc / 1e6).toPrecision(3)`, `(pc / 1e5).toPrecision(3)`],
+  /* ---- the numbers a caption quotes (the distance's units moved to physics.js parsecs on 2026-11-16) ---- */
   ['outside the telescope view the caption quotes the Measure card\'s shadow', `s.view === 'telescope' ? measurement(s) : null`, `s.view === 'telescopeX' ? measurement(s) : null`],
   ['outside the telescope view the shadow width is taken at 17 deg, not edge-on', `shadowFor(s.a, 90, s.q)`, `shadowFor(s.a, 17, s.q)`],
   ['a custom hole is named M87*', `name: o ? o.name : 'this hole'`, `name: o ? o.name : 'M87*'`],
-  ['a hole with no distance quotes an empty one', `distText(o.distPc) : '--',`, `distText(o.distPc) : '',`],
   ['the caption\'s comparison sentence left out', `eht: compareSentence(cmp, o ? o.name : 'this hole'),`, `eht: '',`],
   ['the scale\'s name left out of the caption', `by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',`, `by: 'its mass and distance',`],
   ['at a = 0.001 the fall ends at the centre', `m.rmin < 5e-7 ?`, `m.rmin < 6e-7 ?`],
   ['at a = Q = 0 the fall ends at the inner horizon', `m.rmin < 5e-7 ?`, `m.rmin < 0 ?`],
   ['a key the state does not have reads "undefined"', `n[k] ?? k`, `n[k]`],
+  /* ---- the numbers of 2026-11-16 (review_s2 P2-2, P2-3, P2-8, P2-1) ---- */
+  ['the ring stop quotes a factor at a charged hole', `ringThin: g == null ? '--'`, `ringThin: g != null ? '--'`],
+  ['the ring stop\'s factor the inverse', `: s3(Math.exp(g)),`, `: s3(Math.exp(-g)),`],
+  ['the ring named white in every colour mode', `ringWord: s.color === 'order' ?`, `ringWord: s.color !== 'orderX' ?`],
+  ['the ring never named by its colour', `ringWord: s.color === 'order' ?`, `ringWord: s.color === 'orderX' ?`],
+  ['the ring named bright where order is shown', `colourWord('order1') : 'bright'`, `'bright' : 'bright'`],
+  ['the angle paired with the width again', `shadowAcross: s3(cmp ? cmp.pred.diamM : ts.mean)`, `shadowAcross: s3(ts.chords.width)`],
+  ['the angle to one decimal', `shadowUas: cmp ? s3(cmp.pred.value) : '--',`, `shadowUas: cmp ? cmp.pred.value.toFixed(1) : '--',`],
+  ['the horizon across given as its radius', `horizonAcrossKm: sci(2 * m.horizonKm)`, `horizonAcrossKm: sci(m.horizonKm)`],
+  ['the body typed', `bodyM: String(BODY_M)`, `bodyM: '1'`],
+  ['the horizon across given as its radius in M', `rhAcross: s3(2 * m.rh)`, `rhAcross: s3(m.rh)`],
+  ['the inclination rounded to whole degrees', `incl: deg(s.incl), ri:`, `incl: s.incl.toFixed(0), ri:`],
+  ['the spin to 2 decimals', `a: spinText(s.a), rhAcross:`, `a: s.a.toFixed(2), rhAcross:`],
+  ['the boost to one decimal', `gmax: an && an.gmax ? s3(Math.pow(an.gmax, 4)) : '--'`, `gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--'`],
 
   /* ---- moving through the tour ---- */
   ['start() with no stop named starts at the second', `start(i = 0) {`, `start(i = 1) {`],

@@ -25,6 +25,11 @@ export function tanHalfV(fovDeg, aspect) {
 
 export function objectOf(s) { return OBJECTS.find((o) => o.id === s.obj) || null; }
 
+/** The body a tide is quoted across, in metres, and the tide the card calls lethal, in g: derive() computes with
+ *  them, and every sentence that names a body or a lethal tide quotes them. */
+export const BODY_M = 2;
+export const TIDE_G = 10;
+
 /** Disk + radii + units for a state. */
 export function derive(s) {
   const a = s.a, q = s.q || 0;
@@ -44,12 +49,12 @@ export function derive(s) {
   const rg = K.SI.rgSun * massSun, tg = K.SI.tgSun * massSun;
   const Tpeak = edd > 1e-9 && obj?.id !== 'primordial' ? K.diskPeakKelvin(massSun, a, edd, base.peak.F, q) : 0;
   const tidalCoefH = 2 / (base.rh ** 3);   // radial stretch in the equatorial plane: 2M/r^3 for any spin
-  const tidalH = tidalCoefH * K.SI.c * K.SI.c / (rg * rg) * 2;
+  const tidalH = tidalCoefH * K.SI.c * K.SI.c / (rg * rg) * BODY_M;
   return {
     ...base, a, q, massSun, distPc, edd, rg, tg, Tpeak, obj,
     thetaG: obj?.hypothetical ? null : K.thetaG(massSun, distPc),
     tidalH, tidalHg: tidalH / K.SI.g0,
-    tide10g: K.tideRadius(a, massSun, 2, 10 * K.SI.g0),
+    tide10g: K.tideRadius(a, massSun, BODY_M, TIDE_G * K.SI.g0),
     iscoPeriod: 2 * Math.PI / K.circular(a, base.ri, q).Omega * tg,
     interiorTauS: base.interiorTau * tg,
     piM: Math.PI * tg,
@@ -83,6 +88,40 @@ export function shadowFor(a, inclDeg, q = 0) {
   return { curve: null, chords: { width: m.width, height: m.height }, mean: 0.5 * (m.width + m.height), traced: true };
 }
 
+/** The shadow's mean diameter for a far observer at 90 deg over the horizon's diameter 2 r+: the Instrument card's
+ *  "x the horizon", and every sentence that says how much wider than the horizon the shadow is (review_s2 P2-4). */
+export function shadowToHorizon(a, q = 0) {
+  return shadowFor(a, 90, q).mean / (2 * K.horizon(a, q));
+}
+
+/** The Lyapunov exponent gamma of the polar photon orbit: each further half-orbit image is e^gamma times thinner
+ *  (Johnson et al. 2020). The number the Measure card's sub-ring row prints as e^-gamma and every sentence about
+ *  the sub-rings quotes (review_s2 P2-2). Kerr only: null for a charged hole, for which no closed form is used. */
+export function ringGamma(a, q = 0) {
+  return q > 0 ? null : K.lyapunov(a, K.polarPhotonOrbit(a));
+}
+
+/** The mass at which a non-spinning hole is as warm as the cosmic background: hbar c^3 / (8 pi G k_B T_CMB), in
+ *  kg and in Moon masses (both constants in kerr.js's SI table). A heavier hole is colder than the background, and
+ *  spin or charge cools a hole further (review_s2 P2-6). */
+export function cmbCrossover() {
+  const kg = K.SI.hbar * K.SI.c ** 3 / (8 * Math.PI * K.SI.G * K.SI.kB * K.SI.Tcmb);
+  return { kg, moons: kg / K.SI.Mmoon, T: K.SI.Tcmb };
+}
+
+/** The share of rest mass hydrogen fusion releases, in percent: four 1H atoms to one 4He atom, from the atomic
+ *  masses in kerr.js's SI table. The guide sets the disk's efficiency against it. */
+export function fusionPercent() {
+  return 100 * (1 - K.SI.uHe4 / (4 * K.SI.uH1));
+}
+
+/** The ergosurface of a Kerr-Newman hole, where g_tt = 0: r = 1 + sqrt(1 - Q^2 - a^2 cos^2 theta), theta in degrees
+ *  from the spin axis. The cross-section draws it and the guide quotes its equatorial radius. */
+export function ergosurface(a, q, thetaDeg) {
+  const c = Math.cos(thetaDeg * Math.PI / 180);
+  return 1 + Math.sqrt(Math.max(0, 1 - q * q - a * a * c * c));
+}
+
 /** Shadow measured by the JS integrator (bisection), far observer. */
 export function integratorShadow(a, inclDeg, q = 0) {
   return memo(`m:${a.toFixed(4)}:${q.toFixed(4)}:${inclDeg.toFixed(2)}`, () => K.measureShadow(a, inclDeg * Math.PI / 180, { q, k: 0.08, iters: 22 }));
@@ -106,21 +145,29 @@ export function predictedUas(diamM, obj) {
  *  - A sigma is computed only between two shadows. A ring of emission is not a shadow (Paper VI: emission
  *    "preferentially from outside the photon ring leads to a 10% offset"), so it is shown beside, never in sigma.
  *  - Errors may be asymmetric: the sigma takes the prediction's error on the side of the measurement.
+ *  - The prediction carries the diameter it was computed from (diamM) and its scale with that scale's errors, so a
+ *    sentence or a table row that prints the angle prints its own chord beside it (review_s2 P2-3, P1-3).
+ *  - A ring carries the offset its paper states and the scale that offset is on (the EHT's own theta_g), so the
+ *    sentence can name both (review_s2 P2-10).
  *  Null for an object with no distance. */
 export function compareShadow(diamM, obj) {
   if (!obj || !obj.distPc) return null;
   const r = obj.ruler;
   const p = r ? null : predictedUas(1, obj);
   const tg = r ? r.thetaG : p.value, up = r ? r.errP : p.err, dn = r ? r.errM : p.err;
-  const pred = { value: diamM * tg, errP: diamM * up, errM: diamM * dn, thetaG: tg, by: r ? r.by : obj.massBy };
+  const pred = { diamM, value: diamM * tg, errP: diamM * up, errM: diamM * dn, thetaG: tg, thetaErrP: up, thetaErrM: dn, by: r ? r.by : obj.massBy };
   const e = obj.eht;
   let shadow = null;
   if (e && e.shadow != null) {
     const d = pred.value - e.shadow;
     shadow = { value: e.shadow, err: e.shadowErr, sigma: d / Math.hypot(d > 0 ? pred.errM : pred.errP, e.shadowErr) };
   }
-  return { pred, shadow, ring: e && e.ring != null ? { value: e.ring, err: e.ringErr } : null };
+  return { pred, shadow, ring: e && e.ring != null ? { value: e.ring, err: e.ringErr, offsetPct: e.ringOffsetPct, scale: obj.thetaGPub?.v } : null };
 }
+
+/** The ruling every place that sets the shadow against the EHT states, as one string: the Measure card's note
+ *  and the model's context quote it (ledger row 2). */
+export const RULING = 'A sigma is set only between two shadows; a ring of emission is a different quantity.';
 
 /** A published value and its error, both with the value's own decimals, as the paper prints them: 48.7 and 7.0,
  *  42 and 3 (a JavaScript number drops the 0 of 7.0). */
@@ -129,11 +176,14 @@ export function published(v, e, pm = '+-') {
   return `${v.toFixed(d)} ${pm} ${e.toFixed(d)}`;
 }
 
-/** The comparison in one sentence: the tour's telescope stop and the guide print this and nothing else. */
+/** The comparison in one sentence: the tour's telescope stop and the guide print this and nothing else. A ring's
+ *  offset is stated on the scale its paper states it on, the EHT's own theta_g, and only when both are given. */
 export function compareSentence(c, name = 'this hole') {
   if (!c || (!c.shadow && !c.ring)) return 'The EHT has not imaged it.';
-  if (c.shadow) return `The EHT inferred a shadow of ${published(c.shadow.value, c.shadow.err)} uas: ${c.shadow.sigma >= 0 ? '+' : ''}${s3(c.shadow.sigma)} sigma from this one.`;
-  return `The EHT measured a ring of emission ${published(c.ring.value, c.ring.err)} uas across, which its models place about 10% outside the photon ring; it published no shadow diameter for ${name}.`;
+  if (c.shadow) return `The EHT inferred a shadow of ${published(c.shadow.value, c.shadow.err)} uas: ${sigmaText(c.shadow.sigma)} from this one.`;
+  const r = c.ring;
+  const where = r.offsetPct != null && r.scale != null ? ` On its own scale, theta_g ${r.scale} uas, its models place the ring about ${r.offsetPct}% outside the photon ring.` : '';
+  return `The EHT measured a ring of emission ${published(r.value, r.err)} uas across.${where} It published no shadow diameter for ${name}.`;
 }
 
 /** The far-observer measurement the Measure card shows and the tour quotes, from the
@@ -183,6 +233,53 @@ export function sci(v, n = 3) {
   }
   return Number(v.toPrecision(n)).toLocaleString('en-US');
 }
+/* ---------------- one format per quantity kind (review_s2 P1-2, P1-4; fix_s2_brief C3) ----------------
+   A length or radius in M, an angle on the sky in uas, a speed in c, a ratio, a percentage: s3. A mass, a
+   temperature, a tide, a distance in km: sci. A time: dur. A sigma: sigmaText. An inclination: deg. A spin:
+   spinText. A distance in parsecs: parsecs. A photon energy: photonEnergy. A number for a machine (the model's
+   context, the CSV): sigNum, never fixed decimals. */
+
+/** A sigma as every place writes it: the sign always (+0.00 for none), 3 significant figures, then the symbol or
+ *  the word asked for: the card writes σ, the sentences and the plate "sigma". */
+export function sigmaText(sigma, sym = 'sigma') {
+  return `${sigma >= 0 ? '+' : ''}${s3(sigma)} ${sym}`;
+}
+
+/** A number for a machine: n significant figures as a Number, so Cygnus X-1's 9.14e-4 uas is not 0. None stays
+ *  null. */
+export function sigNum(v, n = 4) {
+  return v == null || !Number.isFinite(v) ? null : +v.toPrecision(n);
+}
+
+/** An inclination in degrees: one decimal at most (the slider's step is 0.5), none when whole: 17, 27.5. */
+export function deg(v) { return String(+(+v).toFixed(1)); }
+
+/** A spin a/M: three decimals, the slider's step. */
+export function spinText(a) { return (+a).toFixed(3); }
+
+/** A distance in parsecs in its unit: Mpc from a million, kpc from a thousand, 3 significant figures. */
+export function parsecs(pc) {
+  return pc >= 1e6 ? `${(pc / 1e6).toPrecision(3)} Mpc` : pc >= 1e3 ? `${(pc / 1e3).toPrecision(3)} kpc` : `${pc.toPrecision(3)} pc`;
+}
+
+/** A photon energy in eV in its unit: keV from a thousand, 3 significant figures. */
+export function photonEnergy(eV) {
+  return eV >= 1000 ? `${(eV / 1000).toPrecision(3)} keV` : `${eV.toPrecision(3)} eV`;
+}
+
+/* ---------------- the claim tags (review_s2 P2-11; fix_s2_brief C10) ---------------- */
+
+/** A derived value is as strong as its weakest input: REAL only when every input is. */
+export function weakest(...tags) {
+  return tags.every((t) => t === 'REAL') ? 'REAL' : 'ILLUSTRATIVE';
+}
+/** The tags of the state's inputs: the object's own, and ILLUSTRATIVE for everything of a custom or hypothetical
+ *  hole (nothing of it is measured). */
+export function inputTags(obj) {
+  if (!obj || obj.hypothetical) return { mass: 'ILLUSTRATIVE', dist: 'ILLUSTRATIVE', spin: 'ILLUSTRATIVE', edd: 'ILLUSTRATIVE' };
+  return { mass: 'REAL', dist: 'REAL', spin: obj.spinTag, edd: obj.eddTag };
+}
+
 /** Seconds in a readable unit, 3 significant figures. */
 export function dur(sec) {
   if (!Number.isFinite(sec)) return '--';

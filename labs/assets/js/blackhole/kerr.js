@@ -48,6 +48,10 @@ export const SI = {
   LeddPerMsun: 1.2572e31,      // W per solar mass, Eddington luminosity for kappa_es = 0.4 cm^2/g
   uasPerRad: 206264.80624709636e6,
   g0: 9.80665,
+  Tcmb: 2.725,                 // K, the cosmic microwave background (Fixsen 2009, ApJ 707, 916: 2.72548 +- 0.00057)
+  Mmoon: 7.346e22,             // kg, the Moon's mass (NASA Moon fact sheet, 0.07346 x 10^24 kg)
+  uH1: 1.00782503223,          // u, the atomic mass of 1H (AME2020: Wang et al. 2021, Chinese Phys. C 45, 030003)
+  uHe4: 4.00260325413,         // u, the atomic mass of 4He (AME2020)
 };
 SI.rgSun = SI.GMsun / (SI.c * SI.c);       // GM_sun/c^2 = 1476.6 m
 SI.tgSun = SI.GMsun / (SI.c ** 3);         // GM_sun/c^3 = 4.925 us

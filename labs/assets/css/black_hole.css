@@ -8,12 +8,16 @@
    Consumes tokens.css: every colour here is a
    tokens.css variable or a color-mix of one, no colour literals.
    Minimum text size 11 px; panels sit on a dark veil so text
-   holds 4.5:1 over the brightest part of the render.
+   holds 4.5:1 over the brightest part of the render: at 95% of
+   --void, --text-dim is 4.7:1 over white (at 92% it was 4.3:1).
+   Text drawn over the render sits on such a plate too (the top
+   bar's breadcrumb, brand and route pill), so its contrast does
+   not depend on the render (review_s2 P4-1).
    ============================================================ */
 
 :root {
   --bh-panel: color-mix(in srgb, var(--void) 88%, transparent);
-  --bh-panel-solid: color-mix(in srgb, var(--void) 92%, transparent);
+  --bh-panel-solid: color-mix(in srgb, var(--void) 95%, transparent);
   --bh-hair: color-mix(in srgb, var(--horizon) 16%, transparent);
   --bh-hair-2: color-mix(in srgb, var(--horizon) 30%, transparent);
   --bh-wash: color-mix(in srgb, var(--horizon) 8%, transparent);        /* pressed button */
@@ -64,7 +68,11 @@ button, input, select { font: inherit; color: inherit; }
 .bh-back { color: var(--text); text-decoration: none; border: 1px solid var(--bh-hair-2); padding: 7px 12px; font-size: var(--bh-fs-s);
   letter-spacing: .16em; text-transform: uppercase; background: var(--bh-panel); transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease); }
 .bh-back:hover { border-color: var(--horizon); color: var(--text-bright); }
-.bh-label, .bh-brand { font-size: var(--bh-fs-s); letter-spacing: .26em; text-transform: uppercase; color: var(--text-dim); }
+.bh-label, .bh-brand { font-size: var(--bh-fs-s); letter-spacing: .26em; text-transform: uppercase; color: var(--text-dim);
+  background: var(--bh-panel-solid); padding: 6px 10px; }
+/* the model route's pill sits on the render too: the same plate (the pill is ai/route-panel.js's; its colours stay
+   that file's) */
+#bh-route .lbr-pill { background: var(--bh-panel-solid); }
 .bh-label span { color: var(--horizon); }
 .bh-brand b { color: var(--text-bright); font-weight: 600; }
 
@@ -127,10 +135,10 @@ button, input, select { font: inherit; color: inherit; }
 .bh-read dd.ink { color: var(--text); }
 .bh-read .hr { height: 1px; background: var(--bh-hair); margin: 4px 0; }
 .bh-tagr, .bh-tagi { font-size: var(--bh-fs-s); letter-spacing: 0; padding: 0 3px; line-height: 1.2; border: 1px solid var(--bh-hair-2); color: var(--horizon); margin-left: 6px; }
-.bh-tagi { color: var(--text-dim); border-style: dashed; }
+.bh-tagi { color: var(--text); border-style: dashed; }   /* one ink step above --text-dim: 4.47:1 was marginal (review_s2 P4-4) */
 .bh-sig { font-variant-numeric: tabular-nums; }
 .bh-sig.good { color: var(--horizon-soft); }
-.bh-sig.warn { color: var(--warn); }
+.bh-sig.warn { color: var(--danger); }   /* a failure: --warn sits within the gold rule's tolerance (palette.js) */
 
 /* diagrams */
 .bh-svg { display: block; width: 100%; height: auto; }
@@ -150,6 +158,7 @@ button, input, select { font: inherit; color: inherit; }
 .bh-legend i { display: inline-block; width: 14px; height: 1px; vertical-align: middle; margin-right: 5px; background: var(--horizon); }
 .bh-legend i.s { background: var(--text-bright); }
 .bh-legend i.d { background: none; border-top: 1px dashed var(--horizon-dim); }
+.bh-legend i.sw { width: 9px; height: 9px; }   /* a colour mode's swatch: the token the render draws the mark in */
 
 /* ask */
 .bh-ask { display: flex; gap: 6px; }
@@ -158,7 +167,7 @@ button, input, select { font: inherit; color: inherit; }
 .bh-answer { font-size: var(--bh-fs); line-height: 1.55; color: var(--text); margin-top: 8px; white-space: pre-wrap; }
 .bh-answer .src { display: block; margin-top: 6px; color: var(--text-dim); font-size: var(--bh-fs-s); }
 .bh-answer .chk { color: var(--horizon-soft); }
-.bh-answer .bad { color: var(--warn); }
+.bh-answer .bad { color: var(--danger); }
 .bh-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
 .bh-chip { cursor: pointer; background: transparent; border: 1px dashed var(--bh-hair-2); color: var(--text-dim); padding: 4px 7px; font-size: var(--bh-fs-s); }
 .bh-chip:hover { color: var(--text-bright); border-color: var(--horizon-dim); }
@@ -195,7 +204,7 @@ button, input, select { font: inherit; color: inherit; }
 .bh-foot .src { flex: none; min-height: 28px; padding: 2px 10px; background: var(--bh-panel-solid); }
 .bh-foot .tags b { color: var(--horizon); font-weight: 500; }
 .bh-foot .tags b.i { color: var(--text-dim); }
-.bh-foot .perf { flex: none; font-variant-numeric: tabular-nums; background: var(--bh-panel); padding: 5px 9px; border: 1px solid var(--bh-hair); white-space: nowrap; }
+.bh-foot .perf { flex: none; font-variant-numeric: tabular-nums; background: var(--bh-panel-solid); padding: 5px 9px; border: 1px solid var(--bh-hair); white-space: nowrap; }
 .bh-foot .perf button { background: none; border: 0; color: var(--horizon); cursor: pointer; padding: 0 0 0 6px; font-size: var(--bh-fs-s); min-height: 24px; }
 .bh-sources { position: fixed; z-index: 40; left: 50%; bottom: 60px; transform: translateX(-50%); width: min(760px, calc(100vw - 32px)); max-height: 64vh; overflow: auto;
   background: var(--bh-panel-solid); border: 1px solid var(--bh-hair-2); padding: 14px 16px; font-size: var(--bh-fs); line-height: 1.55; }
@@ -234,10 +243,15 @@ button, input, select { font: inherit; color: inherit; }
 @media (max-width: 900px) {
   :root { --bh-pad: 14px; }
   .bp { display: none; }
-  .bh-bar { padding: 12px var(--bh-pad) 0; gap: 8px; overflow: hidden; }
+  /* nothing here clips: the route's panel drops out of the bar, so neither the bar nor the route's host may hide
+     what overflows them (review_s2 P4-2); a long route name wraps inside the pill instead */
+  .bh-bar { padding: 12px var(--bh-pad) 0; gap: 8px; }
   .bh-label, .bh-brand { display: none; }
   .bh-bar-r { min-width: 0; }
-  #bh-route { display: block; max-width: calc(100vw - 120px); overflow: hidden; }
+  #bh-route { display: block; max-width: calc(100vw - 120px); }
+  #bh-route .lbr-pill { max-width: 100%; text-align: left; line-height: 1.25; }
+  #bh-route .lbr-label { white-space: normal; min-width: 0; }
+  #bh-route .lbr-panel input, #bh-route .lbr-row button { min-height: 44px; }
   .bh-stage { position: fixed; left: 0; right: 0; bottom: 0; top: auto; height: auto; z-index: 25; }
   .bh-left, .bh-right { position: static; width: auto; overflow: visible; padding: 0; }
   .bh-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; max-height: 72vh; overflow-y: auto; overscroll-behavior: contain;
