@@ -116,6 +116,8 @@ sub, sup { font-size: .72em; line-height: 0; }
   .tab th, .tab td { border: 0; padding: 2px 0; white-space: normal; }
   .tab td { display: grid; grid-template-columns: 42% minmax(0, 1fr); column-gap: 10px; }
   .tab td::before { content: attr(data-label); color: var(--text-dim); font-size: .72rem; line-height: 1.6; }
+  /* a finger's target: the links back and the footer's link to the survey are 44 px tall on a phone */
+  .back, .foot .back.quiet { display: inline-flex; align-items: center; min-height: 44px; }
 }
 
 /* the footer's link to the survey: a link in words, not a boxed label (the bar above keeps the shared chrome) */

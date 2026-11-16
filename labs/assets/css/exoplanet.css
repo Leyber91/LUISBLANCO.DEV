@@ -123,7 +123,7 @@ a.ref:hover { color: var(--text-bright); }
 .render { margin-top: 3px; font-size: 10.5px; color: var(--text-dim); }
 /* the air of a rocky world (air.js), under the surface it is drawn as: one short line, then its scenarios and sources
    in a disclosure; the word "observed" is the one gold of the line (an observation), a disfavoured scenario dotted */
-#ret-render .ret-air { display: block; margin-top: 3px; max-width: 46ch; color: var(--text); line-height: 1.45; }
+#ret-render .ret-air { display: block; margin-top: 3px; max-width: 60ch; color: var(--text); line-height: 1.45; }
 #ret-render a { color: var(--text-bright); text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-bright); }
 #ret-render a:hover, #ret-render a:focus-visible { text-decoration-color: var(--horizon); }
 #ret-render .ret-more { display: block; max-width: 52ch; margin-top: 2px; }
