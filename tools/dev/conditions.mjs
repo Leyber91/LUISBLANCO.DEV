@@ -1,42 +1,49 @@
 /* ============================================================
-   Which conditions of a module no mutant breaks.
+   Which conditions of a module no mutant changes.
 
      node tools/dev/conditions.mjs <module.js> <list> [<list> ...]
      node tools/dev/conditions.mjs selftest
 
-   A <list> is a mutants test file that imports runMutants from
-   a mutants.mjs (labs/assets/js/exoplanet/tests/mutants.mjs), or
-   a gate's JSON list (tools/mutants/<tool>.json). Several lists
-   for one module are read as one. A test file is run with its
-   runner replaced by a stub that only records the entries, so
-   nothing is copied or broken. A file that does not import
-   runMutants from a mutants.mjs is refused before it runs.
+   A <list> is a mutants test file (*.mutants.test.mjs) that
+   imports runMutants from a mutants.mjs, or a gate's JSON list
+   (tools/mutants/<tool>.json). Several lists for one module are
+   read as one. A test file is run with its runner replaced by a
+   stub that only records the entries, so nothing is copied or
+   broken; any other file is refused before it runs.
 
    A condition is a comparison (< <= > >= == != === !==), a
-   default (?? ||, and their assignments) or a clamp
-   (Math.max, Math.min). Conditions inside a function named
-   selftest are a gate's own checks and are left out.
+   default or a boolean chain (?? ||, and their assignments), or
+   a clamp (Math.max, Math.min). Conditions inside a function
+   named selftest are a gate's own checks and are left out.
 
-   An entry breaks a condition when what it changes touches the
-   operator, or one of the two operands beside it, or, for a
-   clamp, the word Math.max or Math.min or one of its own
-   arguments (not a clamp nested inside it). A change touches a
-   span when they share a character; an insertion touches it
-   when it sits inside it or at either end.
-   An entry also breaks a condition by moving the value of a
-   constant the condition names, when that constant is declared
-   once, at the top level, is never a parameter, and is named by
-   no other condition: one moved constant shared by several
-   conditions does not show that each of them is tested.
-   An exported function counts as broken when an entry changes
-   something inside it.
+   Each entry is compared with the module token by token, and
+   each change it makes (a run of removed or added tokens) is
+   judged on its own:
+   - Any condition whose operator it touches is changed.
+   - A comparison is changed by a change inside one of its two
+     operands (a name with its dots, calls and indexes; a
+     string; a number with its sign), or between an operand and
+     the operator, or just outside an operand when what it adds
+     or removes there binds tighter than the comparison
+     (p > lim + 1 changes it; p > lim && q does not).
+   - A default (x ?? 1, x || 'none') is changed by a change to
+     its value when that value is a literal. A boolean chain
+     (a || b) is changed only through its operator.
+   - A clamp is changed by a change inside its brackets that is
+     not inside a condition nested there, or to its word.
+   - A comparison or clamp is also changed when the value of a
+     constant it names is changed, if that constant is declared
+     at the top level and its name occurs exactly twice in the
+     module: once declared, once in this condition. A constant
+     used anywhere else proves nothing about this condition.
+   An exported function is changed by any change inside it.
 
-   A condition no entry can break without changing nothing (a
+   A condition no entry can change without changing nothing (a
    bound only ever met by values on one side) is declared with a
    comment containing "equivalent:" and the reason, on its line.
    The comment declares every condition on that line.
 
-   Exit 0: every condition and export is broken or declared.
+   Exit 0: every condition and export is changed or declared.
    Exit 1: a gap, or an entry whose text is not in the module
    exactly once. Exit 2: usage. Exit 3: the tool could not read
    a list.
@@ -47,9 +54,10 @@
    conditions again in pull requests 41 and 42 on 2026-11-16.
 
    What it cannot see: a bare truthy test (if (x)), a condition
-   built at run time, export default of a value, export { }
-   lists, and whether a test checks just inside and just outside
-   each bound. Those are still read by hand.
+   built at run time, export { } lists, whether an entry that
+   changes a condition loosens it rather than tightening it, and
+   whether a test checks just inside and just outside each bound.
+   Those are still read by hand.
    ============================================================ */
 
 import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync, existsSync } from 'node:fs';
@@ -210,81 +218,87 @@ function selftestSpans(code) {
   return spans;
 }
 
-/* Every condition in the source: {at, end, line, op, near: [[start, end), ...], names: operand identifiers}. */
+/* Every condition in the source: {at, end, line, op, kind, eq, left, right, literal, inner, own, names, declared}.
+   kind is cmp, default or clamp; left and right are a comparison's or default's operands as [start, end);
+   inner is a clamp's inside of the brackets; own is the stretch a change must stay inside to belong to this
+   condition and not to one around it. */
 export function conditions(src) {
   const code = blank(src);
   const skip = selftestSpans(code);
   const found = [];
   for (const m of code.matchAll(OPERATOR)) {
-    const at = m.index, op = m[0];
+    const at = m.index, op = m[0], end = at + op.length;
     if (skip.some(([a, b]) => at >= a && at < b)) continue;
-    let near, names = [];
+    const line = lineAt(src, at), text = lineText(src, line), cut = text.search(/\/\/|\/\*/);
+    const c = { at, end, line, op, declared: cut >= 0 && /equivalent:/.test(text.slice(cut)), names: [] };
     if (op.startsWith('Math.')) {
-      const open = at + op.length - 1, close = closeOf(code, open);
-      near = [[at, open + 1]];
+      const open = end - 1, close = closeOf(code, open);
+      Object.assign(c, { kind: 'clamp', inner: [open + 1, close - 1], own: [at, close] });
       let depth = 0, s = open + 1;
       for (let k = open + 1; k < close; k++) {
         const ch = code[k];
         if ('([{'.includes(ch)) depth++;
         else if (')]}'.includes(ch)) depth--;
         if ((ch === ',' && depth === 0) || k === close - 1) {
-          const e = ch === ',' ? k : k;
-          const text = code.slice(s, e).trim();
-          if (text && !/^Math\.(?:max|min)\(/.test(text)) {
-            const a0 = s + code.slice(s, e).indexOf(text);
-            near.push([a0, a0 + text.length]);
-            if (isName(text.replace(/^-/, ''))) names.push(text.replace(/^-/, ''));
-          }
+          const arg = code.slice(s, ch === ',' ? k : k).trim().replace(/^-/, '');
+          if (isName(arg)) c.names.push(arg);
           s = k + 1;
         }
       }
     } else {
-      const l = operandLeft(code, at), r = operandRight(code, at + op.length);
-      near = [[l.start, l.end], [r.start, r.end]];
-      names = [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);
+      const l = operandLeft(code, at), r = operandRight(code, end);
+      const isDefault = /^(\?\?|\|\|)/.test(op);
+      const literal = isDefault && /^(['"`]|-?[0-9.]|true\b|false\b|null\b|undefined\b|\[|\{)/.test(r.text);
+      Object.assign(c, {
+        kind: isDefault ? 'default' : 'cmp', eq: /^[=!]=/.test(op), literal,
+        left: [l.start, l.end], right: [r.start, r.end],
+        own: isDefault ? [at, literal ? r.end : end] : [l.start, r.end],
+      });
+      if (!isDefault) c.names = [l.text, r.text.replace(/^[-+!]+/, '')].filter(isName);
     }
-    const line = lineAt(src, at);
-    found.push({ at, end: at + op.length, line, op, near, names, declared: /equivalent:/.test(lineText(src, line).slice(lineText(src, line).search(/\/\/|\/\*/) >= 0 ? lineText(src, line).search(/\/\/|\/\*/) : Infinity)) });
+    found.push(c);
   }
   return found;
 }
 
-/* Constants a moved value may stand for: declared once at the top level (const, let or var at the start of a
-   line, comma declarations included), never declared again and never a parameter. {name: [start, end) of its
-   value}. */
+/* Constants a changed value may stand for: declared at the top level (brace depth 0), with the [start, end) of
+   each one's value. Comma declarations are read. */
 export function constantsOf(src) {
   const code = blank(src);
-  const decl = new Map(), count = new Map();
-  for (const m of code.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b/g)) count.set(m[1], (count.get(m[1]) || 0) + 1);
-  for (const m of code.matchAll(/^(?:export\s+)?(?:const|let|var)\s+/gm)) {
-    let k = m.index + m[0].length, depth = 0, s = k;
-    const end = (() => { for (let j = k; j < code.length; j++) { const ch = code[j]; if ('([{'.includes(ch)) depth++; else if (')]}'.includes(ch)) depth--; else if (ch === ';' && depth === 0) return j; else if (ch === '\n' && depth === 0 && !/[,=+\-*/?:|&(]\s*$/.test(code.slice(s, j)) && !/^\s*[,.?:|&+\-*/]/.test(code.slice(j + 1, j + 20))) return j; } return code.length; })();
-    depth = 0;
-    const parts = [];
-    for (let j = k; j <= end; j++) {
+  const depthAt = new Int32Array(code.length + 1);
+  for (let k = 0, d = 0; k < code.length; k++) { if (code[k] === '{') d++; else if (code[k] === '}') d--; depthAt[k + 1] = d; }
+  const out = new Map();
+  for (const m of code.matchAll(/(?:^|[;\n])\s*(?:export\s+)?(?:const|let|var)\s+/g)) {
+    const k0 = m.index + m[0].length;
+    if (depthAt[k0] !== 0) continue;
+    let depth = 0, end = code.length;
+    for (let j = k0; j < code.length; j++) {
       const ch = code[j];
       if ('([{'.includes(ch)) depth++;
       else if (')]}'.includes(ch)) depth--;
-      if ((ch === ',' && depth === 0) || j === end) { parts.push([s, j]); s = j + 1; }
+      else if (depth === 0 && ch === ';') { end = j; break; }
+      else if (depth === 0 && ch === '\n' && !/[,=+\-*/?:|&(]\s*$/.test(code.slice(k0, j)) && !/^\s*[,.?:|&+\-*/]/.test(code.slice(j + 1, j + 20))) { end = j; break; }
     }
-    for (const [a, b] of parts) {
-      const mm = /^\s*([A-Za-z_$][\w$]*)\s*=(?![=>])/.exec(code.slice(a, b));
-      if (!mm) continue;
-      const v0 = a + mm[0].length;
-      decl.set(mm[1], [v0, b]);
-      if (!count.has(mm[1])) count.set(mm[1], 1);        // a comma declarator: counted here
-      else if (code.slice(a, b).trim() !== code.slice(m.index + m[0].length, b).trim()) count.set(mm[1], count.get(mm[1]) + 1);
+    depth = 0;
+    let s = k0;
+    for (let j = k0; j <= end; j++) {
+      const ch = code[j];
+      if ('([{'.includes(ch)) depth++;
+      else if (')]}'.includes(ch)) depth--;
+      if ((ch === ',' && depth === 0) || j === end) {
+        const mm = /^\s*([A-Za-z_$][\w$]*)\s*=(?![=>])\s*/.exec(code.slice(s, j));
+        if (mm) out.set(mm[1], [s + mm[0].length, j]);
+        s = j + 1;
+      }
     }
   }
-  const params = new Set();
-  for (const m of code.matchAll(/function\s*[\w$]*\s*\(/g)) for (const p of code.slice(m.index + m[0].length, closeOf(code, m.index + m[0].length - 1) - 1).match(/[A-Za-z_$][\w$]*/g) || []) params.add(p);
-  for (const m of code.matchAll(/\(([^()]*)\)\s*=>/g)) for (const p of m[1].match(/[A-Za-z_$][\w$]*/g) || []) params.add(p);
-  for (const m of code.matchAll(/([A-Za-z_$][\w$]*)\s*=>/g)) params.add(m[1]);
-  for (const m of code.matchAll(/\b(?:const|let|var)\s*[{[]([^}\]]*)[}\]]/g)) for (const p of m[1].match(/[A-Za-z_$][\w$]*/g) || []) params.add(p);
-  for (const m of code.matchAll(/\bcatch\s*\(\s*([A-Za-z_$][\w$]*)/g)) params.add(m[1]);
-  const out = new Map();
-  for (const [name, span] of decl) if (count.get(name) === 1 && !params.has(name)) out.set(name, span);
   return out;
+}
+
+/* How many times a name occurs in the code, not as a property (a.name) and not inside strings or comments. */
+export function occurrences(src, name) {
+  const code = blank(src);
+  return [...code.matchAll(new RegExp(`(?<![\\w$.])${name.replace(/\$/g, '\\$')}(?![\\w$])`, 'g'))].length;
 }
 
 /* Exported functions and their bodies: {name, start, end, line}. */
@@ -322,37 +336,104 @@ export function exportsOf(src) {
   return out;
 }
 
-/* Where each entry changes the source: {name, edit: [start, end) of what changes}, or {name, missing: true} when
-   its text is not in the source exactly once. The text the entry keeps at either end is not part of the change. */
+/* The changes one entry makes, found by comparing its two texts token by token: [{a, b, ins}], where [a, b) is
+   what it removes (positions in from) and ins what it adds there. A change of spaces alone is no change.
+   A pure removal or insertion that could sit at several places (removing "x == null || " from
+   "x == null || x[k] == null" reads the same as removing " == null || x") is slid to where it starts on a word
+   and ends on a space, so it lands on the tokens a person would say were removed. */
+const TOKEN = /\s+|[A-Za-z_$][\w$]*|\d[\w.]*|===|!==|\*\*=?|\?\?=?|\|\|=?|&&=?|\?\.|=>|<<=?|>>>?=?|<=|>=|==|!=|\+\+|--|\.\.\.|[\s\S]/g;
+const neat = (run) => (run.length && !/^\s/.test(run[0]) ? 1 : 0) + (run.length && /^\s/.test(run[run.length - 1]) ? 1 : 0);
+export function changes(from, to) {
+  const A = [...from.matchAll(TOKEN)].map((x) => [x[0], x.index]), B = [...to.matchAll(TOKEN)].map((x) => x[0]);
+  const T = A.map((t) => t[0]);
+  const at = (k) => (k < A.length ? A[k][1] : from.length);
+  let p = 0; while (p < A.length && p < B.length && T[p] === B[p]) p++;
+  let q = 0; while (q < A.length - p && q < B.length - p && T[A.length - 1 - q] === B[B.length - 1 - q]) q++;
+  const a = T.slice(p, A.length - q), b = B.slice(p, B.length - q);
+  const ops = [];                                  // {i, j, ins: [tokens]}: tokens [i, j) of from replaced by ins
+  if (a.length * b.length > 4e6 || !a.length || !b.length) {
+    if (a.length || b.length) ops.push({ i: p, j: A.length - q, ins: b });
+  } else {
+    const n = a.length, m = b.length, W = m + 1, L = new Int32Array((n + 1) * W);
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i * W + j] = a[i] === b[j] ? L[(i + 1) * W + j + 1] + 1 : Math.max(L[(i + 1) * W + j], L[i * W + j + 1]);
+    let i = 0, j = 0, cur = null;
+    while (i < n || j < m) {
+      if (i < n && j < m && a[i] === b[j]) { if (cur) ops.push(cur); cur = null; i++; j++; }
+      else if (j < m && (i === n || L[i * W + j + 1] >= L[(i + 1) * W + j])) { cur ??= { i: p + i, j: p + i, ins: [] }; cur.ins.push(b[j]); j++; }
+      else { cur ??= { i: p + i, j: p + i, ins: [] }; cur.j = p + i + 1; i++; }
+    }
+    if (cur) ops.push(cur);
+  }
+  for (const o of ops) {
+    if (!o.ins.length) {                           // a pure removal: slide it over equal tokens
+      let i = o.i, j = o.j, best = { i, j, s: neat(T.slice(i, j)) };
+      while (i > 0 && T[i - 1] === T[j - 1]) { i--; j--; const s = neat(T.slice(i, j)); if (s >= best.s) best = { i, j, s }; }
+      i = o.i; j = o.j;
+      while (j < T.length && T[i] === T[j]) { i++; j++; const s = neat(T.slice(i, j)); if (s > best.s) best = { i, j, s }; }
+      o.i = best.i; o.j = best.j;
+    } else if (o.i === o.j) {                      // a pure insertion: slide it the same way
+      let k = o.i, run = o.ins.slice(), best = { k, run, s: neat(run) };
+      while (k > 0 && T[k - 1] === run[run.length - 1]) { run = [run[run.length - 1], ...run.slice(0, -1)]; k--; const s = neat(run); if (s >= best.s) best = { k, run, s }; }
+      k = o.i; run = o.ins.slice();
+      while (k < T.length && T[k] === run[0]) { run = [...run.slice(1), run[0]]; k++; const s = neat(run); if (s > best.s) best = { k, run, s }; }
+      o.i = o.j = best.k; o.ins = best.run;
+    }
+  }
+  return ops.map((o) => ({ a: at(o.i), b: at(o.j), ins: o.ins.join('') })).filter((c) => from.slice(c.a, c.b).trim() || c.ins.trim());
+}
+
+/* Where each entry changes the source: {name, changes: [{a, b, ins, del}]} in the source's positions, or
+   {name, missing: true} when its text is not in the source exactly once. */
 export function edits(src, mutants) {
   return mutants.map(({ name, from, to }) => {
     const i = from ? src.indexOf(from) : -1;
     if (i < 0 || src.indexOf(from, i + 1) >= 0) return { name, missing: true };
-    let a = 0; while (a < from.length && a < to.length && from[a] === to[a]) a++;
-    let b = 0; while (b < from.length - a && b < to.length - a && from[from.length - 1 - b] === to[to.length - 1 - b]) b++;
-    return { name, edit: [i + a, Math.max(i + a, i + from.length - b)] };
+    return { name, changes: changes(from, to).map((c) => ({ a: i + c.a, b: i + c.b, ins: c.ins, del: from.slice(c.a, c.b) })) };
   });
 }
 
-/* A change touches a span when they share a character; an insertion (an empty change) when it sits inside the
-   span or at either end. */
-export const touches = ([a, b], [c, d]) => (a === b ? a >= c && a <= d : a < d && c < b);
+/* A removal overlaps a span when they share a character; an insertion lies in it when it sits strictly inside. */
+const overlaps = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : c.a < e && s < c.b);
+const within = (c, [s, e]) => (c.a === c.b ? s < c.a && c.a < e : s <= c.a && c.b <= e);
+/* What binds tighter than a comparison when it follows or precedes an operand; an equality also yields to < and >. */
+const TIGHT_AFTER = /^(?:\*\*|[*/%+\-.([]|\?\.)/, REL_AFTER = /^(?:<=?|>=?|instanceof\b|in\b)/;
+const TIGHT_BEFORE = /(?:\*\*|[*/%+\-!~.([]|\?\.|\btypeof|\bvoid|\bawait|\bnew)$/, REL_BEFORE = /(?:<=?|>=?|\binstanceof|\bin)$/;
+const LOOSE_AFTER_DEFAULT = /^(?:\|\||\?\?|\?(?!\.)|,|\)|\]|\}|;|:)/;
 
-/* The report: every condition and export with the entries that break it. */
+/* Whether one change changes one condition, by the rules in the header. */
+export function changesCondition(c, ch, all) {
+  if (overlaps(ch, [c.at, c.end])) return true;
+  const added = ch.ins.trim(), removed = ch.del.trim();
+  if (c.kind === 'clamp') {
+    if (!within(ch, [c.inner[0] - 1, c.inner[1] + 1]) && !(ch.a === ch.b && (ch.a === c.inner[0] || ch.a === c.inner[1]))) return false;
+    return !all.some((o) => o !== c && o.own[0] >= c.inner[0] && o.own[1] <= c.inner[1] && within(ch, o.own));
+  }
+  const [l0, l1] = c.left, [r0, r1] = c.right;
+  if (c.kind === 'default') {
+    if (!c.literal) return false;
+    if (overlaps(ch, c.right) || within(ch, c.right)) return true;
+    if (ch.a >= c.end && ch.b <= r0) return true;
+    return ch.a === r1 && [added, removed].some((t) => t && !LOOSE_AFTER_DEFAULT.test(t));
+  }
+  if (overlaps(ch, c.left) || overlaps(ch, c.right) || within(ch, c.left) || within(ch, c.right)) return true;
+  if ((ch.a >= l1 && ch.b <= c.at) || (ch.a >= c.end && ch.b <= r0)) return true;
+  if (ch.b === l0 && [added, removed].some((t) => t && (TIGHT_BEFORE.test(t) || (c.eq && REL_BEFORE.test(t))))) return true;
+  if (ch.a === r1 && [added, removed].some((t) => t && (TIGHT_AFTER.test(t) || (c.eq && REL_AFTER.test(t))))) return true;
+  return false;
+}
+
+/* The report: every condition and export with the entries that change it. */
 export function coverage(src, mutants) {
   const all = edits(src, mutants), es = all.filter((e) => !e.missing);
   const conds = conditions(src);
   const consts = constantsOf(src);
-  const uses = new Map();
-  for (const c of conds) for (const nm of new Set(c.names)) uses.set(nm, (uses.get(nm) || 0) + 1);
   const out = conds.map((c) => {
-    const spans = [[c.at, c.end], ...c.near];
-    const own = c.names.filter((nm) => consts.has(nm) && uses.get(nm) === 1).map((nm) => consts.get(nm));
-    const by = es.filter((e) => spans.some((s) => touches(e.edit, s)) || own.some((s) => touches(e.edit, s)));
+    const values = c.names.filter((nm) => consts.has(nm) && occurrences(src, nm) === 2).map((nm) => consts.get(nm));
+    const by = es.filter((e) => e.changes.some((ch) => changesCondition(c, ch, conds) || values.some((v) => overlaps(ch, v) || (ch.a === ch.b && v[0] <= ch.a && ch.a <= v[1]))));
     return { ...c, by: by.map((e) => e.name), status: c.declared ? 'declared' : by.length ? 'broken' : 'never broken' };
   });
   const exps = exportsOf(src).filter((x) => x.name !== 'selftest').map((x) => {
-    const by = es.filter((e) => touches(e.edit, [x.start, x.end]));
+    const by = es.filter((e) => e.changes.some((ch) => overlaps(ch, [x.start, x.end]) || (ch.a === ch.b && x.start <= ch.a && ch.a <= x.end)));
     return { ...x, by: by.map((e) => e.name), status: by.length ? 'broken' : 'never broken' };
   });
   return { conditions: out, exports: exps, stale: all.filter((e) => e.missing).map((e) => e.name) };
@@ -362,8 +443,10 @@ export function coverage(src, mutants) {
 export function readList(listPath, modulePath) {
   if (listPath.endsWith('.json')) return JSON.parse(readFileSync(listPath, 'utf8').replace(/^﻿/, '')).map((m) => ({ name: m.name, from: m.from, to: m.to }));
   const text = readFileSync(listPath, 'utf8');
-  if (!/import\s*\{[^}]*\brunMutants\b[^}]*\}\s*from\s*['"][^'"]*\bmutants\.mjs['"]/.test(text)) {
-    throw new Error(`${listPath} does not import runMutants from a mutants.mjs, so its entries cannot be read without running it`);
+  const imp = /import\s*\{[^}]*\brunMutants\b[^}]*\}\s*from\s*(['"])/.exec(blank(text));
+  const spec = imp ? text.slice(imp.index + imp[0].length, text.indexOf(imp[1], imp.index + imp[0].length)) : '';
+  if (!/\.mutants\d*\.test\.mjs$/.test(listPath) || !/(^|\/)mutants\.mjs$/.test(spec)) {
+    throw new Error(`${listPath} is not a *.mutants.test.mjs that imports runMutants from a mutants.mjs, so its entries cannot be read without running it`);
   }
   const dir = mkdtempSync(join(tmpdir(), 'conditions-'));
   try {
@@ -393,9 +476,9 @@ function report(modulePath, listPaths) {
   const lost = cov.exports.filter((x) => x.status === 'never broken');
   const declared = cov.conditions.filter((c) => c.status === 'declared').length;
   const short = (t) => t.trim().replace(/\s+/g, ' ').slice(0, 90);
-  console.log(`${modulePath}: ${list.length} entries; ${cov.conditions.length} conditions, ${cov.conditions.length - gaps.length - declared} broken, ${declared} declared, ${gaps.length} never broken; ${cov.exports.length} exports, ${cov.exports.length - lost.length} broken; ${cov.stale.length} stale`);
-  for (const c of gaps) console.log(`  never broken  line ${c.line}  ${c.op}  ${short(lineText(src, c.line))}`);
-  for (const x of lost) console.log(`  export never broken  line ${x.line}  ${x.name}`);
+  console.log(`${modulePath}: ${list.length} entries; ${cov.conditions.length} conditions, ${cov.conditions.length - gaps.length - declared} changed, ${declared} declared, ${gaps.length} never changed; ${cov.exports.length} exports, ${cov.exports.length - lost.length} changed; ${cov.stale.length} stale`);
+  for (const c of gaps) console.log(`  never changed  line ${c.line}  ${c.op}  ${short(lineText(src, c.line))}`);
+  for (const x of lost) console.log(`  export never changed  line ${x.line}  ${x.name}`);
   for (const s of cov.stale) console.log(`  stale entry (text not in the module exactly once)  ${s}`);
   return gaps.length || lost.length || cov.stale.length ? 1 : 0;
 }
@@ -428,94 +511,127 @@ function selftest() {
   yes('a nested template keeps counting after it closes', ops('const t = `x ${`y ${a > 1}`} z`; if (b <= 2) y();').join(' ') === '> <=');
   yes('a line number is right', conditions('a = 1;\nb = 2;\nif (c >= 3) d();').map((c) => c.line).join() === '3');
   yes('a selftest function\'s own checks are left out', ops('function rule(a) { return a < 1; }\nfunction selftest() { ok(rule(0) === true); }\n').join() === '<');
-
-  // the operands beside an operator
-  const near = (s) => conditions(s)[0].near.map(([a, b]) => s.slice(a, b));
-  yes('a string is an operand', near("if (k.w === 'around') x();").join('|') === "k.w|'around'");
-  yes('an exponent number is one operand', near('if (e < 1e-3) x();').join('|') === 'e|1e-3');
-  yes('a negative bound is an operand', near('if (t > -5) x();').join('|') === 't|-5');
-  yes('a string on the left is an operand', near("if ('a' === k) x();").join('|') === "'a'|k");
   yes('a condition just past a selftest\'s closing brace is counted', ops('function selftest() { ok(); }<1').join() === '<');
-  yes('a call and an index are part of the operand', near('if (f(a)[0] >= g.h(b)) x();').join('|') === 'f(a)[0]|g.h(b)');
-  yes('an exponent number on the left is one operand', near('if (1e-3 < e) x();').join('|') === '1e-3|e');
 
-  // what counts as broken: the operator and its operands
+  // the operands
+  const opnd = (s) => { const c = conditions(s)[0]; return [c.left, c.right].map(([a, b]) => s.slice(a, b)).join('|'); };
+  yes('a string is an operand', opnd("if (k.w === 'around') x();") === "k.w|'around'");
+  yes('a string on the left is an operand', opnd("if ('a' === k) x();") === "'a'|k");
+  yes('an exponent number is one operand', opnd('if (e < 1e-3) x();') === 'e|1e-3');
+  yes('an exponent number on the left is one operand', opnd('if (1e-3 < e) x();') === '1e-3|e');
+  yes('a negative bound is an operand', opnd('if (t > -5) x();') === 't|-5');
+  yes('a call and an index are part of the operand', opnd('if (f(a)[0] >= g.h(b)) x();') === 'f(a)[0]|g.h(b)');
+  yes('a negation and an optional chain on the right are part of the operand', opnd('if (a === !b) x();') === 'a|!b' && opnd('if (a > b?.c) x();') === 'a|b?.c');
+
+  // the changes an entry makes
+  const ch = (f, t) => changes(f, t).map((c) => `${c.a},${c.b},${c.ins}`).join(';');
+  yes('only the changed token is the change', ch('if (a < 10) x', 'if (a < 11) x') === '8,10,11');
+  yes('a change at both ends is two changes', ch('f(x)', '[...new Set(f(x))]') === '0,0,[...new Set(;4,4,)]');
+  yes('a change of spaces alone is no change', ch('a<1', 'a < 1') === '');
+  const rm = changes('a || b === 1 || c', 'a || c');
+  yes('a removal is one change with nothing added, taking one operator', rm.length === 1 && rm[0].ins === '' && ['b === 1 ||', '|| b === 1'].includes('a || b === 1 || c'.slice(rm[0].a, rm[0].b).trim()));
+  yes('a removal that could sit in two places lands on whole words', ch('x == null || x[k] == null', 'x[k] == null') === '0,13,');
+  yes('an insertion that could sit in two places lands on whole words', ch('x[k] == null', 'x == null || x[k] == null') === '0,0,x == null || ');
+
+  // a comparison: what changes it
   const SRC = 'export function clamp(p, lim) {\n  if (p > lim) return lim;\n  return Math.max(0, p);\n}\n';
-  yes('no entries: every condition never broken', st(SRC, []) === 'never broken | never broken');
-  yes('an entry that edits the operator breaks it', st(SRC, [m('a', 'p > lim', 'p >= lim')]).startsWith('broken'));
-  yes('an entry that edits an operand breaks it', st(SRC, [m('a', 'if (p > lim)', 'if (p > 2 * lim)')]).startsWith('broken'));
-  yes('an entry that only adds to the bound breaks it', st(SRC, [m('a', 'p > lim)', 'p > lim + 1)')]).startsWith('broken'));
-  yes('an entry that edits only the return beside it does not', st(SRC, [m('a', 'return lim;', 'return 0;')]).startsWith('never broken'));
-  yes('an entry whose text reaches the condition but changes only what follows does not', st(SRC, [m('a', 'if (p > lim) return lim;', 'if (p > lim) return 0;')]).startsWith('never broken'));
-  yes('a changed string operand breaks it', st("if (k === 'a') x();\n", [m('a', "'a')", "'b')")]) === 'broken');
-  yes('a changed exponent breaks it', st('if (e < 1e-3) x();\n', [m('a', '1e-3', '2e-3')]) === 'broken');
-  yes('the clamp\'s own argument breaks the clamp', st(SRC, [m('a', 'Math.max(0, p)', 'Math.max(1, p)')]).endsWith('| broken'));
-  yes('the word Math.max changed breaks the clamp', st(SRC, [m('a', 'Math.max(0', 'Math.min(0')]).endsWith('| broken'));
+  yes('no entries: every condition never changed', st(SRC, []) === 'never broken | never broken');
+  yes('the operator changed changes it', st(SRC, [m('a', 'p > lim', 'p >= lim')]).startsWith('broken'));
+  yes('an operand changed changes it', st(SRC, [m('a', 'if (p > lim)', 'if (p > 2 * lim)')]).startsWith('broken'));
+  yes('something tighter added after the bound changes it', st(SRC, [m('a', 'p > lim)', 'p > lim + 1)')]).startsWith('broken'));
+  yes('something looser added after the bound does not', st(SRC, [m('a', 'p > lim)', 'p > lim && p)')]).startsWith('never broken'));
+  yes('a prefix operator removed before the operand changes it', st("if (typeof v === 'n') x();\n", [m('a', 'typeof v', 'v')]) === 'broken');
+  yes('a looser operand removed before it does not', st("if (q && v === 'n') x();\n", [m('a', 'q && v', 'v')]) === 'never broken');
+  yes('a relational test added after an equality changes it', st('if (a === b) x();\n', [m('a', 'a === b', 'a === b < 2')]) === 'broken');
+  yes('a relational test added before an equality changes it', st('if (b === c) x();\n', [m('a', '(b === c)', '(a < b === c)')]) === 'broken');
+  yes('a relational test added after a relation does not', st('if (a > b) x();\n', [m('a', 'a > b)', 'a > b < 2)')]) === 'never broken');
+  yes('a change beside the condition does not', st(SRC, [m('a', 'return lim;', 'return 0;')]) === 'never broken | never broken');
+  yes('the left operand changed changes it', st(SRC, [m('a', 'if (p > lim)', 'if (q > lim)')]).startsWith('broken'));
+  yes('something added after the left operand changes it', st(SRC, [m('a', 'if (p > lim)', 'if (p + 1 > lim)')]).startsWith('broken'));
+  yes('an entry reaching over the condition that changes only what follows does not', st(SRC, [m('a', 'if (p > lim) return lim;', 'if (p > lim) return 0;')]).startsWith('never broken'));
+  yes('a changed string operand changes it', st("if (k === 'a') x();\n", [m('a', "'a')", "'b')")]) === 'broken');
+  yes('a changed exponent changes it', st('if (e < 1e-3) x();\n', [m('a', '1e-3', '2e-3')]) === 'broken');
+  yes('a conjunct added after a string does not', st("if (c.b === 'pending') x();\n", [m('a', "'pending')", "'pending' && y)")]) === 'never broken');
+  yes('a wrap around the expression does not', st('const k = f(typeof v === "s");\n', [m('a', 'f(typeof v === "s")', '[...new Set(f(typeof v === "s"))]')]) === 'never broken');
+
+  // chains, defaults and nesting
+  const CH = 'if (!a || b === 1 || c === 2) x();\n';
+  yes('removing one disjunct changes its comparison and one operator only', st(CH, [m('a', 'b === 1 || ', '')]) === 'never broken | broken | broken | never broken');
+  yes('a boolean chain is not changed through its operands', st('if (!a || b) x();\n', [m('a', '!a || b', '!a || c')]) === 'never broken');
+  yes('a default\'s literal value changed changes it', st("const t = w || 'every planet';\n", [m('a', "'every planet'", "'all'")]) === 'broken');
+  yes('a default\'s literal extended tighter changes it', st('const t = w ?? 2;\n', [m('a', 'w ?? 2;', 'w ?? 2 * 3;')]) === 'broken');
+  yes('a sign added before a default\'s literal changes it', st('const t = w ?? 2;\n', [m('a', 'w ?? 2;', 'w ?? -2;')]) === 'broken');
+  yes('a default inside a clamp: a change to what it defaults changes the clamp, not the default', st('const t = Math.max(0, w ?? 1);\n', [m('a', 'w ??', 'v ??')]) === 'broken | never broken');
+  yes('a default followed by a looser addition does not change', st('const t = w ?? 2;\n', [m('a', 'w ?? 2;', 'w ?? 2 || 3;')]) === 'never broken');
+  yes('a condition nested in an operand does not change the one around it', st('if (!g || !(g.c >= 0)) x();\n', [m('a', 'g.c >= 0', 'g.c >= 1')]) === 'never broken | broken');
+
+  // clamps
+  yes('the clamp\'s own argument changes the clamp', st(SRC, [m('a', 'Math.max(0, p)', 'Math.max(1, p)')]).endsWith('| broken'));
+  yes('the word Math.max changed changes the clamp', st(SRC, [m('a', 'Math.max(0', 'Math.min(0')]).endsWith('| broken'));
   const NEST = 'export const f = (most, pitch) => Math.max(-most, Math.min(most, pitch));\n';
-  yes('an edit inside a nested clamp breaks the inner clamp only', st(NEST, [m('a', 'Math.min(most, pitch)', 'Math.min(most, pitch * 2)')]) === 'never broken | broken');
+  yes('a change inside a nested clamp changes the inner clamp only', st(NEST, [m('a', 'Math.min(most, pitch)', 'Math.min(most, pitch * 2)')]) === 'never broken | broken');
+  const NEST2 = 'export const g = (a, b) => Math.max(Math.min(a, b) / 2 - 10, 0);\n';
+  yes('a change in the outer clamp\'s own argument after a nested clamp changes the outer', st(NEST2, [m('a', '- 10', '- 12')]) === 'broken | never broken');
 
-  // touching, just inside and just outside
-  yes('a change sharing one character with a span touches it', touches([4, 6], [5, 9]));
-  yes('a change ending where a span starts does not touch it', !touches([2, 5], [5, 9]));
-  yes('a change starting where a span ends does not touch it', !touches([9, 11], [5, 9]));
-  yes('an insertion at the start of a span touches it', touches([5, 5], [5, 9]));
-  yes('an insertion at the end of a span touches it', touches([9, 9], [5, 9]));
-  yes('an insertion one character outside does not', !touches([4, 4], [5, 9]) && !touches([10, 10], [5, 9]));
-  const ed = edits('abcdef', [m('x', 'bcd', 'bXd')])[0].edit;
-  yes('only the changed characters count as the change', ed[0] === 2 && ed[1] === 3);
+  // the change sees just inside and just outside
+  const ov = (a, b, s, e) => overlaps({ a, b }, [s, e]);
+  yes('a removal sharing one character with a span overlaps it', ov(4, 6, 5, 9));
+  yes('a removal ending where a span starts does not', !ov(2, 5, 5, 9));
+  yes('a removal starting where a span ends does not', !ov(9, 11, 5, 9));
+  yes('an insertion strictly inside a span overlaps it', ov(6, 6, 5, 9));
+  yes('an insertion at the edge of a span does not', !ov(5, 5, 5, 9) && !ov(9, 9, 5, 9));
 
-  // what counts as broken: a constant moved at its definition
+  // constants
   const K = 'export const LIMIT = 1.4;\nexport function f(p) {\n  if (p > LIMIT) return 1;\n  return 0;\n}\n';
-  yes('a constant moved at its definition breaks the one condition naming it', st(K, [m('a', 'LIMIT = 1.4', 'LIMIT = 1.5')]) === 'broken');
-  const K2 = 'export const LIMIT = 1.4;\nexport const f = (p) => p > LIMIT;\nexport const g = (q) => q < LIMIT;\n';
-  yes('a constant shared by two conditions breaks neither', st(K2, [m('a', 'LIMIT = 1.4', 'LIMIT = 1.5')]) === 'never broken | never broken');
-  const K3 = 'function a(i) { return i < 3; }\nfunction b() { const i = 5; return i; }\n';
-  yes('a name declared inside a function is not a constant', st(K3, [m('a', 'const i = 5', 'const i = 6')]) === 'never broken');
-  const K4 = 'export const N = 3;\nfunction a(N) { return N > 1; }\n';
-  yes('a constant whose name is also a parameter is not used', st(K4, [m('a', 'N = 3', 'N = 4')]) === 'never broken');
-  const K5 = 'export const LO = 1, HI = 9;\nexport const f = (p) => p < HI;\n';
-  yes('a comma declaration is a constant too', st(K5, [m('a', 'HI = 9', 'HI = 8')]) === 'broken');
-  const K8 = 'export const N = 3;\nfunction a() { const N = 4; return N; }\nexport const f = (p) => p > N;\n';
-  yes('a name declared twice is not a constant', st(K8, [m('a', 'N = 3', 'N = 5')]) === 'never broken');
-  const K9 = 'export const N = 3;\nexport const f = (N) => N > 1;\n';
-  yes('an arrow\'s parameter of the same name is not the constant', st(K9, [m('a', 'N = 3', 'N = 4')]) === 'never broken');
-  const K6 = '// LIMIT = 3 was tried\nexport const LIMIT = 4;\nexport const f = (p) => p > LIMIT;\n';
-  yes('a comment that looks like a definition is not one', st(K6, [m('a', 'LIMIT = 4', 'LIMIT = 5')]) === 'broken');
-  const K7 = 'export const LIMIT = 4;\nexport const f = (p) => p > LIMIT;\n';
-  yes('an edit elsewhere on the definition\'s line does not count', st(K7, [m('a', 'export const LIMIT', 'const LIMIT')]) === 'never broken');
+  yes('a constant changed at its definition changes the one condition naming it', st(K, [m('a', 'LIMIT = 1.4', 'LIMIT = 1.5')]) === 'broken');
+  yes('a constant used twice changes neither', st('export const L = 1.4;\nexport const f = (p) => p > L;\nexport const g = (q) => q < L;\n', [m('a', 'L = 1.4', 'L = 1.5')]) === 'never broken | never broken');
+  yes('a constant used outside conditions too does not', st('export const V = 2;\nexport const f = (p) => p > V;\nexport const g = () => V;\n', [m('a', 'V = 2', 'V = 3')]) === 'never broken');
+  yes('a name declared inside a function is not a constant', st('function a() {\nconst K = 5;\nreturn 0;\n}\nexport const f = (p) => p > K;\n', [m('a', 'K = 5', 'K = 6')]) === 'never broken');
+  yes('a name also used as a parameter is not used', st('export const N = 3;\nconst o = { m(N) { return N; } };\nexport const f = (p) => p > N;\n', [m('a', 'N = 3', 'N = 4')]) === 'never broken');
+  yes('a top-level let assigned again is not used', st('let L = 3;\nL = 4;\nexport const f = (p) => p > L;\n', [m('a', 'L = 3', 'L = 5')]) === 'never broken');
+  yes('a comma declaration is a constant too', st('export const LO = 1, HI = 9;\nexport const f = (p) => p < HI;\n', [m('a', 'HI = 9', 'HI = 8')]) === 'broken');
+  yes('a value on the next line is part of the constant', st('export const L =\n  3;\nexport const f = (p) => p > L;\n', [m('a', '  3;', '  4;')]) === 'broken');
+  yes('an edit elsewhere on the definition\'s line does not', st('export const LIMIT = 4;\nexport const f = (p) => p > LIMIT;\n', [m('a', 'export const LIMIT', 'const LIMIT')]) === 'never broken');
+  yes('a comment that looks like a definition is not one', st('// LIMIT = 3 was tried\nexport const LIMIT = 4;\nexport const f = (p) => p > LIMIT;\n', [m('a', 'LIMIT = 4', 'LIMIT = 5')]) === 'broken');
+  yes('a property of the same name is not another use', st('export const L = 3;\nexport const f = (p) => p.L > L;\n', [m('a', 'L = 3', 'L = 4')]) === 'broken');
+  yes('a constant named in a clamp changes the clamp', st('export const LO = 0;\nexport const f = (p) => Math.max(LO, p);\n', [m('a', 'LO = 0', 'LO = 1')]) === 'broken');
 
   // declared and stale
   yes('a declared condition is reported as declared', st('if (a < 1) b(); // equivalent: the guard above covers it\n', []) === 'declared');
   yes('an ordinary comment does not declare', st('if (a < 1) b(); // a guard\n', []) === 'never broken');
-  yes('the word in code does not declare', st('const o = { equivalent: 1 }; if (a < 1) b();\n', []) === 'never broken');
+  yes('the word in code does not declare', st('const o = { equivalent: 1 }; if (a < 1) b(); // a guard\n', []) === 'never broken');
   yes('an entry whose text appears twice is stale, not counted', coverage('a < 1; a < 1;\n', [m('a', 'a < 1', 'a <= 1')]).stale.join() === 'a');
 
   // exports
   const ex = exportsOf('export function f(a) { return a; }\nexport const g = (b) => b + 1;\nexport const h = async (c) => { return c; };\nexport default function (d) { return d; }\nexport const k = mk(2);\nexport const w = (1 + 2);\nconst z = 2;\n');
   yes('exports are found with their names', ex.map((x) => x.name).join() === 'f,g,h,default', ex.map((x) => x.name).join());
-  const cx = coverage('export function f(a) { return a; }\nexport function g(b) { return b; }\n', [m('a', 'return a;', 'return 0;')]).exports;
-  yes('an export whose body an entry edits is broken; another is not', cx.map((x) => x.status).join() === 'broken,never broken');
-  const ax = coverage('export const f = (a) => a + 1;\nexport const g = (b) => b + 2;\n', [m('a', 'b + 2', 'b + 3')]).exports;
-  yes('an arrow export\'s body ends at its statement', ax.map((x) => x.status).join() === 'never broken,broken');
+  const two = 'export function f(a) { return a; }\nexport function g(b) { return b; }\n';
+  yes('an export whose body an entry edits is changed; another is not', coverage(two, [m('a', 'return a;', 'return 0;')]).exports.map((x) => x.status).join() === 'broken,never broken');
+  yes('an entry in the second export does not change the first', coverage(two, [m('a', 'return b;', 'return 0;')]).exports.map((x) => x.status).join() === 'never broken,broken');
+  yes('an exported selftest is not counted as an export', coverage('export function selftest() { return 1; }\n', []).exports.length === 0);
+  yes('an arrow export\'s body ends at its statement', coverage('export const f = (a) => a + 1;\nexport const g = (b) => b + 2;\n', [m('a', 'b + 2', 'b + 3')]).exports.map((x) => x.status).join() === 'never broken,broken');
 
-  // the exit code
+  // the report and its exit code
   const rd = mkdtempSync(join(tmpdir(), 'conditions-report-'));
-  const quiet = (fn) => { const log = console.log, err = console.error; console.log = () => {}; console.error = () => {}; try { return fn(); } finally { console.log = log; console.error = err; } };
+  const capture = (fn) => { const lines = [], log = console.log, err = console.error; console.log = (s) => lines.push(String(s)); console.error = (s) => lines.push(String(s)); try { return { code: fn(), lines }; } finally { console.log = log; console.error = err; } };
   try {
     const mod = join(rd, 'mod.js'), list = join(rd, 'list.json'), list2 = join(rd, 'list2.json');
     writeFileSync(mod, 'export function f(a) { return a < 1; }\nexport function g(b) { return b; }\n');
     writeFileSync(list, JSON.stringify([{ name: 'x', from: 'a < 1', to: 'a <= 1' }, { name: 'y', from: 'return b;', to: 'return 0;' }]));
-    yes('every condition and export broken: exit 0', quiet(() => report(mod, [list])) === 0);
+    yes('every condition and export changed: exit 0', capture(() => report(mod, [list])).code === 0);
     writeFileSync(list, JSON.stringify([{ name: 'x', from: 'a < 1', to: 'a <= 1' }]));
-    yes('an export never broken alone: exit 1', quiet(() => report(mod, [list])) === 1);
+    let r = capture(() => report(mod, [list]));
+    yes('an export never changed alone: exit 1, and its line printed', r.code === 1 && r.lines.some((l) => /^ {2}export never changed {2}line 2 {2}g$/.test(l)));
     writeFileSync(list2, JSON.stringify([{ name: 'y', from: 'return b;', to: 'return 0;' }]));
-    yes('two lists are read as one', quiet(() => report(mod, [list, list2])) === 0);
+    yes('two lists are read as one', capture(() => report(mod, [list, list2])).code === 0);
     writeFileSync(list, JSON.stringify([{ name: 'y', from: 'return b;', to: 'return 0;' }, { name: 'z', from: 'f(a)', to: 'f(b)' }]));
-    yes('a condition never broken alone: exit 1', quiet(() => report(mod, [list])) === 1);
+    r = capture(() => report(mod, [list]));
+    yes('a condition never changed alone: exit 1, and its line printed', r.code === 1 && r.lines.some((l) => /^ {2}never changed {2}line 1 {2}< /.test(l)));
     writeFileSync(list, JSON.stringify([{ name: 'x', from: 'a < 1', to: 'a <= 1' }, { name: 'y', from: 'return b;', to: 'return 0;' }, { name: 's', from: 'gone', to: 'x' }]));
-    yes('a stale entry alone: exit 1', quiet(() => report(mod, [list])) === 1);
+    r = capture(() => report(mod, [list]));
+    yes('a stale entry alone: exit 1, and it is printed', r.code === 1 && r.lines.some((l) => /stale entry .* s$/.test(l)));
     writeFileSync(join(rd, 'other.mutants.test.mjs'), 'console.log(1);\n');
-    yes('a list the tool cannot read: exit 3', quiet(() => report(mod, [join(rd, 'other.mutants.test.mjs')])) === 3);
+    yes('a list the tool cannot read: exit 3', capture(() => report(mod, [join(rd, 'other.mutants.test.mjs')])).code === 3);
   } finally { rmSync(rd, { recursive: true, force: true }); }
 
   // the list readers
@@ -528,16 +644,17 @@ function selftest() {
     mkdirSync(tests, { recursive: true });
     writeFileSync(join(lab, 'mod.js'), 'export const f = (a) => a < 1;\n');
     writeFileSync(join(tests, 'mutants.mjs'), 'export async function runMutants() { throw new Error("the real runner must not run"); }\nexport const helper = 7;\n');
-    writeFileSync(join(tests, 'mod.mutants.test.mjs'), `import { runMutants, helper } from './mutants.mjs';\nimport { fileURLToPath } from 'node:url';\nimport { dirname } from 'node:path';\nconst here = dirname(fileURLToPath(import.meta.url));\nprocess.exit(await runMutants({ here, file: 'mod.js', test: 'mod.test.mjs', mutants: [['one', 'a < 1', 'a <= ' + (helper - 6)]] }));\n`);
+    const body = `import { runMutants, helper } from './mutants.mjs';\nimport { fileURLToPath } from 'node:url';\nimport { dirname } from 'node:path';\nconst here = dirname(fileURLToPath(import.meta.url));\nprocess.exit(await runMutants({ here, file: 'mod.js', test: 'mod.test.mjs', mutants: [['one', 'a < 1', 'a <= ' + (helper - 6)]] }));\n`;
+    writeFileSync(join(tests, 'mod.mutants.test.mjs'), body);
     const got = readList(join(tests, 'mod.mutants.test.mjs'), join(lab, 'mod.js'));
     yes('a mutants test file is read without running its runner, its other imports kept', got.map((e) => `${e.name}:${e.from}:${e.to}`).join() === 'one:a < 1:a <= 1');
     let threw = false;
     try { readList(join(tests, 'mod.mutants.test.mjs'), join(lab, 'other.js')); } catch { threw = true; }
     yes('a list with no entries for the module is an error, not an empty pass', threw);
-    writeFileSync(join(tests, 'own.mutants.test.mjs'), 'import { writeFileSync } from "node:fs";\nwriteFileSync(process.env.CONDITIONS_DUMP + ".ran", "x");\n');
-    let refused = false;
-    try { readList(join(tests, 'own.mutants.test.mjs'), join(lab, 'mod.js')); } catch (e) { refused = /does not import runMutants/.test(e.message); }
-    yes('a file with its own runner is refused before it runs', refused);
+    const refused = (file, text) => { writeFileSync(join(tests, file), text); try { readList(join(tests, file), join(lab, 'mod.js')); return false; } catch (e) { return /is not a \*\.mutants\.test\.mjs/.test(e.message); } };
+    yes('a file with its own runner is refused before it runs', refused('own.mutants.test.mjs', 'import { spawn } from "node:child_process";\n'));
+    yes('a file not named *.mutants.test.mjs is refused', refused('mod.mutation.test.mjs', body));
+    yes('an import left in a comment is refused', refused('cm.mutants.test.mjs', `// import { runMutants } from './mutants.mjs';\n`));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 
   console.log(`conditions selftest: ${passed} passed, ${failed} failed`);
