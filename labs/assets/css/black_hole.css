@@ -95,7 +95,6 @@ button, input, select { font: inherit; color: inherit; }
 .bh-btn:focus-visible { outline: 1px solid var(--horizon); outline-offset: 2px; }
 .bh-btn[aria-pressed="true"] { border-color: var(--accretion); color: var(--accretion-soft); background: var(--bh-gold-wash); }
 .bh-btn small { display: block; color: var(--text-dim); font-size: var(--bh-fs-s); letter-spacing: .02em; margin-top: 2px; }
-.bh-btn[aria-pressed="true"] small { color: var(--accretion-dim); }
 .bh-btn.wide { flex: 1 1 auto; text-align: left; }
 .bh-btn.go { border-color: var(--bh-gold-line); color: var(--accretion-soft); }
 .bh-btn[disabled] { opacity: .45; cursor: default; }
@@ -249,7 +248,11 @@ button, input, select { font: inherit; color: inherit; }
   .bh-foot { display: none; }
   .bh-sheet .bh-foot-m { display: flex; flex-direction: column; gap: 6px; font-size: var(--bh-fs-s); color: var(--text-dim); }
   .bh-probe { left: var(--bh-pad) !important; right: var(--bh-pad); width: auto; top: 64px !important; }
-  .bh-btn { min-height: 40px; }
+  /* every target a finger presses is 44 px tall (WCAG 2.2 2.5.8 asks 24; the labs ask 44): the lab's buttons,
+     links, fields, sliders and summaries, and the model route's pill (ai/route-panel.js draws it at 27 px) */
+  .bh-btn, .bh-chip, .bh-num, .bh-ask input, .bh-range, .bh-probe summary, .bh-probe .x, #bh-route .lbr-pill { min-height: 44px; }
+  .bh-back { display: inline-flex; align-items: center; min-height: 44px; }
+  .bh-foot-m button { background: none; border: 1px solid var(--bh-hair-2); color: var(--horizon); font: inherit; padding: 0 12px; margin-left: 6px; min-height: 44px; cursor: pointer; }
   .bh-veil-mark { max-width: 90vw; text-align: center; letter-spacing: .18em; }
   .bh-veil-mark b { font-size: 20px; letter-spacing: .3em; }
 }
