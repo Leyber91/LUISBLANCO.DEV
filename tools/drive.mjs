@@ -44,7 +44,8 @@
      frames(except)          a rule on the pixels: after every step a frame is captured, and no pixel of it is fully
                              transparent. except: { '<selector>': '<reason>' }, the elements whose box may hold
                              such pixels, each with its reason. Every shot() is held to the same rule, with the
-                             same exceptions, whether frames() was called or not.
+                             same exceptions, whether frames() was called or not. A frame that does not come back
+                             within 6 tries of frameMs (5 s) is a break too, and the shot throws.
      background(rgba)        the colour Chrome paints under the page ({ r, g, b, a }), for a fixture
    Coordinates are CSS pixels of the viewport.
 
@@ -56,8 +57,9 @@
    from a process that no longer runs, and gives it back at the end;
    a call to Chrome that is cut off when Chrome dies fails at once.
 
-     node tools/drive.mjs selftest   the runner of the invariants and the lock, in one headless Chrome on port
-                                     9362; tools/mutants/drive.json breaks each rule for tools/mutate.mjs
+     node tools/drive.mjs selftest   the runner of the invariants, the frame rule and the lock, in one headless
+                                     Chrome on port 9362; tools/mutants/drive.json breaks each rule for
+                                     tools/mutate.mjs
 
    Exit: 0 every check passed and the console is clean; 1 a check
    failed, the scenario threw or the page logged an error; 2 usage;
@@ -82,6 +84,8 @@ process.on('exit', () => { for (const c of LIVE) c.kill(); });
    Why: on 2026-11-16 every 390 px render of the survey showed a white box over the sharing question, a hole of fully
    transparent pixels where an opaque fixed plate sat over the opaque WebGL canvas in software-composited headless
    Chrome; the rules read the DOM and passed it. */
+const CAPTURE_TRIES = 6;   // how many tries a frame has before the rule fails (each try's limit is drive's frameMs)
+
 export function transparentIn(png, skip = []) {
   let o = 8, w = 0, h = 0, depth = 0, type = 0;
   const parts = [];
@@ -138,22 +142,22 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const NOISE = /favicon\.ico/;
 
 /**
- * Run one scenario. opts: base, out, width, height, timeoutMs, port, say (a line printer).
+ * Run one scenario. opts: base, out, width, height, timeoutMs, port, say (a line printer), frameMs (each try at a frame).
  * Returns { checks: [{ name, ok, detail }], errors: [string], timedOut }.
  */
 export async function drive(scenario, opts = {}) {
   const { base, out = path.join(os.tmpdir(), 'lab-drive'), width = 1440, height = 900, timeoutMs = 180000, port = 9333, say = console.log,
-    waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000, lock = LOCK } = opts;
+    waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000, lock = LOCK, frameMs = 5000 } = opts;
   const release = await holdChrome(waitMs, lock);
   if (!release) {
     const name = `Chrome was free within ${Math.round(waitMs / 1000)} s (another drive holds ${lock})`;
     say(`FAIL ${name}`);
     return { checks: [{ name, ok: false, detail: '' }], errors: [], timedOut: false };
   }
-  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say }); } finally { release(); }
+  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs }); } finally { release(); }
 }
 
-async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, say }) {
+async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs }) {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'lab-drive-'));
   fs.mkdirSync(out, { recursive: true });
   const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${width},${height}`,
@@ -198,10 +202,11 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
     const until = async (expression, ms = 12000) => { for (let t = 0; t < ms; t += 150) { if (await ev(expression).catch(() => false)) return true; await sleep(150); } return false; };
     let touchOn = false, lastEv = '';
     const evAndNote = async (expression) => { lastEv = expression; return ev(expression); };
-    /* after a step: every invariant, each distinct break reported once, eight at most for a rule */
-    /* the pixels of a frame: no fully transparent one outside the boxes of the elements excepted, each break once */
+    /* the pixels of a frame: no fully transparent one outside the boxes of the elements excepted, each break once.
+       No frame at all is a break too: the rule fails closed. */
     const frameCheck = async (label, png) => {
-      const skip = await ev(`(() => { const out = []; for (const s of ${JSON.stringify(Object.keys(frames.except))}) for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); out.push({ x0: Math.floor(r.left), y0: Math.floor(r.top), x1: Math.ceil(r.right), y1: Math.ceil(r.bottom) }); } return out; })()`);
+      if (!png) { frames.steps++; check(`frame: a frame came back, after ${label}`, false, `none within ${CAPTURE_TRIES} tries of ${frameMs / 1000} s`); return; }
+      const skip = await ev(`(() => { const out = []; for (const s of ${JSON.stringify(Object.keys(frames.except))}) for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); out.push({ x0: Math.floor(r.left), y0: Math.floor(r.top), x1: Math.ceil(r.right), y1: Math.ceil(r.bottom) }); } return out; })()`).catch(() => []);   // a page gone by then excepts nothing
       const t = transparentIn(png, skip);
       frames.steps++;
       if (!t.count) return;
@@ -210,7 +215,21 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
       frames.seen.add(k);
       if (frames.seen.size <= 8) check(`frame: no fully transparent pixel, after ${label}`, false, k);
     };
-    const capture = async () => Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).data, 'base64');
+    /* a frame, or null. On 2026-11-16 a capture asked while the page moved to another document failed at once ("Not
+       attached to an active page"), and the second load of the survey in one tab gave no frame for about 20 s, in
+       headless Chrome drawing WebGL in software; with no limit the sky's drive waited out its whole time. So each try
+       has its own limit, and a failed try is tried again. */
+    const capture = async () => {
+      for (let i = 0; i < CAPTURE_TRIES; i++) {   // equivalent: how many tries is a matter of time, and a selftest cannot make Chrome fail a set number of times; one try that fails is tested
+        let timer;
+        const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);
+        clearTimeout(timer);
+        if (r && r.data) return Buffer.from(r.data, 'base64');
+        await sleep(200);
+      }
+      return null;
+    };
+    /* after a step: the frame, then every invariant, each distinct break reported once, eight at most for a rule */
     const step = async (label) => {
       if (frames.on) await frameCheck(label, await capture());
       if (!invariants.length) return;   // equivalent: with no rule there is nothing to run, and the frame it would wait for changes nothing
@@ -272,7 +291,12 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
         await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, ...(vk ? { windowsVirtualKeyCode: vk } : {}) });
         await step(`the key ${key}`);
       },
-      async shot(name) { const png = await capture(), f = path.join(out, name + '.png'); fs.writeFileSync(f, png); await frameCheck(`the shot ${name}`, png); return f; },
+      async shot(name) {
+        const png = await capture(), f = path.join(out, name + '.png');
+        await frameCheck(`the shot ${name}`, png);
+        if (!png) throw new Error(`the shot ${name}: no frame came back`);
+        fs.writeFileSync(f, png); return f;
+      },
     };
     await scenario(page, { base, width, height });
     for (const inv of invariants) check(`${inv.name}: held after each of ${inv.steps} steps`, inv.seen.size === 0 && inv.steps > 0, inv.seen.size ? `${inv.seen.size} distinct breaks` : '');
@@ -439,6 +463,12 @@ async function selftest() {
     yes('an opaque fixed plate over an opaque WebGL canvas is a break where this machine leaves a hole, and the same plate at 98% is not', (pixels['1'] === 0 || fails.some((c) => c.detail === `${pixels['1']} fully transparent pixels, in 300 x 120 px at 20,20`)) && pixels['0.98'] === 0 && fails.length === (pixels['1'] ? 2 : 1), `hole here: ${pixels['1']} pixels; at 98%: ${pixels['0.98']}`);
     const endF = fr.checks.find((c) => /^frame: no fully transparent pixel in each of \d+ frames$/.test(c.name));
     yes('the frame rule ends on one line that counts its frames, failing when a frame broke it', !!endF && !endF.ok && /distinct breaks/.test(endF.detail), J(endF));
+    let shotThrew = '';
+    const t1 = Date.now(), lostPng = path.join(os.tmpdir(), 'lab-drive', 'lost.png');
+    fs.rmSync(lostPng, { force: true });
+    const lost = await drive(async (p) => { p.frames(); await p.go(PLAIN); try { await p.shot('lost'); } catch (e) { shotThrew = e.message; } }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, frameMs: 1, say: () => {} });
+    const lostF = lost.checks.filter((c) => /^frame: a frame came back, after /.test(c.name));
+    yes('a frame that does not come back in its time is a break after each step, the shot throws, and the drive goes on', lostF.length === 2 && lostF.every((c) => !c.ok && /^none within 6 tries of 0.001 s$/.test(c.detail)) && /no frame came back/.test(shotThrew) && !fs.existsSync(lostPng) && Date.now() - t1 < 30000, J(lost.checks) + ' ' + shotThrew);
 
     /* a Chrome that dies under a call */
     t0 = Date.now();

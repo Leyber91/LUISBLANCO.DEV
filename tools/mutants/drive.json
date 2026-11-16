@@ -86,8 +86,8 @@
   },
   {
     "name": "drive: the lock not given back",
-    "from": "  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say }); } finally { release(); }",
-    "to": "  return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say });"
+    "from": "  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs }); } finally { release(); }",
+    "to": "  return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs });"
   },
   {
     "name": "chrome: a call cut off waits for ever",
@@ -236,8 +236,8 @@
   },
   {
     "name": "frame: a shot not held to the rule",
-    "from": "fs.writeFileSync(f, png); await frameCheck(`the shot ${name}`, png); return f;",
-    "to": "fs.writeFileSync(f, png); return f;"
+    "from": "        await frameCheck(`the shot ${name}`, png);\n",
+    "to": ""
   },
   {
     "name": "frame: a broken frame passes",
@@ -308,6 +308,26 @@
     "name": "frame: no end line for shots alone",
     "from": "if (frames.on || frames.steps) check(`frame:",
     "to": "if (frames.on) check(`frame:"
+  },
+  {
+    "name": "frame: a capture with no limit",
+    "from": "Promise.race([send('Page.captureScreenshot', { format: 'png' }), new Promise((res) => { timer = setTimeout(res, frameMs, null); })])",
+    "to": "send('Page.captureScreenshot', { format: 'png' })"
+  },
+  {
+    "name": "frame: a frame that did not come back passes",
+    "from": "      if (!png) { frames.steps++; check(`frame: a frame came back, after ${label}`, false,",
+    "to": "      if (!png) { frames.steps++; return; check(`frame: a frame came back, after ${label}`, false,"
+  },
+  {
+    "name": "frame: a shot with no frame does not throw",
+    "from": "        if (!png) throw new Error(`the shot ${name}: no frame came back`);\n",
+    "to": ""
+  },
+  {
+    "name": "frame: each try's limit not passed to the drive",
+    "from": "timeoutMs, port, say, frameMs }); } finally",
+    "to": "timeoutMs, port, say }); } finally"
   },
   {
     "name": "runner: the rules never run",
