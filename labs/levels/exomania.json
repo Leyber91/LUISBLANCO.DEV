@@ -355,6 +355,135 @@
   ],
   "history": [
     { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
-    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "fa98fbd" }
+    { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "fa98fbd" },
+    { "gen": "atlas", "date": "2026-11-16", "by": "single rater, two skeptic passes", "commit": "c942fc9" }
+  ],
+  "atlas_grades": [
+    {
+      "date": "2026-11-16",
+      "by": "single rater, two skeptic passes",
+      "commit": "c942fc9",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "2026-11-13, on the atlas, before Overdue, the planet looks, the search and the log: product 0 (six axes at 0, six at 1), subject 2, lab 0. That grade was kept with the lab's private plan, not in this file.",
+      "basis": "origin/main at c942fc9 (pull request 39), served from a clean worktree on 2026-11-16. Read: labs/exomania.html, labs/exomania-survey.html, labs/assets/js/exoplanet/ (main.js, record.js, log.js, report.js, panels.js, query.js, views/*.js, overdue/main.js and the parts of exoplanet.js, config.js and science.js cited below), the four lab stylesheets and tokens.css. Run: the 15 node test files under labs/assets/js/exoplanet/tests (2,075 checks passed, 0 failed), and one drive of each page in headless Chrome at 1440 x 900 and 390 x 844 (tools/drive.mjs, cross-origin requests refused, no model called): Overdue is ready about 0.5 s after its document loads, opens WASP-12 b from the picker and reopens on it after a reload; the survey opens Kepler-22 b by name, writes one visit (via search) and one save, and shows both after a reload; the store is IndexedDB, persistent, recording on; the console was clean at both widths. The planet canvas stayed blank about 20 s under software GL, then drew Kepler-22 b.",
+      "bindings": "Graded against the bindings declared in the lab's plan on 2026-11-13 (canon PSCompPars snapshot of 2026-11-11; 11 units in two tracks; a fiction inventory of 23 entries, exo-f1 to exo-f23; the central scene the descent; 10 known setup failures). They predate Overdue: its working parts are in no inventory entry yet, so they add nothing to fiction, and its sheets count only on the product axes and in the graph.",
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 2,
+        "scope": 2,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 1,
+          "evidence": "1.1 and 1.2 hold: labs/exomania.html opens the sky of clocks, which carries a launcher to the survey (\"the survey of every planet\", \"the planets\" at 390 px) and a labelled \"today\". 2.1 holds: the sky ignites to today on HD 209458 b. 2.2 fails: in the first view at 1440 and 390 px the only controls are the labs link, the launcher, the line of time and \"today\", and nothing names one next action (overdue/main.js, drive). 2.3 fails: the failure states name an action and link nowhere (\"The clocks could not be loaded ... Reload to try again.\", the survey veil \"The catalogue did not load. Check the connection and reload.\"), and the log's empty lists name the first action with no link (log.js draw)."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "1.1 fails: no page of text is rendered from a source through sanitised Markdown or an equivalent. The explanatory text is the evidence list typed into exomania.html and the Method dialog typed into panels.js methodHTML; both explain the page's method, and neither is a lesson. 1.2: no worked example exists. Rung 2: no units, modules, track page, unit pages or pager."
+        },
+        "tutoring": {
+          "level": 0,
+          "evidence": "1.1 fails: nothing the visitor answers is checked on either page."
+        },
+        "practice": {
+          "level": 0,
+          "evidence": "1.1 fails: no exercise exists."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "1.1 fails: no task states a goal and its material. Tours are guided viewing (tours.js), and sheet c lists transits without a task."
+        },
+        "evidence": {
+          "level": 0,
+          "evidence": "Lowered from 1 by the second skeptic pass. 1.1 reads \"each answer or action is stored with its time and the mode it came from\". A visit is stored with its time and the way it was reached (record.js visit: name, t, via; the exomania.visit event carries t and via, seen in the drive), and a save with its time and view. Not stored: the questions a visitor asks the catalogue (query.js and main.js runQuestion keep nothing), pins (record.js pin keeps names with no time, and no event), and the way an Overdue clock was opened (the exomania.planet event carries the planet only; the sky, the lens, the night drawing, the table and the picker are not told apart). 1.2 holds for what is stored: it is on the lab's own catalogue. 2.1 fails: no state per unit."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "1.1 holds: the log line under the search field reads \"Your log · 1 visited · 1 saved\" after one visit and one save, at 1440 and 390 px, and again after a reload (log.js draw, record.js counts and lineWords). 2.1 to 2.4 fail: the lab has no sessions, so none is listed, and there is no streak, no activity calendar and no recent sessions on the entry view."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "1.1 holds: the catalogue and the two ephemeris files are data (pscomppars-snapshot.json, ephemerides.json, ephemerides-record.json). 2.2 holds: they are built by build_snapshot.py and build_ephemerides.py. 2.3 holds at 1440 px (the survey stamp and Overdue's title block show the retrieval date; the survey hides its stamp at 390 px). 2.1 fails: tours, the method text and the evidence list live in code (config.js TOURS, panels.js methodHTML, exomania.html). 2.4 fails: a data file that does not load or parse is not named, and no last good version is kept (main.js boot veil, overdue/main.js boot)."
+        },
+        "records": {
+          "level": 1,
+          "evidence": "1.1 holds, driven: Overdue reopens on the planet opened before the reload (record overdue.planet), and the survey's log keeps its visit and save across a reload, in a persistent IndexedDB store. 2.1 fails: record.js is untyped JavaScript with no checked types, and it covers visits, saves, pins and Overdue's planet and place, not the observations (a measured depth, period or duration, a found planet), predictions or notes the bindings list. 2.2 fails: the client (record.read, load, update) is untyped. 2.3 fails strictly: the log's writes refuse unknown names and values past the bounds, but setOverdue accepts any name of up to 80 characters. 2.4 fails: no health check in the lab reports versions and sync state."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "1.1 holds: both pages read tokens.css, and the void ground, gold family and IBM Plex Mono show in the screenshots. 2.1 fails on Overdue: its Google Fonts stylesheet is a plain render-blocking link (exomania.html line 11), where the survey loads it without blocking. 2.2 fails: 52 colour literals by a grep for hex and rgb() values (25 in exoplanet.css, 4 in overdue.css, 14 in views/common.js, 5 in config.js, 3 in export.js, 1 in views/transit.js). 2.3 fails: the survey's buttons and chips are lab-local (.btn, .chip in exoplanet.css) beside plate.css .act on Overdue, and no shared checkbox exists. 2.4 fails: numbers are written by views/common.js fmt, record.js thousands and toLocaleString in overdue/main.js; dates by overdue longDate, the Labs OS ago and ISO slices."
+        },
+        "reach": {
+          "level": 1,
+          "evidence": "1.1 holds: each page starts from one URL and works at 1440 px with a clean console (drive). 2.1 holds: both pages restack at 390 px with no horizontal overflow. 2.3 holds: tokens.css draws a focus ring on links, buttons, inputs and focusable elements. 2.2 fails on Overdue, the entry page: none of its four stylesheets collapses animations and transitions under reduced motion (plate.css resets scroll-behavior only); the survey has the rule (exoplanet.css line 325). 2.4 fails on Overdue: no skip link (the survey has one)."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "1.1 holds: each page runs from its URL; the 15 node test files pass (2,075 checks). 2.1 fails: main.js (847 lines) holds the filter predicate, URL sync, tours, the compare bench and the changelog, and overdue/main.js (499 lines) the clock sentences and the night spans. 2.3 fails: no types at module boundaries and no tsc --checkJs. 2.5 fails: no derived digest; the log's counts are computed on read. 2.6 fails: no .gitattributes at the repository root (site requirement site-repo). 2.2 and 2.4 hold for the catalogue and the ephemerides (catalog.js loadSnapshot, overdue/data.js load)."
+        },
+        "fiction": {
+          "level": 3,
+          "evidence": "3.1 holds by one entry: 12 of the 23 inventory entries run from the visitor's own input (52%), counted by the rule of the 2026-11-13 grade (an entry runs when every capability its name states runs, at any detail). Run: f1 reach any planet (by name, question, diagram; driven), f2 the population, f3 the system to scale under orbital time (Play, Solar system), f4 the transit (drag to scrub), f5 the wobble (Radial velocity tab), f6 the world from its data (drawn after about 20 s under software GL), f7 the surface (Surface, star elevation), f10 grounded tours and \"Tour these\" over a question's results, f12 keep and share (Add to log, the log, \"Copy a link to these worlds\"; there are no finds yet, a detail gap), f13 compare beside Earth (the pins now persist in the log), f14 a question about the catalogue and \"Ask the model\" on the world, f23 the plate's measured, calculated and bound values with their references. Do not run: f8, f9, f11, f15 (no panorama), f16 to f22. 4.1 fails: 80% would be 19 entries."
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "2.1 and 2.2 hold: science.js and overdue/clock.js compute from the archive values, with formulas in the source. 3.1 fails: the cosmos line asks for a published transit model, and the survey's curve is the page's own quadrature of quadratic limb darkening (transit.js, science.js), while Overdue's dip is \"limb-darkened and central\" with no named model. 3.3 fails: the sky diagram labels \"Dec +60\" with no degree sign (views/plot.js line 397). 3.5 fails: the discoveries bar for 2026, a year the snapshot of 2026-11-11 covers in part, is drawn as a full year (views/plot.js drawTimeline)."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "2.1 holds: the sky of clocks draws each lamp from its clock at the date shown, and the survey draws the world from its numbers. 3.2 fails: the system view's star glow is not to scale and encodes no value (views/system.js lines 169 to 172). 3.3 fails: the render's star field and the star's corona and prominences (exoplanet.js starField and the corona march) are neither computed from the catalogue nor inside a region tagged [ILLUSTRATIVE]. 3.4 fails: the survey's instruments assemble on load with staggered transitions that mark no state (exoplanet.css body.ready transition-delay)."
+        },
+        "interaction": {
+          "level": 2,
+          "evidence": "2.1 holds: dragging the line of time redraws the sky, the count and the clock at once, and the albedo and star-elevation sliders recompute live. 3.1 fails: the sky's tip (overdue/main.js sky-tip) and the diagram's tip (views/plot.js showTip) open on hover inside their own section, close on pointer leave, do not pin and do not open on keyboard focus."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "1.1 holds: report.js deterministicNote and query.js parseQuestion produce the main output with no model; Overdue uses none. 2.1 to 2.3 hold by the code: one LLM.complete call per ask (report.js, query.js askModel), the route panel mounted (main.js mountRouteWhenSafe), the engine note as fallback. 2.5 fails: \"Ask the model\" is gold at rest for every world (report.js btn-gold), and no mark says when the model has something to say. No model was called in this grade."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "1.1 holds. 2.3 fails: the Method dialog says \"Every number on this page comes from the NASA Exoplanet Archive or from a published model applied to it in your browser. The planet image is the exception\", while the same dialog calls the 1,200 K and 750 K cuts this page's own and the Earth-likeness score this page's own measure; and its table says \"--accretion only when on\" while \"Ask the model\" sits in --accretion-dim and --accretion-soft at rest (exoplanet.css .btn-gold), visible in the 1440 px screenshot (panels.js methodHTML)."
+        }
+      },
+      "scope": {
+        "level": 2,
+        "organs": [
+          "the sky of clocks (Overdue sheets a, b and d: the clock of each transiting planet at a date the visitor sets, with the one clock read and the tally)",
+          "tonight (Overdue sheet c: the transits up in the dark over the visitor's place in the next 24 hours; keeps the place)",
+          "the catalogue explorer (the survey's diagrams, filters, ranges, replay and the question that sets them; keeps the filter and the question)",
+          "the world (the survey's render, plate, inference chain, ground view, system and signal views, survey note, exports, the log and the compare bench, which draws the plate's values for pinned worlds; keeps camera, albedo, saves and pins)"
+        ],
+        "instrument": "Under the declared bindings, whose central scene is the descent, the world. Under the chosen concept, Overdue, the sky of clocks. Neither choice changes the level, since level 3 fails on the organ count.",
+        "links": [
+          "the world to the catalogue explorer, shows: the worlds saved with \"Add to log\" on the plate are what the \"Your log\" filter computes from (main.js rebuildFilter, log.saved)",
+          "tonight to the sky of clocks, steers: each row of the night, computed from the visitor's place, opens that planet's clock (overdue/main.js renderTonight)",
+          "the sky of clocks to the world, steers: \"See this planet as a world\" carries the planet the visitor opened (overdue/main.js describeStar)"
+        ],
+        "reach": "Every one of the 11 units is worked on by at least one organ (u1 the plate, u2 and u3 the clocks and the system and signal views, u4 the signal view, u5 the method grouping, u6 and u7 the diagrams and the plate, u8 to u11 the plate, system view and ground view): reach 1.0 at one organ per unit.",
+        "evidence": "Level 2 holds: 4 organs (3 needed), 3 links (1 needed), reach 1.0 (0.25 needed). Level 3 fails: it needs 5 joined organs and the graph has 4. Views that draw the same values are one organ, so the compare bench is part of the world; the explorer and the world share one selection, which is no link; the tally and the log belong to the organs whose items they show."
+      },
+      "skeptic": [
+        {
+          "axis": "evidence",
+          "from": 1,
+          "to": 0,
+          "pass": "the letter of the clause",
+          "why": "evidence.1.1 asks that each answer or action be stored with its time and mode. Visits and saves are; questions asked of the catalogue, pins and the way an Overdue clock was opened are not."
+        },
+        {
+          "pass": "does it run",
+          "why": "No axis lowered. Both pages loaded with a clean console at 1440 and 390 px, the store opened (IndexedDB, persistent) within 0.7 s, Overdue's planet and the survey's log survived a reload, and the render drew after about 20 s under software GL."
+        },
+        {
+          "pass": "the letter of the clause, held",
+          "why": "fiction.3.1 holds by one entry (12 of 23); it rests on f12, which runs as keep and share with no finds yet. progress.1.1 asks for a count and the log line shows one. orientation.1.2 holds by its launcher."
+        }
+      ],
+      "not_checked": "No model route was called, so intelligence 2.1 to 2.4 are read from the code. The surface and low-pass views, the compare bench, the radial-velocity tab, a shared log link opened in a fresh profile, the device location and a typed place were not driven; they are counted from the code and the views on screen. Only headless Chrome with software GL was used: no GPU, no real phone. No citation was checked at its source. The style gates and the platform block were not counted; the style gates cap only rungs above 4."
+    }
   ]
 }
