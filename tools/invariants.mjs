@@ -25,62 +25,86 @@
    tests the tools in tools/, can break it in a copy.
 
    The rules
-   - overflow: the page never scrolls sideways (its width is at most
-     the window's plus 1 px), and no block starts more than 1 px off
-     the left edge while part of it is on the page, unless an
-     ancestor that clips its overflow, itself on the page, holds it.
+   - overflow: the page never scrolls sideways (its width, or the
+     body's when the body scrolls on its own, is at most the window's
+     plus 1 px), and no block starts more than 1 px off the left edge
+     while part of it is on the page, unless a box that cuts it (its
+     containing block, or one above that), itself on the page, holds
+     it.
    - targets: up to a width (400 px by default) every target a
      finger can press is at least 44 px tall and 24 px wide (each
-     with 0.5 px of rounding), measured on the part its ancestors let
-     be seen. A target is a link, a button, a field, a summary,
-     anything with the role of a button, link, checkbox, switch,
-     radio, tab, slider, option, menu item, tree item or combo box,
-     and anything in the tab order. Not measured: a link in a line of
-     text (WCAG 2.2, 2.5.8: an inline target), a disabled control,
-     and a target an ancestor cuts away entirely (a skip link before
-     its focus). A checkbox or radio in a label is measured by it.
+     with 0.5 px of rounding), measured on the part the boxes that
+     cut it let be seen (an absolute target is cut by its positioned
+     ancestor, a fixed one only by a box a transform, a filter or
+     containment makes its own), and what a finger meets at the
+     middle of that part, when it is in the window, is the target or
+     a part of it, not another element (covered); an open dialog, a
+     popup list or menu, and what is fixed or sticky to the window
+     lie over the page by design, and the page may name others, each
+     with its reason. A target is a
+     link, a button, a field, a summary, anything with the role of a
+     button, link, checkbox, switch, radio, tab, slider, option, menu
+     item, tree item or combo box, and anything in the tab order. Not
+     measured: a link in a line of text (WCAG 2.2, 2.5.8: an inline
+     target; a line holds two letters or more besides its targets, so
+     a row of bare links is not one), a disabled control, and a target
+     the boxes that cut it hide entirely (a skip link before its
+     focus). A checkbox or radio in a label is measured by it.
    - contrast: every visible text is at least 4.5 to 1 against what
      is behind it (3 to 1 from 24 px, or from 18.66 px at a weight of
      700), as WCAG 2.2 1.4.3 asks, with 0.005 of rounding: the text of
-     an element, the words of its ::before and ::after, and SVG text
-     by its fill. Colours are read in any CSS form (oklab, color-mix)
-     through a canvas. What is behind a text is the backgrounds of its
-     ancestors composited over the page's. A text in a transition or
-     animation that ends is measured once it has ended; one that never
-     ends is measured as it runs. Not measured: a disabled control,
-     .sr, a box of 1 px or less.
+     an element (its -webkit-text-fill-color, which paints over its
+     color), the words of its ::before and ::after (a counter
+     included), and SVG text by its fill. Colours are read in any CSS
+     form (oklab, color-mix) through a canvas. Text and background are
+     each worked out as they reach the screen: each box from the
+     element out, its background under what it holds, the whole faded
+     by its opacity, then over the page; so an ancestor's opacity
+     fades its background as much as the text. A text in a transition
+     or animation that ends is measured once it has ended; one that
+     never ends is measured as it runs. Not measured: a disabled
+     control, .sr, a box of 1 px or less.
    - gold: the site's gold (--accretion and its two tints, when the
      page defines them; each channel within 22, at an alpha of 40 of
      255 or more) is used by no element but the ones a page allows: in
-     its text, the text's decoration, its borders, outline,
-     background, box shadow, SVG stroke or fill, or those of its
-     ::before and ::after. When a page asks, no pixel of any 2D
-     canvas is gold either (alpha 64 of 255 or more, each channel
-     within 22: under a quarter of opacity a pixel is a halo, the
-     tail of a glow mixing with what lies under it, not a mark),
-     with four allowances a page gives by selector: a canvas named
-     with its reason (not read); a canvas whose condition holds (not
-     read while it holds); a canvas that may hold one gold dot while
-     its condition holds (its gold pixels within a box under 12 CSS px
-     each way); a canvas drawn in a colour of its own (pixels within
-     28 of it in every channel are not counted, nor pixels under 160
-     of alpha, where its glow over another line can tint toward
-     gold; a mark drawn in gold is opaque at its core). A canvas the rule
+     its text (color and -webkit-text-fill-color), its text shadow and
+     decoration, its borders, outline, background and the stops of a
+     background gradient, its box shadow, SVG stroke or fill, its
+     accent-color on a checked box or radio, a range or a meter, its
+     ::marker, or those of its ::before and ::after (a counter
+     included). When a page asks, no pixel of any 2D canvas is gold
+     either (alpha 64 of 255 or more, each channel within 22: under a
+     quarter of opacity a pixel is a halo, the tail of a glow mixing
+     with what lies under it, not a mark), with four allowances a
+     page gives by selector: a canvas named with its reason (not
+     read); a canvas whose condition holds (not read while it holds);
+     a canvas that may hold one gold dot while its condition holds
+     (its gold pixels within a box under 12 CSS px each way); a canvas
+     drawn in a colour of its own, a star (pixels within 28 of it in
+     every channel are not counted, nor pixels under 160 of alpha
+     within 3 CSS px of those, its glow, which over another line can
+     tint toward gold; a gold line or mark away from the star counts
+     from an alpha of 64, a 1 px line included). A canvas the rule
      should read and cannot (no 2D context, pixels refused) is a
      break, and so is a canvas whose own colour is not found.
    Each rule lists twelve breaks at most (overflow, six).
 
-   What the rules cannot see (limits, found by the review of pull
-   request 42 and declared rather than guessed at):
+   What the rules cannot see (limits, declared rather than guessed at):
    - a text cut by its parent (a nowrap word in an overflow:hidden
      box): not a sideways scroll; shapes.mjs checks truncation;
-   - a target covered by another element: what covers it changes as
-     the page scrolls (a sticky bar), so coverage is not a size;
-   - a text over a picture, a gradient or a drawing: it is measured
-     against the colours behind it, not the picture;
-   - gold in a gradient or a background image, and a ::marker;
+   - a target covered away from its middle, or covered while it is
+     out of the window: only the middle of what is seen is tested;
+   - a target that something fixed or sticky to the window covers
+     where the page can scroll no further (a bar over the last button):
+     such a cover is taken for one that moves with the scroll;
+   - a text over a picture, a background image or a drawing, or over
+     an element behind it that is not its ancestor (a plate placed
+     under it): it is measured against its ancestors' colours;
+   - gold in a background image: an image's pixels are not read;
    - text drawn on a canvas: the labs' drives check the ink their
-     code names for it.
+     code names for it;
+   - a thin gold line on a star's canvas that passes within 3 CSS px
+     of the star: it reads as the star's glow.
    ============================================================ */
 
 import path from 'node:path';
@@ -110,78 +134,123 @@ function colorFactory() {
     return [d[0], d[1], d[2], d[3] / 255];
   };
 }
-/* The words a ::before or ::after shows: its content when that is a quoted string. */
-function wordsFn(p) { const m = /^"(.*)"$/.exec(p.content); return m ? m[1].trim() : ''; }
+/* The words a ::before or ::after shows: the quoted strings of its content, with a # for each counter or attribute it
+   prints; none for an image or no content. */
+function wordsFn(p) {
+  const parts = String(p.content).match(/"(?:[^"\\]|\\.)*"|counters?\([^)]*\)|attr\([^)]*\)/g) || [];
+  return parts.map((t) => (t[0] === '"' ? t.slice(1, -1) : '#')).join('').trim();
+}
+/* The boxes whose overflow can cut an element: its containing block, then that box's, up the page. A static or
+   relative box is held by its parent; an absolute one by its nearest positioned ancestor; a fixed one by none, unless
+   an ancestor's transform, filter, perspective or containment makes it the containing block. */
+function clippersFn(e) {
+  const out = [];
+  for (let n = e; ;) {
+    const pos = getComputedStyle(n).position;
+    let c = n.parentElement;
+    if (pos === 'absolute' || pos === 'fixed') {
+      const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };
+      while (c && !holds(c)) c = c.parentElement;
+    }
+    if (!c) return out;
+    out.push(c);
+    n = c;
+  }
+}
 
 /* ---------------- the rules, run in the page ---------------- */
 
-function overflowRule(o, { shown, name }) {
+function overflowRule(o, { shown, name, clippers }) {
   const d = document.documentElement, b = document.body, out = [];
-  const w = Math.max(d.scrollWidth, b.scrollWidth);   // equivalent: the document's width already holds the body's
+  const w = Math.max(d.scrollWidth, b.scrollWidth);   // the body can scroll sideways on its own (html overflow hidden, body overflow auto)
   if (w > innerWidth + 1) {
     const wide = [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > innerWidth + 1 && getComputedStyle(e).position !== 'fixed')
       .filter((e) => e.parentElement.getBoundingClientRect().right <= innerWidth + 1).slice(0, 3);
     out.push('the page is ' + w + ' px wide in a ' + innerWidth + ' px window' + (wide.length ? ': ' + wide.map((e) => name(e) + ' to ' + Math.round(e.getBoundingClientRect().right)).join(', ') : ''));
   }
-  // a block pushed off the left edge: part of it before the page, part on it, and no ancestor on the page that clips it
+  // a block pushed off the left edge: part of it before the page, part on it, and no box that cuts it (its containing
+  // block or one above that) on the page
   for (const e of document.querySelectorAll('body *')) {
     const r = e.getBoundingClientRect();
     if (r.left >= -1 || r.right <= 1 || !shown(e)) continue;
-    let held = false;
-    for (let n = e.parentElement; n !== b; n = n.parentElement) if (getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1) { held = true; break; }
+    const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);
     if (!held && (e.parentElement === b || e.parentElement.getBoundingClientRect().left >= -1)) out.push(name(e) + ' starts at ' + Math.round(r.left) + ' px, off the left edge');
   }
   return out.slice(0, 6);
 }
 
-function targetsRule(o, { shown, name }) {
+function targetsRule(o, { shown, name, clippers }) {
   if (innerWidth > o.below) return [];
-  const inline = (e) => {   // a link in a line of text: inline, in a block that holds words besides its own
+  const inline = (e) => {   // a link in a line of text: inline, in a block that holds two letters or more besides targets
     if (e.tagName !== 'A' || getComputedStyle(e).display !== 'inline') return false;
     let b = e.parentElement;
     while (getComputedStyle(b).display.startsWith('inline')) b = b.parentElement;
-    return b.textContent.replace(/\s+/g, '').length > e.textContent.replace(/\s+/g, '').length + 1;
+    let words = 0;
+    const walk = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+    for (let t = walk.nextNode(); t; t = walk.nextNode()) { const at = t.parentElement.closest(o.sel); if (!at || !b.contains(at)) words += t.textContent.replace(/\s+/g, '').length; }
+    return words > 1;
   };
-  // the part of a box its ancestors let be seen: an ancestor that hides or clips its overflow cuts it
+  // the part of a box the boxes that cut it let be seen
+  // the part of a box the boxes that cut it let be seen: a box that hides or clips its overflow cuts for good, so its
+  // cut is the target's size; a box that scrolls cuts only where it now stands, so its cut moves where a finger is
+  // looked for but not the size, and a target it hides now is not looked at
   const seen = (e, r) => {
-    let L = r.left, T = r.top, R = r.right, B = r.bottom;
-    for (let n = e.parentElement; n; n = n.parentElement) {
+    let L = r.left, T = r.top, R = r.right, B = r.bottom, l = L, t = T, rr = R, b = B;
+    for (const n of clippers(e)) {
       const s = getComputedStyle(n), q = n.getBoundingClientRect();
       if (/hidden|clip/.test(s.overflowX)) { L = Math.max(L, q.left); R = Math.min(R, q.right); }
       if (/hidden|clip/.test(s.overflowY)) { T = Math.max(T, q.top); B = Math.min(B, q.bottom); }
+      if (s.overflowX !== 'visible') { l = Math.max(l, q.left); rr = Math.min(rr, q.right); }
+      if (s.overflowY !== 'visible') { t = Math.max(t, q.top); b = Math.min(b, q.bottom); }
     }
-    return { w: Math.max(0, R - L), h: Math.max(0, B - T) };
+    return { w: Math.max(0, R - L), h: Math.max(0, B - T), now: rr > l && b > t, x: (l + rr) / 2, y: (t + b) / 2 };
+  };
+  const overlay = (t) => {
+    if (t.closest('dialog[open], [role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"], [popover]')) return true;
+    for (let n = t; n; n = n.parentElement) if (/fixed|sticky/.test(getComputedStyle(n).position)) return true;
+    return false;
   };
   const out = [];
   for (const e of document.querySelectorAll(o.sel)) {
     if (e.disabled || e.closest('[aria-disabled="true"], [inert]') || !shown(e) || inline(e)) continue;
-    let r = e.getBoundingClientRect();
-    if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) r = e.closest('label').getBoundingClientRect();   // the label is the target
+    let r = e.getBoundingClientRect(), self = e;
+    if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }   // the label is the target
     const v = seen(e, r);
     if (v.w === 0 || v.h === 0) continue;   // cut away entirely: not on the page now
     if (v.h < o.tall - 0.5 || v.w < o.wide - 0.5) out.push(name(e) + ' ' + Math.round(v.w) + 'x' + Math.round(v.h));
+    // covered: what a finger meets at the middle of what is seen is another element, not the target or a part of it
+    // (outside the window there is nothing to meet: elementFromPoint gives null there), and not one that lies over the
+    // page by design: an open dialog, a popup list or menu, or what is fixed or sticky to the window (a bar, a veil, a
+    // plate), whose cover moves with the scroll or closes; nor one the page names with its reason
+    const top = v.now ? document.elementFromPoint(v.x, v.y) : null;
+    if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));
   }
   return [...new Set(out)].slice(0, 12);
 }
 
 function contrastRule(o, { shown, name, color, words }) {
-  const over = (top, under) => { const a = top[3]; return [top[0] * a + under[0] * (1 - a), top[1] * a + under[1] * (1 - a), top[2] * a + under[2] * (1 - a), 1]; };
+  // straight-alpha "over": top on under, both maybe translucent
+  const over = (t, u) => { const a = t[3] + u[3] * (1 - t[3]); if (a === 0) return [0, 0, 0, 0]; return [0, 1, 2].map((k) => (t[k] * t[3] + u[k] * u[3] * (1 - t[3])) / a).concat(a); };
+  const fade = (c, op) => [c[0], c[1], c[2], c[3] * op];
   const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
   const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
   const base = over(color(getComputedStyle(document.body).backgroundColor), over(color(getComputedStyle(document.documentElement).backgroundColor), [255, 255, 255, 1]));
-  // what is behind a text: its ancestors' backgrounds, from the body in, composited over the page's
-  const behind = (e) => {
-    const layers = [];
-    for (let n = e; n !== document.body; n = n.parentElement) layers.push(color(getComputedStyle(n).backgroundColor));
-    return layers.reduceRight((bg, layer) => over(layer, bg), base);
+  /* What reaches the screen at a text, with its ink or without it: each box from the element out, its background under
+     what it holds, the whole faded by its opacity, then over the page. An ancestor's opacity fades its background as
+     much as the text. inner: layers inside the element ([background, opacity] of a ::before or ::after). */
+  const paint = (e, ink, inner) => {
+    let g = ink || [0, 0, 0, 0];
+    for (const [bg, op] of inner) g = fade(over(g, bg), op);
+    for (let n = e; n !== document.body; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, color(s.backgroundColor)), +s.opacity); }
+    return over(g, base);
   };
-  const opacityOf = (e) => { let a = 1; for (let n = e; n; n = n.parentElement) a *= +getComputedStyle(n).opacity; return a; };
+  const ratio = (a, b) => { const L1 = lum(a), L2 = lum(b); return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05); };
   // a text in a transition or an animation that ends is measured once it has ended: a fade is not a colour; one that
   // never ends never settles, so it is measured as it runs
   const moving = document.getAnimations().filter((a) => a.playState === 'running' && a.effect.getComputedTiming().endTime !== Infinity).map((a) => a.effect.target);
   const settling = (e) => moving.some((t) => t.contains(e));
-  const ratio = (fg, bg, a) => { const ink = over([fg[0], fg[1], fg[2], fg[3] * a], bg); const L1 = lum(ink), L2 = lum(bg); return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05); };
   const need = (s) => { const px = parseFloat(s.fontSize); return px >= 24 || (px >= 18.66 && +s.fontWeight >= 700) ? o.large : o.min; };
+  const ink = (s, svgText) => color(svgText ? s.fill : s.webkitTextFillColor);   // -webkit-text-fill-color paints over color, and is color when not set
   const out = [];
   for (const e of document.querySelectorAll('body *')) {
     const svgText = e instanceof SVGTextContentElement;
@@ -189,15 +258,16 @@ function contrastRule(o, { shown, name, color, words }) {
     if (e.closest('button:disabled, input:disabled, select:disabled, textarea:disabled, [aria-disabled="true"]') || settling(e)) continue;
     const r = e.getBoundingClientRect();
     if (r.width <= 1 || r.height <= 1) continue;
-    const s = getComputedStyle(e), bg = behind(e), a = opacityOf(e);
+    const s = getComputedStyle(e);
     if ([...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) {
-      const q = ratio(color(svgText ? s.fill : s.color), bg, a);
+      const q = ratio(paint(e, ink(s, svgText), []), paint(e, null, []));
       if (q < need(s) - 0.005) out.push(name(e) + ' ' + q.toFixed(2) + ':1');
     }
     for (const pseudo of ['::before', '::after']) {
       const p = getComputedStyle(e, pseudo);
       if (!words(p) || p.visibility === 'hidden') continue;   // a pseudo element not displayed has content none, so no words
-      const q = ratio(color(p.color), over(color(p.backgroundColor), bg), a * +p.opacity);
+      const layer = [[color(p.backgroundColor), +p.opacity]];
+      const q = ratio(paint(e, ink(p, false), layer), paint(e, null, layer));
       if (q < need(p) - 0.005) out.push(name(e) + ' ' + pseudo + ' "' + words(p).slice(0, 16) + '" ' + q.toFixed(2) + ':1');
     }
   }
@@ -211,23 +281,27 @@ function goldRule(o, { shown, name, color, words }) {
   probe.remove();
   const near = (c, k) => tok.some((g) => Math.abs(c[0] - g[0]) <= k && Math.abs(c[1] - g[1]) <= k && Math.abs(c[2] - g[2]) <= k);
   const isGold = (css) => { const c = color(css); return c[3] >= 40 / 255 && near(c, 22); };
-  const shadows = (v) => v.match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/g) || [];
-  const uses = (s, text, svg) => {
+  // the colours inside a value: shadows, and the stops of a gradient
+  const colours = (v) => v.match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/g) || [];
+  const accented = (e) => (e.matches('input[type="checkbox"]:checked, input[type="radio"]:checked, input[type="range"], progress, meter'));
+  const uses = (s, text, svg, e) => {
     const u = [];
-    if (text) { u.push(s.color); if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }
+    if (text) { u.push(s.webkitTextFillColor, ...colours(s.textShadow)); if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }   // the fill is the color when not set
     for (const side of ['Top', 'Right', 'Bottom', 'Left']) if (parseFloat(s['border' + side + 'Width']) > 0) u.push(s['border' + side + 'Color']);   // a border of style none has a width of 0
     if (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) u.push(s.outlineColor);   // Chrome gives an outline of style none a width (3 px), so its style is read
-    u.push(s.backgroundColor, ...shadows(s.boxShadow));
+    u.push(s.backgroundColor, ...colours(s.boxShadow), ...colours(s.backgroundImage));
     if (svg) u.push(...[s.stroke, s.fill].filter((v) => v !== 'none'));
+    if (e && accented(e)) u.push(s.accentColor);   // a checked box, a radio, a range or a meter in that colour ('auto' reads as no colour)
+    if (e && s.display === 'list-item' && s.listStyleType !== 'none') u.push(getComputedStyle(e, '::marker').color);
     return u;
   };
   const out = [];
   for (const e of document.querySelectorAll('body *')) {
     if (e.closest(o.allow) || !shown(e)) continue;
-    let hit = uses(getComputedStyle(e), [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()), e instanceof SVGElement).some(isGold);
+    let hit = uses(getComputedStyle(e), [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()), e instanceof SVGElement, e).some(isGold);
     for (const pseudo of ['::before', '::after']) {
       const p = getComputedStyle(e, pseudo);
-      if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false).some(isGold)) hit = true;
+      if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;
     }
     if (hit) out.push(name(e));
   }
@@ -247,18 +321,30 @@ function goldRule(o, { shown, name, color, words }) {
       const dotSel = Object.keys(oneDot).find((s) => c.matches(s)), dot = !!dotSel && !!(0, eval)(oneDot[dotSel]);
       const ownSel = Object.keys(ownColour).find((s) => c.matches(s)), own = ownSel ? hexRgb((0, eval)(ownColour[ownSel])) : null;
       if (ownSel && !own) { out.push(label + ': the colour it is allowed was not found'); continue; }
+      const k = c.width / Math.max(1, c.clientWidth);   // equivalent: a canvas the rule reads is shown, so its CSS width is not 0
+      const W = c.width, H = c.height;
+      const isOwn = (i) => own && Math.abs(d[i] - own[0]) <= 28 && Math.abs(d[i + 1] - own[1]) <= 28 && Math.abs(d[i + 2] - own[2]) <= 28;
+      // the star's glow: within 3 CSS px of a pixel in its own colour, where over another line it can tint toward gold
+      const glow = own ? new Uint8Array(W * H) : null;
+      if (own) {
+        const R = Math.ceil(3 * k);
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] < 64 || !isOwn(i)) continue;
+          const p = i / 4, x = p % W, y = (p - x) / W;
+          for (let Y = y - R; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;   // a row off the canvas is an index off the array, which it ignores; a column is not
+        }
+      }
       let n = 0, x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
       for (let i = 0; i < d.length; i += 4) {
-        // a halo, not a mark: under a quarter of opacity; on a canvas drawn in a colour of its own, under 160, since its
-        // glow over another line tints toward gold (TRAPPIST-1 under the Solar System: alpha 44 to 90)
-        if (d[i + 3] < (own ? 160 : 64)) continue;
-        if (own && Math.abs(d[i] - own[0]) <= 28 && Math.abs(d[i + 1] - own[1]) <= 28 && Math.abs(d[i + 2] - own[2]) <= 28) continue;
+        // a halo, not a mark: under a quarter of opacity; on a canvas drawn in a colour of its own, its pixels, and its
+        // glow under 160 (TRAPPIST-1 under the Solar System: alpha 44 to 90, 1 px from the star)
+        if (d[i + 3] < 64 || isOwn(i)) continue;
+        if (glow && d[i + 3] < 160 && glow[i / 4]) continue;
         if (near([d[i], d[i + 1], d[i + 2]], 22)) {
-          n++; const p = i / 4, x = p % c.width, y = Math.floor(p / c.width);
+          n++; const p = i / 4, x = p % W, y = Math.floor(p / W);
           x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
         }
       }
-      const k = c.width / Math.max(1, c.clientWidth);   // equivalent: a canvas the rule reads is shown, so its CSS width is not 0
       if (dot && x1 - x0 < 12 * k && y1 - y0 < 12 * k) continue;   // the one dot it may hold (none at all passes too)
       if (n > 0) out.push(label + ': ' + n + ' gold pixels' + (dot ? ', more than one dot (' + Math.round((x1 - x0) / k) + ' x ' + Math.round((y1 - y0) / k) + ' px)' : ''));
     }
@@ -267,11 +353,15 @@ function goldRule(o, { shown, name, color, words }) {
 }
 
 /* A rule as an expression for the page: the rule, its settings and its helpers. */
-const inPage = (rule, o) => `(${rule})(${JSON.stringify(o)}, { shown: ${shownFn}, name: ${nameFn}, color: (${colorFactory})(), words: ${wordsFn} })`;
+const inPage = (rule, o) => `(${rule})(${JSON.stringify(o)}, { shown: ${shownFn}, name: ${nameFn}, color: (${colorFactory})(), words: ${wordsFn}, clippers: ${clippersFn} })`;
 
 export const TARGETS = 'a[href], button, input:not([type="hidden"]), select, textarea, summary, [role="button"], [role="link"], [role="checkbox"], [role="switch"], [role="radio"], [role="tab"], [role="slider"], [role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="treeitem"], [role="combobox"], [tabindex]:not([tabindex="-1"])';
 export const overflow = () => inPage(overflowRule, {});
-export const targets = ({ below = 400, tall = 44, wide = 24 } = {}) => inPage(targetsRule, { below, tall, wide, sel: TARGETS });
+/* targets: cover, the elements that may lie over a target, each with its reason: { '<selector>': 'reason' } */
+export function targets({ below = 400, tall = 44, wide = 24, cover = {} } = {}) {
+  for (const [sel, why] of Object.entries(cover)) if (!(typeof why === 'string' && why.trim().length >= 8)) throw new Error(`targets: the cover ${sel} needs its reason`);
+  return inPage(targetsRule, { below, tall, wide, sel: TARGETS, cover: Object.keys(cover).join(', ') || ':not(*)' });
+}
 export const contrast = ({ min = 4.5, large = 3 } = {}) => inPage(contrastRule, { min, large });
 /* gold: allow, the selectors of the elements that may be gold (each with its reason in the caller);
    canvases: { scan: true, named: { '<selector>': 'reason' }, when: { '<selector>': '<expression: gold allowed now>' },
@@ -310,12 +400,13 @@ const PAGE = (body, css = '', script = '', tokens = true) => (`<!doctype html><h
 
 async function selftest() {
   const here = path.dirname(fileURLToPath(import.meta.url));
-  const { drive, holdChrome } = await import(pathToFileURL(path.join(here, 'drive.mjs')).href);
+  const { drive, holdChrome, WATCHDOG_EXIT } = await import(pathToFileURL(path.join(here, 'drive.mjs')).href);
   // the machine's lock first, so that the time below is this run's own and not a wait for another drive (tools/drive.mjs)
   const whole = await holdChrome();
   if (!whole) { console.log('FAIL  invariants selftest: Chrome was not free within 20 minutes'); return 1; }
-  // a selftest that hangs (a broken copy under tools/mutate.mjs) ends here, its Chrome killed and the lock left to be taken
-  setTimeout(() => { console.log('FAIL  invariants selftest: not finished in 60 s'); process.exit(1); }, 60000).unref();
+  // a selftest that hangs (a broken copy under tools/mutate.mjs) ends here, its Chrome killed and the lock left to be
+  // taken: timed out for tools/mutate.mjs, unless a check had already failed and so caught it
+  setTimeout(() => { console.log('FAIL  invariants selftest: not finished in 60 s'); process.exit(failed ? 1 : WATCHDOG_EXIT); }, 60000).unref();
   let failed = 0, passed = 0;
   const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
   const has = (list, id) => list.some((x) => new RegExp(`^#${id}(?![\\w-])`).test(String(x)));
@@ -324,8 +415,12 @@ async function selftest() {
   // the four rules and their settings, without a page
   const four = standard();
   yes('standard gives the four rules in order, each with its name and an expression', four.length === 4 && /scrolls sideways/.test(four[0][0]) && four[0][1].includes('overflowRule') && /44 px/.test(four[1][0]) && four[1][1].includes('targetsRule') && /4\.5 to 1/.test(four[2][0]) && four[2][1].includes('contrastRule') && /gold/.test(four[3][0]) && four[3][1].includes('goldRule'));
+  let noReason = '', reason8 = '';
+  try { targets({ cover: { '#x': 'seven c' } }); } catch (e) { noReason = e.message; }
+  try { targets({ cover: { '#x': 'eight ch' } }); reason8 = 'taken'; } catch (e) { reason8 = e.message; }
+  yes('an element that may cover targets needs its reason: 7 letters are refused, 8 are taken', /needs its reason/.test(noReason) && reason8 === 'taken', `${noReason} | ${reason8}`);
   yes('standard passes each rule its own settings, and the defaults are 400, 44, 24, 4.5 and 3', standard({ targets: { below: 777 } })[1][1].includes('"below":777') && standard({ contrast: { min: 7 } })[2][1].includes('"min":7') && standard({ gold: { allow: ['.zz', '.yy'] } })[3][1].includes('".zz, .yy"')
-    && four[1][1].includes('{"below":400,"tall":44,"wide":24,') && four[2][1].includes('{"min":4.5,"large":3}') && four[3][1].includes('"allow":":not(*)"'));
+    && four[1][1].includes('{"below":400,"tall":44,"wide":24,') && four[1][1].includes('"cover":":not(*)"') && four[2][1].includes('{"min":4.5,"large":3}') && four[3][1].includes('"allow":":not(*)"'));
 
   const c449 = greyFor(4.5, -1), c451 = greyFor(4.5, 1), c299 = greyFor(3, -1), c301 = greyFor(3, 1);
   yes('the greys stand 0.006 to 0.012 on each side of 4.5 and of 3', [[c449, 4.5, -1], [c451, 4.5, 1], [c299, 3, -1], [c301, 3, 1]].every(([g, w, side]) => (g.q - w) * side > 0.006 && (g.q - w) * side < 0.012), [c449, c451, c299, c301].map((g) => g.q.toFixed(4)).join(' '));
@@ -349,6 +444,17 @@ async function selftest() {
     yes('a block off the left edge is a break even when the page hides its own overflow', has(o6, 'lost'), J(o6));
     const o7 = await run(PAGE('<div id="underbody" style="width:100px">under the body</div>', 'body { position: relative; left: -20px; }'), overflow());
     yes('a block straight under a body that is itself off the page is named', has(o7, 'underbody'), J(o7));
+    const o8 = await run(PAGE('<div id="bodywide" style="width:800px;height:20px">wide</div>', 'html { overflow: hidden; height: 100%; } body { height: 100%; overflow-x: auto; }'), overflow());
+    yes('a body that scrolls sideways on its own is a page that scrolls sideways', o8.length === 1 && /^the page is 800 px wide in a 390 px window/.test(o8[0]), J(o8));
+    const o9 = await run(PAGE(`<div style="overflow:hidden"><div id="absleft" style="position:absolute;left:-20px;top:100px;width:100px">pushed</div></div>
+      <div style="position:relative;overflow:hidden;width:200px;height:40px"><div id="absheld" style="position:absolute;left:-20px;top:0;width:100px">held</div></div>
+      <div id="clipm1" style="position:relative;left:-1px;overflow:hidden;width:200px"><div style="position:relative;left:1px"><div id="kidm1" style="position:relative;left:-30px;width:100px">x</div></div></div>
+      <div id="clipm2" style="position:relative;left:-2px;overflow:hidden;width:200px"><div style="position:relative;left:2px"><div id="kidm2" style="position:relative;left:-30px;width:100px">x</div></div></div>
+      <div id="parm1" style="position:relative;left:-1px;width:200px"><div id="kidp1" style="position:relative;left:-30px;width:100px">x</div></div>
+      <div id="parm2" style="position:relative;left:-2px;width:200px"><div id="kidp2" style="position:relative;left:-30px;width:100px">x</div></div>`), overflow());
+    yes('an absolute block is held by its positioned ancestor that cuts it, not by a static one between', has(o9, 'absleft') && !has(o9, 'absheld'), J(o9));
+    yes('a box that cuts a block holds it 1 px off the page, not 2 px off', !has(o9, 'kidm1') && !has(o9, 'clipm1') && has(o9, 'kidm2') && has(o9, 'clipm2'), J(o9));
+    yes('a block is named when its parent is 1 px off the page, and left to its parent at 2 px', has(o9, 'kidp1') && !has(o9, 'parm1') && !has(o9, 'kidp2') && has(o9, 'parm2'), J(o9));
     const o5 = await run(PAGE(Array.from({ length: 7 }, (_, i) => `<div id="many${i}" style="position:relative;left:-20px;width:100px">${i}</div>`).join('')), overflow());
     yes('the rule lists six breaks at most', o5.length === 6 && has(o5, 'many5') && !has(o5, 'many6'), String(o5.length));
 
@@ -372,10 +478,39 @@ async function selftest() {
       <div style="height:60px;width:100px;overflow:hidden;padding-left:0"><button id="lclip" style="height:44px;width:60px;margin-left:-50px">l</button></div>
       <div style="height:60px;overflow:hidden"><button id="tclip" style="height:44px;width:60px;position:relative;top:-30px">t</button></div>
       <div style="height:60px;overflow:clip"><button id="cclip" style="height:44px;width:60px;position:relative;top:-30px">c</button></div>
+      <div style="height:18px;overflow:auto"><button id="sclip" style="height:44px;width:60px">s</button></div>
+      <div style="position:relative;height:60px;width:100px;overflow:auto"><div style="height:100px"></div><button id="sgone" style="height:44px;width:60px">g</button></div><div style="position:relative;top:-60px;height:60px;width:100px;background:#000"></div>
+      <div style="position:relative;height:30px;width:100px;overflow:auto"><div style="height:20px"></div><button id="shalf" style="height:44px;width:60px">h</button></div><div id="shalflid" style="position:relative;height:10px;width:100px;background:#000;margin-top:-10px"></div>
+      <div style="position:relative;height:50px;width:100px"><div style="width:30px;height:50px;overflow-x:auto;overflow-y:hidden;white-space:nowrap"><button id="shalfx" style="margin-left:20px;width:60px;height:44px">x</button></div><div id="shalfxlid" style="position:absolute;left:20px;top:0;width:10px;height:50px;background:#000"></div></div>
+      <div style="position:relative;height:50px;width:100px"><div style="width:30px;height:50px;overflow-x:auto;overflow-y:hidden;white-space:nowrap"><button id="sgonex" style="margin-left:100px;width:60px;height:44px">g</button></div><div style="position:absolute;left:30px;top:0;width:70px;height:50px;background:#000"></div></div>
       <div style="height:0;overflow:hidden"><button id="gone" style="height:44px">cut away</button></div>
       <div style="height:60px;width:100px;overflow:hidden;position:relative"><button id="outside" style="position:absolute;left:200px;height:44px;width:60px">o</button></div>
       <div style="height:60px;width:100px;overflow:hidden;position:relative"><button id="below" style="position:absolute;top:200px;height:44px;width:60px">b</button></div>`);
-    const t1 = [...await run(TA, targets()), ...await run(TB, targets()), ...await run(TC, targets()), ...await run(TD, targets())];
+    const TE = PAGE(`      <div style="position:relative;height:60px"><div style="overflow:hidden;height:0"><button id="absclip" style="position:absolute;top:0;left:0;height:20px;width:60px">abs</button></div></div>
+      <div style="overflow:hidden;width:10px;height:10px"><button id="fixclip" style="position:fixed;top:600px;left:100px;height:20px;width:60px">fixed</button></div>
+      <div style="transform:translateZ(0);overflow:hidden;width:10px;height:10px"><button id="fixheld" style="position:fixed;top:0;left:0;height:44px;width:60px">held</button></div>
+      <div style="position:relative;overflow:hidden;width:10px;height:10px"><button id="fixrel" style="position:fixed;top:700px;left:200px;height:20px;width:60px">rel</button></div>
+      <div style="filter:brightness(1);overflow:hidden;width:10px;height:10px"><button id="fixfilt" style="position:fixed;top:0;left:0;height:44px;width:60px">f</button></div>
+      <div style="perspective:100px;overflow:hidden;width:10px;height:10px"><button id="fixpersp" style="position:fixed;top:0;left:0;height:44px;width:60px">p</button></div>
+      <div style="contain:layout;overflow:hidden;width:10px;height:10px"><button id="fixlay" style="position:fixed;top:0;left:0;height:44px;width:60px">l</button></div>
+      <div style="height:18px;overflow:hidden"><div><button id="gclip" style="height:44px;width:60px">g</button></div></div>
+      <div role="button" style="height:50px"><p>words before <a id="inrole" href="#x">a link</a> and after</p></div>
+      <div><button id="penone" style="pointer-events:none;height:50px;width:60px">p</button></div>
+      <div style="height:50px;width:100px"><button id="underfixed" style="height:50px;width:60px">f</button></div>
+      <div style="height:50px;width:100px"><button id="understicky" style="height:50px;width:60px">s</button></div>
+      <div style="position:relative;height:50px;width:100px"><button id="underlist" style="height:50px;width:60px">l</button><ul role="listbox" style="position:absolute;inset:0;margin:0;background:#000"><li>x</li></ul></div>
+      <div style="position:relative;height:50px;width:100px"><button id="underdialog" style="height:50px;width:60px">d</button><div role="dialog" style="position:absolute;inset:0;background:#000"><span>x</span></div></div>
+      <div style="position:relative;height:50px;width:100px"><button id="undermenu" style="height:50px;width:60px">m</button><div role="menu" style="position:absolute;inset:0;background:#000"></div></div>
+      <div style="position:relative;height:50px;width:100px"><button id="underpop" style="height:50px;width:60px">p</button><div popover style="display:block;position:absolute;inset:0;margin:0;border:0;background:#000"></div></div>
+      <nav><p><a id="n1" href="#a">Home</a> <a id="n2" href="#b">Labs</a> <a id="n3" href="#c">About</a></p></nav>
+      <div style="position:relative;height:50px;width:100px"><button id="under" style="height:50px;width:60px">u</button><div id="lid" style="position:absolute;inset:0;background:#000"></div></div>
+      <div style="position:relative;height:50px;width:100px"><button id="glass" style="height:50px;width:60px">g</button><div style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <button id="withspan" style="height:50px;width:60px"><span style="display:block;height:50px">s</span></button>
+      <div style="height:2000px"></div><button id="faraway" style="height:50px;width:60px">f</button><div style="position:relative;top:-50px;height:50px;width:60px;background:#000"></div>`);
+    // a fixed lid and a sticky one laid over two buttons once the page is drawn (their places known then)
+    const lids = `for (const [id, pos] of [['underfixed', 'fixed'], ['understicky', 'sticky']]) { const b = document.getElementById(id), r = b.getBoundingClientRect(), d = document.createElement('div');
+      d.id = id + '-lid'; d.style.cssText = 'position:' + pos + ';left:' + r.left + 'px;top:' + r.top + 'px;width:60px;height:50px;background:#000;z-index:5;' + (pos === 'sticky' ? 'margin-top:-50px;' : ''); (pos === 'sticky' ? b.parentElement : document.body).append(d); }`;
+    const t1 = [...await run(TA, targets()), ...await run(TB, targets()), ...await run(TC, targets()), ...await run(TD, targets()), ...await run(TE.replace('</body>', `<script>${lids}</script></body>`), targets())];
     const at1 = (id) => t1.find((x) => new RegExp(`^#${id}(?![\\w-])`).test(x)) || '';
     yes('43.4 px tall is a break and 43.6 is not', has(t1, 'h434') && !has(t1, 'h436'), J([at1('h434')]));
     yes('23.4 px wide is a break and 23.6 is not', has(t1, 'w234') && !has(t1, 'w236'), J([at1('w234')]));
@@ -387,6 +522,15 @@ async function selftest() {
     yes('a button its parent cuts is measured on what is seen: below, on the right, on the left, above, by clip', /x18$/.test(at1('clip')) && /^#xclip "x" 20x44$/.test(at1('xclip')) && /^#lclip "l" 10x44$/.test(at1('lclip')) && /^#tclip "t" 60x14$/.test(at1('tclip')) && /^#cclip "c" 60x14$/.test(at1('cclip')), J([at1('clip'), at1('xclip'), at1('lclip'), at1('tclip'), at1('cclip')]));
     yes('a button cut away entirely, by a box of no height or by lying past its box, is not measured', !has(t1, 'gone') && !has(t1, 'outside') && !has(t1, 'below'));
     yes('a target not shown (display none, visibility hidden, opacity 0) is not measured', !has(t1, 'none') && !has(t1, 'vis') && !has(t1, 'op'));
+    yes('an absolute target is cut by its positioned ancestor, not a static one between; a fixed one by none, not even a positioned one, unless a transform, a filter, a perspective or layout containment makes a box its own', /^#absclip "abs" 60x20$/.test(at1('absclip')) && /^#fixclip "fixed" 60x20$/.test(at1('fixclip')) && /^#fixrel "rel" 60x20$/.test(at1('fixrel')) && ['fixheld', 'fixfilt', 'fixpersp', 'fixlay'].every((id) => / 10x10$/.test(at1(id))), J(['absclip', 'fixclip', 'fixrel', 'fixheld', 'fixfilt', 'fixpersp', 'fixlay'].map(at1)));
+    yes('a box that cuts a target from further up cuts it too', / 60x18$/.test(at1('gclip')), at1('gclip'));
+    yes('a box that scrolls does not make a target small: it is measured whole; one it hides now is not looked at for a cover, and one it shows in part is looked at where it shows', !has(t1, 'sclip') && !t1.some((x) => /^#sgone/.test(x)) && !t1.some((x) => /^#sgonex/.test(x)) && t1.includes('#shalf "h" covered by #shalflid') && t1.includes('#shalfx "x" covered by #shalfxlid'), J(t1.filter((x) => /^#s(clip|gone|half)/.test(x))));
+    yes('words in a line count though a target holds the line: a link there is inline', !has(t1, 'inrole'), at1('inrole'));
+    yes('a row of bare links is not a line of text: each is measured', has(t1, 'n1') && has(t1, 'n2') && has(t1, 'n3'), J([at1('n1'), at1('n3')]));
+    yes('a target under another element at its middle is covered; under one that lets the finger through, under its own part, or letting the finger through itself, it is not; one off the window is not looked at', t1.includes('#under "u" covered by #lid') && !t1.some((x) => /^#(glass|withspan|penone|faraway) .*covered/.test(x)), J(t1.filter((x) => /covered/.test(x))));
+    yes('what lies over the page by design covers no target: something fixed or sticky, a part of it, a popup list, a dialog, a menu, a popover', !t1.some((x) => /^#under(fixed|sticky|list|dialog|menu|pop) .*covered/.test(x)), J(t1.filter((x) => /covered/.test(x))));
+    const t6 = await run(TE, targets({ cover: { '#lid': 'a test of the allowance, a lid on purpose' } }));
+    yes('an element the page names, with its reason, may lie over a target', !t6.some((x) => /covered by #lid/.test(x)) && has(t6, 'n1'), J(t6.filter((x) => /covered/.test(x))));
     const t2 = await run(TA, targets({ below: 389 })), t3 = await run(TA, targets({ below: 390 })), t4 = [...await run(TA, targets({ tall: 20, wide: 0 })), ...await run(TD, targets({ tall: 20, wide: 0 }))];
     yes('the rule applies up to its width and not 1 px past it (a 390 px window: below 390 applies, below 389 does not)', J(t2) === '[]' && has(t3, 'h434'), `${t2.length} | ${t3.length}`);
     yes('its sizes are its settings: at 20 by 0, 20 px tall passes and so does 43.4', !has(t4, 'en') && !has(t4, 'h434') && !has(t4, 'w234') && has(t4, 'clip'), J(t4));
@@ -435,6 +579,20 @@ async function selftest() {
       `requestAnimationFrame(() => { document.getElementById('fade').style.color = '#fff'; });`), contrast());
     yes('an ancestor\'s opacity, an opaque background and translucent ones over it are counted; black on white passes', has(k3, 'dim') && has(k3, 'onwhite') && has(k3, 'half') && has(k3, 'halfblack') && !has(k3, 'darkhalf') && !has(k3, 'dark'), J(k3));
     yes('a text in an animation that never ends is measured; one in a transition still running is not, yet', has(k3, 'spin') && !has(k3, 'fade'));
+    const k8 = await run(PAGE(`<div style="opacity:0.5;background:#000"><p id="og" style="color:#fff;margin:0">white on faded black</p></div><p id="bk" style="color:#000">black on white</p>`, 'html, body { background: #fff; color: #000; }'), contrast());
+    yes('an ancestor\'s opacity fades its background as much as the text: white on black at half opacity over white is a break', has(k8, 'og') && !has(k8, 'bk'), J(k8));
+    // white text whose own opacity puts it 0.0005 inside and 0.0005 outside the 0.005 of rounding under 4.5 to 1
+    const opFor = (q) => 1.055 * Math.pow(0.05 * q - 0.05, 1 / 2.4) - 0.055;
+    const back = (a) => 20 * Math.pow((a + 0.055) / 1.055, 2.4) + 1;
+    const tin = opFor(4.4955), tout = opFor(4.4945);
+    const k9 = await run(PAGE(`<p id="tolin" style="color:#fff;opacity:${tin}">inside the rounding</p><p id="tolout" style="color:#fff;opacity:${tout}">outside it</p>
+      <p id="tfc" style="color:#fff;-webkit-text-fill-color:#111">painted near black</p><p id="tfcok" style="color:#111;-webkit-text-fill-color:#fff">painted white</p>
+      <ol><li id="cnt" class="c">item</li></ol><p id="w15" style="color:#222;width:1.5px;height:20px;overflow:hidden">1.5 px wide</p><p id="h15" style="color:#222;height:1.5px;overflow:hidden;margin:0">1.5 px tall</p>`,
+      '.c::before { content: counter(list-item) ". "; color: #222; } .c { color: #fff; }'), contrast());
+    yes('4.4955 to 1 is inside the 0.005 of rounding and passes; 4.4945 is outside it and is a break', Math.abs(back(tin) - 4.4955) < 1e-9 && Math.abs(back(tout) - 4.4945) < 1e-9 && !has(k9, 'tolin') && has(k9, 'tolout'), J(k9.filter((x) => /tol/.test(x))));
+    yes('-webkit-text-fill-color is the ink, over color', has(k9, 'tfc') && !has(k9, 'tfcok'), J(k9.filter((x) => /tfc/.test(x))));
+    yes('a counter shown by a ::before is measured', k9.some((x) => /^#cnt "item" ::before "#\." /.test(x)), J(k9.filter((x) => /cnt/.test(x))));
+    yes('a box 1.5 px wide or 1.5 px tall is measured', has(k9, 'w15') && has(k9, 'h15'), J(k9.filter((x) => /15/.test(x))));
     const k6 = await run(PAGE('<p id="onpage" style="color:#000">black</p>', 'html { background: #fff; } body { background: transparent; }'), contrast());
     yes('with no background of its own the page shows the root\'s: black on a white root passes', J(k6) === '[]', J(k6));
     const k7 = await run(PAGE('<p id="onhalf" style="color:#000">black</p>', 'html { background: #fff; } body { background: rgba(0, 0, 0, 0.5); }'), contrast());
@@ -468,6 +626,14 @@ async function selftest() {
     yes('a decoration colour with no line, an outline or a border of no width, an outline or a border of no style, and the colour of an element with no text are not gold', !has(g2, 'nodeco') && !has(g2, 'nooutline') && !has(g2, 'noborder') && !has(g2, 'gnotext') && !has(g2, 'gonone') && !has(g2, 'gbnone') && !has(g2, 'fillspan'), J(g2));
     yes('gold drawn by a ::before (its words) or an ::after (a box) is a break; a pseudo with no content, or not displayed, is not', has(g2, 'gbefore') && has(g2, 'gafter') && !has(g2, 'gnocontent') && !has(g2, 'gpsnone'));
     yes('gold in a closed dialog is not seen, in an open one it is', !has(g2, 'gclosed') && has(g2, 'gopen'));
+    const g5 = await run(PAGE(`<p id="gts" style="color:#fff;text-shadow:0 0 8px var(--accretion)">glow</p><p id="gtsok" style="color:#fff;text-shadow:0 0 8px #fff">white glow</p>
+      <input id="gac" type="checkbox" checked style="accent-color:var(--accretion)"><input id="gacoff" type="checkbox" style="accent-color:var(--accretion)"><input id="gacrange" type="range" style="accent-color:var(--accretion)">
+      <p id="gtf" style="color:#fff;-webkit-text-fill-color:var(--accretion)">gold paint</p><ol><li id="gcnt" class="gc">item</li></ol>
+      <div id="ggrad" style="height:4px;background:linear-gradient(90deg, #000, var(--accretion))"></div><div id="ggradok" style="height:4px;background:linear-gradient(90deg, #000, #fff)"></div>
+      <ul><li id="gmark" class="gm">a gold marker</li><li id="gmarknone" class="gm" style="list-style:none">no marker</li></ul>`,
+      '.gc::before { content: counter(list-item) ". "; color: var(--accretion); } .gc { color: #fff; } .gm { color: #fff; } .gm::marker { color: var(--accretion); }'), gold());
+    yes('gold in a text shadow, a checked box or a range by accent-color, -webkit-text-fill-color, a counter in a ::before, a gradient stop and a ::marker is a break', ['gts', 'gac', 'gacrange', 'gtf', 'gcnt', 'ggrad', 'gmark'].every((id) => has(g5, id)), J(g5));
+    yes('a white shadow, an unchecked box, a gradient with no gold and a list item with no marker are not gold', !has(g5, 'gtsok') && !has(g5, 'gacoff') && !has(g5, 'ggradok') && !has(g5, 'gmarknone'), J(g5));
     const g3 = await run(PAGE('<p id="white" style="color:#fff">white</p><p id="ochre" style="color:#D4A24C">this page has no gold</p>', '', '', false), gold());
     yes('a page that defines no gold has none, whatever its colours', J(g3) === '[]', J(g3));
     const g4 = await run(PAGE(Array.from({ length: 13 }, (_, i) => `<p id="gold${i}" style="color:var(--accretion)">${i}</p>`).join('')), gold());
@@ -495,11 +661,25 @@ async function selftest() {
       <canvas id="khidden" width="20" height="20" style="display:none"></canvas><canvas id="kempty" width="20" height="20"></canvas>
       <canvas id="kzero" width="0" height="20"></canvas><canvas id="kflat" width="20" height="0"></canvas><canvas id="klast" width="20" height="20"></canvas>`, '',
       ownCases.map(([c, , out]) => px(`kown${c}28`, [...G0, 255]) + px(`kown${c}29`, [...out, 255])).join('') + px('kownlost', [...G0, 255]) + px('kownA160', [...G0, 160]) + px('kownA159', [...G0, 159]) + px('khidden', [...G0, 255]) + px('klast', [...G0, 255], [[19, 19]])
+
       + `document.getElementById('kbitmap').getContext('bitmaprenderer'); document.getElementById('krefuse').getContext = () => { throw new DOMException('refused', 'SecurityError'); };`);
+    // the glow of a star drawn in its own colour (#4060a0 here): its own pixel at (5, 5), faint gold beside it
+    const K3 = PAGE(`
+      <canvas id="kglow3" width="20" height="20"></canvas><canvas id="kglow4" width="20" height="20"></canvas><canvas id="kglow160" width="20" height="20"></canvas><canvas id="kown63" width="20" height="20"></canvas>
+      <canvas id="kglowk6" width="40" height="40" style="width:20px;height:20px"></canvas><canvas id="kglowk7" width="40" height="40" style="width:20px;height:20px"></canvas><canvas id="kthin" width="100" height="20"></canvas>
+      <canvas id="kglowk5" width="30" height="30" style="width:20px;height:20px"></canvas><canvas id="kglowfaint" width="20" height="20"></canvas><canvas id="kglow64" width="20" height="20"></canvas>
+      <canvas id="kwrap" width="20" height="20"></canvas><canvas id="kwrap2" width="20" height="20"></canvas><canvas id="kglowlast" width="20" height="20"></canvas>
+      <canvas id="kglowup" width="20" height="20"></canvas><canvas id="kglowdown" width="20" height="20"></canvas>`, '',
+      ['kglow3', 'kglow4', 'kglow160', 'kglowk6', 'kglowk7'].map((id) => px(id, [64, 96, 160, 255], [[5, 5]])).join('') + px('kglow3', [...G0, 120], [[8, 5]]) + px('kglow4', [...G0, 120], [[9, 5]]) + px('kglow160', [...G0, 160], [[6, 5]])
+      + px('kown63', [...G0, 63]) + px('kglowk6', [...G0, 120], [[11, 5]]) + px('kglowk7', [...G0, 120], [[12, 5]])
+      + px('kglowk5', [64, 96, 160, 255], [[5, 5]]) + px('kglowk5', [...G0, 120], [[10, 5]]) + px('kglowfaint', [64, 96, 160, 63], [[5, 5]]) + px('kglowfaint', [...G0, 120], [[6, 5]]) + px('kglow64', [64, 96, 160, 64], [[5, 5]]) + px('kglow64', [...G0, 120], [[6, 5]])
+      + px('kwrap', [64, 96, 160, 255], [[0, 5]]) + px('kwrap', [...G0, 120], [[19, 4]]) + px('kwrap2', [64, 96, 160, 255], [[19, 5]]) + px('kwrap2', [...G0, 120], [[0, 6]]) + px('kglowlast', [64, 96, 160, 255], [[19, 19]]) + px('kglowlast', [...G0, 120], [[17, 19]])
+      + px('kglowup', [64, 96, 160, 255], [[5, 5]]) + px('kglowup', [...G0, 120], [[5, 2]]) + px('kglowdown', [64, 96, 160, 255], [[5, 5]]) + px('kglowdown', [...G0, 120], [[5, 8]])
+      + `{ const x = document.getElementById('kthin').getContext('2d'); x.fillStyle = '#4060a0'; x.fillRect(0, 0, 4, 4); x.strokeStyle = '#D4A24C'; x.lineWidth = 1; x.beginPath(); x.moveTo(10, 10); x.lineTo(90, 10); x.stroke(); }`);
     const cfg = { scan: true, named: { '#knamed': 'a test' }, when: { '#kwhen': 'true', '#kwhenno': 'false' },
       oneDot: { '#kdot': 'true', '#kdot11': 'true', '#kdot12x': 'true', '#kdot12y': 'true', '#kdotoff': 'false', '#kdotnone': 'true', '#kscaled': 'true' },
-      ownColour: { ...Object.fromEntries(ownCases.flatMap(([c, own]) => [[`#kown${c}28`, J(c === 'R' ? hex(own).slice(1).toUpperCase() : hex(own))], [`#kown${c}29`, J(hex(own))]])), '#kownlost': '""', '#kownA160': '"#4060a0"', '#kownA159': '"#4060a0"' } };   // red's written B8A24C
-    const k = [...await run(K1, gold({ canvases: cfg })), ...await run(K2, gold({ canvases: cfg }))];
+      ownColour: { ...Object.fromEntries(ownCases.flatMap(([c, own]) => [[`#kown${c}28`, J(c === 'R' ? hex(own).slice(1).toUpperCase() : hex(own))], [`#kown${c}29`, J(hex(own))]])), '#kownlost': '""', '#kownA160': '"#4060a0"', '#kownA159': '"#4060a0"', ...Object.fromEntries(['#kglow3', '#kglow4', '#kglow160', '#kown63', '#kglowk6', '#kglowk7', '#kthin', '#kglowk5', '#kglowfaint', '#kglow64', '#kwrap', '#kwrap2', '#kglowlast', '#kglowup', '#kglowdown'].map((s) => [s, '"#4060a0"'])) } };   // red's written B8A24C
+    const k = [...await run(K1, gold({ canvases: cfg })), ...await run(K2, gold({ canvases: cfg })), ...await run(K3, gold({ canvases: cfg }))];
     const at = (id) => k.find((x) => x.startsWith('#' + id + ':')) || '';
     yes('a pixel 22 off gold in any one channel is gold, 23 off is not', ['k22', 'k22g', 'k22b'].every((id) => /gold pixels/.test(at(id))) && ['k23', 'k23g', 'k23b'].every((id) => !at(id)), J(k));
     yes('a pixel at alpha 64 is read, at 63 it is a halo', /gold pixels/.test(at('ka64')) && !at('ka63'), J([at('ka64'), at('ka63')]));
@@ -509,7 +689,12 @@ async function selftest() {
     yes('a canvas drawn at half its size is measured in CSS pixels: 20 of its pixels apart is 10 px, one dot', !at('kscaled'), at('kscaled'));
     yes('pixels within 28 of a canvas\'s own colour in every channel are left out, and 29 off in any one is gold again', ownCases.every(([c]) => !at(`kown${c}28`) && /^#kown\w29: 1 gold pixels$/.test(at(`kown${c}29`))), J(k.filter((x) => /kown/.test(x))));
     yes('an own colour not found is a break', /colour it is allowed was not found/.test(at('kownlost')));
-    yes('on a canvas with its own colour, gold at alpha 160 is read and at 159 is a halo', /^#kownA160: 1 gold pixels$/.test(at('kownA160')) && !at('kownA159'), J([at('kownA160'), at('kownA159')]));
+    yes('on a canvas with its own colour, gold away from the star is read from an alpha of 64; at 63 it is not', /^#kownA160: 1 gold pixels$/.test(at('kownA160')) && /^#kownA159: 1 gold pixels$/.test(at('kownA159')) && !at('kown63'), J([at('kownA160'), at('kownA159'), at('kown63')]));
+    yes('faint gold within 3 CSS px of the star\'s own pixels, beside, above or below, is its glow, at 4 px it is read, and at an alpha of 160 it is read beside the star', !at('kglow3') && !at('kglowup') && !at('kglowdown') && /^#kglow4: 1 gold pixels$/.test(at('kglow4')) && /^#kglow160: 1 gold pixels$/.test(at('kglow160')), J([at('kglow3'), at('kglowup'), at('kglowdown'), at('kglow4'), at('kglow160')]));
+    yes('on a canvas drawn at twice its size the glow reaches 6 of its pixels, not 7; at one and a half times, 5 (4.5 rounded up)', !at('kglowk6') && /^#kglowk7: 1 gold pixels$/.test(at('kglowk7')) && !at('kglowk5'), J([at('kglowk6'), at('kglowk7'), at('kglowk5')]));
+    yes('a pixel of the star\'s colour at an alpha of 64 has a glow, one at 63 has none', !at('kglow64') && /^#kglowfaint: 1 gold pixels$/.test(at('kglowfaint')), J([at('kglow64'), at('kglowfaint')]));
+    yes('the glow stops at the canvas\'s left and right edges, does not wrap onto the next row, and reaches from its last pixel', /^#kwrap: 1 gold pixels$/.test(at('kwrap')) && /^#kwrap2: 1 gold pixels$/.test(at('kwrap2')) && !at('kglowlast'), J([at('kwrap'), at('kwrap2'), at('kglowlast')]));
+    yes('a 1 px gold line on a canvas with its own colour is read, though its pixels are at half opacity', /^#kthin: \d+ gold pixels$/.test(at('kthin')) && +at('kthin').split(' ')[1] >= 150, at('kthin'));
     yes('fails closed: a canvas with no 2D context and one that refuses its pixels are breaks', /no 2D context/.test(at('kbitmap')) && /cannot be read \(SecurityError\)/.test(at('krefuse')), J([at('kbitmap'), at('krefuse')]));
     yes('a hidden canvas, an empty one, and one of no width or no height are not breaks', !at('khidden') && !at('kempty') && !at('kzero') && !at('kflat'), J(k.filter((x) => /khidden|kempty|kzero|kflat/.test(x))));
     yes('the last pixel of a canvas is read', /^#klast: 1 gold pixels$/.test(at('klast')), at('klast'));
@@ -517,7 +702,7 @@ async function selftest() {
     yes('a page that names no allowance has every canvas read', ['k22', 'knamed', 'kwhen', 'kdot', 'kownR28'].every((id) => kb.some((x) => x.startsWith('#' + id + ':'))), J(kb));
     const k0 = [...await run(K1, gold({ canvases: { ...cfg, scan: false } })), ...await run(K2, gold({ canvases: { ...cfg, scan: false } }))], kn = [...await run(K1, gold()), ...await run(K2, gold())];
     yes('canvases are read only when the page asks', !k0.some((x) => /^#k/.test(x)) && !kn.some((x) => /^#k/.test(x)), J([k0, kn]));
-  }, { width: 390, height: 844, port: 9361, timeoutMs: 120000, say: () => {} });
+  }, { width: 390, height: 844, timeoutMs: 120000, say: () => {} });
   const lost = r.checks.filter((c) => !c.ok);
   yes('the fixture pages ran in one Chrome to their end, with a clean console', !r.timedOut && !lost.length, J(lost).slice(0, 400));
   whole();

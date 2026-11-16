@@ -37,7 +37,7 @@
    ============================================================ */
 
 import { overflow, targets, contrast, gold } from '../invariants.mjs';
-import { SURVEY_GOLD } from './shapes.mjs';
+import { SURVEY_GOLD, SURVEY_COVER } from './shapes.mjs';
 
 const SKY_GOLD = { allow: ['.bp', '.los-bk', '.lamp.kept', '.tally-marks .tl-kept', '.fill.kept', '.lbr-panel'] };
 
@@ -48,7 +48,7 @@ export function exomaniaRules() {
   const labs = (e) => `(/\\/labs\\//.test(location.pathname) ? ${e} : [])`;
   return [
     ['invariant: the page never scrolls sideways', labs(overflow())],
-    ['invariant: every visible target is at least 44 px tall and 24 px wide at 390', labs(targets())],
+    ['invariant: every visible target is at least 44 px tall and 24 px wide at 390', labs(targets({ cover: SURVEY_COVER }))],
     ['invariant: every visible text is at least 4.5 to 1 against what is behind it', labs(contrast())],
     ['invariant: gold only where the page allows it', labs(`(/exomania-survey\\.html$/.test(location.pathname) ? ${gold(SURVEY_GOLD)} : ${gold(SKY_GOLD)})`)],
   ];

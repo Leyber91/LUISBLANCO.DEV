@@ -54,6 +54,14 @@ import { standard, gold as goldRule, targets as targetRule } from '../invariants
 const KEPT = '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")';
 const STAR = '(() => { const d = document.querySelector("#nums .sw-dot"); return d ? getComputedStyle(d).getPropertyValue("--star-col").trim() : ""; })()';
 const TRANSIT = '(document.querySelector("#sheet-e [data-k=sig]") || { getAttribute: () => "false" }).getAttribute("aria-checked") !== "true"';
+/* What may lie over a target on the survey beyond what the rule lets by design (dialogs, popup lists, what is fixed or
+   sticky): the two ends of the radius range meet when both are at one value, and the upper then lies on the lower,
+   which its keys still move (a finding for the survey's road: a finger cannot take the lower end there). */
+export const SURVEY_COVER = {
+  '#edge-hi': 'the upper end of the radius range lies on the lower when both meet',
+  'a.skip': 'the skip link, shown over the bar only while it has the focus',
+};
+
 export const SURVEY_GOLD = {
   allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel', '#nums .sw-dot'],
   canvases: {
@@ -67,7 +75,8 @@ export const SURVEY_GOLD = {
     // the catalogue diagram while the chosen world is kept: its point, one dot, and no other gold
     oneDot: { '#v-plot canvas.plot-cv': KEPT },
     // the star drawn in its own colour (its Planck spectrum, which can be as warm as a tint of gold): the pixels near
-    // that colour, as the table's swatch gives it, are not counted; a gold orbit or mark still is
+    // that colour, as the table's swatch gives it, are not counted, nor its faint glow within 3 px of them; a gold orbit
+    // or mark away from the star still is, a 1 px line included (tools/invariants.mjs)
     ownColour: { '#inset': STAR, '#sheet-d canvas.sys-cv': STAR },
   },
 };
@@ -280,7 +289,7 @@ async function names(k, from, longest) {
 /* ---- the scenario ---- */
 export default async function shapes(p, { base, width }) {
   await p.before(`(${guard})()`);
-  for (const [n, e] of standard({ gold: SURVEY_GOLD })) p.invariant(n, e);
+  for (const [n, e] of standard({ gold: SURVEY_GOLD, targets: { cover: SURVEY_COVER } })) p.invariant(n, e);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const phone = width < 700;

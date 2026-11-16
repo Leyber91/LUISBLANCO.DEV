@@ -11,7 +11,7 @@
 // background, only scenarios whose look is built are links.
 
 import { standard } from './invariants.mjs';
-import { SURVEY_GOLD } from './shapes.mjs';
+import { SURVEY_GOLD, SURVEY_COVER } from './shapes.mjs';
 
 // the survey's own gold (shapes.mjs says why each is allowed), and on the article the status word "observed" of a
 // planet's scenarios, gold for the same reason as under the planet's name
@@ -55,7 +55,7 @@ const slug = (n) => n.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
 
 export default async function air(p, { base, width }) {
   // after every step, on both pages: no sideways scroll, 44 px targets at 390, text at 4.5 to 1, gold where allowed
-  for (const [name, expr] of standard({ gold: GOLD })) p.invariant(name, expr);
+  for (const [name, expr] of standard({ gold: GOLD, targets: { cover: SURVEY_COVER } })) p.invariant(name, expr);
   p.invariant('invariant: sheet A\'s corner blocks and the line under the world do not overlap, the details open or closed', CORNERS);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)
 

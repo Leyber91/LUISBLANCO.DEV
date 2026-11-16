@@ -35,11 +35,6 @@
     "to": "return [d[0], d[1], d[2], 1];"
   },
   {
-    "name": "words: the words of a pseudo element never read",
-    "from": "function wordsFn(p) { const m = /^\"(.*)\"$/.exec(p.content); return m ? m[1].trim() : ''; }",
-    "to": "function wordsFn(p) { return ''; }"
-  },
-  {
     "name": "overflow: a page wider than its window passes",
     "from": "  if (w > innerWidth + 1) {",
     "to": "  if (false) {"
@@ -105,16 +100,6 @@
     "to": "if (r.left >= -1 || r.right <= 1) continue;"
   },
   {
-    "name": "overflow: an ancestor that clips never holds",
-    "from": "if (getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1) { held = true; break; }",
-    "to": "if (false) { held = true; break; }"
-  },
-  {
-    "name": "overflow: any ancestor holds",
-    "from": "if (getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1) { held = true; break; }",
-    "to": "if (n.getBoundingClientRect().left >= -1) { held = true; break; }"
-  },
-  {
     "name": "overflow: a clipping ancestor off the page holds",
     "from": "getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1)",
     "to": "getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1000)"
@@ -175,21 +160,6 @@
     "to": "if (v.h < o.tall - 0.5 && v.w < o.wide - 0.5)"
   },
   {
-    "name": "targets: the default width is 389 px",
-    "from": "export const targets = ({ below = 400, tall = 44, wide = 24 } = {})",
-    "to": "export const targets = ({ below = 389, tall = 44, wide = 24 } = {})"
-  },
-  {
-    "name": "targets: the default height is 43 px",
-    "from": "export const targets = ({ below = 400, tall = 44, wide = 24 } = {})",
-    "to": "export const targets = ({ below = 400, tall = 43, wide = 24 } = {})"
-  },
-  {
-    "name": "targets: the default width of a target is 23 px",
-    "from": "export const targets = ({ below = 400, tall = 44, wide = 24 } = {})",
-    "to": "export const targets = ({ below = 400, tall = 44, wide = 23 } = {})"
-  },
-  {
     "name": "targets: a disabled control measured",
     "from": "    if (e.disabled || e.closest(",
     "to": "    if (e.closest("
@@ -230,31 +200,6 @@
     "to": ""
   },
   {
-    "name": "targets: a link beside one letter is inline",
-    "from": ".length > e.textContent.replace(/\\s+/g, '').length + 1;",
-    "to": ".length > e.textContent.replace(/\\s+/g, '').length;"
-  },
-  {
-    "name": "targets: a link beside two letters is not inline",
-    "from": ".length > e.textContent.replace(/\\s+/g, '').length + 1;",
-    "to": ".length > e.textContent.replace(/\\s+/g, '').length + 2;"
-  },
-  {
-    "name": "targets: a checkbox measured alone in its label",
-    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) r =",
-    "to": "if (false) r ="
-  },
-  {
-    "name": "targets: a radio measured alone in its label",
-    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) r =",
-    "to": "if ((e.type === 'checkbox') && e.closest('label')) r ="
-  },
-  {
-    "name": "targets: a checkbox with no label measured by nothing",
-    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) r =",
-    "to": "if ((e.type === 'checkbox' || e.type === 'radio')) r = e.closest('label') ? e.closest('label').getBoundingClientRect() : { left: 0, top: 0, right: 99, bottom: 99 }; else if (false) r ="
-  },
-  {
     "name": "targets: a cut-away target measured",
     "from": "    if (v.w === 0 || v.h === 0) continue;",
     "to": ""
@@ -268,16 +213,6 @@
     "name": "targets: a target cut away from below measured",
     "from": "if (v.w === 0 || v.h === 0) continue;",
     "to": "if (v.w === 0) continue;"
-  },
-  {
-    "name": "targets: a box cut past its edge counted below zero",
-    "from": "return { w: Math.max(0, R - L), h: Math.max(0, B - T) };",
-    "to": "return { w: R - L, h: B - T };"
-  },
-  {
-    "name": "targets: a box cut from below counted below zero",
-    "from": "return { w: Math.max(0, R - L), h: Math.max(0, B - T) };",
-    "to": "return { w: Math.max(0, R - L), h: B - T };"
   },
   {
     "name": "targets: an ancestor that hides its overflow sideways cuts nothing",
@@ -308,16 +243,6 @@
     "name": "targets: the bottom of a box not cut",
     "from": "B = Math.min(B, q.bottom);",
     "to": "B = B;"
-  },
-  {
-    "name": "targets: overflow clip read as visible",
-    "from": "if (/hidden|clip/.test(s.overflowY))",
-    "to": "if (/hidden/.test(s.overflowY))"
-  },
-  {
-    "name": "targets: thirteen breaks listed",
-    "from": "    if (v.h < o.tall - 0.5 || v.w < o.wide - 0.5) out.push(name(e) + ' ' + Math.round(v.w) + 'x' + Math.round(v.h));\n  }\n  return [...new Set(out)].slice(0, 12);",
-    "to": "    if (v.h < o.tall - 0.5 || v.w < o.wide - 0.5) out.push(name(e) + ' ' + Math.round(v.w) + 'x' + Math.round(v.h));\n  }\n  return [...new Set(out)].slice(0, 13);"
   },
   {
     "name": "targets: a role link forgotten",
@@ -358,11 +283,6 @@
     "name": "targets: a tabindex of -1 counted",
     "from": "[tabindex]:not([tabindex=\"-1\"])",
     "to": "[tabindex]"
-  },
-  {
-    "name": "targets: the page measured with another list",
-    "from": "export const targets = ({ below = 400, tall = 44, wide = 24 } = {}) => inPage(targetsRule, { below, tall, wide, sel: TARGETS });",
-    "to": "export const targets = ({ below = 400, tall = 44, wide = 24 } = {}) => inPage(targetsRule, { below, tall, wide, sel: 'button' });"
   },
   {
     "name": "contrast: a text under its ratio passes",
@@ -450,11 +370,6 @@
     "to": "|| e.closest('svg') || !shown(e)) continue;"
   },
   {
-    "name": "contrast: SVG text measured by its colour",
-    "from": "color(svgText ? s.fill : s.color)",
-    "to": "color(s.color)"
-  },
-  {
     "name": "contrast: a disabled button measured",
     "from": "e.closest('button:disabled, input:disabled",
     "to": "e.closest('input:disabled"
@@ -495,24 +410,9 @@
     "to": "if (r.width <= 400 || r.height <= 1) continue;"
   },
   {
-    "name": "contrast: an ancestor's opacity forgotten",
-    "from": "for (let n = e; n; n = n.parentElement) a *= +getComputedStyle(n).opacity;",
-    "to": "a *= +getComputedStyle(e).opacity;"
-  },
-  {
-    "name": "contrast: the backgrounds behind a text forgotten",
-    "from": "return layers.reduceRight((bg, layer) => over(layer, bg), base);",
-    "to": "return layers[0][3] >= 1 ? layers[0] : base;"
-  },
-  {
     "name": "contrast: the root's background forgotten",
     "from": "over(color(getComputedStyle(document.body).backgroundColor), over(color(getComputedStyle(document.documentElement).backgroundColor), [255, 255, 255, 1]))",
     "to": "over(color(getComputedStyle(document.body).backgroundColor), [0, 0, 0, 1])"
-  },
-  {
-    "name": "contrast: a translucent colour read as opaque",
-    "from": "const over = (top, under) => { const a = top[3];",
-    "to": "const over = (top, under) => { const a = 1;"
   },
   {
     "name": "contrast: the lighter of the two not found",
@@ -548,16 +448,6 @@
     "name": "contrast: a pseudo element skipped only when it has no words and is hidden",
     "from": "if (!words(p) || p.visibility === 'hidden') continue;",
     "to": "if (!words(p) && p.visibility === 'hidden') continue;"
-  },
-  {
-    "name": "contrast: a pseudo element's background forgotten",
-    "from": "over(color(p.backgroundColor), bg)",
-    "to": "bg"
-  },
-  {
-    "name": "contrast: a pseudo element's opacity forgotten",
-    "from": "a * +p.opacity);",
-    "to": "a);"
   },
   {
     "name": "contrast: thirteen breaks listed",
@@ -625,16 +515,6 @@
     "to": "return c[3] >= 41 / 255 && near(c, 22); };"
   },
   {
-    "name": "gold: text colour not read",
-    "from": "if (text) { u.push(s.color);",
-    "to": "if (false) { u.push(s.color);"
-  },
-  {
-    "name": "gold: the colour of an element with no text read",
-    "from": "if (text) { u.push(s.color);",
-    "to": "u.push(s.color); if (text) {"
-  },
-  {
     "name": "gold: a text decoration not read",
     "from": "if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }",
     "to": "}"
@@ -675,16 +555,6 @@
     "to": "parseFloat(s.outlineWidth) >= 0) u.push(s.outlineColor);"
   },
   {
-    "name": "gold: a background not read",
-    "from": "u.push(s.backgroundColor, ...shadows(s.boxShadow));",
-    "to": "u.push(...shadows(s.boxShadow));"
-  },
-  {
-    "name": "gold: a box shadow not read",
-    "from": "u.push(s.backgroundColor, ...shadows(s.boxShadow));",
-    "to": "u.push(s.backgroundColor);"
-  },
-  {
     "name": "gold: SVG stroke and fill not read",
     "from": "if (svg) u.push(...[s.stroke, s.fill].filter((v) => v !== 'none'));",
     "to": ""
@@ -700,34 +570,14 @@
     "to": "u.push(...[s.stroke].filter"
   },
   {
-    "name": "gold: an element's own text not seen",
-    "from": "let hit = uses(getComputedStyle(e), [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()), e instanceof SVGElement)",
-    "to": "let hit = uses(getComputedStyle(e), false, e instanceof SVGElement)"
-  },
-  {
-    "name": "gold: an element counted as SVG",
-    "from": "n.textContent.trim()), e instanceof SVGElement).some(isGold);",
-    "to": "n.textContent.trim()), true).some(isGold);"
-  },
-  {
-    "name": "gold: pseudo elements not read",
-    "from": "      if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false).some(isGold)) hit = true;",
-    "to": ""
-  },
-  {
     "name": "gold: a pseudo element with no content read",
-    "from": "if (p.content !== 'none' && p.display !== 'none' && uses(",
-    "to": "if (p.display !== 'none' && uses("
+    "from": "if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;",
+    "to": "if (p.display !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;"
   },
   {
     "name": "gold: a pseudo element not displayed read",
-    "from": "if (p.content !== 'none' && p.display !== 'none' && uses(",
-    "to": "if (p.content !== 'none' && uses("
-  },
-  {
-    "name": "gold: a pseudo element's words not read",
-    "from": "uses(p, !!words(p), false)",
-    "to": "uses(p, false, false)"
+    "from": "if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;",
+    "to": "if (p.content !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;"
   },
   {
     "name": "gold: thirteen breaks listed",
@@ -778,31 +628,6 @@
     "name": "canvas: any canvas with a condition left alone",
     "from": "if (cond && (0, eval)(when[cond])) continue;",
     "to": "if (cond) continue;"
-  },
-  {
-    "name": "canvas: alpha 63 read",
-    "from": "if (d[i + 3] < (own ? 160 : 64)) continue;",
-    "to": "if (d[i + 3] < (own ? 160 : 63)) continue;"
-  },
-  {
-    "name": "canvas: alpha 64 a halo",
-    "from": "if (d[i + 3] < (own ? 160 : 64)) continue;",
-    "to": "if (d[i + 3] < (own ? 160 : 65)) continue;"
-  },
-  {
-    "name": "canvas: with its own colour, alpha 159 read",
-    "from": "if (d[i + 3] < (own ? 160 : 64)) continue;",
-    "to": "if (d[i + 3] < (own ? 159 : 64)) continue;"
-  },
-  {
-    "name": "canvas: with its own colour, alpha 160 a halo",
-    "from": "if (d[i + 3] < (own ? 160 : 64)) continue;",
-    "to": "if (d[i + 3] < (own ? 161 : 64)) continue;"
-  },
-  {
-    "name": "canvas: with its own colour, halos read as on any canvas",
-    "from": "if (d[i + 3] < (own ? 160 : 64)) continue;",
-    "to": "if (d[i + 3] < 64) continue;"
   },
   {
     "name": "canvas: a pixel 23 off is gold",
@@ -880,11 +705,6 @@
     "to": ""
   },
   {
-    "name": "canvas: an own colour never left out",
-    "from": "if (own && Math.abs(d[i] - own[0]) <= 28",
-    "to": "if (false && Math.abs(d[i] - own[0]) <= 28"
-  },
-  {
     "name": "canvas: 29 off an own colour in red left out",
     "from": "Math.abs(d[i] - own[0]) <= 28",
     "to": "Math.abs(d[i] - own[0]) <= 29"
@@ -950,11 +770,6 @@
     "to": "if (r.left >= -1 && r.right <= 1 || !shown(e)) continue;"
   },
   {
-    "name": "overflow: the root that hides its overflow holds a block",
-    "from": "for (let n = e.parentElement; n !== b; n = n.parentElement)",
-    "to": "for (let n = e.parentElement; n !== null; n = n.parentElement)"
-  },
-  {
     "name": "overflow: the rule writes nothing",
     "from": "export const overflow = () => inPage(overflowRule, {});",
     "to": "export const overflow = () => '[]';"
@@ -963,11 +778,6 @@
     "name": "targets: aria-disabled and inert both forgotten",
     "from": "e.closest('[aria-disabled=\"true\"], [inert]') || !shown(e)",
     "to": "false || !shown(e)"
-  },
-  {
-    "name": "contrast: the body counted twice",
-    "from": "for (let n = e; n !== document.body; n = n.parentElement) layers.push(",
-    "to": "for (let n = e; n !== document.documentElement; n = n.parentElement) layers.push("
   },
   {
     "name": "contrast: large only when both 24 px and bold",
@@ -988,11 +798,6 @@
     "name": "contrast: an element read by its child elements, not its own text",
     "from": "if ([...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) {\n      const q = ratio(",
     "to": "if ([...e.childNodes].some((n) => n.nodeType !== 3 && n.textContent.trim())) {\n      const q = ratio("
-  },
-  {
-    "name": "gold: a box shadow with no colour breaks the rule",
-    "from": "const shadows = (v) => v.match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)/g) || [];",
-    "to": "const shadows = (v) => v.match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)/g);"
   },
   {
     "name": "canvas: a page with no named canvases breaks the rule",
@@ -1040,11 +845,6 @@
     "to": "!shown(c) && named.some((s) => c.matches(s))) continue;"
   },
   {
-    "name": "canvas: the last pixel not read",
-    "from": "for (let i = 0; i < d.length; i += 4) {",
-    "to": "for (let i = 0; i < d.length - 4; i += 4) {"
-  },
-  {
     "name": "selftest: greys searched in too narrow a range",
     "from": "for (let v = 40; v < 230; v++)",
     "to": "for (let v = 40; v < 41; v++)"
@@ -1073,5 +873,550 @@
     "name": "selftest: the command does not know its own word",
     "from": "if (process.argv[2] === 'selftest') process.exit(await selftest());",
     "to": "if (process.argv[2] !== 'selftest') process.exit(await selftest());"
+  },
+  {
+    "name": "words: the words of a pseudo element never read",
+    "from": "return parts.map((t) => (t[0] === '\"' ? t.slice(1, -1) : '#')).join('').trim();",
+    "to": "return '';"
+  },
+  {
+    "name": "words: a counter not read as words",
+    "from": "|counters?\\([^)]*\\)|attr\\([^)]*\\)/g)",
+    "to": "/g)"
+  },
+  {
+    "name": "words: a counter read as nothing",
+    "from": ": '#')).join('').trim();",
+    "to": ": '')).join('').trim();"
+  },
+  {
+    "name": "words: no content read as words",
+    "from": ".match(/\"(?:[^\"\\\\]|\\\\.)*\"|counters?\\([^)]*\\)|attr\\([^)]*\\)/g) || [];",
+    "to": ".match(/\"(?:[^\"\\\\]|\\\\.)*\"|counters?\\([^)]*\\)|attr\\([^)]*\\)/g) || ['\"x\"'];"
+  },
+  {
+    "name": "clippers: an absolute box held by its parent",
+    "from": "if (pos === 'absolute' || pos === 'fixed') {",
+    "to": "if (pos === 'fixed') {"
+  },
+  {
+    "name": "clippers: a fixed box held by its parent",
+    "from": "if (pos === 'absolute' || pos === 'fixed') {",
+    "to": "if (pos === 'absolute' || pos === 'xfixed') {"
+  },
+  {
+    "name": "clippers: a positioned ancestor never holds an absolute box",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a static ancestor holds an absolute box",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'none') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a positioned ancestor holds a fixed box",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos !== 'none' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a transform makes no containing block",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a filter makes no containing block",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a perspective makes no containing block",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: containment makes no containing block",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /^$/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: layout containment makes no containing block",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: the chain stops at the first box",
+    "from": "    out.push(c);\n    n = c;",
+    "to": "    out.push(c);\n    return out;"
+  },
+  {
+    "name": "overflow: the body's own width left out",
+    "from": "const w = Math.max(d.scrollWidth, b.scrollWidth);",
+    "to": "const w = d.scrollWidth;"
+  },
+  {
+    "name": "overflow: a box that cuts never holds",
+    "from": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);",
+    "to": "const held = clippers(e).some((n) => n !== b && n !== d && false);"
+  },
+  {
+    "name": "overflow: any box above holds",
+    "from": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);",
+    "to": "const held = clippers(e).some((n) => n !== b && n !== d && n.getBoundingClientRect().left >= -1);"
+  },
+  {
+    "name": "overflow: the body holds a block",
+    "from": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);",
+    "to": "const held = clippers(e).some((n) => n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);"
+  },
+  {
+    "name": "overflow: the root holds a block",
+    "from": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);",
+    "to": "const held = clippers(e).some((n) => n !== b && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);"
+  },
+  {
+    "name": "overflow: a box 2 px off the page holds",
+    "from": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);",
+    "to": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -2);"
+  },
+  {
+    "name": "overflow: a box 1 px off the page does not hold",
+    "from": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left >= -1);",
+    "to": "const held = clippers(e).some((n) => n !== b && n !== d && getComputedStyle(n).overflowX !== 'visible' && n.getBoundingClientRect().left > -1);"
+  },
+  {
+    "name": "targets: text in another target counted as words",
+    "from": "if (!at || !b.contains(at)) words +=",
+    "to": "if (true) words +="
+  },
+  {
+    "name": "targets: the words of a line held by a target left out",
+    "from": "if (!at || !b.contains(at)) words +=",
+    "to": "if (!at) words +="
+  },
+  {
+    "name": "targets: a link beside one letter is inline",
+    "from": "    return words > 1;",
+    "to": "    return words > 0;"
+  },
+  {
+    "name": "targets: a link beside two letters is not inline",
+    "from": "    return words > 1;",
+    "to": "    return words > 2;"
+  },
+  {
+    "name": "targets: a checkbox measured alone in its label",
+    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }",
+    "to": "if ((e.type === 'xcheckbox' || e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }"
+  },
+  {
+    "name": "targets: a radio measured alone in its label",
+    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }",
+    "to": "if ((e.type === 'checkbox' || e.type === 'xradio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }"
+  },
+  {
+    "name": "targets: a checkbox with no label measured by nothing",
+    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }",
+    "to": "if ((e.type === 'checkbox' || e.type === 'radio')) { self = e.closest('label'); r = self.getBoundingClientRect(); }"
+  },
+  {
+    "name": "targets: a box cut past its edge counted below zero",
+    "from": "return { w: Math.max(0, R - L), h: Math.max(0, B - T),",
+    "to": "return { w: R - L, h: Math.max(0, B - T),"
+  },
+  {
+    "name": "targets: a box cut from below counted below zero",
+    "from": "return { w: Math.max(0, R - L), h: Math.max(0, B - T),",
+    "to": "return { w: Math.max(0, R - L), h: B - T,"
+  },
+  {
+    "name": "contrast: nothing on screen is blank",
+    "from": "if (a === 0) return [0, 0, 0, 0];",
+    "to": "if (a === -1) return [0, 0, 0, 0];"
+  },
+  {
+    "name": "contrast: no ink read as black",
+    "from": "let g = ink || [0, 0, 0, 0];",
+    "to": "let g = ink || [0, 0, 0, 1];"
+  },
+  {
+    "name": "contrast: the body counted twice",
+    "from": "for (let n = e; n !== document.body; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, color(s.backgroundColor)), +s.opacity); }",
+    "to": "for (let n = e; n !== document.documentElement; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, color(s.backgroundColor)), +s.opacity); }"
+  },
+  {
+    "name": "contrast: an ancestor's opacity forgotten",
+    "from": "for (let n = e; n !== document.body; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, color(s.backgroundColor)), +s.opacity); }",
+    "to": "for (let n = e; n !== document.body; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, color(s.backgroundColor)), 1); }"
+  },
+  {
+    "name": "contrast: the backgrounds behind a text forgotten",
+    "from": "for (let n = e; n !== document.body; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, color(s.backgroundColor)), +s.opacity); }",
+    "to": "for (let n = e; n !== document.body; n = n.parentElement) { const s = getComputedStyle(n); g = fade(over(g, [0, 0, 0, 0]), +s.opacity); }"
+  },
+  {
+    "name": "contrast: a translucent colour read as opaque",
+    "from": "const fade = (c, op) => [c[0], c[1], c[2], c[3] * op];",
+    "to": "const fade = (c, op) => [c[0], c[1], c[2], op];"
+  },
+  {
+    "name": "contrast: SVG text measured by its colour",
+    "from": "color(svgText ? s.fill : s.webkitTextFillColor)",
+    "to": "color(svgText ? s.color : s.webkitTextFillColor)"
+  },
+  {
+    "name": "contrast: -webkit-text-fill-color not read",
+    "from": "color(svgText ? s.fill : s.webkitTextFillColor)",
+    "to": "color(svgText ? s.fill : s.color)"
+  },
+  {
+    "name": "contrast: a pseudo element's background forgotten",
+    "from": "const layer = [[color(p.backgroundColor), +p.opacity]];",
+    "to": "const layer = [[[0, 0, 0, 0], +p.opacity]];"
+  },
+  {
+    "name": "contrast: a pseudo element's opacity forgotten",
+    "from": "const layer = [[color(p.backgroundColor), +p.opacity]];",
+    "to": "const layer = [[color(p.backgroundColor), 1]];"
+  },
+  {
+    "name": "gold: text colour not read",
+    "from": "if (text) { u.push(s.webkitTextFillColor, ...colours(s.textShadow)); if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }",
+    "to": "if (text) { u.push(...colours(s.textShadow)); if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }"
+  },
+  {
+    "name": "gold: a text shadow not read",
+    "from": "if (text) { u.push(s.webkitTextFillColor, ...colours(s.textShadow)); if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }",
+    "to": "if (text) { u.push(s.webkitTextFillColor); if (s.textDecorationLine !== 'none') u.push(s.textDecorationColor); }"
+  },
+  {
+    "name": "gold: no colour in a value read as gold",
+    "from": ".match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)/g) || [];",
+    "to": ".match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)/g) || ['rgb(212, 162, 76)'];"
+  },
+  {
+    "name": "gold: a background not read",
+    "from": "u.push(s.backgroundColor, ...colours(s.boxShadow), ...colours(s.backgroundImage));",
+    "to": "u.push(...colours(s.boxShadow), ...colours(s.backgroundImage));"
+  },
+  {
+    "name": "gold: a box shadow not read",
+    "from": "u.push(s.backgroundColor, ...colours(s.boxShadow), ...colours(s.backgroundImage));",
+    "to": "u.push(s.backgroundColor, ...colours(s.backgroundImage));"
+  },
+  {
+    "name": "gold: a gradient not read",
+    "from": "u.push(s.backgroundColor, ...colours(s.boxShadow), ...colours(s.backgroundImage));",
+    "to": "u.push(s.backgroundColor, ...colours(s.boxShadow));"
+  },
+  {
+    "name": "gold: accent-color not read",
+    "from": "    if (e && accented(e)) u.push(s.accentColor);",
+    "to": "    if (false) u.push(s.accentColor);"
+  },
+  {
+    "name": "gold: an unchecked box read by its accent",
+    "from": "input[type=\"checkbox\"]:checked, ",
+    "to": "input[type=\"checkbox\"], "
+  },
+  {
+    "name": "gold: a range not read by its accent",
+    "from": ", input[type=\"range\"], progress",
+    "to": ", progress"
+  },
+  {
+    "name": "gold: a ::marker not read",
+    "from": "if (e && s.display === 'list-item' && s.listStyleType !== 'none') u.push(getComputedStyle(e, '::marker').color);",
+    "to": ""
+  },
+  {
+    "name": "gold: the ::marker of any element read",
+    "from": "if (e && s.display === 'list-item' && s.listStyleType !== 'none') u.push(getComputedStyle(e, '::marker').color);",
+    "to": "if (e && s.listStyleType !== 'none') u.push(getComputedStyle(e, '::marker').color);"
+  },
+  {
+    "name": "gold: the ::marker of a list with none read",
+    "from": "if (e && s.display === 'list-item' && s.listStyleType !== 'none') u.push(getComputedStyle(e, '::marker').color);",
+    "to": "if (e && s.display === 'list-item') u.push(getComputedStyle(e, '::marker').color);"
+  },
+  {
+    "name": "gold: an element's own text not seen",
+    "from": "let hit = uses(getComputedStyle(e), [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())",
+    "to": "let hit = uses(getComputedStyle(e), [...e.childNodes].some((n) => n.nodeType === 1 && n.textContent.trim())"
+  },
+  {
+    "name": "gold: an element counted as SVG",
+    "from": ", e instanceof SVGElement, e).some(isGold);",
+    "to": ", true, e).some(isGold);"
+  },
+  {
+    "name": "gold: pseudo elements not read",
+    "from": "if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;",
+    "to": "if (false && uses(p, !!words(p), false, null).some(isGold)) hit = true;"
+  },
+  {
+    "name": "gold: a pseudo element's words not read",
+    "from": "if (p.content !== 'none' && p.display !== 'none' && uses(p, !!words(p), false, null).some(isGold)) hit = true;",
+    "to": "if (p.content !== 'none' && p.display !== 'none' && uses(p, false, false, null).some(isGold)) hit = true;"
+  },
+  {
+    "name": "canvas: alpha 63 read",
+    "from": "if (d[i + 3] < 64 || isOwn(i)) continue;",
+    "to": "if (d[i + 3] < 63 || isOwn(i)) continue;"
+  },
+  {
+    "name": "canvas: alpha 64 a halo",
+    "from": "if (d[i + 3] < 64 || isOwn(i)) continue;",
+    "to": "if (d[i + 3] < 65 || isOwn(i)) continue;"
+  },
+  {
+    "name": "canvas: an own colour never left out",
+    "from": "if (d[i + 3] < 64 || isOwn(i)) continue;",
+    "to": "if (d[i + 3] < 64) continue;"
+  },
+  {
+    "name": "canvas: the last pixel not read",
+    "from": "      for (let i = 0; i < d.length; i += 4) {\n        // a halo, not a mark",
+    "to": "      for (let i = 0; i < d.length - 4; i += 4) {\n        // a halo, not a mark"
+  },
+  {
+    "name": "canvas: the glow never left out",
+    "from": "if (glow && d[i + 3] < 160 && glow[i / 4]) continue;",
+    "to": ""
+  },
+  {
+    "name": "canvas: alpha 160 in the glow left out",
+    "from": "if (glow && d[i + 3] < 160 && glow[i / 4]) continue;",
+    "to": "if (glow && d[i + 3] < 161 && glow[i / 4]) continue;"
+  },
+  {
+    "name": "canvas: alpha 159 in the glow read",
+    "from": "if (glow && d[i + 3] < 160 && glow[i / 4]) continue;",
+    "to": "if (glow && d[i + 3] < 159 && glow[i / 4]) continue;"
+  },
+  {
+    "name": "canvas: a faint pixel of the star's colour has a glow",
+    "from": "if (d[i + 3] < 64 || !isOwn(i)) continue;",
+    "to": "if (d[i + 3] < 63 || !isOwn(i)) continue;"
+  },
+  {
+    "name": "canvas: a pixel of the star's colour at 64 has no glow",
+    "from": "if (d[i + 3] < 64 || !isOwn(i)) continue;",
+    "to": "if (d[i + 3] < 65 || !isOwn(i)) continue;"
+  },
+  {
+    "name": "canvas: every pixel has a glow",
+    "from": "if (d[i + 3] < 64 || !isOwn(i)) continue;",
+    "to": "if (d[i + 3] < 64) continue;"
+  },
+  {
+    "name": "canvas: the glow left out from the last pixel",
+    "from": "        for (let i = 0; i < d.length; i += 4) {\n          if (d[i + 3] < 64 || !isOwn(i)) continue;",
+    "to": "        for (let i = 0; i < d.length - 4; i += 4) {\n          if (d[i + 3] < 64 || !isOwn(i)) continue;"
+  },
+  {
+    "name": "canvas: the glow 3 px wide at any size",
+    "from": "const R = Math.ceil(3 * k);",
+    "to": "const R = 3;"
+  },
+  {
+    "name": "canvas: the glow not rounded up",
+    "from": "const R = Math.ceil(3 * k);",
+    "to": "const R = 3 * k;"
+  },
+  {
+    "name": "canvas: the glow 2 px wide",
+    "from": "const R = Math.ceil(3 * k);",
+    "to": "const R = Math.ceil(2 * k);"
+  },
+  {
+    "name": "canvas: the glow 4 px wide",
+    "from": "const R = Math.ceil(3 * k);",
+    "to": "const R = Math.ceil(4 * k);"
+  },
+  {
+    "name": "canvas: the glow wraps past the left edge",
+    "from": "for (let Y = y - R; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;",
+    "to": "for (let Y = y - R; Y <= y + R; Y++) for (let X = x - R; X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;"
+  },
+  {
+    "name": "canvas: the glow wraps past the right edge",
+    "from": "for (let Y = y - R; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;",
+    "to": "for (let Y = y - R; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= x + R; X++) glow[Y * W + X] = 1;"
+  },
+  {
+    "name": "canvas: the glow a row short above",
+    "from": "for (let Y = y - R; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;",
+    "to": "for (let Y = y - R + 1; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;"
+  },
+  {
+    "name": "canvas: the glow a row short below",
+    "from": "for (let Y = y - R; Y <= y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;",
+    "to": "for (let Y = y - R; Y < y + R; Y++) for (let X = Math.max(0, x - R); X <= Math.min(W - 1, x + R); X++) glow[Y * W + X] = 1;"
+  },
+  {
+    "name": "clippers: a positioned ancestor holds only with a transform",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') && s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a transform holds only with a filter",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' && s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a filter holds only with a perspective",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' && s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "clippers: a perspective holds only with containment",
+    "from": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' || /paint|layout|strict|content/.test(s.contain); };",
+    "to": "const holds = (a) => { const s = getComputedStyle(a); return (pos === 'absolute' && s.position !== 'static') || s.transform !== 'none' || s.filter !== 'none' || s.perspective !== 'none' && /paint|layout|strict|content/.test(s.contain); };"
+  },
+  {
+    "name": "targets: a box measured by its label only when it is both a checkbox and a radio",
+    "from": "if ((e.type === 'checkbox' || e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }",
+    "to": "if ((e.type === 'checkbox' && e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }"
+  },
+  {
+    "name": "targets: a covered target passes",
+    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": ""
+  },
+  {
+    "name": "targets: an element the page names covers a target",
+    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "if (top && !self.contains(top) && !top.contains(self) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a designed overlay covers a target",
+    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: an open dialog not taken for an overlay",
+    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
+    "to": "if (t.closest('dialog[open], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;"
+  },
+  {
+    "name": "targets: a popup list not taken for an overlay",
+    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
+    "to": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"menu\"], [popover]')) return true;"
+  },
+  {
+    "name": "targets: a menu not taken for an overlay",
+    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
+    "to": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [popover]')) return true;"
+  },
+  {
+    "name": "targets: a popover not taken for an overlay",
+    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
+    "to": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"]')) return true;"
+  },
+  {
+    "name": "targets: what is fixed not taken for an overlay",
+    "from": "if (/fixed|sticky/.test(getComputedStyle(n).position)) return true;",
+    "to": "if (/sticky/.test(getComputedStyle(n).position)) return true;"
+  },
+  {
+    "name": "targets: what is sticky not taken for an overlay",
+    "from": "if (/fixed|sticky/.test(getComputedStyle(n).position)) return true;",
+    "to": "if (/fixed/.test(getComputedStyle(n).position)) return true;"
+  },
+  {
+    "name": "targets: a part of what is fixed not taken for an overlay",
+    "from": "for (let n = t; n; n = n.parentElement) if (/fixed|sticky/",
+    "to": "for (let n = t; n === t; n = n.parentElement) if (/fixed|sticky/"
+  },
+  {
+    "name": "targets: the default width is 389 px",
+    "from": "export function targets({ below = 400, tall = 44, wide = 24, cover = {} } = {}) {",
+    "to": "export function targets({ below = 389, tall = 44, wide = 24, cover = {} } = {}) {"
+  },
+  {
+    "name": "targets: the default height is 43 px",
+    "from": "export function targets({ below = 400, tall = 44, wide = 24, cover = {} } = {}) {",
+    "to": "export function targets({ below = 400, tall = 43, wide = 24, cover = {} } = {}) {"
+  },
+  {
+    "name": "targets: the default width of a target is 23 px",
+    "from": "export function targets({ below = 400, tall = 44, wide = 24, cover = {} } = {}) {",
+    "to": "export function targets({ below = 400, tall = 44, wide = 23, cover = {} } = {}) {"
+  },
+  {
+    "name": "targets: the page measured with another list",
+    "from": "sel: TARGETS, cover: Object.keys(cover)",
+    "to": "sel: 'a[href]', cover: Object.keys(cover)"
+  },
+  {
+    "name": "targets: a cover with no reason taken",
+    "from": "for (const [sel, why] of Object.entries(cover)) if (!(typeof why === 'string' && why.trim().length >= 8)) throw new Error(`targets: the cover ${sel} needs its reason`);",
+    "to": "for (const [sel, why] of Object.entries(cover)) if (false) throw new Error(`targets: the cover ${sel} needs its reason`);"
+  },
+  {
+    "name": "targets: a reason of 7 letters taken",
+    "from": "for (const [sel, why] of Object.entries(cover)) if (!(typeof why === 'string' && why.trim().length >= 8)) throw new Error(`targets: the cover ${sel} needs its reason`);",
+    "to": "for (const [sel, why] of Object.entries(cover)) if (!(typeof why === 'string' && why.trim().length >= 7)) throw new Error(`targets: the cover ${sel} needs its reason`);"
+  },
+  {
+    "name": "targets: a reason that is not words taken",
+    "from": "for (const [sel, why] of Object.entries(cover)) if (!(typeof why === 'string' && why.trim().length >= 8)) throw new Error(`targets: the cover ${sel} needs its reason`);",
+    "to": "for (const [sel, why] of Object.entries(cover)) if (!(why.trim().length >= 8)) throw new Error(`targets: the cover ${sel} needs its reason`);"
+  },
+  {
+    "name": "targets: the covers named not passed to the page",
+    "from": "cover: Object.keys(cover).join(', ') || ':not(*)' });",
+    "to": "cover: ':not(*)' });"
+  },
+  {
+    "name": "targets: no cover named lets every element cover",
+    "from": "cover: Object.keys(cover).join(', ') || ':not(*)' });",
+    "to": "cover: Object.keys(cover).join(', ') || '*' });"
+  },
+  {
+    "name": "targets: a target over its own part is covered",
+    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "if (top && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a target that lets the finger through is covered",
+    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "if (top && !self.contains(top) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: overflow clip read as visible",
+    "from": "if (/hidden|clip/.test(s.overflowY)) {",
+    "to": "if (/hidden/.test(s.overflowY)) {"
+  },
+  {
+    "name": "targets: a box that scrolls makes a target small",
+    "from": "if (/hidden|clip/.test(s.overflowY)) {",
+    "to": "if (s.overflowY !== 'visible') {"
+  },
+  {
+    "name": "targets: a box that scrolls never moves the finger",
+    "from": "if (s.overflowY !== 'visible') { t = Math.max(t, q.top); b = Math.min(b, q.bottom); }",
+    "to": ""
+  },
+  {
+    "name": "targets: a box that scrolls sideways never moves the finger",
+    "from": "if (s.overflowX !== 'visible') { l = Math.max(l, q.left); rr = Math.min(rr, q.right); }",
+    "to": ""
+  },
+  {
+    "name": "targets: a target a box that scrolls hides is looked at",
+    "from": "const top = v.now ? document.elementFromPoint(v.x, v.y) : null;",
+    "to": "const top = document.elementFromPoint(v.x, v.y);"
+  },
+  {
+    "name": "targets: sideways, a target a box that scrolls hides counted shown, one it shows counted hidden",
+    "from": "now: rr > l &&",
+    "to": "now: rr < l &&"
+  },
+  {
+    "name": "targets: below, a target a box that scrolls hides counted shown, one it shows counted hidden",
+    "from": "&& b > t, x:",
+    "to": "&& b < t, x:"
   }
 ]
