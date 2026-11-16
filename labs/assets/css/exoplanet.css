@@ -84,8 +84,9 @@ a.ref:hover { color: var(--text-bright); }
 .q-note:empty { display: none; }
 /* the panel is 98% surface and not opaque, as the sharing question's plate in os.css: an opaque scrolling panel over the
    opaque WebGL canvas left a hole of transparent pixels below its list in software-composited captures (782 x 258 px
-   at 1440, found by the frame rule of tools/drive.mjs on 2026-11-16). Two per cent of the sheet behind does not show. */
-.q-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); list-style: none; z-index: 20; background: color-mix(in srgb, var(--surface) 98%, transparent);
+   at 1440, found by the frame rule of tools/drive.mjs on 2026-11-16). Two per cent of the sheet behind does not show.
+   The solid surface first, for a browser without color-mix. */
+.q-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); list-style: none; z-index: 20; background: var(--surface); background: color-mix(in srgb, var(--surface) 98%, transparent);
   border: 1px solid var(--line-bright); max-height: 300px; overflow: auto; }
 .q-results li { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; cursor: pointer; font-size: 11.5px; border-bottom: 1px solid var(--line); min-height: 36px; align-items: baseline; }
 .q-results li b { font-weight: 500; color: var(--text-bright); font-family: var(--font-serif); font-size: 13px; }
