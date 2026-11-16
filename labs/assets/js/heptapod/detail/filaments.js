@@ -136,32 +136,49 @@ const deg = (S, i) => {
   return c;
 };
 
-/* the terminal branches of a skeleton: from each tip to the first junction or other tip, as pixel paths */
-export function terminalBranches(S) {
-  const { W, H, d } = S, out = [];
+/* The skeleton as a graph. Nodes are tips (one skeleton neighbour) and junctions (8-connected pixels with three or
+   more, one node per cluster, its width the widest of them); edges are the pixel paths between nodes, from a to b.
+   A closed loop with no node on it is left out. */
+export function skeletonGraph(S, width) {
+  const { W, H, d } = S;
+  const nodeOf = new Int32Array(W * H).fill(-1);
+  const nodes = [];
+  const nbrs = (i, f) => { const x = i % W, y = (i / W) | 0; for (let k = 0; k < 8; k++) { const X = x + DX[k], Y = y + DY[k]; if (X >= 0 && Y >= 0 && X < W && Y < H && d[Y * W + X]) f(Y * W + X); } };
   for (let i = 0; i < W * H; i++) {
-    if (!d[i] || deg(S, i) !== 1) continue;
-    const path = [i];
-    let prev = -1, cur = i;
-    for (;;) {
-      const x = cur % W, y = (cur / W) | 0;
-      let next = -1, n = 0;
-      for (let k = 0; k < 8; k++) {
-        const X = x + DX[k], Y = y + DY[k];
-        if (X < 0 || Y < 0 || X >= W || Y >= H) continue;
-        const j = Y * W + X;
-        if (!d[j] || j === prev) continue;
-        n++; if (next < 0) next = j;
-      }
-      if (n !== 1) { path.junction = n > 1; break; } // a junction (or the far tip of an isolated piece)
-      prev = cur; cur = next; path.push(cur);
-      const dc = deg(S, cur);
-      if (dc !== 2) { path.junction = dc > 2; break; }
-      if (path.length > W + H + 4 * Math.max(W, H)) break;
-    }
-    out.push(path);
+    if (!d[i] || nodeOf[i] >= 0) continue;
+    const g = deg(S, i);
+    if (g === 2 || g === 0) continue;
+    const id = nodes.length, px = [i];
+    nodeOf[i] = id;
+    if (g >= 3) for (let q = 0; q < px.length; q++) nbrs(px[q], (j) => { if (nodeOf[j] < 0 && deg(S, j) >= 3) { nodeOf[j] = id; px.push(j); } });
+    let w = 0;
+    for (const p of px) w = Math.max(w, width[p]);
+    nodes.push({ id, tip: g === 1, px, width: w, edges: [] });
   }
-  return out;
+  const edges = [], pairs = new Set(), used = new Uint8Array(W * H);
+  const link = (a, b, path) => { const e = { a, b, path }; edges.push(e); nodes[a].edges.push(e); nodes[b].edges.push(e); };
+  for (const u of nodes) for (const q of u.px) nbrs(q, (r) => {
+    if (nodeOf[r] === u.id) return;
+    if (nodeOf[r] >= 0) { // two nodes side by side
+      const key = Math.min(q, r) + ',' + Math.max(q, r);
+      if (!pairs.has(key)) { pairs.add(key); link(u.id, nodeOf[r], [q, r]); }
+      return;
+    }
+    if (used[r]) return;
+    used[r] = 1;
+    const path = [q, r];
+    let prev = q, cur = r;
+    for (;;) {
+      let next = -1;
+      nbrs(cur, (j) => { if (j !== prev) next = j; }); // a pixel between nodes has exactly two neighbours
+      if (next < 0) break;
+      path.push(next);
+      if (nodeOf[next] >= 0) { link(u.id, nodeOf[next], path); break; }
+      if (used[next]) break;
+      used[next] = 1; prev = cur; cur = next;
+    }
+  });
+  return { nodes, edges };
 }
 
 const median = (a) => { if (!a.length) return NaN; const s = Float64Array.from(a).sort(); const h = (s.length - 1) / 2; return (s[Math.floor(h)] + s[Math.ceil(h)]) / 2; };
@@ -170,7 +187,7 @@ const median = (a) => { if (!a.length) return NaN; const s = Float64Array.from(a
    `minLen` is the shortest filament in pixels: the caller passes the line's width unit (w_med for the film),
    because detail shorter than the line is wide is edge roughness, which the suite measures apart (E7a: roughness
    at width-tied scales); without it, every bump of a rough edge is a spur of the skeleton and reads as a filament. */
-export function filamentOf(path, W, width, minLen = 0) {
+export function filamentOf(path, W, width, minLen = 0, joinsAtJunction = false) {
   const n = path.length;
   if (n < 3) return null;
   const xs = path.map((i) => i % W), ys = path.map((i) => (i / W) | 0), ws = path.map((i) => width[i]);
@@ -188,7 +205,7 @@ export function filamentOf(path, W, width, minLen = 0) {
   // its own width). Seen on the F2 overlay: Abbott's two tall tendrils, the long ones of OfferWeapon and Weapon.
   let end = -1;
   for (let k = 1; k < n; k++) if (ws[k] > MASS_W * shaft && s[k] > TIP_SPAN * shaft) { end = k; break; }
-  if (end < 0 && path.junction && ws[n - 1] >= JUNCTION_W * shaft) end = n - 1;
+  if (end < 0 && path.junction && (joinsAtJunction || ws[n - 1] >= JUNCTION_W * shaft)) end = n - 1;
   if (end < 0) return null;
   shaft = median(ws.slice(Math.floor(end / 4), Math.max(Math.floor(end / 4) + 1, Math.ceil((3 * end) / 4))));
   const L = s[end];
@@ -225,28 +242,83 @@ export function filamentOf(path, W, width, minLen = 0) {
   };
 }
 
-/* every filament of a mask at least minLen pixels long. With `ring` ({ cx, cy, R, w }: the film's fitted ring and
-   its median carrier width in pixels), a branch that lies at least CARRIER_SHARE of its length inside the carrier
-   band of ring.js and is at least CARRIER_W of the carrier's width thick is the carrier stroke itself and is
-   dropped: on Ian a hairline strand ends and its branch follows the thin ring to the blot. A tendril near the
-   ring is thinner than the ring (the film's median shaft is a quarter of w_med), so the band alone would drop
-   short tendrils too (it dropped 56 of 136). Our own figures have no carrier (H5, BAR_F G10): no ring passed. */
-export const CARRIER_SHARE = 0.8, CARRIER_W = 0.5;
+/* Every filament of a mask at least minLen pixels long, branched ones whole.
+
+   Branches are walked from the tips over the skeleton graph. A branch that reaches a fork of its own weight (the
+   fork narrower than JUNCTION_W of its shaft) waits there; when every edge of the fork but one carries a waiting
+   branch, the fork is the junction of one branched tendril, which goes on down the remaining edge with all its
+   tips and the longest of them as its stem (Abbott's two tall tendrils, OfferWeapon's top one, Solve's diagonal
+   stopped at their side branch before). A stroke ending beside a tendril never completes its fork, because the
+   line goes on past it.
+
+   With `ring` ({ cx, cy, R }: the film's fitted ring), a branch that lies at least CARRIER_SHARE of its length in
+   the carrier band of ring.js and runs along the ring (its radial extent under TANGENTIAL of its length) is the
+   carrier, or a strand of a doubled stroke, which the striation measure takes; it is dropped. On Ian a hairline
+   strand ends and its branch follows the thin ring to the blot; on Heptapod one strand of a doubled stroke peels
+   off. A short tendril near the ring is radial and stays. Our own figures have no carrier (H5, BAR_F G10). */
+export const CARRIER_SHARE = 0.8, TANGENTIAL = 0.3, LEAVES_BAND = 0.5;
 export function filaments(m, { minLen = 0, ring = null } = {}) {
+  const W = m.W;
   const D2 = edt2(m);
   const width = new Float64Array(D2.length);
   for (let i = 0; i < D2.length; i++) width[i] = 2 * Math.sqrt(D2[i]);
   const S = skeletonize(m);
-  const out = [];
-  for (const p of terminalBranches(S)) {
-    const f = filamentOf(p, m.W, width, minLen);
-    if (!f) continue;
-    if (ring && f.shaft >= CARRIER_W * ring.w) {
-      let inBand = 0;
-      for (const i of f.path) if (Math.abs(Math.hypot((i % m.W) - ring.cx, ((i / m.W) | 0) - ring.cy) - ring.R) <= CARRIER_BAND * ring.R) inBand++;
-      if (inBand >= CARRIER_SHARE * f.path.length) continue;
+  const { nodes } = skeletonGraph(S, width);
+  const carrierLike = (f) => {
+    if (!ring) return false;
+    let inBand = 0, rMin = Infinity, rMax = -Infinity;
+    for (const i of f.path) {
+      const r = Math.hypot((i % W) - ring.cx, ((i / W) | 0) - ring.cy);
+      if (Math.abs(r - ring.R) <= CARRIER_BAND * ring.R) inBand++;
+      rMin = Math.min(rMin, r); rMax = Math.max(rMax, r);
     }
-    out.push(f);
+    return inBand >= CARRIER_SHARE * f.path.length && rMax - rMin < TANGENTIAL * f.length;
+  };
+  const outsideBand = (path) => {
+    let o = 0;
+    for (const i of path) if (Math.abs(Math.hypot((i % W) - ring.cx, ((i / W) | 0) - ring.cy) - ring.R) > CARRIER_BAND * ring.R) o++;
+    return o / path.length;
+  };
+  const out = [], done = new Set(), waiting = new Map();
+  const queue = [];
+  for (const u of nodes) if (u.tip && u.edges.length === 1) queue.push({ tips: [u.px[0]], stem: [], from: u.id, e: u.edges[0] });
+  for (let qi = 0; qi < queue.length; qi++) {
+    const it = queue[qi], e = it.e;
+    if (done.has(e) || e.a === e.b) continue;
+    // an edge is spent only when it gives a filament or waits at a fork: a bar grown from a disc runs from its own
+    // tip to a tip at the disc's centre, and a walk from the disc's end, which finds nothing, must leave the bar's
+    const seg = e.a === it.from ? e.path : e.path.slice().reverse();
+    const to = nodes[e.a === it.from ? e.b : e.a];
+    const path = !it.stem.length ? seg.slice() : it.stem[it.stem.length - 1] === seg[0] ? it.stem.concat(seg.slice(1)) : it.stem.concat(seg);
+    path.junction = !to.tip;
+    let f = filamentOf(path, W, width, minLen);
+    // a tendril as thick as the stroke it leaves meets it at a junction of its own weight, which width alone cannot
+    // tell from a fork of the stroke; with the ring known, a branch lying at least half outside the carrier band
+    // leaves the ring and is a tendril (Abbott's tall pair, OfferWeapon's top one, Solve's diagonal)
+    if (!f && ring && !to.tip && outsideBand(path) >= 1 - LEAVES_BAND) f = filamentOf(path, W, width, minLen, true);
+    if (f) {
+      done.add(e);
+      if (!carrierLike(f)) { f.tips = it.tips.length; f.branching = it.tips.length - 1; out.push(f); }
+      continue;
+    }
+    if (to.tip) continue;
+    // only a branch of one weight waits at a fork: nowhere before the fork wider than MASS_W of its shaft. A walk
+    // that starts inside a body (the tip of a disc's skeleton at its centre) is not one, and must not take the
+    // stem from the arms that will complete the fork.
+    const wsP = path.map((i) => width[i]);
+    const shaftP = median(wsP.slice(Math.floor(wsP.length / 4), Math.max(Math.floor(wsP.length / 4) + 1, Math.ceil((3 * wsP.length) / 4))));
+    let widest = 0;
+    for (let k = 0; k < wsP.length - 1; k++) widest = Math.max(widest, wsP[k]);
+    if (widest > MASS_W * shaftP) continue;
+    done.add(e);
+    const list = waiting.get(to.id) || [];
+    list.push({ tips: it.tips, path });
+    waiting.set(to.id, list);
+    const open = to.edges.filter((x) => !done.has(x) && x.a !== x.b);
+    if (list.length === to.edges.length - 1 && open.length === 1) {
+      const stem = list.reduce((a, b) => (b.path.length > a.path.length ? b : a)).path;
+      queue.push({ tips: list.flatMap((x) => x.tips), stem, from: to.id, e: open[0] });
+    }
   }
   return { filaments: out, skeleton: S };
 }

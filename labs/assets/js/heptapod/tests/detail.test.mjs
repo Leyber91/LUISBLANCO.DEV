@@ -146,6 +146,32 @@ const stroke = (m, pts) => {
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const rr = Math.hypot(x - 300, y - 300); if (Math.abs(rr - 220) <= 8) closed.d[y * N + x] = 1; }
   ok(filaments(closed).filaments.length === 0, 'filaments: a closed even ring alone reads none');
 
+  // a tendril as thick as the ring it leaves: by width a fork of the stroke; with the ring known, a tendril
+  const eq = blank(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const rr = Math.hypot(x - 300, y - 300); if (Math.abs(rr - 220) <= 6) eq.d[y * N + x] = 1; }
+  stroke(eq, [[300, 80, 6], [285, 30, 5.5], [300, 4, 5]]);
+  const eqWithout = filaments(eq).filaments.length, eqWith = filaments(eq, { ring: { cx: 300, cy: 300, R: 220 } }).filaments.length;
+  ok(eqWithout === 0 && eqWith === 1, `filaments: a tendril as thick as the ring reads ${eqWithout} without the ring and ${eqWith} with it (wanted 0, then 1)`);
+
+  // a branched tendril: one stem forking into two arms reads as one filament with two tips
+  const br = blank(N, N); disc(br, 200, 300, 100);
+  stroke(br, [[300, 300, 5], [360, 290, 4.5], [420, 300, 4]]);
+  stroke(br, [[420, 300, 3.5], [470, 270, 3], [520, 230, 2.5]]);
+  stroke(br, [[420, 300, 3.5], [480, 330, 3], [530, 370, 2.5]]);
+  const fbr = filaments(br).filaments;
+  ok(fbr.length === 1 && fbr[0].tips === 2, `filaments: a forked tendril reads ${fbr.length} filament(s)${fbr.length ? ` with ${fbr.map((f) => f.tips).join(', ')} tips` : ''}, wanted 1 with 2`);
+
+  // Heptapod's case: a thin strand runs beside the ring and joins it at one end; with the ring known it is a strand
+  const hp = blank(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const rr = Math.hypot(x - 300, y - 300), a = Math.atan2(y - 300, x - 300);
+    if (Math.abs(rr - 220) <= 6) hp.d[y * N + x] = 1;
+    if (Math.abs(rr - 236) <= 2 && a > 0.2 && a < 1.0) hp.d[y * N + x] = 1;
+  }
+  stroke(hp, [[300 + 222 * Math.cos(1.0), 300 + 222 * Math.sin(1.0), 2.5], [300 + 236 * Math.cos(1.0), 300 + 236 * Math.sin(1.0), 2.5]]);
+  const hpWithout = filaments(hp).filaments.length, hpWith = filaments(hp, { ring: { cx: 300, cy: 300, R: 220 } }).filaments.length;
+  ok(hpWithout >= 1 && hpWith === 0, `filaments: a strand beside the ring reads ${hpWithout} without the ring and ${hpWith} with it (wanted at least 1, then 0)`);
+
   // Ian's case: a thin ring with a gap runs into a blob on the ring; the strand along the ring is the carrier
   const ian = blank(N, N);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const rr = Math.hypot(x - 300, y - 300), a = Math.atan2(y - 300, x - 300); if (Math.abs(rr - 220) <= 3 && Math.abs(a) > 0.35) ian.d[y * N + x] = 1; }
