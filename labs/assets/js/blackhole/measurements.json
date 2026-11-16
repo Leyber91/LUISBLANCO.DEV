@@ -1,0 +1,13 @@
+{
+  "what": "Frame time of bh_animation_page.html measured in real time through the Chrome DevTools protocol (headless Chrome, ANGLE D3D11, 1440 x 900 window). median_ms is the median interval after a drawn frame over the last 60 frames, read from the page's own readout. The display caps at 120 Hz, so 8.3 ms means the frame finished inside one refresh.",
+  "date": "2026-11-11",
+  "runs": [
+    { "gpu": "NVIDIA RTX 3500 Ada Generation Laptop GPU (D3D11)", "tier": "high", "render_px": [1424, 805], "supersampling": "2 x 2 (trace)", "median_ms": 8.3, "fps": 120.0, "state": "default (M87*, a = 0.94, cinematic, thermal)" },
+    { "gpu": "NVIDIA RTX 3500 Ada Generation Laptop GPU (D3D11)", "tier": "mid", "render_px": [997, 564], "supersampling": "2 x 2 (trace)", "median_ms": 8.3, "fps": 120.0, "state": "default" },
+    { "gpu": "NVIDIA RTX 3500 Ada Generation Laptop GPU (D3D11)", "tier": "low", "render_px": [641, 362], "supersampling": "none", "median_ms": 8.3, "fps": 120.0, "state": "default, tour running" },
+    { "gpu": "SwiftShader (CPU rasteriser)", "tier": "min (chosen automatically)", "render_px": [461, 288], "median_ms": 115, "note": "animation redraw throttled to 10 fps on slow devices; full-resolution refinement continues in bands" }
+  ],
+  "export": { "gpu": "NVIDIA RTX 3500 Ada Generation Laptop GPU", "width_px": 3840, "height_px": 2169, "supersampling": "2 x 2", "ms": 2866 },
+  "gpu_strip": { "state": "M87*, a = 0.94, i = 17 deg, observer at 1000 M", "measured_width_M": 9.728, "texel_M": 0.0087, "bardeen_width_M": 9.7321 },
+  "not_measured": "An integrated GPU (Intel Iris Xe class). Headless Chrome on the measuring machine used the discrete GPU even when the page requested low power."
+}

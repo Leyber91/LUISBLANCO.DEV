@@ -1,257 +1,777 @@
 /* ============================================================
-   blackhole/ui.js — the control panel. Token-styled, collapsible,
-   accordion-organised. A TYPE selector (grouped by family) swaps
-   whole black-hole regimes; PHYSICS sliders drive the geometry;
-   a PINNED live readout shows the derived horizon / ISCO / shadow
-   so the model reads as physical. Appearance + Model fold away.
+   blackhole/ui.js — the panels, readouts, linked diagrams, the
+   on-image annotation layer, the probe and the input handlers.
+   Every control writes the store; every readout reads the model
+   (physics.js) or the worker's traced anchors.
    ============================================================ */
 
-// Families — the dominant physical axis each regime exercises.
-const FAMILIES = [
-  { id: 'mass',      label: 'Mass class', caption: 'colour + scale shift with mass  (T ∝ M^-¼)' },
-  { id: 'spacetime', label: 'Spacetime',  caption: 'spin + charge move the ISCO, horizon, shadow' },
-  { id: 'activity',  label: 'Activity',   caption: 'accretion rate sets brightness + thickness' },
-];
+import * as K from './kerr.js';
+import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION } from './config.js';
+import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, predictedUas, measurement, sigmaDiff, fall, sci, dur, len } from './physics.js';
+import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
+import { Tour } from './tour.js';
+import { mountAsk } from './ask.js';
+import { exportPlate, exportState, importState, exportData } from './plate.js';
+import { mountRoutePanel } from '../ai/route-panel.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent } from './probe.js';
 
-// Whole black-hole regimes. cfg sets physical params + a flattering camera + look.
-// Physics (horizon, ISCO, colour) is derived from these in blackhole.js _physics().
-// tag = honesty marker (ESTABLISHED real class · THEORETICAL plausible · SPECULATIVE exotic).
-const TYPES = [
-  // ---- mass class (small/blue -> large/amber) ----
-  { id: 'primordial', family: 'mass', label: 'Primordial', tag: 'THEORETICAL',
-    title: 'Primordial micro · Hawking-hot · asteroid-mass',
-    cfg: { mass: 0.7, spinA: 0.1, charge: 0.0, mdot: 0.35, diskOuter: 8, spin: 1.4, colorTemp: 0.2, exposure: 1.7, diskBright: 1.45, bgBright: 1.25, camDist: 34, pitch: 0.22 } },
-  { id: 'stellar', family: 'mass', label: 'Stellar-mass', tag: 'ESTABLISHED',
-    title: 'Stellar-mass · ~10 M☉ · X-ray hot',
-    cfg: { mass: 1.0, spinA: 0.6, charge: 0.0, mdot: 1.4, diskOuter: 11, spin: 1.8, colorTemp: 0.0, exposure: 1.15, diskBright: 1.05, bgBright: 1.0, camDist: 13, pitch: 0.10 } },
-  { id: 'intermediate', family: 'mass', label: 'Intermediate', tag: 'THEORETICAL',
-    title: 'Intermediate-mass · ~10³·⁵ M☉ · cluster-core',
-    cfg: { mass: 3.5, spinA: 0.7, charge: 0.0, mdot: 1.5, diskOuter: 12, spin: 1.6, colorTemp: 0.0, exposure: 1.25, diskBright: 1.25, bgBright: 0.95, camDist: 14, pitch: 0.34 } },
-  { id: 'supermassive', family: 'mass', label: 'Supermassive', tag: 'ESTABLISHED',
-    title: 'Supermassive · ~10⁹ M☉ · galactic core',
-    cfg: { mass: 9.3, spinA: 0.5, charge: 0.0, mdot: 0.6, diskOuter: 20, spin: 0.6, colorTemp: 0.0, exposure: 1.10, diskBright: 1.00, bgBright: 0.8, camDist: 22, pitch: 0.5 } },
-  { id: 'ultramassive', family: 'mass', label: 'Ultramassive', tag: 'THEORETICAL',
-    title: 'Ultramassive · TON 618-class · ~6.6×10¹⁰ M☉',
-    cfg: { mass: 9.8, spinA: 0.4, charge: 0.0, mdot: 0.5, diskOuter: 24, spin: 0.35, colorTemp: 0.42, exposure: 1.05, diskBright: 0.95, bgBright: 0.7, camDist: 30, pitch: 0.34 } },
+const $ = (sel, root = document) => root.querySelector(sel);
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+const BY_KEY = Object.fromEntries(SCHEMA.map((s) => [s.key, s]));
+const D2R = Math.PI / 180;
 
-  // ---- spacetime (metric: spin + charge) ----
-  { id: 'schwarzschild', family: 'spacetime', label: 'Schwarzschild', tag: 'ESTABLISHED',
-    title: 'Schwarzschild · non-rotating',
-    cfg: { mass: 6.5, spinA: 0.0, charge: 0.0, mdot: 1.0, diskOuter: 14, spin: 1.0, colorTemp: 0.0, exposure: 1.25, diskBright: 1.15, bgBright: 0.9, camDist: 16, pitch: 0.16 } },
-  { id: 'kerr', family: 'spacetime', label: 'Kerr', tag: 'ESTABLISHED',
-    title: 'Kerr · spinning · a = 0.90',
-    cfg: { mass: 6.5, spinA: 0.9, charge: 0.0, mdot: 1.1, diskOuter: 16, spin: 1.3, colorTemp: 0.0, exposure: 1.30, diskBright: 1.20, bgBright: 0.95, camDist: 17, pitch: 0.18 } },
-  { id: 'gargantua', family: 'spacetime', label: 'Gargantua', tag: 'THEORETICAL',
-    title: 'Near-extremal Kerr · a = 0.998',
-    cfg: { mass: 8.0, spinA: 0.998, charge: 0.0, mdot: 0.8, diskOuter: 18, spin: 0.9, colorTemp: 0.10, exposure: 1.15, diskBright: 1.05, bgBright: 0.85, camDist: 19, pitch: 0.06 } },
-  { id: 'charged', family: 'spacetime', label: 'Charged (RN)', tag: 'THEORETICAL',
-    title: 'Reissner-Nordström · charged · Q = 0.70',
-    cfg: { mass: 6.0, spinA: 0.0, charge: 0.7, mdot: 1.0, diskOuter: 14, spin: 1.0, colorTemp: 0.30, exposure: 1.30, diskBright: 1.20, bgBright: 0.9, camDist: 16, pitch: 0.16 } },
-  { id: 'kerrnewman', family: 'spacetime', label: 'Kerr-Newman', tag: 'THEORETICAL',
-    title: 'Kerr-Newman · rotating + charged · a 0.70 · Q 0.50',
-    cfg: { mass: 5.0, spinA: 0.7, charge: 0.5, mdot: 1.2, diskOuter: 15, spin: 1.4, colorTemp: 0.18, exposure: 1.32, diskBright: 1.22, bgBright: 0.92, camDist: 16, pitch: 0.32 } },
-  { id: 'naked', family: 'spacetime', label: 'Naked singularity', tag: 'SPECULATIVE',
-    title: 'Naked singularity · a > M · no event horizon',
-    cfg: { mass: 3.0, spinA: 1.15, charge: 0.2, mdot: 1.6, diskOuter: 13, spin: 2.2, colorTemp: 0.0, exposure: 2.1, diskBright: 1.9, bgBright: 0.6, camDist: 15, pitch: 0.13 } },
+export function buildUI(app) {
+  const { store, renderer } = app;
+  const left = $('#bh-left'), right = $('#bh-right');
+  const overlay = $('#bh-overlay'), caption = $('#bh-caption'), probe = $('#bh-probe');
+  const sr = $('#bh-sr');
+  const narrow = () => window.matchMedia('(max-width: 900px)').matches;
 
-  // ---- activity (accretion state) ----
-  { id: 'quiescent', family: 'activity', label: 'Quiescent', tag: 'ESTABLISHED',
-    title: 'Quiescent · Sgr A*-like · ~4×10⁶ M☉',
-    cfg: { mass: 6.6, spinA: 0.5, charge: 0.0, mdot: 0.2, diskOuter: 12, spin: 0.7, colorTemp: 0.22, exposure: 1.6, diskBright: 0.55, bgBright: 1.05, camDist: 18, pitch: 0.6 } },
-  { id: 'quasar', family: 'activity', label: 'Quasar / AGN', tag: 'THEORETICAL',
-    title: 'Active quasar · ~10⁸·⁵ M☉ · blazing high-accretion',
-    cfg: { mass: 8.5, spinA: 0.7, charge: 0.0, mdot: 1.85, diskOuter: 22, spin: 1.0, colorTemp: 0.0, exposure: 1.7, diskBright: 1.9, bgBright: 0.55, camDist: 18, pitch: 0.13 } },
-];
-
-const VIEWS = [
-  { id: 'edge', label: 'Edge-on', pitch: 0.03 },
-  { id: 'tilt', label: 'Tilted',  pitch: 0.20 },
-  { id: 'top',  label: 'Top-down', pitch: 0.85 },
-];
-
-// fmt helpers
-const f2 = (v) => (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(2));
-const sup = (n) => String(n).replace(/[0-9]/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]);
-const fMass = (v) => `10${sup(Math.round(v))} M☉`;
-
-const SCHEMA = [
-  // physics
-  { group: 'physics', key: 'mass',   label: 'Mass',           min: 0.7, max: 9.8,   step: 0.1,   fmt: fMass },
-  { group: 'physics', key: 'spinA',  label: 'Spin  a',        min: 0.0, max: 0.998, step: 0.001, fmt: (v) => v.toFixed(3) },
-  { group: 'physics', key: 'charge', label: 'Charge  Q',      min: 0.0, max: 0.999, step: 0.005, fmt: (v) => v.toFixed(2) },
-  { group: 'physics', key: 'mdot',   label: 'Accretion rate', min: 0.2, max: 2.0,   step: 0.01,  fmt: f2 },
-  // look
-  { group: 'look', key: 'exposure',   label: 'Exposure',           min: 0.4, max: 2.5,  step: 0.01, fmt: f2 },
-  { group: 'look', key: 'diskBright', label: 'Disk brightness',    min: 0.2, max: 2.5,  step: 0.01, fmt: f2 },
-  { group: 'look', key: 'diskOuter',  label: 'Disk outer edge',    min: 8.0, max: 26.0, step: 0.1,  fmt: f2 },
-  { group: 'look', key: 'spin',       label: 'Disk rotation',      min: 0.0, max: 3.0,  step: 0.01, fmt: f2 },
-  { group: 'look', key: 'colorTemp',  label: 'Colour (warm→cold)', min: 0.0, max: 1.0,  step: 0.01, fmt: f2 },
-  { group: 'look', key: 'bgBright',   label: 'Starfield',          min: 0.0, max: 2.0,  step: 0.01, fmt: f2 },
-  { group: 'look', key: 'camDist',    label: 'Distance',           min: 6.0, max: 36.0, step: 0.2,  fmt: f2 },
-];
-
-const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
-
-export function buildPanel(host, bh, { onPause } = {}) {
-  const titleEl = document.querySelector('.bh-title');
-  const panel = el('div', 'bh-panel');
-
-  const head = el('div', 'bh-panel-head', `<span>Black Hole</span>`);
-  const collapse = el('button', 'bh-collapse', '–');
-  head.appendChild(collapse);
-  panel.appendChild(head);
-
-  const body = el('div', 'bh-panel-body');
-  const inputs = {};
-  const typeBtns = {};
-
-  // ---- accordion section helper ----
-  function accSection(title, { open = false, tag } = {}) {
-    const wrap = el('div', 'bh-acc');
-    if (open) wrap.setAttribute('data-open', '');
-    const h = el('button', 'bh-acc-head');
-    h.appendChild(el('span', null, title));
-    if (tag) h.appendChild(el('span', 'bh-acc-tag', tag));
-    const glyph = el('span', 'bh-acc-glyph', open ? '–' : '+');
-    h.appendChild(glyph);
-    h.setAttribute('aria-expanded', open ? 'true' : 'false');
-    const outer = el('div', 'bh-acc-body');
-    const inner = el('div', 'bh-acc-inner');
-    outer.appendChild(inner);
-    h.addEventListener('click', () => {
-      const o = wrap.toggleAttribute('data-open');
-      glyph.textContent = o ? '–' : '+';
-      h.setAttribute('aria-expanded', o ? 'true' : 'false');
-    });
-    wrap.appendChild(h);
-    wrap.appendChild(outer);
-    body.appendChild(wrap);
-    return inner;
-  }
-
-  function slider(s, into) {
-    const row = el('label', 'bh-row');
-    row.appendChild(el('span', 'bh-row-label', s.label));
-    const val = el('span', 'bh-row-val');
-    const input = el('input', 'bh-slider');
-    Object.assign(input, { type: 'range', min: s.min, max: s.max, step: s.step, value: bh.cfg[s.key] });
-    input.addEventListener('input', () => {
-      const v = parseFloat(input.value);
-      bh.set(s.key, v);
-      val.textContent = s.fmt(v);
-      if (s.group === 'physics') updateReadout();
-    });
-    inputs[s.key] = { input, val };
-    val.textContent = s.fmt(bh.cfg[s.key]);
-    row.appendChild(input);
-    row.appendChild(val);
-    into.appendChild(row);
-  }
-
-  // ---- TYPE (open) — family sub-grids ----
-  const typeInner = accSection('Type', { open: true });
-  FAMILIES.forEach((fam) => {
-    const famBox = el('div', 'bh-fam');
-    famBox.appendChild(el('div', 'bh-fam-head', `${fam.label} — <em>${fam.caption}</em>`));
-    const grid = el('div', 'bh-types');
-    TYPES.filter((t) => t.family === fam.id).forEach((ty) => {
-      const b = el('button', 'bh-type', ty.label);
-      b.addEventListener('click', () => applyType(ty));
-      typeBtns[ty.id] = b;
-      grid.appendChild(b);
-    });
-    famBox.appendChild(grid);
-    typeInner.appendChild(famBox);
+  /* ---------- worker ---------- */
+  let worker = null, wid = 0;
+  const pending = new Map();
+  try {
+    worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    worker.onerror = (e) => { console.warn('worker error:', e.message || e); };
+    worker.onmessage = (e) => { const p = pending.get(e.data.id); if (p) { pending.delete(e.data.id); e.data.error ? p.rej(new Error(e.data.error)) : p.res(e.data.result); } };
+  } catch { worker = null; }
+  const call = (type, args) => new Promise((res, rej) => {
+    if (!worker) { rej(new Error('no worker')); return; }
+    const id = ++wid; pending.set(id, { res, rej }); worker.postMessage({ id, type, args });
   });
 
-  // ---- PHYSICS (open) ----
-  const physInner = accSection('Physics', { open: true });
-  SCHEMA.filter((s) => s.group === 'physics').forEach((s) => slider(s, physInner));
+  /* ---------- back link (hidden when embedded) ---------- */
+  const back = $('#bh-back');
+  if (window.self !== window.top) back.style.display = 'none';
 
-  // ---- READOUT (pinned, never folded) ----
-  const readout = el('div', 'bh-readout');
-  body.appendChild(readout);
+  /* ---------- left column ---------- */
+  const head = el('div', 'bh-head', `<div class="bh-kick">${COPY.kick}</div><h1>${COPY.title}</h1><p>${COPY.sub}</p>`);
+  left.appendChild(head);
 
-  // ---- VIEW (open) ----
-  const viewInner = accSection('View', { open: true });
-  const viewRow = el('div', 'bh-views');
-  VIEWS.forEach((vw) => {
-    const b = el('button', 'bh-view', vw.label);
-    b.addEventListener('click', () => { bh.cfg.pitch = vw.pitch; if (bh.still) bh._draw(); });
-    viewRow.appendChild(b);
+  // object
+  const objCard = el('div', 'bh-card');
+  // each object carries its evidence class on its button; the legend under the buttons defines the classes
+  objCard.innerHTML = `<h2>Object <em id="bh-objkind"></em></h2><div class="bh-seg" id="bh-objs"></div>
+    <p class="bh-note" id="bh-evid">${Object.entries(EVIDENCE).map(([k, v]) => `<b>${k}</b> ${v}`).join('<br>')}</p><p class="bh-note" id="bh-objnote"></p>`;
+  left.appendChild(objCard);
+  const objBtns = {};
+  OBJECTS.forEach((o) => {
+    const b = el('button', 'bh-btn', `${o.name}<small>${o.evidence}</small>`);
+    b.type = 'button';
+    b.addEventListener('click', () => { app.tour?.stop(); store.set(store.objectPatch(o.id)); });
+    objBtns[o.id] = b; $('#bh-objs', objCard).appendChild(b);
   });
-  viewInner.appendChild(viewRow);
 
-  // ---- APPEARANCE (collapsed) ----
-  const lookInner = accSection('Appearance', { open: false, tag: 'advanced' });
-  SCHEMA.filter((s) => s.group === 'look').forEach((s) => slider(s, lookInner));
-
-  // ---- MODEL + PAUSE (collapsed) ----
-  const modelInner = accSection('Model', { open: false });
-  modelInner.appendChild(el('div', 'bh-note',
-    'Exact Schwarzschild geodesics. Spin · charge · mass act on the ISCO, beaming, horizon and disk as physically-motivated approximations — not full Kerr ray tracing. Tags: ESTABLISHED real class · THEORETICAL plausible · SPECULATIVE exotic.'));
-  const pause = el('button', 'bh-pause', 'Pause');
-  let paused = false;
-  pause.addEventListener('click', () => {
-    paused = !paused;
-    pause.textContent = paused ? 'Play' : 'Pause';
-    onPause?.(paused);
+  // view + observer + colour + emitter
+  const viewCard = el('div', 'bh-card');
+  viewCard.innerHTML = `<h2>View</h2><div class="bh-seg" id="bh-views"></div><div class="bh-seg" id="bh-obs"></div>
+    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div>
+    <h2 style="margin-top:12px">Emitter</h2><div class="bh-seg" id="bh-emit"></div><p class="bh-note" id="bh-viewnote"></p>`;
+  left.appendChild(viewCard);
+  const viewBtns = {}, obsBtns = {}, modeBtns = {}, emitBtns = {};
+  Object.entries(VIEWS).forEach(([id, v]) => {
+    const b = el('button', 'bh-btn', v.label); b.type = 'button';
+    b.addEventListener('click', () => { app.tour?.stop(); store.set(store.viewPatch(id)); if (id === 'journey') journey.play(); else journey.stop(); });
+    viewBtns[id] = b; $('#bh-views', viewCard).appendChild(b);
   });
-  modelInner.appendChild(pause);
+  [['zamo', 'hover'], ['faller', 'fall'], ['orbiter', 'orbit']].forEach(([id, lab]) => {
+    const b = el('button', 'bh-btn', lab); b.type = 'button'; b.title = { zamo: 'zero-angular-momentum observer: hovering', faller: 'free fall from rest at infinity', orbiter: 'moving at the local Kepler rate' }[id];
+    b.addEventListener('click', () => store.set({ observer: id }));
+    obsBtns[id] = b; $('#bh-obs', viewCard).appendChild(b);
+  });
+  Object.entries(COLOR_MODES).forEach(([id, m]) => {
+    const b = el('button', 'bh-btn', m.label); b.type = 'button';
+    b.addEventListener('click', () => store.set({ color: id }));
+    modeBtns[id] = b; $('#bh-modes', viewCard).appendChild(b);
+  });
+  [['thick', 'thin disk (thick)'], ['thin', 'optically thin'], ['off', 'none']].forEach(([id, lab]) => {
+    const b = el('button', 'bh-btn', lab); b.type = 'button';
+    b.addEventListener('click', () => store.set({ emit: id }));
+    emitBtns[id] = b; $('#bh-emit', viewCard).appendChild(b);
+  });
 
-  panel.appendChild(body);
-  host.appendChild(panel);
+  // parameters
+  const parCard = el('div', 'bh-card');
+  parCard.innerHTML = `<h2>Parameters <em>type or drag</em></h2>`;
+  left.appendChild(parCard);
+  const rows = {};
+  const sliderKeys = ['a', 'q', 'incl', 'rcam', 'fov', 'mass', 'edd', 'rout', 'hotspot', 'fcol', 'tdisp', 'stretch', 'ev'];
+  const LABEL = { q: 'charge Q/M', fcol: 'colour correction f_col', mass: 'mass, log10 M☉', edd: 'Ṁ/Ṁ_Edd, log10', rcam: 'observer r', a: 'spin a/M', incl: 'inclination', fov: 'field of view', rout: 'disk outer edge', hotspot: 'hot spot r (0 off)', tdisp: 'display peak T', stretch: 'display stretch', ev: 'exposure' };
+  const toRange = (d, v) => (d.log ? Math.log(v) : v);
+  const fromRange = (d, x) => (d.log ? Math.exp(x) : x);
+  sliderKeys.forEach((k) => {
+    const d = BY_KEY[k];
+    const row = el('div', 'bh-row');
+    const id = `bh-in-${k}`;
+    row.innerHTML = `<label for="${id}">${LABEL[k] || d.label}</label><span><input class="bh-num" id="${id}" inputmode="decimal" aria-label="${LABEL[k] || d.label} value"> <span class="bh-unit">${d.unit === 'Msun' ? '' : d.unit}</span></span>
+      <input class="bh-range" type="range" aria-label="${LABEL[k] || d.label}" min="${toRange(d, d.min)}" max="${toRange(d, d.max)}" step="${d.log ? 0.001 : d.step}">`;
+    const num = row.querySelector('.bh-num'), rng = row.querySelector('.bh-range');
+    rng.addEventListener('input', () => { app.tour?.stop(); store.set({ [k]: +fromRange(d, +rng.value).toFixed(5), ...(k === 'a' || k === 'q' || k === 'mass' ? { obj: 'custom' } : {}) }, { dur: 450 }); });
+    num.addEventListener('change', () => { app.tour?.stop(); store.set({ [k]: +num.value, ...(k === 'a' || k === 'q' || k === 'mass' ? { obj: 'custom' } : {}) }); });
+    rows[k] = { num, rng, d };
+    parCard.appendChild(row);
+  });
+  parCard.appendChild(el('p', 'bh-note', 'Spin, inclination, distance and field of view change the light paths and re-trace them; mass, accretion rate and display settings only re-colour the cached rays. In units of M, every hole of the same spin looks the same: mass sets the scale and the temperature.'));
 
-  // whole header toggles (big touch target on phones); the +/- button bubbles here too
-  const setCollapsed = (collapsed) => {
-    body.style.display = collapsed ? 'none' : '';
-    collapse.textContent = collapsed ? '+' : '–';
-    panel.classList.toggle('bh-collapsed', collapsed);
+  // actions
+  const actCard = el('div', 'bh-card');
+  actCard.innerHTML = `<h2>Run and keep</h2>
+    <div class="bh-seg"><button class="bh-btn go" type="button" id="bh-tour">Tour</button><button class="bh-btn" type="button" id="bh-anim"></button><button class="bh-btn" type="button" id="bh-notes"></button></div>
+    <div class="bh-seg"><button class="bh-btn" type="button" id="bh-png">Plate 1920</button><button class="bh-btn" type="button" id="bh-png4">Plate 3840</button><button class="bh-btn" type="button" id="bh-link">Copy link</button></div>
+    <div class="bh-seg"><button class="bh-btn" type="button" id="bh-json">State JSON</button><label class="bh-btn" for="bh-import" tabindex="0">Import JSON</label><input type="file" id="bh-import" accept="application/json" hidden><button class="bh-btn" type="button" id="bh-csv">Objects CSV</button></div>
+    <p class="bh-note" id="bh-actnote">The link and the JSON reproduce this exact frame. The plate stamps the parameters and the measurement onto the image.</p>`;
+  left.appendChild(actCard);
+  const actNote = $('#bh-actnote', actCard);
+  $('#bh-anim', actCard).addEventListener('click', () => store.set({ anim: !store.get('anim') }));
+  $('#bh-notes', actCard).addEventListener('click', () => store.set({ notes: !store.get('notes') }));
+  $('#bh-link', actCard).addEventListener('click', async () => {
+    const url = location.origin + location.pathname + '?' + store.toQuery();
+    try { await navigator.clipboard.writeText(url); actNote.textContent = 'Link copied. It restores every parameter, the camera and the colour mode.'; }
+    catch { actNote.textContent = url; }
+  });
+  const plate = async (W) => {
+    actNote.textContent = `Tracing a ${W} px still with 2 x 2 samples per pixel...`;
+    try { await exportPlate(app, W, (p) => { actNote.textContent = `Tracing a ${W} px still: ${Math.round(p * 100)}%`; }); actNote.textContent = `Plate saved (${W} px, parameters stamped).`; }
+    catch (e) { actNote.textContent = 'Export failed: ' + e.message; }
   };
-  head.addEventListener('click', () => setCollapsed(body.style.display !== 'none'));
-  // on phones, start collapsed so the black hole is the hero; tap the bar to reveal controls
-  if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) setCollapsed(true);
+  $('#bh-png', actCard).addEventListener('click', () => plate(1920));
+  $('#bh-png4', actCard).addEventListener('click', () => plate(3840));
+  $('#bh-json', actCard).addEventListener('click', () => exportState(app));
+  $('#bh-csv', actCard).addEventListener('click', () => exportData(app));
+  $('#bh-import', actCard).addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try { await importState(app, file); actNote.textContent = 'State restored from the file.'; } catch (err) { actNote.textContent = 'Could not read that file: ' + err.message; }
+  });
+  $('label[for="bh-import"]', actCard).addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#bh-import').click(); } });
 
-  function applyType(ty) {
-    Object.entries(ty.cfg).forEach(([k, v]) => { bh.cfg[k] = v; });
-    bh._physics();                                  // recompute horizon / ISCO / colour
-    Object.values(typeBtns).forEach((b) => b.classList.remove('on'));
-    typeBtns[ty.id]?.classList.add('on');
-    if (titleEl) titleEl.textContent = ty.title;
-    activeTag = ty.tag;
-    sync();
-    if (bh.still) bh._draw();
+  /* ---------- right column ---------- */
+  const instCard = el('div', 'bh-card');
+  instCard.innerHTML = `<h2>Instrument <em id="bh-insttag"></em></h2><dl class="bh-read" id="bh-read"></dl><p class="bh-note">R: computed or sourced. I: illustrative. Tides use the equatorial value 2M/r³.</p>`;
+  right.appendChild(instCard);
+
+  const measCard = el('div', 'bh-card');
+  measCard.innerHTML = `<h2>Shadow, measured <em>far observer</em></h2><dl class="bh-read" id="bh-meas"></dl>
+    <div class="bh-seg" style="margin-top:8px"><button class="bh-btn" type="button" id="bh-strip">Measure on the GPU</button><button class="bh-btn" type="button" id="bh-rings">Sub-rings</button></div>
+    <p class="bh-note" id="bh-measnote"></p>`;
+  right.appendChild(measCard);
+
+  const xsCard = el('div', 'bh-card');
+  xsCard.innerHTML = `<h2>Cross-section <em>click the image to trace a ray</em></h2><div id="bh-xs"></div>
+    <div class="bh-legend"><span><i></i>photon orbit</span><span><i class="g"></i>disk, ISCO</span><span><i class="d"></i>ergosurface</span></div>`;
+  right.appendChild(xsCard);
+
+  const profCard = el('div', 'bh-card');
+  profCard.innerHTML = `<h2>Disk profile <em>hover to light an annulus</em></h2><div id="bh-prof"></div>
+    <div class="bh-legend"><span><i class="g"></i>temperature T / T peak</span><span><i class="d"></i>flux F / F peak</span></div>`;
+  right.appendChild(profCard);
+
+  const potCard = el('div', 'bh-card');
+  potCard.innerHTML = `<h2>Effective potential <em>equatorial</em></h2><div id="bh-pot"></div><p class="bh-note" id="bh-potnote"></p>
+    <div class="bh-legend"><span><i></i>photon impact parameter b(r)</span><span><i class="g"></i>particle V(r) at L_ISCO</span></div>`;
+  right.appendChild(potCard);
+
+  const specCard = el('div', 'bh-card');
+  specCard.innerHTML = `<h2>Spectrum <em>the visible disk, traced</em></h2><div id="bh-spec"></div><p class="bh-note" id="bh-specnote"></p>`;
+  right.appendChild(specCard);
+
+  const fallCard = el('div', 'bh-card');
+  fallCard.innerHTML = `<h2>Fall <em>drag the chart to scrub</em></h2><div id="bh-fall"></div><dl class="bh-read" id="bh-fallread"></dl>
+    <div class="bh-seg" style="margin-top:8px"><button class="bh-btn go" type="button" id="bh-fallgo">Fall in</button><button class="bh-btn" type="button" id="bh-fallstop">Hold</button></div>
+    <div class="bh-legend"><span><i class="g"></i>your clock τ</span><span><i></i>far clock t</span><span><i class="d"></i>tide on 2 m</span></div>`;
+  right.appendChild(fallCard);
+
+  const askCard = el('div', 'bh-card');
+  right.appendChild(askCard);
+  const ask = mountAsk(askCard, app);
+
+  const checkCard = el('div', 'bh-card');
+  checkCard.innerHTML = `<h2>Five-minute check <em id="bh-score"></em></h2><div id="bh-quiz"></div>`;
+  right.appendChild(checkCard);
+
+  /* ---------- phone: one bottom sheet ---------- */
+  const stage = $('.bh-stage');
+  const handle = el('button', 'bh-sheet-h', `<span>controls and readouts</span><em id="bh-sheetv">open</em>`);
+  handle.type = 'button';
+  handle.setAttribute('aria-expanded', 'false');
+  stage.prepend(handle);
+  stage.classList.add('bh-sheet');
+  handle.addEventListener('click', () => {
+    const open = stage.classList.toggle('open');
+    handle.setAttribute('aria-expanded', String(open)); $('#bh-sheetv').textContent = open ? 'close' : 'open';
+  });
+  const footM = el('div', 'bh-card bh-foot-m');
+  stage.appendChild(footM);
+
+  /* ---------- footer ---------- */
+  const foot = $('#bh-foot');
+  foot.innerHTML = `<div class="tags"><span><b>[REAL]</b> Kerr geodesics, shadow, disk physics, EHT values, clocks, tides</span>
+    <span><b class="i">[ILLUSTRATIVE]</b> turbulence, display scale, sky</span>
+    <button class="bh-btn" type="button" id="bh-srcbtn" style="min-height:24px;padding:2px 8px">Sources</button></div>
+    <div class="perf" id="bh-perf">tier -- · -- ms</div>`;
+  footM.innerHTML = `<div><b style="color:var(--horizon)">[REAL]</b> geodesics, shadow, disk physics, EHT values, clocks, tides. <b>[ILLUSTRATIVE]</b> turbulence, display colour scale, sky.</div><button class="bh-btn" type="button" id="bh-srcbtn2">Sources</button><div class="perf" id="bh-perf2"></div>`;
+  const sources = $('#bh-sources');
+  const openSources = () => {
+    sources.hidden = !sources.hidden;
+    if (sources.hidden) return;
+    // each value names its own source: 'mass, distance: <paper>; spin: <paper>; inclination: <paper>'
+    const cited = (o) => {
+      const by = new Map();
+      [['mass', o.massSrc], ['distance', o.distSrc], ['spin', o.spinSrc], ['inclination', o.inclSrc]].forEach(([what, k]) => { if (k) by.set(k, [...(by.get(k) || []), what]); });
+      return [...by].map(([k, what]) => `${what.join(', ')}: ${CITE[k]}`).join('; ') || o.massNote || '';
+    };
+    const rowsT = OBJECTS.map((o) => `<tr><td>${o.name}</td><td>${sci(o.mass)} M☉ ${o.massErr ? '± ' + sci(o.massErr) : ''}</td><td>${o.distPc ? len(o.distPc * K.SI.pc) : '--'}</td><td>a ${o.spin} <span class="${o.spinTag === 'REAL' ? 'bh-tagr' : 'bh-tagi'}">${o.spinTag}</span></td><td>i ${o.incl} deg</td><td>${esc(cited(o))}</td></tr>`).join('');
+    sources.innerHTML = `<h3>Objects (data version ${VERSION})</h3><table><tr><th>object</th><th>mass</th><th>distance</th><th>spin</th><th>incl.</th><th>sources</th></tr>${rowsT}</table>
+      <h3 style="margin-top:12px">Equations and values</h3><ol>${Object.values(CITE).map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
+      <p class="bh-note">Verification: <b>node labs/assets/js/blackhole/verify.mjs</b> runs 40 checks of the engine against these sources (shadow vs Bardeen within 0.002%, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification).</p>
+      <button class="bh-btn" type="button" id="bh-srcclose">Close</button>`;
+    $('#bh-srcclose').addEventListener('click', () => { sources.hidden = true; });
+  };
+  $('#bh-srcbtn').addEventListener('click', openSources);
+  $('#bh-srcbtn2').addEventListener('click', openSources);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sources.hidden = true; probe.hidden = true; } });
+
+  /* ---------- route pill ---------- */
+  mountRoutePanel($('#bh-route'));
+
+  /* ---------- the anchors (traced positions of features) ---------- */
+  // Traced in the view the renderer traces (Store.view: the eased values, charge included).
+  // Nothing is traced while a transition runs; its end asks again (tick below). Labels and
+  // the tour read anchorsLive(): anchors traced for the view the state is in, else none.
+  let anchors = null, anchorKey = '', anchorTimer = 0, anchorsRuns = 0;
+  const viewNow = () => store.view();
+  const aspectNow = () => window.innerWidth / window.innerHeight;
+  const anchorsLive = () => liveAnchors(anchors, store.view(true));
+  const requestAnchors = () => {
+    clearTimeout(anchorTimer);
+    anchorTimer = setTimeout(async () => {
+      if (store.anim) return;
+      const v = viewNow();
+      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: 1.7 };
+      // a resize re-traces (the grid's reach follows the aspect); the anchors stay live meanwhile
+      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak)]);
+      if (key === anchorKey) return;
+      anchorKey = key;
+      try {
+        // the first pass runs inline (about 50 ms) so the labels exist with the first frame;
+        // later passes go to the worker
+        const res = anchorsRuns++ === 0 || !worker ? anchorsInline(args) : await call('anchors', args);
+        if (key !== anchorKey) return;
+        anchors = res;
+        drawOverlay(); drawSpectrum(); app.tour?.refresh();
+      } catch (err) { console.warn('anchors unavailable:', err.message); /* the overlay keeps the analytic curve only */ }
+    }, 260);
+  };
+
+  /* ---------- the overlay: model-computed annotations on the image ---------- */
+  const thNow = () => tanHalfV(store.shown.fov, window.innerWidth / window.innerHeight);
+  const toScreen = (sx, sy, th = thNow()) => {
+    const W = window.innerWidth, H = window.innerHeight, asp = W / H;
+    return [(sx / (th * asp) + 1) / 2 * W, (1 - (sy / th + 1) / 2) * H];
+  };
+  function drawOverlay() {
+    const W = window.innerWidth, H = window.innerHeight;
+    overlay.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const s = store.all();
+    const parts = [];
+    const th = thNow();
+    // the analytic critical curve, in the telescope view (far observer)
+    const tsO = s.view === 'telescope' && s.notes ? shadowFor(store.shown.a, store.shown.incl, store.shown.q) : null;
+    if (tsO && tsO.curve) {
+      const ts = tsO;
+      const ro = store.shown.rcam;
+      let d = '';
+      ts.curve.forEach(([al, be], i) => {
+        // impact parameter -> tangent-plane coordinate at finite distance (Synge factor)
+        const sx = Math.tan(Math.asin(al * Math.sqrt(1 - 2 / ro) / ro)), sy = Math.tan(Math.asin(be * Math.sqrt(1 - 2 / ro) / ro));
+        const [x, y] = toScreen(sx, sy, th);
+        d += `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
+      });
+      parts.push(`<g><path class="curve" d="${d}Z"/></g>`);
+      const top = ts.curve.reduce((m, p) => (p[1] > m[1] ? p : m), ts.curve[0]);
+      const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
+      parts.push(`<g><line class="lead" x1="${tx}" y1="${ty}" x2="${tx + 70}" y2="${ty - 46}"/><text x="${tx + 74}" y="${ty - 50}" class="goldt">Bardeen 1973 critical curve</text><text x="${tx + 74}" y="${ty - 36}">gold: theory · dashes: traced edge</text></g>`);
+    }
+    // labels only from anchors traced for this view: none mid-transition, none from the last view
+    const an = anchorsLive();
+    if (s.notes && an) {
+      const placed = [];          // text blocks already drawn, so a later label steps aside
+      const lab = (pt, txt, sub, dx, dy) => {
+        if (!pt) return;
+        const [x, y] = toScreen(pt.sx, pt.sy, th);
+        const lo = narrow() ? 8 : 352, hi = narrow() ? W - 8 : W - 352;
+        if (x < lo || x > hi) return;
+        // keep the label inside the open centre: flip it to the other side if it would run under a panel
+        const tw = Math.max(txt.length, (sub || '').length) * 7 + 10;
+        if (dx > 0 && x + dx + tw > hi) dx = -dx;
+        if (dx < 0 && x + dx - tw < lo) dx = -dx;
+        // and clear of the labels before it: the two text lines span 16 px either side of the
+        // lead's end; of the four mirrored offsets, the first that touches no placed block wins
+        const block = (ox, oy) => (ox < 0 ? [x + ox - tw, y + oy - 16, x + ox, y + oy + 16] : [x + ox, y + oy - 16, x + ox + tw, y + oy + 16]);
+        const free = (b) => b[0] >= lo && b[2] <= hi && b[1] >= 0 && b[3] <= H && placed.every((p) => b[2] < p[0] || b[0] > p[2] || b[3] < p[1] || b[1] > p[3]);
+        const fit = [[dx, dy], [dx, -dy], [-dx, dy], [-dx, -dy]].find(([ox, oy]) => free(block(ox, oy)));
+        if (fit) [dx, dy] = fit;
+        placed.push(block(dx, dy));
+        const lx = x + dx, ly = y + dy;
+        parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="goldt">${sub}</text>` : ''}</g>`);
+      };
+      const m = app.model;
+      if (an.shadow) {
+        const sh = an.shadow;
+        const wM = s.view === 'telescope' ? (K.angleToImpact(Math.atan(sh.right), store.shown.rcam) - K.angleToImpact(Math.atan(sh.left), store.shown.rcam)) : null;
+        const inner = s.emit === 'thick' && s.view === 'telescope';
+        lab({ sx: sh.right, sy: sh.cy + (sh.top - sh.cy) * 0.3 }, inner ? 'inner shadow' : 'shadow',
+          wM ? `${wM.toFixed(2)} M wide${inner ? ': the disk hides the rest' : ''}` : `horizon is ${(2 * m.rh).toFixed(2)} M wide`, narrow() ? 30 : 70, narrow() ? -70 : -30);
+      }
+      if (an.limb && s.emit === 'thick') lab(an.limb, 'approaching side', `g up to ${an.limb.g.toFixed(2)}, I x ${Math.pow(an.limb.g, 4).toFixed(1)}`, -60, 46);
+      if (an.ring && s.emit === 'thick' && !narrow()) lab(an.ring, 'n = 1 image', 'light that circled once', 60, -34);
+      if (an.isco && s.emit === 'thick' && s.view !== 'telescope' && !narrow()) lab(an.isco, 'ISCO edge', `r = ${m.ri.toFixed(2)} M`, -70, -40);
+    }
+    if (app.probePt) parts.push(`<g><circle class="mark" cx="${app.probePt[0]}" cy="${app.probePt[1]}" r="6"/><circle class="mark" cx="${app.probePt[0]}" cy="${app.probePt[1]}" r="1.5"/></g>`);
+    overlay.innerHTML = parts.join('');
   }
 
-  function sync() {
-    SCHEMA.forEach((s) => {
-      if (inputs[s.key]) { inputs[s.key].input.value = bh.cfg[s.key]; inputs[s.key].val.textContent = s.fmt(bh.cfg[s.key]); }
-    });
-    updateReadout();
+  /* ---------- readouts ---------- */
+  const tagR = '<span class="bh-tagr" title="real: computed or sourced">R</span>', tagI = '<span class="bh-tagi" title="illustrative">I</span>';
+  const dd = (label, value, unit = '', tag = '', cls = '') => `<div class="rw"><dt>${label}${tag}</dt><dd class="${cls}">${value}${unit ? `<span class="u">${unit}</span>` : ''}</dd></div>`;
+  function drawReadouts() {
+    const s = store.all(), m = app.model, o = m.obj;
+    $('#bh-objkind').textContent = o ? o.kind : 'custom';
+    const note = o ? `${o.emitterNote} Spin: ${o.spinNote}.` : 'Custom: mass, spin and accretion rate are yours.';
+    $('#bh-objnote').textContent = note;
+    const rgkm = (r) => `${sci(r * m.rg / 1000)} km`;
+    const au = (r) => `${sci(r * m.rg / K.SI.au)} AU`;
+    const isTel = s.view === 'telescope';
+    // readouts quote the state (where a transition is going), never the eased display values
+    const camR = s.rcam;
+    const clock = s.observer === 'orbiter' ? K.orbitClockRate(s.a, Math.max(camR, m.rph * 1.05), s.q) : K.hoverClockRate(s.a, camR, s.incl * D2R, s.q);
+    $('#bh-read').innerHTML = [
+      dd('mass', sci(m.massSun), 'M☉', o && !o.hypothetical ? tagR : tagI),
+      dd('event horizon r+', s3(m.rh), 'M', tagR), dd('the point of no return, unseen', `${rgkm(m.rh)} · ${au(m.rh)}`, '', '', 'ink'),
+      dd('shadow diameter', s3(shadowFor(s.a, isTel ? s.incl : 90, s.q).mean), 'M', tagR),
+      dd('light aimed inside falls in', `${s3(shadowFor(s.a, 90, s.q).mean / (2 * m.rh))} x the horizon`, '', '', 'ink'),
+      dd('photon orbit', s3(m.rph), 'M', tagR), dd('light can circle here, unstably', '', '', '', 'ink'),
+      dd('ISCO, last stable orbit', s3(m.ri), 'M', tagR), dd('the inner edge of the disk', `${rgkm(m.ri)} · ${au(m.ri)}`, '', '', 'ink'),
+      dd('efficiency 1 - E(ISCO)', s3(m.eta * 100), '%', tagR), dd('rest mass radiated on the way in', '', '', '', 'ink'),
+      dd('ISCO gas speed', s3(m.vIsco), 'c', tagR),
+      dd('ISCO orbit period', dur(m.iscoPeriod), '', tagR),
+      '<div class="hr"></div>',
+      dd('disk peak T', m.Tpeak > 0 ? sci(m.Tpeak) : '--', m.Tpeak > 0 ? 'K' : '', tagR),
+      dd('Eddington', m.edd > 0 && m.obj?.id !== 'primordial' ? sci(m.edd) : 'none', '', o ? (o.eddTag === 'REAL' ? tagR : tagI) : ''),
+      dd('Hawking T', sci(m.hawkingK), 'K', tagR),
+      '<div class="hr"></div>',
+      dd('clock rate here', s3(clock), 'x far', tagR),
+      dd('tide at r+, 2 m', sci(m.tidalHg), 'g', tagR),
+      dd('10 g tide at', m.tide10g > m.rh ? `${s3(m.tide10g)} M` : 'inside r+', '', tagR),
+      // the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2) is the centre only without spin and charge
+      dd(m.rmin < 5e-7 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tagR),
+    ].join('');
+    $('#bh-insttag').textContent = o ? o.name : 'custom';
+    // the card that matters for this view goes first
+    const first = s.view === 'journey' ? fallCard : s.view === 'telescope' ? measCard : instCard;
+    if (right.firstElementChild !== first) right.prepend(first);
+    // footer perf readout keeps its own cadence
+    drawMeasure();
+    drawXS();
+    drawProfile();
+    drawPotential();
+    drawFall();
+    drawQuiz();
+    // button states
+    Object.entries(objBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.obj === id)));
+    Object.entries(viewBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.view === id)));
+    Object.entries(obsBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.observer === id)));
+    Object.entries(modeBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.color === id)));
+    Object.entries(emitBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.emit === id)));
+    $('#bh-modenote').textContent = '';
+    $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${COLOR_MODES[s.color].note}.`;
+    $('#bh-anim', actCard).textContent = s.anim ? 'Pause' : 'Play';
+    $('#bh-anim', actCard).setAttribute('aria-pressed', String(!s.anim));
+    $('#bh-notes', actCard).textContent = 'Labels';
+    $('#bh-notes', actCard).setAttribute('aria-pressed', String(!!s.notes));
+    for (const [k, r] of Object.entries(rows)) {
+      const v = s[k];
+      if (document.activeElement !== r.num) r.num.value = r.d.log ? (+v).toPrecision(4) : (+v).toFixed(r.d.digits ?? 2);
+      if (document.activeElement !== r.rng) r.rng.value = r.d.log ? Math.log(v) : v;
+    }
   }
 
-  // live derived-physics readout (rs units) — makes "the animation reflects the
-  // physics" literally legible, and surfaces the per-type honesty tag.
-  let activeTag = 'ESTABLISHED';
-  const fmtR = (v) => (v == null ? '—' : `${v.toFixed(2)} r<sub>s</sub>`);
-  function updateReadout() {
-    const p = bh.phys || {};
-    const overspun = (bh.cfg.spinA * bh.cfg.spinA + bh.cfg.charge * bh.cfg.charge) >= 1.0;
-    const shadow = overspun ? 'none — exposed core'
-                 : (p.a > 0.5 ? 'flattened (frame-dragged)' : 'circular');
-    readout.innerHTML =
-      `<span>r<sub>horizon</sub> ${overspun ? '—' : fmtR(p.horizon)}</span>` +
-      `<span>r<sub>ISCO</sub> ${fmtR(p.risco)}</span>` +
-      `<span>shadow ${shadow}</span>` +
-      `<span class="bh-tag bh-tag-${activeTag.toLowerCase()}">${activeTag}</span>`;
+  let gpuStrip = null, rings = null;
+  function drawMeasure() {
+    const s = store.all(), o = app.model.obj;
+    // the same measurement the tour quotes: the state's inclination in the telescope view
+    const { incl, th } = measurement(s);
+    let integ = null;
+    try { integ = integratorShadow(s.a, incl, s.q); } catch { integ = null; }
+    const rows2 = [];
+    rows2.push(`<dt style="color:var(--text)">i = ${incl} deg, a/M = ${s.a.toFixed(3)}${s.q ? `, Q/M = ${s.q.toFixed(2)}` : ''}, observer at 1000 M</dt>`);
+    rows2.push(dd(th.traced ? 'width (no closed form, Q and a)' : s.q > 0 ? 'width, 2 b_c (RN)' : 'width, Bardeen', s3(th.chords.width), 'M', tagR));
+    if (integ) rows2.push(dd('width, traced', s3(integ.width), 'M', tagR));
+    if (integ) rows2.push(dd('relative difference', s3(Math.abs(integ.width / th.chords.width - 1) * 100), '%', tagR, 'ink'));
+    if (gpuStrip && gpuStrip.a === s.a && gpuStrip.q === s.q && gpuStrip.incl === incl) rows2.push(dd('width, GPU strip', `${s3(gpuStrip.width)} ± ${s3(gpuStrip.res)}`, 'M', tagR));
+    rows2.push(dd('height, B / traced', `${s3(th.chords.height)} / ${integ ? s3(integ.height) : '--'}`, 'M', tagR));
+    rows2.push(dd('mean diameter', s3(th.mean), 'M', tagR));
+    if (o && o.eht) {
+      const pred = predictedUas(th.mean, o);
+      rows2.push('<div class="hr"></div>');
+      rows2.push(dd('predicted', `${s3(pred.value)} ± ${s3(pred.err)}`, 'µas', tagR));
+      const sg = sigmaDiff(pred, o.eht.ring, o.eht.ringErr);
+      rows2.push(dd(`EHT ring ${o.eht.ring}±${o.eht.ringErr}`, `<span class="bh-sig ${Math.abs(sg) < 2 ? 'good' : 'warn'}">${sg >= 0 ? '+' : ''}${s3(sg)} σ</span>`, '', tagR));
+      if (o.eht.shadow) {
+        const sg2 = sigmaDiff(pred, o.eht.shadow, o.eht.shadowErr);
+        rows2.push(dd(`EHT shadow ${o.eht.shadow}±${o.eht.shadowErr}`, `<span class="bh-sig ${Math.abs(sg2) < 2 ? 'good' : 'warn'}">${sg2 >= 0 ? '+' : ''}${s3(sg2)} σ</span>`, '', tagR));
+      }
+      // weigh it: mass implied by the EHT angular size and this ruler
+      const meas = o.eht.shadow || o.eht.ring, measErr = o.eht.shadow ? o.eht.shadowErr : o.eht.ringErr;
+      const Mimp = o.mass * meas / pred.value, Merr = Mimp * Math.hypot(measErr / meas, (o.distErr || 0) / o.distPc);
+      rows2.push(dd('implied mass', `${sci(Mimp)} ± ${sci(Merr)}`, 'M☉', tagR));
+    } else if (o && o.distPc) {
+      const pred = predictedUas(th.mean, o);
+      rows2.push('<div class="hr"></div>');
+      rows2.push(dd('shadow on the sky', sci(pred.value), 'µas', tagR));
+      rows2.push(dd('EHT resolution', '~20', 'µas', tagR));
+    }
+    if (rings) {
+      rows2.push('<div class="hr"></div>');
+      rows2.push(`<dt style="color:var(--text)">sub-rings, face-on, a/M = ${rings.a.toFixed(2)}${rings.q ? `, Q/M = ${rings.q.toFixed(2)}` : ''}</dt>`);
+      rows2.push(dd('n=2 / n=1 width', s3(rings.w[2] / rings.w[1]), '', tagR));
+      rows2.push(dd('n=3 / n=2 width', s3(rings.w[3] / rings.w[2]), '', tagR));
+      rows2.push(dd(rings.gamma == null ? 'e^-γ (Johnson 2020, Kerr only)' : 'e^-γ (Johnson 2020)', rings.gamma == null ? '--' : s3(Math.exp(-rings.gamma)), '', tagR));
+    }
+    $('#bh-meas').innerHTML = rows2.join('');
+    $('#bh-measnote').textContent = o && o.eht
+      ? `Predicted from the traced shadow, the cited mass and distance, errors in quadrature. The EHT ring is emission just outside the shadow edge, so a ring slightly larger than the shadow is expected.`
+      : 'Choose M87* or Sgr A* to compare with the Event Horizon Telescope.';
   }
 
-  // boot on Schwarzschild
-  applyType(TYPES.find((t) => t.id === 'schwarzschild'));
+  $('#bh-strip', measCard).addEventListener('click', () => {
+    if (store.get('view') !== 'telescope') store.set(store.viewPatch('telescope'), { instant: true });
+    setTimeout(() => {
+      const res = renderer.measureStrip(app.ui.frameUniforms());
+      if (!res || !res.h) { $('#bh-measnote').textContent = 'The GPU strip needs float render targets, not available here.'; return; }
+      const ro = store.shown.rcam;
+      const b = (t) => K.angleToImpact(Math.atan(t), ro);
+      gpuStrip = { width: b(res.h.hi) - b(res.h.lo), res: 2 * b(res.h.res), a: store.get('a'), q: store.get('q'), incl: store.get('incl') };
+      drawMeasure();
+      $('#bh-measnote').textContent = `The renderer traced a 4096-texel row through the shadow with the disk switched off; its edges, converted with the finite-distance factor, give the width above.`;
+    }, 60);
+  });
+  $('#bh-rings', measCard).addEventListener('click', async () => {
+    $('#bh-measnote').textContent = 'Tracing 2400 rays face-on out from the critical curve...';
+    try {
+      const a = store.get('a'), q = store.get('q');
+      const res = worker ? await call('subrings', { a, q }) : subringsInline({ a, q });
+      rings = { ...res, a, q };
+      drawMeasure();
+      $('#bh-measnote').textContent = `Each further half-orbit thins the image by e^-γ. The n=3/n=2 ratio has converged; n=2/n=1 has not yet, as expected for the first sub-ring. Test annulus 6 to 8 M, observer face-on.`;
+    } catch (e) { $('#bh-measnote').textContent = 'Sub-ring measurement needs a module worker: ' + e.message; }
+  });
+
+  /* ---------- diagrams ---------- */
+  let probeRay = null;
+  function drawXS() {
+    const s = store.all(), m = app.model;
+    $('#bh-xs').innerHTML = crossSection({ a: s.a, rh: m.rh, rph: m.rph, rphr: m.rphr, ri: m.ri, rout: s.rout, incl: s.incl, rcam: s.rcam, ray: probeRay });
+  }
+  function drawPotential(mark = null) {
+    const s = store.all(), m = app.model;
+    const Lisco = K.circular(s.a, m.ri, s.q).L;
+    const p = potentialPlot({ a: s.a, q: s.q, rh: m.rh, rph: m.rph, ri: m.ri, Lisco, mark });
+    $('#bh-pot').innerHTML = p.svg;
+    $('#bh-potnote').textContent = `Located on the curves: photon orbit ${p.rPh.toFixed(3)} M (readout ${m.rph.toFixed(3)}), ISCO ${p.rIsco ? p.rIsco.toFixed(2) : '--'} M (readout ${m.ri.toFixed(3)}). Gas inside the ISCO has no stable orbit and plunges.`;
+  }
+  let profGeom = null;
+  function drawProfile() {
+    const s = store.all(), m = app.model;
+    const p = diskProfile({ tab: m.tab, ri: m.ri, rout: s.rout, Tpeak: m.Tpeak, hl: app.hover.r, tdispK: s.tdisp });
+    profGeom = p;
+    $('#bh-prof').innerHTML = p.svg;
+  }
+  $('#bh-prof').addEventListener('pointermove', (e) => {
+    const svg = $('#bh-prof svg'); if (!svg || !profGeom) return;
+    const rect = svg.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * profGeom.W;
+    const u = (x - profGeom.L) / (profGeom.W - profGeom.L - profGeom.Rr);
+    if (u < 0 || u > 1) return;
+    app.hover.r = profGeom.r0 * Math.pow(profGeom.r1 / profGeom.r0, u);
+    drawProfile(); app.request();
+  });
+  $('#bh-prof').addEventListener('pointerleave', () => { app.hover.r = 0; drawProfile(); app.request(); });
+  function drawSpectrum() {
+    const m = app.model;
+    $('#bh-spec').innerHTML = spectrumPlot(anchors?.spectrum);
+    const pk = anchors?.spectrum?.reduce((a, b) => (b[1] > a[1] ? b : a));
+    $('#bh-specnote').textContent = m.Tpeak > 0 && pk
+      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = 1.7) at its local temperature, shifted by its own g. Peak near ${pk[0] >= 1000 ? (pk[0] / 1000).toPrecision(3) + ' keV' : pk[0].toPrecision(3) + ' eV'} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.`
+      : 'Set an accretion rate to see the disk spectrum.';
+  }
+
+  /* ---------- the fall ---------- */
+  const journey = {
+    playing: false, tau: 0, rows: null,
+    play() {
+      // the fall the view is going to (incl may still be easing), with the hole's charge
+      this.rows = fall(store.get('a'), store.get('incl'), 40, store.get('q'));
+      this.tau = 0; this.playing = true; this.done = false;
+      store.set({ observer: 'faller', rcam: 40 }, { instant: true, src: 'journey' });
+    },
+    stop() { this.playing = false; },
+    tick(dt) {
+      if (!this.playing || !this.rows) return;
+      const total = this.rows[this.rows.length - 1].tau;
+      this.tau = Math.min(total, this.tau + dt / 1000 * total / (store.reduced ? 1e9 : 22));
+      const row = this.rows.find((r) => r.tau >= this.tau) || this.rows[this.rows.length - 1];
+      const rStop = Math.max(row.r, app.model.rh * 1.08);
+      store.set({ rcam: +rStop.toFixed(4), az: ((row.phi * 180 / Math.PI) % 360 + 540) % 360 - 180 }, { instant: true, src: 'journey' });
+      if (rStop <= app.model.rh * 1.08 + 1e-6) { this.playing = false; this.done = true; app.request(); }
+    },
+  };
+  $('#bh-fallgo', fallCard).addEventListener('click', () => { app.tour?.stop(); store.set(store.viewPatch('journey')); journey.play(); });
+  $('#bh-fallstop', fallCard).addEventListener('click', () => journey.stop());
+  let fallGeom = null;
+  function drawFall() {
+    const s = store.all(), m = app.model;
+    const rows3 = fall(s.a, s.incl, 40, s.q);
+    const tidalScale = K.SI.c * K.SI.c / (m.rg * m.rg) * 2 / K.SI.g0;
+    const rc = s.rcam;
+    const g = fallChart({ rows: rows3, tg: m.tg, rcur: s.view === 'journey' ? rc : null, rh: m.rh, ri: m.ri, rph: m.rph, tidalScale, tide10g: m.tide10g });
+    fallGeom = g;
+    $('#bh-fall').innerHTML = g.svg;
+    const row = rows3.find((r) => r.r <= rc) || rows3[0];
+    const inJ = s.view === 'journey';
+    $('#bh-fallread').innerHTML = [
+      dd('your clock τ since 40 M', inJ ? dur(row.tau * m.tg) : '--', '', tagR),
+      dd('far clock t since 40 M', inJ ? dur(row.t * m.tg) : '--', '', tagR),
+      dd('your speed vs hovering', inJ ? (store.get('observer') === 'faller' ? (Math.sqrt(1 - K.hoverClockRate(s.a, rc, s.incl * D2R, s.q) ** 2)).toFixed(3) + ' c' : '--') : '--', '', tagR),
+      dd('tide on 2 m here', inJ ? `${sci(row.tidal * tidalScale * K.SI.g0)} m/s² · ${sci(row.tidal * tidalScale)} g` : '--', '', tagR),
+      dd('horizon to r = 0 (a = 0 law 4M/3)', dur(4 / 3 * m.tg), '', tagR),
+      dd('longest possible inside (πM)', dur(m.piM), '', tagR),
+      dd('far clock: redshift e-fold every', dur(m.efold), '', tagR),
+    ].join('');
+  }
+  let scrubbing = false;
+  const scrub = (e) => {
+    const svg = $('#bh-fall svg'); if (!svg || !fallGeom) return;
+    const rect = svg.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * fallGeom.W;
+    const u = Math.max(0, Math.min(1, (x - fallGeom.L) / (fallGeom.W - fallGeom.L - fallGeom.Rr)));
+    const rh = fallGeom.rh * 0.999;
+    const r = rh + (fallGeom.r1 - rh) * Math.pow((fallGeom.r0 - rh) / (fallGeom.r1 - rh), 1 - u);
+    journey.stop();
+    if (store.get('view') !== 'journey') store.set({ ...store.viewPatch('journey') }, { instant: true });
+    store.set({ rcam: Math.max(r, app.model.rh * 1.08), observer: 'faller' }, { instant: true, src: 'scrub' });
+  };
+  $('#bh-fall').addEventListener('pointerdown', (e) => { scrubbing = true; e.target.setPointerCapture?.(e.pointerId); scrub(e); });
+  $('#bh-fall').addEventListener('pointermove', (e) => { if (scrubbing) scrub(e); });
+  $('#bh-fall').addEventListener('pointerup', () => { scrubbing = false; });
+
+  /* ---------- the five-minute check ---------- */
+  const quizState = { answers: {} };
+  function drawQuiz() {
+    const s = store.all(), m = app.model;
+    const ts = shadowFor(s.a, 90, s.q);
+    const Q = [
+      { id: 'shadow', q: `How wide is this hole's shadow compared with its horizon (a = ${s.a.toFixed(2)})?`,
+        opts: [['the same', false], [`${(ts.mean / (2 * m.rh)).toFixed(1)} times wider`, true], ['half as wide', false]] },
+      { id: 'side', q: 'Why is one side of the disk brighter?', opts: [['it is hotter there', false], ['gas moving toward you is beamed: I scales as g^4', true], ['the hole lights it', false]] },
+      { id: 'isco', q: `Where does the disk end at a = ${s.a.toFixed(2)}?`, opts: [[`at the horizon, ${m.rh.toFixed(2)} M`, false], [`at the ISCO, ${m.ri.toFixed(2)} M`, true], [`at the photon orbit, ${m.rph.toFixed(2)} M`, false]] },
+      { id: 'clock', q: 'Falling in, what do you see on your own clock at the horizon?', opts: [['it stops', false], ['nothing special: it reads a finite time', true], ['it runs backward', false]] },
+      { id: 'tide', q: `At ${sci(m.massSun)} M☉, does the tide tear a person apart before the horizon?`, opts: [['yes', m.tide10g > m.rh], ['no', m.tide10g <= m.rh]] },
+    ];
+    const score = Object.values(quizState.answers).filter(Boolean).length;
+    $('#bh-score').textContent = `${score} / ${Q.length}`;
+    $('#bh-quiz').innerHTML = Q.map((x) => `<p class="bh-note" style="color:var(--text)">${esc(x.q)}</p><div class="bh-seg">${x.opts.map(([t, ok], i) => {
+      const chosen = quizState.answers[x.id + ':pick'] === i;
+      return `<button class="bh-btn" type="button" data-q="${x.id}" data-i="${i}" data-ok="${ok ? 1 : 0}" aria-pressed="${chosen}">${esc(t)}${chosen ? `<small>${ok ? 'right' : 'not quite'}</small>` : ''}</button>`;
+    }).join('')}</div>`).join('');
+  }
+  $('#bh-quiz').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-q]'); if (!b) return;
+    quizState.answers[b.dataset.q] = b.dataset.ok === '1';
+    quizState.answers[b.dataset.q + ':pick'] = +b.dataset.i;
+    drawQuiz();
+  });
+
+  /* ---------- the probe ---------- */
+  const canvas = $('#bh-canvas');
+  function probeAt(px, py) {
+    // the ray the renderer traced for this pixel: same view object (Store.view, charge
+    // included), same pixel mapping, same horizon and ISCO (probe.js, tested in probe.test.mjs)
+    const v = viewNow();
+    const { sx, sy } = screenToTangent(px, py, window.innerWidth, window.innerHeight, v.fov);
+    const res = traceProbe(v, sx, sy);
+    const ri = res.rIn, q = v.q || 0;
+    probeRay = res.path;
+    app.probePt = [px, py];
+    // brushing: a disk hit lights its radius in the profile plot and its annulus on the image
+    app.hover.r = res.fate === 'disk' ? res.hits[0].r : 0;
+    drawProfile(); drawPotential(res.fate === 'disk' ? res.hits[0].r : null); app.request();
+    drawXS(); drawOverlay();
+    // radii of the traced view (it can differ from the state's while a transition runs)
+    const m = { rh: K.horizon(v.a, q), rph: K.photonOrbit(v.a, 1, q), rphr: K.photonOrbit(v.a, -1, q) };
+    const lam = res.pphi / -res.pt;     // axial angular momentum per energy, in M
+    let title, cause, deriv;
+    if (res.fate === 'captured') {
+      title = 'Shadow: this ray ends in the hole';
+      cause = `Followed back, the light path crosses the horizon at r+ = ${m.rh.toFixed(3)} M. Its angular momentum per energy, ${lam.toFixed(2)} M, is too small to turn around at the photon orbits.`;
+      deriv = q > 0
+        ? `Kerr-Newman, Q/M = ${q.toFixed(2)}: no closed-form critical curve is used. The ray is integrated in the Kerr-Schild form\n  g^mn = eta^mn - f k^m k^n,  f = r^2 (2 r - Q^2) / (r^4 + a^2 z^2)\nand captured when r < 0.98 r+, r+ = 1 + sqrt(1 - a^2 - Q^2) = ${m.rh.toFixed(3)} M.`
+        : 'Critical curve (Bardeen 1973), spherical photon orbit radius r:\n  xi = (r^2 (3 - r) - a^2 (r + 1)) / (a (r - 1))\n  eta = r^3 (4 a^2 - r (r - 3)^2) / (a^2 (r - 1)^2)\n  alpha = -xi / sin i,  beta = +- sqrt(eta + a^2 cos^2 i - xi^2 cot^2 i)';
+    } else if (res.fate === 'disk') {
+      const h = res.hits[0];
+      const nearIsco = h.r < ri * 1.08;
+      title = h.n === 0 ? (nearIsco ? 'ISCO edge of the disk' : (res.g > 1.05 ? 'Approaching side of the disk' : res.g < 0.8 ? 'Receding side of the disk' : 'Disk, direct image')) : `Disk, n = ${h.n} image`;
+      cause = h.n > 0 ? `This light crossed the disk plane ${h.n} time${h.n > 1 ? 's' : ''} outside the gas before landing at r = ${h.r.toFixed(2)} M: it went around the hole first.`
+        : nearIsco ? `Gas here sits at r = ${h.r.toFixed(2)} M, just outside the last stable orbit at ${ri.toFixed(3)} M. Inside it, gas plunges and stops radiating.`
+          : `Gas at r = ${h.r.toFixed(2)} M orbiting at ${K.diskSpeed(v.a, h.r, q).toFixed(3)} c. Its light reaches you shifted by g = ${res.g.toFixed(3)}, so intensity x ${Math.pow(res.g, 4).toFixed(2)}.`;
+      deriv = `Redshift (circular orbit, conserved E and L of the ray):\n  g = 1 / (u^t (E - Omega L)),  ${q > 0 ? 'Omega = sqrt(r - Q^2) / (r^2 + a sqrt(r - Q^2))' : 'Omega = 1 / (r^1.5 + a)'}\n  here E = ${(-res.pt).toFixed(4)}, L = ${res.pphi.toFixed(4)}, g = ${res.g.toFixed(4)}\nObserved intensity I = g^4 I_emit (I_nu / nu^3 is invariant).\nTemperature: Page & Thorne 1974 flux, T = (F / sigma)^(1/4).`;
+    } else if (res.minr < m.rphr * 1.08) {
+      title = 'Photon ring: light that skimmed the photon orbits';
+      cause = `This ray came within ${res.minr.toFixed(3)} M of the centre, among the unstable photon orbits (${m.rph.toFixed(3)} to ${m.rphr.toFixed(3)} M), and was flung back out. Each extra half-orbit thins such images by e^-gamma.`;
+      deriv = `Lyapunov exponent of the spherical photon orbit (Johnson et al. 2020):
+  gamma = 4 r sqrt(chi) K(u+/u-) / (a sqrt(-u-)),  chi = 1 - Delta / (r (r - 1)^2)
+  at a = 0, gamma = pi: each sub-ring is e^-pi = 1/23 of the last`;
+    } else {
+      title = 'Sky: this ray escaped';
+      cause = `The light came from a star, bent on the way. Closest approach r = ${res.minr.toFixed(2)} M${res.minr < 3.5 ? ', close to the photon orbits: near the critical curve the sky is copied many times' : ''}.`;
+      deriv = 'Null geodesics of g^mn = eta^mn - f k^m k^n (Kerr-Schild), integrated by RK4:\n  dx/dl = dH/dp,  dp/dl = -dH/dx,  H = 1/2 g^mn p_m p_n = 0';
+    }
+    probe.innerHTML = `<button class="x" type="button" aria-label="Close">×</button><h3>${title}</h3><p>${cause}</p>
+      <dl class="bh-read">${dd('ray fate', res.fate === 'disk' ? `disk, n = ${res.hits[0].n}` : res.fate, '', tagR)}${dd('L / E (axial)', lam.toFixed(3), 'M', tagR)}${res.g ? dd('redshift g', res.g.toFixed(4), '', tagR) : ''}${dd('steps · |H| drift', `${res.steps} · ${res.drift.toExponential(1)}`, '', tagR)}</dl>
+      <details><summary>the equation the code uses</summary><pre>${esc(deriv)}</pre></details>`;
+    probe.hidden = false;
+    const pw = 300;
+    probe.style.left = `${Math.min(window.innerWidth - pw - 12, Math.max(12, px + 16))}px`;
+    probe.style.top = `${Math.min(window.innerHeight - 260, Math.max(64, py - 40))}px`;
+    $('.x', probe).addEventListener('click', () => { probe.hidden = true; app.probePt = null; app.hover.r = 0; drawProfile(); drawOverlay(); app.request(); });
+    sr.textContent = `${title}. ${cause}`;
+  }
+
+  /* ---------- canvas input: drag orbits (azimuth free, inclination re-traces), wheel zooms ---------- */
+  let drag = null;
+  const pointers = new Map();
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    drag = { x: e.clientX, y: e.clientY, moved: 0, az: store.get('az'), incl: store.get('incl'), rcam: store.get('rcam') };
+    if (pointers.size === 2) { const p = [...pointers.values()]; drag.pinch = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y); }
+    app.tour?.stop(); journey.stop();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!drag || !pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2 && drag.pinch) {
+      const p = [...pointers.values()];
+      const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      store.set({ rcam: drag.rcam * drag.pinch / d }, { instant: true, src: 'drag' });
+      drag.moved = 99; app.interacting = true; return;
+    }
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    drag.moved = Math.max(drag.moved, Math.hypot(dx, dy));
+    if (drag.moved < 4) return;
+    app.interacting = true;
+    store.set({ az: ((drag.az - dx * 0.3) % 360 + 540) % 360 - 180, incl: drag.incl - dy * 0.25 }, { instant: true, src: 'drag' });
+  });
+  const endDrag = (e) => {
+    pointers.delete(e.pointerId);
+    if (drag && drag.moved < 4 && e.type === 'pointerup') probeAt(e.clientX, e.clientY);
+    if (pointers.size === 0) { drag = null; app.interacting = false; app.request(); }
+  };
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('wheel', (e) => { e.preventDefault(); app.tour?.stop(); store.set({ rcam: store.get('rcam') * (e.deltaY > 0 ? 1.08 : 1 / 1.08) }, { dur: 250 }); }, { passive: false });
+  canvas.addEventListener('keydown', (e) => {
+    const k = e.key;
+    const step = e.shiftKey ? 10 : 2;
+    if (k === 'ArrowLeft') store.set({ az: store.get('az') - step * 2 });
+    else if (k === 'ArrowRight') store.set({ az: store.get('az') + step * 2 });
+    else if (k === 'ArrowUp') store.set({ incl: store.get('incl') - step });
+    else if (k === 'ArrowDown') store.set({ incl: store.get('incl') + step });
+    else if (k === '+' || k === '=') store.set({ rcam: store.get('rcam') / 1.15 });
+    else if (k === '-' || k === '_') store.set({ rcam: store.get('rcam') * 1.15 });
+    else if (k === 'Enter') { const r = canvas.getBoundingClientRect(); probeAt(r.width / 2, r.height / 2); }
+    else if (k === ' ') store.set({ anim: !store.get('anim') });
+    else return;
+    e.preventDefault(); app.tour?.stop();
+  });
+
+  /* ---------- store subscription ---------- */
+  let annTimer = 0;
+  store.on((changed, s, src) => {
+    if (changed.some((k) => ['a', 'q', 'incl', 'rcam', 'fov', 'tilt', 'rout', 'observer', 'emit', 'view', 'obj', 'edd', 'mass'].includes(k))) {
+      if (src !== 'drag') probe.hidden = true;
+      requestAnchors();
+    }
+    drawReadouts();
+    drawOverlay();
+    // announce regime changes for screen readers (throttled)
+    clearTimeout(annTimer);
+    annTimer = setTimeout(() => {
+      const m = app.model;
+      sr.textContent = `${m.obj ? m.obj.name : 'Custom hole'}, spin ${s.a.toFixed(2)}, inclination ${s.incl.toFixed(0)} degrees, ${VIEWS[s.view].label} view, ${COLOR_MODES[s.color].label} colour. Horizon ${m.rh.toFixed(2)} M, ISCO ${m.ri.toFixed(2)} M.`;
+    }, 700);
+  });
+
+  /* ---------- tour ---------- */
+  app.tour = new Tour(app, { caption, toScreen, getAnchors: () => anchors, journey });
+  $('#bh-tour', actCard).addEventListener('click', () => (app.tour.running ? app.tour.stop() : app.tour.start(0)));
+
+  /* ---------- perf readout ---------- */
+  const perfEl = $('#bh-perf'), perfEl2 = $('#bh-perf2');
+  const tierCycle = ['auto', 'min', 'low', 'mid', 'high'];
+  // the device name only: 'ANGLE (Vendor, Device (0x..) Direct3D11 ...)' -> 'Device', at most 26 characters
+  const gpuFull = renderer.gpuName || '';
+  let gpu = (gpuFull.replace(/^ANGLE \(/, '').split(',')[1] || gpuFull).replace(/\(0x[0-9A-Fa-f]+\)|Direct3D.*$|Vulkan.*$|\)\s*$/g, '').trim();
+  if (/swiftshader/i.test(gpuFull)) gpu = 'SwiftShader (CPU)';
+  if (gpu.length > 26) gpu = gpu.slice(0, 25) + '…';
+  const perf = (p, res) => {
+    const t = store.get('tier');
+    const html = `<span title="${esc(gpuFull)}">${esc(gpu)}</span> · tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}<button type="button" aria-label="Change quality tier">change</button>`;
+    perfEl.innerHTML = html; perfEl2.innerHTML = html;
+    [perfEl, perfEl2].forEach((n) => n.querySelector('button').addEventListener('click', () => store.set({ tier: tierCycle[(tierCycle.indexOf(t) + 1) % tierCycle.length] })));
+  };
+
+  /* ---------- per-frame hooks ---------- */
+  let lastFallDraw = 0, wasEasing = false;
+  const tick = (now, dt) => {
+    journey.tick(dt);
+    app.tour?.tick(now, dt);
+    // a transition just ended: the image is the state's own view now, so trace its anchors
+    // and redraw what is drawn from the eased values (critical curve, labels, tour focus)
+    const easing = !!store.anim;
+    if (wasEasing && !easing) { requestAnchors(); drawOverlay(); app.tour?.refresh(); }
+    wasEasing = easing;
+    if (store.get('view') === 'journey' && now - lastFallDraw > 120) { lastFallDraw = now; drawFall(); drawReadouts(); }
+  };
+
+  const start = () => {
+    drawReadouts(); requestAnchors(); drawSpectrum();
+    // title card: up to 1.8 s on first load, ended by any input, skipped for stills,
+    // shared links and reduced motion
+    const veil = $('#bh-veil');
+    const lift = () => veil.classList.add('off');
+    if (app.still || store.reduced || app.hasState) lift();
+    else {
+      setTimeout(lift, 1800);
+      ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, lift, { once: true, passive: true }));
+    }
+    // the guided tour starts on its own unless the visitor arrived with a link, prefers
+    // reduced motion, or the page is a still capture
+    if (!app.hasState && !store.reduced && !app.still) setTimeout(() => { if (!app.tour.running && performance.now() - app.lastInput > 2500) app.tour.start(0); }, 3200);
+    else app.tour.idleCaption();
+    // ?ask=... asks the question box on load (a shareable question)
+    const aq = new URLSearchParams(location.search).get('ask');
+    if (aq) setTimeout(() => { $('#bh-askq').value = aq; ask.ask(aq); }, 600);
+    // ?p=x,y (fractions of the screen) opens the probe on that pixel: a shareable traced ray
+    const pq = new URLSearchParams(location.search).get('p');
+    if (pq) {
+      const [fx, fy] = pq.split(',').map(Number);
+      if (Number.isFinite(fx) && Number.isFinite(fy)) setTimeout(() => probeAt(fx * window.innerWidth, fy * window.innerHeight), 400);
+    }
+  };
+  ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, () => { app.lastInput = performance.now(); }, { passive: true }));
 
   return {
-    sync,
-    setType: (id) => { const ty = TYPES.find((t) => t.id === id); if (ty) applyType(ty); },
-    setView: (id) => { const vw = VIEWS.find((w) => w.id === id); if (vw) { bh.cfg.pitch = vw.pitch; if (bh.still) bh._draw(); } },
+    tick, perf, start, frameUniforms: () => app.frameUniforms(app), layout: () => { drawOverlay(); requestAnchors(); },
+    onRefined: () => drawOverlay(), anchors: () => anchors, liveAnchors: anchorsLive, ask,
   };
 }
