@@ -56,6 +56,7 @@ export function exomaniaRules() {
 
 export default async function exomania(p, { base }) {
   for (const [n, e] of exomaniaRules()) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)
   const text = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || {}).textContent || ""`);
   const label = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || { getAttribute() { return ""; } }).getAttribute("aria-label") || ""`);
   const state = () => p.ev('document.body.dataset.state || ""');

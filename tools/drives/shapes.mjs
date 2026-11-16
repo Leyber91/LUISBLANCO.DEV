@@ -281,6 +281,7 @@ async function names(k, from, longest) {
 export default async function shapes(p, { base, width }) {
   await p.before(`(${guard})()`);
   for (const [n, e] of standard({ gold: SURVEY_GOLD })) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const phone = width < 700;
   const NAMED = '(() => { const n = (document.getElementById("ret-name") || {}).textContent; return !!n && n.trim().length > 1 && n.trim() !== "…"; })()';

@@ -77,7 +77,8 @@ function onFirstScreen() {
 /* ---- the scenario ---- */
 
 export default async function search(p, { base }) {
-  for (const [n, e] of exomaniaRules()) p.invariant(n, e);   // after every step: tools/invariants.mjs, as exomania.mjs registers them
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const state = () => call(pageState);
   const open = async (query = '', still = true) => {

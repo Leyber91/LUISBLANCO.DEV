@@ -87,7 +87,8 @@ function noThanks() { const b = [...document.querySelectorAll('button')].find((x
 /* ---- the scenario ---- */
 
 export default async function orbit(p, { base, width }) {
-  for (const [n, e] of exomaniaRules()) p.invariant(n, e);   // after every step: tools/invariants.mjs, as exomania.mjs registers them
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const phone = width < 700;
   const NAMED = '(() => { const n = (document.getElementById("ret-name") || {}).textContent; return !!n && n.trim().length > 1 && n.trim() !== "…"; })()';

@@ -41,6 +41,11 @@
                              returns anything but a list, or throws, is a break. tools/invariants.mjs has
                              the shared rules.
      step(label)             run the invariants now, after a change the scenario names
+     frames(except)          a rule on the pixels: after every step a frame is captured, and no pixel of it is fully
+                             transparent. except: { '<selector>': '<reason>' }, the elements whose box may hold
+                             such pixels, each with its reason. Every shot() is held to the same rule, with the
+                             same exceptions, whether frames() was called or not.
+     background(rgba)        the colour Chrome paints under the page ({ r, g, b, a }), for a fixture
    Coordinates are CSS pixels of the viewport.
 
    Machine safety: one Chrome at a time on the machine, its own
@@ -60,6 +65,7 @@
    ============================================================ */
 
 import { spawn } from 'node:child_process';
+import zlib from 'node:zlib';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -70,6 +76,43 @@ const LOCK = path.join(os.tmpdir(), 'labs-drive-chrome.lock');
 /* Every Chrome this process started and has not yet stopped: killed when the process exits, whatever ends it early. */
 const LIVE = new Set();
 process.on('exit', () => { for (const c of LIVE) c.kill(); });
+
+/* The pixels of a captured frame with no alpha at all, outside the boxes given ({ x0, y0, x1, y1 } in pixels): how
+   many, and the box that holds them. A frame is a PNG of 8 bits a channel, RGB (no alpha, so none) or RGBA.
+   Why: on 2026-11-16 every 390 px render of the survey showed a white box over the sharing question, a hole of fully
+   transparent pixels where an opaque fixed plate sat over the opaque WebGL canvas in software-composited headless
+   Chrome; the rules read the DOM and passed it. */
+export function transparentIn(png, skip = []) {
+  let o = 8, w = 0, h = 0, depth = 0, type = 0;
+  const parts = [];
+  while (o < png.length) {
+    const n = png.readUInt32BE(o), t = png.toString('latin1', o + 4, o + 8), d = png.subarray(o + 8, o + 8 + n);
+    if (t === 'IHDR') { w = d.readUInt32BE(0); h = d.readUInt32BE(4); depth = d[8]; type = d[9]; }
+    if (t === 'IDAT') parts.push(d);
+    o += 12 + n;
+  }
+  if (depth !== 8 || (type !== 2 && type !== 6)) throw new Error(`a frame of colour type ${type} at ${depth} bits, which this reader does not read`);
+  const out = { width: w, height: h, count: 0, box: null };
+  if (type === 2) return out;   // no alpha channel: no pixel can be transparent
+  const stride = w * 4, raw = zlib.inflateSync(Buffer.concat(parts));
+  let prev = Buffer.alloc(stride);
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)], line = Buffer.from(raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1)));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= 4 ? line[x - 4] : 0, b = prev[x], c = x >= 4 ? prev[x - 4] : 0;
+      const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
+      const pred = f === 1 ? a : f === 2 ? b : f === 3 ? (a + b) >> 1 : f === 4 ? (pa <= pb && pa <= pc ? a : pb <= pc ? b : c) : 0;
+      line[x] = (line[x] + pred) & 255;
+    }
+    for (let x = 0; x < w; x++) {
+      if (line[x * 4 + 3] !== 0 || skip.some((r) => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1)) continue;
+      out.count++;
+      out.box = out.box ? { x0: Math.min(out.box.x0, x), y0: Math.min(out.box.y0, y), x1: Math.max(out.box.x1, x + 1), y1: Math.max(out.box.y1, y + 1) } : { x0: x, y0: y, x1: x + 1, y1: y + 1 };
+    }
+    prev = line;
+  }
+  return out;
+}
 
 /* One Chrome at a time on this machine: wait for the lock file, take it from a holder that no longer runs (or from
    one that died before it wrote its name), and return the function that gives it back; null when waitMs runs out. */
@@ -118,6 +161,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
   LIVE.add(chrome); chrome.on('exit', () => LIVE.delete(chrome));   // equivalent: a Linux runner has no sandbox for Chrome; one machine runs one branch
   const checks = [], errors = [];
   const invariants = [];   // { name, expression, steps, seen }
+  const frames = { on: false, except: {}, steps: 0, seen: new Set() };   // the rule on the pixels of a captured frame
   let timedOut = false, ws = null;
   const killer = setTimeout(() => { timedOut = true; chrome.kill(); }, timeoutMs);
   const check = (name, cond, detail = '') => { checks.push({ name, ok: !!cond, detail: String(detail) }); say(`${cond ? 'ok  ' : 'FAIL'} ${name}${detail ? ' :: ' + detail : ''}`); };
@@ -155,7 +199,20 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
     let touchOn = false, lastEv = '';
     const evAndNote = async (expression) => { lastEv = expression; return ev(expression); };
     /* after a step: every invariant, each distinct break reported once, eight at most for a rule */
+    /* the pixels of a frame: no fully transparent one outside the boxes of the elements excepted, each break once */
+    const frameCheck = async (label, png) => {
+      const skip = await ev(`(() => { const out = []; for (const s of ${JSON.stringify(Object.keys(frames.except))}) for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); out.push({ x0: Math.floor(r.left), y0: Math.floor(r.top), x1: Math.ceil(r.right), y1: Math.ceil(r.bottom) }); } return out; })()`);
+      const t = transparentIn(png, skip);
+      frames.steps++;
+      if (!t.count) return;
+      const k = `${t.count} fully transparent pixels, in ${t.box.x1 - t.box.x0} x ${t.box.y1 - t.box.y0} px at ${t.box.x0},${t.box.y0}`;
+      if (frames.seen.has(k)) return;
+      frames.seen.add(k);
+      if (frames.seen.size <= 8) check(`frame: no fully transparent pixel, after ${label}`, false, k);
+    };
+    const capture = async () => Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).data, 'base64');
     const step = async (label) => {
+      if (frames.on) await frameCheck(label, await capture());
       if (!invariants.length) return;   // equivalent: with no rule there is nothing to run, and the frame it would wait for changes nothing
       await ev('new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))').catch(() => false);   // the frame the change asked for is drawn
       for (const inv of invariants) {
@@ -180,6 +237,11 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
       errors: () => errors.slice(),
       invariant(name, expression) { invariants.push({ name, expression, steps: 0, seen: new Set() }); },
       step: (label) => step(label),
+      frames(except = {}) {
+        for (const [sel, why] of Object.entries(except)) if (!(typeof why === 'string' && why.trim().length >= 8)) throw new Error(`frames: the exception ${sel} needs its reason`);
+        frames.on = true; frames.except = except;
+      },
+      async background(color) { await send('Emulation.setDefaultBackgroundColorOverride', { color }); },
       async media(features) { await send('Emulation.setEmulatedMedia', { features }); },
       async before(source) { await send('Page.addScriptToEvaluateOnNewDocument', { source }); },
       async go(u) { await send('Page.navigate', { url: u }); if (!(await until('document.readyState === "complete"'))) throw new Error('the page did not finish loading: ' + u.slice(0, 120)); await step(`go ${u.replace(/^https?:\/\/[^/]+/, '').slice(0, 90)}`); },
@@ -210,10 +272,11 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
         await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, ...(vk ? { windowsVirtualKeyCode: vk } : {}) });
         await step(`the key ${key}`);
       },
-      async shot(name) { const r = await send('Page.captureScreenshot', { format: 'png' }); const f = path.join(out, name + '.png'); fs.writeFileSync(f, Buffer.from(r.data, 'base64')); return f; },
+      async shot(name) { const png = await capture(), f = path.join(out, name + '.png'); fs.writeFileSync(f, png); await frameCheck(`the shot ${name}`, png); return f; },
     };
     await scenario(page, { base, width, height });
     for (const inv of invariants) check(`${inv.name}: held after each of ${inv.steps} steps`, inv.seen.size === 0 && inv.steps > 0, inv.seen.size ? `${inv.seen.size} distinct breaks` : '');
+    if (frames.on || frames.steps) check(`frame: no fully transparent pixel in each of ${frames.steps} frames`, frames.seen.size === 0 && frames.steps > 0, frames.seen.size ? `${frames.seen.size} distinct breaks` : '');
     check('the console is clean', errors.length === 0, errors.slice(0, 4).join(' | ').slice(0, 400));
   } catch (e) {
     check(timedOut ? `finished inside ${timeoutMs / 1000} s` : 'the scenario ran to its end', false, String((e && e.message) || e).slice(0, 400));
@@ -310,9 +373,14 @@ async function selftest() {
     yes('a rule that throws is a break with its error', of('throws').length === 1 && /the rule could not be read: .*thrown on purpose/.test(of('throws')[0].detail) && !end('throws').ok);
     yes('each distinct break is one failed check, however often it comes back', of('repeats a break').length === 2 && J(of('repeats a break').map((c) => c.detail)) === J(['a', 'b']) && /2 distinct breaks/.test(end('repeats a break').detail));
     yes('eight breaks of one rule are listed at most, and the end line counts them all', of('breaks ten ways').length === 8 && /10 distinct breaks/.test(end('breaks ten ways').detail) && !end('breaks ten ways').ok);
-    const none = await drive(async (p) => { p.invariant('never run', '[]'); await p.ev('1'); }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    const none = await drive(async (p) => { p.invariant('never run', '[]'); await p.ev('1'); await p.shot('none'); }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
     const nr = none.checks.find((c) => c.name.startsWith('never run: held after each of 0 steps'));
     yes('a rule that never ran fails: no step is no proof', !!nr && !nr.ok, J(none.checks));
+    const shotOnly = none.checks.find((c) => c.name === 'frame: no fully transparent pixel in each of 1 frames');
+    yes('a shot is held to the frame rule even when frames() was not asked, and ends on its line', !!shotOnly && shotOnly.ok, J(none.checks));
+    const noFrame = await drive(async (p) => { p.frames(); await p.ev('1'); }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    const nf = noFrame.checks.find((c) => c.name === 'frame: no fully transparent pixel in each of 0 frames');
+    yes('a frame rule that never saw a frame fails', !!nf && !nf.ok, J(noFrame.checks));
 
     /* what the page says: an exception, an error and a warning on its console, a resource that fails; not a note,
        not the favicon */
@@ -321,6 +389,56 @@ async function selftest() {
     const E = loud.errors;
     yes('the console is read: an exception, an error, a warning and a failed resource; a note and the favicon are not', E.some((x) => /^exception: .*thrown late/.test(x)) && E.includes('error: an error') && E.includes('warning: a warning') && E.some((x) => /^log: .*missing\.png/.test(x)) && !E.some((x) => /^log: .*favicon/.test(x) || /^\w+: a note/.test(x)), J(E));
     yes('and the drive fails on it', loud.checks.some((c) => c.name === 'the console is clean' && !c.ok) && none.checks.some((c) => c.name === 'the console is clean' && c.ok));
+
+    /* the pixels of a frame: the reader, on PNGs made here with every filter; then frames in Chrome */
+    const png = (w, h, type, rows) => {   // rows: [filter, [bytes...]] for each line
+      const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+      const crc = (b) => { let c = 0xffffffff; for (const x of b) c = crcTable[(c ^ x) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+      const chunk = (t, d) => { const len = Buffer.alloc(4); len.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t, 'latin1'), d]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
+      const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = type;
+      const raw = Buffer.concat(rows.map(([f, bytes]) => Buffer.from([f, ...bytes])));
+      return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+    };
+    // the same 3 x 3 image, opaque but for (1,1) and (2,2), written with each filter: the encoded bytes are worked out here
+    const img = [[[9, 9, 9, 255], [8, 8, 8, 255], [7, 7, 7, 255]], [[6, 6, 6, 255], [0, 0, 0, 0], [5, 5, 5, 255]], [[4, 4, 4, 255], [3, 3, 3, 255], [1, 2, 3, 0]]];
+    const enc = (f) => img.map((row, y) => {
+      const cur = row.flat(), up = y ? img[y - 1].flat() : new Array(12).fill(0);
+      return [f, cur.map((v, x) => {   // the PNG predictors, written out on their own (the reader must agree with them)
+        const left = x < 4 ? 0 : cur[x - 4], above = up[x], corner = x < 4 ? 0 : up[x - 4];
+        const p = left + above - corner, dl = Math.abs(p - left), da = Math.abs(p - above), dc = Math.abs(p - corner);
+        const paeth = dl <= da && dl <= dc ? left : (da <= dc ? above : corner);
+        return (v - [0, left, above, Math.floor((left + above) / 2), paeth][f]) & 255;
+      })];
+    });
+    const read = [0, 1, 2, 3, 4].map((f) => transparentIn(png(3, 3, 6, enc(f))));
+    yes('the frame reader finds the two transparent pixels of an RGBA frame and their box, whatever filter wrote each line', read.every((t) => t.count === 2 && J(t.box) === J({ x0: 1, y0: 1, x1: 3, y1: 3 }) && t.width === 3 && t.height === 3), J(read));
+    yes('a pixel inside a box given is not counted, one outside it is', transparentIn(png(3, 3, 6, enc(4)), [{ x0: 1, y0: 1, x1: 2, y1: 2 }]).count === 1 && transparentIn(png(3, 3, 6, enc(4)), [{ x0: 0, y0: 0, x1: 3, y1: 3 }]).count === 0);
+    yes('an RGB frame has no transparent pixel, and a frame of another kind is refused', transparentIn(png(1, 1, 2, [[0, [1, 2, 3]]])).count === 0 && (() => { try { transparentIn(png(1, 1, 0, [[0, [5]]])); return false; } catch { return true; } })());
+    let refused = '';
+    await drive(async (p) => { try { p.frames({ '#x': 'short' }); } catch (e) { refused = e.message; } }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    yes('an exception to the frame rule needs its reason', /needs its reason/.test(refused), refused);
+    const PLAIN = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html><body style="margin:0"><p style="margin:0;height:300px">no canvas here</p></body></html>');
+    const BARE = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html style="background:transparent"><body style="margin:0;background:transparent"><div id="hole" style="height:100px"></div><div style="height:500px;background:#123"></div></body></html>');
+    const PLATE = (opacity) => 'data:text/html;charset=utf-8,' + encodeURIComponent(`<!doctype html><html><body style="margin:0;background:#000"><canvas id="gl" width="390" height="600" style="display:block"></canvas>
+      <div style="position:fixed;left:20px;bottom:20px;width:300px;height:120px;background:#0b0e13;opacity:${opacity}">a plate</div>
+      <script>const g = document.getElementById('gl').getContext('webgl', { alpha: false }); const f = () => { g.clearColor(0.1, 0.2, 0.4, 1); g.clear(g.COLOR_BUFFER_BIT); requestAnimationFrame(f); }; f();</script></body></html>`);
+    const pixels = {};
+    const fr = await drive(async (p) => {
+      p.frames({ '#hole': 'a test of the exception, a box left bare on purpose' });
+      await p.go(PLAIN); await p.shot('plain');
+      await p.background({ r: 0, g: 0, b: 0, a: 0 });
+      await p.go(BARE); await p.sleep(100);
+      p.frames({});
+      await p.sleep(100);
+      await p.background({ r: 255, g: 255, b: 255, a: 1 });
+      for (const o of ['1', '0.98']) { await p.go(PLATE(o)); await p.ev('new Promise((r) => setTimeout(r, 400))'); pixels[o] = transparentIn(Buffer.from(fs.readFileSync(await p.shot('plate-' + o)))).count; }
+    }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    const fails = fr.checks.filter((c) => /^frame: no fully transparent pixel, after/.test(c.name));
+    yes('a page with no canvas passes, and a bare box an exception names with its reason passes: the first break is the bare box once its exception is gone', fails.length > 0 && /after a wait$/.test(fails[0].name) && /^39000 fully transparent pixels, in 390 x 100 px at 0,0$/.test(fails[0].detail), J(fails));
+    yes('a page that leaves pixels bare is a break once nothing excepts them, named with their box', fails.some((c) => /390 x 100 px at 0,0/.test(c.detail)), J(fails));
+    yes('an opaque fixed plate over an opaque WebGL canvas is a break where this machine leaves a hole, and the same plate at 98% is not', (pixels['1'] === 0 || fails.some((c) => c.detail === `${pixels['1']} fully transparent pixels, in 300 x 120 px at 20,20`)) && pixels['0.98'] === 0 && fails.length === (pixels['1'] ? 2 : 1), `hole here: ${pixels['1']} pixels; at 98%: ${pixels['0.98']}`);
+    const endF = fr.checks.find((c) => /^frame: no fully transparent pixel in each of \d+ frames$/.test(c.name));
+    yes('the frame rule ends on one line that counts its frames, failing when a frame broke it', !!endF && !endF.ok && /distinct breaks/.test(endF.detail), J(endF));
 
     /* a Chrome that dies under a call */
     t0 = Date.now();

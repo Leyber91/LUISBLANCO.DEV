@@ -352,7 +352,7 @@ async function selftest() {
     /* ---- targets ---- */
     const TA = PAGE(`      <button id="h434" style="height:43.4px;width:60px">a</button><button id="h436" style="height:43.6px;width:60px">b</button>
       <button id="w234" style="height:50px;width:23.4px">c</button><button id="w236" style="height:50px;width:23.6px">d</button>
-      <p>words before <a id="inl" href="#x">an inline link</a> and after</p><p>words before <span><a id="inl2" href="#x">a link in a span</a></span> and after</p><p><a id="inl3" href="#x">a link</a>.</p><p><a id="inl4" href="#x">a link</a> ok</p><p>words before <button id="ibtn" style="display:inline;height:20px">b</button> and after</p>
+      <p>words before <a id="inl" href="#x">an inline link</a> and after</p><p>words before <span><a id="inl2" href="#x">a link in a span</a></span> and after</p><p><a id="inl3" href="#x">a link</a>.</p><p><a id="inl4" href="#x">a link</a> ok</p><p>words before <span id="spanlink" role="link" tabindex="0">a span link</span> and after</p>
       <div><a id="alone" href="#x" style="display:inline-block;height:20px">alone</a></div><div><a id="alone2" href="#x">alone too</a></div>
       <button id="dis" disabled style="height:20px">e</button><div aria-disabled="true"><button id="adis" style="height:20px">f</button></div><div inert><button id="inrt" style="height:20px">g</button></div>
       <button id="en" style="height:20px">h</button>
@@ -376,7 +376,7 @@ async function selftest() {
     const at1 = (id) => t1.find((x) => new RegExp(`^#${id}(?![\\w-])`).test(x)) || '';
     yes('43.4 px tall is a break and 43.6 is not', has(t1, 'h434') && !has(t1, 'h436'), J([at1('h434')]));
     yes('23.4 px wide is a break and 23.6 is not', has(t1, 'w234') && !has(t1, 'w236'), J([at1('w234')]));
-    yes('a link in a line of text is not measured (in a span too, and beside two letters); a link alone in its block, or beside one letter, is', !has(t1, 'inl') && !has(t1, 'inl2') && !has(t1, 'inl4') && has(t1, 'inl3') && has(t1, 'alone') && has(t1, 'alone2') && has(t1, 'ibtn'), J([at1('inl3'), at1('alone2'), at1('ibtn')]));
+    yes('a link in a line of text is not measured (in a span too, and beside two letters); a link alone in its block, or beside one letter, is, and so is an inline role link that is not a link element', !has(t1, 'inl') && !has(t1, 'inl2') && !has(t1, 'inl4') && has(t1, 'inl3') && has(t1, 'alone') && has(t1, 'alone2') && has(t1, 'spanlink'), J([at1('inl3'), at1('alone2'), at1('spanlink')]));
     yes('a disabled control, one under aria-disabled and one under inert are not measured; the same control enabled is', !has(t1, 'dis') && !has(t1, 'adis') && !has(t1, 'inrt') && has(t1, 'en'));
     yes('a checkbox or a radio is measured by its label when it has one', !has(t1, 'inlab') && has(t1, 'nolab') && !has(t1, 'radlab') && has(t1, 'radnolab'));
     yes('roles a finger presses are targets with or without a tab stop: link, checkbox, menu item, tree item, combo box, button, switch, radio, tab, slider, option', ['rlink', 'rcheck', 'rmenu', 'rtree', 'rcombo', 'rbtn', 'rsw', 'rrad', 'rtab', 'rsl', 'ropt'].every((id) => has(t1, id)), J(t1));

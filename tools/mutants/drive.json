@@ -130,6 +130,186 @@
     "to": "check('the console is clean', errors.length >= 0,"
   },
   {
+    "name": "frame: a transparent pixel not counted",
+    "from": "if (line[x * 4 + 3] !== 0 || skip.some(",
+    "to": "if (true || skip.some("
+  },
+  {
+    "name": "frame: a faint pixel counted as transparent",
+    "from": "if (line[x * 4 + 3] !== 0 || skip.some(",
+    "to": "if (line[x * 4 + 3] > 9 || skip.some("
+  },
+  {
+    "name": "frame: the boxes given ignored",
+    "from": "|| skip.some((r) => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1)) continue;",
+    "to": ") continue;"
+  },
+  {
+    "name": "frame: a box given reaches one pixel to the left",
+    "from": "x >= r.x0 && x < r.x1",
+    "to": "x >= r.x0 - 1 && x < r.x1"
+  },
+  {
+    "name": "frame: a box given reaches one pixel to the right",
+    "from": "x >= r.x0 && x < r.x1",
+    "to": "x >= r.x0 && x <= r.x1"
+  },
+  {
+    "name": "frame: a box given reaches one pixel up",
+    "from": "y >= r.y0 && y < r.y1",
+    "to": "y >= r.y0 - 1 && y < r.y1"
+  },
+  {
+    "name": "frame: a box given reaches one pixel down",
+    "from": "y >= r.y0 && y < r.y1",
+    "to": "y >= r.y0 && y <= r.y1"
+  },
+  {
+    "name": "frame: a line filtered by sub read raw",
+    "from": "const pred = f === 1 ? a :",
+    "to": "const pred = f === 9 ? a :"
+  },
+  {
+    "name": "frame: a line filtered by up read raw",
+    "from": ": f === 2 ? b :",
+    "to": ": f === 9 ? b :"
+  },
+  {
+    "name": "frame: a line filtered by average read raw",
+    "from": ": f === 3 ? (a + b) >> 1 :",
+    "to": ": f === 9 ? (a + b) >> 1 :"
+  },
+  {
+    "name": "frame: a line filtered by paeth read raw",
+    "from": ": f === 4 ? (pa <= pb && pa <= pc ? a : pb <= pc ? b : c) : 0;",
+    "to": ": 0;"
+  },
+  {
+    "name": "frame: paeth ties broken the wrong way",
+    "from": "(pa <= pb && pa <= pc ? a : pb <= pc ? b : c)",
+    "to": "(pa < pb && pa < pc ? a : pb < pc ? b : c)"
+  },
+  {
+    "name": "frame: the left neighbour taken from the wrong pixel",
+    "from": "const a = x >= 4 ? line[x - 4] : 0,",
+    "to": "const a = x >= 3 ? line[x - 3] : 0,"
+  },
+  {
+    "name": "frame: the upper-left neighbour forgotten",
+    "from": "c = x >= 4 ? prev[x - 4] : 0;",
+    "to": "c = 0;"
+  },
+  {
+    "name": "frame: the line above forgotten",
+    "from": "    prev = line;\n  }\n  return out;",
+    "to": "  }\n  return out;"
+  },
+  {
+    "name": "frame: an RGB frame read as RGBA",
+    "from": "  if (type === 2) return out;   // no alpha channel: no pixel can be transparent\n",
+    "to": ""
+  },
+  {
+    "name": "frame: a frame of another kind read",
+    "from": "if (depth !== 8 || (type !== 2 && type !== 6)) throw",
+    "to": "if (false) throw"
+  },
+  {
+    "name": "frame: the box not grown",
+    "from": "out.box = out.box ? { x0: Math.min(out.box.x0, x), y0: Math.min(out.box.y0, y), x1: Math.max(out.box.x1, x + 1), y1: Math.max(out.box.y1, y + 1) } : { x0: x, y0: y, x1: x + 1, y1: y + 1 };",
+    "to": "out.box = { x0: x, y0: y, x1: x + 1, y1: y + 1 };"
+  },
+  {
+    "name": "frame: an exception with no reason taken",
+    "from": "if (!(typeof why === 'string' && why.trim().length >= 8)) throw",
+    "to": "if (false) throw"
+  },
+  {
+    "name": "frame: a reason of five letters taken",
+    "from": "why.trim().length >= 8)) throw",
+    "to": "why.trim().length >= 5)) throw"
+  },
+  {
+    "name": "frame: the rule never runs after a step",
+    "from": "      if (frames.on) await frameCheck(label, await capture());\n",
+    "to": ""
+  },
+  {
+    "name": "frame: a shot not held to the rule",
+    "from": "fs.writeFileSync(f, png); await frameCheck(`the shot ${name}`, png); return f;",
+    "to": "fs.writeFileSync(f, png); return f;"
+  },
+  {
+    "name": "frame: a broken frame passes",
+    "from": "      if (!t.count) return;\n",
+    "to": "      return;\n"
+  },
+  {
+    "name": "frame: a break reported each time it comes back",
+    "from": "      if (frames.seen.has(k)) return;\n",
+    "to": ""
+  },
+  {
+    "name": "frame: nine breaks listed",
+    "from": "if (frames.seen.size <= 8) check(`frame:",
+    "to": "if (frames.seen.size <= 0) check(`frame:"
+  },
+  {
+    "name": "frame: the exceptions' boxes not read",
+    "from": "for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); out.push(",
+    "to": "for (const e of []) { const r = e.getBoundingClientRect(); out.push("
+  },
+  {
+    "name": "frame: no end line",
+    "from": "    if (frames.on || frames.steps) check(`frame: no fully transparent pixel in each of",
+    "to": "    if (false) check(`frame: no fully transparent pixel in each of"
+  },
+  {
+    "name": "frame: the end line passes a broken rule",
+    "from": "frames.seen.size === 0 && frames.steps > 0,",
+    "to": "frames.steps > 0,"
+  },
+  {
+    "name": "frame: no chunk read",
+    "from": "  while (o < png.length) {",
+    "to": "  while (o < 8) {"
+  },
+  {
+    "name": "frame: the header not read",
+    "from": "if (t === 'IHDR') {",
+    "to": "if (t === 'XXXX') {"
+  },
+  {
+    "name": "frame: the image data not read",
+    "from": "if (t === 'IDAT') parts.push(d);",
+    "to": "if (t === 'XXXX') parts.push(d);"
+  },
+  {
+    "name": "frame: the last line not read",
+    "from": "for (let y = 0; y < h; y++) {",
+    "to": "for (let y = 0; y < h - 1; y++) {"
+  },
+  {
+    "name": "frame: the last byte of a line not unfiltered",
+    "from": "for (let x = 0; x < stride; x++) {",
+    "to": "for (let x = 0; x < stride - 1; x++) {"
+  },
+  {
+    "name": "frame: the last pixel of a line not read",
+    "from": "for (let x = 0; x < w; x++) {",
+    "to": "for (let x = 0; x < w - 1; x++) {"
+  },
+  {
+    "name": "frame: a rule that saw no frame passes",
+    "from": "frames.seen.size === 0 && frames.steps > 0,",
+    "to": "frames.seen.size === 0 && frames.steps >= 0,"
+  },
+  {
+    "name": "frame: no end line for shots alone",
+    "from": "if (frames.on || frames.steps) check(`frame:",
+    "to": "if (frames.on) check(`frame:"
+  },
+  {
     "name": "runner: the rules never run",
     "from": "      if (!invariants.length) return;",
     "to": "      return;"

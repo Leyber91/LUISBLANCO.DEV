@@ -23,7 +23,8 @@ const ALBEDO_BAND = [0.70, 1.30];
 const EARTH_FLOOR = 0.18;
 
 export default async function planets(p, { base }) {
-  for (const [n, e] of exomaniaRules()) p.invariant(n, e);   // after every step: tools/invariants.mjs, as exomania.mjs registers them
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   await p.go(`${base}/tools/dev/planet_sheet.html?set=solar&view=orbit&size=340&cols=4`);
   const ready = await p.until('document.body.dataset.state === "ready"', 240000);
   const sheet = (await p.ev('window.__SHEET__ || []')) || [];
