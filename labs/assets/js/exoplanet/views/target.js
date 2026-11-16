@@ -18,7 +18,8 @@ import {
   forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, limitOf, limitKind, limitText, hzPosition, insolation,
   semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
 } from '../science.js';
-import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
+import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers } from '../starlight.js';
+import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS, DATA } from '../config.js';
 import { fmt, fmtInt } from './common.js';
 import { el } from '../../kit/dom.js';
 import { ivSvg, ivAxisSvg } from '../../kit/controls.js';
@@ -58,11 +59,11 @@ function measuredRows(p, A) {
     note: [a.src === "Kepler's third law" ? 'The orbit is derived from the period and the star\'s mass.' : '', eL ? 'The eccentricity is only a bound, so orbits are drawn circular.' : '', skyNote].filter(Boolean).join(' '), iv: { value: a.a } });
   else if (limitOf(p, 'a')) rows.push({ key: 'a', n: 'orbit', v: boundV(limitOf(p, 'a')), u: 'AU', pm: limitKind(limitOf(p, 'a')), iv: false });
   else rows.push({ key: 'a', n: 'orbit', v: 'none', pm: eText, iv: false });
-  if (S.S) rows.push({ key: 'S', n: 'insolation', v: fmt(S.S, 3), u: 'S⊕', kind: S.src === 'archive' ? 'm' : 'd', note: S.src === 'L / a^2' ? 'The insolation is derived from the star\'s luminosity and the orbit, L / a².' : '', iv: { value: S.S } });
-  else if (limitOf(p, 'S')) rows.push({ key: 'S', n: 'insolation', v: boundV(limitOf(p, 'S')), u: 'S⊕', pm: limitKind(limitOf(p, 'S')), iv: false });
+  if (S.S && S.src === 'archive') rows.push(starlightRow(p, S));   // the archive's value stands with the measured
+  else if (!S.S && limitOf(p, 'S')) rows.push({ key: 'S', n: 'insolation', v: boundV(limitOf(p, 'S')), u: 'S⊕', pm: limitKind(limitOf(p, 'S')), iv: false });
   const starPm = errText(p.TeffErr, p.TeffErr);   // the ± column holds the temperature's interval; the radius has its own row
   const col = starColour(p.Teff), sp = spectralType(p.Teff);
-  const starNote = [isNum(p.Rs) ? '' : 'The star\'s radius is missing: the picture scales it from its temperature.', L.L ? `Its luminosity is ${fmt(L.L, 3)} L\u2609${L.src === 'archive' ? '' : ', from its radius and temperature'}.` : '',
+  const starNote = [isNum(p.Rs) ? '' : 'The star\'s radius is missing: the picture scales it from its temperature.', L.L ? `Its luminosity is ${fmt(L.L, 3)} L\u2609${L.src === 'archive' ? ', the archive\'s' : `, from its radius and temperature${luminosityDiffers(L) ? `; the archive lists ${fmt(L.archive, 3)}` : ''}`}.` : '',
     isNum(p.Teff) ? `Its colour, its Planck spectrum seen through the CIE 1931 observer, is ${col.hex}${sp === '?' ? '' : `, a ${sp}-type star`}.` : ''].filter(Boolean).join(' ');
   if (isNum(p.Teff)) rows.push({ key: 'star', n: 'star', v: fmtInt(p.Teff), swatch: col.hex, u: 'K', pm: starPm, refs: [rf.star], kind: isNum(p.Rs) ? 'm' : 'e',
     note: starNote, iv: { value: p.Teff, lo: isNum(p.TeffErr) ? p.Teff - Math.abs(p.TeffErr) : null, hi: isNum(p.TeffErr) ? p.Teff + Math.abs(p.TeffErr) : null } });
@@ -90,19 +91,31 @@ function inferredRows(p, A) {
     if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', iv: { value: mc.g.med, lo: mc.g.lo, hi: mc.g.hi } });
     if (mc.rho && !fc) rows.push({ key: 'rho', n: 'density', v: fmt(mc.rho.med, 2), u: 'g/cm³', pm: range(mc.rho), kind: 'd', note: 'Earth\'s density is 5.51 g/cm³.', iv: { value: mc.rho.med, lo: mc.rho.lo, hi: mc.rho.hi } });
   }
-  rows.push({ key: 'teq', n: 'equilibrium T', v: mc.teq ? fmtInt(mc.teq.med) : 'none', u: mc.teq ? 'K' : '', pm: mc.teq ? range(mc.teq, 3) : 'needs the star and the orbit', kind: 'd',
-    note: `The equilibrium temperature takes the albedo below and full redistribution of heat${isNum(p.Teq) ? `; the archive publishes ${fmtInt(p.Teq)} K` : ''}.`, iv: mc.teq ? { value: mc.teq.med, lo: mc.teq.lo, hi: mc.teq.hi } : false });
+  const S = insolation(p);
+  if (S.S && S.src !== 'archive') rows.push(starlightRow(p, S));
+  const tq = teqText(mc.teq);
+  rows.push({ key: 'teq', n: 'equilibrium T', v: mc.teq ? tq.v : 'none', u: mc.teq ? 'K' : '', pm: mc.teq ? tq.pm : 'needs the starlight', kind: 'd',
+    note: `The equilibrium temperature takes the starlight${S.src === 'archive' ? ', the archive\'s,' : ''} with the albedo below and full redistribution of heat${isNum(p.Teq) ? `; the archive publishes ${fmtInt(p.Teq)} K` : ''}.`, iv: mc.teq ? { value: mc.teq.med, lo: mc.teq.lo, hi: mc.teq.hi } : false });
   if (mc.H) rows.push({ key: 'H', n: 'scale height', v: fmt(mc.H.med, 2), u: 'km', pm: range(mc.H), kind: 'e',
     note: `The scale height assumes a mean molecular weight of ${p.R > 1.8 ? MC.muEnvelope + ', a hydrogen envelope' : MC.muSecondary + ', an air like nitrogen'}.`, iv: { value: mc.H.med, lo: mc.H.lo, hi: mc.H.hi } });
   if (!mc.hasR) {
     const ML = limitOf(p, 'M');
     if (ML && !fc) rows.push({ key: 'Mf', n: 'mass', v: 'none', pm: 'no forecast', kind: 'e', note: `The mass is only a${ML.dir > 0 ? 'n' : ''} ${limitKind(ML)}, and there is no radius to forecast from.`, iv: false });
   }
-  const hz = hzPosition(p);
-  rows.push({ key: 'zone', n: 'zone', word: true, v: { cons: 'conservative', opt: 'optimistic', hot: 'too hot', cold: 'too cold', unknown: 'unknown' }[hz.key], kind: 'd', refs: hz.hz ? [KOPPARAPU.ref] : [],
-    note: hz.hz ? `The habitable zone runs from ${fmt(hz.hz.sOuter, 2)} to ${fmt(hz.hz.sInner, 2)} times Earth's sunlight; this world is ${hz.label}.` : '', iv: false });
+  const hz = hzPosition(p), e = hz.edges;
+  rows.push({ key: 'zone', n: 'zone', word: true, v: zoneWords(hz, 'word'), kind: 'd', refs: e ? [KOPPARAPU.ref] : [],
+    note: e ? `The habitable zone, the conservative one, runs from ${fmt(e.sOuter, 2)} to ${fmt(e.sInner, 2)} times Earth's sunlight, the optimistic one from ${fmt(e.sOuterOpt, 2)} to ${fmt(e.sInnerOpt, 2)}; this world is ${hz.label}.` : '', iv: false });
   return rows;
 }
+
+/* The starlight's row: where it stands (sheet B's measured group for the archive's value, the inferred group for the
+   one computed from the star) is the caller's; its value, range and note are starlight.js's. */
+function starlightRow(p, S) {
+  const t = starlightText(S);
+  return { key: 'S', n: 'insolation', v: t.v, u: 'S⊕', pm: t.pm, kind: S.src === 'archive' ? 'm' : 'd', refs: S.src === 'archive' || archiveDiffers(S) ? [DATA.snapshotLabel] : [],
+    note: starlightNote(p, S), iv: { value: S.S, lo: S.lo, hi: S.hi } };
+}
+
 
 /* the size class the radius gives, with the share of the draws in each class, and where it stands to the valley */
 function classNote(p, A) {
@@ -117,10 +130,7 @@ function classNote(p, A) {
 export const sheetRows = (p, A = TEQ.albedo) => ({ measured: measuredRows(p, A), inferred: inferredRows(p, A) });
 
 /* Sheet A's line under the name says where the world sits against the zone in these words. */
-export function reticleZone(p) {
-  const hz = hzPosition(p);
-  return { cons: 'in the conservative habitable zone', opt: 'in the optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'its zone unknown' }[hz.key];
-}
+export const reticleZone = (p) => zoneWords(hzPosition(p), 'reticle');
 
 export function createTarget(host, store, actions) {
   host.replaceChildren();

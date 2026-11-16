@@ -81,7 +81,7 @@ const firstNum = (s, after = '') => { const m = String(s || '').match(new RegExp
 const strip = (html) => String(html).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
 const benchCell = (html, head) => { const m = html.match(new RegExp(`<tr><th>${head}</th><td>.*?</td><td>(.*?)</td></tr>`)); return m ? strip(m[1]) : null; };
 const chainStep = (html, head) => { const m = html.match(new RegExp(`<li><b>${head}</b> <code>.*?</code> <span class="ch-v">(.*?)</span>`)); return m ? strip(m[1]) : null; };
-const NONE = /^(—|none|unknown|needs |not computable|no )/;
+const NONE = new RegExp(`^(${String.fromCharCode(0x2014)}|none|unknown|needs |not computable|no )`);   // the dash is the views' mark for no value
 
 /* the zone each view's words name */
 const fromLabel = (s) => (/inside the conservative habitable zone/.test(s) ? 'cons' : /inside the optimistic habitable zone/.test(s) ? 'opt'

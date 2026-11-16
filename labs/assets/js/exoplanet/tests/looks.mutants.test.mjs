@@ -64,6 +64,7 @@ const MUTANTS = [
   ["a locked fluid world's night like a rock's with air", `(look === 'fluid' ? 0.75 : hasAir ? 0.6 : 0.15) * ph.Teq`, `(look !== 'fluid' ? 0.75 : hasAir ? 0.6 : 0.15) * ph.Teq`],
   ["no floor under the night", `* ph.Teq : 0.95 * ph.Teq, 40);`, `* ph.Teq : 0.95 * ph.Teq, 0);`],
   ["the night floor at 100 K", `* ph.Teq : 0.95 * ph.Teq, 40);`, `* ph.Teq : 0.95 * ph.Teq, 100);`],
+  ['the picture\'s zone from its own stand-ins where the sheets have one', `if (pos.key !== 'unknown') return { S: pos.S,`, `if (pos.key === 'none') return { S: pos.S,`],
 ];
 
 process.exit(await runMutants({ here, file: 'data.js', test: 'looks.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));

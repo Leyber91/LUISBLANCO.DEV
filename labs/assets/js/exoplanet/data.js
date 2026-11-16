@@ -206,8 +206,8 @@ export const lockRadiusAU = (Msun) => lockCm(Msun) / 1.495978707e13;
 /* Where the planet's sunlight sits against the habitable-zone limits (Kopparapu et al. 2013),
    by flux. The page's own zone line uses the same functions, so the picture and the text agree. */
 export function zoneOf(p, ph = physics(p)) {
-  const hz = habitableZone(p), ins = insolation(p);
-  if (hz && ins.S) return { S: ins.S, sInner: hz.sInner, sInnerOpt: hz.sInnerOpt, sOuter: hz.sOuter, sOuterOpt: hz.sOuterOpt };
+  const pos = hzPosition(p), e = pos.edges;
+  if (pos.key !== 'unknown') return { S: pos.S, sInner: e.sInner, sInnerOpt: e.sInnerOpt, sOuter: e.sOuter, sOuterOpt: e.sOuterOpt };
   const K = KOPPARAPU;
   return { S: ph.S, sInner: seff(ph.Teff, K.runaway), sInnerOpt: seff(ph.Teff, K.recentVenus), sOuter: seff(ph.Teff, K.maxGreen), sOuterOpt: seff(ph.Teff, K.earlyMars) };
 }

@@ -17,7 +17,10 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { PITCH_LIMIT, HOME, TOUCH_SLOP, orbitFrame, orbitDir, pitchMax, farSideYaw, touchTurns } from '../orbit.js';
-import { SOLAR_REACH, viewExtent, solarWords } from '../views/system.js';
+import { SOLAR_REACH, viewExtent, solarWords, systemModel, systemCaption, strays } from '../views/system.js';
+import { insolation, hzPosition } from '../science.js';
+import { placedAt, zoneWords, starlightText, extrapolatedWords } from '../starlight.js';
+import { fmt } from '../views/common.js';
 import { SOLAR } from '../config.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -152,6 +155,41 @@ const L = unit(STAR), TILT = Math.asin(L[1]);
     && /about as wide as the orbit of Mercury \(0\.39 AU\)/.test(w(0.387)) && /reaches 0\.38 AU, inside the orbit of Mercury/.test(w(0.384)) && /about as wide as the orbit of Neptune \(30 AU\)\.$/.test(w(30.18)) && /reaches 31 AU, beyond the orbit of Neptune/.test(w(30.6)), `${w(1.04)} | ${w(1.06)}`);
   yes('no sentence gives the system and a neighbour the same printed size and calls it between, inside or beyond', Array.from({ length: 4000 }, (_, i) => 0.01 * Math.pow(1.0025, i)).every((x) => { const num = (t) => Number(t.replace(/,/g, '')), s = w(x), n = num(s.match(/reaches ([\d.,]+) AU/)[1]); return /about as wide/.test(s) || [...s.matchAll(/\(([\d.,]+) AU\)/g)].every((m) => num(m[1]) !== n); }));
   yes('the sentence is tagged, names the host and ends', ['Kepler-90', 'TRAPPIST-1'].every((h) => solarWords(h, 0.2).startsWith(`[REAL] On the scale of the Solar System, the outermost known orbit of ${h} reaches 0.20 AU, `) && solarWords(h, 0.2).endsWith('.')));
+}
+
+/* ---- view D's zone: placed by the selected world's starlight, and the planets drawn in another zone named (ticket 2.14) ---- */
+{
+  const star = { host: 'Cnc-like', Teff: 5172, Rs: 0.943, Ms: 0.905 };
+  const e = { ...star, name: 'Cnc-like e', a: 0.0154, P: 0.7366, ecc: 0.05 }, f = { ...star, name: 'Cnc-like f', a: 0.7708, P: 260.6, ecc: 0.08 };
+  const f2 = { ...f, Teff: 5198, Rs: 0.98, Ms: 1.015 };   // the archive lists the star with other values for f
+  const m1 = systemModel(e, [e, f]), m2 = systemModel(e, [e, f2]);
+  yes('the zone is placed by the selected world\'s own starlight', m1.hz.by === 'S' && Math.abs(m1.hz.inner - e.a * Math.sqrt(insolation(e).S / m1.hz.sInner)) < 1e-12);
+  yes('the selected world is drawn in its own zone', placedAt(m1.hz, e.a) === hzPosition(e).key && placedAt(m2.hz, e.a) === hzPosition(e).key);
+  yes('a planet of the same star row is drawn in its own zone, and named nowhere', strays(m1).length === 0 && !systemCaption(m1).includes('Cnc-like f'), systemCaption(m1));
+  const s2 = strays(m2);
+  yes('a planet the archive lists with other star values, drawn in another zone, is a stray with its own zone', s2.length === 1 && s2[0].p === f2 && s2[0].row === true && s2[0].own.key === hzPosition(f2).key && placedAt(m2.hz, f2.a) !== hzPosition(f2).key, s2.map((x) => `${x.p.name} ${x.own.key} ${placedAt(m2.hz, x.p.a)}`).join());
+  yes('and the caption names it with those values and its own zone', systemCaption(m2).includes(`The archive lists this star with other values for Cnc-like f (5,198 K, 0.980 R☉), which put it ${zoneWords(hzPosition(f2), 'reticle')}.`), systemCaption(m2));
+  const forced = { ...m1, hz: { ...m1.hz, inner: 5, outer: 6, innerOpt: 4, outerOpt: 7 } };   // a zone that cannot be f's
+  const s3 = strays(forced);
+  yes('a planet of the same star row drawn in another zone is named by its own starlight', s3.length === 1 && s3[0].row === false && systemCaption(forced).includes(`Cnc-like f's own starlight puts it ${zoneWords(hzPosition(f), 'reticle')}.`), systemCaption(forced));
+  yes('a planet whose own zone is unknown is not named', strays({ ...forced, planets: [...forced.planets, { p: { name: 'nz', host: 'Cnc-like', a: 1 }, a: 1 }] }).length === 1);
+  const round = { ...m1, hz: { ...m1.hz, inner: 0.01, outer: 0.02, innerOpt: 0.005, outerOpt: 0.03 } };   // a zone that would draw e inside its band
+  yes('the selected world itself is never a stray, even against a zone that is not its own', placedAt(round.hz, e.a) !== hzPosition(e).key && strays({ ...round, planets: round.planets.filter((o) => o.p === e) }).length === 0);
+  const rowOf = (q) => { const s = strays({ ...forced, planets: [forced.planets[0], { p: q, a: q.a }] }); return s.length === 1 ? s[0].row : null; };
+  yes('a star row that differs in its radius alone, or its temperature alone, is another row', rowOf({ ...f, Rs: 0.98 }) === true && rowOf({ ...f, Teff: 5198 }) === true && rowOf(f) === false, `${rowOf({ ...f, Rs: 0.98 })} ${rowOf({ ...f, Teff: 5198 })} ${rowOf(f)}`);
+  yes('no zone, no strays', strays({ ...m1, hz: null }).length === 0 && strays(null).length === 0);
+  const cap = systemCaption(m1);
+  yes('the caption gives the band and the dotted rings in AU, what places them, and the fit', cap.startsWith(`[REAL] Habitable zone ${fmt(m1.hz.inner, 2)}-${fmt(m1.hz.outer, 2)} AU, filled; the optimistic edges, dotted, ${fmt(m1.hz.innerOpt, 2)}-${fmt(m1.hz.outerOpt, 2)} AU. Placed by the starlight at Cnc-like e's orbit, ${starlightText(insolation(e)).v} S⊕, and the star's 5,172 K (Kopparapu et al. 2013).`), cap);
+  yes('opened on a world of less than a thousand times Earth\'s starlight, the caption prints it as the sheets do', systemCaption(systemModel(f, [e, f])).includes(`Placed by the starlight at Cnc-like f's orbit, ${starlightText(insolation(f)).v} S⊕,`) && insolation(f).S < 10, systemCaption(systemModel(f, [e, f])));
+  const cool = { host: 'Cool', name: 'Cool b', Teff: 2566, Rs: 0.12, a: 0.03, P: 6.1, Ms: 0.09 };
+  yes('a star outside the fit says extrapolated in the caption', systemCaption(systemModel(cool, [cool])).includes(`(Kopparapu et al. 2013), ${extrapolatedWords(2566)}.`) && !cap.includes('extrapolated'), systemCaption(systemModel(cool, [cool])));
+  const lone = { host: 'Lone', name: 'Lone b', Teff: 5772, Rs: 0.5, logL: 0, a: null, P: null, Ms: null }, near = { host: 'Lone', name: 'Lone c', Teff: 5772, Rs: 0.5, a: 0.01, P: 0.4, Ms: 1 };
+  const ml = systemModel(lone, [lone, near]), cl = systemCaption(ml);
+  yes('a world with no orbit has its zone placed by its star\'s luminosity, said so', ml.hz.by === 'L' && cl.includes(`Placed by the star's luminosity, ${fmt(0.25, 3)} L☉, and the star's 5,772 K`), cl);
+  yes('and a zone off the view is set against the outermost orbit drawn, without throwing', ml.hzOff && cl.includes(`The zone lies ${fmt(ml.hz.inner / ml.outer, 2)}x farther out than the outermost orbit drawn, off this view.`), cl);
+  const far = { host: 'Far', name: 'Far b', Teff: 5772, Rs: 1, a: 0.01, P: 0.37, Ms: 1, ecc: 0.5 }, mf = systemModel(far, [far]);   // eccentric: its orbit reaches past a
+  yes('with an orbit of its own, against this orbit', mf.hzOff && systemCaption(mf).includes(`The zone lies ${fmt(mf.hz.inner / far.a, 2)}x farther out than this orbit, off this view.`), systemCaption(mf));
+  yes('no temperature, no zone, said so', systemCaption(systemModel({ ...far, Teff: null }, [{ ...far, Teff: null }])).startsWith('[REAL] No habitable zone: the archive lacks this star\'s temperature, or the starlight to place its edges.'));
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

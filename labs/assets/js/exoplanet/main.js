@@ -225,7 +225,7 @@ function filterLabel() {
   if (f.method !== 'all') parts.push(METHOD_GROUPS.find((g) => g.key === f.method).label);
   if (f.year !== null) parts.push(String(f.year));
   for (const [k, r] of Object.entries(f.ranges)) if (r) parts.push(`${k} ${r[0] ?? ''}-${r[1] ?? ''}`);
-  if (f.zone) parts.push('habitable zone');
+  if (f.zone) parts.push('conservative or optimistic habitable zone');   // the search takes both, so it names both
   if (f.looks) parts.push(kindWords(f.looks));
   if (f.locked) parts.push(LOCKED_WORDS);
   if (f.cold) parts.push(COLD_WORDS);
@@ -402,7 +402,7 @@ function renderFilters() {
   const token = (k, text) => { const b = el('button', 'token', `${text} \u00d7`); b.type = 'button'; b.dataset.clear = k; b.setAttribute('aria-label', `Clear the filter ${text}`); tokens.push(b); };
   if (f.year !== null) token('year', String(f.year));
   if (f.box) token('box', 'box');
-  if (f.zone) token('zone', 'habitable zone');
+  if (f.zone) token('zone', 'conservative or optimistic zone');
   if (f.looks) token('looks', kindWords(f.looks));
   if (f.locked) token('locked', 'one face to its star');
   if (f.cold) token('cold', `cold: under ${COLD_K} K`);

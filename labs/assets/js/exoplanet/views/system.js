@@ -9,7 +9,8 @@
    Click a planet to fly to it.
    ============================================================ */
 
-import { habitableZone, semiMajor, starColour, isNum } from '../science.js';
+import { habitableZone, hzPosition, insolation, semiMajor, starColour, isNum } from '../science.js';
+import { starlightText, zoneWords, extrapolatedWords, placedAt } from '../starlight.js';
 import { PHYS, SOLAR } from '../config.js';
 import { tokens, alpha, surface, fmt, fmtInt, esc, reducedMotion } from './common.js';
 import { switchCtl, setSwitch, bindSwitch, isOn } from '../../kit/controls.js';
@@ -88,13 +89,34 @@ export function systemModel(sel, system) {
   return { planets, hz, extent, hzOff, outer, sel, colour: starColour(sel.Teff), Rs: sel.Rs, ref, daysPerSec };
 }
 
+/* The other planets of the system that the drawing shows in another zone than their own: drawn against the selected
+   world's zone, a planet the archive lists with other values for the star can fall on the other side of an edge. Each
+   with its own place (hzPosition) and whether its star's row differs. */
+export function strays(m) {
+  if (!m || !m.hz) return [];
+  const out = [];
+  for (const o of m.planets) {
+    if (o.p === m.sel) continue;
+    const own = hzPosition(o.p);
+    if (own.key === 'unknown' || placedAt(m.hz, o.a) === own.key) continue;
+    out.push({ p: o.p, own, row: o.p.Teff !== m.sel.Teff || o.p.Rs !== m.sel.Rs });
+  }
+  return out;
+}
+
 /* The caption under view D, for a model and the scale shown. */
 export function systemCaption(m, showSolar = false) {
   if (!m) return '';
   const hz = m.hz;
   const parts = [];
-  if (hz) parts.push(`[REAL] Habitable zone ${fmt(hz.inner, 2)}-${fmt(hz.outer, 2)} AU from Teff ${fmtInt(m.sel.Teff)} K, L ${fmt(hz.L, 2)} L☉${hz.extrapolated ? ' (Teff outside the fit, extrapolated)' : ''}.`);
-  else parts.push('[REAL] No habitable zone: the archive lacks this star\'s temperature or luminosity.');
+  if (hz) {
+    // the rings are where this world's own starlight would be each edge's flux (starlight.js habitableZone)
+    const by = hz.by === 'S' ? `the starlight at ${m.sel.name}'s orbit, ${starlightText(insolation(m.sel)).v} S⊕` : `the star's luminosity, ${fmt(hz.L, 3)} L☉`;
+    parts.push(`[REAL] Habitable zone ${fmt(hz.inner, 2)}-${fmt(hz.outer, 2)} AU, filled; the optimistic edges, dotted, ${fmt(hz.innerOpt, 2)}-${fmt(hz.outerOpt, 2)} AU. Placed by ${by}, and the star's ${fmtInt(m.sel.Teff)} K (Kopparapu et al. 2013)${hz.extrapolated ? `, ${extrapolatedWords(m.sel.Teff)}` : ''}.`);
+    parts.push(...strays(m).map(({ p, own, row }) => (row
+      ? `The archive lists this star with other values for ${p.name} (${fmtInt(p.Teff)} K, ${fmt(p.Rs, 3)} R☉), which put it ${zoneWords(own, 'reticle')}.`
+      : `${p.name}'s own starlight puts it ${zoneWords(own, 'reticle')}.`)));
+  } else parts.push('[REAL] No habitable zone: the archive lacks this star\'s temperature, or the starlight to place its edges.');
   // said only while it is true: with the Solar System shown the view may reach the zone
   // a world with no orbit of its own is not drawn: the zone is set against the outermost orbit drawn instead
   if (m.hzOff && hz.outer > viewExtent(m.extent, showSolar)) parts.push(`The zone lies ${fmt(hz.inner / (m.ref ? m.ref.a : m.outer), 2)}x farther out than ${m.ref ? 'this orbit' : 'the outermost orbit drawn'}, off this view.`);

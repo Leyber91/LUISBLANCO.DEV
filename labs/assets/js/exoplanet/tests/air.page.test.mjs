@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path';
 import { parts, differences, catalogue } from '../../../../../tools/dev/air_article.mjs';
 import { SHORELINE, BARE, OBSERVED, PAPERS, MR, airProbability, V_ESC_EARTH, percent, percentRange, THICKNESS, BASES } from '../air.js';
 import { physics } from '../data.js';
+import { luminosity } from '../starlight.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const html = readFileSync(join(here, '../../../../exomania-air.html'), 'utf8').replace(/\r\n/g, '\n');   // the checkout's line endings are not the page's
@@ -44,8 +45,9 @@ yes('the list is the paper\'s 13 without air and 2 with, and TRAPPIST-1 d and e;
 
 const list = await catalogue();
 const by = new Map(list.map((p) => [p.name, p]));
-const logL = (n) => by.get(n).logL.toFixed(2).replace('-', '−');
-yes('the luminosities of TRAPPIST-1 and Proxima Centauri are the archive\'s', text.includes(`TRAPPIST-1 (log L = ${logL('TRAPPIST-1 e')} in the archive)`) && text.includes(`Proxima Centauri (${logL('Proxima Cen b')})`), `${logL('TRAPPIST-1 e')} ${logL('Proxima Cen b')}`);
+// the luminosity the fit reads, as every sheet prints it: from the star's radius and temperature (starlight.js, ticket 2.14)
+const logL = (n) => Math.log10(luminosity(by.get(n)).L).toFixed(2).replace('-', '−');
+yes('the luminosities of TRAPPIST-1 and Proxima Centauri are the ones the fit reads', luminosity(by.get('TRAPPIST-1 e')).src === 'R and Teff' && text.includes(`TRAPPIST-1 (log L = ${logL('TRAPPIST-1 e')}, from the radius and temperature the archive gives it)`) && text.includes(`Proxima Centauri (${logL('Proxima Cen b')})`), `${logL('TRAPPIST-1 e')} ${logL('Proxima Cen b')}`);
 const SUN = { st_teff: 5772, st_rad: 1, st_mass: 1, Teff: 5772, Rs: 1, Ms: 1 };
 const P = (R, M, a) => physics({ pl_name: 'x', pl_rade: R, pl_masse: M, pl_orbsmax: a, a, pl_orbper: 365.25 * Math.pow(a, 1.5), pl_eqt: null, ...SUN }).air.fit.P;
 const mars = P(0.532, 0.107, 1.524), mercury = P(0.383, 0.0553, 0.387);

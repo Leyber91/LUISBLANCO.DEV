@@ -14,6 +14,7 @@ import {
   forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, skyView, spectralType,
   transitGeometry, sizeClassOf, limitOf, limitKind, limitText, hasRadius, isNum,
 } from './science.js';
+import { starlightText } from './starlight.js';
 import { groundingCheck } from './grounding.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 
@@ -30,7 +31,8 @@ export function limitsLine(p) {
 /* The fact sheet: the only numbers either writer may use. */
 export function facts(p, albedo) {
   const fc = forecastFor(p);
-  const S = insolation(p).S;
+  // the starlight as every sheet prints it: the fact sheet carries the printed value, so the note and the sheet agree
+  const sl = insolation(p), S = sl.S ? +starlightText(sl).v.replace(/,/g, '') : null;
   const a = semiMajor(p).a;
   const sky = skyView(p);
   const geo = transitGeometry(p);
@@ -52,7 +54,7 @@ export function facts(p, albedo) {
     size_class: cls ? cls.label + (cls.fromLimit ? ' (from the radius limit)' : '') : 'unknown: no radius measured',
     archive_limits: limitsLine(p) || null,
     period_days: r(p.P, 4), orbit_AU: r(a, 3), eccentricity: r(p.ecc, 2),
-    insolation_Searth: r(S, 3),
+    insolation_Searth: S,
     teq_published_K: isNum(p.Teq) ? Math.round(p.Teq) : null,
     teq_this_page_K: teq ? Math.round(teq) : null, albedo_assumed: albedo,
     habitable_zone: hz.label,

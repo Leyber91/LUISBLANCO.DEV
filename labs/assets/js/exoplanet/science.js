@@ -6,69 +6,15 @@
    ============================================================ */
 
 import { int } from '../kit/format.js';
-import { PHYS, KOPPARAPU, CHEN_KIPPING, LIMB, CIE_FIT, XYZ_TO_SRGB, TEQ, VALLEY, SIZE_CLASSES, SEAGER, RV, MC } from './config.js';
+import { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf, fluxFrom, T_ZERO } from './starlight.js';
+import { PHYS, CHEN_KIPPING, LIMB, CIE_FIT, XYZ_TO_SRGB, TEQ, VALLEY, SIZE_CLASSES, SEAGER, RV, MC } from './config.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const isNum = (v) => typeof v === 'number' && isFinite(v);
 
-/* ---------- star ---------- */
-
-/* Luminosity in L_sun: archive log10 L when given, else Stefan-Boltzmann from R and Teff. */
-export function luminosity(p) {
-  if (isNum(p.logL)) return { L: Math.pow(10, p.logL), src: 'archive' };
-  if (isNum(p.Rs) && isNum(p.Teff)) return { L: p.Rs * p.Rs * Math.pow(p.Teff / PHYS.T_SUN, 4), src: 'R and Teff' };
-  return { L: null, src: 'none' };
-}
-
-/* Orbit size in AU: archive value, else Kepler's third law from P and the stellar mass. */
-export function semiMajor(p) {
-  if (isNum(p.a)) return { a: p.a, src: 'archive' };
-  if (isNum(p.P) && isNum(p.Ms)) return { a: Math.cbrt(Math.pow(p.P / 365.25, 2) * p.Ms), src: "Kepler's third law" };
-  return { a: null, src: 'none' };
-}
-
-/* Insolation relative to Earth: archive value, else L / a^2. */
-export function insolation(p) {
-  if (isNum(p.S)) return { S: p.S, src: 'archive' };
-  const { L } = luminosity(p);
-  const { a } = semiMajor(p);
-  if (L && a) return { S: L / (a * a), src: 'L / a^2' };
-  return { S: null, src: 'none' };
-}
-
-/* ---------- habitable zone (Kopparapu et al. 2013 with erratum) ---------- */
-
-export function seff(teff, c) {
-  const T = clamp(teff, KOPPARAPU.tRange[0], KOPPARAPU.tRange[1]) - 5780;
-  return c[0] + c[1] * T + c[2] * T * T + c[3] * T * T * T + c[4] * T * T * T * T;
-}
-
-export function habitableZone(p) {
-  const { L } = luminosity(p);
-  if (!isNum(p.Teff) || !L) return null;
-  const d = (c) => Math.sqrt(L / seff(p.Teff, c));
-  const K = KOPPARAPU;
-  return {
-    inner: d(K.runaway), outer: d(K.maxGreen),             // conservative
-    innerOpt: d(K.recentVenus), outerOpt: d(K.earlyMars),  // optimistic
-    sInner: seff(p.Teff, K.runaway), sOuter: seff(p.Teff, K.maxGreen),
-    sInnerOpt: seff(p.Teff, K.recentVenus), sOuterOpt: seff(p.Teff, K.earlyMars),
-    extrapolated: p.Teff < K.tRange[0] || p.Teff > K.tRange[1],
-    L,
-  };
-}
-
-/* Where the planet sits relative to the zone, by flux (works when a is unknown). */
-export function hzPosition(p) {
-  const hz = habitableZone(p);
-  const { S } = insolation(p);
-  if (!hz || !S) return { key: 'unknown', label: 'not computable', hz, S };
-  if (S <= hz.sInner && S >= hz.sOuter) return { key: 'cons', label: 'inside the conservative habitable zone', hz, S };
-  if (S <= hz.sInnerOpt && S >= hz.sOuterOpt) return { key: 'opt', label: 'inside the optimistic habitable zone', hz, S };
-  if (S > hz.sInnerOpt) return { key: 'hot', label: `${fmtX(S / hz.sInner)} the flux at the zone's inner edge`, hz, S };
-  return { key: 'cold', label: `${fmtX(hz.sOuter / S)} below the flux at the zone's outer edge`, hz, S };
-}
-const fmtX = (x) => (x >= 100 ? int(x) : x >= 10 ? x.toFixed(0) : x.toFixed(1)) + 'x';
+/* ---------- star, orbit, starlight, equilibrium temperature, habitable zone ---------- */
+/* One number each, in starlight.js (ticket 2.14): every view calls those, and this module passes them on. */
+export { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf };
 
 /* ---------- mass-radius (Chen & Kipping 2017) ---------- */
 
@@ -198,18 +144,18 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
     return Math.pow(10, fc.range[0] + (fc.range[1] - fc.range[0]) * (i + rand()) / cdf.length);
   };
   const { a } = semiMajor(p);
-  const N = MC.draws, g = [], teq = [], rho = [], H = [], cls = new Map();
+  const N = MC.draws, g = [], rho = [], H = [], cls = new Map();
   for (let k = 0; k < N; k++) {
     const R = hasR ? Math.max(0.05, draw(p.R, p.Rerr)) : null;
     const M = hasR ? sampleM() : null;
     const gg = isNum(R) && isNum(M) ? M / (R * R) : null;
     if (isNum(gg)) { g.push(gg); rho.push(5.514 * M / (R * R * R)); }
     if (isNum(R)) { const c = sizeClass(R); cls.set(c.key, (cls.get(c.key) || 0) + 1); }
+    // the scale height takes each draw's own temperature, by the relation teqOf uses; the Teq printed is teqOf's
     const Teff = draw(p.Teff, p.TeffErr), Rs = draw(p.Rs, p.RsErr), aa = draw(a, p.aErr);
     let T = null;
-    if (isNum(Teff) && isNum(Rs) && Rs > 0 && isNum(aa) && aa > 0) T = Teff * Math.sqrt(Rs * PHYS.R_SUN_KM / PHYS.AU_KM / (2 * aa)) * Math.pow(1 - albedo, 0.25);
+    if (isNum(Teff) && isNum(Rs) && Rs > 0 && isNum(aa) && aa > 0) T = T_ZERO * Math.pow(fluxFrom(Teff, Rs, aa) * (1 - albedo), 0.25);
     if (T) {
-      teq.push(T);
       if (isNum(gg)) {
         const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;
         H.push(1.380649e-23 * T / (mu * 1.6726e-27 * 9.80665 * gg) / 1000);   // km
@@ -218,7 +164,7 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
   }
   const stat = (arr) => { if (!arr.length) return null; const s = arr.slice().sort((x, y) => x - y); const q = (f) => s[Math.min(s.length - 1, Math.floor(f * s.length))]; return { med: q(0.5), lo: q(0.16), hi: q(0.84) }; };
   const probs = SIZE_CLASSES.map((c) => ({ key: c.key, label: c.label, p: (cls.get(c.key) || 0) / N })).filter((c) => c.p > 0);
-  const out = { n: N, g: stat(g), teq: stat(teq), rho: stat(rho), H: stat(H), probs, hasR,
+  const out = { n: N, g: stat(g), teq: teqOf(p, albedo), rho: stat(rho), H: stat(H), probs, hasR,
     massFrom: !hasR ? 'none' : trueM ? 'measured' : fc ? 'forecast' : 'none', bounded: fc ? fc.bounded : null };
   mcCache.set(key, out);
   return out;
@@ -290,20 +236,6 @@ export function sizeClassOf(p) {
   if (!c) return null;
   if (L.dir < 0 && c.max === Infinity) return { ...c, fromLimit: true };
   if (L.dir > 0 && c.key === SIZE_CLASSES[0].key) return { ...c, fromLimit: true };
-  return null;
-}
-
-/* ---------- equilibrium temperature ---------- */
-
-/* Teq = Teff sqrt(Rs / 2a) (1 - A)^(1/4): full heat redistribution, Bond albedo A. */
-export function equilibriumTemp(p, albedo = TEQ.albedo) {
-  const { a } = semiMajor(p);
-  if (isNum(p.Teff) && isNum(p.Rs) && a) {
-    const rsAU = p.Rs * PHYS.R_SUN_KM / PHYS.AU_KM;
-    return p.Teff * Math.sqrt(rsAU / (2 * a)) * Math.pow(1 - albedo, 0.25);
-  }
-  const { S } = insolation(p);
-  if (S) return 278.3 * Math.pow(S, 0.25) * Math.pow(1 - albedo, 0.25);   // 278.3 K: zero-albedo Teq at 1361 W/m^2
   return null;
 }
 
