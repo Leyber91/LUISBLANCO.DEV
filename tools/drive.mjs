@@ -458,6 +458,7 @@ async function selftest() {
     // a paeth tie: above and the corner equally near, the corner farther; the PNG rule takes above (alpha 0), not the corner (100)
     const tie = [[[0, 0, 0, 100], [0, 0, 0, 0]], [[0, 0, 0, 150], [0, 0, 0, 0]]];
     yes('a paeth tie is broken as the PNG rule breaks it', transparentIn(png(2, 2, 6, encOf(tie, 4))).count === 2, J(transparentIn(png(2, 2, 6, encOf(tie, 4)))));
+    yes('only alpha 0 is transparent: alpha 1 is not', transparentIn(png(2, 1, 6, [[0, [0, 0, 0, 1, 0, 0, 0, 0]]])).count === 1, J(transparentIn(png(2, 1, 6, [[0, [0, 0, 0, 1, 0, 0, 0, 0]]]))));
     yes('an RGB frame has no transparent pixel, and a frame of another kind is refused', transparentIn(png(1, 1, 2, [[0, [1, 2, 3]]])).count === 0 && (() => { try { transparentIn(png(1, 1, 0, [[0, [5]]])); return false; } catch { return true; } })());
     let refused = '';
     await drive(async (p) => { try { p.frames({ '#x': 'short' }); } catch (e) { refused = e.message; } }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
