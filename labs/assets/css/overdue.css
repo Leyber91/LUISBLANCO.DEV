@@ -113,6 +113,7 @@
 .od-read { display: grid; grid-template-columns: minmax(0, 25rem) minmax(0, 1fr); gap: var(--s-3) var(--s-7); align-items: end; margin-bottom: var(--s-5); }
 .od-name { font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-style: normal; font-weight: 400; line-height: 1.05; margin: 0 0 4px; color: var(--text-bright); }      /* upright: in the italic a planet's letter b reads as a 6 */
 .od-name:focus { outline: none; }
+#od-main:focus { outline: none; }   /* reached by the skip link, never by Tab */
 .od-name:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
 .od-meta { font-size: .7rem; letter-spacing: .04em; color: var(--text-dim); margin: 0; min-height: 1.5em; }
 .od-world { font-size: .72rem; margin: 6px 0 0; }
@@ -219,4 +220,9 @@
   #band { height: 206px; }
   #night { height: 240px; }
   #tally-view { height: 330px; }
+}
+
+/* Reduced motion: the finished frame. The sky is drawn still in script (overdue/main.js, `still`); this holds the same for every transition and animation of the page and of the shared parts it uses. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }

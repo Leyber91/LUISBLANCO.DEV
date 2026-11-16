@@ -31,8 +31,11 @@ belongs to. Everything below serves those two recognitions.
 ## Type
 
 - IBM Plex Mono for everything a visitor reads or operates (the token font).
-- Fraunces for display only: page titles, world names (italic), large numerals. It is the main site's display face,
+- Fraunces for display only: page titles, world names, large numerals. It is the main site's display face,
   so the labs and the site read as one hand.
+- World names are upright. In Fraunces italic a planet's letter b reads as a 6: found on Overdue (`overdue.css`,
+  `.od-name`), then repeated in the survey's bar sheet of 2026-11-16 because this line still said "italic". Italic
+  is for a phrase set apart, never for a name that carries a letter or a number.
 - Orbitron and Space Grotesk survive on six older pages and are retired: a page you touch moves to Plex Mono and
   Fraunces. The anti-tells gate rejects them on new pages.
 - Numbers use tabular figures and carry their unit and their source.
