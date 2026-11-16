@@ -133,12 +133,14 @@ function placeWorld() {
   } else {
     top = cv.top + cv.height * 0.2; bottom = cv.bottom - cv.height * 0.2;
   }
-  // a band that shrank keeps the framing it had at this size of the sheet; a short window that never had a taller
-  // band frames as it can
+  // a band that shrank keeps the framing it had at this size of the sheet, and its line still never stands below the
+  // band's bottom (on the ground the key grows up into the sheet); a short window that never had a taller band frames
+  // as it can
   const tight = bottom - top < MIN_BAND;
+  const lineY = (y) => `${Math.round(Math.min(y, bottom - cv.top + 10))}px`;
   if (tight && lastFraming && lastFraming.w === Math.round(cv.width) && lastFraming.h === Math.round(cv.height)) {
     engine.frame(lastFraming.shift, lastFraming.home);
-    $('exo-stage').style.setProperty('--bezel-y', lastFraming.bezel);
+    $('exo-stage').style.setProperty('--bezel-y', lineY(lastFraming.y));
     return;
   }
   const cx = (left + right) / 2 - cv.left, cy = (top + bottom) / 2 - cv.top;
@@ -147,10 +149,9 @@ function placeWorld() {
   const home = Math.min(14, Math.max(2.2, 1 / Math.sin(Math.atan(rho / fov))));
   const shift = [cx - cv.width / 2, cv.height / 2 - cy];
   engine.frame(shift, home);
-  // the line under the world, never below the band's bottom (the 26 px kept above the key and the title block)
-  const bezel = `${Math.round(Math.min(cy + r, bottom - cv.top) + 10)}px`;
-  $('exo-stage').style.setProperty('--bezel-y', bezel);
-  if (!tight) lastFraming = { shift, home, bezel, w: Math.round(cv.width), h: Math.round(cv.height) };
+  // the line under the world, never below the band's bottom (10 px into the 26 px kept above the key and the title block)
+  $('exo-stage').style.setProperty('--bezel-y', lineY(cy + r + 10));
+  if (!tight) lastFraming = { shift, home, y: cy + r + 10, w: Math.round(cv.width), h: Math.round(cv.height) };
 }
 /* The open "scenarios and sources" on a desk lie over sheet A down to the top of the key (exoplanet.css). */
 function fitMore() {

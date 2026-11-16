@@ -107,6 +107,25 @@ export default async function air(p, { base, width }) {
   p.check('opened, the details give the conclusion, what each disfavoured scenario is disfavoured for, the papers, the fit and the article', d1.open && /^Drawn as bare rock\. Its paper concludes: “/.test(d1.more) && / Thick air disfavoured for any air from 10 bar, by energy balance \(Kreidberg 2019\)/.test(d1.more) && / Chance it kept an atmosphere, by the 2026 fit, extrapolated: [\d.]+% \(68% range /.test(d1.more) && /How the survey decides$/.test(d1.more) && JSON.stringify(d1.links) === JSON.stringify(['thin:LHS 3844 b', 'thick:LHS 3844 b']), JSON.stringify(d1));
   await p.shot(`air-details-lhs-3844-b-${width}`);
 
+  // on the ground the key grows by the ground panel and the band above it falls under 120 px: the world keeps its
+  // framing, and its line, which the ground hides (exoplanet.css), is still placed above the key, the details open or
+  // closed, so it never shows inside the key (the corner rule runs after each wait and skips hidden text; the first
+  // build of 2026-11-16's guard kept the line where the orbit had it, 144 px inside the grown key)
+  const lineKey = `(() => { const k = document.getElementById('key').getBoundingClientRect(), g = document.createRange(); g.selectNodeContents(document.getElementById('bezel'));
+    const b = g.getBoundingClientRect(); return { key: Math.round(k.top), line: [Math.round(b.top), Math.round(b.bottom)], shown: getComputedStyle(document.getElementById('bezel')).visibility, open: document.querySelector('#ret-render .ret-more').open }; })()`;
+  await p.ev(`document.querySelector('[data-cam="surface"]').click()`);
+  const landed = await p.until(`!document.getElementById('ground').hidden && /surface/i.test(document.getElementById('bezel').textContent) && !document.getElementById('exo-note')`, 180000);
+  await p.sleep(2500);
+  const gOpen = await p.ev(lineKey);
+  await p.shot(`air-ground-lhs-3844-b-${width}`);
+  await p.ev(`document.querySelector('#ret-render .ret-more summary').click()`);
+  await p.sleep(2500);
+  const gShut = await p.ev(lineKey);
+  if (width > 1100) p.check('landed on a desk, the line under the world (hidden on the ground) is placed above the grown key, the details open and closed', landed && gOpen.open && !gShut.open && gOpen.line[1] <= gOpen.key && gShut.line[1] <= gShut.key, `${JSON.stringify(gOpen)} then ${JSON.stringify(gShut)}`);
+  else p.check('landed on a phone, the ground comes up', landed, JSON.stringify(gShut));
+  await p.ev(`document.querySelector('[data-cam="orbit"]').click()`);
+  await p.sleep(1500);
+
   await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('GJ 367 b')}`);
   await p.until(sel('GJ 367 b'), 90000);
   await p.sleep(3000);
