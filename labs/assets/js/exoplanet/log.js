@@ -53,10 +53,12 @@
    own log changes only when they press "Add all to your log".
    ============================================================ */
 
-import { LabsOS, ago } from '../os/index.js';
+import { LabsOS } from '../os/index.js';
+import { ago } from '../os/util.js';   // the one function the labs share for a visitor's moments (kit/format.js states the convention)
 import * as R from './record.js';
 import { kindLine } from './find.js';
 import { esc } from './views/common.js';
+import { tallySvg } from '../kit/controls.js';
 
 const LAB = 'exomania';
 const SHOWN = 20;   // lines of a list shown before "Show all"
@@ -190,10 +192,24 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     const outs = sec.querySelectorAll('[data-unsave]');
     return outs.length ? outs[Math.min(f.index, outs.length - 1)] : sec.querySelector('[data-empty]');
   };
-  const more = (sec, n, shown) => (n > shown ? `<p><button type="button" class="btn" data-log="all" data-list="${sec}">Show all ${R.thousands(n)}</button></p>` : '');
+  const more = (sec, n, shown) => (n > shown ? `<p><button type="button" class="plain" data-log="all" data-list="${sec}">Show all ${R.thousands(n)}</button></p>` : '');
+  /* The log line is a tally (an observer's logbook): a mark per world visited, a tall gold mark per world saved, as many
+     as fit beside its words, which say the counts. It keeps one line at any count: the marks give way, the words do not. */
+  const words = host.line.querySelector('.tally-w') || host.line;
+  let marks = null;
+  function tally(c) {
+    words.textContent = loaded ? R.lineWords(c, shared.names.length) : 'Log: reading';
+    if (words === host.line) return;
+    const box = host.line.parentElement, cap = window.matchMedia('(max-width: 700px)').matches ? 16 : 26;
+    const room = Math.max(0, Math.min(cap * 7, (box ? box.clientWidth : 0) - words.scrollWidth - 12));
+    const { svg } = tallySvg(loaded ? Math.max(c.visited, c.saved) : 0, loaded ? c.saved : 0, room);
+    if (marks) marks.replaceWith(svg); else host.line.prepend(svg);
+    marks = svg;
+  }
+  if (typeof ResizeObserver === 'function' && host.line.parentElement) new ResizeObserver(() => tally(R.counts(seen().record))).observe(host.line.parentElement);
   function draw() {
     const v = seen(), c = R.counts(v.record);
-    host.line.textContent = loaded ? R.lineWords(c, shared.names.length) : 'Your log · reading';
+    tally(c);
     if (!host.dialog.open) return;
     if (!loaded) { host.body.innerHTML = '<p class="log-note">Reading the log from this browser’s store.</p>'; return; }
     const had = focusKey(), top = host.dialog.scrollTop;
@@ -204,16 +220,16 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     if (os && !os.recording.on) notes.push('Recording is off on this site, so visits are not added. A world you save is still saved.');
     if (fault) notes.push(fault);
     const hiddenHtml = !v.hidden ? '' : `<p class="log-note">${R.thousands(v.hidden)} stored ${v.hidden === 1 ? 'entry names a world' : 'entries name worlds'} this catalogue does not have, and ${v.hidden === 1 ? 'is' : 'are'} not shown.
-      <button type="button" class="btn" data-log="forget">Remove them from the log</button></p>`;
+      <button type="button" class="plain" data-log="forget">Remove them from the log</button></p>`;
     const sharedHtml = !shared.names.length && !shared.refused ? '' : `
       <section class="log-sec" data-sec="shared"><h3>Shared with you <span>${R.worlds(shared.names.length)} from the link</span></h3>
         ${shared.names.length ? `<ul class="log-list">${shared.names.map((n) => `<li>${world(n)}<span class="log-what">${esc(kind(n))}</span><span class="log-when">${R.isSaved(stored, n) ? 'in your log' : ''}</span></li>`).join('')}</ul>
-        <p><button type="button" class="btn" data-log="adopt">Add all to your log</button></p>` : ''}
+        <p><button type="button" class="plain" data-log="adopt">Add all to your log</button></p>` : ''}
         ${shared.refused ? `<p class="dim">${R.thousands(shared.refused)} ${shared.refused === 1 ? 'name in the link was' : 'names in the link were'} not read: not in this catalogue, given twice, or past the first ${R.LIMITS.shared}.</p>` : ''}
       </section>`;
     const saved = v.record.log.saved, visits = v.record.log.visits;
     const shownSaved = all.saved ? saved : saved.slice(0, SHOWN), shownVisits = all.visited ? visits : visits.slice(0, SHOWN);
-    const noSaved = v.hiddenSaved ? 'No saved world of this log is in this catalogue.' : 'Nothing saved yet. Open a world and press “Add to log”, in the panel with its measurements.';
+    const noSaved = v.hiddenSaved ? 'No saved world of this log is in this catalogue.' : 'Nothing saved yet. Open a world and press “Add to log”, under its numbers.';
     const noVisits = os && !os.recording.on ? 'No visit is listed. Recording is off on this site.' : 'No world opened yet. Type a name or a question in the search field, or press “Another world”.';
     host.body.innerHTML = `
       <p class="log-sum">${R.worlds(c.visited)} visited, ${R.thousands(c.saved)} saved.</p>
@@ -221,9 +237,9 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
       ${hiddenHtml}
       ${sharedHtml}
       <section class="log-sec" data-sec="saved"><h3>Saved <span>${R.savedWords(saved.length, v.hiddenSaved)}</span></h3>
-        ${saved.length ? `<ul class="log-list">${shownSaved.map((e) => `<li>${world(e.name)}<span class="log-what">${esc(kind(e.name))}</span><span class="log-when">saved ${esc(when(e.t))}</span><button type="button" class="btn log-out" data-unsave="${esc(e.name)}" aria-label="Take ${esc(e.name)} out of the log">Take out</button></li>`).join('')}</ul>
+        ${saved.length ? `<ul class="log-list">${shownSaved.map((e) => `<li>${world(e.name)}<span class="log-what">${esc(kind(e.name))}</span><span class="log-when">saved ${esc(when(e.t))}</span><button type="button" class="plain log-out" data-unsave="${esc(e.name)}" aria-label="Take ${esc(e.name)} out of the log">take out</button></li>`).join('')}</ul>
           ${more('saved', saved.length, shownSaved.length)}
-          <p><button type="button" class="btn" data-log="copy">Copy a link to these worlds</button></p>`
+          <p><button type="button" class="plain" data-log="copy">Copy a link to these worlds</button></p>`
     : `<p class="dim" data-empty="saved" tabindex="-1">${noSaved}</p>`}
       </section>
       <section class="log-sec" data-sec="visited"><h3>Visited <span>${R.worlds(visits.length)} listed, newest first</span></h3>

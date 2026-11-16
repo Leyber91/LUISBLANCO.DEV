@@ -22,9 +22,30 @@
    the survey before it moved still reaches the survey. Each check
    that names a fault is one an independent review found on
    2026-11-14.
+
+   After every step the rules of tools/drives/invariants.mjs hold
+   on whichever page the drive is on: no sideways scroll, every
+   target 44 px tall at 390, every text 4.5 to 1, and gold only
+   where the page allows it. The sky's gold is the gold of a kept
+   clock (overdue.css .lamp.kept, and the kit's tally and filled
+   action); its canvases draw kept clocks in that gold by the
+   sky's own rule, so their pixels are not scanned. On the survey
+   the rules are the survey's (shapes.mjs SURVEY_GOLD). Added on
+   2026-11-16, when the review of pull request 42 found the sky
+   scrolling sideways at 390 once its table was open, a state the
+   one check for it here ran before.
    ============================================================ */
 
+import { overflow, targets, contrast, gold } from './invariants.mjs';
+import { SURVEY_GOLD } from './shapes.mjs';
+
+const SKY_GOLD = { allow: ['.bp', '.los-bk', '.lamp.kept', '.tally-marks .tl-kept', '.fill.kept', '.lbr-panel'] };
+
 export default async function exomania(p, { base }) {
+  p.invariant('invariant: the page never scrolls sideways', overflow());
+  p.invariant('invariant: every visible target is at least 44 px tall and 24 px wide at 390', targets());
+  p.invariant('invariant: every visible text is at least 4.5 to 1 against what is behind it', contrast());
+  p.invariant('invariant: gold only where the page allows it', `(/exomania-survey\.html$/.test(location.pathname) ? ${gold(SURVEY_GOLD)} : ${gold(SKY_GOLD)})`);
   const text = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || {}).textContent || ""`);
   const label = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || { getAttribute() { return ""; } }).getAttribute("aria-label") || ""`);
   const state = () => p.ev('document.body.dataset.state || ""');
@@ -33,7 +54,9 @@ export default async function exomania(p, { base }) {
   const probe = () => p.ev('(() => { const q = document.getElementById("sky").probe(); return { lens: q.lens, wide: q.wide, lamps: q.lamps, lensLamps: q.lensLamps, star: q.star, date: q.date, k2: q.k2, named: q.named, up: q.up, papers: q.papers, same: q.same, live: q.live, nightHover: q.nightHover }; })()');
   const lampAt = (name) => p.ev(`document.getElementById("sky").probe().at(${JSON.stringify(name)})`);
   const num = (s) => Number(String(s).replace(/[^\d.]/g, ''));
-  const date = () => p.ev('document.getElementById("scrub").getAttribute("aria-valuetext") || ""');       // the date shown, as the line's keyboard says it
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  // the date shown, as the line's keyboard says it: in words (the kit's one convention for dates), read back as an ISO day
+  const date = async () => { const t = String(await p.ev('document.getElementById("scrub").getAttribute("aria-valuetext") || ""')).replace(/\s+/g, ' ').trim(); const m = t.match(/^(\d{1,2}) ([A-Z][a-z]+) (\d{4})$/); return m && MONTHS.includes(m[2]) ? `${m[3]}-${String(MONTHS.indexOf(m[2]) + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}` : `not a date in words: ${t}`; };
   const year = async () => Number((await date()).slice(0, 4));
   const setYear = (y) => p.ev(`(() => { const s = document.getElementById("scrub"); s.value = String(Math.round(2451545 + (${y} - 2000) * 365.25)); s.dispatchEvent(new Event("input", { bubbles: true })); })()`);
   const open = (name) => p.ev(`(() => { const i = document.getElementById("pick"); i.value = ${JSON.stringify(name)}; document.getElementById("pick-form").requestSubmit(); })()`);
@@ -61,7 +84,7 @@ export default async function exomania(p, { base }) {
   const q0 = await probe();
   p.check('the sky holds every lamp, on the map and again under the lens', q0.lamps + q0.lensLamps > 4729 + 1500 && (q0.lens ? q0.lensLamps === 0 : q0.lamps === 4729), `${q0.lamps} lamps on the sheet's canvas, ${q0.lensLamps} on the lens's own`);
   p.check('the count in the corner is a number of clocks, lost today', /^[\d,]+$/.test(await text('n-lost')) && /^of 4,729 transit clocks$/.test(await text('n-of')) && (await text('n-verb')) === 'are lost today' && (await text('n-if')) === '', `${await text('n-lost')} ${await text('n-of')} / ${await text('n-verb')}`);
-  p.check('the line of time stands on today, and the title block carries the source', (await date()) === isoToday && q0.date === isoToday && /NASA Exoplanet Archive, \d{4}-\d\d-\d\d/.test(await text('tb-source')), `${await date()} / ${await text('tb-source')}`);
+  p.check('the line of time stands on today, and the title block carries the source', (await date()) === isoToday && q0.date === isoToday && /^NASA Exoplanet Archive, \d{1,2}\s(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{4}$/.test(await text('tb-source')), `${await date()} / ${await text('tb-source')}`);
   const sky0 = await rect('sky'), band0 = await rect('band'), tall = await p.ev('window.innerHeight');
   p.check('the map and the line that sets its date are both whole on the first screen', sky0.y >= 0 && band0.y > sky0.y && band0.y + band0.h <= tall, `the map from ${Math.round(sky0.y)}, the line ends at ${Math.round(band0.y + band0.h)} of ${tall}`);
   const lostToday = num(await text('n-lost'));

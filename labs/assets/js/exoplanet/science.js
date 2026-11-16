@@ -5,6 +5,7 @@
    so the page can say what was measured and what was inferred.
    ============================================================ */
 
+import { int } from '../kit/format.js';
 import { PHYS, KOPPARAPU, CHEN_KIPPING, LIMB, CIE_FIT, XYZ_TO_SRGB, TEQ, VALLEY, SIZE_CLASSES, SEAGER, RV, MC } from './config.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -67,7 +68,7 @@ export function hzPosition(p) {
   if (S > hz.sInnerOpt) return { key: 'hot', label: `${fmtX(S / hz.sInner)} the flux at the zone's inner edge`, hz, S };
   return { key: 'cold', label: `${fmtX(hz.sOuter / S)} below the flux at the zone's outer edge`, hz, S };
 }
-const fmtX = (x) => (x >= 100 ? Math.round(x).toLocaleString('en-US') : x >= 10 ? x.toFixed(0) : x.toFixed(1)) + 'x';
+const fmtX = (x) => (x >= 100 ? int(x) : x >= 10 ? x.toFixed(0) : x.toFixed(1)) + 'x';
 
 /* ---------- mass-radius (Chen & Kipping 2017) ---------- */
 
@@ -129,7 +130,7 @@ export function forecastMass(R, Rerr, maxM = null, minM = null) {
    -1 a lower limit. catalog.js moves every flagged value here and leaves the field null. */
 export const limitOf = (p, k) => (p && p.lim && p.lim[k]) || null;
 export const limitKind = (L) => (L ? (L.dir > 0 ? 'upper limit' : 'lower limit') : '');
-const fmtBound = (v, d) => (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString('en-US') : String(+(+v).toPrecision(d)));
+const fmtBound = (v, d) => (Math.abs(v) >= 1000 ? int(v) : String(+(+v).toPrecision(d)));
 export const limitText = (L, d = 3) => (L ? `${L.dir > 0 ? '<' : '>'} ${fmtBound(L.v, d)}` : '');
 
 /* the forecast for this record, censored by the archive's mass limit when it gives one */

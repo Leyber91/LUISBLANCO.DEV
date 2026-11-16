@@ -59,9 +59,9 @@ export const SEAGER = {
   ref: 'Seager et al. 2007, ApJ 669, 1279',
   maxM: 20,
   materials: [
-    { key: 'Fe', label: 'IRON', m1: 5.80, r1: 2.52, k1: -0.209490, k2: 0.0804, k3: 0.394 },
-    { key: 'MgSiO3', label: 'ROCK', m1: 10.55, r1: 3.90, k1: -0.209594, k2: 0.0799, k3: 0.413 },
-    { key: 'H2O', label: 'WATER', m1: 5.52, r1: 4.43, k1: -0.209396, k2: 0.0807, k3: 0.375 },
+    { key: 'Fe', label: 'iron', m1: 5.80, r1: 2.52, k1: -0.209490, k2: 0.0804, k3: 0.394 },
+    { key: 'MgSiO3', label: 'rock', m1: 10.55, r1: 3.90, k1: -0.209594, k2: 0.0799, k3: 0.413 },
+    { key: 'H2O', label: 'water', m1: 5.52, r1: 4.43, k1: -0.209396, k2: 0.0807, k3: 0.375 },
   ],
 };
 
@@ -148,11 +148,11 @@ export const PLOT_ORDER = ['valley', 'rp', 'mr', 'time', 'sky'];
 
 /* Discovery-method groups for the timeline (ink ladder, no extra hues). */
 export const METHOD_GROUPS = [
-  { key: 'Transit', label: 'Transit', ink: 'rgba(234,240,251,0.92)' },
-  { key: 'Radial Velocity', label: 'Radial velocity', ink: 'rgba(159,179,214,0.85)' },
-  { key: 'Microlensing', label: 'Microlensing', ink: 'rgba(121,130,143,0.9)' },
-  { key: 'Imaging', label: 'Imaging', ink: 'rgba(86,93,114,0.95)' },
-  { key: 'other', label: 'Other', ink: 'rgba(66,75,87,0.95)' },
+  { key: 'Transit', label: 'Transit', ink: ['bright', 0.92] },
+  { key: 'Radial Velocity', label: 'Radial velocity', ink: ['horizon', 0.85] },
+  { key: 'Microlensing', label: 'Microlensing', ink: ['dim', 0.9] },
+  { key: 'Imaging', label: 'Imaging', ink: ['horizonDim', 0.95] },
+  { key: 'other', label: 'Other', ink: ['faint', 0.95] },
 ];
 
 /* Guided tours. Each picks its stops from the live catalogue by a rule, so a tour
@@ -185,6 +185,9 @@ export const SOURCES = [
   'Lovis & Fischer 2010, in Exoplanets, ed. S. Seager, eq. 14 (radial-velocity semi-amplitude)',
   'Wyman, Sloan & Shirley 2013, JCGT 2(2) (CIE colour matching fit)',
   'NASA Planetary Fact Sheet (solar system reference)',
+  'Berta-Thompson, Wachiraphan & Murray 2026, ApJ 1011, 123, doi:10.3847/1538-4357/ae77fd (which rocky planets keep air; the papers of the 17 observed planets are on labs/exomania-air.html)',
+  'Koll 2022, ApJ 924, 134, doi:10.3847/1538-4357/ac3b48 (day side of a bare rock, f = 2/3)',
+  'Kite, Fegley, Schaefer & Gaidos 2016, ApJ 828, 80, doi:10.3847/0004-637X/828/2/80 (open melt, 50 K night side)',
   'Kasting, Whitmire & Reynolds 1993, Icarus 101, 108 (tidal-lock radius, eq. 10)',
   'Hansen & Travis 1974, Space Sci. Rev. 16, 527 (Rayleigh optical depth, eq. 2.30)',
   'Sudarsky, Burrows & Pinto 2000, ApJ 538, 885 (cloud classes of giant planets)',

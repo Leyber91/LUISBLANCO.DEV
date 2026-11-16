@@ -90,7 +90,8 @@ body{ font-family:var(--mono); color:var(--ink); overflow:hidden;
 
 /* aea3d chrome: hero mode — hide controls, keep the structure + faint labels */
 #heroViz .aea-toolbar,#heroViz .aea-hint,#heroViz .aea-credo,#heroViz .aea-card,
-#heroViz .aea-systems,#heroViz .aea-legend{ display:none !important; }
+#heroViz .aea-systems,#heroViz .aea-legend,
+#heroViz .aea-dock,#heroViz .aea-scrim,#heroViz .aea-sheet{ display:none !important; }
 /* a soft luminous well behind the living figure */
 .figure::before{ content:""; position:absolute; inset:-6% -4% -6% -4%; z-index:-1; pointer-events:none;
   background:radial-gradient(58% 52% at 52% 46%, rgba(212,162,76,0.10), rgba(150,185,255,0.05) 42%, rgba(0,0,0,0) 72%); }
@@ -118,6 +119,29 @@ body{ font-family:var(--mono); color:var(--ink); overflow:hidden;
 .scrollcue .xh::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-50%); }
 .scrollcue .xh i{ position:absolute; left:50%; top:50%; width:6px; height:6px; border:1px solid var(--gold); border-radius:50%; transform:translate(-50%,-50%); }
 .scrollcue .t{ font-size:9px; letter-spacing:.3em; color:var(--faint); text-transform:uppercase; }
+
+/* narrow screens: one column that scrolls, the figure below the name */
+@media (max-width:960px){
+  body{ overflow-x:hidden; overflow-y:auto; }
+  .plate{ height:auto; min-height:100vh; padding:34px 28px; }
+  .topbar{ flex-wrap:wrap; gap:8px; }
+  .topbar nav{ flex-wrap:wrap; row-gap:6px; }
+  .topbar nav a{ padding:0 8px; }
+  .main{ grid-template-columns:minmax(0,1fr); gap:44px; margin:36px 0 28px; }
+  .left{ min-width:0; padding-right:0; }
+  .eyebrow{ letter-spacing:.24em; }
+  .name{ font-size:clamp(46px,14vw,64px); }
+  .census{ flex-wrap:wrap; gap:18px 26px; }
+  .cx:has(> .x){ display:none; }
+  .cta{ display:flex; }
+  .figure{ height:min(70vw,360px); }
+  .figure::before{ inset:-6% 0; }
+  .titleblock{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .tb:nth-child(3){ border-right:none; }
+  .tb:nth-child(-n+3){ border-bottom:1px solid var(--frame); }
+  .tb.brand{ grid-column:1 / -1; }
+  .scrollcue{ display:none; }
+}
 </style></head>
 <body>
 <div class="grid"></div>
@@ -169,6 +193,7 @@ body{ font-family:var(--mono); color:var(--ink); overflow:hidden;
   <div class="scrollcue"><div class="xh"><i></i></div><div class="t">scroll to explore</div></div>
 </div>
 
+<script src="src/data/aea-framework.js"></script>
 <script src="src/aea3d/aea3d.js"></script>
 <script>
   // mount the real living AEA as the hero figure (hero mode = chrome hidden via CSS)

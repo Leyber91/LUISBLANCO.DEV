@@ -121,18 +121,18 @@ const mk = (o = {}) => {
   yes('a world with no radius says so', kindLine(mk({ R: null, measuredR: false })) === 'no radius known');
   const bound = { ...mk({ R: null, measuredR: false }), lim: { R: { v: 15, dir: -1 } } };
   yes('a world with only a lower bound on its radius is named by the size class the bound gives', sizeClassOf(bound) !== null && kindLine(bound) === `${sizeClassOf(bound).label.toLowerCase()} by its radius bound`, kindLine(bound));
-  yes('the line carries the value it was ordered by, with its unit', hitFact(mk({ dist: 10 }), 'dist') === 'temperate world with seas · 33 ly' && /· 1\.00 R⊕$/.test(hitFact(mk(), 'R')));
-  yes('a computed temperature is marked as computed and a published one is not', /· 255 K computed$/.test(hitFact(mk({ Teq: null }), 'T')) && /· 321 K$/.test(hitFact(mk({ Teq: 321 }), 'T')));
-  yes('an unknown distance is said, not left blank', /· distance unknown$/.test(hitFact(mk({ dist: null }), 'dist')));
-  yes('a world with no temperature to be found by says so', /· no equilibrium temperature$/.test(hitFact(mk({ Teq: null, Teff: null }), 'T')) && /· no equilibrium temperature$/.test(hitFact(mk({ Teq: 900, method: 'Imaging' }), 'T')));
-  yes('a radius is printed to three figures below 100 and whole above', /· 0\.532 R⊕$/.test(hitFact(mk({ R: 0.5321 }), 'R')) && /· 1\.00 R⊕$/.test(hitFact(mk({ R: 1 }), 'R')) && /· 12\.3 R⊕$/.test(hitFact(mk({ R: 12.34, M: 300 }), 'R')) && /· 123 R⊕$/.test(hitFact(mk({ R: 123.4, M: 300 }), 'R')),
+  yes('the line carries the value it was ordered by, with its unit', hitFact(mk({ dist: 10 }), 'dist') === 'temperate world with seas, 33 ly' && /, 1\.00 R⊕$/.test(hitFact(mk(), 'R')));
+  yes('a computed temperature is marked as computed and a published one is not', /, 255 K computed$/.test(hitFact(mk({ Teq: null }), 'T')) && /, 321 K$/.test(hitFact(mk({ Teq: 321 }), 'T')));
+  yes('an unknown distance is said, not left blank', /, distance unknown$/.test(hitFact(mk({ dist: null }), 'dist')));
+  yes('a world with no temperature to be found by says so', /, no equilibrium temperature$/.test(hitFact(mk({ Teq: null, Teff: null }), 'T')) && /, no equilibrium temperature$/.test(hitFact(mk({ Teq: 900, method: 'Imaging' }), 'T')));
+  yes('a radius is printed to three figures below 100 and whole above', /, 0\.532 R⊕$/.test(hitFact(mk({ R: 0.5321 }), 'R')) && /, 1\.00 R⊕$/.test(hitFact(mk({ R: 1 }), 'R')) && /, 12\.3 R⊕$/.test(hitFact(mk({ R: 12.34, M: 300 }), 'R')) && /, 123 R⊕$/.test(hitFact(mk({ R: 123.4, M: 300 }), 'R')),
     [0.5321, 1, 12.34, 123.4].map((R) => hitFact(mk({ R, M: R > 5 ? 300 : 1 }), 'R')).join(' | '));
-  yes('a period is printed the same way', /· 0\.457 d$/.test(hitFact(mk({ P: 0.4567, a: 0.012 }), 'P')) && /· 45\.7 d$/.test(hitFact(mk({ P: 45.67, a: 0.25 }), 'P')) && /· 1,234 d$/.test(hitFact(mk({ P: 1234.4, a: 2.2 }), 'P')));
-  yes('the starlight is printed the same way, and a world with none says so', /· 4\.0\d S⊕$/.test(hitFact(mk({ a: 0.5, P: 129 }), 'S')) && /· 0\.25\d S⊕$/.test(hitFact(mk({ a: 2, P: 1033 }), 'S')) && /· no insolation$/.test(hitFact(mk({ Teff: null, Rs: null, a: null, P: null }), 'S')), `${hitFact(mk({ a: 0.5, P: 129 }), 'S')} | ${hitFact(mk({ Teff: null, Rs: null, a: null, P: null }), 'S')}`);
+  yes('a period is printed the same way', /, 0\.457 d$/.test(hitFact(mk({ P: 0.4567, a: 0.012 }), 'P')) && /, 45\.7 d$/.test(hitFact(mk({ P: 45.67, a: 0.25 }), 'P')) && /, 1,234 d$/.test(hitFact(mk({ P: 1234.4, a: 2.2 }), 'P')));
+  yes('the starlight is printed the same way, and a world with none says so', /, 4\.0\d S⊕$/.test(hitFact(mk({ a: 0.5, P: 129 }), 'S')) && /, 0\.25\d S⊕$/.test(hitFact(mk({ a: 2, P: 1033 }), 'S')) && /, no insolation$/.test(hitFact(mk({ Teff: null, Rs: null, a: null, P: null }), 'S')), `${hitFact(mk({ a: 0.5, P: 129 }), 'S')} | ${hitFact(mk({ Teff: null, Rs: null, a: null, P: null }), 'S')}`);
   yes('a world with no year of discovery has a line with the kind alone', hitFact(mk({ year: null }), 'year') === kindLine(mk({ year: null })) && !/null|undefined/.test(hitFact(mk({ year: null }), 'year')));
-  yes('the period, the year and the starlight carry their units', /· 365 d$/.test(hitFact(mk(), 'P')) && /· 2020$/.test(hitFact(mk(), 'year')) && /· 1\.00 S⊕$/.test(hitFact(mk(), 'S')), `${hitFact(mk(), 'P')} | ${hitFact(mk(), 'year')} | ${hitFact(mk(), 'S')}`);
-  yes('a list ordered by likeness prints the likeness', /· likeness \d\.\d\d$/.test(hitFact(mk(), 'earthlike')), hitFact(mk(), 'earthlike'));
-  yes('a missing radius or period is said', /· no radius$/.test(hitFact(mk({ R: null, measuredR: false }), 'R')) && /· no period$/.test(hitFact(mk({ P: null }), 'P')));
+  yes('the period, the year and the starlight carry their units', /, 365 d$/.test(hitFact(mk(), 'P')) && /, 2020$/.test(hitFact(mk(), 'year')) && /, 1\.00 S⊕$/.test(hitFact(mk(), 'S')), `${hitFact(mk(), 'P')} | ${hitFact(mk(), 'year')} | ${hitFact(mk(), 'S')}`);
+  yes('a list ordered by likeness prints the likeness', /, likeness \d\.\d\d$/.test(hitFact(mk(), 'earthlike')), hitFact(mk(), 'earthlike'));
+  yes('a missing radius or period is said', /, no radius$/.test(hitFact(mk({ R: null, measuredR: false }), 'R')) && /, no period$/.test(hitFact(mk({ P: null }), 'P')));
 }
 
 /* ---- the same rules on the catalogue ---- */
