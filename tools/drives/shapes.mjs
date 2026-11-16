@@ -52,7 +52,7 @@ function golds() {
   const probe = document.createElement('i'); document.body.append(probe);
   const tok = ['--accretion', '--accretion-soft', '--accretion-dim'].map((v) => { probe.style.color = `var(${v})`; return getComputedStyle(probe).color; });
   probe.remove();
-  const allowed = (e) => e.closest('.bp, .iv-m .iv-tick, .tally-marks .tl-kept, .fill.kept, dialog:not([open]), .lbr-panel, canvas');
+  const allowed = (e) => e.closest('.bp, .iv-m .iv-tick, .tally-marks .tl-kept, .fill.kept, #ret-render .st-observed, dialog:not([open]), .lbr-panel, canvas');   // with ticket 2.13 (pull request 41) the status word "observed" of the planet's air may be gold
   const out = [];
   for (const e of document.querySelectorAll('body *')) {
     if (allowed(e)) continue;
