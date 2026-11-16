@@ -79,13 +79,20 @@ const AIR = [
   ['under 0.1% said from 0.01%', `if (v < 0.05) return 'under 0.1%';`, `if (v < 0.01) return 'under 0.1%';`],
   ['a decimal from 2% down', '`${v < 1 || v > 99 ? v.toFixed(1)', '`${v < 2 || v > 99 ? v.toFixed(1)'],
   ['a decimal from 98% up', '`${v < 1 || v > 99 ? v.toFixed(1)', '`${v < 1 || v > 98 ? v.toFixed(1)'],
-  ['an excluded scenario said to be allowed', 'out.push({ t: `${L[x.key]} excluded` });', 'out.push({ t: `${L[x.key]} allowed` });'],
-  ['an observed scenario not offered back', 'out.push({ t: `${L[x.key]} observed`, air: x.key });', 'out.push({ t: `${L[x.key]} observed` });'],
-  ['an allowed scenario not offered', 'out.push({ t: `${L[x.key]} allowed`, air: x.key });', 'out.push({ t: `${L[x.key]} allowed` });'],
-  ['an unobserved world not said to be one', `: 'not observed' });`, `: '' });`],
-  ['the only allowed air not named', ' (only ${L[air[0].key]} is allowed)', ''],
+  /* the line, in sentences */
+  ['an excluded scenario offered as a link', `out.push(status === 'excluded' ? { t } : { t, air: x.key });`, `out.push({ t, air: x.key });`],
+  ['an allowed or observed scenario not offered', `out.push(status === 'excluded' ? { t } : { t, air: x.key });`, `out.push({ t });`],
+  ['excluded scenarios never said', `for (const status of ['observed', 'allowed', 'excluded'])`, `for (const status of ['observed', 'allowed'])`],
+  ['the status word left out of its sentence', 'if (xs.length) out.push({ t: ` ${status}.` });', `if (xs.length) out.push({ t: '.' });`],
+  ['two names joined by a comma', `i === xs.length - 1 ? ' and ' : ', '`, `', '`],
+  ['the first name of a sentence in lower case', `const t = i === 0 ? cap(L[x.key]) : L[x.key];`, `const t = L[x.key];`],
+  ['two papers joined by a comma', `(xs.length < 3 ? xs.join(' and ')`, `(xs.length < 3 ? xs.join(', ')`],
+  ['three papers without their "and"', '`${xs.slice(0, -1).join(\', \')} and ${xs[xs.length - 1]}`', `xs.join(', ')`],
+  ['an unobserved world not said to be one', `: ' Not observed.' });`, `: '' });`],
+  ['an observed scenario drawn and not said to be observed', `lead.status === 'observed' ? ', as observed' : ''`, `''`],
+  ['the only allowed air not named', ', of which only ${L[air[0].key]} is allowed', ''],
   ['a world past the sample not said to be', `\${sc.fit.outside ? ' past its sample' : ''}`, ''],
-  ['a chosen scenario not said to be chosen', ' (the survey draws ${L[sc.drawn]})', ''],
+  ['a chosen scenario not said to be chosen', ', by your choice; the survey draws ${L[sc.drawn]}', ''],
 ];
 
 /* Rules data.js takes from air.js. The amounts of air are in looks.mutants.test.mjs, beside the look rules. */

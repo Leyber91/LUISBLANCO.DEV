@@ -53,6 +53,14 @@ const dois = new Set([...html.matchAll(/https:\/\/doi\.org\/([^"]+)"/g)].map((m)
 const read = new Set([...Object.values(PAPERS).map((x) => x.doi), '10.3847/1538-4357/ae77fd', '10.3847/1538-4357/ac3b48', '10.3847/0004-637X/828/2/80']);
 yes('every DOI linked is a paper that was read, and each paper is linked', [...dois].every((x) => read.has(x)) && [...read].every((x) => dois.has(x)), [...dois].filter((x) => !read.has(x)).join(' '));
 yes('the page links back to the survey', html.includes('href="exomania-survey.html"'));
+// the design revision of 2026-11-16 (BAR_L2.md): no meta strings joined by middle dots (the site's mark in the bar is
+// shared chrome and stays), and world names upright, because in Fraunces italic a planet's letter b reads as a 6
+const dots = [...html.matchAll(/&middot;|·/g)].length, mark = (html.match(/THE LAB &middot; <b>L212<\/b>/g) || []).length;
+yes('no middle dot joins anything on the page but the site\'s mark', dots === mark && mark === 1, `${dots} dots`);
+const css = readFileSync(join(here, '../../../css/exomania-air.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');   // the rules, without their comments
+const worldRule = (css.match(/\.world \{[^}]*\}/) || [''])[0];
+yes('world names are set upright, in Fraunces', /font-style: normal/.test(worldRule) && /Fraunces/.test(worldRule) && !/italic/.test(css), worldRule);
+yes('no label on the page is set in tracked capitals by its own stylesheet', !/text-transform:\s*uppercase/.test(css));
 yes('no emoji on the page (the Sun sign and the Earth sign are symbols, not emoji)', !/\p{Emoji_Presentation}/u.test(html) && !/\u{FE0F}/u.test(html));
 
 console.log(`\n${passed} passed, ${failed} failed`);

@@ -245,14 +245,14 @@ function setReticle(p) {
     const a = document.createElement('a');
     a.href = `?${new URLSearchParams({ p: p.name, air: part.air })}`;
     a.dataset.air = part.air;
-    a.title = `Draw ${p.name} with ${SCENARIO_LABEL[part.air]}`;
+    a.title = `Draw ${p.name} ${part.air === 'bare' ? 'as bare rock' : `with ${SCENARIO_LABEL[part.air]}`}`;
     a.textContent = part.t;
     line.append(a);
   }
-  line.append(' · ');
+  line.append(' ');
   const how = document.createElement('a');
   how.href = `exomania-air.html#${cl.air.observed ? 'observed' : 'fit'}`;
-  how.textContent = 'how the survey decides';
+  how.textContent = 'How the survey decides';
   line.append(how);
   r.append(' ', line);   // the space keeps the two lines apart when the text is read as one
 }

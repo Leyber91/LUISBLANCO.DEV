@@ -145,7 +145,7 @@ const by = new Map(list.map((p) => [p.name, p]));
     const p = by.get(e.name); if (!p) continue;
     const out = SCENARIOS.filter((k) => e[k].s === 'excluded');
     const line = airLine(physics(p).air);
-    yes(`${e.name}: each exclusion is listed as excluded and cannot be drawn`, out.every((k) => physics(p, { air: k }).airKey !== k && line.includes(`${{ bare: 'bare rock', thin: 'thin air', thick: 'thick air' }[k]} excluded`)) && (line.match(/excluded/g) || []).length === out.length, line);
+    yes(`${e.name}: each exclusion is listed as excluded and cannot be drawn`, out.every((k) => physics(p, { air: k }).airKey !== k && statusIn(line, k) === 'excluded') && SCENARIOS.filter((k) => statusIn(line, k) === 'excluded').length === out.length, line);
   }
   // the day sides: the bare-rock model against every measurement of a world drawn bare, and the atmosphere's sign
   const bareMeasured = OBSERVED.filter((e) => e.day && physics(by.get(e.name)).airKey === 'bare');
@@ -178,31 +178,46 @@ const by = new Map(list.map((p) => [p.name, p]));
     if (sc.fit && sc.list.some((x) => x.status === 'allowed' && x.p === null)) noP++;
     if (!sc.observed && Math.abs(sc.list[0].p + sc.list[1].p - 1) > 1e-12) sumBad++;
     const line = airLine(sc);
-    if (!SCENARIOS.every((k) => line.includes({ bare: 'bare rock', thin: 'thin air', thick: 'thick air' }[k]))) unnamed++;
+    if (!SCENARIOS.every((k) => statusIn(line, k) === (k === ph.airKey ? 'drawn' : sc.list.find((x) => x.key === k).status))) unnamed++;
     if (sc.fit && !sc.observed && !/2026 fit, extrapolated/.test(line)) noWord++;
   }
   yes(`every one of the ${rocky.length} rocky worlds with no observation keeps at least two scenarios`, rocky.length > 1500 && fewer === 0, `${fewer} with fewer`);
   yes('every allowed scenario carries the fit\'s probability', noP === 0, `${noP} without`);
   yes('bare rock and air add up to one', sumBad === 0);
-  yes('the line names all three scenarios for every rocky world', unnamed === 0, `${unnamed} lines miss one`);
+  yes('the line names all three scenarios for every rocky world, each in a sentence that gives its status', unnamed === 0, `${unnamed} lines miss one`);
   yes('the line marks every unobserved world\'s probability as extrapolated', noWord === 0);
   yes('no giant has scenarios: its look is its cloud tops', list.filter((p) => physics(p).isGiant).every((p) => physics(p).air === null));
 }
 
 /* ---- the line ---- */
+/* The status a line gives a scenario: the one sentence that names it (in any case) starts with "Drawn" or ends with
+   its status. Null when no sentence names it, or more than one does. */
+function statusIn(line, key) {
+  const name = { bare: 'bare rock', thin: 'thin air', thick: 'thick air' }[key];
+  const sentences = line.split(/(?<=\.) /).filter((s) => !/^(Observed by|The 2026 fit|Not observed|No fit)/.test(s));
+  // "Drawn with thin air, by your choice; the survey draws bare rock." names bare rock only as the survey's own choice
+  const own = sentences.filter((s) => { const at = s.toLowerCase().indexOf(name); return at >= 0 && !(s.includes('; the survey draws') && at > s.indexOf(';')); });
+  if (own.length !== 1) return null;
+  if (/^Drawn /.test(own[0])) return 'drawn';
+  const m = own[0].match(/ (excluded|allowed|observed)\.$/);
+  return m ? m[1] : null;
+}
 const PCT = [0.0004, 0.0006, 0.004, 0.0099, 0.0101, 0.143, 0.9899, 0.9901, 0.997, 0.9994, 0.9996];
 {
   const line = (n, shown) => airLine(physics(by.get(n)).air, shown);
-  yes('an unobserved world: drawn, the other two allowed, not observed, the fit with both numbers', line('Proxima Cen b') === 'drawn: bare rock · thin air allowed · thick air allowed · not observed · 2026 fit, extrapolated: bare rock 86%, air 14%', line('Proxima Cen b'));
-  yes('an observed world whose thick air is excluded', line('LHS 3844 b') === 'drawn: bare rock · thin air allowed · thick air excluded · observed by Kreidberg 2019, Zieba 2026 · 2026 fit, extrapolated: bare rock 99.7%, air 0.3% (only thin air is allowed)', line('LHS 3844 b'));
-  yes('an observed atmosphere, with nothing left for the fit', line('55 Cnc e') === 'drawn: thick air, observed · bare rock excluded · thin air excluded · observed by Hu 2024', line('55 Cnc e'));
-  yes('a scenario chosen by the visitor says what the survey would draw', line('TRAPPIST-1 e', 'thin').startsWith('drawn: thin air (the survey draws bare rock) · bare rock allowed · thick air allowed'), line('TRAPPIST-1 e', 'thin'));
-  yes('a world past the fit\'s sample says so', /2026 fit, extrapolated past its sample/.test(line('K2-141 b')));
+  yes('an unobserved world: drawn, the other two allowed, not observed, the fit with both numbers', line('Proxima Cen b') === 'Drawn as bare rock. Thin air and thick air allowed. Not observed. The 2026 fit, extrapolated: bare rock 86%, air 14%.', line('Proxima Cen b'));
+  yes('an observed world whose thick air is excluded', line('LHS 3844 b') === 'Drawn as bare rock. Thin air allowed. Thick air excluded. Observed by Kreidberg 2019 and Zieba 2026. The 2026 fit, extrapolated: bare rock 99.7%, air 0.3%, of which only thin air is allowed.', line('LHS 3844 b'));
+  yes('an observed atmosphere, with nothing left for the fit', line('55 Cnc e') === 'Drawn with thick air, as observed. Bare rock and thin air excluded. Observed by Hu 2024.', line('55 Cnc e'));
+  yes('a scenario chosen by the visitor says what the survey would draw', line('TRAPPIST-1 e', 'thin') === 'Drawn with thin air, by your choice; the survey draws bare rock. Bare rock and thick air allowed. Observed by Espinoza 2025 and Glidden 2025. The 2026 fit, extrapolated: bare rock 99.6%, air 0.4%.', line('TRAPPIST-1 e', 'thin'));
+  yes('a world past the fit\'s sample says so', / The 2026 fit, extrapolated past its sample: /.test(line('K2-141 b')));
+  yes('no part of the line is joined by a middle dot', ['Proxima Cen b', 'LHS 3844 b', '55 Cnc e', 'TRAPPIST-1 b'].every((n) => !line(n).includes('·')));
+  yes('the links of the line are the scenario names alone', ['Proxima Cen b', 'LHS 3844 b', 'LTT 1445 A b'].every((n) => airParts(physics(by.get(n)).air).filter((x) => x.air).every((x) => /^(bare rock|thin air|thick air)$/i.test(x.t))));
+  yes('three papers would be joined as "a, b and c"', airLine(scenariosFor({ name: 'nobody', S: 10, L: 1, vEsc: 11, observed: { name: 'nobody', papers: ['zieba23', 'hu24', 'teske25'], concludes: null, day: null, bare: { s: 'allowed' }, thin: { s: 'allowed' }, thick: { s: 'allowed' } } })).includes('Observed by Zieba 2023, Hu 2024 and Teske 2025.'));
   yes('the switchable parts are the allowed and observed scenarios not drawn', airParts(physics(by.get('LHS 3844 b')).air).filter((x) => x.air).map((x) => x.air).join() === 'thin' && airParts(physics(by.get('55 Cnc e')).air).filter((x) => x.air).length === 0);
   yes('percentages: two digits in the middle, one decimal near the ends, and the extremes said in words', PCT.map(percent).join(' ') === 'under 0.1% 0.1% 0.4% 1.0% 1% 14% 99% 99.0% 99.7% 99.9% over 99.9%', PCT.map(percent).join(' '));
   const x = (s) => ({ s, why: 'test' });
   const sc = scenariosFor({ name: 'nobody', S: 10, L: 1, vEsc: 11, observed: { name: 'nobody', papers: ['zieba23'], concludes: null, day: null, bare: x('allowed'), thin: x('observed'), thick: x('excluded') } });
-  yes('an observed scenario not drawn is named as observed and can be switched back to', airLine(sc, 'bare') === 'drawn: bare rock (the survey draws thin air) · thin air observed · thick air excluded · observed by Zieba 2023 · 2026 fit, extrapolated: bare rock 0.2%' && airParts(sc, 'bare').some((p) => p.air === 'thin'), airLine(sc, 'bare'));
+  yes('an observed scenario not drawn is named as observed and can be switched back to', airLine(sc, 'bare') === 'Drawn as bare rock, by your choice; the survey draws thin air. Thin air observed. Thick air excluded. Observed by Zieba 2023. The 2026 fit, extrapolated: bare rock 0.2%.' && airParts(sc, 'bare').some((p) => p.air === 'thin'), airLine(sc, 'bare'));
 }
 
 /* ---- a scenario can be drawn instead, and the default is the rule's ---- */

@@ -36,6 +36,7 @@ const LOOK_WORD = { temperate: 'seas and cloud', fluid: 'cloud tops', ice: 'ice'
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const int = (x) => Math.round(x).toLocaleString('en-US');
+const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 const doiLink = (d) => `<a href="https://doi.org/${esc(d)}">doi:${esc(d)}</a>`;
 
 const SUN = { st_teff: 5772, st_rad: 1, st_mass: 1 };
@@ -55,13 +56,13 @@ function observed(by) {
     const p = by.get(e.name), ph = physics(p), drawn = ph.airKey;
     const sc = SCENARIOS.map((k) => {
       const s = e[k].s, mark = k === drawn ? ' class="drawn"' : '';
-      return `<li${mark}><b>${SCENARIO_LABEL[k]}</b> <span class="st st-${s}">${s}</span>${k === drawn ? ' <span class="dr">drawn</span>' : ''} ${esc(e[k].why)}</li>`;
+      return `<li${mark}><b>${cap(SCENARIO_LABEL[k])}</b>: <span class="st st-${s}">${s}</span>${k === drawn ? ', <span class="dr">drawn</span>' : ''}. ${esc(e[k].why)}</li>`;
     }).join('');
     const why = ph.air.by === 'observed' ? 'the scenario observed' : ph.air.by === 'paper' ? 'the paper\'s conclusion' : `the fit: air ${percent(ph.air.fit.P)}`;
     const day = e.day ? `<p class="obs-day">Day side measured ${int(e.day.T)} K (−${e.day.lo}, +${e.day.hi}; ${esc(PAPERS[e.day.src].cite)}); drawn at ${int(mapDay(toParams(p).tsub, toParams(p).tnight))} K.</p>` : '';
     const papers = e.papers.map((k) => `<li>${esc(PAPERS[k].cite)}, ${esc(PAPERS[k].venue)}. ${esc(PAPERS[k].what)}. ${doiLink(PAPERS[k].doi)}</li>`).join('');
     return `<article class="obs" id="${esc(e.name.replace(/[^A-Za-z0-9]+/g, '-'))}">
-  <header class="obs-h"><h3 class="world">${esc(e.name)}</h3><p class="obs-drawn">drawn as <b>${SCENARIO_LABEL[drawn]}</b>, by ${why}; look: ${LOOK_WORD[lookOf(p)]}</p></header>
+  <header class="obs-h"><h3 class="world">${esc(e.name)}</h3><p class="obs-drawn">Drawn ${drawn === 'bare' ? 'as' : 'with'} <b>${SCENARIO_LABEL[drawn]}</b>, by ${why}. Look: ${LOOK_WORD[lookOf(p)]}.</p></header>
   <p class="obs-found">${esc(e.found)}</p>
   <ul class="obs-sc">${sc}</ul>
   ${day}<ul class="obs-papers">${papers}</ul>

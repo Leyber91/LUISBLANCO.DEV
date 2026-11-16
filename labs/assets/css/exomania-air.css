@@ -2,34 +2,36 @@
    exomania-air.css — the sheet on which the survey says how it
    decides which rocky worlds keep air (labs/exomania-air.html).
 
-   Drawn on the plate (tokens.css, plate.css): hairlines, small
-   uppercase labels, IBM Plex Mono for what is read, Fraunces for
-   the title and the planets' names. Gold marks one thing only:
-   the scenario the survey draws for a world, which is decided.
-   The ink ladder carries everything else; an excluded scenario
-   is set in the dim ink, never in a colour of its own.
+   Drawn on the plate (tokens.css, plate.css): hairlines, IBM
+   Plex Mono for what is read, Fraunces for the title, the section
+   titles and the planets' names, upright (in its italic a
+   planet's letter b reads as a 6). After the design revision of
+   2026-11-16 (BAR_L2.md): labels are sentence case and never
+   tracked capitals, nothing is joined by middle dots, and gold
+   marks one thing only, an observed scenario, because gold marks
+   a measurement. The scenario drawn is shown by geometry, a rule
+   in the bright ink; an excluded one is set in the dim ink.
    ============================================================ */
 
 .air { max-width: var(--content-max); margin-inline: auto; padding-bottom: var(--s-7); }
 
 /* ---------- the head and its title block ---------- */
 .air-head { padding-block: var(--s-7) var(--s-6); display: grid; grid-template-columns: minmax(0, 1fr) 320px; column-gap: var(--s-7); }
-.air-head > .kick, .air-head > h1, .air-head > .lede { grid-column: 1; }
-.air-head > .block { grid-column: 2; grid-row: 1 / span 3; align-self: end; }
+.air-head > h1, .air-head > .lede { grid-column: 1; }
+.air-head > .block { grid-column: 2; grid-row: 1 / span 2; align-self: end; }
 .air-head h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(2.1rem, 4.2vw, 3.4rem); line-height: 1.04; letter-spacing: -.015em; margin: 0 0 var(--s-4); }
 .lede { font-size: .92rem; line-height: 1.7; color: var(--text); margin: 0; max-width: 68ch; }
 .block { margin: 0; border: 1px solid var(--line); font-size: var(--t-micro); }
 .block div { display: grid; grid-template-columns: 112px 1fr; border-top: 1px solid var(--line); }
 .block div:first-child { border-top: 0; }
 .block dt, .block dd { margin: 0; padding: 7px 10px; }
-.block dt { color: var(--text-dim); letter-spacing: .14em; text-transform: uppercase; border-right: 1px solid var(--line); }
+.block dt { color: var(--text-dim); border-right: 1px solid var(--line); }
 .block dd { color: var(--text-bright); font-variant-numeric: tabular-nums; }
 code { font-family: var(--font-mono); font-size: .92em; color: var(--text-bright); }
 
 /* ---------- plates ---------- */
 .plate-sec { padding-block: var(--s-7) var(--s-5); }
-.plate-sec > .mini { margin: 0 0 var(--s-3); }
-.plate-sec h2 { max-width: 40ch; }
+.plate-sec h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(1.45rem, 2.2vw, 1.9rem); line-height: 1.15; letter-spacing: -.01em; max-width: 40ch; margin-bottom: var(--s-4); }
 .plate-sec > p, .steps, .defs, .unc { font-size: .86rem; line-height: 1.7; color: var(--text); max-width: 76ch; }
 .plate-sec > p { margin: 0 0 var(--s-4); }
 .note { color: var(--text-dim) !important; font-size: .78rem !important; }
@@ -53,12 +55,12 @@ sub, sup { font-size: .72em; line-height: 0; }
 .tab { border-collapse: collapse; font-size: .76rem; line-height: 1.5; min-width: 100%; margin-bottom: var(--s-4); }
 .tab.narrow { min-width: 0; }
 .tab th, .tab td { text-align: left; vertical-align: top; padding: 7px 14px 7px 0; border-bottom: 1px solid var(--line); }
-.tab thead th { font-weight: 500; font-size: var(--t-micro); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); border-bottom-color: var(--line-bright); }
+.tab thead th { font-weight: 500; font-size: .74rem; color: var(--text-dim); border-bottom-color: var(--line-bright); }
 .tab tbody th { color: var(--text-bright); font-weight: 500; white-space: nowrap; }
 .tab td { color: var(--text); }
 .tab td b { color: var(--text-bright); font-weight: 500; }
 .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.world { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 400; }
+.world { font-family: 'Fraunces', Georgia, serif; font-style: normal; font-weight: 500; }
 .tab .world { font-size: .9rem; }
 
 /* ---------- the ledger of observed planets ---------- */
@@ -72,12 +74,13 @@ sub, sup { font-size: .72em; line-height: 0; }
 .obs-sc { list-style: none; padding: 0; margin: 0 0 var(--s-3); font-size: .78rem; line-height: 1.6; color: var(--text-dim); }
 .obs-sc li { padding: 4px 0 4px 14px; position: relative; }
 .obs-sc li b { color: var(--text-bright); font-weight: 500; }
-/* the scenario drawn: decided, so it carries the one gold mark of the page */
-.obs-sc li.drawn::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--accretion); }
-.st { display: inline-block; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; padding: 0 5px; margin: 0 4px; border: 1px solid var(--line-bright); color: var(--text); vertical-align: 1px; }
-.st-excluded { color: var(--text-dim); border-color: var(--line); text-decoration: line-through; text-decoration-color: var(--text-dim); }
-.st-observed { color: var(--text-bright); border-color: var(--horizon-dim); }
-.dr { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accretion-soft); margin-right: 4px; }
+/* the scenario drawn is shown by geometry: a rule in the bright ink beside it */
+.obs-sc li.drawn::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--text-bright); }
+/* status words are words; gold only for observed, which is a measurement */
+.st { color: var(--text); }
+.st-excluded { color: var(--text-dim); }
+.st-observed { color: var(--accretion-soft); }
+.dr { color: var(--text-bright); }
 .obs-day { font-size: .76rem; color: var(--text); margin: 0 0 var(--s-2); font-variant-numeric: tabular-nums; }
 .obs-papers { list-style: none; padding: 0; margin: 0; font-size: .72rem; line-height: 1.6; color: var(--text-dim); }
 .obs-papers a, .src a { color: var(--horizon); text-underline-offset: 3px; overflow-wrap: anywhere; }
@@ -108,5 +111,8 @@ sub, sup { font-size: .72em; line-height: 0; }
   .tab tr { border-bottom: 1px solid var(--line); padding: 10px 0; }
   .tab th, .tab td { border: 0; padding: 2px 0; white-space: normal; }
   .tab td { display: grid; grid-template-columns: 42% minmax(0, 1fr); column-gap: 10px; }
-  .tab td::before { content: attr(data-label); color: var(--text-dim); font-size: var(--t-micro); letter-spacing: .08em; text-transform: uppercase; line-height: 1.6; }
+  .tab td::before { content: attr(data-label); color: var(--text-dim); font-size: .72rem; line-height: 1.6; }
 }
+
+/* the footer's link to the survey: a link in words, not a boxed label (the bar above keeps the shared chrome) */
+.foot .back.quiet { border: 0; padding: 0; text-transform: none; letter-spacing: 0; font-size: .78rem; color: var(--horizon); text-decoration: underline; text-underline-offset: 3px; }

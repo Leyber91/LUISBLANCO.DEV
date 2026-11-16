@@ -264,29 +264,33 @@ const pct = (x) => {
 export { pct as percent };
 
 /* The line under the planet's name, as parts: { t } is text; { t, air } names a scenario the picture can be switched
-   to. shown is the scenario drawn now (the default unless the visitor chose another). Every scenario appears with
-   its status; the fit's probabilities appear whenever an allowed scenario has one. */
+   to. shown is the scenario drawn now (the default unless the visitor chose another). Plain sentences: what is
+   drawn, then the other scenarios grouped by status, then who observed it, then the fit's probabilities whenever an
+   allowed scenario has one. */
+const DRAWN_AS = { bare: 'Drawn as bare rock', thin: 'Drawn with thin air', thick: 'Drawn with thick air' };
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const both = (xs) => (xs.length < 3 ? xs.join(' and ') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 export function airParts(sc, shown = sc.drawn) {
-  const L = SCENARIO_LABEL, out = [], sep = () => out.push({ t: ' · ' });
+  const L = SCENARIO_LABEL, out = [];
   const lead = sc.list.find((x) => x.key === shown);
-  out.push({ t: `drawn: ${L[shown]}${lead.status === 'observed' ? ', observed' : ''}${shown !== sc.drawn ? ` (the survey draws ${L[sc.drawn]})` : ''}` });
-  for (const x of sc.list) {
-    if (x.key === shown) continue;
-    sep();
-    if (x.status === 'excluded') out.push({ t: `${L[x.key]} excluded` });
-    else if (x.status === 'observed') out.push({ t: `${L[x.key]} observed`, air: x.key });
-    else out.push({ t: `${L[x.key]} allowed`, air: x.key });
+  out.push({ t: `${DRAWN_AS[shown]}${lead.status === 'observed' ? ', as observed' : ''}${shown !== sc.drawn ? `, by your choice; the survey draws ${L[sc.drawn]}` : ''}.` });
+  for (const status of ['observed', 'allowed', 'excluded']) {
+    const xs = sc.list.filter((x) => x.key !== shown && x.status === status);
+    xs.forEach((x, i) => {
+      out.push({ t: i === 0 ? ' ' : i === xs.length - 1 ? ' and ' : ', ' });
+      const t = i === 0 ? cap(L[x.key]) : L[x.key];
+      out.push(status === 'excluded' ? { t } : { t, air: x.key });
+    });
+    if (xs.length) out.push({ t: ` ${status}.` });
   }
-  sep();
-  out.push({ t: sc.observed ? `observed by ${sc.observed.papers.map((k) => PAPERS[k].cite.replace(' et al.', '')).join(', ')}` : 'not observed' });
+  out.push({ t: sc.observed ? ` Observed by ${both(sc.observed.papers.map((k) => PAPERS[k].cite.replace(' et al.', '')))}.` : ' Not observed.' });
   const bare = sc.list[0], air = sc.list.filter((x) => x.key !== 'bare' && x.status === 'allowed');
   if (sc.fit && (bare.status === 'allowed' || air.length)) {
     const said = [];
     if (bare.status === 'allowed') said.push(`bare rock ${pct(bare.p)}`);
-    if (air.length) said.push(`air ${pct(sc.fit.P)}${air.length === 1 ? ` (only ${L[air[0].key]} is allowed)` : ''}`);
-    sep();
-    out.push({ t: `2026 fit, extrapolated${sc.fit.outside ? ' past its sample' : ''}: ${said.join(', ')}` });
-  } else if (!sc.fit) { sep(); out.push({ t: 'no fit: flux or luminosity missing' }); }
+    if (air.length) said.push(`air ${pct(sc.fit.P)}${air.length === 1 ? `, of which only ${L[air[0].key]} is allowed` : ''}`);
+    out.push({ t: ` The 2026 fit, extrapolated${sc.fit.outside ? ' past its sample' : ''}: ${said.join(', ')}.` });
+  } else if (!sc.fit) out.push({ t: ' No fit: the flux or the luminosity is missing.' });
   return out;
 }
 export const airLine = (sc, shown) => airParts(sc, shown).map((x) => x.t).join('');
