@@ -169,7 +169,10 @@
   position: fixed; right: var(--s-5); bottom: var(--s-5);
   width: min(760px, calc(100vw - 2 * var(--s-5))); z-index: var(--z-toast);
   max-height: calc(100vh - 2 * var(--s-4)); overflow-y: auto;
-  background: var(--void);
+  /* 98% and not opaque: an opaque fixed plate over an opaque WebGL canvas comes out as a hole of transparent
+     pixels in software-composited captures (headless Chrome with --disable-gpu), white in every review render
+     of the survey on 2026-11-16. Two per cent of the page behind does not show to the eye. */
+  background: color-mix(in srgb, var(--void) 98%, transparent);
   display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-2) var(--s-5); align-items: center;
   padding: var(--s-3) var(--s-4);
 }
