@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { parts, differences, catalogue } from '../../../../../tools/dev/air_article.mjs';
-import { SHORELINE, BARE, OBSERVED, PAPERS, MR, airProbability, V_ESC_EARTH, percent, percentRange } from '../air.js';
+import { SHORELINE, BARE, OBSERVED, PAPERS, MR, airProbability, V_ESC_EARTH, percent, percentRange, THICKNESS, BASES } from '../air.js';
 import { physics } from '../data.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -29,7 +29,7 @@ yes('every generated part of the page is what the code gives now', d.length === 
 // the prose, sentence by sentence where it holds a number
 const text = html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
 const K = SHORELINE;
-yes('the formula on the page is the paper\'s, in its constants f0, p, q and w, for a detectable atmosphere', html.includes('f<sub>shore</sub> / f<sub>⊕</sub> = f<sub>0</sub> (v<sub>esc</sub> / v<sub>esc,⊕</sub>)<sup>p</sup> (L / L<sub>☉</sub>)<sup>q</sup>') && html.includes('P(detectable atmosphere) = 1 / (1 + e<sup>Δ / w</sup>)'));
+yes('the formula on the page is the paper\'s, in its constants f0, p, q and w', html.includes('f<sub>shore</sub> / f<sub>⊕</sub> = f<sub>0</sub> (v<sub>esc</sub> / v<sub>esc,⊕</sub>)<sup>p</sup> (L / L<sub>☉</sub>)<sup>q</sup>') && html.includes('P(atmosphere) = 1 / (1 + e<sup>Δ / w</sup>)'));
 const T771 = airProbability({ S: 10 ** 1.248, L: 10 ** -2.26, vEsc: V_ESC_EARTH * 10 ** 0.16 }).P * 100;
 yes('the Table 1 sentence gives the largest gap as the code computes it', text.includes(`the largest gap is TOI-771 b, ${T771.toFixed(1)}% against 21.6%`) && Math.abs(T771 - 21.6) <= 1, T771.toFixed(2));
 yes('the paper\'s mass relation is stated with its constants', text.includes(`M = e−0.025 R3.37 below 1.8 Earth radii`) && MR.a === -0.025 && MR.b === 3.37 && MR.upTo === 1.8);
@@ -52,8 +52,11 @@ const mars = P(0.532, 0.107, 1.524), mercury = P(0.383, 0.0553, 0.387);
 yes('the Solar System sentence holds: Earth and Venus above 0.999, Mars and Mercury as the posterior gives them', P(1, 1, 1) > 0.999 && P(0.949, 0.815, 0.723) > 0.999 && text.includes(`P = ${mars.toFixed(2)}`) && text.includes(`P = ${mercury.toFixed(3)}`), `${mars.toFixed(3)} ${mercury.toFixed(4)}`);
 yes('Proxima b\'s note gives its probability', text.includes(`the ${Math.round(physics(by.get('Proxima Cen b')).air.fit.P * 100)}% that follows`) && text.includes(`so the ${Math.round(physics(by.get('Proxima Cen b')).air.fit.P * 100)}% is a lower bound`));
 const t1e = physics(by.get('TRAPPIST-1 e')).air.fit, r128 = physics(by.get('Ross 128 b')).air.fit;
-yes('plate e quotes the line\'s odds for TRAPPIST-1 e and Ross 128 b as the code gives them', text.includes(`chance it kept an atmosphere the fit counts (thicker than about 1 to 10 bar) ${percent(t1e.P)}, 68% range ${percentRange(t1e.lo, t1e.hi)}`) && text.includes(`as Ross 128 b's does (${percentRange(r128.lo, r128.hi)})`) && r128.lo < 0.5 && r128.hi > 0.5);
+yes('plate e quotes the line\'s odds for TRAPPIST-1 e and Ross 128 b as the code gives them', text.includes(`Chance of air ${percent(t1e.P)} (${percentRange(t1e.lo, t1e.hi)})`) && text.includes(`Chance it kept an atmosphere, by the 2026 fit, extrapolated: ${percent(t1e.P)} (68% range ${percentRange(t1e.lo, t1e.hi)})`) && text.includes(`as Ross 128 b's does (${percentRange(r128.lo, r128.hi)})`) && r128.lo < 0.5 && r128.hi > 0.5);
 yes('plate e says what the habitable zone does not tell', text.includes('The habitable zone describes the temperature the star gives, and says nothing about whether the planet kept air.'));
+yes('the article says what the fit learns from and that it does not say how thick, as the line does (V1)', text.includes('So the fit learns from Solar System bodies with any air and from exoplanets whose eclipses show a thick one, and it does not say how thick.') && THICKNESS.startsWith('The fit learns from Solar System bodies with any air and from exoplanets whose eclipses show a thick one, so it does not say how thick') && text.includes('any air above 10−6 bar, so Mars counts'));
+yes('the article defines an exclusion as the code does: every composition considered, or energy balance (V4)', text.includes('when a paper rules it out for every composition it considers, or by energy balance') && BASES.join() === 'composition,energy balance');
+yes('no word of the old reading of the fit is left on the page', !/detectable atmosphere|fit counts|the rest is bare/i.test(text));
 const nofit = list.filter((p) => { const ph = physics(p); return !ph.isGiant && !ph.air.fit; }).length;
 yes('the number of worlds with no fit is the code\'s', text.includes(`and says so: ${nofit} rocky worlds`), `${nofit}`);
 

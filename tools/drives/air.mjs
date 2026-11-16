@@ -3,14 +3,22 @@
 //   and again at --width 390 --height 844
 //
 // The article loads clean, fits the width, carries its seventeen planets, and keeps the design revision of
-// 2026-11-16 (upright names, no middle dots, no tracked capitals). On the survey: the line under the name is
-// sentences with the odds and their range; a scenario of the same look switches in one frame and says it was
-// chosen; a link offered for another world does nothing; and where the browser cannot build a look in the
+// 2026-11-16 (upright names, no middle dots, no tracked capitals). On the survey: the line under the name is a short
+// account of at most two lines, with the scenarios and their sources in a disclosure under it whose summary is a
+// 44 px target on a phone; a scenario of the same look switches in one frame, says it was chosen and keeps the
+// disclosure open; a link offered for another world does nothing; and where the browser cannot build a look in the
 // background, only scenarios whose look is built are links.
 
 const sel = (n) => `((document.getElementById('ret-name') || {}).textContent || '').trim() === ${JSON.stringify(n)} && document.body.classList.contains('ready') && !document.getElementById('exo-note')`;
-const lineOf = `(document.querySelector('#ret-render .ret-air') || {}).textContent || ''`;
-const links = `[...document.querySelectorAll('#ret-render .ret-air a[data-air]')].map((a) => a.dataset.air + ':' + a.dataset.world)`;
+const shortOf = `(document.querySelector('#ret-render .ret-air') || {}).textContent || ''`;
+const moreOf = `(document.querySelector('#ret-render .ret-more-body') || {}).textContent || ''`;
+const links = `[...document.querySelectorAll('#ret-render a[data-air]')].map((a) => a.dataset.air + ':' + a.dataset.world)`;
+const measure = `(() => { const s = document.querySelector('#ret-render .ret-air'), m = document.querySelector('#ret-render .ret-more');
+  const lh = parseFloat(getComputedStyle(s).lineHeight), sum = m.querySelector('summary').getBoundingClientRect();
+  return { lines: Math.round(s.getBoundingClientRect().height / lh * 100) / 100, open: m.open, summaryH: Math.round(sum.height), text: s.textContent }; })()`;
+// the five worlds the review read, and the catalogue's longest short line (air.test.mjs checks it is the longest)
+const WORLDS = ['LHS 3844 b', 'TRAPPIST-1 e', 'Proxima Cen b', '55 Cnc e', 'Kepler-442 b', 'EPIC 201238110 b'];
+const slug = (n) => n.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
 
 export default async function air(p, { base, width }) {
   // ---- the article ----
@@ -32,32 +40,50 @@ export default async function air(p, { base, width }) {
   p.check('gold marks only an observed status', a.gold.length > 0 && a.gold.every((c) => /st-observed/.test(c)), a.gold.join(' | '));
   await p.shot(`air-article-${width}`);
 
-  // ---- the line under the name, and a switch within one look ----
+  // ---- the short line stays within two lines, closed, for the five worlds and the longest case ----
+  const tall = [];
+  for (const n of WORLDS) {
+    await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent(n)}`);
+    await p.until(sel(n), 90000);
+    await p.sleep(2500);
+    const m = await p.ev(measure);
+    tall.push(`${n} ${m.lines}${m.open ? ' open' : ''} ${m.summaryH}px`);
+    if (m.lines > 2.05 || m.open || (width < 700 && m.summaryH < 44)) tall.push('  ^ fails');
+    if (['LHS 3844 b', 'TRAPPIST-1 e', 'Kepler-442 b'].includes(n)) await p.shot(`air-line-${slug(n)}-${width}`);
+  }
+  p.check(`closed, the line is at most two lines at ${width} px and its summary is a ${width < 700 ? '44 px' : 'visible'} target`, !tall.some((t) => /fails/.test(t)), tall.join('; '));
+
+  // ---- the details: open them, then a switch within one look ----
   await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('LHS 3844 b')}`);
-  const up = await p.until(sel('LHS 3844 b'), 90000);
-  await p.sleep(3000);
-  const l1 = await p.ev(lineOf);
-  p.check('the line is sentences: drawn, statuses, observers, the odds of what the fit counts with their range, the article', up && /^Drawn as bare rock\. Thin air and thick air disfavoured\. Observed by Kreidberg 2019 and Zieba 2026\. The 2026 fit, extrapolated: chance it kept an atmosphere the fit counts \(thicker than about 1 to 10 bar\) [\d.]+%, 68% range [\d.]+ to [\d.]+%\. The rest is bare rock or thin air\. How the survey decides$/.test(l1) && !/·/.test(l1), l1);
-  p.check('both open scenarios are links for this world', JSON.stringify(await p.ev(links)) === JSON.stringify(['thin:LHS 3844 b', 'thick:LHS 3844 b']), JSON.stringify(await p.ev(links)));
-  await p.shot(`air-line-lhs-3844-b-${width}`);
+  await p.until(sel('LHS 3844 b'), 90000);
+  await p.sleep(2500);
+  const s1 = await p.ev(shortOf);
+  p.check('the short line: drawn, why, and the chance of air with its range', /^Air: drawn as bare rock, from its paper\. Chance of air [\d.]+% \([\d.]+ to [\d.]+%\)\.$/.test(s1), s1);
+  await p.ev(`document.querySelector('#ret-render .ret-more summary').click()`);
+  await p.sleep(300);
+  const d1 = await p.ev(`({ open: document.querySelector('#ret-render .ret-more').open, more: ${moreOf}, links: ${links} })`);
+  p.check('opened, the details give the conclusion, what each disfavoured scenario is disfavoured for, the papers, the fit and the article', d1.open && /^Drawn as bare rock\. Its paper concludes: “/.test(d1.more) && / Thick air disfavoured for any air from 10 bar, by energy balance \(Kreidberg 2019\)/.test(d1.more) && / Chance it kept an atmosphere, by the 2026 fit, extrapolated: [\d.]+% \(68% range /.test(d1.more) && /How the survey decides$/.test(d1.more) && JSON.stringify(d1.links) === JSON.stringify(['thin:LHS 3844 b', 'thick:LHS 3844 b']), JSON.stringify(d1));
+  await p.shot(`air-details-lhs-3844-b-${width}`);
 
   await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('GJ 367 b')}`);
   await p.until(sel('GJ 367 b'), 90000);
   await p.sleep(3000);
+  await p.ev(`document.querySelector('#ret-render .ret-more summary').click()`);
+  await p.sleep(300);
   const sw = await p.ev(`new Promise((done) => {
     const a = document.querySelector('#ret-render a[data-air="thin"]');
     if (!a) { done({ missing: true }); return; }
     let prev = performance.now(), worst = 0, note = false; const t0 = prev;
     const tick = (t) => { worst = Math.max(worst, t - prev); prev = t; if (document.getElementById('exo-note')) note = true;
-      if (t - t0 > 800) { done({ worst: Math.round(worst), note, line: document.querySelector('#ret-render .ret-air').textContent, url: location.search }); return; } requestAnimationFrame(tick); };
+      if (t - t0 > 800) { done({ worst: Math.round(worst), note, short: ${shortOf}, more: ${moreOf}, open: document.querySelector('#ret-render .ret-more').open }); return; } requestAnimationFrame(tick); };
     a.click(); requestAnimationFrame(tick);
   })`);
   await p.sleep(400);
-  p.check('a switch within one look (molten) draws at once, says it was chosen and goes into the address', !sw.missing && !sw.note && sw.worst < 250 && /^Drawn with thin air, though disfavoured, by your choice; the survey draws bare rock\./.test(sw.line) && /air=thin/.test(await p.ev('location.search')), JSON.stringify(sw));
+  p.check('a switch within one look (molten) draws at once, says it was chosen, keeps the details open and goes into the address', !sw.missing && !sw.note && sw.worst < 250 && sw.open && /^Air: drawn with thin air, by your choice\./.test(sw.short) && /^Drawn with thin air, though disfavoured for /.test(sw.more) && /the survey draws bare rock\./.test(sw.more) && /air=thin/.test(await p.ev('location.search')), JSON.stringify(sw).slice(0, 400));
   // a link offered for another world (a flight in between) does nothing
   const stale = await p.ev(`(() => { const a = document.createElement('a'); a.href = '#'; a.dataset.air = 'bare'; a.dataset.world = 'TRAPPIST-1 e';
-    document.querySelector('#ret-render .ret-air').append(a); const before = document.querySelector('#ret-render .ret-air').textContent; a.click();
-    return { same: document.querySelector('#ret-render .ret-air').textContent === before }; })()`);
+    document.querySelector('#ret-render .ret-more-body').append(a); const before = ${shortOf}; a.click();
+    return { same: ${shortOf} === before }; })()`);
   await p.sleep(400);
   p.check('a scenario link offered for another world changes nothing', stale.same && /air=thin/.test(await p.ev('location.search')), JSON.stringify(stale));
 
@@ -67,8 +93,8 @@ export default async function air(p, { base, width }) {
   await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('LHS 3844 b')}`);
   await p.until(sel('LHS 3844 b'), 120000);
   await p.sleep(3000);
-  const held = await p.ev(`({ links: ${links}, line: ${lineOf} })`);
-  p.check('without background builds, scenarios whose look is not built are not links, and the line says why', held.links.length === 0 && /^Drawn as bare rock\. Thin air and thick air disfavoured\./.test(held.line) && / Some scenarios are not a link here: this browser would build its look on the page's thread\./.test(held.line), JSON.stringify(held));
+  const held = await p.ev(`({ links: ${links}, more: ${moreOf} })`);
+  p.check('without background builds, scenarios whose look is not built are not links, and the details say why', held.links.length === 0 && / Some scenarios are not a link here: this browser would build its look on the page's thread\./.test(held.more), JSON.stringify(held).slice(0, 300));
   await p.go(`${base}/labs/exomania-survey.html?p=${encodeURIComponent('GJ 367 b')}`);
   await p.until(sel('GJ 367 b'), 120000);
   await p.sleep(3000);

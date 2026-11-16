@@ -63,7 +63,7 @@ function observed(by) {
     const words = [...(e.observed ? [e.observed] : []), ...(e.concludes ? [e.concludes] : []), ...e.bounds];
     const seen = new Set();
     const quotes = words.filter((w) => !seen.has(w.quote) && seen.add(w.quote)).map((w) => `<li>“${esc(w.quote)}” (${esc(PAPERS[w.paper].cite)}, ${esc(w.where)})</li>`).join('');
-    const why = ph.air.by === 'observed' ? 'the scenario observed' : ph.air.by === 'paper' ? 'the paper\'s conclusion' : `the fit: a ${percent(ph.air.fit.P)} chance of an atmosphere it counts`;
+    const why = ph.air.by === 'observed' ? 'the scenario observed' : ph.air.by === 'paper' ? 'the paper\'s conclusion' : `the fit: a ${percent(ph.air.fit.P)} chance of air`;
     const day = e.day ? `<p class="obs-day">Day side measured ${int(e.day.T)} K (−${e.day.lo}, +${e.day.hi}; ${esc(PAPERS[e.day.src].cite)}); drawn at ${int(mapDay(toParams(p).tsub, toParams(p).tnight))} K.</p>` : '';
     const papers = e.papers.map((k) => `<li>${esc(PAPERS[k].cite)}, ${esc(PAPERS[k].venue)}. ${esc(PAPERS[k].what)}. ${doiLink(PAPERS[k].doi)}</li>`).join('');
     return `<article class="obs" id="${esc(e.name.replace(/[^A-Za-z0-9]+/g, '-'))}">
@@ -78,7 +78,7 @@ function observed(by) {
 }
 
 function famous(by) {
-  const head = '<tr><th>World</th><th>Observed</th><th>Chance of an atmosphere the fit counts, and its 68% range</th><th>Drawn before</th><th>Drawn now</th></tr>';
+  const head = '<tr><th>World</th><th>Observed</th><th>Chance of air, and its 68% range</th><th>Drawn before</th><th>Drawn now</th></tr>';
   const rows = WORLDS.map((n) => {
     const p = SOLAR[n] || by.get(n), ph = physics(p), sc = ph.air;
     const obs = sc.observed ? sc.observed.papers.map((k) => PAPERS[k].cite + (PAPERS[k].preprint ? ', a preprint' : '')).join('; ') : 'no';

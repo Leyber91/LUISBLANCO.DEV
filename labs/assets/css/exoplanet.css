@@ -131,6 +131,15 @@ button, input, select { font: inherit; color: inherit; }
 .ret-render .ret-air { display: block; white-space: normal; max-width: 62ch; margin: 2px auto 0; color: var(--text-dim); line-height: 1.45; }
 .ret-render a { color: var(--text); pointer-events: auto; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-bright); }
 .ret-render a:hover, .ret-render a:focus-visible { color: var(--text-bright); text-decoration-color: var(--horizon-dim); }
+/* under the short line, the scenarios and their sources in a disclosure; the summary is a 44 px target on a phone */
+.ret-render .ret-more { display: block; max-width: 62ch; margin: 0 auto; white-space: normal; }
+.ret-render .ret-more summary { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; list-style: none; cursor: pointer; pointer-events: auto;
+  color: var(--text-dim); text-decoration: underline dotted var(--line-bright); text-underline-offset: 3px; }
+.ret-render .ret-more summary::-webkit-details-marker { display: none; }
+.ret-render .ret-more summary::before { content: '+'; margin-right: 6px; color: var(--horizon); text-decoration: none; }
+.ret-render .ret-more[open] summary::before { content: '\2212'; }
+.ret-render .ret-more summary:hover, .ret-render .ret-more summary:focus-visible { color: var(--text-bright); }
+.ret-render .ret-more-body { display: block; color: var(--text-dim); line-height: 1.45; pointer-events: auto; }
 .tag .tg { margin: 0 3px 0 6px; vertical-align: 1px; }
 .cam { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center;
   gap: 6px; pointer-events: auto; width: max-content; max-width: 100%; }
@@ -350,6 +359,8 @@ body.ready .foot { transition-delay: 1500ms; }
   #exo-canvas { position: absolute; z-index: 0; touch-action: pan-y; }
   .reticle { top: 8px; padding: 8px 18px; min-width: 0; max-width: 92%; }
   .ret-name { font-size: 16px; white-space: normal; }
+  .ret-render .ret-more summary { min-height: 44px; }
+  .ret-render .ret-more-body { max-height: 40vh; overflow-y: auto; }
   .cam { bottom: 10px; gap: 4px; padding: 0 8px; }
   .cam .btn { padding: 6px 8px; font-size: 9.5px; letter-spacing: .08em; }
   .search { order: 1; width: 100%; }

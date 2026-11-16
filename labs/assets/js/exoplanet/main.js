@@ -10,7 +10,7 @@
 
 import { Exoplanet } from './exoplanet.js';
 import { toParams, classify, lockRadiusAU, LOOKS } from './data.js';
-import { airParts, SCENARIOS, SCENARIO_LABEL } from './air.js';
+import { airParts, airShort, SCENARIOS, SCENARIO_LABEL } from './air.js';
 import { loadSnapshot, joinRoster, provisionalMeasured } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
@@ -228,6 +228,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
 }
 
 let reticleHeld = null;   // the world whose line holds a scenario back until its look is built (engine.onReady redraws it)
+let reticleOpen = null;   // the world whose scenarios and sources are open under its name
 function setReticle(p) {
   reticleHeld = null;
   $('ret-name').textContent = p.name;
@@ -239,30 +240,41 @@ function setReticle(p) {
   const r = $('ret-render');
   r.textContent = `procedural surface: ${cl.label.replace(/ · habitable zone/i, '').toLowerCase()}${cl.physics.radiusKnown ? '' : ' [illustrative size]'}`;
   if (!cl.air) return;
-  // the scenarios of its air, each with its status (air.js airParts). A scenario that can be drawn instead is a link,
-  // where the renderer can draw it without building a program on the page's thread: a browser that builds in the
-  // background, or a look already built. The link names the world it was offered for.
+  // The line under the name (air.js): a short account that stays within two lines on a phone (airShort), then the
+  // scenarios and their sources in a disclosure (airParts). A scenario that can be drawn instead is a link where the
+  // renderer can draw it without building a program on the page's thread: a browser that builds in the background,
+  // or a look already built. The link names the world it was offered for.
   const line = document.createElement('span');
   line.className = 'ret-air';
+  line.textContent = airShort(cl.air, cl.airKey);
+  const more = document.createElement('details');
+  more.className = 'ret-more';
+  more.open = reticleOpen === p.name;     // a switch made inside it keeps it open
+  more.addEventListener('toggle', () => { reticleOpen = more.open ? p.name : null; });
+  const summary = document.createElement('summary');
+  summary.textContent = 'scenarios and sources';
+  const body = document.createElement('span');
+  body.className = 'ret-more-body';
   let held = 0;
   for (const part of airParts(cl.air, cl.airKey)) {
-    if (!part.air) { line.append(part.t); continue; }
-    if (glOk && !engine.canDraw(classify(p, { air: part.air }).type)) { held++; line.append(part.t); continue; }
+    if (!part.air) { body.append(part.t); continue; }
+    if (glOk && !engine.canDraw(classify(p, { air: part.air }).type)) { held++; body.append(part.t); continue; }
     const a = document.createElement('a');
     a.href = `?${new URLSearchParams({ p: p.name, air: part.air })}`;
     a.dataset.air = part.air;
     a.dataset.world = p.name;
     a.title = `Draw ${p.name} ${part.air === 'bare' ? 'as bare rock' : `with ${SCENARIO_LABEL[part.air]}`}`;
     a.textContent = part.t;
-    line.append(a);
+    body.append(a);
   }
-  if (held) { reticleHeld = p; line.append(` ${held === 1 ? 'One scenario is' : 'Some scenarios are'} not a link here: this browser would build its look on the page's thread.`); }
-  line.append(' ');
+  if (held) { reticleHeld = p; body.append(` ${held === 1 ? 'One scenario is' : 'Some scenarios are'} not a link here: this browser would build its look on the page's thread.`); }
+  body.append(' ');
   const how = document.createElement('a');
   how.href = `exomania-air.html#${cl.air.observed ? 'observed' : 'fit'}`;
   how.textContent = 'How the survey decides';
-  line.append(how);
-  r.append(' ', line);   // the space keeps the two lines apart when the text is read as one
+  body.append(how);
+  more.append(summary, body);
+  r.append(' ', line, more);   // the space keeps the two lines apart when the text is read as one
 }
 /* Draw the selected world in another scenario of its air, in place. A scenario of the same look changes numbers on
    the program already built; another look builds that look's program, in the background where the browser can. */

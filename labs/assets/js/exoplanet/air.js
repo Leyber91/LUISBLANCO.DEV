@@ -16,15 +16,17 @@
         never typed by hand.
      2. Extrapolated for the rest. The fit of Berta-Thompson,
         Wachiraphan & Murray (2026) gives the probability that a
-        rocky planet hosts a detectable atmosphere, averaged over
-        the paper's posterior (shoreline.js). Its "no atmosphere"
-        means, in the paper's words, "probably <~10 bar CO2", so
-        the remainder is bare rock or thin air.
+        rocky planet kept an atmosphere, averaged over the
+        paper's posterior (shoreline.js). Its label is mixed: a
+        Solar System body counts with any air above 10^-6 bar
+        (Mars counts), an exoplanet with air its eclipse would
+        detect. So the fit says whether, not how thick.
      3. The picture draws one scenario: an observed one; else the
-        one the observing paper concludes for; else, by the fit,
-        bare rock when P < 0.5 (thin air looks like bare rock from
-        outside) and air otherwise, its thickness from data.js
-        (illustrative). An allowed scenario ranks above a
+        one the observing paper's conclusion leads to; else, by
+        the fit, bare rock when P < 0.5 and air otherwise, thin or
+        thick by data.js's amount of air (illustrative: nothing
+        measured gives every hot rock of a Sun-like star thick
+        air, and Mars is thin). An allowed scenario ranks above a
         disfavoured one. Every scenario that is not excluded can
         be drawn instead.
 
@@ -37,9 +39,10 @@
             night side, or a deck of cloud.
 
    Statuses: observed; excluded (a bound covers the whole band
-   for every composition); disfavoured (a bound covers part of
-   the band, or only some gases: the scenario stays drawable);
-   allowed (no bound reaches it).
+   and rules it out for every composition its paper considers,
+   or by energy balance: BASES); disfavoured (a bound covers
+   part of the band, or only some gases: the scenario stays
+   drawable); allowed (no bound reaches it).
 
    Every entry of OBSERVED was read in its paper on 2026-11-16;
    each quote is from the abstract unless its place says else.
@@ -70,24 +73,46 @@ export const SHORELINE = { logF0: 2.62, p: 5.9, q: 1.17, w: 0.247, fluxMax: 1400
 const fin = (x) => Number.isFinite(x);   // false for anything not a number: no coercion
 const cache = new Map();
 
+/* The side the picture takes (air when P >= 0.5) is read from the median parameters alone when their probability
+   is at least SIDE_MARGIN from one half; nearer, from the posterior mean. Over the catalogue the two sides differ
+   only within 0.017 of one half (2026-11-16), and a test checks every world draws the same either way. */
+export const SIDE_MARGIN = 0.1;
+
 /* f in Earth's flux, L in solar luminosities, vEsc in km/s. Null when an input is missing.
-   P: the posterior mean; lo and hi: its 16th and 84th percentiles; delta and fShore at the medians. */
+   P: the posterior mean; lo and hi: its 16th and 84th percentiles; computed over the draws when first read.
+   delta, fShore and median: at the paper's medians. air: the side the picture takes. */
 export function airProbability({ S, L, vEsc }) {
   if (!fin(S) || !fin(L) || !fin(vEsc) || S <= 0 || L <= 0 || vEsc <= 0) return null;
   const key = `${S}|${L}|${vEsc}`;
   if (cache.has(key)) return cache.get(key);
   const lf = Math.log10(S), lv = Math.log10(vEsc / V_ESC_EARTH), lL = Math.log10(L);
-  const ps = new Float64Array(DRAWS.n);
-  let sum = 0;
-  for (let i = 0; i < DRAWS.n; i++) {
-    const d = lf - (DRAWS.logF0[i] + DRAWS.p[i] * lv + DRAWS.q[i] * lL);
-    ps[i] = 1 / (1 + Math.exp(d / DRAWS.w[i]));   // Math.exp overflows to Infinity, which gives 0: no clamp needed
-    sum += ps[i];
-  }
-  ps.sort();
+  let full = null;
+  const posterior = () => {
+    if (full) return full;
+    const ps = new Float64Array(DRAWS.n);
+    let sum = 0;
+    for (let i = 0; i < DRAWS.n; i++) {
+      const d = lf - (DRAWS.logF0[i] + DRAWS.p[i] * lv + DRAWS.q[i] * lL);
+      ps[i] = 1 / (1 + Math.exp(d / DRAWS.w[i]));   // Math.exp overflows to Infinity, which gives 0: no clamp needed
+      sum += ps[i];
+    }
+    ps.sort();
+    full = { P: sum / DRAWS.n, lo: ps[Math.floor(0.16 * DRAWS.n)], hi: ps[Math.floor(0.84 * DRAWS.n)] };
+    return full;
+  };
   const K = SHORELINE;
   const fShore = Math.pow(10, K.logF0 + K.p * lv + K.q * lL);
-  const out = { P: sum / DRAWS.n, lo: ps[Math.floor(0.16 * DRAWS.n)], hi: ps[Math.floor(0.84 * DRAWS.n)], delta: lf - Math.log10(fShore), fShore, outside: S > K.fluxMax };
+  const delta = lf - Math.log10(fShore), median = 1 / (1 + Math.exp(delta / K.w));
+  const out = {
+    delta, fShore, median, outside: S > K.fluxMax,
+    get P() { return posterior().P; },
+    get lo() { return posterior().lo; },
+    get hi() { return posterior().hi; },
+    get air() {
+      if (Math.abs(median - 0.5) < SIDE_MARGIN) return posterior().P >= 0.5;
+      return median >= 0.5;   // equivalent: here the median is at least SIDE_MARGIN from one half, so a bound anywhere within it gives the same side
+    },
+  };
   cache.set(key, out);
   return out;
 }
@@ -173,12 +198,17 @@ export const PAPERS = {
      { kind: 'bare', paper, says, quote, where }                 the paper excludes a planet with no atmosphere;
      { kind: 'pressure', lo, hi, gases, paper, says, quote, where }  it excludes atmospheres whose surface pressure
         is between lo and hi bar (hi may be Infinity), made of gases: 'all' (every composition it calls plausible)
-        or a list of the compositions it covers.
+        or a list of the compositions it covers, each a noun phrase the line can name ("for CO2-rich air").
+        A bound over 'all' carries its basis: 'composition' (it rules the band out for every composition its paper
+        considers) or 'energy balance' (the day side is as hot as bare rock, and air that thick would carry heat to
+        the night side whatever its gases; Koll 2022).
+   A conclusion names the scenario it leads to; reading says why when its sentence does not name that scenario.
    Hydrogen-dominated (primordial) atmospheres are not among the scenarios, so their exclusions are not bounds. */
-const pressure = (paper, lo, hi, gases, says, quote, where = 'abstract') => ({ kind: 'pressure', paper, lo, hi, gases, says, quote, where });
+export const BASES = ['composition', 'energy balance'];
+const pressure = (paper, lo, hi, gases, says, quote, basis = null) => ({ kind: 'pressure', paper, lo, hi, gases, says, quote, where: 'abstract', basis });
 const noBare = (paper, says, quote, where = 'abstract') => ({ kind: 'bare', paper, says, quote, where });
-const said = (scenario, paper, quote, where = 'abstract') => ({ scenario, paper, quote, where });
-const GILLON = (planets) => pressure('gillon25', 1, Infinity, ['with an efficient greenhouse effect'], `Atmospheres of 1 bar or more with an efficient greenhouse effect are strongly disfavoured (Gillon 2025, a preprint).`,
+const said = (scenario, paper, quote, where = 'abstract', reading = null) => ({ scenario, paper, quote, where, reading });
+const GILLON = (planets) => pressure('gillon25', 1, Infinity, ['air with an efficient greenhouse effect'], `Atmospheres of 1 bar or more with an efficient greenhouse effect are strongly disfavoured (Gillon 2025, a preprint).`,
   'Atmosphere models with surface pressures ≥1 bar and efficient greenhouse effects are strongly disfavoured for both planets.');
 
 export const OBSERVED = [
@@ -187,31 +217,31 @@ export const OBSERVED = [
     observed: null,
     concludes: said('bare', 'greene23', 'The most straightforward interpretation is that there is little or no planetary atmosphere redistributing radiation from the host star'),
     bounds: [GILLON()] },
-  { name: 'TRAPPIST-1 c', papers: ['zieba23', 'gillon25'], day: { T: 380, lo: 31, hi: 31, src: 'zieba23' },
-    found: 'A day side of 380 ± 31 K at 15 µm. Cloud-free O2 and CO2 mixtures from 10 bar (with 10 ppm CO2) down to 0.1 bar of pure CO2 are ruled out; a Venus-like atmosphere with sulphuric-acid cloud is disfavoured at 2.6 σ; thinner air or bare rock fit (Zieba 2023). The phase curve disfavours atmospheres of 1 bar or more with an efficient greenhouse effect, and leaves a tenuous O2-dominated atmosphere possible (Gillon 2025, a preprint).',
+  { name: 'TRAPPIST-1 c', papers: ['zieba23', 'gillon25'], day: { T: 369, lo: 23, hi: 23, src: 'gillon25' },
+    found: 'A day side of 380 ± 31 K at 15 µm from one eclipse (Zieba 2023), and 369 ± 23 K from the phase curve (Gillon 2025, a preprint), the value drawn. Cloud-free O2 and CO2 mixtures from 10 bar (with 10 ppm CO2) down to 0.1 bar of pure CO2 are ruled out; a Venus-like atmosphere with sulphuric-acid cloud is disfavoured at 2.6 σ; thinner air or bare rock fit (Zieba 2023). The phase curve disfavours atmospheres of 1 bar or more with an efficient greenhouse effect, and leaves a tenuous O2-dominated atmosphere possible (Gillon 2025, a preprint).',
     observed: null, concludes: null,
     bounds: [
-      pressure('zieba23', 0.1, 10, ['cloud-free O2 and CO2 mixtures'], 'Cloud-free O2 and CO2 mixtures from 0.1 bar of pure CO2 to 10 bar with 10 ppm CO2 are ruled out (Zieba 2023).',
+      pressure('zieba23', 0.1, 10, ['cloud-free mixtures of O2 and CO2'], 'Cloud-free O2 and CO2 mixtures from 0.1 bar of pure CO2 to 10 bar with 10 ppm CO2 are ruled out (Zieba 2023).',
         'The data rule out cloud-free O2/CO2 mixtures with surface pressures ranging from 10 bar (with 10 ppm CO2) to 0.1 bar (pure CO2).'),
-      pressure('zieba23', 92, Infinity, ['Venus-like, with sulphuric-acid cloud'], 'A Venus-like atmosphere with sulphuric-acid cloud is disfavoured at 2.6 σ (Zieba 2023).',
+      pressure('zieba23', 92, Infinity, ['Venus-like air with sulphuric-acid cloud'], 'A Venus-like atmosphere with sulphuric-acid cloud is disfavoured at 2.6 σ (Zieba 2023).',
         'A Venus-analogue atmosphere with sulfuric acid clouds is also disfavoured at 2.6 sigma confidence.'),
       GILLON()] },
   { name: 'TRAPPIST-1 d', papers: ['piaulet25'], day: null,
     found: 'A flat transmission spectrum within 100 to 150 ppm. Clear hydrogen atmospheres are excluded at more than 3 σ; analogues of a haze-free Titan, a cloud-free Venus, early Mars and a cloud-free Archean or modern Earth are rejected at more than 95% confidence. Any atmosphere is extremely thin or carries aerosols high up.',
     observed: null, concludes: null,
-    bounds: [pressure('piaulet25', THICK_FROM, Infinity, ['clear analogues of Titan, Venus, early Mars and Earth'], 'Clear analogues of a haze-free Titan, a cloud-free Venus, early Mars and a cloud-free Earth are rejected at more than 95% confidence (Piaulet-Ghorayeb 2025).',
+    bounds: [pressure('piaulet25', THICK_FROM, Infinity, ['clear air like that of Titan, Venus, early Mars or Earth'], 'Clear analogues of a haze-free Titan, a cloud-free Venus, early Mars and a cloud-free Earth are rejected at more than 95% confidence (Piaulet-Ghorayeb 2025).',
       'further reject high mean molecular weight compositions analogous to a haze-free Titan, a cloud-free Venus, early Mars, and both Archean Earth and a cloud-free modern Earth scenario (>95% confidence)')] },
   { name: 'TRAPPIST-1 e', papers: ['espinoza25', 'glidden25'], day: null,
     found: 'Four transits with strong contamination from the star itself, which varied between visits. Cloudy hydrogen atmospheres (80% or more by volume) are excluded at more than 3 σ (Espinoza 2025). There is no strong evidence for or against an atmosphere: CO2-rich ones at the pressures of Venus and Mars are weakly disfavoured at 2 σ, and N2-rich ones with traces of CO2 and CH4 are permitted; a bare rock and an N2 atmosphere both fit (Glidden 2025).',
     observed: null, concludes: null,
-    bounds: [pressure('glidden25', 0.006, 92, ['CO2-rich'], 'CO2-rich atmospheres at the surface pressures of Mars and Venus (about 0.006 and 92 bar) are weakly disfavoured at 2 σ (Glidden 2025).',
-      'Our results weakly disfavor CO 2 -rich atmospheres for pressures corresponding to the surface of Venus and Mars and the cloud tops of Venus at 2 σ .')] },
+    bounds: [pressure('glidden25', 0.006, 92, ['CO2-rich air'], 'CO2-rich atmospheres at the surface pressures of Mars and Venus (about 0.006 and 92 bar) are weakly disfavoured at 2 σ (Glidden 2025).',
+      'Our results weakly disfavor CO2-rich atmospheres for pressures corresponding to the surface of Venus and Mars and the cloud tops of Venus at 2 σ.')] },
   { name: 'LHS 3844 b', papers: ['kreidberg19', 'zieba26'], day: { T: 985, lo: 17, hi: 16, src: 'zieba26' },
     found: 'A day side of 1,040 ± 40 K and a night side consistent with 0 K; atmospheres above 10 bar are excluded at 3 σ and the best fit is airless rock with Bond albedo under 0.2 (Kreidberg 2019). JWST gives 985 (+16, −17) K, a dark low-silica surface such as basalt, granite excluded at 5.1 σ, CO2 under about 100 mbar and SO2 under about 10 microbar (Zieba 2026).',
     observed: null,
     concludes: said('bare', 'kreidberg19', 'The data are well fitted by a bare rock model with a low Bond albedo'),
     bounds: [
-      pressure('kreidberg19', 10, Infinity, 'all', 'Atmospheres above 10 bar are ruled out at 3 σ (Kreidberg 2019).', 'Thick atmospheres with surface pressures above 10 bar are ruled out by the data (at three standard deviations)'),
+      pressure('kreidberg19', 10, Infinity, 'all', 'Atmospheres above 10 bar are ruled out at 3 σ (Kreidberg 2019).', 'Thick atmospheres with surface pressures above 10 bar are ruled out by the data (at three standard deviations)', 'energy balance'),
       pressure('zieba26', 0.1, Infinity, ['CO2'], 'CO2 above about 100 mbar is disfavoured at 5 σ (Zieba 2026).', 'The data also disfavor trace concentrations of CO2 or SO2 gas (with 5-sigma and 3-sigma upper limits of 100 mbar and 10 microbar, respectively).'),
       pressure('zieba26', 1e-5, Infinity, ['SO2'], 'SO2 above about 10 microbar is disfavoured at 3 σ (Zieba 2026).', 'The data also disfavor trace concentrations of CO2 or SO2 gas (with 5-sigma and 3-sigma upper limits of 100 mbar and 10 microbar, respectively).')] },
   { name: 'GJ 367 b', papers: ['zhang24'], day: { T: 1709, lo: 92, hi: 92, src: 'zhang24' },
@@ -219,77 +249,80 @@ export const OBSERVED = [
     observed: null,
     concludes: said('bare', 'zhang24', 'our JWST observations suggest the planet must have lost the vast majority of its initial inventory of volatiles'),
     bounds: [
-      pressure('zhang24', 1, Infinity, 'all', '1-bar atmospheres are ruled out for a wide range of compositions (Zhang 2024).', 'The lack of day-night heat recirculation implies that 1 bar atmospheres are ruled out for a wide range of compositions, while 0.1 bar atmospheres are consistent with the data.'),
-      pressure('zhang24', 0.01, Infinity, ['outgassed, under reducing conditions'], 'An outgassed atmosphere above about 10 mbar is ruled out under reducing conditions (Zhang 2024).', 'rules out a CO2 atmosphere >~ 1 bar, an outgassed atmosphere >~10 mbar (under heavily reducing conditions), or an outgassed atmosphere >~0.01 mbar (under heavily oxidizing conditions)'),
-      pressure('zhang24', 1e-5, Infinity, ['outgassed, under oxidizing conditions'], 'An outgassed atmosphere above about 0.01 mbar is ruled out under oxidizing conditions (Zhang 2024).', 'rules out a CO2 atmosphere >~ 1 bar, an outgassed atmosphere >~10 mbar (under heavily reducing conditions), or an outgassed atmosphere >~0.01 mbar (under heavily oxidizing conditions)')] },
+      pressure('zhang24', 1, Infinity, 'all', '1-bar atmospheres are ruled out for a wide range of compositions (Zhang 2024).', 'The lack of day-night heat recirculation implies that 1 bar atmospheres are ruled out for a wide range of compositions, while 0.1 bar atmospheres are consistent with the data.', 'energy balance'),
+      pressure('zhang24', 0.01, Infinity, ['outgassed air under reducing conditions'], 'An outgassed atmosphere above about 10 mbar is ruled out under reducing conditions (Zhang 2024).', 'rules out a CO2 atmosphere >~ 1 bar, an outgassed atmosphere >~10 mbar (under heavily reducing conditions), or an outgassed atmosphere >~0.01 mbar (under heavily oxidizing conditions)'),
+      pressure('zhang24', 1e-5, Infinity, ['outgassed air under oxidizing conditions'], 'An outgassed atmosphere above about 0.01 mbar is ruled out under oxidizing conditions (Zhang 2024).', 'rules out a CO2 atmosphere >~ 1 bar, an outgassed atmosphere >~10 mbar (under heavily reducing conditions), or an outgassed atmosphere >~0.01 mbar (under heavily oxidizing conditions)')] },
   { name: 'TOI-1685 b', papers: ['luque25'], day: null,
     found: 'Clear hydrogen atmospheres are ruled out by the transits; the emission is featureless and close to a blackbody, ruling out CO2-, SO2- or CH4-dominated atmospheres thicker than 100 mbar; the planet is described as seemingly airless.',
     observed: null,
     concludes: said('bare', 'luque25', 'Our results add to the growing number of seemingly airless M-star rocky planets'),
-    bounds: [pressure('luque25', 0.1, Infinity, ['CO2-, SO2- or CH4-dominated'], 'CO2-, SO2- or CH4-dominated atmospheres thicker than 100 mbar are ruled out (Luque 2025).', 'ruling out carbon dioxide-, sulfur dioxide-, or methane-dominated atmospheres thicker than 100 mbar')] },
+    bounds: [pressure('luque25', 0.1, Infinity, ['air dominated by CO2, SO2 or CH4'], 'CO2-, SO2- or CH4-dominated atmospheres thicker than 100 mbar are ruled out (Luque 2025).', 'ruling out carbon dioxide-, sulfur dioxide-, or methane-dominated atmospheres thicker than 100 mbar')] },
   { name: 'GJ 1252 b', papers: ['crossfield22'], day: { T: 1410, lo: 125, hi: 91, src: 'crossfield22' },
     found: 'A day side of 1,410 (+91, −125) K at 4.5 µm, as predicted for no atmosphere; the surface pressure is under about 10 bar. The authors conclude no significant atmosphere, because even 100 bar would escape in under 1 Myr.',
     observed: null,
     concludes: said('bare', 'crossfield22', 'We therefore conclude that GJ 1252b has no significant atmosphere.'),
-    bounds: [pressure('crossfield22', 10, Infinity, 'all', 'The surface pressure is under about 10 bar (Crossfield 2022).', 'indicates that GJ 1252b has a surface pressure of ≲10 bar, i.e., substantially thinner than the atmosphere of Venus')] },
+    bounds: [pressure('crossfield22', 10, Infinity, 'all', 'The surface pressure is under about 10 bar (Crossfield 2022).', 'indicates that GJ 1252b has a surface pressure of ≲10 bar, i.e., substantially thinner than the atmosphere of Venus', 'energy balance')] },
   { name: 'TOI-1468 b', papers: ['meier25'], day: { T: 1024, lo: 78, hi: 78, src: 'meier25' },
     found: 'A brightness temperature of 1,024 ± 78 K at 15 µm, consistent with no atmosphere and zero Bond albedo at 1.65 σ. Pure CO2 or H2O atmospheres above 1 bar are ruled out at more than 3 σ. The surface is marginally hotter than expected.',
     observed: null,
     concludes: said('bare', 'meier25', 'The thermal emission of TOI-1468 b reveals a hot bare rock', 'title'),
-    bounds: [pressure('meier25', 1, Infinity, ['pure CO2', 'pure H2O'], 'Pure CO2 or H2O atmospheres above 1 bar are ruled out at more than 3 σ (Meier Valdés 2025).', 'A pure CO 2 or H 2 O atmosphere with a surface pressure above 1 bar is ruled out at higher than 3 σ .')] },
+    bounds: [pressure('meier25', 1, Infinity, ['pure CO2', 'pure H2O'], 'Pure CO2 or H2O atmospheres above 1 bar are ruled out at more than 3 σ (Meier Valdés 2025).', 'A pure CO2 or H2O atmosphere with a surface pressure above 1 bar is ruled out at higher than 3 σ.')] },
   { name: 'LHS 1140 c', papers: ['fortune25'], day: { T: 561, lo: 44, hi: 44, src: 'fortune25' },
     found: 'A day side of 561 ± 44 K, close to the 537 ± 9 K maximum of a bare rock. Pure CO2 atmospheres of 10 mbar or more and pure H2O atmospheres of 1 bar or more are ruled out at more than 3 σ.',
     observed: null,
-    concludes: said('bare', 'fortune25', 'recovering an eclipse depth consistent with a low-albedo bare rock'),
+    concludes: said('bare', 'fortune25', 'We rule out a wide range of atmospheric forward models to >3 σ, including pure CO2 atmospheres with surface pressure ≥10 mbar and pure H2O atmospheres with surface pressure ≥1 bar.', 'abstract',
+      'Its day side, 561 ± 44 K against 537 ± 9 K for a dark bare rock, is drawn as bare rock.'),
     bounds: [
-      pressure('fortune25', 0.01, Infinity, ['pure CO2'], 'Pure CO2 atmospheres of 10 mbar or more are ruled out at more than 3 σ (Fortune 2025).', 'including pure CO 2 atmospheres with surface pressure ≥10 mbar and pure H 2 O atmospheres with surface pressure ≥1 bar'),
-      pressure('fortune25', 1, Infinity, ['pure H2O'], 'Pure H2O atmospheres of 1 bar or more are ruled out at more than 3 σ (Fortune 2025).', 'including pure CO 2 atmospheres with surface pressure ≥10 mbar and pure H 2 O atmospheres with surface pressure ≥1 bar')] },
+      pressure('fortune25', 0.01, Infinity, ['pure CO2'], 'Pure CO2 atmospheres of 10 mbar or more are ruled out at more than 3 σ (Fortune 2025).', 'including pure CO2 atmospheres with surface pressure ≥10 mbar and pure H2O atmospheres with surface pressure ≥1 bar'),
+      pressure('fortune25', 1, Infinity, ['pure H2O'], 'Pure H2O atmospheres of 1 bar or more are ruled out at more than 3 σ (Fortune 2025).', 'including pure CO2 atmospheres with surface pressure ≥10 mbar and pure H2O atmospheres with surface pressure ≥1 bar')] },
   { name: 'LTT 3780 b', papers: ['allen25'], day: { T: 1143, lo: 99, hi: 104, src: 'allen25' },
     found: 'A day side of 1,143 (+104, −99) K, 98 ± 9% of a black rock with no redistribution. CO2 atmospheres down to 0.01 bar are ruled out at more than 3 σ; a pure H2O atmosphere of 1 bar and O2 atmospheres are not.',
     observed: null,
-    concludes: said('bare', 'allen25', 'This eclipse depth is consistent with the thermal emission from a bare rock surface'),
-    bounds: [pressure('allen25', 0.01, Infinity, ['CO2-based'], 'CO2-based atmospheres down to 0.01 bar are ruled out at more than 3 σ (Allen 2025).', 'We are able to confidently rule out CO 2 -based atmospheres down to a 0.01 bar surface pressure to greater than 3 σ')] },
+    concludes: said('bare', 'allen25', 'We are able to confidently rule out CO2-based atmospheres down to a 0.01 bar surface pressure to greater than 3 σ (ruling out an approximately Mars-like atmosphere).', 'abstract',
+      'Its day side, 98 ± 9% of a black rock\'s with no redistribution, is drawn as bare rock.'),
+    bounds: [pressure('allen25', 0.01, Infinity, ['CO2-based air'], 'CO2-based atmospheres down to 0.01 bar are ruled out at more than 3 σ (Allen 2025).', 'We are able to confidently rule out CO2-based atmospheres down to a 0.01 bar surface pressure to greater than 3 σ')] },
   { name: 'GJ 3929 b', papers: ['xue25'], day: { T: 782, lo: 79, hi: 79, src: 'xue25' },
     found: 'A day side of 782 ± 79 K against a 737 ± 14 K maximum for a black rock. CO2-rich atmospheres thicker than 100 mbar are ruled out at more than 3 σ; the planet is likely a bare rock.',
     observed: null,
     concludes: said('bare', 'xue25', 'suggesting that GJ 3929b has lost any significant secondary atmosphere'),
-    bounds: [pressure('xue25', 0.1, Infinity, ['CO2-rich'], 'CO2-rich atmospheres thicker than 100 mbar are ruled out at more than 3 σ (Xue 2025).', 'These results rule out CO 2 -rich atmospheres thicker than 100 mbar at >3 σ')] },
+    bounds: [pressure('xue25', 0.1, Infinity, ['CO2-rich air'], 'CO2-rich atmospheres thicker than 100 mbar are ruled out at more than 3 σ (Xue 2025).', 'These results rule out CO2-rich atmospheres thicker than 100 mbar at >3 σ')] },
   { name: 'GJ 486 b', papers: ['weiner24'], day: { T: 865, lo: 14, hi: 14, src: 'weiner24' },
     found: 'A day side of 865 ± 14 K, 0.97 ± 0.01 of the bare-rock maximum. Consistent with an airless body of slight albedo or a thin atmosphere with under 1% H2O or under 1 ppm CO2; inconsistent with an Earth-like or Venus-like atmosphere.',
     observed: null,
     concludes: said('bare', 'weiner24', 'we conclude that the observations are likely best explained by an airless planet'),
     bounds: [
-      pressure('weiner24', 1, Infinity, 'all', 'The day side is 0.97 ± 0.01 of a bare rock\'s, inconsistent with an Earth-like or Venus-like atmosphere (Weiner Mansfield 2024).', 'However, it is inconsistent with an Earth- or Venus-like atmosphere'),
-      pressure('weiner24', 0, THICK_FROM, ['1% H2O or more', '1 ppm CO2 or more'], 'A thin atmosphere fits only with under 1% H2O and under 1 ppm CO2 (Weiner Mansfield 2024).', 'This value is consistent with an airless body with a slight nonzero albedo or a thin atmosphere with <1% H 2 O or <1 ppm CO 2 .')] },
+      pressure('weiner24', 1, Infinity, 'all', 'The day side is 0.97 ± 0.01 of a bare rock\'s, inconsistent with an Earth-like or Venus-like atmosphere (Weiner Mansfield 2024).', 'However, it is inconsistent with an Earth- or Venus-like atmosphere', 'energy balance'),
+      pressure('weiner24', 0, THICK_FROM, ['air with 1% H2O or more', 'air with 1 ppm CO2 or more'], 'A thin atmosphere fits only with under 1% H2O and under 1 ppm CO2 (Weiner Mansfield 2024).', 'This value is consistent with an airless body with a slight nonzero albedo or a thin atmosphere with <1% H2O or <1 ppm CO2.')] },
   { name: 'GJ 1132 b', papers: ['xue24'], day: { T: 709, lo: 31, hi: 31, src: 'xue24' },
     found: 'A day side of 709 ± 31 K against a 746 (+14, −11) K maximum for a black rock. Ruled out: 1-bar atmospheres with 1% H2O or more, atmospheres of any modelled thickness (0.0001 to 100 bar) with 1% CO2 or more, and Venus-like ones (about 100 bar) with 1 ppm CO2 or H2O.',
     observed: null,
     concludes: said('bare', 'xue24', 'We therefore conclude that GJ 1132b likely does not have a significant atmosphere.'),
     bounds: [
-      pressure('xue24', 1, 1, ['1% H2O or more'], 'Earth-thick (about 1 bar) atmospheres with 1% H2O or more are ruled out (Xue 2024).', 'we rule out Earth-thickness ( P ∼ 1 bar) atmospheres with at least 1% H 2 O'),
-      pressure('xue24', 1e-4, 100, ['1% CO2 or more'], 'Atmospheres of 0.0001 to 100 bar with 1% CO2 or more are ruled out (Xue 2024).', 'atmospheres of any modeled thickness (10 −4 to 10 2 bars) that contain at least 1% CO 2'),
-      pressure('xue24', 100, Infinity, ['1 ppm CO2 or H2O or more'], 'Venus-like atmospheres (about 100 bar or more) with 1 ppm CO2 or H2O are ruled out (Xue 2024).', 'thick, Venus-like atmospheres ( P ≳ 100 bars) with at least 1 ppm CO 2 or H 2 O')] },
+      pressure('xue24', 1, 1, ['air with 1% H2O or more'], 'Earth-thick (about 1 bar) atmospheres with 1% H2O or more are ruled out (Xue 2024).', 'we rule out Earth-thickness ( P ∼ 1 bar) atmospheres with at least 1% H2O'),
+      pressure('xue24', 1e-4, 100, ['air with 1% CO2 or more'], 'Atmospheres of 0.0001 to 100 bar with 1% CO2 or more are ruled out (Xue 2024).', 'atmospheres of any modeled thickness (10 −4 to 10 2 bars) that contain at least 1% CO2'),
+      pressure('xue24', 100, Infinity, ['air with 1 ppm CO2 or H2O or more'], 'Venus-like atmospheres (about 100 bar or more) with 1 ppm CO2 or H2O are ruled out (Xue 2024).', 'thick, Venus-like atmospheres ( P ≳ 100 bars) with at least 1 ppm CO2 or H2O')] },
   { name: 'LTT 1445 A b', papers: ['wachiraphan25'], day: { T: 525, lo: 15, hi: 15, src: 'wachiraphan25' },
     found: 'A day side of 525 ± 15 K, 0.952 ± 0.057 of the bare-rock maximum, consistent with a dark rocky surface. Atmospheres of about 100 bar with Bond albedo above 0.08 are excluded at 3 σ, and pure CO2 at 1, 10 and 100 bar disfavoured at 4.2, 6.6 and 6.8 σ. A moderately thin atmosphere like that of Mars, Titan or Earth remains uncertain.',
     observed: null,
-    concludes: said('bare', 'wachiraphan25', 'consistent with emission from a dark rocky surface'),
+    concludes: said('bare', 'wachiraphan25', 'These results suggest that LTT 1445A b lacks a very thick CO2 atmosphere, possibly due to atmospheric erosion driven by stellar activity. However, the presence of a moderately thin atmosphere (similar to those on Mars, Titan, or Earth) remains uncertain.', 'abstract',
+      'Its day side, 0.952 ± 0.057 of a dark rock\'s, is drawn as bare rock; thin air stays a scenario.'),
     bounds: [
-      pressure('wachiraphan25', 100, Infinity, ['with Bond albedo above 0.08'], 'Atmospheres of about 100 bar with Bond albedo above 0.08 are excluded at 3 σ (Wachiraphan 2025).', 'excluding ∼100 bar atmospheres with Bond albedo >0.08 at the 3 σ level'),
-      pressure('wachiraphan25', 1, Infinity, ['pure CO2'], 'Pure CO2 atmospheres of 1, 10 and 100 bar are disfavoured at 4.2 σ and more (Wachiraphan 2025).', 'disfavor simple 100% CO 2 atmospheres with surface pressures of 1, 10, and 100 bar at 4.2 σ , 6.6 σ , and 6.8 σ confidence, respectively')] },
+      pressure('wachiraphan25', 100, Infinity, ['air with a Bond albedo above 0.08'], 'Atmospheres of about 100 bar with Bond albedo above 0.08 are excluded at 3 σ (Wachiraphan 2025).', 'excluding ∼100 bar atmospheres with Bond albedo >0.08 at the 3 σ level'),
+      pressure('wachiraphan25', 1, Infinity, ['pure CO2'], 'Pure CO2 atmospheres of 1, 10 and 100 bar are disfavoured at 4.2 σ and more (Wachiraphan 2025).', 'disfavor simple 100% CO2 atmospheres with surface pressures of 1, 10, and 100 bar at 4.2 σ, 6.6 σ, and 6.8 σ confidence, respectively')] },
   { name: '55 Cnc e', papers: ['hu24'], day: { T: 1796, lo: 88, hi: 88, src: 'hu24' },
     found: 'A day side of 1,796 ± 88 K at 5 to 12 µm, 8 σ below the 2,511 ± 26 K of a black rock with no redistribution. A lava world with a tenuous rock-vapour atmosphere is ruled out; heat is carried by a substantial atmosphere, best fit by 0.01 to 100 bar of CO or N2 holding CO2. In the Methods, the authors find that such an atmosphere needs more than about 10 bar to carry heat well, and that the emitting layer may sit far above the surface.',
     observed: said('thick', 'hu24', 'indicate a bona fide volatile atmosphere likely rich in CO2 or CO'),
     concludes: null,
     bounds: [
       noBare('hu24', 'The day side is 8 σ cooler than a black rock with no redistribution, 1,796 ± 88 K against 2,511 ± 26 K (Hu 2024, p. 3).', 'This brightness temperature is by 8σ lower than the temperature for zero albedo and zero heat redistribution (2511±26 K)', 'text, p. 3'),
-      pressure('hu24', 0, THICK_FROM, ['vaporized rock'], 'A lava world with a tenuous rock-vapour atmosphere is ruled out (Hu 2024).', 'The measurements rule out the scenario where the planet is a lava world shrouded by a tenuous atmosphere made of vaporized rock')] },
+      pressure('hu24', 0, THICK_FROM, ['air of vaporized rock'], 'A lava world with a tenuous rock-vapour atmosphere is ruled out (Hu 2024).', 'The measurements rule out the scenario where the planet is a lava world shrouded by a tenuous atmosphere made of vaporized rock')] },
   { name: 'TOI-561 b', papers: ['teske25'], day: { T: 1800, lo: 60, hi: 130, src: 'teske25' },
     found: 'A day side of 1,800 (+130, −60) K at 3 to 5 µm in one reduction (1,870 and 2,150 K in two others), against 2,950 K for a bare rock. The day side is inconsistent with a bare rock at high significance and is cooled well below the about 3,000 K of bare rock or thin air.',
     observed: said('thick', 'teske25', 'suggesting instead a thick volatile envelope that is cooling the dayside'),
     concludes: null,
     bounds: [
       noBare('teske25', 'The day side is inconsistent with a bare-rock surface at high statistical significance (Teske 2025).', 'the dayside of TOI-561 b is inconsistent with a bare-rock surface at high statistical significance'),
-      pressure('teske25', 0, THICK_FROM, 'all', 'The day side is well below the about 3,000 K a thin atmosphere would leave (Teske 2025).', 'cooling the dayside to well below the ∼3000 K expected in the bare-rock or thin-atmosphere case')] },
+      pressure('teske25', 0, THICK_FROM, 'all', 'The day side is well below the about 3,000 K a thin atmosphere would leave (Teske 2025).', 'cooling the dayside to well below the ∼3000 K expected in the bare-rock or thin-atmosphere case', 'energy balance')] },
 ];
 const BY_NAME = new Map(OBSERVED.map((e) => [e.name, e]));
 export const observedOf = (name) => BY_NAME.get(name) || null;
@@ -305,7 +338,7 @@ export function touches(b, key) {
 }
 export function covers(b, key) {
   if (key === 'bare') return b.kind === 'bare';
-  if (b.gases !== 'all') return false;   // either range below reaches across its band, so it touches it too
+  if (b.gases !== 'all' || !BASES.includes(b.basis)) return false;   // either range below reaches across its band, so it touches it too
   return key === 'thin' ? b.lo <= 0 && b.hi >= THICK_FROM : b.lo <= THICK_FROM && b.hi === Infinity;
 }
 const cites = (keys) => keys.map((k) => PAPERS[k].cite.replace(' et al.', '')).join(' and ');
@@ -326,19 +359,22 @@ export function statusOf(entry, key) {
    illustrative amount of air in data.js reaches full air (used only to choose the thickness when the fit says
    air). wantAir: the same amount reaches thin air (used only when there is no fit). minMass: the mass behind
    vEsc is a minimum mass (M sin i). inZone: the world is in its star's habitable zone (the line then says what the
-   zone does not tell). observed: an entry in the form of OBSERVED, for tests; by default the table's.
-   Returns { list, drawn, by, fit, observed, minMass }: list holds the three scenarios in order, each
-   { key, status, p, why }. p is the fit's: P (a detectable atmosphere) for thick air, 1 - P (bare rock or thin
-   air) for the other two, null for an observed or excluded scenario or without a fit. by: what chose the drawn
-   scenario, 'observed', 'paper', 'fit' or 'amount'. */
-export function scenariosFor({ name, S, L, vEsc, wantThick = false, wantAir = true, minMass = false, inZone = false, observed = observedOf(name) }) {
+   zone does not tell). lacks: what the archive lacks for the fit, in words, and starStandIn: the star's temperature
+   or size is a stand-in (both said by the line when there is no fit). observed: an entry in the form of OBSERVED,
+   for tests; by default the table's.
+   Returns { list, drawn, by, fit, observed, minMass, inZone, lacks, starStandIn }: list holds the three scenarios
+   in order, each { key, status, open, p, why, bounds }. p is the fit's: 1 - P for bare rock, and P, the chance of
+   any air, for thin and for thick air (the fit does not split it by thickness); null for an observed or excluded
+   scenario or without a fit; computed when first read. by: what chose the drawn scenario, 'observed', 'paper',
+   'fit' or 'amount'. */
+export function scenariosFor({ name, S, L, vEsc, wantThick = false, wantAir = true, minMass = false, inZone = false, lacks = [], starStandIn = false, observed = observedOf(name) }) {
   const fit = airProbability({ S, L, vEsc });
   const obs = observed;
-  const pOf = (key) => (fit ? (key === 'thick' ? fit.P : 1 - fit.P) : null);
+  const pOf = (key) => (fit ? (key !== 'bare' ? fit.P : 1 - fit.P) : null);
   const list = SCENARIOS.map((key) => {
-    const st = obs ? statusOf(obs, key) : { s: 'allowed', why: null };
+    const st = obs ? statusOf(obs, key) : { s: 'allowed', why: null, bounds: [] };
     const open = st.s === 'allowed' || st.s === 'disfavoured';
-    return { key, status: st.s, p: open ? pOf(key) : null, why: st.why };
+    return { key, status: st.s, open, get p() { return open ? pOf(key) : null; }, why: st.why, bounds: st.bounds };
   });
   const status = (k) => list.find((x) => x.key === k).status;
   let drawn = null, by = null;
@@ -346,12 +382,12 @@ export function scenariosFor({ name, S, L, vEsc, wantThick = false, wantAir = tr
   if (seenOne) { drawn = seenOne.key; by = 'observed'; }
   else if (obs && obs.concludes && status(obs.concludes.scenario) !== 'excluded') { drawn = obs.concludes.scenario; by = 'paper'; }
   else {
-    const air = fit ? fit.P >= 0.5 : wantAir;
+    const air = fit ? fit.air : wantAir;
     by = fit ? 'fit' : 'amount';
     const order = air ? (wantThick ? ['thick', 'thin', 'bare'] : ['thin', 'thick', 'bare']) : ['bare', 'thin', 'thick'];
     drawn = order.find((k) => status(k) === 'allowed') || order.find((k) => status(k) === 'disfavoured') || null;
   }
-  return { list, drawn, by, fit, observed: obs, minMass: !!minMass && !!fit, inZone: !!inZone };
+  return { list, drawn, by, fit, observed: obs, minMass: !!minMass && !!fit, inZone: !!inZone, lacks, starStandIn: !!starStandIn };
 }
 
 /* The scenarios the picture can be switched to: every one that is not excluded. */
@@ -359,46 +395,86 @@ export const drawable = (sc) => sc.list.filter((x) => x.status !== 'excluded').m
 
 /* ---- words for the survey line ---- */
 /* A probability as a percentage: one significant figure under 0.1%, two under 1%, whole numbers to 99%, one decimal
-   above, and the extremes in words. A range drops the first per-cent sign when both ends are numbers. */
+   above, and the extremes in words. Just under one half is said so, since "50%" would read as the side with air.
+   A range drops the first per-cent sign when both ends are numbers, and is one value when both ends read alike. */
 const pct = (x) => {
   const v = x * 100;
   if (v >= 99.95) return 'over 99.9%';
   if (v < 0.01) return 'under 0.01%';
   if (v < 1) return `${+v.toPrecision(v < 0.1 ? 1 : 2)}%`;
+  if (v >= 49.5 && v < 50) return 'just under 50%';
   return `${v > 99 ? v.toFixed(1) : Math.round(v)}%`;
 };
 const range = (lo, hi) => { const a = pct(lo), b = pct(hi); return a === b ? `all ${b}` : `${/^\d/.test(a) ? a.slice(0, -1) : a} to ${b}`; };
 export { pct as percent, range as percentRange };
 
-/* The line under the planet's name, as parts: { t } is text; { t, air } names a scenario the picture can be switched
-   to. shown is the scenario drawn now (the default unless the visitor chose another). Plain sentences: what is
-   drawn, then the other scenarios grouped by status, then who observed it, then the fit, worded as the paper
-   defines it. */
+/* What a bound covers, in words taken from its recorded fields: "for CO2-rich air from 6 mbar to 92 bar (Glidden
+   2025)", "for any air from 1 bar, by energy balance (Zhang 2024)", "by its day side (Hu 2024)". */
+const bar = (x) => (x >= 1 ? `${x} bar` : x >= 0.001 ? `${+(x * 1000).toPrecision(3)} mbar` : `${+(x * 1e6).toPrecision(3)} microbar`);
+const span = (b) => (b.lo === b.hi ? `at about ${bar(b.lo)}` : b.hi === Infinity ? `from ${bar(b.lo)}` : b.lo > 0 ? `from ${bar(b.lo)} to ${bar(b.hi)}` : `up to ${bar(b.hi)}`);
+const cite1 = (k) => PAPERS[k].cite.replace(' et al.', '') + (PAPERS[k].preprint ? ', a preprint' : '');
+export function boundWords(b) {
+  if (b.kind === 'bare') return `by its day side (${cite1(b.paper)})`;
+  const gases = b.gases === 'all' ? 'any air' : b.gases.join(' or ');
+  return `for ${gases} ${span(b)}${b.basis === 'energy balance' ? ', by energy balance' : ''} (${cite1(b.paper)})`;
+}
+
+/* The line under the planet's name, in two parts.
+   airShort: one or two lines, always shown: what is drawn, why in a word, and the chance of air with its range.
+   airParts: the details, as parts: { t } is text; { t, air } names a scenario the picture can be switched to.
+   shown is the scenario drawn now (the default unless the visitor chose another). Plain sentences: what is drawn;
+   the paper's conclusion when it chose; the other scenarios by status, a disfavoured or excluded one with what its
+   bounds cover; who observed it; the fit and what it does not say. */
 const DRAWN_AS = { bare: 'Drawn as bare rock', thin: 'Drawn with thin air', thick: 'Drawn with thick air' };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const both = (xs) => (xs.length < 3 ? xs.join(' and ') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+const fitSaid = (sc) => !!sc.fit && sc.list.some((x) => x.open);
+export const THICKNESS = 'The fit learns from Solar System bodies with any air and from exoplanets whose eclipses show a thick one, so it does not say how thick: thin or thick is the survey\'s own rule, illustrative.';
+export function airShort(sc, shown = sc.drawn) {
+  const why = shown !== sc.drawn ? ', by your choice'
+    : sc.by === 'observed' ? ', as observed'
+      : sc.by === 'paper' ? ', from its paper'
+        : sc.by === 'fit' ? (shown === 'bare' ? '' : ', thickness illustrative')
+          : ', illustrative: no fit';
+  const f = sc.fit;
+  const extreme = /^(over|under) /.test(pct(f ? f.P : 0.5));   // the range of an extreme is in the details
+  const chance = fitSaid(sc) ? ` Chance of air ${pct(f.P)}${extreme ? '' : ` (${range(f.lo, f.hi)})`}.` : '';
+  return `Air: ${DRAWN_AS[shown].toLowerCase()}${why}.${chance}`;
+}
 export function airParts(sc, shown = sc.drawn) {
   const L = SCENARIO_LABEL, out = [];
   const lead = sc.list.find((x) => x.key === shown);
-  out.push({ t: `${DRAWN_AS[shown]}${lead.status === 'observed' ? ', as observed' : ''}${lead.status === 'disfavoured' ? ', though disfavoured' : ''}${shown !== sc.drawn ? `, by your choice; the survey draws ${L[sc.drawn]}` : ''}.` });
-  for (const status of ['observed', 'allowed', 'disfavoured', 'excluded']) {
+  const quals = (x) => both(x.bounds.map(boundWords));
+  const chosen = shown !== sc.drawn ? `, by your choice; the survey draws ${L[sc.drawn]}` : '';
+  out.push({ t: `${DRAWN_AS[shown]}${lead.status === 'observed' ? ', as observed' : ''}${lead.status === 'disfavoured' ? `, though disfavoured ${quals(lead)}` : ''}${chosen}.` });
+  if (sc.by === 'paper') {
+    const c = sc.observed.concludes;
+    out.push({ t: ` Its paper concludes: “${c.quote}” (${cite1(c.paper)}).${c.reading ? ` ${c.reading}` : ''}` });
+  }
+  for (const status of ['observed', 'allowed']) {
     const xs = sc.list.filter((x) => x.key !== shown && x.status === status);
     xs.forEach((x, i) => {
       out.push({ t: i === 0 ? ' ' : i === xs.length - 1 ? ' and ' : ', ' });
-      const t = i === 0 ? cap(L[x.key]) : L[x.key];
-      out.push(status === 'excluded' ? { t } : { t, air: x.key });
+      out.push({ t: i === 0 ? cap(L[x.key]) : L[x.key], air: x.key });
     });
     if (xs.length) out.push({ t: ` ${status}.` });
   }
-  out.push({ t: sc.observed ? ` Observed by ${both(sc.observed.papers.map((k) => PAPERS[k].cite.replace(' et al.', '') + (PAPERS[k].preprint ? ' (a preprint)' : '')))}.` : ' Not observed.' });
-  if (sc.fit && sc.list.some((x) => x.p !== null)) {
-    // the paper's "no atmosphere" is "probably <~10 bar CO2" and its eclipses constrain "less than about 1-10 bar":
-    // the odds are of an atmosphere thicker than that, and what is left of P is bare rock or thin air, as far as allowed
-    const rest = sc.list.filter((x) => x.key !== 'thick' && x.p !== null).map((x) => L[x.key]);
-    out.push({ t: ` The 2026 fit, extrapolated${sc.fit.outside ? ' past its sample' : ''}: chance it kept an atmosphere the fit counts (thicker than about 1 to 10 bar) ${pct(sc.fit.P)}, 68% range ${range(sc.fit.lo, sc.fit.hi)}.${rest.length ? ` The rest is ${rest.join(' or ')}.` : ''}` });
+  for (const x of sc.list.filter((y) => y.key !== shown && y.status === 'disfavoured')) {
+    out.push({ t: ' ' }, { t: cap(L[x.key]), air: x.key }, { t: ` disfavoured ${quals(x)}.` });
+  }
+  for (const x of sc.list.filter((y) => y.key !== shown && y.status === 'excluded')) {
+    out.push({ t: ` ${cap(L[x.key])} excluded ${both(x.bounds.filter((b) => covers(b, x.key)).map(boundWords))}.` });
+  }
+  out.push({ t: sc.observed ? ` Observed by ${both(sc.observed.papers.map(cite1))}.` : ' Not observed.' });
+  if (fitSaid(sc)) {
+    out.push({ t: ` Chance it kept an atmosphere, by the 2026 fit, extrapolated${sc.fit.outside ? ' past its sample' : ''}: ${pct(sc.fit.P)} (68% range ${range(sc.fit.lo, sc.fit.hi)}).` });
+    if (sc.by === 'fit' && sc.drawn !== 'bare') out.push({ t: ` ${THICKNESS}` });
     if (sc.fit.lo < 0.5 && sc.fit.hi > 0.5) out.push({ t: ' Its range crosses 50%, so the fit cannot decide; the picture takes the more probable side.' });
     if (sc.minMass) out.push({ t: ' The mass is a minimum (M sin i), so the chance is a lower bound.' });
-  } else if (!sc.fit) out.push({ t: ' No fit: the archive lacks the star\'s luminosity, the flux or a radius, so the amount of air is the survey\'s own rule, illustrative.' });
+  } else if (!sc.fit) {
+    const star = sc.starStandIn ? ' The star\'s temperature and size are stand-ins, so the look is illustrative.' : '';
+    out.push({ t: ` No fit: the archive lacks ${both(sc.lacks)}.${star} Whether it has air, and how much, is the survey's own rule, illustrative.` });
+  }
   if (sc.inZone) out.push({ t: ' The habitable zone describes the temperature the star gives, and says nothing about whether the planet kept air.' });
   return out;
 }

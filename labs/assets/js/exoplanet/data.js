@@ -131,7 +131,9 @@ export function physics(p, opts = {}) {
     // radial velocity); else the paper's own relation below 1.8 Earth radii (air.js fitMass); else the forecast above.
     const Mfit = p.pl_masse != null ? M : fitMass(R) ?? M;
     const vFit = radiusKnown ? Math.sqrt(Mfit / R) * V_ESC_EARTH : null;
-    air = scenariosFor({ name: p.pl_name, S: insolation(p).S, L: luminosity(p).L, vEsc: vFit, wantThick: share >= AIR_FULL, wantAir: share >= AIR_THIN, minMass: p.pl_masse != null && p.Mprov === 'Msini', inZone: ['cons', 'opt'].includes(hzPosition(p).key) });
+    const Sfit = insolation(p).S, Lfit = luminosity(p).L;
+    const lacks = [Lfit == null && 'the star\'s luminosity', Sfit == null && 'the flux', vFit == null && 'a radius'].filter(Boolean);
+    air = scenariosFor({ name: p.pl_name, S: Sfit, L: Lfit, vEsc: vFit, wantThick: share >= AIR_FULL, wantAir: share >= AIR_THIN, minMass: p.pl_masse != null && p.Mprov === 'Msini', inZone: ['cons', 'opt'].includes(hzPosition(p).key), lacks, starStandIn: p.st_teff == null || p.st_rad == null });
     const can = air.list.find((x) => x.key === opts.air);
     airKey = can && can.status !== 'excluded' ? opts.air : air.drawn;
     atmDensity = airKey === 'thick' ? Math.max(share, AIR_FULL) : airKey === 'thin' ? clamp(share, AIR_THIN, AIR_FULL - 0.01) : 0;
@@ -147,7 +149,7 @@ export function physics(p, opts = {}) {
   // the day side that decides melt: a measured one (air.js OBSERVED); else a locked bare rock's own (above);
   // else, inside 0.1 AU, 2^(1/4) times the mean
   const dayMeasured = air && air.observed && air.observed.day && locked ? air.observed.day.T : null;
-  const Ttest = dayMeasured ?? (bare ? bare.Tday : (a < 0.1) ? Tsurf * 1.18921 : Tsurf);
+  const Ttest = dayMeasured !== null ? dayMeasured : (bare ? bare.Tday : (a < 0.1) ? Tsurf * 1.18921 : Tsurf);
   let state = 'temperate';
   if (Ttest >= 1700) state = 'lava';
   else if (Ttest >= 1200) state = 'partial';
