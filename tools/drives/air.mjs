@@ -17,6 +17,31 @@ import { SURVEY_GOLD } from './shapes.mjs';
 // planet's scenarios, gold for the same reason as under the planet's name
 const GOLD = { ...SURVEY_GOLD, allow: [...SURVEY_GOLD.allow, '.obs-sc .st-observed'] };
 
+// Sheet A's corner blocks (the upper left, the inset, the key, the title block) and the line under the world do not
+// overlap, nor does the open "scenarios and sources" lie over the inset, the key or the title block (the review of
+// 8de5af2, F1: opened at 1440 the details grew the upper-left block until the world was a 3 px band and its line sat
+// in the key; air.mjs had read the details' words and not their geometry). The line under the world is measured by
+// its text; the open details lie over the world and its line by design. Kept here, not in invariants.mjs, while that
+// file is being changed on another branch (tools/invariants-selftest).
+const CORNERS = `(() => {
+  const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';
+  const box = (q) => { const e = document.querySelector(q); if (!shown(e)) return null; let r = e.getBoundingClientRect();
+    if (q === '#bezel') { const g = document.createRange(); g.selectNodeContents(e); r = g.getBoundingClientRect(); }
+    return r.width > 0.5 && r.height > 0.5 ? r : null; };
+  const pairs = [['#ul', '#inset-wrap'], ['#ul', '#key'], ['#ul', '#tblock'], ['#ul', '#bezel'], ['#inset-wrap', '#key'], ['#inset-wrap', '#tblock'],
+    ['#inset-wrap', '#bezel'], ['#key', '#tblock'], ['#key', '#bezel'], ['#tblock', '#bezel'],
+    ['#ret-render .ret-more[open] .ret-more-body', '#inset-wrap'], ['#ret-render .ret-more[open] .ret-more-body', '#key'], ['#ret-render .ret-more[open] .ret-more-body', '#tblock']];
+  const out = [];
+  for (const [p, q] of pairs) {
+    const a = box(p), c = box(q); if (!a || !c) continue;
+    const w = Math.min(a.right, c.right) - Math.max(a.left, c.left), h = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
+    if (w > 0.5 && h > 0.5) out.push(p.replace('#ret-render .ret-more[open] .ret-more-body', 'the open details') + ' and ' + q + ' overlap by ' + Math.round(w) + 'x' + Math.round(h) + ' px');
+  }
+  return out;
+})()`;
+const GEOMETRY = `(() => { const R = (q) => { const e = document.querySelector(q); if (!e) return null; const b = e.getBoundingClientRect(); return [Math.round(b.top), Math.round(b.bottom)]; };
+  return { ul: R('#ul'), live: R('#live'), bezelY: getComputedStyle(document.getElementById('exo-stage')).getPropertyValue('--bezel-y').trim() }; })()`;
+
 const sel = (n) => `((document.getElementById('ret-name') || {}).textContent || '').trim() === ${JSON.stringify(n)} && document.body.classList.contains('ready') && !document.getElementById('exo-note')`;
 const shortOf = `(document.querySelector('#ret-render .ret-air') || {}).textContent || ''`;
 const moreOf = `(document.querySelector('#ret-render .ret-more-body') || {}).textContent || ''`;
@@ -31,6 +56,7 @@ const slug = (n) => n.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
 export default async function air(p, { base, width }) {
   // after every step, on both pages: no sideways scroll, 44 px targets at 390, text at 4.5 to 1, gold where allowed
   for (const [name, expr] of standard({ gold: GOLD })) p.invariant(name, expr);
+  p.invariant('invariant: sheet A\'s corner blocks and the line under the world do not overlap, the details open or closed', CORNERS);
 
   // ---- the article ----
   await p.go(`${base}/labs/exomania-air.html`);
@@ -70,8 +96,13 @@ export default async function air(p, { base, width }) {
   await p.sleep(2500);
   const s1 = await p.ev(shortOf);
   p.check('the short line: drawn, why, and the chance of air with its range', /^Air: drawn as bare rock, from its paper\. Chance of air [\d.]+% \([\d.]+ to [\d.]+%\)\.$/.test(s1), s1);
+  await p.ev(`document.querySelector('.los-consent') && document.querySelector('.los-consent').remove(), true`);   // the sharing question, answered in this tab only
+  const g0 = await p.ev(GEOMETRY);
   await p.ev(`document.querySelector('#ret-render .ret-more summary').click()`);
-  await p.sleep(300);
+  await p.sleep(2500);   // a resize of a block above the world reframes it on the next frame; wait past it
+  const g1 = await p.ev(GEOMETRY);
+  if (width > 1100) p.check('opened on a desk, the details leave the upper-left block, the radius line and the world\'s line where they were', JSON.stringify(g0) === JSON.stringify(g1), `${JSON.stringify(g0)} then ${JSON.stringify(g1)}`);
+  else p.check('opened on a phone, the details push what follows down and leave the world\'s line in its frame', g1.ul[1] > g0.ul[1] && g1.bezelY === g0.bezelY, `${JSON.stringify(g0)} then ${JSON.stringify(g1)}`);
   const d1 = await p.ev(`({ open: document.querySelector('#ret-render .ret-more').open, more: ${moreOf}, links: ${links} })`);
   p.check('opened, the details give the conclusion, what each disfavoured scenario is disfavoured for, the papers, the fit and the article', d1.open && /^Drawn as bare rock\. Its paper concludes: “/.test(d1.more) && / Thick air disfavoured for any air from 10 bar, by energy balance \(Kreidberg 2019\)/.test(d1.more) && / Chance it kept an atmosphere, by the 2026 fit, extrapolated: [\d.]+% \(68% range /.test(d1.more) && /How the survey decides$/.test(d1.more) && JSON.stringify(d1.links) === JSON.stringify(['thin:LHS 3844 b', 'thick:LHS 3844 b']), JSON.stringify(d1));
   await p.shot(`air-details-lhs-3844-b-${width}`);

@@ -116,7 +116,12 @@ const desktop = () => window.matchMedia('(min-width: 1101px)').matches;
 /* Fit the world to the free middle of sheet A: on a desk, between the name above and the key and title block below,
    across the sheet; on a phone, the middle three fifths of its own frame. Centre it there (a principal-point shift)
    and choose the camera distance that makes it fill that region. The line under the planet stands just below it. */
+/* The last framing of a band tall enough to hold the world: a band under 120 px (a block above that grew) keeps it,
+   rather than squeezing the world to a floor and its line into the key. */
+const MIN_BAND = 120;
+let lastFraming = null;
 function placeWorld() {
+  fitMore();
   const cv = canvas.getBoundingClientRect();
   if (!cv.height) return;
   const left = cv.left, right = cv.right;
@@ -128,12 +133,28 @@ function placeWorld() {
   } else {
     top = cv.top + cv.height * 0.2; bottom = cv.bottom - cv.height * 0.2;
   }
+  if (bottom - top < MIN_BAND) {
+    if (lastFraming) { engine.frame(lastFraming.shift, lastFraming.home); $('exo-stage').style.setProperty('--bezel-y', lastFraming.bezel); }
+    return;
+  }
   const cx = (left + right) / 2 - cv.left, cy = (top + bottom) / 2 - cv.top;
   const r = Math.max(60, Math.min((bottom - top) / 2, (right - left) / 2 * 0.9));
   const rho = r / cv.height, fov = engine.camera.fov || 1.5;
   const home = Math.min(14, Math.max(2.2, 1 / Math.sin(Math.atan(rho / fov))));
-  engine.frame([cx - cv.width / 2, cv.height / 2 - cy], home);
-  $('exo-stage').style.setProperty('--bezel-y', `${Math.round(cy + r + 10)}px`);
+  const shift = [cx - cv.width / 2, cv.height / 2 - cy];
+  engine.frame(shift, home);
+  // the line under the world, never below the band's bottom (the 26 px kept above the key and the title block)
+  const bezel = `${Math.round(Math.min(cy + r, bottom - cv.top) + 10)}px`;
+  $('exo-stage').style.setProperty('--bezel-y', bezel);
+  lastFraming = { shift, home, bezel };
+}
+/* The open "scenarios and sources" on a desk lie over sheet A down to the top of the key (exoplanet.css). */
+function fitMore() {
+  const body = document.querySelector('#ret-render .ret-more[open] .ret-more-body');
+  if (!body) return;
+  if (!desktop()) { body.style.removeProperty('--more-max'); return; }
+  const room = $('key').getBoundingClientRect().top - 8 - body.getBoundingClientRect().top;
+  body.style.setProperty('--more-max', `${Math.max(80, Math.round(room))}px`);
 }
 
 /* ---------------- views ---------------- */
@@ -271,7 +292,7 @@ function setReticle(p) {
   const more = document.createElement('details');
   more.className = 'ret-more';
   more.open = reticleOpen === p.name;     // a switch made inside it keeps it open
-  more.addEventListener('toggle', () => { reticleOpen = more.open ? p.name : null; });
+  more.addEventListener('toggle', () => { reticleOpen = more.open ? p.name : null; fitMore(); });
   const summary = document.createElement('summary');
   summary.textContent = 'scenarios and sources';
   const body = document.createElement('span');

@@ -203,12 +203,14 @@ export const PAPERS = {
         A bound over 'all' carries its basis: 'composition' (it rules the band out for every composition its paper
         considers) or 'energy balance' (the day side is as hot as bare rock, and air that thick would carry heat to
         the night side whatever its gases; Koll 2022).
-   A conclusion names the scenario it leads to; reading says why when its sentence does not name that scenario.
+   A conclusion names the scenario it leads to; reading says why when its sentence does not name that scenario, and
+   verb is 'finds' when the sentence quoted is a finding (an exclusion) rather than the paper's conclusion.
+   degree: how strongly a paper words a disfavoured range, when it says so ({ word: 'weakly', sigma: 2 }).
    Hydrogen-dominated (primordial) atmospheres are not among the scenarios, so their exclusions are not bounds. */
 export const BASES = ['composition', 'energy balance'];
-const pressure = (paper, lo, hi, gases, says, quote, basis = null) => ({ kind: 'pressure', paper, lo, hi, gases, says, quote, where: 'abstract', basis });
+const pressure = (paper, lo, hi, gases, says, quote, basis = null, degree = null) => ({ kind: 'pressure', paper, lo, hi, gases, says, quote, where: 'abstract', basis, degree });
 const noBare = (paper, says, quote, where = 'abstract') => ({ kind: 'bare', paper, says, quote, where });
-const said = (scenario, paper, quote, where = 'abstract', reading = null) => ({ scenario, paper, quote, where, reading });
+const said = (scenario, paper, quote, where = 'abstract', reading = null, verb = 'concludes') => ({ scenario, paper, quote, where, reading, verb });
 const GILLON = (planets) => pressure('gillon25', 1, Infinity, ['air with an efficient greenhouse effect'], `Atmospheres of 1 bar or more with an efficient greenhouse effect are strongly disfavoured (Gillon 2025, a preprint).`,
   'Atmosphere models with surface pressures ≥1 bar and efficient greenhouse effects are strongly disfavoured for both planets.');
 
@@ -236,7 +238,7 @@ export const OBSERVED = [
     found: 'Four transits with strong contamination from the star itself, which varied between visits. Cloudy hydrogen atmospheres (80% or more by volume) are excluded at more than 3 σ (Espinoza 2025). There is no strong evidence for or against an atmosphere: CO2-rich ones at the pressures of Venus and Mars are weakly disfavoured at 2 σ, and N2-rich ones with traces of CO2 and CH4 are permitted; a bare rock and an N2 atmosphere both fit (Glidden 2025).',
     observed: null, concludes: null,
     bounds: [pressure('glidden25', 0.006, 92, ['CO2-rich air'], 'CO2-rich atmospheres at the surface pressures of Mars and Venus (about 0.006 and 92 bar) are weakly disfavoured at 2 σ (Glidden 2025).',
-      'Our results weakly disfavor CO2-rich atmospheres for pressures corresponding to the surface of Venus and Mars and the cloud tops of Venus at 2 σ.')] },
+      'Our results weakly disfavor CO2-rich atmospheres for pressures corresponding to the surface of Venus and Mars and the cloud tops of Venus at 2 σ.', null, { word: 'weakly', sigma: 2 })] },
   { name: 'LHS 3844 b', papers: ['kreidberg19', 'zieba26'], day: { T: 985, lo: 17, hi: 16, src: 'zieba26' },
     found: 'A day side of 1,040 ± 40 K and a night side consistent with 0 K; atmospheres above 10 bar are excluded at 3 σ and the best fit is airless rock with Bond albedo under 0.2 (Kreidberg 2019). JWST gives 985 (+16, −17) K, a dark low-silica surface such as basalt, granite excluded at 5.1 σ, CO2 under about 100 mbar and SO2 under about 10 microbar (Zieba 2026).',
     observed: null,
@@ -272,7 +274,7 @@ export const OBSERVED = [
     found: 'A day side of 561 ± 44 K, close to the 537 ± 9 K maximum of a bare rock. Pure CO2 atmospheres of 10 mbar or more and pure H2O atmospheres of 1 bar or more are ruled out at more than 3 σ.',
     observed: null,
     concludes: said('bare', 'fortune25', 'We rule out a wide range of atmospheric forward models to >3 σ, including pure CO2 atmospheres with surface pressure ≥10 mbar and pure H2O atmospheres with surface pressure ≥1 bar.', 'abstract',
-      'Its day side, 561 ± 44 K against 537 ± 9 K for a dark bare rock, is drawn as bare rock.'),
+      'Its day side, 561 ± 44 K against 537 ± 9 K for a dark bare rock, is drawn as bare rock.', 'finds'),
     bounds: [
       pressure('fortune25', 0.01, Infinity, ['pure CO2'], 'Pure CO2 atmospheres of 10 mbar or more are ruled out at more than 3 σ (Fortune 2025).', 'including pure CO2 atmospheres with surface pressure ≥10 mbar and pure H2O atmospheres with surface pressure ≥1 bar'),
       pressure('fortune25', 1, Infinity, ['pure H2O'], 'Pure H2O atmospheres of 1 bar or more are ruled out at more than 3 σ (Fortune 2025).', 'including pure CO2 atmospheres with surface pressure ≥10 mbar and pure H2O atmospheres with surface pressure ≥1 bar')] },
@@ -280,7 +282,7 @@ export const OBSERVED = [
     found: 'A day side of 1,143 (+104, −99) K, 98 ± 9% of a black rock with no redistribution. CO2 atmospheres down to 0.01 bar are ruled out at more than 3 σ; a pure H2O atmosphere of 1 bar and O2 atmospheres are not.',
     observed: null,
     concludes: said('bare', 'allen25', 'We are able to confidently rule out CO2-based atmospheres down to a 0.01 bar surface pressure to greater than 3 σ (ruling out an approximately Mars-like atmosphere).', 'abstract',
-      'Its day side, 98 ± 9% of a black rock\'s with no redistribution, is drawn as bare rock.'),
+      'Its day side, 98 ± 9% of a black rock\'s with no redistribution, is drawn as bare rock.', 'finds'),
     bounds: [pressure('allen25', 0.01, Infinity, ['CO2-based air'], 'CO2-based atmospheres down to 0.01 bar are ruled out at more than 3 σ (Allen 2025).', 'We are able to confidently rule out CO2-based atmospheres down to a 0.01 bar surface pressure to greater than 3 σ')] },
   { name: 'GJ 3929 b', papers: ['xue25'], day: { T: 782, lo: 79, hi: 79, src: 'xue25' },
     found: 'A day side of 782 ± 79 K against a 737 ± 14 K maximum for a black rock. CO2-rich atmospheres thicker than 100 mbar are ruled out at more than 3 σ; the planet is likely a bare rock.',
@@ -348,7 +350,7 @@ export function statusOf(entry, key) {
   if (entry.observed && entry.observed.scenario === key) return { s: 'observed', why: `Observed: “${entry.observed.quote}” (${cites([entry.observed.paper])}).`, bounds: [] };
   const hit = entry.bounds.filter((b) => touches(b, key));
   if (!hit.length) {
-    const c = entry.concludes && entry.concludes.scenario === key ? ` The paper concludes: “${entry.concludes.quote}” (${cites([entry.concludes.paper])}).` : '';
+    const c = entry.concludes && entry.concludes.scenario === key ? ` The paper ${entry.concludes.verb}: “${entry.concludes.quote}” (${cites([entry.concludes.paper])}).` : '';
     return { s: 'allowed', why: `No bound of ${cites(entry.papers)} reaches it.${c}`, bounds: [] };
   }
   const s = hit.some((b) => covers(b, key)) ? 'excluded' : 'disfavoured';
@@ -414,11 +416,19 @@ export { pct as percent, range as percentRange };
 const bar = (x) => (x >= 1 ? `${x} bar` : x >= 0.001 ? `${+(x * 1000).toPrecision(3)} mbar` : `${+(x * 1e6).toPrecision(3)} microbar`);
 const span = (b) => (b.lo === b.hi ? `at about ${bar(b.lo)}` : b.hi === Infinity ? `from ${bar(b.lo)}` : b.lo > 0 ? `from ${bar(b.lo)} to ${bar(b.hi)}` : `up to ${bar(b.hi)}`);
 const cite1 = (k) => PAPERS[k].cite.replace(' et al.', '') + (PAPERS[k].preprint ? ', a preprint' : '');
-export function boundWords(b) {
+const degreeWords = (d) => `${d.word} (${d.sigma}σ)`;
+export function boundWords(b, ownDegree = true) {
   if (b.kind === 'bare') return `by its day side (${cite1(b.paper)})`;
   const gases = b.gases === 'all' ? 'any air' : b.gases.join(' or ');
-  return `for ${gases} ${span(b)}${b.basis === 'energy balance' ? ', by energy balance' : ''} (${cite1(b.paper)})`;
+  return `for ${gases} ${span(b)}${b.basis === 'energy balance' ? ', by energy balance' : ''}${ownDegree && b.degree ? `, ${degreeWords(b.degree)}` : ''} (${cite1(b.paper)})`;
 }
+/* The degree every bound of a scenario shares ("weakly (2σ)"), said with the status word; null when they differ or
+   one has none, and then each bound says its own. */
+function sharedDegree(bounds) {
+  const d = bounds.map((b) => b.degree);
+  return d.length && d.every((x) => x && x.word === d[0].word && x.sigma === d[0].sigma) ? d[0] : null;
+}
+const disfavoured = (x) => { const d = sharedDegree(x.bounds); return { st: d ? `${d.word} disfavoured (${d.sigma}σ)` : 'disfavoured', quals: both(x.bounds.map((b) => boundWords(b, !d))) }; };
 
 /* The line under the planet's name, in two parts.
    airShort: one or two lines, always shown: what is drawn, why in a word, and the chance of air with its range.
@@ -446,15 +456,14 @@ export function airShort(sc, shown = sc.drawn) {
 export function airParts(sc, shown = sc.drawn) {
   const L = SCENARIO_LABEL, out = [];
   const lead = sc.list.find((x) => x.key === shown);
-  const quals = (x) => both(x.bounds.map(boundWords));
   const chosen = shown !== sc.drawn ? `, by your choice; the survey draws ${L[sc.drawn]}` : '';
   out.push({ t: DRAWN_AS[shown] });
   if (lead.status === 'observed') out.push({ t: ', as ' }, { t: 'observed', st: 'observed' });
-  if (lead.status === 'disfavoured') out.push({ t: ', though ' }, { t: 'disfavoured', st: 'disfavoured' }, { t: ` ${quals(lead)}` });
+  if (lead.status === 'disfavoured') { const w = disfavoured(lead); out.push({ t: ', though ' }, { t: w.st, st: 'disfavoured' }, { t: ` ${w.quals}` }); }
   out.push({ t: `${chosen}.` });
   if (sc.by === 'paper') {
     const c = sc.observed.concludes;
-    out.push({ t: ` Its paper concludes: “${c.quote}” (${cite1(c.paper)}).${c.reading ? ` ${c.reading}` : ''}` });
+    out.push({ t: ` Its paper ${c.verb}: “${c.quote}” (${cite1(c.paper)}).${c.reading ? ` ${c.reading}` : ''}` });
   }
   for (const status of ['observed', 'allowed']) {
     const xs = sc.list.filter((x) => x.key !== shown && x.status === status);
@@ -465,7 +474,8 @@ export function airParts(sc, shown = sc.drawn) {
     if (xs.length) out.push({ t: ' ' }, { t: status, st: status }, { t: '.' });
   }
   for (const x of sc.list.filter((y) => y.key !== shown && y.status === 'disfavoured')) {
-    out.push({ t: ' ' }, { t: cap(L[x.key]), air: x.key }, { t: ' ' }, { t: 'disfavoured', st: 'disfavoured' }, { t: ` ${quals(x)}.` });
+    const w = disfavoured(x);
+    out.push({ t: ' ' }, { t: cap(L[x.key]), air: x.key }, { t: ' ' }, { t: w.st, st: 'disfavoured' }, { t: ` ${w.quals}.` });
   }
   for (const x of sc.list.filter((y) => y.key !== shown && y.status === 'excluded')) {
     out.push({ t: ` ${cap(L[x.key])} ` }, { t: 'excluded', st: 'excluded' }, { t: ` ${both(x.bounds.filter((b) => covers(b, x.key)).map(boundWords))}.` });

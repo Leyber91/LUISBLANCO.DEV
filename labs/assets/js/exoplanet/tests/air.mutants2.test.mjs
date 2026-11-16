@@ -54,6 +54,9 @@ const STATUSES = [
   ['LHS 3844 b\'s day side taken from Spitzer', `day: { T: 985, lo: 17, hi: 16, src: 'zieba26' }`, `day: { T: 1040, lo: 40, hi: 40, src: 'kreidberg19' }`],
   ['a DOI one digit off', `doi: '10.1038/s41586-023-05951-7'`, `doi: '10.1038/s41586-023-05952-7'`],
   ['the preprint not marked', `what: 'JWST MIRI, phase curves at 15 µm', preprint: true }`, `what: 'JWST MIRI, phase curves at 15 µm' }`],
+  ["Glidden's degree dropped from the table", ", null, { word: 'weakly', sigma: 2 })] },", ")] },"],
+  ["LHS 1140 c's finding taken for a conclusion", "is drawn as bare rock.', 'finds'),\n    bounds: [\n      pressure('fortune25'", "is drawn as bare rock.'),\n    bounds: [\n      pressure('fortune25'"],
+  ["every quote a conclusion", "reading = null, verb = 'concludes') => ({ scenario, paper, quote, where, reading, verb });", "reading = null, verb = 'concludes') => ({ scenario, paper, quote, where, reading, verb: 'concludes' });"],
 ];
 
 /* Rules data.js takes from air.js. The amounts of air and the bare rock's lock are in looks.mutants.test.mjs. */
