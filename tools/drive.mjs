@@ -164,8 +164,8 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'lab-drive-'));
   fs.mkdirSync(out, { recursive: true });
   const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${width},${height}`,
-    '--hide-scrollbars', '--no-first-run', '--disable-gpu', ...(process.platform === 'linux' ? ['--no-sandbox'] : []), 'about:blank'], { stdio: 'ignore' });
-  LIVE.add(chrome); chrome.on('exit', () => LIVE.delete(chrome));   // equivalent: a Linux runner has no sandbox for Chrome; one machine runs one branch
+    '--hide-scrollbars', '--no-first-run', '--disable-gpu', ...(process.platform === 'linux' ? ['--no-sandbox'] : []), 'about:blank'], { stdio: 'ignore' });   // equivalent: a Linux runner has no sandbox for Chrome; one machine runs one system
+  LIVE.add(chrome); chrome.on('exit', () => LIVE.delete(chrome));
   const checks = [], errors = [];
   const invariants = [];   // { name, expression, steps, seen }
   const frames = { on: false, except: {}, steps: 0, seen: new Set() };   // the rule on the pixels of a captured frame
