@@ -227,7 +227,9 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   syncLog();
 }
 
+let reticleHeld = null;   // the world whose line holds a scenario back until its look is built (engine.onReady redraws it)
 function setReticle(p) {
+  reticleHeld = null;
   $('ret-name').textContent = p.name;
   const hz = hzPosition(p);
   const hzShort = { cons: 'conservative habitable zone', opt: 'optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'zone unknown' }[hz.key];
@@ -237,18 +239,24 @@ function setReticle(p) {
   const r = $('ret-render');
   r.textContent = `procedural surface: ${cl.label.replace(/ · habitable zone/i, '').toLowerCase()}${cl.physics.radiusKnown ? '' : ' [illustrative size]'}`;
   if (!cl.air) return;
-  // the scenarios of its air, each with its status (air.js airParts); a scenario that can be drawn instead is a link
+  // the scenarios of its air, each with its status (air.js airParts). A scenario that can be drawn instead is a link,
+  // where the renderer can draw it without building a program on the page's thread: a browser that builds in the
+  // background, or a look already built. The link names the world it was offered for.
   const line = document.createElement('span');
   line.className = 'ret-air';
+  let held = 0;
   for (const part of airParts(cl.air, cl.airKey)) {
     if (!part.air) { line.append(part.t); continue; }
+    if (glOk && !engine.canDraw(classify(p, { air: part.air }).type)) { held++; line.append(part.t); continue; }
     const a = document.createElement('a');
     a.href = `?${new URLSearchParams({ p: p.name, air: part.air })}`;
     a.dataset.air = part.air;
+    a.dataset.world = p.name;
     a.title = `Draw ${p.name} ${part.air === 'bare' ? 'as bare rock' : `with ${SCENARIO_LABEL[part.air]}`}`;
     a.textContent = part.t;
     line.append(a);
   }
+  if (held) { reticleHeld = p; line.append(` ${held === 1 ? 'One scenario is' : 'Some scenarios are'} not a link here: this browser would build its look on the page's thread.`); }
   line.append(' ');
   const how = document.createElement('a');
   how.href = `exomania-air.html#${cl.air.observed ? 'observed' : 'fit'}`;
@@ -258,9 +266,9 @@ function setReticle(p) {
 }
 /* Draw the selected world in another scenario of its air, in place. A scenario of the same look changes numbers on
    the program already built; another look builds that look's program, in the background where the browser can. */
-function setAir(key) {
+function setAir(key, world) {
   const st = store.state;
-  if (!st.sel || !SCENARIOS.includes(key)) return;
+  if (!st.sel || !SCENARIOS.includes(key) || (world !== undefined && world !== st.sel.name)) return;   // offered for another world
   st.air = key === classify(st.sel).airKey ? null : key;
   if (glOk) engine.restyle(paramsFor(st.sel));
   setReticle(st.sel);
@@ -784,7 +792,7 @@ async function boot() {
   $('tour-next').addEventListener('click', () => stepTour(1));
   $('tour-end').addEventListener('click', endTour);
   $('btn-method').addEventListener('click', () => $('method').showModal());
-  $('ret-render').addEventListener('click', (e) => { const a = e.target.closest('[data-air]'); if (!a) return; e.preventDefault(); setAir(a.dataset.air); });
+  $('ret-render').addEventListener('click', (e) => { const a = e.target.closest('[data-air]'); if (!a) return; e.preventDefault(); setAir(a.dataset.air, a.dataset.world); });
   $('method-close').addEventListener('click', () => $('method').close());
   document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => $(b.dataset.close).close()));
   $('compare').addEventListener('click', (e) => {
@@ -794,7 +802,10 @@ async function boot() {
   $('cmp-clear').addEventListener('click', () => { if (log) log.clearPins(() => openCompare()); });
   engine.onCamera = () => writeURL();
   engine.onMode = () => syncCamButtons();
-  engine.onReady = () => { if ($('compare').open) openCompare(); };
+  engine.onReady = () => {
+    if ($('compare').open) openCompare();
+    if (reticleHeld && reticleHeld === store.state.sel) setReticle(reticleHeld);   // a look it held back may be built now
+  };
   document.addEventListener('visibilitychange', () => engine.setVisible && engine.setVisible(!document.hidden));
   if (typeof IntersectionObserver === 'function') new IntersectionObserver((es) => engine.setVisible && engine.setVisible(es[0].isIntersecting && !document.hidden)).observe($('stage'));
   window.addEventListener('resize', () => { placeWorld(); });

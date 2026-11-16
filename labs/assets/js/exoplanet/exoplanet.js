@@ -1347,6 +1347,9 @@ export class Exoplanet {
     else Object.assign(this.cfg, params);
     this.requestDraw();
   }
+  /* whether a world of this look can be drawn without building its program on the page's thread: the browser
+     builds in the background, or the program is already built */
+  canDraw(look) { return !!this.parallel || this._ready(look | 0); }
   setLayers({ cloud, life } = {}) {
     if (Number.isFinite(cloud)) this.cfg.cloud = cloud;
     if (Number.isFinite(life)) this.cfg.life = life;

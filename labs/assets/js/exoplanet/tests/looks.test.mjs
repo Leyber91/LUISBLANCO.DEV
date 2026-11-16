@@ -122,11 +122,11 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   // A locked bare rock melts by its own day side: Teff sqrt(R_star / a) (0.9 x 2/3)^(1/4), with no greenhouse and
   // whatever the archive's Teq. Around the Sun that is 5,772 x 0.880 x sqrt(0.00465047 / a) K, which is 1,200 K at
   // a = 0.00465047 (5,772 x 0.88011 / 1,200)^2 AU.
-  const bareAt = (T) => { const a = 0.00465047 * Math.pow(5772 * Math.pow(0.9 * 2 / 3, 0.25) / T, 2); return { pl_name: `bare rock at ${T} K`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: a, pl_orbper: 365.25 * Math.pow(a, 1.5), pl_eqt: 300 }; };
-  yes('the locked bare rocks are bare by the fit and locked', [1199, 1201].every((T) => { const ph = physics(bareAt(T)); return ph.airKey === 'bare' && ph.locked && ph.bare; }));
+  const bareAt = (T) => { const a = 0.00465047 * Math.pow(5772 * Math.pow(0.9 * 2 / 3, 0.25) / T, 2); return { pl_name: `bare rock at ${T} K`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, Teff: 5772, Rs: 1, pl_orbsmax: a, a, pl_orbper: 365.25 * Math.pow(a, 1.5), pl_eqt: 300 }; };
+  yes('the locked bare rocks are bare by the fit and locked', [1199, 1201].every((T) => { const ph = physics(bareAt(T)); return ph.airKey === 'bare' && ph.air.by === 'fit' && ph.locked && ph.bare; }));
   // beyond the lock radius a bare rock turns, and the mean surface decides: no greenhouse, so the archive's Teq itself
-  const turning = (Teq) => ({ pl_name: `turning bare rock at ${Teq} K`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: 0.5, pl_orbper: 129.1, pl_eqt: Teq });
-  yes('a bare rock beyond the lock radius is bare and not locked', physics(turning(1201)).airKey === 'bare' && !physics(turning(1201)).locked && physics(turning(1201)).bare === null);
+  const turning = (Teq) => ({ pl_name: `turning bare rock at ${Teq} K`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, Teff: 5772, Rs: 1, pl_orbsmax: 0.5, a: 0.5, pl_orbper: 129.1, pl_eqt: Teq });
+  yes('a bare rock beyond the lock radius is bare and not locked', physics(turning(1201)).airKey === 'bare' && physics(turning(1201)).air.by === 'fit' && !physics(turning(1201)).locked && physics(turning(1201)).bare === null);
   yes('beyond the lock radius a bare rock at 1,199 K is not molten and one at 1,201 K is', lookOf(turning(1199)) === 'airless' && lookOf(turning(1201)) === 'molten', `${lookOf(turning(1199))} / ${lookOf(turning(1201))}`);
   yes('a locked bare rock whose day side is 1,199 K is not molten and one at 1,201 K is, though the archive says 300 K', lookOf(bareAt(1199)) === 'airless' && lookOf(bareAt(1201)) === 'molten', `${lookOf(bareAt(1199))} / ${lookOf(bareAt(1201))}`);
 
@@ -184,7 +184,7 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   const lum = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
   yes('its glow under the star is of the order of the starlight a dark rock reflects', lum(lava.glow) > 0.03 && lum(lava.glow) < 0.6, lum(lava.glow).toFixed(3));
   yes('its glow is red before it is blue', lava.glow[0] > lava.glow[1] && lava.glow[1] > lava.glow[2]);
-  const bare = (a) => { const P = 365.25 * Math.pow(a, 1.5); return toParams({ pl_name: `bare rock at ${a}`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, pl_orbsmax: a, pl_orbper: P, pl_eqt: null }); };
+  const bare = (a) => { const P = 365.25 * Math.pow(a, 1.5); return toParams({ pl_name: `bare rock at ${a}`, pl_rade: 0.45, pl_masse: 0.05, st_teff: 5772, st_rad: 1, st_mass: 1, Teff: 5772, Rs: 1, pl_orbsmax: a, a, pl_orbper: P, pl_eqt: null }); };
   // hottest points of 760 K and 740 K: a locked bare rock around the Sun has 5,772 x 0.9^(1/4) x sqrt(0.00465047 / a) K
   const warm = bare(0.2545), cool = bare(0.2684);
   yes('a bare rock whose hottest point is 760 K glows and one at 740 K does not: the bound is 750 K', warm.look === 'airless' && Math.abs(warm.tsub - 760) < 2 && warm.glowT > 0 && cool.look === 'airless' && Math.abs(cool.tsub - 740) < 2 && cool.glowT === 0, `${warm.tsub.toFixed(0)} K glows, ${cool.tsub.toFixed(0)} K does not`);
@@ -227,6 +227,17 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   // these five read the source text: they hold names and numbers in step, and say nothing about behaviour.
   // Behaviour of the build path is checked in a browser by tools/drives/planets.mjs.
   yes('no label claims an ocean under ice', classify({ ...by.Earth, pl_name: 'a larger rock far out', pl_rade: 1.95, R: 1.95, pl_masse: 6, M: 6, pl_orbsmax: 3, a: 3, pl_orbper: 1898, P: 1898 }).label === 'Frozen world');
+}
+
+/* ---- the heat of a world that is not bare rock (thermal), for the conditions tool (pull request 43) ---- */
+{
+  const json = JSON.parse(readFileSync(join(here, '../../../data/exomania/pscomppars-snapshot.json'), 'utf8'));
+  globalThis.fetch = async () => ({ ok: true, body: null, json: async () => json, headers: { get: () => null } });
+  const { list } = await loadSnapshot();
+  const hj = list.find((p) => p.name === 'HD 209458 b'), c = classify(hj), prm = toParams(hj);
+  yes('a locked fluid world: hottest point 1.25 Teq, night 0.75 Teq (HD 209458 b)', c.look === 'fluid' && c.locked && Math.abs(prm.tsub - 1.25 * c.physics.Teq) < 1e-6 && Math.abs(prm.tnight - 0.75 * c.physics.Teq) < 1e-6, c.look + ' ' + prm.tsub + ' ' + prm.tnight + ' ' + c.physics.Teq);
+  const cold = toParams({ ...by.Earth, pl_name: 'a cold Earth', pl_eqt: 30 }), cool = toParams({ ...by.Earth, pl_name: 'a cool Earth', pl_eqt: 100 });
+  yes('the night side of a free world is 0.95 Teq with a floor of 40 K: 95 K at Teq 100 K, 40 K at Teq 30 K', Math.abs(cool.tnight - 95) < 1e-6 && cold.tnight === 40, cool.tnight + ' ' + cold.tnight);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

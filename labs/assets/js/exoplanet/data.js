@@ -24,9 +24,9 @@
    (tests/looks.test.mjs).
    ============================================================ */
 
-import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, insolation, luminosity, seff, photopicFraction } from './science.js';
+import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, hzPosition, insolation, luminosity, seff, photopicFraction } from './science.js';
 import { CHEN_KIPPING, KOPPARAPU } from './config.js';
-import { scenariosFor, bareDay, tsubForDay, BARE } from './air.js';
+import { scenariosFor, bareDay, tsubForDay, fitMass, BARE, V_ESC_EARTH } from './air.js';
 
 const EARTH_R = 6.371e6;
 const kB = 1.380649e-23, mH = 1.6726e-27;
@@ -107,7 +107,7 @@ export function physics(p, opts = {}) {
 
   // gravity / escape
   const gRel = M / (R * R);
-  const vEscKms = Math.sqrt(M / R) * 11.186;
+  const vEscKms = Math.sqrt(M / R) * V_ESC_EARTH;
   const isGiant = domClass >= 2;
 
   // insolation and luminosity, as the page states them
@@ -126,7 +126,12 @@ export function physics(p, opts = {}) {
     const Iinsol = Math.pow(Teq / 278.5, 4);
     const margin = Math.log10(vEscKms) - (Math.log10(7.0) + 0.25 * Math.log10(Math.max(Iinsol, 1e-6)));
     share = smooth(-0.3, 0.3, margin);
-    air = scenariosFor({ name: p.pl_name, S: insolation(p).S ?? S, L: luminosity(p).L ?? Lrel, vEsc: vEscKms, wantThick: share >= AIR_FULL, wantAir: share >= AIR_THIN });
+    // The fit takes the archive's values or none: no flux or luminosity, or no radius, and there is no fit,
+    // so the amount of air decides, illustrative. Its mass: the archive's (a minimum mass for most planets found by
+    // radial velocity); else the paper's own relation below 1.8 Earth radii (air.js fitMass); else the forecast above.
+    const Mfit = p.pl_masse != null ? M : fitMass(R) ?? M;
+    const vFit = radiusKnown ? Math.sqrt(Mfit / R) * V_ESC_EARTH : null;
+    air = scenariosFor({ name: p.pl_name, S: insolation(p).S, L: luminosity(p).L, vEsc: vFit, wantThick: share >= AIR_FULL, wantAir: share >= AIR_THIN, minMass: p.pl_masse != null && p.Mprov === 'Msini', inZone: ['cons', 'opt'].includes(hzPosition(p).key) });
     const can = air.list.find((x) => x.key === opts.air);
     airKey = can && can.status !== 'excluded' ? opts.air : air.drawn;
     atmDensity = airKey === 'thick' ? Math.max(share, AIR_FULL) : airKey === 'thin' ? clamp(share, AIR_THIN, AIR_FULL - 0.01) : 0;
@@ -247,7 +252,7 @@ export function classify(p, opts = {}) {
   }
   // no measured radius: say so, and say what the drawing stands in with
   if (!ph.radiusKnown) label = `Radius not measured, drawn as ${ph.standIn.why}`;
-  return { type: LOOKS[look], look, klass: ph.domClass, state: ph.state, label, atmDensity: ph.atmDensity, locked: ph.a < lockRadiusAU(ph.Mstar), physics: ph, air: ph.air, airKey: ph.airKey };
+  return { type: LOOKS[look], look, klass: ph.domClass, state: ph.state, label, atmDensity: ph.atmDensity, locked: ph.locked, physics: ph, air: ph.air, airKey: ph.airKey };
 }
 
 // ---- star colour: Planck spectrum through the CIE 1931 observer to sRGB (science.js) ----

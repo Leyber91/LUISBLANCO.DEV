@@ -79,9 +79,13 @@ sub, sup { font-size: .72em; line-height: 0; }
 /* status words are words; gold only for observed, which is a measurement */
 .st { color: var(--text); }
 .st-excluded { color: var(--text-dim); }
+.st-disfavoured { color: var(--text); text-decoration: underline dotted var(--line-bright); text-underline-offset: 3px; }
 .st-observed { color: var(--accretion-soft); }
 .dr { color: var(--text-bright); }
 .obs-day { font-size: .76rem; color: var(--text); margin: 0 0 var(--s-2); font-variant-numeric: tabular-nums; }
+/* the papers' own words behind each bound, in the dim ink, as quotations */
+.obs-quotes { list-style: none; padding: 0 0 0 14px; margin: 0 0 var(--s-3); font-size: .72rem; line-height: 1.6; color: var(--text-dim); border-left: 1px solid var(--line); }
+.obs-quotes li { padding: 2px 0; }
 .obs-papers { list-style: none; padding: 0; margin: 0; font-size: .72rem; line-height: 1.6; color: var(--text-dim); }
 .obs-papers a, .src a { color: var(--horizon); text-underline-offset: 3px; overflow-wrap: anywhere; }
 

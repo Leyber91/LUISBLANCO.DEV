@@ -16,7 +16,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const LAB = join(ROOT, 'labs/assets/js/exoplanet');
 const PAGE = join(ROOT, 'labs/exomania-air.html');
 const imp = (f) => import(pathToFileURL(join(LAB, f)).href);
-const { OBSERVED, PAPERS, SCENARIOS, SCENARIO_LABEL, SHORELINE, BARE, bareDay, mapDay, pondAngle, percent } = await imp('air.js');
+const { OBSERVED, PAPERS, SCENARIOS, SCENARIO_LABEL, SHORELINE, BARE, MR, V_ESC_EARTH, THICK_FROM, statusOf, bareDay, mapDay, pondAngle, percent, percentRange } = await imp('air.js');
+const { DRAWS } = await imp('shoreline.js');
 const { physics, lookOf, toParams, LOOKS } = await imp('data.js');
 const { loadSnapshot } = await imp('catalog.js');
 
@@ -39,8 +40,8 @@ const int = (x) => Math.round(x).toLocaleString('en-US');
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 const doiLink = (d) => `<a href="https://doi.org/${esc(d)}">doi:${esc(d)}</a>`;
 
-const SUN = { st_teff: 5772, st_rad: 1, st_mass: 1 };
-const sol = (pl_name, pl_rade, pl_masse, pl_orbsmax, pl_orbper) => ({ pl_name, name: pl_name, pl_rade, pl_masse, pl_orbsmax, pl_orbper, pl_eqt: null, ...SUN });
+const SUN = { st_teff: 5772, st_rad: 1, st_mass: 1, Teff: 5772, Rs: 1, Ms: 1 };
+const sol = (pl_name, pl_rade, pl_masse, a, pl_orbper) => ({ pl_name, name: pl_name, pl_rade, pl_masse, pl_orbsmax: a, a, pl_orbper, pl_eqt: null, ...SUN });
 const SOLAR = { Mercury: sol('Mercury', 0.383, 0.0553, 0.387, 87.97), Venus: sol('Venus', 0.949, 0.815, 0.723, 224.7), Earth: sol('Earth', 1, 1, 1, 365.25), Mars: sol('Mars', 0.532, 0.107, 1.524, 687) };
 
 export async function catalogue() {
@@ -55,16 +56,21 @@ function observed(by) {
   const rows = OBSERVED.map((e) => {
     const p = by.get(e.name), ph = physics(p), drawn = ph.airKey;
     const sc = SCENARIOS.map((k) => {
-      const s = e[k].s, mark = k === drawn ? ' class="drawn"' : '';
-      return `<li${mark}><b>${cap(SCENARIO_LABEL[k])}</b>: <span class="st st-${s}">${s}</span>${k === drawn ? ', <span class="dr">drawn</span>' : ''}. ${esc(e[k].why)}</li>`;
+      const st = statusOf(e, k), mark = k === drawn ? ' class="drawn"' : '';
+      return `<li${mark}><b>${cap(SCENARIO_LABEL[k])}</b>: <span class="st st-${st.s}">${st.s}</span>${k === drawn ? ', <span class="dr">drawn</span>' : ''}. ${esc(st.why)}</li>`;
     }).join('');
-    const why = ph.air.by === 'observed' ? 'the scenario observed' : ph.air.by === 'paper' ? 'the paper\'s conclusion' : `the fit: air ${percent(ph.air.fit.P)}`;
+    // the paper's own words behind each bound, observation and conclusion, with where they are
+    const words = [...(e.observed ? [e.observed] : []), ...(e.concludes ? [e.concludes] : []), ...e.bounds];
+    const seen = new Set();
+    const quotes = words.filter((w) => !seen.has(w.quote) && seen.add(w.quote)).map((w) => `<li>“${esc(w.quote)}” (${esc(PAPERS[w.paper].cite)}, ${esc(w.where)})</li>`).join('');
+    const why = ph.air.by === 'observed' ? 'the scenario observed' : ph.air.by === 'paper' ? 'the paper\'s conclusion' : `the fit: a ${percent(ph.air.fit.P)} chance of an atmosphere it counts`;
     const day = e.day ? `<p class="obs-day">Day side measured ${int(e.day.T)} K (−${e.day.lo}, +${e.day.hi}; ${esc(PAPERS[e.day.src].cite)}); drawn at ${int(mapDay(toParams(p).tsub, toParams(p).tnight))} K.</p>` : '';
     const papers = e.papers.map((k) => `<li>${esc(PAPERS[k].cite)}, ${esc(PAPERS[k].venue)}. ${esc(PAPERS[k].what)}. ${doiLink(PAPERS[k].doi)}</li>`).join('');
     return `<article class="obs" id="${esc(e.name.replace(/[^A-Za-z0-9]+/g, '-'))}">
   <header class="obs-h"><h3 class="world">${esc(e.name)}</h3><p class="obs-drawn">Drawn ${drawn === 'bare' ? 'as' : 'with'} <b>${SCENARIO_LABEL[drawn]}</b>, by ${why}. Look: ${LOOK_WORD[lookOf(p)]}.</p></header>
   <p class="obs-found">${esc(e.found)}</p>
   <ul class="obs-sc">${sc}</ul>
+  <ul class="obs-quotes">${quotes}</ul>
   ${day}<ul class="obs-papers">${papers}</ul>
 </article>`;
   });
@@ -72,11 +78,11 @@ function observed(by) {
 }
 
 function famous(by) {
-  const head = '<tr><th>World</th><th>Observed</th><th>Air by the 2026 fit</th><th>Drawn before</th><th>Drawn now</th></tr>';
+  const head = '<tr><th>World</th><th>Observed</th><th>Chance of an atmosphere the fit counts, and its 68% range</th><th>Drawn before</th><th>Drawn now</th></tr>';
   const rows = WORLDS.map((n) => {
     const p = SOLAR[n] || by.get(n), ph = physics(p), sc = ph.air;
-    const obs = sc.observed ? sc.observed.papers.map((k) => PAPERS[k].cite).join('; ') : 'no';
-    return `<tr><th scope="row" class="world">${esc(n)}</th><td>${esc(obs)}</td><td class="num">${percent(sc.fit.P)}</td><td>${LOOK_WORD[BEFORE.looks[n]]}</td><td><b>${LOOK_WORD[lookOf(p)]}</b> (${SCENARIO_LABEL[ph.airKey]})</td></tr>`;
+    const obs = sc.observed ? sc.observed.papers.map((k) => PAPERS[k].cite + (PAPERS[k].preprint ? ', a preprint' : '')).join('; ') : 'no';
+    return `<tr><th scope="row" class="world">${esc(n)}</th><td>${esc(obs)}</td><td class="num">${percent(sc.fit.P)}, ${percentRange(sc.fit.lo, sc.fit.hi)}${sc.fit.lo < 0.5 && sc.fit.hi > 0.5 ? '; cannot decide' : ''}${sc.minMass ? '; a lower bound' : ''}</td><td>${LOOK_WORD[BEFORE.looks[n]]}</td><td><b>${LOOK_WORD[lookOf(p)]}</b> (${SCENARIO_LABEL[ph.airKey]})</td></tr>`;
   });
   return `<table class="tab"><thead>${head}</thead><tbody>${rows.join('')}</tbody></table>`;
 }
@@ -106,13 +112,19 @@ function counts(list) {
 
 function constants() {
   const K = SHORELINE;
-  return `<table class="tab narrow"><thead><tr><th>Constant</th><th>Median, as used</th><th>68% interval in the paper</th></tr></thead><tbody>
-<tr><th scope="row">log<sub>10</sub>(f<sub>0</sub>/f<sub>⊕</sub>)</th><td class="num">${K.logF0}</td><td class="num">−0.31, +0.45</td></tr>
-<tr><th scope="row">p (escape speed)</th><td class="num">${K.p}</td><td class="num">−0.43, +0.61</td></tr>
-<tr><th scope="row">q (luminosity)</th><td class="num">${K.q}</td><td class="num">−0.20, +0.28</td></tr>
-<tr><th scope="row">w (width, dex)</th><td class="num">${K.w}</td><td class="num">ln w = −1.40 (−0.30, +0.32)</td></tr>
-<tr><th scope="row">v<sub>esc,⊕</sub></th><td class="num">${K.vEscEarth} km/s</td><td class="num">fixed</td></tr>
-<tr><th scope="row">the main fit's flux limit</th><td class="num">${int(K.fluxMax)} f<sub>⊕</sub></td><td class="num">fixed</td></tr>
+  const med = (a) => { const t = [...a].sort((x, y) => x - y); return t[Math.floor(t.length / 2)]; };
+  return `<table class="tab narrow"><thead><tr><th>Constant</th><th>Median in the paper</th><th>68% interval in the paper</th><th>Median of the draws used</th></tr></thead><tbody>
+<tr><th scope="row">log<sub>10</sub>(f<sub>0</sub>/f<sub>⊕</sub>)</th><td class="num">${K.logF0}</td><td class="num">−0.31, +0.45</td><td class="num">${med(DRAWS.logF0).toFixed(3)}</td></tr>
+<tr><th scope="row">p (escape speed)</th><td class="num">${K.p}</td><td class="num">−0.43, +0.61</td><td class="num">${med(DRAWS.p).toFixed(3)}</td></tr>
+<tr><th scope="row">q (luminosity)</th><td class="num">${K.q}</td><td class="num">−0.20, +0.28</td><td class="num">${med(DRAWS.q).toFixed(3)}</td></tr>
+<tr><th scope="row">w (width, dex)</th><td class="num">${K.w}</td><td class="num">ln w = −1.40 (−0.30, +0.32)</td><td class="num">${med(DRAWS.w).toFixed(4)}</td></tr>
+</tbody></table>
+<table class="tab narrow"><thead><tr><th>Also used</th><th>Value</th><th>Source</th></tr></thead><tbody>
+<tr><th scope="row">posterior draws</th><td class="num">${int(DRAWS.n)} of 200,000</td><td>Zenodo record 15858798, doi:10.5281/zenodo.15858798, licence CC BY 4.0; every 100th sample</td></tr>
+<tr><th scope="row">v<sub>esc,⊕</sub></th><td class="num">${V_ESC_EARTH} km/s</td><td>NASA Earth fact sheet; the paper rounds it to 11.18</td></tr>
+<tr><th scope="row">mass without a measured one</th><td class="num">e<sup>${MR.a}</sup> R<sup>${MR.b}</sup> under ${MR.upTo} R<sub>⊕</sub></td><td>the paper, Figure 1; above it, Chen &amp; Kipping 2017</td></tr>
+<tr><th scope="row">thick air from</th><td class="num">${THICK_FROM} bar</td><td>Koll 2022</td></tr>
+<tr><th scope="row">the main fit's flux limit</th><td class="num">${int(K.fluxMax)} f<sub>⊕</sub></td><td>the paper, Section II.4</td></tr>
 </tbody></table>
 <table class="tab narrow"><thead><tr><th>The bare rock</th><th>As used</th><th>Source</th></tr></thead><tbody>
 <tr><th scope="row">Bond albedo A<sub>B</sub></th><td class="num">${BARE.albedo}</td><td>Zhang et al. 2024 (about 0.1); Zieba et al. 2026 (0.14, +0.13, −0.14)</td></tr>
@@ -127,6 +139,7 @@ function sources() {
     ['Berta-Thompson, Wachiraphan & Murray 2026', 'ApJ 1011, 123', 'The 3D cosmic shoreline for nurturing planetary atmospheres; arXiv:2507.02136, v2 of 19 March 2026', '10.3847/1538-4357/ae77fd'],
     ['Koll 2022', 'ApJ 924, 134', 'A scaling for atmospheric heat redistribution on tidally locked rocky planets', '10.3847/1538-4357/ac3b48'],
     ['Kite, Fegley, Schaefer & Gaidos 2016', 'ApJ 828, 80', 'Atmosphere-interior exchange on hot, rocky exoplanets', '10.3847/0004-637X/828/2/80'],
+    ['Berta-Thompson 2026', 'Zenodo record 15858798', 'posterior samples of the shoreline model, licence CC BY 4.0', '10.5281/zenodo.15858798'],
   ];
   const rows = extra.map(([c, v, t, d]) => `<li>${esc(c)}, ${esc(v)}. ${esc(t)}. ${doiLink(d)}</li>`)
     .concat(Object.values(PAPERS).map((x) => `<li>${esc(x.cite)}, ${esc(x.venue)}. ${esc(x.what)}. ${doiLink(x.doi)}</li>`));
@@ -158,7 +171,8 @@ export function fill(html, p) {
 }
 export function differences(html, p) {
   const out = [], seen = new Set();
-  for (const m of html.matchAll(MARK)) { seen.add(m[1]); if (!(m[1] in p)) out.push(`${m[1]}: no such part`); else if (m[2] !== p[m[1]]) out.push(`${m[1]}: differs from what the code gives`); }
+  const lf = (t) => t.replace(/\r\n/g, '\n');
+  for (const m of lf(html).matchAll(MARK)) { seen.add(m[1]); if (!(m[1] in p)) out.push(`${m[1]}: no such part`); else if (m[2] !== lf(p[m[1]])) out.push(`${m[1]}: differs from what the code gives`); }
   for (const k of Object.keys(p)) if (!seen.has(k)) out.push(`${k}: not marked on the page`);
   return out;
 }
