@@ -49,6 +49,7 @@ import { LLM } from '../ai/llm.js';
 import { AI, METHOD_GROUPS } from './config.js';
 import { LOOKS } from './data.js';
 import { COLD_K, HOT_K } from './find.js';
+import { grouped } from '../kit/format.js';
 
 /* the fields a query may constrain, with the units the page shows */
 export const RANGE_FIELDS = [
@@ -76,7 +77,7 @@ export const KINDS = [
   { look: 'fluid', label: 'no surface', re: /\b(no surface|cloud tops)\b/ },
 ];
 const LOCKED = /\b((tidally |tide )?locked|one face|eyeball|permanent day|eternal day|synchronous( rotation)?)( to (its|their|the) (stars?|suns?|hosts?))?\b/;
-const thousands = (v) => v.toLocaleString('en-US');
+const thousands = (v) => grouped(Math.round(v * 1000) / 1000);   // the kit's grouping, to three decimals at most
 export const COLD_WORDS = `cold: equilibrium temperature under ${COLD_K} K, published or computed`;
 export const HOT_WORDS = `hot: equilibrium temperature of ${thousands(HOT_K)} K or more, published or computed`;
 export const LOCKED_WORDS = 'drawn with one face to its star';
@@ -283,7 +284,7 @@ export const needsModel = (r) => !r.complete && (r.recognised > 0 || r.unused.so
 export function say({ r, text, by = PAGE, count, order }) {
   const head = `“${text}”`;
   if (by !== PAGE || r.complete) {
-    let s = `${head} → ${r.notes.join(', ') || 'every planet'} · ${r.notes.length ? `${thousands(count)} ${count === 1 ? 'match' : 'matches'}` : `${thousands(count)} planets`}, ${order} · read by ${by}.`;
+    let s = `${head} reads as ${r.notes.join(', ') || 'every planet'}; ${r.notes.length ? `${thousands(count)} ${count === 1 ? 'match' : 'matches'}` : `${thousands(count)} planets`}, ${order}; read by ${by}.`;
     if (count === 0 && r.looks && !r.looks.includes('fluid') && r.ranges.R && r.ranges.R[0] >= 4) s += ' No world that large is drawn with a surface.';
     if (count === 0 && (r.cold || r.hot) && r.method === 'Imaging') s += ' A directly imaged planet is seen by its own heat, and is given no equilibrium temperature here.';
     if (Object.keys(r.ranges).length) s += ' The numbers can be changed under Ranges.';

@@ -11,7 +11,8 @@
 
 import { habitableZone, semiMajor, starColour, isNum } from '../science.js';
 import { PHYS, SOLAR } from '../config.js';
-import { tokens, alpha, surface, fmt, fmtInt, reducedMotion } from './common.js';
+import { tokens, alpha, surface, fmt, fmtInt, esc, reducedMotion } from './common.js';
+import { switchCtl, setSwitch, bindSwitch, isOn } from '../../kit/controls.js';
 
 function hash01(s) { let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h / 4294967296; }
 
@@ -36,39 +37,67 @@ export function solarWords(host, outer) {
   return `[REAL] On the scale of the Solar System, the outermost known orbit of ${host} reaches ${fmt(outer, 2)} AU, ${where}.`;
 }
 
+/* Sheet A's inset: the selected world's system in miniature, still. The habitable zone dashed, each orbit a circle
+   (the selected one in the bright ink and heavier), the star, the world on its orbit. */
+export function drawInset(canvas, sel, system) {
+  const T = tokens(), dpr = Math.min(2, window.devicePixelRatio || 1), r = canvas.getBoundingClientRect();
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  if (!sel) return;
+  const orbits = system.map((p) => ({ p, a: semiMajor(p).a })).filter((o) => o.a);
+  const hz = habitableZone(sel);
+  const outer = Math.max(...orbits.map((o) => o.a), 1e-4);
+  const reach = hz && hz.outer / outer < 6 ? Math.max(outer, hz.outer) * 1.08 : outer * 1.15;
+  const c = w / 2, k = (Math.min(w, h) / 2 - 4) / reach;
+  if (hz && hz.outer <= reach) {
+    ctx.strokeStyle = alpha(T.horizon, 0.85); ctx.setLineDash([6, 4]); ctx.lineWidth = 1.1;
+    for (const d of [hz.inner, hz.outer]) { ctx.beginPath(); ctx.arc(c, h / 2, d * k, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.setLineDash([]);
+  }
+  for (const o of orbits) {
+    const on = o.p === sel;
+    ctx.strokeStyle = on ? T.bright : alpha(T.text, 0.45); ctx.lineWidth = on ? 1.3 : 1;
+    if (!isNum(o.p.ecc)) ctx.setLineDash([12, 3, 2, 3, 2, 3]);
+    ctx.beginPath(); ctx.arc(c, h / 2, Math.max(1, o.a * k), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    if (on) { ctx.fillStyle = T.bright; ctx.beginPath(); ctx.arc(c + o.a * k * Math.cos(-0.7), h / 2 + o.a * k * Math.sin(-0.7), 3, 0, Math.PI * 2); ctx.fill(); }
+  }
+  const [rr, gg, bb] = starColour(sel.Teff).srgb.map((x) => Math.round(x * 255));
+  ctx.fillStyle = `rgb(${rr},${gg},${bb})`; ctx.beginPath(); ctx.arc(c, h / 2, 3.5, 0, Math.PI * 2); ctx.fill();
+  canvas.setAttribute('aria-label', `The ${sel.host} system in miniature: ${orbits.length === 1 ? 'one orbit' : `${orbits.length} orbits`}${hz ? `, habitable zone ${fmt(hz.inner, 2)} to ${fmt(hz.outer, 2)} AU` : ''}`);
+}
+
 export function createSystem(host, store, actions = {}) {
   host.innerHTML = `
-    <div class="view-head"><span class="view-k">System</span>
-      <span class="sys-ctl"><button type="button" class="chip" data-k="play" aria-pressed="true">Pause</button>
-      <button type="button" class="chip" data-k="solar" aria-pressed="false">Solar system</button>
-      <span class="view-v" data-k="rate"></span></span>
-      <span class="view-v" data-k="sysname">—</span></div>
+    <div class="lab"><h2 class="st" id="d-h"><i>D</i>The system</h2><span class="meta" data-k="sysname"></span></div>
     <div class="sys-wrap"><canvas class="sys-cv" role="img" tabindex="0"></canvas></div>
-    <p class="view-cap" data-k="syscap"></p>`;
+    <div class="view-row" data-k="ctl"><span class="rate" data-k="rate"></span></div>
+    <p class="note2" data-k="syscap"></p>
+    <details class="twin"><summary>table</summary><div class="twin-b" data-k="systwin"></div></details>`;
   const cv = host.querySelector('canvas');
   const nameEl = host.querySelector('[data-k="sysname"]');
   const capEl = host.querySelector('[data-k="syscap"]');
   const rateEl = host.querySelector('[data-k="rate"]');
-  const playBtn = host.querySelector('[data-k="play"]');
-  const solarBtn = host.querySelector('[data-k="solar"]');
+  const twinEl = host.querySelector('[data-k="systwin"]');
+  /* time and scale: two switches, both states engraved */
+  const playBtn = switchCtl({ name: 'time', words: ['running', 'stopped'], ariaLabel: 'Time stopped' });
+  playBtn.dataset.k = 'play';
+  const solarBtn = switchCtl({ name: 'scale', words: ['its own', 'the Solar System'], ariaLabel: 'Scale of the Solar System' });
+  solarBtn.dataset.k = 'solar';
+  host.querySelector('[data-k="ctl"]').prepend(playBtn, solarBtn);
   const T = tokens();
   let model = null, hits = [];
   const still = reducedMotion() || window.__EXO_STILL__ || window.__EXO_LOWPOWER__;
   let simDays = 0, lastT = 0, playing = !still, showSolar = false;
   let raf = 0, visible = true;
   let reach = 0, tween = 0;   // how far the view reaches now, in AU, and the frame request that is moving it
-  playBtn.textContent = playing ? 'Pause' : 'Play';
-  playBtn.setAttribute('aria-pressed', String(playing));
+  setSwitch(playBtn, !playing);
 
   const surf = surface(cv, draw);
 
-  playBtn.addEventListener('click', () => {
-    playing = !playing; lastT = 0;
-    playBtn.textContent = playing ? 'Pause' : 'Play'; playBtn.setAttribute('aria-pressed', String(playing));
-    kick(); surf.redraw();
-  });
-  solarBtn.addEventListener('click', () => {
-    showSolar = !showSolar; solarBtn.classList.toggle('on', showSolar); solarBtn.setAttribute('aria-pressed', String(showSolar));
+  bindSwitch(playBtn, (stopped) => { playing = !stopped; lastT = 0; kick(); surf.redraw(); });
+  bindSwitch(solarBtn, (on) => {
+    showSolar = on;
     if (model) capEl.textContent = caption();
     zoom();
   });
@@ -110,8 +139,12 @@ export function createSystem(host, store, actions = {}) {
     model = { planets, hz, extent, hzOff, outer, sel, colour: starColour(sel.Teff), Rs: sel.Rs, ref, daysPerSec };
     cancelAnimationFrame(tween); tween = 0;
     reach = viewExtent(extent, showSolar);   // a new world opens at the scale the visitor left on
-    nameEl.textContent = `${sel.host} · ${planets.length} planet${planets.length === 1 ? '' : 's'}`;
-    rateEl.textContent = `${fmt(daysPerSec, 2)} d/s`;
+    nameEl.textContent = `${sel.host}, ${planets.length === 1 ? 'one planet' : `${planets.length} planets`}`;
+    rateEl.textContent = `${fmt(daysPerSec, 2)} days a second`;
+    twinEl.innerHTML = `<div class="twin-wrap"><table><thead><tr><th>planet</th><th class="num">orbit, AU</th><th class="num">period, d</th><th class="num">radius, R\u2295</th><th class="num">e</th></tr></thead><tbody>${st.system.map((p) => {
+      const a = semiMajor(p).a;
+      return `<tr><td>${esc(p.name)}${p === sel ? ' (open)' : ''}</td><td class="num">${a ? fmt(a, 3) : 'unknown'}</td><td class="num">${isNum(p.P) ? fmt(p.P, 4) : 'unknown'}</td><td class="num">${isNum(p.R) ? fmt(p.R, 3) : 'not measured'}</td><td class="num">${isNum(p.ecc) ? fmt(p.ecc, 2) : 'unknown'}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
     simDays = 0; lastT = 0;
     capEl.textContent = caption();
   }
@@ -144,10 +177,10 @@ export function createSystem(host, store, actions = {}) {
       for (const r of [m.hz.innerOpt, m.hz.outerOpt]) { if (r * s < Rpx * 1.4) { ctx.beginPath(); ctx.arc(cx, cy, r * s, 0, Math.PI * 2); ctx.stroke(); } }
       ctx.setLineDash([]);
       ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'left';
-      if (m.hz.outer * s > 18) ctx.fillText('HABITABLE ZONE', cx + m.hz.outer * s * 0.71 + 4, cy - m.hz.outer * s * 0.71 - 2);
+      if (m.hz.outer * s > 18) ctx.fillText('habitable zone', cx + m.hz.outer * s * 0.71 + 4, cy - m.hz.outer * s * 0.71 - 2);
     } else if (m.hz) {
       ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'right';
-      ctx.fillText(`HZ ${fmt(m.hz.inner, 2)}-${fmt(m.hz.outer, 2)} AU  →`, w - 6, 12);
+      ctx.fillText(`habitable zone ${fmt(m.hz.inner, 2)} to ${fmt(m.hz.outer, 2)} AU, farther out`, w - 6, 12);
     }
     ctx.font = T.fontSm;
     if (showSolar) {
@@ -156,12 +189,12 @@ export function createSystem(host, store, actions = {}) {
         if (r > Rpx * 1.6) continue;
         ctx.strokeStyle = alpha(T.text, sp.name === 'Earth' ? 0.42 : 0.26); ctx.setLineDash([1, 3]);
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-        if (r > 6) { ctx.fillStyle = T.faint; ctx.textAlign = 'right'; ctx.fillText(sp.short, cx - r * 0.71 - 2, cy + r * 0.71 + 9); }
+        if (r > 6) { ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText(sp.short, cx - r * 0.71 - 2, cy + r * 0.71 + 9); }
       }
     } else if (s > 14 && s < Rpx * 1.25) {
       ctx.strokeStyle = alpha(T.text, 0.18); ctx.setLineDash([1, 3]);
       ctx.beginPath(); ctx.arc(cx, cy, s, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = T.faint; ctx.textAlign = 'left';
+      ctx.fillStyle = T.dim; ctx.textAlign = 'left';
       ctx.fillText('1 AU', cx + s * 0.71 + 3, cy + s * 0.71 + 10);
     }
     const starPx = (m.Rs || 0.5) * PHYS.R_SUN_KM / PHYS.AU_KM * s;
@@ -176,16 +209,16 @@ export function createSystem(host, store, actions = {}) {
       const on = o.p === m.sel;
       const A = o.a * s, B = A * Math.sqrt(1 - o.e * o.e), c = A * o.e;
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(o.w);
-      ctx.strokeStyle = on ? alpha(T.gold, 0.85) : alpha(T.text, 0.28); ctx.lineWidth = on ? 1.2 : 1;
+      ctx.strokeStyle = on ? alpha(T.bright, 0.9) : alpha(T.text, 0.28); ctx.lineWidth = on ? 1.6 : 1;
       if (!o.eKnown) ctx.setLineDash([4, 3]);
       ctx.beginPath(); ctx.ellipse(-c, 0, Math.max(0.5, A), Math.max(0.5, B), 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
       const Mm = o.ph + (o.P ? 2 * Math.PI * simDays / o.P : 0);
       const E = kepler(((Mm % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI), o.e);
       const x = A * (Math.cos(E) - o.e), y = B * Math.sin(E);
       const rad = Math.max(1.8, Math.min(5, Math.sqrt(o.p.R || 1) * 1.3));
-      ctx.fillStyle = on ? T.gold : T.text;
+      ctx.fillStyle = on ? T.bright : T.text;
       ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
-      if (on) { ctx.strokeStyle = alpha(T.gold, 0.6); ctx.beginPath(); ctx.arc(x, y, rad + 4, 0, Math.PI * 2); ctx.stroke(); }
+      if (on) { ctx.strokeStyle = alpha(T.bright, 0.8); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, rad + 4, 0, Math.PI * 2); ctx.stroke(); }
       ctx.restore();
       const cw = Math.cos(o.w), sw = Math.sin(o.w);
       hits.push({ p: o.p, x: cx + x * cw - y * sw, y: cy + x * sw + y * cw, A });

@@ -49,9 +49,10 @@ function pageState() {
     headQuiet: head ? head.getAttribute('aria-hidden') === 'true' && head.getAttribute('role') === 'presentation' : null,
     note: note.textContent || '', noteShown: note.getBoundingClientRect().height > 0, noteLive: note.getAttribute('aria-live'),
     count, n: +count.replace(/[^\d]/g, ''), filtered: /match/.test(count),
-    chips: [...document.querySelectorAll('#filters .chip.on[data-clear]')].map((c) => c.textContent.trim()),
-    cls: (document.querySelector('#filters .chip.on[data-cls]') || {}).textContent || '',
-    tourThese: !!document.querySelector('#filters .chip[data-act="tourthese"]'), replay: (document.querySelector('#filters .chip[data-act="replay"]') || {}).textContent || '',
+    // the filter's tokens, the size band chosen (by its key; "all" for none), "tour these", and the replay switch's state
+    chips: [...document.querySelectorAll('#filters [data-clear]')].map((c) => c.textContent.trim()),
+    cls: (document.querySelector('#filters [data-cls][aria-pressed="true"]') || { dataset: {} }).dataset.cls || '',
+    tourThese: !!document.querySelector('#filters [data-act="tourthese"]'), replay: (document.querySelector('#filters [data-act="replay"]') || { getAttribute: () => '' }).getAttribute('aria-checked') === 'true' ? 'replaying' : 'still',
     rangesOpen: !$('ranges').hidden,
     fits: b.left >= 0 && b.right <= innerWidth + 1, wide: document.documentElement.scrollWidth > innerWidth + 1,
     listInView: !box.hidden && b.top >= 0 && b.bottom <= innerHeight + 1, rowInView: !!rr && rr.top >= 0 && rr.bottom <= innerHeight + 1,
@@ -111,9 +112,9 @@ export default async function search(p, { base }) {
   // ---- "cold planet": a list of results, nearest first, each with the kind it is drawn as ----
   await call(setModel, '{"kinds":["molten"]}', 0);   // a model that would answer "lava" if it were asked
   const cold = await ask('cold planet', 1500);
-  p.check('"cold planet" opens a list of eight results under the field', cold.open && cold.rows.length === 8 && /^[\d,]+ matches · nearest first · the first 8$/.test(cold.head), `${cold.head} | ${cold.rows.map((r) => r.name).join(', ')}`);
+  p.check('"cold planet" opens a list of eight results under the field', cold.open && cold.rows.length === 8 && /^[\d,]+ matches, nearest first, the first 8$/.test(cold.head), `${cold.head} | ${cold.rows.map((r) => r.name).join(', ')}`);
   p.check('the list fits the screen, all of it is in view, and the page does not scroll sideways', cold.fits && cold.listInView && !cold.wide, JSON.stringify({ fits: cold.fits, inView: cold.listInView, wide: cold.wide }));
-  p.check('each result names the kind it is drawn as, or says what is not known, and its distance', cold.rows.every((r) => r.name && /^[a-z][a-z ,/-]+ · [\d,]+ ly$/.test(r.fact)), facts(cold));
+  p.check('each result names the kind it is drawn as, or says what is not known, and its distance', cold.rows.every((r) => r.name && /^[a-z][a-z ,/-]+, [\d,]+ ly$/.test(r.fact)), facts(cold));
   p.check('the results are in order of distance', rising(cold.rows.map(ly)), cold.rows.map(ly).join(' '));
   p.check('the note says how the question was read, and the filter shows it as one chip', /cold: equilibrium temperature under 200 K, published or computed/.test(cold.note) && PAGE.test(cold.note) && cold.noteShown && cold.chips.length === 1 && cold.chips[0] === 'cold: under 200 K ×', `${cold.note} | ${cold.chips.join(', ')}`);
   p.check('the list counts what the filter counts, and that is fewer than the whole catalogue', cold.head.split(' ')[0] === cold.count.split(' ')[0] && cold.filtered && cold.n > 0 && cold.n < whole.n, `${cold.head} | ${cold.count}`);
@@ -149,7 +150,7 @@ export default async function search(p, { base }) {
 
   // ---- the kind found is the kind drawn; the keys open a result ----
   const air = await ask('airless rock');
-  p.check('"airless rock" lists eight worlds, every one drawn as airless rock', air.rows.length === 8 && air.rows.every((r) => /^airless rock(, radius not measured)? · /.test(r.fact)), facts(air));
+  p.check('"airless rock" lists eight worlds, every one drawn as airless rock', air.rows.length === 8 && air.rows.every((r) => /^airless rock(, radius not measured)?, [\d,]+ ly$/.test(r.fact)), facts(air));
   await p.key('ArrowDown'); await p.key('ArrowDown'); await p.key('Enter');
   await p.sleep(1200);
   const keyed = await state();
@@ -160,19 +161,19 @@ export default async function search(p, { base }) {
 
   // ---- "near us" limits the distance; "nearest" only orders ----
   const lava = await ask('lava planets near us');
-  p.check('"lava planets near us" lists molten worlds within 50 light-years', lava.rows.length > 0 && lava.rows.every((r) => /^(lava world|molten-surface world)(, radius not measured)? · [\d,]+ ly$/.test(r.fact) && ly(r) <= 50), `${lava.head} | ${facts(lava)}`);
+  p.check('"lava planets near us" lists molten worlds within 50 light-years', lava.rows.length > 0 && lava.rows.every((r) => /^(lava world|molten-surface world)(, radius not measured)?, [\d,]+ ly$/.test(r.fact) && ly(r) <= 50), `${lava.head} | ${facts(lava)}`);
   const nearest = await ask('nearest lava world');
   p.check('"nearest lava world" orders every molten world by distance and leaves none out', nearest.rows.length === 8 && nearest.n === lavaAll.n && nearest.n > lava.n && rising(nearest.rows.map(ly)) && nearest.rows[0].name === lava.rows[0].name && nearest.rows.some((r) => ly(r) > 50) && nearest.chips.length === 1,
     `${nearest.count} against ${lava.count} | ${facts(nearest)}`);
 
   // ---- an order by temperature uses the temperature "cold" is found by ----
   const coldest = await ask('coldest cold planets');
-  const kelvin = (s) => s.rows.map((r) => { const m = r.fact.match(/· ([\d,]+) K( computed)?$/); return m ? +m[1].replace(/,/g, '') : NaN; });
+  const kelvin = (s) => s.rows.map((r) => { const m = r.fact.match(/, ([\d,]+) K( computed)?$/); return m ? +m[1].replace(/,/g, '') : NaN; });
   p.check('"coldest cold planets" lists them coldest first, each with its temperature, all under 200 K', /coldest first/.test(coldest.head) && coldest.n === cold.n && kelvin(coldest).length === 8 && kelvin(coldest).every((k) => k < 200) && rising(kelvin(coldest)), `${coldest.head} | ${facts(coldest)}`);
 
   // ---- a question that only orders ----
   const biggest = await ask('largest planets');
-  p.check('a question that only orders lists the whole catalogue in that order, counted as planets', biggest.open && /^[\d,]+ planets · largest first · the first 8$/.test(biggest.head) && biggest.head.split(' ')[0] === whole.count.split(' ')[0] && !biggest.filtered && biggest.rows.every((r) => / R⊕$/.test(r.fact)) && /every planet/.test(biggest.note),
+  p.check('a question that only orders lists the whole catalogue in that order, counted as planets', biggest.open && /^[\d,]+ planets, largest first, the first 8$/.test(biggest.head) && biggest.head.split(' ')[0] === whole.count.split(' ')[0] && !biggest.filtered && biggest.rows.every((r) => / R⊕$/.test(r.fact)) && /every planet/.test(biggest.note),
     `${biggest.head} | ${biggest.count} | ${biggest.note}`);
   const coldestAll = await ask('coldest planets');
   p.check('"coldest planets" over the whole catalogue leads with worlds that have an equilibrium temperature, coldest first', coldestAll.rows.length === 8 && kelvin(coldestAll).every((k) => k >= 1 && k < 200) && rising(kelvin(coldestAll)), facts(coldestAll));
@@ -190,18 +191,18 @@ export default async function search(p, { base }) {
   await call(press, '#btn-random');
   await p.sleep(600);
   const still0 = await state();
-  p.check('a question that matches nothing opens no list, says why, and offers no tour', !none0.open && none0.n === 0 && /· 0 matches,/.test(none0.note) && /No world that large is drawn with a surface\./.test(none0.note) && !none0.tourThese, `${none0.note} | ${none0.count} | tour these ${none0.tourThese}`);
+  p.check('a question that matches nothing opens no list, says why, and offers no tour', !none0.open && none0.n === 0 && /; 0 matches,/.test(none0.note) && /No world that large is drawn with a surface\./.test(none0.note) && !none0.tourThese, `${none0.note} | ${none0.count} | tour these ${none0.tourThese}`);
   p.check('"Another world" with nothing to open stays where it is and says so', still0.name === stay && /No world matches the filter, so there is none to open\.$/.test(still0.note), `${still0.name} | ${still0.note}`);
 
   // ---- a new question starts from the whole catalogue ----
-  await p.ev('document.querySelectorAll("#filters .chip[data-cls]")[1].click()');
+  await p.ev('document.querySelector("#filters [data-cls=rocky]").click()');   // a size band, chosen by hand
   await p.sleep(400);
   const sized = await state();
   const seas = await ask('ocean worlds');
-  p.check('a size chosen with a chip is dropped by the next question', sized.cls !== 'All' && sized.cls !== '' && seas.cls === 'All' && seas.chips.length === 1 && seas.chips[0] === 'drawn with seas ×' && seas.rows.length > 0 && seas.rows.every((r) => /^(temperate world with seas|ocean world)/.test(r.fact)), `${sized.cls} then ${seas.cls} | ${seas.chips.join(', ')} | ${facts(seas)}`);
+  p.check('a size chosen with a chip is dropped by the next question', sized.cls !== 'all' && sized.cls !== '' && seas.cls === 'all' && seas.chips.length === 1 && seas.chips[0] === 'drawn with seas ×' && seas.rows.length > 0 && seas.rows.every((r) => /^(temperate world with seas|ocean world)/.test(r.fact)), `${sized.cls} then ${seas.cls} | ${seas.chips.join(', ')} | ${facts(seas)}`);
   await p.sleep(400);
   const linked = await state();
-  await call(press, '#filters .chip.on[data-clear="looks"]');
+  await call(press, '#filters [data-clear="looks"]');
   await p.sleep(500);
   const cleared = await state();
   p.check('the question is in the link while it filters; clearing its chip takes it out of the link, the note and the field', /[?&]q=ocean/.test(linked.url) && !/[?&]q=/.test(cleared.url) && !cleared.filtered && cleared.n === whole.n && cleared.chips.length === 0 && cleared.note === 'The filter was changed by hand. “ocean worlds” no longer describes what is shown.' && cleared.field === '',
@@ -209,7 +210,7 @@ export default async function search(p, { base }) {
 
   // ---- a filter changed by hand takes the question away, and what is left is what the screen says ----
   const coldGiants = await ask('cold giants');
-  await call(press, '#filters .chip.on[data-clear="cold"]');
+  await call(press, '#filters [data-clear="cold"]');
   await p.sleep(500);
   const noCold = await state();
   p.check('one of a question\'s two chips cleared: the other filter stays, and the note and the link no longer claim the question', coldGiants.chips.length === 2 && coldGiants.n < giants.n && noCold.n === giants.n && noCold.chips.length === 1 && noCold.chips[0] === '1 range ×' && /^The filter was changed by hand\. “cold giants” no longer describes what is shown\.$/.test(noCold.note) && !/[?&]q=/.test(noCold.url),
@@ -230,11 +231,11 @@ export default async function search(p, { base }) {
   p.check('no world listed as hot is a directly imaged one drawn far from its star', hots.rows.length === 8 && hots.rows.every((r) => !/cold gas giant|warm gas giant|frozen/.test(r.fact)), facts(hots));
 
   // ---- a replay of discoveries stops when a question is asked ----
-  await call(press, '#filters .chip[data-act="replay"]');
+  await call(press, '#filters [data-act="replay"]');
   await p.sleep(700);
   const replaying = await state();
   const afterReplay = await ask('cold planet', 1600);
-  p.check('a question stops a replay of discoveries', replaying.replay === 'Stop replay' && afterReplay.replay === 'Replay discoveries' && afterReplay.n === cold.n, `${replaying.replay} then ${afterReplay.replay} | ${afterReplay.count}`);
+  p.check('a question stops a replay of discoveries', replaying.replay === 'replaying' && afterReplay.replay === 'still' && afterReplay.n === cold.n, `${replaying.replay} then ${afterReplay.replay} | ${afterReplay.count}`);
 
   // ---- questions the page cannot read in full: nothing is filtered, and the word is named ----
   await call(setModel, null, 0);   // no model answers
@@ -340,7 +341,7 @@ export default async function search(p, { base }) {
   await call(setModel, '{"kinds":["molten"]}', 300);
   await ask('fluffy lava worlds', 300);
   const taken = await read();
-  p.check('a question asked while another is being read takes its place, and the first reply is never applied', taken.calls === 1 && /“fluffy lava worlds” → lava world/.test(taken.note) && taken.n === lavaAll.n && taken.chips.length === 1 && taken.chips[0] === 'lava world ×', `${taken.calls} calls | ${taken.note} | ${taken.count} | ${taken.chips.join(', ')}`);
+  p.check('a question asked while another is being read takes its place, and the first reply is never applied', taken.calls === 1 && /“fluffy lava worlds” reads as lava world/.test(taken.note) && taken.n === lavaAll.n && taken.chips.length === 1 && taken.chips[0] === 'lava world ×', `${taken.calls} calls | ${taken.note} | ${taken.count} | ${taken.chips.join(', ')}`);
 
   // ---- a reply that matches nothing, and one that fails its checks ----
   await call(setModel, '{"ranges":{"R":[5000,null]}}', 300);
@@ -371,26 +372,26 @@ export default async function search(p, { base }) {
   p.check('Escape with no list open leaves the field as it is', twice.field === 'cold planet' && twice.n === cold.n, `field "${twice.field}" | ${twice.count}`);
 
   // ---- with no question: text half typed is not wiped, and a remark about the old filter does not outlive it ----
-  await call(press, '#filters .chip.on[data-clear="cold"]');
-  await p.ev('document.querySelectorAll("#filters .chip[data-cls]")[1].click()');
+  await call(press, '#filters [data-clear="cold"]');
+  await p.ev('document.querySelector("#filters [data-cls=rocky]").click()');
   await p.sleep(300);
   await call(typeInto, 'my half typed');
   await p.ev('document.getElementById("q").blur()');
   await p.sleep(300);
-  await call(press, '#filters .chip[data-act="tourthese"]');
+  await call(press, '#filters [data-act="tourthese"]');
   await p.sleep(900);
   const halfTyped = await state();
   p.check('"Tour these" over a filter set by hand leaves text half typed in the field', halfTyped.tour && halfTyped.field === 'my half typed', `tour ${halfTyped.tour} | field "${halfTyped.field}"`);
   await call(press, '#tour-end');
-  await p.ev('document.querySelectorAll("#filters .chip[data-cls]")[0].click()');
-  if (!(await state()).rangesOpen) await call(press, '#filters .chip[data-act="ranges"]');
+  await p.ev('document.querySelector("#filters [data-cls=all]").click()');
+  if (!(await state()).rangesOpen) await call(press, '#filters [data-act="ranges"]');
   await p.sleep(300);
   await call(change, '#rg-R-lo', '5000');
   await p.sleep(400);
   await call(press, '#btn-random');
   await p.sleep(400);
   const noneLeft = await state();
-  await call(press, '#filters .chip.on[data-clear="ranges"]');
+  await call(press, '#filters [data-clear="ranges"]');
   await p.sleep(400);
   const back = await state();
   p.check('"no world matches" is said for a filter set by hand, and is gone when the filter is', noneLeft.n === 0 && /No world matches the filter, so there is none to open\.$/.test(noneLeft.note) && back.n === whole.n && back.note === '', `${noneLeft.count} "${noneLeft.note}" then ${back.count} "${back.note}"`);
@@ -410,7 +411,7 @@ export default async function search(p, { base }) {
   await p.click(moving.rows[0].x, moving.rows[0].y);
   await p.sleep(900);
   const waits = await state();
-  await call(press, '#filters .chip[data-act="tourthese"]');
+  await call(press, '#filters [data-act="tourthese"]');
   await p.sleep(900);
   const runs = await state();
   p.check('a result opened from the list waits for the visitor; "Tour these" advances by itself', waits.tour && !waits.tourRuns && waits.name === moving.rows[0].name && runs.tour && runs.tourRuns, JSON.stringify({ waits: waits.tourRuns, runs: runs.tourRuns, name: waits.name }));

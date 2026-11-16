@@ -25,8 +25,8 @@
    ============================================================ */
 
 :root {
-  --sky: #0A1B3D;      /* the sky of the sheet, and the night of sheet c */
-  --ice: #7CC0FA;      /* a clock that is slipping or lost; against gold it separates for colour-blind readers (checked with the chart skill's validator, 2026-11-14) */
+  --sky: var(--cosmos-sky);      /* the sky of the sheet, and the night of sheet c (tokens.css) */
+  --ice: var(--cosmos-ice);      /* a clock that is slipping or lost (tokens.css); against gold it separates for colour-blind readers */
 }
 
 .sheet { max-width: 1480px; margin-inline: auto; padding-inline: clamp(1rem, 3.2vw, 3rem); }
@@ -83,12 +83,12 @@
 #lens2 { display: none; }      /* the lens has its own canvas only where the sheet is too narrow to hold it beside the map */
 
 /* The title block of an engineering drawing: what the sheet is, how it is drawn, where its data is from. */
-.od-block { position: absolute; right: 0; bottom: 0; margin: 0; width: min(19.5rem, 34vw); border: 1px solid var(--line-bright); background: rgba(6, 8, 13, .82); }
+.od-block { position: absolute; right: 0; bottom: 0; margin: 0; width: min(19.5rem, 34vw); border: 1px solid var(--line-bright); background: color-mix(in srgb, var(--void) 82%, transparent); }
 .od-block div { display: grid; grid-template-columns: 3.9rem minmax(0, 1fr); border-top: 1px solid var(--line); }
 .od-block div:first-child { border-top: 0; }
 .od-block dt { font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); padding: 5px 8px; border-right: 1px solid var(--line); }
 .od-block dd { margin: 0; font-size: .64rem; line-height: 1.35; color: var(--text); padding: 4px 8px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }      /* a row wraps: nothing in it is ever cut */
-.od-tip { position: absolute; margin: 0; pointer-events: none; font-size: .68rem; color: var(--text-bright); background: rgba(6, 8, 13, .92); border: 1px solid var(--line-bright); padding: 3px 7px; white-space: nowrap; }
+.od-tip { position: absolute; margin: 0; pointer-events: none; font-size: .68rem; color: var(--text-bright); background: color-mix(in srgb, var(--void) 92%, transparent); border: 1px solid var(--line-bright); padding: 3px 7px; white-space: nowrap; }
 
 /* ---------- the line of time: the sheet's one control ---------- */
 .od-time { position: relative; margin-top: var(--s-4); }
@@ -113,6 +113,7 @@
 .od-read { display: grid; grid-template-columns: minmax(0, 25rem) minmax(0, 1fr); gap: var(--s-3) var(--s-7); align-items: end; margin-bottom: var(--s-5); }
 .od-name { font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-style: normal; font-weight: 400; line-height: 1.05; margin: 0 0 4px; color: var(--text-bright); }      /* upright: in the italic a planet's letter b reads as a 6 */
 .od-name:focus { outline: none; }
+#od-main:focus { outline: none; }   /* reached by the skip link, never by Tab */
 .od-name:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: 4px; }
 .od-meta { font-size: .7rem; letter-spacing: .04em; color: var(--text-dim); margin: 0; min-height: 1.5em; }
 .od-world { font-size: .72rem; margin: 6px 0 0; }
@@ -217,6 +218,19 @@
   .od-table { font-size: .72rem; }
   .od-table th, .od-table td { padding: 5px 6px; }
   #band { height: 206px; }
+  /* a finger's target: every control at least 44 px tall (the review of pull request 42, and the drive's invariant) */
+  .bar .back { display: inline-flex; align-items: center; min-height: 44px; }
+  .od-under .act, .od-pick .act, .od-place .act { min-height: 44px; }
+  .od-pick input, .od-place input { min-height: 44px; }
+  .od-world a { display: inline-flex; align-items: center; min-height: 44px; }
+  .od-list summary, .od-placebox summary { display: flex; align-items: center; min-height: 44px; box-sizing: border-box; }
+  .od-placebox summary { display: inline-flex; }
+  .od-table .linkish { display: inline-flex; align-items: center; min-height: 44px; text-align: left; }
   #night { height: 240px; }
   #tally-view { height: 330px; }
+}
+
+/* Reduced motion: the finished frame. The sky is drawn still in script (overdue/main.js, `still`); this holds the same for every transition and animation of the page and of the shared parts it uses. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }

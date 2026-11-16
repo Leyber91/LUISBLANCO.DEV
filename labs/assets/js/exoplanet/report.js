@@ -107,12 +107,13 @@ const SYSTEM = 'You write a short survey note about one exoplanet for a public s
 
 export function createReport(host, store, actions = {}) {
   host.innerHTML = `
-    <div class="rp-head"><span class="view-k">Survey note</span><span class="rp-who" data-k="who">ENGINE</span><span class="rp-src" data-k="src">deterministic engine</span>
-      <button type="button" class="btn btn-gold" data-k="ask">Ask the model</button></div>
+    <div class="lab"><h2 class="st" id="note-h">Survey note</h2><span class="rp-lamp" id="route"></span></div>
     <p class="rp-h" data-k="head" hidden></p>
     <p class="rp-body" data-k="body" aria-live="polite"></p>
     <p class="rp-q" data-k="q" hidden></p>
-    <details class="rp-rej" data-k="rej" hidden><summary>rejected model reply</summary><p data-k="rejtext"></p></details>`;
+    <div class="rp-acts"><button type="button" class="plain" data-k="ask">ask the model about this world</button><span class="rp-who sr" data-k="who">written by this page</span></div>
+    <p class="rp-src" data-k="src">[REAL] written by this page from the numbers above</p>
+    <details class="rp-rej" data-k="rej" hidden><summary>the model's reply that was set aside</summary><p data-k="rejtext"></p></details>`;
   const $ = (k) => host.querySelector(`[data-k="${k}"]`);
   const ask = $('ask');
   let ctrl = null;
@@ -148,9 +149,9 @@ export function createReport(host, store, actions = {}) {
   function showDeterministic(p) {
     const f = facts(p, store.state.albedo());
     $('head').hidden = true; $('q').hidden = true; $('rej').hidden = true;
-    $('who').textContent = 'ENGINE'; host.classList.remove('is-model');
+    $('who').textContent = 'written by this page'; host.classList.remove('is-model');
     write(deterministicNote(p, f, true), p.name);
-    $('src').textContent = '[REAL] deterministic engine · every number from the data';
+    $('src').textContent = '[REAL] written by this page from the numbers above';
   }
 
   /* A reply whose numbers do not all trace to the fact sheet is not shown as the note:
@@ -164,14 +165,14 @@ export function createReport(host, store, actions = {}) {
       showDeterministic(p);
       $('rej').hidden = false;
       $('rejtext').innerHTML = markUngrounded(all, chk);
-      $('src').textContent = `[REAL] ${res.model} reply rejected: ${chk.total - chk.traced} of ${chk.total} numbers are not in the data; engine note kept`;
+      $('src').textContent = `[REAL] ${res.model}'s reply was set aside: ${chk.total - chk.traced} of ${chk.total} numbers are not in the data, so this page's note stays`;
       return;
     }
-    $('who').textContent = 'MODEL TEXT'; host.classList.add('is-model'); $('rej').hidden = true;
+    $('who').textContent = 'written by a model'; host.classList.add('is-model'); $('rej').hidden = true;
     $('head').hidden = !j.headline; $('head').textContent = String(j.headline || '').slice(0, 90);
     write(note, p.name + ' (model)');
     $('q').hidden = !j.question; $('q').textContent = j.question ? 'Open question: ' + String(j.question).slice(0, 240) : '';
-    $('src').textContent = `[REAL] ${res.source} · ${res.model} · ${(res.ms / 1000).toFixed(1)} s · grounding: ${chk.traced} of ${chk.total} numbers traced to the data`;
+    $('src').textContent = `[REAL] written by ${res.model} (${res.source}) in ${(res.ms / 1000).toFixed(1)} s; ${chk.traced} of ${chk.total} numbers traced to the data`;
   }
 
   ask.addEventListener('click', async () => {
@@ -182,8 +183,8 @@ export function createReport(host, store, actions = {}) {
     const f = facts(p, store.state.albedo());
     const key = p.name + '|' + f.albedo_assumed;
     if (cache.has(key)) { showModel(cache.get(key), f, p); return; }
-    ask.disabled = true; ask.textContent = 'Asking';
-    $('src').textContent = 'waiting for a model route';
+    ask.disabled = true; ask.textContent = 'asking the model'; ask.setAttribute('aria-busy', 'true');
+    $('src').textContent = 'waiting for a model to answer';
     try {
       const res = await LLM.complete({
         system: SYSTEM, prompt: 'FACTS = ' + JSON.stringify(f), json: true, temperature: AI.temperature, timeoutMs: AI.timeoutMs,
@@ -194,14 +195,14 @@ export function createReport(host, store, actions = {}) {
       const ok = res.json && typeof res.json.note === 'string' && res.json.note.length > 20;
       if (res.source === 'offline' || !ok) {
         showDeterministic(p);
-        $('src').textContent = `[REAL] no model answered (${(res.errors || []).slice(-1)[0] || 'invalid reply'}); engine note kept`;
+        $('src').textContent = `[REAL] no model answered (${(res.errors || []).slice(-1)[0] || 'its reply could not be read'}), so this page's note stays`;
       } else { cache.set(key, res); showModel(res, f, p); }
     } catch (e) {
-      if (e.name !== 'AbortError') { showDeterministic(p); $('src').textContent = 'model call failed; deterministic engine'; }
-    } finally { ask.disabled = false; ask.textContent = 'Ask the model'; }
+      if (e.name !== 'AbortError') { showDeterministic(p); $('src').textContent = 'The model call failed, so the note written by this page stays.'; }
+    } finally { ask.disabled = false; ask.textContent = 'ask the model about this world'; ask.removeAttribute('aria-busy'); }
   });
 
   return {
-    update(p) { if (ctrl) ctrl.abort(); ask.disabled = false; ask.textContent = 'Ask the model'; showDeterministic(p); },
+    update(p) { if (ctrl) ctrl.abort(); ask.disabled = false; ask.textContent = 'ask the model about this world'; ask.removeAttribute('aria-busy'); showDeterministic(p); },
   };
 }

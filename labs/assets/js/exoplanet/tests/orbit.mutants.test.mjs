@@ -15,7 +15,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const FLOOR = `export const pitchMax = (lightDir) => Math.max(0.35, PITCH_LIMIT - Math.abs(orbitFrame(lightDir).tilt));`;
@@ -82,4 +82,4 @@ const MUTANTS = [
   ['the far side given a quarter turn short', `orbitFrame(lightDir).azimuth + Math.PI;`, `orbitFrame(lightDir).azimuth + Math.PI / 2;`],
 ];
 
-process.exit(await runMutants({ here, file: 'orbit.js', test: 'orbit.test.mjs', mutants: MUTANTS }));
+process.exit(await runMutants({ here, file: 'orbit.js', test: 'orbit.test.mjs', mutants: MUTANTS, also: ['kit'] }));

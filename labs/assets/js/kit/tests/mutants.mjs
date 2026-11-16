@@ -1,6 +1,8 @@
 /* ============================================================
-   The runner the mutants tests of this lab share
-   (query.mutants.test.mjs, find.mutants.test.mjs).
+   The runner every lab's mutants tests share (moved here from
+   exoplanet/tests on 2026-11-16, when the kit's own lists began
+   to use it). A caller passes its own tests folder as `here`; the
+   folder above it is the lab that is copied and broken.
 
    A mutant is one exact replacement in one module that breaks
    one rule: a bound moved to either side, a branch removed, a

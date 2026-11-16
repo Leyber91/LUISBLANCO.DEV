@@ -1,8 +1,11 @@
 /* ============================================================
-   exoplanet/main.js — entry for exomania.html. Owns the state
-   (selection, diagram, filters, query, tour, pins), wires the
-   renderer and the linked views to it, keeps the URL in step,
-   and runs the opening.
+   exoplanet/main.js: entry for exomania-survey.html. Owns the
+   state (selection, diagram, filters, query, tour, pins), wires
+   the renderer and the sheets to it, keeps the URL in step, and
+   runs the opening. The page is laid out as the bar sheet of
+   level 2 draws it (BAR_L2.md): sheet A the planet, B the numbers,
+   the tours, C the catalogue, D the system, E the signal. Its
+   controls are the kit's (kit/controls.js).
 
    Load order: the PSCompPars snapshot paints the page; the weekly
    roster joins in the background and marks measured radii.
@@ -10,14 +13,15 @@
 
 import { Exoplanet } from './exoplanet.js';
 import { toParams, classify, lockRadiusAU, LOOKS } from './data.js';
-import { loadSnapshot, joinRoster, provisionalMeasured } from './catalog.js';
+import { loadSnapshot, joinRoster, provisionalMeasured, countLine } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
   insolation, monteCarlo, skyView, starColour, isNum,
 } from './science.js';
 import { createPlot, plotValue } from './views/plot.js';
-import { createSystem } from './views/system.js';
+import { createSystem, drawInset } from './views/system.js';
+import { bandsHTML, bindEdges, drawHist, classCounts, classTable } from './views/bands.js';
 import { createTransit } from './views/transit.js';
 import { createTarget } from './views/target.js';
 import { createReport } from './report.js';
@@ -30,6 +34,9 @@ import { createLog } from './log.js';
 import { viaOf } from './record.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
+import { keycap, keyHint, switchCtl, setSwitch, bindSwitch, isOn, scale, bindScale, setScale } from '../kit/controls.js';
+import { el } from '../kit/dom.js';
+import { day, fromIso, isoDay, int } from '../kit/format.js';
 
 const params = new URLSearchParams(location.search);
 window.__EXO_STILL__ = params.has('still');
@@ -82,6 +89,18 @@ function rebuildFilter() {
 const canvas = $('exo-canvas');
 const engine = new Exoplanet(canvas);
 const glOk = engine.ok();
+// what the renderer prepares is said on the fixed line under the name, where it covers nothing; a failure stands over
+// the planet. The wheel is a map's in a page: over a planet not yet pressed it scrolls the page and a hint says how to
+// zoom; once pressed it zooms, until the pointer leaves sheet A or Esc is pressed. + and - zoom from anywhere but a field.
+engine.noteHost = $('sheet-msg'); engine.failHost = $('exo-stage'); engine.wheelNeedsFocus = true;
+let hintTimer = 0;
+engine.onIdleWheel = () => {
+  const h = $('wheel-hint'); if (!h) return;
+  h.hidden = false; clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => { h.hidden = true; }, 2000);
+};
+$('sheet-a').addEventListener('pointerleave', () => { engine.engaged = false; });
+window.__exoEngine = engine;   // kept for a drive: tools/drives/shapes.mjs shows the loading notice through it, to check the notice's line holds its height
 // The page opens on LANDMARKS[0], a temperate world, unless a link names another: start building that
 // look's shader now, while the catalogue loads, instead of after it.
 if (glOk && !new URLSearchParams(location.search).get('p')) engine.prepare(LOOKS.temperate);
@@ -91,29 +110,31 @@ if (glOk && !new URLSearchParams(location.search).get('p')) engine.prepare(LOOKS
 window.__EXO_LOWPOWER__ = !!engine.software;
 if (engine.software) document.documentElement.classList.add('tier-software');
 const desktop = () => window.matchMedia('(min-width: 1101px)').matches;
-/* Fit the world to the free region between the instruments: centre it there (a
-   principal-point shift) and choose the camera distance that makes it fill that region. */
+/* Fit the world to the free middle of sheet A: on a desk, between the name above and the key and title block below,
+   across the sheet; on a phone, the middle three fifths of its own frame. Centre it there (a principal-point shift)
+   and choose the camera distance that makes it fill that region. The line under the planet stands just below it. */
 function placeWorld() {
   const cv = canvas.getBoundingClientRect();
   if (!cv.height) return;
-  let left, right, top, bottom;
+  const left = cv.left, right = cv.right;
+  let top, bottom;
   if (desktop()) {
-    left = $('col-l').getBoundingClientRect().right; right = $('col-r').getBoundingClientRect().left;
-    top = document.querySelector('.reticle').getBoundingClientRect().bottom + 2;
-    bottom = document.querySelector('.cam').getBoundingClientRect().top - 6;
+    const ll = $('key').getBoundingClientRect(), lr = $('tblock').getBoundingClientRect();
+    top = $('ul').getBoundingClientRect().bottom + 8;
+    bottom = Math.min(ll.top, lr.top) - 26;
   } else {
-    left = cv.left; right = cv.right;
-    top = cv.top + 64; bottom = document.querySelector('.cam').getBoundingClientRect().top - 6;
+    top = cv.top + cv.height * 0.2; bottom = cv.bottom - cv.height * 0.2;
   }
   const cx = (left + right) / 2 - cv.left, cy = (top + bottom) / 2 - cv.top;
   const r = Math.max(60, Math.min((bottom - top) / 2, (right - left) / 2 * 0.9));
   const rho = r / cv.height, fov = engine.camera.fov || 1.5;
   const home = Math.min(14, Math.max(2.2, 1 / Math.sin(Math.atan(rho / fov))));
   engine.frame([cx - cv.width / 2, cv.height / 2 - cy], home);
+  $('exo-stage').style.setProperty('--bezel-y', `${Math.round(cy + r + 10)}px`);
 }
 
 /* ---------------- views ---------------- */
-let plot, system, transit, target, report, tours, log = null;
+let plot, system, transit, target, report, tours, log = null, plotKept = false;
 /* What follows the log on the page: the compare bench, the buttons on the world's panel, the chips, a filter by the
    log, the link. The bench is the log's: st.pins is set here, from the record the store returned last, and nowhere
    else. */
@@ -129,7 +150,8 @@ function syncLog() {
   if (b && log) {
     const on = !!st.sel && log.isSaved(st.sel.name), busy = !!st.sel && log.busy(st.sel.name);
     b.textContent = on ? 'In your log' : 'Add to log';
-    b.classList.toggle('on', on);
+    b.classList.toggle('kept', on);   // the gold of a kept clock
+    if (plot && on !== plotKept) { plotKept = on; plot.redraw(); }   // and the chosen world's point on the diagram
     b.disabled = !log.loaded() || busy;   // nothing can be said about the log before it is read, or while the store answers
     if (busy) b.setAttribute('aria-busy', 'true'); else b.removeAttribute('aria-busy');
     b.title = !log.loaded() ? 'The log is being read' : on ? 'Take this world out of your log' : 'Save this world to your log';
@@ -154,6 +176,7 @@ function chipsOf() {
 }
 const actions = {
   select, setPlot, setFilter, startTour, pauseTour,
+  isSaved: (name) => !!log && log.loaded() && log.isSaved(name),   // the diagram draws a kept world's point in gold
   exportAs(kind, btn) {
     const st = store.state;
     if (!st.sel) return;
@@ -165,7 +188,7 @@ const actions = {
     else if (kind === 'log' && log) log.toggle(st.sel, glOk ? engine.camera.mode : 'orbit', (text, ok) => target.say(text, ok));
   },
 };
-function flash(btn, text) { if (!btn) return; const t = btn.textContent; btn.textContent = text; setTimeout(() => { btn.textContent = t; }, 1600); }
+function flash(btn, text) { if (!btn) return; const t = btn.dataset.word || btn.textContent; btn.dataset.word = t; btn.textContent = text; setTimeout(() => { btn.textContent = t; }, 1600); }
 
 function filterLabel() {
   const f = store.state.filter, parts = [];
@@ -201,9 +224,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (a.a ?? a.P ?? 0) - (b.a ?? b.P ?? 0));
   const apply = () => {
     setReticle(p); placeWorld();
-    const ret = document.querySelector('.reticle');
-    ret.classList.remove('acq'); void ret.offsetWidth; ret.classList.add('acq');
-    canvas.classList.remove('swap'); void canvas.offsetWidth; canvas.classList.add('swap');
+    if (desktop()) drawInset($('inset'), p, st.system);
     const c = starColour(p.Teff).srgb.map((x) => Math.round(x * 255)).join(',');
     document.body.style.setProperty('--star-rgb', c);
   };
@@ -226,9 +247,9 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
 function setReticle(p) {
   $('ret-name').textContent = p.name;
   const hz = hzPosition(p);
-  const hzShort = { cons: 'conservative habitable zone', opt: 'optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'zone unknown' }[hz.key];
+  const hzWords = { cons: 'in the conservative habitable zone', opt: 'in the optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'its zone unknown' }[hz.key];
   const sc = sizeClassOf(p);
-  $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'no radius measured'} · ${hzShort}`;
+  $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'No radius measured'}, ${hzWords}`;
   const cl = classify(p);
   $('ret-render').textContent = `procedural surface: ${cl.label.replace(/ · habitable zone/i, '').toLowerCase()}${cl.physics.radiusKnown ? '' : ' [illustrative size]'}`;
 }
@@ -283,46 +304,57 @@ function writeURL() {
 }
 
 /* ---------------- filters, ranges, replay, changelog ---------------- */
+/* how many planets of the catalogue fall in each size class: the bands' counts, counted once per catalogue */
+let classN = null, classLen = -1;
+const classesOfList = () => { const st = store.state; if (classLen !== st.list.length) { classN = classCounts(st.list); classLen = st.list.length; } return classN; };
+/* a switch of the filter bar, drawn from the filter's state */
+const fSwitch = (act, name, words, on, ariaLabel) => switchCtl({ name, words, checked: on, ariaLabel, attrs: { 'data-act': act } });
 function renderFilters() {
   const st = store.state, f = st.filter;
   // the control that has the focus, found again once the bar is drawn
   const a = document.activeElement, bar = $('filters');
-  const had = a && bar.contains(a) ? (a.id ? `#${CSS.escape(a.id)}` : ['cls', 'clear', 'act'].map((k) => (a.dataset[k] ? `[data-${k}="${CSS.escape(a.dataset[k])}"]` : '')).join('')) : '';
-  const n = st.filterActive ? st.list.filter(st.filterFn).length : st.list.length;
-  const chips = [];
-  if (f.year !== null) chips.push(`<button type="button" class="chip on" data-clear="year">${f.year} ×</button>`);
-  if (f.box) chips.push(`<button type="button" class="chip on" data-clear="box">box ×</button>`);
-  if (f.zone) chips.push(`<button type="button" class="chip on" data-clear="zone">habitable zone ×</button>`);
-  if (f.looks) chips.push(`<button type="button" class="chip on" data-clear="looks">${esc(kindWords(f.looks))} ×</button>`);
-  if (f.locked) chips.push(`<button type="button" class="chip on" data-clear="locked">one face to its star ×</button>`);
-  if (f.cold) chips.push(`<button type="button" class="chip on" data-clear="cold">cold: under ${COLD_K} K ×</button>`);
-  if (f.hot) chips.push(`<button type="button" class="chip on" data-clear="hot">hot: ${fmtInt(HOT_K)} K or more ×</button>`);
-  if (Object.keys(f.ranges).length) chips.push(`<button type="button" class="chip on" data-clear="ranges">${Object.keys(f.ranges).length} range${Object.keys(f.ranges).length > 1 ? 's' : ''} ×</button>`);
-  if (f.newOnly) chips.push(`<button type="button" class="chip on" data-clear="newOnly">new ×</button>`);
-  const newChip = st.newNames.size ? `<button type="button" class="chip${f.newOnly ? ' on' : ''}" data-act="new">${fmtInt(st.newNames.size)} new since your last visit</button>` : '';
-  $('filters').innerHTML = `
-    <span class="view-k">Filter</span>
-    ${['all', ...SIZE_CLASSES.map((c) => c.key)].map((k) => `<button type="button" class="chip${f.cls === k ? ' on' : ''}" data-cls="${k}">${k === 'all' ? 'All' : SIZE_CLASSES.find((c) => c.key === k).label}</button>`).join('')}
-    <label class="sel"><span class="sr">Discovery method</span><select id="f-method">
-      <option value="all">All methods</option>${METHOD_GROUPS.map((g) => `<option value="${g.key}"${f.method === g.key ? ' selected' : ''}>${g.label}</option>`).join('')}
-    </select></label>
-    <button type="button" class="chip${$('ranges').hidden ? '' : ' on'}" data-act="ranges" aria-expanded="${!$('ranges').hidden}">Ranges</button>
-    <button type="button" class="chip${isNum(f.upTo) ? ' on' : ''}" data-act="replay">${isNum(f.upTo) ? 'Stop replay' : 'Replay discoveries'}</button>
-    ${log && log.counts().saved ? `<button type="button" class="chip${f.set === 'saved' ? ' on' : ''}" data-act="set-saved" aria-pressed="${f.set === 'saved'}" title="Show only the worlds in your log">Your log</button>` : ''}
-    ${log && log.shared().length ? `<button type="button" class="chip${f.set === 'shared' ? ' on' : ''}" data-act="set-shared" aria-pressed="${f.set === 'shared'}" title="Show only the worlds the link shared">Shared log</button>` : ''}
-    ${chips.join('')}${newChip}
-    ${st.filterActive && n > 0 ? `<button type="button" class="chip" data-act="tourthese">Tour these</button>` : ''}
-    <span class="f-count">${fmtInt(n)} ${st.filterActive ? (n === 1 ? 'match' : 'matches') : 'planets'}</span>`;
+  const had = a && bar.contains(a) ? (a.id ? `#${CSS.escape(a.id)}` : ['cls', 'clear', 'act', 'edge'].map((k) => (a.dataset[k] ? `[data-${k}="${CSS.escape(a.dataset[k])}"]` : '')).join('')) : '';
+  const shown = st.filterActive ? st.list.filter(st.filterFn) : st.list, n = shown.length;
+  const tokens = [];
+  const token = (k, text) => { const b = el('button', 'token', `${text} \u00d7`); b.type = 'button'; b.dataset.clear = k; b.setAttribute('aria-label', `Clear the filter ${text}`); tokens.push(b); };
+  if (f.year !== null) token('year', String(f.year));
+  if (f.box) token('box', 'box');
+  if (f.zone) token('zone', 'habitable zone');
+  if (f.looks) token('looks', kindWords(f.looks));
+  if (f.locked) token('locked', 'one face to its star');
+  if (f.cold) token('cold', `cold: under ${COLD_K} K`);
+  if (f.hot) token('hot', `hot: ${fmtInt(HOT_K)} K or more`);
+  if (Object.keys(f.ranges).length) token('ranges', `${Object.keys(f.ranges).length} range${Object.keys(f.ranges).length > 1 ? 's' : ''}`);
+  if (f.newOnly) token('newOnly', 'new');
+  // the bands on the radius axis, then the row: all sizes, the method, ranges, the replay, the log's sets, the tokens
+  bar.innerHTML = bandsHTML(f, classesOfList());
+  const all = el('button', 'plain all-sizes', 'all sizes'); all.type = 'button'; all.dataset.cls = 'all'; all.setAttribute('aria-pressed', String(f.cls === 'all'));
+  const sel = document.createElement('select'); sel.id = 'f-method'; sel.className = 'pick';
+  sel.append(new Option('all methods', 'all'), ...METHOD_GROUPS.map((g) => new Option(g.label, g.key, false, f.method === g.key)));
+  const selL = el('label', 'sr', 'Discovery method'); selL.htmlFor = 'f-method';
+  const rg = el('button', 'plain', 'ranges'); rg.type = 'button'; rg.dataset.act = 'ranges'; rg.setAttribute('aria-expanded', String(!$('ranges').hidden));
+  const row = el('div', 'f-row');
+  row.append(all, selL, sel, rg, fSwitch('replay', 'replay', ['still', 'by year'], isNum(f.upTo), 'Replay the discoveries by year'));
+  if (log && log.counts().saved) row.append(fSwitch('set-saved', 'show', ['all worlds', 'your log'], f.set === 'saved', 'Show only the worlds in your log'));
+  if (log && log.shared().length) row.append(fSwitch('set-shared', 'show', ['all worlds', 'the shared log'], f.set === 'shared', 'Show only the worlds the link shared'));
+  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new since your last visit`, ['all', 'only new'], f.newOnly, 'Show only the worlds new since your last visit'));
+  row.append(...tokens);
+  if (st.filterActive && n > 0) { const t = el('button', 'plain', 'tour these'); t.type = 'button'; t.dataset.act = 'tourthese'; row.append(t); }
+  bar.append(row);
+  document.querySelector('.f-count').textContent = `${fmtInt(n)} ${st.filterActive ? (n === 1 ? 'match' : 'matches') : 'planets'}`;
+  // C's table: each class, in the catalogue and in what is shown
+  const m = classCounts(shown);
+  document.querySelector('#twin-c .twin-b').innerHTML = classTable(classesOfList(), m);
   chipsKey = chipsOf();
   if (had) { const back = bar.querySelector(had); if (back) back.focus(); }
 }
 function renderRanges() {
   const f = store.state.filter;
   if ($('ranges').hidden) return;
-  $('ranges').innerHTML = `<div class="rg-head"><span class="view-k">Ranges</span><span class="dim">empty = open end</span></div>` +
+  $('ranges').innerHTML = `<div class="rg-head"><span>Ranges</span><span>an empty end is open</span></div>` +
     RANGE_FIELDS.map((r) => {
       const v = f.ranges[r.key] || [null, null];
-      return `<div class="rg-row"><label class="tp-k" for="rg-${r.key}-lo">${r.label}${r.unit ? ` <i>${r.unit}</i>` : ''}</label>
+      return `<div class="rg-row"><label for="rg-${r.key}-lo">${r.label}${r.unit ? ` <i>${r.unit}</i>` : ''}</label>
         <input id="rg-${r.key}-lo" data-rg="${r.key}" data-end="0" type="number" step="any" inputmode="decimal" placeholder="min" value="${v[0] ?? ''}">
         <input id="rg-${r.key}-hi" data-rg="${r.key}" data-end="1" type="number" step="any" inputmode="decimal" placeholder="max" value="${v[1] ?? ''}" aria-label="${r.label} max"></div>`;
     }).join('');
@@ -356,6 +388,12 @@ function bindFilters() {
     else if (b.dataset.act === 'set-shared') setFilter({ set: f.set === 'shared' ? null : 'shared' });
   });
   $('filters').addEventListener('change', (e) => { if (e.target.id === 'f-method') setFilter({ method: e.target.value }); });
+  // the edges of the chosen band, dragged or moved by the keys, set the radius range
+  bindEdges($('filters'), () => {
+    const f = store.state.filter, R = f.ranges.R;
+    if (f.cls !== 'all') { let lo = 0.5; for (const c of SIZE_CLASSES) { if (c.key === f.cls) return [lo, Math.min(c.max, 25)]; lo = c.max; } }
+    return R ? [isNum(R[0]) ? R[0] : 0.5, isNum(R[1]) ? R[1] : 25] : [0.5, 25];
+  }, (range) => setFilter({ cls: 'all', ranges: { ...store.state.filter.ranges, R: range } }));
   $('ranges').addEventListener('change', (e) => {
     const i = e.target.closest('[data-rg]'); if (!i) return;
     const k = i.dataset.rg, end = +i.dataset.end;
@@ -377,7 +415,7 @@ function changelog(list) {
     const seen = new Set(prev.names);
     store.state.newNames = new Set(names.filter((n) => !seen.has(n)));
   }
-  store_(key, JSON.stringify({ date: new Date().toISOString().slice(0, 10), names }));
+  store_(key, JSON.stringify({ date: isoDay(Date.now()), names }));
 }
 
 /* ---------------- search and questions ---------------- */
@@ -404,7 +442,7 @@ function bindSearch() {
       : it.hit
       ? `<li role="option" id="qr-${i}" class="${i === cur ? 'on' : ''}" aria-selected="${i === cur}" data-i="${i}"><b>${esc(it.hit.name)}</b><span>${esc(it.fact)}</span></li>`
       : `<li role="option" id="qr-${i}" class="${i === cur ? 'on' : ''}" aria-selected="${i === cur}" data-i="${i}">
-      <b>${esc(it.name)}</b><span>${isNum(it.R) ? fmt(it.R, 3) + ' R⊕' : ''}${it.year ? ' · ' + it.year : ''}</span></li>`).join('');
+      <b>${esc(it.name)}</b><span>${[isNum(it.R) ? fmt(it.R, 3) + ' R⊕' : '', it.year ? 'found ' + it.year : ''].filter(Boolean).join(', ')}</span></li>`).join('');
     box.hidden = !items.length; q.setAttribute('aria-expanded', String(!!items.length));
     const row = cur >= 0 && items[cur] ? $('qr-' + cur) : null;
     if (row) { q.setAttribute('aria-activedescendant', row.id); row.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
@@ -417,7 +455,7 @@ function bindSearch() {
     const r = st.filter.query === text && shut !== text && (st.filterActive || st.querySort) ? rankedMatches(8) : null;
     if (!r || !r.hits.length) { if (hitsFor === text || !items.some((it) => !it.hit)) { items = []; head = ''; hitsFor = null; close(); } return; }
     items = r.hits.map((p) => ({ hit: p, fact: hitFact(p, r.sort.key) }));
-    head = `${st.filterActive ? countWords(r.total) : `${fmtInt(r.total)} planets`} · ${orderWords(r)}${r.total > r.hits.length ? ` · the first ${r.hits.length}` : ''}`;
+    head = `${st.filterActive ? countWords(r.total) : `${fmtInt(r.total)} planets`}, ${orderWords(r)}${r.total > r.hits.length ? `, the first ${r.hits.length}` : ''}`;
     hitsFor = text; hitsOrder = r; cur = 0;
     render();
     box.scrollIntoView({ block: 'nearest' });        // on a phone the field sits low on the page: bring the whole list into view
@@ -548,7 +586,7 @@ function tourOf(hits, i, r, auto) {
   const st = store.state;
   if (!hits.length) return;
   const among = st.filterActive ? countWords(r.total) : `${fmtInt(r.total)} planets`;
-  const stops = hits.map((p) => ({ p, cap: `${hitFact(p, r.sort.key)} · ${orderWords(r)}, among ${among}.` }));
+  const stops = hits.map((p) => ({ p, cap: `${hitFact(p, r.sort.key)}; ${orderWords(r)}, among ${among}.` }));
   st.tour = { key: 'custom', stops, i: Math.max(0, Math.min(i, stops.length - 1)), label: st.filter.query ? `“${st.filter.query}”` : 'Your filter', auto };
   showStop();
 }
@@ -572,10 +610,11 @@ function showStop(self = false) {
   const t = store.state.tour; if (!t) return;
   const s = t.stops[t.i];
   select(s.p, { from: 'tour', keepTour: true, self });
-  $('tour-k').textContent = `Tour · ${t.label} · ${t.i + 1} of ${t.stops.length}`;
+  (t.seen || (t.seen = new Set())).add(t.i);
+  $('tour-k').textContent = `${t.label}, stop ${t.i + 1} of ${t.stops.length}`;
   $('tour-cap').textContent = s.cap;
   $('tourbar').hidden = false;
-  tours.sync();
+  tours.sync(tourKeys, $('tour-keys'));
   writeURL();
   clearTimeout(tourTimer);
   const bar = $('tour-prog');
@@ -591,7 +630,7 @@ function endTour() {
   clearTimeout(tourTimer);
   store.state.tour = null;
   $('tourbar').hidden = true;
-  tours && tours.sync();
+  tours && tours.sync(tourKeys, $('tour-keys'));
 }
 
 /* ---------------- compare ---------------- */
@@ -620,11 +659,12 @@ function openCompare() {
 /* ---------------- camera, ground, bezel ---------------- */
 function syncCamButtons() {
   const mode = glOk ? engine.camera.mode : 'orbit';
-  document.querySelectorAll('[data-cam]').forEach((b) => b.classList.toggle('on', b.dataset.cam === mode));
+  setScale($('distance'), mode);
+  $('sheet-a').dataset.view = mode;   // on the ground the sky is bright: the corners take a dark ground of their own
   const sel = store.state.sel;
   const giant = sel && classify(sel).klass >= 2;
-  const sb = document.querySelector('[data-cam="surface"]');
-  if (sb) sb.textContent = giant ? 'Into the clouds' : 'Surface';
+  const sb = document.querySelector('[data-cam="surface"] .sc-w');
+  if (sb) sb.textContent = giant ? 'into the clouds' : 'surface';
   $('ground').hidden = mode !== 'surface';
   if (mode === 'surface' && sel) renderGround(sel);
 }
@@ -633,10 +673,11 @@ function renderGround(p) {
   const sky = skyView(p);
   const cl = classify(p), locked = cl.locked;   // the rule the picture itself is drawn by
   $('ground-sites').innerHTML = locked
-    ? `<span class="view-k">Drawn tidally locked (${fmt(cl.physics.a, 3)} AU, inside the ${fmt(lockRadiusAU(cl.physics.Mstar), 2)} AU lock radius): land at</span> <button type="button" class="chip" data-elev="80">substellar point</button><button type="button" class="chip" data-elev="0">terminator</button><button type="button" class="chip" data-elev="-10">night side</button>`
-    : `<span class="view-k">Time of day: drag the star's elevation</span>`;
-  const grav = mc.g ? `gravity ${fmt(mc.g.med, 2)} g` : mc.hasR ? 'gravity —' : 'gravity unknown: no radius measured';
-  $('ground-read').innerHTML = `<b class="tg tg-${mc.massFrom === 'measured' ? 'd' : 'e'}">${mc.massFrom === 'measured' ? 'D' : 'E'}</b> ${grav} · <b class="tg tg-d">D</b> Teq ${mc.teq ? fmtInt(mc.teq.med) : '—'} K · <b class="tg tg-d">D</b> star ${sky ? fmt(sky.angDeg, 2) : '—'}° wide (Sun 0.53°)${locked ? ' · <b class="tg tg-i">I</b> lock radius at 4.5 Gyr' : ''} · <b class="tg tg-i">I</b> terrain`;
+    ? `<span>Drawn with one face to its star (${fmt(cl.physics.a, 3)} AU, inside the ${fmt(lockRadiusAU(cl.physics.Mstar), 2)} AU lock radius). Land at</span> <button type="button" class="plain" data-elev="80">the point under the star</button><button type="button" class="plain" data-elev="0">the terminator</button><button type="button" class="plain" data-elev="-10">the night side</button>`
+    : `<span>The time of day: move the star's elevation</span>`;
+  const lt = (k) => `<span class="lt ${k}" aria-hidden="true"></span>`;
+  const grav = mc.g ? `gravity ${fmt(mc.g.med, 2)} g` : mc.hasR ? 'gravity unknown' : 'gravity unknown: no radius measured';
+  $('ground-read').innerHTML = `${lt(mc.massFrom === 'measured' ? 'd' : 'e')}${grav}, ${lt('d')}equilibrium ${mc.teq ? fmtInt(mc.teq.med) + ' K' : 'unknown'}, ${lt('d')}its star ${sky ? fmt(sky.angDeg, 2) + '\u00b0' : 'of unknown size'} wide (the Sun 0.53\u00b0)${locked ? `, ${lt('i')}lock radius at 4.5 Gyr` : ''}, ${lt('i')}the terrain`;
 }
 function setCam(mode) {
   if (!glOk) return;
@@ -649,8 +690,8 @@ function bezel() {
   const c = engine.camera, mode = c.mode;
   const fovDeg = Math.round(2 * Math.atan(0.5 / (mode === 'surface' ? 1.0 : mode === 'closeorbit' ? 1.25 : c.fov)) * 180 / Math.PI);
   $('bezel').textContent = mode === 'surface'
-    ? `SURFACE · STAR ${Math.round(c.sunElev)}° UP · LOOK ${Math.round((c.lookYaw * 180 / Math.PI) % 360)}° · FOV ${fovDeg}°`
-    : `${mode === 'closeorbit' ? 'LOW PASS' : 'ORBIT'} · RANGE ${fmt(mode === 'closeorbit' ? c.closeR : c.dist, 3)} R · FOV ${fovDeg}°`;
+    ? `on the surface, the star ${Math.round(c.sunElev)}\u00b0 up, looking ${Math.round((c.lookYaw * 180 / Math.PI) % 360)}\u00b0, field ${fovDeg}\u00b0`
+    : `${mode === 'closeorbit' ? 'low pass' : 'orbit'}, ${fmt(mode === 'closeorbit' ? c.closeR : c.dist, 3)} planet radii from its centre, field ${fovDeg}\u00b0, ray-traced now`;
 }
 
 function randomWorld() {
@@ -670,29 +711,38 @@ function renderMethod(extra = {}) {
 }
 function perfLine() {
   const s = engine.stats || {};
-  const tier = engine.tier === 'software' ? 'software GL, on demand' : engine.tier === 'still' ? 'still frame' : `${s.fps ? s.fps + ' fps' : 'gpu'} · scale ${(engine.camera.resScale || 0).toFixed(2)}`;
-  $('perf').textContent = glOk ? `${engine.buffer} · ${tier}` : 'WebGL unavailable';
+  const tier = engine.tier === 'software' ? 'software GL, drawn on demand' : engine.tier === 'still' ? 'a still frame' : `${s.fps ? s.fps + ' frames a second' : 'GPU'}, scale ${(engine.camera.resScale || 0).toFixed(2)}`;
+  $('perf').textContent = glOk ? `${engine.buffer}, ${tier}` : 'WebGL unavailable';
   $('perf').title = glOk ? `Renderer: ${engine.renderer}` : '';
 }
 
 /* ---------------- keyboard ---------------- */
+/* The keys the keycaps show: R another world, / the finder, H the instruments, the arrows a tour's stops, Esc the end of
+   a tour. None of them acts while a field has the focus (they are letters there), or while a dialog is open; the
+   arrows belong to a control that takes them itself (a scale, the diagrams, a band's edge, a canvas). */
 function bindKeys() {
   document.addEventListener('keydown', (e) => {
-    const typing = /INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName || '');
+    const a = document.activeElement;
+    const typing = /INPUT|SELECT|TEXTAREA/.test(a?.tagName || '') || !!a?.isContentEditable;
+    if (e.key === 'Escape') engine.engaged = false;   // the wheel scrolls the page again
+    if (document.querySelector('dialog[open]')) return;
     if (e.key === '/' && !typing) { e.preventDefault(); $('q').focus(); return; }
     if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
-    const onCanvas = document.activeElement?.tagName === 'CANVAS';
-    if (e.key === 'r') randomWorld();
-    else if (e.key === 'h') toggleClean();
-    else if (store.state.tour && e.key === 'ArrowRight' && !onCanvas) stepTour(1);
-    else if (store.state.tour && e.key === 'ArrowLeft' && !onCanvas) stepTour(-1);
+    const ownsArrows = !!a && (a.tagName === 'CANVAS' || !!a.closest('[role="radiogroup"], [role="tablist"], [role="slider"]'));
+    if (e.key === 'r' || e.key === 'R') randomWorld();
+    else if (e.key === 'h' || e.key === 'H') toggleClean();
+    else if (store.state.tour && e.key === 'ArrowRight' && !ownsArrows) { e.preventDefault(); stepTour(1); }
+    else if (store.state.tour && e.key === 'ArrowLeft' && !ownsArrows) { e.preventDefault(); stepTour(-1); }
     else if (e.key === 'Escape' && store.state.tour) endTour();
+    else if ((e.key === '+' || e.key === '=' || e.key === '-' || e.key === '_') && glOk && !e.defaultPrevented) {   // the planet's own handler took it when it has the focus
+      e.preventDefault(); engine.zoomBy(e.key === '+' || e.key === '=' ? 1 / 1.12 : 1.12);
+    }
   });
 }
-function toggleClean() {
-  const on = document.body.classList.toggle('clean');
-  $('btn-clean').textContent = on ? 'Show instruments' : 'Hide instruments';
-  $('btn-clean').setAttribute('aria-pressed', String(on));
+/* the world alone: everything but the planet and this switch leaves, and comes back */
+function toggleClean(on = !document.body.classList.contains('clean')) {
+  document.body.classList.toggle('clean', on);
+  setSwitch($('btn-clean'), on);
 }
 
 /* The route pill. On a page served from this machine, llm.js probes the local Ollama when the
@@ -702,7 +752,7 @@ function toggleClean() {
 function mountRouteWhenSafe() {
   const local = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
   if (!local) { mountRoutePanel($('route')); return; }
-  $('route').innerHTML = '<span class="route-wait" title="On this machine the model route is detected the first time you touch the page">model: detected on first use</span>';
+  $('route').innerHTML = '<span class="route-wait" title="On this machine the model route is found the first time you touch the page"><i class="lamp-i" aria-hidden="true"></i>model: found on first use</span>';
   const go = () => {
     ['pointerdown', 'keydown'].forEach((t) => removeEventListener(t, go, true));
     $('route').innerHTML = ''; mountRoutePanel($('route'));
@@ -716,7 +766,53 @@ function veil(text, frac) {
   if (frac !== undefined) $('veil-fill').style.transform = `scaleX(${frac})`;
 }
 
+/* ---------------- the controls of the sheets, built once ---------------- */
+let tourKeys = null;
+function buildControls() {
+  // the finder's key, and the key for another world
+  const field = document.querySelector('.finder .field'), hint = keyHint('/');
+  field.insertBefore(hint, $('q-results'));
+  hint.addEventListener('click', () => $('q').focus());
+  $('finder-acts').append(keycap('R', 'another world', { id: 'btn-random', ariaLabel: 'Another world' }));
+  // sheet A's key: the distance scale, two switches, and on the ground the star's elevation
+  const dist = scale({ name: 'distance', id: 'distance', ariaLabel: 'Camera distance', value: 'orbit',
+    options: [{ value: 'orbit', label: 'orbit', attrs: { 'data-cam': 'orbit' } }, { value: 'closeorbit', label: 'low pass', attrs: { 'data-cam': 'closeorbit' } }, { value: 'surface', label: 'surface', attrs: { 'data-cam': 'surface' } }] });
+  const sws = el('div', 'sws');
+  const plain = switchCtl({ name: 'clouds', words: ['seeded', 'off'], id: 'btn-plain', ariaLabel: 'Clouds off: the data only' });
+  plain.title = 'The clouds\' pattern is seeded by the name; so are continents, craters and bands.';
+  const clean = switchCtl({ name: 'instruments', words: ['shown', 'hidden'], id: 'btn-clean', ariaLabel: 'Instruments hidden' });
+  clean.setAttribute('aria-keyshortcuts', 'H');
+  // the key that does the same, beside the switch: H. It is a legend, not a second target: the switch is the one to press
+  const cleanRow = el('span', 'sw-row'), hKey = keyHint('H');
+  hKey.title = 'H hides the instruments and brings them back';
+  cleanRow.append(clean, hKey);
+  sws.append(plain, cleanRow);
+  const ground = el('div', 'ground'); ground.id = 'ground'; ground.hidden = true;
+  ground.innerHTML = `<div class="ground-row"><label for="sun-elev">star elevation</label><input id="sun-elev" class="engraved" type="range" min="-10" max="80" step="1" value="14" /><span class="rv" id="sun-elev-v">14\u00b0</span></div>
+    <p class="ground-sites" id="ground-sites"></p><p class="ground-read" id="ground-read"></p>`;
+  $('key').append(dist, sws, ground);
+  // the title block, its cells written when the catalogue is in
+  $('tblock').innerHTML = `<div class="tb-h"><span>Sheet A, the planet</span><span>1 of 5</span></div>
+    <div class="tb-c tb-cat"><span class="tb-k">catalogue</span><span class="tb-v" id="tb-cat">loading</span></div>
+    <div class="tb-c"><span class="tb-k">render</span><span class="tb-v">illustrative</span></div>
+    <div class="tb-c"><span class="tb-k">planets</span><span class="tb-v" id="tb-n">loading</span></div>
+    <div class="tb-c"><span class="tb-k">take it</span><span class="tb-v take"><button type="button" class="plain" data-act="plate" title="Save this sheet as a PNG">PNG</button><button type="button" class="plain" data-act="csv" title="The filtered catalogue, with this page's inferences, as CSV">CSV</button><button type="button" class="plain" data-act="link" title="Copy a link to this exact view">link</button></span></div>`;
+  $('tblock').addEventListener('click', (e) => { const b = e.target.closest('[data-act]'); if (b) actions.exportAs(b.dataset.act, b); });
+  // B's label row: how each was inferred
+  document.querySelector('#sheet-b .lab [data-act="chain"]').addEventListener('click', (e) => actions.exportAs('chain', e.currentTarget));
+  // the tour's keys: back, on, end
+  tourKeys = el('span', 'tour-keyset');
+  tourKeys.append(keycap('\u2190', '', { id: 'tour-prev', ariaLabel: 'Previous stop' }), keycap('\u2192', '', { id: 'tour-next', ariaLabel: 'Next stop' }), keycap('Esc', 'end', { id: 'tour-end', ariaLabel: 'End the tour', attrs: { 'aria-keyshortcuts': 'Escape' } }));
+  $('tour-keys').append(tourKeys);
+  // each dialog closes with Esc, and says so on its key
+  for (const slot of document.querySelectorAll('[data-close-slot]')) {
+    const id = slot.dataset.closeSlot;
+    slot.append(keycap('Esc', 'close', { id: id === 'method' ? 'method-close' : undefined, attrs: id === 'method' ? { 'aria-keyshortcuts': 'Escape' } : { 'data-close': id, 'aria-keyshortcuts': 'Escape' } }));
+  }
+}
+
 async function boot() {
+  buildControls();
   rebuildFilter();
   target = createTarget($('col-l'), store, actions);
   store.state.albedo = target.albedo;
@@ -726,22 +822,19 @@ async function boot() {
   transit = createTransit($('v-tr'), store);
   tours = createTours($('tours'), store, actions);
   mountRouteWhenSafe();
-  // in the page from the start and empty, so that its first words are announced; the stylesheet does not draw it while empty
-  const qn = document.createElement('p'); qn.id = 'q-note'; qn.className = 'q-note'; qn.setAttribute('aria-live', 'polite');
-  document.querySelector('.search').appendChild(qn);
+  // the note under the finder (#q-note) is in the page from the start and empty, so that its first words are announced
   bindFilters(); bindSearch(); bindKeys();
-  document.querySelectorAll('[data-cam]').forEach((b) => b.addEventListener('click', () => setCam(b.dataset.cam)));
+  bindScale($('distance'), (mode) => setCam(mode));
   $('btn-random').addEventListener('click', randomWorld);
-  $('btn-clean').addEventListener('click', toggleClean);
-  $('btn-plain').addEventListener('click', () => {
-    const st = store.state; st.plain = !st.plain;
-    $('btn-plain').classList.toggle('on', st.plain); $('btn-plain').setAttribute('aria-pressed', String(st.plain));
+  $('btn-clean').addEventListener('click', () => toggleClean(!document.body.classList.contains('clean')));
+  bindSwitch($('btn-plain'), (off) => {
+    const st = store.state; st.plain = off;
     if (st.sel && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life }); }
   });
-  $('sun-elev').addEventListener('input', (e) => { engine.setCamera({ sunElev: +e.target.value }); $('sun-elev-v').textContent = `${e.target.value}°`; });
+  $('sun-elev').addEventListener('input', (e) => { engine.setCamera({ sunElev: +e.target.value }); $('sun-elev-v').textContent = `${int(+e.target.value)}°`; });   // the kit writes −10, with the minus sign
   $('ground-sites').addEventListener('click', (e) => {
     const b = e.target.closest('[data-elev]'); if (!b) return;
-    engine.setCamera({ sunElev: +b.dataset.elev }); $('sun-elev').value = b.dataset.elev; $('sun-elev-v').textContent = `${b.dataset.elev}°`;
+    engine.setCamera({ sunElev: +b.dataset.elev }); $('sun-elev').value = b.dataset.elev; $('sun-elev-v').textContent = `${int(+b.dataset.elev)}°`;
   });
   $('tour-prev').addEventListener('click', () => stepTour(-1));
   $('tour-next').addEventListener('click', () => stepTour(1));
@@ -758,13 +851,13 @@ async function boot() {
   engine.onMode = () => syncCamButtons();
   engine.onReady = () => { if ($('compare').open) openCompare(); };
   document.addEventListener('visibilitychange', () => engine.setVisible && engine.setVisible(!document.hidden));
-  if (typeof IntersectionObserver === 'function') new IntersectionObserver((es) => engine.setVisible && engine.setVisible(es[0].isIntersecting && !document.hidden)).observe($('stage'));
+  if (typeof IntersectionObserver === 'function') new IntersectionObserver((es) => engine.setVisible && engine.setVisible(es[0].isIntersecting && !document.hidden)).observe($('exo-stage'));
   window.addEventListener('resize', () => { placeWorld(); });
   if (typeof ResizeObserver === 'function') {
     let t = 0;
-    const ro = new ResizeObserver(() => { cancelAnimationFrame(t); t = requestAnimationFrame(placeWorld); });
-    ['stage', 'col-l', 'col-r'].forEach((id) => ro.observe($(id)));
-    ro.observe(document.querySelector('.reticle'));
+    // the canvas follows sheet A's size (not the window's), and the world its free middle
+    const ro = new ResizeObserver(() => { cancelAnimationFrame(t); t = requestAnimationFrame(() => { if (glOk) engine.resize(); placeWorld(); const s = store.state.sel; if (s && desktop()) drawInset($('inset'), s, s ? store.state.system : []); if (store.state.list.length) drawHist($('bands-cv'), store.state.list); }); });
+    ['exo-stage', 'ul', 'key', 'tblock', 'bands'].forEach((id) => ro.observe($(id)));
   }
   placeWorld();
 
@@ -814,7 +907,11 @@ async function boot() {
   if (params.get('q')) { $('q').value = params.get('q'); runQuestion(params.get('q'), false, false); }
 
   renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), rosterNote: 'The weekly roster is joining in the background.' });
-  $('stamp').textContent = `${fmtInt(st.list.length)} planets · NASA Exoplanet Archive · ${snap.meta.retrieved}`;
+  const retrieved = day(fromIso(snap.meta.retrieved), snap.meta.retrieved);
+  $('tb-cat').textContent = `NASA archive, ${retrieved}`;
+  $('tb-n').textContent = countLine(st.list, false);
+  drawHist($('bands-cv'), st.list);
+  tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
 
   // ignition: the world arrives from deep space, the instruments assemble around it
   if (glOk) { engine.start(); if (!cam.every(Number.isFinite) || cam.length !== 3) engine.arrive(); }
@@ -826,14 +923,19 @@ async function boot() {
 
   setInterval(perfLine, 2000); perfLine();
   setInterval(bezel, 300); bezel();
+  // the five thumbnails of sheet C, the page's heaviest drawing, once the page is idle and no shader is being built
+  thumbsWhenQuiet('catalogue');
 
   try {
     const { added, rosterCount } = await joinRoster(st.list);
     for (const p of added) st.byName.set(p.name, p);
     plot.resetStats(); plot.redraw();
+    thumbsWhenQuiet('roster');   // the roster added planets and said which radii are measured: the thumbnails are drawn again, once
     const note = `The weekly roster (${DATA.rosterLabel}) lists ${fmtInt(rosterCount)} planets with a measured radius${added.length ? ` and added ${fmtInt(added.length)} confirmed after the snapshot` : '; none are newer than the snapshot'}.`;
     renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), rosterNote: note });
-    $('stamp').textContent = `${fmtInt(st.list.length)} planets · ${fmtInt(rosterCount)} measured radii · ${snap.meta.retrieved}`;
+    $('tb-n').textContent = countLine(st.list, true);
+    tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
+    drawHist($('bands-cv'), st.list);
     if (st.sel) target.update(st.sel);
   } catch (e) {
     console.warn('[exomania] weekly roster unavailable; radius provenance is provisional', e.message);
@@ -842,6 +944,29 @@ async function boot() {
   renderFilters();
   resay();
   if (log) log.reread();
+}
+
+/* The five thumbnails, drawn when the page is quiet. One drawing waits at a time, and draws the list as it is when it
+   runs. window.__exoThumbs says when each drawing ran, whether a shader was building then, and how many have run. */
+let thumbsPending = false;
+function thumbsWhenQuiet(why) {
+  if (thumbsPending) return;
+  thumbsPending = true;
+  whenQuiet(() => {
+    thumbsPending = false;
+    const building = glOk ? engine.building() : false;
+    plot.drawThumbs();
+    const prev = window.__exoThumbs || { draws: 0, whys: [] };
+    window.__exoThumbs = { at: Math.round(performance.now()), building, draws: prev.draws + 1, whys: [...prev.whys, why], listed: store.state.list.length };
+  });
+}
+
+/* Run fn when the page is idle and the renderer is not building a program: a page that holds its thread while a
+   shader is built breaks what runs under it (Labs OS gave up on its store once, 2026-11-15). */
+function whenQuiet(fn) {
+  const idle = window.requestIdleCallback ? (f) => window.requestIdleCallback(f, { timeout: 8000 }) : (f) => setTimeout(f, 300);
+  const go = () => { if (glOk && engine.building()) { setTimeout(go, 500); return; } idle(() => { if (glOk && engine.building()) { setTimeout(go, 500); return; } fn(); }); };
+  go();
 }
 
 boot();

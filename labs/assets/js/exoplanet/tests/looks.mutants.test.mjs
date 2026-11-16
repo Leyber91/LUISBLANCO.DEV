@@ -63,6 +63,7 @@ const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.l
 try {
   mkdirSync(join(tmp, 'labs/assets/data/exomania'), { recursive: true });
   cpSync(join(here, '..'), join(tmp, 'labs/assets/js/exoplanet'), { recursive: true });
+  cpSync(join(here, '../../kit'), join(tmp, 'labs/assets/js/kit'), { recursive: true });   // the lab's numbers are written by the kit (kit/format.js)
   cpSync(join(here, '../../../data/exomania/pscomppars-snapshot.json'), join(tmp, 'labs/assets/data/exomania/pscomppars-snapshot.json'));
   const dataFile = join(tmp, 'labs/assets/js/exoplanet/data.js');
   const test = join(tmp, 'labs/assets/js/exoplanet/tests/looks.test.mjs');

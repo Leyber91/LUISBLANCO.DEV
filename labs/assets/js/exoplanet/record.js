@@ -42,6 +42,7 @@
    record in, a record out, no storage and no page.
    ============================================================ */
 
+import { grouped } from '../kit/format.js';
 /* The version of the record's shape. */
 export const V = 2;
 export const LIMITS = Object.freeze({ saved: 200, visits: 500, pins: 3, shared: 24, dropped: 1000000 });
@@ -227,10 +228,10 @@ export function viaOf(from, { self = false, results = false } = {}) {
 /* ---------- the words that depend on the record ---------- */
 
 /* 1234567 as "1,234,567", whatever the browser's own language. */
-export const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+export const thousands = (n) => grouped(n);   // the kit's one convention for numbers
 export const worlds = (n) => `${thousands(n)} ${n === 1 ? 'world' : 'worlds'}`;
 /* The words of the log line. */
-export const lineWords = (c, shared = 0) => `Your log · ${thousands(c.visited)} visited · ${thousands(c.saved)} saved${shared > 0 ? ` · ${thousands(shared)} shared with you` : ''}`;
+export const lineWords = (c, shared = 0) => `Log: ${thousands(c.visited)} visited, ${thousands(c.saved)} saved${shared > 0 ? `, ${thousands(shared)} shared with you` : ''}`;
 /* How a line of the visits was reached: the way alone for one visit; for more, the count and the way of the last.
    The way of the earlier visits is not kept, so it is not said. */
 export const visitWords = (e) => (e.n > 1 ? `${thousands(e.n)} visits, the last ${VIA_WORDS[e.via]}` : VIA_WORDS[e.via]);

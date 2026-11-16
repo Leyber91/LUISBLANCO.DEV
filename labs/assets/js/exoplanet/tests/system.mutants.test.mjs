@@ -17,7 +17,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const REACH = `export const viewExtent = (extent, solar) => (solar ? Math.max(extent, SOLAR_REACH) : extent);`;
@@ -58,4 +58,4 @@ const MUTANTS = [
   ['the sentence without its end', SENTENCE, SENTENCE.replace('${where}.`;', '${where}`;')],
 ];
 
-process.exit(await runMutants({ here, file: 'views/system.js', test: 'orbit.test.mjs', mutants: MUTANTS }));
+process.exit(await runMutants({ here, file: 'views/system.js', test: 'orbit.test.mjs', mutants: MUTANTS, also: ['kit'] }));
