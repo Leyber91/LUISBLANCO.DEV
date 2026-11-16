@@ -433,7 +433,7 @@ export function changesCondition(c, ch, all) {
   if (overlaps(ch, [c.at, c.end])) return true;
   const added = ch.ins.trim(), removed = ch.del.trim();
   if (c.kind === 'clamp') {
-    if (!within(ch, [c.inner[0] - 1, c.inner[1] + 1]) && !(ch.a === ch.b && (ch.a === c.inner[0] || ch.a === c.inner[1]))) return false;
+    if (!within(ch, [c.inner[0] - 1, c.inner[1] + 1])) return false;
     return !all.some((o) => o !== c && o.own[0] >= c.inner[0] && o.own[1] <= c.inner[1] && within(ch, o.own));
   }
   const [l0, l1] = c.left, [r0, r1] = c.right;
@@ -657,6 +657,7 @@ function selftest() {
   yes('an entry in the second export does not change the first', coverage(two, [m('a', 'return b;', 'return 0;')]).exports.map((x) => x.status).join() === 'never broken,broken');
   yes('an exported selftest is not counted as an export', coverage('export function selftest() { return 1; }\n', []).exports.length === 0);
   yes('a removal that could sit in either of two exports changes only the one every placement touches', coverage('export function f(a) { return a; }\nexport function g(a) { return a; }\n', [m('a', 'return a; }\nexport function g(a) { return a; }', 'return a; }')]).exports.map((x) => x.status).join() === 'never broken,broken');
+  yes('an export is changed only when every placement of a removal touches it', coverage('export function f(a) { return a; }\nexport function g(a) { return a; }\n', [m('a', 'export function f(a) { return a; }\n', '')]).exports.map((x) => x.status).join() === 'broken,never broken');
   yes('an arrow export\'s body ends at its statement', coverage('export const f = (a) => a + 1;\nexport const g = (b) => b + 2;\n', [m('a', 'b + 2', 'b + 3')]).exports.map((x) => x.status).join() === 'never broken,broken');
 
   // the report and its exit code

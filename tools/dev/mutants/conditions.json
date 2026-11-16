@@ -326,7 +326,7 @@
   },
   {
     "name": "clamp: any change anywhere changes a clamp",
-    "from": "    if (!within(ch, [c.inner[0] - 1, c.inner[1] + 1]) && !(ch.a === ch.b && (ch.a === c.inner[0] || ch.a === c.inner[1]))) return false;\n",
+    "from": "    if (!within(ch, [c.inner[0] - 1, c.inner[1] + 1])) return false;\n",
     "to": ""
   },
   {
