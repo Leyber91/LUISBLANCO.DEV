@@ -23,7 +23,7 @@
    that names a fault is one an independent review found on
    2026-11-14.
 
-   After every step the rules of tools/drives/invariants.mjs hold
+   After every step the rules of tools/invariants.mjs hold
    on whichever page the drive is on: no sideways scroll, every
    target 44 px tall at 390, every text 4.5 to 1, and gold only
    where the page allows it. The sky's gold is the gold of a kept
@@ -36,16 +36,26 @@
    one check for it here ran before.
    ============================================================ */
 
-import { overflow, targets, contrast, gold } from './invariants.mjs';
+import { overflow, targets, contrast, gold } from '../invariants.mjs';
 import { SURVEY_GOLD } from './shapes.mjs';
 
 const SKY_GOLD = { allow: ['.bp', '.los-bk', '.lamp.kept', '.tally-marks .tl-kept', '.fill.kept', '.lbr-panel'] };
 
+/* The four rules on whichever page of the labs a drive is on: the survey's gold on the survey, the sky's on the sky;
+   a page outside labs/ (a dev sheet of tools/dev) is not a visitor's and keeps none of them. search.mjs, log.mjs,
+   orbit.mjs and planets.mjs register these too. */
+export function exomaniaRules() {
+  const labs = (e) => `(/\\/labs\\//.test(location.pathname) ? ${e} : [])`;
+  return [
+    ['invariant: the page never scrolls sideways', labs(overflow())],
+    ['invariant: every visible target is at least 44 px tall and 24 px wide at 390', labs(targets())],
+    ['invariant: every visible text is at least 4.5 to 1 against what is behind it', labs(contrast())],
+    ['invariant: gold only where the page allows it', labs(`(/exomania-survey\\.html$/.test(location.pathname) ? ${gold(SURVEY_GOLD)} : ${gold(SKY_GOLD)})`)],
+  ];
+}
+
 export default async function exomania(p, { base }) {
-  p.invariant('invariant: the page never scrolls sideways', overflow());
-  p.invariant('invariant: every visible target is at least 44 px tall and 24 px wide at 390', targets());
-  p.invariant('invariant: every visible text is at least 4.5 to 1 against what is behind it', contrast());
-  p.invariant('invariant: gold only where the page allows it', `(/exomania-survey\.html$/.test(location.pathname) ? ${gold(SURVEY_GOLD)} : ${gold(SKY_GOLD)})`);
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);
   const text = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || {}).textContent || ""`);
   const label = (id) => p.ev(`(document.getElementById(${JSON.stringify(id)}) || { getAttribute() { return ""; } }).getAttribute("aria-label") || ""`);
   const state = () => p.ev('document.body.dataset.state || ""');

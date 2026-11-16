@@ -1,0 +1,242 @@
+[
+  {
+    "name": "lock: a free lock never taken",
+    "from": "const fd = fs.openSync(file, 'wx');",
+    "to": "const fd = fs.openSync(file, 'r');"
+  },
+  {
+    "name": "lock: a lock taken without the holder's name",
+    "from": "fs.writeSync(fd, JSON.stringify({ pid: process.pid, t: Date.now() }));",
+    "to": "fs.writeSync(fd, '');"
+  },
+  {
+    "name": "lock: giving back removes another's lock",
+    "from": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true });",
+    "to": "fs.rmSync(file, { force: true });"
+  },
+  {
+    "name": "lock: giving back keeps its own lock",
+    "from": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true });",
+    "to": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid !== process.pid) fs.rmSync(file, { force: true });"
+  },
+  {
+    "name": "lock: a lock that cannot be written waited for",
+    "from": "} catch (e) { if (e.code !== 'EEXIST') throw e; }",
+    "to": "} catch (e) { /* wait */ }"
+  },
+  {
+    "name": "lock: a held lock thrown as an error",
+    "from": "} catch (e) { if (e.code !== 'EEXIST') throw e; }",
+    "to": "} catch (e) { if (e.code === 'EEXIST') throw e; }"
+  },
+  {
+    "name": "lock: a dead holder's lock never taken",
+    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
+    "to": "if ((!holder && age > 10000)) {"
+  },
+  {
+    "name": "lock: a running holder's lock taken",
+    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
+    "to": "if ((holder && alive(holder.pid)) || (!holder && age > 10000)) {"
+  },
+  {
+    "name": "lock: an empty lock never taken",
+    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
+    "to": "if ((holder && !alive(holder.pid))) {"
+  },
+  {
+    "name": "lock: an empty lock taken at 5 s",
+    "from": "(!holder && age > 10000)",
+    "to": "(!holder && age > 5000)"
+  },
+  {
+    "name": "lock: an empty lock taken only at 20 s",
+    "from": "(!holder && age > 10000)",
+    "to": "(!holder && age > 20000)"
+  },
+  {
+    "name": "lock: any lock taken",
+    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
+    "to": "if (true) {"
+  },
+  {
+    "name": "lock: the holder read as alive whatever it is",
+    "from": "const alive = (pid) => { try { process.kill(pid, 0); return true; }",
+    "to": "const alive = (pid) => { try { return true; }"
+  },
+  {
+    "name": "lock: the wait never gives up",
+    "from": "    if (Date.now() - t0 >= waitMs) return null;\n",
+    "to": ""
+  },
+  {
+    "name": "lock: the wait gives up at once",
+    "from": "    if (Date.now() - t0 >= waitMs) return null;\n",
+    "to": "    return null;\n"
+  },
+  {
+    "name": "drive: a drive with no lock runs anyway",
+    "from": "  if (!release) {",
+    "to": "  if (false) {"
+  },
+  {
+    "name": "drive: the wait limit from the environment ignored",
+    "from": "waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000",
+    "to": "waitMs = 20 * 60 * 1000"
+  },
+  {
+    "name": "drive: the lock not given back",
+    "from": "  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say }); } finally { release(); }",
+    "to": "  return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say });"
+  },
+  {
+    "name": "chrome: a call cut off waits for ever",
+    "from": "    ws.onclose = () => { for (const [, [, rej]] of pending) rej(new Error('Chrome is gone')); pending.clear(); };",
+    "to": ""
+  },
+  {
+    "name": "chrome: the timeout never kills Chrome",
+    "from": "const killer = setTimeout(() => { timedOut = true; chrome.kill(); }, timeoutMs);",
+    "to": "const killer = setTimeout(() => { timedOut = true; }, timeoutMs);"
+  },
+  {
+    "name": "console: an exception not read",
+    "from": "else if (d.method === 'Runtime.exceptionThrown') errors.push(",
+    "to": "else if (d.method === 'Runtime.none') errors.push("
+  },
+  {
+    "name": "console: a warning not read",
+    "from": "['error', 'warning'].includes(d.params.type)",
+    "to": "['error'].includes(d.params.type)"
+  },
+  {
+    "name": "console: a note read as an error",
+    "from": "['error', 'warning'].includes(d.params.type)",
+    "to": "['error', 'warning', 'log'].includes(d.params.type)"
+  },
+  {
+    "name": "console: a failed resource not read",
+    "from": "d.params.entry.level === 'error' && !NOISE.test(",
+    "to": "d.params.entry.level === 'none' && !NOISE.test("
+  },
+  {
+    "name": "console: the favicon read",
+    "from": "&& !NOISE.test(d.params.entry.url || '')) errors.push(",
+    "to": ") errors.push("
+  },
+  {
+    "name": "console: a page that logs passes",
+    "from": "check('the console is clean', errors.length === 0,",
+    "to": "check('the console is clean', errors.length >= 0,"
+  },
+  {
+    "name": "runner: the rules never run",
+    "from": "      if (!invariants.length) return;",
+    "to": "      return;"
+  },
+  {
+    "name": "runner: a rule that returns null passes",
+    "from": "if (!Array.isArray(bad)) bad = [",
+    "to": "if (bad === null) bad = []; else if (!Array.isArray(bad)) bad = ["
+  },
+  {
+    "name": "runner: a rule that returns a string passes",
+    "from": "if (!Array.isArray(bad)) bad = [",
+    "to": "if (typeof bad === 'string') bad = []; else if (!Array.isArray(bad)) bad = ["
+  },
+  {
+    "name": "runner: a null named as an object",
+    "from": "bad === null ? 'null' : typeof bad",
+    "to": "typeof bad"
+  },
+  {
+    "name": "runner: a rule that throws passes",
+    "from": "catch (e) { bad = [`the rule could not be read: ${String(e.message).slice(0, 160)}`]; }",
+    "to": "catch (e) { bad = []; }"
+  },
+  {
+    "name": "runner: a break reported each time it comes back",
+    "from": "          if (inv.seen.has(k)) continue;\n",
+    "to": ""
+  },
+  {
+    "name": "runner: seven breaks listed",
+    "from": "if (inv.seen.size <= 8) check(",
+    "to": "if (inv.seen.size < 8) check("
+  },
+  {
+    "name": "runner: nine breaks listed",
+    "from": "if (inv.seen.size <= 8) check(",
+    "to": "if (inv.seen.size <= 9) check("
+  },
+  {
+    "name": "runner: steps not counted",
+    "from": "        inv.steps++;\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a wait of 100 ms is no step",
+    "from": "if (ms >= 100) await step(afterEv());",
+    "to": "if (ms > 100) await step(afterEv());"
+  },
+  {
+    "name": "runner: a wait of 99 ms is a step",
+    "from": "if (ms >= 100) await step(afterEv());",
+    "to": "if (ms >= 99) await step(afterEv());"
+  },
+  {
+    "name": "runner: a click is no step",
+    "from": "await mouse('mouseReleased', x, y, 0); await step(`a click at",
+    "to": "await mouse('mouseReleased', x, y, 0); (`a click at"
+  },
+  {
+    "name": "runner: a key is no step",
+    "from": "        await step(`the key ${key}`);\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a drag is no step",
+    "from": "        await step(`a drag from ${Math.round(x0)},${Math.round(y0)}`);\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a swipe is no step",
+    "from": "        await step(`a swipe from ${Math.round(x0)},${Math.round(y0)}`);\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a release is no step",
+    "from": "async up(x, y) { await mouse('mouseReleased', x, y, 0); await step(",
+    "to": "async up(x, y) { await mouse('mouseReleased', x, y, 0); ("
+  },
+  {
+    "name": "runner: a wheel is no step",
+    "from": "await sleep(120); await step(`a wheel of",
+    "to": "await sleep(120); (`a wheel of"
+  },
+  {
+    "name": "runner: going to a page is no step",
+    "from": "await step(`go ${u.replace(",
+    "to": "(`go ${u.replace("
+  },
+  {
+    "name": "runner: a named step does nothing",
+    "from": "      step: (label) => step(label),",
+    "to": "      step: async () => {},"
+  },
+  {
+    "name": "runner: a rule that held passes with no step",
+    "from": "inv.seen.size === 0 && inv.steps > 0,",
+    "to": "inv.seen.size === 0 && inv.steps >= 0,"
+  },
+  {
+    "name": "runner: a broken rule passes at the end",
+    "from": "inv.seen.size === 0 && inv.steps > 0,",
+    "to": "inv.steps > 0,"
+  },
+  {
+    "name": "runner: the end line does not count the breaks",
+    "from": "inv.seen.size ? `${inv.seen.size} distinct breaks` : ''",
+    "to": "''"
+  }
+]

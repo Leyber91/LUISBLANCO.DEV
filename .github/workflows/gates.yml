@@ -33,7 +33,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # 22: tools/drive.mjs talks to Chrome over the WebSocket Node has had since 22; its selftest and that of
+          # tools/invariants.mjs run in the mutation test below, on the runner's Chrome
+          node-version: "22"
       - name: site checks
         run: |
           if [ -f tools/site_check.mjs ]; then node tools/site_check.mjs; else echo "NOT_CHECKED: tools/site_check.mjs does not exist yet (the first roadmap item builds it)"; fi

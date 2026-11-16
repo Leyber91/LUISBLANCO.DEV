@@ -26,7 +26,7 @@
 //  10. every part of ui_inventory.md part 6 is on the page.
 // No model is called and nothing leaves the page's own origin.
 //
-// After every step the rules of tools/drives/invariants.mjs hold: the page never scrolls sideways, every visible
+// After every step the rules of tools/invariants.mjs hold: the page never scrolls sideways, every visible
 // target is 44 px tall at 390, every text is 4.5 to 1, and gold is only where SURVEY_GOLD below allows it, in the DOM
 // and in the pixels of every canvas it does not name.
 //
@@ -42,18 +42,20 @@
 //   exoplanet.css .bp                   the site's four corner brackets
 //   os.css .los-bk                      the corner brackets of a Labs OS plate (the sharing question), the same frame
 //   #ret-render .st-observed            the status word "observed" of the planet's air (ticket 2.13, pull request 41)
+//   #nums .sw-dot                       not gold: the star's own colour beside its temperature, its Planck spectrum, which
+//                                       for a cool star falls within 22 of the gold tint in every channel (TOI-700)
 // No other use: export.js drew the plate's brackets in gold until 2026-11-16, and plot.js the chosen world on the
 // diagram and on the sky map; both are the bright ink now. SURVEY_GOLD.canvases says, with reasons, the one canvas
 // the pixel scan does not read (the WebGL planet), the one it skips under a condition (the signal in transit mode),
 // the one that may hold one gold dot (the diagram, its kept world) and the two whose star's own colour it leaves out.
 
-import { standard, gold as goldRule, targets as targetRule } from './invariants.mjs';
+import { standard, gold as goldRule, targets as targetRule } from '../invariants.mjs';
 
 const KEPT = '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")';
 const STAR = '(() => { const d = document.querySelector("#nums .sw-dot"); return d ? getComputedStyle(d).getPropertyValue("--star-col").trim() : ""; })()';
 const TRANSIT = '(document.querySelector("#sheet-e [data-k=sig]") || { getAttribute: () => "false" }).getAttribute("aria-checked") !== "true"';
 export const SURVEY_GOLD = {
-  allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel'],
+  allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel', '#nums .sw-dot'],
   canvases: {
     scan: true,
     named: {

@@ -6,6 +6,7 @@
 // each planet must show: its kind, its colour, bands where there are bands, black space around it, and how
 // much light it returns against the measured geometric albedo. Then it loads the three views of the survey
 // page for one world.
+import { exomaniaRules } from './exomania.mjs';
 
 const lum = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 
@@ -22,6 +23,7 @@ const ALBEDO_BAND = [0.70, 1.30];
 const EARTH_FLOOR = 0.18;
 
 export default async function planets(p, { base }) {
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   await p.go(`${base}/tools/dev/planet_sheet.html?set=solar&view=orbit&size=340&cols=4`);
   const ready = await p.until('document.body.dataset.state === "ready"', 240000);
   const sheet = (await p.ev('window.__SHEET__ || []')) || [];

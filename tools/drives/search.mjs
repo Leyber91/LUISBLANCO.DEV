@@ -12,6 +12,7 @@
 // inside the page that returns the reply the scenario gives it after the delay it gives. That is how the
 // rules about a model's reading are tested: it is asked only for what the page left unread, a reply that
 // arrives after the visitor moved on is set aside, and a reply that fails its checks changes nothing.
+import { exomaniaRules } from './exomania.mjs';
 
 /* ---- run inside the page ---- */
 
@@ -76,6 +77,7 @@ function onFirstScreen() {
 /* ---- the scenario ---- */
 
 export default async function search(p, { base }) {
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const state = () => call(pageState);
   const open = async (query = '', still = true) => {

@@ -14,8 +14,8 @@ here, the daily routine included, are in SITE_RULES.md:
 - tools/: the gates (privacy_gate.py, site_check.mjs, levels.mjs, lab_tests.mjs, atlas.mjs, stories.mjs,
   evolution.mjs, anti_tells.mjs), the test of the gates themselves (mutate.mjs with tools/mutants/), the merge
   guard (ship_pr.mjs), the lab worktree tool (labs-wt.mjs) and the page driver it runs (drive.mjs, with one
-  scenario per lab under tools/drives/). The gates workflow runs the gates on every pull
-  request.
+  scenario per lab under tools/drives/, and invariants.mjs, the rules a page keeps after every step of a drive).
+  The gates workflow runs the gates on every pull request.
 
 ## Committing
 
@@ -26,7 +26,9 @@ here, the daily routine included, are in SITE_RULES.md:
   merged before its checks had started on 2026-11-13.
 - A gate that node runs is done when its rules are listed in tools/mutants/<tool>.json and
   `node tools/mutate.mjs` shows its selftest catches each one, and after a reviewer who did not write it has read
-  it. atlas.mjs, evolution.mjs, lab_tests.mjs, mutate.mjs, ship_pr.mjs and stories.mjs have such a list;
+  it. atlas.mjs, drive.mjs (the runner of the invariants, its lock and the console), evolution.mjs,
+  invariants.mjs, lab_tests.mjs, mutate.mjs, ship_pr.mjs and stories.mjs have such a list; the selftests of
+  drive.mjs and invariants.mjs run headless Chrome (Node 22 or later), one Chrome at a time on a machine;
   levels.mjs and anti_tells.mjs have a selftest and no list yet, so add one when you change them. A list needs two
   kinds of mutant: one that silences each report, and one that loosens each condition, with a case just inside
   and just outside every bound. The first kind alone reads as full coverage and is not: on 2026-11-14 every report
