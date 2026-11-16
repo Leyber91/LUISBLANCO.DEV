@@ -27,13 +27,13 @@ merged. A run that changed nothing still writes its entry, with the reason.
   console errors in the sweep are expected: the labs probing for a local model on this machine (connection refused)
   and The Roaster's live request refused by CORS from localhost. Item 2 still has no link to remove: no tracked file
   outside _archive/ references labs/weather/.
-- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 27 pages, 0 findings; levels selftest 12 of 12 and 32 labs, 0 errors; lab tests
-  29 files, 0 failed; atlas, stories and evolution selftests and checks pass (they print NOT_CHECKED for the private
-  plans); mutate selftest and run pass (every broken rule caught); model route 56 of 56; anti-tells no new tells; the
-  labs build was not run here (labs-src is untouched) and runs in the gates workflow. No script
-  file changed, so there was no syntax check to run (the change is HTML and CSS). node tools/anti_tells.mjs scan
-  hero_proto.html lists 4 tells, all in lines this run did not touch. Render: hero_proto.html at 1280 px and 390 px
-  (and 320 to 1920 px for width) in headless Chromium, 0 console errors. Forbidden-name check: runs in the gates
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 27 pages, 0 findings; levels selftest 12 of
+  12 and 32 labs, 0 errors; lab tests 29 files, 0 failed; atlas, stories and evolution selftests and checks pass (they
+  print NOT_CHECKED for the private plans); mutate selftest and run pass (every broken rule caught); model route 56 of
+  56; anti-tells no new tells; the labs build was not run here (labs-src is untouched) and runs in the gates workflow.
+  No script file changed, so there was no syntax check to run (the change is HTML and CSS). node tools/anti_tells.mjs
+  scan hero_proto.html lists 4 tells, all in lines this run did not touch. Render: hero_proto.html at 1280 px and 390
+  px (and 320 to 1920 px for width) in headless Chromium, 0 console errors. Forbidden-name check: runs in the gates
   workflow on the pull request.
 - Gates on the pull request: PENDING.
 - Merged: PENDING.
