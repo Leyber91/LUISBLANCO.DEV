@@ -23,6 +23,7 @@ const LABS = fileURLToPath(new URL('../../labs/', import.meta.url));
 const EXPECTED = /labs-model-route|net::ERR_|Failed to fetch|429|rate limit/i;
 
 export default async function pages(p, { base }) {
+  p.frames();   // no fully transparent pixel in any page's frame (tools/drive.mjs frames): a hole can come with any WebGL canvas
   const names = fs.readdirSync(LABS).filter((f) => f.endsWith('.html')).sort();
   p.check('there are lab pages to open', names.length > 5, `${names.length} pages`);
   for (const name of names) {
