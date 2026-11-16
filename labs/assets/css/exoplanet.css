@@ -457,6 +457,7 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   .q-line { grid-row: 4; }
   .field input { min-height: 44px; }
   .q-results li { min-height: 44px; }
+  .q-results { max-height: min(62vh, 520px); }   /* eight results of 44 px stand in the list without scrolling it */
   .tally { min-height: 44px; }
   .bar a { min-height: 44px; }
   .token { min-height: 44px; }
