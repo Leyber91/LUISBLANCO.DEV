@@ -365,6 +365,9 @@ async function selftest() {
     let ran = false;
     t0 = Date.now();
     const blocked = await drive(async () => { ran = true; }, { lock: lockFile, waitMs: 400, port: 9362, say: () => {} });
+    const ownLock = path.join(scratch, 'own.lock');
+    await drive(async () => {}, { lock: ownLock, port: 9362, timeoutMs: 30000, say: () => {} });
+    yes('a drive gives its lock back at its end', !fs.existsSync(ownLock));
     yes('a drive that cannot have Chrome says so, and starts nothing', !ran && blocked.checks.length === 1 && !blocked.checks[0].ok && /^Chrome was free within/.test(blocked.checks[0].name), J(blocked.checks));
     process.env.LABS_DRIVE_WAIT_MS = '300';
     t0 = Date.now();
@@ -434,8 +437,8 @@ async function selftest() {
     };
     // the same 3 x 3 image, opaque but for (1,1) and (2,2), written with each filter: the encoded bytes are worked out here
     const img = [[[9, 9, 9, 255], [8, 8, 8, 255], [7, 7, 7, 255]], [[6, 6, 6, 255], [0, 0, 0, 0], [5, 5, 5, 255]], [[4, 4, 4, 255], [3, 3, 3, 255], [1, 2, 3, 0]]];
-    const enc = (f) => img.map((row, y) => {
-      const cur = row.flat(), up = y ? img[y - 1].flat() : new Array(12).fill(0);
+    const encOf = (im, f) => im.map((row, y) => {
+      const cur = row.flat(), up = y ? im[y - 1].flat() : new Array(row.length * 4).fill(0);
       return [f, cur.map((v, x) => {   // the PNG predictors, written out on their own (the reader must agree with them)
         const left = x < 4 ? 0 : cur[x - 4], above = up[x], corner = x < 4 ? 0 : up[x - 4];
         const p = left + above - corner, dl = Math.abs(p - left), da = Math.abs(p - above), dc = Math.abs(p - corner);
@@ -443,9 +446,18 @@ async function selftest() {
         return (v - [0, left, above, Math.floor((left + above) / 2), paeth][f]) & 255;
       })];
     });
+    const enc = (f) => encOf(img, f);
     const read = [0, 1, 2, 3, 4].map((f) => transparentIn(png(3, 3, 6, enc(f))));
     yes('the frame reader finds the two transparent pixels of an RGBA frame and their box, whatever filter wrote each line', read.every((t) => t.count === 2 && J(t.box) === J({ x0: 1, y0: 1, x1: 3, y1: 3 }) && t.width === 3 && t.height === 3), J(read));
     yes('a pixel inside a box given is not counted, one outside it is', transparentIn(png(3, 3, 6, enc(4)), [{ x0: 1, y0: 1, x1: 2, y1: 2 }]).count === 1 && transparentIn(png(3, 3, 6, enc(4)), [{ x0: 0, y0: 0, x1: 3, y1: 3 }]).count === 0);
+    // (2,2) is transparent: a box ends before its x1 and its y1, and starts at its x0 and its y0
+    const edge = (box) => transparentIn(png(3, 3, 6, enc(4)), [box]).count;
+    yes('a box holds the pixels from its first edge up to, not including, its last: one past it on each side is counted',
+      edge({ x0: 0, y0: 2, x1: 2, y1: 3 }) === 2 && edge({ x0: 2, y0: 0, x1: 3, y1: 2 }) === 2 && edge({ x0: 2, y0: 3, x1: 3, y1: 4 }) === 2 && edge({ x0: 3, y0: 2, x1: 4, y1: 3 }) === 2 && edge({ x0: 2, y0: 2, x1: 3, y1: 3 }) === 1,
+      J([edge({ x0: 0, y0: 2, x1: 2, y1: 3 }), edge({ x0: 2, y0: 0, x1: 3, y1: 2 }), edge({ x0: 2, y0: 3, x1: 3, y1: 4 }), edge({ x0: 3, y0: 2, x1: 4, y1: 3 })]));
+    // a paeth tie: above and the corner equally near, the corner farther; the PNG rule takes above (alpha 0), not the corner (100)
+    const tie = [[[0, 0, 0, 100], [0, 0, 0, 0]], [[0, 0, 0, 150], [0, 0, 0, 0]]];
+    yes('a paeth tie is broken as the PNG rule breaks it', transparentIn(png(2, 2, 6, encOf(tie, 4))).count === 2, J(transparentIn(png(2, 2, 6, encOf(tie, 4)))));
     yes('an RGB frame has no transparent pixel, and a frame of another kind is refused', transparentIn(png(1, 1, 2, [[0, [1, 2, 3]]])).count === 0 && (() => { try { transparentIn(png(1, 1, 0, [[0, [5]]])); return false; } catch { return true; } })());
     let refused = '';
     await drive(async (p) => { try { p.frames({ '#x': 'short' }); } catch (e) { refused = e.message; } }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
