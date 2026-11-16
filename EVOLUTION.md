@@ -3,6 +3,41 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-16, The hero prototype draws its figure and fits a phone (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 27 pages and 0 findings on main
+  today. This run loaded the 25 published pages outside tools/ in headless Chromium at 1280 px and 390 px over a
+  local http server and recorded script errors, failed local requests and the document scroll width. The only
+  script error was on hero_proto.html, which no page links to but Pages publishes at /hero_proto.html.
+- Cause: hero_proto.html loads src/aea3d/aea3d.js without src/data/aea-framework.js, which index.html loads first.
+  The renderer read the empty framework and threw "Cannot read properties of undefined (reading '0')" on load, so
+  the figure on the right was blank at every width. At 390 px the page kept its two-column desktop layout with
+  overflow hidden: it was 704 px wide, and the tagline, the census, the call to action and the whole figure were cut
+  off at the right edge with no way to scroll to them.
+- Changed (hero_proto.html only, 26 added lines): the page loads the framework data before the renderer; the
+  renderer's mobile dock, scrim and sheet join the controls the page already hides in hero mode; at 960 px and
+  below the page scrolls in one column with the figure under the name, the top bar, census and title block wrap,
+  and the census dots and scroll cue are hidden. Above 960 px the layout is unchanged; 960 px is where the figure's
+  axis labels stopped running past the screen edge in the two-column layout (875 px wide at 800 px, 922 at 900).
+- Measured over a local http server in headless Chromium: no script error at 1280 or 390 px; document scroll width
+  equals the screen width at 320, 360, 390, 430, 760, 960, 961, 1280, 1440 and 1920 px, with no element past the
+  right edge. Main measured 704 px at 390 px. At 1280 px the left column matches main by screenshot, and the figure
+  now draws.
+- Still open for later runs: labs/claude-prep/ requests seal.json, which returns 404 (Luis decides). The other
+  console errors in the sweep are expected: the labs probing for a local model on this machine (connection refused)
+  and The Roaster's live request refused by CORS from localhost. Item 2 still has no link to remove: no tracked file
+  outside _archive/ references labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 27 pages, 0 findings; levels selftest 12 of 12 and 32 labs, 0 errors; lab tests
+  29 files, 0 failed; atlas, stories and evolution selftests and checks pass (they print NOT_CHECKED for the private
+  plans); mutate selftest and run pass (every broken rule caught); model route 56 of 56; anti-tells no new tells; the
+  labs build was not run here (labs-src is untouched) and runs in the gates workflow. No script
+  file changed, so there was no syntax check to run (the change is HTML and CSS). node tools/anti_tells.mjs scan
+  hero_proto.html lists 4 tells, all in lines this run did not touch. Render: hero_proto.html at 1280 px and 390 px
+  (and 320 to 1920 px for width) in headless Chromium, 0 console errors. Forbidden-name check: runs in the gates
+  workflow on the pull request.
+- Gates on the pull request: PENDING.
+- Merged: PENDING.
+
 ## 2026-11-15, The home page is as wide as the screen (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 26 pages and 0 findings on main
