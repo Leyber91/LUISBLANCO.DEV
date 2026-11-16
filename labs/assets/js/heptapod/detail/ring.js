@@ -145,6 +145,8 @@ export function fitRing(m) {
 /* ---------------- the unwrap and the carrier ---------------- */
 
 export const NA = 1440, NR = 1200, R0 = 0.3, R1 = 1.8;
+/* the carrier band: ink within this many R of the fitted ring, at an angle, is the carrier stroke there */
+export const CARRIER_BAND = 0.12;
 
 /* ink sampled bilinearly at NA angles x NR radii (outside the mask is background), thresholded at 0.5 */
 export function unwrap(m, ring) {
@@ -200,7 +202,7 @@ export function carrier(U, R) {
       const dd = s <= iR && iR <= e ? 0 : Math.min(Math.abs(s - iR), Math.abs(e - iR));
       if (dd < bd) { bd = dd; best = [s, e]; }
     }
-    if (bd * dr <= 0.12 * R) { w[a] = (best[1] - best[0] + 1) * dr; ri[a] = rr[best[0]]; ro[a] = rr[best[1]]; }
+    if (bd * dr <= CARRIER_BAND * R) { w[a] = (best[1] - best[0] + 1) * dr; ri[a] = rr[best[0]]; ro[a] = rr[best[1]]; }
     outerMax[a] = rr[rs[rs.length - 1][1]];
     innerMin[a] = rr[rs[0][0]];
   }

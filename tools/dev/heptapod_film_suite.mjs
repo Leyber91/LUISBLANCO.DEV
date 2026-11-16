@@ -16,13 +16,20 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { readPBM, ringTable } from '../../labs/assets/js/heptapod/detail/ring.js';
+import { pathToFileURL } from 'node:url';
+import { readPBM, ringTable, percentile } from '../../labs/assets/js/heptapod/detail/ring.js';
+import { filaments } from '../../labs/assets/js/heptapod/detail/filaments.js';
 
 const av = process.argv.slice(2);
 const [dir, out] = av;
-if (!dir || !out) { console.error('usage: heptapod_film_suite.mjs <masks dir> <out.json> [--against measure.json]'); process.exit(2); }
+if (!dir || !out) { console.error('usage: heptapod_film_suite.mjs <masks dir> <out.json> [--against measure.json] [--overlay <html> --stills <dir>]'); process.exit(2); }
+const opt = (k) => { const i = av.indexOf(k); return i > 0 ? av[i + 1] : null; };
 const ai = av.indexOf('--against');
 const against = ai > 0 ? JSON.parse(fs.readFileSync(av[ai + 1], 'utf8')) : null;
+// the overlay sheet puts the private masters under what was measured; it is written for Luis's eyes only
+const overlay = opt('--overlay'), stills = opt('--stills');
+if (overlay && !stills) { console.error('--overlay needs --stills <dir of the masters>'); process.exit(2); }
+const ALL = [], sheets = [];
 
 const files = fs.readdirSync(dir).filter((f) => f.startsWith('wolfram_') && f.endsWith('.pbm')).sort();
 if (!files.length) { console.error(`no wolfram_*.pbm masks in ${dir}`); process.exit(2); }
@@ -77,9 +84,52 @@ for (const f of files) {
       if (!(Math.abs(a - b) <= tol)) outside++, misses.push(`${name} ${k}: ${+a.toFixed(4)} against ${b} (allowed ${+tol.toFixed(4)})`);
     }
   }
-  console.log(`${name}: R ${row.R_over_canvas.toFixed(3)}, closure ${row.ring_closure.toFixed(2)}, w_med ${row.w_med_R.toFixed(3)} R, ink/disc ${row.ink_over_disc.toFixed(2)}, blots ${row.n_blots}, droplets ${row.droplets_ge1u}, box dim ${row.boxdim.toFixed(3)}`);
+  /* part 2a: filaments, in units of R and of the master's own w_med */
+  const { R, cx, cy } = row._ring, wm = row.w_med_R * R;
+  // shorter than the line is wide is roughness, not a filament; a branch along the ring is the carrier
+  const F = filaments(m, { minLen: wm, ring: { ...row._ring, w: wm } }).filaments;
+  const tips = {};
+  let outward = 0;
+  for (const f of F) {
+    tips[f.tip] = (tips[f.tip] || 0) + 1;
+    const out = Math.hypot(f.tipXY[0] - cx, f.tipXY[1] - cy) > Math.hypot(f.baseXY[0] - cx, f.baseXY[1] - cy);
+    if (out) outward++;
+    ALL.push({ len_w: f.length / wm, len_R: f.length / R, shaft_w: f.shaft / wm, shaft_R: f.shaft / R, shaftCV: f.shaftCV, straightness: f.straightness, turnDeg: f.turnDeg, tipRatio: f.tipRatio, taper: f.taper });
+  }
+  result[name].filaments = { n: F.length, tips, outward };
+  if (overlay) {
+    const d = (p) => p.filter((_, k) => k % 3 === 0 || k === p.length - 1).map((i, k) => `${k ? 'L' : 'M'}${i % m.W} ${(i / m.W) | 0}`).join('');
+    sheets.push({ name, W: m.W, R, cx, cy, F: F.map((f) => ({ d: d(f.path), tip: f.tip })), tips, n: F.length });
+  }
+  console.log(`${name}: R ${row.R_over_canvas.toFixed(3)}, closure ${row.ring_closure.toFixed(2)}, w_med ${row.w_med_R.toFixed(3)} R, ink/disc ${row.ink_over_disc.toFixed(2)}, blots ${row.n_blots}, droplets ${row.droplets_ge1u}, box dim ${row.boxdim.toFixed(3)}; filaments ${F.length} (${outward} outward) ${JSON.stringify(tips)}`);
 }
-fs.writeFileSync(out, JSON.stringify({ suite: 'heptapod-detail ring 0.1', masters: files.length, result }, null, 1));
+/* the film's filament distribution, all masters pooled: the reference of BAR_F G9 */
+const Q = [1, 5, 25, 50, 75, 95, 99];
+const dist = {};
+for (const k of ['len_w', 'len_R', 'shaft_w', 'shaft_R', 'shaftCV', 'straightness', 'turnDeg', 'tipRatio', 'taper']) {
+  const s = Float64Array.from(ALL.map((x) => x[k])).sort();
+  dist[k] = Object.fromEntries(Q.map((q) => [`p${q}`, +percentile(s, q).toFixed(4)]));
+}
+const tipsAll = {};
+for (const r of Object.values(result)) for (const [t, n] of Object.entries(r.filaments.tips)) tipsAll[t] = (tipsAll[t] || 0) + n;
+const filamentSummary = { n: ALL.length, perMaster: Object.fromEntries(Object.entries(result).map(([k, r]) => [k.replace(/^wolfram_/, ''), r.filaments.n])), tips: tipsAll, dist };
+fs.writeFileSync(out, JSON.stringify({ suite: 'heptapod-detail ring 0.1, filaments 0.1', masters: files.length, filaments: filamentSummary, result }, null, 1));
+console.log(`filaments: ${ALL.length} on ${files.length} masters, tips ${JSON.stringify(tipsAll)}`);
+for (const [k, v] of Object.entries(dist)) console.log(`  ${k.padEnd(13)} ${Object.entries(v).map(([q, x]) => `${q} ${x}`).join('  ')}`);
+if (overlay) {
+  const COL = { bulb: '#e8590c', flat: '#1c7ed6', pointed: '#c2255c' };
+  const P = 520;
+  const cells = sheets.map((s) => `<figure><div class="p"><img src="${pathToFileURL(path.join(stills, s.name + '.jpg')).href}" width="${P}" height="${P}">` +
+    `<svg viewBox="0 0 ${s.W} ${s.W}" width="${P}" height="${P}"><circle cx="${s.cx}" cy="${s.cy}" r="${s.R}" fill="none" stroke="#1c7ed6" stroke-width="5" stroke-dasharray="30 30" opacity="0.6"/>` +
+    s.F.map((f) => `<path d="${f.d}" fill="none" stroke="${COL[f.tip]}" stroke-width="16" stroke-linecap="round" opacity="0.85"/>`).join('') +
+    `</svg></div><figcaption>${s.name.replace(/^wolfram_/, '')}: ${s.n} filaments ${JSON.stringify(s.tips).replace(/[{}"]/g, '').replace(/,/g, ', ')}</figcaption></figure>`).join('');
+  fs.mkdirSync(path.dirname(overlay), { recursive: true });
+  fs.writeFileSync(overlay, `<!doctype html><html><head><meta charset="utf-8"><title>F2 filaments</title><style>body{margin:0;padding:20px;background:#fff;font:14px system-ui,sans-serif;color:#222}` +
+    `.g{display:grid;grid-template-columns:repeat(6,${P}px);gap:14px}.p{position:relative;width:${P}px;height:${P}px}.p svg{position:absolute;left:0;top:0}figure{margin:0}` +
+    `figcaption{padding:4px 2px}h1{font-size:17px;margin:0 0 12px}</style></head><body><h1>F2 part 2a: every filament the suite found, by tip: ` +
+    `<span style="color:${COL.bulb}">bulb</span>, <span style="color:${COL.flat}">flat</span>, <span style="color:${COL.pointed}">pointed</span>; the fitted ring dashed. Private: the masters are the film's.</h1><div class="g">${cells}</div></body></html>`);
+  console.log(`overlay: ${overlay} (private)`);
+}
 for (const x of misses) console.log('MISS ' + x);
 console.log(`${files.length} masters in ${((Date.now() - t0) / 1000).toFixed(0)} s` + (against ? `; ${compared - outside} of ${compared} columns within tolerance of the earlier measurement` : ''));
 process.exit(misses.length ? 1 : 0);
