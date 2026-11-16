@@ -36,14 +36,14 @@ export const N = P[K];
 
 /* the partitions of PLAN 3.2 and 3.6: radicals come as flip pairs (affirmed and denied); the rest are single words */
 export const PARTITIONS = Object.freeze([
-  ['radical', 96, 'pair'],     // about 96 concept radicals, each with its sign flip (P13, P16)
-  ['marker', 48, 'word'],      // role and link markers of the collars (P14)
-  ['inflection', 40, 'word'],  // aspect, number, quantifier, mode, tense and the like (P14)
-  ['letter', 27, 'word'],      // the name lobe's letters (P7)
-  ['numeral', 36, 'word'],     // digits 1 to 9 at four magnitudes (P20)
-  ['default', 6, 'word'],      // the explicit defaults (P21)
-  ['filler', 4, 'word'],       // fillers for relaxed rims (P22)
-  ['checksum', TOPO.checksumP, 'word'], // one value per residue mod p (P19)
+  ['radical', 96, 'pair', 'a part of a concept; a concept is 1 to 3 of them, so related words share parts; the flip denies it (P13, P16)'],
+  ['marker', 48, 'word', 'who did what to whom, written where two shapes meet, once on each side (P14)'],
+  ['inflection', 40, 'word', 'aspect, number, quantity, mode (a question is a mode), time and evidence (P14)'],
+  ['letter', 27, 'word', 'the letters of a name, the one place read in order (P7)'],
+  ['numeral', 36, 'word', 'digits 1 to 9 at 1, 10, 100 and 1000; a number is their sum, in no order (P20)'],
+  ['default', 6, 'word', 'a default said out loud, so lost ink is never read as a default (P21)'],
+  ['filler', 4, 'word', 'nothing: fills a rim made longer than its words need (P22)'],
+  ['checksum', TOPO.checksumP, 'word', 'the sum of the words of the shape, so a misread shape refuses instead of lying (P19)'],
 ]);
 
 export const digits = (w) => { const d = new Int8Array(K); for (let i = K - 1; i >= 0; i--) { d[i] = w % Q; w = (w - d[i]) / Q; } return d; };
