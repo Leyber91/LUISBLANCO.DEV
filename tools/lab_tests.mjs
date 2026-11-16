@@ -178,7 +178,8 @@ function selftest() {
     go('killed', { 'z/tests.mjs': 'process.kill(process.pid);\nsetTimeout(() => {}, 5000);\n' });
     go('slow', { 'z/tests.mjs': 'setTimeout(() => process.exit(0), 6000);\n' }, '--limit', '1500');
     go('loud', { 'z/tests.mjs': 'const line = "x".repeat(99) + "\\n"; for (let i = 0; i < 30000; i++) process.stdout.write(line);\n' });
-    go('buried', { 'z/tests.mjs': 'console.log("FAIL  the buried check: 0 checks fail");\nfor (let i = 0; i < 30; i++) console.log("pass  filler " + i);\nprocess.exit(1);\n' });
+    go('buried', { 'z/tests.mjs': 'console.log("FAIL  the buried check: 0 checks fail");\nconsole.log("  FAIL  an indented check");\nconsole.log("note: FAIL inside a line");\nconsole.log("FAILED to start");\nfor (let i = 0; i < 30; i++) console.log("pass  filler " + i);\nprocess.exit(1);\n' });
+    go('many', { 'z/tests.mjs': 'for (let i = 1; i <= 41; i++) console.log("FAIL  c" + String(i).padStart(3, "0"));\nfor (let i = 0; i < 25; i++) console.log("pass  filler " + i);\nprocess.exit(1);\n' });
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -205,7 +206,9 @@ function selftest() {
     ['a labs folder with no labs passes with nothing to run', code.empty === 0],
     ['a root with no labs folder fails: nothing ran', code['no-root'] === 1 && out['no-root'].includes('does not exist, so nothing was run')],
     ['a test runs from its own folder', code.cwd === 0],
-    ['a failing check far above the last lines is shown, and only the failing ones', code.buried === 1 && out.buried.includes('failing checks (1):\nFAIL  the buried check: 0 checks fail\n')],
+    ['a failing check far above the last lines is shown, and only lines that start with FAIL', code.buried === 1 && out.buried.includes('failing checks (2):\nFAIL  the buried check: 0 checks fail\n  FAIL  an indented check\n')],
+    ['the last lines are still printed, after the failing checks', out.buried.includes('pass  filler 29') && out.buried.indexOf('failing checks (2)') < out.buried.lastIndexOf('pass  filler 29') && out.buried.includes('pass  filler 10\n')],
+    ['at most forty failing checks are printed, counted in full', out.many.includes('failing checks (41):') && out.many.includes('FAIL  c040') && !out.many.includes('FAIL  c041')],
     ['a test that is killed fails the gate', code.killed === 1],
     ['a test that runs past the limit fails the gate', code.slow === 1],
     ['a test that prints three megabytes and exits 0 passes', code.loud === 0],
