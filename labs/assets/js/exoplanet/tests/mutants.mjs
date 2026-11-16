@@ -35,7 +35,10 @@ function runTest(file) {
     const timer = setTimeout(() => { timedOut = true; child.kill(); }, RUN_LIMIT_MS);
     child.stdout.on('data', (d) => { out += d; });
     child.on('error', () => { clearTimeout(timer); resolve({ code: -1, fails: 0, timedOut }); });
-    child.on('exit', (code) => { clearTimeout(timer); resolve({ code, fails: out.split('\n').filter((l) => l.startsWith('FAIL')).length, timedOut }); });
+    // 'close', not 'exit': at 'exit' the child's output may not all be read yet. On 2026-11-16 the gates reported
+    // "first found: switched off: exit 1 with no failing check" in query.mutants2 (run of pull request 45): the
+    // tests had failed, and the FAIL lines arrived after the count was taken.
+    child.on('close', (code) => { clearTimeout(timer); resolve({ code, fails: out.split('\n').filter((l) => l.startsWith('FAIL')).length, timedOut }); });
   });
 }
 
