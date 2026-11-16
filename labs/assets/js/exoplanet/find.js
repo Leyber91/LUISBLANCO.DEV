@@ -10,6 +10,7 @@
 import { classify } from './data.js';
 import { equilibriumTemp, insolation, earthLikeness, sizeClassOf } from './science.js';
 import { PHYS } from './config.js';
+import { int } from '../kit/format.js';
 
 const isNum = (v) => typeof v === 'number' && isFinite(v);
 
@@ -88,7 +89,7 @@ export const orderWords = (r) => (r.total > 0 && r.known === 0 ? 'in catalogue o
 
 /* ---------- what a line of results says ---------- */
 
-const fmtInt = (v) => Math.round(v).toLocaleString('en-US');
+const fmtInt = (v) => int(v);
 const fmt = (v, d) => { const a = Math.abs(v); return a >= 100 ? fmtInt(v) : a >= 10 ? v.toFixed(1) : a >= 1 ? v.toFixed(2) : v.toPrecision(d); };
 
 /* The kind a world is drawn as. Where the archive's radius is not a measurement the line says so; where it
@@ -110,5 +111,5 @@ export function hitFact(p, key) {
     : key === 'S' ? (insolation(p).S ? `${fmt(insolation(p).S, 3)} S⊕` : 'no insolation')
     : isNum(earthLikeness(p)) ? `likeness ${earthLikeness(p).toFixed(2)}` : '';
   const k = kindLine(p);
-  return v ? `${k} · ${v}` : k;
+  return v ? `${k}, ${v}` : k;
 }

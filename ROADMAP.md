@@ -16,6 +16,10 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-16: Item 1, one finding: hero_proto.html threw a TypeError on load (it never loaded the framework data
+  its figure reads), so the figure was blank, and at 390 px it was 704 px wide with most of the page cut off; it now
+  loads the data and, at 960 px and below, scrolls in one column from 320 px up. Item 1 stays in "Next". Pull request
+  "evolve 2026-11-16: hero prototype draws and fits phones".
 - 2026-11-15: Item 1, one finding: the home page was 1,549 px wide at 1280 px because a 1440 px decorative schematic in
   the "work with me" section ran past the screen edge (not the background canvases, as the 2026-11-14 entry said);
   each page section now clips its own sideways overflow and the page is as wide as the screen from 320 to 1920 px.

@@ -2,12 +2,20 @@
 //   node tools/drive.mjs tools/drives/air.mjs --base http://127.0.0.1:<port> --out <dir> --width 1440 --height 900 --timeout 600
 //   and again at --width 390 --height 844
 //
-// The article loads clean, fits the width, carries its seventeen planets, and keeps the design revision of
+// The rules of tools/drives/invariants.mjs hold after every step (the survey's gold list from shapes.mjs). The article
+// loads clean, fits the width, carries its seventeen planets, and keeps the design revision of
 // 2026-11-16 (upright names, no middle dots, no tracked capitals). On the survey: the line under the name is a short
 // account of at most two lines, with the scenarios and their sources in a disclosure under it whose summary is a
 // 44 px target on a phone; a scenario of the same look switches in one frame, says it was chosen and keeps the
 // disclosure open; a link offered for another world does nothing; and where the browser cannot build a look in the
 // background, only scenarios whose look is built are links.
+
+import { standard } from './invariants.mjs';
+import { SURVEY_GOLD } from './shapes.mjs';
+
+// the survey's own gold (shapes.mjs says why each is allowed), and on the article the status word "observed" of a
+// planet's scenarios, gold for the same reason as under the planet's name
+const GOLD = { ...SURVEY_GOLD, allow: [...SURVEY_GOLD.allow, '.obs-sc .st-observed'] };
 
 const sel = (n) => `((document.getElementById('ret-name') || {}).textContent || '').trim() === ${JSON.stringify(n)} && document.body.classList.contains('ready') && !document.getElementById('exo-note')`;
 const shortOf = `(document.querySelector('#ret-render .ret-air') || {}).textContent || ''`;
@@ -21,6 +29,9 @@ const WORLDS = ['LHS 3844 b', 'TRAPPIST-1 e', 'Proxima Cen b', '55 Cnc e', 'Kepl
 const slug = (n) => n.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
 
 export default async function air(p, { base, width }) {
+  // after every step, on both pages: no sideways scroll, 44 px targets at 390, text at 4.5 to 1, gold where allowed
+  for (const [name, expr] of standard({ gold: GOLD })) p.invariant(name, expr);
+
   // ---- the article ----
   await p.go(`${base}/labs/exomania-air.html`);
   await p.until('document.fonts && document.fonts.status === "loaded"', 15000);

@@ -5,7 +5,7 @@
    Each entry below breaks one rule of data.js: a bound moved to
    either side, a branch removed, a claim reversed. The broken
    file is written to a copy of this lab in the system's temp
-   folder and looks.test.mjs is run on the copy (mutants.mjs). Every broken
+   folder and looks.test.mjs is run on the copy (kit/tests/mutants.mjs). Every broken
    rule must fail at least one check there. A rule that can be
    broken with the tests still passing is not tested.
 
@@ -17,7 +17,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -66,4 +66,4 @@ const MUTANTS = [
   ["the night floor at 100 K", `* ph.Teq : 0.95 * ph.Teq, 40);`, `* ph.Teq : 0.95 * ph.Teq, 100);`],
 ];
 
-process.exit(await runMutants({ here, file: 'data.js', test: 'looks.test.mjs', mutants: MUTANTS, data: ['data/exomania/pscomppars-snapshot.json'] }));
+process.exit(await runMutants({ here, file: 'data.js', test: 'looks.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));

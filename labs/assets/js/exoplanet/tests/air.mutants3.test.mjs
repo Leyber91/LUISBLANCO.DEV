@@ -9,7 +9,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -19,10 +19,10 @@ const WORDS = [
   ['under 0.01% said from 0.02%', `if (v < 0.01) return 'under 0.01%';`, `if (v < 0.02) return 'under 0.01%';`],
   ['two figures from 2% down', `if (v < 1) return`, `if (v < 2) return`],
   ['whole numbers from 0.5%', `if (v < 1) return`, `if (v < 0.5) return`],
-  ['one figure up to 0.2%', `toPrecision(v < 0.1 ? 1 : 2)`, `toPrecision(v < 0.2 ? 1 : 2)`],
-  ['two figures from 0.01%', `toPrecision(v < 0.1 ? 1 : 2)`, `toPrecision(2)`],
-  ['a decimal from 98% up', '`${v > 99 ? v.toFixed(1)', '`${v > 98 ? v.toFixed(1)'],
-  ["a decimal only from 99.5% up", "`${v > 99 ? v.toFixed(1)", "`${v > 99.5 ? v.toFixed(1)"],
+  ["one figure up to 0.2%", "num(v, v < 0.1 ? 1 : 2)", "num(v, v < 0.2 ? 1 : 2)"],
+  ["two figures from 0.01%", "num(v, v < 0.1 ? 1 : 2)", "num(v, 2)"],
+  ["three figures from 98% up", "`${v > 99 ? num(v, 3) : int(v)}%`", "`${v > 98 ? num(v, 3) : int(v)}%`"],
+  ["three figures only from 99.5% up", "`${v > 99 ? num(v, 3) : int(v)}%`", "`${v > 99.5 ? num(v, 3) : int(v)}%`"],
   ["just under 50% from 49%", "if (v >= 49.5 && v < 50) return", "if (v >= 49 && v < 50) return"],
   ["just under 50% only from 49.6%", "if (v >= 49.5 && v < 50) return", "if (v >= 49.6 && v < 50) return"],
   ["50% itself said to be just under", "if (v >= 49.5 && v < 50) return", "if (v >= 49.5 && v <= 50) return"],
@@ -54,8 +54,11 @@ const WORDS = [
   ["the line without its first sentence", `airParts(sc, shown).map((x) => x.t).join('');`, `airParts(sc, shown).slice(1).map((x) => x.t).join('');`],
   ['two papers joined by a comma', `(xs.length < 3 ? xs.join(' and ')`, `(xs.length < 3 ? xs.join(', ')`],
   ['three papers without their "and"', '`${xs.slice(0, -1).join(\', \')} and ${xs[xs.length - 1]}`', `xs.join(', ')`],
-  ['an observed scenario drawn and not said to be', `lead.status === 'observed' ? ', as observed' : ''`, `''`],
-  ["a disfavoured scenario drawn and not said to be", "lead.status === 'disfavoured' ? `, though disfavoured ${quals(lead)}` : ''", "''"],
+  ["an observed scenario drawn and not said to be", "  if (lead.status === 'observed') out.push(", "  if (false) out.push("],
+  ["a drawn scenario said to be observed when it is not", "  if (lead.status === 'observed') out.push(", "  if (lead.status !== 'observed') out.push("],
+  ["the word observed not marked", "{ t: 'observed', st: 'observed' }", "{ t: 'observed' }"],
+  ["a disfavoured scenario drawn and not said to be", "  if (lead.status === 'disfavoured') out.push(", "  if (false) out.push("],
+  ["a drawn scenario said to be disfavoured when it is not", "  if (lead.status === 'disfavoured') out.push(", "  if (lead.status !== 'disfavoured') out.push("],
   ['a chosen scenario not said to be chosen', ', by your choice; the survey draws ${L[sc.drawn]}', ''],
   ["allowed scenarios never said", "for (const status of ['observed', 'allowed'])", "for (const status of ['observed'])"],
   ["observed scenarios never said", "for (const status of ['observed', 'allowed'])", "for (const status of ['allowed'])"],
@@ -67,9 +70,10 @@ const WORDS = [
   ['two names joined by a comma', `i === xs.length - 1 ? ' and ' : ', '`, `', '`],
   ['the first name of a sentence joined to the last', `out.push({ t: i === 0 ? ' ' :`, `out.push({ t: i < 0 ? ' ' :`],
   ["the first name of a sentence in lower case", "out.push({ t: i === 0 ? cap(L[x.key]) : L[x.key], air: x.key });", "out.push({ t: i !== 0 ? cap(L[x.key]) : L[x.key], air: x.key });"],
-  ["a disfavoured scenario not offered as a link", "{ t: cap(L[x.key]), air: x.key }, { t: ` disfavoured", "{ t: cap(L[x.key]) }, { t: ` disfavoured"],
+  ["a disfavoured scenario not offered as a link", "{ t: cap(L[x.key]), air: x.key }, { t: ' ' }, { t: 'disfavoured'", "{ t: cap(L[x.key]) }, { t: ' ' }, { t: 'disfavoured'"],
   ["an allowed scenario not offered as a link", "out.push({ t: i === 0 ? cap(L[x.key]) : L[x.key], air: x.key });", "out.push({ t: i === 0 ? cap(L[x.key]) : L[x.key] });"],
-  ['the status word left out of its sentence', 'if (xs.length) out.push({ t: ` ${status}.` });', `if (xs.length) out.push({ t: '.' });`],
+  ["the status word left out of its sentence", "if (xs.length) out.push({ t: ' ' }, { t: status, st: status }, { t: '.' });", "if (xs.length) out.push({ t: '.' });"],
+  ["a status word not marked", "{ t: status, st: status }", "{ t: status }"],
   ["a preprint not said to be one", " + (PAPERS[k].preprint ? ', a preprint' : '')", ""],
   ['an unobserved world not said to be one', `: ' Not observed.' });`, `: '' });`],
   ["a fit said with nothing left open", "const fitSaid = (sc) => !!sc.fit && sc.list.some((x) => x.open);", "const fitSaid = (sc) => !!sc.fit;"],
@@ -88,6 +92,6 @@ const WORDS = [
 ];
 
 const data = ['data/exomania/pscomppars-snapshot.json'];
-const w = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: WORDS, data });
+const w = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: WORDS, also: ['kit'], data });
 console.log(`\nbroken rules: ${WORDS.length} of the line in air.js`);
 process.exit(w);

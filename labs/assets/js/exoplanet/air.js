@@ -49,6 +49,7 @@
    ============================================================ */
 
 import { DRAWS } from './shoreline.js';
+import { num, int } from '../kit/format.js';
 
 export const SCENARIOS = ['bare', 'thin', 'thick'];
 export const SCENARIO_LABEL = { bare: 'bare rock', thin: 'thin air', thick: 'thick air' };
@@ -394,16 +395,16 @@ export function scenariosFor({ name, S, L, vEsc, wantThick = false, wantAir = tr
 export const drawable = (sc) => sc.list.filter((x) => x.status !== 'excluded').map((x) => x.key);
 
 /* ---- words for the survey line ---- */
-/* A probability as a percentage: one significant figure under 0.1%, two under 1%, whole numbers to 99%, one decimal
-   above, and the extremes in words. Just under one half is said so, since "50%" would read as the side with air.
+/* A probability as a percentage, written by the kit's number convention (kit/format.js): one significant figure
+   under 0.1%, two under 1%, whole numbers to 99%, three figures above, and the extremes in words. Just under one half is said so, since "50%" would read as the side with air.
    A range drops the first per-cent sign when both ends are numbers, and is one value when both ends read alike. */
 const pct = (x) => {
   const v = x * 100;
   if (v >= 99.95) return 'over 99.9%';
   if (v < 0.01) return 'under 0.01%';
-  if (v < 1) return `${+v.toPrecision(v < 0.1 ? 1 : 2)}%`;
+  if (v < 1) return `${num(v, v < 0.1 ? 1 : 2)}%`;
   if (v >= 49.5 && v < 50) return 'just under 50%';
-  return `${v > 99 ? v.toFixed(1) : Math.round(v)}%`;
+  return `${v > 99 ? num(v, 3) : int(v)}%`;
 };
 const range = (lo, hi) => { const a = pct(lo), b = pct(hi); return a === b ? `all ${b}` : `${/^\d/.test(a) ? a.slice(0, -1) : a} to ${b}`; };
 export { pct as percent, range as percentRange };
@@ -421,7 +422,8 @@ export function boundWords(b) {
 
 /* The line under the planet's name, in two parts.
    airShort: one or two lines, always shown: what is drawn, why in a word, and the chance of air with its range.
-   airParts: the details, as parts: { t } is text; { t, air } names a scenario the picture can be switched to.
+   airParts: the details, as parts: { t } is text; { t, air } names a scenario the picture can be switched to;
+   { t, st } is a status word, which the survey marks (gold for "observed" alone).
    shown is the scenario drawn now (the default unless the visitor chose another). Plain sentences: what is drawn;
    the paper's conclusion when it chose; the other scenarios by status, a disfavoured or excluded one with what its
    bounds cover; who observed it; the fit and what it does not say. */
@@ -446,7 +448,10 @@ export function airParts(sc, shown = sc.drawn) {
   const lead = sc.list.find((x) => x.key === shown);
   const quals = (x) => both(x.bounds.map(boundWords));
   const chosen = shown !== sc.drawn ? `, by your choice; the survey draws ${L[sc.drawn]}` : '';
-  out.push({ t: `${DRAWN_AS[shown]}${lead.status === 'observed' ? ', as observed' : ''}${lead.status === 'disfavoured' ? `, though disfavoured ${quals(lead)}` : ''}${chosen}.` });
+  out.push({ t: DRAWN_AS[shown] });
+  if (lead.status === 'observed') out.push({ t: ', as ' }, { t: 'observed', st: 'observed' });
+  if (lead.status === 'disfavoured') out.push({ t: ', though ' }, { t: 'disfavoured', st: 'disfavoured' }, { t: ` ${quals(lead)}` });
+  out.push({ t: `${chosen}.` });
   if (sc.by === 'paper') {
     const c = sc.observed.concludes;
     out.push({ t: ` Its paper concludes: “${c.quote}” (${cite1(c.paper)}).${c.reading ? ` ${c.reading}` : ''}` });
@@ -457,13 +462,13 @@ export function airParts(sc, shown = sc.drawn) {
       out.push({ t: i === 0 ? ' ' : i === xs.length - 1 ? ' and ' : ', ' });
       out.push({ t: i === 0 ? cap(L[x.key]) : L[x.key], air: x.key });
     });
-    if (xs.length) out.push({ t: ` ${status}.` });
+    if (xs.length) out.push({ t: ' ' }, { t: status, st: status }, { t: '.' });
   }
   for (const x of sc.list.filter((y) => y.key !== shown && y.status === 'disfavoured')) {
-    out.push({ t: ' ' }, { t: cap(L[x.key]), air: x.key }, { t: ` disfavoured ${quals(x)}.` });
+    out.push({ t: ' ' }, { t: cap(L[x.key]), air: x.key }, { t: ' ' }, { t: 'disfavoured', st: 'disfavoured' }, { t: ` ${quals(x)}.` });
   }
   for (const x of sc.list.filter((y) => y.key !== shown && y.status === 'excluded')) {
-    out.push({ t: ` ${cap(L[x.key])} excluded ${both(x.bounds.filter((b) => covers(b, x.key)).map(boundWords))}.` });
+    out.push({ t: ` ${cap(L[x.key])} ` }, { t: 'excluded', st: 'excluded' }, { t: ` ${both(x.bounds.filter((b) => covers(b, x.key)).map(boundWords))}.` });
   }
   out.push({ t: sc.observed ? ` Observed by ${both(sc.observed.papers.map(cite1))}.` : ' Not observed.' });
   if (fitSaid(sc)) {

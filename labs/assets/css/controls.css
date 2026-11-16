@@ -1,0 +1,140 @@
+/* ============================================================
+   controls.css: the look of the labs' shared controls (kit/
+   controls.js). Each is drawn from an instrument a visitor
+   already knows, and shows what is chosen by its geometry (the
+   index over a scale, the lever's side, a frame), never by
+   colour. Gold here marks only what is measured or kept: the tick
+   of a measured value, a kept mark of a tally, the filled action
+   once its thing is kept. Every value comes from tokens.css.
+
+   Lifted on 2026-11-16 with the Exomania survey, their first
+   caller. Labels are sentence case and untracked.
+   ============================================================ */
+
+/* ---------- the key: an action drawn as its keycap (DSKY) ---------- */
+.key {
+  display: inline-grid; place-items: center; min-width: 24px; height: 22px; padding: 0 6px; box-sizing: border-box;
+  border: 1px solid var(--text); border-bottom: 3px solid var(--text-bright); border-radius: 3px;
+  color: var(--text-bright); font: 500 11px/1 var(--font-mono); background: var(--void); flex: none;
+}
+.kact {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 32px; padding: 0 2px; margin: 0;
+  background: none; border: 0; color: var(--text); font: 12px var(--font-mono); cursor: pointer; white-space: nowrap;
+}
+.kact:hover .key, .kact:focus-visible .key { border-color: var(--horizon); border-bottom-color: var(--text-bright); }
+.kact:hover, .kact:focus-visible { color: var(--text-bright); }
+.kact:active .key { transform: translateY(1px); border-bottom-width: 2px; }
+.kact:disabled { cursor: default; opacity: .45; }
+.kact.bare { gap: 0; }
+
+/* ---------- the switch: both states engraved, the lever's side is the state ---------- */
+.switch {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0; margin: 0;
+  background: none; border: 0; cursor: pointer; font: 11px var(--font-mono); color: var(--text-dim); white-space: nowrap; text-align: left;
+}
+.switch .sw-name { color: var(--text-dim); min-width: var(--sw-name, 0); margin-right: 4px; }
+.switch .sw-w { color: var(--text-dim); transition: color var(--t-fast) var(--ease); }   /* the other state, still readable (4.5 to 1); the lever says which */
+.switch[aria-checked="false"] .sw-l, .switch[aria-checked="true"] .sw-r { color: var(--text-bright); }
+.switch .sw-track { position: relative; width: 34px; height: 16px; flex: none; }
+.switch .sw-track::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--text); }
+.switch .sw-track::after { content: ''; position: absolute; inset: 4px 0; border-left: 1px solid var(--text-faint); border-right: 1px solid var(--text-faint); }
+.switch .sw-lever { position: absolute; top: 0; bottom: 0; left: 4px; width: 3px; background: var(--text-bright); transition: left var(--t-fast) var(--ease); }
+.switch[aria-checked="true"] .sw-lever { left: calc(100% - 7px); }
+.switch:hover .sw-track::before { background: var(--horizon); }
+.switch:disabled { cursor: default; opacity: .45; }
+/* a switch never pushes its page sideways: below 700 px its words wrap, the track stays whole */
+@media (max-width: 700px) { .switch { max-width: 100%; white-space: normal; flex-wrap: wrap; row-gap: 2px; } .switch .sw-w { min-width: 0; overflow-wrap: anywhere; } }
+
+/* ---------- the scale: one of a few, under a fixed index (a lens's distance scale) ---------- */
+.scale { display: grid; grid-template-columns: auto 1fr; align-items: start; column-gap: 14px; }
+.scale .sc-name { font: 11px var(--font-mono); color: var(--text-dim); padding-top: 18px; white-space: nowrap; }
+.scale .sc-track {
+  position: relative; display: flex; justify-content: space-between; min-width: 0;
+  background:
+    linear-gradient(var(--text), var(--text)) 0 12px / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--text-faint) 0 1px, transparent 1px 10px) 0 12px / 100% 4px no-repeat;
+}
+.scale .sc-opt {
+  position: relative; display: grid; justify-items: center; padding: 20px 0 2px; margin: 0; min-width: 44px; min-height: 40px;
+  background: none; border: 0; cursor: pointer; font: 11px var(--font-mono); color: var(--text-dim); white-space: nowrap;
+}
+.scale .sc-opt:first-child { justify-items: start; } .scale .sc-opt:last-child { justify-items: end; }
+.scale .sc-opt::before { content: ''; position: absolute; top: 12px; width: 1px; height: 8px; background: var(--text-dim); }
+.scale .sc-opt:first-child::before { left: 0; } .scale .sc-opt:last-child::before { right: 0; }
+.scale .sc-opt:not(:first-child):not(:last-child)::before { left: 50%; }
+.scale .sc-opt[aria-checked="true"] { color: var(--text-bright); }
+/* the index: a triangle over the line and its hairline down through it */
+.scale .sc-opt[aria-checked="true"]::after {
+  content: ''; position: absolute; top: 0; width: 0; height: 0;
+  border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 9px solid var(--text-bright);
+}
+.scale .sc-opt[aria-checked="true"]:first-child::after { left: -6px; }
+.scale .sc-opt[aria-checked="true"]:last-child::after { right: -6px; }
+.scale .sc-opt[aria-checked="true"]:not(:first-child):not(:last-child)::after { left: calc(50% - 6px); }
+.scale .sc-opt[aria-checked="true"]::before { top: 6px; height: 16px; width: 2px; background: var(--text-bright); }
+.scale .sc-opt:hover { color: var(--text-bright); }
+.scale .sc-opt:disabled { cursor: default; opacity: .45; }
+
+/* ---------- the one filled action, and its kept state ---------- */
+.fill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 16px; margin: 0;
+  background: var(--text-bright); color: var(--void); border: 1px solid var(--text-bright); border-radius: 0;
+  font: 600 12.5px var(--font-mono); cursor: pointer; white-space: nowrap;
+}
+.fill:hover { background: var(--horizon); border-color: var(--horizon); }
+.fill.kept { background: transparent; color: var(--accretion-soft); border-color: var(--accretion); }
+.fill.kept::before { content: ''; width: 9px; height: 5px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(-45deg); }
+.fill.kept:hover { background: color-mix(in srgb, var(--accretion) 10%, transparent); }
+.fill:disabled { cursor: progress; opacity: .55; }
+
+/* ---------- a plain action: words that do something ---------- */
+.plain {
+  display: inline-flex; align-items: center; min-height: 28px; padding: 0; margin: 0; background: none; border: 0; cursor: pointer;
+  font: inherit; font-family: var(--font-mono); color: var(--text); text-decoration: underline; text-decoration-color: var(--text-dim); text-underline-offset: 3px;
+}
+.plain:hover, .plain:focus-visible { color: var(--text-bright); text-decoration-color: var(--text-bright); }
+.plain:disabled { cursor: default; opacity: .45; text-decoration: none; }
+
+/* ---------- the field: a line to write on, with its key ---------- */
+.field { display: flex; align-items: center; gap: 12px; min-height: 42px; border-bottom: 1px solid var(--line-bright); min-width: 0; }
+.field:focus-within { border-bottom-color: var(--horizon); }
+.field input, .field select {
+  flex: 1; min-width: 0; background: none; border: 0; color: var(--text-bright); font: 13.5px var(--font-mono); padding: 6px 0; border-radius: 0;
+}
+.field input::placeholder { color: var(--text-dim); opacity: 1; }
+.field input:focus { outline: 2px solid var(--horizon); outline-offset: 4px; }
+select.pick {
+  background: var(--void); border: 0; border-bottom: 1px solid var(--line-bright); color: var(--text); font: 11.5px var(--font-mono);
+  min-height: 28px; padding: 2px 4px; border-radius: 0;
+}
+
+/* ---------- the interval on the shared log axis, by line type ---------- */
+svg.iv { display: block; overflow: visible; }
+.iv .iv-mid { stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 2 2; }
+.iv .iv-run { stroke: var(--horizon); stroke-width: 1.3; fill: none; }
+.iv-d .iv-run { stroke-dasharray: 6 4; }
+.iv-e .iv-run { stroke-dasharray: 12 3 2 3; }
+.iv-i .iv-run { stroke-dasharray: 12 3 2 3 2 3; }
+.iv .iv-tick { stroke: var(--text-bright); stroke-width: 1.5; }
+.iv-m .iv-tick { stroke: var(--accretion); }
+svg.iv-axis { display: block; overflow: visible; }
+.iv-axis line { stroke: var(--text-faint); }
+.iv-axis text { fill: var(--text-dim); font: 8.5px var(--font-mono); }
+/* the same four line types, as a key */
+.lt { display: inline-block; width: 26px; height: 0; border-top: 1.5px solid var(--horizon); vertical-align: middle; margin: 0 4px 0 2px; }
+.lt.d { border-top-style: dashed; }
+.lt.e, .lt.i { border-top: 0; height: 2px; background: repeating-linear-gradient(90deg, var(--horizon) 0 12px, transparent 12px 15px, var(--horizon) 15px 17px, transparent 17px 20px); }
+.lt.i { background: repeating-linear-gradient(90deg, var(--horizon) 0 12px, transparent 12px 15px, var(--horizon) 15px 17px, transparent 17px 20px, var(--horizon) 20px 22px, transparent 22px 25px); }
+
+/* ---------- the tally ---------- */
+svg.tally-marks { display: block; flex: none; }
+.tally-marks .tl-seen { stroke: var(--text); stroke-width: 1; }
+.tally-marks .tl-kept { stroke: var(--accretion); stroke-width: 1.8; }
+
+/* ---------- on a phone every control is a target a thumb can take (Fitts; WCAG 2.5.8 asks 24 px, 44 px here) ---------- */
+@media (max-width: 700px) {
+  .kact, .switch, .fill, .plain, select.pick { min-height: 44px; }
+  .scale .sc-opt { min-height: 44px; }
+  .field { min-height: 46px; }
+  .field input { font-size: 16px; }
+}

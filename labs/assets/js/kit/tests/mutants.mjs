@@ -1,6 +1,8 @@
 /* ============================================================
-   The runner the mutants tests of this lab share
-   (query.mutants.test.mjs, find.mutants.test.mjs).
+   The runner every lab's mutants tests share (moved here from
+   exoplanet/tests on 2026-11-16, when the kit's own lists began
+   to use it). A caller passes its own tests folder as `here`; the
+   folder above it is the lab that is copied and broken.
 
    A mutant is one exact replacement in one module that breaks
    one rule: a bound moved to either side, a branch removed, a
@@ -35,7 +37,10 @@ function runTest(file) {
     const timer = setTimeout(() => { timedOut = true; child.kill(); }, RUN_LIMIT_MS);
     child.stdout.on('data', (d) => { out += d; });
     child.on('error', () => { clearTimeout(timer); resolve({ code: -1, fails: 0, timedOut }); });
-    child.on('exit', (code) => { clearTimeout(timer); resolve({ code, fails: out.split('\n').filter((l) => l.startsWith('FAIL')).length, timedOut }); });
+    // 'close', not 'exit': at 'exit' the child's output may not all be read yet. On 2026-11-16 the gates reported
+    // "first found: switched off: exit 1 with no failing check" in query.mutants2 (run of pull request 45): the
+    // tests had failed, and the FAIL lines arrived after the count was taken.
+    child.on('close', (code) => { clearTimeout(timer); resolve({ code, fails: out.split('\n').filter((l) => l.startsWith('FAIL')).length, timedOut }); });
   });
 }
 

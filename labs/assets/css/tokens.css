@@ -39,6 +39,13 @@
   --horizon-dim:  #565D72;
   --horizon-glow: rgba(159, 179, 214, .30);
 
+  /* ---- a world's tint of the ink (labs-design: a world may tint the ink, never add an accent) ---- */
+  /* Cosmos: the deep blue of a sky, and the blue of what is cold. Moved here from overdue.css on 2026-11-16 so that
+     the lab's pages and drawings use site tokens only (atlas interface.2.2). Gold against the ice separates at 22 for
+     colour-blind readers (target 8; the chart skill's validator, 2026-11-14). */
+  --cosmos-sky: #0A1B3D;
+  --cosmos-ice: #7CC0FA;
+
   /* ---- semantic ---- */
   --ok:    #6FCF8E;
   --warn:  #E7B85C;
@@ -111,12 +118,12 @@
 }
 
 /* A link that jumps to the content: off the page until it has the focus. */
-.skip { position: absolute; left: -999px; top: 8px; z-index: 500; padding: 8px 12px; background: var(--surface); color: var(--text-bright); border: 1px solid var(--hair); }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 500; display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 8px 12px; background: var(--surface); color: var(--text-bright); border: 1px solid var(--hair); }
 .skip:focus { left: 8px; }
 
-/* A single accessible focus ring, used everywhere. */
-:where(a, button, input, [tabindex]):focus-visible {
+/* A single accessible focus ring, used everywhere. It sets the ring only: an element keeps its own corners when it
+   takes the focus (a radius here once rounded square selects and cut the memes' 8 px select to 4 px). */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--horizon);
   outline-offset: 2px;
-  border-radius: var(--r-sm);
 }

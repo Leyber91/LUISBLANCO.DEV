@@ -12,7 +12,7 @@
 
    Each entry breaks one rule of air.js. The broken file is
    written to a copy of this lab in the system's temp folder and
-   air.test.mjs is run on the copy (mutants.mjs). Every broken
+   air.test.mjs is run on the copy (kit/tests/mutants.mjs). Every broken
    rule must fail a check.
 
    The list is checked against the code, not written from
@@ -26,7 +26,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -119,6 +119,6 @@ const AIR = [
 ];
 
 const data = ['data/exomania/pscomppars-snapshot.json'];
-const a = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: AIR, data });
+const a = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: AIR, also: ['kit'], data });
 console.log(`\nbroken rules: ${AIR.length} in air.js (the statuses and data.js are in air.mutants2, the line in air.mutants3)`);
 process.exit(a);

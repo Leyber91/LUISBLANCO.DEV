@@ -1,3 +1,5 @@
+import { num, int } from '../../kit/format.js';
+
 /* ============================================================
    views/common.js — what every 2D view shares: the design tokens
    read from CSS, a DPR-aware canvas that redraws on resize, log
@@ -5,20 +7,29 @@
    ============================================================ */
 
 let TOK = null;
+/* The site's tokens (tokens.css), read once from the page. Every colour a view draws is one of these: the views carry
+   no colour of their own. The two Cosmos tints are tokens too: the deep blue of a sky and the blue of what is cold. */
 export function tokens() {
   if (TOK) return TOK;
   const cs = getComputedStyle(document.documentElement);
-  const v = (n, d) => (cs.getPropertyValue(n).trim() || d);
+  const v = (n) => cs.getPropertyValue(n).trim();
   TOK = {
-    void: v('--void', '#06080D'), line: v('--line', '#1C232F'), lineBright: v('--line-bright', '#2C3744'),
-    text: v('--text', '#C5CCD8'), dim: v('--text-dim', '#79828F'), faint: v('--text-faint', '#424B57'),
-    bright: v('--text-bright', '#EAF0FB'), gold: v('--accretion', '#D4A24C'), goldSoft: v('--accretion-soft', '#F0C674'),
-    goldDim: v('--accretion-dim', '#97681F'), horizon: v('--horizon', '#9FB3D6'), horizonDim: v('--horizon-dim', '#565D72'),
-    sky: v('--sky', '#0A1B3D'), ice: v('--ice', '#7CC0FA'),      // the Cosmos pair a page may set: the deep blue of a sky and the blue of what is cold
+    void: v('--void'), surface: v('--surface'), line: v('--line'), lineBright: v('--line-bright'),
+    text: v('--text'), dim: v('--text-dim'), faint: v('--text-faint'), bright: v('--text-bright'),
+    gold: v('--accretion'), goldSoft: v('--accretion-soft'), goldDim: v('--accretion-dim'),
+    horizon: v('--horizon'), horizonDim: v('--horizon-dim'), sky: v('--cosmos-sky'), ice: v('--cosmos-ice'),
     font: '500 10px "IBM Plex Mono", ui-monospace, Consolas, monospace',
-    fontSm: '400 9px "IBM Plex Mono", ui-monospace, Consolas, monospace',
+    fontSm: '400 9.5px "IBM Plex Mono", ui-monospace, Consolas, monospace',
+    serif: '400 11px Fraunces, Georgia, serif',
   };
   return TOK;
+}
+
+/* A colour between two tokens: t = 0 gives a, t = 1 gives b. */
+export function mix(a, b, t, alphaV = 1) {
+  const p = (h) => { const x = h.replace('#', ''); const n = parseInt(x.length === 3 ? x.split('').map((c) => c + c).join('') : x, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const A = p(a), B = p(b), k = Math.max(0, Math.min(1, t));
+  return `rgba(${A.map((x, i) => Math.round(x + (B[i] - x) * k)).join(',')},${alphaV})`;
 }
 
 /* rgba() from a #rrggbb token */
@@ -63,17 +74,10 @@ export function linScale(d0, d1, r0, r1) {
 
 export const isNum = (v) => typeof v === 'number' && isFinite(v);
 
-/* Significant-figure formatting that never prints a false precision. */
-export function fmt(v, sig = 3) {
-  if (!isNum(v)) return '—';
-  const a = Math.abs(v);
-  if (a === 0) return '0';
-  if (a >= 1e5) return Math.round(v).toLocaleString('en-US');
-  if (a >= 1000) return Math.round(v).toLocaleString('en-US');
-  const d = Math.max(0, sig - 1 - Math.floor(Math.log10(a)));
-  return v.toFixed(Math.min(d, 4));
-}
-export const fmtInt = (v) => (isNum(v) ? Math.round(v).toLocaleString('en-US') : '—');
+/* The numbers of this lab are written by the kit's one convention (kit/format.js): significant figures, grouped by
+   thousands. A value that is not there is a dash in the drawings and tables that used it. */
+export const fmt = (v, sig = 3) => num(v, sig, '—');
+export const fmtInt = (v) => int(v, '—');
 
 export function decadeLabel(v) {
   if (v >= 1000) return (v / 1000) + 'k';

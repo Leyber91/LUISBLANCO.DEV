@@ -9,7 +9,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
-import { runMutants } from './mutants.mjs';
+import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -95,7 +95,7 @@ const DATA = [
 ];
 
 const data = ['data/exomania/pscomppars-snapshot.json'];
-const s = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: STATUSES, data });
-const d = await runMutants({ here, file: 'data.js', test: 'air.test.mjs', mutants: DATA, data });
+const s = await runMutants({ here, file: 'air.js', test: 'air.test.mjs', mutants: STATUSES, also: ['kit'], data });
+const d = await runMutants({ here, file: 'data.js', test: 'air.test.mjs', mutants: DATA, also: ['kit'], data });
 console.log(`\nbroken rules: ${STATUSES.length} of the statuses in air.js, ${DATA.length} in data.js`);
 process.exit(s || d);

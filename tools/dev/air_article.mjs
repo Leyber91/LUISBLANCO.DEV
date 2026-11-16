@@ -36,7 +36,7 @@ const WORLDS = ['Mercury', 'Venus', 'Earth', 'Mars', 'TRAPPIST-1 b', 'TRAPPIST-1
 const LOOK_WORD = { temperate: 'seas and cloud', fluid: 'cloud tops', ice: 'ice', molten: 'molten rock', airless: 'airless rock', desert: 'thin-air desert', shrouded: 'cloud deck' };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const int = (x) => Math.round(x).toLocaleString('en-US');
+const { int } = await imp('../kit/format.js');   // the labs' one way of writing a number
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 const doiLink = (d) => `<a href="https://doi.org/${esc(d)}">doi:${esc(d)}</a>`;
 

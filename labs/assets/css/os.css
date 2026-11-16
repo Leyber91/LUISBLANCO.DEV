@@ -197,6 +197,9 @@
   .los-rows { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
   .los-rows dd { margin-bottom: var(--s-2); }
   .los-consent { left: var(--s-3); right: var(--s-3); bottom: var(--s-3); width: auto; grid-template-columns: minmax(0, 1fr); }
+  /* a finger's target: every button and the "what is sent" line at least 44 px tall */
+  .los-btn { min-height: 44px; }
+  .los-what summary { display: flex; align-items: center; min-height: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
