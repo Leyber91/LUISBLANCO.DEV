@@ -439,13 +439,13 @@ async function selftest() {
     fs.writeFileSync(lockFile, stale);
     fs.writeFileSync(lockFile + '.takeover', '');
     const keptBusy = takeStale(lockFile, stale) === false && fs.existsSync(lockFile) && fs.existsSync(lockFile + '.takeover');
-    const t9 = (Date.now() - 9000) / 1000, t11 = (Date.now() - 11000) / 1000;
+    const t9 = (Date.now() - 9500) / 1000, t11 = (Date.now() - 11000) / 1000;
     fs.utimesSync(lockFile + '.takeover', t9, t9);
     const keptYoung = takeStale(lockFile, stale) === false && fs.existsSync(lockFile + '.takeover');
     fs.utimesSync(lockFile + '.takeover', t11, t11);
     const clearedOld = takeStale(lockFile, stale) === false && !fs.existsSync(lockFile + '.takeover');
     const removed = takeStale(lockFile, stale) === true && !fs.existsSync(lockFile) && !fs.existsSync(lockFile + '.takeover');
-    yes('a stale lock is removed under the takeover lock, only while it reads as it was seen; a takeover 9 s old is waited for, one 11 s old is cleared', keptLive && keptBusy && keptYoung && clearedOld && removed, J([keptLive, keptBusy, keptYoung, clearedOld, removed]));
+    yes('a stale lock is removed under the takeover lock, only while it reads as it was seen; a takeover 9.5 s old is waited for, one 11 s old is cleared', keptLive && keptBusy && keptYoung && clearedOld && removed, J([keptLive, keptBusy, keptYoung, clearedOld, removed]));
     let noTake = '';
     try { takeStale(path.join(scratch, 'no such folder', 'chrome.lock'), stale); noTake = 'no error'; } catch (e) { noTake = e.code; }
     yes('a takeover lock that cannot be written is an error, not a wait', noTake === 'ENOENT', noTake);
@@ -557,7 +557,7 @@ async function selftest() {
     const tie = [[[0, 0, 0, 100], [0, 0, 0, 0]], [[0, 0, 0, 150], [0, 0, 0, 0]]];
     yes('a paeth tie is broken as the PNG rule breaks it', transparentIn(png(2, 2, 6, encOf(tie, 4))).count === 2, J(transparentIn(png(2, 2, 6, encOf(tie, 4)))));
     yes('only alpha 0 is transparent: alpha 1 is not', transparentIn(png(2, 1, 6, [[0, [0, 0, 0, 1, 0, 0, 0, 0]]])).count === 1, J(transparentIn(png(2, 1, 6, [[0, [0, 0, 0, 1, 0, 0, 0, 0]]]))));
-    yes('an RGB frame has no transparent pixel, and a frame of another kind is refused', transparentIn(png(1, 1, 2, [[0, [1, 2, 3]]])).count === 0 && (() => { try { transparentIn(png(1, 1, 0, [[0, [5]]])); return false; } catch { return true; } })());
+    yes('an RGB frame has no transparent pixel, and a frame of another kind is refused for its kind', transparentIn(png(1, 1, 2, [[0, [1, 2, 3]]])).count === 0 && (() => { try { transparentIn(png(1, 1, 0, [[0, [5]]])); return false; } catch (e) { return /colour type 0 at 8 bits/.test(e.message); } })());
     // what the reader cannot read it refuses, with its reason
     const refusal = (b) => { try { transparentIn(b); return 'read'; } catch (e) { return e.message; } };
     const withHeader = (b, at, v) => { const c = Buffer.from(b); c[at] = v; return c; };   // IHDR's data starts at 16: interlace is byte 28
