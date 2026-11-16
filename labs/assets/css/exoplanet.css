@@ -110,6 +110,9 @@ a.ref:hover { color: var(--text-bright); }
 #exo-canvas:focus-visible { outline: 2px solid var(--horizon); outline-offset: -2px; }
 .bezel { position: absolute; left: 0; right: 0; top: var(--bezel-y, 80%); text-align: center; font-size: 9.5px; color: var(--text-dim); pointer-events: none; white-space: nowrap; }
 .ul { position: absolute; left: 0; top: 0; z-index: 2; max-width: 62%; pointer-events: none; }
+/* on the ground the sky is bright: the corners keep their words on a dark ground, and the readout goes to the top */
+.sheet[data-view="surface"] :is(.ul, .ll, .ur) { background: color-mix(in srgb, var(--void) 78%, transparent); padding: 6px 10px 8px; }
+.sheet[data-view="surface"] .bezel { top: 10px; }
 .ul > * { pointer-events: auto; }
 .name { font: 400 46px/1.02 var(--font-serif); font-style: normal; color: var(--text-bright); letter-spacing: -.01em; text-shadow: 0 0 12px var(--void); overflow-wrap: anywhere; }
 .name:focus { outline: none; }
@@ -339,6 +342,9 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 .log-what { color: var(--text-dim); font-size: 10.5px; }
 .log-when { color: var(--text-dim); font-size: 10.5px; white-space: nowrap; text-align: right; }
 .log-out { font-size: 10.5px; }
+/* the kind, the time and "take out" share the row: each fills its height and centres its words, so they stand level */
+.method .log-list li > :is(.log-what, .log-when, .log-out) { align-self: stretch; display: flex; align-items: center; }
+.method .log-list li > .log-when { justify-content: flex-end; }
 .log-foot { margin-top: 14px; color: var(--text-dim); }
 .chain { padding-left: 18px; }
 .chain li { font-size: 11px; line-height: 1.55; margin-bottom: 5px; }

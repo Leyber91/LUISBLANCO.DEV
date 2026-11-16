@@ -650,6 +650,7 @@ function openCompare() {
 function syncCamButtons() {
   const mode = glOk ? engine.camera.mode : 'orbit';
   setScale($('distance'), mode);
+  $('sheet-a').dataset.view = mode;   // on the ground the sky is bright: the corners take a dark ground of their own
   const sel = store.state.sel;
   const giant = sel && classify(sel).klass >= 2;
   const sb = document.querySelector('[data-cam="surface"] .sc-w');
