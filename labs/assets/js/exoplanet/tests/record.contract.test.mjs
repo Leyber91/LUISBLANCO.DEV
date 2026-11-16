@@ -8,11 +8,15 @@
    block below proves one in Node, and tools/drives/record.mjs
    proves the ones a browser must show.
 
-   P1 One door. record.js is the only module of either room that
-      reads or writes the lab's record or any browser storage: no
-      other file of exoplanet/ or of the two rooms' pages names
-      localStorage, sessionStorage, indexedDB, caches, a cookie,
-      Labs OS's progress store or its store module.
+   P1 One door. record.js is the only module of the lab's two
+      rooms that reads or writes the lab's record, or keeps
+      anything of the lab in browser storage: no other file of
+      exoplanet/ or of the two rooms' pages names localStorage,
+      sessionStorage, indexedDB, caches, a cookie, Labs OS's
+      progress store or its store module. (The model route the
+      survey mounts, ai/llm.js, keeps the visitor's own model key
+      in localStorage: that is the route's, outside the record and
+      outside this property.)
    P2 Typed. Every record kind the lab's bindings list
       (configuration, observation, prediction, note) is a type in
       record.js, which tsc checks: its first line is // @ts-check,
@@ -25,9 +29,11 @@
    P4 Nothing stored is lost. A record of each older shape, as the
       live site wrote it, reads at version 3 with every entry it
       held; the survey's old local copy of the catalogue is taken
-      into the visitor's own store and then removed, and nothing
-      is taken from it into a fixture, a memory store, or where
-      there is no record.
+      into the visitor's own store, and removed only by a later
+      read that finds a record of version 3 holding the catalogue
+      (so a tab of version 2 that writes back over the upgrade
+      loses nothing); nothing is taken from it into a fixture, a
+      memory store, or where there is no record.
    P5 Reach. What the lab keeps is its one Labs OS record: the
       export holds it whole, and the erase leaves none of it.
    P6 Bounded. A record at every bound fits Labs OS's cap on one
@@ -37,8 +43,12 @@
    P8 The rooms read each other. A clock opened on the sky is a
       visit "from the sky" that the survey's log shows, with the
       day the sky was at, and its line's link opens the sky on
-      that planet at that day. Every planet of the sky can be such
-      a visit.
+      that planet at that day, on the same store. Every planet of
+      the sky can be such a visit, and a day is a day of the sky
+      only when its line shows it. A visit from the sky judges no
+      line of the log by the sky's catalogue: past the bound the
+      oldest line goes, counted. Two writes fired at once both
+      land.
 
    Stopping rule for this slice's review: it ships when P1 to P8
    hold here and in the drive at 1440 and at 390, and a reviewer
@@ -52,7 +62,9 @@ import { dirname, join, relative } from 'node:path';
 import * as R from '../record.js';
 import { LabsOS } from '../../os/index.js';
 import { MAX_PROGRESS_BYTES } from '../../os/progress.js';
-import { FIRST_YEAR, LAST_YEAR } from '../overdue/sky.js';
+import { LINE_JD } from '../overdue/clock.js';
+import { msOfJd } from '../overdue/time.js';
+import { isoDay } from '../../kit/format.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const lab = join(here, '..'), root = join(here, '../../../../..');
@@ -144,7 +156,15 @@ const surveyKnown = ((s) => (n) => s.has(n))(new Set([...surveyNames, ...rosterN
   yes('P4: read at version 3, the record of version 2 keeps the sky\'s slice, every saved world, visit and pin, and the count of dropped visits, as they were',
     os2.rec.v === 3 && same(got.record.overdue, v2.overdue) && same(got.record.log, v2.log), JSON.stringify(got.record.log).slice(0, 200));
   const was = JSON.parse(old.local.value);
-  yes('P4: and holds the catalogue the survey last saw, taken from its old local copy, which is gone from localStorage', same(got.record.seen, { day: was.date, names: was.names.join('|') }) && !ls.m.has(old.local.key));
+  yes('P4: and holds the catalogue the survey last saw, taken from its old local copy, which stays on the read that upgraded the record', same(got.record.seen, { day: was.date, names: was.names.join('|') }) && ls.m.get(old.local.key) === old.local.value);
+  await R.read(os2, ls);
+  yes('P4: the next read, which finds version 3 holding the catalogue, removes the copy', !ls.m.has(old.local.key));
+  // the race of the review (S3): a tab of version 2 read the record before the upgrade and writes it back after
+  const raced = fake(old.v2, OWN), lr = local(), oldTab = JSON.parse(JSON.stringify(old.v2.data));
+  await R.read(raced, lr);
+  await raced.progress.set(oldTab, { v: 2 });
+  const back = await R.read(raced, lr);
+  yes('P4: after a tab of version 2 writes back over the upgrade, the record takes the copy in again', same(back.record.seen, { day: was.date, names: was.names.join('|') }) && lr.m.has(old.local.key) && same(back.record.log, v2.log));
   yes('P4: the hidden entry of the old record (a world the catalogue may lose) is kept in the store', got.record.log.visits.some((e) => e.name === 'Gone World c') && !surveyKnown('Gone World c'));
   const os1 = fake(old.v1, OWN), got1 = await R.read(os1, local());
   yes('P4: the record of version 1 keeps its planet and place, as the sky\'s slice', os1.rec.v === 3 && same(got1.record.overdue, { planet: old.v1.data.planet, place: { lat: old.v1.data.place.lat, lon: old.v1.data.place.lon } }));
@@ -155,7 +175,7 @@ const surveyKnown = ((s) => (n) => s.has(n))(new Set([...surveyNames, ...rosterN
     yes(`P4: on ${name} the old local copy stays where it is and is not taken in, and the record is kept`, r.record.seen === null && l.m.get(old.local.key) === old.local.value && same(r.record.log, v2.log));
   }
   const l0 = local(), none = await R.read(fake(null, OWN), l0);
-  yes('P4: with no record the old local copy is removed and nothing is taken in', none.record.seen === null && !l0.m.has(old.local.key));
+  yes('P4: with no record nothing is taken in, and the copy stays until a record of version 3 holds a catalogue', none.record.seen === null && l0.m.get(old.local.key) === old.local.value);
   const full = JSON.stringify({ date: '2026-11-15', names: [...surveyNames, ...rosterNames.filter((n) => !surveyNames.includes(n))] });
   const lf = { getItem: () => full, removeItem: () => {} }, rf = await R.read(fake(old.v2, OWN), lf);
   yes('P4: an old local copy of the whole catalogue (snapshot and roster) fits the record', !!rf.record.seen && rf.record.seen.names.split('|').length >= surveyNames.length, `${rf.record.seen && rf.record.seen.names.length} characters`);
@@ -197,7 +217,7 @@ const surveyKnown = ((s) => (n) => s.has(n))(new Set([...surveyNames, ...rosterN
   try { await os.progress.set(sound, { v: R.V }); } catch (e) { err = e.message; }
   yes('P6: Labs OS stores it', err === '', err);
   os.close(); LabsOS.reset();
-  // room for the catalogue to grow: when it is spent, see() refuses and the survey says nothing is new (TOO_LONG)
+  // room for the catalogue to grow: when it is spent, seeCatalogue shows no world as new and the log says why (LONG_NOTE)
   const today = [...new Set([...surveyNames, ...rosterNames])].join('|').length, room = Math.floor((R.LIMITS.seen - today) / (longest + 1));
   yes(`P6: the catalogue of today (${today} characters) leaves room for ${room} more names as long as its longest, over 2,000`, room > 2000);
 }
@@ -215,7 +235,11 @@ const surveyKnown = ((s) => (n) => s.has(n))(new Set([...surveyNames, ...rosterN
 
 /* ---- P8 the rooms read each other ---- */
 {
-  yes('P8: the sky\'s line of time is the one record.js bounds a sky visit by', R.SKY_YEARS.from === FIRST_YEAR && R.SKY_YEARS.to === LAST_YEAR);
+  const dayOf = (jd) => isoDay(msOfJd(jd)), next = (d, k) => isoDay(Date.parse(d) + k * 86400000);
+  const first = dayOf(LINE_JD.from), last = dayOf(LINE_JD.to);
+  const sky = (at) => R.visit(R.empty(), { name: 'HD 209458 b', t: T, via: 'sky', at }, skyKnown).ok;
+  yes('P8: a day of the sky is a day its line shows: the days of its two ends are, the day before and the day after are not', first === '1999-01-01' && last === '2040-01-01' && sky(first) && sky(last) && !sky(next(first, -1)) && !sky(next(last, 1)),
+    `${first} to ${last}`);
   const all = skyNames.map((name) => [name, R.visit(R.empty(), { name, t: T, via: 'sky', at: '2031-03-12' }, skyKnown)]);
   yes(`P8: every planet of the sky (${skyNames.length}) can be a visit from the sky`, skyNames.length > 4000 && all.every(([, w]) => w.ok));
   const back = all.map(([name, w]) => { const e = w.record.log.visits[0]; const q = new URLSearchParams(R.skyLink(e).split('?')[1]); return [name, R.skyLink(e).startsWith('exomania.html?'), q.get('planet'), q.get('date')]; });
@@ -223,6 +247,23 @@ const surveyKnown = ((s) => (n) => s.has(n))(new Set([...surveyNames, ...rosterN
   const onSky = R.visit(R.empty(), { name: 'HD 209458 b', t: T, via: 'sky', at: '2031-03-12' }, skyKnown).record;
   const seen = R.view(onSky, surveyKnown).record.log.visits;
   yes('P8: the survey\'s log shows a sky visit with its way and day', seen.length === 1 && R.visitWords(seen[0]) === 'from the sky' && seen[0].at === '2031-03-12' && R.skyWords(seen[0]) === 'its clock on 12 March 2031');
+  // B1 of the review: past the bound, a visit from the sky with the sky's catalogue, over 500 lines the survey wrote
+  const notOnSky = surveyNames.filter((n) => !skyKnown(n)), both = skyNames.filter(surveyKnown);
+  let full = R.empty();
+  [notOnSky[0], ...both.slice(0, 249), notOnSky[1], ...both.slice(249, 498)].forEach((name, i) => { full = R.visit(full, { name, t: T + i, via: 'search' }, surveyKnown).record; });
+  const before = R.counts(R.view(full, surveyKnown).record).visited, w = R.visit(full, { name: both[700], t: T + 1000, via: 'sky', at: '2031-03-12' }, skyKnown);
+  const gone = full.log.visits.filter((e) => !w.record.log.visits.some((x) => x.name === e.name)).map((e) => e.name);
+  yes(`P8: past the bound a sky visit drops the oldest line and counts it (the sky lacks ${notOnSky.length} of the survey's planets)`, full.log.visits.length === 500 && notOnSky.length > 1000 && same(gone, [notOnSky[0]])
+    && w.record.log.dropped === 1 && w.record.log.visits.some((e) => e.name === notOnSky[1]) && R.counts(R.view(w.record, surveyKnown).record).visited === before + 1, `gone ${gone.join(', ')}; dropped ${w.record.log.dropped}`);
+  // S1 of the review, on Labs OS itself: two clocks opened at once, and one pressed twice
+  const os = await LabsOS.init({ lab: 'exomania', idb: null, fixture: null, ui: false, lifecycle: false });
+  const opened = (name, t) => (r) => { const x = R.setOverdue(r, { planet: name, place: null }, skyKnown); return x.ok ? R.visit(x.record, { name, t, via: 'sky', at: '2031-03-12' }, skyKnown) : x; };
+  await Promise.all([R.update(os, opened('KELT-9 b', T)), R.update(os, opened('WASP-12 b', T + 1))]);
+  const two = await R.load(os);
+  await Promise.all([R.update(os, opened('HD 209458 b', T + 2)), R.update(os, opened('HD 209458 b', T + 3))]);
+  const twice = await R.load(os);
+  yes('P8: two clocks opened at once are both visits, and one pressed twice is counted twice', same(two.log.visits.map((e) => e.name), ['WASP-12 b', 'KELT-9 b']) && twice.log.visits[0].name === 'HD 209458 b' && twice.log.visits[0].n === 2);
+  os.close(); LabsOS.reset();
   // Not checked here: that the survey's catalogue has every planet of the sky. On 2026-11-16 it had all 4,801, two of
   // them only through the weekly roster, which the data workflow rewrites; a sky visit of a planet the survey lacks
   // is kept in the store and counted as hidden, as any entry the catalogue lacks.

@@ -6,11 +6,13 @@
 // The properties are written at the head of labs/assets/js/exoplanet/tests/record.contract.test.mjs. This scenario
 // proves in a browser the ones a browser must show, each check named with its property:
 //   P4 a record of version 2 and the survey's old local copy of the catalogue, as the live site left them, are read
-//      at version 3 with every entry kept, the copy taken in and removed from localStorage, and "new since your last
-//      visit" counted from it; a fixture store leaves the copy where it is;
+//      at version 3 with every entry kept, the copy taken in, and removed only once a record of version 3 holds the
+//      catalogue; "new since your last visit" is counted from it; a fixture store leaves the copy where it is;
+//      after the erase a copy written before it is taken into nothing, and goes once the survey keeps a catalogue;
 //   P5 the erase the privacy page points to (the labs hub, "Your data", "Delete everything") leaves nothing of the
 //      lab, and the export holds the record whole;
 //   P7 the log's last words carry the health check;
+//   S2 with recording off, the switch counts from the catalogue the record kept and names its date;
 //   P8 a clock opened on the sky is a visit "from the sky" in the survey's log, with the day the sky was at, unless
 //      recording is off; the line's link opens the sky on that planet at that day, with a real pointer, and is no
 //      visit itself.
@@ -110,11 +112,15 @@ export default async function record(p, { base }) {
   await call(writeRaw, old.v2.data, 2);
   await call(local, LEGACY, old.local.value);
   await survey();
-  const up = await call(rawRecord), gone = await call(local, LEGACY);
+  const up = await call(rawRecord);
   p.check('P4: the stored record of version 2 is read at version 3, with the sky\'s slice, every saved world, visit and pin, and the count of dropped visits, as they were',
     !!up && up.v === 3 && same(up.data.overdue, old.v2.data.overdue) && same(up.data.log, old.v2.data.log), JSON.stringify(up && { v: up.v, visits: up.data.log.visits.length, saved: up.data.log.saved.length, pins: up.data.log.pins }));
-  p.check('P4: the survey\'s old local copy of the catalogue is taken into the record and is gone from localStorage', gone === null && !!up && !!up.data.seen && up.data.seen.day !== undefined, `localStorage ${gone === null ? 'empty' : 'still holds it'} | seen ${up && up.data.seen && up.data.seen.day}`);
   await p.until(`(${newSwitch})() !== ""`, 30000);
+  // the switch is drawn once the survey has read the record again and kept this catalogue: by then a read has found
+  // version 3 holding the catalogue, and the old copy is gone
+  const gone = await call(local, LEGACY), up2 = await call(rawRecord);
+  p.check('P4: the survey\'s old local copy of the catalogue is taken into the record, and is gone once a later read finds version 3 holding it', gone === null && !!up && !!up.data.seen && !!up2 && !!up2.data.seen,
+    `localStorage ${gone === null ? 'empty' : 'still holds it'} | seen ${up && up.data.seen && up.data.seen.day}`);
   const fresh = await call(newSwitch), planets = Number(String(await p.ev('document.getElementById("tb-n").textContent')).match(/^[\d,]+/)[0].replace(/,/g, ''));
   const was = JSON.parse(old.local.value).names.length;
   p.check('P4: "new since your last visit" counts the worlds the old copy did not have', fresh === `${(planets - was).toLocaleString('en-US')} new since your last visit`, `${fresh} | ${planets} planets, ${was} in the old copy`);
@@ -128,6 +134,17 @@ export default async function record(p, { base }) {
   await p.until('/measured radius/.test(document.getElementById("tb-n").textContent)', 30000);
   await p.sleep(3000);
   p.check('P4: on the next visit nothing is new: the record holds the catalogue it saw', (await call(newSwitch)) === '', await call(newSwitch));
+
+  // ---- S2: with recording off, the catalogue the record kept, and its date ----
+  const kept0 = await call(rawRecord);
+  await call(writeRaw, { ...kept0.data, seen: { day: '2026-11-12', names: JSON.parse(old.local.value).names.join('|') } }, 3);
+  await call(osDo, 'recording', false);
+  await survey();
+  await p.until(`(${newSwitch})() !== ""`, 30000);
+  const offWords = await call(newSwitch), offStored = await call(rawRecord);
+  p.check('S2: with recording off the switch counts from the catalogue the record kept, names that day, and keeps nothing new', offWords === `${(planets - was).toLocaleString('en-US')} new since 12${String.fromCharCode(160)}November${String.fromCharCode(160)}2026` && offStored.data.seen.day === '2026-11-12',
+    `${offWords} | stored ${offStored.data.seen.day}`);
+  await call(osDo, 'recording', true);
 
   // ---- P8: a clock opened on the sky is a visit from the sky, at the sky's day ----
   await sky(`date=${DAY}`);
@@ -173,6 +190,8 @@ export default async function record(p, { base }) {
   await call(osDo, 'recording', true);
 
   // ---- P5: the export holds the record whole, and the erase the privacy page points to leaves none of it ----
+  // an old local copy written before the erase, as a tab of the previous version would have left it
+  await call(local, LEGACY, old.local.value);
   await p.go(`${base}/labs/index.html`);
   await p.until('!!document.querySelector(".los-btn[data-act=delete]") && !document.querySelector(".los-btn[data-act=delete]").disabled', 60000);
   await call(noThanks);
@@ -183,10 +202,17 @@ export default async function record(p, { base }) {
   await p.ev('(document.querySelector(".los-btn[data-act=confirm]").click(), true)');
   await p.until(`(${rawRecord})().then((r) => r === null)`, 8000);
   const erased = await call(rawRecord), legacy = await call(local, LEGACY);
-  p.check('P5: the hub\'s "Delete everything" leaves no record of the lab and no old local copy', erased === null && legacy === null, `${JSON.stringify(erased)} | ${legacy}`);
+  p.check('P5: the hub\'s "Delete everything" leaves no record of the lab; the old local copy, which the erase does not know, is still there', erased === null && legacy === old.local.value, `${JSON.stringify(erased)} | copy ${legacy === old.local.value ? 'there' : 'gone'}`);
   await survey();
-  const empty = await p.ev('document.getElementById("log-line").textContent');
-  p.check('P5: and the survey\'s log is empty after it', /Log: 0 visited, 0 saved/.test(empty), empty);
+  await p.until('/measured radius/.test(document.getElementById("tb-n").textContent)', 30000);
+  await p.until(`(${rawRecord})().then((r) => !!r && !!r.data && !!r.data.seen)`, 30000);
+  await p.sleep(1500);
+  const empty = await p.ev('document.getElementById("log-line").textContent'), afterErase = await call(rawRecord);
+  p.check('P5: and the survey\'s log is empty after it, and nothing of the old copy is taken in: no world is new', /Log: 0 visited, 0 saved/.test(empty) && (await call(newSwitch)) === '' && afterErase.data.seen.names.split('|').length > 6000,
+    `${empty} | switch "${await call(newSwitch)}" | seen ${afterErase.data.seen.names.split('|').length} names`);
+  await survey();
+  const copyAfter = await call(local, LEGACY);
+  p.check('P4: the next read, which finds version 3 holding the catalogue, removes the copy', copyAfter === null, copyAfter === null ? 'gone' : 'still there');
 
   // ---- P4: a fixture store leaves the old local copy where it is ----
   // (the survey loaded just now, with recording on, has kept its catalogue in the visitor's own store: that record is

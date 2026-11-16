@@ -5,10 +5,12 @@
    and the survey (exomania-survey.html).
 
    The lab has one record in Labs OS (lab "exomania"), so the
-   privacy page's export and erase reach all of it. No other
-   module of either room reads or writes it, or any browser
-   storage of its own: record.contract.test.mjs greps both rooms
-   for it.
+   export and erase the privacy page points to reach all of it.
+   No other module of either room reads or writes it, or keeps
+   anything of the lab in browser storage: record.contract.test.mjs
+   greps both rooms for it. (The model route, ai/llm.js, keeps the
+   visitor's own model key in localStorage; that key is the
+   route's, not the lab's record.)
 
    The record kinds are the ones the lab's bindings list
    (records-contract), typed below and checked by tsc
@@ -26,8 +28,8 @@
      (ticket 2.04) writes the first predictions, checked against
      the type here.
 
-   Seven rules, the first five learned from reviews on
-   2026-11-15:
+   Nine rules, the first five learned from reviews on 2026-11-15,
+   the last two from the review of this client on 2026-11-16:
 
    1. The store is the truth. A page never writes back its own
       copy of the record. A write is one change (a visit, a save,
@@ -36,7 +38,11 @@
       or an erase made on the privacy page, is not undone by a
       page that read the record earlier. What `update` returns is
       what the page shows, and `changed` says whether the store
-      was written: an event is tracked only for a change.
+      was written: an event is tracked only for a change. A
+      change that is refused stores nothing, even when it is two
+      writes and the first was taken. Every read and write of a
+      page runs in turn, in the order asked, so two writes fired
+      at once both land.
    2. One door. What comes out of the store passes the same
       checks as what comes in: `normalise` reads every entry with
       the function of its kind that a write applies, and `view`
@@ -59,14 +65,31 @@
       version 1 ({ planet, place }) becomes the sky's slice,
       version 2 ({ overdue, log }) is kept whole. Until version 3
       the survey kept the catalogue it last saw in localStorage
-      (exo:seen:v1), where the privacy page's erase does not
-      reach; the upgrade of a record of the visitor's own store
-      takes that copy in, and every read of that store then
-      removes it. With no record (none was ever written, or it
-      was erased) the copy is removed and nothing is taken in.
+      (exo:seen:v1), where the erase does not reach; the upgrade
+      of a record of the visitor's own store takes that copy in.
+      The copy is removed only by a later read that finds a record
+      of this version already holding the catalogue, because a tab
+      of version 2 that read the record before the upgrade can
+      still write it back without one, and the next upgrade then
+      needs the copy again. With no record (none was ever written,
+      or it was erased) nothing is taken in.
    7. The health check (`health`) reports the version this page
       writes, the version stored, the store, and that nothing is
       synced to another device.
+   8. A rule that judges the log by a catalogue runs only in the
+      room whose catalogue it is. The log is the survey's: only a
+      visit the survey writes may decide which lines the survey
+      does not show. A visit from the sky, past the bound, drops
+      the oldest line and counts it, since the sky's catalogue
+      lacks 1,665 of the survey's planets and would have dropped
+      survey lines uncounted (the class: a rule applied with
+      another room's data).
+   9. A sentence about the record says what the record holds.
+      "New since your last visit" is said only when this visit is
+      kept; with recording off it names the day the catalogue it
+      counts from was kept, and with no catalogue kept it says
+      nothing. A catalogue longer than the record keeps shows no
+      world as new, and the log says why.
 
    Every function but `read`, `load`, `update`, `seeCatalogue`
    and `health` is pure: a record in, a record out, no storage
@@ -74,6 +97,7 @@
    ============================================================ */
 
 import { grouped, day, fromIso } from '../kit/format.js';
+import { LINE_JD } from './overdue/clock.js';
 
 /**
  * A place on the globe, in degrees.
@@ -128,14 +152,12 @@ export const VIA_WORDS = Object.freeze({
 export const VIAS = /** @type {readonly Via[]} */ (Object.freeze(Object.keys(VIA_WORDS)));
 /** The views a saved world can reopen in. @type {readonly View[]} */
 export const VIEWS = Object.freeze(['orbit', 'closeorbit', 'surface']);
-/* The years of the sky's line of time (overdue/sky.js FIRST_YEAR and LAST_YEAR; the contract test holds them equal). */
-export const SKY_YEARS = Object.freeze({ from: 1999, to: 2040 });
 const NAME_MAX = 80;
 
 /** @param {unknown} v @returns {v is number} */
 const isTime = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;
 /** @param {unknown} v @returns {v is number} */
-const isNum = (v) => typeof v === 'number' && Number.isFinite(v);   // equivalent: Number.isFinite refuses every value that is no number; the test of the type is for tsc
+const isNum = (v) => typeof v === 'number' && Number.isFinite(v);   // equivalent: Number.isFinite does not coerce, so it refuses every value that is no number
 /** @param {unknown} v @returns {v is string} */
 const isName = (v) => typeof v === 'string' && v.length > 0 && v.length <= NAME_MAX;
 /** @param {unknown} v @returns {v is Via} */
@@ -146,8 +168,10 @@ const isView = (v) => /** @type {readonly unknown[]} */ (VIEWS).includes(v);
 const isCount = (v) => Number.isInteger(v) && /** @type {number} */ (v) >= 1;
 /** An ISO day: "2026-11-16". @param {unknown} v @returns {v is string} */
 const isIso = (v) => Number.isFinite(fromIso(v));
-/** A day the sky's line of time has. @param {unknown} v @returns {v is string} */
-const isSkyDay = (v) => { const y = new Date(fromIso(v)).getUTCFullYear(); return y >= SKY_YEARS.from && y <= SKY_YEARS.to; };
+/** A day the sky's line of time shows: the day, from its start in UTC, overlaps the line, whose ends are the sky's own
+   (overdue/clock.js LINE_JD: 1999-01-01 06:00 and 2040-01-01 12:00 UTC), so its first day is 1999-01-01 and its last
+   2040-01-01. @param {unknown} v @returns {v is string} */
+const isSkyDay = (v) => { const jd = fromIso(v) / 86400000 + 2440587.5; return jd + 1 > LINE_JD.from && jd <= LINE_JD.to; };
 /** @param {unknown} v @returns {Record<string, unknown>} */
 const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? /** @type {Record<string, unknown>} */ (v) : {});
 /** @param {unknown} v @returns {unknown[]} */
@@ -234,9 +258,10 @@ const wrong = (name, t, known) => (!isName(name) || !known(name) ? UNKNOWN : !is
 
 /** The visitor opened a world. Its line moves to the top with the new time and way, and its count goes up by one.
    A visit from the sky carries the day the sky was at, and the line keeps the last such day through visits of
-   other ways, so the line can reopen its clock there. Past the bound one line goes: a line the page does not show
-   goes first and is not counted, because the page never counted it as visited; otherwise the oldest goes and is
-   counted, so the number of worlds visited stays true.
+   other ways, so the line can reopen its clock there. Past the bound one line goes: on a visit the survey writes, a
+   line the survey does not show goes first and is not counted, because it never counted it as visited; otherwise
+   the oldest goes and is counted, so the number of worlds visited stays true. A visit from the sky judges no line
+   by its own catalogue (rule 8): the oldest goes, counted.
    @param {ExoRecord} record @param {{ name: string, t: number, via: Via, at?: string }} w @param {Known} known @returns {Write} */
 export function visit(record, { name, t, via, at }, known) {
   const bad = wrong(name, t, known) || (isVia(via) ? '' : 'the way the world was reached is not one this page has') || (via !== 'sky' || isSkyDay(at) ? '' : OFF_LINE);
@@ -246,7 +271,7 @@ export function visit(record, { name, t, via, at }, known) {
   const last = via === 'sky' ? at : was ? was.at : undefined;
   r.log.visits.unshift({ name, t, via, n: was ? was.n + 1 : 1, ...(last ? { at: last } : {}) });
   if (r.log.visits.length > LIMITS.visits) {
-    const h = r.log.visits.findLastIndex((e) => !known(e.name));
+    const h = via === 'sky' ? -1 : r.log.visits.findLastIndex((e) => !known(e.name));
     if (h >= 0) r.log.visits.splice(h, 1);
     else { r.log.dropped = Math.min(LIMITS.dropped, r.log.dropped + r.log.visits.length - LIMITS.visits); r.log.visits.length = LIMITS.visits; }
   }
@@ -340,12 +365,17 @@ export function setOverdue(record, { planet, place }, known) {
 /* why the catalogue is not kept as the one last seen */
 export const NO_DAY = 'the day is not a date';
 export const TOO_LONG = `the catalogue's names come to more than ${grouped(LIMITS.seen)} characters, more than the record keeps`;
+/* what the log says when the catalogue no longer fits */
+export const LONG_NOTE = `This catalogue's names come to more than the ${grouped(LIMITS.seen)} characters the log keeps of them, so no world is shown as new since an earlier visit.`;
+/** The catalogue's names as the record keeps them, joined by bars, names that cannot be a name left out; null when
+   they come to more than the bound. @param {unknown} names @returns {string | null} */
+const keepable = (names) => { const joined = list(names).filter(isName).join('|'); return joined.length > LIMITS.seen ? null : joined; };
 /** The survey saw this catalogue on this day. Names that cannot be a name are left out.
    @param {ExoRecord} record @param {{ day: string, names: unknown }} w @returns {Write} */
 export function see(record, { day: on, names }) {
   if (!isIso(on)) return refused(record, NO_DAY);
-  const joined = list(names).filter(isName).join('|');
-  if (joined.length > LIMITS.seen) return refused(record, TOO_LONG);
+  const joined = keepable(names);
+  if (joined === null) return refused(record, TOO_LONG);
   if (record.seen && record.seen.day === on && record.seen.names === joined) return done(record);
   const r = copy(record);
   r.seen = { day: on, names: joined };
@@ -372,9 +402,10 @@ export function legacySeen(storage) {
 
 /* ---------- the rooms read each other ---------- */
 
-/** The sky's address at a line's clock and day, or '' for a line whose clock was never opened on the sky.
-   @param {Visit} e */
-export const skyLink = (e) => (e.at ? `exomania.html?planet=${encodeURIComponent(e.name)}&date=${e.at}` : '');
+/** The sky's address at a line's clock and day, or '' for a line whose clock was never opened on the sky. A page on a
+   fixture store (?os-fixture=) passes its fixture, so the sky opens on the same store and not on the visitor's own.
+   @param {Visit} e @param {string | null} [fixture] */
+export const skyLink = (e, fixture = null) => (e.at ? `exomania.html?planet=${encodeURIComponent(e.name)}&date=${e.at}${fixture ? `&os-fixture=${encodeURIComponent(fixture)}` : ''}` : '');
 /** The words of that link. @param {Visit} e */
 export const skyWords = (e) => `its clock on ${day(fromIso(e.at))}`;
 
@@ -437,6 +468,10 @@ export const footWords = ({ persistent, recording }) => [
   recording === true ? 'A visit and a save are also usage events, which are sent to the labs’ backend only where you have allowed it.'
     : recording === false ? 'With recording off, no usage event is written.' : '',
 ].filter(Boolean).join(' ');
+/** What the worlds shown as new are new since (rule 9): the visitor's last visit when this visit is kept; with
+   recording off, the day the catalogue they are counted from was kept.
+   @param {{ kept: boolean, since: string | null }} s */
+export const sinceWords = ({ kept, since }) => (kept ? 'since your last visit' : `since ${day(fromIso(since))}`);
 /** The health check in words: the version this page writes, the version stored, and the sync.
    @param {{ stored: number | null }} h */
 export const healthWords = (h) => `This page writes version ${V} of the record, and ${h.stored === null ? 'nothing is stored yet' : `the stored record is version ${thousands(h.stored)}`}. No copy is synced to another device.`;
@@ -447,48 +482,67 @@ export const healthWords = (h) => `This page writes version ${V} of the record, 
 export const NEWER = 'this log was written by a newer version of this page';
 /** The browser's localStorage, or null where reading it is refused. @returns {Local | null | undefined} */
 const local = () => { try { return globalThis.localStorage; } catch { return null; } };
+/* Every read and write of the record on a page runs in turn (rule 1): a page that fires two writes without waiting
+   (the sky, when two clocks are opened at once) gets both. A job that fails does not stop the ones after it. */
+/** @type {Promise<unknown>} */
+let queue = Promise.resolve();
+/** @template T @param {() => Promise<T>} job @returns {Promise<T>} */
+const inTurn = (job) => { const run = queue.then(job); queue = run.catch(() => undefined); return run; };
 /** The lab's record as stored, sound, and whether a later version of the page wrote it. A record of an older version
    is upgraded by Labs OS once, on this read (rule 6). `storage`: the browser's localStorage, where the survey kept the
-   catalogue it last saw before version 3; it is read and emptied of that copy only for the visitor's own store,
+   catalogue it last saw before version 3; that copy is read, and later removed, only for the visitor's own store,
    which keeps what it is given (not a fixture, not memory).
    @param {OS} os @param {Local | null | undefined} storage @returns {Promise<{ record: ExoRecord, newer: boolean }>} */
-export async function read(os, storage = local()) {
+export function read(os, storage = local()) { return inTurn(() => readNow(os, storage)); }
+/** The read itself, for a job already in turn. @param {OS} os @param {Local | null | undefined} storage */
+async function readNow(os, storage) {
   const own = os.storage.persistent && !os.storage.fixture;
+  let upgraded = false;
   // Labs OS calls migrate only for a record older than V, and every older shape is from before the record kept seen
-  const rec = await os.progress.get({ v: V, migrate: (d) => (own ? { ...normalise(d), seen: legacySeen(storage) } : normalise(d)) });
-  if (own && storage) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }
-  return { record: normalise(rec ? rec.data : null), newer: !!rec && rec.v > V };
+  const rec = await os.progress.get({ v: V, migrate: (d) => { upgraded = true; return own ? { ...normalise(d), seen: legacySeen(storage) } : normalise(d); } });
+  const record = normalise(rec ? rec.data : null);
+  // the copy goes once a record of this version, not upgraded by this read, holds the catalogue (rule 6)
+  if (own && storage && !upgraded && record.seen) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }
+  return { record, newer: !!rec && rec.v > V };
 }
 /** @param {OS} os */
 export async function load(os) { return (await read(os)).record; }
-/** One change, applied to what the store holds now. `change(record)` is one of the writes above and returns
-   { ok, why, record }; a write that is refused hands back the record it was given. The store is written only when
-   the record changed, and never when a later version wrote it. What comes back is the store's record after the
+/** One change, applied to what the store holds now, in turn with every other read and write of the page.
+   `change(record)` is one of the writes above, or several in a row, and returns { ok, why, record }. A change that is
+   refused stores nothing and hands back the stored record, even when a first write of it was taken. The store is
+   written only when the record changed, and never when a later version wrote it. What comes back is the store's record after the
    change, which the page then shows, and `changed`, which says whether the store was written. `resume` ({ url,
    label }) is where the labs' hub leads back to, written beside an accepted change. Two tabs that write in the same
    instant can still interleave (Labs OS says so of every record); the window is one read and one write.
    @param {OS} os @param {(record: ExoRecord) => Write} change @param {{ resume?: { url: string, label: string } | null }} [opts]
    @returns {Promise<Write & { changed: boolean }>} */
-export async function update(os, change, { resume = null } = {}) {
-  const { record: cur, newer } = await read(os);
-  if (newer) return { ok: false, why: NEWER, record: cur, changed: false };
-  const w = change(cur);
-  const changed = JSON.stringify(w.record) !== JSON.stringify(cur);
-  if (changed) await os.progress.set(w.record, { v: V });
-  if (w.ok && resume) {
-    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }
-  }
-  return { ...w, changed };
+export function update(os, change, { resume = null } = {}) {
+  return inTurn(async () => {
+    const { record: cur, newer } = await readNow(os, local());
+    if (newer) return { ok: false, why: NEWER, record: cur, changed: false };
+    const w = change(cur);
+    if (!w.ok) return { ok: false, why: w.why, record: cur, changed: false };
+    const changed = JSON.stringify(w.record) !== JSON.stringify(cur);
+    if (changed) await os.progress.set(w.record, { v: V });
+    if (resume) {
+      try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }
+    }
+    return { ...w, changed };
+  });
 }
-/** The worlds of this catalogue new since the visitor's last visit, by the catalogue the record last saw. With `keep`
-   (the survey's recording is on) the record then holds this catalogue, seen on `day`, as the one last seen.
+/** The worlds of this catalogue new since the catalogue the record last kept (rule 9). With `keep` (the survey's
+   recording is on) the record then holds this catalogue, seen on `day`, as the one last seen. `kept`: this visit's
+   catalogue is now the one kept; `since`: the day of the catalogue counted from, or null when none was kept;
+   `long`: the catalogue does not fit the record, and nothing is new.
    @param {OS} os @param {string[]} names @param {{ day: string, keep: boolean }} opts
-   @returns {Promise<Write & { changed: boolean, fresh: string[] }>} */
+   @returns {Promise<Write & { changed: boolean, fresh: string[], kept: boolean, since: string | null, long: boolean }>} */
 export async function seeCatalogue(os, names, { day: on, keep }) {
   /** @type {Seen | null} */
   let before = null;
+  const long = keepable(names) === null;
   const w = await update(os, (r) => { before = r.seen; return keep ? see(r, { day: on, names }) : done(r); });
-  return { ...w, fresh: newSince(before, names) };
+  const was = /** @type {Seen | null} */ (before);   // set inside the change, which tsc does not follow
+  return { ...w, fresh: long ? [] : newSince(was, names), kept: keep && w.ok, since: was ? was.day : null, long };
 }
 /** The health check: the version this page writes, the version stored (null when nothing is), the store, and the
    sync, which the lab does not have.

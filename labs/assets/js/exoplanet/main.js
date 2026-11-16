@@ -49,7 +49,7 @@ const store = {
   state: {
     list: [], byName: new Map(), sel: null, system: [], plot: PLOTS[params.get('plot')] ? params.get('plot') : 'valley',
     filter: emptyFilter(), filterFn: () => true, filterActive: false, tour: null, colorBy: 'none',
-    albedo: () => 0.3, pins: [], newNames: new Set(), plain: false,
+    albedo: () => 0.3, pins: [], newNames: new Set(), newSince: '', plain: false,
     // a scenario of the selected world's air the visitor chose (air.js); null draws the survey's own. A link may carry one.
     air: SCENARIOS.includes(params.get('air')) ? params.get('air') : null,
   },
@@ -230,7 +230,7 @@ function filterLabel() {
   if (f.cold) parts.push(COLD_WORDS);
   if (f.hot) parts.push(HOT_WORDS);
   if (f.box) parts.push('box on ' + PLOTS[f.box.mode].label);
-  if (f.newOnly) parts.push('new since last visit');
+  if (f.newOnly) parts.push(`new ${store.state.newSince}`);
   if (f.set) parts.push(f.set === 'saved' ? 'your log' : 'shared log');
   return parts.join(', ');
 }
@@ -420,7 +420,7 @@ function renderFilters() {
   row.append(all, selL, sel, rg, fSwitch('replay', 'replay', ['still', 'by year'], isNum(f.upTo), 'Replay the discoveries by year'));
   if (log && log.counts().saved) row.append(fSwitch('set-saved', 'show', ['all worlds', 'your log'], f.set === 'saved', 'Show only the worlds in your log'));
   if (log && log.shared().length) row.append(fSwitch('set-shared', 'show', ['all worlds', 'the shared log'], f.set === 'shared', 'Show only the worlds the link shared'));
-  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new since your last visit`, ['all', 'only new'], f.newOnly, 'Show only the worlds new since your last visit'));
+  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new ${st.newSince}`, ['all', 'only new'], f.newOnly, `Show only the worlds new ${st.newSince}`));
   row.append(...tokens);
   if (st.filterActive && n > 0) { const t = el('button', 'plain', 'tour these'); t.type = 'button'; t.dataset.act = 'tourthese'; row.append(t); }
   bar.append(row);
@@ -488,14 +488,16 @@ function bindFilters() {
   });
 }
 
-/* Worlds confirmed since this browser's last visit: the catalogue the lab's record last saw, against this one. The
+/* Worlds confirmed since the catalogue the lab's record last kept, against this one, and the words for what they are
+   new since: "since your last visit", or with recording off the day that catalogue was kept (record.sinceWords). The
    log asks the store once the stored record is read (record.seeCatalogue), so the switch appears then. */
 async function changelog(list) {
   if (!log) return;
-  let fresh = [];
-  try { fresh = await log.catalogue(list.map((p) => p.name)); } catch { fresh = []; }
-  store.state.newNames = new Set(fresh);
-  if (fresh.length) { renderFilters(); resay(); }
+  let got = { fresh: [], since: '' };
+  try { got = await log.catalogue(list.map((p) => p.name)); } catch { got = { fresh: [], since: '' }; }
+  store.state.newNames = new Set(got.fresh);
+  store.state.newSince = got.since;
+  if (got.fresh.length) { renderFilters(); resay(); }
 }
 
 /* ---------------- search and questions ---------------- */

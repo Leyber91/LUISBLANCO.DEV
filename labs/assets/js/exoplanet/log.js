@@ -85,6 +85,7 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
   const all = { saved: false, visited: false };   // a list shown whole after its "Show all"
   let fault = '';                  // a write the browser refused, said in the dialog until a write goes through
   let healthNow = null;            // the record's health check, read again after each read and change
+  let long = false;                // the catalogue has more names than the record keeps: nothing is shown as new
   let said = { text: '', about: '' };   // what the dialog's status line says, and the saved worlds it was about
   let shared = R.readShare(sharedParam, known);
   const held = [];                 // visits made before the stored record was read
@@ -103,8 +104,10 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     stored = record; newer = isNewer;
     if (said.text && savedKey() !== said.about) say('');
   };
-  /* One job after another. A job that throws is reported by the browser as any error is, and the jobs after it
-     still run: one failure does not stop the log for the rest of the visit. */
+  /* One job after another. record.js already runs every read and write of the record in turn; this queue orders
+     what the page does with each answer (what it takes, says and draws, the status line and the focus), which the
+     client cannot. A job that throws is reported by the browser as any error is, and the jobs after it still run:
+     one failure does not stop the log for the rest of the visit. */
   const inTurn = (job) => { const run = queue.then(job); queue = run.catch(() => {}); return run; };
   /* The health check, as the store answers it now. A store that cannot answer leaves the last one read. */
   const checkHealth = async () => { if (os) { try { healthNow = await R.health(os); } catch { /* keep the last */ } } };
@@ -180,13 +183,16 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     unpin(name, then) { if (loaded) change((rec) => R.unpin(rec, name), { then }); },
     clearPins(then) { if (loaded) change((rec) => R.clearPins(rec), { then }); },
     reread,
-    /* The worlds of this catalogue new since the visitor's last visit, once the log is read; with recording on, the
-       record then keeps this catalogue as the one last seen. Without Labs OS nothing is kept, so nothing is new. */
+    /* The worlds of this catalogue new since the catalogue the record last kept, once the log is read, and the words
+       for what they are new since (record.sinceWords). With recording on, the record then keeps this catalogue. Without
+       Labs OS nothing is kept, so nothing is new. */
     catalogue: (names) => ready.then(() => inTurn(async () => {
-      if (!os) return [];
+      if (!os) return { fresh: [], since: '' };
       const w = await R.seeCatalogue(os, names, { day: isoDay(now()), keep: os.recording.on });
       take(w.record, w.why === R.NEWER);
-      return w.fresh;
+      long = w.long;
+      draw();
+      return { fresh: w.fresh, since: w.fresh.length ? R.sinceWords(w) : '' };
     })),
     open() { all.saved = false; all.visited = false; focusNext = null; if (!host.dialog.open) host.dialog.showModal(); draw(); },
   };
@@ -196,7 +202,7 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
   const kind = (name) => kindLine(byName.get(name));
   const world = (name) => `<button type="button" class="log-open" data-open="${esc(name)}">${esc(name)}</button>`;
   /* a line whose clock was opened on the sky reopens it there, on that planet at that day */
-  const sky = (e) => (e.at ? `<a class="ref log-sky" data-sky="${esc(e.name)}" href="${esc(R.skyLink(e))}">${esc(R.skyWords(e))}</a>` : '');
+  const sky = (e) => (e.at ? `<a class="ref log-sky" data-sky="${esc(e.name)}" href="${esc(R.skyLink(e, fixture))}">${esc(R.skyWords(e))}</a>` : '');
   /* The control with the focus, by its list and its own key, so that drawing the dialog again finds it in the same
      list: a world can be both saved and visited. */
   const focusKey = () => {
@@ -243,6 +249,7 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     if (newer) notes.push('This log was written by a newer version of this page. It is shown as far as this version reads it, and nothing is written until the page is reloaded.');
     if (os && !os.recording.on) notes.push('Recording is off on this site, so visits are not added. A world you save is still saved.');
     if (fault) notes.push(fault);
+    if (long) notes.push(R.LONG_NOTE);
     const hiddenHtml = !v.hidden ? '' : `<p class="log-note">${R.thousands(v.hidden)} stored ${v.hidden === 1 ? 'entry names a world' : 'entries name worlds'} this catalogue does not have, and ${v.hidden === 1 ? 'is' : 'are'} not shown.
       <button type="button" class="plain" data-log="forget">Remove them from the log</button></p>`;
     const sharedHtml = !shared.names.length && !shared.refused ? '' : `

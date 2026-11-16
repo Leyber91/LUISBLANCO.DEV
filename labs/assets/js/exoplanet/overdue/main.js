@@ -41,9 +41,9 @@ import { int, day, fromIso, isoDay, clock } from '../../kit/format.js';
 import { setSwitch, switchCtl } from '../../kit/controls.js';
 import { surface, reducedMotion } from '../views/common.js';
 import { jdOfMs, msOfJd, sunAltitude } from './time.js';
-import { epochAt, sigmaAt, lampAt, lostFrom, tally, grade, contested, stateOf, KEPT_LAMP, yearOfJd, jdOfYear } from './clock.js';
+import { epochAt, sigmaAt, lampAt, lostFrom, tally, grade, contested, stateOf, KEPT_LAMP, yearOfJd, jdOfYear, LINE_JD } from './clock.js';
 import { load, pairOf, durDays } from './data.js';
-import { hammer, lens, historyOf, clockAt, lampOn, census, errorLine, isK2, densestField, FIRST_YEAR, LAST_YEAR } from './sky.js';
+import { hammer, lens, historyOf, clockAt, lampOn, census, errorLine, isK2, densestField } from './sky.js';
 import { skyLayout, drawSky, drawLens, bandScale, stampOf, drawBand, drawCurve, drawOC, drawNight, nearestTrace, drawTally, pointsFor } from './views.js';
 import { crossings, span, placeOf, shownMs, WATCH, EXAMPLE_PLACE } from './tonight.js';
 
@@ -56,7 +56,7 @@ if (leaving) location.replace('exomania-survey.html' + location.search + locatio
 const still = reducedMotion() || q.has('still');
 const LAB = 'exomania';
 const DEFAULT_PLANET = 'HD 209458 b';
-const MIN_JD = jdOfYear(FIRST_YEAR), MAX_JD = jdOfYear(LAST_YEAR);
+const MIN_JD = LINE_JD.from, MAX_JD = LINE_JD.to;   // the line's ends, the ones the record bounds a sky visit by
 const nowJd = () => jdOfMs(Date.now());
 const clampJd = (jd) => Math.max(MIN_JD, Math.min(MAX_JD, jd));
 const HALF_DAY = 0.5;
