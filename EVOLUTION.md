@@ -35,8 +35,8 @@ merged. A run that changed nothing still writes its entry, with the reason.
   scan hero_proto.html lists 4 tells, all in lines this run did not touch. Render: hero_proto.html at 1280 px and 390
   px (and 320 to 1920 px for width) in headless Chromium, 0 console errors. Forbidden-name check: runs in the gates
   workflow on the pull request.
-- Gates on the pull request: PENDING.
-- Merged: PENDING.
+- Gates on pull request #44: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
 
 ## 2026-11-15, The home page is as wide as the screen (roadmap item 1)
 
