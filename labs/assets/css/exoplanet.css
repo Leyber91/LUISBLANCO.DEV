@@ -108,6 +108,9 @@ a.ref:hover { color: var(--text-bright); }
 #exo-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; background: var(--void); outline: none; }
 #exo-canvas:active { cursor: grabbing; }
 #exo-canvas:focus-visible { outline: 2px solid var(--horizon); outline-offset: -2px; }
+.wheel-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 8px 12px; max-width: calc(100% - 32px);
+  background: color-mix(in srgb, var(--void) 86%, transparent); border: 1px solid var(--line-bright); color: var(--text); font-size: 12px; line-height: 1.4; text-align: center; pointer-events: none; z-index: 4; }
+.wheel-hint[hidden] { display: none; }
 .bezel { position: absolute; left: 0; right: 0; top: var(--bezel-y, 80%); text-align: center; font-size: 9.5px; color: var(--text-dim); pointer-events: none; white-space: nowrap; }
 .ul { position: absolute; left: 0; top: 0; z-index: 2; max-width: 62%; pointer-events: none; }
 /* on the ground the sky is bright: the corners keep their words on a dark ground, and the readout goes to the top */
@@ -137,7 +140,6 @@ a.ref:hover { color: var(--text-bright); }
 .sws { display: grid; gap: 2px; justify-items: start; }
 .sws .switch { --sw-name: 90px; }
 .sw-row { display: inline-flex; align-items: center; gap: 12px; }
-.sw-row .key { cursor: pointer; }
 .ground { display: grid; gap: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
 .ground-row { display: flex; align-items: center; gap: 12px; }
 .ground-row label { font-size: 11px; color: var(--text-dim); min-width: 90px; }
@@ -151,6 +153,7 @@ a.ref:hover { color: var(--text-bright); }
 .tblock .tb-c:nth-last-child(-n + 2) { border-bottom: 0; }
 .tblock .tb-k { display: block; font-size: 9.5px; color: var(--text-dim); }
 .tblock .tb-v { display: block; color: var(--text-bright); white-space: nowrap; }
+.tblock #tb-n { white-space: normal; }   /* "6,464 planets, 4,869 with a measured radius" takes two lines and never runs under the next cell */
 .tblock .take { display: flex; gap: 12px; }
 .tblock .take .plain { font-size: 10.5px; min-height: 24px; color: var(--text-bright); }
 
@@ -159,10 +162,10 @@ a.ref:hover { color: var(--text-bright); }
 .st { font: 400 19px/1.15 var(--font-serif); color: var(--text-bright); letter-spacing: 0; text-transform: none; }
 .st i { font: 400 11px var(--font-mono); font-style: normal; color: var(--text-dim); margin-right: 8px; vertical-align: 2px; }
 .side .lab .plain { font-size: 11px; }
-.nums caption.tcap { caption-side: top; text-align: left; font-size: 11px; line-height: 1.5; color: var(--text-dim); padding: 6px 0 6px; white-space: normal; }
+.nums caption.tcap { caption-side: top; text-align: left; font-size: 11px; line-height: 1.5; color: var(--text-dim); padding: 3px 0; white-space: normal; }
 .nums { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 6px; border-top: 1.3px solid var(--text-bright); border-bottom: 1.3px solid var(--text-bright); }
 .nums col.c-n { width: 98px; } .nums col.c-v { width: 64px; } .nums col.c-u { width: 40px; } .nums col.c-r { width: 24px; } .nums col.c-iv { width: 132px; }
-.nums td { padding: 1px 0; font-size: 12px; line-height: 19px; color: var(--text); white-space: nowrap; vertical-align: baseline; overflow: visible; }
+.nums td { padding: 1px 0; font-size: 12px; line-height: 18px; color: var(--text); white-space: nowrap; vertical-align: baseline; overflow: visible; }
 .nums td.n { padding-right: 4px; font-size: 11.5px; }
 .nums td.v { text-align: right; color: var(--text-bright); font-size: 12.5px; padding-right: 5px; }
 .nums td.v.word { text-align: left; padding-left: 0; }
@@ -170,7 +173,7 @@ a.ref:hover { color: var(--text-bright); }
 .nums td.pm { font-size: 10.5px; color: var(--text-dim); padding-right: 6px; }
 .nums td.r { font-size: 9px; color: var(--text-dim); vertical-align: top; padding-top: 2px; }
 .nums td.iv { vertical-align: middle; }
-.nums tr.g td { padding-top: 7px; font-size: 11px; color: var(--text-dim); }
+.nums tr.g td { padding-top: 5px; font-size: 11px; color: var(--text-dim); }
 .nums tr.g td span { display: inline-block; border-bottom: .6px solid var(--text); padding-bottom: 2px; min-width: 60%; }
 .nums tr.ax td { padding-top: 4px; }
 .nums .sw-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 0; background: var(--star-col, var(--text)); }
@@ -184,7 +187,7 @@ a.ref:hover { color: var(--text-bright); }
 .trow { display: inline; }
 .tmore { display: inline; }
 .tmore[open] { display: block; }
-.tmore summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 20px; color: var(--text); text-decoration: underline; text-decoration-color: var(--text-dim); text-underline-offset: 3px; }
+.tmore summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 24px; color: var(--text); text-decoration: underline; text-decoration-color: var(--text-dim); text-underline-offset: 3px; }
 .tnote-list { padding-left: 18px; margin-top: 2px; }
 .tnote-list li { margin-bottom: 2px; }
 .tbl-act { margin-top: 8px; display: flex; align-items: center; gap: 18px; }
@@ -269,12 +272,13 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 
 /* C: lettered thumbnails, the diagram, the bands on the radius axis */
 .thumbs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
-.thumb { position: relative; display: block; padding: 0; background: none; cursor: pointer; border: 1px solid transparent; min-height: 44px; opacity: .55; }
-.thumb canvas { display: block; width: 100%; height: 40px; }
+.thumb { position: relative; display: block; padding: 0; background: none; cursor: pointer; border: 1px solid transparent; min-height: 44px; }
+.thumb canvas { display: block; width: 100%; height: 40px; opacity: .55; }   /* the drawing is dimmed, never the letter */
 .thumb .thumb-l { position: absolute; left: 4px; top: 1px; font: 600 11px var(--font-serif); color: var(--text-dim); }
-.thumb[aria-selected="true"] { border-color: var(--text-bright); opacity: 1; }
+.thumb[aria-selected="true"] { border-color: var(--text-bright); }
+.thumb[aria-selected="true"] canvas { opacity: 1; }
 .thumb[aria-selected="true"] .thumb-l { color: var(--text-bright); }
-.thumb:hover { opacity: .85; }
+.thumb:hover canvas { opacity: .85; }
 .plot-wrap { position: relative; margin-top: 8px; }
 .plot-cv { display: block; width: 100%; height: 230px; cursor: crosshair; outline: none; }
 .plot-cv:focus-visible { outline: 2px solid var(--horizon); outline-offset: 2px; }
@@ -293,6 +297,7 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 .band-edge { position: absolute; top: 4px; width: 14px; height: 32px; margin-left: -7px; background: none; border: 0; cursor: ew-resize; touch-action: none; }
 .band-edge::after { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--text-bright); }
 .band-edge:focus-visible { outline: 2px solid var(--horizon); }
+@media (max-width: 1100px) { .band-edge { top: 0; height: 44px; width: 24px; margin-left: -12px; } .band-edge::after { left: 11px; top: 6px; bottom: 6px; } }   /* a finger's target, the rule as thin */
 .band-all { position: absolute; left: 0; top: 0; }
 .filters { margin-top: 2px; }
 .f-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; margin-top: 8px; }
@@ -414,7 +419,7 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   .name { font-size: 34px; }
   .stage { position: relative; inset: auto; height: min(100vw, 440px); margin: 8px -16px 0; }
   #exo-canvas { touch-action: pan-y; }
-  .bezel { top: auto; bottom: 6px; }
+  .bezel { top: auto; bottom: 6px; white-space: normal; padding: 0 16px; }   /* the low pass's long line wraps inside the phone */
   .ur { display: none; }
   .ll { position: static; width: 100%; margin-top: 10px; }
   .lr { position: static; margin-top: 14px; }
@@ -441,13 +446,21 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   .method .log-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
   .rg-row { grid-template-columns: 1fr 76px 76px; }
   .rg-row input { font-size: 16px; min-height: 44px; }
-  .tblock .take .plain { min-height: 44px; }
+  .tblock .take .plain { min-height: 44px; min-width: 32px; }
+  #route .lbr-pill { min-height: 44px; }   /* the model route's pill, drawn by ai/route-panel.js */
   .tblock .tb-v { white-space: normal; }
-  .twin summary, .rp-rej summary { min-height: 44px; }
+  .twin summary, .rp-rej summary, .tmore summary { min-height: 44px; }
+  /* the finder spans the phone, its whole placeholder read; another world and the tally share the row under it */
+  .finder .field { grid-column: 1 / -1; grid-row: 1; }
+  .finder-acts { grid-column: 1 / -1; grid-row: 2; }
+  .logrow { grid-column: 1 / -1; grid-row: 3; }   /* the tally on its own row: it keeps one line at any count */
+  .q-line { grid-row: 4; }
+  .field input { min-height: 44px; }
+  .q-results li { min-height: 44px; }
   .tally { min-height: 44px; }
   .bar a { min-height: 44px; }
   .token { min-height: 44px; }
-  .log-open { min-height: 32px; }
+  .log-open { min-height: 44px; }
   input.engraved { height: 44px; }
   input.engraved::-webkit-slider-runnable-track { height: 44px; background-position: 0 22px, 0 22px; }
   input.engraved::-webkit-slider-thumb { margin-top: 14px; }

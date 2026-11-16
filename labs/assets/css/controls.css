@@ -42,6 +42,8 @@
 .switch[aria-checked="true"] .sw-lever { left: calc(100% - 7px); }
 .switch:hover .sw-track::before { background: var(--horizon); }
 .switch:disabled { cursor: default; opacity: .45; }
+/* a switch never pushes its page sideways: below 700 px its words wrap, the track stays whole */
+@media (max-width: 700px) { .switch { max-width: 100%; white-space: normal; flex-wrap: wrap; row-gap: 2px; } .switch .sw-w { min-width: 0; overflow-wrap: anywhere; } }
 
 /* ---------- the scale: one of a few, under a fixed index (a lens's distance scale) ---------- */
 .scale { display: grid; grid-template-columns: auto 1fr; align-items: start; column-gap: 14px; }

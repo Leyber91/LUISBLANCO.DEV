@@ -11,7 +11,7 @@ import {
 } from './science.js';
 import { facts, deterministicNote, limitsLine } from './report.js';
 import { tokens, alpha, fmt, fmtInt } from './views/common.js';
-import { day } from '../kit/format.js';
+import { localDay, range } from '../kit/format.js';
 
 function download(blob, name) {
   const a = document.createElement('a');
@@ -46,7 +46,7 @@ export function exportPlate(p, engine, views, albedo) {
   try { ctx.drawImage(g, cx - side / 2, cy - side / 2, side, side, 40, 90, 760, 760); } catch (_) { /* tainted or lost: leave the field dark */ }
   // frame and brackets
   ctx.strokeStyle = alpha(T.horizon, 0.22); ctx.lineWidth = 1; ctx.strokeRect(20.5, 20.5, W - 41, H - 41);
-  ctx.strokeStyle = T.gold;
+  ctx.strokeStyle = T.bright;   // the brackets of the plate: gold is kept for a measured value and a saved world
   for (const [x, y, dx, dy] of [[20, 20, 1, 1], [W - 20, 20, -1, 1], [20, H - 20, 1, -1], [W - 20, H - 20, -1, -1]]) {
     ctx.beginPath(); ctx.moveTo(x + 22 * dx, y + 0.5 * dy); ctx.lineTo(x + 0.5 * dx, y + 0.5 * dy); ctx.lineTo(x + 0.5 * dx, y + 22 * dy); ctx.stroke();
   }
@@ -56,7 +56,7 @@ export function exportPlate(p, engine, views, albedo) {
   ctx.textAlign = 'right'; ctx.fillText('The lab L212, luisblanco.dev/labs/exomania-survey.html', W - 44, 62);
   ctx.textAlign = 'left';
   const X = 840;
-  ctx.fillStyle = T.dim; ctx.font = mono(500, 12); ctx.fillText(`Sheet A, the planet, ${day(Date.now())}`, X, 112);
+  ctx.fillStyle = T.dim; ctx.font = mono(500, 12); ctx.fillText(`Sheet A, the planet, ${localDay(Date.now())}`, X, 112);
   ctx.fillStyle = T.bright; ctx.font = '400 44px Fraunces, Georgia, serif'; ctx.fillText(p.name, X, 160);
   const f = facts(p, albedo);
   ctx.fillStyle = T.text; ctx.font = mono(400, 15);
@@ -65,11 +65,11 @@ export function exportPlate(p, engine, views, albedo) {
   const rows = [
     ['radius', f.radius_Rearth ? `${fmt(f.radius_Rearth, 3)} R⊕` : f.radius_limit_Rearth ? `${f.radius_kind === 'upper limit' ? '<' : '>'} ${fmt(f.radius_limit_Rearth, 3)} R⊕ (${f.radius_kind})` : 'no radius measured'],
     ['mass', f.mass_limit_Mearth ? `${f.mass_kind === 'upper limit' ? '<' : '>'} ${fmt(f.mass_limit_Mearth, 3)} M⊕ (${f.mass_kind})` : isNum(p.M) ? `${fmt(p.M, 3)} M⊕ (${f.mass_kind})` : 'not measured'],
-    ['mass forecast', f.mass_forecast_Mearth ? `${fmt(f.mass_forecast_Mearth, 2)} M⊕ (68%: ${fmt(f.mass_forecast_68[0], 2)}-${fmt(f.mass_forecast_68[1], 2)})` : '—'],
+    ['mass forecast', f.mass_forecast_Mearth ? `${fmt(f.mass_forecast_Mearth, 2)} M⊕ (68%: ${range(f.mass_forecast_68[0], f.mass_forecast_68[1])})` : '—'],
     ['period', isNum(p.P) ? `${fmt(p.P, 4)} d` : '—'], ['insolation', f.insolation_Searth ? `${fmt(f.insolation_Searth, 3)} S⊕` : '—'],
     ['Teq', f.teq_this_page_K ? `${fmtInt(f.teq_this_page_K)} K at albedo ${albedo.toFixed(2)}` : '—'],
-    ['habitable zone', f.habitable_zone], ['star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : '—'} · ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'}`],
-    ['transit', f.transit_depth_ppm ? `${fmtInt(f.transit_depth_ppm)} ppm · ${fmt(f.transit_duration_h, 3)} h` : '—'],
+    ['habitable zone', f.habitable_zone], ['star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : '—'}, ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'}`],
+    ['transit', f.transit_depth_ppm ? `${fmtInt(f.transit_depth_ppm)} ppm deep, ${fmt(f.transit_duration_h, 3)} h long` : '—'],
   ];
   if (f.archive_limits) rows.push(['archive bounds', f.archive_limits]);
   ctx.font = mono(400, 13);
@@ -86,7 +86,7 @@ export function exportPlate(p, engine, views, albedo) {
   };
   drawView(views.system, X, 330, 'D, the system to scale');
   drawView(views.transit, X + 360, 360, 'E, the signal');
-  ctx.fillStyle = T.faint; ctx.font = mono(400, 10.5);
+  ctx.fillStyle = T.dim; ctx.font = mono(400, 10.5);
   let sy = H - 40 - 14 * 4;
   ctx.fillText(`Data: ${DATA.snapshotLabel}. This research has made use of the NASA Exoplanet Archive, operated by Caltech under contract with NASA.`, 44, sy); sy += 14;
   ctx.fillText('Models: ' + SOURCES.slice(1, 5).join('; '), 44, sy); sy += 14;
@@ -104,7 +104,7 @@ export function exportCSV(list, filterFn, filterActive, albedo, label) {
     'transit_depth_ppm_model', 'transit_duration_h_model', 'earth_likeness_illustrative', 'archive_limits'];
   const q = (v) => (v === null || v === undefined || (typeof v === 'number' && !isFinite(v)) ? '' : typeof v === 'number' ? +v.toPrecision(5) : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
   const lines = [
-    `# Exomania survey export, ${day(Date.now())}. ${fmtInt(rows.length)} planets${filterActive ? ' (filter: ' + label + ')' : ''}.`,
+    `# Exomania survey export, ${localDay(Date.now())}. ${fmtInt(rows.length)} planets${filterActive ? ' (filter: ' + label + ')' : ''}.`,
     `# Data: ${DATA.snapshotLabel}; weekly roster for planets confirmed after it. Acknowledgement: NASA Exoplanet Archive, operated by Caltech under contract with NASA.`,
     `# Inferred columns: Chen & Kipping 2017 forecaster (log-uniform prior, censored by any mass limit), Teq at Bond albedo ${albedo} with full redistribution, Kopparapu et al. 2013 zone, transit model at the archive impact parameter (0 if absent).`,
     '# Limits: mass_limit 1 means mass_Mearth is an upper limit, -1 a lower limit, 0 a value. Every other value the archive flags as a limit is left blank in its column and written in archive_limits as a bound (< upper, > lower). No limit is used in an inferred column as a value.',

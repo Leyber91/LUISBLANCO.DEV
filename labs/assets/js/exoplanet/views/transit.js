@@ -123,7 +123,7 @@ export function createTransit(host, store) {
     const Y = (f) => Math.min(bx.y0, bx.y1 + (1 - f) / ymax * (bx.y0 - bx.y1));
     ctx.lineWidth = 1; ctx.font = T.fontSm;
     ctx.strokeStyle = alpha(T.horizon, 0.22); ctx.strokeRect(bx.x0 + 0.5, bx.y1 + 0.5, bx.x1 - bx.x0, bx.y0 - bx.y1);
-    ctx.fillStyle = T.faint; ctx.textAlign = 'right';
+    ctx.fillStyle = T.dim; ctx.textAlign = 'right';
     const unit = ymax > 0.01 ? '%' : 'ppm', k = unit === '%' ? 100 : 1e6;
     for (const f of [0, 0.5, 1]) {
       const v = depth * f, y = Y(1 - v);
@@ -171,7 +171,7 @@ export function createTransit(host, store) {
     ctx.strokeStyle = alpha(T.horizon, 0.1); ctx.beginPath(); ctx.moveTo(bx.x0, Y(0)); ctx.lineTo(bx.x1, Y(0)); ctx.stroke();
     // 1 m/s precision band
     if (1 < K) { ctx.fillStyle = alpha(T.horizon, 0.07); ctx.fillRect(bx.x0, Y(1), bx.x1 - bx.x0, Y(-1) - Y(1)); }
-    ctx.fillStyle = T.faint; ctx.textAlign = 'right';
+    ctx.fillStyle = T.dim; ctx.textAlign = 'right';
     for (const v of [rv.K, 0, -rv.K]) ctx.fillText(fmt(v, 2), bx.x0 - 4, Y(v) + 3);
     ctx.textAlign = 'left'; ctx.fillText('m/s', 2, bx.y1 + 8);
     ctx.textAlign = 'center';

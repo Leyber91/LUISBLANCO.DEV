@@ -13,7 +13,7 @@
 
 import { Exoplanet } from './exoplanet.js';
 import { toParams, classify, lockRadiusAU, LOOKS } from './data.js';
-import { loadSnapshot, joinRoster, provisionalMeasured } from './catalog.js';
+import { loadSnapshot, joinRoster, provisionalMeasured, countLine } from './catalog.js';
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
@@ -90,9 +90,17 @@ const canvas = $('exo-canvas');
 const engine = new Exoplanet(canvas);
 const glOk = engine.ok();
 // what the renderer prepares is said on the fixed line under the name, where it covers nothing; a failure stands over
-// the planet; the wheel scrolls the page until the planet has been pressed
+// the planet. The wheel is a map's in a page: over a planet not yet pressed it scrolls the page and a hint says how to
+// zoom; once pressed it zooms, until the pointer leaves sheet A or Esc is pressed. + and - zoom from anywhere but a field.
 engine.noteHost = $('sheet-msg'); engine.failHost = $('exo-stage'); engine.wheelNeedsFocus = true;
-window.__exoEngine = engine;   // tools/drives/shapes.mjs shows a notice through it
+let hintTimer = 0;
+engine.onIdleWheel = () => {
+  const h = $('wheel-hint'); if (!h) return;
+  h.hidden = false; clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => { h.hidden = true; }, 2000);
+};
+$('sheet-a').addEventListener('pointerleave', () => { engine.engaged = false; });
+window.__exoEngine = engine;   // kept for a drive: tools/drives/shapes.mjs shows the loading notice through it, to check the notice's line holds its height
 // The page opens on LANDMARKS[0], a temperate world, unless a link names another: start building that
 // look's shader now, while the catalogue loads, instead of after it.
 if (glOk && !new URLSearchParams(location.search).get('p')) engine.prepare(LOOKS.temperate);
@@ -126,7 +134,7 @@ function placeWorld() {
 }
 
 /* ---------------- views ---------------- */
-let plot, system, transit, target, report, tours, log = null;
+let plot, system, transit, target, report, tours, log = null, plotKept = false;
 /* What follows the log on the page: the compare bench, the buttons on the world's panel, the chips, a filter by the
    log, the link. The bench is the log's: st.pins is set here, from the record the store returned last, and nowhere
    else. */
@@ -143,6 +151,7 @@ function syncLog() {
     const on = !!st.sel && log.isSaved(st.sel.name), busy = !!st.sel && log.busy(st.sel.name);
     b.textContent = on ? 'In your log' : 'Add to log';
     b.classList.toggle('kept', on);   // the gold of a kept clock
+    if (plot && on !== plotKept) { plotKept = on; plot.redraw(); }   // and the chosen world's point on the diagram
     b.disabled = !log.loaded() || busy;   // nothing can be said about the log before it is read, or while the store answers
     if (busy) b.setAttribute('aria-busy', 'true'); else b.removeAttribute('aria-busy');
     b.title = !log.loaded() ? 'The log is being read' : on ? 'Take this world out of your log' : 'Save this world to your log';
@@ -167,6 +176,7 @@ function chipsOf() {
 }
 const actions = {
   select, setPlot, setFilter, startTour, pauseTour,
+  isSaved: (name) => !!log && log.loaded() && log.isSaved(name),   // the diagram draws a kept world's point in gold
   exportAs(kind, btn) {
     const st = store.state;
     if (!st.sel) return;
@@ -714,6 +724,7 @@ function bindKeys() {
   document.addEventListener('keydown', (e) => {
     const a = document.activeElement;
     const typing = /INPUT|SELECT|TEXTAREA/.test(a?.tagName || '') || !!a?.isContentEditable;
+    if (e.key === 'Escape') engine.engaged = false;   // the wheel scrolls the page again
     if (document.querySelector('dialog[open]')) return;
     if (e.key === '/' && !typing) { e.preventDefault(); $('q').focus(); return; }
     if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -723,6 +734,9 @@ function bindKeys() {
     else if (store.state.tour && e.key === 'ArrowRight' && !ownsArrows) { e.preventDefault(); stepTour(1); }
     else if (store.state.tour && e.key === 'ArrowLeft' && !ownsArrows) { e.preventDefault(); stepTour(-1); }
     else if (e.key === 'Escape' && store.state.tour) endTour();
+    else if ((e.key === '+' || e.key === '=' || e.key === '-' || e.key === '_') && glOk && !e.defaultPrevented) {   // the planet's own handler took it when it has the focus
+      e.preventDefault(); engine.zoomBy(e.key === '+' || e.key === '=' ? 1 / 1.12 : 1.12);
+    }
   });
 }
 /* the world alone: everything but the planet and this switch leaves, and comes back */
@@ -768,10 +782,9 @@ function buildControls() {
   plain.title = 'The clouds\' pattern is seeded by the name; so are continents, craters and bands.';
   const clean = switchCtl({ name: 'instruments', words: ['shown', 'hidden'], id: 'btn-clean', ariaLabel: 'Instruments hidden' });
   clean.setAttribute('aria-keyshortcuts', 'H');
-  // the key that does the same, beside the switch: H
+  // the key that does the same, beside the switch: H. It is a legend, not a second target: the switch is the one to press
   const cleanRow = el('span', 'sw-row'), hKey = keyHint('H');
   hKey.title = 'H hides the instruments and brings them back';
-  hKey.addEventListener('click', () => toggleClean());
   cleanRow.append(clean, hKey);
   sws.append(plain, cleanRow);
   const ground = el('div', 'ground'); ground.id = 'ground'; ground.hidden = true;
@@ -896,7 +909,7 @@ async function boot() {
   renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), rosterNote: 'The weekly roster is joining in the background.' });
   const retrieved = day(fromIso(snap.meta.retrieved), snap.meta.retrieved);
   $('tb-cat').textContent = `NASA archive, ${retrieved}`;
-  $('tb-n').textContent = fmtInt(st.list.length);
+  $('tb-n').textContent = countLine(st.list, false);
   drawHist($('bands-cv'), st.list);
   tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
 
@@ -911,15 +924,16 @@ async function boot() {
   setInterval(perfLine, 2000); perfLine();
   setInterval(bezel, 300); bezel();
   // the five thumbnails of sheet C, the page's heaviest drawing, once the page is idle and no shader is being built
-  whenQuiet(() => { const building = glOk ? engine.building() : false; plot.drawThumbs(); window.__exoThumbs = { at: Math.round(performance.now()), building, idle: true }; });
+  thumbsWhenQuiet('catalogue');
 
   try {
     const { added, rosterCount } = await joinRoster(st.list);
     for (const p of added) st.byName.set(p.name, p);
     plot.resetStats(); plot.redraw();
+    thumbsWhenQuiet('roster');   // the roster added planets and said which radii are measured: the thumbnails are drawn again, once
     const note = `The weekly roster (${DATA.rosterLabel}) lists ${fmtInt(rosterCount)} planets with a measured radius${added.length ? ` and added ${fmtInt(added.length)} confirmed after the snapshot` : '; none are newer than the snapshot'}.`;
     renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), rosterNote: note });
-    $('tb-n').textContent = `${fmtInt(st.list.length)}, ${fmtInt(rosterCount)} with a radius`;
+    $('tb-n').textContent = countLine(st.list, true);
     tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
     drawHist($('bands-cv'), st.list);
     if (st.sel) target.update(st.sel);
@@ -930,6 +944,21 @@ async function boot() {
   renderFilters();
   resay();
   if (log) log.reread();
+}
+
+/* The five thumbnails, drawn when the page is quiet. One drawing waits at a time, and draws the list as it is when it
+   runs. window.__exoThumbs says when each drawing ran, whether a shader was building then, and how many have run. */
+let thumbsPending = false;
+function thumbsWhenQuiet(why) {
+  if (thumbsPending) return;
+  thumbsPending = true;
+  whenQuiet(() => {
+    thumbsPending = false;
+    const building = glOk ? engine.building() : false;
+    plot.drawThumbs();
+    const prev = window.__exoThumbs || { draws: 0, whys: [] };
+    window.__exoThumbs = { at: Math.round(performance.now()), building, draws: prev.draws + 1, whys: [...prev.whys, why], listed: store.state.list.length };
+  });
 }
 
 /* Run fn when the page is idle and the renderer is not building a program: a page that holds its thread while a

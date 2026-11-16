@@ -14,6 +14,7 @@
    ============================================================ */
 
 import { DATA } from './config.js';
+import { plural, int } from '../kit/format.js';
 
 const num = (v) => (v === null || v === undefined || v === '' || isNaN(v)) ? null : +v;
 const TRUE_MASS = new Set(['Mass', 'Msini', 'Msin(i)/sin(i)']);
@@ -156,6 +157,16 @@ export async function joinRoster(list) {
   for (const p of list) p.measuredR = names.has(p.name) && p.R !== null;
   list.push(...added);
   return { added, rosterCount: names.size };
+}
+
+/* The title block's count, counted from the list: "6,464 planets, 4,874 with a measured radius" once the roster has
+   said which radii are measured (joinRoster above); before that, or if it fails, the planets alone, since which radii
+   are measured is then a guess. Tests: tests/counts.test.mjs. */
+export function countLine(list, rosterJoined) {
+  const planets = plural(list.length, 'planet');
+  if (!rosterJoined) return planets;
+  const measured = list.filter((p) => p.measuredR === true && Number.isFinite(p.R)).length;   // Number.isFinite takes no string
+  return `${planets}, ${int(measured)} with a measured radius`;
 }
 
 /* Before the roster arrives (or if it fails), a transit or imaging detection with a

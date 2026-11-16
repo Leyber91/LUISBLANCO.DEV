@@ -22,15 +22,11 @@ import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '..
 import { fmt, fmtInt } from './common.js';
 import { el } from '../../kit/dom.js';
 import { ivSvg, ivAxisSvg } from '../../kit/controls.js';
+import { interval, range as span } from '../../kit/format.js';
 
-const MINUS = '−';
-/* "+0.11 −0.18", or "±0.11" when the two sides agree to 15% */
-const errText = (e1, e2) => {
-  if (!isNum(e1) || !isNum(e2)) return '';
-  const a = Math.abs(e1), b = Math.abs(e2);
-  return Math.abs(a - b) / Math.max(a, 1e-9) < 0.15 ? `±${fmt(a, 2)}` : `+${fmt(a, 2)} ${MINUS}${fmt(b, 2)}`;
-};
-const range = (s, d = 2) => (s ? `${fmt(s.lo, d)} to ${fmt(s.hi, d)}` : '');
+/* "+0.11 −0.18", or "±0.11" when the two sides agree to 15%: the kit's one interval, in the table and the live number */
+const errText = (e1, e2) => interval(e1, e2);
+const range = (s, d = 2) => (s ? span(s.lo, s.hi, d) : '');
 /* an archive bound as a value: "< 6.2" */
 const boundV = (L, d = 3) => limitText(L, d).replace(/\s*[A-Za-z⊕☉°]+$/, '');
 
@@ -128,14 +124,16 @@ export function createTarget(host, store, actions) {
     else rows.push({ key: 'a', n: 'orbit', v: 'none', pm: eText, iv: false });
     if (S.S) rows.push({ key: 'S', n: 'insolation', v: fmt(S.S, 3), u: 'S⊕', kind: S.src === 'archive' ? 'm' : 'd', note: S.src === 'L / a^2' ? 'The insolation is derived from the star\'s luminosity and the orbit, L / a².' : '', iv: { value: S.S } });
     else if (limitOf(p, 'S')) rows.push({ key: 'S', n: 'insolation', v: boundV(limitOf(p, 'S')), u: 'S⊕', pm: limitKind(limitOf(p, 'S')), iv: false });
-    const starPm = isNum(p.Rs) ? `${fmt(p.Rs, 3)} R\u2609` : '';
+    const starPm = errText(p.TeffErr, p.TeffErr);   // the ± column holds the temperature's interval; the radius has its own row
     const col = starColour(p.Teff), sp = spectralType(p.Teff);
     const starNote = [isNum(p.Rs) ? '' : 'The star\'s radius is missing: the picture scales it from its temperature.', L.L ? `Its luminosity is ${fmt(L.L, 3)} L\u2609${L.src === 'archive' ? '' : ', from its radius and temperature'}.` : '',
       isNum(p.Teff) ? `Its colour, its Planck spectrum seen through the CIE 1931 observer, is ${col.hex}${sp === '?' ? '' : `, a ${sp}-type star`}.` : ''].filter(Boolean).join(' ');
     if (isNum(p.Teff)) rows.push({ key: 'star', n: 'star', v: fmtInt(p.Teff), swatch: col.hex, u: 'K', pm: starPm, refs: [rf.star], kind: isNum(p.Rs) ? 'm' : 'e',
       note: starNote, iv: { value: p.Teff, lo: isNum(p.TeffErr) ? p.Teff - Math.abs(p.TeffErr) : null, hi: isNum(p.TeffErr) ? p.Teff + Math.abs(p.TeffErr) : null } });
     else if (limitOf(p, 'Teff')) rows.push({ key: 'star', n: 'star', v: boundV(limitOf(p, 'Teff'), 4), u: 'K', pm: starPm, iv: false });
-    else rows.push({ key: 'star', n: 'star', v: 'none', pm: starPm || 'no temperature in the archive', iv: false });
+    else rows.push({ key: 'star', n: 'star', v: 'none', pm: 'no temperature in the archive', iv: false });
+    if (isNum(p.Rs)) rows.push({ key: 'Rs', n: 'star radius', v: fmt(p.Rs, 3), u: 'R\u2609', pm: errText(p.RsErr, p.RsErr), refs: [rf.star], kind: 'm',
+      iv: { value: p.Rs, lo: isNum(p.RsErr) ? p.Rs - Math.abs(p.RsErr) : null, hi: isNum(p.RsErr) ? p.Rs + Math.abs(p.RsErr) : null } });
     for (const k of ['Teq', 'b', 'depth', 'dur'].filter((x) => limitOf(p, x))) {
       const LL = limitOf(p, k);
       rows.push({ key: 'lim-' + k, n: { Teq: 'Teq (archive)', b: 'impact b', depth: 'depth', dur: 'duration' }[k], v: boundV(LL), u: (LIMIT_FIELDS[k] || ['', ''])[1].trim(), pm: limitKind(LL), note: 'An archive bound, never used as a value.', iv: false });
@@ -221,7 +219,7 @@ export function createTarget(host, store, actions) {
     if (hasRadius(p)) {
       box.append(el('span', 'v', fmt(p.R, 3)), el('span', 'u', 'R⊕'));
       box.append(ivSvg({ value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null, kind: p.measuredR === false ? 'e' : 'm', width: 120 }));
-      const e = isNum(p.Rerr1) && isNum(p.Rerr2) ? `+${fmt(Math.abs(p.Rerr1), 2)} / ${MINUS}${fmt(Math.abs(p.Rerr2), 2)}, ` : '';
+      const e = errText(p.Rerr1, p.Rerr2) ? `${errText(p.Rerr1, p.Rerr2)}, ` : '';
       box.append(el('span', 'pm', `${e}${p.measuredR === false ? 'estimated from the mass' : 'measured'}`));
     } else if (limitOf(p, 'R')) {
       const RL = limitOf(p, 'R');

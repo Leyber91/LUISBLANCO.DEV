@@ -189,12 +189,12 @@ export function createSystem(host, store, actions = {}) {
         if (r > Rpx * 1.6) continue;
         ctx.strokeStyle = alpha(T.text, sp.name === 'Earth' ? 0.42 : 0.26); ctx.setLineDash([1, 3]);
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-        if (r > 6) { ctx.fillStyle = T.faint; ctx.textAlign = 'right'; ctx.fillText(sp.short, cx - r * 0.71 - 2, cy + r * 0.71 + 9); }
+        if (r > 6) { ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText(sp.short, cx - r * 0.71 - 2, cy + r * 0.71 + 9); }
       }
     } else if (s > 14 && s < Rpx * 1.25) {
       ctx.strokeStyle = alpha(T.text, 0.18); ctx.setLineDash([1, 3]);
       ctx.beginPath(); ctx.arc(cx, cy, s, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = T.faint; ctx.textAlign = 'left';
+      ctx.fillStyle = T.dim; ctx.textAlign = 'left';
       ctx.fillText('1 AU', cx + s * 0.71 + 3, cy + s * 0.71 + 10);
     }
     const starPx = (m.Rs || 0.5) * PHYS.R_SUN_KM / PHYS.AU_KM * s;

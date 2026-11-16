@@ -65,6 +65,16 @@ export function createPlot(host, store, actions) {
   const T = tokens();
   const surf = surface(cv, draw);
 
+  /* The chosen world: a ring and its point in the bright ink, as the system draws its chosen orbit. The point is gold
+     only when the world is kept in the log, the one gold a diagram draws besides a measured value against a model. */
+  function chosenMark(ctx, x, y, p) {
+    const kept = !!(actions && actions.isSaved && actions.isSaved(p.name));
+    ctx.lineWidth = 1.2; ctx.strokeStyle = alpha(T.bright, 0.9);
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = kept ? T.gold : T.bright; ctx.beginPath(); ctx.arc(x, y, 3.4, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 1;
+  }
+
   function inkFor(p, a) {
     const cb = store.state.colorBy;
     if (cb === 'method') return alpha(T[methodGroup(p.method).ink[0]], Math.min(1, a * 1.9));
@@ -77,7 +87,7 @@ export function createPlot(host, store, actions) {
     sx = cfg.xRev ? logScale(cfg.xRange[0], cfg.xRange[1], x1, x0) : logScale(cfg.xRange[0], cfg.xRange[1], x0, x1);
     sy = logScale(cfg.yRange[0], cfg.yRange[1], y0, y1);
     ctx.lineWidth = 1;
-    ctx.font = T.fontSm; ctx.fillStyle = T.faint;
+    ctx.font = T.fontSm; ctx.fillStyle = T.dim;
     const decades = (lo, hi) => { const a = []; for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) a.push(e); return a; };
     for (const e of decades(...cfg.xRange)) {
       for (let m = 1; m < 10; m++) {
@@ -199,11 +209,10 @@ export function createPlot(host, store, actions) {
       const vx = plotValue(sel, cfg.x), vy = plotValue(sel, cfg.y);
       if (isNum(vx) && isNum(vy) && vx > 0) {
         const x = sx(vx), y = sy(vy);
-        ctx.strokeStyle = alpha(T.gold, 0.35); ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+        ctx.strokeStyle = alpha(T.bright, 0.35); ctx.lineWidth = 1; ctx.setLineDash([2, 3]);   // the leaders to the two axes
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(box.x0, y); ctx.moveTo(x, y); ctx.lineTo(x, box.y0); ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(x, y, 3.6, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = alpha(T.gold, 0.8); ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+        chosenMark(ctx, x, y, sel);
         ctx.fillStyle = T.bright; ctx.font = T.serif; ctx.textAlign = x > (box.x0 + box.x1) / 2 ? 'right' : 'left';
         ctx.fillText(sel.name, x + (ctx.textAlign === 'right' ? -12 : 12), y - 9);
       } else if (mode === 'mr' || !isNum(sel.R)) {
@@ -236,7 +245,7 @@ export function createPlot(host, store, actions) {
       ctx.fillStyle = alpha(T.horizon, inV ? 0.34 : 0.2);
       ctx.fillRect(bx.x1 - bw, y0 + 0.5, bw, Math.max(1, y1 - y0 - 1));
     }
-    ctx.fillStyle = T.faint; ctx.font = T.fontSm; ctx.textAlign = 'right';
+    ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'right';
     ctx.fillText(`Kepler, P under 100 d, radius to 10%: ${V.n}`, bx.x1 - 4, sy(6) - 4);
   }
 
@@ -325,7 +334,7 @@ export function createPlot(host, store, actions) {
     for (let v = 0; v <= maxC; v += maxC > 1200 ? 500 : 200) {
       const y = Math.round(syl(v)) + 0.5;
       ctx.strokeStyle = alpha(T.horizon, 0.07); ctx.beginPath(); ctx.moveTo(bx.x0, y); ctx.lineTo(bx.x1, y); ctx.stroke();
-      ctx.fillStyle = T.faint; ctx.textAlign = 'right'; ctx.fillText(fmtInt(v), bx.x0 - 5, y + 3);
+      ctx.fillStyle = T.dim; ctx.textAlign = 'right'; ctx.fillText(fmtInt(v), bx.x0 - 5, y + 3);
     }
     const bw = Math.max(2, (bx.x1 - bx.x0) / (y1 - y0 + 1) - 2);
     const upTo = st.filter.upTo;
@@ -342,7 +351,7 @@ export function createPlot(host, store, actions) {
       }
       ctx.globalAlpha = 1;
       bars.push({ yr, x, w: bw, top: syl(acc), c, total: acc });
-      if (yr % 5 === 0) { ctx.fillStyle = T.faint; ctx.textAlign = 'center'; ctx.fillText(String(yr), sxl(yr), bx.y0 + 13); }
+      if (yr % 5 === 0) { ctx.fillStyle = T.dim; ctx.textAlign = 'center'; ctx.fillText(String(yr), sxl(yr), bx.y0 + 13); }
       if (st.filter.year === yr) { ctx.strokeStyle = T.bright; ctx.lineWidth = 1.5; ctx.strokeRect(x - 1.5, syl(acc) - 1.5, bw + 3, bx.y0 - syl(acc) + 1.5); ctx.lineWidth = 1; }
     }
     ctx.strokeStyle = alpha(T.horizon, 0.22); ctx.beginPath(); ctx.moveTo(bx.x0, bx.y0 + 0.5); ctx.lineTo(bx.x1, bx.y0 + 0.5); ctx.stroke();
@@ -398,14 +407,13 @@ export function createPlot(host, store, actions) {
       arr.push(x, y, p.idx);
     }
     pts = new Float32Array(arr);
-    ctx.fillStyle = T.faint; ctx.font = T.fontSm; ctx.textAlign = 'center';
+    ctx.fillStyle = T.dim; ctx.font = T.fontSm; ctx.textAlign = 'center';
     ctx.fillText('RA 0h', proj(0.001, 0)[0], cy + 11);
     ctx.textAlign = 'left'; ctx.fillText('Dec +60', proj(0, 60)[0] + 4, proj(0, 60)[1]);
     const sel = st.sel;
     if (sel && isNum(sel.ra)) {
       const [x, y] = proj(sel.ra, sel.dec);
-      ctx.fillStyle = T.gold; ctx.beginPath(); ctx.arc(x, y, 3.4, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = alpha(T.gold, 0.8); ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.stroke();
+      chosenMark(ctx, x, y, sel);
       ctx.fillStyle = T.bright; ctx.font = T.serif; ctx.textAlign = x > cx ? 'right' : 'left';
       ctx.fillText(sel.host, x + (x > cx ? -12 : 12), y - 9);
     }

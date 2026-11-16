@@ -11,6 +11,7 @@
 <!-- the fonts never block first paint: a blocked or slow fonts host falls back to the system faces -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 <link rel="stylesheet" href="assets/css/tokens.css" />
+<link rel="stylesheet" href="assets/css/os.css" />
 <link rel="stylesheet" href="assets/css/controls.css" />
 <link rel="stylesheet" href="assets/css/exoplanet.css" />
 </head>
@@ -50,8 +51,9 @@
   <section class="sheet" id="sheet-a" aria-label="Sheet A, the planet">
     <span class="reg ra" aria-hidden="true"></span><span class="reg rb" aria-hidden="true"></span><span class="reg rc" aria-hidden="true"></span><span class="reg rd" aria-hidden="true"></span>
     <div class="stage" id="exo-stage">
-      <canvas id="exo-canvas" tabindex="0" aria-label="The selected planet, ray-traced from its measured radius, temperature and host star. Drag or the arrow keys turn it; plus and minus zoom; the scroll wheel zooms once the planet has been pressed."></canvas>
+      <canvas id="exo-canvas" tabindex="0" aria-label="The selected planet, ray-traced from its measured radius, temperature and host star. Drag or the arrow keys turn it; plus and minus zoom; the scroll wheel zooms once the planet has been clicked, until the pointer leaves the sheet or Escape is pressed."></canvas>
       <p class="bezel" id="bezel" aria-hidden="true"></p>
+      <p class="wheel-hint" id="wheel-hint" hidden>Click the planet to zoom with the wheel, or use + and &minus;.</p>
     </div>
     <div class="ul" id="ul">
       <h1 class="name" id="ret-name" tabindex="-1">&hellip;</h1>

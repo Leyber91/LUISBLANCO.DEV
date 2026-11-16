@@ -118,11 +118,11 @@
 }
 
 /* A link that jumps to the content: off the page until it has the focus. */
-.skip { position: absolute; left: -999px; top: 8px; z-index: 500; padding: 8px 12px; background: var(--surface); color: var(--text-bright); border: 1px solid var(--hair); }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 500; display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 8px 12px; background: var(--surface); color: var(--text-bright); border: 1px solid var(--hair); }
 .skip:focus { left: 8px; }
 
 /* A single accessible focus ring, used everywhere. */
-:where(a, button, input, [tabindex]):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--horizon);
   outline-offset: 2px;
   border-radius: var(--r-sm);

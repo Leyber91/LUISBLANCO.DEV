@@ -35,7 +35,7 @@ import { LabsOS } from '../../os/index.js';
 import { load as loadRecord, update as updateRecord, setOverdue } from '../record.js';
 import { el } from '../../kit/dom.js';
 import { int, day, fromIso, isoDay, clock } from '../../kit/format.js';
-import { setSwitch } from '../../kit/controls.js';
+import { setSwitch, switchCtl } from '../../kit/controls.js';
 import { surface, reducedMotion } from '../views/common.js';
 import { jdOfMs, msOfJd, sunAltitude } from './time.js';
 import { epochAt, sigmaAt, lampAt, lostFrom, tally, grade, contested, stateOf, KEPT_LAMP, yearOfJd, jdOfYear } from './clock.js';
@@ -365,9 +365,10 @@ function renderTonight() {
   }
   if (!show.length) { const tr = el('tr'); const td = el('td', 'dim', 'No transit in the next 24 hours is up in the dark here. Show all to see each one and why.'); td.colSpan = 10; tr.append(td); body.append(tr); }
   if (held) { const again = [...body.querySelectorAll('button')].find((x) => x.dataset.planet === held); if (again) again.focus({ preventScroll: true }); }
-  // the shared switch (kit/controls.js): both states engraved, the lever on the side of the rows shown
-  put('t-all-l', `the ${num(up.length)} up in the dark`); put('t-all-r', `all ${num(rows.length)}, with why each other is not`); setSwitch($('t-all'), S.showAll);
-  put('t-shown', `${num(show.length)} of ${num(rows.length)} listed, earliest first`);
+  // the shared switch (kit/controls.js): two short states engraved, the lever on the side of the rows shown; the counts
+  // and what "all" adds are said beside it, where they can wrap
+  setSwitch($('t-all'), S.showAll);
+  put('t-shown', `${num(show.length)} of ${num(rows.length)} listed, earliest first${S.showAll ? '; "from here" says why each one not up in the dark is not' : ', the ones up in the dark'}`);
   put('t-cap', plural(rows.length, 'transit', 'transits'));
 }
 function mountTonight() {
@@ -398,6 +399,7 @@ function mountTonight() {
       () => { put('place-msg', 'The location was not given. Type a latitude and a longitude.'); }, { maximumAge: 600000, timeout: 15000 });
   });
   $('forget').addEventListener('click', () => { S.place = null; S.showAll = false; $('lat').value = ''; $('lon').value = ''; put('place-msg', 'The place is forgotten. The night is drawn for the example again.'); save(); renderTonight(); });
+  $('t-all-slot').replaceWith(switchCtl({ name: 'rows', words: ['up in the dark', 'all'], id: 't-all', ariaLabel: 'Rows: all the transits, with why each is not up' }));
   $('t-all').addEventListener('click', () => { S.showAll = !S.showAll; renderTonight(); });
   $('lat').placeholder = String(EXAMPLE_PLACE.lat); $('lon').placeholder = String(EXAMPLE_PLACE.lon);
   put('t-rule', `From ${WATCH.baselineH * 60} minutes before the transit begins to ${WATCH.baselineH * 60} minutes after it ends, and a window further on each side, the star is ${WATCH.minAlt}° up or more and the Sun ${-WATCH.maxSun}° down or more; the transit is ${WATCH.minLamp} windows long or more; and most other published clocks agree with this one.`);

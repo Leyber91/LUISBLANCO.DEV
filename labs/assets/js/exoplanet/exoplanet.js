@@ -1676,6 +1676,8 @@ export class Exoplanet {
     const ZMIN = 1.15, ZMAX = 60.0;
     const redraw = () => { this.requestDraw(); };
     const zoomBy = (factor) => { this.cfg.camDist = Math.max(ZMIN, Math.min(ZMAX, this.cfg.camDist * factor)); redraw(); };
+    this.zoomBy = (factor) => { zoomBy(factor); this.onCamera && this.onCamera(); };   // for the page's own keys
+    this.engaged = false;   // with wheelNeedsFocus: whether the wheel zooms (the planet has been pressed); the page ends it
 
     let down = false, lx = 0, ly = 0;
     const dn = (x, y) => { down = true; lx = x; ly = y; };
@@ -1707,7 +1709,7 @@ export class Exoplanet {
       else return;
       e.preventDefault(); redraw(); this.onCamera && this.onCamera();
     });
-    cv.addEventListener('mousedown', (e) => dn(e.clientX, e.clientY));
+    cv.addEventListener('mousedown', (e) => { this.engaged = true; dn(e.clientX, e.clientY); });
     window.addEventListener('mousemove', (e) => mv(e.clientX, e.clientY));
     window.addEventListener('mouseup', up);
 
@@ -1737,9 +1739,10 @@ export class Exoplanet {
     cv.addEventListener('touchend', (e) => { if (e.touches.length < 2) pinch = 0; if (e.touches.length === 0) up(); }, { passive: true });
     cv.addEventListener('touchcancel', () => { pinch = 0; up(); }, { passive: true });   // the browser took the gesture for a scroll
 
-    // the wheel zooms once the planet has been pressed (it has the focus); before that it scrolls a page that scrolls
+    // as on a map in a page: the wheel zooms once the planet has been pressed, until the page ends it (engaged false);
+    // before that it scrolls the page, and onIdleWheel lets the page say how to zoom
     cv.addEventListener('wheel', (e) => {
-      if (this.wheelNeedsFocus && document.activeElement !== cv) return;
+      if (this.wheelNeedsFocus && !this.engaged) { if (this.onIdleWheel) this.onIdleWheel(e); return; }
       e.preventDefault(); zoomBy(e.deltaY > 0 ? 1.12 : 1 / 1.12); this.onCamera && this.onCamera();
     }, { passive: false });
   }

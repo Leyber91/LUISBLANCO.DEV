@@ -218,6 +218,14 @@
   .od-table { font-size: .72rem; }
   .od-table th, .od-table td { padding: 5px 6px; }
   #band { height: 206px; }
+  /* a finger's target: every control at least 44 px tall (the review of pull request 42, and the drive's invariant) */
+  .bar .back { display: inline-flex; align-items: center; min-height: 44px; }
+  .od-under .act, .od-pick .act, .od-place .act { min-height: 44px; }
+  .od-pick input, .od-place input { min-height: 44px; }
+  .od-world a { display: inline-flex; align-items: center; min-height: 44px; }
+  .od-list summary, .od-placebox summary { display: flex; align-items: center; min-height: 44px; box-sizing: border-box; }
+  .od-placebox summary { display: inline-flex; }
+  .od-table .linkish { display: inline-flex; align-items: center; min-height: 44px; text-align: left; }
   #night { height: 240px; }
   #tally-view { height: 330px; }
 }
