@@ -30,21 +30,6 @@
     "to": "} catch (e) { if (e.code === 'EEXIST') throw e; }"
   },
   {
-    "name": "lock: a dead holder's lock never taken",
-    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
-    "to": "if ((!holder && age > 10000)) {"
-  },
-  {
-    "name": "lock: a running holder's lock taken",
-    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
-    "to": "if ((holder && alive(holder.pid)) || (!holder && age > 10000)) {"
-  },
-  {
-    "name": "lock: an empty lock never taken",
-    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
-    "to": "if ((holder && !alive(holder.pid))) {"
-  },
-  {
     "name": "lock: an empty lock taken at 5 s",
     "from": "(!holder && age > 10000)",
     "to": "(!holder && age > 5000)"
@@ -53,11 +38,6 @@
     "name": "lock: an empty lock taken only at 20 s",
     "from": "(!holder && age > 10000)",
     "to": "(!holder && age > 20000)"
-  },
-  {
-    "name": "lock: any lock taken",
-    "from": "if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) {",
-    "to": "if (true) {"
   },
   {
     "name": "lock: the holder read as alive whatever it is",
@@ -83,11 +63,6 @@
     "name": "drive: the wait limit from the environment ignored",
     "from": "waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000",
     "to": "waitMs = 20 * 60 * 1000"
-  },
-  {
-    "name": "drive: the lock not given back",
-    "from": "  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs }); } finally { release(); }",
-    "to": "  return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs });"
   },
   {
     "name": "chrome: a call cut off waits for ever",
@@ -265,11 +240,6 @@
     "to": "    if (false) check(`frame: no fully transparent pixel in each of"
   },
   {
-    "name": "frame: the end line passes a broken rule",
-    "from": "frames.seen.size === 0 && frames.steps > 0,",
-    "to": "frames.steps > 0,"
-  },
-  {
     "name": "frame: no chunk read",
     "from": "  while (o < png.length) {",
     "to": "  while (o < 8) {"
@@ -300,34 +270,14 @@
     "to": "for (let x = 0; x < w - 1; x++) {"
   },
   {
-    "name": "frame: a rule that saw no frame passes",
-    "from": "frames.seen.size === 0 && frames.steps > 0,",
-    "to": "frames.seen.size === 0 && frames.steps >= 0,"
-  },
-  {
     "name": "frame: no end line for shots alone",
     "from": "if (frames.on || frames.steps) check(`frame:",
     "to": "if (frames.on) check(`frame:"
   },
   {
-    "name": "frame: a capture with no limit",
-    "from": "Promise.race([send('Page.captureScreenshot', { format: 'png' }), new Promise((res) => { timer = setTimeout(res, frameMs, null); })])",
-    "to": "send('Page.captureScreenshot', { format: 'png' })"
-  },
-  {
-    "name": "frame: a frame that did not come back passes",
-    "from": "      if (!png) { frames.steps++; check(`frame: a frame came back, after ${label}`, false,",
-    "to": "      if (!png) { frames.steps++; return; check(`frame: a frame came back, after ${label}`, false,"
-  },
-  {
     "name": "frame: a shot with no frame does not throw",
     "from": "        if (!png) throw new Error(`the shot ${name}: no frame came back`);\n",
     "to": ""
-  },
-  {
-    "name": "frame: each try's limit not passed to the drive",
-    "from": "timeoutMs, port, say, frameMs }); } finally",
-    "to": "timeoutMs, port, say }); } finally"
   },
   {
     "name": "lock: a process waits for its own hold",
@@ -448,5 +398,235 @@
     "name": "runner: the end line does not count the breaks",
     "from": "inv.seen.size ? `${inv.seen.size} distinct breaks` : ''",
     "to": "''"
+  },
+  {
+    "name": "lock: a dead holder's lock never taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && false) || (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: a running holder's lock taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && true) || (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: an empty lock never taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && !alive(holder.pid)) || false) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: any lock taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: a stale lock taken only when both its holder is dead and it is empty",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && !alive(holder.pid)) && (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: the lock file from the environment ignored",
+    "from": "process.env.LABS_DRIVE_LOCK || path.join(",
+    "to": "path.join("
+  },
+  {
+    "name": "lock: a takeover that cannot be written read as busy",
+    "from": "if (e.code !== 'EEXIST') throw e;\n    try { if (Date.now()",
+    "to": "if (false) throw e;\n    try { if (Date.now()"
+  },
+  {
+    "name": "lock: a takeover 9 s old cleared",
+    "from": "if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true });",
+    "to": "if (Date.now() - fs.statSync(t).mtimeMs > 9000) fs.rmSync(t, { force: true });"
+  },
+  {
+    "name": "lock: a takeover 11 s old kept",
+    "from": "if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true });",
+    "to": "if (Date.now() - fs.statSync(t).mtimeMs > 12000) fs.rmSync(t, { force: true });"
+  },
+  {
+    "name": "lock: a takeover never cleared",
+    "from": "if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true });",
+    "to": ""
+  },
+  {
+    "name": "lock: a stale lock removed whatever it now reads",
+    "from": "if (fs.readFileSync(file, 'utf8') === seen) { fs.rmSync(file, { force: true }); return true; }",
+    "to": "if (true) { fs.rmSync(file, { force: true }); return true; }"
+  },
+  {
+    "name": "lock: a stale lock never removed",
+    "from": "if (fs.readFileSync(file, 'utf8') === seen) { fs.rmSync(file, { force: true }); return true; }",
+    "to": "if (fs.readFileSync(file, 'utf8') === seen + 'x') { fs.rmSync(file, { force: true }); return true; }"
+  },
+  {
+    "name": "lock: the takeover lock left behind",
+    "from": "  finally { fs.rmSync(t, { force: true }); }",
+    "to": "  finally { }"
+  },
+  {
+    "name": "drive: the lock not given back",
+    "from": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { release(); }",
+    "to": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { }"
+  },
+  {
+    "name": "frame: each try's limit not passed to the drive",
+    "from": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { release(); }",
+    "to": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say }); } finally { release(); }"
+  },
+  {
+    "name": "profiles: a profile 23.9 hours old cleared",
+    "from": "try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }",
+    "to": "try { if (now - fs.statSync(at).mtimeMs > 23 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }"
+  },
+  {
+    "name": "profiles: a profile 24.1 hours old kept",
+    "from": "try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }",
+    "to": "try { if (now - fs.statSync(at).mtimeMs > 25 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }"
+  },
+  {
+    "name": "profiles: the out folder cleared with them",
+    "from": "if (!f.startsWith('lab-drive-')) continue;",
+    "to": "if (!f.startsWith('lab-drive')) continue;"
+  },
+  {
+    "name": "profiles: old profiles never cleared",
+    "from": "try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }",
+    "to": "try { } catch { /* another took it */ }"
+  },
+  {
+    "name": "profiles: a drive leaves its profile",
+    "from": "for (let i = 0; i < 10 && fs.existsSync(profile); i++) {",
+    "to": "for (let i = 0; i < 0 && fs.existsSync(profile); i++) {"
+  },
+  {
+    "name": "profiles: the end waits for a Chrome that has ended",
+    "from": "const ended = exited ? Promise.resolve() :",
+    "to": "const ended = false ? Promise.resolve() :"
+  },
+  {
+    "name": "chrome: no Chrome listed",
+    "from": "export const liveChromes = () => [...LIVE];",
+    "to": "export const liveChromes = () => [];"
+  },
+  {
+    "name": "chrome: SIGTERM ends the process without its Chromes",
+    "from": "for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));",
+    "to": ""
+  },
+  {
+    "name": "chrome: SIGTERM ends with another code",
+    "from": "[['SIGTERM', 143], ['SIGINT', 130]]",
+    "to": "[['SIGTERM', 1], ['SIGINT', 130]]"
+  },
+  {
+    "name": "chrome: a call after Chrome has gone is sent anyway",
+    "from": "if (timedOut || ws.readyState !== 1) return rej(",
+    "to": "if (timedOut) return rej("
+  },
+  {
+    "name": "chrome: every call refused",
+    "from": "if (timedOut || ws.readyState !== 1) return rej(",
+    "to": "if (timedOut || ws.readyState !== 3) return rej("
+  },
+  {
+    "name": "chrome: a refused call answered as if it worked",
+    "from": "if (d.error) rej(new Error(`${d.error.message} (${d.error.code})`)); else res(d.result);",
+    "to": "res(d.result || d);"
+  },
+  {
+    "name": "chrome: a fixed port, shared by every drive",
+    "from": "'--remote-debugging-port=0'",
+    "to": "'--remote-debugging-port=9362'"
+  },
+  {
+    "name": "frame: the end line passes a broken rule",
+    "from": "frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0,",
+    "to": "frames.lost === 0 && frames.steps > 0,"
+  },
+  {
+    "name": "frame: the end line passes when no frame came back",
+    "from": "frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0,",
+    "to": "frames.seen.size === 0 && frames.steps > 0,"
+  },
+  {
+    "name": "frame: a rule that saw no frame passes",
+    "from": "frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0,",
+    "to": "frames.seen.size === 0 && frames.lost === 0 && frames.steps >= 0,"
+  },
+  {
+    "name": "frame: a capture with no limit",
+    "from": "const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }).catch(() => null), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);",
+    "to": "const r = await send('Page.captureScreenshot', { format: 'png' }).catch(() => null);"
+  },
+  {
+    "name": "frame: a refused capture ends the drive",
+    "from": "const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }).catch(() => null), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);",
+    "to": "const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);"
+  },
+  {
+    "name": "frame: a frame that did not come back passes",
+    "from": "if (!png) { frames.steps++; frames.lost++; check(",
+    "to": "if (!png) { frames.steps++; frames.lost++; return; check("
+  },
+  {
+    "name": "frame: one try fewer",
+    "from": "for (let i = 0; i < CAPTURE_TRIES; i++) {",
+    "to": "for (let i = 0; i < CAPTURE_TRIES - 1; i++) {"
+  },
+  {
+    "name": "frame: one try more",
+    "from": "for (let i = 0; i < CAPTURE_TRIES; i++) {",
+    "to": "for (let i = 0; i <= CAPTURE_TRIES; i++) {"
+  },
+  {
+    "name": "png: a file that is not a PNG read",
+    "from": "if (!png.subarray(0, 8).equals(PNG_SIGNATURE)) throw new Error('not a PNG');",
+    "to": ""
+  },
+  {
+    "name": "png: a chunk cut before its length read",
+    "from": "if (o + 12 > png.length) throw new Error('a PNG cut short');",
+    "to": ""
+  },
+  {
+    "name": "png: a chunk cut in its data read",
+    "from": "if (o + 12 + n > png.length) throw new Error('a PNG cut short');",
+    "to": ""
+  },
+  {
+    "name": "png: a tRNS chunk not seen",
+    "from": "if (t === 'tRNS') trns = true;",
+    "to": "if (t === 'tRNs') trns = true;"
+  },
+  {
+    "name": "png: an interlaced frame read",
+    "from": "if (interlace !== 0) throw",
+    "to": "if (interlace > 1) throw"
+  },
+  {
+    "name": "png: a tRNS chunk read through",
+    "from": "if (trns) throw new Error(",
+    "to": "if (false) throw new Error("
+  },
+  {
+    "name": "png: a frame one line short read",
+    "from": "if (raw.length < h * (stride + 1)) throw",
+    "to": "if (raw.length < (h - 1) * (stride + 1)) throw"
+  },
+  {
+    "name": "png: whole data refused",
+    "from": "if (raw.length < h * (stride + 1)) throw",
+    "to": "if (raw.length <= h * (stride + 1)) throw"
+  },
+  {
+    "name": "png: filter 5 read",
+    "from": "if (f > 4) throw new Error(`a line filtered by",
+    "to": "if (f > 5) throw new Error(`a line filtered by"
+  },
+  {
+    "name": "png: filter 4 refused",
+    "from": "if (f > 4) throw new Error(`a line filtered by",
+    "to": "if (f >= 4) throw new Error(`a line filtered by"
   }
 ]

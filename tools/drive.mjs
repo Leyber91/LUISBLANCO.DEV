@@ -11,7 +11,7 @@
    screenshots at the moments that matter, and every console error.
 
    Usage (Node 22 or later, Windows-first, no dependencies):
-     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900] [--timeout 180] [--port 9333]
+     node tools/drive.mjs <scenario.mjs> --base http://127.0.0.1:8804 [--out <dir>] [--width 1440] [--height 900] [--timeout 180]
      node tools/labs-wt.mjs drive <lab>          serves the worktree, runs tools/drives/<lab>.mjs at two widths
      node tools/drive.mjs tools/drives/pages.mjs --base <url> --timeout 420     every lab page loads with a clean console
 
@@ -47,19 +47,27 @@
                              same exceptions, whether frames() was called or not. A frame that does not come back
                              within 6 tries of frameMs (5 s) is a break too, and the shot throws.
      background(rgba)        the colour Chrome paints under the page ({ r, g, b, a }), for a fixture
+     crash()                 end the page's renderer, for a selftest of what a drive does after it
    Coordinates are CSS pixels of the viewport.
 
    Machine safety: one Chrome at a time on the machine, its own
    throwaway profile, killed on a timeout (180 s by default) whatever
    the scenario does. A drive waits for the lock file
-   labs-drive-chrome.lock in the system's temp folder before it
-   starts Chrome (20 minutes at most, LABS_DRIVE_WAIT_MS), takes it
-   from a process that no longer runs, and gives it back at the end;
-   a call to Chrome that is cut off when Chrome dies fails at once.
+   labs-drive-chrome.lock in the system's temp folder (or the path in
+   LABS_DRIVE_LOCK; tools/mutate.mjs gives each list run its own)
+   before it starts Chrome (20 minutes at most, LABS_DRIVE_WAIT_MS),
+   takes it from a process that no longer runs, and gives it back at
+   the end. Chrome picks its own debugging port, read back from its
+   profile, so a drive talks to no other Chrome (--port is accepted
+   and not used). A call to Chrome that is cut off when Chrome dies
+   fails at once. The Chromes a process started are killed when it
+   exits, on SIGTERM and on SIGINT (on Windows a process stopped from
+   outside runs no handler). Profiles over a day old are cleared.
 
-     node tools/drive.mjs selftest   the runner of the invariants, the frame rule and the lock, in one headless
-                                     Chrome on port 9362; tools/mutants/drive.json breaks each rule for
-                                     tools/mutate.mjs
+     node tools/drive.mjs selftest   the runner of the invariants, the frame rule and the lock, in headless
+                                     Chrome; tools/mutants/drive.json breaks each rule for tools/mutate.mjs.
+                                     Stopped by its own limit it exits 124, which tools/mutate.mjs reads as
+                                     timed out, not as caught.
 
    Exit: 0 every check passed and the console is clean; 1 a check
    failed, the scenario threw or the page logged an error; 2 usage;
@@ -74,10 +82,25 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const CHROME = process.env.LABS_CHROME || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : 'google-chrome');   // equivalent: where Chrome is, per system; one machine runs one branch
-const LOCK = path.join(os.tmpdir(), 'labs-drive-chrome.lock');
-/* Every Chrome this process started and has not yet stopped: killed when the process exits, whatever ends it early. */
+const lockPath = () => process.env.LABS_DRIVE_LOCK || path.join(os.tmpdir(), 'labs-drive-chrome.lock');
+/* Every Chrome this process started and has not yet stopped: killed when the process exits, whatever ends it early,
+   and on SIGTERM and SIGINT, after which Node would otherwise end without its exit handlers. */
 const LIVE = new Set();
 process.on('exit', () => { for (const c of LIVE) c.kill(); });
+for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));
+export const liveChromes = () => [...LIVE];
+/* A selftest stopped by its own limit exits with this code; tools/mutate.mjs reads it as timed out, not as caught. */
+export const WATCHDOG_EXIT = 124;
+/* Profiles left by a drive that did not end (a process stopped from outside) are cleared once a day old. */
+export function sweepProfiles(dir = os.tmpdir(), now = Date.now()) {
+  const gone = [];
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.startsWith('lab-drive-')) continue;
+    const at = path.join(dir, f);
+    try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }
+  }
+  return gone;
+}
 
 /* The pixels of a captured frame with no alpha at all, outside the boxes given ({ x0, y0, x1, y1 } in pixels): how
    many, and the box that holds them. A frame is a PNG of 8 bits a channel, RGB (no alpha, so none) or RGBA.
@@ -86,22 +109,33 @@ process.on('exit', () => { for (const c of LIVE) c.kill(); });
    Chrome; the rules read the DOM and passed it. */
 const CAPTURE_TRIES = 6;   // how many tries a frame has before the rule fails (each try's limit is drive's frameMs)
 
+const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 export function transparentIn(png, skip = []) {
-  let o = 8, w = 0, h = 0, depth = 0, type = 0;
+  // it refuses what it cannot read rather than guess: a refused frame fails the drive
+  if (!png.subarray(0, 8).equals(PNG_SIGNATURE)) throw new Error('not a PNG');
+  let o = 8, w = 0, h = 0, depth = 0, type = 0, interlace = 0, trns = false;
   const parts = [];
   while (o < png.length) {
-    const n = png.readUInt32BE(o), t = png.toString('latin1', o + 4, o + 8), d = png.subarray(o + 8, o + 8 + n);
-    if (t === 'IHDR') { w = d.readUInt32BE(0); h = d.readUInt32BE(4); depth = d[8]; type = d[9]; }
+    if (o + 12 > png.length) throw new Error('a PNG cut short');
+    const n = png.readUInt32BE(o), t = png.toString('latin1', o + 4, o + 8);
+    if (o + 12 + n > png.length) throw new Error('a PNG cut short');
+    const d = png.subarray(o + 8, o + 8 + n);
+    if (t === 'IHDR') { w = d.readUInt32BE(0); h = d.readUInt32BE(4); depth = d[8]; type = d[9]; interlace = d[12]; }
     if (t === 'IDAT') parts.push(d);
+    if (t === 'tRNS') trns = true;
     o += 12 + n;
   }
   if (depth !== 8 || (type !== 2 && type !== 6)) throw new Error(`a frame of colour type ${type} at ${depth} bits, which this reader does not read`);
+  if (interlace !== 0) throw new Error('an interlaced frame, which this reader does not read');
+  if (trns) throw new Error('a frame with a tRNS chunk (a colour made transparent), which this reader does not read');
   const out = { width: w, height: h, count: 0, box: null };
   if (type === 2) return out;   // no alpha channel: no pixel can be transparent
   const stride = w * 4, raw = zlib.inflateSync(Buffer.concat(parts));
+  if (raw.length < h * (stride + 1)) throw new Error(`pixel data for ${Math.floor(raw.length / (stride + 1))} of ${h} lines`);
   let prev = Buffer.alloc(stride);
   for (let y = 0; y < h; y++) {
     const f = raw[y * (stride + 1)], line = Buffer.from(raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1)));
+    if (f > 4) throw new Error(`a line filtered by ${f}, which PNG does not define`);
     for (let x = 0; x < stride; x++) {
       const a = x >= 4 ? line[x - 4] : 0, b = prev[x], c = x >= 4 ? prev[x - 4] : 0;
       const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
@@ -121,9 +155,23 @@ export function transparentIn(png, skip = []) {
 /* One Chrome at a time on this machine: wait for the lock file, take it from a holder that no longer runs (or from
    one that died before it wrote its name), and return the function that gives it back; null when waitMs runs out.
    A process that holds it already holds it again at once, and that inner hold gives nothing back: a selftest holds
-   the lock for its whole run, so that selftests run one after another rather than drive by drive in turn. */
+   the lock for its whole run, so that selftests run one after another rather than drive by drive in turn.
+   A stale lock is removed only under a second lock (<file>.takeover), and only if it still reads as it did: two
+   processes that saw the same stale holder could otherwise each remove it, the second removing the first's new lock. */
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };   // equivalent: EPERM, a process of another user, cannot be made here; it runs, so the lock is its
-export async function holdChrome(waitMs = 20 * 60 * 1000, file = LOCK) {
+export function takeStale(file, seen) {
+  const t = file + '.takeover';
+  try { fs.closeSync(fs.openSync(t, 'wx')); }
+  catch (e) {
+    if (e.code !== 'EEXIST') throw e;
+    try { if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true }); } catch { /* gone */ }   // a takeover whose owner died
+    return false;
+  }
+  try { if (fs.readFileSync(file, 'utf8') === seen) { fs.rmSync(file, { force: true }); return true; } return false; }
+  catch { return false; }   // gone already
+  finally { fs.rmSync(t, { force: true }); }
+}
+export async function holdChrome(waitMs = 20 * 60 * 1000, file = lockPath()) {
   const t0 = Date.now();
   for (;;) {
     try {
@@ -132,10 +180,10 @@ export async function holdChrome(waitMs = 20 * 60 * 1000, file = LOCK) {
       fs.closeSync(fd);
       return () => { try { if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true }); } catch { /* already gone */ } };
     } catch (e) { if (e.code !== 'EEXIST') throw e; }
-    let holder = null, age = 0;
-    try { age = Date.now() - fs.statSync(file).mtimeMs; holder = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { /* being written, or gone */ }
+    let holder = null, age = 0, raw = null;
+    try { age = Date.now() - fs.statSync(file).mtimeMs; raw = fs.readFileSync(file, 'utf8'); holder = JSON.parse(raw); } catch { /* being written, or gone */ }
     if (holder && holder.pid === process.pid) return () => {};
-    if ((holder && !alive(holder.pid)) || (!holder && age > 10000)) { try { fs.rmSync(file, { force: true }); } catch { /* another took it first */ } continue; }
+    if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;   // unread (null), it is never the file's text
     if (Date.now() - t0 >= waitMs) return null;
     await sleep(250);
   }
@@ -145,37 +193,42 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const NOISE = /favicon\.ico/;
 
 /**
- * Run one scenario. opts: base, out, width, height, timeoutMs, port, say (a line printer), frameMs (each try at a frame).
- * Returns { checks: [{ name, ok, detail }], errors: [string], timedOut }.
+ * Run one scenario. opts: base, out, width, height, timeoutMs, say (a line printer), frameMs (each try at a frame),
+ * waitMs and lock (the lock file). Returns { checks: [{ name, ok, detail }], errors: [string], timedOut, profile }.
  */
 export async function drive(scenario, opts = {}) {
-  const { base, out = path.join(os.tmpdir(), 'lab-drive'), width = 1440, height = 900, timeoutMs = 180000, port = 9333, say = console.log,
-    waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000, lock = LOCK, frameMs = 5000 } = opts;
+  const { base, out = path.join(os.tmpdir(), 'lab-drive'), width = 1440, height = 900, timeoutMs = 180000, say = console.log,
+    waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000, lock = lockPath(), frameMs = 5000 } = opts;
   const release = await holdChrome(waitMs, lock);
   if (!release) {
     const name = `Chrome was free within ${Math.round(waitMs / 1000)} s (another drive holds ${lock})`;
     say(`FAIL ${name}`);
     return { checks: [{ name, ok: false, detail: '' }], errors: [], timedOut: false };
   }
-  try { return await driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs }); } finally { release(); }
+  try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { release(); }
 }
 
-async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, say, frameMs }) {
+async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }) {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'lab-drive-'));
   fs.mkdirSync(out, { recursive: true });
-  const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, `--window-size=${width},${height}`,
+  // port 0: Chrome takes a free port and writes it to DevToolsActivePort in this profile, which no other Chrome uses
+  const chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`, `--window-size=${width},${height}`,
     '--hide-scrollbars', '--no-first-run', '--disable-gpu', ...(process.platform === 'linux' ? ['--no-sandbox'] : []), 'about:blank'], { stdio: 'ignore' });   // equivalent: a Linux runner has no sandbox for Chrome; one machine runs one system
-  LIVE.add(chrome); chrome.on('exit', () => LIVE.delete(chrome));
+  let exited = false;
+  LIVE.add(chrome); chrome.on('exit', () => { exited = true; LIVE.delete(chrome); });
   const checks = [], errors = [];
   const invariants = [];   // { name, expression, steps, seen }
-  const frames = { on: false, except: {}, steps: 0, seen: new Set() };   // the rule on the pixels of a captured frame
-  let timedOut = false, ws = null;
+  const frames = { on: false, except: {}, steps: 0, lost: 0, seen: new Set() };   // the rule on the pixels of a captured frame
+  let timedOut = false, ws = null, tries = 0;
   const killer = setTimeout(() => { timedOut = true; chrome.kill(); }, timeoutMs);
   const check = (name, cond, detail = '') => { checks.push({ name, ok: !!cond, detail: String(detail) }); say(`${cond ? 'ok  ' : 'FAIL'} ${name}${detail ? ' :: ' + detail : ''}`); };
   try {
     let url = null;
     for (let i = 0; i < 60 && !url && !timedOut; i++) {
-      try { const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json(); url = list.find((t) => t.type === 'page')?.webSocketDebuggerUrl || null; } catch { /* not up yet */ }
+      try {
+        const port = parseInt(fs.readFileSync(path.join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0], 10);
+        const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json(); url = list.find((t) => t.type === 'page')?.webSocketDebuggerUrl || null;
+      } catch { /* not up yet */ }
       if (!url) await sleep(250);
     }
     if (!url) throw new Error('Chrome did not open its debugging port');
@@ -186,13 +239,13 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
     ws.onclose = () => { for (const [, [, rej]] of pending) rej(new Error('Chrome is gone')); pending.clear(); };   // a call cut off fails at once
     ws.onmessage = (m) => {
       const d = JSON.parse(m.data);
-      if (d.id && pending.has(d.id)) { pending.get(d.id)[0](d.result || d); pending.delete(d.id); }
+      if (d.id && pending.has(d.id)) { const [res, rej] = pending.get(d.id); pending.delete(d.id); if (d.error) rej(new Error(`${d.error.message} (${d.error.code})`)); else res(d.result); }   // a refused call fails with Chrome's words
       else if (d.method === 'Runtime.exceptionThrown') errors.push('exception: ' + (d.params.exceptionDetails.exception?.description || d.params.exceptionDetails.text));
       else if (d.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(d.params.type)) errors.push(d.params.type + ': ' + d.params.args.map((a) => a.value ?? a.description).join(' '));
       else if (d.method === 'Log.entryAdded' && d.params.entry.level === 'error' && !NOISE.test(d.params.entry.url || '')) errors.push('log: ' + d.params.entry.text + ' ' + (d.params.entry.url || ''));
     };
     const send = (method, params = {}) => new Promise((res, rej) => {
-      if (timedOut || ws.readyState !== 1) return rej(new Error('Chrome is gone'));
+      if (timedOut || ws.readyState !== 1) return rej(new Error('Chrome is gone'));   // equivalent: timedOut only answers sooner, as the timeout kills Chrome and its socket then closes
       const i = ++id; pending.set(i, [res, rej]); ws.send(JSON.stringify({ id: i, method, params }));
     });
     await send('Page.enable'); await send('Runtime.enable'); await send('Log.enable');
@@ -208,7 +261,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
     /* the pixels of a frame: no fully transparent one outside the boxes of the elements excepted, each break once.
        No frame at all is a break too: the rule fails closed. */
     const frameCheck = async (label, png) => {
-      if (!png) { frames.steps++; check(`frame: a frame came back, after ${label}`, false, `none within ${CAPTURE_TRIES} tries of ${frameMs / 1000} s`); return; }
+      if (!png) { frames.steps++; frames.lost++; check(`frame: a frame came back, after ${label}`, false, `none within ${tries} tries of ${frameMs / 1000} s`); return; }
       const skip = await ev(`(() => { const out = []; for (const s of ${JSON.stringify(Object.keys(frames.except))}) for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); out.push({ x0: Math.floor(r.left), y0: Math.floor(r.top), x1: Math.ceil(r.right), y1: Math.ceil(r.bottom) }); } return out; })()`).catch(() => []);   // a page gone by then excepts nothing
       const t = transparentIn(png, skip);
       frames.steps++;
@@ -223,9 +276,10 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
        headless Chrome drawing WebGL in software; with no limit the sky's drive waited out its whole time. So each try
        has its own limit, and a failed try is tried again. */
     const capture = async () => {
-      for (let i = 0; i < CAPTURE_TRIES; i++) {   // equivalent: how many tries is a matter of time, and a selftest cannot make Chrome fail a set number of times; one try that fails is tested
+      for (let i = 0; i < CAPTURE_TRIES; i++) {
+        tries = i + 1;
         let timer;
-        const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);
+        const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }).catch(() => null), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);
         clearTimeout(timer);
         if (r && r.data) return Buffer.from(r.data, 'base64');
         await sleep(200);
@@ -264,6 +318,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
         frames.on = true; frames.except = except;
       },
       async background(color) { await send('Emulation.setDefaultBackgroundColorOverride', { color }); },
+      async crash() { await Promise.race([send('Page.crash').catch(() => null), sleep(800)]); },
       async media(features) { await send('Emulation.setEmulatedMedia', { features }); },
       async before(source) { await send('Page.addScriptToEvaluateOnNewDocument', { source }); },
       async go(u) { await send('Page.navigate', { url: u }); if (!(await until('document.readyState === "complete"'))) throw new Error('the page did not finish loading: ' + u.slice(0, 120)); await step(`go ${u.replace(/^https?:\/\/[^/]+/, '').slice(0, 90)}`); },
@@ -303,18 +358,20 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, port, 
     };
     await scenario(page, { base, width, height });
     for (const inv of invariants) check(`${inv.name}: held after each of ${inv.steps} steps`, inv.seen.size === 0 && inv.steps > 0, inv.seen.size ? `${inv.seen.size} distinct breaks` : '');
-    if (frames.on || frames.steps) check(`frame: no fully transparent pixel in each of ${frames.steps} frames`, frames.seen.size === 0 && frames.steps > 0, frames.seen.size ? `${frames.seen.size} distinct breaks` : '');
+    if (frames.on || frames.steps) check(`frame: no fully transparent pixel in each of ${frames.steps} frames`, frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0, frames.seen.size ? `${frames.seen.size} distinct breaks` : frames.lost ? `${frames.lost} frames did not come back` : '');
     check('the console is clean', errors.length === 0, errors.slice(0, 4).join(' | ').slice(0, 400));
   } catch (e) {
     check(timedOut ? `finished inside ${timeoutMs / 1000} s` : 'the scenario ran to its end', false, String((e && e.message) || e).slice(0, 400));
   } finally {
     clearTimeout(killer);
     try { ws?.close(); } catch { /* already closed */ }
+    const ended = exited ? Promise.resolve() : new Promise((r) => chrome.once('exit', r));
     chrome.kill();
-    await sleep(400);
-    try { fs.rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold a file; the folder is in the temp directory */ }
+    await Promise.race([ended, sleep(5000)]);
+    // Chrome's helpers may hold a file of the profile a moment after it ends: tried again for two seconds
+    for (let i = 0; i < 10 && fs.existsSync(profile); i++) { try { fs.rmSync(profile, { recursive: true, force: true }); } catch { await sleep(200); } }   // equivalent: how many tries is time; a profile let go of at once goes on the first
   }
-  return { checks, errors, timedOut };
+  return { checks, errors, timedOut, profile };
 }
 
 /* ---------------- selftest: the runner of the invariants, the lock, a Chrome that dies ---------------- */
@@ -324,9 +381,9 @@ async function selftest() {
   const whole = await holdChrome();
   if (!whole) { console.log('FAIL  drive selftest: Chrome was not free within 20 minutes'); return 1; }
   /* a selftest that hangs (a broken copy under tools/mutate.mjs) ends here, its Chrome killed and the lock left to be
-     taken. 60 s for a run of about 30: two hung copies ahead of a third in the queue still leave it inside mutate's
-     180 s, where a run stopped at that limit would count as caught */
-  setTimeout(() => { console.log('FAIL  drive selftest: not finished in 60 s'); process.exit(1); }, 60000).unref();
+     taken, with the code tools/mutate.mjs reads as timed out. 120 s for a run of 30 to 50 (it reached 60 once on
+     2026-11-16 with 2 GB of memory free), inside mutate's 180 s; mutate runs this list's copies one at a time */
+  setTimeout(() => { console.log('FAIL  drive selftest: not finished in 120 s'); process.exit(failed ? 1 : WATCHDOG_EXIT); }, 120000).unref();   // a check that failed before the hang has caught it
   let failed = 0, passed = 0;
   const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
   const J = JSON.stringify;
@@ -346,8 +403,8 @@ async function selftest() {
     rel2();
     yes('giving the lock back leaves a lock another process now holds', fs.existsSync(lockFile));
     let t0 = Date.now();
-    const rel3 = await holdChrome(600, lockFile);
-    yes('a lock a running process holds is waited for, and the wait gives up at its limit', rel3 === null && Date.now() - t0 >= 550, `${Date.now() - t0} ms`);
+    const rel3 = await Promise.race([holdChrome(600, lockFile), sleep(3000).then(() => 'no end in 3 s')]);
+    yes('a lock a running process holds is waited for, and the wait gives up at its limit, not before and not long after', rel3 === null && Date.now() - t0 >= 550 && Date.now() - t0 < 1100, `${Date.now() - t0} ms`);
     fs.writeFileSync(lockFile, '');
     const nine = (Date.now() - 9000) / 1000;
     fs.utimesSync(lockFile, nine, nine);
@@ -364,17 +421,57 @@ async function selftest() {
     fs.writeFileSync(lockFile, J({ pid: process.ppid, t: Date.now() }));
     let ran = false;
     t0 = Date.now();
-    const blocked = await drive(async () => { ran = true; }, { lock: lockFile, waitMs: 400, port: 9362, say: () => {} });
+    const blocked = await drive(async () => { ran = true; }, { lock: lockFile, waitMs: 400, say: () => {} });
     const ownLock = path.join(scratch, 'own.lock');
-    await drive(async () => {}, { lock: ownLock, port: 9362, timeoutMs: 30000, say: () => {} });
+    await drive(async () => {}, { lock: ownLock, timeoutMs: 30000, say: () => {} });
     yes('a drive gives its lock back at its end', !fs.existsSync(ownLock));
     yes('a drive that cannot have Chrome says so, and starts nothing', !ran && blocked.checks.length === 1 && !blocked.checks[0].ok && /^Chrome was free within/.test(blocked.checks[0].name), J(blocked.checks));
     process.env.LABS_DRIVE_WAIT_MS = '300';
     t0 = Date.now();
-    const blocked2 = await drive(async () => { ran = true; }, { lock: lockFile, port: 9362, say: () => {} });
+    const blocked2 = await Promise.race([drive(async () => { ran = true; }, { lock: lockFile, say: () => {} }), sleep(5000).then(() => null)]);
     delete process.env.LABS_DRIVE_WAIT_MS;
-    yes('the wait for Chrome is LABS_DRIVE_WAIT_MS when it is set', !ran && !blocked2.checks[0].ok && Date.now() - t0 < 5000, `${Date.now() - t0} ms`);
+    yes('the wait for Chrome is LABS_DRIVE_WAIT_MS when it is set', !ran && !!blocked2 && !blocked2.checks[0].ok && Date.now() - t0 < 5000, `${Date.now() - t0} ms`);
     fs.rmSync(lockFile, { force: true });
+    // a stale lock is removed only under the takeover lock, and only if it still reads as it was seen
+    const stale = J({ pid: 999999999, t: 1 }), fresh = J({ pid: process.ppid, t: 2 });
+    fs.writeFileSync(lockFile, fresh);
+    const keptLive = takeStale(lockFile, stale) === false && fs.readFileSync(lockFile, 'utf8') === fresh;
+    fs.writeFileSync(lockFile, stale);
+    fs.writeFileSync(lockFile + '.takeover', '');
+    const keptBusy = takeStale(lockFile, stale) === false && fs.existsSync(lockFile) && fs.existsSync(lockFile + '.takeover');
+    const t9 = (Date.now() - 9000) / 1000, t11 = (Date.now() - 11000) / 1000;
+    fs.utimesSync(lockFile + '.takeover', t9, t9);
+    const keptYoung = takeStale(lockFile, stale) === false && fs.existsSync(lockFile + '.takeover');
+    fs.utimesSync(lockFile + '.takeover', t11, t11);
+    const clearedOld = takeStale(lockFile, stale) === false && !fs.existsSync(lockFile + '.takeover');
+    const removed = takeStale(lockFile, stale) === true && !fs.existsSync(lockFile) && !fs.existsSync(lockFile + '.takeover');
+    yes('a stale lock is removed under the takeover lock, only while it reads as it was seen; a takeover 9 s old is waited for, one 11 s old is cleared', keptLive && keptBusy && keptYoung && clearedOld && removed, J([keptLive, keptBusy, keptYoung, clearedOld, removed]));
+    let noTake = '';
+    try { takeStale(path.join(scratch, 'no such folder', 'chrome.lock'), stale); noTake = 'no error'; } catch (e) { noTake = e.code; }
+    yes('a takeover lock that cannot be written is an error, not a wait', noTake === 'ENOENT', noTake);
+    // the lock file is LABS_DRIVE_LOCK when that is set (tools/mutate.mjs gives each list run its own)
+    const envBefore = process.env.LABS_DRIVE_LOCK, envLock = path.join(scratch, 'env.lock');
+    process.env.LABS_DRIVE_LOCK = envLock;
+    const relEnv = await holdChrome(500);
+    const envTaken = fs.existsSync(envLock);
+    if (relEnv) relEnv();
+    if (envBefore === undefined) delete process.env.LABS_DRIVE_LOCK; else process.env.LABS_DRIVE_LOCK = envBefore;
+    yes('the lock is the file LABS_DRIVE_LOCK names when it is set', envTaken && !fs.existsSync(envLock));
+    // profiles a day old are cleared, younger ones and other folders kept
+    const tmp = path.join(scratch, 'tmp');
+    for (const f of ['lab-drive-old', 'lab-drive-young', 'lab-drive', 'other-old']) fs.mkdirSync(path.join(tmp, f), { recursive: true });
+    const now = Date.now();
+    for (const [f, h] of [['lab-drive-old', 24.1], ['lab-drive-young', 23.9], ['lab-drive', 48], ['other-old', 48]]) fs.utimesSync(path.join(tmp, f), (now - h * 3600000) / 1000, (now - h * 3600000) / 1000);
+    const swept = sweepProfiles(tmp, now);
+    yes('a profile 24.1 hours old is cleared; one 23.9 hours old, the out folder and other folders are kept', J(swept) === J(['lab-drive-old']) && J(fs.readdirSync(tmp).sort()) === J(['lab-drive', 'lab-drive-young', 'other-old']), J(swept));
+
+    /* this process holds the machine lock for the whole run: holding it again is at once, and gives nothing back */
+    const held = () => fs.existsSync(lockPath()) && JSON.parse(fs.readFileSync(lockPath(), 'utf8') || '{}').pid === process.pid;
+    t0 = Date.now();
+    const again = await holdChrome(500);
+    const againAtOnce = typeof again === 'function' && Date.now() - t0 < 300;
+    if (again) again();
+    yes('a process that holds the lock holds it again at once, and that inner hold gives nothing back', againAtOnce && held(), `${Date.now() - t0} ms`);
 
     /* the runner of the invariants */
     const counts = {};
@@ -398,7 +495,7 @@ async function selftest() {
       await p.swipe(30, 30, 30, 60, { steps: 2 }); counts.swipe = await n();
       await p.wheel(30, 30, 10); counts.wheel = await n();
       await p.step('a step the scenario names'); counts.step = await n();
-    }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
     const of = (rule) => r.checks.filter((c) => c.name.startsWith(rule + ', after '));
     const end = (rule) => r.checks.find((c) => c.name.startsWith(rule + ': held after each of '));
     yes('the rules run after go, a wait of 100 ms, a click, a key, a drag, a release, a swipe, a wheel and a named step; not after a wait of 99 ms, a press or a move',
@@ -409,19 +506,20 @@ async function selftest() {
     yes('a rule that throws is a break with its error', of('throws').length === 1 && /the rule could not be read: .*thrown on purpose/.test(of('throws')[0].detail) && !end('throws').ok);
     yes('each distinct break is one failed check, however often it comes back', of('repeats a break').length === 2 && J(of('repeats a break').map((c) => c.detail)) === J(['a', 'b']) && /2 distinct breaks/.test(end('repeats a break').detail));
     yes('eight breaks of one rule are listed at most, and the end line counts them all', of('breaks ten ways').length === 8 && /10 distinct breaks/.test(end('breaks ten ways').detail) && !end('breaks ten ways').ok);
-    const none = await drive(async (p) => { p.invariant('never run', '[]'); await p.ev('1'); await p.shot('none'); }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    const none = await drive(async (p) => { p.invariant('never run', '[]'); await p.ev('1'); await p.shot('none'); }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
     const nr = none.checks.find((c) => c.name.startsWith('never run: held after each of 0 steps'));
     yes('a rule that never ran fails: no step is no proof', !!nr && !nr.ok, J(none.checks));
     const shotOnly = none.checks.find((c) => c.name === 'frame: no fully transparent pixel in each of 1 frames');
     yes('a shot is held to the frame rule even when frames() was not asked, and ends on its line', !!shotOnly && shotOnly.ok, J(none.checks));
-    const noFrame = await drive(async (p) => { p.frames(); await p.ev('1'); }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    const noFrame = await drive(async (p) => { p.frames(); await p.ev('1'); }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
+    yes('a drive removes its Chrome\'s profile at its end', !!noFrame.profile && !fs.existsSync(noFrame.profile), noFrame.profile);
     const nf = noFrame.checks.find((c) => c.name === 'frame: no fully transparent pixel in each of 0 frames');
     yes('a frame rule that never saw a frame fails', !!nf && !nf.ok, J(noFrame.checks));
 
     /* what the page says: an exception, an error and a warning on its console, a resource that fails; not a note,
        not the favicon */
     const noisy = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html><body><img src="http://127.0.0.1:9/favicon.ico"><img src="http://127.0.0.1:9/missing.png"><script>console.error("an error"); console.warn("a warning"); console.log("a note"); setTimeout(() => { throw new Error("thrown late"); }, 0);</script></body></html>');
-    const loud = await drive(async (p) => { await p.go(noisy); await p.ev('new Promise((r) => setTimeout(() => r(true), 1500))'); }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    const loud = await drive(async (p) => { await p.go(noisy); await p.ev('new Promise((r) => setTimeout(() => r(true), 800))'); }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
     const E = loud.errors;
     yes('the console is read: an exception, an error, a warning and a failed resource; a note and the favicon are not', E.some((x) => /^exception: .*thrown late/.test(x)) && E.includes('error: an error') && E.includes('warning: a warning') && E.some((x) => /^log: .*missing\.png/.test(x)) && !E.some((x) => /^log: .*favicon/.test(x) || /^\w+: a note/.test(x)), J(E));
     yes('and the drive fails on it', loud.checks.some((c) => c.name === 'the console is clean' && !c.ok) && none.checks.some((c) => c.name === 'the console is clean' && c.ok));
@@ -460,9 +558,27 @@ async function selftest() {
     yes('a paeth tie is broken as the PNG rule breaks it', transparentIn(png(2, 2, 6, encOf(tie, 4))).count === 2, J(transparentIn(png(2, 2, 6, encOf(tie, 4)))));
     yes('only alpha 0 is transparent: alpha 1 is not', transparentIn(png(2, 1, 6, [[0, [0, 0, 0, 1, 0, 0, 0, 0]]])).count === 1, J(transparentIn(png(2, 1, 6, [[0, [0, 0, 0, 1, 0, 0, 0, 0]]]))));
     yes('an RGB frame has no transparent pixel, and a frame of another kind is refused', transparentIn(png(1, 1, 2, [[0, [1, 2, 3]]])).count === 0 && (() => { try { transparentIn(png(1, 1, 0, [[0, [5]]])); return false; } catch { return true; } })());
-    let refused = '';
-    await drive(async (p) => { try { p.frames({ '#x': 'short' }); } catch (e) { refused = e.message; } }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
-    yes('an exception to the frame rule needs its reason', /needs its reason/.test(refused), refused);
+    // what the reader cannot read it refuses, with its reason
+    const refusal = (b) => { try { transparentIn(b); return 'read'; } catch (e) { return e.message; } };
+    const withHeader = (b, at, v) => { const c = Buffer.from(b); c[at] = v; return c; };   // IHDR's data starts at 16: interlace is byte 28
+    const crcFix = (b) => { const c = Buffer.from(b); const crcTable = Array.from({ length: 256 }, (_, n) => { let k = n; for (let j = 0; j < 8; j++) k = k & 1 ? 0xedb88320 ^ (k >>> 1) : k >>> 1; return k >>> 0; }); let x = 0xffffffff; for (const v of c.subarray(12, 29)) x = crcTable[(x ^ v) & 255] ^ (x >>> 8); c.writeUInt32BE((x ^ 0xffffffff) >>> 0, 29); return c; };
+    const one = png(1, 1, 6, [[0, [0, 0, 0, 0]]]);
+    const trns = (() => { const b = png(2, 1, 2, [[0, [0, 0, 0, 255, 255, 255]]]); const t = Buffer.from([0, 0, 0, 6, 116, 82, 78, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]); return Buffer.concat([b.subarray(0, 33), t, b.subarray(33)]); })();
+    const shortData = png(1, 3, 6, [[0, [9, 9, 9, 255]]]), threeLines = png(1, 3, 6, [[0, [9, 9, 9, 255]], [0, [9, 9, 9, 255]], [0, [9, 9, 9, 255]]]);
+    const cut = one.subarray(0, one.length - 6), cut9 = one.subarray(0, one.length - 9), cutIdat = one.subarray(0, 48);
+    const shortBy1 = png(1, 3, 6, [[0, [9, 9, 9, 255]], [0, [9, 9, 9, 255]]]);
+    const why = { notPng: refusal(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70])), interlaced: refusal(crcFix(withHeader(one, 28, 1))), trns: refusal(trns), short: refusal(shortData), cut: refusal(cut),
+      f5: refusal(png(1, 1, 6, [[5, [0, 0, 0, 0]]])), f4: refusal(png(1, 1, 6, [[4, [0, 0, 0, 0]]])), whole: refusal(threeLines), cut9: refusal(cut9), cutIdat: refusal(cutIdat), shortBy1: refusal(shortBy1) };
+    yes('the reader refuses a file that is not a PNG, an interlaced frame, a colour made transparent by tRNS, pixel data short of its lines, a file cut short, and a filter above 4; filter 4 and whole data are read',
+      why.notPng === 'not a PNG' && /interlaced/.test(why.interlaced) && /tRNS/.test(why.trns) && why.short === 'pixel data for 1 of 3 lines' && why.shortBy1 === 'pixel data for 2 of 3 lines' && why.cut === 'a PNG cut short' && why.cut9 === 'a PNG cut short' && why.cutIdat === 'a PNG cut short' && /filtered by 5/.test(why.f5) && why.f4 === 'read' && why.whole === 'read', J(why));
+    let refused = '', took8 = '', badColour = '';
+    await drive(async (p) => {
+      try { p.frames({ '#x': 'seven c' }); } catch (e) { refused = e.message; }
+      try { p.frames({ '#x': 'eight ch' }); took8 = 'taken'; } catch (e) { took8 = e.message; }
+      try { await p.background({ r: 'not a number', g: 0, b: 0, a: 1 }); badColour = 'answered'; } catch (e) { badColour = e.message; }
+    }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
+    yes('an exception to the frame rule needs its reason: 7 letters are refused, 8 are taken', /needs its reason/.test(refused) && took8 === 'taken', `${refused} | ${took8}`);
+    yes('a call Chrome refuses fails with Chrome\'s words, not an answer', /^Invalid parameters.*\(-32602\)$/.test(badColour), badColour);
     const PLAIN = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html><body style="margin:0"><p style="margin:0;height:300px">no canvas here</p></body></html>');
     const BARE = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html style="background:transparent"><body style="margin:0;background:transparent"><div id="hole" style="height:100px"></div><div style="height:500px;background:#123"></div></body></html>');
     const PLATE = (opacity) => 'data:text/html;charset=utf-8,' + encodeURIComponent(`<!doctype html><html><body style="margin:0;background:#000"><canvas id="gl" width="390" height="600" style="display:block"></canvas>
@@ -478,7 +594,7 @@ async function selftest() {
       await p.sleep(100);
       await p.background({ r: 255, g: 255, b: 255, a: 1 });
       for (const o of ['1', '0.98']) { await p.go(PLATE(o)); await p.ev('new Promise((r) => setTimeout(r, 400))'); pixels[o] = transparentIn(Buffer.from(fs.readFileSync(await p.shot('plate-' + o)))).count; }
-    }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, say: () => {} });
+    }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
     const fails = fr.checks.filter((c) => /^frame: no fully transparent pixel, after/.test(c.name));
     yes('a page with no canvas passes, and a bare box an exception names with its reason passes: the first break is the bare box once its exception is gone', fails.length > 0 && /after a wait$/.test(fails[0].name) && /^39000 fully transparent pixels, in 390 x 100 px at 0,0$/.test(fails[0].detail), J(fails));
     yes('a page that leaves pixels bare is a break once nothing excepts them, named with their box', fails.some((c) => /390 x 100 px at 0,0/.test(c.detail)), J(fails));
@@ -488,16 +604,51 @@ async function selftest() {
     let shotThrew = '';
     const t1 = Date.now(), lostPng = path.join(os.tmpdir(), 'lab-drive', 'lost.png');
     fs.rmSync(lostPng, { force: true });
-    const lost = await drive(async (p) => { p.frames(); await p.go(PLAIN); try { await p.shot('lost'); } catch (e) { shotThrew = e.message; } }, { width: 390, height: 600, port: 9362, timeoutMs: 60000, frameMs: 1, say: () => {} });
+    const lost = await drive(async (p) => { p.frames(); await p.go(PLAIN); try { await p.shot('lost'); } catch (e) { shotThrew = e.message; } }, { width: 390, height: 600, timeoutMs: 60000, frameMs: 1, say: () => {} });
     const lostF = lost.checks.filter((c) => /^frame: a frame came back, after /.test(c.name));
+    const lostEnd = lost.checks.find((c) => /^frame: no fully transparent pixel in each of 2 frames$/.test(c.name));
     yes('a frame that does not come back in its time is a break after each step, the shot throws, and the drive goes on', lostF.length === 2 && lostF.every((c) => !c.ok && /^none within 6 tries of 0.001 s$/.test(c.detail)) && /no frame came back/.test(shotThrew) && !fs.existsSync(lostPng) && Date.now() - t1 < 30000, J(lost.checks) + ' ' + shotThrew);
+    yes('when no frame came back, the end line fails and says so', !!lostEnd && !lostEnd.ok && lostEnd.detail === '2 frames did not come back', J(lostEnd));
+
+    /* each drive talks to its own Chrome: two at once, each on its own lock, each sees only its own page */
+    const mark = (k) => 'data:text/html,' + encodeURIComponent(`<title>${k}</title>`);
+    const seenBy = {};
+    await Promise.all(['one', 'two'].map((k) => drive(async (p) => { await p.go(mark(k)); await p.ev('new Promise((r) => setTimeout(r, 300))'); seenBy[k] = await p.ev('document.title'); }, { lock: path.join(scratch, k + '.lock'), width: 390, height: 600, timeoutMs: 60000, say: () => {} })));
+    yes('two drives at once each talk to their own Chrome', seenBy.one === 'one' && seenBy.two === 'two', J(seenBy));
+
+    /* a Chrome that ends under the scenario: the next call fails at once */
+    let after = '', scenarioEnd = 0;
+    await drive(async (p) => {
+      await p.ev('1');
+      const [c] = liveChromes(); c.kill();
+      await new Promise((r) => c.once('exit', r)); await new Promise((r) => setTimeout(r, 300));
+      after = await Promise.race([p.ev('1').then(() => 'answered', (e) => 'failed: ' + e.message), new Promise((r) => setTimeout(() => r('no answer in 3 s'), 3000))]);
+      scenarioEnd = Date.now();
+    }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
+    const endTook = Date.now() - scenarioEnd;
+    yes('a call made after Chrome has gone fails at once', after === 'failed: Chrome is gone', after);
+    yes('a drive whose Chrome has already ended does not wait for it at the end', endTook < 3000, `${endTook} ms`);
+
+    /* a capture Chrome refuses (the page's renderer has crashed) is tried again at once, and fails as no frame */
+    let crashed = '', shotTook = 0;
+    await drive(async (p) => { await p.crash(); const t = Date.now(); try { await p.shot('crashed'); crashed = 'a frame'; } catch (e) { crashed = e.message; } shotTook = Date.now() - t; }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
+    yes('a capture Chrome refuses is a frame that did not come back, tried again at once, not at its limit', /^the shot crashed: no frame came back$/.test(crashed) && shotTook < 4000, `${crashed}, ${shotTook} ms`);
+
+    /* SIGTERM ends a process with its Chromes */
+    const child = path.join(scratch, 'child.mjs');
+    fs.writeFileSync(child, `import { writeSync } from 'node:fs'; import { drive, liveChromes } from ${J(pathToFileURL(fileURLToPath(import.meta.url)).href)};
+await drive(async () => { writeSync(1, 'pid ' + liveChromes()[0].pid + String.fromCharCode(10)); process.emit('SIGTERM'); await new Promise(() => {}); }, { lock: ${J(path.join(scratch, 'child.lock'))}, width: 390, height: 600, timeoutMs: 15000, say: () => {} });`);
+    const ran2 = await new Promise((res) => { const k = spawn(process.execPath, [child], { stdio: ['ignore', 'pipe', 'ignore'] }); let out = ''; k.stdout.on('data', (d) => { out += d; }); k.on('exit', (code) => res({ code, out })); });
+    const chromePid = +((/pid (\d+)/.exec(ran2.out) || [])[1] || 0);
+    let chromeGone = false;
+    for (let i = 0; i < 25 && chromePid && !chromeGone; i++) { try { process.kill(chromePid, 0); await new Promise((r) => setTimeout(r, 200)); } catch { chromeGone = true; } }
+    yes('on SIGTERM a process ends with code 143 and its Chrome ends with it', ran2.code === 143 && chromePid > 0 && chromeGone, J({ code: ran2.code, chromePid, chromeGone }));
 
     /* a Chrome that dies under a call */
     t0 = Date.now();
-    const dead = await drive(async (p) => { await p.go(PAGE); await p.ev('new Promise(() => {})'); }, { width: 390, height: 600, port: 9362, timeoutMs: 6000, say: () => {} });
+    const dead = await Promise.race([drive(async (p) => { await p.go(PAGE); await p.ev('new Promise(() => {})'); }, { width: 390, height: 600, timeoutMs: 3000, say: () => {} }), sleep(20000).then(() => ({ timedOut: false, checks: [] }))]);
     const took = Date.now() - t0;
-    yes('a call that never answers ends with the timeout: Chrome is killed, the call fails at once and the drive returns', dead.timedOut && took < 20000 && dead.checks.some((c) => !c.ok && /^finished inside 6 s/.test(c.name)), `${took} ms ${J(dead.checks).slice(0, 200)}`);
-    const held = () => fs.existsSync(LOCK) && JSON.parse(fs.readFileSync(LOCK, 'utf8') || '{}').pid === process.pid;
+    yes('a call that never answers ends with the timeout: Chrome is killed, the call fails at once and the drive returns', dead.timedOut && took < 15000 && dead.checks.some((c) => !c.ok && /^finished inside 3 s/.test(c.name)), `${took} ms ${J(dead.checks).slice(0, 200)}`);
     yes('a drive inside this process\'s hold of the machine lock does not give it back (and did not wait for it: the drives above ran)', held());
     whole();
     yes('the hold gives the machine lock back', !held());
