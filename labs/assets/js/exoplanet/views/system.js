@@ -67,6 +67,43 @@ export function drawInset(canvas, sel, system) {
   canvas.setAttribute('aria-label', `The ${sel.host} system in miniature: ${orbits.length === 1 ? 'one orbit' : `${orbits.length} orbits`}${hz ? `, habitable zone ${fmt(hz.inner, 2)} to ${fmt(hz.outer, 2)} AU` : ''}`);
 }
 
+/* What view D draws and says, as data: pure, so tests/onesource.test.mjs reads it for every planet. The planets of
+   the selected world's system with an orbit, each with its size a (AU), period, eccentricity and phase; the habitable
+   zone of the selected world, in AU; how far the view reaches. */
+export function systemModel(sel, system) {
+  const planets = system.map((p) => {
+    const { a } = semiMajor(p);
+    const P = isNum(p.P) ? p.P : (a && isNum(p.Ms) ? 365.25 * Math.sqrt(a * a * a / p.Ms) : null);
+    return { p, a, P, eKnown: isNum(p.ecc), e: isNum(p.ecc) ? Math.min(p.ecc, 0.97) : 0, w: hash01(p.name) * Math.PI * 2, ph: hash01(p.name + '#') * Math.PI * 2 };
+  }).filter((o) => o.a);
+  const hz = habitableZone(sel);
+  const outer = Math.max(...planets.map((o) => o.a * (1 + o.e)), 1e-4);
+  let extent = outer * 1.2, hzOff = false;
+  if (hz) {
+    if (hz.outer / outer < 6) extent = Math.max(extent, hz.outer * 1.08);
+    else hzOff = true;
+  }
+  const ref = planets.find((o) => o.p === sel);
+  const daysPerSec = ref && ref.P ? ref.P / 10 : 36.5;   // the selected orbit takes 10 s of screen time
+  return { planets, hz, extent, hzOff, outer, sel, colour: starColour(sel.Teff), Rs: sel.Rs, ref, daysPerSec };
+}
+
+/* The caption under view D, for a model and the scale shown. */
+export function systemCaption(m, showSolar = false) {
+  if (!m) return '';
+  const hz = m.hz;
+  const parts = [];
+  if (hz) parts.push(`[REAL] Habitable zone ${fmt(hz.inner, 2)}-${fmt(hz.outer, 2)} AU from Teff ${fmtInt(m.sel.Teff)} K, L ${fmt(hz.L, 2)} L☉${hz.extrapolated ? ' (Teff outside the fit, extrapolated)' : ''}.`);
+  else parts.push('[REAL] No habitable zone: the archive lacks this star\'s temperature or luminosity.');
+  // said only while it is true: with the Solar System shown the view may reach the zone
+  // a world with no orbit of its own is not drawn: the zone is set against the outermost orbit drawn instead
+  if (m.hzOff && hz.outer > viewExtent(m.extent, showSolar)) parts.push(`The zone lies ${fmt(hz.inner / (m.ref ? m.ref.a : m.outer), 2)}x farther out than ${m.ref ? 'this orbit' : 'the outermost orbit drawn'}, off this view.`);
+  if (showSolar) parts.push(solarWords(m.sel.host, m.outer));
+  const unknownE = m.planets.filter((o) => !o.eKnown).length;
+  parts.push(`[ILLUSTRATIVE] orbit orientations, dot sizes${unknownE ? `; e unknown for ${unknownE}, drawn circular and dashed` : ''}.`);
+  return parts.join(' ');
+}
+
 export function createSystem(host, store, actions = {}) {
   host.innerHTML = `
     <div class="lab"><h2 class="st" id="d-h"><i>D</i>The system</h2><span class="meta" data-k="sysname"></span></div>
@@ -122,21 +159,8 @@ export function createSystem(host, store, actions = {}) {
   function build() {
     const st = store.state, sel = st.sel;
     if (!sel) { model = null; return; }
-    const planets = st.system.map((p) => {
-      const { a } = semiMajor(p);
-      const P = isNum(p.P) ? p.P : (a && isNum(p.Ms) ? 365.25 * Math.sqrt(a * a * a / p.Ms) : null);
-      return { p, a, P, eKnown: isNum(p.ecc), e: isNum(p.ecc) ? Math.min(p.ecc, 0.97) : 0, w: hash01(p.name) * Math.PI * 2, ph: hash01(p.name + '#') * Math.PI * 2 };
-    }).filter((o) => o.a);
-    const hz = habitableZone(sel);
-    const outer = Math.max(...planets.map((o) => o.a * (1 + o.e)), 1e-4);
-    let extent = outer * 1.2, hzOff = false;
-    if (hz) {
-      if (hz.outer / outer < 6) extent = Math.max(extent, hz.outer * 1.08);
-      else hzOff = true;
-    }
-    const ref = planets.find((o) => o.p === sel);
-    const daysPerSec = ref && ref.P ? ref.P / 10 : 36.5;   // the selected orbit takes 10 s of screen time
-    model = { planets, hz, extent, hzOff, outer, sel, colour: starColour(sel.Teff), Rs: sel.Rs, ref, daysPerSec };
+    model = systemModel(sel, st.system);
+    const { planets, extent, daysPerSec } = model;
     cancelAnimationFrame(tween); tween = 0;
     reach = viewExtent(extent, showSolar);   // a new world opens at the scale the visitor left on
     nameEl.textContent = `${sel.host}, ${planets.length === 1 ? 'one planet' : `${planets.length} planets`}`;
@@ -149,19 +173,7 @@ export function createSystem(host, store, actions = {}) {
     capEl.textContent = caption();
   }
 
-  function caption() {
-    const m = model; if (!m) return '';
-    const hz = m.hz;
-    const parts = [];
-    if (hz) parts.push(`[REAL] Habitable zone ${fmt(hz.inner, 2)}-${fmt(hz.outer, 2)} AU from Teff ${fmtInt(m.sel.Teff)} K, L ${fmt(hz.L, 2)} L☉${hz.extrapolated ? ' (Teff outside the fit, extrapolated)' : ''}.`);
-    else parts.push('[REAL] No habitable zone: the archive lacks this star\'s temperature or luminosity.');
-    // said only while it is true: with the Solar System shown the view may reach the zone
-    if (m.hzOff && hz.outer > viewExtent(m.extent, showSolar)) parts.push(`The zone lies ${fmt(hz.inner / m.ref.a, 2)}x farther out than this orbit, off this view.`);
-    if (showSolar) parts.push(solarWords(m.sel.host, m.outer));
-    const unknownE = m.planets.filter((o) => !o.eKnown).length;
-    parts.push(`[ILLUSTRATIVE] orbit orientations, dot sizes${unknownE ? `; e unknown for ${unknownE}, drawn circular and dashed` : ''}.`);
-    return parts.join(' ');
-  }
+  const caption = () => systemCaption(model, showSolar);
 
   function draw(ctx, w, h) {
     const m = model; if (!m) return;

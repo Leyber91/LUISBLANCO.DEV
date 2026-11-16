@@ -24,7 +24,7 @@ import { createPlot, plotValue } from './views/plot.js';
 import { createSystem, drawInset } from './views/system.js';
 import { bandsHTML, bindEdges, drawHist, classCounts, classTable } from './views/bands.js';
 import { createTransit } from './views/transit.js';
-import { createTarget } from './views/target.js';
+import { createTarget, reticleZone } from './views/target.js';
 import { createReport } from './report.js';
 import { createTours, tourStops } from './tours.js';
 import { exportPlate, exportCSV, copyLink } from './export.js';
@@ -279,8 +279,7 @@ let reticleOpen = null;   // the world whose scenarios and sources are open unde
 function setReticle(p) {
   reticleHeld = null;
   $('ret-name').textContent = p.name;
-  const hz = hzPosition(p);
-  const hzWords = { cons: 'in the conservative habitable zone', opt: 'in the optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'its zone unknown' }[hz.key];
+  const hzWords = reticleZone(p);
   const sc = sizeClassOf(p);
   $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'No radius measured'}, ${hzWords}`;
   const cl = classify(p, { air: store.state.air });
