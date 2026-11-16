@@ -1323,7 +1323,10 @@ export class Exoplanet {
   /* ---- public API: framing, camera and render options. Other modules use only these. ---- */
   /* centre the world at a principal-point offset (CSS px) and set its resting distance */
   frame(shift, homeDist) {
-    const resetDist = !this._anim && Math.abs(homeDist - (this.cfg.homeDist || 0)) > 0.02 * homeDist;
+    // a camera still at its resting distance follows the new one, however small the change: a page whose layout
+    // settles after the world opens (a font arrives) must not leave the camera a hair off home, as if it had been moved
+    const atHome = Math.abs((this.cfg.camDist ?? NaN) - (this.cfg.homeDist ?? NaN)) < 1e-9;
+    const resetDist = !this._anim && (atHome || Math.abs(homeDist - (this.cfg.homeDist || 0)) > 0.02 * homeDist);
     this.cfg.shift = shift; this.cfg.homeDist = homeDist;
     if (resetDist) this.cfg.camDist = homeDist;
     this.requestDraw();

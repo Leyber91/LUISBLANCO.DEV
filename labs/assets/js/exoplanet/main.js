@@ -768,7 +768,12 @@ function buildControls() {
   plain.title = 'The clouds\' pattern is seeded by the name; so are continents, craters and bands.';
   const clean = switchCtl({ name: 'instruments', words: ['shown', 'hidden'], id: 'btn-clean', ariaLabel: 'Instruments hidden' });
   clean.setAttribute('aria-keyshortcuts', 'H');
-  sws.append(plain, clean);
+  // the key that does the same, beside the switch: H
+  const cleanRow = el('span', 'sw-row'), hKey = keyHint('H');
+  hKey.title = 'H hides the instruments and brings them back';
+  hKey.addEventListener('click', () => toggleClean());
+  cleanRow.append(clean, hKey);
+  sws.append(plain, cleanRow);
   const ground = el('div', 'ground'); ground.id = 'ground'; ground.hidden = true;
   ground.innerHTML = `<div class="ground-row"><label for="sun-elev">star elevation</label><input id="sun-elev" class="engraved" type="range" min="-10" max="80" step="1" value="14" /><span class="rv" id="sun-elev-v">14\u00b0</span></div>
     <p class="ground-sites" id="ground-sites"></p><p class="ground-read" id="ground-read"></p>`;

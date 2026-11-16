@@ -111,8 +111,8 @@ a.ref:hover { color: var(--text-bright); }
 .bezel { position: absolute; left: 0; right: 0; top: var(--bezel-y, 80%); text-align: center; font-size: 9.5px; color: var(--text-dim); pointer-events: none; white-space: nowrap; }
 .ul { position: absolute; left: 0; top: 0; z-index: 2; max-width: 62%; pointer-events: none; }
 /* on the ground the sky is bright: the corners keep their words on a dark ground, and the readout goes to the top */
-.sheet[data-view="surface"] :is(.ul, .ll, .ur) { background: color-mix(in srgb, var(--void) 78%, transparent); padding: 6px 10px 8px; }
-.sheet[data-view="surface"] .bezel { top: 10px; }
+.sheet[data-view="surface"] :is(.ul, .ll, .ur) { background: color-mix(in srgb, var(--void) 66%, transparent); padding: 6px 10px 8px; }
+.sheet[data-view="surface"] .bezel { visibility: hidden; }   /* on the ground the key's readout says the star's height; the line would cross the corners */
 .ul > * { pointer-events: auto; }
 .name { font: 400 46px/1.02 var(--font-serif); font-style: normal; color: var(--text-bright); letter-spacing: -.01em; text-shadow: 0 0 12px var(--void); overflow-wrap: anywhere; }
 .name:focus { outline: none; }
@@ -136,6 +136,8 @@ a.ref:hover { color: var(--text-bright); }
 .ll .scale .sc-name { min-width: 76px; }
 .sws { display: grid; gap: 2px; justify-items: start; }
 .sws .switch { --sw-name: 90px; }
+.sw-row { display: inline-flex; align-items: center; gap: 12px; }
+.sw-row .key { cursor: pointer; }
 .ground { display: grid; gap: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
 .ground-row { display: flex; align-items: center; gap: 12px; }
 .ground-row label { font-size: 11px; color: var(--text-dim); min-width: 90px; }
