@@ -390,7 +390,11 @@ export default async function log(p, { base }) {
   await another();
   await call(press, '#tours [data-tour]');
   await p.sleep(900);
-  const tA = await state(), recA = await call(rawRecord);
+  // the first stop may need its look built first (on 2026-11-16 Kepler-1649 c, then drawn as bare rock, did), and the
+  // visit is written after: wait for it rather than for a fixed time
+  const tA = await state();
+  let recA = await call(rawRecord);
+  for (let i = 0; i < 20 && !(recA && recA.data && recA.data.log.visits[0] && recA.data.log.visits[0].name === tA.name); i++) { await p.sleep(500); recA = await call(rawRecord); }
   await call(press, '#tour-next');
   await p.sleep(900);
   const tB = await state(), recB = await call(rawRecord);

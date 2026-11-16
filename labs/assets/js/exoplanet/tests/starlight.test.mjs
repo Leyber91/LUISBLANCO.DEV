@@ -125,7 +125,7 @@ block('the equilibrium temperature', () => {
 /* ---------- how both are printed ---------- */
 block('how both are printed', () => {
   const t = L.starlightText({ S: 0.7503, lo: 0.6, hi: 0.91 });
-  yes('the starlight to three figures with its range and unit', t.v === '0.750' && t.pm === '0.600 to 0.910' && t.text === '0.750 S⊕ (68%: 0.600 to 0.910)', JSON.stringify(t));
+  yes('the starlight to three figures, its range to two as every range of sheet B, and the unit', t.v === '0.750' && t.pm === '0.60 to 0.91' && t.text === '0.750 S⊕ (68%: 0.60 to 0.91)' && L.starlightText({ S: 0.0263, lo: 0.02471, hi: 0.02804 }).pm === '0.025 to 0.028', JSON.stringify(t));
   yes('without a range, the value alone', L.starlightText({ S: 2658.4, lo: null, hi: null }).text === '2,658 S⊕' && L.starlightText({ S: 2658.4 }).pm === '');
   yes('with no starlight, nothing', L.starlightText({ S: null }).text === '' && L.starlightText({ S: 0 }).v === '');
   const q = L.teqText({ med: 702.6, lo: 662.9, hi: 738.2 });

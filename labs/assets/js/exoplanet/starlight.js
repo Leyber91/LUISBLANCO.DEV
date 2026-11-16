@@ -196,10 +196,11 @@ export const equilibriumTemp = (p, albedo = TEQ.albedo) => { const t = teqOf(p, 
 
 /* ---------- how the two are printed, everywhere ---------- */
 
-/* { v, pm, text }: the value, its 68% range in words ('' without one), and the two in one phrase with the unit. */
+/* { v, pm, text }: the value to three figures, its 68% range to two in words ('' without one), and the two in one phrase
+   with the unit. */
 export function starlightText(s) {
   if (!pos(s.S)) return { v: '', pm: '', text: '' };
-  const v = num(s.S, 3), pm = range(s.lo, s.hi, 3);
+  const v = num(s.S, 3), pm = range(s.lo, s.hi, 2);   // ranges to two figures, as every range of sheet B: three cut its column
   return { v, pm, text: `${v} S⊕${pm ? ` (68%: ${pm})` : ''}` };
 }
 export function teqText(t) {

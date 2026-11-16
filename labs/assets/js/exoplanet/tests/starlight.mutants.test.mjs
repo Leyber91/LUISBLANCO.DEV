@@ -133,8 +133,8 @@ const MUTANTS = [
   ['the one number at no albedo by default', 'export const equilibriumTemp = (p, albedo = TEQ.albedo) =>', 'export const equilibriumTemp = (p, albedo = 0) =>'],
 
   /* ---- how both are printed ---- */
-  ['the starlight to two figures', 'const v = num(s.S, 3), pm = range(s.lo, s.hi, 3);', 'const v = num(s.S, 2), pm = range(s.lo, s.hi, 3);'],
-  ['its range to two figures', 'const v = num(s.S, 3), pm = range(s.lo, s.hi, 3);', 'const v = num(s.S, 3), pm = range(s.lo, s.hi, 2);'],
+  ['the starlight to two figures', 'const v = num(s.S, 3), pm = range(s.lo, s.hi, 2);', 'const v = num(s.S, 2), pm = range(s.lo, s.hi, 2);'],
+  ['its range to three figures', 'const v = num(s.S, 3), pm = range(s.lo, s.hi, 2);', 'const v = num(s.S, 3), pm = range(s.lo, s.hi, 3);'],
   ['the starlight without its unit', "text: `${v} S⊕${pm ? ` (68%: ${pm})` : ''}` };", "text: `${v}${pm ? ` (68%: ${pm})` : ''}` };"],
   ['the starlight\'s range not said to be 68%', "text: `${v} S⊕${pm ? ` (68%: ${pm})` : ''}` };", "text: `${v} S⊕${pm ? ` (${pm})` : ''}` };"],
   ['a starlight of zero printed', "  if (!pos(s.S)) return { v: '', pm: '', text: '' };\n  const v = num(s.S, 3)", '  const v = num(s.S, 3)'],
