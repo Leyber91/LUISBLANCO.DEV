@@ -1,0 +1,227 @@
+[
+  {
+    "name": "shot: the lock is not asked for before the wait",
+    "from": "let release = await hold(0, lock);",
+    "to": "let release = null;"
+  },
+  {
+    "name": "shot: the first look waits, in silence",
+    "from": "let release = await hold(0, lock);",
+    "to": "let release = await hold(waitMs, lock);"
+  },
+  {
+    "name": "shot: the first look is at the machine's lock where the caller named another",
+    "from": "let release = await hold(0, lock);",
+    "to": "let release = await hold(0);"
+  },
+  {
+    "name": "shot: nothing is said before the wait",
+    "from": "    say(`waiting up to ${Math.round(waitMs / 1000)} s for Chrome: another drive or shot holds the machine's lock`);",
+    "to": "    void 0;"
+  },
+  {
+    "name": "shot: the wait is four times what it was told",
+    "from": "release = await hold(waitMs, lock);",
+    "to": "release = await hold(waitMs * 4, lock);"
+  },
+  {
+    "name": "shot: the wait is 1 ms short of what it was told",
+    "from": "release = await hold(waitMs, lock);",
+    "to": "release = await hold(waitMs - 1, lock);"
+  },
+  {
+    "name": "shot: the wait is on the machine's lock where the caller named another",
+    "from": "release = await hold(waitMs, lock);",
+    "to": "release = await hold(waitMs);"
+  },
+  {
+    "name": "shot: a lock still held after the wait is ignored and the shot runs",
+    "from": "if (!release) throw expected(",
+    "to": "if (false) throw expected("
+  },
+  {
+    "name": "shot: the lock is given back before the shot's work has ended",
+    "from": "try { return await fn(); }",
+    "to": "try { return fn(); }"
+  },
+  {
+    "name": "shot: the lock is kept after the shot",
+    "from": "finally { process.off('exit', atExit); release(); }",
+    "to": "finally { process.off('exit', atExit); }"
+  },
+  {
+    "name": "shot: every shot leaves an exit listener behind",
+    "from": "finally { process.off('exit', atExit); release(); }",
+    "to": "finally { release(); }"
+  },
+  {
+    "name": "shot: the lock is kept when the process exits inside the shot",
+    "from": "process.on('exit', atExit);",
+    "to": "void 0;"
+  },
+  {
+    "name": "wait: LABS_DRIVE_WAIT_MS is not read",
+    "from": "Number(env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000;",
+    "to": "20 * 60 * 1000;"
+  },
+  {
+    "name": "wait: with LABS_DRIVE_WAIT_MS unset a shot does not wait at all",
+    "from": "Number(env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000;",
+    "to": "Number(env.LABS_DRIVE_WAIT_MS) || 0;"
+  },
+  {
+    "name": "wait: LABS_DRIVE_WAIT_MS is taken ten times over",
+    "from": "Number(env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000;",
+    "to": "Number(env.LABS_DRIVE_WAIT_MS) * 10 || 20 * 60 * 1000;"
+  },
+  {
+    "name": "wait: with LABS_DRIVE_WAIT_MS unset a shot waits 19 minutes",
+    "from": "Number(env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000;",
+    "to": "Number(env.LABS_DRIVE_WAIT_MS) || 19 * 60 * 1000;"
+  },
+  {
+    "name": "shot: with no wait given it waits one second, not a drive's wait",
+    "from": "const { waitMs = shotWaitMs(), lock, say = console.log } = opts;",
+    "to": "const { waitMs = 1000, lock, say = console.log } = opts;"
+  },
+  {
+    "name": "leaves: the command's leaves are only the ones it was handed",
+    "from": "const t = { ...LEAVES, ...seams };",
+    "to": "const t = { ...seams };"
+  },
+  {
+    "name": "leaves: every lab is taken to have a worktree",
+    "from": "exists: fs.existsSync,",
+    "to": "exists: () => true,"
+  },
+  {
+    "name": "leaves: every port is taken to be served",
+    "from": "open: portOpen,",
+    "to": "open: async () => true,"
+  },
+  {
+    "name": "leaves: no server is started",
+    "from": "start: startTempServer,",
+    "to": "start: () => ({ pid: 0 }),"
+  },
+  {
+    "name": "leaves: the server is not waited for",
+    "from": "wait: waitPort,",
+    "to": "wait: async () => true,"
+  },
+  {
+    "name": "leaves: the server is never stopped",
+    "from": "stop: stopPid,",
+    "to": "stop: () => {},"
+  },
+  {
+    "name": "leaves: the shot takes no pictures",
+    "from": "shot: shootWith,",
+    "to": "shot: async () => {},"
+  },
+  {
+    "name": "leaves: the command says nothing",
+    "from": "say: (m) => console.log(m) };",
+    "to": "say: () => {} };"
+  },
+  {
+    "name": "shoot: the command runs its shot outside the lock",
+    "from": "await withChromeLock(() => shootServed(lab, pageArg, t), t);",
+    "to": "await shootServed(lab, pageArg, t);"
+  },
+  {
+    "name": "shoot: the command gives the lock back before the shot has ended",
+    "from": "await withChromeLock(() => shootServed(lab, pageArg, t), t);",
+    "to": "await withChromeLock(() => { shootServed(lab, pageArg, t); }, t);"
+  },
+  {
+    "name": "shoot: the command waits 1 ms where it was told nothing",
+    "from": "await withChromeLock(() => shootServed(lab, pageArg, t), t);",
+    "to": "await withChromeLock(() => shootServed(lab, pageArg, t), { ...t, waitMs: 1 });"
+  },
+  {
+    "name": "shoot: a shot that failed ends with exit code 0",
+    "from": "} catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); process.exitCode = 1; }",
+    "to": "} catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); }"
+  },
+  {
+    "name": "shoot: a shot that failed says nothing",
+    "from": "} catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); process.exitCode = 1; }",
+    "to": "} catch (e) { process.exitCode = 1; }"
+  },
+  {
+    "name": "shoot: an error nobody expected is printed without where it came from",
+    "from": "} catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); process.exitCode = 1; }",
+    "to": "} catch (e) { console.error(e.message); process.exitCode = 1; }"
+  },
+  {
+    "name": "shoot: an ending the tool chose is printed with a stack",
+    "from": "} catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); process.exitCode = 1; }",
+    "to": "} catch (e) { console.error(e.stack || e.message); process.exitCode = 1; }"
+  },
+  {
+    "name": "shoot: a lab with no worktree and nothing on its port waits for Chrome",
+    "from": "if (!t.exists(wtPath(lab)) && !(await t.open(lab.port))) throw expected(",
+    "to": "if (false) throw expected("
+  },
+  {
+    "name": "shoot: a lab with a worktree is refused when its port is closed",
+    "from": "if (!t.exists(wtPath(lab)) && !(await t.open(lab.port))) throw expected(",
+    "to": "if (!(await t.open(lab.port))) throw expected("
+  },
+  {
+    "name": "shoot: a lab with no worktree is refused though its port is served",
+    "from": "if (!t.exists(wtPath(lab)) && !(await t.open(lab.port))) throw expected(",
+    "to": "if (!t.exists(wtPath(lab))) throw expected("
+  },
+  {
+    "name": "served: a server that did not come up is not reported",
+    "from": "{ stop(temp.pid); throw expected(`server on ${lab.port} did not come up`); }",
+    "to": "{ stop(temp.pid); return; }"
+  },
+  {
+    "name": "served: a server that did not come up is left running",
+    "from": "{ stop(temp.pid); throw expected(`server on ${lab.port} did not come up`); }",
+    "to": "{ throw expected(`server on ${lab.port} did not come up`); }"
+  },
+  {
+    "name": "served: the server the shot started is left running after it",
+    "from": "if (temp) { stop(temp.pid); say(",
+    "to": "if (temp) { say("
+  },
+  {
+    "name": "served: nothing is said about the server it stopped",
+    "from": "stop(temp.pid); say(`stopped the server this shot started on port ${lab.port}`); }",
+    "to": "stop(temp.pid); }"
+  },
+  {
+    "name": "served: a port that is served gets a second server",
+    "from": "if (!(await open(lab.port))) {",
+    "to": "if (true) {"
+  },
+  {
+    "name": "served: a closed port gets no server",
+    "from": "if (!(await open(lab.port))) {",
+    "to": "if (false) {"
+  },
+  {
+    "name": "served: the server is given 80 ms to come up",
+    "from": "wait(lab.port, 8000)",
+    "to": "wait(lab.port, 80)"
+  },
+  {
+    "name": "served: the shot is not waited for",
+    "from": "try { await shot(lab, pageArg); }",
+    "to": "try { shot(lab, pageArg); }"
+  },
+  {
+    "name": "selftest: a hang with no failed check ends as a failure, which reads as caught",
+    "from": "process.exit(failed() ? 1 : WATCHDOG_EXIT); }, ms).unref();",
+    "to": "process.exit(1); }, ms).unref();"
+  },
+  {
+    "name": "selftest: a hang after a failed check ends as timed out",
+    "from": "process.exit(failed() ? 1 : WATCHDOG_EXIT); }, ms).unref();",
+    "to": "process.exit(WATCHDOG_EXIT); }, ms).unref();"
+  }
+]
