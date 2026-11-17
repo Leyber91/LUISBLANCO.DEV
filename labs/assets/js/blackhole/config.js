@@ -135,7 +135,7 @@ export const SCHEMA = [
   { key: 'a', type: 'num', def: 0.94, min: 0, max: 0.998, step: 0.001, url: 'a', retrace: true, panel: 'metric', label: 'spin a/M', unit: '', digits: 3 },
   { key: 'q', type: 'num', def: 0, min: 0, max: 0.99, step: 0.01, url: 'qq', retrace: true, panel: 'metric', label: 'charge Q/M', unit: '', digits: 2 },
   { key: 'incl', type: 'num', def: 84, min: 1, max: 179, step: 0.5, url: 'i', retrace: true, panel: 'camera', label: 'inclination', unit: 'deg', digits: 1 },
-  { key: 'rcam', type: 'num', def: 46, min: 3, max: 1000, step: 0.1, url: 'r', retrace: true, panel: 'camera', label: 'observer r', unit: 'M', digits: 1, log: true },
+  { key: 'rcam', type: 'num', def: 46, min: 1.14, max: 1000, step: 0.1, url: 'r', retrace: true, panel: 'camera', label: 'observer r', unit: 'M', digits: 1, log: true },
   { key: 'fov', type: 'num', def: 31, min: 0.3, max: 140, step: 0.1, url: 'f', retrace: true, panel: 'camera', label: 'field of view', unit: 'deg', digits: 1, log: true },
   { key: 'az', type: 'num', def: 0, min: -180, max: 180, step: 0.5, url: 'z', retrace: false, panel: null, label: 'azimuth', unit: 'deg', digits: 1, id: false },
   { key: 'tilt', type: 'num', def: 0, min: -80, max: 80, step: 0.5, url: 't', retrace: true, panel: null, label: 'look up', unit: 'deg', digits: 1 },

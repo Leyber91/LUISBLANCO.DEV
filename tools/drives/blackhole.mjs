@@ -438,11 +438,10 @@ export async function FALL_STEP(p, { base, width, ready }) {
   const t0 = Date.now();
   // the fall takes 22 s of the page's frame time, and a frame counts at most 250 ms (main.js): under a slow software
   // renderer it takes longer, so the wait is long and the time it took is printed
-  // Known miss, queued (ROAD 1.05, the fall): the journey aims at 1.08 r+, but the state's floor for the camera's
-  // radius is 3 M (config.js SCHEMA rcam min, there for a static camera), so every fall and every scrub stops at
-  // max(3 M, 1.08 r+). This checks the stop the page has today, by that rule, so a change to either shows here.
-  const stopped = await p.until(`(() => { const a = window.__bh, s = a.store.all(); return s.view === 'journey' && s.observer === 'faller' && s.rcam <= Math.max(3, a.model.rh * 1.08) + 1e-4; })()`, 150000);
-  p.check('a fall pressed on the Fall card runs to its stop, today max(3 M, 1.08 r+)', !!stopped, `${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  // ledger row 12, fixed on labs/blackhole-fall: the camera's floor is by observer (state.js cameraFloor), so a fall
+  // stops at 1.08 r+ and no longer at the 3 M a camera that is not falling keeps
+  const stopped = await p.until(`(() => { const a = window.__bh, s = a.store.all(); return s.view === 'journey' && s.observer === 'faller' && s.rcam <= 1.08 * a.model.rh + 1e-4; })()`, 150000);
+  p.check('a fall pressed on the Fall card runs to its stop, 1.08 r+ (ledger row 12: no longer the 3 M floor)', !!stopped, `${((Date.now() - t0) / 1000).toFixed(1)} s`);
   const f = await p.ev(`(async () => { const P = await import('/labs/assets/js/blackhole/physics.js'); const a = window.__bh, s = a.store.all(), m = a.model;
     const rows = P.fall(s.a, s.incl, 40, s.q), row = rows.find((r) => r.r <= s.rcam) || rows[0];
     const rw = [...document.querySelectorAll('#bh-fallread .rw')].find((r) => /your clock/.test(r.textContent));
@@ -529,7 +528,7 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   // the stop's clock held, as the tour section does: the stop moves on after its dwell (10 s), before the fall (about
   // 20 s of frames) reaches its stop
   await p.ev(`(() => { window.__bh.tour.start(${fallStop}); window.__bh.tour.t = -1e9; })()`);
-  const tourFell = await p.until(`(() => { const s = window.__bh.store.all(), m = window.__bh.model; return s.view === 'journey' && s.rcam <= Math.max(3, m.rh * 1.08) + 1e-4; })()`, 150000);
+  const tourFell = await p.until(`(() => { const s = window.__bh.store.all(), m = window.__bh.model; return s.view === 'journey' && s.rcam <= 1.08 * m.rh + 1e-4; })()`, 150000);
   await p.sleep(1500);
   p.check("the tour's fall reaches its stop, and is not recorded (the visitor did not start it)", tourFell && (await p.ev(COUNTS)).falls === c4.falls, JSON.stringify({ tourFell, ...(await p.ev(COUNTS)) }));
   await p.ev('window.__bh.tour.stop()');

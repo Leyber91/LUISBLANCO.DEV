@@ -369,5 +369,29 @@ guard('a named object is its catalogue\'s hole', () => {
   ok('isOwn(): the catalogue state is its own; a custom hole always is', open('?o=cygx1').isOwn() && open('?o=custom&a=0.3').isOwn());
 });
 
+/* ledger row 12: the camera's floor by observer. A faller goes to 1.08 r+ (where the journey stops); every other camera
+   keeps the 3 M of the static views. The floor follows the spin and charge, so no camera is ever inside the horizon. */
+{
+  const { horizon } = await import('./kerr.js');
+  const fallAt = (patch) => { const s = new Store(); s.set(s.preset('m87', 'journey'), { instant: true }); s.set(patch, { instant: true }); return s; };
+  const f = fallAt({ rcam: 1.2 });
+  ok('a faller at M87* (a = 0.94) goes down to 1.08 r+, not to 3 M', Math.abs(f.get('rcam') - 1.08 * horizon(0.94)) < 1e-9, String(f.get('rcam')));
+  const z = fallAt({ observer: 'zamo', rcam: 1.5 });
+  ok('a camera that is not falling keeps 3 M', z.get('rcam') === 3, String(z.get('rcam')));
+  const lift = fallAt({ rcam: 1.2 });
+  lift.set({ a: 0 }, { instant: true });
+  ok('a faller at its floor, its spin lowered to 0, is lifted to the new floor, 1.08 x 2 M: never inside the horizon', Math.abs(lift.get('rcam') - 2.16) < 1e-9, String(lift.get('rcam')));
+  const deep = fallAt({ a: 0.998, rcam: 1 });
+  ok('at the highest spin the floor is 1.08 r+ = 1.148 M, inside the schema\'s bound', Math.abs(deep.get('rcam') - 1.08 * horizon(0.998)) < 1e-9 && SCHEMA.find((d) => d.key === 'rcam').min <= 1.08 * horizon(0.998), String(deep.get('rcam')));
+  const link = new Store(); link.open('?o=m87&v=journey&r=1.2');
+  ok('a link to a fall below the floor opens at the floor', Math.abs(link.get('rcam') - 1.08 * horizon(0.94)) < 1e-9, String(link.get('rcam')));
+  const above = fallAt({ rcam: 5 });
+  ok('a faller above the floor stays where it is', above.get('rcam') === 5);
+  const near = fallAt({ rcam: 1.6 });
+  ok('a faller just above the floor (1.6 M, the floor 1.45 M) stays where it is', near.get('rcam') === 1.6, String(near.get('rcam')));
+  const charged = fallAt({ a: 0, q: 0.6, rcam: 1.2 });
+  ok('a charged faller (a = 0, Q = 0.6) stops at 1.08 r+ of Kerr-Newman, 1.08 x 1.8 M', Math.abs(charged.get('rcam') - 1.08 * horizon(0, 0.6)) < 1e-9 && Math.abs(charged.get('rcam') - 1.944) < 1e-9, String(charged.get('rcam')));
+}
+
 console.log(fails ? `\n${fails} of ${checks} link check(s) failed` : `\nall ${checks} link checks passed`);
 process.exit(fails ? 1 : 0);
