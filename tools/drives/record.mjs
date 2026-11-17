@@ -16,14 +16,15 @@
 //   P8 a clock opened on the sky is a visit "from the sky" in the survey's log, with the day the sky was at, unless
 //      recording is off; the line's link opens the sky on that planet at that day, with a real pointer, and is no
 //      visit itself.
-// After every step on the lab's two rooms the rules of tools/drives/invariants.mjs hold (standard()). The hub, which
+// After every step on the lab's two rooms the rules of tools/invariants.mjs hold (standard(), with the survey's covers),
+// and no frame captured has a fully transparent pixel (p.frames()). The hub, which
 // this scenario visits only to press its erase, is not held to them here: on 2026-11-16 its shared chrome had a label
 // at 2.27 to 1 and a gold "/ labs" on the privacy page, which belong to the site's frame and not to this slice.
 //
 // No model is called and nothing leaves the page's own origin: the guard below runs before the page's own scripts.
 
-import { standard, gold } from './invariants.mjs';
-import { SURVEY_GOLD } from './shapes.mjs';
+import { standard, gold } from '../invariants.mjs';
+import { SURVEY_GOLD, SURVEY_COVER } from './shapes.mjs';
 
 const SKY_GOLD = { allow: ['.bp', '.los-bk', '.lamp.kept', '.tally-marks .tl-kept', '.fill.kept', '.lbr-panel'] };
 const LEGACY = 'exo:seen:v1';
@@ -83,9 +84,12 @@ export default async function record(p, { base }) {
   await p.before(`(${guard})()`);
   // the lab's two rooms, the survey and the sky, each with its own gold; the hub is visited for its erase only
   const ROOM = '/\\/exomania(-survey)?\\.html$/.test(location.pathname)';
-  const rules = standard();
+  // the survey's covers (shapes.mjs SURVEY_COVER): the loading veil is over the page until the catalogue is read, as
+  // every other drive of the lab declares; without them the targets rule reports the veil's cover at 390
+  const rules = standard({ targets: { cover: SURVEY_COVER } });
   for (const [name, expr] of rules.slice(0, 3)) p.invariant(name, `(${ROOM} ? ${expr} : [])`);
   p.invariant(rules[3][0], `(/exomania-survey\\.html$/.test(location.pathname) ? ${gold(SURVEY_GOLD)} : /exomania\\.html$/.test(location.pathname) ? ${gold(SKY_GOLD)} : [])`);
+  p.frames();   // no fully transparent pixel in any frame captured (tools/drive.mjs frames), as the lab's other drives
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const survey = async (query = '') => {
