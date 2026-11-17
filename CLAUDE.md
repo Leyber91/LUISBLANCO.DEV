@@ -14,8 +14,8 @@ here, the daily routine included, are in SITE_RULES.md:
 - tools/: the gates (privacy_gate.py, site_check.mjs, levels.mjs, lab_tests.mjs, atlas.mjs, stories.mjs,
   evolution.mjs, anti_tells.mjs), the test of the gates themselves (mutate.mjs with tools/mutants/), the merge
   guard (ship_pr.mjs), the lab worktree tool (labs-wt.mjs) and the page driver it runs (drive.mjs, with one
-  scenario per lab under tools/drives/). The gates workflow runs the gates on every pull
-  request.
+  scenario per lab under tools/drives/, and invariants.mjs, the rules a page keeps after every step of a drive).
+  The gates workflow runs the gates on every pull request.
 
 ## Committing
 
@@ -26,7 +26,11 @@ here, the daily routine included, are in SITE_RULES.md:
   merged before its checks had started on 2026-11-13.
 - A gate that node runs is done when its rules are listed in tools/mutants/<tool>.json and
   `node tools/mutate.mjs` shows its selftest catches each one, and after a reviewer who did not write it has read
-  it. atlas.mjs, evolution.mjs, lab_tests.mjs, mutate.mjs, ship_pr.mjs and stories.mjs have such a list;
+  it. atlas.mjs, drive.mjs (the runner of the invariants, the frame rule, its lock and the console), evolution.mjs,
+  invariants.mjs, lab_tests.mjs, labs-wt.mjs (the shot's lock and the server it starts), mutate.mjs, ship_pr.mjs
+  and stories.mjs have such a list; the selftests of
+  drive.mjs and invariants.mjs run headless Chrome (Node 22 or later), one Chrome at a time on a machine (mutate.mjs
+  holds the machine's lock around each copy of their lists and leaves 600 ms between copies, so other drives get turns);
   levels.mjs and anti_tells.mjs have a selftest and no list yet, so add one when you change them. A list needs two
   kinds of mutant: one that silences each report, and one that loosens each condition, with a case just inside
   and just outside every bound. The first kind alone reads as full coverage and is not: on 2026-11-14 every report
@@ -36,6 +40,17 @@ here, the daily routine included, are in SITE_RULES.md:
   module at once. On 2026-11-13 a
   checker that passed its own selftest 90 of 90 had 31 defects a review then confirmed, and the small tools
   written to prevent that had 19 of their own, then 27 more in a second review.
+- The selftests of drive.mjs, invariants.mjs and mutate.mjs run on every pull request. Three mutants lists are gated:
+  they run on every push to main, and on a pull request only when one of their files changes (`mutate.mjs
+  --changed-since origin/main`, its GATED lists, renames counted). drive's and invariants' (54m38s on the gates on
+  2026-11-16, before the 600 ms between copies: 0.6 s more a copy) run on a change to tools/drive.mjs,
+  tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json,
+  tools/mutate.mjs or .github/workflows/gates.yml; mutate's own (mutate.json, 498 s on the gates on 2026-11-17) on a
+  change to tools/mutate.mjs, tools/mutants/mutate.json, tools/drive.mjs or the gates workflow. The entries main had
+  before, in tools/mutants/mutate.core.json, run on every pull request with `selftest core`. A run
+  stopped at mutate's limit, or a selftest that stops itself at its own (exit 124, when no check has failed yet),
+  runs once more alone, then counts as timed out, never as caught, and fails the list unless its entry declares
+  `"timeout": "<reason>"`.
 
 ## Labs work
 

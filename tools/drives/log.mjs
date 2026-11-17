@@ -22,6 +22,7 @@
 //
 // No model is called and nothing leaves the page's own origin: the guard below runs before the page's own
 // scripts in every document, and refuses every such request.
+import { exomaniaRules } from './exomania.mjs';
 
 /* ---- run before the page's own scripts, in every document the drive opens ---- */
 
@@ -135,6 +136,8 @@ function skipSeen() { const a = document.activeElement, b = a.getBoundingClientR
 /* ---- the scenario ---- */
 
 export default async function log(p, { base }) {
+  for (const [n, e] of exomaniaRules()) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   await p.before(`(${guard})()`);
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const state = () => call(pageState);
@@ -390,7 +393,11 @@ export default async function log(p, { base }) {
   await another();
   await call(press, '#tours [data-tour]');
   await p.sleep(900);
-  const tA = await state(), recA = await call(rawRecord);
+  // the first stop may need its look built first (on 2026-11-16 Kepler-1649 c, then drawn as bare rock, did), and the
+  // visit is written after: wait for it rather than for a fixed time
+  const tA = await state();
+  let recA = await call(rawRecord);
+  for (let i = 0; i < 20 && !(recA && recA.data && recA.data.log.visits[0] && recA.data.log.visits[0].name === tA.name); i++) { await p.sleep(500); recA = await call(rawRecord); }
   await call(press, '#tour-next');
   await p.sleep(900);
   const tB = await state(), recB = await call(rawRecord);

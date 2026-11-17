@@ -10,6 +10,7 @@ import {
   luminosity, semiMajor, insolation, forecastFor, hasTrueMass, monteCarlo, equilibriumTemp, habitableZone, hzPosition,
   transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClassOf, hasRadius, limitOf, limitKind, limitText, isNum,
 } from './science.js';
+import { teqOf, starlightText, starlightNote, teqText, archiveDiffers, errorWords, starNum, luminosityDiffers, ARCHIVE_DIFF, STASSUN } from './starlight.js';
 import { limitsLine } from './report.js';
 import { classify, physics } from './data.js';
 import { airLine, OBSERVED } from './air.js';
@@ -35,17 +36,22 @@ export function chainHTML(p, albedo, air = null) {
   ];
   if (Object.keys(p.lim || {}).length) inputs.push(['Archive bounds', esc(limitsLine(p)), 'limit flags: kept as bounds, never used as values']);
   const steps = [];
-  steps.push(li('Luminosity', L.src === 'archive' ? 'L = 10^log L' : 'L = R★² (Teff / 5772 K)⁴', L.L ? `${fmt(L.L, 3)} L☉` : '—', L.src));
-  steps.push(li('Insolation', S.src === 'archive' ? 'archive value' : 'S = L / a²', S.S ? `${fmt(S.S, 3)} S⊕` : '—', ''));
+  steps.push(li('Luminosity', L.src === 'archive' ? 'L = 10^log L, the archive\'s' : 'L = R★² (Teff / 5772 K)⁴, R★ in R☉', L.L ? `${starNum(L.L, 3)} L☉` : '—',
+    L.src === 'archive' ? (luminosityDiffers(L) ? `R★² (Teff / 5772 K)⁴ gives ${starNum(L.fromStar, 3)}` : 'archive') : L.src === 'R and Teff' ? 'the archive gives none' : ''));
+  // what the formula is, and what its draws carry, from what was drawn (starlight.js errorWords)
+  const ew = errorWords(S);
+  const sHow = S.src === 'luminosity' ? 'S = L / a², L in L☉ and a in AU' : S.src === 'star' ? 'S = (R★ / a)² (Teff / 5772 K)⁴, R★ in R☉ and a in AU' : S.src === 'archive' ? 'archive value' : 'none: no orbit, or no star to compute it from';
+  steps.push(li('Insolation', `${sHow}${isNum(S.lo) ? `, ${MC.draws} draws over ${ew.carried}` : ''}`,
+    S.S ? starlightText(S).text : '—', esc([S.src === 'archive' ? starlightNote(p, S) : '', S.src !== 'archive' ? ew.missing : '', archiveDiffers(S) ? `the archive lists ${starNum(S.archive, 3)} S⊕` : ''].filter(Boolean).join('; '))));
   if (fc) steps.push(li('Mass', 'log R = C + S log M, inverted with scatter, log-uniform prior' + (fc.bounded ? `, censored by the ${fc.bounded} limit (posterior cut ${fc.bounded === 'upper' ? 'above' : 'below'} ${fmt(fc.bound, 3)} M⊕)` : ''), `${fmt(fc.median, 2)} M⊕ (68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}), ${fc.regime}`, CHEN_KIPPING.ref));
   else if (hasTrueMass(p)) steps.push(li('Mass', 'measured', `${fmt(p.M, 3)} M⊕`, refTxt(r.M)));
   else steps.push(li('Mass', 'none: no measured mass, and no radius to forecast one from', '—', limitOf(p, 'M') ? `the ${limitKind(limitOf(p, 'M'))} is a bound, never drawn as a value` : ''));
   steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})` : mc.hasR ? '—' : 'none: no radius measured', ''));
-  steps.push(li('Teq', `Teq = Teff √(R★ / 2a) (1 − A)^¼, A = ${albedo}`, mc.teq ? `${fmtInt(mc.teq.med)} K (68%: ${fmtInt(mc.teq.lo)}-${fmtInt(mc.teq.hi)})` : '—', 'full heat redistribution'));
+  steps.push(li('Teq', `Teq = 278.3 K S^¼ (1 − A)^¼${S.src === 'star' ? ' = Teff √(R★ / 2a) (1 − A)^¼, R★ and a in one unit' : ''}, A = ${albedo}, ${isNum(S.lo) ? 'the same draws' : 'from the point value'}`, mc.teq ? teqText(mc.teq).text : '—', 'full heat redistribution'));
   if (mc.H) steps.push(li('Scale height', `H = k T / (μ m_H g), μ = ${p.R > 1.8 ? MC.muEnvelope : MC.muSecondary}`, `${fmt(mc.H.med, 2)} km`, 'μ assumed from size'));
   const scl = sizeClassOf(p);
   steps.push(li('Size class', 'radius draws binned at 1.5, 2, 4, 8 R⊕', mc.hasR ? mc.probs.map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ') : scl ? `${scl.label}, from the radius bound` : 'none: no radius measured', ''));
-  if (hz) steps.push(li('Habitable zone', 'S_eff = S₀ + aT + bT² + cT³ + dT⁴, T = Teff − 5780; d = √(L / S_eff)', `${fmt(hz.inner, 3)}-${fmt(hz.outer, 3)} AU; ${pos.label}`, KOPPARAPU.ref));
+  if (hz) steps.push(li('Habitable zone', `S_eff = S₀ + aT + bT² + cT³ + dT⁴, T = Teff − 5780; ${hz.by === 'S' ? 'd = a √(S / S_eff)' : 'd = √(L / S_eff)'}`, `${fmt(hz.inner, 3)}-${fmt(hz.outer, 3)} AU; ${esc(pos.label)}`, KOPPARAPU.ref));
   if (geo) steps.push(li('Transit', `k = Rp/R★ = ${fmt(geo.k, 3)}; depth ≈ k² × limb darkening; T14 = (P/π) asin[(R★/a)√((1+k)² − b²) / sin i]`, `${fmtInt(geo.depthLD * 1e6)} ppm, ${fmt(geo.T14, 3)} h`, 'Seager & Mallén-Ornelas 2003; ' + LIMB.ref));
   if (rv) steps.push(li('Radial velocity', 'K = 28.4329 m/s (Mp sin i / M_J) (M★)^−⅔ (P / 1 yr)^−⅓ / √(1 − e²)', `${fmt(rv.K, 3)} m/s (${rv.massSrc} mass${rv.bounded ? `, cut by the ${rv.bounded} limit` : ''})${rv.eLimit ? `; e is only a bound (${esc(limitText(rv.eLimit, 2))}), so e = 0` : ''}`, 'Lovis & Fischer 2010'));
   if (sky) steps.push(li('Sky', 'θ = 2 atan(R★ / a)', `${fmt(sky.angDeg, 2)}° (Sun from Earth 0.53°)`, ''));
@@ -71,9 +77,9 @@ export function compareHTML(pins, earth, albedo) {
     }],
     ['Gravity', (p) => { const m = monteCarlo(p, albedo); return m.g ? `${fmt(m.g.med, 2)} g` : m.hasR ? '—' : 'needs a radius'; }],
     ['Period', (p) => (isNum(p.P) ? `${fmt(p.P, 4)} d` : '—')],
-    ['Insolation', (p) => (insolation(p).S ? `${fmt(insolation(p).S, 3)} S⊕` : '—')],
-    ['Teq', (p) => { const t = equilibriumTemp(p, albedo); return t ? `${fmtInt(t)} K` : '—'; }],
-    ['Zone', (p) => hzPosition(p).label],
+    ['Insolation', (p) => (insolation(p).S ? starlightText(insolation(p)).text : '—')],
+    ['Teq', (p) => { const t = teqOf(p, albedo); return t ? teqText(t).text : '—'; }],
+    ['Zone', (p) => esc(hzPosition(p).label)],
     ['Size class', (p) => { const c = sizeClassOf(p); return c ? c.label + (c.fromLimit ? ' (by its bound)' : '') : 'no radius measured'; }],
     ['Star', (p) => `${fmtInt(p.Teff)} K`],
     ['Distance', (p) => (isNum(p.dist) ? `${fmtInt(p.dist * 3.26156)} ly` : 'here')],
@@ -83,7 +89,7 @@ export function compareHTML(pins, earth, albedo) {
     <p class="dim">Every render is the same pipeline fed with that world's values; Earth's comes from its own numbers (NASA fact sheet). Teq at albedo ${albedo}.</p>`;
 }
 
-export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote }) {
+export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote, census }) {
   const pc = (x) => (x === null || x === undefined ? '—' : `${Math.round(x * 100)}%`);
   return `
     <p>Every number on this page comes from the NASA Exoplanet Archive or from a published model applied to it in your browser. The planet image is the exception: its surface is procedural, driven by the measured radius, temperature and star, and is illustrative.</p>
@@ -92,8 +98,9 @@ export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote }
     <h3>Models</h3>
     <p>[REAL] Mass from radius: the ${esc(CHEN_KIPPING.ref)} relation, inverted on a grid with its intrinsic scatter and the radius error under a log-uniform mass prior (the prior is this page's choice). A catalogue mass limit is a censoring bound: an upper limit cuts the posterior above it, a lower limit below it; a limit is never used as a mass.</p>
     <p>[REAL] Limits: every value the archive flags as a limit (mass, radius, eccentricity, period, orbit, impact parameter, Teq, depth, duration, stellar temperature) is shown as a bound with its sign and never enters a computation as a value. A world with no measured radius gets no size class, gravity, density or scale height; its image is drawn at a stand-in size, labelled on the reticle [ILLUSTRATIVE].</p>
-    <p>[REAL] ${MC.draws} Monte Carlo draws carry the radius, mass, stellar and orbit errors into gravity, Teq, scale height and the size-class probabilities.</p>
-    <p>[REAL] Habitable zone: ${esc(KOPPARAPU.ref)}, from the star's temperature and luminosity; conservative edges are runaway and maximum greenhouse, optimistic edges recent Venus and early Mars.</p>
+    <p>[REAL] Starlight: S = L / a², L in L☉ and a in AU, and the equilibrium temperature is computed from the same S, so the two never disagree. L is the archive's luminosity for ${fmtInt(census.luminosity)} planets and R★² (Teff / 5772 K)⁴ for the ${fmtInt(census.star)} whose star the archive gives none; the archive's own insolation stands for ${fmtInt(census.archive)} that lack the orbit or the star, and is named beside the computed value where the two differ by more than ${Math.round((ARCHIVE_DIFF - 1) * 100)}%. The archive's luminosity is chosen for the Gaia parallaxes behind the Kepler stars' luminosities and for the M-dwarf papers' own method (the luminosity measured, the radius derived from it); on references that share no catalogue with either, the two rules tie. The orbit is Kepler's third law, or the archive's for a planet of two stars and a star whose values cite ${esc(STASSUN)}, chosen by a backtest against the other papers' masses (labs/assets/data/exomania).</p>
+    <p>[REAL] The starlight and Teq carry a 68% range, from ${MC.draws} draws, only where the snapshot gives every input an error, since a range over some of them would be narrower than the truth: ${fmtInt(census.ranged)} ${census.ranged === 1 ? 'planet has' : 'planets have'} one. The other ${fmtInt(census.point)} print a point value and name the error that is missing (${fmtInt(census.partial)} of them have an error on some input and not on every one): the snapshot carries no error on the archive's luminosity, and none on an orbit from Kepler's third law. The same Monte Carlo draws carry the radius and mass errors into gravity, the scale height and the size-class probabilities. The draws of a star are the same for every planet the archive lists it with.</p>
+    <p>[REAL] Habitable zone: ${esc(KOPPARAPU.ref)}, its edges taken at the star's temperature and placed by the planet's starlight on every view; in the system view an edge lies at a √(S / S_edge). "The habitable zone" is the conservative one (runaway to maximum greenhouse) unless the optimistic one (recent Venus to early Mars) is named. A star outside ${fmtInt(KOPPARAPU.tRange[0])} to ${fmtInt(KOPPARAPU.tRange[1])} K takes the edges of the nearer end of that range, and every view says "extrapolated".</p>
     <p>[REAL] Transit: depth from (Rp/R★)² with quadratic limb darkening (${esc(LIMB.ref)}, Sun-like coefficients for every star), integrated numerically over the planet's disc; duration from Seager &amp; Mallén-Ornelas 2003, eq. 3, at the archive's impact parameter, circular orbit. Radial velocity from Lovis &amp; Fischer 2010, eq. 14.</p>
     <p>[REAL] Composition curves on the mass-radius diagram: Seager et al. 2007, eq. 23 and Table 4 (iron, silicate, water ice), drawn to 20 M⊕.</p>
     <p>[REAL] Star colour: the Planck spectrum at the star's temperature through the CIE 1931 colour-matching functions (Wyman, Sloan &amp; Shirley 2013 fit) to sRGB.</p>

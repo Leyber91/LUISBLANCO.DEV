@@ -26,7 +26,7 @@
 //  10. every part of ui_inventory.md part 6 is on the page.
 // No model is called and nothing leaves the page's own origin.
 //
-// After every step the rules of tools/drives/invariants.mjs hold: the page never scrolls sideways, every visible
+// After every step the rules of tools/invariants.mjs hold: the page never scrolls sideways, every visible
 // target is 44 px tall at 390, every text is 4.5 to 1, and gold is only where SURVEY_GOLD below allows it, in the DOM
 // and in the pixels of every canvas it does not name.
 //
@@ -42,18 +42,28 @@
 //   exoplanet.css .bp                   the site's four corner brackets
 //   os.css .los-bk                      the corner brackets of a Labs OS plate (the sharing question), the same frame
 //   #ret-render .st-observed            the status word "observed" of the planet's air (ticket 2.13, pull request 41)
+//   #nums .sw-dot                       not gold: the star's own colour beside its temperature, its Planck spectrum, which
+//                                       for a cool star falls within 22 of the gold tint in every channel (TOI-700)
 // No other use: export.js drew the plate's brackets in gold until 2026-11-16, and plot.js the chosen world on the
 // diagram and on the sky map; both are the bright ink now. SURVEY_GOLD.canvases says, with reasons, the one canvas
 // the pixel scan does not read (the WebGL planet), the one it skips under a condition (the signal in transit mode),
 // the one that may hold one gold dot (the diagram, its kept world) and the two whose star's own colour it leaves out.
 
-import { standard, gold as goldRule, targets as targetRule } from './invariants.mjs';
+import { standard, gold as goldRule, targets as targetRule } from '../invariants.mjs';
 
 const KEPT = '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")';
 const STAR = '(() => { const d = document.querySelector("#nums .sw-dot"); return d ? getComputedStyle(d).getPropertyValue("--star-col").trim() : ""; })()';
 const TRANSIT = '(document.querySelector("#sheet-e [data-k=sig]") || { getAttribute: () => "false" }).getAttribute("aria-checked") !== "true"';
+/* What may lie over a target on the survey beyond what the rule lets by design (dialogs, popup lists, what is fixed or
+   sticky and a scroll moves off). The two ends of the radius range no longer need an entry: where they meet, the one a
+   finger can move lies on top, and the other says it cannot move (2026-11-17). */
+export const SURVEY_COVER = {
+  'a.skip': 'the skip link, shown over the bar only while it has the focus',
+  'body:not(.ready) #veil': 'the loading veil, over the page until the catalogue is read; once told to go it takes no tap while it fades, and one left up once the page is ready is a break',
+};
+
 export const SURVEY_GOLD = {
-  allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel'],
+  allow: ['.bp', '.los-bk', '.iv-m .iv-tick', '.tally-marks .tl-kept', '.fill.kept', '#ret-render .st-observed', '.lbr-panel', '#nums .sw-dot'],
   canvases: {
     scan: true,
     named: {
@@ -65,7 +75,8 @@ export const SURVEY_GOLD = {
     // the catalogue diagram while the chosen world is kept: its point, one dot, and no other gold
     oneDot: { '#v-plot canvas.plot-cv': KEPT },
     // the star drawn in its own colour (its Planck spectrum, which can be as warm as a tint of gold): the pixels near
-    // that colour, as the table's swatch gives it, are not counted; a gold orbit or mark still is
+    // that colour, as the table's swatch gives it, are not counted, nor its faint glow within 3 px of them; a gold orbit
+    // or mark away from the star still is, a 1 px line included (tools/invariants.mjs)
     ownColour: { '#inset': STAR, '#sheet-d canvas.sys-cv': STAR },
   },
 };
@@ -278,7 +289,8 @@ async function names(k, from, longest) {
 /* ---- the scenario ---- */
 export default async function shapes(p, { base, width }) {
   await p.before(`(${guard})()`);
-  for (const [n, e] of standard({ gold: SURVEY_GOLD })) p.invariant(n, e);
+  for (const [n, e] of standard({ gold: SURVEY_GOLD, targets: { cover: SURVEY_COVER } })) p.invariant(n, e);
+  p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const phone = width < 700;
   const NAMED = '(() => { const n = (document.getElementById("ret-name") || {}).textContent; return !!n && n.trim().length > 1 && n.trim() !== "…"; })()';
@@ -377,7 +389,13 @@ export default async function shapes(p, { base, width }) {
   const pressed = F1.bands.filter((b) => b.on === 'true'), rest = F1.bands.filter((b) => b.on !== 'true');
   // its two edges take Home and End: as far as each can go, the end of the axis or the other edge
   const edge = async (end, key) => { await p.ev(`document.getElementById("edge-${end}").focus()`); await p.key(key); await p.sleep(300); return p.ev('[document.getElementById("edge-lo"), document.getElementById("edge-hi")].map((e) => e ? +e.getAttribute("aria-valuenow") : null)'); };
-  const k1 = await edge('hi', 'End'), k2 = await edge('lo', 'End'), k3 = await edge('lo', 'Home');
+  const k1 = await edge('hi', 'End'), k2 = await edge('lo', 'End');
+  // both at the top of the axis: what a finger meets there is the lower edge, the one that can move, and the upper says
+  // it cannot
+  const met = await p.ev('(() => { const lo = document.getElementById("edge-lo"), hi = document.getElementById("edge-hi"), r = hi.getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { meets: t && t.id, hiOff: hi.getAttribute("aria-disabled"), loOff: lo.getAttribute("aria-disabled") }; })()');
+  const k3 = await edge('lo', 'Home');
+  const apart = await p.ev('[document.getElementById("edge-lo").getAttribute("aria-disabled"), document.getElementById("edge-hi").getAttribute("aria-disabled")]');
+  p.check('where both edges meet at the top of the axis, a finger meets the lower one, which can move off; the upper says it cannot move, and once they part neither says so', met.meets === 'edge-lo' && met.hiOff === 'true' && met.loOff === null && apart[0] === null && apart[1] === null, JSON.stringify({ met, apart }));
   p.check("a band's edges take Home and End: the high edge to the axis's end, the low edge up to the high one and back to the axis's start", k1[1] === 25 && k1[0] === 0.5 && k2[0] > 24 && k2[0] < 25 && k3[0] === 0.5 && k3[1] === 25, JSON.stringify({ k1, k2, k3 }));
   await p.ev('(() => { for (let i = 0; i < 10; i++) { const b = document.querySelector("#filters [data-clear]"); if (!b) break; b.click(); } return true; })()'); await p.sleep(400);
   await p.ev('document.querySelector("#filters [data-cls=rocky]").click()'); await p.sleep(400);

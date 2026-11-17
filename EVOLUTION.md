@@ -3,6 +3,44 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-17, The Figure's question box has a name (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 28 pages and 0 findings on main
+  today. This run loaded the 27 published pages outside tools/ and _archive/ in headless Chromium at 1280 px and 390
+  px over a local http server and recorded script errors, failed local requests and the document scroll width; it
+  then followed the 30 same-origin links the pages hold after their scripts run (all answer 200) and read each page
+  for a language, a title, a description, a viewport, images without alt text, and buttons, links and form fields
+  without an accessible name.
+- Found: no page is wider than the screen and no script error is new. Five lab pages have form fields with no
+  accessible name, so a screen reader announces them as a bare text box: labs/figure.html (the question box),
+  labs/roaster.html (the claim box), labs/md_animation_page.html (one range slider) and labs/seed.html (five fields).
+  The home page lists the labs in the order Honesty Decoder, The Figure, Seed, so The Figure is the most visible page
+  with a finding.
+- Cause: on labs/figure.html the caption "the question" above the question box was a span, not tied to the box.
+- Changed (labs/figure.html, one line): the caption is a label for q_text. Measured in headless Chromium at 1280 and
+  390 px: the box had 0 labels and no textbox named "the question" before, and has 1 label and one such textbox
+  after; a click on the caption now focuses the box. The caption keeps its block display, 9 px IBM Plex Mono, colour
+  rgb(107, 118, 130) and letter spacing, and the caption and the box keep the same position and size to the pixel at
+  both widths. The cursor over the caption changes from auto to default.
+- Still open for later runs of item 1: the unnamed fields on labs/roaster.html, labs/md_animation_page.html and
+  labs/seed.html; 404.html, hero_proto.html, labs/claude-prep/, labs/figure.html, labs/roaster.html, labs/seed.html,
+  leak_map_demo.html and triad_demos.html have no meta description; labs/claude-prep/ requests seal.json, which
+  returns 404 (Luis decides). labs/bh_animation_page.html took 21.8 s to fire its load event in headless Chromium
+  with software WebGL and logged no script error; that speaks to the headless renderer more than to a visitor's
+  browser, and its rebuild is open as draft pull request #48, so it is not counted as a finding. The other console
+  errors are expected: labs probing for a local model (connection refused) and The Roaster's live request refused by
+  CORS from localhost. Item 2 still has no link to remove: no tracked file outside _archive/ references labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 28 pages, 0 findings; levels selftest 12 of
+  12 and 32 labs, 0 errors; lab tests selftest 25 of 25 and 43 files, 0 failed; atlas, stories and evolution
+  selftests and checks pass (they print NOT_CHECKED for the private plans); mutate selftest and run pass (every
+  broken rule caught); model route 56 of 56; anti-tells selftest 27 of 27 and no new tells; node tools/anti_tells.mjs
+  scan labs/figure.html lists 23 tells before and after, none on the changed line. The labs build was not run here
+  (labs-src is untouched) and runs in the gates workflow. No script file changed, so there was no syntax check to
+  run. Render: labs/figure.html at 1280 px and 390 px in headless Chromium, 0 console errors. Forbidden-name check:
+  runs in the gates workflow on the pull request.
+- Gates on pull request #52: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-16, The hero prototype draws its figure and fits a phone (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 27 pages and 0 findings on main
