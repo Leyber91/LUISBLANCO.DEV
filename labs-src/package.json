@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('../labs/assets/js/os',{recursive:true,force:true})\" && tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.test.json",
-    "test": "tsc -p tsconfig.test.json && vitest run"
+    "typecheck": "tsc -p tsconfig.test.json && tsc -p tsconfig.labs.json",
+    "test": "tsc -p tsconfig.test.json && tsc -p tsconfig.labs.json && vitest run"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.7",
