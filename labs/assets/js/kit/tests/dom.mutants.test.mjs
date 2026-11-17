@@ -11,11 +11,13 @@
    ticket 2.19 (2026-11-17), which found nine rules with no test.
 
    Equivalent, so not listed: the quantifiers {1,6}, {1,7} and
-   {2,8} of the pattern (no name in the tables is longer than six
-   letters, and a longer number fails the code-point bound); the
-   windows-1252 range widened to 0x7f or 0xa0 (an index outside the
-   table falls back to the code point itself, which is what HTML
-   reads there).
+   {2,8} of the pattern widened (no name in the tables is longer
+   than six letters, and a longer number fails the code-point
+   bound); narrowing each one fails, and is listed (D50, D61,
+   D62). Also the windows-1252 range widened to 0x7f or 0xa0 (an
+   index outside the table falls back to the code point itself,
+   which is what HTML reads there). Entries D58 to D62 came from
+   the verification of the review's fixes.
 
    Add an entry with every new rule in unesc.
    ============================================================ */
@@ -85,6 +87,11 @@ const MUTANTS = [
   ['D55 an unknown name dropped', 'return named(body) ?? whole;', "return named(body) ?? '';"],
   ['D56 read twice', HEAD, `export const unesc = (s) => unesc1(unesc1(s)); const unesc1 = (s) => String(s ?? '').replace(`],
   ['D57 nothing read at all', HEAD, "export const unesc = (s) => String(s ?? '') || String(s ?? '').replace("],
+  ['D58 a name read as a number', "if (body[0] === '#') return numeric(", "if (body[0] !== '#') return numeric("],
+  ['D59 a lower-case x read as decimal', "numeric(body[1] === 'x' || body[1] === 'X'", "numeric(body[1] === 'q' || body[1] === 'X'"],
+  ['D60 nothing read as the word null', HEAD, HEAD.replace("String(s ?? '')", "String(s ?? 'null')")],
+  ['D61 a seven-digit decimal reference not matched', '|#[0-9]{1,7}|', '|#[0-9]{1,6}|'],
+  ['D62 a six-letter name not matched', '|[A-Za-z]{2,8});', '|[A-Za-z]{2,5});'],
 ];
 
 process.exit(await runMutants({ here, file: 'dom.js', test: 'dom.test.mjs', mutants: MUTANTS }));

@@ -54,6 +54,7 @@ is(unesc('&etilde; &Acaron; &wring; &xcirc; &bogus;'), '&etilde; &Acaron; &wring
 /* ---- numbers: the bounds ---- */
 is(unesc('&#x10FFFF;'), '\u{10FFFF}', 'the last code point is read');
 is(unesc('&#x110000;'), '&#x110000;', 'past the last code point stays as written');
+is(unesc('&#1114111;'), '\u{10ffff}', 'the last code point, in decimal (seven digits), is read');
 is(unesc('&#xD7FF;'), '\ud7ff', 'the code point before the surrogates is read');
 is(unesc('&#xD800;'), '&#xD800;', 'the first surrogate stays as written');
 is(unesc('&#xDFFF;'), '&#xDFFF;', 'the last surrogate stays as written');
