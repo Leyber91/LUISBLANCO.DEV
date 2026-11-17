@@ -4,7 +4,7 @@
    by distribution (p10 to p90 over the masters, never min to max:
    PROCESS 2026-11-17, lesson 1), and the outcomes of F4-P4 to F4-P6.
 
-     node tools/dev/heptapod_inkfig.mjs <out dir> --film <masks dir> [--stills <film stills dir>] [--corpus 30] [--p4]
+     node tools/dev/heptapod_inkfig.mjs <out dir> --film <masks dir> [--stills <film stills dir>] [--corpus 30] [--p4] [--budget <s>]
 
    Figures: randomText(mulberry32(100 + k), k) for k = 1, 4 and 12, the
    same texts as F4 slice 1. Corpus (F4-P4): randomText(mulberry32(500
@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { mulberry32 } from '../../labs/assets/js/heptapod/topo/rng.js';
+import { mulberry32, fnv1a } from '../../labs/assets/js/heptapod/topo/rng.js';
 import { randomText } from '../../labs/assets/js/heptapod/topo/figure.js';
 import { INK, INK_CALIBRATIONS, inkFigure } from '../../labs/assets/js/heptapod/topo/inkfig.js';
 import { readPBM, ringTable, percentile } from '../../labs/assets/js/heptapod/detail/ring.js';
@@ -32,6 +32,13 @@ const opt = (name) => { const i = av.indexOf(name); return i > 0 ? av[i + 1] : n
 const filmDir = opt('--film'), stills = opt('--stills');
 const NC = Number(opt('--corpus') ?? 30);
 const RUN_P4 = av.includes('--p4');
+// Runs are cut into foreground pieces (the coordinating session's practice of 2026-11-17: a background command can
+// be stopped for low memory while the session is idle, and is restarted only when Luis asks): every film mask and
+// corpus text measured is written at once to <out dir>/measure.cache.json, keyed by a hash of the code that made
+// it, and a later run skips it. With --budget <seconds>, the run stops measuring new items after that long and
+// exits 3, writing nothing else; run it again to go on.
+const BUDGET = Number(opt('--budget') ?? 0);
+const T0 = Date.now();
 // the stand-in sentences vary in size (randomText's default gives every sentence 7 nodes, so no pool could dominate):
 // 5 to 12 nodes each, drawn from their own stream
 const sizesFrom = (seed, k) => { const r = mulberry32(seed); return Array.from({ length: k }, () => 5 + Math.floor(r() * 8)); };
@@ -74,14 +81,35 @@ function measure(m) {
   return { cols: Object.fromEntries(COLS.map(([k, , f]) => [k, +(+f(row)).toFixed(4)])), F: row._F };
 }
 
+/* ---------- the cache ---------- */
+fs.mkdirSync(out, { recursive: true });
+const HERE_SRC = (rel) => fs.readFileSync(path.join(HERE, rel), 'utf8');
+const CODE = fnv1a(['../../labs/assets/js/heptapod/topo/inkfig.js', '../../labs/assets/js/heptapod/topo/figure.js', '../../labs/assets/js/heptapod/detail/ring.js', '../../labs/assets/js/heptapod/detail/filaments.js', '../../labs/assets/js/heptapod/detail/masses.js'].map(HERE_SRC).join('\n') + COLS.map(([k]) => k).join(','));
+const CACHE_FILE = path.join(out, 'measure.cache.json');
+let cache = {};
+try { cache = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8')); } catch { cache = {}; }
+let fresh = 0, reused = 0;
+function cached(key, fn) {
+  const k = `${CODE}:${key}`;
+  if (k in cache) { reused++; return cache[k]; }
+  if (BUDGET > 0 && (Date.now() - T0) / 1000 > BUDGET) {
+    console.log(`partial: budget of ${BUDGET} s spent; ${reused} items reused, ${fresh} measured and cached in ${CACHE_FILE}; run again to go on`);
+    process.exit(3);
+  }
+  const v = fn();
+  cache[k] = v; fresh++;
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
+  return v;
+}
+
 /* ---------- the film, by distribution ---------- */
 const film = fs.readdirSync(filmDir).filter((f) => f.startsWith('wolfram_') && f.endsWith('.pbm')).sort();
 if (film.length !== 18) { console.error(`${film.length} film masks in ${filmDir}; exactly 18 expected`); process.exit(1); }
 const filmRows = [], bulbRatios = [];
 for (const f of film) {
-  const { cols, F } = measure(readPBM(fs.readFileSync(path.join(filmDir, f))));
+  const { cols, bulbs } = cached(`film:${f}`, () => { const { cols, F } = measure(readPBM(fs.readFileSync(path.join(filmDir, f)))); return { cols, bulbs: F.filter((x) => x.tip === 'bulb').map((x) => x.tipRatio) }; });
   filmRows.push(cols);
-  for (const x of F) if (x.tip === 'bulb') bulbRatios.push(x.tipRatio);
+  bulbRatios.push(...bulbs);
   console.log(`film ${f}: filaments ${cols.filaments}`);
 }
 const Q = (vals, q) => percentile(Float64Array.from(vals).sort(), q);
@@ -114,7 +142,6 @@ function down3(m) {
 }
 
 /* ---------- the three figures ---------- */
-fs.mkdirSync(out, { recursive: true });
 const figures = [], strip = [];
 for (const k of [1, 4, 12]) {
   const f = inkFigure(randomText(mulberry32(100 + k), k, sizesFrom(700 + k, k)));
@@ -144,10 +171,10 @@ for (const k of [1, 4, 12]) {
 const corpusB = [];
 for (let i = 0; i < NC; i++) {
   const k = 1 + (i % 5);
-  const f = inkFigure(randomText(mulberry32(600 + i), k, sizesFrom(800 + i, k)));
-  if (!f.ok) { corpusB.push({ i, k, error: f.reason }); console.log(`corpus B ${i}: ${f.reason}`); continue; }
-  const { cols } = measure(f);
-  corpusB.push({ i, k, cols, masses: f.masses.length });
+  const r = cached(`B:${i}`, () => { const f = inkFigure(randomText(mulberry32(600 + i), k, sizesFrom(800 + i, k))); return f.ok ? { cols: measure(f).cols, masses: f.masses.length } : { error: f.reason }; });
+  if (r.error) { corpusB.push({ i, k, error: r.error }); console.log(`corpus B ${i}: ${r.error}`); continue; }
+  const { cols } = r, f = { masses: { length: r.masses } };
+  corpusB.push({ i, k, cols, masses: r.masses });
   console.log(`corpus B ${i} (${k} clauses): masses ${f.masses.length}, clusters read ${cols.clusters}, dominance ${cols.dominance}`);
 }
 const okB = corpusB.filter((c) => !c.error);
@@ -166,11 +193,11 @@ const corpusShare = Object.fromEntries(COLS.map(([c]) => [c, +(okB.filter((x) =>
 const corpus = [];
 for (let i = 0; RUN_P4 && i < 30; i++) {
   const k = 1 + (i % 5);
-  const f = inkFigure(randomText(mulberry32(500 + i), k));
-  if (!f.ok) { corpus.push({ i, k, error: f.reason }); console.log(`corpus ${i}: ${f.reason}`); continue; }
-  const { cols } = measure(f);
-  corpus.push({ i, k, drawn: f.filamentsDrawn, read: cols.filaments, cols });
-  console.log(`corpus ${i} (${k} clauses): drawn ${f.filamentsDrawn}, read ${cols.filaments}`);
+  const r = cached(`P4:${i}`, () => { const f = inkFigure(randomText(mulberry32(500 + i), k)); return f.ok ? { cols: measure(f).cols, drawn: f.filamentsDrawn } : { error: f.reason }; });
+  if (r.error) { corpus.push({ i, k, error: r.error }); console.log(`corpus ${i}: ${r.error}`); continue; }
+  const { cols } = r;
+  corpus.push({ i, k, drawn: r.drawn, read: cols.filaments, cols });
+  console.log(`corpus ${i} (${k} clauses): drawn ${r.drawn}, read ${cols.filaments}`);
 }
 const okC = corpus.filter((c) => !c.error);
 // a text that fails to draw counts against both parts: the denominator is every text of the corpus
