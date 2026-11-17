@@ -129,6 +129,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   const MS = { y0: 18, H: 300, W: 150 };
 
   let lastQ = null;
+  let compact = false;
   function drawSpinMarks(q) {
     const g = spin.marks; g.replaceChildren();
     const X = (a) => SP.x0 + (a / AMAX) * SP.W;
@@ -139,7 +140,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       el('line', { x1: X(a), y1: 30, x2: X(a), y2: big ? 22 : 26, class: big ? 'ink' : 'faint' }, g);
       if (i % 4 === 0) svgText(g, { x: X(a), y: 18, 'text-anchor': 'middle' }, a.toFixed(1));
     }
-    // the engine's radii: where isco() and horizon() reach round values at this charge (C12)
+    // the engine's radii: where isco() and horizon() reach round values at this charge (C12); on a phone the value
+    // line under the hand reads them instead
+    if (compact) return;
     const isco = (a) => K.isco(a, 1, q), hor = (a) => K.horizon(a, q);
     el('line', { x1: SP.x0, y1: 46, x2: SP.x0 + SP.W, y2: 46, class: 'faint' }, g);
     el('line', { x1: SP.x0, y1: 70, x2: SP.x0 + SP.W, y2: 70, class: 'faint' }, g);
@@ -152,9 +155,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   function drawSpinHand(a, q) {
     const g = spin.hand; g.replaceChildren();
     const x = SP.x0 + (a / AMAX) * SP.W;
-    el('line', { x1: x, y1: 20, x2: x, y2: 76, class: 'now' }, g);
+    el('line', { x1: x, y1: 20, x2: x, y2: compact ? 34 : 76, class: 'now' }, g);
     el('path', { d: `M${x - 5},30 l5,-7 l5,7 z`, class: 'tip' }, g);
-    svgText(g, { x: SP.x0 + SP.W, y: 104, 'text-anchor': 'end', class: 'val' }, `a ${spinText(a)} · ISCO ${s3(K.isco(a, 1, q))} M · horizon ${s3(K.horizon(a, q))} M`);
+    svgText(g, { x: SP.x0 + SP.W, y: compact ? 50 : 104, 'text-anchor': 'end', class: 'val' }, `a ${spinText(a)} · ISCO ${s3(K.isco(a, 1, q))} M · horizon ${s3(K.horizon(a, q))} M`);
     spin.set(a);
   }
   function drawInclMarks() {
@@ -186,7 +189,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     for (const o of OBJECTS.filter((x) => x.mass >= 1 && !x.hypothetical)) {
       const y = Y(Math.log10(o.mass));
       el('line', { x1: MS.W, y1: y, x2: MS.W - 34, y2: y, class: 'faint', 'data-object': o.id }, g);
-      svgText(g, { x: MS.W - 38, y: y + 3, 'text-anchor': 'end' }, o.name);
+      svgText(g, { x: MS.W - 38, y: y + 3, 'text-anchor': 'end', 'data-label': o.id }, o.name);
     }
   }
   function drawMassHand(lg) {
@@ -194,7 +197,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const y = MS.y0 + MS.H - ((Math.max(LG[0], Math.min(LG[1], lg)) - LG[0]) / (LG[1] - LG[0])) * MS.H;
     el('line', { x1: MS.W - 46, y1: y, x2: MS.W, y2: y, class: 'now' }, g);
     el('path', { d: `M${MS.W},${y} l-7,-5 l0,10 z`, class: 'tip' }, g);
-    svgText(g, { x: MS.W - 50, y: y - 6, 'text-anchor': 'end', class: 'val' }, `${sci(10 ** lg)} M☉`);
+    const near = OBJECTS.find((o) => o.mass >= 1 && !o.hypothetical && Math.abs(Math.log10(o.mass) - lg) < 0.02);
+    for (const tx of mass.marks.querySelectorAll('text[data-label]')) tx.style.display = near && tx.dataset.label === near.id ? 'none' : '';
+    svgText(g, { x: MS.W - 50, y: y + 3, 'text-anchor': 'end', class: 'val' }, `${near ? `${near.name} · ` : ''}${sci(10 ** lg)} M☉`);
     mass.set(lg);
   }
   drawInclMarks(); drawMassMarks();
@@ -217,6 +222,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     body.dataset.sheet = String(n);
     for (const [k, b] of Object.entries(tabBtn)) b.setAttribute('aria-selected', String(+k === n));
     choose.sheet?.(n);
+    draw();
   }
 
   function drawTitle() {
@@ -224,7 +230,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const name = o ? `${esc(o.name)} <i>${esc(o.kind)}${o.distPc ? `, ${parsecs(o.distPc)}` : ''}</i>` : '<i>a hole of your own</i>';
     const c = (l, v, u = '') => `<div class="c"><span class="l">${l}</span><span class="v">${v}${u ? ` <small>${u}</small>` : ''}</span></div>`;
     setHTML(tbBody, `
-      <div class="bh-tb-r bh-tb-h"><div class="c"><h1 class="t">${name}</h1><span class="sub">${esc(COPY.title)}</span></div><div class="c sheetno"><span class="l">sheet</span><span class="v" id="bh-tb-sheet">1 of 4</span></div></div>
+      <div class="bh-tb-r bh-tb-h"><div class="c"><h1 class="t">${name}</h1><span class="sub">${esc(COPY.title)}</span></div><div class="c sheetno"><span class="l">sheet</span><span class="v" id="bh-tb-sheet">${body.dataset.sheet || 1} of 4</span></div></div>
       <div class="bh-tb-r g3">${c('mass', sci(m.massSun), 'M☉')}${c('spin a/M', spinText(s.a))}${c('scale', cmp ? pmText(cmp.pred.thetaG, cmp.pred.thetaErrP, cmp.pred.thetaErrM) : (m.thetaG ? s3(m.thetaG) : '--'), 'µas per M')}</div>
       <div class="bh-tb-r g2">${c(`shadow, far observer at ${deg(ms.incl)}°`, `${s3(ms.th.mean)} M${cmp ? ` · ${pmText(cmp.pred.value, cmp.pred.errP, cmp.pred.errM)}` : ''}`, cmp ? 'µas' : '')}${cmp && cmp.shadow ? c(`EHT shadow`, published(cmp.shadow.value, cmp.shadow.err, '±'), 'µas') : cmp && cmp.ring ? c('EHT ring of emission', published(cmp.ring.value, cmp.ring.err, '±'), 'µas') : c('EHT', 'not imaged')}</div>
       <div class="bh-tb-r g4 wideonly">${c('horizon r+', s3(m.rh), 'M')}${c('ISCO', s3(m.ri), 'M')}${c('photon orbit', s3(m.rph), 'M')}${c('Hawking T', sci(m.hawkingK), 'K')}</div>`);
@@ -247,12 +253,15 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   /* ---------- the layout of the scales, by the window ---------- */
   function place() {
     const W = innerWidth, H = innerHeight, phone = !wide();
+    compact = phone;
     if (phone) {
       SP.x0 = 18; SP.W = W - 2 * 18 - 4;
-      Object.assign(spin.svg.style, { left: '0px', top: Math.round(H * 0.55) + 'px', width: W + 'px', height: SP.H + 18 + 'px' });
+      // just above the caption, whose height the stop sets
+      const cap = document.getElementById('bh-caption').getBoundingClientRect();
+      Object.assign(spin.svg.style, { left: '0px', top: Math.round((cap.height ? cap.top : H * 0.62) - 64) + 'px', width: W + 'px', height: '58px' });
       incl.svg.style.display = 'none'; mass.svg.style.display = 'none';
     } else {
-      SP.x0 = 0; SP.W = Math.max(320, Math.min(560, W - 440 - 380 - 80));
+      SP.x0 = 0; SP.W = Math.max(300, Math.min(480, W - 440 - 380 - 140));
       Object.assign(spin.svg.style, { left: '64px', top: (H - 60 - SP.H - 18) + 'px', width: SP.W + 4 + 'px', height: SP.H + 18 + 'px' });
       Object.assign(incl.svg.style, { display: '', left: '23px', top: Math.round(H * 0.47 - IN.oy) + 'px', width: IN.R + 70 + 'px', height: 2 * IN.oy + 'px' });
       Object.assign(mass.svg.style, { display: '', right: '23px', top: Math.round(H * 0.28) + 'px', width: MS.W + 2 + 'px', height: MS.y0 + MS.H + 10 + 'px' });
@@ -276,5 +285,10 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     /** The band of the window the labels on the render may use on sheet 1, [left, right] in px. */
     openBand() { const a = incl.svg.getBoundingClientRect(), b = mass.svg.getBoundingClientRect(); return [incl.svg.style.display === 'none' ? 0 : a.right, mass.svg.style.display === 'none' ? innerWidth : b.left]; },
     sheet,
+    /** The boxes of the drawing's own parts that show, [x0, y0, x1, y1]: a label on the render steps aside from them. */
+    obstacles() {
+      return [spin.svg, incl.svg, mass.svg, tb, strip].filter((e) => e.getClientRects().length && getComputedStyle(e).display !== 'none')
+        .map((e) => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; });
+    },
   };
 }

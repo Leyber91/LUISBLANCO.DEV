@@ -57,7 +57,7 @@ const idle = () => new Promise((done) => {
 
 /* card: the card's element (its #bh-keep, #bh-recline, #bh-reclist, #bh-recsaid, #bh-recfoot). store: the page's
    state. fixture: the os-fixture value of the address. moving(): whether the view is still easing to its state. */
-export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false }) {
+export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false, thumb = async () => null }) {
   const $ = (s) => card.querySelector(s);
   const btn = $('#bh-keep'), line = $('#bh-recline'), list = $('#bh-reclist'), saidEl = $('#bh-recsaid'), foot = $('#bh-recfoot');
   let os = null, stored = R.empty(), newer = false, loaded = false, said = '', failedStart = false;
@@ -130,8 +130,12 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
   async function keep() {
     if (!loaded) return;
     const q = store.toQuery(), label = nameOf(q);
+    // the frame's picture (BAR_L1 C17), made before the turn (a still takes a moment) and only for a hole this page
+    // has not seen kept; the turn decides from the store whether it keeps or takes out
+    let img = null;
+    if (!R.isKept(stored, q)) { try { img = await thumb(); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
     let wasKept = false;
-    const w = await change((r) => { wasKept = R.isKept(r, q); return wasKept ? R.unkeep(r, q) : R.keep(r, { q, t: now() }); });
+    const w = await change((r) => { wasKept = R.isKept(r, q); return wasKept ? R.unkeep(r, q) : R.keep(r, { q, t: now(), img }); });
     if (w && w.changed) {
       if (!wasKept) {
         track('black-hole.keep', { obj: store.get('obj') });

@@ -15,7 +15,7 @@ import { Tour, setHTML } from './tour.js';
 import { createKeep } from './keep.js';
 import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
-import { exportPlate, exportState, importState, exportData, PLATE_SS } from './plate.js';
+import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, SUBRING } from './probe.js';
 
@@ -139,7 +139,7 @@ export function buildUI(app) {
     <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
     <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
   left.appendChild(recCard);
-  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim });
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: () => thumbnail(app) });
   app.keep = keep;     // for the console and the drive, as window.__bh is
   store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);
@@ -267,7 +267,7 @@ export function buildUI(app) {
       object: (id) => { app.tour?.stop(); store.set(store.objectPatch(id)); },
       view: (id) => { app.tour?.stop(); store.set(store.viewPatch(id)); if (id === 'journey') journey.play(); else journey.stop(); },
       colour: (id) => store.set({ color: id }),
-      sheet: (n) => { if (n === 4) requestAnimationFrame(() => recCard.scrollIntoView({ block: 'start' })); drawOverlay(); },
+      sheet: (n) => { requestAnimationFrame(() => { if (n === 4) recCard.scrollIntoView({ block: 'start' }); drawOverlay(); }); },   // a frame later: the drawing is built before everything drawOverlay reads
     },
     act: { plate: (W) => plate(W), link: () => $('#bh-link').click(), json: () => exportState(app), csv: () => exportData(app), sources: openSources },
     keepRecord: () => keep.record,
@@ -317,7 +317,9 @@ export function buildUI(app) {
    *  stays inside it (review_s2 P4-3; fix_s2_p1 K6, the curve's legend ran under the Measure card at 1440). Read
    *  from the panels' own boxes, so the bound follows the stylesheet at every width; the whole window on a phone,
    *  where the panels are a sheet. */
-  const openCentre = (W) => (narrow() ? [0, W] : drawing && document.body.dataset.sheet === '1' ? drawing.openBand() : [left.getBoundingClientRect().right, right.getBoundingClientRect().left]);
+  const shows = (e) => getComputedStyle(e).display !== 'none';
+  const openCentre = (W) => (narrow() ? [0, W] : drawing && document.body.dataset.sheet === '1' ? drawing.openBand()
+    : [shows(left) ? left.getBoundingClientRect().right : 0, shows(right) ? right.getBoundingClientRect().left : W]);
   /** Where a label's lead ends, kept inside the open centre [L, R] (review_s2 P4-3): flipped to the left where its
    *  text (tw px, 4 px from the lead) would run past the right bound, to the right where it would run past the left,
    *  then held so the text fits, and held between the top and the bottom. end: the text ends at the lead (it sits
@@ -362,7 +364,9 @@ export function buildUI(app) {
     // labels only from anchors traced for this view: none mid-transition, none from the last view
     const an = anchorsLive();
     if (s.notes && an) {
-      const placed = [];          // text blocks already drawn, so a later label steps aside
+      // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
+      // block and kept frames: a label once sat on the spin scale's numbers at 390)
+      const placed = drawing ? drawing.obstacles() : [];
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
