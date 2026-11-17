@@ -63,14 +63,14 @@ const MUTANTS = [
 
   /* ---- the idle caption ---- */
   ['a custom hole titled M87*', `: 'Custom hole';`, `: 'M87*';`],
-  ['the telescope view reads as the cinematic one', `const line = s.view === 'telescope'`, `const line = s.view === 'telescopeX'`],
+  ['the telescope view reads as the cinematic one', `    const line = ms\n`, `    const line = null\n`],
   ['the telescope view never speaks of the inner shadow', `? (s.emit === 'thick'`, `? (s.emit === 'thickX'`],
   ['the journey view reads as the cinematic one', `: s.view === 'journey'`, `: s.view === 'journeyX'`],
   ['the spin quoted to 2 decimals', 'Spin ${spinText(s.a)}', 'Spin ${s.a.toFixed(2)}'],
   /* ---- 2026-11-16 (review_s2 P2-1, P6-3, P6-4) ---- */
   ['the curve called gold again', `const curve = colourWord('curve');`, `const curve = 'gold';`],
-  ['the thick disk\'s inclination rounded', 'at ${deg(s.incl)} deg. An opaque', 'at ${s.incl.toFixed(0)} deg. An opaque'],
-  ['the thin gas\'s inclination rounded', 'at ${deg(s.incl)} deg, through hot', 'at ${s.incl.toFixed(0)} deg, through hot'],
+  ['the thick disk\'s inclination rounded', 'at ${deg(ms.incl)} deg. An opaque', 'at ${ms.incl.toFixed(0)} deg. An opaque'],
+  ['the thin gas\'s inclination rounded', 'at ${deg(ms.incl)} deg, through hot', 'at ${ms.incl.toFixed(0)} deg, through hot'],
   ['the focus ring loses its class', `<circle class="tour-focus"`, `<circle class="focus"`],
   ['the focus ring in ink, not gold', `stroke="var(--accretion)"`, `stroke="var(--horizon)"`],
   ['anchors read for the eased view, not the target', `liveAnchors(this.getAnchors(), this.app.store.view(true))`, `liveAnchors(this.getAnchors(), this.app.store.view())`],

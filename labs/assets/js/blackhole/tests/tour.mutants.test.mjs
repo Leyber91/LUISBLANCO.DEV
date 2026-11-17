@@ -36,8 +36,16 @@ const MUTANTS = [
   ['a stop is set as the visitor\'s change', `{ src: 'tour', dur: 1700 }`, `{ src: 'ui', dur: 1700 }`],
 
   /* ---- the numbers a caption quotes (the distance's units moved to physics.js parsecs on 2026-11-16) ---- */
-  ['outside the telescope view the caption quotes the Measure card\'s shadow', `s.view === 'telescope' ? measurement(s) : null`, `s.view === 'telescopeX' ? measurement(s) : null`],
-  ['outside the telescope view the shadow width is taken at 17 deg, not edge-on', `shadowFor(s.a, 90, s.q)`, `shadowFor(s.a, 17, s.q)`],
+  ['the idle caption reads the telescope view as another view', `s.view === 'telescope' ? measurement(s) : null`, `s.view === 'telescopeX' ? measurement(s) : null`],
+  ['the stops\' shadow taken at 90 deg, not the measurement\'s inclination (fix_s2_p1 K1)', `const ms = measurement(s), ts = ms.th;`, `const ms = measurement(s), ts = measurement({ ...s, view: 'telescope', incl: 90 }).th;`],
+  ['the stops\' comparison taken at 90 deg', `    const cmp = ms.cmp;\n`, `    const cmp = measurement({ ...s, view: 'telescope', incl: 90 }).cmp;\n`],
+  ['the shadow\'s inclination read from the camera', `farIncl: deg(ms.incl),`, `farIncl: deg(s.incl),`],
+  ['the shadow\'s inclination rounded', `farIncl: deg(ms.incl),`, `farIncl: ms.incl.toFixed(0),`],
+  ['the scale\'s number dropped', `scale: cmp ? s3(cmp.pred.thetaG) : '--',`, `scale: '--',`],
+  ['the angle quoted as the scale', `scale: cmp ? s3(cmp.pred.thetaG) : '--',`, `scale: cmp ? s3(cmp.pred.value) : '--',`],
+  ['the idle caption names Bardeen\'s curve whatever the shadow', `named = ms ? SHADOW_HOW[ms.th.how].curve : null;`, `named = ms ? SHADOW_HOW.bardeen.curve : null;`],
+  ['the thick disk names a curve where none is drawn', '${named ? `The ${curve} curve: the ${named}.`', '${true ? `The ${curve} curve: the ${named}.`'],
+  ['the thin gas names a curve where none is drawn', '${named ? `The ${curve} curve is the ${named};', '${true ? `The ${curve} curve is the ${named};'],
   ['a custom hole is named M87*', `name: o ? o.name : 'this hole'`, `name: o ? o.name : 'M87*'`],
   ['the caption\'s comparison sentence left out', `eht: compareSentence(cmp, o ? o.name : 'this hole'),`, `eht: '',`],
   ['the scale\'s name left out of the caption', `by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',`, `by: 'its mass and distance',`],
@@ -55,7 +63,6 @@ const MUTANTS = [
   ['the horizon across given as its radius', `horizonAcrossKm: sci(2 * m.horizonKm)`, `horizonAcrossKm: sci(m.horizonKm)`],
   ['the body typed', `bodyM: String(BODY_M)`, `bodyM: '1'`],
   ['the horizon across given as its radius in M', `rhAcross: s3(2 * m.rh)`, `rhAcross: s3(m.rh)`],
-  ['the inclination rounded to whole degrees', `incl: deg(s.incl), ri:`, `incl: s.incl.toFixed(0), ri:`],
   ['the spin to 2 decimals', `a: spinText(s.a), rhAcross:`, `a: s.a.toFixed(2), rhAcross:`],
   ['the boost to one decimal', `gmax: an && an.gmax ? s3(Math.pow(an.gmax, 4)) : '--'`, `gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--'`],
 

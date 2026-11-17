@@ -18,7 +18,9 @@
 
 import * as K from './kerr.js';
 import * as P from './physics.js';
-import { OBJECTS, DEFAULTS } from './config.js';
+// a namespace, so that a name this module does not export fails its checks instead of the whole file
+import * as CFG from './config.js';
+const { OBJECTS, DEFAULTS, CITE, EHT_RES = {} } = CFG;
 
 let fails = 0, checks = 0;
 const ok = (name, cond, detail = '') => {
@@ -77,6 +79,13 @@ guard('derive', () => {
   ok('the cache keys the charge: a = 0.3 at Q = 0 and at Q = 0.9 are two holes', c0.rh === K.horizon(0.3, 0) && c9.rh === K.horizon(0.3, 0.9), `${c0.rh} ${c9.rh}`);
   const s0 = P.derive(state({ a: 0.94 })), s1 = P.derive(state({ a: 0.941 }));
   ok('the cache keys the spin to the slider\'s step: a = 0.940 and 0.941 are two holes', s0.ri === K.isco(0.94) && s1.ri === K.isco(0.941), `${s0.ri} ${s1.ri}`);
+  // the keys hold the spin and the charge exactly: two inputs one rounding apart are two entries
+  ok('the cache keys the spin exactly: a = 0.12341 and 0.12344 are two disk tables', P.derive(state({ a: 0.12341 })).tab !== P.derive(state({ a: 0.12344 })).tab);
+  ok('the cache keys the charge exactly: Q = 0.10001 and 0.10004 are two disk tables', P.derive(state({ obj: 'custom', a: 0.3, q: 0.10001 })).tab !== P.derive(state({ obj: 'custom', a: 0.3, q: 0.10004 })).tab);
+  ok('the integrator\'s cache keys the spin exactly', P.integratorShadow(0.50001, 40, 0.3) !== P.integratorShadow(0.50004, 40, 0.3));
+  ok('the integrator\'s cache keys the charge exactly', P.integratorShadow(0.5, 41, 0.30001) !== P.integratorShadow(0.5, 41, 0.30004));
+  ok('the fall\'s cache keys the spin exactly', P.fall(0.50001, 40) !== P.fall(0.50004, 40));
+  ok('the fall\'s cache keys the charge exactly', P.fall(0.5, 41, 40, 0.10001) !== P.fall(0.5, 41, 40, 0.10004));
   ok('at a = 0.94 the prograde photon orbit is inside the retrograde one', s0.rph === K.photonOrbit(0.94, 1) && s0.rphr === K.photonOrbit(0.94, -1) && s0.rph < s0.rphr, `${s0.rph} ${s0.rphr}`);
   ok('the disk table of a charged hole starts at its charged ISCO', near(c9.tab.rIn, K.isco(0.3, 1, 0.9), 1e-9) && !near(c9.tab.rIn, K.isco(0.3), 1e-3), `${c9.tab.rIn}`);
   const r20 = P.derive(state({ rout: 20 })), r40 = P.derive(state({ rout: 40 }));
@@ -98,16 +107,23 @@ guard('derive', () => {
 guard('the analytic shadow', () => {
   const kerr = P.theoryShadow(0.5, 60);
   ok('Kerr: Bardeen\'s curve at the inclination asked (60 deg in radians), 360 points a side', same(kerr.curve, K.shadowCurve(0.5, Math.PI / 3, 360)));
-  ok('its chords and mean diameter are the curve\'s', same(kerr.chords, K.shadowChords(kerr.curve)) && kerr.mean === K.shadowMeanDiameter(kerr.curve));
+  ok('its chords are the curve\'s, and its mean diameter is their mean, (width + height) / 2', same(kerr.chords, K.shadowChords(kerr.curve)) && kerr.mean === 0.5 * (kerr.chords.width + kerr.chords.height), `${kerr.mean}`);
   const rn = P.theoryShadow(0, 60, 0.01);
   ok('charge without spin, Q = 0.01 just above 0: a circle of the critical impact parameter b_c(0.01), not sqrt(27)', rn && rn.curve.length === 720 && rn.curve.every(([x, y]) => near(Math.hypot(x, y), K.rnCriticalB(0.01), 1e-12)) && !near(K.rnCriticalB(0.01), Math.sqrt(27), 1e-6), rn && `${rn.curve.length}`);
   ok('the circle goes once round: its mean diameter is 2 b_c', near(rn.mean, 2 * K.rnCriticalB(0.01), 1e-4), `${rn.mean}`);
+  // once round in 720 steps of half a degree (the mean of its chords cannot tell once from twice; the outline can)
+  ok('the circle\'s points step by half a degree', near(Math.atan2(rn.curve[1][1], rn.curve[1][0]), Math.PI / 360, 1e-12) && near(Math.atan2(rn.curve[719][1], rn.curve[719][0]), -Math.PI / 360, 1e-9), `${Math.atan2(rn.curve[1][1], rn.curve[1][0])}`);
   const small = P.theoryShadow(0.00009, 61, 0.5);
   ok('Q = 0.5 at a = 0.00009, just below 1e-4: the circle', !!small && near(small.mean, 2 * K.rnCriticalB(0.5), 1e-4), small && `${small.mean}`);
   ok('Q = 0.5 at a = 1e-4: no closed form (null)', P.theoryShadow(0.0001, 62, 0.5) === null);
   ok('Q = 0.01 at a = 0.5: no closed form (null)', P.theoryShadow(0.5, 60, 0.01) === null);
   ok('the cache keys the charge: a = 0 at Q = 0 and at Q = 0.6 are two shadows', near(P.theoryShadow(0, 63, 0).mean, 2 * Math.sqrt(27), 1e-4) && near(P.theoryShadow(0, 63, 0.6).mean, 2 * K.rnCriticalB(0.6), 1e-4));
   ok('the cache keys the inclination', P.theoryShadow(0.9, 17).chords.amin !== P.theoryShadow(0.9, 90).chords.amin);
+  // one inclination for both calls, so only the key can tell them apart (the fixer's note, 2026-11-17)
+  const below = P.theoryShadow(0.00009, 70, 0.5), at = P.theoryShadow(0.0001, 70, 0.5);
+  ok('at one inclination, a = 0.00009 then a = 0.0001 at Q = 0.5: the circle, then no closed form', !!below && below.how === 'rn' && at === null, `${below && below.how} ${at && at.how}`);
+  const tiny = P.theoryShadow(0.5, 71, 0.00004), none = P.theoryShadow(0.5, 71, 0);
+  ok('at one inclination, Q = 0.00004 then Q = 0 at a = 0.5: no closed form, then Bardeen\'s curve', tiny === null && !!none && none.how === 'bardeen', `${tiny && tiny.how} ${none && none.how}`);
 });
 
 /* ---------- the shadow for display, and the integrator's ---------- */
@@ -150,11 +166,11 @@ guard('the comparison', () => {
   ok('M87*: the scale is the stars\', never the EHT\'s own mass', z.pred.thetaG === 3.62 && z.pred.by === 'the motions of its stars' && !near(z.pred.thetaG, K.thetaG(m87.mass, m87.distPc), 1e-3));
   ok('M87*: no shadow to set it against, and the ring beside it', z.shadow === null && z.ring.value === 42 && z.ring.err === 3);
   const zs = P.compareSentence(z, 'M87*');
-  ok('M87*: the sentence names the ring of emission and sets no sigma', zs.includes('ring of emission 42 +- 3 uas') && zs.includes('no shadow diameter for M87*') && !/sigma/.test(zs), zs);
+  ok('M87*: the sentence names the ring of emission and sets no sigma', zs.includes('ring of emission 42 +- 3 uas') && zs.includes('measured no shadow diameter from its images of M87*') && !/sigma/.test(zs), zs);
   // Sgr A*: scaled by its mass and distance (stellar orbits), set against the EHT shadow 48.7 +- 7.0 in sigma
   const s = P.compareShadow(10, sgr), tg = K.thetaG(sgr.mass, sgr.distPc), e = 10 * tg * Math.hypot(sgr.massErr / sgr.mass, sgr.distErr / sgr.distPc);
   ok('Sgr A*: scaled by its mass and distance, errors in quadrature', near(s.pred.value, 10 * tg, 1e-12) && near(s.pred.errP, e, 1e-12) && near(s.pred.errM, e, 1e-12) && s.pred.by === 'the orbits of its stars');
-  ok('Sgr A*: one sigma, against the shadow', near(s.shadow.sigma, (10 * tg - 48.7) / Math.hypot(e, 7.0), 1e-12) && s.shadow.value === 48.7 && s.ring.value === 51.8, `${s.shadow.sigma}`);
+  ok('Sgr A*: one sigma, against the shadow, and no ring beside it (the ruling: "the ring row goes")', near(s.shadow.sigma, (10 * tg - 48.7) / Math.hypot(e, 7.0), 1e-12) && s.shadow.value === 48.7 && s.ring === null, `${s.shadow.sigma} ${JSON.stringify(s.ring)}`);
   ok('Sgr A*: the sentence prints 7.0 as the paper does', P.compareSentence(s).includes('48.7 +- 7.0 uas') && /sigma from this one/.test(P.compareSentence(s)), P.compareSentence(s));
   // the error on the side of the measurement, just above, at and below it
   const fake = { distPc: 1, ruler: { thetaG: 1, errP: 2, errM: 1, by: 'x' }, eht: { shadow: 10, shadowErr: 0 } };
@@ -263,11 +279,19 @@ guard('the quantity formats', () => {
 });
 
 /* ---------- P2-4: the shadow against the horizon, from one function ---------- */
-guard('shadowToHorizon', () => {
-  const r = P.shadowToHorizon(0.94, 0);
-  ok('at M87*\'s a = 0.94: the 90 deg mean diameter over 2 r+, 3.73', near(r, P.shadowFor(0.94, 90, 0).mean / (2 * K.horizon(0.94, 0)), 1e-12) && P.s3(r) === '3.73', `${r}`);
-  ok('at a = 0: sqrt(27) / 2 = 2.60', near(P.shadowToHorizon(0), Math.sqrt(27) / 2, 1e-4), `${P.shadowToHorizon(0)}`);
-  ok('a charged hole carries its charge: a = 0, Q = 0.6, b_c(0.6) / r+(0.6)', near(P.shadowToHorizon(0, 0.6), K.rnCriticalB(0.6) / K.horizon(0, 0.6), 1e-4), `${P.shadowToHorizon(0, 0.6)}`);
+// the shadow over the horizon is the measurement's own mean diameter, at the inclination the measurement names
+// (fix_s2_p1 K1: the ratio at 90 deg sat under a diameter at 17 deg on the Instrument card)
+guard('the shadow over the horizon', () => {
+  const m = P.measurement(state({ view: 'cinematic' }));
+  ok('M87* outside the telescope view: its 17 deg mean diameter over 2 r+, 3.65', near(m.toHorizon, m.th.mean / (2 * K.horizon(0.94, 0)), 1e-12) && m.incl === 17 && P.s3(m.toHorizon) === '3.65', `${m.toHorizon}`);
+  const t = P.measurement(state({ view: 'telescope', incl: 90 }));
+  ok('in the telescope view at 90 deg: the 90 deg mean diameter over 2 r+, 3.71', near(t.toHorizon, P.shadowFor(0.94, 90, 0).mean / (2 * K.horizon(0.94, 0)), 1e-12) && P.s3(t.toHorizon) === '3.71', `${t.toHorizon}`);
+  ok('at a = 0: sqrt(27) / 2 = 2.60', near(P.measurement(state({ obj: 'custom', a: 0 })).toHorizon, Math.sqrt(27) / 2, 1e-4));
+  const rn = P.measurement(state({ obj: 'custom', a: 0, q: 0.6 }));
+  ok('a charged hole carries its charge: a = 0, Q = 0.6, b_c(0.6) / r+(0.6)', near(rn.toHorizon, K.rnCriticalB(0.6) / K.horizon(0, 0.6), 1e-4), `${rn.toHorizon}`);
+  const noq = state({ obj: 'custom', a: 0.5 });
+  delete noq.q;
+  ok('a state with no charge: the uncharged horizon', near(P.measurement(noq).toHorizon, P.shadowFor(0.5, 17, 0).mean / (2 * K.horizon(0.5, 0)), 1e-12));
 });
 
 /* ---------- P2-2: the sub-ring factor is the engine's at the spin on screen ---------- */
@@ -302,15 +326,20 @@ guard('the chord on the sky', () => {
 guard('the ruling\'s words', () => {
   const [m87, sgr] = OBJECTS;
   const m = P.compareSentence(P.compareShadow(P.shadowFor(0.94, 17).mean, m87), 'M87*');
-  ok('M87*: the ring sentence, word for word', m === 'The EHT measured a ring of emission 42 +- 3 uas across. On its own scale, theta_g 3.8 uas, its models place the ring about 10% outside the photon ring. It published no shadow diameter for M87*.', m);
+  // the verbs are the papers' (research/eht_diameters.md 1.4): no shadow diameter "as a measured value" in Paper I or
+  // VI, and Paper I's stellar and gas masses "predict a theoretical shadow diameter for a Schwarzschild black hole of
+  // 37.6 (+6.2, -3.5)" uas; the lab's own value at a = 0 follows at the same scale (fix_s2_p1 S2)
+  ok('M87*: the ring sentence, word for word', m === 'The EHT measured a ring of emission 42 +- 3 uas across. On its own scale, theta_g 3.8 uas, its models place the ring about 10% outside the photon ring. The EHT measured no shadow diameter from its images of M87*. From the mass given by the motions of its stars, the EHT\'s Paper I predicts a shadow of 37.6 (+6.2, -3.5) uas for a hole without spin, and the lab gives 37.6 (+6.2, -3.5) uas at a = 0.000.', m);
+  ok('M87*: nothing said to be published that a paper only predicted', !/published/.test(m) && /predicts a shadow of 37\.6/.test(m), m);
   const sg = P.compareShadow(P.shadowFor(0.5, 30).mean, sgr);
   ok('Sgr A*: the shadow sentence, word for word', P.compareSentence(sg) === `The EHT inferred a shadow of 48.7 +- 7.0 uas: ${P.sigmaText(sg.shadow.sigma)} from this one.` && P.sigmaText(sg.shadow.sigma) === '+0.553 sigma', P.compareSentence(sg));
   ok('a ring with no published offset or scale gives the ring and no claim about it',
-    P.compareSentence({ ring: { value: 5, err: 1 } }, 'X') === 'The EHT measured a ring of emission 5 +- 1 uas across. It published no shadow diameter for X.',
+    P.compareSentence({ ring: { value: 5, err: 1 } }, 'X') === 'The EHT measured a ring of emission 5 +- 1 uas across. The EHT measured no shadow diameter from its images of X.',
     P.compareSentence({ ring: { value: 5, err: 1 } }, 'X'));
   ok('an offset with no scale gives no claim either', !/models/.test(P.compareSentence({ ring: { value: 5, err: 1, offsetPct: 10 } }, 'X')));
   ok('a scale with no offset gives no claim either', !/models/.test(P.compareSentence({ ring: { value: 5, err: 1, scale: 3.8 } }, 'X')));
-  ok('the ruling, one string: a sigma only between two shadows', P.RULING === 'A sigma is set only between two shadows; a ring of emission is a different quantity.', P.RULING);
+  ok('the ruling in full, one string: a shadow only against a shadow, a ring in no form (fix_s2_p1 K3)', P.RULING === 'A shadow is compared only with a shadow. A ring of emission is a different quantity: the lab shows it only where the EHT measured no shadow, and never compares it with one by a sigma, a ratio, a percentage or a match.', P.RULING);
+  ok('the sentence that no shadow was measured is one function', P.noShadow('M87*') === 'The EHT measured no shadow diameter from its images of M87*.', P.noShadow('M87*'));
 });
 
 /* ---------- C10: a value is as strong as its weakest input ---------- */
@@ -365,6 +394,91 @@ guard('len, row by row', () => {
     ok(`len(${f}) = 1 ${name}`, P.len(f) === `1 ${name}`, P.len(f));
     ok(`len(${f} x 0.998) is not in ${name}`, !P.len(f * 0.998).endsWith(` ${name}`), P.len(f * 0.998));
   }
+});
+
+/* ============================================================
+   Added 2026-11-17 after review_s2_p1_second.md (its scripts in
+   scratchpad/p1_second): each block a finding's reproduction, set
+   against the rule that removes it. The writers that call these
+   rules (the guide, the plate, the tour, the cards) are read in
+   ask.test.mjs, plate.test.mjs, tour.test.mjs and the drive.
+   ============================================================ */
+
+/* ---------- S8: one definition of the mean diameter for every spin and charge ---------- */
+guard('S8: the mean diameter across Q = 0', () => {
+  // continuity first, on the shadow every writer reads: at Q = 0 Bardeen's curve, at Q = 1e-3 the integrator
+  for (const [a, i] of [[0.5, 30], [0.9, 60], [0.99, 88]]) {
+    const k0 = P.shadowFor(a, i, 0), k1 = P.shadowFor(a, i, 1e-3);
+    ok(`a = ${a}, i = ${i}: the mean diameter is continuous from Q = 0 to Q = 1e-3, within 5e-4 of itself`, Math.abs(k1.mean / k0.mean - 1) < 5e-4, `${k0.mean} vs ${k1.mean}`);
+  }
+  const sg = OBJECTS[1], s0 = P.compareShadow(P.shadowFor(0.99, 88, 0).mean, sg).shadow.sigma, s1 = P.compareShadow(P.shadowFor(0.99, 88, 0.01).mean, sg).shadow.sigma;
+  ok('Sgr A* at a = 0.99, i = 88: the sigma moves by less than 0.01 when a charge of 0.01 is added (0.08 before)', Math.abs(s1 - s0) < 0.01, `${s0} -> ${s1}`);
+  for (const [a, i, q] of [[0.5, 30, 0], [0, 30, 0.6], [0.5, 30, 0.5]]) {
+    const t = P.shadowFor(a, i, q);
+    ok(`a = ${a}, Q = ${q}: the mean is (width + height) / 2 of its own chords`, t.mean === 0.5 * (t.chords.width + t.chords.height), `${t.mean}`);
+  }
+  ok('meanDiameter: the mean of the two chords; the definition as every label names it', P.meanDiameter({ width: 10, height: 8 }) === 9 && P.MEAN_DEF === '(width + height) / 2');
+});
+
+/* ---------- S7: how a shadow was obtained, one label for every writer ---------- */
+guard('S7: the shadow\'s source label', () => {
+  ok('Kerr: Bardeen 1973, its critical curve drawn', P.shadowFor(0.5, 30, 0).how === 'bardeen' && P.SHADOW_HOW.bardeen.label === 'Bardeen 1973' && P.SHADOW_HOW.bardeen.curve === 'Bardeen 1973 critical curve');
+  ok('charge without spin: the circle 2 b_c, Reissner-Nordstrom, never Bardeen', P.shadowFor(0, 30, 0.6).how === 'rn' && /2 b_c, Reissner-Nordstrom/.test(P.SHADOW_HOW.rn.label) && !/Bardeen/.test(P.SHADOW_HOW.rn.label + P.SHADOW_HOW.rn.curve));
+  ok('Kerr-Newman with spin: traced, no closed form, and no curve to name', P.shadowFor(0.5, 30, 0.5).how === 'traced' && P.SHADOW_HOW.traced.curve === null && !/Bardeen/.test(P.SHADOW_HOW.traced.label));
+  ok('a charge at a = 9e-5, just under 1e-4: the circle', P.shadowFor(9e-5, 30, 0.5).how === 'rn');
+  ok('a charge at a = 1e-4: traced', P.shadowFor(1e-4, 31, 0.5).how === 'traced');   // another inclination: the cache keys a to 4 decimals
+});
+
+/* ---------- S6: the scale is a number with its source ---------- */
+guard('S6: the scale\'s source', () => {
+  const [m87, sgr, cyg] = OBJECTS;
+  ok('M87*: Gebhardt et al. 2011 at 16.8 Mpc, as EHT 2019 Paper VI, Table 9 gives it', P.compareShadow(10, m87).pred.src === CITE.gebhardt2011 && /Gebhardt et al\. 2011/.test(CITE.gebhardt2011) && /Paper VI, Table 9/.test(CITE.gebhardt2011), P.compareShadow(10, m87).pred.src);
+  ok('Sgr A*: Gravity Collaboration et al. 2022, as tabulated in EHT 2022 Sgr A* Paper I, Table 1', P.compareShadow(10, sgr).pred.src === CITE.gravity2022 && /Gravity Collaboration et al\. 2022/.test(CITE.gravity2022) && /Sgr A\* Paper I, Table 1/.test(CITE.gravity2022) && sgr.massSrc === 'gravity2022' && sgr.distSrc === 'gravity2022', P.compareShadow(10, sgr).pred.src);
+  ok('Cygnus X-1: its mass and distance\'s one paper, named once', P.compareShadow(10, cyg).pred.src === CITE.mj2021, P.compareShadow(10, cyg).pred.src);
+  ok('a mass and a distance from two papers: both named', P.compareShadow(10, { distPc: 1, mass: 1, massSrc: 'kerr1963', distSrc: 'mj2021' }).pred.src === `${CITE.kerr1963}; ${CITE.mj2021}`);
+});
+
+/* ---------- S2: what the EHT measured, and the prediction the lab reproduces ---------- */
+guard('S2: the prediction at a = 0', () => {
+  const z = P.compareShadow(P.shadowFor(0.94, 17).mean, OBJECTS[0]);
+  ok('M87* carries Paper I\'s 37.6 (+6.2, -3.5) uas, and the lab\'s a = 0 value at the same scale', z.predicted && z.predicted.v === 37.6 && z.predicted.errP === 6.2 && z.predicted.errM === 3.5
+    && near(z.predicted.lab.value, 2 * Math.sqrt(27) * 3.62, 1e-4) && near(z.predicted.lab.errP, 2 * Math.sqrt(27) * 0.6, 1e-4) && near(z.predicted.lab.errM, 2 * Math.sqrt(27) * 0.34, 1e-4), JSON.stringify(z.predicted));
+  ok('Sgr A*, with a shadow of its own, carries none', P.compareShadow(10, OBJECTS[1]).predicted === null);
+  ok('published(): two errors that differ as the paper prints them, one when they agree', P.published(37.6, 6.2, '+-', 3.5) === '37.6 (+6.2, -3.5)' && P.published(48.7, 7, '±', 7) === '48.7 ± 7.0', P.published(37.6, 6.2, '+-', 3.5));
+  ok('published(): both of two errors with the value\'s decimals, 48.7 (+7.0, -3.0)', P.published(48.7, 7, '+-', 3) === '48.7 (+7.0, -3.0)', P.published(48.7, 7, '+-', 3));
+});
+
+/* ---------- S11: every published number in config names its source ---------- */
+guard('S11: the sources of config\'s numbers', () => {
+  ok('the EHT\'s nominal resolution, 20 uas, cited to EHT 2019 Paper V, p. 5', EHT_RES.uas === 20 && EHT_RES.src === 'eht2019e' && /Paper V\)/.test(CITE[EHT_RES.src]) && EHT_RES.where === 'p. 5');
+  for (const o of OBJECTS) {
+    const keys = [o.massSrc, o.distSrc, o.spinSrc, o.inclSrc, o.ruler?.src, o.ruler?.basis, o.eht?.src, o.eht?.predicted?.src, o.thetaGPub?.src].filter((k) => k != null);
+    ok(`${o.name}: every source key is a citation`, keys.every((k) => typeof CITE[k] === 'string'), keys.join());
+    if (!o.hypothetical) ok(`${o.name}: its mass and distance name their source`, !!CITE[o.massSrc] && !!CITE[o.distSrc]);
+  }
+});
+
+/* ---------- K6: a value and its error to one precision ---------- */
+guard('K6: pmText', () => {
+  const eq = (name, got, want) => ok(`${name}: ${want}`, got === want, got);
+  eq('Sgr A*\'s angle, never 52.6 ± 0.268', P.pmText(52.5715, 0.2682), '52.57 ± 0.27');
+  eq('two errors that differ', P.pmText(35.414, 5.870, 3.326), '35.4 (+5.9, −3.3)');
+  eq('the smaller error sets the place', P.pmText(3.62, 0.6, 0.34), '3.62 (+0.60, −0.34)');
+  eq('in a sentence, ASCII, two errors', P.pmText(35.414, 5.870, 3.326, P.ASCII), '35.4 (+5.9, -3.3)');
+  eq('in a sentence, ASCII, one error', P.pmText(52.5715, 0.2682, 0.2682, P.ASCII), '52.57 +- 0.27');
+  eq('two errors that differ but print alike: written once', P.pmText(52.5715, 0.2682, 0.2684), '52.57 ± 0.27');
+  eq('an error just under 10: one decimal', P.pmText(120.33, 9.9), '120.3 ± 9.9');
+  eq('an error of 10: no decimal', P.pmText(120.33, 10), '120 ± 10');
+  eq('just under 1e5: no power of ten', P.pmText(99990, 120), '99990 ± 120');
+  eq('1e5: one power of ten for both', P.pmText(1e5, 1200), '(1.000 ± 0.012)×10⁵');
+  eq('the mass the EHT shadow implies', P.pmText(3.98e6, 5.72e5), '(3.98 ± 0.57)×10⁶');
+  eq('1e-3: no power of ten', P.pmText(0.001, 0.0002), '0.00100 ± 0.00020');
+  eq('just under 1e-3, Cygnus X-1\'s angle', P.pmText(9.122e-4, 1.201e-4), '(9.1 ± 1.2)×10⁻⁴');
+  eq('a large error sets the power for a small value', P.pmText(5, 2e5), '(0.0 ± 2.0)×10⁵');
+  eq('a negative value keeps its sign', P.pmText(-0.5526, 0.12), '-0.55 ± 0.12');
+  eq('a zero error: the value alone, as sci writes it', P.pmText(21.2, 0), P.sci(21.2));
+  eq('a zero lower error: the value alone', P.pmText(21.2, 1, 0), P.sci(21.2));
+  ok('not a number: --', P.pmText(NaN, 1) === '--' && P.pmText(1, NaN) === '--' && P.pmText(1, 1, NaN) === '--');
 });
 
 console.log(fails ? `\n${fails} of ${checks} physics check(s) failed` : `\nall ${checks} physics checks passed`);

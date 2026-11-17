@@ -51,16 +51,16 @@ const finishTransition = () => { const t = performance.now() + 1e6; store.tick(t
 // times the scale, a horizon across is twice its radius) are checked on their own below, from the caption's text.
 function expected(stop, s, an) {
   const m = P.derive(s), o = OBJECTS.find((x) => x.id === s.obj);
-  const ms = P.measurement(s);                                      // the Measure card's numbers
-  const ts = s.view === 'telescope' ? ms.th : P.shadowFor(s.a, 90, s.q);
-  const cmp = s.view === 'telescope' ? ms.cmp : P.compareShadow(ts.mean, o);   // ledger row 2
+  // every shadow number is the Measure card's, in every view, at the inclination it was measured at (fix_s2_p1 K1)
+  const ms = P.measurement(s), ts = ms.th, cmp = ms.cmp;                // ledger row 2
   const g = P.ringGamma(s.a, s.q);
   const n = {
     name: o.name,
     eht: P.compareSentence(cmp, o.name), by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',
+    farIncl: P.deg(ms.incl), scale: cmp ? P.s3(cmp.pred.thetaG) : '--',
     a: P.spinText(s.a), rhAcross: P.s3(2 * m.rh), shadowW: P.s3(ts.chords.width), shadowAcross: P.s3(cmp ? cmp.pred.diamM : ts.mean), vmax: P.s3(m.vIsco),
     gmax: an ? P.s3(Math.pow(an.gmax, 4)) : '--', gmin: an ? P.s3(Math.pow(an.gmin, 4)) : '--',
-    incl: P.deg(s.incl), shadowUas: cmp ? P.s3(cmp.pred.value) : '--', ri: P.s3(m.ri), eta: P.s3(m.eta * 100),
+    shadowUas: cmp ? P.s3(cmp.pred.value) : '--', ri: P.s3(m.ri), eta: P.s3(m.eta * 100),
     // the interior time runs to the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2): the centre only at a = Q = 0
     tauIn: P.dur(m.interiorTauS), inner: s.a === 0 && s.q === 0 ? 'the centre' : 'the inner horizon',
     massSun: P.sci(m.massSun), horizonAcrossKm: P.sci(2 * m.horizonKm), tidalG: P.sci(m.tidalHg), bodyM: String(P.BODY_M),
@@ -184,7 +184,8 @@ guard('the numbers a caption quotes', () => {
   st.set({ obj: 'custom', a: 0.5 }, { instant: true });
   const n = T.numbers();
   ok('a custom hole is "this hole", with no EHT image and no angular size', n.name === 'this hole' && n.eht === 'The EHT has not imaged it.' && n.shadowUas === '--', JSON.stringify([n.name, n.eht, n.shadowUas]));
-  ok('a custom hole\'s diameter across is its own mean, at 90 deg', n.shadowAcross === P.s3(P.shadowFor(0.5, 90, 0).mean), n.shadowAcross);
+  ok('a custom hole\'s diameter across is its own mean, at the 17 deg the Measure card measures it at (90 before)', n.shadowAcross === P.s3(P.shadowFor(0.5, 17, 0).mean) && n.farIncl === '17', `${n.shadowAcross} ${n.farIncl}`);
+  ok('a custom hole has no scale', n.scale === '--');
   ok('a custom hole\'s by is its mass and distance', n.by === 'its mass and distance', n.by);
   st.set({ a: 0, q: 0 }, { instant: true });
   ok('at a = Q = 0 the fall ends at the centre', T.numbers().inner === 'the centre', T.numbers().inner);
@@ -369,7 +370,7 @@ guard('the telescope stop\'s angle in significant figures', () => {
   T.start(at('telescope'));
   st.set(st.objectPatch('cygx1', 'telescope'), { instant: true });     // the state changes under a running stop
   const c = P.measurement(st.all()).cmp;
-  ok('Cygnus X-1: 9.14e-4 uas, in significant figures, not 0.0', pg.text().includes(`${P.s3(c.pred.value)} uas on the sky`) && P.s3(c.pred.value) === '9.14×10⁻⁴', pg.text());
+  ok('Cygnus X-1: 9.12e-4 uas (its mean diameter, (width + height) / 2), in significant figures, not 0.0', pg.text().includes(`${P.s3(c.pred.value)} uas on the sky`) && P.s3(c.pred.value) === '9.12×10⁻⁴', pg.text());
 });
 
 /* ---------- P2-8: a word that fixes a quantity matches the key that fills it ---------- */
@@ -391,9 +392,9 @@ guard('the words of the keys', () => {
 guard('the curve\'s colour in the idle caption', () => {
   const pg = page(), { st } = pg, w = PAL.colourWord('curve');
   st.set(st.viewPatch('telescope'), { instant: true });
-  ok(`thin gas: the curve is named ${w}, as ${PAL.MARKS.curve} draws it`, pg.text().includes(`The ${w} curve is Bardeen's 1973 critical curve`) && !/gold/i.test(pg.text()), pg.text());
+  ok(`thin gas: the curve is named ${w}, as ${PAL.MARKS.curve} draws it`, pg.text().includes(`The ${w} curve is the Bardeen 1973 critical curve`) && !/gold/i.test(pg.text()), pg.text());
   st.set({ emit: 'thick' }, { instant: true });
-  ok(`the thick disk: the curve is named ${w}`, pg.text().toLowerCase().includes(`${w} curve: bardeen's critical curve`) && !/gold/i.test(pg.text()), pg.text());
+  ok(`the thick disk: the curve is named ${w}`, pg.text().includes(`${w} curve: the Bardeen 1973 critical curve`) && !/gold/i.test(pg.text()), pg.text());
   st.set(st.objectPatch('cygx1', 'telescope'), { instant: true });
   ok('Cygnus X-1\'s 27.5 deg is written as the card writes it', pg.text().includes('at 27.5 deg'), pg.text());
   st.set({ emit: 'thick' }, { instant: true });
@@ -419,6 +420,39 @@ guard('the anchors of a camera-only transition', () => {
   ok('the eased view still differs from the target', st.view().rcam !== st.view(true).rcam);
   pg.points = POINTS;
   ok('anchors traced for the target view are live at once', T.anchors() !== null && T.anchors().key === viewKey(st.view(true)), JSON.stringify(T.anchors()));
+});
+
+/* ============================================================
+   Added 2026-11-17 after review_s2_p1_second.md (S1, S6, S7):
+   the stops quote the measurement's shadow at the inclination they
+   name, the angle with its scale's number, and the idle caption
+   names the curve as the overlay's legend does.
+   ============================================================ */
+guard('S1: the shadow stop names the inclination of its numbers', () => {
+  const pg = page(), { T, st } = pg;
+  T.start(at('shadow'));
+  const s = st.all(), ms = P.measurement(s);
+  ok('the shadow stop in the cinematic view at 84 deg: the width at M87*\'s 17 deg, said so', s.incl === 84 && ms.incl === 17 && pg.text().includes(`Seen from far away at 17 deg, the dark region is ${P.s3(ms.th.chords.width)} M wide`), pg.text());
+  ok('and not the 90 deg width it quoted before', !pg.text().includes(`${P.s3(P.shadowFor(0.94, 90, 0).chords.width)} M wide`), pg.text());
+});
+guard('S6: the telescope stop prints the scale\'s number', () => {
+  const pg = page(), { T, st } = pg;
+  T.start(at('telescope'));
+  ok('M87*: 35.4 uas at 3.62 uas per M, the scale from the motions of its stars', pg.text().includes('35.4 uas on the sky at 3.62 uas per M, the scale from the motions of its stars'), pg.text());
+  st.set(st.objectPatch('sgra', 'telescope'), { instant: true });
+  ok('Sgr A*: at 5.12 uas per M, from the orbits of its stars', pg.text().includes('at 5.12 uas per M, the scale from the orbits of its stars'), pg.text());
+});
+guard('S7: the idle caption names the curve as the legend does', () => {
+  const pg = page(), { st } = pg, w = PAL.colourWord('curve');
+  st.set(st.viewPatch('telescope'), { instant: true });
+  st.set({ obj: 'custom', a: 0, q: 0.6 }, { instant: true });
+  ok('charge without spin: the critical circle, never Bardeen\'s curve', pg.text().includes(`The ${w} curve is the ${P.SHADOW_HOW.rn.curve}`) && !/Bardeen/.test(pg.text()), pg.text());
+  st.set({ a: 0.5, q: 0.5 }, { instant: true });
+  ok('Kerr-Newman with spin: no curve is drawn, so none is named', /No closed-form curve is drawn/.test(pg.text()) && !/Bardeen/.test(pg.text()), pg.text());
+  st.set({ emit: 'thick' }, { instant: true });
+  ok('and so with the thick disk', /No closed-form curve is drawn/.test(pg.text()) && !/Bardeen/.test(pg.text()), pg.text());
+  st.set({ a: 0, q: 0.6 }, { instant: true });
+  ok('the thick disk, charge without spin: the circle', pg.text().includes(`${w} curve: the ${P.SHADOW_HOW.rn.curve}`), pg.text());
 });
 
 console.log(fails ? `\n${fails} of ${checks} tour check(s) failed` : `\nall ${checks} tour checks passed`);

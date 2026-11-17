@@ -103,8 +103,13 @@ button, input, select { font: inherit; color: inherit; }
   letter-spacing: .06em; min-height: 32px; line-height: 1.1; transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease); }
 .bh-btn:hover { border-color: var(--horizon-dim); color: var(--text-bright); }
 .bh-btn:active { background: var(--bh-wash); }
+/* a label styled as a button (the import) centres its words as a button does */
+label.bh-btn { display: inline-flex; align-items: center; justify-content: center; }
 .bh-btn:focus-visible { outline: 1px solid var(--horizon); outline-offset: 2px; }
 .bh-btn[aria-pressed="true"] { border-color: var(--accretion); color: var(--accretion-soft); background: var(--bh-gold-wash); }
+/* a toggle that stops being chosen loses its gold at once: faded out over 0.18 s, gold sat on a control no longer
+   chosen, and the drive's gold rule read it there at 390 (2026-11-17) */
+.bh-btn[aria-pressed="false"] { transition: none; }
 .bh-btn small { display: block; color: var(--text-dim); font-size: var(--bh-fs-s); letter-spacing: .02em; margin-top: 2px; }
 .bh-btn.wide { flex: 1 1 auto; text-align: left; }
 .bh-btn.go { border-color: var(--horizon-dim); color: var(--text-bright); }
@@ -258,7 +263,9 @@ button, input, select { font: inherit; color: inherit; }
     background: var(--bh-panel-solid); border-top: 1px solid var(--bh-hair-2); padding: 0 var(--bh-pad) 18px; transform: translateY(calc(100% - var(--sheet-peek, 132px)));
     transition: transform var(--t-slow) var(--ease-out); display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
   .bh-sheet.open { transform: none; }
-  .bh-sheet-h { display: flex; position: sticky; top: 0; z-index: 2; background: var(--bh-panel-solid); align-items: center; justify-content: space-between;
+  /* the header hides what scrolls under it: at 99% a white word under it shows by 2 of 255 levels. Fully opaque,
+     Chrome on Windows draws its words with LCD antialiasing, whose orange edges read as gold (2026-11-17). */
+  .bh-sheet-h { display: flex; position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--void) 99%, transparent); align-items: center; justify-content: space-between;
     padding: 10px 0 8px; border: 0; color: var(--text); width: 100%; cursor: pointer; font-size: var(--bh-fs-s); letter-spacing: .2em; text-transform: uppercase; min-height: 44px; }
   .bh-sheet-h::before { content: ''; position: absolute; top: 4px; left: 50%; width: 34px; height: 2px; margin-left: -17px; background: var(--bh-hair-2); }
   .bh-sheet-h em { font-style: normal; color: var(--horizon); }

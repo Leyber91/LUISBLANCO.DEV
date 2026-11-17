@@ -34,10 +34,10 @@ const TAGS = `if (!obj || obj.hypothetical) return { mass: 'ILLUSTRATIVE', dist:
 const REAL = `return { mass: 'REAL', dist: 'REAL', spin: obj.spinTag, edd: obj.eddTag };`;
 
 const MUTANTS = [
-  /* ---- the shadow against the horizon (P2-4) ---- */
-  ['the ratio taken at 17 deg', `return shadowFor(a, 90, q).mean / (2 * K.horizon(a, q));`, `return shadowFor(a, 17, q).mean / (2 * K.horizon(a, q));`],
-  ['the ratio over the radius, not the diameter', `return shadowFor(a, 90, q).mean / (2 * K.horizon(a, q));`, `return shadowFor(a, 90, q).mean / K.horizon(a, q);`],
-  ['the ratio\'s horizon without the charge', `return shadowFor(a, 90, q).mean / (2 * K.horizon(a, q));`, `return shadowFor(a, 90, q).mean / (2 * K.horizon(a, 0));`],
+  /* ---- the shadow against the horizon (P2-4), the measurement's own since fix_s2_p1 K1 ---- */
+  ['the ratio taken at 90 deg, not at the measurement\'s inclination', `toHorizon: th.mean / (2 * K.horizon(s.a, q))`, `toHorizon: shadowFor(s.a, 90, q).mean / (2 * K.horizon(s.a, q))`],
+  ['the ratio over the radius, not the diameter', `toHorizon: th.mean / (2 * K.horizon(s.a, q))`, `toHorizon: th.mean / K.horizon(s.a, q)`],
+  ['the ratio\'s horizon without the charge', `toHorizon: th.mean / (2 * K.horizon(s.a, q))`, `toHorizon: th.mean / (2 * K.horizon(s.a, 0))`],
 
   /* ---- the sub-ring factor (P2-2) ---- */
   ['a small charge given a closed form', `return q > 0 ? null : K.lyapunov`, `return q > 0.01 ? null : K.lyapunov`],
@@ -66,7 +66,7 @@ const MUTANTS = [
   ['the ring\'s place given as fact, not its models\'', `its models place the ring`, `it places the ring`],
   ['a claim with no offset', WHERE, WHERE.replace(`r.offsetPct != null &&`, `true &&`)],
   ['a claim with no scale', WHERE, WHERE.replace(`&& r.scale != null`, `&& true`)],
-  ['the ruling reworded', `'A sigma is set only between two shadows; a ring of emission is a different quantity.'`, `'A sigma is set between a shadow and a ring.'`],
+  ['the ruling reworded to a sigma alone', `'A shadow is compared only with a shadow. A ring of emission is a different quantity: the lab shows it only where the EHT measured no shadow, and never compares it with one by a sigma, a ratio, a percentage or a match.'`, `'A sigma is set only between two shadows; a ring of emission is a different quantity.'`],
 
   /* ---- one format per quantity kind (C3) ---- */
   ['sigmaText: 2 decimals, not 3 figures', '${sigma >= 0 ? \'+\' : \'\'}${s3(sigma)} ${sym}', '${sigma >= 0 ? \'+\' : \'\'}${sigma.toFixed(2)} ${sym}'],

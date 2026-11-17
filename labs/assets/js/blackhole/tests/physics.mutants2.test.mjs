@@ -72,7 +72,7 @@ const MUTANTS = [
   ['sci: a power of ten from 0.01', SCIFORM, SCIFORM.replace(`e <= -3`, `e <= -2`)],
   ['sci: a power of ten only below 0.001', SCIFORM, SCIFORM.replace(`e <= -3`, `e <= -4`)],
   ['sci: never a power of ten', SCIFORM, SCIFORM.replace(`e >= 5 || e <= -3`, `e >= 5 && e <= -3`)],
-  ['sci: the minus sign not raised', `.replace(/-/g, '⁻')`, ``],
+  ['sci: the minus sign not raised', `const sup = String(e).replace(/-/g, '⁻')`, `const sup = String(e)`],
   ['sci: the superscript digits shifted by one', `'⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]`, `'¹²³⁴⁵⁶⁷⁸⁹⁰'[+d]`],
   ['sci: plain numbers without thousands separators', `return Number(v.toPrecision(n)).toLocaleString('en-US');`, `return Number(v.toPrecision(n)).toString();`],
 
@@ -117,14 +117,15 @@ const MUTANTS = [
   ['compareShadow: no object breaks', `if (!obj || !obj.distPc) return null;\n  const r = obj.ruler;`, `if (!obj.distPc) return null;\n  const r = obj.ruler;`],
   ['the EHT\'s own mass used where a ruler is given', `const r = obj.ruler;`, `const r = null;`],
   ['the ruler\'s upper and lower errors swapped', `up = r ? r.errP : p.err, dn = r ? r.errM : p.err;`, `up = r ? r.errM : p.err, dn = r ? r.errP : p.err;`],
-  ['the scale\'s name dropped', `by: r ? r.by : obj.massBy };`, `by: obj.massBy };`],
+  ['the scale\'s name dropped', `by: r ? r.by : obj.massBy, src };`, `by: obj.massBy, src };`],
   ['no shadow ever set against', `if (e && e.shadow != null) {`, `if (false) {`],
   ['a shadow set against where none was published', `if (e && e.shadow != null) {`, `if (e && e.shadow == null) {`],
   ['the side of the error turned', `d > 0 ? pred.errM : pred.errP`, `d > 0 ? pred.errP : pred.errM`],
   ['the side chosen by the wrong sign', `d > 0 ? pred.errM`, `d < 0 ? pred.errM`],
   ['a sigma without the measurement\'s error', `Math.hypot(d > 0 ? pred.errM : pred.errP, e.shadowErr)`, `(d > 0 ? pred.errM : pred.errP)`],
-  ['the ring dropped', `ring: e && e.ring != null ? { value: e.ring, err: e.ringErr, offsetPct: e.ringOffsetPct, scale: obj.thetaGPub?.v } : null`, `ring: null`],
-  ['a ring where none was published', `e && e.ring != null ?`, `e && e.ring == null ?`],
+  ['the ring dropped', `const ring = e && e.ring != null && !shadow ? { value: e.ring, err: e.ringErr, offsetPct: e.ringOffsetPct, scale: obj.thetaGPub?.v } : null;`, `const ring = null;`],
+  ['a ring where none was published', `e && e.ring != null && !shadow ?`, `e && e.ring == null && !shadow ?`],
+  ['a ring beside a shadow (the ruling: "the ring row goes")', `e.ring != null && !shadow ?`, `e.ring != null ?`],
   ['published drops the error\'s decimals', '${v.toFixed(d)} ${pm} ${e.toFixed(d)}', '${v.toFixed(d)} ${pm} ${e}'],
   ['published breaks on a whole number', `(String(v).split('.')[1] || '').length`, `(String(v).split('.')[1]).length`],
   ['published with one decimal too many', `(String(v).split('.')[1] || '').length`, `(String(v).split('.')[1] || '0').length`],
@@ -134,7 +135,8 @@ const MUTANTS = [
   ['the ring sentence where a shadow exists', `if (c.shadow) return`, `if (false) return`],
   ['a sigma of 0 written without its sign', `sigma >= 0 ? '+' : ''`, `sigma > 0 ? '+' : ''`],
   ['a negative sigma given a plus', `sigma >= 0 ? '+' : ''`, `'+'`],
-  ['the name left out of the ring sentence', 'no shadow diameter for ${name}.', 'no shadow diameter.'],
+  ['the name left out of the ring sentence', '${where} ${noShadow(name)}${pred}', '${where} ${noShadow(\'M87*\')}${pred}'],
+  ['the name left out of the sentence that no shadow was measured', 'from its images of ${name}.`', 'from its images.`'],
 ];
 
 process.exit(await runMutants({ here, file: 'physics.js', test: '../physics.test.mjs', mutants: MUTANTS }));

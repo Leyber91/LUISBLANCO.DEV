@@ -16,6 +16,14 @@
 //   the Sources panel's tags are read against the pixels (P4-4), and the model route's panel opens at 390 (P4-2).
 // The expectations come from the lab's modules in the page (physics.js, kerr.js; palette.js where it exists).
 //
+// Version 3 (2026-11-17, after review_s2_p1_second.md): on load every writer of the shadow (the Instrument card, the
+// Measure card, the plate, the guide's context) names the inclination the shadow was measured at, apart from the
+// camera's (S1), and the plate's lines fit its frame, measured in the page's own font; the Measure card prints the
+// scale as a number with its source and the angle at one precision (S6, K6), and Sgr A*'s card shows no ring (S3);
+// a link giving Sgr A* a mass or a charge of its own opens a custom hole (S10), and a charged, spinning hole is
+// labelled alike on the card and the plate (S7); the tour's shadow and telescope stops quote the measurement (S1, S6);
+// on a wide screen no label on the render runs under a panel (K6).
+//
 // The frame rule. The test browser draws WebGL on the processor, and a capture of a WebGL page has come back
 // black, or with fully transparent pixels where the compositor left a hole (pull request 46). So every shot is
 // read here: no pixel with alpha 0 anywhere, and inside the canvas at least LIT_SHARE of the pixels brighter
@@ -181,6 +189,21 @@ export const CLIPPED = `(() => {
   return [...new Set(out)].slice(0, 12);
 })()`;
 
+/* fix_s2_p1 K6: on a wide screen every label drawn on the render stays clear of the two panels (the curve's legend ran
+   under the Measure card at 1440); on a phone the panels are a sheet and the window is the bound (OVERLAY_INSIDE). */
+export const OVERLAY_CLEAR = `(() => {
+  const out = [];
+  if (matchMedia('(max-width: 900px)').matches) return out;
+  const cols = ['bh-left', 'bh-right'].map((id) => document.getElementById(id)).filter((e) => e && e.getClientRects().length).map((e) => [e.id, e.getBoundingClientRect()]);
+  for (const t of document.querySelectorAll('#bh-overlay text')) {
+    const r = t.getBoundingClientRect();
+    if (r.width < 1) continue;
+    for (const [id, c] of cols) if (r.right > c.left + 1 && r.left < c.right - 1 && r.bottom > c.top + 1 && r.top < c.bottom - 1)
+      out.push('"' + t.textContent.slice(0, 32) + '" runs under #' + id + ' (' + Math.round(r.left) + ' to ' + Math.round(r.right) + ' against ' + Math.round(c.left) + ' to ' + Math.round(c.right) + ')');
+  }
+  return out;
+})()`;
+
 /* review_s2 P4-3: every label drawn on the render stays inside the window. */
 export const OVERLAY_INSIDE = `(() => {
   const out = [];
@@ -189,6 +212,37 @@ export const OVERLAY_INSIDE = `(() => {
     if (r.width < 1) continue;
     if (r.left < -1 || r.right > innerWidth + 1 || r.top < -1 || r.bottom > innerHeight + 1)
       out.push('"' + t.textContent.slice(0, 32) + '" runs past the window (' + Math.round(r.left) + ' to ' + Math.round(r.right) + ', ' + Math.round(r.top) + ' to ' + Math.round(r.bottom) + ')');
+  }
+  return out;
+})()`;
+
+/* Read in the final frames of 2026-11-17: a header that stays put while content scrolls under it hides that content
+   (the phone sheet's header was 95%, and the export buttons showed through it). Hidden means a white word under it
+   shows by under 3 of 255 levels: a ground of at least 1 - 3/255 = 98.8%. Fully opaque is not required: Chrome on
+   Windows then draws the header's words with LCD antialiasing, whose orange edges the gold rule reads as gold. */
+export const STICKY_OPAQUE = `(() => {
+  const out = [];
+  const alpha = (c) => { if (c === 'transparent') return 0; const m = /^color\\(srgb [\\d.e-]+ [\\d.e-]+ [\\d.e-]+ \\/ ([\\d.e-]+)\\)$/.exec(c) || /^rgba\\([^)]*,\\s*([\\d.]+)\\)$/.exec(c); return m ? +m[1] : 1; };
+  for (const e of document.querySelectorAll('body *')) {
+    if (getComputedStyle(e).position !== 'sticky' || !e.getClientRects().length) continue;
+    const c = getComputedStyle(e).backgroundColor, through = (1 - alpha(c)) * 255;
+    if (through >= 3) out.push((e.id ? '#' + e.id : e.tagName.toLowerCase() + '.' + [...e.classList].join('.')) + ' lets what scrolls under it show by ' + through.toFixed(1) + ' of 255 levels (' + c + ')');
+  }
+  return out;
+})()`;
+
+/* Read in the same frames: in a row of controls every label sits at the middle of its box (the import, a label
+   styled as a button, set its words 9 px above its neighbours'). */
+export const SEG_CENTRED = `(() => {
+  const out = [];
+  for (const e of document.querySelectorAll('.bh-seg > .bh-btn')) {
+    const b = e.getBoundingClientRect();
+    if (b.height < 1 || !e.getClientRects().length) continue;
+    const g = document.createRange(); g.selectNodeContents(e);
+    const rs = [...g.getClientRects()].filter((r) => r.width >= 1);
+    if (!rs.length) continue;
+    const mid = (Math.min(...rs.map((r) => r.top)) + Math.max(...rs.map((r) => r.bottom))) / 2;
+    if (Math.abs(mid - (b.top + b.bottom) / 2) > 2) out.push('"' + e.textContent.trim().slice(0, 18) + '" sits ' + Math.round(mid - (b.top + b.bottom) / 2) + ' px off its box\\'s middle');
   }
   return out;
 })()`;
@@ -269,6 +323,9 @@ export default async function blackhole(p, { base, width }) {
   for (const [n, e] of standard({ gold: { allow: [...GOLD_ALLOW, ...GOLD_DEFERRED] } })) p.invariant(n, e);
   p.invariant('invariant: no target is cut by an ancestor that does not scroll, or by the window', CLIPPED);
   p.invariant('invariant: every label on the render stays inside the window', OVERLAY_INSIDE);
+  p.invariant('invariant: on a wide screen every label on the render stays clear of the panels', OVERLAY_CLEAR);
+  p.invariant('invariant: a header that sticks over scrolling content has an opaque ground', STICKY_OPAQUE);
+  p.invariant('invariant: in a row of controls every label sits at the middle of its box', SEG_CENTRED);
   await p.before(`(${guard})()`);
   console.log(`deferred (review_s2 P3-2, the shared ai/route-panel.js): the gold rules leave out ${GOLD_DEFERRED.join(', ')}`);
 
@@ -340,6 +397,29 @@ export default async function blackhole(p, { base, width }) {
   await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
   await p.until(READY, READY_MS);
   await p.sleep(2000);
+
+  /* fix_s2_p1 S1: the page as it loads, M87* with the camera at 84 deg. Every writer of the shadow prints the
+     inclination it was measured at (physics.js measurement); the plate names the camera's apart. The plate's lines are
+     measured in the page's own IBM Plex Mono against its frame at both plate widths. */
+  const WRITERS = `(async () => {
+    const P = await import('/labs/assets/js/blackhole/physics.js'), PL = await import('/labs/assets/js/blackhole/plate.js'), A = await import('/labs/assets/js/blackhole/ask.js');
+    const app = window.__bh, s = app.store.all(), ms = P.measurement(s), f = A.facts(app);
+    const inst = [...document.querySelectorAll('#bh-read .rw')].map((r) => [r.querySelector('dt').textContent, (r.querySelector('dd') || {}).textContent || '']).find(([t]) => /^shadow, mean diameter/.test(t)) || null;
+    const meas = (document.querySelector('#bh-meas dt') || {}).textContent || '';
+    await document.fonts.load(PL.plateFont(19)); await document.fonts.load(PL.plateFont(26, 600));
+    const L = PL.plateLines(app, '2026-11-17'), g = document.createElement('canvas').getContext('2d');
+    const widest = [1920, 3840].map((W) => { const u = W / 1920; return Math.max(...L.map((l) => { g.font = PL.plateFont(l.px * u, l.weight); return g.measureText(l.text).width / u; })); });
+    return { camera: s.incl, incl: ms.incl, deg: P.deg(ms.incl), mean: P.s3(ms.th.mean), inst, meas, lines: L.map((l) => l.text), widest, inner: 1920 - PL.PLATE_BAND.frame - PL.PLATE_BAND.x,
+      font: document.fonts.check(PL.plateFont(19)), facts: [f.camera_inclination_deg, f.shadow_inclination_deg, P.s3(f.shadow_mean_diameter_M)] };
+  })()`;
+  {
+    const w = await p.ev(WRITERS);
+    p.check(`on load (M87*, camera at ${w.camera} deg): the Instrument card's shadow is the measurement's ${w.mean} M, at the ${w.deg} deg it names`, w.camera === 84 && w.incl === 17 && w.inst && w.inst[0].includes(`far observer at ${w.deg} deg`) && w.inst[1].startsWith(w.mean), JSON.stringify(w.inst));
+    p.check('on load: the Measure card\'s header names the same inclination', w.meas.startsWith(`i = ${w.deg} deg`), w.meas);
+    p.check('on load: the plate names the camera\'s 84 deg as the camera\'s and the shadow at its 17 deg', w.lines[0].includes('camera at i = 84 deg') && w.lines[1].includes(`shadow ${w.mean} M across`) && w.lines[1].includes(`seen from far away at i = ${w.deg} deg`), w.lines.slice(0, 2).join(' | '));
+    p.check('on load: the guide\'s context carries both inclinations and the measurement\'s diameter', w.facts[0] === 84 && w.facts[1] === 17 && w.facts[2] === w.mean, JSON.stringify(w.facts));
+    p.check(`the plate's lines fit inside its frame in IBM Plex Mono, at 1920 and 3840 px (widest ${w.widest.map((x) => Math.round(x)).join(', ')} of ${w.inner})`, w.font && w.widest.every((x) => x <= w.inner), JSON.stringify(w.lines));
+  }
   await sheet(true);
   for (const [mode, label] of [['true', 'True colour'], ['redshift', 'Redshift g'], ['order', 'Photon order'], ['steps', 'Integrator'], ['thermal', 'Thermal']]) {
     const i = await button('#bh-modes', label);
@@ -365,7 +445,10 @@ export default async function blackhole(p, { base, width }) {
     const s = window.__bh.store.all(), ms = P.measurement(s), c = ms.cmp;
     const card = document.getElementById('bh-meas'), sig = [...card.querySelectorAll('.bh-sig')].map((e) => e.textContent.trim());
     return { text: card.textContent.replace(/\\s+/g, ' '), sig, note: document.getElementById('bh-measnote').textContent,
-      want: c && c.shadow ? (c.shadow.sigma >= 0 ? '+' : '') + P.s3(c.shadow.sigma) + ' σ' : null };
+      want: c && c.shadow ? (c.shadow.sigma >= 0 ? '+' : '') + P.s3(c.shadow.sigma) + ' σ' : null,
+      // fix_s2_p1 S6 and K6: the scale and the angle as pmText writes them, the scale's source, the ruling in full
+      scale: c ? P.pmText(c.pred.thetaG, c.pred.thetaErrP, c.pred.thetaErrM) : null, angle: c ? P.pmText(c.pred.value, c.pred.errP, c.pred.errM) : null,
+      src: c ? c.pred.src : null, ruling: P.RULING, none: P.noShadow('M87*') };
   })()`;
   // the curve's colour word in the overlay's legend and the idle caption, against the stroke the stylesheet draws
   const WORDS = `(async () => {
@@ -393,13 +476,37 @@ export default async function blackhole(p, { base, width }) {
       p.check('M87*: no sigma on the card, the ring named as emission, the scale from its stars',
         card.sig.length === 0 && card.text.includes('EHT ring of emission') && card.text.includes('42 ± 3') && card.text.includes('the motions of its stars') && card.want === null,
         card.text.slice(0, 400));
+      p.check('M87*: the note says the EHT measured no shadow from its images', card.note.includes(card.none), card.note);
     } else {
       p.check('Sgr A*: one sigma, against the EHT shadow 48.7 ± 7.0, equal to the engine\'s',
         card.sig.length === 1 && card.sig[0] === card.want && card.text.includes('EHT shadow 48.7 ± 7.0') && card.text.includes('the orbits of its stars'),
         JSON.stringify({ sig: card.sig, want: card.want }) + ' ' + card.text.slice(0, 300));
+      // fix_s2_p1 S3: the ruling's "the ring row goes"; the research calls the near match a coincidence not to show
+      p.check('Sgr A*: no ring of emission on the card beside its shadow', !/ring of emission/.test(card.text) && !card.text.includes('51.8'), card.text.slice(0, 400));
     }
-    p.check(`${name}: the note under the card is the ruling's`, card.note.includes('a scale the EHT image did not give') && card.note.includes('only between two shadows'), card.note);
+    p.check(`${name}: the scale as a number, ${card.scale} µas per M, and the angle at one precision, ${card.angle} µas`, card.text.includes(`${card.scale}µas per M`) && card.text.includes(`${card.angle}µas`) && !/\d\.\d ± 0\.\d{3}/.test(card.text), card.text.slice(0, 500));
+    p.check(`${name}: the note names the scale's source and states the ruling in full`, card.note.includes('a scale the EHT image did not give') && card.note.includes(card.src) && card.note.includes(card.ruling), card.note);
     await frame(`measure-${obj}-${width}`);
+  }
+
+  /* fix_s2_p1 S10 and S7: a link that gives a named object a mass or a charge of its own opens a custom hole, as the
+     slider makes one, so no comparison reads the catalogue under other values; a charged, spinning hole is labelled on
+     the card as on the plate, by how its shadow was obtained (physics.js SHADOW_HOW) */
+  const CUSTOM = `(async () => {
+    const P = await import('/labs/assets/js/blackhole/physics.js'), PL = await import('/labs/assets/js/blackhole/plate.js');
+    const app = window.__bh, s = app.store.all(), ms = P.measurement(s);
+    const rows = [...document.querySelectorAll('#bh-meas .rw dt')].map((d) => d.textContent);
+    return { obj: s.obj, mass: s.mass, q: s.q, how: ms.th.how, label: P.SHADOW_HOW[ms.th.how].label, row: rows[0] || '', plate: PL.plateLines(app, 'x')[1].text,
+      card: document.getElementById('bh-meas').textContent.replace(/\\s+/g, ' '), kind: document.getElementById('bh-objkind').textContent };
+  })()`;
+  for (const [q, what] of [['?o=sgra&v=telescope&m=7', 'a mass of 1e7'], ['?o=sgra&v=telescope&qq=0.5', 'a charge of 0.5']]) {
+    await p.go(`${base}/labs/bh_animation_page.html${q}`);
+    await p.until(READY, READY_MS);
+    await p.sleep(2500);
+    await p.step(`the link ${q}`);
+    const c = await p.ev(CUSTOM);
+    p.check(`${q}: Sgr A* given ${what} opens a custom hole, with no EHT comparison on its card`, c.obj === 'custom' && c.kind === 'custom' && !/EHT shadow/.test(c.card) && !/σ/.test(c.card.replace('no σ', '')), JSON.stringify({ obj: c.obj, kind: c.kind }) + ' ' + c.card.slice(0, 200));
+    if (c.q > 0) p.check(`${q}: the card and the plate label the Kerr-Newman shadow alike, "${c.label}", never Bardeen`, c.how === 'traced' && c.row.startsWith(`width, ${c.label}`) && c.plate.includes(`(${c.label})`) && !/Bardeen/.test(c.row + c.plate), JSON.stringify({ row: c.row, plate: c.plate }));
   }
 
   /* ---- 4. the tour, stop by stop, against the engine (P2-2, P2-3, P2-8, P6-3) ---- */
@@ -415,6 +522,7 @@ export default async function blackhole(p, { base, width }) {
     const ms = P.measurement(s);
     return { i: app.tour.i, running: app.tour.running, title: (document.querySelector('#bh-caption .cap-t') || {}).textContent || '', text: (document.querySelector('#bh-caption .cap-b') || {}).textContent || '',
       a: s.a, incl: s.incl, eg: P.s3(Math.exp(K.lyapunov(s.a, K.polarPhotonOrbit(s.a)))), scale: ms.cmp ? ms.cmp.pred.thetaG : null,
+      farDeg: P.deg(ms.incl), width: P.s3(ms.th.chords.width), scaleText: ms.cmp ? P.s3(ms.cmp.pred.thetaG) : null,
       across: P.sci(2 * m.horizonKm), ring: f ? { cls: f.getAttribute('class'), stroke: f.getAttribute('stroke') } : null };
   })()`;
   const halfUlp = (t) => 0.5 * 10 ** -((String(t).split('.')[1] || '').length);
@@ -429,7 +537,10 @@ export default async function blackhole(p, { base, width }) {
     if (/Event Horizon Telescope sees/.test(st.title)) {
       const d = (st.text.match(/is ([\d.]+) M (across|wide)/) || [])[1], u = (st.text.match(/([\d.]+) uas on the sky/) || [])[1];
       p.check(`the telescope stop: the angle is the diameter beside it times the scale (${d} x ${st.scale} = ${u}), said across`, d && u && /M across/.test(st.text) && Math.abs(u - d * st.scale) <= halfUlp(d) * st.scale + halfUlp(u), st.text);
+      p.check(`the telescope stop: the scale printed as a number beside the angle, ${st.scaleText} uas per M (fix_s2_p1 S6)`, st.text.includes(`uas on the sky at ${st.scaleText} uas per M`), st.text);
     }
+    // fix_s2_p1 S1: the shadow stop, in the cinematic view at 84 deg, quotes the measurement's width at the 17 deg it names
+    if (/not the horizon/.test(st.title)) p.check(`the shadow stop: the width at the ${st.farDeg} deg it names, ${st.width} M, with the camera at ${st.incl} deg`, st.text.includes(`Seen from far away at ${st.farDeg} deg, the dark region is ${st.width} M wide`), st.text);
     if (/size of a city/.test(st.title)) p.check(`the Cygnus X-1 stop: its horizon across is 2 r+, ${st.across} km`, st.text.includes(`horizon is ${st.across} km across`), st.text);
     await pixelRules(`tour stop ${k + 1}`);
     if (k < 7) await click('#bh-caption button[data-n="next"]');

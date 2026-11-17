@@ -94,6 +94,23 @@ const MUTANTS = [
   ['boot starts from the cinematic preset whatever view the link names', BOOT, BOOT.replace(`patch.view ?? DEFAULTS.view`, `DEFAULTS.view`)],
   ['boot skips the preset', `    ${BOOT}\n`, ``],
   ['open() returns nothing the link carried', `    this.set(patch, { instant: true, src: 'boot' });\n    return patch;`, `    this.set(patch, { instant: true, src: 'boot' });\n    return {};`],
+
+  /* ---- fix_s2_p1 K5: one rule for when a named object turns custom, on every way in ---- */
+  ['a named object never turns custom', `    if (!this.isOwn()) {\n`, `    if (false) {\n`],
+  ['a named object turns custom but keeps its name', `      this.s.obj = 'custom';\n`, `      this.s.obj = this.s.obj;\n`],
+  ['the turn to custom not reported', `      if (!changed.includes('obj')) changed.push('obj');\n    }\n    if (!changed.length)`, `    }\n    if (!changed.length)`],
+  ['a mass of the visitor\'s keeps the object', `const OWN = ['mass', 'dist', 'a', 'q'];`, `const OWN = ['dist', 'a', 'q'];`],
+  ['a distance of the visitor\'s keeps the object', `const OWN = ['mass', 'dist', 'a', 'q'];`, `const OWN = ['mass', 'a', 'q'];`],
+  ['a spin of the visitor\'s keeps the object', `const OWN = ['mass', 'dist', 'a', 'q'];`, `const OWN = ['mass', 'dist', 'q'];`],
+  ['a charge of the visitor\'s keeps the object', `const OWN = ['mass', 'dist', 'a', 'q'];`, `const OWN = ['mass', 'dist', 'a'];`],
+  ['the tolerance three times the link\'s rounding', `const linkTol = (d) => 0.5 *`, `const linkTol = (d) => 1.5 *`],
+  ['the tolerance a tenth of the link\'s rounding', `const linkTol = (d) => 0.5 *`, `const linkTol = (d) => 0.05 *`],
+  ['the tolerance at the schema digits, not one more', `Math.max(d.digits, 2) + 1));`, `Math.max(d.digits, 2)));`],
+  ['the tolerance at 3 digits at least, not 2', `Math.max(d.digits, 2) + 1));`, `Math.max(d.digits, 3) + 1));`],
+  ['a key its object does not set compared all the same (Primordial\'s distance)', `p[k] === undefined || Math.abs`, `false || Math.abs`],
+  ['a key its object sets never its own', `p[k] === undefined || Math.abs`, `p[k] === undefined && Math.abs`],
+  ['twice the tolerance taken as the object\'s own', `<= linkTol(BY_KEY[k]));`, `<= 2 * linkTol(BY_KEY[k]));`],
+  ['the catalogue read for another object', `const p = this.objectPatch(s.obj, s.view);`, `const p = this.objectPatch('m87', s.view);`],
 ];
 
 process.exit(await runMutants({ here, file: 'state.js', test: '../state.test.mjs', mutants: MUTANTS }));

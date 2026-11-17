@@ -27,9 +27,9 @@ import { dirname } from 'node:path';
 import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const BASEKEY = 'b:${a.toFixed(4)}:${q.toFixed(4)}:${s.rout}';
-const SHAPEKEY = 's:${a.toFixed(4)}:${q.toFixed(4)}:${inclDeg.toFixed(2)}';
-const FALLKEY = 'f:${a.toFixed(4)}:${q.toFixed(4)}:${inclDeg.toFixed(1)}:${r0}';
+const BASEKEY = 'b:${a}:${q}:${s.rout}';
+const SHAPEKEY = 's:${a}:${q}:${inclDeg.toFixed(2)}';
+const FALLKEY = 'f:${a}:${q}:${inclDeg.toFixed(1)}:${r0}';
 const TPEAK = `const Tpeak = edd > 1e-9 && obj?.id !== 'primordial' ? K.diskPeakKelvin(massSun, a, edd, base.peak.F, q) : 0;`;
 const REL = `Math.hypot((obj.massErr || 0) / obj.mass, (obj.distErr || 0) / obj.distPc)`;
 const INCL = `const incl = s.view === 'telescope' ? s.incl : (obj ? obj.incl : 17);`;
@@ -52,10 +52,10 @@ const MUTANTS = [
   ['objectOf a custom hole is undefined', `OBJECTS.find((o) => o.id === s.obj) || null`, `OBJECTS.find((o) => o.id === s.obj) || undefined`],
 
   /* ---- derive ---- */
-  ['a state with no charge read at Q = 0.1', `q = s.q || 0;`, `q = s.q || 0.1;`],
-  ['the cache does not key the charge', BASEKEY, 'b:${a.toFixed(4)}:${s.rout}'],
-  ['the cache keys the spin to 2 decimals', BASEKEY, 'b:${a.toFixed(2)}:${q.toFixed(4)}:${s.rout}'],
-  ['the cache does not key the disk\'s outer edge', BASEKEY, 'b:${a.toFixed(4)}:${q.toFixed(4)}'],
+  ['a state with no charge read at Q = 0.1', `const a = s.a, q = s.q || 0;`, `const a = s.a, q = s.q || 0.1;`],
+  ['the cache does not key the charge', BASEKEY, 'b:${a}:${s.rout}'],
+  ['the cache keys the spin to 2 decimals', BASEKEY, 'b:${a.toFixed(2)}:${q}:${s.rout}'],
+  ['the cache does not key the disk\'s outer edge', BASEKEY, 'b:${a}:${q}'],
   ['the disk table drops the charge', `K.ntFluxTable(a, s.rout, 512, q)`, `K.ntFluxTable(a, s.rout, 512, 0)`],
   ['the retrograde photon orbit taken prograde', `rphr: K.photonOrbit(a, -1, q)`, `rphr: K.photonOrbit(a, 1, q)`],
   ['the ISCO taken retrograde', `ri: K.isco(a, 1, q),`, `ri: K.isco(a, -1, q),`],
@@ -94,17 +94,17 @@ const MUTANTS = [
   ['the charged circle drawn at sqrt(27)', `const b = K.rnCriticalB(q);`, `const b = Math.sqrt(27);`],
   ['the charged circle drawn twice round', `b * Math.cos(Math.PI * i / 360), b * Math.sin(Math.PI * i / 360)`, `b * Math.cos(Math.PI * i / 180), b * Math.sin(Math.PI * i / 180)`],
   ['the Kerr curve at the inclination in degrees read as radians', `K.shadowCurve(a, inclDeg * Math.PI / 180, 360)`, `K.shadowCurve(a, inclDeg, 360)`],
-  ['the shadow cache does not key the charge', SHAPEKEY, 's:${a.toFixed(4)}:${inclDeg.toFixed(2)}'],
-  ['the shadow cache does not key the inclination', SHAPEKEY, 's:${a.toFixed(4)}:${q.toFixed(4)}'],
+  ['the shadow cache does not key the charge', SHAPEKEY, 's:${a}:${inclDeg.toFixed(2)}'],
+  ['the shadow cache does not key the inclination', SHAPEKEY, 's:${a}:${q}'],
 
   /* ---- the shadow for display, the integrator ---- */
   ['the analytic shadow never used', `  if (t) return t;\n`, ``],
-  ['the traced shadow\'s mean is its width', `mean: 0.5 * (m.width + m.height), traced: true`, `mean: m.width, traced: true`],
-  ['the traced shadow not marked as traced', `, traced: true };`, ` };`],
+  ['the traced shadow\'s mean is its width', `mean: meanDiameter(chords), traced: true`, `mean: chords.width, traced: true`],
+  ['the traced shadow not marked as traced', `traced: true, how: 'traced' };`, `how: 'traced' };`],
   ['the integrator drops the charge', `{ q, k: 0.08, iters: 22 }`, `{ k: 0.08, iters: 22 }`],
   ['the integrator at half the inclination', `K.measureShadow(a, inclDeg * Math.PI / 180,`, `K.measureShadow(a, inclDeg * Math.PI / 360,`],
   ['the integrator\'s bisection cut to 6 halvings', `k: 0.08, iters: 22 }`, `k: 0.08, iters: 6 }`],
-  ['the integrator\'s cache does not key the charge', 'm:${a.toFixed(4)}:${q.toFixed(4)}:', 'm:${a.toFixed(4)}:'],
+  ['the integrator\'s cache does not key the charge', 'm:${a}:${q}:', 'm:${a}:'],
 
   /* ---- the predicted angle ---- */
   ['no distance: an angle all the same', `if (!obj || !obj.distPc) return null;\n  const tg = K.thetaG(obj.mass, obj.distPc);`, `if (!obj) return null;\n  const tg = K.thetaG(obj.mass, obj.distPc);`],
@@ -118,7 +118,7 @@ const MUTANTS = [
   ['the telescope view measured at the object\'s inclination', INCL, INCL.replace(`'telescope'`, `'telescopeX'`)],
   ['a custom hole measured at 18 deg', INCL, INCL.replace(`: 17);`, `: 18);`)],
   ['every view measured at the state\'s inclination', INCL, `const incl = s.incl;`],
-  ['a state with no charge measured at Q = 0.1', `const th = shadowFor(s.a, incl, s.q || 0);`, `const th = shadowFor(s.a, incl, s.q || 0.1);`],
+  ['a state with no charge measured at Q = 0.1', `objectOf(s), q = s.q || 0;`, `objectOf(s), q = s.q || 0.1;`],
   ['no comparison in the measurement', `cmp: compareShadow(th.mean, obj) };`, `cmp: null };`],
 
   /* ---- the fall ---- */
@@ -126,8 +126,8 @@ const MUTANTS = [
   ['the fall at the polar angle in degrees read as radians', `K.fallTable(a, inclDeg * Math.PI / 180, r0, q, 500)`, `K.fallTable(a, inclDeg, r0, q, 500)`],
   ['the fall in 600 steps', `K.fallTable(a, inclDeg * Math.PI / 180, r0, q, 500)`, `K.fallTable(a, inclDeg * Math.PI / 180, r0, q, 600)`],
   ['the fall drops the charge', `K.fallTable(a, inclDeg * Math.PI / 180, r0, q, 500)`, `K.fallTable(a, inclDeg * Math.PI / 180, r0, 0, 500)`],
-  ['the fall cache does not key the start', FALLKEY, 'f:${a.toFixed(4)}:${q.toFixed(4)}:${inclDeg.toFixed(1)}'],
-  ['the fall cache does not key the charge', FALLKEY, 'f:${a.toFixed(4)}:${inclDeg.toFixed(1)}:${r0}'],
+  ['the fall cache does not key the start', FALLKEY, 'f:${a}:${q}:${inclDeg.toFixed(1)}'],
+  ['the fall cache does not key the charge', FALLKEY, 'f:${a}:${inclDeg.toFixed(1)}:${r0}'],
 ];
 
 process.exit(await runMutants({ here, file: 'physics.js', test: '../physics.test.mjs', mutants: MUTANTS }));

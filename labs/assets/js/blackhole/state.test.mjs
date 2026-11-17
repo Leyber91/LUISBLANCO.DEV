@@ -75,8 +75,10 @@ function roundTrip(name, store) {
   ok('a full telescope link opens as before', s.get('rcam') === 1000 && s.get('fov') === 1.15 && s.get('incl') === 17 && s.get('emit') === 'thin');
   const t = open('?o=sgra&i=60');
   ok('?o=sgra&i=60 opens Sgr A* at 60 deg', t.get('obj') === 'sgra' && t.get('incl') === 60 && t.get('a') === 0.5 && t.get('edd') === -8);
+  // a spin of the link's own is not Cygnus X-1's measured 0.998: the hole opens custom, at the object's mass and
+  // distance, as the spin slider makes it (fix_s2_p1 K5; this asserted obj = cygx1 before)
   const u = open('?o=cygx1&i=40&a=0.5');
-  ok('?o=cygx1&i=40&a=0.5 opens Cygnus X-1 at 40 deg and a = 0.5', u.get('obj') === 'cygx1' && u.get('incl') === 40 && u.get('a') === 0.5);
+  ok('?o=cygx1&i=40&a=0.5 opens a custom hole at Cygnus X-1\'s mass, 40 deg and a = 0.5', u.get('obj') === 'custom' && u.get('incl') === 40 && u.get('a') === 0.5 && u.get('mass') === Math.log10(21.2), `${u.get('obj')}`);
   ok('the legacy ?type=schwarzschild&view=edge still maps to a = 0 at 88 deg', open('?type=schwarzschild&view=edge').get('a') === 0 && open('?type=schwarzschild&view=edge').get('incl') === 88);
 }
 
@@ -184,7 +186,9 @@ guard('a hole needs a^2 + q^2 < 1', () => {
 });
 
 guard('what a change reports', () => {
+  // a custom hole, so that a spin changes the spin alone (on a named object it also makes the hole custom, below)
   const s = new Store(), heard = [];
+  s.set({ obj: 'custom' }, { instant: true });
   s.on((changed, state, src) => heard.push([changed.join(), src, state === s.s]));
   ok('a key set to the value it already has is no change, and nobody hears it', s.set({ a: s.get('a') }).length === 0 && heard.length === 0, `${heard.length} heard`);
   s.set({ a: 0.5 }, { instant: true });
@@ -314,6 +318,55 @@ guard('the link\'s text', () => {
   ok('?type=kerr (the first version\'s links) opens a = 0.9', open('?type=kerr').get('a') === 0.9, `${open('?type=kerr').get('a')}`);
   ok('?type=kerr&o=sgra: the object names the spin, 0.5', open('?type=kerr&o=sgra').get('a') === 0.5, `${open('?type=kerr&o=sgra').get('a')}`);
   ok('?type=schwarzschild alone opens at the cinematic 84 deg: only view=edge means 88', open('?type=schwarzschild').get('incl') === 84, `${open('?type=schwarzschild').get('incl')}`);
+});
+
+/* ============================================================
+   fix_s2_p1 K5 (review_s2_p1_second S10): every way into the
+   state takes one rule for when a named object turns custom. A
+   link, a set() from an imported file (plate.test.mjs) and a
+   slider (the drive) all go through Store.set. Each bound is
+   checked just inside and just outside half a unit of the link's
+   last written digit.
+   ============================================================ */
+guard('a named object is its catalogue\'s hole', () => {
+  const g = open('?o=sgra&v=telescope&m=7');
+  ok('?o=sgra&v=telescope&m=7: a mass of the link\'s own makes a custom hole, so no comparison reads 4.297e6 under 1e7', g.get('obj') === 'custom' && g.get('mass') === 7, `${g.get('obj')}`);
+  const sg = Math.log10(4.297e6), m87 = Math.log10(6.5e9);
+  for (const [name, q, want] of [
+    ['a mass 4e-4 above Sgr A*\'s log10, inside the link\'s 5e-4', `?o=sgra&m=${sg + 4e-4}`, 'sgra'],
+    ['a mass 6e-4 above it, outside', `?o=sgra&m=${sg + 6e-4}`, 'custom'],
+    ['a mass 6e-4 below it, outside', `?o=sgra&m=${sg - 6e-4}`, 'custom'],
+    ['a distance 4e-4 off Sgr A*\'s, inside', `?o=sgra&d=${Math.log10(8277) + 4e-4}`, 'sgra'],
+    ['a distance 6e-4 off it, outside', `?o=sgra&d=${Math.log10(8277) + 6e-4}`, 'custom'],
+    ['a spin 4e-5 off M87*\'s 0.94, inside the link\'s 5e-5', '?o=m87&a=0.94004', 'm87'],
+    ['a spin 6e-5 off it, outside', '?o=m87&a=0.94006', 'custom'],
+    ['a spin 6e-5 below it, outside', '?o=m87&a=0.93994', 'custom'],
+    ['a charge of 4e-4, inside the link\'s 5e-4', '?o=sgra&qq=0.0004', 'sgra'],
+    ['a charge of 6e-4, outside', '?o=sgra&qq=0.0006', 'custom'],
+    ['M87*\'s own mass written to 3 decimals, as a link writes it', `?o=m87&m=${m87.toFixed(3)}`, 'm87'],
+    ['an Eddington ratio of the link\'s own: not a key of the rule', '?o=sgra&e=-5', 'sgra'],
+    ['an inclination of the link\'s own: not a key of the rule', '?o=sgra&v=telescope&i=60', 'sgra'],
+    ['Primordial has no distance, so a distance of the link\'s own is not compared', '?o=primordial&d=5', 'primordial'],
+  ]) {
+    const s = open(q);
+    ok(`${name}: ${q} opens ${want}`, s.get('obj') === want, `${s.get('obj')}`);
+  }
+  // the same rule after boot: a set() of a spin, a charge or a mass, as a slider or the guide's apply sends it
+  for (const k of ['a', 'q', 'mass', 'dist']) {
+    const s = open('?o=sgra'), heard = [];
+    s.on((changed) => heard.push(changed.join()));
+    s.set({ [k]: s.get(k) + 0.05 }, { instant: true });
+    ok(`Sgr A* given a ${k} of the visitor's: custom, and the change reports obj`, s.get('obj') === 'custom' && heard[0] === `${k},obj`, `${s.get('obj')} ${heard[0]}`);
+  }
+  const c = open('?o=custom&m=3');
+  c.set({ a: 0.2 }, { instant: true });
+  ok('a custom hole stays custom, whatever it is given', c.get('obj') === 'custom');
+  const back = open('?o=sgra');
+  back.set({ a: 0.6 }, { instant: true });
+  back.set({ a: 0.5 }, { instant: true });
+  ok('a named object made custom does not turn back when its spin returns', back.get('obj') === 'custom');
+  ok('the tour\'s and the buttons\' presets keep their object: every object in every view', OBJECTS.every((o) => Object.keys(VIEWS).every((v) => { const s = open(''); s.set(s.objectPatch(o.id, v), { instant: true }); s.set(s.viewPatch(v), { instant: true }); return s.get('obj') === o.id; })));
+  ok('isOwn(): the catalogue state is its own; a custom hole always is', open('?o=cygx1').isOwn() && open('?o=custom&a=0.3').isOwn());
 });
 
 console.log(fails ? `\n${fails} of ${checks} link check(s) failed` : `\nall ${checks} link checks passed`);
