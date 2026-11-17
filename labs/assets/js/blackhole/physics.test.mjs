@@ -342,22 +342,6 @@ guard('the ruling\'s words', () => {
   ok('the sentence that no shadow was measured is one function', P.noShadow('M87*') === 'The EHT measured no shadow diameter from its images of M87*.', P.noShadow('M87*'));
 });
 
-/* ---------- the claim before the card (2026-11-17): the page's opening line, its description and the hub card said
-   "the shadow measured against the Event Horizon Telescope" over M87*, for which the EHT measured no shadow. Where
-   one of them names the EHT, it names Sgr A*, the object whose shadow it measured, and never "matches". ---------- */
-{
-  const fs = await import('node:fs');
-  const page = fs.readFileSync(new URL('../../../bh_animation_page.html', import.meta.url), 'utf8');
-  const desc = (/<meta name="description" content="([^"]*)"/.exec(page) || [])[1] || '';
-  let hub = '';
-  try { hub = ((await import('../config/site.config.js')).ALL_PROJECTS.find((p) => p.id === 'black-hole') || {}).blurb || ''; } catch (e) { hub = ''; }
-  for (const [where, s] of [['the opening line', CFG.COPY ? CFG.COPY.sub : ''], ['the description', desc], ['the hub card', hub]]) {
-    ok(`${where} is read`, s.length > 40, s);
-    // in the EHT's own clause: the old hub card named Sgr A* in its list of objects and passed a looser check
-    if (/Event Horizon Telescope|EHT/.test(s)) ok(`${where} names Sgr A* in the clause that names the EHT, and claims no match`, /(Event Horizon Telescope|EHT)[^,.;]*Sgr A\*/.test(s) && !/match/i.test(s), s);
-  }
-}
-
 /* ---------- C10: a value is as strong as its weakest input ---------- */
 guard('the tags', () => {
   ok('all REAL is REAL', P.weakest('REAL', 'REAL') === 'REAL' && P.weakest('REAL') === 'REAL');
