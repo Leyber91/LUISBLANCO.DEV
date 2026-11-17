@@ -1,17 +1,7 @@
 /* ============================================================
    heptapod/pod/inked.js — the inked script (topo/inkfig.js) in the
-   pod, behind a switch.
-
-   The switch. research/ip.md rule 6 keeps a figure off the public
-   site until its similarity to the film's logograms has been checked:
-   Luis looks at every pair in the review band (0.65 to 0.80) and a
-   corpus run of the gate passes. Until then INKED.published is false,
-   and the pod writes in the codec's ring script for everyone. On a
-   page served from this machine (127.0.0.1 or localhost) the link
-   ?script=inked shows the inked figure, so it can be judged in the
-   chamber before it is published. Turning it on for everyone is the
-   one line `published: true` below; then ?script=ring brings the
-   codec's ring back.
+   pod. Loaded only when pod/switch.js turns it on (pod/main.js), so a
+   public visit never fetches it while it is unpublished.
 
    A ring as a meaning graph. A pod ring is one clause: the act is the
    event, and whoever acts, what is handled and whoever receives are
@@ -23,11 +13,17 @@
    reading of a mark) is one pool with nothing hanging from it.
 
    What a crop keeps. The figure is drawn with a trace of where each
-   pool and thread was laid (inkfig.js opts.trace). A crop keeps a
-   radical when it holds at least KEEP of that thread's traced points
-   (or of its pool's, for the act) with ink still there at that moment
-   of the thinning; the thinning removes the same width from every
-   stroke, read from a distance transform of the raster.
+   pool and thread was laid (inkfig.js opts.trace). A thread's first
+   quarter rises out of the act's pool, so it is not read as the
+   thread's own: a crop keeps a radical when it holds at least KEEP of
+   that thread's other traced points (or of its pool's, for the act)
+   with ink still there at that moment of the thinning; the thinning
+   removes the same width from every stroke, read from a distance
+   transform of the raster.
+
+   One figure per ring and species is drawn at one size and kept in
+   one bounded cache that the chamber and the notebook share, so a
+   crop is drawn from the raster it was read on.
 
    Not drawn by this script yet: the being's press on one concept (the
    ring script widens that sector; inkfig.js has no weight channel), so
@@ -40,21 +36,12 @@ import { inkFigure } from '../topo/inkfig.js';
 import { mulberry32, seedOf, shuffle } from '../../kit/rng.js';
 import { ROLES } from './ring.js';
 
-export const INKED = Object.freeze({
-  published: false,   // rule 6 (research/ip.md): the one place to turn the inked script on for everyone
-  S: 1000,            // the raster side the figure is drawn at, pixels
-  KEEP: 0.6,          // share of a thread's traced points a crop must hold, with ink left, to keep its radical
+export const INKFIG = Object.freeze({
+  S: 800,             // the raster side the figure is drawn at, pixels (R 292 px, about 2.5 raster pixels a field cell)
+  KEEP: 0.6,          // share of a part's traced points a crop must hold, with ink left, to keep its radical
+  ROOT: 0.25,         // the share of a thread, from its root in the pool, that is not read as the thread's own
+  CACHE: 16,          // figures kept at once (each about 0.6 MB)
 });
-
-const LOCAL = /^(127\.0\.0\.1|localhost|\[::1\])$/;
-
-/** Which script the pod writes in: 'inked' or 'ring'. */
-export function scriptOf(loc = globalThis.location) {
-  let q = null;
-  try { q = new URLSearchParams(loc.search).get('script'); } catch { q = null; }
-  if (INKED.published) return q === 'ring' ? 'ring' : 'inked';
-  return loc && LOCAL.test(loc.hostname || '') && q === 'inked' ? 'inked' : 'ring';
-}
 
 /* ---------------- a species' concepts as radical sets ---------------- */
 const COMBOS = (() => {
@@ -102,7 +89,8 @@ export function soloGraph(sp, id) {
 
 /* ---------------- the figure, its distance field, its trace ---------------- */
 
-/* Chamfer distance (3-4, divided by 3) from each ink pixel to the nearest pixel without ink. */
+/* Chamfer distance (3-4) from each ink pixel to the nearest pixel without ink, in thirds of a pixel and clamped at
+   255 (85 pixels, deeper than any stroke's half width at INKFIG.S): one byte a pixel. */
 export function distanceIn(d, W, H) {
   const BIG = 1e9, D = new Float32Array(W * H);
   for (let i = 0; i < W * H; i++) D[i] = d[i] ? BIG : 0;
@@ -122,31 +110,50 @@ export function distanceIn(d, W, H) {
     if (y < H - 1) { v = Math.min(v, D[i + W] + 3); if (x < W - 1) v = Math.min(v, D[i + W + 1] + 4); if (x > 0) v = Math.min(v, D[i + W - 1] + 4); } else v = Math.min(v, 3);
     D[i] = v;
   }
-  for (let i = 0; i < W * H; i++) D[i] /= 3;
-  return D;
+  const out = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) out[i] = Math.min(255, D[i]);
+  return out;
 }
+/* The distance (thirds of a pixel) a pixel must exceed to keep ink after a thinning of `erode` ring radii of width. */
+const keepAbove = (fig, erode) => 3 * ((erode / 2) * fig.R + 0.5);
 
 /**
  * The inked figure of a graph, ready for the pod: { ok, S, R, c, dist, parts }, where parts maps a role
  * ('pred', 'agent', 'patient', 'recipient') to its traced points in ring radii (x right, y down, from the
  * centre), and dist is each pixel's distance to the paper, in raster pixels.
  */
-export function podFigure(g, S = INKED.S) {
+export function podFigure(g, S = INKFIG.S) {
   const f = inkFigure(g, { S, trace: true });
   if (!f.ok) return { ok: false, reason: f.reason };
   const R = f.R, c = f.cx;
   const toRing = ([x, y]) => [(x - c) / R, (y - c) / R];
   const parts = {};
   for (const p of f.trace.pools) parts.pred = (parts.pred || []).concat(p.pts.map(toRing));
-  for (const t of f.trace.threads) { const role = ROLE_OF[t.label]; if (role) parts[role] = (parts[role] || []).concat(t.pts.map(toRing)); }
+  for (const t of f.trace.threads) {
+    const role = ROLE_OF[t.label];
+    if (role) parts[role] = (parts[role] || []).concat(t.pts.slice(Math.floor(INKFIG.ROOT * t.pts.length)).map(toRing));
+  }
   return { ok: true, S, R, c, dist: distanceIn(f.d, S, S), parts, version: f.version };
+}
+
+/* One bounded cache of figures, shared by the chamber and the notebook: the oldest used goes first. */
+const cache = new Map();
+/** The figure of a pod ring: spec.pod is { scene } (or -1, the greeting) or { solo }. */
+export function figureOf(sp, pod) {
+  const key = `${sp.target}|${sp.seed}|${pod.solo ? 's:' + pod.solo : 'r:' + pod.scene}`;
+  if (cache.has(key)) { const f = cache.get(key); cache.delete(key); cache.set(key, f); return f; }
+  const g = pod.solo ? soloGraph(sp, pod.solo) : ringGraph(sp, pod.scene < 0 ? sp.greeting.ids : sp.rings[pod.scene].ids);
+  const f = podFigure(g);
+  cache.set(key, f);
+  while (cache.size > INKFIG.CACHE) cache.delete(cache.keys().next().value);
+  return f;
 }
 
 /** Is there ink at ring point (x, y) after a thinning of `erode` ring radii of width? */
 export function inkAt(fig, x, y, erode = 0) {
   const px = Math.round(fig.c + x * fig.R - 0.5), py = Math.round(fig.c + y * fig.R - 0.5);
   if (px < 0 || py < 0 || px >= fig.S || py >= fig.S) return false;
-  return fig.dist[py * fig.S + px] > (erode / 2) * fig.R + 0.5;
+  return fig.dist[py * fig.S + px] > keepAbove(fig, erode);
 }
 
 /**
@@ -164,17 +171,30 @@ export function recogniseInked(fig, rect, erode = 0) {
     for (const [x, y] of pts) if (x >= rect.x0 && x <= rect.x1 && y >= rect.y0 && y <= rect.y1 && inkAt(fig, x, y, erode)) held++;
     counts[role] = held;
     cells += held;
-    if (held >= INKED.KEEP * pts.length) roles.push(role);
+    if (held >= INKFIG.KEEP * pts.length) roles.push(role);
   }
   return { roles, counts, cells };
 }
 
-/** The rectangle (ring radii) around one role's traced points, with a margin. */
-export function sectorRectInked(fig, role, pad = 0.12) {
-  const pts = fig.parts[role];
-  if (!pts || !pts.length) return null;
-  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
-  return { x0: Math.min(...xs) - pad, y0: Math.min(...ys) - pad, x1: Math.max(...xs) + pad, y1: Math.max(...ys) + pad };
+/**
+ * The rectangle (ring radii) a key keeps for one role: the box around its traced points, with a margin, or, where
+ * that box also holds enough of another part to keep it, the box around the longest run of its points that holds it
+ * alone (a run, in the order the part was drawn, of at least KEEP of its points). Null when the ring has no such part.
+ */
+export function sectorRectInked(fig, role, pad = 0.04) {
+  const own = fig.parts[role];
+  if (!own || !own.length) return null;
+  const box = (pts, m = pad) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [x, y] of pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    return { x0: x0 - m, y0: y0 - m, x1: x1 + m, y1: y1 + m };
+  };
+  const alone = (r) => { const k = recogniseInked(fig, r, 0); return k.roles.length === 1 && k.roles[0] === role; };
+  const whole = box(own);
+  if (alone(whole)) return whole;
+  const n = own.length, need = Math.ceil(INKFIG.KEEP * n);
+  for (const m of [pad, pad / 4]) for (let k = n; k >= need; k--) for (let a = 0; a + k <= n; a++) { const r = box(own.slice(a, a + k), m); if (alone(r)) return r; }
+  return whole;
 }
 
 /**
@@ -183,7 +203,7 @@ export function sectorRectInked(fig, role, pad = 0.12) {
  */
 export function inkedTarget(fig, N, span, erode = 0) {
   const T = new Float32Array(N * N);
-  const thr = (erode / 2) * fig.R + 0.5;
+  const thr = keepAbove(fig, erode);
   const k = (span * fig.R) / N;                 // raster pixels per field cell
   const x0 = fig.c - (span / 2) * fig.R;
   const sub = Math.max(1, Math.min(4, Math.round(k)));

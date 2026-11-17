@@ -64,14 +64,14 @@ import { seedOf } from './species.js';
 import { ringSpec, podStrokes, recognise, sectorRect, INK } from './ring.js';
 import { DAY, GREETING, whereIs, freeSlot } from './day.js';
 import { drawObject, drawShadow, objW, objH, THING_NAME } from './objects.js';
-import { InkField, MEDIUM, fogNoise } from './medium.js';
-import { ringGraph, soloGraph, podFigure, recogniseInked, sectorRectInked, inkedTarget } from './inked.js';
+import { InkField, MEDIUM, fogNoise, flowFor } from './medium.js';
 
 export const TIME = { bloom: 2200, hang: 4000, thin: 3400, slate: 2800, giveOut: 640, giveBack: 760, flash: 700 };
 /* The disc holds the ring with room for its longest threads: the disc's radius over the ring's. */
 export const DISC_OVER_RING = 1.72;
 const SPAN = 2 * DISC_OVER_RING;        // the field's side, in ring radii
 const FOG_Q = 2;                         // the fog is drawn at half size and scaled up
+const TALL = 2.1;                        // the being's half height in body radii (its half width is 0.8): taller than the room shows
 const INK_RGB = [7, 9, 13];              // what the ink lets through is the fog's own light: this is the absorber
 const INK_SPREAD = 1.5;                  // a ring-script stroke's width in the fog, over its width on the bench
 const ease = (t) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
@@ -81,13 +81,16 @@ const HORIZON = [159, 179, 214];
 
 export function initPod(canvas, hooks) {
   const { sp } = hooks;
-  const script = hooks.script === 'inked' ? 'inked' : 'ring';
+  const inked = hooks.script === 'inked' ? hooks.inked : null;   // pod/inked.js, passed in only when the switch is on
+  const script = inked ? 'inked' : 'ring';
   const P = palette();
   const reduced = hooks.reduced ?? prefersReduced();   // the platform's scene lifecycle passes it in
   const rnd = mulberry32(seedOf('body', sp.target, sp.seed));
   const body = {
     side: rnd() < 0.5 ? -1 : 1,
-    lobes: [[2, 0.1], [3, 0.13], [5, 0.07], [7, 0.04]].map(([k, a]) => ({ k, a: a * (0.7 + 0.6 * rnd()), ph: rnd() * Math.PI * 2 })),
+    // its outline: an ellipse bent by the four lowest harmonics that change its shape (2 to 5 bulges round it), each
+    // with a seeded strength and phase, weaker the higher it is, so the outline stays smooth and counts no limbs
+    lobes: [[2, 0.1], [3, 0.12], [4, 0.07], [5, 0.04]].map(([k, a]) => ({ k, a: a * (0.7 + 0.6 * rnd()), ph: rnd() * Math.PI * 2 })),
     // its folds: lines that run down the body between its two sides, each from a seeded place across it
     folds: Array.from({ length: 11 }, () => ({ u: -0.92 + 1.84 * rnd(), t0: 0.03 + 0.12 * rnd(), len: 0.5 + 0.45 * rnd(), amp: 0.015 + 0.035 * rnd(), ph: rnd() * Math.PI * 2, f: 2 + 4 * rnd() })),
   };
@@ -118,45 +121,53 @@ export function initPod(canvas, hooks) {
   const gaze = { x: 0, y: 1, tx: 0, ty: 1, lean: 0 };
   let slate = null, flash = null, hover = null, enabled = true, sel = 0, keys = false;
   const givers = [];
-  const figs = new Map();
   let lastKeep = null;               // what the last crop read, for the drive
 
   /* ---------------- what is written: the ring script, or the inked one behind its switch ---------------- */
   function writing(spec) {
-    if (script === 'inked' && spec.pod) {
-      const key = spec.pod.solo ? 's:' + spec.pod.solo : 'r:' + spec.pod.scene;
-      if (!figs.has(key)) {
-        const g = spec.pod.solo ? soloGraph(sp, spec.pod.solo) : ringGraph(sp, spec.pod.scene < 0 ? sp.greeting.ids : sp.rings[spec.pod.scene].ids);
-        figs.set(key, podFigure(g));
-      }
-      const fig = figs.get(key);
-      if (fig.ok) return { kind: 'inked', spec, fig, id: key };
+    if (inked && spec.pod) {
+      const fig = inked.figureOf(sp, spec.pod);
+      if (fig.ok) return { kind: 'inked', spec, fig };
     }
-    return { kind: 'ring', spec, strokes: podStrokes(spec), id: 'ring' };
+    return { kind: 'ring', spec, strokes: podStrokes(spec) };
   }
-  const recogniseW = (w, rect, erode) => (w.kind === 'inked' ? recogniseInked(w.fig, rect, erode) : recognise(w.spec, rect, erode));
-  const sectorW = (w, role) => (w.kind === 'inked' ? sectorRectInked(w.fig, role) : sectorRect(w.spec, role));
+  const recogniseW = (w, rect, erode) => (w.kind === 'inked' ? inked.recogniseInked(w.fig, rect, erode) : recognise(w.spec, rect, erode));
+  const sectorW = (w, role) => (w.kind === 'inked' ? inked.sectorRectInked(w.fig, role) : sectorRect(w.spec, role));
 
   /* ---------------- layout ---------------- */
   function layout() {
     const { w: W, h: H } = fitCanvas(canvas);
     const portrait = H > W * 1.05;
-    const Rd = Math.round(portrait ? Math.min(0.43 * W, 0.26 * H) : Math.min(0.26 * H, 0.3 * W));
+    let Rd = Math.round(portrait ? Math.min(0.43 * W, 0.26 * H) : Math.min(0.26 * H, 0.3 * W));
     const disc = { cx: W / 2, cy: Math.round(0.045 * H + Rd), Rd };
-    // the page's caption may lie over the room's top left: the disc and its bezel keep clear of its corner, moving
-    // right as far as the room allows (found at 1024 px, where the caption lay on the disc)
+    // the page's caption may lie over the room's top left: the disc and its bezel (1.1 of its radius) keep clear of
+    // the caption's corner, first by moving right as far as the room allows, then down, then by growing smaller, the
+    // sill kept above 0.64 of the room's height (found at 1024 px, where the caption lay on the disc)
     const cap = hooks.keepClear?.();
     if (cap) {
-      const k = W / Math.max(1, canvas.getBoundingClientRect().width), x1 = cap.x1 * k + 0.02 * W, y1 = cap.y1 * k;
-      const need = 1.1 * Rd, dy = disc.cy - y1;
-      if (dy < need) disc.cx = Math.min(W - 1.12 * Rd, Math.max(disc.cx, x1 + Math.sqrt(need * need - Math.max(0, dy) * Math.max(0, dy))));
+      const k = W / Math.max(1, canvas.getBoundingClientRect().width), x1 = cap.x1 * k + 0.02 * W, y1 = cap.y1 * k + 0.01 * H;
+      const clear = () => Math.hypot(Math.max(0, disc.cx - x1), Math.max(0, disc.cy - y1)) >= 1.1 * disc.Rd;
+      for (let i = 0; i < 40 && !clear(); i++) {
+        const need = 1.1 * disc.Rd, dy = Math.max(0, disc.cy - y1);
+        disc.cx = Math.min(W - 1.12 * disc.Rd, Math.max(disc.cx, x1 + (dy < need ? Math.sqrt(need * need - dy * dy) : 0)));
+        if (clear()) break;
+        const down = Math.min(0.64 * H - 0.03 * H - disc.Rd, y1 + 1.1 * disc.Rd);   // the lowest the centre may go
+        if (down > disc.cy) { disc.cy = down; continue; }
+        disc.Rd = Rd = Math.round(0.95 * disc.Rd);
+        disc.cy = Math.round(0.045 * H + Rd);
+      }
     }
     const glassB = Math.round(disc.cy + Rd + 0.03 * H);
     const u = Math.min(H * 0.125, W * 0.1);
     const near = { place: 'near', cx: W / 2, cy: Math.max(0.735 * H, glassB + 0.11 * H), rx: Math.min(0.31 * W, 4.3 * u), ry: 0.02 * H, k: 0.84 };
     const far = { place: 'far', cx: W / 2, cy: 0.915 * H, rx: Math.min(0.43 * W, 5.8 * u), ry: 0.046 * H, k: 1 };
     const dpr = W / Math.max(1, canvas.getBoundingClientRect().width);
-    const rb = portrait ? 0.34 * W : Math.min(0.2 * W, 0.62 * glassB);
+    // their floor: it meets the far dark at a horizon a little above the sill, and the being stands on it, whole in
+    // width on the canvas beside the disc (on a narrow portrait screen there is no room beside the disc, and only
+    // its edge is in the picture)
+    const horizon = Math.round(glassB - 0.075 * H), foot = Math.round(glassB - 0.032 * H);
+    const sideRoom = body.side > 0 ? W - (disc.cx + Rd) : disc.cx - Rd;
+    const rb = portrait ? 0.34 * W : Math.max(0.06 * W, Math.min(0.42 * glassB, (sideRoom - 0.04 * W) / 2.4));
     L = {
       W, H, glassB, u, near, far, disc, dpr, portrait,
       ring: { cx: disc.cx, cy: disc.cy, R: Rd / DISC_OVER_RING },
@@ -164,7 +175,8 @@ export function initPod(canvas, hooks) {
       // held far, set down far. A thing at rest in the hand sits in the middle of its "held" band.
       z: { give: glassB - 0.04 * H, nearDown: near.cy - 0.03 * H, split: near.cy + 0.022 * H, farDown: far.cy - 0.053 * H },
       hoverY: { near: near.cy - near.ry - 0.95 * u * near.k, far: far.cy - far.ry - 0.6 * u },
-      body: { x: disc.cx + body.side * (Rd + (portrait ? 0.42 : 1.06) * rb), y: 0.55 * glassB, r: rb },
+      body: { x: disc.cx + body.side * (Rd + (portrait ? 0.42 * rb : 0.02 * W + 1.18 * rb)), y: foot - TALL * rb, r: rb, foot },
+      horizon,
     };
     const D = 2 * Rd;
     if (discCv.width !== D) {
@@ -262,7 +274,7 @@ export function initPod(canvas, hooks) {
     if (!ink || !ph) { field.clear(); if (reduced) field.snap(); return; }
     const erode = (q / 24) * INK.ERODE_MAX;
     let T;
-    if (ink.w.kind === 'inked') T = inkedTarget(ink.w.fig, N, SPAN, erode);
+    if (ink.w.kind === 'inked') T = inked.inkedTarget(ink.w.fig, N, SPAN, erode);
     else {
       const c = targetCv.getContext('2d', { willReadFrequently: true });
       c.clearRect(0, 0, N, N);
@@ -282,7 +294,7 @@ export function initPod(canvas, hooks) {
   function outlineAt(bx, by, r, a) {
     let k = 1;
     for (const l of body.lobes) k += l.a * Math.cos(l.k * a + l.ph);
-    return [bx + r * k * 0.8 * Math.sin(a), by - r * k * 1.5 * Math.cos(a)];
+    return [bx + r * k * 0.8 * Math.sin(a), by - r * k * TALL * Math.cos(a)];
   }
   function bodyPath(c, bx, by, r) {
     c.beginPath();
@@ -290,7 +302,7 @@ export function initPod(canvas, hooks) {
       const a = d * Math.PI / 180;
       let k = 1;
       for (const l of body.lobes) k += l.a * Math.cos(l.k * a + l.ph);
-      const x = bx + r * k * 0.8 * Math.sin(a), y = by - r * k * 1.5 * Math.cos(a);
+      const x = bx + r * k * 0.8 * Math.sin(a), y = by - r * k * TALL * Math.cos(a);
       if (d) c.lineTo(x, y); else c.moveTo(x, y);
     }
     c.closePath();
@@ -308,21 +320,34 @@ export function initPod(canvas, hooks) {
     const air = ctx.createRadialGradient(disc.cx, disc.cy, disc.Rd * 0.8, disc.cx, disc.cy, disc.Rd * 2.9);
     air.addColorStop(0, rgba(HORIZON, 0.085)); air.addColorStop(0.4, rgba(HORIZON, 0.03)); air.addColorStop(1, rgba(HORIZON, 0));
     ctx.fillStyle = air; ctx.fillRect(0, 0, W, glassB);
+    // their floor, from the horizon to the sill, lit under the disc and fading toward the sides
+    const hz = L.horizon;
+    const fg = ctx.createLinearGradient(0, hz, 0, glassB);
+    fg.addColorStop(0, '#0A0D14'); fg.addColorStop(1, '#0D111A');
+    ctx.fillStyle = fg; ctx.fillRect(0, hz, W, glassB - hz);
     ctx.save();
-    ctx.translate(disc.cx, glassB - 0.004 * H); ctx.scale(1, 0.055 * H / (1.7 * disc.Rd));
-    const fl = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.7 * disc.Rd);
-    fl.addColorStop(0, rgba(HORIZON, 0.075)); fl.addColorStop(1, rgba(HORIZON, 0));
-    ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(0, 0, 1.7 * disc.Rd, 0, Math.PI * 2); ctx.fill();
+    ctx.translate(disc.cx, (hz + glassB) / 2); ctx.scale(1, (glassB - hz) / (1.6 * disc.Rd));
+    const fl = ctx.createRadialGradient(0, 0, 0, 0, 0, 2.2 * disc.Rd);
+    fl.addColorStop(0, rgba(HORIZON, 0.11)); fl.addColorStop(0.5, rgba(HORIZON, 0.035)); fl.addColorStop(1, rgba(HORIZON, 0));
+    ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(0, 0, 2.2 * disc.Rd, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
+    ctx.fillStyle = rgba(HORIZON, 0.05); ctx.fillRect(0, hz, W, Math.max(1, Math.round(L.dpr)));
   }
   function drawBeyond(ctx) {
     const { W, glassB, disc } = L;
     ctx.drawImage(bgCv, 0, 0);
 
-    // the being, in the dark
-    const lean = gaze.lean;
-    const bx = L.body.x - body.side * lean * 0.025 * W + gaze.x * L.body.r * 0.04, by = L.body.y + gaze.y * L.body.r * 0.02, r = L.body.r * (1 + 0.025 * lean);
+    // the being, in the dark, standing on their floor: it leans toward the disc from its foot
+    const lean = gaze.lean, foot = L.body.foot;
+    const bx = L.body.x - body.side * lean * 0.018 * W + gaze.x * L.body.r * 0.03, by = L.body.y, r = L.body.r;
+    ctx.save();                                                  // its shadow on the floor, from the disc's light
+    ctx.translate(bx - body.side * 0.25 * r, foot); ctx.scale(1, 0.08);
+    const sh = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.3 * r);
+    sh.addColorStop(0, 'rgba(0, 0, 0, .75)'); sh.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(0, 0, 1.3 * r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
     ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, W, foot); ctx.clip();      // it stands on the floor: nothing of it below its foot
     bodyPath(ctx, bx, by, r);
     ctx.fillStyle = '#020305'; ctx.fill();
     ctx.clip();
@@ -334,7 +359,7 @@ export function initPod(canvas, hooks) {
     ctx.fillStyle = lit(0.2, 0.05); ctx.fillRect(bx - 1.5 * r, 0, 3 * r, glassB);
     // its folds, seen only where the disc's light reaches: each runs from top to foot between the two sides
     ctx.strokeStyle = lit(0.42, 0.08); ctx.lineWidth = Math.max(1, 0.9 * L.dpr);
-    for (const f of body.folds) {
+    if (!L.portrait) for (const f of body.folds) {
       ctx.beginPath();
       for (let i = 0; i <= 28; i++) {
         const t = f.t0 + (f.len * i) / 28, a = Math.PI * t;
@@ -352,6 +377,7 @@ export function initPod(canvas, hooks) {
     ctx.restore();
     // its edge where the disc's light grazes it
     ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, W, foot); ctx.clip();
     bodyPath(ctx, bx, by, r);
     ctx.strokeStyle = lit(0.62, 0.14); ctx.lineWidth = Math.max(1, 1.2 * L.dpr); ctx.stroke();
     ctx.restore();
@@ -391,54 +417,50 @@ export function initPod(canvas, hooks) {
     dc.drawImage(maskCv, 0, 0);
     dc.globalCompositeOperation = 'source-over';
     ctx.drawImage(discCv, disc.cx - Rd, disc.cy - Rd);
-    // the bezel: the visitor's instrument around it, a tick every 6 degrees, the four quarters the keys keep longer
+    // the bezel, the visitor's instrument: a hairline round the disc, and on it the life of the ring in the disc,
+    // an arc from the top that fills as the ring gathers, stays full while it hangs and drains as it thins (how long
+    // is left to cut a piece); under the ring script, the four quarters its keys keep are marked
     const br = Rd * 1.045;
     ctx.save();
     ctx.lineWidth = Math.max(1, L.dpr * 0.8);
-    ctx.strokeStyle = P.lineB; ctx.beginPath(); ctx.arc(disc.cx, disc.cy, br, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath();
-    for (let d = 0; d < 360; d += 6) {
-      if (d % 90 === 0) continue;
-      const a = d * Math.PI / 180, s = Math.sin(a), co = -Math.cos(a), l = (d % 30 === 0 ? 0.03 : 0.016) * Rd;
-      ctx.moveTo(disc.cx + s * br, disc.cy + co * br); ctx.lineTo(disc.cx + s * (br + l), disc.cy + co * (br + l));
+    ctx.strokeStyle = P.line; ctx.beginPath(); ctx.arc(disc.cx, disc.cy, br, 0, Math.PI * 2); ctx.stroke();
+    const life = lifeOf(ink, performance.now());
+    if (life > 0.002) {
+      ctx.strokeStyle = P.horizonDim; ctx.lineWidth = Math.max(1.5, 1.6 * L.dpr);
+      ctx.beginPath(); ctx.arc(disc.cx, disc.cy, br, -Math.PI / 2, -Math.PI / 2 + life * 2 * Math.PI); ctx.stroke();
     }
-    ctx.strokeStyle = P.faint; ctx.stroke();
-    ctx.beginPath();
-    for (let d = 0; d < 360; d += 90) {
-      const a = d * Math.PI / 180, s = Math.sin(a), co = -Math.cos(a);
-      ctx.moveTo(disc.cx + s * (br - 0.025 * Rd), disc.cy + co * (br - 0.025 * Rd)); ctx.lineTo(disc.cx + s * (br + 0.06 * Rd), disc.cy + co * (br + 0.06 * Rd));
+    if (script === 'ring') {
+      ctx.lineWidth = Math.max(1, L.dpr * 0.8);
+      ctx.beginPath();
+      for (let d = 0; d < 360; d += 90) {
+        const a = d * Math.PI / 180, s = Math.sin(a), co = -Math.cos(a);
+        ctx.moveTo(disc.cx + s * (br - 0.025 * Rd), disc.cy + co * (br - 0.025 * Rd)); ctx.lineTo(disc.cx + s * (br + 0.06 * Rd), disc.cy + co * (br + 0.06 * Rd));
+      }
+      ctx.strokeStyle = keys ? P.horizon : P.horizonDim; ctx.stroke();
     }
-    ctx.strokeStyle = keys ? P.horizon : P.horizonDim; ctx.stroke();
     ctx.restore();
+  }
+  /* The share of the ring's life left, for the bezel: 0 to 1 while it gathers, 1 while it hangs, down to 0 as it thins. */
+  function lifeOf(k, now) {
+    const ph = phaseOf(k, now);
+    if (!ph) return 0;
+    if (ph.forming) return ph.p;
+    return ph.thinning ? Math.max(0, 1 - ph.erode / INK.ERODE_MAX) : 1;
   }
 
-  /* ---------------- drawing: the glass and this side ---------------- */
-  function drawGlass(ctx) {
-    const { W, H, glassB } = L;
-    ctx.save();                                                       // two faint reflections: it is glass
-    ctx.globalAlpha = 0.022; ctx.fillStyle = P.ink;
-    for (const [a, b] of [[0.2, 0.27], [0.31, 0.322]]) { ctx.beginPath(); ctx.moveTo(a * W, 0); ctx.lineTo(b * W, 0); ctx.lineTo((b - 0.12) * W, glassB); ctx.lineTo((a - 0.12) * W, glassB); ctx.closePath(); ctx.fill(); }
-    ctx.restore();
-    const lip = ctx.createLinearGradient(0, glassB - 0.025 * H, 0, glassB);
-    lip.addColorStop(0, rgba(HORIZON, 0)); lip.addColorStop(1, rgba(HORIZON, 0.05));
-    ctx.fillStyle = lip; ctx.fillRect(0, glassB - 0.025 * H, W, 0.025 * H);
-  }
+  /* ---------------- drawing: this side of the glass ---------------- */
   function drawTable(ctx) {
     const { W, H, glassB, disc } = L;
     const t = ctx.createLinearGradient(0, glassB, 0, H);
     t.addColorStop(0, '#0C1018'); t.addColorStop(0.3, '#080B11'); t.addColorStop(1, '#06080D');
     ctx.fillStyle = t; ctx.fillRect(0, glassB, W, H - glassB);
-    // the disc on the polished table, foreshortened, fading with distance from the sill
-    const k = 0.32;
+    // the disc's light on the table's near edge, falling off away from the glass
     ctx.save();
-    ctx.beginPath(); ctx.rect(0, glassB, W, H - glassB); ctx.clip();
-    ctx.globalAlpha = 0.13;
-    ctx.translate(disc.cx, glassB + k * (glassB - disc.cy)); ctx.scale(1, -k);
-    ctx.drawImage(discCv, -disc.Rd, -disc.Rd);
+    ctx.translate(disc.cx, glassB); ctx.scale(1, 0.22);
+    const tl = ctx.createRadialGradient(0, 0, 0, 0, 0, 1.6 * disc.Rd);
+    tl.addColorStop(0, rgba(HORIZON, 0.07)); tl.addColorStop(1, rgba(HORIZON, 0));
+    ctx.fillStyle = tl; ctx.beginPath(); ctx.arc(0, 0, 1.6 * disc.Rd, 0, Math.PI); ctx.fill();
     ctx.restore();
-    const fade = ctx.createLinearGradient(0, glassB, 0, glassB + 0.75 * k * 2 * disc.Rd + 0.05 * H);
-    fade.addColorStop(0, 'rgba(6, 8, 13, 0)'); fade.addColorStop(1, 'rgba(6, 8, 13, 1)');
-    ctx.fillStyle = fade; ctx.fillRect(0, glassB, W, H - glassB);
     // the sill: where the glass meets the table
     const sill = ctx.createLinearGradient(0, glassB, 0, glassB + 0.06 * H);
     sill.addColorStop(0, rgba(HORIZON, 0.06)); sill.addColorStop(1, rgba(HORIZON, 0));
@@ -554,16 +576,16 @@ export function initPod(canvas, hooks) {
     if (!ph && ink && !ink.still) { ink = null; hooks.inkGone?.(); }
     syncTarget(ink ? ph : null);
     // the field is busy while a ring forms or thins, and while the ink of a ring that left is still in the fog
-    const busy = !!(ph && (ph.forming || ph.thinning)) || (targetKey === 'none' && !inkBlank);
+    const busy = !!(ph && (ph.forming || ph.thinning)) || (targetKey === 'none' && !inkBlank) || field.oldLive;
     const t0 = performance.now();
     if (!reduced) {
       stir += ((busy ? 3 : 1) - stir) * (1 - Math.exp(-dt / 700));    // the fog stirs while the being writes
       fogT += (dt / 1000) * stir;
-      if (!inkBlank || field.residual > 0.002 || targetKey !== 'none') {
-        field.step(Math.min(0.05, dt / 1000), busy ? MEDIUM.FLOW_FORM : MEDIUM.FLOW_HOLD);
+      if (!inkBlank || field.residual > 0.002 || targetKey !== 'none' || field.oldLive) {
+        field.step(Math.min(0.05, dt / 1000), flowFor(ph ? (ph.forming ? 'forming' : ph.thinning ? 'thinning' : 'hanging') : 'leaving'));
         field.paint(inkPx, INK_RGB);
         inkCv.getContext('2d').putImageData(inkImg, 0, 0);
-        inkBlank = targetKey === 'none' && field.residual <= 0.002;
+        inkBlank = targetKey === 'none' && field.residual <= 0.002 && !field.oldLive;
       }
     } else {
       field.paint(inkPx, INK_RGB);
@@ -589,7 +611,6 @@ export function initPod(canvas, hooks) {
     ctx.fillStyle = P.void; ctx.fillRect(0, 0, L.W, L.H);
     drawBeyond(ctx);
     drawDisc(ctx);
-    drawGlass(ctx);
     drawTable(ctx);
     drawSlate(ctx, now);
     drawDesk(ctx, st, now);
@@ -774,6 +795,9 @@ export function initPod(canvas, hooks) {
     snap(); kick();
   };
   const ro = new ResizeObserver(onResize);
+  // the light tier, once the page takes it, reaches the field at once (a smaller grid), not at the next resize
+  const onTier = () => { if (L && !dead) onResize(); };
+  Tier.listeners.add(onTier);
   ro.observe(canvas);
   canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointermove', onMove);
@@ -817,7 +841,7 @@ export function initPod(canvas, hooks) {
     pause() { running = false; cancelAnimationFrame(raf); clearTimeout(timer); raf = 0; timer = 0; },
     resume() { if (!running) { running = true; lastT = 0; kick(); } },
     destroy() {
-      dead = true; cancelAnimationFrame(raf); clearTimeout(timer); ro.disconnect();
+      dead = true; cancelAnimationFrame(raf); clearTimeout(timer); ro.disconnect(); Tier.listeners.delete(onTier);
       canvas.removeEventListener('pointerdown', onDown); canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp); canvas.removeEventListener('pointercancel', onCancel);
       canvas.removeEventListener('keydown', onKey);

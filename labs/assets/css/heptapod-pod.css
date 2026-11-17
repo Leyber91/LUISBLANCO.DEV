@@ -23,13 +23,17 @@
   border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
 }
 .room { position: relative; margin: 0; min-width: 0; background: var(--void); scroll-margin-top: var(--bar-h); }
-.room-view { position: absolute; inset: 0; }
+.room-view { position: absolute; inset: 0; scroll-margin-top: var(--bar-h); }
 .room-view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
 .room-view canvas:focus-visible { outline: 2px solid var(--horizon); outline-offset: -3px; }
 .room-cap { position: absolute; z-index: 1; left: clamp(16px, 2.4vw, 36px); top: clamp(14px, 2.2vh, 26px); max-width: 34ch; pointer-events: none; }
-.room-cap h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(1.15rem, 1.45vw, 1.5rem); letter-spacing: -.01em; margin: 0 0 var(--s-2); }
-.cap-sub { margin: 0; font-size: .74rem; line-height: 1.55; color: var(--text-dim); max-width: 34ch; }
-.room-tag { position: absolute; z-index: 1; right: clamp(16px, 2vw, 28px); bottom: 14px; margin: 0; pointer-events: none; color: var(--text-faint); }
+.room-cap h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(1.15rem, 1.45vw, 1.5rem); letter-spacing: -.01em; margin: 0; }
+.room-tag { position: absolute; z-index: 1; right: clamp(16px, 2vw, 28px); bottom: 14px; margin: 0; pointer-events: none; color: var(--text-dim); }
+/* labels stay uncoloured: gold on this page is only a kept radical and the day's truth */
+.pod .kick, .sec .kick { color: var(--text-dim); }
+/* text a visitor reads is never fainter than --text-dim (heptapod.css keeps some of it fainter for the codec) */
+.console .hint, .console .mini.dim { color: var(--text-dim); }
+.how-to { margin: 0; padding: var(--s-4) var(--s-4) 0; font-size: .78rem; line-height: 1.6; color: var(--text); }
 
 /* the console scrolls as one column when the evening's panel or the notebook outgrows the first screen */
 .console { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: var(--void); overflow-y: auto; overscroll-behavior: contain; }
@@ -50,7 +54,7 @@
 .pp-slate { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; margin: 0; }
 .pp-marks { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; align-items: center; }
 .pp-mark { font-size: .72rem; color: var(--text); border: 1px solid var(--line-bright); padding: 3px 8px; font-variant-numeric: tabular-nums; }
-.pp-none { font-size: .74rem; color: var(--text-faint); line-height: 1.5; }
+.pp-none { font-size: .74rem; color: var(--text-dim); line-height: 1.5; }
 .pp-lamp { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-4); align-items: center; border-top: 1px solid var(--line); padding-top: var(--s-3); }
 .pp-lamp .mini { font-variant-numeric: tabular-nums; }
 .pp-bar { display: block; height: 1px; background: var(--line-bright); position: relative; }
@@ -71,7 +75,7 @@
 .pp-pic img { display: block; width: 100%; height: auto; }
 .pp-pic.right { border-color: var(--accretion); }
 .pp-pic.yours::after { content: ''; position: absolute; left: 14%; right: 14%; bottom: 2px; border-bottom: 1px dashed var(--text); }
-.pp-legend { margin: 0; font-size: .72rem; color: var(--text-faint); }
+.pp-legend { margin: 0; font-size: .72rem; color: var(--text-dim); }
 
 /* ---------- plate b: the notebook ---------- */
 .nb { min-width: 0; }
@@ -84,7 +88,7 @@
 .nb-kc.lit { border: 1px solid var(--horizon); color: var(--text-bright); }
 
 .nb-list { display: flex; flex-direction: column; gap: var(--s-3); min-height: 120px; }
-.nb-empty { margin: 0; font-size: .78rem; color: var(--text-faint); line-height: 1.55; max-width: 46ch; }
+.nb-empty { margin: 0; font-size: .78rem; color: var(--text-dim); line-height: 1.55; max-width: 46ch; }
 .nb-entry { display: grid; grid-template-columns: 64px 68px minmax(0, 1fr); gap: var(--s-3); align-items: center; padding-top: var(--s-3); border-top: 1px solid var(--line); }
 .nb-list > .nb-entry:first-child, .nb-group > .nb-entry:first-of-type { border-top: 0; padding-top: 0; }
 .nb-crop { width: 64px; height: 64px; display: block; background: var(--void); border: 1px solid var(--line); }
@@ -98,7 +102,7 @@
 .nb-grid i.on.can { background: var(--accretion-soft); }
 .nb-body { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
 .nb-meta { margin: 0; font-size: .68rem; color: var(--text-dim); font-variant-numeric: tabular-nums; line-height: 1.4; }
-.nb-from { display: block; color: var(--text-faint); }
+.nb-from { display: block; color: var(--text-dim); }
 .nb-row { display: flex; gap: 6px; }
 .nb-guess { font-style: italic; color: var(--text-dim); padding: 6px 8px; font-size: 12px; border-color: var(--line); background: transparent; min-height: 36px; }
 input.nb-guess:focus { color: var(--text-bright); }
@@ -113,15 +117,18 @@ input.nb-guess:focus { color: var(--text-bright); }
 
 @media (max-width: 1020px) {
   .pod { display: block; height: auto; min-height: 0; max-height: none; }
-  .room { height: clamp(520px, 74svh, 820px); }
+  /* the caption stands over the room, not on it: a narrower room has no corner the disc can leave free */
+  .room { height: auto; }
+  .room-cap { position: static; padding: var(--s-4) clamp(16px, 2.4vw, 36px) var(--s-3); max-width: none; }
+  .room-view { position: relative; inset: auto; height: clamp(500px, 70svh, 800px); }
   .console { border-left: 0; border-top: 1px solid var(--line); }
   .console { overflow: visible; }
 }
 @media (max-width: 560px) {
   .pod { --bar-h: 52px; margin-inline: -16px; }     /* main's padding here is 16 px (heptapod.css) */
-  .room { height: auto; }
-  .room-cap { position: static; padding: var(--s-3) 16px var(--s-3); max-width: none; }
-  .room-view { position: relative; inset: auto; height: clamp(470px, 70svh, 640px); }
+  .room-cap { padding: var(--s-3) 16px var(--s-3); }
+  /* the chamber leaves room below it to scroll, and to see the evening's pictures with the ring */
+  .room-view { height: clamp(400px, 58svh, 560px); }
   .room-tag { display: none; }
   .pp-slate { grid-template-columns: minmax(0, 1fr) auto; }
   .pp-slate label { grid-column: 1 / -1; }

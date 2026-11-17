@@ -8,6 +8,15 @@
       target at one moment, ln 2 / GATHER (exact for a linear
       relaxation). With the haze, the crossings are measured and their
       spread is held under a tenth of the bloom (2.2 s).
+   1b. As the chamber runs it: the flow the scene uses while a ring
+      gathers (flowFor('forming')), at the scene's field size (N 300,
+      span 3.44 ring radii), on the pod's own inked figures (each
+      species' greeting, and a ring written over the settled ink of
+      another, whose ink then leaves in its own layer): every cell of
+      the new ring's ink crosses half its target within the bloom, all
+      within a tenth of it.
+      (The independent review of 2026-11-17 found 87.9% with the flow
+      stirring while the ring gathered.)
    2. Ink is conserved while it gathers: the haze carries the target's
       total, and the relaxation keeps it (no flow: within 0.5%; with the
       forming flow, over the whole bloom: within 5%).
@@ -29,7 +38,9 @@
    Exits 1 on any failure, and on a run that checked nothing.
    ============================================================ */
 
-import { MEDIUM, InkField, fogNoise, boxBlur, transmittance } from '../pod/medium.js';
+import { MEDIUM, InkField, fogNoise, boxBlur, transmittance, flowFor } from '../pod/medium.js';
+import { figureOf, inkedTarget } from '../pod/inked.js';
+import { GATE_SPECIES, makeSpecies } from '../pod/species.js';
 
 let checks = 0, failures = 0;
 const ok = (cond, what, detail = '') => { checks++; if (!cond) { failures++; console.log('FAIL ' + what + (detail ? ' :: ' + detail : '')); } };
@@ -84,6 +95,41 @@ function corr(A, B) {
   console.log(`  whole at once: no haze ${ts[0].toFixed(3)} s for every cell; with haze ${Math.min(...hs).toFixed(3)} to ${Math.max(...hs).toFixed(3)} s (spread ${(100 * spread / BLOOM).toFixed(1)}% of the bloom)`);
 }
 
+/* 1b. as the chamber runs it */
+{
+  const N = 300, SPAN = 3.44;
+  const cross = (f, T, from) => {
+    const c = new Float64Array(N * N).fill(-1), live = new Uint8Array(N * N);
+    for (let i = 0; i < T.length; i++) live[i] = T[i] > 0.25 && from[i] < T[i] / 2 ? 1 : 0;
+    for (let t = 0; t < BLOOM; t += DT) {
+      f.step(DT, flowFor('forming'));
+      for (let i = 0; i < T.length; i++) if (live[i] && c[i] < 0 && f.D[i] >= T[i] / 2) c[i] = t + DT;
+    }
+    const all = [...c].filter((v, i) => live[i]), got = all.filter((v) => v > 0);
+    return { n: all.length, never: all.length - got.length, spread: got.length ? Math.max(...got) - Math.min(...got) : 0 };
+  };
+  ok(flowFor('forming') === 0 && flowFor('hanging') === MEDIUM.FLOW_HOLD && flowFor('thinning') === MEDIUM.FLOW_STIR, 'the flow is still while a ring gathers, slow while it hangs, stirred while it thins');
+  for (const [a, sd] of GATE_SPECIES) {
+    const sp = makeSpecies(a, sd);
+    const T = inkedTarget(figureOf(sp, { scene: -1 }), N, SPAN, 0);
+    const f = new InkField(N, 5);
+    const start = f.D.slice();
+    f.setTarget(T, true);
+    const r = cross(f, T, start);
+    ok(r.never === 0 && r.spread <= 0.1 * BLOOM, `species ${a}/${sd}: the greeting gathers whole at once as the chamber runs it`, `${r.never} of ${r.n} never cross; spread ${(100 * r.spread / BLOOM).toFixed(1)}% of the bloom`);
+    // a ring written over the settled ink of the one before
+    const T2 = inkedTarget(figureOf(sp, { scene: 5 }), N, SPAN, 0);
+    const g = new InkField(N, 6);
+    g.setTarget(T, false); g.snap();
+    for (let i = 0; i < 30; i++) g.step(DT, flowFor('hanging'));
+    const before = g.D.slice();
+    g.setTarget(T2, true);
+    const r2 = cross(g, T2, before);
+    ok(r2.never === 0 && r2.spread <= 0.1 * BLOOM, `species ${a}/${sd}: a ring over the ink of another gathers whole at once`, `${r2.never} of ${r2.n} never cross; spread ${(100 * r2.spread / BLOOM).toFixed(1)}% of the bloom`);
+    if (a === GATE_SPECIES[0][0] && sd === GATE_SPECIES[0][1]) console.log(`  as the chamber runs it (N ${N}): greeting ${r.n} cells, spread ${(100 * r.spread / BLOOM).toFixed(1)}%; over another ring ${r2.n} cells, spread ${(100 * r2.spread / BLOOM).toFixed(1)}%`);
+  }
+}
+
 /* 2. conservation, 3. settling */
 {
   const N = 96, T = ringTarget(N), mT = total(T);
@@ -98,7 +144,7 @@ function corr(A, B) {
   const g = new InkField(N, 5);
   g.setTarget(T, true);
   worst = 0;
-  for (let t = 0; t < BLOOM; t += DT) { g.step(DT, MEDIUM.FLOW_FORM); worst = Math.max(worst, Math.abs(g.mass() - mT) / mT); }
+  for (let t = 0; t < BLOOM; t += DT) { g.step(DT, MEDIUM.FLOW_STIR); worst = Math.max(worst, Math.abs(g.mass() - mT) / mT); }
   ok(worst < 0.05, 'forming flow: ink conserved within 5% over the bloom', `${(100 * worst).toFixed(2)}%`);
   console.log(`  conservation with the forming flow: worst ${(100 * worst).toFixed(2)}% over ${BLOOM} s`);
 }
@@ -135,7 +181,7 @@ function corr(A, B) {
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) f.D[y * N + x] = 1;
   // advection alone: a pull to a target would hide a divergence
   let worst = 0;
-  for (let t = 0; t < 3; t += DT) f.advect(DT, MEDIUM.FLOW_FORM);
+  for (let t = 0; t < 3; t += DT) f.advect(DT, MEDIUM.FLOW_STIR);
   for (let y = N / 4; y < (3 * N) / 4; y++) for (let x = N / 4; x < (3 * N) / 4; x++) worst = Math.max(worst, Math.abs(f.D[y * N + x] - 1));
   ok(worst < 0.03, 'the flow neither gathers nor spreads uniform ink', `largest change ${worst.toFixed(4)} after 3 s`);
 }
@@ -166,7 +212,7 @@ function corr(A, B) {
 
 /* 8. determinism */
 {
-  const run = () => { const f = new InkField(80, 77); f.setTarget(ringTarget(80), true); for (let i = 0; i < 40; i++) f.step(DT, MEDIUM.FLOW_FORM); return f.D; };
+  const run = () => { const f = new InkField(80, 77); f.setTarget(ringTarget(80), true); for (let i = 0; i < 40; i++) f.step(DT, MEDIUM.FLOW_STIR); return f.D; };
   const a = run(), b = run();
   ok(a.every((v, i) => v === b[i]), 'the same seed gives the same ink');
   const B = new Float32Array(16 * 16); B[8 * 16 + 8] = 1; boxBlur(B, 16, 2);
