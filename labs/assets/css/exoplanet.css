@@ -467,6 +467,8 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   .lettered { grid-template-columns: 1fr; }
   .nums col.c-n { width: 94px; } .nums col.c-v { width: 62px; } .nums col.c-u { width: 34px; } .nums col.c-r { width: 20px; } .nums col.c-iv { width: 72px; }
   .nums td { font-size: 11.5px; }
+  /* a range longer than its column (0.025 to 0.028; 1,773 to 1,795 K) takes a second line rather than being cut */
+  .nums td.pm { white-space: normal; line-height: 14px; }
   .tbl-act { gap: 14px; }
   .method .log-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
   .rg-row { grid-template-columns: 1fr 76px 76px; }
