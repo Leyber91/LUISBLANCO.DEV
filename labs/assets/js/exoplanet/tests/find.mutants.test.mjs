@@ -10,7 +10,9 @@
    system's temp folder and find.test.mjs is run on the copy
    (mutants.mjs). Every broken rule must fail a check there.
 
-   Add an entry here with every new rule in find.js.
+   Add an entry here with every new rule in find.js. The rules of
+   the line of results are in find.mutants2.test.mjs, so each list
+   stays well under the gates' 120 s a file.
    ============================================================ */
 
 import { fileURLToPath } from 'node:url';
@@ -83,38 +85,6 @@ const MUTANTS = [
   ['the total cut to the limit', `total: pool.length,`, `total: (limit ? pool.slice(0, limit) : pool).length,`],
   ['every world passes', `const pool = list.filter(passes);`, `const pool = list.slice();`],
 
-  /* ---- what a line of results says ---- */
-  ['a calculated radius not said to be one', `(p.measuredR ? '' : ', radius not measured')`, `''`],
-  ['a measured radius said to be calculated', `(p.measuredR ? '' : ', radius not measured')`, `', radius not measured'`],
-  ['a world with no radius left blank', `'no radius known'`, `''`],
-  ['a radius bound not said to be one', '`${sc.label.toLowerCase()} by its radius bound`', '`${sc.label.toLowerCase()}`'],
-  ['a radius bound ignored', 'return sc ? `${sc.label.toLowerCase()} by its radius bound` : \'no radius known\';', 'return \'no radius known\';'],
-  ['a published temperature not named as the archive\'s', '${t.published ? \' published\' : \'\'}`', '`'],
-  ['every temperature named as the archive\'s', '${t.published ? \' published\' : \'\'}`', ' published`'],
-  ['a distance printed in parsecs', `p.dist * PHYS.PC_LY`, `p.dist`],
-  ['a distance with no unit', '`${fmtInt(p.dist * PHYS.PC_LY)} ly`', '`${fmtInt(p.dist * PHYS.PC_LY)}`'],
-  ['a temperature with no unit', '`${fmtInt(t.T)} K${', '`${fmtInt(t.T)}${'],
-  ['a radius with no unit', '`${fmt(p.R, 3)} R' + EARTH + '`', '`${fmt(p.R, 3)}`'],
-  ['a period with no unit', '`${fmt(p.P, 3)} d`', '`${fmt(p.P, 3)}`'],
-  ['the starlight with no unit', '`${fmt(insolation(p).S, 3)} S' + EARTH + '`', '`${fmt(insolation(p).S, 3)}`'],
-  ['an unknown distance left blank', `'distance unknown'`, `''`],
-  ['a missing temperature left blank', `: 'no equilibrium temperature')`, `: '')`],
-  ['a missing insolation left blank', `: 'no insolation')`, `: '')`],
-  ['a missing year printed as it is stored', `key === 'year' ? (p.year ? String(p.year) : '')`, `key === 'year' ? String(p.year)`],
-  ['a value over 100 printed with a decimal', `a >= 100 ? fmtInt(v)`, `a >= 1000 ? fmtInt(v)`],
-  ['a value from 10 to 100 printed to two places', `a >= 10 ? v.toFixed(1)`, `a >= 10 ? v.toFixed(2)`],
-  ['a value from 1 to 10 printed to one place', `a >= 1 ? v.toFixed(2)`, `a >= 1 ? v.toFixed(1)`],
-  ['a value under 1 printed to two places', `: v.toPrecision(d); };`, `: v.toFixed(2); };`],
-  ['a radius printed to two figures', '`${fmt(p.R, 3)} R', '`${fmt(p.R, 2)} R'],
-  ['a period printed to two figures', '`${fmt(p.P, 3)} d`', '`${fmt(p.P, 2)} d`'],
-  ['the starlight printed to two figures', '`${fmt(insolation(p).S, 3)} S', '`${fmt(insolation(p).S, 2)} S'],
-  ['worlds with no value put in another order', `isNum(x) ? -1 : isNum(y) ? 1 : 0`, `isNum(x) ? -1 : isNum(y) ? 1 : -1`],
-  ['a missing radius left blank', `: 'no radius')`, `: '')`],
-  ['a missing period left blank', `: 'no period')`, `: '')`],
-  ['the year left out of the line', `key === 'year' ? (p.year ? String(p.year) : '')`, `key === 'year' ? ''`],
-  ['the likeness printed with no word', '`likeness ${earthLikeness(p).toFixed(2)}`', '`${earthLikeness(p).toFixed(2)}`'],
-  ['the line without the kind', 'return v ? `${k}, ${v}` : k;', 'return v ? v : k;'],
-  ['the line without the value', 'return v ? `${k}, ${v}` : k;', 'return k;'],
 ];
 
 process.exit(await runMutants({ here, file: 'find.js', test: 'find.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));
