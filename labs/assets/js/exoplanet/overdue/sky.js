@@ -48,11 +48,11 @@
    on a date, and the count of lamps through the years.
    ============================================================ */
 
-import { epochAt, sigmaAt, jdOfYear, yearOfJd, KEPT_LAMP } from './clock.js';
+import { epochAt, sigmaAt, jdOfYear, yearOfJd, KEPT_LAMP, FIRST_YEAR, LAST_YEAR } from './clock.js';
 import { durDays } from './data.js';
 
 const RAD = Math.PI / 180;
-export const FIRST_YEAR = 1999, LAST_YEAR = 2040;
+export { FIRST_YEAR, LAST_YEAR };   // the line of time's years, kept in clock.js beside its Julian dates
 export const MAP_CENTRE_RA = 0;                   // the middle of the map: 0h of right ascension, the usual centre of an all-sky chart
 export const KEPLER = { ra: 290.667, dec: 44.5, radius: 9 };      // the centre of the Kepler field and the half-width of its lens, degrees
 const EPS = 23.4392911 * RAD;                     // obliquity of the ecliptic, J2000

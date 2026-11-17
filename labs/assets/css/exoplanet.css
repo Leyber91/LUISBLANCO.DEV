@@ -378,6 +378,9 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 .log-what { color: var(--text-dim); font-size: 10.5px; }
 .log-when { color: var(--text-dim); font-size: 10.5px; white-space: nowrap; text-align: right; }
 .log-out { font-size: 10.5px; }
+/* a line whose clock was opened on the sky: the way back to it on the sky, under the line's way and time */
+.method .log-list li > .log-sky { grid-column: 1 / -1; justify-self: start; }
+.log-sky { font-size: 10.5px; min-height: 26px; display: inline-flex; align-items: center; }
 /* the kind, the time and "take out" share the row: each fills its height and centres its words, so they stand level */
 .method .log-list li > :is(.log-what, .log-when, .log-out) { align-self: stretch; display: flex; align-items: center; }
 .method .log-list li > .log-when { justify-content: flex-end; }
@@ -472,6 +475,8 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   .lettered { grid-template-columns: 1fr; }
   .nums col.c-n { width: 94px; } .nums col.c-v { width: 62px; } .nums col.c-u { width: 34px; } .nums col.c-r { width: 20px; } .nums col.c-iv { width: 72px; }
   .nums td { font-size: 11.5px; }
+  /* a range longer than its column (0.025 to 0.028; 1,773 to 1,795 K) takes a second line rather than being cut */
+  .nums td.pm { white-space: normal; line-height: 14px; }
   .tbl-act { gap: 14px; }
   .method .log-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
   .rg-row { grid-template-columns: 1fr 76px 76px; }
@@ -491,7 +496,7 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   .tally { min-height: 44px; }
   .bar a { min-height: 44px; }
   .token { min-height: 44px; }
-  .log-open { min-height: 44px; }
+  .log-open, .log-sky { min-height: 44px; }
   input.engraved { height: 44px; }
   input.engraved::-webkit-slider-runnable-track { height: 44px; background-position: 0 22px, 0 22px; }
   input.engraved::-webkit-slider-thumb { margin-top: 14px; }
