@@ -39,15 +39,24 @@ const MUTANTS = [
   ['a click of any count past the first is a press', `(e && e.detail > 1 ? undefined : keep())`, `(e && e.detail > 2 ? undefined : keep())`],
 
   /* ---- what the press acts on ---- */
-  ['the intent decided in the turn from the store (M5, finding A)',
-    `const q = store.toQuery(), label = nameOf(q), wantKept = btn.getAttribute('aria-pressed') !== 'true';\n    const w = wantKept\n      ? await change((r) => R.keep(r, { q, t: now() }), { resume: { url: here(q), label: R.resumeLabel(q) } })\n      : await change((r) => R.unkeep(r, q));`,
-    `const q = store.toQuery(), label = nameOf(q); let wantKept = true;\n    const w = await change((r) => { wantKept = !R.isKept(r, q); return wantKept ? R.keep(r, { q, t: now() }) : R.unkeep(r, q); }, { resume: { url: here(q), label: R.resumeLabel(q) } });`],
+  ['the intent decided in the turn from the store (M5, finding A)', `const q = store.toQuery(), label = nameOf(q), wantKept = btn.getAttribute('aria-pressed') !== 'true';
+    // the frame's picture (BAR_L1 C17), made inside the press (a still takes a moment; the card is busy meanwhile)
+    let img = null;
+    if (wantKept) { try { img = await thumb(); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
+    const w = wantKept
+      ? await change((r) => R.keep(r, { q, t: now(), img }), { resume: { url: here(q), label: R.resumeLabel(q) } })
+      : await change((r) => R.unkeep(r, q));`, `const q = store.toQuery(), label = nameOf(q); let wantKept = true;
+    let img = null;
+    const w = await change((r) => { wantKept = !R.isKept(r, q); return wantKept ? R.keep(r, { q, t: now(), img }) : R.unkeep(r, q); }, { resume: { url: here(q), label: R.resumeLabel(q) } });`],
+  ['the way back written though the keep was refused (M7)', `? await change((r) => R.keep(r, { q, t: now(), img }), { resume: { url: here(q), label: R.resumeLabel(q) } })`, `? await change((r) => R.keep(r, { q, t: now(), img })).finally(() => os.progress.setResume(here(q), R.resumeLabel(q)).catch(() => {}))`],
+  ['a picture made for a take out', `    if (wantKept) { try { img = await thumb(); }`, `    if (true) { try { img = await thumb(); }`],
+  ['a picture that is not a thumbnail kept', `if (img && !R.isThumb(img)) img = null; }`, `}`],
+  ['a picture that fails stops the keep', `try { img = await thumb(); } catch { img = null; }`, `img = await thumb();`],
+  ['the strip not drawn again with the card', `    onDraw();
+  }`, `  }`],
   ['Take out by its place in the list (M8, finding F)', `data-out="\${esc(e.q)}"`, `data-out="\${esc(String(stored.kept.indexOf(e)))}"`],
 
   /* ---- the way back ---- */
-  ['the way back written though the keep was refused (M7)',
-    `? await change((r) => R.keep(r, { q, t: now() }), { resume: { url: here(q), label: R.resumeLabel(q) } })`,
-    `? await change((r) => R.keep(r, { q, t: now() })).finally(() => os.progress.setResume(here(q), R.resumeLabel(q)).catch(() => {}))`],
   ['a take out leaves the way back on the hole taken out', `    if (!wantKept) await wayBack();\n`, ``],
   ['a Take out from the list leaves the way back', `if (w && w.ok) { await wayBack(); said =`, `if (w && w.ok) { said =`],
   ['the last take out leaves the way back', `else await os.progress.clearResume();`, ``],

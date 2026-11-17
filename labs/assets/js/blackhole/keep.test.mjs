@@ -21,13 +21,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
 /** A card on a fresh page: its elements, the store, the api, and helpers to read the store and the card. */
-async function page({ open = '', moving = () => false } = {}) {
+async function page({ open = '', moving = () => false, thumb = async () => null, onDraw = () => {} } = {}) {
   const mk = () => ({ textContent: '', innerHTML: '', disabled: false, dataset: {}, attrs: {}, setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] ?? null; }, addEventListener(t, fn) { this['on' + t] = fn; } });
   const els = { '#bh-keep': mk(), '#bh-recline': mk(), '#bh-reclist': mk(), '#bh-recsaid': mk(), '#bh-recfoot': mk() };
   const card = { dataset: {}, querySelector: (s) => els[s] };
   const store = new Store(); store.open(open);
   let t = 1000;
-  const api = createKeep({ card, store, fixture: null, now: () => ++t, start: async () => {}, moving });
+  const api = createKeep({ card, store, fixture: null, now: () => ++t, start: async () => {}, moving, thumb, onDraw });
   await api.ready;
   const os = api.os;
   // a fresh record for each page: Labs OS's memory store is shared by the process
@@ -237,9 +237,14 @@ const other = (open) => { const s = new Store(); s.open(open); return s.toQuery(
 {
   const p = await page();
   p.store.set({ a: 0.31 }, { instant: true }); p.api.refresh();
+  // the keep's write first, slowly, then the ray, so the ray's write lands after the keep's sentence
+  const set = p.os.progress.set; let started = false;
+  p.os.progress.set = async (...x) => { started = true; await sleep(30); return set(...x); };
   const k = p.press();
+  for (let i = 0; i < 50 && !started; i++) await sleep(2);
   p.api.ray({ s: [0.01, 0.02], fate: 'sky' });
-  await k; await sleep(30);
+  await k; await sleep(80);
+  p.os.progress.set = set;
   ok('a ray written behind a keep leaves "... is kept."', / is kept\.$/.test(p.said()), p.said());
 }
 
@@ -367,6 +372,31 @@ const other = (open) => { const s = new Store(); s.open(open); return s.toQuery(
   await api.ready;
   console.warn = warn; LabsOS.init = init;
   ok('Labs OS failing to start: Keep is off and the card says Labs OS did not start', els['#bh-keep'].disabled === true && /Labs OS did not start/.test(els['#bh-recsaid'].textContent), JSON.stringify({ d: els['#bh-keep'].disabled, s: els['#bh-recsaid'].textContent }));
+}
+
+/* slice 4: the kept frame's picture, made for a keep only; a picture that is not a small JPEG, or that fails, never
+   stops the keep; whatever else shows the record is drawn again with the card */
+{
+  const JPEG = 'data:image/jpeg;base64,' + 'A'.repeat(400);
+  let calls = 0, draws = 0, give = JPEG;
+  const p = await page({ thumb: async () => { calls++; if (give === 'throw') throw new Error('no still'); return give; }, onDraw: () => { draws++; } });
+  p.store.set({ a: 0.81 }, { instant: true }); p.api.refresh();
+  await p.press(); await sleep(10);
+  let s = await p.stored();
+  ok('a keep stores its frame\'s picture', s.kept[0] && s.kept[0].img === JPEG, JSON.stringify(s.kept[0] && Object.keys(s.kept[0])));
+  ok('the strip is drawn again with the card', draws > 0, String(draws));
+  const c0 = calls;
+  await p.press(); await sleep(10);
+  ok('a take out makes no picture', calls === c0, String(calls));
+  give = 'data:image/png;base64,AAAA';
+  await p.press(); await sleep(10);
+  s = await p.stored();
+  ok('a picture that is not a small JPEG is left out, and the hole is kept', R.isKept(s, p.store.toQuery()) && !('img' in s.kept[0]), JSON.stringify(s.kept[0] && Object.keys(s.kept[0])));
+  await p.press(); await sleep(10);
+  give = 'throw';
+  await p.press(); await sleep(10);
+  s = await p.stored();
+  ok('a picture that fails leaves the hole kept without one', R.isKept(s, p.store.toQuery()) && !('img' in s.kept[0]), p.said());
 }
 
 console.log(fails ? `\n${fails} of ${checks} keep check(s) failed` : `\nall ${checks} keep checks passed`);

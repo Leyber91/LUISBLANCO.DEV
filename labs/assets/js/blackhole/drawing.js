@@ -20,7 +20,7 @@ import * as K from './kerr.js';
 import { OBJECTS, VIEWS, COLOR_MODES, SCHEMA, COPY } from './config.js';
 import { s3, sci, pmText, published, measurement, parsecs, deg, spinText } from './physics.js';
 import { setHTML } from './tour.js';
-import { linkLabel } from './record.js';
+import { linkLabel, openLink, isKept } from './record.js';
 
 // a link's name never changes, and the strip is drawn on every change of state
 const names = new Map();
@@ -100,7 +100,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       e.preventDefault();
       const v = k === 'Home' ? BY[key].min : k === 'End' ? BY[key].max : s + d;
       app.tour?.stop();
-      store.set({ [key]: +Math.max(BY[key].min, Math.min(BY[key].max, v)).toFixed(BY[key].digits ?? 3) }, { dur: 250 });
+      // a step keeps the value's own digits (float noise aside): rounded to the schema's 2, M87*'s 9.8129 came back from a
+      // right and a left as 9.81, a hole of its own
+      store.set({ [key]: +Math.max(BY[key].min, Math.min(BY[key].max, v)).toFixed(6) }, { dur: 250 });
     });
     return { svg, marks, hand, set(v) { svg.setAttribute('aria-valuenow', String(v)); svg.setAttribute('aria-valuetext', valueText(v)); } };
   }
@@ -251,10 +253,14 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   body.appendChild(strip);
   function drawStrip() {
     const rec = keepRecord(); if (!rec) return;
-    const items = rec.kept.slice(0, 3).map((e) => `<a class="bh-fr" href="?${esc(e.q)}">${e.img ? `<img alt="" src="${esc(e.img)}">` : '<span class="ph"></span>'}<span class="cap">${esc(nameOf(e.q))}</span></a>`);
-    setHTML(strip, `<span class="k">kept</span>${items.join('')}<button type="button" class="bh-fr add" id="bh-keep2">keep<br>this frame</button>`);
+    // the button says what the card's Keep says (it presses that button): "kept" on a kept hole, whose press takes it out
+    const kept = isKept(rec, store.toQuery());
+    // a link through openLink, as the card's: the empty link (the page as it opens) would start the tour
+    const items = rec.kept.slice(0, 3).map((e) => `<a class="bh-fr" href="${esc(location.pathname + openLink(e.q))}">${e.img ? `<img alt="" src="${esc(e.img)}">` : '<span class="ph"></span>'}<span class="cap">${esc(nameOf(e.q))}</span></a>`);
+    setHTML(strip, `<span class="k">kept</span>${items.join('')}<button type="button" class="bh-fr add" id="bh-keep2" aria-pressed="${kept}">${kept ? 'kept' : 'keep<br>this frame'}</button>`);
   }
-  strip.addEventListener('click', (e) => { if (e.target.closest('#bh-keep2')) document.querySelector('#bh-keep')?.click(); });
+  // the second click of a double-click is not a press (review_s3c 1): the card's guard sees a click of detail 0 here
+  strip.addEventListener('click', (e) => { if (e.target.closest('#bh-keep2') && !(e.detail > 1)) document.querySelector('#bh-keep')?.click(); });
 
   /* ---------- the layout of the scales, by the window ---------- */
   function place() {
@@ -296,6 +302,8 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     /** The band of the window the labels on the render may use on sheet 1, [left, right] in px. */
     openBand() { const a = incl.svg.getBoundingClientRect(), b = mass.svg.getBoundingClientRect(); return [incl.svg.style.display === 'none' ? 0 : a.right, mass.svg.style.display === 'none' ? innerWidth : b.left]; },
     sheet,
+    /** The kept frames again: the record changed (keep.js onDraw). */
+    drawStrip,
     /** The boxes of the drawing's own parts that show, [x0, y0, x1, y1]: a label on the render steps aside from them. */
     obstacles() {
       return [spin.svg, incl.svg, mass.svg, tb, strip].filter((e) => e.getClientRects().length && getComputedStyle(e).display !== 'none')

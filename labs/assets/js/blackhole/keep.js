@@ -65,7 +65,7 @@ const idle = () => new Promise((done) => {
 
 /* card: the card's element (its #bh-keep, #bh-recline, #bh-reclist, #bh-recsaid, #bh-recfoot). store: the page's
    state. fixture: the os-fixture value of the address. moving(): whether the view is still easing to its state. */
-export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false, thumb = async () => null }) {
+export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false, thumb = async () => null, onDraw = () => {} }) {
   const $ = (s) => card.querySelector(s);
   const btn = $('#bh-keep'), line = $('#bh-recline'), list = $('#bh-reclist'), saidEl = $('#bh-recsaid'), foot = $('#bh-recfoot');
   let os = null, stored = R.empty(), newer = false, loaded = false, said = '', failedStart = false, busy = false, saidErr = false;
@@ -138,6 +138,8 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     foot.textContent = !os ? '' : os.recording.on
       ? `${where} A keep, a ray and a fall are also usage events, as is opening and leaving this page; they are sent to the labs' backend only where you allowed it on another lab.`
       : `${where} With recording off, no usage event is recorded on this page.`;
+    // what else shows the record (the drawing's strip of kept frames) is drawn again with the card
+    onDraw();
   }
 
   /** One press on the card, written in its turn; another press meanwhile does nothing (review_s3b A). */

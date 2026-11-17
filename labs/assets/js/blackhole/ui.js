@@ -139,7 +139,7 @@ export function buildUI(app) {
     <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
     <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
   left.appendChild(recCard);
-  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: () => thumbnail(app) });
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: () => thumbnail(app), onDraw: () => drawing?.drawStrip() });
   app.keep = keep;     // for the console and the drive, as window.__bh is
   store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);

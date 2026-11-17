@@ -78,8 +78,31 @@ const MUTANTS = [
   ['the cache read as empty', `export const cachedKeys = () => keys.size;`, `export const cachedKeys = () => 0;`],
 
   /* ---- one door ---- */
-  ['a stored hole with a bad link', `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => ({ q: e.q, t: e.t }))`, `filter((e) => isTime(e.t)).map((e) => ({ q: e.q, t: e.t }))`],
-  ['a stored hole with no time', `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => ({ q: e.q, t: e.t }))`, `filter((e) => isLink(e.q)).map((e) => ({ q: e.q, t: e.t }))`],
+  ['a stored hole with a bad link', `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`, `filter((e) => isTime(e.t)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`],
+  ['a stored hole with no time', `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`, `filter((e) => isLink(e.q)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`],
+  ['the stored holes past their bound', `kept: thumbsBounded(unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept)),`, `kept: thumbsBounded(unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept + 1)),`],
+  ['keep takes a bad link', `export function keep(record, { q, t, img = null }) {
+  if (img !== null && !isThumb(img)) return refuse(record, 'the frame\\'s picture is not a small JPEG');
+  if (!isLink(q)) return refuse(record, BAD_LINK);
+`, `export function keep(record, { q, t, img = null }) {
+  if (img !== null && !isThumb(img)) return refuse(record, 'the frame\\'s picture is not a small JPEG');
+`],
+  ['the store keeps two entries of one hole', `kept: thumbsBounded(unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept)),`, `kept: thumbsBounded(unique(kept, (e) => e.q).slice(0, LIMITS.kept)),`],
+  ['a picture past its bound is a thumbnail', `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`, `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb + 1 && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`],
+  ['a picture at its bound is not', `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`, `export const isThumb = (v) => typeof v === 'string' && v.length < LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`],
+  ['any text is a thumbnail', `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`, `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb;`],
+  ['a thumbnail need not be text', `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`, `export const isThumb = (v) => v.length <= LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`],
+  ['a PNG is a thumbnail', `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(v);`, `export const isThumb = (v) => typeof v === 'string' && v.length <= LIMITS.thumb && /^data:image\\/(jpeg|png);base64,[A-Za-z0-9+/]+=*$/.test(v);`],
+  ['a stored picture kept unchecked', `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`, `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (typeof e.img === 'string' ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`],
+  ['a stored picture dropped', `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (isThumb(e.img) ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`, `filter((e) => isLink(e.q) && isTime(e.t)).map((e) => (false ? { q: e.q, t: e.t, img: e.img } : { q: e.q, t: e.t }))`],
+  ['pictures kept on every hole', `function thumbsBounded(kept) { return kept.map((e, i) => (i < LIMITS.thumbs || !('img' in e) ? e : { q: e.q, t: e.t })); }`, `function thumbsBounded(kept) { return kept; }`],
+  ['one picture more than the bound', `function thumbsBounded(kept) { return kept.map((e, i) => (i < LIMITS.thumbs || !('img' in e) ? e : { q: e.q, t: e.t })); }`, `function thumbsBounded(kept) { return kept.map((e, i) => (i <= LIMITS.thumbs || !('img' in e) ? e : { q: e.q, t: e.t })); }`],
+  ['one picture fewer than the bound', `function thumbsBounded(kept) { return kept.map((e, i) => (i < LIMITS.thumbs || !('img' in e) ? e : { q: e.q, t: e.t })); }`, `function thumbsBounded(kept) { return kept.map((e, i) => (i < LIMITS.thumbs - 1 || !('img' in e) ? e : { q: e.q, t: e.t })); }`],
+  ['a keep with a bad picture taken', `  if (img !== null && !isThumb(img)) return refuse(`, `  if (false) return refuse(`],
+  ['a keep with no picture refused', `  if (img !== null && !isThumb(img)) return refuse(`, `  if (!isThumb(img)) return refuse(`],
+  ['a keep drops its picture', `kept: thumbsBounded([img ? { q, t, img } : { q, t }, ...rest])`, `kept: thumbsBounded([{ q, t }, ...rest])`],
+  ['a keep bounds no picture', `kept: thumbsBounded([img ? { q, t, img } : { q, t }, ...rest])`, `kept: [img ? { q, t, img } : { q, t }, ...rest]`],
+  ['the stored record bounds no picture', `kept: thumbsBounded(unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept)),`, `kept: (unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept)),`],
   ['a stored hole twice', `if (seen.has(k)) return false; `, ``],
   ['a stored ray of a fate it does not name', `&& FATES.includes(e.fate) && Number.isInteger(e.n)`, `&& Number.isInteger(e.n)`],
   ['a stored ray of an order that is not whole', `&& FATES.includes(e.fate) && Number.isInteger(e.n)`, `&& FATES.includes(e.fate) && Number.isFinite(e.n)`],
@@ -88,12 +111,10 @@ const MUTANTS = [
   ['a stored fall with no proper time', `isTime(e.t) && isTime(e.tau)).map`, `isTime(e.t)).map`],
   ['a negative count of drops kept', `Number.isInteger(d.dropped) && d.dropped >= 0 ?`, `Number.isInteger(d.dropped) && d.dropped >= -5 ?`],
   ['a count of drops above the cap', `Math.min(d.dropped, LIMITS.dropped) : 0;`, `d.dropped : 0;`],
-  ['the stored holes past their bound', `kept: unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept),`, `kept: unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept + 1),`],
   ['the stored rays past their bound', `    rays: rays.slice(0, LIMITS.rays),\n    falls:`, `    rays: rays.slice(0, LIMITS.rays + 1),\n    falls:`],
   ['the stored falls past their bound', `    falls: falls.slice(0, LIMITS.falls),\n    dropped,`, `    falls: falls.slice(0, LIMITS.falls + 1),\n    dropped,`],
 
   /* ---- the writes ---- */
-  ['keep takes a bad link', `export function keep(record, { q, t }) {\n  if (!isLink(q)) return refuse(record, BAD_LINK);\n`, `export function keep(record, { q, t }) {\n`],
   ['keep takes a bad time', `  if (!isTime(t)) return refuse(record, BAD_TIME);\n  const rest`, `  const rest`],
   ['a hole past the bound kept', `record.kept.length >= LIMITS.kept) return refuse(record, FULL);`, `record.kept.length > LIMITS.kept) return refuse(record, FULL);`],
   ['a kept hole cannot move up when full', `if (rest.length === record.kept.length && record.kept.length >= LIMITS.kept)`, `if (record.kept.length >= LIMITS.kept)`],
@@ -123,7 +144,6 @@ const MUTANTS = [
   ['keep compares the whole link again', `const rest = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));`, `const rest = record.kept.filter((e) => e.q !== q);`],
   ['take out compares the whole link again', `const kept = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));`, `const kept = record.kept.filter((e) => e.q !== q);`],
   ['isKept compares the whole link again', `record.kept.some((e) => holeKey(e.q) === holeKey(q))`, `record.kept.some((e) => e.q === q)`],
-  ['the store keeps two entries of one hole', `kept: unique(kept, (e) => holeKey(e.q)).slice`, `kept: unique(kept, (e) => e.q).slice`],
   ['the empty link left empty (the tour starts over it)', `  if (q) return \`?\${q}\${extra}\`;\n  const s = new Store();\n  s.open('');\n  return \`?o=\${s.all().obj}\${extra}\`;`, `  return \`?\${q}\${extra}\`;`],
   ['every link gets an object prefixed (another preset)', `  if (q) return \`?\${q}\${extra}\`;`, `  if (q) return \`?o=custom&\${q}\${extra}\`;`],
   ['a ray on the disk named without its order', `(e.n > 0 ? \`lands on the disk after going round, n = \${e.n}\` : FATE_WORDS.disk)`, `FATE_WORDS.disk`],

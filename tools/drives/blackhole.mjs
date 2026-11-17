@@ -587,6 +587,120 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
 
 /* ---- the scenario ---- */
 
+/* ---- BAR_L1 section 6, the form: checks C11 to C17 on the drawing (slice 4) ---- */
+export async function DRAWING_STEP(p, { base, width, ready }) {
+  const phone = width <= 900;
+  const load = async () => { await p.go(`${base}/labs/bh_animation_page.html?o=m87`); await p.until(ready, 60000); await p.sleep(1500); };
+  await load();
+  if (!(await p.ev(`!!document.querySelector('#bh-tb')`))) { p.check('the drawing is on the page (#bh-tb)', false); return; }
+  const settled = (expr) => p.until(`(() => { const a = window.__bh; return !a.store.anim && (${expr}); })()`, 8000);
+
+  // C11: sheet 1 shows no card of the old columns
+  if (!phone) {
+    const cards = await p.ev(`[...document.querySelectorAll('.bh-card')].filter((e) => e.getClientRects().length).map((e) => ((e.querySelector('h2') || e).textContent || '').trim().slice(0, 24))`);
+    p.check('C11: sheet 1 shows no card of the old columns', cards.length === 0, JSON.stringify(cards));
+  }
+
+  // C12: every graduation and hand is the engine's or the state's
+  const c12 = await p.ev(`(async () => { const K = await import('/labs/assets/js/blackhole/kerr.js'), C = await import('/labs/assets/js/blackhole/config.js'); const s = window.__bh.store.all();
+    const ticks = [...document.querySelectorAll('#bh-sc-spin [data-of]')].map((t) => Math.abs((t.dataset.of === 'isco' ? K.isco(+t.dataset.a, 1, s.q) : K.horizon(+t.dataset.a, s.q)) - +t.dataset.r));
+    const objs = C.OBJECTS.filter((o) => o.mass >= 1 && !o.hypothetical);
+    const marks = objs.map((o) => { const m = document.querySelector('#bh-sc-mass [data-object="' + o.id + '"]'); return m ? [o.mass, +m.getAttribute('y1')] : null; });
+    const ordered = marks.every(Boolean) && marks.slice().sort((x, y) => x[0] - y[0]).every((m, i, a) => i === 0 || m[1] < a[i - 1][1]);
+    const now = ['spin', 'incl', 'mass'].map((k) => +document.querySelector('#bh-sc-' + k).getAttribute('aria-valuenow'));
+    return { ticks: ticks.length, worst: Math.max(0, ...ticks), ordered, objects: objs.length, now, want: [s.a, s.incl, s.mass] }; })()`);
+  if (!phone) p.check('C12: the spin scale\'s ISCO and horizon marks are where kerr.js reaches their radii', c12.ticks >= 3 && c12.worst < 1e-6, JSON.stringify(c12));
+  if (!phone) p.check('C12: the mass scale carries every known hole of the catalogue, in the order of their masses', c12.ordered && c12.objects >= 3, JSON.stringify(c12));
+  p.check('C12: each scale\'s hand says the state\'s value', c12.now.every((v, i) => Math.abs(v - c12.want[i]) < 1e-9), JSON.stringify(c12));
+
+  // C13: each scale is a slider a keyboard and a pointer can use
+  const SCALES = phone ? [['spin', 'a', 0.01, 0, 0.998]] : [['spin', 'a', 0.01, 0, 0.998], ['incl', 'incl', 1, 1, 179], ['mass', 'mass', 0.1, -19, 11]];
+  for (const [id, key, step, min, max] of SCALES) {
+    const aria = await p.ev(`(() => { const e = document.querySelector('#bh-sc-${id}'); return [e.getAttribute('role'), +e.getAttribute('aria-valuemin'), +e.getAttribute('aria-valuemax'), e.getAttribute('aria-valuetext') || '']; })()`);
+    p.check(`C13: the ${id} scale is a slider with its bounds and a value in words`, aria[0] === 'slider' && aria[1] === min && aria[2] === max && aria[3].length > 2, JSON.stringify(aria));
+    const v0 = await p.ev(`window.__bh.store.get('${key}')`);
+    await p.ev(`document.querySelector('#bh-sc-${id}').focus()`);
+    await p.key('ArrowRight');
+    // a step keeps six decimals (drawing.js), so a right and a left come back to the value to 1e-6 (rounded to the
+    // schema's 2 digits, a step of 0.1 from M87*'s 9.8129 landed at 9.91)
+    const up = await settled(`Math.abs(a.store.get('${key}') - ${v0 + step}) < 1e-6`);
+    await p.key('ArrowLeft');
+    const back = await settled(`Math.abs(a.store.get('${key}') - ${v0}) < 1e-6`);
+    p.check(`C13: the right arrow steps the ${id} scale by ${step}, the left arrow back`, up && back, JSON.stringify(await p.ev(`window.__bh.store.get('${key}')`)));
+  }
+  // a press on the scale sets the value under the pointer: the spin at the middle of its ruler, the inclination at 60
+  // degrees on the protractor, the mass at Sgr A*'s mark
+  const at = await p.ev(`(() => { const s = document.querySelector('#bh-sc-spin'), r = s.getBoundingClientRect();
+    const xs = [...s.querySelectorAll('text')].filter((t) => /^(0\\.0|1\\.0)$/.test(t.textContent)).map((t) => +t.getAttribute('x'));
+    const out = { spin: xs.length === 2 ? [r.left + (xs[0] + xs[1]) / 2, r.top + 30] : null };
+    const i = document.querySelector('#bh-sc-incl');
+    if (i && i.getClientRects().length) { const ri = i.getBoundingClientRect(), o = i.querySelector('.hand line'), n90 = [...i.querySelectorAll('text')].find((t) => t.textContent === '90');
+      const ox = +o.getAttribute('x1'), oy = +o.getAttribute('y1'), R = +n90.getAttribute('x') - 13 - 4; out.incl = [ri.left + ox + R * Math.sin(Math.PI / 3), ri.top + oy - R * Math.cos(Math.PI / 3)]; }
+    const m = document.querySelector('#bh-sc-mass');
+    if (m && m.getClientRects().length) { const rm = m.getBoundingClientRect(), mk = m.querySelector('[data-object="sgra"]'); out.mass = [rm.left + +mk.getAttribute('x1') - 2, rm.top + +mk.getAttribute('y1')]; }
+    return out; })()`);
+  const SGRA = await p.ev(`(async () => { const C = await import('/labs/assets/js/blackhole/config.js'); return Math.log10(C.OBJECTS.find((o) => o.id === 'sgra').mass); })()`);
+  for (const [id, key, want, tol] of [['spin', 'a', 0.499, 0.012], ['incl', 'incl', 60, 1.5], ['mass', 'mass', SGRA, 0.06]]) {
+    if (!at[id]) { if (!phone || id === 'spin') p.check(`C13: the ${id} scale can be pressed`, false, JSON.stringify(at)); continue; }
+    await p.click(at[id][0], at[id][1]);
+    const got = await settled(`Math.abs(a.store.get('${key}') - ${want}) < ${tol}`);
+    p.check(`C13: a press on the ${id} scale sets ${key} to the value under the pointer (${+want.toFixed(3)})`, got, String(await p.ev(`window.__bh.store.get('${key}')`)));
+  }
+  await load();
+
+  // C14: nothing the old columns did is lost: each column is shown whole on its sheet, the record on sheet 4
+  if (!phone) {
+    const c14 = await p.ev(`(async () => { const out = {}; const wait = () => new Promise((r) => setTimeout(r, 450));
+      const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).display !== 'none';
+      for (const n of [2, 3, 4]) { document.querySelector('.bh-tab[data-sheet="' + n + '"]').click(); await wait();
+        out[n] = { left: shown(document.querySelector('#bh-left')), right: shown(document.querySelector('#bh-right')), keep: shown(document.querySelector('#bh-keep')) }; }
+      document.querySelector('.bh-tab[data-sheet="1"]').click(); await wait();
+      out[1] = { object: document.querySelectorAll('#bh-hl .bh-opt').length }; return out; })()`);
+    p.check('C14: sheet 2 shows the readouts column, sheet 3 the settings column, sheet 4 the record; sheet 1 names object, view and colour', c14[2].right && c14[3].left && c14[4].keep && c14[1].object >= 12, JSON.stringify(c14));
+  }
+
+  // C15: the title block's numbers are the readout cards' numbers
+  const c15 = await p.ev(`(() => { const tb = {}; for (const c of document.querySelectorAll('#bh-tb .c')) { const l = c.querySelector('.l'), v = c.querySelector('.v'); if (l && v) tb[l.textContent.trim()] = v.textContent.replace(/\\s+/g, ''); }
+    const rows = [...document.querySelectorAll('#bh-read .rw')].map((r) => [r.querySelector('dt').textContent, r.querySelector('dd').textContent.replace(/\\s+/g, '')]);
+    const card = (re) => { const r = rows.find(([t]) => re.test(t)); return r ? r[1] : null; };
+    const shadowKey = Object.keys(tb).find((k) => /^shadow, far observer/.test(k));
+    const pairs = [['mass', tb.mass, card(/^mass/)], ['horizon r+', tb['horizon r+'], card(/^event horizon/)], ['ISCO', tb.ISCO, card(/^ISCO/)], ['photon orbit', tb['photon orbit'], card(/^photon orbit/)], ['Hawking T', tb['Hawking T'], card(/^Hawking T/)], ['shadow', shadowKey ? tb[shadowKey].split('·')[0] : null, card(/^shadow, mean diameter/)]];
+    return pairs.map(([n, a, b]) => [n, a, b, !!a && !!b && a === b]); })()`);
+  p.check('C15: the title block\'s mass, horizon, ISCO, photon orbit, Hawking T and shadow are the readout cards\' own', c15.length === 6 && c15.every((x) => x[3]), JSON.stringify(c15));
+
+  // C16: the head line breaks between options, never inside one; at 390 the title block is the sheet's first block
+  const c16 = await p.ev(`(() => { const opts = [...document.querySelectorAll('#bh-hl .bh-opt')].filter((b) => b.getClientRects().length);
+    const broken = opts.filter((b) => b.getClientRects().length > 1 || b.getBoundingClientRect().height > 2 * parseFloat(getComputedStyle(b).lineHeight || '16')).map((b) => b.textContent);
+    const tb = document.querySelector('#bh-tb'), h = document.querySelector('.bh-sheet-h');
+    return { shown: opts.length, broken, inSheet: !!h && h.nextElementSibling === tb }; })()`);
+  p.check(`C16: every option of the head line on one line (${c16.shown} shown)`, c16.shown >= 4 && c16.broken.length === 0, JSON.stringify(c16));
+  if (phone) p.check('C16: at 390 the title block is the first block of the sheet, under the picture', c16.inSheet, JSON.stringify(c16));
+
+  // C17: a kept frame is a small picture of it, in the record and (on a wide screen) in the strip
+  const before = await p.ev(`window.__bh.keep.record.kept.length`);
+  if (!phone) {
+    await p.ev(`document.querySelector('#bh-keep2').click()`);
+  } else {
+    await p.ev(`(() => { const h = document.querySelector('.bh-sheet-h'); if (h.getAttribute('aria-expanded') !== 'true') h.click(); })()`);
+    await p.sleep(800);
+    await p.ev(`document.querySelector('#bh-keep').click()`);
+  }
+  const kept = await p.until(`(() => { const k = window.__bh.keep.record.kept; return k.length === ${before + 1} && !!k[0].img; })()`, 15000);
+  const k0 = await p.ev(`(() => { const e = window.__bh.keep.record.kept[0] || {}; const img = document.querySelector('#bh-strip img'); const b = document.querySelector('#bh-keep2');
+    return { jpeg: /^data:image\\/jpeg;base64,/.test(e.img || ''), chars: (e.img || '').length, strip: img ? img.getAttribute('src') === e.img : null, button: b ? [b.getAttribute('aria-pressed'), b.textContent] : null,
+      href: (document.querySelector('#bh-strip a.bh-fr') || { getAttribute: () => null }).getAttribute('href') }; })()`);
+  p.check('C17: a keep stores a JPEG of the frame, at most 12,000 characters', kept && k0.jpeg && k0.chars > 200 && k0.chars <= 12000, JSON.stringify({ ...k0, kept }));
+  if (!phone) {
+    p.check('C17: the strip shows that picture at once, and its button says the hole is kept', k0.strip === true && k0.button && k0.button[0] === 'true' && k0.button[1] === 'kept', JSON.stringify(k0));
+    p.check('the strip\'s link opens the hole by its name, so the tour does not start', /\?o=m87$/.test(k0.href || ''), String(k0.href));
+    await p.ev(`document.querySelector('#bh-keep2').click()`);
+    const out = await p.until(`window.__bh.keep.record.kept.length === ${before}`, 8000);
+    const b2 = await p.ev(`(() => { const b = document.querySelector('#bh-keep2'); return [b.getAttribute('aria-pressed'), b.textContent]; })()`);
+    p.check('the strip\'s "kept" takes the hole out, as the card\'s "Kept" does, and says "keep this frame" again', out && b2[0] === 'false' && /keep/.test(b2[1]), JSON.stringify(b2));
+  }
+  await p.shot(`drawing-${width}`);
+}
+
 export default async function blackhole(p, { base, width }) {
   const phone = width < 700;
   for (const [n, e] of standard({ gold: { allow: [...GOLD_ALLOW, ...GOLD_DEFERRED] }, targets: { cover: SHEET_COVER } })) p.invariant(n, e);
@@ -849,6 +963,9 @@ export default async function blackhole(p, { base, width }) {
 
   /* ---- 4c. the record (road 1.09) ---- */
   await RECORD_STEP(p, { base, width, ready: READY, after: (label) => pixelRules(label) });
+
+  /* ---- 4d. the drawing: the bar's form, C11 to C17 (slice 4) ---- */
+  await DRAWING_STEP(p, { base, width, ready: READY });
 
   /* ---- 5. the Instrument card's Hawking temperature, read against derive() in the page (P5-1) ---- */
   const HAWK = `(async () => { const P = await import('/labs/assets/js/blackhole/physics.js');
