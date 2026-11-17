@@ -25,7 +25,9 @@
          5 large clauses, where strokes reach furthest);
       c. the pools where the figure says: along the radius through each
          pool's middle half the deepest run of ink is at least 0.13 R,
-         where the carrier alone is under 0.09 R (catches a mirrored or
+         at least the carrier's widest (W_RING times 1.45; with 0.3.1 they
+         are equal, so a mirrored figure is caught here only where the
+         carrier is narrower, and always by the empty gap band of b2) (a mirrored or
          turned figure);
       d. the side: pooled over the texts, the share of filaments the
          suite (filaments.js) reads as pointing outward is within 0.2
@@ -146,7 +148,7 @@ for (const [i, g] of texts.entries()) {
       }
       best = Math.max(best, run);
     }
-    ok(best >= 0.13 * f.R, `text ${i}: pool ${j} at ${th} degrees has at most ${best} px of ink on a radius (${(0.13 * f.R).toFixed(0)} needed; the carrier is under ${(0.09 * f.R).toFixed(0)})`);
+    ok(best >= 0.13 * f.R, `text ${i}: pool ${j} at ${th} degrees has at most ${best} px of ink on a radius (${(0.13 * f.R).toFixed(0)} needed; the carrier is at most ${(INK.W_RING * 1.45 * f.R).toFixed(0)})`);
   }
   // d. the side, read by the suite
   const wm = row.w_med_R * row._ring.R;

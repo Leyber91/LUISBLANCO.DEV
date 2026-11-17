@@ -105,7 +105,7 @@ import { PI, sinK, cosK } from './trig.js';
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.3',
+  version: 'inkfig-0.3.1',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -118,8 +118,8 @@ export const INK = Object.freeze({
   GAP_DEG: 26.5,      // I6: the gap's arc, degrees
   TAPER_DEG: 10,      // I6: the stroke thins into the gap over this arc
   DEPTH: 0.33,        // I2: a pool's peak depth across the ring, over R
-  WOBBLE: 0.06,       // I1: centreline wander, over R
-  W_RING: 0.06,       // I6: the carrier's width at full load, over R
+  WOBBLE: 0.11,       // I1: centreline wander, over R
+  W_RING: 0.09,       // I6: the carrier's width at full load, over R
   LOAD_ARC: 0.3,      // I6: arc (over R) at which the carrier's load has fallen to half
   LOAD_FLOOR: 0.7,   // I6: the share of a full load the brush keeps however far from a pool (it is redipped by the writer's hand, not only by the pools)
   BRISTLES: 28,       // I6
@@ -141,6 +141,7 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'SHAFT', value: INK.SHAFT, source: 'film suite 2026-11-17: filament shaft median 0.0172 R' },
   { name: 'FIL_LEN', value: INK.FIL_LEN, source: 'film suite 2026-11-17: filament length median 0.143 R' },
   { name: 'WOBBLE bounded', value: INK.WOBBLE, source: "v0.2 raised it to 0.10 on a 30-degree lattice and the 12-clause carrier left the suite's carrier band (closure 0.75, below the film's p10 0.81; the coordinating session saw straight chords between knots); 0.06 on a 45-degree lattice gives 0.92 (4 and 12 clauses, 2026-11-17)" },
+  { name: 'v0.3.1: W_RING, WOBBLE, thread turning', value: INK.W_RING, source: "after 0.3's measurement (49ffc98) and the coordinating session's read: the carrier thin on 1 and 4 clauses (w_med 0.0338 and 0.0438 against the film's p10 0.0441), the wander overcorrected (0.0094 to 0.0187 against p10 0.0189), the threads straight (turning 48.6 and 49.5 against p10 55.9). W_RING 0.06 to 0.09, WOBBLE 0.06 on 45 degrees to 0.11 on 60, the threads' turning noise 4 octaves at 4 cycles and amplitude 0.55 to 1.1 radians: on the three figures w_med 0.046, 0.064, 0.075; wobble 0.016, 0.021, 0.046; turning 57, 62, 66 (2026-11-17)" },
   { name: 'MASS_MAX', value: INK.MASS_MAX, source: 'film suite 2026-11-17: blot clusters per master p90 4.3' },
   { name: 'MASS_ARC', value: INK.MASS_ARC, source: 'film suite 2026-11-17: the sum of a master s cluster spans, p50 45, p90 98.1 degrees' },
   { name: 'R_CANVAS', value: INK.R_CANVAS, source: 'film.md 5.2: R over canvas median 0.365 (the measuring frame; figure.js)' },
@@ -394,7 +395,7 @@ export function inkFigure(g, opts = {}) {
 
   // I1: the centreline
   const wobSeed = fnv1a(`${cert}:wobble`);
-  const rc = (phiDeg) => R * (1 + INK.WOBBLE * fbm1(wobSeed, (((phiDeg % 360) + 360) % 360) / 45, 3, 8));
+  const rc = (phiDeg) => R * (1 + INK.WOBBLE * fbm1(wobSeed, (((phiDeg % 360) + 360) % 360) / 60, 3, 6));
 
   const body = new Float32Array(S * S), bristle = new Float32Array(S * S);
   const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0 };
@@ -576,15 +577,15 @@ function thread(F, S, x, y, head, len, shaft, o) {
   const rnd = o.rnd || mulberry32(o.seed);
   const n = Math.max(4, Math.ceil(len / Math.max(1, shaft * 0.35)));
   const ds = len / n;
-  const curl = (rnd() * 2 - 1) * 1.3 * o.turn, amp = (0.45 + 0.5 * rnd()) * o.turn;
+  const curl = (rnd() * 2 - 1) * 1.3 * o.turn, amp = (0.55 + 0.55 * rnd()) * o.turn;
   const seed = o.seed >>> 0;
-  const f0 = fbm1(seed, 0, 3);
+  const f0 = fbm1(seed, 0, 4);
   const width = (t) => (t < 0.18 ? shaft * (1 + (o.flare - 1) * (1 - t / 0.18) * (1 - t / 0.18)) : shaft * (1.1 - ((1.1 - o.end) * (t - 0.18)) / 0.82)) * (1 + 0.08 * noise1(seed + 3, t * 9));
   const path = [];
   let X = x, Y = y, h = head;
   for (let k = 0; k <= n; k++) {
     const t = k / n;
-    h = head + curl * t + amp * (fbm1(seed, t * 2.5, 3) - f0);
+    h = head + curl * t + amp * (fbm1(seed, t * 4, 4) - f0);
     stampDisc(F, S, X, Y, width(t) / 2);
     path.push([X, Y, h]);
     X += ds * cosK(h); Y -= ds * sinK(h);
