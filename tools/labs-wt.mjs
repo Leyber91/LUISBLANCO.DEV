@@ -525,7 +525,12 @@ async function selftest() {
     fs.rmSync(scratch, { recursive: true, force: true });
   };
   process.on('exit', (code) => { if (!done) err(`FAIL  labs-wt selftest: the process ended inside a check, exit code ${code}${kept.length ? `: ${kept.join(' | ')}` : ''}`); clean(); });
-  await watchdog(30000, () => failed, () => { done = true; });   // the whole selftest takes a few seconds
+  // The whole selftest takes about 3 s. The limit was 30 s until 2026-11-17, when one run of every list reported
+  // this selftest as failing before any mutation; in that run another list took 41 s for its usual 5. At eight
+  // times slower, 3 s is 24 to 29 s, so the limit is the likely cause; it is not proven, and 70 runs since, 24 of
+  // them eight at a time, all passed. The limit is tools/drive.mjs's 120 s now, under the 180 s tools/mutate.mjs
+  // gives a copy.
+  await watchdog(120000, () => failed, () => { done = true; });
   try {
     /* ---- the real lock (tools/drive.mjs holdChrome), on a lock file of the selftest's own ---- */
     let during = null, after = null;
@@ -555,7 +560,7 @@ async function selftest() {
     for (let i = 0; i < 3; i++) await withChromeLock(async () => {}, { waitMs: 1000, lock, say: () => {} });
     yes('a shot leaves no exit listener behind', process.listenerCount('exit') === listeners, `${process.listenerCount('exit')} after three shots, ${listeners} before`);
 
-    const child = spawnSync(process.execPath, [SELF, 'selftest-part', 'exit', lock], { encoding: 'utf8', timeout: 20000 });
+    const child = spawnSync(process.execPath, [SELF, 'selftest-part', 'exit', lock], { encoding: 'utf8', timeout: 60000 });
     yes('a shot whose process exits inside it gives the lock back on the way out', child.status === 3 && !fs.existsSync(lock), `exit code ${child.status}, lock ${fs.existsSync(lock) ? 'left' : 'gone'}`);
     fs.rmSync(lock, { force: true });
 
@@ -649,7 +654,7 @@ async function selftest() {
     yes('a lab with no worktree whose port is served is shot', same(r.log, [`open ${port}`, 'hold 0', `open ${port}`, `shot starts ${name} undefined`, 'shot ends', 'lock given back']) && r.code === 0, `${J(r.log)}, exit code ${r.code}`);
 
     /* ---- the selftest's own limit ---- */
-    const dog = (what) => spawnSync(process.execPath, [SELF, 'selftest-part', what], { encoding: 'utf8', timeout: 20000 }).status;
+    const dog = (what) => spawnSync(process.execPath, [SELF, 'selftest-part', what], { encoding: 'utf8', timeout: 60000 }).status;
     const hung = dog('watchdog-clean'), hungFailed = dog('watchdog-failed');
     yes('a selftest that hangs with no failed check ends with the code mutate reads as timed out', hung === WATCHDOG_EXIT, `exit code ${hung}, WATCHDOG_EXIT ${WATCHDOG_EXIT}`);
     yes('a selftest that hangs after a failed check ends with exit code 1', hungFailed === 1, `exit code ${hungFailed}`);
