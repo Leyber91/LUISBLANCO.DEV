@@ -1,0 +1,25 @@
+{
+  "about": "Heptapod's predictions, committed before the comparison that tests them (BAR_F G13; research/ip.md rule 9: arrive at the film's results by our own route). Each entry: the feature, its derivation, the prediction, how it is measured, and whether the film's value was known when it was written. Outcomes are written by the measuring script to predictions.results.json; this file is not edited after its comparison has run.",
+  "predictions": [
+    {
+      "id": "F4-P1",
+      "date": "2026-11-17",
+      "feature": "where the ring's gap falls",
+      "derivation": "Brush depletion: the brush is reloaded where ink pools, at the blot clusters, and its bristle reservoirs deplete with arc distance from the last reload (Strassmann 1986, the hairy-brush model; PLAN M1); the line breathes at its driest point (PLAN M6). So the ring's main gap falls in the largest arc between two neighbouring blot clusters.",
+      "prediction": "On the film's masters with a gap of at least 1 degree and at least 2 blot clusters, the centre of the main gap lies inside the largest inter-cluster arc in at least two thirds of them, and more often than gaps placed uniformly at random would (the mean share of the circle the largest arc covers).",
+      "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters: detail/ring.js gives the per-angle carrier, the gaps and the blot clusters (film-tools/table.py's merge rule).",
+      "filmValueKnown": false,
+      "filmValueKnownNote": "film.md 5.1 and 5.2 give the gaps' sizes and the clusters' spans, never where a gap sits relative to the clusters."
+    },
+    {
+      "id": "F4-P2",
+      "date": "2026-11-17",
+      "feature": "how the ring's width varies along it",
+      "derivation": "The same depletion: the further the brush is from its last reload, the less ink it lays, so the carrier thins with arc distance from the nearest blot cluster (Strassmann 1986; PLAN M1). Chiang gives thickness a meaning (inflection); the physics gives it a profile.",
+      "prediction": "On the film's masters with at least 1 blot cluster, the carrier's width outside the blots (at most 2.5 times its median) falls with angular distance to the nearest cluster: Spearman's rho is negative in at least two thirds of the masters, and the median rho is below -0.2.",
+      "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters, from detail/ring.js's per-angle carrier width and blot clusters.",
+      "filmValueKnown": false,
+      "filmValueKnownNote": "film.md 5.2 gives the width's coefficient of variation (0.51 to 1.21), never its relation to where the blots are."
+    }
+  ]
+}
