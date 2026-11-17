@@ -252,6 +252,29 @@ for (const a of [0.0, 0.5, 0.94, 0.998]) {
   ok('Sgr A* theta_g (GRAVITY M, D) = 5.125 uas (EHT 2022 Paper I, Table 1)', Math.abs(sgr - 5.125) < 0.01, sgr.toFixed(4) + ' uas');
   const T = K.hawkingKelvin(K.SI.Msun);
   ok('Hawking temperature of 1 Msun = 6.17e-8 K', Math.abs(T - 6.17e-8) < 0.02e-8, T.toExponential(3) + ' K');
+  // the a = q = 0 value is hbar c^3 / (8 pi G M k_B) to rounding
+  const T0 = K.SI.hbar * K.SI.c ** 3 / (8 * Math.PI * K.SI.G * K.SI.Msun * K.SI.kB);
+  ok('Hawking temperature at a = Q = 0 is hbar c^3 / (8 pi G M k_B)', Math.abs(T / T0 - 1) < 1e-12, `ratio ${(T / T0).toFixed(15)}`);
+  // spinning and charged: T / T(a = q = 0) = 4 sqrt(1 - a^2 - q^2) / (r+^2 + a^2), r+ = 1 + sqrt(1 - a^2 - q^2)
+  // (Adamo and Newman, arXiv:1410.6626, p. 21: T_bh proportional to sqrt(M^2 - a^2 - Q^2) / (r+^2 + a^2)), written
+  // here from that form and not from the engine's (r+ - r-) / (2 (r+^2 + a^2))
+  for (const [a, q] of [[0.5, 0], [0.94, 0], [0.998, 0], [0, 0.5], [0.3, 0.9]]) {
+    const s = Math.sqrt(1 - a * a - q * q), want = 4 * s / ((1 + s) ** 2 + a * a);
+    const got = K.hawkingKelvin(K.SI.Msun, a, q) / T;
+    ok(`Hawking temperature at a = ${a}, Q = ${q}: ${want.toFixed(4)} of the non-spinning value`, Math.abs(got / want - 1) < 1e-9, `engine ${got.toFixed(6)}`);
+  }
+  ok('an extremal hole has no Hawking temperature', K.hawkingKelvin(K.SI.Msun, 1, 0) === 0 && K.hawkingKelvin(K.SI.Msun, 0.6, 0.8) < 1e-20, `${K.hawkingKelvin(K.SI.Msun, 0.6, 0.8)}`);
+  // the number the page shows (physics.js derive, the Instrument card's "Hawking T") carries the hole's own spin
+  // and charge: Cygnus X-1 as the page opens it, and a custom charged hole
+  const { Store } = await import('./state.js');
+  const { derive } = await import('./physics.js');
+  for (const [name, search, patch] of [['Cygnus X-1', '?o=cygx1', null], ['a custom hole at a = 0.3, Q = 0.9', '', { obj: 'custom', a: 0.3, q: 0.9 }]]) {
+    const st = new Store(); st.open(search); if (patch) st.set(patch, { instant: true });
+    const m = derive(st.all());
+    const want = K.hawkingKelvin(m.massSun * K.SI.Msun, m.a, m.q), flat = K.hawkingKelvin(m.massSun * K.SI.Msun);
+    ok(`the page's Hawking T for ${name} is the spinning, charged value`, Math.abs(m.hawkingK / want - 1) < 1e-12 && m.hawkingK < flat * 0.95,
+      `${m.hawkingK.toExponential(3)} K at a = ${m.a}, Q = ${m.q} (non-spinning ${flat.toExponential(3)} K)`);
+  }
 }
 
 console.log(fails ? `\n${fails} check(s) failed` : '\nall checks passed');

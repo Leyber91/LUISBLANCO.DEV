@@ -6,14 +6,21 @@
    ============================================================ */
 
 import * as K from './kerr.js';
-import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION } from './config.js';
-import { tanHalfV, derive, theoryShadow, shadowFor, s3, integratorShadow, predictedUas, measurement, sigmaDiff, fall, sci, dur, len } from './physics.js';
+import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION, EHT_RES } from './config.js';
+import { tanHalfV, derive, shadowFor, s3, integratorShadow, measurement, published, fall, sci, dur, len,
+  sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G } from './physics.js';
+import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour } from './tour.js';
 import { mountAsk } from './ask.js';
-import { exportPlate, exportState, importState, exportData } from './plate.js';
+import { exportPlate, exportState, importState, exportData, PLATE_SS } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent } from './probe.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, SUBRING } from './probe.js';
+
+/** The texels of the GPU's measuring row; the Measure card's note quotes it. */
+const STRIP_N = 4096;
+/** The overlay's text: 11 px IBM Plex Mono at .06em letter spacing, about 7.3 px a character (black_hole.css). */
+const LABEL_CH = 7.3;
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
@@ -65,7 +72,7 @@ export function buildUI(app) {
   // view + observer + colour + emitter
   const viewCard = el('div', 'bh-card');
   viewCard.innerHTML = `<h2>View</h2><div class="bh-seg" id="bh-views"></div><div class="bh-seg" id="bh-obs"></div>
-    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div>
+    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div><div class="bh-legend" id="bh-modekey"></div>
     <h2 style="margin-top:12px">Emitter</h2><div class="bh-seg" id="bh-emit"></div><p class="bh-note" id="bh-viewnote"></p>`;
   left.appendChild(viewCard);
   const viewBtns = {}, obsBtns = {}, modeBtns = {}, emitBtns = {};
@@ -106,8 +113,9 @@ export function buildUI(app) {
     row.innerHTML = `<label for="${id}">${LABEL[k] || d.label}</label><span><input class="bh-num" id="${id}" inputmode="decimal" aria-label="${LABEL[k] || d.label} value"> <span class="bh-unit">${d.unit === 'Msun' ? '' : d.unit}</span></span>
       <input class="bh-range" type="range" aria-label="${LABEL[k] || d.label}" min="${toRange(d, d.min)}" max="${toRange(d, d.max)}" step="${d.log ? 0.001 : d.step}">`;
     const num = row.querySelector('.bh-num'), rng = row.querySelector('.bh-range');
-    rng.addEventListener('input', () => { app.tour?.stop(); store.set({ [k]: +fromRange(d, +rng.value).toFixed(5), ...(k === 'a' || k === 'q' || k === 'mass' ? { obj: 'custom' } : {}) }, { dur: 450 }); });
-    num.addEventListener('change', () => { app.tour?.stop(); store.set({ [k]: +num.value, ...(k === 'a' || k === 'q' || k === 'mass' ? { obj: 'custom' } : {}) }); });
+    // whether a value makes a named object custom is Store.set's rule, the one a link and a file take (fix_s2_p1 K5)
+    rng.addEventListener('input', () => { app.tour?.stop(); store.set({ [k]: +fromRange(d, +rng.value).toFixed(5) }, { dur: 450 }); });
+    num.addEventListener('change', () => { app.tour?.stop(); store.set({ [k]: +num.value }); });
     rows[k] = { num, rng, d };
     parCard.appendChild(row);
   });
@@ -130,7 +138,7 @@ export function buildUI(app) {
     catch { actNote.textContent = url; }
   });
   const plate = async (W) => {
-    actNote.textContent = `Tracing a ${W} px still with 2 x 2 samples per pixel...`;
+    actNote.textContent = `Tracing a ${W} px still with ${PLATE_SS} × ${PLATE_SS} samples per pixel...`;
     try { await exportPlate(app, W, (p) => { actNote.textContent = `Tracing a ${W} px still: ${Math.round(p * 100)}%`; }); actNote.textContent = `Plate saved (${W} px, parameters stamped).`; }
     catch (e) { actNote.textContent = 'Export failed: ' + e.message; }
   };
@@ -157,17 +165,17 @@ export function buildUI(app) {
 
   const xsCard = el('div', 'bh-card');
   xsCard.innerHTML = `<h2>Cross-section <em>click the image to trace a ray</em></h2><div id="bh-xs"></div>
-    <div class="bh-legend"><span><i></i>photon orbit</span><span><i class="g"></i>disk, ISCO</span><span><i class="d"></i>ergosurface</span></div>`;
+    <div class="bh-legend"><span><i></i>photon orbit</span><span><i class="s"></i>disk, ISCO</span><span><i class="d"></i>ergosurface</span></div>`;
   right.appendChild(xsCard);
 
   const profCard = el('div', 'bh-card');
   profCard.innerHTML = `<h2>Disk profile <em>hover to light an annulus</em></h2><div id="bh-prof"></div>
-    <div class="bh-legend"><span><i class="g"></i>temperature T / T peak</span><span><i class="d"></i>flux F / F peak</span></div>`;
+    <div class="bh-legend"><span><i class="s"></i>temperature T / T peak</span><span><i class="d"></i>flux F / F peak</span></div>`;
   right.appendChild(profCard);
 
   const potCard = el('div', 'bh-card');
   potCard.innerHTML = `<h2>Effective potential <em>equatorial</em></h2><div id="bh-pot"></div><p class="bh-note" id="bh-potnote"></p>
-    <div class="bh-legend"><span><i></i>photon impact parameter b(r)</span><span><i class="g"></i>particle V(r) at L_ISCO</span></div>`;
+    <div class="bh-legend"><span><i></i>photon impact parameter b(r)</span><span><i class="s"></i>particle V(r) at L_ISCO</span></div>`;
   right.appendChild(potCard);
 
   const specCard = el('div', 'bh-card');
@@ -177,7 +185,7 @@ export function buildUI(app) {
   const fallCard = el('div', 'bh-card');
   fallCard.innerHTML = `<h2>Fall <em>drag the chart to scrub</em></h2><div id="bh-fall"></div><dl class="bh-read" id="bh-fallread"></dl>
     <div class="bh-seg" style="margin-top:8px"><button class="bh-btn go" type="button" id="bh-fallgo">Fall in</button><button class="bh-btn" type="button" id="bh-fallstop">Hold</button></div>
-    <div class="bh-legend"><span><i class="g"></i>your clock τ</span><span><i></i>far clock t</span><span><i class="d"></i>tide on 2 m</span></div>`;
+    <div class="bh-legend"><span><i class="s"></i>your clock τ</span><span><i></i>far clock t</span><span><i class="d"></i>tide on ${BODY_M} m</span></div>`;
   right.appendChild(fallCard);
 
   const askCard = el('div', 'bh-card');
@@ -204,11 +212,11 @@ export function buildUI(app) {
 
   /* ---------- footer ---------- */
   const foot = $('#bh-foot');
-  foot.innerHTML = `<div class="tags"><span><b>[REAL]</b> Kerr geodesics, shadow, disk physics, EHT values, clocks, tides</span>
-    <span><b class="i">[ILLUSTRATIVE]</b> turbulence, display scale, sky</span>
-    <button class="bh-btn" type="button" id="bh-srcbtn" style="min-height:24px;padding:2px 8px">Sources</button></div>
+  foot.innerHTML = `<div class="tags"><span><b>[REAL]</b> ${COPY.real}</span>
+    <span><b class="i">[ILLUSTRATIVE]</b> ${COPY.illustrative}</span></div>
+    <button class="bh-btn src" type="button" id="bh-srcbtn">Sources</button>
     <div class="perf" id="bh-perf">tier -- · -- ms</div>`;
-  footM.innerHTML = `<div><b style="color:var(--horizon)">[REAL]</b> geodesics, shadow, disk physics, EHT values, clocks, tides. <b>[ILLUSTRATIVE]</b> turbulence, display colour scale, sky.</div><button class="bh-btn" type="button" id="bh-srcbtn2">Sources</button><div class="perf" id="bh-perf2"></div>`;
+  footM.innerHTML = `<div><b style="color:var(--horizon)">[REAL]</b> ${COPY.real}. <b>[ILLUSTRATIVE]</b> ${COPY.illustrative}.</div><button class="bh-btn" type="button" id="bh-srcbtn2">Sources</button><div class="perf" id="bh-perf2"></div>`;
   const sources = $('#bh-sources');
   const openSources = () => {
     sources.hidden = !sources.hidden;
@@ -219,10 +227,10 @@ export function buildUI(app) {
       [['mass', o.massSrc], ['distance', o.distSrc], ['spin', o.spinSrc], ['inclination', o.inclSrc]].forEach(([what, k]) => { if (k) by.set(k, [...(by.get(k) || []), what]); });
       return [...by].map(([k, what]) => `${what.join(', ')}: ${CITE[k]}`).join('; ') || o.massNote || '';
     };
-    const rowsT = OBJECTS.map((o) => `<tr><td>${o.name}</td><td>${sci(o.mass)} M☉ ${o.massErr ? '± ' + sci(o.massErr) : ''}</td><td>${o.distPc ? len(o.distPc * K.SI.pc) : '--'}</td><td>a ${o.spin} <span class="${o.spinTag === 'REAL' ? 'bh-tagr' : 'bh-tagi'}">${o.spinTag}</span></td><td>i ${o.incl} deg</td><td>${esc(cited(o))}</td></tr>`).join('');
+    const rowsT = OBJECTS.map((o) => `<tr><td>${o.name}</td><td>${o.massErr ? pmText(o.mass, o.massErr) : sci(o.mass)} M☉</td><td>${o.distPc ? parsecs(o.distPc) : '--'}</td><td>a ${spinText(o.spin)} <span class="${o.spinTag === 'REAL' ? 'bh-tagr' : 'bh-tagi'}">${o.spinTag}</span></td><td>i ${deg(o.incl)} deg</td><td>${esc(cited(o))}</td></tr>`).join('');
     sources.innerHTML = `<h3>Objects (data version ${VERSION})</h3><table><tr><th>object</th><th>mass</th><th>distance</th><th>spin</th><th>incl.</th><th>sources</th></tr>${rowsT}</table>
       <h3 style="margin-top:12px">Equations and values</h3><ol>${Object.values(CITE).map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
-      <p class="bh-note">Verification: <b>node labs/assets/js/blackhole/verify.mjs</b> runs 40 checks of the engine against these sources (shadow vs Bardeen within 0.002%, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification).</p>
+      <p class="bh-note">Verification: ${esc(COPY.verify)}</p>
       <p class="bh-note">The first version of this page, from June 2026, stays at <a href="bh_animation_page_v1.html" style="color:var(--horizon)">bh_animation_page_v1.html</a>.</p>
       <button class="bh-btn" type="button" id="bh-srcclose">Close</button>`;
     $('#bh-srcclose').addEventListener('click', () => { sources.hidden = true; });
@@ -247,9 +255,9 @@ export function buildUI(app) {
     anchorTimer = setTimeout(async () => {
       if (store.anim) return;
       const v = viewNow();
-      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: 1.7 };
+      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: store.get('fcol') };
       // a resize re-traces (the grid's reach follows the aspect); the anchors stay live meanwhile
-      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak)]);
+      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak), args.fcol]);
       if (key === anchorKey) return;
       anchorKey = key;
       try {
@@ -257,7 +265,7 @@ export function buildUI(app) {
         // later passes go to the worker
         const res = anchorsRuns++ === 0 || !worker ? anchorsInline(args) : await call('anchors', args);
         if (key !== anchorKey) return;
-        anchors = res;
+        anchors = { ...res, fcol: args.fcol };
         drawOverlay(); drawSpectrum(); app.tour?.refresh();
       } catch (err) { console.warn('anchors unavailable:', err.message); /* the overlay keeps the analytic curve only */ }
     }, 260);
@@ -269,6 +277,23 @@ export function buildUI(app) {
     const W = window.innerWidth, H = window.innerHeight, asp = W / H;
     return [(sx / (th * asp) + 1) / 2 * W, (1 - (sy / th + 1) / 2) * H];
   };
+  /** The part of the window the render shows between the panels, [left, right] in px: every label on the image
+   *  stays inside it (review_s2 P4-3; fix_s2_p1 K6, the curve's legend ran under the Measure card at 1440). Read
+   *  from the panels' own boxes, so the bound follows the stylesheet at every width; the whole window on a phone,
+   *  where the panels are a sheet. */
+  const openCentre = (W) => (narrow() ? [0, W] : [left.getBoundingClientRect().right, right.getBoundingClientRect().left]);
+  /** Where a label's lead ends, kept inside the open centre [L, R] (review_s2 P4-3): flipped to the left where its
+   *  text (tw px, 4 px from the lead) would run past the right bound, to the right where it would run past the left,
+   *  then held so the text fits, and held between the top and the bottom. end: the text ends at the lead (it sits
+   *  left). */
+  function keepInside(x, y, dx, dy, tw, [L, R], H, pad = 8) {
+    if (dx > 0 && x + dx + 4 + tw > R - pad) dx = -dx;
+    else if (dx < 0 && x + dx - 4 - tw < L + pad) dx = -dx;
+    const end = dx < 0;
+    const lx = end ? Math.min(R - pad, Math.max(x + dx, L + pad + 4 + tw)) : Math.max(L + pad, Math.min(x + dx, R - pad - 4 - tw));
+    const ly = Math.max(pad + 14, Math.min(H - pad - 14, y + dy));
+    return { lx, ly, end };
+  }
   function drawOverlay() {
     const W = window.innerWidth, H = window.innerHeight;
     overlay.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -290,7 +315,13 @@ export function buildUI(app) {
       parts.push(`<g><path class="curve" d="${d}Z"/></g>`);
       const top = ts.curve.reduce((m, p) => (p[1] > m[1] ? p : m), ts.curve[0]);
       const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
-      parts.push(`<g><line class="lead" x1="${tx}" y1="${ty}" x2="${tx + 70}" y2="${ty - 46}"/><text x="${tx + 74}" y="${ty - 50}" class="goldt">Bardeen 1973 critical curve</text><text x="${tx + 74}" y="${ty - 36}">gold: theory · dashes: traced edge</text></g>`);
+      // the legend names the curve by the colour its token draws it in (palette.js; review_s2 P2-1) and by how it was
+      // obtained (physics.js SHADOW_HOW; fix_s2_p1 K4), and stays between the panels at every width: flipped to the
+      // left where it would run under the Measure card (P4-3, K6)
+      const l1 = SHADOW_HOW[ts.how].curve, l2 = `solid ${colourWord('curve')}: theory · dashes: traced edge`;
+      const { lx: cx, ly: cy, end } = keepInside(tx, ty, 70, -46, Math.max(l1.length, l2.length) * LABEL_CH, openCentre(W), H);
+      const anchor = end ? 'end' : 'start', ox = end ? -4 : 4;
+      parts.push(`<g><line class="lead" x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}"/><text x="${(cx + ox).toFixed(1)}" y="${(cy - 4).toFixed(1)}" text-anchor="${anchor}" class="subt">${l1}</text><text x="${(cx + ox).toFixed(1)}" y="${(cy + 10).toFixed(1)}" text-anchor="${anchor}">${l2}</text></g>`);
     }
     // labels only from anchors traced for this view: none mid-transition, none from the last view
     const an = anchorsLive();
@@ -299,10 +330,10 @@ export function buildUI(app) {
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
-        const lo = narrow() ? 8 : 352, hi = narrow() ? W - 8 : W - 352;
+        const [L, R] = openCentre(W), lo = L + 8, hi = R - 8;
         if (x < lo || x > hi) return;
         // keep the label inside the open centre: flip it to the other side if it would run under a panel
-        const tw = Math.max(txt.length, (sub || '').length) * 7 + 10;
+        const tw = Math.max(txt.length, (sub || '').length) * LABEL_CH + 10;
         if (dx > 0 && x + dx + tw > hi) dx = -dx;
         if (dx < 0 && x + dx - tw < lo) dx = -dx;
         // and clear of the labels before it: the two text lines span 16 px either side of the
@@ -311,9 +342,11 @@ export function buildUI(app) {
         const free = (b) => b[0] >= lo && b[2] <= hi && b[1] >= 0 && b[3] <= H && placed.every((p) => b[2] < p[0] || b[0] > p[2] || b[3] < p[1] || b[1] > p[3]);
         const fit = [[dx, dy], [dx, -dy], [-dx, dy], [-dx, -dy]].find(([ox, oy]) => free(block(ox, oy)));
         if (fit) [dx, dy] = fit;
-        placed.push(block(dx, dy));
-        const lx = x + dx, ly = y + dy;
-        parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="goldt">${sub}</text>` : ''}</g>`);
+        // where no offset is free, the label still stays between the panels (review_s2 P4-3)
+        const { lx, ly, end } = keepInside(x, y, dx, dy, tw, [L, R], H);
+        dx = end ? -1 : 1;
+        placed.push(end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16]);
+        parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="subt">${sub}</text>` : ''}</g>`);
       };
       const m = app.model;
       if (an.shadow) {
@@ -321,11 +354,11 @@ export function buildUI(app) {
         const wM = s.view === 'telescope' ? (K.angleToImpact(Math.atan(sh.right), store.shown.rcam) - K.angleToImpact(Math.atan(sh.left), store.shown.rcam)) : null;
         const inner = s.emit === 'thick' && s.view === 'telescope';
         lab({ sx: sh.right, sy: sh.cy + (sh.top - sh.cy) * 0.3 }, inner ? 'inner shadow' : 'shadow',
-          wM ? `${wM.toFixed(2)} M wide${inner ? ': the disk hides the rest' : ''}` : `horizon is ${(2 * m.rh).toFixed(2)} M wide`, narrow() ? 30 : 70, narrow() ? -70 : -30);
+          wM ? `${s3(wM)} M wide${inner ? ': the disk hides the rest' : ''}` : `horizon is ${s3(2 * m.rh)} M across`, narrow() ? 30 : 70, narrow() ? -70 : -30);
       }
-      if (an.limb && s.emit === 'thick') lab(an.limb, 'approaching side', `g up to ${an.limb.g.toFixed(2)}, I x ${Math.pow(an.limb.g, 4).toFixed(1)}`, -60, 46);
+      if (an.limb && s.emit === 'thick') lab(an.limb, 'approaching side', `g up to ${s3(an.limb.g)}, I × ${s3(Math.pow(an.limb.g, 4))}`, -60, 46);
       if (an.ring && s.emit === 'thick' && !narrow()) lab(an.ring, 'n = 1 image', 'light that circled once', 60, -34);
-      if (an.isco && s.emit === 'thick' && s.view !== 'telescope' && !narrow()) lab(an.isco, 'ISCO edge', `r = ${m.ri.toFixed(2)} M`, -70, -40);
+      if (an.isco && s.emit === 'thick' && s.view !== 'telescope' && !narrow()) lab(an.isco, 'ISCO edge', `r = ${s3(m.ri)} M`, -70, -40);
     }
     if (app.probePt) parts.push(`<g><circle class="mark" cx="${app.probePt[0]}" cy="${app.probePt[1]}" r="6"/><circle class="mark" cx="${app.probePt[0]}" cy="${app.probePt[1]}" r="1.5"/></g>`);
     overlay.innerHTML = parts.join('');
@@ -341,30 +374,36 @@ export function buildUI(app) {
     $('#bh-objnote').textContent = note;
     const rgkm = (r) => `${sci(r * m.rg / 1000)} km`;
     const au = (r) => `${sci(r * m.rg / K.SI.au)} AU`;
-    const isTel = s.view === 'telescope';
     // readouts quote the state (where a transition is going), never the eased display values
     const camR = s.rcam;
     const clock = s.observer === 'orbiter' ? K.orbitClockRate(s.a, Math.max(camR, m.rph * 1.05), s.q) : K.hoverClockRate(s.a, camR, s.incl * D2R, s.q);
+    // a value is as strong as its weakest input (physics.js weakest): a radius in M rests on the spin, a value in
+    // km or seconds on the mass as well, the disk's temperature on the accretion rate too (fix_s2_brief C10)
+    const it = inputTags(o), tag = (...ins) => (weakest(...ins.map((k) => it[k])) === 'REAL' ? tagR : tagI);
+    // the shadow is the measurement's, at the inclination it names (physics.js measurement; fix_s2_p1 K1)
+    const ms = measurement(s);
     $('#bh-read').innerHTML = [
-      dd('mass', sci(m.massSun), 'M☉', o && !o.hypothetical ? tagR : tagI),
-      dd('event horizon r+', s3(m.rh), 'M', tagR), dd('the point of no return, unseen', `${rgkm(m.rh)} · ${au(m.rh)}`, '', '', 'ink'),
-      dd('shadow diameter', s3(shadowFor(s.a, isTel ? s.incl : 90, s.q).mean), 'M', tagR),
-      dd('light aimed inside falls in', `${s3(shadowFor(s.a, 90, s.q).mean / (2 * m.rh))} x the horizon`, '', '', 'ink'),
-      dd('photon orbit', s3(m.rph), 'M', tagR), dd('light can circle here, unstably', '', '', '', 'ink'),
-      dd('ISCO, last stable orbit', s3(m.ri), 'M', tagR), dd('the inner edge of the disk', `${rgkm(m.ri)} · ${au(m.ri)}`, '', '', 'ink'),
-      dd('efficiency 1 - E(ISCO)', s3(m.eta * 100), '%', tagR), dd('rest mass radiated on the way in', '', '', '', 'ink'),
-      dd('ISCO gas speed', s3(m.vIsco), 'c', tagR),
-      dd('ISCO orbit period', dur(m.iscoPeriod), '', tagR),
+      dd('mass', sci(m.massSun), 'M☉', tag('mass')),
+      // what the mass rests on: M87*'s is the EHT's ring, which the Measure card's scale does not use (fix_s2_p1 S6)
+      o && o.massBy ? dd(`from ${o.massBy}`, '', '', '', 'ink') : '',
+      dd('event horizon r+', s3(m.rh), 'M', tag('spin')), dd('the point of no return, unseen', `${rgkm(m.rh)} · ${au(m.rh)}`, '', '', 'ink'),
+      dd(`shadow, mean diameter, far observer at ${deg(ms.incl)} deg`, s3(ms.th.mean), 'M', tag('spin')),
+      dd('light aimed inside falls in', `${s3(ms.toHorizon)} × the horizon`, '', '', 'ink'),
+      dd('photon orbit', s3(m.rph), 'M', tag('spin')), dd('light can circle here, unstably', '', '', '', 'ink'),
+      dd('ISCO, last stable orbit', s3(m.ri), 'M', tag('spin')), dd('the inner edge of the disk', `${rgkm(m.ri)} · ${au(m.ri)}`, '', '', 'ink'),
+      dd('efficiency 1 - E(ISCO)', s3(m.eta * 100), '%', tag('spin')), dd('rest mass radiated on the way in', '', '', '', 'ink'),
+      dd('ISCO gas speed', s3(m.vIsco), 'c', tag('spin')),
+      dd('ISCO orbit period', dur(m.iscoPeriod), '', tag('mass', 'spin')),
       '<div class="hr"></div>',
-      dd('disk peak T', m.Tpeak > 0 ? sci(m.Tpeak) : '--', m.Tpeak > 0 ? 'K' : '', tagR),
-      dd('Eddington', m.edd > 0 && m.obj?.id !== 'primordial' ? sci(m.edd) : 'none', '', o ? (o.eddTag === 'REAL' ? tagR : tagI) : ''),
-      dd('Hawking T', sci(m.hawkingK), 'K', tagR),
+      dd('disk peak T', m.Tpeak > 0 ? sci(m.Tpeak) : '--', m.Tpeak > 0 ? 'K' : '', tag('mass', 'spin', 'edd')),
+      dd('Eddington', m.edd > 0 && m.obj?.id !== 'primordial' ? sci(m.edd) : 'none', '', tag('edd')),
+      dd('Hawking T', sci(m.hawkingK), 'K', tag('mass', 'spin')),
       '<div class="hr"></div>',
-      dd('clock rate here', s3(clock), 'x far', tagR),
-      dd('tide at r+, 2 m', sci(m.tidalHg), 'g', tagR),
-      dd('10 g tide at', m.tide10g > m.rh ? `${s3(m.tide10g)} M` : 'inside r+', '', tagR),
+      dd('clock rate here', s3(clock), 'x far', tag('spin')),
+      dd(`tide at r+, ${BODY_M} m`, sci(m.tidalHg), 'g', tag('mass', 'spin')),
+      dd(`${TIDE_G} g tide at`, m.tide10g > m.rh ? `${s3(m.tide10g)} M` : 'inside r+', '', tag('mass', 'spin')),
       // the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2) is the centre only without spin and charge
-      dd(m.rmin < 5e-7 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tagR),
+      dd(m.rmin < 5e-7 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tag('mass', 'spin')),
     ].join('');
     $('#bh-insttag').textContent = o ? o.name : 'custom';
     // the card that matters for this view goes first
@@ -384,7 +423,9 @@ export function buildUI(app) {
     Object.entries(modeBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.color === id)));
     Object.entries(emitBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.emit === id)));
     $('#bh-modenote').textContent = '';
-    $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${COLOR_MODES[s.color].note}.`;
+    $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${modeNote(s.color)}.`;
+    // the swatches are drawn in the tokens the render draws the same marks with (palette.js modeKey)
+    $('#bh-modekey').innerHTML = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');
     $('#bh-anim', actCard).textContent = s.anim ? 'Pause' : 'Play';
     $('#bh-anim', actCard).setAttribute('aria-pressed', String(!s.anim));
     $('#bh-notes', actCard).textContent = 'Labels';
@@ -400,70 +441,77 @@ export function buildUI(app) {
   function drawMeasure() {
     const s = store.all(), o = app.model.obj;
     // the same measurement the tour quotes: the state's inclination in the telescope view
-    const { incl, th } = measurement(s);
+    const { incl, th, cmp } = measurement(s);
     let integ = null;
     try { integ = integratorShadow(s.a, incl, s.q); } catch { integ = null; }
     const rows2 = [];
-    rows2.push(`<dt style="color:var(--text)">i = ${incl} deg, a/M = ${s.a.toFixed(3)}${s.q ? `, Q/M = ${s.q.toFixed(2)}` : ''}, observer at 1000 M</dt>`);
-    rows2.push(dd(th.traced ? 'width (no closed form, Q and a)' : s.q > 0 ? 'width, 2 b_c (RN)' : 'width, Bardeen', s3(th.chords.width), 'M', tagR));
-    if (integ) rows2.push(dd('width, traced', s3(integ.width), 'M', tagR));
+    rows2.push(`<dt style="color:var(--text)">i = ${deg(incl)} deg, a/M = ${spinText(s.a)}${s.q ? `, Q/M = ${s.q.toFixed(2)}` : ''}, observer at ${s3(VIEWS.telescope.rcam)} M</dt>`);
+    // a value is as strong as its weakest input: the shadow rests on the spin, its angle on the scale too; the
+    // EHT's own numbers are sourced (fix_s2_brief C10)
+    const it = inputTags(o), tag = (...ins) => (weakest(...ins.map((k) => (k === 'sourced' ? 'REAL' : it[k]))) === 'REAL' ? tagR : tagI);
+    // the width row names how the shadow was obtained, in the words the plate uses (physics.js SHADOW_HOW; K4)
+    rows2.push(dd(`width, ${SHADOW_HOW[th.how].label}`, s3(th.chords.width), 'M', tag('spin')));
+    if (integ) rows2.push(dd('width, traced', s3(integ.width), 'M', tag('spin')));
     if (integ) rows2.push(dd('relative difference', s3(Math.abs(integ.width / th.chords.width - 1) * 100), '%', tagR, 'ink'));
-    if (gpuStrip && gpuStrip.a === s.a && gpuStrip.q === s.q && gpuStrip.incl === incl) rows2.push(dd('width, GPU strip', `${s3(gpuStrip.width)} ± ${s3(gpuStrip.res)}`, 'M', tagR));
-    rows2.push(dd('height, B / traced', `${s3(th.chords.height)} / ${integ ? s3(integ.height) : '--'}`, 'M', tagR));
-    rows2.push(dd('mean diameter', s3(th.mean), 'M', tagR));
-    if (o && o.eht) {
-      const pred = predictedUas(th.mean, o);
+    if (gpuStrip && gpuStrip.a === s.a && gpuStrip.q === s.q && gpuStrip.incl === incl) rows2.push(dd('width, GPU strip', pmText(gpuStrip.width, gpuStrip.res), 'M', tag('spin')));
+    rows2.push(dd('height, B / traced', `${s3(th.chords.height)} / ${integ ? s3(integ.height) : '--'}`, 'M', tag('spin')));
+    rows2.push(dd('mean diameter', s3(th.mean), 'M', tag('spin')), dd(MEAN_DEF, '', '', '', 'ink'));
+    // the comparison is compareShadow's through measurement, the one rule every place that states it calls (ledger
+    // row 2); every angle is printed with its scale's number, and the note names the scale's source (fix_s2_p1 S6)
+    if (cmp) {
+      const p = cmp.pred;
       rows2.push('<div class="hr"></div>');
-      rows2.push(dd('predicted', `${s3(pred.value)} ± ${s3(pred.err)}`, 'µas', tagR));
-      const sg = sigmaDiff(pred, o.eht.ring, o.eht.ringErr);
-      rows2.push(dd(`EHT ring ${o.eht.ring}±${o.eht.ringErr}`, `<span class="bh-sig ${Math.abs(sg) < 2 ? 'good' : 'warn'}">${sg >= 0 ? '+' : ''}${s3(sg)} σ</span>`, '', tagR));
-      if (o.eht.shadow) {
-        const sg2 = sigmaDiff(pred, o.eht.shadow, o.eht.shadowErr);
-        rows2.push(dd(`EHT shadow ${o.eht.shadow}±${o.eht.shadowErr}`, `<span class="bh-sig ${Math.abs(sg2) < 2 ? 'good' : 'warn'}">${sg2 >= 0 ? '+' : ''}${s3(sg2)} σ</span>`, '', tagR));
+      rows2.push(dd('scale θ_g', pmText(p.thetaG, p.thetaErrP, p.thetaErrM), 'µas per M', tag('mass', 'dist')), dd(`from ${p.by}`, '', '', '', 'ink'));
+      rows2.push(dd(`shadow on the sky at that scale`, pmText(p.value, p.errP, p.errM), 'µas', tag('spin', 'mass', 'dist')));
+    }
+    if (cmp && o.eht) {
+      if (cmp.shadow) {
+        const sg = cmp.shadow.sigma;
+        rows2.push(dd(`EHT shadow ${published(cmp.shadow.value, cmp.shadow.err, '±')}`, `<span class="bh-sig ${Math.abs(sg) < 2 ? 'good' : 'warn'}">${sigmaText(sg, 'σ')}</span>`, '', tag('spin', 'mass', 'dist', 'sourced')));
+        // weigh it: the mass the EHT shadow implies with this traced diameter, at the distance named
+        const Mimp = o.mass * cmp.shadow.value / cmp.pred.value, Merr = Mimp * Math.hypot(cmp.shadow.err / cmp.shadow.value, (o.distErr || 0) / o.distPc);
+        rows2.push(dd(`mass the EHT shadow implies at ${parsecs(o.distPc)}`, pmText(Mimp, Merr), 'M☉', tag('spin', 'dist', 'sourced')));
       }
-      // weigh it: mass implied by the EHT angular size and this ruler
-      const meas = o.eht.shadow || o.eht.ring, measErr = o.eht.shadow ? o.eht.shadowErr : o.eht.ringErr;
-      const Mimp = o.mass * meas / pred.value, Merr = Mimp * Math.hypot(measErr / meas, (o.distErr || 0) / o.distPc);
-      rows2.push(dd('implied mass', `${sci(Mimp)} ± ${sci(Merr)}`, 'M☉', tagR));
-    } else if (o && o.distPc) {
-      const pred = predictedUas(th.mean, o);
-      rows2.push('<div class="hr"></div>');
-      rows2.push(dd('shadow on the sky', sci(pred.value), 'µas', tagR));
-      rows2.push(dd('EHT resolution', '~20', 'µas', tagR));
+      // a ring only where no shadow was published (compareShadow carries none beside a shadow; S3)
+      if (cmp.ring) rows2.push(dd('EHT ring of emission (no σ: a different quantity)', published(cmp.ring.value, cmp.ring.err, '±'), 'µas', tagR, 'ink'));
+    } else if (cmp) {
+      rows2.push(dd('EHT nominal resolution', String(EHT_RES.uas), 'µas', tagR));
     }
     if (rings) {
       rows2.push('<div class="hr"></div>');
-      rows2.push(`<dt style="color:var(--text)">sub-rings, face-on, a/M = ${rings.a.toFixed(2)}${rings.q ? `, Q/M = ${rings.q.toFixed(2)}` : ''}</dt>`);
+      rows2.push(`<dt style="color:var(--text)">sub-rings, face-on, a/M = ${spinText(rings.a)}${rings.q ? `, Q/M = ${rings.q.toFixed(2)}` : ''}</dt>`);
       rows2.push(dd('n=2 / n=1 width', s3(rings.w[2] / rings.w[1]), '', tagR));
       rows2.push(dd('n=3 / n=2 width', s3(rings.w[3] / rings.w[2]), '', tagR));
       rows2.push(dd(rings.gamma == null ? 'e^-γ (Johnson 2020, Kerr only)' : 'e^-γ (Johnson 2020)', rings.gamma == null ? '--' : s3(Math.exp(-rings.gamma)), '', tagR));
     }
     $('#bh-meas').innerHTML = rows2.join('');
-    $('#bh-measnote').textContent = o && o.eht
-      ? `Predicted from the traced shadow, the cited mass and distance, errors in quadrature. The EHT ring is emission just outside the shadow edge, so a ring slightly larger than the shadow is expected.`
-      : 'Choose M87* or Sgr A* to compare with the Event Horizon Telescope.';
+    // written from the comparison it describes (ledger row 2): the scale's source, what the EHT measured, and why a
+    // ring gets no sigma
+    $('#bh-measnote').textContent = cmp && o.eht
+      ? `The size on the sky uses a scale the EHT image did not give: ${cmp.pred.by}, ${cmp.pred.src}.${cmp.ring ? ` ${noShadow(o.name)}` : ''} ${RULING}`
+      : `Choose M87* or Sgr A* to compare with the Event Horizon Telescope.${cmp ? ` The scale here: ${cmp.pred.by}, ${cmp.pred.src}. The resolution: ${CITE[EHT_RES.src]}, ${EHT_RES.where}.` : ''}`;
   }
 
   $('#bh-strip', measCard).addEventListener('click', () => {
     if (store.get('view') !== 'telescope') store.set(store.viewPatch('telescope'), { instant: true });
     setTimeout(() => {
-      const res = renderer.measureStrip(app.ui.frameUniforms());
+      const res = renderer.measureStrip(app.ui.frameUniforms(), STRIP_N);
       if (!res || !res.h) { $('#bh-measnote').textContent = 'The GPU strip needs float render targets, not available here.'; return; }
       const ro = store.shown.rcam;
       const b = (t) => K.angleToImpact(Math.atan(t), ro);
       gpuStrip = { width: b(res.h.hi) - b(res.h.lo), res: 2 * b(res.h.res), a: store.get('a'), q: store.get('q'), incl: store.get('incl') };
       drawMeasure();
-      $('#bh-measnote').textContent = `The renderer traced a 4096-texel row through the shadow with the disk switched off; its edges, converted with the finite-distance factor, give the width above.`;
+      $('#bh-measnote').textContent = `The renderer traced a ${STRIP_N}-texel row through the shadow with the disk switched off; its edges, converted with the finite-distance factor, give the width above.`;
     }, 60);
   });
   $('#bh-rings', measCard).addEventListener('click', async () => {
-    $('#bh-measnote').textContent = 'Tracing 2400 rays face-on out from the critical curve...';
+    $('#bh-measnote').textContent = `Tracing ${SUBRING.samples} rays face-on out from the critical curve...`;
     try {
       const a = store.get('a'), q = store.get('q');
       const res = worker ? await call('subrings', { a, q }) : subringsInline({ a, q });
       rings = { ...res, a, q };
       drawMeasure();
-      $('#bh-measnote').textContent = `Each further half-orbit thins the image by e^-γ. The n=3/n=2 ratio has converged; n=2/n=1 has not yet, as expected for the first sub-ring. Test annulus 6 to 8 M, observer face-on.`;
+      $('#bh-measnote').textContent = `Each further half-orbit thins the image by e^-γ. The n=3/n=2 ratio has converged; n=2/n=1 has not yet, as expected for the first sub-ring. Test annulus ${SUBRING.r0} to ${SUBRING.r1} M, observer face-on.`;
     } catch (e) { $('#bh-measnote').textContent = 'Sub-ring measurement needs a module worker: ' + e.message; }
   });
 
@@ -471,14 +519,14 @@ export function buildUI(app) {
   let probeRay = null;
   function drawXS() {
     const s = store.all(), m = app.model;
-    $('#bh-xs').innerHTML = crossSection({ a: s.a, rh: m.rh, rph: m.rph, rphr: m.rphr, ri: m.ri, rout: s.rout, incl: s.incl, rcam: s.rcam, ray: probeRay });
+    $('#bh-xs').innerHTML = crossSection({ a: s.a, q: s.q, rh: m.rh, rph: m.rph, rphr: m.rphr, ri: m.ri, rout: s.rout, incl: s.incl, rcam: s.rcam, ray: probeRay });
   }
   function drawPotential(mark = null) {
     const s = store.all(), m = app.model;
     const Lisco = K.circular(s.a, m.ri, s.q).L;
     const p = potentialPlot({ a: s.a, q: s.q, rh: m.rh, rph: m.rph, ri: m.ri, Lisco, mark });
     $('#bh-pot').innerHTML = p.svg;
-    $('#bh-potnote').textContent = `Located on the curves: photon orbit ${p.rPh.toFixed(3)} M (readout ${m.rph.toFixed(3)}), ISCO ${p.rIsco ? p.rIsco.toFixed(2) : '--'} M (readout ${m.ri.toFixed(3)}). Gas inside the ISCO has no stable orbit and plunges.`;
+    $('#bh-potnote').textContent = `Located on the curves: photon orbit ${s3(p.rPh)} M (readout ${s3(m.rph)}), ISCO ${p.rIsco ? s3(p.rIsco) : '--'} M (readout ${s3(m.ri)}). Gas inside the ISCO has no stable orbit and plunges.`;
   }
   let profGeom = null;
   function drawProfile() {
@@ -502,7 +550,7 @@ export function buildUI(app) {
     $('#bh-spec').innerHTML = spectrumPlot(anchors?.spectrum);
     const pk = anchors?.spectrum?.reduce((a, b) => (b[1] > a[1] ? b : a));
     $('#bh-specnote').textContent = m.Tpeak > 0 && pk
-      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = 1.7) at its local temperature, shifted by its own g. Peak near ${pk[0] >= 1000 ? (pk[0] / 1000).toPrecision(3) + ' keV' : pk[0].toPrecision(3) + ' eV'} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.`
+      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.`
       : 'Set an accretion rate to see the disk spectrum.';
   }
 
@@ -542,8 +590,8 @@ export function buildUI(app) {
     $('#bh-fallread').innerHTML = [
       dd('your clock τ since 40 M', inJ ? dur(row.tau * m.tg) : '--', '', tagR),
       dd('far clock t since 40 M', inJ ? dur(row.t * m.tg) : '--', '', tagR),
-      dd('your speed vs hovering', inJ ? (store.get('observer') === 'faller' ? (Math.sqrt(1 - K.hoverClockRate(s.a, rc, s.incl * D2R, s.q) ** 2)).toFixed(3) + ' c' : '--') : '--', '', tagR),
-      dd('tide on 2 m here', inJ ? `${sci(row.tidal * tidalScale * K.SI.g0)} m/s² · ${sci(row.tidal * tidalScale)} g` : '--', '', tagR),
+      dd('your speed vs hovering', inJ ? (store.get('observer') === 'faller' ? s3(Math.sqrt(1 - K.hoverClockRate(s.a, rc, s.incl * D2R, s.q) ** 2)) + ' c' : '--') : '--', '', tagR),
+      dd(`tide on ${BODY_M} m here`, inJ ? `${sci(row.tidal * tidalScale * K.SI.g0)} m/s² · ${sci(row.tidal * tidalScale)} g` : '--', '', tagR),
       dd('horizon to r = 0 (a = 0 law 4M/3)', dur(4 / 3 * m.tg), '', tagR),
       dd('longest possible inside (πM)', dur(m.piM), '', tagR),
       dd('far clock: redshift e-fold every', dur(m.efold), '', tagR),
@@ -569,12 +617,13 @@ export function buildUI(app) {
   const quizState = { answers: {} };
   function drawQuiz() {
     const s = store.all(), m = app.model;
-    const ts = shadowFor(s.a, 90, s.q);
+    // the shadow is the measurement's, at the inclination the question names (fix_s2_p1 K1)
+    const ms = measurement(s);
     const Q = [
-      { id: 'shadow', q: `How wide is this hole's shadow compared with its horizon (a = ${s.a.toFixed(2)})?`,
-        opts: [['the same', false], [`${(ts.mean / (2 * m.rh)).toFixed(1)} times wider`, true], ['half as wide', false]] },
+      { id: 'shadow', q: `How wide is this hole's shadow compared with its horizon (a = ${spinText(s.a)}, seen from far away at ${deg(ms.incl)} deg)?`,
+        opts: [['the same', false], [`${s3(ms.toHorizon)} times wider`, true], ['half as wide', false]] },
       { id: 'side', q: 'Why is one side of the disk brighter?', opts: [['it is hotter there', false], ['gas moving toward you is beamed: I scales as g^4', true], ['the hole lights it', false]] },
-      { id: 'isco', q: `Where does the disk end at a = ${s.a.toFixed(2)}?`, opts: [[`at the horizon, ${m.rh.toFixed(2)} M`, false], [`at the ISCO, ${m.ri.toFixed(2)} M`, true], [`at the photon orbit, ${m.rph.toFixed(2)} M`, false]] },
+      { id: 'isco', q: `Where does the disk end at a = ${spinText(s.a)}?`, opts: [[`at the horizon, ${s3(m.rh)} M`, false], [`at the ISCO, ${s3(m.ri)} M`, true], [`at the photon orbit, ${s3(m.rph)} M`, false]] },
       { id: 'clock', q: 'Falling in, what do you see on your own clock at the horizon?', opts: [['it stops', false], ['nothing special: it reads a finite time', true], ['it runs backward', false]] },
       { id: 'tide', q: `At ${sci(m.massSun)} M☉, does the tide tear a person apart before the horizon?`, opts: [['yes', m.tide10g > m.rh], ['no', m.tide10g <= m.rh]] },
     ];
@@ -613,31 +662,33 @@ export function buildUI(app) {
     let title, cause, deriv;
     if (res.fate === 'captured') {
       title = 'Shadow: this ray ends in the hole';
-      cause = `Followed back, the light path crosses the horizon at r+ = ${m.rh.toFixed(3)} M. Its angular momentum per energy, ${lam.toFixed(2)} M, is too small to turn around at the photon orbits.`;
+      cause = `Followed back, the light path crosses the horizon at r+ = ${s3(m.rh)} M. Its angular momentum per energy, ${s3(lam)} M, is too small to turn around at the photon orbits.`;
+      // the curve is named as every label names it: how the shadow was obtained (physics.js SHADOW_HOW; K4)
+      const how = q > 0 ? shadowFor(v.a, v.incl, q).how : 'bardeen';
       deriv = q > 0
-        ? `Kerr-Newman, Q/M = ${q.toFixed(2)}: no closed-form critical curve is used. The ray is integrated in the Kerr-Schild form\n  g^mn = eta^mn - f k^m k^n,  f = r^2 (2 r - Q^2) / (r^4 + a^2 z^2)\nand captured when r < 0.98 r+, r+ = 1 + sqrt(1 - a^2 - Q^2) = ${m.rh.toFixed(3)} M.`
+        ? `${how === 'rn' ? `Reissner-Nordstrom, Q/M = ${q.toFixed(2)}: the critical curve is the ${SHADOW_HOW.rn.curve}, b_c = r_p / sqrt(1 - 2/r_p + Q^2/r_p^2) at r_p = (3 + sqrt(9 - 8 Q^2)) / 2.` : `Kerr-Newman, Q/M = ${q.toFixed(2)}: no closed-form critical curve is used.`} The ray is integrated in the Kerr-Schild form\n  g^mn = eta^mn - f k^m k^n,  f = r^2 (2 r - Q^2) / (r^4 + a^2 z^2)\nand captured when r < 0.98 r+, r+ = 1 + sqrt(1 - a^2 - Q^2) = ${s3(m.rh)} M.`
         : 'Critical curve (Bardeen 1973), spherical photon orbit radius r:\n  xi = (r^2 (3 - r) - a^2 (r + 1)) / (a (r - 1))\n  eta = r^3 (4 a^2 - r (r - 3)^2) / (a^2 (r - 1)^2)\n  alpha = -xi / sin i,  beta = +- sqrt(eta + a^2 cos^2 i - xi^2 cot^2 i)';
     } else if (res.fate === 'disk') {
       const h = res.hits[0];
       const nearIsco = h.r < ri * 1.08;
       title = h.n === 0 ? (nearIsco ? 'ISCO edge of the disk' : (res.g > 1.05 ? 'Approaching side of the disk' : res.g < 0.8 ? 'Receding side of the disk' : 'Disk, direct image')) : `Disk, n = ${h.n} image`;
-      cause = h.n > 0 ? `This light crossed the disk plane ${h.n} time${h.n > 1 ? 's' : ''} outside the gas before landing at r = ${h.r.toFixed(2)} M: it went around the hole first.`
-        : nearIsco ? `Gas here sits at r = ${h.r.toFixed(2)} M, just outside the last stable orbit at ${ri.toFixed(3)} M. Inside it, gas plunges and stops radiating.`
-          : `Gas at r = ${h.r.toFixed(2)} M orbiting at ${K.diskSpeed(v.a, h.r, q).toFixed(3)} c. Its light reaches you shifted by g = ${res.g.toFixed(3)}, so intensity x ${Math.pow(res.g, 4).toFixed(2)}.`;
-      deriv = `Redshift (circular orbit, conserved E and L of the ray):\n  g = 1 / (u^t (E - Omega L)),  ${q > 0 ? 'Omega = sqrt(r - Q^2) / (r^2 + a sqrt(r - Q^2))' : 'Omega = 1 / (r^1.5 + a)'}\n  here E = ${(-res.pt).toFixed(4)}, L = ${res.pphi.toFixed(4)}, g = ${res.g.toFixed(4)}\nObserved intensity I = g^4 I_emit (I_nu / nu^3 is invariant).\nTemperature: Page & Thorne 1974 flux, T = (F / sigma)^(1/4).`;
+      cause = h.n > 0 ? `This light crossed the disk plane ${h.n} time${h.n > 1 ? 's' : ''} outside the gas before landing at r = ${s3(h.r)} M: it went around the hole first.`
+        : nearIsco ? `Gas here sits at r = ${s3(h.r)} M, just outside the last stable orbit at ${s3(ri)} M. Inside it, gas plunges and stops radiating.`
+          : `Gas at r = ${s3(h.r)} M orbiting at ${s3(K.diskSpeed(v.a, h.r, q))} c. Its light reaches you shifted by g = ${s3(res.g)}, so intensity x ${s3(Math.pow(res.g, 4))}.`;
+      deriv = `Redshift (circular orbit, conserved E and L of the ray):\n  g = 1 / (u^t (E - Omega L)),  ${q > 0 ? 'Omega = sqrt(r - Q^2) / (r^2 + a sqrt(r - Q^2))' : 'Omega = 1 / (r^1.5 + a)'}\n  here E = ${s3(-res.pt)}, L = ${s3(res.pphi)}, g = ${s3(res.g)}\nObserved intensity I = g^4 I_emit (I_nu / nu^3 is invariant).\nTemperature: Page & Thorne 1974 flux, T = (F / sigma)^(1/4).`;
     } else if (res.minr < m.rphr * 1.08) {
       title = 'Photon ring: light that skimmed the photon orbits';
-      cause = `This ray came within ${res.minr.toFixed(3)} M of the centre, among the unstable photon orbits (${m.rph.toFixed(3)} to ${m.rphr.toFixed(3)} M), and was flung back out. Each extra half-orbit thins such images by e^-gamma.`;
+      cause = `This ray came within ${s3(res.minr)} M of the centre, among the unstable photon orbits (${s3(m.rph)} to ${s3(m.rphr)} M), and was flung back out. Each extra half-orbit thins such images by e^-gamma.`;
       deriv = `Lyapunov exponent of the spherical photon orbit (Johnson et al. 2020):
   gamma = 4 r sqrt(chi) K(u+/u-) / (a sqrt(-u-)),  chi = 1 - Delta / (r (r - 1)^2)
   at a = 0, gamma = pi: each sub-ring is e^-pi = 1/23 of the last`;
     } else {
       title = 'Sky: this ray escaped';
-      cause = `The light came from a star, bent on the way. Closest approach r = ${res.minr.toFixed(2)} M${res.minr < 3.5 ? ', close to the photon orbits: near the critical curve the sky is copied many times' : ''}.`;
+      cause = `The light came from a star, bent on the way. Closest approach r = ${s3(res.minr)} M${res.minr < 3.5 ? ', close to the photon orbits: near the critical curve the sky is copied many times' : ''}.`;
       deriv = 'Null geodesics of g^mn = eta^mn - f k^m k^n (Kerr-Schild), integrated by RK4:\n  dx/dl = dH/dp,  dp/dl = -dH/dx,  H = 1/2 g^mn p_m p_n = 0';
     }
     probe.innerHTML = `<button class="x" type="button" aria-label="Close">×</button><h3>${title}</h3><p>${cause}</p>
-      <dl class="bh-read">${dd('ray fate', res.fate === 'disk' ? `disk, n = ${res.hits[0].n}` : res.fate, '', tagR)}${dd('L / E (axial)', lam.toFixed(3), 'M', tagR)}${res.g ? dd('redshift g', res.g.toFixed(4), '', tagR) : ''}${dd('steps · |H| drift', `${res.steps} · ${res.drift.toExponential(1)}`, '', tagR)}</dl>
+      <dl class="bh-read">${dd('ray fate', res.fate === 'disk' ? `disk, n = ${res.hits[0].n}` : res.fate, '', tagR)}${dd('L / E (axial)', s3(lam), 'M', tagR)}${res.g ? dd('redshift g', s3(res.g), '', tagR) : ''}${dd('steps · |H| drift', `${res.steps} · ${res.drift.toExponential(1)}`, '', tagR)}</dl>
       <details><summary>the equation the code uses</summary><pre>${esc(deriv)}</pre></details>`;
     probe.hidden = false;
     const pw = 300;
@@ -698,7 +749,7 @@ export function buildUI(app) {
   /* ---------- store subscription ---------- */
   let annTimer = 0;
   store.on((changed, s, src) => {
-    if (changed.some((k) => ['a', 'q', 'incl', 'rcam', 'fov', 'tilt', 'rout', 'observer', 'emit', 'view', 'obj', 'edd', 'mass'].includes(k))) {
+    if (changed.some((k) => ['a', 'q', 'incl', 'rcam', 'fov', 'tilt', 'rout', 'observer', 'emit', 'view', 'obj', 'edd', 'mass', 'fcol'].includes(k))) {
       if (src !== 'drag') probe.hidden = true;
       requestAnchors();
     }
@@ -708,7 +759,7 @@ export function buildUI(app) {
     clearTimeout(annTimer);
     annTimer = setTimeout(() => {
       const m = app.model;
-      sr.textContent = `${m.obj ? m.obj.name : 'Custom hole'}, spin ${s.a.toFixed(2)}, inclination ${s.incl.toFixed(0)} degrees, ${VIEWS[s.view].label} view, ${COLOR_MODES[s.color].label} colour. Horizon ${m.rh.toFixed(2)} M, ISCO ${m.ri.toFixed(2)} M.`;
+      sr.textContent = `${m.obj ? m.obj.name : 'Custom hole'}, spin ${spinText(s.a)}, inclination ${deg(s.incl)} degrees, ${VIEWS[s.view].label} view, ${COLOR_MODES[s.color].label} colour. Horizon ${s3(m.rh)} M, ISCO ${s3(m.ri)} M.`;
     }, 700);
   });
 

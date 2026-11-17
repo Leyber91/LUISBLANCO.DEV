@@ -9,6 +9,12 @@ import { SCHEMA, DEFAULTS, OBJECTS, VIEWS } from './config.js';
 
 const BY_KEY = Object.fromEntries(SCHEMA.map((s) => [s.key, s]));
 const EASED = ['a', 'q', 'incl', 'rcam', 'fov', 'tilt', 'rout'];
+/** The keys that make a named object the hole its catalogue gives (fix_s2_p1 K5): a mass, distance, spin or charge
+ *  more than half a unit of the link's last written digit away from the object's own makes the hole custom. */
+const OWN = ['mass', 'dist', 'a', 'q'];
+/** Half a unit in the last digit a link writes a number with (toQuery: the schema digits + 1, 3 at least). Every key
+ *  of OWN has its digits in SCHEMA. */
+const linkTol = (d) => 0.5 * Math.pow(10, -(Math.max(d.digits, 2) + 1));
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -48,6 +54,13 @@ export class Store {
       this.s.q = +Math.sqrt(Math.max(0, 0.996 - this.s.a * this.s.a)).toFixed(3);
       if (!changed.includes('q')) changed.push('q');
     }
+    // a named object is its catalogue's hole: on every way in (a link, an imported file, a slider, the guide's
+    // apply) a mass, distance, spin or charge of the visitor's own makes it custom, so no comparison reads the
+    // catalogue while the page shows other values (fix_s2_p1 K5)
+    if (!this.isOwn()) {
+      this.s.obj = 'custom';
+      if (!changed.includes('obj')) changed.push('obj');
+    }
     if (!changed.length) return changed;
     const easedChanged = changed.filter((k) => EASED.includes(k));
     if (easedChanged.length) {
@@ -83,6 +96,14 @@ export class Store {
   view(target = false) {
     const v = target ? this.s : this.shown;
     return { a: v.a, q: v.q, incl: v.incl, rcam: v.rcam, fov: v.fov, tilt: v.tilt, rout: v.rout, observer: this.s.observer, emit: this.s.emit };
+  }
+
+  /** Whether the state's mass, distance, spin and charge are its object's own, each within the link's rounding of
+   *  the object's preset (a custom hole, and a key its object does not set, always are). The one rule for when a
+   *  named object turns custom (fix_s2_p1 K5). */
+  isOwn(s = this.s) {
+    const p = this.objectPatch(s.obj, s.view);
+    return OWN.every((k) => p[k] === undefined || Math.abs(s[k] - p[k]) <= linkTol(BY_KEY[k]));
   }
 
   /** Patch for an object preset (mass, distance, spin, inclination, accretion), for the

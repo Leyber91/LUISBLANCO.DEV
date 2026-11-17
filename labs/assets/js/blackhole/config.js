@@ -6,7 +6,9 @@
    OBJECTS entry. Nothing here computes.
    ============================================================ */
 
-export const VERSION = '2026-11-11';
+// The objects' data version. It moves whenever the data a comparison uses move: plate.test.mjs pins it beside a hash
+// of those fields, so a change of data without a change of version fails (fix_s2_p1 S9).
+export const VERSION = '2026-11-17';
 
 /* ---------------- citations (author, year, venue) ---------------- */
 export const CITE = {
@@ -28,6 +30,11 @@ export const CITE = {
   eht2019e: 'EHT Collaboration 2019, ApJL 875, L5 (Paper V)',
   eht2019f: 'EHT Collaboration 2019, ApJL 875, L6 (Paper VI)',
   eht2022a: 'EHT Collaboration 2022, ApJL 930, L12 (Sgr A* Paper I)',
+  // the stellar-orbit mass and distance of Sgr A*, as the EHT paper tabulates them (its Table 1, note d); the
+  // collaboration's own paper was not opened, so it is cited through that table
+  gravity2022: 'Gravity Collaboration et al. 2022 (VLTI stellar orbits), as tabulated in EHT 2022 Sgr A* Paper I, Table 1',
+  gebhardt2011: 'Gebhardt et al. 2011, ApJ 729, 119 (M87 stellar dynamics; at 16.8 Mpc in EHT 2019 Paper VI, Table 9)',
+  fixsen2009: 'Fixsen 2009, ApJ 707, 916 (the cosmic background, 2.725 K)',
   mertens2016: 'Mertens et al. 2016, A&A 595, A54 (M87 jet viewing angle 17.2 +- 3.3 deg)',
   mj2021: 'Miller-Jones et al. 2021, Science 371, 1046',
   zhao2021: 'Zhao et al. 2021, ApJ 908, 117',
@@ -51,32 +58,47 @@ export const OBJECTS = [
   {
     id: 'm87', name: 'M87*', kind: 'supermassive, galaxy M87', evidence: 'ESTABLISHED',
     mass: 6.5e9, massErr: 0.7e9, massSrc: 'eht2019f',
+    // the EHT's own mass rests on its ring (Paper VI: theta_g from the ring, times the distance): the Instrument card
+    // says so beside it, and the shadow on the sky uses the stars' scale below (ledger row 2)
+    massBy: 'the EHT\'s ring of emission: its θ_g times the distance (Paper VI)',
     distPc: 16.8e6, distErr: 0.8e6, distSrc: 'eht2019f',
     spin: 0.94, spinTag: 'ILLUSTRATIVE', spinNote: 'not measured; 0.94 is one value of the EHT model grid',
     spinSrc: 'eht2019e',
     incl: 17, inclSrc: 'mertens2016', inclNote: 'jet viewing angle, adopted by EHT Paper V',
     edd: 1e-5, eddTag: 'ILLUSTRATIVE',
-    eht: { ring: 42, ringErr: 3, src: 'eht2019a', what: 'ring diameter' },
+    // the EHT's ring of emission; no shadow diameter was measured from the EHT's images of M87* (ledger row 2). Its
+    // models place the emission "preferentially from outside the photon ring", a 10% offset on the EHT's own scale
+    // thetaGPub (Paper VI, as physics.js compareShadow quotes it). Paper I, Section 2, p. 2 predicts "a theoretical
+    // shadow diameter for a Schwarzschild black hole of 37.6 (+6.2, -3.5)" uas from the stellar-dynamics mass: a
+    // prediction, which the lab reproduces at a = 0 (research/eht_diameters.md 1.4)
+    eht: { ring: 42, ringErr: 3, ringOffsetPct: 10, src: 'eht2019a', what: 'emission ring diameter',
+      predicted: { v: 37.6, errP: 6.2, errM: 3.5, spin: 0, src: 'eht2019a', by: 'the motions of its stars' } },
     thetaGPub: { v: 3.8, err: 0.4, src: 'eht2019f' },
+    // the scale the shadow is drawn on the sky with: the stellar-dynamics theta of Gebhardt et al. 2011 at 16.8 Mpc,
+    // as EHT 2019 Paper VI, Table 9 gives it, because the EHT's own mass above rests on its ring (ledger row 2)
+    ruler: { thetaG: 3.62, errP: 0.60, errM: 0.34, src: 'eht2019f', basis: 'gebhardt2011', by: 'the motions of its stars' },
     emitterNote: 'M87* accretes through a hot, thick, radiatively inefficient flow; a thin disk is a stand-in here.',
     view: { incl: 17 },
   },
   {
     id: 'sgra', name: 'Sgr A*', kind: 'supermassive, Milky Way centre', evidence: 'ESTABLISHED',
-    mass: 4.297e6, massErr: 0.013e6, massSrc: 'eht2022a', massNote: 'VLTI/GRAVITY value as tabulated in EHT 2022 Paper I, Table 1',
-    distPc: 8277, distErr: 34, distSrc: 'eht2022a',
+    mass: 4.297e6, massErr: 0.013e6, massSrc: 'gravity2022',
+    distPc: 8277, distErr: 34, distSrc: 'gravity2022',
     spin: 0.5, spinTag: 'ILLUSTRATIVE', spinNote: 'not measured; EHT favours prograde models with a* = 0.5 or 0.94 at i = 30 deg',
     spinSrc: 'eht2022a',
     incl: 30, inclSrc: 'eht2022a', inclNote: 'EHT disfavours i > 50 deg; 30 deg is the passing models\' value',
     edd: 1e-8, eddTag: 'ILLUSTRATIVE',
-    eht: { ring: 51.8, ringErr: 2.3, shadow: 48.7, shadowErr: 7.0, src: 'eht2022a', what: 'ring diameter' },
+    massBy: 'the orbits of its stars',
+    // the ring of emission and the shadow the EHT inferred from it "solely from EHT data" (2022 Paper I, Table 1).
+    // The ring is kept as the shadow's source; where a shadow is given, no comparison shows the ring (ledger row 2)
+    eht: { ring: 51.8, ringErr: 2.3, shadow: 48.7, shadowErr: 7.0, src: 'eht2022a', what: 'emission ring and shadow diameters' },
     thetaGPub: { v: 4.8, errP: 1.4, errM: 0.7, src: 'eht2022a' },
     emitterNote: 'Sgr A* is fed at about a billionth of its Eddington rate through a hot flow; a thin disk is a stand-in here.',
     view: { incl: 30 },
   },
   {
     id: 'cygx1', name: 'Cygnus X-1', kind: 'stellar-mass, X-ray binary', evidence: 'ESTABLISHED',
-    mass: 21.2, massErr: 2.2, massSrc: 'mj2021',
+    mass: 21.2, massErr: 2.2, massSrc: 'mj2021', massBy: 'the orbit of its companion star',
     distPc: 2220, distErr: 180, distSrc: 'mj2021',
     spin: 0.998, spinTag: 'REAL', spinNote: 'a* > 0.9985 (3 sigma, continuum fitting); traced at the 0.998 Thorne limit',
     spinSrc: 'zhao2021',
@@ -146,12 +168,14 @@ export const TIERS = {
 };
 
 /* ---------------- colour modes ---------------- */
+// The three maps whose colours copy names (redshift, order, steps) get their notes from palette.js, which names
+// each colour by the token or the constant that draws it (review_s2 P2-1).
 export const COLOR_MODES = {
   thermal: { label: 'Thermal', note: 'hue = blackbody at g T with the peak shown at the display temperature; brightness = bolometric g^4 T^4' },
   true: { label: 'True colour', note: 'hue and brightness of the real blackbody at g T, as an eye would see it (stretched)' },
-  redshift: { label: 'Redshift g', note: 'g < 1 amber, g > 1 blue-white: gravity and motion together' },
-  order: { label: 'Photon order', note: 'n = 0 direct image, n = 1 and n = 2 light that circled the hole first' },
-  steps: { label: 'Integrator', note: 'steps per ray (brightness) and null-condition drift |H| (gold where above 1e-4)' },
+  redshift: { label: 'Redshift g' },
+  order: { label: 'Photon order' },
+  steps: { label: 'Integrator' },
 };
 
 /* ---------------- the guided tour ---------------- */
@@ -165,16 +189,16 @@ export const TOUR = [
     text: 'Every pixel is a light ray followed backward through the exact Kerr spacetime of spin a = {a}. Nothing here is painted.', focus: 'shadow' },
   { id: 'shadow', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'thermal' },
     title: 'The shadow is not the horizon',
-    text: 'The horizon is {rh} M across. The dark region is {shadowW} M wide: rays that pass inside the photon orbits never come back out.', focus: 'shadow' },
+    text: 'The horizon is {rhAcross} M across. Seen from far away at {farIncl} deg, the dark region is {shadowW} M wide: rays that pass inside the photon orbits never come back out.', focus: 'shadow' },
   { id: 'beaming', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'redshift' },
     title: 'One side is brighter',
     text: 'The gas on the left moves toward you at up to {vmax} c. Its light is boosted by g^4, up to {gmax}x; the receding side is dimmed to {gmin}x.', focus: 'limb' },
   { id: 'order', dur: 10, patch: { obj: 'm87', view: 'cinematic', color: 'order' },
     title: 'Light that went around',
-    text: 'The thin gold ring is the n = 1 image: light that circled the hole once. Each further turn makes the ring about e^-pi, 23 times, thinner.', focus: 'ring' },
+    text: 'The thin {ringWord} ring is the n = 1 image: light that circled the hole once. Each further half-orbit makes the next image about {ringThin} times thinner.', focus: 'ring' },
   { id: 'telescope', dur: 11, patch: { obj: 'm87', view: 'telescope', color: 'thermal' },
     title: 'What the Event Horizon Telescope sees',
-    text: 'From Earth, {name} sits at {incl} deg. The traced shadow is {shadowW} M wide; at {dist} that is {shadowUas} uas. {eht}', focus: 'curve' },
+    text: 'From Earth, {name} sits at {farIncl} deg. The traced shadow is {shadowAcross} M across, {shadowUas} uas on the sky at {scale} uas per M, the scale from {by}. {eht}', focus: 'curve' },
   { id: 'isco', dur: 9, patch: { obj: 'm87', view: 'cinematic', color: 'thermal' },
     title: 'The last stable orbit',
     text: 'At spin {a} no circular orbit is stable inside {ri} M. The disk ends there, and {eta}% of the infalling rest mass has been radiated away.', focus: 'isco' },
@@ -183,12 +207,23 @@ export const TOUR = [
     text: 'Your clock and a distant clock disagree more each second. At {name} the fall from the horizon to {inner} takes {tauIn} of your time.', focus: 'none' },
   { id: 'cyg', dur: 10, patch: { obj: 'cygx1', view: 'cinematic', color: 'thermal' },
     title: 'A hole the size of a city',
-    text: '{name} has {massSun} solar masses. Its horizon spans {horizonKm} km, and 2 m above it the tide stretches you at {tidalG} g.', focus: 'none' },
+    text: '{name} has {massSun} solar masses. Its horizon is {horizonAcrossKm} km across, and at the horizon the tide across a {bodyM} m body is {tidalG} g.', focus: 'none' },
 ];
 
 /* ---------------- UI copy ---------------- */
+// A claim the page states in more than one place is one string here, and every place quotes it (review_s2 P2-5).
 export const COPY = {
   kick: 'kerr ray tracer / measured',
   title: 'Measure the shadow of a spinning black hole.',
   sub: 'Light rays traced through the exact Kerr spacetime, a relativistic disk at its real temperature, and the shadow measured against the Event Horizon Telescope.',
+  // what verify.mjs checks: the Sources panel and the guide quote this; no count, since the count changes
+  verify: 'node labs/assets/js/blackhole/verify.mjs checks the engine against these sources: the shadow against Bardeen\'s curve, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification, and the Hawking temperature of a spinning, charged hole.',
+  // the footer's claim tags, on the desktop footer and in the phone's sheet
+  real: 'Kerr geodesics, shadow, disk physics, EHT values, clocks, tides',
+  illustrative: 'accretion rates, unmeasured spins, turbulence, display colour scale, sky',
 };
+
+/* The Event Horizon Telescope's nominal resolution as the page quotes it (the Measure card and the guide): EHT 2019
+   Paper V, p. 5, model images at "1 uas/pixel (20 times finer than the nominal resolution of EHT2017" (as the second
+   reader of P1 read it, review_s2_p1_second S11). Every published number here carries its CITE key. */
+export const EHT_RES = { uas: 20, src: 'eht2019e', where: 'p. 5' };

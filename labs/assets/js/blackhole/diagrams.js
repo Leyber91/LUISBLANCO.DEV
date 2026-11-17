@@ -4,6 +4,9 @@
    scrubbing back into the store.
    ============================================================ */
 
+import { ergosurface, s3, sci, dur, photonEnergy, TIDE_G } from './physics.js';
+
+// f() places marks (SVG coordinates); every number a visitor reads is in physics.js's format for its kind
 const f = (v, d = 2) => (Number.isFinite(v) ? v.toFixed(d) : '');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -11,7 +14,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
  * Meridional cross-section to scale: horizon, ergosurface, photon orbits, ISCO, disk,
  * the camera's line of sight, and an optional traced ray (KS x, z projection).
  */
-export function crossSection({ a, rh, rph, rphr, ri, rout, incl, rcam, ray, R = null }) {
+export function crossSection({ a, q = 0, rh, rph, rphr, ri, rout, incl, rcam, ray, R = null }) {
   const W = 300, H = 200, cx = W / 2, cy = H / 2;
   const span = R || Math.max(8, Math.min(rout + 3, 26));
   const s = (H / 2 - 12) / span;
@@ -19,12 +22,12 @@ export function crossSection({ a, rh, rph, rphr, ri, rout, incl, rcam, ray, R = 
   const parts = [];
   parts.push(`<line class="grid" x1="0" y1="${cy}" x2="${W}" y2="${cy}"/>`);
   parts.push(`<line class="grid" x1="${cx}" y1="0" x2="${cx}" y2="${H}"/>`);
-  // ergosurface r_E(theta) = 1 + sqrt(1 - a^2 cos^2 theta), drawn in the x-z plane
+  // the ergosurface, physics.js's (charge included), drawn in the x-z plane
   let erg = '';
   for (let i = 0; i <= 72; i++) {
     const t = (i / 72) * 2 * Math.PI;
     const ct = Math.cos(t), st = Math.sin(t);
-    const rE = 1 + Math.sqrt(Math.max(0, 1 - a * a * ct * ct));
+    const rE = ergosurface(a, q, t * 180 / Math.PI);
     const x = Math.sqrt(rE * rE + a * a) * st, z = rE * ct;
     erg += `${i ? 'L' : 'M'}${f(X(x))},${f(Y(z))}`;
   }
@@ -35,13 +38,13 @@ export function crossSection({ a, rh, rph, rphr, ri, rout, incl, rcam, ray, R = 
   const tick = (r, cls, lab, dy) => {
     const x1 = X(Math.sqrt(r * r + a * a)), x0 = X(-Math.sqrt(r * r + a * a));
     return `<line class="${cls}" x1="${f(x1)}" y1="${cy - 5}" x2="${f(x1)}" y2="${cy + 5}"/><line class="${cls}" x1="${f(x0)}" y1="${cy - 5}" x2="${f(x0)}" y2="${cy + 5}"/>` +
-      (lab ? `<text x="${f(x1 + 3)}" y="${cy + dy}" class="${cls === 'gold' ? 'labg' : 'lab'}">${lab}</text>` : '');
+      (lab ? `<text x="${f(x1 + 3)}" y="${cy + dy}" class="${'lab'}">${lab}</text>` : '');
   };
   // disk: right side carries prograde gas toward the far side of the page
-  parts.push(`<line class="gold" stroke-width="2" x1="${f(X(Math.sqrt(ri * ri + a * a)))}" y1="${cy}" x2="${f(X(Math.min(rout, span)))}" y2="${cy}"/>`);
-  parts.push(`<line class="gold" stroke-width="2" x1="${f(X(-Math.sqrt(ri * ri + a * a)))}" y1="${cy}" x2="${f(X(-Math.min(rout, span)))}" y2="${cy}"/>`);
+  parts.push(`<line class="ser" stroke-width="2" x1="${f(X(Math.sqrt(ri * ri + a * a)))}" y1="${cy}" x2="${f(X(Math.min(rout, span)))}" y2="${cy}"/>`);
+  parts.push(`<line class="ser" stroke-width="2" x1="${f(X(-Math.sqrt(ri * ri + a * a)))}" y1="${cy}" x2="${f(X(-Math.min(rout, span)))}" y2="${cy}"/>`);
   parts.push(tick(rph, 'ink', 'r_ph', -8));
-  parts.push(tick(ri, 'gold', 'ISCO', 16));
+  parts.push(tick(ri, 'ser', 'ISCO', 16));
   if (rphr < span) parts.push(tick(rphr, 'dim', '', 0));
   // camera direction
   const it = incl * Math.PI / 180;
@@ -49,8 +52,8 @@ export function crossSection({ a, rh, rph, rphr, ri, rout, incl, rcam, ray, R = 
   const rc = Math.min(rcam, span * 0.96);
   const camX = X(rc * dx), camY = Y(rc * dz);
   parts.push(`<line class="dim" x1="${cx}" y1="${cy}" x2="${f(camX)}" y2="${f(camY)}" stroke-dasharray="1 3"/>`);
-  parts.push(`<rect class="goldf" x="${f(camX - 3)}" y="${f(camY - 3)}" width="6" height="6"/>`);
-  parts.push(`<text x="${f(Math.min(camX + 6, W - 60))}" y="${f(Math.max(camY - 6, 12))}" class="labg">eye ${rcam >= 100 ? f(rcam, 0) : f(rcam, 1)} M${rcam > span ? ' (far)' : ''}</text>`);
+  parts.push(`<rect class="nowf" x="${f(camX - 3)}" y="${f(camY - 3)}" width="6" height="6"/>`);   // the live position: gold
+  parts.push(`<text x="${f(Math.min(camX + 6, W - 60))}" y="${f(Math.max(camY - 6, 12))}" class="lab">eye ${s3(rcam)} M${rcam > span ? ' (far)' : ''}</text>`);
   // the probed ray
   if (ray && ray.length > 1) {
     let d = '';
@@ -63,7 +66,7 @@ export function crossSection({ a, rh, rph, rphr, ri, rout, incl, rcam, ray, R = 
     }
     parts.push(`<path class="ray" d="${d}"/>`);
   }
-  parts.push(`<text x="6" y="${H - 6}">${f(span * 2, 0)} M across, to scale</text>`);
+  parts.push(`<text x="6" y="${H - 6}">${s3(span * 2)} M across, to scale</text>`);
   return `<svg class="bh-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cross-section of the hole to scale">${parts.join('')}</svg>`;
 }
 
@@ -84,15 +87,15 @@ export function diskProfile({ tab, ri, rout, Tpeak, hl, tdispK }) {
   }
   const parts = [];
   for (const v of [0, 0.5, 1]) parts.push(`<line class="grid" x1="${L}" x2="${W - Rr}" y1="${f(Y(v))}" y2="${f(Y(v))}"/>`);
-  parts.push(`<path class="gold" d="${dT}"/><path class="ink" stroke-dasharray="3 3" d="${dF}"/>`);
-  parts.push(`<line class="gold" x1="${f(X(ri))}" x2="${f(X(ri))}" y1="${T}" y2="${H - B}"/>`);
+  parts.push(`<path class="ser" d="${dT}"/><path class="ink" stroke-dasharray="3 3" d="${dF}"/>`);
+  parts.push(`<line class="ser" x1="${f(X(ri))}" x2="${f(X(ri))}" y1="${T}" y2="${H - B}"/>`);
   const ticks = [ri, 2 * ri, 4 * ri, rout].filter((r, i, arr) => r <= rout && (i === 0 || r - arr[i - 1] > 0.5));
-  for (const r of ticks) parts.push(`<text x="${f(X(r) - 8)}" y="${H - 10}">${f(r, r < 10 ? 1 : 0)}</text>`);
+  for (const r of ticks) parts.push(`<text x="${f(X(r) - 8)}" y="${H - 10}">${s3(r)}</text>`);
   parts.push(`<text x="${W - 40}" y="${H - 10}">r / M</text>`);
   parts.push(`<text x="2" y="${f(Y(1) + 4)}">1</text><text x="2" y="${f(Y(0) + 4)}">0</text>`);
-  if (Tpeak > 0) parts.push(`<text x="${L + 4}" y="${T + 10}" class="labg">T peak ${Tpeak >= 1e4 ? Tpeak.toExponential(2) : Math.round(Tpeak)} K</text>`);
-  else parts.push(`<text x="${L + 4}" y="${T + 10}" class="labg">display peak ${Math.round(tdispK)} K</text>`);
-  if (hl > 0) parts.push(`<line class="ink" x1="${f(X(hl))}" x2="${f(X(hl))}" y1="${T}" y2="${H - B}"/><text x="${f(Math.min(X(hl) + 4, W - 70))}" y="${T + 24}" class="lab">r = ${f(hl, 2)} M</text>`);
+  if (Tpeak > 0) parts.push(`<text x="${L + 4}" y="${T + 10}" class="lab">T peak ${sci(Tpeak)} K</text>`);
+  else parts.push(`<text x="${L + 4}" y="${T + 10}" class="lab">display peak ${sci(tdispK)} K</text>`);
+  if (hl > 0) parts.push(`<line class="ink" x1="${f(X(hl))}" x2="${f(X(hl))}" y1="${T}" y2="${H - B}"/><text x="${f(Math.min(X(hl) + 4, W - 70))}" y="${T + 24}" class="lab">r = ${s3(hl)} M</text>`);
   parts.push(`<rect class="hit" data-hit="profile" x="${L}" y="${T}" width="${W - L - Rr}" height="${H - T - B}"/>`);
   return { svg: `<svg class="bh-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Disk temperature and flux against radius">${parts.join('')}</svg>`, X, r0, r1, L, W, Rr };
 }
@@ -112,16 +115,16 @@ export function spectrumPlot(spec) {
     const lab = k >= 3 ? `${10 ** (k - 3)} keV` : k >= 0 ? `${10 ** k} eV` : `1e${k}`;
     parts.push(`<text x="${f(X(10 ** k) - 10)}" y="${H - 9}">${lab}</text>`);
   }
-  parts.push(`<path class="gold" d="${d}"/>`);
-  parts.push(`<circle class="goldf" cx="${f(X(peak[0]))}" cy="${f(Y(peak[1]))}" r="2.5"/>`);
+  parts.push(`<path class="ser" d="${d}"/>`);
+  parts.push(`<circle class="serf" cx="${f(X(peak[0]))}" cy="${f(Y(peak[1]))}" r="2.5"/>`);
   const pe = peak[0];
-  parts.push(`<text x="${f(Math.min(X(pe) + 6, W - 110))}" y="${T + 12}" class="labg">peak ${pe >= 1000 ? (pe / 1000).toPrecision(3) + ' keV' : pe.toPrecision(3) + ' eV'}</text>`);
+  parts.push(`<text x="${f(Math.min(X(pe) + 6, W - 110))}" y="${T + 12}" class="lab">peak ${photonEnergy(pe)}</text>`);
   parts.push(`<text x="2" y="${T + 8}">νFν</text>`);
   return `<svg class="bh-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Observed spectrum of the disk">${parts.join('')}</svg>`;
 }
 
 /**
- * The fall: proper time (gold) and far time (ink) to reach r, in seconds for the mass,
+ * The fall: proper time (bright ink) and far time (horizon ink) to reach r, in seconds for the mass,
  * on log axes; tidal stretch across 2 m along the bottom; the current radius marked.
  */
 export function fallChart({ rows, tg, rcur, rh, ri, rph, tidalScale, tide10g }) {
@@ -133,10 +136,10 @@ export function fallChart({ rows, tg, rcur, rh, ri, rph, tidalScale, tide10g }) 
   let dTau = '', dT = '';
   for (const row of rows) { dTau += `${dTau ? 'L' : 'M'}${f(X(row.r))},${f(Y(row.tau))}`; dT += `${dT ? 'L' : 'M'}${f(X(row.r))},${f(Y(row.t))}`; }
   const parts = [];
-  parts.push(`<path class="gold" d="${dTau}"/><path class="ink" d="${dT}"/>`);
-  const mark = (r, lab, cls) => r > r1 && r < r0 ? `<line class="${cls}" stroke-dasharray="2 3" x1="${f(X(r))}" x2="${f(X(r))}" y1="${T}" y2="${H - B}"/><text x="${f(X(r) + 2)}" y="${H - B + 12}" class="${cls === 'gold' ? 'labg' : 'lab'}">${lab}</text>` : '';
-  parts.push(mark(ri, 'ISCO', 'gold'), mark(rph, 'r_ph', 'ink'));
-  if (tide10g > rh) parts.push(mark(tide10g, '10 g', 'dim'));
+  parts.push(`<path class="ser" d="${dTau}"/><path class="ink" d="${dT}"/>`);
+  const mark = (r, lab, cls) => r > r1 && r < r0 ? `<line class="${cls}" stroke-dasharray="2 3" x1="${f(X(r))}" x2="${f(X(r))}" y1="${T}" y2="${H - B}"/><text x="${f(X(r) + 2)}" y="${H - B + 12}" class="${'lab'}">${lab}</text>` : '';
+  parts.push(mark(ri, 'ISCO', 'ser'), mark(rph, 'r_ph', 'ink'));
+  if (tide10g > rh) parts.push(mark(tide10g, `${TIDE_G} g`, 'dim'));
   // tidal strip: log10 of acceleration in g across 2 m
   let dTid = '';
   const tmin = -12, tmx = 12;
@@ -148,11 +151,10 @@ export function fallChart({ rows, tg, rcur, rh, ri, rph, tidalScale, tide10g }) 
   parts.push(`<path class="dim" d="${dTid}"/>`);
   if (rcur) {
     const xc = X(Math.max(r1, Math.min(r0, rcur)));
-    parts.push(`<line class="gold" x1="${f(xc)}" x2="${f(xc)}" y1="${T}" y2="${H - 4}"/>`);
+    parts.push(`<line class="now" x1="${f(xc)}" x2="${f(xc)}" y1="${T}" y2="${H - 4}"/>`);   // the faller's radius now: gold
   }
-  const unit = (sec) => (sec >= 86400 * 2 ? [86400, 'd'] : sec >= 7200 ? [3600, 'h'] : sec >= 120 ? [60, 'min'] : sec >= 1 ? [1, 's'] : sec >= 1e-3 ? [1e-3, 'ms'] : [1e-6, 'µs']);
-  const [uf, un] = unit(tmax * tg);
-  parts.push(`<line class="grid" x1="${L}" x2="${W - Rr}" y1="${f(Y(tmax))}" y2="${f(Y(tmax))}"/><text x="2" y="${f(Y(tmax) + 4)}">${(tmax * tg / uf).toPrecision(2)}</text><text x="2" y="${f(Y(0))}">0 ${un}</text>`);
+  // the time axis in the readouts' own format (physics.js dur), not a table of units of its own
+  parts.push(`<line class="grid" x1="${L}" x2="${W - Rr}" y1="${f(Y(tmax))}" y2="${f(Y(tmax))}"/><text x="2" y="${f(Y(tmax) + 4)}">${dur(tmax * tg)}</text><text x="2" y="${f(Y(0))}">0</text>`);
   parts.push(`<text x="${W - 92}" y="${H - B + 12}">r → horizon</text>`);
   parts.push(`<rect class="hit" data-hit="fall" x="${L}" y="${T}" width="${W - L - Rr}" height="${H - T - 4}"/>`);
   return { svg: `<svg class="bh-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Proper time and far time during the fall">${parts.join('')}</svg>`, X, L, W, Rr, r0, r1, rh };
@@ -189,12 +191,12 @@ export function potentialPlot({ a, q = 0, rh, rph, ri, Lisco, mark }) {
   const Yv = (v) => T + (1 - (Math.max(Math.min(v, vmax), vmin) - vmin) / (vmax - vmin)) * (H - T - B);
   let db = '', dv2 = '';
   rs.forEach((r, i) => { db += `${i ? 'L' : 'M'}${f(X(r))},${f(Yb(bs[i]))}`; dv2 += `${i ? 'L' : 'M'}${f(X(r))},${f(Yv(vs[i]))}`; });
-  const parts = [`<path class="ink" d="${db}"/><path class="gold" d="${dv2}"/>`];
-  parts.push(`<circle class="goldf" cx="${f(X(rs[ib]))}" cy="${f(Yb(bs[ib]))}" r="2.5"/>`);
-  if (iv > 0) parts.push(`<circle class="goldf" cx="${f(X(rs[iv]))}" cy="${f(Yv(vs[iv]))}" r="2.5"/>`);
-  parts.push(`<text x="${L + 4}" y="${T + 10}" class="lab">photon b(r): min at ${rs[ib].toFixed(3)} M</text>`);
-  if (iv > 0) parts.push(`<text x="${L + 4}" y="${T + 24}" class="labg">massive V(r), L = L_ISCO: flat at ${rs[iv].toFixed(2)} M</text>`);
-  for (const r of [r0, ri, r1].filter((x, i, arr) => i === 0 || x - arr[i - 1] > 0.6)) parts.push(`<text x="${f(X(r) - 8)}" y="${H - 10}">${r.toFixed(r < 10 ? 1 : 0)}</text>`);
+  const parts = [`<path class="ink" d="${db}"/><path class="ser" d="${dv2}"/>`];
+  parts.push(`<circle class="serf" cx="${f(X(rs[ib]))}" cy="${f(Yb(bs[ib]))}" r="2.5"/>`);
+  if (iv > 0) parts.push(`<circle class="serf" cx="${f(X(rs[iv]))}" cy="${f(Yv(vs[iv]))}" r="2.5"/>`);
+  parts.push(`<text x="${L + 4}" y="${T + 10}" class="lab">photon b(r): min at ${s3(rs[ib])} M</text>`);
+  if (iv > 0) parts.push(`<text x="${L + 4}" y="${T + 24}" class="lab">massive V(r), L = L_ISCO: flat at ${s3(rs[iv])} M</text>`);
+  for (const r of [r0, ri, r1].filter((x, i, arr) => i === 0 || x - arr[i - 1] > 0.6)) parts.push(`<text x="${f(X(r) - 8)}" y="${H - 10}">${s3(r)}</text>`);
   parts.push(`<text x="${W - 40}" y="${H - 10}">r / M</text>`);
   if (mark) parts.push(`<line class="dim" x1="${f(X(mark))}" x2="${f(X(mark))}" y1="${T}" y2="${H - B}"/>`);
   return { svg: `<svg class="bh-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Effective potentials">${parts.join('')}</svg>`, rPh: rs[ib], rIsco: iv > 0 ? rs[iv] : null };

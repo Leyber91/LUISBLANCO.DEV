@@ -15,11 +15,11 @@
    ============================================================ */
 
 import { TOUR, VIEWS, COLOR_MODES } from './config.js';
-import { shadowFor, predictedUas, measurement, sci, s3, dur } from './physics.js';
+import { compareSentence, measurement, ringGamma, sci, s3, dur, deg, spinText, SHADOW_HOW, BODY_M } from './physics.js';
+import { colourWord } from './palette.js';
 import { liveAnchors } from './probe.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const distText = (pc) => (pc >= 1e6 ? `${(pc / 1e6).toPrecision(3)} Mpc` : pc >= 1e3 ? `${(pc / 1e3).toPrecision(3)} kpc` : `${pc.toPrecision(3)} pc`);
 
 /** The complete state a tour stop asks for: the object preset resolved for the stop's view,
  *  then the view preset for the stop's object, then the stop's own keys. Independent of the
@@ -48,22 +48,33 @@ export class Tour {
     const { store, model: m } = this.app;
     const s = store.all();
     const o = m.obj;
-    // in the telescope view the caption quotes the Measure card's own numbers
-    const ms = s.view === 'telescope' ? measurement(s) : null;
-    const ts = ms ? ms.th : shadowFor(s.a, 90, s.q);
-    const pred = ms ? ms.pred : (o ? predictedUas(ts.mean, o) : null);
+    // every shadow number is the Measure card's own, at the inclination it was measured at, which the caption
+    // names (physics.js measurement, the one rule; fix_s2_p1 K1)
+    const ms = measurement(s), ts = ms.th;
+    // the comparison with the EHT is compareShadow's, worded by compareSentence (ledger row 2)
+    const cmp = ms.cmp;
     const an = this.anchors();
+    const g = ringGamma(s.a, s.q);
+    // every number in physics.js's format for its kind (3 significant figures for lengths in M, angles, speeds and
+    // ratios), and a key that fills a word of a chord names its chord: rhAcross, shadowAcross, horizonAcrossKm are
+    // diameters, shadowW a width (review_s2 P2-8)
     return {
-      name: o ? o.name : 'this hole', dist: o && o.distPc ? distText(o.distPc) : '--',
-      eht: o && o.eht ? `EHT measured a ring of ${o.eht.ring} +- ${o.eht.ringErr} uas.` : 'The EHT has not imaged it.',
-      a: s.a.toFixed(3), rh: (2 * m.rh).toFixed(2), shadowW: ts.chords.width.toFixed(2), vmax: m.vIsco.toFixed(2),
-      // 3 significant figures for the dimming: at two decimals 5.41e-4 would read 0.00
-      gmax: an && an.gmax ? Math.pow(an.gmax, 4).toFixed(1) : '--', gmin: an && an.gmin ? s3(Math.pow(an.gmin, 4)) : '--',
-      incl: s.incl.toFixed(0), shadowUas: pred ? pred.value.toFixed(1) : '--', ri: m.ri.toFixed(2),
+      name: o ? o.name : 'this hole',
+      eht: compareSentence(cmp, o ? o.name : 'this hole'), by: cmp && cmp.pred.by ? cmp.pred.by : 'its mass and distance',
+      a: spinText(s.a), rhAcross: s3(2 * m.rh), shadowW: s3(ts.chords.width), vmax: s3(m.vIsco),
+      // the angle and the diameter it was computed from, one chord (review_s2 P2-3), the inclination they were
+      // measured at, and the scale's number beside the angle (fix_s2_p1 S6)
+      shadowAcross: s3(cmp ? cmp.pred.diamM : ts.mean), shadowUas: cmp ? s3(cmp.pred.value) : '--',
+      farIncl: deg(ms.incl), scale: cmp ? s3(cmp.pred.thetaG) : '--',
+      gmax: an && an.gmax ? s3(Math.pow(an.gmax, 4)) : '--', gmin: an && an.gmin ? s3(Math.pow(an.gmin, 4)) : '--',
+      ri: s3(m.ri),
       // tauIn is the proper time from the horizon to the inner horizon, which is the centre
       // only without spin and charge (the Instrument card labels the same number the same way)
-      eta: (m.eta * 100).toFixed(1), tauIn: dur(m.interiorTauS), inner: m.rmin < 5e-7 ? 'the centre' : 'the inner horizon',
-      massSun: sci(m.massSun), horizonKm: sci(m.horizonKm), tidalG: sci(m.tidalHg),
+      eta: s3(m.eta * 100), tauIn: dur(m.interiorTauS), inner: m.rmin < 5e-7 ? 'the centre' : 'the inner horizon',
+      massSun: sci(m.massSun), horizonAcrossKm: sci(2 * m.horizonKm), tidalG: sci(m.tidalHg), bodyM: String(BODY_M),
+      // the sub-ring factor is the engine's at this spin (review_s2 P2-2); the ring's colour is named only where the
+      // photon-order map draws it in its token (P2-1)
+      ringThin: g == null ? '--' : s3(Math.exp(g)), ringWord: s.color === 'order' ? colourWord('order1') : 'bright',
     };
   }
 
@@ -139,7 +150,7 @@ export class Tour {
     if (!pt) { this.focusSvg.innerHTML = ''; return; }
     const [x, y] = this.toScreen(pt.sx, pt.sy);
     const pulse = 1 + 0.08 * Math.sin(this.t * 3);
-    this.focusSvg.innerHTML = `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rad * pulse).toFixed(1)}" fill="none" stroke="var(--accretion)" stroke-width="1" stroke-dasharray="4 5" opacity="0.85"/>`;
+    this.focusSvg.innerHTML = `<circle class="tour-focus" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rad * pulse).toFixed(1)}" fill="none" stroke="var(--accretion)" stroke-width="1" stroke-dasharray="4 5" opacity="0.85"/>`;
   }
 
   idleCaption() {
@@ -148,13 +159,18 @@ export class Tour {
     const s = store.all();
     const o = m.obj;
     const title = o ? `${o.name}: ${o.kind}` : 'Custom hole';
-    const line = s.view === 'telescope'
+    // the curve is named by the colour its stylesheet token draws it in (palette.js MARKS.curve; review_s2 P2-1),
+    // and by how the shadow was obtained, as the overlay's legend names it (physics.js SHADOW_HOW; fix_s2_p1 K4):
+    // where no curve is drawn (Kerr-Newman with spin) the caption names none
+    const curve = colourWord('curve');
+    const ms = s.view === 'telescope' ? measurement(s) : null, named = ms ? SHADOW_HOW[ms.th.how].curve : null;
+    const line = ms
       ? (s.emit === 'thick'
-        ? `Seen from far away at ${s.incl.toFixed(0)} deg. An opaque disk reaching the ISCO covers the outer shadow: the dark patch is the inner shadow (Chael et al. 2021). Gold: Bardeen's critical curve.`
-        : `Seen from far away at ${s.incl.toFixed(0)} deg, through hot thin gas as the EHT sees it. The gold curve is Bardeen's 1973 critical curve; the bright ring the rays found sits on it.`)
+        ? `Seen from far away at ${deg(ms.incl)} deg. An opaque disk reaching the ISCO covers the outer shadow: the dark patch is the inner shadow (Chael et al. 2021). ${named ? `The ${curve} curve: the ${named}.` : 'No closed-form curve is drawn for a charged, spinning hole.'}`
+        : `Seen from far away at ${deg(ms.incl)} deg, through hot thin gas as the EHT sees it. ${named ? `The ${curve} curve is the ${named}; the bright ring the rays found sits on it.` : 'No closed-form curve is drawn for a charged, spinning hole; the bright ring the rays found marks the edge of its shadow.'}`)
       : s.view === 'journey'
         ? 'Free fall from rest far away. Drag the Fall chart to scrub; your clock and the far clock part ways near the horizon.'
-        : `Spin ${s.a.toFixed(3)}, ${COLOR_MODES[s.color].label.toLowerCase()} colour. Click any pixel to trace its ray; drag to orbit.`;
+        : `Spin ${spinText(s.a)}, ${COLOR_MODES[s.color].label.toLowerCase()} colour. Click any pixel to trace its ray; drag to orbit.`;
     this.caption.innerHTML = `<div class="cap"><div class="cap-k">${esc(VIEWS[s.view].label)} view</div><div class="cap-t">${esc(title)}</div><div class="cap-b">${esc(line)}</div>
       <div class="cap-nav"><button class="bh-btn go" type="button" data-n="tour">Take the tour</button></div></div>`;
     this.caption.querySelector('button').addEventListener('click', () => this.start(0));

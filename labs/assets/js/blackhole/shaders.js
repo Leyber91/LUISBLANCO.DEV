@@ -14,7 +14,12 @@
    DIRECT fuses all three for GPUs without float render targets.
    A new metric is a new METRICS entry exposing ksR() and rhs(); a new emission
    model is a new EMISSION entry; neither touches the integrator or the trace loop.
+   Every colour constant comes from palette.js: the lab's own marks
+   from the tokens that draw them (none gold), the physical maps as
+   they were (fix_s2_brief C4; palette.test.mjs reads this GLSL).
    ============================================================ */
+
+import { glslMark, glslConst, PHYSICAL, LAB, DIAG_EXPO, DRIFT_LIMIT } from './palette.js';
 
 const header = `#version 300 es
 precision highp float;
@@ -233,7 +238,7 @@ vec3 skyColor(vec3 dir, float gsky){
   vec3 bandN = normalize(vec3(0.35, 0.6, 0.72));
   float b = dot(d, bandN);
   float band = exp(-b*b/0.03)*(0.5 + 0.8*fbm(d*7.0));
-  c += vec3(0.62, 0.68, 0.80)*band*0.016;
+  c += ${glslConst(LAB.skyBand)}*band*0.016;
   // hovering deep in the well the whole sky is blueshifted and brightened (g_sky^4)
   float gs = clamp(gsky, 0.2, 4.0);
   return c*uSkyGain*gs*gs*gs*gs;
@@ -290,30 +295,32 @@ vec3 diskColor(vec4 g0, vec4 g2){
   } else if (uMode == 2) {
     // diverging map of g: amber below 1 (redshift), blue-white above (blueshift), dim grey at 1
     float x = clamp((g - 1.0)/0.5, -1.0, 1.0);
-    vec3 warm = vec3(0.95, 0.38, 0.08), cold = vec3(0.62, 0.76, 1.05);
-    col = mix(vec3(0.16, 0.17, 0.19), (x < 0.0 ? warm : cold)*0.85, pow(abs(x), 0.7))*(0.55 + 0.45*Tn);
+    vec3 warm = ${glslConst(PHYSICAL.redshiftWarm.rgb)}, cold = ${glslConst(PHYSICAL.redshiftCold.rgb)};
+    col = mix(${glslConst(PHYSICAL.redshiftMid.rgb)}, (x < 0.0 ? warm : cold)*0.85, pow(abs(x), 0.7))*(0.55 + 0.45*Tn);
   } else if (uMode == 3) {
-    // image order: n = 0 dim ink, n = 1 gold, n >= 2 bright white-gold
-    vec3 c0 = vec3(0.07, 0.085, 0.11), c1 = vec3(0.85, 0.52, 0.14), c2 = vec3(1.0, 0.9, 0.7);
-    col = (n < 0.5 ? c0*(0.5 + 0.8*Tn) : (n < 1.5 ? c1*(0.6 + 0.6*Tn) : c2*2.4));
+    // image order in the ink ladder (palette.js MARKS): n = 0 --text-dim, n = 1 --text-bright, n >= 2 --horizon,
+    // each at most its token (the temperature dims it), with no limb law, so the legend's swatch is the colour seen
+    vec3 c0 = ${glslMark('order0', DIAG_EXPO)}, c1 = ${glslMark('order1', DIAG_EXPO)}, c2 = ${glslMark('order2', DIAG_EXPO)};
+    col = (n < 0.5 ? c0 : (n < 1.5 ? c1 : c2))*(0.55 + 0.45*Tn);
   } else {
     vec4 b = bb(uTdisp*tob);
     float I = pow(tob, 4.0);                          // bolometric I = g^4 I_emit
     col = b.rgb*pow(I, uStretch);
   }
-  col *= limb*(uMode >= 2 ? 1.0 : turb)*ign*outer;
-  col += spot*vec3(1.0, 0.86, 0.6)*pow(max(g, 0.0), 4.0)*1.6*ign;
+  col *= (uMode == 3 ? 1.0 : limb)*(uMode >= 2 ? 1.0 : turb)*ign*outer;
+  col += spot*${glslConst(PHYSICAL.hotSpot.rgb)}*pow(max(g, 0.0), 4.0)*1.6*ign;
   return col;
 }
 vec3 thinColor(float I){
   // optically thin emitter, displayed as a warm intensity map (illustrative)
   float v = pow(max(I, 0.0)*0.11, uStretch);
-  return vec3(1.0, 0.58, 0.22)*v + vec3(1.0, 0.92, 0.8)*max(v - 0.8, 0.0)*0.9;
+  return ${glslConst(PHYSICAL.thin.rgb)}*v + ${glslConst(PHYSICAL.thinTop.rgb)}*max(v - 0.8, 0.0)*0.9;
 }
 vec3 stepsColor(vec4 g2){
   float s = g2.z;
-  vec3 c = mix(vec3(0.05, 0.06, 0.08), vec3(0.78, 0.84, 0.95), pow(s, 0.6));
-  if (g2.w > -4.0) c = vec3(1.0, 0.66, 0.2)*(0.6 + 0.4*s);
+  vec3 c = mix(${glslConst(LAB.stepsFloor)}, ${glslMark('steps', DIAG_EXPO)}, pow(s, 0.6));
+  // a drift above the limit is a failure of the integrator: --danger, flat, its words in the legend (palette.js)
+  if (g2.w > ${Math.log10(DRIFT_LIMIT).toFixed(1)}) c = ${glslMark('drift', DIAG_EXPO)};
   return c;
 }
 `;
@@ -386,11 +393,12 @@ void main(){
     // the shadow edge: a dashed blue-white hairline (dashes by angle around the screen centre)
     vec2 rel = gl_FragCoord.xy - 0.5*vec2(uGSize)/uScale;
     float dash = step(0.0, sin(atan(rel.y, rel.x)*90.0));
-    if ((cap != capx || cap != capy) && dash > 0.5) col = mix(col, vec3(0.62, 0.70, 0.84), 0.4);
+    if ((cap != capx || cap != capy) && dash > 0.5) col = mix(col, ${glslConst(LAB.edge)}, 0.4);
     if (m.w > -0.5 && m.w < 0.5) {
       float dr = max(abs(m.x - nx.x)*step(-0.5, nx.w), abs(m.x - ny.x)*step(-0.5, ny.w)) + 1e-4;
-      if (abs(m.x - uRin) < dr*0.9 && dr < 0.6) col = mix(col, vec3(0.83, 0.64, 0.30), 0.85);
-      if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6) col = mix(col, vec3(0.94, 0.78, 0.45), 0.9);
+      // the ISCO and the annulus a visitor points at, in ink: neither is gold (palette.js MARKS)
+      if (abs(m.x - uRin) < dr*0.9 && dr < 0.6) col = mix(col, ${glslMark('isco')}, 0.85);
+      if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6) col = mix(col, ${glslMark('annulus')}, 0.9);
     }
   }
   oColor = vec4(col, 1.0);

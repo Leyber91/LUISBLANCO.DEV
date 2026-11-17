@@ -15,7 +15,7 @@
    ============================================================ */
 
 import * as K from './kerr.js';
-import { tanHalfV } from './physics.js';
+import { tanHalfV, ringGamma } from './physics.js';
 
 const H_ = 6.62607015e-34, KB = 1.380649e-23, C = 299792458;
 const planckNu = (nu, T) => {
@@ -142,9 +142,14 @@ export function anchors({ view, aspect, nx = 72, ny = 44, tpeakK = 0, fcol = 1.7
 
 /** Sub-ring widths traced with the charge; the Lyapunov comparison (Johnson et al. 2020)
  *  is the Kerr formula, so it is returned only at q = 0. */
+/** The sub-ring measurement's rays: how many, and the annulus of the face-on disk they are aimed at (in M). The
+ *  Measure card's note quotes these, so it cannot name another count. */
+export const SUBRING = { samples: 2400, r0: 6, r1: 8 };
+
 export function subrings({ a, q = 0 }) {
-  const w = K.subringWidths(a, 0.001, 6, 8, { q, samples: 2400, k: 0.035 });
-  const gamma = q ? null : K.lyapunov(a, K.polarPhotonOrbit(a));
+  const w = K.subringWidths(a, 0.001, SUBRING.r0, SUBRING.r1, { q, samples: SUBRING.samples, k: 0.035 });
+  // e^-gamma by the one function every sentence about the sub-rings quotes (physics.js ringGamma)
+  const gamma = ringGamma(a, q);
   return { w, gamma, q, rPolar: q ? null : K.polarPhotonOrbit(a) };
 }
 
