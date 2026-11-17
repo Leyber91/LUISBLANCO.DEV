@@ -41,7 +41,9 @@ button, input, select { font: inherit; color: inherit; }
 
 #bh-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; cursor: crosshair; touch-action: none; outline: none; }
 #bh-canvas:focus-visible { outline: 1px solid var(--horizon-dim); outline-offset: -6px; }
-#bh-overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; overflow: visible; }
+/* it covers the window exactly, so clipping hides nothing on it: a probe mark at the edge (a click on the open sky at 0,0,
+   which the drawing leaves free) stays inside its box */
+#bh-overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; overflow: hidden; }
 
 /* ---------- ignition veil ---------- */
 .bh-veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--void);
@@ -310,6 +312,9 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 .bh-opt[aria-pressed="true"] { color: var(--text-bright); }
 .bh-opt[aria-pressed="true"]::after { content: ''; position: absolute; left: 6px; right: 6px; bottom: 0; height: 1px; background: var(--accretion); }
 .bh-hl-own { font-size: var(--bh-fs-s); color: var(--text-bright); margin-left: 6px; }
+/* the colour's key after the colour line: the Colour card's key, drawn by the same function (ui.js) */
+.bh-hl-key { margin: 0; gap: 0 12px; }
+.bh-hl-key:empty { display: none; }
 /* the scales: graduations in the dim ink, the hand and its value bright */
 .bh-scale { position: fixed; z-index: 14; overflow: visible; cursor: ew-resize; touch-action: none; }
 #bh-sc-incl { cursor: grab; } #bh-sc-mass { cursor: ns-resize; }
@@ -360,20 +365,28 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
   body:not([data-sheet="1"]) .bh-scale, body:not([data-sheet="1"]) .bh-strip { display: none; }
   body[data-sheet="1"] .bh-caption { left: auto; right: 500px; transform: none; width: 340px; bottom: 56px; }
   body[data-sheet="1"] .bh-caption .cap-b { max-height: calc(5.5 * 1.5em); overflow-y: auto; overscroll-behavior: contain; }
-  /* the drawing's margin notes: the old chrome's boxes become text on the sheet */
-  .bh-back, .bh-brand { border-color: transparent; background: none; }
-  body[data-sheet="1"] .bh-foot .tags, body[data-sheet="1"] .bh-foot .perf { border-color: transparent; background: none; }
+  /* the drawing's margin notes: the old chrome's boxes lose their border and keep their dark ground, so their words read
+     at 4.5 to 1 over any colouring of the render (with no ground, Back read 1.07 to 1 over the steps colouring) */
+  .bh-back, .bh-brand { border-color: transparent; }
+  body[data-sheet="1"] .bh-foot .tags, body[data-sheet="1"] .bh-foot .perf { border-color: transparent; }
   /* sheets 2 to 4: the title block keeps only its tabs, and the column takes the height */
   body:not([data-sheet="1"]) .bh-tb-body, body:not([data-sheet="1"]) .bh-tb-take { display: none; }
   body:not([data-sheet="1"]) .bh-left, body:not([data-sheet="1"]) .bh-right { bottom: 110px; }
 }
 @media (max-width: 900px) {
-  .bh-tb, .bh-strip { display: none; }
+  .bh-strip { display: none; }
+  /* the title block, first in the sheet under the picture (C16): in the flow, the sheet's width; no tabs, the sheet
+     holds every card; its take-away buttons a phone's 44 px */
+  /* z-index auto: the sheet lays its blocks out as flex items, and a flex item takes z-index though static; the wide
+     rule's 16 put the title block over the sticky handle (2), so a press on the handle met a cell (probe_cover, 2026-11-17) */
+  .bh-tb { position: static; width: auto; margin: 0 0 14px; z-index: auto; }
+  .bh-tb .bh-tabs { display: none; }
+  .bh-tb-take button, .bh-tb-take a { min-height: 44px; }
   /* the head line is the bar's own row under Back and the model's pill */
   .bh-bar { flex-wrap: wrap; }
   /* on a phone the head line is the objects alone, one row that scrolls inside itself; the view and the colour are
      in the sheet's cards */
   .bh-hl { order: 3; flex: 0 0 100%; margin: 4px 0 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .bh-hl-g:not(:first-child), .bh-hl-k { display: none; }
+  .bh-hl-g:not(:first-child), .bh-hl-k, .bh-hl-key { display: none; }
   .bh-opt { min-height: 44px; padding: 0 6px; }
 }

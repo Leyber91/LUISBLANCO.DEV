@@ -70,6 +70,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   const own = el('span', { class: 'bh-hl-own' }, head.firstChild);
   const viewOpts = group('view', Object.entries(VIEWS).map(([id, v]) => [id, v.label.toLowerCase()]), (id) => choose.view(id));
   const colOpts = group('colour', Object.entries(COLOR_MODES).map(([id, m]) => [id, m.label.toLowerCase()]), (id) => choose.colour(id));
+  // the colour's key on sheet 1, after the colour line: without it a mode's colours mean nothing until sheet 3 (ui.js
+  // draws the key into every [data-modekey])
+  el('span', { class: 'bh-legend bh-hl-key', 'data-modekey': '' }, head);
   // a child of the bar between its two ends: after Back on a wide screen, its own row under the bar on a phone
   document.querySelector('.bh-bar').insertBefore(head, document.querySelector('.bh-bar-r'));
 
@@ -257,6 +260,11 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   function place() {
     const W = innerWidth, H = innerHeight, phone = !wide();
     compact = phone;
+    // the title block: on a phone the first block of the sheet, under the picture (C16); on a wide screen the sheet's
+    // corner of the drawing
+    const stage = document.querySelector('.bh-stage'), handle = stage && stage.querySelector('.bh-sheet-h');
+    if (phone && handle && handle.nextElementSibling !== tb) handle.after(tb);
+    if (!phone && tb.parentElement !== body) body.appendChild(tb);
     if (phone) {
       SP.x0 = 18; SP.W = W - 2 * 18 - 4;
       // under the head line, in the sky above the hole: below it the labels and the caption have the frame

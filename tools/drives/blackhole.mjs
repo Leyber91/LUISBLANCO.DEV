@@ -149,7 +149,8 @@ function guard() {
 /* Gold means "this happened" in four places (BAR_L1 section 2), named here as elements, never as kinds:
    the chosen control, the tour's current stop and the ring around what it points at, the live markers of the
    charts, the plate's corner brackets. */
-export const GOLD_ALLOW = ['.bp', '.bh-btn[aria-pressed="true"]', '.bh-caption .cap-nav .dots i.on', '.bh-svg .now', '.bh-svg .nowf', 'circle.tour-focus'];
+/* BAR_L1 section 6: on the drawing, gold marks the chosen option's underline and the active sheet's tab */
+export const GOLD_ALLOW = ['.bp', '.bh-btn[aria-pressed="true"]', '.bh-opt[aria-pressed="true"]', '.bh-tab[aria-selected="true"]', '.bh-caption .cap-nav .dots i.on', '.bh-svg .now', '.bh-svg .nowf', 'circle.tour-focus'];
 /* A failure (the integrator's drift, a sigma two or more from the EHT, a number a model got wrong) is drawn in
    --danger with its words beside it. It was --warn until 2026-11-16, which sits within the gold rule's tolerance of
    --accretion (19, 22, 16) and so read as "this happened"; no element is excused from the pixel rule for it now. */
@@ -158,6 +159,24 @@ export const WARN_ALLOW = [];
    route's dot (review_s2 P3-2). That palette is the shared labs/assets/js/ai/route-panel.js's, which this lab may
    not change (fix_s2_brief C5); it is reported to Luis as a shared change of its own. Until it changes, these
    elements are left out of the gold rules here, and the drive says so on every run. Delete this list with it. */
+/* The drawing (slice 4): at wide widths the controls and readouts of the old columns are sheets 2 to 4 of the title
+   block. A press on a control that is not shown opens the sheet that shows it; closing the phone's sheet returns a
+   wide page to sheet 1. One helper for the press, click and sheet of every section (they were three copies, and each
+   assumed every control is in view). On a page without sheets it changes nothing. */
+const IN_VIEW = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); return !!e && e.getClientRects().length > 0; })()`;
+export async function reveal(p, sel) {
+  if (await p.ev(IN_VIEW(sel))) return true;
+  for (const n of [3, 2, 4]) {
+    if (!(await p.ev(`!!document.querySelector('.bh-tab[data-sheet="${n}"]')`))) return false;
+    await p.ev(`document.querySelector('.bh-tab[data-sheet="${n}"]').click()`);
+    await p.sleep(450);
+    if (await p.ev(IN_VIEW(sel))) return true;
+  }
+  return false;
+}
+export async function sheetOne(p) {
+  if (await p.ev(`!!document.querySelector('.bh-tab[data-sheet="1"]') && document.body.dataset.sheet !== '1'`)) { await p.ev(`document.querySelector('.bh-tab[data-sheet="1"]').click()`); await p.sleep(450); }
+}
 export const GOLD_DEFERRED = ['.lbr-pill:hover', '.lbr-panel button.go', '.lbr-row button:hover', '.lbr-routes li.on', '.lbr[data-route="pollinations"] .lbr-dot'];
 
 /* BAR_L1 C10: nothing a visitor operates is cut. A target whose box runs past an ancestor that clips without
@@ -404,9 +423,9 @@ const HOLD_STOP = '(() => { const t = window.__bh && window.__bh.tour; if (t && 
 export async function FALL_STEP(p, { base, width, ready }) {
   const phone = width < 700;
   const at = (sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; })()`);
-  const press = async (sel) => { const b = await at(sel); if (!b) { p.check(`the page has ${sel}`, false); return false; } await p.click(b[0] + b[2] / 2, b[1] + b[3] / 2); return true; };
+  const press = async (sel) => { if (!phone) await reveal(p, sel); const b = await at(sel); if (!b) { p.check(`the page has ${sel}`, false); return false; } await p.click(b[0] + b[2] / 2, b[1] + b[3] / 2); return true; };
   const sheet = async (open) => {
-    if (!phone) return;
+    if (!phone) { if (!open) await sheetOne(p); return; }
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await press('.bh-sheet-h'); await p.sleep(700); }
   };
@@ -451,9 +470,9 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   const READ = `(() => { const e = document.querySelector('#bh-recline'); return !!e && e.textContent !== 'reading'; })()`;
   const COUNTS = `(() => { const k = window.__bh.keep; const r = k.record; return { kept: r.kept.length, rays: r.rays.length, falls: r.falls.length }; })()`;
   const at = (sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
-  const press = async (sel) => { const c = await at(sel); if (!c) { p.check(`the page has ${sel}`, false); return false; } await p.click(c[0], c[1]); return true; };
+  const press = async (sel) => { if (!phone) await reveal(p, sel); const c = await at(sel); if (!c) { p.check(`the page has ${sel}`, false); return false; } await p.click(c[0], c[1]); return true; };
   const sheet = async (open) => {
-    if (!phone) return;
+    if (!phone) { if (!open) await sheetOne(p); return; }
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await press('.bh-sheet-h'); await p.sleep(800); }
   };
@@ -623,6 +642,7 @@ export default async function blackhole(p, { base, width }) {
     return f;
   };
   const click = async (sel) => {
+    if (!phone) await reveal(p, sel);
     const r = await p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
     if (!r) { p.check(`the page has ${sel}`, false); return false; }
     await p.click(r[0], r[1]);
@@ -630,7 +650,7 @@ export default async function blackhole(p, { base, width }) {
   };
   let closedOnce = false;
   const sheet = async (open) => {
-    if (!phone) return;
+    if (!phone) { if (!open) await sheetOne(p); return; }
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await click('.bh-sheet-h'); await p.sleep(700); }
     if (now && !open && !closedOnce) {
@@ -656,7 +676,7 @@ export default async function blackhole(p, { base, width }) {
   await pixelRules('loaded');
 
   // BAR_L1 C11: the title in Fraunces, loaded (not a fallback serif); the readouts in IBM Plex Mono
-  const type = await p.ev(`(async () => { await document.fonts.ready; const h = document.querySelector('.bh-head h1'), d = document.querySelector('.bh-read dd');
+  const type = await p.ev(`(async () => { await document.fonts.ready; const h = document.querySelector('h1'), d = document.querySelector('.bh-read dd');
     return { h1: h ? getComputedStyle(h).fontFamily : '', dd: d ? getComputedStyle(d).fontFamily : '', fraunces: document.fonts.check('26px Fraunces'), plex: document.fonts.check('12px "IBM Plex Mono"') }; })()`);
   p.check('the page title is set in Fraunces, and the face loaded', /Fraunces/.test(type.h1) && type.fraunces, JSON.stringify(type));
   p.check('the readouts are set in IBM Plex Mono, and the face loaded', /IBM Plex Mono/.test(type.dd) && type.plex, JSON.stringify(type));
@@ -700,7 +720,7 @@ export default async function blackhole(p, { base, width }) {
     await pixelRules(`colour ${mode}`);
     if (mode === 'order' || mode === 'steps') {
       // the legend's swatches are the tokens the render draws the marks in (palette.js modeKey)
-      const key = await p.ev(`(() => { const tok = ${TOKEN}; return [...document.querySelectorAll('#bh-modekey span')].map((s) => { const i = s.querySelector('i'); const v = (i.getAttribute('style') || '').match(/var\\((--[\\w-]+)\\)/); return { text: s.textContent, bg: getComputedStyle(i).backgroundColor, want: v ? tok(v[1]) : null }; }); })()`);
+      const key = await p.ev(`(() => { const tok = ${TOKEN}; return [...document.querySelectorAll('[data-modekey]')].filter((k) => k.getClientRects().length).flatMap((k) => [...k.querySelectorAll('span')]).map((s) => { const i = s.querySelector('i'); const v = (i.getAttribute('style') || '').match(/var\\((--[\\w-]+)\\)/); return { text: s.textContent, bg: getComputedStyle(i).backgroundColor, want: v ? tok(v[1]) : null }; }); })()`);
       p.check(`colour ${mode}: a legend of swatches, each the colour of its token, none gold`, key.length >= 2 && key.every((k) => k.want && k.bg === k.want && k.bg !== 'rgb(212, 162, 76)'), JSON.stringify(key));
       if (mode === 'steps') p.check('colour steps: the drift is labelled with its limit', key.some((k) => k.text === 'drift above 1e-4' && k.want === 'rgb(224, 108, 117)'), JSON.stringify(key));
     }

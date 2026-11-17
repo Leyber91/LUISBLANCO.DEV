@@ -75,7 +75,7 @@ export function buildUI(app) {
   // view + observer + colour + emitter
   const viewCard = el('div', 'bh-card');
   viewCard.innerHTML = `<h2>View</h2><div class="bh-seg" id="bh-views"></div><div class="bh-seg" id="bh-obs"></div>
-    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div><div class="bh-legend" id="bh-modekey"></div>
+    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div><div class="bh-legend" id="bh-modekey" data-modekey></div>
     <h2 style="margin-top:12px">Emitter</h2><div class="bh-seg" id="bh-emit"></div><p class="bh-note" id="bh-viewnote"></p>`;
   left.appendChild(viewCard);
   const viewBtns = {}, obsBtns = {}, modeBtns = {}, emitBtns = {};
@@ -471,7 +471,9 @@ export function buildUI(app) {
     $('#bh-modenote').textContent = '';
     $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${modeNote(s.color)}.`;
     // the swatches are drawn in the tokens the render draws the same marks with (palette.js modeKey)
-    $('#bh-modekey').innerHTML = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');
+    // the key, drawn by one function into every place it shows (the Colour card, and the drawing's head line)
+    const keyHtml = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');
+    for (const k of document.querySelectorAll('[data-modekey]')) if (k.innerHTML !== keyHtml) k.innerHTML = keyHtml;
     $('#bh-anim', actCard).textContent = s.anim ? 'Pause' : 'Play';
     $('#bh-anim', actCard).setAttribute('aria-pressed', String(!s.anim));
     $('#bh-notes', actCard).textContent = 'Labels';
