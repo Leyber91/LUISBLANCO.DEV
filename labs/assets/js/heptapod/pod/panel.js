@@ -1,5 +1,5 @@
 /* ============================================================
-   heptapod/pod/panel.js — what sits under the glass: the slate
+   heptapod/pod/panel.js — what sits beside the chamber: the slate
    and the lamp by day, the read-back and the six rings in the
    evening, and the count when the day is over.
 
@@ -131,7 +131,7 @@ export function mountPanel(host, hooks) {
     const never = g.filter((t) => (sp.ext.get(t) || []).length === 0);
     const kept = back.filter((t) => state.entries.some((e) => e.tokens.includes(t))).length;
     const rest = g.length - back.length - never.length;
-    const greet = el('p', 'pp-text', `On the glass again is the ring it wrote when you arrived. It carries ${g.length} radicals. ${back.length} of them came back in the rings of your day, and your notebook holds ${kept} of those. ${never.length} belong to no scene of the tray, so nothing on it could point at them.${rest > 0 ? ` ${rest} more could have come back and did not, because of what you did not do.` : ''} `);
+    const greet = el('p', 'pp-text', `In the disc again is the ring it wrote when you arrived. It carries ${g.length} radicals. ${back.length} of them came back in the rings of your day, and your notebook holds ${kept} of those. ${never.length} belong to no scene of the tray, so nothing on it could point at them.${rest > 0 ? ` ${rest} more could have come back and did not, because of what you did not do.` : ''} `);
     greet.append(tag(true));
     wrap.append(greet);
     wrap.append(el('p', 'pp-text', 'The notebook now outlines in gold every scene each of your radicals is used for. Compare the outlines with your pencil.'));

@@ -1,0 +1,313 @@
+{
+ "about": "Outcomes of predictions.json, written by tools/dev/heptapod_predictions.mjs on the 18 film masters (numbers only).",
+ "predictionsFile": "predictions.json",
+ "ranOn": "2026-11-17",
+ "outcome": {
+  "F4-P1": {
+   "masters": 6,
+   "hits": 5,
+   "share": 0.833,
+   "chanceShare": 0.553,
+   "confirmed": true,
+   "rows": [
+    {
+     "master": "Abbott",
+     "gapDeg": 32.3,
+     "gapAt": 318.8,
+     "clusters": 2,
+     "largestArc": [
+      287.9,
+      233.9
+     ],
+     "hit": true,
+     "chance": 0.955
+    },
+    {
+     "master": "Earth",
+     "gapDeg": 21.3,
+     "gapAt": 217.3,
+     "clusters": 2,
+     "largestArc": [
+      333.6,
+      95.4
+     ],
+     "hit": false,
+     "chance": 0.516
+    },
+    {
+     "master": "ThereIsNoLinearTime",
+     "gapDeg": 76.8,
+     "gapAt": 77.5,
+     "clusters": 3,
+     "largestArc": [
+      31.9,
+      145.6
+     ],
+     "hit": true,
+     "chance": 0.417
+    },
+    {
+     "master": "Time",
+     "gapDeg": 83.8,
+     "gapAt": 80.8,
+     "clusters": 3,
+     "largestArc": [
+      38.9,
+      145.4
+     ],
+     "hit": true,
+     "chance": 0.426
+    },
+    {
+     "master": "WeaponToolDuality",
+     "gapDeg": 44.8,
+     "gapAt": 88.5,
+     "clusters": 5,
+     "largestArc": [
+      291.6,
+      130.1
+     ],
+     "hit": true,
+     "chance": 0.618
+    },
+    {
+     "master": "YouHaveChooseLife",
+     "gapDeg": 28.8,
+     "gapAt": 243,
+     "clusters": 5,
+     "largestArc": [
+      197.6,
+      317.9
+     ],
+     "hit": true,
+     "chance": 0.389
+    }
+   ]
+  },
+  "F4-P2": {
+   "masters": 17,
+   "negative": 12,
+   "medianRho": -0.189,
+   "confirmed": false,
+   "rows": [
+    {
+     "master": "Abbott",
+     "clusters": 2,
+     "angles": 993,
+     "rho": 0.162
+    },
+    {
+     "master": "Costello",
+     "clusters": 1,
+     "angles": 1005,
+     "rho": 0.048
+    },
+    {
+     "master": "Earth",
+     "clusters": 2,
+     "angles": 753,
+     "rho": -0.315
+    },
+    {
+     "master": "HepWritesRealTime",
+     "clusters": 2,
+     "angles": 1308,
+     "rho": 0.059
+    },
+    {
+     "master": "Heptapod",
+     "clusters": 1,
+     "angles": 1193,
+     "rho": 0.129
+    },
+    {
+     "master": "Human",
+     "clusters": 4,
+     "angles": 1239,
+     "rho": -0.575
+    },
+    {
+     "master": "Humanity",
+     "clusters": 1,
+     "angles": 1243,
+     "rho": -0.39
+    },
+    {
+     "master": "Ian",
+     "clusters": 1,
+     "angles": 1189,
+     "rho": -0.833
+    },
+    {
+     "master": "Louise",
+     "clusters": 1,
+     "angles": 1318,
+     "rho": -0.189
+    },
+    {
+     "master": "OfferWeapon",
+     "clusters": 3,
+     "angles": 1060,
+     "rho": -0.434
+    },
+    {
+     "master": "Solve",
+     "clusters": 1,
+     "angles": 1170,
+     "rho": 0.024
+    },
+    {
+     "master": "ThereIsNoLinearTime",
+     "clusters": 3,
+     "angles": 784,
+     "rho": -0.182
+    },
+    {
+     "master": "Time",
+     "clusters": 3,
+     "angles": 659,
+     "rho": -0.474
+    },
+    {
+     "master": "Walk",
+     "clusters": 1,
+     "angles": 1289,
+     "rho": -0.015
+    },
+    {
+     "master": "Weapon",
+     "clusters": 2,
+     "angles": 1137,
+     "rho": -0.349
+    },
+    {
+     "master": "WeaponToolDuality",
+     "clusters": 5,
+     "angles": 1071,
+     "rho": -0.116
+    },
+    {
+     "master": "YouHaveChooseLife",
+     "clusters": 5,
+     "angles": 1022,
+     "rho": -0.251
+    }
+   ]
+  },
+  "F4-P3": {
+   "masters": 13,
+   "hits": 6,
+   "share": 0.462,
+   "chancePerMaster": 0.25,
+   "chanceOfThisManyHits": 0.0802,
+   "falling": 6,
+   "confirmed": false,
+   "rows": [
+    {
+     "master": "Abbott",
+     "gapDeg": 32.3,
+     "angles": 624,
+     "rho": -0.468,
+     "percentile": 0.854,
+     "hit": true
+    },
+    {
+     "master": "Costello",
+     "gapDeg": 26.5,
+     "angles": 568,
+     "rho": 0.581,
+     "percentile": 0.982,
+     "hit": true
+    },
+    {
+     "master": "CowrittenLogogram",
+     "gapDeg": 42.5,
+     "angles": 616,
+     "rho": 0.032,
+     "percentile": 0.083,
+     "hit": false
+    },
+    {
+     "master": "Earth",
+     "gapDeg": 21.3,
+     "angles": 353,
+     "rho": -0.012,
+     "percentile": 0.034,
+     "hit": false
+    },
+    {
+     "master": "Heptapod",
+     "gapDeg": 43.8,
+     "angles": 996,
+     "rho": 0.242,
+     "percentile": 0.558,
+     "hit": false
+    },
+    {
+     "master": "Humanity",
+     "gapDeg": 26.5,
+     "angles": 1045,
+     "rho": -0.322,
+     "percentile": 0.665,
+     "hit": false
+    },
+    {
+     "master": "Louise",
+     "gapDeg": 16.8,
+     "angles": 1123,
+     "rho": 0.457,
+     "percentile": 0.949,
+     "hit": true
+    },
+    {
+     "master": "Solve",
+     "gapDeg": 27.8,
+     "angles": 775,
+     "rho": 0.166,
+     "percentile": 0.78,
+     "hit": true
+    },
+    {
+     "master": "ThereIsNoLinearTime",
+     "gapDeg": 76.8,
+     "angles": 655,
+     "rho": -0.028,
+     "percentile": 0.116,
+     "hit": false
+    },
+    {
+     "master": "Time",
+     "gapDeg": 83.8,
+     "angles": 575,
+     "rho": 0.14,
+     "percentile": 0.467,
+     "hit": false
+    },
+    {
+     "master": "Walk",
+     "gapDeg": 16.5,
+     "angles": 1083,
+     "rho": -0.25,
+     "percentile": 0.934,
+     "hit": true
+    },
+    {
+     "master": "WeaponToolDuality",
+     "gapDeg": 44.8,
+     "angles": 907,
+     "rho": -0.023,
+     "percentile": 0.084,
+     "hit": false
+    },
+    {
+     "master": "YouHaveChooseLife",
+     "gapDeg": 28.8,
+     "angles": 659,
+     "rho": 0.201,
+     "percentile": 0.821,
+     "hit": true
+    }
+   ]
+  }
+ }
+}
