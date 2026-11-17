@@ -22,25 +22,40 @@
    The copies run a few at a time, each worker in its own folder.
    ============================================================ */
 
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, cpSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, cpSync, rmSync, openSync, closeSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import os from 'node:os';
 import { dirname, join, basename } from 'node:path';
 
 const RUN_LIMIT_MS = 60000;
 
-/* Run one test file; resolves {code, fails}: the exit code and the number of lines that start with FAIL. */
+/* Run one test file; resolves {code, fails, timedOut, err}: the exit code, the number of lines that start with FAIL,
+   whether it ran past the limit, and the last line it wrote to stderr. The copy writes its stdout and stderr to files,
+   not pipes. Node writes to a pipe asynchronously on POSIX ("Pipes (and sockets): synchronous on Windows, asynchronous
+   on POSIX", nodejs.org/api/process.html, "A note on process I/O"), and a test that ends with process.exit(1) can
+   leave its last lines unwritten: on 2026-11-17 the gates on Linux reported "exit 1 with no failing check" for two
+   mutants of query.mutants2 on main (run 44133832161) and two others on pull request 54, a different pair each time,
+   never on Windows. A file is written synchronously on both. Tests: kit/tests/mutants.test.mjs. */
 export function runTest(file) {
+  const dir = mkdtempSync(join(os.tmpdir(), 'mutant-run-'));
+  const outPath = join(dir, 'out.txt'), errPath = join(dir, 'err.txt');
+  const out = openSync(outPath, 'w'), err = openSync(errPath, 'w');
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [file], { stdio: ['ignore', 'pipe', 'ignore'] });
-    let out = '', timedOut = false;
+    let timedOut = false, settled = false, child;
+    const done = (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      const text = readFileSync(outPath, 'utf8'), last = readFileSync(errPath, 'utf8').split('\n').map((l) => l.trim())
+        .filter((l) => l && !l.startsWith('at ') && !/^Node\.js v\d/.test(l)).pop() || '';   // the error, not its stack or Node's banner
+      rmSync(dir, { recursive: true, force: true });
+      resolve({ code, fails: text.split('\n').filter((l) => l.startsWith('FAIL')).length, timedOut, err: last.trim() });
+    };
+    try { child = spawn(process.execPath, [file], { stdio: ['ignore', out, err] }); } finally { closeSync(out); closeSync(err); }   // the child holds its own copies
     const timer = setTimeout(() => { timedOut = true; child.kill(); }, RUN_LIMIT_MS);
-    child.stdout.on('data', (d) => { out += d; });
-    child.on('error', () => { clearTimeout(timer); resolve({ code: -1, fails: 0, timedOut }); });
-    // 'close', not 'exit': at 'exit' the child's output may not all be read yet. On 2026-11-16 the gates reported
-    // "first found: switched off: exit 1 with no failing check" in query.mutants2 (run of pull request 45): the
-    // tests had failed, and the FAIL lines arrived after the count was taken.
-    child.on('close', (code) => { clearTimeout(timer); resolve({ code, fails: out.split('\n').filter((l) => l.startsWith('FAIL')).length, timedOut }); });
+    child.on('error', () => done(-1));
+    // 'close' after the child has exited: its files are complete then
+    child.on('close', (code) => done(code));
   });
 }
 
@@ -87,7 +102,7 @@ export async function runMutants({ here, file, test, mutants, also = [], data = 
         if (!job) break;
         writeFileSync(at.module, job.text);
         const r = await runTest(at.test);
-        lines[job.k] = [`broken: ${job.name}`, r.fails > 0 && r.code !== 0, r.timedOut ? 'the tests ran past the limit' : r.fails > 0 ? `${r.fails} checks fail` : `exit ${r.code} with no failing check`];
+        lines[job.k] = [`broken: ${job.name}`, r.fails > 0 && r.code !== 0, r.timedOut ? 'the tests ran past the limit' : r.fails > 0 ? `${r.fails} checks fail` : `exit ${r.code} with no failing check${r.err ? `; its last error: ${r.err.slice(0, 240)}` : ''}`];
       }
     }));
     for (const l of lines) yes(...l);
