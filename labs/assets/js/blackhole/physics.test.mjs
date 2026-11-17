@@ -65,6 +65,11 @@ guard('derive', () => {
   ok('a = Q = 0: horizon 2 M, ISCO 6 M, photon orbits 3 M, no inner horizon', m.rh === 2 && m.ri === 6 && m.rph === 3 && m.rphr === 3 && m.rmin === 0, `${m.rh} ${m.ri} ${m.rph} ${m.rphr} ${m.rmin}`);
   ok('a = Q = 0: efficiency 1 - sqrt(8/9), gas at the ISCO at 0.5 c, surface gravity 1/4', near(m.eta, 1 - Math.sqrt(8 / 9), 1e-6) && near(m.vIsco, 0.5, 1e-9) && near(m.kappa, 0.25, 1e-12), `${m.eta} ${m.vIsco} ${m.kappa}`);
   ok('M and time in SI: rg = GM/c^2, tg = GM/c^3', near(m.rg, rg, 1e-12) && near(m.tg, tg, 1e-12));
+  // ledger row 6: one rule for where the interior time ends, the centre only at a = Q = 0
+  const at = (a, q) => P.derive(state({ obj: 'custom', a, q, mass: 1, dist: 3, edd: -2 })).endsAtCentre;
+  ok('the interior time ends at the centre at a = Q = 0', at(0, 0) === true);
+  ok('and at the inner horizon for any spin or charge, however small: a = 0.0005 (r- 1.25e-7 M, which the old rule of r- < 5e-7 called the centre), a = 0.001, Q = 0.0001',
+    at(0.0005, 0) === false && at(0.001, 0) === false && at(0, 0.0001) === false, [at(0.0005, 0), at(0.001, 0), at(0, 0.0001)].join(' '));
   ok('the horizon of 10 Msun at a = 0 spans 2 GM/c^2 = 29.5 km', near(m.horizonKm, 2 * rg / 1000, 1e-12), `${m.horizonKm}`);
   ok('the tide over 2 m at the horizon is 2 GM L / r^3 with L = 2 m', near(m.tidalH, 2 * GM * 2 / (2 * rg) ** 3, 1e-9) && near(m.tidalHg, m.tidalH / SI.g0, 1e-12), `${m.tidalH}`);
   ok('the tide over 2 m reaches 10 g at r = (4 GM / 10 g)^(1/3)', near(m.tide10g, Math.cbrt(4 * GM / (10 * SI.g0)) / rg, 1e-6), `${m.tide10g}`);

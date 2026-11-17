@@ -61,6 +61,9 @@ export function derive(s) {
     tide10g: K.tideRadius(a, massSun, BODY_M, TIDE_G * K.SI.g0),
     iscoPeriod: 2 * Math.PI / K.circular(a, base.ri, q).Omega * tg,
     interiorTauS: base.interiorTau * tg,
+    // where the interior time ends, one rule for every sentence that names it (ledger row 6): the inner horizon
+    // r- = 1 - sqrt(1 - a^2 - Q^2) exists for any spin or charge, however small, and is the centre only at a = Q = 0
+    endsAtCentre: a === 0 && q === 0,
     piM: Math.PI * tg,
     efold: tg / base.kappa,
     hawkingK: K.hawkingKelvin(massSun * K.SI.Msun, a, q),

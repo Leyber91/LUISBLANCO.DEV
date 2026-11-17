@@ -409,7 +409,7 @@ export function buildUI(app) {
       dd(`tide at r+, ${BODY_M} m`, sci(m.tidalHg), 'g', tag('mass', 'spin')),
       dd(`${TIDE_G} g tide at`, m.tide10g > m.rh ? `${s3(m.tide10g)} M` : 'inside r+', '', tag('mass', 'spin')),
       // the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2) is the centre only without spin and charge
-      dd(m.rmin < 5e-7 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tag('mass', 'spin')),
+      dd(m.endsAtCentre ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tag('mass', 'spin')),
     ].join('');
     $('#bh-insttag').textContent = o ? o.name : 'custom';
     // the card that matters for this view goes first

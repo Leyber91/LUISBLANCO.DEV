@@ -70,7 +70,7 @@ export class Tour {
       ri: s3(m.ri),
       // tauIn is the proper time from the horizon to the inner horizon, which is the centre
       // only without spin and charge (the Instrument card labels the same number the same way)
-      eta: s3(m.eta * 100), tauIn: dur(m.interiorTauS), inner: m.rmin < 5e-7 ? 'the centre' : 'the inner horizon',
+      eta: s3(m.eta * 100), tauIn: dur(m.interiorTauS), inner: m.endsAtCentre ? 'the centre' : 'the inner horizon',
       massSun: sci(m.massSun), horizonAcrossKm: sci(2 * m.horizonKm), tidalG: sci(m.tidalHg), bodyM: String(BODY_M),
       // the sub-ring factor is the engine's at this spin (review_s2 P2-2); the ring's colour is named only where the
       // photon-order map draws it in its token (P2-1)
