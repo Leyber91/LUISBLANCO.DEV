@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-17: Item 1, one finding: on The Figure the question box had no accessible name, so a screen reader
+  announced a bare text box; its caption "the question" is now its label. Item 1 stays in "Next". Pull request
+  "evolve 2026-11-17: figure question box has a name".
 - 2026-11-16: Item 1, one finding: hero_proto.html threw a TypeError on load (it never loaded the framework data
   its figure reads), so the figure was blank, and at 390 px it was 704 px wide with most of the page cut off; it now
   loads the data and, at 960 px and below, scrolls in one column from 320 px up. Item 1 stays in "Next". Pull request

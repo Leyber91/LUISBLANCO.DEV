@@ -46,7 +46,7 @@ a.ref:hover { color: var(--text-bright); }
 /* ---------- the loading veil ---------- */
 .veil { position: fixed; inset: 0; z-index: var(--z-overlay); display: grid; place-items: center; background: var(--void);
   transition: opacity 900ms var(--ease-out), visibility 0s linear 900ms; }
-.veil.gone { opacity: 0; visibility: hidden; }
+.veil.gone { opacity: 0; visibility: hidden; pointer-events: none; }   /* visibility waits out the fade; a tap must not */
 .veil-core { width: min(360px, 80vw); display: grid; gap: 10px; }
 .veil-k { font: 500 19px var(--font-serif); color: var(--text-bright); }
 .veil-status { font-size: 12px; color: var(--text); min-height: 1.5em; }
@@ -82,7 +82,11 @@ a.ref:hover { color: var(--text-bright); }
 .q-line { grid-column: 1 / -1; min-height: 36px; padding-top: 4px; }
 .q-note { font-size: 10.5px; line-height: 1.45; color: var(--text-dim); }
 .q-note:empty { display: none; }
-.q-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); list-style: none; z-index: 20; background: var(--surface);
+/* the panel is 98% surface and not opaque, as the sharing question's plate in os.css: an opaque scrolling panel over the
+   opaque WebGL canvas left a hole of transparent pixels below its list in software-composited captures (782 x 258 px
+   at 1440, found by the frame rule of tools/drive.mjs on 2026-11-16). Two per cent of the sheet behind does not show.
+   The solid surface first, for a browser without color-mix. */
+.q-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); list-style: none; z-index: 20; background: var(--surface); background: color-mix(in srgb, var(--surface) 98%, transparent);
   border: 1px solid var(--line-bright); max-height: 300px; overflow: auto; }
 .q-results li { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; cursor: pointer; font-size: 11.5px; border-bottom: 1px solid var(--line); min-height: 36px; align-items: baseline; }
 .q-results li b { font-weight: 500; color: var(--text-bright); font-family: var(--font-serif); font-size: 13px; }
@@ -321,6 +325,7 @@ mark.ungrounded { background: transparent; color: var(--danger); border-bottom: 
 .band-edge { position: absolute; top: 4px; width: 14px; height: 32px; margin-left: -7px; background: none; border: 0; cursor: ew-resize; touch-action: none; }
 .band-edge::after { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--text-bright); }
 .band-edge:focus-visible { outline: 2px solid var(--horizon); }
+.band-edge.over { z-index: 1; }   /* the lower edge, met by the upper at the top of the axis, lies over it (views/bands.js) */
 @media (max-width: 1100px) { .band-edge { top: 0; height: 44px; width: 24px; margin-left: -12px; } .band-edge::after { left: 11px; top: 6px; bottom: 6px; } }   /* a finger's target, the rule as thin */
 .band-all { position: absolute; left: 0; top: 0; }
 .filters { margin-top: 2px; }
