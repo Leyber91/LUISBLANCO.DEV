@@ -50,6 +50,12 @@ export function screenToTangent(px, py, W, H, fov) {
   const asp = W / H, th = tanHalfV(fov, asp);
   return { sx: ((px / W) * 2 - 1) * th * asp, sy: (1 - (py / H) * 2) * th, th };
 }
+/** The inverse: the CSS pixel of a place on the image plane, on a W x H canvas. A stored ray opens by its place,
+ *  which is the same ray at any window size (review_s3b E); the pixel may fall outside a narrower window. */
+export function tangentToScreen(sx, sy, W, H, fov) {
+  const asp = W / H, th = tanHalfV(fov, asp);
+  return { px: (sx / (th * asp) + 1) / 2 * W, py: (1 - sy / th) / 2 * H };
+}
 
 /** The probe: the ray under one pixel, traced with the view's spin, charge, camera and disk,
  *  exactly as the renderer's geometry sets them (horizon and ISCO of Kerr-Newman). */

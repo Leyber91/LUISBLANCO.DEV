@@ -132,6 +132,12 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 .bh-range:focus-visible { outline: 1px solid var(--horizon); outline-offset: 2px; }
 .bh-note { font-size: var(--bh-fs-s); line-height: 1.5; color: var(--text-dim); margin: 7px 0 0; }
 .bh-note b { color: var(--text); font-weight: 500; }
+/* the record's list (keep.js): one line per entry, its words then its buttons */
+.bh-rec { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.bh-rec li { display: flex; align-items: center; gap: 6px; font-size: var(--bh-fs-s); line-height: 1.45; color: var(--text); }
+.bh-rec li span { flex: 1; min-width: 0; }
+.bh-rec a.bh-btn { text-decoration: none; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+.bh-rec button.bh-btn { flex: none; }
 
 /* readouts */
 .bh-read { display: flex; flex-direction: column; gap: 3px; font-size: var(--bh-fs); margin: 0; }
