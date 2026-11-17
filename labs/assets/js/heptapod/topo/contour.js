@@ -93,6 +93,19 @@ export function gridNodes(G) {
   return G.tiles.size * TS * TS;
 }
 
+/* A dense field (row-major W x H, node (i, j) at (x0 + i h, y0 + j h), negative inside) in the sparse
+   form marchLoops reads, for a caller that builds its field another way (figure.js, F4). */
+export function gridFromDense(W, H, x0, y0, h, f) {
+  const tiles = new Map();
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+    const key = (i >> TSH) * TK + (j >> TSH);
+    let t = tiles.get(key);
+    if (!t) { t = new Float32Array(TS * TS).fill(FAR); tiles.set(key, t); }
+    t[((j & TM) << TSH) | (i & TM)] = f[j * W + i];
+  }
+  return { W, H, x0, y0, h, tiles };
+}
+
 /* ---------------- marching squares ---------------- */
 /* Cell corners counter-clockwise c0 (i,j), c1 (i+1,j), c2 (i+1,j+1), c3 (i,j+1);
    edges e0 c0-c1, e1 c1-c2, e2 c2-c3, e3 c3-c0. Each segment is oriented

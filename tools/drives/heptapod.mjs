@@ -6,11 +6,14 @@
    element's probe(), set in pod/main.js), so this file holds no
    copy of the scene's layout.
 
-   What it proves: a ring can be cropped, a thing can be taken, set
-   down, held up and passed through the glass, one gesture is one
-   act, the keyboard does the same, a mark can be raised, the day
-   and a pencil guess survive a reload through the labs' store, and
-   the evening runs to its count.
+   What it proves: the chamber fills the first screen, a ring forms
+   in the disc's ink field, a ring can be cropped, a thing can be
+   taken, set down, held up and passed through the glass, one
+   gesture is one act, the keyboard does the same, a mark can be
+   raised, the day and a pencil guess survive a reload through the
+   labs' store, the evening runs to its count, the inked script
+   turns on only by its link on this machine, and every deep-linked
+   state comes up.
    ============================================================ */
 
 export default async function heptapod(p, { base }) {
@@ -33,9 +36,16 @@ export default async function heptapod(p, { base }) {
   await p.sleep(400);
   let g = await probe();
   p.check('the day starts at ring 0', (await ringNo()).includes('ring 0 of 40'), await ringNo());
+  p.check('the ring script by default', g.script === 'ring', g.script);
+  // the first screen is the chamber: on a wide screen it starts under the bar and fills most of the viewport
+  const box = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { top: r.top + scrollY, h: r.height, w: r.width, vh: innerHeight, vw: innerWidth }; })()');
+  p.check('the chamber fills the first screen', box.h >= 0.55 * box.vh && box.top < 0.3 * box.vh, JSON.stringify(box));
+  p.check('the disc is inside the chamber', g.disc.y - g.disc.R >= -1 && g.disc.y + g.disc.R <= g.sill + 1, JSON.stringify(g.disc));
 
-  // the greeting stays on the glass until the first act: keep its lower part
-  p.check('the greeting is on the glass and can be cropped', await p.until('document.getElementById("pod").probe().crop', 6000));
+  // the greeting forms in the disc and stays until the first act: keep its lower part
+  p.check('the greeting is in the disc and can be cropped', await p.until('document.getElementById("pod").probe().crop', 6000));
+  p.check('its ink field has gathered', await p.until('(() => { const f = document.getElementById("pod").probe().field; return f.mass > 10 && f.fit > 0.8; })()', 6000), JSON.stringify((await probe()).field));
+  p.check('no horizontal scroll', await p.ev('document.documentElement.scrollWidth <= innerWidth'), await p.ev('`${document.documentElement.scrollWidth} > ${innerWidth}`'));
   await p.shot('01-greeting');
   await cropSide(g, 180);
   p.check('a crop of the greeting lands in the notebook', (await entries()) === 1, `${await entries()} entries`);
@@ -46,14 +56,15 @@ export default async function heptapod(p, { base }) {
   await p.sleep(200);
   p.check('taking a thing writes ring 1', (await ringNo()).includes('ring 1 of 40'), await ringNo());
   p.check('the greeting gave way to the new ring', await p.until('document.getElementById("pod").probe().crop', 6000));
-  await p.sleep(700);
-  await p.shot('02-ring-hangs');
-  await cropSide(g, 90);
-  p.check('a crop of the right side lands in the notebook', (await entries()) === 2, `${await entries()} entries`);
+  // both sides are cut while the ring hangs, before any picture: a picture of this page took seconds in the headless
+  // browser, and a ring lives 9.6 s (2026-11-17: the second crop came after the ring had gone)
   // who takes is written on the left, and it is the radical at the foot of the greeting: the notebook knows it again
   await cropSide(g, 270);
   const said = await p.ev('document.getElementById("say").textContent');
-  p.check('the left of ring 1 is the radical at the foot of the greeting', (await entries()) === 2 && said.includes('already in the notebook'), `${await entries()} entries; "${said}"`);
+  p.check('the left of ring 1 is the radical at the foot of the greeting', (await entries()) === 1 && said.includes('already in the notebook'), `${await entries()} entries; "${said}"; read ${JSON.stringify((await probe()).lastKeep)}`);
+  await cropSide(g, 90);
+  p.check('a crop of the right side lands in the notebook', (await entries()) === 2, `${await entries()} entries; read ${JSON.stringify((await probe()).lastKeep)}; ring ${(await probe()).age} ms old`);
+  await p.shot('02-ring-hangs');
   // late in the thinning only hairlines are left on that side: a crop of them is a scrap
   await p.until('!document.getElementById("pod").probe().ink', 12000);
   p.check('the ring thins away', !(await probe()).ink);
@@ -99,6 +110,8 @@ export default async function heptapod(p, { base }) {
   await p.drag(t.x, t.y, g.air.near.x + 0.06 * g.width, g.air.near.y - 0.03 * g.height, { steps: 14 });
   await p.sleep(300);
   p.check('holding it up at the glass writes ring 6', (await ringNo()).includes('ring 6 of 40'), await ringNo());
+  await p.sleep(250);
+  await p.shot('03-ring-forming');
   await p.until('document.getElementById("pod").probe().crop', 6000);
   await p.sleep(500);
   await p.shot('04-held-at-the-glass');
@@ -155,4 +168,31 @@ export default async function heptapod(p, { base }) {
   p.check('six answers end the day', (await panelHead()).includes('the day is over'), await p.ev('(document.querySelector("#panel .pp-score") || {}).textContent || ""'));
   p.check('the notebook then outlines what each radical is used for', (await p.ev('document.querySelectorAll("#nb .nb-grid i.can").length')) > 0);
   await p.shot('08-done');
+
+  // the inked script: behind its switch, on by its link on this machine only (pod/inked.js)
+  await p.go(`${base}/labs/heptapod.html?species=0&script=inked`);
+  p.check('an inked day comes up', await ready());
+  g = await probe();
+  p.check('the link turns the inked script on, here', g.script === 'inked', g.script);
+  p.check('its greeting forms and can be cropped', await p.until('document.getElementById("pod").probe().crop', 8000));
+  await p.sleep(800);
+  await p.shot('09-inked-greeting');
+  await p.ev('document.getElementById("pod").focus()');
+  const n0 = await entries();
+  await p.key('w');
+  await p.sleep(300);
+  p.check('W keeps the act of the inked ring', (await entries()) === n0 + 1, `${n0} -> ${await entries()}`);
+  [name, t] = first(g, 'near');
+  await p.drag(t.x, t.y, t.x, t.y - 0.11 * g.height, { steps: 10 });
+  await p.until('document.getElementById("pod").probe().crop', 6000);
+  await p.sleep(900);
+  await p.shot('10-inked-ring');
+
+  // the states a link opens, each shot
+  for (const [q, shot] of [['?at=mid&still', '11-mid-still'], ['?at=evening&species=2', '12-evening-readback'], ['?at=check&species=1', '13-check'], ['?at=done', '14-done']]) {
+    await p.go(`${base}/labs/heptapod.html${q}`);
+    p.check(`${q} comes up`, await ready());
+    await p.sleep(2600);
+    await p.shot(shot);
+  }
 }

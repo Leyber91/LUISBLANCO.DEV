@@ -104,6 +104,7 @@ ok(seedOf('a', 1) !== seedOf('a', 2) && seedOf('a', 1) === seedOf('a', 1), 'a se
   eq(esc('<img src=x onerror="a(\'b\')">&'), '&lt;img src=x onerror=&quot;a(&#39;b&#39;)&quot;&gt;&amp;', 'esc leaves nothing that opens a tag or closes a quoted attribute');
   eq(esc(null), '', 'esc of nothing is the empty string');
   eq(esc(12), '12', 'esc takes a number');
+  // unesc has its own tests and mutants: kit/tests/dom.test.mjs
   // el with a stand-in document: the text goes to textContent and never to innerHTML
   const made = [];
   globalThis.document = { createElement: (tag) => { const n = { tag, className: '', set innerHTML(v) { n.parsed = v; } }; made.push(n); return n; } };

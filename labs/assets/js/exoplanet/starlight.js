@@ -118,7 +118,7 @@ export const ARCHIVE_DIFF = 1.2;
    Decided 2026-11-17 on the parallax and the M dwarfs' method (the header above; render_science.md), with
    labs/assets/data/exomania/backtest_starlight.py's counts as a witness. archive and fromStar: the two values; the
    second is named beside the first where they differ by more than ARCHIVE_DIFF, and where they differ by more than
-   LUMINOSITY_SPLIT the sheet says they are two solutions of the star. */
+   LUMINOSITY_SPLIT the sheet says they disagree and that the starlight rests on the luminosity. */
 export function luminosity(p) {
   const archive = isNum(p.logL) ? Math.pow(10, p.logL) : null;
   const fromStar = pos(p.Rs) && pos(p.Teff) ? p.Rs * p.Rs * Math.pow(p.Teff / PHYS.T_SUN, 4) : null;
@@ -130,7 +130,9 @@ export function luminosity(p) {
 export const luminosityApart = (L) => (L.src === 'archive' && pos(L.fromStar) ? Math.max(L.fromStar / L.L, L.L / L.fromStar) : null);
 /* Whether the luminosity from the star's radius and temperature is to be named beside the archive's. */
 export const luminosityDiffers = (L) => luminosityApart(L) > ARCHIVE_DIFF;
-/* Past this factor the two are two solutions of the star, and the sheet says the starlight rests on the luminosity: the
+/* Past this factor the sheet names the disagreement and says the starlight rests on the luminosity, without a cause: for
+   21 planets on 2026-11-17 one paper gives the luminosity, the radius and the temperature, so the two are not always two
+   solutions from two papers (the final verification of pull request 50). The factor is the
    95th percentile of the factor over the snapshot (1.96 over 6,129 planets; tests/onesource.test.mjs computes it and
    holds this constant to it at two figures), where 1.2 is about where one paper's own solution ends. */
 export const LUMINOSITY_SPLIT = 2.0;
@@ -400,7 +402,7 @@ export function starlightNote(p, s = starlight(p)) {
   const ew = errorWords(s);
   const range_ = isNum(s.lo) ? `Its 68% range carries ${ew.carried}.` : ew.missing ? `A point value: ${ew.missing}.` : '';
   const f = luminosityApart(luminosity(p));
-  const split = f > LUMINOSITY_SPLIT ? ` The archive's luminosity and the star's radius and temperature disagree by ${num(f, 2)} times, so they are two solutions of the star; the starlight rests on the luminosity.` : '';
+  const split = f > LUMINOSITY_SPLIT ? ` The archive's luminosity and the star's radius and temperature differ by a factor of ${num(f, 2)}; the starlight rests on the luminosity.` : '';
   const differs = archiveDiffers(s) ? ` The archive lists ${starNum(s.archive, 3)} S⊕ (NASA Exoplanet Archive, PSCompPars), ${num(s.ratio > 1 ? s.ratio : 1 / s.ratio, 2)} times ${s.ratio > 1 ? 'more' : 'less'}.` : '';
   if (s.src === 'luminosity') return `The starlight is the star's luminosity, the archive's, over the square of the orbit: S = L / a², L in L☉ and a in AU. ${range_}${split}${differs}`;
   if (s.src === 'star') return `The starlight is computed from the star's temperature and radius and the orbit, S = (R★ / a)² (Teff / 5772 K)⁴ with R★ in R☉ and a in AU: the archive gives the star no luminosity. ${range_}${differs}`;
