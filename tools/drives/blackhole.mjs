@@ -231,6 +231,49 @@ export const STICKY_OPAQUE = `(() => {
   return out;
 })()`;
 
+/* The class of the header above, read again in B1's frames (2026-11-17): any panel drawn over words hides them. The
+   Sources panel at 390 (95%) showed the sheet's words through it by 11 levels; the rule above looked only at
+   sticky headers. A panel here is a fixed or absolute element with a ground; a word under it is the text of an
+   element outside it whose box meets the panel's, where the panel is on top at the middle of the meeting. */
+export const OVER_TEXT_OPAQUE = `(() => {
+  const out = [];
+  const alpha = (c) => { if (c === 'transparent') return 0; const m = /^color\\(srgb [\\d.e-]+ [\\d.e-]+ [\\d.e-]+ \\/ ([\\d.e-]+)\\)$/.exec(c) || /^rgba\\([^)]*,\\s*([\\d.]+)\\)$/.exec(c); return m ? +m[1] : 1; };
+  const name = (e) => e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.classList.length ? '.' + [...e.classList].join('.') : '');
+  const words = [...document.querySelectorAll('body *')].filter((t) => [...t.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && t.getClientRects().length && getComputedStyle(t).visibility !== 'hidden');
+  for (const e of document.querySelectorAll('body *')) {
+    const cs = getComputedStyle(e);
+    if (!/^(fixed|absolute)$/.test(cs.position) || !e.getClientRects().length || cs.visibility === 'hidden') continue;
+    const a = alpha(cs.backgroundColor), through = (1 - a) * 255;
+    if (a === 0 || through < 3) continue;
+    const r = e.getBoundingClientRect();
+    for (const t of words) {
+      if (e.contains(t) || t.contains(e)) continue;
+      const q = t.getBoundingClientRect();
+      const x0 = Math.max(r.left, q.left), x1 = Math.min(r.right, q.right), y0 = Math.max(r.top, q.top), y1 = Math.min(r.bottom, q.bottom);
+      if (x1 - x0 < 2 || y1 - y0 < 2) continue;
+      const at = document.elementFromPoint((x0 + x1) / 2, (y0 + y1) / 2);
+      if (!at || !(at === e || e.contains(at))) continue;
+      out.push(name(e) + ' lets the words of ' + name(t) + ' show through by ' + through.toFixed(1) + ' of 255 levels (' + cs.backgroundColor + ')');
+      break;
+    }
+  }
+  return out;
+})()`;
+
+/* Read in B1's frames (2026-11-17): a custom hole's readout set "the point of no return, unseen" one word to a line,
+   because its value (9.77x10^-16 km and 6.53x10^-27 AU) never wraps and took the row. A label in the readouts keeps
+   at most three lines. */
+export const READ_LABEL_LINES = `(() => {
+  const out = [];
+  for (const t of document.querySelectorAll('.bh-read dt')) {
+    if (!t.getClientRects().length) continue;
+    const lh = parseFloat(getComputedStyle(t).lineHeight) || parseFloat(getComputedStyle(t).fontSize) * 1.4;
+    const lines = Math.round(t.getBoundingClientRect().height / lh);
+    if (lines > 3) out.push('"' + t.textContent.trim().slice(0, 40) + '" takes ' + lines + ' lines beside "' + ((t.nextElementSibling && t.nextElementSibling.textContent) || '').trim().slice(0, 40) + '"');
+  }
+  return out;
+})()`;
+
 /* Read in the same frames: in a row of controls every label sits at the middle of its box (the import, a label
    styled as a button, set its words 9 px above its neighbours'). */
 export const SEG_CENTRED = `(() => {
@@ -326,6 +369,8 @@ export default async function blackhole(p, { base, width }) {
   p.invariant('invariant: on a wide screen every label on the render stays clear of the panels', OVERLAY_CLEAR);
   p.invariant('invariant: a header that sticks over scrolling content has an opaque ground', STICKY_OPAQUE);
   p.invariant('invariant: in a row of controls every label sits at the middle of its box', SEG_CENTRED);
+  p.invariant('invariant: a panel drawn over words hides them', OVER_TEXT_OPAQUE);
+  p.invariant('invariant: a label in the readouts keeps at most three lines beside its value', READ_LABEL_LINES);
   await p.before(`(${guard})()`);
   console.log(`deferred (review_s2 P3-2, the shared ai/route-panel.js): the gold rules leave out ${GOLD_DEFERRED.join(', ')}`);
 
@@ -573,6 +618,15 @@ export default async function blackhole(p, { base, width }) {
   else await click('#bh-srcbtn');
   await p.sleep(900);
   p.check('Sources opens', await p.ev(`!document.getElementById('bh-sources').hidden`));
+  // B1 (2026-11-17): the first version stays reachable from the page at every width, and its address serves it
+  const v1 = await p.ev(`(async () => { const a = document.querySelector('#bh-sources a[href="bh_animation_page_v1.html"]'); if (!a) return null;
+    a.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 200)); const r = a.getBoundingClientRect();
+    const at = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
+    const res = await fetch(a.href); const html = await res.text();
+    return { onTop: !!at && (at === a || a.contains(at)), inside: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight,
+      status: res.status, first: html.includes('assets/js/blackhole_v1/main.js') }; })()`);
+  p.check('Sources links the first version, on top and inside the window, and its address serves that version',
+    !!v1 && v1.onTop && v1.inside && v1.status === 200 && v1.first, JSON.stringify(v1));
   await pixelRules('Sources open');
   await click('#bh-srcclose');
   await p.sleep(400);

@@ -17,7 +17,9 @@
 
 :root {
   --bh-panel: color-mix(in srgb, var(--void) 88%, transparent);
-  --bh-panel-solid: color-mix(in srgb, var(--void) 95%, transparent);
+  /* every panel that can come over words (the phone sheet, Sources, the probe, the cards): at 95% the words under it
+     showed by 12.8 of 255 levels; at 99% by 2.6. Not 100%: Chrome on Windows then draws LCD text (2026-11-17). */
+  --bh-panel-solid: color-mix(in srgb, var(--void) 99%, transparent);
   --bh-hair: color-mix(in srgb, var(--horizon) 16%, transparent);
   --bh-hair-2: color-mix(in srgb, var(--horizon) 30%, transparent);
   --bh-wash: color-mix(in srgb, var(--horizon) 8%, transparent);        /* pressed button */
@@ -138,6 +140,8 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 .bh-read dd { margin: 0; text-align: right; color: var(--text-bright); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bh-read dd .u { color: var(--text-dim); margin-left: 4px; }
 .bh-read dd.ink { color: var(--text); }
+.bh-read dd.wrap { white-space: normal; max-width: 62%; }
+.bh-read dd .nw { white-space: nowrap; }
 .bh-read .hr { height: 1px; background: var(--bh-hair); margin: 4px 0; }
 .bh-tagr, .bh-tagi { font-size: var(--bh-fs-s); letter-spacing: 0; padding: 0 3px; line-height: 1.2; border: 1px solid var(--bh-hair-2); color: var(--horizon); margin-left: 6px; }
 .bh-tagi { color: var(--text); border-style: dashed; }   /* one ink step above --text-dim: 4.47:1 was marginal (review_s2 P4-4) */

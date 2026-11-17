@@ -231,7 +231,7 @@ export function buildUI(app) {
     sources.innerHTML = `<h3>Objects (data version ${VERSION})</h3><table><tr><th>object</th><th>mass</th><th>distance</th><th>spin</th><th>incl.</th><th>sources</th></tr>${rowsT}</table>
       <h3 style="margin-top:12px">Equations and values</h3><ol>${Object.values(CITE).map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
       <p class="bh-note">Verification: ${esc(COPY.verify)}</p>
-      <p class="bh-note">The first version of this page, from June 2026, stays at <a href="bh_animation_page_v1.html" style="color:var(--horizon)">bh_animation_page_v1.html</a>.</p>
+      <p class="bh-note"><a href="bh_animation_page_v1.html" style="color:var(--horizon)">The first version of this page</a>, from June 2026, is kept as it was.</p>
       <button class="bh-btn" type="button" id="bh-srcclose">Close</button>`;
     $('#bh-srcclose').addEventListener('click', () => { sources.hidden = true; });
   };
@@ -366,7 +366,13 @@ export function buildUI(app) {
 
   /* ---------- readouts ---------- */
   const tagR = '<span class="bh-tagr" title="real: computed or sourced">R</span>', tagI = '<span class="bh-tagi" title="illustrative">I</span>';
-  const dd = (label, value, unit = '', tag = '', cls = '') => `<div class="rw"><dt>${label}${tag}</dt><dd class="${cls}">${value}${unit ? `<span class="u">${unit}</span>` : ''}</dd></div>`;
+  // A value of two quantities (a length in km and in AU) may break between them, each kept whole, so a long one never
+  // squeezes its label to a word a line (a custom hole's "the point of no return, unseen" took 5 lines, 2026-11-17).
+  const dd = (label, value, unit = '', tag = '', cls = '') => {
+    const two = String(value).includes(' · ');
+    const v = two ? String(value).split(' · ').map((x) => `<span class="nw">${x}</span>`).join(' · ') : value;
+    return `<div class="rw"><dt>${label}${tag}</dt><dd class="${[cls, two ? 'wrap' : ''].filter(Boolean).join(' ')}">${v}${unit ? `<span class="u">${unit}</span>` : ''}</dd></div>`;
+  };
   function drawReadouts() {
     const s = store.all(), m = app.model, o = m.obj;
     $('#bh-objkind').textContent = o ? o.kind : 'custom';
