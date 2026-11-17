@@ -245,46 +245,6 @@
     "to": "if (r.survived.length || r.stale.length || r.noop.length && r.timedOut.some((t) => !t.reason)) bad++;"
   },
   {
-    "name": "the unbroken selftest is not run first",
-    "from": "if ((await runs(place('base', base), limit, env)) !== 'pass') { out.broken = true; return out; }",
-    "to": ""
-  },
-  {
-    "name": "an unbroken selftest that times out is not broken",
-    "from": "if ((await runs(place('base', base), limit, env)) !== 'pass') { out.broken = true; return out; }",
-    "to": "if ((await runs(place('base', base), limit, env)) === 'fail') { out.broken = true; return out; }"
-  },
-  {
-    "name": "a run stopped at the limit is not run again",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
-    "to": ""
-  },
-  {
-    "name": "the second runs run side by side",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
-    "to": "    await Promise.all(jobs.map(async (j, k) => { if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, j.text), limit, env); out.reruns.push({ name: j.name, result: result[k] }); } }));\n"
-  },
-  {
-    "name": "a second run is run a third time",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
-    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
-  },
-  {
-    "name": "a second run is not told",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
-    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); }\n"
-  },
-  {
-    "name": "the last run is never run again",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
-    "to": "    for (let k = 0; k < jobs.length - 1; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
-  },
-  {
-    "name": "every run is run again",
-    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
-    "to": "    for (let k = 0; k < jobs.length; k++) if (true) { result[k] = await runs(place(`m${k}`, jobs[k].text), limit, env); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
-  },
-  {
     "name": "a stopped run is reported as failed",
     "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
     "to": "resolve(code === 0 ? 'pass' : 'fail');"
@@ -298,21 +258,6 @@
     "name": "a selftest that stops itself with another code is timed out",
     "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
     "to": "resolve(late || code === WATCHDOG + 1 ? 'timeout' : code === 0 ? 'pass' : 'fail');"
-  },
-  {
-    "name": "the watchdog code is 125",
-    "from": "const LIMIT_MS = 180000, WATCHDOG = 124;",
-    "to": "const LIMIT_MS = 180000, WATCHDOG = 125;"
-  },
-  {
-    "name": "the limit given to the command is not used",
-    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, SLOW.includes(name) ? 1 : WIDTH);",
-    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, LIMIT_MS, SLOW.includes(name) ? 1 : WIDTH);"
-  },
-  {
-    "name": "a slow list runs its copies side by side",
-    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, SLOW.includes(name) ? 1 : WIDTH);",
-    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, WIDTH);"
   },
   {
     "name": "the width given is not used",
@@ -365,19 +310,9 @@
     "to": "return r.status === 1 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;"
   },
   {
-    "name": "--changed-since not read",
-    "from": "if (since >= 0) { changed = changedSince(argv[since + 1] || ''); if (!changed) console.log(`mutate: git could not name the files changed since ${argv[since + 1]}, so every list runs`); }",
-    "to": ""
-  },
-  {
     "name": "--changed-since as the first word not seen",
     "from": "if (since >= 0) {",
     "to": "if (since > 0) {"
-  },
-  {
-    "name": "an unknown ref not said",
-    "from": "if (since >= 0) { changed = changedSince(argv[since + 1] || ''); if (!changed) console.log(`mutate: git could not name the files changed since ${argv[since + 1]}, so every list runs`); }",
-    "to": "if (since >= 0) { changed = changedSince(argv[since + 1] || ''); }"
   },
   {
     "name": "the file of changes is taken as a list name",
@@ -438,5 +373,165 @@
     "name": "a change to .github/workflows/gates.yml does not run the slow lists",
     "from": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
     "to": "const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
+  },
+  {
+    "name": "the watchdog code is 125",
+    "from": "export const WATCHDOG = 124;",
+    "to": "export const WATCHDOG = 125;"
+  },
+  {
+    "name": "--changed-since not read",
+    "from": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }",
+    "to": ""
+  },
+  {
+    "name": "an unknown ref not said",
+    "from": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }",
+    "to": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); }"
+  },
+  {
+    "name": "an empty ref said as an unknown one",
+    "from": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }",
+    "to": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(true ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }"
+  },
+  {
+    "name": "an empty ref asks git",
+    "from": "if (!ref) return null;",
+    "to": ""
+  },
+  {
+    "name": "imported, it runs as a command",
+    "from": "const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;",
+    "to": "const isMain = process.argv[1] && path.resolve(process.argv[1]) !== SELF + 'x';"
+  },
+  {
+    "name": "imported from node -e, it fails",
+    "from": "const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;",
+    "to": "const isMain = path.resolve(process.argv[1]) === SELF;"
+  },
+  {
+    "name": "a slow list runs without the machine lock",
+    "from": "slow ? await machineHold(waitMs) : null",
+    "to": "null"
+  },
+  {
+    "name": "every list holds the machine lock",
+    "from": "slow ? await machineHold(waitMs) : null",
+    "to": "await machineHold(waitMs)"
+  },
+  {
+    "name": "mutate takes the machine lock without waiting",
+    "from": "const release = await holdChrome(waitMs);",
+    "to": "const release = () => {};"
+  },
+  {
+    "name": "the machine lock never given back",
+    "from": "try { return await run(); } finally { release(); last = Date.now(); }",
+    "to": "try { return await run(); } finally { last = Date.now(); }"
+  },
+  {
+    "name": "the gap counted from no copy",
+    "from": "try { return await run(); } finally { release(); last = Date.now(); }",
+    "to": "try { return await run(); } finally { release(); }"
+  },
+  {
+    "name": "no gap between copies",
+    "from": "const GAP_MS = 600;",
+    "to": "const GAP_MS = 0;"
+  },
+  {
+    "name": "the gap waited only when it is long",
+    "from": "if (wait > 0) await sleep(wait);",
+    "to": "if (wait > 600) await sleep(wait);"
+  },
+  {
+    "name": "a lock not free is held anyway",
+    "from": "if (!release) return 'busy';",
+    "to": ""
+  },
+  {
+    "name": "a busy hold read as run",
+    "from": "if (got === 'busy') out.busy = true;",
+    "to": "if (got !== 'busy') out.busy = true;"
+  },
+  {
+    "name": "after a busy copy the rest still ask",
+    "from": "const got = out.busy ? 'busy' : await hold(() => runs(place(label, text), limit, env));",
+    "to": "const got = await hold(() => runs(place(label, text), limit, env));"
+  },
+  {
+    "name": "a busy first copy is a broken list",
+    "from": "if (out.busy) return out;\n    if (first !== 'pass')",
+    "to": "if (first !== 'pass')"
+  },
+  {
+    "name": "busy copies counted as caught",
+    "from": "    if (out.busy) return out;\n    jobs.forEach",
+    "to": "    jobs.forEach"
+  },
+  {
+    "name": "a busy list not said",
+    "from": "if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); bad++; continue; }",
+    "to": ""
+  },
+  {
+    "name": "a busy list passes",
+    "from": "if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); bad++; continue; }",
+    "to": "if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); continue; }"
+  },
+  {
+    "name": "the wait for the machine lock 600 ms by default",
+    "from": "export async function run(only, tools = TOOLS, say = console.log, { changed = null, limit = LIMIT_MS, waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000 } = {}) {",
+    "to": "export async function run(only, tools = TOOLS, say = console.log, { changed = null, limit = LIMIT_MS, waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 600 } = {}) {"
+  },
+  {
+    "name": "the unbroken selftest is not run first",
+    "from": "const first = await go('base', base);\n    if (out.busy) return out;\n    if (first !== 'pass') { out.broken = true; return out; }",
+    "to": ""
+  },
+  {
+    "name": "an unbroken selftest that times out is not broken",
+    "from": "if (first !== 'pass') { out.broken = true; return out; }",
+    "to": "if (first === 'fail') { out.broken = true; return out; }"
+  },
+  {
+    "name": "a run stopped at the limit is not run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": ""
+  },
+  {
+    "name": "the second runs run side by side",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    await Promise.all(jobs.map(async (j, k) => { if (result[k] === 'timeout') { result[k] = await go(`m${k}`, j.text); out.reruns.push({ name: j.name, result: result[k] }); } }));\n"
+  },
+  {
+    "name": "a second run is run a third time",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "a second run is not told",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); }\n"
+  },
+  {
+    "name": "the last run is never run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length - 1; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "every run is run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (true) { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "the limit given to the command is not used",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, LIMIT_MS, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null);"
+  },
+  {
+    "name": "a slow list runs its copies side by side",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, WIDTH, slow ? await machineHold(waitMs) : null);"
   }
 ]

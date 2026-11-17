@@ -28,7 +28,8 @@ here, the daily routine included, are in SITE_RULES.md:
   `node tools/mutate.mjs` shows its selftest catches each one, and after a reviewer who did not write it has read
   it. atlas.mjs, drive.mjs (the runner of the invariants, the frame rule, its lock and the console), evolution.mjs,
   invariants.mjs, lab_tests.mjs, mutate.mjs, ship_pr.mjs and stories.mjs have such a list; the selftests of
-  drive.mjs and invariants.mjs run headless Chrome (Node 22 or later), one Chrome at a time on a machine;
+  drive.mjs and invariants.mjs run headless Chrome (Node 22 or later), one Chrome at a time on a machine (mutate.mjs
+  holds the machine's lock around each copy of their lists and leaves 600 ms between copies, so other drives get turns);
   levels.mjs and anti_tells.mjs have a selftest and no list yet, so add one when you change them. A list needs two
   kinds of mutant: one that silences each report, and one that loosens each condition, with a case just inside
   and just outside every bound. The first kind alone reads as full coverage and is not: on 2026-11-14 every report
@@ -39,9 +40,9 @@ here, the daily routine included, are in SITE_RULES.md:
   checker that passed its own selftest 90 of 90 had 31 defects a review then confirmed, and the small tools
   written to prevent that had 19 of their own, then 27 more in a second review.
 - The selftests of drive.mjs and invariants.mjs run on every pull request; their mutants lists (54m38s on the gates,
-  2026-11-16) run on every push to main and on a pull request that changes tools/drive.mjs, tools/invariants.mjs,
-  tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json, tools/mutate.mjs or
-  .github/workflows/gates.yml (`mutate.mjs --changed-since origin/main`, its WATCHED list, renames counted). A run
+  2026-11-16, before the 600 ms between copies: 0.6 s more a copy) run on every push to main and on a pull request
+  that changes tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json,
+  tools/mutants/invariants.json, tools/mutate.mjs or .github/workflows/gates.yml (`mutate.mjs --changed-since origin/main`, its WATCHED list, renames counted). A run
   stopped at mutate's limit, or a selftest that stops itself at its own (exit 124, when no check has failed yet),
   runs once more alone, then counts as timed out, never as caught, and fails the list unless its entry declares
   `"timeout": "<reason>"`.

@@ -1280,56 +1280,6 @@
     "to": "if ((e.type === 'checkbox' && e.type === 'radio') && e.closest('label')) { self = e.closest('label'); r = self.getBoundingClientRect(); }"
   },
   {
-    "name": "targets: a covered target passes",
-    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": ""
-  },
-  {
-    "name": "targets: an element the page names covers a target",
-    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "if (top && !self.contains(top) && !top.contains(self) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: a designed overlay covers a target",
-    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: an open dialog not taken for an overlay",
-    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
-    "to": "if (t.closest('dialog[open], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;"
-  },
-  {
-    "name": "targets: a popup list not taken for an overlay",
-    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
-    "to": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"menu\"], [popover]')) return true;"
-  },
-  {
-    "name": "targets: a menu not taken for an overlay",
-    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
-    "to": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [popover]')) return true;"
-  },
-  {
-    "name": "targets: a popover not taken for an overlay",
-    "from": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) return true;",
-    "to": "if (t.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"]')) return true;"
-  },
-  {
-    "name": "targets: what is fixed not taken for an overlay",
-    "from": "if (/fixed|sticky/.test(getComputedStyle(n).position)) return true;",
-    "to": "if (/sticky/.test(getComputedStyle(n).position)) return true;"
-  },
-  {
-    "name": "targets: what is sticky not taken for an overlay",
-    "from": "if (/fixed|sticky/.test(getComputedStyle(n).position)) return true;",
-    "to": "if (/fixed/.test(getComputedStyle(n).position)) return true;"
-  },
-  {
-    "name": "targets: a part of what is fixed not taken for an overlay",
-    "from": "for (let n = t; n; n = n.parentElement) if (/fixed|sticky/",
-    "to": "for (let n = t; n === t; n = n.parentElement) if (/fixed|sticky/"
-  },
-  {
     "name": "targets: the default width is 389 px",
     "from": "export function targets({ below = 400, tall = 44, wide = 24, cover = {} } = {}) {",
     "to": "export function targets({ below = 389, tall = 44, wide = 24, cover = {} } = {}) {"
@@ -1375,16 +1325,6 @@
     "to": "cover: Object.keys(cover).join(', ') || '*' });"
   },
   {
-    "name": "targets: a target over its own part is covered",
-    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "if (top && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: a target that lets the finger through is covered",
-    "from": "if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "if (top && !self.contains(top) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
     "name": "targets: overflow clip read as visible",
     "from": "if (/hidden|clip/.test(s.overflowY)) {",
     "to": "if (/hidden/.test(s.overflowY)) {"
@@ -1418,5 +1358,220 @@
     "name": "targets: below, a target a box that scrolls hides counted shown, one it shows counted hidden",
     "from": "&& b > t, x:",
     "to": "&& b < t, x:"
+  },
+  {
+    "name": "targets: a covered target passes",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": ""
+  },
+  {
+    "name": "targets: an element the page names covers a target",
+    "from": "if (!top || self.contains(top) || top.closest(o.cover)) continue;",
+    "to": "if (!top || self.contains(top)) continue;"
+  },
+  {
+    "name": "targets: a target over its own part is covered",
+    "from": "if (!top || self.contains(top) || top.closest(o.cover)) continue;",
+    "to": "if (!top || top.closest(o.cover)) continue;"
+  },
+  {
+    "name": "targets: no element met read as one",
+    "from": "if (!top || self.contains(top) || top.closest(o.cover)) continue;",
+    "to": "if (self.contains(top) || top.closest(o.cover)) continue;"
+  },
+  {
+    "name": "targets: a target that lets the finger through is covered",
+    "from": "if (top.contains(self)) { const k = pseudoOver(top); if (k) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }",
+    "to": "if (false) { const k = pseudoOver(top); if (k) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }"
+  },
+  {
+    "name": "targets: an ancestor's pseudo element never a cover",
+    "from": "if (top.contains(self)) { const k = pseudoOver(top); if (k) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }",
+    "to": "if (top.contains(self)) { const k = pseudoOver(top); if (false) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }"
+  },
+  {
+    "name": "targets: any ancestor met a cover",
+    "from": "if (top.contains(self)) { const k = pseudoOver(top); if (k) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }",
+    "to": "if (top.contains(self)) { const k = pseudoOver(top); if (true) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }"
+  },
+  {
+    "name": "targets: an ancestor's ::before never read",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: an ancestor's ::after never read",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: a pseudo element with no content a cover",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content === 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: content never asked of a pseudo element",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: a fixed pseudo element not a cover",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute/.test(p.position) && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: an absolute pseudo element not a cover",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /fixed/.test(p.position) && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: a pseudo element in the flow a cover",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && p.pointerEvents !== 'none'; });"
+  },
+  {
+    "name": "targets: a pseudo element that lets the finger through a cover",
+    "from": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });",
+    "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'nonex'; });"
+  },
+  {
+    "name": "targets: an open dialog not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a popup list not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a menu not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a popover not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: what is fixed or sticky apart never an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: what is sticky not pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'stickyx' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
+  },
+  {
+    "name": "targets: what is fixed not pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixedx' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
+  },
+  {
+    "name": "targets: what a transform holds pinned to the window",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || p === 'fixed') return { box: n, with: p === 'sticky' ? n : 'window' }; }"
+  },
+  {
+    "name": "targets: a sticky box moves with the window",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: 'window' }; }"
+  },
+  {
+    "name": "targets: each fixed box moves on its own",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: n }; }"
+  },
+  {
+    "name": "targets: a part of what is pinned not pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = null) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
+  },
+  {
+    "name": "targets: a cover that moves with the page apart",
+    "from": "if (!c) return false;",
+    "to": "if (!c) return true;"
+  },
+  {
+    "name": "targets: a pinned target never apart",
+    "from": "return !s || s.with !== c.with;",
+    "to": "return !s;"
+  },
+  {
+    "name": "targets: a pinned target always apart",
+    "from": "return !s || s.with !== c.with;",
+    "to": "return !s || true;"
+  },
+  {
+    "name": "targets: covers pinned alike apart",
+    "from": "return !s || s.with !== c.with;",
+    "to": "return !s || s.with === c.with;"
+  },
+  {
+    "name": "targets: a target on the page asked what it moves with",
+    "from": "return !s || s.with !== c.with;",
+    "to": "return s.with !== c.with;"
+  },
+  {
+    "name": "targets: only what is both sticky and fixed pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' && (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
+  },
+  {
+    "name": "targets: a veil 2 px from the left spans the window",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 2 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil 1 px from the left does not span",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left < 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil 2 px from the top spans the window",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 2 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil 1 px from the top does not span",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top < 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil 2 px from the right spans the window",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 2 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil 1 px from the right does not span",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right > innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil 2 px from the bottom spans the window",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 2) return false;"
+  },
+  {
+    "name": "targets: a veil 1 px from the bottom does not span",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom > innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: a veil over the window apart",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": ""
+  },
+  {
+    "name": "targets: a layer that lets the finger through a veil",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+  },
+  {
+    "name": "targets: only a layer that lets the finger through a veil",
+    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "to": "if (getComputedStyle(c.box).pointerEvents === 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
   }
 ]

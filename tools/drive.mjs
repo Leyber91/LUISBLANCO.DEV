@@ -54,15 +54,18 @@
    throwaway profile, killed on a timeout (180 s by default) whatever
    the scenario does. A drive waits for the lock file
    labs-drive-chrome.lock in the system's temp folder (or the path in
-   LABS_DRIVE_LOCK; tools/mutate.mjs gives each list run its own)
-   before it starts Chrome (20 minutes at most, LABS_DRIVE_WAIT_MS),
+   LABS_DRIVE_LOCK; tools/mutate.mjs gives each copy it tests one of
+   its own, and holds the machine's around each copy itself) before
+   it starts Chrome (20 minutes at most, LABS_DRIVE_WAIT_MS),
    takes it from a process that no longer runs, and gives it back at
    the end. Chrome picks its own debugging port, read back from its
    profile, so a drive talks to no other Chrome (--port is accepted
    and not used). A call to Chrome that is cut off when Chrome dies
    fails at once. The Chromes a process started are killed when it
-   exits, on SIGTERM and on SIGINT (on Windows a process stopped from
-   outside runs no handler). Profiles over a day old are cleared.
+   exits, on SIGTERM and on SIGINT. Profiles over a day old are
+   cleared. A declared limit: on Windows a process stopped from
+   outside (a kill, a closed terminal) runs no handler, so the Chrome
+   it started can be left running, with no lock held for it.
 
      node tools/drive.mjs selftest   the runner of the invariants, the frame rule and the lock, in headless
                                      Chrome; tools/mutants/drive.json breaks each rule for tools/mutate.mjs.
@@ -75,6 +78,7 @@
    ============================================================ */
 
 import { spawn } from 'node:child_process';
+import http from 'node:http';
 import zlib from 'node:zlib';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -390,6 +394,9 @@ async function selftest() {
   const PAGE = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html><body style="margin:0"><button id="b" style="position:absolute;left:10px;top:10px;width:100px;height:50px">b</button></body></html>');
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'drive-self-'));
   try {
+    /* the code it stops itself with is the one tools/mutate.mjs, beside it, reads as timed out */
+    const { WATCHDOG } = await import(pathToFileURL(path.join(path.dirname(fileURLToPath(import.meta.url)), 'mutate.mjs')).href);
+    yes('a selftest stopped by its own limit exits with the code tools/mutate.mjs reads as timed out', WATCHDOG_EXIT === WATCHDOG, `${WATCHDOG_EXIT} and ${WATCHDOG}`);
     /* the lock, on a lock file of its own */
     const lockFile = path.join(scratch, 'chrome.lock');
     const rel = await holdChrome(1000, lockFile);
@@ -610,11 +617,15 @@ async function selftest() {
     yes('a frame that does not come back in its time is a break after each step, the shot throws, and the drive goes on', lostF.length === 2 && lostF.every((c) => !c.ok && /^none within 6 tries of 0.001 s$/.test(c.detail)) && /no frame came back/.test(shotThrew) && !fs.existsSync(lostPng) && Date.now() - t1 < 30000, J(lost.checks) + ' ' + shotThrew);
     yes('when no frame came back, the end line fails and says so', !!lostEnd && !lostEnd.ok && lostEnd.detail === '2 frames did not come back', J(lostEnd));
 
-    /* each drive talks to its own Chrome: two at once, each on its own lock, each sees only its own page */
-    const mark = (k) => 'data:text/html,' + encodeURIComponent(`<title>${k}</title>`);
-    const seenBy = {};
-    await Promise.all(['one', 'two'].map((k) => drive(async (p) => { await p.go(mark(k)); await p.ev('new Promise((r) => setTimeout(r, 300))'); seenBy[k] = await p.ev('document.title'); }, { lock: path.join(scratch, k + '.lock'), width: 390, height: 600, timeoutMs: 60000, say: () => {} })));
-    yes('two drives at once each talk to their own Chrome', seenBy.one === 'one' && seenBy.two === 'two', J(seenBy));
+    /* a drive talks to its own Chrome and to no other: a server that answers /json on 9333, the port every drive shared
+       before Chrome chose its own (--port's default), stands for another drive's Chrome. One Chrome only: a selftest
+       never starts two */
+    const decoy = { asked: 0 };
+    const server = http.createServer((q, s) => { decoy.asked++; s.setHeader('content-type', 'application/json'); s.end(J([{ type: 'page', webSocketDebuggerUrl: 'ws://127.0.0.1:9333/devtools/page/decoy' }])); });
+    decoy.bound = await new Promise((res) => { server.once('error', () => res(false)); server.listen(9333, '127.0.0.1', () => res(true)); });
+    if (decoy.bound) await drive(async (p) => { await p.go('data:text/html,' + encodeURIComponent('<title>mine</title>')); decoy.title = await p.ev('document.title'); }, { width: 390, height: 600, timeoutMs: 60000, say: () => {} });
+    await new Promise((res) => server.close(() => res()));
+    yes('a drive talks to its own Chrome: a server answering /json on 9333, as another drive\'s Chrome would, is never asked', decoy.bound && decoy.title === 'mine' && decoy.asked === 0, J(decoy));
 
     /* a Chrome that ends under the scenario: the next call fails at once */
     let after = '', scenarioEnd = 0;

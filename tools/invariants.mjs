@@ -38,10 +38,15 @@
      ancestor, a fixed one only by a box a transform, a filter or
      containment makes its own), and what a finger meets at the
      middle of that part, when it is in the window, is the target or
-     a part of it, not another element (covered); an open dialog, a
-     popup list or menu, and what is fixed or sticky to the window
-     lie over the page by design, and the page may name others, each
-     with its reason. A target is a
+     a part of it, not another element (covered), nor an ancestor
+     through its ::before or ::after (placed out of the flow, taking
+     the finger). An open dialog, a popup list or menu and a popover
+     lie over the page by design; so does what is fixed or sticky to
+     the window when the target is not pinned with it (it moves apart
+     on a scroll: not fixed to the window too, not in the same sticky
+     box) and its fixed or sticky box does not span the window (a
+     veil). The page may name others, each with its reason. A target
+     is a
      link, a button, a field, a summary, anything with the role of a
      button, link, checkbox, switch, radio, tab, slider, option, menu
      item, tree item or combo box, and anything in the tab order. Not
@@ -95,8 +100,15 @@
    - a target covered away from its middle, or covered while it is
      out of the window: only the middle of what is seen is tested;
    - a target that something fixed or sticky to the window covers
-     where the page can scroll no further (a bar over the last button):
-     such a cover is taken for one that moves with the scroll;
+     where the page can scroll no further (a bar over the last button,
+     a sticky header over a page that cannot scroll): such a cover is
+     taken for one that moves with the scroll;
+   - an element with the role of a dialog is taken to lie over the
+     page by design, though it never closes (a banner given the role);
+   - where an ancestor's ::before or ::after lies is not read: when
+     the finger meets the ancestor at a target's middle and one of
+     them is placed out of the flow and takes the finger, the target
+     is taken to be covered by it;
    - a text over a picture, a background image or a drawing, or over
      an element behind it that is not its ancestor (a plate placed
      under it): it is measured against its ancestors' colours;
@@ -205,11 +217,26 @@ function targetsRule(o, { shown, name, clippers }) {
     }
     return { w: Math.max(0, R - L), h: Math.max(0, B - T), now: rr > l && b > t, x: (l + rr) / 2, y: (t + b) / 2 };
   };
-  const overlay = (t) => {
-    if (t.closest('dialog[open], [role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"], [popover]')) return true;
-    for (let n = t; n; n = n.parentElement) if (/fixed|sticky/.test(getComputedStyle(n).position)) return true;
-    return false;
+  // what moves with the window as the page or a box scrolls: the nearest box fixed to it (one that a transform, a filter
+  // or containment above holds is not: it moves with that box) or sticky, itself included, and what it moves with
+  const pinned = (n) => {
+    for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }
+    return null;
   };
+  // a cover fixed or sticky to the window and a target that move apart on a scroll: the target is not pinned with it
+  // (on 2026-11-17 a toast fixed over a fixed bar's button passed, and so did every cover inside an app in a fixed
+  // scroller), and the cover's box is not a veil, one that spans the window and takes the finger (an invisible veil left
+  // behind passed); a layer over the whole window that lets the finger through to its panels is not one
+  const apart = (t, self) => {
+    const c = pinned(t), s = pinned(self);
+    if (!c) return false;
+    const q = c.box.getBoundingClientRect();
+    if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;
+    return !s || s.with !== c.with;
+  };
+  // an ancestor's ::before or ::after placed out of the flow that takes the finger: the one a finger meets there, or
+  // undefined
+  const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'none'; });
   const out = [];
   for (const e of document.querySelectorAll(o.sel)) {
     if (e.disabled || e.closest('[aria-disabled="true"], [inert]') || !shown(e) || inline(e)) continue;
@@ -219,11 +246,14 @@ function targetsRule(o, { shown, name, clippers }) {
     if (v.w === 0 || v.h === 0) continue;   // cut away entirely: not on the page now
     if (v.h < o.tall - 0.5 || v.w < o.wide - 0.5) out.push(name(e) + ' ' + Math.round(v.w) + 'x' + Math.round(v.h));
     // covered: what a finger meets at the middle of what is seen is another element, not the target or a part of it
-    // (outside the window there is nothing to meet: elementFromPoint gives null there), and not one that lies over the
-    // page by design: an open dialog, a popup list or menu, or what is fixed or sticky to the window (a bar, a veil, a
-    // plate), whose cover moves with the scroll or closes; nor one the page names with its reason
+    // (outside the window there is nothing to meet: elementFromPoint gives null there), or an ancestor through its
+    // ::before or ::after (a card's overlay over its own button); not one that lies over the page by design (an open
+    // dialog, a popup list or menu, a popover, what is fixed or sticky apart from the target), whose cover closes or
+    // moves with the scroll; nor one the page names with its reason
     const top = v.now ? document.elementFromPoint(v.x, v.y) : null;
-    if (top && !self.contains(top) && !top.contains(self) && !top.closest(o.cover) && !overlay(top)) out.push(name(e) + ' covered by ' + name(top));
+    if (!top || self.contains(top) || top.closest(o.cover)) continue;
+    if (top.contains(self)) { const k = pseudoOver(top); if (k) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }
+    else if (!top.closest('dialog[open], [role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));
   }
   return [...new Set(out)].slice(0, 12);
 }
@@ -534,6 +564,31 @@ async function selftest() {
     yes('what lies over the page by design covers no target: something fixed or sticky, a part of it, a popup list, a dialog, a menu, a popover', !t1.some((x) => /^#under(fixed|sticky|list|dialog|menu|pop) .*covered/.test(x)), J(t1.filter((x) => /covered/.test(x))));
     const t6 = await run(TE, targets({ cover: { '#lid': 'a test of the allowance, a lid on purpose' } }));
     yes('an element the page names, with its reason, may lie over a target', !t6.some((x) => /covered by #lid/.test(x)) && has(t6, 'n1'), J(t6.filter((x) => /covered/.test(x))));
+    /* covers that never scroll away (a review of 2026-11-17: F1 to F5 passed when each is a break, F4 a declared limit) */
+    const TF = PAGE(`      <header id="hdr4" style="position:sticky;top:0;height:60px;background:#111;z-index:2">bar</header><button id="f4btn" style="position:absolute;top:0;left:200px;width:60px;height:50px">4</button>
+      <div id="card5"><button id="f5btn" style="width:60px;height:50px">a</button></div><div id="cardbefore"><button id="beforebtn" style="width:60px;height:50px">b</button></div><div id="cardfix"><button id="fixbtn" style="width:60px;height:50px">c</button></div>
+      <div id="cardglass"><button id="glassbtn" style="width:60px;height:50px">d</button></div><div id="cardflow"><button id="flowbtn" style="pointer-events:none;width:60px;height:50px">e</button></div><div id="cardnone"><button id="nonebtn" style="pointer-events:none;width:60px;height:50px">f</button></div><div id="cardpass"><button id="passbtn" style="pointer-events:none;width:60px;height:50px">k</button></div>
+      <div style="transform:translateZ(0);position:relative;height:60px;width:100px"><button id="tfbtn" style="width:60px;height:50px">g</button><div id="tflid" style="position:fixed;left:0;top:0;width:100px;height:60px;background:#222"></div></div>
+      <div style="position:relative"><div style="position:sticky;top:0;height:50px;width:100px;z-index:1"><button id="stkbtn" style="width:60px;height:50px">h</button></div><div id="stklid" style="position:sticky;top:0;height:50px;width:100px;margin-top:-50px;z-index:2;background:#222"></div></div>
+      <div style="position:sticky;top:0;height:50px;width:100px;z-index:1"><button id="insticky" style="width:60px;height:50px">i</button><div id="instickylid" style="position:absolute;left:0;top:0;width:100px;height:50px;background:#222"></div></div>
+      <nav style="position:fixed;left:0;right:0;bottom:0;height:60px;background:#111"><button id="barbtn" style="width:60px;height:50px">j</button></nav><div id="toast" style="position:fixed;left:0;bottom:0;width:100px;height:56px;background:#333;z-index:2">toast</div>`,
+      `#card5, #cardbefore, #cardglass, #cardfix, #cardpass { position: relative; height: 60px; width: 100px; } #cardfix { transform: translateZ(0); }
+      #card5::after, #cardglass::after, #cardpass::after { content: ""; position: absolute; inset: 0; } #cardglass::after, #cardpass::after { pointer-events: none; } #cardbefore::before { content: ""; position: absolute; inset: 0; z-index: 1; }
+      #cardfix::after { content: ""; position: fixed; inset: 0; } #cardflow::before { content: "x"; } #cardnone { position: relative; } #cardnone::after { content: none; position: absolute; inset: 0; }`);
+    const TG = PAGE(`      <div id="app" style="position:fixed;inset:0;overflow:auto"><header id="apphdr" style="position:sticky;top:0;height:60px;background:#111;z-index:2">bar</header>
+      <div style="position:relative;height:2000px"><button id="hdrbtn" style="position:absolute;top:-60px;left:150px;width:60px;height:50px">h</button><button id="f3btn" style="position:absolute;top:100px;left:0;width:60px;height:50px">b</button><div id="plate3" style="position:absolute;left:0;top:100px;width:100px;height:60px;background:#222"></div></div></div>`);
+    const VEIL = (l, t, r, b) => PAGE(`<button id="vbtn" style="position:absolute;left:150px;top:300px;width:60px;height:50px">v</button><div id="veil" style="position:fixed;left:${l}px;top:${t}px;right:${r}px;bottom:${b}px"></div>`);
+    const t7 = await run(TF, targets()), t8 = await run(TG, targets()), veils = [];
+    for (const at of [[0, 0, 0, 0], [1, 1, 1, 1], [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2]]) veils.push((await run(VEIL(...at), targets())).some((x) => x === '#vbtn "v" covered by #veil'));
+    const hud = await run(PAGE(`<button id="hudbtn" style="position:absolute;left:150px;top:300px;width:60px;height:50px">u</button><div style="position:fixed;inset:0;pointer-events:none"><div id="hudpanel" style="position:absolute;left:100px;top:280px;width:200px;height:100px;pointer-events:auto;background:#222"></div></div>`), targets());
+    yes('a fixed cover that spans the window is a break, an invisible one too, within 1 px of each edge; 2 px short of any edge, it is fixed apart from the target', J(veils) === '[true,true,false,false,false,false]', J(veils));
+    yes('a panel of a layer over the whole window that lets the finger through is fixed apart from the target, not a veil', !hud.some((x) => /^#hudbtn .*covered/.test(x)), J(hud));
+    yes('a toast fixed over a button of a fixed bar is a break: both are fixed to the window', t7.includes('#barbtn "j" covered by #toast "toast"'), J(t7.filter((x) => /covered/.test(x))));
+    yes('in an app inside a fixed scroller, a plate over a button is a break; the app\'s sticky header over one of its buttons is not', t8.includes('#f3btn "b" covered by #plate3') && !t8.some((x) => /^#hdrbtn .*covered/.test(x)), J(t8.filter((x) => /covered/.test(x))));
+    yes('a sticky header over a button where the page cannot scroll is taken for one that moves with the scroll (a declared limit)', !t7.some((x) => /^#f4btn .*covered/.test(x)), J(t7.filter((x) => /covered/.test(x))));
+    yes('an ancestor\'s ::after or ::before over its own target is a break, placed absolute or fixed; one that lets the finger through (over the target, or over a target that lets it through too), one in the flow and one with no content are not',
+      t7.includes('#f5btn "a" covered by the ::after of #card5 "a"') && t7.includes('#beforebtn "b" covered by the ::before of #cardbefore "b"') && t7.includes('#fixbtn "c" covered by the ::after of #cardfix "c"') && !t7.some((x) => /^#(glassbtn|passbtn|flowbtn|nonebtn) .*covered/.test(x)), J(t7.filter((x) => /covered/.test(x))));
+    yes('what a transform holds is not fixed to the window; two sticky boxes move apart, and one sticky box holding the target and its cover does not', t7.includes('#tfbtn "g" covered by #tflid') && !t7.some((x) => /^#stkbtn .*covered/.test(x)) && t7.includes('#insticky "i" covered by #instickylid'), J(t7.filter((x) => /covered/.test(x))));
     const t2 = await run(TA, targets({ below: 389 })), t3 = await run(TA, targets({ below: 390 })), t4 = [...await run(TA, targets({ tall: 20, wide: 0 })), ...await run(TD, targets({ tall: 20, wide: 0 }))];
     yes('the rule applies up to its width and not 1 px past it (a 390 px window: below 390 applies, below 389 does not)', J(t2) === '[]' && has(t3, 'h434'), `${t2.length} | ${t3.length}`);
     yes('its sizes are its settings: at 20 by 0, 20 px tall passes and so does 43.4', !has(t4, 'en') && !has(t4, 'h434') && !has(t4, 'w234') && has(t4, 'clip'), J(t4));

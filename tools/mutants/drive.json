@@ -537,7 +537,7 @@
   {
     "name": "chrome: a fixed port, shared by every drive",
     "from": "'--remote-debugging-port=0'",
-    "to": "'--remote-debugging-port=9362'"
+    "to": "'--remote-debugging-port=9333'"
   },
   {
     "name": "frame: the end line passes a broken rule",
@@ -628,5 +628,15 @@
     "name": "png: filter 4 refused",
     "from": "if (f > 4) throw new Error(`a line filtered by",
     "to": "if (f >= 4) throw new Error(`a line filtered by"
+  },
+  {
+    "name": "chrome: the list asked of the port drives shared",
+    "from": "await fetch(`http://127.0.0.1:${port}/json`)",
+    "to": "await fetch('http://127.0.0.1:9333/json')"
+  },
+  {
+    "name": "the watchdog code moved",
+    "from": "export const WATCHDOG_EXIT = 124;",
+    "to": "export const WATCHDOG_EXIT = 125;"
   }
 ]
