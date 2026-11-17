@@ -60,7 +60,7 @@ const TRANSIT = '(document.querySelector("#sheet-e [data-k=sig]") || { getAttrib
 export const SURVEY_COVER = {
   '#edge-hi': 'the upper end of the radius range lies on the lower when both meet',
   'a.skip': 'the skip link, shown over the bar only while it has the focus',
-  'body:not(.ready) #veil, #veil.gone': 'the loading veil, over the page until the catalogue is read and for the 900 ms it fades once told to go; one left up once the page is ready is a break',
+  'body:not(.ready) #veil': 'the loading veil, over the page until the catalogue is read; once told to go it takes no tap while it fades, and one left up once the page is ready is a break',
 };
 
 export const SURVEY_GOLD = {
