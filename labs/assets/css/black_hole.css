@@ -302,7 +302,7 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 
 /* ---------- the drawing (BAR_L1 section 6, drawing.js) ---------- */
 /* the head: what is drawn, set as one line of type; the chosen option underlined in gold */
-.bh-hl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 30px; }
+.bh-hl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 30px; margin: 0 auto 0 18px; text-shadow: 0 0 2px var(--bh-halo), 0 0 4px var(--bh-halo); }
 .bh-hl-g { display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; }
 .bh-hl-k { font-size: 9px; letter-spacing: .26em; text-transform: uppercase; color: var(--text-dim); margin-right: 8px; }
 .bh-opt { background: none; border: 0; padding: 4px 6px; font: inherit; font-size: var(--bh-fs-s); letter-spacing: .03em; color: var(--text-dim); cursor: pointer; position: relative; white-space: nowrap; }
@@ -314,7 +314,8 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 .bh-scale { position: fixed; z-index: 14; overflow: visible; cursor: ew-resize; touch-action: none; }
 #bh-sc-incl { cursor: grab; } #bh-sc-mass { cursor: ns-resize; }
 .bh-scale:focus-visible { outline: 1px solid var(--horizon); outline-offset: 4px; }
-.bh-scale text { font-family: var(--font-mono, 'IBM Plex Mono', monospace); font-size: 9.5px; fill: var(--text-dim); letter-spacing: .04em; }
+/* the scales' words sit on the sky: the render's label halo, so a star streak never cuts one (it cut 'horizon') */
+.bh-scale text { font-family: var(--font-mono, 'IBM Plex Mono', monospace); font-size: 9.5px; fill: var(--text-dim); letter-spacing: .04em; paint-order: stroke; stroke: var(--bh-halo); stroke-width: 3px; stroke-linejoin: round; }
 .bh-scale .cap { font-size: 8.5px; letter-spacing: .24em; }
 .bh-scale .val { fill: var(--text-bright); font-size: 11px; }
 .bh-scale .ink { stroke: var(--text-dim); stroke-width: 1; fill: none; }
@@ -368,11 +369,11 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 }
 @media (max-width: 900px) {
   .bh-tb, .bh-strip { display: none; }
-  /* the head line under the bar, wrapping between options, never inside one */
-  .bh-bar-l { flex-wrap: wrap; }
+  /* the head line is the bar's own row under Back and the model's pill */
+  .bh-bar { flex-wrap: wrap; }
   /* on a phone the head line is the objects alone, one row that scrolls inside itself; the view and the colour are
      in the sheet's cards */
-  .bh-hl { width: 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .bh-hl { order: 3; flex: 0 0 100%; margin: 4px 0 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .bh-hl-g:not(:first-child), .bh-hl-k { display: none; }
   .bh-opt { min-height: 44px; padding: 0 6px; }
 }

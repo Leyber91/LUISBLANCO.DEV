@@ -70,7 +70,8 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   const own = el('span', { class: 'bh-hl-own' }, head.firstChild);
   const viewOpts = group('view', Object.entries(VIEWS).map(([id, v]) => [id, v.label.toLowerCase()]), (id) => choose.view(id));
   const colOpts = group('colour', Object.entries(COLOR_MODES).map(([id, m]) => [id, m.label.toLowerCase()]), (id) => choose.colour(id));
-  document.querySelector('.bh-bar-l').appendChild(head);
+  // a child of the bar between its two ends: after Back on a wide screen, its own row under the bar on a phone
+  document.querySelector('.bh-bar').insertBefore(head, document.querySelector('.bh-bar-r'));
 
   /* ---------- the scales ---------- */
   function scale({ id, key, label, toFrac, fromFrac, step, valueText }) {
@@ -133,7 +134,6 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   function drawSpinMarks(q) {
     const g = spin.marks; g.replaceChildren();
     const X = (a) => SP.x0 + (a / AMAX) * SP.W;
-    svgText(g, { x: SP.x0, y: 10, class: 'cap' }, 'SPIN a/M');
     el('line', { x1: SP.x0, y1: 30, x2: SP.x0 + SP.W, y2: 30, class: 'ink' }, g);
     for (let i = 0; i <= 20; i++) {
       const a = Math.min(AMAX, i * 0.05), big = i % 2 === 0;
@@ -157,13 +157,16 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const x = SP.x0 + (a / AMAX) * SP.W;
     el('line', { x1: x, y1: 20, x2: x, y2: compact ? 34 : 76, class: 'now' }, g);
     el('path', { d: `M${x - 5},30 l5,-7 l5,7 z`, class: 'tip' }, g);
+    // the scale's title at its foot, on the reading's baseline: the top row is the ticks' numbers (they collided)
+    svgText(g, { x: SP.x0, y: compact ? 50 : 104, class: 'cap' }, 'SPIN a/M');
     svgText(g, { x: SP.x0 + SP.W, y: compact ? 50 : 104, 'text-anchor': 'end', class: 'val' }, `a ${spinText(a)} · ISCO ${s3(K.isco(a, 1, q))} M · horizon ${s3(K.horizon(a, q))} M`);
     spin.set(a);
   }
   function drawInclMarks() {
     const g = incl.marks; g.replaceChildren();
     const P = (d, r) => [r * Math.sin(d * Math.PI / 180), IN.oy - r * Math.cos(d * Math.PI / 180)];
-    svgText(g, { x: 6, y: IN.oy - IN.R - 16, class: 'cap' }, 'INCLINATION');
+    // on the 0 label's baseline, past it: one line, '0  INCLINATION' (they collided)
+    svgText(g, { x: 16, y: IN.oy - IN.R - 10, class: 'cap' }, 'INCLINATION');
     el('path', { d: `M${P(0, IN.R)} A${IN.R},${IN.R} 0 0 1 ${P(180, IN.R)}`, class: 'ink' }, g);
     for (let d = 0; d <= 180; d += 10) { const big = d % 30 === 0; const [x1, y1] = P(d, IN.R), [x2, y2] = P(d, IN.R - (big ? 9 : 5)); el('line', { x1, y1, x2, y2, class: big ? 'ink' : 'faint' }, g); if (big) { const [tx, ty] = P(d, IN.R + 13); svgText(g, { x: tx, y: ty + 3, 'text-anchor': 'middle' }, String(d)); } }
     el('line', { x1: 0, y1: IN.oy, x2: IN.R - 14, y2: IN.oy, class: 'faint', 'stroke-dasharray': '2 3' }, g);
@@ -256,9 +259,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     compact = phone;
     if (phone) {
       SP.x0 = 18; SP.W = W - 2 * 18 - 4;
-      // just above the caption, whose height the stop sets
-      const cap = document.getElementById('bh-caption').getBoundingClientRect();
-      Object.assign(spin.svg.style, { left: '0px', top: Math.round((cap.height ? cap.top : H * 0.62) - 64) + 'px', width: W + 'px', height: '58px' });
+      // under the head line, in the sky above the hole: below it the labels and the caption have the frame
+      const hl = head.getBoundingClientRect();
+      Object.assign(spin.svg.style, { left: '0px', top: Math.round((hl.height ? hl.bottom : 110) + 4) + 'px', width: W + 'px', height: '58px' });
       incl.svg.style.display = 'none'; mass.svg.style.display = 'none';
     } else {
       SP.x0 = 0; SP.W = Math.max(300, Math.min(480, W - 440 - 380 - 140));
