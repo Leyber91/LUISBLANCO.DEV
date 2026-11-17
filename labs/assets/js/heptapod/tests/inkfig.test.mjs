@@ -16,7 +16,9 @@
       a. the graph: one filament drawn per node joined to a main event
          in its clause, one drop per entity that is not a main event,
          and NODE_DEG per node of each clause, squeezed by one factor
-         only when the ring is too short;
+         at most 1; the masses partition the clauses, number at most
+         MASS_MAX, keep clauses sharing a referent together and cover at
+         most MASS_ARC;
       b. the gap: the detail suite (ring.js) reads a main gap of at
          least half of GAP_DEG on the raster, and the middle 60% of the
          drawn gap holds no ink in the carrier band (also on 4 texts of
@@ -31,12 +33,14 @@
       e. the drops: pooled, the suite reads at least 30% as many
          bulb-tipped filaments as drops drawn (at 1500 px).
    3. The order rule, placed again here from I8's text for every cyclic
-      order of texts of 4 and 5 clauses of unequal sizes: none puts the
-      centre of mass nearer the centre than the drawn one.
+      order of the masses of texts of 4 and 5 clauses of unequal sizes:
+      none puts the centre of mass nearer the centre than the drawn one.
    4. The same text gives the same bytes; a copy with fresh node ids in
       another order gives the same bytes.
-   Not caught yet (mutants, 2026-11-17): a constant role angle; the
-   angle is read by the reader of an inked figure, the next slice.
+   Not caught (mutants, 2026-11-17): a constant role angle (the angle
+   is read by the reader of an inked figure, the next slice); strokes
+   unclipped at the gap, equivalent under MASS_ARC (0 ink in the gap
+   band on 40 texts with the clip removed), kept as a guard.
    Exits 1 on any failure, and on a run that drew nothing (G2).
    ============================================================ */
 
@@ -101,8 +105,20 @@ for (const [i, g] of texts.entries()) {
   // spans: NODE_DEG per node of the clause, counted here from the graph, all squeezed by one factor at most 1
   const want = mains.map((m) => { let n = 0; for (let v = 0; v < cg.n; v++) if (v !== origo && member[v] === member[m]) n++; return INK.NODE_DEG * n; }).sort((x, y) => x - y);
   const got = f.spansDeg.slice().sort((x, y) => x - y);
-  const fac = Math.min(1, (360 - INK.GAP_DEG - mains.length * INK.ARC_MIN_DEG) / want.reduce((x, y) => x + y, 0));
-  ok(got.every((x, j) => Math.abs(x - want[j] * fac) < 0.02), `text ${i}: spans ${got.join(' ')} against ${want.map((x) => (x * fac).toFixed(2)).join(' ')}`);
+  const fac = got[0] / want[0];
+  ok(fac <= 1 + 1e-9 && got.every((x, j) => Math.abs(x - want[j] * fac) < 0.02), `text ${i}: spans ${got.join(' ')} against ${want.join(' ')} times one factor at most 1 (${fac.toFixed(3)})`);
+  // I9, from the graph: the masses partition the clauses, at most MASS_MAX of them, and clauses sharing a referent
+  // (a coreference link between them, counted here) share a mass
+  const massOf = new Map();
+  f.masses.forEach((m, j) => m.forEach((c) => massOf.set(c, j)));
+  ok(massOf.size === mains.length && f.masses.reduce((a, m) => a + m.length, 0) === mains.length, `text ${i}: masses ${JSON.stringify(f.masses)} do not partition ${mains.length} clauses`);
+  ok(f.masses.length <= INK.MASS_MAX, `text ${i}: ${f.masses.length} masses, at most ${INK.MASS_MAX}`);
+  for (const e of cg.edges) {
+    const cls = { 'same-entity': 1, 'same-event': 1, 'subset-of': 1 }[e.label];
+    if (cls && member[e.h] >= 0 && member[e.d] >= 0 && member[e.h] !== member[e.d])
+      ok(massOf.get(member[e.h]) === massOf.get(member[e.d]), `text ${i}: clauses ${member[e.h]} and ${member[e.d]} share a referent (${e.label}) and lie in different masses`);
+  }
+  ok(f.massSpansDeg.reduce((a, b) => a + b, 0) <= INK.MASS_ARC + 0.01, `text ${i}: masses cover ${f.massSpansDeg.reduce((a, b) => a + b, 0).toFixed(1)} degrees, at most ${INK.MASS_ARC}`);
   // b. the gap, read by the suite
   const row = ringTable({ W: f.W, H: f.H, d: f.d });
   ok(row && (row.gaps_deg[0] || 0) >= 0.5 * INK.GAP_DEG, `text ${i}: the suite reads a main gap of ${row ? (row.gaps_deg[0] || 0).toFixed(1) : '?'} degrees, ${f.gapDeg} drawn`);
@@ -170,6 +186,23 @@ ok(inRead > 0 && filDrawn - outDrawn > 0, `side: ${inRead} read inward, ${filDra
   }
 }
 
+/* 2g. a ring's capacity on texts of 8 clauses, where coreference alone leaves more masses than a ring holds */
+{
+  let beyond = 0;
+  for (let seed = 1100; seed < 1105; seed++) {
+    const g = randomText(mulberry32(seed), 8, [5, 9, 6, 8]);
+    const f = inkFigure(g, { S: 200 });
+    ok(f.ok && f.masses.length <= INK.MASS_MAX, `8 clauses, seed ${seed}: ${f.ok ? f.masses.length : f.reason} masses, at most ${INK.MASS_MAX}`);
+    // counted here: the groups coreference alone makes (union of clauses sharing a referent)
+    const { cg, member, mains } = clausesOf(g);
+    const up = mains.map((_, c) => c);
+    const root = (c) => (up[c] === c ? c : (up[c] = root(up[c])));
+    for (const e of cg.edges) if ({ 'same-entity': 1, 'same-event': 1, 'subset-of': 1 }[e.label] && member[e.h] >= 0 && member[e.d] >= 0) up[root(member[e.h])] = root(member[e.d]);
+    if (new Set(mains.map((_, c) => root(c))).size > INK.MASS_MAX) beyond++;
+  }
+  ok(beyond > 0, `capacity: ${beyond} of 5 texts of 8 clauses leave more than ${INK.MASS_MAX} groups by coreference alone, so the cap is exercised`);
+}
+
 /* 3. the order rule, placed again from I8's text */
 {
   // free arcs: the gap kept first, ARC_MIN_DEG each, the rest by the neighbours' spans; the gap joins the largest
@@ -185,19 +218,26 @@ ok(inRead > 0 && filDrawn - outDrawn > 0, `side: ${inRead} read inward, ${filDra
   };
   const com = (sp, c) => { let x = 0, y = 0, M = 0; sp.forEach((s, j) => { x += s * cosK(c[j] * DEG); y += s * sinK(c[j] * DEG); M += s; }); return Math.sqrt(x * x + y * y) / M; };
   let tried = 0, worse = 0, texts45 = 0;
-  for (const [i, k] of [[0, 4], [1, 5], [2, 4], [3, 5]]) {
-    const f = inkFigure(randomText(mulberry32(950 + i), k, [3, 9, 5, 8, 4]), { S: 200 });
-    if (!f.ok) { ok(false, `order text ${i}: ${f.reason}`); continue; }
+  // the first seeds from 950 whose texts (4 and 5 clauses in turn) lie in 4 masses: with 3, the two cyclic orders
+  // are mirror images and score alike, so the rule has nothing to choose
+  const picked = [];
+  for (let seed = 950; picked.length < 4 && seed < 1050; seed++) {
+    const k = 4 + (picked.length % 2);
+    const f = inkFigure(randomText(mulberry32(seed), k, [3, 9, 5, 8, 4]), { S: 200 });
+    if (f.ok && f.masses.length >= 4) picked.push([seed, k, f]);
+  }
+  ok(picked.length === 4, `order: ${picked.length} of 4 texts in 4 masses found in seeds 950 to 1049`);
+  for (const [i, k, f] of picked) {
     texts45++;
-    const sp = f.spansDeg;
-    const chosen = com(sp, f.centresDeg.map((c) => c - f.centresDeg[0]));
+    const sp = f.massSpansDeg;
+    const chosen = com(sp, f.massCentresDeg.map((c) => c - f.massCentresDeg[0]));
     const rest = [...Array(k).keys()].slice(1);
     const perm = (pre, left) => {
       if (!left.length) { const o = [0, ...pre].map((j) => sp[j]); tried++; if (com(o, placeHere(o)) < chosen - 1e-6) worse++; return; }
       for (let q = 0; q < left.length; q++) perm([...pre, left[q]], [...left.slice(0, q), ...left.slice(q + 1)]);
     };
     perm([], rest);
-    ok(new Set(sp).size > 1, `order text ${i}: spans ${sp.join(' ')} are unequal`);
+    ok(sp.length >= 4 && new Set(sp).size > 1, `order text ${i}: ${sp.length} masses of spans ${sp.join(' ')}, 4 and unequal`);
   }
   ok(texts45 === 4 && tried > 0 && worse === 0, `order: ${worse} of ${tried} cyclic orders put the centre of mass nearer the centre than the drawn one`);
 }

@@ -53,6 +53,17 @@
       "filmValueKnown": true,
       "filmValueKnownNote": "Post-hoc risk, stated before the test: film.md 5.2 (2026-11-11) describes 'rounded knobs about twice the shaft width', and F2 part 2a (2026-11-16) wrote the pooled tipRatio percentiles of all filaments to a private file; this session's notes do not record them being read. The median over bulb-tipped filaments alone has not been computed. Because 1.5 is the class's floor, the median is biased up from the floor by construction; a value above 2.27 misses.",
       "ifConfirmed": "The film's bulbs are what a breaking thread makes, and our bulbs need no calibration."
+    },
+    {
+      "id": "F4-P6",
+      "date": "2026-11-17",
+      "feature": "whether one mass dominates a ring, from coreference and unequal sentences",
+      "derivation": "inkfig 0.3 (I9): clauses sharing a referent are one mass; a ring holds at most MASS_MAX (4) masses and MASS_ARC (98 degrees) of mass, both calibrated on the film's cluster count and total cluster arc, not on dominance; a pool's ink grows with its clause's nodes (arc with n, depth with the square root of n, capped). Sentences of unequal size and the merging of linked clauses then make one mass carry most of the ink. Nothing is tuned to the film's dominance (detail/masses.js), which was measured on 2026-11-17 before this was written (film p10 0.411, median 0.762).",
+      "prediction": "On 30 texts randomText(mulberry32(600 + i), 1 + i mod 5, sizes), the sizes of its sentences drawn 5 to 12 nodes from mulberry32(800 + i) (5 + floor(8 u) each), drawn by inkfig 0.3 at 3300 px and read by the suite: (a) among the texts in which the suite reads at least 2 blot clusters, dominance lies inside the film's p10 to p90 in at least 80%; (b) the blot clusters read lie inside the film's p10 to p90 in at least 80% of all 30.",
+      "measure": "tools/dev/heptapod_inkfig.mjs, corpus B (the default corpus from inkfig 0.3), with detail/masses.js.",
+      "filmValueKnown": true,
+      "filmValueKnownNote": "The film's dominance and cluster distributions were measured on 2026-11-17 before this entry (6d87248's message gives dominance p10 and median); MASS_MAX and MASS_ARC were set from the film's cluster count and total cluster arc the same afternoon. Three showcase texts (1, 4 and 12 clauses, seeds 101, 104, 112) were rendered and read before this entry: dominance 1.0, 0.559, 0.546. The corpus of this prediction has not been drawn.",
+      "ifConfirmed": "Dominance follows from coreference and unequal sentences with no dominance parameter; the figure gets the film's composition from the grammar."
     }
   ]
 }

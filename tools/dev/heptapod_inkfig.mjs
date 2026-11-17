@@ -2,9 +2,9 @@
    tools/dev/heptapod_inkfig.mjs — film track F4-ink: the inked ring
    figures measured by the detail suite against the film's 18 masters,
    by distribution (p10 to p90 over the masters, never min to max:
-   PROCESS 2026-11-17, lesson 1), and the outcomes of F4-P4 and F4-P5.
+   PROCESS 2026-11-17, lesson 1), and the outcomes of F4-P4 to F4-P6.
 
-     node tools/dev/heptapod_inkfig.mjs <out dir> --film <masks dir> [--stills <film stills dir>] [--corpus 30]
+     node tools/dev/heptapod_inkfig.mjs <out dir> --film <masks dir> [--stills <film stills dir>] [--corpus 30] [--p4]
 
    Figures: randomText(mulberry32(100 + k), k) for k = 1, 4 and 12, the
    same texts as F4 slice 1. Corpus (F4-P4): randomText(mulberry32(500
@@ -31,6 +31,10 @@ const out = av[0];
 const opt = (name) => { const i = av.indexOf(name); return i > 0 ? av[i + 1] : null; };
 const filmDir = opt('--film'), stills = opt('--stills');
 const NC = Number(opt('--corpus') ?? 30);
+const RUN_P4 = av.includes('--p4');
+// the stand-in sentences vary in size (randomText's default gives every sentence 7 nodes, so no pool could dominate):
+// 5 to 12 nodes each, drawn from their own stream
+const sizesFrom = (seed, k) => { const r = mulberry32(seed); return Array.from({ length: k }, () => 5 + Math.floor(r() * 8)); };
 if (!out || out.startsWith('--') || !filmDir || !(NC >= 0)) { console.error('usage: heptapod_inkfig.mjs <out dir> --film <masks dir> [--stills <dir>] [--corpus 30]'); process.exit(2); }
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(HERE, '../../labs/assets/data/heptapod/f4-ink.json');
@@ -113,7 +117,7 @@ function down3(m) {
 fs.mkdirSync(out, { recursive: true });
 const figures = [], strip = [];
 for (const k of [1, 4, 12]) {
-  const f = inkFigure(randomText(mulberry32(100 + k), k));
+  const f = inkFigure(randomText(mulberry32(100 + k), k, sizesFrom(700 + k, k)));
   if (!f.ok) { console.error(`${k} clauses: ${f.reason}`); process.exit(1); }
   const { cols } = measure(f);
   const small = down3(f);
@@ -136,9 +140,31 @@ for (const k of [1, 4, 12]) {
   fs.writeFileSync(path.join(out, 'ink-1-4-12.png'), png(W, s, d));
 }
 
-/* ---------- the corpus: F4-P4 ---------- */
-const corpus = [];
+/* ---------- corpus B (the verdict's corpus from inkfig 0.3, and F4-P6) ---------- */
+const corpusB = [];
 for (let i = 0; i < NC; i++) {
+  const k = 1 + (i % 5);
+  const f = inkFigure(randomText(mulberry32(600 + i), k, sizesFrom(800 + i, k)));
+  if (!f.ok) { corpusB.push({ i, k, error: f.reason }); console.log(`corpus B ${i}: ${f.reason}`); continue; }
+  const { cols } = measure(f);
+  corpusB.push({ i, k, cols, masses: f.masses.length });
+  console.log(`corpus B ${i} (${k} clauses): masses ${f.masses.length}, clusters read ${cols.clusters}, dominance ${cols.dominance}`);
+}
+const okB = corpusB.filter((c) => !c.error);
+const multi = okB.filter((c) => c.cols.clusters >= 2);
+const domIn = multi.filter((c) => where('dominance', c.cols.dominance) === 'in').length;
+const clIn = okB.filter((c) => where('clusters', c.cols.clusters) === 'in').length;
+const P6 = {
+  id: 'F4-P6', texts: corpusB.length, errors: corpusB.length - okB.length,
+  a: { textsWithTwoOrMoreClusters: multi.length, dominanceInside: domIn, share: +(domIn / Math.max(1, multi.length)).toFixed(3), needed: 0.8 },
+  b: { clustersInside: clIn, share: +(clIn / Math.max(1, corpusB.length)).toFixed(3), needed: 0.8 },
+};
+P6.outcome = NC !== 30 || INK.version !== 'inkfig-0.3' ? 'not the committed corpus or version' : (domIn >= 0.8 * multi.length && multi.length > 0 && clIn >= 0.8 * corpusB.length ? 'confirmed' : 'missed');
+const corpusShare = Object.fromEntries(COLS.map(([c]) => [c, +(okB.filter((x) => where(c, x.cols[c]) === 'in').length / Math.max(1, okB.length)).toFixed(3)]));
+
+/* ---------- the corpus of F4-P4 (with --p4): its first outcome stands ---------- */
+const corpus = [];
+for (let i = 0; RUN_P4 && i < 30; i++) {
   const k = 1 + (i % 5);
   const f = inkFigure(randomText(mulberry32(500 + i), k));
   if (!f.ok) { corpus.push({ i, k, error: f.reason }); console.log(`corpus ${i}: ${f.reason}`); continue; }
@@ -157,12 +183,11 @@ const P4 = {
   b: { insideFilmP10toP90: inFilm, share: +(inFilm / Math.max(1, N)).toFixed(3), needed: 2 / 3, filmP10: dist.filaments.p10, filmP90: dist.filaments.p90 },
   byClauses: [1, 2, 3, 4, 5].map((k) => { const r = okC.filter((c) => c.k === k); return { clauses: k, drawn: r.map((c) => c.drawn), read: r.map((c) => c.read) }; }),
 };
-const held = within30 >= 0.8 * N && 3 * inFilm >= 2 * N;
+const held = N > 0 && within30 >= 0.8 * N && 3 * inFilm >= 2 * N;
 // the prediction's outcome is its first run, on the code committed before it (5241298, inkfig-0.1); a later version reports how it does now
 P4.firstOutcome = 'missed (bb8f228, inkfig-0.1: a 0.4, b 0.667)';
-P4.thisRun = NC !== 30 ? 'not the committed corpus' : `${INK.version}: ${held ? 'would hold' : 'would miss'}`;
-P4.outcome = INK.version === 'inkfig-0.1' ? (NC === 30 ? (held ? 'confirmed' : 'missed') : 'not the committed corpus') : 'missed (first outcome stands)';
-const corpusShare = Object.fromEntries(COLS.map(([c]) => [c, +(okC.filter((x) => where(c, x.cols[c]) === 'in').length / Math.max(1, okC.length)).toFixed(3)]));
+P4.thisRun = !RUN_P4 ? 'not run (--p4)' : `${INK.version}: ${held ? 'would hold' : 'would miss'}`;
+P4.outcome = INK.version === 'inkfig-0.1' ? (RUN_P4 ? (held ? 'confirmed' : 'missed') : 'not run') : 'missed (first outcome stands)';
 
 /* ---------- F4-P5: the film's bulbs ---------- */
 const bm = med(bulbRatios);
@@ -176,7 +201,7 @@ const data = {
   about: 'F4-ink (BAR_F order of 2026-11-17): the inked ring figures of 1, 4 and 12 clauses and a corpus of 30 texts, measured by the detail suite at 3300 px beside the 18 film masters by distribution (p10 to p90 over the masters). Outcomes of F4-P4 and F4-P5 (predictions.json) are here; predictions.results.json is rewritten whole by heptapod_predictions.mjs and is not touched. Numbers only (research/ip.md rule 6). Written by tools/dev/heptapod_inkfig.mjs.',
   version: INK.version, ranOn: new Date().toISOString().slice(0, 10), filmMasters: film.length, calibrations: INK_CALIBRATIONS,
   columns: Object.fromEntries(COLS.map(([k, what]) => [k, what])), detailColumns: DETAIL, film: dist,
-  figures, corpus: { texts: okC.length, shareInsideFilmP10toP90: corpusShare }, predictions: [P4, P5],
+  figures, corpus: { name: 'B', texts: okB.length, definition: 'randomText(mulberry32(600 + i), 1 + i mod 5, sizes 5 + floor(8 u) from mulberry32(800 + i)), i = 0 to ' + (NC - 1), shareInsideFilmP10toP90: corpusShare }, predictions: [P4, P5, P6],
   readBack: 'deferred to the next slice, declared in BAR_F before this run',
 };
 fs.writeFileSync(DATA, JSON.stringify(data, null, 1));
@@ -195,10 +220,10 @@ table{border-collapse:collapse;margin:12px 0}td,th{border:1px solid #ddd;padding
 <p>Each clause is a pool laid along the ring by brush strokes; each node other than a clause's main event is a filament (an entity's ends in a drop 1.89 times its thread); the carrier is a hairy brush that dries away from the pools. The film's range is p10 to p90 over its 18 masters. Reading the inked figure back is the next slice. Labels: ${figures.map((F) => `${F.clauses} clause${F.clauses > 1 ? 's' : ''}: ${F.label}`).join('; ')}.</p>
 <div class="row">${figures.map((F) => cell(`ink-${F.clauses}.png`, `${F.clauses} clause${F.clauses > 1 ? 's' : ''}: ${F.nodes} nodes; ${F.drawn.filaments} filaments drawn, ${F.columns.filaments} read`)).join('')}</div>
 ${refs.length ? `<div class="row">${refs.map((f) => cell(pathToFileURL(path.resolve(f)).href, `The film: ${path.basename(f)} (private, never committed)`)).join('')}</div>` : ''}
-<table><tr><th>column</th><th>film, ${film.length} masters, p10 to p90</th>${figures.map((F) => `<th>${F.clauses} clause${F.clauses > 1 ? 's' : ''}</th>`).join('')}<th>corpus of ${okC.length} inside</th></tr>${rows}</table>
+<table><tr><th>column</th><th>film, ${film.length} masters, p10 to p90</th>${figures.map((F) => `<th>${F.clauses} clause${F.clauses > 1 ? 's' : ''}</th>`).join('')}<th>corpus B of ${okB.length} inside</th></tr>${rows}</table>
 <p>F4-P4 (filaments from the grammar): ${P4.outcome}; this run ${P4.thisRun}: read within 30% of drawn in ${Math.round(100 * P4.a.share)}% (80% needed), inside the film's p10 to p90 in ${Math.round(100 * P4.b.share)}% (67% needed). F4-P5 (bulbs from a breaking thread): ${P5.outcome}; median ${P5.medianTipRatio} over ${P5.bulbTipped} bulb-tipped film filaments, against 1.89. The negative controls of G3 are not run here (owed).</p>
 <p>Calibrations: ${INK_CALIBRATIONS.map((c) => `${c.name} = ${+(+c.value).toFixed(4)} (${c.source})`).join('; ')}.</p>
 </body></html>`;
 fs.writeFileSync(path.join(out, 'sheet.html'), html);
-console.log(`F4-P4 ${P4.outcome}; this run ${P4.thisRun}: a ${P4.a.share}, b ${P4.b.share}; F4-P5 ${P5.outcome}: median ${P5.medianTipRatio} (n ${P5.bulbTipped})`);
+console.log(`F4-P6 ${P6.outcome}: a ${P6.a.dominanceInside} of ${P6.a.textsWithTwoOrMoreClusters} (${P6.a.share}), b ${P6.b.clustersInside} of ${P6.b.clustersInside === undefined ? '?' : corpusB.length} (${P6.b.share}); F4-P4 ${P4.outcome}, this run ${P4.thisRun}; F4-P5 ${P5.outcome}: median ${P5.medianTipRatio} (n ${P5.bulbTipped})`);
 console.log(`wrote ${DATA} and ${path.join(out, 'sheet.html')}`);

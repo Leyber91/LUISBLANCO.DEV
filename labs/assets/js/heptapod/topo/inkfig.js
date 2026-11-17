@@ -68,7 +68,18 @@
       over a third of it, and ink is where the diffused load is at least
       half. Joins become waists and drops round. [physics: capillary
       spreading]
-   I8 Order around the ring: the clauses' centre of mass (each pool
+   I9 Masses: clauses that share a referent (a coreference link
+      between them) are one mass, since one referent is one pool of
+      ink; a ring holds at most MASS_MAX masses (the film's p90 of
+      blot clusters), so while more remain the two masses with the
+      most links between them merge (ties: the larger merged mass,
+      then the lower clause indices), which grows one dominant mass
+      as the film's rings have (detail/masses.js: dominance median
+      0.76). Within a mass the clauses' pools overlap by OVERLAP of
+      their spans, so they lie as lumps of one pool drawn out along
+      the stroke, each clause's threads erupting from its own lump.
+      [grammar: coreference; a ring's capacity a calibration]
+   I8 Order around the ring: the masses' centre of mass (each mass
       weighed by its span, at its placed centre, free arcs and the gap
       included) nearest the centre (figure.js F4, PLAN 3.4.3), so no
       position carries discourse order: every cyclic order up to 7
@@ -87,19 +98,23 @@
 
 import { clausesOf } from './figure.js';
 import { edgeClassRank, edgeRoleRank, EDGE_LABELS } from './hmr.js';
+const classOf = (label) => (EDGE_LABELS[label] ? EDGE_LABELS[label].cls : null);
 import { mulberry32, fnv1a } from './rng.js';
 import { PI, sinK, cosK } from './trig.js';
 
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.2.1',
+  version: 'inkfig-0.3',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
   CORE: 0.65,         // I2b: the share of the pool's depth laid as its solid core
   DEPOSITS: 1.2,      // I2b: strokes laid per degree of the pool's arc
-  ARC_MIN_DEG: 6,     // I8: clearance between neighbouring pools, degrees
+  ARC_MIN_DEG: 6,     // I8: clearance between neighbouring masses, degrees
+  MASS_MAX: 4,        // I9: the most masses a ring holds
+  MASS_ARC: 98,       // I9: the most arc a ring's masses cover together, degrees
+  OVERLAP: 0.3,       // I9: neighbouring clauses of one mass overlap by this share of their spans
   GAP_DEG: 26.5,      // I6: the gap's arc, degrees
   TAPER_DEG: 10,      // I6: the stroke thins into the gap over this arc
   DEPTH: 0.33,        // I2: a pool's peak depth across the ring, over R
@@ -126,6 +141,8 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'SHAFT', value: INK.SHAFT, source: 'film suite 2026-11-17: filament shaft median 0.0172 R' },
   { name: 'FIL_LEN', value: INK.FIL_LEN, source: 'film suite 2026-11-17: filament length median 0.143 R' },
   { name: 'WOBBLE bounded', value: INK.WOBBLE, source: "v0.2 raised it to 0.10 on a 30-degree lattice and the 12-clause carrier left the suite's carrier band (closure 0.75, below the film's p10 0.81; the coordinating session saw straight chords between knots); 0.06 on a 45-degree lattice gives 0.92 (4 and 12 clauses, 2026-11-17)" },
+  { name: 'MASS_MAX', value: INK.MASS_MAX, source: 'film suite 2026-11-17: blot clusters per master p90 4.3' },
+  { name: 'MASS_ARC', value: INK.MASS_ARC, source: 'film suite 2026-11-17: the sum of a master s cluster spans, p50 45, p90 98.1 degrees' },
   { name: 'R_CANVAS', value: INK.R_CANVAS, source: 'film.md 5.2: R over canvas median 0.365 (the measuring frame; figure.js)' },
   { name: 'v0.2 after the first measurement (bb8f228)', value: 0, source: 'NODE_DEG 4 to 7, WOBBLE 0.03 to 0.10, LOAD_FLOOR 0.45 to 0.7, W_RING 0.05 to 0.06, SHAFT 0.017 to 0.02, INK_SPREAD 0.0035 to 0.006, depth by clause size, the crown, more turning: set by eye against the film master and by the suite after F4-P4 had run; F4-P4 keeps its first outcome' },
   { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG', value: 0, source: 'first values, not compared with any film measure of their own' },
@@ -245,6 +262,28 @@ function clauseTrees(cl) {
   });
 }
 
+/* I9: the masses, as lists of clause indices. Coreference joins first; then, while more than MASS_MAX remain,
+   the pair with the most links between them merges (ties: the larger merged node count, then the lower first
+   indices). A mass lists its clauses by index. */
+export function massesOf(k, cross, sizes) {
+  let G = [...Array(k).keys()].map((c) => [c]);
+  const find = (c) => G.findIndex((g) => g.includes(c));
+  const join = (i, j) => { const [a, b] = i < j ? [i, j] : [j, i]; G[a] = G[a].concat(G[b]).sort((x, y) => x - y); G.splice(b, 1); };
+  for (const e of cross) if (e.label === 'same-entity' || classOf(e.label) === 'coreference') { const i = find(e.a), j = find(e.b); if (i !== j) join(i, j); }
+  while (G.length > INK.MASS_MAX) {
+    let best = null;
+    for (let i = 0; i < G.length; i++) for (let j = i + 1; j < G.length; j++) {
+      let links = 0;
+      for (const e of cross) if ((G[i].includes(e.a) && G[j].includes(e.b)) || (G[i].includes(e.b) && G[j].includes(e.a))) links++;
+      const size = G[i].concat(G[j]).reduce((a, c) => a + sizes[c], 0);
+      const key = [links, size, -G[i][0], -G[j][0]];
+      if (!best || key[0] > best.key[0] || (key[0] === best.key[0] && (key[1] > best.key[1] || (key[1] === best.key[1] && (key[2] > best.key[2] || (key[2] === best.key[2] && key[3] > best.key[3])))))) best = { i, j, key };
+    }
+    join(best.i, best.j);
+  }
+  return G;
+}
+
 /* I6, I8: the placement of an order. The gap's arc is kept before the free arcs are shared; it goes to the
    largest shared arc (the first in drawing order among equals). Centres in degrees from the first pool's. */
 export function placeOrder(sp) {
@@ -320,20 +359,35 @@ export function inkFigure(g, opts = {}) {
   const R = INK.R_CANVAS * S, c0 = S / 2;
   const toX = (X) => c0 + X, toY = (Y) => c0 - Y;
 
-  // I2: spans, compressed when the ring is too short for them
+  // I9: masses
+  const groups = massesOf(k, cl.cross, trees.map((t) => t.n));
+  // I2: spans, compressed when the ring is too short for its masses
   let span = trees.map((t) => INK.NODE_DEG * t.n);
-  const room = 360 - INK.GAP_DEG - k * INK.ARC_MIN_DEG;
-  const sumSpan = span.reduce((a, b) => a + b, 0);
-  const squeeze = sumSpan > room ? room / sumSpan : 1;
+  const massLen = (sps) => sps.reduce((a, b) => a + b, 0) - INK.OVERLAP * sps.slice(1).reduce((a, b, i) => a + (sps[i] + b) / 2, 0);
+  // a ring holds at most MASS_ARC of mass (the film's p90): a longer text is written denser, never wider
+  const room = Math.min(INK.MASS_ARC, 360 - INK.GAP_DEG - groups.length * INK.ARC_MIN_DEG);
+  const sumMass = groups.reduce((a, g) => a + massLen(g.map((c) => span[c])), 0);
+  const squeeze = sumMass > room ? room / sumMass : 1;
   span = span.map((s) => s * squeeze);
-  // I8: order, free arcs, centres
-  const order = orderByCentre(span);
-  const sp = order.map((c) => span[c]);
-  const { arcs, jg, centres } = placeOrder(sp);
+  const mspan = groups.map((g) => massLen(g.map((c) => span[c])));
+  // I8: order of the masses, free arcs, centres; each clause's centre inside its mass
+  const gorder = orderByCentre(mspan);
+  const msp = gorder.map((gi) => mspan[gi]);
+  const { arcs, jg, centres } = placeOrder(msp);
   const rot = (fnv1a(cert) % 3600) / 10;
-  const centreDeg = centres.map((c) => c + rot);
+  const massCentreDeg = centres.map((c) => c + rot);
+  const order = [], centreDeg = [];
+  gorder.forEach((gi, m) => {
+    let at = massCentreDeg[m] - msp[m] / 2;
+    groups[gi].forEach((c, i) => {
+      if (i) at += ((span[groups[gi][i - 1]] + span[c]) / 2) * (1 - INK.OVERLAP);
+      else at += span[c] / 2;
+      order.push(c); centreDeg.push(at);
+    });
+  });
+  const sp = order.map((c) => span[c]);
   const gapLen = INK.GAP_DEG;
-  const gapMid = centreDeg[jg] + sp[jg] / 2 + arcs[jg] / 2;
+  const gapMid = massCentreDeg[jg] + msp[jg] / 2 + arcs[jg] / 2;
   // I6: nothing but the carrier's tapered ends is drawn within the gap and its tapers
   const wrap0 = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
   const inGap = (phi) => Math.abs(wrap0(phi - gapMid)) < gapLen / 2 + INK.TAPER_DEG;
@@ -350,12 +404,14 @@ export function inkFigure(g, opts = {}) {
 
   // ---------- I2, I3, I4, I5: pools and their threads ----------
   const pools = [];
-  for (let j = 0; j < k; j++) {
+  for (let j = 0; j < order.length; j++) {
     const t = trees[order[j]];
     const rnd = streamOf(cert, t.main, 'pool');
     const half = sp[j] / 2, th = centreDeg[j];
     const skew = (rnd() * 2 - 1) * 0.6, fOut = 0.15 + 0.7 * rnd();
-    const depth = INK.DEPTH * R * (0.7 + 0.6 * rnd()) * Math.sqrt(t.n / 6);
+    // a pool's ink grows with its clause, up to what one stroke can hold (1.3 times the median pool); on a squeezed
+    // ring the same ink is laid shorter and shallower alike (depth with the square root of the squeeze)
+    const depth = INK.DEPTH * R * (0.7 + 0.6 * rnd()) * Math.min(1.3, Math.sqrt(t.n / 6)) * Math.sqrt(squeeze);
     const nSeed = fnv1a(`${cert}:${t.main}:rim`);
     // a puddle dragged along the stroke: a steep front, a long tail (the skew's sign is the drag's direction)
     const prof = (x) => { const b = 1 - x * x; if (b <= 0) return 0; const y = (x - skew) / (1 + (x > skew ? -skew : skew)); const c = 1 - y * y; return c <= 0 ? 0 : c * Math.sqrt(c * b); };
@@ -507,7 +563,8 @@ export function inkFigure(g, opts = {}) {
   for (let i = 0; i < S * S; i++) if (body[i] >= 0.5 || bristle[i] >= 0.5) { d[i] = 1; ink++; }
   return {
     ok: true, version: INK.version, W: S, H: S, d, R, cx: c0, cy: c0, clauses: k, nodes: cg.n,
-    spansDeg: Array.from(sp, (x) => +x.toFixed(2)), arcsDeg: Array.from(arcs, (x) => +x.toFixed(2)), centresDeg: Array.from(centreDeg, (x) => +(((x % 360) + 360) % 360).toFixed(3)), gapDeg: +gapLen.toFixed(2), gapMidDeg: +(((gapMid % 360) + 360) % 360).toFixed(3), squeeze: +squeeze.toFixed(3),
+    spansDeg: Array.from(sp, (x) => +x.toFixed(2)), arcsDeg: Array.from(arcs, (x) => +x.toFixed(2)), centresDeg: Array.from(centreDeg, (x) => +(((x % 360) + 360) % 360).toFixed(3)),
+    masses: gorder.map((gi) => groups[gi].slice()), massSpansDeg: Array.from(msp, (x) => +x.toFixed(3)), massCentresDeg: Array.from(massCentreDeg, (x) => +(((x % 360) + 360) % 360).toFixed(3)), gapDeg: +gapLen.toFixed(2), gapMidDeg: +(((gapMid % 360) + 360) % 360).toFixed(3), squeeze: +squeeze.toFixed(3),
     ink, ...report,
   };
 }
