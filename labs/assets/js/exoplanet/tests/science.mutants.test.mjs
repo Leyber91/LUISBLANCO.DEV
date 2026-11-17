@@ -23,18 +23,20 @@ import { runMutants } from '../../kit/tests/mutants.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const data = ['data/exomania/pscomppars-snapshot.json'];
-const SZ = '  const u = size(up) ?? size(down), d = size(down) ?? size(up);';
+const SZ = '  const u = errSize(up) ?? errSize(down), d = lowerError(up, down);';
+const LOW = 'export const lowerError = (up, down) => errSize(down) ?? errSize(up);';
 const NUL = '  if (!isNum(v) || v <= 0 || u === null) return null;';
 const HI = '  const sHi = Math.log((v + u) / v), open = v - d <= 0;';
 const RET = '  return { v, sLo: open ? sHi : Math.log(v / (v - d)), sHi, open };';
 const DRAW = 'export const drawPositive = (sp, z) => sp.v * Math.exp(z * (z < 0 ? sp.sLo : sp.sHi));';
 const OPEN = "  const open = spR && spR.open ? 'radius' : spM && spM.open ? 'mass' : null;";
-const DER = '  const derived = (arr) => { const st = stat(arr); return st && open ? { med: st.med, lo: null, hi: null, open } : st; };';
+const DER = '  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: point[k], lo: null, hi: null, open } : st; };';
 const RD = '    const R = hasR ? (spR ? drawPositive(spR, gauss()) : p.R) : null;';
 const MD = '    if (trueM) return spM ? drawPositive(spM, gauss()) : p.M;';
 const MUTANTS = [
-  ['a missing upper error not taken from the lower', SZ, '  const u = size(up), d = size(down) ?? size(up);'],
-  ['a missing lower error not taken from the upper', SZ, '  const u = size(up) ?? size(down), d = size(down);'],
+  ['a missing upper error not taken from the lower', SZ, '  const u = errSize(up), d = lowerError(up, down);'],
+  ['a missing lower error not taken from the upper', LOW, 'export const lowerError = (up, down) => errSize(down);'],
+  ['the upper error read as the lower', LOW, 'export const lowerError = (up, down) => errSize(up) ?? errSize(down);'],
   ['a zero value drawn', NUL, '  if (!isNum(v) || v < 0 || u === null) return null;'],
   ['the upper side from the lower error', HI, '  const sHi = Math.log((v + d) / v), open = v - d <= 0;'],
   ['open only past the value, not at it', HI, '  const sHi = Math.log((v + u) / v), open = v - d < 0;'],
@@ -46,9 +48,13 @@ const MUTANTS = [
   ['a measured mass drawn as itself', MD, '    if (trueM) return p.M;'],
   ['an open mass ignored', OPEN, "  const open = spR && spR.open ? 'radius' : null;"],
   ['an open radius ignored', OPEN, "  const open = spM && spM.open ? 'mass' : null;"],
-  ['an open range reported as numbers', DER, '  const derived = (arr) => stat(arr);'],
-  ['an open range with no median', DER, '  const derived = (arr) => { const st = stat(arr); return st && open ? { med: null, lo: null, hi: null, open } : st; };'],
+  ['an open range reported as numbers', DER, '  const derived = (arr, k) => stat(arr);'],
+  ['an open range with no value', DER, '  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: null, lo: null, hi: null, open } : st; };'],
+  ['an open range valued at the median of the mirrored draws', DER, '  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: st.med, lo: null, hi: null, open } : st; };'],
+  ['an open radius given class shares', "  const probs = open === 'radius' ? [] : SIZE_CLASSES", '  const probs = SIZE_CLASSES'],
+  ['both open named by the mass first', OPEN, "  const open = spM && spM.open ? 'mass' : spR && spR.open ? 'radius' : null;"],
   ['the note of an open range silent', '  if (!mc || !mc.open) return \'\';', '  return \'\';'],
+  ['the note naming the upper error', "[p.M, lowerError(p.Merr1, p.Merr2), 'M⊕', 'mass']", "[p.M, Math.abs(p.Merr1), 'M⊕', 'mass']"],
 ];
 
 process.exit(await runMutants({ here, file: 'science.js', test: 'science.test.mjs', mutants: MUTANTS, also: ['kit', 'ai'], data }));

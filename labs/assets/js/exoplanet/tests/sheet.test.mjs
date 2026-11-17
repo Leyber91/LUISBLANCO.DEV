@@ -18,6 +18,7 @@
 
 import { sheetRows, createTarget, inferredHeading, ARCHIVE_HEADING } from '../views/target.js';
 import { semiMajor, starlight, starNum, teqOf, teqText } from '../starlight.js';
+import { chainHTML } from '../panels.js';
 
 let failed = 0, passed = 0;
 const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
@@ -43,13 +44,23 @@ block('the radius', () => {
 });
 
 block('an open range', () => {
-  // a radius whose lower error reaches it (ticket 2.20): gravity, density and scale height print no 68% range, and the
-  // gravity's note says which value and why; a bounded radius prints its range as before
-  const open = sheetRows(mk({ R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3).inferred, shut = sheetRows(mk({}), 0.3).inferred;
+  // a radius whose value minus its lower error is below zero (ticket 2.20): gravity, density and scale height print no 68%
+  // range and draw no tick (a bare tick reads as a value with no interval); the gravity's note says which value and why;
+  // a mass forecast from it has no range either; a bounded radius prints its ranges as before. The fixture has an orbit,
+  // so a scale height exists to be checked (the review of pull request 59: a check had passed on a row that never existed)
+  const orbit = { P: 10, a: 0.08 };
+  const open = sheetRows(mk({ ...orbit, R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3).inferred, shut = sheetRows(mk({ ...orbit }), 0.3).inferred;
+  const fcOpen = sheetRows(mk({ ...orbit, R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5, M: null, Merr1: null, Merr2: null, Mprov: null }), 0.3).inferred;
   const at = (rows, k) => rows.find((r) => r.key === k);
-  yes('every derived range of an open radius says "no 68% range"', ['g', 'rho', 'H'].every((k) => !at(open, k) || at(open, k).pm === 'no 68% range') && !!at(open, 'g'), ['g', 'rho', 'H'].map((k) => at(open, k) && at(open, k).pm).join(' | '));
-  yes('and the gravity\'s note names the radius and its error', /^The radius's lower error \(2.5 on 2 R⊕\) reaches zero/.test(at(open, 'g').note || ''), at(open, 'g').note);
-  yes('a bounded radius prints its gravity range and no such note', /\d to \d/.test(at(shut, 'g').pm) && !at(shut, 'g').note, `${at(shut, 'g').pm} | ${at(shut, 'g').note}`);
+  yes('an open radius has gravity, density and scale height rows, each "no 68% range" with no tick drawn', ['g', 'rho', 'H'].every((k) => at(open, k) && at(open, k).pm === 'no 68% range' && at(open, k).iv === false), ['g', 'rho', 'H'].map((k) => at(open, k) && `${at(open, k).pm}/${JSON.stringify(at(open, k).iv)}`).join(' | '));
+  yes('and the gravity\'s note names the radius, its lower error, and what the values are', /^The radius minus its lower error \(2 − 2.5 R⊕\) is below zero, so nothing derived from it has a 68% range; each value shown is at the radius and mass given\.$/.test(at(open, 'g').note || ''), at(open, 'g').note);
+  yes('and the heading does not count the open rows as point values', !['g', 'rho', 'H'].some((k) => at(open, k).iv), inferredHeading(open));
+  yes('a mass forecast from an open radius has no range and no tick, and says it is at the radius given', at(fcOpen, 'Mf') && at(fcOpen, 'Mf').pm === 'no 68% range' && at(fcOpen, 'Mf').iv === false && /at the radius given/.test(at(fcOpen, 'Mf').note), at(fcOpen, 'Mf') && `${at(fcOpen, 'Mf').pm} | ${at(fcOpen, 'Mf').note}`);
+  yes('a bounded radius prints its gravity and scale height ranges, with ticks, and no such note', /\d to \d/.test(at(shut, 'g').pm) && /\d to \d/.test(at(shut, 'H').pm) && at(shut, 'g').iv && !at(shut, 'g').note, `${at(shut, 'g').pm} | ${at(shut, 'H') && at(shut, 'H').pm}`);
+  // the chain: the radius with both sides of its interval, and the open gravity in the sheet's words
+  const chain = String(chainHTML(mk({ ...orbit, name: 'Sh chain', R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3)).replace(/<[^>]+>/g, ' ');
+  yes('the chain gives the radius as +0.50 and −2.5, not their average', /2\.00 \+0\.50 −2\.5 R⊕/.test(chain), (chain.match(/Radius.{0,60}/) || [''])[0]);
+  yes('and its gravity says no 68% range, at the radius and mass given', /g at the radius and mass given \(no 68% range: the radius minus its lower error is below zero\)/.test(chain), (chain.match(/Gravity.{0,160}/) || [''])[0]);
 });
 
 block('the orbit', () => {

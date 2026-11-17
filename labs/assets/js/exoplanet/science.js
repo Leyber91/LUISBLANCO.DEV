@@ -128,18 +128,22 @@ function rng(seedStr) {
   return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 const mcCache = new Map();
-/* A positive measured value and its 68% interval (+up, -down, as the archive gives them; one missing takes the
-   other's size), drawn as a split log-normal: the median is the value, the 16th and 84th percentiles are value - down
-   and value + up, so the paper's interval is kept, both sides of it, and no draw is zero or negative. [REAL] the
-   percentiles; [ILLUSTRATIVE] the log-normal shape between them, the page's choice. Ticket 2.20, 2026-11-17: the draws
-   were a normal on the two sides' average, clamped at 0.05 R_earth or 0.001 M_earth, and where the error was near the
-   value the clamped draws gave density ranges such as "17 to 328,558,509 g/cm3" (KOI-2513.01; 187 planets past a
-   factor of 100). open: the value minus its lower error is zero or less, so it is not bounded away from zero at 68%;
-   its lower side is then drawn as the mirror of the upper in log, and a range that divides by it is reported open
-   (monteCarlo), never as a number. Null for a value with no error: it is drawn as itself. */
+/* A positive value with the archive's interval (+up, -down; one missing takes the other's size, lowerError), drawn
+   as a split log-normal: the median is the value, the 16th and 84th percentiles are value - down and value + up, so
+   both sides of the interval are kept and no draw is zero or negative. The archive does not state the interval's
+   level or whether the value is a median; reading it as the 16th to 84th percentiles about the median is this
+   page's choice, and so is the log-normal shape between them (the Method dialog says so). Ticket 2.20, 2026-11-17: the
+   draws were a normal on the two sides' average, clamped at 0.05 R_earth or 0.001 M_earth; where an error neared its
+   value the clamp piled draws at the floor and sheet B printed density ranges such as "17 to 328,558,509 g/cm3"
+   (KOI-2513.01; 69 printed density ranges past a factor of 100). open: the value minus its lower error is zero or
+   less, so it is not bounded away from zero at 68%; nothing that divides by it gets a range (monteCarlo), and its
+   lower side is drawn as the mirror of the upper only so the draws exist. Null for a value with no error. */
+const errSize = (e) => (isNum(e) && e !== 0 ? Math.abs(e) : null);
+/* The size of a value's lower error: the archive's lower error, or its upper where the lower is missing or 0. The one
+   rule the draws and the notes read. */
+export const lowerError = (up, down) => errSize(down) ?? errSize(up);
 export function positiveSpread(v, up, down) {
-  const size = (e) => (isNum(e) && e !== 0 ? Math.abs(e) : null);
-  const u = size(up) ?? size(down), d = size(down) ?? size(up);
+  const u = errSize(up) ?? errSize(down), d = lowerError(up, down);
   if (!isNum(v) || v <= 0 || u === null) return null;
   const sHi = Math.log((v + u) / v), open = v - d <= 0;
   return { v, sLo: open ? sHi : Math.log(v / (v - d)), sHi, open };
@@ -149,8 +153,8 @@ export function positiveSpread(v, up, down) {
 export const OPEN_RANGE = 'no 68% range';
 export function openRangeNote(p, mc) {
   if (!mc || !mc.open) return '';
-  const [v, e, u, word] = mc.open === 'radius' ? [p.R, p.Rerr2 ?? p.Rerr1, 'R⊕', 'radius'] : [p.M, p.Merr2 ?? p.Merr1, 'M⊕', 'mass'];
-  return `The ${word}'s lower error (${int3(Math.abs(e))} on ${int3(v)} ${u}) reaches zero, so the gravity, density and scale height have no 68% range; each value shown is the median of the draws.`;
+  const [v, e, u, word] = mc.open === 'radius' ? [p.R, lowerError(p.Rerr1, p.Rerr2), 'R⊕', 'radius'] : [p.M, lowerError(p.Merr1, p.Merr2), 'M⊕', 'mass'];
+  return `The ${word} minus its lower error (${int3(v)} − ${int3(e)} ${u}) is below zero, so nothing derived from it has a 68% range; each value shown is at the radius and mass given.`;
 }
 /* One draw from a positiveSpread, given a standard normal deviate z. */
 export const drawPositive = (sp, z) => sp.v * Math.exp(z * (z < 0 ? sp.sLo : sp.sHi));
@@ -183,6 +187,7 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
   // the luminosity and their errors are the page's one each, and the Teq printed is teqOf's
   const sDraws = starlightDraws(p), S0 = insolation(p).S, kT = T_ZERO * Math.pow(1 - albedo, 0.25);
   const N = MC.draws, g = [], rho = [], H = [], cls = new Map();
+  const mu = p.R > 1.8 ? MC.muEnvelope : MC.muSecondary;   // the radius given's, as the scale height's note says, for every draw
   for (let k = 0; k < N; k++) {
     const R = hasR ? (spR ? drawPositive(spR, gauss()) : p.R) : null;
     const M = hasR ? sampleM() : null;
@@ -193,16 +198,20 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
     const T = isNum(Sk) ? kT * Math.pow(Sk, 0.25) : null;   // the starlight and its draws are positive (starlight.js keeps no other)
     if (T) {
       if (isNum(gg)) {
-        const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;
         H.push(1.380649e-23 * T / (mu * 1.6726e-27 * 9.80665 * gg) / 1000);   // km
       }
     }
   }
   const stat = (arr) => { if (!arr.length) return null; const s = arr.slice().sort((x, y) => x - y); const q = (f) => s[Math.min(s.length - 1, Math.floor(f * s.length))]; return { med: q(0.5), lo: q(0.16), hi: q(0.84) }; };
-  // a range that divides by a value not bounded away from zero keeps its median and says why it has no 68% range
-  const derived = (arr) => { const st = stat(arr); return st && open ? { med: st.med, lo: null, hi: null, open } : st; };
-  const probs = SIZE_CLASSES.map((c) => ({ key: c.key, label: c.label, p: (cls.get(c.key) || 0) / N })).filter((c) => c.p > 0);
-  const out = { n: N, g: derived(g), teq: teqOf(p, albedo), rho: derived(rho), H: derived(H), probs, hasR, open,
+  // a range that divides by a value not bounded away from zero has no ends; its value is the one at the radius and mass
+  // given (a forecast mass: the relation's mean at that radius), which needs no assumption about the open side
+  const M0 = trueM ? p.M : hasR && fc ? massFromRadiusMean(p.R) : null, R0 = p.R;
+  const g0 = isNum(M0) && isNum(R0) ? M0 / (R0 * R0) : null, T0 = isNum(S0) ? kT * Math.pow(S0, 0.25) : null;
+  const point = { g: g0, rho: isNum(g0) ? 5.514 * M0 / (R0 * R0 * R0) : null, H: isNum(g0) && T0 ? 1.380649e-23 * T0 / (mu * 1.6726e-27 * 9.80665 * g0) / 1000 : null };
+  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: point[k], lo: null, hi: null, open } : st; };
+  // the size classes' shares come from the radius draws; an open radius has no lower side to draw, so it has none
+  const probs = open === 'radius' ? [] : SIZE_CLASSES.map((c) => ({ key: c.key, label: c.label, p: (cls.get(c.key) || 0) / N })).filter((c) => c.p > 0);
+  const out = { n: N, g: derived(g, 'g'), teq: teqOf(p, albedo), rho: derived(rho, 'rho'), H: derived(H, 'H'), probs, hasR, open,
     massFrom: !hasR ? 'none' : trueM ? 'measured' : fc ? 'forecast' : 'none', bounded: fc ? fc.bounded : null };
   mcCache.set(key, out);
   return out;

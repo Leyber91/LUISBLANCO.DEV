@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import * as S from '../science.js';
+import { mulberry32 } from '../../kit/rng.js';
 import { loadSnapshot } from '../catalog.js';
 import { physics, classify } from '../data.js';
 
@@ -47,8 +48,7 @@ yes('An upper limit caps the forecast', S.forecastMass(1.61, 0.05, 2).hi <= 2.00
 // ---- a positive value with its interval, drawn as a split log-normal (ticket 2.20) ----
 {
   // a fixed normal deviate sequence (Box-Muller on a small LCG), so the percentiles below are reproducible
-  let st = 12345;
-  const u = () => { st = (st * 1103515245 + 12345) % 2147483648; return (st + 0.5) / 2147483648; };
+  const u = mulberry32(12345);   // the kit's generator: a period far past the 80,000 numbers these draws use
   const z = () => Math.sqrt(-2 * Math.log(u())) * Math.cos(2 * Math.PI * u());
   const pct = (sp, n = 40000) => { const d = Array.from({ length: n }, () => S.drawPositive(sp, z())).sort((x, y) => x - y); return { lo: d[Math.floor(0.16 * n)], med: d[Math.floor(0.5 * n)], hi: d[Math.floor(0.84 * n)], min: d[0] }; };
   const lop = S.positiveSpread(2.0, 0.6, -0.3), q = pct(lop);
@@ -177,10 +177,18 @@ yes(`with no published Teq, the render's Teq is within 20% of the plate's for ${
   const hat = S.monteCarlo(byName.get('HAT-P-57 b'), 0.3), hd = S.monteCarlo(byName.get('HD 110113 c'), 0.3);
   yes('HAT-P-57 b (mass 448 -480 M_earth) is open by its mass, HD 110113 c (radius 2.11 -4.6 R_earth) by its radius', hat.open === 'mass' && hd.open === 'radius');
   const koi = S.monteCarlo(byName.get('KOI-2513.01'), 0.3);
-  yes(`KOI-2513.01's density range no longer reaches 328,558,509 g/cm3 by the clamp (now ${koi.rho.lo.toPrecision(3)} to ${koi.rho.hi.toPrecision(3)})`, koi.rho.hi < 1e4 && !koi.open);
+  yes(`KOI-2513.01's density range no longer reaches 328,558,509 g/cm3 by the clamp (now ${koi.rho.lo.toPrecision(3)} to ${koi.rho.hi.toPrecision(3)})`, koi.rho.hi < 5000 && !koi.open);
   const prox = S.monteCarlo(byName.get('Proxima Cen b'), 0.3);
   yes('Proxima Cen b keeps its ranges', !prox.open && prox.g.lo > 0.9 && prox.g.hi < 1.2);
-  yes('the note of an open range names the value and its error, and none is written for a bounded one', /^The mass's lower error \(480 on 448 M⊕\) reaches zero/.test(S.openRangeNote(byName.get('HAT-P-57 b'), hat)) && S.openRangeNote(byName.get('Proxima Cen b'), prox) === '');
+  // the note on a lopsided open mass names its lower error, not its upper; and the value shown is the one at the radius
+  // and mass given, M / R^2, with no assumption about the open side (HAT-P-57 b: 448 / 19.5^2 = 1.18 g)
+  const lop = { host: 'X', Teff: 5772, Rs: 1, logL: 0, a: 1, P: 365.25, Ms: 1, Mprov: 'Mass', Mlim: 0, method: 'Transit', lim: {}, name: 'test 2.20 open mass', R: 2, Rerr1: 0.1, Rerr2: -0.1, Rerr: 0.1, M: 5, Merr1: 1, Merr2: -6 };
+  const lopMc = S.monteCarlo(lop, 0.3);
+  yes('the note of a lopsided open mass names the value and its lower error', S.openRangeNote(lop, lopMc) === 'The mass minus its lower error (5 − 6 M⊕) is below zero, so nothing derived from it has a 68% range; each value shown is at the radius and mass given.' && S.openRangeNote(byName.get('Proxima Cen b'), prox) === '', S.openRangeNote(lop, lopMc));
+  near('an open range\'s value is at the radius and mass given (HAT-P-57 b, M / R^2 in g)', hat.g.med, 448.1 / (19.5 * 19.5), 0.005);
+  const both = S.monteCarlo({ ...lop, name: 'test 2.20 both open', Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }, 0.3);
+  yes('a radius and a mass both open is named by the radius, and an open radius gives the size classes no shares', both.open === 'radius' && both.probs.length === 0 && hd.probs.length === 0 && hat.probs.length > 0, `${both.open}; shares ${both.probs.length}, ${hd.probs.length}, ${hat.probs.length}`);
+  yes('the lower error is the archive\'s lower, or its upper where the lower is missing or 0', S.lowerError(1, -2) === 2 && S.lowerError(1, null) === 1 && S.lowerError(1, 0) === 1 && S.lowerError(null, null) === null);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
