@@ -1,0 +1,106 @@
+{
+ "summary": {
+  "films": 38,
+  "film_nearest_median": 0.712,
+  "film_unrelated_pairs_median": 0.458,
+  "masters": 12,
+  "max": 0.687,
+  "median": 0.579,
+  "hard_fail_at_or_above_0.80": 0,
+  "review_0.65_to_0.80": [
+   {
+    "master": "f4ink/ink-1",
+    "max": 0.669,
+    "nearest": "Walk1.jpg",
+    "second": 0.626
+   },
+   {
+    "master": "f4ink-v02/ink-1",
+    "max": 0.687,
+    "nearest": "Weapon1.jpg",
+    "second": 0.676
+   },
+   {
+    "master": "f4ink-v031/ink-1",
+    "max": 0.662,
+    "nearest": "Abbott1.jpg",
+    "second": 0.645
+   }
+  ]
+ },
+ "rows": [
+  {
+   "master": "f4ink/ink-1",
+   "max": 0.669,
+   "nearest": "Walk1.jpg",
+   "second": 0.626
+  },
+  {
+   "master": "f4ink/ink-4",
+   "max": 0.577,
+   "nearest": "Walk1.jpg",
+   "second": 0.558
+  },
+  {
+   "master": "f4ink/ink-12",
+   "max": 0.556,
+   "nearest": "WeaponToolDuality1.jpg",
+   "second": 0.551
+  },
+  {
+   "master": "f4ink-v02/ink-1",
+   "max": 0.687,
+   "nearest": "Weapon1.jpg",
+   "second": 0.676
+  },
+  {
+   "master": "f4ink-v02/ink-4",
+   "max": 0.571,
+   "nearest": "HepWritesRealTime1.jpg",
+   "second": 0.53
+  },
+  {
+   "master": "f4ink-v02/ink-12",
+   "max": 0.496,
+   "nearest": "BeforeAndAfter1.jpg",
+   "second": 0.48
+  },
+  {
+   "master": "f4ink-v03/ink-1",
+   "max": 0.382,
+   "nearest": "WhereIsAbbott1.jpg",
+   "second": 0.371
+  },
+  {
+   "master": "f4ink-v03/ink-4",
+   "max": 0.586,
+   "nearest": "OfferWeapon1.jpg",
+   "second": 0.566
+  },
+  {
+   "master": "f4ink-v03/ink-12",
+   "max": 0.582,
+   "nearest": "Humanity1.jpg",
+   "second": 0.566
+  },
+  {
+   "master": "f4ink-v031/ink-1",
+   "max": 0.662,
+   "nearest": "Abbott1.jpg",
+   "second": 0.645
+  },
+  {
+   "master": "f4ink-v031/ink-4",
+   "max": 0.588,
+   "nearest": "OfferWeapon1.jpg",
+   "second": 0.558
+  },
+  {
+   "master": "f4ink-v031/ink-12",
+   "max": 0.515,
+   "nearest": "Costello1.jpg",
+   "second": 0.51
+  }
+ ],
+ "about": "G4 (BAR_F; research/ip.md rule 6) on the 12 ink masters shown to Luis on 2026-11-17 (F4-ink 0.1, 0.2, 0.3, 0.3.1; 1, 4 and 12 clauses): the marks layer, best rotation and mirror, against the 38 Wolfram logograms, by research/ip_probe/simprobe.py. Numbers and file names only. Not the 1,000-master corpus the rule asks before a publish."
+}
