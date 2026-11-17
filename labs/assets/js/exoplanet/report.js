@@ -53,7 +53,8 @@ export function facts(p, albedo) {
     mass_forecast_Mearth: fc ? r(fc.median, 2) : null, mass_forecast_68: fc ? [r(fc.lo, 2), r(fc.hi, 2)] : null,
     size_class: cls ? cls.label + (cls.fromLimit ? ' (from the radius limit)' : '') : 'unknown: no radius measured',
     archive_limits: limitsLine(p) || null,
-    period_days: r(p.P, 4), orbit_AU: r(a, 3), eccentricity: r(p.ecc, 2),
+    // the orbit as sheet B prints it, so the note and the sheet agree (a wide orbit printed whole: 7,493, not 7,490)
+    period_days: r(p.P, 4), orbit_AU: isNum(a) ? +fmt(a, 3).replace(/,/g, '') : null, eccentricity: r(p.ecc, 2),
     insolation_Searth: S,
     teq_published_K: isNum(p.Teq) ? Math.round(p.Teq) : null,
     teq_this_page_K: teq ? Math.round(teq) : null, albedo_assumed: albedo,

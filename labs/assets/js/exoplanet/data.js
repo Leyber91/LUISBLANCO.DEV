@@ -24,7 +24,7 @@
    (tests/looks.test.mjs).
    ============================================================ */
 
-import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, hzPosition, insolation, luminosity, seff, photopicFraction } from './science.js';
+import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, hzPosition, insolation, luminosity, seff, photopicFraction, semiMajor } from './science.js';
 import { CHEN_KIPPING, KOPPARAPU } from './config.js';
 import { scenariosFor, bareDay, tsubForDay, fitMass, BARE, V_ESC_EARTH } from './air.js';
 
@@ -78,7 +78,8 @@ export function physics(p, opts = {}) {
   const Teff = p.st_teff ?? 5600;
   const Mstar = p.st_mass ?? clamp(Math.pow(Teff / 5772, 1.7), 0.1, 1.6);
   const Rstar = p.st_rad ?? clamp(Math.pow(Mstar, 0.8), 0.1, 4.0);  // solar radii (for star angular size)
-  const a = p.pl_orbsmax ?? (p.pl_orbper ? Math.cbrt(Math.pow(p.pl_orbper / 365.25, 2) * Mstar) : 1);
+  // the page's one orbit (starlight.js semiMajor); a stand-in from the stand-in star only where the archive gives neither
+  const a = semiMajor(p).a ?? p.pl_orbsmax ?? (p.pl_orbper ? Math.cbrt(Math.pow(p.pl_orbper / 365.25, 2) * Mstar) : 1);
   const P = p.pl_orbper ?? 365.25 * Math.sqrt(a * a * a / Mstar);   // days
 
   // radius soft-membership (single tiling scheme)

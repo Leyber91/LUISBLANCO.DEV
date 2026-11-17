@@ -33,6 +33,15 @@
      equilibrium temperature computed from the star: HD 28109 b
      read 33.5 times Earth's sunlight beside 885 K, which is about
      147 times.
+   - The orbit is Kepler's third law from the period, the star's
+     mass and the planet's measured mass, wherever the period and
+     the star's mass exist; the archive's pl_orbsmax only where one
+     is missing, and named beside where the two differ by more than
+     ORBIT_DIFF. Decided 2026-11-17 by backtest_orbit.py: the
+     composite table can take the orbit from one paper and the star
+     from another (Kepler-1649 c), and every independent paper on
+     the same star and orbit that decides supports Kepler's law.
+     The view D drawing, sheet B's orbit and S all use this one a.
    - The luminosity is the same inputs' R^2 (Teff / 5772 K)^4, so
      that S = L / a^2 for every planet the page can compute; the
      archive's st_lum only when the radius or the temperature is
@@ -91,11 +100,38 @@ export function luminosity(p) {
   return { L: null, src: 'none', archive: null };
 }
 
-/* Orbit size in AU: the archive's, else Kepler's third law from the period and the star's mass. */
+/* Earth's mass in solar masses: the ratio of the two GM (IAU 2015 nominal), 3.986004e14 / 1.3271244e20. */
+export const M_EARTH_IN_SUN = 3.986004e14 / 1.3271244e20;
+/* The archive's orbit is named beside Kepler's when the two differ by more than this share. */
+export const ORBIT_DIFF = 0.10;
+const TRUE_MASS = new Set(['Mass', 'Msini', 'Msin(i)/sin(i)']);
+/* The planet's own mass in solar masses where the archive measures one (a minimum mass counts); else none. A bound on
+   the mass is never used (catalog.js has already moved it out of p.M). */
+const ownMass = (p) => (pos(p.M) && TRUE_MASS.has(p.Mprov) ? p.M * M_EARTH_IN_SUN : 0);
+
+/* Orbit size in AU: { a, src, archive }. Kepler's third law from the period, the star's mass and the planet's own
+   measured mass, wherever the period and the star's mass exist; the archive's pl_orbsmax only where one is missing.
+   Decided 2026-11-17 by labs/assets/data/exomania/backtest_orbit.py: the composite table takes its orbit from one paper
+   and the star from another, and where independent papers describe the same star and orbit, every one of them that
+   decides supports Kepler's law (Kepler-1649 c: 0.0649 AU in the archive from an old stellar mass, 0.0827 AU from the
+   0.198 solar masses its discovery paper gives, which states 74% of Earth's flux). archive: the archive's value,
+   shown beside where it differs by more than ORBIT_DIFF. */
 export function semiMajor(p) {
-  if (isNum(p.a)) return { a: p.a, src: 'archive' };
-  if (isNum(p.P) && isNum(p.Ms)) return { a: Math.cbrt(Math.pow(p.P / 365.25, 2) * p.Ms), src: "Kepler's third law" };
-  return { a: null, src: 'none' };
+  const archive = isNum(p.a) ? p.a : null;
+  if (pos(p.P) && pos(p.Ms)) return { a: Math.cbrt(Math.pow(p.P / 365.25, 2) * (p.Ms + ownMass(p))), src: "Kepler's third law", archive };
+  if (archive !== null) return { a: archive, src: 'archive', archive };
+  return { a: null, src: 'none', archive: null };
+}
+/* Whether the archive's orbit is to be named beside the one Kepler's law gives. */
+export const orbitDiffers = (o) => o.src === "Kepler's third law" && pos(o.archive) && Math.abs(o.a / o.archive - 1) > ORBIT_DIFF;
+/* What the page says about the orbit: where it comes from, and the archive's value where it differs. */
+export function orbitNote(o) {
+  if (o.src === 'archive') return 'The orbit is the archive\'s: it lacks the period or the star\'s mass.';
+  if (o.src !== "Kepler's third law") return '';
+  const base = 'The orbit is derived from the period and the star\'s mass, by Kepler\'s third law.';
+  if (!orbitDiffers(o)) return base;
+  const pc = Math.round(Math.abs(o.archive / o.a - 1) * 100);
+  return `${base} The archive lists ${num(o.archive, 3)} AU (NASA Exoplanet Archive, PSCompPars), ${pc}% ${o.archive > o.a ? 'more' : 'less'}.`;
 }
 
 /* The starlight at a, for a star of temperature T and radius R, relative to Earth's. */

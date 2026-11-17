@@ -5,7 +5,7 @@
    ============================================================ */
 
 import { TOURS, VALLEY } from './config.js';
-import { earthLikeness, insolation, transitGeometry, density, isNum } from './science.js';
+import { earthLikeness, insolation, transitGeometry, density, semiMajor, isNum } from './science.js';
 import { fmt, fmtInt } from './views/common.js';
 
 const top = (arr, n, key, desc = true) =>
@@ -33,8 +33,8 @@ export function tourStops(key, list) {
     if (ecc) add(ecc, `The most eccentric orbit with a measured radius: e = ${fmt(ecc.ecc, 2)}.`);
     const hug = top(measured, 1, (p) => { const g = transitGeometry(p); return g ? g.aRs : null; }, false)[0];
     if (hug) add(hug, `Orbits ${fmt(transitGeometry(hug).aRs, 3)} stellar radii from its star's centre.`);
-    const wide = top(measured, 1, (p) => p.a)[0];
-    if (wide) add(wide, `The widest orbit with a measured radius: ${fmtInt(wide.a)} AU.`);
+    const wide = top(measured, 1, (p) => semiMajor(p).a)[0];   // the orbit every sheet prints
+    if (wide) add(wide, `The widest orbit with a measured radius: ${fmtInt(semiMajor(wide).a)} AU.`);
     const longT = top(measured.filter((p) => p.method === 'Transit'), 1, (p) => p.P)[0];
     if (longT) add(longT, `The longest period caught in transit: ${fmtInt(longT.P)} days.`);
     return stops.slice(0, t.n);

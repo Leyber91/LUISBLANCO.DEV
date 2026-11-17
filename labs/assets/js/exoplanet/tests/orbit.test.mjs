@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { PITCH_LIMIT, HOME, TOUCH_SLOP, orbitFrame, orbitDir, pitchMax, farSideYaw, touchTurns } from '../orbit.js';
 import { SOLAR_REACH, viewExtent, solarWords, systemModel, systemCaption, strays } from '../views/system.js';
-import { insolation, hzPosition } from '../science.js';
+import { insolation, hzPosition, semiMajor } from '../science.js';
 import { placedAt, zoneWords, starlightText, extrapolatedWords } from '../starlight.js';
 import { fmt } from '../views/common.js';
 import { SOLAR } from '../config.js';
@@ -163,7 +163,7 @@ const L = unit(STAR), TILT = Math.asin(L[1]);
   const e = { ...star, name: 'Cnc-like e', a: 0.0154, P: 0.7366, ecc: 0.05 }, f = { ...star, name: 'Cnc-like f', a: 0.7708, P: 260.6, ecc: 0.08 };
   const f2 = { ...f, Teff: 5198, Rs: 0.98, Ms: 1.015 };   // the archive lists the star with other values for f
   const m1 = systemModel(e, [e, f]), m2 = systemModel(e, [e, f2]);
-  yes('the zone is placed by the selected world\'s own starlight', m1.hz.by === 'S' && Math.abs(m1.hz.inner - e.a * Math.sqrt(insolation(e).S / m1.hz.sInner)) < 1e-12);
+  yes('the zone is placed by the selected world\'s own starlight', m1.hz.by === 'S' && Math.abs(m1.hz.inner - semiMajor(e).a * Math.sqrt(insolation(e).S / m1.hz.sInner)) < 1e-12);
   yes('the selected world is drawn in its own zone', placedAt(m1.hz, e.a) === hzPosition(e).key && placedAt(m2.hz, e.a) === hzPosition(e).key);
   yes('a planet of the same star row is drawn in its own zone, and named nowhere', strays(m1).length === 0 && !systemCaption(m1).includes('Cnc-like f'), systemCaption(m1));
   const s2 = strays(m2);
@@ -188,7 +188,7 @@ const L = unit(STAR), TILT = Math.asin(L[1]);
   yes('a world with no orbit has its zone placed by its star\'s luminosity, said so', ml.hz.by === 'L' && cl.includes(`Placed by the star's luminosity, ${fmt(0.25, 3)} L☉, and the star's 5,772 K`), cl);
   yes('and a zone off the view is set against the outermost orbit drawn, without throwing', ml.hzOff && cl.includes(`The zone lies ${fmt(ml.hz.inner / ml.outer, 2)}x farther out than the outermost orbit drawn, off this view.`), cl);
   const far = { host: 'Far', name: 'Far b', Teff: 5772, Rs: 1, a: 0.01, P: 0.37, Ms: 1, ecc: 0.5 }, mf = systemModel(far, [far]);   // eccentric: its orbit reaches past a
-  yes('with an orbit of its own, against this orbit', mf.hzOff && systemCaption(mf).includes(`The zone lies ${fmt(mf.hz.inner / far.a, 2)}x farther out than this orbit, off this view.`), systemCaption(mf));
+  yes('with an orbit of its own, against this orbit', mf.hzOff && systemCaption(mf).includes(`The zone lies ${fmt(mf.hz.inner / semiMajor(far).a, 2)}x farther out than this orbit, off this view.`), systemCaption(mf));
   yes('no temperature, no zone, said so', systemCaption(systemModel({ ...far, Teff: null }, [{ ...far, Teff: null }])).startsWith('[REAL] No habitable zone: the archive lacks this star\'s temperature, or the starlight to place its edges.'));
 }
 

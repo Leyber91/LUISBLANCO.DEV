@@ -18,7 +18,7 @@ import { loadSnapshot, joinRoster, provisionalMeasured, countLine } from './cata
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
-  insolation, monteCarlo, skyView, starColour, isNum,
+  insolation, monteCarlo, skyView, starColour, semiMajor, isNum,
 } from './science.js';
 import { createPlot, plotValue } from './views/plot.js';
 import { createSystem, drawInset } from './views/system.js';
@@ -251,7 +251,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   const prev = st.sel;
   st.sel = p;
   if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
-  st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (a.a ?? a.P ?? 0) - (b.a ?? b.P ?? 0));
+  st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (semiMajor(a).a ?? a.P ?? 0) - (semiMajor(b).a ?? b.P ?? 0));
   const apply = () => {
     setReticle(p); placeWorld();
     if (desktop()) drawInset($('inset'), p, st.system);

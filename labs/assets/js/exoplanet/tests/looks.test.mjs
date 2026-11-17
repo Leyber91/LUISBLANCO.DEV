@@ -13,7 +13,7 @@
    ============================================================ */
 
 import { physics, classify, lookOf, toParams, zoneOf, fluidPalette, LOOKS, AIR_THIN, AIR_FULL, lockRadiusAU, TAU_EARTH, SHELL_STRETCH } from '../data.js';
-import { photopicFraction } from '../science.js';
+import { photopicFraction, semiMajor } from '../science.js';
 import { loadSnapshot } from '../catalog.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -105,6 +105,10 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   // insolation against the star's own edges, not the picture's stand-in radius
   const noRadius = { ...by.Earth, pl_name: 'an Earth whose star has no radius', name: 'an Earth whose star has no radius', st_rad: null, Rs: null, S: 0.2 };
   yes('a world whose star has no radius is placed by the archive\'s starlight, as its sheet is', zoneOf(noRadius).S === 0.2 && Math.abs(zoneOf(noRadius).sOuterOpt - z.sOuterOpt) < 1e-12, `${zoneOf(noRadius).S}`);
+  // the picture draws the orbit every sheet prints (starlight.js semiMajor): Kepler's law from the period and the star's
+  // mass, where the archive's orbit belongs to another solution (backtest_orbit.py)
+  const offOrbit = { ...by.Earth, pl_name: 'an Earth the archive puts at 0.8 AU', name: 'an Earth the archive puts at 0.8 AU', pl_orbsmax: 0.8, a: 0.8 };
+  yes('the picture draws the orbit the sheets print, not the archive\'s', Math.abs(physics(offOrbit).a - 1) < 1e-9 && physics(offOrbit).a === semiMajor(offOrbit).a, `${physics(offOrbit).a}`);
   const aIn = 1 / Math.sqrt(z.sInnerOpt), aOut = 1 / Math.sqrt(z.sOuterOpt);
   yes('just inside the recent-Venus distance an Earth is shrouded, just outside it keeps seas', lookOf(earthAt(aIn * 0.99)) === 'shrouded' && lookOf(earthAt(aIn * 1.01)) === 'temperate', `${lookOf(earthAt(aIn * 0.99))} / ${lookOf(earthAt(aIn * 1.01))}`);
   // the cold limit, on a world with thin air: its temperature alone would leave it a desert, so only the flux rule makes it ice

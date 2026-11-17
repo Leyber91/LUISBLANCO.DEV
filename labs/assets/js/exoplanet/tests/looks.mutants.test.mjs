@@ -65,6 +65,8 @@ const MUTANTS = [
   ["no floor under the night", `* ph.Teq : 0.95 * ph.Teq, 40);`, `* ph.Teq : 0.95 * ph.Teq, 0);`],
   ["the night floor at 100 K", `* ph.Teq : 0.95 * ph.Teq, 40);`, `* ph.Teq : 0.95 * ph.Teq, 100);`],
   ['the picture\'s zone from its own stand-ins where the sheets have one', `if (pos.key !== 'unknown') return { S: pos.S,`, `if (pos.key === 'none') return { S: pos.S,`],
+  ['the picture\'s orbit the archive\'s first, as before', 'const a = semiMajor(p).a ?? p.pl_orbsmax ??', 'const a = p.pl_orbsmax ?? semiMajor(p).a ??'],
+  ['the picture\'s orbit the archive\'s wherever the sheets have one', 'const a = semiMajor(p).a ?? p.pl_orbsmax ??', 'const a = (semiMajor(p).a && p.pl_orbsmax) ??'],
 ];
 
 process.exit(await runMutants({ here, file: 'data.js', test: 'looks.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));

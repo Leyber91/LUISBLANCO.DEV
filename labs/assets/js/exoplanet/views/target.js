@@ -18,7 +18,7 @@ import {
   forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, limitOf, limitKind, limitText, hzPosition, insolation,
   semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
 } from '../science.js';
-import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers } from '../starlight.js';
+import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers, orbitNote, orbitDiffers } from '../starlight.js';
 import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
 import { fmt, fmtInt } from './common.js';
 import { el } from '../../kit/dom.js';
@@ -55,8 +55,8 @@ function measuredRows(p, A) {
   const eText = isNum(p.ecc) ? `e ${fmt(p.ecc, 2)}` : eL ? `e ${limitText(eL, 2)}` : 'e unknown';
   const sky = skyView(p);
   const skyNote = sky ? `From its surface its star spans ${fmt(sky.angDeg, 2)}\u00b0, ${fmt(sky.vsSun, 2)} times the Sun's width from Earth.` : '';
-  if (a.a) rows.push({ key: 'a', n: 'orbit', v: fmt(a.a, 3), u: 'AU', pm: eText, kind: a.src === 'archive' ? 'm' : 'd', refs: a.src === 'archive' ? [rf.P] : [],
-    note: [a.src === "Kepler's third law" ? 'The orbit is derived from the period and the star\'s mass.' : '', eL ? 'The eccentricity is only a bound, so orbits are drawn circular.' : '', skyNote].filter(Boolean).join(' '), iv: { value: a.a } });
+  if (a.a) rows.push({ key: 'a', n: 'orbit', v: fmt(a.a, 3), u: 'AU', pm: eText, kind: a.src === 'archive' ? 'm' : 'd', refs: a.src === 'archive' || orbitDiffers(a) ? [COMPOSITE] : [],
+    note: [orbitNote(a), eL ? 'The eccentricity is only a bound, so orbits are drawn circular.' : '', skyNote].filter(Boolean).join(' '), iv: { value: a.a } });
   else if (limitOf(p, 'a')) rows.push({ key: 'a', n: 'orbit', v: boundV(limitOf(p, 'a')), u: 'AU', pm: limitKind(limitOf(p, 'a')), iv: false });
   else rows.push({ key: 'a', n: 'orbit', v: 'none', pm: eText, iv: false });
   if (S.S && S.src === 'archive') rows.push(starlightRow(p, S));   // the archive's value stands with the measured

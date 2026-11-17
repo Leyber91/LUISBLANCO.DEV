@@ -22,6 +22,9 @@
      where another says there is none;
    - the printed equilibrium temperature is not the one the
      printed starlight gives (T = 278.3 K S^(1/4) (1 - A)^(1/4));
+   - the orbit printed on sheet B, in the chain and in the note is
+     not the one view D draws (one a for every view, ticket 2.14 and
+     labs/assets/data/exomania/backtest_orbit.py);
    - two views put one planet in two zones: the words of each view,
      where view D draws its orbit against the zone (inner edge to
      outer edge in AU), and the zone the search's words claim for
@@ -105,7 +108,7 @@ function views(p) {
   const row = (k) => all.find((r) => r.key === k) || null;
   const bench = compareHTML([p], EARTH, A), chain = chainHTML(p, A);
   const f = facts(p, A), note = deterministicNote(p, f);
-  const out = { S: [], Slo: [], Shi: [], T: [], Tlo: [], Thi: [], L: [], zone: [], extrap: [] };
+  const out = { S: [], Slo: [], Shi: [], T: [], Tlo: [], Thi: [], L: [], a: [], zone: [], extrap: [] };
   const put = (q, view, text, num) => { out[q].push({ view, text: String(text ?? ''), n: num, none: num === null && NONE.test(String(text ?? '').trim()) }); };
   const rangeOf = (s) => { const m = String(s || '').match(new RegExp(`${NUM} to ${NUM}`)); return m ? [printed(m[1]), printed(m[2])] : null; };
 
@@ -136,6 +139,17 @@ function views(p) {
   if (f.teq_this_page_K !== null && f.teq_this_page_K !== undefined) put('T', 'note facts', f.teq_this_page_K, printed(String(f.teq_this_page_K)));
   const lT = hitFact(p, 'T');
   if (!/published|archive/.test(lT)) { const m = lT.match(new RegExp(`, ${NUM} K(?: computed)?$`)); if (m || /no equilibrium temperature$/.test(lT)) put('T', 'list', lT, m ? printed(m[1]) : null); }
+
+  // the orbit: printed on sheet B, in the chain and the note, and drawn by view D (the value itself, unrounded)
+  const ar = row('a');
+  if (ar && printed(ar.v)) put('a', 'sheet B', ar.v, printed(ar.v));
+  const cA = chainStep(chain, 'Orbit');
+  const cAi = chain.match(new RegExp(`<li><b>Orbit</b> <span class="ch-v">${NUM} AU`));
+  if (cAi) put('a', 'chain', cAi[1], printed(cAi[1]));
+  const nA = note.match(new RegExp(` at ${NUM} AU\\.`));
+  if (nA) put('a', 'note', nA[1], printed(nA[1]));
+  const drawn = models.get(p).m.planets.find((x) => x.p === p);
+  if (drawn) put('a', 'view D, drawn', String(drawn.a), { s: String(drawn.a), v: drawn.a, lo: drawn.a, hi: drawn.a });
 
   // the luminosity
   const st = row('star');
@@ -172,7 +186,7 @@ const agree = (xs) => { const ns = xs.map((x) => x.n).filter(Boolean); return !n
 
 for (const p of list) {
   const v = views(p);
-  for (const q of ['S', 'Slo', 'Shi', 'T', 'Tlo', 'Thi', 'L']) {
+  for (const q of ['S', 'Slo', 'Shi', 'T', 'Tlo', 'Thi', 'L', 'a']) {
     const xs = v[q];
     if (!agree(xs)) bad.numbers.push(`${p.name} ${q}: ${show(xs)}`);
     if (xs.some((x) => x.n) && xs.some((x) => x.none)) bad.none.push(`${p.name} ${q}: ${show(xs)}`);
@@ -211,7 +225,7 @@ const misnamed = found.filter((p) => !claims.has(own.get(p)));
 
 const ex = (xs) => `${xs.length}${xs.length ? `; first: ${xs.slice(0, 4).join(' || ')}` : ''}`;
 console.log(`${list.length} planets, ${list.filter((p) => byHost.get(p.host).length > 1).length} in systems of two or more`);
-yes('no two views print numbers for one quantity that no one value rounds to', bad.numbers.length === 0, ex(bad.numbers));
+yes('no two views print numbers for one quantity that no one value rounds to (the starlight, Teq and its range, the luminosity, the orbit)', bad.numbers.length === 0, ex(bad.numbers));
 yes('no view prints a number where another says there is none', bad.none.length === 0, ex(bad.none));
 yes('the equilibrium temperature on the sheet is the one its starlight gives', bad.teqFromS.length === 0, ex(bad.teqFromS));
 yes('no planet is in two zones across sheet A, sheet B, the bench, the note, the chain and view D', bad.zones.length === 0, ex(bad.zones));
