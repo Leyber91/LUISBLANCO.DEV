@@ -11,6 +11,7 @@ import { classify } from './data.js';
 import { equilibriumTemp, insolation, earthLikeness, sizeClassOf } from './science.js';
 import { PHYS } from './config.js';
 import { int } from '../kit/format.js';
+import { starNum } from './starlight.js';
 
 const isNum = (v) => typeof v === 'number' && isFinite(v);
 
@@ -104,11 +105,13 @@ export function kindLine(p) {
 export function hitFact(p, key) {
   const t = tempOf(p);
   const v = key === 'dist' ? (isNum(p.dist) ? `${fmtInt(p.dist * PHYS.PC_LY)} ly` : 'distance unknown')
-    : key === 'T' ? (t ? `${fmtInt(t.T)} K${t.published ? '' : ' computed'}` : 'no equilibrium temperature')
+    // the page's own temperature is printed as the sheets print it; the archive's is named as the archive's, and a world
+    // tempOf passes over for its own heat says that, not that it has no temperature (its sheet prints the starlight's)
+    : key === 'T' ? (t ? `${fmtInt(t.T)} K${t.published ? ' published' : ''}` : p.method === 'Imaging' || isNum(p.Teq) ? 'seen by its own heat' : 'no equilibrium temperature')
     : key === 'R' ? (isNum(p.R) ? `${fmt(p.R, 3)} R⊕` : 'no radius')
     : key === 'P' ? (isNum(p.P) ? `${fmt(p.P, 3)} d` : 'no period')
     : key === 'year' ? (p.year ? String(p.year) : '')
-    : key === 'S' ? (insolation(p).S ? `${fmt(insolation(p).S, 3)} S⊕` : 'no insolation')
+    : key === 'S' ? (insolation(p).S ? `${starNum(insolation(p).S, 3)} S⊕` : 'no insolation')   // the starlight as every sheet writes it
     : isNum(earthLikeness(p)) ? `likeness ${earthLikeness(p).toFixed(2)}` : '';
   const k = kindLine(p);
   return v ? `${k}, ${v}` : k;

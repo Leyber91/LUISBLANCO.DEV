@@ -31,9 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # the whole history, so that the mutation test can name what a pull request changed (git diff origin/main...HEAD)
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # 22: tools/drive.mjs talks to Chrome over the WebSocket Node has had since 22; its selftest and that of
+          # tools/invariants.mjs run below, on the runner's Chrome
+          node-version: "22"
       - name: site checks
         run: |
           if [ -f tools/site_check.mjs ]; then node tools/site_check.mjs; else echo "NOT_CHECKED: tools/site_check.mjs does not exist yet (the first roadmap item builds it)"; fi
@@ -52,10 +57,22 @@ jobs:
       - name: evolution
         run: |
           if [ -f tools/evolution.mjs ]; then node tools/evolution.mjs selftest && node tools/evolution.mjs; else echo "NOT_CHECKED: tools/evolution.mjs does not exist"; fi
-      # a selftest is only as good as the broken rules it catches: each listed rule is broken in a copy and must fail it
+      # the page driver and the rules a page keeps after every step of a drive, in the runner's headless Chrome
+      - name: drive and invariants
+        run: |
+          if [ -f tools/drive.mjs ]; then node tools/drive.mjs selftest; else echo "NOT_CHECKED: tools/drive.mjs does not exist"; fi
+          if [ -f tools/invariants.mjs ]; then node tools/invariants.mjs selftest; else echo "NOT_CHECKED: tools/invariants.mjs does not exist"; fi
+      # a selftest is only as good as the broken rules it catches: each listed rule is broken in a copy and must fail it.
+      # On a pull request tools/mutate.mjs asks git what changed since main (renames split) and runs a gated list (drive
+      # and invariants, about 55 minutes here; mutate's own, about 8) only when one of its files changed; on a push to
+      # main every list runs. It says which way it went.
       - name: mutation test of the gates
         run: |
-          if [ -f tools/mutate.mjs ]; then node tools/mutate.mjs selftest && node tools/mutate.mjs; else echo "NOT_CHECKED: tools/mutate.mjs does not exist"; fi
+          if [ -f tools/mutate.mjs ]; then
+            since=""
+            if [ "${{ github.event_name }}" = "pull_request" ]; then since="--changed-since origin/main"; fi
+            node tools/mutate.mjs selftest && node tools/mutate.mjs $since
+          else echo "NOT_CHECKED: tools/mutate.mjs does not exist"; fi
       - name: model route tests
         run: |
           if [ -f workers/model-route/test.mjs ]; then node workers/model-route/test.mjs; else echo "NOT_CHECKED: workers/model-route/test.mjs does not exist"; fi

@@ -26,7 +26,9 @@ import { spawnSync } from 'node:child_process';
 /* The two jobs of .github/workflows/gates.yml. A pull request is not merged until both have reported. */
 const REQUIRED = ['privacy', 'site'];
 const FLAGS = ['--squash', '--merge'];
-const WAIT_MS = 20 * 60 * 1000, POLL_MS = 10 * 1000, CALL_MS = 2 * 60 * 1000;
+// 150 minutes: the site job of a pull request that changes the files of the Chrome lists took 64 on 2026-11-16, before
+// those lists grew and came to run one copy at a time (tools/mutate.mjs); waiting longer weakens nothing
+const WAIT_MS = 150 * 60 * 1000, POLL_MS = 10 * 1000, CALL_MS = 2 * 60 * 1000;
 const VIEW = 'headRefOid,headRefName,baseRefName,state';
 
 // checks: [{name, bucket}] as `gh pr checks --json name,bucket` gives them. bucket is pass, fail, pending,
@@ -190,6 +192,7 @@ async function selftest() {
     ['checks read while the branch moved are not used: it looks again', moved.code === 0 && moved.calls.filter((c) => c.includes('checks')).length === 2 && moved.merges[0][2] === 'ccc3333'],
     ['a skipped gate is never merged', skipped.code === 1 && skipped.merges.length === 0 && skipped.text.includes('NOT MERGED')],
     ['gates that never start are given up on at the deadline, not merged', never.code === 3 && never.merges.length === 0 && never.calls.filter((c) => c.includes('checks')).length === WAIT_MS / POLL_MS + 1],
+    ['the deadline is 150 minutes, well past the 64 a site job running the Chrome lists took', WAIT_MS === 150 * 60 * 1000 && never.text.includes('after 150 minutes')],
     ['labs/foundation is merged with a merge commit, and the report says so', foundation.code === 0 && foundation.merges[0][0] === '--merge' && foundation.text.includes('(merge;')],
     ['a flag on the command line overrides the branch', squashFlag.code === 0 && squashFlag.merges[0][0] === '--squash'],
     ['a flag that is not --squash or --merge is refused before anything is asked of GitHub', badFlag.code === 2 && badFlag.calls.length === 0],
@@ -203,7 +206,7 @@ async function selftest() {
     ['a pull request gh cannot read is not merged, and the reason is shown', noView.code === 1 && noView.merges.length === 0 && noView.text.includes('HTTP 404')],
     ['a pull request whose branch or base name did not come back is not merged', noHead.code === 1 && noHead.merges.length === 0 && noBase.code === 1 && noBase.merges.length === 0],
     ['a gh that exits non-zero is not trusted, whatever it printed', ghFailed.code === 1 && ghFailed.merges.length === 0],
-    ['a failure of gh is reported at once, not after twenty minutes', ghDown.code === 1 && ghDown.calls.length === 2 && ghDown.text.includes('HTTP 502')],
+    ['a failure of gh is reported at once, not after the deadline', ghDown.code === 1 && ghDown.calls.length === 2 && ghDown.text.includes('HTTP 502')],
     ['a closed pull request is not merged', closed.code === 1 && closed.merges.length === 0],
     ['the exit status and the error text of the real command come back', (() => { const a = child(3), b = child(0); return a.code === 3 && a.err === 'why' && a.out === 'out' && b.code === 0 && realGh(['x'], 'no-such-command-on-this-machine').code === -1; })()],
   ];

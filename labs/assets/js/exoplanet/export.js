@@ -12,6 +12,7 @@ import {
 import { facts, deterministicNote, limitsLine } from './report.js';
 import { tokens, alpha, fmt, fmtInt } from './views/common.js';
 import { localDay, range } from '../kit/format.js';
+import { starNum, STASSUN } from './starlight.js';
 
 function download(blob, name) {
   const a = document.createElement('a');
@@ -66,7 +67,7 @@ export function exportPlate(p, engine, views, albedo) {
     ['radius', f.radius_Rearth ? `${fmt(f.radius_Rearth, 3)} R⊕` : f.radius_limit_Rearth ? `${f.radius_kind === 'upper limit' ? '<' : '>'} ${fmt(f.radius_limit_Rearth, 3)} R⊕ (${f.radius_kind})` : 'no radius measured'],
     ['mass', f.mass_limit_Mearth ? `${f.mass_kind === 'upper limit' ? '<' : '>'} ${fmt(f.mass_limit_Mearth, 3)} M⊕ (${f.mass_kind})` : isNum(p.M) ? `${fmt(p.M, 3)} M⊕ (${f.mass_kind})` : 'not measured'],
     ['mass forecast', f.mass_forecast_Mearth ? `${fmt(f.mass_forecast_Mearth, 2)} M⊕ (68%: ${range(f.mass_forecast_68[0], f.mass_forecast_68[1])})` : '—'],
-    ['period', isNum(p.P) ? `${fmt(p.P, 4)} d` : '—'], ['insolation', f.insolation_Searth ? `${fmt(f.insolation_Searth, 3)} S⊕` : '—'],
+    ['period', isNum(p.P) ? `${fmt(p.P, 4)} d` : '—'], ['insolation', f.insolation_Searth ? `${starNum(f.insolation_Searth, 3)} S⊕` : '—'],
     ['Teq', f.teq_this_page_K ? `${fmtInt(f.teq_this_page_K)} K at albedo ${albedo.toFixed(2)}` : '—'],
     ['habitable zone', f.habitable_zone], ['star', `${isNum(p.Teff) ? fmtInt(p.Teff) + ' K' : '—'}, ${isNum(p.Rs) ? fmt(p.Rs, 3) + ' R☉' : '—'}`],
     ['transit', f.transit_depth_ppm ? `${fmtInt(f.transit_depth_ppm)} ppm deep, ${fmt(f.transit_duration_h, 3)} h long` : '—'],
@@ -95,32 +96,42 @@ export function exportPlate(p, engine, views, albedo) {
   cv.toBlob((b) => b && download(b, `exomania-${slug(p.name)}.png`), 'image/png');
 }
 
-export function exportCSV(list, filterFn, filterActive, albedo, label) {
-  const rows = filterActive ? list.filter(filterFn) : list;
+/* The CSV of a list of planets, as text: pure, so tests/routes.test.mjs reads it. The page's own orbit and starlight
+   (starlight.js) are inferred columns and are named so; the archive's values stand beside them under their own names.
+   filter: the words of the filter the list was cut by, or ''. */
+export function csvText(rows, albedo, filter = '') {
   const head = ['name', 'host', 'discovery_method', 'discovery_year', 'facility', 'radius_Rearth', 'radius_err', 'radius_measured',
-    'mass_Mearth', 'mass_provenance', 'mass_limit', 'period_d', 'a_AU', 'eccentricity', 'insolation_Searth', 'teq_published_K',
+    'mass_Mearth', 'mass_provenance', 'mass_limit', 'period_d', 'a_AU_page', 'a_AU_archive', 'eccentricity',
+    'insolation_Searth_page', 'insolation_lo68_page', 'insolation_hi68_page', 'insolation_Searth_archive', 'teq_published_K',
     'teff_K', 'star_radius_Rsun', 'distance_ly',
     'mass_forecast_median', 'mass_forecast_lo68', 'mass_forecast_hi68', 'teq_this_page_K', 'habitable_zone',
     'transit_depth_ppm_model', 'transit_duration_h_model', 'earth_likeness_illustrative', 'archive_limits'];
+  const archiveOwn = rows.filter((p) => insolation(p).src === 'archive').length;
   const q = (v) => (v === null || v === undefined || (typeof v === 'number' && !isFinite(v)) ? '' : typeof v === 'number' ? +v.toPrecision(5) : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
   const lines = [
-    `# Exomania survey export, ${localDay(Date.now())}. ${fmtInt(rows.length)} planets${filterActive ? ' (filter: ' + label + ')' : ''}.`,
-    `# Data: ${DATA.snapshotLabel}; weekly roster for planets confirmed after it. Acknowledgement: NASA Exoplanet Archive, operated by Caltech under contract with NASA.`,
-    `# Inferred columns: Chen & Kipping 2017 forecaster (log-uniform prior, censored by any mass limit), Teq at Bond albedo ${albedo} with full redistribution, Kopparapu et al. 2013 zone, transit model at the archive impact parameter (0 if absent).`,
+    `# Exomania survey export, ${localDay(Date.now())}. ${fmtInt(rows.length)} planets${filter ? ' (filter: ' + filter + ')' : ''}.`,
+    `# Data: ${DATA.snapshotLabel}; weekly roster for planets confirmed after it. Acknowledgement: NASA Exoplanet Archive, operated by Caltech under contract with NASA. The archive's own orbit and insolation are a_AU_archive and insolation_Searth_archive.`,
+    `# Inferred columns: a_AU_page, the orbit this page uses (Kepler's third law from the period and the star's mass; the archive's for a planet of two stars, a star whose values cite ${STASSUN}, or a missing period or mass); insolation_Searth_page, the starlight this page uses (the archive's luminosity over a_AU_page squared, or the star's radius and temperature where the archive gives no luminosity; equal to insolation_Searth_archive, the archive's own, for the ${archiveOwn} planet${archiveOwn === 1 ? ' here that lacks' : 's here that lack'} the orbit or the star; the median of the draws, with lo68 and hi68 its 68% range where the snapshot gives every input an error, blank elsewhere); Chen & Kipping 2017 forecaster (log-uniform prior, censored by any mass limit), Teq at Bond albedo ${albedo} with full redistribution from insolation_Searth_page, Kopparapu et al. 2013 zone placed by it, transit model at the archive impact parameter (0 if absent).`,
     '# Limits: mass_limit 1 means mass_Mearth is an upper limit, -1 a lower limit, 0 a value. Every other value the archive flags as a limit is left blank in its column and written in archive_limits as a bound (< upper, > lower). No limit is used in an inferred column as a value.',
     head.join(','),
   ];
   for (const p of rows) {
     const fc = forecastFor(p);
     const geo = transitGeometry(p);
+    const o = semiMajor(p), sl = insolation(p);
     lines.push([
-      p.name, p.host, p.method, p.year, p.facility, p.R, p.Rerr, p.measuredR ? 1 : 0, limitOf(p, 'M') ? limitOf(p, 'M').v : p.M, p.Mprov, p.Mlim, p.P, semiMajor(p).a, p.ecc,
-      insolation(p).S, p.Teq, p.Teff, p.Rs, isNum(p.dist) ? p.dist * PHYS.PC_LY : null,
+      p.name, p.host, p.method, p.year, p.facility, p.R, p.Rerr, p.measuredR ? 1 : 0, limitOf(p, 'M') ? limitOf(p, 'M').v : p.M, p.Mprov, p.Mlim, p.P, o.a, o.archive, p.ecc,
+      sl.S, sl.lo, sl.hi, p.S, p.Teq, p.Teff, p.Rs, isNum(p.dist) ? p.dist * PHYS.PC_LY : null,
       fc && fc.median, fc && fc.lo, fc && fc.hi, equilibriumTemp(p, albedo), hzPosition(p).key,
       geo ? geo.depthLD * 1e6 : null, geo ? geo.T14 : null, earthLikeness(p), limitsLine(p) || null,
     ].map(q).join(','));
   }
-  download(new Blob([lines.join('\n') + '\n'], { type: 'text/csv' }), `exomania-${filterActive ? 'filtered' : 'catalogue'}-${rows.length}.csv`);
+  return lines.join('\n') + '\n';
+}
+
+export function exportCSV(list, filterFn, filterActive, albedo, label) {
+  const rows = filterActive ? list.filter(filterFn) : list;
+  download(new Blob([csvText(rows, albedo, filterActive ? label : '')], { type: 'text/csv' }), `exomania-${filterActive ? 'filtered' : 'catalogue'}-${rows.length}.csv`);
   return rows.length;
 }
 
