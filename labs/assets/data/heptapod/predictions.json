@@ -1,0 +1,69 @@
+{
+  "about": "Heptapod's predictions, committed before the comparison that tests them (BAR_F G13; research/ip.md rule 9: arrive at the film's results by our own route). Each entry: the feature, its derivation, the prediction, how it is measured, and whether the film's value was known when it was written. Outcomes are written by the measuring script to predictions.results.json; this file is not edited after its comparison has run.",
+  "predictions": [
+    {
+      "id": "F4-P1",
+      "date": "2026-11-17",
+      "feature": "where the ring's gap falls",
+      "derivation": "Brush depletion: the brush is reloaded where ink pools, at the blot clusters, and its bristle reservoirs deplete with arc distance from the last reload (Strassmann 1986, the hairy-brush model; PLAN M1); the line breathes at its driest point (PLAN M6). So the ring's main gap falls in the largest arc between two neighbouring blot clusters.",
+      "prediction": "On the film's masters with a gap of at least 1 degree and at least 2 blot clusters, the centre of the main gap lies inside the largest inter-cluster arc in at least two thirds of them, and more often than gaps placed uniformly at random would (the mean share of the circle the largest arc covers).",
+      "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters: detail/ring.js gives the per-angle carrier, the gaps and the blot clusters (film-tools/table.py's merge rule).",
+      "filmValueKnown": false,
+      "filmValueKnownNote": "film.md 5.1 and 5.2 give the gaps' sizes and the clusters' spans, never where a gap sits relative to the clusters."
+    },
+    {
+      "id": "F4-P2",
+      "date": "2026-11-17",
+      "feature": "how the ring's width varies along it",
+      "derivation": "The same depletion: the further the brush is from its last reload, the less ink it lays, so the carrier thins with arc distance from the nearest blot cluster (Strassmann 1986; PLAN M1). Chiang gives thickness a meaning (inflection); the physics gives it a profile.",
+      "prediction": "On the film's masters with at least 1 blot cluster, the carrier's width outside the blots (at most 2.5 times its median) falls with angular distance to the nearest cluster: Spearman's rho is negative in at least two thirds of the masters, and the median rho is below -0.2.",
+      "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters, from detail/ring.js's per-angle carrier width and blot clusters.",
+      "filmValueKnown": false,
+      "filmValueKnownNote": "film.md 5.2 gives the width's coefficient of variation (0.51 to 1.21), never its relation to where the blots are."
+    },
+    {
+      "id": "F4-P3",
+      "date": "2026-11-17",
+      "feature": "whether the ring's width carries the direction of one stroke",
+      "derivation": "A ring is one stroke. Its brush is loaded where the stroke starts and its bristle reservoirs deplete with arc length along the stroke (Strassmann 1986, the hairy-brush model; PLAN M1), and the stroke starts and ends at the two edges of the main gap (the breath, PLAN M6). So, away from the taper into the gap and away from the blots, the width falls along the ring in one direction, from the gap edge where the stroke started to the edge where it ended. F4-P2 measured depletion symmetrically, from the nearest cluster on either side, which a stroke with a direction would blur; this is the directed form. Written after F4-P2 missed: of the per-angle widths, only F4-P2's one rank correlation per master, against symmetric distance, had been seen.",
+      "prediction": "On the film's masters with a main gap of at least 1 degree, the angles kept as in F4-P2 (carrier present, width at most 2.5 times its median, outside every blot cluster) and further than 25 degrees from the edges of every gap (a run of angles without carrier of at least 1 degree; 25 degrees is the taper of film.md 5.2), the absolute Spearman rho of width against arc position counted from the main gap ranks at or above the 75th percentile of the same statistic with the origin moved to each kept angle in turn (every distinct starting point; an origin anywhere inside the gap or its taper zones gives the same order as the gap's own), in at least two thirds of those masters. Under no direction the chance is 0.25 per master.",
+      "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters, from detail/ring.js's per-angle carrier width, gaps and blot clusters.",
+      "filmValueKnown": false,
+      "filmValueKnownNote": "film.md 5.2 gives the taper into a gap as a median over 34 stroke ends taken together, never a trend along the ring or a difference between a stroke's two ends.",
+      "ifConfirmed": "The film's ring would show where it was started, in its width. PLAN V18 forbids a start mark in our own figures; a confirmation is reported against V18 and never used to loosen it."
+    },
+    {
+      "id": "F4-P4",
+      "date": "2026-11-17",
+      "feature": "how many filaments an inked figure carries, from its grammar alone",
+      "derivation": "F4-ink (BAR_F, order of 2026-11-17): every node of a clause other than its main event is drawn as one filament leaving the clause's mass, and a node hanging from such a node is a branch of its filament, so the suite (detail/filaments.js, which counts a branched tendril once) reads one filament per child of each main event. In randomText's sentences (randomHMR, 7 nodes with the speaker) a main event has about 3 to 5 children. Nothing in the count is tuned to the film.",
+      "prediction": "On 30 random texts (randomText(mulberry32(500 + i), 1 + i mod 5), i = 0 to 29: 6 texts each of 1 to 5 clauses), drawn by topo/inkfig.js at 3300 px and read by the detail suite as the film's masks are: (a) the suite's filament count is within 30% of the number of filaments drawn in at least 80% of the texts; (b) it lies inside the film's p10 to p90 of filaments per master (18 masters, the same suite) in at least two thirds of the texts.",
+      "measure": "tools/dev/heptapod_inkfig.mjs: the 30 texts and the 18 film masks through detail/ring.js and detail/filaments.js.",
+      "filmValueKnown": true,
+      "filmValueKnownNote": "The film's per-master filament counts were measured on 2026-11-16 (F2 part 2a: 259 on 18 masters) and the F4 slice 1 table gave their minimum and maximum (5 to 28). Its p10 and p90 had not been computed. The rule (one filament per child of a main event) was written without tuning to them.",
+      "ifConfirmed": "The film-level filament count follows from the grammar with no calibration, and each filament stays a node a reader can find."
+    },
+    {
+      "id": "F4-P5",
+      "date": "2026-11-17",
+      "feature": "the size of a filament's tip bulb against its neck",
+      "derivation": "A filament's tip is a thread of ink breaking under surface tension. The fastest-growing disturbance of a liquid thread of radius a has wavelength 2 pi a / 0.697, about 9.02 a (Rayleigh 1878, after Plateau; from memory, to verify at the source before it is cited on a page), and the ink of one wavelength gathers into one drop: (4/3) pi r^3 = pi a^2 (9.02 a), so r = (6.765)^(1/3) a = 1.89 a. The bulb is that drop, the neck behind it the thread, so knob width over neck width is 1.89. topo/inkfig.js draws its bulbs by this rule.",
+      "prediction": "Over the film's filaments that the suite classes as bulb-tipped (tipRatio at least 1.5, detail/filaments.js), the median tipRatio (knob width over the narrowest width 1 to 3 shaft widths behind it) lies in 1.89 plus or minus 20%, that is 1.51 to 2.27.",
+      "measure": "tools/dev/heptapod_film_suite.mjs output (private), the bulb-tipped filaments pooled over the 18 masters.",
+      "filmValueKnown": true,
+      "filmValueKnownNote": "Post-hoc risk, stated before the test: film.md 5.2 (2026-11-11) describes 'rounded knobs about twice the shaft width', and F2 part 2a (2026-11-16) wrote the pooled tipRatio percentiles of all filaments to a private file; this session's notes do not record them being read. The median over bulb-tipped filaments alone has not been computed. Because 1.5 is the class's floor, the median is biased up from the floor by construction; a value above 2.27 misses.",
+      "ifConfirmed": "The film's bulbs are what a breaking thread makes, and our bulbs need no calibration."
+    },
+    {
+      "id": "F4-P6",
+      "date": "2026-11-17",
+      "feature": "whether one mass dominates a ring, from coreference and unequal sentences",
+      "derivation": "inkfig 0.3 (I9): clauses sharing a referent are one mass; a ring holds at most MASS_MAX (4) masses and MASS_ARC (98 degrees) of mass, both calibrated on the film's cluster count and total cluster arc, not on dominance; a pool's ink grows with its clause's nodes (arc with n, depth with the square root of n, capped). Sentences of unequal size and the merging of linked clauses then make one mass carry most of the ink. Nothing is tuned to the film's dominance (detail/masses.js), which was measured on 2026-11-17 before this was written (film p10 0.411, median 0.762).",
+      "prediction": "On 30 texts randomText(mulberry32(600 + i), 1 + i mod 5, sizes), the sizes of its sentences drawn 5 to 12 nodes from mulberry32(800 + i) (5 + floor(8 u) each), drawn by inkfig 0.3 at 3300 px and read by the suite: (a) among the texts in which the suite reads at least 2 blot clusters, dominance lies inside the film's p10 to p90 in at least 80%; (b) the blot clusters read lie inside the film's p10 to p90 in at least 80% of all 30.",
+      "measure": "tools/dev/heptapod_inkfig.mjs, corpus B (the default corpus from inkfig 0.3), with detail/masses.js.",
+      "filmValueKnown": true,
+      "filmValueKnownNote": "The film's dominance and cluster distributions were measured on 2026-11-17 before this entry (6d87248's message gives dominance p10 and median); MASS_MAX and MASS_ARC were set from the film's cluster count and total cluster arc the same afternoon. Three showcase texts (1, 4 and 12 clauses, seeds 101, 104, 112) were rendered and read before this entry: dominance 1.0, 0.559, 0.546. The corpus of this prediction has not been drawn.",
+      "ifConfirmed": "Dominance follows from coreference and unequal sentences with no dominance parameter; the figure gets the film's composition from the grammar."
+    }
+  ]
+}

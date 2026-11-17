@@ -1,0 +1,539 @@
+{
+ "about": "F4-ink (BAR_F order of 2026-11-17): the inked ring figures of 1, 4 and 12 clauses and a corpus of 30 texts, measured by the detail suite at 3300 px beside the 18 film masters by distribution (p10 to p90 over the masters). Outcomes of F4-P4 and F4-P5 (predictions.json) are here; predictions.results.json is rewritten whole by heptapod_predictions.mjs and is not touched. Numbers only (research/ip.md rule 6). Written by tools/dev/heptapod_inkfig.mjs.",
+ "version": "inkfig-0.3.1",
+ "ranOn": "2026-11-17",
+ "filmMasters": 18,
+ "calibrations": [
+  {
+   "name": "NODE_DEG",
+   "value": 7,
+   "source": "first value: a 6-node clause drawn about 24 degrees, the film's cluster spans having median 15 and widest-per-master median 32 degrees (film suite, 2026-11-17)"
+  },
+  {
+   "name": "GAP_DEG",
+   "value": 26.5,
+   "source": "film suite 2026-11-17: main gap median 26.5 degrees over the 18 masters"
+  },
+  {
+   "name": "DEPTH",
+   "value": 0.33,
+   "source": "film suite 2026-11-17: blot peak width median 0.325 R"
+  },
+  {
+   "name": "WOBBLE",
+   "value": 0.11,
+   "source": "film suite 2026-11-17: centreline deviation median 0.043 R (first value set below it, the pools add their own)"
+  },
+  {
+   "name": "W_RING",
+   "value": 0.09,
+   "source": "film suite 2026-11-17: carrier w_med median 0.066 R, w_p25 median 0.035 R"
+  },
+  {
+   "name": "SHAFT",
+   "value": 0.02,
+   "source": "film suite 2026-11-17: filament shaft median 0.0172 R"
+  },
+  {
+   "name": "FIL_LEN",
+   "value": 0.15,
+   "source": "film suite 2026-11-17: filament length median 0.143 R"
+  },
+  {
+   "name": "WOBBLE bounded",
+   "value": 0.11,
+   "source": "v0.2 raised it to 0.10 on a 30-degree lattice and the 12-clause carrier left the suite's carrier band (closure 0.75, below the film's p10 0.81; the coordinating session saw straight chords between knots); 0.06 on a 45-degree lattice gives 0.92 (4 and 12 clauses, 2026-11-17)"
+  },
+  {
+   "name": "v0.3.1: W_RING, WOBBLE, thread turning",
+   "value": 0.09,
+   "source": "after 0.3's measurement (49ffc98) and the coordinating session's read: the carrier thin on 1 and 4 clauses (w_med 0.0338 and 0.0438 against the film's p10 0.0441), the wander overcorrected (0.0094 to 0.0187 against p10 0.0189), the threads straight (turning 48.6 and 49.5 against p10 55.9). W_RING 0.06 to 0.09, WOBBLE 0.06 on 45 degrees to 0.11 on 60, the threads' turning noise 4 octaves at 4 cycles and amplitude 0.55 to 1.1 radians: on the three figures w_med 0.046, 0.064, 0.075; wobble 0.016, 0.021, 0.046; turning 57, 62, 66 (2026-11-17)"
+  },
+  {
+   "name": "MASS_MAX",
+   "value": 4,
+   "source": "film suite 2026-11-17: blot clusters per master p90 4.3"
+  },
+  {
+   "name": "MASS_ARC",
+   "value": 98,
+   "source": "film suite 2026-11-17: the sum of a master s cluster spans, p50 45, p90 98.1 degrees"
+  },
+  {
+   "name": "R_CANVAS",
+   "value": 0.365,
+   "source": "film.md 5.2: R over canvas median 0.365 (the measuring frame; figure.js)"
+  },
+  {
+   "name": "v0.2 after the first measurement (bb8f228)",
+   "value": 0,
+   "source": "NODE_DEG 4 to 7, WOBBLE 0.03 to 0.10, LOAD_FLOOR 0.45 to 0.7, W_RING 0.05 to 0.06, SHAFT 0.017 to 0.02, INK_SPREAD 0.0035 to 0.006, depth by clause size, the crown, more turning: set by eye against the film master and by the suite after F4-P4 had run; F4-P4 keeps its first outcome"
+  },
+  {
+   "name": "LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG",
+   "value": 0,
+   "source": "first values, not compared with any film measure of their own"
+  }
+ ],
+ "columns": {
+  "ink_over_disc": "ink over the disc",
+  "ring_closure": "share of angles with carrier",
+  "main_gap_deg": "main gap, degrees",
+  "w_med_R": "median carrier width / R",
+  "w_cv": "carrier width CV",
+  "clusters": "blot clusters",
+  "span_max_deg": "widest cluster, degrees",
+  "peak_depth_R": "peak blot depth / R",
+  "out_reach_R": "outward reach / R",
+  "in_reach_R": "inward reach / R",
+  "wobble_R": "centreline wobble / R",
+  "filaments": "filaments",
+  "fil_len_R": "filament length / R, median",
+  "fil_shaft_R": "filament shaft / R, median",
+  "fil_turn_deg": "filament turning, degrees, median",
+  "outward_share": "share of filaments pointing outward",
+  "dominance": "largest cluster ink over all cluster ink (detail/masses.js)",
+  "fan_max": "most filaments rooted on one cluster (detail/masses.js)",
+  "droplets": "droplets of 1% R or more",
+  "boxdim": "edge box dimension"
+ },
+ "detailColumns": [
+  "filaments",
+  "droplets",
+  "boxdim"
+ ],
+ "film": {
+  "ink_over_disc": {
+   "p10": 0.1461,
+   "p50": 0.2172,
+   "p90": 0.3599
+  },
+  "ring_closure": {
+   "p10": 0.8106,
+   "p50": 0.8959,
+   "p90": 1
+  },
+  "main_gap_deg": {
+   "p10": 0,
+   "p50": 26.5,
+   "p90": 54.35
+  },
+  "w_med_R": {
+   "p10": 0.0441,
+   "p50": 0.0657,
+   "p90": 0.1045
+  },
+  "w_cv": {
+   "p10": 0.641,
+   "p50": 0.8767,
+   "p90": 1.0787
+  },
+  "clusters": {
+   "p10": 1,
+   "p50": 2,
+   "p90": 4.3
+  },
+  "span_max_deg": {
+   "p10": 12.4,
+   "p50": 31.5,
+   "p90": 63.3
+  },
+  "peak_depth_R": {
+   "p10": 0.297,
+   "p50": 0.3597,
+   "p90": 0.5605
+  },
+  "out_reach_R": {
+   "p10": 0.2281,
+   "p50": 0.3172,
+   "p90": 0.4844
+  },
+  "in_reach_R": {
+   "p10": 0.2608,
+   "p50": 0.4647,
+   "p90": 0.5396
+  },
+  "wobble_R": {
+   "p10": 0.0189,
+   "p50": 0.043,
+   "p90": 0.0566
+  },
+  "filaments": {
+   "p10": 8.4,
+   "p50": 13,
+   "p90": 21.9
+  },
+  "fil_len_R": {
+   "p10": 0.099,
+   "p50": 0.134,
+   "p90": 0.1814
+  },
+  "fil_shaft_R": {
+   "p10": 0.0134,
+   "p50": 0.0173,
+   "p90": 0.0212
+  },
+  "fil_turn_deg": {
+   "p10": 55.8897,
+   "p50": 82.0285,
+   "p90": 116.676
+  },
+  "outward_share": {
+   "p10": 0.5,
+   "p50": 0.6464,
+   "p90": 0.8171
+  },
+  "dominance": {
+   "p10": 0.4109,
+   "p50": 0.7619,
+   "p90": 1
+  },
+  "fan_max": {
+   "p10": 4,
+   "p50": 6,
+   "p90": 10.9
+  },
+  "droplets": {
+   "p10": 0,
+   "p50": 7,
+   "p90": 24.4
+  },
+  "boxdim": {
+   "p10": 1.096,
+   "p50": 1.1658,
+   "p90": 1.2379
+  }
+ },
+ "figures": [
+  {
+   "clauses": 1,
+   "seed": 101,
+   "nodes": 9,
+   "columns": {
+    "ink_over_disc": 0.1667,
+    "ring_closure": 0.9146,
+    "main_gap_deg": 30.75,
+    "w_med_R": 0.0463,
+    "w_cv": 1.223,
+    "clusters": 1,
+    "span_max_deg": 43,
+    "peak_depth_R": 0.4892,
+    "out_reach_R": 0.2214,
+    "in_reach_R": 0.1902,
+    "wobble_R": 0.0165,
+    "filaments": 7,
+    "fil_len_R": 0.0889,
+    "fil_shaft_R": 0.018,
+    "fil_turn_deg": 57.0948,
+    "outward_share": 0.4286,
+    "dominance": 1,
+    "fan_max": 5,
+    "droplets": 12,
+    "boxdim": 1.1945
+   },
+   "verdict": {
+    "ink_over_disc": "in",
+    "ring_closure": "in",
+    "main_gap_deg": "in",
+    "w_med_R": "in",
+    "w_cv": "above",
+    "clusters": "in",
+    "span_max_deg": "in",
+    "peak_depth_R": "in",
+    "out_reach_R": "below",
+    "in_reach_R": "below",
+    "wobble_R": "below",
+    "filaments": "below",
+    "fil_len_R": "below",
+    "fil_shaft_R": "in",
+    "fil_turn_deg": "in",
+    "outward_share": "below",
+    "dominance": "in",
+    "fan_max": "in",
+    "droplets": "in",
+    "boxdim": "in"
+   },
+   "label": "skeleton",
+   "outOfRange": [
+    "w_cv",
+    "out_reach_R",
+    "in_reach_R",
+    "wobble_R",
+    "filaments",
+    "fil_len_R",
+    "outward_share"
+   ],
+   "drawn": {
+    "filaments": 4,
+    "outward": 3,
+    "threads": 7,
+    "bulbs": 3,
+    "drops": 14,
+    "spikes": 27,
+    "spansDeg": [
+     56
+    ],
+    "gapDeg": 26.5,
+    "squeeze": 1
+   }
+  },
+  {
+   "clauses": 4,
+   "seed": 104,
+   "nodes": 24,
+   "columns": {
+    "ink_over_disc": 0.1806,
+    "ring_closure": 0.9187,
+    "main_gap_deg": 29.25,
+    "w_med_R": 0.0638,
+    "w_cv": 0.8046,
+    "clusters": 3,
+    "span_max_deg": 25,
+    "peak_depth_R": 0.3966,
+    "out_reach_R": 0.3666,
+    "in_reach_R": 0.2965,
+    "wobble_R": 0.0206,
+    "filaments": 11,
+    "fil_len_R": 0.1047,
+    "fil_shaft_R": 0.0195,
+    "fil_turn_deg": 61.6695,
+    "outward_share": 0.9091,
+    "dominance": 0.5688,
+    "fan_max": 7,
+    "droplets": 11,
+    "boxdim": 1.1809
+   },
+   "verdict": {
+    "ink_over_disc": "in",
+    "ring_closure": "in",
+    "main_gap_deg": "in",
+    "w_med_R": "in",
+    "w_cv": "in",
+    "clusters": "in",
+    "span_max_deg": "in",
+    "peak_depth_R": "in",
+    "out_reach_R": "in",
+    "in_reach_R": "in",
+    "wobble_R": "in",
+    "filaments": "in",
+    "fil_len_R": "in",
+    "fil_shaft_R": "in",
+    "fil_turn_deg": "in",
+    "outward_share": "above",
+    "dominance": "in",
+    "fan_max": "in",
+    "droplets": "in",
+    "boxdim": "in"
+   },
+   "label": "outside the film's range",
+   "outOfRange": [
+    "outward_share"
+   ],
+   "drawn": {
+    "filaments": 10,
+    "outward": 8,
+    "threads": 19,
+    "bulbs": 11,
+    "drops": 29,
+    "spikes": 48,
+    "spansDeg": [
+     20.05,
+     45.12,
+     30.08,
+     20.05
+    ],
+    "gapDeg": 26.5,
+    "squeeze": 0.716
+   }
+  },
+  {
+   "clauses": 12,
+   "seed": 112,
+   "nodes": 97,
+   "columns": {
+    "ink_over_disc": 0.2169,
+    "ring_closure": 0.7951,
+    "main_gap_deg": 72.25,
+    "w_med_R": 0.0751,
+    "w_cv": 0.8837,
+    "clusters": 3,
+    "span_max_deg": 28,
+    "peak_depth_R": 0.4666,
+    "out_reach_R": 0.3253,
+    "in_reach_R": 0.4078,
+    "wobble_R": 0.0459,
+    "filaments": 37,
+    "fil_len_R": 0.1116,
+    "fil_shaft_R": 0.0181,
+    "fil_turn_deg": 65.6416,
+    "outward_share": 0.6486,
+    "dominance": 0.5629,
+    "fan_max": 12,
+    "droplets": 31,
+    "boxdim": 1.2332
+   },
+   "verdict": {
+    "ink_over_disc": "in",
+    "ring_closure": "below",
+    "main_gap_deg": "above",
+    "w_med_R": "in",
+    "w_cv": "in",
+    "clusters": "in",
+    "span_max_deg": "in",
+    "peak_depth_R": "in",
+    "out_reach_R": "in",
+    "in_reach_R": "in",
+    "wobble_R": "in",
+    "filaments": "above",
+    "fil_len_R": "in",
+    "fil_shaft_R": "in",
+    "fil_turn_deg": "in",
+    "outward_share": "in",
+    "dominance": "in",
+    "fan_max": "above",
+    "droplets": "above",
+    "boxdim": "in"
+   },
+   "label": "outside the film's range",
+   "outOfRange": [
+    "ring_closure",
+    "main_gap_deg",
+    "filaments",
+    "fan_max",
+    "droplets"
+   ],
+   "drawn": {
+    "filaments": 44,
+    "outward": 34,
+    "threads": 84,
+    "bulbs": 50,
+    "drops": 66,
+    "spikes": 29,
+    "spansDeg": [
+     10.17,
+     10.17,
+     12.71,
+     6.36,
+     13.98,
+     8.9,
+     12.71,
+     10.17,
+     11.44,
+     7.63,
+     7.63,
+     10.17
+    ],
+    "gapDeg": 26.5,
+    "squeeze": 0.182
+   }
+  }
+ ],
+ "corpus": {
+  "name": "B",
+  "texts": 30,
+  "definition": "randomText(mulberry32(600 + i), 1 + i mod 5, sizes 5 + floor(8 u) from mulberry32(800 + i)), i = 0 to 29",
+  "shareInsideFilmP10toP90": {
+   "ink_over_disc": 0.9,
+   "ring_closure": 0.9,
+   "main_gap_deg": 0.933,
+   "w_med_R": 0.9,
+   "w_cv": 0.8,
+   "clusters": 1,
+   "span_max_deg": 0.867,
+   "peak_depth_R": 0.867,
+   "out_reach_R": 0.767,
+   "in_reach_R": 0.633,
+   "wobble_R": 0.6,
+   "filaments": 0.433,
+   "fil_len_R": 0.767,
+   "fil_shaft_R": 0.8,
+   "fil_turn_deg": 0.833,
+   "outward_share": 0.667,
+   "dominance": 0.9,
+   "fan_max": 0.767,
+   "droplets": 0.733,
+   "boxdim": 0.733
+  }
+ },
+ "predictions": [
+  {
+   "id": "F4-P4",
+   "texts": 0,
+   "errors": 0,
+   "a": {
+    "readWithin30pctOfDrawn": 0,
+    "share": 0,
+    "needed": 0.8
+   },
+   "b": {
+    "insideFilmP10toP90": 0,
+    "share": 0,
+    "needed": 0.6666666666666666,
+    "filmP10": 8.4,
+    "filmP90": 21.9
+   },
+   "byClauses": [
+    {
+     "clauses": 1,
+     "drawn": [],
+     "read": []
+    },
+    {
+     "clauses": 2,
+     "drawn": [],
+     "read": []
+    },
+    {
+     "clauses": 3,
+     "drawn": [],
+     "read": []
+    },
+    {
+     "clauses": 4,
+     "drawn": [],
+     "read": []
+    },
+    {
+     "clauses": 5,
+     "drawn": [],
+     "read": []
+    }
+   ],
+   "firstOutcome": "missed (bb8f228, inkfig-0.1: a 0.4, b 0.667)",
+   "thisRun": "not run (--p4)",
+   "outcome": "missed (first outcome stands)"
+  },
+  {
+   "id": "F4-P5",
+   "bulbTipped": 92,
+   "medianTipRatio": 1.8,
+   "predicted": 1.89,
+   "band": [
+    1.512,
+    2.268
+   ],
+   "inBand": true,
+   "outcome": "post-hoc, not a test (G13): the film was measured before the prediction was committed, and the band could not miss below",
+   "p25": 1.601,
+   "p75": 1.923
+  },
+  {
+   "id": "F4-P6",
+   "texts": 30,
+   "errors": 0,
+   "a": {
+    "textsWithTwoOrMoreClusters": 23,
+    "dominanceInside": 20,
+    "share": 0.87,
+    "needed": 0.8
+   },
+   "b": {
+    "clustersInside": 30,
+    "share": 1,
+    "needed": 0.8
+   },
+   "outcome": "not the committed corpus or version"
+  }
+ ],
+ "readBack": "deferred to the next slice, declared in BAR_F before this run"
+}

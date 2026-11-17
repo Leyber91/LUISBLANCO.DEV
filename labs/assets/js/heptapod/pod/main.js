@@ -3,7 +3,7 @@
 
    One record (day.js) is the whole state. Every act, crop, guess
    and mark changes the record, the record is saved, and the three
-   views (the pod, the notebook, the panel under the glass) are
+   views (the chamber, the notebook, the panel beside it) are
    redrawn from it.
 
    The page stands on the labs' shared platform (Labs OS) and
@@ -26,6 +26,9 @@
      ?at=check        at the third ring of the check
      ?at=done         the day over
      ?still           no motion (also set by the system preference)
+     ?script=inked    the inked script, on a page served from this
+                      machine only, until it is published (switch.js);
+                      such a day is played and never stored
    A linked state is replayed from a seed, is never saved and logs
    nothing of its own.
    ============================================================ */
@@ -39,6 +42,7 @@ import { GATE_SPECIES, makeSpecies, seedOf } from './species.js';
 import { ringSpec, soloSpec, recognise, sectorRect } from './ring.js';
 import { DAY, GREETING, newDay, doAct, addCrop, addSolo, dropEntry, setGuess, raiseMark, endDay, answer, score, validDay, whereIs, dayOver, carry } from './day.js';
 import { initPod } from './scene.js';
+import { scriptOf, keysHelp } from './switch.js';
 import { mountNotebook } from './notebook.js';
 import { mountPanel } from './panel.js';
 
@@ -49,7 +53,10 @@ const q = new URLSearchParams(location.search);
 const at = ['mid', 'evening', 'check', 'done'].includes(q.get('at')) ? q.get('at') : null;
 const wantSpecies = /^[0-2]$/.test(q.get('species') || '') ? Number(q.get('species')) : null;
 const preview = !!at;
-const trial = !preview && wantSpecies != null;      // a link that picks the species: played, never stored, so it cannot replace a kept day
+let script = scriptOf();
+let inked = null;                                   // pod/inked.js, fetched only when the inked script is on
+// a link that picks the species, or the unpublished inked script: played, never stored, so it cannot replace a kept day
+const trial = !preview && (wantSpecies != null || script === 'inked');
 const kept = !preview && !trial;
 const speciesIndex = (s) => GATE_SPECIES.findIndex(([a, b]) => a === s[0] && b === s[1]);
 
@@ -131,7 +138,7 @@ let pod = null, notebook = null, panel = null;
 
 const say = (t) => { $('say').textContent = t; };
 
-/* What stands on the glass outside the day: the read-back, a ring of the check, or the greeting again. */
+/* What stands in the disc outside the day: the read-back, a ring of the check, or the greeting again. */
 function evening() {
   pod.setEnabled(state.phase === 'day');
   if (state.phase === 'day') return;
@@ -139,11 +146,12 @@ function evening() {
   else if (state.phase === 'evening') pod.show(ringSpec(sp, state.check.items[state.check.answers.length].target));
   else pod.show(ringSpec(sp, GREETING));
 }
-function redraw(freshKey) { notebook.render(freshKey); panel.render(); $('stage').dataset.phase = state.phase; }
+/* The how-to is for the day: in the evening the console begins with the evening's question. */
+function redraw(freshKey) { notebook.render(freshKey); panel.render(); $('stage').dataset.phase = state.phase; $('how-to').hidden = state.phase !== 'day'; }
 
 function mount() {
   if (notebook) notebook.destroy();
-  const hooks = { sp, getState: () => state };
+  const hooks = { sp, script, inked, getState: () => state };
   // the platform's lifecycle: a scene already on this canvas is destroyed first, and this one is paused
   // while the tab is hidden or the pod is off screen
   mountScene($('pod'), ({ reducedMotion }) => {
@@ -151,13 +159,20 @@ function mount() {
       ...hooks,
       reduced: reducedMotion,
       say,
+      // the caption lies over the room's top left on a wide screen: the disc keeps clear of it
+      keepClear() {
+        const c = document.querySelector('.room-cap');
+        if (!c || getComputedStyle(c).position !== 'absolute') return null;
+        const a = c.getBoundingClientRect(), b = $('pod').getBoundingClientRect();
+        return { x1: a.right - b.left, y1: a.bottom - b.top };
+      },
       carry(place) { carry(state, place); save(); },
       act(kind, opts) {
         const rec = doAct(state, sp, kind, opts);
         if (!rec) return null;
         save(); bookmark(); redraw();
         track('heptapod.act', { kind, ring: state.acts.length });
-        say(`Ring ${state.acts.length} of ${DAY.ACTS} is on the glass.${dayOver(state) ? ' The lamp is out.' : ''}`);
+        say(`Ring ${state.acts.length} of ${DAY.ACTS} is in the disc.${dayOver(state) ? ' The lamp is out.' : ''}`);
         return rec;
       },
       crop(actIndex, rect, erode, kept) {
@@ -191,7 +206,8 @@ function mount() {
       if (!endDay(state, sp)) return;
       save(); bookmark(); evening(); redraw(); say('Evening.');
       track('heptapod.evening', { species: speciesIndex(state.species), rings: state.acts.length, kept: state.entries.filter((e) => e.tokens.length).length, marks: state.marks.length, readback: !!state.readback });
-      $('stage').scrollIntoView({ block: 'start', behavior: prefersReduced() ? 'auto' : 'smooth' });
+      // the chamber's top at the top of the screen: on a phone the ring and the evening's pictures then fit together
+      document.querySelector('.room-view').scrollIntoView({ block: 'start', behavior: prefersReduced() ? 'auto' : 'smooth' });
     },
     onKeepSolo(id) { const r = addSolo(state, sp, id); save(); redraw(r && r.fresh ? r.entry.key : null); },
     onReadbackSeen() { state.rbSeen = true; save(); evening(); redraw(); },
@@ -213,13 +229,19 @@ function mount() {
   redraw();
   $('pod').probe = () => pod.probe();      // for the drive tool: where things are on screen
   if (state.phase === 'day') pod.greet(); else evening();
-  $('pod').setAttribute('aria-label', 'The pod. A being behind glass, and a tray with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. While a ring is on the glass, W, D, S and A keep its top, right, bottom and left part in the notebook.');
+  const keysText = keysHelp(script);
+  $('pod').setAttribute('aria-label', keysText.label);
+  const keysHint = document.querySelector('.keys .hint');
+  if (keysHint) keysHint.textContent = keysText.hint;
   $('preview').hidden = kept;
-  $('preview-what').textContent = preview ? 'This is a recorded day, replayed from a seed.' : 'This day was opened from a link that picks the species.';
+  $('preview-what').textContent = preview ? 'This is a recorded day, replayed from a seed.' : script === 'inked' ? 'This day is written in the inked script, which is not published yet.' : 'This day was opened from a link that picks the species.';
   $('unkept').hidden = !kept || !!(os && os.storage.persistent);
 }
 
 async function boot() {
+  if (script === 'inked') {
+    try { inked = await import('./inked.js'); } catch (e) { console.error('the inked script could not load; the ring script is used', e); inked = null; script = 'ring'; }
+  }
   try { os = await LabsOS.init({ lab: LAB }); } catch { os = null; }      // the lab runs without the platform
   if (os) for (const [type, cls] of Object.entries(EVENTS)) { try { os.register(type, { cls }); } catch { /* registered by an earlier boot on this page */ } }
   state = preview ? recorded(wantSpecies ?? 0) : (trial ? null : await load()) || fresh();
