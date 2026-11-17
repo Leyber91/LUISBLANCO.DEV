@@ -13,6 +13,7 @@ import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour, setHTML } from './tour.js';
 import { createKeep } from './keep.js';
+import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
@@ -31,6 +32,7 @@ const D2R = Math.PI / 180;
 export function buildUI(app) {
   const { store, renderer } = app;
   const left = $('#bh-left'), right = $('#bh-right');
+  let drawing = null;     // buildDrawing, once the cards exist (below)
   const overlay = $('#bh-overlay'), caption = $('#bh-caption'), probe = $('#bh-probe');
   const sr = $('#bh-sr');
   const narrow = () => window.matchMedia('(max-width: 900px)').matches;
@@ -53,7 +55,7 @@ export function buildUI(app) {
   if (window.self !== window.top) back.style.display = 'none';
 
   /* ---------- left column ---------- */
-  const head = el('div', 'bh-head', `<div class="bh-kick">${COPY.kick}</div><h1>${COPY.title}</h1><p>${COPY.sub}</p>`);
+  const head = el('div', 'bh-head', `<div class="bh-kick">${COPY.kick}</div><h2 class="bh-h">${COPY.title}</h2><p>${COPY.sub}</p>`);
   left.appendChild(head);
 
   // object
@@ -258,6 +260,19 @@ export function buildUI(app) {
   };
   $('#bh-srcbtn').addEventListener('click', openSources);
   $('#bh-srcbtn2').addEventListener('click', openSources);
+
+  /* ---------- the drawing (BAR_L1 section 6): sheet 1 is the picture with its scales and title block ---------- */
+  drawing = buildDrawing(app, {
+    choose: {
+      object: (id) => { app.tour?.stop(); store.set(store.objectPatch(id)); },
+      view: (id) => { app.tour?.stop(); store.set(store.viewPatch(id)); if (id === 'journey') journey.play(); else journey.stop(); },
+      colour: (id) => store.set({ color: id }),
+      sheet: (n) => { if (n === 4) requestAnimationFrame(() => recCard.scrollIntoView({ block: 'start' })); drawOverlay(); },
+    },
+    act: { plate: (W) => plate(W), link: () => $('#bh-link').click(), json: () => exportState(app), csv: () => exportData(app), sources: openSources },
+    keepRecord: () => keep.record,
+  });
+  store.on(() => drawing.draw());
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sources.hidden = true; probe.hidden = true; } });
 
   /* ---------- route pill ---------- */
@@ -302,7 +317,7 @@ export function buildUI(app) {
    *  stays inside it (review_s2 P4-3; fix_s2_p1 K6, the curve's legend ran under the Measure card at 1440). Read
    *  from the panels' own boxes, so the bound follows the stylesheet at every width; the whole window on a phone,
    *  where the panels are a sheet. */
-  const openCentre = (W) => (narrow() ? [0, W] : [left.getBoundingClientRect().right, right.getBoundingClientRect().left]);
+  const openCentre = (W) => (narrow() ? [0, W] : drawing && document.body.dataset.sheet === '1' ? drawing.openBand() : [left.getBoundingClientRect().right, right.getBoundingClientRect().left]);
   /** Where a label's lead ends, kept inside the open centre [L, R] (review_s2 P4-3): flipped to the left where its
    *  text (tw px, 4 px from the lead) would run past the right bound, to the right where it would run past the left,
    *  then held so the text fits, and held between the top and the bottom. end: the text ends at the lead (it sits
@@ -830,6 +845,7 @@ export function buildUI(app) {
   let lastFallDraw = 0, wasEasing = false;
   const tick = (now, dt) => {
     journey.tick(dt);
+    if (store.anim && drawing) drawing.draw();
     app.tour?.tick(now, dt);
     // a transition just ended: the image is the state's own view now, so trace its anchors
     // and redraw what is drawn from the eased values (critical curve, labels, tour focus)
