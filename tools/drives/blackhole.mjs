@@ -466,7 +466,7 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   await press('#bh-keep');
   p.check('Keep: the hole is kept', await until(`c.kept === ${c0.kept + 1}`), JSON.stringify(await p.ev(COUNTS)));
   const k = await p.ev(`(() => ({ pressed: document.querySelector('#bh-keep').getAttribute('aria-pressed'), text: document.querySelector('#bh-keep').textContent, row: (document.querySelector('#bh-reclist li span') || {}).textContent || '', line: document.querySelector('#bh-recline').textContent }))()`);
-  p.check('the button says so, pressed; the list names the hole as the page shows it; the line counts it', k.pressed === 'true' && k.text === 'Kept' && k.row === 'M87*, a = 0.940, cinematic' && k.line.startsWith(`${c0.kept + 1} kept`), JSON.stringify(k));
+  p.check('the button says so, pressed; the list names the hole as the page shows it; the line counts it', k.pressed === 'true' && k.text === 'Kept' && k.row === 'M87*, a = 0.940, i = 84°, cinematic' && k.line.startsWith(`${c0.kept + 1} kept`), JSON.stringify(k));
   await after('the record, a hole kept');
 
   p.check('reloaded, the record is read again', await open('?o=m87'));
@@ -475,8 +475,9 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   await sheet(false);
   const c1 = await p.ev(COUNTS);
   const cv = await p.ev(`(() => { const r = document.querySelector('#bh-canvas').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * 0.3]; })()`);
+  const t1 = await p.ev('Date.now()');
   await p.click(cv[0], cv[1]);
-  p.check('a pixel pressed: a ray recorded', await until(`c.rays === ${Math.min(100, c1.rays + 1)}`), JSON.stringify(await p.ev(COUNTS)));
+  p.check('a pixel pressed: a ray recorded (the newest ray is younger than the press)', await p.until(`(() => { const r = window.__bh.keep.record.rays[0]; return !!r && r.t >= ${t1}; })()`, 8000), JSON.stringify(await p.ev(COUNTS)));
   const ray = await p.ev('window.__bh.keep.record.rays[0]');
   p.check('the ray keeps its link, its pixel as fractions of the screen and a fate the page names', !!ray && ray.p.every((v) => v >= 0 && v <= 1) && ['captured', 'disk', 'ring', 'sky'].includes(ray.fate), JSON.stringify(ray));
 
@@ -491,25 +492,67 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   await open('?o=m87');
   const c3 = await p.ev(COUNTS);
   await sheet(true);
+  const t3 = await p.ev('Date.now()');
   await press('#bh-fallgo');
   await sheet(false);
-  p.check('a fall pressed: a fall recorded at its stop', await p.until(`(() => { const c = ${COUNTS}; return c.falls === ${Math.min(50, c3.falls + 1)}; })()`, 150000), JSON.stringify(await p.ev(COUNTS)));
+  p.check('a fall pressed: a fall recorded at its stop (the newest fall is younger than the press)', await p.until(`(() => { const f = window.__bh.keep.record.falls[0]; return !!f && f.t >= ${t3}; })()`, 150000), JSON.stringify(await p.ev(COUNTS)));
   const fl = await p.ev(`(async () => { const P = await import('/labs/assets/js/blackhole/physics.js'); const a = window.__bh, f = a.keep.record.falls[0];
     const rw = [...document.querySelectorAll('#bh-fallread .rw')].find((r) => /your clock/.test(r.textContent));
     return { rec: f ? P.dur(f.tau).replace(/\\s+/g, '') : null, card: rw ? rw.querySelector('dd').textContent.replace(/\\s+/g, '') : null }; })()`);
   p.check(`the fall's proper time is the Fall card's at the stop, ${fl.card}`, !!fl.rec && fl.rec === fl.card, JSON.stringify(fl));
   const c4 = await p.ev(COUNTS);
   const fallStop = await p.ev(`(async () => { const C = await import('/labs/assets/js/blackhole/config.js'); return C.TOUR.findIndex((s) => s.id === 'fall'); })()`);
-  await p.ev(`window.__bh.tour.start(${fallStop})`);
-  await p.until(`(() => { const s = window.__bh.store.all(), m = window.__bh.model; return s.view === 'journey' && s.rcam <= Math.max(3, m.rh * 1.08) + 1e-4; })()`, 150000);
+  // the stop's clock held, as the tour section does: the stop moves on after its dwell (10 s), before the fall (about
+  // 20 s of frames) reaches its stop
+  await p.ev(`(() => { window.__bh.tour.start(${fallStop}); window.__bh.tour.t = -1e9; })()`);
+  const tourFell = await p.until(`(() => { const s = window.__bh.store.all(), m = window.__bh.model; return s.view === 'journey' && s.rcam <= Math.max(3, m.rh * 1.08) + 1e-4; })()`, 150000);
   await p.sleep(1500);
-  p.check("the tour's fall is not recorded (the visitor did not start it)", (await p.ev(COUNTS)).falls === c4.falls, JSON.stringify(await p.ev(COUNTS)));
+  p.check("the tour's fall reaches its stop, and is not recorded (the visitor did not start it)", tourFell && (await p.ev(COUNTS)).falls === c4.falls, JSON.stringify({ tourFell, ...(await p.ev(COUNTS)) }));
   await p.ev('window.__bh.tour.stop()');
 
   const c5 = await p.ev(COUNTS);
   await sheet(true);
   await press('#bh-reclist button[data-out]');
   p.check('Take out: the hole is out', await until(`c.kept === ${c5.kept - 1}`), JSON.stringify(await p.ev(COUNTS)));
+  await sheet(false);
+
+  // review_s3 finding 2: the record's own links, as it writes them, open their state and the tour does not start
+  await open('?o=m87');
+  await sheet(true);
+  await press('#bh-keep');
+  await until(`c.kept >= 1`);
+  const hrefs = await p.ev(`(() => { const a = [...document.querySelectorAll('#bh-reclist a.bh-btn')].map((x) => x.getAttribute('href')); return { kept: a[0], ray: a.find((h) => /[?&]p=/.test(h)) || null }; })()`);
+  p.check('the default hole is kept under a link that names it', /\?o=m87$/.test(hrefs.kept || ''), JSON.stringify(hrefs));
+  for (const [what, h] of [['the kept hole', hrefs.kept], ['the ray', hrefs.ray]]) {
+    if (!h) { p.check(`the record has a link for ${what}`, false); continue; }
+    await p.go(`${base}${h}`);
+    await p.until(ready, 60000);
+    await p.sleep(4200);
+    const st = await p.ev(`(() => ({ tour: window.__bh.tour.running, probe: !document.getElementById('bh-probe').hidden, obj: window.__bh.store.get('obj') }))()`);
+    p.check(`opening ${what} from the record does not start the tour${what === 'the ray' ? ', and traces its ray' : ''}`, !st.tour && st.obj === 'm87' && (what !== 'the ray' || st.probe), JSON.stringify(st));
+  }
+  // recording off: a ray pressed is not added, and the card says so
+  await open('?o=m87&os-fixture=recording-off');
+  const r0 = await p.ev(COUNTS);
+  await sheet(false);
+  const cv2 = await p.ev(`(() => { const r = document.querySelector('#bh-canvas').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * 0.3]; })()`);
+  await p.click(cv2[0], cv2[1]);
+  await p.sleep(1500);
+  const off2 = await p.ev(`(() => ({ rays: window.__bh.keep.record.rays.length, said: document.querySelector('#bh-recsaid').textContent }))()`);
+  p.check('recording off: a pressed ray is not added, and the card says recording is off', off2.rays === r0.rays && /Recording is off/.test(off2.said), JSON.stringify(off2));
+  // a full list: past 8 kept holes the card offers the rest, and every one can be seen
+  await open('?o=m87');
+  await sheet(true);
+  for (let k = 0; k < 9; k++) {
+    await p.ev(`window.__bh.store.set({ a: ${(0.1 + k * 0.05).toFixed(2)} }, { instant: true })`);
+    await press('#bh-keep');
+    await p.sleep(250);
+  }
+  const full = await p.ev(`(() => ({ kept: window.__bh.keep.record.kept.length, rows: document.querySelectorAll('#bh-reclist li:not(.more)').length, more: (document.querySelector('#bh-reclist button[data-all="kept"]') || {}).textContent || '' }))()`);
+  p.check('past 8 kept holes the card offers the rest', full.kept >= 9 && /Show the \d+ more/.test(full.more), JSON.stringify(full));
+  await press('#bh-reclist button[data-all="kept"]');
+  const shown = await p.ev(`(() => ({ kept: window.__bh.keep.record.kept.length, outs: document.querySelectorAll('#bh-reclist button[data-out]').length }))()`);
+  p.check('shown whole, every kept hole has its Take out', shown.outs === shown.kept, JSON.stringify(shown));
   await sheet(false);
 
   await open('?o=m87&os-fixture=storage-unavailable');

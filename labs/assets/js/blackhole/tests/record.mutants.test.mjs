@@ -49,7 +49,7 @@ const MUTANTS = [
   ['a stored fall with no proper time', `isTime(e.t) && isTime(e.tau)).map`, `isTime(e.t)).map`],
   ['a negative count of drops kept', `Number.isInteger(d.dropped) && d.dropped >= 0 ?`, `Number.isInteger(d.dropped) && d.dropped >= -5 ?`],
   ['a count of drops above the cap', `Math.min(d.dropped, LIMITS.dropped) : 0;`, `d.dropped : 0;`],
-  ['the stored holes past their bound', `kept: unique(kept, (e) => e.q).slice(0, LIMITS.kept),`, `kept: unique(kept, (e) => e.q).slice(0, LIMITS.kept + 1),`],
+  ['the stored holes past their bound', `kept: unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept),`, `kept: unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept + 1),`],
   ['the stored rays past their bound', `    rays: rays.slice(0, LIMITS.rays),\n    falls:`, `    rays: rays.slice(0, LIMITS.rays + 1),\n    falls:`],
   ['the stored falls past their bound', `    falls: falls.slice(0, LIMITS.falls),\n    dropped,`, `    falls: falls.slice(0, LIMITS.falls + 1),\n    dropped,`],
 
@@ -58,8 +58,6 @@ const MUTANTS = [
   ['keep takes a bad time', `  if (!isTime(t)) return refuse(record, BAD_TIME);\n  const rest`, `  const rest`],
   ['a hole past the bound kept', `record.kept.length >= LIMITS.kept) return refuse(record, FULL);`, `record.kept.length > LIMITS.kept) return refuse(record, FULL);`],
   ['a kept hole cannot move up when full', `if (rest.length === record.kept.length && record.kept.length >= LIMITS.kept)`, `if (record.kept.length >= LIMITS.kept)`],
-  ['keeping a kept hole keeps it twice', `const rest = record.kept.filter((e) => e.q !== q);`, `const rest = record.kept.filter((e) => e.q === q);`],
-  ['unkeep takes out every other hole', `const kept = record.kept.filter((e) => e.q !== q);`, `const kept = record.kept.filter((e) => e.q === q);`],
   ['unkeep of one not kept', `return kept.length === record.kept.length ? refuse(record, 'that hole is not kept')`, `return kept.length !== record.kept.length ? refuse(record, 'that hole is not kept')`],
   ['a ray of three numbers', `if (!(Array.isArray(p) && p.length === 2 && p.every(isFrac)))`, `if (!(Array.isArray(p) && p.length >= 2 && p.every(isFrac)))`],
   ['a ray off the screen', `if (!(Array.isArray(p) && p.length === 2 && p.every(isFrac)))`, `if (!(Array.isArray(p) && p.length === 2))`],
@@ -76,7 +74,6 @@ const MUTANTS = [
 
   /* ---- the store ---- */
   /* ---- the words and counts ---- */
-  ['every hole read as kept', `export const isKept = (record, q) => record.kept.some((e) => e.q === q);`, `export const isKept = (record, q) => record.kept.some((e) => e.q !== q);`],
   ['the counts swapped', `({ kept: record.kept.length, rays: record.rays.length, falls: record.falls.length })`, `({ kept: record.rays.length, rays: record.kept.length, falls: record.falls.length })`],
   ['the empty record with a drop counted', `export const empty = () => ({ kept: [], rays: [], falls: [], dropped: 0 });`, `export const empty = () => ({ kept: [], rays: [], falls: [], dropped: 1 });`],
   ['load gives an empty record', `export async function load(os) { return (await read(os)).record; }`, `export async function load(os) { return empty(); }`],
@@ -85,6 +82,25 @@ const MUTANTS = [
   ['a later version written', `newer: !!rec && rec.v > V };`, `newer: false };`],
   ['every change written, refused or not', `  if (changed) await os.progress.set(w.record, { v: V });`, `  await os.progress.set(w.record, { v: V });`],
   ['the way back written beside a refused change', `if (w.ok && resume) {`, `if (resume) {`],
+
+  /* ---- review_s3: a hole's identity, its link, its name, the words ---- */
+  ['the azimuth is part of a hole', `export const holeKey = (q) => String(q).split('&').filter((kv) => kv && !kv.startsWith('z=')).join('&');`, `export const holeKey = (q) => String(q);`],
+  ['every key starting with z is dropped', `!kv.startsWith('z=')`, `!kv.startsWith('z')`],
+  ['keep compares the whole link again', `const rest = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));`, `const rest = record.kept.filter((e) => e.q !== q);`],
+  ['take out compares the whole link again', `const kept = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));`, `const kept = record.kept.filter((e) => e.q !== q);`],
+  ['isKept compares the whole link again', `record.kept.some((e) => holeKey(e.q) === holeKey(q))`, `record.kept.some((e) => e.q === q)`],
+  ['the store keeps two entries of one hole', `kept: unique(kept, (e) => holeKey(e.q)).slice`, `kept: unique(kept, (e) => e.q).slice`],
+  ['the empty link left empty (the tour starts over it)', `  if (q) return \`?\${q}\${extra}\`;\n  const s = new Store();\n  s.open('');\n  return \`?o=\${s.all().obj}\${extra}\`;`, `  return \`?\${q}\${extra}\`;`],
+  ['every link gets an object prefixed (another preset)', `  if (q) return \`?\${q}\${extra}\`;`, `  if (q) return \`?o=custom&\${q}\${extra}\`;`],
+  ['a link names another object', `OBJECTS.find((x) => x.id === st.obj)`, `OBJECTS.find((x) => x.id !== st.obj)`],
+  ['a name without the inclination', `, i = \${deg(st.incl)}°`, ``],
+  ['a hole of your own named without its mass', `\`a hole of your own, \${sci(10 ** st.mass)} M☉\``, `'a hole of your own'`],
+  ['a charge named when there is none', `\${st.q > 0 ? \`, Q = \${(+st.q).toFixed(2)}\` : ''}`, `\${st.q >= 0 ? \`, Q = \${(+st.q).toFixed(2)}\` : ''}`],
+  ['a ray on the disk named without its order', `(e.n > 0 ? \`lands on the disk after going round, n = \${e.n}\` : FATE_WORDS.disk)`, `FATE_WORDS.disk`],
+  ['a direct image named as going round', `e.n > 0 ? \`lands on the disk`, `e.n >= 0 ? \`lands on the disk`],
+  ['every fate read as the disk', `(e.fate === 'disk' ? (e.n > 0`, `(true ? (e.n > 0`],
+  ['one ray counted as rays', `\${c.rays === 1 ? 'ray' : 'rays'}`, `\${c.rays !== 1 ? 'ray' : 'rays'}`],
+  ['one fall counted as falls', `\${c.falls === 1 ? 'fall' : 'falls'}`, `\${c.falls !== 1 ? 'fall' : 'falls'}`],
 ];
 
 process.exit(await runMutants({ here, file: 'record.js', test: '../record.test.mjs', mutants: MUTANTS }));

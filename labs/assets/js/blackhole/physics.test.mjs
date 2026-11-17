@@ -69,7 +69,10 @@ guard('derive', () => {
   const at = (a, q) => P.derive(state({ obj: 'custom', a, q, mass: 1, dist: 3, edd: -2 })).endsAtCentre;
   ok('the interior time ends at the centre at a = Q = 0', at(0, 0) === true);
   // ledger row 3: Shimura and Takahara (1995) fit no colour correction below 1% of Eddington
-  ok('f_col fits at 1% of Eddington and above, not just below it (0.0099)', P.fcolFits(0.01) === true && P.fcolFits(0.0099) === false && P.fcolFits(1e-5) === false && P.fcolFits(1) === true, [P.fcolFits(0.01), P.fcolFits(0.0099)].join(' '));
+  const fits = (x) => P.fcolFits({ edd: 0.1, massSun: 10, a: 0, q: 0, ...x });
+  ok('f_col fits a non-rotating hole of 1.4 to 10 Msun at 1% of Eddington and above (Shimura and Takahara 1995)', fits({}) && fits({ edd: 0.01 }) && fits({ massSun: 1.4 }) && fits({ massSun: 10 }));
+  ok('and not just outside: 0.0099 of Eddington, 1.39 or 10.01 Msun, spin 0.001, charge 0.01', !fits({ edd: 0.0099 }) && !fits({ massSun: 1.39 }) && !fits({ massSun: 10.01 }) && !fits({ a: 0.001 }) && !fits({ q: 0.01 }));
+  ok('nor M87*, Sgr A* or Cygnus X-1 (a = 0.998)', !fits({ massSun: 6.5e9, edd: 1e-5, a: 0.94 }) && !fits({ massSun: 4.3e6, edd: 1e-8, a: 0.5 }) && !fits({ massSun: 21.2, a: 0.998 }));
   ok('the boundary is the 1% the paper names', P.FCOL_MIN_EDD === 0.01);
   ok('and at the inner horizon for any spin or charge, however small: a = 0.0005 (r- 1.25e-7 M, which the old rule of r- < 5e-7 called the centre), a = 0.001, Q = 0.0001',
     at(0.0005, 0) === false && at(0.001, 0) === false && at(0, 0.0001) === false, [at(0.0005, 0), at(0.001, 0), at(0, 0.0001)].join(' '));
