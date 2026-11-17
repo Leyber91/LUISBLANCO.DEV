@@ -185,6 +185,37 @@ for (const k of [0.08, 0.12]) {
     `${n} of ${total} points compared (${skipped} skipped at the curves' ends, at most ${4 * curves}), ${wrongSide} on the wrong side, worst |beta^2| difference ${worst.toExponential(2)} M^2${thin.length ? `; too few points or too short a span: ${thin.join('; ')}` : ''}`);
 }
 
+/* 3c. the integrator's drift and the shadow's outline (ledger row 10). On M87*'s cinematic frame, every render tier's
+   step (TIERS k and step cap) against a fine trace (k = 0.02, 6000 steps): no ray on the shadow's edge changes its fate,
+   so the drift the Integrator view shows above DRIFT_LIMIT at the low tiers (measured 2026-11-17: 1.37% of the frame at
+   min, 0.56% at low, on the edge; none at mid and high) does not move the outline. Off the edge at most 2 rays in the
+   frame may differ (one did, at the disk's rim, at three tiers). */
+{
+  const { probeRay, screenToTangent } = await import('./probe.js');
+  const { TIERS } = await import('./config.js');
+  const { DRIFT_LIMIT } = await import('./palette.js');
+  const view = { a: 0.94, q: 0, incl: 84, rcam: 46, fov: 31, tilt: 0, observer: 'zamo', rout: 20, emit: 'thick' };
+  const W = 96, H = 60, fate = (r) => (r.fate === 'captured' ? 'c' : r.fate === 'disk' ? 'd' : 's');
+  const at = (i, j) => screenToTangent((i + 0.5) / W * 1440, (j + 0.5) / H * 900, 1440, 900, view.fov);
+  const ref = [];
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const { sx, sy } = at(i, j); ref.push(fate(probeRay(view, sx, sy, { k: 0.02, maxSteps: 6000 }))); }
+  const edge = ref.map((f, n) => { const i = n % W, j = Math.floor(n / W); return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => i + di >= 0 && i + di < W && j + dj >= 0 && j + dj < H && (ref[(j + dj) * W + i + di] === 'c') !== (f === 'c')); });
+  const rows = [];
+  for (const [name, t] of Object.entries(TIERS)) {
+    let over = 0, flipsEdge = 0, flipsOff = 0;
+    for (let n = 0; n < W * H; n++) {
+      const { sx, sy } = at(n % W, Math.floor(n / W));
+      const r = probeRay(view, sx, sy, { k: t.k, maxSteps: t.maxSteps });
+      if ((r.drift ?? 0) > DRIFT_LIMIT) over++;
+      if (fate(r) !== ref[n]) { if (edge[n]) flipsEdge++; else flipsOff++; }
+    }
+    rows.push([name, over, flipsEdge, flipsOff]);
+  }
+  ok(`the integrator's drift moves no ray of the shadow's edge at any tier (${edge.filter(Boolean).length} edge pixels of ${W * H}, M87* cinematic)`,
+    edge.filter(Boolean).length >= 100 && rows.every(([, , fe, fo]) => fe === 0 && fo <= 2),
+    rows.map(([n, o, fe, fo]) => `${n}: ${o} over ${DRIFT_LIMIT}, ${fe} edge flips, ${fo} other`).join('; '));
+}
+
 /* 4. Schwarzschild numbers */
 {
   const th = K.shadowChords(K.shadowCurve(0, Math.PI / 3));
