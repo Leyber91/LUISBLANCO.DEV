@@ -38,12 +38,11 @@ import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { keycap, keyHint, switchCtl, setSwitch, bindSwitch, isOn, scale, bindScale, setScale } from '../kit/controls.js';
 import { el } from '../kit/dom.js';
-import { day, fromIso, isoDay, int } from '../kit/format.js';
+import { day, fromIso, int } from '../kit/format.js';
 
 const params = new URLSearchParams(location.search);
 window.__EXO_STILL__ = params.has('still');
 const $ = (id) => document.getElementById(id);
-const store_ = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (_) { return null; } return null; };
 
 /* ---------------- state ---------------- */
 const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, looks: null, locked: null, cold: null, hot: null, set: null, newOnly: false, query: null });
@@ -51,7 +50,7 @@ const store = {
   state: {
     list: [], byName: new Map(), sel: null, system: [], plot: PLOTS[params.get('plot')] ? params.get('plot') : 'valley',
     filter: emptyFilter(), filterFn: () => true, filterActive: false, tour: null, colorBy: 'none',
-    albedo: () => 0.3, pins: [], newNames: new Set(), plain: false,
+    albedo: () => 0.3, pins: [], newNames: new Set(), newSince: '', plain: false,
     // a scenario of the selected world's air the visitor chose (air.js); null draws the survey's own. A link may carry one.
     air: SCENARIOS.includes(params.get('air')) ? params.get('air') : null,
   },
@@ -232,7 +231,7 @@ function filterLabel() {
   if (f.cold) parts.push(COLD_WORDS);
   if (f.hot) parts.push(HOT_WORDS);
   if (f.box) parts.push('box on ' + PLOTS[f.box.mode].label);
-  if (f.newOnly) parts.push('new since last visit');
+  if (f.newOnly) parts.push(`new ${store.state.newSince}`);
   if (f.set) parts.push(f.set === 'saved' ? 'your log' : 'shared log');
   return parts.join(', ');
 }
@@ -421,7 +420,7 @@ function renderFilters() {
   row.append(all, selL, sel, rg, fSwitch('replay', 'replay', ['still', 'by year'], isNum(f.upTo), 'Replay the discoveries by year'));
   if (log && log.counts().saved) row.append(fSwitch('set-saved', 'show', ['all worlds', 'your log'], f.set === 'saved', 'Show only the worlds in your log'));
   if (log && log.shared().length) row.append(fSwitch('set-shared', 'show', ['all worlds', 'the shared log'], f.set === 'shared', 'Show only the worlds the link shared'));
-  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new since your last visit`, ['all', 'only new'], f.newOnly, 'Show only the worlds new since your last visit'));
+  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new ${st.newSince}`, ['all', 'only new'], f.newOnly, `Show only the worlds new ${st.newSince}`));
   row.append(...tokens);
   if (st.filterActive && n > 0) { const t = el('button', 'plain', 'tour these'); t.type = 'button'; t.dataset.act = 'tourthese'; row.append(t); }
   bar.append(row);
@@ -489,17 +488,16 @@ function bindFilters() {
   });
 }
 
-/* worlds confirmed since this browser's last visit (localStorage, this device only) */
-function changelog(list) {
-  const key = 'exo:seen:v1';
-  let prev = null;
-  try { prev = JSON.parse(store_(key) || 'null'); } catch (_) { prev = null; }
-  const names = list.map((p) => p.name);
-  if (prev && Array.isArray(prev.names)) {
-    const seen = new Set(prev.names);
-    store.state.newNames = new Set(names.filter((n) => !seen.has(n)));
-  }
-  store_(key, JSON.stringify({ date: isoDay(Date.now()), names }));
+/* Worlds confirmed since the catalogue the lab's record last kept, against this one, and the words for what they are
+   new since: "since your last visit", or with recording off the day that catalogue was kept (record.sinceWords). The
+   log asks the store once the stored record is read (record.seeCatalogue), so the switch appears then. */
+async function changelog(list) {
+  if (!log) return;
+  let got = { fresh: [], since: '' };
+  try { got = await log.catalogue(list.map((p) => p.name)); } catch { got = { fresh: [], since: '' }; }
+  store.state.newNames = new Set(got.fresh);
+  store.state.newSince = got.since;
+  if (got.fresh.length) { renderFilters(); resay(); }
 }
 
 /* ---------------- search and questions ---------------- */
@@ -1028,7 +1026,7 @@ async function boot() {
   } catch (e) {
     console.warn('[exomania] weekly roster unavailable; radius provenance is provisional', e.message);
   }
-  changelog(st.list);
+  void changelog(st.list);
   renderFilters();
   resay();
   if (log) log.reread();

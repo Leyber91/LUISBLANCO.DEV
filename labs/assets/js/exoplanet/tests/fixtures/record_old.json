@@ -1,0 +1,134 @@
+{
+ "about": "Records in the shapes the live site wrote before version 3: v1 as Overdue wrote it before the log, v2 made on 2026-11-16 by the version 2 record module itself (git show 13f70eb:labs/assets/js/exoplanet/record.js), through its own writes; and local, the survey's old copy of the catalogue it last saw, in the format of main.js at 13f70eb (key exo:seen:v1), with the first 40 names. Read by record.contract.test.mjs and tools/drives/record.mjs.",
+ "v1": {
+  "v": 1,
+  "data": {
+   "planet": "WASP-12 b",
+   "place": {
+    "lat": 41.39,
+    "lon": 2.17,
+    "name": "an example place"
+   }
+  }
+ },
+ "v2": {
+  "v": 2,
+  "data": {
+   "overdue": {
+    "planet": "HD 209458 b",
+    "place": {
+     "lat": 41.39,
+     "lon": 2.17
+    }
+   },
+   "log": {
+    "saved": [
+     {
+      "name": "WASP-12 b",
+      "t": 1794780120000,
+      "view": "orbit"
+     },
+     {
+      "name": "K2-18 b",
+      "t": 1794779220000,
+      "view": "closeorbit"
+     },
+     {
+      "name": "TRAPPIST-1 e",
+      "t": 1794778980000,
+      "view": "surface"
+     }
+    ],
+    "visits": [
+     {
+      "name": "WASP-12 b",
+      "t": 1794780060000,
+      "via": "search",
+      "n": 3
+     },
+     {
+      "name": "WASP-121 b",
+      "t": 1794779460000,
+      "via": "random",
+      "n": 1
+     },
+     {
+      "name": "HD 219134 b",
+      "t": 1794779400000,
+      "via": "tour",
+      "n": 1
+     },
+     {
+      "name": "TOI-700 d",
+      "t": 1794779340000,
+      "via": "results",
+      "n": 1
+     },
+     {
+      "name": "55 Cnc e",
+      "t": 1794779280000,
+      "via": "search",
+      "n": 1
+     },
+     {
+      "name": "GJ 1214 b",
+      "t": 1794779220000,
+      "via": "log",
+      "n": 1
+     },
+     {
+      "name": "K2-18 b",
+      "t": 1794779160000,
+      "via": "link",
+      "n": 1
+     },
+     {
+      "name": "PSR B1257+12 c",
+      "t": 1794779100000,
+      "via": "system",
+      "n": 1
+     },
+     {
+      "name": "Teegarden's Star b",
+      "t": 1794779040000,
+      "via": "diagram",
+      "n": 1
+     },
+     {
+      "name": "Kepler-442 b",
+      "t": 1794778980000,
+      "via": "random",
+      "n": 1
+     },
+     {
+      "name": "TRAPPIST-1 e",
+      "t": 1794778920000,
+      "via": "tour",
+      "n": 1
+     },
+     {
+      "name": "HD 209458 b",
+      "t": 1794778800000,
+      "via": "search",
+      "n": 1
+     },
+     {
+      "name": "Gone World c",
+      "t": 1794775200000,
+      "via": "random",
+      "n": 1
+     }
+    ],
+    "pins": [
+     "TRAPPIST-1 e",
+     "K2-18 b"
+    ],
+    "dropped": 7
+   }
+  }
+ },
+ "local": {
+  "key": "exo:seen:v1",
+  "value": "{\"date\":\"2026-11-15\",\"names\":[\"11 Com b\",\"11 UMi b\",\"14 And b\",\"14 Her b\",\"16 Cyg B b\",\"17 Sco b\",\"18 Del b\",\"1RXS J160929.1-210524 b\",\"24 Boo b\",\"24 Sex b\",\"24 Sex c\",\"2M0437 b\",\"2MASS J01033563-5515561 AB b\",\"2MASS J01225093-2439505 b\",\"2MASS J02192210-3925225 b\",\"2MASS J0249-0557 c\",\"2MASS J03590986+2009361 b\",\"2MASS J04414489+2301513 b\",\"2MASS J11011926-7732383 b\",\"2MASS J11550485-7919108 b\",\"2MASS J12073346-3932539 b\",\"2MASS J19383260+4603591 b\",\"2MASS J21252752-8138278 b\",\"2MASS J22362452+4751425 b\",\"2MASS J22501512+2325342 b\",\"4 UMa b\",\"47 UMa b\",\"47 UMa c\",\"47 UMa d\",\"51 Eri b\",\"51 Peg b\",\"55 Cnc B b\",\"55 Cnc B c\",\"55 Cnc b\",\"55 Cnc c\",\"55 Cnc d\",\"55 Cnc e\",\"55 Cnc f\",\"6 Lyn b\",\"61 Vir b\"]}"
+ }
+}
