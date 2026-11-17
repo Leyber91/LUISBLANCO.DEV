@@ -57,9 +57,11 @@ export const SHARED = {
 export const ROWS = [
   /* ---------------------------------------------------------------- space */
   {
+    // The first version of the page, which this row audits, is kept at bh_animation_page_v1.html with its
+    // scripts in blackhole_v1/ since the rebuild replaced it at the lab's address (2026-11-17).
     id: 'black-hole',
-    files: ['labs/bh_animation_page.html', 'labs/assets/js/blackhole/blackhole.js', 'labs/assets/js/blackhole/ui.js', 'labs/assets/js/blackhole/main.js'],
-    state: 'bh_animation_page.html?still',
+    files: ['labs/bh_animation_page_v1.html', 'labs/assets/js/blackhole_v1/blackhole.js', 'labs/assets/js/blackhole_v1/ui.js', 'labs/assets/js/blackhole_v1/main.js'],
+    state: 'bh_animation_page_v1.html?still',
     mech: [
       ['A fragment shader integrates every pixel\'s light ray through the Schwarzschild bending law a = -(3/2) h^2 r/r^5, 360 semi-implicit Euler steps, and samples the sky along the bent direction.', ['bh.metric', 'bh.lens']],
       ['A requestAnimationFrame loop redraws the full shader every frame at 0.85 resolution.', ['bh.rt']],
@@ -69,23 +71,23 @@ export const ROWS = [
       { id: 'bh.metric', phrase: 'Schwarzschild black hole', text: 'The hole is a Schwarzschild (non-rotating, uncharged) black hole.', type: 'mechanism',
         w: 3, why: 'The metric is the subject of the claim; every other property is drawn in it.',
         verdict: 'supported', note: 'The page boots on the Schwarzschild type and its readout gives the ISCO at 3.00 r_s, the published 6GM/c^2.',
-        ev: [['labs/assets/js/blackhole/ui.js', "applyType(TYPES.find((t) => t.id === 'schwarzschild'));"]], probe: 'bh-isco' },
+        ev: [['labs/assets/js/blackhole_v1/ui.js', "applyType(TYPES.find((t) => t.id === 'schwarzschild'));"]], probe: 'bh-isco' },
       { id: 'bh.lens', phrase: 'gravitational lensing', text: 'Gravitational lensing is computed by bending each light ray.', type: 'mechanism',
         w: 3, why: 'Lensing is the visible proof of the metric and the hardest part to fake.',
         verdict: 'supported', note: 'Each pixel integrates a ray with the Schwarzschild bending law; replayed in JS with the shader\'s own constants, rays are captured below the published critical impact parameter.',
-        ev: [['labs/assets/js/blackhole/blackhole.js', 'return -1.5 * h2 * p / pow(r2, 2.5);'], ['labs/assets/js/blackhole/blackhole.js', 'if(escaped) color += background(v)*transmit;']], probe: 'bh-bcrit' },
+        ev: [['labs/assets/js/blackhole_v1/blackhole.js', 'return -1.5 * h2 * p / pow(r2, 2.5);'], ['labs/assets/js/blackhole_v1/blackhole.js', 'if(escaped) color += background(v)*transmit;']], probe: 'bh-bcrit' },
       { id: 'bh.rt', phrase: 'real-time', text: 'The lensed image is recomputed in real time.', type: 'quantity',
         w: 1, why: 'Real time is a rate claim on top of the mechanism; it does not change what is computed.',
         verdict: 'supported', note: 'A requestAnimationFrame loop redraws the shader every frame (at 0.85 resolution).',
-        ev: [['labs/assets/js/blackhole/blackhole.js', 'requestAnimationFrame(this._frame)'], ['labs/assets/js/blackhole/blackhole.js', 'resScale: 0.85,']] },
+        ev: [['labs/assets/js/blackhole_v1/blackhole.js', 'requestAnimationFrame(this._frame)'], ['labs/assets/js/blackhole_v1/blackhole.js', 'resScale: 0.85,']] },
       { id: 'bh.disk', phrase: 'accretion disk', text: 'There is an accretion disk around the hole.', type: 'mechanism',
         w: 2, why: 'The disk is the light source of the image, a second structure after the hole itself.',
         verdict: 'supported', note: 'A procedural annulus from the ISCO outward with the zero-torque thin-disk temperature profile.',
-        ev: [['labs/assets/js/blackhole/blackhole.js', 'float f = pow(r, -0.75) * pow(max(0.0, 1.0 - sqrt(uRisco / r)), 0.25);']] },
+        ev: [['labs/assets/js/blackhole_v1/blackhole.js', 'float f = pow(r, -0.75) * pow(max(0.0, 1.0 - sqrt(uRisco / r)), 0.25);']] },
       { id: 'bh.doppler', phrase: 'doppler-asymmetric', text: 'The disk is Doppler-asymmetric: the approaching side is beamed brighter.', type: 'mechanism',
         w: 2, why: 'Beaming is a named physical effect of the disk, as heavy as the disk itself.',
         verdict: 'partial', note: 'Beaming is real but ad hoc: no Lorentz gamma, an exponent of 2.7, and an orbital speed at the ISCO about 11% under the published c/2.',
-        ev: [['labs/assets/js/blackhole/blackhole.js', 'float doppler = 1.0 / (1.0 - mu*beta);'], ['labs/assets/js/blackhole/blackhole.js', 'float boost = pow(doppler, 2.7);']], probe: 'bh-beta' },
+        ev: [['labs/assets/js/blackhole_v1/blackhole.js', 'float doppler = 1.0 / (1.0 - mu*beta);'], ['labs/assets/js/blackhole_v1/blackhole.js', 'float boost = pow(doppler, 2.7);']], probe: 'bh-beta' },
     ],
   },
   {
