@@ -104,16 +104,7 @@ ok(seedOf('a', 1) !== seedOf('a', 2) && seedOf('a', 1) === seedOf('a', 1), 'a se
   eq(esc('<img src=x onerror="a(\'b\')">&'), '&lt;img src=x onerror=&quot;a(&#39;b&#39;)&quot;&gt;&amp;', 'esc leaves nothing that opens a tag or closes a quoted attribute');
   eq(esc(null), '', 'esc of nothing is the empty string');
   eq(esc(12), '12', 'esc takes a number');
-  const { unesc } = await import('./dom.js');
-  eq(unesc('Anglada-Escud&eacute; et al. 2016'), 'Anglada-Escudé et al. 2016', 'unesc reads a named accent');
-  eq(unesc('Gajdo&scaron; et al. 2019'), 'Gajdoš et al. 2019', 'unesc reads a caron');
-  eq(unesc('&Aacute;&ntilde;&ccedil;&uuml;&aring;&Ouml;'), 'ÁñçüåÖ', 'unesc composes each letter with its accent');
-  eq(unesc('Bo&#x10D;ek &#321;ukasz O&#39;Brien'), 'Boček Łukasz O\'Brien', 'unesc reads hexadecimal and decimal references');
-  eq(unesc('Smith &amp; Jones'), 'Smith & Jones', 'unesc reads the ampersand');
-  eq(unesc(esc('<a href="x">O\'Hara & co</a>')), '<a href="x">O\'Hara & co</a>', 'unesc undoes esc');
-  eq(unesc('&qacute; &bogus; &#0; &#xD800; &#x110000; & alone'), '&qacute; &bogus; &#0; &#xD800; &#x110000; & alone', 'unesc leaves what names no character as it was');
-  eq(unesc('&amp;eacute;'), '&eacute;', 'unesc reads once: an escaped reference becomes the reference, not the letter');
-  eq(unesc(null), '', 'unesc of nothing is the empty string');
+  // unesc has its own tests and mutants: kit/tests/dom.test.mjs
   // el with a stand-in document: the text goes to textContent and never to innerHTML
   const made = [];
   globalThis.document = { createElement: (tag) => { const n = { tag, className: '', set innerHTML(v) { n.parsed = v; } }; made.push(n); return n; } };

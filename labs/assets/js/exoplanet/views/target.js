@@ -15,7 +15,7 @@
    ============================================================ */
 
 import {
-  forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, limitOf, limitKind, limitText, hzPosition, insolation,
+  forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, radiusEstimated, limitOf, limitKind, limitText, hzPosition, insolation,
   semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
 } from '../science.js';
 import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers, orbitNote, orbitDiffers, starNum } from '../starlight.js';
@@ -40,8 +40,8 @@ function measuredRows(p, A) {
   if (hasRadius(p)) {
     // an estimated radius says so where a measured one gives its error, as the archive's estimated mass does and as sheet A
     // says it ("estimated from the mass")
-    rows.push({ key: 'R', n: 'radius', v: fmt(p.R, 3), u: 'R\u2295', pm: p.measuredR === false ? 'estimated' : errText(p.Rerr1, p.Rerr2), refs: [rf.R], kind: p.measuredR === false ? 'e' : 'm',
-      note: [p.measuredR === false ? 'The radius is the archive\'s estimate from the mass.' : '', classNote(p, A)].filter(Boolean).join(' '), iv: { value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null } });
+    rows.push({ key: 'R', n: 'radius', v: fmt(p.R, 3), u: 'R\u2295', pm: radiusEstimated(p) ? 'estimated' : errText(p.Rerr1, p.Rerr2), refs: [rf.R], kind: radiusEstimated(p) ? 'e' : 'm',
+      note: [radiusEstimated(p) ? 'The radius is the archive\'s estimate from the mass.' : '', classNote(p, A)].filter(Boolean).join(' '), iv: { value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null } });
   } else if (limitOf(p, 'R')) {
     const RL = limitOf(p, 'R');
     rows.push({ key: 'R', n: 'radius', v: boundV(RL), u: 'R⊕', pm: limitKind(RL), refs: [rf.R], note: 'A bound, not a measurement: no radius is measured.', iv: false });
@@ -165,7 +165,7 @@ export const reticleZone = (p) => zoneWords(hzPosition(p), 'reticle');
 export function createTarget(host, store, actions) {
   host.replaceChildren();
   const table = el('table', 'nums'); table.id = 'nums';
-  const cap = el('caption', 'sr', 'The selected world\'s numbers: measured, then inferred, each with its interval on one log axis');
+  const cap = el('caption', 'sr', 'The selected world\'s numbers: from the archive, then inferred, each with its interval on one log axis');
   const meas = document.createElement('tbody'), inf = document.createElement('tbody'), alb = document.createElement('tbody'), foot = document.createElement('tfoot');
   const cols = document.createElement('colgroup');
   for (const c of ['n', 'v', 'u', 'pm', 'r', 'iv']) { const col = document.createElement('col'); col.className = `c-${c}`; cols.append(col); }
@@ -198,7 +198,7 @@ export function createTarget(host, store, actions) {
   albWrap.append(albedo, albV); albCell.append(albWrap); albRow.append(albName, albCell); alb.append(albRow);
   albedo.addEventListener('input', () => { A = +albedo.value; albV.textContent = A.toFixed(2); if (store.state.sel) draw(store.state.sel, false); });
 
-  const ivWidth = () => (host.clientWidth && host.clientWidth < 420 ? 70 : 130);
+  const ivWidth = () => (host.clientWidth && host.clientWidth < 420 ? 64 : 130);   // 64 in the 66 px column at 390 (exoplanet.css)
 
   /* one row: name, value, unit, the interval in words, its source letters and note numbers, the interval drawn */
   function row(tb, r, ctx) {
@@ -272,9 +272,9 @@ export function createTarget(host, store, actions) {
     box.replaceChildren();
     if (hasRadius(p)) {
       box.append(el('span', 'v', fmt(p.R, 3)), el('span', 'u', 'R⊕'));
-      box.append(ivSvg({ value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null, kind: p.measuredR === false ? 'e' : 'm', width: 120 }));
+      box.append(ivSvg({ value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null, kind: radiusEstimated(p) ? 'e' : 'm', width: 120 }));
       const e = errText(p.Rerr1, p.Rerr2) ? `${errText(p.Rerr1, p.Rerr2)}, ` : '';
-      box.append(el('span', 'pm', `${e}${p.measuredR === false ? 'estimated from the mass' : 'measured'}`));
+      box.append(el('span', 'pm', `${e}${radiusEstimated(p) ? 'estimated from the mass' : 'measured'}`));
     } else if (limitOf(p, 'R')) {
       const RL = limitOf(p, 'R');
       box.append(el('span', 'v', boundV(RL)), el('span', 'u', 'R⊕'), el('span', 'pm', `${limitKind(RL)}: no radius is measured`));

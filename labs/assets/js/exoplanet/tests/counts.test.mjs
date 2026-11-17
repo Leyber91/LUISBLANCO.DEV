@@ -19,7 +19,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { countLine, loadSnapshot, joinRoster, provisionalMeasured } from '../catalog.js';
+import { countLine, loadSnapshot, joinRoster, provisionalMeasured, CALCULATED } from '../catalog.js';
 import { radiusBins, histWords, xr, BINS, R_LO, R_HI } from '../views/bands.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -61,9 +61,16 @@ globalThis.fetch = async (url) => {
 };
 const { list } = await loadSnapshot();
 provisionalMeasured(list);
+const early = new Map(list.map((p) => [p, p.measuredR]));
 const before = countLine(list, false);
 yes('before the roster, the title block counts the snapshot', digits(before)[0] === list.length && digits(before).length === 1, before);
 await joinRoster(list);
+// before the roster the page marks each radius by its source in the snapshot; the roster, once read, must agree on every one
+const withR = [...early.keys()].filter((p) => p.R !== null), differ = withR.filter((p) => early.get(p) !== p.measuredR);
+const est = withR.filter((p) => early.get(p) === false);
+yes(`before the roster, each radius is marked as the roster then marks it (${withR.length} radii, ${est.length} the archive's estimates)`, differ.length === 0 && est.length > 0 && est.length < withR.length,
+  `${differ.length} differ; first: ${differ.slice(0, 3).map((p) => `${p.name} ${early.get(p)} then ${p.measuredR}`).join(', ')}`);
+yes('and an estimate is exactly a radius whose source is the archive\'s calculation', est.every((p) => p.refs.R && p.refs.R.label === CALCULATED) && withR.filter((p) => p.refs.R && p.refs.R.label === CALCULATED).length === est.length, `${est.length}`);
 const line = countLine(list, true), [nAll, nMeasured] = digits(line);
 const measured = list.filter((p) => p.measuredR === true && Number.isFinite(p.R)).length;
 yes('after it, the title block says how many planets there are and how many radii are measured, as counted here', nAll === list.length && nMeasured === measured && nMeasured < nAll, `${line} (counted ${list.length}, ${measured})`);
@@ -88,6 +95,24 @@ const flat = new Array(BINS).fill(100), dipped = flat.map((c, i) => (at(i) >= 1.
 yes('the dip measure reads a flat histogram as no dip and a 10% dip as one past the bound', dip(flat) === 1 && dip(dipped) < DIP_BOUND && Math.abs(dip(dipped) - 0.9) < 1e-9, `${dip(flat)} ${dip(dipped)}`);
 const real = dip(n);
 yes('and the whole catalogue shows no valley of its own, which is why the words do not claim one', real >= DIP_BOUND, `emptiest bin between 1.5 and 2 over the lower side's mean: ${real.toFixed(3)} (bound ${DIP_BOUND})`);
+
+// the provisional flag on made-up records: the source decides; with none, the method; a flag already set is kept
+{
+  const src = (label) => ({ R: { label, url: '' } });
+  const mk = (o) => ({ name: 'x', R: 2, method: 'Radial Velocity', depth: null, refs: {}, measuredR: null, ...o });
+  const cases = [
+    ['a radius whose source is the archive\'s calculation is its estimate', mk({ refs: src(CALCULATED) }), false],
+    ['a radius from a paper is measured, whatever found the planet', mk({ refs: src('Artigau et al. 2015') }), true],
+    ['a radius from a paper on a transiting planet is measured', mk({ method: 'Transit', refs: src('Smith et al. 2020') }), true],
+    ['the archive\'s calculation is an estimate on a transiting planet too', mk({ method: 'Transit', refs: src(CALCULATED) }), false],
+    ['with no source, a transit makes it measured', mk({ method: 'Transit' }), true],
+    ['with no source, a measured depth makes it measured', mk({ depth: 0.01 }), true],
+    ['with no source, neither makes it an estimate', mk({}), false],
+    ['no radius is not measured', mk({ R: null, refs: src('Smith et al. 2020') }), false],
+    ['a flag the roster already set is kept', mk({ refs: src(CALCULATED), measuredR: true }), true],
+  ];
+  for (const [name, p, want] of cases) { provisionalMeasured([p]); yes(name, p.measuredR === want, String(p.measuredR)); }
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

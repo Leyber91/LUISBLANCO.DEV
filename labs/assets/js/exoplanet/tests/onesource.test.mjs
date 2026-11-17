@@ -73,6 +73,7 @@ const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.l
 const json = JSON.parse(readFileSync(join(here, '../../../data/exomania/pscomppars-snapshot.json'), 'utf8'));
 globalThis.fetch = async () => ({ ok: true, body: null, json: async () => json, headers: { get: () => null } });
 const { list } = await loadSnapshot();
+provisionalMeasured(list);   // as the page marks the radii before its first draw (main.js), so the sheets read what it shows
 const A = TEQ.albedo, A2 = 0.1;   // the default albedo, and a second one the bench and sheet B must both follow
 const T0 = PHYS.T_SUN * Math.sqrt(PHYS.R_SUN_KM / PHYS.AU_KM / 2);   // 278.3 K
 // the bench's reference column, as main.js builds it; only the planet's own column is read
@@ -322,13 +323,46 @@ yes(`every planet whose star's reference is ${STASSUN} takes the archive's orbit
 yes(`every system of two or more is kept in the order of the orbits view D draws (${[...byHost.values()].filter((x) => x.length > 1).length} systems)`, order.length === 0, ex(order));
 yes(`the tour of extreme orbits names the widest orbit every sheet prints (${widest.name}, ${semiMajor(widest).a} AU)`, !!tourOk, wideStop ? wideStop.cap : 'no stop');
 
-// the archive's labels arrive with HTML's character references ("Anglada-Escud&eacute;"; 140 of 2,157 labels on
-// 2026-11-17): every label the page reads is letters, and the accented ones are there to be read
-const labels = new Set(), escaped = [];
-for (const p of list) for (const r of Object.values(p.refs || {})) if (r && r.label) labels.add(r.label);
-for (const l of labels) if (/&(#x?[0-9a-fA-F]+|[A-Za-z]+);/.test(l)) escaped.push(l);
-const accented = [...labels].filter((l) => /[À-ɏ]/.test(l));
-yes(`no reference label the page reads keeps a character reference (${labels.size} labels; ${accented.length} with an accented letter, e.g. ${accented.slice(0, 2).join(', ')})`, escaped.length === 0 && accented.length > 0, ex(escaped));
+// the archive's labels arrive with HTML's character references ("Anglada-Escud&eacute;"; 133 of the 1,908 labels the
+// page reads on 2026-11-17). Each label the page reads is held to the raw one decoded by Unicode's own decomposition, not
+// by the decoder's tables: a letter and an accent named "eacute" is, in NFD, the letter and the accent's combining mark.
+// A kind of reference this oracle does not know fails the check by name, so a new snapshot cannot pass on a guess.
+const MARK = { grave: 0x300, acute: 0x301, circ: 0x302, tilde: 0x303, uml: 0x308, ring: 0x30a, cedil: 0x327, caron: 0x30c };
+const PLAIN = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>' };
+const unknown = new Set();
+const oracle = (raw) => raw.replace(/&(#[xX][0-9a-fA-F]+|#[0-9]+|[A-Za-z]+);/g, (whole, b) => {
+  if (b[0] === '#') { const cp = /^#[xX]/.test(b) ? parseInt(b.slice(2), 16) : parseInt(b.slice(1), 10); if (cp >= 0xa0 && cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff) || cp === 39 || cp === 38) return String.fromCodePoint(cp); unknown.add(whole); return whole; }
+  if (Object.hasOwn(PLAIN, b)) return PLAIN[b];
+  const m = /^([A-Za-z])(grave|acute|circ|tilde|uml|ring|cedil|caron)$/.exec(b);
+  if (m) { const c = (m[1] + String.fromCodePoint(MARK[m[2]])).normalize('NFC'); if (c.length === 1) return c; }
+  unknown.add(whole); return whole;
+});
+// each raw entry as the page would read it (catalog.js refOf: an archive path, a link, or an ADS bibcode), decoded by the oracle
+const urlOf = (key) => (key.startsWith('/') ? 'https://exoplanetarchive.ipac.caltech.edu' + key : key.startsWith('http') ? key : `https://ui.adsabs.harvard.edu/abs/${key}/abstract`);
+const expected = new Set(json.refs.map(([label, key]) => `${urlOf(key)}\n${oracle(label)}`));
+const raws = new Set(json.refs.map(([label]) => label));
+const seen = new Set(), badLabels = [], decoded = [];
+for (const p of list) for (const r of Object.values(p.refs || {})) if (r && r.label) seen.add(`${r.url}\n${r.label}`);
+for (const pair of seen) {
+  const label = pair.split('\n')[1];
+  if (!expected.has(pair)) badLabels.push(`${label} (${pair.split('\n')[0]})`);
+  if (!raws.has(label)) decoded.push(label);
+}
+yes(`every reference label the page reads is its raw label with each reference read as Unicode composes it (${seen.size} labels, ${decoded.length} decoded, e.g. ${decoded.slice(0, 3).join(', ')})`,
+  badLabels.length === 0 && unknown.size === 0 && decoded.length > 0, `${ex(badLabels)}${unknown.size ? `; kinds the oracle does not know: ${[...unknown].join(' ')}` : ''}`);
+
+// the archive's own estimates of a radius (from a mass; their source is "Calculated Value"): sheet B says "estimated"
+// where it would give an error, and no other radius says it
+const wrongR = [];
+let nEst = 0;
+for (const p of list) {
+  const r = sheetRows(p, A).measured.find((x) => x.key === 'R');
+  if (!r || r.v === 'none' || !Number.isFinite(p.R)) continue;
+  const calc = !!(p.refs && p.refs.R && p.refs.R.label === 'Calculated Value');
+  if (calc) nEst++;
+  if ((r.pm === 'estimated') !== calc || (r.kind === 'e') !== calc) wrongR.push(`${p.name} (${p.refs && p.refs.R ? p.refs.R.label : 'no source'}): ${r.pm}, ${r.kind}`);
+}
+yes(`sheet B says "estimated" on exactly the radii the archive calculated from a mass (${nEst} of them)`, wrongR.length === 0 && nEst > 0, ex(wrongR));
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

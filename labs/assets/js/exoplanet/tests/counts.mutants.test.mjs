@@ -25,7 +25,18 @@ const here = dirname(fileURLToPath(import.meta.url));
 const data = ['data/exomania/pscomppars-snapshot.json', '../exoplanet_data.json'];
 
 const MEASURED = 'const measured = list.filter((p) => p.measuredR === true && Number.isFinite(p.R)).length;';
+const PROV = "    p.measuredR = p.R !== null && (src ? src !== CALCULATED : p.method === 'Transit' || p.depth !== null);";
 const CATALOG = [
+  // the provisional flag (ticket 2.19's review: the method of discovery called 56 published radii estimates)
+  ['the method guessed again over the source', PROV, PROV.replace("(src ? src !== CALCULATED : p.method === 'Transit' || p.depth !== null)", "(p.method === 'Transit' || p.depth !== null)")],
+  ['every sourced radius called measured', PROV, PROV.replace('src ? src !== CALCULATED :', 'src ? true :')],
+  ['every sourced radius called an estimate', PROV, PROV.replace('src ? src !== CALCULATED :', 'src ? false :')],
+  ['with no source, every radius an estimate', PROV, PROV.replace(": p.method === 'Transit' || p.depth !== null)", ': false)')],
+  ['with no source, a depth not counted', PROV, PROV.replace(" || p.depth !== null)", ')')],
+  ['with no source, a transit not counted', PROV, PROV.replace("p.method === 'Transit' || ", '')],
+  ['no radius called measured', PROV, PROV.replace('p.R !== null && ', '')],
+  ['a flag already set overwritten', '    if (p.measuredR !== null) continue;\n', ''],
+  ['the archive\'s label misread', "export const CALCULATED = 'Calculated Value';", "export const CALCULATED = 'Calculated value';"],
   ['the planets said before the roster as measured too', "  if (!rosterJoined) return planets;\n", ''],
   ['a radius the roster does not list counted as measured', MEASURED, MEASURED.replace('p.measuredR === true', 'p.measuredR !== false')],
   ['a planet with no radius counted as measured', MEASURED, MEASURED.replace(' && Number.isFinite(p.R)', '')],

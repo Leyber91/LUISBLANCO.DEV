@@ -402,7 +402,7 @@ export function starlightNote(p, s = starlight(p)) {
   const ew = errorWords(s);
   const range_ = isNum(s.lo) ? `Its 68% range carries ${ew.carried}.` : ew.missing ? `A point value: ${ew.missing}.` : '';
   const f = luminosityApart(luminosity(p));
-  const split = f > LUMINOSITY_SPLIT ? ` The archive's luminosity and the star's radius and temperature disagree by ${num(f, 2)} times; the starlight rests on the luminosity.` : '';
+  const split = f > LUMINOSITY_SPLIT ? ` The archive's luminosity and the star's radius and temperature differ by a factor of ${num(f, 2)}; the starlight rests on the luminosity.` : '';
   const differs = archiveDiffers(s) ? ` The archive lists ${starNum(s.archive, 3)} S⊕ (NASA Exoplanet Archive, PSCompPars), ${num(s.ratio > 1 ? s.ratio : 1 / s.ratio, 2)} times ${s.ratio > 1 ? 'more' : 'less'}.` : '';
   if (s.src === 'luminosity') return `The starlight is the star's luminosity, the archive's, over the square of the orbit: S = L / a², L in L☉ and a in AU. ${range_}${split}${differs}`;
   if (s.src === 'star') return `The starlight is computed from the star's temperature and radius and the orbit, S = (R★ / a)² (Teff / 5772 K)⁴ with R★ in R☉ and a in AU: the archive gives the star no luminosity. ${range_}${differs}`;

@@ -36,9 +36,10 @@ block('the radius', () => {
   const est = where(mk({ method: 'Radial Velocity', measuredR: false, R: 11.2, Rerr1: 1.4, Rerr2: -1.1 }), 'R'), mea = where(mk({}), 'R');
   yes('an estimated radius says "estimated" in its own row, is marked an estimate, and says from what', est.row && est.row.pm === 'estimated' && est.row.kind === 'e' && /estimate from the mass/.test(est.row.note), JSON.stringify(est.row && { pm: est.row.pm, kind: est.row.kind }));
   yes('a measured radius gives its error and is marked measured', mea.row && mea.row.pm !== 'estimated' && mea.row.pm !== '' && mea.row.kind === 'm', JSON.stringify(mea.row && { pm: mea.row.pm, kind: mea.row.kind }));
-  // before the roster says which radii were measured (catalog.js provisionalMeasured), the flag is null: not an estimate
+  // a flag not yet set (science.js radiusEstimated): not an estimate; the page sets it before the first draw
+  // (catalog.js provisionalMeasured, tests/counts.test.mjs)
   const open = where(mk({ measuredR: null }), 'R');
-  yes('a radius not yet marked either way gives its error, as sheet A does not call it estimated', open.row && open.row.pm === mea.row.pm && open.row.kind === 'm', JSON.stringify(open.row && { pm: open.row.pm, kind: open.row.kind }));
+  yes('a radius not yet marked either way gives its error, is drawn measured, and is not noted as an estimate', open.row && open.row.pm === mea.row.pm && open.row.kind === 'm' && !/estimate/.test(open.row.note), JSON.stringify(open.row && { pm: open.row.pm, kind: open.row.kind, note: open.row.note }));
 });
 
 block('the orbit', () => {
