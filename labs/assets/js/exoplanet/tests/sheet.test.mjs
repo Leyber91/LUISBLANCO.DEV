@@ -46,7 +46,8 @@ block('the starlight and the equilibrium temperature', () => {
   const sk = where(kep, 'S'), ss = where(st, 'S'), sa = where(arch, 'S');
   yes('the page\'s starlight in the inferred group; a point value says so', sk.group === 'inferred' && sk.row.v === starNum(starlight(kep).S, 3) && sk.row.pm === 'point value', JSON.stringify(sk.row && { v: sk.row.v, pm: sk.row.pm }));
   yes('with a range where the snapshot carries an error', ss.group === 'inferred' && / to /.test(ss.row.pm) && ss.row.pm !== 'point value', ss.row && ss.row.pm);
-  yes('the archive\'s insolation in the measured group, not called a point value', sa.group === 'measured' && sa.row.v === '3.00' && sa.row.pm === '' && sa.row.kind === 'm', JSON.stringify(sa.row && { v: sa.row.v, pm: sa.row.pm }));
+  yes('the page\'s starlight derived, with no source unless the archive\'s differs', sk.row.kind === 'd' && sk.row.refs.length === 0 && where(mk({ P: 10, a: 0.5, S: 60 }), 'S').row.refs.length === 0 && where(mk({ P: 10, a: 0.5, S: 200 }), 'S').row.refs.length === 1);
+  yes('the archive\'s insolation in the measured group, not called a point value', sa.group === 'measured' && sa.row.v === '3.00' && sa.row.pm === '' && sa.row.kind === 'm' && sa.row.refs.length === 1, JSON.stringify(sa.row && { v: sa.row.v, pm: sa.row.pm }));
   const tk = where(kep, 'teq'), ts = where(st, 'teq'), ta = where(arch, 'teq');
   yes('Teq from a point value is one, and says why', tk.row.v === teqText(teqOf(kep, 0.3)).v && tk.row.pm === 'point value' && /has no range because the starlight has none/.test(tk.row.note), `${tk.row.pm} | ${tk.row.note}`);
   yes('Teq with the starlight\'s range has it, and says nothing of a point', / to /.test(ts.row.pm) && !/no range/.test(ts.row.note));
