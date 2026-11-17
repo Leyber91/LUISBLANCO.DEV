@@ -55,10 +55,9 @@ const KEPT = '(document.querySelector("[data-act=log]") || { classList: { contai
 const STAR = '(() => { const d = document.querySelector("#nums .sw-dot"); return d ? getComputedStyle(d).getPropertyValue("--star-col").trim() : ""; })()';
 const TRANSIT = '(document.querySelector("#sheet-e [data-k=sig]") || { getAttribute: () => "false" }).getAttribute("aria-checked") !== "true"';
 /* What may lie over a target on the survey beyond what the rule lets by design (dialogs, popup lists, what is fixed or
-   sticky): the two ends of the radius range meet when both are at one value, and the upper then lies on the lower,
-   which its keys still move (a finding for the survey's road: a finger cannot take the lower end there). */
+   sticky and a scroll moves off). The two ends of the radius range no longer need an entry: where they meet, the one a
+   finger can move lies on top, and the other says it cannot move (2026-11-17). */
 export const SURVEY_COVER = {
-  '#edge-hi': 'the upper end of the radius range lies on the lower when both meet',
   'a.skip': 'the skip link, shown over the bar only while it has the focus',
   'body:not(.ready) #veil': 'the loading veil, over the page until the catalogue is read; once told to go it takes no tap while it fades, and one left up once the page is ready is a break',
 };
@@ -390,7 +389,13 @@ export default async function shapes(p, { base, width }) {
   const pressed = F1.bands.filter((b) => b.on === 'true'), rest = F1.bands.filter((b) => b.on !== 'true');
   // its two edges take Home and End: as far as each can go, the end of the axis or the other edge
   const edge = async (end, key) => { await p.ev(`document.getElementById("edge-${end}").focus()`); await p.key(key); await p.sleep(300); return p.ev('[document.getElementById("edge-lo"), document.getElementById("edge-hi")].map((e) => e ? +e.getAttribute("aria-valuenow") : null)'); };
-  const k1 = await edge('hi', 'End'), k2 = await edge('lo', 'End'), k3 = await edge('lo', 'Home');
+  const k1 = await edge('hi', 'End'), k2 = await edge('lo', 'End');
+  // both at the top of the axis: what a finger meets there is the lower edge, the one that can move, and the upper says
+  // it cannot
+  const met = await p.ev('(() => { const lo = document.getElementById("edge-lo"), hi = document.getElementById("edge-hi"), r = hi.getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { meets: t && t.id, hiOff: hi.getAttribute("aria-disabled"), loOff: lo.getAttribute("aria-disabled") }; })()');
+  const k3 = await edge('lo', 'Home');
+  const apart = await p.ev('[document.getElementById("edge-lo").getAttribute("aria-disabled"), document.getElementById("edge-hi").getAttribute("aria-disabled")]');
+  p.check('where both edges meet at the top of the axis, a finger meets the lower one, which can move off; the upper says it cannot move, and once they part neither says so', met.meets === 'edge-lo' && met.hiOff === 'true' && met.loOff === null && apart[0] === null && apart[1] === null, JSON.stringify({ met, apart }));
   p.check("a band's edges take Home and End: the high edge to the axis's end, the low edge up to the high one and back to the axis's start", k1[1] === 25 && k1[0] === 0.5 && k2[0] > 24 && k2[0] < 25 && k3[0] === 0.5 && k3[1] === 25, JSON.stringify({ k1, k2, k3 }));
   await p.ev('(() => { for (let i = 0; i < 10; i++) { const b = document.querySelector("#filters [data-clear]"); if (!b) break; b.click(); } return true; })()'); await p.sleep(400);
   await p.ev('document.querySelector("#filters [data-cls=rocky]").click()'); await p.sleep(400);

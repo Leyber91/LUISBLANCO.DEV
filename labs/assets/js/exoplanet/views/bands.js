@@ -90,8 +90,13 @@ export function bandsHTML(f, counts) {
     return `<button type="button" class="band" data-cls="${e.key}" aria-pressed="${on}" style="left:${pc(rx(e.lo))};width:${pc(rx(e.hi) - rx(e.lo))}"
       aria-label="${esc(e.label)}, ${fmt(e.lo, 2)} to ${e.hi >= R_HI ? 'more than ' + fmt(R_HI, 2) : fmt(e.hi, 2)} Earth radii, ${fmtInt(counts[e.key] || 0)} planets" title="${esc(e.label)}: ${fmtInt(counts[e.key] || 0)} planets">${esc(SHORT[e.key])}</button>`;
   }).join('');
-  const handle = (end, r) => `<button type="button" class="band-edge" id="edge-${end}" data-edge="${end}" role="slider" aria-label="${end === 'lo' ? 'Smallest' : 'Largest'} radius of the range"
-    aria-valuemin="${R_LO}" aria-valuemax="${R_HI}" aria-valuenow="${fmt(r, 3)}" aria-valuetext="${fmt(r, 3)} Earth radii" style="left:${pc(rx(r))}"></button>`;
+  // where the two edges meet at an end of the axis, the one a finger can move off the meeting point lies on top: the
+  // lower at the top of the axis, where the upper can go no higher, and the upper at the bottom. The other cannot move
+  // there and says so. On 2026-11-17 the upper lay on the lower at the top, so a finger could not separate them.
+  const atTop = !!span && span.hi >= R_HI && span.lo >= span.hi * 0.98, atBottom = !!span && span.lo <= R_LO && span.hi <= span.lo * 1.02;
+  const stuck = (end) => (end === 'hi' && atTop) || (end === 'lo' && atBottom);
+  const handle = (end, r) => `<button type="button" class="band-edge${end === 'lo' && atTop ? ' over' : ''}" id="edge-${end}" data-edge="${end}" role="slider" aria-label="${end === 'lo' ? 'Smallest' : 'Largest'} radius of the range"
+    aria-valuemin="${R_LO}" aria-valuemax="${R_HI}" aria-valuenow="${fmt(r, 3)}" aria-valuetext="${fmt(r, 3)} Earth radii"${stuck(end) ? ' aria-disabled="true"' : ''} style="left:${pc(rx(r))}"></button>`;
   return `<div class="band-row">${bands}${span ? handle('lo', span.lo) + handle('hi', span.hi) : ''}</div>`;
 }
 
