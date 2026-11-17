@@ -76,6 +76,11 @@ const MUTANTS = [
   ['anchors read for the eased view, not the target', `liveAnchors(this.getAnchors(), this.app.store.view(true))`, `liveAnchors(this.getAnchors(), this.app.store.view())`],
   ['the colour named by its key, not its label', '${COLOR_MODES[s.color].label.toLowerCase()} colour', '${s.color} colour'],
   ['the view named by its key, not its label', '${esc(VIEWS[s.view].label)} view', '${esc(s.view)} view'],
+  /* ---- 2026-11-17: a press is never cut by a redraw (setHTML) ---- */
+  ['the caption rebuilt on every change of state', `  if (el._bhHtml === html) return false;\n`, ``],
+  ['the caption rebuilt only when its words stay the same', `if (el._bhHtml === html) return false;`, `if (el._bhHtml !== html) return false;`],
+  ['a kept button of the tour gets another listener on every redraw', `if (built) this.caption.querySelectorAll('button')`, `this.caption.querySelectorAll('button')`],
+  ['the kept idle button gets another listener on every redraw', `if (built) this.caption.querySelector('button')`, `this.caption.querySelector('button')`],
 ];
 
 process.exit(await runMutants({ here, file: 'tour.js', test: '../tour.test.mjs', mutants: MUTANTS }));

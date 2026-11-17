@@ -21,6 +21,17 @@ import { liveAnchors } from './probe.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+/** Sets an element's HTML only when it differs from what this function last set there, and says whether it did. A
+ *  press is a down and an up on one element, so a control rebuilt between them loses the click: the fall moves the
+ *  state every frame and so does the idle drift, and a caption rebuilt on each change lost a visitor's Next at the
+ *  fall stop. Every redraw of HTML that holds a control, here and in ui.js, goes through it. */
+export function setHTML(el, html) {
+  if (el._bhHtml === html) return false;
+  el._bhHtml = html;
+  el.innerHTML = html;
+  return true;
+}
+
 /** The complete state a tour stop asks for: the object preset resolved for the stop's view,
  *  then the view preset for the stop's object, then the stop's own keys. Independent of the
  *  stop before it. */
@@ -127,10 +138,10 @@ export class Tour {
   draw() {
     const stop = TOUR[this.i];
     const dots = TOUR.map((_, k) => `<i class="${k === this.i ? 'on' : ''}"></i>`).join('');
-    this.caption.innerHTML = `<div class="cap"><div class="cap-k">Tour ${this.i + 1} / ${TOUR.length}</div><div class="cap-t">${esc(stop.title)}</div>
+    const built = setHTML(this.caption, `<div class="cap"><div class="cap-k">Tour ${this.i + 1} / ${TOUR.length}</div><div class="cap-t">${esc(stop.title)}</div>
       <div class="cap-b">${esc(this.fill(stop.text))}</div>
-      <div class="cap-nav"><button class="bh-btn" type="button" data-n="prev">Back</button><button class="bh-btn go" type="button" data-n="next">${this.i === TOUR.length - 1 ? 'Finish' : 'Next'}</button><button class="bh-btn" type="button" data-n="exit">Exit</button><span class="dots">${dots}</span></div></div>`;
-    this.caption.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      <div class="cap-nav"><button class="bh-btn" type="button" data-n="prev">Back</button><button class="bh-btn go" type="button" data-n="next">${this.i === TOUR.length - 1 ? 'Finish' : 'Next'}</button><button class="bh-btn" type="button" data-n="exit">Exit</button><span class="dots">${dots}</span></div></div>`);
+    if (built) this.caption.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
       const n = b.dataset.n;
       if (n === 'next') this.next(); else if (n === 'prev') this.prev(); else this.stop();
     }));
@@ -171,8 +182,8 @@ export class Tour {
       : s.view === 'journey'
         ? 'Free fall from rest far away. Drag the Fall chart to scrub; your clock and the far clock part ways near the horizon.'
         : `Spin ${spinText(s.a)}, ${COLOR_MODES[s.color].label.toLowerCase()} colour. Click any pixel to trace its ray; drag to orbit.`;
-    this.caption.innerHTML = `<div class="cap"><div class="cap-k">${esc(VIEWS[s.view].label)} view</div><div class="cap-t">${esc(title)}</div><div class="cap-b">${esc(line)}</div>
-      <div class="cap-nav"><button class="bh-btn go" type="button" data-n="tour">Take the tour</button></div></div>`;
-    this.caption.querySelector('button').addEventListener('click', () => this.start(0));
+    const built = setHTML(this.caption, `<div class="cap"><div class="cap-k">${esc(VIEWS[s.view].label)} view</div><div class="cap-t">${esc(title)}</div><div class="cap-b">${esc(line)}</div>
+      <div class="cap-nav"><button class="bh-btn go" type="button" data-n="tour">Take the tour</button></div></div>`);
+    if (built) this.caption.querySelector('button').addEventListener('click', () => this.start(0));
   }
 }

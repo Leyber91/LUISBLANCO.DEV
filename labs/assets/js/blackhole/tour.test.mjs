@@ -159,8 +159,8 @@ function page({ still = true } = {}) {
   st.set(st.objectPatch('m87'), { instant: true, src: 'boot' });
   const ap = { store: st, model: P.derive(st.all()), still, lastInput: 0 };
   st.on(() => { ap.model = P.derive(st.all()); });
-  const cap = { innerHTML: '', click: {} };
-  const buttons = () => [...cap.innerHTML.matchAll(/data-n="(\w+)"/g)].map((m) => ({ dataset: { n: m[1] }, addEventListener: (type, fn) => { cap.click[m[1]] = fn; } }));
+  const cap = { innerHTML: '', click: {}, adds: 0 };
+  const buttons = () => [...cap.innerHTML.matchAll(/data-n="(\w+)"/g)].map((m) => ({ dataset: { n: m[1] }, addEventListener: (type, fn) => { cap.click[m[1]] = fn; cap.adds++; } }));
   cap.querySelectorAll = () => buttons();
   cap.querySelector = () => buttons()[0];
   const asked = [];
@@ -453,6 +453,30 @@ guard('S7: the idle caption names the curve as the legend does', () => {
   ok('and so with the thick disk', /No closed-form curve is drawn/.test(pg.text()) && !/Bardeen/.test(pg.text()), pg.text());
   st.set({ a: 0, q: 0.6 }, { instant: true });
   ok('the thick disk, charge without spin: the circle', pg.text().includes(`${w} curve: the ${P.SHADOW_HOW.rn.curve}`), pg.text());
+});
+
+/* A press is a down and an up on one element: a caption rebuilt between them loses the click. The fall moves the state
+   every frame and the idle drift turns the view every frame, so a caption rebuilt on every change of state lost the
+   Next of a visitor at the fall stop (seen by the drive on 2026-11-17, after pull request 47 slowed its steps). */
+guard('a press on the caption is never cut by a redraw that leaves its words alone', () => {
+  const pg = page(), { T, st, cap } = pg;
+  let sets = 0, html = cap.innerHTML;
+  Object.defineProperty(cap, 'innerHTML', { get: () => html, set: (v) => { sets++; html = v; }, configurable: true });
+  T.start(at('fall'));
+  const atFall = sets, addsAtFall = cap.adds;
+  for (let k = 0; k < 5; k++) st.set({ az: k * 7 }, { instant: true, src: 'journey' });
+  ok('at the fall stop, five changes of state that leave its words alone rebuild the caption 0 times', sets === atFall, `${sets - atFall} rebuilds`);
+  ok('and give its kept buttons no second listener (one press, one step)', cap.adds === addsAtFall, `${cap.adds - addsAtFall} listeners added`);
+  const beforeNext = sets;
+  T.next();
+  ok('a new stop rebuilds it, and its Next still works', sets > beforeNext && typeof cap.click.next === 'function', `${sets - beforeNext}`);
+  T.stop();
+  const idle = sets, addsIdle = cap.adds;
+  for (let k = 0; k < 5; k++) st.set({ az: 40 + k }, { instant: true, src: 'idle' });
+  ok('idle, five turns of the view rebuild the idle caption 0 times', sets === idle, `${sets - idle} rebuilds`);
+  ok('and give its kept button no second listener', cap.adds === addsIdle, `${cap.adds - addsIdle} listeners added`);
+  st.set({ a: 0.5 }, { instant: true });
+  ok('a change of the words rebuilds it', sets > idle && /Spin 0\.5/.test(pg.text()), pg.text());
 });
 
 console.log(fails ? `\n${fails} of ${checks} tour check(s) failed` : `\nall ${checks} tour checks passed`);

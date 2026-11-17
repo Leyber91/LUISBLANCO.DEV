@@ -11,7 +11,7 @@ import { tanHalfV, derive, shadowFor, s3, integratorShadow, measurement, publish
   sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G, fcolFits } from './physics.js';
 import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
-import { Tour } from './tour.js';
+import { Tour, setHTML } from './tour.js';
 import { createKeep } from './keep.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS } from './plate.js';
@@ -213,10 +213,20 @@ export function buildUI(app) {
   handle.type = 'button';
   handle.setAttribute('aria-expanded', 'false');
   stage.prepend(handle);
+  // at its peek at once: the class arrives after the page's first paint, and with the sheet's transition on, the
+  // sheet slid down over the stage on every load (seen by the drive's cover rule at 390, 2026-11-17)
+  stage.style.transition = 'none';
   stage.classList.add('bh-sheet');
+  void stage.offsetHeight;
+  stage.style.transition = '';
   handle.addEventListener('click', () => {
     const open = stage.classList.toggle('open');
     handle.setAttribute('aria-expanded', String(open)); $('#bh-sheetv').textContent = open ? 'close' : 'open';
+    // it says while it slides (data-moving), for as long as its own transition lasts (none under reduced motion), so
+    // a check of what covers what tells a sheet on its way down from one that stays (tools/drives/blackhole.mjs)
+    clearTimeout(stage._moving);
+    stage.dataset.moving = '';
+    stage._moving = setTimeout(() => { delete stage.dataset.moving; }, (parseFloat(getComputedStyle(stage).transitionDuration) || 0) * 1000);
   });
   const footM = el('div', 'bh-card bh-foot-m');
   stage.appendChild(footM);
@@ -633,9 +643,11 @@ export function buildUI(app) {
     if (store.get('view') !== 'journey') store.set({ ...store.viewPatch('journey') }, { instant: true });
     store.set({ rcam: Math.max(r, app.model.rh * 1.08), observer: 'faller' }, { instant: true, src: 'scrub' });
   };
-  $('#bh-fall').addEventListener('pointerdown', (e) => { scrubbing = true; e.target.setPointerCapture?.(e.pointerId); scrub(e); });
+  // the pointer is held by the chart's box, which stays, never by a part of the chart, which each redraw replaces: a
+  // capture held by a replaced part was lost, and a scrub let go off the chart never ended (the class of setHTML)
+  $('#bh-fall').addEventListener('pointerdown', (e) => { scrubbing = true; e.currentTarget.setPointerCapture?.(e.pointerId); scrub(e); });
   $('#bh-fall').addEventListener('pointermove', (e) => { if (scrubbing) scrub(e); });
-  $('#bh-fall').addEventListener('pointerup', () => { scrubbing = false; });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((t) => $('#bh-fall').addEventListener(t, () => { scrubbing = false; }));
 
   /* ---------- the five-minute check ---------- */
   const quizState = { answers: {} };
@@ -653,10 +665,10 @@ export function buildUI(app) {
     ];
     const score = Object.values(quizState.answers).filter(Boolean).length;
     $('#bh-score').textContent = `${score} / ${Q.length}`;
-    $('#bh-quiz').innerHTML = Q.map((x) => `<p class="bh-note" style="color:var(--text)">${esc(x.q)}</p><div class="bh-seg">${x.opts.map(([t, ok], i) => {
+    setHTML($('#bh-quiz'), Q.map((x) => `<p class="bh-note" style="color:var(--text)">${esc(x.q)}</p><div class="bh-seg">${x.opts.map(([t, ok], i) => {
       const chosen = quizState.answers[x.id + ':pick'] === i;
       return `<button class="bh-btn" type="button" data-q="${x.id}" data-i="${i}" data-ok="${ok ? 1 : 0}" aria-pressed="${chosen}">${esc(t)}${chosen ? `<small>${ok ? 'right' : 'not quite'}</small>` : ''}</button>`;
-    }).join('')}</div>`).join('');
+    }).join('')}</div>`).join(''));
   }
   $('#bh-quiz').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-q]'); if (!b) return;
@@ -803,11 +815,15 @@ export function buildUI(app) {
   let gpu = (gpuFull.replace(/^ANGLE \(/, '').split(',')[1] || gpuFull).replace(/\(0x[0-9A-Fa-f]+\)|Direct3D.*$|Vulkan.*$|\)\s*$/g, '').trim();
   if (/swiftshader/i.test(gpuFull)) gpu = 'SwiftShader (CPU)';
   if (gpu.length > 26) gpu = gpu.slice(0, 25) + '…';
+  // the readout changes with every frame report while its button stays: the button is built once (setHTML, tour.js)
+  [perfEl, perfEl2].forEach((n) => {
+    setHTML(n, `<span class="pt">${esc(n.textContent)}</span><button type="button" aria-label="Change quality tier">change</button>`);
+    n.querySelector('button').addEventListener('click', () => { const t = store.get('tier'); store.set({ tier: tierCycle[(tierCycle.indexOf(t) + 1) % tierCycle.length] }); });
+  });
   const perf = (p, res) => {
     const t = store.get('tier');
-    const html = `<span title="${esc(gpuFull)}">${esc(gpu)}</span> · tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}<button type="button" aria-label="Change quality tier">change</button>`;
-    perfEl.innerHTML = html; perfEl2.innerHTML = html;
-    [perfEl, perfEl2].forEach((n) => n.querySelector('button').addEventListener('click', () => store.set({ tier: tierCycle[(tierCycle.indexOf(t) + 1) % tierCycle.length] })));
+    const html = `<span title="${esc(gpuFull)}">${esc(gpu)}</span> · tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}`;
+    [perfEl, perfEl2].forEach((n) => setHTML(n.querySelector('.pt'), html));
   };
 
   /* ---------- per-frame hooks ---------- */

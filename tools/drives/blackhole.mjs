@@ -378,11 +378,73 @@ const RECT = '(() => { const r = document.getElementById("bh-canvas").getBoundin
 // the colour a token computes to in the page
 const TOKEN = `(v) => { const i = document.createElement('i'); i.style.color = 'var(' + v + ')'; document.body.append(i); const c = getComputedStyle(i).color; i.remove(); return c; }`;
 
+/* The phone's sheet of controls and readouts, opened, lies over the stage by design: its header stays at its top and
+   closes it, and the stage's targets come back. So does a sheet sliding shut, for its --t-slow (it says so with
+   data-moving, cleared when its transition is over; the drive checks it clears). The closed sheet is not named, so
+   a target its peek hides is still a break (tools/invariants.mjs, targets: a cover no scroll moves off is named with
+   its reason). Deferred, a shared change: the rule itself judging a target only once the animations around it are
+   over (document.getAnimations()). */
+export const SHEET_COVER = {
+  '.bh-sheet.open': 'the opened sheet lies over the stage by design; its header closes it',
+  '.bh-sheet[data-moving]': 'a sheet sliding shut lies over the stage until it is down',
+};
+
+/* The tour moves to its next stop by itself after the stop's dwell (TOUR[i].dur, 9 to 14 s). Reading a stop at both
+   widths, with the invariants and a frame after every step, can take longer than that since the frame rule of pull
+   request 47, so the drive holds the stop's clock while it reads, and checks the move by itself once, on its own. */
+const HOLD_STOP = '(() => { const t = window.__bh && window.__bh.tour; if (t && t.running) t.t = -1e9; return !!(t && t.running); })()';
+
+/* A fall to its stop (road 1.08), and a scrub let go off the Fall chart. The chart is redrawn from HTML on every
+   change of state, so a pointer captured on one of its parts lost the capture with the redraw: a scrub dragged off
+   the chart and let go there never saw its release, and hovering over the chart afterwards went on scrubbing with no
+   button held (the class of setHTML in tour.js: a control replaced while the pointer is on it). Self-contained, so a
+   scratch scenario can run it alone on the page before a fix. */
+export async function FALL_STEP(p, { base, width, ready }) {
+  const phone = width < 700;
+  const at = (sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; })()`);
+  const press = async (sel) => { const b = await at(sel); if (!b) { p.check(`the page has ${sel}`, false); return false; } await p.click(b[0] + b[2] / 2, b[1] + b[3] / 2); return true; };
+  const sheet = async (open) => {
+    if (!phone) return;
+    const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
+    if (now !== open) { await press('.bh-sheet-h'); await p.sleep(700); }
+  };
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+  await p.until(ready, 60000);
+  await p.sleep(1500);
+  await sheet(true);
+  if (!(await press('#bh-fallgo'))) return;
+  await sheet(false);
+  const t0 = Date.now();
+  // the fall takes 22 s of the page's frame time, and a frame counts at most 250 ms (main.js): under a slow software
+  // renderer it takes longer, so the wait is long and the time it took is printed
+  // Known miss, queued (ROAD 1.05, the fall): the journey aims at 1.08 r+, but the state's floor for the camera's
+  // radius is 3 M (config.js SCHEMA rcam min, there for a static camera), so every fall and every scrub stops at
+  // max(3 M, 1.08 r+). This checks the stop the page has today, by that rule, so a change to either shows here.
+  const stopped = await p.until(`(() => { const a = window.__bh, s = a.store.all(); return s.view === 'journey' && s.observer === 'faller' && s.rcam <= Math.max(3, a.model.rh * 1.08) + 1e-4; })()`, 150000);
+  p.check('a fall pressed on the Fall card runs to its stop, today max(3 M, 1.08 r+)', !!stopped, `${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  const f = await p.ev(`(async () => { const P = await import('/labs/assets/js/blackhole/physics.js'); const a = window.__bh, s = a.store.all(), m = a.model;
+    const rows = P.fall(s.a, s.incl, 40, s.q), row = rows.find((r) => r.r <= s.rcam) || rows[0];
+    const rw = [...document.querySelectorAll('#bh-fallread .rw')].find((r) => /your clock/.test(r.textContent));
+    return { shown: rw ? rw.querySelector('dd').textContent.replace(/\\s+/g, '') : null, want: P.dur(row.tau * m.tg).replace(/\\s+/g, ''), rcam: s.rcam }; })()`);
+  p.check(`at the stop the Fall card's clock is the engine's proper time there, ${f.want}`, f.shown === f.want, JSON.stringify(f));
+  await sheet(true);
+  const box = await at('#bh-fall svg');
+  if (!box) { p.check('the page has the Fall chart', false); return; }
+  const [x, y, w, h] = box, cy = y + h / 2;
+  await p.drag(x + w * 0.3, cy, x + w * 0.6, Math.max(4, y - h * 1.5));   // pressed on the chart, let go above it
+  const r1 = await p.ev('window.__bh.store.get("rcam")');
+  await p.move(x + w * 0.85, cy); await p.sleep(250);
+  await p.move(x + w * 0.15, cy); await p.sleep(250);
+  const r2 = await p.ev('window.__bh.store.get("rcam")');
+  p.check('a scrub let go off the Fall chart has ended: moving over the chart afterwards with no button held leaves the fall where it was', r1 === r2, JSON.stringify({ r1, r2 }));
+  await sheet(false);
+}
+
 /* ---- the scenario ---- */
 
 export default async function blackhole(p, { base, width }) {
   const phone = width < 700;
-  for (const [n, e] of standard({ gold: { allow: [...GOLD_ALLOW, ...GOLD_DEFERRED] } })) p.invariant(n, e);
+  for (const [n, e] of standard({ gold: { allow: [...GOLD_ALLOW, ...GOLD_DEFERRED] }, targets: { cover: SHEET_COVER } })) p.invariant(n, e);
   p.invariant('invariant: no target is cut by an ancestor that does not scroll, or by the window', CLIPPED);
   p.invariant('invariant: every label on the render stays inside the window', OVERLAY_INSIDE);
   p.invariant('invariant: on a wide screen every label on the render stays clear of the panels', OVERLAY_CLEAR);
@@ -403,6 +465,12 @@ export default async function blackhole(p, { base, width }) {
   const pixelRules = async (label) => {
     const b = await p.ev(BOXES([...GOLD_ALLOW, ...GOLD_DEFERRED, ...WARN_ALLOW]));
     const file = await p.shot(`px-${String(++shots.n).padStart(2, '0')}-${width}`);
+    // an allowed mark that moves while the frame is taken (the Fall chart's cursor during a fall) is allowed along
+    // its path: each element's box measured before and after the shot, and the box spanning both (seen 2026-11-17:
+    // the cursor's four pixels outside its box measured before the shot)
+    const after = await p.ev(BOXES([...GOLD_ALLOW, ...GOLD_DEFERRED, ...WARN_ALLOW]));
+    if (after.allowed.length === b.allowed.length) b.allowed = b.allowed.map((a, i) => { const z = after.allowed[i]; return [Math.min(a[0], z[0]), Math.min(a[1], z[1]), Math.max(a[2], z[2]), Math.max(a[3], z[3])]; });
+    else b.allowed = b.allowed.concat(after.allowed);
     const img = pixels(file);
     const g = goldIn(img, b);
     if (g.n) shots.gold++;
@@ -434,10 +502,16 @@ export default async function blackhole(p, { base, width }) {
     await p.click(r[0], r[1]);
     return true;
   };
+  let closedOnce = false;
   const sheet = async (open) => {
     if (!phone) return;
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await click('.bh-sheet-h'); await p.sleep(700); }
+    if (now && !open && !closedOnce) {
+      closedOnce = true;
+      const c = await p.ev(`(() => { const s = document.querySelector('.bh-sheet'); return { moving: 'moving' in s.dataset, open: s.classList.contains('open'), t: getComputedStyle(s).transitionDuration }; })()`);
+      p.check('the sheet, slid down, no longer says it moves (so its peek is judged as a cover again)', !c.moving && !c.open, JSON.stringify(c));
+    }
   };
   const button = (box, text) => p.ev(`[...document.querySelectorAll(${JSON.stringify(box + ' button')})].findIndex((b) => b.textContent.trim().startsWith(${JSON.stringify(text)}))`);
 
@@ -584,6 +658,7 @@ export default async function blackhole(p, { base, width }) {
   await p.sleep(2000);
   await sheet(true);
   await click('#bh-tour');
+  await p.ev(HOLD_STOP);
   await sheet(false);
   const STOP = `(async () => {
     const K = await import('/labs/assets/js/blackhole/kerr.js'), P = await import('/labs/assets/js/blackhole/physics.js');
@@ -612,11 +687,19 @@ export default async function blackhole(p, { base, width }) {
     if (/not the horizon/.test(st.title)) p.check(`the shadow stop: the width at the ${st.farDeg} deg it names, ${st.width} M, with the camera at ${st.incl} deg`, st.text.includes(`Seen from far away at ${st.farDeg} deg, the dark region is ${st.width} M wide`), st.text);
     if (/size of a city/.test(st.title)) p.check(`the Cygnus X-1 stop: its horizon across is 2 r+, ${st.across} km`, st.text.includes(`horizon is ${st.across} km across`), st.text);
     await pixelRules(`tour stop ${k + 1}`);
-    if (k < 7) await click('#bh-caption button[data-n="next"]');
+    if (k < 7) { await click('#bh-caption button[data-n="next"]'); await p.ev(HOLD_STOP); }
   }
   p.check('the tour drew its focus ring at the stops that point at something', rings >= 3, `${rings} stops with a ring`);
   await click('#bh-caption button[data-n="exit"]');
   await p.sleep(800);
+  // the move by itself, held above while each stop was read: the first stop's clock set 0.3 s short of its dwell
+  const moved = await p.ev(`(async () => { const C = await import('/labs/assets/js/blackhole/config.js'), t = window.__bh.tour;
+    t.start(0); t.t = C.TOUR[0].dur - 0.3; await new Promise((r) => setTimeout(r, 1500)); const i = t.i, running = t.running; t.stop(); return { i, running, dur: C.TOUR[0].dur }; })()`);
+  p.check(`the tour moves to its second stop by itself after the first stop's ${moved.dur} s`, moved.running && moved.i === 1, JSON.stringify(moved));
+  await p.sleep(800);
+
+  /* ---- 4b. a fall to its stop, and a scrub let go off the chart ---- */
+  await FALL_STEP(p, { base, width, ready: READY });
 
   /* ---- 5. the Instrument card's Hawking temperature, read against derive() in the page (P5-1) ---- */
   const HAWK = `(async () => { const P = await import('/labs/assets/js/blackhole/physics.js');

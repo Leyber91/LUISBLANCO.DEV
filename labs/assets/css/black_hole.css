@@ -269,7 +269,8 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
   #bh-route .lbr-panel input, #bh-route .lbr-row button { min-height: 44px; }
   .bh-stage { position: fixed; left: 0; right: 0; bottom: 0; top: auto; height: auto; z-index: 25; }
   .bh-left, .bh-right { position: static; width: auto; overflow: visible; padding: 0; }
-  .bh-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; max-height: 72vh; overflow-y: auto; overscroll-behavior: contain;
+  /* one height, so its closed place (100% less the peek) does not move when its cards change height */
+  .bh-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; height: 72vh; overflow-y: auto; overscroll-behavior: contain;
     background: var(--bh-panel-solid); border-top: 1px solid var(--bh-hair-2); padding: 0 var(--bh-pad) 18px; transform: translateY(calc(100% - var(--sheet-peek, 132px)));
     transition: transform var(--t-slow) var(--ease-out); display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
   .bh-sheet.open { transform: none; }
@@ -281,7 +282,10 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
   .bh-sheet-h em { font-style: normal; color: var(--horizon); }
   .bh-head h1 { font-size: 18px; }
   .bh-caption { width: calc(100vw - 2 * var(--bh-pad)); bottom: calc(var(--sheet-peek, 132px) + 10px); }
-  .bh-caption .cap-b { font-size: var(--bh-fs-s); }
+  /* four lines and half a fifth, the rest scrolled inside: a stop's words never rise over the hole they are about (at
+     390 the EHT stop ran to 12 lines and covered the shadow and its ring), every stop's caption is one height, and
+     the half line shows there is more */
+  .bh-caption .cap-b { font-size: var(--bh-fs-s); max-height: calc(4.5 * 1.5em); overflow-y: auto; overscroll-behavior: contain; }
   .bh-foot { display: none; }
   .bh-sheet .bh-foot-m { display: flex; flex-direction: column; gap: 6px; font-size: var(--bh-fs-s); color: var(--text-dim); }
   .bh-probe { left: var(--bh-pad) !important; right: var(--bh-pad); width: auto; top: 64px !important; }
