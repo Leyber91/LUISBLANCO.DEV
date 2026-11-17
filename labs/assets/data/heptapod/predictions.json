@@ -20,6 +20,17 @@
       "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters, from detail/ring.js's per-angle carrier width and blot clusters.",
       "filmValueKnown": false,
       "filmValueKnownNote": "film.md 5.2 gives the width's coefficient of variation (0.51 to 1.21), never its relation to where the blots are."
+    },
+    {
+      "id": "F4-P3",
+      "date": "2026-11-17",
+      "feature": "whether the ring's width carries the direction of one stroke",
+      "derivation": "A ring is one stroke. Its brush is loaded where the stroke starts and its bristle reservoirs deplete with arc length along the stroke (Strassmann 1986, the hairy-brush model; PLAN M1), and the stroke starts and ends at the two edges of the main gap (the breath, PLAN M6). So, away from the taper into the gap and away from the blots, the width falls along the ring in one direction, from the gap edge where the stroke started to the edge where it ended. F4-P2 measured depletion symmetrically, from the nearest cluster on either side, which a stroke with a direction would blur; this is the directed form. Written after F4-P2 missed: of the per-angle widths, only F4-P2's one rank correlation per master, against symmetric distance, had been seen.",
+      "prediction": "On the film's masters with a main gap of at least 1 degree, the angles kept as in F4-P2 (carrier present, width at most 2.5 times its median, outside every blot cluster) and further than 25 degrees from the edges of every gap (a run of angles without carrier of at least 1 degree; 25 degrees is the taper of film.md 5.2), the absolute Spearman rho of width against arc position counted from the main gap ranks at or above the 75th percentile of the same statistic with the origin moved to each kept angle in turn (every distinct starting point; an origin anywhere inside the gap or its taper zones gives the same order as the gap's own), in at least two thirds of those masters. Under no direction the chance is 0.25 per master.",
+      "measure": "tools/dev/heptapod_predictions.mjs on the 18 film masters, from detail/ring.js's per-angle carrier width, gaps and blot clusters.",
+      "filmValueKnown": false,
+      "filmValueKnownNote": "film.md 5.2 gives the taper into a gap as a median over 34 stroke ends taken together, never a trend along the ring or a difference between a stroke's two ends.",
+      "ifConfirmed": "The film's ring would show where it was started, in its width. PLAN V18 forbids a start mark in our own figures; a confirmation is reported against V18 and never used to loosen it."
     }
   ]
 }
