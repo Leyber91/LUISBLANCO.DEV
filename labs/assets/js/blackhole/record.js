@@ -36,6 +36,10 @@
    Every function but `read`, `load` and `update` is pure.
    ============================================================ */
 
+import { Store } from './state.js';
+import { OBJECTS, VIEWS } from './config.js';
+import { spinText } from './physics.js';
+
 export const V = 1;
 export const LIMITS = Object.freeze({ kept: 50, rays: 100, falls: 50, link: 400, dropped: 1000000 });
 /* What a traced ray did, as the probe names it, and the words for each. */
@@ -108,6 +112,18 @@ export function fall(record, { q, t, tau }) {
 }
 export const isKept = (record, q) => record.kept.some((e) => e.q === q);
 export const counts = (record) => ({ kept: record.kept.length, rays: record.rays.length, falls: record.falls.length });
+
+/* ---------------- the words ---------------- */
+/** What a link opens, in words: the object (or a hole of your own), its spin, a charge if it has one, the view.
+ *  Read through the state's own door (Store.open), so a link names what the page would show. */
+export function linkLabel(q) {
+  const s = new Store();
+  s.open(q);
+  const st = s.all(), o = OBJECTS.find((x) => x.id === st.obj);
+  return `${o ? o.name : 'a hole of your own'}, a = ${spinText(st.a)}${st.q > 0 ? `, Q = ${(+st.q).toFixed(2)}` : ''}, ${VIEWS[st.view].label.toLowerCase()}`;
+}
+export const rayWords = (e) => (e.fate === 'disk' ? (e.n > 0 ? `lands on the disk after going round, n = ${e.n}` : FATE_WORDS.disk) : FATE_WORDS[e.fate]);
+export const lineWords = (c) => `${c.kept} kept · ${c.rays} ${c.rays === 1 ? 'ray' : 'rays'} · ${c.falls} ${c.falls === 1 ? 'fall' : 'falls'}`;
 
 /* ---------------- the store ---------------- */
 export const NEWER = 'this record was written by a newer version of this page';

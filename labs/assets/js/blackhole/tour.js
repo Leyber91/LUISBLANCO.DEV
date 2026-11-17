@@ -94,7 +94,7 @@ export class Tour {
     const stop = TOUR[this.i];
     const { store } = this.app;
     store.set(stopPatch(stop, store), { src: 'tour', dur: 1700 });
-    if (stop.id === 'fall') this.journey.play(); else this.journey.stop();
+    if (stop.id === 'fall') this.journey.play('tour'); else this.journey.stop();
     this.draw();
   }
 

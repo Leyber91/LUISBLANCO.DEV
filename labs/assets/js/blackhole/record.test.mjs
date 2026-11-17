@@ -93,6 +93,18 @@ guard('one door: what the store gives back passes the same checks', () => {
   ok('a stored fall with no proper time goes', f0.falls.length === 1 && f0.falls[0].tau === 3, J(f0.falls));
 });
 
+guard('the words: a link named as the page would show it', () => {
+  ok('M87*', R.linkLabel(M87) === 'M87*, a = 0.940, cinematic', R.linkLabel(M87));
+  ok('Sgr A*', R.linkLabel(SGRA).startsWith('Sgr A*, a = '), R.linkLabel(SGRA));
+  ok('a hole of your own with its charge and view', R.linkLabel(CUSTOM).startsWith('a hole of your own, a = 0.500, Q = 0.30, '), R.linkLabel(CUSTOM));
+  ok('no charge, no charge named', !R.linkLabel(M87).includes('Q ='));
+  ok('the view by its label: telescope', R.linkLabel(linkOf({ obj: 'm87', view: 'telescope' })).endsWith(', telescope'), R.linkLabel(linkOf({ obj: 'm87', view: 'telescope' })));
+  ok('an empty link is the page as it opens', R.linkLabel('').includes(', a = '), R.linkLabel(''));
+  ok('a ray on the disk after going round names its order', R.rayWords({ fate: 'disk', n: 2 }) === 'lands on the disk after going round, n = 2' && R.rayWords({ fate: 'disk', n: 0 }) === R.FATE_WORDS.disk);
+  ok('the other fates in their words', R.rayWords({ fate: 'captured', n: 0 }) === R.FATE_WORDS.captured && R.rayWords({ fate: 'sky', n: 0 }) === R.FATE_WORDS.sky && R.rayWords({ fate: 'ring', n: 0 }) === R.FATE_WORDS.ring);
+  ok('the line, one and many', R.lineWords({ kept: 1, rays: 1, falls: 1 }) === '1 kept · 1 ray · 1 fall' && R.lineWords({ kept: 0, rays: 2, falls: 0 }) === '0 kept · 2 rays · 0 falls');
+});
+
 /* the store: a stand-in with the Labs OS progress API */
 function fakeOS(initial = null, v = R.V) {
   let rec = initial ? { data: initial, v } : null, writes = 0, resume = null;
