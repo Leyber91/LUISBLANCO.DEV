@@ -5,8 +5,9 @@
    ============================================================ */
 
 import { TOURS, VALLEY } from './config.js';
-import { earthLikeness, insolation, transitGeometry, density, isNum } from './science.js';
+import { earthLikeness, insolation, transitGeometry, density, semiMajor, isNum } from './science.js';
 import { fmt, fmtInt } from './views/common.js';
+import { starNum } from './starlight.js';
 
 const top = (arr, n, key, desc = true) =>
   arr.filter((p) => isNum(key(p))).sort((a, b) => (desc ? key(b) - key(a) : key(a) - key(b))).slice(0, n);
@@ -16,7 +17,7 @@ export function tourStops(key, list) {
   const t = TOURS.find((x) => x.key === key);
   if (key === 'earthlike') {
     return top(measured, t.n, (p) => earthLikeness(p)).map((p) => ({
-      p, cap: `Earth-likeness ${earthLikeness(p).toFixed(2)} [ILLUSTRATIVE measure]: ${fmt(p.R, 3)} R⊕ and ${fmt(insolation(p).S, 3)} S⊕.`,
+      p, cap: `Earth-likeness ${earthLikeness(p).toFixed(2)} [ILLUSTRATIVE measure]: ${fmt(p.R, 3)} R⊕ and ${starNum(insolation(p).S, 3)} S⊕.`,
     }));
   }
   if (key === 'hottest') {
@@ -33,8 +34,8 @@ export function tourStops(key, list) {
     if (ecc) add(ecc, `The most eccentric orbit with a measured radius: e = ${fmt(ecc.ecc, 2)}.`);
     const hug = top(measured, 1, (p) => { const g = transitGeometry(p); return g ? g.aRs : null; }, false)[0];
     if (hug) add(hug, `Orbits ${fmt(transitGeometry(hug).aRs, 3)} stellar radii from its star's centre.`);
-    const wide = top(measured, 1, (p) => p.a)[0];
-    if (wide) add(wide, `The widest orbit with a measured radius: ${fmtInt(wide.a)} AU.`);
+    const wide = top(measured, 1, (p) => semiMajor(p).a)[0];   // the orbit every sheet prints
+    if (wide) add(wide, `The widest orbit with a measured radius: ${fmt(semiMajor(wide).a, 3)} AU.`);   // to three figures, as sheet B prints it
     const longT = top(measured.filter((p) => p.method === 'Transit'), 1, (p) => p.P)[0];
     if (longT) add(longT, `The longest period caught in transit: ${fmtInt(longT.P)} days.`);
     return stops.slice(0, t.n);
