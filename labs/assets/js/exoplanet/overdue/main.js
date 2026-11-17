@@ -37,7 +37,7 @@
 import { LabsOS } from '../../os/index.js';
 import { load as loadRecord, update as updateRecord, setOverdue, visit } from '../record.js';
 import { el } from '../../kit/dom.js';
-import { int, day, fromIso, isoDay, clock } from '../../kit/format.js';
+import { int, grouped, MINUS, day, fromIso, isoDay, clock } from '../../kit/format.js';
 import { setSwitch, switchCtl } from '../../kit/controls.js';
 import { surface, reducedMotion } from '../views/common.js';
 import { jdOfMs, msOfJd, sunAltitude } from './time.js';
@@ -169,7 +169,7 @@ function describePapers(c) {
   const p = S.star.p, ul = $('r-points');
   ul.textContent = '';
   if (!p.sols || !c) { put('r-count', 'published clocks'); return; }
-  ul.append(el('li', '', `${paperOf(c)}, the clock in use. Mid-transit ${c.t0.toFixed(5)} ± ${span(c.sT * 86400)}, period ${c.P} d ± ${span(c.sP * 86400)}.`));
+  ul.append(el('li', '', `${paperOf(c)}, the clock in use. Mid-transit ${grouped(Number(c.t0.toFixed(4)))} ± ${span(c.sT * 86400)}, period ${c.P} d ± ${span(c.sP * 86400)}.`));
   const orbit = (n) => (n === 0 ? 'on the clock\'s own orbit' : `${plural(Math.abs(n), 'orbit', 'orbits')} ${n < 0 ? 'before' : 'after'} it`);
   for (const pt of pointsFor(p, c).sort((a, b) => a.s.t0 - b.s.t0)) {
     ul.append(el('li', '', `${paperOf(pt.s)} timed a transit ${orbit(pt.n)} and found it ${span(Math.abs(pt.residual) * 86400)} ${pt.residual < 0 ? 'early' : 'late'}, ${Math.abs(pt.z).toFixed(1)} sigma of the two errors together.`));
@@ -337,7 +337,9 @@ function mountPicker() {
 /* ---------------- tonight ---------------- */
 /* The place the night is drawn for: the visitor's, or the example until they set one. */
 const placeNow = () => S.place || EXAMPLE_PLACE;
-const placeWords = () => (S.place ? `${S.place.lat.toFixed(2)}°, ${S.place.lon.toFixed(2)}°` : `${EXAMPLE_PLACE.name} (${EXAMPLE_PLACE.lat.toFixed(2)}°, ${EXAMPLE_PLACE.lon.toFixed(2)}°), an example place`);
+// two decimals, as before, with kit/format.js's minus sign, never the hyphen; a value that rounds to zero has no sign
+const deg2 = (v) => { const t = Math.abs(v).toFixed(2); return `${v < 0 && Number(t) !== 0 ? MINUS : ''}${t}°`; };
+const placeWords = () => (S.place ? `${deg2(S.place.lat)}, ${deg2(S.place.lon)}` : `${EXAMPLE_PLACE.name} (${deg2(EXAMPLE_PLACE.lat)}, ${deg2(EXAMPLE_PLACE.lon)}), an example place`);
 function nightSpans(place, from) {
   const out = []; let open = null;
   for (let i = 0; i <= 144; i++) {
@@ -366,7 +368,7 @@ function renderTonight() {
     const name = el('td'); const b = el('button', 'linkish', r.planet.name); b.type = 'button'; b.dataset.planet = r.planet.name;
     b.addEventListener('click', () => { openStar(S.stars[r.planet.i], { user: true }); put('pick-msg', ''); $('clock').scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' }); $('c-name').focus({ preventScroll: true }); });
     name.append(b);
-    const alt = !Number.isFinite(r.altMin) ? 'none' : Math.round(r.altMin) === Math.round(r.altMax) ? `${Math.round(r.altMin)}°` : `${Math.round(r.altMin)}° to ${Math.round(r.altMax)}°`;
+    const alt = !Number.isFinite(r.altMin) ? 'none' : Math.round(r.altMin) === Math.round(r.altMax) ? `${int(r.altMin)}°` : `${int(r.altMin)}° to ${int(r.altMax)}°`;
     tr.append(name, el('td', 'num', localTime(r.mid, r.windowS)), el('td', 'num', `± ${span(r.windowS)}`),
       el('td', `why${r.watchable ? ' yes' : ''}`, r.watchable ? 'up in the dark' : (r.why || 'none')), el('td', 'num', alt), el('td', '', r.sky || 'none'),
       el('td', '', r.contested ? `${r.state}, contested` : r.state),
