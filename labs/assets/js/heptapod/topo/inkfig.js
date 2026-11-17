@@ -93,7 +93,7 @@ import { PI, sinK, cosK } from './trig.js';
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.2',
+  version: 'inkfig-0.2.1',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -103,7 +103,7 @@ export const INK = Object.freeze({
   GAP_DEG: 26.5,      // I6: the gap's arc, degrees
   TAPER_DEG: 10,      // I6: the stroke thins into the gap over this arc
   DEPTH: 0.33,        // I2: a pool's peak depth across the ring, over R
-  WOBBLE: 0.10,       // I1: centreline wander, over R
+  WOBBLE: 0.06,       // I1: centreline wander, over R
   W_RING: 0.06,       // I6: the carrier's width at full load, over R
   LOAD_ARC: 0.3,      // I6: arc (over R) at which the carrier's load has fallen to half
   LOAD_FLOOR: 0.7,   // I6: the share of a full load the brush keeps however far from a pool (it is redipped by the writer's hand, not only by the pools)
@@ -125,6 +125,7 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'W_RING', value: INK.W_RING, source: 'film suite 2026-11-17: carrier w_med median 0.066 R, w_p25 median 0.035 R' },
   { name: 'SHAFT', value: INK.SHAFT, source: 'film suite 2026-11-17: filament shaft median 0.0172 R' },
   { name: 'FIL_LEN', value: INK.FIL_LEN, source: 'film suite 2026-11-17: filament length median 0.143 R' },
+  { name: 'WOBBLE bounded', value: INK.WOBBLE, source: "v0.2 raised it to 0.10 on a 30-degree lattice and the 12-clause carrier left the suite's carrier band (closure 0.75, below the film's p10 0.81; the coordinating session saw straight chords between knots); 0.06 on a 45-degree lattice gives 0.92 (4 and 12 clauses, 2026-11-17)" },
   { name: 'R_CANVAS', value: INK.R_CANVAS, source: 'film.md 5.2: R over canvas median 0.365 (the measuring frame; figure.js)' },
   { name: 'v0.2 after the first measurement (bb8f228)', value: 0, source: 'NODE_DEG 4 to 7, WOBBLE 0.03 to 0.10, LOAD_FLOOR 0.45 to 0.7, W_RING 0.05 to 0.06, SHAFT 0.017 to 0.02, INK_SPREAD 0.0035 to 0.006, depth by clause size, the crown, more turning: set by eye against the film master and by the suite after F4-P4 had run; F4-P4 keeps its first outcome' },
   { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG', value: 0, source: 'first values, not compared with any film measure of their own' },
@@ -339,7 +340,7 @@ export function inkFigure(g, opts = {}) {
 
   // I1: the centreline
   const wobSeed = fnv1a(`${cert}:wobble`);
-  const rc = (phiDeg) => R * (1 + INK.WOBBLE * fbm1(wobSeed, (((phiDeg % 360) + 360) % 360) / 30, 3, 12));
+  const rc = (phiDeg) => R * (1 + INK.WOBBLE * fbm1(wobSeed, (((phiDeg % 360) + 360) % 360) / 45, 3, 8));
 
   const body = new Float32Array(S * S), bristle = new Float32Array(S * S);
   const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0 };

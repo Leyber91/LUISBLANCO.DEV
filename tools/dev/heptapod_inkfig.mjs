@@ -24,6 +24,7 @@ import { randomText } from '../../labs/assets/js/heptapod/topo/figure.js';
 import { INK, INK_CALIBRATIONS, inkFigure } from '../../labs/assets/js/heptapod/topo/inkfig.js';
 import { readPBM, ringTable, percentile } from '../../labs/assets/js/heptapod/detail/ring.js';
 import { filaments } from '../../labs/assets/js/heptapod/detail/filaments.js';
+import { masses } from '../../labs/assets/js/heptapod/detail/masses.js';
 
 const av = process.argv.slice(2);
 const out = av[0];
@@ -52,6 +53,8 @@ const COLS = [
   ['fil_shaft_R', 'filament shaft / R, median', (r) => med(r._F.map((f) => f.shaft / r._ring.R))],
   ['fil_turn_deg', 'filament turning, degrees, median', (r) => med(r._F.map((f) => f.turnDeg))],
   ['outward_share', 'share of filaments pointing outward', (r) => (r._F.length ? r._F.filter((f) => out_(f, r._ring)).length / r._F.length : 0)],
+  ['dominance', 'largest cluster ink over all cluster ink (detail/masses.js)', (r) => r._M.dominance],
+  ['fan_max', 'most filaments rooted on one cluster (detail/masses.js)', (r) => r._M.fanMax],
   ['droplets', 'droplets of 1% R or more', (r) => r.droplets_ge1u],
   ['boxdim', 'edge box dimension', (r) => r.boxdim],
 ];
@@ -63,6 +66,7 @@ function measure(m) {
   const row = ringTable(m);
   const wm = row.w_med_R * row._ring.R;
   row._F = filaments(m, { minLen: wm, ring: { ...row._ring, w: wm } }).filaments;
+  row._M = masses(row, row._F);
   return { cols: Object.fromEntries(COLS.map(([k, , f]) => [k, +(+f(row)).toFixed(4)])), F: row._F };
 }
 
