@@ -155,7 +155,7 @@
     "to": "if (!h || !h.headRefOid"
   },
   {
-    "name": "ship: a failure of gh is waited on for twenty minutes",
+    "name": "ship: a failure of gh is waited on until the deadline",
     "from": "else { say(`NOT MERGED: gh could not read the checks of pull request ${n}${because(c)}`); return 1; }",
     "to": "else checks = [];"
   },
@@ -168,5 +168,20 @@
     "name": "ship: a pull request found merged counts as merged by this run",
     "from": "its checks and the way it was merged were not verified here`); return { stop: 4 }; }",
     "to": "its checks and the way it was merged were not verified here`); return { stop: 0 }; }"
+  },
+  {
+    "name": "ship: the deadline is the old twenty minutes",
+    "from": "const WAIT_MS = 150 * 60 * 1000,",
+    "to": "const WAIT_MS = 20 * 60 * 1000,"
+  },
+  {
+    "name": "ship: the deadline is 149 minutes",
+    "from": "const WAIT_MS = 150 * 60 * 1000,",
+    "to": "const WAIT_MS = 149 * 60 * 1000,"
+  },
+  {
+    "name": "ship: the deadline is the 80 minutes first asked",
+    "from": "const WAIT_MS = 150 * 60 * 1000,",
+    "to": "const WAIT_MS = 80 * 60 * 1000,"
   }
 ]

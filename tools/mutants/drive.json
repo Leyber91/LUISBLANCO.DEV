@@ -1,0 +1,642 @@
+[
+  {
+    "name": "lock: a free lock never taken",
+    "from": "const fd = fs.openSync(file, 'wx');",
+    "to": "const fd = fs.openSync(file, 'r');"
+  },
+  {
+    "name": "lock: a lock taken without the holder's name",
+    "from": "fs.writeSync(fd, JSON.stringify({ pid: process.pid, t: Date.now() }));",
+    "to": "fs.writeSync(fd, '');"
+  },
+  {
+    "name": "lock: giving back removes another's lock",
+    "from": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true });",
+    "to": "fs.rmSync(file, { force: true });"
+  },
+  {
+    "name": "lock: giving back keeps its own lock",
+    "from": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true });",
+    "to": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid !== process.pid) fs.rmSync(file, { force: true });"
+  },
+  {
+    "name": "lock: a lock that cannot be written waited for",
+    "from": "} catch (e) { if (e.code !== 'EEXIST') throw e; }",
+    "to": "} catch (e) { /* wait */ }"
+  },
+  {
+    "name": "lock: a held lock thrown as an error",
+    "from": "} catch (e) { if (e.code !== 'EEXIST') throw e; }",
+    "to": "} catch (e) { if (e.code === 'EEXIST') throw e; }"
+  },
+  {
+    "name": "lock: an empty lock taken at 5 s",
+    "from": "(!holder && age > 10000)",
+    "to": "(!holder && age > 5000)"
+  },
+  {
+    "name": "lock: an empty lock taken only at 20 s",
+    "from": "(!holder && age > 10000)",
+    "to": "(!holder && age > 20000)"
+  },
+  {
+    "name": "lock: the holder read as alive whatever it is",
+    "from": "const alive = (pid) => { try { process.kill(pid, 0); return true; }",
+    "to": "const alive = (pid) => { try { return true; }"
+  },
+  {
+    "name": "lock: the wait never gives up",
+    "from": "    if (Date.now() - t0 >= waitMs) return null;\n",
+    "to": ""
+  },
+  {
+    "name": "lock: the wait gives up at once",
+    "from": "    if (Date.now() - t0 >= waitMs) return null;\n",
+    "to": "    return null;\n"
+  },
+  {
+    "name": "drive: a drive with no lock runs anyway",
+    "from": "  if (!release) {",
+    "to": "  if (false) {"
+  },
+  {
+    "name": "drive: the wait limit from the environment ignored",
+    "from": "waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000",
+    "to": "waitMs = 20 * 60 * 1000"
+  },
+  {
+    "name": "chrome: a call cut off waits for ever",
+    "from": "    ws.onclose = () => { for (const [, [, rej]] of pending) rej(new Error('Chrome is gone')); pending.clear(); };",
+    "to": ""
+  },
+  {
+    "name": "chrome: the timeout never kills Chrome",
+    "from": "const killer = setTimeout(() => { timedOut = true; chrome.kill(); }, timeoutMs);",
+    "to": "const killer = setTimeout(() => { timedOut = true; }, timeoutMs);"
+  },
+  {
+    "name": "console: an exception not read",
+    "from": "else if (d.method === 'Runtime.exceptionThrown') errors.push(",
+    "to": "else if (d.method === 'Runtime.none') errors.push("
+  },
+  {
+    "name": "console: a warning not read",
+    "from": "['error', 'warning'].includes(d.params.type)",
+    "to": "['error'].includes(d.params.type)"
+  },
+  {
+    "name": "console: a note read as an error",
+    "from": "['error', 'warning'].includes(d.params.type)",
+    "to": "['error', 'warning', 'log'].includes(d.params.type)"
+  },
+  {
+    "name": "console: a failed resource not read",
+    "from": "d.params.entry.level === 'error' && !NOISE.test(",
+    "to": "d.params.entry.level === 'none' && !NOISE.test("
+  },
+  {
+    "name": "console: the favicon read",
+    "from": "&& !NOISE.test(d.params.entry.url || '')) errors.push(",
+    "to": ") errors.push("
+  },
+  {
+    "name": "console: a page that logs passes",
+    "from": "check('the console is clean', errors.length === 0,",
+    "to": "check('the console is clean', errors.length >= 0,"
+  },
+  {
+    "name": "frame: a transparent pixel not counted",
+    "from": "if (line[x * 4 + 3] !== 0 || skip.some(",
+    "to": "if (true || skip.some("
+  },
+  {
+    "name": "frame: a faint pixel counted as transparent",
+    "from": "if (line[x * 4 + 3] !== 0 || skip.some(",
+    "to": "if (line[x * 4 + 3] > 9 || skip.some("
+  },
+  {
+    "name": "frame: the boxes given ignored",
+    "from": "|| skip.some((r) => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1)) continue;",
+    "to": ") continue;"
+  },
+  {
+    "name": "frame: a box given reaches one pixel to the left",
+    "from": "x >= r.x0 && x < r.x1",
+    "to": "x >= r.x0 - 1 && x < r.x1"
+  },
+  {
+    "name": "frame: a box given reaches one pixel to the right",
+    "from": "x >= r.x0 && x < r.x1",
+    "to": "x >= r.x0 && x <= r.x1"
+  },
+  {
+    "name": "frame: a box given reaches one pixel up",
+    "from": "y >= r.y0 && y < r.y1",
+    "to": "y >= r.y0 - 1 && y < r.y1"
+  },
+  {
+    "name": "frame: a box given reaches one pixel down",
+    "from": "y >= r.y0 && y < r.y1",
+    "to": "y >= r.y0 && y <= r.y1"
+  },
+  {
+    "name": "frame: a line filtered by sub read raw",
+    "from": "const pred = f === 1 ? a :",
+    "to": "const pred = f === 9 ? a :"
+  },
+  {
+    "name": "frame: a line filtered by up read raw",
+    "from": ": f === 2 ? b :",
+    "to": ": f === 9 ? b :"
+  },
+  {
+    "name": "frame: a line filtered by average read raw",
+    "from": ": f === 3 ? (a + b) >> 1 :",
+    "to": ": f === 9 ? (a + b) >> 1 :"
+  },
+  {
+    "name": "frame: a line filtered by paeth read raw",
+    "from": ": f === 4 ? (pa <= pb && pa <= pc ? a : pb <= pc ? b : c) : 0;",
+    "to": ": 0;"
+  },
+  {
+    "name": "frame: paeth ties broken the wrong way",
+    "from": "(pa <= pb && pa <= pc ? a : pb <= pc ? b : c)",
+    "to": "(pa < pb && pa < pc ? a : pb < pc ? b : c)"
+  },
+  {
+    "name": "frame: the left neighbour taken from the wrong pixel",
+    "from": "const a = x >= 4 ? line[x - 4] : 0,",
+    "to": "const a = x >= 3 ? line[x - 3] : 0,"
+  },
+  {
+    "name": "frame: the upper-left neighbour forgotten",
+    "from": "c = x >= 4 ? prev[x - 4] : 0;",
+    "to": "c = 0;"
+  },
+  {
+    "name": "frame: the line above forgotten",
+    "from": "    prev = line;\n  }\n  return out;",
+    "to": "  }\n  return out;"
+  },
+  {
+    "name": "frame: an RGB frame read as RGBA",
+    "from": "  if (type === 2) return out;   // no alpha channel: no pixel can be transparent\n",
+    "to": ""
+  },
+  {
+    "name": "frame: a frame of another kind read",
+    "from": "if (depth !== 8 || (type !== 2 && type !== 6)) throw",
+    "to": "if (false) throw"
+  },
+  {
+    "name": "frame: the box not grown",
+    "from": "out.box = out.box ? { x0: Math.min(out.box.x0, x), y0: Math.min(out.box.y0, y), x1: Math.max(out.box.x1, x + 1), y1: Math.max(out.box.y1, y + 1) } : { x0: x, y0: y, x1: x + 1, y1: y + 1 };",
+    "to": "out.box = { x0: x, y0: y, x1: x + 1, y1: y + 1 };"
+  },
+  {
+    "name": "frame: an exception with no reason taken",
+    "from": "if (!(typeof why === 'string' && why.trim().length >= 8)) throw",
+    "to": "if (false) throw"
+  },
+  {
+    "name": "frame: a reason of five letters taken",
+    "from": "why.trim().length >= 8)) throw",
+    "to": "why.trim().length >= 5)) throw"
+  },
+  {
+    "name": "frame: the rule never runs after a step",
+    "from": "      if (frames.on) await frameCheck(label, await capture());\n",
+    "to": ""
+  },
+  {
+    "name": "frame: a shot not held to the rule",
+    "from": "        await frameCheck(`the shot ${name}`, png);\n",
+    "to": ""
+  },
+  {
+    "name": "frame: a broken frame passes",
+    "from": "      if (!t.count) return;\n",
+    "to": "      return;\n"
+  },
+  {
+    "name": "frame: a break reported each time it comes back",
+    "from": "      if (frames.seen.has(k)) return;\n",
+    "to": ""
+  },
+  {
+    "name": "frame: nine breaks listed",
+    "from": "if (frames.seen.size <= 8) check(`frame:",
+    "to": "if (frames.seen.size <= 0) check(`frame:"
+  },
+  {
+    "name": "frame: the exceptions' boxes not read",
+    "from": "for (const e of document.querySelectorAll(s)) { const r = e.getBoundingClientRect(); out.push(",
+    "to": "for (const e of []) { const r = e.getBoundingClientRect(); out.push("
+  },
+  {
+    "name": "frame: no end line",
+    "from": "    if (frames.on || frames.steps) check(`frame: no fully transparent pixel in each of",
+    "to": "    if (false) check(`frame: no fully transparent pixel in each of"
+  },
+  {
+    "name": "frame: no chunk read",
+    "from": "  while (o < png.length) {",
+    "to": "  while (o < 8) {"
+  },
+  {
+    "name": "frame: the header not read",
+    "from": "if (t === 'IHDR') {",
+    "to": "if (t === 'XXXX') {"
+  },
+  {
+    "name": "frame: the image data not read",
+    "from": "if (t === 'IDAT') parts.push(d);",
+    "to": "if (t === 'XXXX') parts.push(d);"
+  },
+  {
+    "name": "frame: the last line not read",
+    "from": "for (let y = 0; y < h; y++) {",
+    "to": "for (let y = 0; y < h - 1; y++) {"
+  },
+  {
+    "name": "frame: the last byte of a line not unfiltered",
+    "from": "for (let x = 0; x < stride; x++) {",
+    "to": "for (let x = 0; x < stride - 1; x++) {"
+  },
+  {
+    "name": "frame: the last pixel of a line not read",
+    "from": "for (let x = 0; x < w; x++) {",
+    "to": "for (let x = 0; x < w - 1; x++) {"
+  },
+  {
+    "name": "frame: no end line for shots alone",
+    "from": "if (frames.on || frames.steps) check(`frame:",
+    "to": "if (frames.on) check(`frame:"
+  },
+  {
+    "name": "frame: a shot with no frame does not throw",
+    "from": "        if (!png) throw new Error(`the shot ${name}: no frame came back`);\n",
+    "to": ""
+  },
+  {
+    "name": "lock: a process waits for its own hold",
+    "from": "    if (holder && holder.pid === process.pid) return () => {};\n",
+    "to": ""
+  },
+  {
+    "name": "lock: an inner hold gives the lock back",
+    "from": "    if (holder && holder.pid === process.pid) return () => {};",
+    "to": "    if (holder && holder.pid === process.pid) return () => { fs.rmSync(file, { force: true }); };"
+  },
+  {
+    "name": "runner: the rules never run",
+    "from": "      if (!invariants.length) return;",
+    "to": "      return;"
+  },
+  {
+    "name": "runner: a rule that returns null passes",
+    "from": "if (!Array.isArray(bad)) bad = [",
+    "to": "if (bad === null) bad = []; else if (!Array.isArray(bad)) bad = ["
+  },
+  {
+    "name": "runner: a rule that returns a string passes",
+    "from": "if (!Array.isArray(bad)) bad = [",
+    "to": "if (typeof bad === 'string') bad = []; else if (!Array.isArray(bad)) bad = ["
+  },
+  {
+    "name": "runner: a null named as an object",
+    "from": "bad === null ? 'null' : typeof bad",
+    "to": "typeof bad"
+  },
+  {
+    "name": "runner: a rule that throws passes",
+    "from": "catch (e) { bad = [`the rule could not be read: ${String(e.message).slice(0, 160)}`]; }",
+    "to": "catch (e) { bad = []; }"
+  },
+  {
+    "name": "runner: a break reported each time it comes back",
+    "from": "          if (inv.seen.has(k)) continue;\n",
+    "to": ""
+  },
+  {
+    "name": "runner: seven breaks listed",
+    "from": "if (inv.seen.size <= 8) check(",
+    "to": "if (inv.seen.size < 8) check("
+  },
+  {
+    "name": "runner: nine breaks listed",
+    "from": "if (inv.seen.size <= 8) check(",
+    "to": "if (inv.seen.size <= 9) check("
+  },
+  {
+    "name": "runner: steps not counted",
+    "from": "        inv.steps++;\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a wait of 100 ms is no step",
+    "from": "if (ms >= 100) await step(afterEv());",
+    "to": "if (ms > 100) await step(afterEv());"
+  },
+  {
+    "name": "runner: a wait of 99 ms is a step",
+    "from": "if (ms >= 100) await step(afterEv());",
+    "to": "if (ms >= 99) await step(afterEv());"
+  },
+  {
+    "name": "runner: a click is no step",
+    "from": "await mouse('mouseReleased', x, y, 0); await step(`a click at",
+    "to": "await mouse('mouseReleased', x, y, 0); (`a click at"
+  },
+  {
+    "name": "runner: a key is no step",
+    "from": "        await step(`the key ${key}`);\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a drag is no step",
+    "from": "        await step(`a drag from ${Math.round(x0)},${Math.round(y0)}`);\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a swipe is no step",
+    "from": "        await step(`a swipe from ${Math.round(x0)},${Math.round(y0)}`);\n",
+    "to": ""
+  },
+  {
+    "name": "runner: a release is no step",
+    "from": "async up(x, y) { await mouse('mouseReleased', x, y, 0); await step(",
+    "to": "async up(x, y) { await mouse('mouseReleased', x, y, 0); ("
+  },
+  {
+    "name": "runner: a wheel is no step",
+    "from": "await sleep(120); await step(`a wheel of",
+    "to": "await sleep(120); (`a wheel of"
+  },
+  {
+    "name": "runner: going to a page is no step",
+    "from": "await step(`go ${u.replace(",
+    "to": "(`go ${u.replace("
+  },
+  {
+    "name": "runner: a named step does nothing",
+    "from": "      step: (label) => step(label),",
+    "to": "      step: async () => {},"
+  },
+  {
+    "name": "runner: a rule that held passes with no step",
+    "from": "inv.seen.size === 0 && inv.steps > 0,",
+    "to": "inv.seen.size === 0 && inv.steps >= 0,"
+  },
+  {
+    "name": "runner: a broken rule passes at the end",
+    "from": "inv.seen.size === 0 && inv.steps > 0,",
+    "to": "inv.steps > 0,"
+  },
+  {
+    "name": "runner: the end line does not count the breaks",
+    "from": "inv.seen.size ? `${inv.seen.size} distinct breaks` : ''",
+    "to": "''"
+  },
+  {
+    "name": "lock: a dead holder's lock never taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && false) || (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: a running holder's lock taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && true) || (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: an empty lock never taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && !alive(holder.pid)) || false) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: any lock taken",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: a stale lock taken only when both its holder is dead and it is empty",
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
+    "to": "if (((holder && !alive(holder.pid)) && (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+  },
+  {
+    "name": "lock: the lock file from the environment ignored",
+    "from": "process.env.LABS_DRIVE_LOCK || path.join(",
+    "to": "path.join("
+  },
+  {
+    "name": "lock: a takeover that cannot be written read as busy",
+    "from": "if (e.code !== 'EEXIST') throw e;\n    try { if (Date.now()",
+    "to": "if (false) throw e;\n    try { if (Date.now()"
+  },
+  {
+    "name": "lock: a takeover 9 s old cleared",
+    "from": "if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true });",
+    "to": "if (Date.now() - fs.statSync(t).mtimeMs > 9000) fs.rmSync(t, { force: true });"
+  },
+  {
+    "name": "lock: a takeover 11 s old kept",
+    "from": "if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true });",
+    "to": "if (Date.now() - fs.statSync(t).mtimeMs > 12000) fs.rmSync(t, { force: true });"
+  },
+  {
+    "name": "lock: a takeover never cleared",
+    "from": "if (Date.now() - fs.statSync(t).mtimeMs > 10000) fs.rmSync(t, { force: true });",
+    "to": ""
+  },
+  {
+    "name": "lock: a stale lock removed whatever it now reads",
+    "from": "if (fs.readFileSync(file, 'utf8') === seen) { fs.rmSync(file, { force: true }); return true; }",
+    "to": "if (true) { fs.rmSync(file, { force: true }); return true; }"
+  },
+  {
+    "name": "lock: a stale lock never removed",
+    "from": "if (fs.readFileSync(file, 'utf8') === seen) { fs.rmSync(file, { force: true }); return true; }",
+    "to": "if (fs.readFileSync(file, 'utf8') === seen + 'x') { fs.rmSync(file, { force: true }); return true; }"
+  },
+  {
+    "name": "lock: the takeover lock left behind",
+    "from": "  finally { fs.rmSync(t, { force: true }); }",
+    "to": "  finally { }"
+  },
+  {
+    "name": "drive: the lock not given back",
+    "from": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { release(); }",
+    "to": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { }"
+  },
+  {
+    "name": "frame: each try's limit not passed to the drive",
+    "from": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say, frameMs }); } finally { release(); }",
+    "to": "try { sweepProfiles(); return await driveHeld(scenario, { base, out, width, height, timeoutMs, say }); } finally { release(); }"
+  },
+  {
+    "name": "profiles: a profile 23.9 hours old cleared",
+    "from": "try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }",
+    "to": "try { if (now - fs.statSync(at).mtimeMs > 23 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }"
+  },
+  {
+    "name": "profiles: a profile 24.1 hours old kept",
+    "from": "try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }",
+    "to": "try { if (now - fs.statSync(at).mtimeMs > 25 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }"
+  },
+  {
+    "name": "profiles: the out folder cleared with them",
+    "from": "if (!f.startsWith('lab-drive-')) continue;",
+    "to": "if (!f.startsWith('lab-drive')) continue;"
+  },
+  {
+    "name": "profiles: old profiles never cleared",
+    "from": "try { if (now - fs.statSync(at).mtimeMs > 24 * 3600 * 1000) { fs.rmSync(at, { recursive: true, force: true }); gone.push(f); } } catch { /* another took it */ }",
+    "to": "try { } catch { /* another took it */ }"
+  },
+  {
+    "name": "profiles: a drive leaves its profile",
+    "from": "for (let i = 0; i < 10 && fs.existsSync(profile); i++) {",
+    "to": "for (let i = 0; i < 0 && fs.existsSync(profile); i++) {"
+  },
+  {
+    "name": "profiles: the end waits for a Chrome that has ended",
+    "from": "const ended = exited ? Promise.resolve() :",
+    "to": "const ended = false ? Promise.resolve() :"
+  },
+  {
+    "name": "chrome: no Chrome listed",
+    "from": "export const liveChromes = () => [...LIVE];",
+    "to": "export const liveChromes = () => [];"
+  },
+  {
+    "name": "chrome: SIGTERM ends the process without its Chromes",
+    "from": "for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));",
+    "to": ""
+  },
+  {
+    "name": "chrome: SIGTERM ends with another code",
+    "from": "[['SIGTERM', 143], ['SIGINT', 130]]",
+    "to": "[['SIGTERM', 1], ['SIGINT', 130]]"
+  },
+  {
+    "name": "chrome: a call after Chrome has gone is sent anyway",
+    "from": "if (timedOut || ws.readyState !== 1) return rej(",
+    "to": "if (timedOut) return rej("
+  },
+  {
+    "name": "chrome: every call refused",
+    "from": "if (timedOut || ws.readyState !== 1) return rej(",
+    "to": "if (timedOut || ws.readyState !== 3) return rej("
+  },
+  {
+    "name": "chrome: a refused call answered as if it worked",
+    "from": "if (d.error) rej(new Error(`${d.error.message} (${d.error.code})`)); else res(d.result);",
+    "to": "res(d.result || d);"
+  },
+  {
+    "name": "chrome: a fixed port, shared by every drive",
+    "from": "'--remote-debugging-port=0'",
+    "to": "'--remote-debugging-port=9333'"
+  },
+  {
+    "name": "frame: the end line passes a broken rule",
+    "from": "frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0,",
+    "to": "frames.lost === 0 && frames.steps > 0,"
+  },
+  {
+    "name": "frame: the end line passes when no frame came back",
+    "from": "frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0,",
+    "to": "frames.seen.size === 0 && frames.steps > 0,"
+  },
+  {
+    "name": "frame: a rule that saw no frame passes",
+    "from": "frames.seen.size === 0 && frames.lost === 0 && frames.steps > 0,",
+    "to": "frames.seen.size === 0 && frames.lost === 0 && frames.steps >= 0,"
+  },
+  {
+    "name": "frame: a capture with no limit",
+    "from": "const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }).catch(() => null), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);",
+    "to": "const r = await send('Page.captureScreenshot', { format: 'png' }).catch(() => null);"
+  },
+  {
+    "name": "frame: a refused capture ends the drive",
+    "from": "const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }).catch(() => null), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);",
+    "to": "const r = await Promise.race([send('Page.captureScreenshot', { format: 'png' }), new Promise((res) => { timer = setTimeout(res, frameMs, null); })]);"
+  },
+  {
+    "name": "frame: a frame that did not come back passes",
+    "from": "if (!png) { frames.steps++; frames.lost++; check(",
+    "to": "if (!png) { frames.steps++; frames.lost++; return; check("
+  },
+  {
+    "name": "frame: one try fewer",
+    "from": "for (let i = 0; i < CAPTURE_TRIES; i++) {",
+    "to": "for (let i = 0; i < CAPTURE_TRIES - 1; i++) {"
+  },
+  {
+    "name": "frame: one try more",
+    "from": "for (let i = 0; i < CAPTURE_TRIES; i++) {",
+    "to": "for (let i = 0; i <= CAPTURE_TRIES; i++) {"
+  },
+  {
+    "name": "png: a file that is not a PNG read",
+    "from": "if (!png.subarray(0, 8).equals(PNG_SIGNATURE)) throw new Error('not a PNG');",
+    "to": ""
+  },
+  {
+    "name": "png: a chunk cut before its length read",
+    "from": "if (o + 12 > png.length) throw new Error('a PNG cut short');",
+    "to": ""
+  },
+  {
+    "name": "png: a chunk cut in its data read",
+    "from": "if (o + 12 + n > png.length) throw new Error('a PNG cut short');",
+    "to": ""
+  },
+  {
+    "name": "png: a tRNS chunk not seen",
+    "from": "if (t === 'tRNS') trns = true;",
+    "to": "if (t === 'tRNs') trns = true;"
+  },
+  {
+    "name": "png: an interlaced frame read",
+    "from": "if (interlace !== 0) throw",
+    "to": "if (interlace > 1) throw"
+  },
+  {
+    "name": "png: a tRNS chunk read through",
+    "from": "if (trns) throw new Error(",
+    "to": "if (false) throw new Error("
+  },
+  {
+    "name": "png: a frame one line short read",
+    "from": "if (raw.length < h * (stride + 1)) throw",
+    "to": "if (raw.length < (h - 1) * (stride + 1)) throw"
+  },
+  {
+    "name": "png: whole data refused",
+    "from": "if (raw.length < h * (stride + 1)) throw",
+    "to": "if (raw.length <= h * (stride + 1)) throw"
+  },
+  {
+    "name": "png: filter 5 read",
+    "from": "if (f > 4) throw new Error(`a line filtered by",
+    "to": "if (f > 5) throw new Error(`a line filtered by"
+  },
+  {
+    "name": "png: filter 4 refused",
+    "from": "if (f > 4) throw new Error(`a line filtered by",
+    "to": "if (f >= 4) throw new Error(`a line filtered by"
+  },
+  {
+    "name": "chrome: the list asked of the port drives shared",
+    "from": "await fetch(`http://127.0.0.1:${port}/json`)",
+    "to": "await fetch('http://127.0.0.1:9333/json')"
+  },
+  {
+    "name": "the watchdog code moved",
+    "from": "export const WATCHDOG_EXIT = 124;",
+    "to": "export const WATCHDOG_EXIT = 125;"
+  }
+]
