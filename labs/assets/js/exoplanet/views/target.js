@@ -232,7 +232,7 @@ export function createTarget(host, store, actions) {
     const mrows = measuredRows(p, A), irows = inferredRows(p, A);
     if (full) { meas.replaceChildren(); group(meas, 'Measured, from the archive'); mrows.forEach((r) => row(meas, r, ctx)); }
     else mrows.forEach((r) => { ctx.letter((r.refs || [])[0]); for (const x of (r.refs || []).slice(1)) ctx.letter(x); if (r.note) ctx.number(r.note); });
-    inf.replaceChildren(); group(inf, `Inferred: ${MC.draws} draws, 68% ranges`); irows.forEach((r) => row(inf, r, ctx));
+    inf.replaceChildren(); group(inf, `Inferred: 68% ranges over ${MC.draws} draws, where the errors exist`); irows.forEach((r) => row(inf, r, ctx));
     foot.replaceChildren();
     const ax = document.createElement('tr'); ax.className = 'ax'; const pad = el('td'); pad.colSpan = 5; const axc = el('td', 'iv'); axc.append(ivAxisSvg({ width: ivWidth() })); ax.append(pad, axc); foot.append(ax);
     // the notes: the sources by letter, then the numbered notes
