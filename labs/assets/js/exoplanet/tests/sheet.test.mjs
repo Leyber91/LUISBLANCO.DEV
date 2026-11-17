@@ -7,12 +7,16 @@
    What it holds: the archive's orbit and insolation stand in the
    measured group and the page's own in the inferred group (review
    of pull request 50, S3); a value with no range says it is a point
-   value; the star's note names the luminosity's source. No
-   catalogue, so sheet.mutants.test.mjs can run it many times; the
-   catalogue-wide reading of the sheet is onesource.test.mjs.
+   value; the star's note names the luminosity's source; and the
+   table createTarget draws holds those rows, under a heading taken
+   from them (a minimal stand-in for the page's DOM below: on
+   bcb5b88 a comment swallowed the call that drew the inferred rows
+   and no test saw it). No catalogue, so sheet.mutants.test.mjs can
+   run it many times; the catalogue-wide reading of the sheet is
+   onesource.test.mjs.
    ============================================================ */
 
-import { sheetRows } from '../views/target.js';
+import { sheetRows, createTarget, inferredHeading } from '../views/target.js';
 import { semiMajor, starlight, starNum, teqOf, teqText } from '../starlight.js';
 
 let failed = 0, passed = 0;
@@ -42,7 +46,8 @@ block('the orbit', () => {
 });
 
 block('the starlight and the equilibrium temperature', () => {
-  const kep = mk({ P: 10, a: 0.5 }), st = mk({ P: 30, a: 0.2, aErr: 0.01, refs: { star: { label: 'Stassun et al. 2017', url: 'x' } } }), arch = mk({ P: null, a: null, logL: null, S: 3 });
+  // st: the archive's orbit with its error and no luminosity in the archive, so all three inputs carry an error
+  const kep = mk({ P: 10, a: 0.5 }), st = mk({ P: 30, a: 0.2, aErr: 0.01, logL: null, refs: { star: { label: 'Stassun et al. 2017', url: 'x' } } }), arch = mk({ P: null, a: null, logL: null, S: 3 });
   const sk = where(kep, 'S'), ss = where(st, 'S'), sa = where(arch, 'S');
   yes('the page\'s starlight in the inferred group; a point value says so', sk.group === 'inferred' && sk.row.v === starNum(starlight(kep).S, 3) && sk.row.pm === 'point value', JSON.stringify(sk.row && { v: sk.row.v, pm: sk.row.pm }));
   yes('with a range where the snapshot carries an error', ss.group === 'inferred' && / to /.test(ss.row.pm) && ss.row.pm !== 'point value', ss.row && ss.row.pm);
@@ -61,6 +66,46 @@ block('the star', () => {
   yes('with the radius and temperature\'s named where they differ by more than 1.2 times', /Its luminosity is 2.00 L☉, the archive's; its radius and temperature give 0.360\./.test(note({ P: 10, a: 0.5, logL: Math.log10(2) })), note({ P: 10, a: 0.5, logL: Math.log10(2) }));
   yes('and from the radius and temperature where the archive gives none', /Its luminosity is 0.360 L☉, from its radius and temperature: the archive gives none\./.test(note({ P: 10, a: 0.5, logL: null })), note({ P: 10, a: 0.5, logL: null }));
   yes('below a thousandth of the Sun\'s, with a power of ten', /Its luminosity is 7.22 × 10⁻⁴ L☉/.test(note({ P: 10, a: 0.05, logL: Math.log10(0.000722) })), note({ P: 10, a: 0.05, logL: Math.log10(0.000722) }));
+});
+
+/* ---------- the table on the page, through a stand-in for the DOM ---------- */
+class Text { constructor(t) { this.t = String(t); } get textContent() { return this.t; } }
+class Node {
+  constructor(tag) { this.tagName = tag; this.children = []; this.attrs = {}; this.dataset = {}; this.style = { setProperty() {} }; this.classList = { add() {}, remove() {}, toggle() {} }; this.own = ''; }
+  append(...xs) { for (const x of xs) this.children.push(typeof x === 'string' || typeof x === 'number' ? new Text(x) : x); }
+  replaceChildren(...xs) { this.children = []; this.own = ''; this.append(...xs); }
+  setAttribute(k, v) { this.attrs[k] = String(v); }
+  getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; }
+  addEventListener() {}
+  get firstChild() { return this.children[0] || null; }
+  get clientWidth() { return 800; }
+  get textContent() { return this.own + this.children.map((c) => c.textContent).join(''); }
+  set textContent(v) { this.children = []; this.own = String(v); }
+  all(tag) { const out = []; const walk = (n) => { for (const c of n.children || []) { if (c.tagName === tag) out.push(c); walk(c); } }; walk(this); return out; }
+}
+block('the table on the page', () => {
+  const keep = globalThis.document;
+  globalThis.document = { createElement: (t) => new Node(t), createElementNS: (ns, t) => new Node(t), getElementById: () => null };
+  try {
+    const host = new Node('div'), view = createTarget(host, { state: { sel: null } }, { exportAs() {} });
+    for (const p of [mk({ P: 10, a: 0.5 }), mk({ P: 30, a: 0.2, aErr: 0.01, logL: null }), mk({ P: null, a: null, logL: null, S: 3 })]) {
+      view.update(p);
+      const [meas, inf] = host.all('tbody'), rows = sheetRows(p, view.albedo());
+      const keys = (tb) => tb.all('tr').filter((tr) => tr.dataset.row).map((tr) => tr.dataset.row).join();
+      const head = (tb) => { const g = tb.all('tr').find((tr) => tr.className === 'g'); return g ? g.textContent : null; };
+      yes(`${p.name}: the measured group holds every measured row, under its heading`, keys(meas) === rows.measured.map((r) => r.key).join() && rows.measured.length > 0 && head(meas) === 'Measured, from the archive', `${keys(meas)} | ${head(meas)}`);
+      yes(`${p.name}: the inferred group holds every inferred row, under the heading its rows give`, keys(inf) === rows.inferred.map((r) => r.key).join() && rows.inferred.length > 0 && head(inf) === inferredHeading(rows.inferred), `${keys(inf)} | ${head(inf)}`);
+    }
+  } finally { globalThis.document = keep; }
+});
+
+block('the inferred group\'s heading', () => {
+  const r = (lo, hi, pm) => ({ iv: { value: 1, lo, hi }, pm });
+  yes('ranges and point values both named where the group holds both', inferredHeading([r(0.9, 1.1, '0.9 to 1.1'), r(null, null, 'point value')]) === 'Inferred: 68% ranges and point values');
+  yes('ranges alone, with the draws they come from', inferredHeading([r(0.9, 1.1, ''), { iv: false }]) === 'Inferred: 68% ranges from 400 draws');
+  yes('point values alone never promise a range; a value with no range is one, whatever its words', inferredHeading([r(null, null, 'point value'), { iv: false, pm: 'needs the starlight' }]) === 'Inferred: point values' && inferredHeading([{ iv: { value: 0.08 }, pm: 'e 0' }]) === 'Inferred: point values');
+  yes('half a range is a point value; a row with no value is neither; with no rows, the bare word', inferredHeading([r(0.9, null, '')]) === 'Inferred: point values' && inferredHeading([{ iv: false }]) === 'Inferred' && inferredHeading([]) === 'Inferred');
+  yes('every heading fits a phone: 38 characters at most', ['Inferred: 68% ranges and point values', 'Inferred: 68% ranges from 400 draws'].every((h) => h.length <= 38));
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

@@ -220,6 +220,36 @@ def main(folder, cache):
           f"90th percentile {w['p90'] * 100:.1f}% against {r2['p90'] * 100:.1f}%.")
     covered = sum(r['star_ref'] == STASSUN for r in rows if r['mass_ref'] == STASSUN)
     print(f"The guard reads the snapshot's star reference: it covers {covered} of the {sum(r['mass_ref'] == STASSUN for r in rows)} scored planets whose composite mass is from {STASSUN}.")
+    stassun_masses(planets, cache)
+
+
+def stassun_masses(planets, cache):
+    """How far Stassun et al. 2017's star masses sit from the other papers', over every star the guard covers: for each
+    star, its mass in that paper's row against the median of the other papers' (the KOI tables counted once). The
+    page's note on the guard quotes the median (config.js STASSUN_MASS_OFF)."""
+    guarded = sorted(p['name'] for p in planets if p['star_ref'] == STASSUN)
+    by_host = {}
+    for i in range(0, len(guarded), CHUNK):
+        inlist = ','.join("'" + n.replace("'", "''") + "'" for n in guarded[i:i + CHUNK])
+        for r in tap.query(f'select pl_name,hostname,st_refname,st_mass from ps where pl_name in ({inlist})', cache):
+            by_host.setdefault(r['hostname'], []).append(r)
+    offs = []
+    for host, rs in by_host.items():
+        mine = [r['st_mass'] for r in rs if r['st_mass'] is not None and label(r['st_refname']) == STASSUN]
+        others, koi = {}, []
+        for r in rs:
+            if r['st_mass'] is None or label(r['st_refname']) == STASSUN:
+                continue
+            if 'KOI Table' in label(r['st_refname']):
+                koi.append(r['st_mass'])
+            else:
+                others.setdefault(label(r['st_refname']), r['st_mass'])
+        m = list(others.values()) + ([statistics.median(koi)] if koi else [])
+        if mine and m:
+            offs.append(abs(mine[0] / statistics.median(m) - 1))
+    print(f"\n{STASSUN}'s star masses against the other papers', over the {len(by_host)} stars of the {len(guarded)} planets the guard covers: "
+          f"{len(offs)} stars with both; off by a median {statistics.median(offs) * 100:.0f}% (quartiles {statistics.quantiles(offs, n=4)[0] * 100:.0f}% "
+          f"and {statistics.quantiles(offs, n=4)[2] * 100:.0f}%).")
 
 
 if __name__ == '__main__':

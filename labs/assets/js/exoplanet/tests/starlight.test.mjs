@@ -52,7 +52,7 @@ block('the luminosity and the orbit', () => {
   const BASE = 'The orbit is derived from the period and the star\'s mass, by Kepler\'s third law.';
   yes('the note says where the orbit comes from, and names the archive\'s where it differs, the share taken of the archive\'s as the threshold is', L.orbitNote(o(0.0827, 0.0649)) === `${BASE} The archive lists 0.0649 AU (NASA Exoplanet Archive, PSCompPars); this orbit is 27% wider.` && L.orbitNote(o(0.1, 0.12)).endsWith('this orbit is 17% narrower.') && L.orbitNote(o(0.1, 0.105)) === BASE && L.orbitNote(o(0.889, 1)).endsWith('11% narrower.'), L.orbitNote(o(0.1, 0.12)));
   yes('the archive\'s orbit says why', L.orbitNote({ a: 1, src: 'archive', why: 'missing' }) === 'The orbit is the archive\'s: it lacks the period or the star\'s mass.'
-    && L.orbitNote({ a: 1, src: 'archive', why: 'star mass' }) === 'The orbit is the archive\'s: the star\'s mass comes from Stassun et al. 2017, and for such stars the archive\'s orbit agreed better with other papers than Kepler\'s third law did.'
+    && L.orbitNote({ a: 1, src: 'archive', why: 'star mass' }) === 'The orbit is the archive\'s: the star\'s values in the snapshot cite Stassun et al. 2017, whose star masses sit a median 19% from other papers\', so Kepler\'s third law is not applied to them.'
     && L.orbitNote({ a: 1, src: 'archive', why: 'two stars' }) === 'The orbit is the archive\'s: the planet orbits two stars, and Kepler\'s third law on one star\'s mass does not give it.');
   yes('with none, why, or nothing', L.orbitNote({ a: null, src: 'none', why: 'two stars' }) === 'The orbit is unknown: the planet orbits two stars, and the archive gives none.' && L.orbitNote({ a: null, src: 'none', why: 'missing' }) === '');
   const sys = [{ name: 'c', a: 0.3, P: 100, Ms: 1 }, { name: 'n', a: null, P: 5 }, { name: 'b', a: 0.5, P: 10, Ms: 1 }, { name: 'm', a: null, P: 2 }, { name: 'z', a: null }];
@@ -83,8 +83,8 @@ block('the starlight', () => {
   yes('with nothing, none', L.starlight({ name: 'x', host: 'n' }).S === null && L.starlight({ name: 'x', host: 'n2', a: 1 }).src === 'none' && L.starlight({ name: 'x', host: 'n3' }).inputs.length === 0);
   yes('the archive\'s value is shown beside the computed one past 1.2 times either way, and not at 1.2', !L.archiveDiffers({ src: 'star', ratio: 1.2 }) && L.archiveDiffers({ src: 'star', ratio: 1.2001 }) && !L.archiveDiffers({ src: 'star', ratio: 1 / 1.2 }) && L.archiveDiffers({ src: 'star', ratio: 1 / 1.2001 })
     && L.archiveDiffers({ src: 'luminosity', ratio: 1.5 }) && !L.archiveDiffers({ src: 'archive', ratio: 3 }) && !L.archiveDiffers({ src: 'star', ratio: null }) && L.ARCHIVE_DIFF === 1.2);
-  const c = L.starlightCensus([earth, { name: 'c1', host: 'C1', a: 1, aErr: 0.1, logL: 0 }, { name: 'c2', host: 'C2', a: 1, P: 365.25, Ms: 1, logL: 0 }, { name: 'c3', host: 'C3', S: 2 }, { name: 'c4', host: 'C4' }, { name: 'c5', host: 'C5', Teff: 5772, TeffErr: 50, Rs: 1, a: 1 }, { name: 'c6', host: 'C6', Teff: 5772, Rs: 1, RsErr: 0.1, a: 1 }]);
-  yes('the method\'s numbers: how each planet\'s starlight is computed and which carry a range', c.n === 6 && c.luminosity === 2 && c.star === 3 && c.archive === 1 && c.ranged === 3 && c.orbitOnly === 1 && c.point === 2, JSON.stringify(c));
+  const c = L.starlightCensus([earth, { name: 'c1', host: 'C1', a: 1, aErr: 0.1, logL: 0 }, { name: 'c2', host: 'C2', a: 1, P: 365.25, Ms: 1, logL: 0 }, { name: 'c3', host: 'C3', S: 2 }, { name: 'c4', host: 'C4' }, { name: 'c5', host: 'C5', Teff: 5772, TeffErr: 50, Rs: 1, a: 1 }, { name: 'c6', host: 'C6', Teff: 5772, Rs: 1, RsErr: 0.1, a: 1 }, { name: 'c7', host: 'C7', Teff: 5772, TeffErr: 50, Rs: 1, RsErr: 0.1, a: 1, aErr: 0.01 }]);
+  yes('the method\'s numbers: how each planet\'s starlight is computed and which carry a range', c.n === 7 && c.luminosity === 2 && c.star === 4 && c.archive === 1 && c.ranged === 1 && c.point === 5 && c.partial === 3, JSON.stringify(c));
 });
 
 /* ---------- its range, and two planets of one star ---------- */
@@ -95,14 +95,13 @@ block('its range', () => {
   // the range of S = R² T⁴ / a² from 1.7% in T, 5% in R and 1% in a: about 12% either side
   near('the range is about 12% either side for 1.7% in T, 5% in R and 1% in a (lower)', (s.S - s.lo) / s.S, 0.12, 0.02);
   near('(upper)', (s.hi - s.S) / s.S, 0.125, 0.02);
-  yes('each error alone gives a range, and names itself', ['TeffErr', 'RsErr', 'aErr'].every((k) => { const q = L.starlight({ name: 'e2', host: `Err ${k}`, Teff: 5772, Rs: 1, a: 1, [k]: k === 'TeffErr' ? 100 : 0.05 }); return q.lo < q.hi && q.drawn.join() === { TeffErr: 'Teff', RsErr: 'Rs', aErr: 'a' }[k]; }));
+  yes('one error alone gives no range: a range over some of the errors is narrower than the truth; the others are named as missing', ['TeffErr', 'RsErr', 'aErr'].every((k) => { const q = L.starlight({ name: 'e2', host: `Err ${k}`, Teff: 5772, Rs: 1, a: 1, [k]: k === 'TeffErr' ? 100 : 0.05 }); const w = { TeffErr: 'Teff', RsErr: 'Rs', aErr: 'a' }[k]; return q.lo === null && q.drawn.length === 0 && q.have.join() === w && !L.errorWords(q).missing.includes({ Teff: 'temperature', Rs: 'radius', a: 'orbit' }[w]); }));
+  yes('two of the three give none either', L.starlight({ name: 'e2b', host: 'Err two', Teff: 5772, TeffErr: 100, Rs: 1, RsErr: 0.05, a: 1 }).lo === null && L.starlight({ name: 'e2c', host: 'Err two b', Teff: 5772, Rs: 1, RsErr: 0.05, a: 1, aErr: 0.01 }).lo === null);
   yes('an error on an orbit from Kepler\'s law is not drawn', L.starlight({ name: 'e3', host: 'Kep', Teff: 5772, Rs: 1, a: null, P: 365.25, Ms: 1, aErr: 0.5 }).lo === null && L.starlight({ name: 'e3b', host: 'Kep2', Teff: 5772, Rs: 1, a: 1.2, P: 365.25, Ms: 1, aErr: 0.5 }).lo === null);
   yes('a negative or zero error is none', L.starlight({ name: 'e4', host: 'Neg', Teff: 5772, Rs: 1, a: 1, TeffErr: -5, RsErr: 0, aErr: null }).lo === null);
-  // the archive's luminosity carries no error in the snapshot: only the orbit's, and only on the archive's orbit
+  // the archive's luminosity carries no error in the snapshot, so its starlight is never drawn; the orbit's error is named as had
   const lo = L.starlight({ name: 'lo1', host: 'Lo1', logL: 0, a: 1, aErr: 0.05, Teff: 5772, TeffErr: 300, Rs: 1, RsErr: 0.3 });
-  yes('on the archive\'s luminosity the range carries the orbit\'s error alone, never the star\'s', lo.src === 'luminosity' && lo.drawn.join() === 'a' && lo.lo < lo.S && lo.S < lo.hi, JSON.stringify(lo));
-  near('10% either side for 5% in a (lower)', (lo.S - lo.lo) / lo.S, 0.092, 0.01);
-  near('(upper)', (lo.hi - lo.S) / lo.S, 0.108, 0.01);
+  yes('on the archive\'s luminosity no range, though the orbit has an error, and the luminosity named as the missing one', lo.src === 'luminosity' && lo.lo === null && lo.drawn.length === 0 && lo.have.join() === 'a' && L.errorWords(lo).missing === 'the snapshot carries no error on the star\'s luminosity', JSON.stringify(lo));
   const kp = L.starlight({ name: 'lo2', host: 'Lo2', logL: 0, a: 1, aErr: 0.05, P: 365.25, Ms: 1, TeffErr: 300 });
   yes('and on Kepler\'s orbit none: a point value', kp.src === 'luminosity' && kp.lo === null && kp.hi === null && kp.drawn.length === 0 && kp.S === 1);
   const b = { name: 'b', host: 'Two', Teff: 5000, TeffErr: 80, Rs: 0.8, RsErr: 0.04, a: 0.1, aErr: 0.002 }, c = { ...b, name: 'c', a: 0.4, aErr: 0.008 };
@@ -121,18 +120,17 @@ block('its range', () => {
   const wild = L.starlight({ name: 'w', host: 'Wild', Teff: 3000, TeffErr: 4000, Rs: 0.1, RsErr: 0.5, a: 0.01, aErr: 0.05 });
   yes('draws below zero are left out, and the rest still give a value', Number.isFinite(wild.S) && wild.S > 0 && wild.lo > 0, `${wild.lo} ${wild.S} ${wild.hi}`);
   const neg = L.starlight({ name: 'w2', host: 'Wild2', logL: 0, a: 0.01, aErr: 0.05 });
-  yes('and on the luminosity\'s path too', Number.isFinite(neg.S) && neg.lo > 0 && neg.hi > neg.lo, JSON.stringify(neg));
-  const dw = L.starlightDraws({ name: 'w3', host: 'Wild3', logL: 0, a: 0.01, aErr: 0.05 }), dw2 = L.starlightDraws({ name: 'w4', host: 'Wild4', Teff: 3000, TeffErr: 4000, Rs: 0.1, RsErr: 0.5, a: 0.01, aErr: 0.05 });
-  yes('the draws kept are those above zero, and no more: 232 of 400 on that orbit, 92 on that star', dw.length === 232 && dw2.length === 92 && Array.from(dw).every((x) => x > 0) && Array.from(dw2).every((x) => x > 0), `${dw.length} ${dw2.length}`);
+  yes('on the luminosity\'s path nothing is drawn, whatever the orbit\'s error', neg.lo === null && neg.S === 10000 && L.starlightDraws({ name: 'w3', host: 'Wild3', logL: 0, a: 0.01, aErr: 0.05 }) === null, JSON.stringify(neg));
+  const dw2 = L.starlightDraws({ name: 'w4', host: 'Wild4', Teff: 3000, TeffErr: 4000, Rs: 0.1, RsErr: 0.5, a: 0.01, aErr: 0.05 });
+  yes('the draws kept are those above zero, and no more: 92 of 400 on that star', dw2.length === 92 && Array.from(dw2).every((x) => x > 0), `${dw2.length}`);
   yes(`the draws are the page's ${MC.draws}`, MC.draws === 400);
-  const dr = L.starlightDraws(p), drK = L.starlightDraws({ name: 'lo3', host: 'Lo3', logL: 0, a: 1, P: 365.25, Ms: 1 });
+  const dr = L.starlightDraws(p), drK = L.starlightDraws({ name: 'lo3', host: 'Lo3', logL: 0, a: 1, P: 365.25, Ms: 1 }) || L.starlightDraws({ name: 'lo4', host: 'Lo4', Teff: 5772, Rs: 1, a: 1 });
   const sorted = Array.from(dr).sort((x, y) => x - y);
   yes('the draws themselves, for a quantity drawn with the starlight: those its median and range are taken from; none without errors', dr.length === n && sorted[Math.floor(0.5 * n)] === s.S && sorted[Math.floor(0.16 * n)] === s.lo && sorted[Math.floor(0.84 * n)] === s.hi && drK === null);
   // the draws themselves are fixed: a change to the seed, the order of the deviates, their number or the draws kept moves these
   const pin = (x, w) => Math.abs(x / w - 1) < 1e-12;
   yes('the draws are the same on every machine: a star of 5,772 +- 100 K, 1 +- 0.05 R and 1 +- 0.01 AU', pin(s.S, 1.0051098025699796) && pin(s.lo, 0.8808704437515993) && pin(s.hi, 1.1312798177903396), `${s.S} ${s.lo} ${s.hi}`);
   yes('and with most draws below zero left out', pin(wild.S, 37.62950399892173) && pin(wild.lo, 0.1164114505645139) && pin(wild.hi, 748.6488751102337), `${wild.S} ${wild.lo} ${wild.hi}`);
-  yes('and on the luminosity\'s path, an orbit of 0.01 +- 0.05 AU', pin(neg.S, 711.6107206944666) && pin(neg.lo, 173.58420848341135) && pin(neg.hi, 7275.69423073678), `${neg.S} ${neg.lo} ${neg.hi}`);
 });
 
 /* ---------- the normal's quantile ---------- */
@@ -197,11 +195,11 @@ block('how both are printed', () => {
   yes('the archive\'s own insolation is not called a point value', L.starlightText({ S: 2658.4, src: 'archive' }).text === '2,658 S⊕' && !L.starlightText({ S: 2658.4, src: 'archive' }).point);
   yes('with no starlight, nothing', L.starlightText({ S: null }).text === '' && L.starlightText({ S: 0 }).v === '');
   yes('below 0.001, a power of ten, the value to three figures and the range to two', L.starlightText({ S: 2.6e-7, lo: 2.31e-7, hi: 2.94e-7, src: 'star' }).text === '2.60 × 10⁻⁷ S⊕ (68%: 2.3 × 10⁻⁷ to 2.9 × 10⁻⁷)', L.starlightText({ S: 2.6e-7, lo: 2.31e-7, hi: 2.94e-7, src: 'star' }).text);
-  yes('the one formatter: at 0.001 the kit\'s figures, just below it the power; ten thousand and more grouped', L.starNum(0.001) === '0.0010' && L.starNum(0.00099) === '9.90 × 10⁻⁴' && L.starNum(0.000722, 3) === '7.22 × 10⁻⁴' && L.starNum(12345.6) === '12,346' && L.starNum(1.5e-12, 2) === '1.5 × 10⁻¹²' && L.SMALL === 0.001, `${L.starNum(0.001)} ${L.starNum(0.00099)}`);
+  yes('the one formatter: at 0.01 the kit\'s three figures, just below it the power, so AB Aur b\'s 0.006459 keeps three; ten thousand and more grouped', L.starNum(0.01) === '0.0100' && L.starNum(0.00999) === '9.99 × 10⁻³' && L.starNum(0.006459) === '6.46 × 10⁻³' && L.starNum(0.001) === '1.00 × 10⁻³' && L.starNum(0.000722, 3) === '7.22 × 10⁻⁴' && L.starNum(12345.6) === '12,346' && L.starNum(1.5e-12, 2) === '1.5 × 10⁻¹²' && L.SMALL === 0.01, `${L.starNum(0.01)} ${L.starNum(0.00999)} ${L.starNum(0.006459)}`);
   yes('nothing for no number; zero and below as the kit writes them', L.starNum(null) === '' && L.starNum(NaN) === '' && L.starNum(0) === '0' && L.starNum(-0.0005) === '−0.0005');
   const parse = (t) => { const m = t.replace(/,/g, '').replace('−', '-').match(/^(-?[\d.]+)(?: × 10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+))?$/); const sup = { '⁻': '-', '⁰': 0, '¹': 1, '²': 2, '³': 3, '⁴': 4, '⁵': 5, '⁶': 6, '⁷': 7, '⁸': 8, '⁹': 9 }; return +m[1] * (m[2] ? Math.pow(10, +[...m[2]].map((ch) => sup[ch]).join('')) : 1); };
-  const xs = [2.6049e-7, 0.00099, 0.00123, 0.0015, 0.75049, 12345.6, -1.234e-5, 0, -0.25];
-  yes('the number it writes is the number written, for values on each side of 0.001 and of zero', xs.every((x) => Object.is(L.starValue(x), parse(L.starNum(x))) || L.starValue(x) === parse(L.starNum(x))), xs.map((x) => `${L.starNum(x)}=${L.starValue(x)}`).join(' '));
+  const xs = [2.6049e-7, 0.00099, 0.00123, 0.0015, 0.006459, 0.0123, 0.75049, 12345.6, -1.234e-5, 0, -0.25];
+  yes('the number it writes is the number written, for values on each side of 0.01 and of zero', xs.every((x) => Object.is(L.starValue(x), parse(L.starNum(x))) || Math.abs(L.starValue(x) - parse(L.starNum(x))) <= 1e-12 * Math.abs(L.starValue(x))), xs.map((x) => `${L.starNum(x)}=${L.starValue(x)}`).join(' '));
   yes('the number it writes, as a number', L.starValue(2.6049e-7) === 2.6e-7 && L.starValue(0.75049) === 0.75 && L.starValue(12345.6) === 12346 && L.starValue(null) === null && L.starValue(0.00099) === 0.00099 && L.starValue(-0.25) === -0.25);
   const q = L.teqText({ med: 702.6, lo: 662.9, hi: 738.2, src: 'star' });
   yes('the temperature in whole kelvin with its range', q.v === '703' && q.pm === '663 to 738' && q.text === '703 K (68%: 663 to 738)', JSON.stringify(q));
@@ -215,7 +213,14 @@ block('how both are printed', () => {
 block('the note', () => {
   const lum = { name: 'n0', host: 'N0', a: 1, logL: 0, P: 365.25, Ms: 1, S: 3 };
   yes('the archive\'s luminosity over the orbit says so, with the units, why there is no range, and the archive\'s insolation where it differs', L.starlightNote(lum) === 'The starlight is the star\'s luminosity, the archive\'s, over the square of the orbit: S = L / a², L in L☉ and a in AU. A point value: the snapshot carries no error on the star\'s luminosity or the orbit. The archive lists 3.00 S⊕ (NASA Exoplanet Archive, PSCompPars), 3.0 times more.', L.starlightNote(lum));
-  yes('and what its range carries', L.starlightNote({ name: 'n01', host: 'N01', a: 1, aErr: 0.05, logL: 0 }).endsWith('Its 68% range carries the error of the orbit; the snapshot carries no error on the star\'s luminosity.'), L.starlightNote({ name: 'n01', host: 'N01', a: 1, aErr: 0.05, logL: 0 }));
+  yes('an orbit with an error and a luminosity without: a point value, naming the luminosity\'s error alone as missing', L.starlightNote({ name: 'n01', host: 'N01', a: 1, aErr: 0.05, logL: 0 }).endsWith('A point value: the snapshot carries no error on the star\'s luminosity.'), L.starlightNote({ name: 'n01', host: 'N01', a: 1, aErr: 0.05, logL: 0 }));
+  // two solutions of the star: past LUMINOSITY_SPLIT the sheet says the starlight rests on the luminosity
+  const two = (f, o = {}) => L.starlightNote({ name: `split ${f}`, host: `Split ${f}`, Teff: 5772, Rs: 1, a: 1, logL: Math.log10(f), ...o });
+  const SPLIT = 'The archive\'s luminosity and the star\'s radius and temperature disagree by';
+  yes('a luminosity 2.001 times the radius and temperature\'s is said to be another solution of the star, and the starlight to rest on it', two(2.001).includes(`${SPLIT} 2.0 times, so they are two solutions of the star; the starlight rests on the luminosity.`) && L.LUMINOSITY_SPLIT === 2, two(2.001));
+  yes('and one 1.999 times is not; nor where it is the smaller, just inside', !two(1.999).includes(SPLIT) && !two(1 / 1.999).includes(SPLIT) && two(1 / 2.001).includes(SPLIT) && two(3.4).includes('disagree by 3.4 times'), two(1 / 2.001));
+  yes('and not where the radius and temperature give the starlight, or one of them is missing', !two(3, { logL: null }).includes(SPLIT) && !two(3, { Rs: null }).includes(SPLIT));
+  yes('the factor either way up, and none without both', L.luminosityApart({ src: 'archive', L: 1, fromStar: 4 }) === 4 && L.luminosityApart({ src: 'archive', L: 4, fromStar: 1 }) === 4 && L.luminosityApart({ src: 'archive', L: 1, fromStar: null }) === null && L.luminosityApart({ src: 'R and Teff', L: 1, fromStar: 1 }) === null);
   const base = 'The starlight is computed from the star\'s temperature and radius and the orbit, S = (R★ / a)² (Teff / 5772 K)⁴ with R★ in R☉ and a in AU: the archive gives the star no luminosity.';
   const hd = { name: 'n1', host: 'N1', Teff: 5772, Rs: 1, a: 0.5, S: 0.9 };
   yes('the starlight from the star says where it comes from, and names the archive\'s value where it differs', L.starlightNote(hd) === `${base} A point value: the snapshot carries no error on the star's temperature, the star's radius or the orbit. The archive lists 0.900 S⊕ (NASA Exoplanet Archive, PSCompPars), 4.4 times less.`, L.starlightNote(hd));

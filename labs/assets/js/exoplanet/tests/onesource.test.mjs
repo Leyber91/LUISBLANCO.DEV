@@ -61,7 +61,7 @@ import { facts, deterministicNote } from '../report.js';
 import { hitFact, kindLine } from '../find.js';
 import { csvText } from '../export.js';
 import { tourStops } from '../tours.js';
-import { byOrbit, semiMajor, STASSUN } from '../starlight.js';
+import { byOrbit, semiMajor, STASSUN, starlightCensus, luminosity, luminosityApart, LUMINOSITY_SPLIT } from '../starlight.js';
 import { CIRCUMBINARY } from '../config.js';
 import { parseQuestion } from '../query.js';
 import { PHYS, TEQ, KOPPARAPU } from '../config.js';
@@ -287,8 +287,24 @@ const ex = (xs) => `${xs.length}${xs.length ? `; first: ${xs.slice(0, 4).join(' 
 const EXPECT = { S: ['sheet B', 'bench', 'chain', 'note', 'list', 'view D', 'CSV'], Slo: ['sheet B', 'bench', 'chain'], Shi: ['sheet B', 'bench', 'chain'],
   T: ['sheet B', 'bench', 'chain', 'note facts', 'list', 'CSV'], Tlo: ['sheet B', 'bench', 'chain'], Thi: ['sheet B', 'bench', 'chain'], T2: ['sheet B', 'bench'],
   L: ['sheet B', 'chain', 'view D'], a: ['sheet B', 'chain', 'note', 'view D, drawn', 'CSV'] };
+// a range is printed only where the snapshot gives every input an error (starlight.js plan); where no planet of the
+// catalogue has one, the range readers are held on stand-ins that do (a real planet with every error given), so a
+// reader that stops matching the views' words still fails
+const census = starlightCensus(list);
+const RANGES = ['Slo', 'Shi', 'Tlo', 'Thi'];
+const standIns = list.filter((p) => p.TeffErr > 0 && p.RsErr > 0 && p.aErr > 0).slice(0, 25).map((p) => ({ ...p, name: `${p.name} (every error)`, logL: null, P: null }));
+const before = Object.fromEntries(RANGES.flatMap((q) => EXPECT[q].map((v) => [`${q}|${v}`, counts[`${q}|${v}`] || 0])));
+for (const p of standIns) {
+  const m = systemModel(p, [p]); models.set(p, { m, cap: systemCaption(m, false) });
+  const v = views(p);
+  for (const q of ['S', 'Slo', 'Shi', 'T', 'Tlo', 'Thi', 'T2', 'L', 'a']) { if (!agree(v[q])) bad.numbers.push(`${p.name} ${q}: ${show(v[q])}`); if (v[q].some((x) => x.n) && v[q].some((x) => x.none)) bad.none.push(`${p.name} ${q}: ${show(v[q])}`); }
+}
 const empty = [];
-for (const [q, vs] of Object.entries(EXPECT)) console.log(`${q.padEnd(4)} ${vs.map((v) => { const n = counts[`${q}|${v}`] || 0; if (!n) empty.push(`${q} from ${v}`); return `${v} ${n}`; }).join(', ')}`);
+for (const [q, vs] of Object.entries(EXPECT)) console.log(`${q.padEnd(4)} ${vs.map((v) => { const n = RANGES.includes(q) ? before[`${q}|${v}`] : counts[`${q}|${v}`] || 0; const m = RANGES.includes(q) ? (counts[`${q}|${v}`] || 0) - n : 0; if (!(RANGES.includes(q) ? (census.ranged ? n : m) : n)) empty.push(`${q} from ${v}`); return RANGES.includes(q) ? `${v} ${n} (stand-ins ${m})` : `${v} ${n}`; }).join(', ')}`);
+console.log(`the catalogue: ${census.ranged} planets with a range, ${census.point} point values (${census.partial} with an error on some input and not every one); ${standIns.length} stand-ins with every error`);
+// two solutions of a star: the threshold is the 95th percentile of the factor between the two luminosities, at two figures
+const apart = list.map((p) => luminosityApart(luminosity(p))).filter((x) => x !== null).sort((x, y) => x - y);
+const p95 = apart[Math.floor(0.95 * apart.length)], beyond = list.filter((p) => luminosityApart(luminosity(p)) > LUMINOSITY_SPLIT);
 console.log(`${list.length} planets, ${list.filter((p) => byHost.get(p.host).length > 1).length} in systems of two or more`);
 yes('no two views print numbers for one quantity that no one value rounds to (the starlight, Teq and its range, the luminosity, the orbit)', bad.numbers.length === 0, ex(bad.numbers));
 yes('no view prints a number where another says there is none', bad.none.length === 0, ex(bad.none));
@@ -298,7 +314,8 @@ yes('every view that names a zone names one of the four, or unknown', bad.words.
 yes('view D, opened on another planet of the system, draws each planet in its own zone or names it with its own', bad.siblings.length === 0, ex(bad.siblings));
 yes(`the search for habitable planets claims for each world it finds the zone its sheet gives (${found.length} found; the note: ${q.notes.join('; ')})`, misnamed.length === 0, ex(misnamed.map((p) => `${p.name} (${own.get(p)})`)));
 yes('every view that names the zone of a star outside 2,600 to 7,200 K says extrapolated, and no other does', bad.extrap.length === 0, ex(bad.extrap));
-yes('every view gave values for every quantity it prints (the counts above)', empty.length === 0, ex(empty));
+yes('every view gave values for every quantity it prints (the counts above; the ranges from the stand-ins where the catalogue has none)', empty.length === 0 && standIns.length > 0, ex(empty));
+yes(`the threshold for two solutions of a star is the 95th percentile of the factor between its luminosities, at two figures (${p95.toFixed(3)} over ${apart.length} planets; ${beyond.length} planets on ${new Set(beyond.map((p) => p.host)).size} stars past it)`, Math.round(p95 * 10) / 10 === LUMINOSITY_SPLIT && beyond.length > 0, `${p95}`);
 yes(`every one of the ${CIRCUMBINARY.length} names of config.js CIRCUMBINARY is a planet of the snapshot`, cbMissing.length === 0 && CIRCUMBINARY.length > 0, ex(cbMissing));
 yes('a planet of two stars takes the archive\'s orbit, or none, never Kepler\'s law on one star\'s mass', cbKepler.length === 0, ex(cbKepler));
 yes(`every planet whose star's reference is ${STASSUN} takes the archive's orbit (${stassun.length} planets)`, stKepler.length === 0 && stassun.length > 0, ex(stKepler));

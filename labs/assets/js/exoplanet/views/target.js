@@ -144,6 +144,17 @@ function classNote(p, A) {
 /* Sheet B's rows for a world at albedo A: the measured group and the inferred group, in order. */
 export const sheetRows = (p, A = TEQ.albedo) => ({ measured: measuredRows(p, A), inferred: inferredRows(p, A) });
 
+/* The inferred group's heading, from the rows it holds: it names 68% ranges only where a row carries one, and point
+   values where a row with a value carries none (a derived orbit, a starlight without every error). At most 38
+   characters: a heading of 61 took a 390 px page to 405 px. */
+const hasRange = (r) => r.iv && isNum(r.iv.lo) && isNum(r.iv.hi);
+export function inferredHeading(rows) {
+  const ranged = rows.some(hasRange), point = rows.some((r) => r.iv && !hasRange(r));
+  if (ranged && point) return 'Inferred: 68% ranges and point values';
+  if (ranged) return `Inferred: 68% ranges from ${MC.draws} draws`;
+  return point ? 'Inferred: point values' : 'Inferred';
+}
+
 /* Sheet A's line under the name says where the world sits against the zone in these words. */
 export const reticleZone = (p) => zoneWords(hzPosition(p), 'reticle');
 
@@ -232,8 +243,7 @@ export function createTarget(host, store, actions) {
     const mrows = measuredRows(p, A), irows = inferredRows(p, A);
     if (full) { meas.replaceChildren(); group(meas, 'Measured, from the archive'); mrows.forEach((r) => row(meas, r, ctx)); }
     else mrows.forEach((r) => { ctx.letter((r.refs || [])[0]); for (const x of (r.refs || []).slice(1)) ctx.letter(x); if (r.note) ctx.number(r.note); });
-    // the heading is 43 characters: the 61 of a longer one took a 390 px page to 405 px
-    inf.replaceChildren(); group(inf, `Inferred: ${MC.draws} draws, 68% where errors exist`);
+    inf.replaceChildren(); group(inf, inferredHeading(irows));
     irows.forEach((r) => row(inf, r, ctx));
     foot.replaceChildren();
     const ax = document.createElement('tr'); ax.className = 'ax'; const pad = el('td'); pad.colSpan = 5; const axc = el('td', 'iv'); axc.append(ivAxisSvg({ width: ivWidth() })); ax.append(pad, axc); foot.append(ax);

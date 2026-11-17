@@ -45,6 +45,10 @@ const CSV = [
   ['the CSV\'s page starlight the archive\'s', '      sl.S, sl.lo, sl.hi, p.S, p.Teq,', '      p.S, sl.lo, sl.hi, p.S, p.Teq,'],
   ['the CSV without the starlight\'s range', '      sl.S, sl.lo, sl.hi, p.S, p.Teq,', '      sl.S, null, null, p.S, p.Teq,'],
   ['the CSV\'s preamble without the page\'s orbit', '# Inferred columns: a_AU_page, the orbit this page uses', '# Inferred columns: the orbit this page uses'],
+  ['the archive\'s own insolation counted over every planet', "const archiveOwn = rows.filter((p) => insolation(p).src === 'archive').length;", 'const archiveOwn = rows.length;'],
+  ['the archive\'s own insolation counted as none', "const archiveOwn = rows.filter((p) => insolation(p).src === 'archive').length;", "const archiveOwn = rows.filter((p) => insolation(p).src === 'none').length;"],
+  ['one planet said in the plural', "${archiveOwn === 1 ? ' here that lacks' : 's here that lack'}", "${archiveOwn === 0 ? ' here that lacks' : 's here that lack'}"],
+  ['the Stassun guard named as a mass from the paper', 'a star whose values cite ${STASSUN}', 'a star whose mass is from ${STASSUN}'],
   ['the CSV\'s Teq at the default albedo', 'fc && fc.median, fc && fc.lo, fc && fc.hi, equilibriumTemp(p, albedo),', 'fc && fc.median, fc && fc.lo, fc && fc.hi, equilibriumTemp(p),'],
 ];
 const HEIGHT = [
@@ -69,7 +73,11 @@ const CHAIN = [
   ['the zone step\'s edge by the luminosity', "${hz.by === 'S' ? 'd = a √(S / S_eff)' : 'd = √(L / S_eff)'}", "${hz.by === 'L' ? 'd = a √(S / S_eff)' : 'd = √(L / S_eff)'}"],
   ['the method\'s count of the archive\'s luminosity', 'L is the archive\'s luminosity for ${fmtInt(census.luminosity)} planets', 'L is the archive\'s luminosity for ${fmtInt(census.n)} planets'],
   ['the method\'s count of the star\'s', 'R★² (Teff / 5772 K)⁴ for the ${fmtInt(census.star)} whose star', 'R★² (Teff / 5772 K)⁴ for the ${fmtInt(census.archive)} whose star'],
-  ['the method\'s count of ranges', ': ${fmtInt(census.ranged)} planets have one (${fmtInt(census.orbitOnly)}', ': ${fmtInt(census.n)} planets have one (${fmtInt(census.orbitOnly)}'],
+  ['the method\'s count of ranges', ': ${fmtInt(census.ranged)} ${census.ranged === 1', ': ${fmtInt(census.n)} ${census.ranged === 1'],
+  ['the method\'s ranges always plural', "${census.ranged === 1 ? 'planet has' : 'planets have'} one.", "planets have one."],
+  ['the method\'s count of partial ranges', '(${fmtInt(census.partial)} of them have an error on some input', '(${fmtInt(census.point)} of them have an error on some input'],
+  ['the method promising a range over some errors', 'only where the snapshot gives every input an error, since a range over some of them would be narrower than the truth:', 'over the errors the snapshot carries:'],
+  ['the method\'s old ground for the luminosity', 'The archive\'s luminosity is chosen for the Gaia parallaxes behind the Kepler stars\' luminosities', 'The archive\'s luminosity was nearer the papers\' insolation for 2,283 of 3,354 planets'],
   ['the method\'s count of point values', 'The other ${fmtInt(census.point)} print a point value', 'The other ${fmtInt(census.n - census.ranged)} print a point value'],
 ];
 const BENCH = [

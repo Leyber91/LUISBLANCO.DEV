@@ -199,6 +199,12 @@ export const SOURCES = [
   'Essack, Seager & Pajusalu 2020, ApJ 898, 160 (the temperatures over which rock melts)',
 ];
 
+/* How far the star masses of Stassun et al. 2017 sit from the other papers' masses for the same stars: the median over
+   the 208 stars whose values in the snapshot cite that paper and that another paper gives a mass for (quartiles 9% and
+   33%). Printed by labs/assets/data/exomania/backtest_orbit.py from the archive's table of papers, 2026-11-17; the
+   orbit's note quotes it (starlight.js orbitNote). */
+export const STASSUN_MASS_OFF = 0.19;
+
 // circumbinary:start
 /* The snapshot's planets that orbit two stars, written by labs/assets/data/exomania/circumbinary.py; do not
    edit by hand. Query: select pl_name,cb_flag from pscomppars where cb_flag = 1 (NASA Exoplanet Archive TAP), fetched 2026-11-17,
