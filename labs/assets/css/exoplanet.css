@@ -470,7 +470,9 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
 }
 @media (max-width: 700px) {
   .lettered { grid-template-columns: 1fr; }
-  .nums col.c-n { width: 94px; } .nums col.c-v { width: 62px; } .nums col.c-u { width: 34px; } .nums col.c-r { width: 20px; } .nums col.c-iv { width: 72px; }
+  /* the unit keeps its 40 px: "g/cm³" is about 37 px at 11 px, and at 34 it touched the density's range (ticket 2.19);
+     the range's column, which wraps, gives the six */
+  .nums col.c-n { width: 94px; } .nums col.c-v { width: 62px; } .nums col.c-u { width: 40px; } .nums col.c-r { width: 20px; } .nums col.c-iv { width: 72px; }
   .nums td { font-size: 11.5px; }
   /* a range longer than its column (0.025 to 0.028; 1,773 to 1,795 K) takes a second line rather than being cut */
   .nums td.pm { white-space: normal; line-height: 14px; }
