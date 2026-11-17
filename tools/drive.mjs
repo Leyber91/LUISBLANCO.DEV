@@ -380,6 +380,16 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
 
 /* ---------------- selftest: the runner of the invariants, the lock, a Chrome that dies ---------------- */
 async function selftest() {
+  /* the lock is the file LABS_DRIVE_LOCK names, checked before anything waits for a lock: under tools/mutate.mjs a copy
+     that took the machine's lock instead would wait for mutate, which holds that lock around the copy */
+  const envBefore = process.env.LABS_DRIVE_LOCK, envLock = path.join(os.tmpdir(), `drive-self-env-${process.pid}.lock`);
+  process.env.LABS_DRIVE_LOCK = envLock;
+  const relEnv = await holdChrome(500);
+  const envTaken = fs.existsSync(envLock);
+  if (relEnv) relEnv();
+  if (envBefore === undefined) delete process.env.LABS_DRIVE_LOCK; else process.env.LABS_DRIVE_LOCK = envBefore;
+  const envOk = envTaken && !fs.existsSync(envLock);
+  if (!envOk) { console.log('FAIL  drive selftest: the lock is not the file LABS_DRIVE_LOCK names'); return 1; }
   /* the whole run holds the machine's lock, and its time starts once it has it: under tools/mutate.mjs, copies run a few
      at a time and would otherwise take Chrome in turn, drive by drive, each outrunning its time */
   const whole = await holdChrome();
@@ -456,14 +466,8 @@ async function selftest() {
     let noTake = '';
     try { takeStale(path.join(scratch, 'no such folder', 'chrome.lock'), stale); noTake = 'no error'; } catch (e) { noTake = e.code; }
     yes('a takeover lock that cannot be written is an error, not a wait', noTake === 'ENOENT', noTake);
-    // the lock file is LABS_DRIVE_LOCK when that is set (tools/mutate.mjs gives each list run its own)
-    const envBefore = process.env.LABS_DRIVE_LOCK, envLock = path.join(scratch, 'env.lock');
-    process.env.LABS_DRIVE_LOCK = envLock;
-    const relEnv = await holdChrome(500);
-    const envTaken = fs.existsSync(envLock);
-    if (relEnv) relEnv();
-    if (envBefore === undefined) delete process.env.LABS_DRIVE_LOCK; else process.env.LABS_DRIVE_LOCK = envBefore;
-    yes('the lock is the file LABS_DRIVE_LOCK names when it is set', envTaken && !fs.existsSync(envLock));
+    // the lock file is LABS_DRIVE_LOCK when that is set (tools/mutate.mjs gives each copy its own): checked first, above
+    yes('the lock is the file LABS_DRIVE_LOCK names when it is set', envOk);
     // profiles a day old are cleared, younger ones and other folders kept
     const tmp = path.join(scratch, 'tmp');
     for (const f of ['lab-drive-old', 'lab-drive-young', 'lab-drive', 'other-old']) fs.mkdirSync(path.join(tmp, f), { recursive: true });
