@@ -90,7 +90,9 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     if (os && !os.recording.on) notes.push('Recording is off on this site, so rays and falls are not added. A hole you keep is still kept.');
     if (loaded && !os) notes.push('This browser keeps nothing for this page (its storage is off or full).');
     saidEl.textContent = [said, ...notes].filter(Boolean).join(' ');
-    foot.textContent = os ? (os.storage.persistent ? 'Kept in this browser with the other labs\' records.' : 'Kept in this browser for now; it may clear it when space runs short.') : '';
+    // where it lives, as Labs OS reports it: a memory store (storage off or refused) keeps it until the page closes
+    foot.textContent = !os ? '' : os.storage.kind === 'memory' ? 'This page cannot reach the storage of this browser, so the record lasts until the page closes.'
+      : os.storage.persistent ? 'Kept in this browser with the other labs\' records.' : 'Kept in this browser; it may clear it when space runs short.';
   }
 
   async function keep() {
