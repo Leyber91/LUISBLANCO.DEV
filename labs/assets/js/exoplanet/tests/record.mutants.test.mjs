@@ -44,10 +44,10 @@ const F_VISITS = `r.log.visits = r.log.visits.filter((e) => known(e.name));`;
 const F_PINS = `r.log.pins = r.log.pins.filter((n) => known(n));`;
 const F_SAME = `const same = r.log.saved.length === record.log.saved.length && r.log.visits.length === record.log.visits.length && r.log.pins.length === record.log.pins.length;`;
 const FULL_WHY = 'export const fullWhy = (notShown = 0) => (notShown > 0 ? `${FULL}. ${thousands(notShown)} of them ${notShown === 1 ? \'is\' : \'are\'} not shown; remove ${notShown === 1 ? \'it\' : \'them\'} in the log` : FULL);';
-const NEWER_OUT = `    if (newer) return { ok: false, why: NEWER, record: cur, changed: false };\n`;
+const NEWER_OUT = `  if (newer) return { ok: false, why: NEWER, record: cur, changed: false };\n`;
 const CHANGED = `const changed = JSON.stringify(w.record) !== JSON.stringify(cur);`;
-const WRITE = `    if (changed) await os.progress.set(w.record, { v: V });\n`;
-const RESUME = `    if (resume) {\n      try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }\n    }\n`;
+const WRITE = `  if (changed) await os.progress.set(w.record, { v: V });\n`;
+const RESUME = `  if (resume) {\n    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }\n  }\n`;
 const FOOT_USE = `recording === true ? 'A visit and a save are also usage events, which are sent to the labs’ backend only where you have allowed it.'`;
 const FOOT_OFF = `: recording === false ? 'With recording off, no usage event is written.' : '',`;
 const SAVED_OF = `return isName(e.name) && isTime(e.t) ? { name: e.name, t: e.t, view: isView(e.view) ? e.view : 'orbit' } : null; };`;
@@ -64,8 +64,7 @@ const OWN = `const own = os.storage.persistent && !os.storage.fixture;`;
 const REMOVE = `  if (own && storage && !upgraded) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }\n`;
 const SKY_DAY = `return jd + 1 > LINE_JD.from && jd <= LINE_JD.to; };`;
 const KEEP = `return joined.length > LIMITS.seen ? null : joined; };`;
-const QUEUE = `  const run = queue.then(() => new Promise((resolve, reject) => {`;
-const REFUSED_OUT = `    if (!w.ok) return { ok: false, why: w.why, record: cur, changed: false };\n`;
+const REFUSED_OUT = `  if (!w.ok) return { ok: false, why: w.why, record: cur, changed: false };\n`;
 const SEEN_BACK = `return { ...w, fresh: long ? [] : newSince(was, names), since: was ? was.day : null, long };`;
 const HEALTH = `return { version: V, stored: rec ? rec.v : null, store: os.storage.kind, persistent: os.storage.persistent, fixture: os.storage.fixture, synced: false };`;
 const HEALTH_WORDS = 'export const healthWords = (h) => `This page writes version ${V} of the record, and ${h.stored === null ? \'nothing is stored yet\' : `the stored record is version ${thousands(h.stored)}`}. No copy is synced to another device.`;';
@@ -409,16 +408,15 @@ const MUTANTS = [
   ['a change that changes nothing is written', WRITE, `  await os.progress.set(w.record, { v: V });\n`],
   ['a change is never written', WRITE, ``],
   ['a write at version 1', `await os.progress.set(w.record, { v: V });`, `await os.progress.set(w.record, { v: 1 });`],
-  ['whether the store changed is not said', `    return { ...w, changed };\n  }, limit);`, `    return w;\n  }, limit);`],
-  ['what comes back from a change is the record before it', `    return { ...w, changed };\n  }, limit);`, `    return { ...w, record: cur, changed };\n  }, limit);`],
+  ['whether the store changed is not said', `  return { ...w, changed };\n}`, `  return w;\n}`],
+  ['what comes back from a change is the record before it', `  return { ...w, changed };\n}`, `  return { ...w, record: cur, changed };\n}`],
   ['N1: a refused change stored', REFUSED_OUT, ``],
   ['N1: a refused change hands back the record it made', REFUSED_OUT, REFUSED_OUT.replace('record: cur,', 'record: w.record,')],
   ['N1: a refused change gives no reason', REFUSED_OUT, REFUSED_OUT.replace('why: w.why,', "why: '',")],
-  ['an accepted change writes no way back', `    if (resume) {`, `    if (resume && false) {`],
-  ['the way back written only when the record changed', `    if (resume) {`, `    if (resume && changed) {`],
-  ['S1: reads and writes not in turn', QUEUE, QUEUE.replace('queue.then(', 'Promise.resolve().then(')],
-  ['S1: a job that fails stops the ones after it', `queue = run.catch(() => undefined);`, `queue = run;`],
-  ['S1: a read not in turn with the writes', `{ return inTurn(() => readNow(os, storage), limit); }`, `{ return readNow(os, storage); }`],
+  ['an accepted change writes no way back', `  if (resume) {`, `  if (resume && false) {`],
+  ['the way back written only when the record changed', `  if (resume) {`, `  if (resume && changed) {`],
+  ['S1: writes not one after another', `const job = before.then(() => writeNow(os, change, resume));`, `const job = writeNow(os, change, resume);`],
+  ['S1: a write that fails stops the ones after it', `writes = job.catch(() => undefined);`, `writes = job;`],
   ['a way back the store refuses fails the stored change', `    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }`, `    await os.progress.setResume(resume.url, resume.label);`],
   ['the way back written before the record', `${WRITE}${RESUME}`, `${RESUME}${WRITE}`],
 

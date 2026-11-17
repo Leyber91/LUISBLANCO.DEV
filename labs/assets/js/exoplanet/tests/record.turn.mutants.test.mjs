@@ -23,8 +23,11 @@ const MUTANTS = [
   ['rule 10: a held thread charged up to twenty ticks', `spent += Math.min(now - last, 2 * TICK_MS);`, `spent += Math.min(now - last, 20 * TICK_MS);`],
   ['rule 10: ticks of 2.5 s', `export const TICK_MS = 250;`, `export const TICK_MS = 2500;`],
   ['rule 10: a job past its time fails with no reason', `reject(new Error(STUCK))`, `reject(new Error(''))`],
-  ['rule 10: the time a read is given ignored', `{ return inTurn(() => readNow(os, storage), limit); }`, `{ return inTurn(() => readNow(os, storage), TURN_MS); }`],
-  ['rule 10: the time a write is given ignored', `  }, limit);\n}`, `  }, TURN_MS);\n}`],
+  ['rule 10: the time a read is given ignored', `reported(readNow(os, storage), limit)`, `reported(readNow(os, storage), TURN_MS)`],
+  ['rule 10: a read held by the writes', `{ return reported(readNow(os, storage), limit); }`, `{ return writes.then(() => reported(readNow(os, storage), limit)); }`],
+  ['rule 10: the time a write is given ignored', `return before.then(() => reported(job, limit));`, `return before.then(() => reported(job, TURN_MS));`],
+  ['rule 10: a write waiting behind another timed from when it was asked', `return before.then(() => reported(job, limit));`, `return reported(job, limit);`],
+  ['rule 10: the time limit lets the next write start, and a late write undoes it', `writes = job.catch(() => undefined);`, `writes = reported(job, limit).catch(() => undefined);`],
   ['rule 10: 4 seconds a job', `export const TURN_MS = 5000;`, `export const TURN_MS = 4000;`],
   ['rule 10: the reason a job failed changed', `did not answer within \${TURN_MS / 1000} seconds`, `timed out`],
 ];

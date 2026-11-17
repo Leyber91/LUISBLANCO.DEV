@@ -122,9 +122,12 @@ export function createLog({ host, byName, open, onChange, sharedParam = null, fi
     let w;
     try { w = os ? await R.update(os, op, { resume }) : local(op); }
     catch (e) {
-      fault = `The browser refused to write the log (${String((e && e.message) || e).slice(0, 80)}). What is listed here is what was stored before.`;
+      // a write the store has not finished goes on, and the writes after it wait for it (record.js, rule 10)
+      const stuck = !!e && e.message === R.STUCK;
+      fault = stuck ? `The browser's store has not answered this change within ${R.TURN_MS / 1000} seconds. It is still being written, and what you do next waits for it and is written after it, in order. What is listed here is what was stored before.`
+        : `The browser refused to write the log (${String((e && e.message) || e).slice(0, 80)}). What is listed here is what was stored before.`;
       try { const r = await R.read(os); take(r.record, r.newer); } catch { /* the store cannot be read either: the page keeps what it last read */ }
-      w = { ok: false, why: 'the browser refused to write the log', changed: false };
+      w = { ok: false, why: stuck ? R.STUCK : 'the browser refused to write the log', changed: false };
       before(w); show(); then(w);
       return;
     }

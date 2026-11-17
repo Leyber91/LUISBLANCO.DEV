@@ -539,7 +539,8 @@ const filled = (nVisits, nSaved = 0) => {
   const bad = update(os, () => { throw new Error('a change that throws'); }).catch((e) => e.message), after = update(os, opened('w4', T + 4));
   yes('S1: a write that fails does not stop the ones after it', (await bad) === 'a change that throws' && (await after).ok && os.rec.data.log.visits[0].name === 'w4');
   const pend = update(os, opened('w5', T + 6)), seenNow = await read(os);
-  yes('S1: a read asked after a write, without waiting for it, sees it', (await pend).ok && seenNow.record.log.visits[0].name === 'w5');
+  const w5 = await pend, seenAfter = await read(os);
+  yes('S1: a read does not wait for a write in turn: it reports what is stored when it runs, and the read after the write has it', w5.ok && seenNow.record.log.visits[0].name !== 'w5' && seenAfter.record.log.visits[0].name === 'w5');
   const r0 = JSON.stringify(os.rec.data), n0 = os.sets;
   const half = await update(os, (r) => { const w = setOverdue(r, { planet: 'w9', place: null }, known); return w.ok ? visit(w.record, { name: 'w9', t: T + 5, via: 'sky', at: '2041-05-01' }, known) : w; });
   yes('N1: a change of two writes whose second is refused stores nothing, says why, and hands back the stored record', !half.ok && half.why === OFF_LINE && !half.changed && os.sets === n0 && JSON.stringify(os.rec.data) === r0 && same(half.record, os.rec.data));

@@ -40,9 +40,10 @@
       what the page shows, and `changed` says whether the store
       was written: an event is tracked only for a change. A
       change that is refused stores nothing, even when it is two
-      writes and the first was taken. Every read and write of a
-      page runs in turn, in the order asked, so two writes fired
-      at once both land.
+      writes and the first was taken. The writes of a page run
+      one after another, in the order asked, each waiting for the
+      one before it to finish, so two writes fired at once both
+      land and none undoes a later one. A read does not wait.
    2. One door. What comes out of the store passes the same
       checks as what comes in: `normalise` reads every entry with
       the function of its kind that a write applies, and `view`
@@ -93,10 +94,12 @@
       whatever recording did in between; with no catalogue kept
       nothing is said. A catalogue longer than the record keeps
       shows no world as new, and the log says why.
-  10. A store that does not answer does not stall the page: each
-      read and write has TURN_MS (5 s) of the page's free time to
-      finish, then fails with STUCK, which the log can show, and
-      the next one runs. Time the page holds its own thread is not
+  10. A store that does not answer is said, and loses nothing.
+      A read or write not finished within TURN_MS (5 s) of the
+      page's free time is reported to its caller as STUCK, which
+      the log shows; the job goes on, and the writes after it wait
+      for it, since one given up on could land after them. Reads
+      do not wait. Time the page holds its own thread is not
       counted against the store.
 
    Every function but `read`, `load`, `update`, `seeCatalogue`
@@ -489,43 +492,43 @@ export const healthWords = (h) => `This page writes version ${V} of the record, 
 export const NEWER = 'this log was written by a newer version of this page';
 /** The browser's localStorage, or null where reading it is refused. @returns {Local | null | undefined} */
 const local = () => { try { return globalThis.localStorage; } catch { return null; } };
-/* Every read and write of the record on a page runs in turn (rule 1): a page that fires two writes without waiting
-   (the sky, when two clocks are opened at once) gets both. A job that fails does not stop the ones after it, and a
-   job the store does not finish within its limit fails with STUCK (rule 10). The store may still finish a job given
-   up on; the page has by then said it failed.
-   A job's time is counted by a tick every TICK_MS, and a gap between two ticks counts as two ticks at most: a page
-   that holds its thread (the survey builds a shader for seconds) delays the tick, and that time is the page's, not
-   the store's. Counted by the wall clock, a job the store had answered failed once the thread was free, before the
-   answer was delivered: a visit by name was written late and said to have failed (the log's drive at 1440 on
-   2026-11-16; the same class as Labs OS's store timer, ROAD ticket 1.04). */
+/* Writes run one after another, in the order asked (rule 1): a page that fires two writes without waiting (the sky,
+   when two clocks are opened at once) gets both. A write starts from what the store holds once the write before it
+   has finished, however long that takes: a write given up on can still land, and landing after a later write it
+   would undo it. A write that fails does not stop the ones after it.
+   The time limit only reports (rule 10): the caller of a read or write the store has not finished within TURN_MS of
+   the page's free time hears STUCK, the job goes on, and the writes after it wait for it. A write waiting behind
+   another is not timed until it starts. A read does not wait for writes: it reports what is stored when it runs, and
+   may miss a write still waiting or running.
+   Time is counted by a tick every TICK_MS, and a gap between two ticks counts as two ticks at most: a page that holds
+   its thread (the survey builds a shader for seconds) delays the tick, and that time is the page's, not the store's.
+   Counted by the wall clock, a job the store had answered was reported as failed once the thread was free, before the
+   answer was delivered (the log's drive at 1440 on 2026-11-16; the class of Labs OS's store timer, ROAD ticket 1.04). */
 export const TURN_MS = 5000;
 export const TICK_MS = 250;
 export const STUCK = `the browser's store did not answer within ${TURN_MS / 1000} seconds`;
-/** @type {Promise<unknown>} */
-let queue = Promise.resolve();
-/** @template T @param {() => Promise<T>} job @param {number} limit @returns {Promise<T>} */
-const inTurn = (job, limit) => {
-  /** @type {Promise<T>} */
-  const run = queue.then(() => new Promise((resolve, reject) => {
-    let spent = 0, last = Date.now();
-    const tick = setInterval(() => {
-      const now = Date.now();
-      spent += Math.min(now - last, 2 * TICK_MS);
-      last = now;
-      if (spent >= limit) { clearInterval(tick); reject(new Error(STUCK)); }
-    }, TICK_MS);
-    job().then((v) => { clearInterval(tick); resolve(v); }, (e) => { clearInterval(tick); reject(e); });
-  }));
-  queue = run.catch(() => undefined);
-  return run;
-};
+/** The last write asked for, as the store finishes it. @type {Promise<unknown>} */
+let writes = Promise.resolve();
+/** What `job` answers, or STUCK once it has taken `limit` of the page's free time; the job itself goes on.
+   @template T @param {Promise<T>} job @param {number} limit @returns {Promise<T>} */
+const reported = (job, limit) => new Promise((resolve, reject) => {
+  let spent = 0, last = Date.now();
+  const tick = setInterval(() => {
+    const now = Date.now();
+    spent += Math.min(now - last, 2 * TICK_MS);
+    last = now;
+    if (spent >= limit) { clearInterval(tick); reject(new Error(STUCK)); }
+  }, TICK_MS);
+  job.then((v) => { clearInterval(tick); resolve(v); }, (e) => { clearInterval(tick); reject(e); });
+});
 /** The lab's record as stored, sound, and whether a later version of the page wrote it. A record of an older version
    is upgraded by Labs OS once, on this read (rule 6). `storage`: the browser's localStorage, where the survey kept the
    catalogue it last saw before version 3; that copy is read, and removed, only for the visitor's own store, which
-   keeps what it is given (not a fixture, not memory). `limit`: the time the read may take (rule 10).
+   keeps what it is given (not a fixture, not memory). The read does not wait for writes (rule 1). `limit`: the time
+   it may take before its caller hears STUCK (rule 10).
    @param {OS} os @param {Local | null | undefined} storage @param {number} limit @returns {Promise<{ record: ExoRecord, newer: boolean }>} */
-export function read(os, storage = local(), limit = TURN_MS) { return inTurn(() => readNow(os, storage), limit); }
-/** The read itself, for a job already in turn. @param {OS} os @param {Local | null | undefined} storage */
+export function read(os, storage = local(), limit = TURN_MS) { return reported(readNow(os, storage), limit); }
+/** The read itself, as a read or as the first step of a write. @param {OS} os @param {Local | null | undefined} storage */
 async function readNow(os, storage) {
   const own = os.storage.persistent && !os.storage.fixture;
   let upgraded = false;
@@ -538,29 +541,37 @@ async function readNow(os, storage) {
 }
 /** @param {OS} os */
 export async function load(os) { return (await read(os)).record; }
-/** One change, applied to what the store holds now, in turn with every other read and write of the page.
+/** One change, applied to what the store holds once every write asked for before it has finished (rule 1).
    `change(record)` is one of the writes above, or several in a row, and returns { ok, why, record }. A change that is
    refused stores nothing and hands back the stored record, even when a first write of it was taken. The store is
    written only when the record changed, and never when a later version wrote it. What comes back is the store's record after the
    change, which the page then shows, and `changed`, which says whether the store was written. `resume` ({ url,
    label }) is where the labs' hub leads back to, written beside an accepted change. Two tabs that write in the same
    instant can still interleave (Labs OS says so of every record); the window is one read and one write. `limit`:
-   the time the read and the write may take together (rule 10).
+   the time the read and the write may take together, from the moment the change starts, before its caller hears
+   STUCK; the change goes on, and the writes after it wait for it (rule 10).
    @param {OS} os @param {(record: ExoRecord) => Write} change @param {{ resume?: { url: string, label: string } | null, limit?: number }} [opts]
    @returns {Promise<Write & { changed: boolean }>} */
 export function update(os, change, { resume = null, limit = TURN_MS } = {}) {
-  return inTurn(async () => {
-    const { record: cur, newer } = await readNow(os, local());
-    if (newer) return { ok: false, why: NEWER, record: cur, changed: false };
-    const w = change(cur);
-    if (!w.ok) return { ok: false, why: w.why, record: cur, changed: false };
-    const changed = JSON.stringify(w.record) !== JSON.stringify(cur);
-    if (changed) await os.progress.set(w.record, { v: V });
-    if (resume) {
-      try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }
-    }
-    return { ...w, changed };
-  }, limit);
+  const before = writes;
+  const job = before.then(() => writeNow(os, change, resume));
+  writes = job.catch(() => undefined);
+  return before.then(() => reported(job, limit));
+}
+/** The change itself, once the writes before it have finished.
+   @param {OS} os @param {(record: ExoRecord) => Write} change @param {{ url: string, label: string } | null} resume
+   @returns {Promise<Write & { changed: boolean }>} */
+async function writeNow(os, change, resume) {
+  const { record: cur, newer } = await readNow(os, local());
+  if (newer) return { ok: false, why: NEWER, record: cur, changed: false };
+  const w = change(cur);
+  if (!w.ok) return { ok: false, why: w.why, record: cur, changed: false };
+  const changed = JSON.stringify(w.record) !== JSON.stringify(cur);
+  if (changed) await os.progress.set(w.record, { v: V });
+  if (resume) {
+    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }
+  }
+  return { ...w, changed };
 }
 /** The worlds of this catalogue new since the catalogue the record last kept (rule 9). With `keep` (the survey's
    recording is on) the record then holds this catalogue, seen on `day`, as the one last seen. `since`: the day of the
