@@ -1360,11 +1360,6 @@
     "to": "&& b < t, x:"
   },
   {
-    "name": "targets: a covered target passes",
-    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": ""
-  },
-  {
     "name": "targets: an element the page names covers a target",
     "from": "if (!top || self.contains(top) || top.closest(o.cover)) continue;",
     "to": "if (!top || self.contains(top)) continue;"
@@ -1435,143 +1430,213 @@
     "to": "const pseudoOver = (a) => ['::before', '::after'].find((k) => { const p = getComputedStyle(a, k); return p.content !== 'none' && /absolute|fixed/.test(p.position) && p.pointerEvents !== 'nonex'; });"
   },
   {
-    "name": "targets: an open dialog not taken for an overlay",
-    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "else if (!top.closest('dialog[open], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: a popup list not taken for an overlay",
-    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: a menu not taken for an overlay",
-    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: a popover not taken for an overlay",
-    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: what is fixed or sticky apart never an overlay",
-    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));",
-    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) out.push(name(e) + ' covered by ' + name(top));"
-  },
-  {
-    "name": "targets: what is sticky not pinned",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'stickyx' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
-  },
-  {
-    "name": "targets: what is fixed not pinned",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixedx' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
-  },
-  {
-    "name": "targets: what a transform holds pinned to the window",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || p === 'fixed') return { box: n, with: p === 'sticky' ? n : 'window' }; }"
-  },
-  {
-    "name": "targets: a sticky box moves with the window",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: 'window' }; }"
-  },
-  {
-    "name": "targets: each fixed box moves on its own",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: n }; }"
-  },
-  {
-    "name": "targets: a part of what is pinned not pinned",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = null) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
-  },
-  {
     "name": "targets: a cover that moves with the page apart",
     "from": "if (!c) return false;",
     "to": "if (!c) return true;"
   },
   {
-    "name": "targets: a pinned target never apart",
-    "from": "return !s || s.with !== c.with;",
-    "to": "return !s;"
+    "name": "targets: a box that scrolls itself moves itself up and down",
+    "from": "if (n !== e && /auto|scroll/.test(st.overflowY)) { r.up += n.scrollTop; r.down += n.scrollHeight - n.clientHeight - n.scrollTop; }",
+    "to": "if (/auto|scroll/.test(st.overflowY)) { r.up += n.scrollTop; r.down += n.scrollHeight - n.clientHeight - n.scrollTop; }"
   },
   {
-    "name": "targets: a pinned target always apart",
-    "from": "return !s || s.with !== c.with;",
-    "to": "return !s || true;"
+    "name": "targets: a box that scrolls itself moves itself sideways",
+    "from": "if (n !== e && /auto|scroll/.test(st.overflowX)) { r.left += n.scrollLeft; r.right += n.scrollWidth - n.clientWidth - n.scrollLeft; }",
+    "to": "if (/auto|scroll/.test(st.overflowX)) { r.left += n.scrollLeft; r.right += n.scrollWidth - n.clientWidth - n.scrollLeft; }"
   },
   {
-    "name": "targets: covers pinned alike apart",
-    "from": "return !s || s.with !== c.with;",
-    "to": "return !s || s.with === c.with;"
-  },
-  {
-    "name": "targets: a target on the page asked what it moves with",
-    "from": "return !s || s.with !== c.with;",
-    "to": "return s.with !== c.with;"
-  },
-  {
-    "name": "targets: only what is both sticky and fixed pinned",
-    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }",
-    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' && (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }"
-  },
-  {
-    "name": "targets: a veil 2 px from the left spans the window",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 2 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil 1 px from the left does not span",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left < 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil 2 px from the top spans the window",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 2 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil 1 px from the top does not span",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top < 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil 2 px from the right spans the window",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 2 && q.bottom >= innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil 1 px from the right does not span",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right > innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil 2 px from the bottom spans the window",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 2) return false;"
-  },
-  {
-    "name": "targets: a veil 1 px from the bottom does not span",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom > innerHeight - 1) return false;"
-  },
-  {
-    "name": "targets: a veil over the window apart",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
+    "name": "targets: a box that scrolls up and down not counted",
+    "from": "if (n !== e && /auto|scroll/.test(st.overflowY)) { r.up += n.scrollTop; r.down += n.scrollHeight - n.clientHeight - n.scrollTop; }",
     "to": ""
   },
   {
-    "name": "targets: a layer that lets the finger through a veil",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+    "name": "targets: a box that scrolls sideways not counted",
+    "from": "if (n !== e && /auto|scroll/.test(st.overflowX)) { r.left += n.scrollLeft; r.right += n.scrollWidth - n.clientWidth - n.scrollLeft; }",
+    "to": ""
   },
   {
-    "name": "targets: only a layer that lets the finger through a veil",
-    "from": "if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;",
-    "to": "if (getComputedStyle(c.box).pointerEvents === 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;"
+    "name": "targets: a box scrolled down not counted back",
+    "from": "if (n !== e && /auto|scroll/.test(st.overflowY)) { r.up += n.scrollTop; r.down += n.scrollHeight - n.clientHeight - n.scrollTop; }",
+    "to": "if (n !== e && /auto|scroll/.test(st.overflowY)) { r.down += n.scrollHeight - n.clientHeight - n.scrollTop; }"
+  },
+  {
+    "name": "targets: a box scrolled right not counted back",
+    "from": "if (n !== e && /auto|scroll/.test(st.overflowX)) { r.left += n.scrollLeft; r.right += n.scrollWidth - n.clientWidth - n.scrollLeft; }",
+    "to": "if (n !== e && /auto|scroll/.test(st.overflowX)) { r.right += n.scrollWidth - n.clientWidth - n.scrollLeft; }"
+  },
+  {
+    "name": "targets: what is pinned moves with the page",
+    "from": "if (st.position === 'sticky' || (st.position === 'fixed' && !clippers(n).length)) return r;",
+    "to": ""
+  },
+  {
+    "name": "targets: what is sticky moves with the page",
+    "from": "if (st.position === 'sticky' || (st.position === 'fixed' && !clippers(n).length)) return r;",
+    "to": "if ((st.position === 'fixed' && !clippers(n).length)) return r;"
+  },
+  {
+    "name": "targets: what is fixed moves with the page",
+    "from": "if (st.position === 'sticky' || (st.position === 'fixed' && !clippers(n).length)) return r;",
+    "to": "if (st.position === 'sticky') return r;"
+  },
+  {
+    "name": "targets: every box stops the reach",
+    "from": "if (st.position === 'sticky' || (st.position === 'fixed' && !clippers(n).length)) return r;",
+    "to": "if (st.position !== 'sticky' || (st.position === 'fixed' && !clippers(n).length)) return r;"
+  },
+  {
+    "name": "targets: the window's scroll not counted",
+    "from": "r.up += d.scrollTop; r.down += d.scrollHeight - d.clientHeight - d.scrollTop; r.left += d.scrollLeft; r.right += d.scrollWidth - d.clientWidth - d.scrollLeft;",
+    "to": ""
+  },
+  {
+    "name": "targets: the window's scroll back down not counted",
+    "from": "r.up += d.scrollTop; r.down += d.scrollHeight - d.clientHeight - d.scrollTop; r.left += d.scrollLeft; r.right += d.scrollWidth - d.clientWidth - d.scrollLeft;",
+    "to": "r.down += d.scrollHeight - d.clientHeight - d.scrollTop; r.left += d.scrollLeft; r.right += d.scrollWidth - d.clientWidth - d.scrollLeft;"
+  },
+  {
+    "name": "targets: the window's scroll on not counted",
+    "from": "r.up += d.scrollTop; r.down += d.scrollHeight - d.clientHeight - d.scrollTop; r.left += d.scrollLeft; r.right += d.scrollWidth - d.clientWidth - d.scrollLeft;",
+    "to": "r.up += d.scrollTop; r.left += d.scrollLeft; r.right += d.scrollWidth - d.clientWidth - d.scrollLeft;"
+  },
+  {
+    "name": "targets: the last pixel of scroll does not free",
+    "from": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= Math.min(at + back, hi - size);",
+    "to": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) < Math.min(at + back, hi - size);"
+  },
+  {
+    "name": "targets: a place before the gap counts as in it",
+    "from": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= Math.min(at + back, hi - size);",
+    "to": "const fits = (at, back, fwd, lo, hi, size) => (at - fwd) <= Math.min(at + back, hi - size);"
+  },
+  {
+    "name": "targets: a place past the gap counts as in it",
+    "from": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= Math.min(at + back, hi - size);",
+    "to": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= (hi - size);"
+  },
+  {
+    "name": "targets: the size of the target not asked",
+    "from": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= Math.min(at + back, hi - size);",
+    "to": "const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= Math.min(at + back, hi);"
+  },
+  {
+    "name": "targets: a scroll never frees up and down",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));"
+  },
+  {
+    "name": "targets: a scroll never frees sideways",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight)));"
+  },
+  {
+    "name": "targets: the gap above a cover not looked at",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (x(0, innerWidth) && (y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));"
+  },
+  {
+    "name": "targets: the gap below a cover not looked at",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (x(0, innerWidth) && (y(0, c.top))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));"
+  },
+  {
+    "name": "targets: the gap left of a cover not looked at",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(c.right, innerWidth)));"
+  },
+  {
+    "name": "targets: the gap right of a cover not looked at",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left)));"
+  },
+  {
+    "name": "targets: a target wider than the window freed up or down",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return ((y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));"
+  },
+  {
+    "name": "targets: a target taller than the window freed sideways",
+    "from": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));",
+    "to": "return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || ((x(0, c.left) || x(c.right, innerWidth)));"
+  },
+  {
+    "name": "targets: a cover always freed",
+    "from": "return freed(k.getBoundingClientRect(), r, reach(self));",
+    "to": "return true;"
+  },
+  {
+    "name": "targets: a cover never freed",
+    "from": "return freed(k.getBoundingClientRect(), r, reach(self));",
+    "to": "return false;"
+  },
+  {
+    "name": "targets: a covered target passes",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": ""
+  },
+  {
+    "name": "targets: an open dialog not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a popup list not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a menu not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a popover not taken for an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: what is fixed or sticky apart never an overlay",
+    "from": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));",
+    "to": "else if (!top.closest('dialog[open], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"listbox\"], [role=\"menu\"], [popover]')) out.push(name(e) + ' covered by ' + name(top));"
+  },
+  {
+    "name": "targets: a layer that lets the finger through is the cover",
+    "from": "for (let n = t; ; n = n.parentElement) { if (getComputedStyle(n).pointerEvents !== 'none') k = n; if (n === c) break; }",
+    "to": "for (let n = t; ; n = n.parentElement) { k = n; if (n === c) break; }"
+  },
+  {
+    "name": "targets: only what lets the finger through is the cover",
+    "from": "for (let n = t; ; n = n.parentElement) { if (getComputedStyle(n).pointerEvents !== 'none') k = n; if (n === c) break; }",
+    "to": "for (let n = t; ; n = n.parentElement) { if (getComputedStyle(n).pointerEvents === 'none') k = n; if (n === c) break; }"
+  },
+  {
+    "name": "targets: the cover is what the finger met alone",
+    "from": "for (let n = t; ; n = n.parentElement) { if (getComputedStyle(n).pointerEvents !== 'none') k = n; if (n === c) break; }",
+    "to": "for (let n = t; ; n = n.parentElement) { if (getComputedStyle(n).pointerEvents !== 'none') k = n; break; }"
+  },
+  {
+    "name": "targets: what is sticky not pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'stickyx' || (p === 'fixed' && !clippers(n).length)) return n; }"
+  },
+  {
+    "name": "targets: what is fixed not pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixedx' && !clippers(n).length)) return n; }"
+  },
+  {
+    "name": "targets: what a transform holds pinned to the window",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || p === 'fixed') return n; }"
+  },
+  {
+    "name": "targets: only what is both sticky and fixed pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }",
+    "to": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' && (p === 'fixed' && !clippers(n).length)) return n; }"
+  },
+  {
+    "name": "targets: a part of what is pinned not pinned",
+    "from": "for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }",
+    "to": "for (; n; n = null) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }"
   }
 ]

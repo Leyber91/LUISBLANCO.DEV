@@ -42,11 +42,13 @@
      through its ::before or ::after (placed out of the flow, taking
      the finger). An open dialog, a popup list or menu and a popover
      lie over the page by design; so does what is fixed or sticky to
-     the window when the target is not pinned with it (it moves apart
-     on a scroll: not fixed to the window too, not in the same sticky
-     box) and its fixed or sticky box does not span the window (a
-     veil). The page may name others, each with its reason. A target
-     is a
+     the window when a scroll frees the target from it: the target is
+     not pinned with it (not fixed to the window too, not in the same
+     sticky box), and some scroll the page and the boxes that scroll
+     the target can still make puts the whole target in the window
+     clear of the cover. A cover no scroll moves off (a veil, a drawer,
+     a sheet, a header over a page that cannot scroll) is a break
+     unless the page names it, with its reason. A target is a
      link, a button, a field, a summary, anything with the role of a
      button, link, checkbox, switch, radio, tab, slider, option, menu
      item, tree item or combo box, and anything in the tab order. Not
@@ -99,10 +101,10 @@
      box): not a sideways scroll; shapes.mjs checks truncation;
    - a target covered away from its middle, or covered while it is
      out of the window: only the middle of what is seen is tested;
-   - a target that something fixed or sticky to the window covers
-     where the page can scroll no further (a bar over the last button,
-     a sticky header over a page that cannot scroll): such a cover is
-     taken for one that moves with the scroll;
+   - a sticky cover is taken to stay where it is now, though it moves
+     with its scroller until it sticks; the reach of a box that scrolls
+     the target is counted whole, without that box's own clip; a target
+     taller or wider than the window is never freed;
    - an element with the role of a dialog is taken to lie over the
      page by design, though it never closes (a banner given the role);
    - where an ancestor's ::before or ::after lies is not read: when
@@ -217,22 +219,47 @@ function targetsRule(o, { shown, name, clippers }) {
     }
     return { w: Math.max(0, R - L), h: Math.max(0, B - T), now: rr > l && b > t, x: (l + rr) / 2, y: (t + b) / 2 };
   };
-  // what moves with the window as the page or a box scrolls: the nearest box fixed to it (one that a transform, a filter
-  // or containment above holds is not: it moves with that box) or sticky, itself included, and what it moves with
+  // what does not move with the page: the nearest box fixed to the window (one that a transform, a filter or containment
+  // above holds is not: it moves with that box) or sticky, itself included; null when there is none
   const pinned = (n) => {
-    for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return { box: n, with: p === 'sticky' ? n : 'window' }; }
+    for (; n; n = n.parentElement) { const p = getComputedStyle(n).position; if (p === 'sticky' || (p === 'fixed' && !clippers(n).length)) return n; }
     return null;
   };
-  // a cover fixed or sticky to the window and a target that move apart on a scroll: the target is not pinned with it
-  // (on 2026-11-17 a toast fixed over a fixed bar's button passed, and so did every cover inside an app in a fixed
-  // scroller), and the cover's box is not a veil, one that spans the window and takes the finger (an invisible veil left
-  // behind passed); a layer over the whole window that lets the finger through to its panels is not one
-  const apart = (t, self) => {
-    const c = pinned(t), s = pinned(self);
+  // how far the boxes that scroll an element can still move it: its top up by `up` (their content going back down) or
+  // down by `down`, its left by `left` or `right`. The window's own scroll counts unless a box fixed to the window or
+  // sticky holds the element (a sticky box is taken to stay where it is now, as when it has stuck)
+  const reach = (e) => {
+    const r = { up: 0, down: 0, left: 0, right: 0 };
+    for (let n = e; n.parentElement; n = n.parentElement) {
+      const st = getComputedStyle(n);
+      if (n !== e && /auto|scroll/.test(st.overflowY)) { r.up += n.scrollTop; r.down += n.scrollHeight - n.clientHeight - n.scrollTop; }
+      if (n !== e && /auto|scroll/.test(st.overflowX)) { r.left += n.scrollLeft; r.right += n.scrollWidth - n.clientWidth - n.scrollLeft; }
+      if (st.position === 'sticky' || (st.position === 'fixed' && !clippers(n).length)) return r;
+    }
+    const d = document.scrollingElement;
+    r.up += d.scrollTop; r.down += d.scrollHeight - d.clientHeight - d.scrollTop; r.left += d.scrollLeft; r.right += d.scrollWidth - d.clientWidth - d.scrollLeft;
+    return r;
+  };
+  // whether some reachable scroll puts the whole target in the window clear of the cover's box c: above it, below it,
+  // left or right of it. t: the target's box; r: its reach. A span of places [at - fwd, at + back] fits a gap [lo, hi]
+  // when it meets [lo, hi - size]
+  const freed = (c, t, r) => {
+    const fits = (at, back, fwd, lo, hi, size) => Math.max(at - fwd, lo) <= Math.min(at + back, hi - size);
+    const y = (lo, hi) => fits(t.top, r.up, r.down, lo, hi, t.height), x = (lo, hi) => fits(t.left, r.left, r.right, lo, hi, t.width);
+    return (x(0, innerWidth) && (y(0, c.top) || y(c.bottom, innerHeight))) || (y(0, innerHeight) && (x(0, c.left) || x(c.right, innerWidth)));
+  };
+  // a cover fixed or sticky to the window lies over the page by design when some reachable scroll puts the target clear
+  // of it. None does for a veil, a drawer the full height, a backdrop inside the edges, a sheet that leaves less than
+  // the target's height, a header over a page that cannot scroll, a toast over a button of a fixed bar, a plate inside
+  // the same fixed scroller as the target (on 2026-11-17 all of these passed). The cover is the outermost box, from
+  // what the finger met up to the fixed or sticky box, that takes the finger: a layer over the whole window that lets
+  // the finger through to its panels is not one.
+  const apart = (t, self, r) => {
+    const c = pinned(t);
     if (!c) return false;
-    const q = c.box.getBoundingClientRect();
-    if (getComputedStyle(c.box).pointerEvents !== 'none' && q.left <= 1 && q.top <= 1 && q.right >= innerWidth - 1 && q.bottom >= innerHeight - 1) return false;
-    return !s || s.with !== c.with;
+    let k = t;
+    for (let n = t; ; n = n.parentElement) { if (getComputedStyle(n).pointerEvents !== 'none') k = n; if (n === c) break; }
+    return freed(k.getBoundingClientRect(), r, reach(self));
   };
   // an ancestor's ::before or ::after placed out of the flow that takes the finger: the one a finger meets there, or
   // undefined
@@ -253,7 +280,7 @@ function targetsRule(o, { shown, name, clippers }) {
     const top = v.now ? document.elementFromPoint(v.x, v.y) : null;
     if (!top || self.contains(top) || top.closest(o.cover)) continue;
     if (top.contains(self)) { const k = pseudoOver(top); if (k) out.push(name(e) + ' covered by the ' + k + ' of ' + name(top)); }
-    else if (!top.closest('dialog[open], [role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"], [popover]') && !apart(top, self)) out.push(name(e) + ' covered by ' + name(top));
+    else if (!top.closest('dialog[open], [role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"], [popover]') && !apart(top, self, r)) out.push(name(e) + ' covered by ' + name(top));
   }
   return [...new Set(out)].slice(0, 12);
 }
@@ -457,7 +484,8 @@ async function selftest() {
   const c449 = greyFor(4.5, -1), c451 = greyFor(4.5, 1), c299 = greyFor(3, -1), c301 = greyFor(3, 1);
   yes('the greys stand 0.006 to 0.012 on each side of 4.5 and of 3', [[c449, 4.5, -1], [c451, 4.5, 1], [c299, 3, -1], [c301, 3, 1]].every(([g, w, side]) => (g.q - w) * side > 0.006 && (g.q - w) * side < 0.012), [c449, c451, c299, c301].map((g) => g.q.toFixed(4)).join(' '));
   const r = await drive(async (p) => {
-    const run = async (html, expr) => { await p.ev(`(document.open(), document.write(${J(html)}), document.close(), true)`); await p.ev('new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))'); return p.ev(expr); };
+    const run = async (html, expr) => { await p.ev(`(scrollTo(0, 0), document.open(), document.write(${J(html)}), document.close(), true)`);   // each page from the top: a scroll would carry over
+    await p.ev('new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))'); return p.ev(expr); };
 
     /* ---- overflow ---- */
     const wide = (k) => PAGE('<div id="w" style="height:10px"><div id="wchild" style="width:100%;height:2px"></div></div><div id="fixedwide" style="position:fixed;top:0;left:0;width:200vw;height:2px"></div>', '', `document.getElementById('w').style.width = (innerWidth + ${k}) + 'px';`);
@@ -576,19 +604,52 @@ async function selftest() {
       #card5::after, #cardglass::after, #cardpass::after { content: ""; position: absolute; inset: 0; } #cardglass::after, #cardpass::after { pointer-events: none; } #cardbefore::before { content: ""; position: absolute; inset: 0; z-index: 1; }
       #cardfix::after { content: ""; position: fixed; inset: 0; } #cardflow::before { content: "x"; } #cardnone { position: relative; } #cardnone::after { content: none; position: absolute; inset: 0; }`);
     const TG = PAGE(`      <div id="app" style="position:fixed;inset:0;overflow:auto"><header id="apphdr" style="position:sticky;top:0;height:60px;background:#111;z-index:2">bar</header>
-      <div style="position:relative;height:2000px"><button id="hdrbtn" style="position:absolute;top:-60px;left:150px;width:60px;height:50px">h</button><button id="f3btn" style="position:absolute;top:100px;left:0;width:60px;height:50px">b</button><div id="plate3" style="position:absolute;left:0;top:100px;width:100px;height:60px;background:#222"></div></div></div>`);
-    const VEIL = (l, t, r, b) => PAGE(`<button id="vbtn" style="position:absolute;left:150px;top:300px;width:60px;height:50px">v</button><div id="veil" style="position:fixed;left:${l}px;top:${t}px;right:${r}px;bottom:${b}px"></div>`);
-    const t7 = await run(TF, targets()), t8 = await run(TG, targets()), veils = [];
-    for (const at of [[0, 0, 0, 0], [1, 1, 1, 1], [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2]]) veils.push((await run(VEIL(...at), targets())).some((x) => x === '#vbtn "v" covered by #veil'));
-    const hud = await run(PAGE(`<button id="hudbtn" style="position:absolute;left:150px;top:300px;width:60px;height:50px">u</button><div style="position:fixed;inset:0;pointer-events:none"><div id="hudpanel" style="position:absolute;left:100px;top:280px;width:200px;height:100px;pointer-events:auto;background:#222"></div></div>`), targets());
-    yes('a fixed cover that spans the window is a break, an invisible one too, within 1 px of each edge; 2 px short of any edge, it is fixed apart from the target', J(veils) === '[true,true,false,false,false,false]', J(veils));
-    yes('a panel of a layer over the whole window that lets the finger through is fixed apart from the target, not a veil', !hud.some((x) => /^#hudbtn .*covered/.test(x)), J(hud));
+      <div style="position:relative;height:2000px"><button id="hdrbtn" style="position:absolute;top:-60px;left:150px;width:60px;height:50px">h</button><button id="hdrbtn2" style="position:absolute;top:400px;left:150px;width:60px;height:50px">i</button><button id="f3btn" style="position:absolute;top:100px;left:0;width:60px;height:50px">b</button><div id="plate3" style="position:absolute;left:0;top:100px;width:100px;height:60px;background:#222"></div></div></div>`,
+      '', "document.getElementById('app').scrollTop = 0; requestAnimationFrame(() => {});");
+    // the app scrolled so that its header lies over its second button, a scroll back frees it
+    const TG2 = TG.replace("document.getElementById('app').scrollTop = 0;", "document.getElementById('app').scrollTop = 455;");
+    // tall pages and boxes that scroll: what a scroll frees and what it cannot
+    const TALL = (body, script = '') => PAGE(`<div style="height:3000px;position:relative">${body}</div>`, '', script);
+    const covered = async (html, id) => (await run(html, targets())).some((x) => new RegExp(`^#${id} .*covered by`).test(x));
+    const veil = await covered(PAGE('<button id="vbtn" style="position:absolute;left:150px;top:300px;width:60px;height:50px">v</button><div id="veil" style="position:fixed;inset:0"></div>'), 'vbtn');
+    const g1c = await covered(TALL('<button id="g1" style="position:absolute;left:50px;top:400px;width:60px;height:50px">b</button><aside style="position:fixed;left:0;top:0;bottom:0;width:300px;background:#222"></aside>'), 'g1');
+    const g2c = await covered(TALL('<button id="g2" style="position:absolute;left:150px;top:400px;width:60px;height:50px">b</button><div style="position:fixed;inset:8px;background:#222"></div>'), 'g2');
+    const g3c = await covered(TALL('<button id="g3" style="position:absolute;left:150px;top:400px;width:60px;height:50px">b</button><div style="position:fixed;left:0;right:0;bottom:0;height:95%;background:#222"></div>'), 'g3');
+    // a bar at the bottom over the last button: the page's last 55 px of scroll free it, 54 px do not
+    const LAST = (pad) => PAGE(`<div style="height:2000px"></div><button id="lastbtn" style="display:block;width:60px;height:50px">l</button><div style="height:${pad}px"></div><div style="position:fixed;left:0;right:0;bottom:0;height:60px;background:#111"></div>`, '', 'scrollTo(0, 2000 - innerHeight + 55);');
+    const last60 = await covered(LAST(60), 'lastbtn'), last59 = await covered(LAST(59), 'lastbtn');
+    // a header at the top over a button the page has scrolled under it: a scroll back frees it below the header
+    const under = await covered(PAGE('<div style="height:100px"></div><button id="topbtn" style="display:block;width:60px;height:50px">t</button><div style="height:2000px"></div><div style="position:fixed;left:0;right:0;top:0;height:60px;background:#111"></div>', '', 'scrollTo(0, 95);'), 'topbtn');
+    // a box that scrolls sideways under a cover the full height: scrolled on, the button comes out on the left; scrolled back, on the right
+    const SIDE = (btnLeft, coverCss, at) => PAGE(`<div id="hs" style="overflow-x:auto;overflow-y:hidden;width:390px;height:60px"><div style="width:1000px;height:50px;position:relative"><button id="sidebtn" style="position:absolute;left:${btnLeft}px;top:0;width:60px;height:50px">s</button></div></div><div style="position:fixed;top:0;bottom:0;${coverCss};background:#111"></div>`, '', `document.getElementById('hs').scrollLeft = ${at};`);
+    const sideLeft = await covered(SIDE(300, 'left:280px;right:0', 0), 'sidebtn'), sideRight = await covered(SIDE(260, 'left:0;width:110px', 200), 'sidebtn'), sideNone = await covered(SIDE(300, 'left:280px;right:0', 0).replace('width:1000px', 'width:390px'), 'sidebtn');
+    // a button wider than the window under a bar, and one taller than it beside a cover: neither is ever whole in the window
+    const widebtn = await covered(PAGE('<div style="height:600px"></div><div style="overflow-x:auto;overflow-y:hidden;width:390px;height:50px"><button id="widebtn" style="display:block;width:500px;height:50px">w</button></div><div style="height:2000px"></div><div style="position:fixed;left:0;right:0;bottom:0;height:300px;background:#111"></div>'), 'widebtn');
+    const tallbtn = await covered(PAGE('<div style="overflow-x:auto;overflow-y:hidden;width:390px;height:900px"><div style="width:1000px;height:900px;position:relative"><button id="tallbtn" style="position:absolute;left:300px;top:0;width:60px;height:900px">T</button></div></div><div style="position:fixed;left:280px;right:0;top:0;bottom:0;background:#111"></div>'), 'tallbtn');
+    // a box that scrolls itself does not move itself; a box fixed to the window does not move with the page
+    const selfScroll = await covered(PAGE('<div id="selfbox" tabindex="0" style="overflow:auto;width:60px;height:50px"><div style="width:500px;height:500px"></div></div><div style="position:fixed;left:0;top:0;width:100px;height:60px;background:#111"></div>', '', "const b = document.getElementById('selfbox'); b.scrollTop = 200; b.scrollLeft = 200;"), 'selfbox');
+    const inSticky = await covered(TALL('<header style="position:sticky;top:0;height:60px;z-index:1"><button id="stickybtn" style="width:60px;height:50px">s</button></header><div style="position:fixed;left:0;top:0;width:100px;height:56px;z-index:2;background:#111"></div>', 'scrollTo(0, 500);'), 'stickybtn');
+    const inFixed = await covered(TALL('<div style="position:fixed;left:0;top:200px;width:390px;height:60px"><button id="panelbtn" style="width:60px;height:50px">p</button></div><div style="height:200px"></div><div style="position:sticky;top:200px;height:60px;width:100px;z-index:10;background:#111"></div>'), 'panelbtn');
+    // the finger meets a small part at the top of a tall bar fixed to the bottom; the page, at its end, can only scroll back:
+    // clear of the part, the button would still lie under the bar
+    const barPart = await covered(TALL('<button id="barbtn2" style="position:absolute;left:20px;top:2805px;width:60px;height:50px">b</button><div style="position:fixed;left:0;right:0;bottom:0;height:200px;background:#111"><div style="position:absolute;left:0;top:0;width:100px;height:50px;background:#222"></div></div>', 'scrollTo(0, 3000);'), 'barbtn2');
+    // a box a transform holds, on a page that scrolls: its "fixed" lid moves with the page, over the button beside it
+    const tfHeld = await covered(TALL('<div style="transform:translateZ(0);position:relative;height:60px;width:100px;margin-top:400px"><button id="tfbtn2" style="width:60px;height:50px">g</button><div style="position:fixed;left:0;top:0;width:100px;height:60px;background:#222"></div></div>'), 'tfbtn2');
+    const t7 = await run(TF, targets()), t8 = await run(TG, targets()), t9 = await run(TG2, targets());
+    const hud = await run(TALL('<button id="hudbtn" style="position:absolute;left:150px;top:300px;width:60px;height:50px">u</button><div style="position:fixed;inset:0;pointer-events:none"><div id="hudpanel" style="position:absolute;left:100px;top:280px;width:200px;height:100px;pointer-events:auto;background:#222"></div></div>'), targets());
+    yes('a cover no scroll moves off is a break: a veil, a drawer the full height, a backdrop 8 px inside the edges, a sheet that leaves 42 px for a 50 px button', veil && g1c && g2c && g3c, J([veil, g1c, g2c, g3c]));
+    yes('a bar over the last button: the last pixel of scroll that frees it makes it apart, 1 px short is a break', !last60 && last59, J([last60, last59]));
+    yes('a scroll back frees a button from a header above it, and a box that scrolls sideways frees one to the left or to the right; one that cannot scroll does not', !under && !sideLeft && !sideRight && sideNone, J([under, sideLeft, sideRight, sideNone]));
+    yes('a button wider than the window, and one taller than it, are never freed', widebtn && tallbtn, J([widebtn, tallbtn]));
+    yes('a box does not scroll itself out from under a cover, and a box fixed to the window or sticky does not move with the page', selfScroll && inFixed && inSticky, J([selfScroll, inFixed, inSticky]));
+    yes('a panel of a layer over the whole window that lets the finger through is the cover, not the layer: a scroll frees the target from it', !hud.some((x) => /^#hudbtn .*covered/.test(x)), J(hud));
+    yes('the cover is the whole fixed bar that takes the finger, not the part of it the finger met', barPart, J(barPart));
     yes('a toast fixed over a button of a fixed bar is a break: both are fixed to the window', t7.includes('#barbtn "j" covered by #toast "toast"'), J(t7.filter((x) => /covered/.test(x))));
-    yes('in an app inside a fixed scroller, a plate over a button is a break; the app\'s sticky header over one of its buttons is not', t8.includes('#f3btn "b" covered by #plate3') && !t8.some((x) => /^#hdrbtn .*covered/.test(x)), J(t8.filter((x) => /covered/.test(x))));
-    yes('a sticky header over a button where the page cannot scroll is taken for one that moves with the scroll (a declared limit)', !t7.some((x) => /^#f4btn .*covered/.test(x)), J(t7.filter((x) => /covered/.test(x))));
+    yes('in an app inside a fixed scroller, a plate over a button is a break, and so is its sticky header over a button at the top no scroll frees; scrolled so that the header lies over a button lower down, the header is not', t8.includes('#f3btn "b" covered by #plate3') && t8.some((x) => /^#hdrbtn "h" covered by #apphdr/.test(x)) && !t9.some((x) => /^#hdrbtn2 .*covered/.test(x)), J([t8.filter((x) => /covered/.test(x)), t9]));
+    yes('a sticky header over a button where the page cannot scroll is a break (F4)', t7.some((x) => /^#f4btn "4" covered by #hdr4/.test(x)), J(t7.filter((x) => /covered/.test(x))));
     yes('an ancestor\'s ::after or ::before over its own target is a break, placed absolute or fixed; one that lets the finger through (over the target, or over a target that lets it through too), one in the flow and one with no content are not',
       t7.includes('#f5btn "a" covered by the ::after of #card5 "a"') && t7.includes('#beforebtn "b" covered by the ::before of #cardbefore "b"') && t7.includes('#fixbtn "c" covered by the ::after of #cardfix "c"') && !t7.some((x) => /^#(glassbtn|passbtn|flowbtn|nonebtn) .*covered/.test(x)), J(t7.filter((x) => /covered/.test(x))));
-    yes('what a transform holds is not fixed to the window; two sticky boxes move apart, and one sticky box holding the target and its cover does not', t7.includes('#tfbtn "g" covered by #tflid') && !t7.some((x) => /^#stkbtn .*covered/.test(x)) && t7.includes('#insticky "i" covered by #instickylid'), J(t7.filter((x) => /covered/.test(x))));
+    yes('what a transform holds is not fixed to the window; one sticky box over another on a page that cannot scroll is a break, and so is one sticky box holding the target and its cover', t7.includes('#tfbtn "g" covered by #tflid') && tfHeld && t7.some((x) => /^#stkbtn "h" covered by #stklid/.test(x)) && t7.includes('#insticky "i" covered by #instickylid'), J(t7.filter((x) => /covered/.test(x))));
     const t2 = await run(TA, targets({ below: 389 })), t3 = await run(TA, targets({ below: 390 })), t4 = [...await run(TA, targets({ tall: 20, wide: 0 })), ...await run(TD, targets({ tall: 20, wide: 0 }))];
     yes('the rule applies up to its width and not 1 px past it (a 390 px window: below 390 applies, below 389 does not)', J(t2) === '[]' && has(t3, 'h434'), `${t2.length} | ${t3.length}`);
     yes('its sizes are its settings: at 20 by 0, 20 px tall passes and so does 43.4', !has(t4, 'en') && !has(t4, 'h434') && !has(t4, 'w234') && has(t4, 'clip'), J(t4));
