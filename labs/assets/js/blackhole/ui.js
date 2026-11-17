@@ -223,6 +223,7 @@ export function buildUI(app) {
     sources.innerHTML = `<h3>Objects (data version ${VERSION})</h3><table><tr><th>object</th><th>mass</th><th>distance</th><th>spin</th><th>incl.</th><th>sources</th></tr>${rowsT}</table>
       <h3 style="margin-top:12px">Equations and values</h3><ol>${Object.values(CITE).map((c) => `<li>${esc(c)}</li>`).join('')}</ol>
       <p class="bh-note">Verification: <b>node labs/assets/js/blackhole/verify.mjs</b> runs 40 checks of the engine against these sources (shadow vs Bardeen within 0.002%, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification).</p>
+      <p class="bh-note">The first version of this page, from June 2026, stays at <a href="bh_animation_page_v1.html" style="color:var(--horizon)">bh_animation_page_v1.html</a>.</p>
       <button class="bh-btn" type="button" id="bh-srcclose">Close</button>`;
     $('#bh-srcclose').addEventListener('click', () => { sources.hidden = true; });
   };

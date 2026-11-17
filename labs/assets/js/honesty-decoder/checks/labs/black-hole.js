@@ -4,7 +4,7 @@
    parameter below which rays are captured. */
 import { REFERENCES } from '../../config.js';
 
-const SRC = 'labs/assets/js/blackhole/blackhole.js';
+const SRC = 'labs/assets/js/blackhole_v1/blackhole.js';
 const num = (text, rx, name) => {
   const m = text.match(rx);
   if (!m) throw new Error(`could not read ${name} from the shader`);
@@ -79,7 +79,7 @@ export const PROBES = {
     what: 'loading the lab (?still) in a hidden frame and reading its ISCO readout',
     fails: `fails if the readout is gone or the ISCO is more than ${REFERENCES.isco0.tol * 100}% from 3 r_s`,
     async run(ctx) {
-      const f = await ctx.frame('bh_animation_page.html?still', { ready: (a) => /ISCO/.test(a.text('.bh-readout')) || a.$('.bh-nowebgl'), w: 640, h: 420 });
+      const f = await ctx.frame('bh_animation_page_v1.html?still', { ready: (a) => /ISCO/.test(a.text('.bh-readout')) || a.$('.bh-nowebgl'), w: 640, h: 420 });
       if (f.$('.bh-nowebgl')) return { status: 'error', detail: 'this browser gave the lab no WebGL context' };
       const read = f.text('.bh-readout');
       const title = f.text('.bh-title');
