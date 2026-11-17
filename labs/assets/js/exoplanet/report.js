@@ -14,6 +14,7 @@ import {
   forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, skyView, spectralType,
   transitGeometry, sizeClassOf, limitOf, limitKind, limitText, hasRadius, isNum,
 } from './science.js';
+import { starNum, starValue } from './starlight.js';
 import { groundingCheck } from './grounding.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 
@@ -30,7 +31,8 @@ export function limitsLine(p) {
 /* The fact sheet: the only numbers either writer may use. */
 export function facts(p, albedo) {
   const fc = forecastFor(p);
-  const S = insolation(p).S;
+  // the starlight as every sheet prints it: the fact sheet carries the printed value, so the note and the sheet agree
+  const sl = insolation(p), S = sl.S ? starValue(sl.S) : null;
   const a = semiMajor(p).a;
   const sky = skyView(p);
   const geo = transitGeometry(p);
@@ -51,8 +53,9 @@ export function facts(p, albedo) {
     mass_forecast_Mearth: fc ? r(fc.median, 2) : null, mass_forecast_68: fc ? [r(fc.lo, 2), r(fc.hi, 2)] : null,
     size_class: cls ? cls.label + (cls.fromLimit ? ' (from the radius limit)' : '') : 'unknown: no radius measured',
     archive_limits: limitsLine(p) || null,
-    period_days: r(p.P, 4), orbit_AU: r(a, 3), eccentricity: r(p.ecc, 2),
-    insolation_Searth: r(S, 3),
+    // the orbit as sheet B prints it, so the note and the sheet agree (a wide orbit printed whole: 7,493, not 7,490)
+    period_days: r(p.P, 4), orbit_AU: isNum(a) ? +fmt(a, 3).replace(/,/g, '') : null, eccentricity: r(p.ecc, 2),
+    insolation_Searth: S,
     teq_published_K: isNum(p.Teq) ? Math.round(p.Teq) : null,
     teq_this_page_K: teq ? Math.round(teq) : null, albedo_assumed: albedo,
     habitable_zone: hz.label,
@@ -72,7 +75,7 @@ export function deterministicNote(p, f, short = false) {
     ? `is ${fmt(f.radius_Rearth, 3)} times Earth's radius and circles`
     : `has no measured radius${f.radius_limit_Rearth ? ` (the archive gives only a ${f.radius_kind} of ${fmt(f.radius_limit_Rearth, 3)} Earth radii)` : ''}; it circles`;
   s.push(`${f.name} ${size} ${star}${f.period_days ? ` every ${fmt(f.period_days, 3)} days` : ''}${f.orbit_AU ? ` at ${fmt(f.orbit_AU, 3)} AU` : ''}.`);
-  if (f.insolation_Searth) s.push(`It receives ${fmt(f.insolation_Searth, 3)} times the sunlight Earth does, ${f.habitable_zone}.`);
+  if (f.insolation_Searth) s.push(`It receives ${starNum(f.insolation_Searth, 3)} times the sunlight Earth does, ${f.habitable_zone}.`);
   const lim = f.mass_kind === 'upper limit' || f.mass_kind === 'lower limit';
   if (f.mass_kind === 'measured') s.push(`Its mass is measured at ${fmt(f.mass_Mearth, 3)} Earth masses.`);
   else if (f.mass_forecast_Mearth) {

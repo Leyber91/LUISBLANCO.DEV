@@ -50,7 +50,7 @@ const measure = `(() => { const s = document.querySelector('#ret-render .ret-air
   const lh = parseFloat(getComputedStyle(s).lineHeight), sum = m.querySelector('summary').getBoundingClientRect();
   return { lines: Math.round(s.getBoundingClientRect().height / lh * 100) / 100, open: m.open, summaryH: Math.round(sum.height), text: s.textContent }; })()`;
 // the five worlds the review read, and the catalogue's longest short line (air.test.mjs checks it is the longest)
-const WORLDS = ['LHS 3844 b', 'TRAPPIST-1 e', 'Proxima Cen b', '55 Cnc e', 'Kepler-442 b', 'EPIC 201238110 b'];
+const WORLDS = ['LHS 3844 b', 'TRAPPIST-1 e', 'Proxima Cen b', '55 Cnc e', 'Kepler-442 b', 'EPIC 201238110 b', 'Kepler-138 e'];
 const slug = (n) => n.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase();
 
 export default async function air(p, { base, width }) {

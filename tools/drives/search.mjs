@@ -171,7 +171,7 @@ export default async function search(p, { base }) {
 
   // ---- an order by temperature uses the temperature "cold" is found by ----
   const coldest = await ask('coldest cold planets');
-  const kelvin = (s) => s.rows.map((r) => { const m = r.fact.match(/, ([\d,]+) K( computed)?$/); return m ? +m[1].replace(/,/g, '') : NaN; });
+  const kelvin = (s) => s.rows.map((r) => { const m = r.fact.match(/, ([\d,]+) K( published)?$/); return m ? +m[1].replace(/,/g, '') : NaN; });
   p.check('"coldest cold planets" lists them coldest first, each with its temperature, all under 200 K', /coldest first/.test(coldest.head) && coldest.n === cold.n && kelvin(coldest).length === 8 && kelvin(coldest).every((k) => k < 200) && rising(kelvin(coldest)), `${coldest.head} | ${facts(coldest)}`);
 
   // ---- a question that only orders ----
@@ -230,7 +230,7 @@ export default async function search(p, { base }) {
   p.check('a range edited by hand under a question: the question goes, the count is the screen\'s', near30.rangesOpen && near30.n > 0 && near100.n > near30.n && /changed by hand\. “rocky planets within 30 ly” no longer/.test(near100.note) && !/[?&]q=/.test(near100.url), `${near30.count} then ${near100.count} | note "${near100.note}"`);
   const zoned = await ask('habitable planets');
   const hots = await ask('hot planets');
-  p.check('the zone and hot each have a chip', zoned.chips.length === 1 && zoned.chips[0] === 'habitable zone ×' && zoned.n > 0 && hots.chips.length === 1 && hots.chips[0] === 'hot: 1,000 K or more ×' && hots.n > cold.n, `${zoned.chips.join(', ')} ${zoned.count} | ${hots.chips.join(', ')} ${hots.count}`);
+  p.check('the zone and hot each have a chip', zoned.chips.length === 1 && zoned.chips[0] === 'conservative or optimistic zone ×' && zoned.n > 0 && hots.chips.length === 1 && hots.chips[0] === 'hot: 1,000 K or more ×' && hots.n > cold.n, `${zoned.chips.join(', ')} ${zoned.count} | ${hots.chips.join(', ')} ${hots.count}`);
   p.check('no world listed as hot is a directly imaged one drawn far from its star', hots.rows.length === 8 && hots.rows.every((r) => !/cold gas giant|warm gas giant|frozen/.test(r.fact)), facts(hots));
 
   // ---- a replay of discoveries stops when a question is asked ----
@@ -280,7 +280,7 @@ export default async function search(p, { base }) {
   const mType = await ask('m type stars');
   p.check('"red dwarfs" keeps out the giant stars of the same temperature that "m type stars" lets in, and says so', dwarfs.n > 400 && dwarfs.n < mType.n && /star of 0\.08 to 1\.5 R☉/.test(dwarfs.note) && dwarfs.chips.includes('2 ranges ×') && mType.chips.includes('1 range ×'), `${dwarfs.count} against ${mType.count} | ${dwarfs.note}`);
   const imagedHot = await ask('hottest imaged planets');
-  p.check('an order no listed world has a value for is said to be the catalogue\'s', imagedHot.rows.length === 8 && /in catalogue order, since none of them has a value to order by/.test(imagedHot.head) && /in catalogue order, since none of them has a value to order by/.test(imagedHot.note) && imagedHot.rows.every((r) => /no equilibrium temperature$/.test(r.fact)),
+  p.check('an order no listed world has a value for is said to be the catalogue\'s', imagedHot.rows.length === 8 && /in catalogue order, since none of them has a value to order by/.test(imagedHot.head) && /in catalogue order, since none of them has a value to order by/.test(imagedHot.note) && imagedHot.rows.every((r) => /(no equilibrium temperature|seen by its own heat)$/.test(r.fact)),
     `${imagedHot.head} | ${imagedHot.note}`);
   const imagedCold = await ask('cold imaged planets');
   p.check('cold asked of imaged planets finds none and says why', imagedCold.n === 0 && /A directly imaged planet is seen by its own heat, and is given no equilibrium temperature here\./.test(imagedCold.note), `${imagedCold.count} | ${imagedCold.note}`);
