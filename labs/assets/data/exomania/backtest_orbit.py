@@ -220,10 +220,11 @@ def main(folder, cache):
           f"90th percentile {w['p90'] * 100:.1f}% against {r2['p90'] * 100:.1f}%.")
     covered = sum(r['star_ref'] == STASSUN for r in rows if r['mass_ref'] == STASSUN)
     print(f"The guard reads the snapshot's star reference: it covers {covered} of the {sum(r['mass_ref'] == STASSUN for r in rows)} scored planets whose composite mass is from {STASSUN}.")
-    stassun_masses(planets, cache)
+    if not stassun_masses(planets, cache, folder):
+        sys.exit(1)
 
 
-def stassun_masses(planets, cache):
+def stassun_masses(planets, cache, folder):
     """How far Stassun et al. 2017's star masses sit from the other papers', over every star the guard covers: for each
     star, its mass in that paper's row against the median of the other papers' (the KOI tables counted once). The
     page's note on the guard quotes the median (config.js STASSUN_MASS_OFF)."""
@@ -250,6 +251,15 @@ def stassun_masses(planets, cache):
     print(f"\n{STASSUN}'s star masses against the other papers', over the {len(by_host)} stars of the {len(guarded)} planets the guard covers: "
           f"{len(offs)} stars with both; off by a median {statistics.median(offs) * 100:.0f}% (quartiles {statistics.quantiles(offs, n=4)[0] * 100:.0f}% "
           f"and {statistics.quantiles(offs, n=4)[2] * 100:.0f}%).")
+    # The page quotes this median from config.js; held to it here, at two figures, so the constant cannot drift from
+    # the backtest that sets it (ticket 2.19). Exits non-zero when they part.
+    config = os.path.join(folder, '..', '..', 'js', 'exoplanet', 'config.js')
+    with open(config, encoding='utf-8') as fh:
+        m = re.search(r'export const STASSUN_MASS_OFF = ([0-9.]+);', fh.read())
+    typed, median = float(m.group(1)) if m else None, round(statistics.median(offs), 2)
+    held = typed == median
+    print(f"config.js STASSUN_MASS_OFF = {typed}: {'the median, at two figures' if held else f'FAIL, the median is {median}'}.")
+    return held
 
 
 if __name__ == '__main__':

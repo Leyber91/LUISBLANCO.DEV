@@ -33,10 +33,14 @@ const boundV = (L, d = 3) => limitText(L, d).replace(/\s*[A-Za-z⊕☉°]+$/, ''
 
 /* ---------- what sheet B prints, as rows: pure, so tests/onesource.test.mjs reads it for every planet ---------- */
 
+export const ARCHIVE_HEADING = 'From the archive';
+
 function measuredRows(p, A) {
   const L = luminosity(p), a = semiMajor(p), S = insolation(p), rf = p.refs || {}, rows = [];
   if (hasRadius(p)) {
-    rows.push({ key: 'R', n: 'radius', v: fmt(p.R, 3), u: 'R\u2295', pm: errText(p.Rerr1, p.Rerr2), refs: [rf.R], kind: p.measuredR === false ? 'e' : 'm',
+    // an estimated radius says so where a measured one gives its error, as the archive's estimated mass does and as sheet A
+    // says it ("estimated from the mass")
+    rows.push({ key: 'R', n: 'radius', v: fmt(p.R, 3), u: 'R\u2295', pm: p.measuredR === false ? 'estimated' : errText(p.Rerr1, p.Rerr2), refs: [rf.R], kind: p.measuredR === false ? 'e' : 'm',
       note: [p.measuredR === false ? 'The radius is the archive\'s estimate from the mass.' : '', classNote(p, A)].filter(Boolean).join(' '), iv: { value: p.R, lo: isNum(p.Rerr2) ? p.R - Math.abs(p.Rerr2) : null, hi: isNum(p.Rerr1) ? p.R + Math.abs(p.Rerr1) : null } });
   } else if (limitOf(p, 'R')) {
     const RL = limitOf(p, 'R');
@@ -241,7 +245,9 @@ export function createTarget(host, store, actions) {
     const ctx = context();
     caption(p, ctx);
     const mrows = measuredRows(p, A), irows = inferredRows(p, A);
-    if (full) { meas.replaceChildren(); group(meas, 'Measured, from the archive'); mrows.forEach((r) => row(meas, r, ctx)); }
+    // "from the archive", not "measured": the group also holds the archive's own estimates (1,540 radii calculated from a
+    // mass on 2026-11-17, masses from a radius) and its bounds, each marked on its row
+    if (full) { meas.replaceChildren(); group(meas, ARCHIVE_HEADING); mrows.forEach((r) => row(meas, r, ctx)); }
     else mrows.forEach((r) => { ctx.letter((r.refs || [])[0]); for (const x of (r.refs || []).slice(1)) ctx.letter(x); if (r.note) ctx.number(r.note); });
     inf.replaceChildren(); group(inf, inferredHeading(irows));
     irows.forEach((r) => row(inf, r, ctx));

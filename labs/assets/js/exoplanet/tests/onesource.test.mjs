@@ -302,7 +302,7 @@ for (const p of standIns) {
 const empty = [];
 for (const [q, vs] of Object.entries(EXPECT)) console.log(`${q.padEnd(4)} ${vs.map((v) => { const n = RANGES.includes(q) ? before[`${q}|${v}`] : counts[`${q}|${v}`] || 0; const m = RANGES.includes(q) ? (counts[`${q}|${v}`] || 0) - n : 0; if (!(RANGES.includes(q) ? (census.ranged ? n : m) : n)) empty.push(`${q} from ${v}`); return RANGES.includes(q) ? `${v} ${n} (stand-ins ${m})` : `${v} ${n}`; }).join(', ')}`);
 console.log(`the catalogue: ${census.ranged} planets with a range, ${census.point} point values (${census.partial} with an error on some input and not every one); ${standIns.length} stand-ins with every error`);
-// two solutions of a star: the threshold is the 95th percentile of the factor between the two luminosities, at two figures
+// the disagreement of a star's two luminosities: the threshold is the 95th percentile of the factor between the two luminosities, at two figures
 const apart = list.map((p) => luminosityApart(luminosity(p))).filter((x) => x !== null).sort((x, y) => x - y);
 const p95 = apart[Math.floor(0.95 * apart.length)], beyond = list.filter((p) => luminosityApart(luminosity(p)) > LUMINOSITY_SPLIT);
 console.log(`${list.length} planets, ${list.filter((p) => byHost.get(p.host).length > 1).length} in systems of two or more`);
@@ -315,12 +315,20 @@ yes('view D, opened on another planet of the system, draws each planet in its ow
 yes(`the search for habitable planets claims for each world it finds the zone its sheet gives (${found.length} found; the note: ${q.notes.join('; ')})`, misnamed.length === 0, ex(misnamed.map((p) => `${p.name} (${own.get(p)})`)));
 yes('every view that names the zone of a star outside 2,600 to 7,200 K says extrapolated, and no other does', bad.extrap.length === 0, ex(bad.extrap));
 yes('every view gave values for every quantity it prints (the counts above; the ranges from the stand-ins where the catalogue has none)', empty.length === 0 && standIns.length > 0, ex(empty));
-yes(`the threshold for two solutions of a star is the 95th percentile of the factor between its luminosities, at two figures (${p95.toFixed(3)} over ${apart.length} planets; ${beyond.length} planets on ${new Set(beyond.map((p) => p.host)).size} stars past it)`, Math.round(p95 * 10) / 10 === LUMINOSITY_SPLIT && beyond.length > 0, `${p95}`);
+yes(`the threshold at which the sheet names a star's two luminosities as disagreeing is the 95th percentile of the factor between its luminosities, at two figures (${p95.toFixed(3)} over ${apart.length} planets; ${beyond.length} planets on ${new Set(beyond.map((p) => p.host)).size} stars past it)`, Math.round(p95 * 10) / 10 === LUMINOSITY_SPLIT && beyond.length > 0, `${p95}`);
 yes(`every one of the ${CIRCUMBINARY.length} names of config.js CIRCUMBINARY is a planet of the snapshot`, cbMissing.length === 0 && CIRCUMBINARY.length > 0, ex(cbMissing));
 yes('a planet of two stars takes the archive\'s orbit, or none, never Kepler\'s law on one star\'s mass', cbKepler.length === 0, ex(cbKepler));
 yes(`every planet whose star's reference is ${STASSUN} takes the archive's orbit (${stassun.length} planets)`, stKepler.length === 0 && stassun.length > 0, ex(stKepler));
 yes(`every system of two or more is kept in the order of the orbits view D draws (${[...byHost.values()].filter((x) => x.length > 1).length} systems)`, order.length === 0, ex(order));
 yes(`the tour of extreme orbits names the widest orbit every sheet prints (${widest.name}, ${semiMajor(widest).a} AU)`, !!tourOk, wideStop ? wideStop.cap : 'no stop');
+
+// the archive's labels arrive with HTML's character references ("Anglada-Escud&eacute;"; 140 of 2,157 labels on
+// 2026-11-17): every label the page reads is letters, and the accented ones are there to be read
+const labels = new Set(), escaped = [];
+for (const p of list) for (const r of Object.values(p.refs || {})) if (r && r.label) labels.add(r.label);
+for (const l of labels) if (/&(#x?[0-9a-fA-F]+|[A-Za-z]+);/.test(l)) escaped.push(l);
+const accented = [...labels].filter((l) => /[À-ɏ]/.test(l));
+yes(`no reference label the page reads keeps a character reference (${labels.size} labels; ${accented.length} with an accented letter, e.g. ${accented.slice(0, 2).join(', ')})`, escaped.length === 0 && accented.length > 0, ex(escaped));
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

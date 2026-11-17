@@ -15,6 +15,7 @@
 
 import { DATA } from './config.js';
 import { plural, int } from '../kit/format.js';
+import { unesc } from '../kit/dom.js';
 
 const num = (v) => (v === null || v === undefined || v === '' || isNaN(v)) ? null : +v;
 const TRUE_MASS = new Set(['Mass', 'Msini', 'Msin(i)/sin(i)']);
@@ -48,7 +49,8 @@ function refOf(json, i) {
   const r = i === null || i === undefined ? null : json.refs && json.refs[i];
   if (!r) return null;
   const [label, key] = r;
-  return { label, url: key.startsWith('/') ? ARCHIVE + key : key.startsWith('http') ? key : ADS + key + '/abstract' };
+  // the archive escapes accents in its labels ("Anglada-Escud&eacute;"): the page writes them as letters
+  return { label: unesc(label), url: key.startsWith('/') ? ARCHIVE + key : key.startsWith('http') ? key : ADS + key + '/abstract' };
 }
 
 function fromSnapshot(json) {

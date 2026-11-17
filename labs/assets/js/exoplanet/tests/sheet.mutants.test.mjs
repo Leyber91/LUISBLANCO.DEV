@@ -30,7 +30,10 @@ const MUTANTS = [
   ['the page\'s starlight under the measured heading', "if (S.S && S.src === 'archive') rows.push(starlightRow(p, S));", "if (S.S) rows.push(starlightRow(p, S));"],
   /* ---- the table on the page (createTarget): the loops a comment once swallowed ---- */
   ['the sheet never drawn', '      draw(p, true);\n', ''],
-  ['the measured rows never drawn', "group(meas, 'Measured, from the archive'); mrows.forEach((r) => row(meas, r, ctx)); }", "group(meas, 'Measured, from the archive'); }"],
+  ['the measured rows never drawn', "group(meas, ARCHIVE_HEADING); mrows.forEach((r) => row(meas, r, ctx)); }", "group(meas, ARCHIVE_HEADING); }"],
+  ['the archive group called measured again', "export const ARCHIVE_HEADING = 'From the archive';", "export const ARCHIVE_HEADING = 'Measured, from the archive';"],
+  ['an estimated radius gives an error as if measured', "pm: p.measuredR === false ? 'estimated' : errText(p.Rerr1, p.Rerr2),", "pm: errText(p.Rerr1, p.Rerr2),"],
+  ['a measured radius called estimated', "pm: p.measuredR === false ? 'estimated' : errText(p.Rerr1, p.Rerr2),", "pm: p.measuredR !== true ? 'estimated' : errText(p.Rerr1, p.Rerr2),"],
   ['the inferred rows never drawn', '    irows.forEach((r) => row(inf, r, ctx));\n', ''],
   ['the inferred rows drawn into the measured group', '    irows.forEach((r) => row(inf, r, ctx));', '    irows.forEach((r) => row(meas, r, ctx));'],
   ['the inferred rows behind a comment, as on bcb5b88', "    inf.replaceChildren(); group(inf, inferredHeading(irows));\n    irows.forEach((r) => row(inf, r, ctx));", "    inf.replaceChildren(); group(inf, inferredHeading(irows));   // a note irows.forEach((r) => row(inf, r, ctx));"],

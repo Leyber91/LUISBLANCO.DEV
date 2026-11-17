@@ -16,7 +16,7 @@
    onesource.test.mjs.
    ============================================================ */
 
-import { sheetRows, createTarget, inferredHeading } from '../views/target.js';
+import { sheetRows, createTarget, inferredHeading, ARCHIVE_HEADING } from '../views/target.js';
 import { semiMajor, starlight, starNum, teqOf, teqText } from '../starlight.js';
 
 let failed = 0, passed = 0;
@@ -29,6 +29,17 @@ const base = { host: 'Sh', method: 'Transit', year: 2020, facility: 'test', R: 1
 let n = 0;
 const mk = (o) => ({ ...base, name: `Sh ${++n}`, host: `Sh ${n}`, ...o });
 const where = (p, k) => { const r = sheetRows(p, 0.3); const m = r.measured.find((x) => x.key === k), i = r.inferred.find((x) => x.key === k); return { group: m ? 'measured' : i ? 'inferred' : 'none', row: m || i || null }; };
+
+block('the radius', () => {
+  // the archive's radius calculated from a mass (1,540 planets on 2026-11-17) is an estimate, and its row says so where a
+  // measured radius gives its error; a measured one gives its error
+  const est = where(mk({ method: 'Radial Velocity', measuredR: false, R: 11.2, Rerr1: 1.4, Rerr2: -1.1 }), 'R'), mea = where(mk({}), 'R');
+  yes('an estimated radius says "estimated" in its own row, is marked an estimate, and says from what', est.row && est.row.pm === 'estimated' && est.row.kind === 'e' && /estimate from the mass/.test(est.row.note), JSON.stringify(est.row && { pm: est.row.pm, kind: est.row.kind }));
+  yes('a measured radius gives its error and is marked measured', mea.row && mea.row.pm !== 'estimated' && mea.row.pm !== '' && mea.row.kind === 'm', JSON.stringify(mea.row && { pm: mea.row.pm, kind: mea.row.kind }));
+  // before the roster says which radii were measured (catalog.js provisionalMeasured), the flag is null: not an estimate
+  const open = where(mk({ measuredR: null }), 'R');
+  yes('a radius not yet marked either way gives its error, as sheet A does not call it estimated', open.row && open.row.pm === mea.row.pm && open.row.kind === 'm', JSON.stringify(open.row && { pm: open.row.pm, kind: open.row.kind }));
+});
 
 block('the orbit', () => {
   const kep = mk({ P: 10, a: 0.5 }), arch = mk({ P: null, a: 0.3 }), none = mk({ P: null, a: null }), two = mk({ name: 'Kepler-451 c', P: 1800, a: null });
@@ -93,7 +104,7 @@ block('the table on the page', () => {
       const [meas, inf] = host.all('tbody'), rows = sheetRows(p, view.albedo());
       const keys = (tb) => tb.all('tr').filter((tr) => tr.dataset.row).map((tr) => tr.dataset.row).join();
       const head = (tb) => { const g = tb.all('tr').find((tr) => tr.className === 'g'); return g ? g.textContent : null; };
-      yes(`${p.name}: the measured group holds every measured row, under its heading`, keys(meas) === rows.measured.map((r) => r.key).join() && rows.measured.length > 0 && head(meas) === 'Measured, from the archive', `${keys(meas)} | ${head(meas)}`);
+      yes(`${p.name}: the measured group holds every measured row, under its heading`, keys(meas) === rows.measured.map((r) => r.key).join() && rows.measured.length > 0 && head(meas) === ARCHIVE_HEADING && ARCHIVE_HEADING === 'From the archive', `${keys(meas)} | ${head(meas)}`);
       yes(`${p.name}: the inferred group holds every inferred row, under the heading its rows give`, keys(inf) === rows.inferred.map((r) => r.key).join() && rows.inferred.length > 0 && head(inf) === inferredHeading(rows.inferred), `${keys(inf)} | ${head(inf)}`);
     }
   } finally { globalThis.document = keep; }
