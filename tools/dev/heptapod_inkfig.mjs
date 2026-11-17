@@ -68,7 +68,7 @@ function measure(m) {
 
 /* ---------- the film, by distribution ---------- */
 const film = fs.readdirSync(filmDir).filter((f) => f.startsWith('wolfram_') && f.endsWith('.pbm')).sort();
-if (film.length < 18) { console.error(`${film.length} film masks in ${filmDir}; 18 expected`); process.exit(1); }
+if (film.length !== 18) { console.error(`${film.length} film masks in ${filmDir}; exactly 18 expected`); process.exit(1); }
 const filmRows = [], bulbRatios = [];
 for (const f of film) {
   const { cols, F } = measure(readPBM(fs.readFileSync(path.join(filmDir, f))));
@@ -119,7 +119,8 @@ for (const k of [1, 4, 12]) {
   const verdict = Object.fromEntries(COLS.map(([c]) => [c, where(c, cols[c])]));
   figures.push({
     clauses: k, seed: 100 + k, nodes: f.nodes, columns: cols, verdict,
-    label: DETAIL.some((c) => verdict[c] === 'below') ? 'skeleton' : 'figure candidate',
+    // G12: a skeleton when any detail column is below the film's p10; a figure candidate only when every column is inside
+    label: DETAIL.some((c) => verdict[c] === 'below') ? 'skeleton' : COLS.every(([c]) => verdict[c] === 'in') ? 'figure candidate' : 'outside the film's range',
     outOfRange: COLS.filter(([c]) => verdict[c] !== 'in').map(([c]) => c),
     drawn: { filaments: f.filamentsDrawn, outward: f.outward, threads: f.threads, bulbs: f.bulbs, drops: f.satellites, spikes: f.spikes, spansDeg: f.spansDeg, gapDeg: f.gapDeg, squeeze: f.squeeze },
   });
@@ -136,26 +137,36 @@ const corpus = [];
 for (let i = 0; i < NC; i++) {
   const k = 1 + (i % 5);
   const f = inkFigure(randomText(mulberry32(500 + i), k));
-  if (!f.ok) { corpus.push({ i, k, error: f.reason }); continue; }
+  if (!f.ok) { corpus.push({ i, k, error: f.reason }); console.log(`corpus ${i}: ${f.reason}`); continue; }
   const { cols } = measure(f);
   corpus.push({ i, k, drawn: f.filamentsDrawn, read: cols.filaments, cols });
   console.log(`corpus ${i} (${k} clauses): drawn ${f.filamentsDrawn}, read ${cols.filaments}`);
 }
 const okC = corpus.filter((c) => !c.error);
+// a text that fails to draw counts against both parts: the denominator is every text of the corpus
 const within30 = okC.filter((c) => Math.abs(c.read - c.drawn) <= 0.3 * c.drawn).length;
 const inFilm = okC.filter((c) => where('filaments', c.read) === 'in').length;
+const N = corpus.length;
 const P4 = {
   id: 'F4-P4', texts: okC.length, errors: corpus.length - okC.length,
-  a: { readWithin30pctOfDrawn: within30, share: +(within30 / Math.max(1, okC.length)).toFixed(3), needed: 0.8 },
-  b: { insideFilmP10toP90: inFilm, share: +(inFilm / Math.max(1, okC.length)).toFixed(3), needed: 2 / 3, filmP10: dist.filaments.p10, filmP90: dist.filaments.p90 },
+  a: { readWithin30pctOfDrawn: within30, share: +(within30 / Math.max(1, N)).toFixed(3), needed: 0.8 },
+  b: { insideFilmP10toP90: inFilm, share: +(inFilm / Math.max(1, N)).toFixed(3), needed: 2 / 3, filmP10: dist.filaments.p10, filmP90: dist.filaments.p90 },
   byClauses: [1, 2, 3, 4, 5].map((k) => { const r = okC.filter((c) => c.k === k); return { clauses: k, drawn: r.map((c) => c.drawn), read: r.map((c) => c.read) }; }),
 };
-P4.outcome = NC === 30 && P4.a.share >= 0.8 && P4.b.share >= 2 / 3 ? 'confirmed' : NC === 30 ? 'missed' : 'not the committed corpus';
+const held = within30 >= 0.8 * N && 3 * inFilm >= 2 * N;
+// the prediction's outcome is its first run, on the code committed before it (5241298, inkfig-0.1); a later version reports how it does now
+P4.firstOutcome = 'missed (bb8f228, inkfig-0.1: a 0.4, b 0.667)';
+P4.thisRun = NC !== 30 ? 'not the committed corpus' : `${INK.version}: ${held ? 'would hold' : 'would miss'}`;
+P4.outcome = INK.version === 'inkfig-0.1' ? (NC === 30 ? (held ? 'confirmed' : 'missed') : 'not the committed corpus') : 'missed (first outcome stands)';
 const corpusShare = Object.fromEntries(COLS.map(([c]) => [c, +(okC.filter((x) => where(c, x.cols[c]) === 'in').length / Math.max(1, okC.length)).toFixed(3)]));
 
 /* ---------- F4-P5: the film's bulbs ---------- */
 const bm = med(bulbRatios);
-const P5 = { id: 'F4-P5', bulbTipped: bulbRatios.length, medianTipRatio: +bm.toFixed(3), predicted: 1.89, band: [1.51, 2.27], outcome: bm >= 1.51 && bm <= 2.27 ? 'confirmed (post-hoc risk stated in the prediction)' : 'missed', p25: +Q(bulbRatios, 25).toFixed(3), p75: +Q(bulbRatios, 75).toFixed(3) };
+// post-hoc by G13: the film's filaments were measured (runs/f4ink/film-suite.json, 14:07:26) before the prediction was
+// committed (b062158, 14:09:12), research/ink.md had 1.5 to 2.5, and the band's lower edge sits at the bulb class's floor
+// (1.5), so the median could not fall below it: the band could not miss on its low side (independent review, 2026-11-17)
+const lo = 0.8 * 1.89, hi = 1.2 * 1.89;
+const P5 = { id: 'F4-P5', bulbTipped: bulbRatios.length, medianTipRatio: +bm.toFixed(3), predicted: 1.89, band: [+lo.toFixed(3), +hi.toFixed(3)], inBand: bm >= lo && bm <= hi, outcome: 'post-hoc, not a test (G13): the film was measured before the prediction was committed, and the band could not miss below', p25: +Q(bulbRatios, 25).toFixed(3), p75: +Q(bulbRatios, 75).toFixed(3) };
 
 const data = {
   about: 'F4-ink (BAR_F order of 2026-11-17): the inked ring figures of 1, 4 and 12 clauses and a corpus of 30 texts, measured by the detail suite at 3300 px beside the 18 film masters by distribution (p10 to p90 over the masters). Outcomes of F4-P4 and F4-P5 (predictions.json) are here; predictions.results.json is rewritten whole by heptapod_predictions.mjs and is not touched. Numbers only (research/ip.md rule 6). Written by tools/dev/heptapod_inkfig.mjs.',
@@ -181,9 +192,9 @@ table{border-collapse:collapse;margin:12px 0}td,th{border:1px solid #ddd;padding
 <div class="row">${figures.map((F) => cell(`ink-${F.clauses}.png`, `${F.clauses} clause${F.clauses > 1 ? 's' : ''}: ${F.nodes} nodes; ${F.drawn.filaments} filaments drawn, ${F.columns.filaments} read`)).join('')}</div>
 ${refs.length ? `<div class="row">${refs.map((f) => cell(pathToFileURL(path.resolve(f)).href, `The film: ${path.basename(f)} (private, never committed)`)).join('')}</div>` : ''}
 <table><tr><th>column</th><th>film, ${film.length} masters, p10 to p90</th>${figures.map((F) => `<th>${F.clauses} clause${F.clauses > 1 ? 's' : ''}</th>`).join('')}<th>corpus of ${okC.length} inside</th></tr>${rows}</table>
-<p>F4-P4 (filaments from the grammar): ${P4.outcome}; read within 30% of drawn in ${Math.round(100 * P4.a.share)}% (80% needed), inside the film's p10 to p90 in ${Math.round(100 * P4.b.share)}% (67% needed). F4-P5 (bulbs from a breaking thread): ${P5.outcome}; median ${P5.medianTipRatio} over ${P5.bulbTipped} bulb-tipped film filaments, predicted 1.89 (1.51 to 2.27).</p>
+<p>F4-P4 (filaments from the grammar): ${P4.outcome}; this run ${P4.thisRun}: read within 30% of drawn in ${Math.round(100 * P4.a.share)}% (80% needed), inside the film's p10 to p90 in ${Math.round(100 * P4.b.share)}% (67% needed). F4-P5 (bulbs from a breaking thread): ${P5.outcome}; median ${P5.medianTipRatio} over ${P5.bulbTipped} bulb-tipped film filaments, against 1.89. The negative controls of G3 are not run here (owed).</p>
 <p>Calibrations: ${INK_CALIBRATIONS.map((c) => `${c.name} = ${+(+c.value).toFixed(4)} (${c.source})`).join('; ')}.</p>
 </body></html>`;
 fs.writeFileSync(path.join(out, 'sheet.html'), html);
-console.log(`F4-P4 ${P4.outcome}: a ${P4.a.share}, b ${P4.b.share}; F4-P5 ${P5.outcome}: median ${P5.medianTipRatio} (n ${P5.bulbTipped})`);
+console.log(`F4-P4 ${P4.outcome}; this run ${P4.thisRun}: a ${P4.a.share}, b ${P4.b.share}; F4-P5 ${P5.outcome}: median ${P5.medianTipRatio} (n ${P5.bulbTipped})`);
 console.log(`wrote ${DATA} and ${path.join(out, 'sheet.html')}`);

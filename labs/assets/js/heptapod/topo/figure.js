@@ -517,11 +517,12 @@ export function rasterFigure(fig, S = 1100) {
 
 /* k sentence graphs (randomHMR with one speaker and one main clause each), joined into one text:
    one origo, a chain of discourse links between the main clauses, and a coreference link between
-   neighbouring sentences half the time. Stands in for F8's English until F8 is built. */
+   neighbouring sentences half the time. n may be a list, one size per sentence in turn. Stands in for F8's
+   English until F8 is built. */
 export function randomText(rnd, k, n = 7) {
   const parts = [];
   for (let guard = 0; parts.length < k && guard < 200 * k; guard++) {
-    const g = randomHMR(rnd, { n });
+    const g = randomHMR(rnd, { n: Array.isArray(n) ? n[parts.length % n.length] : n });
     const ids = Object.keys(g.nodes);
     const origos = ids.filter((id) => g.nodes[id].k === 'origo');
     const anchors = g.edges.filter((e) => e[1] === 'anchor');

@@ -4,17 +4,39 @@
 
      node labs/assets/js/heptapod/tests/inkfig.test.mjs
 
-   1. inkfig.js calls no engine-approximated function (BAR_F G5), read
-      from its source with comments removed.
-   2. On 15 random texts of 1 to 5 clauses (none may fail), counted here
-      from the graph by an independent route: one filament is drawn for
-      each node joined to a clause's main event inside its clause (I3),
-      one drop for each entity that is not a main event (I4); the pools'
-      spans and free arcs fill the circle; the gap is no larger than
-      GAP_DEG; every pool's span is NODE_DEG per node unless the ring
-      was squeezed, and then all by the same factor.
-   3. The same text gives the same bytes; a copy with fresh node ids in
+   The independent review of 2026-11-17 found the first version of this
+   test restating the code's own counters (7 of 8 mutants survived).
+   Each check below reads the raster, or the graph, by a route of its
+   own:
+   1. inkfig.js and every seeded module it calls (trig.js, topo/rng.js,
+      kit/rng.js) call no engine-approximated function and no
+      Math.random (BAR_F G5), read from source with comments removed.
+   2. On 15 random texts of 1 to 5 clauses with clause sizes of 4 to 9
+      nodes (none may fail), at 900 px:
+      a. the graph: one filament drawn per node joined to a main event
+         in its clause, one drop per entity that is not a main event,
+         and NODE_DEG per node of each clause, squeezed by one factor
+         only when the ring is too short;
+      b. the gap: the detail suite (ring.js) reads a main gap of at
+         least half of GAP_DEG on the raster, and the middle 60% of the
+         drawn gap holds no ink in the carrier band (also on 4 texts of
+         5 large clauses, where strokes reach furthest);
+      c. the pools where the figure says: along the radius through each
+         pool's middle half the deepest run of ink is at least 0.13 R,
+         where the carrier alone is under 0.09 R (catches a mirrored or
+         turned figure);
+      d. the side: pooled over the texts, the share of filaments the
+         suite (filaments.js) reads as pointing outward is within 0.2
+         of the share drawn outward, and some are read inward;
+      e. the drops: pooled, the suite reads at least 30% as many
+         bulb-tipped filaments as drops drawn (at 1500 px).
+   3. The order rule, placed again here from I8's text for every cyclic
+      order of texts of 4 and 5 clauses of unequal sizes: none puts the
+      centre of mass nearer the centre than the drawn one.
+   4. The same text gives the same bytes; a copy with fresh node ids in
       another order gives the same bytes.
+   Not caught yet (mutants, 2026-11-17): a constant role angle; the
+   angle is read by the reader of an inked figure, the next slice.
    Exits 1 on any failure, and on a run that drew nothing (G2).
    ============================================================ */
 
@@ -23,33 +45,46 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mulberry32, fnv1a } from '../topo/rng.js';
 import { permuteGraph } from '../topo/hmr.js';
+import { sinK, cosK, PI } from '../topo/trig.js';
 import { clausesOf, randomText } from '../topo/figure.js';
 import { INK, inkFigure } from '../topo/inkfig.js';
+import { ringTable } from '../detail/ring.js';
+import { filaments } from '../detail/filaments.js';
 
 let checks = 0, failures = 0;
 const ok = (cond, what) => { checks++; if (!cond) { failures++; console.log('FAIL ' + what); } };
 const here = path.dirname(fileURLToPath(import.meta.url));
 const S = 900;
+const DEG = PI / 180;
 
 /* 1. G5 */
 {
-  const src = fs.readFileSync(path.join(here, '../topo/inkfig.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-  const banned = /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|exp|expm1|log|log1p|log2|log10|pow|hypot|cbrt)\b|\*\*/;
-  const m = src.match(banned);
-  ok(!m, `G5: inkfig.js calls ${m ? m[0] : ''}, which each engine approximates its own way`);
+  const banned = /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|exp|expm1|log|log1p|log2|log10|pow|hypot|cbrt|random)\b|\*\*/;
+  const strip = (f) => fs.readFileSync(path.join(here, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  for (const f of ['../topo/inkfig.js', '../topo/trig.js', '../topo/rng.js']) {
+    const m = strip(f).match(banned);
+    ok(!m, `G5: ${f} calls ${m ? m[0] : ''}`);
+  }
+  // of the kit's generators, the path calls mulberry32 and fnv1a only (its normalFrom takes a logarithm, off the path)
+  const kit = strip('../../kit/rng.js');
+  for (const fn of ['mulberry32', 'fnv1a']) {
+    const i = kit.indexOf(`export function ${fn}(`), j = kit.indexOf('export ', i + 1);
+    const m = i < 0 ? null : kit.slice(i, j < 0 ? undefined : j).match(banned);
+    ok(i >= 0 && !m, `G5: kit/rng.js ${fn} ${i < 0 ? 'not found' : 'calls ' + (m ? m[0] : '')}`);
+  }
 }
 
-/* 2. what is drawn, against the graph */
+/* 2. the raster against the graph */
+const sizes = [4, 9, 6, 5, 8, 7];
 const texts = [];
-for (let i = 0; i < 15; i++) texts.push(randomText(mulberry32(900 + i), 1 + (i % 5)));
-let drawn = 0;
+for (let i = 0; i < 15; i++) texts.push(randomText(mulberry32(900 + i), 1 + (i % 5), sizes.slice(i % 6).concat(sizes.slice(0, i % 6))));
+let drawn = 0, outDrawn = 0, filDrawn = 0, outRead = 0, inRead = 0, filRead = 0, dropsDrawn = 0;
 for (const [i, g] of texts.entries()) {
   const f = inkFigure(g, { S });
   ok(f.ok, `text ${i}: ${f.reason}`);
   if (!f.ok) continue;
   drawn++;
-  const cl = clausesOf(g);
-  const { cg, mains, member, origo } = cl;
+  const { cg, mains, member, origo } = clausesOf(g);
   const isMain = new Set(mains);
   let fil = 0, ent = 0;
   for (const m of mains) {
@@ -62,18 +97,112 @@ for (const [i, g] of texts.entries()) {
   }
   for (let v = 0; v < cg.n; v++) if (v !== origo && !isMain.has(v) && cg.nodes[v].k === 'entity') ent++;
   ok(f.filamentsDrawn === fil, `text ${i}: ${f.filamentsDrawn} filaments drawn, ${fil} nodes joined to a main event in its clause`);
-  ok(f.bulbs === ent, `text ${i}: ${f.bulbs} drops at thread tips, ${ent} entities that are not main events`);
-  const total = f.spansDeg.reduce((a, b) => a + b, 0) + f.arcsDeg.reduce((a, b) => a + b, 0);
-  ok(Math.abs(total - 360) < 0.05, `text ${i}: spans and free arcs sum to ${total.toFixed(2)} degrees`);
-  ok(f.gapDeg <= INK.GAP_DEG + 1e-9 && f.gapDeg > 0, `text ${i}: gap ${f.gapDeg} degrees`);
-  const sizes = mains.map((m) => { let n = 0; for (let v = 0; v < cg.n; v++) if (member[v] === member[m] && v !== origo) n++; return n; });
-  const ratios = f.spansDeg.map((s) => s).sort((a, b) => a - b);
-  const want = sizes.map((n) => INK.NODE_DEG * n * f.squeeze).sort((a, b) => a - b);
-  ok(ratios.every((s, j) => Math.abs(s - want[j]) < 0.02), `text ${i}: spans ${ratios.join(' ')} against ${want.map((x) => x.toFixed(2)).join(' ')}`);
-  ok(f.squeeze <= 1, `text ${i}: squeeze ${f.squeeze}`);
+  ok(f.bulbs === ent, `text ${i}: ${f.bulbs} drops drawn, ${ent} entities that are not main events`);
+  // spans: NODE_DEG per node of the clause, counted here from the graph, all squeezed by one factor at most 1
+  const want = mains.map((m) => { let n = 0; for (let v = 0; v < cg.n; v++) if (v !== origo && member[v] === member[m]) n++; return INK.NODE_DEG * n; }).sort((x, y) => x - y);
+  const got = f.spansDeg.slice().sort((x, y) => x - y);
+  const fac = Math.min(1, (360 - INK.GAP_DEG - mains.length * INK.ARC_MIN_DEG) / want.reduce((x, y) => x + y, 0));
+  ok(got.every((x, j) => Math.abs(x - want[j] * fac) < 0.02), `text ${i}: spans ${got.join(' ')} against ${want.map((x) => (x * fac).toFixed(2)).join(' ')}`);
+  // b. the gap, read by the suite
+  const row = ringTable({ W: f.W, H: f.H, d: f.d });
+  ok(row && (row.gaps_deg[0] || 0) >= 0.5 * INK.GAP_DEG, `text ${i}: the suite reads a main gap of ${row ? (row.gaps_deg[0] || 0).toFixed(1) : '?'} degrees, ${f.gapDeg} drawn`);
+  // b2. the gap's middle 60%, in the carrier band (|r - R| < 0.12 R), holds almost no ink: nothing bridges it
+  {
+    let inkPx = 0, all = 0;
+    for (let a = -0.3; a <= 0.3; a += 0.01) {
+      const phi = (f.gapMidDeg + a * f.gapDeg) * DEG;
+      for (let r = 0.88 * f.R; r <= 1.12 * f.R; r += 1) {
+        const x = Math.round(f.cx + r * cosK(phi)), y = Math.round(f.cy - r * sinK(phi));
+        all++; if (f.d[y * f.W + x]) inkPx++;
+      }
+    }
+    ok(inkPx === 0, `text ${i}: ${inkPx} of ${all} samples in the gap's carrier band are ink`);
+  }
+  // c. ink along the radii through each pool's middle half: the deepest is a pool's, deeper than any carrier
+  for (const [j, th] of f.centresDeg.entries()) {
+    let best = 0;
+    for (let a = -0.5; a <= 0.5; a += 0.05) {
+      const phi = (th + a * f.spansDeg[j] / 2) * DEG;
+      let run = 0;
+      for (let r = 0.4 * f.R; r <= 1.6 * f.R; r += 1) {
+        const x = Math.round(f.cx + r * cosK(phi)), y = Math.round(f.cy - r * sinK(phi));
+        if (x >= 0 && y >= 0 && x < f.W && y < f.H && f.d[y * f.W + x]) run++;
+      }
+      best = Math.max(best, run);
+    }
+    ok(best >= 0.13 * f.R, `text ${i}: pool ${j} at ${th} degrees has at most ${best} px of ink on a radius (${(0.13 * f.R).toFixed(0)} needed; the carrier is under ${(0.09 * f.R).toFixed(0)})`);
+  }
+  // d. the side, read by the suite
+  const wm = row.w_med_R * row._ring.R;
+  const F = filaments({ W: f.W, H: f.H, d: f.d }, { minLen: wm, ring: { ...row._ring, w: wm } }).filaments;
+  const dist = (p) => Math.sqrt((p[0] - row._ring.cx) * (p[0] - row._ring.cx) + (p[1] - row._ring.cy) * (p[1] - row._ring.cy));
+  for (const x of F) { filRead++; if (dist(x.tipXY) > dist(x.baseXY)) outRead++; else inRead++; }
+  filDrawn += f.filamentsDrawn; outDrawn += f.outward;
+}
+ok(filRead > 0 && Math.abs(outRead / filRead - outDrawn / filDrawn) <= 0.2, `side: the suite reads ${outRead} of ${filRead} filaments outward, ${outDrawn} of ${filDrawn} drawn outward`);
+ok(inRead > 0 && filDrawn - outDrawn > 0, `side: ${inRead} read inward, ${filDrawn - outDrawn} drawn inward`);
+// e. the drops, at 1500 px
+{
+  let bulbsRead = 0;
+  for (const g of texts.slice(0, 5)) {
+    const f = inkFigure(g, { S: 1500 });
+    dropsDrawn += f.bulbs;
+    const row = ringTable({ W: f.W, H: f.H, d: f.d });
+    const wm = row.w_med_R * row._ring.R;
+    bulbsRead += filaments({ W: f.W, H: f.H, d: f.d }, { minLen: wm, ring: { ...row._ring, w: wm } }).filaments.filter((x) => x.tip === 'bulb').length;
+  }
+  ok(dropsDrawn > 0 && bulbsRead >= 0.3 * dropsDrawn, `drops: the suite reads ${bulbsRead} bulb-tipped filaments, ${dropsDrawn} drops drawn`);
 }
 
-/* 3. determinism and node ids */
+/* 2f. the gap on texts of 5 large clauses, where a pool's strokes reach furthest toward it */
+{
+  const gapInk = (f) => {
+    let inkPx = 0;
+    for (let a = -0.3; a <= 0.3; a += 0.01) {
+      const phi = (f.gapMidDeg + a * f.gapDeg) * DEG;
+      for (let r = 0.88 * f.R; r <= 1.12 * f.R; r += 1) { const x = Math.round(f.cx + r * cosK(phi)), y = Math.round(f.cy - r * sinK(phi)); if (f.d[y * f.W + x]) inkPx++; }
+    }
+    return inkPx;
+  };
+  for (const seed of [524, 529, 534, 539]) {
+    const f = inkFigure(randomText(mulberry32(seed), 5, [9, 8, 9, 7, 9]), { S });
+    ok(f.ok && gapInk(f) === 0, `large clauses ${seed}: ${f.ok ? gapInk(f) : f.reason} ink samples in the gap's carrier band`);
+  }
+}
+
+/* 3. the order rule, placed again from I8's text */
+{
+  // free arcs: the gap kept first, ARC_MIN_DEG each, the rest by the neighbours' spans; the gap joins the largest
+  const placeHere = (sp) => {
+    const k = sp.length, free = 360 - sp.reduce((a, b) => a + b, 0) - INK.GAP_DEG;
+    const share = sp.map((s, j) => s + sp[(j + 1) % k]), tot = share.reduce((a, b) => a + b, 0);
+    const arcs = share.map((x) => INK.ARC_MIN_DEG + ((free - k * INK.ARC_MIN_DEG) * x) / tot);
+    let jg = 0; arcs.forEach((a, j) => { if (a > arcs[jg] + 1e-9) jg = j; });
+    arcs[jg] += INK.GAP_DEG;
+    const c = [0];
+    for (let j = 1; j < k; j++) c.push(c[j - 1] + sp[j - 1] / 2 + arcs[j - 1] + sp[j] / 2);
+    return c;
+  };
+  const com = (sp, c) => { let x = 0, y = 0, M = 0; sp.forEach((s, j) => { x += s * cosK(c[j] * DEG); y += s * sinK(c[j] * DEG); M += s; }); return Math.sqrt(x * x + y * y) / M; };
+  let tried = 0, worse = 0, texts45 = 0;
+  for (const [i, k] of [[0, 4], [1, 5], [2, 4], [3, 5]]) {
+    const f = inkFigure(randomText(mulberry32(950 + i), k, [3, 9, 5, 8, 4]), { S: 200 });
+    if (!f.ok) { ok(false, `order text ${i}: ${f.reason}`); continue; }
+    texts45++;
+    const sp = f.spansDeg;
+    const chosen = com(sp, f.centresDeg.map((c) => c - f.centresDeg[0]));
+    const rest = [...Array(k).keys()].slice(1);
+    const perm = (pre, left) => {
+      if (!left.length) { const o = [0, ...pre].map((j) => sp[j]); tried++; if (com(o, placeHere(o)) < chosen - 1e-6) worse++; return; }
+      for (let q = 0; q < left.length; q++) perm([...pre, left[q]], [...left.slice(0, q), ...left.slice(q + 1)]);
+    };
+    perm([], rest);
+    ok(new Set(sp).size > 1, `order text ${i}: spans ${sp.join(' ')} are unequal`);
+  }
+  ok(texts45 === 4 && tried > 0 && worse === 0, `order: ${worse} of ${tried} cyclic orders put the centre of mass nearer the centre than the drawn one`);
+}
+
+/* 4. determinism and node ids */
 {
   let same = 0, perm = 0;
   const h = (m) => fnv1a(Buffer.from(m.d).toString('latin1'));

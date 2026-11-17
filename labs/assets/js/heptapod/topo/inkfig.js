@@ -18,41 +18,63 @@
       content (NODE_DEG per node) and its depth is the pool's (DEPTH).
       The pool's profile is a puddle's, skewed along the drag, split
       between the two sides of the ring. [physics: pooling; PLAN M3]
-   I3 Every node of a clause other than its main event is a filament
-      leaving the mass; a node that hangs from such a node is a branch
-      of its filament. The side is the role's class: a core argument
-      (actor, undergoer, goal, content) leaves outward, a circumstance
-      inward. The angle at which it leaves the normal is the role's
-      rank (PLAN L6: role by neck angle). Its length grows with what
-      hangs from it. [grammar; F4-P4]
+   I3 Every node joined to a clause's main event is a filament leaving
+      the mass where the pool is deepest (a splash's crown); a node
+      that hangs from such a node is a branch of its filament. The side
+      is the role's class: a core argument (actor, undergoer, goal,
+      content) leaves outward, any other role inward. The angle at
+      which it leaves the normal is the role's own: each label has one
+      angle, spread evenly over LEAN_DEG either side of the normal in
+      hmr.js's label order within its side (PLAN L6: role by neck
+      angle). Its length grows with what hangs from it. [grammar; F4-P4,
+      missed: the suite reads 1 to 7 more filaments than are drawn]
    I4 A filament is a thread of ink: it flares where it leaves the pool,
-      tapers along its length and wanders by a smooth turning noise. An
-      entity's thread ends in a drop of radius 1.89 times the thread's
-      (Rayleigh 1878, after Plateau: one fastest-growing wavelength,
-      9.02 a, gathers into one drop; F4-P5); any other node's thread
-      ends flat. A drop may shed satellites beyond it, smaller and in
-      line, as a breaking thread does. [physics; grammar for which tips]
+      tapers along its length and wanders by a smooth turning noise that
+      starts at zero, so it leaves at the role's angle. An entity's
+      thread ends in a drop of radius 1.89 times the thread's radius
+      where it breaks, its tip (Rayleigh 1878, after Plateau: one
+      fastest-growing wavelength, 9.02 a, gathers into one drop; from
+      memory, to verify; F4-P5, a post-hoc outcome); any other node's
+      thread ends flat. A drop may shed up to two satellites beyond it,
+      smaller and in line, as a breaking thread leaves satellite drops
+      (Eggers 1997, Rev. Mod. Phys. 69, 865; from memory, to verify);
+      their number and spacing are seeded. [physics; grammar for which
+      tips]
    I5 The rim of a pool breaks into short spikes spaced as a thin rim's
       fastest-growing wavelength (the same 9.02 a, for a rim of half
       thickness RIM_A): edge roughness, below the length of a filament.
       [physics]
+   I5b Spray: a pool throws drops off its rim as the brush leaves it
+      (the splash's ejecta; Worthington, A Study of Splashes, 1908, from
+      memory, to verify), one per SPRAY_DEG of its arc, more on the side
+      holding more ink, within 0.3 R of the rim, radii many small and
+      few large. The pool's place is the grammar's; each drop's place
+      is seeded. Never in the gap. [physics; positions seeded]
    I6 The carrier between masses is a hairy brush (Strassmann 1986):
-      bristles across the stroke, each with its own reservoir, loaded
-      where the brush passes a pool and depleting with arc distance from
-      it; a bristle whose load falls below its threshold leaves a gap,
-      outer bristles first, so the dry stretch shows streaks and specks
-      (flying white). The gap sits in the largest free arc, where the
-      brush is driest (figure.js F6; F4-P1), and the stroke tapers into
-      it. [physics]
+      bristles across the stroke, each with its own reservoir. Its load
+      is highest beside a pool and falls with arc distance from the
+      nearest one, on either side alike (wet ink wicks out of a pool
+      along the stroke both ways), to LOAD_FLOOR; a stroke direction is
+      not drawn, so the ring shows no start (PLAN V18; the film showed
+      none either, F4-P2 and F4-P3 missed). A bristle whose load falls
+      below its threshold leaves a gap, outer bristles first, so a dry
+      stretch shows streaks and specks (flying white). The gap's arc,
+      GAP_DEG, is kept free before the pools share the rest, and goes
+      to the largest free arc, where the brush is driest (figure.js F6;
+      F4-P1); among equal arcs, the first in drawing order. The stroke
+      tapers into it, and nothing else is drawn in it. [physics]
    I7 Ink spreads into the surface before it dries: the body (pools,
       threads, drops) is diffused over INK_SPREAD and the bristle layer
       over a third of it, and ink is where the diffused load is at least
       half. Joins become waists and drops round. [physics: capillary
       spreading]
-   I8 Order around the ring: the clauses' centre of mass nearest the
-      centre (figure.js F4, PLAN 3.4.3), so no position carries
-      discourse order; free arcs keep ARC_MIN_DEG and share the rest by
-      the neighbours' spans (figure.js F5); the figure is turned by its
+   I8 Order around the ring: the clauses' centre of mass (each pool
+      weighed by its span, at its placed centre, free arcs and the gap
+      included) nearest the centre (figure.js F4, PLAN 3.4.3), so no
+      position carries discourse order: every cyclic order up to 7
+      clauses, above that insertion by weight then swaps, as figure.js
+      does; free arcs keep ARC_MIN_DEG and share the rest by the
+      neighbours' spans (figure.js F5); the figure is turned by its
       meaning's certificate (figure.js).
 
    Every random choice is a stream seeded by the graph's canonical
@@ -64,14 +86,14 @@
    ============================================================ */
 
 import { clausesOf } from './figure.js';
-import { edgeClassRank, edgeRoleRank } from './hmr.js';
+import { edgeClassRank, edgeRoleRank, EDGE_LABELS } from './hmr.js';
 import { mulberry32, fnv1a } from './rng.js';
 import { PI, sinK, cosK } from './trig.js';
 
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.1',
+  version: 'inkfig-0.2',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -79,18 +101,19 @@ export const INK = Object.freeze({
   DEPOSITS: 1.2,      // I2b: strokes laid per degree of the pool's arc
   ARC_MIN_DEG: 6,     // I8: clearance between neighbouring pools, degrees
   GAP_DEG: 26.5,      // I6: the gap's arc, degrees
-  GAP_SHARE: 0.6,     // a gap takes at most this share of its free arc
   TAPER_DEG: 10,      // I6: the stroke thins into the gap over this arc
   DEPTH: 0.33,        // I2: a pool's peak depth across the ring, over R
-  WOBBLE: 0.07,       // I1: centreline wander, over R
+  WOBBLE: 0.10,       // I1: centreline wander, over R
   W_RING: 0.06,       // I6: the carrier's width at full load, over R
   LOAD_ARC: 0.3,      // I6: arc (over R) at which the carrier's load has fallen to half
-  LOAD_FLOOR: 0.45,   // I6: the share of a full load the brush keeps however far from a pool (it is redipped by the writer's hand, not only by the pools)
+  LOAD_FLOOR: 0.7,   // I6: the share of a full load the brush keeps however far from a pool (it is redipped by the writer's hand, not only by the pools)
   BRISTLES: 28,       // I6
-  SHAFT: 0.017,       // I4: a thread's shaft width, over R
+  SHAFT: 0.02,        // I4: a thread's shaft width, over R
   FIL_LEN: 0.15,      // I3: a filament's length with nothing hanging from it, over R
   RIM_A: 0.005,       // I5: rim half thickness, over R
-  INK_SPREAD: 0.0035, // I7: diffusion length of the body, over R
+  SPRAY_DEG: 5,       // I5b: one drop per this many degrees of a pool's arc
+  LEAN_DEG: 30,       // I3: the role angles spread over this many degrees either side of the normal
+  INK_SPREAD: 0.006,  // I7: diffusion length of the body, over R
   CORE_ROLES: Object.freeze(['actor', 'undergoer', 'goal', 'content']),
 });
 
@@ -102,7 +125,9 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'W_RING', value: INK.W_RING, source: 'film suite 2026-11-17: carrier w_med median 0.066 R, w_p25 median 0.035 R' },
   { name: 'SHAFT', value: INK.SHAFT, source: 'film suite 2026-11-17: filament shaft median 0.0172 R' },
   { name: 'FIL_LEN', value: INK.FIL_LEN, source: 'film suite 2026-11-17: filament length median 0.143 R' },
-  { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS', value: 0, source: 'first values, not yet compared with any film measure' },
+  { name: 'R_CANVAS', value: INK.R_CANVAS, source: 'film.md 5.2: R over canvas median 0.365 (the measuring frame; figure.js)' },
+  { name: 'v0.2 after the first measurement (bb8f228)', value: 0, source: 'NODE_DEG 4 to 7, WOBBLE 0.03 to 0.10, LOAD_FLOOR 0.45 to 0.7, W_RING 0.05 to 0.06, SHAFT 0.017 to 0.02, INK_SPREAD 0.0035 to 0.006, depth by clause size, the crown, more turning: set by eye against the film master and by the suite after F4-P4 had run; F4-P4 keeps its first outcome' },
+  { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG', value: 0, source: 'first values, not compared with any film measure of their own' },
 ]);
 
 /* ---------------- seeded noise (exact operations only) ---------------- */
@@ -127,6 +152,17 @@ function fbm1(seed, t, oct, period = 0) {
   return v / norm;
 }
 const streamOf = (cert, i, tag) => mulberry32(fnv1a(`${cert}:${i}:${tag}`));
+
+/* I3: one angle per role label, spread evenly over LEAN_DEG either side of the normal, in hmr.js's label order
+   within its side (core roles outward, every other label inward) */
+const LEANS = (() => {
+  const all = Object.keys(EDGE_LABELS);
+  const m = new Map();
+  for (const side of [all.filter((l) => INK.CORE_ROLES.includes(l)), all.filter((l) => !INK.CORE_ROLES.includes(l))])
+    side.forEach((l, i) => m.set(l, side.length === 1 ? 0 : -INK.LEAN_DEG + (2 * INK.LEAN_DEG * i) / (side.length - 1)));
+  return m;
+})();
+export const leanOf = (label) => LEANS.get(label) ?? 0;
 
 /* ---------------- the raster ---------------- */
 
@@ -208,27 +244,65 @@ function clauseTrees(cl) {
   });
 }
 
+/* I6, I8: the placement of an order. The gap's arc is kept before the free arcs are shared; it goes to the
+   largest shared arc (the first in drawing order among equals). Centres in degrees from the first pool's. */
+export function placeOrder(sp) {
+  const k = sp.length;
+  const free = 360 - sp.reduce((a, b) => a + b, 0) - INK.GAP_DEG;
+  const arcs = new Float64Array(k);
+  if (k === 1) arcs[0] = free;
+  else {
+    let wsum = 0;
+    for (let j = 0; j < k; j++) wsum += sp[j] + sp[(j + 1) % k];
+    for (let j = 0; j < k; j++) arcs[j] = INK.ARC_MIN_DEG + ((free - k * INK.ARC_MIN_DEG) * (sp[j] + sp[(j + 1) % k])) / wsum;
+  }
+  let jg = 0;
+  for (let j = 1; j < k; j++) if (arcs[j] > arcs[jg] + 1e-9) jg = j;
+  arcs[jg] += INK.GAP_DEG;
+  const centres = new Float64Array(k);
+  for (let j = 1; j < k; j++) centres[j] = centres[j - 1] + sp[j - 1] / 2 + arcs[j - 1] + sp[j] / 2;
+  return { arcs, jg, centres };
+}
+function centreOfMass(sp) {
+  const { centres } = placeOrder(sp);
+  let x = 0, y = 0, M = 0;
+  for (let j = 0; j < sp.length; j++) { x += sp[j] * cosK(centres[j] * DEG); y += sp[j] * sinK(centres[j] * DEG); M += sp[j]; }
+  return Math.sqrt(x * x + y * y) / M;
+}
+const lexLess = (a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i]; return false; };
+const better = (s, o, sb, ob) => s < sb - 1e-12 || (Math.abs(s - sb) <= 1e-12 && lexLess(o, ob));
 function orderByCentre(span) {
   const k = span.length;
-  const centre = (o) => {
-    let x = 0, y = 0, th = 0, M = 0;
-    for (let j = 0; j < k; j++) { if (j) th += (span[o[j - 1]] + span[o[j]]) / 2; x += span[o[j]] * cosK(th * DEG); y += span[o[j]] * sinK(th * DEG); M += span[o[j]]; }
-    return Math.sqrt(x * x + y * y) / M;
-  };
+  const score = (o) => centreOfMass(o.map((c) => span[c]));
   if (k <= 2) return [...Array(k).keys()];
   let best = null, bs = Infinity;
   if (k <= 7) {
     const perm = (pre, left) => {
-      if (!left.length) { const o = [0, ...pre], s = centre(o); if (s < bs - 1e-12) { bs = s; best = o; } return; }
+      if (!left.length) { const o = [0, ...pre], s = score(o); if (better(s, o, bs, best)) { bs = s; best = o; } return; }
       for (let i = 0; i < left.length; i++) perm([...pre, left[i]], [...left.slice(0, i), ...left.slice(i + 1)]);
     };
     perm([], [...Array(k).keys()].slice(1));
     return best;
   }
-  // more than 7: alternate heavy and light around the ring
+  // more than 7: insertion, heaviest first, then pairwise swaps while the centre of mass improves (figure.js)
   const byMass = [...Array(k).keys()].sort((a, b) => span[b] - span[a] || a - b);
-  const o = [];
-  for (let i = 0, lo = 0, hi = k - 1; lo <= hi; i++) o.push(i % 2 ? byMass[hi--] : byMass[lo++]);
+  let o = [byMass[0]];
+  for (const c of byMass.slice(1)) {
+    let bo = null, s0 = Infinity;
+    for (let j = 0; j <= o.length; j++) { const t = [...o.slice(0, j), c, ...o.slice(j)]; const s = score(t); if (better(s, t, s0, bo)) { s0 = s; bo = t; } }
+    o = bo;
+  }
+  const i0 = o.indexOf(0);
+  o = [...o.slice(i0), ...o.slice(0, i0)];
+  bs = score(o);
+  for (let pass = 0, moved = true; moved && pass < 20; pass++) {
+    moved = false;
+    for (let i = 1; i < k; i++) for (let j = i + 1; j < k; j++) {
+      const t = o.slice(); [t[i], t[j]] = [t[j], t[i]];
+      const s = score(t);
+      if (better(s, t, bs, o)) { o = t; bs = s; moved = true; }
+    }
+  }
   return o;
 }
 
@@ -254,22 +328,14 @@ export function inkFigure(g, opts = {}) {
   // I8: order, free arcs, centres
   const order = orderByCentre(span);
   const sp = order.map((c) => span[c]);
-  const free = 360 - sp.reduce((a, b) => a + b, 0);
-  const arcs = new Float64Array(k);
-  if (k === 1) arcs[0] = free;
-  else {
-    let wsum = 0;
-    for (let j = 0; j < k; j++) wsum += sp[j] + sp[(j + 1) % k];
-    for (let j = 0; j < k; j++) arcs[j] = INK.ARC_MIN_DEG + ((free - k * INK.ARC_MIN_DEG) * (sp[j] + sp[(j + 1) % k])) / wsum;
-  }
+  const { arcs, jg, centres } = placeOrder(sp);
   const rot = (fnv1a(cert) % 3600) / 10;
-  const centreDeg = new Float64Array(k);
-  centreDeg[0] = rot;
-  for (let j = 1; j < k; j++) centreDeg[j] = centreDeg[j - 1] + sp[j - 1] / 2 + arcs[j - 1] + sp[j] / 2;
-  let jg = 0;
-  for (let j = 1; j < k; j++) if (arcs[j] > arcs[jg] + 1e-9) jg = j;
-  const gapLen = Math.min(INK.GAP_DEG, INK.GAP_SHARE * arcs[jg]);
+  const centreDeg = centres.map((c) => c + rot);
+  const gapLen = INK.GAP_DEG;
   const gapMid = centreDeg[jg] + sp[jg] / 2 + arcs[jg] / 2;
+  // I6: nothing but the carrier's tapered ends is drawn within the gap and its tapers
+  const wrap0 = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
+  const inGap = (phi) => Math.abs(wrap0(phi - gapMid)) < gapLen / 2 + INK.TAPER_DEG;
 
   // I1: the centreline
   const wobSeed = fnv1a(`${cert}:wobble`);
@@ -287,11 +353,11 @@ export function inkFigure(g, opts = {}) {
     const t = trees[order[j]];
     const rnd = streamOf(cert, t.main, 'pool');
     const half = sp[j] / 2, th = centreDeg[j];
-    const skew = (rnd() * 2 - 1) * 0.6, fOut = 0.25 + 0.5 * rnd();
-    const depth = INK.DEPTH * R * (0.6 + 0.7 * rnd());
+    const skew = (rnd() * 2 - 1) * 0.6, fOut = 0.15 + 0.7 * rnd();
+    const depth = INK.DEPTH * R * (0.7 + 0.6 * rnd()) * Math.sqrt(t.n / 6);
     const nSeed = fnv1a(`${cert}:${t.main}:rim`);
     // a puddle dragged along the stroke: a steep front, a long tail (the skew's sign is the drag's direction)
-    const prof = (x) => { const b = 1 - x * x; if (b <= 0) return 0; const y = (x - skew) / (1 + (x > skew ? -skew : skew)); const c = 1 - y * y; return c <= 0 ? 0 : c * c * Math.sqrt(b); };
+    const prof = (x) => { const b = 1 - x * x; if (b <= 0) return 0; const y = (x - skew) / (1 + (x > skew ? -skew : skew)); const c = 1 - y * y; return c <= 0 ? 0 : c * Math.sqrt(c * b); };
     const hOut = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * fOut * prof(x) * (1 + 0.4 * fbm1(nSeed, x * 6, 5)); };
     const hIn = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * (1 - fOut) * prof(x) * (1 + 0.4 * fbm1(nSeed + 1, x * 6, 5)); };
     const wr = INK.W_RING * R / 2;
@@ -319,6 +385,7 @@ export function inkFigure(g, opts = {}) {
       const nS = Math.max(8, Math.ceil(((len * DEG) * R) / Math.max(1, ws / 3)));
       for (let q = 0; q <= nS; q++) {
         const u = q / nS, phi = mid - len / 2 + len * u;
+        if (Math.abs(wrap(phi - th)) > 1.5 * half || inGap(phi)) continue;
         const env = Math.max(wr, side > 0 ? hOut(phi) : hIn(phi));
         const r = rc(phi) + side * share * env, cs = cosK(phi * DEG), sn = sinK(phi * DEG);
         const wq = ws * Math.sqrt(4 * u * (1 - u));
@@ -339,7 +406,7 @@ export function inkFigure(g, opts = {}) {
         const h = side > 0 ? hOut(phi) : hIn(phi);
         if (h < wr) continue;
         const r0 = rc(phi) + side * h, cs = cosK(phi * DEG), sn = sinK(phi * DEG);
-        const len = R * (0.008 + 0.022 * srnd() * srnd()), w = R * (0.004 + 0.004 * srnd());
+        const len = R * (0.01 + 0.025 * srnd() * srnd()), w = R * (0.006 + 0.008 * srnd());
         const head = phi * DEG + (side > 0 ? 0 : PI) + (srnd() - 0.5) * 0.9;
         thread(body, S, toX(r0 * cs), toY(r0 * sn), head, len, w, { flare: 1.2, end: 0.35, turn: 0.2, seed: srnd() * 4294967296 >>> 0 });
         report.spikes++;
@@ -349,9 +416,10 @@ export function inkFigure(g, opts = {}) {
     // I5b: spray. Drops thrown off the pool's rim as the brush leaves it, more on the side it holds more
     // ink on; radii from a power law (many small, few large), within 0.3 R of the rim.
     const prnd = streamOf(cert, t.main, 'spray');
-    const nSpray = Math.round((2 * half) / 5);
+    const nSpray = Math.round((2 * half) / INK.SPRAY_DEG);
     for (let i = 0; i < nSpray; i++) {
       const phi = th + (prnd() * 2 - 1) * half * 1.1, side = prnd() < fOut ? 1 : -1;
+      if (inGap(phi)) { prnd(); prnd(); continue; }
       const h = Math.max(wr, side > 0 ? hOut(phi) : hIn(phi));
       const u = prnd(), off = R * (0.02 + 0.28 * u * u);
       const r0 = rc(phi) + side * (h + off), cs = cosK(phi * DEG), sn = sinK(phi * DEG);
@@ -366,14 +434,14 @@ export function inkFigure(g, opts = {}) {
     kids0.forEach((w, i) => {
       const lab = t.parent.get(w).label;
       const out = INK.CORE_ROLES.includes(lab);
-      const x = nk === 1 ? 0 : -0.75 + (1.5 * i) / (nk - 1);
+      // the crown: threads erupt where the pool is deepest (a splash's rim fingers), spread over 0.7 of its half span
+      const x = skew + (nk === 1 ? 0 : -0.35 + (0.7 * i) / (nk - 1));
       const phi = th + x * half;
       const h = out ? Math.max(wr, hOut(phi)) : Math.max(wr, hIn(phi));
       const side = out ? 1 : -1;
-      const r0 = rc(phi) + side * (h - INK.SHAFT * R), cs = cosK(phi * DEG), sn = sinK(phi * DEG);
+      const r0 = rc(phi) + side * 0.75 * h, cs = cosK(phi * DEG), sn = sinK(phi * DEG);
       const frnd = streamOf(cert, w, 'thread');
-      const rank = edgeRoleRank(lab);
-      const lean = (((rank % 5) - 2) * 14 + (frnd() - 0.5) * 16) * DEG;
+      const lean = leanOf(lab) * DEG;
       const head = phi * DEG + (out ? 0 : PI) + side * lean;
       drawNode(t, w, toX(r0 * cs), toY(r0 * sn), head, 1, frnd, 0);
       report.filamentsDrawn++;
@@ -438,7 +506,7 @@ export function inkFigure(g, opts = {}) {
   for (let i = 0; i < S * S; i++) if (body[i] >= 0.5 || bristle[i] >= 0.5) { d[i] = 1; ink++; }
   return {
     ok: true, version: INK.version, W: S, H: S, d, R, cx: c0, cy: c0, clauses: k, nodes: cg.n,
-    spansDeg: Array.from(sp, (x) => +x.toFixed(2)), arcsDeg: Array.from(arcs, (x) => +x.toFixed(2)), gapDeg: +gapLen.toFixed(2), squeeze: +squeeze.toFixed(3),
+    spansDeg: Array.from(sp, (x) => +x.toFixed(2)), arcsDeg: Array.from(arcs, (x) => +x.toFixed(2)), centresDeg: Array.from(centreDeg, (x) => +(((x % 360) + 360) % 360).toFixed(3)), gapDeg: +gapLen.toFixed(2), gapMidDeg: +(((gapMid % 360) + 360) % 360).toFixed(3), squeeze: +squeeze.toFixed(3),
     ink, ...report,
   };
 }
@@ -450,14 +518,15 @@ function thread(F, S, x, y, head, len, shaft, o) {
   const rnd = o.rnd || mulberry32(o.seed);
   const n = Math.max(4, Math.ceil(len / Math.max(1, shaft * 0.35)));
   const ds = len / n;
-  const curl = (rnd() * 2 - 1) * 0.8 * o.turn, amp = (0.25 + 0.35 * rnd()) * o.turn;
+  const curl = (rnd() * 2 - 1) * 1.3 * o.turn, amp = (0.45 + 0.5 * rnd()) * o.turn;
   const seed = o.seed >>> 0;
+  const f0 = fbm1(seed, 0, 3);
   const width = (t) => (t < 0.18 ? shaft * (1 + (o.flare - 1) * (1 - t / 0.18) * (1 - t / 0.18)) : shaft * (1.1 - ((1.1 - o.end) * (t - 0.18)) / 0.82)) * (1 + 0.08 * noise1(seed + 3, t * 9));
   const path = [];
   let X = x, Y = y, h = head;
   for (let k = 0; k <= n; k++) {
     const t = k / n;
-    h = head + curl * t + amp * fbm1(seed, t * 2.5, 3);
+    h = head + curl * t + amp * (fbm1(seed, t * 2.5, 3) - f0);
     stampDisc(F, S, X, Y, width(t) / 2);
     path.push([X, Y, h]);
     X += ds * cosK(h); Y -= ds * sinK(h);
