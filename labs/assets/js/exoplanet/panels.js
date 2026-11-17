@@ -8,7 +8,7 @@
 import { SOURCES, DATA, VALLEY, CHEN_KIPPING, TEQ, MC, LIMB, KOPPARAPU } from './config.js';
 import {
   luminosity, semiMajor, insolation, forecastFor, hasTrueMass, monteCarlo, equilibriumTemp, habitableZone, hzPosition,
-  transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClassOf, hasRadius, limitOf, limitKind, limitText, isNum,
+  transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClassOf, hasRadius, limitOf, limitKind, limitText, isNum, OPEN_RANGE,
 } from './science.js';
 import { teqOf, starlightText, starlightNote, teqText, archiveDiffers, errorWords, starNum, luminosityDiffers, ARCHIVE_DIFF, STASSUN } from './starlight.js';
 import { limitsLine } from './report.js';
@@ -46,7 +46,7 @@ export function chainHTML(p, albedo, air = null) {
   if (fc) steps.push(li('Mass', 'log R = C + S log M, inverted with scatter, log-uniform prior' + (fc.bounded ? `, censored by the ${fc.bounded} limit (posterior cut ${fc.bounded === 'upper' ? 'above' : 'below'} ${fmt(fc.bound, 3)} M⊕)` : ''), `${fmt(fc.median, 2)} M⊕ (68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}), ${fc.regime}`, CHEN_KIPPING.ref));
   else if (hasTrueMass(p)) steps.push(li('Mass', 'measured', `${fmt(p.M, 3)} M⊕`, refTxt(r.M)));
   else steps.push(li('Mass', 'none: no measured mass, and no radius to forecast one from', '—', limitOf(p, 'M') ? `the ${limitKind(limitOf(p, 'M'))} is a bound, never drawn as a value` : ''));
-  steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})` : mc.hasR ? '—' : 'none: no radius measured', ''));
+  steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? (mc.g.open ? `${fmt(mc.g.med, 2)} g (${OPEN_RANGE}: the ${mc.open}'s lower error reaches zero)` : `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})`) : mc.hasR ? '—' : 'none: no radius measured', ''));
   steps.push(li('Teq', `Teq = 278.3 K S^¼ (1 − A)^¼${S.src === 'star' ? ' = Teff √(R★ / 2a) (1 − A)^¼, R★ and a in one unit' : ''}, A = ${albedo}, ${isNum(S.lo) ? 'the same draws' : 'from the point value'}`, mc.teq ? teqText(mc.teq).text : '—', 'full heat redistribution'));
   if (mc.H) steps.push(li('Scale height', `H = k T / (μ m_H g), μ = ${p.R > 1.8 ? MC.muEnvelope : MC.muSecondary}`, `${fmt(mc.H.med, 2)} km`, 'μ assumed from size'));
   const scl = sizeClassOf(p);

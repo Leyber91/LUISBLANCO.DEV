@@ -42,6 +42,16 @@ block('the radius', () => {
   yes('a radius not yet marked either way gives its error, is drawn measured, and is not noted as an estimate', open.row && open.row.pm === mea.row.pm && open.row.kind === 'm' && !/estimate/.test(open.row.note), JSON.stringify(open.row && { pm: open.row.pm, kind: open.row.kind, note: open.row.note }));
 });
 
+block('an open range', () => {
+  // a radius whose lower error reaches it (ticket 2.20): gravity, density and scale height print no 68% range, and the
+  // gravity's note says which value and why; a bounded radius prints its range as before
+  const open = sheetRows(mk({ R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3).inferred, shut = sheetRows(mk({}), 0.3).inferred;
+  const at = (rows, k) => rows.find((r) => r.key === k);
+  yes('every derived range of an open radius says "no 68% range"', ['g', 'rho', 'H'].every((k) => !at(open, k) || at(open, k).pm === 'no 68% range') && !!at(open, 'g'), ['g', 'rho', 'H'].map((k) => at(open, k) && at(open, k).pm).join(' | '));
+  yes('and the gravity\'s note names the radius and its error', /^The radius's lower error \(2.5 on 2 R⊕\) reaches zero/.test(at(open, 'g').note || ''), at(open, 'g').note);
+  yes('a bounded radius prints its gravity range and no such note', /\d to \d/.test(at(shut, 'g').pm) && !at(shut, 'g').note, `${at(shut, 'g').pm} | ${at(shut, 'g').note}`);
+});
+
 block('the orbit', () => {
   const kep = mk({ P: 10, a: 0.5 }), arch = mk({ P: null, a: 0.3 }), none = mk({ P: null, a: null }), two = mk({ name: 'Kepler-451 c', P: 1800, a: null });
   const wk = where(kep, 'a'), wa = where(arch, 'a'), wn = where(none, 'a'), w2 = where(two, 'a');

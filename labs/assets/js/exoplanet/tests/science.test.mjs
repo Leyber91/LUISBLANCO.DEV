@@ -21,6 +21,8 @@ const near = (name, got, want, tol) => {
   console.log(`${ok ? 'pass' : 'FAIL'}  ${name}: ${got} (want ${want} ± ${tol})`);
 };
 const yes = (name, cond) => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}`); };
+process.on('uncaughtException', (e) => { console.log(`FAIL  the tests stopped on an error: ${e && e.message}`); process.exit(1); });
+process.on('unhandledRejection', (e) => { console.log(`FAIL  the tests stopped on an error: ${e && e.message}`); process.exit(1); });
 
 // the Sun-Earth system
 const earth = { name: 'Earth', Teff: 5772, Rs: 1, logL: 0, a: 1, P: 365.25, R: 1, Rerr: 0.01, Ms: 1, M: 1, Mprov: 'Mass', Mlim: 0, method: 'Transit' };
@@ -41,6 +43,38 @@ near('Seager et al. 2007 pure iron at 1 M_earth (R_earth)', S.seagerRadius(1, S.
 near('RV semi-amplitude of Earth around the Sun (m/s)', S.rvSemiAmplitude(earth).K, 0.0895, 0.001);
 yes('Sun colour is a warm white', S.starColour(5772).hex === '#fff1ea');
 yes('An upper limit caps the forecast', S.forecastMass(1.61, 0.05, 2).hi <= 2.0001);
+
+// ---- a positive value with its interval, drawn as a split log-normal (ticket 2.20) ----
+{
+  // a fixed normal deviate sequence (Box-Muller on a small LCG), so the percentiles below are reproducible
+  let st = 12345;
+  const u = () => { st = (st * 1103515245 + 12345) % 2147483648; return (st + 0.5) / 2147483648; };
+  const z = () => Math.sqrt(-2 * Math.log(u())) * Math.cos(2 * Math.PI * u());
+  const pct = (sp, n = 40000) => { const d = Array.from({ length: n }, () => S.drawPositive(sp, z())).sort((x, y) => x - y); return { lo: d[Math.floor(0.16 * n)], med: d[Math.floor(0.5 * n)], hi: d[Math.floor(0.84 * n)], min: d[0] }; };
+  const lop = S.positiveSpread(2.0, 0.6, -0.3), q = pct(lop);
+  near('a lopsided interval 2.0 +0.6 -0.3: the median is the value', q.med, 2.0, 0.02);
+  near('and the 16th percentile is the value minus its lower error', q.lo, 1.7, 0.02);
+  near('and the 84th percentile is the value plus its upper error', q.hi, 2.6, 0.03);
+  yes('and no draw is zero or negative', q.min > 0);
+  const wide = pct(S.positiveSpread(1.0, 0.9, -0.9));
+  yes(`an error of 90% of the value keeps its 16th percentile at 0.1 and no draw at or below zero (16th ${wide.lo.toFixed(3)}, least ${wide.min.toExponential(2)})`, Math.abs(wide.lo - 0.1) < 0.005 && wide.min > 0);
+  const upOnly = S.positiveSpread(3, 0.5, null), downOnly = S.positiveSpread(3, null, -0.5), both = S.positiveSpread(3, 0.5, -0.5);
+  yes('one side missing takes the other side\'s size', !!upOnly && !!downOnly && upOnly.sLo === both.sLo && downOnly.sHi === both.sHi);
+  yes('no error, or no positive value, is drawn as itself (null)', S.positiveSpread(3, null, null) === null && S.positiveSpread(3, 0, 0) === null && S.positiveSpread(0, 1, -1) === null && S.positiveSpread(null, 1, -1) === null);
+  const justIn = S.positiveSpread(1, 0.5, -0.9999), atZero = S.positiveSpread(1, 0.5, -1), past = S.positiveSpread(1, 0.5, -1.2);
+  yes('a lower error just short of the value is bounded; one equal to it or past it is open', !justIn.open && atZero.open && past.open);
+  yes('an open value draws its lower side as the mirror of its upper in log', atZero.sLo === atZero.sHi && past.sLo === past.sHi);
+  // the Monte Carlo draws the radius and a measured mass from both sides of their intervals: g = M / R^2, so with the
+  // mass exact the gravity's 16th and 84th percentiles sit at M / (R + up)^2 and M / (R - down)^2, and the other way
+  const base = { host: 'X', Teff: 5772, Rs: 1, logL: 0, a: 1, P: 365.25, Ms: 1, Mprov: 'Mass', Mlim: 0, method: 'Transit', lim: {} };
+  const rOnly = S.monteCarlo({ ...base, name: 'test 2.20 radius', R: 2, Rerr1: 0.6, Rerr2: -0.3, Rerr: 0.45, M: 8, Merr1: null, Merr2: null }, 0.3);
+  near('a lopsided radius, the mass exact: the gravity\'s 16th percentile is M / (R + up)^2', rOnly.g.lo, 8 / (2.6 * 2.6), 0.06 * 8 / (2.6 * 2.6));   // 6%: a percentile of 400 draws
+  near('and its 84th percentile is M / (R - down)^2', rOnly.g.hi, 8 / (1.7 * 1.7), 0.06 * 8 / (1.7 * 1.7));
+  const mOnly = S.monteCarlo({ ...base, name: 'test 2.20 mass', R: 2, Rerr1: null, Rerr2: null, Rerr: null, M: 10, Merr1: 3, Merr2: -2 }, 0.3);
+  near('a lopsided mass, the radius exact: the gravity\'s 16th percentile is (M - down) / R^2', mOnly.g.lo, 8 / 4, 0.06 * 8 / 4);
+  near('and its 84th percentile is (M + up) / R^2', mOnly.g.hi, 13 / 4, 0.06 * 13 / 4);
+  yes('a draw below the median takes the lower side, one above it the upper', Math.abs(S.drawPositive(lop, -1) - 1.7) < 1e-9 && Math.abs(S.drawPositive(lop, 1) - 2.6) < 1e-9 && S.drawPositive(lop, 0) === 2.0);
+}
 
 // the committed snapshot
 const json = JSON.parse(readFileSync(join(here, '../../../data/exomania/pscomppars-snapshot.json'), 'utf8'));
@@ -119,6 +153,35 @@ for (const p of list) {
   nFb++; if (Math.abs(physics(p).Teq / plate - 1) <= 0.2) okFb++;
 }
 yes(`with no published Teq, the render's Teq is within 20% of the plate's for ${okFb} of ${nFb} worlds`, nFb > 200 && okFb / nFb > 0.97);
+
+// ---- ranges that divide by a value not bounded away from zero are open (ticket 2.20) ----
+{
+  const low = (e1, e2) => (Number.isFinite(e2) && e2 !== 0 ? Math.abs(e2) : Number.isFinite(e1) && e1 !== 0 ? Math.abs(e1) : null);
+  const reachesZero = (pl) => (S.hasRadius(pl) && low(pl.Rerr1, pl.Rerr2) !== null && pl.R - low(pl.Rerr1, pl.Rerr2) <= 0)
+    || (S.hasRadius(pl) && S.hasTrueMass(pl) && low(pl.Merr1, pl.Merr2) !== null && pl.M - low(pl.Merr1, pl.Merr2) <= 0);
+  const wrongOpen = [], badRange = [];
+  let nOpen = 0;
+  for (const pl of list) {
+    const m = S.monteCarlo(pl, 0.3);
+    if (!m.hasR) continue;
+    if (!!m.open !== reachesZero(pl)) wrongOpen.push(pl.name);
+    if (m.open) nOpen++;
+    for (const k of ['g', 'rho', 'H']) {
+      const x = m[k];
+      if (!x) continue;
+      if (m.open ? (x.lo !== null || x.hi !== null || x.open !== m.open || !(x.med > 0)) : !(x.lo > 0 && x.lo <= x.med && x.med <= x.hi)) badRange.push(`${pl.name} ${k}`);
+    }
+  }
+  yes(`the ranges are open exactly where the radius or a measured mass has a lower error reaching it (${nOpen} planets; wrong: ${wrongOpen.slice(0, 4).join(', ') || 'none'})`, wrongOpen.length === 0 && nOpen > 0);
+  yes(`every range is either open, with a median and no ends, or positive and ordered (${badRange.slice(0, 4).join(', ') || 'all'})`, badRange.length === 0);
+  const hat = S.monteCarlo(byName.get('HAT-P-57 b'), 0.3), hd = S.monteCarlo(byName.get('HD 110113 c'), 0.3);
+  yes('HAT-P-57 b (mass 448 -480 M_earth) is open by its mass, HD 110113 c (radius 2.11 -4.6 R_earth) by its radius', hat.open === 'mass' && hd.open === 'radius');
+  const koi = S.monteCarlo(byName.get('KOI-2513.01'), 0.3);
+  yes(`KOI-2513.01's density range no longer reaches 328,558,509 g/cm3 by the clamp (now ${koi.rho.lo.toPrecision(3)} to ${koi.rho.hi.toPrecision(3)})`, koi.rho.hi < 1e4 && !koi.open);
+  const prox = S.monteCarlo(byName.get('Proxima Cen b'), 0.3);
+  yes('Proxima Cen b keeps its ranges', !prox.open && prox.g.lo > 0.9 && prox.g.hi < 1.2);
+  yes('the note of an open range names the value and its error, and none is written for a bounded one', /^The mass's lower error \(480 on 448 M⊕\) reaches zero/.test(S.openRangeNote(byName.get('HAT-P-57 b'), hat)) && S.openRangeNote(byName.get('Proxima Cen b'), prox) === '');
+}
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

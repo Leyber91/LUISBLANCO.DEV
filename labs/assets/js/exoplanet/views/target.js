@@ -16,7 +16,7 @@
 
 import {
   forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, radiusEstimated, limitOf, limitKind, limitText, hzPosition, insolation,
-  semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
+  semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum, OPEN_RANGE, openRangeNote,
 } from '../science.js';
 import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers, orbitNote, orbitDiffers, starNum } from '../starlight.js';
 import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
@@ -27,7 +27,7 @@ import { interval, range as span } from '../../kit/format.js';
 
 /* "+0.11 −0.18", or "±0.11" when the two sides agree to 15%: the kit's one interval, in the table and the live number */
 const errText = (e1, e2) => interval(e1, e2);
-const range = (s, d = 2) => (s ? span(s.lo, s.hi, d) : '');
+const range = (s, d = 2) => (s ? (s.open ? OPEN_RANGE : span(s.lo, s.hi, d)) : '');   // science.js monteCarlo: an open range
 /* an archive bound as a value: "< 6.2" */
 const boundV = (L, d = 3) => limitText(L, d).replace(/\s*[A-Za-z⊕☉°]+$/, '');
 
@@ -87,7 +87,7 @@ function inferredRows(p, A) {
       note: `The mass is forecast from the radius (${fc.regime})${cmp ? `; ${cmp}` : ''}.`, iv: { value: fc.median, lo: fc.lo, hi: fc.hi } });
   }
   if (mc.hasR) {
-    if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', iv: { value: mc.g.med, lo: mc.g.lo, hi: mc.g.hi } });
+    if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', note: openRangeNote(p, mc), iv: { value: mc.g.med, lo: mc.g.lo, hi: mc.g.hi } });
     if (mc.rho && !fc) rows.push({ key: 'rho', n: 'density', v: fmt(mc.rho.med, 2), u: 'g/cm³', pm: range(mc.rho), kind: 'd', note: 'Earth\'s density is 5.51 g/cm³.', iv: { value: mc.rho.med, lo: mc.rho.lo, hi: mc.rho.hi } });
   }
   const a = semiMajor(p);

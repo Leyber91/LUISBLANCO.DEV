@@ -32,6 +32,8 @@ const MUTANTS = [
   ['the sheet never drawn', '      draw(p, true);\n', ''],
   ['the measured rows never drawn', "group(meas, ARCHIVE_HEADING); mrows.forEach((r) => row(meas, r, ctx)); }", "group(meas, ARCHIVE_HEADING); }"],
   ['the archive group called measured again', "export const ARCHIVE_HEADING = 'From the archive';", "export const ARCHIVE_HEADING = 'Measured, from the archive';"],
+  ['an open range printed as numbers', "const range = (s, d = 2) => (s ? (s.open ? OPEN_RANGE : span(s.lo, s.hi, d)) : '');", "const range = (s, d = 2) => (s ? span(s.lo, s.hi, d) : '');"],
+  ['an open range not said on the gravity', "u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', note: openRangeNote(p, mc),", "u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', note: '',"],
   ['an estimated radius gives an error as if measured', "pm: radiusEstimated(p) ? 'estimated' : errText(p.Rerr1, p.Rerr2),", "pm: errText(p.Rerr1, p.Rerr2),"],
   ['a radius not yet marked called estimated', "pm: radiusEstimated(p) ? 'estimated' : errText(p.Rerr1, p.Rerr2),", "pm: p.measuredR !== true ? 'estimated' : errText(p.Rerr1, p.Rerr2),"],
   ['a radius not yet marked drawn as an estimate', "refs: [rf.R], kind: radiusEstimated(p) ? 'e' : 'm',", "refs: [rf.R], kind: p.measuredR !== true ? 'e' : 'm',"],
