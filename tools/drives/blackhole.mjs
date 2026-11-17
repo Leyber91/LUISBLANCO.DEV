@@ -479,12 +479,17 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   await p.click(cv[0], cv[1]);
   p.check('a pixel pressed: a ray recorded (the newest ray is younger than the press)', await p.until(`(() => { const r = window.__bh.keep.record.rays[0]; return !!r && r.t >= ${t1}; })()`, 8000), JSON.stringify(await p.ev(COUNTS)));
   const ray = await p.ev('window.__bh.keep.record.rays[0]');
-  p.check('the ray keeps its link, its pixel as fractions of the screen and a fate the page names', !!ray && ray.p.every((v) => v >= 0 && v <= 1) && ['captured', 'disk', 'ring', 'sky'].includes(ray.fate), JSON.stringify(ray));
+  p.check('the ray keeps its link, its place on the image plane (two numbers inside the plane) and a fate the page names', !!ray && Array.isArray(ray.s) && ray.s.length === 2 && ray.s.every((v) => typeof v === 'number' && Math.abs(v) <= 100) && !('p' in ray) && ['captured', 'disk', 'ring', 'sky'].includes(ray.fate), JSON.stringify(ray));
 
   const c2 = await p.ev(COUNTS);
-  await open('?o=m87&p=0.5,0.4');
-  await p.sleep(2500);
-  p.check('a ray a link opens is not recorded (the visitor did not press it)', (await p.ev(COUNTS)).rays === c2.rays, JSON.stringify(await p.ev(COUNTS)));
+  // a ray a link opens, by the record's key (ps, the image plane) and by the key shared since G1 (p, fractions of
+  // the window): traced, and not recorded
+  for (const link of ['?o=m87&ps=0.00500,0.03000', '?o=m87&p=0.5,0.4']) {
+    await open(link);
+    await p.sleep(2500);
+    const st = await p.ev(`(() => ({ probe: !document.getElementById('bh-probe').hidden, rays: window.__bh.keep.record.rays.length }))()`);
+    p.check(`a ray a link opens (${link.split('&')[1].split('=')[0]}) is traced and not recorded (the visitor did not press it)`, st.probe && st.rays === c2.rays, JSON.stringify(st));
+  }
 
   const ex = await p.ev(`(async () => { const f = await window.__bh.keep.os.privacy.exportAll(); const s = JSON.stringify(f); return { hasLab: s.includes('black-hole'), hasKept: s.includes('"kept"'), events: (s.match(/black-hole\\.(keep|ray)/g) || []).length }; })()`);
   p.check('the privacy export carries the record and its events', ex.hasLab && ex.hasKept && ex.events >= 2, JSON.stringify(ex));
@@ -521,7 +526,7 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   await sheet(true);
   await press('#bh-keep');
   await until(`c.kept >= 1`);
-  const hrefs = await p.ev(`(() => { const a = [...document.querySelectorAll('#bh-reclist a.bh-btn')].map((x) => x.getAttribute('href')); return { kept: a[0], ray: a.find((h) => /[?&]p=/.test(h)) || null }; })()`);
+  const hrefs = await p.ev(`(() => { const a = [...document.querySelectorAll('#bh-reclist a.bh-btn')].map((x) => x.getAttribute('href')); return { kept: a[0], ray: a.find((h) => /[?&]ps=/.test(h)) || null }; })()`);
   p.check('the default hole is kept under a link that names it', /\?o=m87$/.test(hrefs.kept || ''), JSON.stringify(hrefs));
   for (const [what, h] of [['the kept hole', hrefs.kept], ['the ray', hrefs.ray]]) {
     if (!h) { p.check(`the record has a link for ${what}`, false); continue; }
@@ -538,8 +543,9 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   const cv2 = await p.ev(`(() => { const r = document.querySelector('#bh-canvas').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * 0.3]; })()`);
   await p.click(cv2[0], cv2[1]);
   await p.sleep(1500);
-  const off2 = await p.ev(`(() => ({ rays: window.__bh.keep.record.rays.length, said: document.querySelector('#bh-recsaid').textContent }))()`);
-  p.check('recording off: a pressed ray is not added, and the card says recording is off', off2.rays === r0.rays && /Recording is off/.test(off2.said), JSON.stringify(off2));
+  const off2 = await p.ev(`(() => ({ probe: !document.getElementById('bh-probe').hidden, rays: window.__bh.keep.record.rays.length, said: document.querySelector('#bh-recsaid').textContent, foot: document.querySelector('#bh-recfoot').textContent }))()`);
+  // the probe open: the press traced a ray, so the count staying is the switch and not a missed click (review_s3b K)
+  p.check('recording off: a pressed ray is traced and not added, the card says recording is off, and its foot names no usage event', off2.probe && off2.rays === r0.rays && /Recording is off/.test(off2.said) && /no usage event/.test(off2.foot), JSON.stringify(off2));
   // a full list: past 8 kept holes the card offers the rest, and every one can be seen
   await open('?o=m87');
   await sheet(true);

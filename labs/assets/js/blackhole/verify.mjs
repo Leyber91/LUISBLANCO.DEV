@@ -57,7 +57,8 @@ const rel = (x, y) => Math.abs(x - y) / Math.abs(y);
     worst = Math.max(worst, Math.abs(K.hamiltonian(a, s, p[0])));
     steps++;
   }
-  ok('null condition holds along a strong-field ray', worst < 2e-4 && Math.abs(H0) < 1e-12, `|H|max = ${worst.toExponential(2)} over ${steps} steps`);
+  // a floor (review_s3b C, the class: a check that passes on nothing): the ray takes 99 steps to leave
+  ok('null condition holds along a strong-field ray', worst < 2e-4 && Math.abs(H0) < 1e-12 && steps >= 80, `|H|max = ${worst.toExponential(2)} over ${steps} steps (at least 80; 99 measured on 2026-11-17)`);
 }
 
 /* 3. shadow vs Bardeen */
@@ -146,12 +147,15 @@ for (const k of [0.08, 0.12]) {
   const glEta = (a, r) => { const D = r * r - 2 * r + a * a; return (r ** 3 / (a * a)) * (4 * D / ((r - 1) ** 2) - r); };
   // review_s3 finding 10: beta^2 cannot see a half drawn on the wrong side, so the halves' signs are checked too; and
   // a point is skipped only where the root sits on the photon shell's edge, at most the two ends of each curve
-  let worst = 0, n = 0, skipped = 0, total = 0, wrongSide = 0, curves = 0;
+  // and a floor (review_s3b C): every curve has its 800 points, compares all but its ends, and the points compared
+  // span the alpha range of the shell's radii seen from i, to 1%
+  let worst = 0, n = 0, skipped = 0, total = 0, wrongSide = 0, curves = 0, thin = [];
   for (const a of [0.5, 0.94, 0.998]) for (const inclDeg of [17, 60, 90]) {
     const incl = inclDeg * Math.PI / 180, s = Math.sin(incl), c = Math.cos(incl);
     const rLo = 2 * (1 + Math.cos(2 / 3 * Math.acos(-a))), rHi = 2 * (1 + Math.cos(2 / 3 * Math.acos(a)));
     const pts = K.shadowCurve(a, incl, 400), half = pts.length / 2;
     curves++;
+    let nHere = 0, aMin = Infinity, aMax = -Infinity;
     // shadowCurve gives the upper half first (beta >= 0), then the lower (beta <= 0)
     pts.forEach(([, beta], i) => { if (i < half ? beta < 0 : beta > 0) wrongSide++; });
     for (const [alpha, beta] of pts) {
@@ -165,11 +169,20 @@ for (const k of [0.08, 0.12]) {
       const b2 = glEta(a, r) + a * a * c * c - L * L * c * c / (s * s);
       // beta^2 and not beta: near the curve's ends beta goes as sqrt(r - r_end), which magnifies the last digit of r
       worst = Math.max(worst, Math.abs(b2 - beta * beta));
-      n++;
+      n++; nHere++; aMin = Math.min(aMin, alpha); aMax = Math.max(aMax, alpha);
     }
+    // the span of the curve seen: alpha = -lambda(r) / sin i over the radii of the shell where beta^2 >= 0 (off the
+    // equator only part of the shell is seen), sampled from the same forms
+    let sMin = Infinity, sMax = -Infinity;
+    for (let j = 0; j <= 20000; j++) {
+      const r = rLo + (rHi - rLo) * j / 20000, L = glLambda(a, r);
+      if (glEta(a, r) + a * a * c * c - L * L * c * c / (s * s) >= 0) { sMin = Math.min(sMin, -L / s); sMax = Math.max(sMax, -L / s); }
+    }
+    const span = sMax - sMin;
+    if (pts.length < 800 || nHere < pts.length - 4 || !(aMax - aMin >= 0.99 * span)) thin.push(`a ${a} i ${inclDeg}: ${nHere} of ${pts.length}, span ${(aMax - aMin).toFixed(3)} of ${span.toFixed(3)}`);
   }
-  ok(`critical curve = Gralla & Lupsasca 2020 eqs (38)-(40), (55)-(57) at a = 0.5, 0.94, 0.998 and i = 17, 60, 90 deg`, worst < 1e-9 && skipped <= 4 * curves && wrongSide === 0,
-    `${n} of ${total} points compared (${skipped} skipped at the curves' ends, at most ${4 * curves}), ${wrongSide} on the wrong side, worst |beta^2| difference ${worst.toExponential(2)} M^2`);
+  ok(`critical curve = Gralla & Lupsasca 2020 eqs (38)-(40), (55)-(57) at a = 0.5, 0.94, 0.998 and i = 17, 60, 90 deg`, worst < 1e-9 && skipped <= 4 * curves && wrongSide === 0 && curves === 9 && thin.length === 0,
+    `${n} of ${total} points compared (${skipped} skipped at the curves' ends, at most ${4 * curves}), ${wrongSide} on the wrong side, worst |beta^2| difference ${worst.toExponential(2)} M^2${thin.length ? `; too few points or too short a span: ${thin.join('; ')}` : ''}`);
 }
 
 /* 4. Schwarzschild numbers */
@@ -269,14 +282,16 @@ ok('photon orbit a=0 = 3M, a=1 prograde -> 1M', Math.abs(K.photonOrbit(0) - 3) <
 /* 6. NT flux: quadrature vs closed form */
 for (const a of [0.0, 0.5, 0.94, 0.998]) {
   const tab = K.ntFluxTable(a, 40, 512);
-  let worst = 0, peakQ = 0;
+  let worst = 0, peakQ = 0, compared = 0;
   for (let i = 4; i < tab.r.length; i++) peakQ = Math.max(peakQ, tab.F[i]);
   for (let i = 4; i < tab.r.length; i += 7) {
     const c = K.ntFluxClosed(a, tab.r[i]);
     worst = Math.max(worst, Math.abs(tab.F[i] - c) / peakQ);
+    compared++;
   }
   const pk = K.tablePeak(tab);
-  ok(`NT flux a=${a}: quadrature = Page-Thorne closed form`, worst < 5e-3, `max dev ${(worst * 100).toFixed(3)}% of peak, peak at r=${pk.r.toFixed(2)}M`);
+  // a floor (review_s3b C): 512 radii give 73 compared
+  ok(`NT flux a=${a}: quadrature = Page-Thorne closed form`, worst < 5e-3 && compared >= 70 && peakQ > 0, `max dev ${(worst * 100).toFixed(3)}% of peak over ${compared} radii (at least 70), peak at r=${pk.r.toFixed(2)}M`);
 }
 
 /* 7. units */

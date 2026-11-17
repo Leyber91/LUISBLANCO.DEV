@@ -9,11 +9,18 @@
      or a fall made meanwhile is held and written once it is read.
    - Changes are asked of the store one at a time (inTurn, as
      Exomania's log does): each reads what the store holds then and
-     writes once, so two presses in one instant both land (review_s3
-     finding 1: Keep then a pixel lost the keep while the card said
-     "Kept"). The card draws the record that comes back. A change
-     refused, a read or a write the browser refused, is said under
-     the list, each in its own words.
+     writes once, so a press and a ray in one instant both land
+     (review_s3 finding 1). The card draws the record that comes
+     back. A change refused, a read or a write the browser refused,
+     is said under the list, each in its own words.
+   - A press acts on what the visitor saw (review_s3b A, F): "Keep
+     this hole" keeps and "Kept" takes out, whatever another window
+     did since; a Take out names its hole by its link. While a press
+     is written, the card's buttons are off and Keep says it is busy;
+     the second click of a double-click is not a press (review_s3c
+     1). The hub's way back is the newest hole in the record: written
+     by a keep's own update after the store took it (G), moved to the
+     next newest by a take out, cleared by the last (review_s3c 5).
    - An event is tracked only for a change the store made, and it
      carries the object's id and a fate, never anything typed:
      black-hole.keep, black-hole.ray, black-hole.fall. Starting Labs
@@ -25,7 +32,8 @@
    - Only what the visitor did is recorded: a ray they pressed, a
      fall they started; never a ray a link opens or the tour's fall
      (ui.js passes who did it), nor a ray traced while the view is
-     still moving to its state (its link would not reproduce it).
+     still moving to its state (its link would not reproduce it;
+     the card says so).
    - When the tab comes back into view the record is read again, so
      a keep, or an erase made on the labs' hub, shows here then.
    - A record a later version of the page wrote is shown and never
@@ -37,8 +45,8 @@
      press on one of its buttons is never cut by a redraw.
 
    Where it is kept: Labs OS, lab "black-hole", in this browser;
-   exported and erased with the labs' other records (the privacy page
-   says how).
+   exported and erased with the labs' other records, on the labs'
+   hub.
    ============================================================ */
 
 import { LabsOS } from '../os/index.js';
@@ -52,7 +60,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 /* Resolves when the main thread is free, or after 10 s at the latest (Labs OS's store gives up on a database that has
    not opened within 4 s, and this page holds the main thread while its first shader is built). */
 const idle = () => new Promise((done) => {
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(() => done(), { timeout: 10000 }); else setTimeout(done, 1500);
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(() => done(), { timeout: 10000 }); else setTimeout(done, 1500);   // equivalent: the node tests pass their own start; the page's drive loads it in Chrome
 });
 
 /* card: the card's element (its #bh-keep, #bh-recline, #bh-reclist, #bh-recsaid, #bh-recfoot). store: the page's
@@ -60,7 +68,7 @@ const idle = () => new Promise((done) => {
 export function createKeep({ card, store, fixture = null, now = () => Date.now(), start = idle, moving = () => false, thumb = async () => null }) {
   const $ = (s) => card.querySelector(s);
   const btn = $('#bh-keep'), line = $('#bh-recline'), list = $('#bh-reclist'), saidEl = $('#bh-recsaid'), foot = $('#bh-recfoot');
-  let os = null, stored = R.empty(), newer = false, loaded = false, said = '', failedStart = false;
+  let os = null, stored = R.empty(), newer = false, loaded = false, said = '', failedStart = false, busy = false, saidErr = false;
   const all = { kept: false, rays: false, falls: false };   // a list shown whole after its "Show all"
   const held = [];
   // one change at a time, the same queue as exoplanet/log.js (a shared helper to lift into Labs OS: queued)
@@ -78,16 +86,17 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
    *  when nothing could be asked of the store. */
   const change = (op, opts) => inTurn(async () => {
     if (!os) { said = failedStart ? 'Labs OS did not start on this page, so nothing could be written.' : 'This browser keeps nothing for this page, so nothing could be written.'; draw(); return null; }
-    let cur;
-    try { cur = await R.read(os); } catch { said = 'The browser could not read the record, so nothing was changed.'; draw(); return null; }
-    take(cur.record, cur.newer);
     try {
       const w = await R.update(os, op, opts);
-      take(w.record, cur.newer || w.why === R.NEWER);
-      said = w.ok ? '' : `Not written: ${w.why}.`;
+      take(w.record, w.why === R.NEWER);
+      // a success clears a failure's sentence, never a press's own (a ray behind a keep left "is kept." empty)
+      if (!w.ok) { said = `Not written: ${w.why}.`; saidErr = true; } else if (saidErr) { said = ''; saidErr = false; }
       return w;
-    } catch {
-      said = 'The browser refused to write the record. Nothing was changed.';
+    } catch (err) {
+      // update names the stage it failed at (record.js failed): a read refused, or a write refused after a read
+      if (err && err.stage === 'write') { if (err.record) take(err.record, false); said = 'The browser refused to write the record. Nothing was changed.'; }
+      else said = 'The browser could not read the record, so nothing was changed.';
+      saidErr = true;
       return null;
     } finally { draw(); }
   });
@@ -102,14 +111,15 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
 
   function draw() {
     const c = R.counts(stored), q = store.toQuery(), kept = R.isKept(stored, q);
-    const recording = !os || os.recording.on;
+    const recording = os ? os.recording.on : true;   // no Labs OS: nothing is recorded, so nothing to say is off
     line.textContent = loaded ? R.lineWords(c) : 'reading';
-    btn.disabled = !loaded || !os || newer;
+    btn.disabled = !loaded || !os || newer || busy;
     btn.setAttribute('aria-pressed', String(kept));
+    btn.setAttribute('aria-busy', String(busy));
     btn.textContent = kept ? 'Kept' : 'Keep this hole';
     const out = [
-      ...rows('kept', stored.kept, (e, i) => `<li><span>${esc(nameOf(e.q))}</span><a class="bh-btn" href="${esc(here(e.q))}">Open</a><button class="bh-btn" type="button" data-out="${i}">Take out</button></li>`),
-      ...rows('rays', stored.rays, (e) => `<li><span>A ray at ${esc(nameOf(e.q))}: it ${esc(R.rayWords(e))}</span><a class="bh-btn" href="${esc(here(e.q, `&p=${e.p[0].toFixed(4)},${e.p[1].toFixed(4)}`))}">Open</a></li>`),
+      ...rows('kept', stored.kept, (e) => `<li><span>${esc(nameOf(e.q))}</span><a class="bh-btn" href="${esc(here(e.q))}">Open</a><button class="bh-btn" type="button" data-out="${esc(e.q)}"${busy ? ' disabled' : ''}>Take out</button></li>`),
+      ...rows('rays', stored.rays, (e) => `<li><span>A ray at ${esc(nameOf(e.q))}: it ${esc(R.rayWords(e))}</span><a class="bh-btn" href="${esc(here(e.q, `&ps=${e.s[0].toFixed(5)},${e.s[1].toFixed(5)}`))}">Open</a></li>`),
       ...rows('falls', stored.falls, (e) => `<li><span>A fall at ${esc(nameOf(e.q))}: ${esc(dur(e.tau))} of its own time from 40 M to the stop</span><a class="bh-btn" href="${esc(here(e.q))}">Open</a></li>`),
     ];
     const empty = !loaded ? '' : recording ? 'Nothing yet. Keep a hole, press a pixel to trace its ray, or fall in.' : 'Nothing yet. Keep a hole: with recording off, rays and falls are not added.';
@@ -124,27 +134,42 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     const where = !os ? '' : os.storage.kind === 'memory' ? 'This page cannot reach the storage of this browser, so the record lasts until the page closes.'
       : os.storage.persistent ? 'Kept in this browser with the other labs\' records.' : 'Kept in this browser; it may clear it when space runs short.';
     // what is also recorded (review_s3 finding 7), as Exomania's card says it
-    foot.textContent = !os ? '' : `${where} A keep, a ray and a fall are also usage events, as is opening and leaving this page; they are sent to the labs' backend only where you allowed it on another lab.`;
+    // with recording off Labs OS records no usage event (events.js), so the foot says none is (review_s3b H)
+    foot.textContent = !os ? '' : os.recording.on
+      ? `${where} A keep, a ray and a fall are also usage events, as is opening and leaving this page; they are sent to the labs' backend only where you allowed it on another lab.`
+      : `${where} With recording off, no usage event is recorded on this page.`;
   }
 
-  async function keep() {
-    if (!loaded) return;
-    const q = store.toQuery(), label = nameOf(q);
-    // the frame's picture (BAR_L1 C17), made before the turn (a still takes a moment) and only for a hole this page
-    // has not seen kept; the turn decides from the store whether it keeps or takes out
-    let img = null;
-    if (!R.isKept(stored, q)) { try { img = await thumb(); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
-    let wasKept = false;
-    const w = await change((r) => { wasKept = R.isKept(r, q); return wasKept ? R.unkeep(r, q) : R.keep(r, { q, t: now(), img }); });
-    if (w && w.changed) {
-      if (!wasKept) {
-        track('black-hole.keep', { obj: store.get('obj') });
-        // the hub's way back: the hole just kept, never one just taken out
-        try { await os.progress.setResume(here(q), `Black Hole: ${label}`); } catch { /* the way back is not the record */ }
-      }
-      said = wasKept ? `${label} is out of your record.` : `${label} is kept.`; draw();
-    }
+  /** One press on the card, written in its turn; another press meanwhile does nothing (review_s3b A). */
+  async function press(job) {
+    if (!loaded || busy) return;
+    try { busy = true; draw(); await job(); }
+    catch (err) {
+      // a fault of this page, not of the store (change() answers those): the card says so and is released
+      said = 'That press could not be completed. The record shows what the store holds.'; saidErr = true;
+      console.warn('the record card:', err && err.message);
+    } finally { busy = false; draw(); }
   }
+  /** The hub's way back after a take out: the newest hole left in the record, or none (review_s3c 5). */
+  const wayBack = () => inTurn(async () => {
+    const k = stored.kept[0];
+    try { if (k) await os.progress.setResume(here(k.q), R.resumeLabel(k.q)); else await os.progress.clearResume(); } catch { /* the way back is not the record */ }
+  });
+  /** Keep or take out, as the button said at the press: "Keep this hole" keeps, "Kept" takes out (review_s3b A).
+   *  The hub's way back is written by the keep's own update, after the store took it (G). */
+  const keep = () => press(async () => {
+    const q = store.toQuery(), label = nameOf(q), wantKept = btn.getAttribute('aria-pressed') !== 'true';
+    // the frame's picture (BAR_L1 C17), made inside the press (a still takes a moment; the card is busy meanwhile)
+    let img = null;
+    if (wantKept) { try { img = await thumb(); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
+    const w = wantKept
+      ? await change((r) => R.keep(r, { q, t: now(), img }), { resume: { url: here(q), label: R.resumeLabel(q) } })
+      : await change((r) => R.unkeep(r, q));
+    if (!w || !w.ok) return;
+    if (wantKept && w.changed) track('black-hole.keep', { obj: store.get('obj') });
+    if (!wantKept) await wayBack();
+    said = wantKept ? `${label} is kept.` : `${label} is out of your record.`; saidErr = false;
+  });
   async function writeRay(r) {
     if (os && !os.recording.on) return;
     const w = await change((x) => R.ray(x, r));
@@ -156,25 +181,28 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     if (w && w.changed) track('black-hole.fall', { obj: f.obj });
   }
 
-  btn.addEventListener('click', keep);
+  // a double-click's second click (detail 2) comes 100 to 500 ms after the first, once its write is done and the
+  // button reads "Kept": it is not a press (review_s3c 1). A key's click has detail 0.
+  btn.addEventListener('click', (e) => (e && e.detail > 1 ? undefined : keep()));
   // one listener on the list, so a redraw never leaves a button without its listener or with two
   list.addEventListener('click', (e) => {
     const more = e.target.closest('button[data-all]');
     if (more) { all[more.dataset.all] = true; draw(); return; }
+    // the row names its hole by its link, so the hole taken out is the one the visitor read, though the list moved
     const b = e.target.closest('button[data-out]'); if (!b) return;
-    const entry = stored.kept[+b.dataset.out]; if (!entry) return;
-    const label = nameOf(entry.q);
-    void change((r) => R.unkeep(r, entry.q)).then((w) => { if (w && w.changed) { said = `${label} is out of your record.`; draw(); } });
+    const q = b.dataset.out, label = nameOf(q);
+    void press(async () => { const w = await change((r) => R.unkeep(r, q)); if (w && w.ok) { await wayBack(); said = `${label} is out of your record.`; saidErr = false; } });
   });
   const reread = () => inTurn(async () => { if (os) { try { const r = await R.read(os); take(r.record, r.newer); } catch { /* keep what was read last */ } draw(); } });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) reread(); });
 
   const api = {
-    /** A ray the visitor traced: p, fractions of the screen; fate and n from the probe. Not recorded while the view
-     *  is still moving to its state: the link written is the state's, and would not reproduce that ray. */
-    ray({ p, fate, n = 0 }) {
-      if (moving()) return;
-      const r = { q: store.toQuery(), t: now(), p, fate, n, obj: store.get('obj') };
+    /** A ray the visitor traced: s, its place on the image plane (the probe's sx and sy, tangent units of the
+     *  camera); fate and n from the probe. Not recorded while the view is still moving to its state: the link
+     *  written is the state's, and would not reproduce that ray. The card says so (review_s3b I). */
+    ray({ s, fate, n = 0 }) {
+      if (moving()) { said = 'That ray was traced while the view was still moving, so it is not added; press again once it settles.'; saidErr = true; draw(); return; }
+      const r = { q: store.toQuery(), t: now(), s, fate, n, obj: store.get('obj') };
       if (!loaded) held.push(['ray', r]); else void writeRay(r);
     },
     /** A fall the visitor ran to its stop, with the proper time the Fall card shows there (s). */

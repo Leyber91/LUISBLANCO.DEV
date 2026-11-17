@@ -20,11 +20,12 @@ import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
   insolation, monteCarlo, skyView, starColour, isNum,
 } from './science.js';
+import { byOrbit, starlightCensus } from './starlight.js';
 import { createPlot, plotValue } from './views/plot.js';
 import { createSystem, drawInset } from './views/system.js';
 import { bandsHTML, bindEdges, drawHist, classCounts, classTable } from './views/bands.js';
 import { createTransit } from './views/transit.js';
-import { createTarget } from './views/target.js';
+import { createTarget, reticleZone } from './views/target.js';
 import { createReport } from './report.js';
 import { createTours, tourStops } from './tours.js';
 import { exportPlate, exportCSV, copyLink } from './export.js';
@@ -37,12 +38,11 @@ import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { keycap, keyHint, switchCtl, setSwitch, bindSwitch, isOn, scale, bindScale, setScale } from '../kit/controls.js';
 import { el } from '../kit/dom.js';
-import { day, fromIso, isoDay, int } from '../kit/format.js';
+import { day, fromIso, int } from '../kit/format.js';
 
 const params = new URLSearchParams(location.search);
 window.__EXO_STILL__ = params.has('still');
 const $ = (id) => document.getElementById(id);
-const store_ = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (_) { return null; } return null; };
 
 /* ---------------- state ---------------- */
 const emptyFilter = () => ({ cls: 'all', method: 'all', year: null, box: null, upTo: null, ranges: {}, zone: null, looks: null, locked: null, cold: null, hot: null, set: null, newOnly: false, query: null });
@@ -50,7 +50,7 @@ const store = {
   state: {
     list: [], byName: new Map(), sel: null, system: [], plot: PLOTS[params.get('plot')] ? params.get('plot') : 'valley',
     filter: emptyFilter(), filterFn: () => true, filterActive: false, tour: null, colorBy: 'none',
-    albedo: () => 0.3, pins: [], newNames: new Set(), plain: false,
+    albedo: () => 0.3, pins: [], newNames: new Set(), newSince: '', plain: false,
     // a scenario of the selected world's air the visitor chose (air.js); null draws the survey's own. A link may carry one.
     air: SCENARIOS.includes(params.get('air')) ? params.get('air') : null,
   },
@@ -225,13 +225,13 @@ function filterLabel() {
   if (f.method !== 'all') parts.push(METHOD_GROUPS.find((g) => g.key === f.method).label);
   if (f.year !== null) parts.push(String(f.year));
   for (const [k, r] of Object.entries(f.ranges)) if (r) parts.push(`${k} ${r[0] ?? ''}-${r[1] ?? ''}`);
-  if (f.zone) parts.push('habitable zone');
+  if (f.zone) parts.push('conservative or optimistic habitable zone');   // the search takes both, so it names both
   if (f.looks) parts.push(kindWords(f.looks));
   if (f.locked) parts.push(LOCKED_WORDS);
   if (f.cold) parts.push(COLD_WORDS);
   if (f.hot) parts.push(HOT_WORDS);
   if (f.box) parts.push('box on ' + PLOTS[f.box.mode].label);
-  if (f.newOnly) parts.push('new since last visit');
+  if (f.newOnly) parts.push(`new ${store.state.newSince}`);
   if (f.set) parts.push(f.set === 'saved' ? 'your log' : 'shared log');
   return parts.join(', ');
 }
@@ -251,7 +251,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   const prev = st.sel;
   st.sel = p;
   if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
-  st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (a.a ?? a.P ?? 0) - (b.a ?? b.P ?? 0));
+  st.system = byOrbit(st.list.filter((q) => q.host === p.host));
   const apply = () => {
     setReticle(p); placeWorld();
     if (desktop()) drawInset($('inset'), p, st.system);
@@ -279,8 +279,7 @@ let reticleOpen = null;   // the world whose scenarios and sources are open unde
 function setReticle(p) {
   reticleHeld = null;
   $('ret-name').textContent = p.name;
-  const hz = hzPosition(p);
-  const hzWords = { cons: 'in the conservative habitable zone', opt: 'in the optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'its zone unknown' }[hz.key];
+  const hzWords = reticleZone(p);
   const sc = sizeClassOf(p);
   $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'No radius measured'}, ${hzWords}`;
   const cl = classify(p, { air: store.state.air });
@@ -403,7 +402,7 @@ function renderFilters() {
   const token = (k, text) => { const b = el('button', 'token', `${text} \u00d7`); b.type = 'button'; b.dataset.clear = k; b.setAttribute('aria-label', `Clear the filter ${text}`); tokens.push(b); };
   if (f.year !== null) token('year', String(f.year));
   if (f.box) token('box', 'box');
-  if (f.zone) token('zone', 'habitable zone');
+  if (f.zone) token('zone', 'conservative or optimistic zone');
   if (f.looks) token('looks', kindWords(f.looks));
   if (f.locked) token('locked', 'one face to its star');
   if (f.cold) token('cold', `cold: under ${COLD_K} K`);
@@ -421,7 +420,7 @@ function renderFilters() {
   row.append(all, selL, sel, rg, fSwitch('replay', 'replay', ['still', 'by year'], isNum(f.upTo), 'Replay the discoveries by year'));
   if (log && log.counts().saved) row.append(fSwitch('set-saved', 'show', ['all worlds', 'your log'], f.set === 'saved', 'Show only the worlds in your log'));
   if (log && log.shared().length) row.append(fSwitch('set-shared', 'show', ['all worlds', 'the shared log'], f.set === 'shared', 'Show only the worlds the link shared'));
-  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new since your last visit`, ['all', 'only new'], f.newOnly, 'Show only the worlds new since your last visit'));
+  if (st.newNames.size) row.append(fSwitch('new', `${fmtInt(st.newNames.size)} new ${st.newSince}`, ['all', 'only new'], f.newOnly, `Show only the worlds new ${st.newSince}`));
   row.append(...tokens);
   if (st.filterActive && n > 0) { const t = el('button', 'plain', 'tour these'); t.type = 'button'; t.dataset.act = 'tourthese'; row.append(t); }
   bar.append(row);
@@ -489,17 +488,16 @@ function bindFilters() {
   });
 }
 
-/* worlds confirmed since this browser's last visit (localStorage, this device only) */
-function changelog(list) {
-  const key = 'exo:seen:v1';
-  let prev = null;
-  try { prev = JSON.parse(store_(key) || 'null'); } catch (_) { prev = null; }
-  const names = list.map((p) => p.name);
-  if (prev && Array.isArray(prev.names)) {
-    const seen = new Set(prev.names);
-    store.state.newNames = new Set(names.filter((n) => !seen.has(n)));
-  }
-  store_(key, JSON.stringify({ date: isoDay(Date.now()), names }));
+/* Worlds confirmed since the catalogue the lab's record last kept, against this one, and the words for what they are
+   new since: "since your last visit", or with recording off the day that catalogue was kept (record.sinceWords). The
+   log asks the store once the stored record is read (record.seeCatalogue), so the switch appears then. */
+async function changelog(list) {
+  if (!log) return;
+  let got = { fresh: [], since: '' };
+  try { got = await log.catalogue(list.map((p) => p.name)); } catch { got = { fresh: [], since: '' }; }
+  store.state.newNames = new Set(got.fresh);
+  store.state.newSince = got.since;
+  if (got.fresh.length) { renderFilters(); resay(); }
 }
 
 /* ---------------- search and questions ---------------- */
@@ -994,7 +992,7 @@ async function boot() {
   // a shared question replays with the page's own rules: it goes back into the field, no model is called and no list opens on load
   if (params.get('q')) { $('q').value = params.get('q'); runQuestion(params.get('q'), false, false); }
 
-  renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), rosterNote: 'The weekly roster is joining in the background.' });
+  renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), census: starlightCensus(st.list), rosterNote: 'The weekly roster is joining in the background.' });
   const retrieved = day(fromIso(snap.meta.retrieved), snap.meta.retrieved);
   $('tb-cat').textContent = `NASA archive, ${retrieved}`;
   $('tb-n').textContent = countLine(st.list, false);
@@ -1020,7 +1018,7 @@ async function boot() {
     plot.resetStats(); plot.redraw();
     thumbsWhenQuiet('roster');   // the roster added planets and said which radii are measured: the thumbnails are drawn again, once
     const note = `The weekly roster (${DATA.rosterLabel}) lists ${fmtInt(rosterCount)} planets with a measured radius${added.length ? ` and added ${fmtInt(added.length)} confirmed after the snapshot` : '; none are newer than the snapshot'}.`;
-    renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), rosterNote: note });
+    renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), census: starlightCensus(st.list), rosterNote: note });
     $('tb-n').textContent = countLine(st.list, true);
     tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
     drawHist($('bands-cv'), st.list);
@@ -1028,7 +1026,7 @@ async function boot() {
   } catch (e) {
     console.warn('[exomania] weekly roster unavailable; radius provenance is provisional', e.message);
   }
-  changelog(st.list);
+  void changelog(st.list);
   renderFilters();
   resay();
   if (log) log.reread();

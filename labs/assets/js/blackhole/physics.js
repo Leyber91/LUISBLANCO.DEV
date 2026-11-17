@@ -337,14 +337,19 @@ export function weakest(...tags) {
 }
 /** The tags of the state's inputs: the object's own, and ILLUSTRATIVE for everything of a custom or hypothetical
  *  hole (nothing of it is measured). */
-/** Whether a colour correction f_col describes the disk's local spectrum (ledger row 3, review_s3 finding 8): Shimura and
- *  Takahara (1995) find about 1.7 at 10% of Eddington and 1.8 to 2.0 near it, and "for accretion rates lower than 1%
- *  of the Eddington limit, the local spectrum cannot be fitted with any f". Below that the spectrum is illustrative. */
-export const FCOL_MIN_EDD = 0.01;
+/** Whether the colour correction drawn is one Shimura and Takahara (1995) state for this disk (ledger row 3, review_s3
+ *  finding 8, review_s3b D). Their abstract states two points: f about 1.7 at 10% of Eddington, and 1.8 to 2.0 near
+ *  the Eddington rate; and "for accretion rates lower than 1% of the Eddington limit, the local spectrum cannot be
+ *  fitted with any f". It states no value between them, so the tag is [REAL] only at those two points, with the f
+ *  drawn inside the stated value, and [ILLUSTRATIVE] everywhere else. */
+export const FCOL_POINTS = Object.freeze([Object.freeze({ edd: 0.1, f: Object.freeze([1.7, 1.7]) }), Object.freeze({ edd: 1, f: Object.freeze([1.8, 2.0]) })]);
+/** Half a slider step either way: the Eddington ratio moves in steps of 0.05 of its log10, f_col in 0.01. */
+export const FCOL_STEP = Object.freeze({ logEdd: 0.025, f: 0.005 });
 /** The disks Shimura and Takahara computed: non-rotating holes of 1.4 to 10 solar masses (their abstract). */
 export const FCOL_MASS = Object.freeze([1.4, 10]);
-export function fcolFits({ edd, massSun, a, q = 0 }) {
-  return edd >= FCOL_MIN_EDD && a === 0 && q === 0 && massSun >= FCOL_MASS[0] && massSun <= FCOL_MASS[1];
+export function fcolFits({ edd, massSun, a, q = 0, fcol }) {
+  if (!(a === 0 && q === 0 && massSun >= FCOL_MASS[0] && massSun <= FCOL_MASS[1])) return false;
+  return FCOL_POINTS.some((p) => Math.abs(Math.log10(edd) - Math.log10(p.edd)) < FCOL_STEP.logEdd && fcol > p.f[0] - FCOL_STEP.f && fcol < p.f[1] + FCOL_STEP.f);
 }
 
 export function inputTags(obj) {

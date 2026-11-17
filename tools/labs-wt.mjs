@@ -13,7 +13,8 @@
      serve <name>             start http.server for the worktree on its port, left running (stop it with stop)
      stop <name|all>          stop the http.server listening on a lab's port, or on every lab port
      shoot <name> [page]      desktop 1440 and phone 390 screenshots + console errors; a server it
-                              had to start is stopped when it finishes
+                              had to start is stopped when it finishes; it waits for the machine's
+                              one-Chrome lock, as a drive does, and holds it for the whole shot
      drive <name>             run tools/drives/<name>.mjs with a real pointer and keyboard at 1440 and
                               390 wide (tools/drive.mjs): what a still cannot show
      gates <name>             privacy selftest, site_check, levels check, in the worktree
@@ -21,6 +22,7 @@
      ship <name>              push, open a pull request to main, wait for the gates, squash-merge
      remove <name>            remove a worktree whose branch is merged into main
      ports                    the name, hub id, port and page table
+     selftest                 the shot's lock: taken, held, given back, refused while another holds it
 
    Ship publishes: a merge to main is live at luisblanco.dev within minutes.
    ============================================================ */
@@ -173,16 +175,60 @@ async function waitPort(port, ms) {
   return false;
 }
 
-async function cmdShoot(n, pageArg) {
-  const lab = byName(n);
-  let temp = null;
-  if (!(await portOpen(lab.port))) {
-    temp = startTempServer(lab);
-    if (!(await waitPort(lab.port, 8000))) { stopPid(temp.pid); die(`server on ${lab.port} did not come up`); }
+/* How long a shot waits for Chrome: a drive's wait, LABS_DRIVE_WAIT_MS, else 20 minutes. */
+export const shotWaitMs = (env = process.env) => Number(env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000;
+/* An ending this tool chose and can say in one line; anything else is printed with its stack. */
+const expected = (msg) => Object.assign(new Error(msg), { expected: true });
+/* The leaves a shot ends in. The selftest stands in for them, and checks that each one here is the real thing. */
+export const LEAVES = { exists: fs.existsSync, open: portOpen, start: startTempServer, wait: waitPort, stop: stopPid, shot: shootWith, say: (m) => console.log(m) };
+
+/* One Chrome at a time on the machine. A shot starts browsers of its own (two shots through the screenshot script,
+   each tried once more in classic mode when it leaves no picture, and one Chrome for the console), and until
+   2026-11-17 it started them without looking at the lock a drive waits for (tools/drive.mjs holdChrome), so a shot
+   could run beside another conversation's drive. It now takes that lock before fn and gives it back when fn's work
+   has ended, by a return or a throw, and when the process exits inside fn (an exit, an uncaught error, Ctrl+C). A
+   process killed outright gives nothing back: the next drive or shot takes the lock from a holder that no longer
+   runs (holdChrome's rule). When another holds the lock it says so at once, then waits waitMs; when the lock is
+   still not free it throws before fn runs. The lock is taken with the holdChrome beside this file, never a lab
+   worktree's: a tree that has not merged main since the lock was written has none.
+   opts: waitMs (shotWaitMs()), lock (the machine's lock file), say (console.log), hold (given only by the selftest). */
+export async function withChromeLock(fn, opts = {}) {
+  const { waitMs = shotWaitMs(), lock, say = console.log } = opts;
+  const hold = opts.hold || (await import(new URL('./drive.mjs', import.meta.url).href)).holdChrome;
+  let release = await hold(0, lock);
+  if (!release) {
+    say(`waiting up to ${Math.round(waitMs / 1000)} s for Chrome: another drive or shot holds the machine's lock`);
+    release = await hold(waitMs, lock);
   }
-  try { await shootWith(lab, pageArg); }
+  if (!release) throw expected(`Chrome was not free within ${Math.round(waitMs / 1000)} s: another drive or shot holds the machine's lock`);
+  const atExit = () => release();
+  process.on('exit', atExit);
+  try { return await fn(); }
+  finally { process.off('exit', atExit); release(); }
+}
+
+/* Exit code 1 with a line saying why: the page printed console errors, Chrome was not free in time, the server
+   did not come up, or the lab has neither a worktree nor anything serving its port (said before the wait for
+   Chrome, not after it). seams are given only by the selftest: any of LEAVES, and withChromeLock's opts. */
+async function cmdShoot(n, pageArg, seams = {}) {
+  const lab = byName(n);
+  const t = { ...LEAVES, ...seams };
+  try {
+    if (!t.exists(wtPath(lab)) && !(await t.open(lab.port))) throw expected(`no worktree for ${lab.name}; run add first`);
+    await withChromeLock(() => shootServed(lab, pageArg, t), t);
+  } catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); process.exitCode = 1; }
+}
+
+async function shootServed(lab, pageArg, t) {
+  const { open, start, wait, stop, shot, say } = t;
+  let temp = null;
+  if (!(await open(lab.port))) {
+    temp = start(lab);
+    if (!(await wait(lab.port, 8000))) { stop(temp.pid); throw expected(`server on ${lab.port} did not come up`); }
+  }
+  try { await shot(lab, pageArg); }
   finally {
-    if (temp) { stopPid(temp.pid); console.log(`stopped the server this shot started on port ${lab.port}`); }
+    if (temp) { stop(temp.pid); say(`stopped the server this shot started on port ${lab.port}`); }
   }
 }
 
@@ -428,9 +474,203 @@ function cmdRemove(n) {
   console.log(r.ok ? `removed ${p}` : `remove failed: ${r.err}`);
 }
 
+/* ---------- selftest: a shot takes the machine's Chrome lock, holds it until its work has ended, gives it back ---------- */
+
+const SELF = fileURLToPath(import.meta.url);
+const driveTool = () => import(new URL('./drive.mjs', import.meta.url).href);
+
+/* A selftest that hangs stops itself: with exit code 1 when a check had already failed (that check caught the
+   break), else with tools/drive.mjs WATCHDOG_EXIT, which tools/mutate.mjs reads as timed out and not as
+   caught. On 2026-11-17 a copy that did not read LABS_DRIVE_WAIT_MS failed its check and then waited on the next
+   one past mutate's 180 s limit, twice. */
+async function watchdog(ms, failed, before = () => {}) {
+  const { WATCHDOG_EXIT } = await driveTool();
+  return setTimeout(() => { before(); console.log(`FAIL  labs-wt selftest: not finished in ${Math.round(ms / 1000)} s`); process.exit(failed() ? 1 : WATCHDOG_EXIT); }, ms).unref();
+}
+
+/* The pieces of the selftest that need a process of their own to end. */
+async function selftestPart(what, arg) {
+  if (what === 'exit') await withChromeLock(() => process.exit(3), { waitMs: 1000, lock: arg, say: () => {} });
+  if (what === 'watchdog-clean' || what === 'watchdog-failed') {
+    console.log = () => {};
+    await watchdog(50, () => (what === 'watchdog-failed' ? 1 : 0));
+    setInterval(() => {}, 1000);   // a hang: something still to do, and nothing done
+    await new Promise(() => {});
+  }
+  return 2;
+}
+
+async function selftest() {
+  const { WATCHDOG_EXIT } = await driveTool();
+  let passed = 0, failed = 0;
+  const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
+  const tick = (ms = 30) => new Promise((r) => setTimeout(r, ms));
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const J = JSON.stringify;
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'labs-wt-self-'));
+  const lock = path.join(scratch, 'chrome.lock');
+  const holder = () => { try { return JSON.parse(fs.readFileSync(lock, 'utf8')).pid; } catch { return null; } };
+  const other = () => fs.writeFileSync(lock, J({ pid: process.ppid, t: Date.now() }));   // a process that runs and is not this one
+  const envWait = process.env.LABS_DRIVE_WAIT_MS;
+  const err = console.error;
+  // The command's own messages are kept, not printed. If the tool ends the process inside a check (an unknown lab
+  // name does), the selftest says so with what was kept: its first run ended that way, after ten passes, with exit
+  // code 1 and no line saying why. Whatever ends the process from inside, the scratch folder goes with it; a
+  // process killed outright leaves it.
+  const kept = [];
+  let done = false;
+  const clean = () => {
+    console.error = err;
+    if (envWait === undefined) delete process.env.LABS_DRIVE_WAIT_MS; else process.env.LABS_DRIVE_WAIT_MS = envWait;
+    fs.rmSync(scratch, { recursive: true, force: true });
+  };
+  process.on('exit', (code) => { if (!done) err(`FAIL  labs-wt selftest: the process ended inside a check, exit code ${code}${kept.length ? `: ${kept.join(' | ')}` : ''}`); clean(); });
+  // The whole selftest takes about 3 s. The limit was 30 s until 2026-11-17, when one run of every list reported
+  // this selftest as failing before any mutation; in that run another list took 41 s for its usual 5. At eight
+  // times slower, 3 s is 24 to 29 s, so the limit is the likely cause; it is not proven, and 70 runs since, 24 of
+  // them eight at a time, all passed. The limit is tools/drive.mjs's 120 s now, under the 180 s tools/mutate.mjs
+  // gives a copy.
+  await watchdog(120000, () => failed, () => { done = true; });
+  try {
+    /* ---- the real lock (tools/drive.mjs holdChrome), on a lock file of the selftest's own ---- */
+    let during = null, after = null;
+    const got = await withChromeLock(async () => { during = holder(); await tick(); after = holder(); return 7; }, { waitMs: 1000, lock, say: () => {} });
+    yes('a shot holds the lock in its own name when it starts', during === process.pid, `holder ${during}`);
+    yes('and still holds it when its work ends, after a wait inside it', after === process.pid, `holder ${after}`);
+    yes('a shot gives the lock back when it ends', !fs.existsSync(lock));
+    yes('what the shot returns comes back', got === 7, String(got));
+
+    other();
+    let ran = false, why = null, said = [];
+    const t0 = Date.now();
+    try { await withChromeLock(async () => { ran = true; }, { waitMs: 600, lock, say: (m) => said.push(m) }); } catch (e) { why = e; }
+    const waited = Date.now() - t0;
+    yes('a shot does not start while another process holds the lock', !ran && !!why && why.expected === true && /^Chrome was not free within 1 s/.test(why.message), why ? why.message : 'no error');
+    yes('it says that it waits, and for how long', said.length === 1 && /^waiting up to 1 s for Chrome/.test(said[0]), said.join(' | ') || 'nothing said');
+    yes('it waits as long as it was told before it gives up', waited >= 600, `${waited} ms`);
+    yes('giving up leaves the lock with its holder', holder() === process.ppid, `holder ${holder()}`);
+    fs.rmSync(lock, { force: true });
+
+    why = null;
+    try { await withChromeLock(async () => { await tick(); throw new Error('the shot failed'); }, { waitMs: 1000, lock, say: () => {} }); } catch (e) { why = e; }
+    yes('a shot that fails still gives the lock back', !fs.existsSync(lock));
+    yes('a shot that fails says so itself', !!why && why.message === 'the shot failed' && !why.expected, why ? why.message : 'no error');
+
+    const listeners = process.listenerCount('exit');
+    for (let i = 0; i < 3; i++) await withChromeLock(async () => {}, { waitMs: 1000, lock, say: () => {} });
+    yes('a shot leaves no exit listener behind', process.listenerCount('exit') === listeners, `${process.listenerCount('exit')} after three shots, ${listeners} before`);
+
+    const child = spawnSync(process.execPath, [SELF, 'selftest-part', 'exit', lock], { encoding: 'utf8', timeout: 60000 });
+    yes('a shot whose process exits inside it gives the lock back on the way out', child.status === 3 && !fs.existsSync(lock), `exit code ${child.status}, lock ${fs.existsSync(lock) ? 'left' : 'gone'}`);
+    fs.rmSync(lock, { force: true });
+
+    /* ---- what it asks of the lock, exactly: a stand-in for holdChrome that writes down each call ---- */
+    const fake = (answers) => {
+      const calls = [];
+      let back = 0;
+      return { calls, back: () => back, hold: async (ms, file) => { calls.push([ms, file]); return answers.shift() ? () => { back++; } : null; } };
+    };
+    let f = fake([true]);
+    said = []; ran = false;
+    await withChromeLock(async () => { ran = true; }, { waitMs: 123456, lock: 'L', hold: f.hold, say: (m) => said.push(m) });
+    yes('a free lock is asked for once, without waiting, nothing is said, and it is given back once', ran && same(f.calls, [[0, 'L']]) && said.length === 0 && f.back() === 1, `${J(f.calls)}, said ${said.length}, given back ${f.back()}`);
+
+    f = fake([false, true]);
+    said = []; ran = false;
+    const order = [];
+    await withChromeLock(async () => { ran = true; }, { waitMs: 123456, lock: 'L', hold: (ms, file) => { order.push(`hold ${ms}`); return f.hold(ms, file); }, say: (m) => { order.push('say'); said.push(m); } });
+    yes('a held lock is then waited for exactly as long as told, on the same file', ran && same(f.calls, [[0, 'L'], [123456, 'L']]) && f.back() === 1, `${J(f.calls)}, given back ${f.back()}`);
+    yes('the line about waiting comes before the wait and gives its length', same(order, ['hold 0', 'say', 'hold 123456']) && said[0] === "waiting up to 123 s for Chrome: another drive or shot holds the machine's lock", `${J(order)} ${J(said)}`);
+
+    f = fake([false, false]);
+    ran = false; why = null;
+    try { await withChromeLock(async () => { ran = true; }, { waitMs: 123456, lock: 'L', hold: f.hold, say: () => {} }); } catch (e) { why = e; }
+    yes('a lock still held after the wait refuses the shot', !ran && !!why && why.expected === true && same(f.calls, [[0, 'L'], [123456, 'L']]) && f.back() === 0, `${J(f.calls)}, ${why ? why.message : 'no error'}`);
+
+    delete process.env.LABS_DRIVE_WAIT_MS;
+    f = fake([false, true]);
+    await withChromeLock(async () => {}, { hold: f.hold, say: () => {} });
+    yes('with no wait given and LABS_DRIVE_WAIT_MS unset, a shot waits 20 minutes, on the machine\'s lock', same(f.calls, [[0, null], [1200000, null]]), J(f.calls));
+    process.env.LABS_DRIVE_WAIT_MS = '300';
+    f = fake([false, true]);
+    await withChromeLock(async () => {}, { hold: f.hold, say: () => {} });
+    yes('with LABS_DRIVE_WAIT_MS set, it waits that long', same(f.calls, [[0, null], [300, null]]), J(f.calls));
+    delete process.env.LABS_DRIVE_WAIT_MS;
+    const waits = [shotWaitMs({}), shotWaitMs({ LABS_DRIVE_WAIT_MS: '300' }), shotWaitMs({ LABS_DRIVE_WAIT_MS: 'soon' }), shotWaitMs({ LABS_DRIVE_WAIT_MS: '0' })];
+    yes('the wait is LABS_DRIVE_WAIT_MS when it reads as a number other than 0, else 20 minutes, as a drive reads it', same(waits, [1200000, 300, 1200000, 1200000]), J(waits));
+
+    /* ---- the shoot command, with the lock, the server and the pictures stood in for ---- */
+    console.error = (m) => { kept.push(String(m)); };
+    const { name, port } = LABS[0];
+    yes('the leaves the command ends in are the real ones', same(Object.keys(LEAVES), ['exists', 'open', 'start', 'wait', 'stop', 'shot', 'say']) && LEAVES.exists === fs.existsSync && LEAVES.open === portOpen && LEAVES.start === startTempServer && LEAVES.wait === waitPort && LEAVES.stop === stopPid && LEAVES.shot === shootWith, Object.keys(LEAVES).join(' '));
+    const shoot = async (o = {}, page = undefined) => {
+      const log = [], printed = [];
+      const lk = fake(o.lock || [true]);
+      const out = console.log;
+      kept.length = 0;
+      process.exitCode = 0;
+      if (o.say === 'real') console.log = (m) => { printed.push(String(m)); };   // the command's own say, read here
+      try {
+        await cmdShoot(name, page, {
+          exists: () => o.worktree !== false,
+          open: async (p) => { log.push(`open ${p}`); return !!o.served; },
+          start: (l) => { log.push(`start ${l.name}`); return { pid: 4242 }; },
+          wait: async (p, ms) => { log.push(`wait ${p} ${ms}`); return o.comesUp !== false; },
+          stop: (pid) => { log.push(`stop ${pid}`); },
+          shot: async (l, pg) => { log.push(`shot starts ${l.name} ${pg}`); await tick(); if (o.shotFails) throw new Error('the pictures failed'); log.push('shot ends'); },
+          hold: async (ms, file) => { log.push(`hold ${ms}`); const back = await lk.hold(ms, file); return back && (() => { log.push('lock given back'); back(); }); },
+          ...(o.say === 'real' ? {} : { say: () => {} }),
+        });
+      } finally { console.log = out; }
+      const code = process.exitCode || 0;
+      process.exitCode = 0;
+      return { log, code, kept: kept.slice(), printed };
+    };
+
+    let r = await shoot({ served: true }, 'page.html');
+    yes('the command takes the lock, then shoots, and gives the lock back only after the shot has ended', same(r.log, ['hold 0', `open ${port}`, `shot starts ${name} page.html`, 'shot ends', 'lock given back']) && r.code === 0, `${J(r.log)}, exit code ${r.code}`);
+
+    r = await shoot({ served: true, lock: [false, true], say: 'real' });
+    yes('the command itself says that it waits', same(r.printed, ["waiting up to 1200 s for Chrome: another drive or shot holds the machine's lock"]), J(r.printed));
+    yes('the command adds no wait of its own: a held lock is waited for 20 minutes', same(r.log.filter((l) => l.startsWith('hold')), ['hold 0', 'hold 1200000']) && r.log.includes('shot ends'), J(r.log));
+
+    r = await shoot({ served: true, lock: [false, false] });
+    yes('when Chrome is not free the command starts nothing, says why, and ends with exit code 1', same(r.log, ['hold 0', 'hold 1200000']) && r.code === 1 && same(r.kept, ["Chrome was not free within 1200 s: another drive or shot holds the machine's lock"]), `${J(r.log)}, exit code ${r.code}, ${J(r.kept)}`);
+
+    r = await shoot({ served: false, comesUp: false });
+    yes('a server that does not come up is stopped, nothing is shot, the lock is given back, exit code 1 with the reason', same(r.log, ['hold 0', `open ${port}`, `start ${name}`, `wait ${port} 8000`, 'stop 4242', 'lock given back']) && r.code === 1 && same(r.kept, [`server on ${port} did not come up`]), `${J(r.log)}, exit code ${r.code}, ${J(r.kept)}`);
+
+    r = await shoot({ served: false, say: 'real' });
+    yes('the command itself says that it stopped the server it started', same(r.printed, [`stopped the server this shot started on port ${port}`]), J(r.printed));
+    yes('a server the shot started is stopped after the shot, and then the lock is given back', same(r.log, ['hold 0', `open ${port}`, `start ${name}`, `wait ${port} 8000`, `shot starts ${name} undefined`, 'shot ends', 'stop 4242', 'lock given back']) && r.code === 0, `${J(r.log)}, exit code ${r.code}`);
+
+    r = await shoot({ served: false, shotFails: true });
+    yes('a shot that throws: the server is still stopped, the lock given back, exit code 1 with the error and where it came from', same(r.log.slice(-2), ['stop 4242', 'lock given back']) && !r.log.includes('shot ends') && r.code === 1 && r.kept.length === 1 && /the pictures failed/.test(r.kept[0]) && /\n\s+at /.test(r.kept[0]), `${J(r.log)}, exit code ${r.code}, ${J(r.kept).slice(0, 34)}`);
+
+    r = await shoot({ worktree: false, served: false });
+    yes('a lab with no worktree and nothing on its port is refused before the wait for Chrome', same(r.log, [`open ${port}`]) && r.code === 1 && same(r.kept, [`no worktree for ${name}; run add first`]), `${J(r.log)}, exit code ${r.code}, ${J(r.kept)}`);
+
+    r = await shoot({ worktree: false, served: true });
+    yes('a lab with no worktree whose port is served is shot', same(r.log, [`open ${port}`, 'hold 0', `open ${port}`, `shot starts ${name} undefined`, 'shot ends', 'lock given back']) && r.code === 0, `${J(r.log)}, exit code ${r.code}`);
+
+    /* ---- the selftest's own limit ---- */
+    const dog = (what) => spawnSync(process.execPath, [SELF, 'selftest-part', what], { encoding: 'utf8', timeout: 60000 }).status;
+    const hung = dog('watchdog-clean'), hungFailed = dog('watchdog-failed');
+    yes('a selftest that hangs with no failed check ends with the code mutate reads as timed out', hung === WATCHDOG_EXIT, `exit code ${hung}, WATCHDOG_EXIT ${WATCHDOG_EXIT}`);
+    yes('a selftest that hangs after a failed check ends with exit code 1', hungFailed === 1, `exit code ${hungFailed}`);
+  } finally { clean(); }
+  done = true;
+  if (!passed) { console.log('FAIL  labs-wt selftest: no check ran'); return 1; }
+  console.log(`labs-wt selftest: ${passed} passed, ${failed} failed`);
+  return failed ? 1 : 0;
+}
+
 /* ---------- cli ---------- */
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;
+// each ends the process itself and says the code: a stand-in left waiting must not keep it open
+if (isMain && process.argv[2] === 'selftest-part') process.exit(await selftestPart(process.argv[3], process.argv[4]));
+if (isMain && process.argv[2] === 'selftest') process.exit(await selftest());
 if (isMain) {
   const argv = process.argv.slice(2);
   const flag = (k) => { const i = argv.indexOf(k); if (i < 0) return null; const v = argv[i + 1]; argv.splice(i, 2); return v; };
@@ -451,7 +691,7 @@ if (isMain) {
     case 'ship': await cmdShip(need()); break;
     case 'remove': cmdRemove(need()); break;
     default:
-      console.log('commands: status | add <name...> [--base B] | serve <name> | stop <name|all> | shoot <name> [page] | drive <name> | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports');
+      console.log('commands: status | add <name...> [--base B] | serve <name> | stop <name|all> | shoot <name> [page] | drive <name> | gates <name> | sync <name> [--from B] | ship <name> | remove <name> | ports | selftest');
       process.exitCode = cmd ? 2 : 0;
   }
 }

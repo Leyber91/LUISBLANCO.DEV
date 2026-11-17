@@ -213,7 +213,7 @@ export function parseQuestion(text) {
   if (take(LOCKED, 'locked', w)) { locked = true; notes.push(LOCKED_WORDS); }
 
   // ---- the zone, cold and hot. "hot Jupiter" was read above as a size and a period. ----
-  if (take(/\b(temperate|habitable( zones?)?|goldilocks( zones?)?|liquid water)( of (its|their|the) (stars?|suns?|hosts?))?\b/, 'zone', w)) { zone = ['cons', 'opt']; notes.push('inside the habitable zone'); }
+  if (take(/\b(temperate|habitable( zones?)?|goldilocks( zones?)?|liquid water)( of (its|their|the) (stars?|suns?|hosts?))?\b/, 'zone', w)) { zone = ['cons', 'opt']; notes.push('inside the conservative or the optimistic habitable zone'); }
   if (take(/\b(cold|chilly|freezing|frigid)\b/, 'cold', w)) { cold = true; notes.push(COLD_WORDS); }
   if (take(/\b(hot|scorching)\b/, 'hot', w.replace(/\bhot jupiters?\b/g, blanks))) { hot = true; notes.push(HOT_WORDS); }
   if (cold && hot) doubt('cold and hot are both asked for');
@@ -312,7 +312,7 @@ export function validateQuery(j) {
     const show = (v) => (f.key === 'year' ? String(v) : thousands(v));
     out.notes.push(`${f.label} ${lo === null ? `up to ${show(hi)}` : hi === null ? `from ${show(lo)}` : `${show(lo)} to ${show(hi)}`} ${f.unit}`.trim());
   }
-  if (j.habitable_zone === true) { out.zone = ['cons', 'opt']; out.notes.push('inside the habitable zone'); }
+  if (j.habitable_zone === true) { out.zone = ['cons', 'opt']; out.notes.push('inside the conservative or the optimistic habitable zone'); }
   if (typeof j.method === 'string' && METHOD_GROUPS.some((g) => g.key !== 'other' && g.key === j.method)) { out.method = j.method; out.notes.push(`found by ${j.method.toLowerCase()}`); }
   // kinds: only names the picture has, each once
   const kinds = Array.isArray(j.kinds) ? [...new Set(j.kinds.filter((k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(LOOKS, k)))] : [];

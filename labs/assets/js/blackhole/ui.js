@@ -17,7 +17,7 @@ import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, SUBRING } from './probe.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING } from './probe.js';
 
 /** The texels of the GPU's measuring row; the Measure card's note quotes it. */
 const STRIP_N = 4096;
@@ -596,7 +596,7 @@ export function buildUI(app) {
     $('#bh-spec').innerHTML = spectrumPlot(anchors?.spectrum);
     const pk = anchors?.spectrum?.reduce((a, b) => (b[1] > a[1] ? b : a));
     $('#bh-specnote').textContent = m.Tpeak > 0 && pk
-      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.${fcolFits({ edd: m.edd, massSun: m.massSun, a: m.a, q: m.q }) ? ' [REAL] Shimura and Takahara 1995 find f about 1.7 for such a disk at 10% of Eddington, 1.8 to 2.0 near it.' : ' [ILLUSTRATIVE] Shimura and Takahara 1995 computed f for non-rotating holes of 1.4 to 10 M☉ and found no f that fits the local spectrum below 1% of Eddington; this disk lies outside that, so its spectrum is drawn, not predicted.'}`
+      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.${fcolFits({ edd: m.edd, massSun: m.massSun, a: m.a, q: m.q, fcol: anchors.fcol }) ? ' [REAL] Shimura and Takahara 1995 state f about 1.7 for such a disk at 10% of Eddington and 1.8 to 2.0 near the Eddington rate; this disk and this f are one of those.' : ' [ILLUSTRATIVE] Shimura and Takahara 1995 state f for non-rotating holes of 1.4 to 10 M☉ at two points, about 1.7 at 10% of Eddington and 1.8 to 2.0 near the Eddington rate, and none that fits below 1%; this disk or this f is not one of those, so its spectrum is drawn, not predicted.'}`
       : 'Set an accretion rate to see the disk spectrum.';
   }
 
@@ -720,7 +720,8 @@ export function buildUI(app) {
     const lam = res.pphi / -res.pt;     // axial angular momentum per energy, in M
     let title, cause, deriv;
     const fate = fateOf(res, m);
-    if (by === 'visitor') keep.ray({ p: [Math.min(1, Math.max(0, px / window.innerWidth)), Math.min(1, Math.max(0, py / window.innerHeight))], fate, n: fate === 'disk' ? Math.min(9, res.hits[0].n) : 0 });
+    // the ray by its place on the image plane, the same ray at any window size (review_s3b E)
+    if (by === 'visitor') keep.ray({ s: [sx, sy], fate, n: fate === 'disk' ? Math.min(9, res.hits[0].n) : 0 });
     if (fate === 'captured') {
       title = 'Shadow: this ray ends in the hole';
       cause = `Followed back, the light path crosses the horizon at r+ = ${s3(m.rh)} M. Its angular momentum per energy, ${s3(lam)} M, is too small to turn around at the photon orbits.`;
@@ -879,12 +880,13 @@ export function buildUI(app) {
     // ?ask=... asks the question box on load (a shareable question)
     const aq = new URLSearchParams(location.search).get('ask');
     if (aq) setTimeout(() => { $('#bh-askq').value = aq; ask.ask(aq); }, 600);
-    // ?p=x,y (fractions of the screen) opens the probe on that pixel: a shareable traced ray
-    const pq = new URLSearchParams(location.search).get('p');
-    if (pq) {
-      const [fx, fy] = pq.split(',').map(Number);
-      if (Number.isFinite(fx) && Number.isFinite(fy)) setTimeout(() => probeAt(fx * window.innerWidth, fy * window.innerHeight, 'link'), 400);
-    }
+    // ?ps=sx,sy (the image plane, tangent units: the record's rays) opens the probe on that ray at any window size;
+    // ?p=x,y (fractions of the window, links shared since G1) opens the pixel at that fraction, as it always did
+    const sp = new URLSearchParams(location.search);
+    const two = (v) => { const xy = String(v).split(',').map(Number); return xy.length === 2 && xy.every(Number.isFinite) ? xy : null; };
+    const ps = sp.has('ps') ? two(sp.get('ps')) : null, pf = !ps && sp.has('p') ? two(sp.get('p')) : null;
+    if (ps) setTimeout(() => { const { px, py } = tangentToScreen(ps[0], ps[1], window.innerWidth, window.innerHeight, viewNow().fov); probeAt(px, py, 'link'); }, 400);
+    else if (pf) setTimeout(() => probeAt(pf[0] * window.innerWidth, pf[1] * window.innerHeight, 'link'), 400);
   };
   ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, () => { app.lastInput = performance.now(); }, { passive: true }));
 

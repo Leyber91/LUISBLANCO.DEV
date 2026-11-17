@@ -25,7 +25,7 @@ function boot() {
   // (Store.open: the same baseline toQuery() writes a link against)
   const fromUrl = store.open(location.search);
   // a link that asks for a ray (p) or a question (ask) is a visitor's link too: the tour does not start over it
-  const hasState = Object.keys(fromUrl).length > 0 || params.has('p') || params.has('ask');
+  const hasState = Object.keys(fromUrl).length > 0 || params.has('p') || params.has('ps') || params.has('ask');
   if (store.reduced) store.set({ anim: false }, { instant: true, src: 'boot' });
 
   const renderer = new Renderer(canvas);
