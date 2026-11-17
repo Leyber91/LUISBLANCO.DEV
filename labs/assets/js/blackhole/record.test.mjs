@@ -113,15 +113,42 @@ guard('one door: what the store gives back passes the same checks', () => {
 });
 
 guard('the words: a link named as the page would show it', () => {
-  ok('M87*', R.linkLabel(M87) === 'M87*, a = 0.940, cinematic', R.linkLabel(M87));
+  ok('M87*', R.linkLabel(M87) === 'M87*, a = 0.940, i = 84°, cinematic', R.linkLabel(M87));
   ok('Sgr A*', R.linkLabel(SGRA).startsWith('Sgr A*, a = '), R.linkLabel(SGRA));
-  ok('a hole of your own with its charge and view', R.linkLabel(CUSTOM).startsWith('a hole of your own, a = 0.500, Q = 0.30, '), R.linkLabel(CUSTOM));
+  ok('a hole of your own with its mass, charge, inclination and view', /^a hole of your own, [\d.×⁰-⁹]+ M☉, a = 0\.500, Q = 0\.30, i = 60°, cinematic$/.test(R.linkLabel(CUSTOM)), R.linkLabel(CUSTOM));
+  // review_s3 finding 5: two different holes never share a name
+  const own1 = linkOf({ obj: 'custom', a: 0.5, incl: 20, mass: 1 }), own2 = linkOf({ obj: 'custom', a: 0.5, incl: 80, mass: 9 }), own3 = linkOf({ obj: 'custom', a: 0.5, incl: 20, mass: 9 });
+  ok('holes of your own differing in inclination or in mass have different names', new Set([own1, own2, own3].map(R.linkLabel)).size === 3, [own1, own2, own3].map(R.linkLabel).join(' | '));
   ok('no charge, no charge named', !R.linkLabel(M87).includes('Q ='));
   ok('the view by its label: telescope', R.linkLabel(linkOf({ obj: 'm87', view: 'telescope' })).endsWith(', telescope'), R.linkLabel(linkOf({ obj: 'm87', view: 'telescope' })));
   ok('an empty link is the page as it opens', R.linkLabel('').includes(', a = '), R.linkLabel(''));
   ok('a ray on the disk after going round names its order', R.rayWords({ fate: 'disk', n: 2 }) === 'lands on the disk after going round, n = 2' && R.rayWords({ fate: 'disk', n: 0 }) === R.FATE_WORDS.disk);
   ok('the other fates in their words', R.rayWords({ fate: 'captured', n: 0 }) === R.FATE_WORDS.captured && R.rayWords({ fate: 'sky', n: 0 }) === R.FATE_WORDS.sky && R.rayWords({ fate: 'ring', n: 0 }) === R.FATE_WORDS.ring);
   ok('the line, one and many', R.lineWords({ kept: 1, rays: 1, falls: 1 }) === '1 kept · 1 ray · 1 fall' && R.lineWords({ kept: 0, rays: 2, falls: 0 }) === '0 kept · 2 rays · 0 falls');
+});
+
+guard('a hole is the same hole whatever its azimuth (review_s3 finding 5: the idle drift)', () => {
+  // as the page drifts: M87*'s preset, then the azimuth alone
+  const turned = (() => { const s = new Store(); s.set(s.objectPatch('m87'), { instant: true }); s.set({ az: 37 }, { instant: true }); return s.toQuery(); })();
+  ok('the drifted link carries z=', /(^|&)z=/.test(turned), turned);
+  ok('holeKey drops only the azimuth', R.holeKey(turned) === R.holeKey(M87) && R.holeKey('a=1&z=5&i=3') === 'a=1&i=3' && R.holeKey('za=1') === 'za=1', R.holeKey(turned));
+  let r = R.keep(R.empty(), { q: M87, t: 1 }).record;
+  ok('a kept hole is still kept once the view has drifted', R.isKept(r, turned));
+  r = R.keep(r, { q: turned, t: 2 }).record;
+  ok('keeping it again after the drift moves it up with the new link, not a second entry', r.kept.length === 1 && r.kept[0].q === turned && r.kept[0].t === 2, JSON.stringify(r.kept));
+  ok('take out after the drift takes it out', R.unkeep(r, M87).ok && R.unkeep(r, M87).record.kept.length === 0);
+  ok('one door: two stored entries of one hole are one', R.normalise({ kept: [{ q: turned, t: 2 }, { q: M87, t: 1 }] }).kept.length === 1);
+});
+
+guard('every link the record writes opens the state it names (review_s3 finding 2)', () => {
+  ok('the page as it opens (an empty link) names its object, so the tour does not start', R.openLink('') === '?o=m87', R.openLink(''));
+  ok('any other link is kept as it is (prefixing an object could change the preset it opens from)', R.openLink('a=0.5') === '?a=0.5' && R.openLink(SGRA) === `?${SGRA}`, R.openLink('a=0.5'));
+  // the property: every link the record writes opens the state of the link it was made from
+  const stateOf = (search) => { const s = new Store(); s.open(search); return JSON.stringify(s.all()); };
+  const qs = ['', M87, SGRA, CUSTOM, 'a=0.5', 'i=30', 'v=telescope', 'z=37', linkOf({ obj: 'custom', a: 0.2, mass: 3 })];
+  const bad = qs.filter((q) => stateOf(R.openLink(q).slice(1)) !== stateOf(q));
+  ok(`every written link opens the same state as its source (${qs.length} links)`, bad.length === 0, JSON.stringify(bad));
+  ok('a ray link carries its pixel after the state', R.openLink('', '&p=0.5000,0.3000') === '?o=m87&p=0.5000,0.3000', R.openLink('', '&p=0.5000,0.3000'));
 });
 
 /* the store: a stand-in with the Labs OS progress API */

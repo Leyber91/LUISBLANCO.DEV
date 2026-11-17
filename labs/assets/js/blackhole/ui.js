@@ -139,7 +139,7 @@ export function buildUI(app) {
     <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
     <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
   left.appendChild(recCard);
-  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture') });
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim });
   app.keep = keep;     // for the console and the drive, as window.__bh is
   store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);
@@ -592,7 +592,7 @@ export function buildUI(app) {
     $('#bh-spec').innerHTML = spectrumPlot(anchors?.spectrum);
     const pk = anchors?.spectrum?.reduce((a, b) => (b[1] > a[1] ? b : a));
     $('#bh-specnote').textContent = m.Tpeak > 0 && pk
-      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.${fcolFits(m.edd) ? '' : ' [ILLUSTRATIVE] Below 1% of Eddington no colour correction fits the spectrum of a disk (Shimura and Takahara 1995): this one is drawn, not predicted.'}`
+      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.${fcolFits({ edd: m.edd, massSun: m.massSun, a: m.a, q: m.q }) ? ' [REAL] Shimura and Takahara 1995 find f about 1.7 for such a disk at 10% of Eddington, 1.8 to 2.0 near it.' : ' [ILLUSTRATIVE] Shimura and Takahara 1995 computed f for non-rotating holes of 1.4 to 10 M☉ and found no f that fits the local spectrum below 1% of Eddington; this disk lies outside that, so its spectrum is drawn, not predicted.'}`
       : 'Set an accretion rate to see the disk spectrum.';
   }
 
@@ -611,7 +611,9 @@ export function buildUI(app) {
     tick(dt) {
       if (!this.playing || !this.rows) return;
       const total = this.rows[this.rows.length - 1].tau;
-      this.tau = Math.min(total, this.tau + dt / 1000 * total / (store.reduced ? 1e9 : 22));
+      // under reduced motion the finished frame at once (labs-design), so the fall still reaches its stop and the
+      // record (review_s3 minor: it advanced at total / 1e9 per second and never arrived)
+      this.tau = store.reduced ? total : Math.min(total, this.tau + dt / 1000 * total / 22);
       const row = this.rows.find((r) => r.tau >= this.tau) || this.rows[this.rows.length - 1];
       const rStop = Math.max(row.r, app.model.rh * 1.08);
       store.set({ rcam: +rStop.toFixed(4), az: ((row.phi * 180 / Math.PI) % 360 + 540) % 360 - 180 }, { instant: true, src: 'journey' });

@@ -166,7 +166,7 @@ function page({ still = true } = {}) {
   const asked = [];
   const pg = { st, ap, cap, asked, points: null, src: null };
   st.on((changed, state, src) => { pg.src = src; });
-  const jr = { play() { asked.push('play'); }, stop() { asked.push('stop'); } };
+  const jr = { play(by) { asked.push('play:' + by); }, stop() { asked.push('stop'); } };
   // anchors traced for the view the state is in, while points are set
   const getAnchors = () => (pg.points ? { key: viewKey(st.view(true)), ...pg.points } : null);
   pg.T = new Tour(ap, { caption: cap, toScreen: (x, y) => [700 + 100 * x, 450 - 100 * y], getAnchors, journey: jr });
@@ -238,7 +238,7 @@ guard('moving through the tour', () => {
   T.go(at('fall'));
   T.next();
   T.go(at('arrive'));
-  ok('the fall stop plays the journey; the stops around it stop it', asked.join(' ') === 'play stop stop', asked.join(' '));
+  ok('the fall stop plays the journey as the tour (the record keeps only a fall the visitor started); the stops around it stop it', asked.join(' ') === 'play:tour stop stop', asked.join(' '));
 });
 
 guard('the tour\'s clock', () => {

@@ -144,15 +144,22 @@ for (const k of [0.08, 0.12]) {
 {
   const glLambda = (a, r) => { const D = r * r - 2 * r + a * a; return a + (r / a) * (r - 2 * D / (r - 1)); };
   const glEta = (a, r) => { const D = r * r - 2 * r + a * a; return (r ** 3 / (a * a)) * (4 * D / ((r - 1) ** 2) - r); };
-  let worst = 0, n = 0;
+  // review_s3 finding 10: beta^2 cannot see a half drawn on the wrong side, so the halves' signs are checked too; and
+  // a point is skipped only where the root sits on the photon shell's edge, at most the two ends of each curve
+  let worst = 0, n = 0, skipped = 0, total = 0, wrongSide = 0, curves = 0;
   for (const a of [0.5, 0.94, 0.998]) for (const inclDeg of [17, 60, 90]) {
     const incl = inclDeg * Math.PI / 180, s = Math.sin(incl), c = Math.cos(incl);
     const rLo = 2 * (1 + Math.cos(2 / 3 * Math.acos(-a))), rHi = 2 * (1 + Math.cos(2 / 3 * Math.acos(a)));
-    for (const [alpha, beta] of K.shadowCurve(a, incl, 400)) {
+    const pts = K.shadowCurve(a, incl, 400), half = pts.length / 2;
+    curves++;
+    // shadowCurve gives the upper half first (beta >= 0), then the lower (beta <= 0)
+    pts.forEach(([, beta], i) => { if (i < half ? beta < 0 : beta > 0) wrongSide++; });
+    for (const [alpha, beta] of pts) {
+      total++;
       const want = -alpha * s;
       let lo = rLo, hi = rHi;
       const f = (r) => glLambda(a, r) - want;
-      if (f(lo) * f(hi) > 0) continue;            // the curve's ends, where the root sits on the shell's edge
+      if (f(lo) * f(hi) > 0) { skipped++; continue; }   // the curve's ends, where the root sits on the shell's edge
       for (let k = 0; k < 200; k++) { const mid = 0.5 * (lo + hi); if (f(lo) * f(mid) <= 0) hi = mid; else lo = mid; }
       const r = 0.5 * (lo + hi), L = glLambda(a, r);
       const b2 = glEta(a, r) + a * a * c * c - L * L * c * c / (s * s);
@@ -161,7 +168,8 @@ for (const k of [0.08, 0.12]) {
       n++;
     }
   }
-  ok(`critical curve = Gralla & Lupsasca 2020 eqs (38)-(40), (55)-(57) at a = 0.5, 0.94, 0.998 and i = 17, 60, 90 deg`, n > 5000 && worst < 1e-9, `${n} points, worst |beta^2| difference ${worst.toExponential(2)} M^2`);
+  ok(`critical curve = Gralla & Lupsasca 2020 eqs (38)-(40), (55)-(57) at a = 0.5, 0.94, 0.998 and i = 17, 60, 90 deg`, worst < 1e-9 && skipped <= 4 * curves && wrongSide === 0,
+    `${n} of ${total} points compared (${skipped} skipped at the curves' ends, at most ${4 * curves}), ${wrongSide} on the wrong side, worst |beta^2| difference ${worst.toExponential(2)} M^2`);
 }
 
 /* 4. Schwarzschild numbers */

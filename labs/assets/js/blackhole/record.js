@@ -38,7 +38,7 @@
 
 import { Store } from './state.js';
 import { OBJECTS, VIEWS } from './config.js';
-import { spinText } from './physics.js';
+import { spinText, sci, deg } from './physics.js';
 
 export const V = 1;
 export const LIMITS = Object.freeze({ kept: 50, rays: 100, falls: 50, link: 400, dropped: 1000000, thumbs: 12, thumb: 12000 });
@@ -70,7 +70,7 @@ export function normalise(data) {
   const unique = (xs, key) => { const seen = new Set(); return xs.filter((e) => { const k = key(e); if (seen.has(k)) return false; seen.add(k); return true; }); };
   const dropped = Number.isInteger(d.dropped) && d.dropped >= 0 ? Math.min(d.dropped, LIMITS.dropped) : 0;
   return {
-    kept: thumbsBounded(unique(kept, (e) => e.q).slice(0, LIMITS.kept)),
+    kept: thumbsBounded(unique(kept, (e) => holeKey(e.q)).slice(0, LIMITS.kept)),
     rays: rays.slice(0, LIMITS.rays),
     falls: falls.slice(0, LIMITS.falls),
     dropped,
@@ -90,12 +90,12 @@ export function keep(record, { q, t, img = null }) {
   if (img !== null && !isThumb(img)) return refuse(record, 'the frame\'s picture is not a small JPEG');
   if (!isLink(q)) return refuse(record, BAD_LINK);
   if (!isTime(t)) return refuse(record, BAD_TIME);
-  const rest = record.kept.filter((e) => e.q !== q);
+  const rest = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));
   if (rest.length === record.kept.length && record.kept.length >= LIMITS.kept) return refuse(record, FULL);
   return { ok: true, why: '', record: { ...record, kept: thumbsBounded([img ? { q, t, img } : { q, t }, ...rest]) } };
 }
 export function unkeep(record, q) {
-  const kept = record.kept.filter((e) => e.q !== q);
+  const kept = record.kept.filter((e) => holeKey(e.q) !== holeKey(q));
   return kept.length === record.kept.length ? refuse(record, 'that hole is not kept') : { ok: true, why: '', record: { ...record, kept } };
 }
 /** A traced ray (most recent first); past the bound the oldest goes, counted in `dropped`. */
@@ -118,7 +118,10 @@ export function fall(record, { q, t, tau }) {
   const over = Math.max(0, falls.length - LIMITS.falls);
   return { ok: true, why: '', record: { ...record, falls: falls.slice(0, LIMITS.falls), dropped: Math.min(LIMITS.dropped, record.dropped + over) } };
 }
-export const isKept = (record, q) => record.kept.some((e) => e.q === q);
+export const isKept = (record, q) => record.kept.some((e) => holeKey(e.q) === holeKey(q));
+/** A hole's identity in the record: its link without the azimuth (z), which the idle drift turns after 20 s
+ *  without input, so a kept hole does not stop being kept while the visitor looks at it (review_s3 finding 5). */
+export const holeKey = (q) => String(q).split('&').filter((kv) => kv && !kv.startsWith('z=')).join('&');
 export const counts = (record) => ({ kept: record.kept.length, rays: record.rays.length, falls: record.falls.length });
 
 /* ---------------- the words ---------------- */
@@ -128,7 +131,17 @@ export function linkLabel(q) {
   const s = new Store();
   s.open(q);
   const st = s.all(), o = OBJECTS.find((x) => x.id === st.obj);
-  return `${o ? o.name : 'a hole of your own'}, a = ${spinText(st.a)}${st.q > 0 ? `, Q = ${(+st.q).toFixed(2)}` : ''}, ${VIEWS[st.view].label.toLowerCase()}`;
+  return `${o ? o.name : `a hole of your own, ${sci(10 ** st.mass)} M☉`}, a = ${spinText(st.a)}${st.q > 0 ? `, Q = ${(+st.q).toFixed(2)}` : ''}, i = ${deg(st.incl)}°, ${VIEWS[st.view].label.toLowerCase()}`;
+}
+/** The link the record writes: always naming the object, so it opens that state and the tour does not start (a
+ *  link with no key of the state is the page's first visit; review_s3 finding 2). extra: more of the address. */
+export function openLink(q, extra = '') {
+  // only the empty link (the page as it opens) carries no key; it gets its object's, which opens the same preset.
+  // Any other link is left as it is: prefixing an object could change the preset it opens from.
+  if (q) return `?${q}${extra}`;
+  const s = new Store();
+  s.open('');
+  return `?o=${s.all().obj}${extra}`;
 }
 export const rayWords = (e) => (e.fate === 'disk' ? (e.n > 0 ? `lands on the disk after going round, n = ${e.n}` : FATE_WORDS.disk) : FATE_WORDS[e.fate]);
 export const lineWords = (c) => `${c.kept} kept · ${c.rays} ${c.rays === 1 ? 'ray' : 'rays'} · ${c.falls} ${c.falls === 1 ? 'fall' : 'falls'}`;

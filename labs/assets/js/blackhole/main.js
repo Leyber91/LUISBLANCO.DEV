@@ -24,7 +24,8 @@ function boot() {
   // the preset of the object and view the link names, then the link's own keys on top
   // (Store.open: the same baseline toQuery() writes a link against)
   const fromUrl = store.open(location.search);
-  const hasState = Object.keys(fromUrl).length > 0;
+  // a link that asks for a ray (p) or a question (ask) is a visitor's link too: the tour does not start over it
+  const hasState = Object.keys(fromUrl).length > 0 || params.has('p') || params.has('ask');
   if (store.reduced) store.set({ anim: false }, { instant: true, src: 'boot' });
 
   const renderer = new Renderer(canvas);
