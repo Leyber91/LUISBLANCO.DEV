@@ -8,14 +8,15 @@
 import * as K from './kerr.js';
 import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION, EHT_RES } from './config.js';
 import { tanHalfV, derive, shadowFor, s3, integratorShadow, measurement, published, fall, sci, dur, len,
-  sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G } from './physics.js';
+  sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G, fcolFits } from './physics.js';
 import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour, setHTML } from './tour.js';
+import { createKeep } from './keep.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, SUBRING } from './probe.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING } from './probe.js';
 
 /** The texels of the GPU's measuring row; the Measure card's note quotes it. */
 const STRIP_N = 4096;
@@ -129,6 +130,16 @@ export function buildUI(app) {
     <div class="bh-seg"><button class="bh-btn" type="button" id="bh-json">State JSON</button><label class="bh-btn" for="bh-import" tabindex="0">Import JSON</label><input type="file" id="bh-import" accept="application/json" hidden><button class="bh-btn" type="button" id="bh-csv">Objects CSV</button></div>
     <p class="bh-note" id="bh-actnote">The link and the JSON reproduce this exact frame. The plate stamps the parameters and the measurement onto the image.</p>`;
   left.appendChild(actCard);
+  // the record (road 1.09): keep.js draws it, record.js holds its rules
+  const recCard = el('div', 'bh-card');
+  recCard.innerHTML = `<h2>Your record <em id="bh-recline">reading</em></h2>
+    <div class="bh-seg"><button class="bh-btn" type="button" id="bh-keep" aria-pressed="false" disabled>Keep this hole</button></div>
+    <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
+    <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
+  left.appendChild(recCard);
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim });
+  app.keep = keep;     // for the console and the drive, as window.__bh is
+  store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);
   $('#bh-anim', actCard).addEventListener('click', () => store.set({ anim: !store.get('anim') }));
   $('#bh-notes', actCard).addEventListener('click', () => store.set({ notes: !store.get('notes') }));
@@ -419,7 +430,7 @@ export function buildUI(app) {
       dd(`tide at r+, ${BODY_M} m`, sci(m.tidalHg), 'g', tag('mass', 'spin')),
       dd(`${TIDE_G} g tide at`, m.tide10g > m.rh ? `${s3(m.tide10g)} M` : 'inside r+', '', tag('mass', 'spin')),
       // the inner horizon r- = 1 - sqrt(1 - a^2 - Q^2) is the centre only without spin and charge
-      dd(m.rmin < 5e-7 ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tag('mass', 'spin')),
+      dd(m.endsAtCentre ? 'r+ to r = 0' : 'r+ to inner r-', dur(m.interiorTauS), '', tag('mass', 'spin')),
     ].join('');
     $('#bh-insttag').textContent = o ? o.name : 'custom';
     // the card that matters for this view goes first
@@ -566,15 +577,17 @@ export function buildUI(app) {
     $('#bh-spec').innerHTML = spectrumPlot(anchors?.spectrum);
     const pk = anchors?.spectrum?.reduce((a, b) => (b[1] > a[1] ? b : a));
     $('#bh-specnote').textContent = m.Tpeak > 0 && pk
-      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.`
+      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.${fcolFits({ edd: m.edd, massSun: m.massSun, a: m.a, q: m.q, fcol: anchors.fcol }) ? ' [REAL] Shimura and Takahara 1995 state f about 1.7 for such a disk at 10% of Eddington and 1.8 to 2.0 near the Eddington rate; this disk and this f are one of those.' : ' [ILLUSTRATIVE] Shimura and Takahara 1995 state f for non-rotating holes of 1.4 to 10 M☉ at two points, about 1.7 at 10% of Eddington and 1.8 to 2.0 near the Eddington rate, and none that fits below 1%; this disk or this f is not one of those, so its spectrum is drawn, not predicted.'}`
       : 'Set an accretion rate to see the disk spectrum.';
   }
 
   /* ---------- the fall ---------- */
   const journey = {
     playing: false, tau: 0, rows: null,
-    play() {
-      // the fall the view is going to (incl may still be easing), with the hole's charge
+    play(by = 'visitor') {
+      // the fall the view is going to (incl may still be easing), with the hole's charge; who started it (the record
+      // keeps only a fall the visitor started, never the tour's)
+      this.by = by;
       this.rows = fall(store.get('a'), store.get('incl'), 40, store.get('q'));
       this.tau = 0; this.playing = true; this.done = false;
       store.set({ observer: 'faller', rcam: 40 }, { instant: true, src: 'journey' });
@@ -583,16 +596,23 @@ export function buildUI(app) {
     tick(dt) {
       if (!this.playing || !this.rows) return;
       const total = this.rows[this.rows.length - 1].tau;
-      this.tau = Math.min(total, this.tau + dt / 1000 * total / (store.reduced ? 1e9 : 22));
+      // under reduced motion the finished frame at once (labs-design), so the fall still reaches its stop and the
+      // record (review_s3 minor: it advanced at total / 1e9 per second and never arrived)
+      this.tau = store.reduced ? total : Math.min(total, this.tau + dt / 1000 * total / 22);
       const row = this.rows.find((r) => r.tau >= this.tau) || this.rows[this.rows.length - 1];
       const rStop = Math.max(row.r, app.model.rh * 1.08);
       store.set({ rcam: +rStop.toFixed(4), az: ((row.phi * 180 / Math.PI) % 360 + 540) % 360 - 180 }, { instant: true, src: 'journey' });
-      if (rStop <= app.model.rh * 1.08 + 1e-6) { this.playing = false; this.done = true; app.request(); }
+      if (rStop <= app.model.rh * 1.08 + 1e-6) {
+        this.playing = false; this.done = true; app.request();
+        if (this.by === 'visitor') keep.fall({ tau: fallRow(store.all()).tau * app.model.tg });
+      }
     },
   };
   $('#bh-fallgo', fallCard).addEventListener('click', () => { app.tour?.stop(); store.set(store.viewPatch('journey')); journey.play(); });
   $('#bh-fallstop', fallCard).addEventListener('click', () => journey.stop());
   let fallGeom = null;
+  /** The fall's row at the camera's radius: the Fall card's clock, and the record's (one rule). */
+  const fallRow = (s) => { const rows = fall(s.a, s.incl, 40, s.q); return rows.find((r) => r.r <= s.rcam) || rows[0]; };
   function drawFall() {
     const s = store.all(), m = app.model;
     const rows3 = fall(s.a, s.incl, 40, s.q);
@@ -601,7 +621,7 @@ export function buildUI(app) {
     const g = fallChart({ rows: rows3, tg: m.tg, rcur: s.view === 'journey' ? rc : null, rh: m.rh, ri: m.ri, rph: m.rph, tidalScale, tide10g: m.tide10g });
     fallGeom = g;
     $('#bh-fall').innerHTML = g.svg;
-    const row = rows3.find((r) => r.r <= rc) || rows3[0];
+    const row = fallRow(s);
     const inJ = s.view === 'journey';
     $('#bh-fallread').innerHTML = [
       dd('your clock τ since 40 M', inJ ? dur(row.tau * m.tg) : '--', '', tagR),
@@ -661,7 +681,9 @@ export function buildUI(app) {
 
   /* ---------- the probe ---------- */
   const canvas = $('#bh-canvas');
-  function probeAt(px, py) {
+  /** What a traced ray did, in the record's words: the probe's title reads the same rule. */
+  const fateOf = (res, m) => (res.fate === 'captured' ? 'captured' : res.fate === 'disk' ? 'disk' : res.minr < m.rphr * 1.08 ? 'ring' : 'sky');
+  function probeAt(px, py, by = 'visitor') {
     // the ray the renderer traced for this pixel: same view object (Store.view, charge
     // included), same pixel mapping, same horizon and ISCO (probe.js, tested in probe.test.mjs)
     const v = viewNow();
@@ -678,7 +700,10 @@ export function buildUI(app) {
     const m = { rh: K.horizon(v.a, q), rph: K.photonOrbit(v.a, 1, q), rphr: K.photonOrbit(v.a, -1, q) };
     const lam = res.pphi / -res.pt;     // axial angular momentum per energy, in M
     let title, cause, deriv;
-    if (res.fate === 'captured') {
+    const fate = fateOf(res, m);
+    // the ray by its place on the image plane, the same ray at any window size (review_s3b E)
+    if (by === 'visitor') keep.ray({ s: [sx, sy], fate, n: fate === 'disk' ? Math.min(9, res.hits[0].n) : 0 });
+    if (fate === 'captured') {
       title = 'Shadow: this ray ends in the hole';
       cause = `Followed back, the light path crosses the horizon at r+ = ${s3(m.rh)} M. Its angular momentum per energy, ${s3(lam)} M, is too small to turn around at the photon orbits.`;
       // the curve is named as every label names it: how the shadow was obtained (physics.js SHADOW_HOW; K4)
@@ -686,7 +711,7 @@ export function buildUI(app) {
       deriv = q > 0
         ? `${how === 'rn' ? `Reissner-Nordstrom, Q/M = ${q.toFixed(2)}: the critical curve is the ${SHADOW_HOW.rn.curve}, b_c = r_p / sqrt(1 - 2/r_p + Q^2/r_p^2) at r_p = (3 + sqrt(9 - 8 Q^2)) / 2.` : `Kerr-Newman, Q/M = ${q.toFixed(2)}: no closed-form critical curve is used.`} The ray is integrated in the Kerr-Schild form\n  g^mn = eta^mn - f k^m k^n,  f = r^2 (2 r - Q^2) / (r^4 + a^2 z^2)\nand captured when r < 0.98 r+, r+ = 1 + sqrt(1 - a^2 - Q^2) = ${s3(m.rh)} M.`
         : 'Critical curve (Bardeen 1973), spherical photon orbit radius r:\n  xi = (r^2 (3 - r) - a^2 (r + 1)) / (a (r - 1))\n  eta = r^3 (4 a^2 - r (r - 3)^2) / (a^2 (r - 1)^2)\n  alpha = -xi / sin i,  beta = +- sqrt(eta + a^2 cos^2 i - xi^2 cot^2 i)';
-    } else if (res.fate === 'disk') {
+    } else if (fate === 'disk') {
       const h = res.hits[0];
       const nearIsco = h.r < ri * 1.08;
       title = h.n === 0 ? (nearIsco ? 'ISCO edge of the disk' : (res.g > 1.05 ? 'Approaching side of the disk' : res.g < 0.8 ? 'Receding side of the disk' : 'Disk, direct image')) : `Disk, n = ${h.n} image`;
@@ -694,7 +719,7 @@ export function buildUI(app) {
         : nearIsco ? `Gas here sits at r = ${s3(h.r)} M, just outside the last stable orbit at ${s3(ri)} M. Inside it, gas plunges and stops radiating.`
           : `Gas at r = ${s3(h.r)} M orbiting at ${s3(K.diskSpeed(v.a, h.r, q))} c. Its light reaches you shifted by g = ${s3(res.g)}, so intensity x ${s3(Math.pow(res.g, 4))}.`;
       deriv = `Redshift (circular orbit, conserved E and L of the ray):\n  g = 1 / (u^t (E - Omega L)),  ${q > 0 ? 'Omega = sqrt(r - Q^2) / (r^2 + a sqrt(r - Q^2))' : 'Omega = 1 / (r^1.5 + a)'}\n  here E = ${s3(-res.pt)}, L = ${s3(res.pphi)}, g = ${s3(res.g)}\nObserved intensity I = g^4 I_emit (I_nu / nu^3 is invariant).\nTemperature: Page & Thorne 1974 flux, T = (F / sigma)^(1/4).`;
-    } else if (res.minr < m.rphr * 1.08) {
+    } else if (fate === 'ring') {
       title = 'Photon ring: light that skimmed the photon orbits';
       cause = `This ray came within ${s3(res.minr)} M of the centre, among the unstable photon orbits (${s3(m.rph)} to ${s3(m.rphr)} M), and was flung back out. Each extra half-orbit thins such images by e^-gamma.`;
       deriv = `Lyapunov exponent of the spherical photon orbit (Johnson et al. 2020):
@@ -835,12 +860,13 @@ export function buildUI(app) {
     // ?ask=... asks the question box on load (a shareable question)
     const aq = new URLSearchParams(location.search).get('ask');
     if (aq) setTimeout(() => { $('#bh-askq').value = aq; ask.ask(aq); }, 600);
-    // ?p=x,y (fractions of the screen) opens the probe on that pixel: a shareable traced ray
-    const pq = new URLSearchParams(location.search).get('p');
-    if (pq) {
-      const [fx, fy] = pq.split(',').map(Number);
-      if (Number.isFinite(fx) && Number.isFinite(fy)) setTimeout(() => probeAt(fx * window.innerWidth, fy * window.innerHeight), 400);
-    }
+    // ?ps=sx,sy (the image plane, tangent units: the record's rays) opens the probe on that ray at any window size;
+    // ?p=x,y (fractions of the window, links shared since G1) opens the pixel at that fraction, as it always did
+    const sp = new URLSearchParams(location.search);
+    const two = (v) => { const xy = String(v).split(',').map(Number); return xy.length === 2 && xy.every(Number.isFinite) ? xy : null; };
+    const ps = sp.has('ps') ? two(sp.get('ps')) : null, pf = !ps && sp.has('p') ? two(sp.get('p')) : null;
+    if (ps) setTimeout(() => { const { px, py } = tangentToScreen(ps[0], ps[1], window.innerWidth, window.innerHeight, viewNow().fov); probeAt(px, py, 'link'); }, 400);
+    else if (pf) setTimeout(() => probeAt(pf[0] * window.innerWidth, pf[1] * window.innerHeight, 'link'), 400);
   };
   ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, () => { app.lastInput = performance.now(); }, { passive: true }));
 
