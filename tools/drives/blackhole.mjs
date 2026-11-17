@@ -297,7 +297,9 @@ export const READ_LABEL_LINES = `(() => {
    styled as a button, set its words 9 px above its neighbours'). */
 export const SEG_CENTRED = `(() => {
   const out = [];
-  for (const e of document.querySelectorAll('.bh-seg > .bh-btn')) {
+  // every button-shaped control in a row: the rows of controls and the record's list (whose Open, a link drawn as a
+  // button, sat at the top of its 44 px box at 390 on 2026-11-17)
+  for (const e of document.querySelectorAll('.bh-seg > .bh-btn, .bh-rec .bh-btn')) {
     const b = e.getBoundingClientRect();
     if (b.height < 1 || !e.getClientRects().length) continue;
     const g = document.createRange(); g.selectNodeContents(e);
@@ -438,6 +440,81 @@ export async function FALL_STEP(p, { base, width, ready }) {
   const r2 = await p.ev('window.__bh.store.get("rcam")');
   p.check('a scrub let go off the Fall chart has ended: moving over the chart afterwards with no button held leaves the fall where it was', r1 === r2, JSON.stringify({ r1, r2 }));
   await sheet(false);
+}
+
+/* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,
+   a fall the visitor starts and the tour's, take out, and a browser whose storage is refused. Every count is read
+   relative to the record as the step finds it, since earlier steps press pixels and run a fall, which the record keeps.
+   after(label): the main scenario's pixel rules on the frame with the kept hole. Self-contained, like FALL_STEP. */
+export async function RECORD_STEP(p, { base, width, ready, after = async () => {} }) {
+  const phone = width < 700;
+  const READ = `(() => { const e = document.querySelector('#bh-recline'); return !!e && e.textContent !== 'reading'; })()`;
+  const COUNTS = `(() => { const k = window.__bh.keep; const r = k.record; return { kept: r.kept.length, rays: r.rays.length, falls: r.falls.length }; })()`;
+  const at = (sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
+  const press = async (sel) => { const c = await at(sel); if (!c) { p.check(`the page has ${sel}`, false); return false; } await p.click(c[0], c[1]); return true; };
+  const sheet = async (open) => {
+    if (!phone) return;
+    const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
+    if (now !== open) { await press('.bh-sheet-h'); await p.sleep(800); }
+  };
+  const open = async (q) => { await p.go(`${base}/labs/bh_animation_page.html${q}`); await p.until(ready, 60000); return p.until(READ, 20000); };
+  const until = (expr) => p.until(`(() => { const c = ${COUNTS}; return ${expr}; })()`, 8000);
+
+  p.check('the record is read: its line leaves "reading"', await open('?o=m87'), await p.ev(`document.querySelector('#bh-recline').textContent`));
+  const c0 = await p.ev(COUNTS);
+  await sheet(true);
+  await press('#bh-keep');
+  p.check('Keep: the hole is kept', await until(`c.kept === ${c0.kept + 1}`), JSON.stringify(await p.ev(COUNTS)));
+  const k = await p.ev(`(() => ({ pressed: document.querySelector('#bh-keep').getAttribute('aria-pressed'), text: document.querySelector('#bh-keep').textContent, row: (document.querySelector('#bh-reclist li span') || {}).textContent || '', line: document.querySelector('#bh-recline').textContent }))()`);
+  p.check('the button says so, pressed; the list names the hole as the page shows it; the line counts it', k.pressed === 'true' && k.text === 'Kept' && k.row === 'M87*, a = 0.940, cinematic' && k.line.startsWith(`${c0.kept + 1} kept`), JSON.stringify(k));
+  await after('the record, a hole kept');
+
+  p.check('reloaded, the record is read again', await open('?o=m87'));
+  p.check('the hole is still kept after a reload', (await p.ev(COUNTS)).kept === c0.kept + 1 && (await p.ev(`document.querySelector('#bh-keep').getAttribute('aria-pressed')`)) === 'true');
+
+  await sheet(false);
+  const c1 = await p.ev(COUNTS);
+  const cv = await p.ev(`(() => { const r = document.querySelector('#bh-canvas').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * 0.3]; })()`);
+  await p.click(cv[0], cv[1]);
+  p.check('a pixel pressed: a ray recorded', await until(`c.rays === ${Math.min(100, c1.rays + 1)}`), JSON.stringify(await p.ev(COUNTS)));
+  const ray = await p.ev('window.__bh.keep.record.rays[0]');
+  p.check('the ray keeps its link, its pixel as fractions of the screen and a fate the page names', !!ray && ray.p.every((v) => v >= 0 && v <= 1) && ['captured', 'disk', 'ring', 'sky'].includes(ray.fate), JSON.stringify(ray));
+
+  const c2 = await p.ev(COUNTS);
+  await open('?o=m87&p=0.5,0.4');
+  await p.sleep(2500);
+  p.check('a ray a link opens is not recorded (the visitor did not press it)', (await p.ev(COUNTS)).rays === c2.rays, JSON.stringify(await p.ev(COUNTS)));
+
+  const ex = await p.ev(`(async () => { const f = await window.__bh.keep.os.privacy.exportAll(); const s = JSON.stringify(f); return { hasLab: s.includes('black-hole'), hasKept: s.includes('"kept"'), events: (s.match(/black-hole\\.(keep|ray)/g) || []).length }; })()`);
+  p.check('the privacy export carries the record and its events', ex.hasLab && ex.hasKept && ex.events >= 2, JSON.stringify(ex));
+
+  await open('?o=m87');
+  const c3 = await p.ev(COUNTS);
+  await sheet(true);
+  await press('#bh-fallgo');
+  await sheet(false);
+  p.check('a fall pressed: a fall recorded at its stop', await p.until(`(() => { const c = ${COUNTS}; return c.falls === ${Math.min(50, c3.falls + 1)}; })()`, 150000), JSON.stringify(await p.ev(COUNTS)));
+  const fl = await p.ev(`(async () => { const P = await import('/labs/assets/js/blackhole/physics.js'); const a = window.__bh, f = a.keep.record.falls[0];
+    const rw = [...document.querySelectorAll('#bh-fallread .rw')].find((r) => /your clock/.test(r.textContent));
+    return { rec: f ? P.dur(f.tau).replace(/\\s+/g, '') : null, card: rw ? rw.querySelector('dd').textContent.replace(/\\s+/g, '') : null }; })()`);
+  p.check(`the fall's proper time is the Fall card's at the stop, ${fl.card}`, !!fl.rec && fl.rec === fl.card, JSON.stringify(fl));
+  const c4 = await p.ev(COUNTS);
+  const fallStop = await p.ev(`(async () => { const C = await import('/labs/assets/js/blackhole/config.js'); return C.TOUR.findIndex((s) => s.id === 'fall'); })()`);
+  await p.ev(`window.__bh.tour.start(${fallStop})`);
+  await p.until(`(() => { const s = window.__bh.store.all(), m = window.__bh.model; return s.view === 'journey' && s.rcam <= Math.max(3, m.rh * 1.08) + 1e-4; })()`, 150000);
+  await p.sleep(1500);
+  p.check("the tour's fall is not recorded (the visitor did not start it)", (await p.ev(COUNTS)).falls === c4.falls, JSON.stringify(await p.ev(COUNTS)));
+  await p.ev('window.__bh.tour.stop()');
+
+  const c5 = await p.ev(COUNTS);
+  await sheet(true);
+  await press('#bh-reclist button[data-out]');
+  p.check('Take out: the hole is out', await until(`c.kept === ${c5.kept - 1}`), JSON.stringify(await p.ev(COUNTS)));
+  await sheet(false);
+
+  await open('?o=m87&os-fixture=storage-unavailable');
+  const off = await p.ev(`(() => ({ store: document.querySelector('#bh-keep').closest('.bh-card').dataset.store, foot: document.querySelector('#bh-recfoot').textContent }))()`);
+  p.check('a browser whose storage is refused: the record is in memory and the card says it lasts until the page closes', off.store === 'memory' && /until the page closes/.test(off.foot), JSON.stringify(off));
 }
 
 /* ---- the scenario ---- */
@@ -700,6 +777,9 @@ export default async function blackhole(p, { base, width }) {
 
   /* ---- 4b. a fall to its stop, and a scrub let go off the chart ---- */
   await FALL_STEP(p, { base, width, ready: READY });
+
+  /* ---- 4c. the record (road 1.09) ---- */
+  await RECORD_STEP(p, { base, width, ready: READY, after: (label) => pixelRules(label) });
 
   /* ---- 5. the Instrument card's Hawking temperature, read against derive() in the page (P5-1) ---- */
   const HAWK = `(async () => { const P = await import('/labs/assets/js/blackhole/physics.js');

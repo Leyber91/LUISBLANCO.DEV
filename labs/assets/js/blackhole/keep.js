@@ -142,7 +142,11 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
 
   api.ready = (async () => {
     await start();
-    try { os = await LabsOS.init({ lab: LAB, ...(fixture ? { fixture } : {}) }); } catch { os = null; }
+    // ui: false, the sharing question is not asked on this page: the instrument fills the window with fixed panels,
+    // and Labs OS's strip covered the phone's sheet handle (the only way to the controls) and the foot of the panels
+    // (the drive, 2026-11-17). Unanswered, nothing is sent: a usage event leaves the browser only where the visitor
+    // allowed it, on another lab or on the privacy page this card links.
+    try { os = await LabsOS.init({ lab: LAB, ui: false, ...(fixture ? { fixture } : {}) }); } catch { os = null; }
     if (os) {
       for (const [type, cls] of [['black-hole.keep', 'outcome'], ['black-hole.ray', 'action'], ['black-hole.fall', 'outcome']]) { try { os.register(type, { cls }); } catch { /* registered already */ } }
       try { const r = await R.read(os); take(r.record, r.newer); } catch { take(R.empty(), false); said = 'The stored record could not be read, so what is listed here is empty. The stored record has not been changed.'; }
