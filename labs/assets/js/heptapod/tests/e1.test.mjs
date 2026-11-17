@@ -5,6 +5,18 @@
      node labs/assets/js/heptapod/tests/e1.test.mjs          gate size (about 30 s of CPU; the gate allows 120 s wall)
      node labs/assets/js/heptapod/tests/e1.test.mjs --full   the binding size of the plan's pass test
      ... --full --shard 2/4                                   one of 4 reproducible shards of the full run
+                                                              (counted from 0: 0/4 to 3/4)
+     ... --merge s0.log s1.log s2.log s3.log                  checks that the shards' logs are one whole
+                                                              run and prints its sums
+
+   A run that tests nothing fails. Arguments are checked before anything
+   runs: an unknown flag, a count that is not a positive integer, a shard
+   outside 0 to K-1 or a K larger than the smallest sharded section exits
+   2; a run in which a sharded section ran no case exits 1. On 2026-11-15
+   `--shard 4/4` (counted from 1) selected no graph and no tree and exited
+   0. A full run made of shards is claimed only from --merge, which refuses
+   logs of different seeds, sizes or versions, a missing or repeated shard,
+   a shard that failed, and sums that do not reach the full size.
 
    Sizes: gate 30 graphs (180 drawings), 30 crops, 30 plane trees for
    check 3 at 1 start per tree and both directions, 2,000 + 500 canon
@@ -58,6 +70,7 @@
    ============================================================ */
 
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { mulberry32, randInt, shuffle } from '../topo/rng.js';
 import { TOPO } from '../topo/config.js';
 import { randomHMR, validateHMR, permuteGraph, nodeKey, edgeKey } from '../topo/hmr.js';
@@ -68,19 +81,121 @@ import { decodeContour, decodeCrop } from '../topo/decode.js';
 import { cropContour } from '../topo/crop.js';
 import { sdfGrid, marchLoops, rasterTopology, signedArea } from '../topo/contour.js';
 
-const FULL = process.argv.includes('--full');
-const arg = (name, dflt) => { const i = process.argv.indexOf(name); return i > 0 ? +process.argv[i + 1] : dflt; };
-const SIZE = {
-  graphs: arg('--graphs', FULL ? 10000 : 30),
-  crops: arg('--crops', FULL ? 1000 : 30),
-  trees: arg('--trees', FULL ? 300 : 30),
-  treeStarts: FULL ? 'all' : 1,
-  canonPairs: arg('--canon-pairs', FULL ? 20000 : 2000),
-  symPairs: arg('--sym-pairs', FULL ? 5000 : 500),
+/* ---------------- arguments: refused before anything runs ---------------- */
+const USAGE = 'usage: e1.test.mjs [--full] [--shard k/K] [--graphs n] [--crops n] [--trees n] [--canon-pairs n] [--sym-pairs n] [--seed n]\n' +
+  '       e1.test.mjs --merge <shard log> <shard log> ...';
+const refuse = (msg) => { console.error(`E1 refused: ${msg}\n${USAGE}`); process.exit(2); };
+const VALUED = new Set(['--graphs', '--crops', '--trees', '--canon-pairs', '--sym-pairs', '--seed', '--shard']);
+const OPTS = { full: false, merge: null, v: {} };
+{
+  const av = process.argv.slice(2);
+  for (let i = 0; i < av.length; i++) {
+    const a = av[i];
+    if (a === '--full') OPTS.full = true;
+    else if (a === '--merge') { OPTS.merge = av.slice(i + 1); break; }
+    else if (VALUED.has(a)) {
+      if (i + 1 >= av.length) refuse(`${a} needs a value`);
+      if (a in OPTS.v) refuse(`${a} is given twice`);
+      OPTS.v[a] = av[++i];
+    } else refuse(`unknown argument "${a}"`);
+  }
+  if (OPTS.merge && (OPTS.full || Object.keys(OPTS.v).length)) refuse('--merge takes only log files');
+}
+const count = (name, dflt, min = 1) => {
+  const s = OPTS.v[name];
+  if (s === undefined) return dflt;
+  if (!/^\d+$/.test(s) || !Number.isSafeInteger(+s) || +s < min) refuse(`${name} takes an integer of at least ${min}, got "${s}"`);
+  return +s;
 };
-const SEED = arg('--seed', 20261111);
-const SHARD = (() => { const i = process.argv.indexOf('--shard'); if (i < 0) return null; const [k, K] = process.argv[i + 1].split('/').map(Number); return { k, K }; })();
+const FULL = OPTS.full;
+const SIZE = {
+  graphs: count('--graphs', FULL ? 10000 : 30),
+  crops: count('--crops', FULL ? 1000 : 30),
+  trees: count('--trees', FULL ? 300 : 30),
+  treeStarts: FULL ? 'all' : 1,
+  canonPairs: count('--canon-pairs', FULL ? 20000 : 2000),
+  symPairs: count('--sym-pairs', FULL ? 5000 : 500),
+};
+const SEED = count('--seed', 20261111, 0);
+const SHARD = (() => {
+  const s = OPTS.v['--shard'];
+  if (s === undefined) return null;
+  const m = /^(\d+)\/(\d+)$/.exec(s);
+  if (!m) refuse(`--shard takes k/K, got "${s}"`);
+  const k = +m[1], K = +m[2];
+  if (K < 1) refuse(`--shard ${s}: K is the number of shards and must be at least 1`);
+  if (k >= K) refuse(`--shard ${s}: shards are counted from 0, so with K = ${K} the index runs from 0 to ${K - 1}`);
+  const least = Math.min(SIZE.graphs, SIZE.trees);
+  if (K > least) refuse(`--shard ${s}: K = ${K} is larger than the ${least} cases of the smallest sharded section, so a shard would test nothing`);
+  return { k, K };
+})();
 const mine = (i) => !SHARD || i % SHARD.K === SHARD.k;
+if (OPTS.merge) mergeLogs(OPTS.merge);
+
+/* The shards of one run, checked as one whole: same version, seed and sizes; every shard 0 to K-1 once; each
+   exited with 0 failures; the sums reach the full size. Section 1 is not sharded, so its numbers must agree. */
+function mergeLogs(files) {
+  if (files.length < 2) refuse('--merge needs the logs of at least 2 shards');
+  const read = (f) => {
+    let b;
+    try { b = readFileSync(f); } catch (e) { refuse(`cannot read ${f}: ${e.code || e.message}`); }
+    // a PowerShell redirect writes UTF-16 with a byte-order mark; a pipe to a file may write UTF-8 with one
+    const t = b[0] === 0xff && b[1] === 0xfe ? b.subarray(2).toString('utf16le') : b.toString('utf8').replace(/^﻿/, '');
+    const lines = t.split(/\r?\n/);
+    const s = lines.filter((l) => l.startsWith('E1-SUMMARY '));
+    const v = lines.filter((l) => /^E1: /.test(l));
+    if (s.length !== 1 || v.length !== 1) refuse(`${f} is not one complete E1 log (${s.length} summary lines, ${v.length} verdict lines)`);
+    let sum;
+    try { sum = JSON.parse(s[0].slice('E1-SUMMARY '.length)); } catch { refuse(`${f}: the summary line is not JSON`); }
+    if (!sum.shard || !sum.size || sum.seed === undefined || !sum.version) refuse(`${f} was written by an E1 test older than --merge (its summary names no shard, size, seed or version)`);
+    return { f, sum, verdict: v[0] };
+  };
+  const logs = files.map(read);
+  const errs = [];
+  const one = (key, show = (x) => JSON.stringify(x)) => {
+    const vals = new Set(logs.map((l) => JSON.stringify(l.sum[key])));
+    if (vals.size !== 1) errs.push(`the logs differ in ${key}: ${[...vals].join(' vs ')}`);
+    return logs[0].sum[key];
+  };
+  const version = one('version'), seed = one('seed'), size = one('size'), full = one('full');
+  const K = new Set(logs.map((l) => l.sum.shard.K));
+  if (K.size !== 1) errs.push(`the logs differ in K: ${[...K].join(', ')}`);
+  const KK = logs[0].sum.shard.K;
+  const ks = logs.map((l) => l.sum.shard.k).sort((a, b) => a - b);
+  for (let k = 0; k < KK; k++) {
+    const n = ks.filter((x) => x === k).length;
+    if (n === 0) errs.push(`shard ${k}/${KK} is missing`);
+    if (n > 1) errs.push(`shard ${k}/${KK} is given ${n} times`);
+  }
+  if (logs.length !== KK) errs.push(`${logs.length} logs for ${KK} shards`);
+  for (const l of logs) {
+    if (l.sum.failures !== 0 || !/^E1: 0 failures/.test(l.verdict)) errs.push(`${l.f} (shard ${l.sum.shard.k}/${KK}) failed: ${l.verdict}`);
+  }
+  for (const key of ['canonPairs', 'symPairs', 'symFamilies', 'symSlow']) one(key);
+  const ADD = ['graphs', 'drawings', 'oneCurve', 'decoded', 'lobeGraphs', 'permOk', 'masters', 'kisses', 'echoes', 'nonTree', 'lobes',
+    'crops', 'cropsWanted', 'cropsOk', 'cropSkipped', 'openNecks', 'openKisses', 'cropLobes', 'cropsOffset', 'cropsEmptyTruth', 'cropsEmptyOk',
+    'cropsNothingReadable', 'slivers', 'sliversWanted', 'sliversOk', 'sliversNothingReadable', 'sliversEmptyOk', 'collisionGraphs', 'mirrors',
+    'reversed', 'trees', 'readings', 'treeWrong', 'failures'];
+  const M = { version, seed, full, size, shards: KK, symWorstMs: Math.max(...logs.map((l) => l.sum.symWorstMs)) };
+  for (const key of ['canonPairs', 'symPairs', 'symFamilies', 'symSlow']) M[key] = logs[0].sum[key];
+  for (const key of ADD) {
+    if (logs.some((l) => typeof l.sum[key] !== 'number')) { errs.push(`a log has no number for ${key}`); continue; }
+    M[key] = logs.reduce((a, l) => a + l.sum[key], 0);
+  }
+  const need = (ok, msg) => { if (!ok) errs.push(msg); };
+  need(M.graphs === size.graphs, `the shards ran ${M.graphs} graphs of ${size.graphs}`);
+  need(M.trees === size.trees, `the shards ran ${M.trees} trees of ${size.trees}`);
+  need(M.drawings === 6 * M.graphs && M.oneCurve === M.drawings && M.decoded === M.drawings && M.lobeGraphs === M.decoded,
+    `drawings ${M.drawings}, one curve ${M.oneCurve}, decoded ${M.decoded}, lobe graphs ${M.lobeGraphs}: not all ${6 * M.graphs}`);
+  need(M.permOk === M.graphs, `${M.permOk} of ${M.graphs} masters byte-identical under node-id permutation`);
+  need(M.treeWrong === 0 && M.readings > 0, `check 3: ${M.readings} readings, ${M.treeWrong} wrong`);
+  need(M.cropsWanted > 0 && M.crops >= 0.9 * M.cropsWanted && M.cropsOk === M.crops, `crops: ${M.cropsOk} of ${M.crops} read right, ${M.cropsWanted} wanted`);
+  need(M.sliversWanted > 0 && M.slivers >= 0.9 * M.sliversWanted && M.sliversOk === M.slivers, `slivers: ${M.sliversOk} of ${M.slivers} read right, ${M.sliversWanted} wanted`);
+  console.log('E1-MERGED ' + JSON.stringify(M));
+  for (const e of errs) console.log('FAIL ' + e);
+  console.log(errs.length ? `E1 merge: ${errs.length} FAILURES` : `E1 merge: shards 0 to ${KK - 1} of ${KK} are one whole run with 0 failures`);
+  process.exit(errs.length ? 1 : 0);
+}
 const seedOf = (salt, i) => (Math.imul((SEED ^ salt) >>> 0, 0x9E3779B1) ^ Math.imul(i + 1, 0x85EBCA6B)) >>> 0;
 const T0 = Date.now();
 let failures = 0;
@@ -632,9 +747,14 @@ function runCrop(dw, rnd, stats, sliver = false) {
   line(`5. crops: ${cs.n} crops decoded (${cs.n - cs.offset} centred on a lobe, ${cs.offset} offset up to 2 lobe radii; ${cs.whole} held the whole figure), ${cs.n - cs.bad}/${cs.n} read as the induced subgraph of the whole lobes with cut necks open; ${cs.inside} whole lobes, ${cs.openNecks} open necks, ${cs.openKisses} open kisses, ${cs.internalKisses} kisses inside; ${cs.skipped} skipped (no unambiguous radius), ${cs.tries} radius draws for an ambiguity band of ${MU} l [sections 4 and 5: ${lap()}, of which crops ${cs.cpu.toFixed(1)} s CPU]`);
   line(`   crops holding no whole lobe: ${cs.emptyTruth}, read as the empty graph: ${cs.emptyOk}/${cs.emptyTruth} (${cs.nothingReadable} of all crops had no complete motif to read)`);
   line(`   slivers (extra crops: a disk centred 0.5-2.5 l outside a lobe rim, reaching 2-5 l in): ${ss.n - ss.bad}/${ss.n} read right; ${ss.nothingReadable} had no complete motif, ${ss.emptyTruth} held no whole lobe, ${ss.emptyOk} read as the empty graph; ${ss.skipped} skipped`);
-  let cropsWanted = 0;
-  for (let gi = 0; gi < SIZE.graphs; gi++) if (mine(gi) && cropHere(gi)) cropsWanted++;
+  let cropsWanted = 0, sliversWanted = 0;
+  for (let gi = 0; gi < SIZE.graphs; gi++) if (mine(gi) && cropHere(gi)) { cropsWanted++; if (gi % 4 === 0) sliversWanted++; }
   if (cs.n < cropsWanted * 0.9) fail(`crops: only ${cs.n} of about ${cropsWanted} ran`);
+  if (ss.n < sliversWanted * 0.9) fail(`crops (sliver): only ${ss.n} of about ${sliversWanted} ran`);
+  // a shard's part may hold no crop graph (they fall on blocks of 4 graphs); --merge checks the whole run has them
+  if (!SHARD && !cropsWanted) fail('empty run: no graph was given a crop');
+  if (!SHARD && !sliversWanted) fail('empty run: no graph was given a sliver');
+  Object.assign(SUM, { cropsWanted, sliversWanted });
   Object.assign(SUM, { graphs: st.graphs, drawings: st.drawings, oneCurve: st.drawings - st.topoBad, decoded: ok, lobeGraphs: ok - st.lobeBad, permOk: st.graphs - st.permBad,
     masters: st.rasterChecked, kisses: st.kisses, echoes: st.echoes, nonTree: st.nonTree, lobes: st.lobes, crops: cs.n, cropsOk: cs.n - cs.bad, cropSkipped: cs.skipped,
     openNecks: cs.openNecks, openKisses: cs.openKisses, cropLobes: cs.inside, cropsOffset: cs.offset, cropsEmptyTruth: cs.emptyTruth, cropsEmptyOk: cs.emptyOk, cropsNothingReadable: cs.nothingReadable,
@@ -642,7 +762,12 @@ function runCrop(dw, rnd, stats, sliver = false) {
     collisionGraphs: st.collisionGraphs, mirrors: st.mirrors, reversed: st.reversed });
 }
 
+// a run that tests nothing fails (BAR_F G2)
+if (!SUM.graphs) fail('empty run: no graph of the pass test ran');
+if (!SUM.trees) fail('empty run: no tree of check 3 ran');
+if (!SUM.readings) fail('empty run: check 3 made no reading');
 for (const list of failLog.values()) for (const f of list) line('FAIL ' + f);
+Object.assign(SUM, { version: TOPO.version, seed: SEED, full: FULL, size: SIZE, shard: SHARD });
 SUM.failures = failures;
 line('E1-SUMMARY ' + JSON.stringify(SUM));
 const secs = ((Date.now() - T0) / 1000).toFixed(1);
