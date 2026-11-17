@@ -215,7 +215,7 @@ export const TOUR = [
 export const COPY = {
   kick: 'kerr ray tracer / measured',
   title: 'Measure the shadow of a spinning black hole.',
-  sub: 'Light rays traced through the exact Kerr spacetime, a relativistic disk at its real temperature, and the shadow measured against the Event Horizon Telescope.',
+  sub: 'Light rays traced through the exact Kerr spacetime, a relativistic disk at its real temperature, and the shadow\'s size, set against the Event Horizon Telescope\'s measurement of Sgr A*.',
   // what verify.mjs checks: the Sources panel and the guide quote this; no count, since the count changes
   verify: 'node labs/assets/js/blackhole/verify.mjs checks the engine against these sources: the shadow against Bardeen\'s curve, Synge angles, ISCO, efficiency, Page-Thorne flux, aberration, clocks, sub-ring demagnification, and the Hawking temperature of a spinning, charged hole.',
   // the footer's claim tags, on the desktop footer and in the phone's sheet
