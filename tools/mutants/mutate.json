@@ -1,102 +1,542 @@
 [
   {
-    "name": "a survivor does not fail the check",
-    "from": "if (r.survived.length || r.stale.length || r.noop.length) bad++;",
-    "to": "if (r.stale.length || r.noop.length) bad++;"
-  },
-  {
-    "name": "a stale mutant does not fail the check",
-    "from": "if (r.survived.length || r.stale.length || r.noop.length) bad++;",
-    "to": "if (r.survived.length || r.noop.length) bad++;"
-  },
-  {
-    "name": "a mutant that changes nothing does not fail the check",
-    "from": "if (r.survived.length || r.stale.length || r.noop.length) bad++;",
-    "to": "if (r.survived.length || r.stale.length) bad++;"
-  },
-  {
-    "name": "the exit code is always 0",
-    "from": "  return bad ? 1 : 0;",
-    "to": "  return 0;"
-  },
-  {
-    "name": "text that is in the tool twice is not stale",
-    "from": "if (i < 0 || base.indexOf(from, i + 1) >= 0) { out.stale.push(m.name); continue; }",
-    "to": "if (i < 0) { out.stale.push(m.name); continue; }"
-  },
-  {
-    "name": "a mutant that changes nothing is run as if it broke something",
-    "from": "if (from === to) { out.noop.push(m.name); continue; }",
+    "name": "a timed-out mutant is not reported",
+    "from": "    for (const t of r.timedOut) say(`  TIMED OUT ${t.name}: the selftest did not end within ${limit / 1000} s, twice; ${t.reason ? `declared: ${t.reason}` : 'nothing saw it fail, so it is not caught'}`);\n",
     "to": ""
   },
   {
-    "name": "a selftest that fails unbroken is not a failure",
-    "from": "{ say(`mutate ${name}: the selftest fails before any mutation`); bad++; continue; }",
-    "to": "{ continue; }"
+    "name": "an undeclared timeout does not fail the check",
+    "from": "if (r.survived.length || r.stale.length || r.noop.length || r.timedOut.some((t) => !t.reason)) bad++;",
+    "to": "if (r.survived.length || r.stale.length || r.noop.length) bad++;"
   },
   {
-    "name": "the unbroken selftest is not run first",
-    "from": "if (!(await passes(place('base', base), limit))) { out.broken = true; return out; }",
+    "name": "a declared timeout fails the check",
+    "from": "r.timedOut.some((t) => !t.reason)) bad++;",
+    "to": "r.timedOut.length) bad++;"
+  },
+  {
+    "name": "a run stopped twice counts as caught",
+    "from": "      else if (result[k] === 'timeout') out.timedOut.push({ name: j.name, reason: j.timeout });\n",
     "to": ""
   },
   {
-    "name": "a missing tool is not a failure",
-    "from": "{ say(`mutate ${name}: tools/${name}.mjs does not exist`); bad++; continue; }",
-    "to": "{ continue; }"
+    "name": "a run stopped twice counts as survived",
+    "from": "if (result[k] === 'pass') out.survived.push",
+    "to": "if (result[k] !== 'fail') out.survived.push"
   },
   {
-    "name": "a mutants file that is not JSON is not a failure",
-    "from": "); bad++; continue; }\n    const errs = shape(",
-    "to": "); continue; }\n    const errs = shape("
-  },
-  {
-    "name": "a byte order mark breaks a mutants file",
-    "from": ".replace(BOM, '')",
+    "name": "the timed-out count is left out of the summary",
+    "from": "${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}",
     "to": ""
   },
   {
-    "name": "a missing mutants folder passes",
-    "from": "does not exist, so no gate was tested`); return 1; }",
-    "to": "does not exist, so no gate was tested`); return 0; }"
+    "name": "a declared reason is not printed",
+    "from": "`declared: ${t.reason}`",
+    "to": "'declared'"
   },
   {
-    "name": "an empty mutants folder passes",
-    "from": "holds no mutants file, so no gate was tested'); return 1; }",
-    "to": "holds no mutants file, so no gate was tested'); return 0; }"
+    "name": "a declared timeout is forgotten",
+    "from": "timeout: m.timeout, text:",
+    "to": "text:"
   },
   {
-    "name": "a tool named with no mutants file passes",
-    "from": "); return 2; }\n  if (!names.length)",
-    "to": "); return 0; }\n  if (!names.length)"
+    "name": "a timeout with no reason is accepted",
+    "from": "    if (m && 'timeout' in m && !(typeof m.timeout === 'string' && m.timeout.trim().length >= 8)) errs.push(`${where}: \"${m.name}\" declares a timeout without its reason (8+ characters)`);\n",
+    "to": ""
   },
   {
-    "name": "a file in mutants that is not <tool>.json is skipped in silence",
-    "from": "if (strays.length) {",
-    "to": "if (false) {"
+    "name": "a timeout reason of 7 characters is accepted",
+    "from": "m.timeout.trim().length >= 8",
+    "to": "m.timeout.trim().length >= 7"
   },
   {
-    "name": "line endings hide a mutant",
-    "from": "const lf = (s) => s.replace(/\\r\\n/g, '\\n');",
-    "to": "const lf = (s) => s;"
+    "name": "the decision is not applied",
+    "from": "for (const name of plan.run) {",
+    "to": "for (const name of names) {"
   },
   {
-    "name": "caught and survived are swapped",
-    "from": "if (alive[k]) out.survived.push(j.name); else out.caught++;",
-    "to": "if (!alive[k]) out.survived.push(j.name); else out.caught++;"
+    "name": "the reader keeps blank lines",
+    "from": ".filter(Boolean); } catch { return null; }",
+    "to": "; } catch { return null; }"
   },
   {
-    "name": "a selftest that never ends counts as passed",
-    "from": "const timer = setTimeout(() => child.kill(), limit);",
-    "to": "const timer = setTimeout(() => resolve(true), limit);"
+    "name": "a file of changes that cannot be read reads as no change",
+    "from": ".filter(Boolean); } catch { return null; }",
+    "to": ".filter(Boolean); } catch { return []; }"
   },
   {
-    "name": "a mutants file with no names is accepted",
-    "from": "if (errs.length) { for (const e of errs) say('  ' + e); bad++; continue; }",
-    "to": "if (errs.length) { for (const e of errs) say('  ' + e); }"
+    "name": "--changed is not read",
+    "from": "changed = readChanged(argv[ch + 1] || '');",
+    "to": "changed = null;"
   },
   {
-    "name": "a mutant with no \"to\" is accepted",
-    "from": "m.from && typeof m.to === 'string')) errs.push(",
-    "to": "m.from)) errs.push("
+    "name": "a file of changes that cannot be read is not said",
+    "from": "if (!changed) console.log(`mutate: the changed files could not be read from ${argv[ch + 1]}, so every list runs`); ",
+    "to": ""
+  },
+  {
+    "name": "a selftest that exits 0 counts as failed",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(late || code === WATCHDOG ? 'timeout' : code !== 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "the --changed flag is taken as a list name",
+    "from": "(ch < 0 || (i !== ch && i !== ch + 1))",
+    "to": "(ch < 0 || (i !== ch + 1))"
+  },
+  {
+    "name": "the word after the file of changes is dropped instead",
+    "from": "(ch < 0 || (i !== ch && i !== ch + 1))",
+    "to": "(ch < 0 || (i !== ch && i !== ch + 2))"
+  },
+  {
+    "name": "with no --changed the first word is dropped",
+    "from": "(ch < 0 || (i !== ch && i !== ch + 1))",
+    "to": "(ch < -1 || (i !== ch && i !== ch + 1))"
+  },
+  {
+    "name": "--changed as the first word is not seen",
+    "from": "if (ch >= 0) {",
+    "to": "if (ch > 0) {"
+  },
+  {
+    "name": "an undeclared timeout fails the check only beside a mutant that changes nothing",
+    "from": "if (r.survived.length || r.stale.length || r.noop.length || r.timedOut.some((t) => !t.reason)) bad++;",
+    "to": "if (r.survived.length || r.stale.length || r.noop.length && r.timedOut.some((t) => !t.reason)) bad++;"
+  },
+  {
+    "name": "a stopped run is reported as failed",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(code === 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "a selftest that stops itself is caught",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(late ? 'timeout' : code === 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "a selftest that stops itself with another code is timed out",
+    "from": "resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail');",
+    "to": "resolve(late || code === WATCHDOG + 1 ? 'timeout' : code === 0 ? 'pass' : 'fail');"
+  },
+  {
+    "name": "the width given is not used",
+    "from": "await Promise.all(Array.from({ length: width }, worker));",
+    "to": "await Promise.all(Array.from({ length: WIDTH }, worker));"
+  },
+  {
+    "name": "the copies share the machine's lock",
+    "from": "const env = { ...process.env, LABS_DRIVE_LOCK: path.join(root, 'chrome.lock') };",
+    "to": "const env = process.env;"
+  },
+  {
+    "name": "the rerun count left out of the summary",
+    "from": "${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}, ${r.reruns.length} run again, ${Math.round((Date.now() - t0) / 1000)} s`);",
+    "to": "${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}, ${Math.round((Date.now() - t0) / 1000)} s`);"
+  },
+  {
+    "name": "a second run not printed",
+    "from": "    for (const x of r.reruns) say(`  RERUN     ${x.name}: stopped at the limit once, then ${{ pass: 'survived', fail: 'caught', timeout: 'stopped again' }[x.result]}`);\n",
+    "to": ""
+  },
+  {
+    "name": "a second run that caught printed as survived",
+    "from": "{ pass: 'survived', fail: 'caught', timeout: 'stopped again' }",
+    "to": "{ pass: 'survived', fail: 'survived', timeout: 'stopped again' }"
+  },
+  {
+    "name": "the reader does not trim",
+    "from": "return fs.readFileSync(file, 'utf8').split('\\n').map((l) => l.trim()).filter(Boolean);",
+    "to": "return fs.readFileSync(file, 'utf8').split('\\n').filter(Boolean);"
+  },
+  {
+    "name": "git asked with renames",
+    "from": "['diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
+    "to": "['diff', '--name-only', `${ref}...HEAD`]"
+  },
+  {
+    "name": "git asked from the ref itself",
+    "from": "['diff', '--name-only', '--no-renames', `${ref}...HEAD`]",
+    "to": "['diff', '--name-only', '--no-renames', `${ref}`]"
+  },
+  {
+    "name": "git that fails read as no change",
+    "from": "return r.status === 0 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;",
+    "to": "return r.status === 0 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : [];"
+  },
+  {
+    "name": "git that succeeds read as unknown",
+    "from": "return r.status === 0 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;",
+    "to": "return r.status === 1 ? r.stdout.split('\\n').map((l) => l.trim()).filter(Boolean) : null;"
+  },
+  {
+    "name": "--changed-since as the first word not seen",
+    "from": "if (since >= 0) {",
+    "to": "if (since > 0) {"
+  },
+  {
+    "name": "the file of changes is taken as a list name",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n"
+  },
+  {
+    "name": "the ref is taken as a list name",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)));\n"
+  },
+  {
+    "name": "the word after the ref dropped instead",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 2)));\n"
+  },
+  {
+    "name": "the --changed-since flag taken as a list name",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since + 1)));\n"
+  },
+  {
+    "name": "with no --changed-since the first word dropped",
+    "from": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < 0 || (i !== since && i !== since + 1)));\n",
+    "to": "const rest = argv.filter((_, i) => (at < 0 || (i !== at && i !== at + 1)) && (ch < 0 || (i !== ch && i !== ch + 1)) && (since < -1 || (i !== since && i !== since + 1)));\n"
+  },
+  {
+    "name": "the watchdog code is 125",
+    "from": "export const WATCHDOG = 124;",
+    "to": "export const WATCHDOG = 125;"
+  },
+  {
+    "name": "--changed-since not read",
+    "from": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }",
+    "to": ""
+  },
+  {
+    "name": "an unknown ref not said",
+    "from": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }",
+    "to": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); }"
+  },
+  {
+    "name": "an empty ref said as an unknown one",
+    "from": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }",
+    "to": "if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(true ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }"
+  },
+  {
+    "name": "an empty ref asks git",
+    "from": "if (!ref) return null;",
+    "to": ""
+  },
+  {
+    "name": "imported, it runs as a command",
+    "from": "const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;",
+    "to": "const isMain = process.argv[1] && path.resolve(process.argv[1]) !== SELF + 'x';"
+  },
+  {
+    "name": "imported from node -e, it fails",
+    "from": "const isMain = process.argv[1] && path.resolve(process.argv[1]) === SELF;",
+    "to": "const isMain = path.resolve(process.argv[1]) === SELF;"
+  },
+  {
+    "name": "a slow list runs without the machine lock",
+    "from": "slow ? await machineHold(waitMs) : null",
+    "to": "null"
+  },
+  {
+    "name": "every list holds the machine lock",
+    "from": "slow ? await machineHold(waitMs) : null",
+    "to": "await machineHold(waitMs)"
+  },
+  {
+    "name": "mutate takes the machine lock without waiting",
+    "from": "const release = await holdChrome(waitMs);",
+    "to": "const release = () => {};"
+  },
+  {
+    "name": "the machine lock never given back",
+    "from": "try { return await run(); } finally { release(); last = Date.now(); }",
+    "to": "try { return await run(); } finally { last = Date.now(); }"
+  },
+  {
+    "name": "the gap counted from no copy",
+    "from": "try { return await run(); } finally { release(); last = Date.now(); }",
+    "to": "try { return await run(); } finally { release(); }"
+  },
+  {
+    "name": "no gap between copies",
+    "from": "const GAP_MS = 600;",
+    "to": "const GAP_MS = 0;"
+  },
+  {
+    "name": "the gap waited only when it is long",
+    "from": "if (wait > 0) await sleep(wait);",
+    "to": "if (wait > 600) await sleep(wait);"
+  },
+  {
+    "name": "a lock not free is held anyway",
+    "from": "if (!release) return 'busy';",
+    "to": ""
+  },
+  {
+    "name": "a busy hold read as run",
+    "from": "if (got === 'busy') out.busy = true;",
+    "to": "if (got !== 'busy') out.busy = true;"
+  },
+  {
+    "name": "a busy first copy is a broken list",
+    "from": "if (out.busy) return out;\n    if (first !== 'pass')",
+    "to": "if (first !== 'pass')"
+  },
+  {
+    "name": "busy copies counted as caught",
+    "from": "    if (out.busy) return out;\n    jobs.forEach",
+    "to": "    jobs.forEach"
+  },
+  {
+    "name": "a busy list not said",
+    "from": "if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); bad++; continue; }",
+    "to": ""
+  },
+  {
+    "name": "a busy list passes",
+    "from": "if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); bad++; continue; }",
+    "to": "if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); continue; }"
+  },
+  {
+    "name": "the wait for the machine lock 600 ms by default",
+    "from": "export async function run(only, tools = TOOLS, say = console.log, { changed = null, limit = LIMIT_MS, waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 20 * 60 * 1000 } = {}) {",
+    "to": "export async function run(only, tools = TOOLS, say = console.log, { changed = null, limit = LIMIT_MS, waitMs = Number(process.env.LABS_DRIVE_WAIT_MS) || 600 } = {}) {"
+  },
+  {
+    "name": "an unbroken selftest that times out is not broken",
+    "from": "if (first !== 'pass') { out.broken = true; return out; }",
+    "to": "if (first === 'fail') { out.broken = true; return out; }"
+  },
+  {
+    "name": "a run stopped at the limit is not run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": ""
+  },
+  {
+    "name": "the second runs run side by side",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    await Promise.all(jobs.map(async (j, k) => { if (result[k] === 'timeout') { result[k] = await go(`m${k}`, j.text); out.reruns.push({ name: j.name, result: result[k] }); } }));\n"
+  },
+  {
+    "name": "a second run is run a third time",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "a second run is not told",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); }\n"
+  },
+  {
+    "name": "the last run is never run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length - 1; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "every run is run again",
+    "from": "    for (let k = 0; k < jobs.length; k++) if (result[k] === 'timeout') { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n",
+    "to": "    for (let k = 0; k < jobs.length; k++) if (true) { result[k] = await go(`m${k}`, jobs[k].text); out.reruns.push({ name: jobs[k].name, result: result[k] }); }\n"
+  },
+  {
+    "name": "the copies running are not ended on exit",
+    "from": "process.on('exit', () => { for (const c of RUNNING) endTree(c, true); });",
+    "to": ""
+  },
+  {
+    "name": "SIGTERM ends a run with 0",
+    "from": "for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));",
+    "to": "for (const [sig, code] of [['SIGTERM', 0], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));"
+  },
+  {
+    "name": "SIGINT ends a run with 143",
+    "from": "for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));",
+    "to": "for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 143]]) process.on(sig, () => process.exit(code));"
+  },
+  {
+    "name": "no signal ends a run",
+    "from": "for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));",
+    "to": ""
+  },
+  {
+    "name": "a copy ended the other system's way",
+    "from": "if (process.platform === 'win32') { if (sync) spawnSync('taskkill', args, { stdio: 'ignore' }); else spawn('taskkill', args, { stdio: 'ignore' }).on('error', () => {}); }",
+    "to": "if (process.platform !== 'win32') { if (sync) spawnSync('taskkill', args, { stdio: 'ignore' }); else spawn('taskkill', args, { stdio: 'ignore' }).on('error', () => {}); }"
+  },
+  {
+    "name": "a copy ended as on Linux everywhere but Windows",
+    "from": "if (process.platform === 'win32') { if (sync) spawnSync('taskkill', args, { stdio: 'ignore' }); else spawn('taskkill', args, { stdio: 'ignore' }).on('error', () => {}); }",
+    "to": "if (process.platform === 'linux') { if (sync) spawnSync('taskkill', args, { stdio: 'ignore' }); else spawn('taskkill', args, { stdio: 'ignore' }).on('error', () => {}); }"
+  },
+  {
+    "name": "a copy running is not tracked",
+    "from": "RUNNING.add(child);",
+    "to": ""
+  },
+  {
+    "name": "the limit is twice as long",
+    "from": "endTree(child); }, limit);",
+    "to": "endTree(child); }, limit * 2);"
+  },
+  {
+    "name": "the limit is half as long",
+    "from": "endTree(child); }, limit);",
+    "to": "endTree(child); }, limit / 2);"
+  },
+  {
+    "name": "the gated lists run whatever changed",
+    "from": "if (h.length) hits[n] = h; else skipped.push(n);",
+    "to": "hits[n] = h;"
+  },
+  {
+    "name": "the gated lists are skipped whatever changed",
+    "from": "if (h.length) hits[n] = h; else skipped.push(n);",
+    "to": "skipped.push(n);"
+  },
+  {
+    "name": "every list is gated",
+    "from": "if (!Object.hasOwn(GATED, n)) continue;",
+    "to": "if (false) continue;"
+  },
+  {
+    "name": "a list named like an object method is gated",
+    "from": "if (!Object.hasOwn(GATED, n)) continue;",
+    "to": "if (!GATED[n]) continue;"
+  },
+  {
+    "name": "a file near a gated one counts as one",
+    "from": "changed.filter((f) => GATED[n].includes(f))",
+    "to": "changed.filter((f) => GATED[n].some((w) => f.includes(w)))"
+  },
+  {
+    "name": "a gated list run by the files of another",
+    "from": "changed.filter((f) => GATED[n].includes(f))",
+    "to": "changed.filter((f) => CHROME_FILES.includes(f))"
+  },
+  {
+    "name": "an unknown list of changes skips the gated lists",
+    "from": "if (!changed) return { run: names, skipped: [], hits: {} };",
+    "to": "if (!changed) changed = [];"
+  },
+  {
+    "name": "the gated lists that ran are not said",
+    "from": "for (const n of Object.keys(plan.hits)) say(`mutate: ran ${n}: changed files ${plan.hits[n].join(', ')}`);",
+    "to": ""
+  },
+  {
+    "name": "the gated lists that were skipped are not said",
+    "from": "for (const n of plan.skipped) say(`mutate: skipped ${n}: none of ${GATED[n].join(', ')} changed`);",
+    "to": ""
+  },
+  {
+    "name": "mutate's own list is not gated",
+    "from": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };",
+    "to": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES };"
+  },
+  {
+    "name": "a change to tools/mutate.mjs does not run mutate's own list",
+    "from": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };",
+    "to": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };"
+  },
+  {
+    "name": "a change to tools/mutants/mutate.json does not run mutate's own list",
+    "from": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };",
+    "to": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/drive.mjs', '.github/workflows/gates.yml'] };"
+  },
+  {
+    "name": "a change to tools/drive.mjs does not run mutate's own list",
+    "from": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };",
+    "to": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', '.github/workflows/gates.yml'] };"
+  },
+  {
+    "name": "a change to the gates workflow does not run mutate's own list",
+    "from": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };",
+    "to": "const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs'] };"
+  },
+  {
+    "name": "the part of a list not passed to its selftest",
+    "from": "const child = spawn(process.execPath, [file, 'selftest', ...(part ? [part] : [])], { stdio: 'ignore', env });",
+    "to": "const child = spawn(process.execPath, [file, 'selftest'], { stdio: 'ignore', env });"
+  },
+  {
+    "name": "a copy run without its list's part",
+    "from": "if (!hold) return runs(place(label, text), limit, env, part);",
+    "to": "if (!hold) return runs(place(label, text), limit, env);"
+  },
+  {
+    "name": "a held copy run without its list's part",
+    "from": "const got = out.busy ? 'busy' : await hold(() => runs(place(label, text), limit, env, part));",
+    "to": "const got = out.busy ? 'busy' : await hold(() => runs(place(label, text), limit, env));"
+  },
+  {
+    "name": "after a busy copy the rest still ask",
+    "from": "const got = out.busy ? 'busy' : await hold(() => runs(place(label, text), limit, env, part));",
+    "to": "const got = await hold(() => runs(place(label, text), limit, env, part));"
+  },
+  {
+    "name": "the tool of a list is its whole name",
+    "from": "const [toolName, ...more] = name.split('.'), part = more.join('.');",
+    "to": "const toolName = name, part = '';"
+  },
+  {
+    "name": "a list's part is never read",
+    "from": "const [toolName, ...more] = name.split('.'), part = more.join('.');",
+    "to": "const [toolName, ...more] = name.split('.'), part = '';"
+  },
+  {
+    "name": "a list of a slow tool with a part runs without the lock",
+    "from": "const slow = SLOW.includes(toolName);",
+    "to": "const slow = SLOW.includes(name);"
+  },
+  {
+    "name": "the limit given to the command is not used",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null, part);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, LIMIT_MS, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null, part);"
+  },
+  {
+    "name": "a slow list runs its copies side by side",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null, part);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, limit, WIDTH, slow ? await machineHold(waitMs) : null, part);"
+  },
+  {
+    "name": "a list's part not given to its copies",
+    "from": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null, part);",
+    "to": "const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null);"
+  },
+  {
+    "name": "a change to tools/drive.mjs does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/invariants.mjs does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/drives/invariants.mjs does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/mutants/drive.json does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/mutants/invariants.json does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to tools/mutate.mjs does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', '.github/workflows/gates.yml'];"
+  },
+  {
+    "name": "a change to .github/workflows/gates.yml does not run the slow lists",
+    "from": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];",
+    "to": "const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs'];"
   }
 ]
