@@ -10,6 +10,7 @@
 
 import { PLOTS, PLOT_ORDER, SOLAR, VALLEY, METHOD_GROUPS, CHEN_KIPPING, LIMITS, RV } from '../config.js';
 import { insolation, valleyHistogram, radiusFromMass, seagerRadius, SEAGER_MATERIALS } from '../science.js';
+import { starNum } from '../starlight.js';
 import { tokens, alpha, mix, surface, logScale, linScale, isNum, fmt, fmtInt, esc } from './common.js';
 import { scale, bindScale, setScale } from '../../kit/controls.js';
 
@@ -498,7 +499,7 @@ export function createPlot(host, store, actions) {
     if (n) {
       const p = st.list[n.idx];
       const S = insolation(p).S;
-      showTip(`<b>${esc(p.name)}</b><br>${[`${fmt(p.R)} R⊕`, isNum(p.P) ? fmt(p.P) + ' d' : '', isNum(S) ? fmt(S) + ' S⊕' : '', isNum(p.year) ? 'found ' + p.year : ''].filter(Boolean).join(', ')}`, mx, my);
+      showTip(`<b>${esc(p.name)}</b><br>${[`${fmt(p.R)} R⊕`, isNum(p.P) ? fmt(p.P) + ' d' : '', isNum(S) ? starNum(S, 3) + ' S⊕' : '', isNum(p.year) ? 'found ' + p.year : ''].filter(Boolean).join(', ')}`, mx, my);
     } else tip.hidden = true;
     cv.style.cursor = n ? 'pointer' : 'crosshair';
     if (changed) surf.redraw();

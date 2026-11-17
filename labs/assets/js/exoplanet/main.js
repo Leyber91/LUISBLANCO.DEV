@@ -20,11 +20,12 @@ import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
   insolation, monteCarlo, skyView, starColour, isNum,
 } from './science.js';
+import { byOrbit, starlightCensus } from './starlight.js';
 import { createPlot, plotValue } from './views/plot.js';
 import { createSystem, drawInset } from './views/system.js';
 import { bandsHTML, bindEdges, drawHist, classCounts, classTable } from './views/bands.js';
 import { createTransit } from './views/transit.js';
-import { createTarget } from './views/target.js';
+import { createTarget, reticleZone } from './views/target.js';
 import { createReport } from './report.js';
 import { createTours, tourStops } from './tours.js';
 import { exportPlate, exportCSV, copyLink } from './export.js';
@@ -225,7 +226,7 @@ function filterLabel() {
   if (f.method !== 'all') parts.push(METHOD_GROUPS.find((g) => g.key === f.method).label);
   if (f.year !== null) parts.push(String(f.year));
   for (const [k, r] of Object.entries(f.ranges)) if (r) parts.push(`${k} ${r[0] ?? ''}-${r[1] ?? ''}`);
-  if (f.zone) parts.push('habitable zone');
+  if (f.zone) parts.push('conservative or optimistic habitable zone');   // the search takes both, so it names both
   if (f.looks) parts.push(kindWords(f.looks));
   if (f.locked) parts.push(LOCKED_WORDS);
   if (f.cold) parts.push(COLD_WORDS);
@@ -251,7 +252,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   const prev = st.sel;
   st.sel = p;
   if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
-  st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (a.a ?? a.P ?? 0) - (b.a ?? b.P ?? 0));
+  st.system = byOrbit(st.list.filter((q) => q.host === p.host));
   const apply = () => {
     setReticle(p); placeWorld();
     if (desktop()) drawInset($('inset'), p, st.system);
@@ -279,8 +280,7 @@ let reticleOpen = null;   // the world whose scenarios and sources are open unde
 function setReticle(p) {
   reticleHeld = null;
   $('ret-name').textContent = p.name;
-  const hz = hzPosition(p);
-  const hzWords = { cons: 'in the conservative habitable zone', opt: 'in the optimistic habitable zone', hot: 'hotter than the habitable zone', cold: 'colder than the habitable zone', unknown: 'its zone unknown' }[hz.key];
+  const hzWords = reticleZone(p);
   const sc = sizeClassOf(p);
   $('ret-class').textContent = `${sc ? sc.label + (sc.fromLimit ? ' by its radius bound' : '') : 'No radius measured'}, ${hzWords}`;
   const cl = classify(p, { air: store.state.air });
@@ -403,7 +403,7 @@ function renderFilters() {
   const token = (k, text) => { const b = el('button', 'token', `${text} \u00d7`); b.type = 'button'; b.dataset.clear = k; b.setAttribute('aria-label', `Clear the filter ${text}`); tokens.push(b); };
   if (f.year !== null) token('year', String(f.year));
   if (f.box) token('box', 'box');
-  if (f.zone) token('zone', 'habitable zone');
+  if (f.zone) token('zone', 'conservative or optimistic zone');
   if (f.looks) token('looks', kindWords(f.looks));
   if (f.locked) token('locked', 'one face to its star');
   if (f.cold) token('cold', `cold: under ${COLD_K} K`);
@@ -994,7 +994,7 @@ async function boot() {
   // a shared question replays with the page's own rules: it goes back into the field, no model is called and no list opens on load
   if (params.get('q')) { $('q').value = params.get('q'); runQuestion(params.get('q'), false, false); }
 
-  renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), rosterNote: 'The weekly roster is joining in the background.' });
+  renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), census: starlightCensus(st.list), rosterNote: 'The weekly roster is joining in the background.' });
   const retrieved = day(fromIso(snap.meta.retrieved), snap.meta.retrieved);
   $('tb-cat').textContent = `NASA archive, ${retrieved}`;
   $('tb-n').textContent = countLine(st.list, false);
@@ -1020,7 +1020,7 @@ async function boot() {
     plot.resetStats(); plot.redraw();
     thumbsWhenQuiet('roster');   // the roster added planets and said which radii are measured: the thumbnails are drawn again, once
     const note = `The weekly roster (${DATA.rosterLabel}) lists ${fmtInt(rosterCount)} planets with a measured radius${added.length ? ` and added ${fmtInt(added.length)} confirmed after the snapshot` : '; none are newer than the snapshot'}.`;
-    renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), rosterNote: note });
+    renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), census: starlightCensus(st.list), rosterNote: note });
     $('tb-n').textContent = countLine(st.list, true);
     tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
     drawHist($('bands-cv'), st.list);
