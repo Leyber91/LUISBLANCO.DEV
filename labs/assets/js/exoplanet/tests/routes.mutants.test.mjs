@@ -36,6 +36,8 @@ const INSET = [
   ['view D and the inset drawn at the archive\'s orbits', '    const { a } = semiMajor(p);\n    const P = isNum(p.P)', '    const a = p.a;\n    const P = isNum(p.P)'],
   ['the inset\'s zone left out', 'const orbits = m.planets.map((o) => ({ p: o.p, a: o.a })), hz = m.hz;', 'const orbits = m.planets.map((o) => ({ p: o.p, a: o.a })), hz = null;'],
   ['the inset reaching to its outer orbit alone', 'reach: hz && hz.outer / outer < 6 ? Math.max(outer, hz.outer) * 1.08 : outer * 1.15 };', 'reach: outer * 1.15 };'],
+  ['the inset measured from its inner orbit', 'const outer = Math.max(...orbits.map((o) => o.a), 1e-4);', 'const outer = Math.min(...orbits.map((o) => o.a), 1e-4);'],
+  ['the inset with no orbit reaching a thousandth of an AU', 'const outer = Math.max(...orbits.map((o) => o.a), 1e-4);', 'const outer = Math.max(...orbits.map((o) => o.a), 1e-3);'],
 ];
 const CSV = [
   ['the CSV\'s page orbit the archive\'s', 'p.Mprov, p.Mlim, p.P, o.a, o.archive, p.ecc,', 'p.Mprov, p.Mlim, p.P, p.a, o.archive, p.ecc,'],
@@ -50,6 +52,26 @@ const HEIGHT = [
   ['the scale height drawing an orbit error on Kepler\'s orbit', 'const Sk = sDraws ? sDraws[k % sDraws.length] : S0;', 'const Sk = sDraws ? sDraws[k % sDraws.length] : S0 / Math.pow(Math.max(0.5, 1 + (isNum(p.aErr) ? p.aErr / semiMajor(p).a : 0) * gauss()), 2);'],
   ['the scale height\'s temperature at albedo 0.3 whatever is asked', 'kT = T_ZERO * Math.pow(1 - albedo, 0.25);', 'kT = T_ZERO * Math.pow(1 - 0.3, 0.25);'],
 ];
+const CHAIN = [
+  ['the luminosity step\'s formula for the archive\'s always the star\'s', "steps.push(li('Luminosity', L.src === 'archive' ? 'L = 10^log L, the archive\\'s'", "steps.push(li('Luminosity', L.src === 'none' ? 'L = 10^log L, the archive\\'s'"],
+  ['the luminosity step\'s source never the archive\'s', "    L.src === 'archive' ? (luminosityDiffers(L) ?", "    L.src === 'none' ? (luminosityDiffers(L) ?"],
+  ['the star\'s luminosity not said to be the only one', ": L.src === 'R and Teff' ? 'the archive gives none' : ''));", ": L.src === 'none' ? 'the archive gives none' : ''));"],
+  ['the other luminosity never named', '(luminosityDiffers(L) ? `R★² (Teff / 5772 K)⁴ gives', '(false ? `R★² (Teff / 5772 K)⁴ gives'],
+  ['the luminosity\'s formula for the starlight never given', "const sHow = S.src === 'luminosity' ? 'S = L / a²", "const sHow = S.src === 'none' ? 'S = L / a²"],
+  ['the star\'s formula for the starlight never given', ": S.src === 'star' ? 'S = (R★ / a)²", ": S.src === 'none' ? 'S = (R★ / a)²"],
+  ['the archive\'s value not said', ": S.src === 'archive' ? 'archive value' :", ": S.src === 'none' ? 'archive value' :"],
+  ['the starlight step without its units', "'S = L / a², L in L☉ and a in AU' :", "'S = L / a²' :"],
+  ['draws said where there are none', "${isNum(S.lo) ? `, ${MC.draws} draws over ${ew.carried}` : ''}", "${true ? `, ${MC.draws} draws over ${ew.carried}` : ''}"],
+  ['the archive\'s insolation not said in the step', "esc([S.src === 'archive' ? starlightNote(p, S) : ''", "esc([S.src === 'none' ? starlightNote(p, S) : ''"],
+  ['what carries no error never said', "S.src !== 'archive' ? ew.missing : ''", "S.src === 'archive' ? ew.missing : ''"],
+  ['the Teq step\'s second form for every starlight', "${S.src === 'star' ? ' = Teff √(R★ / 2a) (1 − A)^¼, R★ and a in one unit' : ''}", "${S.src !== 'none' ? ' = Teff √(R★ / 2a) (1 − A)^¼, R★ and a in one unit' : ''}"],
+  ['the Teq step always drawn', "${isNum(S.lo) ? 'the same draws' : 'from the point value'}", "${true ? 'the same draws' : 'from the point value'}"],
+  ['the zone step\'s edge by the luminosity', "${hz.by === 'S' ? 'd = a √(S / S_eff)' : 'd = √(L / S_eff)'}", "${hz.by === 'L' ? 'd = a √(S / S_eff)' : 'd = √(L / S_eff)'}"],
+  ['the method\'s count of the archive\'s luminosity', 'L is the archive\'s luminosity for ${fmtInt(census.luminosity)} planets', 'L is the archive\'s luminosity for ${fmtInt(census.n)} planets'],
+  ['the method\'s count of the star\'s', 'R★² (Teff / 5772 K)⁴ for the ${fmtInt(census.star)} whose star', 'R★² (Teff / 5772 K)⁴ for the ${fmtInt(census.archive)} whose star'],
+  ['the method\'s count of ranges', ': ${fmtInt(census.ranged)} planets have one (${fmtInt(census.orbitOnly)}', ': ${fmtInt(census.n)} planets have one (${fmtInt(census.orbitOnly)}'],
+  ['the method\'s count of point values', 'The other ${fmtInt(census.point)} print a point value', 'The other ${fmtInt(census.n - census.ranged)} print a point value'],
+];
 const BENCH = [
   ['the bench\'s Teq at the default albedo', "['Teq', (p) => { const t = teqOf(p, albedo);", "['Teq', (p) => { const t = teqOf(p);"],
 ];
@@ -60,5 +82,7 @@ codes.push(await run('tours.js', TOUR));
 codes.push(await run('views/system.js', INSET));
 codes.push(await run('export.js', CSV));
 codes.push(await run('science.js', HEIGHT));
-codes.push(await run('panels.js', BENCH));
+
+codes.push(await run('panels.js', [...BENCH, ...CHAIN]));
+console.log(`\nroutes: ${codes.filter(Boolean).length} of ${codes.length} lists failed`);
 process.exit(codes.some(Boolean) ? 1 : 0);

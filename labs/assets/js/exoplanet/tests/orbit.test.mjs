@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path';
 import { PITCH_LIMIT, HOME, TOUCH_SLOP, orbitFrame, orbitDir, pitchMax, farSideYaw, touchTurns } from '../orbit.js';
 import { SOLAR_REACH, viewExtent, solarWords, systemModel, systemCaption, strays } from '../views/system.js';
 import { insolation, hzPosition, semiMajor } from '../science.js';
-import { placedAt, zoneWords, starlightText, extrapolatedWords } from '../starlight.js';
+import { placedAt, zoneWords, starlightText, extrapolatedWords, zoneEdges } from '../starlight.js';
 import { fmt } from '../views/common.js';
 import { SOLAR } from '../config.js';
 
@@ -192,6 +192,17 @@ const L = unit(STAR), TILT = Math.asin(L[1]);
   const far = { host: 'Far', name: 'Far b', Teff: 5772, Rs: 1, a: 0.01, P: 0.37, Ms: 1, ecc: 0.5 }, mf = systemModel(far, [far]);   // eccentric: its orbit reaches past a
   yes('with an orbit of its own, against this orbit', mf.hzOff && systemCaption(mf).includes(`The zone lies ${fmt(mf.hz.inner / semiMajor(far).a, 2)}x farther out than this orbit, off this view.`), systemCaption(mf));
   yes('no temperature, no zone, said so', systemCaption(systemModel({ ...far, Teff: null }, [{ ...far, Teff: null }])).startsWith('[REAL] No habitable zone: the archive lacks this star\'s temperature, or the starlight to place its edges.'));
+  // how far view D reaches (systemModel): the far end of the widest orbit, and the zone where it is near
+  yes('the view reaches the far end of an eccentric orbit, a (1 + e), and a fifth past it with the zone off the view', Math.abs(mf.outer - semiMajor(far).a * 1.5) < 1e-12 && Math.abs(mf.extent - mf.outer * 1.2) < 1e-12, `${mf.outer} ${mf.extent}`);
+  const wild = { ...far, name: 'Far c', ecc: 0.99 }, mw = systemModel(wild, [wild]);
+  yes('an eccentricity is drawn at 0.97 at most', Math.abs(mw.outer - semiMajor(wild).a * 1.97) < 1e-12, `${mw.outer / semiMajor(wild).a}`);
+  const two = [{ host: 'Two', name: 'Two b', Teff: 5772, Rs: 1, a: 0.1, P: null, Ms: null, ecc: 0 }, { host: 'Two', name: 'Two c', Teff: 5772, Rs: 1, a: 0.3, P: null, Ms: null, ecc: 0 }];
+  const m2b = systemModel(two[0], two);
+  yes('the widest orbit of the system sets the reach, and the selected orbit is the selected world\'s', Math.abs(m2b.outer - 0.3) < 1e-12 && m2b.ref.p === two[0] && systemModel(two[1], two).ref.p === two[1]);
+  const beyond = { host: 'Beyond', name: 'Beyond b', Teff: 5772, Rs: 1, a: 2, P: null, Ms: null, ecc: 0 }, mb = systemModel(beyond, [beyond]);
+  yes('a zone inside the orbit is drawn whole, and the view still reaches past the orbit', !mb.hzOff && Math.abs(mb.extent - Math.max(2 * 1.2, mb.hz.outer * 1.08)) < 1e-12 && mb.extent > mb.hz.outer * 1.08, `${mb.extent} ${mb.hz.outer}`);
+  const sO = zoneEdges(5772).sOuter, at = (r) => { const q = { host: `Six ${r}`, name: `Six ${r} b`, Teff: 5772, Rs: 1, a: 1 / (Math.sqrt(sO) * r), P: null, Ms: null, ecc: 0 }; return systemModel(q, [q]); };
+  yes('a zone under six times the system\'s size is on the view, one over it off', !at(5.9).hzOff && Math.abs(at(5.9).extent - at(5.9).hz.outer * 1.08) < 1e-12 && at(6.1).hzOff && Math.abs(at(6.1).hz.outer / at(6.1).outer - 6.1) < 1e-9, `${at(5.9).hz.outer / at(5.9).outer} ${at(6.1).hzOff}`);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

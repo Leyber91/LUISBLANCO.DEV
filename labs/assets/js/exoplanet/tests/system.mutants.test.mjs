@@ -86,6 +86,15 @@ const MUTANTS = [
   ['a world with an orbit set against the outermost one', "${m.ref ? 'this orbit' : 'the outermost orbit drawn'}", "${'the outermost orbit drawn'}"],
   ['no zone said with its old reason', "lacks this star\\'s temperature, or the starlight to place its edges.", "lacks this star\\'s temperature or luminosity."],
   ['a zone off the view never said to be', "if (m.hzOff && hz.outer > viewExtent(m.extent, showSolar)) parts.push(", "if (m.hzOff && hz.outer < viewExtent(m.extent, showSolar)) parts.push("],
+
+  /* ---- what view D draws, as data (systemModel, moved out of the view on this branch) ---- */
+  ['an eccentricity held at a half', 'e: isNum(p.ecc) ? Math.min(p.ecc, 0.97) : 0,', 'e: isNum(p.ecc) ? Math.min(p.ecc, 0.5) : 0,'],
+  ['the view reaching the orbit\'s size, not its far end', 'const outer = Math.max(...planets.map((o) => o.a * (1 + o.e)), 1e-4);', 'const outer = Math.max(...planets.map((o) => o.a), 1e-4);'],
+  ['the view measured from the inner orbit', 'const outer = Math.max(...planets.map((o) => o.a * (1 + o.e)), 1e-4);', 'const outer = Math.min(...planets.map((o) => o.a * (1 + o.e)), 1e-4);'],
+  ['a zone five times the system\'s size taken off the view', 'if (hz.outer / outer < 6) extent =', 'if (hz.outer / outer < 5) extent ='],
+  ['a zone seven times the system\'s size kept on the view', 'if (hz.outer / outer < 6) extent =', 'if (hz.outer / outer < 7) extent ='],
+  ['a near zone drawn to its edge only', 'extent = Math.max(extent, hz.outer * 1.08);', 'extent = hz.outer * 1.08;'],
+  ['the selected orbit taken from another planet', 'const ref = planets.find((o) => o.p === sel);', 'const ref = planets.find((o) => o.p !== sel);'],
 ];
 
 process.exit(await runMutants({ here, file: 'views/system.js', test: 'orbit.test.mjs', mutants: MUTANTS, also: ['kit'] }));

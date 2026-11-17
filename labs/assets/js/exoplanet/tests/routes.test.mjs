@@ -21,7 +21,8 @@ import { monteCarlo } from '../science.js';
 import { insetModel } from '../views/system.js';
 import { csvText } from '../export.js';
 import { tourStops } from '../tours.js';
-import { compareHTML } from '../panels.js';
+import { compareHTML, chainHTML, methodHTML } from '../panels.js';
+import { MC } from '../config.js';
 
 let failed = 0, passed = 0;
 const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
@@ -59,6 +60,8 @@ block('sheet A\'s inset', () => {
   yes('and the zone of the selected world', m.hz && m.hz.inner === hz.inner && m.hz.outer === hz.outer);
   const outer = Math.max(semiMajor(b).a, semiMajor(c).a);
   yes('and reaches past the outer orbit, or past the zone where the zone is near', Math.abs(m.reach - (hz.outer / outer < 6 ? Math.max(outer, hz.outer) * 1.08 : outer * 1.15)) < 1e-12, `${m.reach}`);
+  const lone = mk({ name: 'Fix i', host: 'Fix6', a: null, P: null }), ml = insetModel(lone, [lone]);
+  yes('a world with no orbit draws no orbit, and the inset reaches its floor of a ten-thousandth of an AU', ml.orbits.length === 0 && Math.abs(ml.reach - 1e-4 * 1.15) < 1e-15, `${ml.orbits.length} ${ml.reach}`);
 });
 
 block('the CSV', () => {
@@ -84,6 +87,23 @@ block('the scale height\'s temperature', () => {
 block('the bench\'s albedo', () => {
   const cell = (A) => { const m = compareHTML([b], EARTH, A).match(/<tr><th>Teq<\/th><td>.*?<\/td><td>(.*?)<\/td><\/tr>/); return m ? m[1] : null; };
   yes('the bench prints Teq at the visitor\'s albedo', cell(0.1) === teqText(teqOf(b, 0.1)).text && cell(0.3) === teqText(teqOf(b, 0.3)).text && cell(0.1) !== cell(0.3), `${cell(0.1)} | ${cell(0.3)}`);
+});
+
+block('the chain and the method say what was computed and drawn', () => {
+  const step = (html, k) => { const m = html.match(new RegExp(`<li><b>${k}</b> <code>(.*?)</code> <span class="ch-v">(.*?)</span>(?: <span class="ch-s">(.*?)</span>)?</li>`)); return m ? { eq: m[1], v: m[2], src: m[3] || '' } : null; };
+  const noLum = mk({ name: 'Fix f', host: 'Fix3', logL: null, P: 10 });   // the star's luminosity: R² Teff⁴
+  const far = mk({ name: 'Fix g', host: 'Fix4', logL: 0.3 });           // R² Teff⁴ more than 1.2 times off the archive's
+  const arch = mk({ name: 'Fix h', host: 'Fix5', logL: null, Teff: null, a: null, P: null, S: 2 });
+  const cb = chainHTML(b, 0.3), cs = chainHTML(st, 0.3), cn = chainHTML(noLum, 0.3), cf = chainHTML(far, 0.3), ca = chainHTML(arch, 0.3);
+  yes('the luminosity step names its source: the archive\'s, or the radius and temperature\'s, with the other where it differs', step(cb, 'Luminosity').eq === 'L = 10^log L, the archive\'s' && step(cb, 'Luminosity').src === 'archive' && step(cn, 'Luminosity').eq === 'L = R★² (Teff / 5772 K)⁴, R★ in R☉' && step(cn, 'Luminosity').src === 'the archive gives none' && /^R★² \(Teff \/ 5772 K\)⁴ gives /.test(step(cf, 'Luminosity').src), `${step(cf, 'Luminosity').src}`);
+  yes('the starlight step gives the formula with its units, and the draws only where there are some', step(cb, 'Insolation').eq === 'S = L / a², L in L☉ and a in AU' && step(cs, 'Insolation').eq === `S = L / a², L in L☉ and a in AU, ${MC.draws} draws over the error of the orbit` && step(cn, 'Insolation').eq === 'S = (R★ / a)² (Teff / 5772 K)⁴, R★ in R☉ and a in AU, 400 draws over the errors of the star\'s temperature and the star\'s radius' && step(ca, 'Insolation').eq === 'archive value', `${step(cs, 'Insolation').eq} | ${step(cn, 'Insolation').eq}`);
+  yes('and what the snapshot carries no error on, from what was drawn', step(cb, 'Insolation').src === 'the snapshot carries no error on the star&#39;s luminosity or the orbit' || step(cb, 'Insolation').src === 'the snapshot carries no error on the star\'s luminosity or the orbit', step(cb, 'Insolation').src);
+  yes('the Teq step says whether it is drawn, and gives Teff √(R★ / 2a) only where the star gives the starlight', /, the same draws$/.test(step(cs, 'Teq').eq) && /, from the point value$/.test(step(cb, 'Teq').eq) && /= Teff √\(R★ \/ 2a\) \(1 − A\)\^¼, R★ and a in one unit/.test(step(cn, 'Teq').eq) && !/Teff √/.test(step(cb, 'Teq').eq), `${step(cb, 'Teq').eq} | ${step(cn, 'Teq').eq}`);
+  yes('the archive\'s insolation says in the step what the page lacks to compute it', step(ca, 'Insolation').src.includes('PSCompPars): it lacks the orbit') && !step(cb, 'Insolation').src.includes('it lacks'), step(ca, 'Insolation').src);
+  yes('the zone step gives the edge in AU by the starlight', /d = a √\(S \/ S_eff\)/.test(step(cb, 'Habitable zone').eq), step(cb, 'Habitable zone').eq);
+  const census = { n: 10, luminosity: 7, star: 2, archive: 1, ranged: 3, orbitOnly: 2, point: 6 };
+  const m = methodHTML({ meta: { rows: 10 }, val: { n: 1, median: 0, p95: 0 }, valley: {}, transit: { depth: { rate: 1, n: 1, median: 1 }, dur: { rate: 1, n: 1, median: 1 } }, teq: {}, hold: {}, rosterNote: '', census });
+  yes('the method\'s numbers are the census of what was computed and drawn', m.includes('L is the archive\'s luminosity for 7 planets and R★² (Teff / 5772 K)⁴ for the 2 whose star the archive gives none; the archive\'s own insolation stands for 1 ') && m.includes(': 3 planets have one (2 over the orbit\'s error alone). The other 6 print a point value'), m.slice(m.indexOf('Starlight'), m.indexOf('Starlight') + 400));
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

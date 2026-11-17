@@ -154,7 +154,7 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
     if (isNum(gg)) { g.push(gg); rho.push(5.514 * M / (R * R * R)); }
     if (isNum(R)) { const c = sizeClass(R); cls.set(c.key, (cls.get(c.key) || 0) + 1); }
     const Sk = sDraws ? sDraws[k % sDraws.length] : S0;
-    const T = isNum(Sk) && Sk > 0 ? kT * Math.pow(Sk, 0.25) : null;
+    const T = isNum(Sk) ? kT * Math.pow(Sk, 0.25) : null;   // the starlight and its draws are positive (starlight.js keeps no other)
     if (T) {
       if (isNum(gg)) {
         const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;

@@ -59,6 +59,9 @@ const MUTANTS = [
   ['own heat said without its words', `'seen by its own heat'`, `''`],
   ['own heat said of a world found by transit instead', `p.method === 'Imaging' || isNum(p.Teq) ? 'seen by`, `p.method === 'Transit' || isNum(p.Teq) ? 'seen by`],
   ['own heat said only of an imaged world with a published temperature', `p.method === 'Imaging' || isNum(p.Teq) ? 'seen by`, `p.method === 'Imaging' && isNum(p.Teq) ? 'seen by`],
+
+  ['the line by temperature never giving one', ": key === 'T' ? (t ?", ": key === 'x' ? (t ?"],
+  ['the line by starlight never giving one', ": key === 'S' ? (insolation(p).S ?", ": key === 'x' ? (insolation(p).S ?"],
 ];
 
 process.exit(await runMutants({ here, file: 'find.js', test: 'find.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));
