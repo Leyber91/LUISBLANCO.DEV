@@ -18,7 +18,7 @@ import {
   forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, limitOf, limitKind, limitText, hzPosition, insolation,
   semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
 } from '../science.js';
-import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers, orbitNote, orbitDiffers } from '../starlight.js';
+import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers, orbitNote, orbitDiffers, starNum } from '../starlight.js';
 import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
 import { fmt, fmtInt } from './common.js';
 import { el } from '../../kit/dom.js';
@@ -51,19 +51,14 @@ function measuredRows(p, A) {
   if (isNum(p.P)) rows.push({ key: 'P', n: 'period', v: fmt(p.P, 4), u: 'd', refs: [rf.P], kind: 'm', iv: { value: p.P } });
   else if (limitOf(p, 'P')) rows.push({ key: 'P', n: 'period', v: boundV(limitOf(p, 'P'), 4), u: 'd', pm: limitKind(limitOf(p, 'P')), refs: [rf.P], iv: false });
   else rows.push({ key: 'P', n: 'period', v: 'none', pm: 'not in the archive', iv: false });
-  const eL = limitOf(p, 'ecc');
-  const eText = isNum(p.ecc) ? `e ${fmt(p.ecc, 2)}` : eL ? `e ${limitText(eL, 2)}` : 'e unknown';
-  const sky = skyView(p);
-  const skyNote = sky ? `From its surface its star spans ${fmt(sky.angDeg, 2)}\u00b0, ${fmt(sky.vsSun, 2)} times the Sun's width from Earth.` : '';
-  if (a.a) rows.push({ key: 'a', n: 'orbit', v: fmt(a.a, 3), u: 'AU', pm: eText, kind: a.src === 'archive' ? 'm' : 'd', refs: a.src === 'archive' || orbitDiffers(a) ? [COMPOSITE] : [],
-    note: [orbitNote(a), eL ? 'The eccentricity is only a bound, so orbits are drawn circular.' : '', skyNote].filter(Boolean).join(' '), iv: { value: a.a } });
-  else if (limitOf(p, 'a')) rows.push({ key: 'a', n: 'orbit', v: boundV(limitOf(p, 'a')), u: 'AU', pm: limitKind(limitOf(p, 'a')), iv: false });
-  else rows.push({ key: 'a', n: 'orbit', v: 'none', pm: eText, iv: false });
+  if (a.a && a.src === 'archive') rows.push(orbitRow(p, a));   // the archive's orbit stands with the measured; Kepler's with the inferred
+  else if (!a.a && limitOf(p, 'a')) rows.push({ key: 'a', n: 'orbit', v: boundV(limitOf(p, 'a')), u: 'AU', pm: limitKind(limitOf(p, 'a')), iv: false });
+  else if (!a.a) rows.push({ key: 'a', n: 'orbit', v: 'none', pm: eText(p), note: orbitNote(a), iv: false });
   if (S.S && S.src === 'archive') rows.push(starlightRow(p, S));   // the archive's value stands with the measured
   else if (!S.S && limitOf(p, 'S')) rows.push({ key: 'S', n: 'insolation', v: boundV(limitOf(p, 'S')), u: 'S⊕', pm: limitKind(limitOf(p, 'S')), iv: false });
   const starPm = errText(p.TeffErr, p.TeffErr);   // the ± column holds the temperature's interval; the radius has its own row
   const col = starColour(p.Teff), sp = spectralType(p.Teff);
-  const starNote = [isNum(p.Rs) ? '' : 'The star\'s radius is missing: the picture scales it from its temperature.', L.L ? `Its luminosity is ${fmt(L.L, 3)} L\u2609${L.src === 'archive' ? ', the archive\'s' : `, from its radius and temperature${luminosityDiffers(L) ? `; the archive lists ${fmt(L.archive, 3)}` : ''}`}.` : '',
+  const starNote = [isNum(p.Rs) ? '' : 'The star\'s radius is missing: the picture scales it from its temperature.', L.L ? `Its luminosity is ${starNum(L.L, 3)} L\u2609${L.src === 'archive' ? `, the archive's${luminosityDiffers(L) ? `; its radius and temperature give ${starNum(L.fromStar, 3)}` : ''}` : ', from its radius and temperature: the archive gives none'}.` : '',
     isNum(p.Teff) ? `Its colour, its Planck spectrum seen through the CIE 1931 observer, is ${col.hex}${sp === '?' ? '' : `, a ${sp}-type star`}.` : ''].filter(Boolean).join(' ');
   if (isNum(p.Teff)) rows.push({ key: 'star', n: 'star', v: fmtInt(p.Teff), swatch: col.hex, u: 'K', pm: starPm, refs: [rf.star], kind: isNum(p.Rs) ? 'm' : 'e',
     note: starNote, iv: { value: p.Teff, lo: isNum(p.TeffErr) ? p.Teff - Math.abs(p.TeffErr) : null, hi: isNum(p.TeffErr) ? p.Teff + Math.abs(p.TeffErr) : null } });
@@ -91,11 +86,13 @@ function inferredRows(p, A) {
     if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', iv: { value: mc.g.med, lo: mc.g.lo, hi: mc.g.hi } });
     if (mc.rho && !fc) rows.push({ key: 'rho', n: 'density', v: fmt(mc.rho.med, 2), u: 'g/cm³', pm: range(mc.rho), kind: 'd', note: 'Earth\'s density is 5.51 g/cm³.', iv: { value: mc.rho.med, lo: mc.rho.lo, hi: mc.rho.hi } });
   }
+  const a = semiMajor(p);
+  if (a.a && a.src !== 'archive') rows.push(orbitRow(p, a));
   const S = insolation(p);
   if (S.S && S.src !== 'archive') rows.push(starlightRow(p, S));
   const tq = teqText(mc.teq);
-  rows.push({ key: 'teq', n: 'equilibrium T', v: mc.teq ? tq.v : 'none', u: mc.teq ? 'K' : '', pm: mc.teq ? tq.pm : 'needs the starlight', kind: 'd',
-    note: `The equilibrium temperature takes the starlight${S.src === 'archive' ? ', the archive\'s,' : ''} with the albedo below and full redistribution of heat${isNum(p.Teq) ? `; the archive publishes ${fmtInt(p.Teq)} K` : ''}.`, iv: mc.teq ? { value: mc.teq.med, lo: mc.teq.lo, hi: mc.teq.hi } : false });
+  rows.push({ key: 'teq', n: 'equilibrium T', v: mc.teq ? tq.v : 'none', u: mc.teq ? 'K' : '', pm: mc.teq ? tq.pm || (tq.point ? 'point value' : '') : 'needs the starlight', kind: 'd',
+    note: `The equilibrium temperature takes the starlight${S.src === 'archive' ? ', the archive\'s,' : ''} with the albedo below and full redistribution of heat${tq.point ? ', and has no range because the starlight has none' : ''}${isNum(p.Teq) ? `; the archive publishes ${fmtInt(p.Teq)} K` : ''}.`, iv: mc.teq ? { value: mc.teq.med, lo: mc.teq.lo, hi: mc.teq.hi } : false });
   if (mc.H) rows.push({ key: 'H', n: 'scale height', v: fmt(mc.H.med, 2), u: 'km', pm: range(mc.H), kind: 'e',
     note: `The scale height assumes a mean molecular weight of ${p.R > 1.8 ? MC.muEnvelope + ', a hydrogen envelope' : MC.muSecondary + ', an air like nitrogen'}.`, iv: { value: mc.H.med, lo: mc.H.lo, hi: mc.H.hi } });
   if (!mc.hasR) {
@@ -108,6 +105,20 @@ function inferredRows(p, A) {
   return rows;
 }
 
+/* The eccentricity as the orbit's row prints it beside the size. */
+function eText(p) {
+  const eL = limitOf(p, 'ecc');
+  return isNum(p.ecc) ? `e ${fmt(p.ecc, 2)}` : eL ? `e ${limitText(eL, 2)}` : 'e unknown';
+}
+/* The orbit's row: where it stands (the measured group for the archive's orbit, the inferred group for Kepler's) is the
+   caller's; its value and note are starlight.js's semiMajor and orbitNote. */
+function orbitRow(p, a) {
+  const sky = skyView(p);
+  const skyNote = sky ? `From its surface its star spans ${fmt(sky.angDeg, 2)}\u00b0, ${fmt(sky.vsSun, 2)} times the Sun's width from Earth.` : '';
+  return { key: 'a', n: 'orbit', v: fmt(a.a, 3), u: 'AU', pm: eText(p), kind: a.src === 'archive' ? 'm' : 'd', refs: a.src === 'archive' || orbitDiffers(a) ? [COMPOSITE] : [],
+    note: [orbitNote(a), limitOf(p, 'ecc') ? 'The eccentricity is only a bound, so orbits are drawn circular.' : '', skyNote].filter(Boolean).join(' '), iv: { value: a.a } };
+}
+
 /* The archive's composite table, the source of an insolation the sheet shows (config.js DATA.snapshotLabel gives its
    DOI). Short, because the line of sources keeps each on one line: the full label took that line to 493 px at 390. */
 const COMPOSITE = { label: 'PSCompPars', url: 'https://doi.org/10.26133/NEA13' };
@@ -116,7 +127,7 @@ const COMPOSITE = { label: 'PSCompPars', url: 'https://doi.org/10.26133/NEA13' }
    one computed from the star) is the caller's; its value, range and note are starlight.js's. */
 function starlightRow(p, S) {
   const t = starlightText(S);
-  return { key: 'S', n: 'insolation', v: t.v, u: 'S⊕', pm: t.pm, kind: S.src === 'archive' ? 'm' : 'd', refs: S.src === 'archive' || archiveDiffers(S) ? [COMPOSITE] : [],
+  return { key: 'S', n: 'insolation', v: t.v, u: 'S⊕', pm: t.pm || (t.point ? 'point value' : ''), kind: S.src === 'archive' ? 'm' : 'd', refs: S.src === 'archive' || archiveDiffers(S) ? [COMPOSITE] : [],
     note: starlightNote(p, S), iv: { value: S.S, lo: S.lo, hi: S.hi } };
 }
 

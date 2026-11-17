@@ -40,6 +40,10 @@ These hold on every change under labs/, because each one has failed before or pr
 - A rule that chooses among data (which clock, which source, which value) and has failed review once is chosen by
   a backtest, and the backtest is committed beside the data. Overdue's choice of a working clock was argued three
   times on 2026-11-14 and wrong three times; `labs/assets/data/exomania/backtest_clock.py` settled it.
+- A backtest scores every candidate rule, the adopted one included, against a reference none of them was built from,
+  over the whole set or a sample stratified by what decides the answer, and its selftest shows each candidate winning
+  on rows built for it. On 2026-11-17 a vote of 7 to 0 for Kepler's law could not have gone the other way: its filter
+  kept only papers that agreed with the mass Kepler's law used.
 - A canvas that fills a box is positioned absolutely inside a box that CSS sizes. Sized by its own bitmap inside a
   stretched grid row, a canvas grows: on 2026-11-14 a drawing grew by a screen in three seconds after load.
 - Text a visitor must read is never fainter than `--text-dim`. `--text-faint` is 2.3 to 1 on the ground and is kept

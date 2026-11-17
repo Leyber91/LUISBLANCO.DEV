@@ -10,7 +10,7 @@
    ============================================================ */
 
 import { habitableZone, hzPosition, insolation, semiMajor, starColour, isNum } from '../science.js';
-import { starlightText, zoneWords, extrapolatedWords, placedAt } from '../starlight.js';
+import { starlightText, zoneWords, extrapolatedWords, placedAt, starNum } from '../starlight.js';
 import { PHYS, SOLAR } from '../config.js';
 import { tokens, alpha, surface, fmt, fmtInt, esc, reducedMotion } from './common.js';
 import { switchCtl, setSwitch, bindSwitch, isOn } from '../../kit/controls.js';
@@ -46,10 +46,7 @@ export function drawInset(canvas, sel, system) {
   canvas.width = w * dpr; canvas.height = h * dpr;
   const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
   if (!sel) return;
-  const orbits = system.map((p) => ({ p, a: semiMajor(p).a })).filter((o) => o.a);
-  const hz = habitableZone(sel);
-  const outer = Math.max(...orbits.map((o) => o.a), 1e-4);
-  const reach = hz && hz.outer / outer < 6 ? Math.max(outer, hz.outer) * 1.08 : outer * 1.15;
+  const { orbits, hz, reach } = insetModel(sel, system);
   const c = w / 2, k = (Math.min(w, h) / 2 - 4) / reach;
   if (hz && hz.outer <= reach) {
     ctx.strokeStyle = alpha(T.horizon, 0.85); ctx.setLineDash([6, 4]); ctx.lineWidth = 1.1;
@@ -66,6 +63,15 @@ export function drawInset(canvas, sel, system) {
   const [rr, gg, bb] = starColour(sel.Teff).srgb.map((x) => Math.round(x * 255));
   ctx.fillStyle = `rgb(${rr},${gg},${bb})`; ctx.beginPath(); ctx.arc(c, h / 2, 3.5, 0, Math.PI * 2); ctx.fill();
   canvas.setAttribute('aria-label', `The ${sel.host} system in miniature: ${orbits.length === 1 ? 'one orbit' : `${orbits.length} orbits`}${hz ? `, habitable zone ${fmt(hz.inner, 2)} to ${fmt(hz.outer, 2)} AU` : ''}`);
+}
+
+/* What sheet A's inset draws, as data: the system's orbits as view D draws them (the page's one orbit, systemModel),
+   the selected world's zone, and how far the inset reaches. Pure, so tests/routes.test.mjs reads it. */
+export function insetModel(sel, system) {
+  const m = systemModel(sel, system);
+  const orbits = m.planets.map((o) => ({ p: o.p, a: o.a })), hz = m.hz;
+  const outer = Math.max(...orbits.map((o) => o.a), 1e-4);
+  return { orbits, hz, reach: hz && hz.outer / outer < 6 ? Math.max(outer, hz.outer) * 1.08 : outer * 1.15 };
 }
 
 /* What view D draws and says, as data: pure, so tests/onesource.test.mjs reads it for every planet. The planets of
@@ -111,7 +117,7 @@ export function systemCaption(m, showSolar = false) {
   const parts = [];
   if (hz) {
     // the rings are where this world's own starlight would be each edge's flux (starlight.js habitableZone)
-    const by = hz.by === 'S' ? `the starlight at ${m.sel.name}'s orbit, ${starlightText(insolation(m.sel)).v} S⊕` : `the star's luminosity, ${fmt(hz.L, 3)} L☉`;
+    const by = hz.by === 'S' ? `the starlight at ${m.sel.name}'s orbit, ${starlightText(insolation(m.sel)).v} S⊕` : `the star's luminosity, ${starNum(hz.L, 3)} L☉`;
     parts.push(`[REAL] Habitable zone ${fmt(hz.inner, 2)}-${fmt(hz.outer, 2)} AU, filled; the optimistic edges, dotted, ${fmt(hz.innerOpt, 2)}-${fmt(hz.outerOpt, 2)} AU. Placed by ${by}, and the star's ${fmtInt(m.sel.Teff)} K (Kopparapu et al. 2013)${hz.extrapolated ? `, ${extrapolatedWords(m.sel.Teff)}` : ''}.`);
     parts.push(...strays(m).map(({ p, own, row }) => (row
       ? `The archive lists this star with other values for ${p.name} (${fmtInt(p.Teff)} K, ${fmt(p.Rs, 3)} R☉), which put it ${zoneWords(own, 'reticle')}.`

@@ -45,9 +45,9 @@ yes('the list is the paper\'s 13 without air and 2 with, and TRAPPIST-1 d and e;
 
 const list = await catalogue();
 const by = new Map(list.map((p) => [p.name, p]));
-// the luminosity the fit reads, as every sheet prints it: from the star's radius and temperature (starlight.js, ticket 2.14)
+// the luminosity the fit reads, as every sheet prints it: the archive's where it gives one (starlight.js, ticket 2.14, backtest_starlight.py)
 const logL = (n) => Math.log10(luminosity(by.get(n)).L).toFixed(2).replace('-', '−');
-yes('the luminosities of TRAPPIST-1 and Proxima Centauri are the ones the fit reads', luminosity(by.get('TRAPPIST-1 e')).src === 'R and Teff' && text.includes(`TRAPPIST-1 (log L = ${logL('TRAPPIST-1 e')}, from the radius and temperature the archive gives it)`) && text.includes(`Proxima Centauri (${logL('Proxima Cen b')})`), `${logL('TRAPPIST-1 e')} ${logL('Proxima Cen b')}`);
+yes('the luminosities of TRAPPIST-1 and Proxima Centauri are the ones the fit reads', luminosity(by.get('TRAPPIST-1 e')).src === 'archive' && luminosity(by.get('Proxima Cen b')).src === 'archive' && text.includes(`TRAPPIST-1 (log L = ${logL('TRAPPIST-1 e')}, the archive's luminosity)`) && text.includes(`Proxima Centauri (${logL('Proxima Cen b')})`), `${logL('TRAPPIST-1 e')} ${logL('Proxima Cen b')}`);
 const SUN = { st_teff: 5772, st_rad: 1, st_mass: 1, Teff: 5772, Rs: 1, Ms: 1 };
 const P = (R, M, a) => physics({ pl_name: 'x', pl_rade: R, pl_masse: M, pl_orbsmax: a, a, pl_orbper: 365.25 * Math.pow(a, 1.5), pl_eqt: null, ...SUN }).air.fit.P;
 const mars = P(0.532, 0.107, 1.524), mercury = P(0.383, 0.0553, 0.387);

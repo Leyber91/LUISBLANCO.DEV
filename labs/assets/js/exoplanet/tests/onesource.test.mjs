@@ -14,8 +14,11 @@
      the list   find.js hitFact
      view D     views/system.js systemModel and systemCaption,
                 opened on every planet of the system in turn
+     the CSV    export.js csvText
      the search query.js parseQuestion, its habitable-zone reading
-   and fails when
+     the tour   tours.js tourStops, its widest orbit
+   and the bench and sheet B again at a second albedo, and fails
+   when
    - two views print numbers for one quantity (the starlight, the
      equilibrium temperature and its 68% range, the luminosity)
      that no single value rounds to, or one view prints a number
@@ -31,7 +34,12 @@
      the worlds it finds;
    - a view that names the zone of a star outside the fit's
      2,600 to 7,200 K does not say "extrapolated", or says it of
-     one inside.
+     one inside;
+   - a view reads nothing: each prints how many values it gave
+     for each quantity, and one that gave none fails (a pattern
+     that stops matching the view's words would otherwise pass);
+   - a system is kept in another order than its orbits, or the
+     tour of extreme orbits names another widest orbit.
    A number the page labels as the archive's ("published", "the
    archive lists") is a source, not the page's value, and is not
    read as one. That the page's DOM prints what these functions
@@ -45,12 +53,16 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { loadSnapshot } from '../catalog.js';
+import { loadSnapshot, provisionalMeasured } from '../catalog.js';
 import { sheetRows, reticleZone } from '../views/target.js';
 import { systemModel, systemCaption } from '../views/system.js';
 import { compareHTML, chainHTML } from '../panels.js';
 import { facts, deterministicNote } from '../report.js';
-import { hitFact } from '../find.js';
+import { hitFact, kindLine } from '../find.js';
+import { csvText } from '../export.js';
+import { tourStops } from '../tours.js';
+import { byOrbit, semiMajor, STASSUN } from '../starlight.js';
+import { CIRCUMBINARY } from '../config.js';
 import { parseQuestion } from '../query.js';
 import { PHYS, TEQ, KOPPARAPU } from '../config.js';
 
@@ -61,7 +73,7 @@ const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.l
 const json = JSON.parse(readFileSync(join(here, '../../../data/exomania/pscomppars-snapshot.json'), 'utf8'));
 globalThis.fetch = async () => ({ ok: true, body: null, json: async () => json, headers: { get: () => null } });
 const { list } = await loadSnapshot();
-const A = TEQ.albedo;
+const A = TEQ.albedo, A2 = 0.1;   // the default albedo, and a second one the bench and sheet B must both follow
 const T0 = PHYS.T_SUN * Math.sqrt(PHYS.R_SUN_KM / PHYS.AU_KM / 2);   // 278.3 K
 // the bench's reference column, as main.js builds it; only the planet's own column is read
 const EARTH = { name: 'Earth', host: 'Sun', idx: -1, R: 1, Rerr: 0, M: 1, Mprov: 'Mass', Mlim: 0, P: 365.25, a: 1, ecc: 0.0167, S: 1, Teq: 255,
@@ -70,14 +82,18 @@ const EARTH = { name: 'Earth', host: 'Sun', idx: -1, R: 1, Rerr: 0, M: 1, Mprov:
 
 /* ---------- reading printed text ---------- */
 
-const NUM = '(\\d[\\d,]*(?:\\.\\d+)?)';
-/* A printed number with the interval its rounding leaves: "0.750" is 0.7495 to 0.7505, "1,783" 1,782.5 to 1,783.5. */
+/* A printed number: digits grouped by commas, with decimals, and below 0.001 a power of ten (starlight.js starNum). */
+const NUM = '(\\d[\\d,]*(?:\\.\\d+)?(?: × 10[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)?)';
+const SUP = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+/* A printed number with the interval its rounding leaves: "0.750" is 0.7495 to 0.7505, "1,783" 1,782.5 to 1,783.5,
+   "2.60 × 10⁻⁷" 2.595e-7 to 2.605e-7; a CSV's "2.6e-7" likewise. */
 function printed(s) {
   if (s === null || s === undefined) return null;
   const t = String(s).replace(/,/g, '');
-  if (!/^\d+(\.\d+)?$/.test(t)) return null;
-  const d = (t.split('.')[1] || '').length;
-  const v = +t, h = 0.5 * Math.pow(10, -d);
+  const m = t.match(/^(\d+(?:\.\d+)?)(?: × 10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)|e([+-]?\d+))?$/);
+  if (!m) return null;
+  const d = (m[1].split('.')[1] || '').length, e = m[2] ? +[...m[2]].map((c) => SUP[c]).join('') : m[3] ? +m[3] : 0;
+  const v = +m[1] * Math.pow(10, e), h = 0.5 * Math.pow(10, e - d);
   return { s: String(s), v, lo: v - h, hi: v + h };
 }
 const firstNum = (s, after = '') => { const m = String(s || '').match(new RegExp(after + NUM)); return m ? printed(m[1]) : null; };
@@ -103,13 +119,24 @@ for (const p of list) { if (!byHost.has(p.host)) byHost.set(p.host, []); byHost.
 const models = new Map();   // view D opened on each planet
 for (const p of list) { const sys = byHost.get(p.host); const m = systemModel(p, sys); models.set(p, { m, cap: systemCaption(m, false) }); }
 
+/* the CSV's columns, read by name: a quoted field may hold a comma */
+const csvSplit = (line) => { const out = []; let cur = '', q = false; for (const ch of line) { if (q) { if (ch === '"') q = false; else cur += ch; } else if (ch === '"') q = true; else if (ch === ',') { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out; };
+const CSV_HEAD = csvSplit(csvText([], A).trim().split('\n').pop());
+/* a CSV number keeps five significant figures (export.js): the interval its rounding leaves */
+const csvNum = (s) => { const v = +s; if (!(v > 0)) return null; const h = 0.5 * Math.pow(10, Math.floor(Math.log10(v)) - 4); return { s, v, lo: v - h, hi: v + h }; };
+const csvRow = (p, albedo) => { const v = csvSplit(csvText([p], albedo).trim().split('\n').pop()); return Object.fromEntries(CSV_HEAD.map((h, i) => [h, v[i]])); };
+
+/* how many values each view gave for each quantity, over the catalogue */
+const counts = {};
+const count = (q, view) => { const k = `${q}|${view}`; counts[k] = (counts[k] || 0) + 1; };
+
 function views(p) {
   const rows = sheetRows(p, A), all = [...rows.measured, ...rows.inferred];
   const row = (k) => all.find((r) => r.key === k) || null;
   const bench = compareHTML([p], EARTH, A), chain = chainHTML(p, A);
-  const f = facts(p, A), note = deterministicNote(p, f);
-  const out = { S: [], Slo: [], Shi: [], T: [], Tlo: [], Thi: [], L: [], a: [], zone: [], extrap: [] };
-  const put = (q, view, text, num) => { out[q].push({ view, text: String(text ?? ''), n: num, none: num === null && NONE.test(String(text ?? '').trim()) }); };
+  const f = facts(p, A), note = deterministicNote(p, f), csv = csvRow(p, A);
+  const out = { S: [], Slo: [], Shi: [], T: [], Tlo: [], Thi: [], T2: [], L: [], a: [], zone: [], extrap: [] };
+  const put = (q, view, text, num) => { if (num) count(q, view); out[q].push({ view, text: String(text ?? ''), n: num, none: num === null && NONE.test(String(text ?? '').trim()) }); };
   const rangeOf = (s) => { const m = String(s || '').match(new RegExp(`${NUM} to ${NUM}`)); return m ? [printed(m[1]), printed(m[2])] : null; };
 
   // the starlight
@@ -121,10 +148,12 @@ function views(p) {
   if (cS !== null) { put('S', 'chain', cS, firstNum(cS)); const r = rangeOf(cS); if (r) { put('Slo', 'chain', r[0].s, r[0]); put('Shi', 'chain', r[1].s, r[1]); } }
   const nS = note.match(new RegExp(`It receives ${NUM} times the sunlight Earth does, (.*?)\\.(?: [A-Z]|$)`));
   if (nS) put('S', 'note', nS[1], printed(nS[1]));
-  const lS = hitFact(p, 'S');
-  if (!/published|archive/.test(lS)) { const m = lS.match(new RegExp(`, ${NUM} S⊕$`)); put('S', 'list', lS, m ? printed(m[1]) : null); }
+  // the list: the value after the kind, so that "no insolation" is read as none whatever the kind says
+  const lS = hitFact(p, 'S').slice(kindLine(p).length + 2);
+  if (!/published|archive/.test(lS)) { const m = lS.match(new RegExp(`^${NUM} S⊕$`)); put('S', 'list', lS, m ? printed(m[1]) : null); }
   const dS = models.get(p).cap.match(new RegExp(`${NUM} S⊕`));
   if (dS) put('S', 'view D', dS[1], printed(dS[1]));
+  if (csv.insolation_Searth_page) put('S', 'CSV', csv.insolation_Searth_page, csvNum(csv.insolation_Searth_page));
 
   // the equilibrium temperature
   const tr = row('teq');
@@ -137,8 +166,14 @@ function views(p) {
     const m = cT.match(new RegExp(`${NUM}(?:-| to )${NUM}\\)`)); if (m) { put('Tlo', 'chain', m[1], printed(m[1])); put('Thi', 'chain', m[2], printed(m[2])); }
   }
   if (f.teq_this_page_K !== null && f.teq_this_page_K !== undefined) put('T', 'note facts', f.teq_this_page_K, printed(String(f.teq_this_page_K)));
-  const lT = hitFact(p, 'T');
-  if (!/published|archive/.test(lT)) { const m = lT.match(new RegExp(`, ${NUM} K(?: computed)?$`)); if (m || /no equilibrium temperature$/.test(lT)) put('T', 'list', lT, m ? printed(m[1]) : null); }
+  const lT = hitFact(p, 'T').slice(kindLine(p).length + 2);
+  if (!/published|archive|own heat/.test(lT)) { const m = lT.match(new RegExp(`^${NUM} K$`)); put('T', 'list', lT, m ? printed(m[1]) : null); }
+  if (csv.teq_this_page_K) put('T', 'CSV', csv.teq_this_page_K, csvNum(csv.teq_this_page_K));
+  // a second albedo: the bench and sheet B must both follow the visitor's
+  const t2 = (sheetRows(p, A2).inferred.find((r) => r.key === 'teq') || {}).v;
+  if (t2 && t2 !== 'none') put('T2', 'sheet B', t2, printed(t2));
+  const bT2 = benchCell(compareHTML([p], EARTH, A2), 'Teq');
+  if (bT2 !== null) put('T2', 'bench', bT2, firstNum(bT2));
 
   // the orbit: printed on sheet B, in the chain and the note, and drawn by view D (the value itself, unrounded)
   const ar = row('a');
@@ -150,6 +185,7 @@ function views(p) {
   if (nA) put('a', 'note', nA[1], printed(nA[1]));
   const drawn = models.get(p).m.planets.find((x) => x.p === p);
   if (drawn) put('a', 'view D, drawn', String(drawn.a), { s: String(drawn.a), v: drawn.a, lo: drawn.a, hi: drawn.a });
+  if (csv.a_AU_page) put('a', 'CSV', csv.a_AU_page, csvNum(csv.a_AU_page));
 
   // the luminosity
   const st = row('star');
@@ -157,7 +193,7 @@ function views(p) {
   if (sL) put('L', 'sheet B', sL[1], printed(sL[1]));
   const cL = chainStep(chain, 'Luminosity');
   if (cL !== null) put('L', 'chain', cL, firstNum(cL));
-  const dL = models.get(p).cap.match(new RegExp(`L ${NUM} L☉`));
+  const dL = models.get(p).cap.match(new RegExp(`luminosity, ${NUM} L☉`));
   if (dL) put('L', 'view D', dL[1], printed(dL[1]));
 
   // the zone, as each view names it
@@ -186,7 +222,7 @@ const agree = (xs) => { const ns = xs.map((x) => x.n).filter(Boolean); return !n
 
 for (const p of list) {
   const v = views(p);
-  for (const q of ['S', 'Slo', 'Shi', 'T', 'Tlo', 'Thi', 'L', 'a']) {
+  for (const q of ['S', 'Slo', 'Shi', 'T', 'Tlo', 'Thi', 'T2', 'L', 'a']) {
     const xs = v[q];
     if (!agree(xs)) bad.numbers.push(`${p.name} ${q}: ${show(xs)}`);
     if (xs.some((x) => x.n) && xs.some((x) => x.none)) bad.none.push(`${p.name} ${q}: ${show(xs)}`);
@@ -223,7 +259,36 @@ const claims = new Set(q.notes.some((n) => /optimistic/.test(n)) ? ['cons', 'opt
 const found = list.filter((p) => q.zone && q.zone.includes(own.get(p)));
 const misnamed = found.filter((p) => !claims.has(own.get(p)));
 
+// a system in the order of its orbits, as main.js keeps it (byOrbit), is in the order view D draws them
+const order = [];
+for (const [host, sys] of byHost) {
+  if (sys.length < 2) continue;
+  const as = byOrbit(sys).map((p) => semiMajor(p).a).filter((a) => a !== null);
+  const drawnAs = models.get(sys[0]).m.planets.map((o) => o.a).sort((x, y) => x - y);
+  if (as.some((a, i) => i && a < as[i - 1]) || as.join() !== drawnAs.join()) order.push(host);
+}
+// the tour of extreme orbits names the widest orbit every sheet prints, on copies marked as the page marks them before the
+// roster arrives (catalog.js provisionalMeasured), so the sheets above read the records as loaded
+const tl = list.map((p) => ({ ...p }));
+provisionalMeasured(tl);
+const wideStop = tourStops('extreme', tl).find((s) => /widest orbit/.test(s.cap));
+const widest = tl.filter((p) => p.measuredR).reduce((w, p) => ((semiMajor(p).a ?? -1) > (semiMajor(w).a ?? -1) ? p : w));
+const wideAU = wideStop && wideStop.cap.match(new RegExp(`${NUM} AU`)), wideN = wideAU && printed(wideAU[1]);
+const tourOk = wideStop && wideStop.p === widest && wideN && wideN.lo <= semiMajor(widest).a && semiMajor(widest).a <= wideN.hi && wideN.hi - wideN.lo <= 0.01 * semiMajor(widest).a;
+
+// the orbit's two exceptions (backtest_orbit.py): every name of the list is a planet here, and the rules hold for each
+const names = new Set(list.map((p) => p.name));
+const cbMissing = CIRCUMBINARY.filter((n) => !names.has(n));
+const cbKepler = list.filter((p) => CIRCUMBINARY.includes(p.name) && semiMajor(p).src !== 'archive' && semiMajor(p).src !== 'none').map((p) => p.name);
+const stassun = list.filter((p) => p.refs && p.refs.star && String(p.refs.star.label).trim() === STASSUN && p.a > 0);
+const stKepler = stassun.filter((p) => semiMajor(p).a !== p.a).map((p) => p.name);
+
 const ex = (xs) => `${xs.length}${xs.length ? `; first: ${xs.slice(0, 4).join(' || ')}` : ''}`;
+const EXPECT = { S: ['sheet B', 'bench', 'chain', 'note', 'list', 'view D', 'CSV'], Slo: ['sheet B', 'bench', 'chain'], Shi: ['sheet B', 'bench', 'chain'],
+  T: ['sheet B', 'bench', 'chain', 'note facts', 'list', 'CSV'], Tlo: ['sheet B', 'bench', 'chain'], Thi: ['sheet B', 'bench', 'chain'], T2: ['sheet B', 'bench'],
+  L: ['sheet B', 'chain', 'view D'], a: ['sheet B', 'chain', 'note', 'view D, drawn', 'CSV'] };
+const empty = [];
+for (const [q, vs] of Object.entries(EXPECT)) console.log(`${q.padEnd(4)} ${vs.map((v) => { const n = counts[`${q}|${v}`] || 0; if (!n) empty.push(`${q} from ${v}`); return `${v} ${n}`; }).join(', ')}`);
 console.log(`${list.length} planets, ${list.filter((p) => byHost.get(p.host).length > 1).length} in systems of two or more`);
 yes('no two views print numbers for one quantity that no one value rounds to (the starlight, Teq and its range, the luminosity, the orbit)', bad.numbers.length === 0, ex(bad.numbers));
 yes('no view prints a number where another says there is none', bad.none.length === 0, ex(bad.none));
@@ -233,6 +298,12 @@ yes('every view that names a zone names one of the four, or unknown', bad.words.
 yes('view D, opened on another planet of the system, draws each planet in its own zone or names it with its own', bad.siblings.length === 0, ex(bad.siblings));
 yes(`the search for habitable planets claims for each world it finds the zone its sheet gives (${found.length} found; the note: ${q.notes.join('; ')})`, misnamed.length === 0, ex(misnamed.map((p) => `${p.name} (${own.get(p)})`)));
 yes('every view that names the zone of a star outside 2,600 to 7,200 K says extrapolated, and no other does', bad.extrap.length === 0, ex(bad.extrap));
+yes('every view gave values for every quantity it prints (the counts above)', empty.length === 0, ex(empty));
+yes(`every one of the ${CIRCUMBINARY.length} names of config.js CIRCUMBINARY is a planet of the snapshot`, cbMissing.length === 0 && CIRCUMBINARY.length > 0, ex(cbMissing));
+yes('a planet of two stars takes the archive\'s orbit, or none, never Kepler\'s law on one star\'s mass', cbKepler.length === 0, ex(cbKepler));
+yes(`every planet whose star's reference is ${STASSUN} takes the archive's orbit (${stassun.length} planets)`, stKepler.length === 0 && stassun.length > 0, ex(stKepler));
+yes(`every system of two or more is kept in the order of the orbits view D draws (${[...byHost.values()].filter((x) => x.length > 1).length} systems)`, order.length === 0, ex(order));
+yes(`the tour of extreme orbits names the widest orbit every sheet prints (${widest.name}, ${semiMajor(widest).a} AU)`, !!tourOk, wideStop ? wideStop.cap : 'no stop');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

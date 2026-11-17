@@ -18,8 +18,9 @@ import { loadSnapshot, joinRoster, provisionalMeasured, countLine } from './cata
 import { LANDMARKS, PLOTS, SIZE_CLASSES, METHOD_GROUPS, TOURS, DATA, PHYS } from './config.js';
 import {
   sizeClass, sizeClassOf, hzPosition, validateAgainstArchive, valleyHistogram, transitValidation, teqValidation, withholdingTest,
-  insolation, monteCarlo, skyView, starColour, semiMajor, isNum,
+  insolation, monteCarlo, skyView, starColour, isNum,
 } from './science.js';
+import { byOrbit, starlightCensus } from './starlight.js';
 import { createPlot, plotValue } from './views/plot.js';
 import { createSystem, drawInset } from './views/system.js';
 import { bandsHTML, bindEdges, drawHist, classCounts, classTable } from './views/bands.js';
@@ -251,7 +252,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   const prev = st.sel;
   st.sel = p;
   if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
-  st.system = st.list.filter((q) => q.host === p.host).sort((a, b) => (semiMajor(a).a ?? a.P ?? 0) - (semiMajor(b).a ?? b.P ?? 0));
+  st.system = byOrbit(st.list.filter((q) => q.host === p.host));
   const apply = () => {
     setReticle(p); placeWorld();
     if (desktop()) drawInset($('inset'), p, st.system);
@@ -993,7 +994,7 @@ async function boot() {
   // a shared question replays with the page's own rules: it goes back into the field, no model is called and no list opens on load
   if (params.get('q')) { $('q').value = params.get('q'); runQuestion(params.get('q'), false, false); }
 
-  renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), rosterNote: 'The weekly roster is joining in the background.' });
+  renderMethod({ meta: snap.meta, val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), transit: transitValidation(st.list), teq: teqValidation(st.list), hold: withholdingTest(st.list), census: starlightCensus(st.list), rosterNote: 'The weekly roster is joining in the background.' });
   const retrieved = day(fromIso(snap.meta.retrieved), snap.meta.retrieved);
   $('tb-cat').textContent = `NASA archive, ${retrieved}`;
   $('tb-n').textContent = countLine(st.list, false);
@@ -1019,7 +1020,7 @@ async function boot() {
     plot.resetStats(); plot.redraw();
     thumbsWhenQuiet('roster');   // the roster added planets and said which radii are measured: the thumbnails are drawn again, once
     const note = `The weekly roster (${DATA.rosterLabel}) lists ${fmtInt(rosterCount)} planets with a measured radius${added.length ? ` and added ${fmtInt(added.length)} confirmed after the snapshot` : '; none are newer than the snapshot'}.`;
-    renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), rosterNote: note });
+    renderMethod({ val: validateAgainstArchive(st.list), valley: valleyHistogram(st.list), census: starlightCensus(st.list), rosterNote: note });
     $('tb-n').textContent = countLine(st.list, true);
     tours.setCounts(Object.fromEntries(TOURS.map((t) => [t.key, tourStops(t.key, st.list).length])));
     drawHist($('bands-cv'), st.list);

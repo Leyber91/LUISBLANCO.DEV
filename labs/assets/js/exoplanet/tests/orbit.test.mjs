@@ -185,7 +185,9 @@ const L = unit(STAR), TILT = Math.asin(L[1]);
   yes('a star outside the fit says extrapolated in the caption', systemCaption(systemModel(cool, [cool])).includes(`(Kopparapu et al. 2013), ${extrapolatedWords(2566)}.`) && !cap.includes('extrapolated'), systemCaption(systemModel(cool, [cool])));
   const lone = { host: 'Lone', name: 'Lone b', Teff: 5772, Rs: 0.5, logL: 0, a: null, P: null, Ms: null }, near = { host: 'Lone', name: 'Lone c', Teff: 5772, Rs: 0.5, a: 0.01, P: 0.4, Ms: 1 };
   const ml = systemModel(lone, [lone, near]), cl = systemCaption(ml);
-  yes('a world with no orbit has its zone placed by its star\'s luminosity, said so', ml.hz.by === 'L' && cl.includes(`Placed by the star's luminosity, ${fmt(0.25, 3)} L☉, and the star's 5,772 K`), cl);
+  yes('a world with no orbit has its zone placed by its star\'s luminosity, the archive\'s where it gives one, said so', ml.hz.by === 'L' && cl.includes(`Placed by the star's luminosity, ${fmt(1, 3)} L☉, and the star's 5,772 K`), cl);
+  const dim = { host: 'Dim', name: 'Dim b', Teff: 2600, Rs: 0.1, logL: -3.2, a: null, P: null, Ms: null };
+  yes('a luminosity below a thousandth of the Sun\'s is written as every view writes it, with a power of ten', systemCaption(systemModel(dim, [dim])).includes('Placed by the star\'s luminosity, 6.31 × 10⁻⁴ L☉,'), systemCaption(systemModel(dim, [dim])));
   yes('and a zone off the view is set against the outermost orbit drawn, without throwing', ml.hzOff && cl.includes(`The zone lies ${fmt(ml.hz.inner / ml.outer, 2)}x farther out than the outermost orbit drawn, off this view.`), cl);
   const far = { host: 'Far', name: 'Far b', Teff: 5772, Rs: 1, a: 0.01, P: 0.37, Ms: 1, ecc: 0.5 }, mf = systemModel(far, [far]);   // eccentric: its orbit reaches past a
   yes('with an orbit of its own, against this orbit', mf.hzOff && systemCaption(mf).includes(`The zone lies ${fmt(mf.hz.inner / semiMajor(far).a, 2)}x farther out than this orbit, off this view.`), systemCaption(mf));

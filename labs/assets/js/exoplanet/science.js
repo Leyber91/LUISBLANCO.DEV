@@ -6,7 +6,7 @@
    ============================================================ */
 
 import { int } from '../kit/format.js';
-import { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf, fluxFrom, T_ZERO } from './starlight.js';
+import { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf, starlightDraws, T_ZERO } from './starlight.js';
 import { PHYS, CHEN_KIPPING, LIMB, CIE_FIT, XYZ_TO_SRGB, TEQ, VALLEY, SIZE_CLASSES, SEAGER, RV, MC } from './config.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -143,7 +143,9 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
     const u = rand(); let i = 0; while (i < cdf.length - 1 && cdf[i] < u) i++;
     return Math.pow(10, fc.range[0] + (fc.range[1] - fc.range[0]) * (i + rand()) / cdf.length);
   };
-  const { a } = semiMajor(p);
+  // the scale height's temperature is the starlight's own draws (starlight.js), by the relation teqOf uses: the orbit,
+  // the luminosity and their errors are the page's one each, and the Teq printed is teqOf's
+  const sDraws = starlightDraws(p), S0 = insolation(p).S, kT = T_ZERO * Math.pow(1 - albedo, 0.25);
   const N = MC.draws, g = [], rho = [], H = [], cls = new Map();
   for (let k = 0; k < N; k++) {
     const R = hasR ? Math.max(0.05, draw(p.R, p.Rerr)) : null;
@@ -151,10 +153,8 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
     const gg = isNum(R) && isNum(M) ? M / (R * R) : null;
     if (isNum(gg)) { g.push(gg); rho.push(5.514 * M / (R * R * R)); }
     if (isNum(R)) { const c = sizeClass(R); cls.set(c.key, (cls.get(c.key) || 0) + 1); }
-    // the scale height takes each draw's own temperature, by the relation teqOf uses; the Teq printed is teqOf's
-    const Teff = draw(p.Teff, p.TeffErr), Rs = draw(p.Rs, p.RsErr), aa = draw(a, p.aErr);
-    let T = null;
-    if (isNum(Teff) && isNum(Rs) && Rs > 0 && isNum(aa) && aa > 0) T = T_ZERO * Math.pow(fluxFrom(Teff, Rs, aa) * (1 - albedo), 0.25);
+    const Sk = sDraws ? sDraws[k % sDraws.length] : S0;
+    const T = isNum(Sk) && Sk > 0 ? kT * Math.pow(Sk, 0.25) : null;
     if (T) {
       if (isNum(gg)) {
         const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;

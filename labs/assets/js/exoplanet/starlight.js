@@ -21,51 +21,64 @@
    fails on two numbers for one quantity or two zones for one
    planet.
 
-   The rules (ticket 2.14, decided 2026-11-16 on the evidence of
-   plans/exomania/PROBE_L2.md, logged in render_science.md):
-   - The starlight is computed from the star's temperature, the
-     star's radius and the orbit, S = (R/a)^2 (Teff / 5772 K)^4,
-     the inputs of the equilibrium temperature, so the two never
-     disagree. The archive's insolation (pl_insol) is used only
-     when one of those inputs is missing, and is shown beside the
-     computed one where the two differ by more than ARCHIVE_DIFF.
-     Before, the page printed the archive's insolation beside an
-     equilibrium temperature computed from the star: HD 28109 b
-     read 33.5 times Earth's sunlight beside 885 K, which is about
-     147 times.
+   The rules (ticket 2.14; each choice among data decided by a
+   backtest in labs/assets/data/exomania, logged in
+   render_science.md):
+   - The starlight is the star's luminosity over the square of the
+     orbit, S = L / a^2 (L in solar luminosities, a in AU, S in
+     Earth's), and the equilibrium temperature is computed from the
+     same S, so the two never disagree. The archive's insolation
+     (pl_insol) is used only when the orbit or the star is missing,
+     and is shown beside the computed one where the two differ by
+     more than ARCHIVE_DIFF. Before, the page printed the archive's
+     insolation beside an equilibrium temperature computed from the
+     star: HD 28109 b read 33.5 times Earth's sunlight beside 885 K,
+     which is about 147 times.
+   - The luminosity is the archive's st_lum wherever the snapshot
+     has one, and R^2 (Teff / 5772 K)^4 from the star's radius and
+     temperature only where it has none (backtest_starlight.py,
+     2026-11-17: against the papers' own insolation, the archive's
+     luminosity was the nearer for 2,283 of 3,354 planets where the
+     paper is the source of neither; R^2 Teff^4 put Teegarden's
+     Star b at 1.61 times Earth's sunlight, its papers at 1.15 and
+     1.08).
    - The orbit is Kepler's third law from the period, the star's
-     mass and the planet's measured mass, wherever the period and
-     the star's mass exist; the archive's pl_orbsmax only where one
-     is missing, and named beside where the two differ by more than
-     ORBIT_DIFF. Decided 2026-11-17 by backtest_orbit.py: the
-     composite table can take the orbit from one paper and the star
-     from another (Kepler-1649 c), and every independent paper on
-     the same star and orbit that decides supports Kepler's law.
-     The view D drawing, sheet B's orbit and S all use this one a.
-   - The luminosity is the same inputs' R^2 (Teff / 5772 K)^4, so
-     that S = L / a^2 for every planet the page can compute; the
-     archive's st_lum only when the radius or the temperature is
-     missing.
-   - S carries the snapshot's errors on Teff, R and a: MC.draws
-     draws, the median and the 16th and 84th percentiles. The
-     equilibrium temperature is Teff (R / 2a)^(1/2) (1 - A)^(1/4) of
-     the same draws, so its median and range are those of S, in
-     kelvin: T = T_ZERO S^(1/4) (1 - A)^(1/4).
+     mass and the planet's measured mass, except for a planet of two
+     stars and a star whose mass comes from Stassun et al. 2017,
+     which take the archive's pl_orbsmax (backtest_orbit.py,
+     2026-11-17, over all 216 planets whose two orbits differ by more
+     than 10%: the rule picks the orbit nearer the other papers' for
+     116 of 150, the archive's alone for 83, Kepler's law alone for
+     67). The archive's orbit also where the period or the star's
+     mass is missing, and named beside Kepler's where the two differ
+     by more than ORBIT_DIFF of the archive's. The view D drawing,
+     sheet B's orbit and S all use this one a.
+   - S is the median of MC.draws draws with its 16th and 84th
+     percentiles, over the errors the snapshot carries for that
+     planet and no others: it carries none on the archive's
+     luminosity, and none on an orbit from Kepler's law (no error on
+     the period or the star's mass), so most planets print a point
+     value and say why (errorWords). The equilibrium temperature is
+     T_ZERO S^(1/4) (1 - A)^(1/4) of the same draws, so its median
+     and range are those of S, in kelvin.
    - Every planet is drawn with one table of deviates, made once
      (DEVIATES), three a draw: the star's temperature, its radius
-     and the orbit. So the draws of a star are the same for every
-     planet the archive lists it with, and the orbit's error moves
-     with them: two planets of one star keep their order against
-     the zone's edges, and the system view, which draws one planet's
-     zone around all of them, agrees with each planet's own sheet.
-     Each planet's own median and range are those of its errors;
-     only planets of different stars share deviates, which no
-     printed number compares. One table, and not a stream for each
-     star, and a selection of the three shares, not a sort, because
-     the whole catalogue is drawn on the page's thread when the
-     radius against insolation diagram first draws: a stream and a
-     sort for each planet took 660 ms on this machine, the table and
-     the selection about 100 ms (main's archive values: 2 ms).
+     and the orbit, each column a stratified sample of the normal.
+     So the draws of a star are the same for every planet the
+     archive lists it with, and the orbit's error moves with them:
+     two planets of one star keep their order against the zone's
+     edges, and the system view, which draws one planet's zone
+     around all of them, agrees with each planet's own sheet. Each
+     planet's own median and range are those of its errors; only
+     planets of different stars share deviates, which no printed
+     number compares. The radius and the temperature are drawn
+     independently: the snapshot carries no correlation between
+     them. One table, and not a stream for each star, and a
+     selection of the three shares, not a sort, because the whole
+     catalogue is drawn on the page's thread when the radius against
+     insolation diagram first draws: a stream and a sort for each
+     planet took 660 ms on this machine, the table and the selection
+     about 100 ms (main's archive values: 2 ms).
    - The zone is placed by that S on every view. Its edges are the
      fluxes of Kopparapu et al. 2013 at the star's temperature; in
      AU they are where the same starlight falls, a sqrt(S / S_edge),
@@ -79,9 +92,9 @@
      zone says "extrapolated".
    ============================================================ */
 
-import { PHYS, KOPPARAPU, MC, TEQ } from './config.js';
-import { mulberry32, seedOf, normalFrom } from '../kit/rng.js';
-import { int, num, range } from '../kit/format.js';
+import { PHYS, KOPPARAPU, MC, TEQ, CIRCUMBINARY } from './config.js';
+import { mulberry32, seedOf, shuffle } from '../kit/rng.js';
+import { int, num, MINUS } from '../kit/format.js';
 
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 const pos = (v) => isNum(v) && v > 0;
@@ -92,58 +105,114 @@ export const T_ZERO = PHYS.T_SUN * Math.sqrt(PHYS.R_SUN_KM / PHYS.AU_KM / 2);
 /* The archive's insolation is shown beside the computed one when either is more than this many times the other. */
 export const ARCHIVE_DIFF = 1.2;
 
-/* Luminosity in L_sun: from the star's radius and temperature (Stefan-Boltzmann), else the archive's log L. */
+/* Luminosity in L_sun: { L, src, archive, fromStar }. The archive's st_lum (10^log L) wherever the snapshot has one;
+   R^2 (Teff / 5772 K)^4 from the star's radius and temperature (Stefan-Boltzmann, R in R_sun) only where it has none.
+   Decided 2026-11-17 by labs/assets/data/exomania/backtest_starlight.py: against the insolation the papers give, where
+   the paper is the source of neither the luminosity nor the radius and temperature, the archive's luminosity was the
+   nearer for 2,283 of 3,354 planets (median 7.4% off, against 15.4%). archive and fromStar: the two values; the second
+   is named beside the first where they differ by more than ARCHIVE_DIFF. */
 export function luminosity(p) {
   const archive = isNum(p.logL) ? Math.pow(10, p.logL) : null;
-  if (pos(p.Rs) && pos(p.Teff)) return { L: p.Rs * p.Rs * Math.pow(p.Teff / PHYS.T_SUN, 4), src: 'R and Teff', archive };
-  if (archive !== null) return { L: archive, src: 'archive', archive };
-  return { L: null, src: 'none', archive: null };
+  const fromStar = pos(p.Rs) && pos(p.Teff) ? p.Rs * p.Rs * Math.pow(p.Teff / PHYS.T_SUN, 4) : null;
+  if (archive !== null) return { L: archive, src: 'archive', archive, fromStar };
+  if (fromStar !== null) return { L: fromStar, src: 'R and Teff', archive, fromStar };
+  return { L: null, src: 'none', archive, fromStar };
 }
+/* Whether the luminosity from the star's radius and temperature is to be named beside the archive's. */
+export const luminosityDiffers = (L) => L.src === 'archive' && pos(L.fromStar) && Math.max(L.fromStar / L.L, L.L / L.fromStar) > ARCHIVE_DIFF;
 
 /* Earth's mass in solar masses: the ratio of the two GM (IAU 2015 nominal), 3.986004e14 / 1.3271244e20. */
 export const M_EARTH_IN_SUN = 3.986004e14 / 1.3271244e20;
-/* The archive's orbit is named beside Kepler's when the two differ by more than this share. */
+/* The archive's orbit is named beside Kepler's when the two differ by more than this share of the archive's. */
 export const ORBIT_DIFF = 0.10;
+/* The star's reference whose masses Kepler's law is not applied to (backtest_orbit.py), by its name in the snapshot. */
+export const STASSUN = 'Stassun et al. 2017';
+const TWO_STARS = new Set(CIRCUMBINARY);
 const TRUE_MASS = new Set(['Mass', 'Msini', 'Msin(i)/sin(i)']);
 /* The planet's own mass in solar masses where the archive measures one (a minimum mass counts); else none. A bound on
    the mass is never used (catalog.js has already moved it out of p.M). */
 const ownMass = (p) => (pos(p.M) && TRUE_MASS.has(p.Mprov) ? p.M * M_EARTH_IN_SUN : 0);
 
-/* Orbit size in AU: { a, src, archive }. Kepler's third law from the period, the star's mass and the planet's own
-   measured mass, wherever the period and the star's mass exist; the archive's pl_orbsmax only where one is missing.
-   Decided 2026-11-17 by labs/assets/data/exomania/backtest_orbit.py: the composite table takes its orbit from one paper
-   and the star from another, and where independent papers describe the same star and orbit, every one of them that
-   decides supports Kepler's law (Kepler-1649 c: 0.0649 AU in the archive from an old stellar mass, 0.0827 AU from the
-   0.198 solar masses its discovery paper gives, which states 74% of Earth's flux). archive: the archive's value,
-   shown beside where it differs by more than ORBIT_DIFF. */
+/* Orbit size in AU: { a, src, why, archive, err }. Decided 2026-11-17 by labs/assets/data/exomania/backtest_orbit.py,
+   over every planet whose two orbits differ by more than ORBIT_DIFF, against Kepler's law on the median of the star's
+   masses that the other papers give:
+   - a planet of two stars (config.js CIRCUMBINARY) takes the archive's orbit, and has none where the archive gives none:
+     Kepler's law on one star's mass does not give its orbit (why 'two stars');
+   - a star whose reference in the snapshot is Stassun et al. 2017 takes the archive's orbit (why 'star mass'): Kepler's
+     law on that paper's masses was the nearer for 5 of the 61 planets where the two differ;
+   - every other planet takes Kepler's third law from the period, the star's mass and the planet's measured mass,
+     wherever the period and the star's mass exist (Kepler-1649 c: 0.0649 AU in the archive from an old stellar mass,
+     0.0827 AU from the 0.198 solar masses of its discovery paper, which states 74% of Earth's flux);
+   - the archive's pl_orbsmax where one of them is missing (why 'missing').
+   archive: the archive's value. err: the orbit's error the draws carry: the archive's on the archive's orbit, none on
+   Kepler's, because the snapshot carries no error on the period or the star's mass. */
 export function semiMajor(p) {
-  const archive = isNum(p.a) ? p.a : null;
-  if (pos(p.P) && pos(p.Ms)) return { a: Math.cbrt(Math.pow(p.P / 365.25, 2) * (p.Ms + ownMass(p))), src: "Kepler's third law", archive };
-  if (archive !== null) return { a: archive, src: 'archive', archive };
-  return { a: null, src: 'none', archive: null };
+  const archive = pos(p.a) ? p.a : null;
+  const theirs = (why) => (archive !== null ? { a: archive, src: 'archive', why, archive, err: sd(p.aErr) } : { a: null, src: 'none', why, archive, err: 0 });
+  if (TWO_STARS.has(p.name)) return theirs('two stars');
+  if (archive !== null && p.refs && p.refs.star && String(p.refs.star.label).trim() === STASSUN) return theirs('star mass');
+  if (pos(p.P) && pos(p.Ms)) return { a: Math.cbrt(Math.pow(p.P / 365.25, 2) * (p.Ms + ownMass(p))), src: "Kepler's third law", why: '', archive, err: 0 };
+  return theirs('missing');
 }
-/* Whether the archive's orbit is to be named beside the one Kepler's law gives. */
+/* Whether the archive's orbit is to be named beside the one Kepler's law gives: their difference as a share of the
+   archive's, the base the note's percentage is taken on too. */
 export const orbitDiffers = (o) => o.src === "Kepler's third law" && pos(o.archive) && Math.abs(o.a / o.archive - 1) > ORBIT_DIFF;
 /* What the page says about the orbit: where it comes from, and the archive's value where it differs. */
 export function orbitNote(o) {
+  if (o.why === 'two stars') {
+    return o.src === 'archive' ? 'The orbit is the archive\'s: the planet orbits two stars, and Kepler\'s third law on one star\'s mass does not give it.'
+      : 'The orbit is unknown: the planet orbits two stars, and the archive gives none.';
+  }
+  if (o.why === 'star mass') return `The orbit is the archive's: the star's mass comes from ${STASSUN}, and for such stars the archive's orbit agreed better with other papers than Kepler's third law did.`;
   if (o.src === 'archive') return 'The orbit is the archive\'s: it lacks the period or the star\'s mass.';
   if (o.src !== "Kepler's third law") return '';
   const base = 'The orbit is derived from the period and the star\'s mass, by Kepler\'s third law.';
   if (!orbitDiffers(o)) return base;
-  const pc = Math.round(Math.abs(o.archive / o.a - 1) * 100);
-  return `${base} The archive lists ${num(o.archive, 3)} AU (NASA Exoplanet Archive, PSCompPars), ${pc}% ${o.archive > o.a ? 'more' : 'less'}.`;
+  const pc = Math.round(Math.abs(o.a / o.archive - 1) * 100);
+  return `${base} The archive lists ${num(o.archive, 3)} AU (NASA Exoplanet Archive, PSCompPars); this orbit is ${pc}% ${o.a > o.archive ? 'wider' : 'narrower'}.`;
+}
+/* A system's planets in the order of the page's orbit (the order the survey keeps a system in, main.js); those with no
+   orbit after them, by their period. */
+export function byOrbit(planets) {
+  const key = (p) => semiMajor(p).a;
+  return planets.slice().sort((x, y) => {
+    const ax = key(x), ay = key(y);
+    if (ax !== null && ay !== null) return ax - ay;
+    if (ax !== null || ay !== null) return ax !== null ? -1 : 1;
+    return (isNum(x.P) ? x.P : Infinity) - (isNum(y.P) ? y.P : Infinity) || 0;   // equivalent: two with neither give NaN, which a sort reads as 0
+  });
 }
 
-/* The starlight at a, for a star of temperature T and radius R, relative to Earth's. */
+/* The starlight at a, for a star of temperature T and radius R, relative to Earth's: R in R_sun and a in AU. */
 export const fluxFrom = (T, R, a) => { const t = T / PHYS.T_SUN; return R * R / (a * a) * (t * t) * (t * t); };
 
-/* The deviates every planet is drawn with: 3 x MC.draws standard normals from one seeded generator, made on first use. */
+/* The standard normal's quantile: the x below which a share u of it lies (Acklam's rational approximation, relative
+   error below 1.2e-9). Its three pieces meet at u = 0.02425 and 1 - 0.02425 where they agree to that error, so which
+   piece takes the meeting point is not observable. */
+const QA = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+const QB = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+const QC = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+const QD = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+const tail = (q) => (((((QC[0] * q + QC[1]) * q + QC[2]) * q + QC[3]) * q + QC[4]) * q + QC[5]) / ((((QD[0] * q + QD[1]) * q + QD[2]) * q + QD[3]) * q + 1);
+export function normalQuantile(u) {
+  if (u < 0.02425) return tail(Math.sqrt(-2 * Math.log(u)));   // equivalent: the pieces agree at the meeting point
+  if (u > 1 - 0.02425) return -tail(Math.sqrt(-2 * Math.log(1 - u)));   // equivalent: the pieces agree at the meeting point
+  const q = u - 0.5, r = q * q;
+  return (((((QA[0] * r + QA[1]) * r + QA[2]) * r + QA[3]) * r + QA[4]) * r + QA[5]) * q / (((((QB[0] * r + QB[1]) * r + QB[2]) * r + QB[3]) * r + QB[4]) * r + 1);
+}
+
+/* The deviates every planet is drawn with: MC.draws draws of three standard normals, one for each input that can carry
+   an error (the star's temperature, its radius, the orbit). Each column holds the normal's quantiles at
+   (i + 0.5) / MC.draws, each once, in an order one seeded generator shuffles (a stratified sample): so each column's
+   median and 16th and 84th percentiles are the normal's own. 400 free draws had skewed every planet's range one way
+   (this seed's temperature column: mean -0.106, sd 1.053). Made on first use. */
 let table = null;
 export const DEVIATES = () => {
   if (!table) {
-    const z = normalFrom(mulberry32(seedOf('exomania', 'starlight')));
-    table = new Float64Array(3 * MC.draws);
-    for (let i = 0; i < table.length; i++) table[i] = z();
+    const n = MC.draws, rng = mulberry32(seedOf('exomania', 'starlight'));
+    const col = Array.from({ length: n }, (_, i) => normalQuantile((i + 0.5) / n));
+    table = new Float64Array(3 * n);
+    for (let c = 0; c < 3; c++) { const s = shuffle(col, rng); for (let k = 0; k < n; k++) table[3 * k + c] = s[k]; }
   }
   return table;
 };
@@ -175,89 +244,147 @@ export function shares(d, n) {
   return { S, lo: il < im ? kth(d, il, 0, im - 1) : S, hi: ih > im ? kth(d, ih, im + 1, n - 1) : S };
 }
 
+/* What a planet's starlight is computed from: src, the inputs, and those whose error the snapshot carries (drawn).
+   'luminosity': the archive's luminosity over the orbit, S = L / a^2; the snapshot carries no error on L, so only the
+   orbit's, where it has one. 'star': R^2 (Teff / 5772 K)^4 / a^2, where the snapshot gives the star no luminosity.
+   'archive': the archive's insolation, where the orbit or the star is missing. */
+function plan(p) {
+  const o = semiMajor(p), a = o.a, L = luminosity(p), archive = pos(p.S) ? p.S : null;
+  if (L.src === 'archive' && pos(a)) return { src: 'luminosity', a, eA: o.err, L: L.L, inputs: ['L', 'a'], drawn: o.err ? ['a'] : [], archive };
+  if (L.src === 'R and Teff' && pos(a)) {
+    const eT = sd(p.TeffErr), eR = sd(p.RsErr);
+    return { src: 'star', a, eA: o.err, eT, eR, inputs: ['Teff', 'Rs', 'a'], drawn: [eT && 'Teff', eR && 'Rs', o.err && 'a'].filter(Boolean), archive };
+  }
+  if (archive !== null) return { src: 'archive', inputs: ['S'], drawn: [], archive };
+  return { src: 'none', inputs: [], drawn: [], archive: null };
+}
+const pointOf = (p, q) => (q.src === 'luminosity' ? q.L / (q.a * q.a) : q.src === 'star' ? fluxFrom(p.Teff, p.Rs, q.a) : q.src === 'archive' ? q.archive : null);
+/* The draws of the starlight into d, three deviates a draw from the one table, whichever errors this planet has; their
+   count. A draw that puts an input at or below zero is left out. */
+function fill(p, q, d) {
+  const z = DEVIATES();
+  let n = 0;
+  for (let k = 0; k < MC.draws; k++) {
+    const aa = q.a + q.eA * z[3 * k + 2];
+    if (q.src === 'luminosity') { if (aa > 0) d[n++] = q.L / (aa * aa); continue; }
+    const T = p.Teff + q.eT * z[3 * k], R = p.Rs + q.eR * z[3 * k + 1];
+    if (T > 0 && R > 0 && aa > 0) d[n++] = fluxFrom(T, R, aa);
+  }
+  return n;
+}
+
 const memo = new WeakMap();
 let work = null;
-/* The starlight a planet receives, relative to Earth's: { S, lo, hi, src, archive, ratio }.
-   src 'star': from Teff, R and a, the median of the draws, lo and hi its 68% range (null when the snapshot gives
-   none of the three an error); 'archive': the archive's insolation, because one of the three is missing;
-   'L / a^2': the archive's luminosity over the orbit, when the archive gives no insolation either; 'none'.
-   archive: the archive's insolation, whichever is used; ratio: archive / S. */
+/* The starlight a planet receives, relative to Earth's: { S, lo, hi, src, inputs, drawn, archive, ratio }. S is the
+   median of the draws and lo and hi its 68% range, over the errors the snapshot carries for this planet; where it
+   carries none, S is the point value and lo and hi are null. src, inputs, drawn: as plan() above. archive: the
+   archive's insolation, whichever is used; ratio: archive / S. */
 export function starlight(p) {
   let out = memo.get(p);
   if (!out) { out = compute(p); memo.set(p, out); }
   return out;
 }
 function compute(p) {
-  const { a, src: aSrc } = semiMajor(p);
-  const archive = pos(p.S) ? p.S : null;
-  if (pos(p.Teff) && pos(p.Rs) && pos(a)) {
-    const eT = sd(p.TeffErr), eR = sd(p.RsErr), eA = aSrc === 'archive' ? sd(p.aErr) : 0;
-    let S = fluxFrom(p.Teff, p.Rs, a), lo = null, hi = null;
-    if (eT || eR || eA) {
-      // three deviates a draw from the one table, whichever errors this row has
-      const z = DEVIATES(), d = work || (work = new Float64Array(MC.draws));   // one buffer: a planet is drawn at once
-      let n = 0;
-      for (let k = 0; k < MC.draws; k++) {
-        const T = p.Teff + eT * z[3 * k], R = p.Rs + eR * z[3 * k + 1], aa = a + eA * z[3 * k + 2];
-        if (T > 0 && R > 0 && aa > 0) d[n++] = fluxFrom(T, R, aa);
-      }
-      if (n) ({ S, lo, hi } = shares(d, n));
-    }
-    return { S, lo, hi, src: 'star', archive, ratio: archive === null ? null : archive / S };
+  const q = plan(p);
+  let S = pointOf(p, q), lo = null, hi = null;
+  if (q.drawn.length) {
+    const d = work || (work = new Float64Array(MC.draws));   // one buffer: a planet is drawn at once
+    const n = fill(p, q, d);
+    if (n) ({ S, lo, hi } = shares(d, n));
   }
-  if (archive !== null) return { S: archive, lo: null, hi: null, src: 'archive', archive, ratio: 1 };
-  const { L } = luminosity(p);
-  if (pos(L) && pos(a)) return { S: L / (a * a), lo: null, hi: null, src: 'L / a^2', archive: null, ratio: null };
-  return { S: null, lo: null, hi: null, src: 'none', archive: null, ratio: null };
+  return { S, lo, hi, src: q.src, inputs: q.inputs, drawn: q.drawn, archive: q.archive, ratio: q.archive === null || !pos(S) ? null : q.archive / S };
+}
+/* The draws themselves, in the table's order, for a quantity drawn with the starlight (science.js, the scale height's
+   temperature); null where the snapshot gives its inputs no error. */
+export function starlightDraws(p) {
+  const q = plan(p);
+  if (!q.drawn.length) return null;
+  const d = new Float64Array(MC.draws), n = fill(p, q, d);
+  return n ? d.subarray(0, n) : null;
 }
 /* The name the rest of the page has always called it by. */
 export const insolation = starlight;
 
-/* Whether the archive's insolation is to be shown beside the computed one. */
-export const archiveDiffers = (s) => s.src === 'star' && isNum(s.ratio) && Math.max(s.ratio, 1 / s.ratio) > ARCHIVE_DIFF;
-/* Whether the archive's luminosity is to be named beside the one computed from the star's radius and temperature. */
-export const luminosityDiffers = (L) => L.src === 'R and Teff' && pos(L.archive) && Math.max(L.archive / L.L, L.L / L.archive) > ARCHIVE_DIFF;
+/* How the catalogue's starlight is computed, the method's numbers: how many planets take it each way (src), how many
+   carry a range, how many of those carry the orbit's error alone, and how many print a point value. */
+export function starlightCensus(list) {
+  const c = { n: 0, luminosity: 0, star: 0, archive: 0, ranged: 0, orbitOnly: 0, point: 0 };
+  for (const p of list) {
+    const s = starlight(p);
+    if (!pos(s.S)) continue;
+    c.n++; c[s.src]++;
+    if (isNum(s.lo)) { c.ranged++; if (s.drawn.join() === 'a') c.orbitOnly++; }
+    else if (s.src !== 'archive') c.point++;
+  }
+  return c;
+}
 
-/* The equilibrium temperature at Bond albedo A with full redistribution: { med, lo, hi, src }, the starlight's draws
-   in kelvin; null with no starlight. */
+/* Whether the archive's insolation is to be shown beside the computed one. */
+export const archiveDiffers = (s) => s.src !== 'archive' && isNum(s.ratio) && Math.max(s.ratio, 1 / s.ratio) > ARCHIVE_DIFF;
+
+/* The words for what a range carries, from the inputs and the errors drawn: { carried, missing }. */
+const INPUT = { L: 'the star\'s luminosity', Teff: 'the star\'s temperature', Rs: 'the star\'s radius', a: 'the orbit', S: 'the archive\'s insolation' };
+const listed = (xs, w) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${w} ${xs[xs.length - 1]}`);
+export function errorWords(s) {
+  const drawn = s.drawn || [], yes = drawn.map((k) => INPUT[k]), no = (s.inputs || []).filter((k) => !drawn.includes(k)).map((k) => INPUT[k]);
+  return { carried: yes.length ? `the error${yes.length > 1 ? 's' : ''} of ${listed(yes, 'and')}` : '', missing: no.length ? `the snapshot carries no error on ${listed(no, 'or')}` : '' };
+}
+
+/* The equilibrium temperature at Bond albedo A with full redistribution: { med, lo, hi, src, drawn }, the starlight's
+   draws in kelvin; null with no starlight. */
 export function teqOf(p, albedo = TEQ.albedo) {
   const s = starlight(p);
   if (!pos(s.S)) return null;
   const k = T_ZERO * Math.pow(1 - albedo, 0.25);
   const t = (x) => (isNum(x) ? k * Math.pow(x, 0.25) : null);
-  return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src };
+  return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };
 }
 /* Its median, for the callers that need one number. */
 export const equilibriumTemp = (p, albedo = TEQ.albedo) => { const t = teqOf(p, albedo); return t ? t.med : null; };
 
 /* ---------- how the two are printed, everywhere ---------- */
 
-/* { v, pm, text }: the value to three figures, its 68% range to two in words ('' without one), and the two in one phrase
-   with the unit. */
+/* The one way the starlight and the luminosity are written: sig figures by the kit's num, and below 0.001, where num's
+   four decimals would leave no figure, as a power of ten: 2.60 × 10⁻⁷. */
+const SUP = { '-': '⁻', '+': '', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+export const SMALL = 0.001;
+export function starNum(x, sig = 3) {
+  if (!isNum(x)) return '';
+  if (x <= 0 || x >= SMALL) return num(x, sig);
+  const [m, e] = x.toExponential(sig - 1).split('e');
+  return `${m} × 10${[...e].map((c) => SUP[c]).join('')}`;
+}
+/* The number starNum writes, as a number: what a sheet of facts carries so that it says what the page prints. */
+export const starValue = (x, sig = 3) => (!isNum(x) ? null : x > 0 && x < SMALL ? +x.toExponential(sig - 1) : +num(x, sig).replace(/,/g, '').replace(MINUS, '-'));
+
+/* { v, pm, point, text }: the value to three figures, its 68% range to two in words ('' without one), whether it is a
+   point value for want of errors (never said of the archive's own insolation), and the whole in one phrase with the
+   unit. */
 export function starlightText(s) {
-  if (!pos(s.S)) return { v: '', pm: '', text: '' };
-  const v = num(s.S, 3), pm = range(s.lo, s.hi, 2);   // ranges to two figures, as every range of sheet B: three cut its column
-  return { v, pm, text: `${v} S⊕${pm ? ` (68%: ${pm})` : ''}` };
+  if (!pos(s.S)) return { v: '', pm: '', point: false, text: '' };
+  const v = starNum(s.S, 3), pm = isNum(s.lo) && isNum(s.hi) ? `${starNum(s.lo, 2)} to ${starNum(s.hi, 2)}` : '';   // ranges to two figures, as every range of sheet B: three cut its column
+  const point = !pm && s.src !== 'archive';
+  return { v, pm, point, text: `${v} S⊕${pm ? ` (68%: ${pm})` : point ? ', a point value' : ''}` };
 }
 export function teqText(t) {
-  if (!t) return { v: '', pm: '', text: '' };
+  if (!t) return { v: '', pm: '', point: false, text: '' };
   const v = int(t.med), pm = isNum(t.lo) && isNum(t.hi) ? `${int(t.lo)} to ${int(t.hi)}` : '';
-  return { v, pm, text: `${v} K${pm ? ` (68%: ${pm})` : ''}` };
+  const point = !pm && t.src !== 'archive';
+  return { v, pm, point, text: `${v} K${pm ? ` (68%: ${pm})` : point ? ', a point value' : ''}` };
 }
 
-/* What the page says about where the starlight comes from, and the archive's value where it differs. */
+/* What the page says about where the starlight comes from, what its range carries, and the archive's value where it
+   differs. */
 export function starlightNote(p, s = starlight(p)) {
-  if (s.src === 'star') {
-    const base = 'The starlight is computed from the star\'s temperature, the star\'s radius and the orbit, S = (R★ / a)² (Teff / 5772 K)⁴, the inputs of the equilibrium temperature.';
-    if (!archiveDiffers(s)) return base;
-    const f = s.ratio > 1 ? s.ratio : 1 / s.ratio;
-    return `${base} The archive lists ${num(s.archive, 3)} S⊕ (NASA Exoplanet Archive, PSCompPars), ${num(f, 2)} times ${s.ratio > 1 ? 'more' : 'less'}.`;
-  }
+  const ew = errorWords(s);
+  const range_ = isNum(s.lo) ? `Its 68% range carries ${ew.carried}${ew.missing ? `; ${ew.missing}` : ''}.` : ew.missing ? `A point value: ${ew.missing}.` : '';
+  const differs = archiveDiffers(s) ? ` The archive lists ${starNum(s.archive, 3)} S⊕ (NASA Exoplanet Archive, PSCompPars), ${num(s.ratio > 1 ? s.ratio : 1 / s.ratio, 2)} times ${s.ratio > 1 ? 'more' : 'less'}.` : '';
+  if (s.src === 'luminosity') return `The starlight is the star's luminosity, the archive's, over the square of the orbit: S = L / a², L in L☉ and a in AU. ${range_}${differs}`;
+  if (s.src === 'star') return `The starlight is computed from the star's temperature and radius and the orbit, S = (R★ / a)² (Teff / 5772 K)⁴ with R★ in R☉ and a in AU: the archive gives the star no luminosity. ${range_}${differs}`;
+  if (s.src !== 'archive') return '';
   const { a } = semiMajor(p);
-  const lacks = [!pos(p.Teff) && 'the star\'s temperature', !pos(p.Rs) && 'the star\'s radius', !pos(a) && 'the orbit'].filter(Boolean).join(' and ');
-  if (s.src === 'archive') return `The archive's insolation (NASA Exoplanet Archive, PSCompPars): it lacks ${lacks}, so the starlight cannot be computed from the star.`;
-  if (s.src === 'L / a^2') return `The starlight is the archive's luminosity over the orbit, L / a²: it lacks ${lacks} and gives no insolation.`;
-  return '';
+  const lacks = [!pos(a) && 'the orbit', luminosity(p).src === 'none' && 'the star\'s luminosity and its radius or temperature'].filter(Boolean).join(' and ');
+  return `The archive's insolation (NASA Exoplanet Archive, PSCompPars): it lacks ${lacks}, so the starlight cannot be computed here.`;
 }
 
 /* ---------- the habitable zone (Kopparapu et al. 2013 with erratum) ---------- */

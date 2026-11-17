@@ -14,7 +14,7 @@ import {
   forecastFor, equilibriumTemp, hzPosition, insolation, semiMajor, skyView, spectralType,
   transitGeometry, sizeClassOf, limitOf, limitKind, limitText, hasRadius, isNum,
 } from './science.js';
-import { starlightText } from './starlight.js';
+import { starNum, starValue } from './starlight.js';
 import { groundingCheck } from './grounding.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 
@@ -32,7 +32,7 @@ export function limitsLine(p) {
 export function facts(p, albedo) {
   const fc = forecastFor(p);
   // the starlight as every sheet prints it: the fact sheet carries the printed value, so the note and the sheet agree
-  const sl = insolation(p), S = sl.S ? +starlightText(sl).v.replace(/,/g, '') : null;
+  const sl = insolation(p), S = sl.S ? starValue(sl.S) : null;
   const a = semiMajor(p).a;
   const sky = skyView(p);
   const geo = transitGeometry(p);
@@ -75,7 +75,7 @@ export function deterministicNote(p, f, short = false) {
     ? `is ${fmt(f.radius_Rearth, 3)} times Earth's radius and circles`
     : `has no measured radius${f.radius_limit_Rearth ? ` (the archive gives only a ${f.radius_kind} of ${fmt(f.radius_limit_Rearth, 3)} Earth radii)` : ''}; it circles`;
   s.push(`${f.name} ${size} ${star}${f.period_days ? ` every ${fmt(f.period_days, 3)} days` : ''}${f.orbit_AU ? ` at ${fmt(f.orbit_AU, 3)} AU` : ''}.`);
-  if (f.insolation_Searth) s.push(`It receives ${fmt(f.insolation_Searth, 3)} times the sunlight Earth does, ${f.habitable_zone}.`);
+  if (f.insolation_Searth) s.push(`It receives ${starNum(f.insolation_Searth, 3)} times the sunlight Earth does, ${f.habitable_zone}.`);
   const lim = f.mass_kind === 'upper limit' || f.mass_kind === 'lower limit';
   if (f.mass_kind === 'measured') s.push(`Its mass is measured at ${fmt(f.mass_Mearth, 3)} Earth masses.`);
   else if (f.mass_forecast_Mearth) {
