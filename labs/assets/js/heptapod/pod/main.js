@@ -155,6 +155,13 @@ function mount() {
       ...hooks,
       reduced: reducedMotion,
       say,
+      // the caption lies over the room's top left on a wide screen: the disc keeps clear of it
+      keepClear() {
+        const c = document.querySelector('.room-cap');
+        if (!c || getComputedStyle(c).position !== 'absolute') return null;
+        const a = c.getBoundingClientRect(), b = $('pod').getBoundingClientRect();
+        return { x1: a.right - b.left, y1: a.bottom - b.top };
+      },
       carry(place) { carry(state, place); save(); },
       act(kind, opts) {
         const rec = doAct(state, sp, kind, opts);

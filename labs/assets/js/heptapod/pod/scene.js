@@ -102,6 +102,8 @@ export function initPod(canvas, hooks) {
     c.putImageData(img, 0, 0);
   }
   const discCv = document.createElement('canvas');           // fog and ink, at full size
+  const fogCv = document.createElement('canvas');            // the fog alone, at half size
+  const bgCv = document.createElement('canvas');             // the room beyond the glass
   const maskCv = document.createElement('canvas');           // the disc's soft edge
   const inkCv = document.createElement('canvas');            // the ink field, one pixel a cell
   const targetCv = document.createElement('canvas');         // where a ring-script ring's ink belongs
@@ -141,6 +143,14 @@ export function initPod(canvas, hooks) {
     const portrait = H > W * 1.05;
     const Rd = Math.round(portrait ? Math.min(0.43 * W, 0.26 * H) : Math.min(0.26 * H, 0.3 * W));
     const disc = { cx: W / 2, cy: Math.round(0.045 * H + Rd), Rd };
+    // the page's caption may lie over the room's top left: the disc and its bezel keep clear of its corner, moving
+    // right as far as the room allows (found at 1024 px, where the caption lay on the disc)
+    const cap = hooks.keepClear?.();
+    if (cap) {
+      const k = W / Math.max(1, canvas.getBoundingClientRect().width), x1 = cap.x1 * k + 0.02 * W, y1 = cap.y1 * k;
+      const need = 1.1 * Rd, dy = disc.cy - y1;
+      if (dy < need) disc.cx = Math.min(W - 1.12 * Rd, Math.max(disc.cx, x1 + Math.sqrt(need * need - Math.max(0, dy) * Math.max(0, dy))));
+    }
     const glassB = Math.round(disc.cy + Rd + 0.03 * H);
     const u = Math.min(H * 0.125, W * 0.1);
     const near = { place: 'near', cx: W / 2, cy: Math.max(0.735 * H, glassB + 0.11 * H), rx: Math.min(0.31 * W, 4.3 * u), ry: 0.02 * H, k: 0.84 };
@@ -164,8 +174,10 @@ export function initPod(canvas, hooks) {
       const g = m.createRadialGradient(Rd, Rd, 0, Rd, Rd, Rd);
       g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.74, 'rgba(0,0,0,1)'); g.addColorStop(0.9, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
       m.clearRect(0, 0, D, D); m.fillStyle = g; m.fillRect(0, 0, D, D);
+      fogCv.width = fogCv.height = Math.ceil(D / FOG_Q);
       fogPat = null;
     }
+    paintRoom();
     // the ink field: about 0.8 cells per CSS pixel of the disc, fewer on the light tier
     const N = clamp(Math.round(((2 * Rd) / dpr) * (Tier.name === 'lite' ? 0.55 : 0.8)), 160, 360);
     if (!field || field.N !== N) {
@@ -283,8 +295,11 @@ export function initPod(canvas, hooks) {
     }
     c.closePath();
   }
-  function drawBeyond(ctx) {
+  /* The room beyond the glass, which changes only with the layout: drawn once into bgCv. */
+  function paintRoom() {
     const { W, H, glassB, disc } = L;
+    bgCv.width = W; bgCv.height = glassB;
+    const ctx = bgCv.getContext('2d');
     // the far dark, a little less dark toward the floor the disc lights
     const room = ctx.createLinearGradient(0, 0, 0, glassB);
     room.addColorStop(0, '#04060A'); room.addColorStop(1, '#090C12');
@@ -299,6 +314,10 @@ export function initPod(canvas, hooks) {
     fl.addColorStop(0, rgba(HORIZON, 0.075)); fl.addColorStop(1, rgba(HORIZON, 0));
     ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(0, 0, 1.7 * disc.Rd, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
+  }
+  function drawBeyond(ctx) {
+    const { W, glassB, disc } = L;
+    ctx.drawImage(bgCv, 0, 0);
 
     // the being, in the dark
     const lean = gaze.lean;
@@ -340,9 +359,10 @@ export function initPod(canvas, hooks) {
 
   function drawDisc(ctx) {
     const { disc } = L, D = discCv.width, Rd = disc.Rd;
-    const c = discCv.getContext('2d');
+    // the fog is soft: it is laid at half size and scaled up; the ink is laid at full size over it
+    const c = fogCv.getContext('2d');
+    c.setTransform(fogCv.width / D, 0, 0, fogCv.width / D, 0, 0);
     c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
-    c.clearRect(0, 0, D, D);
     // the fog gives light from inside: brightest a little above its centre
     const base = c.createRadialGradient(Rd * 0.94, Rd * 0.86, 0, Rd, Rd, Rd);
     base.addColorStop(0, '#D3D9E3'); base.addColorStop(0.45, '#B0B8C5'); base.addColorStop(0.8, '#6E7786'); base.addColorStop(1, '#2A303A');
@@ -358,13 +378,18 @@ export function initPod(canvas, hooks) {
       }
       c.globalAlpha = 1;
     }
+    c.globalCompositeOperation = 'source-over';
+    const dc = discCv.getContext('2d');
+    dc.globalCompositeOperation = 'source-over'; dc.globalAlpha = 1;
+    dc.clearRect(0, 0, D, D);
+    dc.imageSmoothingEnabled = true; dc.imageSmoothingQuality = 'high';
+    dc.drawImage(fogCv, 0, 0, D, D);
     // the ink: what it takes from the fog's light
-    c.globalCompositeOperation = 'source-over';
-    if (!inkBlank) { c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(inkCv, 0, 0, D, D); }
+    if (!inkBlank) dc.drawImage(inkCv, 0, 0, D, D);
     // the fog ends softly at the disc's edge
-    c.globalCompositeOperation = 'destination-in';
-    c.drawImage(maskCv, 0, 0);
-    c.globalCompositeOperation = 'source-over';
+    dc.globalCompositeOperation = 'destination-in';
+    dc.drawImage(maskCv, 0, 0);
+    dc.globalCompositeOperation = 'source-over';
     ctx.drawImage(discCv, disc.cx - Rd, disc.cy - Rd);
     // the bezel: the visitor's instrument around it, a tick every 6 degrees, the four quarters the keys keep longer
     const br = Rd * 1.045;
@@ -572,10 +597,19 @@ export function initPod(canvas, hooks) {
 
     if (drag || moving || slate || flash || (!reduced && busy)) kick();
     else if (!reduced) idle(50);                       // at rest the fog drifts and the ink breathes
-    else if (ph && !ink.still) idle(250);              // without motion, a ring still has its three steps to take
+    else if (ph && !ink.still) wakeAt(nextStep(ink, now));  // without motion, a ring still has its three steps to take
   }
   function kick() { if (!raf && running && !dead) { clearTimeout(timer); timer = 0; raf = requestAnimationFrame(frame); } }
   function idle(ms) { if (!timer && !raf && running && !dead) timer = setTimeout(() => { timer = 0; kick(); }, ms); }
+  /* With motion reduced, the page sleeps until the ring's next still step is due, and not at all for a ring that
+     stays (the greeting): nothing is drawn between changes. */
+  function nextStep(k, now) {
+    const rest = Math.max(9000, k.hang);
+    if (!Number.isFinite(rest)) return Infinity;
+    const t = now - k.t0;
+    return t < rest ? k.t0 + rest : k.t0 + rest + (Math.floor((t - rest) / 1300) + 1) * 1300;
+  }
+  function wakeAt(at) { if (Number.isFinite(at)) idle(Math.max(16, at - performance.now() + 5)); }
 
   /* ---------------- acts ---------------- */
   const onPlates = (st) => ['near', 'far'].flatMap((p) => st.plates[p].filter(Boolean));
