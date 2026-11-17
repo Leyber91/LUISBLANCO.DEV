@@ -38,6 +38,10 @@ export const MIN_YEARS_APART = 2;         // a paper tests an older one when it 
 /* A Julian date as a year with a fraction, and back. */
 export const yearOfJd = (jd) => 2000 + (jd - 2451545.0) / YEAR_DAYS;
 export const jdOfYear = (y) => 2451545.0 + (y - 2000) * YEAR_DAYS;
+/* The sky's line of time, as years and as Julian dates: from 1999-01-01 06:00 to 2040-01-01 12:00 UTC. The sky
+   clamps its date to these ends, and the lab's record (record.js) keeps a day of the sky only when the line shows it. */
+export const FIRST_YEAR = 1999, LAST_YEAR = 2040;
+export const LINE_JD = Object.freeze({ from: jdOfYear(FIRST_YEAR), to: jdOfYear(LAST_YEAR) });
 export const REAL_TEST_ORBITS = 10;       // a later mid-time fewer orbits on than this is the same transits quoted again
 export const BLIND_SHARE = 1 / 6;         // an uncertainty this share of the period or more: three sigma is half an orbit, the largest miss there can be
 

@@ -73,6 +73,7 @@ const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.l
 const json = JSON.parse(readFileSync(join(here, '../../../data/exomania/pscomppars-snapshot.json'), 'utf8'));
 globalThis.fetch = async () => ({ ok: true, body: null, json: async () => json, headers: { get: () => null } });
 const { list } = await loadSnapshot();
+provisionalMeasured(list);   // as the page marks the radii before its first draw (main.js), so the sheets read what it shows
 const A = TEQ.albedo, A2 = 0.1;   // the default albedo, and a second one the bench and sheet B must both follow
 const T0 = PHYS.T_SUN * Math.sqrt(PHYS.R_SUN_KM / PHYS.AU_KM / 2);   // 278.3 K
 // the bench's reference column, as main.js builds it; only the planet's own column is read
@@ -302,7 +303,7 @@ for (const p of standIns) {
 const empty = [];
 for (const [q, vs] of Object.entries(EXPECT)) console.log(`${q.padEnd(4)} ${vs.map((v) => { const n = RANGES.includes(q) ? before[`${q}|${v}`] : counts[`${q}|${v}`] || 0; const m = RANGES.includes(q) ? (counts[`${q}|${v}`] || 0) - n : 0; if (!(RANGES.includes(q) ? (census.ranged ? n : m) : n)) empty.push(`${q} from ${v}`); return RANGES.includes(q) ? `${v} ${n} (stand-ins ${m})` : `${v} ${n}`; }).join(', ')}`);
 console.log(`the catalogue: ${census.ranged} planets with a range, ${census.point} point values (${census.partial} with an error on some input and not every one); ${standIns.length} stand-ins with every error`);
-// two solutions of a star: the threshold is the 95th percentile of the factor between the two luminosities, at two figures
+// the disagreement of a star's two luminosities: the threshold is the 95th percentile of the factor between the two luminosities, at two figures
 const apart = list.map((p) => luminosityApart(luminosity(p))).filter((x) => x !== null).sort((x, y) => x - y);
 const p95 = apart[Math.floor(0.95 * apart.length)], beyond = list.filter((p) => luminosityApart(luminosity(p)) > LUMINOSITY_SPLIT);
 console.log(`${list.length} planets, ${list.filter((p) => byHost.get(p.host).length > 1).length} in systems of two or more`);
@@ -315,12 +316,53 @@ yes('view D, opened on another planet of the system, draws each planet in its ow
 yes(`the search for habitable planets claims for each world it finds the zone its sheet gives (${found.length} found; the note: ${q.notes.join('; ')})`, misnamed.length === 0, ex(misnamed.map((p) => `${p.name} (${own.get(p)})`)));
 yes('every view that names the zone of a star outside 2,600 to 7,200 K says extrapolated, and no other does', bad.extrap.length === 0, ex(bad.extrap));
 yes('every view gave values for every quantity it prints (the counts above; the ranges from the stand-ins where the catalogue has none)', empty.length === 0 && standIns.length > 0, ex(empty));
-yes(`the threshold for two solutions of a star is the 95th percentile of the factor between its luminosities, at two figures (${p95.toFixed(3)} over ${apart.length} planets; ${beyond.length} planets on ${new Set(beyond.map((p) => p.host)).size} stars past it)`, Math.round(p95 * 10) / 10 === LUMINOSITY_SPLIT && beyond.length > 0, `${p95}`);
+yes(`the threshold at which the sheet names a star's two luminosities as disagreeing is the 95th percentile of the factor between its luminosities, at two figures (${p95.toFixed(3)} over ${apart.length} planets; ${beyond.length} planets on ${new Set(beyond.map((p) => p.host)).size} stars past it)`, Math.round(p95 * 10) / 10 === LUMINOSITY_SPLIT && beyond.length > 0, `${p95}`);
 yes(`every one of the ${CIRCUMBINARY.length} names of config.js CIRCUMBINARY is a planet of the snapshot`, cbMissing.length === 0 && CIRCUMBINARY.length > 0, ex(cbMissing));
 yes('a planet of two stars takes the archive\'s orbit, or none, never Kepler\'s law on one star\'s mass', cbKepler.length === 0, ex(cbKepler));
 yes(`every planet whose star's reference is ${STASSUN} takes the archive's orbit (${stassun.length} planets)`, stKepler.length === 0 && stassun.length > 0, ex(stKepler));
 yes(`every system of two or more is kept in the order of the orbits view D draws (${[...byHost.values()].filter((x) => x.length > 1).length} systems)`, order.length === 0, ex(order));
 yes(`the tour of extreme orbits names the widest orbit every sheet prints (${widest.name}, ${semiMajor(widest).a} AU)`, !!tourOk, wideStop ? wideStop.cap : 'no stop');
+
+// the archive's labels arrive with HTML's character references ("Anglada-Escud&eacute;"; 133 of the 1,908 labels the
+// page reads on 2026-11-17). Each label the page reads is held to the raw one decoded by Unicode's own decomposition, not
+// by the decoder's tables: a letter and an accent named "eacute" is, in NFD, the letter and the accent's combining mark.
+// A kind of reference this oracle does not know fails the check by name, so a new snapshot cannot pass on a guess.
+const MARK = { grave: 0x300, acute: 0x301, circ: 0x302, tilde: 0x303, uml: 0x308, ring: 0x30a, cedil: 0x327, caron: 0x30c };
+const PLAIN = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>' };
+const unknown = new Set();
+const oracle = (raw) => raw.replace(/&(#[xX][0-9a-fA-F]+|#[0-9]+|[A-Za-z]+);/g, (whole, b) => {
+  if (b[0] === '#') { const cp = /^#[xX]/.test(b) ? parseInt(b.slice(2), 16) : parseInt(b.slice(1), 10); if (cp >= 0xa0 && cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff) || cp === 39 || cp === 38) return String.fromCodePoint(cp); unknown.add(whole); return whole; }
+  if (Object.hasOwn(PLAIN, b)) return PLAIN[b];
+  const m = /^([A-Za-z])(grave|acute|circ|tilde|uml|ring|cedil|caron)$/.exec(b);
+  if (m) { const c = (m[1] + String.fromCodePoint(MARK[m[2]])).normalize('NFC'); if (c.length === 1) return c; }
+  unknown.add(whole); return whole;
+});
+// each raw entry as the page would read it (catalog.js refOf: an archive path, a link, or an ADS bibcode), decoded by the oracle
+const urlOf = (key) => (key.startsWith('/') ? 'https://exoplanetarchive.ipac.caltech.edu' + key : key.startsWith('http') ? key : `https://ui.adsabs.harvard.edu/abs/${key}/abstract`);
+const expected = new Set(json.refs.map(([label, key]) => `${urlOf(key)}\n${oracle(label)}`));
+const raws = new Set(json.refs.map(([label]) => label));
+const seen = new Set(), badLabels = [], decoded = [];
+for (const p of list) for (const r of Object.values(p.refs || {})) if (r && r.label) seen.add(`${r.url}\n${r.label}`);
+for (const pair of seen) {
+  const label = pair.split('\n')[1];
+  if (!expected.has(pair)) badLabels.push(`${label} (${pair.split('\n')[0]})`);
+  if (!raws.has(label)) decoded.push(label);
+}
+yes(`every reference label the page reads is its raw label with each reference read as Unicode composes it (${seen.size} labels, ${decoded.length} decoded, e.g. ${decoded.slice(0, 3).join(', ')})`,
+  badLabels.length === 0 && unknown.size === 0 && decoded.length > 0, `${ex(badLabels)}${unknown.size ? `; kinds the oracle does not know: ${[...unknown].join(' ')}` : ''}`);
+
+// the archive's own estimates of a radius (from a mass; their source is "Calculated Value"): sheet B says "estimated"
+// where it would give an error, and no other radius says it
+const wrongR = [];
+let nEst = 0;
+for (const p of list) {
+  const r = sheetRows(p, A).measured.find((x) => x.key === 'R');
+  if (!r || r.v === 'none' || !Number.isFinite(p.R)) continue;
+  const calc = !!(p.refs && p.refs.R && p.refs.R.label === 'Calculated Value');
+  if (calc) nEst++;
+  if ((r.pm === 'estimated') !== calc || (r.kind === 'e') !== calc) wrongR.push(`${p.name} (${p.refs && p.refs.R ? p.refs.R.label : 'no source'}): ${r.pm}, ${r.kind}`);
+}
+yes(`sheet B says "estimated" on exactly the radii the archive calculated from a mass (${nEst} of them)`, wrongR.length === 0 && nEst > 0, ex(wrongR));
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

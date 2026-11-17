@@ -12,7 +12,7 @@
   "labs/assets/css/altverse.css": {
    "frosted-glass": 2
   },
-  "labs/assets/css/black_hole.css": {
+  "labs/assets/css/black_hole_v1.css": {
    "frosted-glass": 2
   },
   "labs/assets/css/dimensions.css": {
@@ -63,7 +63,7 @@
   "labs/assets/js/altverse/worldstate.js": {
    "em-dash": 1
   },
-  "labs/assets/js/blackhole/ui.js": {
+  "labs/assets/js/blackhole_v1/ui.js": {
    "em-dash": 5
   },
   "labs/assets/js/config/levels.data.js": {
@@ -221,7 +221,7 @@
   "labs/assets/js/workout-plans/constants.js": {
    "em-dash": 2
   },
-  "labs/bh_animation_page.html": {
+  "labs/bh_animation_page_v1.html": {
    "em-dash": 2,
    "default-font": 1
   },

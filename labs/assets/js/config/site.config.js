@@ -50,7 +50,7 @@ export const CATEGORIES = [
     projects: [
       { id: 'black-hole', title: 'Black Hole', status: 'built',
         href: 'bh_animation_page.html',
-        blurb: 'A Schwarzschild black hole with a doppler-asymmetric accretion disk and real-time gravitational lensing.' },
+        blurb: 'Light traced through the exact Kerr spacetime: M87*, Sgr A* and Cygnus X-1 at their published masses, the shadow\'s size set against the Event Horizon Telescope\'s measurement of Sgr A*, and a free fall with two clocks.' },
       { id: 'dimensional', title: 'Dimensional Test', status: 'built',
         href: 'md_animation_page.html',
         blurb: 'Project an n-dimensional hypercube down into three and watch dimensions fold.' },
