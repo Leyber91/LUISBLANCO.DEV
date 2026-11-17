@@ -76,7 +76,7 @@ guard('derive', () => {
   ok('one slider step off does not: f 1.69 or 1.71 at 10%, 1.79 or 2.01 at the Eddington rate', !fits({ fcol: 1.69 }) && !fits({ fcol: 1.71 }) && !fits({ edd: 1, fcol: 1.79 }) && !fits({ edd: 1, fcol: 2.01 }));
   ok('nor one step of the ratio: log10 -0.95 or -1.05 at f 1.70, -0.05 at f 1.9', !fits({ edd: e(-0.95) }) && !fits({ edd: e(-1.05) }) && !fits({ edd: e(-0.05), fcol: 1.9 }));
   ok('the second reader\'s three: f 1.00 at 10%, the default 1.70 at the Eddington rate, 2.00 at log10 -1.9', !fits({ fcol: 1 }) && !fits({ edd: 1, fcol: 1.7 }) && !fits({ edd: e(-1.9), fcol: 2 }));
-  ok('and not just outside the holes they computed: 1.39 or 10.01 Msun, spin 0.001, charge 0.01', !fits({ massSun: 1.39 }) && !fits({ massSun: 10.01 }) && !fits({ a: 0.001 }) && !fits({ q: 0.01 }));
+  ok('holes just past the ones they computed do not fit: 1.39 or 10.01 Msun, spin 0.001, charge 0.01', !fits({ massSun: 1.39 }) && !fits({ massSun: 10.01 }) && !fits({ a: 0.001 }) && !fits({ q: 0.01 }));
   ok('nor M87*, Sgr A* or Cygnus X-1 (a = 0.998)', !fits({ massSun: 6.5e9, edd: 1e-5, a: 0.94 }) && !fits({ massSun: 4.3e6, edd: 1e-8, a: 0.5 }) && !fits({ massSun: 21.2, a: 0.998 }));
   ok('the two points are the abstract\'s', JSON.stringify(P.FCOL_POINTS) === '[{"edd":0.1,"f":[1.7,1.7]},{"edd":1,"f":[1.8,2]}]', JSON.stringify(P.FCOL_POINTS));
   ok('and at the inner horizon for any spin or charge, however small: a = 0.0005 (r- 1.25e-7 M, which the old rule of r- < 5e-7 called the centre), a = 0.001, Q = 0.0001',
