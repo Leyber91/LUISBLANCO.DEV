@@ -63,9 +63,9 @@ jobs:
           if [ -f tools/drive.mjs ]; then node tools/drive.mjs selftest; else echo "NOT_CHECKED: tools/drive.mjs does not exist"; fi
           if [ -f tools/invariants.mjs ]; then node tools/invariants.mjs selftest; else echo "NOT_CHECKED: tools/invariants.mjs does not exist"; fi
       # a selftest is only as good as the broken rules it catches: each listed rule is broken in a copy and must fail it.
-      # On a pull request tools/mutate.mjs asks git what changed since main (renames split) and runs the lists of drive
-      # and invariants only when one of the files it watches changed (about 55 minutes here); on a push to main every list
-      # runs. It says which way it went.
+      # On a pull request tools/mutate.mjs asks git what changed since main (renames split) and runs a gated list (drive
+      # and invariants, about 55 minutes here; mutate's own, about 8) only when one of its files changed; on a push to
+      # main every list runs. It says which way it went.
       - name: mutation test of the gates
         run: |
           if [ -f tools/mutate.mjs ]; then

@@ -63,9 +63,21 @@
    and not used). A call to Chrome that is cut off when Chrome dies
    fails at once. The Chromes a process started are killed when it
    exits, on SIGTERM and on SIGINT. Profiles over a day old are
-   cleared. A declared limit: on Windows a process stopped from
-   outside (a kill, a closed terminal) runs no handler, so the Chrome
-   it started can be left running, with no lock held for it.
+   cleared. A process killed outright runs no handler: on Windows its
+   Chrome ends with it all the same (Node puts the children it did
+   not detach in a job that closes with it; on 2026-11-17 a drive
+   killed so took its 12 Chrome processes with it within 3 s);
+   elsewhere (SIGKILL) its Chrome is left running, with no lock held
+   for it, a declared limit.
+   Two notes. LABS_DRIVE_LOCK set in a shell makes that file the
+   machine's lock for every drive and for tools/mutate.mjs started
+   from that shell: one Chrome at a time then holds only among the
+   processes that share the variable. The selftest's decoy answers
+   /json on port 9333, the port drives used before Chrome chose its
+   own: while it runs, a drive of an older copy of this file (main's
+   until this lands, or a branch made before), which takes that port
+   and no lock, connects to the decoy and fails; and when 9333 is
+   taken, the decoy check fails.
 
      node tools/drive.mjs selftest   the runner of the invariants, the frame rule and the lock, in headless
                                      Chrome; tools/mutants/drive.json breaks each rule for tools/mutate.mjs.

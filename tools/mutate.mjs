@@ -3,7 +3,9 @@
 // On 2026-11-13 the scope rule in tools/evolution.mjs passed its own selftest (90 of 90) while a reviewer who broke
 // the rule in a copy, one condition at a time, found broken versions the selftest still passed. So each gate that
 // has a list of mutants in tools/mutants/<tool>.json is tested here: every mutant is one exact replacement that
-// breaks one rule, and the tool's selftest must fail on it. A mutant that survives means a rule nobody tests. A
+// breaks one rule, and the tool's selftest must fail on it. A list named <tool>.<part>.json breaks <tool>.mjs and runs
+// "selftest <part>", a part of the selftest that catches that list's entries in less time (mutate.core.json: the
+// entries main had before 2026-11-17, a few seconds a copy, against about 13 s for the whole selftest on the gates). A mutant that survives means a rule nobody tests. A
 // mutant whose text is no longer in the tool exactly once means the list went stale. Both fail this check.
 // It works for a gate that node runs and that has a "selftest" argument needing nothing outside its own folder.
 //
@@ -20,14 +22,15 @@
 // holdChrome of tools/drive.mjs in its own folder (never a copy's), so that one Chrome runs on the machine: a drive of
 // another conversation waits, and gets its turn in the 600 ms mutate leaves between copies (a waiting drive looks
 // every 250 ms). On 2026-11-17 a private lock for every copy let a local run of these lists start Chrome beside other
-// drives. Those lists take most of an hour on the gates' machine: given --changed-since <ref> (on a pull request:
-// origin/main), mutate asks git for the files changed since <ref> (renames as a deletion and an addition, so a watched
-// file moved away still counts) and runs them only when a file in WATCHED changed; --changed <file> gives the paths
-// instead, one a line; with neither, as on a push to main, every list runs. When the files cannot be named, or
-// --changed-since is given no ref, every list runs, and that is said.
+// drives. Those lists take most of an hour on the gates' machine, and mutate's own (mutate.json) took 498 s of every
+// pull request: each is GATED. Given --changed-since <ref> (on a pull request: origin/main), mutate asks git for the
+// files changed since <ref> (renames as a deletion and an addition, so a watched file moved away still counts) and runs
+// a gated list only when one of its files changed; --changed <file> gives the paths instead, one a line; with neither,
+// as on a push to main, every list runs. When the files cannot be named, or --changed-since is given no ref, every list
+// runs, and that is said. Every other list, mutate.core.json among them, runs on every pull request.
 //
-// usage: node tools/mutate.mjs [<tool>] [--tools <folder>] [--changed-since <ref> | --changed <file>]
-//        node tools/mutate.mjs selftest
+// usage: node tools/mutate.mjs [<list>] [--tools <folder>] [--changed-since <ref> | --changed <file>]
+//        node tools/mutate.mjs selftest [core]
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -47,25 +50,54 @@ const WIDTH = Math.max(1, Math.min(4, (os.availableParallelism ? os.availablePar
 // that the other's is the same.
 export const WATCHDOG = 124;
 const LIMIT_MS = 180000;
-function runs(file, limit = LIMIT_MS, env = process.env) {
+/* The copies running now end with this process: on its exit, and on SIGTERM and SIGINT, after which Node would end
+   without its exit handlers. On Windows the copy's whole tree goes (taskkill /T /F: the copy and the Chrome it started);
+   elsewhere the copy gets SIGTERM and ends its own Chromes (tools/drive.mjs). On 2026-11-17 a run stopped from outside
+   left its copy and that copy's Chrome running, while the machine's lock named a dead pid.
+   Killed outright, a process runs no handler. On Windows Node ends the children it did not detach when it dies, by any
+   means (libuv puts them in a job that closes with it), and a copy's Chrome with them: checked here on 2026-11-17. A
+   declared limit, elsewhere: a mutate killed outright (SIGKILL) leaves its copy running until the copy's own watchdog
+   (120 s for drive, 60 s for invariants), and a waiting drive takes the lock from the dead pid meanwhile, so a second
+   Chrome can run beside that copy's. */
+const RUNNING = new Set();
+// sync: wait for taskkill (on exit, where nothing waits after); else it runs beside (it takes about 2 s here)
+export function endTree(child, sync = false) {
+  const args = ['/T', '/F', '/PID', String(child.pid)];
+  if (process.platform === 'win32') { if (sync) spawnSync('taskkill', args, { stdio: 'ignore' }); else spawn('taskkill', args, { stdio: 'ignore' }).on('error', () => {}); }
+  else child.kill('SIGTERM');
+}
+process.on('exit', () => { for (const c of RUNNING) endTree(c, true); });
+for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130]]) process.on(sig, () => process.exit(code));
+// part: the selftest's part a list asks for (tools/mutants/<tool>.<part>.json runs "<tool>.mjs selftest <part>")
+function runs(file, limit = LIMIT_MS, env = process.env, part = '') {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [file, 'selftest'], { stdio: 'ignore', env });
+    const child = spawn(process.execPath, [file, 'selftest', ...(part ? [part] : [])], { stdio: 'ignore', env });
+    RUNNING.add(child);
     let late = false;
-    const timer = setTimeout(() => { late = true; child.kill(); }, limit);
-    child.on('exit', (code) => { clearTimeout(timer); resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail'); });
-    child.on('error', () => { clearTimeout(timer); resolve('fail'); });
+    const timer = setTimeout(() => { late = true; endTree(child); }, limit);
+    child.on('exit', (code) => { RUNNING.delete(child); clearTimeout(timer); resolve(late || code === WATCHDOG ? 'timeout' : code === 0 ? 'pass' : 'fail'); });
+    child.on('error', () => { RUNNING.delete(child); clearTimeout(timer); resolve('fail'); });
   });
 }
 
-// The lists that run on a pull request only when one of these files changed, and the decision.
+// The tools whose selftests drive Chrome: their lists run one copy at a time, under the machine's lock.
 const SLOW = ['drive', 'invariants'];
-const WATCHED = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];
-// changed: the paths that changed, or null when they are not known (then every list runs)
+// The lists that run on a pull request only when one of their files changed, as on every push to main. mutate's own
+// list (this PR's entries: the timeouts, the machine's lock, the stopped runs) took 498 s of every pull request on
+// 2026-11-17; the entries main had before, in mutate.core.json, run on every pull request.
+const CHROME_FILES = ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'];
+const GATED = { drive: CHROME_FILES, invariants: CHROME_FILES, mutate: ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'] };
+// changed: the paths that changed, or null when they are not known (then every list runs). hits: for each gated list
+// that runs, the changed files that made it run
 export function listsToRun(names, changed) {
-  if (!changed) return { run: names, skipped: [], hit: null };
-  const hit = changed.filter((f) => WATCHED.includes(f));
-  const skipped = hit.length ? [] : names.filter((n) => SLOW.includes(n));
-  return { run: names.filter((n) => !skipped.includes(n)), skipped, hit };
+  if (!changed) return { run: names, skipped: [], hits: {} };
+  const hits = {}, skipped = [];
+  for (const n of names) {
+    if (!Object.hasOwn(GATED, n)) continue;
+    const h = changed.filter((f) => GATED[n].includes(f));
+    if (h.length) hits[n] = h; else skipped.push(n);
+  }
+  return { run: names.filter((n) => !skipped.includes(n)), skipped, hits };
 }
 // the files changed since a ref, as git names them with renames split; null when git cannot say, or no ref is given
 // (git would read "...HEAD" as HEAD against itself: nothing changed)
@@ -99,7 +131,7 @@ export async function machineHold(waitMs) {
 // Returns {caught, survived, stale, noop: [names], timedOut: [{ name, reason }], reruns: [{ name, result }], broken:
 // true when the unmutated selftest fails or does not end, busy: true when the machine's lock was not free in time}.
 // width: how many copies run at once; hold: machineHold's function, for a list that drives Chrome.
-export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS, width = WIDTH, hold = null) {
+export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS, width = WIDTH, hold = null, part = '') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mutate-'));
   const env = { ...process.env, LABS_DRIVE_LOCK: path.join(root, 'chrome.lock') };
   const place = (label, text) => {
@@ -114,8 +146,8 @@ export async function mutate(source, mutants, name, siblings, limit = LIMIT_MS, 
   const out = { caught: 0, survived: [], stale: [], noop: [], timedOut: [], reruns: [], broken: false, busy: false };
   // one copy's run; once the machine's lock was not free, no copy runs any more
   const go = async (label, text) => {
-    if (!hold) return runs(place(label, text), limit, env);
-    const got = out.busy ? 'busy' : await hold(() => runs(place(label, text), limit, env));
+    if (!hold) return runs(place(label, text), limit, env, part);
+    const got = out.busy ? 'busy' : await hold(() => runs(place(label, text), limit, env, part));
     if (got === 'busy') out.busy = true;
     return got;
   };
@@ -175,20 +207,22 @@ export async function run(only, tools = TOOLS, say = console.log, { changed = nu
   if (only && !names.length) { say(`mutate: no mutants file for "${only}"`); return 2; }
   if (!names.length) { say('mutate: tools/mutants holds no mutants file, so no gate was tested'); return 1; }
   const plan = listsToRun(names, changed);
-  if (plan.hit && plan.hit.length) say(`mutate: ran ${SLOW.join(' and ')}: changed files ${plan.hit.join(', ')}`);
-  if (plan.skipped.length) say(`mutate: skipped ${plan.skipped.join(' and ')}: none of ${WATCHED.join(', ')} changed`);
+  for (const n of Object.keys(plan.hits)) say(`mutate: ran ${n}: changed files ${plan.hits[n].join(', ')}`);
+  for (const n of plan.skipped) say(`mutate: skipped ${n}: none of ${GATED[n].join(', ')} changed`);
   let bad = 0;
   for (const name of plan.run) {
-    const tool = path.join(tools, `${name}.mjs`);
-    if (!fs.existsSync(tool)) { say(`mutate ${name}: tools/${name}.mjs does not exist`); bad++; continue; }
+    // a list named <tool>.<part> breaks <tool>.mjs and runs that part of its selftest
+    const [toolName, ...more] = name.split('.'), part = more.join('.');
+    const tool = path.join(tools, `${toolName}.mjs`);
+    if (!fs.existsSync(tool)) { say(`mutate ${name}: tools/${toolName}.mjs does not exist`); bad++; continue; }
     let mutants;
     try { mutants = JSON.parse(fs.readFileSync(path.join(folder, `${name}.json`), 'utf8').replace(BOM, '')); }
     catch (e) { say(`mutate ${name}: tools/mutants/${name}.json is not valid JSON (${e.message})`); bad++; continue; }
     const errs = shape(mutants, `tools/mutants/${name}.json`);
     if (errs.length) { for (const e of errs) say('  ' + e); bad++; continue; }
     const t0 = Date.now();
-    const slow = SLOW.includes(name);
-    const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, name, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null);
+    const slow = SLOW.includes(toolName);
+    const r = await mutate(fs.readFileSync(tool, 'utf8'), mutants, toolName, tools, limit, slow ? 1 : WIDTH, slow ? await machineHold(waitMs) : null, part);
     if (r.busy) { say(`mutate ${name}: the machine's Chrome lock was not free within ${Math.round(waitMs / 1000)} s, so the list did not finish`); bad++; continue; }
     if (r.broken) { say(`mutate ${name}: the selftest fails before any mutation`); bad++; continue; }
     say(`mutate ${name}: ${mutants.length} broken rules, ${r.caught} caught by the selftest${r.timedOut.length ? `, ${r.timedOut.length} timed out` : ''}, ${r.reruns.length} run again, ${Math.round((Date.now() - t0) / 1000)} s`);
@@ -202,7 +236,10 @@ export async function run(only, tools = TOOLS, say = console.log, { changed = nu
   return bad ? 1 : 0;
 }
 
-async function selftest() {
+// part 'core': the cases that catch the entries of tools/mutants/mutate.core.json (the ones main had before 2026-11-17),
+// a few seconds; with no part, every case
+async function selftest(part) {
+  const core = part === 'core';
   // a toy gate: one rule that is tested, one that is not
   const toy = [
     `const add = (a, b) => a + b;`,
@@ -220,7 +257,7 @@ async function selftest() {
   const { WATCHDOG_EXIT } = await import(DRIVE);
   const read = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').split(String.fromCharCode(10)).map((l) => l.trim()).filter(Boolean) : []);
   let r, crlf, broken, hung, cli = {}, tm, said = {}, codes = {}, runsPast = '', reruns = [], readBack = {}, lockSeen = '', slowRuns = [], renamed = null, gitless = null;
-  let held = {}, fake = {}, imported = {}, ranAt = 0, busyStarted = true;
+  let held = {}, fake = {}, imported = {}, ranAt = 0, busyStarted = true, orphans = {};
   try {
     const M = [CAUGHT, { name: 'label threshold moved', from: 'n > 9', to: 'n > 99' }, { name: 'text that is not there', from: 'a * b', to: 'a / b' },
       { name: 'text that is there twice', from: 'a + ', to: 'a - ' }, { name: 'a mutant that changes nothing', from: 'a + b', to: 'a + b' }];
@@ -232,6 +269,18 @@ async function selftest() {
     // the command itself, run as CI runs it, on toy tools folders
     const make = (name, files) => { const t = path.join(root, name, 'tools'); fs.mkdirSync(path.join(t, 'mutants'), { recursive: true }); for (const [f, body] of Object.entries(files)) { if (body === null) fs.rmSync(path.join(t, f), { recursive: true, force: true }); else fs.writeFileSync(path.join(t, f), body); } return t; };
     const J = (list) => JSON.stringify(list);
+    // the command itself, as CI runs it: four at a time, each with a lock file of its own, so that none waits on another
+    let lockN = 0;
+    const cmd = (args, cwd) => () => new Promise((res) => {
+      const k = spawn(process.execPath, args, { cwd, env: { ...process.env, LABS_DRIVE_LOCK: path.join(root, `cmd${lockN++}.lock`) }, stdio: ['ignore', 'pipe', 'ignore'] });
+      let text = '';
+      const timer = setTimeout(() => k.kill(), 120000);
+      k.stdout.on('data', (d) => { text += d; });
+      k.on('close', (c) => { clearTimeout(timer); res({ code: c, text }); });
+    });
+    const code = (tools, ...args) => cmd([SELF, ...args, '--tools', tools]);
+    let extra = {};
+    if (!core) {
     // runs stopped at the limit. LIM is short; a toy stopped at it would end by itself (12 s at most), so none is left
     // behind. The three calls run at once: their toys wait on timers, so they do not slow one another.
     const LIM = 1500, END = 'process.exit(ok ? 0 : 1); }', count = path.join(root, 'past.runs'), log = path.join(root, 'reruns.log'), log2 = path.join(root, 'reruns2.log'), lockLog = path.join(root, 'lock.seen');
@@ -265,6 +314,40 @@ async function selftest() {
     fake.firstAsked = asked; asked = 0;
     fake.later = await mutate(toy, [CAUGHT, { name: 'addition adds one more', from: 'a + b', to: 'a + b + 1' }], 'toy', undefined, LIMIT_MS, 1, async (go) => (asked++ === 1 ? 'busy' : go()));
     fake.laterAsked = asked;
+    // a run stopped while a copy runs: the copy and what the copy started end with it (exit, SIGTERM, SIGINT, and a copy
+    // stopped at the limit). What the copy starts here is detached, out of the job in which Windows ends a Node process's
+    // children with it, so that only the tree kill can end it. Killed outright, mutate leaves the machine's lock to a dead
+    // pid, and a waiting drive takes it
+    const orphanRun = async (how, slowList) => {
+      const dir = path.join(root, 'orphan-' + how), pids = path.join(dir, 'pids.txt'), lock = path.join(dir, 'machine.lock');
+      const copy = `const { spawn } = await import('node:child_process'); const { writeFileSync } = await import('node:fs'); const g = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 30000)'], { stdio: 'ignore', detached: true }); process.on('SIGTERM', () => { try { g.kill(); } catch { /* gone */ } process.exit(143); }); writeFileSync(${J(pids)}, process.pid + ' ' + g.pid); setTimeout(() => process.exit(1), 30000); }`;
+      const tools = make('orphan-' + how, { 'toy.mjs': toy, [slowList ? 'drive.mjs' : 'other.mjs']: toy, [`mutants/${slowList ? 'drive' : 'toy'}.json`]: J([{ name: 'a copy that waits', from: END, to: copy }]) });
+      if (slowList) fs.rmSync(path.join(tools, 'mutants', 'toy.json'), { force: true });
+      const script = path.join(dir, 'stop.mjs');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(script, `import { existsSync } from 'node:fs'; const { run } = await import(${J(pathToFileURL(SELF).href)}); const how = ${J(how)};
+const look = setInterval(() => { if (!existsSync(${J(pids)})) return; clearInterval(look); if (how === 'exit') process.exit(7); else if (how !== 'limit' && how !== 'kill') process.emit(how); }, 20);
+process.exit(await run(undefined, ${J(tools)}, () => {}, how === 'limit' ? { limit: 1000 } : {}));`);
+      const k = spawn(process.execPath, [script], { stdio: 'ignore', env: { ...process.env, LABS_DRIVE_LOCK: lock } });
+      const out = { code: null, pids: [], gone: false, lockTaken: null };
+      if (how === 'kill') {
+        for (let i = 0; i < 300 && !fs.existsSync(pids); i++) await sleep(20);
+        const heldBy = fs.existsSync(lock) ? JSON.parse(fs.readFileSync(lock, 'utf8')).pid : null;
+        k.kill(process.platform === 'win32' ? undefined : 'SIGKILL');
+        await new Promise((r) => k.once('exit', r));
+        const { holdChrome } = await import(DRIVE);
+        const t0 = Date.now(), got = await holdChrome(3000, lock);
+        out.lockTaken = { heldBy: heldBy === k.pid, got: !!got, ms: Date.now() - t0 };
+        if (got) got();
+      } else out.code = await new Promise((r) => k.once('exit', (c) => r(c)));
+      out.pids = (fs.existsSync(pids) ? fs.readFileSync(pids, 'utf8') : '').split(' ').map(Number).filter(Boolean);
+      const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
+      for (let i = 0; i < 100 && how !== 'kill' && out.pids.some(alive); i++) await sleep(50);
+      out.gone = out.pids.length === 2 && !out.pids.some(alive);
+      for (const pid of out.pids) if (alive(pid)) { if (process.platform === 'win32') spawnSync('taskkill', ['/T', '/F', '/PID', String(pid)], { stdio: 'ignore' }); else try { process.kill(pid, 'SIGKILL'); } catch { /* gone */ } }
+      return out;
+    };
+    [orphans.exit, orphans.term, orphans.int, orphans.limit, orphans.kill] = await Promise.all([orphanRun('exit'), orphanRun('SIGTERM'), orphanRun('SIGINT'), orphanRun('limit'), orphanRun('kill', true)]);
     // which lists run: a folder with a slow list (drive) and another (toy)
     // its two copies write when they run, with the pid that holds the machine's lock then: a slow list runs them one at
     // a time, each under mutate's hold of that lock
@@ -301,19 +384,27 @@ async function selftest() {
     const listed = path.join(root, 'changed.txt');
     fs.writeFileSync(listed, 'labs/a.css' + String.fromCharCode(13, 10) + '  tools/drives/air.mjs ' + String.fromCharCode(10, 10));
     readBack.file = readChanged(listed); readBack.none = readChanged(path.join(root, 'nowhere.txt'));
+    // a list named <tool>.<part>.json breaks <tool>.mjs and runs "selftest <part>": a toy whose selftest passes only so;
+    // a list of a tool that drives Chrome holds the machine's lock, whatever its part
+    const toyPart = toy.replace('const ok = add(2, 2) === 4;', "const ok = add(2, 2) === 4 && process.argv[3] === 'quick';");
+    said.part = []; said.ghost = [];
+    codes.part = await run(undefined, make('parts', { 'toy.mjs': toyPart, 'mutants/toy.quick.json': J([CAUGHT]) }), (l) => said.part.push(l));
+    codes.ghost = await run(undefined, make('ghost-part', { 'toy.mjs': toy, 'mutants/ghost.quick.json': J([CAUGHT]) }), (l) => said.ghost.push(l));
+    const partLog = path.join(root, 'part.log');
+    const partCopy = `const { appendFileSync, readFileSync } = await import('node:fs'); let pid = ''; try { pid = JSON.parse(readFileSync(${J(MACHINE)}, 'utf8')).pid; } catch { /* free */ } appendFileSync(${J(partLog)}, String(pid)); process.exit(1); }`;
+    codes.slowPart = await run('drive.quick', make('slow-part', { 'drive.mjs': toyPart, 'mutants/drive.quick.json': J([{ name: 'a copy that names the lock holder', from: END, to: partCopy }]) }), () => {});
+    held.part = fs.existsSync(partLog) ? fs.readFileSync(partLog, 'utf8') : '';
+    extra = {
+      renamed: hasRepo ? cmd([SELF, '--changed-since', 'main', '--tools', slow], repo) : async () => null,
+      gitless: cmd([SELF, '--changed-since', 'no-such-ref', '--tools', slow], repo),
+      skip: cmd([SELF, '--changed', listed, '--tools', slow]),
+      lost: cmd([SELF, '--changed', path.join(root, 'nowhere.txt'), '--tools', slow]),
+      noRef: cmd([SELF, '--tools', slow, '--changed-since']),
+    };
+    }
     // and from its own folder, with no --tools: the folder is found whatever characters its path holds
     const own = make('own folder', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT]) });
     fs.copyFileSync(SELF, path.join(own, 'mutate.mjs'));
-    // the command itself, as CI runs it: four at a time, each with a lock file of its own, so that none waits on another
-    let lockN = 0;
-    const cmd = (args, cwd) => () => new Promise((res) => {
-      const k = spawn(process.execPath, args, { cwd, env: { ...process.env, LABS_DRIVE_LOCK: path.join(root, `cmd${lockN++}.lock`) }, stdio: ['ignore', 'pipe', 'ignore'] });
-      let text = '';
-      const timer = setTimeout(() => k.kill(), 120000);
-      k.stdout.on('data', (d) => { text += d; });
-      k.on('close', (c) => { clearTimeout(timer); res({ code: c, text }); });
-    });
-    const code = (tools, ...args) => cmd([SELF, ...args, '--tools', tools]);
     const tasks = {
       clean: code(make('clean', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT]) })),
       survivor: code(make('survivor', { 'toy.mjs': toy, 'mutants/toy.json': J([CAUGHT, M[1]]) })),
@@ -329,11 +420,7 @@ async function selftest() {
       noFolder: code(make('no-folder', { 'toy.mjs': toy, mutants: null })),
       emptyFolder: code(make('empty-folder', { 'toy.mjs': toy })),
       ownFolder: cmd([path.join(own, 'mutate.mjs')]),
-      renamed: hasRepo ? cmd([SELF, '--changed-since', 'main', '--tools', slow], repo) : async () => null,
-      gitless: cmd([SELF, '--changed-since', 'no-such-ref', '--tools', slow], repo),
-      skip: cmd([SELF, '--changed', listed, '--tools', slow]),
-      lost: cmd([SELF, '--changed', path.join(root, 'nowhere.txt'), '--tools', slow]),
-      noRef: cmd([SELF, '--tools', slow, '--changed-since']),
+      ...extra,
     };
     const keys = Object.keys(tasks);
     let nextTask = 0;
@@ -350,47 +437,6 @@ async function selftest() {
     ['line endings do not hide a mutant', crlf.caught === 1 && !crlf.stale.length],
     ['a selftest that fails before any mutation is reported, not counted as catching', broken.broken === true && broken.caught === 0],
     ['a selftest that does not end within the limit counts as failed', hung.broken === true && hung.caught === 0],
-    ['a run stopped at the limit, and stopped again on its second run, is timed out, apart from caught and survived; it ran twice, no more',
-      tm.timedOut.length === 2 && tm.timedOut.find((t) => t.name === 'fails 0.5 s past the limit').reason === undefined && runsPast === 'nn'],
-    ['a run stopped once is counted by its second run: passing, it survives; failing, it is caught', tm.survived.length === 1 && tm.survived[0] === 'stopped once, then passes' && tm.caught === 3],
-    ['a selftest that stops itself at its own limit (exit 124) is timed out, not caught, after a second run', tm.timedOut.some((t) => t.name === 'stops itself at its own limit') && tm.reruns.some((x) => x.name === 'stops itself at its own limit' && x.result === 'timeout')],
-    ['every run stopped at the limit is run again and named with what its second run did; a run inside the limit is not', JSON.stringify(tm.reruns.map((x) => x.name + ':' + x.result).sort()) === JSON.stringify(['fails 0.5 s past the limit:timeout', 'stopped once, then fails:fail', 'stopped once, then passes:pass', 'stops itself at its own limit:timeout'])],
-    ['each run of a list gets a lock file of its own, not the machine\'s nor the one this process was given', /mutate-[^/\\]+[/\\]chrome\.lock$/.test(lockSeen) && lockSeen !== String(process.env.LABS_DRIVE_LOCK), lockSeen],
-    ['the second runs run alone, one after another', reruns.join(' ') === 'start end start end'],
-    ['a run that ends 0.7 s inside the limit is counted, one that ends 0.5 s past it is timed out', !tm.timedOut.some((t) => t.name === 'fails 0.7 s inside the limit') && tm.timedOut.some((t) => t.name === 'fails 0.5 s past the limit')],
-    ['the command reports a timeout and counts it in the summary; it fails on one undeclared and passes on one declared',
-      codes.und === 1 && codes.dec === 0 && said.und.some((l) => /^mutate toy: 2 broken rules, 1 caught by the selftest, 1 timed out, 1 run again, \d+ s$/.test(l))
-      && said.und.includes('  RERUN     a break that never ends: stopped at the limit once, then stopped again') && codes.surv === 1 && said.surv.includes('  RERUN     stopped once, then survives: stopped at the limit once, then survived')
-      && said.dec.includes('  RERUN     stopped once, then caught: stopped at the limit once, then caught') && said.dec.some((l) => /^mutate toy: 3 broken rules, 2 caught by the selftest, 1 timed out, 2 run again, \d+ s$/.test(l))
-      && said.und.some((l) => /^  TIMED OUT a break that never ends: the selftest did not end within 1.5 s, twice; nothing saw it fail/.test(l))
-      && said.dec.some((l) => /^  TIMED OUT a break that never ends: .*declared: the break is an endless loop$/.test(l))],
-    ['a timeout is declared with its reason, 8 characters or more', shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: '' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'seven c' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'eight ch' }], 't').length === 0],
-    ['with no list of changes every list runs', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], null).run) === JSON.stringify(['atlas', 'drive', 'invariants'])],
-    ['each watched file alone runs the slow lists, the gates workflow among them', ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], [f]).run) === JSON.stringify(['atlas', 'drive', 'invariants']))],
-    ['a change to none of them skips drive and invariants and runs every other list, a near name included', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], ['labs/a.css', 'tools/drives/air.mjs', 'tools/drive.mjs.orig', 'x/tools/drive.mjs'])) === JSON.stringify({ run: ['atlas'], skipped: ['drive', 'invariants'], hit: [] }) && JSON.stringify(listsToRun(['atlas', 'drive'], []).skipped) === JSON.stringify(['drive'])],
-    ['the command says which way it went', codes.skip === 0 && said.skip.some((l) => l === 'mutate: skipped drive: none of tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json, tools/mutate.mjs, .github/workflows/gates.yml changed') && !said.skip.some((l) => l.startsWith('mutate drive:')) && said.skip.some((l) => l.startsWith('mutate toy:'))
-      && codes.ran === 0 && said.ran.includes('mutate: ran drive and invariants: changed files tools/drive.mjs') && said.ran.some((l) => /^mutate drive: 2 broken rules, 2 caught by the selftest, 0 run again, \d+ s$/.test(l))],
-    ['a slow list runs its copies one at a time', slowRuns.map((l) => l.split(' ')[0]).join(' ') === 'start end start end', slowRuns.join(' ')],
-    ['while another holds the machine\'s lock, a slow list waits for it, and holds it itself around each copy', (() => {
-      const freed = +((held.hold.find((l) => l.startsWith('freed ')) || '').split(' ')[1]), starts = slowRuns.filter((l) => l.startsWith('start '));
-      return ranAt < freed && starts.length === 2 && +starts[0].split(' ')[1] >= freed && starts.every((l) => l.split(' ')[2] === String(process.pid));
-    })(), JSON.stringify([held.hold, ranAt, slowRuns])],
-    ['between two copies a drive that waits gets its turn: the lock is free for 600 ms', (() => {
-      const t = (list, w, k = 0) => +((list.filter((l) => l.startsWith(w + ' '))[k] || '').split(' ')[1]);
-      const e1 = t(slowRuns, 'end'), s2 = t(slowRuns, 'start', 1), got = t(held.wait, 'got'), gave = t(held.wait, 'gave');
-      return got >= e1 && gave <= s2 && s2 - e1 >= 590;
-    })(), JSON.stringify([held.wait, slowRuns])],
-    ['a list that does not drive Chrome does not wait for the machine lock', codes.free === 0 && said.free.some((l) => /^mutate toy: 1 broken rules, 1 caught/.test(l)), JSON.stringify(said.free)],
-    ['a slow list whose lock is not free in its time is a failure that says so, and none of its copies runs', codes.busy === 1 && said.busy.includes('mutate drive: the machine\'s Chrome lock was not free within 1 s, so the list did not finish') && !busyStarted, JSON.stringify(said.busy)],
-    ['a lock not free at the first copy runs nothing and is not a broken list; at a later copy, the copies left neither run nor ask again', fake.first.busy && !fake.first.broken && fake.first.caught === 0 && fake.firstAsked === 1 && fake.later.busy && !fake.later.broken && fake.later.caught === 0 && fake.laterAsked === 2, JSON.stringify([fake.first, fake.firstAsked, fake.later, fake.laterAsked])],
-    ['the code read as timed out is the one tools/drive.mjs stops its selftests with', WATCHDOG === WATCHDOG_EXIT, `${WATCHDOG} and ${WATCHDOG_EXIT}`],
-    ['imported, from a script or from node -e, it runs nothing and gives WATCHDOG', [imported.script, imported.evaluated].every((x) => x.code === 0 && x.text === 'imported ' + WATCHDOG), JSON.stringify(imported)],
-    ['--changed-since with no ref runs every list and says so; git is not asked', changedSince('') === null && cli.noRef.code === 0 && cli.noRef.text.includes('mutate: --changed-since was given no ref, so every list runs') && /mutate drive: 2 broken rules, 2 caught/.test(cli.noRef.text), cli.noRef.text],
-    ['git names a watched file renamed away, so the slow lists run; the command asks it with --changed-since', JSON.stringify(renamed) === JSON.stringify(['tools/drive.mjs', 'tools/driver.mjs']) && !!cli.renamed && cli.renamed.code === 0 && cli.renamed.text.includes('mutate: ran drive and invariants: changed files tools/drive.mjs'), JSON.stringify([renamed, cli.renamed])],
-    ['when git cannot name the files, every list runs and the command says so', gitless === null && cli.gitless.code === 0 && cli.gitless.text.includes('mutate: git could not name the files changed since no-such-ref, so every list runs') && /mutate drive: 2 broken rules/.test(cli.gitless.text), cli.gitless.text],
-    ['the changed files are read one a line, trimmed, blank lines left out; a file that cannot be read gives none', JSON.stringify(readBack.file) === JSON.stringify(['labs/a.css', 'tools/drives/air.mjs']) && readBack.none === null],
-    ['the command reads --changed, and runs every list when the file cannot be read, saying so', cli.skip.code === 0 && /mutate: skipped drive:/.test(cli.skip.text) && !/mutate drive:/.test(cli.skip.text)
-      && cli.lost.code === 0 && /the changed files could not be read from .*nowhere\.txt, so every list runs/.test(cli.lost.text) && /mutate drive: 2 broken rules, 2 caught/.test(cli.lost.text)],
     ['a mutants file must name each rule and give exact text', shape([{ name: 'x', from: '', to: '' }], 't').length === 2 && shape([], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b' }], 't').length === 0 && shape([{ name: 'a rule broken', from: 'a' }], 't').length === 1],
     ['the same mutant listed twice is refused', shape([{ name: 'a rule broken', from: 'a', to: 'b' }, { name: 'a rule broken', from: 'c', to: 'd' }], 't').some((e) => e.includes('twice'))],
     ['the command exits 0 when every broken rule is caught', cli.clean === 0],
@@ -406,6 +452,59 @@ async function selftest() {
     ['no mutants folder, or an empty one, is a failure and never a pass', cli.noFolder === 1 && cli.emptyFolder === 1],
     ['the command finds its own folder when the path holds a space and a tilde', cli.ownFolder.code === 0 && /mutate toy: 1 broken rules, 1 caught/.test(cli.ownFolder.text), JSON.stringify(cli.ownFolder)],
   ];
+  if (!core) cases.push(
+    ['a run stopped at the limit, and stopped again on its second run, is timed out, apart from caught and survived; it ran twice, no more',
+      tm.timedOut.length === 2 && tm.timedOut.find((t) => t.name === 'fails 0.5 s past the limit').reason === undefined && runsPast === 'nn'],
+    ['a run stopped once is counted by its second run: passing, it survives; failing, it is caught', tm.survived.length === 1 && tm.survived[0] === 'stopped once, then passes' && tm.caught === 3],
+    ['a selftest that stops itself at its own limit (exit 124) is timed out, not caught, after a second run', tm.timedOut.some((t) => t.name === 'stops itself at its own limit') && tm.reruns.some((x) => x.name === 'stops itself at its own limit' && x.result === 'timeout')],
+    ['every run stopped at the limit is run again and named with what its second run did; a run inside the limit is not', JSON.stringify(tm.reruns.map((x) => x.name + ':' + x.result).sort()) === JSON.stringify(['fails 0.5 s past the limit:timeout', 'stopped once, then fails:fail', 'stopped once, then passes:pass', 'stops itself at its own limit:timeout'])],
+    ['each run of a list gets a lock file of its own, not the machine\'s nor the one this process was given', /mutate-[^/\\]+[/\\]chrome\.lock$/.test(lockSeen) && lockSeen !== String(process.env.LABS_DRIVE_LOCK), lockSeen],
+    ['the second runs run alone, one after another', reruns.join(' ') === 'start end start end'],
+    ['a run that ends 0.7 s inside the limit is counted, one that ends 0.5 s past it is timed out', !tm.timedOut.some((t) => t.name === 'fails 0.7 s inside the limit') && tm.timedOut.some((t) => t.name === 'fails 0.5 s past the limit')],
+    ['the command reports a timeout and counts it in the summary; it fails on one undeclared and passes on one declared',
+      codes.und === 1 && codes.dec === 0 && said.und.some((l) => /^mutate toy: 2 broken rules, 1 caught by the selftest, 1 timed out, 1 run again, \d+ s$/.test(l))
+      && said.und.includes('  RERUN     a break that never ends: stopped at the limit once, then stopped again') && codes.surv === 1 && said.surv.includes('  RERUN     stopped once, then survives: stopped at the limit once, then survived')
+      && said.dec.includes('  RERUN     stopped once, then caught: stopped at the limit once, then caught') && said.dec.some((l) => /^mutate toy: 3 broken rules, 2 caught by the selftest, 1 timed out, 2 run again, \d+ s$/.test(l))
+      && said.und.some((l) => /^  TIMED OUT a break that never ends: the selftest did not end within 1.5 s, twice; nothing saw it fail/.test(l))
+      && said.dec.some((l) => /^  TIMED OUT a break that never ends: .*declared: the break is an endless loop$/.test(l))],
+    ['a timeout is declared with its reason, 8 characters or more', shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: '' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'seven c' }], 't').length === 1 && shape([{ name: 'a rule broken', from: 'a', to: 'b', timeout: 'eight ch' }], 't').length === 0],
+    ['mutate\'s own list runs when mutate.mjs, its list, drive.mjs or the gates workflow changed, each alone; the core list and the others run whatever changed', ['tools/mutate.mjs', 'tools/mutants/mutate.json', 'tools/drive.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['atlas', 'mutate', 'mutate.core'], [f]).run) === JSON.stringify(['atlas', 'mutate', 'mutate.core']))
+      && JSON.stringify(listsToRun(['atlas', 'mutate', 'mutate.core'], ['labs/a.css', 'tools/mutants/mutate.core.json'])) === JSON.stringify({ run: ['atlas', 'mutate.core'], skipped: ['mutate'], hits: {} })],
+    ['each gated list is run by its own files: invariants.mjs runs drive and invariants, not mutate; mutate\'s list runs mutate, not the other two', JSON.stringify(listsToRun(['drive', 'invariants', 'mutate'], ['tools/invariants.mjs'])) === JSON.stringify({ run: ['drive', 'invariants'], skipped: ['mutate'], hits: { drive: ['tools/invariants.mjs'], invariants: ['tools/invariants.mjs'] } })
+      && JSON.stringify(listsToRun(['drive', 'invariants', 'mutate'], ['tools/mutants/mutate.json'])) === JSON.stringify({ run: ['mutate'], skipped: ['drive', 'invariants'], hits: { mutate: ['tools/mutants/mutate.json'] } })
+      && JSON.stringify(listsToRun(['constructor', 'toString'], ['x']).run) === JSON.stringify(['constructor', 'toString'])],
+    ['a list named <tool>.<part>.json breaks <tool>.mjs and runs that part of its selftest; one whose tool is missing is a failure that names it', codes.part === 0 && said.part.some((l) => /^mutate toy\.quick: 1 broken rules, 1 caught by the selftest/.test(l)) && codes.ghost === 1 && said.ghost.includes('mutate ghost.quick: tools/ghost.mjs does not exist'), JSON.stringify([said.part, said.ghost])],
+    ['a list of a tool that drives Chrome holds the machine lock, whatever its part', codes.slowPart === 0 && held.part === String(process.pid), JSON.stringify([codes.slowPart, held.part])],
+    ['with no list of changes every list runs', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], null).run) === JSON.stringify(['atlas', 'drive', 'invariants'])],
+    ['each watched file alone runs the slow lists, the gates workflow among them', ['tools/drive.mjs', 'tools/invariants.mjs', 'tools/drives/invariants.mjs', 'tools/mutants/drive.json', 'tools/mutants/invariants.json', 'tools/mutate.mjs', '.github/workflows/gates.yml'].every((f) => JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], [f]).run) === JSON.stringify(['atlas', 'drive', 'invariants']))],
+    ['a change to none of them skips drive and invariants and runs every other list, a near name included', JSON.stringify(listsToRun(['atlas', 'drive', 'invariants'], ['labs/a.css', 'tools/drives/air.mjs', 'tools/drive.mjs.orig', 'x/tools/drive.mjs'])) === JSON.stringify({ run: ['atlas'], skipped: ['drive', 'invariants'], hits: {} }) && JSON.stringify(listsToRun(['atlas', 'drive'], []).skipped) === JSON.stringify(['drive'])],
+    ['the command says which way it went', codes.skip === 0 && said.skip.some((l) => l === 'mutate: skipped drive: none of tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json, tools/mutate.mjs, .github/workflows/gates.yml changed') && !said.skip.some((l) => l.startsWith('mutate drive:')) && said.skip.some((l) => l.startsWith('mutate toy:'))
+      && codes.ran === 0 && said.ran.includes('mutate: ran drive: changed files tools/drive.mjs') && said.ran.some((l) => /^mutate drive: 2 broken rules, 2 caught by the selftest, 0 run again, \d+ s$/.test(l))],
+    ['a slow list runs its copies one at a time', slowRuns.map((l) => l.split(' ')[0]).join(' ') === 'start end start end', slowRuns.join(' ')],
+    ['while another holds the machine\'s lock, a slow list waits for it, and holds it itself around each copy', (() => {
+      const freed = +((held.hold.find((l) => l.startsWith('freed ')) || '').split(' ')[1]), starts = slowRuns.filter((l) => l.startsWith('start '));
+      return ranAt < freed && starts.length === 2 && +starts[0].split(' ')[1] >= freed && starts.every((l) => l.split(' ')[2] === String(process.pid));
+    })(), JSON.stringify([held.hold, ranAt, slowRuns])],
+    ['between two copies a drive that waits gets its turn: the lock is free for 600 ms', (() => {
+      const t = (list, w, k = 0) => +((list.filter((l) => l.startsWith(w + ' '))[k] || '').split(' ')[1]);
+      const e1 = t(slowRuns, 'end'), s2 = t(slowRuns, 'start', 1), got = t(held.wait, 'got'), gave = t(held.wait, 'gave');
+      return got >= e1 && gave <= s2 && s2 - e1 >= 590;
+    })(), JSON.stringify([held.wait, slowRuns])],
+    ['a list that does not drive Chrome does not wait for the machine lock', codes.free === 0 && said.free.some((l) => /^mutate toy: 1 broken rules, 1 caught/.test(l)), JSON.stringify(said.free)],
+    ['a slow list whose lock is not free in its time is a failure that says so, and none of its copies runs', codes.busy === 1 && said.busy.includes('mutate drive: the machine\'s Chrome lock was not free within 1 s, so the list did not finish') && !busyStarted, JSON.stringify(said.busy)],
+    ['a lock not free at the first copy runs nothing and is not a broken list; at a later copy, the copies left neither run nor ask again', fake.first.busy && !fake.first.broken && fake.first.caught === 0 && fake.firstAsked === 1 && fake.later.busy && !fake.later.broken && fake.later.caught === 0 && fake.laterAsked === 2, JSON.stringify([fake.first, fake.firstAsked, fake.later, fake.laterAsked])],
+    ['a run stopped by its exit, by SIGTERM (143) or by SIGINT (130) ends the copy it runs and what that copy started', orphans.exit.code === 7 && orphans.exit.gone && orphans.term.code === 143 && orphans.term.gone && orphans.int.code === 130 && orphans.int.gone, JSON.stringify([orphans.exit, orphans.term, orphans.int])],
+    ['a copy stopped at the limit ends with what it started', orphans.limit.code === 1 && orphans.limit.gone, JSON.stringify(orphans.limit)],
+    ['killed outright while it holds the machine lock for a copy, mutate leaves the lock to a dead pid, and a waiting drive takes it at once', !!orphans.kill.lockTaken && orphans.kill.lockTaken.heldBy && orphans.kill.lockTaken.got && orphans.kill.lockTaken.ms < 1500, JSON.stringify(orphans.kill)],
+    ['the code read as timed out is the one tools/drive.mjs stops its selftests with', WATCHDOG === WATCHDOG_EXIT, `${WATCHDOG} and ${WATCHDOG_EXIT}`],
+    ['imported, from a script or from node -e, it runs nothing and gives WATCHDOG', [imported.script, imported.evaluated].every((x) => x.code === 0 && x.text === 'imported ' + WATCHDOG), JSON.stringify(imported)],
+    ['--changed-since with no ref runs every list and says so; git is not asked', changedSince('') === null && cli.noRef.code === 0 && cli.noRef.text.includes('mutate: --changed-since was given no ref, so every list runs') && /mutate drive: 2 broken rules, 2 caught/.test(cli.noRef.text), cli.noRef.text],
+    ['git names a watched file renamed away, so the slow lists run; the command asks it with --changed-since', JSON.stringify(renamed) === JSON.stringify(['tools/drive.mjs', 'tools/driver.mjs']) && !!cli.renamed && cli.renamed.code === 0 && cli.renamed.text.includes('mutate: ran drive: changed files tools/drive.mjs'), JSON.stringify([renamed, cli.renamed])],
+    ['when git cannot name the files, every list runs and the command says so', gitless === null && cli.gitless.code === 0 && cli.gitless.text.includes('mutate: git could not name the files changed since no-such-ref, so every list runs') && /mutate drive: 2 broken rules/.test(cli.gitless.text), cli.gitless.text],
+    ['the changed files are read one a line, trimmed, blank lines left out; a file that cannot be read gives none', JSON.stringify(readBack.file) === JSON.stringify(['labs/a.css', 'tools/drives/air.mjs']) && readBack.none === null],
+    ['the command reads --changed, and runs every list when the file cannot be read, saying so', cli.skip.code === 0 && /mutate: skipped drive:/.test(cli.skip.text) && !/mutate drive:/.test(cli.skip.text)
+      && cli.lost.code === 0 && /the changed files could not be read from .*nowhere\.txt, so every list runs/.test(cli.lost.text) && /mutate drive: 2 broken rules, 2 caught/.test(cli.lost.text)],
+  );
   const fail = cases.filter(([, v]) => !v);
   for (const [n, , d] of fail) console.log('FAIL ' + n + (d ? ': ' + String(d).slice(0, 300) : ''));
   console.log(`mutate selftest: ${cases.length - fail.length}/${cases.length}`);
@@ -422,6 +521,6 @@ if (isMain) {
   let changed = null;
   if (ch >= 0) { changed = readChanged(argv[ch + 1] || ''); if (!changed) console.log(`mutate: the changed files could not be read from ${argv[ch + 1]}, so every list runs`); }
   if (since >= 0) { const ref = argv[since + 1]; changed = changedSince(ref); if (!changed) console.log(ref ? `mutate: git could not name the files changed since ${ref}, so every list runs` : 'mutate: --changed-since was given no ref, so every list runs'); }
-  if (rest[0] === 'selftest') await selftest();
+  if (rest[0] === 'selftest') await selftest(rest[1]);
   else process.exit(await run(rest[0], tools, console.log, { changed }));
 }

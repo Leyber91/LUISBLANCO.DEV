@@ -39,10 +39,14 @@ here, the daily routine included, are in SITE_RULES.md:
   module at once. On 2026-11-13 a
   checker that passed its own selftest 90 of 90 had 31 defects a review then confirmed, and the small tools
   written to prevent that had 19 of their own, then 27 more in a second review.
-- The selftests of drive.mjs and invariants.mjs run on every pull request; their mutants lists (54m38s on the gates,
-  2026-11-16, before the 600 ms between copies: 0.6 s more a copy) run on every push to main and on a pull request
-  that changes tools/drive.mjs, tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json,
-  tools/mutants/invariants.json, tools/mutate.mjs or .github/workflows/gates.yml (`mutate.mjs --changed-since origin/main`, its WATCHED list, renames counted). A run
+- The selftests of drive.mjs, invariants.mjs and mutate.mjs run on every pull request. Three mutants lists are gated:
+  they run on every push to main, and on a pull request only when one of their files changes (`mutate.mjs
+  --changed-since origin/main`, its GATED lists, renames counted). drive's and invariants' (54m38s on the gates on
+  2026-11-16, before the 600 ms between copies: 0.6 s more a copy) run on a change to tools/drive.mjs,
+  tools/invariants.mjs, tools/drives/invariants.mjs, tools/mutants/drive.json, tools/mutants/invariants.json,
+  tools/mutate.mjs or .github/workflows/gates.yml; mutate's own (mutate.json, 498 s on the gates on 2026-11-17) on a
+  change to tools/mutate.mjs, tools/mutants/mutate.json, tools/drive.mjs or the gates workflow. The entries main had
+  before, in tools/mutants/mutate.core.json, run on every pull request with `selftest core`. A run
   stopped at mutate's limit, or a selftest that stops itself at its own (exit 124, when no check has failed yet),
   runs once more alone, then counts as timed out, never as caught, and fails the list unless its entry declares
   `"timeout": "<reason>"`.
