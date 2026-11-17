@@ -19,7 +19,7 @@
 import * as K from './kerr.js';
 import { Store } from './state.js';
 import { TIERS } from './config.js';
-import { probeRay, screenToTangent } from './probe.js';
+import { probeRay, screenToTangent, tangentToScreen } from './probe.js';
 import { Renderer } from './renderer.js';
 
 let fails = 0, checks = 0;
@@ -79,5 +79,20 @@ function compare(label, patch) {
 compare('cinematic view, Q/M 0.9, a 0.3', {});
 compare('telescope view, Q/M 0.9, a 0.3', { view: 'telescope', rcam: 1000, fov: 1.15, incl: 17, emit: 'thin' });
 
+
+/* a place on the image plane is the same ray at any window size (review_s3b E): the inverse mapping round-trips, and
+   the place a pixel names on one window opens the same direction on another */
+{
+  let worst = 0, n = 0;
+  for (const [W, H] of [[1440, 900], [390, 844], [844, 390], [1280, 720]]) for (const fov of [1.15, 31, 70]) for (const [fx, fy] of [[0.1, 0.6], [0.5, 0.5], [0.93, 0.07]]) {
+    const { sx, sy } = screenToTangent(fx * W, fy * H, W, H, fov);
+    const { px, py } = tangentToScreen(sx, sy, W, H, fov);
+    worst = Math.max(worst, Math.abs(px - fx * W), Math.abs(py - fy * H)); n++;
+    // the same place on a phone's window gives back the same place
+    const back = tangentToScreen(sx, sy, 390, 844, fov), again = screenToTangent(back.px, back.py, 390, 844, fov);
+    worst = Math.max(worst, Math.abs(again.sx - sx) * 1e6, Math.abs(again.sy - sy) * 1e6);
+  }
+  ok(`tangentToScreen inverts screenToTangent on ${n} places and four windows, and a place opens the same ray on a phone`, worst < 1e-6, `worst ${worst}`);
+}
 console.log(fails ? `\n${fails} of ${checks} probe check(s) failed` : `\nall ${checks} probe checks passed`);
 process.exit(fails ? 1 : 0);

@@ -68,12 +68,17 @@ guard('derive', () => {
   // ledger row 6: one rule for where the interior time ends, the centre only at a = Q = 0
   const at = (a, q) => P.derive(state({ obj: 'custom', a, q, mass: 1, dist: 3, edd: -2 })).endsAtCentre;
   ok('the interior time ends at the centre at a = Q = 0', at(0, 0) === true);
-  // ledger row 3: Shimura and Takahara (1995) fit no colour correction below 1% of Eddington
-  const fits = (x) => P.fcolFits({ edd: 0.1, massSun: 10, a: 0, q: 0, ...x });
-  ok('f_col fits a non-rotating hole of 1.4 to 10 Msun at 1% of Eddington and above (Shimura and Takahara 1995)', fits({}) && fits({ edd: 0.01 }) && fits({ massSun: 1.4 }) && fits({ massSun: 10 }));
-  ok('and not just outside: 0.0099 of Eddington, 1.39 or 10.01 Msun, spin 0.001, charge 0.01', !fits({ edd: 0.0099 }) && !fits({ massSun: 1.39 }) && !fits({ massSun: 10.01 }) && !fits({ a: 0.001 }) && !fits({ q: 0.01 }));
+  // ledger row 3, review_s3b D: [REAL] only at the two points Shimura and Takahara (1995) state, with the f drawn
+  const fits = (x) => P.fcolFits({ edd: 0.1, massSun: 10, a: 0, q: 0, fcol: 1.7, ...x });
+  const e = (log) => 10 ** log;
+  ok('f = 1.70 at 10% of Eddington fits a non-rotating hole of 1.4 to 10 Msun', fits({}) && fits({ massSun: 1.4 }) && fits({ massSun: 10 }));
+  ok('f = 1.80, 1.90 and 2.00 at the Eddington rate fit', fits({ edd: 1, fcol: 1.8 }) && fits({ edd: 1, fcol: 1.9 }) && fits({ edd: 1, fcol: 2 }));
+  ok('one slider step off does not: f 1.69 or 1.71 at 10%, 1.79 or 2.01 at the Eddington rate', !fits({ fcol: 1.69 }) && !fits({ fcol: 1.71 }) && !fits({ edd: 1, fcol: 1.79 }) && !fits({ edd: 1, fcol: 2.01 }));
+  ok('nor one step of the ratio: log10 -0.95 or -1.05 at f 1.70, -0.05 at f 1.9', !fits({ edd: e(-0.95) }) && !fits({ edd: e(-1.05) }) && !fits({ edd: e(-0.05), fcol: 1.9 }));
+  ok('the second reader\'s three: f 1.00 at 10%, the default 1.70 at the Eddington rate, 2.00 at log10 -1.9', !fits({ fcol: 1 }) && !fits({ edd: 1, fcol: 1.7 }) && !fits({ edd: e(-1.9), fcol: 2 }));
+  ok('and not just outside the holes they computed: 1.39 or 10.01 Msun, spin 0.001, charge 0.01', !fits({ massSun: 1.39 }) && !fits({ massSun: 10.01 }) && !fits({ a: 0.001 }) && !fits({ q: 0.01 }));
   ok('nor M87*, Sgr A* or Cygnus X-1 (a = 0.998)', !fits({ massSun: 6.5e9, edd: 1e-5, a: 0.94 }) && !fits({ massSun: 4.3e6, edd: 1e-8, a: 0.5 }) && !fits({ massSun: 21.2, a: 0.998 }));
-  ok('the boundary is the 1% the paper names', P.FCOL_MIN_EDD === 0.01);
+  ok('the two points are the abstract\'s', JSON.stringify(P.FCOL_POINTS) === '[{"edd":0.1,"f":[1.7,1.7]},{"edd":1,"f":[1.8,2]}]', JSON.stringify(P.FCOL_POINTS));
   ok('and at the inner horizon for any spin or charge, however small: a = 0.0005 (r- 1.25e-7 M, which the old rule of r- < 5e-7 called the centre), a = 0.001, Q = 0.0001',
     at(0.0005, 0) === false && at(0.001, 0) === false && at(0, 0.0001) === false, [at(0.0005, 0), at(0.001, 0), at(0, 0.0001)].join(' '));
   ok('the horizon of 10 Msun at a = 0 spans 2 GM/c^2 = 29.5 km', near(m.horizonKm, 2 * rg / 1000, 1e-12), `${m.horizonKm}`);
