@@ -48,10 +48,15 @@ CALCULATED = 'Calculated Value'
 BERGER = 'Berger et al. 2018'
 
 
+# The references whose star values are TICv8's, by their whole label (bo.label has read the archive's escapes): a prefix
+# took any paper by the same first author into the lineage (Gajdoš et al. 2026, for TIC 87422071 b; 2026-11-17).
+TICV8_LINEAGE = ('TICv8', 'Gajdoš et al. 2019', 'Q1-Q17 DR25 Supplemental KOI Table')
+
+
 def lineage(lum_ref):
     """What a luminosity's reference is: the TICv8 lineage (TICv8, and the tables that copy its star values), Gaia DR2,
     or a paper."""
-    if lum_ref == 'TICv8' or lum_ref.startswith('Gajdo') or lum_ref == 'Q1-Q17 DR25 Supplemental KOI Table':
+    if lum_ref in TICV8_LINEAGE:
         return 'the TICv8 lineage'
     return 'Gaia DR2' if lum_ref == 'Gaia DR2' else 'a paper'
 
@@ -111,6 +116,11 @@ def selftest():
         got, _ = best(rows(key))
         print(f"  selftest: rows built for \"{name}\": {'it wins' if got == name else 'FAIL, ' + got + ' wins'}")
         ok = ok and got == name
+    for ref, want in [('TICv8', 'the TICv8 lineage'), ('Gajdoš et al. 2019', 'the TICv8 lineage'), ('Gajdoš et al. 2026', 'a paper'),
+                      ('Gaia DR2', 'Gaia DR2'), ('Q1-Q17 DR25 Supplemental KOI Table', 'the TICv8 lineage'), ('Berger et al. 2018', 'a paper')]:
+        got = lineage(ref)
+        print(f"  selftest: the lineage of \"{ref}\" is {'that of ' + want if got == want else 'FAIL, ' + got + ', not ' + want}")
+        ok = ok and got == want
     return ok
 
 

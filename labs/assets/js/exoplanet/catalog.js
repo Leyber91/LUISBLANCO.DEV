@@ -15,6 +15,7 @@
 
 import { DATA } from './config.js';
 import { plural, int } from '../kit/format.js';
+import { unesc } from '../kit/dom.js';
 
 const num = (v) => (v === null || v === undefined || v === '' || isNaN(v)) ? null : +v;
 const TRUE_MASS = new Set(['Mass', 'Msini', 'Msin(i)/sin(i)']);
@@ -48,7 +49,8 @@ function refOf(json, i) {
   const r = i === null || i === undefined ? null : json.refs && json.refs[i];
   if (!r) return null;
   const [label, key] = r;
-  return { label, url: key.startsWith('/') ? ARCHIVE + key : key.startsWith('http') ? key : ADS + key + '/abstract' };
+  // the archive escapes accents in its labels ("Anglada-Escud&eacute;"): the page writes them as letters
+  return { label: unesc(label), url: key.startsWith('/') ? ARCHIVE + key : key.startsWith('http') ? key : ADS + key + '/abstract' };
 }
 
 function fromSnapshot(json) {
@@ -169,8 +171,18 @@ export function countLine(list, rosterJoined) {
   return `${planets}, ${int(measured)} with a measured radius`;
 }
 
-/* Before the roster arrives (or if it fails), a transit or imaging detection with a
-   radius is the best guess for "measured". */
+/* The label the archive gives a value it calculated itself (a radius from a mass, by its mass-radius relation). */
+export const CALCULATED = 'Calculated Value';
+
+/* Before the roster arrives (or if it fails): a radius whose source in the snapshot is the archive's own calculation is
+   its estimate, and any other radius is a published one. On 2026-11-17 this agreed with the roster on all 6,409 radii of
+   the snapshot (the review of ticket 2.19); the method of discovery, the guess before it, called 56 published radii
+   estimates (2MASS J02192210-3925225 b, Artigau et al. 2015, among them). A record with no source in the snapshot
+   falls back on the method: a transit or a depth. */
 export function provisionalMeasured(list) {
-  for (const p of list) if (p.measuredR === null) p.measuredR = p.R !== null && (p.method === 'Transit' || p.depth !== null);
+  for (const p of list) {
+    if (p.measuredR !== null) continue;
+    const src = p.refs && p.refs.R && p.refs.R.label;
+    p.measuredR = p.R !== null && (src ? src !== CALCULATED : p.method === 'Transit' || p.depth !== null);
+  }
 }

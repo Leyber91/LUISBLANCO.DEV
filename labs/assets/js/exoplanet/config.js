@@ -200,9 +200,10 @@ export const SOURCES = [
 ];
 
 /* How far the star masses of Stassun et al. 2017 sit from the other papers' masses for the same stars: the median over
-   the 208 stars whose values in the snapshot cite that paper and that another paper gives a mass for (quartiles 9% and
-   33%). Printed by labs/assets/data/exomania/backtest_orbit.py from the archive's table of papers, 2026-11-17; the
-   orbit's note quotes it (starlight.js orbitNote). */
+   the stars whose values in the snapshot cite that paper and that another paper gives a mass for. Computed by
+   labs/assets/data/exomania/backtest_orbit.py from the archive's table of papers, which prints the count of stars and
+   the quartiles beside it and fails when this constant is not its median at two figures; the orbit's note quotes it
+   (starlight.js orbitNote). */
 export const STASSUN_MASS_OFF = 0.19;
 
 // circumbinary:start

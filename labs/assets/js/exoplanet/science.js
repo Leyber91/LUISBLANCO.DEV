@@ -86,6 +86,10 @@ export function forecastFor(p) {
 }
 export const hasTrueMass = (p) => isNum(p.M) && !p.Mlim && !limitOf(p, 'M') && (p.Mprov === 'Mass' || p.Mprov === 'Msini' || p.Mprov === 'Msin(i)/sin(i)');
 export const hasRadius = (p) => isNum(p.R) && p.R > 0;
+/* Whether the radius is the archive's estimate from the mass rather than a measurement: the one place the page decides
+   it (catalog.js sets measuredR, from the roster or, before it, from the radius's source). A flag not yet set is not an
+   estimate. */
+export const radiusEstimated = (p) => p.measuredR === false;
 
 /* ---------- composition curves (Seager et al. 2007) ---------- */
 export function seagerRadius(M, mat) {
