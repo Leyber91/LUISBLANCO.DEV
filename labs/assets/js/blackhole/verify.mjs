@@ -137,6 +137,33 @@ for (const k of [0.08, 0.12]) {
   console.log(`info  step k=${k}: width ${m.width.toFixed(4)} vs ${th.width.toFixed(4)} (${(rel(m.width, th.width) * 100).toFixed(3)}%)`);
 }
 
+/* 3b. the critical curve against its form as Gralla and Lupsasca (2020, Phys. Rev. D 101, 044031, Eqs. 38 to 40 and
+   55 to 57) state it, written out here independently of kerr.js (ledger row 5, S10). For every point (alpha, beta) of
+   K.shadowCurve, the photon-shell radius r with lambda(r) = -alpha sin(i) is found by bisection inside
+   [r-, r+] = 2[1 + cos(2/3 arccos(-+a))], and their beta at that r must equal the point's |beta|. */
+{
+  const glLambda = (a, r) => { const D = r * r - 2 * r + a * a; return a + (r / a) * (r - 2 * D / (r - 1)); };
+  const glEta = (a, r) => { const D = r * r - 2 * r + a * a; return (r ** 3 / (a * a)) * (4 * D / ((r - 1) ** 2) - r); };
+  let worst = 0, n = 0;
+  for (const a of [0.5, 0.94, 0.998]) for (const inclDeg of [17, 60, 90]) {
+    const incl = inclDeg * Math.PI / 180, s = Math.sin(incl), c = Math.cos(incl);
+    const rLo = 2 * (1 + Math.cos(2 / 3 * Math.acos(-a))), rHi = 2 * (1 + Math.cos(2 / 3 * Math.acos(a)));
+    for (const [alpha, beta] of K.shadowCurve(a, incl, 400)) {
+      const want = -alpha * s;
+      let lo = rLo, hi = rHi;
+      const f = (r) => glLambda(a, r) - want;
+      if (f(lo) * f(hi) > 0) continue;            // the curve's ends, where the root sits on the shell's edge
+      for (let k = 0; k < 200; k++) { const mid = 0.5 * (lo + hi); if (f(lo) * f(mid) <= 0) hi = mid; else lo = mid; }
+      const r = 0.5 * (lo + hi), L = glLambda(a, r);
+      const b2 = glEta(a, r) + a * a * c * c - L * L * c * c / (s * s);
+      // beta^2 and not beta: near the curve's ends beta goes as sqrt(r - r_end), which magnifies the last digit of r
+      worst = Math.max(worst, Math.abs(b2 - beta * beta));
+      n++;
+    }
+  }
+  ok(`critical curve = Gralla & Lupsasca 2020 eqs (38)-(40), (55)-(57) at a = 0.5, 0.94, 0.998 and i = 17, 60, 90 deg`, n > 5000 && worst < 1e-9, `${n} points, worst |beta^2| difference ${worst.toExponential(2)} M^2`);
+}
+
 /* 4. Schwarzschild numbers */
 {
   const th = K.shadowChords(K.shadowCurve(0, Math.PI / 3));
