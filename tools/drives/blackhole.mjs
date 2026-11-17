@@ -34,12 +34,14 @@
 // No model is called and nothing leaves the page's own origin: every such request is refused before any page
 // script runs (p.before).
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
 import { inflateSync } from 'node:zlib';
 import { standard } from './invariants.mjs';
 
 const LIT_LUMA = 40;        // of 255: brighter than the sky's faintest stars drawn at this size
 const LIT_SHARE = 0.01;     // of the canvas's pixels
+const PLATE_MS = 120000;   // the 1920 plate took 25.5 s under software GL on 2026-11-17 (M87*, 2 x 2 samples)
 const READY_MS = 60000;     // the first full trace under software GL took 2.8 s at tier min on 2026-11-16 (both widths)
 
 /* A screenshot as pixels: 8-bit RGB or RGBA, not interlaced, which is what Chrome writes. */
@@ -260,6 +262,23 @@ export const OVER_TEXT_OPAQUE = `(() => {
   return out;
 })()`;
 
+/* The plate as an image (road ticket 1.08; NOT_CHECKED until 2026-11-17): where its words' ink lies in the band
+   under the picture. img is pixels(); W the plate's width; band its height in px. Ink is a pixel brighter than
+   luma 100 (the frame's hairline is about 66, the dimmest stamp line about 140). The frame runs 24 u inside the
+   edges and the corner brackets reach 26 u along it, so the right edge is read above the brackets and the bottom
+   away from them. */
+export function plateInk(img, W, band) {
+  const { w, h, bpp, px } = img, u = W / 1920, frame = Math.round(24 * u), arm = Math.ceil(26 * u) + 2;
+  const top = h - band, luma = (x, y) => { const i = (y * w + x) * bpp; return 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]; };
+  let right = -1, bottom = -1, n = 0;
+  for (let y = top; y < h; y++) for (let x = 0; x < w; x++) {
+    if (luma(x, y) <= 100) continue;
+    if (y < h - frame - arm) { n++; if (x > right) right = x; }
+    if (x > frame + arm && x < w - frame - arm && y > bottom) bottom = y;
+  }
+  return { ink: n, right, bottom, rightLimit: w - Math.round(48 * u), bottomLimit: h - frame - 1 };
+}
+
 /* Read in B1's frames (2026-11-17): a custom hole's readout set "the point of no return, unseen" one word to a line,
    because its value (9.77x10^-16 km and 6.53x10^-27 AU) never wraps and took the row. A label in the readouts keeps
    at most three lines. */
@@ -372,6 +391,11 @@ export default async function blackhole(p, { base, width }) {
   p.invariant('invariant: a panel drawn over words hides them', OVER_TEXT_OPAQUE);
   p.invariant('invariant: a label in the readouts keeps at most three lines beside its value', READ_LABEL_LINES);
   await p.before(`(${guard})()`);
+  // a plate's PNG is caught where the page hands it to the download, and the file is not saved by the browser
+  await p.before(`(() => { const real = URL.createObjectURL.bind(URL), click = HTMLAnchorElement.prototype.click;
+    URL.createObjectURL = (b) => { if (b && b.type === 'image/png') window.__bhPng = b; return real(b); };
+    HTMLAnchorElement.prototype.click = function () { if (this.download) { window.__bhSaved = this.download; return; } return click.call(this); };
+    return true; })()`);
   console.log(`deferred (review_s2 P3-2, the shared ai/route-panel.js): the gold rules leave out ${GOLD_DEFERRED.join(', ')}`);
 
   /* the pixel rules, read from one shot after a step (fix_s2_brief C4) */
@@ -643,4 +667,33 @@ export default async function blackhole(p, { base, width }) {
   await p.key('Escape');
   await p.sleep(500);
   console.log(`pixel rules: ${shots.n} shots read; gold found in ${shots.gold}, a text under 4.5 to 1 in ${shots.contrast}`);
+
+  /* ---- 8. the plate (1.08): exported at 1920 from M87*, its PNG read. Its pixels do not depend on the window, so
+     it runs at the wide width only. 3840 is the same code at u = 2 and is not driven (four times the trace). ---- */
+  if (!phone) {
+    await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+    await p.until(`!!(window.__bh && window.__bh.renderer) && !!document.getElementById('bh-png')`, READY_MS);
+    await p.sleep(3000);
+    const t0 = Date.now();
+    await p.ev(`(window.__bhPng = null, window.__bhSaved = '', document.getElementById('bh-png').click(), true)`);
+    const made = await p.until(`!!window.__bhPng || /failed/.test(document.getElementById('bh-actnote').textContent)`, PLATE_MS);
+    const secs = (Date.now() - t0) / 1000, note = await p.ev(`document.getElementById('bh-actnote').textContent`);
+    const name = await p.ev('window.__bhSaved || ""');
+    p.check(`the 1920 plate is made and offered as a file named for its state (${secs.toFixed(1)} s)`,
+      made && /saved/.test(note) && /^kerr-m87-a0\.940-i\d+-1920px\.png$/.test(name), `${note} | ${name}`);
+    const b64 = await p.ev(`(async () => { const b = window.__bhPng; if (!b) return ''; const a = new Uint8Array(await b.arrayBuffer()); let s = '';
+      for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000)); return btoa(s); })()`);
+    const shot = await p.shot(`plate-made-${width}`);
+    if (b64) {
+      const file = path.join(path.dirname(shot), name || 'plate-1920.png');
+      writeFileSync(file, Buffer.from(b64, 'base64'));
+      const img = pixels(file), band = Math.round(img.w / 1920 * 232);
+      const f = readFrame(file, { left: 0, top: 0, right: img.w, bottom: img.h - band }, 1, img);
+      p.check('the plate: 1920 px wide, no fully transparent pixel, the picture not a black frame', img.w === 1920 && f.clear === 0 && f.lit >= LIT_SHARE && f.top > 150,
+        `${img.w} x ${img.h}, ${f.clear} transparent, ${(f.lit * 100).toFixed(1)}% lit, brightest ${f.top.toFixed(0)}`);
+      const k = plateInk(img, img.w, band);
+      p.check('the plate: its stamp is drawn, and every word stays inside the frame', k.ink > 2000 && k.right <= k.rightLimit && k.bottom <= k.bottomLimit, JSON.stringify(k));
+      console.log(`plate read: ${file}`);
+    } else p.check('the plate: its PNG was caught', false);
+  }
 }
