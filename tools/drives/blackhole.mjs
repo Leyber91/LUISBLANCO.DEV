@@ -677,6 +677,11 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
   if (phone) p.check('C16: at 390 the title block is the first block of the sheet, under the picture', c16.inSheet, JSON.stringify(c16));
 
   // C17: a kept frame is a small picture of it, in the record and (on a wide screen) in the strip
+  // a known start: this hole not kept (the record step before this one leaves it kept, and a press on "kept" takes it out)
+  if (await p.ev(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'true'`)) {
+    await p.ev(`document.querySelector('#bh-keep').click()`);
+    await p.until(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'false' && !document.querySelector('#bh-keep').disabled`, 8000);
+  }
   const before = await p.ev(`window.__bh.keep.record.kept.length`);
   if (!phone) {
     await p.ev(`document.querySelector('#bh-keep2').click()`);
