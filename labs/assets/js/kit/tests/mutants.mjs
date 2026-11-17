@@ -30,7 +30,7 @@ import { dirname, join, basename } from 'node:path';
 const RUN_LIMIT_MS = 60000;
 
 /* Run one test file; resolves {code, fails}: the exit code and the number of lines that start with FAIL. */
-function runTest(file) {
+export function runTest(file) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [file], { stdio: ['ignore', 'pipe', 'ignore'] });
     let out = '', timedOut = false;
