@@ -7,8 +7,8 @@
 // proves in a browser the ones a browser must show, each check named with its property:
 //   P4 a record of version 2 and the survey's old local copy of the catalogue, as the live site left them, are read
 //      at version 3 with every entry kept, the copy taken in, and removed only once a record of version 3 holds the
-//      catalogue; "new since your last visit" is counted from it; a fixture store leaves the copy where it is;
-//      after the erase a copy written before it is taken into nothing, and goes once the survey keeps a catalogue;
+//      catalogue; the worlds new are counted from it and said to be new since its date; a fixture store leaves the
+//      copy where it is; after the erase a copy written before it is taken into nothing and goes on the first read;
 //   P5 the erase the privacy page points to (the labs hub, "Your data", "Delete everything") leaves nothing of the
 //      lab, and the export holds the record whole;
 //   P7 the log's last words carry the health check;
@@ -123,7 +123,8 @@ export default async function record(p, { base }) {
     `localStorage ${gone === null ? 'empty' : 'still holds it'} | seen ${up && up.data.seen && up.data.seen.day}`);
   const fresh = await call(newSwitch), planets = Number(String(await p.ev('document.getElementById("tb-n").textContent')).match(/^[\d,]+/)[0].replace(/,/g, ''));
   const was = JSON.parse(old.local.value).names.length;
-  p.check('P4: "new since your last visit" counts the worlds the old copy did not have', fresh === `${(planets - was).toLocaleString('en-US')} new since your last visit`, `${fresh} | ${planets} planets, ${was} in the old copy`);
+  const NB = String.fromCharCode(160);
+  p.check('P4: the switch counts the worlds the old copy did not have, new since the date of that copy', fresh === `${(planets - was).toLocaleString('en-US')} new since 15${NB}November${NB}2026`, `${fresh} | ${planets} planets, ${was} in the old copy`);
   const lines0 = await openLog();
   p.check('P4: the log lists the visits of the old record, with their ways', lines0.lines.length === old.v2.data.log.visits.length - 1 && lines0.lines.every((l) => l.what.length > 2 && !l.link), `${lines0.lines.length} lines | ${lines0.line}`);
   p.check('P7: the log\'s last words carry the health check', lines0.foot.includes('This page writes version 3 of the record, and the stored record is version 3. No copy is synced to another device.'), lines0.foot);
@@ -204,15 +205,14 @@ export default async function record(p, { base }) {
   const erased = await call(rawRecord), legacy = await call(local, LEGACY);
   p.check('P5: the hub\'s "Delete everything" leaves no record of the lab; the old local copy, which the erase does not know, is still there', erased === null && legacy === old.local.value, `${JSON.stringify(erased)} | copy ${legacy === old.local.value ? 'there' : 'gone'}`);
   await survey();
+  const copyAfter = await call(local, LEGACY);
+  p.check('P4: the survey\'s first read after the erase finds no record, takes nothing in, and removes the copy', copyAfter === null, copyAfter === null ? 'gone' : 'still there');
   await p.until('/measured radius/.test(document.getElementById("tb-n").textContent)', 30000);
   await p.until(`(${rawRecord})().then((r) => !!r && !!r.data && !!r.data.seen)`, 30000);
   await p.sleep(1500);
   const empty = await p.ev('document.getElementById("log-line").textContent'), afterErase = await call(rawRecord);
   p.check('P5: and the survey\'s log is empty after it, and nothing of the old copy is taken in: no world is new', /Log: 0 visited, 0 saved/.test(empty) && (await call(newSwitch)) === '' && afterErase.data.seen.names.split('|').length > 6000,
     `${empty} | switch "${await call(newSwitch)}" | seen ${afterErase.data.seen.names.split('|').length} names`);
-  await survey();
-  const copyAfter = await call(local, LEGACY);
-  p.check('P4: the next read, which finds version 3 holding the catalogue, removes the copy', copyAfter === null, copyAfter === null ? 'gone' : 'still there');
 
   // ---- P4: a fixture store leaves the old local copy where it is ----
   // (the survey loaded just now, with recording on, has kept its catalogue in the visitor's own store: that record is

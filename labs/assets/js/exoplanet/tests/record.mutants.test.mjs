@@ -12,7 +12,8 @@
 
    Add an entry here with every new rule in record.js, and count
    what the list changes with
-     node tools/dev/conditions.mjs labs/assets/js/exoplanet/record.js labs/assets/js/exoplanet/tests/record.mutants.test.mjs
+     node tools/dev/conditions.mjs labs/assets/js/exoplanet/record.js labs/assets/js/exoplanet/tests/record.mutants.test.mjs labs/assets/js/exoplanet/tests/record.turn.mutants.test.mjs
+   The time a read or write is given (rule 10) is broken in record.turn.mutants.test.mjs, whose test waits on ticks.
    ============================================================ */
 
 import { fileURLToPath } from 'node:url';
@@ -60,12 +61,12 @@ const SAME_SEEN = `  if (record.seen && record.seen.day === on && record.seen.na
 const LEGACY_READ = `try { v = storage ? JSON.parse(String(storage.getItem(LEGACY_SEEN))) : null; } catch { v = null; }`;
 const MIGRATE = `migrate: (d) => { upgraded = true; return own ? { ...normalise(d), seen: legacySeen(storage) } : normalise(d); } });`;
 const OWN = `const own = os.storage.persistent && !os.storage.fixture;`;
-const REMOVE = `  if (own && storage && !upgraded && record.seen) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }\n`;
+const REMOVE = `  if (own && storage && !upgraded) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }\n`;
 const SKY_DAY = `return jd + 1 > LINE_JD.from && jd <= LINE_JD.to; };`;
 const KEEP = `return joined.length > LIMITS.seen ? null : joined; };`;
-const QUEUE = `const inTurn = (job) => { const run = queue.then(job); queue = run.catch(() => undefined); return run; };`;
+const QUEUE = `  const run = queue.then(() => new Promise((resolve, reject) => {`;
 const REFUSED_OUT = `    if (!w.ok) return { ok: false, why: w.why, record: cur, changed: false };\n`;
-const SEEN_BACK = `return { ...w, fresh: long ? [] : newSince(was, names), kept: keep && w.ok, since: was ? was.day : null, long };`;
+const SEEN_BACK = `return { ...w, fresh: long ? [] : newSince(was, names), since: was ? was.day : null, long };`;
 const HEALTH = `return { version: V, stored: rec ? rec.v : null, store: os.storage.kind, persistent: os.storage.persistent, fixture: os.storage.fixture, synced: false };`;
 const HEALTH_WORDS = 'export const healthWords = (h) => `This page writes version ${V} of the record, and ${h.stored === null ? \'nothing is stored yet\' : `the stored record is version ${thousands(h.stored)}`}. No copy is synced to another device.`;';
 const SEE_CAT = `const w = await update(os, (r) => { before = r.seen; return keep ? see(r, { day: on, names }) : done(r); });`;
@@ -383,8 +384,8 @@ const MUTANTS = [
   ['the old local copy never removed', REMOVE, ``],
   ['the old local copy removed on every store', REMOVE, REMOVE.replace('if (own && storage &&', 'if (storage &&')],
   ['S3: the old copy removed by the read that upgraded the record', REMOVE, REMOVE.replace(' && !upgraded', '')],
-  ['S3: the old copy removed where no record holds the catalogue', REMOVE, REMOVE.replace(' && record.seen', '')],
-  ['a localStorage that refuses the removal stops the read', REMOVE, `  if (own && storage && !upgraded && record.seen) { storage.removeItem(LEGACY_SEEN); }\n`],
+  ['the old copy kept where there is no record', REMOVE, REMOVE.replace('if (own && storage && !upgraded)', 'if (own && storage && !upgraded && rec)')],
+  ['a localStorage that refuses the removal stops the read', REMOVE, `  if (own && storage && !upgraded) { storage.removeItem(LEGACY_SEEN); }\n`],
   ['the old local copy read from another key', `storage.getItem(LEGACY_SEEN)`, `storage.getItem('exo:seen')`],
   ['the key of the old local copy changed', `export const LEGACY_SEEN = 'exo:seen:v1';`, `export const LEGACY_SEEN = 'exo:seen:v2';`],
   ['a localStorage that refuses the read stops it', LEGACY_READ, `v = storage ? JSON.parse(String(storage.getItem(LEGACY_SEEN))) : null;`],
@@ -408,16 +409,16 @@ const MUTANTS = [
   ['a change that changes nothing is written', WRITE, `  await os.progress.set(w.record, { v: V });\n`],
   ['a change is never written', WRITE, ``],
   ['a write at version 1', `await os.progress.set(w.record, { v: V });`, `await os.progress.set(w.record, { v: 1 });`],
-  ['whether the store changed is not said', `    return { ...w, changed };\n  });`, `    return w;\n  });`],
-  ['what comes back from a change is the record before it', `    return { ...w, changed };\n  });`, `    return { ...w, record: cur, changed };\n  });`],
+  ['whether the store changed is not said', `    return { ...w, changed };\n  }, limit);`, `    return w;\n  }, limit);`],
+  ['what comes back from a change is the record before it', `    return { ...w, changed };\n  }, limit);`, `    return { ...w, record: cur, changed };\n  }, limit);`],
   ['N1: a refused change stored', REFUSED_OUT, ``],
   ['N1: a refused change hands back the record it made', REFUSED_OUT, REFUSED_OUT.replace('record: cur,', 'record: w.record,')],
   ['N1: a refused change gives no reason', REFUSED_OUT, REFUSED_OUT.replace('why: w.why,', "why: '',")],
   ['an accepted change writes no way back', `    if (resume) {`, `    if (resume && false) {`],
   ['the way back written only when the record changed', `    if (resume) {`, `    if (resume && changed) {`],
-  ['S1: reads and writes not in turn', QUEUE, `const inTurn = (job) => job();`],
-  ['S1: a job that fails stops the ones after it', QUEUE, QUEUE.replace('queue = run.catch(() => undefined);', 'queue = run;')],
-  ['S1: a read not in turn with the writes', `{ return inTurn(() => readNow(os, storage)); }`, `{ return readNow(os, storage); }`],
+  ['S1: reads and writes not in turn', QUEUE, QUEUE.replace('queue.then(', 'Promise.resolve().then(')],
+  ['S1: a job that fails stops the ones after it', `queue = run.catch(() => undefined);`, `queue = run;`],
+  ['S1: a read not in turn with the writes', `{ return inTurn(() => readNow(os, storage), limit); }`, `{ return readNow(os, storage); }`],
   ['a way back the store refuses fails the stored change', `    try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }`, `    await os.progress.setResume(resume.url, resume.label);`],
   ['the way back written before the record', `${WRITE}${RESUME}`, `${RESUME}${WRITE}`],
 
@@ -448,10 +449,8 @@ const MUTANTS = [
   ['the catalogue never kept', SEE_CAT, SEE_CAT.replace('keep ? see(r, { day: on, names }) : done(r)', 'done(r)')],
   ['every world of the catalogue said to be new', SEEN_BACK, SEEN_BACK.replace('newSince(was, names)', 'names')],
   ['N4: a long catalogue still counted from the old one', SEEN_BACK, SEEN_BACK.replace('fresh: long ? [] : newSince(was, names)', 'fresh: newSince(was, names)')],
-  ['S2: a visit said kept with recording off', SEEN_BACK, SEEN_BACK.replace('kept: keep && w.ok', 'kept: w.ok')],
-  ['S2: a refused visit said kept', SEEN_BACK, SEEN_BACK.replace('kept: keep && w.ok', 'kept: keep')],
   ['S2: the day counted from said to be today', SEEN_BACK, SEEN_BACK.replace('since: was ? was.day : null', 'since: on')],
-  ['S2: the words always say the last visit', `(kept ? 'since your last visit' :`, `(true ? 'since your last visit' :`],
+  ['S2: the words say the last visit', 'export const sinceWords = ({ since }) => `since ${day(fromIso(since))}`;', "export const sinceWords = ({ since }) => 'since your last visit';"],
   ['S2: the words give the day as the record writes it', 'since ${day(fromIso(since))}', 'since ${since}'],
 
   /* ---- version 3: the rooms read each other ---- */

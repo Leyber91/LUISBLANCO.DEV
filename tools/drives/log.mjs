@@ -680,9 +680,14 @@ export default async function log(p, { base }) {
   await call(writeRaw, rec9({ visits: [...many.slice(0, 499).map((name, i) => ({ name, t: t9 - i * 1000, via: 'search', n: 1 })), { name: 'Gone World d', t: t9 - 600000, via: 'search', n: 1 }] }), 2);
   await open();
   const hv0 = await state();
-  await another();
-  const hv1 = await line('Log: 500 visited, 0 saved');
-  p.check('D5: with the oldest of 500 visits hidden, one more visit raises "visited" by one, and the hidden line is the one that goes', hv0.line === 'Log: 499 visited, 0 saved' && hv1.line === 'Log: 500 visited, 0 saved' && !(await call(rawRecord)).data.log.visits.some((v) => v.name === 'Gone World d'), `${hv0.line} then ${hv1.line}`);
+  // the one more visit is a link to a named world that is not among the log's 499: "Another world" picked one of
+  // them at random about once in thirteen runs, and a world visited again raises nothing
+  const fresh5 = many[650];
+  await open(`p=${encodeURIComponent(fresh5)}`);
+  const hv1 = await line('Log: 500 visited, 0 saved'), hraw5 = await call(rawRecord), top5 = hraw5.data.log.visits[0];
+  p.check('D5: with the oldest of 500 visits hidden, a visit to a world not in the log raises "visited" by one, and the hidden line is the one that goes',
+    !many.slice(0, 499).includes(fresh5) && hv0.line === 'Log: 499 visited, 0 saved' && hv1.line === 'Log: 500 visited, 0 saved' && top5.name === fresh5 && top5.n === 1 && top5.via === 'link'
+    && hraw5.data.log.visits.length === 500 && !hraw5.data.log.visits.some((v) => v.name === 'Gone World d'), `${hv0.line} then ${hv1.line} | top ${JSON.stringify(top5)}`);
 
   // ---- D6 and T9: a record of a later version ----
   const later = { overdue: { planet: 'WASP-12 b', place: null, tz: 'Europe/Madrid' }, log: { saved: [{ name: many[0], t: t9, view: 'orbit', note: 'kept by a later page' }], visits: [], pins: [], dropped: 0, tags: { [many[0]]: ['hot'] } }, notes: { a: 1 } };

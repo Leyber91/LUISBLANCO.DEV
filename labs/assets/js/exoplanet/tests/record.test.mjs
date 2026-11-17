@@ -438,10 +438,10 @@ const filled = (nVisits, nSaved = 0) => {
   const ls2 = local(JSON.stringify({ date: '2026-11-12', names: ['w9'] })), r2 = await read(os, ls2);
   yes('a record of version 3 keeps its own catalogue, and an old local copy written since is removed', same(r2.record.seen, { day: '2026-11-11', names: 'w1|w2' }) && !ls2.map.has(LEGACY_SEEN));
   const lsNone = local(OLD), none = fake(null, OWN), rn = await read(none, lsNone);
-  yes('with no record (never written, or erased) nothing is taken in, and the copy stays', rn.record.seen === null && none.rec === null && lsNone.map.get(LEGACY_SEEN) === OLD);
+  yes('with no record (never written, or erased) nothing is taken in, and the copy goes', rn.record.seen === null && none.rec === null && !lsNone.map.has(LEGACY_SEEN));
   const lsBare = local(OLD), bare = fake({ v: 3, data: empty() }, OWN);
   await read(bare, lsBare);
-  yes('a record of this version that holds no catalogue leaves the copy too', lsBare.map.get(LEGACY_SEEN) === OLD);
+  yes('a record of version 3 that holds no catalogue removes the copy too', !lsBare.map.has(LEGACY_SEEN));
   for (const [name, storage] of [['a fixture', FIXTURE], ['a store in memory', MEMORY]]) {
     const lsF = local(OLD), f = fake({ v: 2, data: JSON.parse(JSON.stringify(v2)) }, storage), rf = await read(f, lsF);
     yes(`on ${name} the old copy is neither taken in nor removed`, rf.record.seen === null && lsF.map.get(LEGACY_SEEN) === OLD && same(rf.record.log, v2.log));
@@ -485,12 +485,16 @@ const filled = (nVisits, nSaved = 0) => {
   const n0 = os.sets, off = await seeCatalogue(os, ['w1', 'w2', 'w3', 'w4'], { day: '2026-11-17', keep: false });
   yes('with recording off the new worlds are still found and nothing is written', same(off.fresh, ['w4']) && os.sets === n0 && !off.changed && os.rec.data.seen.day === '2026-11-16');
   const nw = fake({ v: 4, data: { seen: { day: '2026-11-15', names: 'w1' } } }), late = await seeCatalogue(nw, ['w1', 'w2'], { day: '2026-11-16', keep: true });
-  yes('on a record of a later version nothing is said to be new and nothing is written', same(late.fresh, []) && nw.sets === 0 && late.why === NEWER && !late.kept);
+  yes('on a record of a later version nothing is said to be new and nothing is written', same(late.fresh, []) && nw.sets === 0 && late.why === NEWER);
   // S2: what the new worlds are new since, said from the record
-  yes('S2: a visit that is kept counts from the last visit, and says so', next.kept && next.since === '2026-11-15' && sinceWords(next) === 'since your last visit');
-  yes('S2: with recording off the count is from the day the catalogue was kept, and the words give that day', !off.kept && off.since === '2026-11-16' && sinceWords(off) === 'since 16\u00a0November\u00a02026');
+  yes('S2: the new worlds are said to be new since the day of the catalogue they are counted from, with recording on', next.since === '2026-11-15' && sinceWords(next) === 'since 15\u00a0November\u00a02026');
+  yes('S2: and with recording off', off.since === '2026-11-16' && sinceWords(off) === 'since 16\u00a0November\u00a02026');
+  const gap = fake({ v: 3, data: { ...empty(), seen: { day: '2026-11-12', names: 'w1' } } });
+  await seeCatalogue(gap, ['w1', 'w2'], { day: '2026-11-14', keep: false });
+  const back = await seeCatalogue(gap, ['w1', 'w2'], { day: '2026-11-16', keep: true });
+  yes('S2: recording off on one visit and on again the next: the words name the day counted from, not "your last visit"', same(back.fresh, ['w2']) && back.since === '2026-11-12' && sinceWords(back) === 'since 12\u00a0November\u00a02026');
   const blank = fake(null), offNone = await seeCatalogue(blank, ['w1', 'w2'], { day: '2026-11-16', keep: false });
-  yes('S2: with recording off and no catalogue kept, nothing is new and nothing is said', same(offNone.fresh, []) && offNone.since === null && !offNone.kept && blank.rec === null);
+  yes('S2: with recording off and no catalogue kept, nothing is new and nothing is said', same(offNone.fresh, []) && offNone.since === null && blank.rec === null);
   // N4: a catalogue past the bound
   const fits = Array.from({ length: 15000 }, (_, i) => `n${String(i).padStart(8, '0')}`), atBound = [...fits.slice(0, -1), 'n0000000xy'], past = [...fits, 'x'];
   const big = fake({ v: 3, data: { ...empty(), seen: { day: '2026-11-15', names: 'w1' } } });
@@ -542,6 +546,50 @@ const filled = (nVisits, nSaved = 0) => {
   const resumes = []; const os2 = slow(); os2.progress.setResume = async (u) => { resumes.push(u); };
   await update(os2, (r) => visit(r, { name: 'nope', t: T, via: 'log' }, known), { resume: { url: 'exomania.html', label: 'x' } });
   yes('N1: and writes no way back', resumes.length === 0);
+}
+
+/* ---- the old copy through the page's own localStorage (local()), for the three groups of visitors, over three visits ---- */
+{
+  const page = new Map();
+  globalThis.localStorage = { getItem: (k) => (page.has(k) ? page.get(k) : null), setItem: (k, v) => page.set(k, String(v)), removeItem: (k) => { page.delete(k); } };
+  const OLD = JSON.stringify({ date: '2026-11-11', names: ['w1', 'w2'] });
+  const shared = (start) => { let rec = start ? JSON.parse(JSON.stringify(start)) : null; return { get rec() { return rec; }, storage: { kind: 'indexeddb', persistent: true, fixture: null }, progress: {
+    get: async (o = {}) => { if (rec && o.migrate && rec.v < o.v) rec = { ...rec, v: o.v, data: JSON.parse(JSON.stringify(o.migrate(rec.data, rec.v))) }; return rec; },
+    set: async (d, o) => { rec = { ...(rec || {}), v: o.v, data: JSON.parse(JSON.stringify(d)) }; return rec; }, setResume: async () => rec } }; };
+  const v2 = { overdue: { planet: 'w5', place: null }, log: { saved: [], visits: [{ name: 'w2', t: T, via: 'tour', n: 1 }], pins: [], dropped: 0 } };
+  /* a visit of the survey: its log reads the record, then it sees the catalogue, recording on or off */
+  const visit3 = async (os, keep, day) => { await read(os); await seeCatalogue(os, ['w1', 'w2', 'w3'], { day, keep }); return page.has(LEGACY_SEEN); };
+  const groups = [
+    ['no record, recording off', null, false, OLD],
+    ['no record, recording on', null, true, OLD],
+    ['a record of version 2 and a copy that cannot be read, recording off', { v: 2, data: v2 }, false, '{not json'],
+    ['a record of version 2 and a readable copy, recording on', { v: 2, data: v2 }, true, OLD],
+  ];
+  for (const [who, start, keep, copy] of groups) {
+    page.clear(); page.set(LEGACY_SEEN, copy);
+    const os = shared(start), left = [];
+    for (const day of ['2026-11-16', '2026-11-17', '2026-11-18']) left.push(await visit3(os, keep, day));
+    const seen = os.rec && os.rec.data ? os.rec.data.seen : null;
+    const takenIn = !!seen && seen.day === '2026-11-11';
+    yes(`the old copy, ${who}: gone after the first visit and on every one after`, same(left, [false, false, false]), JSON.stringify(left));
+    yes(`and what the record holds, ${who}`, who.startsWith('no record, recording off') ? os.rec === null
+      : who.startsWith('no record, recording on') ? !!seen && seen.day === '2026-11-18' && !takenIn
+      : who.includes('cannot be read') ? os.rec.v === 3 && seen === null
+      : os.rec.v === 3 && !!seen && seen.day === '2026-11-18', JSON.stringify(seen && seen.day));
+  }
+  // the read that upgrades keeps the copy, through local(), and the next takes it away
+  page.clear(); page.set(LEGACY_SEEN, OLD);
+  const up = shared({ v: 2, data: v2 });
+  const r1 = await read(up);
+  const keptOnUpgrade = page.get(LEGACY_SEEN) === OLD && same(r1.record.seen, { day: '2026-11-11', names: 'w1|w2' });
+  await update(up, (r) => pin(r, 'w1', known));
+  yes('through the page\'s localStorage: the upgrading read takes the copy in and keeps it, the next write\'s read removes it', keptOnUpgrade && !page.has(LEGACY_SEEN));
+  // a localStorage the page may not read
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('SecurityError'); } });
+  let denied = '';
+  try { await read(shared({ v: 2, data: v2 })); } catch (e) { denied = e.message; }
+  yes('a localStorage the page may not read is no localStorage: the record is still read and upgraded', denied === '');
+  delete globalThis.localStorage;
 }
 
 /* ---- version 3: the health check ---- */

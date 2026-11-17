@@ -28,8 +28,8 @@
      (ticket 2.04) writes the first predictions, checked against
      the type here.
 
-   Nine rules, the first five learned from reviews on 2026-11-15,
-   the last two from the review of this client on 2026-11-16:
+   Ten rules, the first five learned from reviews on 2026-11-15,
+   the last three from the reviews of this client on 2026-11-16:
 
    1. The store is the truth. A page never writes back its own
       copy of the record. A write is one change (a visit, a save,
@@ -67,12 +67,15 @@
       the survey kept the catalogue it last saw in localStorage
       (exo:seen:v1), where the erase does not reach; the upgrade
       of a record of the visitor's own store takes that copy in.
-      The copy is removed only by a later read that finds a record
-      of this version already holding the catalogue, because a tab
-      of version 2 that read the record before the upgrade can
-      still write it back without one, and the next upgrade then
-      needs the copy again. With no record (none was ever written,
-      or it was erased) nothing is taken in.
+      The copy stays through the read that upgraded the record,
+      because a tab of version 2 that read the record before the
+      upgrade can still write it back without the catalogue, and
+      the next upgrade then needs the copy again. Every other read
+      of the visitor's own store removes it: one that finds no
+      record (none was ever written, or it was erased), which takes
+      nothing in, and one that finds a record of version 3 or later
+      it did not upgrade. So the copy outlives the erase only until
+      either room next reads the record.
    7. The health check (`health`) reports the version this page
       writes, the version stored, the store, and that nothing is
       synced to another device.
@@ -85,11 +88,16 @@
       survey lines uncounted (the class: a rule applied with
       another room's data).
    9. A sentence about the record says what the record holds.
-      "New since your last visit" is said only when this visit is
-      kept; with recording off it names the day the catalogue it
-      counts from was kept, and with no catalogue kept it says
-      nothing. A catalogue longer than the record keeps shows no
-      world as new, and the log says why.
+      The worlds new are counted from the catalogue the record
+      kept, so they are said to be new since that catalogue's day,
+      whatever recording did in between; with no catalogue kept
+      nothing is said. A catalogue longer than the record keeps
+      shows no world as new, and the log says why.
+  10. A store that does not answer does not stall the page: each
+      read and write has TURN_MS (5 s) of the page's free time to
+      finish, then fails with STUCK, which the log can show, and
+      the next one runs. Time the page holds its own thread is not
+      counted against the store.
 
    Every function but `read`, `load`, `update`, `seeCatalogue`
    and `health` is pure: a record in, a record out, no storage
@@ -468,10 +476,9 @@ export const footWords = ({ persistent, recording }) => [
   recording === true ? 'A visit and a save are also usage events, which are sent to the labs’ backend only where you have allowed it.'
     : recording === false ? 'With recording off, no usage event is written.' : '',
 ].filter(Boolean).join(' ');
-/** What the worlds shown as new are new since (rule 9): the visitor's last visit when this visit is kept; with
-   recording off, the day the catalogue they are counted from was kept.
-   @param {{ kept: boolean, since: string | null }} s */
-export const sinceWords = ({ kept, since }) => (kept ? 'since your last visit' : `since ${day(fromIso(since))}`);
+/** What the worlds shown as new are new since (rule 9): the day of the catalogue the record kept, which is what they
+   are counted from. @param {{ since: string | null }} s */
+export const sinceWords = ({ since }) => `since ${day(fromIso(since))}`;
 /** The health check in words: the version this page writes, the version stored, and the sync.
    @param {{ stored: number | null }} h */
 export const healthWords = (h) => `This page writes version ${V} of the record, and ${h.stored === null ? 'nothing is stored yet' : `the stored record is version ${thousands(h.stored)}`}. No copy is synced to another device.`;
@@ -483,17 +490,41 @@ export const NEWER = 'this log was written by a newer version of this page';
 /** The browser's localStorage, or null where reading it is refused. @returns {Local | null | undefined} */
 const local = () => { try { return globalThis.localStorage; } catch { return null; } };
 /* Every read and write of the record on a page runs in turn (rule 1): a page that fires two writes without waiting
-   (the sky, when two clocks are opened at once) gets both. A job that fails does not stop the ones after it. */
+   (the sky, when two clocks are opened at once) gets both. A job that fails does not stop the ones after it, and a
+   job the store does not finish within its limit fails with STUCK (rule 10). The store may still finish a job given
+   up on; the page has by then said it failed.
+   A job's time is counted by a tick every TICK_MS, and a gap between two ticks counts as two ticks at most: a page
+   that holds its thread (the survey builds a shader for seconds) delays the tick, and that time is the page's, not
+   the store's. Counted by the wall clock, a job the store had answered failed once the thread was free, before the
+   answer was delivered: a visit by name was written late and said to have failed (the log's drive at 1440 on
+   2026-11-16; the same class as Labs OS's store timer, ROAD ticket 1.04). */
+export const TURN_MS = 5000;
+export const TICK_MS = 250;
+export const STUCK = `the browser's store did not answer within ${TURN_MS / 1000} seconds`;
 /** @type {Promise<unknown>} */
 let queue = Promise.resolve();
-/** @template T @param {() => Promise<T>} job @returns {Promise<T>} */
-const inTurn = (job) => { const run = queue.then(job); queue = run.catch(() => undefined); return run; };
+/** @template T @param {() => Promise<T>} job @param {number} limit @returns {Promise<T>} */
+const inTurn = (job, limit) => {
+  /** @type {Promise<T>} */
+  const run = queue.then(() => new Promise((resolve, reject) => {
+    let spent = 0, last = Date.now();
+    const tick = setInterval(() => {
+      const now = Date.now();
+      spent += Math.min(now - last, 2 * TICK_MS);
+      last = now;
+      if (spent >= limit) { clearInterval(tick); reject(new Error(STUCK)); }
+    }, TICK_MS);
+    job().then((v) => { clearInterval(tick); resolve(v); }, (e) => { clearInterval(tick); reject(e); });
+  }));
+  queue = run.catch(() => undefined);
+  return run;
+};
 /** The lab's record as stored, sound, and whether a later version of the page wrote it. A record of an older version
    is upgraded by Labs OS once, on this read (rule 6). `storage`: the browser's localStorage, where the survey kept the
-   catalogue it last saw before version 3; that copy is read, and later removed, only for the visitor's own store,
-   which keeps what it is given (not a fixture, not memory).
-   @param {OS} os @param {Local | null | undefined} storage @returns {Promise<{ record: ExoRecord, newer: boolean }>} */
-export function read(os, storage = local()) { return inTurn(() => readNow(os, storage)); }
+   catalogue it last saw before version 3; that copy is read, and removed, only for the visitor's own store, which
+   keeps what it is given (not a fixture, not memory). `limit`: the time the read may take (rule 10).
+   @param {OS} os @param {Local | null | undefined} storage @param {number} limit @returns {Promise<{ record: ExoRecord, newer: boolean }>} */
+export function read(os, storage = local(), limit = TURN_MS) { return inTurn(() => readNow(os, storage), limit); }
 /** The read itself, for a job already in turn. @param {OS} os @param {Local | null | undefined} storage */
 async function readNow(os, storage) {
   const own = os.storage.persistent && !os.storage.fixture;
@@ -501,8 +532,8 @@ async function readNow(os, storage) {
   // Labs OS calls migrate only for a record older than V, and every older shape is from before the record kept seen
   const rec = await os.progress.get({ v: V, migrate: (d) => { upgraded = true; return own ? { ...normalise(d), seen: legacySeen(storage) } : normalise(d); } });
   const record = normalise(rec ? rec.data : null);
-  // the copy goes once a record of this version, not upgraded by this read, holds the catalogue (rule 6)
-  if (own && storage && !upgraded && record.seen) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }
+  // the copy goes on every read but the one that upgraded the record: with no record, or a record of version 3 (rule 6)
+  if (own && storage && !upgraded) { try { storage.removeItem(LEGACY_SEEN); } catch { /* a store that refuses: the copy stays, read by no page */ } }
   return { record, newer: !!rec && rec.v > V };
 }
 /** @param {OS} os */
@@ -513,10 +544,11 @@ export async function load(os) { return (await read(os)).record; }
    written only when the record changed, and never when a later version wrote it. What comes back is the store's record after the
    change, which the page then shows, and `changed`, which says whether the store was written. `resume` ({ url,
    label }) is where the labs' hub leads back to, written beside an accepted change. Two tabs that write in the same
-   instant can still interleave (Labs OS says so of every record); the window is one read and one write.
-   @param {OS} os @param {(record: ExoRecord) => Write} change @param {{ resume?: { url: string, label: string } | null }} [opts]
+   instant can still interleave (Labs OS says so of every record); the window is one read and one write. `limit`:
+   the time the read and the write may take together (rule 10).
+   @param {OS} os @param {(record: ExoRecord) => Write} change @param {{ resume?: { url: string, label: string } | null, limit?: number }} [opts]
    @returns {Promise<Write & { changed: boolean }>} */
-export function update(os, change, { resume = null } = {}) {
+export function update(os, change, { resume = null, limit = TURN_MS } = {}) {
   return inTurn(async () => {
     const { record: cur, newer } = await readNow(os, local());
     if (newer) return { ok: false, why: NEWER, record: cur, changed: false };
@@ -528,21 +560,20 @@ export function update(os, change, { resume = null } = {}) {
       try { await os.progress.setResume(resume.url, resume.label); } catch { /* the hub's way back is not the log: the change is stored */ }
     }
     return { ...w, changed };
-  });
+  }, limit);
 }
 /** The worlds of this catalogue new since the catalogue the record last kept (rule 9). With `keep` (the survey's
-   recording is on) the record then holds this catalogue, seen on `day`, as the one last seen. `kept`: this visit's
-   catalogue is now the one kept; `since`: the day of the catalogue counted from, or null when none was kept;
-   `long`: the catalogue does not fit the record, and nothing is new.
-   @param {OS} os @param {string[]} names @param {{ day: string, keep: boolean }} opts
-   @returns {Promise<Write & { changed: boolean, fresh: string[], kept: boolean, since: string | null, long: boolean }>} */
+   recording is on) the record then holds this catalogue, seen on `day`, as the one last seen. `since`: the day of the
+   catalogue counted from, or null when none was kept; `long`: the catalogue does not fit the record, and nothing is
+   new. @param {OS} os @param {string[]} names @param {{ day: string, keep: boolean }} opts
+   @returns {Promise<Write & { changed: boolean, fresh: string[], since: string | null, long: boolean }>} */
 export async function seeCatalogue(os, names, { day: on, keep }) {
   /** @type {Seen | null} */
   let before = null;
   const long = keepable(names) === null;
   const w = await update(os, (r) => { before = r.seen; return keep ? see(r, { day: on, names }) : done(r); });
   const was = /** @type {Seen | null} */ (before);   // set inside the change, which tsc does not follow
-  return { ...w, fresh: long ? [] : newSince(was, names), kept: keep && w.ok, since: was ? was.day : null, long };
+  return { ...w, fresh: long ? [] : newSince(was, names), since: was ? was.day : null, long };
 }
 /** The health check: the version this page writes, the version stored (null when nothing is), the store, and the
    sync, which the lab does not have.

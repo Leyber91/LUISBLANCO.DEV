@@ -29,11 +29,13 @@
    P4 Nothing stored is lost. A record of each older shape, as the
       live site wrote it, reads at version 3 with every entry it
       held; the survey's old local copy of the catalogue is taken
-      into the visitor's own store, and removed only by a later
-      read that finds a record of version 3 holding the catalogue
-      (so a tab of version 2 that writes back over the upgrade
-      loses nothing); nothing is taken from it into a fixture, a
-      memory store, or where there is no record.
+      into the visitor's own store; it stays through the read
+      that upgraded the record (so a tab of version 2 that writes
+      back over the upgrade before the next read loses nothing)
+      and goes on every other read of that store, one that finds
+      no record included, so it outlives an erase only until
+      either room next reads the record. Nothing is taken from it
+      into a fixture, a memory store, or where there is no record.
    P5 Reach. What the lab keeps is its one Labs OS record: the
       export holds it whole, and the erase leaves none of it.
    P6 Bounded. A record at every bound fits Labs OS's cap on one
@@ -175,7 +177,7 @@ const surveyKnown = ((s) => (n) => s.has(n))(new Set([...surveyNames, ...rosterN
     yes(`P4: on ${name} the old local copy stays where it is and is not taken in, and the record is kept`, r.record.seen === null && l.m.get(old.local.key) === old.local.value && same(r.record.log, v2.log));
   }
   const l0 = local(), none = await R.read(fake(null, OWN), l0);
-  yes('P4: with no record nothing is taken in, and the copy stays until a record of version 3 holds a catalogue', none.record.seen === null && l0.m.get(old.local.key) === old.local.value);
+  yes('P4: with no record (none written, or erased) nothing is taken in, and the copy goes', none.record.seen === null && !l0.m.has(old.local.key));
   const full = JSON.stringify({ date: '2026-11-15', names: [...surveyNames, ...rosterNames.filter((n) => !surveyNames.includes(n))] });
   const lf = { getItem: () => full, removeItem: () => {} }, rf = await R.read(fake(old.v2, OWN), lf);
   yes('P4: an old local copy of the whole catalogue (snapshot and roster) fits the record', !!rf.record.seen && rf.record.seen.names.split('|').length >= surveyNames.length, `${rf.record.seen && rf.record.seen.names.length} characters`);
