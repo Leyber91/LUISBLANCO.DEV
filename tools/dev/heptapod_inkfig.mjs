@@ -120,7 +120,7 @@ for (const k of [1, 4, 12]) {
   figures.push({
     clauses: k, seed: 100 + k, nodes: f.nodes, columns: cols, verdict,
     // G12: a skeleton when any detail column is below the film's p10; a figure candidate only when every column is inside
-    label: DETAIL.some((c) => verdict[c] === 'below') ? 'skeleton' : COLS.every(([c]) => verdict[c] === 'in') ? 'figure candidate' : 'outside the film's range',
+    label: DETAIL.some((c) => verdict[c] === 'below') ? 'skeleton' : COLS.every(([c]) => verdict[c] === 'in') ? 'figure candidate' : "outside the film's range",
     outOfRange: COLS.filter(([c]) => verdict[c] !== 'in').map(([c]) => c),
     drawn: { filaments: f.filamentsDrawn, outward: f.outward, threads: f.threads, bulbs: f.bulbs, drops: f.satellites, spikes: f.spikes, spansDeg: f.spansDeg, gapDeg: f.gapDeg, squeeze: f.squeeze },
   });
