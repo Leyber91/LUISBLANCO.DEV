@@ -8,7 +8,7 @@
 import * as K from './kerr.js';
 import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION, EHT_RES } from './config.js';
 import { tanHalfV, derive, shadowFor, s3, integratorShadow, measurement, published, fall, sci, dur, len,
-  sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G } from './physics.js';
+  sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G, fcolFits } from './physics.js';
 import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour } from './tour.js';
@@ -556,7 +556,7 @@ export function buildUI(app) {
     $('#bh-spec').innerHTML = spectrumPlot(anchors?.spectrum);
     const pk = anchors?.spectrum?.reduce((a, b) => (b[1] > a[1] ? b : a));
     $('#bh-specnote').textContent = m.Tpeak > 0 && pk
-      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.`
+      ? `Observed νFν of every disk pixel: each a colour-corrected blackbody (f = ${s3(anchors.fcol)}) at its local temperature, shifted by its own g. Peak near ${photonEnergy(pk[0])} for ${sci(m.massSun)} M☉ at Eddington ratio ${sci(m.edd)}.${fcolFits(m.edd) ? '' : ' [ILLUSTRATIVE] Below 1% of Eddington no colour correction fits the spectrum of a disk (Shimura and Takahara 1995): this one is drawn, not predicted.'}`
       : 'Set an accretion rate to see the disk spectrum.';
   }
 

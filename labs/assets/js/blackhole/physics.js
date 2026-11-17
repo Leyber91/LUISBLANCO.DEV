@@ -337,6 +337,12 @@ export function weakest(...tags) {
 }
 /** The tags of the state's inputs: the object's own, and ILLUSTRATIVE for everything of a custom or hypothetical
  *  hole (nothing of it is measured). */
+/** Whether a colour correction f_col describes the disk's spectrum at this Eddington ratio (ledger row 3): Shimura and
+ *  Takahara (1995) find about 1.7 at 10% of Eddington and 1.8 to 2.0 near it, and "for accretion rates lower than 1%
+ *  of the Eddington limit, the local spectrum cannot be fitted with any f". Below that the spectrum is illustrative. */
+export const FCOL_MIN_EDD = 0.01;
+export function fcolFits(edd) { return edd >= FCOL_MIN_EDD; }
+
 export function inputTags(obj) {
   if (!obj || obj.hypothetical) return { mass: 'ILLUSTRATIVE', dist: 'ILLUSTRATIVE', spin: 'ILLUSTRATIVE', edd: 'ILLUSTRATIVE' };
   return { mass: 'REAL', dist: 'REAL', spin: obj.spinTag, edd: obj.eddTag };

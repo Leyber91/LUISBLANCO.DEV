@@ -68,6 +68,9 @@ guard('derive', () => {
   // ledger row 6: one rule for where the interior time ends, the centre only at a = Q = 0
   const at = (a, q) => P.derive(state({ obj: 'custom', a, q, mass: 1, dist: 3, edd: -2 })).endsAtCentre;
   ok('the interior time ends at the centre at a = Q = 0', at(0, 0) === true);
+  // ledger row 3: Shimura and Takahara (1995) fit no colour correction below 1% of Eddington
+  ok('f_col fits at 1% of Eddington and above, not just below it (0.0099)', P.fcolFits(0.01) === true && P.fcolFits(0.0099) === false && P.fcolFits(1e-5) === false && P.fcolFits(1) === true, [P.fcolFits(0.01), P.fcolFits(0.0099)].join(' '));
+  ok('the boundary is the 1% the paper names', P.FCOL_MIN_EDD === 0.01);
   ok('and at the inner horizon for any spin or charge, however small: a = 0.0005 (r- 1.25e-7 M, which the old rule of r- < 5e-7 called the centre), a = 0.001, Q = 0.0001',
     at(0.0005, 0) === false && at(0.001, 0) === false && at(0, 0.0001) === false, [at(0.0005, 0), at(0.001, 0), at(0, 0.0001)].join(' '));
   ok('the horizon of 10 Msun at a = 0 spans 2 GM/c^2 = 29.5 km', near(m.horizonKm, 2 * rg / 1000, 1e-12), `${m.horizonKm}`);
