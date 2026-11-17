@@ -24,6 +24,7 @@ import { OBJ, sceneOf } from './world.js';
 import { ringSpec, soloSpec, podStrokes } from './ring.js';
 import { GREETING, entryActs, brackets, specArgsOfAct, DAY } from './day.js';
 import { objectImage, actImage, sceneName } from './objects.js';
+import { podFigure, ringGraph, soloGraph, inkAt } from './inked.js';
 
 export const COLS = [['lift', 'near'], ['lift', 'far'], ['hold', 'near'], ['hold', 'far'], ['putdown', 'near'], ['putdown', 'far'], ['give', 'near']];
 const sceneAt = (row, col) => sceneOf(COLS[col][0], OBJ[row], COLS[col][1]);
@@ -60,6 +61,25 @@ export function mountNotebook({ list, key, count }, hooks) {
     key.append(grid);
   }
 
+  /* Under the inked script a crop is drawn from the inked figure, read pixel by pixel at its thinning. */
+  const figs = new Map();
+  function drawInkedCrop(ctx, n, spec, crop, xf) {
+    const key = spec.pod.solo ? 's:' + spec.pod.solo : 'r:' + spec.pod.scene;
+    if (!figs.has(key)) figs.set(key, podFigure(spec.pod.solo ? soloGraph(sp, spec.pod.solo) : ringGraph(sp, spec.pod.scene < 0 ? sp.greeting.ids : sp.rings[spec.pod.scene].ids), 700));
+    const fig = figs.get(key);
+    if (!fig.ok) return false;
+    const img = ctx.createImageData(n, n), r = crop.rect;
+    const rgb = [0, 2, 4].map((i) => parseInt(P.ink.slice(1 + i, 3 + i), 16));
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const x = (i + 0.5 - xf.ox) / xf.s, y = (j + 0.5 - xf.oy) / xf.s;
+      if (x < r.x0 || x > r.x1 || y < r.y0 || y > r.y1 || !inkAt(fig, x, y, crop.erode)) continue;
+      const o = 4 * (j * n + i);
+      img.data[o] = rgb[0]; img.data[o + 1] = rgb[1]; img.data[o + 2] = rgb[2]; img.data[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return true;
+  }
+
   function drawCrop(cv, state, crop) {
     const n = Math.round(64 * cappedDpr());
     cv.width = cv.height = n;
@@ -68,6 +88,7 @@ export function mountNotebook({ list, key, count }, hooks) {
     if (!spec || !crop.rect) return;
     const r = crop.rect, rw = r.x1 - r.x0, rh = r.y1 - r.y0;
     const s = Math.min(n / rw, n / rh) * 0.94;
+    if (hooks.script === 'inked' && spec.pod && drawInkedCrop(ctx, n, spec, crop, { s, ox: n / 2 - s * (r.x0 + rw / 2), oy: n / 2 - s * (r.y0 + rh / 2) })) return;
     const xf = { s, ox: n / 2 - s * (r.x0 + rw / 2), oy: n / 2 - s * (r.y0 + rh / 2) };
     ctx.save();
     ctx.beginPath(); ctx.rect(xf.ox + s * r.x0, xf.oy + s * r.y0, s * rw, s * rh); ctx.clip();
@@ -139,7 +160,7 @@ export function mountNotebook({ list, key, count }, hooks) {
     const kept = state.entries.filter((e) => e.tokens.length).length;
     count.textContent = kept ? `${kept} radical${kept === 1 ? '' : 's'} kept` : '';
     if (!state.entries.length) {
-      list.append(el('p', 'nb-empty', 'Nothing kept yet. While a ring hangs on the glass, drag across a part of it. What you cut lands here.'));
+      list.append(el('p', 'nb-empty', 'Nothing kept yet. While a ring hangs in the disc, drag across a part of it. What you cut lands here.'));
       return;
     }
     const groups = truth ? [] : brackets(state, sp);

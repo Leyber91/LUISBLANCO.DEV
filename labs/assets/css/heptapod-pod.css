@@ -1,37 +1,51 @@
 /* ============================================================
    The Pod — on the plate family of heptapod.css (ground, hairline
    frames, corner brackets, mono labels). Contact's material is
-   ink in fog: the page is quiet so that the one lit wall and the
-   ink on it carry the eye. Gold appears in two places only: a
-   crop that kept a radical, and the truth laid over the day once
-   it is over. Every value comes from tokens.css.
+   ink in fog. The first screen is the chamber: a dark room whose
+   one light is the disc of fog where the being writes, with the
+   visitor's console (slate, lamp, notebook) beside it as one
+   hairline column. Everything else waits below. Gold appears in
+   two places only: a crop that kept a radical, and the truth laid
+   over the day once it is over. Every value comes from tokens.css.
    ============================================================ */
 
-.pod-head { max-width: var(--content-max); margin-inline: auto; padding-block: var(--s-3) var(--s-5); }
-.pod-head h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(1.7rem, 2.6vw, 2.35rem); letter-spacing: -.012em; }
-.pod-head .sub { max-width: 92ch; }
 .back.quiet { border-color: var(--line); color: var(--text-dim); }
-.pod-head a, .evidence a { color: var(--horizon); text-underline-offset: 3px; }
-.pod-head a:hover, .evidence a:hover { color: var(--text-bright); }
-.pod-stage { scroll-margin-top: 70px; }
+.console a, .sec a, .evidence a { color: var(--horizon); text-underline-offset: 3px; }
+.console a:hover, .sec a:hover, .evidence a:hover { color: var(--text-bright); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
 
-.pod-grid {
-  display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(330px, 1fr); gap: var(--s-6);
-  max-width: var(--content-max); margin-inline: auto; align-items: start; padding-bottom: var(--s-8);
+/* ---------- the first screen: the chamber and the console ---------- */
+.pod {
+  --bar-h: 62px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 384px;
+  margin-inline: calc(-1 * var(--content-pad));
+  height: calc(100svh - var(--bar-h)); min-height: 620px; max-height: 1100px;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
 }
-.pod-col { min-width: 0; }
+.room { position: relative; margin: 0; min-width: 0; background: var(--void); scroll-margin-top: var(--bar-h); }
+.room-view { position: absolute; inset: 0; }
+.room-view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+.room-view canvas:focus-visible { outline: 2px solid var(--horizon); outline-offset: -3px; }
+.room-cap { position: absolute; z-index: 1; left: clamp(16px, 2.4vw, 36px); top: clamp(14px, 2.2vh, 26px); max-width: 34ch; pointer-events: none; }
+.room-cap h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: clamp(1.15rem, 1.45vw, 1.5rem); letter-spacing: -.01em; margin: 0 0 var(--s-2); }
+.cap-sub { margin: 0; font-size: .74rem; line-height: 1.55; color: var(--text-dim); max-width: 34ch; }
+.room-tag { position: absolute; z-index: 1; right: clamp(16px, 2vw, 28px); bottom: 14px; margin: 0; pointer-events: none; color: var(--text-faint); }
 
-/* ---------- plate a: the pod ---------- */
-.pod-stage { margin: 0; border: 1px solid var(--line); background: var(--void); }
-.pod-stage canvas { width: 100%; aspect-ratio: 3 / 2; display: block; touch-action: none; outline: none; }
-.pod-stage canvas:focus-visible { outline: 2px solid var(--horizon); outline-offset: 3px; }
+/* the console scrolls as one column when the evening's panel or the notebook outgrows the first screen */
+.console { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: var(--void); overflow-y: auto; overscroll-behavior: contain; }
+.console > .hint { margin: 0; padding: var(--s-3) var(--s-4) 0; }
+.console .nb { flex: 1 0 auto; padding: var(--s-4); }
+.console .pp-res { grid-template-columns: 14px repeat(3, minmax(0, 76px)); }
 .pod-panel :focus-visible, .nb :focus-visible, .keys summary:focus-visible { outline: 2px solid var(--horizon); outline-offset: 2px; }
-.keys { margin-top: var(--s-3); }
-.keys summary { cursor: pointer; display: inline-block; padding: 6px 0; }
-.keys .hint { margin-top: 4px; max-width: 78ch; }
+.keys { flex: none; border-top: 1px solid var(--line); padding: 2px var(--s-4) var(--s-2); }
+.keys summary { cursor: pointer; display: inline-block; padding: 8px 0; }
+.keys .hint { margin-top: 2px; }
 
-.pod-panel { border: 1px solid var(--line); border-top: 0; background: rgba(11, 14, 19, .55); padding: var(--s-4); min-height: 172px; }
+.pod-panel { flex: none; border-bottom: 1px solid var(--line); padding: var(--s-4); min-height: 172px; }
+.sec .sub { max-width: 88ch; }
+/* in the console the slate's label stands over its line, so the line keeps its width */
+.console .pp-slate { grid-template-columns: minmax(0, 1fr) auto; row-gap: var(--s-2); }
+.console .pp-slate label { grid-column: 1 / -1; }
 .pp { display: flex; flex-direction: column; gap: var(--s-3); }
 .pp-slate { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; margin: 0; }
 .pp-marks { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; align-items: center; }
@@ -51,7 +65,7 @@
 
 .pp-score { margin: 0; font-size: .95rem; color: var(--text); }
 .pp-score b { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.9rem; color: var(--accretion-soft); font-variant-numeric: tabular-nums; margin-right: 8px; }
-.pp-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px var(--s-5); }
+.pp-rows { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .pp-res { display: grid; grid-template-columns: 14px repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; }
 .pp-pic { border: 1px solid var(--line); padding: 2px 2px 5px; position: relative; display: block; }
 .pp-pic img { display: block; width: 100%; height: auto; }
@@ -60,7 +74,7 @@
 .pp-legend { margin: 0; font-size: .72rem; color: var(--text-faint); }
 
 /* ---------- plate b: the notebook ---------- */
-.nb { min-width: 0; border: 1px solid var(--line); background: rgba(11, 14, 19, .55); padding: var(--s-4); position: sticky; top: 64px; max-height: calc(100vh - 84px); overflow: auto; }
+.nb { min-width: 0; }
 .nb-how { margin: var(--s-2) 0 var(--s-4); }
 .nb-keygrid { display: grid; grid-template-columns: 34px repeat(7, 30px); grid-auto-rows: 30px; gap: 2px; justify-content: start; }
 .nb-keygrid img { width: 30px; height: 30px; display: block; opacity: .9; }
@@ -98,12 +112,17 @@ input.nb-guess:focus { color: var(--text-bright); }
 .nb-bracket { margin: 0; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--horizon); }
 
 @media (max-width: 1020px) {
-  .pod-grid { grid-template-columns: minmax(0, 1fr); }
-  .nb { position: static; max-height: none; }
+  .pod { display: block; height: auto; min-height: 0; max-height: none; }
+  .room { height: clamp(520px, 74svh, 820px); }
+  .console { border-left: 0; border-top: 1px solid var(--line); }
+  .console { overflow: visible; }
 }
 @media (max-width: 560px) {
-  .pod-stage canvas { aspect-ratio: 4 / 5; }
-  .pod-head { padding-top: 0; }
+  .pod { --bar-h: 52px; margin-inline: -16px; }     /* main's padding here is 16 px (heptapod.css) */
+  .room { height: auto; }
+  .room-cap { position: static; padding: var(--s-3) 16px var(--s-3); max-width: none; }
+  .room-view { position: relative; inset: auto; height: clamp(470px, 70svh, 640px); }
+  .room-tag { display: none; }
   .pp-slate { grid-template-columns: minmax(0, 1fr) auto; }
   .pp-slate label { grid-column: 1 / -1; }
   .pp-lamp { grid-template-columns: auto minmax(0, 1fr); }

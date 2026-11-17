@@ -399,6 +399,9 @@ export function inkFigure(g, opts = {}) {
 
   const body = new Float32Array(S * S), bristle = new Float32Array(S * S);
   const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0 };
+  // opts.trace: where each pool and each thread was laid, in raster pixels, for a reader of crops (the pod's
+  // notebook). It records what was drawn and changes nothing that is drawn.
+  const trace = opts.trace ? { pools: [], threads: [] } : null;
 
   // the angular distance (deg, signed into [-180, 180))
   const wrap = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
@@ -452,6 +455,11 @@ export function inkFigure(g, opts = {}) {
     }
     pools.push({ j, th, half, hOut, hIn });
     report.pools.push({ spanDeg: +(2 * half).toFixed(2), depthR: +(depth / R).toFixed(3), nodes: t.n });
+    if (trace) {
+      const pts = [];
+      for (let i = 0; i <= 8; i++) { const phi = th - half + (2 * half * i) / 8, r0 = rc(phi); pts.push([toX(r0 * cosK(phi * DEG)), toY(r0 * sinK(phi * DEG))]); }
+      trace.pools.push({ node: t.main, pts });
+    }
 
     // I5: rim spikes, spaced by the rim's fastest-growing wavelength
     const lam = 9.02 * INK.RIM_A * R;
@@ -514,6 +522,7 @@ export function inkFigure(g, opts = {}) {
     const isEntity = cg.nodes[w].k === 'entity';
     const tip = thread(body, S, x, y, head, len, shaft, { flare: depthLevel ? 1.6 : 3.4, end: 0.75, turn: 1, seed: (rnd() * 4294967296) >>> 0, bulb: isEntity, rnd, report });
     report.threads++;
+    if (trace) trace.threads.push({ node: w, label: t.parent.get(w).label, pts: tip.path.map((q) => [q[0], q[1]]) });
     const kids = t.kids.get(w);
     kids.forEach((u, i) => {
       const at = 0.15 + (0.3 * (i + 1)) / (kids.length + 1);
@@ -566,7 +575,7 @@ export function inkFigure(g, opts = {}) {
     ok: true, version: INK.version, W: S, H: S, d, R, cx: c0, cy: c0, clauses: k, nodes: cg.n,
     spansDeg: Array.from(sp, (x) => +x.toFixed(2)), arcsDeg: Array.from(arcs, (x) => +x.toFixed(2)), centresDeg: Array.from(centreDeg, (x) => +(((x % 360) + 360) % 360).toFixed(3)),
     masses: gorder.map((gi) => groups[gi].slice()), massSpansDeg: Array.from(msp, (x) => +x.toFixed(3)), massCentresDeg: Array.from(massCentreDeg, (x) => +(((x % 360) + 360) % 360).toFixed(3)), gapDeg: +gapLen.toFixed(2), gapMidDeg: +(((gapMid % 360) + 360) % 360).toFixed(3), squeeze: +squeeze.toFixed(3),
-    ink, ...report,
+    ink, ...report, ...(trace ? { trace } : {}),
   };
 }
 

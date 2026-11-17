@@ -3,7 +3,7 @@
 
    One record (day.js) is the whole state. Every act, crop, guess
    and mark changes the record, the record is saved, and the three
-   views (the pod, the notebook, the panel under the glass) are
+   views (the chamber, the notebook, the panel beside it) are
    redrawn from it.
 
    The page stands on the labs' shared platform (Labs OS) and
@@ -26,6 +26,8 @@
      ?at=check        at the third ring of the check
      ?at=done         the day over
      ?still           no motion (also set by the system preference)
+     ?script=inked    the inked script, on a page served from this
+                      machine only, until it is published (inked.js)
    A linked state is replayed from a seed, is never saved and logs
    nothing of its own.
    ============================================================ */
@@ -39,6 +41,7 @@ import { GATE_SPECIES, makeSpecies, seedOf } from './species.js';
 import { ringSpec, soloSpec, recognise, sectorRect } from './ring.js';
 import { DAY, GREETING, newDay, doAct, addCrop, addSolo, dropEntry, setGuess, raiseMark, endDay, answer, score, validDay, whereIs, dayOver, carry } from './day.js';
 import { initPod } from './scene.js';
+import { scriptOf } from './inked.js';
 import { mountNotebook } from './notebook.js';
 import { mountPanel } from './panel.js';
 
@@ -51,6 +54,7 @@ const wantSpecies = /^[0-2]$/.test(q.get('species') || '') ? Number(q.get('speci
 const preview = !!at;
 const trial = !preview && wantSpecies != null;      // a link that picks the species: played, never stored, so it cannot replace a kept day
 const kept = !preview && !trial;
+const script = scriptOf();
 const speciesIndex = (s) => GATE_SPECIES.findIndex(([a, b]) => a === s[0] && b === s[1]);
 
 /* ---------------- the platform ---------------- */
@@ -131,7 +135,7 @@ let pod = null, notebook = null, panel = null;
 
 const say = (t) => { $('say').textContent = t; };
 
-/* What stands on the glass outside the day: the read-back, a ring of the check, or the greeting again. */
+/* What stands in the disc outside the day: the read-back, a ring of the check, or the greeting again. */
 function evening() {
   pod.setEnabled(state.phase === 'day');
   if (state.phase === 'day') return;
@@ -143,7 +147,7 @@ function redraw(freshKey) { notebook.render(freshKey); panel.render(); $('stage'
 
 function mount() {
   if (notebook) notebook.destroy();
-  const hooks = { sp, getState: () => state };
+  const hooks = { sp, script, getState: () => state };
   // the platform's lifecycle: a scene already on this canvas is destroyed first, and this one is paused
   // while the tab is hidden or the pod is off screen
   mountScene($('pod'), ({ reducedMotion }) => {
@@ -157,7 +161,7 @@ function mount() {
         if (!rec) return null;
         save(); bookmark(); redraw();
         track('heptapod.act', { kind, ring: state.acts.length });
-        say(`Ring ${state.acts.length} of ${DAY.ACTS} is on the glass.${dayOver(state) ? ' The lamp is out.' : ''}`);
+        say(`Ring ${state.acts.length} of ${DAY.ACTS} is in the disc.${dayOver(state) ? ' The lamp is out.' : ''}`);
         return rec;
       },
       crop(actIndex, rect, erode, kept) {
@@ -213,7 +217,7 @@ function mount() {
   redraw();
   $('pod').probe = () => pod.probe();      // for the drive tool: where things are on screen
   if (state.phase === 'day') pod.greet(); else evening();
-  $('pod').setAttribute('aria-label', 'The pod. A being behind glass, and a tray with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. While a ring is on the glass, W, D, S and A keep its top, right, bottom and left part in the notebook.');
+  $('pod').setAttribute('aria-label', 'The pod. Beyond the glass a being stands in the dark beside a disc of fog, where it writes; on this side, a tray with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. While a ring is in the disc, W, D, S and A keep its top, right, bottom and left part in the notebook.');
   $('preview').hidden = kept;
   $('preview-what').textContent = preview ? 'This is a recorded day, replayed from a seed.' : 'This day was opened from a link that picks the species.';
   $('unkept').hidden = !kept || !!(os && os.storage.persistent);
