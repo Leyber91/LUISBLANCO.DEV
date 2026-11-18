@@ -139,7 +139,12 @@ export function buildUI(app) {
     <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
     <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
   left.appendChild(recCard);
-  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: () => thumbnail(app), onDraw: () => drawing?.drawStrip() });
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: async (q) => {
+    // the kept frame's picture is the hole the press named, once the view has settled on it (review_s4 3: a picture of
+    // the view still easing was stored with the target's link); another choice since the press, no picture
+    for (let i = 0; i < 40 && store.anim; i++) await new Promise((r) => setTimeout(r, 50));
+    return !store.anim && store.toQuery() === q ? thumbnail(app) : null;
+  }, onDraw: () => drawing?.drawStrip() });
   app.keep = keep;     // for the console and the drive, as window.__bh is
   store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);
@@ -854,7 +859,8 @@ export function buildUI(app) {
   let lastFallDraw = 0, wasEasing = false;
   const tick = (now, dt) => {
     journey.tick(dt);
-    if (store.anim && drawing) drawing.draw();
+    // the drawing's hands move with the eased view (they draw only when a value moved)
+    if (drawing) drawing.drawHands();
     app.tour?.tick(now, dt);
     // a transition just ended: the image is the state's own view now, so trace its anchors
     // and redraw what is drawn from the eased values (critical curve, labels, tour focus)

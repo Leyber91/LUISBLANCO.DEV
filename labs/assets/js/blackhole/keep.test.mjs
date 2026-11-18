@@ -399,5 +399,19 @@ const other = (open) => { const s = new Store(); s.open(open); return s.toQuery(
   ok('a picture that fails leaves the hole kept without one', R.isKept(s, p.store.toQuery()) && !('img' in s.kept[0]), p.said());
 }
 
+/* review_s4 8: a kept hole's picture shows in the card's row, at every width */
+{
+  const JPEG = 'data:image/jpeg;base64,' + 'B'.repeat(300);
+  const p = await page({ thumb: async () => JPEG });
+  p.store.set({ a: 0.83 }, { instant: true }); p.api.refresh();
+  await p.press(); await sleep(10);
+  ok('the card\'s row of a kept hole shows its picture', p.els['#bh-reclist'].innerHTML.includes(`<img class="bh-th" alt="" src="${JPEG}">`), p.els['#bh-reclist'].innerHTML.slice(0, 200));
+  let asked = null;
+  const p2 = await page({ thumb: async (q) => { asked = q; return null; } });
+  p2.store.set({ a: 0.84 }, { instant: true }); p2.api.refresh();
+  await p2.press(); await sleep(10);
+  ok('the picture is asked for the link the press keeps', asked === p2.store.toQuery(), String(asked));
+}
+
 console.log(fails ? `\n${fails} of ${checks} keep check(s) failed` : `\nall ${checks} keep checks passed`);
 process.exit(fails ? 1 : 0);

@@ -60,7 +60,15 @@ guard('the kept frames carry a small picture, the 12 newest only (BAR_L1 C17; th
   ok('one door: a stored record keeps pictures on the 12 newest only, and a bad picture is dropped, its hole kept', stored.kept.filter((e) => 'img' in e).length === R.LIMITS.thumbs && stored.kept.some((e) => e.q === SGRA && !('img' in e)), JSON.stringify(stored.kept.map((e) => 'img' in e)));
   const first = R.normalise({ kept: [{ q: SGRA, t: 99, img: 'data:image/png;base64,AA' }, { q: M87, t: 98, img: '<svg onload=x>' }] });
   ok('a stored picture that is text and not a small JPEG is dropped where the bound would keep it (the newest)', first.kept.length === 2 && first.kept.every((e) => !('img' in e)), JSON.stringify(first.kept));
-  const worst = R.normalise({ kept: Array.from({ length: R.LIMITS.kept }, (_, i) => ({ q: ('ab=1' + '&a=1'.repeat(99)).slice(0, 396) + i.toString().padStart(4, '0').slice(-4), t: i + 1, img: jpg(R.LIMITS.thumb - 23) })), rays: Array.from({ length: R.LIMITS.rays }, (_, i) => ({ q: 'ab=1' + '&a=1'.repeat(99), t: i + 1, p: [0.5, 0.5], fate: 'sky', n: 0 })), falls: Array.from({ length: R.LIMITS.falls }, (_, i) => ({ q: 'ab=1' + '&a=1'.repeat(99), t: i + 1, tau: 1 })) });
+  // 50 different holes (each its own spin, so its own identity) at the longest link, 100 rays on the image plane and 50
+  // falls, all at the longest link: the record the rules allow at its fullest (review_s4 11: the links once collapsed
+  // to one hole and the rays were dropped, so the bound was measured on 1 kept and 0 rays)
+  // whole pairs only, the last value padded so the link is exactly the bound (a cut pair is not a link)
+  const longLink = (head) => { let q = head; while (q.length + 5 <= R.LIMITS.link) q += '&ab=1'; return q + '1'.repeat(R.LIMITS.link - q.length); };
+  const worst = R.normalise({ kept: Array.from({ length: R.LIMITS.kept }, (_, i) => ({ q: longLink(`a=0.${100 + i}`), t: i + 1, img: jpg(R.LIMITS.thumb - 23) })),
+    rays: Array.from({ length: R.LIMITS.rays }, (_, i) => ({ q: longLink(`a=0.${300 + i}`), t: i + 1, s: [-0.123456789, 0.123456789], fate: 'sky', n: 0 })),
+    falls: Array.from({ length: R.LIMITS.falls }, (_, i) => ({ q: longLink(`a=0.${500 + i}`), t: i + 1, tau: 123456.789 })) });
+  ok('the fullest record is full: 50 holes, 12 of them with a picture, 100 rays, 50 falls, every link 400 characters', worst.kept.length === R.LIMITS.kept && worst.kept.filter((e) => 'img' in e).length === R.LIMITS.thumbs && worst.rays.length === R.LIMITS.rays && worst.falls.length === R.LIMITS.falls && worst.kept.every((e) => e.q.length === R.LIMITS.link), JSON.stringify([worst.kept.length, worst.rays.length, worst.falls.length]));
   const bytes = new TextEncoder().encode(JSON.stringify(worst)).length;
   ok(`the fullest record the rules allow stays under Labs OS's cap of 256 KB (${bytes} bytes)`, bytes < 256 * 1024, String(bytes));
 });
