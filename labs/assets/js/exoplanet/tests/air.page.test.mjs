@@ -77,5 +77,14 @@ yes('world names are set upright, in Fraunces', /font-style: normal/.test(worldR
 yes('no label on the page is set in tracked capitals by its own stylesheet', !/text-transform:\s*uppercase/.test(css));
 yes('no emoji on the page (the Sun sign and the Earth sign are symbols, not emoji)', !/\p{Emoji_Presentation}/u.test(html) && !/\u{FE0F}/u.test(html));
 
+// reach 2.4 and interface 2.1 (the regrade of 2026-11-17; pull request 60): a skip link to the article, a target it can
+// focus with no ring around the whole article, and fonts that never block first paint, with a fallback without script
+yes('the first thing in the body is a skip link to the article', /<body>\s*<a class="skip" href="#air">Skip to the article<\/a>/.test(html));
+yes('and its target is the article, focusable by the link and not by Tab', /<main class="air" id="air" tabindex="-1">/.test(html));
+yes('and the target draws no ring around the whole article when the link lands', /#air:focus\s*\{\s*outline:\s*none;\s*\}/.test(css));
+const fontLinks = html.match(/<link [^>]*fonts\.googleapis\.com\/css2[^>]*>/g) || [];
+yes('the web fonts load as print and switch to all on load, never blocking first paint', fontLinks.length === 2 && /media="print" onload="this\.media='all'"/.test(fontLinks[0]), fontLinks.length);
+yes('and a visitor without script gets the same fonts from a noscript link', /<noscript><link href="https:\/\/fonts\.googleapis\.com\/css2[^"]+" rel="stylesheet" \/><\/noscript>/.test(html) && fontLinks[1] && fontLinks[1].split('href="')[1].split('"')[0] === fontLinks[0].split('href="')[1].split('"')[0]);
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

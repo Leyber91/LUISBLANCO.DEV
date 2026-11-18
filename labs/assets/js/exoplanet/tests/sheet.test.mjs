@@ -18,6 +18,7 @@
 
 import { sheetRows, createTarget, inferredHeading, ARCHIVE_HEADING } from '../views/target.js';
 import { semiMajor, starlight, starNum, teqOf, teqText } from '../starlight.js';
+import { chainHTML } from '../panels.js';
 
 let failed = 0, passed = 0;
 const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
@@ -40,6 +41,33 @@ block('the radius', () => {
   // (catalog.js provisionalMeasured, tests/counts.test.mjs)
   const open = where(mk({ measuredR: null }), 'R');
   yes('a radius not yet marked either way gives its error, is drawn measured, and is not noted as an estimate', open.row && open.row.pm === mea.row.pm && open.row.kind === 'm' && !/estimate/.test(open.row.note), JSON.stringify(open.row && { pm: open.row.pm, kind: open.row.kind, note: open.row.note }));
+});
+
+block('an open range', () => {
+  // a radius whose value minus its lower error is below zero (ticket 2.20): gravity, density and scale height print no 68%
+  // range and draw no tick (a bare tick reads as a value with no interval); the gravity's note says which value and why;
+  // a mass forecast from it has no range either; a bounded radius prints its ranges as before. The fixture has an orbit,
+  // so a scale height exists to be checked (the review of pull request 59: a check had passed on a row that never existed)
+  const orbit = { P: 10, a: 0.08 };
+  const open = sheetRows(mk({ ...orbit, R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3).inferred, shut = sheetRows(mk({ ...orbit }), 0.3).inferred;
+  const fcOpen = sheetRows(mk({ ...orbit, R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5, M: null, Merr1: null, Merr2: null, Mprov: null }), 0.3).inferred;
+  const at = (rows, k) => rows.find((r) => r.key === k);
+  yes('an open radius has gravity, density and scale height rows, each "no 68% range" with no tick drawn', ['g', 'rho', 'H'].every((k) => at(open, k) && at(open, k).pm === 'no 68% range' && at(open, k).iv === false), ['g', 'rho', 'H'].map((k) => at(open, k) && `${at(open, k).pm}/${JSON.stringify(at(open, k).iv)}`).join(' | '));
+  yes('and the gravity\'s note names the radius, its lower error, and what the values are', /^The radius minus its lower error \(2 − 2.5 R⊕\) is zero or less, so the gravity, density and scale height computed from it have no 68% range; each is shown at the radius and mass given\.$/.test(at(open, 'g').note || ''), at(open, 'g').note);
+  yes('and the heading does not count the open rows as point values', !['g', 'rho', 'H'].some((k) => at(open, k).iv), inferredHeading(open));
+  // a mass forecast from an open radius is the forecast every view prints (the chain, the bench, the CSV, the note), and
+  // the open gravity beside it is at that forecast's median (the verification of pull request 59: two masses had been printed)
+  const fcRow = at(fcOpen, 'Mf'), fcG = at(fcOpen, 'g');
+  yes('a mass forecast from an open radius is the forecast every view prints, with its range, and the gravity is at its median', fcRow && /\d to \d/.test(fcRow.pm) && fcG && fcG.pm === 'no 68% range' && Math.abs(parseFloat(fcG.v) - parseFloat(fcRow.v) / 4) < 0.02, fcRow && `${fcRow.v} ${fcRow.pm} | g ${fcG && fcG.v}`);
+  // the radius row's note and the chain's size class of an open radius
+  const openR = sheetRows(mk({ ...orbit, R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3).measured.find((r) => r.key === 'R');
+  yes('the radius row of an open radius says its draws give the size classes no shares, and names the class at the radius', /^The radius minus its lower error is zero or less, so its draws give the size classes no shares; the radius given makes it /.test(openR.note.split('The radius is')[0].trim() || openR.note), openR.note);
+  yes('a bounded radius prints its gravity and scale height ranges, with ticks, and no such note', /\d to \d/.test(at(shut, 'g').pm) && /\d to \d/.test(at(shut, 'H').pm) && at(shut, 'g').iv && !at(shut, 'g').note, `${at(shut, 'g').pm} | ${at(shut, 'H') && at(shut, 'H').pm}`);
+  // the chain: the radius with both sides of its interval, and the open gravity in the sheet's words
+  const chain = String(chainHTML(mk({ ...orbit, name: 'Sh chain', R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }), 0.3)).replace(/<[^>]+>/g, ' ');
+  yes('the chain gives the radius as +0.50 and −2.5, not their average', /2\.00 \+0\.50 −2\.5 R⊕/.test(chain), (chain.match(/Radius.{0,60}/) || [''])[0]);
+  yes('and its size class has no shares, named at the radius given', /Size class.{0,80}none: the radius minus its lower error is zero or less; [^ ]+ at the radius given/.test(chain), (chain.match(/Size class.{0,140}/) || [''])[0]);
+  yes('and its gravity says no 68% range, at the radius and mass given', /g at the radius and mass given \(no 68% range: the radius minus its lower error is zero or less\)/.test(chain), (chain.match(/Gravity.{0,160}/) || [''])[0]);
 });
 
 block('the orbit', () => {

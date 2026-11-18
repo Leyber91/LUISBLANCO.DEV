@@ -11,6 +11,7 @@ import { PHYS, CHEN_KIPPING, LIMB, CIE_FIT, XYZ_TO_SRGB, TEQ, VALLEY, SIZE_CLASS
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const isNum = (v) => typeof v === 'number' && isFinite(v);
+const int3 = (v) => (isNum(v) ? String(Number(v.toPrecision(3))) : '');   // three figures, for a note
 
 /* ---------- star, orbit, starlight, equilibrium temperature, habitable zone ---------- */
 /* One number each, in starlight.js (ticket 2.14): every view calls those, and this module passes them on. */
@@ -127,22 +128,57 @@ function rng(seedStr) {
   return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 const mcCache = new Map();
+/* A positive value with the archive's interval (+up, -down; one missing takes the other's size, lowerError), drawn
+   as a split log-normal: the median is the value, the 16th and 84th percentiles are value - down and value + up, so
+   both sides of the interval are kept and no draw is zero or negative. The archive does not state the interval's
+   level or whether the value is a median; reading it as the 16th to 84th percentiles about the median is this
+   page's choice, and so is the log-normal shape between them (the Method dialog says so). Ticket 2.20, 2026-11-17: the
+   draws were a normal on the two sides' average, clamped at 0.05 R_earth or 0.001 M_earth; where an error neared its
+   value the clamp piled draws at the floor and sheet B printed density ranges such as "17 to 328,558,509 g/cm3"
+   (KOI-2513.01; 69 printed density ranges past a factor of 100). open: the value minus its lower error is zero or
+   less, so it is not bounded away from zero at 68%; the gravity, density and scale height computed from it get no range (monteCarlo), and its
+   lower side is drawn as the mirror of the upper only so the draws exist. Null for a value with no error. */
+const errSize = (e) => (isNum(e) && e !== 0 ? Math.abs(e) : null);
+/* The size of a value's lower error: the archive's lower error, or its upper where the lower is missing or 0. The one
+   rule the draws and the notes read. */
+export const lowerError = (up, down) => errSize(down) ?? errSize(up);
+export function positiveSpread(v, up, down) {
+  const u = errSize(up) ?? errSize(down), d = lowerError(up, down);
+  if (!isNum(v) || v <= 0 || u === null) return null;
+  const sHi = Math.log((v + u) / v), open = v - d <= 0;
+  return { v, sLo: open ? sHi : Math.log(v / (v - d)), sHi, open };
+}
+/* What every view says of an open range (monteCarlo's open): which value's lower error reaches zero, and what the
+   value printed is. '' when the ranges are not open. */
+export const OPEN_RANGE = 'no 68% range';
+export function openRangeNote(p, mc) {
+  if (!mc || !mc.open) return '';
+  const [v, e, u, word] = mc.open === 'radius' ? [p.R, lowerError(p.Rerr1, p.Rerr2), 'R⊕', 'radius'] : [p.M, lowerError(p.Merr1, p.Merr2), 'M⊕', 'mass'];
+  return `The ${word} minus its lower error (${int3(v)} − ${int3(e)} ${u}) is zero or less, so the gravity, density and scale height computed from it have no 68% range; each is shown at the radius and mass given.${mc.massFrom === 'forecast' ? ' The mass is the forecast\'s median.' : ''}`;
+}
+/* One draw from a positiveSpread, given a standard normal deviate z. */
+export const drawPositive = (sp, z) => sp.v * Math.exp(z * (z < 0 ? sp.sLo : sp.sHi));
+
 export function monteCarlo(p, albedo = TEQ.albedo) {
   const key = p.name + '|' + albedo;
   if (mcCache.has(key)) return mcCache.get(key);
   const rand = rng(p.name);
   const gauss = () => { const u = Math.max(1e-12, rand()), v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
-  const draw = (v, e) => (isNum(v) ? (isNum(e) && e > 0 ? v + e * gauss() : v) : null);
   // A mass enters only as a measurement or as the forecast posterior, which a mass limit
   // censors. A limit alone is never drawn as a value. With no radius there is no forecast,
   // so no mass draw, and nothing that needs a radius: gravity, density, scale height, class.
   const trueM = hasTrueMass(p), hasR = hasRadius(p);
+  // the radius and a measured mass, each with both sides of its interval (positiveSpread); a forecast mass is drawn
+  // from its own posterior below
+  const spR = hasR ? positiveSpread(p.R, p.Rerr1, p.Rerr2) : null, spM = trueM ? positiveSpread(p.M, p.Merr1, p.Merr2) : null;
+  // a range of gravity, density or scale height divides by the radius and the mass: it is open when either is
+  const open = spR && spR.open ? 'radius' : spM && spM.open ? 'mass' : null;
   const fc = trueM ? null : forecastFor(p);
   // inverse-CDF sampler on the forecast posterior grid
   let cdf = null;
   if (fc) { cdf = new Float64Array(fc.pdf.length); let acc = 0; for (let i = 0; i < fc.pdf.length; i++) { acc += fc.pdf[i] / fc.tot; cdf[i] = acc; } }
   const sampleM = () => {
-    if (trueM) { const e = isNum(p.Merr1) && isNum(p.Merr2) ? (Math.abs(p.Merr1) + Math.abs(p.Merr2)) / 2 : null; return Math.max(1e-3, draw(p.M, e)); }
+    if (trueM) return spM ? drawPositive(spM, gauss()) : p.M;
     if (!fc) return null;
     const u = rand(); let i = 0; while (i < cdf.length - 1 && cdf[i] < u) i++;
     return Math.pow(10, fc.range[0] + (fc.range[1] - fc.range[0]) * (i + rand()) / cdf.length);
@@ -151,8 +187,9 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
   // the luminosity and their errors are the page's one each, and the Teq printed is teqOf's
   const sDraws = starlightDraws(p), S0 = insolation(p).S, kT = T_ZERO * Math.pow(1 - albedo, 0.25);
   const N = MC.draws, g = [], rho = [], H = [], cls = new Map();
+  const mu = p.R > 1.8 ? MC.muEnvelope : MC.muSecondary;   // the radius given's, as the scale height's note says, for every draw
   for (let k = 0; k < N; k++) {
-    const R = hasR ? Math.max(0.05, draw(p.R, p.Rerr)) : null;
+    const R = hasR ? (spR ? drawPositive(spR, gauss()) : p.R) : null;
     const M = hasR ? sampleM() : null;
     const gg = isNum(R) && isNum(M) ? M / (R * R) : null;
     if (isNum(gg)) { g.push(gg); rho.push(5.514 * M / (R * R * R)); }
@@ -161,14 +198,21 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
     const T = isNum(Sk) ? kT * Math.pow(Sk, 0.25) : null;   // the starlight and its draws are positive (starlight.js keeps no other)
     if (T) {
       if (isNum(gg)) {
-        const mu = R > 1.8 ? MC.muEnvelope : MC.muSecondary;
         H.push(1.380649e-23 * T / (mu * 1.6726e-27 * 9.80665 * gg) / 1000);   // km
       }
     }
   }
   const stat = (arr) => { if (!arr.length) return null; const s = arr.slice().sort((x, y) => x - y); const q = (f) => s[Math.min(s.length - 1, Math.floor(f * s.length))]; return { med: q(0.5), lo: q(0.16), hi: q(0.84) }; };
-  const probs = SIZE_CLASSES.map((c) => ({ key: c.key, label: c.label, p: (cls.get(c.key) || 0) / N })).filter((c) => c.p > 0);
-  const out = { n: N, g: stat(g), teq: teqOf(p, albedo), rho: stat(rho), H: stat(H), probs, hasR,
+  // a range that divides by a value not bounded away from zero has no ends; its value is the one at the radius and mass
+  // given (a forecast mass: the forecast's median, as every view prints it; that median carries the radius's averaged
+  // error, ticket 2.20b), not the median of draws whose lower side is an assumption
+  const M0 = trueM ? p.M : hasR && fc ? fc.median : null, R0 = p.R;   // the forecast's median: the mass every view prints
+  const g0 = isNum(M0) && isNum(R0) ? M0 / (R0 * R0) : null, T0 = isNum(S0) ? kT * Math.pow(S0, 0.25) : null;
+  const point = { g: g0, rho: isNum(g0) ? 5.514 * M0 / (R0 * R0 * R0) : null, H: isNum(g0) && T0 ? 1.380649e-23 * T0 / (mu * 1.6726e-27 * 9.80665 * g0) / 1000 : null };
+  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: point[k], lo: null, hi: null, open } : st; };
+  // the size classes' shares come from the radius draws; an open radius has no lower side to draw, so it has none
+  const probs = open === 'radius' ? [] : SIZE_CLASSES.map((c) => ({ key: c.key, label: c.label, p: (cls.get(c.key) || 0) / N })).filter((c) => c.p > 0);
+  const out = { n: N, g: derived(g, 'g'), teq: teqOf(p, albedo), rho: derived(rho, 'rho'), H: derived(H, 'H'), probs, hasR, open,
     massFrom: !hasR ? 'none' : trueM ? 'measured' : fc ? 'forecast' : 'none', bounded: fc ? fc.bounded : null };
   mcCache.set(key, out);
   return out;
