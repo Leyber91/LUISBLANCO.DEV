@@ -462,6 +462,60 @@ export async function FALL_STEP(p, { base, width, ready }) {
   await sheet(false);
 }
 
+// The render's resolution (adapt.js, renderer.js _previewBuffers; 2026-11-18). While the view moved, the preview was
+// shaded at the canvas's size, each ray copied to every pixel it covered: hard squares 2.8 to 5 px wide. And the tier
+// was judged in the first two seconds only. The frame read in the middle of a drag must be smooth (few neighbouring
+// lit pixels equal, where copies made runs of equal pixels), and a full picture's time must reach the tier rule.
+const DRAG_FRAME = `(async () => {
+  const a = window.__bh, s = a.store, r = a.renderer, gl = r.gl;
+  // one preview scale for the measure, 0.4, where copied rays make long runs of equal pixels (at 1 both enlargements
+  // give the same picture; review_res 9); main has no setter and keeps its own scale
+  if (r.setPreviewScale) r.setPreviewScale(0.4);
+  const refines0 = a.perf.refines || 0;
+  a.interacting = true;
+  let i = 0;
+  const id = setInterval(() => s.set({ incl: 80 + 8 * Math.sin(i++ / 8) }, { instant: true }), 16);
+  await new Promise((res) => setTimeout(res, 1200));
+  // the scale back to 0.4 just before the read: the preview's own rule may have moved it during the drag
+  if (r.setPreviewScale) r.setPreviewScale(0.4);
+  await new Promise((res) => setTimeout(res, 300));
+  const w = r.canvas.width, h = r.canvas.height, px = new Uint8Array(w * h * 4);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  // the scale of the preview on screen, as the renderer drew it (the rule may change the buffer's after the draw)
+  const ps = r.shownScale ?? (r.preview ? r.preview.scale : null), preview = !r.mainDone && ps != null;
+  clearInterval(id); a.interacting = false;
+  // neighbours within one level in every channel (the final pass dithers by one level), among lit pixels where the
+  // picture is not flat over three pixels (a flat or saturated stretch is equal under either enlargement)
+  const near = (k, j) => Math.abs(px[k] - px[j]) <= 1 && Math.abs(px[k + 1] - px[j + 1]) <= 1 && Math.abs(px[k + 2] - px[j + 2]) <= 1;
+  let lit = 0, same = 0;
+  for (let y = 0; y < h; y++) for (let x = 1; x + 2 < w; x++) {
+    const k = (y * w + x) * 4;
+    if (px[k] + px[k + 1] + px[k + 2] < 120) continue;
+    if (near(k - 4, k + 8)) continue;
+    lit++;
+    if (near(k, k + 4)) same++;
+  }
+  return { preview, ps, w, h, lit, share: lit ? +(same / lit).toFixed(3) : null, refines0 };
+})()`;
+export async function RES_STEP(p, { base, ready }) {
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+  await p.until(ready, READY_MS);
+  await p.sleep(1500);
+  const d = await p.ev(DRAG_FRAME);
+  console.log('RES drag ' + JSON.stringify(d));
+  // copying each ray to the pixels it covers makes about 1 - ps of neighbouring pairs equal: the frame must have under
+  // half that (review_res 9: a fixed bound read smooth gradients at a small scale as copies)
+  const bound = 0.5 * (1 - d.ps);
+  p.check(`the frame in the middle of a drag is a preview, enlarged smoothly: under half the equal neighbours copied rays would make (${bound.toFixed(3)} at scale ${d.ps})`,
+    d.preview && d.lit > 2000 && d.share != null && d.ps <= 0.75 && d.share < bound, JSON.stringify({ ...d, bound: +bound.toFixed(3) }));
+  await p.until(ready, READY_MS);
+  // a new full picture after the drag reaches the rule: the count of pictures rises past the one read before it
+  const t = await p.until(`(window.__bh.perf.refines || 0) > ${d.refines0}`, 30000);
+  const perf = await p.ev(`(() => { const q = window.__bh.perf; return { tier: q.tier, refines: q.refines, refineMs: q.refineMs, previewScale: q.previewScale }; })()`);
+  p.check('the full picture after the drag reaches the tier rule with its time', !!t && perf.refines > d.refines0 && perf.refineMs > 0 && ['min', 'low', 'mid', 'high'].includes(perf.tier), JSON.stringify({ ...perf, before: d.refines0 }));
+}
+
 // The shadow's rim (probe.js outline, ui.js drawOverlay; 2026-11-18). The shader drew a per-texel shadow edge and ISCO
 // line on the black's rim in every view, in nearly the same blue: at the low tiers a staircase of dashes. The frame is
 // now the same with the notes on and off (the overlay's labels are not in it), and the telescope view draws the
@@ -1132,6 +1186,7 @@ export default async function blackhole(p, { base, width }) {
 
   /* ---- 3. the measurement and the telescope view, opened by link (ledger row 2; P2-1, P4-3) ---- */
   await SPIN_STEP(p, { base, ready: READY });
+  await RES_STEP(p, { base, ready: READY });
   await EDGE_STEP(p, { base, ready: READY });
   const CARD = `(async () => {
     const P = await import('/labs/assets/js/blackhole/physics.js');

@@ -307,5 +307,147 @@
   ],
   "history": [
     { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" }
+  ],
+  "atlas_grades": [
+    {
+      "date": "2026-11-18",
+      "by": "single rater, two skeptic passes",
+      "commit": "a905796",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "None on the atlas. The ladder's own G0 grade (2026-11-11, at cd1e9f7, on the older scale) is of the first version of the page, kept since pull request 48 at bh_animation_page_v1.html; no axis of it carries over.",
+      "basis": "origin/main at a905796 (pull request 65), served on 2026-11-18 from the clean worktree _labs_wt/_grade_bh. The lab on that tree is the rebuild of pull request 48, the record of 56 and the drawing of 62; pull requests 67 and 68 are not on main and do not count. Read: labs/bh_animation_page.html, labs/assets/js/blackhole/ (main.js, ui.js, config.js, record.js, keep.js, ask.js, drawing.js, verify.mjs, measurements.json, and the parts of shaders.js, physics.js and probe.js cited below), black_hole.css, tokens.css and labs-src/tsconfig.labs.json. Run: node tools/lab_tests.mjs blackhole (22 files, 0 failed; verify.mjs: all checks passed). In headless Chrome with software GL (Microsoft Basic Render Driver, tier min), every cross-origin request refused and no model called: the rater's scenario at 1440 x 900 (19 of 19) and at 390 x 844 (20 of 20): the first screen with an empty record, the tour after idle, a wrong pick in the five-minute check, a press on the render and a reload, three links (malformed, empty, out of range), the telescope view, a question to the guide, the tab order, the phone sheet, and emulated reduced motion; a second rater scenario at 390 x 844 (8 of 8): a press on the render, a fall run to its stop, both recorded and both after a reload; and the lab's own drive, tools/drives/blackhole.mjs, at 1440 x 900: 104 checks passed before its 380 s limit ended Chrome (the 7 lines that failed each say \"Chrome is gone\"). Every page loaded with a clean console.",
+      "bindings": {
+        "declared_in": "The ladder declares none. Every binding below is declared in the lab's private plan, dated 2026-11-13, written for the thesis this ladder states; the road keeps its 12 units \"until the eye adds its own\" and names a new concept, Earth-Sized Eye, pending its kill test, which declares no binding yet. The lab's public files declare none. The grade reads the plan's bindings, as Exomania's grades read its plan's.",
+        "canon": "Declared in the plan: the published physics of the Schwarzschild, Kerr and Kerr-Newman spacetimes and the published measurements of real black holes (Schwarzschild 1916, Kerr 1963, Newman et al. 1965, Bardeen, Press and Teukolsky 1972, Bardeen 1973, Synge 1966 and the papers it lists). Ladder: missing. Public files: missing (config.js CITE lists citations, no canon).",
+        "units": "Declared in the plan: 12 units, bh-u1 to bh-u12, in two tracks (light and the image; matter, motion and the fall) and five weighted modules. Ladder: missing. Public files: missing.",
+        "challenge_blueprint": "Declared in the plan: weights over the 12 units summing to 100, predict-then-reveal formats on the live image, 40 items, 60 minutes. Ladder: missing. Public files: missing.",
+        "central_scene": "Declared in the plan: the descent (pick a hole, set the traced shadow beside the EHT ring at 1,000 M, then fall in with two clocks and the tide to the end), sourced to this ladder's thesis and Exploring Black Holes, chapter 12. Ladder: missing. Public files: missing.",
+        "fiction_inventory": "Declared in the plan: 22 entries, bh-f1 to bh-f22. Ladder: missing. Public files: missing.",
+        "known_setup_failures": "Declared in the plan: 10 entries, bh-k1 to bh-k10, each with its diagnosis. Ladder: missing. Public files: missing (the page shows one notice, \"This instrument traces light rays on the GPU and needs WebGL2.\", with the renderer's error)."
+      },
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 1,
+        "scope": 1,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 2,
+          "evidence": "1.1 holds: labs/bh_animation_page.html opens the instrument on its main view (site.config.js, black-hole). 1.2 holds: the title block reads \"Measure the shadow of a spinning black hole.\" and the caption \"Click any pixel to trace its ray; drag to orbit.\" at both widths. 2.1 holds: the render draws and turns at rest, and the tour starts by itself after 3.2 s idle (ui.js start; \"TOUR 1 / 8\" in the rater's scenario at both widths). 2.2 holds by the title block's one action. 2.3 holds: with an empty record the entry view names its first actions beside the controls that start them (the caption with \"Take the tour\", the strip's \"Keep this frame\", the record card's \"Nothing yet. Keep a hole, press a pixel to trace its ray, or fall in.\"). 3.1 fails: the entry view offers no continue, due review or drill on a weakest unit; a kept hole reopens only from the record's list (keep.js draw) and the labs hub's way back. 3.2 fails: ?o= opens the default view with no message. 3.3 holds: ?a=abc&i=xyz&o=nosuch&v=bogus opened M87* at its preset with each malformed value dropped. 3.4 fails: no launcher to any practice."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "1.1 fails: no page of text is rendered from a source. The lab's words are the intro paragraph, the eight tour captions (config.js TOUR), the probe's causes and equations (ui.js probeAt) and the guide's answers (ask.js answerOffline), all typed in code, none a lesson of a declared unit. Rung 2: no units, modules, track page or pager."
+        },
+        "tutoring": {
+          "level": 1,
+          "evidence": "1.1 holds: the five-minute check marks a pick \"right\" or \"not quite\" at once (ui.js drawQuiz). 1.2 holds by its three items keyed by the engine on the live state: the shadow against the horizon (physics.js measurement), the ISCO at the state's spin, and whether the tide passes 10 g before the horizon at the state's mass (derive, tide10g); the other two items have fixed keys and count for nothing. 2.1 fails: after a wrong pick the scenario read only \"not quite\" on the chosen button at both widths; the right answer is not named, no option is explained (2.2) and nothing links to a lesson (2.3)."
+        },
+        "practice": {
+          "level": 1,
+          "evidence": "1.1 and 1.2 hold by the same three engine-keyed items of the five-minute check. 2.1 fails: the five questions stand on one card at once, with no session and no check, feedback and next; no readout of position and accuracy (2.2), no progress strip (2.3), no end (2.4), no star (2.5), and the score is recorded nowhere (2.6: \"0 / 5\" again after a reload in the scenario at both widths)."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "1.1 fails: no task states a goal and its material. \"Measure the shadow of a spinning black hole.\" is the page's title, with no task, steps or check behind it."
+        },
+        "evidence": {
+          "level": 0,
+          "evidence": "1.1 fails. The record keeps a kept hole, a pressed ray and a fall run to its stop, each with its time (record.js keep, ray, fall; both widths) and none with the mode it came from; the five-minute check's answers, the answers the cosmos line names as the lab's, are stored nowhere (ui.js quizState lives in memory and a reload clears it). 2.1 fails: no state per unit."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "1.1 holds: the record card's line counts what the visitor did, \"0 kept · 1 ray · 1 fall\" after a press and a fall at 390 (record.js lineWords), and the check shows its score. 2.1 to 2.4 fail: no session is listed, and there is no streak, no activity calendar and no recent sessions on the entry view."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "1.1 holds: the objects with their sources, the citations, the views and the tour (config.js), and measurements.json. 2.1 fails: config.js is a module of constants, and the check's items (ui.js drawQuiz), the guide's answers (ask.js answerOffline) and the probe's causes (ui.js probeAt) are written inside functions; no material is a data file loaded into indexes. 2.3 holds: the Sources panel reads \"Objects (data version 2026-11-17)\" (config.js VERSION). 2.4 fails: no material file is loaded, so none is checked when it loads."
+        },
+        "records": {
+          "level": 1,
+          "evidence": "1.1 holds: kept holes, rays and falls survive a reload, in Labs OS under lab black-hole (rater's scenarios at 1440 and 390; the lab's drive: \"the hole is still kept after a reload\", and the privacy export carries the record). 2.1 fails twice: record.js declares no types (no // @ts-check, and labs-src/tsconfig.labs.json includes only exoplanet/record.js), and its three lists cover the cosmos line's configurations (kept holes) and observations (rays, falls) with no prediction or note kind. 2.3 holds: keep, ray and fall refuse a bad link, time, place, fate or order with the reason. 2.4 fails: no health check on the page reports the record's version or sync state; keep.js says only where the record is kept."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "1.1 holds: tokens.css is applied, and the lab's drive found IBM Plex Mono and Fraunces loaded. 2.1 fails: the Google Fonts stylesheet is a plain render-blocking link (bh_animation_page.html line 11, read in the scenario with no media and no onload), where Exomania's rooms load theirs without blocking first paint."
+        },
+        "reach": {
+          "level": 1,
+          "evidence": "1.1 holds. 2.1 holds: at 390 the controls and readouts restack into one bottom sheet over the render, and the page does not scroll sideways (scrollWidth 390 with the sheet open). 2.3 holds: tokens.css draws a focus ring on every focusable element. 2.2 fails: there is no global rule; black_hole.css collapses transitions for five selectors under reduced motion (lines 253 to 256 and 305), and with reduced motion emulated the back link still ran a 0.18 s transition (the page stops the disk and the tour in script). 2.4 fails: no skip link; the tab order starts at the canvas, Back and the object options at both widths."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "1.1 holds: the page runs from its URL, and node tools/lab_tests.mjs blackhole passes 22 files with 0 failed. 2.1 fails: main.js holds domain logic, the hot spot's orbital rate Omega = 1/(r^1.5 + a) in frameUniforms, the exposure law in g_max^4 in autoExposure, and the tier choice. 2.2 fails as material 2.1 does. 2.3 fails: no module is typed at its boundary. 2.5 fails: no derived digest."
+        },
+        "fiction": {
+          "level": 3,
+          "evidence": "Counted against the plan's 22 entries by one rule: an entry counts when its capability runs end to end from the visitor's own input on the page, at any detail. 13 count without doubt: f1 (objects, sliders and the drawing's scales; a press on the spin scale at 390 made a hole of one's own at a = 0.505), f2 (a Kerr-Schild ray per pixel; verify.mjs finds the outline within 0.042% of Bardeen's curve), f4, f5 (Sgr A* at +0.553 sigma against the EHT shadow 48.7 ± 7.0 uas, M87* beside its ring with no sigma; the lab's drive), f6 and f7 (Fall in runs from 40 M to its stop at 3 M with both clocks, 43.2 d of proper time for M87*, at 1440 and at 390), f8, f10 (hover, fall and orbit observers), f12 (a press traces a ray: its fate, L/E, steps and drift), f14 (the guide answered from the live state with every route refused), f15 (link, plates at 1920 and 3840, state JSON), f17 (drag, wheel and pinch fly the camera; the scales set spin, inclination and mass) and f20 (the Hawking temperature for spin and charge; verify.mjs). Four run in part: f3 (sub-ring widths by a press, no zoom view), f11 (one hot spot on a circular orbit), f16 (the spectrum, no line and no fit), f18 (the sky brightens by g^4 with no change of hue). Five do not run: f9 (the fall stops at 3 M), f13 (the stars are hashed), f19 (no frame-dragging rate, no static observer), f21 (no particle leaves the circular orbit), f22 (the e-fold time is a number; no probe is seen falling). 3.1 holds at 13 to 17 of 22, 59 to 77%. 4.1 fails: 80% is 18 entries."
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "2.1 and 2.2 hold: kerr.js integrates null geodesics of the Kerr-Newman metric in Kerr-Schild form by RK4 with its formulas in the source, and physics.js derives every readout. 3.1 fails by the letter of the cosmos world line that replaces it: \"the models include Schwarzschild and Kerr geodesics and a published transit model (for example Mandel and Agol 2002)\". The lab's models are published and named (Kerr 1963, Bardeen 1973, Bardeen, Press and Teukolsky 1972, Page and Thorne 1974; config.js CITE and the Sources panel) and it has no transit model. Read as Exomania's line alone, rung 3 holds (every input the store accepts runs, a² + Q² is held below 1, values carry their units) and rung 4 fails at 4.3: the thresholds the page applies sit where they are used, with no direction or source declared (the Measure card's 2 sigma in ui.js drawMeasure, the ray fates' 1.08 in ui.js fateOf, the capture at 0.98 r+ in the tracer). 4.1 would hold: verify.mjs checks the Synge angles 45.00 and 66.72 deg, the ISCO at 6 M and 1.237 M, the efficiency 5.72% and 32.1%, theta_g 3.8 uas for M87* and the Hawking temperature 6.17e-8 K of one solar mass."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "2.1 holds: the render draws every frame from traced geodesics, and the diagrams draw from the engine. 3.4 fails: on a load that carries no state the disk ignites from the ISCO outward over 2.6 s (main.js app.ignite, shaders.js uIgnite) and the title card's bar scans every 1.4 s (black_hole.css bh-scan), motion that marks no state. With the labels on (the default), the shader also dashes the shadow edge's hairline by angle around the screen centre (shaders.js annotation layer), a mark whose dashes encode nothing."
+        },
+        "interaction": {
+          "level": 2,
+          "evidence": "2.1 holds: drag, wheel, pinch, the sliders and the drawing's scales re-trace live with no submit. 3.1 holds: a press on any pixel pins the probe, a dialog drawn at page level with the ray's fate, L/E, g and drift (ui.js probeAt). 3.4 holds: the cards' sliders and the drawing's scales write one store. 3.2 fails: the probe is clamped inside the window (ui.js probeAt, lines 770 to 772), so at the right edge it covers the pixel instead of flipping. 3.3 fails: it opens on a press only; by keyboard, Enter on the canvas probes the centre pixel and no other (ui.js, the canvas keydown)."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "1.1 holds: the tracer and physics.js make every image and number with no model, and ask.js answerOffline answers 20 topics from the live state. 2.1 to 2.4 hold by the code: one LLM.complete call per question (ask.js ask), the route panel mounted (ui.js mountRoutePanel), the instrument's answer shown first and kept when no route answers (both widths, every route refused: \"instrument answer: no model route answered\"), the model called only on Ask. 2.5 fails: the Ask button reads the same in every state (bh-btn go, ink on no ground), and nothing tells the visitor when the guide has something to say."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "1.1 holds. 2.1 holds: the intro paragraph (\"Light rays traced through the exact Kerr spacetime ...\") in the settings sheet at 1440 and the sheet at 390, and the tour's first stops. 2.2 fails: only the readouts and the spectrum note tag their claims; the footer names kinds of claim as [REAL] and [ILLUSTRATIVE], and the tour captions, the probe's causes and the cards' notes carry no tag, among them the first stop's \"Every pixel is a light ray followed backward through the exact Kerr spacetime ... Nothing here is painted.\", said over a sky of hashed stars the footer calls illustrative, a bloom pass (shaders.js FINAL) and the labels' dashed hairlines."
+        }
+      },
+      "scope": {
+        "level": 1,
+        "organs": [
+          "the instrument (the Kerr tracer on the visitor's hole: the render, the drawing's scales and title block, the probe of a ray, the overlay, the Instrument and Measure cards with the GPU strip and the sub-rings, the cross-section, disk profile, potential and spectrum; the tour and the guide that narrate it; the plates, link and files that export it; the kept holes and rays that are its states)",
+          "the fall (the Fall card: a free fall from 40 M on the rain geodesic to its stop at 3 M, with its two clocks and the tide, scrubbed on its chart; keeps its place, and the falls run to their stop)",
+          "the five-minute check (five questions on the state shown, three keyed by the engine; keeps the picks and the score until the page closes)"
+        ],
+        "instrument": "the instrument",
+        "links": [],
+        "reach": "Every one of the 12 units is worked on by at least one organ: u1 to u9, u11 and u12 by the instrument (mass sets km, s and K; the horizon and ergosurface; the probe's L/E; the shadow; the sub-rings; the ISCO and the potential; the disk's flux, temperature and spectrum; the g map; the three observers; the objects and the EHT comparison; the lensed sky), u10 by the fall: reach 1.0 at one organ per unit.",
+        "evidence": "Level 1 holds: 3 organs, reach 1.0. Level 2 fails: it needs one link and the graph has none. The fall and the check read the hole and the camera from the store every part shares, which the atlas counts as a shared selection and no link; nothing reads the check's score or the falls; the kept holes, rays and falls are lists of the organs that made them, and the record card computes only their counts, so it is no record view. The guide and the tour narrate or set the instrument and are its own. Before the scope cap, product computes to 1 (lower median of 0,0,0,1,1,1,1,1,1,1,1,2) and subject to 2 (lower median of 1,1,2,2,2,3, weakest 1 + 2 = 3); the cap holds subject at 1."
+      },
+      "skeptic": [
+        {
+          "axis": "fidelity",
+          "from": 3,
+          "to": 2,
+          "pass": "the letter of the clause",
+          "why": "fidelity.3.1 is replaced in the cosmos world by a line that asks for Schwarzschild and Kerr geodesics and a published transit model. Read literally it asks this lab for a transit model it has no use for; read as written for Exomania, rung 3 holds. Uncertain, so the lower. No level moves: subject stays 2 before the cap with fidelity at 2 or 3. The atlas line should name which lab each model is for."
+        },
+        {
+          "axis": "tutoring, practice",
+          "pass": "the letter of the clause, held",
+          "why": "tutoring.1.2 and practice.1.2 refuse a quiz set beside the instrument and accept an answer the lab's engine computes. Three of the check's five keys are the engine's on the live state (the tide answer flips at the mass where tide10g crosses r+); rung 1 holds on those three. Were the check read as a quiz beside the instrument, both axes fall to 0 and product stays 1."
+        },
+        {
+          "axis": "orientation",
+          "pass": "the letter of the clause, held",
+          "why": "orientation.2.2 asks that the entry view name one next action, and the title block names one. 2.3 asks that an empty entry view name the first action and link to where it starts; with an empty record the view names its actions beside the controls that start them on the same screen."
+        },
+        {
+          "axis": "scope",
+          "pass": "the letter of the clause, held",
+          "why": "The fall is counted as an organ because it computes a timelike path, its clocks and its tide, which no other part holds; counted as the instrument's mode, the graph has 2 organs and level 2 fails on organs as well as on links. The check reads the state the visitor set on the instrument; were that read as a link, scope would be 2 and the lab level would stay 1 on the product half."
+        },
+        {
+          "pass": "does it run",
+          "why": "No axis lowered. Every page loaded with a clean console at 1440 and 390, and the first full trace took 2.2 to 4.6 s under software GL at tier min. The lab's own drive passed 104 checks at 1440 before its 380 s limit; its 390 pair was not run, and the rater's phone scenario covered the probe, the record and the fall there. A press at 390 meant for the render landed on the spin scale, which is drawn over the render as a control, and set a = 0.505."
+        }
+      ],
+      "not_checked": "No model route was called, so intelligence 2.1 to 2.4 are read from the code. The lab's drive ran at 1440 only and stopped at its 380 s limit after 104 passing checks; at 390 the rater's two scenarios stood in for it. The rater opened no plate and imported no state file (the lab's drive checked the plate's lines and the privacy export). None of the bindings' ten known setup failures was triggered. Only headless Chrome with software GL was used: no GPU, no real phone. No citation was checked at its source. The style gates and the platform block were not counted; the style gates cap only rungs above 4."
+    }
   ]
 }

@@ -125,6 +125,11 @@ const mk = (o = {}) => {
   yes('the page\'s own temperature is printed as its sheets print it and a published one is named as the archive\'s', /, 255 K$/.test(hitFact(mk({ Teq: null }), 'T')) && /, 321 K published$/.test(hitFact(mk({ Teq: 321 }), 'T')), `${hitFact(mk({ Teq: null }), 'T')} | ${hitFact(mk({ Teq: 321 }), 'T')}`);
   yes('an unknown distance is said, not left blank', /, distance unknown$/.test(hitFact(mk({ dist: null }), 'dist')));
   yes('a world with no temperature to be found by says so', /, no equilibrium temperature$/.test(hitFact(mk({ Teq: null, Teff: null }), 'T')));
+  {
+    const imaged = hitFact(mk({ R: 12, M: 300, a: 100, P: 365.25 * 1000, Teq: 1500, method: 'Imaging' }), 'T');
+    yes('a gas giant seen by its own heat says so once in the line of results, by its name', imaged === 'gas giant seen by its own heat', imaged);
+    yes('a world with no temperature at all is said to have none, not to be seen by its own heat', /, no equilibrium temperature$/.test(hitFact(mk({ Teq: null, Teff: null, method: 'Radial Velocity' }), 'T')), hitFact(mk({ Teq: null, Teff: null, method: 'Radial Velocity' }), 'T'));
+  }
   yes('a world passed over for its own heat says so, and not that it has no temperature: found by imaging, or published at more than twice the starlight\'s', /, seen by its own heat$/.test(hitFact(mk({ Teq: 900, method: 'Imaging' }), 'T')) && /, seen by its own heat$/.test(hitFact(mk({ Teq: null, method: 'Imaging' }), 'T')) && /, seen by its own heat$/.test(hitFact(mk({ Teq: 1250 }), 'T')) && /, no equilibrium temperature$/.test(hitFact(mk({ Teq: null, Teff: null, method: 'Transit' }), 'T')),
     [hitFact(mk({ Teq: 900, method: 'Imaging' }), 'T'), hitFact(mk({ Teq: 1250 }), 'T')].join(' | '));
   yes('a radius is printed to three figures below 100 and whole above', /, 0\.532 R⊕$/.test(hitFact(mk({ R: 0.5321 }), 'R')) && /, 1\.00 R⊕$/.test(hitFact(mk({ R: 1 }), 'R')) && /, 12\.3 R⊕$/.test(hitFact(mk({ R: 12.34, M: 300 }), 'R')) && /, 123 R⊕$/.test(hitFact(mk({ R: 123.4, M: 300 }), 'R')),

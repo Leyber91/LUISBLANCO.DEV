@@ -357,12 +357,36 @@ export function errorWords(s) {
 export function teqOf(p, albedo = TEQ.albedo) {
   const s = starlight(p);
   if (!pos(s.S)) return null;
-  const k = T_ZERO * Math.pow(1 - albedo, 0.25);
-  const t = (x) => (isNum(x) ? k * Math.pow(x, 0.25) : null);
+  const t = (x) => (isNum(x) ? teqFromS(x, albedo) : null);
   return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };
 }
+/* The formula teqOf and ownHeat share: the equilibrium temperature of a starlight S (Earth = 1) at Bond albedo A, in
+   kelvin. science.js keeps its own copy for the sheet's step of draws (to be made one call). */
+export const teqFromS = (S, albedo = TEQ.albedo) => T_ZERO * Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25);
 /* Its median, for the callers that need one number. */
 export const equilibriumTemp = (p, albedo = TEQ.albedo) => { const t = teqOf(p, albedo); return t ? t.med : null; };
+
+/* A published temperature more than this many times what the starlight gives is the planet's own heat. */
+export const OWN_HEAT = 2;
+/* Whether a planet is seen by its own heat, so that the temperature the archive lists for it is no equilibrium with
+   its starlight to be found or named by. Most are young giants found by direct imaging far from their stars, which
+   still glow from their formation: 1RXS J160929.1-210524 b, imaged at 330 AU, is listed at 1,700 K where the
+   starlight gives 11 K. Two tests: the method is imaging (most imaged planets are seen in their own infrared light,
+   though for some the archive lists a temperature near the starlight's), or the listed value is more than OWN_HEAT
+   times what the starlight gives at Bond albedo 0.3, by this page's starlight and, where the archive lists an
+   insolation, by that too (bet Pic c, found by radial velocity, is listed at 1,250 K where the starlight gives 269 K).
+   The archive's insolation keeps out a planet listed at the equilibrium of that insolation, where only this page's
+   starlight differs: ZTF J1230-2655 b, listed at 2,950 K, is at 2,944 K by the archive's insolation at albedo 0.3. The
+   search (find.js tempOf) gives such a planet no temperature to be found by, and a gas giant's name (data.js classify)
+   does not use one. */
+export function ownHeat(p) {
+  if (p.method === 'Imaging') return true;
+  if (!isNum(p.Teq)) return false;
+  const t = equilibriumTemp(p, 0.3);
+  if (!isNum(t) || !(p.Teq > OWN_HEAT * t)) return false;
+  const byArchive = pos(p.S) ? teqFromS(p.S, 0.3) : null;
+  return byArchive === null || p.Teq > OWN_HEAT * byArchive;
+}
 
 /* ---------- how the two are printed, everywhere ---------- */
 

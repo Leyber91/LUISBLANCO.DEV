@@ -312,5 +312,301 @@
       "by": "v2 ladder from the deep plan (_reference/labs/heptapod/PLAN.md v2.1, revised after two critics' reviews); rung 5 is Luis's anchor; G0 rates the G1 code at commit a84783b strictly, folding in the independent v1 rater's findings (commit c37529c), each checked in the code; replaces the v1 ladder, whose G0 rated the pre-G1 page",
       "commit": "a84783b"
     }
+  ],
+  "atlas_grades": [
+    {
+      "date": "2026-11-18",
+      "by": "single rater, two skeptic passes",
+      "commit": "f16a2cf",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "No atlas grade in this file before this one. The lab's own ladder above (G0, 2026-11-11) rates the codec on twelve lab axes and is a different scale. A first atlas reading of 2026-11-13, kept with the road's plan and not in this file, rated the codec when it stood at labs/heptapod.html (product 0, subject 2, scope not counted); The Pod has replaced it at that address since pull request 26, so this is the first atlas grade of the lab as it now runs.",
+      "basis": "origin/main at f16a2cf (pull request 67, the chamber lit by one light), served on 2026-11-18 from the worktree _labs_wt/_grade_hep checked out at that commit with no change. Graded as one lab of two rooms: The Pod (labs/heptapod.html, the ladder's page) and the codec bench (labs/heptapod-codec.html), the page the pod's bar links as \"the script on the bench\". Read: both pages, labs/assets/js/heptapod/pod/ (main.js, day.js, panel.js, notebook.js, ring.js, being.js, proxy.js, switch.js, world.js, and the parts of scene.js cited), the codec's main.js, views.js, reader.js and model.js, labs/assets/js/os/ (events.js, recording.js, progress.js), heptapod.css, heptapod-pod.css, tokens.css and labs-src/tsconfig.labs.json. Run: node tools/lab_tests.mjs heptapod (11 files, 0 failed: pod 917 checks, chamber 242, medium 28, inked 48, inkfig 232, selftest all passed); tools/drives/heptapod.mjs through labs-wt drive on this tree, 72 of 72 at 1440x900 and 69 of 69 at 390x844, console clean; and the rater's own scenario at both widths, 35 readings each, console clean (both pages at rest in a fresh profile, the first screen's words, the empty notebook and slate, links to skip and to fonts, sideways scroll, what still declares a transition or an animation under emulated reduced motion, the evening, the check and the end by the page's deep links, five typed sentences on the codec, a click on the semagram). Every picture of both drives was looked at. The inked script is off on this commit (pod/switch.js SWITCH.published false; ?script=inked works only on 127.0.0.1 or localhost) and is not graded: the public path writes the codec's ring script.",
+      "bindings": {
+        "declared_in_this_file": "missing: labs/levels/heptapod.json declares no bindings. Every field below is a proposal in the road's plan (plan.json, 2026-11-13), written for the translator pod before The Pod was chosen on 2026-11-14; the lab is graded against those proposals, as Exomania was graded against its plan's.",
+        "canon": "proposed: Heptapod B as Chiang 1998 (\"Story of Your Life\") specifies it and Arrival (2016) shows it, written in the lab's own script; kind source fiction; reference works Sampson 1985 and Van Gysel et al. 2021 (UMR).",
+        "units": "proposed: 14 units with weights (line 6, lobes 10, roles 12, code 8, concepts 10, polarity 8, time 10, mode 8, number 6, composition 10, names 4, conversation 4, material 2, decoding 2) in two tracks, form and meaning.",
+        "challenge_blueprint": "proposed: 40 items in 60 minutes over the 14 units by weight, six formats (single choice, multiple choice, ordering, matching, typed reading, composition).",
+        "central_scene": "proposed: the translator pod, a luminous disc of fog with one input line under it; a typed or spoken sentence condenses whole as one closed line, is read back, is shown to the far side, and the far side answers in the script. The scene the lab now runs (a dark chamber, a being beside a disc of fog, six things on a table, a notebook of crops) is in no binding.",
+        "fiction_inventory": "proposed: 36 entries, F1 to F36, of the translator's fiction. The Pod's own working parts are in no inventory (ticket 1.05, one inventory for three rooms, not done), so fiction is counted against the 36.",
+        "known_setup_failures": "proposed: 6 (no-webgl2, model-route-silent, speech-unavailable, local-model-blocked, frame-budget, storage-blocked), each with its diagnosis.",
+        "curriculum": "proposed: Chiang's 19 properties of Heptapod B with the categories of UMR, mapped onto the units.",
+        "tracks": "proposed: form (line, lobes, roles, code, material, decoding) and meaning (concepts, polarity, time, mode, number, composition, names, conversation).",
+        "own_material": "proposed: the visitor's own sentences, typed or said into the pod.",
+        "record_kinds": "proposed: 18 kinds (profile, messages, exchanges, evidence, sessions, lessons, cards, missions, stars, plan, notes, runtime concepts, curriculum ticks, study time, the session in progress, freehand strokes, elicited writings, labels for the far side's names).",
+        "object_kinds": "proposed: 12 kinds (words, radicals, categories, saved exchanges and messages, lessons, items, missions, cards, guides, misconceptions, decision rules, views).",
+        "protagonist_verbs": "proposed: 16 verbs (write, say, show, read a reply, take apart, compose, write freehand, drop an image, converse, introduce yourself, act out a scene, compare two writings, the least-time demonstration, trace a stroke, damage and read again, start at any lobe).",
+        "signature_move": "proposed: ink condensing whole from haze into the line; gold only on a read-back whose meaning graph equals what was written.",
+        "intelligent_role": "proposed: the far side, replying in the script inside the story's rules, as a semagram the decoder reads back."
+      },
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 2,
+        "scope": 2,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 1,
+          "evidence": "1.1 and 1.2 hold: labs/heptapod.html (the hub's link, site.config.js) opens on the chamber, and the console's first line names what can be done (\"Take a thing from the table, hold it up, set it down or pass it through the glass. Each act is one ring. Drag across a ring to keep a piece of it.\"). 2.1 holds: on load the being's greeting ring hangs in the disc of fog, at both widths (rater's scenario, pod-rest; the lab's drive, 01-greeting). 2.2 fails on the letter: the first screen names four acts and a drag in one breath beside \"raise it\" and \"end the day\", and no single next action is named or marked. 2.3 fails: the empty notebook (\"Nothing kept yet. While a ring hangs in the disc, drag across a part of it.\", notebook.js render) and the empty slate (\"Write a mark and raise it after an act.\", panel.js day) name the first action and hold no link or control to it (rater's scenario: 0 links in each, at both widths)."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "1.1 fails: no page of text is rendered from a source through sanitised Markdown or an equivalent. The pod's \"the day\" section and evidence list, and the codec's key, composition, \"written at once\" and Fermat sections, are markup typed into the HTML; the codec's tour (\"walk through it\") and its key cards are strings in views.js. No unit, module, track page or pager exists (rung 2)."
+        },
+        "tutoring": {
+          "level": 0,
+          "evidence": "Rung 0 describes the pod exactly: \"No feedback before the end of the activity.\" The evening's six rings are answered with nothing marked until all six are in (panel.js header: \"Nothing is marked right or wrong until all six are answered\"), and the pencil guesses are never read (notebook.js). The codec asks the visitor nothing. 1.1, an answer marked right or wrong when it is checked, is not met by marks that arrive only with the day's end; the road puts feedback in the school (ticket 2.06), not built."
+        },
+        "practice": {
+          "level": 1,
+          "evidence": "1.1 holds: the evening check deals six rings about scenes the visitor did not do, each matched to one of three pictures (day.js endDay, proxy.js checkItems), and the end view says for each ring whether the choice was right: a gold frame on the scene it was about, a dashed line under the choice, and the labels \"Ring 1 was about the small dark block, held up at the glass. You matched it.\" and \"You chose the small dark block, set down at the glass.\" (rater's scenario at ?at=done, both widths; the lab's drive: \"six answers end the day\"). 1.2 holds: the rings are drawn by the script's solver in the chamber's disc and the key is the scene the species wrote the ring about (ring.js ringSpec). 2.1 fails: the session runs the six one at a time with no check or feedback per item. 2.2 fails: \"evening, ring 3 of 6\" gives the position and no accuracy."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "1.1 fails: no task is set apart with its goal and its material. The day is the instrument's own loop and its evening check is the practice above; nothing else states a goal. The codec's \"Damage the ink ... and watch where it fails\" is a prompt, not a task with a goal."
+        },
+        "evidence": {
+          "level": 0,
+          "evidence": "1.1 fails: the six answers of the evening are kept in the day's record as scene numbers with no time and no mode (day.js answer pushes the scene to check.answers), the acts as { scene, emph } with no time (day.js doAct), and pencil guesses and drops with no time. Labs OS does append some actions to its local activity log with a time while recording is on, its default (os/recording.js): heptapod.act with its kind and ring number, heptapod.crop, heptapod.mark as a count, and one heptapod.check outcome with the day's score (pod/main.js track); a single answer is never logged, and neither log names the mode (a kept day, a species link or the unpublished inked trial). 2.1 fails: no state per unit."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "1.1 holds: the lamp counts the day (\"ring 0 of 40\" to \"ring 7 of 40\" in the lab's drive), the notebook counts what was kept (\"3 radicals kept\"), and the end view counts the evening (\"4 of 6 rings matched\"). 2.1 fails: one day is kept at a time and no finished day is listed; 2.2 to 2.4 fail: no streak, no activity calendar and no recent days on the entry view."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "1.1 holds: the world (pod/world.js OBJECTS, 42 scenes), the species generator and the three gate species (pod/species.js), the codec's 322-concept lexicon (lexicon-data.js), its categories (script.js CATEGORIES) and presets exist. 2.1 fails: all of them are JavaScript modules, with the tour and the key cards in views.js and the page texts in the HTML; the only material loaded as data is the codec's bench.json. 2.3 fails: no version is shown on either page (rater's scenario: none; script.js SCRIPT_VERSION is never displayed). 2.4 fails: a bench.json that does not load or parse is dropped silently (views.js line 287, .catch(() => {}))."
+        },
+        "records": {
+          "level": 1,
+          "evidence": "1.1 holds: the day is the lab's progress record in the Labs OS store, and the lab's drive reloads at ring 7 and finds the day, the notebook and a pencil guess as they were, at both widths. 2.1 fails: no typed contract covers the record kinds the bindings propose, or even the day's own shape; no heptapod file has // @ts-check and labs-src/tsconfig.labs.json includes only exoplanet/record.js. day.js validDay checks the shape of a stored day when it is read back, not each write on arrival (2.3)."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "1.1 holds: both pages read tokens.css and use its type families. 2.1 fails: both pages load Google Fonts by a plain render-blocking stylesheet link (rater's scenario: media null and no onload swap, on the pod and on the codec), the case Exomania's air article failed on 2026-11-17. 2.2 fails: colour literals stand outside the token file, on 7 lines of heptapod.css (rgba(11, 14, 19, .7) and others) and 1 of heptapod-pod.css, and in pod/scene.js, light.js and objects.js and the codec's render.js and fermat.js. 2.3 fails: the main actions are the lab-local .act, .chip and .ed-num of heptapod.css, not the kit's shared controls."
+        },
+        "reach": {
+          "level": 1,
+          "evidence": "1.1 holds: both pages start from their URL and work at 1440 px. 2.1 holds: both restack at 390 px with no sideways scroll (rater's scenario: 390 of 390 on both pages; the lab's drive at 390x844). 2.2 fails: there is no global reduced-motion rule; heptapod.css stops only the hero's three rise animations, and under emulated reduced motion 10 elements on the codec (its buttons) and 2 buttons on the pod still declare a 0.18 s transition (rater's scenario). 2.3 holds on the pod (a 2 px ring from tokens.css and heptapod-pod.css) and not on the codec's text inputs, which set outline: none and change only their border (heptapod.css line 71). 2.4 fails: neither page has a skip link (rater's scenario: none on either; tokens.css defines .skip and no Heptapod page uses it)."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "1.1 holds: each page runs from its URL, and the lab's 11 test files pass (node tools/lab_tests.mjs heptapod, 0 failed). 2.1 fails: the codec's entry file holds domain logic (main.js readBack, explain, eraseAt), and the pod's holds the scripted day the deep links replay (pod/main.js recorded). 2.2 fails: the material is code (see material). 2.3 fails: nothing at a module boundary is typed. 2.6 fails: the repository has no .gitattributes (site requirement site-repo)."
+        },
+        "fiction": {
+          "level": 2,
+          "evidence": "2.1 holds by two of the 36 proposed entries. F1 runs end to end from typed English on the codec: \"Did the heptapod see the ship?\" is written as one ring and read back exactly from its 1400 by 840 raster (rater's scenario, both widths); its stated detail fails, because a word outside the 322 concepts is replaced and not refused (\"Please do not leave.\" reads back \"Something does not leave.\", \"We come in peace.\" reads back \"We come the peace to something.\", each with a status line saying so), and the atlas asks the detail only at rung 5. F5 runs in the pod from each act: a ring condenses out of a haze of its own ink, hangs while a curl-noise flow moves it, and thins away (pod/medium.js; the lab's drive: \"its ink field has gathered\", \"the ring thins away\"). 3.1 fails: 50% is 18 entries, and at most 8 run even in part (F1, F3, F5, F7 from the codec's raster, F17 as the codec's pin, F20 as the codec's least-time panel outside any disc, F29 as the ring script's fixed six cells per concept, F34 as the pod's acts written with no English and never compared); no entry of the far side answering, showing, speech, conversation, rotation, crops read as their own meaning or the lobed line runs."
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "2.1 and 2.2 hold: the mechanisms compute along their paths with their formulas in the source: the codec's parse, ring solve (a 360 by 360 system, geometry.js solveRing) and pixel reader (reader.js readSector), the pod's species, rings, the being's reading of a mark (being.js MarkLearner, dP = P(concept | mark) - P(concept | no mark)), the ink field (Beer-Lambert absorption, curl-noise advection) and the chamber's light (inverse square and Lambert's cosine). 3.1 fails: the model of the subject, the script and its grammar, is the lab's own design, and neither page names a published meaning framework (the contact world line's substitute for 3.1, a documented framework such as AMR, is named only in the road's plan); the published models the pod cites (Bridson et al. 2007, Stam 1999, Lambert 1760, Sun et al. 2005, Schlick 1994) render the room, not the language."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "2.1 holds: the disc draws the ring from the solver and the ink field from its density grid, and the codec draws the solved ring live. 3.3 fails: the fog is seeded noise, the being's body is grown from its seed and \"means nothing more\", and the room's depths, exposure and materials are design values (the evidence list says so), and the canvas region carries no [ILLUSTRATIVE] tag of its own; the list's tag on \"The chamber\" is below the page. 3.4 fails: the codec's hero text, form and graph rise on load with staggered delays that mark no state (heptapod.css lines 245 to 247)."
+        },
+        "interaction": {
+          "level": 2,
+          "evidence": "2.1 holds: typing on the codec re-encodes the ring 320 ms after the last key with no submit (main.js input listener; the rater's five sentences changed the read-back with no press), and in the pod a drag across the ring cuts a crop and a drag of a thing acts. 3.1 fails: a click on the codec's semagram writes its meaning into an inline paragraph under it (\"TIME: past. the lean of the tendril...\", in the figcaption .readback, rater's scenario), not a popover at page level, and the pod pins nothing (a notebook cell lights its key cell on pointer-over only, notebook.js point). 3.3 fails: neither opens on keyboard focus."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "1.1 holds: the pod uses no model (\"canvas 2D, no build step, no model\" in its footer) and the codec's offline parser writes every ring. 2.1 to 2.4 hold by the code: \"ask the model\" makes one call through LLM.complete (model.js graphFromModel), the route panel is mounted in the codec's bar (\"model: chosen on first use\"), the offline parser answers alone, and the call is made only on the press. 2.5 fails: the button reads the same for every sentence, including the four the parser rewrote with \"something\" (rater's scenario: identical markup after each); only when the parser returns nothing does the status line, not the control, suggest the model. No model was called."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "1.1 holds. 2.1 holds: the pod's \"the day\" paragraph and the codec's hero explain the mechanism. 2.2 fails: the pod's paragraph tags one sentence of eight and leaves \"A ring gathers out of the fog in about two seconds, all of it at once\" untagged; the codec's key cards and tour captions carry no tag. 2.3 fails on two statements of the codec. Its evidence list says [REAL] that \"every round-trip count, field accuracy and breaking point on this page is measured in your browser when you look at it\", while the breaking points are read from the stored bench.json (views.js lines 287 to 292; the page's own caption reads \"Measured by bench.mjs on 2026-11-11\"). Its key card for a concept says \"The last is a check, so one misread cell is caught\" (views.js line 35), while reader.js readSector returns the nearest codeword and refuses nothing. A slip on the pod as well: after pull request 67 moved the six things to a table, the end view still says the greeting's radicals \"belong to no scene of the tray\" (panel.js done)."
+        }
+      },
+      "scope": {
+        "level": 2,
+        "organs": [
+          "the chamber (the instrument: an act on the table makes the being write one ring about it in the disc of fog, and a drag across the ring cuts a crop; pod/scene.js, day.js doAct)",
+          "the notebook (the crops kept with their pencil guesses, each radical's table of the acts whose rings carried it, and brackets of radicals no act has yet told apart; notebook.js, day.js entryActs and brackets)",
+          "the slate (marks the visitor raises against the ring just written, and the being's reading of the most repeated one, written back as one radical in the evening; panel.js day, being.js MarkLearner, day.js endDay)",
+          "the evening check (six rings about scenes the visitor did not do, matched to pictures, scored against chance; panel.js check and done, proxy.js checkItems)",
+          "the codec bench (typed English parsed, solved as one ring, read back from pixels, with its graph editor, pin, tour, composition, the two writers and the noise bench, all on the current sentence; heptapod-codec.html, main.js, views.js)",
+          "the least-time panel (two points the visitor drags and a lower medium set on a slider, the least-time crossing against Snell's law; fermat.js)"
+        ],
+        "instrument": "The chamber, under the chosen concept. The proposed central scene, the translator pod, is built on no page; read with the codec as the instrument, level 3 fails the same way, since the codec stands apart.",
+        "links": [
+          "the chamber to the evening check, steers: the six rings and their pictures are dealt from the scenes the visitor did not do on the record (day.js endDay, proxy.js checkItems and pickTargets)",
+          "the chamber to the notebook, shows: each entry's table, its count of rings and the brackets are computed from the acts (day.js entryActs, brackets; notebook.js table and drawKey)",
+          "the chamber to the slate, shows: the being's reading of a mark counts the concepts of the ring each mark was raised against (day.js learnerOf)",
+          "the slate to the notebook, shows: the evening's read-back radical is kept in the notebook on the visitor's choice (day.js addSolo)",
+          "the notebook to the evening check, shows: the end view counts how many of the greeting's radicals the notebook holds (panel.js done)",
+          "the evening check to the notebook, shows: once the check is done, every entry is outlined with each scene its radical is used for (notebook.js render, truth)"
+        ],
+        "reach": "Units worked on by at least one organ: line, roles, code, concepts, polarity, time, mode, number, composition, material and decoding, 11 of the 14 proposed (0.79); lobes, names and conversation by none. Inside the joined part, by two organs or more: roles, concepts, material and decoding, 4 of 14 (0.29); the pod's rings write every act in the present, indicative and affirmed, so its organs work on no unit of the meaning track but concepts.",
+        "evidence": "Level 2 holds: 6 organs (3 needed), 6 links (1 needed), reach 0.79 at one organ per unit (0.25 needed). Level 3 fails on the organ count and on reach: the largest connected part is the pod's 4 organs, with the instrument among them and 6 links inside it, and 5 joined organs are needed; at two organs per unit its reach is 0.29 against 0.5. The codec bench and the least-time panel read nothing any other organ wrote and are read by none: the pod uses the codec's solver, a shared engine, and the bar's link to the bench is a hyperlink. One steering link, so no steering loop (level 4). Not counted as a link: the read-back panel offers to keep its radical only when the notebook lacks it, which is a control of the slate's own output."
+      },
+      "skeptic": [
+        {
+          "pass": "does it run",
+          "why": "No axis lowered. Every rung given rests on what ran: the lab's drive, 72 of 72 at 1440x900 and 69 of 69 at 390x844 on this tree, and the rater's scenario at both widths, all with a clean console. At 390 px the site's sharing question covers the how-to on first load until it is answered; the how-to stays on the main view under the chamber, so orientation 1.2 holds."
+        },
+        {
+          "axis": "orientation",
+          "pass": "the letter of the clause",
+          "why": "orientation.2.2 reads \"The entry view names one next action.\" The first screen names four acts and a drag in one sentence, with \"raise it\" and \"end the day\" beside it, and marks none as the next; uncertain, so taken as not met. The axis stays at 1 by 2.3 in any case."
+        },
+        {
+          "axis": "fiction",
+          "pass": "the letter of the clause, held",
+          "why": "fiction.2.1 asks that an entry run end to end from the visitor's own input, and the depicted detail only at rung 5. F1 runs on the codec within its lexicon and replaces, with a status line, what it cannot write, where its detail asks a refusal; F5 runs in the pod from every act. Two entries run, so the rung does not rest on one disputed reading."
+        },
+        {
+          "axis": "practice",
+          "pass": "the letter of the clause, held",
+          "why": "practice.1.1 asks that an exercise check an answer and say whether it is right, which the end view does ring by ring; tutoring.1.1 asks the mark when the answer is checked, and tutoring.0.1 names the pod's design word for word (\"No feedback before the end of the activity\"). Practice 1 and tutoring 0 are read from the same panel without contradiction."
+        },
+        {
+          "axis": "scope",
+          "pass": "the letter of the clause, held",
+          "why": "The slate is counted as an organ: it keeps marks no other organ holds and gives a result of its own kind, the being's reading of the visitor. Folded into the chamber, the lab has 5 organs and the joined part 3, which changes no level: 2 holds either way and 3 fails either way."
+        }
+      ],
+      "not_checked": "No model route was called, so intelligence 2.1 to 2.4 are read from the code. Only headless Chrome with software GL was used: no GPU, no real phone, no screen reader. The codec's noise bench, composition, the two writers and the least-time panel were not driven by the rater; they are counted from the code. A malformed deep link on the codec was not read: the rater's drive changed only the hash of an open page, which the page does not reread. No citation on either page was checked at its source. The style gates and the platform block were not counted; seen in passing were gold at rest on the codec's kicker, gradient fills and colour literals in heptapod.css, and they cap only rungs above 4. The inked script (switch off) and the codec's presets' film wording were not graded. The gates workflow run of pull request 67 was not read. The proposed bindings were read as declared; whether they fit The Pod is ticket 1.05's question, not the rater's."
+    },
+    {
+      "date": "2026-11-18",
+      "by": "single rater, two skeptic passes, delta from the grade at f16a2cf",
+      "commit": "13e724e",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "The f16a2cf grade of 2026-11-18 (the first entry, single rater, two skeptic passes): product 1, subject 2, scope 2, lab 1. This entry grades only what pull request 69 (13e724e) changed. Each axis is either carried, with what the diff does not touch, or graded again from the running page and the code.",
+      "basis": "origin/main at 13e724e (pull request 69). pod/switch.js sets SWITCH.published to true, so the pod writes in the inked script (topo/inkfig.js, inkfig-0.6.1) on its public path and keeps the ring script at ?script=ring. pod/main.js keeps a day in either script. The evidence list of heptapod.html is rewritten for the ink and the film calibrations. labs/assets/data/heptapod/g4-pod.json holds the corpus run and Luis's decision, and tools/drives/heptapod.mjs has a new block. The rest of git diff f16a2cf 13e724e (15 files) is the black hole lab's pull request 68, which touches no heptapod file. The lab was served from the worktree _labs_wt/_grade_hep2 (branch labs/heptapod-grade-1118b, the earlier grade's branch with origin/main merged), whose tree differs from 13e724e only in labs/levels/heptapod.json. Read: the whole diff; pod/switch.js, pod/inked.js and pod/main.js; the inked paths of pod/scene.js (writing, syncTarget, onKey, probe) and pod/notebook.js (drawInkedCrop); topo/inkfig.js rules I1 to I9; the header of topo/hmr.js; equations.json; g4-pod.json; panel.js done; and, for the misread cell, script.js (makeCode, codeValid, CODEBOOK) and reader.js (readSector, readProp). Run: node tools/lab_tests.mjs heptapod (11 files, 0 failed: pod 917 checks, chamber 242, medium 28, inked 50, inkfig 232, selftest all passed). The lab's drive through labs-wt drive --tree _grade_hep2 passed 79 of 79 at 1440x900 and 75 of 76 at 390x844, the same result twice. The one failure is the drive's own precondition in its tier block: after the drive pushed 60 slow samples the tier stayed full, because the freshly loaded page's own fast frames were already in the sample window (stage.js Tier.sample). The crop that block guards was kept (6 cells), and the check bears on no rung graded here. The console was clean at both widths. The rater's two scenarios passed at both widths, 47 and 9 readings each, with a clean console. They covered the public path at rest in a fresh profile, one act, crops by key and by drag on the inked ring, the kept day across a reload, the same day at ?script=ring, the evening, check and end by their links in the inked script, emulated reduced motion, sideways scroll, and the codec's key card. 22 pictures were looked at, the inked figures at both widths first. A first drive was started by mistake from the main checkout's older labs-wt.mjs, which has no --tree; it drove the road's own worktree and is not used.",
+      "bindings": {
+        "declared_in_this_file": "unchanged since f16a2cf: labs/levels/heptapod.json still declares no bindings, and the lab is graded against the road's proposals as in the first entry (canon, units, the 36-entry fiction inventory F1 to F36, and the rest)."
+      },
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 2,
+        "scope": 2,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 1,
+          "evidence": "Graded again, because the entry view's picture at rest is now the inked greeting and the keys are described anew. 1.1 holds: labs/heptapod.html opens on the chamber. 1.2 holds: the how-to is unchanged (\"Take a thing from the table, hold it up, set it down or pass it through the glass. Each act is one ring. Drag across a ring to keep a piece of it.\"), read at both widths. 2.1 holds: in a fresh profile the inked greeting hangs in the disc on load and can be cropped, with field fit 0.73 at 1440 px and 0.94 at 390 px (rater's scenario r01; the lab's drive 17). The page replaces the keys hint and the canvas label with the inked wording (\"W, D, S and A each keep one of its parts, the same part in every ring\"). 2.2 fails as at f16a2cf: the how-to names four acts and a drag and marks none as the next. 2.3 fails as at f16a2cf: the empty notebook (\"Nothing kept yet. While a ring hangs in the disc, drag across a part of it. What you cut lands here.\") and the empty slate hold no link or control to the first action."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch any page text rendered from a source, any unit, module or pager (the only page change is the evidence list's markup). The f16a2cf evidence (first entry) stands."
+        },
+        "tutoring": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch when an answer is marked (panel.js and day.js are not in the diff); nothing is marked before all six evening rings are answered. The f16a2cf evidence (first entry) stands."
+        },
+        "practice": {
+          "level": 1,
+          "evidence": "Graded again, because the evening's six rings are now drawn in the inked script. pod/main.js evening() calls pod.show(ringSpec(...)), and scene.js writing() turns the ring into inked.figureOf. In the rater's scenario at ?at=check&species=1 the ring is inked (field fit 0.84 at 1440 px, 0.95 at 390 px). 1.1 holds: panel.js check and done are unchanged, and the end view at ?at=done in the inked script says \"4 of 6 rings matched to what they were about\", ring by ring, with gold frames and dashed lines (the rater's scenario read the end view at both widths; the lab's drive 14 at 1440 px). 1.2 holds: each ring is the lab's engine drawing the species' ring for a scene, and the key is that scene. 2.1 fails as at f16a2cf: no check or feedback per item."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch anything that sets a task apart with a goal. The f16a2cf evidence (first entry) stands."
+        },
+        "evidence": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch what an answer or an act stores (day.js answer and doAct) or logs (the track calls in pod/main.js). The f16a2cf evidence (first entry) stands. The diff changes only which days are kept. The script a kept day was played in is not stored either, so the mode stays unrecorded."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the counts: the lamp, the notebook's count and the end view's score (the counts read the same in the inked script, for example \"ring 1 of 40\" and \"4 of 6 rings matched\"). The f16a2cf evidence (first entry) stands."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the lab's material (world.js, species.js, the codec's lexicon), which stays in JavaScript modules. The f16a2cf evidence (first entry) stands. The new g4-pod.json and the cited equations.json are records that only tests/inked.test.mjs and a tool read: no page loads either, and no page shows a version."
+        },
+        "records": {
+          "level": 1,
+          "evidence": "Graded again, because the kept day on the public path is now an inked day (pod/main.js: trial only for a species link, or for the inked script while unpublished). 1.1 holds on the default path. The lab's drive keeps a part of the greeting in the Labs OS store and finds it after a reload (\"and comes back after a reload :: 4 entries\"). The rater's scenario finds \"ring 1 of 40\" and 3 notebook entries after a reload at both widths, and ?script=ring opens the same kept day. 2.1 fails as at f16a2cf: no typed contract, and day.js validDay checks a stored day on read, not each write."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the stylesheets, the font links or the controls (the only page change is evidence-list text). The f16a2cf evidence (first entry) stands."
+        },
+        "reach": {
+          "level": 1,
+          "evidence": "Graded again, because the product's default path changed. 1.1 holds: the inked public path works at 1440 px (the lab's drive 79 of 79, console clean). 2.1 holds: at 390 px the views restack with 0 px of sideways scroll at rest, at the evening, at the check and at the end (rater's scenario). 2.2 fails as at f16a2cf: under emulated reduced motion two buttons (.act and .act.ghost) still declare a transition, and there is no global rule. The ink itself does obey the preference: the ring is snapped whole (field fit 1.00), and the being is still."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "Graded again, because pod/main.js changed. 1.1 holds: the page runs from its URL, and node tools/lab_tests.mjs heptapod passes 11 files with 0 failed at this commit. inked.test.mjs ties the switch to the corpus record (it fails while SWITCH.published is true unless g4-pod.json covers the current inkfig version). 2.1 fails as at f16a2cf: pod/main.js still holds the scripted day the deep links replay (recorded), and the codec's main.js its domain logic."
+        },
+        "fiction": {
+          "level": 2,
+          "evidence": "Graded again, because the pod now writes in the inked script. 1.1 holds. 2.1 holds by two entries. F1 runs on the codec, whose files the diff does not touch (carried). F5 runs in the pod in the inked script: each act's ring condenses out of a haze into the inked figure (scene.js syncTarget, then inked.inkedTarget, then the medium's field), hangs and thins, with the threads going before the pool (inked.test.mjs 5). The rater's drives read field fit 0.64 to 0.95 while a ring hangs, and crops were kept from it by key and by drag. 3.1 fails: 18 of the 36 entries are needed. Counting every entry that runs even in part from the visitor's input gives at most 9: F1, F3, F5, F7, F17, F20, F29 and F34, as at f16a2cf, and now F6 in part. For F6, the inked figure has masses, threads ending in drops, satellites, spray and dry-brush gaps, with eight constants calibrated to film distributions (inkfig.js I2 to I7, equations.json). F29 stays in part: a concept keeps one radical set in every ring (inked.js radicalsOf). F12 does not count: a thread leaves at one angle per role label within LEAN_DEG of the normal, not parallel, perpendicular and at 45 degrees with collar motifs. F14 does not count: radical sets are dealt in a seeded order per species, so related meanings share no radical by meaning."
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "Graded again, because the pod's rings now come from a meaning graph. 2.1 and 2.2 hold: inked.js ringGraph builds an HMR graph of each ring (the act as event; actor, undergoer and goal), and topo/inkfig.js draws it by equations visible in the source. equations.json lists each constant by kind: 2 frame, 8 calibrated, 18 chosen and 1 derived, plus 161 inline literals the sheet calls debt. 3.1 fails, disputed (see skeptic). topo/hmr.js calls its graph \"a subset of Uniform Meaning Representation (Van Gysel et al. 2021, KI - Kunstliche Intelligenz)\", so a published framework now stands behind the public path. But neither page names it. The pod uses three of its participant labels, fixes every anchor feature (decl, unspec, visual) and makes every entity sg and def. inked.js deals the concept-to-radical mapping in a seeded order and tags it [ILLUSTRATIVE], and hmr.js leaves its full schema to an epic that is not done. The contact world line's substitute asks that the framework be documented; a citation in a code comment is not, read on the letter."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "Graded again, because the disc now draws the inked figure. 2.1 holds: each ring is inkFigure of the ring's graph, area-sampled into the field's target (inked.js inkedTarget) and drawn through the fog, at both widths (rater's r01 and r02; the lab's drive 09, 12 to 14 and 17). 3.1 holds: the view is procedural. 3.3 fails: the fog is seeded noise and the being's body is grown from a seed. The ink's spray drops, satellites and the pool's drag direction are now seeded too (inkfig.js I2e, I4 and I5b), and the canvas region carries no [ILLUSTRATIVE] tag of its own. 3.4 fails as at f16a2cf on the codec's staggered rise animations (heptapod.css is not in the diff)."
+        },
+        "interaction": {
+          "level": 2,
+          "evidence": "Graded again, because crops on the public path now read the inked figure (inked.js recogniseInked and sectorRectInked). 2.1 holds: a drag across the inked ring keeps a piece with no submit. In the rater's drag scenario at both widths, a drag around the greeting kept the act and the actor (\"Kept in the notebook.\"), and a drag across its top kept three parts. The notebook draws each crop from the same figure (notebook.js drawInkedCrop; rater's r03 at both widths). The codec's live typing is untouched (carried). 3.1 fails as at f16a2cf: nothing opens a popover at page level, the codec writes its read-back inline, and the pod pins nothing."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch the model route (model.js), the codec's controls or the route panel; the inked script, like the ring script, is a deterministic engine and calls no model. The f16a2cf evidence (first entry) stands."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "Graded again, because the evidence list was rewritten. 1.1 and 2.1 hold. 2.2 fails as at f16a2cf: \"the day\" paragraph is untouched and tags one sentence of eight. 2.3 fails. The codec's [REAL] \"measured in your browser when you look at it\" still stands against the stored bench.json (views.js is not in the diff). The key card's \"one misread cell is caught\" is false of the page's reader (see misread_cell). panel.js done still says \"belong to no scene of the tray\". The new copy, checked against its sources: the eight calibrated constants it names are the eight of equations.json (R_CANVAS, GAP_DEG, W_RING, PRESS_FLOOR, MASS_MAX, MASS_ARC, DEPTH, FIL_LEN). 170 figures and 38 logograms match g4-pod.json. The ink paragraph's pools, thread turns, inward thread for the being and the shorter, deeper pool for holding match inkfig.js I2e, I3 and I4 and inked.js personOf and aspectOf. Its note that the inked script does not draw the being's press is true (inked.js header). The keys hint is true by part (scene.js onKey: W the act, D the thing handled, S the goal, A the actor). The film-comparison sentence is true on the fine grid, where the 0.786 floor is defined (fineMax 0.69, failsAtFineFloor 0). It leaves out that the coarse grid, the other of the \"two scales\" it names, scores 23 figures at 0.80 or more against their nearest film logogram (coarseMax 0.857, coarseAtOrOver080 23). That makes the sentence incomplete, and it is not counted as false."
+        }
+      },
+      "scope": {
+        "level": 2,
+        "organs": [
+          "the chamber (the instrument: an act on the table makes the being write one ring about it in the disc of fog, and a drag across the ring cuts a crop; pod/scene.js, day.js doAct)",
+          "the notebook (the crops kept with their pencil guesses, each radical's table of the acts whose rings carried it, and brackets of radicals no act has yet told apart; notebook.js, day.js entryActs and brackets)",
+          "the slate (marks the visitor raises against the ring just written, and the being's reading of the most repeated one, written back as one radical in the evening; panel.js day, being.js MarkLearner, day.js endDay)",
+          "the evening check (six rings about scenes the visitor did not do, matched to pictures, scored against chance; panel.js check and done, proxy.js checkItems)",
+          "the codec bench (typed English parsed, solved as one ring, read back from pixels, with its graph editor, pin, tour, composition, the two writers and the noise bench, all on the current sentence; heptapod-codec.html, main.js, views.js)",
+          "the least-time panel (two points the visitor drags and a lower medium set on a slider, the least-time crossing against Snell's law; fermat.js)"
+        ],
+        "instrument": "The chamber, under the chosen concept. The proposed central scene, the translator pod, is built on no page; read with the codec as the instrument, level 3 fails the same way, since the codec stands apart.",
+        "links": [
+          "the chamber to the evening check, steers: the six rings and their pictures are dealt from the scenes the visitor did not do on the record (day.js endDay, proxy.js checkItems and pickTargets)",
+          "the chamber to the notebook, shows: each entry's table, its count of rings and the brackets are computed from the acts (day.js entryActs, brackets; notebook.js table and drawKey)",
+          "the chamber to the slate, shows: the being's reading of a mark counts the concepts of the ring each mark was raised against (day.js learnerOf)",
+          "the slate to the notebook, shows: the evening's read-back radical is kept in the notebook on the visitor's choice (day.js addSolo)",
+          "the notebook to the evening check, shows: the end view counts how many of the greeting's radicals the notebook holds (panel.js done)",
+          "the evening check to the notebook, shows: once the check is done, every entry is outlined with each scene its radical is used for (notebook.js render, truth)"
+        ],
+        "reach": "Units worked on by at least one organ: line, roles, code, concepts, polarity, time, mode, number, composition, material and decoding, 11 of the 14 proposed (0.79); lobes, names and conversation by none. Inside the joined part, by two organs or more: roles, concepts, material and decoding, 4 of 14 (0.29); the pod's rings write every act in the present, indicative and affirmed, so its organs work on no unit of the meaning track but concepts.",
+        "evidence": "Carried: the diff adds no organ and no link. The inked script is how the chamber writes, and ?script=ring runs the same organ in another script. The notebook draws crops from the chamber's figure cache, a shared engine. The evidence list's new links are hyperlinks. The pod's rings still write every act as declarative and affirmed, so reach does not change. Level 2 holds and level 3 fails as at f16a2cf."
+      },
+      "misread_cell": "Settled from the code. The road is right about the code: makeCode (script.js) sets the sixth cell so that the six trits sum to 0 mod 3, which codeValid tests, so one changed cell always gives a word no concept has. Over all 325 codewords (198 nouns, the three reference codes among them, and 127 verbs) and every single-cell change, 0 of 3,900 changed words is a valid code. The earlier rater is right about the reader: readSector (reader.js) measures the six cells and returns the nearest codeword of the whole codebook by squared distance. It never calls codeValid and refuses nothing, and its margin (d2 - d, kept as conf.pred by readProp) is read by no other code. Fed these hard misreads, nearest-codeword decoding returns another word for 1,919 of 2,376 noun misreads and 1,123 of 1,524 verb misreads, mostly at a tie (2,275 and 1,360 ties). This is the rater's script, run on the module; the page's reads are continuous, so the counts show the rule, not the rate on the page. So one misread cell is detectable by construction, and the decoder snaps it to a word, usually a wrong one. The key card's \"The last is a check, so one misread cell is caught\" (views.js line 35) is true of the code's design and false of the page, which catches nothing. explanation 2.3 already fails on the [REAL] bench.json sentence, so this finding moves no rung.",
+      "skeptic": [
+        {
+          "pass": "does it run",
+          "why": "No axis lowered. The inked script runs on the public path at both widths with a clean console. The only failing check, the lab's drive at 390 px, is a precondition the drive sets up (the tier did not switch), and the crop it guards was kept. The phone pictures show the disc, the being and the table whole, with no sideways scroll in any state read. At 390 px the sharing question covers the how-to on first load until it is answered, as at f16a2cf."
+        },
+        {
+          "axis": "fidelity",
+          "pass": "the letter of the clause",
+          "why": "fidelity.3.1 under the contact world line asks that the framework be documented. The public path now draws from a UMR subset, cited with authors, year and venue in topo/hmr.js, a step from f16a2cf. The citation sits in a code comment, the pages name no framework, and the subset the pod uses is three labels with every other feature fixed. Uncertain, so taken as not met. Had it been met, 3.2 to 3.5 would still need checking, and the subject level would not move: the lower median of 1, 1, 2, 2, 2, 3 is 2."
+        },
+        {
+          "axis": "fiction",
+          "pass": "the letter of the clause, held",
+          "why": "fiction.3.1 needs 18 entries run from the visitor's input. The inked script adds F6 in part, and the count stays at most 9, so the rung is not close to a disputed reading."
+        },
+        {
+          "axis": "explanation",
+          "pass": "the letter of the clause, held",
+          "why": "explanation 2.2 fails on the untagged sentences of \"the day\" whatever the new copy says, so the axis stays at 1. Under the inked script a crop cut earlier in the ring script is redrawn from the inked figure (notebook.js), while its radicals were read from the ring script's quarters. The page's \"a day is the same day in either\" holds for the acts, the radicals and the guesses but not for the pictures of crops. This is noted and not counted."
+        }
+      ],
+      "not_checked": "No model route was called; intelligence is carried. Only headless Chrome with software GL was used: no GPU, no real phone, no screen reader. Whether a crop survives a change of tier at 390 px was not checked, because the lab's drive could not switch the tier there, twice. The codec bench was not driven again: its files are not in the diff, and its evidence is carried. No citation was checked at its source, UMR (Van Gysel et al. 2021) in hmr.js and inkfig.js's physics citations included (several are marked there \"from memory, to verify\"). The film comparison in g4-pod.json was read as a record and not recomputed, since the film masks are not in the repository. Luis's review of the 123 figures at 0.65 or more is recorded there as a decision to publish, not as a pair-by-pair verdict, and was not judged here. Of the drives' pictures, the ring-script day by hand (01 to 08 and 16), on a path the diff did not change, was not looked at. The style gates and the platform block were not counted. The gates workflow run of pull request 69 was not read."
+    }
   ]
 }

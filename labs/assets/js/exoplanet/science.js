@@ -6,7 +6,7 @@
    ============================================================ */
 
 import { int } from '../kit/format.js';
-import { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf, starlightDraws, T_ZERO } from './starlight.js';
+import { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf, ownHeat, OWN_HEAT, starlightDraws, T_ZERO } from './starlight.js';
 import { PHYS, CHEN_KIPPING, LIMB, CIE_FIT, XYZ_TO_SRGB, TEQ, VALLEY, SIZE_CLASSES, SEAGER, RV, MC } from './config.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -15,7 +15,7 @@ const int3 = (v) => (isNum(v) ? String(Number(v.toPrecision(3))) : '');   // thr
 
 /* ---------- star, orbit, starlight, equilibrium temperature, habitable zone ---------- */
 /* One number each, in starlight.js (ticket 2.14): every view calls those, and this module passes them on. */
-export { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf };
+export { luminosity, semiMajor, insolation, seff, habitableZone, hzPosition, equilibriumTemp, teqOf, ownHeat, OWN_HEAT };
 
 /* ---------- mass-radius (Chen & Kipping 2017) ---------- */
 

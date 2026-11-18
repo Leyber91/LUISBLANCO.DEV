@@ -30,13 +30,9 @@ const MUTANTS = [
   ['hot from 1,000 K up to 1,001 K', `HOT_K = 1000;`, `HOT_K = 1001;`],
   ['200 K itself counted as cold', `return !!t && t.T < COLD_K;`, `return !!t && t.T <= COLD_K;`],
   ['1,000 K itself not counted as hot', `return !!t && t.T >= HOT_K;`, `return !!t && t.T > HOT_K;`],
-  ['an imaged planet given the temperature the archive lists', `  if (p.method === 'Imaging') return null;\n`, ``],
-  ['every planet not found by transit given no temperature', `if (p.method === 'Imaging') return null;`, `if (p.method !== 'Transit') return null;`],
-  ['a planet\'s own heat taken for an equilibrium temperature', `  if (isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t) return null;\n`, ``],
-  ['own heat from three times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 3;`],
-  ['own heat from one and a half times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 1.5;`],
-  ['exactly twice the starlight counted as own heat', `p.Teq > OWN_HEAT * t) return null;`, `p.Teq >= OWN_HEAT * t) return null;`],
-  ['a published temperature dropped when the starlight is not known', `if (isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t) return null;`, `if (isNum(p.Teq) && p.Teq > OWN_HEAT * t) return null;`],
+  // the rule of a planet's own heat is starlight.js ownHeat, with its entries in starlight.mutants.test.mjs
+  ['a planet seen by its own heat given the temperature the archive lists', `  if (ownHeat(p)) return null;\n`, ``],
+  ['every planet given no temperature', `if (ownHeat(p)) return null;`, `return null;`],
   ['a value that is not a number counted as one', `const isNum = (v) => typeof v === 'number' && isFinite(v);`, `const isNum = (v) => typeof v === 'number';`],
 
   /* ---- the temperature a world is found by ---- */
