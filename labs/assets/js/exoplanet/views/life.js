@@ -11,9 +11,10 @@
    nothing on this sheet is measured.
    ============================================================ */
 
-import { lifeOf, reflectance } from '../life.js';
+import { lifeOf, reflectance, colourSource } from '../life.js';
 import { el } from '../../kit/dom.js';
-import { num } from '../../kit/format.js';
+import { num, int } from '../../kit/format.js';
+import { KOPPARAPU } from '../config.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 /* a wavelength's hue as the eye sees it, for the strip's band only (a drawing aid, not a measurement) */
@@ -31,18 +32,18 @@ function strip(L) {
   const W = 420, H = 170, x = (nm) => ((nm - 400) / 700) * W, y = (r) => H - 24 - r * (H - 46) * 1.75;
   const pk = L.case.peak;
   const svg = svgEl('svg', { viewBox: `-4 0 ${W + 8} ${H + 8}`, class: 'life-strip', role: 'img',
-    'aria-label': `Reflectance from 400 to 1,100 nm of ${L.scenarios.length > 1 ? 'readings a and b' : 'the cover'}; the star's light at the surface peaks at ${Math.round(pk)} nm` });
+    'aria-label': `Reflectance from 400 to 1,100 nm of ${L.scenarios.length > 1 ? 'readings a and b' : 'the cover'}; the star's light at the surface peaks at ${int(pk)} nm` });
   const defs = svgEl('defs', {}, svg), pat = svgEl('pattern', { id: 'life-hatch', width: 5, height: 5, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
   svgEl('line', { x1: 0, y1: 0, x2: 0, y2: 5, class: 'hatch' }, pat);
   for (let nm = 400; nm < 700; nm += 5) svgEl('rect', { x: x(nm).toFixed(1), y: H - 18, width: (x(nm + 5) - x(nm) + 0.6).toFixed(1), height: 6, fill: hue(nm), opacity: 0.55 }, svg);
   svgEl('rect', { x: x(700), y: H - 18, width: x(1100) - x(700), height: 6, fill: 'url(#life-hatch)' }, svg);
   for (const t of [400, 550, 700, 900, 1100]) {
     svgEl('line', { x1: x(t), y1: H - 12, x2: x(t), y2: H - 8, class: 'tk' }, svg);
-    text(svg, x(t), H + 6, `${t}${t === 1100 ? ' nm' : ''}`, t === 400 ? 'start' : t === 1100 ? 'end' : 'middle');
+    text(svg, x(t), H + 6, `${int(t)}${t === 1100 ? ' nm' : ''}`, t === 400 ? 'start' : t === 1100 ? 'end' : 'middle');
   }
   text(svg, x(900), H - 26, 'near infrared, unseen', 'middle', 'ax dim');
   svgEl('line', { x1: x(pk), y1: 6, x2: x(pk), y2: H - 18, class: 'peak' }, svg);
-  text(svg, x(pk) + (pk > 900 ? -5 : 5), 14, `its light peaks at ${Math.round(pk)} nm`, pk > 900 ? 'end' : 'start');
+  text(svg, x(pk) + (pk > 900 ? -5 : 5), 14, `its light peaks at ${int(pk)} nm`, pk > 900 ? 'end' : 'start');
   L.scenarios.forEach((s, i) => {
     const R = reflectance(s.bands, s.broad);
     let d = '';
@@ -91,8 +92,8 @@ export function drawLife(host, p, { kind, air = null, reading = 'a', onReading =
   }
   host.append(el('p', 'life-words', L.words.join(' ')));
   const ev = el('footer', 'life-ev');
-  ev.append(el('span', '', '[REAL] each case\'s light and UV-B at noon (Table 2a) and its productivity averaged over the day and the disk (Table 3), under Earth-like air: Kiang et al. 2007, Astrobiology 7, 252; the habitable zone: Kopparapu et al. 2013.'),
-    el('span', '', '[ILLUSTRATIVE] those numbers times this planet\'s starlight, the colour, the cover and these sentences: rules on top of the papers; the M dwarfs\' second reading after Takizawa et al. 2017, Sci. Rep. 7, 7561.'));
+  ev.append(el('span', '', '[REAL] each case\'s light and UV-B at noon (Table 2a) and its productivity averaged over the day and the disk (Table 3), under Earth-like air: Kiang et al. 2007, Astrobiology 7, 252; the habitable zone: ' + KOPPARAPU.ref + '.'),
+    el('span', '', '[ILLUSTRATIVE] those numbers times this planet\'s starlight, the colour' + (colourSource(L) ? ` (${colourSource(L)})` : '') + ', the cover and these sentences: rules on top of the papers; the M dwarfs\' second reading after Takizawa et al. 2017, Sci. Rep. 7, 7561.'));
   host.append(ev);
   if (focus) { const k = host.querySelector(`button[data-reading="${focus}"]`); if (k) k.focus({ preventScroll: true }); }
   return L;
