@@ -186,6 +186,20 @@ block('the equilibrium temperature', () => {
   yes('with no starlight, none', L.teqOf({ name: 'x', host: 'tN' }) === null && L.equilibriumTemp({ name: 'x', host: 'tN2' }) === null);
 });
 
+/* ---------- a planet's own heat ---------- */
+block('a planet\'s own heat', () => {
+  const light = L.equilibriumTemp(earth, 0.3);   // 254.6 K: twice is 509.2 K
+  let n = 0;
+  const mk = (o) => { n++; return { name: `own ${n}`, host: `Own host ${n}`, Teff: 5772, Rs: 1, a: 1, S: null, method: 'Transit', ...o }; };
+  yes('the bound is twice the starlight', L.OWN_HEAT === 2);
+  yes('a planet found by imaging is seen by its own heat, with or without a listed temperature', L.ownHeat(mk({ method: 'Imaging', Teq: 20 })) && L.ownHeat(mk({ method: 'Imaging', Teq: null })));
+  yes('the method alone counts only for imaging', ['Transit', 'Radial Velocity', 'Astrometry', 'Microlensing'].every((m) => !L.ownHeat(mk({ method: m, Teq: 250 }))));
+  yes('a listed temperature over twice the starlight is its own heat; exactly twice, or under, is not', L.ownHeat(mk({ Teq: Math.ceil(2 * light) + 1 })) && !L.ownHeat(mk({ Teq: 2 * light })) && !L.ownHeat(mk({ Teq: Math.floor(2 * light) })), `${Math.ceil(2 * light) + 1} K, ${2 * light} K, ${Math.floor(2 * light)} K`);
+  yes('the starlight is taken at albedo 0.3: 530 K is over twice 254.6 K, though under twice the 278.3 K of albedo 0', L.ownHeat(mk({ Teq: 530 })));
+  yes('with no starlight to hold it against, a listed temperature is not its own heat', !L.ownHeat(mk({ Teq: 900, Teff: null, Rs: null })));
+  yes('with no listed temperature, a planet not imaged is not', !L.ownHeat(mk({ Teq: null })) && !L.ownHeat(mk({})));
+});
+
 /* ---------- how both are printed ---------- */
 block('how both are printed', () => {
   const t = L.starlightText({ S: 0.7503, lo: 0.6, hi: 0.91, src: 'star' });

@@ -342,6 +342,16 @@ const MUTANTS = [
   ['the line under the name for hot', "hot: 'hotter than the habitable zone'", "hot: 'too hot'"],
   ['the line under the name for the optimistic zone', "opt: 'in the optimistic habitable zone', hot: 'hotter", "opt: 'in the habitable zone', hot: 'hotter"],
 
+  /* ---- a planet's own heat (moved here from find.js with the rule) ---- */
+  ['an imaged planet\'s listed temperature taken for an equilibrium', `  if (p.method === 'Imaging') return true;\n`, ``],
+  ['every planet not found by transit seen by its own heat', `if (p.method === 'Imaging') return true;`, `if (p.method !== 'Transit') return true;`],
+  ['a listed temperature never its own heat, past the method', `return isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t;`, `return false;`],
+  ['own heat from three times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 3;`],
+  ['own heat from one and a half times the starlight', `export const OWN_HEAT = 2;`, `export const OWN_HEAT = 1.5;`],
+  ['exactly twice the starlight counted as own heat', `p.Teq > OWN_HEAT * t;`, `p.Teq >= OWN_HEAT * t;`],
+  ['own heat said where the starlight is not known', `isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t;`, `isNum(p.Teq) && p.Teq > OWN_HEAT * t;`],
+  ['own heat held against the starlight at albedo 0', `const t = equilibriumTemp(p, 0.3);\n  return isNum(p.Teq)`, `const t = equilibriumTemp(p, 0);\n  return isNum(p.Teq)`],
+
   /* ---- where view D draws an orbit ---- */
   ['an orbit drawn with no zone', "if (!hz || !pos(a)) return 'unknown';", "if (!hz && !pos(a)) return 'unknown';"],
   ['the inner edge itself outside the band', "if (a >= hz.inner && a <= hz.outer) return 'cons';", "if (a > hz.inner && a <= hz.outer) return 'cons';"],

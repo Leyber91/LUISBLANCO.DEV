@@ -8,7 +8,7 @@
    ============================================================ */
 
 import { classify } from './data.js';
-import { equilibriumTemp, insolation, earthLikeness, sizeClassOf } from './science.js';
+import { equilibriumTemp, insolation, earthLikeness, sizeClassOf, ownHeat, OWN_HEAT } from './science.js';
 import { PHYS } from './config.js';
 import { int } from '../kit/format.js';
 import { starNum } from './starlight.js';
@@ -17,8 +17,8 @@ const isNum = (v) => typeof v === 'number' && isFinite(v);
 
 /* "cold" is an equilibrium temperature under COLD_K and "hot" one of HOT_K or more. */
 export const COLD_K = 200, HOT_K = 1000;
-/* A published temperature more than this many times what the starlight gives is the planet's own heat. */
-export const OWN_HEAT = 2;
+/* The bound of a planet's own heat, kept with its rule in starlight.js (ownHeat). */
+export { OWN_HEAT };
 
 /* The kind of world the picture draws for a planet, kept once per planet: its look, whether it is drawn
    with one face to its star, the label the page prints, and whether the archive holds a radius for it
@@ -34,18 +34,14 @@ export function kindOf(p) {
    the starlight at Bond albedo 0.3 (science.js equilibriumTemp), which needs the star's temperature and
    radius and the orbit, or the archive's insolation. Null when neither exists: a world with no published
    value whose star lacks a temperature or a radius is not given one.
-   Null too for a planet seen by its own heat. Those are young giants, most of them found by direct imaging
-   far from their stars: the starlight would leave them at a few kelvin while they glow at a thousand, and
-   the temperature the archive lists for them is their own. Two tests find them: the method is imaging, or
-   the published value is more than OWN_HEAT times what the starlight gives (bet Pic c, found by radial
-   velocity, is listed at 1,250 K where the starlight gives 268 K; on 2026-11-15 the archive had 64 such
-   worlds). Neither number is an equilibrium with starlight, so such a planet is not cold, not hot, and comes
-   last in an order by temperature. */
+   Null too for a planet seen by its own heat (starlight.js ownHeat, the rule the picture's label uses too:
+   the method is imaging, or the published value is more than OWN_HEAT times what the starlight gives; on
+   2026-11-15 the archive had 64 such worlds). Neither number is an equilibrium with starlight, so such a
+   planet is not cold, not hot, and comes last in an order by temperature. */
 export function tempOf(p) {
-  if (p.method === 'Imaging') return null;
-  const t = equilibriumTemp(p, 0.3);
-  if (isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t) return null;
+  if (ownHeat(p)) return null;
   if (isNum(p.Teq)) return { T: p.Teq, published: true };
+  const t = equilibriumTemp(p, 0.3);
   return isNum(t) ? { T: t, published: false } : null;
 }
 

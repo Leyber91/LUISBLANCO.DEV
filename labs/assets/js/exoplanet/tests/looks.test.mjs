@@ -12,7 +12,7 @@
    rule.
    ============================================================ */
 
-import { physics, classify, lookOf, toParams, zoneOf, fluidPalette, LOOKS, AIR_THIN, AIR_FULL, lockRadiusAU, TAU_EARTH, SHELL_STRETCH } from '../data.js';
+import { physics, classify, lookOf, toParams, zoneOf, fluidPalette, LOOKS, AIR_THIN, AIR_FULL, lockRadiusAU, TAU_EARTH, SHELL_STRETCH, OWN_HEAT_LABEL } from '../data.js';
 import { photopicFraction, semiMajor } from '../science.js';
 import { loadSnapshot } from '../catalog.js';
 import { readFileSync } from 'node:fs';
@@ -246,6 +246,29 @@ const by = Object.fromEntries(SOLAR.map((p) => [p.pl_name, p]));
   yes('a locked fluid world: hottest point 1.25 Teq, night 0.75 Teq (HD 209458 b)', c.look === 'fluid' && c.locked && Math.abs(prm.tsub - 1.25 * c.physics.Teq) < 1e-6 && Math.abs(prm.tnight - 0.75 * c.physics.Teq) < 1e-6, c.look + ' ' + prm.tsub + ' ' + prm.tnight + ' ' + c.physics.Teq);
   const cold = toParams({ ...by.Earth, pl_name: 'a cold Earth', pl_eqt: 30 }), cool = toParams({ ...by.Earth, pl_name: 'a cool Earth', pl_eqt: 100 });
   yes('the night side of a free world is 0.95 Teq with a floor of 40 K: 95 K at Teq 100 K, 40 K at Teq 30 K', Math.abs(cool.tnight - 95) < 1e-6 && cold.tnight === 40, cool.tnight + ' ' + cold.tnight);
+}
+
+/* ---- the name of a gas giant: by its temperature, or by its own heat (starlight.js ownHeat) ----
+   Around a Sun at 0.02 AU the starlight gives 1,800 K at albedo 0.3, so a listed temperature up to 3,600 K is an
+   equilibrium; at 5 AU it gives 114 K; at 2.7 AU 155 K, so a listed 1,250 K is the planet's own heat (bet Pic c's
+   numbers). */
+{
+  let n = 0;
+  const giant = (a, T, o = {}) => {
+    n++;
+    return { pl_name: `giant ${n}`, name: `giant ${n}`, host: `Giant host ${n}`, pl_rade: 12, R: 12, pl_masse: 300, M: 300, ...SUN, pl_orbsmax: a, a,
+      pl_orbper: 365.25 * Math.pow(a, 1.5), P: 365.25 * Math.pow(a, 1.5), pl_eqt: T, Teq: T, method: 'Transit', ...o };
+  };
+  const name = (a, T, o) => classify(giant(a, T, o)).label;
+  yes('over 1,200 K a hot Jupiter, 1,200 K itself warm', name(0.02, 1201) === 'Hot Jupiter' && name(0.02, 1200) === 'Warm gas giant', `${name(0.02, 1201)}, ${name(0.02, 1200)}`);
+  yes('over 800 K warm, 800 K itself a gas giant', name(0.02, 801) === 'Warm gas giant' && name(0.02, 800) === 'Gas giant', `${name(0.02, 801)}, ${name(0.02, 800)}`);
+  yes('under 150 K cold, 150 K itself a gas giant', name(5, 149) === 'Cold gas giant' && name(5, 150) === 'Gas giant', `${name(5, 149)}, ${name(5, 150)}`);
+  yes('a giant imaged 100 AU out and listed at 1,500 K is named by its own heat, not as a hot Jupiter', name(100, 1500, { method: 'Imaging' }) === OWN_HEAT_LABEL && OWN_HEAT_LABEL === 'Gas giant seen by its own heat', name(100, 1500, { method: 'Imaging' }));
+  yes('so is one imaged with no listed temperature, which the starlight alone would name cold', name(100, null, { method: 'Imaging' }) === OWN_HEAT_LABEL && name(100, null) === 'Cold gas giant', `${name(100, null, { method: 'Imaging' })}, ${name(100, null)}`);
+  yes('and one found by radial velocity at 2.7 AU listed at 1,250 K, while at 0.02 AU the same 1,250 K is a hot Jupiter', name(2.7, 1250, { method: 'Radial Velocity' }) === OWN_HEAT_LABEL && name(0.02, 1250, { method: 'Radial Velocity' }) === 'Hot Jupiter');
+  yes('its colour still follows the temperature listed for it, the one its clouds form at', physics(giant(100, 1500, { method: 'Imaging' })).Teq === 1500);
+  yes('a sub-Neptune and an ice giant keep their names, which say no temperature', classify(giant(100, 1500, { method: 'Imaging', pl_rade: 3, R: 3, pl_masse: 10, M: 10 })).label === 'Sub-Neptune'
+    && classify(giant(0.02, 1500, { pl_rade: 4.6, R: 4.6, pl_masse: 17, M: 17 })).label === 'Ice giant');
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

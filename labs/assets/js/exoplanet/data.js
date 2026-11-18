@@ -24,7 +24,7 @@
    (tests/looks.test.mjs).
    ============================================================ */
 
-import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, hzPosition, insolation, luminosity, seff, photopicFraction, semiMajor } from './science.js';
+import { forecastFor, starColour, sizeClassOf, limitOf, limitKind, habitableZone, hzPosition, insolation, luminosity, seff, photopicFraction, semiMajor, ownHeat } from './science.js';
 import { CHEN_KIPPING, KOPPARAPU } from './config.js';
 import { scenariosFor, bareDay, tsubForDay, fitMass, BARE, V_ESC_EARTH } from './air.js';
 
@@ -241,13 +241,19 @@ const LOOK_LABEL = {
   temperate: ['Temperate world with seas', 'Ocean world'],
   ice: ['Frozen world', 'Frozen world'],             // nothing in the archive shows an ocean under the ice
 };
+/* The words the search uses for the same planets (find.js). */
+export const OWN_HEAT_LABEL = 'Gas giant seen by its own heat';
 export function classify(p, opts = {}) {
   const ph = physics(p, opts);
   const look = lookOf(p, ph);
   let label;
   if (look === 'fluid') {
     label = ['Sub-Neptune', 'Ice giant', 'Gas giant'][ph.domClass - 2];
-    if (ph.domClass >= 4) label = ph.Teq > 1200 ? 'Hot Jupiter' : ph.Teq > 800 ? 'Warm gas giant' : ph.Teq < 150 ? 'Cold gas giant' : 'Gas giant';
+    // a gas giant is named by its temperature, except one whose listed temperature is its own heat (starlight.js
+    // ownHeat, the rule the search uses): on the snapshot of 2026-11-11 that names 99 giants, which were named by a
+    // temperature before, 45 of them "Hot Jupiter" (bet Pic c at 2.7 AU, the rest imaged 9 to 7,493 AU from their
+    // stars). Its colour still follows the temperature listed for it, the one its clouds form at.
+    if (ph.domClass >= 4) label = ownHeat(p) ? OWN_HEAT_LABEL : ph.Teq > 1200 ? 'Hot Jupiter' : ph.Teq > 800 ? 'Warm gas giant' : ph.Teq < 150 ? 'Cold gas giant' : 'Gas giant';
   } else if (look === 'molten') {
     label = ph.state === 'lava' ? 'Lava world' : 'Molten-surface world';
   } else {

@@ -364,6 +364,22 @@ export function teqOf(p, albedo = TEQ.albedo) {
 /* Its median, for the callers that need one number. */
 export const equilibriumTemp = (p, albedo = TEQ.albedo) => { const t = teqOf(p, albedo); return t ? t.med : null; };
 
+/* A published temperature more than this many times what the starlight gives is the planet's own heat. */
+export const OWN_HEAT = 2;
+/* Whether the temperature the archive lists for a planet is its own heat and not an equilibrium with its starlight.
+   Those are giants that still glow from their formation, most of them found by direct imaging far from their stars:
+   the starlight would leave them at a few kelvin, and the temperature the archive lists for them is their own
+   (1RXS J160929.1-210524 b, imaged at 330 AU, is listed at 1,700 K where the starlight gives 11 K). Two tests find
+   them: the method is imaging, or the published value is more than OWN_HEAT times what the starlight gives at Bond
+   albedo 0.3 (bet Pic c, found by radial velocity, is listed at 1,250 K where the starlight gives 269 K). The search
+   (find.js tempOf) gives such a planet no temperature to be found by, and the picture (data.js classify) does not
+   name it by one. */
+export function ownHeat(p) {
+  if (p.method === 'Imaging') return true;
+  const t = equilibriumTemp(p, 0.3);
+  return isNum(p.Teq) && isNum(t) && p.Teq > OWN_HEAT * t;
+}
+
 /* ---------- how the two are printed, everywhere ---------- */
 
 /* The one way the starlight and the luminosity are written: sig figures by the kit's num, and below 0.01, where num's
