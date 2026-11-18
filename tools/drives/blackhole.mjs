@@ -658,6 +658,10 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
   const settled = (expr) => p.until(`(() => { const a = window.__bh; return !a.store.anim && (${expr}); })()`, 8000);
   const shownScales = await p.ev(`['spin', 'incl', 'mass'].filter((id) => document.querySelector('#bh-sc-' + id).getClientRects().length)`);
 
+  // F4: the render's labels are drawn: a check that loops over the labels it finds passes on none (review_s4c 1: from
+  // d133f39 no label was drawn at any width, and every label check passed)
+  const labelWords = await p.ev(`[...document.querySelectorAll('#bh-overlay text')].map((t) => t.textContent.trim()).filter(Boolean)`);
+  p.check(`F4: the render's labels are drawn on M87* (${labelWords.length} lines): the shadow and the approaching side among them`, labelWords.length >= 4 && labelWords.some((w) => /^shadow/.test(w)) && labelWords.some((w) => /approaching side/.test(w)), JSON.stringify(labelWords.slice(0, 8)));
   // F1: sheet 1 has no bordered box but the title block
   if (!phone) {
     const boxes = await p.ev(BORDERED);
@@ -682,6 +686,19 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     const isco = +(txt.match(/ISCO ([\\d.]+)/) || [])[1], hor = +(txt.match(/horizon ([\\d.]+)/) || [])[1];
     return { moving: !!a.store.anim, txt, isco, hor, wantIsco: +K.isco(v.a, 1, v.q).toPrecision(3), wantHor: +K.horizon(v.a, v.q).toPrecision(3) }; })()`);
   p.check('F2: during an ease the spin hand reads the ISCO and horizon of the hole the picture shows (its eased spin and charge)', mid.moving && Math.abs(mid.isco - mid.wantIsco) < 0.006 && Math.abs(mid.hor - mid.wantHor) < 0.006, JSON.stringify(mid));
+  if (!phone) {
+    // and stands among the ISCO marks where its reading puts it: from a 0.3, Q 0.9 to M87* the marks were the target's
+    // while the hand read the eased hole (review_s4c 2)
+    await load('?o=custom&a=0.3&qq=0.9');
+    const among = await p.ev(`(async () => { const a = window.__bh; a.store.set(a.store.objectPatch('m87'), { dur: 1400 }); await new Promise((r) => setTimeout(r, 350));
+      const sp = document.querySelector('#bh-sc-spin'), h = +sp.querySelector('[data-hand]').dataset.hand;
+      const txt = [...sp.querySelectorAll('.hand text.val')].map((x) => x.textContent).join(''), isco = +(txt.match(/ISCO ([\\d.]+)/) || [])[1];
+      const marks = [...sp.querySelectorAll('[data-of="isco"]')].map((m) => [+m.dataset.r, +m.dataset.a]);
+      const wrong = marks.filter(([r, ma]) => Math.abs(isco - r) > 0.01 && Math.abs(h - ma) > 1e-3 && ((h < ma) !== (isco > r)));
+      return { moving: !!a.store.anim, hand: h, isco, marks, wrong }; })()`);
+    p.check('F2: during an ease the spin hand stands among the ISCO marks where its reading puts it', among.moving && among.wrong.length === 0, JSON.stringify(among));
+    await load();
+  }
   await load();
   p.check('F2: each hand is drawn where its scale\'s graduations put the state\'s value', drawnOk(d0), JSON.stringify(d0));
   if (shownScales.includes('mass')) {
@@ -696,11 +713,23 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     await settled('true');
     const kept = await p.ev(`[window.__bh.store.get('q'), window.__bh.store.get('a')]`);
     p.check('F2: at Q = 0.9 no ISCO or horizon mark lies past the spin the charge allows, and a drag past it keeps the charge', past.length === 0 && kept[0] === 0.9 && kept[1] <= Math.sqrt(0.996 - 0.81) + 1e-6, JSON.stringify({ past, kept }));
+    // a press at the ruler's far end keeps a small charge too: rounding to 3 digits once landed above the top and the
+    // store lowered Q (0.01 to 0, 0.05 to 0.045: review_s4c 3); aria's maximum is the charge's top
+    for (const qq of [0.01, 0.05, 0.2]) {
+      await load(`?o=custom&a=0.5&qq=${qq}`);
+      const end = await p.ev(`(() => { const s = document.querySelector('#bh-sc-spin'), r = s.getBoundingClientRect(), t = [...s.querySelectorAll('[data-tick]')].map((e) => +e.getAttribute('x1')); return [r.left + Math.max(...t) - 0.5, r.top + 30]; })()`);
+      await p.click(end[0], end[1]);
+      await settled('true');
+      const st = await p.ev(`[window.__bh.store.get('q'), window.__bh.store.get('a'), +document.querySelector('#bh-sc-spin').getAttribute('aria-valuemax')]`);
+      const top = Math.min(0.998, Math.sqrt(0.996 - qq * qq));
+      p.check(`F2: at Q = ${qq} a press at the ruler's end keeps the charge, and aria's maximum is its top (${top.toFixed(4)})`, st[0] === qq && st[1] <= top + 1e-9 && Math.abs(st[2] - top) < 1e-6, JSON.stringify(st));
+    }
     await load();
   }
 
   // F3: each scale is a slider a keyboard and a pointer can use, to its ends
-  p.check(`F3: the scales this window shows (${shownScales.join(', ')}): the spin always, all three at 1440 x 900`, shownScales.includes('spin') && (width !== 1440 || shownScales.length === 3), JSON.stringify(shownScales));
+  const winH = await p.ev('innerHeight');
+  p.check(`F3: the scales this window shows (${shownScales.join(', ')}): the spin always, all three from 1100 x 720 up (review_s4c 7)`, shownScales.includes('spin') && (phone || width < 1100 || winH < 720 || shownScales.length === 3), JSON.stringify({ shownScales, width, winH }));
   const SCALES = [['spin', 'a', 0.01, 0, 0.998], ['incl', 'incl', 1, 1, 179], ['mass', 'mass', 0.1, -19, 11]].filter(([id]) => shownScales.includes(id));
   for (const [id, key, step, min, max] of SCALES) {
     const aria = await p.ev(`(() => { const e = document.querySelector('#bh-sc-${id}'); return [e.getAttribute('role'), +e.getAttribute('aria-valuemin'), +e.getAttribute('aria-valuemax'), e.getAttribute('aria-valuetext') || '', e.getAttribute('aria-orientation')]; })()`);
@@ -764,11 +793,13 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
       const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).display !== 'none';
       for (const n of [2, 3, 4]) { document.querySelector('.bh-tab[data-sheet="' + n + '"]').click(); await wait();
         const cap = document.querySelector('#bh-caption').getBoundingClientRect(), col = document.querySelector(n === 2 ? '#bh-right' : '#bh-left').getBoundingClientRect();
-        out[n] = { left: shown(document.querySelector('#bh-left')), right: shown(document.querySelector('#bh-right')), keep: shown(document.querySelector('#bh-keep')), capW: Math.round(cap.width), capClear: cap.right <= col.left + 1 || cap.left >= col.right - 1 }; }
+        const tbTop = document.querySelector('#bh-tb').getBoundingClientRect().top;
+        out[n] = { left: shown(document.querySelector('#bh-left')), right: shown(document.querySelector('#bh-right')), keep: shown(document.querySelector('#bh-keep')), capW: Math.round(cap.width), capClear: cap.right <= col.left + 1 || cap.left >= col.right - 1, colAboveTabs: col.bottom <= tbTop + 1 || col.left >= document.querySelector('#bh-tb').getBoundingClientRect().right || col.right <= document.querySelector('#bh-tb').getBoundingClientRect().left }; }
       document.querySelector('.bh-tab[data-sheet="1"]').click(); await wait();
       out[1] = { object: document.querySelectorAll('#bh-hl .bh-opt').length }; return out; })()`);
     p.check('F6: sheet 2 shows the readouts column, sheet 3 the settings column, sheet 4 the record; sheet 1 names object, view and colour', c14[2].right && c14[3].left && c14[4].keep && c14[1].object >= 12, JSON.stringify(c14));
     p.check('F6: on sheets 2 and 3 the caption keeps 300 px or more beside the column shown, and clear of it (review_s4b 8)', [2, 3].every((n) => c14[n].capW >= 300 && c14[n].capClear), JSON.stringify([c14[2], c14[3]]));
+    p.check('F6: on sheets 2, 3 and 4 the column ends above the title block\'s tabs (review_s4c 5)', [2, 3, 4].every((n) => c14[n].colAboveTabs), JSON.stringify([c14[2], c14[3], c14[4]].map((x) => x.colAboveTabs)));
     // the tabs by keyboard: the right arrow moves to the next sheet
     await p.ev(`document.querySelector('.bh-tab[data-sheet="1"]').focus()`);
     await p.key('ArrowRight');
@@ -844,13 +875,15 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     await p.until(`!document.querySelector('#bh-keep').disabled`, 8000);
     // two holes of one's own and M87*, kept: the strip's captions tell them apart (review_s4b 5: every hole of one's own
     // read "a hole of your own, cinematic"), and the grown strip lies on no part (review_s4b 2)
-    for (const q of ['?o=custom&m=7', '?o=custom&m=8', '?o=m87']) {
+    for (const q of ['?o=custom&m=7', '?o=m87', '?o=m87&c=redshift']) {
       await load(q);
       if (await p.ev(`document.querySelector('#bh-keep').getAttribute('aria-pressed') !== 'true'`)) { const c = await centre('#bh-keep2'); await p.click(c[0], c[1]); await p.until(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'true'`, 15000); }
     }
     await p.sleep(600);
-    const caps = await p.ev(`[...document.querySelectorAll('#bh-strip .bh-fr .cap')].map((c) => c.textContent)`);
-    p.check('F7: the strip\'s captions tell its kept holes apart', caps.length === 3 && new Set(caps).size === 3, JSON.stringify(caps));
+    // as a visitor sees them: none cut by its box, and no two alike (review_s4c 4: the ellipsis cut the spin off, and M87*
+    // in two colours read alike)
+    const caps = await p.ev(`[...document.querySelectorAll('#bh-strip .bh-fr .cap')].map((c) => [c.textContent, c.scrollWidth <= c.clientWidth + 1 && c.scrollHeight <= c.clientHeight + 1])`);
+    p.check('F7: the strip\'s captions tell its kept holes apart as they are seen: none cut, no two alike', caps.length === 3 && new Set(caps.map((c) => c[0])).size === 3 && caps.every((c) => c[1]), JSON.stringify(caps));
     const lay2 = await p.ev(LAYOUT);
     p.check('F4: with three kept frames in the strip, no part on another and no words on words', lay2.pairs.length === 0 && lay2.crossed.length === 0, JSON.stringify(lay2));
   }
