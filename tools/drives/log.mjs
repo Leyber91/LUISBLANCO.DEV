@@ -23,6 +23,7 @@
 // No model is called and nothing leaves the page's own origin: the guard below runs before the page's own
 // scripts in every document, and refuses every such request.
 import { exomaniaRules } from './exomania.mjs';
+import { seedRandom, buildPrograms } from './survey.mjs';
 
 /* ---- run before the page's own scripts, in every document the drive opens ---- */
 
@@ -136,9 +137,11 @@ function skipSeen() { const a = document.activeElement, b = a.getBoundingClientR
 /* ---- the scenario ---- */
 
 export default async function log(p, { base }) {
+  await p.before(`(${guard})()`);
+  await seedRandom(p);
+  await buildPrograms(p, { base });   // before any frame is judged (tools/drives/survey.mjs, ticket 2.22)
   for (const [n, e] of exomaniaRules()) p.invariant(n, e);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
-  await p.before(`(${guard})()`);
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
   const state = () => call(pageState);
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);

@@ -223,5 +223,900 @@
     "name": "selftest: a hang after a failed check ends as timed out",
     "from": "process.exit(failed() ? 1 : WATCHDOG_EXIT); }, ms).unref();",
     "to": "process.exit(WATCHDOG_EXIT); }, ms).unref();"
+  },
+  {
+    "name": "args: a misspelt flag is taken",
+    "from": "if (!k) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "args: a flag with no value is taken",
+    "from": "if (!v || v.startsWith('--')) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "args: a flag with an empty value is taken",
+    "from": "if (!v || v.startsWith('--')) throw usage(",
+    "to": "if (v === undefined || v.startsWith('--')) throw usage("
+  },
+  {
+    "name": "args: a flag whose value is the next flag takes it",
+    "from": "if (!v || v.startsWith('--')) throw usage(",
+    "to": "if (!v) throw usage("
+  },
+  {
+    "name": "args: a flag's value is read again as a lab name",
+    "from": "    opts[k] = v;\n    i++;",
+    "to": "    opts[k] = v;"
+  },
+  {
+    "name": "args: the words are read one past their end",
+    "from": "for (let i = 0; i < args.length; i++) {",
+    "to": "for (let i = 0; i <= args.length; i++) {"
+  },
+  {
+    "name": "args: no lab name is taken",
+    "from": "if (names.length !== 1) throw usage(",
+    "to": "if (names.length > 1) throw usage("
+  },
+  {
+    "name": "args: two lab names are taken",
+    "from": "if (names.length !== 1) throw usage(",
+    "to": "if (names.length < 1) throw usage("
+  },
+  {
+    "name": "pair run: no flag makes a run of pairs",
+    "from": "Object.keys(opts).length > 0;",
+    "to": "Object.keys(opts).length >= 0;"
+  },
+  {
+    "name": "pair run: one flag does not make a run of pairs",
+    "from": "Object.keys(opts).length > 0;",
+    "to": "Object.keys(opts).length > 1;"
+  },
+  {
+    "name": "plan: an empty --scenario is the lab's own",
+    "from": "(o.scenario ?? lab.name)",
+    "to": "(o.scenario || lab.name)"
+  },
+  {
+    "name": "plan: an empty --widths is the default sizes",
+    "from": "(o.widths ?? '1440x900,390x844')",
+    "to": "(o.widths || '1440x900,390x844')"
+  },
+  {
+    "name": "plan: the default sizes are 1440x900 and 390x845",
+    "from": "(o.widths ?? '1440x900,390x844')",
+    "to": "(o.widths ?? '1440x900,390x845')"
+  },
+  {
+    "name": "plan: a drive's default limit is 301 s",
+    "from": "Number(o.timeout ?? 300)",
+    "to": "Number(o.timeout ?? 301)"
+  },
+  {
+    "name": "plan: the default budget is 541 s",
+    "from": "Number(o.budget ?? 540)",
+    "to": "Number(o.budget ?? 541)"
+  },
+  {
+    "name": "plan: the default memory floor is 1 GB",
+    "from": "Number(o.minFreeGb ?? 2)",
+    "to": "Number(o.minFreeGb ?? 1)"
+  },
+  {
+    "name": "plan: an empty scenario name is taken",
+    "from": "if (scenarios.some((s) => !s)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "plan: a size of any form is taken",
+    "from": "if (bad !== undefined) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "plan: an empty size is taken",
+    "from": "if (bad !== undefined) throw usage(",
+    "to": "if (bad !== undefined && bad !== '') throw usage("
+  },
+  {
+    "name": "plan: a size of 0, or with a leading 0, is taken",
+    "from": "const bad = sizes.find((s) => !/^[1-9]\\d*x[1-9]\\d*$/.test(s));",
+    "to": "const bad = sizes.find((s) => !/^\\d+x\\d+$/.test(s));"
+  },
+  {
+    "name": "plan: a size with more after it is taken",
+    "from": "const bad = sizes.find((s) => !/^[1-9]\\d*x[1-9]\\d*$/.test(s));",
+    "to": "const bad = sizes.find((s) => !/^[1-9]\\d*x[1-9]\\d*/.test(s));"
+  },
+  {
+    "name": "plan: a timeout of 0 is taken",
+    "from": "if (!(each > 0)) throw usage(",
+    "to": "if (!(each >= 0)) throw usage("
+  },
+  {
+    "name": "plan: a timeout that is not a number is taken",
+    "from": "if (!(each > 0)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "plan: a budget under the timeout by less than 1 s is taken",
+    "from": "if (!(budget >= each)) throw usage(",
+    "to": "if (!(budget >= each - 1)) throw usage("
+  },
+  {
+    "name": "plan: a budget equal to the timeout is refused",
+    "from": "if (!(budget >= each)) throw usage(",
+    "to": "if (!(budget > each)) throw usage("
+  },
+  {
+    "name": "plan: a budget that is not a number is taken",
+    "from": "if (!(budget >= each)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "plan: a negative memory floor is taken",
+    "from": "if (!(floor >= 0)) throw usage(",
+    "to": "if (!(floor >= -1)) throw usage("
+  },
+  {
+    "name": "plan: a memory floor of 0 is refused",
+    "from": "if (!(floor >= 0)) throw usage(",
+    "to": "if (!(floor > 0)) throw usage("
+  },
+  {
+    "name": "plan: a memory floor that is not a number is taken",
+    "from": "if (!(floor >= 0)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "plan: a drive's limit in seconds is taken as ms",
+    "from": "each: each * 1000,",
+    "to": "each: each,"
+  },
+  {
+    "name": "plan: the budget in seconds is taken as ms",
+    "from": "budget: budget * 1000,",
+    "to": "budget: budget,"
+  },
+  {
+    "name": "plan: the memory floor is in MB, not GB",
+    "from": "floor: floor * 2 ** 30 };",
+    "to": "floor: floor * 2 ** 20 };"
+  },
+  {
+    "name": "tree: a name with a slash in it is a folder under _labs_wt",
+    "from": "(/^[\\w-]+$/.test(t) ?",
+    "to": "(/^[\\w-]+/.test(t) ?"
+  },
+  {
+    "name": "tree: a bare name is a path from where the command runs",
+    "from": "(/^[\\w-]+$/.test(t) ?",
+    "to": "(false ?"
+  },
+  {
+    "name": "state: a checkout with no commit is read as clean",
+    "from": "  if (!head.ok) return null;",
+    "to": "  if (false) return null;"
+  },
+  {
+    "name": "state: untracked files are not listed",
+    "from": "'--untracked-files=all'",
+    "to": "'--untracked-files=no'"
+  },
+  {
+    "name": "state: a folder git does not track is listed as one path",
+    "from": "'--untracked-files=all'",
+    "to": "'--untracked-files=normal'"
+  },
+  {
+    "name": "state: an index git cannot read is read as clean",
+    "from": "if (st.status !== 0) return null;",
+    "to": "if (st.status < 0) return null;"
+  },
+  {
+    "name": "state: a listed path keeps its status letters",
+    "from": ".map((e) => e.slice(3)).sort() };",
+    "to": ".map((e) => e.slice(2)).sort() };"
+  },
+  {
+    "name": "state: an empty entry is listed",
+    "from": ".split('\\0').filter(Boolean).map((e) => e.slice(3))",
+    "to": ".split('\\0').map((e) => e.slice(3))"
+  },
+  {
+    "name": "state: the paths are in git's order, the staged before the untracked",
+    "from": ".map((e) => e.slice(3)).sort() };",
+    "to": ".map((e) => e.slice(3)) };"
+  },
+  {
+    "name": "state: the top is the tree, not the checkout's top",
+    "from": "return { head: head.out, root: root.out, paths:",
+    "to": "return { head: head.out, root: tree, paths:"
+  },
+  {
+    "name": "state: the head is given at 20 characters",
+    "from": "['rev-parse', '--short=12', 'HEAD']",
+    "to": "['rev-parse', '--short=20', 'HEAD']"
+  },
+  {
+    "name": "state: no listing is read as one",
+    "from": "  if (!diff) return null;",
+    "to": "  if (false) return null;"
+  },
+  {
+    "name": "state: a clean checkout gets a hash",
+    "from": "  if (!diff.paths.length) return diff.head;",
+    "to": "  if (false) return diff.head;"
+  },
+  {
+    "name": "state: a path's name is not in the hash",
+    "from": "    h.update(`${f}\\0`);",
+    "to": "    void 0;"
+  },
+  {
+    "name": "state: a file's content is not in the hash",
+    "from": "try { h.update(fs.readFileSync(path.join(diff.root, f))); }",
+    "to": "try { fs.readFileSync(path.join(diff.root, f)); }"
+  },
+  {
+    "name": "state: a deleted file hashes as an empty one",
+    "from": "catch { h.update('\\0no file\\0'); }",
+    "to": "catch { /* gone */ }"
+  },
+  {
+    "name": "state: the hash is cut to 9 characters",
+    "from": "h.digest('hex').slice(0, 10)}",
+    "to": "h.digest('hex').slice(0, 9)}"
+  },
+  {
+    "name": "server: the port is read only from the first line",
+    "from": "/^Serving HTTP on \\S+ port (\\d+) /m.exec(text)",
+    "to": "/^Serving HTTP on \\S+ port (\\d+) /.exec(text)"
+  },
+  {
+    "name": "server: a text with no port gives a port",
+    "from": "return m ? Number(m[1]) : 0; }",
+    "to": "return m ? Number(m[1]) : 8000; }"
+  },
+  {
+    "name": "server: one that says no port in its time is left running",
+    "from": "const timer = setTimeout(() => fail(",
+    "to": "const timer = setTimeout(() => refuse("
+  },
+  {
+    "name": "server: one that says no port is refused twenty times later",
+    "from": "s`), ms);",
+    "to": "s`), ms * 20);"
+  },
+  {
+    "name": "server: one that cannot start is waited for",
+    "from": "child.on('error', (e) => fail(e.message));",
+    "to": "child.on('error', () => {});"
+  },
+  {
+    "name": "server: the first line with a port is not taken",
+    "from": "      if (!port) return;",
+    "to": "      if (port) return;"
+  },
+  {
+    "name": "out: a folder named ..foo in the tree is outside it",
+    "from": "return /^\\.\\.([\\\\/]|$)/.test(rel) || p.isAbsolute(rel); }",
+    "to": "return /^\\.\\./.test(rel) || p.isAbsolute(rel); }"
+  },
+  {
+    "name": "out: the tree's parent is inside it",
+    "from": "return /^\\.\\.([\\\\/]|$)/.test(rel) || p.isAbsolute(rel); }",
+    "to": "return /^\\.\\.[\\\\/]/.test(rel) || p.isAbsolute(rel); }"
+  },
+  {
+    "name": "out: a folder on another drive is inside the tree",
+    "from": "return /^\\.\\.([\\\\/]|$)/.test(rel) || p.isAbsolute(rel); }",
+    "to": "return /^\\.\\.([\\\\/]|$)/.test(rel); }"
+  },
+  {
+    "name": "summary: a line with a field more is read",
+    "from": "if (c.length === ROW && (",
+    "to": "if (c.length >= ROW && ("
+  },
+  {
+    "name": "summary: a line cut short is read",
+    "from": "if (c.length === ROW && (",
+    "to": "if (c.length <= ROW && ("
+  },
+  {
+    "name": "summary: a status that only begins with ok is read",
+    "from": "(c[4] === 'ok' || c[4] === 'FAIL')",
+    "to": "(c[4].startsWith('ok') || c[4] === 'FAIL')"
+  },
+  {
+    "name": "summary: a status that only begins with F is read",
+    "from": "(c[4] === 'ok' || c[4] === 'FAIL')",
+    "to": "(c[4] === 'ok' || c[4].startsWith('F'))"
+  },
+  {
+    "name": "summary: a line needs both statuses at once",
+    "from": "(c[4] === 'ok' || c[4] === 'FAIL')",
+    "to": "(c[4] === 'ok' && c[4] === 'FAIL')"
+  },
+  {
+    "name": "summary: a CR at the end of a line is kept",
+    "from": "const c = line.replace(/\\r$/, '').split('\\t');",
+    "to": "const c = line.split('\\t');"
+  },
+  {
+    "name": "summary: the first line of a pair wins",
+    "from": "rows.set(c.slice(0, 4).join('\\t'), c);",
+    "to": "rows.has(c.slice(0, 4).join('\\t')) || rows.set(c.slice(0, 4).join('\\t'), c);"
+  },
+  {
+    "name": "pair leaves: the state is not read",
+    "from": "state: treeState,",
+    "to": "state: () => 'k',"
+  },
+  {
+    "name": "pair leaves: no server is started",
+    "from": "serve: serveTree,",
+    "to": "serve: async () => ({ port: 0, stop() {} }),"
+  },
+  {
+    "name": "pair leaves: free memory is taken to be plenty",
+    "from": "free: os.freemem,",
+    "to": "free: () => 2 ** 40,"
+  },
+  {
+    "name": "pair leaves: the clock stands still",
+    "from": "now: Date.now,",
+    "to": "now: () => 0,"
+  },
+  {
+    "name": "pair leaves: results go to the temp folder, not the shots folder",
+    "from": "shots: SHOTS,",
+    "to": "shots: os.tmpdir(),"
+  },
+  {
+    "name": "pair leaves: a lab's worktree is its name",
+    "from": "wt: wtPath,",
+    "to": "wt: (lab) => lab.name,"
+  },
+  {
+    "name": "pair leaves: the run says nothing",
+    "from": "say: (line) => console.log(line) };",
+    "to": "say: () => {} };"
+  },
+  {
+    "name": "pairs: the run's leaves are only the ones it was handed",
+    "from": "const t = { ...PAIR_LEAVES, ...seams };",
+    "to": "const t = { ...seams };"
+  },
+  {
+    "name": "pairs: an error is not said",
+    "from": "catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); return e.code === 2 ? 2 : 1; }",
+    "to": "catch (e) { return e.code === 2 ? 2 : 1; }"
+  },
+  {
+    "name": "pairs: an error nobody expected is said without where it came from",
+    "from": "(e.stack || e.message)); return e.code",
+    "to": "(e.stack && e.message)); return e.code"
+  },
+  {
+    "name": "pairs: an ending the tool chose is said with a stack",
+    "from": "console.error(e.expected ? e.message : (e.stack || e.message)); return e.code",
+    "to": "console.error(e.stack || e.message); return e.code"
+  },
+  {
+    "name": "pairs: an error with a code of its own ends as a usage error",
+    "from": "return e.code === 2 ? 2 : 1; }",
+    "to": "return e.code !== 1 ? 2 : 1; }"
+  },
+  {
+    "name": "pairs: a usage error ends with exit code 1",
+    "from": "return e.code === 2 ? 2 : 1; }",
+    "to": "return 1; }"
+  },
+  {
+    "name": "pairs: a tree that is not there is taken",
+    "from": "if (!fs.existsSync(tree)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "pairs: a tree with no tools/drive.mjs is taken",
+    "from": "if (!fs.existsSync(driver)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "pairs: a tree git cannot read is driven",
+    "from": "if (!key) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "pairs: the out folder given is replaced by the default",
+    "from": "path.resolve(o.out ?? path.join(t.shots, lab.name, `drive-${key}`))",
+    "to": "path.resolve(o.out && path.join(t.shots, lab.name, `drive-${key}`))"
+  },
+  {
+    "name": "pairs: an out folder inside the tree is taken",
+    "from": "if (!outside(tree, out)) throw usage(",
+    "to": "if (false) throw usage("
+  },
+  {
+    "name": "pairs: a scenario's path is read as a name in the tree's drives",
+    "from": "(s.endsWith('.mjs') ? path.resolve(s) :",
+    "to": "(false ? path.resolve(s) :"
+  },
+  {
+    "name": "pairs: a scenario that is not there is taken",
+    "from": "for (const f of files) if (!fs.existsSync(f)) throw usage(",
+    "to": "for (const f of files) if (false) throw usage("
+  },
+  {
+    "name": "pairs: a scenario's content is not in its pair's key",
+    "from": "id: [key, name, hash, size].join('\\t')",
+    "to": "id: [key, name, 'h', size].join('\\t')"
+  },
+  {
+    "name": "pairs: the tree's state is not in a pair's key",
+    "from": "id: [key, name, hash, size].join('\\t')",
+    "to": "id: ['k', name, hash, size].join('\\t')"
+  },
+  {
+    "name": "pairs: a scenario at a size asked for twice is taken",
+    "from": "if (new Set(named).size !== named.length) throw usage(",
+    "to": "if (new Set(named).size < named.length - 1) throw usage("
+  },
+  {
+    "name": "pairs: a pair that failed counts as passed",
+    "from": "rows.get(p.id)?.[4] === 'ok';",
+    "to": "rows.get(p.id)?.[4] !== undefined;"
+  },
+  {
+    "name": "pairs: a pair that passed is driven again",
+    "from": "const todo = [...pairs.filter((p) => !rows.has(p.id)), ...pairs.filter((p) => rows.has(p.id) && !passed(p))];",
+    "to": "const todo = pairs;"
+  },
+  {
+    "name": "pairs: a pair that failed is not driven again",
+    "from": "const todo = [...pairs.filter((p) => !rows.has(p.id)), ...pairs.filter((p) => rows.has(p.id) && !passed(p))];",
+    "to": "const todo = [...pairs.filter((p) => !rows.has(p.id))];"
+  },
+  {
+    "name": "pairs: a pair that failed is driven before the pairs never driven",
+    "from": "const todo = [...pairs.filter((p) => !rows.has(p.id)), ...pairs.filter((p) => rows.has(p.id) && !passed(p))];",
+    "to": "const todo = [...pairs.filter((p) => rows.has(p.id) && !passed(p)), ...pairs.filter((p) => !rows.has(p.id))];"
+  },
+  {
+    "name": "pairs: a server starts when there is nothing to drive",
+    "from": "  if (todo.length) {",
+    "to": "  if (true) {"
+  },
+  {
+    "name": "pairs: a tree whose drive.mjs has no drive is driven",
+    "from": "if (typeof drive !== 'function') throw expected(",
+    "to": "if (typeof drive === 'number') throw expected("
+  },
+  {
+    "name": "pairs: a scenario with no default export is taken",
+    "from": "if (typeof s !== 'function') throw usage(",
+    "to": "if (typeof s === 'number') throw usage("
+  },
+  {
+    "name": "pairs: the server is left running when the process exits inside a drive",
+    "from": "process.on('exit', stopAtExit);",
+    "to": "void 0;"
+  },
+  {
+    "name": "pairs: every run leaves an exit listener behind",
+    "from": "process.off('exit', stopAtExit);",
+    "to": "void 0;"
+  },
+  {
+    "name": "lock: the lock taken is not the one the run was handed",
+    "from": "say: t.say, hold: t.hold });",
+    "to": "say: t.say });"
+  },
+  {
+    "name": "lock: the wait for the lock is said nowhere",
+    "from": "say: t.say, hold: t.hold });",
+    "to": "say: () => {}, hold: t.hold });"
+  },
+  {
+    "name": "lock: a lock still held ends the run as an error",
+    "from": "} catch (e) { if (!e.expected) throw e; why = e.message; break; }",
+    "to": "} catch (e) { throw e; }"
+  },
+  {
+    "name": "drive: every pair's pictures go to one folder",
+    "from": "{ base: `http://127.0.0.1:${srv.port}`, out: dir,",
+    "to": "{ base: `http://127.0.0.1:${srv.port}`, out,"
+  },
+  {
+    "name": "drive: it is told another server",
+    "from": "base: `http://127.0.0.1:${srv.port}`",
+    "to": "base: 'http://127.0.0.1:8000'"
+  },
+  {
+    "name": "drive: its time limit is not passed",
+    "from": "timeoutMs: plan.each, say: (m)",
+    "to": "say: (m)"
+  },
+  {
+    "name": "drive: what it says is not kept",
+    "from": "say: (m) => fs.appendFileSync(log, `${m}\\n`) });",
+    "to": "say: () => {} });"
+  },
+  {
+    "name": "drive: its file of lines is not started afresh",
+    "from": "fs.writeFileSync(log, '');",
+    "to": "void 0;"
+  },
+  {
+    "name": "drive: the size is not read",
+    "from": "const [width, height] = p.size.split('x').map(Number)",
+    "to": "const [width, height] = [1440, 900]"
+  },
+  {
+    "name": "drive: one that throws ends the run",
+    "from": "catch (e) { r = { checks: [{ name: 'the drive ran to its end', ok: false, detail: String((e && e.stack) || e) }], timedOut: false }; }",
+    "to": "catch (e) { throw e; }"
+  },
+  {
+    "name": "drive: its error is kept without where it came from",
+    "from": "String((e && e.stack) || e)",
+    "to": "String((e && e.stack) && e)"
+  },
+  {
+    "name": "drive: its seconds are not counted",
+    "from": "took = Math.round((t.now() - s0) / 1000);",
+    "to": "took = 0;"
+  },
+  {
+    "name": "status: a drive stopped at its limit passes",
+    "from": "const status = r.timedOut || !r.checks.length || bad.length ? 'FAIL' : 'ok';",
+    "to": "const status = !r.checks.length || bad.length ? 'FAIL' : 'ok';"
+  },
+  {
+    "name": "status: a drive that ran no check passes",
+    "from": "const status = r.timedOut || !r.checks.length || bad.length ? 'FAIL' : 'ok';",
+    "to": "const status = r.timedOut || bad.length ? 'FAIL' : 'ok';"
+  },
+  {
+    "name": "status: a failed check passes",
+    "from": "const status = r.timedOut || !r.checks.length || bad.length ? 'FAIL' : 'ok';",
+    "to": "const status = r.timedOut || !r.checks.length ? 'FAIL' : 'ok';"
+  },
+  {
+    "name": "pairs: a result is not kept in the summary",
+    "from": "fs.appendFileSync(sum, `${row}\\n`);",
+    "to": "void 0;"
+  },
+  {
+    "name": "pairs: a result is not counted in this run",
+    "from": "rows.set(p.id, row.split('\\t'));",
+    "to": "void 0;"
+  },
+  {
+    "name": "pairs: a drive's line is not said",
+    "from": "t.say(`${status.padEnd(4)} ${p.name}",
+    "to": "void (`${status.padEnd(4)} ${p.name}"
+  },
+  {
+    "name": "pairs: a stop at the limit is not said",
+    "from": "if (r.timedOut) t.say(",
+    "to": "if (false) t.say("
+  },
+  {
+    "name": "pairs: a drive that ran no check is not said",
+    "from": "if (!r.checks.length) t.say(",
+    "to": "if (false) t.say("
+  },
+  {
+    "name": "pairs: the failed checks are not said",
+    "from": "for (const c of bad.slice(0, 8)) t.say(",
+    "to": "for (const c of []) t.say("
+  },
+  {
+    "name": "pairs: a failed check's detail is not said",
+    "from": "t.say(`  FAIL ${c.name}${c.detail ?",
+    "to": "t.say(`  FAIL ${c.name}${false ?"
+  },
+  {
+    "name": "pairs: a pair with no result is not said at the end",
+    "from": ": `---- ${p.name} ${p.size}: no result yet`);",
+    "to": ": '');"
+  },
+  {
+    "name": "pairs: a pair's result is not said at the end",
+    "from": "t.say(c ? `${c[4].padEnd(4)} ${p.name} ${p.size}: ${c[5]} ok, ${c[6]} FAIL, ${c[7]} s` :",
+    "to": "t.say(c ? '' :"
+  },
+  {
+    "name": "pairs: pairs with no result end with exit code 1",
+    "from": ": run the same command again`); return 3; }",
+    "to": ": run the same command again`); return 1; }"
+  },
+  {
+    "name": "pairs: pairs with no result end with exit code 0",
+    "from": "  if (left.length) { t.say(",
+    "to": "  if (false) { t.say("
+  },
+  {
+    "name": "pairs: a failed pair ends with exit code 0",
+    "from": "  if (failed.length) { t.say(",
+    "to": "  if (false) { t.say("
+  },
+  {
+    "name": "pairs: why a run stopped is not said",
+    "from": "yet${why ? ` (${why})` : ''}",
+    "to": "yet${''}"
+  },
+  {
+    "name": "pairs: a failure does not say why some were not driven again",
+    "from": "${why ? `, not all driven again (${why})` : ''}",
+    "to": "${''}"
+  },
+  {
+    "name": "selftest: the part that exits inside a drive does not run",
+    "from": "if (what === 'pairs-exit') {",
+    "to": "if (what === 'pairs-exit-not') {"
+  },
+  {
+    "name": "server: one that ended is killed when stopped",
+    "from": "const stop = () => { if (!ended) end(child.pid); };",
+    "to": "const stop = () => { end(child.pid); };"
+  },
+  {
+    "name": "server: one that ended before it said a port is waited for",
+    "from": "    child.on('exit', (code) => { ended = true; refuse(`it ended with exit code ${code}`); });",
+    "to": "    child.on('exit', (code) => { ended = true; });"
+  },
+  {
+    "name": "server: one that ended reads as running",
+    "from": "child.on('exit', (code) => { ended = true; refuse(",
+    "to": "child.on('exit', (code) => { refuse("
+  },
+  {
+    "name": "server: it always reads as running",
+    "from": "resolve({ port, stop, alive: () => !ended });",
+    "to": "resolve({ port, stop, alive: () => true });"
+  },
+  {
+    "name": "server: its stop ends nothing",
+    "from": "const stop = () => { if (!ended) end(child.pid); };",
+    "to": "const stop = () => {};"
+  },
+  {
+    "name": "pairs: the budget counts from after the state is read",
+    "from": "const latest = t0 + plan.budget - plan.each;",
+    "to": "const latest = t.now() + plan.budget - plan.each;"
+  },
+  {
+    "name": "pairs: the server is left running after the run",
+    "from": "      const running = srv.alive();\n      srv.stop();",
+    "to": "      const running = srv.alive();"
+  },
+  {
+    "name": "pairs: nothing is said about the server it stopped",
+    "from": "t.say(running ? `stopped the server this drive started on port ${srv.port}` : `the server this drive started on port ${srv.port} had ended by itself`);",
+    "to": "void 0;"
+  },
+  {
+    "name": "pairs: a server that ended by itself is said to be stopped",
+    "from": "      const running = srv.alive();",
+    "to": "      const running = true;"
+  },
+  {
+    "name": "budget: the first pair waits for room in the budget too",
+    "from": "if (kept && t.now() > latest) {",
+    "to": "if (t.now() > latest) {"
+  },
+  {
+    "name": "budget: a pair that just fits the budget is not started",
+    "from": "if (kept && t.now() > latest) {",
+    "to": "if (kept && t.now() >= latest) {"
+  },
+  {
+    "name": "budget: a pair 1 ms past the budget is started",
+    "from": "if (kept && t.now() > latest) {",
+    "to": "if (kept && t.now() > latest + 1) {"
+  },
+  {
+    "name": "lock: the drive runs outside the lock",
+    "from": "await withChromeLock(async () => {\n            const freeNow = t.free();",
+    "to": "await ((fn) => fn())(async () => {\n            const freeNow = t.free();"
+  },
+  {
+    "name": "lock: the lock is waited for 20 minutes, not what the budget leaves",
+    "from": "}, { waitMs: Math.max(0, latest - t.now()), say: t.say, hold: t.hold });",
+    "to": "}, { say: t.say, hold: t.hold });"
+  },
+  {
+    "name": "lock: a wait the budget has no room for is negative",
+    "from": "Math.max(0, latest - t.now())",
+    "to": "(latest - t.now())"
+  },
+  {
+    "name": "memory: memory is not read again with the lock held",
+    "from": "if (freeNow < plan.floor) { low = freeNow; return; }",
+    "to": "if (false) { low = freeNow; return; }"
+  },
+  {
+    "name": "memory: with the lock held, a drive does not start at the floor",
+    "from": "if (freeNow < plan.floor) { low = freeNow; return; }",
+    "to": "if (freeNow <= plan.floor) { low = freeNow; return; }"
+  },
+  {
+    "name": "memory: with the lock held, a drive starts 1 byte under the floor",
+    "from": "if (freeNow < plan.floor) { low = freeNow; return; }",
+    "to": "if (freeNow < plan.floor - 1) { low = freeNow; return; }"
+  },
+  {
+    "name": "memory: under the floor with the lock held the drive still starts",
+    "from": "{ low = freeNow; return; }",
+    "to": "{ low = freeNow; }"
+  },
+  {
+    "name": "memory: under the floor with the lock held the later pairs still start",
+    "from": "if (low !== null) { why = short(low); break; }",
+    "to": "if (low !== null) { why = short(low); continue; }"
+  },
+  {
+    "name": "memory: no free memory at all with the lock held is not under the floor",
+    "from": "if (low !== null) { why = short(low); break; }",
+    "to": "if (low > 0) { why = short(low); break; }"
+  },
+  {
+    "name": "memory: memory short until the latest start lets a later pair start past it",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (free < plan.floor) { why = short(free); continue; }"
+  },
+  {
+    "name": "memory: memory short is not refused before the lock",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (false) { why = short(free); break; }"
+  },
+  {
+    "name": "memory: before the lock, a drive does not start at the floor",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (free <= plan.floor) { why = short(free); break; }"
+  },
+  {
+    "name": "memory: before the lock, a drive starts 1 byte under the floor",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (free < plan.floor - 1) { why = short(free); break; }"
+  },
+  {
+    "name": "memory: memory short is not waited for",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (false) {"
+  },
+  {
+    "name": "memory: memory at the floor is waited for",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free <= plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {"
+  },
+  {
+    "name": "memory: memory 1 byte short is not waited for",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free < plan.floor - 1 && t.now() + MEMORY_EVERY_MS <= latest) {"
+  },
+  {
+    "name": "memory: a look that would end at the latest start is not taken",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS < latest) {"
+  },
+  {
+    "name": "memory: a look that would end 1 ms past the latest start is taken",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest + 1) {"
+  },
+  {
+    "name": "memory: the wait never reads memory again",
+    "from": "await t.sleep(MEMORY_EVERY_MS); free = t.free(); }",
+    "to": "await t.sleep(MEMORY_EVERY_MS); }"
+  },
+  {
+    "name": "memory: memory is read every second, not every 10 s",
+    "from": "const MEMORY_EVERY_MS = 10000;",
+    "to": "const MEMORY_EVERY_MS = 1000;"
+  },
+  {
+    "name": "gap: no gap between two pairs",
+    "from": "        if (i) await t.sleep(GAP_MS);",
+    "to": "        void 0;"
+  },
+  {
+    "name": "gap: a gap before the first pair too",
+    "from": "        if (i) await t.sleep(GAP_MS);",
+    "to": "        await t.sleep(GAP_MS);"
+  },
+  {
+    "name": "gap: the gap is 60 ms",
+    "from": "const GAP_MS = 600;",
+    "to": "const GAP_MS = 60;"
+  },
+  {
+    "name": "pairs: a drive is not counted",
+    "from": "        kept++;",
+    "to": "        void 0;"
+  },
+  {
+    "name": "pairs: a run that drove nothing does not say so",
+    "from": "${kept ? '' : ', none driven now: each had passed before'}",
+    "to": "${''}"
+  },
+  {
+    "name": "pairs: a server that ended during a drive is not seen",
+    "from": "if (!srv.alive()) { why =",
+    "to": "if (false) { why ="
+  },
+  {
+    "name": "pairs: a server that ended during a drive ends the run as memory or a lock would",
+    "from": "ended during ${p.name} ${p.size}, so nothing is kept for it`; broke = true; break; }",
+    "to": "ended during ${p.name} ${p.size}, so nothing is kept for it`; break; }"
+  },
+  {
+    "name": "pairs: the state is not read again before a result is kept",
+    "from": "const keyNow = t.state(tree);",
+    "to": "const keyNow = key;"
+  },
+  {
+    "name": "pairs: a changed state is taken",
+    "from": "if (keyNow !== key) { why =",
+    "to": "if (keyNow !== keyNow) { why ="
+  },
+  {
+    "name": "pairs: a changed state ends the run as memory or a lock would",
+    "from": "and is ${keyNow}), so nothing is kept for it`; broke = true; break; }",
+    "to": "and is ${keyNow}), so nothing is kept for it`; break; }"
+  },
+  {
+    "name": "pairs: a run that broke ends as one that did not",
+    "from": "  if (broke) { t.say(",
+    "to": "  if (false) { t.say("
+  },
+  {
+    "name": "pairs: pairs left after a run that kept nothing give 3",
+    "from": "  if (left.length && kept) { t.say(",
+    "to": "  if (left.length) { t.say("
+  },
+  {
+    "name": "pairs: a run that drove nothing ends with exit code 0",
+    "from": "  if (left.length) { t.say(`nothing was driven:",
+    "to": "  if (false) { t.say(`nothing was driven:"
+  },
+  {
+    "name": "pairs: a run that drove nothing ends with exit code 3",
+    "from": ": wait, then run the same command again`); return 4; }",
+    "to": ": wait, then run the same command again`); return 3; }"
+  },
+  {
+    "name": "pairs: an unknown lab ends with exit code 1, saying nothing",
+    "from": "    if (!lab) throw usage(unknownLab(n));",
+    "to": "    if (!lab) return 1;"
+  },
+  {
+    "name": "args: a word with one dash is a lab name",
+    "from": "if (!args[i].startsWith('-')) {",
+    "to": "if (!args[i].startsWith('--')) {"
+  },
+  {
+    "name": "lab: a name's first letters find it",
+    "from": "LABS.find((l) => l.name === n || l.hubId === n)",
+    "to": "LABS.find((l) => l.name.startsWith(n) || l.hubId === n)"
+  },
+  {
+    "name": "lab: a hub id's first letters find it",
+    "from": "LABS.find((l) => l.name === n || l.hubId === n)",
+    "to": "LABS.find((l) => l.name === n || l.hubId.startsWith(n))"
+  },
+  {
+    "name": "lab: a lab is found only by name and hub id at once",
+    "from": "LABS.find((l) => l.name === n || l.hubId === n)",
+    "to": "LABS.find((l) => l.name === n && l.hubId === n)"
+  },
+  {
+    "name": "pair leaves: the wait between pairs does not wait",
+    "from": "sleep: pause,",
+    "to": "sleep: async () => {},"
   }
 ]

@@ -16,6 +16,9 @@ site already knows), then builds it on the next run. It never adds more than one
 
 (The routine moves items here with the date and the commit.)
 
+- 2026-11-18: Item 1, one finding: on Seed the five fields (grammar, axiom, angle, generation, replay) had no
+  accessible name; each caption is now the label of its field. Item 1 stays in "Next". Pull request
+  "evolve 2026-11-18: seed fields have names".
 - 2026-11-17: Item 1, one finding: on The Figure the question box had no accessible name, so a screen reader
   announced a bare text box; its caption "the question" is now its label. Item 1 stays in "Next". Pull request
   "evolve 2026-11-17: figure question box has a name".

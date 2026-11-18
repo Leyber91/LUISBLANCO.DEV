@@ -3,6 +3,36 @@
 One entry per daily run, newest first: the date, the roadmap item, what changed, the gates' results, and whether it
 merged. A run that changed nothing still writes its entry, with the reason.
 
+## 2026-11-18, Seed's five fields have names (roadmap item 1)
+
+- Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 29 pages and 0 findings on main
+  today, so this run took the next finding the 2026-11-17 sweep left open. The home page lists the labs in the order
+  Honesty Decoder, The Figure, Seed; The Figure was fixed on 2026-11-17, so Seed is the most visible page with a
+  finding. This run did not repeat the full sweep of every page.
+- Cause: on labs/seed.html the captions "grammar", "axiom (the seed)", "angle", "generation" and "replay gen" sat
+  beside their fields as label elements with no for attribute (the first four) and a span (the last), so none was
+  tied to its field and a screen reader announced five bare controls.
+- Changed (labs/seed.html, five lines): each caption is a label for its field (preset, axiom, angle, genin, scrub);
+  the "replay gen" span becomes a label with the same class. Measured in headless Chromium over a local http
+  server at 1280 and 390 px: the five fields had 0 labels each before and have 1 each after, and each is found by
+  its caption as an accessible name. The captions keep their position and width to the pixel at both widths, the
+  "replay gen" caption keeps its 10 px size, colour rgb(107, 118, 130) and block display, and the document scroll
+  width equals the screen width.
+- Still open for later runs of item 1, from the 2026-11-17 sweep and not re-checked today: the unnamed fields on
+  labs/roaster.html (the claim box) and labs/md_animation_page.html (one range slider); 404.html, hero_proto.html,
+  labs/claude-prep/, labs/figure.html, labs/roaster.html, labs/seed.html, leak_map_demo.html and triad_demos.html
+  have no meta description; labs/claude-prep/ requests seal.json, which returns 404 (Luis decides). Item 2 still has
+  no link to remove: no tracked file outside _archive/ references labs/weather/.
+- Checks: privacy_gate.py --selftest 18 of 18; node tools/site_check.mjs 29 pages, 0 findings; levels 32 labs, 0
+  errors; lab tests 88 files, 0 failed; atlas, stories and evolution checks pass (they print NOT_CHECKED for the
+  private plans); anti-tells selftest 27 of 27 and no new tells; node tools/anti_tells.mjs scan labs/seed.html
+  lists 7 tells before and after, none on a changed line. The mutate run was not repeated (no tool changed) and
+  runs in the gates workflow. No script file changed, so there was no syntax check to run. Render: labs/seed.html at
+  1280 px and 390 px in headless Chromium, 0 console errors. Forbidden-name check: runs in the gates workflow on the
+  pull request.
+- Gates on pull request #63: privacy passed (selftest and forbidden-name scan), site passed, GitGuardian passed.
+- Merged: yes, squash, after the gates passed on the commit that recorded these results.
+
 ## 2026-11-17, The Figure's question box has a name (roadmap item 1)
 
 - Item 1 asks to fix what the site checks found. node tools/site_check.mjs reports 28 pages and 0 findings on main

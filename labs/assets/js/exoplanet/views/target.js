@@ -16,7 +16,7 @@
 
 import {
   forecastFor, massFromRadiusMean, hasTrueMass, sizeClassOf, hasRadius, radiusEstimated, limitOf, limitKind, limitText, hzPosition, insolation,
-  semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum,
+  semiMajor, luminosity, starColour, spectralType, skyView, monteCarlo, isNum, OPEN_RANGE, openRangeNote,
 } from '../science.js';
 import { starlightText, starlightNote, teqText, zoneWords, archiveDiffers, luminosityDiffers, orbitNote, orbitDiffers, starNum } from '../starlight.js';
 import { TEQ, VALLEY, MC, LIMIT_FIELDS, CHEN_KIPPING, KOPPARAPU, PHYS } from '../config.js';
@@ -27,7 +27,9 @@ import { interval, range as span } from '../../kit/format.js';
 
 /* "+0.11 −0.18", or "±0.11" when the two sides agree to 15%: the kit's one interval, in the table and the live number */
 const errText = (e1, e2) => interval(e1, e2);
-const range = (s, d = 2) => (s ? span(s.lo, s.hi, d) : '');
+const range = (s, d = 2) => (s ? (s.open ? OPEN_RANGE : span(s.lo, s.hi, d)) : '');   // science.js monteCarlo: an open range
+/* the interval drawn for a derived value: none for an open range, whose bare tick would read as a value with no interval */
+const ivOf = (s) => (s.open ? false : { value: s.med, lo: s.lo, hi: s.hi });
 /* an archive bound as a value: "< 6.2" */
 const boundV = (L, d = 3) => limitText(L, d).replace(/\s*[A-Za-z⊕☉°]+$/, '');
 
@@ -87,8 +89,8 @@ function inferredRows(p, A) {
       note: `The mass is forecast from the radius (${fc.regime})${cmp ? `; ${cmp}` : ''}.`, iv: { value: fc.median, lo: fc.lo, hi: fc.hi } });
   }
   if (mc.hasR) {
-    if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', iv: { value: mc.g.med, lo: mc.g.lo, hi: mc.g.hi } });
-    if (mc.rho && !fc) rows.push({ key: 'rho', n: 'density', v: fmt(mc.rho.med, 2), u: 'g/cm³', pm: range(mc.rho), kind: 'd', note: 'Earth\'s density is 5.51 g/cm³.', iv: { value: mc.rho.med, lo: mc.rho.lo, hi: mc.rho.hi } });
+    if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', note: openRangeNote(p, mc), iv: ivOf(mc.g) });
+    if (mc.rho && !fc) rows.push({ key: 'rho', n: 'density', v: fmt(mc.rho.med, 2), u: 'g/cm³', pm: range(mc.rho), kind: 'd', note: 'Earth\'s density is 5.51 g/cm³.', iv: ivOf(mc.rho) });
   }
   const a = semiMajor(p);
   if (a.a && a.src !== 'archive') rows.push(orbitRow(p, a));
@@ -98,7 +100,7 @@ function inferredRows(p, A) {
   rows.push({ key: 'teq', n: 'equilibrium T', v: mc.teq ? tq.v : 'none', u: mc.teq ? 'K' : '', pm: mc.teq ? tq.pm || (tq.point ? 'point value' : '') : 'needs the starlight', kind: 'd',
     note: `The equilibrium temperature takes the starlight${S.src === 'archive' ? ', the archive\'s,' : ''} with the albedo below and full redistribution of heat${tq.point ? ', and has no range because the starlight has none' : ''}${isNum(p.Teq) ? `; the archive publishes ${fmtInt(p.Teq)} K` : ''}.`, iv: mc.teq ? { value: mc.teq.med, lo: mc.teq.lo, hi: mc.teq.hi } : false });
   if (mc.H) rows.push({ key: 'H', n: 'scale height', v: fmt(mc.H.med, 2), u: 'km', pm: range(mc.H), kind: 'e',
-    note: `The scale height assumes a mean molecular weight of ${p.R > 1.8 ? MC.muEnvelope + ', a hydrogen envelope' : MC.muSecondary + ', an air like nitrogen'}.`, iv: { value: mc.H.med, lo: mc.H.lo, hi: mc.H.hi } });
+    note: `The scale height assumes a mean molecular weight of ${p.R > 1.8 ? MC.muEnvelope + ', a hydrogen envelope' : MC.muSecondary + ', an air like nitrogen'}.`, iv: ivOf(mc.H) });
   if (!mc.hasR) {
     const ML = limitOf(p, 'M');
     if (ML && !fc) rows.push({ key: 'Mf', n: 'mass', v: 'none', pm: 'no forecast', kind: 'e', note: `The mass is only a${ML.dir > 0 ? 'n' : ''} ${limitKind(ML)}, and there is no radius to forecast from.`, iv: false });
@@ -140,8 +142,9 @@ function starlightRow(p, S) {
 function classNote(p, A) {
   const mc = monteCarlo(p, A), sc = sizeClassOf(p);
   if (!mc.hasR) return sc ? `Every radius the bound allows makes it ${sc.label}.` : 'With no radius there is no size class, gravity, density or scale height.';
-  const probs = mc.probs.slice().sort((x, y) => y.p - x.p).filter((c) => c.p >= 0.01).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ');
   const valley = p.R < VALLEY.lo ? 'below the radius valley' : p.R <= VALLEY.hi ? 'inside the radius valley' : 'above the radius valley';
+  if (mc.open === 'radius') return `The radius minus its lower error is zero or less, so its draws give the size classes no shares; the radius given makes it ${sc ? sc.label : 'unclassed'} and puts it ${valley} (${VALLEY.ref}).`;
+  const probs = mc.probs.slice().sort((x, y) => y.p - x.p).filter((c) => c.p >= 0.01).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ');
   return `Its draws fall in the size classes as ${probs}; the radius puts it ${valley} (${VALLEY.ref}).`;
 }
 

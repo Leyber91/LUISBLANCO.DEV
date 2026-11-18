@@ -14,7 +14,7 @@
    ============================================================ */
 
 process.env.TZ = 'Pacific/Kiritimati';   // UTC+14, set before any date is made
-const { grouped, int, num, signed, interval, range, plural, day, localDay, fromIso, isoDay, clock, MONTHS, MINUS, isFiniteNumber } = await import('../format.js');
+const { grouped, int, num, signed, interval, range, plural, day, localDay, fromIso, isoDay, clock, MONTHS, MINUS, isFiniteNumber, fixed, measured } = await import('../format.js');
 
 let failed = 0, passed = 0;
 const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
@@ -26,6 +26,16 @@ yes('the tests run fourteen hours from UTC', new Date(Date.UTC(2026, 10, 14, 12)
 
 /* ---- numbers ---- */
 yes('the minus sign is U+2212', MINUS === '−' && MINUS.length === 1);
+
+/* ---- fixed decimals, and a measured value to its error's decimals (the review of pull request 60) ---- */
+yes('fixed keeps its decimals and writes the minus sign', fixed(-33.87, 2) === `${M}33.87` && fixed(13.4, 2) === '13.40' && fixed(-90, 0) === `${M}90`, `${fixed(-33.87, 2)} ${fixed(13.4, 2)} ${fixed(-90, 0)}`);
+yes('a value that rounds to zero carries no sign, just either side of the half', fixed(-0.004, 2) === '0.00' && fixed(-0.005, 2) === `${M}0.01` && fixed(0, 2) === '0.00', `${fixed(-0.004, 2)} ${fixed(-0.005, 2)}`);
+yes('fixed is held to 0 to 4 decimals, and nothing for what is not a number', fixed(1.234567, 6) === '1.2346' && fixed(2.6, -1) === '3' && fixed(null, 2) === '' && fixed(NaN, 2, 'none') === 'none');
+yes('a measured value keeps the decimal of its error\'s second figure', measured(2454238.48335, 3.94e-5) === '2,454,238.483350' && measured(3.52474955, 4.2e-7) === '3.52474955' && measured(12.5, 3) === '12.5' && measured(150, 30) === '150', [measured(2454238.48335, 3.94e-5), measured(3.52474955, 4.2e-7), measured(12.5, 3), measured(150, 30)].join(' '));
+yes('just either side of a power of ten in the error', measured(1.23456, 0.01) === '1.235' && measured(1.23456, 0.0099) === '1.2346' && measured(1.23456, 0.1) === '1.23' && measured(1.23456, 0.099) === '1.235', [measured(1.23456, 0.01), measured(1.23456, 0.0099), measured(1.23456, 0.1), measured(1.23456, 0.099)].join(' '));
+yes('a measured value keeps its trailing zeros, writes the minus sign, and is grouped', measured(2455198.1, 0.0005) === '2,455,198.10000' && measured(-1234.5, 0.5) === `${M}1,234.50` && measured(-0.0001, 0.05) === '0.000', [measured(2455198.1, 0.0005), measured(-1234.5, 0.5), measured(-0.0001, 0.05)].join(' '));
+yes('with no positive error it is the value grouped as given; nothing for what is not a number', measured(2454238.48, null) === '2,454,238.48' && measured(5, 0) === '5' && measured(5, -1) === '5' && measured(null, 1) === '', [measured(2454238.48, null), measured(5, 0)].join(' '));
+yes('at most twelve decimals, whatever the error', measured(1, 1e-20) === '1.000000000000', measured(1, 1e-20));
 yes('digits are grouped by thousands with a comma, from 1,000 up', same([0, 7, 999, 1000, 12345, 1234567].map(grouped), ['0', '7', '999', '1,000', '12,345', '1,234,567']), [0, 7, 999, 1000, 12345, 1234567].map(grouped).join(' '));
 yes('a negative value carries the minus sign, zero none, and a fraction keeps its digits', grouped(-1234) === `${M}1,234` && grouped(0) === '0' && grouped(-0.25) === `${M}0.25` && grouped(1234.5) === '1,234.5', `${grouped(-1234)} ${grouped(0)} ${grouped(-0.25)} ${grouped(1234.5)}`);
 yes('a whole number is rounded and grouped', int(6464) === '6,464' && int(2.5) === '3' && int(2.4) === '2' && int(-1500.4) === `${M}1,500`, `${int(6464)} ${int(2.5)} ${int(2.4)} ${int(-1500.4)}`);

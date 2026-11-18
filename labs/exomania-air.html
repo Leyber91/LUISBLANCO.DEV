@@ -8,12 +8,15 @@
 <link rel="icon" href="data:," />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<!-- the fonts never block first paint: a blocked or slow fonts host falls back to the system faces -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" /></noscript>
 <link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/plate.css" />
 <link rel="stylesheet" href="assets/css/exomania-air.css" />
 </head>
 <body>
+<a class="skip" href="#air">Skip to the article</a>
 <span class="bp tl" aria-hidden="true"></span><span class="bp tr" aria-hidden="true"></span><span class="bp bl" aria-hidden="true"></span><span class="bp br" aria-hidden="true"></span>
 
 <header class="bar solid">
@@ -25,7 +28,7 @@
   <div class="bar-r"><span class="brand">THE LAB &middot; <b>L212</b></span></div>
 </header>
 
-<main class="air">
+<main class="air" id="air" tabindex="-1">
   <section class="air-head" aria-labelledby="h-title">
     <h1 id="h-title" class="display">Which rocky worlds keep air</h1>
     <p class="lede">The survey draws every rocky planet in one of three ways: as bare rock, with thin air, or with thick air. This page says how it chooses, from the code that does it (<code>labs/assets/js/exoplanet/air.js</code> and <code>data.js</code>). Every paper below was opened and read on 16 November 2026. <span class="tg r">real</span></p>

@@ -49,6 +49,7 @@
    ============================================================ */
 
 import { tokens, alpha } from '../views/common.js';
+import { num } from '../../kit/format.js';
 import { fluxAt } from '../science.js';
 import { epochAt, midAt, sigmaAt, blindAt, testOf, stateOf, KEPT_LAMP, REAL_TEST_ORBITS, MIN_YEARS_APART, yearOfJd, jdOfYear } from './clock.js';
 import { durDays } from './data.js';
@@ -414,7 +415,10 @@ export function dipShape(depth, durH) {
   const samples = raw.map((v) => (v * depth) / raw[0]);       // the archive's depth is the deepest point as measured, so the shape is held to it
   return (t) => { const u = (Math.abs(t) / half) * N; if (u >= N) return 0; const i = Math.floor(u); return samples[i] + (samples[i + 1] - samples[i]) * (u - i); };
 }
-const pct = (share) => `${(share * 100).toPrecision(2)} %`;
+/* A dip as words: a percent to two figures, or in parts per million below 0.01 % (kit/format.js: at most four decimals;
+   "0.00011 %" was printed for 12 planets). */
+export const dipWords = (share) => (share * 100 >= 0.01 ? `${num(share * 100, 2)} %` : `${num(share * 1e6, 2)} ppm`);
+const pct = dipWords;
 /* The dip a clock lets through is shallower than the transit itself, and is said to be, below this share of its
    depth. The two lines are seen apart, and both named, once they differ anywhere by this share of the depth. */
 export const DIP_APART = 0.97, SHAPE_APART = 0.04;

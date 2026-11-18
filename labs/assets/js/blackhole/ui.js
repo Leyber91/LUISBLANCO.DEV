@@ -13,8 +13,9 @@ import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour, setHTML } from './tour.js';
 import { createKeep } from './keep.js';
+import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
-import { exportPlate, exportState, importState, exportData, PLATE_SS } from './plate.js';
+import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING } from './probe.js';
 
@@ -31,6 +32,7 @@ const D2R = Math.PI / 180;
 export function buildUI(app) {
   const { store, renderer } = app;
   const left = $('#bh-left'), right = $('#bh-right');
+  let drawing = null;     // buildDrawing, once the cards exist (below)
   const overlay = $('#bh-overlay'), caption = $('#bh-caption'), probe = $('#bh-probe');
   const sr = $('#bh-sr');
   const narrow = () => window.matchMedia('(max-width: 900px)').matches;
@@ -53,7 +55,7 @@ export function buildUI(app) {
   if (window.self !== window.top) back.style.display = 'none';
 
   /* ---------- left column ---------- */
-  const head = el('div', 'bh-head', `<div class="bh-kick">${COPY.kick}</div><h1>${COPY.title}</h1><p>${COPY.sub}</p>`);
+  const head = el('div', 'bh-head', `<div class="bh-kick">${COPY.kick}</div><h2 class="bh-h">${COPY.title}</h2><p>${COPY.sub}</p>`);
   left.appendChild(head);
 
   // object
@@ -73,7 +75,7 @@ export function buildUI(app) {
   // view + observer + colour + emitter
   const viewCard = el('div', 'bh-card');
   viewCard.innerHTML = `<h2>View</h2><div class="bh-seg" id="bh-views"></div><div class="bh-seg" id="bh-obs"></div>
-    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div><div class="bh-legend" id="bh-modekey"></div>
+    <h2 style="margin-top:12px">Colour <em id="bh-modenote"></em></h2><div class="bh-seg" id="bh-modes"></div><div class="bh-legend" id="bh-modekey" data-modekey></div>
     <h2 style="margin-top:12px">Emitter</h2><div class="bh-seg" id="bh-emit"></div><p class="bh-note" id="bh-viewnote"></p>`;
   left.appendChild(viewCard);
   const viewBtns = {}, obsBtns = {}, modeBtns = {}, emitBtns = {};
@@ -137,7 +139,12 @@ export function buildUI(app) {
     <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
     <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
   left.appendChild(recCard);
-  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim });
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: async (q) => {
+    // the kept frame's picture is the hole the press named, once the view has settled on it (review_s4 3: a picture of
+    // the view still easing was stored with the target's link); another choice since the press, no picture
+    for (let i = 0; i < 40 && store.anim; i++) await new Promise((r) => setTimeout(r, 50));
+    return !store.anim && store.toQuery() === q ? thumbnail(app) : null;
+  }, onDraw: () => drawing?.drawStrip() });
   app.keep = keep;     // for the console and the drive, as window.__bh is
   store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);
@@ -258,6 +265,19 @@ export function buildUI(app) {
   };
   $('#bh-srcbtn').addEventListener('click', openSources);
   $('#bh-srcbtn2').addEventListener('click', openSources);
+
+  /* ---------- the drawing (BAR_L1 section 6): sheet 1 is the picture with its scales and title block ---------- */
+  drawing = buildDrawing(app, {
+    choose: {
+      object: (id) => { app.tour?.stop(); store.set(store.objectPatch(id)); },
+      view: (id) => { app.tour?.stop(); store.set(store.viewPatch(id)); if (id === 'journey') journey.play(); else journey.stop(); },
+      colour: (id) => store.set({ color: id }),
+      sheet: (n) => { requestAnimationFrame(() => { if (n === 4) recCard.scrollIntoView({ block: 'start' }); drawOverlay(); }); },   // a frame later: the drawing is built before everything drawOverlay reads
+    },
+    act: { plate: (W) => plate(W), link: () => $('#bh-link').click(), json: () => exportState(app), csv: () => exportData(app), sources: openSources },
+    keepRecord: () => keep.record,
+  });
+  store.on(() => drawing.draw());
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sources.hidden = true; probe.hidden = true; } });
 
   /* ---------- route pill ---------- */
@@ -302,7 +322,9 @@ export function buildUI(app) {
    *  stays inside it (review_s2 P4-3; fix_s2_p1 K6, the curve's legend ran under the Measure card at 1440). Read
    *  from the panels' own boxes, so the bound follows the stylesheet at every width; the whole window on a phone,
    *  where the panels are a sheet. */
-  const openCentre = (W) => (narrow() ? [0, W] : [left.getBoundingClientRect().right, right.getBoundingClientRect().left]);
+  const shows = (e) => getComputedStyle(e).display !== 'none';
+  const openCentre = (W) => (narrow() ? [0, W] : drawing && document.body.dataset.sheet === '1' ? drawing.openBand()
+    : [shows(left) ? left.getBoundingClientRect().right : 0, shows(right) ? right.getBoundingClientRect().left : W]);
   /** Where a label's lead ends, kept inside the open centre [L, R] (review_s2 P4-3): flipped to the left where its
    *  text (tw px, 4 px from the lead) would run past the right bound, to the right where it would run past the left,
    *  then held so the text fits, and held between the top and the bottom. end: the text ends at the lead (it sits
@@ -347,7 +369,12 @@ export function buildUI(app) {
     // labels only from anchors traced for this view: none mid-transition, none from the last view
     const an = anchorsLive();
     if (s.notes && an) {
-      const placed = [];          // text blocks already drawn, so a later label steps aside
+      // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
+      // block and kept frames: a label once sat on the spin scale's numbers at 390)
+      // the drawing's own parts (named apart from the overlay's `parts`, which this once shadowed, so no label was drawn:
+      // review_s4c 1)
+      const blocks = drawing ? drawing.obstacles() : [];
+      const placed = blocks.slice();
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
@@ -365,6 +392,10 @@ export function buildUI(app) {
         if (fit) [dx, dy] = fit;
         // where no offset is free, the label still stays between the panels (review_s2 P4-3)
         const { lx, ly, end } = keepInside(x, y, dx, dy, tw, [L, R], H);
+        // with no free place, a label that would lie on a part of the drawing is left out rather than laid on it (a
+        // small window, 960 x 640: labels lay on the title block and the ruler)
+        const box = end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16];
+        if (!fit && blocks.some((p) => box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3])) return;
         dx = end ? -1 : 1;
         placed.push(end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16]);
         parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="subt">${sub}</text>` : ''}</g>`);
@@ -452,7 +483,9 @@ export function buildUI(app) {
     $('#bh-modenote').textContent = '';
     $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${modeNote(s.color)}.`;
     // the swatches are drawn in the tokens the render draws the same marks with (palette.js modeKey)
-    $('#bh-modekey').innerHTML = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');
+    // the key, drawn by one function into every place it shows (the Colour card, and the drawing's head line)
+    const keyHtml = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');
+    for (const k of document.querySelectorAll('[data-modekey]')) if (k.innerHTML !== keyHtml) k.innerHTML = keyHtml;
     $('#bh-anim', actCard).textContent = s.anim ? 'Pause' : 'Play';
     $('#bh-anim', actCard).setAttribute('aria-pressed', String(!s.anim));
     $('#bh-notes', actCard).textContent = 'Labels';
@@ -825,7 +858,8 @@ export function buildUI(app) {
   });
   const perf = (p, res) => {
     const t = store.get('tier');
-    const html = `<span title="${esc(gpuFull)}">${esc(gpu)}</span> · tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}`;
+    // the device name with its separator, so a narrow screen can leave it out whole (its full name stays the title)
+    const html = `<span class="gpu" title="${esc(gpuFull)}">${esc(gpu)} · </span>tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · <span class="pm">${res && !res.refined ? `refining ${Math.round((res.progress || 0) * 100)}%` : `median ${p.median ? p.median.toFixed(1) : '--'} ms`}</span>`;   // one length either way: the footer never reflows as the render refines
     [perfEl, perfEl2].forEach((n) => setHTML(n.querySelector('.pt'), html));
   };
 
@@ -833,6 +867,8 @@ export function buildUI(app) {
   let lastFallDraw = 0, wasEasing = false;
   const tick = (now, dt) => {
     journey.tick(dt);
+    // the drawing's hands move with the eased view (they draw only when a value moved)
+    if (drawing) drawing.drawHands();
     app.tour?.tick(now, dt);
     // a transition just ended: the image is the state's own view now, so trace its anchors
     // and redraw what is drawn from the eased values (critical curve, labels, tour focus)

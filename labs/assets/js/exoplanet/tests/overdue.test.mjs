@@ -21,8 +21,9 @@ import { jdOfMs, msOfJd, taiMinusUtc, ttMinusUtc, sun, romerSeconds, toEarthUtc,
 import { solution, usable, contested, epochAt, midAt, sigmaAt, lampAt, lostFrom, phaseAt, bandDegrees, grade, testOf, transitsBetween, tally, blindAt, stateOf, KEPT_LAMP, BLIND_SHARE, yearOfJd, jdOfYear } from '../overdue/clock.js';
 import { planetsOf, attachRecord, pairOf, durDays } from '../overdue/data.js';
 import { hammer, eclipticToEquatorial, galacticToEquatorial, circleOnMap, lens, knownFrom, historyOf, clockAt, lampOn, inTransit, census, errorLine, smearedDip, isK2, densestField, KEPLER, FIRST_YEAR, LAST_YEAR } from '../overdue/sky.js';
-import { pointsFor, notATest, lampMark, skyLayout, lensLayout, onMap, onLens, bandScale, stampOf, dipShape, tallyBin, nightNamed, nearestTrace, nightAxis, paperKind, BESIDE, TITLE_ROOM, DIP_APART, SHAPE_APART } from '../overdue/views.js';
+import { dipWords, pointsFor, notATest, lampMark, skyLayout, lensLayout, onMap, onLens, bandScale, stampOf, dipShape, tallyBin, nightNamed, nearestTrace, nightAxis, paperKind, BESIDE, TITLE_ROOM, DIP_APART, SHAPE_APART } from '../overdue/views.js';
 import { crossings, span, placeOf, watchable, unwatchable, shownMs, samplesFor, WATCH, EXAMPLE_PLACE } from '../overdue/tonight.js';
+import { measured } from '../../kit/format.js';
 import { readFileSync } from 'node:fs';
 
 let passed = 0;
@@ -474,6 +475,13 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   ok(Math.abs(long.altMin - lo) < 0.5 && Math.abs(long.altMax - hi) < 0.5, `the lowest and highest altitude of a star through a 30-hour transit are found to half a degree (${long.altMin.toFixed(2)} against ${lo.toFixed(2)}, ${long.altMax.toFixed(2)} against ${hi.toFixed(2)})`);
 }
 
+/* ---------------- the dip in words, and a place typed with the page's own minus sign (pull request 60) ---------------- */
+{
+  ok(dipWords(0.0053) === '0.53 %' && dipWords(0.0001) === '0.010 %' && dipWords(0.0000999) === '100 ppm' && dipWords(0.0000011) === '1.1 ppm', `a dip is a percent to two figures, in parts per million below 0.01 % (${dipWords(0.0053)}, ${dipWords(0.0001)}, ${dipWords(0.0000999)}, ${dipWords(0.0000011)})`);
+  const typed = placeOf('\u221233.87', '\u221270.65');
+  ok(typed && typed.lat === -33.87 && typed.lon === -70.65, 'a place typed with the minus sign the page prints is read');
+}
+
 /* ---------------- the committed data: the page's numbers, recomputed ---------------- */
 {
   const dir = new URL('../../../data/exomania/', import.meta.url);
@@ -490,6 +498,17 @@ near(gmst(jdOfMs(Date.UTC(1987, 3, 10, 19, 21, 0))), (8 + 34 / 60 + 57.0896 / 36
   ok(P.every((p) => cat.standards[p.clock.std] && p.sols.every((s) => cat.standards[s.std] && s.stdName === cat.standards[s.std] && (s.ref == null || cat.refs[s.ref]))), 'every clock names a time standard this page knows, and every reference it points at exists');
   ok(P.every((p) => p.sols.filter((s) => s.pub != null).every((s, i, a) => !i || a[i - 1].pub <= s.pub)), 'each planet\'s dated solutions are in order of publication, which the choice of the oldest clock relies on');
   ok(P.every((p) => p.sols.every((s) => s.pub == null || (s.pub > 1995 && s.pub < 2027))), 'every publication date lies between the first transit paper and the day of retrieval');
+  // every clock's mid-transit time and period, as the page prints them (kit/format.js measured), lie within their own
+  // error of the paper's values: four decimals put 82 of them further off than the error printed beside them
+  const off = [];
+  let nSols = 0;
+  for (const p of P) for (const s of p.sols) {
+    nSols++;
+    const back = (txt) => Number(txt.replace(/,/g, '').replace('\u2212', '-'));
+    if (s.sT > 0 && Math.abs(back(measured(s.t0, s.sT)) - s.t0) > s.sT / 2) off.push(`${p.name} t0 ${measured(s.t0, s.sT)}`);
+    if (s.sP > 0 && Math.abs(back(measured(s.P, s.sP)) - s.P) > s.sP / 2) off.push(`${p.name} P ${measured(s.P, s.sP)}`);
+  }
+  ok(off.length === 0 && nSols > 12000, `every printed mid-transit time and period lies within half its error of the paper's value (${nSols} clocks; off: ${off.slice(0, 3).join(', ') || 'none'})`);
   ok(cat.refs.every((r) => !/&[a-z]+;|&#\d+;/i.test(r[0])), 'every reference is a name in plain text, with no leftover markup');
   ok(P.every((p) => Number.isInteger(p.clock.agree) && Number.isInteger(p.clock.others) && p.clock.agree >= 0 && p.clock.agree <= p.clock.others), 'every working clock says how many other clocks could be compared with it and how many of them agree');
   ok(P.every((p) => !Number.isFinite(p.ra) || (p.ra >= 0 && p.ra < 360 && p.dec >= -90 && p.dec <= 90)), 'every position is a place on the sky');

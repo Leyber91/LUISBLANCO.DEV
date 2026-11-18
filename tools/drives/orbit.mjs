@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import { HOME, PITCH_LIMIT, orbitFrame, pitchMax, farSideYaw } from '../../labs/assets/js/exoplanet/orbit.js';
 import { exomaniaRules } from './exomania.mjs';
+import { seedRandom, buildPrograms } from './survey.mjs';
 
 const STAR = [-0.15, 0.45, 0.85], LENS = 1.5;   // the engine's star and lens (tests/orbit.test.mjs reads both from its source)
 
@@ -87,6 +88,8 @@ function noThanks() { const b = [...document.querySelectorAll('button')].find((x
 /* ---- the scenario ---- */
 
 export default async function orbit(p, { base, width }) {
+  await seedRandom(p);
+  await buildPrograms(p, { base });   // before any frame is judged (tools/drives/survey.mjs, ticket 2.22)
   for (const [n, e] of exomaniaRules()) p.invariant(n, e);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);
