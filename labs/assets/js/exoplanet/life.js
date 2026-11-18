@@ -33,7 +33,7 @@
    ============================================================ */
 
 import { reflectanceColour, insolation } from './science.js';
-import { classify } from './data.js';
+import { classify, toParams } from './data.js';
 import { num, int } from '../kit/format.js';
 
 /** @typedef {{ key: string, star: string, T: number, peak: number, par: number, uvb: number, gppVis: number, gppWide: number | null }} Case */
@@ -137,6 +137,10 @@ export function lifeOf(p, k = classify(p)) {
     for (const s of scenarios) words.push(s.words);
     words.push(`At noon it would get ${num(/** @type {number} */ (light), 2)} times Earth's visible light and ${num(/** @type {number} */ (uvb), 2)} times Earth's UV-B.`);
     if (where.surface === 'sparse') words.push(where.why);
+    // the picture's own ice line (data.js toParams iceCap, the sine of the latitude where ice begins): cover past it
+    // lies under the ice, so a cold world's picture shows little of it, and the words say why
+    const ice = k.look === 'temperate' ? toParams(p).iceCap : 2;
+    if (ice < 1) words.push(`In the picture its ice reaches down to about ${int(Math.asin(ice) * 180 / Math.PI)}° of latitude; any cover nearer its poles lies under the ice.`);
     if (k.label === 'Ocean world') words.push('It is mostly sea: life, if any, would be mostly in the water, where the colour above would tint the shallows.');
   }
   // the day side and the ground's gravity are said only of a world where surface life is considered at all

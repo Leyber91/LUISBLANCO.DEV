@@ -74,6 +74,9 @@ const SS = { Mercury: sol('Mercury', 0.383, 0.0553, 0.387, 87.97), Venus: sol('V
   yes('Venus: too hot under its clouds, nothing drawn', V.where === WHERE.shrouded && V.scenarios.length === 0 && V.words.includes(WHERE.shrouded.why));
   yes('Mercury: no air to hold water, and though one face is to the Sun, no day side to keep to', Me.where === WHERE.airless && Me.scenarios.length === 0 && !Me.words.some((w) => /day side/.test(w)), Me.words.join(' | '));
   yes('Jupiter: no surface, and so no surface gravity or day side said', J.where === WHERE.fluid && J.scenarios.length === 0 && !J.words.some((w) => /surface gravity|day side/.test(w)), J.words.join(' | '));
+  yes('Earth\'s words say where its ice begins in the picture, about 63 degrees', E.words.some((w) => /ice reaches down to about 6[2-4]° of latitude/.test(w)), E.words.join(' | '));
+  const warm = lifeOf({ ...SS.Earth, name: 'Earth at 0.9 AU', pl_name: 'Earth at 0.9 AU', host: 'warm sun', a: 0.9, pl_orbsmax: 0.9, P: 365.25 * Math.pow(0.9, 1.5), pl_orbper: 365.25 * Math.pow(0.9, 1.5) });
+  yes('a warmer twin, with no ice in the picture, is told of none', warm.where === WHERE.temperate && !warm.words.some((w) => /ice reaches/.test(w)), warm.words.join(' | '));
   yes('Earth\'s words name its gravity, a world with a surface', E.words.some((w) => /surface gravity is 1\.0 times Earth's/.test(w)), E.words.join(' | '));
 }
 

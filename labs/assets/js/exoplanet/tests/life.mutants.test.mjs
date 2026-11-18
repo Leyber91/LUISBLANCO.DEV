@@ -56,6 +56,8 @@ const MUTANTS = [
   ['the day side said of a world with no surface life', `if (where.surface && ph.locked)`, `if (ph.locked)`],
   ['a surface gravity said of a giant', `if (where.surface && ph.radiusKnown && ph.gRel > 0)`, `if (ph.radiusKnown && ph.gRel > 0)`],
   ['the reason a desert is sparse not said', `    if (where.surface === 'sparse') words.push(where.why);\n`, ``],
+  ['the ice line never said', `    if (ice < 1) words.push(`, `    if (false) words.push(`],
+  ['the ice line said of a world with no ice', `    if (ice < 1) words.push(`, `    if (ice < 2.5) words.push(`],
   ['the case not named', ` is nearest the \${c.key} case of Kiang`, ` is nearest a case of Kiang`],
 ];
 
