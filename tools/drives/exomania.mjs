@@ -220,9 +220,9 @@ export default async function exomania(p, { base }) {
   await p.ev('document.getElementById("place-box").open = true'); await p.sleep(150);
   const place = (lat, lon) => p.ev(`(() => { document.getElementById("lat").value = ${JSON.stringify(lat)}; document.getElementById("lon").value = ${JSON.stringify(lon)}; document.getElementById("place-form").requestSubmit(); })()`);
   await place('941', '2.17'); await p.sleep(200);
-  p.check('a latitude of 941 is refused in words, where the visitor is typing', /latitude from -90 to 90/.test(await text('place-msg')) && (await rect('place-msg')).h > 8, await text('place-msg'));
+  p.check('a latitude of 941 is refused in words, where the visitor is typing', /latitude from \u221290 to 90/.test(await text('place-msg')) && (await rect('place-msg')).h > 8, await text('place-msg'));
   await place('0x10', '2.17'); await p.sleep(200);
-  p.check('a latitude written as 0x10 is refused, not read as 16, and the night stays where it was', /latitude from -90 to 90/.test(await text('place-msg')) && /an example place\.$/.test(await text('t-count')));
+  p.check('a latitude written as 0x10 is refused, not read as 16, and the night stays where it was', /latitude from \u221290 to 90/.test(await text('place-msg')) && /an example place\.$/.test(await text('t-count')));
   await place('52.52', '13,40'); await p.sleep(700);
   p.check('a place is set, with a comma for the decimal point, and is no longer called an example', /[\d,]+ (is|are) up in the dark over 52\.52°, 13\.40°\.$/.test(await text('t-count')) && (await text('place-msg')) === '' && /over 52\.52°, 13\.40°\./.test(await label('night')), (await text('t-count')).slice(-60));
   await p.ev('document.getElementById("plate-c").scrollIntoView({ block: "start" })'); await p.sleep(300);

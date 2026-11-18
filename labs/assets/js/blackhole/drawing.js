@@ -35,12 +35,25 @@ const nameOf = (q) => { if (!names.has(q)) names.set(q, linkLabel(q)); return na
 /** A kept frame's caption, short enough for its picture and telling holes apart (review_s4b 5: every hole of one's
  *  own read "a hole of your own, cinematic"): the object, or a hole of one's own by its mass; its spin; the view when
  *  it is not the cinematic one. The whole name is the link's title. */
-function captionOf(q) {
-  const id = Object.fromEntries(identity(q).map((x) => [x.d.key, x.v]));
-  const o = OBJECTS.find((x) => x.id === id.obj);
-  return `${o ? o.name : id.mass} · a ${id.a}${id.view !== 'cinematic' ? ` · ${id.view}` : ''}`;
+const idOf = (q) => { if (!shorts.has(q)) shorts.set(q, Object.fromEntries(identity(q).map((x) => [x.d.key, x.v]))); return shorts.get(q); };
+/** A value in a caption, short: the key's letter where it has one. */
+const SHORT = { q: 'Q', incl: 'i', rcam: 'r', fov: 'fov', tilt: 'tilt', edd: 'e', rout: 'ro', fcol: 'f', hotspot: 'spot' };
+const shortVal = (k, v) => (SHORT[k] ? `${SHORT[k]} ${v}` : String(v));
+/** The kept frames' captions, two lines each: the object (or a hole of one's own by its mass), then its spin. Where
+ *  two shown frames would read alike, each takes the first value their holes differ in, in SCHEMA's order (review_s4c
+ *  4: M87* in two colours, or two holes of one's own cut to their mass, read alike). */
+function captionsOf(qs) {
+  const ids = qs.map(idOf);
+  const caps = ids.map((id) => { const o = OBJECTS.find((x) => x.id === id.obj); return [o ? o.name : id.mass, `a ${id.a}`]; });
+  const groups = new Map();
+  caps.forEach((c, i) => { const k = c.join('|'); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(i); });
+  for (const members of groups.values()) {
+    if (members.length < 2) continue;
+    const key = Object.keys(ids[members[0]]).find((k) => new Set(members.map((i) => ids[i][k])).size > 1);
+    if (key) for (const i of members) caps[i][1] += ` · ${shortVal(key, ids[i][key])}`;
+  }
+  return caps;
 }
-const shortOf = (q) => { if (!shorts.has(q)) shorts.set(q, captionOf(q)); return shorts.get(q); };
 
 const NS = 'http://www.w3.org/2000/svg';
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -61,7 +74,8 @@ function spinFor(f, target, aMax) {
   return (lo + hi) / 2;
 }
 /** The highest spin the store lets a hole of charge q have (state.js: a^2 + q^2 is held at 0.996 or less). */
-const spinTop = (q) => (q > 0 ? Math.min(BY.a.max, Math.sqrt(Math.max(0, 0.996 - q * q))) : BY.a.max);   // with no charge, the store's 0.998
+// with no charge, the store's 0.998; with a charge, floored to 6 digits so no rounding lands above it (review_s4c 3)
+const spinTop = (q) => (q > 0 ? Math.min(BY.a.max, Math.floor(Math.sqrt(Math.max(0, 0.996 - q * q)) * 1e6) / 1e6) : BY.a.max);
 
 /* app: the page's app; choose: { object(id), view(id), colour(id), sheet(n) } from ui.js, the same actions as the
    cards' buttons; act: { plate(W), link(), json(), csv(), sources() }; keepRecord(): the record the card shows. */
@@ -105,7 +119,11 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       if (f == null) return;
       const v = fromFrac(Math.max(0, Math.min(1, f)));
       app.tour?.stop();
-      store.set({ [key]: +v.toFixed(BY[key].digits ?? 3) }, { dur: 250 });
+      // rounded to the schema's digits, never above the spin the charge allows (a press at the end rounded up past it and
+      // the store lowered the charge: review_s4c 3)
+      let r = +v.toFixed(BY[key].digits ?? 3);
+      if (key === 'a') r = Math.min(r, Math.floor(spinTop(store.get('q')) * 1000) / 1000);
+      store.set({ [key]: r }, { dur: 250 });
     };
     // the pointer is held by the svg itself, which is never replaced (only its groups are redrawn)
     svg.addEventListener('pointerdown', (e) => { dragging = true; svg.setPointerCapture?.(e.pointerId); setFrom(e); });
@@ -117,6 +135,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       if (!d && k !== 'Home' && k !== 'End') return;
       e.preventDefault();
       const top = key === 'a' ? spinTop(store.get('q')) : BY[key].max;   // the spin stops where the charge lets it
+      if (d > 0 && s >= top) return;   // already at its top: a step right never lowers it
       const v = Math.min(top, k === 'Home' ? BY[key].min : k === 'End' ? top : s + d);
       app.tour?.stop();
       // a step keeps the value's own digits (float noise aside): rounded to the schema's 2, M87*'s 9.8129 came back from a
@@ -227,7 +246,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const named = OBJECTS.filter((x) => x.mass >= 1 && !x.hypothetical).map((o) => massY(Math.log10(o.mass)));
     for (let lg = Math.ceil(LG[0]); lg <= LG[1]; lg++) {
       el('line', { x1: MS.W, y1: massY(lg), x2: MS.W - (lg % 3 === 0 ? 8 : 4), y2: massY(lg), class: lg % 3 === 0 ? 'ink' : 'faint', 'data-lg': String(lg) }, g);
-      if (lg % 6 === 0 && !named.some((y) => Math.abs(y - massY(lg)) < 10)) { const t = svgText(g, { x: MS.W - 12, y: massY(lg) + 3, 'text-anchor': 'end' }, '10'); const sup = el('tspan', { 'baseline-shift': 'super', 'font-size': '7' }, t); sup.textContent = String(lg); }
+      if (lg % 6 === 0 && !named.some((y) => Math.abs(y - massY(lg)) < 10)) {
+        // (each number carries its decade, so the hand can make it step aside: review_s4c 8)
+        const t = svgText(g, { x: MS.W - 12, y: massY(lg) + 3, 'text-anchor': 'end', 'data-dec': String(lg) }, '10'); const sup = el('tspan', { 'baseline-shift': 'super', 'font-size': '7' }, t); sup.textContent = String(lg); }
     }
     for (const o of OBJECTS.filter((x) => x.mass >= 1 && !x.hypothetical)) {
       const y = massY(Math.log10(o.mass));
@@ -245,7 +266,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const o = OBJECTS.find((x) => x.id === store.get('obj'));
     // the hand's words win: a mark's name within 12 px of the hand steps aside, whatever the hole (review_s4b 1: a hole of
     // one's own at M87*'s mass had both words on one baseline)
-    for (const tx of mass.marks.querySelectorAll('text[data-label]')) tx.style.display = Math.abs(+tx.getAttribute('y') - 3 - y) < 12 ? 'none' : '';
+    for (const tx of mass.marks.querySelectorAll('text[data-label]')) tx.style.display = Math.abs(+tx.getAttribute('y') - 3 - y) < 10 ? 'none' : '';
+    // the hand's line runs across the decade numbers' column: a number within 8 px of it steps aside (review_s4c 8)
+    for (const tx of mass.marks.querySelectorAll('text[data-dec]')) tx.style.display = Math.abs(+tx.getAttribute('y') - 3 - y) < 8 ? 'none' : '';
     svgText(g, { x: MS.W - 50, y: y + 3, 'text-anchor': 'end', class: 'val' }, `${o ? `${o.name} · ` : ''}${sci(10 ** lg)} M☉`);
     mass.set(lg);
   }
@@ -325,7 +348,8 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     if (keepBtn.textContent !== words) keepBtn.textContent = words;
     // a link through openLink, as the card's (the empty link would start the tour); one short line under the picture,
     // the whole name for a reader and on hover
-    setHTML(frames, rec.kept.slice(0, 3).map((e) => `<a class="bh-fr" href="${esc(location.pathname + openLink(e.q))}" title="${esc(nameOf(e.q))}" aria-label="${esc(nameOf(e.q))}">${e.img ? `<img alt="" src="${esc(e.img)}">` : '<span class="ph"></span>'}<span class="cap">${esc(shortOf(e.q))}</span></a>`).join(''));
+    const shown = rec.kept.slice(0, 3), caps = captionsOf(shown.map((e) => e.q));
+    setHTML(frames, shown.map((e, i) => `<a class="bh-fr" href="${esc(location.pathname + openLink(e.q))}" title="${esc(nameOf(e.q))}" aria-label="${esc(nameOf(e.q))}">${e.img ? `<img alt="" src="${esc(e.img)}">` : '<span class="ph"></span>'}<span class="cap"><span>${esc(caps[i][0])}</span><span>${esc(caps[i][1])}</span></span></a>`).join(''));
   }
   // the second click of a double-click is not a press (review_s3c 1); a press on an off button does nothing
   keepBtn.addEventListener('click', (e) => { if (e.detail > 1 || keepBtn.disabled || keepBtn.getAttribute('aria-disabled') === 'true') return; document.querySelector('#bh-keep')?.click(); });
@@ -366,11 +390,13 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       Object.assign(spin.svg.style, { left: '64px', top: top + 'px', width: SP.W + 4 + 'px', height: SP.H + 32 + 'px' });
       // the protractor below the ruler when the ruler is under the head line (review_s4b 9: on a short window its title
       // lay on the ruler's)
-      const inTop = Math.round(foot ? H * 0.47 - IN.oy : Math.max(H * 0.47 - IN.oy, top + SP.H + 32 + 8));
+      // and, with the ruler at the foot, it ends above the ruler (review_s4c 6: below 649 px tall its box lay over the
+      // ruler's first numbers); where neither fits, it is left off
+      const inTop = Math.round(foot ? Math.min(H * 0.47 - IN.oy, top - 8 - 2 * IN.oy) : Math.max(H * 0.47 - IN.oy, top + SP.H + 32 + 8));
       // the protractor only where it fits above the caption it would reach: on a small window it is left off, as on a
       // phone, and the inclination stays on the settings sheet (960 x 640: it ran into the caption)
       const inLeft = 23, inRight = inLeft + IN.R + 96;
-      const inFits = !cap || cap.left >= inRight || cap.right <= inLeft || inTop + 2 * IN.oy <= cap.top - 8;
+      const inFits = inTop >= (hl.height ? hl.bottom : 80) + 8 && (!cap || cap.left >= inRight || cap.right <= inLeft || inTop + 2 * IN.oy <= cap.top - 8);
       Object.assign(incl.svg.style, { display: inFits ? '' : 'none', left: inLeft + 'px', top: inTop + 'px', width: IN.R + 96 + 'px', height: 2 * IN.oy + 'px' });
       // the mass scale from 28% of the height down to above the title block, which it never reaches (review_s4 6: at
       // 1280 x 720 the block covered 128 px of it, Cygnus X-1's mark included)
@@ -396,6 +422,10 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const key = `${v.a}|${v.q}|${v.incl}|${s.a}|${s.incl}|${s.mass}|${s.obj}|${SP.W}|${MS.H}`;
     if (key === handKey) return;
     handKey = key;
+    // the marks are the eased hole's too, so the hand stands among them where its reading puts it (review_s4c 2: the
+    // marks were the target's while the hand read the eased hole)
+    if (v.q !== lastQ) { drawSpinMarks(v.q); lastQ = v.q; }
+    spin.svg.setAttribute('aria-valuemax', String(spinTop(s.q)));
     // the eased spin with the eased charge: the hole the picture shows (review_s4b 6: the target's charge with the eased
     // spin read ISCO 1.00 mid-ease)
     drawSpinHand(v.a, v.q); drawInclHand(v.incl); drawMassHand(s.mass);
@@ -403,8 +433,6 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     spin.set(s.a); incl.set(s.incl);
   }
   function draw() {
-    const s = store.all();
-    if (s.q !== lastQ) { drawSpinMarks(s.q); lastQ = s.q; }
     handKey = '';
     drawHands(); drawTitle(); drawStrip();
   }

@@ -122,3 +122,5 @@ sub, sup { font-size: .72em; line-height: 0; }
 
 /* the footer's link to the survey: a link in words, not a boxed label (the bar above keeps the shared chrome) */
 .foot .back.quiet { border: 0; padding: 0; text-transform: none; letter-spacing: 0; font-size: .78rem; color: var(--horizon); text-decoration: underline; text-underline-offset: 3px; }
+
+#air:focus { outline: none; }   /* reached by the skip link, never by Tab, as the sky's #od-main */

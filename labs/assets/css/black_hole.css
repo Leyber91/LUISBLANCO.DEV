@@ -355,10 +355,11 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 /* the frames kept */
 .bh-strip { position: fixed; top: 84px; right: 40px; z-index: 14; display: flex; gap: 10px; align-items: flex-start; }
 .bh-strip .k { font-size: 9px; letter-spacing: .26em; text-transform: uppercase; color: var(--text-dim); writing-mode: vertical-rl; transform: rotate(180deg); }
-.bh-fr { width: 92px; text-decoration: none; color: var(--text-dim); font-size: 9px; line-height: 1.4; display: block; }
-.bh-fr img, .bh-fr .ph { display: block; width: 92px; height: 58px; border: 1px solid var(--bh-hair-2); object-fit: cover; background: var(--void); }
-/* one line under the picture: the object and the view; the whole name is the link's title */
-.bh-fr .cap { display: block; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bh-fr { width: 108px; text-decoration: none; color: var(--text-dim); font-size: 9px; line-height: 1.4; display: block; }
+.bh-fr img, .bh-fr .ph { display: block; width: 108px; height: 64px; border: 1px solid var(--bh-hair-2); object-fit: cover; background: var(--void); }
+/* two lines under the picture, each whole (review_s4c 4: an ellipsis cut the spin off); the whole name is the title */
+.bh-fr .cap { display: block; margin-top: 4px; }
+.bh-fr .cap span { display: block; white-space: nowrap; }
 .bh-frs { display: flex; gap: 10px; }
 /* a control as the plate draws one: a hairline, not a dashed placeholder (review_s4 12) */
 .bh-fr.add { height: 58px; border: 1px solid var(--bh-hair-2); background: none; font: inherit; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--text-dim); cursor: pointer; }
@@ -379,7 +380,8 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
   body[data-sheet="1"] .bh-caption .cap { border-left-color: transparent; }
   /* sheets 2 to 4: the title block keeps only its tabs, and the column takes the height */
   body:not([data-sheet="1"]) .bh-tb-body, body:not([data-sheet="1"]) .bh-tb-take { display: none; }
-  body:not([data-sheet="1"]) .bh-left, body:not([data-sheet="1"]) .bh-right { bottom: 110px; }
+  /* above the title block's tabs, which stand on the footer (review_s4c 5: at 960 x 640 the tabs covered 12 px) */
+  body:not([data-sheet="1"]) .bh-left, body:not([data-sheet="1"]) .bh-right { bottom: calc(var(--bh-above-foot, 56px) + 58px); }
   /* a sheet shows one column alone, so it may be wider than two side by side (at 1100 px a readout's label took four
      lines in 280) */
   body:not([data-sheet="1"]) { --bh-colw: min(380px, calc(100vw - 2 * var(--bh-pad) - 480px)); }
@@ -414,3 +416,6 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 /* a Keep that cannot act looks it, whether off (disabled) or while a press is written (aria-disabled, which keeps the
    focus); the strip's button the same (review_s4b 2, 4) */
 .bh-btn[aria-disabled="true"], .bh-fr.add[disabled], .bh-fr.add[aria-disabled="true"] { opacity: .45; cursor: default; }
+
+/* the performance line's status in one width, so the footer never reflows as the render refines (review_s4c 9) */
+.bh-foot .perf .pm { display: inline-block; min-width: 15ch; }

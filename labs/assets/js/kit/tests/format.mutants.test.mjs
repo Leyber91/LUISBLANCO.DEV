@@ -108,6 +108,19 @@ const MUTANTS = [
   ['F60 the weekday shown by default', CLOCK, CLOCK.replace('weekday = false', 'weekday = true')],
   ['F61 seconds shown by default', CLOCK, CLOCK.replace('seconds = false', 'seconds = true')],
   ['F62 a time of day for what is not a time', CLOCK, CLOCK.replace("if (!isFiniteNumber(ms)) return '';", '')],
+  // fixed and measured (pull request 60)
+  ['F63 fixed writes the hyphen', "  return (v < 0 && Number(t) !== 0 ? MINUS : '') + t;\n}", "  return (v < 0 && Number(t) !== 0 ? '-' : '') + t;\n}"],
+  ['F64 fixed signs a value that rounds to zero', "  return (v < 0 && Number(t) !== 0 ? MINUS : '') + t;\n}", "  return (v < 0 ? MINUS : '') + t;\n}"],
+  ['F65 fixed past four decimals', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(4, d)));', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(6, d)));'],
+  ['F66 fixed below zero decimals', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(4, d)));', '  const t = Math.abs(v).toFixed(Math.min(4, d));'],
+  ['F67 measured a decimal short', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 1 - Math.floor(Math.log10(err)))));', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 0 - Math.floor(Math.log10(err)))));'],
+  ['F68 measured a decimal long', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 1 - Math.floor(Math.log10(err)))));', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 2 - Math.floor(Math.log10(err)))));'],
+  ['F69 measured rounds the error\'s order up', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 1 - Math.floor(Math.log10(err)))));', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 1 - Math.ceil(Math.log10(err)))));'],
+  ['F70 measured past twelve decimals', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 1 - Math.floor(Math.log10(err)))));', '  const t = Math.abs(v).toFixed(Math.max(0, Math.min(14, 1 - Math.floor(Math.log10(err)))));'],
+  ['F71 measured drops trailing zeros', "  const [whole, frac] = t.split('.');", "  const [whole, frac] = String(Number(t)).split('.');"],
+  ['F72 measured ungrouped', '+ grouped(Number(whole)) +', '+ whole +'],
+  ['F73 measured with a zero error', '  if (!isFiniteNumber(err) || err <= 0) return grouped(v);', '  if (!isFiniteNumber(err) || err < 0) return grouped(v);'],
+  ['F74 measured writes the hyphen', "  return (v < 0 && Number(t) !== 0 ? MINUS : '') + grouped(Number(whole))", "  return (v < 0 && Number(t) !== 0 ? '-' : '') + grouped(Number(whole))"],
 ];
 
 process.exit(await runMutants({ here, file: 'format.js', test: 'format.test.mjs', mutants: MUTANTS }));

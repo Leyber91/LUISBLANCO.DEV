@@ -8,13 +8,14 @@
 import { SOURCES, DATA, VALLEY, CHEN_KIPPING, TEQ, MC, LIMB, KOPPARAPU } from './config.js';
 import {
   luminosity, semiMajor, insolation, forecastFor, hasTrueMass, monteCarlo, equilibriumTemp, habitableZone, hzPosition,
-  transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClassOf, hasRadius, limitOf, limitKind, limitText, isNum,
+  transitGeometry, rvSemiAmplitude, starColour, skyView, sizeClassOf, hasRadius, limitOf, limitKind, limitText, isNum, OPEN_RANGE,
 } from './science.js';
 import { teqOf, starlightText, starlightNote, teqText, archiveDiffers, errorWords, starNum, luminosityDiffers, ARCHIVE_DIFF, STASSUN } from './starlight.js';
 import { limitsLine } from './report.js';
 import { classify, physics } from './data.js';
 import { airLine, OBSERVED } from './air.js';
 import { fmt, fmtInt, esc } from './views/common.js';
+import { interval } from '../kit/format.js';
 
 const li = (k, eq, v, src) => `<li><b>${k}</b> <code>${eq}</code> <span class="ch-v">${v}</span>${src ? ` <span class="ch-s">${src}</span>` : ''}</li>`;
 
@@ -28,7 +29,7 @@ export function chainHTML(p, albedo, air = null) {
   const r = p.refs || {};
   const refTxt = (x) => (x ? esc(x.label) : 'archive');
   const inputs = [
-    ['Radius', hasRadius(p) ? `${fmt(p.R, 3)} ± ${fmt(p.Rerr, 2)} R⊕` : limitOf(p, 'R') ? `${esc(limitText(limitOf(p, 'R')))} R⊕ (${limitKind(limitOf(p, 'R'))})` : 'no radius measured', refTxt(r.R)],
+    ['Radius', hasRadius(p) ? `${fmt(p.R, 3)}${isNum(p.Rerr1) || isNum(p.Rerr2) ? ` ${interval(p.Rerr1, p.Rerr2)}` : ''} R⊕` : limitOf(p, 'R') ? `${esc(limitText(limitOf(p, 'R')))} R⊕ (${limitKind(limitOf(p, 'R'))})` : 'no radius measured', refTxt(r.R)],
     ['Mass', limitOf(p, 'M') ? `${esc(limitText(limitOf(p, 'M')))} M⊕ (${limitKind(limitOf(p, 'M'))}, a bound, not a value)` : isNum(p.M) ? `${fmt(p.M, 3)} M⊕ (${p.Mprov || 'unknown'})` : 'not measured', refTxt(r.M)],
     ['Period', isNum(p.P) ? `${fmt(p.P, 5)} d` : '—', refTxt(r.P)],
     ['Orbit', a.a ? `${fmt(a.a, 3)} AU, e ${isNum(p.ecc) ? fmt(p.ecc, 2) : 'unknown'}` : '—', a.src],
@@ -46,11 +47,11 @@ export function chainHTML(p, albedo, air = null) {
   if (fc) steps.push(li('Mass', 'log R = C + S log M, inverted with scatter, log-uniform prior' + (fc.bounded ? `, censored by the ${fc.bounded} limit (posterior cut ${fc.bounded === 'upper' ? 'above' : 'below'} ${fmt(fc.bound, 3)} M⊕)` : ''), `${fmt(fc.median, 2)} M⊕ (68%: ${fmt(fc.lo, 2)}-${fmt(fc.hi, 2)}), ${fc.regime}`, CHEN_KIPPING.ref));
   else if (hasTrueMass(p)) steps.push(li('Mass', 'measured', `${fmt(p.M, 3)} M⊕`, refTxt(r.M)));
   else steps.push(li('Mass', 'none: no measured mass, and no radius to forecast one from', '—', limitOf(p, 'M') ? `the ${limitKind(limitOf(p, 'M'))} is a bound, never drawn as a value` : ''));
-  steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})` : mc.hasR ? '—' : 'none: no radius measured', ''));
+  steps.push(li('Gravity', `g = M / R², ${MC.draws} draws over the errors`, mc.g ? (mc.g.open ? `${fmt(mc.g.med, 2)} g at the radius and mass given (${OPEN_RANGE}: the ${mc.open} minus its lower error is zero or less)` : `${fmt(mc.g.med, 2)} g (68%: ${fmt(mc.g.lo, 2)}-${fmt(mc.g.hi, 2)})`) : mc.hasR ? '—' : 'none: no radius measured', ''));
   steps.push(li('Teq', `Teq = 278.3 K S^¼ (1 − A)^¼${S.src === 'star' ? ' = Teff √(R★ / 2a) (1 − A)^¼, R★ and a in one unit' : ''}, A = ${albedo}, ${isNum(S.lo) ? 'the same draws' : 'from the point value'}`, mc.teq ? teqText(mc.teq).text : '—', 'full heat redistribution'));
   if (mc.H) steps.push(li('Scale height', `H = k T / (μ m_H g), μ = ${p.R > 1.8 ? MC.muEnvelope : MC.muSecondary}`, `${fmt(mc.H.med, 2)} km`, 'μ assumed from size'));
   const scl = sizeClassOf(p);
-  steps.push(li('Size class', 'radius draws binned at 1.5, 2, 4, 8 R⊕', mc.hasR ? mc.probs.map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ') : scl ? `${scl.label}, from the radius bound` : 'none: no radius measured', ''));
+  steps.push(li('Size class', 'radius draws binned at 1.5, 2, 4, 8 R⊕', mc.hasR ? (mc.open === 'radius' ? `none: the radius minus its lower error is zero or less; ${scl ? scl.label : 'unclassed'} at the radius given` : mc.probs.map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ')) : scl ? `${scl.label}, from the radius bound` : 'none: no radius measured', ''));
   if (hz) steps.push(li('Habitable zone', `S_eff = S₀ + aT + bT² + cT³ + dT⁴, T = Teff − 5780; ${hz.by === 'S' ? 'd = a √(S / S_eff)' : 'd = √(L / S_eff)'}`, `${fmt(hz.inner, 3)}-${fmt(hz.outer, 3)} AU; ${esc(pos.label)}`, KOPPARAPU.ref));
   if (geo) steps.push(li('Transit', `k = Rp/R★ = ${fmt(geo.k, 3)}; depth ≈ k² × limb darkening; T14 = (P/π) asin[(R★/a)√((1+k)² − b²) / sin i]`, `${fmtInt(geo.depthLD * 1e6)} ppm, ${fmt(geo.T14, 3)} h`, 'Seager & Mallén-Ornelas 2003; ' + LIMB.ref));
   if (rv) steps.push(li('Radial velocity', 'K = 28.4329 m/s (Mp sin i / M_J) (M★)^−⅔ (P / 1 yr)^−⅓ / √(1 − e²)', `${fmt(rv.K, 3)} m/s (${rv.massSrc} mass${rv.bounded ? `, cut by the ${rv.bounded} limit` : ''})${rv.eLimit ? `; e is only a bound (${esc(limitText(rv.eLimit, 2))}), so e = 0` : ''}`, 'Lovis & Fischer 2010'));
@@ -92,7 +93,7 @@ export function compareHTML(pins, earth, albedo) {
 export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote, census }) {
   const pc = (x) => (x === null || x === undefined ? '—' : `${Math.round(x * 100)}%`);
   return `
-    <p>Every number on this page comes from the NASA Exoplanet Archive or from a published model applied to it in your browser. The planet image is the exception: its surface is procedural, driven by the measured radius, temperature and star, and is illustrative.</p>
+    <p>The numbers on this page come from the NASA Exoplanet Archive, from the papers it cites (among them the observations of rocky worlds' air), from NASA's planetary fact sheet for the Solar System, or from a published model applied to them in your browser. Five choices are the page's own, each named as such where it is used below: the log-uniform prior on a forecast mass, the line between thin and thick air, the 1,200 K at which a surface is drawn molten, the 750 K above which a world gives its own light, and the Earth-likeness score. The planet image is illustrative: its surface is procedural, driven by the measured radius, temperature and star.</p>
     <h3>Data</h3>
     <p>[REAL] ${esc(DATA.snapshotLabel)}: ${fmtInt(meta.rows)} confirmed planets with the archive's composite values, error bars, mass provenance and limit flags, discovery facts, stellar parameters and the reference for each value. ${esc(rosterNote)}</p>
     <h3>Models</h3>
@@ -100,6 +101,7 @@ export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote, 
     <p>[REAL] Limits: every value the archive flags as a limit (mass, radius, eccentricity, period, orbit, impact parameter, Teq, depth, duration, stellar temperature) is shown as a bound with its sign and never enters a computation as a value. A world with no measured radius gets no size class, gravity, density or scale height; its image is drawn at a stand-in size, labelled on the reticle [ILLUSTRATIVE].</p>
     <p>[REAL] Starlight: S = L / a², L in L☉ and a in AU, and the equilibrium temperature is computed from the same S, so the two never disagree. L is the archive's luminosity for ${fmtInt(census.luminosity)} planets and R★² (Teff / 5772 K)⁴ for the ${fmtInt(census.star)} whose star the archive gives none; the archive's own insolation stands for ${fmtInt(census.archive)} that lack the orbit or the star, and is named beside the computed value where the two differ by more than ${Math.round((ARCHIVE_DIFF - 1) * 100)}%. The archive's luminosity is chosen for the Gaia parallaxes behind the Kepler stars' luminosities and for the M-dwarf papers' own method (the luminosity measured, the radius derived from it); on references that share no catalogue with either, the two rules tie. The orbit is Kepler's third law, or the archive's for a planet of two stars and a star whose values cite ${esc(STASSUN)}, chosen by a backtest against the other papers' masses (labs/assets/data/exomania).</p>
     <p>[REAL] The starlight and Teq carry a 68% range, from ${MC.draws} draws, only where the snapshot gives every input an error, since a range over some of them would be narrower than the truth: ${fmtInt(census.ranged)} ${census.ranged === 1 ? 'planet has' : 'planets have'} one. The other ${fmtInt(census.point)} print a point value and name the error that is missing (${fmtInt(census.partial)} of them have an error on some input and not on every one): the snapshot carries no error on the archive's luminosity, and none on an orbit from Kepler's third law. The same Monte Carlo draws carry the radius and mass errors into gravity, the scale height and the size-class probabilities. The draws of a star are the same for every planet the archive lists it with.</p>
+    <p>[ILLUSTRATIVE] The draws read an archive interval as its 16th to 84th percentiles about the value, with a log-normal shape on each side: this page's choice, so that no draw is zero or negative. Where a value minus its lower error is zero or less, the gravity, density and scale height computed from it get no range, and an open radius gives the size classes no shares.</p>
     <p>[REAL] Habitable zone: ${esc(KOPPARAPU.ref)}, its edges taken at the star's temperature and placed by the planet's starlight on every view; in the system view an edge lies at a √(S / S_edge). "The habitable zone" is the conservative one (runaway to maximum greenhouse) unless the optimistic one (recent Venus to early Mars) is named. A star outside ${fmtInt(KOPPARAPU.tRange[0])} to ${fmtInt(KOPPARAPU.tRange[1])} K takes the edges of the nearer end of that range, and every view says "extrapolated".</p>
     <p>[REAL] Transit: depth from (Rp/R★)² with quadratic limb darkening (${esc(LIMB.ref)}, Sun-like coefficients for every star), integrated numerically over the planet's disc; duration from Seager &amp; Mallén-Ornelas 2003, eq. 3, at the archive's impact parameter, circular orbit. Radial velocity from Lovis &amp; Fischer 2010, eq. 14.</p>
     <p>[REAL] Composition curves on the mass-radius diagram: Seager et al. 2007, eq. 23 and Table 4 (iron, silicate, water ice), drawn to 20 M⊕.</p>

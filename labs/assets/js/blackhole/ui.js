@@ -372,8 +372,10 @@ export function buildUI(app) {
     if (s.notes && an) {
       // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
       // block and kept frames: a label once sat on the spin scale's numbers at 390)
-      const parts = drawing ? drawing.obstacles() : [];
-      const placed = parts.slice();
+      // the drawing's own parts (named apart from the overlay's `parts`, which this once shadowed, so no label was drawn:
+      // review_s4c 1)
+      const blocks = drawing ? drawing.obstacles() : [];
+      const placed = blocks.slice();
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
@@ -394,7 +396,7 @@ export function buildUI(app) {
         // with no free place, a label that would lie on a part of the drawing is left out rather than laid on it (a
         // small window, 960 x 640: labels lay on the title block and the ruler)
         const box = end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16];
-        if (!fit && parts.some((p) => box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3])) return;
+        if (!fit && blocks.some((p) => box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3])) return;
         dx = end ? -1 : 1;
         placed.push(end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16]);
         parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="subt">${sub}</text>` : ''}</g>`);
@@ -861,7 +863,7 @@ export function buildUI(app) {
   const perf = (p, res) => {
     const t = store.get('tier');
     // the device name with its separator, so a narrow screen can leave it out whole (its full name stays the title)
-    const html = `<span class="gpu" title="${esc(gpuFull)}">${esc(gpu)} · </span>tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · ${res && !res.refined ? `refining ${String(Math.round((res.progress || 0) * 100)).padStart(2, ' ')}%` : `median ${p.median ? p.median.toFixed(1) : '--'} ms`}`;   // one length either way: the footer never reflows as the render refines
+    const html = `<span class="gpu" title="${esc(gpuFull)}">${esc(gpu)} · </span>tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · <span class="pm">${res && !res.refined ? `refining ${Math.round((res.progress || 0) * 100)}%` : `median ${p.median ? p.median.toFixed(1) : '--'} ms`}</span>`;   // one length either way: the footer never reflows as the render refines
     [perfEl, perfEl2].forEach((n) => setHTML(n.querySelector('.pt'), html));
   };
 
