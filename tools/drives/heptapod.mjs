@@ -525,7 +525,10 @@ export default async function heptapod(p, { base, width }) {
     const cx = g2.ring.x, cy = g2.ring.y + g2.ring.R, h = 0.55 * g2.ring.R;
     await p.down(cx - h, cy - h);
     await p.move(cx, cy);
-    await p.ev(`import('${base}/labs/assets/js/heptapod/stage.js').then((m) => { for (let i = 0; i < 60; i++) m.Tier.sample(50); return m.Tier.name; })`);
+    // 120 slow frames: the page judges its frames in batches of 60 and may have some of its own fast ones queued, so a
+    // batch of 60 alone can close mixed and keep the tier (the rater's drive at 390 px, 2026-11-18); the second batch is
+    // only these
+    await p.ev(`import('${base}/labs/assets/js/heptapod/stage.js').then((m) => { for (let i = 0; i < 120; i++) m.Tier.sample(50); return m.Tier.name; })`);
     const mid = await probe();
     await p.move(cx + h, cy + h);
     await p.up(cx + h, cy + h);

@@ -32,7 +32,7 @@ const withP = (o) => ({ ...clone(BASE), ...o });
 const KEY = [
   { title: 'role', param: 'position on the ring', text: 'Clockwise from the top: predicate, then patient, recipient and agent, with the four slots between them.',
     vals: ['pred', 'patient', 'recipient', 'agent'].map((r) => ({ label: r === 'pred' ? 'predicate' : r, prop: withP({ recipient: { c: 'we', num: 'pl' } }), gold: r, focus: 'all' })) },
-  { title: 'concept', param: 'curvature of six cells', text: 'Each cell swells out, lies flat or dips in. The first cell is the radical: beings, things, or ideas. The last is a check, so one misread cell is caught.',
+  { title: 'concept', param: 'curvature of six cells', text: 'Each cell swells out, lies flat or dips in. The first cell is the radical: beings, things, or ideas. The last is a check cell, so no word is one cell away from another. The reader takes the nearest word and never refuses one, so a cell misread by a whole step can still turn into another word.',
     vals: [['human', 'being'], ['ship', 'thing'], ['language', 'idea'], ['heptapod', 'being']].map(([c, k]) => ({ label: `${c} (${k})`, prop: withP({ agent: { c, num: 'sg' } }), gold: 'agent', focus: 'agent' })) },
   { title: 'number', param: 'stroke weight', text: 'A plural entity doubles the weight of its sector. The reader measures thickness along the ray.',
     vals: [['sg', 'one'], ['pl', 'many']].map(([n, l]) => ({ label: l, prop: withP({ agent: { c: 'visitor', num: n } }), gold: 'agent', focus: 'agent' })) },
