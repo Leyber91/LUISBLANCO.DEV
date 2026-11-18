@@ -67,6 +67,18 @@ const MUTANTS = [
   ['the picture\'s zone from its own stand-ins where the sheets have one', `if (pos.key !== 'unknown') return { S: pos.S,`, `if (pos.key === 'none') return { S: pos.S,`],
   ['the picture\'s orbit the archive\'s first, as before', 'const a = semiMajor(p).a ?? p.pl_orbsmax ??', 'const a = p.pl_orbsmax ?? semiMajor(p).a ??'],
   ['the picture\'s orbit the archive\'s wherever the sheets have one', 'const a = semiMajor(p).a ?? p.pl_orbsmax ??', 'const a = (semiMajor(p).a && p.pl_orbsmax) ??'],
+
+  /* ---- the name of a gas giant ---- */
+  ['a giant seen by its own heat named by its temperature', `label = ownHeat(p) ? OWN_HEAT_LABEL : ph.Teq > 1200`, `label = ph.Teq > 1200`],
+  ['every gas giant named by its own heat', `ownHeat(p) ? OWN_HEAT_LABEL :`, `true ? OWN_HEAT_LABEL :`],
+  ['the words for its own heat', `export const OWN_HEAT_LABEL = 'Gas giant seen by its own heat';`, `export const OWN_HEAT_LABEL = 'Hot Jupiter';`],
+  ['an ice giant named by its temperature', `if (ph.domClass >= 4) label = ownHeat`, `if (ph.domClass >= 3) label = ownHeat`],
+  ['a hot Jupiter from 1,199 K', `ph.Teq > 1200 ? 'Hot Jupiter'`, `ph.Teq > 1199 ? 'Hot Jupiter'`],
+  ['a hot Jupiter only from 1,202 K', `ph.Teq > 1200 ? 'Hot Jupiter'`, `ph.Teq > 1201 ? 'Hot Jupiter'`],
+  ['warm from 799 K', `ph.Teq > 800 ? 'Warm gas giant'`, `ph.Teq > 799 ? 'Warm gas giant'`],
+  ['warm only from 802 K', `ph.Teq > 800 ? 'Warm gas giant'`, `ph.Teq > 801 ? 'Warm gas giant'`],
+  ['150 K itself cold', `ph.Teq < 150 ? 'Cold gas giant'`, `ph.Teq <= 150 ? 'Cold gas giant'`],
+  ['cold only under 149 K', `ph.Teq < 150 ? 'Cold gas giant'`, `ph.Teq < 149 ? 'Cold gas giant'`],
 ];
 
 process.exit(await runMutants({ here, file: 'data.js', test: 'looks.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));
