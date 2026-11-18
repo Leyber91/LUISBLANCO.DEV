@@ -531,6 +531,20 @@ export async function EDGE_STEP(p, { base, ready }) {
   }
 }
 
+// The disk's motion (flow.js; 2026-11-18). One pattern carried along the orbits wound into rings finer than the pixels,
+// which read as the disk expanding and contracting. The bounded shear is held in node (flow.test.mjs, from the orbits
+// themselves). A measure of fine detail in two stills five minutes apart was tried here and did not separate main from
+// the fix (ratio 1.09 against 0.97: within one ring the pattern only turns, and the winding showed as grain of the
+// same energy), so it is not kept. The page states its clock for the hole shown.
+export async function SPIN_STEP(p, { base, ready }) {
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87&n=0`);
+  await p.until(ready, READY_MS);
+  await p.sleep(1500);
+  await p.step('M87* as the page opens, its caption');
+  const caption = await p.ev(`(document.getElementById('bh-viewnote') || {}).textContent || ''`);
+  p.check('the view\'s caption states the page\'s clock for the hole shown', /The disk turns at 7\.5 M of time a second: a second here is .+ of M87\*'s time, and an orbit at the ISCO takes [\d.]+ s here and .+ there\./.test(caption), caption);
+}
+
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,
    a fall the visitor starts and the tour's, take out, and a browser whose storage is refused. Every count is read
    relative to the record as the step finds it, since earlier steps press pixels and run a fall, which the record keeps.
@@ -1101,6 +1115,7 @@ export default async function blackhole(p, { base, width }) {
   await sheet(false);
 
   /* ---- 3. the measurement and the telescope view, opened by link (ledger row 2; P2-1, P4-3) ---- */
+  await SPIN_STEP(p, { base, ready: READY });
   await EDGE_STEP(p, { base, ready: READY });
   const CARD = `(async () => {
     const P = await import('/labs/assets/js/blackhole/physics.js');
