@@ -27,6 +27,19 @@
       lumps. So two clauses about different things never pour the same
       pool, and no shape class (one smooth mass) is shared by all.
       [grammar: the concept; the code's words]
+   I2d The crown is the code: on the side of the pool holding more ink,
+      each radical's affirmed word (nine cells, code.js) is written
+      across its lump as a fan, a cell of 2 growing a tendril that ends
+      in a drop, a cell of 1 a short stub, a cell of 0 nothing. Every
+      tendril is a thread with the legs' physics (I4: SHAFT, FIL_LEN,
+      flaring as a branch does, 1.6 shafts, since it leaves the rim and
+      not the pool's depth;
+      the 1.89 drop), so the crown the film's single masses carry
+      (Humanity1: 16 filaments on one mass) is here the concept's code,
+      read cell by cell. Where a leg leaves the rim it drains the rim's
+      ink, so no cell grows within 1.5 cells of a leg's root. Luis, 2026-11-18: "make sure the feel is like
+      number 1, yet everything obeys the rules of the language we
+      figured out on our own". [grammar: the code; physics: I4]
    I3 Every node joined to a clause's main event is a filament leaving
       the mass where the pool is deepest (a splash's crown); a node
       that hangs from such a node is a branch of its filament. The side
@@ -116,7 +129,7 @@ import { RADICALS } from './hmr.js';
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.4',
+  version: 'inkfig-0.5',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -164,10 +177,17 @@ export const INK_CALIBRATIONS = Object.freeze([
 
 let LUMP = null;
 /** radical -> the lump's height (0.55 to 1.1 of the pool's depth): its affirmed word's digits summed over 18. */
+/** radical -> its affirmed word's nine cells (0, 1 or 2), the crown it writes (I2d). */
+export function lumpWord(radical) {
+  lumpHeight(radical);
+  return WORDS.get(radical) || null;
+}
+const WORDS = new Map();
 export function lumpHeight(radical) {
   if (!LUMP) {
     const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical;
     LUMP = new Map(RADICALS.map((r, i) => [r, 0.55 + (0.55 * digits(rad[i][0]).reduce((a, b) => a + b, 0)) / 18]));
+    RADICALS.forEach((r, i) => WORDS.set(r, Array.from(digits(rad[i][0]))));
   }
   return LUMP.get(radical) ?? 0.8;
 }
@@ -421,7 +441,7 @@ export function inkFigure(g, opts = {}) {
   const rc = (phiDeg) => R * (1 + INK.WOBBLE * fbm1(wobSeed, (((phiDeg % 360) + 360) % 360) / 60, 3, 6));
 
   const body = new Float32Array(S * S), bristle = new Float32Array(S * S);
-  const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0 };
+  const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0, crownTendrils: 0, crownStubs: 0 };
   // opts.trace: where each pool and each thread was laid, in raster pixels, for a reader of crops (the pod's
   // notebook). It records what was drawn and changes nothing that is drawn.
   const trace = opts.trace ? { pools: [], threads: [] } : null;
@@ -508,6 +528,31 @@ export function inkFigure(g, opts = {}) {
         thread(body, S, toX(r0 * cs), toY(r0 * sn), head, len, w, { flare: 1.2, end: 0.35, turn: 0.2, seed: srnd() * 4294967296 >>> 0 });
         report.spikes++;
       }
+    }
+
+    // I2d: the crown is the code, a fan across each radical's lump on the side holding more ink
+    {
+      const crnd = streamOf(cert, t.main, 'crown');
+      const side = fOut >= 0.5 ? 1 : -1;
+      // where a leg leaves the rim its thread drains the rim's ink, so no crown cell grows within DRAIN of its root
+      const legsAt = t.kids.get(t.main).map((w, i, all) => skew + (all.length === 1 ? 0 : -0.35 + (0.7 * i) / (all.length - 1)));
+      const drain = (lw * 0.85) / 4.5;
+      rads.forEach((r, q) => {
+        const w = lumpWord(r);
+        if (!w) return;
+        const xc = nr === 1 ? 0 : -0.55 + (1.1 * q) / (nr - 1);
+        for (let c = 0; c < 9; c++) {
+          if (w[c] === 0) continue;
+          const xx = xc + ((c - 4) * lw * 0.85) / 4.5, phi = th + xx * half;
+          if (legsAt.some((xl) => Math.abs(xl - xx) < 1.5 * drain)) continue;
+          const h = Math.max(wr, side > 0 ? hOut(phi) : hIn(phi));
+          const r0 = rc(phi) + side * h * 0.85, cs = cosK(phi * DEG), sn = sinK(phi * DEG);
+          const head = phi * DEG + (side > 0 ? 0 : PI) + (c - 4) * 0.13 + (crnd() - 0.5) * 0.15;
+          const len = R * INK.FIL_LEN * (w[c] === 2 ? 0.75 + 0.5 * crnd() : 0.3 + 0.1 * crnd());
+          thread(body, S, toX(r0 * cs), toY(r0 * sn), head, len, R * INK.SHAFT * (0.7 + 0.3 * crnd()), { flare: 1.6, end: 0.75, turn: 1, seed: (crnd() * 4294967296) >>> 0, bulb: w[c] === 2, rnd: crnd });
+          if (w[c] === 2) report.crownTendrils++; else report.crownStubs++;
+        }
+      });
     }
 
     // I5b: spray. Drops thrown off the pool's rim as the brush leaves it, more on the side it holds more

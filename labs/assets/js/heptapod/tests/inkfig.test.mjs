@@ -244,6 +244,27 @@ ok(inRead > 0 && filDrawn - outDrawn > 0, `side: ${inRead} read inward, ${filDra
   ok(texts45 === 4 && tried > 0 && worse === 0, `order: ${worse} of ${tried} cyclic orders put the centre of mass nearer the centre than the drawn one`);
 }
 
+/* 3b. the crown is the code (I2d), counted from the code's words by this test's own route: a figure grows no more
+   tendrils and stubs than its main events' words have cells of 2 and 1, and, over the texts, at least half of the
+   cells of 2 grow a tendril (some fall where a leg drains the rim) */
+{
+  const { buildCode, partition, digits, CODE_SEED } = await import('../topo/code.js');
+  const { RADICALS } = await import('../topo/hmr.js');
+  const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical;
+  const word = (r) => Array.from(digits(rad[RADICALS.indexOf(r)][0]));
+  let twos = 0, grown = 0, over = 0;
+  for (const g of texts.slice(0, 8)) {
+    const f = inkFigure(g, { S: 300 });
+    const { cg, mains } = clausesOf(g);
+    let t2 = 0, t1 = 0;
+    for (const m of mains) for (const r of cg.nodes[m].c || []) { const w = word(r); t2 += w.filter((x) => x === 2).length; t1 += w.filter((x) => x === 1).length; }
+    if (f.crownTendrils > t2 || f.crownStubs > t1) over++;
+    twos += t2; grown += f.crownTendrils;
+  }
+  ok(over === 0, `crown: ${over} of 8 texts grow more tendrils or stubs than their words have cells of 2 or 1`);
+  ok(twos > 0 && grown >= 0.5 * twos, `crown: ${grown} tendrils grown of ${twos} cells of 2 in the words`);
+}
+
 /* 4. determinism and node ids */
 {
   let same = 0, perm = 0;
