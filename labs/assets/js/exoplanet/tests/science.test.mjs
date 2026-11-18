@@ -184,7 +184,7 @@ yes(`with no published Teq, the render's Teq is within 20% of the plate's for ${
   // and mass given, M / R^2, with no assumption about the open side (HAT-P-57 b: 448 / 19.5^2 = 1.18 g)
   const lop = { host: 'X', Teff: 5772, Rs: 1, logL: 0, a: 1, P: 365.25, Ms: 1, Mprov: 'Mass', Mlim: 0, method: 'Transit', lim: {}, name: 'test 2.20 open mass', R: 2, Rerr1: 0.1, Rerr2: -0.1, Rerr: 0.1, M: 5, Merr1: 1, Merr2: -6 };
   const lopMc = S.monteCarlo(lop, 0.3);
-  yes('the note of a lopsided open mass names the value and its lower error', S.openRangeNote(lop, lopMc) === 'The mass minus its lower error (5 − 6 M⊕) is zero or less, so nothing that divides by it has a 68% range; each value shown is at the radius and mass given.' && S.openRangeNote(byName.get('Proxima Cen b'), prox) === '', S.openRangeNote(lop, lopMc));
+  yes('the note of a lopsided open mass names the value and its lower error', S.openRangeNote(lop, lopMc) === 'The mass minus its lower error (5 − 6 M⊕) is zero or less, so the gravity, density and scale height computed from it have no 68% range; each is shown at the radius and mass given.' && S.openRangeNote(byName.get('Proxima Cen b'), prox) === '', S.openRangeNote(lop, lopMc));
   near('an open range\'s value is at the radius and mass given (HAT-P-57 b, M / R^2 in g)', hat.g.med, 448.1 / (19.5 * 19.5), 0.005);
   const both = S.monteCarlo({ ...lop, name: 'test 2.20 both open', Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5 }, 0.3);
   yes('a radius and a mass both open is named by the radius, and an open radius gives the size classes no shares', both.open === 'radius' && both.probs.length === 0 && hd.probs.length === 0 && hat.probs.length > 0, `${both.open}; shares ${both.probs.length}, ${hd.probs.length}, ${hat.probs.length}`);

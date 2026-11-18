@@ -53,7 +53,7 @@ block('an open range', () => {
   const fcOpen = sheetRows(mk({ ...orbit, R: 2, Rerr1: 0.5, Rerr2: -2.5, Rerr: 1.5, M: null, Merr1: null, Merr2: null, Mprov: null }), 0.3).inferred;
   const at = (rows, k) => rows.find((r) => r.key === k);
   yes('an open radius has gravity, density and scale height rows, each "no 68% range" with no tick drawn', ['g', 'rho', 'H'].every((k) => at(open, k) && at(open, k).pm === 'no 68% range' && at(open, k).iv === false), ['g', 'rho', 'H'].map((k) => at(open, k) && `${at(open, k).pm}/${JSON.stringify(at(open, k).iv)}`).join(' | '));
-  yes('and the gravity\'s note names the radius, its lower error, and what the values are', /^The radius minus its lower error \(2 − 2.5 R⊕\) is zero or less, so nothing that divides by it has a 68% range; each value shown is at the radius and mass given\.$/.test(at(open, 'g').note || ''), at(open, 'g').note);
+  yes('and the gravity\'s note names the radius, its lower error, and what the values are', /^The radius minus its lower error \(2 − 2.5 R⊕\) is zero or less, so the gravity, density and scale height computed from it have no 68% range; each is shown at the radius and mass given\.$/.test(at(open, 'g').note || ''), at(open, 'g').note);
   yes('and the heading does not count the open rows as point values', !['g', 'rho', 'H'].some((k) => at(open, k).iv), inferredHeading(open));
   // a mass forecast from an open radius is the forecast every view prints (the chain, the bench, the CSV, the note), and
   // the open gravity beside it is at that forecast's median (the verification of pull request 59: two masses had been printed)
