@@ -7,6 +7,7 @@
 import { Store } from './state.js';
 import { Renderer } from './renderer.js';
 import { TIERS } from './config.js';
+import { FLOW } from './flow.js';
 import { derive } from './physics.js';
 import { DIAG_EXPO } from './palette.js';
 import { buildUI } from './ui.js';
@@ -116,7 +117,7 @@ function boot() {
     const transitioning = store.tick(now);
     ui.tick?.(now, dt);
     const anim = store.get('anim') && !STILL;
-    if (anim) app.time += dt / 1000 * 7.5;            // M of coordinate time per second of display
+    if (anim) app.time += dt / 1000 * FLOW.mPerSecond;   // M of coordinate time per second of display (flow.js clockLine)
     if (app.ignite < 1) app.ignite = Math.min(1, (now - app.ignitedAt) / 2600);
     const k = geometryKey();
     if (k !== geoKey) { geoKey = k; pushGeometry(); }

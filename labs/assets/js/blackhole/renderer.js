@@ -21,6 +21,7 @@ import { traceProgram, shadeProgram, FINAL, VERT, directProgram } from './shader
 import { buildLUT, LOG_T0, LOG_T1, LUT_N } from './blackbody.js';
 import { TIERS } from './config.js';
 import { tanHalfV } from './physics.js';
+import { flowCycle } from './flow.js';
 
 const MODE_ID = { thermal: 0, true: 1, redshift: 2, order: 3, steps: 4 };
 const EMIT_ID = { off: 0, thick: 1, thin: 2 };
@@ -35,7 +36,7 @@ const UNIFORMS = [
   ['uLogT', '2f', () => [LOG_T0, LOG_T1]],
   ['uPixAng', '1f', (f) => f.pixAng], ['uAz', '1f', (f) => f.az], ['uSkyGain', '1f', (f) => f.skyGain],
   ['uTime', '1f', (f) => f.time], ['uTdisp', '1f', (f) => f.tdisp], ['uTpeakK', '1f', (f) => f.tpeakK],
-  ['uFcol', '1f', (f) => f.fcol], ['uStretch', '1f', (f) => f.stretch], ['uIgnite', '1f', (f) => f.ignite],
+  ['uFcol', '1f', (f) => f.fcol], ['uStretch', '1f', (f) => f.stretch], ['uIgnite', '1f', (f) => f.ignite], ['uCycle', '1f', (f) => f.cycle],
   ['uHot', '3fv', (f) => f.hot], ['uMode', '1i', (f) => f.mode], ['uNotes', '1i', (f) => f.notes], ['uHL', '1f', (f) => f.hl],
   ['uExpo', '1f', (f) => f.expo], ['uFrame', '1f', (f) => f.frame],
 ];
@@ -211,7 +212,7 @@ export class Renderer {
     const cam = K.observerFrame(a, pos, { q, observer: view.observer, tilt: (view.tilt || 0) * Math.PI / 180 });
     const toF32 = (v) => Float32Array.from(v);
     const geo = {
-      a, q, rh: K.horizon(a, q), rin: K.isco(a, 1, q), rout: view.rout,
+      a, q, rh: K.horizon(a, q), rin: K.isco(a, 1, q), rout: view.rout, cycle: flowCycle(a, q),
       emit: EMIT_ID[view.emit] ?? 1,
       cam: { U: toF32(cam.U), R: toF32(cam.R), Up: toF32(cam.Up), F: toF32(cam.F), pos: toF32(cam.pos), raw: cam },
       tanHalf: tanHalfV(view.fov, this.canvas.clientWidth / Math.max(1, this.canvas.clientHeight)),

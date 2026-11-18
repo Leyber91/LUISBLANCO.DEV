@@ -253,23 +253,38 @@ uniform float uTdisp;        // display temperature of the peak (thermal mode), 
 uniform float uTpeakK;       // physical peak temperature, K (true colour mode)
 uniform float uFcol;         // colour-correction factor (true colour)
 uniform float uStretch;      // display stretch exponent
-uniform float uIgnite;       // 0..1 ignition from the ISCO outward
+uniform float uIgnite;       // 0..1 the disk fading in on load, everywhere at once
+uniform float uCycle;        // M a copy of the disk's pattern is carried along the orbits (flow.js flowCycle)
 uniform vec3 uHot;           // hot spot: (r, phi(t), on)
 uniform int uMode;           // 0 thermal 1 true 2 redshift 3 order 4 steps
 float profileT(float r){
   float u = sqrt(clamp((r - uRin)/(uRout - uRin), 0.0, 1.0));
   return texture(uProfile, vec2(u*(511.0/512.0) + 0.5/512.0, 0.5)).r;
 }
-float turbulence(float r, float phiW){
-  // co-rotating, differentially sheared texture: each annulus turns at its own Omega,
-  // so the pattern winds into trailing spirals as the clock runs (illustrative structure)
-  float Om = circularOrbit(max(r, uRin)).x;
-  float ang = phiW - Om*uTime;
-  float lr = log(r);
-  vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0);
+// the pattern's two fields at an angle in the co-moving frame, from one of flow.js's seeds (illustrative structure)
+vec2 diskFields(float ang, float lr, float seed){
+  vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0) + vec3(seed*1.37, seed*0.73, 0.0);
   float body = fbm(p*vec3(1.0, 1.0, 0.5));
   float ridge = 1.0 - abs(2.0*fbm(p*vec3(1.7, 1.7, 1.3) + 4.0) - 1.0);   // filaments
-  float lanes = 0.5 + 0.5*sin(lr*42.0 + 3.0*body);                         // thin radial lanes
+  return vec2(body, ridge);
+}
+float turbulence(float r, float phiW){
+  // Each annulus turns at its own Kerr orbital frequency. One pattern carried along wound into rings finer than the
+  // pixels, and a turning spiral read as the disk expanding and contracting (2026-11-18). Two copies are carried, each
+  // for one cycle from a fresh seed, and crossfaded with the copy at its reset weighing nothing (flow.js flowPhases,
+  // line for line; Neyret 2003), so the shear stays bounded and an inner feature is seen going round.
+  float Om = circularOrbit(max(r, uRin)).x;
+  float lr = log(r);
+  float T = uCycle;
+  float c0 = floor(uTime/T), c1 = floor(uTime/T + 0.5);
+  float t0 = uTime - c0*T, t1 = uTime + 0.5*T - c1*T;
+  float w0 = 1.0 - abs(2.0*t0/T - 1.0), w1 = 1.0 - w0;
+  vec2 f0 = diskFields(phiW - Om*t0, lr, mod(c0*2.0, 64.0));
+  vec2 f1 = diskFields(phiW - Om*t1, lr, mod(c1*2.0 + 1.0, 64.0));
+  // a blend of two independent patterns keeps their contrast: deviations from the mean scaled by 1/|w|
+  vec2 f = 0.5 + (w0*(f0 - 0.5) + w1*(f1 - 0.5))*inversesqrt(w0*w0 + w1*w1);
+  float body = clamp(f.x, 0.0, 1.0), ridge = clamp(f.y, 0.0, 1.0);
+  float lanes = 0.5 + 0.5*sin(lr*42.0 + 3.0*body);                         // thin lanes along the orbits
   return 0.30 + 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge) * (0.75 + 0.35*lanes);
 }
 vec3 diskColor(vec4 g0, vec4 g2){
@@ -279,7 +294,7 @@ vec3 diskColor(vec4 g0, vec4 g2){
   float tob = g*Tn;                                   // observed T / T_peak
   float limb = (1.0 + 2.06*g2.y)/3.06*1.5;            // Chandrasekhar electron-scattering limb law
   float turb = turbulence(r, phiW);
-  float ign = smoothstep(0.0, 1.0, (uIgnite*1.35 - (r - uRin)/(uRout - uRin))*3.0);
+  float ign = smoothstep(0.0, 1.0, uIgnite);          // in place: lit from the ISCO outward, it read as the disk expanding
   float outer = 1.0 - smoothstep(uRout*0.72, uRout, r);
   float spot = 0.0;
   if (uHot.z > 0.5) {
