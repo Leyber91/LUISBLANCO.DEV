@@ -99,13 +99,13 @@
     <!-- left: the seed console -->
     <div class="panel">
       <div class="pt">the seed</div>
-      <div class="row"><label>grammar</label>
+      <div class="row"><label for="preset">grammar</label>
         <select id="preset"></select></div>
-      <div class="row"><label>axiom (the seed)</label>
+      <div class="row"><label for="axiom">axiom (the seed)</label>
         <input class="f" id="axiom" spellcheck="false" /></div>
       <div class="two">
-        <div class="row"><label>angle&deg;</label><input class="f" id="angle" inputmode="decimal" /></div>
-        <div class="row"><label>generation</label><input class="f" id="genin" inputmode="numeric" /></div>
+        <div class="row"><label for="angle">angle&deg;</label><input class="f" id="angle" inputmode="decimal" /></div>
+        <div class="row"><label for="genin">generation</label><input class="f" id="genin" inputmode="numeric" /></div>
       </div>
       <div class="btns">
         <button class="btn" id="grow" type="button">grow &rarr;</button>
@@ -133,7 +133,7 @@
   </div>
   <div class="foot">
     <span class="tag" id="foot"><i></i><span id="foot_t"><b>[real]</b> D0L Lindenmayer rewriting + crystallise-a-motif-into-a-rule + entropy ceiling, all deterministic in-browser &mdash; the image IS the output of the visible rules &nbsp;·&nbsp; crystallised motifs are frozen reusable skills (reuse over re-growth &mdash; the visible trade-off) &nbsp;·&nbsp; <b>[illustrative]</b> the "seed / organism" naming</span></span>
-    <span class="scrub"><span class="gl">replay gen</span><input type="range" id="scrub" min="0" max="0" value="0" /></span>
+    <span class="scrub"><label class="gl" for="scrub">replay gen</label><input type="range" id="scrub" min="0" max="0" value="0" /></span>
   </div>
 </div>
 
