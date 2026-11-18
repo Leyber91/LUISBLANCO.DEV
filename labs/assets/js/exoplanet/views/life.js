@@ -93,7 +93,7 @@ export function drawLife(host, p, { kind, air = null, reading = 'a', onReading =
   host.append(el('p', 'life-words', L.words.join(' ')));
   const ev = el('footer', 'life-ev');
   ev.append(el('span', '', '[REAL] each case\'s light and UV-B at noon (Table 2a) and its productivity averaged over the day and the disk (Table 3), under Earth-like air: Kiang et al. 2007, Astrobiology 7, 252; the habitable zone: ' + KOPPARAPU.ref + '.'),
-    el('span', '', '[ILLUSTRATIVE] those numbers times this planet\'s starlight, the colour, the cover and these sentences: rules on top of the papers; the M dwarfs\' second reading after Takizawa et al. 2017, Sci. Rep. 7, 7561.'));
+    el('span', '', '[ILLUSTRATIVE] those numbers times this planet\'s starlight, the colour (the paper gives where pigments absorb most, at the star\'s peak; the other band drawn, Earth\'s chlorophyll\'s, is this page\'s), the cover and these sentences: rules on top of the papers; the M dwarfs\' second reading after Takizawa et al. 2017, Sci. Rep. 7, 7561.'));
   host.append(ev);
   if (focus) { const k = host.querySelector(`button[data-reading="${focus}"]`); if (k) k.focus({ preventScroll: true }); }
   return L;
