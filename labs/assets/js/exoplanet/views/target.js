@@ -85,9 +85,8 @@ function inferredRows(p, A) {
   if (fc) {
     const det = massFromRadiusMean(p.R);
     const cmp = [p.Mprov === 'M-R relationship' && isNum(p.M) && det ? `the archive gives ${fmt(p.M, 3)}, this page's mean ${fmt(det, 3)}` : '', fc.bounded ? `cut at the ${fmt(fc.bound, 3)} M⊕ ${fc.bounded} limit` : ''].filter(Boolean).join('; ');
-    const openR = mc.open === 'radius';   // the radius minus its lower error is below zero: the forecast has no range either
-    rows.push({ key: 'Mf', n: 'mass', v: fmt(openR ? det : fc.median, 2), u: 'M⊕', pm: openR ? OPEN_RANGE : `${fmt(fc.lo, 2)} to ${fmt(fc.hi, 2)}`, refs: [CHEN_KIPPING.ref], kind: 'e',
-      note: `The mass is forecast from the radius (${fc.regime})${cmp ? `; ${cmp}` : ''}${openR ? '; at the radius given, since the radius has no lower bound' : ''}.`, iv: openR ? false : { value: fc.median, lo: fc.lo, hi: fc.hi } });
+    rows.push({ key: 'Mf', n: 'mass', v: fmt(fc.median, 2), u: 'M⊕', pm: `${fmt(fc.lo, 2)} to ${fmt(fc.hi, 2)}`, refs: [CHEN_KIPPING.ref], kind: 'e',
+      note: `The mass is forecast from the radius (${fc.regime})${cmp ? `; ${cmp}` : ''}.`, iv: { value: fc.median, lo: fc.lo, hi: fc.hi } });
   }
   if (mc.hasR) {
     if (mc.g) rows.push({ key: 'g', n: 'gravity', v: fmt(mc.g.med, 2), u: 'g', pm: range(mc.g), kind: fc ? 'e' : 'd', note: openRangeNote(p, mc), iv: ivOf(mc.g) });
@@ -144,7 +143,7 @@ function classNote(p, A) {
   const mc = monteCarlo(p, A), sc = sizeClassOf(p);
   if (!mc.hasR) return sc ? `Every radius the bound allows makes it ${sc.label}.` : 'With no radius there is no size class, gravity, density or scale height.';
   const valley = p.R < VALLEY.lo ? 'below the radius valley' : p.R <= VALLEY.hi ? 'inside the radius valley' : 'above the radius valley';
-  if (mc.open === 'radius') return `The radius minus its lower error is below zero, so its draws give the size classes no shares; the radius given makes it ${sc ? sc.label : 'unclassed'} and puts it ${valley} (${VALLEY.ref}).`;
+  if (mc.open === 'radius') return `The radius minus its lower error is zero or less, so its draws give the size classes no shares; the radius given makes it ${sc ? sc.label : 'unclassed'} and puts it ${valley} (${VALLEY.ref}).`;
   const probs = mc.probs.slice().sort((x, y) => y.p - x.p).filter((c) => c.p >= 0.01).map((c) => `${c.label} ${Math.round(c.p * 100)}%`).join(', ');
   return `Its draws fall in the size classes as ${probs}; the radius puts it ${valley} (${VALLEY.ref}).`;
 }

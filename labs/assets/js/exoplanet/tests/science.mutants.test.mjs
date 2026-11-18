@@ -52,6 +52,8 @@ const MUTANTS = [
   ['an open range with no value', DER, '  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: null, lo: null, hi: null, open } : st; };'],
   ['an open range valued at the median of the mirrored draws', DER, '  const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: st.med, lo: null, hi: null, open } : st; };'],
   ['an open radius given class shares', "  const probs = open === 'radius' ? [] : SIZE_CLASSES", '  const probs = SIZE_CLASSES'],
+  ['an open forecast valued at the relation\'s mean, not the printed median', '  const M0 = trueM ? p.M : hasR && fc ? fc.median : null, R0 = p.R;', '  const M0 = trueM ? p.M : hasR && fc ? massFromRadiusMean(p.R) : null, R0 = p.R;'],
+  ['the molecular weight switched per draw', '        H.push(1.380649e-23 * T / (mu * 1.6726e-27', '        H.push(1.380649e-23 * T / ((R > 1.8 ? MC.muEnvelope : MC.muSecondary) * 1.6726e-27'],
   ['both open named by the mass first', OPEN, "  const open = spM && spM.open ? 'mass' : spR && spR.open ? 'radius' : null;"],
   ['the note of an open range silent', '  if (!mc || !mc.open) return \'\';', '  return \'\';'],
   ['the note naming the upper error', "[p.M, lowerError(p.Merr1, p.Merr2), 'M⊕', 'mass']", "[p.M, Math.abs(p.Merr1), 'M⊕', 'mass']"],

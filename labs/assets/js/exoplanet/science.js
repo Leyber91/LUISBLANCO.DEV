@@ -154,7 +154,7 @@ export const OPEN_RANGE = 'no 68% range';
 export function openRangeNote(p, mc) {
   if (!mc || !mc.open) return '';
   const [v, e, u, word] = mc.open === 'radius' ? [p.R, lowerError(p.Rerr1, p.Rerr2), 'R⊕', 'radius'] : [p.M, lowerError(p.Merr1, p.Merr2), 'M⊕', 'mass'];
-  return `The ${word} minus its lower error (${int3(v)} − ${int3(e)} ${u}) is below zero, so nothing derived from it has a 68% range; each value shown is at the radius and mass given.`;
+  return `The ${word} minus its lower error (${int3(v)} − ${int3(e)} ${u}) is zero or less, so nothing that divides by it has a 68% range; each value shown is at the radius and mass given.`;
 }
 /* One draw from a positiveSpread, given a standard normal deviate z. */
 export const drawPositive = (sp, z) => sp.v * Math.exp(z * (z < 0 ? sp.sLo : sp.sHi));
@@ -204,8 +204,8 @@ export function monteCarlo(p, albedo = TEQ.albedo) {
   }
   const stat = (arr) => { if (!arr.length) return null; const s = arr.slice().sort((x, y) => x - y); const q = (f) => s[Math.min(s.length - 1, Math.floor(f * s.length))]; return { med: q(0.5), lo: q(0.16), hi: q(0.84) }; };
   // a range that divides by a value not bounded away from zero has no ends; its value is the one at the radius and mass
-  // given (a forecast mass: the relation's mean at that radius), which needs no assumption about the open side
-  const M0 = trueM ? p.M : hasR && fc ? massFromRadiusMean(p.R) : null, R0 = p.R;
+  // given (a forecast mass: the forecast's median, as every view prints it), which needs no assumption about the open side
+  const M0 = trueM ? p.M : hasR && fc ? fc.median : null, R0 = p.R;   // the forecast's median: the mass every view prints
   const g0 = isNum(M0) && isNum(R0) ? M0 / (R0 * R0) : null, T0 = isNum(S0) ? kT * Math.pow(S0, 0.25) : null;
   const point = { g: g0, rho: isNum(g0) ? 5.514 * M0 / (R0 * R0 * R0) : null, H: isNum(g0) && T0 ? 1.380649e-23 * T0 / (mu * 1.6726e-27 * 9.80665 * g0) / 1000 : null };
   const derived = (arr, k) => { const st = stat(arr); return st && open ? { med: point[k], lo: null, hi: null, open } : st; };
