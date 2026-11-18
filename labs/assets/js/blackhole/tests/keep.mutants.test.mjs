@@ -26,12 +26,18 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 const MUTANTS = [
   /* ---- a press, one at a time ---- */
+  ['the button not said off while busy (M3)', `    btn.setAttribute('aria-disabled', String(busy));
+`, ``],
+  ['the button said off when not busy', `    btn.setAttribute('aria-disabled', String(busy));
+`, `    btn.setAttribute('aria-disabled', String(!busy));
+`],
+  ['the button on before the record is read', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !os || newer;`],
+  ['the button on over a newer record', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !loaded || !os;`],
+  ['Keep on when Labs OS did not start', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !loaded && !os || newer;`],
+  ['Keep on over a newer record whenever Labs OS started', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !loaded || !os && newer;`],
   ['a press while one is written is taken (review_s3c M1)', `if (!loaded || busy) return;`, `if (!loaded) return;`],
   ['a press before the record is read is taken', `if (!loaded || busy) return;`, `if (busy) return;`],
   ['no busy at all (M2)', `try { busy = true; draw(); await job(); }`, `try { draw(); await job(); }`],
-  ['the button on while busy (M3)', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os || newer;`],
-  ['the button on before the record is read', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !os || newer || busy;`],
-  ['the button on over a newer record', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os || busy;`],
   ['busy never said (M4)', `    btn.setAttribute('aria-busy', String(busy));\n`, ``],
   ['the Take outs on while busy', `\${busy ? ' disabled' : ''}>Take out`, `>Take out`],
   ['a Take out not held by busy (M13)', `void press(async () => { const w = await change((r) => R.unkeep(r, q));`, `void (async () => { const w = await change((r) => R.unkeep(r, q));`],
@@ -39,19 +45,21 @@ const MUTANTS = [
   ['a click of any count past the first is a press', `(e && e.detail > 1 ? undefined : keep())`, `(e && e.detail > 2 ? undefined : keep())`],
 
   /* ---- what the press acts on ---- */
+  ['the card\'s row without its picture', `<li>\${e.img ? \`<img class="bh-th" alt="" src="\${esc(e.img)}">\` : ''}<span>`, `<li><span>`],
+  ['the picture asked with no link', `img = await thumb(q);`, `img = await thumb();`],
   ['the intent decided in the turn from the store (M5, finding A)', `const q = store.toQuery(), label = nameOf(q), wantKept = btn.getAttribute('aria-pressed') !== 'true';
     // the frame's picture (BAR_L1 C17), made inside the press (a still takes a moment; the card is busy meanwhile)
     let img = null;
-    if (wantKept) { try { img = await thumb(); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
+    if (wantKept) { try { img = await thumb(q); } catch { img = null; } if (img && !R.isThumb(img)) img = null; }
     const w = wantKept
       ? await change((r) => R.keep(r, { q, t: now(), img }), { resume: { url: here(q), label: R.resumeLabel(q) } })
       : await change((r) => R.unkeep(r, q));`, `const q = store.toQuery(), label = nameOf(q); let wantKept = true;
     let img = null;
     const w = await change((r) => { wantKept = !R.isKept(r, q); return wantKept ? R.keep(r, { q, t: now(), img }) : R.unkeep(r, q); }, { resume: { url: here(q), label: R.resumeLabel(q) } });`],
   ['the way back written though the keep was refused (M7)', `? await change((r) => R.keep(r, { q, t: now(), img }), { resume: { url: here(q), label: R.resumeLabel(q) } })`, `? await change((r) => R.keep(r, { q, t: now(), img })).finally(() => os.progress.setResume(here(q), R.resumeLabel(q)).catch(() => {}))`],
-  ['a picture made for a take out', `    if (wantKept) { try { img = await thumb(); }`, `    if (true) { try { img = await thumb(); }`],
+  ['a picture made for a take out', `    if (wantKept) { try { img = await thumb(q); }`, `    if (true) { try { img = await thumb(); }`],
   ['a picture that is not a thumbnail kept', `if (img && !R.isThumb(img)) img = null; }`, `}`],
-  ['a picture that fails stops the keep', `try { img = await thumb(); } catch { img = null; }`, `img = await thumb();`],
+  ['a picture that fails stops the keep', `try { img = await thumb(q); } catch { img = null; }`, `img = await thumb(q);`],
   ['the strip not drawn again with the card', `    onDraw();
   }`, `  }`],
   ['Take out by its place in the list (M8, finding F)', `data-out="\${esc(e.q)}"`, `data-out="\${esc(String(stored.kept.indexOf(e)))}"`],
@@ -65,9 +73,6 @@ const MUTANTS = [
   ["every write read as a newer version's", `take(w.record, w.why === R.NEWER);`, `take(w.record, w.why !== R.NEWER);`],
   ['"Show the 0 more" under a list that fits', `if (more > 0) out.push(`, `if (more >= 0) out.push(`],
   ['the empty card read as recording off', `const recording = os ? os.recording.on : true;`, `const recording = os ? !os.recording.on : true;`],
-  ['Keep on over a newer record, as long as it is not busy', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os || newer && busy;`],
-  ['Keep on over a newer record whenever Labs OS started', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os && newer || busy;`],
-  ['Keep on when Labs OS did not start', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded && !os || newer || busy;`],
   ['no entry let go counted as some', `if (stored.dropped > 0) notes.push(`, `if (stored.dropped >= 0) notes.push(`],
   ['one entry let go counted as many', `\${stored.dropped === 1 ? 'entry was' : 'rays and falls were'}`, `\${stored.dropped !== 1 ? 'entry was' : 'rays and falls were'}`],
   ['a record in memory said to be kept in the browser', `os.storage.kind === 'memory' ?`, `os.storage.kind !== 'memory' ?`],

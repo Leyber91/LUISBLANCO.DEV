@@ -140,7 +140,12 @@ export function buildUI(app) {
     <div id="bh-reclist"></div><p class="bh-note" id="bh-recsaid" aria-live="polite"></p>
     <p class="bh-note"><span id="bh-recfoot"></span> Nothing typed is kept: a link holds the numbers of the state. <a href="privacy.html" style="color:var(--horizon)">What the site keeps, and how to erase it</a></p>`;
   left.appendChild(recCard);
-  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: () => thumbnail(app), onDraw: () => drawing?.drawStrip() });
+  const keep = createKeep({ card: recCard, store, fixture: new URLSearchParams(location.search).get('os-fixture'), moving: () => !!store.anim, thumb: async (q) => {
+    // the kept frame's picture is the hole the press named, once the view has settled on it (review_s4 3: a picture of
+    // the view still easing was stored with the target's link); another choice since the press, no picture
+    for (let i = 0; i < 40 && store.anim; i++) await new Promise((r) => setTimeout(r, 50));
+    return !store.anim && store.toQuery() === q ? thumbnail(app) : null;
+  }, onDraw: () => drawing?.drawStrip() });
   app.keep = keep;     // for the console and the drive, as window.__bh is
   store.on(() => keep.refresh());
   const actNote = $('#bh-actnote', actCard);
@@ -367,7 +372,8 @@ export function buildUI(app) {
     if (s.notes && an) {
       // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
       // block and kept frames: a label once sat on the spin scale's numbers at 390)
-      const placed = drawing ? drawing.obstacles() : [];
+      const parts = drawing ? drawing.obstacles() : [];
+      const placed = parts.slice();
       const lab = (pt, txt, sub, dx, dy) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
@@ -385,6 +391,10 @@ export function buildUI(app) {
         if (fit) [dx, dy] = fit;
         // where no offset is free, the label still stays between the panels (review_s2 P4-3)
         const { lx, ly, end } = keepInside(x, y, dx, dy, tw, [L, R], H);
+        // with no free place, a label that would lie on a part of the drawing is left out rather than laid on it (a
+        // small window, 960 x 640: labels lay on the title block and the ruler)
+        const box = end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16];
+        if (!fit && parts.some((p) => box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3])) return;
         dx = end ? -1 : 1;
         placed.push(end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16]);
         parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="subt">${sub}</text>` : ''}</g>`);
@@ -850,7 +860,8 @@ export function buildUI(app) {
   });
   const perf = (p, res) => {
     const t = store.get('tier');
-    const html = `<span title="${esc(gpuFull)}">${esc(gpu)}</span> · tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}`;
+    // the device name with its separator, so a narrow screen can leave it out whole (its full name stays the title)
+    const html = `<span class="gpu" title="${esc(gpuFull)}">${esc(gpu)} · </span>tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · ${res && !res.refined ? `refining ${String(Math.round((res.progress || 0) * 100)).padStart(2, ' ')}%` : `median ${p.median ? p.median.toFixed(1) : '--'} ms`}`;   // one length either way: the footer never reflows as the render refines
     [perfEl, perfEl2].forEach((n) => setHTML(n.querySelector('.pt'), html));
   };
 
@@ -858,7 +869,8 @@ export function buildUI(app) {
   let lastFallDraw = 0, wasEasing = false;
   const tick = (now, dt) => {
     journey.tick(dt);
-    if (store.anim && drawing) drawing.draw();
+    // the drawing's hands move with the eased view (they draw only when a value moved)
+    if (drawing) drawing.drawHands();
     app.tour?.tick(now, dt);
     // a transition just ended: the image is the state's own view now, so trace its anchors
     // and redraw what is drawn from the eased values (critical curve, labels, tour focus)
