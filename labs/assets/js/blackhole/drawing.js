@@ -210,9 +210,11 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const g = mass.marks; g.replaceChildren();
     svgText(g, { x: MS.W, y: 8, 'text-anchor': 'end', class: 'cap' }, 'MASS, SOLAR MASSES');
     el('line', { x1: MS.W, y1: MS.y0, x2: MS.W, y2: MS.y0 + MS.H, class: 'ink' }, g);
+    // a decade's number steps aside where a known hole's name sits within 10 px (on 30 decades Sgr A*'s name lay on 10^6)
+    const named = OBJECTS.filter((x) => x.mass >= 1 && !x.hypothetical).map((o) => massY(Math.log10(o.mass)));
     for (let lg = Math.ceil(LG[0]); lg <= LG[1]; lg++) {
       el('line', { x1: MS.W, y1: massY(lg), x2: MS.W - (lg % 3 === 0 ? 8 : 4), y2: massY(lg), class: lg % 3 === 0 ? 'ink' : 'faint', 'data-lg': String(lg) }, g);
-      if (lg % 6 === 0) { const t = svgText(g, { x: MS.W - 12, y: massY(lg) + 3, 'text-anchor': 'end' }, '10'); const sup = el('tspan', { 'baseline-shift': 'super', 'font-size': '7' }, t); sup.textContent = String(lg); }
+      if (lg % 6 === 0 && !named.some((y) => Math.abs(y - massY(lg)) < 10)) { const t = svgText(g, { x: MS.W - 12, y: massY(lg) + 3, 'text-anchor': 'end' }, '10'); const sup = el('tspan', { 'baseline-shift': 'super', 'font-size': '7' }, t); sup.textContent = String(lg); }
     }
     for (const o of OBJECTS.filter((x) => x.mass >= 1 && !x.hypothetical)) {
       const y = massY(Math.log10(o.mass));
@@ -299,6 +301,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const card = document.querySelector('#bh-keep');
     const kept = !!card && card.getAttribute('aria-pressed') === 'true';
     keepBtn.disabled = !card || card.disabled;
+    keepBtn.setAttribute('aria-disabled', card ? card.getAttribute('aria-disabled') || 'false' : 'true');
     keepBtn.setAttribute('aria-pressed', String(kept));
     keepBtn.setAttribute('aria-busy', card ? card.getAttribute('aria-busy') || 'false' : 'false');
     const words = kept ? 'kept' : 'keep this frame';
@@ -308,7 +311,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     setHTML(frames, rec.kept.slice(0, 3).map((e) => `<a class="bh-fr" href="${esc(location.pathname + openLink(e.q))}" title="${esc(nameOf(e.q))}" aria-label="${esc(nameOf(e.q))}">${e.img ? `<img alt="" src="${esc(e.img)}">` : '<span class="ph"></span>'}<span class="cap">${esc(shortOf(e.q))}</span></a>`).join(''));
   }
   // the second click of a double-click is not a press (review_s3c 1); a press on an off button does nothing
-  keepBtn.addEventListener('click', (e) => { if (e.detail > 1 || keepBtn.disabled) return; document.querySelector('#bh-keep')?.click(); });
+  keepBtn.addEventListener('click', (e) => { if (e.detail > 1 || keepBtn.disabled || keepBtn.getAttribute('aria-disabled') === 'true') return; document.querySelector('#bh-keep')?.click(); });
 
   /* ---------- the layout of the scales, by the window ---------- */
   function place() {
@@ -325,13 +328,15 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       Object.assign(spin.svg.style, { left: '0px', top: Math.round((hl.height ? hl.bottom : 110) + 4) + 'px', width: W + 'px', height: '58px' });
       incl.svg.style.display = 'none'; mass.svg.style.display = 'none';
     } else {
-      // the spin ruler at the foot, clear of the caption on sheet 1; where the caption leaves it under 300 px, it rises
-      // above the caption (review_s4 6: from 901 to 1207 px wide the caption covered its right end)
+      // the spin ruler at the foot, clear of the caption on sheet 1. Where the caption leaves it under 300 px (901 to 1207 px
+      // wide: review_s4 6), the foot has no room between the protractor, the caption and the title block, so the ruler
+      // goes where the phone puts it: under the head line, in the sky, left of the kept frames
       const capEl = document.getElementById('bh-caption'), cap = capEl && capEl.getClientRects().length ? capEl.getBoundingClientRect() : null;
-      const room = cap ? cap.left - 64 - 24 : 480;
-      SP.x0 = 0; SP.W = Math.max(300, Math.min(480, W - 440 - 380 - 140, Math.max(300, room)));
-      const low = H - 60 - SP.H - 18;
-      const top = !cap || room >= 300 ? low : Math.round(cap.top - (SP.H + 18) - 14);
+      const room = cap ? cap.left - 64 - 24 : 480, foot = !cap || room >= 300;
+      const stripLeft = strip.getClientRects().length ? strip.getBoundingClientRect().left : W;
+      SP.x0 = 0; SP.W = Math.max(300, foot ? Math.min(480, W - 440 - 380 - 140, room) : Math.min(480, stripLeft - 64 - 24));
+      const low = H - 60 - SP.H - 18, hl = head.getBoundingClientRect();
+      const top = foot ? low : Math.round((hl.height ? hl.bottom : 80) + 8);
       Object.assign(spin.svg.style, { left: '64px', top: top + 'px', width: SP.W + 4 + 'px', height: SP.H + 18 + 'px' });
       Object.assign(incl.svg.style, { display: '', left: '23px', top: Math.round(H * 0.47 - IN.oy) + 'px', width: IN.R + 96 + 'px', height: 2 * IN.oy + 'px' });
       // the mass scale from 28% of the height down to above the title block, which it never reaches (review_s4 6: at
@@ -361,6 +366,10 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     drawHands(); drawTitle(); drawStrip();
   }
   window.addEventListener('resize', place);
+  // the caption's height changes with the tour's words after the drawing is placed: the spin scale is placed again
+  // against it, so it never lies under it (seen at 1100 x 800)
+  const capEl = document.getElementById('bh-caption');
+  if (capEl && typeof ResizeObserver === 'function') new ResizeObserver(() => { if (wide()) place(); }).observe(capEl);
   sheet(1);
   place();
 

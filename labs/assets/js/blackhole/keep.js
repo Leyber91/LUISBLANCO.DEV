@@ -113,7 +113,10 @@ export function createKeep({ card, store, fixture = null, now = () => Date.now()
     const c = R.counts(stored), q = store.toQuery(), kept = R.isKept(stored, q);
     const recording = os ? os.recording.on : true;   // no Labs OS: nothing is recorded, so nothing to say is off
     line.textContent = loaded ? R.lineWords(c) : 'reading';
-    btn.disabled = !loaded || !os || newer || busy;
+    // off while it cannot act at all (the record not read, no store, a newer version's record); while a press is
+    // written it says so and a press does nothing, but it keeps its focus, which a disabled button drops (review_s4 8)
+    btn.disabled = !loaded || !os || newer;
+    btn.setAttribute('aria-disabled', String(busy));
     btn.setAttribute('aria-pressed', String(kept));
     btn.setAttribute('aria-busy', String(busy));
     btn.textContent = kept ? 'Kept' : 'Keep this hole';

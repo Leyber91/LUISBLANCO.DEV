@@ -26,12 +26,18 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 const MUTANTS = [
   /* ---- a press, one at a time ---- */
+  ['the button not said off while busy (M3)', `    btn.setAttribute('aria-disabled', String(busy));
+`, ``],
+  ['the button said off when not busy', `    btn.setAttribute('aria-disabled', String(busy));
+`, `    btn.setAttribute('aria-disabled', String(!busy));
+`],
+  ['the button on before the record is read', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !os || newer;`],
+  ['the button on over a newer record', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !loaded || !os;`],
+  ['Keep on when Labs OS did not start', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !loaded && !os || newer;`],
+  ['Keep on over a newer record whenever Labs OS started', `btn.disabled = !loaded || !os || newer;`, `btn.disabled = !loaded || !os && newer;`],
   ['a press while one is written is taken (review_s3c M1)', `if (!loaded || busy) return;`, `if (!loaded) return;`],
   ['a press before the record is read is taken', `if (!loaded || busy) return;`, `if (busy) return;`],
   ['no busy at all (M2)', `try { busy = true; draw(); await job(); }`, `try { draw(); await job(); }`],
-  ['the button on while busy (M3)', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os || newer;`],
-  ['the button on before the record is read', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !os || newer || busy;`],
-  ['the button on over a newer record', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os || busy;`],
   ['busy never said (M4)', `    btn.setAttribute('aria-busy', String(busy));\n`, ``],
   ['the Take outs on while busy', `\${busy ? ' disabled' : ''}>Take out`, `>Take out`],
   ['a Take out not held by busy (M13)', `void press(async () => { const w = await change((r) => R.unkeep(r, q));`, `void (async () => { const w = await change((r) => R.unkeep(r, q));`],
@@ -67,9 +73,6 @@ const MUTANTS = [
   ["every write read as a newer version's", `take(w.record, w.why === R.NEWER);`, `take(w.record, w.why !== R.NEWER);`],
   ['"Show the 0 more" under a list that fits', `if (more > 0) out.push(`, `if (more >= 0) out.push(`],
   ['the empty card read as recording off', `const recording = os ? os.recording.on : true;`, `const recording = os ? !os.recording.on : true;`],
-  ['Keep on over a newer record, as long as it is not busy', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os || newer && busy;`],
-  ['Keep on over a newer record whenever Labs OS started', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded || !os && newer || busy;`],
-  ['Keep on when Labs OS did not start', `btn.disabled = !loaded || !os || newer || busy;`, `btn.disabled = !loaded && !os || newer || busy;`],
   ['no entry let go counted as some', `if (stored.dropped > 0) notes.push(`, `if (stored.dropped >= 0) notes.push(`],
   ['one entry let go counted as many', `\${stored.dropped === 1 ? 'entry was' : 'rays and falls were'}`, `\${stored.dropped !== 1 ? 'entry was' : 'rays and falls were'}`],
   ['a record in memory said to be kept in the browser', `os.storage.kind === 'memory' ?`, `os.storage.kind !== 'memory' ?`],

@@ -851,7 +851,8 @@ export function buildUI(app) {
   });
   const perf = (p, res) => {
     const t = store.get('tier');
-    const html = `<span title="${esc(gpuFull)}">${esc(gpu)}</span> · tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}`;
+    // the device name with its separator, so a narrow screen can leave it out whole (its full name stays the title)
+    const html = `<span class="gpu" title="${esc(gpuFull)}">${esc(gpu)} · </span>tier ${t === 'auto' ? 'auto/' + (p.tier || '--') : t} · median ${p.median ? p.median.toFixed(1) : '--'} ms${res && !res.refined ? ` · refining ${Math.round((res.progress || 0) * 100)}%` : ''}`;
     [perfEl, perfEl2].forEach((n) => setHTML(n.querySelector('.pt'), html));
   };
 

@@ -179,14 +179,14 @@ const other = (open) => { const s = new Store(); s.open(open); return s.toQuery(
   const first = p.press();
   await sleep(5);
   const b = p.els['#bh-keep'];
-  ok('while a press is written the Keep button is off and says it is busy', b.disabled === true && b.getAttribute('aria-busy') === 'true', JSON.stringify({ d: b.disabled, busy: b.getAttribute('aria-busy') }));
+  ok('while a press is written the Keep button says it is off and busy, and keeps its focus (not disabled)', b.disabled === false && b.getAttribute('aria-disabled') === 'true' && b.getAttribute('aria-busy') === 'true', JSON.stringify({ d: b.disabled, off: b.getAttribute('aria-disabled'), busy: b.getAttribute('aria-busy') }));
   const html = p.els['#bh-reclist'].innerHTML;
   ok('and every Take out is off', /data-out="[^"]*" disabled>/.test(html) && !/data-out="[^"]*">/.test(html), html.slice(0, 300));
   await p.press();
   await first; await sleep(60);
   p.os.progress.set = set;
   ok('a second press while the first is written writes nothing', sets === 1, String(sets));
-  ok('once written the button is on again', b.disabled === false && b.getAttribute('aria-busy') === 'false');
+  ok('once written the button is on again', b.disabled === false && b.getAttribute('aria-disabled') === 'false' && b.getAttribute('aria-busy') === 'false');
 }
 
 /* review_s3c 3 and 5: the way back is the newest hole in the record; a refused keep leaves it; a take out moves it to
