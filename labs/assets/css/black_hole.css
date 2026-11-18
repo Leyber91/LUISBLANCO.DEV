@@ -330,7 +330,8 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 .bh-scale .now { stroke: var(--text-bright); stroke-width: 1.2; }
 .bh-scale .tip { fill: var(--text-bright); }
 /* the title block: the one ruled form on the sheet */
-.bh-tb { position: fixed; right: 40px; bottom: 56px; width: 440px; z-index: 16; border: 1px solid var(--bh-hair-2); background: var(--bh-panel-solid); }
+/* above the footer as it is (drawing.js sets --bh-above-foot from its height; 56 px when it is one line) */
+.bh-tb { position: fixed; right: 40px; bottom: var(--bh-above-foot, 56px); width: 440px; z-index: 16; border: 1px solid var(--bh-hair-2); background: var(--bh-panel-solid); }
 .bh-tb-r { display: grid; border-top: 1px solid var(--bh-hair); }
 .bh-tb-body > .bh-tb-r:first-child { border-top: 0; }
 .bh-tb-r.g2 { grid-template-columns: 1.4fr 1fr; } .bh-tb-r.g3 { grid-template-columns: 1fr 1fr 1fr; } .bh-tb-r.g4 { grid-template-columns: repeat(4, 1fr); }
@@ -368,7 +369,7 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
   body[data-sheet="2"] .bh-left { display: none; }
   body[data-sheet="3"] .bh-right, body[data-sheet="4"] .bh-right { display: none; }
   body:not([data-sheet="1"]) .bh-scale, body:not([data-sheet="1"]) .bh-strip { display: none; }
-  body[data-sheet="1"] .bh-caption { left: auto; right: 500px; transform: none; width: 340px; bottom: 56px; }
+  body[data-sheet="1"] .bh-caption { left: auto; right: 500px; transform: none; width: 340px; bottom: var(--bh-above-foot, 56px); }
   body[data-sheet="1"] .bh-caption .cap-b { max-height: calc(5.5 * 1.5em); overflow-y: auto; overscroll-behavior: contain; }
   /* the drawing's margin notes: the old chrome's boxes lose their border and keep their dark ground, so their words read
      at 4.5 to 1 over any colouring of the render (with no ground, Back read 1.07 to 1 over the steps colouring) */
@@ -381,7 +382,12 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
   body:not([data-sheet="1"]) .bh-left, body:not([data-sheet="1"]) .bh-right { bottom: 110px; }
   /* a sheet shows one column alone, so it may be wider than two side by side (at 1100 px a readout's label took four
      lines in 280) */
-  body:not([data-sheet="1"]) { --bh-col: min(380px, calc(100vw - 2 * var(--bh-pad) - 480px)); }
+  body:not([data-sheet="1"]) { --bh-colw: min(380px, calc(100vw - 2 * var(--bh-pad) - 480px)); }
+  body:not([data-sheet="1"]) .bh-left, body:not([data-sheet="1"]) .bh-right { width: var(--bh-colw); }
+  /* the caption beside the one column shown, with the rest of the width (review_s4b 8: it took two columns off and
+     shrank to 81 px at 901) */
+  body[data-sheet="2"] .bh-caption { left: calc((100vw - var(--bh-colw)) / 2); width: min(620px, calc(100vw - var(--bh-colw) - 4 * var(--bh-pad))); }
+  body[data-sheet="3"] .bh-caption, body[data-sheet="4"] .bh-caption { left: calc(var(--bh-colw) + (100vw - var(--bh-colw)) / 2); width: min(620px, calc(100vw - var(--bh-colw) - 4 * var(--bh-pad))); }
 }
 @media (max-width: 900px) {
   .bh-strip { display: none; }
@@ -404,3 +410,7 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 /* a kept hole's picture beside its name in the record card, at every width (review_s4 8: a phone stored pictures it never
    showed) */
 .bh-rec .bh-th { width: 46px; height: 29px; object-fit: cover; border: 1px solid var(--bh-hair-2); flex: none; }
+
+/* a Keep that cannot act looks it, whether off (disabled) or while a press is written (aria-disabled, which keeps the
+   focus); the strip's button the same (review_s4b 2, 4) */
+.bh-btn[aria-disabled="true"], .bh-fr.add[disabled], .bh-fr.add[aria-disabled="true"] { opacity: .45; cursor: default; }

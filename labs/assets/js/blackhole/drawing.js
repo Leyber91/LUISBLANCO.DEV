@@ -27,12 +27,20 @@ import * as K from './kerr.js';
 import { OBJECTS, VIEWS, COLOR_MODES, SCHEMA, COPY } from './config.js';
 import { s3, sci, pmText, published, measurement, parsecs, deg, spinText } from './physics.js';
 import { setHTML } from './tour.js';
-import { linkLabel, openLink, resumeLabel } from './record.js';
+import { linkLabel, openLink, identity } from './record.js';
 
 // a link's names never change, and the strip is drawn on every change of state
 const names = new Map(), shorts = new Map();
 const nameOf = (q) => { if (!names.has(q)) names.set(q, linkLabel(q)); return names.get(q); };
-const shortOf = (q) => { if (!shorts.has(q)) shorts.set(q, resumeLabel(q).replace(/^Black Hole: /, '')); return shorts.get(q); };
+/** A kept frame's caption, short enough for its picture and telling holes apart (review_s4b 5: every hole of one's
+ *  own read "a hole of your own, cinematic"): the object, or a hole of one's own by its mass; its spin; the view when
+ *  it is not the cinematic one. The whole name is the link's title. */
+function captionOf(q) {
+  const id = Object.fromEntries(identity(q).map((x) => [x.d.key, x.v]));
+  const o = OBJECTS.find((x) => x.id === id.obj);
+  return `${o ? o.name : id.mass} · a ${id.a}${id.view !== 'cinematic' ? ` · ${id.view}` : ''}`;
+}
+const shortOf = (q) => { if (!shorts.has(q)) shorts.set(q, captionOf(q)); return shorts.get(q); };
 
 const NS = 'http://www.w3.org/2000/svg';
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -53,7 +61,7 @@ function spinFor(f, target, aMax) {
   return (lo + hi) / 2;
 }
 /** The highest spin the store lets a hole of charge q have (state.js: a^2 + q^2 is held at 0.996 or less). */
-const spinTop = (q) => Math.min(BY.a.max, Math.sqrt(Math.max(0, 0.996 - q * q)));
+const spinTop = (q) => (q > 0 ? Math.min(BY.a.max, Math.sqrt(Math.max(0, 0.996 - q * q))) : BY.a.max);   // with no charge, the store's 0.998
 
 /* app: the page's app; choose: { object(id), view(id), colour(id), sheet(n) } from ui.js, the same actions as the
    cards' buttons; act: { plate(W), link(), json(), csv(), sources() }; keepRecord(): the record the card shows. */
@@ -108,7 +116,8 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       const d = k === 'ArrowRight' || k === 'ArrowUp' ? step : k === 'ArrowLeft' || k === 'ArrowDown' ? -step : k === 'PageUp' ? step * 10 : k === 'PageDown' ? -step * 10 : 0;
       if (!d && k !== 'Home' && k !== 'End') return;
       e.preventDefault();
-      const v = k === 'Home' ? BY[key].min : k === 'End' ? BY[key].max : s + d;
+      const top = key === 'a' ? spinTop(store.get('q')) : BY[key].max;   // the spin stops where the charge lets it
+      const v = Math.min(top, k === 'Home' ? BY[key].min : k === 'End' ? top : s + d);
       app.tour?.stop();
       // a step keeps the value's own digits (float noise aside): rounded to the schema's 2, M87*'s 9.8129 came back from a
       // right and a left as 9.81
@@ -123,7 +132,8 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   const spin = scale({
     id: 'bh-sc-spin', key: 'a', label: 'spin a/M', orient: 'horizontal', step: 0.01,
     toFrac: (e, r) => (e.clientX - r.left - SP.x0) / SP.W,
-    fromFrac: (f) => f * AMAX,
+    // never past the spin the charge allows, so a press keeps the charge and the marks do not move under it
+    fromFrac: (f) => Math.min(f * AMAX, spinTop(store.get('q'))),
     valueText: (v) => `a = ${spinText(v)}, ISCO ${s3(K.isco(v, 1, store.get('q')))} M, horizon ${s3(K.horizon(v, store.get('q')))} M`,
   });
   // inclination: a protractor on the left edge, 0 at the spin axis, 90 in the disk's plane. Its 180 end lies on the svg's
@@ -183,9 +193,13 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     el('path', { d: `M${x - 5},30 l5,-7 l5,7 z`, class: 'tip' }, g);
     if (!compact) { el('line', { x1: x, y1: 44, x2: x, y2: 50, class: 'now' }, g); el('line', { x1: x, y1: 68, x2: x, y2: 74, class: 'now' }, g); }
     // the scale's title at its foot, on the reading's baseline: the top row is the ticks' numbers
-    svgText(g, { x: SP.x0, y: compact ? 50 : 104, class: 'cap' }, 'SPIN a/M');
-    svgText(g, { x: SP.x0 + SP.W, y: compact ? 50 : 104, 'text-anchor': 'end', class: 'val' }, `a ${spinText(a)} · ISCO ${s3(K.isco(a, 1, q))} M · horizon ${s3(K.horizon(a, q))} M`);
-    spin.set(a);
+    const y = compact ? 50 : 104;
+    const title = svgText(g, { x: SP.x0, y, class: 'cap' }, 'SPIN a/M');
+    const val = svgText(g, { x: SP.x0 + SP.W, y, 'text-anchor': 'end', class: 'val' }, `a ${spinText(a)} · ISCO ${s3(K.isco(a, 1, q))} M · horizon ${s3(K.horizon(a, q))} M`);
+    // the title on the reading's line where both fit, on the line under it where they would cross (review_s4b 3: they
+    // crossed at 1280 and at 360)
+    const tw = title.getComputedTextLength ? title.getComputedTextLength() : 60, vw = val.getComputedTextLength ? val.getComputedTextLength() : 270;
+    if (tw + 12 > SP.W - vw) title.setAttribute('y', String(y + 13));
   }
   const P = (d, r) => [r * Math.sin(d * Math.PI / 180), IN.oy - r * Math.cos(d * Math.PI / 180)];
   function drawInclMarks() {
@@ -204,7 +218,6 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     el('circle', { cx: x, cy: y, r: 3, class: 'tip' }, g);
     // the value outside the graduations' numbers, along the hand (it sat on "30" at Sgr A*: review_s4 7)
     svgText(g, { x: lx, y: ly + 4, class: 'val' }, `i ${deg(i)}°`);
-    incl.set(i);
   }
   function drawMassMarks() {
     const g = mass.marks; g.replaceChildren();
@@ -230,7 +243,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     // a hole is named on the hand only when the state is that hole (review_s4 9: a hole of one's own near M87*'s mass was
     // named M87*); its mark's own name then steps aside
     const o = OBJECTS.find((x) => x.id === store.get('obj'));
-    for (const tx of mass.marks.querySelectorAll('text[data-label]')) tx.style.display = o && tx.dataset.label === o.id ? 'none' : '';
+    // the hand's words win: a mark's name within 12 px of the hand steps aside, whatever the hole (review_s4b 1: a hole of
+    // one's own at M87*'s mass had both words on one baseline)
+    for (const tx of mass.marks.querySelectorAll('text[data-label]')) tx.style.display = Math.abs(+tx.getAttribute('y') - 3 - y) < 12 ? 'none' : '';
     svgText(g, { x: MS.W - 50, y: y + 3, 'text-anchor': 'end', class: 'val' }, `${o ? `${o.name} · ` : ''}${sci(10 ** lg)} M☉`);
     mass.set(lg);
   }
@@ -276,7 +291,9 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const eht = cmp && cmp.shadow ? c('EHT shadow', published(cmp.shadow.value, cmp.shadow.err, '±'), 'µas')
       : cmp && cmp.ring ? c('EHT ring of emission (no σ: a different quantity)', published(cmp.ring.value, cmp.ring.err, '±'), 'µas')
         : c('EHT', 'not imaged');
-    const drawn = new Date().toISOString().slice(0, 10);
+    // the visitor's own date (toISOString is UTC: between 00:00 and 01:00 in Barcelona it read yesterday)
+    const now = new Date(), two = (n) => String(n).padStart(2, '0');
+    const drawn = `${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())}`;
     setHTML(tbBody, `
       <div class="bh-tb-r bh-tb-h"><div class="c"><h1 class="t">${name}</h1><span class="sub">${esc(COPY.title)}</span></div><div class="c sheetno"><span class="l">sheet</span><span class="v" id="bh-tb-sheet">${body.dataset.sheet || 1} of 4</span></div></div>
       <div class="bh-tb-r g2">${c(`shadow, far observer at ${deg(ms.incl)}°`, `${s3(ms.th.mean)} M${cmp ? ` · ${pmText(cmp.pred.value, cmp.pred.errP, cmp.pred.errM)}` : ''}`, cmp ? 'µas' : '')}${eht}</div>
@@ -314,6 +331,7 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   keepBtn.addEventListener('click', (e) => { if (e.detail > 1 || keepBtn.disabled || keepBtn.getAttribute('aria-disabled') === 'true') return; document.querySelector('#bh-keep')?.click(); });
 
   /* ---------- the layout of the scales, by the window ---------- */
+  let tbRoom = 260, footRoom = 38;   // px, the title block's and the footer's tallest so far, until the window changes
   function place() {
     const W = innerWidth, H = innerHeight, phone = !wide();
     compact = phone;
@@ -321,11 +339,19 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     const stage = document.querySelector('.bh-stage'), handle = stage && stage.querySelector('.bh-sheet-h');
     if (phone && handle && handle.nextElementSibling !== tb) handle.after(tb);
     if (!phone && tb.parentElement !== body) body.appendChild(tb);
+    // what stands at the foot stands on the footer as it is: its tags wrap on a narrow screen and it grows (at 960 x 640
+    // the caption lay on its first line)
+    const footEl = document.getElementById('bh-foot');
+    // the room kept for it only grows: its words change while the render refines ("refining 45%"), and a footer that
+    // wrapped and unwrapped moved the scales under the pointer (a press on the mass scale read 6.31 for 6.63)
+    footRoom = Math.max(footRoom, !phone && footEl && footEl.getClientRects().length ? Math.round(H - footEl.getBoundingClientRect().top) : 38);
+    const footTop = H - footRoom;
+    document.documentElement.style.setProperty('--bh-above-foot', `${footRoom + 8}px`);
     if (phone) {
       SP.x0 = 18; SP.W = W - 2 * 18 - 4;
       // under the head line, in the sky above the hole: below it the labels and the caption have the frame
       const hl = head.getBoundingClientRect();
-      Object.assign(spin.svg.style, { left: '0px', top: Math.round((hl.height ? hl.bottom : 110) + 4) + 'px', width: W + 'px', height: '58px' });
+      Object.assign(spin.svg.style, { left: '0px', top: Math.round((hl.height ? hl.bottom : 110) + 4) + 'px', width: W + 'px', height: '72px' });
       incl.svg.style.display = 'none'; mass.svg.style.display = 'none';
     } else {
       // the spin ruler at the foot, clear of the caption on sheet 1. Where the caption leaves it under 300 px (901 to 1207 px
@@ -335,15 +361,28 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
       const room = cap ? cap.left - 64 - 24 : 480, foot = !cap || room >= 300;
       const stripLeft = strip.getClientRects().length ? strip.getBoundingClientRect().left : W;
       SP.x0 = 0; SP.W = Math.max(300, foot ? Math.min(480, W - 440 - 380 - 140, room) : Math.min(480, stripLeft - 64 - 24));
-      const low = H - 60 - SP.H - 18, hl = head.getBoundingClientRect();
+      const low = Math.round(footTop - 8 - (SP.H + 32)), hl = head.getBoundingClientRect();
       const top = foot ? low : Math.round((hl.height ? hl.bottom : 80) + 8);
-      Object.assign(spin.svg.style, { left: '64px', top: top + 'px', width: SP.W + 4 + 'px', height: SP.H + 18 + 'px' });
-      Object.assign(incl.svg.style, { display: '', left: '23px', top: Math.round(H * 0.47 - IN.oy) + 'px', width: IN.R + 96 + 'px', height: 2 * IN.oy + 'px' });
+      Object.assign(spin.svg.style, { left: '64px', top: top + 'px', width: SP.W + 4 + 'px', height: SP.H + 32 + 'px' });
+      // the protractor below the ruler when the ruler is under the head line (review_s4b 9: on a short window its title
+      // lay on the ruler's)
+      const inTop = Math.round(foot ? H * 0.47 - IN.oy : Math.max(H * 0.47 - IN.oy, top + SP.H + 32 + 8));
+      // the protractor only where it fits above the caption it would reach: on a small window it is left off, as on a
+      // phone, and the inclination stays on the settings sheet (960 x 640: it ran into the caption)
+      const inLeft = 23, inRight = inLeft + IN.R + 96;
+      const inFits = !cap || cap.left >= inRight || cap.right <= inLeft || inTop + 2 * IN.oy <= cap.top - 8;
+      Object.assign(incl.svg.style, { display: inFits ? '' : 'none', left: inLeft + 'px', top: inTop + 'px', width: IN.R + 96 + 'px', height: 2 * IN.oy + 'px' });
       // the mass scale from 28% of the height down to above the title block, which it never reaches (review_s4 6: at
       // 1280 x 720 the block covered 128 px of it, Cygnus X-1's mark included)
-      const mTop = Math.round(H * 0.28), tbTop = tb.getClientRects().length ? tb.getBoundingClientRect().top : H;
-      MS.H = Math.max(140, Math.min(300, tbTop - 16 - mTop - MS.y0 - 10));
-      Object.assign(mass.svg.style, { display: '', right: '23px', top: mTop + 'px', width: MS.W + 2 + 'px', height: MS.y0 + MS.H + 10 + 'px' });
+      // the room kept for the title block only grows, so a change of its words (a hole of one's own, a ring's label) never
+      // moves the mass scale under the pointer (it did: a spin press made M87* one's own and the scale jumped)
+      tbRoom = Math.max(tbRoom, tb.getClientRects().length ? tb.getBoundingClientRect().height : 0);
+      const mTop = Math.round(H * 0.28), tbTop = footTop - 8 - tbRoom;
+      // the room above the title block, down to 80 px (a floor of 140 brought the cover back below 657 px tall)
+      MS.H = Math.min(300, tbTop - 16 - mTop - MS.y0 - 10);
+      // under 80 px the mass scale's 30 decades do not read: left off, the settings sheet keeps the mass
+      const msFits = MS.H >= 80; if (!msFits) MS.H = 80;
+      Object.assign(mass.svg.style, { display: msFits ? '' : 'none', right: '23px', top: mTop + 'px', width: MS.W + 2 + 'px', height: MS.y0 + MS.H + 10 + 'px' });
     }
     drawMassMarks();
     lastQ = null; draw();
@@ -354,10 +393,14 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
   let handKey = '';
   function drawHands() {
     const s = store.all(), v = store.view();
-    const key = `${v.a}|${v.incl}|${s.mass}|${s.q}|${s.obj}|${SP.W}|${MS.H}`;
+    const key = `${v.a}|${v.q}|${v.incl}|${s.a}|${s.incl}|${s.mass}|${s.obj}|${SP.W}|${MS.H}`;
     if (key === handKey) return;
     handKey = key;
-    drawSpinHand(v.a, s.q); drawInclHand(v.incl); drawMassHand(s.mass);
+    // the eased spin with the eased charge: the hole the picture shows (review_s4b 6: the target's charge with the eased
+    // spin read ISCO 1.00 mid-ease)
+    drawSpinHand(v.a, v.q); drawInclHand(v.incl); drawMassHand(s.mass);
+    // a reader hears the state's value, not the values on the way to it (review_s4b 7)
+    spin.set(s.a); incl.set(s.incl);
   }
   function draw() {
     const s = store.all();
@@ -365,11 +408,12 @@ export function buildDrawing(app, { choose, act, keepRecord }) {
     handKey = '';
     drawHands(); drawTitle(); drawStrip();
   }
-  window.addEventListener('resize', place);
+  window.addEventListener('resize', () => { tbRoom = 260; footRoom = 38; place(); });
   // the caption's height changes with the tour's words after the drawing is placed: the spin scale is placed again
   // against it, so it never lies under it (seen at 1100 x 800)
   const capEl = document.getElementById('bh-caption');
-  if (capEl && typeof ResizeObserver === 'function') new ResizeObserver(() => { if (wide()) place(); }).observe(capEl);
+  // and as the kept frames and the title block change size (review_s4b 2: the strip grew over the ruler's end)
+  if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(() => { if (wide()) place(); }); for (const e of [capEl, strip, tb, document.getElementById('bh-foot')]) if (e) ro.observe(e); }
   sheet(1);
   place();
 

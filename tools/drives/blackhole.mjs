@@ -606,17 +606,21 @@ const DRAWN = `(() => {
   const s = window.__bh.store.all(), v = window.__bh.store.view();
   out.state = { a: v.a, incl: v.incl, mass: s.mass };
   return out; })()`;
-const drawnOk = (d, phone) => !!d.spin && Math.abs(d.spin.x - d.spin.want) < 0.5 && Math.abs(d.spin.v - d.state.a) < 1e-9
-  && (phone || (!!d.mass && d.mass.inside && Math.abs(d.mass.y - d.mass.want) < 0.5 && Math.abs(d.mass.v - d.state.mass) < 1e-9 && !!d.incl && Math.abs(d.incl.drawn - d.state.incl) < 0.2));
-const PARTS = ['#bh-sc-spin', '#bh-sc-incl', '#bh-sc-mass', '#bh-tb', '#bh-strip', '#bh-caption'];
+// the scales that show are judged; a small window or a phone leaves the protractor and the mass scale off
+const drawnOk = (d) => !!d.spin && Math.abs(d.spin.x - d.spin.want) < 0.5 && Math.abs(d.spin.v - d.state.a) < 1e-9
+  && (!d.mass || (d.mass.inside && Math.abs(d.mass.y - d.mass.want) < 0.5 && Math.abs(d.mass.v - d.state.mass) < 1e-9))
+  && (!d.incl || Math.abs(d.incl.drawn - d.state.incl) < 0.2);
+const PARTS = ['#bh-sc-spin', '#bh-sc-incl', '#bh-sc-mass', '#bh-tb', '#bh-strip', '#bh-caption', '#bh-foot'];
 const LAYOUT = `(() => { const box = (s) => { const e = document.querySelector(s); if (!e || !e.getClientRects().length || getComputedStyle(e).display === 'none') return null; const r = e.getBoundingClientRect(); return { s, r: [r.left, r.top, r.right, r.bottom] }; };
   const parts = ${JSON.stringify(PARTS)}.map(box).filter(Boolean);
   const hit = (a, b) => a[0] < b[2] - 1 && b[0] < a[2] - 1 && a[1] < b[3] - 1 && b[1] < a[3] - 1;
   const pairs = []; for (let i = 0; i < parts.length; i++) for (let j = i + 1; j < parts.length; j++) if (hit(parts[i].r, parts[j].r)) pairs.push(parts[i].s + ' / ' + parts[j].s);
   const labels = [...document.querySelectorAll('#bh-overlay text')].filter((t) => t.textContent.trim() && t.getClientRects().length).map((t) => { const r = t.getBoundingClientRect(); return { t: t.textContent.slice(0, 24), r: [r.left, r.top, r.right, r.bottom] }; });
   // and no box's words run past it (the footer's tags once ran under the Sources button)
+  const words = [...document.querySelectorAll('.bh-scale text')].filter((x) => x.textContent.trim() && x.getClientRects().length && getComputedStyle(x).display !== 'none').map((x) => { const r = x.getBoundingClientRect(); return { t: x.textContent.slice(0, 16), r: [r.left, r.top, r.right, r.bottom] }; });
+  const crossed = []; for (let i = 0; i < words.length; i++) for (let j = i + 1; j < words.length; j++) if (hit(words[i].r, words[j].r)) crossed.push(words[i].t + ' / ' + words[j].t);
   const spill = [...document.querySelectorAll('.bh-foot .tags, .bh-foot .perf, #bh-tb .c, .bh-caption .cap, .bh-strip')].filter((e) => e.getClientRects().length && e.scrollWidth > e.clientWidth + 1).map((e) => (e.id || e.className) + ' ' + e.scrollWidth + ' > ' + e.clientWidth);
-  return { parts: parts.length, pairs, spill, onParts: labels.flatMap((l) => parts.filter((p) => hit(l.r, p.r)).map((p) => l.t + ' on ' + p.s)).slice(0, 6) }; })()`;
+  return { parts: parts.length, pairs, spill, crossed: crossed.slice(0, 6), onParts: labels.flatMap((l) => parts.filter((p) => hit(l.r, p.r)).map((p) => l.t + ' on ' + p.s)).slice(0, 6) }; })()`;
 // F1: a bordered box on sheet 1 besides the title block. Not counted, each with its reason: a control (it is outlined by
 // the plate's rule), a picture's frame, the plate's corner brackets, and the shared model route's pill (labs/assets/js/ai,
 // the same deferral as the gold rule's GOLD_DEFERRED)
@@ -652,6 +656,7 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
   await load();
   if (!(await p.ev(`!!document.querySelector('#bh-tb')`))) { p.check('the drawing is on the page (#bh-tb)', false); return; }
   const settled = (expr) => p.until(`(() => { const a = window.__bh; return !a.store.anim && (${expr}); })()`, 8000);
+  const shownScales = await p.ev(`['spin', 'incl', 'mass'].filter((id) => document.querySelector('#bh-sc-' + id).getClientRects().length)`);
 
   // F1: sheet 1 has no bordered box but the title block
   if (!phone) {
@@ -669,16 +674,34 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
   if (!phone) p.check('F2: the spin scale\'s ISCO and horizon marks are where kerr.js reaches their radii', c12.ticks >= 3 && c12.worst < 1e-6, JSON.stringify(c12));
   if (!phone) p.check('F2: the mass scale carries every known hole of the catalogue, in the order of their masses', c12.ordered && c12.objects >= 3, JSON.stringify(c12));
   const d0 = await p.ev(DRAWN);
-  p.check('F2: each hand is drawn where its scale\'s graduations put the state\'s value', drawnOk(d0, phone), JSON.stringify(d0));
-  if (!phone) {
+  // during an ease the spin hand's reading is the eased hole's, its spin and its charge (review_s4b 6: it read the
+  // target's charge with the eased spin, ISCO 4.12 for a hole at 3.46)
+  const mid = await p.ev(`(async () => { const K = await import('/labs/assets/js/blackhole/kerr.js'); const a = window.__bh;
+    a.store.set({ obj: 'custom', a: 0.5, q: 0.6 }, { dur: 1400 }); await new Promise((r) => setTimeout(r, 350));
+    const v = a.store.view(), txt = [...document.querySelectorAll('#bh-sc-spin .hand text.val')].map((x) => x.textContent).join('');
+    const isco = +(txt.match(/ISCO ([\\d.]+)/) || [])[1], hor = +(txt.match(/horizon ([\\d.]+)/) || [])[1];
+    return { moving: !!a.store.anim, txt, isco, hor, wantIsco: +K.isco(v.a, 1, v.q).toPrecision(3), wantHor: +K.horizon(v.a, v.q).toPrecision(3) }; })()`);
+  p.check('F2: during an ease the spin hand reads the ISCO and horizon of the hole the picture shows (its eased spin and charge)', mid.moving && Math.abs(mid.isco - mid.wantIsco) < 0.006 && Math.abs(mid.hor - mid.wantHor) < 0.006, JSON.stringify(mid));
+  await load();
+  p.check('F2: each hand is drawn where its scale\'s graduations put the state\'s value', drawnOk(d0), JSON.stringify(d0));
+  if (shownScales.includes('mass')) {
     await load('?o=primordial');
     const d1 = await p.ev(DRAWN);
-    p.check('F2: Primordial\'s 10^-18 solar masses is drawn on the mass scale at its place, not at its end (review_s4 1)', drawnOk(d1, phone) && d1.state.mass < -10, JSON.stringify(d1.mass));
+    p.check('F2: Primordial\'s 10^-18 solar masses is drawn on the mass scale at its place, not at its end (review_s4 1)', drawnOk(d1) && d1.state.mass < -10, JSON.stringify(d1.mass));
+    // at Q = 0.9 the spin can reach sqrt(0.996 - 0.81) = 0.431: no mark past it, and a drag past it keeps the charge
+    await load('?o=custom&a=0.3&qq=0.9');
+    const past = await p.ev(`[...document.querySelectorAll('#bh-sc-spin [data-of]')].map((t) => +t.dataset.a).filter((x) => x > Math.sqrt(0.996 - 0.81) + 1e-9)`);
+    const far = await p.ev(`(() => { const s = document.querySelector('#bh-sc-spin'), r = s.getBoundingClientRect(), t = [...s.querySelectorAll('[data-tick]')].map((e) => [+e.dataset.tick, +e.getAttribute('x1')]).sort((a, b) => a[0] - b[0]); return [r.left + t[0][1] + 0.4 * (t[t.length - 1][1] - t[0][1]), r.left + t[0][1] + 0.9 * (t[t.length - 1][1] - t[0][1]), r.top + 30]; })()`);
+    await p.drag(far[0], far[2], far[1], far[2], { steps: 6 });
+    await settled('true');
+    const kept = await p.ev(`[window.__bh.store.get('q'), window.__bh.store.get('a')]`);
+    p.check('F2: at Q = 0.9 no ISCO or horizon mark lies past the spin the charge allows, and a drag past it keeps the charge', past.length === 0 && kept[0] === 0.9 && kept[1] <= Math.sqrt(0.996 - 0.81) + 1e-6, JSON.stringify({ past, kept }));
     await load();
   }
 
   // F3: each scale is a slider a keyboard and a pointer can use, to its ends
-  const SCALES = phone ? [['spin', 'a', 0.01, 0, 0.998]] : [['spin', 'a', 0.01, 0, 0.998], ['incl', 'incl', 1, 1, 179], ['mass', 'mass', 0.1, -19, 11]];
+  p.check(`F3: the scales this window shows (${shownScales.join(', ')}): the spin always, all three at 1440 x 900`, shownScales.includes('spin') && (width !== 1440 || shownScales.length === 3), JSON.stringify(shownScales));
+  const SCALES = [['spin', 'a', 0.01, 0, 0.998], ['incl', 'incl', 1, 1, 179], ['mass', 'mass', 0.1, -19, 11]].filter(([id]) => shownScales.includes(id));
   for (const [id, key, step, min, max] of SCALES) {
     const aria = await p.ev(`(() => { const e = document.querySelector('#bh-sc-${id}'); return [e.getAttribute('role'), +e.getAttribute('aria-valuemin'), +e.getAttribute('aria-valuemax'), e.getAttribute('aria-valuetext') || '', e.getAttribute('aria-orientation')]; })()`);
     p.check(`F3: the ${id} scale is a slider with its bounds, its orientation and a value in words`, aria[0] === 'slider' && aria[1] === min && aria[2] === max && aria[3].length > 2 && !!aria[4], JSON.stringify(aria));
@@ -686,17 +709,18 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     await p.ev(`document.querySelector('#bh-sc-${id}').focus()`);
     // a step keeps six decimals (drawing.js), so a right and a left come back to the value to 1e-6
     await p.key('ArrowRight');
+    const ariaNow = await p.ev(`[+document.querySelector('#bh-sc-${id}').getAttribute('aria-valuenow'), window.__bh.store.get('${key}'), !!window.__bh.store.anim]`);
     const up = await settled(`Math.abs(a.store.get('${key}') - ${v0 + step}) < 1e-6`);
     await p.key('ArrowLeft');
     const back = await settled(`Math.abs(a.store.get('${key}') - ${v0}) < 1e-6`);
-    p.check(`F3: the right arrow steps the ${id} scale by ${step}, the left arrow back`, up && back, JSON.stringify(await p.ev(`window.__bh.store.get('${key}')`)));
+    p.check(`F3: the right arrow steps the ${id} scale by ${step}, the left arrow back, and aria says the new value at once (${JSON.stringify(ariaNow)})`, up && back && Math.abs(ariaNow[0] - ariaNow[1]) < 1e-9, JSON.stringify(await p.ev(`window.__bh.store.get('${key}')`)));
     await p.key('End');
     const atMax = await settled(`a.store.get('${key}') === ${max}`);
     const dMax = await p.ev(DRAWN);
     await p.key('Home');
     const atMin = await settled(`a.store.get('${key}') === ${min}`);
     const dMin = await p.ev(DRAWN);
-    p.check(`F3: End and Home take the ${id} scale to ${max} and ${min}, and its hand is drawn there`, atMax && atMin && drawnOk(dMax, phone) && drawnOk(dMin, phone), JSON.stringify({ atMax, atMin, max: dMax[id], min: dMin[id] }));
+    p.check(`F3: End and Home take the ${id} scale to ${max} and ${min}, and its hand is drawn there`, atMax && atMin && drawnOk(dMax) && drawnOk(dMin), JSON.stringify({ atMax, atMin, max: dMax[id], min: dMin[id] }));
     await load();
   }
   // a press on the scale sets the value under the pointer: the spin at the middle of its ruler, the inclination at 60
@@ -713,11 +737,16 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     return out; })()`);
   const SGRA = await p.ev(`(async () => { const C = await import('/labs/assets/js/blackhole/config.js'); return Math.log10(C.OBJECTS.find((o) => o.id === 'sgra').mass); })()`);
   for (const [id, key, want, tol] of [['spin', 'a', 0.499, 0.012], ['incl', 'incl', 60, 1.5], ['mass', 'mass', SGRA, 0.06]]) {
-    if (!at[id]) { if (!phone || id === 'spin') p.check(`F3: the ${id} scale can be pressed`, false, JSON.stringify(at)); continue; }
+    if (!at[id]) { if (shownScales.includes(id)) p.check(`F3: the ${id} scale can be pressed`, false, JSON.stringify(at)); continue; }
     await p.click(at[id][0], at[id][1]);
     const got = await settled(`Math.abs(a.store.get('${key}') - ${want}) < ${tol}`);
-    p.check(`F3: a press on the ${id} scale sets ${key} to the value under the pointer (${+want.toFixed(3)})`, got, String(await p.ev(`window.__bh.store.get('${key}')`)));
+    const where = id === 'mass' ? await p.ev(`(() => { const m = document.querySelector('#bh-sc-mass'), rm = m.getBoundingClientRect(), mk = m.querySelector('[data-object="sgra"]'); return { pressedAt: ${JSON.stringify(at.mass || null)}, markNow: [rm.left + +mk.getAttribute('x1') - 2, rm.top + +mk.getAttribute('y1')], svgH: rm.height }; })()`) : null;
+    p.check(`F3: a press on the ${id} scale sets ${key} to the value under the pointer (${+want.toFixed(3)})`, got, String(await p.ev(`window.__bh.store.get('${key}')`)) + (where ? ' ' + JSON.stringify(where) : ''));
   }
+  // the presses above left a hole of one's own at M87*'s mass: the mass hand's words and the mark's name do not cross
+  // (review_s4b 1)
+  const layP = await p.ev(LAYOUT);
+  p.check("F4: a hole of one's own at a named hole's mass: no words on words on the scales", layP.crossed.length === 0, JSON.stringify(layP.crossed));
   if (at.end) {
     await p.drag(at.end[0], at.end[1], at.end[2], at.end[3], { steps: 8 });
     const got = await settled(`a.store.get('incl') === 179`);
@@ -727,17 +756,19 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
 
   // F4: no part of the drawing lies on another, and no label of the render lies on a part
   const lay = await p.ev(LAYOUT);
-  p.check(`F4: no part of the drawing on another, no label on a part, no words past their box (${lay.parts} parts)`, lay.pairs.length === 0 && lay.onParts.length === 0 && lay.spill.length === 0, JSON.stringify(lay));
+  p.check(`F4: no part of the drawing on another, no label on a part, no words past their box, no words on words (${lay.parts} parts)`, lay.pairs.length === 0 && lay.onParts.length === 0 && lay.spill.length === 0 && lay.crossed.length === 0, JSON.stringify(lay));
 
   // F6 (was C14): nothing the old columns did is lost: each column is shown whole on its sheet, the record on sheet 4
   if (!phone) {
     const c14 = await p.ev(`(async () => { const out = {}; const wait = () => new Promise((r) => setTimeout(r, 450));
       const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).display !== 'none';
       for (const n of [2, 3, 4]) { document.querySelector('.bh-tab[data-sheet="' + n + '"]').click(); await wait();
-        out[n] = { left: shown(document.querySelector('#bh-left')), right: shown(document.querySelector('#bh-right')), keep: shown(document.querySelector('#bh-keep')) }; }
+        const cap = document.querySelector('#bh-caption').getBoundingClientRect(), col = document.querySelector(n === 2 ? '#bh-right' : '#bh-left').getBoundingClientRect();
+        out[n] = { left: shown(document.querySelector('#bh-left')), right: shown(document.querySelector('#bh-right')), keep: shown(document.querySelector('#bh-keep')), capW: Math.round(cap.width), capClear: cap.right <= col.left + 1 || cap.left >= col.right - 1 }; }
       document.querySelector('.bh-tab[data-sheet="1"]').click(); await wait();
       out[1] = { object: document.querySelectorAll('#bh-hl .bh-opt').length }; return out; })()`);
     p.check('F6: sheet 2 shows the readouts column, sheet 3 the settings column, sheet 4 the record; sheet 1 names object, view and colour', c14[2].right && c14[3].left && c14[4].keep && c14[1].object >= 12, JSON.stringify(c14));
+    p.check('F6: on sheets 2 and 3 the caption keeps 300 px or more beside the column shown, and clear of it (review_s4b 8)', [2, 3].every((n) => c14[n].capW >= 300 && c14[n].capClear), JSON.stringify([c14[2], c14[3]]));
     // the tabs by keyboard: the right arrow moves to the next sheet
     await p.ev(`document.querySelector('.bh-tab[data-sheet="1"]').focus()`);
     await p.key('ArrowRight');
@@ -795,8 +826,15 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     const b2 = await p.ev(`(() => { const b = document.querySelector('#bh-keep2'); return [b.getAttribute('aria-pressed'), b.textContent, document.activeElement === b]; })()`);
     p.check('the strip\'s "kept" takes the hole out, as the card\'s "Kept" does, says "keep this frame" again, and keeps the focus', out && b2[0] === 'false' && /keep/.test(b2[1]) && b2[2], JSON.stringify(b2));
     // over a record a newer version wrote, the card's Keep is off, and so is the strip's: a press does nothing (review_s4 2)
+    await p.until(`(() => { const k = document.querySelector('#bh-keep'); return !k.disabled && k.getAttribute('aria-disabled') !== 'true'; })()`, 8000);   // idle, the last press done
+    const looks = `(() => { const s = (e) => { const c = getComputedStyle(e); return c.color + '|' + c.opacity + '|' + c.borderTopColor; }; return [s(document.querySelector('#bh-keep2')), s(document.querySelector('#bh-keep'))]; })()`;
+    const onLook = await p.ev(looks);
     await p.ev(`(async () => { const os = window.__bh.keep.os, cur = await os.progress.get(); window.__bhRec = cur ? cur.data : null; await os.progress.set(cur ? cur.data : {}, { v: 2 }); document.dispatchEvent(new Event('visibilitychange')); return true; })()`);
     const off = await p.until(`document.querySelector('#bh-keep2').disabled && document.querySelector('#bh-keep').disabled`, 8000);
+    const offLook = await p.ev(looks);
+    // and while a press is written (aria-disabled, which keeps the focus) both look off as well (review_s4b 4)
+    const busyLook = await p.ev(`(() => { const k = document.querySelector('#bh-keep'), k2 = document.querySelector('#bh-keep2'); const was = [k.disabled, k2.disabled]; k.disabled = false; k2.disabled = false; k.setAttribute('aria-disabled', 'true'); k2.setAttribute('aria-disabled', 'true'); const s = (e) => { const c = getComputedStyle(e); return c.color + '|' + c.opacity + '|' + c.borderTopColor; }; const out = [s(k2), s(k)]; k.removeAttribute('aria-disabled'); k2.removeAttribute('aria-disabled'); [k.disabled, k2.disabled] = was; return out; })()`);
+    p.check('F7: the card\'s Keep and the strip\'s button look off when off (disabled) and while a press is written (aria-disabled) (review_s4b 2, 4)', offLook[0] !== onLook[0] && offLook[1] !== onLook[1] && busyLook[0] !== onLook[0] && busyLook[1] !== onLook[1], JSON.stringify({ onLook, offLook, busyLook }));
     const kb3 = await centre('#bh-keep2');
     await p.click(kb3[0], kb3[1]);
     await p.sleep(800);
@@ -804,6 +842,17 @@ export async function DRAWING_STEP(p, { base, width, ready }) {
     p.check('F7: over a newer version\'s record the strip\'s button is off, as the card\'s, and a press on it keeps nothing', off && still, JSON.stringify({ off, still }));
     await p.ev(`(async () => { await window.__bh.keep.os.progress.set(window.__bhRec || {}, { v: 1 }); document.dispatchEvent(new Event('visibilitychange')); return true; })()`);
     await p.until(`!document.querySelector('#bh-keep').disabled`, 8000);
+    // two holes of one's own and M87*, kept: the strip's captions tell them apart (review_s4b 5: every hole of one's own
+    // read "a hole of your own, cinematic"), and the grown strip lies on no part (review_s4b 2)
+    for (const q of ['?o=custom&m=7', '?o=custom&m=8', '?o=m87']) {
+      await load(q);
+      if (await p.ev(`document.querySelector('#bh-keep').getAttribute('aria-pressed') !== 'true'`)) { const c = await centre('#bh-keep2'); await p.click(c[0], c[1]); await p.until(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'true'`, 15000); }
+    }
+    await p.sleep(600);
+    const caps = await p.ev(`[...document.querySelectorAll('#bh-strip .bh-fr .cap')].map((c) => c.textContent)`);
+    p.check('F7: the strip\'s captions tell its kept holes apart', caps.length === 3 && new Set(caps).size === 3, JSON.stringify(caps));
+    const lay2 = await p.ev(LAYOUT);
+    p.check('F4: with three kept frames in the strip, no part on another and no words on words', lay2.pairs.length === 0 && lay2.crossed.length === 0, JSON.stringify(lay2));
   }
   await p.shot(`drawing-${width}`);
 }

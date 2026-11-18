@@ -65,9 +65,9 @@ guard('the kept frames carry a small picture, the 12 newest only (BAR_L1 C17; th
   // to one hole and the rays were dropped, so the bound was measured on 1 kept and 0 rays)
   // whole pairs only, the last value padded so the link is exactly the bound (a cut pair is not a link)
   const longLink = (head) => { let q = head; while (q.length + 5 <= R.LIMITS.link) q += '&ab=1'; return q + '1'.repeat(R.LIMITS.link - q.length); };
-  const worst = R.normalise({ kept: Array.from({ length: R.LIMITS.kept }, (_, i) => ({ q: longLink(`a=0.${100 + i}`), t: i + 1, img: jpg(R.LIMITS.thumb - 23) })),
-    rays: Array.from({ length: R.LIMITS.rays }, (_, i) => ({ q: longLink(`a=0.${300 + i}`), t: i + 1, s: [-0.123456789, 0.123456789], fate: 'sky', n: 0 })),
-    falls: Array.from({ length: R.LIMITS.falls }, (_, i) => ({ q: longLink(`a=0.${500 + i}`), t: i + 1, tau: 123456.789 })) });
+  const worst = R.normalise({ kept: Array.from({ length: R.LIMITS.kept }, (_, i) => ({ q: longLink(`a=0.${100 + i}`), t: 1794943231695 + i, img: jpg(R.LIMITS.thumb - 23) })),
+    rays: Array.from({ length: R.LIMITS.rays }, (_, i) => ({ q: longLink(`a=0.${300 + i}`), t: 1794943231695 + i, s: [-0.12345678901234567, 0.12345678901234567], fate: 'captured', n: 0 })),
+    falls: Array.from({ length: R.LIMITS.falls }, (_, i) => ({ q: longLink(`a=0.${500 + i}`), t: 1794943231695 + i, tau: 123456.78901234567 })) });
   ok('the fullest record is full: 50 holes, 12 of them with a picture, 100 rays, 50 falls, every link 400 characters', worst.kept.length === R.LIMITS.kept && worst.kept.filter((e) => 'img' in e).length === R.LIMITS.thumbs && worst.rays.length === R.LIMITS.rays && worst.falls.length === R.LIMITS.falls && worst.kept.every((e) => e.q.length === R.LIMITS.link), JSON.stringify([worst.kept.length, worst.rays.length, worst.falls.length]));
   const bytes = new TextEncoder().encode(JSON.stringify(worst)).length;
   ok(`the fullest record the rules allow stays under Labs OS's cap of 256 KB (${bytes} bytes)`, bytes < 256 * 1024, String(bytes));
