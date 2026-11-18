@@ -65,8 +65,16 @@ const MUTANTS = [
   /* ---- the words of light ---- */
   ['the light at noon blind to the starlight', `(c.par / SUN.par) * S`, `(c.par / SUN.par)`],
   ['the UV-B blind to the starlight', `(c.uvb / SUN.uvb) * S`, `(c.uvb / SUN.uvb)`],
-  ['violet only under 400 nm', `nm < 495 ? 'in the violet'`, `nm < 400 ? 'in the violet'`],
-  ['red up to 800 nm', `: nm < 700 ? 'in the red'`, `: nm < 800 ? 'in the red'`],
+  ['violet up to 451 nm, so the F2V peak is violet', `[450, 'in the violet']`, `[451, 'in the violet']`],
+  ['violet only under 449 nm', `[450, 'in the violet']`, `[449, 'in the violet']`],
+  ['blue up to 496 nm', `[495, 'in the blue']`, `[496, 'in the blue']`],
+  ['blue only under 494 nm', `[495, 'in the blue']`, `[494, 'in the blue']`],
+  ['green up to 571 nm', `[570, 'in the green']`, `[571, 'in the green']`],
+  ['yellow up to 591 nm', `[590, 'in the yellow']`, `[591, 'in the yellow']`],
+  ['orange up to 621 nm', `[620, 'in the orange']`, `[621, 'in the orange']`],
+  ['red up to 701 nm', `[700, 'in the red']`, `[701, 'in the red']`],
+  ['red only under 699 nm', `[700, 'in the red']`, `[699, 'in the red']`],
+  ['the green band left out', `[570, 'in the green'], `, ``],
   ['0.01 itself said to be under it', `(v < 0.01 ? 'under 0.01 times'`, `(v <= 0.01 ? 'under 0.01 times'`],
 
   /* ---- the sentences ---- */

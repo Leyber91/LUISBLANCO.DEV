@@ -36,6 +36,7 @@
 import { reflectanceColour, insolation, spectralType, hzPosition } from './science.js';
 import { classify, toParams } from './data.js';
 import { num, int } from '../kit/format.js';
+import { KOPPARAPU } from './config.js';
 
 /** @typedef {{ key: string, star: string, T: number, peak: number, par: number, uvb: number, gppVis: number, gppWide: number | null }} Case */
 /** @typedef {{ mu: number, w: number, d: number }} Band */
@@ -68,7 +69,7 @@ export const article = (type) => (['O', 'A', 'F', 'M', 'L'].includes(type) ? 'an
 
 /* L1: the reasons a world has no surface life, by the picture's look and, for thin air, the zone */
 export const WHY = Object.freeze({
-  shrouded: 'It gets more starlight than the recent-Venus limit of the habitable zone (Kopparapu et al. 2013): under its clouds the surface would be too hot for water.',
+  shrouded: `It gets more starlight than the recent-Venus limit of the habitable zone (${KOPPARAPU.ref}): under its clouds the surface would be too hot for water.`,
   molten: 'Its day side is hot enough to melt rock.',
   airless: 'It keeps no air to hold water at its surface.',
   ice: 'Its surface is frozen. Life, if any, would be under the ice, where none of this would show.',
@@ -76,7 +77,7 @@ export const WHY = Object.freeze({
   iceGiant: 'It is an ice giant, with no surface these rules can reach.',
   gasGiant: 'It is a gas giant with no surface. What could live in its clouds is beyond these rules.',
   noRadius: 'Its radius is not measured, and the page draws it as a world of gas: these rules say nothing of a surface.',
-  desertHot: 'Its air is thin and it gets more starlight than the habitable zone\'s inner edge (Kopparapu et al. 2013): what water it had would be gone.',
+  desertHot: `Its air is thin and it gets more starlight than the habitable zone's inner edge (${KOPPARAPU.ref}): what water it had would be gone.`,
   desertCold: 'Its air is thin and it is colder than the habitable zone\'s outer edge: its water would be frozen.',
   desertUnknown: 'Its air is thin, and its place against the habitable zone cannot be computed: these rules draw nothing.',
   desertSparse: 'Its air is thin, so water, and life with it, would keep to the low ground; the picture does not draw it.',
@@ -120,7 +121,7 @@ export function scenariosOf(c, S, type = 'M') {
   const cover = (/** @type {number} */ gpp) => Math.max(0, Math.min(1, (gpp / SUN.gppVis) * S));
   /** @param {string} key @param {string} words @param {Band[]} bands @param {number} broad @param {number} gpp @returns {Scenario} */
   const mk = (key, words, bands, broad, gpp) => ({ key, words, bands, broad, colour: reflectanceColour(reflectance(bands, broad)), cover: cover(gpp) });
-  if (c === F2V) return [mk('one', 'Pigments tuned to a light that peaks in the violet would absorb the blue most: a cover darker in the blue than Earth\'s.', [{ mu: c.peak, w: 40, d: 0.9 }, { mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];
+  if (c === F2V) return [mk('one', 'Pigments tuned to a light that peaks in the blue would absorb the blue most: a cover darker in the blue than Earth\'s.', [{ mu: c.peak, w: 40, d: 0.9 }, { mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];
   if (c === SUN || c === K2V) return [mk('one', 'Pigments tuned to a light that peaks in the red would absorb red and blue and return green: plants much like Earth\'s.', [SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];
   return [
     mk('a', `Reading a: harvesting all its light from 400 to 1,100 nm, as Kiang et al. expect under a star like their ${c.key}, a cover would return little visible light and look dark; its main band, at ${int(c.peak)} nm, is past what eyes see.`, [{ mu: c.peak, w: 40, d: 0.9 }], 0.8, /** @type {number} */ (c.gppWide)),
@@ -128,8 +129,11 @@ export function scenariosOf(c, S, type = 'M') {
   ];
 }
 
+/** The colours of the spectrum by wavelength, each band's upper edge in nm (the usual bands: violet to 450, blue to 495,
+   green to 570, yellow to 590, orange to 620, red to 700); past 700 the near infrared. */
+export const BANDS = Object.freeze([[450, 'in the violet'], [495, 'in the blue'], [570, 'in the green'], [590, 'in the yellow'], [620, 'in the orange'], [700, 'in the red']]);
 /** Where a light peaks, in words. @param {number} nm */
-export const band = (nm) => (nm < 495 ? 'in the violet' : nm < 700 ? 'in the red' : 'in the near infrared, past what eyes see');
+export const band = (nm) => { for (const [hi, w] of BANDS) if (nm < hi) return w; return 'in the near infrared, past what eyes see'; };
 /** A ratio to Earth's, in words: two figures, and under 0.01 said so. @param {number} v */
 export const timesEarth = (v) => (v < 0.01 ? 'under 0.01 times' : `${num(v, 2)} times`);
 

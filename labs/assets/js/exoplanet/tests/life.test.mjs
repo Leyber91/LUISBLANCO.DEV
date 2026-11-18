@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, timesEarth, iceLocked, NO_STAR, NO_LIGHT, LOCKED, LOCKED_NEAR, OCEAN } from '../life.js';
+import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, BANDS, timesEarth, iceLocked, NO_STAR, NO_LIGHT, LOCKED, LOCKED_NEAR, OCEAN } from '../life.js';
 import { reflectanceColour, hzPosition } from '../science.js';
 import { loadSnapshot, provisionalMeasured } from '../catalog.js';
 import { classify } from '../data.js';
@@ -65,7 +65,8 @@ const by = Object.fromEntries(CASES.map((c) => [c.key, c]));
   yes('a leaf returns more past its red edge than in the visible', reflectance([], 0)(900) > 3 * reflectance([], 0)(550));
   yes('the cover: each case\'s productivity against the Sun\'s, times the starlight, at most all', g.cover === 1 && Math.abs(scenariosOf(by.G2V, 0.5)[0].cover - 0.5) < 1e-12 && scenariosOf(by.F2V, 3)[0].cover === 1
     && Math.abs(kk.cover - 0.61 / 0.72) < 1e-12 && Math.abs(scenariosOf(by.F2V, 0.5)[0].cover - 0.85 / 0.72 * 0.5) < 1e-12 && Math.abs(a.cover - Math.min(1, 0.59 / 0.72)) < 1e-12 && Math.abs(b.cover - 0.08 / 0.72) < 1e-12, `${kk.cover} ${a.cover} ${b.cover}`);
-  yes('a light under 495 nm is violet, from 495 red, from 700 near infrared', band(494) === 'in the violet' && band(495) === 'in the red' && band(699) === 'in the red' && /near infrared/.test(band(700)));
+  const edges = [[449, 'violet'], [450, 'blue'], [494, 'blue'], [495, 'green'], [569, 'green'], [570, 'yellow'], [589, 'yellow'], [590, 'orange'], [619, 'orange'], [620, 'red'], [699, 'red'], [700, 'near infrared']];
+  yes('the colour of a wavelength, one nanometre each side of every band\'s edge; the F2V peak, 450.8 nm, is blue, as the paper says of its pigments', edges.every(([nm, w]) => (w === 'near infrared' ? /^in the near infrared/.test(band(nm)) : band(nm) === `in the ${w}`)) && BANDS.length === 6 && band(450.8) === 'in the blue' && band(668.5) === 'in the red' && /near infrared/.test(band(754.3)), edges.filter(([nm, w]) => !(w === 'near infrared' ? /^in the near infrared/.test(band(nm)) : band(nm) === `in the ${w}`)).map(([nm]) => nm).join(' '));
   yes('on a locked world ice from 89.9 degrees is on the day side, from 90 on the night side', /on its day side/.test(iceLocked(89.9)) && /on its night side/.test(iceLocked(90)) && /on its night side/.test(iceLocked(90.1)));
   yes('reading b names a star of another type nearest an M case by its temperature, and an M dwarf by nothing more', !/whose temperature/.test(scenariosOf(by.M5V, 1, 'M')[1].words) && /whose temperature this L-type star's is nearest/.test(scenariosOf(by.M5V, 1, 'L')[1].words) && /whose temperature this K-type star's is nearest/.test(scenariosOf(by.M1V, 1, 'K')[1].words));
   yes('a ratio under 0.01 is said so, from 0.01 in two figures', timesEarth(0.009) === 'under 0.01 times' && timesEarth(0.01) === '0.010 times' && timesEarth(1.234) === '1.2 times');
