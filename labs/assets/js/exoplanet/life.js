@@ -121,19 +121,30 @@ export function scenariosOf(c, S, type = 'M') {
   const cover = (/** @type {number} */ gpp) => Math.max(0, Math.min(1, (gpp / SUN.gppVis) * S));
   /** @param {string} key @param {string} words @param {Band[]} bands @param {number} broad @param {number} gpp @returns {Scenario} */
   const mk = (key, words, bands, broad, gpp) => ({ key, words, bands, broad, colour: reflectanceColour(reflectance(bands, broad)), cover: cover(gpp) });
-  if (c === F2V) return [mk('one', 'Pigments tuned to a light that peaks in the blue would absorb the blue most: a cover darker in the blue than Earth\'s.', [{ mu: c.peak, w: 40, d: 0.9 }, { mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];
-  if (c === SUN || c === K2V) return [mk('one', 'Pigments tuned to a light that peaks in the red would absorb red and blue and return green: plants much like Earth\'s.', [SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];
+  if (c === F2V) return [mk('one', `Pigments tuned to a light that peaks ${band(c.peak)} would absorb the blue most: a cover darker in the blue than Earth's.`, [{ mu: c.peak, w: 40, d: 0.9 }, { mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];
+  if (c === SUN || c === K2V) return [mk('one', `Pigments tuned to a light that peaks ${band(c.peak)} would absorb red and blue and return green: plants much like Earth's.`, [SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];
   return [
     mk('a', `Reading a: harvesting all its light from 400 to 1,100 nm, as Kiang et al. expect under a star like their ${c.key}, a cover would return little visible light and look dark; its main band, at ${int(c.peak)} nm, is past what eyes see.`, [{ mu: c.peak, w: 40, d: 0.9 }], 0.8, /** @type {number} */ (c.gppWide)),
     mk('b', `Reading b: or, as Takizawa et al. 2017 argue for M dwarfs${type === 'M' ? '' : `, whose temperature this ${type}-type star's is nearest`}, the first plants would use visible light, with a red edge near 700 to 760 nm as Earth's; drawn here in Earth's colour, with less light to grow on.`, [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
   ];
 }
 
-/** The colours of the spectrum by wavelength, each band's upper edge in nm (the usual bands: violet to 450, blue to 495,
-   green to 570, yellow to 590, orange to 620, red to 700); past 700 the near infrared. */
+/** The colours of the spectrum by wavelength, each band's upper edge in nm: this page's bands (violet to 450, blue to
+   495, green to 570, yellow to 590, orange to 620, red to 700, where the page's near infrared begins; published
+   divisions differ, red ending anywhere from 700 to 750). Kiang et al. call the F2V light's peak "in the violet at
+   451 nm" and its pigments "in the blue"; by these bands 450.8 nm is blue. */
 export const BANDS = Object.freeze([[450, 'in the violet'], [495, 'in the blue'], [570, 'in the green'], [590, 'in the yellow'], [620, 'in the orange'], [700, 'in the red']]);
 /** Where a light peaks, in words. @param {number} nm */
 export const band = (nm) => { for (const [hi, w] of BANDS) if (nm < hi) return w; return 'in the near infrared, past what eyes see'; };
+/** Which part of a sheet's colour is the paper's and which is this page's, by the readings drawn: one reading (F, G,
+   K) has its main band at the star's peak and Earth's chlorophyll's other band beside it; an M dwarf's reading a has
+   the peak and the page's absorption across 400 to 1,100 nm, its reading b Earth's chlorophyll's two bands. null where
+   no colour is drawn. @param {{ scenarios: Scenario[] }} L */
+export function colourSource(L) {
+  if (!L.scenarios.length) return null;
+  if (L.scenarios.length === 1) return 'the paper gives where pigments absorb most, at the star\'s peak; the other band drawn, Earth\'s chlorophyll\'s, is this page\'s';
+  return 'reading a takes the paper\'s band at the star\'s peak and this page\'s absorption across 400 to 1,100 nm; reading b draws Earth\'s chlorophyll bands, this page\'s choice after Takizawa et al. 2017';
+}
 /** A ratio to Earth's, in words: two figures, and under 0.01 said so. @param {number} v */
 export const timesEarth = (v) => (v < 0.01 ? 'under 0.01 times' : `${num(v, 2)} times`);
 

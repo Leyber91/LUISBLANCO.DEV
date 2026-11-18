@@ -65,6 +65,12 @@ const MUTANTS = [
   /* ---- the words of light ---- */
   ['the light at noon blind to the starlight', `(c.par / SUN.par) * S`, `(c.par / SUN.par)`],
   ['the UV-B blind to the starlight', `(c.uvb / SUN.uvb) * S`, `(c.uvb / SUN.uvb)`],
+  ['the F star\'s sentence with its colour word written in, not from the rule', `light that peaks \${band(c.peak)} would absorb the blue most`, `light that peaks in the violet would absorb the blue most`],
+  ['the Sun\'s sentence with its colour word written in', `light that peaks \${band(c.peak)} would absorb red and blue`, `light that peaks in the orange would absorb red and blue`],
+  ['the recent-Venus reason without its journal', `(\${KOPPARAPU.ref}): under its clouds`, `(Kopparapu et al. 2013): under its clouds`],
+  ['the inner-edge reason without its journal', `(\${KOPPARAPU.ref}): what water it had`, `(Kopparapu et al. 2013): what water it had`],
+  ['an M dwarf\'s colour said to be like an F, G or K star\'s', `  if (L.scenarios.length === 1) return 'the paper gives`, `  if (L.scenarios.length >= 1) return 'the paper gives`],
+  ['the colour\'s source said where nothing is drawn', `  if (!L.scenarios.length) return null;\n`, ``],
   ['violet up to 451 nm, so the F2V peak is violet', `[450, 'in the violet']`, `[451, 'in the violet']`],
   ['violet only under 449 nm', `[450, 'in the violet']`, `[449, 'in the violet']`],
   ['blue up to 496 nm', `[495, 'in the blue']`, `[496, 'in the blue']`],

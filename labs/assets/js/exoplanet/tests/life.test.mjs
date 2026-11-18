@@ -15,10 +15,11 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, BANDS, timesEarth, iceLocked, NO_STAR, NO_LIGHT, LOCKED, LOCKED_NEAR, OCEAN } from '../life.js';
+import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, BANDS, colourSource, timesEarth, iceLocked, NO_STAR, NO_LIGHT, LOCKED, LOCKED_NEAR, OCEAN } from '../life.js';
 import { reflectanceColour, hzPosition } from '../science.js';
 import { loadSnapshot, provisionalMeasured } from '../catalog.js';
 import { classify } from '../data.js';
+import { KOPPARAPU } from '../config.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 let failed = 0, passed = 0;
@@ -69,6 +70,9 @@ const by = Object.fromEntries(CASES.map((c) => [c.key, c]));
   yes('the colour of a wavelength, one nanometre each side of every band\'s edge; the F2V peak, 450.8 nm, is blue, as the paper says of its pigments', edges.every(([nm, w]) => (w === 'near infrared' ? /^in the near infrared/.test(band(nm)) : band(nm) === `in the ${w}`)) && BANDS.length === 6 && band(450.8) === 'in the blue' && band(668.5) === 'in the red' && /near infrared/.test(band(754.3)), edges.filter(([nm, w]) => !(w === 'near infrared' ? /^in the near infrared/.test(band(nm)) : band(nm) === `in the ${w}`)).map(([nm]) => nm).join(' '));
   yes('on a locked world ice from 89.9 degrees is on the day side, from 90 on the night side', /on its day side/.test(iceLocked(89.9)) && /on its night side/.test(iceLocked(90)) && /on its night side/.test(iceLocked(90.1)));
   yes('reading b names a star of another type nearest an M case by its temperature, and an M dwarf by nothing more', !/whose temperature/.test(scenariosOf(by.M5V, 1, 'M')[1].words) && /whose temperature this L-type star's is nearest/.test(scenariosOf(by.M5V, 1, 'L')[1].words) && /whose temperature this K-type star's is nearest/.test(scenariosOf(by.M1V, 1, 'K')[1].words));
+  yes('each sentence names its light by the one band rule: an F star\'s in the blue, a Sun\'s and a K star\'s in the red', /peaks in the blue would absorb/.test(f.words) && /peaks in the red would absorb/.test(g.words) && /peaks in the red would absorb/.test(kk.words), `${f.words.slice(0, 50)} | ${g.words.slice(0, 50)}`);
+  yes('the zone\'s reasons cite it in full, journal and volume', WHY.shrouded.includes(KOPPARAPU.ref) && WHY.desertHot.includes(KOPPARAPU.ref) && /ApJ 765, 131/.test(KOPPARAPU.ref));
+  yes('which band is the paper\'s, by the readings drawn: one reading its peak and Earth\'s other band; an M dwarf\'s a and b each their own; none where nothing is drawn', /at the star's peak; the other band drawn, Earth's chlorophyll's, is this page's/.test(colourSource({ scenarios: [g] })) && /^reading a takes the paper's band at the star's peak and this page's absorption across 400 to 1,100 nm; reading b draws Earth's chlorophyll bands/.test(colourSource({ scenarios: [a, b] })) && colourSource({ scenarios: [] }) === null);
   yes('a ratio under 0.01 is said so, from 0.01 in two figures', timesEarth(0.009) === 'under 0.01 times' && timesEarth(0.01) === '0.010 times' && timesEarth(1.234) === '1.2 times');
 }
 
