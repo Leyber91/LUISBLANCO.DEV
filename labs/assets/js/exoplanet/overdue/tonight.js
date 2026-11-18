@@ -130,7 +130,7 @@ const DECIMAL = /^[+-]?(\d+\.?\d*|\.\d+)$/;
 export function placeOf(lat, lon) {
   const read = (v) => {
     if (typeof v === 'number') return v;
-    const t = String(v ?? '').trim().replace(',', '.');
+    const t = String(v ?? '').trim().replace(',', '.').replace('\u2212', '-');   // the minus sign the page prints (kit/format.js)
     return DECIMAL.test(t) ? Number(t) : NaN;
   };
   const a = read(lat), o = read(lon);
