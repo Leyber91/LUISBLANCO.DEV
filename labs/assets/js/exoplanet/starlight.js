@@ -360,7 +360,8 @@ export function teqOf(p, albedo = TEQ.albedo) {
   const t = (x) => (isNum(x) ? teqFromS(x, albedo) : null);
   return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };
 }
-/* The one formula: the equilibrium temperature of a starlight S (Earth = 1) at Bond albedo A, in kelvin. */
+/* The formula teqOf and ownHeat share: the equilibrium temperature of a starlight S (Earth = 1) at Bond albedo A, in
+   kelvin. science.js keeps its own copy for the sheet's step of draws (to be made one call). */
 export const teqFromS = (S, albedo = TEQ.albedo) => T_ZERO * Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25);
 /* Its median, for the callers that need one number. */
 export const equilibriumTemp = (p, albedo = TEQ.albedo) => { const t = teqOf(p, albedo); return t ? t.med : null; };
