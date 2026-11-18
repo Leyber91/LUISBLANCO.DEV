@@ -13,6 +13,7 @@ import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour, setHTML } from './tour.js';
 import { createKeep } from './keep.js';
+import { clockLine, clockShown } from './flow.js';
 import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
@@ -504,7 +505,8 @@ export function buildUI(app) {
     Object.entries(modeBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.color === id)));
     Object.entries(emitBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.emit === id)));
     $('#bh-modenote').textContent = '';
-    $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${modeNote(s.color)}.`;
+    // the page's clock, said for the hole shown, where a turning disk is drawn (flow.js clockShown, clockLine)
+    $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${modeNote(s.color)}.${clockShown(s, store.reduced) ? ' ' + clockLine(app.model, app.model.obj ? app.model.obj.name : null) : ''}`;
     // the swatches are drawn in the tokens the render draws the same marks with (palette.js modeKey)
     // the key, drawn by one function into every place it shows (the Colour card, and the drawing's head line)
     const keyHtml = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');
