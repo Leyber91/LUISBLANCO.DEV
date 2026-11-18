@@ -84,8 +84,8 @@ export class Renderer {
     this.preview = null; this.main = null; this.hdr = null; this.hdrPreview = null;
     // the preview's scale when the frame loop sets one (adapt.js previewAfter); until then the rule in resize
     this.previewPs = null;
-    // the full picture's clock: from its first band to its last (adapt.js tierAfter reads the time)
-    this.refineT0 = null;
+    // a full picture's bands: render() says which band starts one and which ends it, and the frame loop sums the
+    // frame times between (a hidden tab draws no frame and adds nothing; review_res 1)
     this.bandRows = 64; this.bandY = 0; this.mainDone = false;
     this.frameNo = 0;
     this.tier = TIERS.mid;
@@ -200,7 +200,10 @@ export class Renderer {
     this.hdr = this._hdrTarget(w, h);
     const ss = this.tier.ss;
     this.main = this._gbuffer(w * ss, h * ss); this.main.ss = ss;
-    this._previewBuffers(this.previewPs ?? (w * h > 600000 ? 0.4 : w * h < 220000 ? 0.75 : 0.55));
+    // the preview's scale is set once from the canvas's size and kept across tiers; the frame loop changes it and reads it
+    // back (review_res 6: after a tier change the size rule picked another scale than the loop's)
+    if (this.previewPs == null) this.previewPs = w * h > 600000 ? 0.4 : w * h < 220000 ? 0.75 : 0.55;
+    this._previewBuffers(this.previewPs);
     this.dirtyGeo = true;
   }
 
@@ -303,11 +306,11 @@ export class Renderer {
       return { traced: 'direct' };
     }
     let traced = null;
-    let refineMs = null;
+    let firstBand = false, lastBand = false;
     if (this.dirtyGeo) {
       this._traceInto(this.preview, f);
       this.dirtyGeo = false;
-      this.bandY = 0; this.mainDone = false; this.refineT0 = null;
+      this.bandY = 0; this.mainDone = false;
       traced = 'preview';
     }
     if (full && !this.mainDone) {
@@ -316,13 +319,10 @@ export class Renderer {
       this.bandY = this.main.h; this.mainDone = true; traced = 'full';
     } else if (!traced && !this.mainDone && !interacting) {
       const rows = Math.min(this.bandRows, this.main.h - this.bandY);
-      if (this.bandY === 0) this.refineT0 = performance.now();
+      firstBand = this.bandY === 0;
       this._traceInto(this.main, f, this.bandY, rows);
       this.bandY += rows;
-      if (this.bandY >= this.main.h) {
-        this.mainDone = true;
-        if (this.refineT0 != null) { gl.finish(); refineMs = performance.now() - this.refineT0; this.refineT0 = null; }
-      }
+      if (this.bandY >= this.main.h) { this.mainDone = true; lastBand = true; }
       traced = 'band';
     }
     // the full picture is shaded at the canvas's size from its supersamples; the preview at its own size, one ray a
@@ -356,7 +356,7 @@ export class Renderer {
     gl.uniform1f(this.pFinal.loc.uBloom, frame.bloom ?? 0.55);
     gl.uniform1f(this.pFinal.loc.uFrame, this.frameNo % 64);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    return { traced, refined: this.mainDone, progress: this.mainDone ? 1 : this.bandY / (this.main?.h || 1), refineMs };
+    return { traced, refined: this.mainDone, progress: this.mainDone ? 1 : this.bandY / (this.main?.h || 1), firstBand, lastBand };
   }
 
   _bindTex(prog, name, tex, unit) {
@@ -456,6 +456,9 @@ export class Renderer {
     gl.useProgram(this.pFinal.p);
     this._bindTex(this.pFinal, 'uHDR', hdr.t, 0);
     gl.uniform2f(this.pFinal.loc.uRes, W, H);
+    // the still is shaded at its own size: no level offset (a uniform keeps its last value: render()'s, for a preview,
+    // shifted a thumbnail's bloom; review_res 5)
+    gl.uniform1f(this.pFinal.loc.uLod0, 0);
     gl.uniform1f(this.pFinal.loc.uBloom, frame.bloom ?? 0.55);
     gl.uniform1f(this.pFinal.loc.uFrame, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

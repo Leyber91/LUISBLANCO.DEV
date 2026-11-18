@@ -468,24 +468,34 @@ export async function FALL_STEP(p, { base, width, ready }) {
 // lit pixels equal, where copies made runs of equal pixels), and a full picture's time must reach the tier rule.
 const DRAG_FRAME = `(async () => {
   const a = window.__bh, s = a.store, r = a.renderer, gl = r.gl;
+  // one preview scale for the measure, 0.4, where copied rays make long runs of equal pixels (at 1 both enlargements
+  // give the same picture; review_res 9); main has no setter and keeps its own scale
+  if (r.setPreviewScale) r.setPreviewScale(0.4);
+  const refines0 = a.perf.refines || 0;
   a.interacting = true;
   let i = 0;
   const id = setInterval(() => s.set({ incl: 80 + 8 * Math.sin(i++ / 8) }, { instant: true }), 16);
-  await new Promise((res) => setTimeout(res, 1500));
+  await new Promise((res) => setTimeout(res, 1200));
+  // the scale back to 0.4 just before the read: the preview's own rule may have moved it during the drag
+  if (r.setPreviewScale) r.setPreviewScale(0.4);
+  await new Promise((res) => setTimeout(res, 300));
   const w = r.canvas.width, h = r.canvas.height, px = new Uint8Array(w * h * 4);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
   const preview = !r.mainDone, ps = r.preview.scale;
   clearInterval(id); a.interacting = false;
-  // neighbours within one level in every channel (the final pass dithers by one level), among lit pixels
+  // neighbours within one level in every channel (the final pass dithers by one level), among lit pixels where the
+  // picture is not flat over three pixels (a flat or saturated stretch is equal under either enlargement)
+  const near = (k, j) => Math.abs(px[k] - px[j]) <= 1 && Math.abs(px[k + 1] - px[j + 1]) <= 1 && Math.abs(px[k + 2] - px[j + 2]) <= 1;
   let lit = 0, same = 0;
-  for (let y = 0; y < h; y++) for (let x = 0; x + 1 < w; x++) {
+  for (let y = 0; y < h; y++) for (let x = 1; x + 2 < w; x++) {
     const k = (y * w + x) * 4;
     if (px[k] + px[k + 1] + px[k + 2] < 120) continue;
+    if (near(k - 4, k + 8)) continue;
     lit++;
-    if (Math.abs(px[k] - px[k + 4]) <= 1 && Math.abs(px[k + 1] - px[k + 5]) <= 1 && Math.abs(px[k + 2] - px[k + 6]) <= 1) same++;
+    if (near(k, k + 4)) same++;
   }
-  return { preview, ps, w, h, lit, share: lit ? +(same / lit).toFixed(3) : null };
+  return { preview, ps, w, h, lit, share: lit ? +(same / lit).toFixed(3) : null, refines0 };
 })()`;
 export async function RES_STEP(p, { base, ready }) {
   await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
@@ -493,12 +503,16 @@ export async function RES_STEP(p, { base, ready }) {
   await p.sleep(1500);
   const d = await p.ev(DRAG_FRAME);
   console.log('RES drag ' + JSON.stringify(d));
-  p.check('the frame in the middle of a drag is a preview, enlarged smoothly: under 25% of neighbouring lit pixels equal (copied rays made runs of equal pixels)',
-    d.preview && d.lit > 2000 && d.share != null && d.share < 0.25, JSON.stringify(d));
+  // copying each ray to the pixels it covers makes about 1 - ps of neighbouring pairs equal: the frame must have under
+  // half that (review_res 9: a fixed bound read smooth gradients at a small scale as copies)
+  const bound = 0.5 * (1 - d.ps);
+  p.check(`the frame in the middle of a drag is a preview, enlarged smoothly: under half the equal neighbours copied rays would make (${bound.toFixed(3)} at scale ${d.ps})`,
+    d.preview && d.lit > 2000 && d.share != null && d.ps <= 0.75 && d.share < bound, JSON.stringify({ ...d, bound: +bound.toFixed(3) }));
   await p.until(ready, READY_MS);
-  const t = await p.until(`window.__bh.perf.refineMs > 0`, 30000);
-  const perf = await p.ev(`(() => { const q = window.__bh.perf; return { tier: q.tier, refineMs: q.refineMs, previewScale: q.previewScale }; })()`);
-  p.check('a full picture\'s time reaches the tier rule after the view settles', !!t && perf.refineMs > 0 && typeof perf.tier === 'string', JSON.stringify(perf));
+  // a new full picture after the drag reaches the rule: the count of pictures rises past the one read before it
+  const t = await p.until(`(window.__bh.perf.refines || 0) > ${d.refines0}`, 30000);
+  const perf = await p.ev(`(() => { const q = window.__bh.perf; return { tier: q.tier, refines: q.refines, refineMs: q.refineMs, previewScale: q.previewScale }; })()`);
+  p.check('the full picture after the drag reaches the tier rule with its time', !!t && perf.refines > d.refines0 && perf.refineMs > 0 && ['min', 'low', 'mid', 'high'].includes(perf.tier), JSON.stringify({ ...perf, before: d.refines0 }));
 }
 
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,

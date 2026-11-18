@@ -7,7 +7,7 @@
 import { Store } from './state.js';
 import { Renderer } from './renderer.js';
 import { TIERS } from './config.js';
-import { tierStart, tierAfter, previewStart, previewAfter } from './adapt.js';
+import { tierStart, tierAfter, previewStart, previewAfter, previewReset } from './adapt.js';
 import { derive } from './physics.js';
 import { DIAG_EXPO } from './palette.js';
 import { buildUI } from './ui.js';
@@ -102,7 +102,24 @@ function boot() {
   let last = performance.now(), frames = 0, acc = 0, lastDraw = 0, drew = false, costAcc = 0, costN = 0, winStart = performance.now();
   // the tier and the preview's scale follow what the frames measure (adapt.js), for the whole visit
   let tierState = tierStart(autoTier), previewState = previewStart(renderer.preview?.scale ?? 0.55);
-  let lastTraced = null, previewDts = [];
+  // a full picture's time: the frame times of the frames that traced its bands, summed; a frame of the fallback path
+  // (no float targets) traces a whole picture and counts as one (review_res 1 and 3)
+  let lastTraced = null, previewDts = [], refineAcc = 0, refineOpen = false, refineDone = false;
+  app.perf.refines = 0;
+  /** The tier after a full picture of refineMs, with frames at their median (adapt.js tierAfter): auto tier only. */
+  function decideTier(refineMs, now) {
+    app.perf.refines++; app.perf.refineMs = refineMs;
+    if (STILL || store.get('tier') !== 'auto') return;
+    const next = tierAfter(tierState, { refineMs, frameMs: app.perf.median || 0, w: canvas.clientWidth, h: canvas.clientHeight, dpr: window.devicePixelRatio || 1, now, tiers: TIERS });
+    if (next.tier !== tierState.tier) {
+      autoTier = next.tier; renderer.setTier(TIERS[autoTier]); geoKey = '';
+      // the preview's rays change with the tier: its last step proves nothing now
+      previewState = previewReset(previewState, now);
+    }
+    tierState = next;
+    app.perf.tier = autoTier;
+    ui.perf?.(app.perf, null);
+  }
   function loop(now) {
     if (!visible) return;
     const dt = Math.min(250, now - last);
@@ -111,6 +128,11 @@ function boot() {
     if (drew) {
       costAcc += dt; costN++; drew = false;
       if (lastTraced === 'preview') previewDts.push(dt);
+      if (refineOpen && (lastTraced === 'band' || lastTraced === 'direct')) refineAcc += dt;
+      if (refineDone) {
+        refineDone = false; refineOpen = false;
+        decideTier(refineAcc, now);
+      }
       // median over the last 60 drawn frames, for the on-page readout
       app.perf.samples.push(dt); if (app.perf.samples.length > 60) app.perf.samples.shift();
       const sorted = app.perf.samples.slice().sort((x, y) => x - y);
@@ -142,22 +164,20 @@ function boot() {
       void acc;
       renderer.adaptBands(dt);
       lastTraced = res && res.traced;
-      // the tier after each full picture, from the time it took (adapt.js tierAfter)
-      if (!STILL && res && res.refineMs != null && store.get('tier') === 'auto') {
-        const next = tierAfter(tierState, { refineMs: res.refineMs, w: canvas.clientWidth, h: canvas.clientHeight, dpr: window.devicePixelRatio || 1, now, tiers: TIERS });
-        if (next.tier !== tierState.tier) { autoTier = next.tier; renderer.setTier(TIERS[autoTier]); geoKey = ''; }
-        tierState = next;
-        app.perf.tier = autoTier; app.perf.refineMs = res.refineMs;
-        ui.perf?.(app.perf, res);
-      }
-      // the preview's scale after every six preview frames, from their median time (adapt.js previewAfter)
+      // a picture's bands open and close its clock; a new view (a preview) drops an open one; the last band's frame
+      // time is known at the next frame, which decides
+      if (res && res.traced === 'preview') { refineOpen = false; refineAcc = 0; }
+      if (res && (res.firstBand || res.traced === 'direct')) { refineOpen = true; refineAcc = 0; }
+      if (res && (res.lastBand || res.traced === 'direct') && refineOpen) refineDone = true;
+      // the preview's scale after every six preview frames, from their median time (adapt.js previewAfter), from the
+      // scale the renderer traces at
       if (!STILL && previewDts.length >= 6) {
         const m = previewDts.slice().sort((x, y) => x - y)[3];
         previewDts = [];
-        const next = previewAfter(previewState, { frameMs: m, now });
-        if (next.ps !== previewState.ps) renderer.setPreviewScale(next.ps);
+        const next = previewAfter({ ...previewState, ps: renderer.preview?.scale ?? previewState.ps }, { frameMs: m, now });
+        if (next.ps !== renderer.preview?.scale) renderer.setPreviewScale(next.ps);
         previewState = next;
-        app.perf.previewScale = next.ps;
+        app.perf.previewScale = renderer.preview?.scale;
       }
       if (res && res.refined && !app.refinedOnce) { app.refinedOnce = true; ui.onRefined?.(); }
     }
