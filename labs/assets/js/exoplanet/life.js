@@ -140,7 +140,10 @@ export const NO_LIGHT = 'The page has no starlight for it (no orbit, or no star 
 /** The words for the ice the picture draws on a world with one face to its star: it begins this many degrees from the
    point under the star (the shader's sin(angle / 2) against iceCap), on the day side under 90 degrees.
    @param {number} deg */
-export const iceLocked = (deg) => `In the picture its ice begins about ${int(deg)}° from the point under its star, ${deg < 90 ? 'on its day side' : 'on its night side'}; any cover farther out lies under the ice.`;
+export const iceLocked = (deg) => `In the picture its ice begins about ${int(deg)}° from the point under its star, ${iceOnDaySide(deg) ? 'on its day side' : 'on its night side'}; any cover farther out lies under the ice.`;
+/** The one rule of a locked world's ice reaching its day side: it begins under 90 degrees from the point under its
+   star. null (no ice) is not. @param {number | null} deg */
+export const iceOnDaySide = (deg) => deg !== null && deg < 90;
 /** @param {number} deg */
 export const iceLine = (deg) => `In the picture its ice reaches down to about ${int(deg)}° of latitude; any cover nearer its poles lies under the ice.`;
 /** The words for a world with one face to its star, and for one whose ice reaches its day side. */
@@ -193,6 +196,6 @@ export function lifeOf(p, k = classify(p), opts = {}) {
       words.push(ph.locked ? iceLocked(iceDeg) : iceLine(iceDeg));
     }
   }
-  if (ph.locked) words.push(iceDeg !== null && iceDeg < 90 ? LOCKED_NEAR : LOCKED);
+  if (ph.locked) words.push(iceOnDaySide(iceDeg) ? LOCKED_NEAR : LOCKED);
   return { case: c, type, extrapolated, where, scenarios, light, uvb, words, phys: ph };
 }
