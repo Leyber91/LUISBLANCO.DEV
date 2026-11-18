@@ -585,6 +585,36 @@ export async function EDGE_STEP(p, { base, ready }) {
   }
 }
 
+// The disk's motion (flow.js; 2026-11-18). One pattern carried along the orbits wound into rings finer than the pixels,
+// which read as the disk expanding and contracting. The bounded shear is held in node (flow.test.mjs, from the orbits
+// themselves). A measure of fine detail in two stills five minutes apart was tried here and did not separate main from
+// the fix (ratio 1.09 against 0.97: within one ring the pattern only turns, and the winding showed as grain of the
+// same energy), so it is not kept. The page states its clock for the hole shown.
+export async function SPIN_STEP(p, { base, ready }) {
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87&n=0`);
+  await p.until(ready, READY_MS);
+  await p.sleep(1500);
+  await p.step('M87* as the page opens, its caption');
+  // the view's note (in the panels) and the caption card under the picture: their text, and whether the card shows all
+  // of its words (the card's height is capped on a phone)
+  const CAPTION = `(() => { const e = document.getElementById('bh-viewnote'), c = document.querySelector('#bh-caption .cap-b'), box = document.querySelector('#bh-caption .cap');
+    return { note: e ? e.textContent : null, card: c ? c.textContent : null, cut: box ? box.scrollHeight - box.clientHeight : null }; })()`;
+  const c = await p.ev(CAPTION);
+  p.check('the caption card under the picture gives the clock in short, by a distant clock, and shows every word of it',
+    /Time here runs at 7\.5 M a second: an orbit at the ISCO takes 3\.2 s here and 8\.89 d by a distant clock\./.test(c.card || '') && c.cut != null && c.cut <= 1, JSON.stringify({ card: c.card, cut: c.cut }));
+  p.check('the view\'s note states the clock for M87* as a distant clock counts it',
+    /Time here runs at 7\.5 M a second: a second here is 2\.78 d by a distant clock at M87\*, and an orbit at the ISCO takes 3\.2 s here and 8\.89 d by that clock\./.test(c.note || ''), c.note);
+  // where nothing turns, no sentence about a turning disk (review_spin 4), read from a note and a card that exist and say
+  // their view (a missing or emptied note passed the first version of these)
+  for (const [q, what, hint] of [['&v=telescope', 'the telescope view, whose thin emitter carries no texture,', /the object as the EHT sees it/], ['&an=0', 'a paused disk', /a camera 46 M away/]]) {
+    await p.go(`${base}/labs/bh_animation_page.html?o=m87&n=0${q}`);
+    await p.until(ready, READY_MS);
+    await p.sleep(1000);
+    const z = await p.ev(CAPTION);
+    p.check(`${what} says nothing of a turning disk, in its note or its card`, hint.test(z.note || '') && !!z.card && !/Time here runs/.test(z.note) && !/Time here runs/.test(z.card), JSON.stringify({ note: (z.note || '').slice(0, 80), card: z.card }));
+  }
+}
+
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,
    a fall the visitor starts and the tour's, take out, and a browser whose storage is refused. Every count is read
    relative to the record as the step finds it, since earlier steps press pixels and run a fall, which the record keeps.
@@ -1155,6 +1185,7 @@ export default async function blackhole(p, { base, width }) {
   await sheet(false);
 
   /* ---- 3. the measurement and the telescope view, opened by link (ledger row 2; P2-1, P4-3) ---- */
+  await SPIN_STEP(p, { base, ready: READY });
   await RES_STEP(p, { base, ready: READY });
   await EDGE_STEP(p, { base, ready: READY });
   const CARD = `(async () => {
