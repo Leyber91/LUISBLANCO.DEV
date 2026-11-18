@@ -21,7 +21,15 @@
            [--widths WxH[,...]] [--out <dir>] [--timeout <s a drive, 300>] [--budget <s, 540>]
            [--min-free-gb <n, 2>]
                               every scenario at every size on any tree, one Chrome at a time, within
-                              a budget; exit 3 means run the same command again (see cmdDrivePairs)
+                              a budget (see cmdDrivePairs). One run is one command: give it an outer
+                              limit of its own, above --budget. Exit 0 every pair passed for the
+                              tree's state; 1 a pair failed, or the run broke (server, tree changed);
+                              2 usage, an unknown lab too; 3 this run recorded a pair and pairs remain:
+                              run the same command again; 4 nothing driven, as memory or the lock
+                              stayed short for the whole budget: wait, then run it again.
+                              Not in a result's key: files git ignores, and what a scenario outside
+                              the tree imports. A --scenario path resolves from where the command
+                              runs. With the flags, any word but one lab name is refused.
      gates <name>             privacy selftest, site_check, levels check, in the worktree
      sync <name> [--from B]   merge B (default main) into the lab branch
      ship <name>              push, open a pull request to main, wait for the gates, squash-merge
@@ -84,9 +92,12 @@ export const LABS = [
   ['os', 'hub', 8833, 'index.html'],   // the Labs OS platform layer, shown through the hub
 ].map(([name, hubId, port, page]) => ({ name, hubId, port, page }));
 
+/* A lab by its name or hub id, or undefined. */
+export const findLab = (n) => LABS.find((l) => l.name === n || l.hubId === n);
+const unknownLab = (n) => `unknown lab "${n}". Run: node tools/labs-wt.mjs ports`;
 const byName = (n) => {
-  const lab = LABS.find((l) => l.name === n || l.hubId === n);
-  if (!lab) die(`unknown lab "${n}". Run: node tools/labs-wt.mjs ports`);
+  const lab = findLab(n);
+  if (!lab) die(unknownLab(n));
   return lab;
 };
 const wtPath = (lab) => path.join(WT_ROOT, lab.name).replace(/\\/g, '/');
@@ -317,7 +328,7 @@ const usage = (msg) => Object.assign(new Error(msg), { expected: true, code: 2 }
 export function driveArgs(args) {
   const opts = {}, names = [];
   for (let i = 0; i < args.length; i++) {
-    if (!args[i].startsWith('--')) { names.push(args[i]); continue; }
+    if (!args[i].startsWith('-')) { names.push(args[i]); continue; }   // no lab name begins with a dash: -budget is a misspelt flag
     const k = DRIVE_FLAGS[args[i]], v = args[i + 1];
     if (!k) throw usage(`drive: unknown flag ${args[i]}`);
     if (!v || v.startsWith('--')) throw usage(`drive: ${args[i]} needs a value`);
@@ -380,24 +391,26 @@ export function treeState(tree, diff = treeDiff(tree)) {
 export function servedPort(text) { const m = /^Serving HTTP on \S+ port (\d+) /m.exec(text); return m ? Number(m[1]) : 0; }
 /* A server for one tree on a port the system picks (0): two runs are never handed one port, and the port is read from
    this server's own first line, so the server that answers is this one and never another tree's. Resolves
-   { port, stop }; on no port within ms or an error it stops the server and throws, and on an early end it throws. cmd
-   and end are given only by the selftest, which has no python and should not spend a second on each taskkill. */
+   { port, stop, alive }: alive() is false once the server has ended, and stop() then kills nothing. On no port within ms
+   or an error it stops the server and throws, and on an early end it throws. cmd and end are given only by the
+   selftest, which has no python and should not spend a second on each taskkill. */
 function serveTree(tree, ms = 8000, cmd = ['python', ['-u', '-I', '-m', 'http.server', '0', '--bind', '127.0.0.1', '--directory', tree]], end = stopPid) {
   const child = spawn(cmd[0], cmd[1], { cwd: tree, stdio: ['ignore', 'pipe', 'ignore'], windowsHide: true });
-  const stop = () => end(child.pid);
+  let ended = false;
+  const stop = () => { if (!ended) end(child.pid); };
   return new Promise((resolve, reject) => {
     let text = '';
     const refuse = (why) => { clearTimeout(timer); reject(expected(`the server for ${tree} did not come up: ${why}`)); };
     const fail = (why) => { stop(); refuse(why); };
     const timer = setTimeout(() => fail(`it said no port within ${ms / 1000} s`), ms);
     child.on('error', (e) => fail(e.message));
-    child.on('exit', (code) => refuse(`it ended with exit code ${code}`));
+    child.on('exit', (code) => { ended = true; refuse(`it ended with exit code ${code}`); });
     child.stdout.on('data', (d) => {
       text += d;
       const port = servedPort(text);
       if (!port) return;
       clearTimeout(timer);
-      resolve({ port, stop });
+      resolve({ port, stop, alive: () => !ended });
     });
   });
 }
@@ -422,7 +435,13 @@ export function readPairs(file) {
 
 /* The leaves a run of pairs ends in, as LEAVES are a shot's: the selftest stands in for them and checks that each one
    here is the real thing. A drive itself is never a leaf: it is always the tree's own tools/drive.mjs. */
-export const PAIR_LEAVES = { state: treeState, serve: serveTree, free: os.freemem, now: Date.now, shots: SHOTS, wt: wtPath, say: (line) => console.log(line) };
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+export const PAIR_LEAVES = { state: treeState, serve: serveTree, free: os.freemem, now: Date.now, sleep: pause, shots: SHOTS, wt: wtPath, say: (line) => console.log(line) };
+/* Between two pairs the lock is left free this long, as tools/mutate.mjs leaves it between copies: a drive of another
+   conversation looks every 250 ms, so it can take the lock between two pairs instead of waiting out the whole run. */
+const GAP_MS = 600;
+/* Free memory under the floor is read again this often, while a drive could still start inside the budget. */
+const MEMORY_EVERY_MS = 10000;
 
 /* Every scenario at every size, on any tree, one Chrome at a time, within a budget; the same command run again
    resumes. A pair is one scenario at one size. Its result is a line of <out>/summary.tsv kept under the tree's state
@@ -430,21 +449,34 @@ export const PAIR_LEAVES = { state: treeState, serve: serveTree, free: os.freeme
    <out>/<scenario>-<WxH>.txt. The default out is <shots>/<lab>/drive-<state>. A pair that passed under the same state
    and the same scenario is skipped; one that failed is driven again, after the pairs never driven. A result kept under
    another state or another copy of the scenario is never read.
-   The budget: the first pair to drive starts at once if the lock is free; a later one starts only when the time so far
-   and one drive's limit (--timeout) fit the budget. The lock is waited for only as long as the budget leaves for that,
-   so an outer limit above the budget never cuts a drive. With the lock held and before the drive, free memory is read;
-   under --min-free-gb nothing more starts. Each drive is the tree's own tools/drive.mjs, inside withChromeLock with the
-   holdChrome beside this file. The one server is started for the tree after its drive.mjs and scenarios have loaded,
-   and stopped when the run ends: by a return, a throw, or an exit inside a drive.
-   Exit code: 0 when every pair has passed for this state; 1 when every pair has a result and one failed, or nothing
-   could be driven (the server did not come up, an error); 2 usage; 3 when a pair has no result for this state yet
-   (the budget, the memory floor or the lock stopped it): run the same command again. A drive that ran no check, or
-   was stopped at its limit, failed. seams: any of PAIR_LEAVES, and hold (withChromeLock's), given only by the selftest. */
+   The budget: a drive may start until its limit (--timeout) before the budget's end, counted from the run's start; the
+   first pair to drive is the one exception, so that the reading of the state and the server's start never leave a
+   run with no room for one drive. Before a pair, free memory under --min-free-gb is read again every 10 s, and the lock
+   is waited for, each only until that latest start. With the lock held and before the drive, memory is read once more.
+   Between two pairs the lock is left free for 600 ms. Each drive is the tree's own tools/drive.mjs, inside
+   withChromeLock with the holdChrome beside this file. Before a pair's result is kept, the server must still run and the
+   tree's state must be the one the run began with; else nothing is kept for that pair and the run stops. The one server
+   is started after the tree's drive.mjs and scenarios have loaded, and stopped when the run ends: by a return, a throw,
+   or an exit inside a drive.
+   What this guarantees: no drive starts later than its limit before the budget's end, except the first. So a run ends
+   within the budget, plus the reading of the state and the server's start when the first drive came late, plus what a
+   drive takes past its limit: with a drive.mjs whose waits end with Chrome (waitsOf, since 2026-11-18), the end of its
+   Chrome, a few seconds; with an older drive.mjs, up to the longest wait of its scenario, minutes. One run is one
+   command, under an outer limit above the budget: a limit shared with other work can still cut a drive.
+   Exit code: 0 when every pair has passed for this state; 1 when every pair has a result and one failed, or the run
+   broke (the server ended, the tree changed, the server did not come up, an error); 2 usage, an unknown lab included;
+   3 when this run kept a result and a pair still has none for this state: run the same command again, and a loop on 3
+   ends within as many runs as there are pairs; 4 when this run kept nothing because memory or the lock stayed short
+   until the latest start: wait, then run it again. A drive that ran no check, or was stopped at its limit, failed;
+   console errors fail a pair only through the checks of its drive.mjs. seams: any of PAIR_LEAVES, and hold
+   (withChromeLock's), given only by the selftest. */
 export async function cmdDrivePairs(n, opts = {}, seams = {}) {
   const t = { ...PAIR_LEAVES, ...seams };
-  const lab = byName(n);
-  try { return await drivePairs(lab, opts, t); }
-  catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); return e.code === 2 ? 2 : 1; }
+  try {
+    const lab = findLab(n);
+    if (!lab) throw usage(unknownLab(n));
+    return await drivePairs(lab, opts, t);
+  } catch (e) { console.error(e.expected ? e.message : (e.stack || e.message)); return e.code === 2 ? 2 : 1; }
 }
 
 async function drivePairs(lab, o, t) {
@@ -472,7 +504,7 @@ async function drivePairs(lab, o, t) {
   const rows = readPairs(sum);
   const passed = (p) => rows.get(p.id)?.[4] === 'ok';
   const todo = [...pairs.filter((p) => !rows.has(p.id)), ...pairs.filter((p) => rows.has(p.id) && !passed(p))];
-  let ran = 0, why = '';
+  let kept = 0, why = '', broke = false;
   if (todo.length) {
     const { drive } = await import(pathToFileURL(driver).href);
     if (typeof drive !== 'function') throw expected(`${driver} exports no drive function`);
@@ -482,34 +514,41 @@ async function drivePairs(lab, o, t) {
       if (typeof s !== 'function') throw usage(`${f} has no default export to run`);
       scenario.set(f, s);
     }
-    const deadline = t0 + plan.budget;
+    const latest = t0 + plan.budget - plan.each;   // the latest a drive may start and still end inside the budget
     const srv = await t.serve(tree);
     const stopAtExit = () => srv.stop();
     process.on('exit', stopAtExit);
     try {
-      for (const p of todo) {
-        const now = t.now();
-        if (ran && now + plan.each > deadline) { why = `the ${plan.budget / 1000} s budget has no room left for a drive of up to ${plan.each / 1000} s`; break; }
+      for (const [i, p] of todo.entries()) {
+        if (i) await t.sleep(GAP_MS);
+        if (kept && t.now() > latest) { why = `the ${plan.budget / 1000} s budget has no room left for a drive of up to ${plan.each / 1000} s`; break; }
+        let free = t.free();
+        while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) { await t.sleep(MEMORY_EVERY_MS); free = t.free(); }
+        const short = (gb) => `${(gb / 2 ** 30).toFixed(2)} GB free, under the floor of ${plan.floor / 2 ** 30} GB`;
+        if (free < plan.floor) { why = short(free); break; }
         let low = null, r = null, took = 0;
         const dir = path.join(out, `${p.name}-${p.size}`), log = `${dir}.txt`;
         try {
           await withChromeLock(async () => {
-            const free = t.free();
-            if (free < plan.floor) { low = free; return; }
+            const freeNow = t.free();
+            if (freeNow < plan.floor) { low = freeNow; return; }
             const [width, height] = p.size.split('x').map(Number), s0 = t.now();
             fs.writeFileSync(log, '');
             try { r = await drive(scenario.get(p.f), { base: `http://127.0.0.1:${srv.port}`, out: dir, width, height, timeoutMs: plan.each, say: (m) => fs.appendFileSync(log, `${m}\n`) }); }
             catch (e) { r = { checks: [{ name: 'the drive ran to its end', ok: false, detail: String((e && e.stack) || e) }], timedOut: false }; }
             took = Math.round((t.now() - s0) / 1000);
-          }, { waitMs: Math.max(0, deadline - plan.each - now), say: t.say, hold: t.hold });
+          }, { waitMs: Math.max(0, latest - t.now()), say: t.say, hold: t.hold });
         } catch (e) { if (!e.expected) throw e; why = e.message; break; }
-        if (low !== null) { why = `${(low / 2 ** 30).toFixed(2)} GB free, under the floor of ${plan.floor / 2 ** 30} GB`; break; }
-        ran++;
+        if (low !== null) { why = short(low); break; }
+        if (!srv.alive()) { why = `the server for the tree ended during ${p.name} ${p.size}, so nothing is kept for it`; broke = true; break; }
+        const keyNow = t.state(tree);
+        if (keyNow !== key) { why = `the tree changed during ${p.name} ${p.size} (its state was ${key}, and is ${keyNow}), so nothing is kept for it`; broke = true; break; }
         const bad = r.checks.filter((c) => !c.ok);
         const status = r.timedOut || !r.checks.length || bad.length ? 'FAIL' : 'ok';
         const row = [p.id, status, r.checks.length - bad.length, bad.length, took, new Date().toISOString()].join('\t');
         fs.appendFileSync(sum, `${row}\n`);
         rows.set(p.id, row.split('\t'));
+        kept++;
         t.say(`${status.padEnd(4)} ${p.name} ${p.size}: ${r.checks.length - bad.length} ok, ${bad.length} FAIL, ${took} s; pictures in ${dir}, its lines in ${log}`);
         if (r.timedOut) t.say(`  FAIL stopped at its limit of ${plan.each / 1000} s`);
         if (!r.checks.length) t.say('  FAIL no check ran: a drive that tested nothing failed');
@@ -517,8 +556,9 @@ async function drivePairs(lab, o, t) {
       }
     } finally {
       process.off('exit', stopAtExit);
+      const running = srv.alive();
       srv.stop();
-      t.say(`stopped the server this drive started on port ${srv.port}`);
+      t.say(running ? `stopped the server this drive started on port ${srv.port}` : `the server this drive started on port ${srv.port} had ended by itself`);
     }
   }
   const left = pairs.filter((p) => !rows.has(p.id)), failed = pairs.filter((p) => rows.has(p.id) && !passed(p));
@@ -526,9 +566,11 @@ async function drivePairs(lab, o, t) {
     const c = rows.get(p.id);
     t.say(c ? `${c[4].padEnd(4)} ${p.name} ${p.size}: ${c[5]} ok, ${c[6]} FAIL, ${c[7]} s` : `---- ${p.name} ${p.size}: no result yet`);
   }
-  if (left.length) { t.say(`${left.length} of ${pairs.length} pairs have no result for ${key} yet${why ? ` (${why})` : ''}: run the same command again`); return 3; }
+  if (broke) { t.say(`the run broke: ${why}; results in ${sum}`); return 1; }
+  if (left.length && kept) { t.say(`${left.length} of ${pairs.length} pairs have no result for ${key} yet${why ? ` (${why})` : ''}: run the same command again`); return 3; }
+  if (left.length) { t.say(`nothing was driven: ${why}; ${left.length} of ${pairs.length} pairs have no result for ${key}: wait, then run the same command again`); return 4; }
   if (failed.length) { t.say(`${failed.length} of ${pairs.length} pairs failed for ${key}${why ? `, not all driven again (${why})` : ''}; results in ${sum}`); return 1; }
-  t.say(`all ${pairs.length} pairs passed for ${key}${ran ? '' : ', none driven now: each had passed before'}; results in ${sum}`);
+  t.say(`all ${pairs.length} pairs passed for ${key}${kept ? '' : ', none driven now: each had passed before'}; results in ${sum}`);
   return 0;
 }
 
@@ -896,18 +938,20 @@ async function selftest() {
     const outLog = console.log, said2 = [];
     console.log = (m) => { said2.push(String(m)); };
     try { PAIR_LEAVES.say('a line'); } finally { console.log = outLog; }
-    yes('the leaves a run of pairs ends in are the real ones', same(Object.keys(PAIR_LEAVES), ['state', 'serve', 'free', 'now', 'shots', 'wt', 'say']) && PAIR_LEAVES.state === treeState && PAIR_LEAVES.serve === serveTree && PAIR_LEAVES.free === os.freemem && PAIR_LEAVES.now === Date.now && PAIR_LEAVES.shots === SHOTS && PAIR_LEAVES.wt === wtPath && same(said2, ['a line']), `${Object.keys(PAIR_LEAVES).join(' ')}; said ${J(said2)}`);
+    yes('the leaves a run of pairs ends in are the real ones', same(Object.keys(PAIR_LEAVES), ['state', 'serve', 'free', 'now', 'sleep', 'shots', 'wt', 'say']) && PAIR_LEAVES.state === treeState && PAIR_LEAVES.serve === serveTree && PAIR_LEAVES.free === os.freemem && PAIR_LEAVES.now === Date.now && PAIR_LEAVES.sleep === pause && PAIR_LEAVES.shots === SHOTS && PAIR_LEAVES.wt === wtPath && same(said2, ['a line']), `${Object.keys(PAIR_LEAVES).join(' ')}; said ${J(said2)}`);
 
     const argsOf = (a) => { try { return driveArgs(a); } catch (e) { return { error: e.message, code: e.code, expected: e.expected }; } };
     yes('drive with a lab name and no flag has no option, so it is the drive it was before the flags', same(argsOf(['heptapod']), { name: 'heptapod', opts: {} }) && isPairRun({}) === false, J(argsOf(['heptapod'])));
     const every = argsOf(['--tree', 'T', '--scenario', 'a,b', 'heptapod', '--widths', '390x844', '--out', 'O', '--timeout', '9', '--budget', '99', '--min-free-gb', '1']);
     yes('each flag is read into its option, with the lab name anywhere among them', same(every, { name: 'heptapod', opts: { tree: 'T', scenario: 'a,b', widths: '390x844', out: 'O', timeout: '9', budget: '99', minFreeGb: '1' } }), J(every));
     yes('any one flag makes it a run of pairs', isPairRun({ budget: '60' }) === true);
-    const refusals = [[['heptapod', '--widht', '390x844'], 'drive: unknown flag --widht'], [['heptapod', '--budget'], 'drive: --budget needs a value'],
+    const refusals = [[['heptapod', '--widht', '390x844'], 'drive: unknown flag --widht'], [['heptapod', '-budget', '9'], 'drive: unknown flag -budget'], [['heptapod', '--budget'], 'drive: --budget needs a value'],
       [['heptapod', '--budget', '--tree', 'x'], 'drive: --budget needs a value'], [['heptapod', '--tree', ''], 'drive: --tree needs a value'],
       [[], 'drive takes one lab name, and was given 0'], [['a', 'b'], 'drive takes one lab name, and was given 2: a b']];
     const refused = refusals.map(([a]) => argsOf(a));
-    yes('a misspelt flag, a flag with no value, and no lab name or two are refused with exit code 2 and the reason', refused.every((x, i) => x.code === 2 && x.expected === true && x.error === refusals[i][1]), J(refused));
+    yes('a misspelt flag, one dash or two, a flag with no value, and no lab name or two are refused with exit code 2 and the reason', refused.every((x, i) => x.code === 2 && x.expected === true && x.error === refusals[i][1]), J(refused));
+    const labs = [findLab('blackhole'), findLab('black-hole'), findLab('black'), findLab('black-h')].map((l) => l && l.name);
+    yes('a lab is found by its name or its hub id, and by nothing less', same(labs, ['blackhole', 'blackhole', undefined, undefined]), J(labs));
 
     const planOf = (o) => { try { return drivePlan(o, LABS[0]); } catch (e) { return { error: e.message, code: e.code }; } };
     yes('with no flag, a run drives the lab\'s own scenario at 1440x900 and 390x844, 300 s a drive, 540 s in all, with 2 GB free', same(planOf({}), { scenarios: [name], sizes: ['1440x900', '390x844'], each: 300000, budget: 540000, floor: 2 * 2 ** 30 }), J(planOf({})));
@@ -936,12 +980,20 @@ async function selftest() {
     const pidOf = async () => { for (let i = 0; i < 30; i++) { try { return Number(fs.readFileSync(pidFile, 'utf8')); } catch { await tick(100); } } return 0; };
     const gone = async (pid) => { for (let i = 0; i < 30; i++) { try { process.kill(pid, 0); } catch { return true; } await tick(100); } return false; };
     const kill = (pid) => { try { process.kill(pid); } catch { /* gone */ } };
-    const upSrv = await serveTree(scratch, 8000, standIn('console.log("Serving HTTP on 127.0.0.1 port 54321 (http://127.0.0.1:54321/) ...");'), kill);
+    const upSrv = await serveTree(scratch, 8000, standIn('process.stdout.write("Serving HTTP on 127.0.0.1 po"); setTimeout(() => console.log("rt 54321 (http://127.0.0.1:54321/) ..."), 150);'), kill);
     const upPid = await pidOf();
     let upLive = true;
     try { process.kill(upPid, 0); } catch { upLive = false; }
+    const upAlive = upSrv.alive();
     upSrv.stop();
-    yes('a server that says its port comes back with that port, and its stop ends it', upSrv.port === 54321 && upPid > 0 && upLive && (await gone(upPid)), `port ${upSrv.port}, pid ${upPid}, ${upLive ? 'running' : 'not running'} before the stop`);
+    yes('a server that says its port, in two pieces, comes back with that port, running, and its stop ends it', upSrv.port === 54321 && upPid > 0 && upLive && upAlive === true && (await gone(upPid)), `port ${upSrv.port}, pid ${upPid}, ${upLive ? 'running' : 'not running'} before the stop`);
+    fs.rmSync(pidFile, { force: true });
+    const quits = [];
+    const quitter = await serveTree(scratch, 8000, standIn('console.log("Serving HTTP on 127.0.0.1 port 54322 (http://127.0.0.1:54322/) ..."); setTimeout(() => process.exit(0), 200);'), (pid) => quits.push(pid));
+    let quitAlive = quitter.alive();
+    for (let i = 0; i < 30 && quitAlive; i++) { await tick(100); quitAlive = quitter.alive(); }
+    quitter.stop();
+    yes('a server that ends by itself after its port reads as ended, and its stop kills nothing', quitAlive === false && quits.length === 0, `alive ${quitAlive}, stopped ${quits.length} times`);
     fs.rmSync(pidFile, { force: true });
     const lateT0 = Date.now();
     const late = await serveTree(scratch, 500, standIn(''), kill).then(() => 'came up', (e) => e);
@@ -962,18 +1014,19 @@ async function selftest() {
     const genv = { ...process.env, GIT_CONFIG_GLOBAL: path.join(scratch, 'gitconfig'), GIT_CONFIG_NOSYSTEM: '1' };
     const g = (...a) => run('git', ['-c', 'user.name=selftest', '-c', 'user.email=selftest@example.invalid', ...a], { cwd: repo, env: genv });
     const put = (f, text) => fs.writeFileSync(path.join(repo, f), text);
-    put('a.txt', 'one\n'); put('d.txt', 'd\n'); put('.gitignore', 'ignored/\n'); put('sub/c.txt', 'c\n');
+    put('a.txt', 'one\n'); put('d.txt', 'd\n'); put('r.txt', 'r\n'); put('.gitignore', 'ignored/\n'); put('sub/c.txt', 'c\n');
     const inited = g('init', '-q').ok;
     const noCommit = treeDiff(repo);
-    const made = inited && g('add', 'a.txt', 'd.txt', '.gitignore', 'sub/c.txt').ok && g('commit', '-q', '-m', 'one').ok;
+    const made = inited && g('add', 'a.txt', 'd.txt', 'r.txt', '.gitignore', 'sub/c.txt').ok && g('commit', '-q', '-m', 'one').ok;
     const clean = treeDiff(repo);
     put('a.txt', 'two\n'); fs.rmSync(path.join(repo, 'd.txt')); put('b b.txt', 'b\n'); fs.mkdirSync(path.join(repo, 'ignored')); put('ignored/x.txt', 'x\n'); fs.mkdirSync(path.join(repo, 'newdir')); put('newdir/n.txt', 'n\n');
+    const moved = g('mv', 'r.txt', 'r2.txt').ok;
     const dirtyD = treeDiff(repo), fromSub = treeDiff(path.join(repo, 'sub')), noTree = treeDiff(path.join(repo, '.git'));
     const unstaged = treeState(repo, dirtyD), staged = g('add', 'b b.txt').ok && treeState(repo);
     put('.git/index', 'not an index');
     const broken = treeDiff(repo);
     yes('git lists nothing for a clean checkout, and gives its head and top', made && !!clean && /^[0-9a-f]{12}$/.test(clean.head) && norm(clean.root) === real(repo) && same(clean.paths, []), J(clean));
-    yes('it lists a changed, a deleted and an untracked file, one in a folder git does not track, a space in a name kept, and nothing git ignores', !!dirtyD && same(dirtyD.paths, ['a.txt', 'b b.txt', 'd.txt', 'newdir/n.txt']) && dirtyD.head === clean.head, J(dirtyD));
+    yes('it lists a changed, a deleted and an untracked file, one in a folder git does not track, both names of a staged rename, a space in a name kept, and nothing git ignores', moved && !!dirtyD && same(dirtyD.paths, ['a.txt', 'b b.txt', 'd.txt', 'newdir/n.txt', 'r.txt', 'r2.txt']) && dirtyD.head === clean.head, J(dirtyD));
     yes('from a folder below the top, the paths and the top are the checkout\'s', !!fromSub && same(fromSub.paths, dirtyD.paths) && norm(fromSub.root) === real(repo), J(fromSub));
     yes('a new file staged and not committed leaves the state as it was: the server serves the same files', !!unstaged && unstaged === staged, J([unstaged, staged]));
     yes('git that cannot say (no commit yet, no working tree, an index it cannot read) gives nothing, and so no state', noCommit === null && noTree === null && broken === null && treeState(path.join(repo, '.git')) === null, J({ noCommit, noTree, broken }));
@@ -999,7 +1052,7 @@ async function selftest() {
     const okResult = () => ({ checks: [{ name: 'it works', ok: true, detail: '' }], errors: [], timedOut: false });
     const pairRun = async (o = {}) => {
       const log = [], printed = [], seen = [];
-      let clock = 0, held = false, drives = 0, frees = 0;
+      let clock = 0, held = false, drives = 0, frees = 0, states = 0;
       const answers = [...(o.lock || [])];
       globalThis.labsWtDrive = async (scenario, d) => {
         log.push(`drive ${await scenario()} ${d.width}x${d.height}${held ? '' : ' OUTSIDE THE LOCK'}`);
@@ -1014,8 +1067,9 @@ async function selftest() {
       kept.length = 0;
       const listeners = process.listenerCount('exit');
       const code = await cmdDrivePairs(o.lab || name, { tree: T1, out: path.join(scratch, o.outDir || 'out'), scenario: 'a', widths: '1440x900', ...o.opts }, {
-        state: (tr) => { log.push(`state ${path.basename(tr)}`); clock += o.stateTakes || 0; return o.key === undefined ? 'k1' : o.key; },
-        serve: async (tr) => { log.push(`serve ${path.basename(tr)}`); clock += o.setup || 0; if (o.serveFails) throw expected('the server did not come up'); return { port: 4242, stop: () => log.push('stop') }; },
+        state: (tr) => { log.push(`state ${path.basename(tr)}`); clock += o.stateTakes || 0; const k = typeof o.key === 'function' ? o.key(states++) : o.key; return k === undefined ? 'k1' : k; },
+        serve: async (tr) => { log.push(`serve ${path.basename(tr)}`); clock += o.setup || 0; if (o.serveFails) throw expected('the server did not come up'); return { port: 4242, stop: () => log.push('stop'), alive: () => !o.serverEnds || drives < o.serverEnds }; },
+        sleep: async (ms) => { log.push(`sleep ${ms}`); clock += ms; },
         free: () => (typeof o.free === 'function' ? o.free(frees++) : (o.free ?? 8 * 2 ** 30)),
         now: () => clock,
         shots: path.join(scratch, 'shots'),
@@ -1030,7 +1084,8 @@ async function selftest() {
     const drove = (x) => x.log.filter((l) => l.startsWith('drive '));
 
     let x = await pairRun({ outDir: 'o1', opts: { scenario: 'a,b', widths: '1440x900,390x844' } });
-    yes('every scenario at every size is driven, in order, each inside the lock and given back after it, between one server\'s start and stop', x.code === 0 && same(x.log, ['state t1', 'serve t1', 'hold 0', 'drive a 1440x900', 'given back', 'hold 0', 'drive a 390x844', 'given back', 'hold 0', 'drive b 1440x900', 'given back', 'hold 0', 'drive b 390x844', 'given back', 'stop']), `exit ${x.code} ${J(x.log)}`);
+    yes('every scenario at every size is driven, in order, each inside the lock and given back after it, between one server\'s start and stop', x.code === 0 && same(x.log, ['state t1', 'serve t1', 'hold 0', 'drive a 1440x900', 'given back', 'state t1', 'sleep 600', 'hold 0', 'drive a 390x844', 'given back', 'state t1', 'sleep 600', 'hold 0', 'drive b 1440x900', 'given back', 'state t1', 'sleep 600', 'hold 0', 'drive b 390x844', 'given back', 'state t1', 'stop']), `exit ${x.code} ${J(x.log)}`);
+    yes('between two pairs the lock is left free for 600 ms, and the state is read again after each drive', x.log.filter((l) => l === 'sleep 600').length === 3 && x.log.indexOf('sleep 600') > x.log.indexOf('drive a 1440x900') && x.log.filter((l) => l === 'state t1').length === 5, J(x.log));
     const o1 = norm(path.join(scratch, 'o1'));
     yes('each drive is told the server, a folder of its own and the time limit', same(x.seen.map((s) => [s.base, s.out, s.timeoutMs]), [['http://127.0.0.1:4242', `${o1}/a-1440x900`, 300000], ['http://127.0.0.1:4242', `${o1}/a-390x844`, 300000], ['http://127.0.0.1:4242', `${o1}/b-1440x900`, 300000], ['http://127.0.0.1:4242', `${o1}/b-390x844`, 300000]]), J(x.seen));
     let rows = rowsIn('o1');
@@ -1047,8 +1102,9 @@ async function selftest() {
     x = await pairRun({ outDir: 'o1', key: 'k2', opts: { scenario: 'a,b', widths: '1440x900,390x844' } });
     yes('a scenario whose file changed is driven again, the other is not', x.code === 0 && same(drove(x), ['drive b 1440x900', 'drive b 390x844']), J(x.log));
 
-    x = await pairRun({ outDir: 'o2', opts: { scenario: 'a,b,c', timeout: '100', budget: '300' }, takes: (k) => (k === 0 ? 200000 : 1), lock: [false, true, false, true] });
-    yes('a later pair starts when the time so far and one drive\'s limit just fit the budget, and not 1 ms past it: exit code 3', x.code === 3 && same(drove(x), ['drive a 1440x900', 'drive b 1440x900']) && x.log[x.log.length - 1] === 'stop' && x.printed.includes('---- c 1440x900: no result yet') && last(x) === '1 of 3 pairs have no result for k1 yet (the 300 s budget has no room left for a drive of up to 100 s): run the same command again', `exit ${x.code} ${J(x.log)} ${last(x)}`);
+    x = await pairRun({ outDir: 'o2', opts: { scenario: 'a,b,c', timeout: '100', budget: '300' }, takes: (k) => (k === 0 ? 199400 : 1), lock: [false, true, false, true] });
+    const past = await pairRun({ outDir: 'o2b', opts: { scenario: 'a,b', timeout: '100', budget: '300' }, takes: 199401 });
+    yes('a later pair starts when, after the 600 ms gap, one drive\'s limit just fits the budget, and not 1 ms past it: exit code 3', x.code === 3 && same(drove(x), ['drive a 1440x900', 'drive b 1440x900']) && past.code === 3 && same(drove(past), ['drive a 1440x900']) && x.log[x.log.length - 1] === 'stop' && x.printed.includes('---- c 1440x900: no result yet') && last(x) === '1 of 3 pairs have no result for k1 yet (the 300 s budget has no room left for a drive of up to 100 s): run the same command again', `exit ${x.code} ${J(x.log)} ${last(x)} | ${past.code} ${J(drove(past))}`);
     yes('the lock is waited for as long as the budget leaves for a drive to start, and no longer', same(x.log.filter((l) => l.startsWith('hold')), ['hold 0', 'hold 200000', 'hold 0', 'hold 0']), J(x.log));
     x = await pairRun({ outDir: 'o2', opts: { scenario: 'a,b,c', timeout: '100', budget: '300' } });
     yes('the same command run again drives only the pair that had no result', x.code === 0 && same(drove(x), ['drive c 1440x900']), `exit ${x.code} ${J(x.log)}`);
@@ -1056,12 +1112,26 @@ async function selftest() {
     yes('the first pair starts though the setup took its first ms, waits for no lock it cannot fit, and the next does not start', x.code === 3 && same(drove(x), ['drive a 1440x900']) && same(x.log.filter((l) => l.startsWith('hold')), ['hold 0', 'hold 0']), J(x.log));
 
     x = await pairRun({ outDir: 'o4', lock: [false, false] });
-    yes('a lock that stays held for the 240 s the budget leaves starts no drive, stops the server, says why, exit code 3', x.code === 3 && same(x.log, ['state t1', 'serve t1', 'hold 0', 'hold 240000', 'stop']) && x.printed.includes("waiting up to 240 s for Chrome: another drive or shot holds the machine's lock") && last(x).endsWith("(Chrome was not free within 240 s: another drive or shot holds the machine's lock): run the same command again"), `exit ${x.code} ${J(x.log)} ${last(x)}`);
+    yes('a lock that stays held for the 240 s the budget leaves: nothing driven, the server stopped, the reason said, exit code 4 (wait)', x.code === 4 && same(x.log, ['state t1', 'serve t1', 'hold 0', 'hold 240000', 'stop']) && x.printed.includes("waiting up to 240 s for Chrome: another drive or shot holds the machine's lock") && last(x) === "nothing was driven: Chrome was not free within 240 s: another drive or shot holds the machine's lock; 1 of 1 pairs have no result for k1: wait, then run the same command again", `exit ${x.code} ${J(x.log)} ${last(x)}`);
+    const loop = [];
+    for (let k = 0; k < 3; k++) loop.push((await pairRun({ outDir: 'o4b', opts: { timeout: '100', budget: '100' }, lock: [false, false] })).code);
+    yes('a budget equal to the timeout leaves no wait for the lock: run after run drives nothing, and each ends with 4, never 3', same(loop, [4, 4, 4]), J(loop));
     const floorRuns = [];
     for (const [free, gb] of [[2 * 2 ** 30, undefined], [2 * 2 ** 30 - 1, undefined], [3 * 2 ** 30, '3'], [3 * 2 ** 30 - 1, '3'], [0, '0'], [0, undefined]]) floorRuns.push(await pairRun({ outDir: `o5-${floorRuns.length}`, free, opts: gb === undefined ? {} : { minFreeGb: gb } }));
-    yes('a drive starts with free memory at the floor (2 GB, or --min-free-gb), and not 1 byte under it: exit code 3, the server stopped', same(floorRuns.map((r) => [r.code, drove(r).length, r.log[r.log.length - 1]]), [[0, 1, 'stop'], [3, 0, 'stop'], [0, 1, 'stop'], [3, 0, 'stop'], [0, 1, 'stop'], [3, 0, 'stop']]) && last(floorRuns[1]) === '1 of 1 pairs have no result for k1 yet (2.00 GB free, under the floor of 2 GB): run the same command again', J(floorRuns.map((r) => [r.code, r.log])) + last(floorRuns[1]));
-    x = await pairRun({ outDir: 'o6', opts: { scenario: 'a,b,c' }, free: (k) => (k === 1 ? 1 : 8 * 2 ** 30) });
-    yes('free memory is read again before each pair, and under the floor no later pair starts', x.code === 3 && same(drove(x), ['drive a 1440x900']), J(x.log));
+    const naps = (r) => r.log.filter((l) => l === 'sleep 10000').length;
+    yes('a drive starts with free memory at the floor (2 GB, or --min-free-gb); 1 byte under it, memory is read every 10 s until the latest start, nothing is driven, no lock is taken: exit code 4, the server stopped', same(floorRuns.map((r) => [r.code, drove(r).length, naps(r), r.log.includes('hold 0'), r.log[r.log.length - 1]]), [[0, 1, 0, true, 'stop'], [4, 0, 24, false, 'stop'], [0, 1, 0, true, 'stop'], [4, 0, 24, false, 'stop'], [0, 1, 0, true, 'stop'], [4, 0, 24, false, 'stop']]) && last(floorRuns[1]) === 'nothing was driven: 2.00 GB free, under the floor of 2 GB; 1 of 1 pairs have no result for k1: wait, then run the same command again', J(floorRuns.map((r) => [r.code, naps(r)])) + last(floorRuns[1]));
+    x = await pairRun({ outDir: 'o5b', free: 1, stateTakes: 1 });
+    yes('a look at memory starts only when it ends by the latest start: 1 ms later, one fewer', x.code === 4 && naps(x) === 23, `${x.code} ${naps(x)}`);
+    x = await pairRun({ outDir: 'o5c', free: (k) => (k < 2 ? 1 : 8 * 2 ** 30) });
+    yes('memory that comes back within the budget is waited for, and the pair is driven', x.code === 0 && same(x.log.slice(2, 6), ['sleep 10000', 'sleep 10000', 'hold 0', 'drive a 1440x900']), J(x.log));
+    x = await pairRun({ outDir: 'o5d', opts: { scenario: 'a,b' }, free: (k) => (k === 1 ? 2 * 2 ** 30 - 1 : 8 * 2 ** 30) });
+    yes('memory is read again with the lock held, and 1 byte under the floor then nothing is driven, the lock is given back and no later pair starts', x.code === 4 && same(x.log, ['state t1', 'serve t1', 'hold 0', 'given back', 'stop']), J(x.log));
+    x = await pairRun({ outDir: 'o5f', free: (k) => (k === 1 ? 0 : 8 * 2 ** 30) });
+    yes('no free memory at all with the lock held is under the floor: nothing driven, exit code 4', x.code === 4 && drove(x).length === 0 && same(x.log.slice(-2), ['given back', 'stop']), `${x.code} ${J(x.log)}`);
+    x = await pairRun({ outDir: 'o5e', opts: { scenario: 'a,b' }, free: (k) => (k <= 24 ? 1 : 8 * 2 ** 30) });
+    yes('memory short until the latest start: no later pair starts, though memory came back by then', x.code === 4 && drove(x).length === 0, `${x.code} ${J(drove(x))}`);
+    x = await pairRun({ outDir: 'o6', opts: { scenario: 'a,b,c', timeout: '100', budget: '300' }, free: (k) => (k >= 2 ? 1 : 8 * 2 ** 30) });
+    yes('free memory is read again before each pair; under the floor no later pair starts, and a run that kept one ends with 3', x.code === 3 && same(drove(x), ['drive a 1440x900']), J(x.log));
     x = await pairRun({ outDir: 'o16', opts: { timeout: '100', budget: '300' }, stateTakes: 7, lock: [false, true] });
     yes('the budget counts from the run\'s start, the time spent reading the tree\'s state included', x.code === 0 && same(x.log.filter((l) => l.startsWith('hold')), ['hold 0', 'hold 199993']), J(x.log));
 
@@ -1084,7 +1154,7 @@ async function selftest() {
     yes('a drive that ran no check failed, and so did one stopped at its limit with every check passed', same(odd, [[1, 'FAIL', true], [1, 'FAIL', true]]), J(odd));
     x = await pairRun({ outDir: 'o11', result: () => new Error('the drive broke') });
     rows = rowsIn('o11');
-    yes('a drive that throws is a failed pair with the error, the lock given back and the server stopped', x.code === 1 && rows.length === 1 && rows[0][4] === 'FAIL' && x.printed.some((l) => l.startsWith('  FAIL the drive ran to its end :: Error: the drive broke') && /\n\s+at /.test(l)) && same(x.log.slice(-3), ['drive a 1440x900', 'given back', 'stop']), `exit ${x.code} ${J(x.log)}`);
+    yes('a drive that throws is a failed pair with the error, the lock given back and the server stopped', x.code === 1 && rows.length === 1 && rows[0][4] === 'FAIL' && x.printed.some((l) => l.startsWith('  FAIL the drive ran to its end :: Error: the drive broke') && /\n\s+at /.test(l)) && same(x.log.slice(-4), ['drive a 1440x900', 'given back', 'state t1', 'stop']), `exit ${x.code} ${J(x.log)}`);
 
     x = await pairRun({ outDir: 'o12', opts: { tree: path.join(scratch, 'trees', 'none') } });
     yes('a tree that is not there is refused with exit code 2, before its state is read', x.code === 2 && same(x.kept, [`no tree at ${norm(path.join(scratch, 'trees', 'none'))}`]) && x.log.length === 0, `exit ${x.code} ${J(x.kept)}`);
@@ -1111,6 +1181,20 @@ async function selftest() {
     yes('an out folder inside the tree is refused with exit code 2 and the reason, and one beside it is taken', same(outs.map((r) => r.code), [2, 0]) && outs[0].kept[0] === `--out ${path.join(T1, 'x')} is inside the tree: what a drive writes there would change the tree's state`, J(outs.map((r) => [r.code, r.kept])));
     const twice = [await pairRun({ outDir: 'o15', opts: { scenario: 'a,a' } }), await pairRun({ outDir: 'o15', opts: { widths: '390x844,390x844' } }), await pairRun({ outDir: 'o15', opts: { scenario: `a,${path.join(T1, 'tools', 'drives', 'b.mjs')}` } })];
     yes('a scenario at a size asked for twice is refused with exit code 2, and two that differ are taken', same(twice.map((r) => r.code), [2, 2, 0]), J(twice.map((r) => [r.code, r.kept])));
+
+    x = await pairRun({ lab: 'nosuch' });
+    yes('an unknown lab is refused with exit code 2 and the reason, before anything is read', x.code === 2 && same(x.kept, ['unknown lab "nosuch". Run: node tools/labs-wt.mjs ports']) && x.log.length === 0, `exit ${x.code} ${J(x.kept)}`);
+    x = await pairRun({ lab: LABS[0].hubId, outDir: 'o17', opts: { tree: undefined, scenario: undefined } });
+    yes('a lab named by its hub id drives that lab\'s worktree and scenario', x.code === 0 && same(drove(x), [`drive ${name} 1440x900`]), `exit ${x.code} ${J(x.log)}`);
+    x = await pairRun({ outDir: 'o18', opts: { scenario: 'a,b' }, serverEnds: 1 });
+    yes('a server that ends during a drive: nothing kept for that pair, the run stops and says so, no kill for a server already gone, exit code 1', x.code === 1 && rowsIn('o18').length === 0 && same(drove(x), ['drive a 1440x900']) && x.printed.includes('the server this drive started on port 4242 had ended by itself') && last(x) === `the run broke: the server for the tree ended during a 1440x900, so nothing is kept for it; results in ${path.join(scratch, 'o18', 'summary.tsv')}`, `exit ${x.code} ${J(x.log)} ${last(x)}`);
+    x = await pairRun({ outDir: 'o19', opts: { scenario: 'a,b' }, key: (k) => (k === 0 ? 'k1' : 'k9') });
+    yes('a tree whose state changed during a drive: nothing kept for that pair, the run stops and says so, exit code 1', x.code === 1 && rowsIn('o19').length === 0 && same(drove(x), ['drive a 1440x900']) && last(x) === `the run broke: the tree changed during a 1440x900 (its state was k1, and is k9), so nothing is kept for it; results in ${path.join(scratch, 'o19', 'summary.tsv')}`, `exit ${x.code} ${last(x)}`);
+    fs.mkdirSync(path.join(scratch, 'o20', 'a-1440x900.txt'), { recursive: true });
+    x = await pairRun({ outDir: 'o20' });
+    yes('an error nobody expected with the lock held is no busy lock: the lock is given back, the server stopped, exit code 1 with where it came from', x.code === 1 && /EISDIR/.test(x.kept[0] || '') && /\n\s+at /.test(x.kept[0] || '') && same(x.log, ['state t1', 'serve t1', 'hold 0', 'given back', 'stop']), `exit ${x.code} ${J(x.log)} ${(x.kept[0] || '').slice(0, 80)}`);
+    x = await pairRun({ outDir: 'o21', result: () => ({ checks: [{ name: 'it works', ok: true }], errors: ['error: a message the drive did not hold against the page'], timedOut: false }) });
+    yes('console errors fail a pair only through the checks of its drive.mjs', x.code === 0 && rowsIn('o21').map((c) => c[4]).join() === 'ok', `exit ${x.code}`);
 
     fs.mkdirSync(path.join(scratch, 'rows'), { recursive: true });
     const rowFile = path.join(scratch, 'rows', 'summary.tsv');

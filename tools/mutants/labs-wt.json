@@ -490,16 +490,6 @@
     "to": "s`), ms * 20);"
   },
   {
-    "name": "server: one that ended is stopped again",
-    "from": "child.on('exit', (code) => refuse(",
-    "to": "child.on('exit', (code) => fail("
-  },
-  {
-    "name": "server: one that ended before it said a port is waited for",
-    "from": "    child.on('exit', (code) => refuse(`it ended with exit code ${code}`));",
-    "to": "    void 0;"
-  },
-  {
     "name": "server: one that cannot start is waited for",
     "from": "child.on('error', (e) => fail(e.message));",
     "to": "child.on('error', () => {});"
@@ -508,11 +498,6 @@
     "name": "server: the first line with a port is not taken",
     "from": "      if (!port) return;",
     "to": "      if (port) return;"
-  },
-  {
-    "name": "server: its stop ends nothing",
-    "from": "const stop = () => end(child.pid);",
-    "to": "const stop = () => {};"
   },
   {
     "name": "out: a folder named ..foo in the tree is outside it",
@@ -715,11 +700,6 @@
     "to": "if (typeof s === 'number') throw usage("
   },
   {
-    "name": "pairs: the budget counts from after the state is read",
-    "from": "const deadline = t0 + plan.budget;",
-    "to": "const deadline = t.now() + plan.budget;"
-  },
-  {
     "name": "pairs: the server is left running when the process exits inside a drive",
     "from": "process.on('exit', stopAtExit);",
     "to": "void 0;"
@@ -728,46 +708,6 @@
     "name": "pairs: every run leaves an exit listener behind",
     "from": "process.off('exit', stopAtExit);",
     "to": "void 0;"
-  },
-  {
-    "name": "pairs: the server is left running after the run",
-    "from": "      srv.stop();\n      t.say(`stopped the server this drive started",
-    "to": "      t.say(`stopped the server this drive started"
-  },
-  {
-    "name": "pairs: nothing is said about the server it stopped",
-    "from": "t.say(`stopped the server this drive started on port ${srv.port}`);",
-    "to": "void 0;"
-  },
-  {
-    "name": "budget: the first pair waits for room in the budget too",
-    "from": "if (ran && now + plan.each > deadline) {",
-    "to": "if (now + plan.each > deadline) {"
-  },
-  {
-    "name": "budget: a pair that just fits the budget is not started",
-    "from": "if (ran && now + plan.each > deadline) {",
-    "to": "if (ran && now + plan.each >= deadline) {"
-  },
-  {
-    "name": "budget: a pair 1 ms past the budget is started",
-    "from": "if (ran && now + plan.each > deadline) {",
-    "to": "if (ran && now + plan.each > deadline + 1) {"
-  },
-  {
-    "name": "lock: the drive runs outside the lock",
-    "from": "await withChromeLock(async () => {\n            const free = t.free();",
-    "to": "await ((fn) => fn())(async () => {\n            const free = t.free();"
-  },
-  {
-    "name": "lock: the lock is waited for 20 minutes, not what the budget leaves",
-    "from": "}, { waitMs: Math.max(0, deadline - plan.each - now), say: t.say, hold: t.hold });",
-    "to": "}, { say: t.say, hold: t.hold });"
-  },
-  {
-    "name": "lock: a wait the budget has no room for is negative",
-    "from": "Math.max(0, deadline - plan.each - now)",
-    "to": "(deadline - plan.each - now)"
   },
   {
     "name": "lock: the lock taken is not the one the run was handed",
@@ -783,36 +723,6 @@
     "name": "lock: a lock still held ends the run as an error",
     "from": "} catch (e) { if (!e.expected) throw e; why = e.message; break; }",
     "to": "} catch (e) { throw e; }"
-  },
-  {
-    "name": "memory: free memory is not read",
-    "from": "if (free < plan.floor) { low = free; return; }",
-    "to": "if (false) { low = free; return; }"
-  },
-  {
-    "name": "memory: a drive does not start at the floor",
-    "from": "if (free < plan.floor) { low = free; return; }",
-    "to": "if (free <= plan.floor) { low = free; return; }"
-  },
-  {
-    "name": "memory: a drive starts 1 byte under the floor",
-    "from": "if (free < plan.floor) { low = free; return; }",
-    "to": "if (free < plan.floor - 1) { low = free; return; }"
-  },
-  {
-    "name": "memory: under the floor the drive still starts",
-    "from": "{ low = free; return; }",
-    "to": "{ low = free; }"
-  },
-  {
-    "name": "memory: no free memory at all is not under the floor",
-    "from": "if (low !== null) {",
-    "to": "if (low > 0) {"
-  },
-  {
-    "name": "memory: under the floor the later pairs still start",
-    "from": "under the floor of ${plan.floor / 2 ** 30} GB`; break; }",
-    "to": "under the floor of ${plan.floor / 2 ** 30} GB`; continue; }"
   },
   {
     "name": "drive: every pair's pictures go to one folder",
@@ -873,11 +783,6 @@
     "name": "status: a failed check passes",
     "from": "const status = r.timedOut || !r.checks.length || bad.length ? 'FAIL' : 'ok';",
     "to": "const status = r.timedOut || !r.checks.length ? 'FAIL' : 'ok';"
-  },
-  {
-    "name": "pairs: a drive is not counted",
-    "from": "        ran++;",
-    "to": "        void 0;"
   },
   {
     "name": "pairs: a result is not kept in the summary",
@@ -950,13 +855,268 @@
     "to": "${''}"
   },
   {
-    "name": "pairs: a run that drove nothing does not say so",
-    "from": "${ran ? '' : ', none driven now: each had passed before'}",
-    "to": "${''}"
-  },
-  {
     "name": "selftest: the part that exits inside a drive does not run",
     "from": "if (what === 'pairs-exit') {",
     "to": "if (what === 'pairs-exit-not') {"
+  },
+  {
+    "name": "server: one that ended is killed when stopped",
+    "from": "const stop = () => { if (!ended) end(child.pid); };",
+    "to": "const stop = () => { end(child.pid); };"
+  },
+  {
+    "name": "server: one that ended before it said a port is waited for",
+    "from": "    child.on('exit', (code) => { ended = true; refuse(`it ended with exit code ${code}`); });",
+    "to": "    child.on('exit', (code) => { ended = true; });"
+  },
+  {
+    "name": "server: one that ended reads as running",
+    "from": "child.on('exit', (code) => { ended = true; refuse(",
+    "to": "child.on('exit', (code) => { refuse("
+  },
+  {
+    "name": "server: it always reads as running",
+    "from": "resolve({ port, stop, alive: () => !ended });",
+    "to": "resolve({ port, stop, alive: () => true });"
+  },
+  {
+    "name": "server: its stop ends nothing",
+    "from": "const stop = () => { if (!ended) end(child.pid); };",
+    "to": "const stop = () => {};"
+  },
+  {
+    "name": "pairs: the budget counts from after the state is read",
+    "from": "const latest = t0 + plan.budget - plan.each;",
+    "to": "const latest = t.now() + plan.budget - plan.each;"
+  },
+  {
+    "name": "pairs: the server is left running after the run",
+    "from": "      const running = srv.alive();\n      srv.stop();",
+    "to": "      const running = srv.alive();"
+  },
+  {
+    "name": "pairs: nothing is said about the server it stopped",
+    "from": "t.say(running ? `stopped the server this drive started on port ${srv.port}` : `the server this drive started on port ${srv.port} had ended by itself`);",
+    "to": "void 0;"
+  },
+  {
+    "name": "pairs: a server that ended by itself is said to be stopped",
+    "from": "      const running = srv.alive();",
+    "to": "      const running = true;"
+  },
+  {
+    "name": "budget: the first pair waits for room in the budget too",
+    "from": "if (kept && t.now() > latest) {",
+    "to": "if (t.now() > latest) {"
+  },
+  {
+    "name": "budget: a pair that just fits the budget is not started",
+    "from": "if (kept && t.now() > latest) {",
+    "to": "if (kept && t.now() >= latest) {"
+  },
+  {
+    "name": "budget: a pair 1 ms past the budget is started",
+    "from": "if (kept && t.now() > latest) {",
+    "to": "if (kept && t.now() > latest + 1) {"
+  },
+  {
+    "name": "lock: the drive runs outside the lock",
+    "from": "await withChromeLock(async () => {\n            const freeNow = t.free();",
+    "to": "await ((fn) => fn())(async () => {\n            const freeNow = t.free();"
+  },
+  {
+    "name": "lock: the lock is waited for 20 minutes, not what the budget leaves",
+    "from": "}, { waitMs: Math.max(0, latest - t.now()), say: t.say, hold: t.hold });",
+    "to": "}, { say: t.say, hold: t.hold });"
+  },
+  {
+    "name": "lock: a wait the budget has no room for is negative",
+    "from": "Math.max(0, latest - t.now())",
+    "to": "(latest - t.now())"
+  },
+  {
+    "name": "memory: memory is not read again with the lock held",
+    "from": "if (freeNow < plan.floor) { low = freeNow; return; }",
+    "to": "if (false) { low = freeNow; return; }"
+  },
+  {
+    "name": "memory: with the lock held, a drive does not start at the floor",
+    "from": "if (freeNow < plan.floor) { low = freeNow; return; }",
+    "to": "if (freeNow <= plan.floor) { low = freeNow; return; }"
+  },
+  {
+    "name": "memory: with the lock held, a drive starts 1 byte under the floor",
+    "from": "if (freeNow < plan.floor) { low = freeNow; return; }",
+    "to": "if (freeNow < plan.floor - 1) { low = freeNow; return; }"
+  },
+  {
+    "name": "memory: under the floor with the lock held the drive still starts",
+    "from": "{ low = freeNow; return; }",
+    "to": "{ low = freeNow; }"
+  },
+  {
+    "name": "memory: under the floor with the lock held the later pairs still start",
+    "from": "if (low !== null) { why = short(low); break; }",
+    "to": "if (low !== null) { why = short(low); continue; }"
+  },
+  {
+    "name": "memory: no free memory at all with the lock held is not under the floor",
+    "from": "if (low !== null) { why = short(low); break; }",
+    "to": "if (low > 0) { why = short(low); break; }"
+  },
+  {
+    "name": "memory: memory short until the latest start lets a later pair start past it",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (free < plan.floor) { why = short(free); continue; }"
+  },
+  {
+    "name": "memory: memory short is not refused before the lock",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (false) { why = short(free); break; }"
+  },
+  {
+    "name": "memory: before the lock, a drive does not start at the floor",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (free <= plan.floor) { why = short(free); break; }"
+  },
+  {
+    "name": "memory: before the lock, a drive starts 1 byte under the floor",
+    "from": "if (free < plan.floor) { why = short(free); break; }",
+    "to": "if (free < plan.floor - 1) { why = short(free); break; }"
+  },
+  {
+    "name": "memory: memory short is not waited for",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (false) {"
+  },
+  {
+    "name": "memory: memory at the floor is waited for",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free <= plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {"
+  },
+  {
+    "name": "memory: memory 1 byte short is not waited for",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free < plan.floor - 1 && t.now() + MEMORY_EVERY_MS <= latest) {"
+  },
+  {
+    "name": "memory: a look that would end at the latest start is not taken",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS < latest) {"
+  },
+  {
+    "name": "memory: a look that would end 1 ms past the latest start is taken",
+    "from": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest) {",
+    "to": "while (free < plan.floor && t.now() + MEMORY_EVERY_MS <= latest + 1) {"
+  },
+  {
+    "name": "memory: the wait never reads memory again",
+    "from": "await t.sleep(MEMORY_EVERY_MS); free = t.free(); }",
+    "to": "await t.sleep(MEMORY_EVERY_MS); }"
+  },
+  {
+    "name": "memory: memory is read every second, not every 10 s",
+    "from": "const MEMORY_EVERY_MS = 10000;",
+    "to": "const MEMORY_EVERY_MS = 1000;"
+  },
+  {
+    "name": "gap: no gap between two pairs",
+    "from": "        if (i) await t.sleep(GAP_MS);",
+    "to": "        void 0;"
+  },
+  {
+    "name": "gap: a gap before the first pair too",
+    "from": "        if (i) await t.sleep(GAP_MS);",
+    "to": "        await t.sleep(GAP_MS);"
+  },
+  {
+    "name": "gap: the gap is 60 ms",
+    "from": "const GAP_MS = 600;",
+    "to": "const GAP_MS = 60;"
+  },
+  {
+    "name": "pairs: a drive is not counted",
+    "from": "        kept++;",
+    "to": "        void 0;"
+  },
+  {
+    "name": "pairs: a run that drove nothing does not say so",
+    "from": "${kept ? '' : ', none driven now: each had passed before'}",
+    "to": "${''}"
+  },
+  {
+    "name": "pairs: a server that ended during a drive is not seen",
+    "from": "if (!srv.alive()) { why =",
+    "to": "if (false) { why ="
+  },
+  {
+    "name": "pairs: a server that ended during a drive ends the run as memory or a lock would",
+    "from": "ended during ${p.name} ${p.size}, so nothing is kept for it`; broke = true; break; }",
+    "to": "ended during ${p.name} ${p.size}, so nothing is kept for it`; break; }"
+  },
+  {
+    "name": "pairs: the state is not read again before a result is kept",
+    "from": "const keyNow = t.state(tree);",
+    "to": "const keyNow = key;"
+  },
+  {
+    "name": "pairs: a changed state is taken",
+    "from": "if (keyNow !== key) { why =",
+    "to": "if (keyNow !== keyNow) { why ="
+  },
+  {
+    "name": "pairs: a changed state ends the run as memory or a lock would",
+    "from": "and is ${keyNow}), so nothing is kept for it`; broke = true; break; }",
+    "to": "and is ${keyNow}), so nothing is kept for it`; break; }"
+  },
+  {
+    "name": "pairs: a run that broke ends as one that did not",
+    "from": "  if (broke) { t.say(",
+    "to": "  if (false) { t.say("
+  },
+  {
+    "name": "pairs: pairs left after a run that kept nothing give 3",
+    "from": "  if (left.length && kept) { t.say(",
+    "to": "  if (left.length) { t.say("
+  },
+  {
+    "name": "pairs: a run that drove nothing ends with exit code 0",
+    "from": "  if (left.length) { t.say(`nothing was driven:",
+    "to": "  if (false) { t.say(`nothing was driven:"
+  },
+  {
+    "name": "pairs: a run that drove nothing ends with exit code 3",
+    "from": ": wait, then run the same command again`); return 4; }",
+    "to": ": wait, then run the same command again`); return 3; }"
+  },
+  {
+    "name": "pairs: an unknown lab ends with exit code 1, saying nothing",
+    "from": "    if (!lab) throw usage(unknownLab(n));",
+    "to": "    if (!lab) return 1;"
+  },
+  {
+    "name": "args: a word with one dash is a lab name",
+    "from": "if (!args[i].startsWith('-')) {",
+    "to": "if (!args[i].startsWith('--')) {"
+  },
+  {
+    "name": "lab: a name's first letters find it",
+    "from": "LABS.find((l) => l.name === n || l.hubId === n)",
+    "to": "LABS.find((l) => l.name.startsWith(n) || l.hubId === n)"
+  },
+  {
+    "name": "lab: a hub id's first letters find it",
+    "from": "LABS.find((l) => l.name === n || l.hubId === n)",
+    "to": "LABS.find((l) => l.name === n || l.hubId.startsWith(n))"
+  },
+  {
+    "name": "lab: a lab is found only by name and hub id at once",
+    "from": "LABS.find((l) => l.name === n || l.hubId === n)",
+    "to": "LABS.find((l) => l.name === n && l.hubId === n)"
+  },
+  {
+    "name": "pair leaves: the wait between pairs does not wait",
+    "from": "sleep: pause,",
+    "to": "sleep: async () => {},"
   }
 ]
