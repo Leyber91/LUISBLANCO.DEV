@@ -50,6 +50,7 @@
 // the one that may hold one gold dot (the diagram, its kept world) and the two whose star's own colour it leaves out.
 
 import { standard, gold as goldRule, targets as targetRule } from '../invariants.mjs';
+import { seedRandom, buildPrograms } from './survey.mjs';
 
 const KEPT = '(document.querySelector("[data-act=log]") || { classList: { contains: () => false } }).classList.contains("kept")';
 const STAR = '(() => { const d = document.querySelector("#nums .sw-dot"); return d ? getComputedStyle(d).getPropertyValue("--star-col").trim() : ""; })()';
@@ -289,6 +290,8 @@ async function names(k, from, longest) {
 /* ---- the scenario ---- */
 export default async function shapes(p, { base, width }) {
   await p.before(`(${guard})()`);
+  await seedRandom(p);
+  await buildPrograms(p, { base });   // before any frame is judged (tools/drives/survey.mjs, ticket 2.22)
   for (const [n, e] of standard({ gold: SURVEY_GOLD, targets: { cover: SURVEY_COVER } })) p.invariant(n, e);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)
   const call = (fn, ...args) => p.ev(`(${fn})(${args.map((a) => JSON.stringify(a)).join(', ')})`);

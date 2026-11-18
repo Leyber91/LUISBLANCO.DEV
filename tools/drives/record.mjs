@@ -25,6 +25,7 @@
 
 import { standard, gold } from '../invariants.mjs';
 import { SURVEY_GOLD, SURVEY_COVER } from './shapes.mjs';
+import { seedRandom, buildPrograms } from './survey.mjs';
 
 const SKY_GOLD = { allow: ['.bp', '.los-bk', '.lamp.kept', '.tally-marks .tl-kept', '.fill.kept', '.lbr-panel'] };
 const LEGACY = 'exo:seen:v1';
@@ -82,6 +83,8 @@ function newSwitch() { const s = document.querySelector('#filters [data-act="new
 /* ---- the scenario ---- */
 export default async function record(p, { base }) {
   await p.before(`(${guard})()`);
+  await seedRandom(p);
+  await buildPrograms(p, { base });   // before any frame is judged (tools/drives/survey.mjs, ticket 2.22)
   // the lab's two rooms, the survey and the sky, each with its own gold; the hub is visited for its erase only
   const ROOM = '/\\/exomania(-survey)?\\.html$/.test(location.pathname)';
   // the survey's covers (shapes.mjs SURVEY_COVER): the loading veil is over the page until the catalogue is read, as
