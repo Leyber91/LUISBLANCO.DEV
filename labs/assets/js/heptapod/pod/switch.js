@@ -19,10 +19,15 @@
 
    This file loads nothing else: pod/inked.js and topo/inkfig.js are
    fetched only when the inked script is on (pod/main.js).
+
+   Turned on 2026-11-18 by Luis's decision ("Let's incorporate them as
+   we have them right now"), with inkfig 0.6.1's corpus run and the
+   review sheet he had: g4-pod.json records both, and what the decision
+   was. The ring script stays at ?script=ring.
    ============================================================ */
 
 export const SWITCH = Object.freeze({
-  published: false,   // the one place to turn the inked script on for everyone
+  published: true,    // the one place to turn the inked script on for everyone
 });
 
 const LOCAL = /^(127\.0\.0\.1|localhost|\[::1\])$/;
@@ -44,7 +49,7 @@ export function keysHelp(script) {
     ? 'While a ring is in the disc, W, D, S and A each keep one of its parts, the same part in every ring.'
     : 'While a ring is in the disc, W, D, S and A keep its top, right, bottom and left part.';
   return {
-    hint: `Put the focus on the chamber. Left and Right choose a thing, Enter takes it. With a thing in the hand: Up holds it up at the glass, Down holds it up far from the glass, Enter sets it down on the plate it is over, G passes it through the glass. ${keep}`,
-    label: `The pod. Beyond the glass a being stands in the dark beside a disc of fog, where it writes; on this side, a tray with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. ${keep}`,
+    hint: `Put the focus on the chamber. Left and Right choose a thing, Enter takes it. With a thing in the hand: Up holds it up at the glass, Down holds it up far from the glass, Enter sets it down where it is held, G passes it through the glass. ${keep}`,
+    label: `The pod. Beyond the glass a being stands in the dark beside a disc of fog, where it writes; on this side, a table with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. ${keep}`,
   };
 }

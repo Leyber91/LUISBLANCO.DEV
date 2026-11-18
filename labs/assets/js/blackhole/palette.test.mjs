@@ -80,7 +80,7 @@ guard('the inverse of the final pass', () => {
   ok('the diagnostic exposure is the 0.9 the two modes had', C.DIAG_EXPO === 0.9);
   ok('the integrator\'s limit is 1e-4, the shader\'s log10 |H| > -4.0', C.DRIFT_LIMIT === 1e-4 && S.shadeProgram().includes('g2.w > -4.0)'));
   ok('the physical colours are the values they had (fix_s2_brief C4: unchanged)', JSON.stringify(Object.fromEntries(Object.entries(C.PHYSICAL).map(([k, v]) => [k, v.rgb]))) === JSON.stringify({ redshiftWarm: [0.95, 0.38, 0.08], redshiftCold: [0.62, 0.76, 1.05], redshiftMid: [0.16, 0.17, 0.19], thin: [1.0, 0.58, 0.22], thinTop: [1.0, 0.92, 0.8], hotSpot: [1.0, 0.86, 0.6] }));
-  ok('the lab\'s ink constants are the values they had', JSON.stringify(C.LAB) === JSON.stringify({ stepsFloor: [0.05, 0.06, 0.08], edge: [0.62, 0.70, 0.84], skyBand: [0.62, 0.68, 0.80] }));
+  ok('the lab\'s ink constants are the values they had', JSON.stringify(C.LAB) === JSON.stringify({ stepsFloor: [0.05, 0.06, 0.08], skyBand: [0.62, 0.68, 0.80] }));
   ok('a value the tone map sends below 0 is clamped to 0', C.displayRgb([-0.005, -0.005, -0.005]).every((v) => v === 0), C.displayRgb([-0.005, -0.005, -0.005]).join(','));
   ok('just inside sRGB\'s linear part, 0.003, is 12.92 x', C.displayRgb([C.linearFor('#000000')[0]])[0] === 0);
   ok('the GLSL constant of a mark is its linear colour at the exposure given', C.glslMark('order1', C.DIAG_EXPO) === `vec3(${C.linearFor('#EAF0FB', C.DIAG_EXPO).map((v) => v.toFixed(4)).join(', ')})`, C.glslMark('order1', C.DIAG_EXPO));
@@ -104,7 +104,7 @@ guard('no gold in the render', () => {
   for (const old of ['vec3(0.85, 0.52, 0.14)', 'vec3(1.0, 0.66, 0.2)', 'vec3(0.83, 0.64, 0.30)', 'vec3(0.94, 0.78, 0.45)'])
     ok(`the gold constant ${old} is gone from the shaders`, !glsl.includes(old));
   for (const mark of ['order0', 'order1', 'order2', 'steps', 'drift']) ok(`the shaders draw ${mark} in its token at the diagnostic exposure`, glsl.includes(C.glslMark(mark, C.DIAG_EXPO)), C.glslMark(mark, C.DIAG_EXPO));
-  for (const mark of ['isco', 'annulus']) ok(`the shaders draw the ${mark} hairline in its token`, glsl.includes(C.glslMark(mark)), C.glslMark(mark));
+  ok('the shaders draw the annulus hairline in its token', glsl.includes(C.glslMark('annulus')), C.glslMark('annulus'));
   for (const [name, c] of Object.entries(C.LAB)) ok(`the lab constant ${name} is ink, not gold`, !gold(C.displayRgb(c)) && glsl.includes(C.glslConst(c)), C.displayRgb(c).join(','));
   for (const [name, p] of Object.entries(C.PHYSICAL)) ok(`the physical colour ${name} is drawn as it was`, glsl.includes(C.glslConst(p.rgb)), C.glslConst(p.rgb));
   ok('the diagnostic modes are exposed at DIAG_EXPO in main.js', /order: DIAG_EXPO, steps: DIAG_EXPO/.test(read('main.js')));

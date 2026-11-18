@@ -68,23 +68,33 @@ const LABEL = { agent: 'actor', patient: 'undergoer', recipient: 'goal' };
 const ROLE_OF = { actor: 'agent', undergoer: 'patient', goal: 'recipient' };
 const ORIGO = { k: 'origo', f: { speaker: 'far' } };
 const ANCHOR = { mode: 'decl', temp: 'unspec', evid: 'visual' };
-const EVENT_F = { aspect: 'performance', strength: 'AFF' };
-const ENTITY_F = { person: '3', num: 'sg', quant: 'def' };
+
+/* A ring's features are what the being's own word for each part says (2026-11-18, inkfig 0.6 draws them): a word
+   that names only the being is the speaker (person 1), one that names only the visitor is person 2, and any other
+   word, a thing or a party word that joins or splits the two, is the unmarked third (Benveniste's non-person, from
+   memory, to verify). An act word that names holding alone is a state (hmr.js aspect); any other act word, one that
+   joins holding with another act included, is a performance. So the figure never tells apart what the species'
+   word does not: two scenes the species writes alike stay one ring. */
+const nameOf = (id) => id.slice(id.indexOf(':') + 1).split('|')[0];
+export const personOf = (id) => (!id || !id.startsWith('party:') ? '3' : nameOf(id) === 'me' ? '1' : nameOf(id) === 'you' ? '2' : '3');
+export const aspectOf = (id) => (id && id.startsWith('act:') && nameOf(id) === 'hold' ? 'state' : 'performance');
+const eventF = (id) => ({ aspect: aspectOf(id), strength: 'AFF' });
+const entityF = (id) => ({ person: personOf(id), num: 'sg', quant: 'def' });
 
 /** The graph of a ring: ids is a species ring's { agent, pred, patient, recip } (an id or null each). */
 export function ringGraph(sp, ids) {
   const rad = radicalsOf(sp);
-  const g = { v: 'hmr-0.1', nodes: { o: ORIGO, e: { k: 'event', c: rad.get(ids.pred), f: EVENT_F } }, edges: [['o', 'anchor', 'e', ANCHOR]] };
+  const g = { v: 'hmr-0.1', nodes: { o: ORIGO, e: { k: 'event', c: rad.get(ids.pred), f: eventF(ids.pred) } }, edges: [['o', 'anchor', 'e', ANCHOR]] };
   for (const [role, key] of [['agent', 'agent'], ['patient', 'patient'], ['recipient', 'recip']]) {
     if (!ids[key]) continue;
-    g.nodes[role] = { k: 'entity', c: rad.get(ids[key]), f: ENTITY_F };
+    g.nodes[role] = { k: 'entity', c: rad.get(ids[key]), f: entityF(ids[key]) };
     g.edges.push(['e', LABEL[role], role, { inv: 'direct' }]);
   }
   return g;
 }
 /** One concept alone: one pool. */
 export function soloGraph(sp, id) {
-  return { v: 'hmr-0.1', nodes: { o: ORIGO, e: { k: 'event', c: radicalsOf(sp).get(id), f: EVENT_F } }, edges: [['o', 'anchor', 'e', ANCHOR]] };
+  return { v: 'hmr-0.1', nodes: { o: ORIGO, e: { k: 'event', c: radicalsOf(sp).get(id), f: eventF(id) } }, edges: [['o', 'anchor', 'e', ANCHOR]] };
 }
 
 /* ---------------- the figure, its distance field, its trace ---------------- */

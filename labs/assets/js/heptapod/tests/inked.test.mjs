@@ -13,9 +13,11 @@
       test fails unless labs/assets/data/heptapod/g4-pod.json records a
       corpus run of the gate on every figure the pod can write (every
       ring and every concept alone of the three species) for the
-      current inkfig version, with no pair at 0.80 or above, a median
-      under the film's own nearest-match median (0.712), and a named
-      review of the pairs from 0.65.
+      current inkfig version, with no figure at or above the film's own
+      copied-part floor on the fine grid (0.786; rule 6 as amended
+      2026-11-18), a coarse median under the film's own nearest-match
+      median (0.712), and a named review of every figure from 0.65 on
+      the coarse grid (those at 0.80 or above included).
    2. A species' concepts get distinct radical sets, the same ones on
       every call.
    3. Every ring of the three species (42 scenes and the greeting) and
@@ -79,7 +81,11 @@ if (SWITCH.published) {
   if (g) {
     ok(g.inkVersion === FIG.version, 'published: it measured the inkfig version the pod draws', `${g.inkVersion} against ${FIG.version}`);
     ok(g.figures === want, 'published: it measured every figure the pod can write', `${g.figures} of ${want}`);
-    ok(g.max < 0.8 && g.median < 0.712, 'published: no pair at 0.80 or above, the median under 0.712', `max ${g.max}, median ${g.median}`);
+    // rule 6 as amended by Luis on 2026-11-17 (the median like for like) and 2026-11-18 (two scales): a figure fails
+    // at or above the film's own copied-part floor on the fine grid (0.786); one at 0.80 or above on the coarse grid
+    // and under that floor goes to his review, as the 0.65 to 0.80 band does
+    ok(typeof g.fineMax === 'number' && g.fineMax < 0.786 && g.median < 0.712, 'published: no figure at the fine floor (0.786), the coarse median under 0.712', `fine max ${g.fineMax}, median ${g.median}`);
+    ok(Array.isArray(g.reviewed) && g.reviewed.length === g.toReview, 'published: every figure at 0.65 or above on the coarse grid was reviewed', `${(g.reviewed || []).length} of ${g.toReview}`);
     ok(typeof g.reviewedBy === 'string' && g.reviewedBy.length > 0 && /^\d{4}-\d{2}-\d{2}$/.test(g.reviewedOn || ''), 'published: the pairs from 0.65 were reviewed, by whom and when');
   }
 }

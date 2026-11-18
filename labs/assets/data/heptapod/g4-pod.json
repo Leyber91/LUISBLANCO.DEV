@@ -1,0 +1,2247 @@
+{
+  "about": "Rule 6 (research/ip.md, BAR_F G4, two scales as amended by Luis on 2026-11-18) on every figure the pod can write with the inkfig version it draws: every ring and every concept alone of the three gate species, 170 figures, each against the film's 38 logograms on the marks layer, best rotation and mirror. Coarse grid: the nearest film logogram's score; fine grid (1440 angles by 192 radii): a figure fails at or above the film's own floor for two logograms that share a drawn part (0.786). Numbers and the nearest logogram's file name only; no film image is committed. Read by tests/inked.test.mjs before the inked script may be on.",
+  "inkVersion": "inkfig-0.6.1",
+  "figures": 170,
+  "median": 0.694,
+  "filmNearestMedian": 0.712,
+  "coarseMax": 0.857,
+  "fineMax": 0.69,
+  "fineFloor": 0.786,
+  "failsAtFineFloor": 0,
+  "coarseAtOrOver080": 23,
+  "toReview": 123,
+  "reviewedBy": "Luis Blanco",
+  "reviewedOn": "2026-11-18",
+  "review": {
+    "decision": "publish the inked script with the figures as drawn by inkfig-0.6.1",
+    "hisWords": "Let's incorporate them as we have them right now, please. Because if not, we're not going to progress.",
+    "when": "2026-11-18 11:09 (Barcelona), in the heptapod road's conversation",
+    "sheet": "Every figure at 0.65 or above on the coarse grid (123), each beside its nearest film logogram, was sent to his own device on 2026-11-18 before this decision; the sheet is not committed (film images stay off the site).",
+    "whatItIs": "His decision to publish, given with the sheet in hand. It is not a pair-by-pair verdict: he named no pair as a copy and cleared none one by one. The fine grid, which fails a copy of a drawn part, passes every figure on its own (max 0.69 against 0.786)."
+  },
+  "reviewed": [
+    {
+      "figure": "0.75-1-greeting",
+      "coarse": 0.81,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.627,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring01",
+      "coarse": 0.675,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring03",
+      "coarse": 0.763,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.552,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring04",
+      "coarse": 0.736,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.53,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring05",
+      "coarse": 0.736,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.53,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring11",
+      "coarse": 0.794,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.552,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring12",
+      "coarse": 0.665,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.589,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring15",
+      "coarse": 0.768,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.574,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring16",
+      "coarse": 0.689,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.547,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring17",
+      "coarse": 0.689,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.547,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring18",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring19",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring20",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring21",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring22",
+      "coarse": 0.665,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.589,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring25",
+      "coarse": 0.661,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.515,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring26",
+      "coarse": 0.709,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.539,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring27",
+      "coarse": 0.857,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.684,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring28",
+      "coarse": 0.656,
+      "nearest": "Costello1.jpg",
+      "fine": 0.556,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring29",
+      "coarse": 0.656,
+      "nearest": "Costello1.jpg",
+      "fine": 0.556,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring30",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring31",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring32",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring33",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring35",
+      "coarse": 0.736,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.526,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring36",
+      "coarse": 0.795,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.6,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring37",
+      "coarse": 0.753,
+      "nearest": "Solve1.jpg",
+      "fine": 0.602,
+      "fineNearest": "Solve1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring38",
+      "coarse": 0.775,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.594,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring40",
+      "coarse": 0.765,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.578,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring41",
+      "coarse": 0.795,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.6,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-00",
+      "coarse": 0.781,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.631,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-01",
+      "coarse": 0.7,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-02",
+      "coarse": 0.678,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.51,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-03",
+      "coarse": 0.667,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.557,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-07",
+      "coarse": 0.659,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-08",
+      "coarse": 0.717,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.583,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-09",
+      "coarse": 0.67,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.533,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-10",
+      "coarse": 0.664,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.595,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-12",
+      "coarse": 0.718,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.553,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-13",
+      "coarse": 0.707,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.6,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-14",
+      "coarse": 0.678,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.488,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-15",
+      "coarse": 0.711,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.59,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-greeting",
+      "coarse": 0.809,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.643,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring02",
+      "coarse": 0.69,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring03",
+      "coarse": 0.69,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring12",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring13",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring14",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring15",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring18",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring19",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring22",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring23",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring28",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring29",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring32",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring33",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring36",
+      "coarse": 0.77,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring37",
+      "coarse": 0.794,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring38",
+      "coarse": 0.771,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring39",
+      "coarse": 0.77,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring40",
+      "coarse": 0.771,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring41",
+      "coarse": 0.794,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-solo-00",
+      "coarse": 0.722,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.615,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-01",
+      "coarse": 0.744,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.58,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-02",
+      "coarse": 0.732,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.541,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-05",
+      "coarse": 0.804,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.617,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-06",
+      "coarse": 0.721,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.602,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-07",
+      "coarse": 0.695,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.504,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-08",
+      "coarse": 0.793,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.641,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-09",
+      "coarse": 0.766,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.629,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-greeting",
+      "coarse": 0.826,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.656,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring00",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.525,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring01",
+      "coarse": 0.793,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring02",
+      "coarse": 0.823,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.634,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring03",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.67,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring04",
+      "coarse": 0.806,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.642,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring05",
+      "coarse": 0.701,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.581,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring06",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring07",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring08",
+      "coarse": 0.682,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring09",
+      "coarse": 0.682,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring10",
+      "coarse": 0.796,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.615,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring11",
+      "coarse": 0.705,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.58,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring12",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.525,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring13",
+      "coarse": 0.793,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring14",
+      "coarse": 0.751,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.62,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring16",
+      "coarse": 0.687,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.576,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring17",
+      "coarse": 0.829,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.69,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring18",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring19",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring20",
+      "coarse": 0.77,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.656,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring21",
+      "coarse": 0.77,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.656,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring22",
+      "coarse": 0.796,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.615,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring23",
+      "coarse": 0.705,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.58,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring24",
+      "coarse": 0.784,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.567,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring25",
+      "coarse": 0.703,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.549,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring26",
+      "coarse": 0.784,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.567,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring28",
+      "coarse": 0.778,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.613,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring29",
+      "coarse": 0.678,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.555,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring30",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring31",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring32",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring33",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring34",
+      "coarse": 0.817,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.628,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring35",
+      "coarse": 0.751,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.568,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring38",
+      "coarse": 0.71,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.579,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring39",
+      "coarse": 0.73,
+      "nearest": "Solve1.jpg",
+      "fine": 0.572,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "1-14-ring40",
+      "coarse": 0.73,
+      "nearest": "Solve1.jpg",
+      "fine": 0.572,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "1-14-ring41",
+      "coarse": 0.759,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.616,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-00",
+      "coarse": 0.764,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-01",
+      "coarse": 0.745,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.55,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-02",
+      "coarse": 0.707,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.582,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-03",
+      "coarse": 0.796,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.548,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-04",
+      "coarse": 0.679,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.502,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-05",
+      "coarse": 0.671,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.51,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-06",
+      "coarse": 0.681,
+      "nearest": "Solve1.jpg",
+      "fine": 0.523,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-07",
+      "coarse": 0.696,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.54,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-08",
+      "coarse": 0.695,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.504,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-09",
+      "coarse": 0.79,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.595,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-11",
+      "coarse": 0.804,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.617,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-12",
+      "coarse": 0.67,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.577,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-14",
+      "coarse": 0.772,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Humanity1.jpg"
+    }
+  ],
+  "rows": [
+    {
+      "figure": "0.75-1-greeting",
+      "kind": "greeting",
+      "coarse": 0.81,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.627,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring00",
+      "kind": "ring",
+      "coarse": 0.579,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.497,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring01",
+      "kind": "ring",
+      "coarse": 0.675,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring02",
+      "kind": "ring",
+      "coarse": 0.561,
+      "nearest": "Walk1.jpg",
+      "fine": 0.352,
+      "fineNearest": "Walk1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring03",
+      "kind": "ring",
+      "coarse": 0.763,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.552,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring04",
+      "kind": "ring",
+      "coarse": 0.736,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.53,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring05",
+      "kind": "ring",
+      "coarse": 0.736,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.53,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring06",
+      "kind": "ring",
+      "coarse": 0.544,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.456,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring07",
+      "kind": "ring",
+      "coarse": 0.544,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.456,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring08",
+      "kind": "ring",
+      "coarse": 0.544,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.456,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring09",
+      "kind": "ring",
+      "coarse": 0.544,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.456,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring10",
+      "kind": "ring",
+      "coarse": 0.579,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.497,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring11",
+      "kind": "ring",
+      "coarse": 0.794,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.552,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring12",
+      "kind": "ring",
+      "coarse": 0.665,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.589,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring13",
+      "kind": "ring",
+      "coarse": 0.573,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.464,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring14",
+      "kind": "ring",
+      "coarse": 0.602,
+      "nearest": "IanLouiseMustGo1.jpg",
+      "fine": 0.453,
+      "fineNearest": "IanLouiseMustGo1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring15",
+      "kind": "ring",
+      "coarse": 0.768,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.574,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring16",
+      "kind": "ring",
+      "coarse": 0.689,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.547,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring17",
+      "kind": "ring",
+      "coarse": 0.689,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.547,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring18",
+      "kind": "ring",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring19",
+      "kind": "ring",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring20",
+      "kind": "ring",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring21",
+      "kind": "ring",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.639,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring22",
+      "kind": "ring",
+      "coarse": 0.665,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.589,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring23",
+      "kind": "ring",
+      "coarse": 0.645,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.515,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring24",
+      "kind": "ring",
+      "coarse": 0.647,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring25",
+      "kind": "ring",
+      "coarse": 0.661,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.515,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring26",
+      "kind": "ring",
+      "coarse": 0.709,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.539,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring27",
+      "kind": "ring",
+      "coarse": 0.857,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.684,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring28",
+      "kind": "ring",
+      "coarse": 0.656,
+      "nearest": "Costello1.jpg",
+      "fine": 0.556,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring29",
+      "kind": "ring",
+      "coarse": 0.656,
+      "nearest": "Costello1.jpg",
+      "fine": 0.556,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring30",
+      "kind": "ring",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring31",
+      "kind": "ring",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring32",
+      "kind": "ring",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring33",
+      "kind": "ring",
+      "coarse": 0.662,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.521,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring34",
+      "kind": "ring",
+      "coarse": 0.647,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring35",
+      "kind": "ring",
+      "coarse": 0.736,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.526,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring36",
+      "kind": "ring",
+      "coarse": 0.795,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.6,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring37",
+      "kind": "ring",
+      "coarse": 0.753,
+      "nearest": "Solve1.jpg",
+      "fine": 0.602,
+      "fineNearest": "Solve1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring38",
+      "kind": "ring",
+      "coarse": 0.775,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.594,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring39",
+      "kind": "ring",
+      "coarse": 0.646,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.522,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring40",
+      "kind": "ring",
+      "coarse": 0.765,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.578,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-ring41",
+      "kind": "ring",
+      "coarse": 0.795,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.6,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-00",
+      "kind": "solo",
+      "coarse": 0.781,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.631,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-01",
+      "kind": "solo",
+      "coarse": 0.7,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-02",
+      "kind": "solo",
+      "coarse": 0.678,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.51,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-03",
+      "kind": "solo",
+      "coarse": 0.667,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.557,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-04",
+      "kind": "solo",
+      "coarse": 0.633,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.527,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-05",
+      "kind": "solo",
+      "coarse": 0.613,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.407,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-06",
+      "kind": "solo",
+      "coarse": 0.487,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.396,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-07",
+      "kind": "solo",
+      "coarse": 0.659,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-08",
+      "kind": "solo",
+      "coarse": 0.717,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.583,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-09",
+      "kind": "solo",
+      "coarse": 0.67,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.533,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-10",
+      "kind": "solo",
+      "coarse": 0.664,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.595,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-11",
+      "kind": "solo",
+      "coarse": 0.639,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.553,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-12",
+      "kind": "solo",
+      "coarse": 0.718,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.553,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-13",
+      "kind": "solo",
+      "coarse": 0.707,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.6,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-14",
+      "kind": "solo",
+      "coarse": 0.678,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.488,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "0.75-1-solo-15",
+      "kind": "solo",
+      "coarse": 0.711,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.59,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-greeting",
+      "kind": "greeting",
+      "coarse": 0.809,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.643,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring00",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring01",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring02",
+      "kind": "ring",
+      "coarse": 0.69,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring03",
+      "kind": "ring",
+      "coarse": 0.69,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring04",
+      "kind": "ring",
+      "coarse": 0.637,
+      "nearest": "Solve1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Solve1.jpg"
+    },
+    {
+      "figure": "1-10-ring05",
+      "kind": "ring",
+      "coarse": 0.637,
+      "nearest": "Solve1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Solve1.jpg"
+    },
+    {
+      "figure": "1-10-ring06",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring07",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring08",
+      "kind": "ring",
+      "coarse": 0.637,
+      "nearest": "Solve1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Solve1.jpg"
+    },
+    {
+      "figure": "1-10-ring09",
+      "kind": "ring",
+      "coarse": 0.637,
+      "nearest": "Solve1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Solve1.jpg"
+    },
+    {
+      "figure": "1-10-ring10",
+      "kind": "ring",
+      "coarse": 0.566,
+      "nearest": "LouiseHasQuestion1.jpg",
+      "fine": 0.455,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring11",
+      "kind": "ring",
+      "coarse": 0.566,
+      "nearest": "LouiseHasQuestion1.jpg",
+      "fine": 0.455,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring12",
+      "kind": "ring",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring13",
+      "kind": "ring",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring14",
+      "kind": "ring",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring15",
+      "kind": "ring",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring16",
+      "kind": "ring",
+      "coarse": 0.638,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.524,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring17",
+      "kind": "ring",
+      "coarse": 0.638,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.524,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring18",
+      "kind": "ring",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring19",
+      "kind": "ring",
+      "coarse": 0.733,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.586,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring20",
+      "kind": "ring",
+      "coarse": 0.638,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.524,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring21",
+      "kind": "ring",
+      "coarse": 0.638,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.524,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring22",
+      "kind": "ring",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring23",
+      "kind": "ring",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.529,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring24",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring25",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring26",
+      "kind": "ring",
+      "coarse": 0.63,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.52,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring27",
+      "kind": "ring",
+      "coarse": 0.63,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.52,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring28",
+      "kind": "ring",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring29",
+      "kind": "ring",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring30",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring31",
+      "kind": "ring",
+      "coarse": 0.618,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.484,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring32",
+      "kind": "ring",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring33",
+      "kind": "ring",
+      "coarse": 0.685,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.564,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring34",
+      "kind": "ring",
+      "coarse": 0.566,
+      "nearest": "LouiseHasQuestion1.jpg",
+      "fine": 0.455,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring35",
+      "kind": "ring",
+      "coarse": 0.566,
+      "nearest": "LouiseHasQuestion1.jpg",
+      "fine": 0.455,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-ring36",
+      "kind": "ring",
+      "coarse": 0.77,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring37",
+      "kind": "ring",
+      "coarse": 0.794,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring38",
+      "kind": "ring",
+      "coarse": 0.771,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring39",
+      "kind": "ring",
+      "coarse": 0.77,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring40",
+      "kind": "ring",
+      "coarse": 0.771,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-ring41",
+      "kind": "ring",
+      "coarse": 0.794,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.638,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-10-solo-00",
+      "kind": "solo",
+      "coarse": 0.722,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.615,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-01",
+      "kind": "solo",
+      "coarse": 0.744,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.58,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-02",
+      "kind": "solo",
+      "coarse": 0.732,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.541,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-03",
+      "kind": "solo",
+      "coarse": 0.633,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.527,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-04",
+      "kind": "solo",
+      "coarse": 0.517,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.466,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-05",
+      "kind": "solo",
+      "coarse": 0.804,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.617,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-06",
+      "kind": "solo",
+      "coarse": 0.721,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.602,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-07",
+      "kind": "solo",
+      "coarse": 0.695,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.504,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-08",
+      "kind": "solo",
+      "coarse": 0.793,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.641,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-10-solo-09",
+      "kind": "solo",
+      "coarse": 0.766,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.629,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-greeting",
+      "kind": "greeting",
+      "coarse": 0.826,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.656,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring00",
+      "kind": "ring",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.525,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring01",
+      "kind": "ring",
+      "coarse": 0.793,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring02",
+      "kind": "ring",
+      "coarse": 0.823,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.634,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring03",
+      "kind": "ring",
+      "coarse": 0.836,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.67,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring04",
+      "kind": "ring",
+      "coarse": 0.806,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.642,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring05",
+      "kind": "ring",
+      "coarse": 0.701,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.581,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring06",
+      "kind": "ring",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring07",
+      "kind": "ring",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring08",
+      "kind": "ring",
+      "coarse": 0.682,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring09",
+      "kind": "ring",
+      "coarse": 0.682,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring10",
+      "kind": "ring",
+      "coarse": 0.796,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.615,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring11",
+      "kind": "ring",
+      "coarse": 0.705,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.58,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring12",
+      "kind": "ring",
+      "coarse": 0.693,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.525,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring13",
+      "kind": "ring",
+      "coarse": 0.793,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring14",
+      "kind": "ring",
+      "coarse": 0.751,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.62,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring15",
+      "kind": "ring",
+      "coarse": 0.637,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.577,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring16",
+      "kind": "ring",
+      "coarse": 0.687,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.576,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring17",
+      "kind": "ring",
+      "coarse": 0.829,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.69,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring18",
+      "kind": "ring",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring19",
+      "kind": "ring",
+      "coarse": 0.809,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.673,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring20",
+      "kind": "ring",
+      "coarse": 0.77,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.656,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring21",
+      "kind": "ring",
+      "coarse": 0.77,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.656,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring22",
+      "kind": "ring",
+      "coarse": 0.796,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.615,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring23",
+      "kind": "ring",
+      "coarse": 0.705,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.58,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring24",
+      "kind": "ring",
+      "coarse": 0.784,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.567,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring25",
+      "kind": "ring",
+      "coarse": 0.703,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.549,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring26",
+      "kind": "ring",
+      "coarse": 0.784,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.567,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring27",
+      "kind": "ring",
+      "coarse": 0.644,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.526,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring28",
+      "kind": "ring",
+      "coarse": 0.778,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.613,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring29",
+      "kind": "ring",
+      "coarse": 0.678,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.555,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring30",
+      "kind": "ring",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring31",
+      "kind": "ring",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring32",
+      "kind": "ring",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring33",
+      "kind": "ring",
+      "coarse": 0.855,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.676,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring34",
+      "kind": "ring",
+      "coarse": 0.817,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.628,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-ring35",
+      "kind": "ring",
+      "coarse": 0.751,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.568,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring36",
+      "kind": "ring",
+      "coarse": 0.576,
+      "nearest": "IanLouiseMustGo1.jpg",
+      "fine": 0.468,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "1-14-ring37",
+      "kind": "ring",
+      "coarse": 0.576,
+      "nearest": "IanLouiseMustGo1.jpg",
+      "fine": 0.468,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "1-14-ring38",
+      "kind": "ring",
+      "coarse": 0.71,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.579,
+      "fineNearest": "Heptapod1.jpg"
+    },
+    {
+      "figure": "1-14-ring39",
+      "kind": "ring",
+      "coarse": 0.73,
+      "nearest": "Solve1.jpg",
+      "fine": 0.572,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "1-14-ring40",
+      "kind": "ring",
+      "coarse": 0.73,
+      "nearest": "Solve1.jpg",
+      "fine": 0.572,
+      "fineNearest": "Costello1.jpg"
+    },
+    {
+      "figure": "1-14-ring41",
+      "kind": "ring",
+      "coarse": 0.759,
+      "nearest": "Heptapod1.jpg",
+      "fine": 0.616,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-00",
+      "kind": "solo",
+      "coarse": 0.764,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.604,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-01",
+      "kind": "solo",
+      "coarse": 0.745,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.55,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-02",
+      "kind": "solo",
+      "coarse": 0.707,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.582,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-03",
+      "kind": "solo",
+      "coarse": 0.796,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.548,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-04",
+      "kind": "solo",
+      "coarse": 0.679,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.502,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-05",
+      "kind": "solo",
+      "coarse": 0.671,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.51,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-06",
+      "kind": "solo",
+      "coarse": 0.681,
+      "nearest": "Solve1.jpg",
+      "fine": 0.523,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-07",
+      "kind": "solo",
+      "coarse": 0.696,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.54,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-08",
+      "kind": "solo",
+      "coarse": 0.695,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.504,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-09",
+      "kind": "solo",
+      "coarse": 0.79,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.595,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-10",
+      "kind": "solo",
+      "coarse": 0.633,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.527,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-11",
+      "kind": "solo",
+      "coarse": 0.804,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.617,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-12",
+      "kind": "solo",
+      "coarse": 0.67,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.577,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-13",
+      "kind": "solo",
+      "coarse": 0.539,
+      "nearest": "Walk1.jpg",
+      "fine": 0.514,
+      "fineNearest": "Humanity1.jpg"
+    },
+    {
+      "figure": "1-14-solo-14",
+      "kind": "solo",
+      "coarse": 0.772,
+      "nearest": "Humanity1.jpg",
+      "fine": 0.517,
+      "fineNearest": "Humanity1.jpg"
+    }
+  ]
+}

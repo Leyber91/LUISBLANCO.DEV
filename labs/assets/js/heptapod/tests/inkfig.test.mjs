@@ -15,8 +15,10 @@
       nodes (none may fail), at 900 px:
       a. the graph: one filament drawn per node joined to a main event
          in its clause, one drop per entity that is not a main event,
-         and NODE_DEG per node of each clause, squeezed by one factor
-         at most 1; the masses partition the clauses, number at most
+         and NODE_DEG per unit of each clause's ink (inkfig 0.6, I2e: a
+         node's ink its radicals' words in the lab's code summed over 9,
+         or 1 with no concept, read here from code.js; over C_REF; times
+         E_STATE for a state), squeezed by one factor at most 1; the masses partition the clauses, number at most
          MASS_MAX, keep clauses sharing a referent together and cover at
          most MASS_ARC;
       b. the gap: the detail suite (ring.js) reads a main gap of at
@@ -54,6 +56,10 @@ import { permuteGraph } from '../topo/hmr.js';
 import { sinK, cosK, PI } from '../topo/trig.js';
 import { clausesOf, randomText } from '../topo/figure.js';
 import { INK, inkFigure } from '../topo/inkfig.js';
+import { buildCode, partition, digits, CODE_SEED } from '../topo/code.js';
+import { RADICALS } from '../topo/hmr.js';
+const RAD_SUM = (() => { const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical; return new Map(RADICALS.map((r, i) => [r, digits(rad[i][0]).reduce((a, b) => a + b, 0)])); })();
+const nodeInk = (nd) => (nd.c ? nd.c.reduce((a, r) => a + RAD_SUM.get(r), 0) / 9 : 1);
 import { ringTable } from '../detail/ring.js';
 import { filaments } from '../detail/filaments.js';
 
@@ -67,7 +73,7 @@ const DEG = PI / 180;
 {
   const banned = /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|exp|expm1|log|log1p|log2|log10|pow|hypot|cbrt|random)\b|\*\*/;
   const strip = (f) => fs.readFileSync(path.join(here, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-  for (const f of ['../topo/inkfig.js', '../topo/trig.js', '../topo/rng.js']) {
+  for (const f of ['../topo/inkfig.js', '../topo/trig.js', '../topo/rng.js', '../topo/code.js']) {
     const m = strip(f).match(banned);
     ok(!m, `G5: ${f} calls ${m ? m[0] : ''}`);
   }
@@ -104,11 +110,13 @@ for (const [i, g] of texts.entries()) {
   for (let v = 0; v < cg.n; v++) if (v !== origo && !isMain.has(v) && cg.nodes[v].k === 'entity') ent++;
   ok(f.filamentsDrawn === fil, `text ${i}: ${f.filamentsDrawn} filaments drawn, ${fil} nodes joined to a main event in its clause`);
   ok(f.bulbs === ent, `text ${i}: ${f.bulbs} drops drawn, ${ent} entities that are not main events`);
-  // spans: NODE_DEG per node of the clause, counted here from the graph, all squeezed by one factor at most 1
-  const want = mains.map((m) => { let n = 0; for (let v = 0; v < cg.n; v++) if (v !== origo && member[v] === member[m]) n++; return INK.NODE_DEG * n; }).sort((x, y) => x - y);
+  // spans (I2e): NODE_DEG per unit of the clause's ink, from the graph and the code's radical words read here, a
+  // state's gathered to E_STATE, all squeezed by one factor at most 1
+  const want = mains.map((m) => { let v = 0; for (let u = 0; u < cg.n; u++) if (u !== origo && member[u] === member[m]) v += nodeInk(cg.nodes[u]); return (INK.NODE_DEG * v * (cg.nodes[m].f.aspect === 'state' ? INK.E_STATE : 1)) / INK.C_REF; }).sort((x, y) => x - y);
   const got = f.spansDeg.slice().sort((x, y) => x - y);
   const fac = got[0] / want[0];
-  ok(fac <= 1 + 1e-9 && got.every((x, j) => Math.abs(x - want[j] * fac) < 0.02), `text ${i}: spans ${got.join(' ')} against ${want.join(' ')} times one factor at most 1 (${fac.toFixed(3)})`);
+  // spansDeg is reported to 0.01 degree, so the factor read off the first span may pass 1 by 0.005 over it
+  ok(fac <= 1 + 0.005 / want[0] + 1e-9 && got.every((x, j) => Math.abs(x - want[j] * fac) < 0.02), `text ${i}: spans ${got.join(' ')} against ${want.join(' ')} times one factor at most 1 (${fac.toFixed(3)})`);
   // I9, from the graph: the masses partition the clauses, at most MASS_MAX of them, and clauses sharing a referent
   // (a coreference link between them, counted here) share a mass
   const massOf = new Map();
@@ -219,7 +227,11 @@ ok(inRead > 0 && filDrawn - outDrawn > 0, `side: ${inRead} read inward, ${filDra
     return c;
   };
   const com = (sp, c) => { let x = 0, y = 0, M = 0; sp.forEach((s, j) => { x += s * cosK(c[j] * DEG); y += s * sinK(c[j] * DEG); M += s; }); return Math.sqrt(x * x + y * y) / M; };
-  let tried = 0, worse = 0, texts45 = 0;
+  // The figure reports spans and centres to 0.001 degree; two orders that score alike (mirror images) can then differ
+  // here by a few 1e-6 (measured 2026-11-18: 2.98e-6, once spans stopped being multiples of NODE_DEG). A misordered
+  // figure differs by about 1e-2, so 1e-5 still catches it.
+  const ROUND_TOL = 1e-5;
+  let tried = 0, worse = 0, texts45 = 0, maxEx = 0;
   // the first seeds from 950 whose texts (4 and 5 clauses in turn) lie in 4 masses: with 3, the two cyclic orders
   // are mirror images and score alike, so the rule has nothing to choose
   const picked = [];
@@ -235,13 +247,63 @@ ok(inRead > 0 && filDrawn - outDrawn > 0, `side: ${inRead} read inward, ${filDra
     const chosen = com(sp, f.massCentresDeg.map((c) => c - f.massCentresDeg[0]));
     const rest = [...Array(k).keys()].slice(1);
     const perm = (pre, left) => {
-      if (!left.length) { const o = [0, ...pre].map((j) => sp[j]); tried++; if (com(o, placeHere(o)) < chosen - 1e-6) worse++; return; }
+      if (!left.length) { const o = [0, ...pre].map((j) => sp[j]); tried++; const ex = chosen - com(o, placeHere(o)); if (ex > ROUND_TOL) { worse++; maxEx = Math.max(maxEx, ex); } return; }
       for (let q = 0; q < left.length; q++) perm([...pre, left[q]], [...left.slice(0, q), ...left.slice(q + 1)]);
     };
     perm([], rest);
     ok(sp.length >= 4 && new Set(sp).size > 1, `order text ${i}: ${sp.length} masses of spans ${sp.join(' ')}, 4 and unequal`);
   }
-  ok(texts45 === 4 && tried > 0 && worse === 0, `order: ${worse} of ${tried} cyclic orders put the centre of mass nearer the centre than the drawn one`);
+  ok(texts45 === 4 && tried > 0 && worse === 0, `order: ${worse} of ${tried} cyclic orders put the centre of mass nearer the centre than the drawn one (by at most ${maxEx.toExponential(2)})`);
+}
+
+/* 3b. the crown is the code (I2d), counted from the code's words by this test's own route: a figure grows no more
+   tendrils and stubs than its main events' words have cells of 2 and 1, and, over the texts, at least half of the
+   cells of 2 grow a tendril (some fall where a leg drains the rim) */
+{
+  const { buildCode, partition, digits, CODE_SEED } = await import('../topo/code.js');
+  const { RADICALS } = await import('../topo/hmr.js');
+  const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical;
+  const word = (r) => Array.from(digits(rad[RADICALS.indexOf(r)][0]));
+  let twos = 0, grown = 0, over = 0;
+  for (const g of texts.slice(0, 8)) {
+    const f = inkFigure(g, { S: 300 });
+    const { cg, mains } = clausesOf(g);
+    let t2 = 0, t1 = 0;
+    for (const m of mains) for (const r of cg.nodes[m].c || []) { const w = word(r); t2 += w.filter((x) => x === 2).length; t1 += w.filter((x) => x === 1).length; }
+    if (f.crownTendrils > t2 || f.crownStubs > t1) over++;
+    twos += t2; grown += f.crownTendrils;
+  }
+  ok(over === 0, `crown: ${over} of 8 texts grow more tendrils or stubs than their words have cells of 2 or 1`);
+  ok(twos > 0 && grown >= 0.5 * twos, `crown: ${grown} tendrils grown of ${twos} cells of 2 in the words`);
+}
+
+/* 5. I4 (inkfig 0.6): a thread is its node's word turned. One clause, an actor whose concept's words turn one way
+   and an undergoer whose words turn the other, at four seeds (the anchor's time feature): the turn read off each
+   traced thread (the heading of its last tenth against its first) is within 2 TREMOR and 0.15 of TURN_CELL times
+   the sum of (cell - 1) over the words, read here from code.js; and the two threads turn opposite ways. */
+{
+  const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical;
+  const turnOf = (rs) => [...rs].sort().reduce((a, r) => a + Array.from(digits(rad[RADICALS.indexOf(r)][0])).reduce((x, y) => x + y - 1, 0), 0);
+  const L = ['PLACE', 'GIVE'], Rr = ['ANIMAL', 'MOVE'];
+  const want = [INK.TURN_CELL * turnOf(L), INK.TURN_CELL * turnOf(Rr)];
+  const dir = (p, q) => Math.atan2(-(q[1] - p[1]), q[0] - p[0]);
+  const wrapR = (x) => { while (x > PI) x -= 2 * PI; while (x < -PI) x += 2 * PI; return x; };
+  let within = 0, opposite = 0, n = 0;
+  for (const temp of ['before', 'after', 'overlap', 'unspec']) {
+    const g = { v: 'hmr-0.1', nodes: { o: { k: 'origo', f: { speaker: 'far' } }, e: { k: 'event', c: ['SEE'], f: { aspect: 'performance', strength: 'AFF' } },
+      a: { k: 'entity', c: L, f: { person: '3', num: 'sg', quant: 'def' } }, u: { k: 'entity', c: Rr, f: { person: '3', num: 'sg', quant: 'def' } } },
+      edges: [['o', 'anchor', 'e', { mode: 'decl', temp, evid: 'visual' }], ['e', 'actor', 'a', { inv: 'direct' }], ['e', 'undergoer', 'u', { inv: 'direct' }]] };
+    const f = inkFigure(g, { S: 900, trace: true });
+    const got = ['actor', 'undergoer'].map((lab) => {
+      const pts = f.trace.threads.find((t) => t.label === lab).pts, m = pts.length, k = Math.max(2, Math.floor(m / 10));
+      return wrapR(dir(pts[m - 1 - k], pts[m - 1]) - dir(pts[0], pts[k]));
+    });
+    got.forEach((x, j) => { n++; if (Math.abs(x - want[j]) <= 2 * INK.TREMOR + 0.15) within++; });
+    if (got[0] * got[1] < 0) opposite++;
+  }
+  ok(want[0] > 0.5 && want[1] < -0.5, `word turn: the chosen words turn ${want[0].toFixed(2)} and ${want[1].toFixed(2)} radians`);
+  ok(within === n, `word turn: ${within} of ${n} threads turn as their words say, within ${(2 * INK.TREMOR + 0.15).toFixed(2)} radians`);
+  ok(opposite === 4, `word turn: in ${opposite} of 4 figures the two threads turn opposite ways`);
 }
 
 /* 4. determinism and node ids */

@@ -31,7 +31,9 @@ import { mulberry32, shuffle } from './rng.js';
 import { TOPO } from './config.js';
 
 export const Q = 3, K = TOPO.K, RUN = 3, DIST = 2;
-const P = Array.from({ length: K + 1 }, (_, i) => Q ** i);
+// powers of Q by multiplication (BAR_F G5: no engine-approximated function on the seeded path; inkfig.js calls this module)
+const P = [1];
+for (let i = 1; i <= K; i++) P.push(P[i - 1] * Q);
 export const N = P[K];
 
 /* the partitions of PLAN 3.2 and 3.6: radicals come as flip pairs (affirmed and denied); the rest are single words */
