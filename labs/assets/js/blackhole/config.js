@@ -121,10 +121,20 @@ export const OBJECTS = [
 
 /* ---------------- views (camera presets) ---------------- */
 export const VIEWS = {
-  cinematic: { label: 'Cinematic', rcam: 46, fov: 31, tilt: 0, incl: 84, hint: 'a camera 46 M away, 5 M above the disk plane' },
+  cinematic: { label: 'Cinematic', rcam: 46, fov: 31, tilt: 0, incl: 84, hint: 'a camera close to the hole (viewHint gives its distance and height)' },
   telescope: { label: 'Telescope', rcam: 1000, fov: 1.15, tilt: 0, hint: 'the object as the EHT sees it: observer at 1000 M, the object\'s inclination' },
   journey: { label: 'Fall in', rcam: 40, fov: 70, tilt: 0, incl: 75, hint: 'free fall from rest at infinity, two clocks running' },
 };
+
+/** The view's caption hint. The cinematic camera's height above the disk plane is r cos i, from its own distance and
+ *  inclination: the fixed "46 M away, 5 M above the disk plane" was true at 84 deg only (the final grade, 2026-11-18). */
+export function viewHint(s) {
+  if (s.view !== 'cinematic') return VIEWS[s.view].hint;
+  const r = +s.rcam, z = r * Math.cos(s.incl * Math.PI / 180);
+  const n = (x) => (Math.abs(x) >= 10 ? x.toFixed(0) : x.toFixed(1));
+  const where = Math.abs(z) < 0.05 ? 'in the disk plane' : `${n(Math.abs(z))} M ${z > 0 ? 'above' : 'below'} the disk plane`;
+  return `a camera ${n(r)} M away, ${where}`;
+}
 
 /* ---------------- the state schema ---------------- */
 // type: num | enum | bool. url: short query key. retrace: changing it needs new geodesics.
