@@ -29,9 +29,12 @@
      older fronds, lower down, are longer, as in acropetal growth;
      each frond rises from the stalk, curls upward and widens to a
      blade before its point;
-   - a head at the stalk's tip, the place where it attends: a long
-     bud that the neck turns toward what it attends to, with a dark
-     wet opening at its point.
+   - a head at the stalk's tip, the place where it attends: a closed
+     bud that swells and ends round, with no point, no opening and no
+     face, nodding its whole self toward what it attends to (Luis,
+     2026-11-18: a long bud with a dark opening at its point read as a
+     bird's beak; a face would make it an animal, and an animal is the
+     film's road, rule 7).
    Never the film's creature and never a seven-limbed radial body
    (research/ip.md rule 7, as amended by H8): the frond count is
    drawn from 4, 5, 6, 8, 9 and 10, the fronds leave the stalk at
@@ -65,7 +68,6 @@ const HEAD_SEG = 18;                                     // round cones along th
 const SKIN = { alb: 0.4, f0: 0.05, rough: 0.38, lines: true };
 const HEAD = { alb: 0.4, f0: 0.05, rough: 0.38, lines: false };
 const BLADE = HEAD;                       // the fronds' skin: smooth, no growth lines
-const MOUTH = { alb: 0.04, f0: 0.06, rough: 0.3, lines: false };
 export const BODY = Object.freeze({
   BREATH: 0.035,     // the swell of a breath, as a share of the radius
   SWAY: 0.07,        // how far a frond lifts with a breath, radians at its tip
@@ -126,7 +128,7 @@ export function growBody(target, sSeed) {
     const phi = (i % 2 ? -1 : 1) * (Math.PI / 2 + phi0) + r(-0.3, 0.3);
     return { s, phi, len, r0: r(0.08, 0.13) * Math.sqrt(len / L0) + 0.02, rise: r(0.2, 0.75), curl: r(0.8, 2.2), blade };
   });
-  const head = { r: r(0.2, 0.36), len: r(2.4, 4.8), bow: r(0.15, 0.7), lift: r(-0.15, 0.2) };
+  const head = { r: r(0.26, 0.4), len: r(1.3, 2.1), bow: r(0.15, 0.7), lift: r(-0.15, 0.2) };
   return {
     target, seed: sSeed, H, profile, bend, sac, fronds, head,
     lines: r(9, 16),                 // growth lines along the stalk, per unit of its height
@@ -176,14 +178,14 @@ export function poseBody(B, t = 0, att = { x: 0, y: 1, w: 0 }) {
   const a0 = Math.atan2(tip.x - prev.x, tip.y - prev.y);
   const a1 = w > 0 ? a0 + (want - a0) * w : a0 + B.head.bow;            // at rest it bows, by its seed
   const hr = B.head.r * (1 + 0.5 * BODY.BREATH * Math.sin(ph - 2.4));
-  const thick = (u) => 0.9 + 0.32 * Math.sin(Math.PI * Math.min(1, u * 1.3)) - 0.6 * u * u;   // the neck's width, a swell, a blunt point
+  const thick = (u) => 0.75 + 0.75 * Math.sin(Math.PI * Math.min(1, u));   // from the neck's width it swells to a bud and closes round
   const L = (B.head.len * hr) / HEAD_SEG;
   const hp = [{ x: tip.x, y: tip.y, z: tip.z, r: hr * thick(0), s: B.H }];
   for (let j = 0; j < HEAD_SEG; j++) {
     const u1 = (j + 1) / HEAD_SEG, ang = a0 + (a1 - a0) * smooth(0, 0.55, u1), p = hp[j];
     hp.push({ x: p.x + L * Math.sin(ang), y: p.y + L * Math.cos(ang), z: p.z + B.head.lift * L, r: hr * Math.max(0.3, thick(u1)), s: B.H + (j + 1) * L });
   }
-  chain(prims, hp, (j) => ({ mat: j / HEAD_SEG >= 0.86 ? MOUTH : HEAD }));
+  chain(prims, hp, () => ({ mat: SKIN }));   // one skin with the stalk: no mouth, no eye
   // the fronds
   for (const [fi, f] of B.fronds.entries()) {
     const i = Math.min(STALK - 1, Math.floor(f.s * STALK));
