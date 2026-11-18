@@ -78,6 +78,27 @@ export function num(v, sig = 3, none = '') {
 /* A difference with its sign: "+0.11", "−0.18". */
 export const signed = (v, sig = 2) => (isFiniteNumber(v) ? (v < 0 ? '' : '+') + num(v, sig) : '');
 
+/* A number to exactly d decimals (0 to 4), with the minus sign and never the hyphen; one that rounds to zero carries no
+   sign. For values whose decimals are a fixed resolution: a place's coordinates, "−33.87". */
+export function fixed(v, d = 2, none = '') {
+  if (!isFiniteNumber(v)) return none;
+  const t = Math.abs(v).toFixed(Math.max(0, Math.min(4, d)));
+  return (v < 0 && Number(t) !== 0 ? MINUS : '') + t;
+}
+
+/* A measured value printed beside its error, to the decimals the error needs: the place of the error's second
+   significant figure, trailing zeros kept, the whole part grouped. The one exception to "at most four decimals": a
+   transit time known to seconds is known to the fifth or sixth decimal of a day, and cutting it to four put 82 of the
+   sky's 12,665 clocks further from the paper than the error printed beside them (the review of pull request 60,
+   2026-11-17). With no positive error it is grouped as given. */
+export function measured(v, err, none = '') {
+  if (!isFiniteNumber(v)) return none;
+  if (!isFiniteNumber(err) || err <= 0) return grouped(v);
+  const t = Math.abs(v).toFixed(Math.max(0, Math.min(12, 1 - Math.floor(Math.log10(err)))));
+  const [whole, frac] = t.split('.');
+  return (v < 0 && Number(t) !== 0 ? MINUS : '') + grouped(Number(whole)) + (frac === undefined ? '' : `.${frac}`);
+}
+
 /* The interval of a value: "+0.11 −0.18", or "±0.11" when the two sides agree to 15%. up and down are the archive's
    errors, either sign; nothing when either is missing. */
 export function interval(up, down, sig = 2) {

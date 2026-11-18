@@ -92,7 +92,7 @@ export function compareHTML(pins, earth, albedo) {
 export function methodHTML({ meta, val, valley, transit, teq, hold, rosterNote, census }) {
   const pc = (x) => (x === null || x === undefined ? '—' : `${Math.round(x * 100)}%`);
   return `
-    <p>The numbers on this page come from the NASA Exoplanet Archive or from a published model applied to it in your browser, with five choices of the page's own, each named as such where it is used below: the log-uniform prior on a forecast mass, the line between thin and thick air, the 1,200 K at which a surface is drawn molten, the 750 K above which a world gives its own light, and the Earth-likeness score. The planet image is illustrative too: its surface is procedural, driven by the measured radius, temperature and star.</p>
+    <p>The numbers on this page come from the NASA Exoplanet Archive, from the papers it cites (among them the observations of rocky worlds' air), from NASA's planetary fact sheet for the Solar System, or from a published model applied to them in your browser. Five choices are the page's own, each named as such where it is used below: the log-uniform prior on a forecast mass, the line between thin and thick air, the 1,200 K at which a surface is drawn molten, the 750 K above which a world gives its own light, and the Earth-likeness score. The planet image is illustrative: its surface is procedural, driven by the measured radius, temperature and star.</p>
     <h3>Data</h3>
     <p>[REAL] ${esc(DATA.snapshotLabel)}: ${fmtInt(meta.rows)} confirmed planets with the archive's composite values, error bars, mass provenance and limit flags, discovery facts, stellar parameters and the reference for each value. ${esc(rosterNote)}</p>
     <h3>Models</h3>
