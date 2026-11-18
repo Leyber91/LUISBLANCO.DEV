@@ -228,5 +228,13 @@ ok('the port below is the shader\'s noise and core word for word', missing.lengt
   ok('the shader declares uCycle and the ignition fades in place', /uniform float uCycle/.test(shade) && /float ign = smoothstep\(0\.0, 1\.0, uIgnite\);/.test(shade));
 }
 
+// the clock's tag follows its weakest input, the mass and the spin (flow.js clockTag; the final grade, 2026-11-18)
+{
+  const byId = Object.fromEntries(OBJECTS.map((o) => [o.id, o]));
+  const want = { m87: 'ILLUSTRATIVE', sgra: 'ILLUSTRATIVE', cygx1: 'REAL', primordial: 'ILLUSTRATIVE' };
+  for (const [id, tag] of Object.entries(want)) ok(`the clock of ${byId[id].name} is tagged ${tag}, from its spin tag ${byId[id].spinTag}`, F.clockTag(byId[id]) === tag, F.clockTag(byId[id]));
+  ok('a custom hole\'s clock is tagged ILLUSTRATIVE', F.clockTag(null) === 'ILLUSTRATIVE');
+}
+
 console.log(`\n${checks - fails}/${checks} checks passed`);
 process.exit(fails ? 1 : 0);
