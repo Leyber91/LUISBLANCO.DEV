@@ -48,7 +48,6 @@ export const MARKS = {
   order2: '--horizon',       // photon order: n = 2 and higher
   steps: '--text-bright',    // the integrator: the top of the steps-per-ray ramp
   drift: '--danger',         // the integrator: null-condition drift above DRIFT_LIMIT, a failure
-  isco: '--horizon',         // the ISCO hairline on the render
   annulus: '--text-bright',  // the annulus a visitor points at (the profile's hover, a probed disk pixel)
   plate: '--accretion',      // the plate's corner brackets: the one gold mark of the saved image
 };
@@ -71,7 +70,6 @@ export const PHYSICAL = {
 /** The lab's own constants that are not a token's (linear, before the tone map): all ink. */
 export const LAB = {
   stepsFloor: [0.05, 0.06, 0.08],   // the integrator: one step per ray
-  edge: [0.62, 0.70, 0.84],         // the traced shadow edge's dashes
   skyBand: [0.62, 0.68, 0.80],      // the faint band of the sky
 };
 
