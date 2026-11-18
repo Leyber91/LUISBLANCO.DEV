@@ -36,13 +36,12 @@ const MUTANTS = [
   ['n = 2 marked white', `order2: '--horizon',`, `order2: '--text-bright',`],
   ['the drift marked in gold', `drift: '--danger',`, `drift: '--accretion',`],
   ['the drift marked in amber, within the gold rule\'s tolerance', `drift: '--danger',`, `drift: '--warn',`],
-  ['the ISCO hairline in gold', `isco: '--horizon',`, `isco: '--accretion',`],
   ['the annulus in gold', `annulus: '--text-bright',`, `annulus: '--accretion',`],
   ['colourWord names another token\'s word', `return INK[t].word;`, `return INK['--warn'].word;`],
   ['the drift\'s limit at 1e-3', `export const DRIFT_LIMIT = 1e-4;`, `export const DRIFT_LIMIT = 1e-3;`],
   ['the diagnostic exposure at 1', `export const DIAG_EXPO = 0.9;`, `export const DIAG_EXPO = 1;`],
   ['a physical colour changed', `redshiftWarm: { rgb: [0.95, 0.38, 0.08]`, `redshiftWarm: { rgb: [0.95, 0.48, 0.08]`],
-  ['a lab ink constant changed', `edge: [0.62, 0.70, 0.84],`, `edge: [0.62, 0.70, 0.94],`],
+  ['a lab ink constant changed', `skyBand: [0.62, 0.68, 0.80],`, `skyBand: [0.62, 0.68, 0.90],`],
 
   /* ---- the final pass and its inverse ---- */
   ['sRGB\'s linear part read up to 0.4 on the way in', `(s <= 0.04045 ? s / 12.92`, `(s <= 0.4 ? s / 12.92`],

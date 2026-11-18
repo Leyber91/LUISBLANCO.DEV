@@ -462,6 +462,75 @@ export async function FALL_STEP(p, { base, width, ready }) {
   await sheet(false);
 }
 
+// The shadow's rim (probe.js outline, ui.js drawOverlay; 2026-11-18). The shader drew a per-texel shadow edge and ISCO
+// line on the black's rim in every view, in nearly the same blue: at the low tiers a staircase of dashes. The frame is
+// now the same with the notes on and off (the overlay's labels are not in it), and the telescope view draws the
+// traced edge as ticks across the theory curve, which its legend then names; where no ticks are drawn the legend
+// does not name them (review_edge 3 and 4).
+const STILL_NOTES = `(async () => {
+  const a = window.__bh, f = { ...a.frameUniforms(a), hl: 0 };
+  const on = await a.renderer.renderStill({ ...f, notes: 1 }, 480, { ss: 1 });
+  const off = await a.renderer.renderStill({ ...f, notes: 0 }, 480, { ss: 1 });
+  if (!on || !off) return { still: false };
+  // a canvas resized between the two (a tier change) would misalign them: said, not compared (review_edge N6)
+  if (on.width !== off.width || on.height !== off.height) return { still: false, sizes: [on.width, on.height, off.width, off.height] };
+  let diff = 0;
+  for (let i = 0; i < on.data.length; i += 4) if (on.data[i] !== off.data[i] || on.data[i + 1] !== off.data[i + 1] || on.data[i + 2] !== off.data[i + 2]) diff++;
+  return { still: true, pixels: on.data.length / 4, diff };
+})()`;
+const TICKS = `(() => {
+  const pts = (el) => (el ? [...el.getAttribute('d').matchAll(/[ML](-?[\\d.]+),(-?[\\d.]+)/g)].map((m) => [+m[1], +m[2]]) : []);
+  const e = document.querySelector('#bh-overlay path.edge'), c = document.querySelector('#bh-overlay path.curve');
+  const E = pts(e), C = pts(c);
+  let worst = 0, n = 0;
+  for (let i = 0; i + 1 < E.length; i += 2) {
+    const x = 0.5 * (E[i][0] + E[i + 1][0]), y = 0.5 * (E[i][1] + E[i + 1][1]);
+    let b = Infinity;
+    for (let j = 0; j < C.length; j++) {
+      const [x0, y0] = C[j], [x1, y1] = C[(j + 1) % C.length], ex = x1 - x0, ey = y1 - y0;
+      const u = Math.max(0, Math.min(1, ((x - x0) * ex + (y - y0) * ey) / (ex * ex + ey * ey || 1)));
+      b = Math.min(b, Math.hypot(x - x0 - u * ex, y - y0 - u * ey));
+    }
+    worst = Math.max(worst, b); n++;
+  }
+  const texts = [...document.querySelectorAll('#bh-overlay text')].map((t) => t.textContent);
+  return { ticks: n, curve: C.length, worst: n && C.length ? +worst.toFixed(2) : null, named: texts.some((t) => /ticks: traced edge/.test(t)),
+    stroke: e ? getComputedStyle(e).stroke : null, labels: texts.length };
+})()`;
+export async function EDGE_STEP(p, { base, ready }) {
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+  await p.until(ready, READY_MS);
+  await p.until(`document.querySelectorAll('#bh-overlay text').length > 0`, 30000);
+  await p.sleep(2000);
+  await p.step('M87* as the page opens, its labels drawn');
+  const s = await p.ev(STILL_NOTES);
+  p.check('the frame as the page opens is the same with the notes on and off: no line drawn on the shadow\'s rim', s.still && s.diff === 0, JSON.stringify(s));
+  const c0 = await p.ev(TICKS);
+  p.check('the cinematic view draws no ticks', c0.ticks === 0 && !c0.named, JSON.stringify(c0));
+  // the anchors say when they traced the edge (probe.js edgeTraced), so "no ticks" is read only after they did
+  const TRACED = `(() => { const an = window.__bh.ui.liveAnchors(); return !!(an && an.edgeTraced); })()`;
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87&v=telescope`);
+  await p.until(ready, READY_MS);
+  const traced0 = await p.until(TRACED, 30000);
+  const drawn = await p.until(`!!document.querySelector('#bh-overlay path.edge')`, 30000);
+  await p.sleep(1000);
+  await p.step('M87* in the telescope view, its traced edge drawn');
+  const t1 = await p.ev(TICKS);
+  p.check('the telescope view draws the traced edge as ticks across the theory curve, 40 or more, each centred within 1.5 px of it, and its legend names them',
+    !!traced0 && !!drawn && t1.ticks >= 40 && t1.curve > 0 && t1.worst != null && t1.worst <= 1.5 && t1.named, JSON.stringify(t1));
+  // where there is no theory curve (spin and charge together) no ticks are drawn and none are named; where the grid
+  // finds no shadow (fov 20) there are no ticks, and the legend of the curve does not name them
+  for (const [q, what, curve] of [['?o=custom&a=0.5&qq=0.5&v=telescope', 'a 0.5 and Q/M 0.5, no theory curve', false], ['?o=m87&v=telescope&f=20', 'fov 20, the shadow smaller than the grid', true]]) {
+    await p.go(`${base}/labs/bh_animation_page.html${q}`);
+    await p.until(ready, READY_MS);
+    const traced = await p.until(TRACED, 30000);
+    await p.sleep(500);
+    await p.step(`the telescope view, ${what}`);
+    const t2 = await p.ev(TICKS);
+    p.check(`the telescope view, ${what}: the anchors traced the edge, and no ticks are drawn without the curve and the shadow both, and none named`, !!traced && t2.ticks === 0 && !t2.named && (t2.curve > 0) === curve, JSON.stringify({ traced, ...t2 }));
+  }
+}
+
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,
    a fall the visitor starts and the tour's, take out, and a browser whose storage is refused. Every count is read
    relative to the record as the step finds it, since earlier steps press pixels and run a fall, which the record keeps.
@@ -1032,6 +1101,7 @@ export default async function blackhole(p, { base, width }) {
   await sheet(false);
 
   /* ---- 3. the measurement and the telescope view, opened by link (ledger row 2; P2-1, P4-3) ---- */
+  await EDGE_STEP(p, { base, ready: READY });
   const CARD = `(async () => {
     const P = await import('/labs/assets/js/blackhole/physics.js');
     const s = window.__bh.store.all(), ms = P.measurement(s), c = ms.cmp;
