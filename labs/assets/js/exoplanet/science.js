@@ -388,6 +388,26 @@ export function starColour(teff) {
   return out;
 }
 
+/* The colour of a surface that reflects R(lam) of the light at each wavelength (R a function of nm, 0 to 1), by the
+   same CIE 1931 fit as the star colours, under an equal-energy light: { linear, srgb, hex, Y }. Scaled so that a
+   surface reflecting everything is white (1, 1, 1), so the result is an albedo the renderer can light with its star;
+   Y is the share of light the eye sees it return. Used by life.js. */
+let whiteRGB = null;
+export function reflectanceColour(R) {
+  const M = XYZ_TO_SRGB;
+  const toRGB = (f) => {
+    let X = 0, Y = 0, Z = 0;
+    for (let lam = 380; lam <= 780; lam += 5) { const r = f(lam); X += r * cmf(lam, CIE_FIT.x); Y += r * cmf(lam, CIE_FIT.y); Z += r * cmf(lam, CIE_FIT.z); }
+    return { rgb: [0, 1, 2].map((i) => M[i][0] * X + M[i][1] * Y + M[i][2] * Z), Y };
+  };
+  if (!whiteRGB) whiteRGB = toRGB(() => 1);
+  const c = toRGB(R);
+  const linear = c.rgb.map((v, i) => clamp(v / whiteRGB.rgb[i], 0, 1));
+  const srgb = linear.map(gammaEnc);
+  const hex = '#' + srgb.map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
+  return { linear, srgb, hex, Y: c.Y / whiteRGB.Y };
+}
+
 export function spectralType(teff) {
   if (!isNum(teff)) return '?';
   if (teff >= 30000) return 'O'; if (teff >= 10000) return 'B'; if (teff >= 7500) return 'A';
