@@ -7,6 +7,7 @@
 // much light it returns against the measured geometric albedo. Then it loads the three views of the survey
 // page for one world.
 import { exomaniaRules } from './exomania.mjs';
+import { buildPrograms } from './survey.mjs';
 
 const lum = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 
@@ -23,6 +24,10 @@ const ALBEDO_BAND = [0.70, 1.30];
 const EARTH_FLOOR = 0.18;
 
 export default async function planets(p, { base }) {
+  // the sheet draws its looks in still mode, which waits for each program: built first, before any frame is judged
+  // (tools/drives/survey.mjs; ticket 2.22b: with each try at a frame cut to 0.4 s the frame after the sheet of
+  // exoplanets loaded did not come back)
+  await buildPrograms(p, { base });
   for (const [n, e] of exomaniaRules()) p.invariant(n, e);
   p.frames();   // and no fully transparent pixel in any frame captured (tools/drive.mjs frames)   // after every step: tools/invariants.mjs, as exomania.mjs registers them
   await p.go(`${base}/tools/dev/planet_sheet.html?set=solar&view=orbit&size=340&cols=4`);
