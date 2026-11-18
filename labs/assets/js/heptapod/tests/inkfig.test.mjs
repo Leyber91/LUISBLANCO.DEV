@@ -67,7 +67,7 @@ const DEG = PI / 180;
 {
   const banned = /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|exp|expm1|log|log1p|log2|log10|pow|hypot|cbrt|random)\b|\*\*/;
   const strip = (f) => fs.readFileSync(path.join(here, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-  for (const f of ['../topo/inkfig.js', '../topo/trig.js', '../topo/rng.js']) {
+  for (const f of ['../topo/inkfig.js', '../topo/trig.js', '../topo/rng.js', '../topo/code.js']) {
     const m = strip(f).match(banned);
     ok(!m, `G5: ${f} calls ${m ? m[0] : ''}`);
   }

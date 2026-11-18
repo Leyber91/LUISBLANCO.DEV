@@ -18,6 +18,15 @@
       content (NODE_DEG per node) and its depth is the pool's (DEPTH).
       The pool's profile is a puddle's, skewed along the drag, split
       between the two sides of the ring. [physics: pooling; PLAN M3]
+   I2c A pool carries its clause's concept: the main event's concept is
+      1 to 3 radicals (hmr.js), and the pool's outline is one lump per
+      radical in the concept's canonical order, each as high as that
+      radical's word in the lab's code says (code.js, the radical
+      partition: the affirmed word's nine digits summed, 0 to 18, give
+      0.55 to 1.1 of the pool's depth), with a waist at 0.3 between
+      lumps. So two clauses about different things never pour the same
+      pool, and no shape class (one smooth mass) is shared by all.
+      [grammar: the concept; the code's words]
    I3 Every node joined to a clause's main event is a filament leaving
       the mass where the pool is deepest (a splash's crown); a node
       that hangs from such a node is a branch of its filament. The side
@@ -101,11 +110,13 @@ import { edgeClassRank, edgeRoleRank, EDGE_LABELS } from './hmr.js';
 const classOf = (label) => (EDGE_LABELS[label] ? EDGE_LABELS[label].cls : null);
 import { mulberry32, fnv1a } from './rng.js';
 import { PI, sinK, cosK } from './trig.js';
+import { buildCode, partition, digits, CODE_SEED } from './code.js';
+import { RADICALS } from './hmr.js';
 
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.3.1',
+  version: 'inkfig-0.4',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -148,6 +159,18 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'v0.2 after the first measurement (bb8f228)', value: 0, source: 'NODE_DEG 4 to 7, WOBBLE 0.03 to 0.10, LOAD_FLOOR 0.45 to 0.7, W_RING 0.05 to 0.06, SHAFT 0.017 to 0.02, INK_SPREAD 0.0035 to 0.006, depth by clause size, the crown, more turning: set by eye against the film master and by the suite after F4-P4 had run; F4-P4 keeps its first outcome' },
   { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG', value: 0, source: 'first values, not compared with any film measure of their own' },
 ]);
+
+/* ---------------- I2c: the radicals' words in the lab's code ---------------- */
+
+let LUMP = null;
+/** radical -> the lump's height (0.55 to 1.1 of the pool's depth): its affirmed word's digits summed over 18. */
+export function lumpHeight(radical) {
+  if (!LUMP) {
+    const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical;
+    LUMP = new Map(RADICALS.map((r, i) => [r, 0.55 + (0.55 * digits(rad[i][0]).reduce((a, b) => a + b, 0)) / 18]));
+  }
+  return LUMP.get(radical) ?? 0.8;
+}
 
 /* ---------------- seeded noise (exact operations only) ---------------- */
 
@@ -419,8 +442,16 @@ export function inkFigure(g, opts = {}) {
     const nSeed = fnv1a(`${cert}:${t.main}:rim`);
     // a puddle dragged along the stroke: a steep front, a long tail (the skew's sign is the drag's direction)
     const prof = (x) => { const b = 1 - x * x; if (b <= 0) return 0; const y = (x - skew) / (1 + (x > skew ? -skew : skew)); const c = 1 - y * y; return c <= 0 ? 0 : c * Math.sqrt(c * b); };
-    const hOut = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * fOut * prof(x) * (1 + 0.4 * fbm1(nSeed, x * 6, 5)); };
-    const hIn = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * (1 - fOut) * prof(x) * (1 + 0.4 * fbm1(nSeed + 1, x * 6, 5)); };
+    // I2c: one lump per radical of the main event's concept, as high as its word in the code
+    const rads = [...(cg.nodes[t.main].c || [])].sort(), nr = Math.max(1, rads.length), lw = (1.6 / nr) * 0.62;
+    const lumpEnv = (x) => {
+      if (!rads.length) return 1;
+      let m = 0;
+      rads.forEach((r, q) => { const u = (x - (nr === 1 ? 0 : -0.55 + (1.1 * q) / (nr - 1))) / lw; if (u * u < 1) m = Math.max(m, lumpHeight(r) * (1 - u * u) * (1 - u * u)); });
+      return 0.3 + 0.7 * m;
+    };
+    const hOut = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * fOut * prof(x) * lumpEnv(x) * (1 + 0.4 * fbm1(nSeed, x * 6, 5)); };
+    const hIn = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * (1 - fOut) * prof(x) * lumpEnv(x) * (1 + 0.4 * fbm1(nSeed + 1, x * 6, 5)); };
     const wr = INK.W_RING * R / 2;
     const n = Math.max(16, Math.ceil(((2 * half * DEG) * R) / 2));
     const P = new Float64Array(4 * n);
