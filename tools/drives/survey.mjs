@@ -19,11 +19,11 @@
    own store is read or written), before any rule judges a frame, and says how long that took. A drive with a guard on
    what the page may fetch installs the guard first, so that document is under it too. The drives that call this are
    the ones that open the survey with ?still while frames are judged: log, shapes, search and orbit, which change its
-   world, and record, which opens only its default world and was exposed at its first, cold load. planets opens it
-   with ?still only on Kepler-442 b, whose look its sheet draws first, and on the ground, which its live landing
-   before has waited for; air opens it live, where nothing waits. exomania opens it with ?still
+   world, and record, which opens only its default world and was exposed at its first, cold load; and planets, whose
+   contact sheet (tools/dev/planet_sheet.html, the same shader source) draws its looks in still mode with frames on
+   (ticket 2.22b). air opens the survey live, where nothing waits. exomania opens it with ?still
    once, on WASP-12 b after a live visit that waits for the world's note and not for its build, so it is exposed to a
-   build still running when the page leaves (ticket 2.22b).
+   build still running when the page leaves; with each try at a frame cut to 0.4 s it passed 76 of 76 at 390 (2.22b).
    seedRandom makes "Another world" open the same worlds on every run from the same state (its pool takes in the
    weekly roster once that has joined), so a failure can be run again: it replaces
    Math.random in every document with the kit's mulberry32. Labs OS makes its ids with crypto, so the seed reaches the
