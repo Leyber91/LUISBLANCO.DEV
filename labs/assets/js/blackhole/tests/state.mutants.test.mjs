@@ -87,17 +87,7 @@ const MUTANTS = [
   /* ---- the geometry handed to the renderer, the probe and the anchors ---- */
   ['view() and view(true) exchanged', `const v = target ? this.s : this.shown;`, `const v = target ? this.shown : this.s;`],
   ['view() drops the charge, as the probe once did', `q: v.q,`, `q: 0,`],
-  /* ---- ledger row 12: the camera's floor by observer ---- */
-  ['every camera falls to the horizon', `export const cameraFloor = (s) => (s.observer === 'faller' ? FALL_STOP * horizon(s.a, s.q) : STILL_FLOOR);`, `export const cameraFloor = (s) => (FALL_STOP * horizon(s.a, s.q));`],
-  ['no camera falls below 3 M (the floor before ledger row 12)', `export const cameraFloor = (s) => (s.observer === 'faller' ? FALL_STOP * horizon(s.a, s.q) : STILL_FLOOR);`, `export const cameraFloor = (s) => (STILL_FLOOR);`],
-  ['the floor reads another observer as the faller', `export const cameraFloor = (s) => (s.observer === 'faller' ? FALL_STOP * horizon(s.a, s.q) : STILL_FLOOR);`, `export const cameraFloor = (s) => (s.observer !== 'orbiter' ? FALL_STOP * horizon(s.a, s.q) : STILL_FLOOR);`],
-  ['the floor without the charge', `export const cameraFloor = (s) => (s.observer === 'faller' ? FALL_STOP * horizon(s.a, s.q) : STILL_FLOOR);`, `export const cameraFloor = (s) => (s.observer === 'faller' ? FALL_STOP * horizon(s.a) : STILL_FLOOR);`],
-  ['the floor at the horizon itself', `export const FALL_STOP = 1.08;`, `export const FALL_STOP = 1;`],
-  ['the still floor at 2 M', `export const STILL_FLOOR = 3;`, `export const STILL_FLOOR = 2;`],
-  ['the floor never applied', `    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`, ``],
-  ['the floor applied only past it', `    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`, `    if (this.s.rcam < floor - 0.01) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`],
-  ['a camera above the floor moved to it', `    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`, `    if (this.s.rcam < floor + 1) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`],
-  ['view() reads the observer from the eased values', `rout: v.rout, observer: this.s.observer`, `rout: v.rout, observer: v.observer`],
+  ['view() reads the observer from the eased values', `observer: this.s.observer`, `observer: v.observer`],
 ];
 
 process.exit(await runMutants({ here, file: 'state.js', test: '../state.test.mjs', mutants: MUTANTS }));

@@ -6,15 +6,6 @@
    ============================================================ */
 
 import { SCHEMA, DEFAULTS, OBJECTS, VIEWS } from './config.js';
-import { horizon } from './kerr.js';
-
-/** Where a fall stops: 1.08 r+, just outside the horizon (the journey's stop since G1). The camera's floor by
- *  observer (ledger row 12): a faller may go down to it; every other camera keeps the 3 M of the static views. The
- *  floor moves with the spin and the charge, so no camera is ever inside the horizon. SCHEMA's rcam min sits at or
- *  below the lowest floor any state allows, 1.08 (1 + sqrt(1 - 0.996)) = 1.148 M. */
-export const FALL_STOP = 1.08;
-export const STILL_FLOOR = 3;
-export const cameraFloor = (s) => (s.observer === 'faller' ? FALL_STOP * horizon(s.a, s.q) : STILL_FLOOR);
 
 const BY_KEY = Object.fromEntries(SCHEMA.map((s) => [s.key, s]));
 const EASED = ['a', 'q', 'incl', 'rcam', 'fov', 'tilt', 'rout'];
@@ -63,9 +54,6 @@ export class Store {
       this.s.q = +Math.sqrt(Math.max(0, 0.996 - this.s.a * this.s.a)).toFixed(3);
       if (!changed.includes('q')) changed.push('q');
     }
-    // the camera's floor by observer (ledger row 12), after the spin and charge are settled
-    const floor = cameraFloor(this.s);
-    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }
     // a named object is its catalogue's hole: on every way in (a link, an imported file, a slider, the guide's
     // apply) a mass, distance, spin or charge of the visitor's own makes it custom, so no comparison reads the
     // catalogue while the page shows other values (fix_s2_p1 K5)
@@ -98,11 +86,6 @@ export class Store {
       // distance and field of view ease in log space so a zoom feels even
       this.shown[k] = (k === 'rcam' || k === 'fov') ? Math.exp(Math.log(a) + (Math.log(b) - Math.log(a)) * e) : a + (b - a) * e;
     });
-    // the camera on its way keeps the floor of the hole on its way (review_s5 1: from M87*'s stop the Primordial button
-    // took the eased camera to 0.93 r+, inside the horizon, for half a second; 5: a hovering camera eased up from
-    // 1.45 M)
-    const low = cameraFloor({ observer: this.s.observer, a: this.shown.a, q: this.shown.q });
-    if (this.shown.rcam < low) this.shown.rcam = low;
     if (t >= 1) this.anim = null;
     return true;
   }

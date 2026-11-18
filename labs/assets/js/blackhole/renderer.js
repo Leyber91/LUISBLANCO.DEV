@@ -216,7 +216,6 @@ export class Renderer {
       cam: { U: toF32(cam.U), R: toF32(cam.R), Up: toF32(cam.Up), F: toF32(cam.F), pos: toF32(cam.pos), raw: cam },
       tanHalf: tanHalfV(view.fov, this.canvas.clientWidth / Math.max(1, this.canvas.clientHeight)),
       resc: Math.max(view.rcam * 1.02, 80),
-      rcam: view.rcam,
     };
     return geo;
   }
@@ -264,8 +263,7 @@ export class Renderer {
   render(frame, { interacting = false, full = false } = {}) {
     if (!this.ok() || !this.geo) return null;
     const gl = this.gl;
-    // the tier's budget, more near the horizon (kerr.js stepBudget, review_s5 2)
-    const f = { ...this.geo, ...frame, k: this.tier.k, maxSteps: K.stepBudget(this.tier.maxSteps, this.geo.rcam, this.geo.rh), mode: MODE_ID[frame.modeName] ?? 0, frame: this.frameNo++ };
+    const f = { ...this.geo, ...frame, k: this.tier.k, maxSteps: this.tier.maxSteps, mode: MODE_ID[frame.modeName] ?? 0, frame: this.frameNo++ };
     gl.bindVertexArray(this.vao);
     if (!this.floatRT) {
       // fallback: everything per frame at the canvas resolution
@@ -355,7 +353,7 @@ export class Renderer {
     const gl = this.gl;
     const row = this._gbuffer(N, 1), col = this._gbuffer(1, N);
     const th = this.geo.tanHalf, aspect = this.canvas.width / this.canvas.height;
-    const f = { ...this.geo, ...frame, emit: 0, k: this.tier.k, maxSteps: K.stepBudget(720, this.geo.rcam, this.geo.rh), mode: 0, frame: 0 };
+    const f = { ...this.geo, ...frame, emit: 0, k: this.tier.k, maxSteps: 720, mode: 0, frame: 0 };
     gl.bindVertexArray(this.vao);
     const span = th * Math.max(aspect, 1) * 1.0;
     this._traceInto(row, f, 0, 1, { origin: [-span, 0], stepX: [2 * span / N, 0], stepY: [0, 0], jit: [0, 0] });
@@ -402,7 +400,7 @@ export class Renderer {
     const ofb = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, ofb);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, out, 0);
-    const f = { ...this.geo, ...frame, k: Math.min(this.tier.k, 0.08), maxSteps: K.stepBudget(600, this.geo.rcam, this.geo.rh), mode: MODE_ID[frame.modeName] ?? 0, frame: 0 };
+    const f = { ...this.geo, ...frame, k: Math.min(this.tier.k, 0.08), maxSteps: 600, mode: MODE_ID[frame.modeName] ?? 0, frame: 0 };
     gl.bindVertexArray(this.vao);
     const rows = Math.max(8, Math.floor(65536 / gb.w));
     for (let y = 0; y < gb.h; y += rows) {
