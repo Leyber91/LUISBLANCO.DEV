@@ -105,7 +105,12 @@
       GAP_DEG, is kept free before the pools share the rest, and goes
       to the largest free arc, where the brush is driest (figure.js F6;
       F4-P1); among equal arcs, the first in drawing order. The stroke
-      tapers into it, and nothing else is drawn in it. [physics]
+      tapers into it, and nothing else is drawn in it. The hand presses
+      and lifts along the stroke, and the width goes with PRESS_FLOOR
+      plus its pressure: the film's carrier thins and swells with no
+      relation to its masses (F4-P2 missed), so its unevenness is the
+      hand's (0.6.1, fitted with W_RING to the film's carrier width and
+      its spread; held out on F4-P9). [physics; a fit]
    I7 Ink spreads into the surface before it dries: the body (pools,
       threads, drops) is diffused over INK_SPREAD and the bristle layer
       over a third of it, and ink is where the diffused load is at least
@@ -150,7 +155,7 @@ import { RADICALS } from './hmr.js';
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.6',
+  version: 'inkfig-0.6.1',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -164,7 +169,7 @@ export const INK = Object.freeze({
   TAPER_DEG: 10,      // I6: the stroke thins into the gap over this arc
   DEPTH: 0.33,        // I2: a pool's peak depth across the ring, over R
   WOBBLE: 0.11,       // I1: centreline wander, over R
-  W_RING: 0.09,       // I6: the carrier's width at full load, over R
+  W_RING: 0.083,      // I6: the carrier's width at full load, over R
   LOAD_ARC: 0.3,      // I6: arc (over R) at which the carrier's load has fallen to half
   LOAD_FLOOR: 0.7,   // I6: the share of a full load the brush keeps however far from a pool (it is redipped by the writer's hand, not only by the pools)
   BRISTLES: 28,       // I6
@@ -174,6 +179,7 @@ export const INK = Object.freeze({
   SPRAY_DEG: 5,       // I5b: one drop per this many degrees of a pool's arc
   LEAN_DEG: 30,       // I3: the role angles spread over this many degrees either side of the normal
   INK_SPREAD: 0.006,  // I7: diffusion length of the body, over R
+  PRESS_FLOOR: 0.2,   // I6: the carrier's width goes with this plus the hand's pressure (0 to 1)
   C_REF: 1.511,       // I2e: the unit of a clause's ink, the stand-in corpus's mean node ink
   E_STATE: 0.6,       // I2e: a state's pool, gathered: this share of the arc, the depth over it
   TURN_CELL: 0.17,    // I4: the turn of a thread per unit of its word's cells (cell - 1), radians
@@ -217,7 +223,7 @@ export const INK_KIND = Object.freeze({
   TAPER_DEG: ['chosen', 'first value'],
   DEPTH: ['calibrated', 'film suite: blot peak width median 0.325 R'],
   WOBBLE: ['chosen', 'by eye with the suite column in view (0.03, 0.10, 0.06, 0.11); film centreline deviation median 0.043 R'],
-  W_RING: ['chosen', 'by eye with the suite column in view (0.05, 0.06, 0.09); film carrier w_med median 0.066 R'],
+  W_RING: ['calibrated', "fitted 2026-11-18 with PRESS_FLOOR on the pod's 126 rings to the film's carrier (w_med 0.051 R and w_cv 0.709 inside the film's p10 to p90) while rings sharing no word are no more alike than the film's single masses (0.717 against 0.722, ring included); held out: F4-P9. Before: 0.05, 0.06, 0.09 by eye"],
   LOAD_ARC: ['chosen', 'first value'],
   LOAD_FLOOR: ['chosen', 'raised by eye (0.45, 0.7) when the 1-clause ring dried away'],
   BRISTLES: ['chosen', 'first value'],
@@ -228,6 +234,7 @@ export const INK_KIND = Object.freeze({
   LEAN_DEG: ['chosen', 'first value'],
   INK_SPREAD: ['chosen', 'raised by eye (0.0035, 0.006) to close gaps between strokes'],
   CORE_ROLES: ['derived', 'the grammar: hmr.js core participant roles'],
+  PRESS_FLOOR: ['calibrated', "fitted with W_RING (2026-11-18): the film's carrier thins and swells with no relation to its masses (F4-P2 missed), so its unevenness is the hand's; 0.45 (an inline literal until 0.6) to 0.2"],
   C_REF: ['frame', "the unit of a clause's ink: corpus B's mean node ink, 1.511 over 632 nodes (2026-11-18), so a clause of mean nodes keeps NODE_DEG per node"],
   E_STATE: ['chosen', 'first value: a resting hand gathers the pool to 0.6 of its arc, the area kept'],
   TURN_CELL: ['chosen', "first value: a radical's word turns a thread at most 3 units, 0.5 radians; three radicals up to about 1.5, the range 0.3.1's turning noise spanned"],
@@ -731,7 +738,7 @@ export function inkFigure(g, opts = {}) {
     const q = INK.LOAD_FLOOR + ((1 - INK.LOAD_FLOOR) * Kd * Kd) / (Kd * Kd + d * d);
     // pressure: the hand presses and lifts along the stroke
     const press = 0.55 + 0.45 * fbm1(wobSeed + 11, phi / 12, 4, 30);
-    const w = INK.W_RING * R * (0.25 + 0.75 * q) * (0.5 + 0.5 * taper) * (0.45 + press);
+    const w = INK.W_RING * R * (0.25 + 0.75 * q) * (0.5 + 0.5 * taper) * (INK.PRESS_FLOOR + press);
     const r0 = rc(phi), cs = cosK(phi * DEG), sn = sinK(phi * DEG);
     for (let b = 0; b < NB; b++) {
       const u = -1 + (2 * (b + 0.5)) / NB;

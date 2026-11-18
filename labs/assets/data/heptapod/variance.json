@@ -19,6 +19,26 @@
       "p10": 0.323,
       "p50": 0.458,
       "p90": 0.589
+    },
+    "singleMassAllPairs": {
+      "n": 21,
+      "marks": {
+        "p10": 0.552,
+        "p50": 0.614,
+        "p90": 0.742
+      },
+      "full": {
+        "p10": 0.628,
+        "p50": 0.722,
+        "p90": 0.806
+      },
+      "note": "like for like for rings that share no word; 'full' keeps the base ring, which the eye sees and the gate's marks layer removes"
+    },
+    "allPairsFull": {
+      "n": 703,
+      "p10": 0.533,
+      "p50": 0.634,
+      "p90": 0.724
     }
   },
   "inkfig-0.5": {
@@ -53,6 +73,12 @@
       "filaments": 5,
       "w_cv": 0.519,
       "gapDeg": 30.25
+    },
+    "pairsBySectorsDifferingFull": {
+      "1": 0.77,
+      "2": 0.746,
+      "3": 0.744,
+      "4": 0.755
     }
   },
   "inkfig-0.6": {
@@ -95,7 +121,14 @@
       "fineMax": 0.687,
       "failsAtFineFloor": 0,
       "toReview": 117
-    }
+    },
+    "pairsBySectorsDifferingFull": {
+      "1": 0.773,
+      "2": 0.782,
+      "3": 0.759,
+      "4": 0.761
+    },
+    "readingFull": "with the ring kept, the meaning gradient vanishes: the same heavy, even ring in every figure outweighs what the words do"
   },
   "outcomes": {
     "F4-P7": {
@@ -107,6 +140,27 @@
       "predicted": "no figure at or above the fine floor 0.786; coarse median below 0.712",
       "fineMax": 0.687,
       "coarseMedian": 0.692,
+      "confirmed": true
+    },
+    "F4-P9": {
+      "predicted": "corpus B (held out): median w_med and median w_cv inside the film's 18-master p10 to p90",
+      "w_med": 0.0613,
+      "w_medBand": [
+        0.0463,
+        0.1026
+      ],
+      "w_cv": 0.7888,
+      "w_cvBand": [
+        0.652,
+        1.0728
+      ],
+      "inBandShare": 0.93,
+      "confirmed": true
+    },
+    "F4-P10": {
+      "predicted": "no figure at or above the fine floor 0.786; coarse median below 0.712",
+      "fineMax": 0.69,
+      "coarseMedian": 0.694,
       "confirmed": true
     }
   },
@@ -131,6 +185,52 @@
         "1": 0.685,
         "4": 0.506
       }
+    }
+  },
+  "inkfig-0.6.1": {
+    "change": "the carrier: width with PRESS_FLOOR + pressure (0.2, was 0.45) and W_RING 0.083 (was 0.09), fitted on the pod rings",
+    "fitOnPodRings": {
+      "w_med": 0.051,
+      "w_cv": 0.709,
+      "arcDeg": 25,
+      "filaments": 8,
+      "pairsBySectorsDifferingFull": {
+        "1": 0.737,
+        "2": 0.746,
+        "3": 0.721,
+        "4": 0.717
+      }
+    },
+    "fitCandidates": {
+      "W_RING 0.07": {
+        "w_med": 0.044,
+        "w_cv": 0.78,
+        "full4": 0.69
+      },
+      "W_RING 0.06": {
+        "w_med": 0.039,
+        "w_cv": 0.851,
+        "full4": 0.676
+      },
+      "W_RING 0.095": {
+        "w_med": 0.056,
+        "w_cv": 0.683,
+        "full4": 0.736
+      },
+      "W_RING 0.083": {
+        "w_med": 0.051,
+        "w_cv": 0.709,
+        "full4": 0.717
+      },
+      "rule": "the heaviest carrier with w_med and w_cv inside the film single-mass p10 to p90 and rings sharing no word no more alike than the film single masses (full)"
+    },
+    "g4": {
+      "figures": 170,
+      "coarseMedian": 0.694,
+      "coarseMax": 0.857,
+      "fineMax": 0.69,
+      "failsAtFineFloor": 0,
+      "toReview": 123
     }
   }
 }
