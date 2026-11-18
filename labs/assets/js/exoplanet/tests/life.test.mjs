@@ -3,8 +3,9 @@
      node labs/assets/js/exoplanet/tests/life.test.mjs
 
    The cases are Kiang et al. 2007 II's tables, value by value;
-   the case follows the spectral type the page names, with a star
-   one kelvin each side of every type's edge; every look has its
+   the case is the nearest in temperature, a tie to the hotter,
+   with a star one kelvin each side of every boundary; every look
+   has its
    reason; the Solar System comes out as itself; then the
    catalogue: the air scenario the visitor chose, the deserts
    against the zone, the sub-Neptunes, the ice the picture draws,
@@ -14,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { CASES, M_SPLIT, caseOf, WHY, lifeOf, scenariosOf, reflectance, band, timesEarth, NO_STAR, NO_LIGHT, ICE_NIGHT, LOCKED, OCEAN } from '../life.js';
+import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, timesEarth, NO_STAR, NO_LIGHT, LOCKED, OCEAN } from '../life.js';
 import { reflectanceColour, hzPosition } from '../science.js';
 import { loadSnapshot, provisionalMeasured } from '../catalog.js';
 import { classify } from '../data.js';
@@ -35,15 +36,16 @@ const by = Object.fromEntries(CASES.map((c) => [c.key, c]));
   yes('M5V: 3,100 K, peak 1,042.8 nm, PAR 1.5, UV-B 0, GPP 0.08, and 0.59 over 400 to 1,100 nm', row('M5V') === '3100 1042.8 1.5 0 0.08 0.59', row('M5V'));
 }
 
-/* ---- the case follows the page's spectral type, one kelvin each side of every edge ---- */
+/* ---- the nearest case, one kelvin each side of every boundary; a tie goes to the hotter star ---- */
 {
   const k = (t) => caseOf(t).c.key;
-  yes('6,000 K is F-type and F2V, 5,999 K G2V', k(6000) === 'F2V' && k(5999) === 'G2V', `${k(6000)} ${k(5999)}`);
-  yes('5,200 K is G2V, 5,199 K K2V', k(5200) === 'G2V' && k(5199) === 'K2V', `${k(5200)} ${k(5199)}`);
-  yes('3,700 K is K2V, 3,699 K an M dwarf, M1V: a K-type star never takes a red dwarf\'s case', k(3700) === 'K2V' && k(3699) === 'M1V' && caseOf(3844).c.key === 'K2V', `${k(3700)} ${k(3699)}`);
-  yes(`within the M dwarfs, ${M_SPLIT} K is M1V, one kelvin less M5V`, M_SPLIT === 3375 && k(3375) === 'M1V' && k(3374) === 'M5V', `${k(3375)} ${k(3374)}`);
-  yes('hotter types take F2V and an L dwarf M5V', k(7500) === 'F2V' && k(12000) === 'F2V' && k(2399) === 'M5V' && caseOf(2399).type === 'L');
+  yes('6,297 K and 6,296 K (halfway) are F2V, 6,295 K is G2V', k(6297) === 'F2V' && k(6296) === 'F2V' && k(6295) === 'G2V', `${k(6297)} ${k(6296)} ${k(6295)}`);
+  yes('5,397 K and 5,396 K (halfway) are G2V, 5,395 K is K2V', k(5397) === 'G2V' && k(5396) === 'G2V' && k(5395) === 'K2V', `${k(5397)} ${k(5396)} ${k(5395)}`);
+  yes('4,336 K and 4,335 K (halfway) are K2V, 4,334 K is M1V', k(4336) === 'K2V' && k(4335) === 'K2V' && k(4334) === 'M1V', `${k(4336)} ${k(4335)} ${k(4334)}`);
+  yes('3,376 K and 3,375 K (halfway) are M1V, 3,374 K is M5V', k(3376) === 'M1V' && k(3375) === 'M1V' && k(3374) === 'M5V', `${k(3376)} ${k(3375)} ${k(3374)}`);
+  yes('the type is the page\'s: a 3,844 K star is K-type and nearest M1V; 12,000 K is B-type and F2V', caseOf(3844).type === 'K' && k(3844) === 'M1V' && caseOf(12000).type === 'B' && k(12000) === 'F2V');
   yes('past 6,820 K or under 3,100 K the case is extrapolated, at either end not', caseOf(6821).extrapolated && !caseOf(6820).extrapolated && !caseOf(3100).extrapolated && caseOf(3099).extrapolated);
+  yes('an O, an A, an F, an M, an L; a B, a G, a K', ['O', 'A', 'F', 'M', 'L'].every((t) => article(t) === 'an') && ['B', 'G', 'K'].every((t) => article(t) === 'a'));
 }
 
 /* ---- the colour, the cover and the words of a light ---- */
@@ -74,7 +76,7 @@ const SS = { Mercury: sol('Mercury', 0.383, 0.0553, 0.387, 87.97), Venus: sol('V
 const at = (a, name) => sol(name, 1, 1, a, 365.25 * Math.pow(a, 1.5), { host: name });
 {
   const E = lifeOf(SS.Earth);
-  yes('Earth: a G-type, the Sun\'s case, surface life, one green reading, all its cover', E.case.key === 'G2V' && E.type === 'G' && E.where.surface === true && E.scenarios.length === 1 && E.scenarios[0].cover === 1 && /^Its star, a G-type at 5,772 K, takes the G2V case/.test(E.words[0]), E.words[0]);
+  yes('Earth: a G-type nearest the Sun\'s case, surface life, one green reading, all its cover', E.case.key === 'G2V' && E.type === 'G' && E.where.surface === true && E.scenarios.length === 1 && E.scenarios[0].cover === 1 && /^Its star, a G-type at 5,772 K, is nearest the G2V case/.test(E.words[0]), E.words[0]);
   yes('Earth gets Earth\'s light and UV-B, and the words say so', Math.abs(E.light - 1) < 0.01 && Math.abs(E.uvb - 1) < 0.01 && E.words.some((w) => /1\.0 times Earth's visible light and 1\.0 times Earth's UV-B/.test(w)), `${E.light} ${E.uvb}`);
   yes('Earth\'s words say where its ice begins in the picture, about 63 degrees, and not that it is locked', E.words.some((w) => /ice reaches down to about 6[2-4]° of latitude/.test(w)) && !E.words.includes(LOCKED), E.words.join(' | '));
   const warm = lifeOf(at(0.9, 'Earth at 0.9 AU'));
@@ -86,6 +88,14 @@ const at = (a, name) => sol(name, 1, 1, a, 365.25 * Math.pow(a, 1.5), { host: na
   yes('Jupiter: a gas giant, the reason alone', J.words.length === 1 && J.words[0] === WHY.gasGiant);
   const iced = lifeOf(at(3, 'Earth at 3 AU')), molten = lifeOf(at(0.02, 'Earth at 0.02 AU'));
   yes('an Earth at 3 AU is ice and an Earth at 0.02 AU molten, neither with surface life', classify(at(3, 'x3')).look === 'ice' && iced.words[0] === WHY.ice && iced.scenarios.length === 0 && classify(at(0.02, 'x002')).look === 'molten' && molten.words[0] === WHY.molten && molten.scenarios.length === 0, `${iced.words[0]} | ${molten.words[0]}`);
+}
+
+/* ---- a desert by its side of the zone ---- */
+{
+  const desert = { look: 'desert', klass: 0, physics: { radiusKnown: true } };
+  const w = (p) => whereOf(p, desert);
+  yes('thin air inside the zone is sparse; past its inner edge the water is gone; past its outer edge frozen; with no zone, nothing', w(SS.Mars).surface === 'sparse' && w(at(0.5, 'd05')).why === WHY.desertHot && w(at(3, 'd3')).why === WHY.desertCold && w({ name: 'no zone', host: 'nozone' }).why === WHY.desertUnknown,
+    `${w(at(0.5, 'd05')).why.slice(0, 40)} | ${w(at(3, 'd3')).why.slice(0, 40)}`);
 }
 
 /* ---- what the rules cannot place ---- */
@@ -109,13 +119,16 @@ const at = (a, name) => sol(name, 1, 1, a, 365.25 * Math.pow(a, 1.5), { host: na
   const d0 = withAir('GJ 1061 d', null), d1 = withAir('GJ 1061 d', 'bare'), b0 = withAir('GJ 1002 b', null), b1 = withAir('GJ 1002 b', 'thick');
   yes('the air the visitor chose decides: GJ 1061 d drawn bare has no surface life, GJ 1002 b drawn thick has', d0.L.where.surface === true && d1.k.look === 'airless' && d1.L.where.surface === false && d1.L.words[0] === WHY.airless
     && b0.L.where.surface === false && b1.k.look === 'temperate' && b1.L.where.surface === true && b1.L.scenarios.length === 2, `${d0.k.look} ${d1.k.look} ${b0.k.look} ${b1.k.look}`);
-  yes('GJ 1061 d\'s star, 2,953 K, takes M5V extrapolated, and the words say so', d0.L.extrapolated && /an M-type at 2,953 K, takes the M5V case of Kiang et al\. 2007 \(a modelled M5 dwarf\), extrapolated/.test(d0.L.words[0]), d0.L.words[0]);
-  const k442 = lifeOf(P('Kepler-442 b')), k23 = lifeOf(P('K2-3 d')), k452 = lifeOf(P('Kepler-452 b'));
-  yes('Kepler-442 b, one face to its star: its ice on the night side, and the day side said', k442.words.includes(ICE_NIGHT) && k442.words.includes(LOCKED) && !k442.words.some((w) => /latitude/.test(w)), k442.words.slice(1).join(' | '));
-  yes('K2-3 d, a K-type at 3,844 K, takes K2V with one reading', k23.case.key === 'K2V' && k23.type === 'K' && k23.scenarios.length === 1);
+  yes('GJ 1061 d\'s star, 2,953 K, is nearest M5V, extrapolated, and the words say so', d0.L.extrapolated && /an M-type at 2,953 K, is nearest the M5V case of Kiang et al\. 2007 \(a modelled M5 dwarf\), extrapolated/.test(d0.L.words[0]), d0.L.words[0]);
+  const k442 = lifeOf(P('Kepler-442 b')), k23 = lifeOf(P('K2-3 d')), k452 = lifeOf(P('Kepler-452 b')), k1229 = lifeOf(P('Kepler-1229 b'));
+  yes('Kepler-442 b, one face to its star: its ice begins about 97 degrees from the point under the star, past the twilight', k442.words.some((w) => /ice begins about 97° from the point under its star, past the ring of twilight/.test(w)) && k442.words.includes(LOCKED) && !k442.words.some((w) => /latitude/.test(w)), k442.words.slice(1).join(' | '));
+  yes('Kepler-1229 b: its ice begins about 22 degrees from the point under the star, on its day side', k1229.words.some((w) => /ice begins about 22° from the point under its star, on its day side/.test(w)), k1229.words.slice(1).join(' | '));
+  yes('K2-3 d, a K-type at 3,844 K, is nearest M1V and says both, with two readings, b naming its type', k23.case.key === 'M1V' && k23.type === 'K' && /a K-type at 3,844 K, is nearest the M1V case/.test(k23.words[0]) && k23.scenarios.length === 2 && /whose light this K-type star's is nearest/.test(k23.scenarios[1].words), k23.words[0]);
+  const g2 = withAir('GJ 1002 b', 'thick');
+  yes('the ice line follows the scenario the visitor chose: GJ 1002 b drawn thick has its ice begin about 76 degrees from its star', g2.L.words.some((w) => /ice begins about 76° from the point under its star/.test(w)), g2.L.words.slice(1).join(' | '));
   yes('Kepler-452 b, an ocean world, is told its life would be mostly in the water', k452.words.includes(OCEAN));
   let n = 0, errors = 0, unnamed = 0, colourless = 0, desertsDrawn = 0, sparseOutside = 0, subNeptunes = 0, subNeptuneWrong = 0, noSurfacePeak = 0, gravity = 0, iceOff = 0;
-  let hotDeserts = 0, hotDesertWrong = 0, noRadius = 0, noRadiusWrong = 0;
+  let hotDeserts = 0, hotDesertWrong = 0, noRadius = 0, noRadiusWrong = 0, iceGiants = 0, iceGiantWrong = 0;
   for (const p of list) {
     let k, L;
     try { k = classify(p); L = lifeOf(p, k); } catch { errors++; continue; }
@@ -127,13 +140,14 @@ const at = (a, name) => sol(name, 1, 1, a, 365.25 * Math.pow(a, 1.5), { host: na
     if (k.look === 'fluid' && k.klass === 2 && k.physics.radiusKnown) { subNeptunes++; if (L.words[0] !== WHY.subNeptune) subNeptuneWrong++; }
     if (k.look === 'desert' && hzPosition(p).key === 'hot') { hotDeserts++; if (L.words[0] !== WHY.desertHot) hotDesertWrong++; }
     if (k.look === 'fluid' && !k.physics.radiusKnown) { noRadius++; if (L.words[0] !== WHY.noRadius) noRadiusWrong++; }
+    if (k.look === 'fluid' && k.klass === 3 && k.physics.radiusKnown) { iceGiants++; if (L.words[0] !== WHY.iceGiant) iceGiantWrong++; }
     if (!L.where.surface && L.words.some((w) => /would peak/.test(w))) noSurfacePeak++;
     if (L.words.some((w) => /gravity/.test(w))) gravity++;
     if (k.look !== 'temperate' && L.words.some((w) => /ice (lies|reaches)/.test(w))) iceOff++;
   }
   yes('every planet in the catalogue is described, its case named, every colour a colour', errors === 0 && unnamed === 0 && colourless === 0 && n === list.length, `${n} described, ${errors} errors, ${unnamed} unnamed, ${colourless} colourless`);
   yes('no desert is drawn with a cover or called sparse outside the zone, and every sub-Neptune is called one', desertsDrawn === 0 && sparseOutside === 0 && subNeptunes > 1000 && subNeptuneWrong === 0, `${desertsDrawn} ${sparseOutside} ${subNeptunes} ${subNeptuneWrong}`);
-  yes('a desert past the zone\'s inner edge is told its water would be gone; a world drawn with no measured radius is told so', hotDeserts > 500 && hotDesertWrong === 0 && noRadius > 10 && noRadiusWrong === 0, `${hotDeserts} ${hotDesertWrong} ${noRadius} ${noRadiusWrong}`);
+  yes('a desert past the zone\'s inner edge is told its water would be gone; a world drawn with no measured radius is told so', hotDeserts > 500 && hotDesertWrong === 0 && noRadius > 10 && noRadiusWrong === 0 && iceGiants > 100 && iceGiantWrong === 0, `${hotDeserts} ${hotDesertWrong} ${noRadius} ${noRadiusWrong} ${iceGiants} ${iceGiantWrong}`);
   yes('no world without surface life speaks of the light at its surface, none of gravity, and the ice line only of a temperate world', noSurfacePeak === 0 && gravity === 0 && iceOff === 0, `${noSurfacePeak} ${gravity} ${iceOff}`);
 }
 

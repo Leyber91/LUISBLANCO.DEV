@@ -81,7 +81,7 @@ export function drawLife(host, p, { kind, air = null, reading = 'a', onReading =
     }
     sws.addEventListener('click', (e) => { const b = e.target.closest('[data-reading]'); if (b) onReading(b.dataset.reading); });
     host.append(sws);
-    if (plain) host.append(el('p', 'life-plain', 'Data only is on, so the picture draws no cover.'));
+    if (plain) host.append(el('p', 'life-plain', 'The clouds switch is off (the data only), so the picture draws no cover.'));
   }
   if (L.case && L.light !== null) {
     const rows = [['the case of its star', `${L.case.key}, ${L.case.star}`], ['visible light, noon', times(L.light)], ['UV-B, noon', times(L.uvb)]];
@@ -91,7 +91,7 @@ export function drawLife(host, p, { kind, air = null, reading = 'a', onReading =
   }
   host.append(el('p', 'life-words', L.words.join(' ')));
   const ev = el('footer', 'life-ev');
-  ev.append(el('span', '', '[REAL] each case\'s light, UV-B and productivity at noon under Earth-like air: Kiang et al. 2007, Astrobiology 7, 252, Tables 2a and 3; the habitable zone: Kopparapu et al. 2013.'),
+  ev.append(el('span', '', '[REAL] each case\'s light and UV-B at noon (Table 2a) and its productivity averaged over the day and the disk (Table 3), under Earth-like air: Kiang et al. 2007, Astrobiology 7, 252; the habitable zone: Kopparapu et al. 2013.'),
     el('span', '', '[ILLUSTRATIVE] those numbers times this planet\'s starlight, the colour, the cover and these sentences: rules on top of the papers; the M dwarfs\' second reading after Takizawa et al. 2017, Sci. Rep. 7, 7561.'));
   host.append(ev);
   if (focus) { const k = host.querySelector(`button[data-reading="${focus}"]`); if (k) k.focus({ preventScroll: true }); }

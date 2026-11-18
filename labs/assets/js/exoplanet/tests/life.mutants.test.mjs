@@ -3,8 +3,9 @@
      node labs/assets/js/exoplanet/tests/life.mutants.test.mjs
 
    Each entry breaks one rule of life.js: a value of the paper's
-   tables, a spectral type given the wrong case, the M dwarfs'
-   split moved, an end of the cases' range, a look or a zone given
+   tables, the nearest case's tie turned or the first case always
+   taken, an article, an end of the cases' range, a look or a zone
+   given
    or denied surface life, a reading dropped or a band taken out,
    a cover blind to its case or its starlight, a word of light or
    ratio at the wrong bound, a sentence said where it does not
@@ -29,12 +30,12 @@ const MUTANTS = [
   ['the M1V productivity over the wide band changed', `gppVis: 0.33, gppWide: 0.81`, `gppVis: 0.33, gppWide: 0.33`],
   ['the M5V UV-B given a value', `peak: 1042.8, par: 1.5, uvb: 0.000,`, `peak: 1042.8, par: 1.5, uvb: 0.001,`],
 
-  /* ---- the case of a spectral type ---- */
-  ['a G-type star given the K2V case', `const c = type === 'G' ? SUN :`, `const c = type === 'G' ? K2V :`],
-  ['a K-type star given a red dwarf\'s case', `: type === 'K' ? K2V :`, `: type === 'K' ? M1V :`],
-  ['the M dwarfs\' split from 3,376 K', `export const M_SPLIT = 3375;`, `export const M_SPLIT = 3376;`],
-  ['the M dwarfs\' split from 3,374 K', `export const M_SPLIT = 3375;`, `export const M_SPLIT = 3374;`],
-  ['an L dwarf given F2V', `: type === 'L' ? M5V : F2V;`, `: F2V;`],
+  /* ---- the nearest case ---- */
+  ['a tie between two cases given to the cooler star', `if (Math.abs(x.T - teff) < Math.abs(c.T - teff)) c = x;`, `if (Math.abs(x.T - teff) <= Math.abs(c.T - teff)) c = x;`],
+  ['the first case always taken', `if (Math.abs(x.T - teff) < Math.abs(c.T - teff)) c = x;`, `if (false) c = x;`],
+  ['an F without its "an"', `['O', 'A', 'F', 'M', 'L'].includes(type) ? 'an' : 'a'`, `['O', 'A', 'M', 'L'].includes(type) ? 'an' : 'a'`],
+  ['an A without its "an"', `['O', 'A', 'F', 'M', 'L'].includes(type) ? 'an' : 'a'`, `['O', 'F', 'M', 'L'].includes(type) ? 'an' : 'a'`],
+  ['a G given "an"', `['O', 'A', 'F', 'M', 'L'].includes(type) ? 'an' : 'a'`, `['O', 'A', 'F', 'M', 'L', 'G'].includes(type) ? 'an' : 'a'`],
   ['the hot end itself extrapolated', `extrapolated: teff > F2V.T || teff < M5V.T`, `extrapolated: teff >= F2V.T || teff < M5V.T`],
   ['the cool end itself extrapolated', `extrapolated: teff > F2V.T || teff < M5V.T`, `extrapolated: teff > F2V.T || teff <= M5V.T`],
   ['nothing ever extrapolated', `extrapolated: teff > F2V.T || teff < M5V.T`, `extrapolated: false`],
@@ -51,7 +52,7 @@ const MUTANTS = [
   /* ---- the readings and their colours ---- */
   ['an M dwarf given one reading', `  return [\n    mk('a',`, `  return [mk('b', 'Reading b: x', [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis)];\n  return [\n    mk('a',`],
   ['the dark reading not harvesting the visible', `}], 0.8, /** @type {number} */ (c.gppWide)),`, `}], 0, /** @type {number} */ (c.gppWide)),`],
-  ['reading b without its chlorophyll band', `with less light to grow on.', [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),`, `with less light to grow on.', [SORET], 0, c.gppVis),`],
+  ['reading b without its chlorophyll band', `with less light to grow on.\`, [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),`, `with less light to grow on.\`, [SORET], 0, c.gppVis),`],
   ['the F star\'s blue band left out', `[{ mu: c.peak, w: 40, d: 0.9 }, { mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];`, `[{ mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];`],
   ['the Sun\'s red band left out', `[SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];`, `[SORET], 0, c.gppVis)];`],
   ['no red edge on a leaf', `const VIS = 0.14, NIR = 0.5;`, `const VIS = 0.14, NIR = 0.14;`],
@@ -71,14 +72,18 @@ const MUTANTS = [
   /* ---- the sentences ---- */
   ['a star with no temperature given a stand-in case', `  if (T === null) {\n    words.push(NO_STAR);`, `  if (false) {\n    words.push(NO_STAR);`],
   ['a world with no surface told of its light first', `    words.push(where.why);\n    return { case: null,`, `    words.push('Its light would peak somewhere.', where.why);\n    return { case: null,`],
-  ['a surface world with no starlight drawn anyway', `const scenarios = S === null ? [] : scenariosOf(c, S)`, `const scenarios = scenariosOf(c, S || 1)`],
+  ['a surface world with no starlight drawn anyway', `const scenarios = S === null ? [] : scenariosOf(c, S, type)`, `const scenarios = scenariosOf(c, S || 1, type)`],
   ['extrapolation never said', `\${extrapolated ? ', extrapolated past the cases\\' range' : ''}`, ``],
-  ['the case not named', ` takes the \${c.key} case of Kiang`, ` takes a case of Kiang`],
+  ['the case not named', ` is nearest the \${c.key} case of Kiang`, ` is nearest a case of Kiang`],
+  ['a star of another type nearest an M case not said to be so', `\${type === 'M' ? '' : \`, whose light this \${type}-type star's is nearest\`}`, ``],
   ['the reason a desert is sparse not said', `  if (sparse) words.push(where.why);\n`, ``],
   ['the ocean sentence never said', `  if (k.label === 'Ocean world') words.push(OCEAN);\n`, ``],
   ['the day side never said', `  if (ph.locked) words.push(LOCKED);\n`, ``],
   ['the ice line said of every look', `  if (k.look === 'temperate') {\n    // the picture's own ice`, `  if (true) {\n    // the picture's own ice`],
-  ['the ice on a locked world said by latitude', `words.push(ph.locked ? ICE_NIGHT : iceLine(`, `words.push(false ? ICE_NIGHT : iceLine(`],
+  ['the ice on a locked world said by latitude', `words.push(ph.locked ? iceLocked(`, `words.push(false ? iceLocked(`],
+  ['the ice on a locked world at half its angle', `iceLocked(2 * Math.asin(ice) * 180 / Math.PI)`, `iceLocked(Math.asin(ice) * 180 / Math.PI)`],
+  ['the ice on a locked world always past the twilight', `\${deg < 90 ? 'on its day side' : 'past the ring of twilight'}`, `\${false ? 'on its day side' : 'past the ring of twilight'}`],
+  ['the ice line read from the archive\'s air, not the visitor\'s', `const ice = toParams(p, { air: opts.air ?? null }).iceCap;`, `const ice = toParams(p).iceCap;`],
   ['the ice line never said', `    if (ice < 1) words.push(`, `    if (false) words.push(`],
   ['the ice line said of a world with no ice', `    if (ice < 1) words.push(`, `    if (ice < 2.5) words.push(`],
 ];

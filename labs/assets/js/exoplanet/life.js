@@ -14,12 +14,11 @@
    L2 The star's light at the surface: the case of Kiang et al.
       2007 (Astrobiology 7, 252, "Spectral signatures of
       photosynthesis II", Table 2a: cloudless, Earth-like air, the
-      planet at the distance that gives 288 K) for the star's
-      spectral type as the page names it (science.js
-      spectralType): F, G and K take F2V, G2V and K2V; an M dwarf
-      takes M1V from 3,375 K, halfway between the paper's 3,650
-      and 3,100 K, else M5V. Hotter and cooler types take the end
-      cases, extrapolated. The F2V and K2V cases are observed stars
+      planet at the distance that gives 288 K) whose star is
+      nearest in temperature, a tie going to the hotter; the words
+      name the star by the spectral type the page gives it
+      (science.js spectralType), so a K-type star nearest the M1V
+      model says both. The F2V and K2V cases are observed stars
       (sigma Bootis, epsilon Eridani).
    L3 Pigments absorb where the surface photon flux peaks (the
       paper's rule, section 2.2.1).
@@ -54,17 +53,18 @@ export const CASES = Object.freeze([
   { key: 'M1V', star: 'a modelled M1 dwarf', T: 3650, peak: 754.3, par: 6.1, uvb: 0.001, gppVis: 0.33, gppWide: 0.81 },
   { key: 'M5V', star: 'a modelled M5 dwarf', T: 3100, peak: 1042.8, par: 1.5, uvb: 0.000, gppVis: 0.08, gppWide: 0.59 },
 ]);
-const [F2V, SUN, K2V, M1V, M5V] = /** @type {Case[]} */ ([...CASES]);
-/** Within the M dwarfs, M1V from this temperature up: halfway between the paper's 3,650 and 3,100 K. */
-export const M_SPLIT = 3375;
+const [F2V, SUN, K2V, , M5V] = /** @type {Case[]} */ ([...CASES]);
 
-/** The case for a star of this temperature, by the spectral type the page names it, and whether it is extrapolated
-   (past the cases' 6,820 to 3,100 K). @param {number} teff @returns {{ c: Case, type: string, extrapolated: boolean }} */
+/** The case whose star is nearest in temperature (the cases run hot to cool, so a tie keeps the hotter), the spectral
+   type the page names the star by, and whether the case is extrapolated (past the cases' 6,820 to 3,100 K).
+   @param {number} teff @returns {{ c: Case, type: string, extrapolated: boolean }} */
 export function caseOf(teff) {
-  const type = spectralType(teff);
-  const c = type === 'G' ? SUN : type === 'K' ? K2V : type === 'M' ? (teff >= M_SPLIT ? M1V : M5V) : type === 'L' ? M5V : F2V;
-  return { c, type, extrapolated: teff > F2V.T || teff < M5V.T };
+  let c = F2V;
+  for (const x of CASES) if (Math.abs(x.T - teff) < Math.abs(c.T - teff)) c = x;
+  return { c, type: spectralType(teff), extrapolated: teff > F2V.T || teff < M5V.T };
 }
+/** The article before a spectral type's letter: an O, an A, an F, an M, an L; a B, a G, a K. @param {string} type */
+export const article = (type) => (['O', 'A', 'F', 'M', 'L'].includes(type) ? 'an' : 'a');
 
 /* L1: the reasons a world has no surface life, by the picture's look and, for thin air, the zone */
 export const WHY = Object.freeze({
@@ -113,9 +113,10 @@ export const reflectance = (bands, broad) => (lam) => {
 /** The blue band every chlorophyll-like pigment keeps, and Earth's chlorophyll a in the red. */
 const SORET = { mu: 440, w: 22, d: 0.8 }, CHL_A = 680;
 
-/** L4 and L5: the readings of a case, each with its colour and its cover at the planet's starlight S.
-   @param {Case} c @param {number} S @returns {Scenario[]} */
-export function scenariosOf(c, S) {
+/** L4 and L5: the readings of a case, each with its colour and its cover at the planet's starlight S. type: the
+   spectral type the page names the star by, so a star of another type nearest an M case is said to be so.
+   @param {Case} c @param {number} S @param {string} [type] @returns {Scenario[]} */
+export function scenariosOf(c, S, type = 'M') {
   const cover = (/** @type {number} */ gpp) => Math.max(0, Math.min(1, (gpp / SUN.gppVis) * S));
   /** @param {string} key @param {string} words @param {Band[]} bands @param {number} broad @param {number} gpp @returns {Scenario} */
   const mk = (key, words, bands, broad, gpp) => ({ key, words, bands, broad, colour: reflectanceColour(reflectance(bands, broad)), cover: cover(gpp) });
@@ -123,7 +124,7 @@ export function scenariosOf(c, S) {
   if (c === SUN || c === K2V) return [mk('one', 'Pigments tuned to a light that peaks in the red would absorb red and blue and return green: plants much like Earth\'s.', [SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];
   return [
     mk('a', `Reading a: harvesting all its light from 400 to 1,100 nm, as Kiang et al. expect under a star like their ${c.key}, a cover would return little visible light and look dark; its main band, at ${int(c.peak)} nm, is past what eyes see.`, [{ mu: c.peak, w: 40, d: 0.9 }], 0.8, /** @type {number} */ (c.gppWide)),
-    mk('b', 'Reading b: or, as Takizawa et al. 2017 argue for M dwarfs, the first plants would use visible light, with a red edge near 700 to 760 nm as Earth\'s; drawn here in Earth\'s colour, with less light to grow on.', [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
+    mk('b', `Reading b: or, as Takizawa et al. 2017 argue for M dwarfs${type === 'M' ? '' : `, whose light this ${type}-type star's is nearest`}, the first plants would use visible light, with a red edge near 700 to 760 nm as Earth's; drawn here in Earth's colour, with less light to grow on.`, [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
   ];
 }
 
@@ -136,8 +137,10 @@ export const timesEarth = (v) => (v < 0.01 ? 'under 0.01 times' : `${num(v, 2)} 
 export const NO_STAR = 'The archive gives no temperature for its star, so these rules cannot say what its light would be at the surface.';
 /** The words for a planet with no starlight to grow on. */
 export const NO_LIGHT = 'The page has no starlight for it (no orbit, or no star to compute one from), so these rules cannot say how much would grow.';
-/** The words for the ice the picture draws over the cover. */
-export const ICE_NIGHT = 'In the picture its ice lies on the night side, past the twilight; any cover there lies under the ice.';
+/** The words for the ice the picture draws on a world with one face to its star: it begins this many degrees from the
+   point under the star (the shader's sin(angle / 2) against iceCap), on the day side under 90 degrees.
+   @param {number} deg */
+export const iceLocked = (deg) => `In the picture its ice begins about ${int(deg)}° from the point under its star, ${deg < 90 ? 'on its day side' : 'past the ring of twilight'}; any cover farther out lies under the ice.`;
 /** @param {number} deg */
 export const iceLine = (deg) => `In the picture its ice reaches down to about ${int(deg)}° of latitude; any cover nearer its poles lies under the ice.`;
 /** The words for a world with one face to its star. */
@@ -168,9 +171,9 @@ export function lifeOf(p, k = classify(p), opts = {}) {
   const s0 = insolation(p).S, S = typeof s0 === 'number' && s0 > 0 ? s0 : null;
   const sparse = where.surface === 'sparse';
   // a sparse cover is described and not drawn: its cover is 0
-  const scenarios = S === null ? [] : scenariosOf(c, S).map((s) => (sparse ? { ...s, cover: 0 } : s));
+  const scenarios = S === null ? [] : scenariosOf(c, S, type).map((s) => (sparse ? { ...s, cover: 0 } : s));
   const light = S === null ? null : (c.par / SUN.par) * S, uvb = S === null ? null : (c.uvb / SUN.uvb) * S;
-  words.push(`Its star, ${['O', 'A', 'F', 'M', 'L'].includes(type) ? 'an' : 'a'} ${type}-type at ${int(T)} K, takes the ${c.key} case of Kiang et al. 2007 (${c.star})${extrapolated ? ', extrapolated past the cases\' range' : ''}. Under air like Earth's, its light at the surface would peak at ${int(c.peak)} nm, ${band(c.peak)}.`);
+  words.push(`Its star, ${article(type)} ${type}-type at ${int(T)} K, is nearest the ${c.key} case of Kiang et al. 2007 (${c.star})${extrapolated ? ', extrapolated past the cases\' range' : ''}. Under air like Earth's, its light at the surface would peak at ${int(c.peak)} nm, ${band(c.peak)}.`);
   if (S === null || light === null || uvb === null) words.push(NO_LIGHT);
   else {
     for (const s of scenarios) words.push(s.words);
@@ -182,7 +185,7 @@ export function lifeOf(p, k = classify(p), opts = {}) {
     // the picture's own ice (data.js toParams iceCap, the sine of the latitude where ice begins on a turning world;
     // on a world with one face to its star the ice is drawn on the night side)
     const ice = toParams(p, { air: opts.air ?? null }).iceCap;
-    if (ice < 1) words.push(ph.locked ? ICE_NIGHT : iceLine(Math.asin(ice) * 180 / Math.PI));
+    if (ice < 1) words.push(ph.locked ? iceLocked(2 * Math.asin(ice) * 180 / Math.PI) : iceLine(Math.asin(ice) * 180 / Math.PI));
   }
   if (ph.locked) words.push(LOCKED);
   return { case: c, type, extrapolated, where, scenarios, light, uvb, words, phys: ph };
