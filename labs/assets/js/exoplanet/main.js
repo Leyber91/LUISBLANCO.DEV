@@ -250,17 +250,26 @@ function paramsFor(p) {
 }
 /* the reading of life the picture draws for p: the one chosen, else its first; null where the rules draw none */
 function lifeReading(p) {
-  const L = lifeOf(p);
+  const air = store.state.air, L = lifeOf(p, classify(p, { air }), { air });
   return L.scenarios.find((s) => s.key === store.state.lifeReading) || L.scenarios[0] || null;
 }
 /* the sheet "If there were life" for the world on sheet A, shown while the switch is on; with layers, the picture
    takes the cover at once (a change of world takes it with the world's own parameters) */
-function applyLife({ layers = true } = {}) {
+function applyLife({ layers = true, focus = null } = {}) {
   const st = store.state, host = $('life-sheet');
   if (!host || !st.sel) return;
   host.hidden = !st.life;
-  if (st.life) drawLife(host, st.sel, { reading: st.lifeReading, onReading: (k) => { st.lifeReading = k; applyLife(); writeURL(); } });
-  if (layers && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life, plant: prm.plant }); }
+  if (st.life) {
+    drawLife(host, st.sel, { kind: classify(st.sel, { air: st.air }), air: st.air, reading: st.lifeReading, plain: !!st.plain, focus,
+      onReading: (k) => { st.lifeReading = k; applyLife({ focus: k }); writeURL(); } });
+  }
+  // restyle, not setLayers: during a change of world it goes into the world arriving, so the swap does not bring back
+  // the cover that was asked for before the switch was turned
+  if (layers && glOk) {
+    const prm = paramsFor(st.sel), layer = { cloud: prm.cloud, life: prm.life };
+    if (prm.plant) layer.plant = prm.plant;   // a world with no reading keeps the colour it has: an undefined one cannot be uploaded
+    engine.restyle(layer);
+  }
 }
 /* self: the page opened this world with no action of the visitor (the world it starts on, a tour moving by
    itself). Such a world is shown and is not written to the log as a visit. */
@@ -270,7 +279,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   if (!keepTour && st.tour) endTour();
   const prev = st.sel;
   st.sel = p;
-  if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
+  if (prev && prev !== p) { st.air = null; st.lifeReading = 'a'; }   // a chosen scenario and reading belong to the world they were chosen on
   st.system = byOrbit(st.list.filter((q) => q.host === p.host));
   const apply = () => {
     setReticle(p); placeWorld(); applyLife({ layers: false });
@@ -350,7 +359,7 @@ function setAir(key, world) {
   if (!st.sel || !SCENARIOS.includes(key) || (world !== undefined && world !== st.sel.name)) return;   // offered for another world
   st.air = key === classify(st.sel).airKey ? null : key;
   if (glOk) engine.restyle(paramsFor(st.sel));
-  setReticle(st.sel);
+  setReticle(st.sel); applyLife({ layers: false });   // the sheet of life reads the scenario too
   const back = document.querySelector('#ret-render [data-air]');
   if (back) back.focus({ preventScroll: true });
   writeURL();
@@ -932,10 +941,7 @@ async function boot() {
   bindScale($('distance'), (mode) => setCam(mode));
   $('btn-random').addEventListener('click', randomWorld);
   $('btn-clean').addEventListener('click', () => toggleClean(!document.body.classList.contains('clean')));
-  bindSwitch($('btn-plain'), (off) => {
-    const st = store.state; st.plain = off;
-    if (st.sel && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life, plant: prm.plant }); }
-  });
+  bindSwitch($('btn-plain'), (off) => { store.state.plain = off; applyLife(); });
   bindSwitch($('btn-life'), (on) => { store.state.life = on; applyLife(); writeURL(); });
   $('sun-elev').addEventListener('input', (e) => { engine.setCamera({ sunElev: +e.target.value }); $('sun-elev-v').textContent = `${int(+e.target.value)}°`; });   // the kit writes −10, with the minus sign
   $('ground-sites').addEventListener('click', (e) => {

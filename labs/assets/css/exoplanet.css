@@ -528,4 +528,5 @@ button.life-sw:focus-visible { outline: 1px solid var(--horizon); outline-offset
 .life-t td { color: var(--text-bright); text-align: right; padding: 4px 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .life-t tr:first-child td { white-space: normal; }
 .life-words { font: 400 15px/1.6 var(--font-serif); color: var(--text); margin: 0 0 10px; }
+.life-plain { color: var(--text-dim); margin: 0 0 8px; }
 .life-ev { border-top: 1px solid var(--line); padding-top: 6px; color: var(--text-dim); font-size: 11px; display: grid; gap: 4px; }
