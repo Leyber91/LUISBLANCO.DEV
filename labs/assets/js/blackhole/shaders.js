@@ -381,23 +381,18 @@ void main(){
     acc += shadeTexel(texelFetch(uG0, tc, 0), texelFetch(uG1, tc, 0), texelFetch(uG2, tc, 0));
   }
   vec3 col = acc/float(uSS*uSS)*uExpo;
-  // annotation layer: 1 px hairlines at model-computed boundaries
+  // annotation layer: the annulus a visitor points at. The shadow's edge (telescope view) is drawn by the overlay from
+  // traced points (probe.js outline); the per-texel edge and ISCO lines that sat on the black's rim are gone
+  // (2026-11-18)
   if (uNotes == 1) {
     ivec2 c0 = clamp(ivec2(base + 0.5*uScale), ivec2(0), uGSize - 1);
     int st = max(1, int(uScale + 0.5));
     vec4 m = texelFetch(uG0, c0, 0);
     vec4 nx = texelFetch(uG0, clamp(c0 + ivec2(st, 0), ivec2(0), uGSize - 1), 0);
     vec4 ny = texelFetch(uG0, clamp(c0 + ivec2(0, st), ivec2(0), uGSize - 1), 0);
-    bool cap = m.w > -1.5 && m.w < -0.5;
-    bool capx = nx.w > -1.5 && nx.w < -0.5, capy = ny.w > -1.5 && ny.w < -0.5;
-    // the shadow edge: a dashed blue-white hairline (dashes by angle around the screen centre)
-    vec2 rel = gl_FragCoord.xy - 0.5*vec2(uGSize)/uScale;
-    float dash = step(0.0, sin(atan(rel.y, rel.x)*90.0));
-    if ((cap != capx || cap != capy) && dash > 0.5) col = mix(col, ${glslConst(LAB.edge)}, 0.4);
     if (m.w > -0.5 && m.w < 0.5) {
       float dr = max(abs(m.x - nx.x)*step(-0.5, nx.w), abs(m.x - ny.x)*step(-0.5, ny.w)) + 1e-4;
-      // the ISCO and the annulus a visitor points at, in ink: neither is gold (palette.js MARKS)
-      if (abs(m.x - uRin) < dr*0.9 && dr < 0.6) col = mix(col, ${glslMark('isco')}, 0.85);
+      // in ink, never gold (palette.js MARKS)
       if (uHL > 0.0 && abs(m.x - uHL) < dr*0.9 && dr < 0.6) col = mix(col, ${glslMark('annulus')}, 0.9);
     }
   }

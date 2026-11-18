@@ -296,18 +296,26 @@ export function buildUI(app) {
     anchorTimer = setTimeout(async () => {
       if (store.anim) return;
       const v = viewNow();
-      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: store.get('fcol') };
+      // the traced edge is drawn in the telescope view only, so only that view's anchors trace it
+      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: store.get('fcol'), edge: store.get('view') === 'telescope' };
       // a resize re-traces (the grid's reach follows the aspect); the anchors stay live meanwhile
-      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak), args.fcol]);
+      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak), args.fcol, args.edge]);
       if (key === anchorKey) return;
       anchorKey = key;
       try {
-        // the first pass runs inline (about 50 ms) so the labels exist with the first frame;
-        // later passes go to the worker
-        const res = anchorsRuns++ === 0 || !worker ? anchorsInline(args) : await call('anchors', args);
+        // the first pass runs inline (about 50 ms) so the labels exist with the first frame, and leaves a traced edge
+        // (about 50 ms more) to the worker, which sends the whole set straight after; later passes go to the worker
+        const first = anchorsRuns++ === 0 && !!worker;
+        const res = first || !worker ? anchorsInline(first ? { ...args, edge: false } : args) : await call('anchors', args);
         if (key !== anchorKey) return;
         anchors = { ...res, fcol: args.fcol };
         drawOverlay(); drawSpectrum(); app.tour?.refresh();
+        if (first && args.edge) {
+          const all = await call('anchors', args);
+          if (key !== anchorKey) return;
+          anchors = { ...all, fcol: args.fcol };
+          drawOverlay(); app.tour?.refresh();
+        }
       } catch (err) { console.warn('anchors unavailable:', err.message); /* the overlay keeps the analytic curve only */ }
     }, 260);
   };
@@ -343,6 +351,7 @@ export function buildUI(app) {
     const s = store.all();
     const parts = [];
     const th = thNow();
+    const an = anchorsLive();
     // the analytic critical curve, in the telescope view (far observer)
     const tsO = s.view === 'telescope' && s.notes ? shadowFor(store.shown.a, store.shown.incl, store.shown.q) : null;
     if (tsO && tsO.curve) {
@@ -366,8 +375,19 @@ export function buildUI(app) {
       const anchor = end ? 'end' : 'start', ox = end ? -4 : 4;
       parts.push(`<g><line class="lead" x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}"/><text x="${(cx + ox).toFixed(1)}" y="${(cy - 4).toFixed(1)}" text-anchor="${anchor}" class="subt">${l1}</text><text x="${(cx + ox).toFixed(1)}" y="${(cy + 10).toFixed(1)}" text-anchor="${anchor}">${l2}</text></g>`);
     }
+    // the traced edge, in the telescope view, where its legend names it ("dashes: traced edge") beside the theory
+    // curve: a dashed hairline through points where rays change fate (probe.js outline), under the labels. It was a
+    // per-texel test in the shader in every view, a staircase at the low tiers dashed by angle around the screen
+    // centre, and on the cinematic view's black rim it doubled the ISCO's line (2026-11-18). The other views draw
+    // no line on the rim: the black's edge is in the image, and the labels name what bounds it.
     // labels only from anchors traced for this view: none mid-transition, none from the last view
-    const an = anchorsLive();
+    if (s.view === 'telescope' && s.notes && an && an.edge) {
+      const d = an.edge.runs.map((run) => run.map(([sx, sy], i) => {
+        const [x, y] = toScreen(sx, sy, th);
+        return `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join('') + (an.edge.closed ? 'Z' : '')).join('');
+      parts.push(`<g><path class="edge" d="${d}"/></g>`);
+    }
     if (s.notes && an) {
       // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
       // block and kept frames: a label once sat on the spin scale's numbers at 390)

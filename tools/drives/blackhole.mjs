@@ -466,6 +466,45 @@ export async function FALL_STEP(p, { base, width, ready }) {
    a fall the visitor starts and the tour's, take out, and a browser whose storage is refused. Every count is read
    relative to the record as the step finds it, since earlier steps press pixels and run a fall, which the record keeps.
    after(label): the main scenario's pixel rules on the frame with the kept hole. Self-contained, like FALL_STEP. */
+// The overlay's line on the shadow's rim (probe.js outline, ui.js drawOverlay; 2026-11-18). The cinematic view drew a
+// per-texel shadow edge and a per-texel ISCO line on the black's rim, in nearly the same blue: at the low tiers a
+// staircase of dashes. Now the cinematic view draws no line there, and the telescope view draws the traced edge as
+// dashes on the theory curve, the comparison its legend names.
+const EDGE = `(() => {
+  const pts = (el) => (el ? [...el.getAttribute('d').matchAll(/[ML](-?[\\d.]+),(-?[\\d.]+)/g)].map((m) => [+m[1], +m[2]]) : []);
+  const e = document.querySelector('#bh-overlay path.edge'), c = document.querySelector('#bh-overlay path.curve');
+  const E = pts(e), C = pts(c);
+  let worst = 0;
+  for (const [x, y] of E) {
+    let b = Infinity;
+    for (let i = 0; i < C.length; i++) {
+      const [x0, y0] = C[i], [x1, y1] = C[(i + 1) % C.length], ex = x1 - x0, ey = y1 - y0;
+      const u = Math.max(0, Math.min(1, ((x - x0) * ex + (y - y0) * ey) / (ex * ex + ey * ey || 1)));
+      b = Math.min(b, Math.hypot(x - x0 - u * ex, y - y0 - u * ey));
+    }
+    worst = Math.max(worst, b);
+  }
+  return { n: E.length, closed: e ? /Z/.test(e.getAttribute('d')) : null, dash: e ? getComputedStyle(e).strokeDasharray : null,
+    curve: C.length, worst: C.length && E.length ? +worst.toFixed(2) : null, labels: document.querySelectorAll('#bh-overlay text').length };
+})()`;
+export async function EDGE_STEP(p, { base, ready }) {
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+  await p.until(ready, READY_MS);
+  await p.until(`document.querySelectorAll('#bh-overlay text').length > 0`, 30000);
+  await p.sleep(2500);
+  await p.step('M87* as the page opens, its labels drawn');
+  const a = await p.ev(EDGE);
+  p.check('the page as it opens draws no line on the shadow\'s rim: the black\'s edge is in the image, and its labels are drawn', a.n === 0 && a.labels > 0, JSON.stringify(a));
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87&v=telescope`);
+  await p.until(ready, READY_MS);
+  const drawn = await p.until(`!!document.querySelector('#bh-overlay path.edge')`, 30000);
+  await p.sleep(1000);
+  await p.step('M87* in the telescope view, its traced edge drawn');
+  const b = await p.ev(EDGE);
+  p.check('the telescope view draws the traced edge as dashes on the theory curve: closed, 100 points or more, every one within 1.5 px of the curve',
+    !!drawn && b.n >= 100 && b.closed === true && b.dash && b.dash !== 'none' && b.curve > 0 && b.worst != null && b.worst <= 1.5, JSON.stringify(b));
+}
+
 export async function RECORD_STEP(p, { base, width, ready, after = async () => {} }) {
   const phone = width < 700;
   const READ = `(() => { const e = document.querySelector('#bh-recline'); return !!e && e.textContent !== 'reading'; })()`;
@@ -1032,6 +1071,7 @@ export default async function blackhole(p, { base, width }) {
   await sheet(false);
 
   /* ---- 3. the measurement and the telescope view, opened by link (ledger row 2; P2-1, P4-3) ---- */
+  await EDGE_STEP(p, { base, ready: READY });
   const CARD = `(async () => {
     const P = await import('/labs/assets/js/blackhole/physics.js');
     const s = window.__bh.store.all(), ms = P.measurement(s), c = ms.cmp;
