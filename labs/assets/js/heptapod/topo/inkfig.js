@@ -173,6 +173,38 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG', value: 0, source: 'first values, not compared with any film measure of their own' },
 ]);
 
+/* Each constant's kind (Luis, 2026-11-18: "we don't want handwaved, it will be generated obeying mathematical
+   equations"). derived: an equation from physics or the grammar. calibrated: set to a named film measure (the
+   film enters as a distribution, ip.md rule 9). frame: the measuring frame. chosen: set by eye or a first value,
+   debt to be derived or fitted by a stated objective on held-out sentences. tools/dev/heptapod_equations.mjs
+   writes the sheet from this, with the numeric literals still inline in the drawing code. */
+export const INK_KIND = Object.freeze({
+  S: ['frame', 'the film masks are 3300 px; the suite measures ours at the same size'],
+  R_CANVAS: ['calibrated', 'film.md 5.2: R over canvas, median 0.365'],
+  NODE_DEG: ['chosen', 'first 4, then 6 and 7 by eye on 2026-11-17 against the film cluster spans (median 15, widest median 32)'],
+  CORE: ['chosen', 'first value'],
+  DEPOSITS: ['chosen', 'first value'],
+  ARC_MIN_DEG: ['chosen', 'first value'],
+  MASS_MAX: ['calibrated', 'film suite: blot clusters per master p90 4.3'],
+  MASS_ARC: ['calibrated', 'film suite: total cluster arc per master p90 98.1 degrees'],
+  OVERLAP: ['chosen', 'first value'],
+  GAP_DEG: ['calibrated', 'film suite: main gap median 26.5 degrees'],
+  TAPER_DEG: ['chosen', 'first value'],
+  DEPTH: ['calibrated', 'film suite: blot peak width median 0.325 R'],
+  WOBBLE: ['chosen', 'by eye with the suite column in view (0.03, 0.10, 0.06, 0.11); film centreline deviation median 0.043 R'],
+  W_RING: ['chosen', 'by eye with the suite column in view (0.05, 0.06, 0.09); film carrier w_med median 0.066 R'],
+  LOAD_ARC: ['chosen', 'first value'],
+  LOAD_FLOOR: ['chosen', 'raised by eye (0.45, 0.7) when the 1-clause ring dried away'],
+  BRISTLES: ['chosen', 'first value'],
+  SHAFT: ['chosen', 'film filament shaft median 0.0172 R, raised by eye to 0.02'],
+  FIL_LEN: ['calibrated', 'film suite: filament length median 0.143 R'],
+  RIM_A: ['chosen', 'first value'],
+  SPRAY_DEG: ['chosen', 'first value'],
+  LEAN_DEG: ['chosen', 'first value'],
+  INK_SPREAD: ['chosen', 'raised by eye (0.0035, 0.006) to close gaps between strokes'],
+  CORE_ROLES: ['derived', 'the grammar: hmr.js core participant roles'],
+});
+
 /* ---------------- I2c: the radicals' words in the lab's code ---------------- */
 
 let LUMP = null;
