@@ -76,7 +76,7 @@ export const WHERE = Object.freeze({
 });
 
 /* L4: a leaf's reflectance before its pigments, low in the visible and high past the red edge near 720 nm (the shape
-   of Earth's vegetation, Kiang et al. 2007 I), and the pigments' bands taken out of it. [ILLUSTRATIVE] */
+   of Earth's vegetation, the "red edge" of Kiang et al. 2007 II), and the pigments' bands taken out of it. [ILLUSTRATIVE] */
 const VIS = 0.14, NIR = 0.5;
 const gauss = (/** @type {number} */ lam, /** @type {Band} */ b) => Math.exp(-0.5 * ((lam - b.mu) / b.w) ** 2);
 /** @param {number} lam */

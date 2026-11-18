@@ -544,7 +544,7 @@ vec3 landColor(float e, float clim, float moist){
   col = mix(col, mix(uColB, vec3(0.22,0.21,0.20), 0.5), smoothstep(0.35, 0.10, warm)*0.6);   // cold ground: grey scree
   if(uLife > 0.0){
     vec3 plant = uPlant * mix(1.0, 0.55, smoothstep(0.4,0.8,moist));   // wet ground's cover darker
-    // a thin cover (lichen-like crusts, Kiang et al. 2007 I) on dry ground, full on wet, none on high rock; frozen
+    // a thin cover (lichen-like crusts: Kiang et al. 2007 II, conclusion, "given the example of lichens") on dry ground, full on wet, none on high rock; frozen
     // ground is the ice cap's, drawn over it. [ILLUSTRATIVE] uLife is 0 unless the visitor turns life on (life.js)
     col = mix(col, plant, uLife*(0.35 + 0.65*smoothstep(0.2,0.55,moist))*(1.0-smoothstep(0.55,0.8,e)));
   }
