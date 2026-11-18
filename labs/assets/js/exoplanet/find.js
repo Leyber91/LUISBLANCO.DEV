@@ -35,9 +35,9 @@ export function kindOf(p) {
    radius and the orbit, or the archive's insolation. Null when neither exists: a world with no published
    value whose star lacks a temperature or a radius is not given one.
    Null too for a planet seen by its own heat (starlight.js ownHeat, the rule a gas giant's name uses too:
-   the method is imaging, or the published value is more than OWN_HEAT times the starlight's by both this
-   page's starlight and the archive's insolation). Such a planet is not cold, not hot, and comes last in an
-   order by temperature. */
+   the method is imaging, or the published value is more than OWN_HEAT times the starlight's by this page's
+   starlight and, where the archive lists an insolation, by that too). Such a planet is not cold, not hot,
+   and comes last in an order by temperature. */
 export function tempOf(p) {
   if (ownHeat(p)) return null;
   if (isNum(p.Teq)) return { T: p.Teq, published: true };

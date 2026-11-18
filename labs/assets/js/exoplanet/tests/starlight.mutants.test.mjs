@@ -233,10 +233,10 @@ const MUTANTS = [
   ['the luminosity named as the radius', "L: 'the star\\'s luminosity',", "L: 'the star\\'s radius',"],
 
   /* ---- the equilibrium temperature ---- */
-  ['a temperature with no starlight', '  if (!pos(s.S)) return null;\n  const k = T_ZERO', '  const k = T_ZERO'],
-  ['the albedo taken to the half', 'const k = T_ZERO * Math.pow(1 - albedo, 0.25);', 'const k = T_ZERO * Math.pow(1 - albedo, 0.5);'],
-  ['the albedo left out', 'const k = T_ZERO * Math.pow(1 - albedo, 0.25);', 'const k = T_ZERO;'],
-  ['the temperature as the square root of the starlight', 'k * Math.pow(x, 0.25) : null);', 'k * Math.pow(x, 0.5) : null);'],
+  ['a temperature with no starlight', '  if (!pos(s.S)) return null;\n  const t = (x)', '  const t = (x)'],
+  ['the albedo taken to the half', 'T_ZERO * Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25)', 'T_ZERO * Math.pow(1 - albedo, 0.5) * Math.pow(S, 0.25)'],
+  ['the albedo left out', 'T_ZERO * Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25)', 'T_ZERO * Math.pow(S, 0.25)'],
+  ['the temperature as the square root of the starlight', 'Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.25)', 'Math.pow(1 - albedo, 0.25) * Math.pow(S, 0.5)'],
   ['no range for the temperature', 'return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };', 'return { med: t(s.S), lo: null, hi: null, src: s.src, drawn: s.drawn };'],
   ['the range of the temperature the wrong way round', 'return { med: t(s.S), lo: t(s.lo), hi: t(s.hi), src: s.src, drawn: s.drawn };', 'return { med: t(s.S), lo: t(s.hi), hi: t(s.lo), src: s.src, drawn: s.drawn };'],
   ['the temperature without the errors drawn', 'src: s.src, drawn: s.drawn };', 'src: s.src, drawn: [] };'],
@@ -355,7 +355,10 @@ const MUTANTS = [
   ['the archive\'s insolation ignored', `return byArchive === null || p.Teq > OWN_HEAT * byArchive;`, `return true;`],
   ['own heat only where the archive has an insolation', `return byArchive === null || p.Teq`, `return byArchive !== null && p.Teq`],
   ['exactly twice the archive\'s counted as own heat', `p.Teq > OWN_HEAT * byArchive;`, `p.Teq >= OWN_HEAT * byArchive;`],
-  ['the archive\'s insolation read at albedo 0', `T_ZERO * Math.pow(p.S * 0.7, 0.25)`, `T_ZERO * Math.pow(p.S, 0.25)`],
+  ['the archive\'s insolation read at albedo 0', `pos(p.S) ? teqFromS(p.S, 0.3) : null`, `pos(p.S) ? teqFromS(p.S, 0) : null`],
+  ['a negative insolation held against it', `const byArchive = pos(p.S) ?`, `const byArchive = isNum(p.S) ?`],
+  ['an infinite insolation held against it', `const byArchive = pos(p.S) ?`, `const byArchive = p.S !== null && p.S !== undefined ?`],
+  ['own heat by the archive\'s insolation alone', `if (!isNum(t) || !(p.Teq > OWN_HEAT * t)) return false;`, `if (!isNum(t)) return false;`],
 
   /* ---- where view D draws an orbit ---- */
   ['an orbit drawn with no zone', "if (!hz || !pos(a)) return 'unknown';", "if (!hz && !pos(a)) return 'unknown';"],
