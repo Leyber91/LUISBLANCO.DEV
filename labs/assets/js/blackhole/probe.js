@@ -151,23 +151,23 @@ export function anchors({ view, aspect, nx = 72, ny = 44, tpeakK = 0, fcol = 1.7
  *  between two points strays at most 0.1 px from the curve. */
 export const OUTLINE_N = 120;
 
-/** The rays the traced edge is found with: the shadow as the lab measures it everywhere else (kerr.js bisectEdge, the
- *  renderer's measureStrip), with the disk switched off, so the line also runs where the disk hides the shadow; at
- *  a finer step than the anchors' grid (0.08 against 0.1, 2400 steps). With the disk on, the outermost black edge
- *  jumped between the shadow above the disk and a sliver below it, and the line crossed the disk (edge.test.mjs,
- *  2026-11-18). */
+/** The rays the traced edge is found with: the disk switched off, as kerr.js bisectEdge and the renderer's
+ *  measureStrip measure the shadow (unlike bisectEdge, a ray that ran out of steps is not counted inside: inShadow),
+ *  at a finer step than the anchors' grid (0.08 against 0.1, 2400 steps). With the disk on, the outermost black
+ *  edge jumped between the shadow above the disk and a sliver below it (edge.test.mjs, 2026-11-18). */
 export function edgeOpts(view) {
   return { q: view.q || 0, k: 0.08, maxSteps: 2400 };
 }
 /** A ray inside the shadow: captured, and not one that ran out of steps (kerr.js traceRay counts those captured). */
 export const inShadow = (res) => res.fate === 'captured' && !res.maxed;
 
-/** The shadow's edge, for the telescope view's dashed hairline (ui.js drawOverlay). Along OUTLINE_N directions from (cx, cy), a point inside the
+/** The shadow's edge, for the telescope view's ticks on the theory curve (ui.js drawOverlay). Along OUTLINE_N directions from (cx, cy), a point inside the
  *  shadow, it brackets the change of fate near the radius the previous direction found (captured inside, not
  *  outside), widening the bracket until it holds, and bisects it 10 times (to a thousandth of the bracket). A
  *  direction gives no point where the edge lies beyond the screen (the shadow runs off the frame) or no bracket is
  *  found, and the line breaks there.
- *  Returns the runs of [sx, sy] in direction order (closed when every direction gave a point) and the rays traced. */
+ *  Returns the runs of [sx, sy] in direction order (closed when every direction gave a point), the rays traced and
+ *  the centre the directions start from. */
 export function outline({ a, cam, opts, X, Y, cx, cy, r0, n = OUTLINE_N, iters = 10 }) {
   const trace = (x, y) => inShadow(K.traceRay(a, cam, x, y, 1, opts));
   if (!(r0 > 0) || !trace(cx, cy)) return null;
@@ -186,7 +186,9 @@ export function outline({ a, cam, opts, X, Y, cx, cy, r0, n = OUTLINE_N, iters =
       if (inLo && !inHi) {
         for (let s = 0; s < iters; s++) { const m = 0.5 * (lo + hi); if (cap(m)) lo = m; else hi = m; }
         r = 0.5 * (lo + hi);
-        pt = [cx + r * dx, cy + r * dy];
+        // only a point on the screen: from a centre off it, a direction runs off the screen before it enters
+        const x = cx + r * dx, y = cy + r * dy;
+        if (Math.abs(x) <= X && Math.abs(y) <= Y) pt = [x, y];
       }
     }
     pts.push(pt);
@@ -197,7 +199,7 @@ export function outline({ a, cam, opts, X, Y, cx, cy, r0, n = OUTLINE_N, iters =
   const closed = pts.every(Boolean);
   // a run that ends at the last direction continues into the one that starts at the first
   if (!closed && runs.length > 1 && pts[0] && pts[n - 1]) runs[0] = runs.pop().concat(runs[0]);
-  return { runs, closed, n, rays };
+  return { runs, closed, n, rays, cx, cy };
 }
 
 /** Sub-ring widths traced with the charge; the Lyapunov comparison (Johnson et al. 2020)

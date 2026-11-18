@@ -238,7 +238,7 @@ label.bh-btn { display: inline-flex; align-items: center; justify-content: cente
 #bh-overlay text { font-family: var(--font-mono); font-size: 11px; fill: var(--text-bright); paint-order: stroke; stroke: var(--bh-halo); stroke-width: 3px; letter-spacing: .06em; }
 #bh-overlay .lead { stroke: var(--horizon-soft); stroke-width: 1; fill: none; opacity: .75; }
 #bh-overlay .curve { stroke: var(--horizon); stroke-width: 1; fill: none; opacity: .9; }
-#bh-overlay .edge { stroke: var(--horizon); stroke-width: 1; fill: none; stroke-dasharray: 4 3; opacity: .85; }
+#bh-overlay .edge { stroke: var(--text-bright); stroke-width: 1; fill: none; opacity: .9; }   /* the traced edge's ticks across the theory curve */
 #bh-overlay .curve2 { stroke: var(--horizon-soft); stroke-width: 1; fill: none; stroke-dasharray: 3 4; opacity: .7; }
 #bh-overlay .mark { fill: none; stroke: var(--horizon-soft); stroke-width: 1; }
 #bh-overlay .subt { fill: var(--text); }

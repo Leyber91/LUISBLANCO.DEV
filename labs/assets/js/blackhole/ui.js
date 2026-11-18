@@ -304,7 +304,8 @@ export function buildUI(app) {
       anchorKey = key;
       try {
         // the first pass runs inline (about 50 ms) so the labels exist with the first frame, and leaves a traced edge
-        // (about 50 ms more) to the worker, which sends the whole set straight after; later passes go to the worker
+        // (45 to 100 ms more in node on this machine, 2026-11-18) to the worker, which sends the whole set straight
+        // after; later passes go to the worker
         const first = anchorsRuns++ === 0 && !!worker;
         const res = first || !worker ? anchorsInline(first ? { ...args, edge: false } : args) : await call('anchors', args);
         if (key !== anchorKey) return;
@@ -345,6 +346,19 @@ export function buildUI(app) {
     const ly = Math.max(pad + 14, Math.min(H - pad - 14, y + dy));
     return { lx, ly, end };
   }
+  /** The traced edge as short ticks across the theory curve, one a direction, fewer where they would stand closer than
+   *  9 px. A dashed line laid on the solid curve in the same ink read as the curve itself (review_edge 1). */
+  function edgeTicks(e, th) {
+    const [ox, oy] = toScreen(e.cx, e.cy, th);
+    const pts = e.runs.flat().map(([sx, sy]) => toScreen(sx, sy, th));
+    if (!pts.length) return '';
+    const R = pts.reduce((m, [x, y]) => m + Math.hypot(x - ox, y - oy), 0) / pts.length;
+    const every = Math.max(1, Math.ceil(9 / (R * 2 * Math.PI / e.n)));
+    return pts.filter((_, i) => i % every === 0).map(([x, y]) => {
+      const d = Math.hypot(x - ox, y - oy) || 1, ux = (x - ox) / d, uy = (y - oy) / d;
+      return `M${(x - 4 * ux).toFixed(1)},${(y - 4 * uy).toFixed(1)}L${(x + 4 * ux).toFixed(1)},${(y + 4 * uy).toFixed(1)}`;
+    }).join('');
+  }
   function drawOverlay() {
     const W = window.innerWidth, H = window.innerHeight;
     overlay.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -365,29 +379,24 @@ export function buildUI(app) {
         d += `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
       });
       parts.push(`<g><path class="curve" d="${d}Z"/></g>`);
+      // the traced edge on it as ticks (probe.js outline). One rule draws them and names them: no ticks without the
+      // curve they are compared with, and the legend names ticks only where they are drawn (review_edge 4)
+      const ticks = an && an.edge ? edgeTicks(an.edge, th) : '';
+      if (ticks) parts.push(`<g><path class="edge" d="${ticks}"/></g>`);
       const top = ts.curve.reduce((m, p) => (p[1] > m[1] ? p : m), ts.curve[0]);
       const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
       // the legend names the curve by the colour its token draws it in (palette.js; review_s2 P2-1) and by how it was
       // obtained (physics.js SHADOW_HOW; fix_s2_p1 K4), and stays between the panels at every width: flipped to the
       // left where it would run under the Measure card (P4-3, K6)
-      const l1 = SHADOW_HOW[ts.how].curve, l2 = `solid ${colourWord('curve')}: theory · dashes: traced edge`;
+      const l1 = SHADOW_HOW[ts.how].curve, l2 = `solid ${colourWord('curve')}: theory${ticks ? ' · ticks: traced edge' : ''}`;
       const { lx: cx, ly: cy, end } = keepInside(tx, ty, 70, -46, Math.max(l1.length, l2.length) * LABEL_CH, openCentre(W), H);
       const anchor = end ? 'end' : 'start', ox = end ? -4 : 4;
       parts.push(`<g><line class="lead" x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}"/><text x="${(cx + ox).toFixed(1)}" y="${(cy - 4).toFixed(1)}" text-anchor="${anchor}" class="subt">${l1}</text><text x="${(cx + ox).toFixed(1)}" y="${(cy + 10).toFixed(1)}" text-anchor="${anchor}">${l2}</text></g>`);
     }
-    // the traced edge, in the telescope view, where its legend names it ("dashes: traced edge") beside the theory
-    // curve: a dashed hairline through points where rays change fate (probe.js outline), under the labels. It was a
-    // per-texel test in the shader in every view, a staircase at the low tiers dashed by angle around the screen
-    // centre, and on the cinematic view's black rim it doubled the ISCO's line (2026-11-18). The other views draw
-    // no line on the rim: the black's edge is in the image, and the labels name what bounds it.
+    // No other view draws a line on the shadow's rim. The shader drew a per-texel shadow edge and ISCO line there in
+    // every view, in nearly the same blue: a staircase of dashes at the low tiers (2026-11-18). The black's edge is
+    // in the image, and the labels name what bounds it.
     // labels only from anchors traced for this view: none mid-transition, none from the last view
-    if (s.view === 'telescope' && s.notes && an && an.edge) {
-      const d = an.edge.runs.map((run) => run.map(([sx, sy], i) => {
-        const [x, y] = toScreen(sx, sy, th);
-        return `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join('') + (an.edge.closed ? 'Z' : '')).join('');
-      parts.push(`<g><path class="edge" d="${d}"/></g>`);
-    }
     if (s.notes && an) {
       // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
       // block and kept frames: a label once sat on the spin scale's numbers at 390)
