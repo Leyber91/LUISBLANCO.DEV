@@ -81,7 +81,11 @@ export class Renderer {
     // blackbody table
     this.lut = this._tex(LUT_N, 1, gl.RGBA16F, gl.RGBA, gl.FLOAT, buildLUT(), gl.LINEAR);
     this.profile = this._tex(512, 1, gl.R16F, gl.RED, gl.FLOAT, new Float32Array(512), gl.LINEAR);
-    this.preview = null; this.main = null; this.hdr = null;
+    this.preview = null; this.main = null; this.hdr = null; this.hdrPreview = null;
+    // the preview's scale when the frame loop sets one (adapt.js previewAfter); until then the rule in resize
+    this.previewPs = null;
+    // a full picture's bands: render() says which band starts one and which ends it, and the frame loop sums the
+    // frame times between (a hidden tab draws no frame and adds nothing; review_res 1)
     this.bandRows = 64; this.bandY = 0; this.mainDone = false;
     this.frameNo = 0;
     this.tier = TIERS.mid;
@@ -192,13 +196,33 @@ export class Renderer {
     if (!force && this.canvas.width === w && this.canvas.height === h && this.hdr) return;
     this.canvas.width = w; this.canvas.height = h;
     if (!this.floatRT) { this.dirtyGeo = true; return; }
-    this._free(this.hdr); this._free(this.main); this._free(this.preview);
+    this._free(this.hdr); this._free(this.main);
     this.hdr = this._hdrTarget(w, h);
     const ss = this.tier.ss;
     this.main = this._gbuffer(w * ss, h * ss); this.main.ss = ss;
-    const ps = w * h > 600000 ? 0.4 : w * h < 220000 ? 0.75 : 0.55;
-    this.preview = this._gbuffer(Math.max(2, Math.round(w * ps)), Math.max(2, Math.round(h * ps)));
+    // the preview's scale is set once from the canvas's size and kept across tiers; the frame loop changes it and reads it
+    // back (review_res 6: after a tier change the size rule picked another scale than the loop's)
+    if (this.previewPs == null) this.previewPs = w * h > 600000 ? 0.4 : w * h < 220000 ? 0.75 : 0.55;
+    this._previewBuffers(this.previewPs);
+    this.dirtyGeo = true;
+  }
+
+  /** The preview's ray buffer at scale ps of the canvas, and the target it is shaded into at its own size: the final
+   *  pass enlarges that with linear filtering. Shaded at the canvas's size, each preview ray was copied to every pixel
+   *  it covers, a hard square 2.8 to 5 px wide while the view moved (2026-11-18). */
+  _previewBuffers(ps) {
+    this._free(this.preview); this._free(this.hdrPreview);
+    const w = Math.max(2, Math.round(this.canvas.width * ps)), h = Math.max(2, Math.round(this.canvas.height * ps));
+    this.preview = this._gbuffer(w, h);
     this.preview.scale = ps;
+    this.hdrPreview = this._hdrTarget(w, h);
+  }
+
+  /** Trace the preview at scale ps from the next frame on (adapt.js previewAfter). */
+  setPreviewScale(ps) {
+    if (!this.ok() || !this.floatRT || !this.preview || Math.abs(ps - this.preview.scale) < 1e-9) return;
+    this.previewPs = ps;
+    this._previewBuffers(ps);
     this.dirtyGeo = true;
   }
 
@@ -282,6 +306,7 @@ export class Renderer {
       return { traced: 'direct' };
     }
     let traced = null;
+    let firstBand = false, lastBand = false;
     if (this.dirtyGeo) {
       this._traceInto(this.preview, f);
       this.dirtyGeo = false;
@@ -294,17 +319,23 @@ export class Renderer {
       this.bandY = this.main.h; this.mainDone = true; traced = 'full';
     } else if (!traced && !this.mainDone && !interacting) {
       const rows = Math.min(this.bandRows, this.main.h - this.bandY);
+      firstBand = this.bandY === 0;
       this._traceInto(this.main, f, this.bandY, rows);
       this.bandY += rows;
-      if (this.bandY >= this.main.h) this.mainDone = true;
+      if (this.bandY >= this.main.h) { this.mainDone = true; lastBand = true; }
       traced = 'band';
     }
+    // the full picture is shaded at the canvas's size from its supersamples; the preview at its own size, one ray a
+    // pixel, and enlarged by the final pass
     const src = this.mainDone ? this.main : this.preview;
-    const scale = this.mainDone ? this.main.ss : this.preview.scale;
+    const dst = this.mainDone ? this.hdr : this.hdrPreview;
+    // the scale of the preview this frame shows, null for a full picture (the drive reads it; review_res2 9)
+    this.shownScale = this.mainDone ? null : this.preview.scale;
+    const scale = this.mainDone ? this.main.ss : 1;
     const ss = this.mainDone ? this.main.ss : 1;
     // shade -> HDR
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.hdr.fbo);
-    gl.viewport(0, 0, this.hdr.w, this.hdr.h);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fbo);
+    gl.viewport(0, 0, dst.w, dst.h);
     this._bind(this.pShade, { ...f, pixAng: 2 * this.geo.tanHalf / src.h });
     const L = this.pShade.loc;
     gl.uniform1f(L.uScale, scale);
@@ -314,18 +345,20 @@ export class Renderer {
     this._bindTex(this.pShade, 'uLUT', this.lut, 3);
     this._bindTex(this.pShade, 'uProfile', this.profile, 4);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.bindTexture(gl.TEXTURE_2D, this.hdr.t);
+    gl.bindTexture(gl.TEXTURE_2D, dst.t);
     gl.generateMipmap(gl.TEXTURE_2D);
     // final -> canvas
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.useProgram(this.pFinal.p);
-    this._bindTex(this.pFinal, 'uHDR', this.hdr.t, 0);
+    this._bindTex(this.pFinal, 'uHDR', dst.t, 0);
     gl.uniform2f(this.pFinal.loc.uRes, this.canvas.width, this.canvas.height);
+    // the bloom's levels as on the full picture: a preview at scale ps is log2(1/ps) levels down already
+    gl.uniform1f(this.pFinal.loc.uLod0, Math.log2(this.canvas.height / dst.h));
     gl.uniform1f(this.pFinal.loc.uBloom, frame.bloom ?? 0.55);
     gl.uniform1f(this.pFinal.loc.uFrame, this.frameNo % 64);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    return { traced, refined: this.mainDone, progress: this.mainDone ? 1 : this.bandY / (this.main?.h || 1) };
+    return { traced, refined: this.mainDone, progress: this.mainDone ? 1 : this.bandY / (this.main?.h || 1), firstBand, lastBand };
   }
 
   _bindTex(prog, name, tex, unit) {
@@ -425,6 +458,9 @@ export class Renderer {
     gl.useProgram(this.pFinal.p);
     this._bindTex(this.pFinal, 'uHDR', hdr.t, 0);
     gl.uniform2f(this.pFinal.loc.uRes, W, H);
+    // the still is shaded at its own size: no level offset (a uniform keeps its last value: render()'s, for a preview,
+    // shifted a thumbnail's bloom; review_res 5)
+    gl.uniform1f(this.pFinal.loc.uLod0, 0);
     gl.uniform1f(this.pFinal.loc.uBloom, frame.bloom ?? 0.55);
     gl.uniform1f(this.pFinal.loc.uFrame, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

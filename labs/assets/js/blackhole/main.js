@@ -7,6 +7,7 @@
 import { Store } from './state.js';
 import { Renderer } from './renderer.js';
 import { TIERS } from './config.js';
+import { ORDER, tierStart, tierAfter, previewStart, previewAfter, previewReset } from './adapt.js';
 import { derive } from './physics.js';
 import { DIAG_EXPO } from './palette.js';
 import { buildUI } from './ui.js';
@@ -70,8 +71,10 @@ function boot() {
     app.geoView = view;
   };
 
+  let previewNeedsReset = false;
   store.on((changed) => {
-    if (changed.includes('tier')) { renderer.setTier(TIERS[tierName()]); geoKey = ''; }
+    // a tier the visitor picks changes the preview's rays too: what its last step taught no longer holds
+    if (changed.includes('tier')) { renderer.setTier(TIERS[tierName()]); geoKey = ''; previewNeedsReset = true; }
     app.model = derive(store.all());
     app.needs = true;
     app.urlDirty = true;
@@ -92,22 +95,60 @@ function boot() {
   reduceMQ.addEventListener?.('change', (e) => { store.reduced = e.matches; if (e.matches) store.set({ anim: false }); });
 
   // pause rendering when the tab is hidden or the canvas is scrolled off-screen
-  let visible = true;
-  document.addEventListener('visibilitychange', () => { visible = !document.hidden; if (visible) requestAnimationFrame(loop); });
+  // One chain of frames: a frame is asked for only when none is pending, and on the page's return the frame clock
+  // starts afresh (a second chain measured frames of 0 ms; review_res2 4). A full picture the page was hidden through
+  // is not counted (review_res2 1).
+  let visible = true, scheduled = false, hiddenDuring = false;
+  const wake = () => { if (!scheduled) { scheduled = true; last = performance.now(); requestAnimationFrame(loop); } };
+  document.addEventListener('visibilitychange', () => { visible = !document.hidden; if (!visible) hiddenDuring = true; else wake(); });
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver((es) => { const v = es[0].isIntersecting; if (v && !visible) { visible = true; requestAnimationFrame(loop); } visible = v && !document.hidden; }).observe(canvas);
+    new IntersectionObserver((es) => {
+      const v = es[0].isIntersecting;
+      if (v && !visible && !document.hidden) { visible = true; wake(); }
+      visible = v && !document.hidden;
+      if (!visible) hiddenDuring = true;
+    }).observe(canvas);
   }
 
-  let last = performance.now(), frames = 0, acc = 0, tierChecks = 0, lastDraw = 0, drew = false, costAcc = 0, costN = 0, winStart = performance.now();
+  let last = performance.now(), frames = 0, acc = 0, lastDraw = 0, drew = false, costAcc = 0, costN = 0, winStart = performance.now();
+  // the tier and the preview's scale follow what the frames measure (adapt.js), for the whole visit
+  let tierState = tierStart(autoTier), previewState = previewStart(renderer.preview?.scale ?? 0.55);
+  // a full picture's time: the frame times of the frames that traced its bands, summed (review_res 1)
+  let lastTraced = null, previewDts = [], refineAcc = 0, refineOpen = false, refineDone = false;
+  app.perf.refines = 0;
+  // the fallback path without float targets keeps the rule it had: two judgements in the first two seconds, from frame
+  // times (review_res 3; the new rule's pictures there are single frames, which it cannot weigh)
   const t0 = performance.now();
-  const ORDER = ['min', 'low', 'mid', 'high'];
+  let legacyChecks = 0;
+  /** The tier after a full picture of refineMs (adapt.js tierAfter): auto tier only, on a hardware renderer with float
+   *  targets. A software rasteriser stays on min, where it starts: climbing, its moving picture got coarser (review_res 4). */
+  function decideTier(refineMs, now) {
+    app.perf.refines++; app.perf.refineMs = refineMs;
+    if (STILL || store.get('tier') !== 'auto' || renderer.software || !renderer.floatRT) return;
+    const next = tierAfter(tierState, { refineMs, w: canvas.clientWidth, h: canvas.clientHeight, dpr: window.devicePixelRatio || 1, now, tiers: TIERS });
+    if (next.tier !== tierState.tier) {
+      autoTier = next.tier; renderer.setTier(TIERS[autoTier]); geoKey = '';
+      // the preview's rays change with the tier: its last step proves nothing now
+      previewState = previewReset(previewState, now);
+    }
+    tierState = next;
+    app.perf.tier = autoTier;
+    ui.perf?.(app.perf, null);
+  }
   function loop(now) {
+    scheduled = false;
     if (!visible) return;
     const dt = Math.min(250, now - last);
     last = now;
     // the interval after a frame that drew is that frame's cost (GPU-bound), the frame-time readout
     if (drew) {
       costAcc += dt; costN++; drew = false;
+      if (lastTraced === 'preview') previewDts.push(dt);
+      if (refineOpen && lastTraced === 'band') refineAcc += dt;
+      if (refineDone) {
+        refineDone = false; refineOpen = false;
+        if (!hiddenDuring) decideTier(refineAcc, now);
+      }
       // median over the last 60 drawn frames, for the on-page readout
       app.perf.samples.push(dt); if (app.perf.samples.length > 60) app.perf.samples.shift();
       const sorted = app.perf.samples.slice().sort((x, y) => x - y);
@@ -138,28 +179,43 @@ function boot() {
       }
       void acc;
       renderer.adaptBands(dt);
-      // the tier is chosen from frame times measured in the first two seconds
-      if (!STILL && tierChecks < 2 && now - t0 > (tierChecks ? 2200 : 1000) && store.get('tier') === 'auto' && app.perf.ms) {
-        tierChecks++;
+      lastTraced = res && res.traced;
+      // a picture's bands open and close its clock; a new view (a preview) drops an open one; the last band's frame
+      // time is known at the next frame, which decides
+      if (res && res.traced === 'preview') { refineOpen = false; refineAcc = 0; }
+      if (res && res.firstBand) { refineOpen = true; refineAcc = 0; hiddenDuring = false; }
+      if (res && res.lastBand && refineOpen) refineDone = true;
+      if (!STILL && !renderer.floatRT && legacyChecks < 2 && now - t0 > (legacyChecks ? 2200 : 1000) && store.get('tier') === 'auto' && app.perf.ms) {
+        legacyChecks++;
         const ms = app.perf.ms;
         let i = ORDER.indexOf(autoTier);
         if (ms > 40) i = Math.max(0, i - (ms > 110 ? 2 : 1));
         else if (ms < 14) i = Math.min(ORDER.length - 1, i + 1);
-        const next = ORDER[i];
-        if (next !== autoTier) { autoTier = next; renderer.setTier(TIERS[autoTier]); geoKey = ''; }
+        if (ORDER[i] !== autoTier) { autoTier = ORDER[i]; renderer.setTier(TIERS[autoTier]); geoKey = ''; }
         app.perf.tier = autoTier;
         ui.perf?.(app.perf, res);
       }
+      // the preview's scale after every six preview frames, from their median time (adapt.js previewAfter), from the
+      // scale the renderer traces at
+      if (previewNeedsReset) { previewNeedsReset = false; previewState = previewReset(previewState, now); previewDts = []; }
+      if (!STILL && previewDts.length >= 6) {
+        const m = previewDts.slice().sort((x, y) => x - y)[3];
+        previewDts = [];
+        const next = previewAfter({ ...previewState, ps: renderer.preview?.scale ?? previewState.ps }, { frameMs: m, now });
+        if (next.ps !== renderer.preview?.scale) renderer.setPreviewScale(next.ps);
+        previewState = next;
+        app.perf.previewScale = renderer.preview?.scale;
+      }
       if (res && res.refined && !app.refinedOnce) { app.refinedOnce = true; ui.onRefined?.(); }
     }
-    requestAnimationFrame(loop);
+    scheduled = true; requestAnimationFrame(loop);
   }
 
   if (renderer.ok()) {
     pushGeometry();
     geoKey = geometryKey();
   }
-  requestAnimationFrame(loop);
+  scheduled = true; requestAnimationFrame(loop);
   ui.start?.();
 }
 
