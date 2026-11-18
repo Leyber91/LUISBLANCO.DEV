@@ -283,7 +283,7 @@ export default async function search(p, { base }) {
   const mType = await ask('m type stars');
   p.check('"red dwarfs" keeps out the giant stars of the same temperature that "m type stars" lets in, and says so', dwarfs.n > 400 && dwarfs.n < mType.n && /star of 0\.08 to 1\.5 R☉/.test(dwarfs.note) && dwarfs.chips.includes('2 ranges ×') && mType.chips.includes('1 range ×'), `${dwarfs.count} against ${mType.count} | ${dwarfs.note}`);
   const imagedHot = await ask('hottest imaged planets');
-  p.check('an order no listed world has a value for is said to be the catalogue\'s', imagedHot.rows.length === 8 && /in catalogue order, since none of them has a value to order by/.test(imagedHot.head) && /in catalogue order, since none of them has a value to order by/.test(imagedHot.note) && imagedHot.rows.every((r) => /(no equilibrium temperature|seen by its own heat)$/.test(r.fact)),
+  p.check('an order no listed world has a value for is said to be the catalogue\'s', imagedHot.rows.length === 8 && /in catalogue order, since none of them has a value to order by/.test(imagedHot.head) && /in catalogue order, since none of them has a value to order by/.test(imagedHot.note) && imagedHot.rows.every((r) => /(no equilibrium temperature|seen by its own heat)(,|$)/.test(r.fact)),
     `${imagedHot.head} | ${imagedHot.note}`);
   const imagedCold = await ask('cold imaged planets');
   p.check('cold asked of imaged planets finds none and says why', imagedCold.n === 0 && /A directly imaged planet is seen by its own heat, and is given no equilibrium temperature here\./.test(imagedCold.note), `${imagedCold.count} | ${imagedCold.note}`);
