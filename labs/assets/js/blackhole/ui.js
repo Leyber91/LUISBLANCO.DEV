@@ -17,7 +17,7 @@ import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
-import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING } from './probe.js';
+import { anchors as anchorsInline, subrings as subringsInline, liveAnchors, viewKey, probeRay as traceProbe, screenToTangent, tangentToScreen, SUBRING, ticksOf } from './probe.js';
 
 /** The texels of the GPU's measuring row; the Measure card's note quotes it. */
 const STRIP_N = 4096;
@@ -296,18 +296,27 @@ export function buildUI(app) {
     anchorTimer = setTimeout(async () => {
       if (store.anim) return;
       const v = viewNow();
-      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: store.get('fcol') };
+      // the traced edge is drawn in the telescope view only, so only that view's anchors trace it
+      const args = { view: v, aspect: aspectNow(), tpeakK: app.model.Tpeak, fcol: store.get('fcol'), edge: store.get('view') === 'telescope' };
       // a resize re-traces (the grid's reach follows the aspect); the anchors stay live meanwhile
-      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak), args.fcol]);
+      const key = JSON.stringify([viewKey(v), args.aspect.toFixed(3), Math.round(app.model.Tpeak), args.fcol, args.edge]);
       if (key === anchorKey) return;
       anchorKey = key;
       try {
-        // the first pass runs inline (about 50 ms) so the labels exist with the first frame;
-        // later passes go to the worker
-        const res = anchorsRuns++ === 0 || !worker ? anchorsInline(args) : await call('anchors', args);
+        // the first pass runs inline (about 50 ms) so the labels exist with the first frame, and leaves a traced edge
+        // (45 to 130 ms more in node on this machine, 2026-11-18, the higher under load) to the worker, which sends
+        // the whole set straight after; later passes go to the worker
+        const first = anchorsRuns++ === 0 && !!worker;
+        const res = first || !worker ? anchorsInline(first ? { ...args, edge: false } : args) : await call('anchors', args);
         if (key !== anchorKey) return;
         anchors = { ...res, fcol: args.fcol };
         drawOverlay(); drawSpectrum(); app.tour?.refresh();
+        if (first && args.edge) {
+          const all = await call('anchors', args);
+          if (key !== anchorKey) return;
+          anchors = { ...all, fcol: args.fcol };
+          drawOverlay(); app.tour?.refresh();
+        }
       } catch (err) { console.warn('anchors unavailable:', err.message); /* the overlay keeps the analytic curve only */ }
     }, 260);
   };
@@ -337,12 +346,20 @@ export function buildUI(app) {
     const ly = Math.max(pad + 14, Math.min(H - pad - 14, y + dy));
     return { lx, ly, end };
   }
+  /** The traced edge as short ticks across the theory curve (probe.js ticksOf). A dashed line laid on the solid curve
+   *  in the same ink read as the curve itself (review_edge 1). */
+  function edgeTicks(e, th) {
+    const [ox, oy] = toScreen(e.cx, e.cy, th);
+    const pts = e.runs.map((run) => run.map(([sx, sy, k]) => [...toScreen(sx, sy, th), k]));
+    return ticksOf(pts, ox, oy, e.n, e.closed).map(([x0, y0, x1, y1]) => `M${x0.toFixed(1)},${y0.toFixed(1)}L${x1.toFixed(1)},${y1.toFixed(1)}`).join('');
+  }
   function drawOverlay() {
     const W = window.innerWidth, H = window.innerHeight;
     overlay.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const s = store.all();
     const parts = [];
     const th = thNow();
+    const an = anchorsLive();
     // the analytic critical curve, in the telescope view (far observer)
     const tsO = s.view === 'telescope' && s.notes ? shadowFor(store.shown.a, store.shown.incl, store.shown.q) : null;
     if (tsO && tsO.curve) {
@@ -356,18 +373,24 @@ export function buildUI(app) {
         d += `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
       });
       parts.push(`<g><path class="curve" d="${d}Z"/></g>`);
+      // the traced edge on it as ticks (probe.js outline). One rule draws them and names them: no ticks without the
+      // curve they are compared with, and the legend names ticks only where they are drawn (review_edge 4)
+      const ticks = an && an.edge ? edgeTicks(an.edge, th) : '';
+      if (ticks) parts.push(`<g><path class="edge" d="${ticks}"/></g>`);
       const top = ts.curve.reduce((m, p) => (p[1] > m[1] ? p : m), ts.curve[0]);
       const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
       // the legend names the curve by the colour its token draws it in (palette.js; review_s2 P2-1) and by how it was
       // obtained (physics.js SHADOW_HOW; fix_s2_p1 K4), and stays between the panels at every width: flipped to the
       // left where it would run under the Measure card (P4-3, K6)
-      const l1 = SHADOW_HOW[ts.how].curve, l2 = `solid ${colourWord('curve')}: theory · dashes: traced edge`;
+      const l1 = SHADOW_HOW[ts.how].curve, l2 = `solid ${colourWord('curve')}: theory${ticks ? ' · ticks: traced edge' : ''}`;
       const { lx: cx, ly: cy, end } = keepInside(tx, ty, 70, -46, Math.max(l1.length, l2.length) * LABEL_CH, openCentre(W), H);
       const anchor = end ? 'end' : 'start', ox = end ? -4 : 4;
       parts.push(`<g><line class="lead" x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${cy.toFixed(1)}"/><text x="${(cx + ox).toFixed(1)}" y="${(cy - 4).toFixed(1)}" text-anchor="${anchor}" class="subt">${l1}</text><text x="${(cx + ox).toFixed(1)}" y="${(cy + 10).toFixed(1)}" text-anchor="${anchor}">${l2}</text></g>`);
     }
+    // No other view draws a line on the shadow's rim. The shader drew a per-texel shadow edge and ISCO line there in
+    // every view, in nearly the same blue: a staircase of dashes at the low tiers (2026-11-18). The black's edge is
+    // in the image, and the labels name what bounds it.
     // labels only from anchors traced for this view: none mid-transition, none from the last view
-    const an = anchorsLive();
     if (s.notes && an) {
       // text blocks already drawn, so a later label steps aside; the drawing's own parts first (its scales, title
       // block and kept frames: a label once sat on the spin scale's numbers at 390)
