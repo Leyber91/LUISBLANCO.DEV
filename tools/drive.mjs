@@ -82,14 +82,20 @@
      node tools/drive.mjs selftest   the runner of the invariants, the frame rule and the lock, in headless
                                      Chrome; tools/mutants/drive.json breaks each rule for tools/mutate.mjs.
                                      Stopped by its own limit it exits 124, which tools/mutate.mjs reads as
-                                     timed out, not as caught.
+                                     timed out, not as caught. The cases of the lock's log run first, without
+                                     Chrome, and a failure among them ends the run before Chrome starts.
+     node tools/drive.mjs selftest locklog   only the cases of the lock's log, without Chrome, in seconds
+     node tools/drive.mjs locklog [--file <lock>]   the lock's log read back (<lock>.log.1, then <lock>.log; the
+                                     machine's lock by default): every hold as pid, from, to, how long, tree and
+                                     how it ended, then every overlap of two holds. Exit 1 when two overlap, 0
+                                     when none do.
 
    Exit: 0 every check passed and the console is clean; 1 a check
    failed, the scenario threw or the page logged an error; 2 usage;
    3 timeout.
    ============================================================ */
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import http from 'node:http';
 import zlib from 'node:zlib';
 import fs from 'node:fs';
@@ -187,22 +193,108 @@ export function takeStale(file, seen) {
   catch { return false; }   // gone already
   finally { fs.rmSync(t, { force: true }); }
 }
+/* The lock's own record, so that whether two holders ran at once is read from evidence. Every take, give-back, stale
+   takeover and give-up of a lock file appends one JSON line to <lock>.log: op, t (ms), pid, ppid, cwd, tree (the
+   checkout this drive.mjs is in), and what the op names. A take's t is the t it writes in the lock; a give-back and a
+   takeover name the hold they end by its pid and that t (since), so the reader pairs them even without the take's
+   line. A log of LOG_LINES lines moves to <lock>.log.1 before the next line: one older generation, the one before it
+   dropped. A hold taken again by the process that holds it takes nothing, and writes nothing.
+   Best effort: a line that cannot be written is lost and the lock goes on exactly as it would without the log, so a
+   gap in the log is no evidence either way. Two processes that move the log at the same moment can lose a generation.
+   It sees only the processes that take this lock with a drive.mjs that keeps the log. A checkout made before it takes
+   the lock and writes no line; eight checkouts on 2026-11-17 had a drive.mjs with no lock at all; a Chrome started
+   outside drive.mjs (shoot.ps1 called directly) takes nothing. None of those leaves a line, so the log can show two
+   lock holders overlapping and never that no other Chrome ran. The lines hold local paths: the log stays in the
+   temp folder and is never committed.
+   Why: twice on 2026-11-17 sessions argued for an hour over whether two browsers had run at once, and only the lock's
+   last line could settle it. */
+const TREE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const LOG_LINES = 5000;   // about 250 bytes a line: 1.2 MB a generation, a week or more of drives
+function lockEvent(file, op, extra) {
+  const log = file + '.log';
+  try { if (fs.readFileSync(log, 'latin1').split('\n').length - 1 >= LOG_LINES) fs.renameSync(log, log + '.1'); } catch { /* no log yet, or it cannot be moved: the line goes on */ }
+  try { fs.appendFileSync(log, JSON.stringify({ op, t: Date.now(), pid: process.pid, ppid: process.ppid, cwd: process.cwd(), tree: TREE, ...extra }) + '\n'); } catch { /* evidence, not a gate */ }
+}
 export async function holdChrome(waitMs = 20 * 60 * 1000, file = lockPath()) {
   const t0 = Date.now();
   for (;;) {
     try {
       const fd = fs.openSync(file, 'wx');
-      fs.writeSync(fd, JSON.stringify({ pid: process.pid, t: Date.now() }));
+      const since = Date.now();
+      fs.writeSync(fd, JSON.stringify({ pid: process.pid, t: since }));
       fs.closeSync(fd);
-      return () => { try { if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true }); } catch { /* already gone */ } };
+      lockEvent(file, 'take', { t: since });
+      return () => {
+        let named = null;   // whom the lock names at the give-back: this process, another that took it meanwhile, or none
+        try { named = JSON.parse(fs.readFileSync(file, 'utf8')).pid; if (named === process.pid) fs.rmSync(file, { force: true }); } catch { /* already gone */ }
+        lockEvent(file, 'release', { since, named });
+      };
     } catch (e) { if (e.code !== 'EEXIST') throw e; }
     let holder = null, age = 0, raw = null;
     try { age = Date.now() - fs.statSync(file).mtimeMs; raw = fs.readFileSync(file, 'utf8'); holder = JSON.parse(raw); } catch { /* being written, or gone */ }
     if (holder && holder.pid === process.pid) return () => {};
-    if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;   // unread (null), it is never the file's text
-    if (Date.now() - t0 >= waitMs) return null;
+    if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) {   // unread (null), it is never the file's text
+      lockEvent(file, 'stale', { holder: holder && holder.pid, since: holder && holder.t, age });
+      continue;
+    }
+    if (Date.now() - t0 >= waitMs) {
+      lockEvent(file, 'giveup', { holder: holder && holder.pid, since: holder && holder.t, waited: Date.now() - t0 });
+      return null;
+    }
     await sleep(250);
   }
+}
+
+/* The holds a lock's log records, oldest first: { pid, from, to, tree, end, unsettled }. A hold is known by its pid
+   and the time it was taken. Its first give-back ends it (a give-back called twice writes two lines); else a stale
+   takeover that names it, its holder gone by then (the takeover is the latest it can have ended). A give-back written
+   after such a takeover ends it there instead: its holder still ran. A hold no line ends is cut where the first hold
+   of another process taken after it begins, and marked unsettled: a line was lost, a drive.mjs that keeps no log took
+   the lock, or the lock was removed by hand, and the log cannot tell which. One taken in the same millisecond is not
+   after it, so the two overlap. */
+const clock = (t) => (Number.isFinite(t) ? new Date(t - new Date(t).getTimezoneOffset() * 60000).toISOString().replace('T', ' ').slice(0, 23) : 'open');
+const span = (from, to) => (Number.isFinite(to - from) ? `${((to - from) / 1000).toFixed(3)} s` : '-');
+function lockHolds(lines) {
+  const ops = { take: 0, release: 0, stale: 0, giveup: 0 }, by = new Map();
+  let unread = 0;
+  const hold = (pid, since) => {
+    const k = `${pid}@${since}`;
+    if (!by.has(k)) by.set(k, { pid, from: since, to: Infinity, tree: 'tree unknown', end: 'no line ends it', unsettled: false, given: false });
+    return by.get(k);
+  };
+  for (const line of lines) {
+    let e, op;
+    try { e = JSON.parse(line); op = e.op; } catch { unread++; continue; }   // a line cut short, or two appends run together
+    if (Object.hasOwn(ops, op)) ops[op]++;
+    if (op === 'take') hold(e.pid, e.t).tree = e.tree;
+    if (op === 'release') { const h = hold(e.pid, e.since); if (!h.given) Object.assign(h, { given: true, to: e.t, tree: e.tree, end: e.named === e.pid ? 'given back' : `given back; the lock named ${e.named} by then` }); }
+    if (op === 'stale' && e.holder) { const h = hold(e.holder, e.since); if (!h.given) Object.assign(h, { to: e.t, end: `taken by pid ${e.pid}, its holder gone` }); }
+  }
+  const holds = [...by.values()].sort((a, b) => a.from - b.from);
+  for (const h of holds) {
+    const next = h.to === Infinity && holds.find((g) => g.pid !== h.pid && g.from > h.from);
+    if (next) Object.assign(h, { to: next.from, unsettled: true, end: `no line ends it; pid ${next.pid} took the lock at ${clock(next.from)} (a line lost, a drive.mjs that keeps no log, or the lock removed by hand)` });
+  }
+  return { holds, ops, unread };
+}
+/* Two holds of different processes overlap when each began before the other ended. Holds that touch (one ends in the
+   millisecond the other begins) do not; one process's holds never overlap one another. */
+function lockOverlaps(holds) {
+  const out = [];
+  holds.forEach((a, i) => { for (const b of holds.slice(i + 1)) if (a.pid !== b.pid && a.from < b.to && b.from < a.to) out.push({ a, b, from: Math.max(a.from, b.from), to: Math.min(a.to, b.to) }); });
+  return out;
+}
+function lockReport(lines, where) {
+  const { holds, ops, unread } = lockHolds(lines), overlaps = lockOverlaps(holds);
+  const out = [`${where}.log.1 and ${where}.log: ${lines.length} lines, ${ops.take} takes, ${ops.release} give-backs, ${ops.stale} stale takeovers, ${ops.giveup} give-ups, ${unread} unread`];
+  for (const h of holds) out.push(`  pid ${h.pid}  ${clock(h.from)} to ${clock(h.to)}  ${span(h.from, h.to)}  ${h.tree}  ${h.end}`);
+  for (const o of overlaps) out.push(`OVERLAP  pid ${o.a.pid} and pid ${o.b.pid} both held the lock from ${clock(o.from)} to ${clock(o.to)}, ${span(o.from, o.to)}`);
+  out.push(`${overlaps.length} overlaps, ${holds.filter((h) => h.unsettled).length} holds unsettled. The log sees only the processes that take this lock with a drive.mjs that keeps it.`);
+  return { lines: out, code: overlaps.length > 0 ? 1 : 0, holds, overlaps, ops, unread };
+}
+function readLockLog(file) {
+  const text = [file + '.log.1', file + '.log'].map((f) => { try { return fs.readFileSync(f, 'utf8'); } catch { return ''; } }).join('\n');
+  return lockReport(text.split('\n').filter((l) => l.trim()), file);
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /* The dev server has no favicon; that 404 is the server's, not the page's. */
@@ -391,7 +483,138 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
 }
 
 /* ---------------- selftest: the runner of the invariants, the lock, a Chrome that dies ---------------- */
-async function selftest() {
+async function selftest(part) {
+  let failed = 0, passed = 0;
+  const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
+  /* ---------------- the lock's log: what each op writes, a log that cannot be written, the bound, the reader ----------------
+     No Chrome, lock files of its own in a folder of its own. Every hold is raced against 3 s: a wait broken by a copy under
+     tools/mutate.mjs fails here, before the watchdog of the selftest is set. */
+  async function lockLogCases(yes) {
+    const J = JSON.stringify;
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'drive-locklog-'));
+    const within = (p) => Promise.race([p, sleep(3000).then(() => 'no end in 3 s')]);
+    const logOf = (lock) => { try { return fs.readFileSync(lock + '.log', 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)); } catch { return []; } };
+    const me = (e) => !!e && e.pid === process.pid && e.ppid === process.ppid && e.cwd === process.cwd() && e.tree === TREE && Number.isInteger(e.t);
+    try {
+      /* a take and its give-back */
+      const A = path.join(dir, 'a.lock'), t1 = Date.now();
+      const relA = await within(holdChrome(1000, A));
+      const inLock = fs.existsSync(A) ? JSON.parse(fs.readFileSync(A, 'utf8')) : {}, taken = logOf(A);
+      if (typeof relA === 'function') relA();
+      const both = logOf(A), [tk, gb] = both;
+      yes('a take writes one line: take, the t it wrote in the lock, this process, its parent, its working directory and its tree',
+        taken.length === 1 && tk.op === 'take' && me(tk) && tk.t === inLock.t && tk.t >= t1 && tk.t <= Date.now(), J(taken));
+      yes('its give-back writes one line that names the hold it ends and whom the lock named', both.length === 2 && gb.op === 'release' && me(gb) && gb.since === tk.t && gb.named === process.pid && gb.t >= tk.t && !fs.existsSync(A), J(both));
+      /* a stale takeover; another takes the lock while this process holds it; a wait for a live holder runs out */
+      const S = path.join(dir, 's.lock');
+      fs.writeFileSync(S, J({ pid: 999999999, t: 12345 }));
+      const relS = await within(holdChrome(1000, S)), st = logOf(S);
+      yes('a stale takeover writes one line naming the gone holder and the t of its hold, then the take', st.length === 2 && st[0].op === 'stale' && me(st[0]) && st[0].holder === 999999999 && st[0].since === 12345 && Number.isFinite(st[0].age) && st[1].op === 'take' && st[1].t >= st[0].t, J(st));
+      fs.writeFileSync(S, J({ pid: process.ppid, t: 67890 }));
+      if (typeof relS === 'function') relS();
+      const after = logOf(S);
+      yes('a give-back after another took the lock leaves the other\'s lock, and its line names the other', after.length === 3 && after[2].op === 'release' && after[2].since === st[1].t && after[2].named === process.ppid && JSON.parse(fs.readFileSync(S, 'utf8')).pid === process.ppid, J(after));
+      const relG = await within(holdChrome(0, S)), gave = logOf(S).slice(3);   // a wait of 0: the wait's own length is tested beside the drives
+      yes('a wait that runs out writes one line naming the live holder, the t of its hold and how long it waited', relG === null && gave.length === 1 && gave[0].op === 'giveup' && me(gave[0]) && gave[0].holder === process.ppid && gave[0].since === 67890 && Number.isFinite(gave[0].waited) && gave[0].waited < 3000, J(gave));
+      setTimeout(() => fs.rmSync(S, { force: true }), 100);   // the live holder lets go while this process waits
+      const relW = await within(holdChrome(1000, S)), waitedFor = logOf(S).slice(4);
+      if (typeof relW === 'function') relW();
+      yes('a wait that ends when the holder lets go takes the lock and writes its take, and nothing for the wait', typeof relW === 'function' && waitedFor.length === 1 && waitedFor[0].op === 'take' && me(waitedFor[0]), J(waitedFor));
+      const E = path.join(dir, 'e.lock');
+      fs.writeFileSync(E, '');
+      const old = (Date.now() - 11000) / 1000;
+      fs.utimesSync(E, old, old);
+      const relE = await within(holdChrome(1000, E)), emp = logOf(E);
+      if (typeof relE === 'function') relE();
+      yes('the takeover of an empty lock (its holder died before it wrote its name) names no holder', emp.length === 2 && emp[0].op === 'stale' && emp[0].holder === null && emp[0].since === null && emp[1].op === 'take', J(emp));
+
+      /* a log that cannot be written, planted: a folder where <lock>.log would be. The lock goes as it does with a log */
+      const B = path.join(dir, 'b.lock'), seen = {};
+      fs.mkdirSync(B + '.log');
+      let threw = '';
+      try {
+        try { fs.appendFileSync(B + '.log', 'x'); seen.planted = false; } catch { seen.planted = true; }
+        const r1 = await within(holdChrome(1000, B));
+        seen.taken = typeof r1 === 'function' && JSON.parse(fs.readFileSync(B, 'utf8')).pid === process.pid;
+        if (typeof r1 === 'function') r1();
+        seen.given = !fs.existsSync(B);
+        fs.writeFileSync(B, J({ pid: 999999999, t: 1 }));
+        const r2 = await within(holdChrome(1000, B));
+        seen.stale = typeof r2 === 'function' && JSON.parse(fs.readFileSync(B, 'utf8')).pid === process.pid;
+        fs.writeFileSync(B, J({ pid: process.ppid, t: 2 }));
+        if (typeof r2 === 'function') r2();
+        seen.kept = fs.existsSync(B) && JSON.parse(fs.readFileSync(B, 'utf8')).pid === process.ppid;
+        seen.gaveUp = (await within(holdChrome(0, B))) === null;
+        seen.folder = fs.statSync(B + '.log').isDirectory() && !fs.existsSync(B + '.log.1');
+      } catch (e) { threw = e.message; }
+      yes('with <lock>.log a folder (a log that cannot be written), a take, a give-back, a stale takeover, a give-back of a lock another took and a give-up go as with a log',
+        !threw && Object.keys(seen).length === 7 && Object.values(seen).every(Boolean), threw || J(seen));
+
+      /* the bound: a log of LOG_LINES lines moves to .log.1 before the next line */
+      const R = path.join(dir, 'r.lock'), count = (f) => fs.readFileSync(f, 'utf8').split('\n').length - 1;
+      fs.writeFileSync(R + '.log', '{}\n'.repeat(LOG_LINES - 1));
+      fs.writeFileSync(R + '.log.1', 'the older generation\n');
+      lockEvent(R, 'probe', {});
+      const below = { log: count(R + '.log'), older: fs.readFileSync(R + '.log.1', 'utf8') };
+      lockEvent(R, 'probe', {});
+      const at = { older: count(R + '.log.1'), log: logOf(R).map((e) => e.op), two: fs.existsSync(R + '.log.2') };
+      yes(`a log of ${LOG_LINES - 1} lines takes one more where it is; at ${LOG_LINES} the next line moves them to .log.1, in place of the older generation, and starts the log again`,
+        below.log === LOG_LINES && below.older === 'the older generation\n' && at.older === LOG_LINES && J(at.log) === J(['probe']) && !at.two, J({ below, at }));
+
+      /* the reader, on lines written here: holds, how they end, overlaps and the exit code */
+      const line = (o) => J({ ppid: 1, cwd: 'C', tree: 'T' + o.pid, ...o });
+      const tk2 = (pid, t) => line({ op: 'take', t, pid });
+      const gb2 = (pid, since, t, named = pid) => line({ op: 'release', t, since, named, pid });
+      const st2 = (pid, holder, since, t) => line({ op: 'stale', t, holder, since, age: 0, pid });
+      const rep = (...ls) => lockReport(ls, 'L');
+      const ov = (r) => J(r.overlaps.map((o) => [o.a.pid, o.b.pid, o.from, o.to]));
+      const hs = (r) => J(r.holds.map((h) => [h.pid, h.from, h.to]));
+      const touch = rep(tk2(1, 1000), gb2(1, 1000, 2000), tk2(2, 2000), gb2(2, 2000, 3000)), inside = rep(tk2(1, 1000), gb2(1, 1000, 2000), tk2(2, 1999), gb2(2, 1999, 3000));
+      yes('two holds that touch (one given back in the millisecond the other is taken) do not overlap and the reader exits 0; taken 1 ms sooner they overlap for that 1 ms and it exits 1',
+        ov(touch) === '[]' && touch.code === 0 && ov(inside) === J([[1, 2, 1999, 2000]]) && inside.code === 1, `${ov(touch)} ${touch.code}, ${ov(inside)} ${inside.code}`);
+      const z1 = rep(tk2(1, 1000), gb2(1, 1000, 2000), tk2(2, 1000), gb2(2, 1000, 1000)), z2 = rep(tk2(2, 1000), gb2(2, 1000, 1000), tk2(1, 1000), gb2(1, 1000, 2000));
+      const zIn = rep(tk2(1, 1000), gb2(1, 1000, 2000), tk2(2, 1001), gb2(2, 1001, 1001));
+      yes('a hold of no length at the very start of another does not overlap it, whichever is listed first; 1 ms inside it, it does', ov(z1) === '[]' && ov(z2) === '[]' && ov(zIn) === J([[1, 2, 1001, 1001]]), `${ov(z1)} ${ov(z2)} ${ov(zIn)}`);
+      const same = rep(tk2(1, 1000), tk2(1, 2000), gb2(1, 2000, 2500), gb2(1, 1000, 3000));
+      yes('two holds of one process do not overlap one another', ov(same) === '[]' && hs(same) === J([[1, 1000, 3000], [1, 2000, 2500]]), `${ov(same)} ${hs(same)}`);
+      const open = rep(tk2(1, 1000), tk2(1, 2000), gb2(1, 2000, 2500), tk2(2, 5000), gb2(2, 5000, 6000), tk2(3, 7000));
+      yes('a hold no line ends is cut where another process\'s next hold begins, not its own, and marked unsettled; the last one stays open; no overlap, exit 0',
+        hs(open) === J([[1, 1000, 5000], [1, 2000, 2500], [2, 5000, 6000], [3, 7000, null]]) && J(open.holds.map((h) => h.unsettled)) === J([true, false, false, false]) && ov(open) === '[]' && open.code === 0, `${hs(open)} ${ov(open)}`);
+      const sameMs = rep(tk2(1, 1000), tk2(2, 1000), gb2(2, 1000, 2000)), nextMs = rep(tk2(1, 1000), tk2(2, 1001), gb2(2, 1001, 2000));
+      yes('a hold no line ends overlaps a hold another process took in the same millisecond; one taken 1 ms later cuts it there, with no overlap',
+        ov(sameMs) === J([[1, 2, 1000, 2000]]) && sameMs.code === 1 && ov(nextMs) === '[]' && hs(nextMs) === J([[1, 1000, 1001], [2, 1001, 2000]]) && nextMs.holds[0].unsettled, `${ov(sameMs)} ${ov(nextMs)} ${hs(nextMs)}`);
+      const dead = rep(tk2(1, 1000), st2(2, 1, 1000, 4000), tk2(2, 4000), gb2(2, 4000, 5000));
+      yes('a stale takeover ends the gone holder\'s hold where it took the lock, and the two do not overlap', hs(dead) === J([[1, 1000, 4000], [2, 4000, 5000]]) && ov(dead) === '[]' && /^taken by pid 2,/.test(dead.holds[0].end) && dead.holds[1].end === 'given back', `${hs(dead)} ${J(dead.holds.map((h) => h.end))}`);
+      const ran = rep(tk2(1, 1000), st2(2, 1, 1000, 4000), tk2(2, 4000), gb2(1, 1000, 4500, 2), gb2(2, 4000, 5000));
+      yes('a give-back written after a takeover that named its hold ends the hold there, as its holder still ran: the two overlap, exit 1',
+        hs(ran) === J([[1, 1000, 4500], [2, 4000, 5000]]) && ov(ran) === J([[1, 2, 4000, 4500]]) && ran.code === 1 && ran.holds[0].end === 'given back; the lock named 2 by then', `${hs(ran)} ${ov(ran)} ${ran.holds[0].end}`);
+      const twice = rep(tk2(1, 1000), gb2(1, 1000, 2000), gb2(1, 1000, 2500, null), st2(2, 1, 1000, 3000));
+      yes('a hold ends at its first give-back: a second one, or a takeover written after it, moves nothing', hs(twice) === J([[1, 1000, 2000]]) && twice.holds[0].end === 'given back', `${hs(twice)} ${twice.holds[0].end}`);
+      const odd = rep('garbage', '{"op":"take"', 'null', '7', gb2(3, 1000, 2000), st2(4, null, null, 3000), tk2(4, 3000), line({ op: 'giveup', t: 3500, holder: 4, since: 3000, waited: 300, pid: 5 }));
+      yes('a give-back with no take line is a hold from the t it names, with its tree; a takeover of an empty lock names none; lines that do not read are counted and left out',
+        hs(odd) === J([[3, 1000, 2000], [4, 3000, null]]) && odd.holds[0].tree === 'T3' && odd.unread === 3 && J(odd.ops) === J({ take: 1, release: 1, stale: 1, giveup: 1 }), `${hs(odd)} ${odd.unread} ${J(odd.ops)}`);
+      const T = Date.UTC(2026, 10, 17, 14, 59, 22, 104), d = new Date(T), p2 = (n) => String(n).padStart(2, '0');
+      const local = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}.104`;
+      const text = rep(tk2(1, T), gb2(1, T, T + 3500, 2), tk2(2, T + 3000), gb2(2, T + 3000, T + 5000)).lines.join('\n'), openText = open.lines.join('\n');
+      yes('the report gives each hold its pid, from and to in local time with ms, its length, its tree and how it ended, then each overlap, then the count',
+        text.includes(`\n  pid 1  ${local} to `) && /^ {2}pid 1 {2}\S+ \S+ to \S+ \S+ {2}3\.500 s {2}T1 {2}given back; the lock named 2 by then$/m.test(text) && /^OVERLAP {2}pid 1 and pid 2 both held the lock from \S+ \S+ to \S+ \S+, 0\.500 s$/m.test(text)
+        && /^1 overlaps, 0 holds unsettled\./.test(text.split('\n').pop()) && /^ {2}pid 3 {2}\S+ \S+ to open {2}- {2}T3 {2}no line ends it$/m.test(openText) && /^0 overlaps, 1 holds unsettled\./.test(openText.split('\n').pop()), text);
+
+      /* the command: both generations of the log, oldest first; the machine's lock (LABS_DRIVE_LOCK) when no file is named */
+      const F = path.join(dir, 'f.lock'), G = path.join(dir, 'g.lock');
+      fs.writeFileSync(F + '.log.1', [tk2(1, 1000), gb2(1, 1000, 2000), tk2(2, 3000)].join('\n') + '\n');
+      fs.writeFileSync(F + '.log', [gb2(2, 3000, 4000), tk2(3, 3500), gb2(3, 3500, 5000)].join('\n') + '\n');
+      fs.writeFileSync(G + '.log', [tk2(1, 1000), gb2(1, 1000, 2000)].join('\n') + '\n');
+      const cli = (args, env = process.env) => spawnSync(process.execPath, [fileURLToPath(import.meta.url), 'locklog', ...args], { encoding: 'utf8', timeout: 30000, env });
+      const withFile = cli(['--file', F]), byEnv = cli([], { ...process.env, LABS_DRIVE_LOCK: G });
+      yes('"locklog --file <lock>" reads <lock>.log.1, then <lock>.log, and exits 1 on an overlap; with no file named it reads the lock LABS_DRIVE_LOCK names, and exits 0 on none',
+        withFile.status === 1 && String(withFile.stdout).startsWith(`${F}.log.1 and ${F}.log: 6 lines,`) && /^ {2}pid 1 .* T1 {2}given back$/m.test(withFile.stdout) && /^OVERLAP {2}pid 2 and pid 3 /m.test(withFile.stdout)
+        && byEnv.status === 0 && String(byEnv.stdout).startsWith(`${G}.log.1 and ${G}.log: 2 lines,`) && /^0 overlaps,/m.test(byEnv.stdout), `${withFile.status} ${byEnv.status} ${String(withFile.stdout).slice(0, 300)}`);
+    } catch (e) {
+      yes('the cases of the lock\'s log ran to their end', false, String((e && e.stack) || e).slice(0, 400));
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  }
+  if (part === 'locklog') { await lockLogCases(yes); console.log(`drive selftest locklog: ${passed} passed, ${failed} failed`); return failed ? 1 : 0; }
   /* the lock is the file LABS_DRIVE_LOCK names, checked before anything waits for a lock: under tools/mutate.mjs a copy
      that took the machine's lock instead would wait for mutate, which holds that lock around the copy */
   const envBefore = process.env.LABS_DRIVE_LOCK, envLock = path.join(os.tmpdir(), `drive-self-env-${process.pid}.lock`);
@@ -399,9 +622,16 @@ async function selftest() {
   const relEnv = await holdChrome(500);
   const envTaken = fs.existsSync(envLock);
   if (relEnv) relEnv();
+  fs.rmSync(envLock + '.log', { force: true });   // the lock's log, which would stay in the temp folder
   if (envBefore === undefined) delete process.env.LABS_DRIVE_LOCK; else process.env.LABS_DRIVE_LOCK = envBefore;
   const envOk = envTaken && !fs.existsSync(envLock);
   if (!envOk) { console.log('FAIL  drive selftest: the lock is not the file LABS_DRIVE_LOCK names'); return 1; }
+  /* the lock's log, first and without Chrome; a failure here ends the run before Chrome starts, so that a copy under
+     tools/mutate.mjs with a rule of the log broken is caught in seconds, not in a whole run of Chrome */
+  await lockLogCases(yes);
+  const cases = passed, alone = spawnSync(process.execPath, [fileURLToPath(import.meta.url), 'selftest', 'locklog'], { encoding: 'utf8', timeout: 20000 });
+  yes('"selftest locklog" runs the cases of the lock\'s log alone, without Chrome', alone.status === 0 && new RegExp(`^drive selftest locklog: ${cases} passed, 0 failed$`, 'm').test(alone.stdout), `exit ${alone.status}: ${String(alone.stdout).trim().split('\n').pop()}`);
+  if (failed) { console.log(`drive selftest: ${passed} passed, ${failed} failed, in the lock's log; Chrome was not started`); return 1; }
   /* the whole run holds the machine's lock, and its time starts once it has it: under tools/mutate.mjs, copies run a few
      at a time and would otherwise take Chrome in turn, drive by drive, each outrunning its time */
   const whole = await holdChrome();
@@ -410,8 +640,6 @@ async function selftest() {
      taken, with the code tools/mutate.mjs reads as timed out. 120 s for a run of 30 to 50 (it reached 60 once on
      2026-11-16 with 2 GB of memory free), inside mutate's 180 s; mutate runs this list's copies one at a time */
   setTimeout(() => { console.log('FAIL  drive selftest: not finished in 120 s'); process.exit(failed ? 1 : WATCHDOG_EXIT); }, 120000).unref();   // a check that failed before the hang has caught it
-  let failed = 0, passed = 0;
-  const yes = (name, cond, detail = '') => { cond ? passed++ : failed++; console.log(`${cond ? 'pass' : 'FAIL'}  ${name}${detail ? `: ${detail}` : ''}`); };
   const J = JSON.stringify;
   const PAGE = 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><html><body style="margin:0"><button id="b" style="position:absolute;left:10px;top:10px;width:100px;height:50px">b</button></body></html>');
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'drive-self-'));
@@ -686,7 +914,8 @@ await drive(async () => { writeSync(1, 'pid ' + liveChromes()[0].pid + String.fr
 
 /* ---------------- command line ---------------- */
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-if (isMain && process.argv[2] === 'selftest') process.exit(await selftest());
+if (isMain && process.argv[2] === 'selftest') process.exit(await selftest(process.argv[3]));
+if (isMain && process.argv[2] === 'locklog') { const r = readLockLog(process.argv[3] === '--file' ? process.argv[4] : lockPath()); console.log(r.lines.join('\n')); process.exit(r.code); }
 if (isMain) {
   const argv = process.argv.slice(2);
   const flag = (name, fb) => { const i = argv.indexOf('--' + name); return i >= 0 && argv[i + 1] ? argv[i + 1] : fb; };

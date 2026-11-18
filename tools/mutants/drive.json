@@ -6,18 +6,18 @@
   },
   {
     "name": "lock: a lock taken without the holder's name",
-    "from": "fs.writeSync(fd, JSON.stringify({ pid: process.pid, t: Date.now() }));",
+    "from": "fs.writeSync(fd, JSON.stringify({ pid: process.pid, t: since }));",
     "to": "fs.writeSync(fd, '');"
   },
   {
     "name": "lock: giving back removes another's lock",
-    "from": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true });",
+    "from": "if (named === process.pid) fs.rmSync(file, { force: true });",
     "to": "fs.rmSync(file, { force: true });"
   },
   {
     "name": "lock: giving back keeps its own lock",
-    "from": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid === process.pid) fs.rmSync(file, { force: true });",
-    "to": "if (JSON.parse(fs.readFileSync(file, 'utf8')).pid !== process.pid) fs.rmSync(file, { force: true });"
+    "from": "if (named === process.pid) fs.rmSync(file, { force: true });",
+    "to": "if (named !== process.pid) fs.rmSync(file, { force: true });"
   },
   {
     "name": "lock: a lock that cannot be written waited for",
@@ -46,13 +46,13 @@
   },
   {
     "name": "lock: the wait never gives up",
-    "from": "    if (Date.now() - t0 >= waitMs) return null;\n",
-    "to": ""
+    "from": "    if (Date.now() - t0 >= waitMs) {\n",
+    "to": "    if (false) {\n"
   },
   {
     "name": "lock: the wait gives up at once",
-    "from": "    if (Date.now() - t0 >= waitMs) return null;\n",
-    "to": "    return null;\n"
+    "from": "    if (Date.now() - t0 >= waitMs) {\n",
+    "to": "    if (true) {\n"
   },
   {
     "name": "drive: a drive with no lock runs anyway",
@@ -401,28 +401,28 @@
   },
   {
     "name": "lock: a dead holder's lock never taken",
-    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
-    "to": "if (((holder && false) || (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw))",
+    "to": "if (((holder && false) || (!holder && age > 10000)) && takeStale(file, raw))"
   },
   {
     "name": "lock: a running holder's lock taken",
-    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
-    "to": "if (((holder && true) || (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw))",
+    "to": "if (((holder && true) || (!holder && age > 10000)) && takeStale(file, raw))"
   },
   {
     "name": "lock: an empty lock never taken",
-    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
-    "to": "if (((holder && !alive(holder.pid)) || false) && takeStale(file, raw)) continue;"
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw))",
+    "to": "if (((holder && !alive(holder.pid)) || false) && takeStale(file, raw))"
   },
   {
     "name": "lock: any lock taken",
-    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
-    "to": "if (takeStale(file, raw)) continue;"
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw))",
+    "to": "if (takeStale(file, raw))"
   },
   {
     "name": "lock: a stale lock taken only when both its holder is dead and it is empty",
-    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw)) continue;",
-    "to": "if (((holder && !alive(holder.pid)) && (!holder && age > 10000)) && takeStale(file, raw)) continue;"
+    "from": "if (((holder && !alive(holder.pid)) || (!holder && age > 10000)) && takeStale(file, raw))",
+    "to": "if (((holder && !alive(holder.pid)) && (!holder && age > 10000)) && takeStale(file, raw))"
   },
   {
     "name": "lock: the lock file from the environment ignored",
@@ -638,5 +638,300 @@
     "name": "the watchdog code moved",
     "from": "export const WATCHDOG_EXIT = 124;",
     "to": "export const WATCHDOG_EXIT = 125;"
+  },
+  {
+    "name": "lock log: a take writes no line",
+    "from": "      lockEvent(file, 'take', { t: since });\n",
+    "to": ""
+  },
+  {
+    "name": "lock log: a give-back writes no line",
+    "from": "        lockEvent(file, 'release', { since, named });\n",
+    "to": ""
+  },
+  {
+    "name": "lock log: a give-back does not name the hold it ends",
+    "from": "lockEvent(file, 'release', { since, named });",
+    "to": "lockEvent(file, 'release', { named });"
+  },
+  {
+    "name": "lock log: a give-back names this process, whoever the lock named",
+    "from": "lockEvent(file, 'release', { since, named });",
+    "to": "lockEvent(file, 'release', { since, named: process.pid });"
+  },
+  {
+    "name": "lock log: a stale takeover writes no line",
+    "from": "      lockEvent(file, 'stale', { holder: holder && holder.pid, since: holder && holder.t, age });\n",
+    "to": ""
+  },
+  {
+    "name": "lock log: a stale takeover does not name the gone holder or its hold",
+    "from": "lockEvent(file, 'stale', { holder: holder && holder.pid, since: holder && holder.t, age });",
+    "to": "lockEvent(file, 'stale', { age });"
+  },
+  {
+    "name": "lock log: the takeover of an empty lock throws while it writes its line",
+    "from": "lockEvent(file, 'stale', { holder: holder && holder.pid,",
+    "to": "lockEvent(file, 'stale', { holder: holder.pid,"
+  },
+  {
+    "name": "lock log: a give-up writes no line",
+    "from": "      lockEvent(file, 'giveup', { holder: holder && holder.pid, since: holder && holder.t, waited: Date.now() - t0 });\n",
+    "to": ""
+  },
+  {
+    "name": "lock log: a give-up does not name the holder or its hold",
+    "from": "lockEvent(file, 'giveup', { holder: holder && holder.pid, since: holder && holder.t, waited: Date.now() - t0 });",
+    "to": "lockEvent(file, 'giveup', { waited: Date.now() - t0 });"
+  },
+  {
+    "name": "lock log: a line without its op",
+    "from": "{ op, t: Date.now(), pid",
+    "to": "{ t: Date.now(), pid"
+  },
+  {
+    "name": "lock log: a line without its pid",
+    "from": "t: Date.now(), pid: process.pid, ppid",
+    "to": "t: Date.now(), ppid"
+  },
+  {
+    "name": "lock log: a line without the parent pid",
+    "from": "ppid: process.ppid, cwd",
+    "to": "cwd"
+  },
+  {
+    "name": "lock log: a line without its working directory",
+    "from": "cwd: process.cwd(), tree",
+    "to": "tree"
+  },
+  {
+    "name": "lock log: a line without its tree",
+    "from": "tree: TREE, ...extra",
+    "to": "...extra"
+  },
+  {
+    "name": "lock log: a line written where the reader does not look",
+    "from": "const log = file + '.log';",
+    "to": "const log = file + '.log2';"
+  },
+  {
+    "name": "lock log: a log that cannot be written fails the lock",
+    "from": "try { fs.appendFileSync(log, JSON.stringify({ op, t: Date.now(), pid: process.pid, ppid: process.ppid, cwd: process.cwd(), tree: TREE, ...extra }) + '\\n'); } catch { /* evidence, not a gate */ }",
+    "to": "fs.appendFileSync(log, JSON.stringify({ op, t: Date.now(), pid: process.pid, ppid: process.ppid, cwd: process.cwd(), tree: TREE, ...extra }) + '\\n');"
+  },
+  {
+    "name": "lock log: a log that cannot be read fails the lock",
+    "from": "try { if (fs.readFileSync(log, 'latin1').split('\\n').length - 1 >= LOG_LINES) fs.renameSync(log, log + '.1'); } catch { /* no log yet, or it cannot be moved: the line goes on */ }",
+    "to": "if (fs.readFileSync(log, 'latin1').split('\\n').length - 1 >= LOG_LINES) fs.renameSync(log, log + '.1');"
+  },
+  {
+    "name": "lock log: the log never moves",
+    "from": ">= LOG_LINES) fs.renameSync(log, log + '.1');",
+    "to": ">= LOG_LINES) {}"
+  },
+  {
+    "name": "lock log: the log moves to another name",
+    "from": "fs.renameSync(log, log + '.1');",
+    "to": "fs.renameSync(log, log + '.2');"
+  },
+  {
+    "name": "lock log: the log moves one line early",
+    "from": "length - 1 >= LOG_LINES)",
+    "to": "length - 1 >= LOG_LINES - 1)"
+  },
+  {
+    "name": "lock log: the log moves one line late",
+    "from": "length - 1 >= LOG_LINES)",
+    "to": "length - 1 > LOG_LINES)"
+  },
+  {
+    "name": "lock log: the lines counted one too many",
+    "from": ".split('\\n').length - 1 >= LOG_LINES",
+    "to": ".split('\\n').length >= LOG_LINES"
+  },
+  {
+    "name": "reader: a take line read as nothing",
+    "from": "if (op === 'take') hold",
+    "to": "if (op === 'takes') hold"
+  },
+  {
+    "name": "reader: a give-back read as nothing",
+    "from": "if (op === 'release') {",
+    "to": "if (op === 'releases') {"
+  },
+  {
+    "name": "reader: a stale takeover read as nothing",
+    "from": "if (op === 'stale' && e.holder)",
+    "to": "if (op === 'stales' && e.holder)"
+  },
+  {
+    "name": "reader: the takeover of an empty lock read as a hold",
+    "from": "if (op === 'stale' && e.holder)",
+    "to": "if (op === 'stale')"
+  },
+  {
+    "name": "reader: every give-back read as one of a lock still its own",
+    "from": "end: e.named === e.pid ? 'given back'",
+    "to": "end: true ? 'given back'"
+  },
+  {
+    "name": "reader: a give-back read as the lock passed on when it was not, and the other way",
+    "from": "end: e.named === e.pid ? 'given back'",
+    "to": "end: e.named !== e.pid ? 'given back'"
+  },
+  {
+    "name": "reader: a give-back ends no hold",
+    "from": "given: true, to: e.t, tree: e.tree,",
+    "to": "given: true, tree: e.tree,"
+  },
+  {
+    "name": "reader: a give-back's tree not read",
+    "from": "to: e.t, tree: e.tree, end:",
+    "to": "to: e.t, end:"
+  },
+  {
+    "name": "reader: a second give-back moves the end",
+    "from": "if (!h.given) Object.assign(h, { given: true,",
+    "to": "Object.assign(h, { given: true,"
+  },
+  {
+    "name": "reader: a takeover written after the give-back moves the end",
+    "from": "if (!h.given) Object.assign(h, { to: e.t, end: `taken",
+    "to": "Object.assign(h, { to: e.t, end: `taken"
+  },
+  {
+    "name": "reader: a stale takeover ends no hold",
+    "from": "Object.assign(h, { to: e.t, end: `taken",
+    "to": "Object.assign(h, { end: `taken"
+  },
+  {
+    "name": "reader: a line that does not read stops the reader",
+    "from": "try { e = JSON.parse(line); op = e.op; } catch { unread++; continue; }",
+    "to": "e = JSON.parse(line); op = e.op;"
+  },
+  {
+    "name": "reader: lines that do not read are not counted",
+    "from": "catch { unread++; continue; }",
+    "to": "catch { continue; }"
+  },
+  {
+    "name": "reader: the ops are not counted",
+    "from": "    if (Object.hasOwn(ops, op)) ops[op]++;\n",
+    "to": ""
+  },
+  {
+    "name": "reader: the older generation not read",
+    "from": "[file + '.log.1', file + '.log']",
+    "to": "[file + '.log']"
+  },
+  {
+    "name": "reader: a hold no line ends is never cut",
+    "from": "const next = h.to === Infinity &&",
+    "to": "const next = false &&"
+  },
+  {
+    "name": "reader: every hold is cut, ended or not",
+    "from": "const next = h.to === Infinity &&",
+    "to": "const next = true &&"
+  },
+  {
+    "name": "reader: a hold no line ends is cut by its own process's next hold",
+    "from": "g.pid !== h.pid && g.from > h.from",
+    "to": "true && g.from > h.from"
+  },
+  {
+    "name": "reader: a hold no line ends is cut by a hold taken in its own millisecond",
+    "from": "g.from > h.from)",
+    "to": "g.from >= h.from)"
+  },
+  {
+    "name": "reader: a hold no line ends is cut only by a hold taken 2 ms after it",
+    "from": "g.from > h.from)",
+    "to": "g.from > h.from + 1)"
+  },
+  {
+    "name": "reader: a cut hold is not marked unsettled",
+    "from": "{ to: next.from, unsettled: true, end:",
+    "to": "{ to: next.from, end:"
+  },
+  {
+    "name": "reader: a cut does not end the hold",
+    "from": "{ to: next.from, unsettled: true,",
+    "to": "{ unsettled: true,"
+  },
+  {
+    "name": "overlap: none is ever found",
+    "from": "if (a.pid !== b.pid && a.from < b.to && b.from < a.to) out.push(",
+    "to": "if (false) out.push("
+  },
+  {
+    "name": "overlap: one process's holds overlap one another",
+    "from": "a.pid !== b.pid && a.from",
+    "to": "true && a.from"
+  },
+  {
+    "name": "overlap: a hold of no length at another's very start overlaps it",
+    "from": "a.from < b.to &&",
+    "to": "a.from <= b.to &&"
+  },
+  {
+    "name": "overlap: two holds that touch overlap",
+    "from": "b.from < a.to)",
+    "to": "b.from <= a.to)"
+  },
+  {
+    "name": "overlap: a hold of no length 1 ms inside another is missed",
+    "from": "a.from < b.to &&",
+    "to": "a.from < b.to - 1 &&"
+  },
+  {
+    "name": "overlap: an overlap of 1 ms is missed",
+    "from": "b.from < a.to)",
+    "to": "b.from < a.to - 1)"
+  },
+  {
+    "name": "overlap: it starts where the earlier hold began",
+    "from": "from: Math.max(a.from, b.from)",
+    "to": "from: Math.min(a.from, b.from)"
+  },
+  {
+    "name": "overlap: it ends where the later hold ended",
+    "from": "to: Math.min(a.to, b.to)",
+    "to": "to: Math.max(a.to, b.to)"
+  },
+  {
+    "name": "report: exit 0 on one overlap",
+    "from": "code: overlaps.length > 0 ? 1 : 0",
+    "to": "code: overlaps.length > 1 ? 1 : 0"
+  },
+  {
+    "name": "report: exit 1 on none",
+    "from": "code: overlaps.length > 0 ? 1 : 0",
+    "to": "code: overlaps.length >= 0 ? 1 : 0"
+  },
+  {
+    "name": "report: no line for each hold",
+    "from": "for (const h of holds) out.push(",
+    "to": "for (const h of []) out.push("
+  },
+  {
+    "name": "report: no line for each overlap",
+    "from": "for (const o of overlaps) out.push(",
+    "to": "for (const o of []) out.push("
+  },
+  {
+    "name": "command: locklog is not a command",
+    "from": "process.argv[2] === 'locklog'",
+    "to": "process.argv[2] === 'lock-log'"
+  },
+  {
+    "name": "command: --file is not read",
+    "from": "process.argv[3] === '--file'",
+    "to": "process.argv[3] === '--files'"
+  },
+  {
+    "name": "command: it exits 0 whatever the log shows",
+    "from": "process.exit(r.code); }",
+    "to": "process.exit(0); }"
   }
 ]
