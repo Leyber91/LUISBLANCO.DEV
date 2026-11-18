@@ -6,14 +6,14 @@
    ============================================================ */
 
 import * as K from './kerr.js';
-import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION, EHT_RES } from './config.js';
+import { OBJECTS, EVIDENCE, VIEWS, SCHEMA, COLOR_MODES, CITE, COPY, TIERS, VERSION, EHT_RES, viewHint } from './config.js';
 import { tanHalfV, derive, shadowFor, s3, integratorShadow, measurement, published, fall, sci, dur, len,
   sigmaText, parsecs, photonEnergy, deg, spinText, weakest, inputTags, pmText, noShadow, SHADOW_HOW, MEAN_DEF, RULING, BODY_M, TIDE_G, fcolFits } from './physics.js';
 import { colourWord, modeNote, modeKey } from './palette.js';
 import { crossSection, diskProfile, spectrumPlot, fallChart, potentialPlot, esc } from './diagrams.js';
 import { Tour, setHTML } from './tour.js';
 import { createKeep } from './keep.js';
-import { clockLine, clockShown } from './flow.js';
+import { clockLine, clockShown, clockTag } from './flow.js';
 import { buildDrawing } from './drawing.js';
 import { mountAsk } from './ask.js';
 import { exportPlate, exportState, importState, exportData, PLATE_SS, thumbnail } from './plate.js';
@@ -361,23 +361,41 @@ export function buildUI(app) {
     const parts = [];
     const th = thNow();
     const an = anchorsLive();
+    let ring = null;
+    // a block [x0, y0, x1, y1] that meets the ring of the curve and its ticks: its nearest point inside the ring's outer
+    // edge and its farthest outside the inner one
+    const onRing = (b) => {
+      if (!ring) return false;
+      const nx = Math.max(b[0], Math.min(ring.ox, b[2])), ny = Math.max(b[1], Math.min(ring.oy, b[3]));
+      const far = Math.max(...[[b[0], b[1]], [b[2], b[1]], [b[0], b[3]], [b[2], b[3]]].map(([x, y]) => Math.hypot(x - ring.ox, y - ring.oy)));
+      return Math.hypot(nx - ring.ox, ny - ring.oy) <= ring.r1 && far >= ring.r0;
+    };
     // the analytic critical curve, in the telescope view (far observer)
     const tsO = s.view === 'telescope' && s.notes ? shadowFor(store.shown.a, store.shown.incl, store.shown.q) : null;
     if (tsO && tsO.curve) {
       const ts = tsO;
       const ro = store.shown.rcam;
       let d = '';
+      const cpts = [];
       ts.curve.forEach(([al, be], i) => {
         // impact parameter -> tangent-plane coordinate at finite distance (Synge factor)
         const sx = Math.tan(Math.asin(al * Math.sqrt(1 - 2 / ro) / ro)), sy = Math.tan(Math.asin(be * Math.sqrt(1 - 2 / ro) / ro));
         const [x, y] = toScreen(sx, sy, th);
+        cpts.push([x, y]);
         d += `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`;
       });
       parts.push(`<g><path class="curve" d="${d}Z"/></g>`);
       // the traced edge on it as ticks (probe.js outline). One rule draws them and names them: no ticks without the
       // curve they are compared with, and the legend names ticks only where they are drawn (review_edge 4)
       const ticks = an && an.edge ? edgeTicks(an.edge, th) : '';
-      if (ticks) parts.push(`<g><path class="edge" d="${ticks}"/></g>`);
+      if (ticks) {
+        parts.push(`<g><path class="edge" d="${ticks}"/></g>`);
+        // the band the curve and its ticks take, which no label may lie on (at 390 px the shadow's width sat on it; the
+        // final grade, 2026-11-18)
+        const ox = cpts.reduce((a, p) => a + p[0], 0) / cpts.length, oy = cpts.reduce((a, p) => a + p[1], 0) / cpts.length;
+        const ds = cpts.map(([x, y]) => Math.hypot(x - ox, y - oy));
+        ring = { ox, oy, r0: Math.min(...ds) - 8, r1: Math.max(...ds) + 8 };
+      }
       const top = ts.curve.reduce((m, p) => (p[1] > m[1] ? p : m), ts.curve[0]);
       const [tx, ty] = toScreen(Math.tan(Math.asin(top[0] / ro)), Math.tan(Math.asin(top[1] / ro)), th);
       // the legend names the curve by the colour its token draws it in (palette.js; review_s2 P2-1) and by how it was
@@ -411,7 +429,7 @@ export function buildUI(app) {
         // and clear of the labels before it: the two text lines span 16 px either side of the
         // lead's end; of the four mirrored offsets, the first that touches no placed block wins
         const block = (ox, oy) => (ox < 0 ? [x + ox - tw, y + oy - 16, x + ox, y + oy + 16] : [x + ox, y + oy - 16, x + ox + tw, y + oy + 16]);
-        const free = (b) => b[0] >= lo && b[2] <= hi && b[1] >= 0 && b[3] <= H && placed.every((p) => b[2] < p[0] || b[0] > p[2] || b[3] < p[1] || b[1] > p[3]);
+        const free = (b) => b[0] >= lo && b[2] <= hi && b[1] >= 0 && b[3] <= H && placed.every((p) => b[2] < p[0] || b[0] > p[2] || b[3] < p[1] || b[1] > p[3]) && !onRing(b);
         const fit = [[dx, dy], [dx, -dy], [-dx, dy], [-dx, -dy]].find(([ox, oy]) => free(block(ox, oy)));
         if (fit) [dx, dy] = fit;
         // where no offset is free, the label still stays between the panels (review_s2 P4-3)
@@ -419,7 +437,7 @@ export function buildUI(app) {
         // with no free place, a label that would lie on a part of the drawing is left out rather than laid on it (a
         // small window, 960 x 640: labels lay on the title block and the ruler)
         const box = end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16];
-        if (!fit && blocks.some((p) => box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3])) return;
+        if (!fit && (blocks.some((p) => box[0] < p[2] && p[0] < box[2] && box[1] < p[3] && p[1] < box[3]) || onRing(box))) return;
         dx = end ? -1 : 1;
         placed.push(end ? [lx - tw, ly - 16, lx, ly + 16] : [lx, ly - 16, lx + tw, ly + 16]);
         parts.push(`<g><circle class="mark" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/><line class="lead" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}"/><text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}">${txt}</text>${sub ? `<text x="${(lx + (dx < 0 ? -4 : 4)).toFixed(1)}" y="${(ly + 11).toFixed(1)}" text-anchor="${dx < 0 ? 'end' : 'start'}" class="subt">${sub}</text>` : ''}</g>`);
@@ -505,8 +523,10 @@ export function buildUI(app) {
     Object.entries(modeBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.color === id)));
     Object.entries(emitBtns).forEach(([id, b]) => b.setAttribute('aria-pressed', String(s.emit === id)));
     $('#bh-modenote').textContent = '';
-    // the page's clock, said for the hole shown, where a turning disk is drawn (flow.js clockShown, clockLine)
-    $('#bh-viewnote').textContent = `${VIEWS[s.view].hint}. ${modeNote(s.color)}.${clockShown(s, store.reduced) ? ' ' + clockLine(app.model, app.model.obj ? app.model.obj.name : null) : ''}`;
+    // the page's clock, said for the hole shown, where a turning disk is drawn (flow.js clockShown, clockLine), tagged
+    // as every claim on the page is; the camera's height is its own (config.js viewHint)
+    const clockSay = clockShown(s, store.reduced) ? ` ${esc(clockLine(m, o ? o.name : null))} ${clockTag(o) === 'REAL' ? tagR : tagI}` : '';
+    $('#bh-viewnote').innerHTML = `${esc(viewHint(s))}. ${esc(modeNote(s.color))}.${clockSay}`;
     // the swatches are drawn in the tokens the render draws the same marks with (palette.js modeKey)
     // the key, drawn by one function into every place it shows (the Colour card, and the drawing's head line)
     const keyHtml = modeKey(s.color).map(([c, t]) => `<span><i class="sw" style="background:${c}"></i>${esc(t)}</span>`).join('');

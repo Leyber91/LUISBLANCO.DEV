@@ -36,7 +36,7 @@
    ============================================================ */
 
 import * as K from './kerr.js';
-import { dur } from './physics.js';
+import { dur, weakest, inputTags } from './physics.js';
 
 export const FLOW = { mPerSecond: 7.5, cycleOrbits: 2, seeds: 256, coreMean: 0.52 };
 
@@ -92,6 +92,14 @@ export function clockShort(m) {
 /** Whether a sentence about the disk turning is true of the view: a disk drawn with its texture (the thick disk in the
  *  thermal or true-colour map; the thin emitter and the diagnostic maps carry none), the clock running, and not the fall,
  *  whose own clocks run on the fall's schedule (ui.js, the journey). */
+/** The clock sentences' tag, as strong as their weakest input (physics.js weakest): a second here by a distant clock
+ *  rests on the hole's mass, the orbit at the ISCO on its spin as well. M87* and Sgr A* have no measured spin, so
+ *  their clock is ILLUSTRATIVE; Cygnus X-1's is REAL (the final grade, 2026-11-18). */
+export function clockTag(obj) {
+  const t = inputTags(obj);
+  return weakest(t.mass, t.spin);
+}
+
 export function clockShown(s, reduced = false) {
   return s.emit === 'thick' && (s.color === 'thermal' || s.color === 'true') && !!s.anim && !reduced && s.view !== 'journey';
 }

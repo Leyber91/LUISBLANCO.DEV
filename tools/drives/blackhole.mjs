@@ -572,6 +572,25 @@ export async function EDGE_STEP(p, { base, ready }) {
   const t1 = await p.ev(TICKS);
   p.check('the telescope view draws the traced edge as ticks across the theory curve, 40 or more, each centred within 1.5 px of it, and its legend names them',
     !!traced0 && !!drawn && t1.ticks >= 40 && t1.curve > 0 && t1.worst != null && t1.worst <= 1.5 && t1.named, JSON.stringify(t1));
+  // no label lies on the ring the curve and its ticks take (at 390 px the shadow's width sat on it; the final grade,
+  // 2026-11-18): every overlay text box clear of the band between the ticks' nearest and farthest reach
+  const ONRING = `(() => {
+    const e = document.querySelector('#bh-overlay path.edge');
+    const P = e ? [...e.getAttribute('d').matchAll(/[ML](-?[\\d.]+),(-?[\\d.]+)/g)].map((m) => [+m[1], +m[2]]) : [];
+    if (P.length < 8) return { ring: false };
+    const ox = P.reduce((a, p) => a + p[0], 0) / P.length, oy = P.reduce((a, p) => a + p[1], 0) / P.length;
+    const ds = P.map(([x, y]) => Math.hypot(x - ox, y - oy)), r0 = Math.min(...ds), r1 = Math.max(...ds);
+    const svg = document.getElementById('bh-overlay').getBoundingClientRect();
+    const on = [...document.querySelectorAll('#bh-overlay text')].filter((t) => {
+      const b = t.getBoundingClientRect(), x0 = b.left - svg.left, y0 = b.top - svg.top, x1 = b.right - svg.left, y1 = b.bottom - svg.top;
+      const nx = Math.max(x0, Math.min(ox, x1)), ny = Math.max(y0, Math.min(oy, y1));
+      const far = Math.max(...[[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([x, y]) => Math.hypot(x - ox, y - oy)));
+      return Math.hypot(nx - ox, ny - oy) <= r1 && far >= r0;
+    }).map((t) => t.textContent);
+    return { ring: true, r0: +r0.toFixed(1), r1: +r1.toFixed(1), on, labels: document.querySelectorAll('#bh-overlay text').length };
+  })()`;
+  const rg = await p.ev(ONRING);
+  p.check('no label of the telescope view lies on the ring of the curve and its ticks', rg.ring && rg.on.length === 0 && rg.labels > 0, JSON.stringify(rg));
   // where there is no theory curve (spin and charge together) no ticks are drawn and none are named; where the grid
   // finds no shadow (fov 20) there are no ticks, and the legend of the curve does not name them
   for (const [q, what, curve] of [['?o=custom&a=0.5&qq=0.5&v=telescope', 'a 0.5 and Q/M 0.5, no theory curve', false], ['?o=m87&v=telescope&f=20', 'fov 20, the shadow smaller than the grid', true]]) {
@@ -598,8 +617,23 @@ export async function SPIN_STEP(p, { base, ready }) {
   // the view's note (in the panels) and the caption card under the picture: their text, and whether the card shows all
   // of its words (the card's height is capped on a phone)
   const CAPTION = `(() => { const e = document.getElementById('bh-viewnote'), c = document.querySelector('#bh-caption .cap-b'), box = document.querySelector('#bh-caption .cap');
-    return { note: e ? e.textContent : null, card: c ? c.textContent : null, cut: box ? box.scrollHeight - box.clientHeight : null }; })()`;
+    return { note: e ? e.textContent : null, card: c ? c.textContent : null, cut: box ? box.scrollHeight - box.clientHeight : null,
+      tags: [e, c].map((x) => { const t = x && x.querySelector('.bh-tagr, .bh-tagi'); return t ? t.className : null; }) }; })()`;
   const c = await p.ev(CAPTION);
+  // the camera's height is its own, r cos i (config.js viewHint; it said 5 M at every inclination), and the clock's
+  // sentences carry the tag of their weakest input in the note and the card (flow.js clockTag; the final grade,
+  // 2026-11-18): M87*'s spin is not measured, so I; Cygnus X-1's is, so R
+  p.check('the note gives the camera\'s own height, 4.8 M above the disk plane at 46 M and 84 deg', /^a camera 46 M away, 4\.8 M above the disk plane\./.test(c.note || ''), (c.note || '').slice(0, 80));
+  p.check('the clock\'s sentences for M87* are tagged I in the note and in the card, its spin not measured', c.tags.every((t) => t === 'bh-tagi'), JSON.stringify(c.tags));
+  await p.go(`${base}/labs/bh_animation_page.html?o=cygx1&n=0`);
+  await p.until(ready, READY_MS);
+  await p.sleep(1500);
+  await p.step('Cygnus X-1 as the page opens, its caption');
+  const cx = await p.ev(CAPTION);
+  p.check('the clock\'s sentences for Cygnus X-1 are tagged R in the note and in the card, its spin measured', cx.tags.every((t) => t === 'bh-tagr'), JSON.stringify(cx.tags));
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87&n=0`);
+  await p.until(ready, READY_MS);
+  await p.sleep(1500);
   p.check('the caption card under the picture gives the clock in short, by a distant clock, and shows every word of it',
     /Time here runs at 7\.5 M a second: an orbit at the ISCO takes 3\.2 s here and 8\.89 d by a distant clock\./.test(c.card || '') && c.cut != null && c.cut <= 1, JSON.stringify({ card: c.card, cut: c.cut }));
   p.check('the view\'s note states the clock for M87* as a distant clock counts it',
