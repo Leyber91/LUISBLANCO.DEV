@@ -417,7 +417,7 @@ export function buildUI(app) {
       // review_s4c 1)
       const blocks = drawing ? drawing.obstacles() : [];
       const placed = blocks.slice();
-      const lab = (pt, txt, sub, dx, dy) => {
+      const lab = (pt, txt, sub, dx, dy, within = false) => {
         if (!pt) return;
         const [x, y] = toScreen(pt.sx, pt.sy, th);
         const [L, R] = openCentre(W), lo = L + 8, hi = R - 8;
@@ -430,7 +430,11 @@ export function buildUI(app) {
         // lead's end; of the four mirrored offsets, the first that touches no placed block wins
         const block = (ox, oy) => (ox < 0 ? [x + ox - tw, y + oy - 16, x + ox, y + oy + 16] : [x + ox, y + oy - 16, x + ox + tw, y + oy + 16]);
         const free = (b) => b[0] >= lo && b[2] <= hi && b[1] >= 0 && b[3] <= H && placed.every((p) => b[2] < p[0] || b[0] > p[2] || b[3] < p[1] || b[1] > p[3]) && !onRing(b);
-        const fit = [[dx, dy], [dx, -dy], [-dx, dy], [-dx, -dy]].find(([ox, oy]) => free(block(ox, oy)));
+        // a label that names the shadow may, where all four lie on the ring of the curve and its ticks (at 390 px the ring
+        // is a few tens of px from the anchor on the shadow's edge), be written inside the shadow, centred, as a drawing
+        // dimensions a feature inside it; the offset is ox < 0, so the text ends at the lead
+        const inside = within && ring ? [ring.ox + tw / 2 - x, ring.oy - y] : null;
+        const fit = [[dx, dy], [dx, -dy], [-dx, dy], [-dx, -dy], ...(inside && inside[0] < 0 ? [inside] : [])].find(([ox, oy]) => free(block(ox, oy)));
         if (fit) [dx, dy] = fit;
         // where no offset is free, the label still stays between the panels (review_s2 P4-3)
         const { lx, ly, end } = keepInside(x, y, dx, dy, tw, [L, R], H);
@@ -448,7 +452,7 @@ export function buildUI(app) {
         const wM = s.view === 'telescope' ? (K.angleToImpact(Math.atan(sh.right), store.shown.rcam) - K.angleToImpact(Math.atan(sh.left), store.shown.rcam)) : null;
         const inner = s.emit === 'thick' && s.view === 'telescope';
         lab({ sx: sh.right, sy: sh.cy + (sh.top - sh.cy) * 0.3 }, inner ? 'inner shadow' : 'shadow',
-          wM ? `${s3(wM)} M wide${inner ? ': the disk hides the rest' : ''}` : `horizon is ${s3(2 * m.rh)} M across`, narrow() ? 30 : 70, narrow() ? -70 : -30);
+          wM ? `${s3(wM)} M wide${inner ? ': the disk hides the rest' : ''}` : `horizon is ${s3(2 * m.rh)} M across`, narrow() ? 30 : 70, narrow() ? -70 : -30, true);
       }
       if (an.limb && s.emit === 'thick') lab(an.limb, 'approaching side', `g up to ${s3(an.limb.g)}, I × ${s3(Math.pow(an.limb.g, 4))}`, -60, 46);
       if (an.ring && s.emit === 'thick' && !narrow()) lab(an.ring, 'n = 1 image', 'light that circled once', 60, -34);

@@ -587,10 +587,13 @@ export async function EDGE_STEP(p, { base, ready }) {
       const far = Math.max(...[[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([x, y]) => Math.hypot(x - ox, y - oy)));
       return Math.hypot(nx - ox, ny - oy) <= r1 && far >= r0;
     }).map((t) => t.textContent);
-    return { ring: true, r0: +r0.toFixed(1), r1: +r1.toFixed(1), on, labels: document.querySelectorAll('#bh-overlay text').length };
+    const width = [...document.querySelectorAll('#bh-overlay text')].some((t) => / M wide/.test(t.textContent));
+    return { ring: true, r0: +r0.toFixed(1), r1: +r1.toFixed(1), on, width, labels: document.querySelectorAll('#bh-overlay text').length };
   })()`;
   const rg = await p.ev(ONRING);
-  p.check('no label of the telescope view lies on the ring of the curve and its ticks', rg.ring && rg.on.length === 0 && rg.labels > 0, JSON.stringify(rg));
+  // and the shadow's width, the measurement the view exists for, is still written on the picture: the first version of
+  // the fix cleared the ring by leaving the label out at 390 px
+  p.check('no label of the telescope view lies on the ring of the curve and its ticks, and the shadow\'s width is written', rg.ring && rg.on.length === 0 && rg.width, JSON.stringify(rg));
   // where there is no theory curve (spin and charge together) no ticks are drawn and none are named; where the grid
   // finds no shadow (fov 20) there are no ticks, and the legend of the curve does not name them
   for (const [q, what, curve] of [['?o=custom&a=0.5&qq=0.5&v=telescope', 'a 0.5 and Q/M 0.5, no theory curve', false], ['?o=m87&v=telescope&f=20', 'fov 20, the shadow smaller than the grid', true]]) {
