@@ -20,6 +20,7 @@
    ============================================================ */
 
 import { glslMark, glslConst, PHYSICAL, LAB, DIAG_EXPO, DRIFT_LIMIT } from './palette.js';
+import { FLOW } from './flow.js';
 
 const header = `#version 300 es
 precision highp float;
@@ -261,12 +262,13 @@ float profileT(float r){
   float u = sqrt(clamp((r - uRin)/(uRout - uRin), 0.0, 1.0));
   return texture(uProfile, vec2(u*(511.0/512.0) + 0.5/512.0, 0.5)).r;
 }
-// the pattern's two fields at an angle in the co-moving frame, from one of flow.js's seeds (illustrative structure)
-vec2 diskFields(float ang, float lr, float seed){
-  vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0) + vec3(seed*1.37, seed*0.73, 0.0);
+// one copy of the disk's pattern at an angle in the co-moving frame, from one of flow.js's seeds (illustrative structure)
+float diskPattern(float ang, float lr, float seed){
+  vec3 p = vec3(cos(ang)*5.5, sin(ang)*5.5, lr*16.0) + vec3(seed*13.7, seed*7.9, 0.0);   // seeds far apart: independent copies
   float body = fbm(p*vec3(1.0, 1.0, 0.5));
   float ridge = 1.0 - abs(2.0*fbm(p*vec3(1.7, 1.7, 1.3) + 4.0) - 1.0);   // filaments
-  return vec2(body, ridge);
+  float lanes = 0.5 + 0.5*sin(lr*42.0 + 3.0*body);                         // thin lanes along the orbits
+  return 0.30 + 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge) * (0.75 + 0.35*lanes);
 }
 float turbulence(float r, float phiW){
   // Each annulus turns at its own Kerr orbital frequency. One pattern carried along wound into rings finer than the
@@ -279,13 +281,11 @@ float turbulence(float r, float phiW){
   float c0 = floor(uTime/T), c1 = floor(uTime/T + 0.5);
   float t0 = uTime - c0*T, t1 = uTime + 0.5*T - c1*T;
   float w0 = 1.0 - abs(2.0*t0/T - 1.0), w1 = 1.0 - w0;
-  vec2 f0 = diskFields(phiW - Om*t0, lr, mod(c0*2.0, 64.0));
-  vec2 f1 = diskFields(phiW - Om*t1, lr, mod(c1*2.0 + 1.0, 64.0));
-  // a blend of two independent patterns keeps their contrast: deviations from the mean scaled by 1/|w|
-  vec2 f = 0.5 + (w0*(f0 - 0.5) + w1*(f1 - 0.5))*inversesqrt(w0*w0 + w1*w1);
-  float body = clamp(f.x, 0.0, 1.0), ridge = clamp(f.y, 0.0, 1.0);
-  float lanes = 0.5 + 0.5*sin(lr*42.0 + 3.0*body);                         // thin lanes along the orbits
-  return 0.30 + 1.05*body*body*2.0*(0.55 + 0.75*ridge*ridge) * (0.75 + 0.35*lanes);
+  float v0 = diskPattern(phiW - Om*t0, lr, mod(c0*2.0, ${FLOW.seeds.toFixed(1)}));
+  float v1 = diskPattern(phiW - Om*t1, lr, mod(c1*2.0 + 1.0, ${FLOW.seeds.toFixed(1)}));
+  // two independent copies blended around the pattern's own mean, their spread kept (flow.js flowBlend)
+  float m = ${FLOW.patternMean.toFixed(4)};
+  return max(0.05, m + (w0*(v0 - m) + w1*(v1 - m))*inversesqrt(w0*w0 + w1*w1 + ${(2 * FLOW.copyCorrelation).toFixed(4)}*w0*w1));
 }
 vec3 diskColor(vec4 g0, vec4 g2){
   float r = g0.x, phiW = g0.y + uAz, g = max(g0.z, 1e-3);

@@ -17,14 +17,25 @@
    between the ISCO and twice its radius, and an inner feature can be
    followed around before it fades.
 
-   The page's clock runs FLOW.mPerSecond M of the hole's time a
-   second of display; clockLine says what that is for the hole shown.
+   The two copies are blended around the pattern's own mean,
+   FLOW.patternMean (0.778 at every spin, measured in flow.test.mjs
+   from a port of the shader's noise), with their spread kept, so the
+   disk neither brightens nor loses contrast as the copies trade
+   places. The copies correlate at FLOW.copyCorrelation, 0.07 (they
+   share the radial lanes), which the blend allows for. Blended field
+   by field around 0.5, a field whose mean is 0.82 clamped over 41% of
+   the disk twice a cycle (review_spin 3).
+
+   The page's clock runs FLOW.mPerSecond M of coordinate time, as a
+   distant clock counts it, a second of display; clockLine says what
+   that is for the hole shown, and clockShown when a sentence about a
+   turning disk is true (review_spin 4 and 5).
    ============================================================ */
 
 import * as K from './kerr.js';
 import { dur } from './physics.js';
 
-export const FLOW = { mPerSecond: 7.5, cycleOrbits: 2, seeds: 64 };
+export const FLOW = { mPerSecond: 7.5, cycleOrbits: 2, seeds: 256, patternMean: 0.778, copyCorrelation: 0.07 };
 
 /** One prograde circular orbit at the ISCO, in M of coordinate time. */
 export function iscoOrbitM(a, q = 0) {
@@ -47,11 +58,32 @@ export function flowPhases(t, T) {
   return [{ tau: t0, w: w0, seed: seed(c0, 0) }, { tau: t1, w: 1 - w0, seed: seed(c1, 1) }];
 }
 
-/** The page's clock for the hole shown, in a sentence: what a second here is there, and an orbit at the ISCO in both.
- *  m: physics.js derive() (tg, the hole's time unit in s; iscoPeriod in s); who: the hole's name, or null. */
+/** The two copies' pattern values blended around the pattern's mean, their spread kept: the copies share the radial
+ *  lanes and correlate at FLOW.copyCorrelation (0.07, measured in flow.test.mjs), so the blend divides by the spread of a
+ *  weighted sum of two values so correlated. The shader's turbulence() ends with this line. */
+export function flowBlend(v0, v1, w0, w1) {
+  const m = FLOW.patternMean, rho = FLOW.copyCorrelation;
+  return Math.max(0.05, m + (w0 * (v0 - m) + w1 * (v1 - m)) / Math.sqrt(w0 * w0 + w1 * w1 + 2 * rho * w0 * w1));
+}
+
+/** The page's clock for the hole shown, in a sentence: a second here as a distant clock at the hole counts it, and an
+ *  orbit at the ISCO in both. m: physics.js derive() (tg, the hole's time unit in s; iscoPeriod in s, a distant
+ *  clock's); who: the hole's name, or null. */
 export function clockLine(m, who) {
   const here = iscoOrbitM(m.a, m.q) / FLOW.mPerSecond;
   const per = FLOW.mPerSecond * m.tg;
-  const whose = who ? `${who}'s` : 'the hole\'s';
-  return `The disk turns at ${FLOW.mPerSecond} M of time a second: a second here is ${dur(per)} of ${whose} time, and an orbit at the ISCO takes ${here.toFixed(1)} s here and ${dur(m.iscoPeriod)} there.`;
+  return `Time here runs at ${FLOW.mPerSecond} M a second: a second here is ${dur(per)} by a distant clock at ${who || 'this hole'}, and an orbit at the ISCO takes ${here.toFixed(1)} s here and ${dur(m.iscoPeriod)} there.`;
+}
+
+/** The clock in short, for the caption card under the picture, which shows at every width (the full sentence sits in the
+ *  view's note, in the panels): an orbit at the ISCO here and at the hole, by a distant clock. */
+export function clockShort(m, who) {
+  const here = iscoOrbitM(m.a, m.q) / FLOW.mPerSecond;
+  return `Time here runs at ${FLOW.mPerSecond} M a second: an orbit at the ISCO takes ${here.toFixed(1)} s here and ${dur(m.iscoPeriod)} at ${who || 'this hole'}.`;
+}
+
+/** Whether a sentence about the disk turning is true of the view: a disk drawn with its texture (the thick disk in the
+ *  thermal or true-colour map; the thin emitter and the diagnostic maps carry none), and the clock running. */
+export function clockShown(s, reduced = false) {
+  return s.emit === 'thick' && (s.color === 'thermal' || s.color === 'true') && !!s.anim && !reduced;
 }
