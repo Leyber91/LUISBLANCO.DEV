@@ -97,6 +97,7 @@ uniform float uBump;
 uniform float uTempBias;
 uniform float uIceCap;
 uniform float uLife;
+uniform vec3 uPlant;   // the cover's albedo when uLife > 0 (life.js, the rules' colour for this star)
 uniform float uCloud;
 uniform float uBandFreq;
 uniform float uBandContrast; // how hard the belts and zones differ
@@ -542,8 +543,10 @@ vec3 landColor(float e, float clim, float moist){
   col = mix(col, uColB, smoothstep(0.45, 0.80, e));                           // bare highlands
   col = mix(col, mix(uColB, vec3(0.22,0.21,0.20), 0.5), smoothstep(0.35, 0.10, warm)*0.6);   // cold ground: grey scree
   if(uLife > 0.0){
-    vec3 plant = mix(vec3(0.05,0.10,0.03), vec3(0.025,0.06,0.02), smoothstep(0.4,0.8,moist));
-    col = mix(col, plant, uLife*smoothstep(0.3,0.6,moist)*smoothstep(0.15,0.4,warm)*(1.0-smoothstep(0.5,0.75,e)));
+    vec3 plant = uPlant * mix(1.0, 0.55, smoothstep(0.4,0.8,moist));   // wet ground's cover darker
+    // a thin cover (lichen-like crusts, Kiang et al. 2007 I) on dry ground, full on wet, none on high rock; frozen
+    // ground is the ice cap's, drawn over it. [ILLUSTRATIVE] uLife is 0 unless the visitor turns life on (life.js)
+    col = mix(col, plant, uLife*(0.35 + 0.65*smoothstep(0.2,0.55,moist))*(1.0-smoothstep(0.55,0.8,e)));
   }
   return col;
 }
@@ -1072,7 +1075,7 @@ const DEFAULTS = {
   lightMul: 1.0, bgBright: 0.32,
   type: -1, isGasGiant: 0, locked: 0, seed: 0.0, spin: 0.05,   // -1: no world loaded yet
   seaLevel: 0.5, contFreq: 1.9, mtnFreq: 6.0, bump: 0.14,
-  tempBias: 0.5, iceCap: 0.89, life: 0.0, cloud: 0.0, bandFreq: 16.0, bandContrast: 0.2, storm: 0.0, crater: 0.0,
+  tempBias: 0.5, iceCap: 0.89, life: 0.0, plant: [0.05, 0.10, 0.03], cloud: 0.0, bandFreq: 16.0, bandContrast: 0.2, storm: 0.0, crater: 0.0,
   colA: [0.30,0.32,0.36], colB: [0.24,0.26,0.30], colC: [0.40,0.42,0.46],
   glow: [0.0,0.0,0.0], glowT: 0.0, tsub: 300.0, tnight: 250.0,
   atmR: 1.033, hvis: 0.0047, tauR: [0.064,0.097,0.193], tauM: 0.07, hazeCol: [0.96,0.97,1.0], mieG: 0.76,
@@ -1087,7 +1090,7 @@ const UNIFORMS = [
   'uRes','uShift','uTime','uCam','uFwd','uFov','uExposure','uRaw',
   'uLightDir','uStarColor','uStarSurf','uStarAngle','uStarActivity','uStarSpots','uStarTeff','uStarSpin','uLightMul','uBgBright',
   'uType','uIsGasGiant','uLocked','uSurfaceMode','uSeed','uSpin','uSeaLevel','uContFreq','uMtnFreq','uBump',
-  'uTempBias','uIceCap','uLife','uCloud','uBandFreq','uBandContrast','uStorm','uCrater','uColA','uColB','uColC',
+  'uTempBias','uIceCap','uLife','uPlant','uCloud','uBandFreq','uBandContrast','uStorm','uCrater','uColA','uColB','uColC',
   'uGlow','uGlowT','uTsub','uTnight',
   'uAtmR','uHvis','uTauR','uTauM','uHazeCol','uMieG','uHasAtmo',
   'uOctaves','uLastAmp',
@@ -1358,9 +1361,10 @@ export class Exoplanet {
   /* whether a world of this look can be drawn without building its program on the page's thread: the browser
      builds in the background, or the program is already built */
   canDraw(look) { return !!this.parallel || this._ready(look | 0); }
-  setLayers({ cloud, life } = {}) {
+  setLayers({ cloud, life, plant } = {}) {
     if (Number.isFinite(cloud)) this.cfg.cloud = cloud;
     if (Number.isFinite(life)) this.cfg.life = life;
+    if (Array.isArray(plant) && plant.length === 3 && plant.every(Number.isFinite)) this.cfg.plant = plant;
     this.requestDraw();
   }
   /* draw now, synchronously, for a capture in the same task. A change of world still in flight is
@@ -1638,6 +1642,7 @@ export class Exoplanet {
     gl.uniform1f(u.uTempBias, cfg.tempBias);
     gl.uniform1f(u.uIceCap, cfg.iceCap);
     gl.uniform1f(u.uLife, cfg.life);
+    gl.uniform3fv(u.uPlant, cfg.plant);
     gl.uniform1f(u.uCloud, cfg.cloud);
     gl.uniform1f(u.uBandFreq, cfg.bandFreq);
     gl.uniform1f(u.uBandContrast, cfg.bandContrast);

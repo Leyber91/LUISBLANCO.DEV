@@ -504,3 +504,28 @@ body.ready :is(.search, .logrow, .finder-acts) { transition-delay: 700ms; } body
   input.engraved::-webkit-slider-runnable-track { height: 44px; background-position: 0 22px, 0 22px; }
   input.engraved::-webkit-slider-thumb { margin-top: 14px; }
 }
+
+/* ---- If there were life (views/life.js): a sheet under the note, shown while the switch is on. Nothing on it is
+   measured, so nothing is gold; the strip is a spectrum as a spectrograph prints it. ---- */
+.life { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 8px; }
+.life[hidden] { display: none; }
+.life-lede { color: var(--text-dim); margin: 4px 0 8px; }
+.life-strip { display: block; width: 100%; height: auto; margin: 2px 0 10px; }
+.life-strip .ax { fill: var(--text-dim); font: 11px var(--font-mono); }
+.life-strip .tk { stroke: var(--text-dim); stroke-width: 1; }
+.life-strip .hatch { stroke: var(--line-bright); stroke-width: 1; }
+.life-strip .peak { stroke: var(--horizon); stroke-width: 1; stroke-dasharray: 3 3; }
+.life-strip .refl { fill: none; stroke: var(--text-bright); stroke-width: 1.3; }
+.life-strip .refl-b { stroke: var(--horizon); stroke-dasharray: 5 3; }
+.life-sws { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 0 0 10px; }
+.life-sw { display: flex; gap: 8px; align-items: center; max-width: 280px; min-height: 44px; padding: 0; background: none; border: 0; color: var(--text); font: inherit; text-align: left; }
+button.life-sw { cursor: pointer; border-left: 2px solid transparent; padding-left: 6px; }
+button.life-sw[aria-pressed="true"] { border-left-color: var(--text-bright); }
+button.life-sw:focus-visible { outline: 1px solid var(--horizon); outline-offset: 2px; }
+.life-sw .chip { width: 36px; height: 36px; flex: none; border: 1px solid var(--line-bright); }
+.life-t { width: 100%; border-collapse: collapse; border-top: 1px solid var(--text-dim); border-bottom: 1px solid var(--text-dim); margin: 0 0 10px; }
+.life-t th { font-weight: 400; color: var(--text-dim); text-align: left; padding: 4px 8px 4px 0; }
+.life-t td { color: var(--text-bright); text-align: right; padding: 4px 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.life-t tr:first-child td { white-space: normal; }
+.life-words { font: 400 15px/1.6 var(--font-serif); color: var(--text); margin: 0 0 10px; }
+.life-ev { border-top: 1px solid var(--line); padding-top: 6px; color: var(--text-dim); font-size: 11px; display: grid; gap: 4px; }

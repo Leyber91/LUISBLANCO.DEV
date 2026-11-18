@@ -37,6 +37,8 @@ import { viaOf } from './record.js';
 import { fmt, fmtInt, esc, reducedMotion } from './views/common.js';
 import { mountRoutePanel } from '../ai/route-panel.js';
 import { keycap, keyHint, switchCtl, setSwitch, bindSwitch, isOn, scale, bindScale, setScale } from '../kit/controls.js';
+import { lifeOf } from './life.js';
+import { drawLife } from './views/life.js';
 import { el } from '../kit/dom.js';
 import { day, fromIso, int } from '../kit/format.js';
 
@@ -53,6 +55,8 @@ const store = {
     albedo: () => 0.3, pins: [], newNames: new Set(), newSince: '', plain: false,
     // a scenario of the selected world's air the visitor chose (air.js); null draws the survey's own. A link may carry one.
     air: SCENARIOS.includes(params.get('air')) ? params.get('air') : null,
+    // if there were life (life.js): drawn by the rules when on; a red dwarf's reading, a or b
+    life: ['a', 'b'].includes(params.get('life')), lifeReading: params.get('life') === 'b' ? 'b' : 'a',
   },
 };
 const methodGroup = (m) => (METHOD_GROUPS.some((g) => g.key === m) ? m : 'other');
@@ -239,8 +243,24 @@ function filterLabel() {
 /* ---------------- selection ---------------- */
 function paramsFor(p) {
   const prm = toParams(p, { air: store.state.air });
+  const s = store.state.life && !store.state.plain ? lifeReading(p) : null;
+  if (s) { prm.life = s.cover; prm.plant = s.colour.linear; }
   if (store.state.plain) { prm.cloud = 0; prm.life = 0; }
   return prm;
+}
+/* the reading of life the picture draws for p: the one chosen, else its first; null where the rules draw none */
+function lifeReading(p) {
+  const L = lifeOf(p);
+  return L.scenarios.find((s) => s.key === store.state.lifeReading) || L.scenarios[0] || null;
+}
+/* the sheet "If there were life" for the world on sheet A, shown while the switch is on; with layers, the picture
+   takes the cover at once (a change of world takes it with the world's own parameters) */
+function applyLife({ layers = true } = {}) {
+  const st = store.state, host = $('life-sheet');
+  if (!host || !st.sel) return;
+  host.hidden = !st.life;
+  if (st.life) drawLife(host, st.sel, { reading: st.lifeReading, onReading: (k) => { st.lifeReading = k; applyLife(); writeURL(); } });
+  if (layers && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life, plant: prm.plant }); }
 }
 /* self: the page opened this world with no action of the visitor (the world it starts on, a tour moving by
    itself). Such a world is shown and is not written to the log as a visit. */
@@ -253,7 +273,7 @@ function select(p, { from = 'ui', keepTour = false, self = false } = {}) {
   if (prev && prev !== p) st.air = null;   // a chosen scenario belongs to the world it was chosen on
   st.system = byOrbit(st.list.filter((q) => q.host === p.host));
   const apply = () => {
-    setReticle(p); placeWorld();
+    setReticle(p); placeWorld(); applyLife({ layers: false });
     if (desktop()) drawInset($('inset'), p, st.system);
     const c = starColour(p.Teff).srgb.map((x) => Math.round(x * 255)).join(',');
     document.body.style.setProperty('--star-rgb', c);
@@ -379,6 +399,7 @@ function writeURL() {
     }
     if (st.filter.query) u.set('q', st.filter.query);
     if (st.air && classify(st.sel, { air: st.air }).airKey === st.air) u.set('air', st.air);
+    if (st.life) u.set('life', st.lifeReading);
     if (log && log.shared().length) u.set('log', log.shared().join('|'));
     if (params.get('os-fixture')) u.set('os-fixture', params.get('os-fixture'));
     if (window.__EXO_STILL__) u.set('still', '');
@@ -868,7 +889,9 @@ function buildControls() {
   const cleanRow = el('span', 'sw-row'), hKey = keyHint('H');
   hKey.title = 'H hides the instruments and brings them back';
   cleanRow.append(clean, hKey);
-  sws.append(plain, cleanRow);
+  const lifeSw = switchCtl({ name: 'life', words: ['none', 'by these rules'], id: 'btn-life', checked: store.state.life, ariaLabel: 'Life, drawn by these rules' });
+  lifeSw.title = 'What life could look like here, by rules from the planet\'s numbers. No life is known on any planet but Earth.';
+  sws.append(plain, cleanRow, lifeSw);
   const ground = el('div', 'ground'); ground.id = 'ground'; ground.hidden = true;
   ground.innerHTML = `<div class="ground-row"><label for="sun-elev">star elevation</label><input id="sun-elev" class="engraved" type="range" min="-10" max="80" step="1" value="14" /><span class="rv" id="sun-elev-v">14\u00b0</span></div>
     <p class="ground-sites" id="ground-sites"></p><p class="ground-read" id="ground-read"></p>`;
@@ -911,8 +934,9 @@ async function boot() {
   $('btn-clean').addEventListener('click', () => toggleClean(!document.body.classList.contains('clean')));
   bindSwitch($('btn-plain'), (off) => {
     const st = store.state; st.plain = off;
-    if (st.sel && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life }); }
+    if (st.sel && glOk) { const prm = paramsFor(st.sel); engine.setLayers({ cloud: prm.cloud, life: prm.life, plant: prm.plant }); }
   });
+  bindSwitch($('btn-life'), (on) => { store.state.life = on; applyLife(); writeURL(); });
   $('sun-elev').addEventListener('input', (e) => { engine.setCamera({ sunElev: +e.target.value }); $('sun-elev-v').textContent = `${int(+e.target.value)}°`; });   // the kit writes −10, with the minus sign
   $('ground-sites').addEventListener('click', (e) => {
     const b = e.target.closest('[data-elev]'); if (!b) return;

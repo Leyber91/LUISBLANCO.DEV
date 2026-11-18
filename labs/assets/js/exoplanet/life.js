@@ -100,8 +100,8 @@ export function scenariosOf(c, S) {
   if (c.key === 'F2V') return [mk('one', 'Pigments tuned to a light that peaks in the violet would absorb the blue most: a cover darker in the blue than Earth\'s.', [{ mu: c.peak, w: 40, d: 0.9 }, { mu: CHL_A, w: 20, d: 0.6 }], 0, c.gppVis)];
   if (c.key === 'G2V' || c.key === 'K2V') return [mk('one', 'Pigments tuned to a light that peaks in the red would absorb red and blue and return green: plants much like Earth\'s.', [SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];
   return [
-    mk('a', `Harvesting all its light from 400 to 1,100 nm, as Kiang et al. expect of a red dwarf's plants, a cover would return little visible light and look dark; its main band, at ${int(c.peak)} nm, is past what eyes see.`, [{ mu: c.peak, w: 40, d: 0.9 }], 0.8, /** @type {number} */ (c.gppWide)),
-    mk('b', 'Or, as Takizawa et al. 2017 argue, the first plants of a red dwarf would use visible light as Earth\'s do, and look green, with less light to grow on.', [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
+    mk('a', `Harvesting all its light from 400 to 1,100 nm, as Kiang et al. expect under a star like their ${c.key}, a cover would return little visible light and look dark; its main band, at ${int(c.peak)} nm, is past what eyes see.`, [{ mu: c.peak, w: 40, d: 0.9 }], 0.8, /** @type {number} */ (c.gppWide)),
+    mk('b', 'Or, as Takizawa et al. 2017 argue for stars this cool, the first plants would use visible light as Earth\'s do, and look green, with less light to grow on.', [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
   ];
 }
 
@@ -124,7 +124,7 @@ export function lifeOf(p, k = classify(p)) {
   if (!(typeof p.Teff === 'number' && p.Teff > 0)) {
     words.push(NO_STAR);
     if (!where.surface) words.push(where.why);
-    return { case: null, extrapolated: false, where, scenarios: [], light: null, uvb: null, words };
+    return { case: null, extrapolated: false, where, scenarios: [], light: null, uvb: null, words, phys: ph };
   }
   const { c, extrapolated } = caseOf(p.Teff);
   const s0 = insolation(p).S, S = typeof s0 === 'number' && s0 > 0 ? s0 : null;
@@ -142,5 +142,5 @@ export function lifeOf(p, k = classify(p)) {
   // the day side and the ground's gravity are said only of a world where surface life is considered at all
   if (where.surface && ph.locked) words.push('One face is always to its star: life, if any, would keep to the day side and the ring of twilight.');
   if (where.surface && ph.radiusKnown && ph.gRel > 0) words.push(`Its surface gravity is ${num(ph.gRel, 2)} times Earth's. No published rule says what that would do to a living form.`);
-  return { case: c, extrapolated, where, scenarios, light, uvb, words };
+  return { case: c, extrapolated, where, scenarios, light, uvb, words, phys: ph };
 }
