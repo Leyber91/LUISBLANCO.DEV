@@ -124,7 +124,7 @@ export function scenariosOf(c, S, type = 'M') {
   if (c === SUN || c === K2V) return [mk('one', 'Pigments tuned to a light that peaks in the red would absorb red and blue and return green: plants much like Earth\'s.', [SORET, { mu: c.peak, w: 20, d: 0.85 }], 0, c.gppVis)];
   return [
     mk('a', `Reading a: harvesting all its light from 400 to 1,100 nm, as Kiang et al. expect under a star like their ${c.key}, a cover would return little visible light and look dark; its main band, at ${int(c.peak)} nm, is past what eyes see.`, [{ mu: c.peak, w: 40, d: 0.9 }], 0.8, /** @type {number} */ (c.gppWide)),
-    mk('b', `Reading b: or, as Takizawa et al. 2017 argue for M dwarfs${type === 'M' ? '' : `, whose light this ${type}-type star's is nearest`}, the first plants would use visible light, with a red edge near 700 to 760 nm as Earth's; drawn here in Earth's colour, with less light to grow on.`, [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
+    mk('b', `Reading b: or, as Takizawa et al. 2017 argue for M dwarfs${type === 'M' ? '' : `, whose temperature this ${type}-type star's is nearest`}, the first plants would use visible light, with a red edge near 700 to 760 nm as Earth's; drawn here in Earth's colour, with less light to grow on.`, [SORET, { mu: CHL_A, w: 20, d: 0.85 }], 0, c.gppVis),
   ];
 }
 
@@ -140,11 +140,12 @@ export const NO_LIGHT = 'The page has no starlight for it (no orbit, or no star 
 /** The words for the ice the picture draws on a world with one face to its star: it begins this many degrees from the
    point under the star (the shader's sin(angle / 2) against iceCap), on the day side under 90 degrees.
    @param {number} deg */
-export const iceLocked = (deg) => `In the picture its ice begins about ${int(deg)}° from the point under its star, ${deg < 90 ? 'on its day side' : 'past the ring of twilight'}; any cover farther out lies under the ice.`;
+export const iceLocked = (deg) => `In the picture its ice begins about ${int(deg)}° from the point under its star, ${deg < 90 ? 'on its day side' : 'on its night side'}; any cover farther out lies under the ice.`;
 /** @param {number} deg */
 export const iceLine = (deg) => `In the picture its ice reaches down to about ${int(deg)}° of latitude; any cover nearer its poles lies under the ice.`;
-/** The words for a world with one face to its star. */
+/** The words for a world with one face to its star, and for one whose ice reaches its day side. */
 export const LOCKED = 'One face is always to its star: life, if any, would keep to the day side and the ring of twilight.';
+export const LOCKED_NEAR = 'One face is always to its star: life, if any, would keep to the open ground around the point under it.';
 /** The words for an ocean world. */
 export const OCEAN = 'It is mostly sea: life, if any, would be mostly in the water, where the colour above would tint the shallows.';
 
@@ -181,12 +182,17 @@ export function lifeOf(p, k = classify(p), opts = {}) {
   }
   if (sparse) words.push(where.why);
   if (k.label === 'Ocean world') words.push(OCEAN);
+  // the picture's own ice (data.js toParams iceCap): on a turning world the sine of the latitude where it begins; on a
+  // world with one face to its star the sine of half its angle from the point under the star, so it reaches the day
+  // side wherever that angle is under 90 degrees
+  let iceDeg = null;
   if (k.look === 'temperate') {
-    // the picture's own ice (data.js toParams iceCap, the sine of the latitude where ice begins on a turning world;
-    // on a world with one face to its star the ice is drawn on the night side)
     const ice = toParams(p, { air: opts.air ?? null }).iceCap;
-    if (ice < 1) words.push(ph.locked ? iceLocked(2 * Math.asin(ice) * 180 / Math.PI) : iceLine(Math.asin(ice) * 180 / Math.PI));
+    if (ice < 1) {
+      iceDeg = ph.locked ? 2 * Math.asin(ice) * 180 / Math.PI : Math.asin(ice) * 180 / Math.PI;
+      words.push(ph.locked ? iceLocked(iceDeg) : iceLine(iceDeg));
+    }
   }
-  if (ph.locked) words.push(LOCKED);
+  if (ph.locked) words.push(iceDeg !== null && iceDeg < 90 ? LOCKED_NEAR : LOCKED);
   return { case: c, type, extrapolated, where, scenarios, light, uvb, words, phys: ph };
 }

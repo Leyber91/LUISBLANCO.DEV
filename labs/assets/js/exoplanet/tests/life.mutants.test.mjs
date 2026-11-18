@@ -75,17 +75,26 @@ const MUTANTS = [
   ['a surface world with no starlight drawn anyway', `const scenarios = S === null ? [] : scenariosOf(c, S, type)`, `const scenarios = scenariosOf(c, S || 1, type)`],
   ['extrapolation never said', `\${extrapolated ? ', extrapolated past the cases\\' range' : ''}`, ``],
   ['the case not named', ` is nearest the \${c.key} case of Kiang`, ` is nearest a case of Kiang`],
-  ['a star of another type nearest an M case not said to be so', `\${type === 'M' ? '' : \`, whose light this \${type}-type star's is nearest\`}`, ``],
+  ['a star of another type nearest an M case not said to be so', `\${type === 'M' ? '' : \`, whose temperature this \${type}-type star's is nearest\`}`, ``],
+  ['an M dwarf told it is another type', `\${type === 'M' ? '' :`, `\${false ? '' :`],
   ['the reason a desert is sparse not said', `  if (sparse) words.push(where.why);\n`, ``],
   ['the ocean sentence never said', `  if (k.label === 'Ocean world') words.push(OCEAN);\n`, ``],
-  ['the day side never said', `  if (ph.locked) words.push(LOCKED);\n`, ``],
-  ['the ice line said of every look', `  if (k.look === 'temperate') {\n    // the picture's own ice`, `  if (true) {\n    // the picture's own ice`],
+  ['the day side never said', `  if (ph.locked) words.push(iceDeg !== null && iceDeg < 90 ? LOCKED_NEAR : LOCKED);
+`, ``],
+  ['the ice line said of every look', `  if (k.look === 'temperate') {
+    const ice`, `  if (true) {
+    const ice`],
   ['the ice on a locked world said by latitude', `words.push(ph.locked ? iceLocked(`, `words.push(false ? iceLocked(`],
-  ['the ice on a locked world at half its angle', `iceLocked(2 * Math.asin(ice) * 180 / Math.PI)`, `iceLocked(Math.asin(ice) * 180 / Math.PI)`],
-  ['the ice on a locked world always past the twilight', `\${deg < 90 ? 'on its day side' : 'past the ring of twilight'}`, `\${false ? 'on its day side' : 'past the ring of twilight'}`],
+  ['the ice on a locked world at half its angle', `ph.locked ? 2 * Math.asin(ice) * 180 / Math.PI : Math.asin`, `ph.locked ? Math.asin(ice) * 180 / Math.PI : Math.asin`],
+  ['the ice on a locked world always on the night side', `\${deg < 90 ? 'on its day side' : 'on its night side'}`, `\${false ? 'on its day side' : 'on its night side'}`],
+  ['90 degrees itself on the day side', `\${deg < 90 ? 'on its day side'`, `\${deg <= 90 ? 'on its day side'`],
+  ['the day side only under 80 degrees', `\${deg < 90 ? 'on its day side'`, `\${deg < 80 ? 'on its day side'`],
+  ['the day side up to 96 degrees', `\${deg < 90 ? 'on its day side'`, `\${deg < 96 ? 'on its day side'`],
+  ['a locked world whose ice reaches its day side told to keep to the twilight', `iceDeg !== null && iceDeg < 90 ? LOCKED_NEAR : LOCKED`, `LOCKED`],
+  ['every locked world told to keep near the point under its star', `iceDeg !== null && iceDeg < 90 ? LOCKED_NEAR : LOCKED`, `LOCKED_NEAR`],
   ['the ice line read from the archive\'s air, not the visitor\'s', `const ice = toParams(p, { air: opts.air ?? null }).iceCap;`, `const ice = toParams(p).iceCap;`],
-  ['the ice line never said', `    if (ice < 1) words.push(`, `    if (false) words.push(`],
-  ['the ice line said of a world with no ice', `    if (ice < 1) words.push(`, `    if (ice < 2.5) words.push(`],
+  ['the ice line never said', `    if (ice < 1) {`, `    if (false) {`],
+  ['the ice line said of a world with no ice', `    if (ice < 1) {`, `    if (ice < 2.5) {`],
 ];
 
 process.exit(await runMutants({ here, file: 'life.js', test: 'life.test.mjs', mutants: MUTANTS, also: ['kit'], data: ['data/exomania/pscomppars-snapshot.json'] }));

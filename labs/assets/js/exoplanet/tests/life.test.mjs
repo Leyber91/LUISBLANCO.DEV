@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, timesEarth, NO_STAR, NO_LIGHT, LOCKED, OCEAN } from '../life.js';
+import { CASES, caseOf, article, WHY, whereOf, lifeOf, scenariosOf, reflectance, band, timesEarth, iceLocked, NO_STAR, NO_LIGHT, LOCKED, LOCKED_NEAR, OCEAN } from '../life.js';
 import { reflectanceColour, hzPosition } from '../science.js';
 import { loadSnapshot, provisionalMeasured } from '../catalog.js';
 import { classify } from '../data.js';
@@ -66,6 +66,8 @@ const by = Object.fromEntries(CASES.map((c) => [c.key, c]));
   yes('the cover: each case\'s productivity against the Sun\'s, times the starlight, at most all', g.cover === 1 && Math.abs(scenariosOf(by.G2V, 0.5)[0].cover - 0.5) < 1e-12 && scenariosOf(by.F2V, 3)[0].cover === 1
     && Math.abs(kk.cover - 0.61 / 0.72) < 1e-12 && Math.abs(scenariosOf(by.F2V, 0.5)[0].cover - 0.85 / 0.72 * 0.5) < 1e-12 && Math.abs(a.cover - Math.min(1, 0.59 / 0.72)) < 1e-12 && Math.abs(b.cover - 0.08 / 0.72) < 1e-12, `${kk.cover} ${a.cover} ${b.cover}`);
   yes('a light under 495 nm is violet, from 495 red, from 700 near infrared', band(494) === 'in the violet' && band(495) === 'in the red' && band(699) === 'in the red' && /near infrared/.test(band(700)));
+  yes('on a locked world ice from 89.9 degrees is on the day side, from 90 on the night side', /on its day side/.test(iceLocked(89.9)) && /on its night side/.test(iceLocked(90)) && /on its night side/.test(iceLocked(90.1)));
+  yes('reading b names a star of another type nearest an M case by its temperature, and an M dwarf by nothing more', !/whose temperature/.test(scenariosOf(by.M5V, 1, 'M')[1].words) && /whose temperature this L-type star's is nearest/.test(scenariosOf(by.M5V, 1, 'L')[1].words) && /whose temperature this K-type star's is nearest/.test(scenariosOf(by.M1V, 1, 'K')[1].words));
   yes('a ratio under 0.01 is said so, from 0.01 in two figures', timesEarth(0.009) === 'under 0.01 times' && timesEarth(0.01) === '0.010 times' && timesEarth(1.234) === '1.2 times');
 }
 
@@ -121,9 +123,9 @@ const at = (a, name) => sol(name, 1, 1, a, 365.25 * Math.pow(a, 1.5), { host: na
     && b0.L.where.surface === false && b1.k.look === 'temperate' && b1.L.where.surface === true && b1.L.scenarios.length === 2, `${d0.k.look} ${d1.k.look} ${b0.k.look} ${b1.k.look}`);
   yes('GJ 1061 d\'s star, 2,953 K, is nearest M5V, extrapolated, and the words say so', d0.L.extrapolated && /an M-type at 2,953 K, is nearest the M5V case of Kiang et al\. 2007 \(a modelled M5 dwarf\), extrapolated/.test(d0.L.words[0]), d0.L.words[0]);
   const k442 = lifeOf(P('Kepler-442 b')), k23 = lifeOf(P('K2-3 d')), k452 = lifeOf(P('Kepler-452 b')), k1229 = lifeOf(P('Kepler-1229 b'));
-  yes('Kepler-442 b, one face to its star: its ice begins about 97 degrees from the point under the star, past the twilight', k442.words.some((w) => /ice begins about 97° from the point under its star, past the ring of twilight/.test(w)) && k442.words.includes(LOCKED) && !k442.words.some((w) => /latitude/.test(w)), k442.words.slice(1).join(' | '));
-  yes('Kepler-1229 b: its ice begins about 22 degrees from the point under the star, on its day side', k1229.words.some((w) => /ice begins about 22° from the point under its star, on its day side/.test(w)), k1229.words.slice(1).join(' | '));
-  yes('K2-3 d, a K-type at 3,844 K, is nearest M1V and says both, with two readings, b naming its type', k23.case.key === 'M1V' && k23.type === 'K' && /a K-type at 3,844 K, is nearest the M1V case/.test(k23.words[0]) && k23.scenarios.length === 2 && /whose light this K-type star's is nearest/.test(k23.scenarios[1].words), k23.words[0]);
+  yes('Kepler-442 b, one face to its star: its ice begins about 97 degrees from the point under the star, past the twilight', k442.words.some((w) => /ice begins about 97° from the point under its star, on its night side/.test(w)) && k442.words.includes(LOCKED) && !k442.words.some((w) => /latitude/.test(w)), k442.words.slice(1).join(' | '));
+  yes('Kepler-1229 b: its ice begins about 22 degrees from the point under the star, on its day side, so its life keeps near that point', k1229.words.some((w) => /ice begins about 22° from the point under its star, on its day side/.test(w)) && k1229.words.includes(LOCKED_NEAR) && !k1229.words.includes(LOCKED), k1229.words.slice(1).join(' | '));
+  yes('K2-3 d, a K-type at 3,844 K, is nearest M1V and says both, with two readings, b naming its type', k23.case.key === 'M1V' && k23.type === 'K' && /a K-type at 3,844 K, is nearest the M1V case/.test(k23.words[0]) && k23.scenarios.length === 2 && /whose temperature this K-type star's is nearest/.test(k23.scenarios[1].words), k23.words[0]);
   const g2 = withAir('GJ 1002 b', 'thick');
   yes('the ice line follows the scenario the visitor chose: GJ 1002 b drawn thick has its ice begin about 76 degrees from its star', g2.L.words.some((w) => /ice begins about 76° from the point under its star/.test(w)), g2.L.words.slice(1).join(' | '));
   yes('Kepler-452 b, an ocean world, is told its life would be mostly in the water', k452.words.includes(OCEAN));
@@ -143,7 +145,7 @@ const at = (a, name) => sol(name, 1, 1, a, 365.25 * Math.pow(a, 1.5), { host: na
     if (k.look === 'fluid' && k.klass === 3 && k.physics.radiusKnown) { iceGiants++; if (L.words[0] !== WHY.iceGiant) iceGiantWrong++; }
     if (!L.where.surface && L.words.some((w) => /would peak/.test(w))) noSurfacePeak++;
     if (L.words.some((w) => /gravity/.test(w))) gravity++;
-    if (k.look !== 'temperate' && L.words.some((w) => /ice (lies|reaches)/.test(w))) iceOff++;
+    if (k.look !== 'temperate' && L.words.some((w) => /ice (lies|reaches|begins)/.test(w))) iceOff++;
   }
   yes('every planet in the catalogue is described, its case named, every colour a colour', errors === 0 && unnamed === 0 && colourless === 0 && n === list.length, `${n} described, ${errors} errors, ${unnamed} unnamed, ${colourless} colourless`);
   yes('no desert is drawn with a cover or called sparse outside the zone, and every sub-Neptune is called one', desertsDrawn === 0 && sparseOutside === 0 && subNeptunes > 1000 && subNeptuneWrong === 0, `${desertsDrawn} ${sparseOutside} ${subNeptunes} ${subNeptuneWrong}`);
