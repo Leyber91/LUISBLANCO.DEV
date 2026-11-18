@@ -482,7 +482,8 @@ const DRAG_FRAME = `(async () => {
   const w = r.canvas.width, h = r.canvas.height, px = new Uint8Array(w * h * 4);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
-  const preview = !r.mainDone, ps = r.preview.scale;
+  // the scale of the preview on screen, as the renderer drew it (the rule may change the buffer's after the draw)
+  const ps = r.shownScale ?? (r.preview ? r.preview.scale : null), preview = !r.mainDone && ps != null;
   clearInterval(id); a.interacting = false;
   // neighbours within one level in every channel (the final pass dithers by one level), among lit pixels where the
   // picture is not flat over three pixels (a flat or saturated stretch is equal under either enlargement)

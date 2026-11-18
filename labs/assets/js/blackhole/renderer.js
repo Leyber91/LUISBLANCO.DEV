@@ -329,6 +329,8 @@ export class Renderer {
     // pixel, and enlarged by the final pass
     const src = this.mainDone ? this.main : this.preview;
     const dst = this.mainDone ? this.hdr : this.hdrPreview;
+    // the scale of the preview this frame shows, null for a full picture (the drive reads it; review_res2 9)
+    this.shownScale = this.mainDone ? null : this.preview.scale;
     const scale = this.mainDone ? this.main.ss : 1;
     const ss = this.mainDone ? this.main.ss : 1;
     // shade -> HDR

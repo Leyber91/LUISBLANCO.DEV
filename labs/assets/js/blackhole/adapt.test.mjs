@@ -26,28 +26,28 @@ const ok = (name, cond, detail = '') => {
   if (!cond) fails++;
 };
 
-ok('the tier rule\'s bounds are 1.2 s to climb, 2.5 s to drop, a 3 s hold, frames under 34 ms to climb and over 100 ms to drop',
-  JSON.stringify(A.ADAPT) === JSON.stringify({ climbMs: 1200, dropMs: 2500, holdMs: 3000, climbFrameMs: 34, dropFrameMs: 100 }), JSON.stringify(A.ADAPT));
+ok('the tier rule\'s bounds are 1.2 s to climb, 2.5 s to drop and a 3 s hold, and frame time is not among them',
+  JSON.stringify(A.ADAPT) === JSON.stringify({ climbMs: 1200, dropMs: 2500, holdMs: 3000 }), JSON.stringify(A.ADAPT));
 ok('the preview\'s bounds are 40 ms slow, 20 ms keeping up, a 1 s hold, a 5 s undo, steps 0.3 to 1',
   JSON.stringify(A.PREVIEW) === JSON.stringify({ slowMs: 40, keepUpMs: 20, holdMs: 1000, undoMs: 5000 }) && JSON.stringify(A.PREVIEW_STEPS) === '[0.3,0.4,0.55,0.75,1]');
 
 const W = 1762, H = 1003, DPR = 0.9;               // his window, measured 2026-11-18
 const rays = (tier) => A.tierRays(TIERS[tier], W, H, DPR);
-const ctx = (refineMs, now, frameMs = 16.7) => ({ refineMs, frameMs, w: W, h: H, dpr: DPR, now, tiers: TIERS });
+const ctx = (refineMs, now) => ({ refineMs, w: W, h: H, dpr: DPR, now, tiers: TIERS });
 
 ok('the rays a full picture traces, supersamples counted: min 228874, low 605197, mid 2806080, high 5728632',
   rays('min') === 228874 && rays('low') === 605197 && rays('mid') === 2806080 && rays('high') === 5728632, A.ORDER.map((t) => `${t} ${rays(t)}`).join(', '));
 
 /** A visit: n pictures, each taking rays x cost (ms a ray, a function of the tier), each after dragMs of dragging and a
  *  4 s pause; the clock advances by all three. */
-function visit(start, costOf, { n = 30, dragMs = 0, frameMs = 16.7 } = {}) {
+function visit(start, costOf, { n = 30, dragMs = 0 } = {}) {
   let s = A.tierStart(start), now = 0;
   const path = [s.tier];
   for (let k = 0; k < n; k++) {
     now += dragMs;
     const refineMs = rays(s.tier) * costOf(s.tier);
     now += refineMs;
-    s = A.tierAfter(s, ctx(refineMs, now, frameMs));
+    s = A.tierAfter(s, ctx(refineMs, now));
     if (s.tier !== path[path.length - 1]) path.push(s.tier);
     now += 4000;
   }
@@ -81,8 +81,9 @@ for (const dragMs of [0, 8000, 30000]) {
   const two = A.tierAfter(A.tierStart('high'), ctx(7501, 10000)), at3 = A.tierAfter(A.tierStart('high'), ctx(7500, 10000));
   ok('a picture of 2501 ms drops one tier and one of 2500 ms does not', one.tier === 'mid' && at.tier === 'high', `${one.tier}, ${at.tier}`);
   ok('a picture of 7501 ms drops two tiers and one of 7500 ms drops one', two.tier === 'low' && at3.tier === 'mid', `${two.tier}, ${at3.tier}`);
-  const floor = A.tierAfter(A.tierStart('min'), ctx(9000, 10000));
-  ok('min stays min however slow', floor.tier === 'min' && floor === floor);
+  const s0 = { ...A.tierStart('min'), lastChange: 5000 };
+  const floor = A.tierAfter(s0, ctx(9000, 10000));
+  ok('min stays min however slow, and a slow picture there does not restart the hold', floor.tier === 'min' && floor.lastChange === 5000, `${floor.tier}, ${floor.lastChange}`);
 }
 // 6. the climb's prediction, just under and just over 1.2 s
 {
@@ -96,12 +97,20 @@ for (const dragMs of [0, 8000, 30000]) {
   const s0 = { ...A.tierStart('min'), lastChange: 10000 };
   ok('no climb 2999 ms after a change, a climb at 3000 ms', A.tierAfter(s0, ctx(10, 12999)).tier === 'min' && A.tierAfter(s0, ctx(10, 13000)).tier === 'low');
 }
-// 8. frames: a climb needs frames at 34 ms or less; frames over 100 ms drop a tier however fast the picture
+// 8. a bounded number of changes: pictures of random times, fast and slow; the ceiling only falls, and each fall is a
+//    failed climb, so the climbs that fail are at most three
 {
-  const c34 = A.tierAfter(A.tierStart('min'), ctx(10, 10000, 34)), c35 = A.tierAfter(A.tierStart('min'), ctx(10, 10000, 35));
-  ok('frames at 34 ms allow a climb, at 35 ms they do not', c34.tier === 'low' && c35.tier === 'min', `${c34.tier}, ${c35.tier}`);
-  const d100 = A.tierAfter(A.tierStart('mid'), ctx(10, 10000, 100)), d101 = A.tierAfter(A.tierStart('mid'), ctx(10, 10000, 101));
-  ok('frames at 101 ms drop a tier, at 100 ms they do not', d101.tier === 'low' && d100.tier === 'mid', `${d101.tier}, ${d100.tier}`);
+  let s = A.tierStart('min'), now = 0, changes = 0, falls = 0, seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let k = 0; k < 2000; k++) {
+    now += 500 + 8000 * rnd();
+    const next = A.tierAfter(s, ctx(rnd() < 0.5 ? 50 * rnd() : 2500 + 9000 * rnd(), now));
+    if (next.ceiling > s.ceiling) falls = -99;
+    if (next.ceiling < s.ceiling) falls++;
+    if (next.tier !== s.tier) changes++;
+    s = next;
+  }
+  ok('2000 pictures of random times: the ceiling never rises and falls at most three times', falls >= 0 && falls <= 3, `${changes} changes, ${falls} falls, ceiling ${A.ORDER[s.ceiling]}`);
 }
 // 9. a drop with no climb before it (a moment the machine was busy) bars nothing: fast pictures climb back after the hold
 {
@@ -172,6 +181,10 @@ function drag(frameOf, n = 400, start = 0.4) {
   const after = A.previewAfter({ ...reset, holdUntil: -Infinity }, { frameMs: 50, now: 11000 });
   ok('after a tier change a slow preview steps down without barring the step it came from', after.ps === 0.55 && after.ceiling === 4, `${after.ps}, ceiling ${after.ceiling}`);
   ok('a tier change holds the preview for 1 s', reset.holdUntil === 11500);
+  // a step down remembers the step up before it, for the undo
+  const up2 = A.previewAfter(A.previewStart(0.55), { frameMs: 10, now: 10000 });
+  const down2 = A.previewAfter(up2, { frameMs: 50, now: 11500 });
+  ok('a step down keeps the time of the step up before it', down2.lastUp === 10000 && down2.ceiling === 2, `lastUp ${down2.lastUp}, ceiling ${down2.ceiling}`);
   // a step down holds too: a second slow run 0.5 s later does not step again
   const down = A.previewAfter(A.previewStart(0.75), { frameMs: 50, now: 10000 });
   ok('no second step down within the hold', A.previewAfter(down, { frameMs: 50, now: 10500 }).ps === 0.55 && A.previewAfter(down, { frameMs: 50, now: 11000 }).ps === 0.4);
