@@ -240,7 +240,7 @@ export default async function heptapod(p, { base, width }) {
   p.check('C2: the being is lit on its side facing the disc', sideA.max > sideB.max + 8 && g.being.light.near > 3 * g.being.light.far,
     `brightest pixel facing ${sideA.max.toFixed(0)}, away ${sideB.max.toFixed(0)}; light ${JSON.stringify(g.being.light)}`);
   await cropSide(g, 180);
-  p.check('a crop of the greeting lands in the notebook', (await entries()) === 1, `${await entries()} entries`);
+  p.check('a crop of the greeting lands in the notebook', (await entries()) === 1, `${await entries()} entries; read ${JSON.stringify((await probe()).lastKeep)}; dragging ${(await probe()).dragging}`);
 
   // take a thing from the plate at the glass: first its light and the table round its foot at rest, so that its shadow
   // and its light held up can be told from them (the thing farthest from the disc's centre line, so the shadow's side
@@ -369,12 +369,17 @@ export default async function heptapod(p, { base, width }) {
   // a pencil guess and the day survive a reload
   await p.ev('(() => { const i = document.querySelector(".nb-guess"); i.value = "the one who takes?"; i.dispatchEvent(new Event("input", { bubbles: true })); })()');
   await p.sleep(600);
+  // a paused guess is written 300 ms after the typing stops, through the store's queue behind the acts' own writes;
+  // the reload comes once the store holds it, as a visitor's would after a pause (on 2026-11-18, at 1440 px on a
+  // machine short of memory, the queue took longer than a fixed 600 ms and the reload came first)
+  p.check('the guess reaches the store', await p.until(`import('${base}/labs/assets/js/os/index.js').then((m) => m.LabsOS.instance && m.LabsOS.instance.progress.get('heptapod')).then((r) => JSON.stringify(r || {}).includes('the one who takes?'))`, 8000));
   await p.ev('window.scrollTo(0, 0)');
   await p.shot('05-notebook');
   await p.go(`${base}/labs/heptapod.html`);
   p.check('the page comes up again', await ready());
   p.check('the day survives a reload', (await ringNo()).includes('ring 7 of 40'), await ringNo());
-  p.check('the guess survives a reload', (await p.ev('(document.querySelector(".nb-guess") || {}).value || ""')) === 'the one who takes?');
+  p.check('the guess survives a reload', (await p.ev('(document.querySelector(".nb-guess") || {}).value || ""')) === 'the one who takes?',
+    `guesses after the reload ${JSON.stringify(await p.ev('[...document.querySelectorAll(".nb-guess")].map((i) => i.value)'))}`);
   p.check('the notebook survives a reload', (await entries()) === before + 1, `${await entries()} entries`);
 
   // the evening, from a recorded day
@@ -481,5 +486,23 @@ export default async function heptapod(p, { base, width }) {
     const b = (await probe()).being.drawn, c = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; })()');
     p.check(`C2: species ${k}'s being is whole in the frame`, b.x0 >= c.x0 - 1 && b.x1 <= c.x1 + 1 && b.y0 >= c.y0 - 1 && b.y1 <= c.y1 + 1, JSON.stringify(b));
     await p.shot(`15-species-${k}`);
+  }
+  // the light tier taken in the middle of a crop does not drop it (on 2026-11-18 a tier switch went through the
+  // resize handler, which drops a drag; the drive's own canvas reads slowed the frames enough at 1440 px). On the
+  // last species' own day, so the kept day is not touched; the tier is taken as the page takes it, by 60 slow frames.
+  {
+    p.check('a species greeting can be cropped', await p.until('document.getElementById("pod").probe().crop', 8000));
+    const g2 = await probe();
+    const cx = g2.ring.x, cy = g2.ring.y + g2.ring.R, h = 0.55 * g2.ring.R;
+    await p.down(cx - h, cy - h);
+    await p.move(cx, cy);
+    await p.ev(`import('${base}/labs/assets/js/heptapod/stage.js').then((m) => { for (let i = 0; i < 60; i++) m.Tier.sample(50); return m.Tier.name; })`);
+    const mid = await probe();
+    await p.move(cx + h, cy + h);
+    await p.up(cx + h, cy + h);
+    await p.sleep(250);
+    const kept = (await probe()).lastKeep;
+    p.check('a crop goes on through a change of tier and is kept', mid.tier === 'lite' && mid.dragging === 'crop' && !!kept && kept.cells > 0,
+      `tier ${mid.tier}, dragging ${mid.dragging} after the change; read ${JSON.stringify(kept)}`);
   }
 }

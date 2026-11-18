@@ -855,8 +855,11 @@ export function initPod(canvas, hooks) {
     snap(); kick();
   };
   const ro = new ResizeObserver(onResize);
-  // the light tier, once the page takes it, reaches the field at once (a smaller grid), not at the next resize
-  const onTier = () => { if (L && !dead) onResize(); };
+  // the light tier, once the page takes it, reaches the field at once (a smaller grid), not at the next resize. The
+  // size has not changed, so a drag in progress goes on: through onResize, a tier taken during a crop dropped the
+  // crop, and the release then kept nothing (the drive at 1440 px, 2026-11-18, where the frames slow while it reads
+  // the canvas; a slow laptop takes the tier the same way)
+  const onTier = () => { if (L && !dead) { layout(); kick(); } };
   Tier.listeners.add(onTier);
   ro.observe(canvas);
   canvas.addEventListener('pointerdown', onDown);
