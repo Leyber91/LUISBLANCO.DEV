@@ -83,6 +83,22 @@ export async function exportPlate(app, W, onProgress) {
   await new Promise((res) => cv.toBlob((b) => { download(b, `kerr-${o ? o.id : 'custom'}-a${spinText(s.a)}-i${Math.round(s.incl)}-${width}px.png`); res(); }, 'image/png'));
 }
 
+/** A kept frame's picture (BAR_L1 C17): the engine's still at W px, one sample a pixel, as a small JPEG data address,
+ *  or null when it cannot be made or does not fit record.js's bound (LIMITS.thumb). Quality steps down until it fits. */
+export async function thumbnail(app, W = 184, maxChars = 12000) {
+  let still;
+  try { still = await app.renderer.renderStill(app.frameUniforms(app), W, { ss: 1 }); } catch { return null; }
+  if (!still) return null;
+  const cv = document.createElement('canvas');
+  cv.width = still.width; cv.height = still.height;
+  cv.getContext('2d').putImageData(new ImageData(still.data, still.width, still.height), 0, 0);
+  for (const qual of [0.72, 0.6, 0.48, 0.36]) {
+    const url = cv.toDataURL('image/jpeg', qual);
+    if (url.length <= maxChars) return url;
+  }
+  return null;
+}
+
 export function exportState(app) {
   const body = {
     kind: 'luisblanco.dev black-hole state', version: VERSION, saved: new Date().toISOString(),

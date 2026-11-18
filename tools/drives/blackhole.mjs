@@ -149,7 +149,9 @@ function guard() {
 /* Gold means "this happened" in four places (BAR_L1 section 2), named here as elements, never as kinds:
    the chosen control, the tour's current stop and the ring around what it points at, the live markers of the
    charts, the plate's corner brackets. */
-export const GOLD_ALLOW = ['.bp', '.bh-btn[aria-pressed="true"]', '.bh-caption .cap-nav .dots i.on', '.bh-svg .now', '.bh-svg .nowf', 'circle.tour-focus'];
+/* BAR_L1 section 6: on the drawing, gold marks the chosen option's underline and the active sheet's tab */
+/* a kept frame's picture (the card's row, the strip) is a picture of the render, in the render's own colours */
+export const GOLD_ALLOW = ['.bp', '.bh-btn[aria-pressed="true"]', '.bh-opt[aria-pressed="true"]', '.bh-tab[aria-selected="true"]', '.bh-rec .bh-th', '.bh-fr img', '.bh-caption .cap-nav .dots i.on', '.bh-svg .now', '.bh-svg .nowf', 'circle.tour-focus'];
 /* A failure (the integrator's drift, a sigma two or more from the EHT, a number a model got wrong) is drawn in
    --danger with its words beside it. It was --warn until 2026-11-16, which sits within the gold rule's tolerance of
    --accretion (19, 22, 16) and so read as "this happened"; no element is excused from the pixel rule for it now. */
@@ -158,6 +160,24 @@ export const WARN_ALLOW = [];
    route's dot (review_s2 P3-2). That palette is the shared labs/assets/js/ai/route-panel.js's, which this lab may
    not change (fix_s2_brief C5); it is reported to Luis as a shared change of its own. Until it changes, these
    elements are left out of the gold rules here, and the drive says so on every run. Delete this list with it. */
+/* The drawing (slice 4): at wide widths the controls and readouts of the old columns are sheets 2 to 4 of the title
+   block. A press on a control that is not shown opens the sheet that shows it; closing the phone's sheet returns a
+   wide page to sheet 1. One helper for the press, click and sheet of every section (they were three copies, and each
+   assumed every control is in view). On a page without sheets it changes nothing. */
+const IN_VIEW = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); return !!e && e.getClientRects().length > 0; })()`;
+export async function reveal(p, sel) {
+  if (await p.ev(IN_VIEW(sel))) return true;
+  for (const n of [3, 2, 4]) {
+    if (!(await p.ev(`!!document.querySelector('.bh-tab[data-sheet="${n}"]')`))) return false;
+    await p.ev(`document.querySelector('.bh-tab[data-sheet="${n}"]').click()`);
+    await p.sleep(450);
+    if (await p.ev(IN_VIEW(sel))) return true;
+  }
+  return false;
+}
+export async function sheetOne(p) {
+  if (await p.ev(`!!document.querySelector('.bh-tab[data-sheet="1"]') && document.body.dataset.sheet !== '1'`)) { await p.ev(`document.querySelector('.bh-tab[data-sheet="1"]').click()`); await p.sleep(450); }
+}
 export const GOLD_DEFERRED = ['.lbr-pill:hover', '.lbr-panel button.go', '.lbr-row button:hover', '.lbr-routes li.on', '.lbr[data-route="pollinations"] .lbr-dot'];
 
 /* BAR_L1 C10: nothing a visitor operates is cut. A target whose box runs past an ancestor that clips without
@@ -404,9 +424,9 @@ const HOLD_STOP = '(() => { const t = window.__bh && window.__bh.tour; if (t && 
 export async function FALL_STEP(p, { base, width, ready }) {
   const phone = width < 700;
   const at = (sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; })()`);
-  const press = async (sel) => { const b = await at(sel); if (!b) { p.check(`the page has ${sel}`, false); return false; } await p.click(b[0] + b[2] / 2, b[1] + b[3] / 2); return true; };
+  const press = async (sel) => { if (!phone && !(await reveal(p, sel))) { p.check(`the page shows ${sel} on one of its sheets`, false); return false; } const b = await at(sel); if (!b) { p.check(`the page has ${sel}`, false); return false; } await p.click(b[0] + b[2] / 2, b[1] + b[3] / 2); return true; };
   const sheet = async (open) => {
-    if (!phone) return;
+    if (!phone) { if (!open) await sheetOne(p); return; }
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await press('.bh-sheet-h'); await p.sleep(700); }
   };
@@ -451,9 +471,9 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
   const READ = `(() => { const e = document.querySelector('#bh-recline'); return !!e && e.textContent !== 'reading'; })()`;
   const COUNTS = `(() => { const k = window.__bh.keep; const r = k.record; return { kept: r.kept.length, rays: r.rays.length, falls: r.falls.length }; })()`;
   const at = (sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
-  const press = async (sel) => { const c = await at(sel); if (!c) { p.check(`the page has ${sel}`, false); return false; } await p.click(c[0], c[1]); return true; };
+  const press = async (sel) => { if (!phone && !(await reveal(p, sel))) { p.check(`the page shows ${sel} on one of its sheets`, false); return false; } const c = await at(sel); if (!c) { p.check(`the page has ${sel}`, false); return false; } await p.click(c[0], c[1]); return true; };
   const sheet = async (open) => {
-    if (!phone) return;
+    if (!phone) { if (!open) await sheetOne(p); return; }
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await press('.bh-sheet-h'); await p.sleep(800); }
   };
@@ -568,6 +588,308 @@ export async function RECORD_STEP(p, { base, width, ready, after = async () => {
 
 /* ---- the scenario ---- */
 
+/* ---- BAR_L1 section 6, the form: checks F1 to F7 on the drawing (slice 4). After review_s4, each reads what is drawn
+   (where a hand is, which box has a border, what lies on what), not what the page says in aria ---- */
+const DRAWN = `(() => {
+  const out = {};
+  const sp = document.querySelector('#bh-sc-spin');
+  if (sp) { const t = [...sp.querySelectorAll('[data-tick]')].map((e) => [+e.dataset.tick, +e.getAttribute('x1')]).sort((a, b) => a[0] - b[0]);
+    const h = sp.querySelector('[data-hand]'), v = +h.dataset.hand, x = +h.getAttribute('x1'), [a0, x0] = t[0], [a1, x1] = t[t.length - 1];
+    out.spin = { v, x, want: x0 + (v - a0) / (a1 - a0) * (x1 - x0) }; }
+  const ms = document.querySelector('#bh-sc-mass');
+  if (ms && ms.getClientRects().length) { const g = [...ms.querySelectorAll('[data-lg]')].map((e) => [+e.dataset.lg, +e.getAttribute('y1')]).sort((a, b) => a[0] - b[0]);
+    const h = ms.querySelector('[data-hand]'), v = +h.dataset.hand, y = +h.getAttribute('y1'), [l0, y0] = g[0], [l1, y1] = g[g.length - 1];
+    out.mass = { v, y, want: y0 + (v - l0) / (l1 - l0) * (y1 - y0), inside: v >= l0 && v <= l1 }; }
+  const ic = document.querySelector('#bh-sc-incl');
+  if (ic && ic.getClientRects().length) { const h = ic.querySelector('[data-hand]');
+    out.incl = { v: +h.dataset.hand, drawn: Math.atan2(+h.getAttribute('x2') - +h.getAttribute('x1'), +h.getAttribute('y1') - +h.getAttribute('y2')) * 180 / Math.PI }; }
+  const s = window.__bh.store.all(), v = window.__bh.store.view();
+  out.state = { a: v.a, incl: v.incl, mass: s.mass };
+  return out; })()`;
+// the scales that show are judged; a small window or a phone leaves the protractor and the mass scale off
+const drawnOk = (d) => !!d.spin && Math.abs(d.spin.x - d.spin.want) < 0.5 && Math.abs(d.spin.v - d.state.a) < 1e-9
+  && (!d.mass || (d.mass.inside && Math.abs(d.mass.y - d.mass.want) < 0.5 && Math.abs(d.mass.v - d.state.mass) < 1e-9))
+  && (!d.incl || Math.abs(d.incl.drawn - d.state.incl) < 0.2);
+const PARTS = ['#bh-sc-spin', '#bh-sc-incl', '#bh-sc-mass', '#bh-tb', '#bh-strip', '#bh-caption', '#bh-foot'];
+const LAYOUT = `(() => { const box = (s) => { const e = document.querySelector(s); if (!e || !e.getClientRects().length || getComputedStyle(e).display === 'none') return null; const r = e.getBoundingClientRect(); return { s, r: [r.left, r.top, r.right, r.bottom] }; };
+  const parts = ${JSON.stringify(PARTS)}.map(box).filter(Boolean);
+  const hit = (a, b) => a[0] < b[2] - 1 && b[0] < a[2] - 1 && a[1] < b[3] - 1 && b[1] < a[3] - 1;
+  const pairs = []; for (let i = 0; i < parts.length; i++) for (let j = i + 1; j < parts.length; j++) if (hit(parts[i].r, parts[j].r)) pairs.push(parts[i].s + ' / ' + parts[j].s);
+  const labels = [...document.querySelectorAll('#bh-overlay text')].filter((t) => t.textContent.trim() && t.getClientRects().length).map((t) => { const r = t.getBoundingClientRect(); return { t: t.textContent.slice(0, 24), r: [r.left, r.top, r.right, r.bottom] }; });
+  // and no box's words run past it (the footer's tags once ran under the Sources button)
+  const words = [...document.querySelectorAll('.bh-scale text')].filter((x) => x.textContent.trim() && x.getClientRects().length && getComputedStyle(x).display !== 'none').map((x) => { const r = x.getBoundingClientRect(); return { t: x.textContent.slice(0, 16), r: [r.left, r.top, r.right, r.bottom] }; });
+  const crossed = []; for (let i = 0; i < words.length; i++) for (let j = i + 1; j < words.length; j++) if (hit(words[i].r, words[j].r)) crossed.push(words[i].t + ' / ' + words[j].t);
+  const spill = [...document.querySelectorAll('.bh-foot .tags, .bh-foot .perf, #bh-tb .c, .bh-caption .cap, .bh-strip')].filter((e) => e.getClientRects().length && e.scrollWidth > e.clientWidth + 1).map((e) => (e.id || e.className) + ' ' + e.scrollWidth + ' > ' + e.clientWidth);
+  return { parts: parts.length, pairs, spill, crossed: crossed.slice(0, 6), onParts: labels.flatMap((l) => parts.filter((p) => hit(l.r, p.r)).map((p) => l.t + ' on ' + p.s)).slice(0, 6) }; })()`;
+// F1: a bordered box on sheet 1 besides the title block. Not counted, each with its reason: a control (it is outlined by
+// the plate's rule), a picture's frame, the plate's corner brackets, and the shared model route's pill (labs/assets/js/ai,
+// the same deferral as the gold rule's GOLD_DEFERRED)
+const BORDERED = `(() => { const out = [];
+  for (const e of document.querySelectorAll('body *')) {
+    if (!e.getClientRects().length || e.tagName === 'IMG' || e.closest('#bh-tb, #bh-overlay, svg, button, a, input, select, [role="slider"], [role="tab"], .bp, #bh-route, .lbr-panel')) continue;
+    const cs = getComputedStyle(e); if (cs.visibility === 'hidden') continue;
+    const r = e.getBoundingClientRect(); if (r.width * r.height < 1500) continue;
+    const sides = ['Top', 'Right', 'Bottom', 'Left'].filter((k) => parseFloat(cs['border' + k + 'Width']) > 0.5 && !/^rgba\\(.*,\\s*0\\)$|^transparent$/.test(cs['border' + k + 'Color']));
+    if (sides.length) out.push((e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.classList.length ? '.' + [...e.classList].join('.') : '')) + ' ' + sides.join(''));
+  }
+  return out.slice(0, 8); })()`;
+// F5: the title block's cells against the cards' rows, by the cards' own words
+const TITLE_VS_CARDS = `(() => { const tb = {}; for (const c of document.querySelectorAll('#bh-tb .c')) { const l = c.querySelector('.l'), v = c.querySelector('.v'); if (l && v) tb[l.textContent.trim()] = v.textContent.replace(/\\s+/g, ''); }
+  // a row's words without its R or I tag (a span in the label)
+  const txt = (e) => { const c = e.cloneNode(true); c.querySelectorAll('.bh-tagr, .bh-tagi').forEach((x) => x.remove()); return c.textContent; };
+  const rows = (sel) => [...document.querySelectorAll(sel + ' .rw')].map((r) => [txt(r.querySelector('dt')).replace(/\\s+/g, ' ').trim(), txt(r.querySelector('dd')).replace(/\\s+/g, '')]);
+  const read = rows('#bh-read'), meas = rows('#bh-meas'), find = (rs, re) => { const r = rs.find(([t]) => re.test(t)); return r ? r[1] : null; };
+  const key = (re) => Object.keys(tb).find((k) => re.test(k));
+  const sc = find(meas, /^scale θ_g/), shadowRow = meas.find(([t]) => /^EHT shadow/.test(t)), ring = find(meas, /^EHT ring of emission/);
+  const pairs = [
+    ['shadow', tb[key(/^shadow, far observer/)] ? tb[key(/^shadow, far observer/)].split('·')[0] : null, find(read, /^shadow, mean diameter/)],
+    ['photon orbit', tb['photon orbit'] ?? null, find(read, /^photon orbit/)],
+    ['Hawking T', tb['Hawking T'] ?? null, find(read, /^Hawking T/)],
+    ['scale', tb['scale θ_g'] ?? null, sc === null ? '--' : sc],
+    ['EHT', key(/^EHT/) ? tb[key(/^EHT/)].replace(/µas$/, '') : null, (shadowRow ? shadowRow[0].replace(/^EHT shadow /, '').replace(/\\s+/g, '') : ring !== null ? ring : 'notimaged').replace(/µas$/, '')],
+  ];
+  return pairs.map(([n, a, b]) => [n, a, b, a !== null && b !== null && a === b]); })()`;
+
+export async function DRAWING_STEP(p, { base, width, ready }) {
+  const phone = width <= 900;
+  const load = async (q = '?o=m87') => { await p.go(`${base}/labs/bh_animation_page.html${q}`); await p.until(ready, 60000); await p.sleep(1500); };
+  await load();
+  if (!(await p.ev(`!!document.querySelector('#bh-tb')`))) { p.check('the drawing is on the page (#bh-tb)', false); return; }
+  const settled = (expr) => p.until(`(() => { const a = window.__bh; return !a.store.anim && (${expr}); })()`, 8000);
+  const shownScales = await p.ev(`['spin', 'incl', 'mass'].filter((id) => document.querySelector('#bh-sc-' + id).getClientRects().length)`);
+
+  // F4: the render's labels are drawn: a check that loops over the labels it finds passes on none (review_s4c 1: from
+  // d133f39 no label was drawn at any width, and every label check passed)
+  const labelWords = await p.ev(`[...document.querySelectorAll('#bh-overlay text')].map((t) => t.textContent.trim()).filter(Boolean)`);
+  p.check(`F4: the render's labels are drawn on M87* (${labelWords.length} lines): the shadow and the approaching side among them`, labelWords.length >= 4 && labelWords.some((w) => /^shadow/.test(w)) && labelWords.some((w) => /approaching side/.test(w)), JSON.stringify(labelWords.slice(0, 8)));
+  // F1: sheet 1 has no bordered box but the title block
+  if (!phone) {
+    const boxes = await p.ev(BORDERED);
+    p.check('F1: sheet 1 has no bordered box but the title block (controls, pictures, brackets and the shared route pill apart)', boxes.length === 0, JSON.stringify(boxes));
+  }
+
+  // F2: every graduation is the engine's; every hand is drawn where its scale's graduations put the value
+  const c12 = await p.ev(`(async () => { const K = await import('/labs/assets/js/blackhole/kerr.js'), C = await import('/labs/assets/js/blackhole/config.js'); const s = window.__bh.store.all();
+    const ticks = [...document.querySelectorAll('#bh-sc-spin [data-of]')].map((t) => Math.abs((t.dataset.of === 'isco' ? K.isco(+t.dataset.a, 1, s.q) : K.horizon(+t.dataset.a, s.q)) - +t.dataset.r));
+    const objs = C.OBJECTS.filter((o) => o.mass >= 1 && !o.hypothetical);
+    const marks = objs.map((o) => { const m = document.querySelector('#bh-sc-mass [data-object="' + o.id + '"]'); return m ? [o.mass, +m.getAttribute('y1')] : null; });
+    const ordered = marks.every(Boolean) && marks.slice().sort((x, y) => x[0] - y[0]).every((m, i, a) => i === 0 || m[1] < a[i - 1][1]);
+    return { ticks: ticks.length, worst: Math.max(0, ...ticks), ordered, objects: objs.length }; })()`);
+  if (!phone) p.check('F2: the spin scale\'s ISCO and horizon marks are where kerr.js reaches their radii', c12.ticks >= 3 && c12.worst < 1e-6, JSON.stringify(c12));
+  if (!phone) p.check('F2: the mass scale carries every known hole of the catalogue, in the order of their masses', c12.ordered && c12.objects >= 3, JSON.stringify(c12));
+  const d0 = await p.ev(DRAWN);
+  // during an ease the spin hand's reading is the eased hole's, its spin and its charge (review_s4b 6: it read the
+  // target's charge with the eased spin, ISCO 4.12 for a hole at 3.46)
+  const mid = await p.ev(`(async () => { const K = await import('/labs/assets/js/blackhole/kerr.js'); const a = window.__bh;
+    a.store.set({ obj: 'custom', a: 0.5, q: 0.6 }, { dur: 1400 }); await new Promise((r) => setTimeout(r, 350));
+    const v = a.store.view(), txt = [...document.querySelectorAll('#bh-sc-spin .hand text.val')].map((x) => x.textContent).join('');
+    const isco = +(txt.match(/ISCO ([\\d.]+)/) || [])[1], hor = +(txt.match(/horizon ([\\d.]+)/) || [])[1];
+    return { moving: !!a.store.anim, txt, isco, hor, wantIsco: +K.isco(v.a, 1, v.q).toPrecision(3), wantHor: +K.horizon(v.a, v.q).toPrecision(3) }; })()`);
+  p.check('F2: during an ease the spin hand reads the ISCO and horizon of the hole the picture shows (its eased spin and charge)', mid.moving && Math.abs(mid.isco - mid.wantIsco) < 0.006 && Math.abs(mid.hor - mid.wantHor) < 0.006, JSON.stringify(mid));
+  if (!phone) {
+    // and stands among the ISCO marks where its reading puts it: from a 0.3, Q 0.9 to M87* the marks were the target's
+    // while the hand read the eased hole (review_s4c 2)
+    await load('?o=custom&a=0.3&qq=0.9');
+    const among = await p.ev(`(async () => { const a = window.__bh; a.store.set(a.store.objectPatch('m87'), { dur: 1400 }); await new Promise((r) => setTimeout(r, 350));
+      const sp = document.querySelector('#bh-sc-spin'), h = +sp.querySelector('[data-hand]').dataset.hand;
+      const txt = [...sp.querySelectorAll('.hand text.val')].map((x) => x.textContent).join(''), isco = +(txt.match(/ISCO ([\\d.]+)/) || [])[1];
+      const marks = [...sp.querySelectorAll('[data-of="isco"]')].map((m) => [+m.dataset.r, +m.dataset.a]);
+      const wrong = marks.filter(([r, ma]) => Math.abs(isco - r) > 0.01 && Math.abs(h - ma) > 1e-3 && ((h < ma) !== (isco > r)));
+      return { moving: !!a.store.anim, hand: h, isco, marks, wrong }; })()`);
+    p.check('F2: during an ease the spin hand stands among the ISCO marks where its reading puts it', among.moving && among.wrong.length === 0, JSON.stringify(among));
+    await load();
+  }
+  await load();
+  p.check('F2: each hand is drawn where its scale\'s graduations put the state\'s value', drawnOk(d0), JSON.stringify(d0));
+  if (shownScales.includes('mass')) {
+    await load('?o=primordial');
+    const d1 = await p.ev(DRAWN);
+    p.check('F2: Primordial\'s 10^-18 solar masses is drawn on the mass scale at its place, not at its end (review_s4 1)', drawnOk(d1) && d1.state.mass < -10, JSON.stringify(d1.mass));
+    // at Q = 0.9 the spin can reach sqrt(0.996 - 0.81) = 0.431: no mark past it, and a drag past it keeps the charge
+    await load('?o=custom&a=0.3&qq=0.9');
+    const past = await p.ev(`[...document.querySelectorAll('#bh-sc-spin [data-of]')].map((t) => +t.dataset.a).filter((x) => x > Math.sqrt(0.996 - 0.81) + 1e-9)`);
+    const far = await p.ev(`(() => { const s = document.querySelector('#bh-sc-spin'), r = s.getBoundingClientRect(), t = [...s.querySelectorAll('[data-tick]')].map((e) => [+e.dataset.tick, +e.getAttribute('x1')]).sort((a, b) => a[0] - b[0]); return [r.left + t[0][1] + 0.4 * (t[t.length - 1][1] - t[0][1]), r.left + t[0][1] + 0.9 * (t[t.length - 1][1] - t[0][1]), r.top + 30]; })()`);
+    await p.drag(far[0], far[2], far[1], far[2], { steps: 6 });
+    await settled('true');
+    const kept = await p.ev(`[window.__bh.store.get('q'), window.__bh.store.get('a')]`);
+    p.check('F2: at Q = 0.9 no ISCO or horizon mark lies past the spin the charge allows, and a drag past it keeps the charge', past.length === 0 && kept[0] === 0.9 && kept[1] <= Math.sqrt(0.996 - 0.81) + 1e-6, JSON.stringify({ past, kept }));
+    // a press at the ruler's far end keeps a small charge too: rounding to 3 digits once landed above the top and the
+    // store lowered Q (0.01 to 0, 0.05 to 0.045: review_s4c 3); aria's maximum is the charge's top
+    for (const qq of [0.01, 0.05, 0.2]) {
+      await load(`?o=custom&a=0.5&qq=${qq}`);
+      const end = await p.ev(`(() => { const s = document.querySelector('#bh-sc-spin'), r = s.getBoundingClientRect(), t = [...s.querySelectorAll('[data-tick]')].map((e) => +e.getAttribute('x1')); return [r.left + Math.max(...t) - 0.5, r.top + 30]; })()`);
+      await p.click(end[0], end[1]);
+      await settled('true');
+      const st = await p.ev(`[window.__bh.store.get('q'), window.__bh.store.get('a'), +document.querySelector('#bh-sc-spin').getAttribute('aria-valuemax')]`);
+      const top = Math.min(0.998, Math.sqrt(0.996 - qq * qq));
+      p.check(`F2: at Q = ${qq} a press at the ruler's end keeps the charge, and aria's maximum is its top (${top.toFixed(4)})`, st[0] === qq && st[1] <= top + 1e-9 && Math.abs(st[2] - top) < 1e-6, JSON.stringify(st));
+    }
+    await load();
+  }
+
+  // F3: each scale is a slider a keyboard and a pointer can use, to its ends
+  const winH = await p.ev('innerHeight');
+  p.check(`F3: the scales this window shows (${shownScales.join(', ')}): the spin always, all three from 1100 x 720 up (review_s4c 7)`, shownScales.includes('spin') && (phone || width < 1100 || winH < 720 || shownScales.length === 3), JSON.stringify({ shownScales, width, winH }));
+  const SCALES = [['spin', 'a', 0.01, 0, 0.998], ['incl', 'incl', 1, 1, 179], ['mass', 'mass', 0.1, -19, 11]].filter(([id]) => shownScales.includes(id));
+  for (const [id, key, step, min, max] of SCALES) {
+    const aria = await p.ev(`(() => { const e = document.querySelector('#bh-sc-${id}'); return [e.getAttribute('role'), +e.getAttribute('aria-valuemin'), +e.getAttribute('aria-valuemax'), e.getAttribute('aria-valuetext') || '', e.getAttribute('aria-orientation')]; })()`);
+    p.check(`F3: the ${id} scale is a slider with its bounds, its orientation and a value in words`, aria[0] === 'slider' && aria[1] === min && aria[2] === max && aria[3].length > 2 && !!aria[4], JSON.stringify(aria));
+    const v0 = await p.ev(`window.__bh.store.get('${key}')`);
+    await p.ev(`document.querySelector('#bh-sc-${id}').focus()`);
+    // a step keeps six decimals (drawing.js), so a right and a left come back to the value to 1e-6
+    await p.key('ArrowRight');
+    const ariaNow = await p.ev(`[+document.querySelector('#bh-sc-${id}').getAttribute('aria-valuenow'), window.__bh.store.get('${key}'), !!window.__bh.store.anim]`);
+    const up = await settled(`Math.abs(a.store.get('${key}') - ${v0 + step}) < 1e-6`);
+    await p.key('ArrowLeft');
+    const back = await settled(`Math.abs(a.store.get('${key}') - ${v0}) < 1e-6`);
+    p.check(`F3: the right arrow steps the ${id} scale by ${step}, the left arrow back, and aria says the new value at once (${JSON.stringify(ariaNow)})`, up && back && Math.abs(ariaNow[0] - ariaNow[1]) < 1e-9, JSON.stringify(await p.ev(`window.__bh.store.get('${key}')`)));
+    await p.key('End');
+    const atMax = await settled(`a.store.get('${key}') === ${max}`);
+    const dMax = await p.ev(DRAWN);
+    await p.key('Home');
+    const atMin = await settled(`a.store.get('${key}') === ${min}`);
+    const dMin = await p.ev(DRAWN);
+    p.check(`F3: End and Home take the ${id} scale to ${max} and ${min}, and its hand is drawn there`, atMax && atMin && drawnOk(dMax) && drawnOk(dMin), JSON.stringify({ atMax, atMin, max: dMax[id], min: dMin[id] }));
+    await load();
+  }
+  // a press on the scale sets the value under the pointer: the spin at the middle of its ruler, the inclination at 60
+  // degrees, the mass at Sgr A*'s mark; a drag on the protractor past its 180 end, off the svg, reads 179 (review_s4 4)
+  const at = await p.ev(`(() => { const s = document.querySelector('#bh-sc-spin'), r = s.getBoundingClientRect();
+    const t = [...s.querySelectorAll('[data-tick]')].map((e) => [+e.dataset.tick, +e.getAttribute('x1')]).sort((a, b) => a[0] - b[0]);
+    const out = { spin: [r.left + t[0][1] + 0.5 * (t[t.length - 1][1] - t[0][1]) / t[t.length - 1][0], r.top + 30] };
+    const i = document.querySelector('#bh-sc-incl');
+    if (i && i.getClientRects().length) { const ri = i.getBoundingClientRect(), h = i.querySelector('[data-hand]'), ox = +h.getAttribute('x1'), oy = +h.getAttribute('y1'), R = 100;
+      out.incl = [ri.left + ox + R * Math.sin(Math.PI / 3), ri.top + oy - R * Math.cos(Math.PI / 3)];
+      out.end = [ri.left + ox + R * Math.sin(170 * Math.PI / 180), ri.top + oy - R * Math.cos(170 * Math.PI / 180), ri.left + ox - 8, ri.top + oy + R * 0.98]; }
+    const m = document.querySelector('#bh-sc-mass');
+    if (m && m.getClientRects().length) { const rm = m.getBoundingClientRect(), mk = m.querySelector('[data-object="sgra"]'); out.mass = [rm.left + +mk.getAttribute('x1') - 2, rm.top + +mk.getAttribute('y1')]; }
+    return out; })()`);
+  const SGRA = await p.ev(`(async () => { const C = await import('/labs/assets/js/blackhole/config.js'); return Math.log10(C.OBJECTS.find((o) => o.id === 'sgra').mass); })()`);
+  for (const [id, key, want, tol] of [['spin', 'a', 0.499, 0.012], ['incl', 'incl', 60, 1.5], ['mass', 'mass', SGRA, 0.06]]) {
+    if (!at[id]) { if (shownScales.includes(id)) p.check(`F3: the ${id} scale can be pressed`, false, JSON.stringify(at)); continue; }
+    await p.click(at[id][0], at[id][1]);
+    const got = await settled(`Math.abs(a.store.get('${key}') - ${want}) < ${tol}`);
+    const where = id === 'mass' ? await p.ev(`(() => { const m = document.querySelector('#bh-sc-mass'), rm = m.getBoundingClientRect(), mk = m.querySelector('[data-object="sgra"]'); return { pressedAt: ${JSON.stringify(at.mass || null)}, markNow: [rm.left + +mk.getAttribute('x1') - 2, rm.top + +mk.getAttribute('y1')], svgH: rm.height }; })()`) : null;
+    p.check(`F3: a press on the ${id} scale sets ${key} to the value under the pointer (${+want.toFixed(3)})`, got, String(await p.ev(`window.__bh.store.get('${key}')`)) + (where ? ' ' + JSON.stringify(where) : ''));
+  }
+  // the presses above left a hole of one's own at M87*'s mass: the mass hand's words and the mark's name do not cross
+  // (review_s4b 1)
+  const layP = await p.ev(LAYOUT);
+  p.check("F4: a hole of one's own at a named hole's mass: no words on words on the scales", layP.crossed.length === 0, JSON.stringify(layP.crossed));
+  if (at.end) {
+    await p.drag(at.end[0], at.end[1], at.end[2], at.end[3], { steps: 8 });
+    const got = await settled(`a.store.get('incl') === 179`);
+    p.check('F3: a drag on the protractor past its 180 end, off its edge, reads 179 and not 1 (review_s4 4)', got, String(await p.ev(`window.__bh.store.get('incl')`)));
+  }
+  await load();
+
+  // F4: no part of the drawing lies on another, and no label of the render lies on a part
+  const lay = await p.ev(LAYOUT);
+  p.check(`F4: no part of the drawing on another, no label on a part, no words past their box, no words on words (${lay.parts} parts)`, lay.pairs.length === 0 && lay.onParts.length === 0 && lay.spill.length === 0 && lay.crossed.length === 0, JSON.stringify(lay));
+
+  // F6 (was C14): nothing the old columns did is lost: each column is shown whole on its sheet, the record on sheet 4
+  if (!phone) {
+    const c14 = await p.ev(`(async () => { const out = {}; const wait = () => new Promise((r) => setTimeout(r, 450));
+      const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).display !== 'none';
+      for (const n of [2, 3, 4]) { document.querySelector('.bh-tab[data-sheet="' + n + '"]').click(); await wait();
+        const cap = document.querySelector('#bh-caption').getBoundingClientRect(), col = document.querySelector(n === 2 ? '#bh-right' : '#bh-left').getBoundingClientRect();
+        const tbTop = document.querySelector('#bh-tb').getBoundingClientRect().top;
+        out[n] = { left: shown(document.querySelector('#bh-left')), right: shown(document.querySelector('#bh-right')), keep: shown(document.querySelector('#bh-keep')), capW: Math.round(cap.width), capClear: cap.right <= col.left + 1 || cap.left >= col.right - 1, colAboveTabs: col.bottom <= tbTop + 1 || col.left >= document.querySelector('#bh-tb').getBoundingClientRect().right || col.right <= document.querySelector('#bh-tb').getBoundingClientRect().left }; }
+      document.querySelector('.bh-tab[data-sheet="1"]').click(); await wait();
+      out[1] = { object: document.querySelectorAll('#bh-hl .bh-opt').length }; return out; })()`);
+    p.check('F6: sheet 2 shows the readouts column, sheet 3 the settings column, sheet 4 the record; sheet 1 names object, view and colour', c14[2].right && c14[3].left && c14[4].keep && c14[1].object >= 12, JSON.stringify(c14));
+    p.check('F6: on sheets 2 and 3 the caption keeps 300 px or more beside the column shown, and clear of it (review_s4b 8)', [2, 3].every((n) => c14[n].capW >= 300 && c14[n].capClear), JSON.stringify([c14[2], c14[3]]));
+    p.check('F6: on sheets 2, 3 and 4 the column ends above the title block\'s tabs (review_s4c 5)', [2, 3, 4].every((n) => c14[n].colAboveTabs), JSON.stringify([c14[2], c14[3], c14[4]].map((x) => x.colAboveTabs)));
+    // the tabs by keyboard: the right arrow moves to the next sheet
+    await p.ev(`document.querySelector('.bh-tab[data-sheet="1"]').focus()`);
+    await p.key('ArrowRight');
+    const tab = await p.ev(`[document.body.dataset.sheet, document.activeElement && document.activeElement.dataset.sheet]`);
+    p.check('F6: the right arrow on the tabs opens sheet 2 and moves the focus to its tab', tab[0] === '2' && tab[1] === '2', JSON.stringify(tab));
+    await p.ev(`document.querySelector('.bh-tab[data-sheet="1"]').click()`);
+  }
+
+  // F5: the title block's numbers are the cards' own, for three holes, one of one's own and the telescope view
+  for (const q of ['?o=m87', '?o=sgra', '?o=cygx1', '?o=custom&a=0.5', '?o=m87&v=telescope']) {
+    if (q !== '?o=m87') await load(q);
+    const c15 = await p.ev(TITLE_VS_CARDS);
+    p.check(`F5 ${q}: the title block's shadow, photon orbit, Hawking T, scale and EHT cell are the cards' own`, c15.length === 5 && c15.every((x) => x[3]), JSON.stringify(c15));
+  }
+  await load();
+
+  // F4 (phone): the head line breaks between options, never inside one; the title block is the sheet's first block
+  const c16 = await p.ev(`(() => { const opts = [...document.querySelectorAll('#bh-hl .bh-opt')].filter((b) => b.getClientRects().length);
+    const broken = opts.filter((b) => b.getClientRects().length > 1 || b.getBoundingClientRect().height > 2 * parseFloat(getComputedStyle(b).lineHeight || '16')).map((b) => b.textContent);
+    const tb = document.querySelector('#bh-tb'), h = document.querySelector('.bh-sheet-h'), sn = document.querySelector('#bh-tb .sheetno');
+    return { shown: opts.length, broken, inSheet: !!h && h.nextElementSibling === tb, sheetNo: !!sn && sn.getClientRects().length > 0 }; })()`);
+  p.check(`F4: every option of the head line on one line (${c16.shown} shown)`, c16.shown >= 4 && c16.broken.length === 0, JSON.stringify(c16));
+  if (phone) p.check('F4: at 390 the title block is the first block of the sheet, under the picture, with no sheet number', c16.inSheet && !c16.sheetNo, JSON.stringify(c16));
+
+  // F7: a kept frame is a small picture of it, in the record, in the card's row and (on a wide screen) in the strip
+  // a known start: this hole not kept (the record step before this one leaves it kept, and a press on "kept" takes it out)
+  if (await p.ev(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'true'`)) {
+    await p.ev(`document.querySelector('#bh-keep').click()`);
+    await p.until(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'false' && !document.querySelector('#bh-keep').disabled`, 8000);
+  }
+  const before = await p.ev(`window.__bh.keep.record.kept.length`);
+  const centre = (sel) => p.ev(`(() => { const b = document.querySelector('${sel}').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
+  if (!phone) {
+    const kb = await centre('#bh-keep2');
+    await p.click(kb[0], kb[1]);
+  } else {
+    await p.ev(`(() => { const h = document.querySelector('.bh-sheet-h'); if (h.getAttribute('aria-expanded') !== 'true') h.click(); })()`);
+    await p.sleep(800);
+    await p.ev(`document.querySelector('#bh-keep').scrollIntoView({ block: 'center' })`);
+    await p.sleep(300);
+    const kc = await centre('#bh-keep');
+    await p.click(kc[0], kc[1]);
+  }
+  const kept = await p.until(`(() => { const k = window.__bh.keep.record.kept; return k.length === ${before + 1} && !!k[0].img; })()`, 15000);
+  const k0 = await p.ev(`(() => { const e = window.__bh.keep.record.kept[0] || {}; const img = document.querySelector('#bh-strip img'); const b = document.querySelector('#bh-keep2');
+    return { jpeg: /^data:image\\/jpeg;base64,/.test(e.img || ''), chars: (e.img || '').length, strip: img ? img.getAttribute('src') === e.img : null, row: !!document.querySelector('#bh-reclist img.bh-th[src="' + (e.img || 'x') + '"]'),
+      button: b ? [b.getAttribute('aria-pressed'), b.textContent] : null, href: (document.querySelector('#bh-strip a.bh-fr') || { getAttribute: () => null }).getAttribute('href') }; })()`);
+  p.check('F7: a press keeps a JPEG of the frame, at most 12,000 characters, and the card\'s row shows it', kept && k0.jpeg && k0.chars > 200 && k0.chars <= 12000 && k0.row, JSON.stringify({ ...k0, kept }));
+  if (!phone) {
+    p.check('F7: the strip shows that picture at once, and its button says the hole is kept', k0.strip === true && k0.button && k0.button[0] === 'true' && k0.button[1] === 'kept', JSON.stringify(k0));
+    p.check('the strip\'s link opens the hole by its name, so the tour does not start', /\?o=m87$/.test(k0.href || ''), String(k0.href));
+    const kb2 = await centre('#bh-keep2');
+    await p.click(kb2[0], kb2[1]);
+    const out = await p.until(`window.__bh.keep.record.kept.length === ${before}`, 8000);
+    const b2 = await p.ev(`(() => { const b = document.querySelector('#bh-keep2'); return [b.getAttribute('aria-pressed'), b.textContent, document.activeElement === b]; })()`);
+    p.check('the strip\'s "kept" takes the hole out, as the card\'s "Kept" does, says "keep this frame" again, and keeps the focus', out && b2[0] === 'false' && /keep/.test(b2[1]) && b2[2], JSON.stringify(b2));
+    // over a record a newer version wrote, the card's Keep is off, and so is the strip's: a press does nothing (review_s4 2)
+    await p.until(`(() => { const k = document.querySelector('#bh-keep'); return !k.disabled && k.getAttribute('aria-disabled') !== 'true'; })()`, 8000);   // idle, the last press done
+    const looks = `(() => { const s = (e) => { const c = getComputedStyle(e); return c.color + '|' + c.opacity + '|' + c.borderTopColor; }; return [s(document.querySelector('#bh-keep2')), s(document.querySelector('#bh-keep'))]; })()`;
+    const onLook = await p.ev(looks);
+    await p.ev(`(async () => { const os = window.__bh.keep.os, cur = await os.progress.get(); window.__bhRec = cur ? cur.data : null; await os.progress.set(cur ? cur.data : {}, { v: 2 }); document.dispatchEvent(new Event('visibilitychange')); return true; })()`);
+    const off = await p.until(`document.querySelector('#bh-keep2').disabled && document.querySelector('#bh-keep').disabled`, 8000);
+    const offLook = await p.ev(looks);
+    // and while a press is written (aria-disabled, which keeps the focus) both look off as well (review_s4b 4)
+    const busyLook = await p.ev(`(() => { const k = document.querySelector('#bh-keep'), k2 = document.querySelector('#bh-keep2'); const was = [k.disabled, k2.disabled]; k.disabled = false; k2.disabled = false; k.setAttribute('aria-disabled', 'true'); k2.setAttribute('aria-disabled', 'true'); const s = (e) => { const c = getComputedStyle(e); return c.color + '|' + c.opacity + '|' + c.borderTopColor; }; const out = [s(k2), s(k)]; k.removeAttribute('aria-disabled'); k2.removeAttribute('aria-disabled'); [k.disabled, k2.disabled] = was; return out; })()`);
+    p.check('F7: the card\'s Keep and the strip\'s button look off when off (disabled) and while a press is written (aria-disabled) (review_s4b 2, 4)', offLook[0] !== onLook[0] && offLook[1] !== onLook[1] && busyLook[0] !== onLook[0] && busyLook[1] !== onLook[1], JSON.stringify({ onLook, offLook, busyLook }));
+    const kb3 = await centre('#bh-keep2');
+    await p.click(kb3[0], kb3[1]);
+    await p.sleep(800);
+    const still = await p.ev(`window.__bh.keep.record.kept.length === ${before}`);
+    p.check('F7: over a newer version\'s record the strip\'s button is off, as the card\'s, and a press on it keeps nothing', off && still, JSON.stringify({ off, still }));
+    await p.ev(`(async () => { await window.__bh.keep.os.progress.set(window.__bhRec || {}, { v: 1 }); document.dispatchEvent(new Event('visibilitychange')); return true; })()`);
+    await p.until(`!document.querySelector('#bh-keep').disabled`, 8000);
+    // two holes of one's own and M87*, kept: the strip's captions tell them apart (review_s4b 5: every hole of one's own
+    // read "a hole of your own, cinematic"), and the grown strip lies on no part (review_s4b 2)
+    for (const q of ['?o=custom&m=7', '?o=m87', '?o=m87&c=redshift']) {
+      await load(q);
+      if (await p.ev(`document.querySelector('#bh-keep').getAttribute('aria-pressed') !== 'true'`)) { const c = await centre('#bh-keep2'); await p.click(c[0], c[1]); await p.until(`document.querySelector('#bh-keep').getAttribute('aria-pressed') === 'true'`, 15000); }
+    }
+    await p.sleep(600);
+    // as a visitor sees them: none cut by its box, and no two alike (review_s4c 4: the ellipsis cut the spin off, and M87*
+    // in two colours read alike)
+    const caps = await p.ev(`[...document.querySelectorAll('#bh-strip .bh-fr .cap')].map((c) => [c.textContent, c.scrollWidth <= c.clientWidth + 1 && c.scrollHeight <= c.clientHeight + 1])`);
+    p.check('F7: the strip\'s captions tell its kept holes apart as they are seen: none cut, no two alike', caps.length === 3 && new Set(caps.map((c) => c[0])).size === 3 && caps.every((c) => c[1]), JSON.stringify(caps));
+    const lay2 = await p.ev(LAYOUT);
+    p.check('F4: with three kept frames in the strip, no part on another and no words on words', lay2.pairs.length === 0 && lay2.crossed.length === 0, JSON.stringify(lay2));
+  }
+  await p.shot(`drawing-${width}`);
+}
+
 export default async function blackhole(p, { base, width }) {
   const phone = width < 700;
   for (const [n, e] of standard({ gold: { allow: [...GOLD_ALLOW, ...GOLD_DEFERRED] }, targets: { cover: SHEET_COVER } })) p.invariant(n, e);
@@ -623,6 +945,7 @@ export default async function blackhole(p, { base, width }) {
     return f;
   };
   const click = async (sel) => {
+    if (!phone && !(await reveal(p, sel))) { p.check(`the page shows ${sel} on one of its sheets`, false); return false; }
     const r = await p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; e.scrollIntoView({ block: 'center' }); const b = e.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; })()`);
     if (!r) { p.check(`the page has ${sel}`, false); return false; }
     await p.click(r[0], r[1]);
@@ -630,7 +953,7 @@ export default async function blackhole(p, { base, width }) {
   };
   let closedOnce = false;
   const sheet = async (open) => {
-    if (!phone) return;
+    if (!phone) { if (!open) await sheetOne(p); return; }
     const now = (await p.ev(`document.querySelector('.bh-sheet-h').getAttribute('aria-expanded')`)) === 'true';
     if (now !== open) { await click('.bh-sheet-h'); await p.sleep(700); }
     if (now && !open && !closedOnce) {
@@ -656,7 +979,7 @@ export default async function blackhole(p, { base, width }) {
   await pixelRules('loaded');
 
   // BAR_L1 C11: the title in Fraunces, loaded (not a fallback serif); the readouts in IBM Plex Mono
-  const type = await p.ev(`(async () => { await document.fonts.ready; const h = document.querySelector('.bh-head h1'), d = document.querySelector('.bh-read dd');
+  const type = await p.ev(`(async () => { await document.fonts.ready; const h = document.querySelector('h1'), d = document.querySelector('.bh-read dd');
     return { h1: h ? getComputedStyle(h).fontFamily : '', dd: d ? getComputedStyle(d).fontFamily : '', fraunces: document.fonts.check('26px Fraunces'), plex: document.fonts.check('12px "IBM Plex Mono"') }; })()`);
   p.check('the page title is set in Fraunces, and the face loaded', /Fraunces/.test(type.h1) && type.fraunces, JSON.stringify(type));
   p.check('the readouts are set in IBM Plex Mono, and the face loaded', /IBM Plex Mono/.test(type.dd) && type.plex, JSON.stringify(type));
@@ -700,7 +1023,7 @@ export default async function blackhole(p, { base, width }) {
     await pixelRules(`colour ${mode}`);
     if (mode === 'order' || mode === 'steps') {
       // the legend's swatches are the tokens the render draws the marks in (palette.js modeKey)
-      const key = await p.ev(`(() => { const tok = ${TOKEN}; return [...document.querySelectorAll('#bh-modekey span')].map((s) => { const i = s.querySelector('i'); const v = (i.getAttribute('style') || '').match(/var\\((--[\\w-]+)\\)/); return { text: s.textContent, bg: getComputedStyle(i).backgroundColor, want: v ? tok(v[1]) : null }; }); })()`);
+      const key = await p.ev(`(() => { const tok = ${TOKEN}; return [...document.querySelectorAll('[data-modekey]')].filter((k) => k.getClientRects().length).flatMap((k) => [...k.querySelectorAll('span')]).map((s) => { const i = s.querySelector('i'); const v = (i.getAttribute('style') || '').match(/var\\((--[\\w-]+)\\)/); return { text: s.textContent, bg: getComputedStyle(i).backgroundColor, want: v ? tok(v[1]) : null }; }); })()`);
       p.check(`colour ${mode}: a legend of swatches, each the colour of its token, none gold`, key.length >= 2 && key.every((k) => k.want && k.bg === k.want && k.bg !== 'rgb(212, 162, 76)'), JSON.stringify(key));
       if (mode === 'steps') p.check('colour steps: the drift is labelled with its limit', key.some((k) => k.text === 'drift above 1e-4' && k.want === 'rgb(224, 108, 117)'), JSON.stringify(key));
     }
@@ -829,6 +1152,9 @@ export default async function blackhole(p, { base, width }) {
 
   /* ---- 4c. the record (road 1.09) ---- */
   await RECORD_STEP(p, { base, width, ready: READY, after: (label) => pixelRules(label) });
+
+  /* ---- 4d. the drawing: the bar's form, F1 to F7 (slice 4) ---- */
+  await DRAWING_STEP(p, { base, width, ready: READY });
 
   /* ---- 5. the Instrument card's Hawking temperature, read against derive() in the page (P5-1) ---- */
   const HAWK = `(async () => { const P = await import('/labs/assets/js/blackhole/physics.js');
