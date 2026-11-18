@@ -19,10 +19,15 @@
 
    This file loads nothing else: pod/inked.js and topo/inkfig.js are
    fetched only when the inked script is on (pod/main.js).
+
+   Turned on 2026-11-18 by Luis's decision ("Let's incorporate them as
+   we have them right now"), with inkfig 0.6.1's corpus run and the
+   review sheet he had: g4-pod.json records both, and what the decision
+   was. The ring script stays at ?script=ring.
    ============================================================ */
 
 export const SWITCH = Object.freeze({
-  published: false,   // the one place to turn the inked script on for everyone
+  published: true,    // the one place to turn the inked script on for everyone
 });
 
 const LOCAL = /^(127\.0\.0\.1|localhost|\[::1\])$/;
