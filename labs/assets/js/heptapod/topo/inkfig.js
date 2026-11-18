@@ -18,19 +18,62 @@
       content (NODE_DEG per node) and its depth is the pool's (DEPTH).
       The pool's profile is a puddle's, skewed along the drag, split
       between the two sides of the ring. [physics: pooling; PLAN M3]
+   I2c A pool carries its clause's concept: the main event's concept is
+      1 to 3 radicals (hmr.js), and the pool's outline is one lump per
+      radical in the concept's canonical order, each as high as that
+      radical's word in the lab's code says (code.js, the radical
+      partition: the affirmed word's nine digits summed, 0 to 18, give
+      0.55 to 1.1 of the pool's depth), with a waist at 0.3 between
+      lumps. So two clauses about different things never pour the same
+      pool, and no shape class (one smooth mass) is shared by all.
+      [grammar: the concept; the code's words]
+   I2d The crown is the code: on the side of the pool holding more ink,
+      each radical's affirmed word (nine cells, code.js) is written
+      across its lump as a fan, a cell of 2 growing a tendril that ends
+      in a drop, a cell of 1 a short stub, a cell of 0 nothing. Every
+      tendril is a thread with the legs' physics (I4: SHAFT, FIL_LEN,
+      flaring as a branch does, 1.6 shafts, since it leaves the rim and
+      not the pool's depth;
+      the 1.89 drop), so the crown the film's single masses carry
+      (Humanity1: 16 filaments on one mass) is here the concept's code,
+      read cell by cell. Where a leg leaves the rim it drains the rim's
+      ink, so no cell grows within 1.5 cells of a leg's root. Luis, 2026-11-18: "make sure the feel is like
+      number 1, yet everything obeys the rules of the language we
+      figured out on our own". [grammar: the code; physics: I4]
+   I2e A pool holds its clause's ink (0.6; Luis, 2026-11-18: "ours look
+      very similar, why is that?"). A node's ink is its concept's words'
+      digits summed over 9 (1 for a node with no concept), so a
+      three-radical concept carries more than a one-radical one; a
+      clause's ink is its nodes' over C_REF, the stand-in corpus's mean
+      node ink, and its pool's arc is NODE_DEG per unit of it, so the
+      pool grows with what the clause says, not with how many nodes say
+      it. A state (hmr.js aspect) is where the hand rests: its pool is
+      gathered, E_STATE of the arc and the depth over E_STATE, the same
+      area, with no drag; any other event's pool is dragged along the
+      stroke, the drag's direction seeded (the film shows none, F4-P2
+      and F4-P3). The pool's ink lies on each side as its threads' ink
+      leaves it. [grammar: the code, aspect; physics: area kept]
    I3 Every node joined to a clause's main event is a filament leaving
       the mass where the pool is deepest (a splash's crown); a node
       that hangs from such a node is a branch of its filament. The side
       is the role's class: a core argument (actor, undergoer, goal,
-      content) leaves outward, any other role inward. The angle at
+      content) leaves outward, any other role inward, and so does a
+      referent that is the speaker (person 1), into the ring that is
+      the speaker (figure.js F1). The angle at
       which it leaves the normal is the role's own: each label has one
       angle, spread evenly over LEAN_DEG either side of the normal in
       hmr.js's label order within its side (PLAN L6: role by neck
       angle). Its length grows with what hangs from it. [grammar; F4-P4,
       missed: the suite reads 1 to 7 more filaments than are drawn]
    I4 A filament is a thread of ink: it flares where it leaves the pool,
-      tapers along its length and wanders by a smooth turning noise that
-      starts at zero, so it leaves at the role's angle. An entity's
+      tapers along its length and leaves at the role's angle. It is its
+      node's word written as a turn (0.6): read from the pool out, each
+      cell of each radical's nine-cell word (canonical order) turns the
+      thread by TURN_CELL times (cell - 1), so its bend is its concept,
+      and the hand adds a small wander (TREMOR) that starts at zero; a
+      node with no concept wanders by the noise alone. A thread keeps
+      one slenderness, so its length and its shaft grow with the cube
+      root of its node's ink. An entity's
       thread ends in a drop of radius 1.89 times the thread's radius
       where it breaks, its tip (Rayleigh 1878, after Plateau: one
       fastest-growing wavelength, 9.02 a, gathers into one drop; from
@@ -62,7 +105,12 @@
       GAP_DEG, is kept free before the pools share the rest, and goes
       to the largest free arc, where the brush is driest (figure.js F6;
       F4-P1); among equal arcs, the first in drawing order. The stroke
-      tapers into it, and nothing else is drawn in it. [physics]
+      tapers into it, and nothing else is drawn in it. The hand presses
+      and lifts along the stroke, and the width goes with PRESS_FLOOR
+      plus its pressure: the film's carrier thins and swells with no
+      relation to its masses (F4-P2 missed), so its unevenness is the
+      hand's (0.6.1, fitted with W_RING to the film's carrier width and
+      its spread; held out on F4-P9). [physics; a fit]
    I7 Ink spreads into the surface before it dries: the body (pools,
       threads, drops) is diffused over INK_SPREAD and the bristle layer
       over a third of it, and ink is where the diffused load is at least
@@ -101,11 +149,13 @@ import { edgeClassRank, edgeRoleRank, EDGE_LABELS } from './hmr.js';
 const classOf = (label) => (EDGE_LABELS[label] ? EDGE_LABELS[label].cls : null);
 import { mulberry32, fnv1a } from './rng.js';
 import { PI, sinK, cosK } from './trig.js';
+import { buildCode, partition, digits, CODE_SEED } from './code.js';
+import { RADICALS } from './hmr.js';
 
 const TAU = 2 * PI, DEG = PI / 180;
 
 export const INK = Object.freeze({
-  version: 'inkfig-0.3.1',
+  version: 'inkfig-0.6.1',
   S: 3300,            // raster side, the film masks' size
   R_CANVAS: 0.365,    // R over the raster side (figure.js)
   NODE_DEG: 7.0,      // I2: arc of a clause's pool per node, degrees
@@ -119,7 +169,7 @@ export const INK = Object.freeze({
   TAPER_DEG: 10,      // I6: the stroke thins into the gap over this arc
   DEPTH: 0.33,        // I2: a pool's peak depth across the ring, over R
   WOBBLE: 0.11,       // I1: centreline wander, over R
-  W_RING: 0.09,       // I6: the carrier's width at full load, over R
+  W_RING: 0.083,      // I6: the carrier's width at full load, over R
   LOAD_ARC: 0.3,      // I6: arc (over R) at which the carrier's load has fallen to half
   LOAD_FLOOR: 0.7,   // I6: the share of a full load the brush keeps however far from a pool (it is redipped by the writer's hand, not only by the pools)
   BRISTLES: 28,       // I6
@@ -129,6 +179,11 @@ export const INK = Object.freeze({
   SPRAY_DEG: 5,       // I5b: one drop per this many degrees of a pool's arc
   LEAN_DEG: 30,       // I3: the role angles spread over this many degrees either side of the normal
   INK_SPREAD: 0.006,  // I7: diffusion length of the body, over R
+  PRESS_FLOOR: 0.2,   // I6: the carrier's width goes with this plus the hand's pressure (0 to 1)
+  C_REF: 1.511,       // I2e: the unit of a clause's ink, the stand-in corpus's mean node ink
+  E_STATE: 0.6,       // I2e: a state's pool, gathered: this share of the arc, the depth over it
+  TURN_CELL: 0.17,    // I4: the turn of a thread per unit of its word's cells (cell - 1), radians
+  TREMOR: 0.15,       // I4: the hand's wander along a thread that carries a word, radians
   CORE_ROLES: Object.freeze(['actor', 'undergoer', 'goal', 'content']),
 });
 
@@ -148,6 +203,86 @@ export const INK_CALIBRATIONS = Object.freeze([
   { name: 'v0.2 after the first measurement (bb8f228)', value: 0, source: 'NODE_DEG 4 to 7, WOBBLE 0.03 to 0.10, LOAD_FLOOR 0.45 to 0.7, W_RING 0.05 to 0.06, SHAFT 0.017 to 0.02, INK_SPREAD 0.0035 to 0.006, depth by clause size, the crown, more turning: set by eye against the film master and by the suite after F4-P4 had run; F4-P4 keeps its first outcome' },
   { name: 'LOAD_ARC, LOAD_FLOOR, BRISTLES, RIM_A, INK_SPREAD, TAPER_DEG, CORE, DEPOSITS, ARC_MIN_DEG, SPRAY_DEG, LEAN_DEG', value: 0, source: 'first values, not compared with any film measure of their own' },
 ]);
+
+/* Each constant's kind (Luis, 2026-11-18: "we don't want handwaved, it will be generated obeying mathematical
+   equations"). derived: an equation from physics or the grammar. calibrated: set to a named film measure (the
+   film enters as a distribution, ip.md rule 9). frame: the measuring frame. chosen: set by eye or a first value,
+   debt to be derived or fitted by a stated objective on held-out sentences. tools/dev/heptapod_equations.mjs
+   writes the sheet from this, with the numeric literals still inline in the drawing code. */
+export const INK_KIND = Object.freeze({
+  S: ['frame', 'the film masks are 3300 px; the suite measures ours at the same size'],
+  R_CANVAS: ['calibrated', 'film.md 5.2: R over canvas, median 0.365'],
+  NODE_DEG: ['chosen', 'first 4, then 6 and 7 by eye on 2026-11-17 against the film cluster spans (median 15, widest median 32)'],
+  CORE: ['chosen', 'first value'],
+  DEPOSITS: ['chosen', 'first value'],
+  ARC_MIN_DEG: ['chosen', 'first value'],
+  MASS_MAX: ['calibrated', 'film suite: blot clusters per master p90 4.3'],
+  MASS_ARC: ['calibrated', 'film suite: total cluster arc per master p90 98.1 degrees'],
+  OVERLAP: ['chosen', 'first value'],
+  GAP_DEG: ['calibrated', 'film suite: main gap median 26.5 degrees'],
+  TAPER_DEG: ['chosen', 'first value'],
+  DEPTH: ['calibrated', 'film suite: blot peak width median 0.325 R'],
+  WOBBLE: ['chosen', 'by eye with the suite column in view (0.03, 0.10, 0.06, 0.11); film centreline deviation median 0.043 R'],
+  W_RING: ['calibrated', "fitted 2026-11-18 with PRESS_FLOOR on the pod's 126 rings to the film's carrier (w_med 0.051 R and w_cv 0.709 inside the film's p10 to p90) while rings sharing no word are no more alike than the film's single masses (0.717 against 0.722, ring included); held out: F4-P9. Before: 0.05, 0.06, 0.09 by eye"],
+  LOAD_ARC: ['chosen', 'first value'],
+  LOAD_FLOOR: ['chosen', 'raised by eye (0.45, 0.7) when the 1-clause ring dried away'],
+  BRISTLES: ['chosen', 'first value'],
+  SHAFT: ['chosen', 'film filament shaft median 0.0172 R, raised by eye to 0.02'],
+  FIL_LEN: ['calibrated', 'film suite: filament length median 0.143 R'],
+  RIM_A: ['chosen', 'first value'],
+  SPRAY_DEG: ['chosen', 'first value'],
+  LEAN_DEG: ['chosen', 'first value'],
+  INK_SPREAD: ['chosen', 'raised by eye (0.0035, 0.006) to close gaps between strokes'],
+  CORE_ROLES: ['derived', 'the grammar: hmr.js core participant roles'],
+  PRESS_FLOOR: ['calibrated', "fitted with W_RING (2026-11-18): the film's carrier thins and swells with no relation to its masses (F4-P2 missed), so its unevenness is the hand's; 0.45 (an inline literal until 0.6) to 0.2"],
+  C_REF: ['frame', "the unit of a clause's ink: corpus B's mean node ink, 1.511 over 632 nodes (2026-11-18), so a clause of mean nodes keeps NODE_DEG per node"],
+  E_STATE: ['chosen', 'first value: a resting hand gathers the pool to 0.6 of its arc, the area kept'],
+  TURN_CELL: ['chosen', "first value: a radical's word turns a thread at most 3 units, 0.5 radians; three radicals up to about 1.5, the range 0.3.1's turning noise spanned"],
+  TREMOR: ['chosen', 'first value, a quarter of the turning noise it replaces on threads that carry a word'],
+});
+
+/* ---------------- I2c: the radicals' words in the lab's code ---------------- */
+
+let LUMP = null;
+/** radical -> the lump's height (0.55 to 1.1 of the pool's depth): its affirmed word's digits summed over 18. */
+/** radical -> its affirmed word's nine cells (0, 1 or 2), the crown it writes (I2d). */
+export function lumpWord(radical) {
+  lumpHeight(radical);
+  return WORDS.get(radical) || null;
+}
+const WORDS = new Map();
+export function lumpHeight(radical) {
+  if (!LUMP) {
+    const rad = partition(buildCode({ seed: CODE_SEED })).parts.radical;
+    LUMP = new Map(RADICALS.map((r, i) => [r, 0.55 + (0.55 * digits(rad[i][0]).reduce((a, b) => a + b, 0)) / 18]));
+    RADICALS.forEach((r, i) => WORDS.set(r, Array.from(digits(rad[i][0]))));
+  }
+  return LUMP.get(radical) ?? 0.8;
+}
+
+/* ---------------- I2e, I4: a node's ink, its word, its side ---------------- */
+
+/** A node's word: its concept's radicals in canonical order, each radical's nine cells (code.js), concatenated. */
+export function wordOf(node) {
+  if (!node || !node.c) return [];
+  return [...node.c].sort().flatMap((r) => lumpWord(r) || []);
+}
+/** A node's ink: its word's cells summed over 9 (a radical's share), 1 for a node with no concept. */
+export function inkOf(node) {
+  if (!node || !node.c) return 1;
+  return wordOf(node).reduce((a, b) => a + b, 0) / 9;
+}
+/** The cube root by Newton's method (exact operations only, BAR_F G5). */
+export function cbrt(x) {
+  if (!(x > 0)) return 0;
+  let y = x > 1 ? x / 2 : 1;
+  for (let i = 0; i < 40; i++) y -= (y * y * y - x) / (3 * y * y);
+  return y;
+}
+/** I3: does the node a role leads to leave outward? A core role does, unless its referent is the speaker. */
+export const leavesOutward = (label, node) => INK.CORE_ROLES.includes(label) && !(node && node.f && node.f.person === '1');
+/** I2e: is the event a state (its pool gathered, undragged)? */
+export const isState = (node) => !!(node && node.f && node.f.aspect === 'state');
 
 /* ---------------- seeded noise (exact operations only) ---------------- */
 
@@ -257,9 +392,14 @@ function clauseTrees(cl) {
         parent.set(w, { u, label: e.label }); kids.set(w, []); kids.get(u).push(w); order.push(w);
       }
     }
-    const size = new Map();
-    for (let q = order.length - 1; q >= 0; q--) { const u = order[q]; size.set(u, 1 + kids.get(u).reduce((a, w) => a + size.get(w), 0)); }
-    return { c, main: m, parent, kids, size, n: order.length };
+    const size = new Map(), ink = new Map();
+    for (let q = order.length - 1; q >= 0; q--) {
+      const u = order[q];
+      size.set(u, 1 + kids.get(u).reduce((a, w) => a + size.get(w), 0));
+      ink.set(u, inkOf(cg.nodes[u]) + kids.get(u).reduce((a, w) => a + ink.get(w), 0));
+    }
+    // I2e: the clause's ink in units of C_REF
+    return { c, main: m, parent, kids, size, ink, n: order.length, V: ink.get(m) / INK.C_REF };
   });
 }
 
@@ -363,7 +503,9 @@ export function inkFigure(g, opts = {}) {
   // I9: masses
   const groups = massesOf(k, cl.cross, trees.map((t) => t.n));
   // I2: spans, compressed when the ring is too short for its masses
-  let span = trees.map((t) => INK.NODE_DEG * t.n);
+  // I2e: a pool's arc is NODE_DEG per unit of its clause's ink; a state's is gathered to E_STATE of it
+  const eOf = (t) => (isState(cg.nodes[t.main]) ? INK.E_STATE : 1);
+  let span = trees.map((t) => INK.NODE_DEG * t.V * eOf(t));
   const massLen = (sps) => sps.reduce((a, b) => a + b, 0) - INK.OVERLAP * sps.slice(1).reduce((a, b, i) => a + (sps[i] + b) / 2, 0);
   // a ring holds at most MASS_ARC of mass (the film's p90): a longer text is written denser, never wider
   const room = Math.min(INK.MASS_ARC, 360 - INK.GAP_DEG - groups.length * INK.ARC_MIN_DEG);
@@ -398,7 +540,7 @@ export function inkFigure(g, opts = {}) {
   const rc = (phiDeg) => R * (1 + INK.WOBBLE * fbm1(wobSeed, (((phiDeg % 360) + 360) % 360) / 60, 3, 6));
 
   const body = new Float32Array(S * S), bristle = new Float32Array(S * S);
-  const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0 };
+  const report = { pools: [], filamentsDrawn: 0, threads: 0, bulbs: 0, satellites: 0, spikes: 0, outward: 0, crownTendrils: 0, crownStubs: 0 };
   // opts.trace: where each pool and each thread was laid, in raster pixels, for a reader of crops (the pod's
   // notebook). It records what was drawn and changes nothing that is drawn.
   const trace = opts.trace ? { pools: [], threads: [] } : null;
@@ -412,15 +554,31 @@ export function inkFigure(g, opts = {}) {
     const t = trees[order[j]];
     const rnd = streamOf(cert, t.main, 'pool');
     const half = sp[j] / 2, th = centreDeg[j];
-    const skew = (rnd() * 2 - 1) * 0.6, fOut = 0.15 + 0.7 * rnd();
-    // a pool's ink grows with its clause, up to what one stroke can hold (1.3 times the median pool); on a squeezed
-    // ring the same ink is laid shorter and shallower alike (depth with the square root of the squeeze)
-    const depth = INK.DEPTH * R * (0.7 + 0.6 * rnd()) * Math.min(1.3, Math.sqrt(t.n / 6)) * Math.sqrt(squeeze);
+    // I2e: a state's pool is not dragged; any other is, by 0.6 of its half span, the direction seeded
+    const st = isState(cg.nodes[t.main]);
+    const skew = st ? 0 : rnd() < 0.5 ? -0.6 : 0.6;
+    // I2e: the pool's ink lies on each side as its threads' ink leaves it (a pool with no thread, evenly)
+    const kidsI = t.kids.get(t.main);
+    const inkAll = kidsI.reduce((a, w) => a + t.ink.get(w), 0);
+    const inkOut = kidsI.reduce((a, w) => a + (leavesOutward(t.parent.get(w).label, cg.nodes[w]) ? t.ink.get(w) : 0), 0);
+    const fOut = inkAll > 0 ? 0.15 + (0.7 * inkOut) / inkAll : 0.5;
+    // a pool's ink grows with its clause's (I2e), up to what one stroke can hold (1.3 times the median pool); a
+    // state's is gathered, deeper by 1 over E_STATE; on a squeezed ring the same ink is laid shorter and shallower
+    // alike (depth with the square root of the squeeze)
+    const depth = INK.DEPTH * R * (0.9 + 0.2 * rnd()) * Math.min(1.3, Math.sqrt(t.V / 6)) * (st ? 1 / INK.E_STATE : 1) * Math.sqrt(squeeze);
     const nSeed = fnv1a(`${cert}:${t.main}:rim`);
     // a puddle dragged along the stroke: a steep front, a long tail (the skew's sign is the drag's direction)
     const prof = (x) => { const b = 1 - x * x; if (b <= 0) return 0; const y = (x - skew) / (1 + (x > skew ? -skew : skew)); const c = 1 - y * y; return c <= 0 ? 0 : c * Math.sqrt(c * b); };
-    const hOut = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * fOut * prof(x) * (1 + 0.4 * fbm1(nSeed, x * 6, 5)); };
-    const hIn = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * (1 - fOut) * prof(x) * (1 + 0.4 * fbm1(nSeed + 1, x * 6, 5)); };
+    // I2c: one lump per radical of the main event's concept, as high as its word in the code
+    const rads = [...(cg.nodes[t.main].c || [])].sort(), nr = Math.max(1, rads.length), lw = (1.6 / nr) * 0.62;
+    const lumpEnv = (x) => {
+      if (!rads.length) return 1;
+      let m = 0;
+      rads.forEach((r, q) => { const u = (x - (nr === 1 ? 0 : -0.55 + (1.1 * q) / (nr - 1))) / lw; if (u * u < 1) m = Math.max(m, lumpHeight(r) * (1 - u * u) * (1 - u * u)); });
+      return 0.3 + 0.7 * m;
+    };
+    const hOut = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * fOut * prof(x) * lumpEnv(x) * (1 + 0.4 * fbm1(nSeed, x * 6, 5)); };
+    const hIn = (phi) => { const x = wrap(phi - th) / half; return Math.abs(x) >= 1 ? 0 : depth * (1 - fOut) * prof(x) * lumpEnv(x) * (1 + 0.4 * fbm1(nSeed + 1, x * 6, 5)); };
     const wr = INK.W_RING * R / 2;
     const n = Math.max(16, Math.ceil(((2 * half * DEG) * R) / 2));
     const P = new Float64Array(4 * n);
@@ -479,6 +637,31 @@ export function inkFigure(g, opts = {}) {
       }
     }
 
+    // I2d: the crown is the code, a fan across each radical's lump on the side holding more ink
+    {
+      const crnd = streamOf(cert, t.main, 'crown');
+      const side = fOut >= 0.5 ? 1 : -1;
+      // where a leg leaves the rim its thread drains the rim's ink, so no crown cell grows within DRAIN of its root
+      const legsAt = t.kids.get(t.main).map((w, i, all) => skew + (all.length === 1 ? 0 : -0.35 + (0.7 * i) / (all.length - 1)));
+      const drain = (lw * 0.85) / 4.5;
+      rads.forEach((r, q) => {
+        const w = lumpWord(r);
+        if (!w) return;
+        const xc = nr === 1 ? 0 : -0.55 + (1.1 * q) / (nr - 1);
+        for (let c = 0; c < 9; c++) {
+          if (w[c] === 0) continue;
+          const xx = xc + ((c - 4) * lw * 0.85) / 4.5, phi = th + xx * half;
+          if (legsAt.some((xl) => Math.abs(xl - xx) < 1.5 * drain)) continue;
+          const h = Math.max(wr, side > 0 ? hOut(phi) : hIn(phi));
+          const r0 = rc(phi) + side * h * 0.85, cs = cosK(phi * DEG), sn = sinK(phi * DEG);
+          const head = phi * DEG + (side > 0 ? 0 : PI) + (c - 4) * 0.13 + (crnd() - 0.5) * 0.15;
+          const len = R * INK.FIL_LEN * (w[c] === 2 ? 0.75 + 0.5 * crnd() : 0.3 + 0.1 * crnd());
+          thread(body, S, toX(r0 * cs), toY(r0 * sn), head, len, R * INK.SHAFT * (0.7 + 0.3 * crnd()), { flare: 1.6, end: 0.75, turn: 1, seed: (crnd() * 4294967296) >>> 0, bulb: w[c] === 2, rnd: crnd });
+          if (w[c] === 2) report.crownTendrils++; else report.crownStubs++;
+        }
+      });
+    }
+
     // I5b: spray. Drops thrown off the pool's rim as the brush leaves it, more on the side it holds more
     // ink on; radii from a power law (many small, few large), within 0.3 R of the rim.
     const prnd = streamOf(cert, t.main, 'spray');
@@ -499,7 +682,7 @@ export function inkFigure(g, opts = {}) {
     const nk = kids0.length;
     kids0.forEach((w, i) => {
       const lab = t.parent.get(w).label;
-      const out = INK.CORE_ROLES.includes(lab);
+      const out = leavesOutward(lab, cg.nodes[w]);
       // the crown: threads erupt where the pool is deepest (a splash's rim fingers), spread over 0.7 of its half span
       const x = skew + (nk === 1 ? 0 : -0.35 + (0.7 * i) / (nk - 1));
       const phi = th + x * half;
@@ -517,10 +700,12 @@ export function inkFigure(g, opts = {}) {
 
   function drawNode(t, w, x, y, head, scale, rnd, depthLevel) {
     const sub = t.size.get(w);
-    const len = INK.FIL_LEN * R * scale * (1 + 0.35 * (sub - 1)) * (0.6 + 0.8 * rnd() * rnd() + 0.3 * rnd());
-    const shaft = INK.SHAFT * R * scale * (0.9 + 1.0 * rnd() * rnd()) * (1 + 0.1 * (sub - 1));
+    // I4: one slenderness, so length and shaft grow with the cube root of the node's ink; the hand varies both a little
+    const g3 = cbrt(inkOf(cg.nodes[w]) / INK.C_REF);
+    const len = INK.FIL_LEN * R * scale * (1 + 0.35 * (sub - 1)) * g3 * (0.87 + 0.3 * rnd());
+    const shaft = INK.SHAFT * R * scale * g3 * (1.1 + 0.25 * rnd()) * (1 + 0.1 * (sub - 1));
     const isEntity = cg.nodes[w].k === 'entity';
-    const tip = thread(body, S, x, y, head, len, shaft, { flare: depthLevel ? 1.6 : 3.4, end: 0.75, turn: 1, seed: (rnd() * 4294967296) >>> 0, bulb: isEntity, rnd, report });
+    const tip = thread(body, S, x, y, head, len, shaft, { flare: depthLevel ? 1.6 : 3.4, end: 0.75, turn: 1, seed: (rnd() * 4294967296) >>> 0, bulb: isEntity, rnd, report, word: wordOf(cg.nodes[w]) });
     report.threads++;
     if (trace) trace.threads.push({ node: w, label: t.parent.get(w).label, pts: tip.path.map((q) => [q[0], q[1]]) });
     const kids = t.kids.get(w);
@@ -553,7 +738,7 @@ export function inkFigure(g, opts = {}) {
     const q = INK.LOAD_FLOOR + ((1 - INK.LOAD_FLOOR) * Kd * Kd) / (Kd * Kd + d * d);
     // pressure: the hand presses and lifts along the stroke
     const press = 0.55 + 0.45 * fbm1(wobSeed + 11, phi / 12, 4, 30);
-    const w = INK.W_RING * R * (0.25 + 0.75 * q) * (0.5 + 0.5 * taper) * (0.45 + press);
+    const w = INK.W_RING * R * (0.25 + 0.75 * q) * (0.5 + 0.5 * taper) * (INK.PRESS_FLOOR + press);
     const r0 = rc(phi), cs = cosK(phi * DEG), sn = sinK(phi * DEG);
     for (let b = 0; b < NB; b++) {
       const u = -1 + (2 * (b + 0.5)) / NB;
@@ -580,21 +765,33 @@ export function inkFigure(g, opts = {}) {
 }
 
 /* One thread of ink from (x, y), heading `head` (radians, y up), length `len`, shaft width `shaft` (pixels).
-   It flares to `flare` shafts at its root, tapers to `end` shafts at its tip, turns by a smooth noise, and with
+   It flares to `flare` shafts at its root, tapers to `end` shafts at its tip, turns by o.word (a node's word, I4)
+   and the hand's small wander or, with no word, by a smooth noise, and with
    o.bulb ends in a drop of radius 1.89 times the tip's (I4), shedding up to two satellites. */
 function thread(F, S, x, y, head, len, shaft, o) {
   const rnd = o.rnd || mulberry32(o.seed);
   const n = Math.max(4, Math.ceil(len / Math.max(1, shaft * 0.35)));
   const ds = len / n;
-  const curl = (rnd() * 2 - 1) * 1.3 * o.turn, amp = (0.55 + 0.55 * rnd()) * o.turn;
   const seed = o.seed >>> 0;
   const f0 = fbm1(seed, 0, 4);
+  // I4: a thread that carries a word turns by it, cell by cell from its root, plus the hand's small wander; any other
+  // thread (a crown cell, a rim spike, a node with no concept) turns by the noise alone
+  const word = o.word && o.word.length ? o.word : null;
+  let curl = 0, amp = INK.TREMOR;
+  const turnAt = [0];
+  if (word) for (let c = 0; c < word.length; c++) turnAt.push(turnAt[c] + INK.TURN_CELL * (word[c] - 1));
+  else { curl = (rnd() * 2 - 1) * 1.3 * o.turn; amp = (0.55 + 0.55 * rnd()) * o.turn; }
+  const wordTurn = (t) => {
+    if (!word) return 0;
+    const x = t * word.length, c = Math.min(word.length - 1, Math.floor(x));
+    return turnAt[c] + (x - c) * (turnAt[c + 1] - turnAt[c]);
+  };
   const width = (t) => (t < 0.18 ? shaft * (1 + (o.flare - 1) * (1 - t / 0.18) * (1 - t / 0.18)) : shaft * (1.1 - ((1.1 - o.end) * (t - 0.18)) / 0.82)) * (1 + 0.08 * noise1(seed + 3, t * 9));
   const path = [];
   let X = x, Y = y, h = head;
   for (let k = 0; k <= n; k++) {
     const t = k / n;
-    h = head + curl * t + amp * (fbm1(seed, t * 4, 4) - f0);
+    h = head + curl * t + wordTurn(t) + amp * (fbm1(seed, t * 4, 4) - f0);
     stampDisc(F, S, X, Y, width(t) / 2);
     path.push([X, Y, h]);
     X += ds * cosK(h); Y -= ds * sinK(h);
