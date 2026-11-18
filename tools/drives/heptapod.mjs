@@ -11,8 +11,9 @@
    taken, set down, held up and passed through the glass, one
    gesture is one act, the keyboard does the same, a mark can be
    raised, the day and a pencil guess survive a reload through the
-   labs' store, the evening runs to its count, the inked script
-   turns on only by its link on this machine, and every deep-linked
+   labs' store, the evening runs to its count, the inked script is
+   the page's own once published (a kept day, in the store across a
+   reload) and the ring script stays at its link, and every deep-linked
    state comes up.
 
    BAR_C, C1 to C3, on the canvas's own pixels (luma, Rec. 709 on the
@@ -124,13 +125,15 @@ export default async function heptapod(p, { base, width }) {
     }
     return +worst.toFixed(2); })()`);
 
-  await p.go(`${base}/labs/heptapod.html`);
+  // the day by hand runs in the ring script, whose parts sit in fixed quarters (the crops below are by side); the
+  // inked script, the page's own once published, is driven at the end
+  await p.go(`${base}/labs/heptapod.html?script=ring`);
   p.check('the page comes up', await ready());
   await p.ev('document.getElementById("pod").scrollIntoView({ block: "center" })');
   await p.sleep(400);
   let g = await probe();
   p.check('the day starts at ring 0', (await ringNo()).includes('ring 0 of 40'), await ringNo());
-  p.check('the ring script by default', g.script === 'ring', g.script);
+  p.check('the ring script by its link', g.script === 'ring', g.script);
   // the first screen is the chamber: on a wide screen it starts under the bar and fills most of the viewport
   const box = await p.ev('(() => { const r = document.getElementById("pod").getBoundingClientRect(); return { top: r.top + scrollY, h: r.height, w: r.width, vh: innerHeight, vw: innerWidth }; })()');
   p.check('the chamber fills the first screen', box.h >= 0.55 * box.vh && box.top < 0.3 * box.vh, JSON.stringify(box));
@@ -375,7 +378,7 @@ export default async function heptapod(p, { base, width }) {
   p.check('the guess reaches the store', await p.until(`import('${base}/labs/assets/js/os/index.js').then((m) => m.LabsOS.instance && m.LabsOS.instance.progress.get('heptapod')).then((r) => JSON.stringify(r || {}).includes('the one who takes?'))`, 8000));
   await p.ev('window.scrollTo(0, 0)');
   await p.shot('05-notebook');
-  await p.go(`${base}/labs/heptapod.html`);
+  await p.go(`${base}/labs/heptapod.html?script=ring`);
   p.check('the page comes up again', await ready());
   p.check('the day survives a reload', (await ringNo()).includes('ring 7 of 40'), await ringNo());
   p.check('the guess survives a reload', (await p.ev('(document.querySelector(".nb-guess") || {}).value || ""')) === 'the one who takes?',
@@ -390,7 +393,7 @@ export default async function heptapod(p, { base, width }) {
   [name, t] = first(g, 'near');
   await p.drag(t.x, t.y, t.x, t.y - 0.11 * g.height, { steps: 10 });
   await p.sleep(300);
-  await p.go(`${base}/labs/heptapod.html`);
+  await p.go(`${base}/labs/heptapod.html?script=ring`);
   p.check('and it did not replace the kept day', (await ready()) && (await ringNo()).includes('ring 7 of 40'), await ringNo());
 
   await p.go(`${base}/labs/heptapod.html?species=0&at=evening`);
@@ -414,7 +417,7 @@ export default async function heptapod(p, { base, width }) {
   p.check('the notebook then outlines what each radical is used for', (await p.ev('document.querySelectorAll("#nb .nb-grid i.can").length')) > 0);
   await p.shot('08-done');
 
-  // the inked script: behind its switch, on by its link on this machine only (pod/inked.js)
+  // the inked script by its link (on this machine only while unpublished; pod/switch.js), on a species' own day
   await p.go(`${base}/labs/heptapod.html?species=0&script=inked`);
   p.check('an inked day comes up', await ready());
   g = await probe();
@@ -487,10 +490,36 @@ export default async function heptapod(p, { base, width }) {
     p.check(`C2: species ${k}'s being is whole in the frame`, b.x0 >= c.x0 - 1 && b.x1 <= c.x1 + 1 && b.y0 >= c.y0 - 1 && b.y1 <= c.y1 + 1, JSON.stringify(b));
     await p.shot(`15-species-${k}`);
   }
+  // the page's own script: inked once published (pod/switch.js), and then the visitor's kept day, the same day as in
+  // the ring script, kept in the store across a reload
+  {
+    const published = await p.ev(`import('${base}/labs/assets/js/heptapod/pod/switch.js').then((m) => m.SWITCH.published)`);
+    await p.go(`${base}/labs/heptapod.html`);
+    p.check('the page comes up in its own script', await ready());
+    await p.ev('document.getElementById("pod").scrollIntoView({ block: "center" })');
+    const g3 = await probe();
+    p.check("the page's own script follows the switch", g3.script === (published ? 'inked' : 'ring'), `${g3.script}, published ${published}`);
+    p.check('it is the kept day', (await p.ev('document.getElementById("preview").hidden')) && (await ringNo()).includes('ring 7 of 40'), await ringNo());
+    p.check('its greeting forms and can be cropped', await p.until('document.getElementById("pod").probe().crop', 8000));
+    await p.sleep(800);
+    await p.shot('17-own-script-greeting');
+    await p.ev('document.getElementById("pod").focus()');
+    const n0 = await entries();
+    await p.key('w');
+    await p.sleep(300);
+    p.check('W keeps a part of the greeting, in the notebook', (await entries()) === n0 + 1, `${n0} -> ${await entries()}`);
+    p.check('the part reaches the store', await p.until(`import('${base}/labs/assets/js/os/index.js').then((m) => m.LabsOS.instance && m.LabsOS.instance.progress.get('heptapod')).then((r) => !!r && r.data.entries.length === ${n0 + 1})`, 8000));
+    await p.go(`${base}/labs/heptapod.html`);
+    p.check('and comes back after a reload', (await ready()) && (await entries()) === n0 + 1, `${await entries()} entries`);
+    await p.shot('18-own-script-notebook');
+  }
   // the light tier taken in the middle of a crop does not drop it (on 2026-11-18 a tier switch went through the
   // resize handler, which drops a drag; the drive's own canvas reads slowed the frames enough at 1440 px). On the
   // last species' own day, so the kept day is not touched; the tier is taken as the page takes it, by 60 slow frames.
   {
+    await p.go(`${base}/labs/heptapod.html?species=2&script=ring`);         // the ring script: the crop below is at its foot
+    await ready();
+    await p.ev('document.getElementById("pod").scrollIntoView({ block: "center" })');
     p.check('a species greeting can be cropped', await p.until('document.getElementById("pod").probe().crop', 8000));
     const g2 = await probe();
     const cx = g2.ring.x, cy = g2.ring.y + g2.ring.R, h = 0.55 * g2.ring.R;
