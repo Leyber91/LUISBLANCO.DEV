@@ -44,7 +44,7 @@ export function keysHelp(script) {
     ? 'While a ring is in the disc, W, D, S and A each keep one of its parts, the same part in every ring.'
     : 'While a ring is in the disc, W, D, S and A keep its top, right, bottom and left part.';
   return {
-    hint: `Put the focus on the chamber. Left and Right choose a thing, Enter takes it. With a thing in the hand: Up holds it up at the glass, Down holds it up far from the glass, Enter sets it down on the plate it is over, G passes it through the glass. ${keep}`,
-    label: `The pod. Beyond the glass a being stands in the dark beside a disc of fog, where it writes; on this side, a tray with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. ${keep}`,
+    hint: `Put the focus on the chamber. Left and Right choose a thing, Enter takes it. With a thing in the hand: Up holds it up at the glass, Down holds it up far from the glass, Enter sets it down where it is held, G passes it through the glass. ${keep}`,
+    label: `The pod. Beyond the glass a being stands in the dark beside a disc of fog, where it writes; on this side, a table with six things. Arrow keys choose a thing and Enter takes it. With a thing in hand: Up holds it at the glass, Down holds it far from the glass, Enter sets it down, G passes it through the glass. ${keep}`,
   };
 }
