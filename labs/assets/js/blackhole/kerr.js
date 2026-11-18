@@ -184,6 +184,16 @@ export function hamiltonian(a, s, pt, q = 0) {
 }
 
 /** The step rule shared with the shader: affine step ~ distance to the horizon. */
+/** The steps a ray may take, by the camera's closeness to the horizon: a camera at 1.08 r+ starts every ray where the
+ *  steps are smallest, and with the tier's budget 8 to 11% of the frame ran out of steps while escaping and was drawn as
+ *  shadow (review_s5 2). Up to 4 times the budget brings that under 1% at every tier, the plate and the shadow's
+ *  measurement included, from the stop out to 3 M (row 12, measured 2026-11-18). STEP_LOOP_MAX is the shader's loop
+ *  bound (shaders.js MAXLOOP), so no pass asks for more steps than the GPU will take. */
+export const STEP_BUDGET_MAX = 4;
+export const STEP_LOOP_MAX = 2400;
+export function stepBudget(maxSteps, rcam, rh) {
+  return Math.min(STEP_LOOP_MAX, Math.round(maxSteps * Math.min(STEP_BUDGET_MAX, Math.max(1, 1.5 / Math.max(rcam / rh - 1, 1e-6)))));
+}
 export function stepSize(r, rh, k) {
   return k * Math.max(r - 0.92 * rh, 0.04) * clamp(r / 3, 0.45, 1.0) + 0.002;
 }

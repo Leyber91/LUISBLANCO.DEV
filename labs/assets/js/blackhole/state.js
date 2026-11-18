@@ -98,6 +98,11 @@ export class Store {
       // distance and field of view ease in log space so a zoom feels even
       this.shown[k] = (k === 'rcam' || k === 'fov') ? Math.exp(Math.log(a) + (Math.log(b) - Math.log(a)) * e) : a + (b - a) * e;
     });
+    // the camera on its way keeps the floor of the hole on its way (review_s5 1: from M87*'s stop the Primordial button
+    // took the eased camera to 0.93 r+, inside the horizon, for half a second; 5: a hovering camera eased up from
+    // 1.45 M)
+    const low = cameraFloor({ observer: this.s.observer, a: this.shown.a, q: this.shown.q });
+    if (this.shown.rcam < low) this.shown.rcam = low;
     if (t >= 1) this.anim = null;
     return true;
   }

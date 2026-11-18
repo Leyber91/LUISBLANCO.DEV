@@ -20,6 +20,7 @@
    ============================================================ */
 
 import { glslMark, glslConst, PHYSICAL, LAB, DIAG_EXPO, DRIFT_LIMIT } from './palette.js';
+import { STEP_LOOP_MAX } from './kerr.js';
 
 const header = `#version 300 es
 precision highp float;
@@ -129,7 +130,7 @@ uniform vec4 uCU, uCR, uCUp, uCF;   // observer frame covectors (t,x,y,z)
 uniform vec3 uCamPos;
 uniform float uREsc;
 uniform vec2 uOrigin, uStepX, uStepY, uJit;   // texel -> tangent-plane screen coordinates
-#define MAXLOOP 720
+#define MAXLOOP ${STEP_LOOP_MAX}   // the most steps any pass asks for (kerr.js stepBudget)
 void traceRay(vec2 frag, out vec4 G0, out vec4 G1, out vec4 G2){
   vec2 s = uOrigin + (frag.x + uJit.x)*uStepX + (frag.y + uJit.y)*uStepY;
   vec3 n = normalize(vec3(s, 1.0));

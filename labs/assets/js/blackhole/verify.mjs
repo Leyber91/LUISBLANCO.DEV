@@ -211,9 +211,36 @@ for (const k of [0.08, 0.12]) {
     }
     rows.push([name, over, flipsEdge, flipsOff]);
   }
+  // and the drift's own counts stay at most a quarter over what was measured (79 at min, 32 at low, none at mid and
+  // high, 2026-11-17): review_s5 4 found them printed and never asserted
+  const OVER_MAX = { min: 99, low: 40, mid: 0, high: 0 };
   ok(`the integrator's drift moves no ray of the shadow's edge at any tier (${edge.filter(Boolean).length} edge pixels of ${W * H}, M87* cinematic)`,
-    edge.filter(Boolean).length >= 100 && rows.every(([, , fe, fo]) => fe === 0 && fo <= 2),
+    edge.filter(Boolean).length >= 100 && rows.every(([, , fe, fo]) => fe === 0 && fo <= 2) && rows.every(([n, o]) => o <= OVER_MAX[n]),
     rows.map(([n, o, fe, fo]) => `${n}: ${o} over ${DRIFT_LIMIT}, ${fe} edge flips, ${fo} other`).join('; '));
+}
+
+/* 3d. at a fall's stop, rays that run out of steps are drawn as shadow: with each tier's budget near the horizon
+   (kerr.js stepBudget), under 1% of the frame is drawn black while the ray escapes or lands on the disk, at M87*'s stop
+   and at Cygnus X-1's (review_s5 2: with the tier's budget it was 8 to 11%; at the old 3 M stop, 0.5%). The reference
+   is k 0.01 with 20000 steps, 64 x 40 rays of the journey's camera (i 75, fov 70). */
+{
+  const { probeRay, screenToTangent } = await import('./probe.js');
+  const { TIERS } = await import('./config.js');
+  const W = 64, H = 40, rows = [];
+  for (const [name, a] of [['M87*', 0.94], ['Cygnus X-1', 0.998]]) {
+    const rh = K.horizon(a), view = { a, q: 0, incl: 75, rcam: 1.08 * rh, fov: 70, tilt: 0, observer: 'faller', rout: 20, emit: 'thick' };
+    const at = (n) => screenToTangent((n % W + 0.5) / W * 1440, (Math.floor(n / W) + 0.5) / H * 900, 1440, 900, view.fov);
+    const ref = [];
+    for (let n = 0; n < W * H; n++) { const { sx, sy } = at(n); ref.push(probeRay(view, sx, sy, { k: 0.01, maxSteps: 20000 }).fate); }
+    for (const [tier, t] of Object.entries(TIERS)) {
+      let wrong = 0;
+      const budget = K.stepBudget(t.maxSteps, view.rcam, rh);
+      for (let n = 0; n < W * H; n++) { const { sx, sy } = at(n); const r = probeRay(view, sx, sy, { k: t.k, maxSteps: budget }); if (r.maxed && ref[n] !== 'captured') wrong++; }
+      rows.push([name, tier, budget, wrong / (W * H)]);
+    }
+  }
+  ok(`at a fall's stop under 1% of the frame is drawn as shadow while its ray escapes or lands on the disk, at every tier (M87* and Cygnus X-1 at 1.08 r+)`,
+    rows.every((r) => r[3] < 0.01), rows.map((r) => `${r[0]} ${r[1]} (${r[2]} steps): ${(100 * r[3]).toFixed(2)}%`).join('; '));
 }
 
 /* 4. Schwarzschild numbers */

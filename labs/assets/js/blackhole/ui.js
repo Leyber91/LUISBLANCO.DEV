@@ -494,10 +494,10 @@ export function buildUI(app) {
     for (const [k, r] of Object.entries(rows)) {
       const v = s[k];
       if (document.activeElement !== r.num) r.num.value = r.d.log ? (+v).toPrecision(4) : (+v).toFixed(r.d.digits ?? 2);
-      if (document.activeElement !== r.rng) r.rng.value = r.d.log ? Math.log(v) : v;
-      // the camera's slider starts at the store's floor for this observer (ledger row 12), so it has no stretch the
-      // store would undo: 1.08 r+ for a faller, 3 M for a camera that is not falling
+      // the camera's slider starts at the store's floor for this observer (ledger row 12), set before the value so the
+      // thumb is not held at the old minimum (review_s5 7)
       if (k === 'rcam') { const lo = String(toRange(r.d, cameraFloor(s))); if (r.rng.min !== lo) r.rng.min = lo; }
+      if (document.activeElement !== r.rng) r.rng.value = r.d.log ? Math.log(v) : v;
     }
   }
 
@@ -632,6 +632,9 @@ export function buildUI(app) {
     stop() { this.playing = false; },
     tick(dt) {
       if (!this.playing || !this.rows) return;
+      // a camera that stopped falling (hover, orbit, another view) ends the fall, unrecorded (review_s5 3: the journey went
+      // on and recorded a fall at 3 M with a hovering camera)
+      if (store.get('observer') !== 'faller' || store.get('view') !== 'journey') { this.playing = false; return; }
       const total = this.rows[this.rows.length - 1].tau;
       // under reduced motion the finished frame at once (labs-design), so the fall still reaches its stop and the
       // record (review_s3 minor: it advanced at total / 1e9 per second and never arrived)
@@ -639,7 +642,9 @@ export function buildUI(app) {
       const row = this.rows.find((r) => r.tau >= this.tau) || this.rows[this.rows.length - 1];
       const rStop = Math.max(row.r, FALL_STOP * app.model.rh);
       store.set({ rcam: +rStop.toFixed(4), az: ((row.phi * 180 / Math.PI) % 360 + 540) % 360 - 180 }, { instant: true, src: 'journey' });
-      if (rStop <= FALL_STOP * app.model.rh + 1e-6) {
+      // done when the fall has reached the store's floor for a faller (state.js cameraFloor, one rule), read on the
+      // fall's own radius: the camera's is rounded to 4 decimals, 1.4485 against 1.448468, and never met it
+      if (row.r <= cameraFloor(store.all()) + 1e-6) {
         this.playing = false; this.done = true; app.request();
         if (this.by === 'visitor') keep.fall({ tau: fallRow(store.all()).tau * app.model.tg });
       }

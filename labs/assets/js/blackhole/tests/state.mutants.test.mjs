@@ -97,7 +97,7 @@ const MUTANTS = [
   ['the floor never applied', `    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`, ``],
   ['the floor applied only past it', `    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`, `    if (this.s.rcam < floor - 0.01) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`],
   ['a camera above the floor moved to it', `    if (this.s.rcam < floor) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`, `    if (this.s.rcam < floor + 1) { this.s.rcam = floor; if (!changed.includes('rcam')) changed.push('rcam'); }`],
-  ['view() reads the observer from the eased values', `observer: this.s.observer`, `observer: v.observer`],
+  ['view() reads the observer from the eased values', `rout: v.rout, observer: this.s.observer`, `rout: v.rout, observer: v.observer`],
 ];
 
 process.exit(await runMutants({ here, file: 'state.js', test: '../state.test.mjs', mutants: MUTANTS }));

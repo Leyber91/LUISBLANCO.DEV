@@ -393,5 +393,46 @@ guard('a named object is its catalogue\'s hole', () => {
   ok('a charged faller (a = 0, Q = 0.6) stops at 1.08 r+ of Kerr-Newman, 1.08 x 1.8 M', Math.abs(charged.get('rcam') - 1.08 * horizon(0, 0.6)) < 1e-9 && Math.abs(charged.get('rcam') - 1.944) < 1e-9, String(charged.get('rcam')));
 }
 
+/* review_s5: the floor holds on the eased camera, for every observer, after the charge gives way, and is reported */
+{
+  const { horizon } = await import('./kerr.js');
+  const { cameraFloor } = await import('./state.js');
+  const fallAt = (patch) => { const s = new Store(); s.set(s.preset('m87', 'journey'), { instant: true }); s.set(patch, { instant: true }); return s; };
+  // 1: from M87*'s stop, Primordial (a hole of 0 spin, r+ = 2): every frame of the ease keeps the eased camera at the
+  // eased hole's floor
+  const e = fallAt({ rcam: 1.2 });
+  e.set(e.objectPatch('primordial'), { dur: 1400 });
+  const t0 = e.anim.t0;
+  let worst = Infinity;
+  for (let ms = 0; ms <= 1400; ms += 25) { e.tick(t0 + ms); const v = e.view(); worst = Math.min(worst, v.rcam / cameraFloor({ observer: e.get('observer'), a: v.a, q: v.q })); }
+  ok('an ease from M87*\'s stop to Primordial keeps the eased camera at or above the eased floor on every frame (review_s5 1)', worst >= 1 - 1e-12, String(worst));
+  // 5: from the stop, a camera that stops falling eases up and never sits under 3 M on the way
+  const h = fallAt({ rcam: 1.2 });
+  h.set({ observer: 'zamo' }, { dur: 1400 });
+  const h0 = h.anim ? h.anim.t0 : 0;
+  let lowest = Infinity;
+  for (let ms = 0; ms <= 1400; ms += 25) { h.tick(h0 + ms); lowest = Math.min(lowest, h.view().rcam); }
+  ok('a camera that stops falling at the stop never sits under 3 M on its way up (review_s5 5)', lowest >= 3 - 1e-12, String(lowest));
+  // 6: an orbiter keeps 3 M; a lifted radius is reported as a change; the floor follows the charge after it gives way
+  ok('an orbiting camera keeps 3 M (review_s5 6)', fallAt({ observer: 'orbiter', rcam: 1.5 }).get('rcam') === 3);
+  const lift = fallAt({ rcam: 1.2 });
+  const changed = lift.set({ a: 0 }, { instant: true });
+  ok('a faller lifted by a change of spin reports its radius as changed (review_s5 6)', Array.isArray(changed) && changed.includes('rcam'), JSON.stringify(changed));
+  // charge and radius in one change: the charge gives way to the spin (0.5 to 0.335), and the floor is the hole's with
+  // that charge, 1.08 x 1.066 M; taken before, with 0.5, it would be 1.08 M
+  const gq = fallAt({});
+  gq.set({ q: 0.5, rcam: 1.0 }, { instant: true });
+  const qq = gq.get('q');
+  ok('the floor is the hole\'s after the charge gives way to the spin (review_s5 6)', qq < 0.5 && Math.abs(gq.get('rcam') - 1.08 * horizon(0.94, qq)) < 1e-9, JSON.stringify([qq, gq.get('rcam')]));
+}
+{
+  // review_s5 2: the step budget grows as the camera nears the horizon, by one rule, up to 4 times
+  const { stepBudget } = await import('./kerr.js');
+  // r / r+ of 2.5 and out: the tier's; 2: 1.5 times; 1.5: 3 times; 1.08: 4 times; never over the shader's 2400
+  const got = [2.5, 2, 1.5, 1.08].map((x) => stepBudget(100, x * 1.3412, 1.3412));
+  ok('the step budget is the tier\'s from 2.5 r+ out, then 1.5, 3 and 4 times it at 2, 1.5 and 1.08 r+, never over 2400 (review_s5 2)',
+    JSON.stringify(got) === '[100,150,300,400]' && stepBudget(46, 46, 1.3412) === 46 && stepBudget(720, 1.08 * 1.3412, 1.3412) === 2400 && stepBudget(599, 1.08 * 1.3412, 1.3412) === 2396, JSON.stringify(got));
+}
+
 console.log(fails ? `\n${fails} of ${checks} link check(s) failed` : `\nall ${checks} link checks passed`);
 process.exit(fails ? 1 : 0);
