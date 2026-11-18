@@ -42,7 +42,7 @@ import { GATE_SPECIES, makeSpecies, seedOf } from './species.js';
 import { ringSpec, soloSpec, recognise, sectorRect } from './ring.js';
 import { DAY, GREETING, newDay, doAct, addCrop, addSolo, dropEntry, setGuess, raiseMark, endDay, answer, score, validDay, whereIs, dayOver, carry } from './day.js';
 import { initPod } from './scene.js';
-import { scriptOf, keysHelp } from './switch.js';
+import { SWITCH, scriptOf, keysHelp } from './switch.js';
 import { mountNotebook } from './notebook.js';
 import { mountPanel } from './panel.js';
 
@@ -55,8 +55,10 @@ const wantSpecies = /^[0-2]$/.test(q.get('species') || '') ? Number(q.get('speci
 const preview = !!at;
 let script = scriptOf();
 let inked = null;                                   // pod/inked.js, fetched only when the inked script is on
-// a link that picks the species, or the unpublished inked script: played, never stored, so it cannot replace a kept day
-const trial = !preview && (wantSpecies != null || script === 'inked');
+// a link that picks the species, or the inked script while unpublished: played, never stored, so it cannot replace a
+// kept day. Once published, a day in either script is the visitor's own day (both read the same record of acts).
+const unpublished = script === 'inked' && !SWITCH.published;
+const trial = !preview && (wantSpecies != null || unpublished);
 const kept = !preview && !trial;
 const speciesIndex = (s) => GATE_SPECIES.findIndex(([a, b]) => a === s[0] && b === s[1]);
 
@@ -236,7 +238,7 @@ function mount() {
   const keysHint = document.querySelector('.keys .hint');
   if (keysHint) keysHint.textContent = keysText.hint;
   $('preview').hidden = kept;
-  $('preview-what').textContent = preview ? 'This is a recorded day, replayed from a seed.' : script === 'inked' ? 'This day is written in the inked script, which is not published yet.' : 'This day was opened from a link that picks the species.';
+  $('preview-what').textContent = preview ? 'This is a recorded day, replayed from a seed.' : unpublished ? 'This day is written in the inked script, which is not published yet.' : 'This day was opened from a link that picks the species.';
   $('unkept').hidden = !kept || !!(os && os.storage.persistent);
 }
 
