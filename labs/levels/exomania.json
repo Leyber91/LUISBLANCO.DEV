@@ -357,7 +357,8 @@
     { "gen": "G0", "date": "2026-11-11", "by": "ladder audit, revised after adversarial review", "commit": "cd1e9f7" },
     { "gen": "G1", "date": "2026-11-11", "by": "independent rater", "commit": "fa98fbd" },
     { "gen": "atlas", "date": "2026-11-16", "by": "single rater, two skeptic passes", "commit": "c942fc9" },
-    { "gen": "atlas", "date": "2026-11-17", "by": "single rater, two skeptic passes", "commit": "832ffad" }
+    { "gen": "atlas", "date": "2026-11-17", "by": "single rater, two skeptic passes", "commit": "832ffad" },
+    { "gen": "atlas", "date": "2026-11-18", "by": "single rater, two skeptic passes, delta from the grade at 832ffad", "commit": "fac56e3" }
   ],
   "atlas_grades": [
     {
@@ -616,6 +617,149 @@
         }
       ],
       "not_checked": "No model route was called, so intelligence 2.1 to 2.4 are read from the code. The surface and low-pass views, the radial-velocity switch, the device location and a shared log link opened in a fresh profile were not driven by the rater; they are counted from the code and the drives named. Only headless Chrome with software GL was used: no GPU, no real phone. No citation was checked at its source. The style gates and the platform block were not counted; the style gates cap only rungs above 4."
+    },
+    {
+      "date": "2026-11-18",
+      "by": "single rater, two skeptic passes, delta from the grade at 832ffad",
+      "commit": "fac56e3",
+      "atlas": 3,
+      "scale": "labs/levels/atlas.json version 3: product and subject levels are each min(lower median of the axis rungs, weakest axis + 2) and never above the scope level; the lab level is the lowest of product, subject and scope.",
+      "previous": "2026-11-17 at 832ffad (pull request 58, merged as 4ce4659): product 1, subject 2, scope 2, lab 1.",
+      "basis": "origin/main at fac56e3 (pull request 78), 22 commits after 832ffad, among them the lab's pull requests 59 (ranges from both sides of each interval), 60 (the regrade's cheapest rungs), 64 and 66 (drives), 72 (a gas giant seen by its own heat named so) and 78 (the life view), and the shared tools of 61 and 65. Graded in the worktree _labs_wt/_grade_exo on the branch labs/exomania-grade-1118, whose tree is fac56e3. Read whole: git diff 832ffad fac56e3 over labs/exomania*.html, labs/assets/js/exoplanet, labs/assets/data/exomania (no change), labs/assets/css, kit/format.js and the lab's drives; life.js and views/life.js in full; the lab's science ledger, section \"The life view\" (render_science.md in the lab's plan folder). Run: the 41 test files under labs/assets/js/exoplanet, each from its folder with a 120 s limit, in six slices: 41 passed, 0 failed (query.mutants.test.mjs passed alone in 79 s after running past 120 s once in a slice; node tools/lab_tests.mjs exoplanet as one command did not finish inside the rater's 540 s limit and was stopped in routes.mutants.test.mjs, which then passed alone). Drives through tools/labs-wt.mjs on this tree, headless Chrome with software GL, console clean in each: tools/drives/life.mjs 16 of 16 at 1440x900 and at 390x844, and the rater's own scenario 32 of 32 at both widths (the air article's skip link, fonts, focus on load and reduced motion; the sky's place line set to −33.87, −70.65, its full table of 1,066 altitudes, the clocks of GJ 436 b and Kepler-37 b and their dips; the Method's first paragraph and its keys; the life sheet with life on for Kepler-442 b, TOI-700 d, TRAPPIST-1 e, LHS 1140 b, HD 209458 b, K2-18 b and Proxima Cen b, each pictured as the sheet and as the world). The numbers of Kiang et al. 2007 Tables 2a and 3 were read in the arXiv draft (astro-ph/0701391); the venues of Kiang et al. 2007 (Astrobiology 7, 252, doi 10.1089/ast.2006.0108) and Takizawa et al. 2017 (Sci. Rep. 7, 7561, doi 10.1038/s41598-017-07948-5) were confirmed in PubMed.",
+      "bindings": "Graded against the bindings declared in the lab's plan on 2026-11-13, as on 2026-11-16 and 2026-11-17 (canon PSCompPars snapshot of 2026-11-11; 11 units in two tracks; a fiction inventory of 23 entries, exo-f1 to exo-f23; record kinds configurations, observations, predictions and notes; the central scene the descent). No entry of the inventory names life on a planet, so the life view adds nothing to fiction; Overdue's working parts are still in no entry (ticket 1.05).",
+      "na": {},
+      "levels": {
+        "product": 1,
+        "subject": 2,
+        "scope": 2,
+        "lab": 1
+      },
+      "grade": {
+        "orientation": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch labs/exomania.html, the sky's first screen or its failure states (overdue/main.js lines 489 to 490 still end \"Reload to try again.\"); its changes to overdue/main.js are the minus sign and the decimals of numbers. As graded at 832ffad: 1.1 and 1.2 hold: labs/exomania.html opens the sky of clocks, with a launcher to the survey (\"the survey of every planet\", \"the planets\" at 390 px) and a labelled \"today\". 2.1 holds: the sky ignites to today with the count drawn (\"388 of 4,729 transit clocks are lost today\"). 2.2 fails: the first screen at 1440 and at 390 px holds the skip link, the labs link, the launcher, the line of time, \"today\" and the site's sharing question, and its words are the title, the two-line thesis and the count; nothing names one next action (rater's scenario; ticket 2.07 is not built). 2.3 fails: the failure states name an action and link nowhere (overdue/main.js lines 488 to 489, \"Reload to try again.\"; main.js line 956, \"The catalogue did not load. Check the connection and reload.\"), and the log's empty lists name the first action with no link (log.js draw, \"Nothing saved yet. Open a world and press “Add to log”, under its numbers.\")."
+        },
+        "lessons": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch anything lessons read: labs/exomania-air.html gains a skip link, a font link that does not block and a focus rule, and is still markup written by hand; no unit page or worked example is added. As graded at 832ffad: 1.1 fails: no page of text is rendered from a source through sanitised Markdown or an equivalent. New since the last grade, labs/exomania-air.html (pull request 41) is an article typed as HTML that says how the survey decides which rocky worlds keep air, linked from the plate (main.js line 320, panels.js chainHTML); its numbers are checked against air.js by tests/air.page.test.mjs, but it is markup written by hand, not text rendered from a source, and it explains the page's own method for one unit (exo-u11), as the Method dialog does. 1.2: no worked example runs on the instrument. Rung 2: no units, modules, track page or pager (ticket 2.06 not built)."
+        },
+        "tutoring": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch anything a visitor answers: none is added. As graded at 832ffad: 1.1 fails: nothing the visitor answers is checked on either room. The round (tickets 2.03 and 2.04) is not built; record.js types a Prediction that nothing writes."
+        },
+        "practice": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch any exercise: none is added. As graded at 832ffad: 1.1 fails: no exercise exists (tickets 2.03 and 2.04 not built)."
+        },
+        "missions": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch any task: none is added. As graded at 832ffad: 1.1 fails: no task states a goal and its material."
+        },
+        "evidence": {
+          "level": 0,
+          "evidence": "Carried: the diff does not touch record.js or log.js; the life switch and a red dwarf's reading are kept only in the address (main.js writeURL, life=a or life=b), never in the record. As graded at 832ffad: 1.1 still fails. Visits are now stored with their time and way in both rooms: a clock opened on the sky is a visit with the way \"sky\" and the day the sky was at (record.js visit; record drive P8 at both widths: {\"name\":\"KELT-9 b\",\"via\":\"sky\",\"n\":1,\"at\":\"2031-03-12\"}), and saves keep their time and view. Still not stored: the questions a visitor asks the catalogue (main.js runQuestion keeps nothing; a tour of a question's list is kept only as the way \"from a question\"), and pins, which are kept as names with no time (record.js Log.pins is string[]; pin). Which control opened a clock on the sky (the map, the lens, the tonight table, the picker) is still one way, \"sky\". 2.1 fails: no state per unit."
+        },
+        "progress": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch record.js or log.js. As graded at 832ffad: 1.1 holds: the log line reads \"Log: N visited, M saved\" (record.js lineWords; \"Log: 19 visited, 3 saved\" from a seeded record in the record drive, at both widths). 2.1 to 2.4 fail: the lab has no sessions, so none is listed, and there is no streak, no activity calendar and no recent sessions on the entry view (ticket 2.05 not built)."
+        },
+        "material": {
+          "level": 1,
+          "evidence": "Re-read, unchanged at 1. 2.1 still fails: the Method text (panels.js methodHTML, rewritten by pull requests 59, 60 and 78) and the tours are code, and the life view adds its cases as a table in code (life.js CASES, from Kiang et al. 2007 Tables 2a and 3). 2.4 still fails: a catalogue that does not load is still met with \"The catalogue did not load. Check the connection and reload.\" (main.js line 986) and no last good version is kept. 1.1, 2.2 and 2.3 hold as at 832ffad: the catalogue and the ephemerides are data files precomputed by build_snapshot.py and build_ephemerides.py (labs/assets/data/exomania, unchanged by the diff), and the retrieval date shows at 1440."
+        },
+        "records": {
+          "level": 2,
+          "evidence": "Carried: the diff does not touch record.js, its contract test or any write to the record. As graded at 832ffad: Raised from 1 by slice A (pull request 49). 2.1 holds: record.js (// @ts-check) types the four kinds the bindings list, with KINDS saying where each lives: configuration (SkyView, SavedView, the pins, Seen), observation (Visit; Measure and Find with no writer yet), prediction and note (typed, no writer yet); tsc --strict checks it in the gates' labs build (labs-src/tsconfig.labs.json extends the strict tsconfig.json), and the gates passed on this tree's pull request run. The saved view types its stage (orbit, close orbit, surface) and not the camera, filters, albedo or orbital time the bindings' configuration names: the kind is covered, its fields are fewer. 2.2 holds: read, load, update, seeCatalogue and health in record.js are the only reads and writes of the lab's record, used by log.js and overdue/main.js; record.contract.test.mjs (49 checks) fails on any other store access in either room. 2.3 holds: every write is checked on arrival, and a name the room's catalogue lacks, a time that is not a positive number, a way the lab does not have, a sky day off the line of time, a place off the globe, and a 201st saved world are refused with the reason (visit, save, pin, setOverdue, which now checks the planet against the sky's catalogue, see). 2.4 holds: health() reports the version written, the version stored, the store and that nothing is synced, and the log's last words say it: \"This page writes version 3 of the record, and the stored record is version 3. No copy is synced to another device.\" (record drive P7 and the rater's scenario, at both widths). 3.1 fails: actions append no typed event log (visits and saves are usage events only with recording on, and a pin or a take-out is none). 3.6 fails: no derived digest."
+        },
+        "interface": {
+          "level": 1,
+          "evidence": "Regraded, held at 1, now by 2.4 alone. 1.1 holds. 2.1 now holds: labs/exomania-air.html loads its Google Fonts stylesheet with media=\"print\" swapped to all on load and a noscript fallback (pull request 60, lines 12 and 13), as the sky and the survey do; the rater's scenario read media \"all\" on the article at both widths. 2.2 holds: the life sheet is styled from tokens (exoplanet.css, the .life rules); the hue table in views/life.js (HUES) draws a wavelength's colour on the spectrum strip, a colour of the data as the star's is, not one of the palette. 2.3 holds: the life switch is the kit's switchCtl beside the clouds and instruments switches; the readings' keys are the instrument's own buttons. 2.4 fails again, on the new sheet: kit/format.js groups digits by thousands with a comma and the sheet's words use it (life.js int: \"peak at 1,043 nm\", \"from 400 to 1,100 nm\"), while the strip drawn above them writes raw numbers (views/life.js strip: the tick \"1100 nm\" on every strip, and \"its light peaks at 1043 nm\" through Math.round for an M5V case), seen on LHS 1140 b at 1440 and at 390 px. The earlier failure is closed: the sky's place line and every one of its 1,066 altitudes write the minus sign (\"over −33.87°, −70.65°\", \"−72° to −62°\"; kit fixed and int), and a clock's mid-transit and period keep the decimals their error needs by the kit's one documented exception (kit measured: \"Mid-transit 2,454,238.479958 ± 3.4 s, period 2.64389788 d ± 8.6 ms\" for GJ 436 b); a dip below 0.01 % is said in ppm (\"a dip of 12 ppm\", Kepler-37 b)."
+        },
+        "reach": {
+          "level": 2,
+          "evidence": "Raised from 1. 1.1 holds. 2.1 holds: the three pages restack at 390 px and none scrolls sideways, the life sheet included (rater's scenario: scrollWidth 390 of 390 on the article and on each of seven worlds with life on; the life drive at 390). 2.2 holds: under emulated reduced motion the article runs no animation (0 running), the life sheet adds no transition or animation, and the sky's and the survey's global rules are unchanged (overdue.css, exoplanet.css). 2.3 holds: tokens.css draws the focus ring, and the readings' keys keep a ring of their own (exoplanet.css button.life-sw:focus-visible). 2.4 now holds: the article on air has \"Skip to the article\" (labs/exomania-air.html line 19); the first Tab lands on it and Enter moves the focus to the article (main#air, tabindex -1) at both widths, as the sky's and the survey's skip links do. 3.1 fails: on arriving at any of the three pages with no hash the focus stays on the body (rater's scenario: document.activeElement BODY on the article, the sky and the survey at both widths), and the lab's way from a clock to its world, \"See this planet as a world\", is such an arrival. 3.2 to 3.4 hold as read: the kit's scale takes the arrow keys (kit/controls.js bindScale), the survey's single keys wait while a field has the focus or a dialog is open (main.js bindKeys), and the Method's table lists the keys."
+        },
+        "engineering": {
+          "level": 1,
+          "evidence": "Re-read, unchanged at 1. 2.1 fails: main.js grows to 1,088 lines and still holds the filter predicate, the URL sync, the tours, the compare bench and the opening, now with the life view's wiring. 2.3 fails: life.js declares // @ts-check, but labs-src/tsconfig.labs.json still includes record.js alone, so no other module is typed at its boundary by tsc. 2.6 fails: still no .gitattributes at the repository root. 1.1 holds: each page runs from its URL and the lab's 41 test files pass (basis). 2.2 and 2.4 hold as at 832ffad."
+        },
+        "fiction": {
+          "level": 3,
+          "evidence": "Regraded, held at 3. 3.1 holds by the same 12 of 23 inventory entries as at 832ffad (f1, f2, f3, f4, f5, f6, f7, f10, f12, f13, f14, f23, 52%): the diff touches none of the views they run on but the render, whose shader changes only the plant cover, 0 unless the life switch is on (exoplanet.js landColor; views/system.js, views/transit.js and views/plot.js unchanged), and pull request 72 renames 97 giants seen by their own heat without changing what is drawn. The life view runs from the visitor's choice of world, air scenario and reading, but no entry of the inventory names life, so it adds no entry. 4.1 fails: 80% would be 19 entries."
+        },
+        "fidelity": {
+          "level": 2,
+          "evidence": "Regraded, held at 2. 2.1 and 2.2 hold, and the life view adds a mechanism whose formulas sit in the source (life.js caseOf, whereOf, scenariosOf, lifeOf; science.js reflectanceColour), checked by life.test.mjs (50 checks) and its mutants (62 and 7). Its table is the paper's: peak 450.8, 668.5, 666.6, 754.3 and 1,042.8 nm, PAR 400 to 700 nm at noon 16.4, 11.0, 11.5, 6.1 and 1.5, UV-B 0.049, 0.018, 0.015, 0.001 and 0.000 (Table 2a, 1 PAL columns), GPP 0.85, 0.72, 0.61, 0.33 and 0.08, and 0.81 and 0.59 for 400 to 1,100 nm at 1.5 times the quanta (Table 3), each read by the rater in the arXiv draft. 3.1 fails as before: the cosmos line asks for a published transit model, and the transit is still the page's numerical integration of quadratic limb darkening (the Method: \"integrated numerically over the planet's disc\"); Kiang et al. 2007 is a published model with its venue, but not that one. 3.3 fails: \"Dec +60\" with no degree sign (views/plot.js line 413, unchanged). 3.5 fails: the discoveries bar for 2026 is still drawn as a full year (views/plot.js drawTimeline, unchanged)."
+        },
+        "graphics": {
+          "level": 2,
+          "evidence": "Regraded, held at 2. 2.1 holds; with the switch on, the render's land takes the chosen reading's colour and amount (exoplanet.js landColor, uPlant and uLife), and the life drive read the values uploaded to the planet's program against the swatch, 16 of 16 at both widths. 3.2 fails: the system view's star glow encodes no value (views/system.js line 242, unchanged). 3.3 fails: the star field is hashed noise (exoplanet.js starField, unchanged) in no region tagged [ILLUSTRATIVE]; the new cover is tagged illustrative on the sheet. 3.4 fails: the instruments still assemble on load with staggered delays that mark no state (exoplanet.css lines 415 to 416, unchanged)."
+        },
+        "interaction": {
+          "level": 2,
+          "evidence": "Regraded, held at 2. 2.1 holds: the life switch and a red dwarf's reading keys redraw the sheet and the cover at once with no submit (life drive, both widths), beside the line of time and the albedo and star-elevation controls. 3.1 fails: the sky's tip and the diagram's tip still open on hover inside their own section, close when the pointer leaves, do not pin and do not open on keyboard focus (overdue/main.js sky-tip; views/plot.js showTip, unchanged)."
+        },
+        "intelligence": {
+          "level": 1,
+          "evidence": "Carried: the diff does not touch report.js, query.js, the route panel or the assist; find.js changes only which planets the search gives a temperature to. As graded at 832ffad: 1.1 holds: report.js and query.js produce the survey note and the reading of a question with no model; the sky uses none. 2.1 to 2.4 hold by the code: one LLM.complete call per press, the route panel mounted, the page's note as the fallback, the assist opened only by the visitor. 2.5 fails: the gold at rest is gone (\"ask the model about this world\" is now a .plain text button, report.js line 117), but nothing on it or beside it tells the visitor when the model has something to say; it reads the same for every world. No model was called."
+        },
+        "explanation": {
+          "level": 1,
+          "evidence": "Regraded, held at 1. 1.1 holds. 2.3 fails anew. Pull request 60 rewrote the Method's first paragraph: \"The numbers on this page come from the NASA Exoplanet Archive, from the papers it cites (among them the observations of rocky worlds' air), from NASA's planetary fact sheet for the Solar System, or from a published model applied to them in your browser. Five choices are the page's own, each named as such where it is used below: the log-uniform prior on a forecast mass, the line between thin and thick air, the 1,200 K at which a surface is drawn molten, the 750 K above which a world gives its own light, and the Earth-likeness score.\" The same dialog names a sixth below it: \"[ILLUSTRATIVE] The draws read an archive interval as its 16th to 84th percentiles about the value, with a log-normal shape on each side: this page's choice\" (pull request 59, panels.js methodHTML; both read on the running page at both widths). And with the life switch on, the page prints numbers (\"covers 66% as much as on Earth\", \"reflects 13% of white light\", \"0.82× Earth\") that the life sheet tags as its own rules on top of the papers, from none of the sources the sentence lists. The statement about the code is false by its count. The earlier half of the finding stays closed. The life sheet itself is honest: it opens \"No life is known on any planet but Earth. These are rules applied to this planet's numbers, not observations.\", and its footer tags the papers' values [REAL] and every rule on top of them [ILLUSTRATIVE] (views/life.js drawLife). Not counted, uncertain: life.js band() calls the F2V case's 450.8 nm peak \"in the violet\", where Kiang et al. 2007 put that star's pigments in the blue."
+        }
+      },
+      "scope": {
+        "level": 2,
+        "organs": [
+          "the sky of clocks (Overdue sheets a, b and d: the clock of each transiting planet at a date the visitor sets, the one clock read, the tally)",
+          "tonight (Overdue sheet c: the transits up in the dark over the visitor's place in the next 24 hours; keeps the place)",
+          "the catalogue explorer (the survey's diagrams, filters, ranges, replay and the question that sets them)",
+          "the world (the survey's render, sheet B, the inference chain, the ground view, the system and signal views, the survey note, exports, the log and the compare bench)"
+        ],
+        "instrument": "Under the declared bindings, whose central scene is the descent, the world; under the chosen concept, the sky of clocks. Neither choice changes the level: level 3 fails on the organ count.",
+        "links": [
+          "the world to the catalogue explorer, shows: the worlds saved in the log are what the \"Your log\" filter computes from (main.js, log.saved)",
+          "tonight to the sky of clocks, steers: each row of the night, computed from the visitor's place, opens that planet's clock (overdue/main.js renderTonight)",
+          "the sky of clocks to the world, steers: \"See this planet as a world\" carries the planet the visitor opened (overdue/main.js describeStar, c-world)"
+        ],
+        "reach": "Unchanged: every one of the 11 units is worked on by at least one organ, reach 1.0 at one organ per unit. The life view works on no unit the world did not already (exo-u8, exo-u9 and exo-u10 through the starlight, the zone and the star).",
+        "evidence": "Level 2 holds: 4 organs (3 needed), 3 links (1 needed), reach 1.0 (0.25 needed). Level 3 fails on the organ count: it needs 5 joined organs and the graph has 4. The life view is no new organ: it computes from the world on sheet A and the visitor's air scenario, keeps only a view option in the address (the switch and a red dwarf's reading), and draws its cover on the world's own render, so it is the world's panel, as sheet B, the inference chain and the ground view are. It adds no link: what it reads is the shared selection, and no organ reads it (the log and the record keep nothing of it). Counted as an organ, it would stand outside the joined graph and count for nothing at level 3."
+      },
+      "skeptic": [
+        {
+          "axis": "interface",
+          "from": 2,
+          "to": 1,
+          "pass": "the letter of the clause",
+          "why": "The rater's first reading raised interface to 2 once the sky's hyphens, its five decimals and the article's blocking font link were closed. interface.2.4 asks for one convention for numbers, and the life sheet's strip writes \"1100 nm\" and \"1043 nm\" beside words that write \"1,100\" and \"1,043\" by the kit. Lowered to 1."
+        },
+        {
+          "axis": "explanation",
+          "from": 2,
+          "to": 1,
+          "pass": "the letter of the clause",
+          "why": "The rater's first reading took pull request 60's new first paragraph as closing explanation.2.3. Read literally, it counts five choices of the page's own while the same dialog names a sixth (the log-normal draws) and the life sheet adds its own rules. Lowered to 1."
+        },
+        {
+          "axis": "reach",
+          "pass": "does it run, held",
+          "why": "Tried to keep reach at 1. The article's skip link is the first Tab stop and Enter moves the focus to main#air at 1440 and 390; the life sheet kept 390 of 390 on seven worlds and the console was clean. reach.3.1 read literally fails (the focus stays on the body on arrival), so reach stops at 2."
+        },
+        {
+          "axis": "interface",
+          "pass": "the letter of the clause, held",
+          "why": "interface.2.2 holds although views/life.js types a table of rgb hues: they colour the spectrum strip by wavelength, a colour of the data like the star's computed colour, which the 832ffad grade already set apart from the palette."
+        },
+        {
+          "pass": "the life view against its ledger",
+          "why": "No rung moves. Every rule the sheet states is tagged: the footer marks the cases' light, UV-B and productivity and the habitable zone [REAL] and the scaling by this planet's starlight, the colour, the cover, the sentences and reading b [ILLUSTRATIVE]; the page says \"No life is known on any planet but Earth.\" The code applies each rule as render_science.md states it (the nearest case in temperature with a tie to the hotter, the boundaries 6,296, 5,396, 4,335 and 3,375 K, the cover as GPP over the Sun's 0.72 times S capped at 1, a sparse desert's cover 0, the ice at asin(iceCap) or 2 asin(iceCap) with the day side under 90°, the shader's 35% cover on dry ground), with one gap: L4 states bands at the peak and at 440 nm, and for the F2V case scenariosOf takes them at the peak (450.8 nm) and at 680 nm with depth 0.6, a band the ledger does not name. On the sheet, \"Kopparapu et al. 2013\" carries no venue (the Method's reference carries ApJ 765, 131). Neither changes a rung up to the levels given."
+        },
+        {
+          "pass": "does it run",
+          "why": "No axis lowered on this lens. Every page loaded with a clean console at 1440 and 390 px in both drives, and all 41 test files pass when each is given its own run."
+        }
+      ],
+      "not_checked": "No model route was called, so intelligence 2.1 to 2.4 are read from the code. Of the lab's drives only life.mjs was run on this tree, beside the rater's scenario; the record, exomania, shapes, log, search and planets drives were not run again, and the carried axes rest on the 832ffad grade's drives and on the diff. node tools/lab_tests.mjs exoplanet did not complete as one command inside 540 s; its 41 files were run in slices instead. A thin-air desert inside the habitable zone (the sparse case) was not opened in the browser; the snapshot has none. Takizawa et al. 2017 was read in its PubMed abstract, not in full, so its \"red edge near 700 to 760 nm\" is not confirmed at the source; Kiang et al. 2007 was read in the arXiv draft, not the published pages. Only headless Chrome with software GL was used: no GPU, no real phone. The style gates and the platform block were not counted."
     }
   ]
 }
