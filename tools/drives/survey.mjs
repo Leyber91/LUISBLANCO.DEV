@@ -5,19 +5,24 @@
    the page's main thread until the GPU process has compiled it, and no frame comes back meanwhile. Measured on
    2026-11-18 at 390 px in headless Chrome drawing in software (_reference/labs/process/scripts/stall_still.mjs, seed 1,
    main e01282d): the first build of a look held the page 2.4 to 5.7 s and its frame came 1.7 to 5.0 s late, the
-   first look at load 8.7 to 10.4 s, the ground program 38 s. Under load those builds outlast the drive's 6 tries of
-   5 s at a frame, which was the stall of the log and shapes drives ("a frame came back ... none within 6 tries").
-   Chrome keeps a built program for every later document of the same Chrome: on a second load the same looks took
-   under 160 ms, and the page was ready in 426 ms instead of 9.5 s. Without ?still the page builds in the background
-   and held its main thread for no second at all (the same seed, frames in 54 to 94 ms).
+   first look at load 8.7 to 10.4 s; the ground program, started with the seven looks, was ready after 38 s. The
+   stalls of the log and shapes drives ("a frame came back ... none within 6 tries" of 5 s) fell at the same steps
+   as the frames main's drives lost with each try cut to 0.4 s, so they are taken to be these builds slowed past 30 s
+   by a loaded machine: inferred, since no build under load was timed. Chrome keeps a built program for a later
+   document of the same Chrome: on one reload the same looks took under 160 ms, and the page was ready in 426 ms
+   instead of 9.5 s (how many programs it keeps, and for how long, is not known). Without ?still the page builds in
+   the background and held its main thread for no second at all (the same seed, frames in 54 to 94 ms).
 
    So a survey drive builds the programs first, in a document of its own on a fixture store (nothing of the visitor's
    own store is read or written), before any rule judges a frame, and says how long that took. A drive with a guard on
    what the page may fetch installs the guard first, so that document is under it too. The drives that call this are
-   the ones that open the survey with ?still while frames are judged: log, shapes, search, orbit and record (planets
-   draws every look on its sheet first; air opens the survey live, where nothing waits, and exomania opens it with
-   ?still once, on a world a live visit just before has built).
-   seedRandom makes "Another world" open the same worlds on every run, so a failure can be run again: it replaces
+   the ones that open the survey with ?still while frames are judged and change its world: log, shapes, search, orbit
+   and record. planets opens it with ?still only on Kepler-442 b, whose look its sheet draws first, and on the ground,
+   which its live landing before has waited for; air opens it live, where nothing waits. exomania opens it with ?still
+   once, on WASP-12 b after a live visit that waits for the world's note and not for its build, so it is exposed to a
+   build still running when the page leaves (ticket 2.22b).
+   seedRandom makes "Another world" open the same worlds on every run from the same state (its pool takes in the
+   weekly roster once that has joined), so a failure can be run again: it replaces
    Math.random in every document with the kit's mulberry32. Labs OS makes its ids with crypto, so the seed reaches the
    survey's random pick (main.js randomWorld) and nothing else of the lab. */
 import { mulberry32 } from '../../labs/assets/js/kit/rng.js';
