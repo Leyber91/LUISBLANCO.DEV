@@ -11,13 +11,13 @@
   },
   {
     "name": "lock: giving back removes another's lock",
-    "from": "if (named === process.pid) fs.rmSync(file, { force: true });",
+    "from": "if (named === process.pid && held.t === since) fs.rmSync(file, { force: true });",
     "to": "fs.rmSync(file, { force: true });"
   },
   {
     "name": "lock: giving back keeps its own lock",
-    "from": "if (named === process.pid) fs.rmSync(file, { force: true });",
-    "to": "if (named !== process.pid) fs.rmSync(file, { force: true });"
+    "from": "if (named === process.pid && held.t === since) fs.rmSync(file, { force: true });",
+    "to": "if (named !== process.pid && held.t === since) fs.rmSync(file, { force: true });"
   },
   {
     "name": "lock: a lock that cannot be written waited for",
@@ -646,33 +646,33 @@
   },
   {
     "name": "lock log: a give-back writes no line",
-    "from": "        lockEvent(file, 'release', { since, named });\n",
+    "from": "        lockEvent(file, 'release', { t: at, since, named });\n",
     "to": ""
   },
   {
     "name": "lock log: a give-back does not name the hold it ends",
-    "from": "lockEvent(file, 'release', { since, named });",
-    "to": "lockEvent(file, 'release', { named });"
+    "from": "lockEvent(file, 'release', { t: at, since, named });",
+    "to": "lockEvent(file, 'release', { t: at, named });"
   },
   {
     "name": "lock log: a give-back names this process, whoever the lock named",
-    "from": "lockEvent(file, 'release', { since, named });",
-    "to": "lockEvent(file, 'release', { since, named: process.pid });"
+    "from": "lockEvent(file, 'release', { t: at, since, named });",
+    "to": "lockEvent(file, 'release', { t: at, since, named: process.pid });"
   },
   {
     "name": "lock log: a stale takeover writes no line",
-    "from": "      lockEvent(file, 'stale', { holder: holder && holder.pid, since: holder && holder.t, age });\n",
+    "from": "      lockEvent(file, 'stale', { t: at, holder: holder && holder.pid, since: holder && holder.t, age });\n",
     "to": ""
   },
   {
     "name": "lock log: a stale takeover does not name the gone holder or its hold",
-    "from": "lockEvent(file, 'stale', { holder: holder && holder.pid, since: holder && holder.t, age });",
-    "to": "lockEvent(file, 'stale', { age });"
+    "from": "lockEvent(file, 'stale', { t: at, holder: holder && holder.pid, since: holder && holder.t, age });",
+    "to": "lockEvent(file, 'stale', { t: at, age });"
   },
   {
     "name": "lock log: the takeover of an empty lock throws while it writes its line",
-    "from": "lockEvent(file, 'stale', { holder: holder && holder.pid,",
-    "to": "lockEvent(file, 'stale', { holder: holder.pid,"
+    "from": "lockEvent(file, 'stale', { t: at, holder: holder && holder.pid,",
+    "to": "lockEvent(file, 'stale', { t: at, holder: holder.pid,"
   },
   {
     "name": "lock log: a give-up writes no line",
@@ -770,14 +770,14 @@
     "to": "if (op === 'stale')"
   },
   {
-    "name": "reader: every give-back read as one of a lock still its own",
-    "from": "end: e.named === e.pid ? 'given back'",
-    "to": "end: true ? 'given back'"
+    "name": "reader: a give-back that found the lock already gone read as a plain one",
+    "from": ": e.named === e.pid ? 'given back' :",
+    "to": ": true ? 'given back' :"
   },
   {
-    "name": "reader: a give-back read as the lock passed on when it was not, and the other way",
-    "from": "end: e.named === e.pid ? 'given back'",
-    "to": "end: e.named !== e.pid ? 'given back'"
+    "name": "reader: a give-back read as the lock taken by another when it was not, and the other way",
+    "from": "Number.isInteger(e.named) && e.named !== e.pid;",
+    "to": "Number.isInteger(e.named) && e.named === e.pid;"
   },
   {
     "name": "reader: a give-back ends no hold",
@@ -786,8 +786,8 @@
   },
   {
     "name": "reader: a give-back's tree not read",
-    "from": "to: e.t, tree: e.tree, end:",
-    "to": "to: e.t, end:"
+    "from": "to: e.t, tree: e.tree, takenBy:",
+    "to": "to: e.t, takenBy:"
   },
   {
     "name": "reader: a second give-back moves the end",
@@ -931,7 +931,87 @@
   },
   {
     "name": "command: it exits 0 whatever the log shows",
-    "from": "process.exit(r.code); }",
-    "to": "process.exit(0); }"
+    "from": "console.log(r.lines.join('\\n')); process.exit(r.code);",
+    "to": "console.log(r.lines.join('\\n')); process.exit(0);"
+  },
+  {
+    "name": "lock log: a give-back's time taken after it removed the lock",
+    "from": "lockEvent(file, 'release', { t: at, since, named });",
+    "to": "lockEvent(file, 'release', { since, named });"
+  },
+  {
+    "name": "lock log: a give-back's time taken before it read the lock",
+    "from": "named = held.pid; at = Date.now();",
+    "to": "named = held.pid;"
+  },
+  {
+    "name": "lock log: a takeover's time taken after it removed the lock",
+    "from": "lockEvent(file, 'stale', { t: at, holder:",
+    "to": "lockEvent(file, 'stale', { holder:"
+  },
+  {
+    "name": "lock: a give-back called again removes the process's new hold",
+    "from": "&& held.t === since) fs.rmSync",
+    "to": ") fs.rmSync"
+  },
+  {
+    "name": "lock: a give-back keeps its own hold when the t matches",
+    "from": "&& held.t === since) fs.rmSync",
+    "to": "&& held.t !== since) fs.rmSync"
+  },
+  {
+    "name": "reader: a lock named by nobody read as taken by another",
+    "from": "other = Number.isInteger(e.named) && e.named !== e.pid",
+    "to": "other = e.named !== e.pid"
+  },
+  {
+    "name": "reader: a give-back that found the lock taken names no taker",
+    "from": "takenBy: other ? e.named : null,",
+    "to": "takenBy: null,"
+  },
+  {
+    "name": "overlap: a give-back that found the lock taken is no overlap",
+    "from": "for (const h of holds) if (Number.isInteger(h.takenBy)",
+    "to": "for (const h of []) if (Number.isInteger(h.takenBy)"
+  },
+  {
+    "name": "overlap: a give-back that found the lock taken counted again beside the pair that shows it",
+    "from": "&& !out.some((o) => [o.a, o.b]",
+    "to": "&& ![].some((o) => [o.a, o.b]"
+  },
+  {
+    "name": "overlap: a give-back's overlap hidden by an overlap of its hold with a third process",
+    "from": " && [o.a.pid, o.b.pid].includes(h.takenBy))",
+    "to": ")"
+  },
+  {
+    "name": "report: an overlap found by a give-back printed as a pair with times",
+    "from": "out.push(o.byGiveBack ? ",
+    "to": "out.push(false ? "
+  },
+  {
+    "name": "command: --file with no file read as a file",
+    "from": "  if (!lock) { console.error('usage: node tools/drive.mjs locklog [--file <lock>]'); process.exit(2); }\n",
+    "to": ""
+  },
+  {
+    "name": "lock log: a give-up's wait not measured",
+    "from": "waited: Date.now() - t0 });",
+    "to": "waited: 0 });"
+  },
+  {
+    "name": "reader: holds kept in the order their lines come",
+    "from": "const holds = [...by.values()].sort((a, b) => a.from - b.from);",
+    "to": "const holds = [...by.values()];"
+  },
+  {
+    "name": "reader: the newer generation read first",
+    "from": "[file + '.log.1', file + '.log']",
+    "to": "[file + '.log', file + '.log.1']"
+  },
+  {
+    "name": "lock log: a take's t is the time of its line, not the t it wrote in the lock",
+    "from": "lockEvent(file, 'take', { t: since });",
+    "to": "lockEvent(file, 'take', {});"
   }
 ]
