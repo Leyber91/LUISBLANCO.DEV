@@ -411,15 +411,16 @@ uniform sampler2D uHDR;
 uniform vec2 uRes;
 uniform float uBloom;
 uniform float uFrame;
+uniform float uLod0;           // levels the shaded image is below the canvas (a preview: log2(1/scale)); 0 when equal
 out vec4 oColor;
 void main(){
   vec2 uv = gl_FragCoord.xy/uRes;
-  vec3 c = textureLod(uHDR, uv, 0.0).rgb;
+  vec3 c = textureLod(uHDR, uv, 0.0).rgb;                          // a smaller image is enlarged linearly
   vec3 bl = vec3(0.0);
   float w = 0.0;
   for (int l = 1; l <= 6; l++) {
     float wl = 1.0/float(l);
-    bl += wl*max(textureLod(uHDR, uv, float(l)).rgb - 0.85, 0.0);   // only physically bright pixels bloom
+    bl += wl*max(textureLod(uHDR, uv, max(0.0, float(l) - uLod0)).rgb - 0.85, 0.0);   // only physically bright pixels bloom
     w += wl;
   }
   c += uBloom*bl/w;

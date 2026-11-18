@@ -462,6 +462,45 @@ export async function FALL_STEP(p, { base, width, ready }) {
   await sheet(false);
 }
 
+// The render's resolution (adapt.js, renderer.js _previewBuffers; 2026-11-18). While the view moved, the preview was
+// shaded at the canvas's size, each ray copied to every pixel it covered: hard squares 2.8 to 5 px wide. And the tier
+// was judged in the first two seconds only. The frame read in the middle of a drag must be smooth (few neighbouring
+// lit pixels equal, where copies made runs of equal pixels), and a full picture's time must reach the tier rule.
+const DRAG_FRAME = `(async () => {
+  const a = window.__bh, s = a.store, r = a.renderer, gl = r.gl;
+  a.interacting = true;
+  let i = 0;
+  const id = setInterval(() => s.set({ incl: 80 + 8 * Math.sin(i++ / 8) }, { instant: true }), 16);
+  await new Promise((res) => setTimeout(res, 1500));
+  const w = r.canvas.width, h = r.canvas.height, px = new Uint8Array(w * h * 4);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  const preview = !r.mainDone, ps = r.preview.scale;
+  clearInterval(id); a.interacting = false;
+  // neighbours within one level in every channel (the final pass dithers by one level), among lit pixels
+  let lit = 0, same = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x + 1 < w; x++) {
+    const k = (y * w + x) * 4;
+    if (px[k] + px[k + 1] + px[k + 2] < 120) continue;
+    lit++;
+    if (Math.abs(px[k] - px[k + 4]) <= 1 && Math.abs(px[k + 1] - px[k + 5]) <= 1 && Math.abs(px[k + 2] - px[k + 6]) <= 1) same++;
+  }
+  return { preview, ps, w, h, lit, share: lit ? +(same / lit).toFixed(3) : null };
+})()`;
+export async function RES_STEP(p, { base, ready }) {
+  await p.go(`${base}/labs/bh_animation_page.html?o=m87`);
+  await p.until(ready, READY_MS);
+  await p.sleep(1500);
+  const d = await p.ev(DRAG_FRAME);
+  console.log('RES drag ' + JSON.stringify(d));
+  p.check('the frame in the middle of a drag is a preview, enlarged smoothly: under 25% of neighbouring lit pixels equal (copied rays made runs of equal pixels)',
+    d.preview && d.lit > 2000 && d.share != null && d.share < 0.25, JSON.stringify(d));
+  await p.until(ready, READY_MS);
+  const t = await p.until(`window.__bh.perf.refineMs > 0`, 30000);
+  const perf = await p.ev(`(() => { const q = window.__bh.perf; return { tier: q.tier, refineMs: q.refineMs, previewScale: q.previewScale }; })()`);
+  p.check('a full picture\'s time reaches the tier rule after the view settles', !!t && perf.refineMs > 0 && typeof perf.tier === 'string', JSON.stringify(perf));
+}
+
 /* The record (road 1.09): keep a hole, a reload, a ray the visitor presses and one a link opens, the privacy export,
    a fall the visitor starts and the tour's, take out, and a browser whose storage is refused. Every count is read
    relative to the record as the step finds it, since earlier steps press pixels and run a fall, which the record keeps.
@@ -1032,6 +1071,7 @@ export default async function blackhole(p, { base, width }) {
   await sheet(false);
 
   /* ---- 3. the measurement and the telescope view, opened by link (ledger row 2; P2-1, P4-3) ---- */
+  await RES_STEP(p, { base, ready: READY });
   const CARD = `(async () => {
     const P = await import('/labs/assets/js/blackhole/physics.js');
     const s = window.__bh.store.all(), ms = P.measurement(s), c = ms.cmp;

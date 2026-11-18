@@ -7,6 +7,7 @@
 import { Store } from './state.js';
 import { Renderer } from './renderer.js';
 import { TIERS } from './config.js';
+import { tierStart, tierAfter, previewStart, previewAfter } from './adapt.js';
 import { derive } from './physics.js';
 import { DIAG_EXPO } from './palette.js';
 import { buildUI } from './ui.js';
@@ -98,9 +99,10 @@ function boot() {
     new IntersectionObserver((es) => { const v = es[0].isIntersecting; if (v && !visible) { visible = true; requestAnimationFrame(loop); } visible = v && !document.hidden; }).observe(canvas);
   }
 
-  let last = performance.now(), frames = 0, acc = 0, tierChecks = 0, lastDraw = 0, drew = false, costAcc = 0, costN = 0, winStart = performance.now();
-  const t0 = performance.now();
-  const ORDER = ['min', 'low', 'mid', 'high'];
+  let last = performance.now(), frames = 0, acc = 0, lastDraw = 0, drew = false, costAcc = 0, costN = 0, winStart = performance.now();
+  // the tier and the preview's scale follow what the frames measure (adapt.js), for the whole visit
+  let tierState = tierStart(autoTier), previewState = previewStart(renderer.preview?.scale ?? 0.55);
+  let lastTraced = null, previewDts = [];
   function loop(now) {
     if (!visible) return;
     const dt = Math.min(250, now - last);
@@ -108,6 +110,7 @@ function boot() {
     // the interval after a frame that drew is that frame's cost (GPU-bound), the frame-time readout
     if (drew) {
       costAcc += dt; costN++; drew = false;
+      if (lastTraced === 'preview') previewDts.push(dt);
       // median over the last 60 drawn frames, for the on-page readout
       app.perf.samples.push(dt); if (app.perf.samples.length > 60) app.perf.samples.shift();
       const sorted = app.perf.samples.slice().sort((x, y) => x - y);
@@ -138,17 +141,23 @@ function boot() {
       }
       void acc;
       renderer.adaptBands(dt);
-      // the tier is chosen from frame times measured in the first two seconds
-      if (!STILL && tierChecks < 2 && now - t0 > (tierChecks ? 2200 : 1000) && store.get('tier') === 'auto' && app.perf.ms) {
-        tierChecks++;
-        const ms = app.perf.ms;
-        let i = ORDER.indexOf(autoTier);
-        if (ms > 40) i = Math.max(0, i - (ms > 110 ? 2 : 1));
-        else if (ms < 14) i = Math.min(ORDER.length - 1, i + 1);
-        const next = ORDER[i];
-        if (next !== autoTier) { autoTier = next; renderer.setTier(TIERS[autoTier]); geoKey = ''; }
-        app.perf.tier = autoTier;
+      lastTraced = res && res.traced;
+      // the tier after each full picture, from the time it took (adapt.js tierAfter)
+      if (!STILL && res && res.refineMs != null && store.get('tier') === 'auto') {
+        const next = tierAfter(tierState, { refineMs: res.refineMs, w: canvas.clientWidth, h: canvas.clientHeight, dpr: window.devicePixelRatio || 1, now, tiers: TIERS });
+        if (next.tier !== tierState.tier) { autoTier = next.tier; renderer.setTier(TIERS[autoTier]); geoKey = ''; }
+        tierState = next;
+        app.perf.tier = autoTier; app.perf.refineMs = res.refineMs;
         ui.perf?.(app.perf, res);
+      }
+      // the preview's scale after every six preview frames, from their median time (adapt.js previewAfter)
+      if (!STILL && previewDts.length >= 6) {
+        const m = previewDts.slice().sort((x, y) => x - y)[3];
+        previewDts = [];
+        const next = previewAfter(previewState, { frameMs: m, now });
+        if (next.ps !== previewState.ps) renderer.setPreviewScale(next.ps);
+        previewState = next;
+        app.perf.previewScale = next.ps;
       }
       if (res && res.refined && !app.refinedOnce) { app.refinedOnce = true; ui.onRefined?.(); }
     }
