@@ -1,0 +1,52 @@
+[
+  {
+    "name": "waits: a nap after the end waits its time",
+    "from": "    if (ended) { reject(new Error('Chrome is gone')); return; }",
+    "to": "    if (false) { reject(new Error('Chrome is gone')); return; }"
+  },
+  {
+    "name": "waits: the end leaves a nap in progress waiting",
+    "from": "  const end = () => { ended = true; for (const cut of cuts) cut(); cuts.clear(); };",
+    "to": "  const end = () => { ended = true; cuts.clear(); };"
+  },
+  {
+    "name": "waits: the end is never marked, so a later nap waits",
+    "from": "  const end = () => { ended = true; for (const cut of cuts) cut(); cuts.clear(); };",
+    "to": "  const end = () => { for (const cut of cuts) cut(); cuts.clear(); };"
+  },
+  {
+    "name": "waits: a nap cut short leaves its timer running",
+    "from": "    const cut = () => { clearTimeout(timer); reject(new Error('Chrome is gone')); };",
+    "to": "    const cut = () => { reject(new Error('Chrome is gone')); };"
+  },
+  {
+    "name": "waits: a nap cut short ends as if its time were up",
+    "from": "    const cut = () => { clearTimeout(timer); reject(new Error('Chrome is gone')); };",
+    "to": "    const cut = () => { clearTimeout(timer); resolve(); };"
+  },
+  {
+    "name": "waits: a nap does not wait",
+    "from": "    const timer = setTimeout(() => { cuts.delete(cut); resolve(); }, ms);",
+    "to": "    const timer = setTimeout(() => { cuts.delete(cut); resolve(); }, 0);"
+  },
+  {
+    "name": "waits: until sleeps where the end cannot cut it",
+    "from": "await nap(150); }",
+    "to": "await sleep(150); }"
+  },
+  {
+    "name": "waits: until asks once more than its time allows",
+    "from": "    for (let t = 0; t < ms; t += 150) {",
+    "to": "    for (let t = 0; t <= ms; t += 150) {"
+  },
+  {
+    "name": "waits: an ev that throws answers true",
+    "from": "if (await ev(expression).catch(() => false)) return true;",
+    "to": "if (await ev(expression).catch(() => true)) return true;"
+  },
+  {
+    "name": "waits: until is never true",
+    "from": "if (await ev(expression).catch(() => false)) return true;",
+    "to": "if (false) return true;"
+  }
+]

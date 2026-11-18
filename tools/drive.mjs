@@ -23,7 +23,8 @@
                              (a guard on what the page may fetch belongs here: nothing of the page runs sooner)
      ev(expression)          evaluate in the page, return the value (promises are awaited)
      until(expression, ms)   wait until the expression is truthy; false on timeout
-     sleep(ms)
+     sleep(ms)               (both, and a gesture's hold, throw at once once the drive's Chrome has ended, as at the
+                             drive's timeout, so a drive stopped at its limit returns then, not after its waits)
      move(x, y) · down(x, y) · up(x, y) · drag(x0, y0, x1, y1, { steps, hold }) · click(x, y) · wheel(x, y, dy)
      swipe(x0, y0, x1, y1, { steps, hold })   one finger, as a phone sends it: the browser applies the
                              page's touch-action, so a swipe the page gives to scrolling scrolls
@@ -85,6 +86,8 @@
                                      timed out, not as caught. The cases of the lock's log run first, without
                                      Chrome, and a failure among them ends the run before Chrome starts.
      node tools/drive.mjs selftest locklog   only the cases of the lock's log, without Chrome, in seconds
+     node tools/drive.mjs selftest waits     only the cases of the waits ended with Chrome (waitsOf), without
+                                     Chrome; tools/mutants/drive.waits.json breaks each of their rules
      node tools/drive.mjs locklog [--file <lock>]   the lock's log read back (<lock>.log.1, then <lock>.log; the
                                      machine's lock by default): every hold as pid, from, to, how long, tree and
                                      how it ended, then every overlap of two holds. Exit 1 when two overlap, 0
@@ -317,6 +320,29 @@ function readLockLog(file) {
   return lockReport(text.split('\n').filter((l) => l.trim()), file);
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/* The waits a scenario makes, ended with its Chrome. nap(ms) waits ms; until(ev, expression, ms) asks ev every 150 ms,
+   for ms at most, and is true once the answer is truthy (an ev that throws answers false). Once end() has run, a nap in
+   progress ends at once with the error "Chrome is gone", its timer cleared, and every later nap throws at once, so an
+   until throws after its first ask. The drive ends them when its Chrome exits: killed at the timeout, or gone by itself.
+   Why: until 2026-11-18 a drive stopped at its limit went on. Every call to Chrome failed at once, but until() kept
+   asking every 150 ms to its own limit, and the scenario's sleeps slept, so a review measured a drive returning up to
+   about 247 s after its limit, past the budget of a labs-wt run that had counted on that limit. */
+export function waitsOf() {
+  let ended = false;
+  const cuts = new Set();
+  const nap = (ms) => new Promise((resolve, reject) => {
+    if (ended) { reject(new Error('Chrome is gone')); return; }
+    const cut = () => { clearTimeout(timer); reject(new Error('Chrome is gone')); };
+    const timer = setTimeout(() => { cuts.delete(cut); resolve(); }, ms);
+    cuts.add(cut);
+  });
+  const until = async (ev, expression, ms) => {
+    for (let t = 0; t < ms; t += 150) { if (await ev(expression).catch(() => false)) return true; await nap(150); }
+    return false;
+  };
+  const end = () => { ended = true; for (const cut of cuts) cut(); cuts.clear(); };
+  return { nap, until, end };
+}
 /* The dev server has no favicon; that 404 is the server's, not the page's. */
 const NOISE = /favicon\.ico/;
 
@@ -343,7 +369,8 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
   const chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`, `--window-size=${width},${height}`,
     '--hide-scrollbars', '--no-first-run', '--disable-gpu', ...(process.platform === 'linux' ? ['--no-sandbox'] : []), 'about:blank'], { stdio: 'ignore' });   // equivalent: a Linux runner has no sandbox for Chrome; one machine runs one system
   let exited = false;
-  LIVE.add(chrome); chrome.on('exit', () => { exited = true; LIVE.delete(chrome); });
+  const waits = waitsOf();   // the scenario's sleeps and untils, ended with this Chrome
+  LIVE.add(chrome); chrome.on('exit', () => { exited = true; LIVE.delete(chrome); waits.end(); });
   const checks = [], errors = [];
   const invariants = [];   // { name, expression, steps, seen }
   const frames = { on: false, except: {}, steps: 0, lost: 0, seen: new Set() };   // the rule on the pixels of a captured frame
@@ -383,7 +410,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
       if (r.exceptionDetails) throw new Error((r.exceptionDetails.exception?.description || r.exceptionDetails.text) + ' in: ' + expression.slice(0, 120));
       return r.result.value;
     };
-    const until = async (expression, ms = 12000) => { for (let t = 0; t < ms; t += 150) { if (await ev(expression).catch(() => false)) return true; await sleep(150); } return false; };
+    const until = (expression, ms = 12000) => waits.until(ev, expression, ms);
     let touchOn = false, lastEv = '';
     const evAndNote = async (expression) => { lastEv = expression; return ev(expression); };
     /* the pixels of a frame: no fully transparent one outside the boxes of the elements excepted, each break once.
@@ -437,7 +464,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
     const mouse = (type, x, y, buttons) => send('Input.dispatchMouseEvent', { type, x, y, button: type === 'mouseMoved' && !buttons ? 'none' : 'left', buttons, clickCount: type === 'mouseMoved' ? 0 : 1 });
     const page = {
       ev: evAndNote, until, check,
-      async sleep(ms) { await sleep(ms); if (ms >= 100) await step(afterEv()); },
+      async sleep(ms) { await waits.nap(ms); if (ms >= 100) await step(afterEv()); },
       errors: () => errors.slice(),
       invariant(name, expression) { invariants.push({ name, expression, steps: 0, seen: new Set() }); },
       step: (label) => step(label),
@@ -457,7 +484,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
         if (!touchOn) { await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }); touchOn = true; }
         await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y: y0 }] });
         for (let i = 1; i <= steps; i++) { await send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + ((x1 - x0) * i) / steps, y: y0 + ((y1 - y0) * i) / steps }] }); await sleep(16); }
-        if (hold) await sleep(hold);
+        if (hold) await waits.nap(hold);
         await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
         await step(`a swipe from ${Math.round(x0)},${Math.round(y0)}`);
       },
@@ -465,7 +492,7 @@ async function driveHeld(scenario, { base, out, width, height, timeoutMs, say, f
         await mouse('mouseMoved', x0, y0, 0);
         await mouse('mousePressed', x0, y0, 1);
         for (let i = 1; i <= steps; i++) { await mouse('mouseMoved', x0 + ((x1 - x0) * i) / steps, y0 + ((y1 - y0) * i) / steps, 1); await sleep(16); }
-        if (hold) await sleep(hold);
+        if (hold) await waits.nap(hold);
         await mouse('mouseReleased', x1, y1, 0);
         await step(`a drag from ${Math.round(x0)},${Math.round(y0)}`);
       },
@@ -674,6 +701,47 @@ async function selftest(part) {
       yes('the cases of the lock\'s log ran to their end', false, String((e && e.stack) || e).slice(0, 400));
     } finally { fs.rmSync(dir, { recursive: true, force: true }); }
   }
+  /* ---------------- the waits ended with Chrome (waitsOf), without Chrome ---------------- */
+  async function waitsCases(yes) {
+    const J = JSON.stringify;
+    const settle = (p) => p.then(() => 'resolved', (e) => `rejected: ${e.message}`);
+    const within = (p, ms = 3000) => Promise.race([p, sleep(ms).then(() => `no end in ${ms / 1000} s`)]);
+    try {
+      let w = waitsOf(), t0 = Date.now();
+      const napped = await settle(w.nap(60)), napTook = Date.now() - t0;
+      yes('a nap waits its time', napped === 'resolved' && napTook >= 50, `${napped} after ${napTook} ms`);
+      const long = settle(w.nap(60000));
+      await sleep(30);
+      t0 = Date.now(); w.end();
+      const cut = await within(long), cutTook = Date.now() - t0;
+      t0 = Date.now();
+      const later = await within(settle(w.nap(60000))), laterTook = Date.now() - t0;
+      yes('when its Chrome ends, a nap in progress ends at once, and a later nap throws at once', cut === 'rejected: Chrome is gone' && cutTook < 1000 && later === 'rejected: Chrome is gone' && laterTook < 1000, `${cut} after ${cutTook} ms; ${later} after ${laterTook} ms`);
+
+      w = waitsOf();
+      let asked = 0;
+      const truthy = await within(w.until(async () => { asked++; return 1; }, 'x', 60000));
+      yes('until is true at the first truthy answer', truthy === true && asked === 1, `${truthy}, asked ${asked} times`);
+      asked = 0;
+      const failing = await w.until(async () => { asked++; throw new Error('the page is between documents'); }, 'x', 300);
+      yes('until gives false after ms, asking every 150 ms (300 ms: twice), and an ev that throws answers false', failing === false && asked === 2, `${failing}, asked ${asked} times`);
+      asked = 0;
+      const polling = settle(w.until(async () => { asked++; throw new Error('Chrome is gone'); }, 'x', 60000));
+      await sleep(200);
+      t0 = Date.now(); w.end();
+      const stopped = await within(polling), stopTook = Date.now() - t0;
+      t0 = Date.now();
+      const after = await within(settle(w.until(async () => false, 'x', 60000))), afterTook = Date.now() - t0;
+      yes('when its Chrome ends, an until in progress throws at once, and so does a later one', stopped === 'rejected: Chrome is gone' && stopTook < 1000 && after === 'rejected: Chrome is gone' && afterTook < 1000, `${stopped} after ${stopTook} ms; ${after} after ${afterTook} ms`);
+
+      // a nap cut short leaves no timer: a process whose only wait was cut ends at once, not 60 s later
+      const child = spawnSync(process.execPath, ['--input-type=module', '-e', `import { waitsOf } from ${J(pathToFileURL(fileURLToPath(import.meta.url)).href)}; const w = waitsOf(); w.nap(60000).catch(() => {}); w.end();`], { encoding: 'utf8', timeout: 20000 });
+      yes('a nap cut short leaves no timer behind to keep the process running', child.status === 0, `exit ${child.status}${child.error ? `, ${child.error.code}` : ''}`);
+    } catch (e) {
+      yes('the cases of the waits ran to their end', false, String((e && e.stack) || e).slice(0, 400));
+    }
+  }
+  if (part === 'waits') { await waitsCases(yes); console.log(`drive selftest waits: ${passed} passed, ${failed} failed`); return failed ? 1 : 0; }
   if (part === 'locklog') { await lockLogCases(yes); console.log(`drive selftest locklog: ${passed} passed, ${failed} failed`); return failed ? 1 : 0; }
   /* the lock is the file LABS_DRIVE_LOCK names, checked before anything waits for a lock: under tools/mutate.mjs a copy
      that took the machine's lock instead would wait for mutate, which holds that lock around the copy */
@@ -691,6 +759,7 @@ async function selftest(part) {
   await lockLogCases(yes);
   const cases = passed, alone = spawnSync(process.execPath, [fileURLToPath(import.meta.url), 'selftest', 'locklog'], { encoding: 'utf8', timeout: 20000 });
   yes('"selftest locklog" runs the cases of the lock\'s log alone, without Chrome', alone.status === 0 && new RegExp(`^drive selftest locklog: ${cases} passed, 0 failed$`, 'm').test(alone.stdout), `exit ${alone.status}: ${String(alone.stdout).trim().split('\n').pop()}`);
+  await waitsCases(yes);   // the waits ended with Chrome, also without Chrome
   if (failed) { console.log(`drive selftest: ${passed} passed, ${failed} failed, in the lock's log; Chrome was not started`); return 1; }
   /* the whole run holds the machine's lock, and its time starts once it has it: under tools/mutate.mjs, copies run a few
      at a time and would otherwise take Chrome in turn, drive by drive, each outrunning its time */
